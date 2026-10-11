@@ -333,14 +333,17 @@ em.hl{font-style:normal;color:#098BE1}
 .mm-tile{padding:8px;max-height:calc(100svh - 104px)}
 .mm-link{min-height:42px;font-size:16px;padding:0 16px;border-radius:14px}
 .mm-cs{padding:10px 6px 2px;gap:8px;margin-top:4px}
-.mm-cs-row{flex-wrap:nowrap !important;justify-content:center;gap:5px !important}
-.mm-pill{min-height:34px !important;padding:0 11px !important;font-size:13px !important;flex:0 0 auto}
+.mm-cs{align-items:stretch !important}
+.mm-cs .mm-lab{text-align:center}
+.mm-cs-row{display:grid !important;grid-template-columns:1fr 1.3fr 1.15fr 1.1fr .75fr;gap:4px !important;width:100%}
+.mm-pill{min-height:34px !important;min-width:0;padding:0 2px !important;font-size:clamp(11px,3.3vw,13px) !important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mm-contact{margin:6px 6px 2px;padding:10px 6px 4px;gap:8px}
 .mm-mail{min-height:38px;padding:0 16px;font-size:14px}
 .mm-social{gap:8px}
 .mm-social .soc{width:36px;height:36px}
 }
-@media (max-width:370px){.mm-pill{padding:0 8px !important;font-size:12px !important}}
+@media (max-width:340px){.mm-pill{font-size:10px !important}.mm-cs-row{gap:3px !important}}
+
 
 /* ---------- menu button: wave bars that morph into a cross ---------- */
 @keyframes mbRipple{0%{transform:scale(0);opacity:.55}100%{transform:scale(2.4);opacity:0}}
