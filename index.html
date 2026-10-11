@@ -328,6 +328,47 @@ em.hl{font-style:normal;color:#098BE1}
 .hd-space{height:118px !important}
 .h2{color:#098BE1}
 
+/* ---------- desktop concept: hero, zigzag, full-bleed ---------- */
+@keyframes zhUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@keyframes zhZoom{from{transform:scale(1.08)}to{transform:scale(1)}}
+@keyframes zhBob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,6px)}}
+.hd-space{display:none}
+.zh{position:relative;min-height:max(620px,100vh);display:flex;align-items:flex-end;overflow:hidden;background:#0A0A0A;color:#FFFFFF;margin-bottom:14px}
+.zh-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 35%;animation:zhZoom 2.4s cubic-bezier(.2,.7,.2,1) both}
+.zh-scrim{position:absolute;inset:0;background:linear-gradient(90deg,rgba(10,10,10,.72) 0%,rgba(10,10,10,.45) 45%,rgba(10,10,10,.05) 75%),linear-gradient(0deg,rgba(10,10,10,.45) 0%,rgba(10,10,10,0) 40%)}
+.zh-in{position:relative;width:100%;padding-top:180px;padding-bottom:96px;display:flex;flex-direction:column;align-items:flex-start;gap:18px}
+.zh-in > *{animation:zhUp .8s cubic-bezier(.2,.7,.2,1) both}
+.zh-in > :nth-child(2){animation-delay:.1s}.zh-in > :nth-child(3){animation-delay:.2s}.zh-in > :nth-child(4){animation-delay:.3s}.zh-in > :nth-child(5){animation-delay:.4s}
+.zh-chip{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;background:rgba(10,10,10,.42);border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:6px 14px}
+.zh-chip i{width:8px;height:8px;border-radius:50%;background:#6BBDF2;animation:dotPulse 1.8s ease-out infinite}
+.zh-h1{margin:0;font-size:clamp(44px,6vw,88px);line-height:1.02;font-weight:800;letter-spacing:-0.035em;max-width:11em;text-shadow:0 2px 20px rgba(0,0,0,.35)}
+.zh-p{margin:0;font-size:20px;line-height:1.55;max-width:30em;color:rgba(255,255,255,.92)}
+.zh-stat{display:flex;align-items:baseline;gap:12px;padding:12px 18px;border-radius:18px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.35)}
+.zh-stat b{font-size:34px;font-weight:800;letter-spacing:-0.03em;color:#6BBDF2}
+.zh-stat span{font-size:15px;font-weight:600}
+.zh-cta{display:flex;flex-wrap:wrap;gap:12px}
+.zh-b1,.zh-b2{display:inline-flex;align-items:center;min-height:56px;padding:0 30px;border-radius:999px;font-weight:700;font-size:16px;text-decoration:none}
+.zh-b1{background:#098BE1;color:#FFFFFF}
+.zh-b2{background:#FFFFFF;color:#0A0A0A}
+.zh-down{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);width:46px;height:46px;border-radius:50%;display:grid;place-items:center;color:#FFFFFF;border:1px solid rgba(255,255,255,.5);animation:zhBob 2s ease-in-out infinite}
+.zq{padding:56px 10% !important}
+.zq .h1{font-size:clamp(24px,2.4vw,34px) !important;max-width:30em}
+.rows > .rw-flip > .ph{order:2}
+.rows > .ptile.rw-side > .ph{height:100%;min-height:380px;aspect-ratio:auto !important}
+.rows > .ptile.rw-side > .ph img{height:100%}
+#why-water{max-width:none;padding-left:0;padding-right:0}
+#why-water .ww{border-radius:0;min-height:560px}
+@media (max-width:900px){
+.zh{min-height:640px}.zh-in{padding-top:130px;padding-bottom:84px}
+.zh-scrim{background:linear-gradient(0deg,rgba(10,10,10,.82) 0%,rgba(10,10,10,.45) 60%,rgba(10,10,10,.15) 100%)}
+.zh-p{font-size:17px}.zh-stat b{font-size:26px}
+.zq{padding:32px 18px !important}
+.rows > .rw-flip > .ph{order:0}
+.rows > .ptile.rw-side > .ph{min-height:0;aspect-ratio:1.3 !important;height:auto}
+#why-water .ww{min-height:420px}
+}
+@media (prefers-reduced-motion: reduce){.zh-bg,.zh-in > *,.zh-down,.zh-chip i{animation:none !important}}
+
 /* ---------- homepage rows: cards side by side ---------- */
 .rows{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:stretch;padding-bottom:14px}
 .rows > .tile,.rows > .ptile,.rows > .ph{min-width:0;height:100%;box-sizing:border-box}
@@ -612,8 +653,19 @@ em.hl{font-style:normal;color:#098BE1}
 </sc-if>
 </header>
 </div>
-<div class="hd-space" aria-hidden="true"></div><main class="wrap rows"><div class="tile ctr"><svg width="40" height="31" viewBox="0 0 44 34" aria-hidden="true"><path d="M0 34V20C0 8.6 6 2 18 0l2 5c-6.4 1.7-9.6 5.4-10 11h8v18zm24 0V20C24 8.6 30 2 42 0l2 5c-6.4 1.7-9.6 5.4-10 11h8v18z" fill="#098BE1"></path></svg><blockquote class="h1" style="margin:0">I pass through this world but once. Any good that I can do or any kindness that I can show to any human being, let me do it now. Let me not defer or neglect it, for I shall not pass this way again.</blockquote><span class="att">― Stephen Grellet</span></div>
-<div class="ph pt rw-fill" style="aspect-ratio:1.5;"><img src="/img/w-elder.jpg" alt="An elder, children and a Rafiki volunteer in a village lane"></div>
+<div class="hd-space" aria-hidden="true"></div><section class="zh" aria-label="Rafiki Outreach">
+<img class="zh-bg" src="/img/w-elder.jpg" alt="An elder, children and a Rafiki volunteer in a village lane">
+<div class="zh-scrim" aria-hidden="true"></div>
+<div class="wrap zh-in">
+<span class="zh-chip"><i aria-hidden="true"></i>Rafiki Outreach · {{cName}}</span>
+<h1 class="zh-h1">Clean water, close to home.</h1>
+<p class="zh-p">We drill wells with communities in Kenya, Tanzania, Uganda and Malawi, bringing better health, more time and a way out of poverty.</p>
+<div class="zh-stat"><b>780,500+</b><span>people reached with clean, safe water</span></div>
+<div class="zh-cta"><a class="zh-b1" href="https://www.rafikioutreach.org/donate">Donate</a><a class="zh-b2" href="#impact-tile">See our impact</a></div>
+</div>
+<a class="zh-down" href="#zmain" aria-label="Scroll down"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></a>
+</section>
+<main class="wrap rows" id="zmain"><div class="tile ctr rw-full zq"><svg width="40" height="31" viewBox="0 0 44 34" aria-hidden="true"><path d="M0 34V20C0 8.6 6 2 18 0l2 5c-6.4 1.7-9.6 5.4-10 11h8v18zm24 0V20C24 8.6 30 2 42 0l2 5c-6.4 1.7-9.6 5.4-10 11h8v18z" fill="#098BE1"></path></svg><blockquote class="h1" style="margin:0">I pass through this world but once. Any good that I can do or any kindness that I can show to any human being, let me do it now. Let me not defer or neglect it, for I shall not pass this way again.</blockquote><span class="att">― Stephen Grellet</span></div>
 <div class="tile impact2 imp-photo {{ixCls}}" id="impact-tile">
 <img class="imp-bg" src="/img/w-team.jpg" alt="A Rafiki Outreach volunteer smiling with five children in a village">
 <div class="imp-scrim" aria-hidden="true"></div>
@@ -686,8 +738,8 @@ em.hl{font-style:normal;color:#098BE1}
 </div>
 <div class="ptile rw-full rw-side"><div class="ph " style="aspect-ratio:1.46;"><img src="/img/collect.jpg" alt="Two men fill yellow jerrycans from a muddy river"></div><div class="tb ctr"><h2 class="h2">Reaching water</h2><p class="p">Even though clean water might only be 50 meters beneath their feet, it is not uncommon for men, women, &amp; children to walk upwards of 3 miles to collect and carry water from contaminated sources. Not just once, but multiple times a day.</p></div></div>
 <div class="tile dark howdrill ctr rw-full rw-side rw-how"><div class="rw-txt"><h2 class="h2">How we drill</h2><p class="p">We use a portable, hand crank borehole drill created by the village drill.</p><p class="p">It allows drilling in 75% more places at 75% less the cost than a typical drilling rig.</p><a class="p" href="https://villagedrill.com" style="color:#9FD3F7">(villagedrill.com)</a><a class="b" href="https://www.rafikioutreach.org/water">Learn more</a></div><div class="ph pt" style="aspect-ratio:0.75;"><img src="/img/w-drill1.jpg" alt="Volunteers and a local crew turn the arms of The Village Drill"></div></div>
-<div class="ptile"><div class="ph " style="aspect-ratio:1.26;"><img src="/img/w-drill2.jpg" alt="The blue Village Drill rig standing on open plains"></div><div class="tb ctr"><h2 class="h2">Sponsor a well</h2><p class="p">Help us promote self reliance by donating to our interest free well loan program, or by sponsoring a well.</p><p class="p">Interest free loans provide communities the opportunity to bring clean water sources to their communities without creating dependency.</p><a class="b" href="https://www.rafikioutreach.org/donate">Sponsor</a></div></div>
-<div class="ptile"><div class="ph" style="aspect-ratio:1.03"><img src="/img/w-field3.jpg" alt="A volunteer's hand holds a child's hand through a vehicle window"></div><div class="tb ctr"><h2 class="h2">Drill a well</h2><p class="p">Interested in drilling a well in person? Join a humanitarian safari in East Africa.</p><a class="b" href="https://www.rafikioutreach.org/trips">Trips</a></div></div>
+<div class="ptile rw-full rw-side"><div class="ph " style="aspect-ratio:1.26;"><img src="/img/w-drill2.jpg" alt="The blue Village Drill rig standing on open plains"></div><div class="tb ctr"><h2 class="h2">Sponsor a well</h2><p class="p">Help us promote self reliance by donating to our interest free well loan program, or by sponsoring a well.</p><p class="p">Interest free loans provide communities the opportunity to bring clean water sources to their communities without creating dependency.</p><a class="b" href="https://www.rafikioutreach.org/donate">Sponsor</a></div></div>
+<div class="ptile rw-full rw-side rw-flip"><div class="ph" style="aspect-ratio:1.03"><img src="/img/w-field3.jpg" alt="A volunteer's hand holds a child's hand through a vehicle window"></div><div class="tb ctr"><h2 class="h2">Drill a well</h2><p class="p">Interested in drilling a well in person? Join a humanitarian safari in East Africa.</p><a class="b" href="https://www.rafikioutreach.org/trips">Trips</a></div></div>
 <div class="tile blue reachout ctr rw-full"><h2 class="h2">Stay in touch with us</h2><p class="p">Follow our social media pages to see our latest community projects.</p><div class="bf-social"><a class="soc soc-fb" href="https://www.facebook.com/rafikioutreach" target="_blank" rel="noopener" aria-label="Rafiki Outreach on Facebook"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="#FFFFFF" d="M13.5 21v-7.5h2.6l.4-3h-3V8.6c0-.9.3-1.5 1.6-1.5h1.6V4.4c-.3 0-1.2-.1-2.3-.1-2.3 0-3.9 1.4-3.9 4V10.5H8v3h2.5V21h3z"></path></svg></a><a class="soc soc-ig" href="https://www.instagram.com/rafikioutreach" target="_blank" rel="noopener" aria-label="Rafiki Outreach on Instagram"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.3" cy="6.7" r="1" fill="#FFFFFF" stroke="none"></circle></svg></a></div></div>
 </main><section class="wrap xs" id="where-we-work" aria-label="Where we work">
 <div class="cc-ww">
@@ -800,7 +852,7 @@ em.hl{font-style:normal;color:#098BE1}
 </footer>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":6482}}'>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":7790}}'>
 var STORIES = [
   { src: '/img/w-child.jpg', alt: 'A smiling boy in a hooded jacket drinks from a blue cup among other children', tag: 'Clean water', title: 'A cup of clean water', text: 'By making clean water accessible to families, villages, and communities, they experience improved health, have more time, and are better equipped to lift themselves out of poverty.' },
   { src: '/img/collect.jpg', alt: 'Two men fill yellow jerrycans from a muddy river', tag: 'The problem', title: 'Reaching water', text: 'Even though clean water might only be 50 meters beneath their feet, it is not uncommon for men, women, & children to walk upwards of 3 miles to collect and carry water from contaminated sources. Not just once, but multiple times a day.' },
