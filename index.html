@@ -328,6 +328,27 @@ em.hl{font-style:normal;color:#098BE1}
 .hd-space{height:118px !important}
 .h2{color:#098BE1}
 
+/* ---------- menu button: wave bars that morph into a cross ---------- */
+@keyframes mbRipple{0%{transform:scale(0);opacity:.55}100%{transform:scale(2.4);opacity:0}}
+@keyframes mbPop{0%{transform:scale(1)}40%{transform:scale(.86)}100%{transform:scale(1)}}
+.hd-menu{position:relative;overflow:hidden;isolation:isolate;transition:background .35s ease,box-shadow .35s ease}
+.hd-menu::before{content:"";position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 50% 50%,#098BE1 0%,#076DB1 100%);transform:scale(0);transition:transform .45s cubic-bezier(.2,.7,.2,1);z-index:-1}
+.hd-menu::after{content:"";position:absolute;inset:0;border-radius:50%;border:2px solid #9FD3F7;opacity:0;pointer-events:none}
+.hd-menu.open::before{transform:scale(1)}
+.hd-menu.open::after{animation:mbRipple .7s ease-out}
+.hd-menu.open{box-shadow:0 8px 22px rgba(9,139,225,.4);animation:mbPop .45s ease}
+.hd-menu.shut{animation:mbPop .45s ease}
+.mb{position:relative;display:block;width:20px;height:14px}
+.mb i{position:absolute;right:0;height:2.5px;border-radius:3px;background:#FFFFFF;transform-origin:center;transition:top .3s cubic-bezier(.2,.7,.2,1) .05s,width .3s ease,transform .45s cubic-bezier(.68,-.5,.27,1.5),opacity .2s ease,background .3s ease}
+.mb i:nth-child(1){top:0;width:12px}
+.mb i:nth-child(2){top:5.75px;width:20px;background:#6BBDF2}
+.mb i:nth-child(3){top:11.5px;width:16px}
+.hd-menu:hover .mb i{width:20px}
+.hd-menu.open .mb i:nth-child(1){top:5.75px;width:20px;transform:rotate(45deg);transition:top .25s ease,width .25s ease,transform .45s cubic-bezier(.68,-.5,.27,1.5) .2s}
+.hd-menu.open .mb i:nth-child(2){opacity:0;transform:scaleX(0)}
+.hd-menu.open .mb i:nth-child(3){top:5.75px;width:20px;transform:rotate(-45deg);transition:top .25s ease,width .25s ease,transform .45s cubic-bezier(.68,-.5,.27,1.5) .2s}
+@media (prefers-reduced-motion: reduce){.hd-menu,.hd-menu::before,.hd-menu::after,.mb i{animation:none !important;transition:none !important}}
+
 /* ---------- desktop concept: hero, zigzag, full-bleed ---------- */
 @keyframes zhUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
 @keyframes zhZoom{from{transform:scale(1.08)}to{transform:scale(1)}}
@@ -642,10 +663,7 @@ em.hl{font-style:normal;color:#098BE1}
 <div class="hd-act">
 <div class="cs"><button type="button" class="cs-btn" onClick="{{toggleCs}}" aria-expanded="{{csExpanded}}" aria-haspopup="true" aria-label="Country: {{cName}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18"></path><path d="M12 3a14 14 0 010 18"></path><path d="M12 3a14 14 0 000 18"></path></svg><span class="cs-v">{{cCode}}</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></button><sc-if value="{{csOpen}}" hint-placeholder-val="{{false}}"><div class="cs-pop" role="menu"><span class="cs-h">Choose a country</span><sc-for list="{{csList}}" as="c" hint-placeholder-count="5"><button type="button" role="menuitemradio" aria-checked="{{c.on}}" class="{{c.cls}}" onClick="{{c.pick}}"><span>{{c.n}}</span><small>{{c.sub}}</small></button></sc-for></div></sc-if></div>
 <a class="hd-donate" href="https://www.rafikioutreach.org/donate">Donate<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.7C8 7.5 6 10.7 6 14a6 6 0 0012 0c0-3.3-2-6.5-6-11.3z"></path></svg></a>
-<button type="button" class="hd-menu" onClick="{{toggleMenu}}" aria-expanded="{{menuExpanded}}" aria-controls="bento-menu" aria-label="{{menuLabel}}">
-<sc-if value="{{menuOpen}}" hint-placeholder-val="{{false}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></sc-if>
-<sc-if value="{{menuClosed}}" hint-placeholder-val="{{true}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M4 8h16M4 16h16"></path></svg></sc-if>
-</button>
+<button type="button" class="{{menuCls}}" onClick="{{toggleMenu}}" aria-expanded="{{menuExpanded}}" aria-controls="bento-menu" aria-label="{{menuLabel}}"><span class="mb" aria-hidden="true"><i></i><i></i><i></i></span></button>
 </div>
 </div>
 <sc-if value="{{menuOpen}}" hint-placeholder-val="{{false}}">
@@ -871,7 +889,7 @@ function countryVals(self) {
   var pick = function (k) { self.setState({ ctry: k === 'all' ? (self.state.ctry || 'ke') : k, cAll: k === 'all', cs: false }); };
   var list = CORDER.map(function (k) { var on = !all && (s.ctry || 'ke') === k; return { n: CTRY[k].n, sub: k === 'ke' ? 'Main site' : 'rafikioutreach.org/' + CTRY[k].n.toLowerCase(), on: on ? 'true' : 'false', cls: 'cs-it' + (on ? ' on' : ''), pill: 'mm-pill' + (on ? ' on' : ''), pick: function () { pick(k); } }; })
     .concat([{ n: 'All countries', sub: 'Totals across all four', on: all ? 'true' : 'false', cls: 'cs-it all' + (all ? ' on' : ''), pill: 'mm-pill' + (all ? ' on' : ''), pick: function () { pick('all'); } }]);
-  return { cName: all ? 'All countries' : cur.n, cCode: all ? 'All' : cur.ab, csOpen: !!s.cs, csExpanded: s.cs ? 'true' : 'false',
+  return { menuCls: 'hd-menu' + (s.menu ? ' open' : (self._menuWasOpen ? ' shut' : '')), cName: all ? 'All countries' : cur.n, cCode: all ? 'All' : cur.ab, csOpen: !!s.cs, csExpanded: s.cs ? 'true' : 'false',
     toggleCs: function () { self.setState({ cs: !self.state.cs }); }, csList: list,
     wwCards: CORDER.map(function (k) { var on = !all && (s.ctry || 'ke') === k; return { n: CTRY[k].n, ab: CTRY[k].ab, w: CTRY[k].w.toLocaleString('en-US'), u: CTRY[k].u.toLocaleString('en-US'), p: CTRY[k].p.toLocaleString('en-US') + '+', on: on ? 'true' : 'false', here: on, cls: 'cc-card' + (on ? ' on' : ''), go: on ? 'You are viewing' : 'Explore ' + CTRY[k].n + ' →', pick: function () { pick(k); } }; }) };
 }
@@ -1024,7 +1042,7 @@ class Component extends DCLogic {
       menuOpen: s.menu, menuClosed: !s.menu,
       menuExpanded: s.menu ? 'true' : 'false',
       menuLabel: s.menu ? 'Close menu' : 'Open menu',
-      toggleMenu: function () { self.setState({ menu: !self.state.menu }); },
+      toggleMenu: function () { self._menuWasOpen = true; self.setState({ menu: !self.state.menu }); },
       closeMenu: function () { self.setState({ menu: false }); }
     });
   }
