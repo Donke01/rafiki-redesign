@@ -388,7 +388,9 @@ em.hl{font-style:normal;color:#098BE1}
 .zh-in{align-items:center !important;text-align:center}
 .zh-h1,.zh-p{margin-left:auto !important;margin-right:auto !important}
 .zh-cta{justify-content:center}
-.zh-scrim{background:radial-gradient(ellipse at center 60%,rgba(10,10,10,.6) 0%,rgba(10,10,10,.42) 55%,rgba(10,10,10,.2) 100%),linear-gradient(0deg,rgba(10,10,10,.45) 0%,rgba(10,10,10,0) 40%) !important}
+.zh-scrim{background:linear-gradient(0deg,rgba(10,10,10,.88) 0%,rgba(10,10,10,.72) 30%,rgba(10,10,10,.35) 52%,rgba(10,10,10,.08) 68%,rgba(10,10,10,0) 80%),linear-gradient(0deg,rgba(10,10,10,.12),rgba(10,10,10,.12)) !important}
+.zh-short{display:none}
+@media (max-width:900px){.zh-long{display:none}.zh-short{display:inline}}
 @media (prefers-reduced-motion: reduce){.zh-bg,.zh-in > *,.zh-down,.zh-chip i{animation:none !important}}
 
 /* ---------- homepage rows: cards side by side ---------- */
@@ -676,9 +678,8 @@ em.hl{font-style:normal;color:#098BE1}
 <img class="zh-bg" style="{{zhImg}}" src="/img/w-elder.jpg" alt="An elder, children and a Rafiki volunteer in a village lane">
 <div class="zh-scrim" aria-hidden="true"></div>
 <div class="wrap zh-in">
-<span class="zh-chip"><i aria-hidden="true"></i>Rafiki Outreach · {{cName}}</span>
 <h1 class="zh-h1">Clean water, close to home.</h1>
-<p class="zh-p">We drill wells with communities in Kenya, Tanzania, Uganda and Malawi, bringing better health, more time and a way out of poverty.</p>
+<p class="zh-p"><span class="zh-long">We drill wells with communities in Kenya, Tanzania, Uganda and Malawi, bringing better health, more time and a way out of poverty.</span><span class="zh-short">Wells with communities in Kenya, Tanzania, Uganda and Malawi</span></p>
 <div class="zh-stat"><b>780,500+</b><span>people reached with clean, safe water</span></div>
 </div>
 <a class="zh-down" href="#zmain" aria-label="Scroll down"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></a>
