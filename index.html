@@ -328,6 +328,23 @@ em.hl{font-style:normal;color:#098BE1}
 .hd-space{height:118px !important}
 .h2{color:#098BE1}
 
+/* ---------- homepage rows: cards side by side ---------- */
+.rows{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:stretch;padding-bottom:14px}
+.rows > .tile,.rows > .ptile,.rows > .ph{min-width:0;height:100%;box-sizing:border-box}
+.rows > .tile{justify-content:center}
+.rows > .imp-photo{justify-content:flex-end}
+.rows > .ptile > .tb{flex:1;justify-content:center}
+.rows > .rw-fill{aspect-ratio:auto !important;border-radius:28px;min-height:320px}
+.rows > .rw-fill img{height:100%}
+.rows > .rw-full{grid-column:1 / -1}
+.rows > .rw-side{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:center;gap:0}
+.rows > .ptile.rw-side > .tb{padding:40px 48px}
+.rows > .rw-how{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:40px;padding:40px 48px}
+.rw-txt{display:flex;flex-direction:column;align-items:center;gap:18px}
+.rows > .rw-how > .ph{border-radius:22px}
+@media (max-width:900px){.rows > .rw-side,.rows > .rw-how{grid-template-columns:1fr;gap:18px}.rows > .rw-how{padding:28px 18px}.rows > .ptile.rw-side > .tb{padding:24px 18px 28px}}
+@media (max-width:900px){.rows{grid-template-columns:1fr}.rows > .rw-fill{aspect-ratio:1.5 !important;min-height:0;height:auto}}
+
 /* ---------- where we work ---------- */
 .cc-ww{background:#FFFFFF;border-radius:28px;padding:40px 32px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
 .cc-lab{font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#076DB1}
@@ -595,7 +612,8 @@ em.hl{font-style:normal;color:#098BE1}
 </sc-if>
 </header>
 </div>
-<div class="hd-space" aria-hidden="true"></div><main class="wrap grid"><div class="col"><div class="tile ctr"><svg width="40" height="31" viewBox="0 0 44 34" aria-hidden="true"><path d="M0 34V20C0 8.6 6 2 18 0l2 5c-6.4 1.7-9.6 5.4-10 11h8v18zm24 0V20C24 8.6 30 2 42 0l2 5c-6.4 1.7-9.6 5.4-10 11h8v18z" fill="#098BE1"></path></svg><blockquote class="h1" style="margin:0">I pass through this world but once. Any good that I can do or any kindness that I can show to any human being, let me do it now. Let me not defer or neglect it, for I shall not pass this way again.</blockquote><span class="att">― Stephen Grellet</span></div>
+<div class="hd-space" aria-hidden="true"></div><main class="wrap rows"><div class="tile ctr"><svg width="40" height="31" viewBox="0 0 44 34" aria-hidden="true"><path d="M0 34V20C0 8.6 6 2 18 0l2 5c-6.4 1.7-9.6 5.4-10 11h8v18zm24 0V20C24 8.6 30 2 42 0l2 5c-6.4 1.7-9.6 5.4-10 11h8v18z" fill="#098BE1"></path></svg><blockquote class="h1" style="margin:0">I pass through this world but once. Any good that I can do or any kindness that I can show to any human being, let me do it now. Let me not defer or neglect it, for I shall not pass this way again.</blockquote><span class="att">― Stephen Grellet</span></div>
+<div class="ph pt rw-fill" style="aspect-ratio:1.5;"><img src="/img/w-elder.jpg" alt="An elder, children and a Rafiki volunteer in a village lane"></div>
 <div class="tile impact2 imp-photo {{ixCls}}" id="impact-tile">
 <img class="imp-bg" src="/img/w-team.jpg" alt="A Rafiki Outreach volunteer smiling with five children in a village">
 <div class="imp-scrim" aria-hidden="true"></div>
@@ -637,7 +655,6 @@ em.hl{font-style:normal;color:#098BE1}
 </div>
 </div>
 </div>
-<div class="ph pt" style="aspect-ratio:1.5;"><img src="/img/w-elder.jpg" alt="An elder, children and a Rafiki volunteer in a village lane"></div>
 <div class="tile access2"><div class="aq" aria-hidden="true">
 <svg class="aq-w aq-w1" viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M0 60 Q75 25 150 60 T300 60 T450 60 T600 60 T750 60 T900 60 T1050 60 T1200 60 V120 H0Z"></path></svg>
 <svg class="aq-w aq-w2" viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M0 60 Q75 35 150 60 T300 60 T450 60 T600 60 T750 60 T900 60 T1050 60 T1200 60 V120 H0Z"></path></svg>
@@ -667,10 +684,12 @@ em.hl{font-style:normal;color:#098BE1}
 </div>
 </div>
 </div>
-<div class="ptile"><div class="ph " style="aspect-ratio:1.46;"><img src="/img/collect.jpg" alt="Two men fill yellow jerrycans from a muddy river"></div><div class="tb ctr"><h2 class="h2">Reaching water</h2><p class="p">Even though clean water might only be 50 meters beneath their feet, it is not uncommon for men, women, &amp; children to walk upwards of 3 miles to collect and carry water from contaminated sources. Not just once, but multiple times a day.</p></div></div></div><div class="col"><div class="ptile"><div class="ph " style="aspect-ratio:1.26;"><img src="/img/w-drill2.jpg" alt="The blue Village Drill rig standing on open plains"></div><div class="tb ctr"><h2 class="h2">Sponsor a well</h2><p class="p">Help us promote self reliance by donating to our interest free well loan program, or by sponsoring a well.</p><p class="p">Interest free loans provide communities the opportunity to bring clean water sources to their communities without creating dependency.</p><a class="b" href="https://www.rafikioutreach.org/donate">Sponsor</a></div></div>
+<div class="ptile rw-full rw-side"><div class="ph " style="aspect-ratio:1.46;"><img src="/img/collect.jpg" alt="Two men fill yellow jerrycans from a muddy river"></div><div class="tb ctr"><h2 class="h2">Reaching water</h2><p class="p">Even though clean water might only be 50 meters beneath their feet, it is not uncommon for men, women, &amp; children to walk upwards of 3 miles to collect and carry water from contaminated sources. Not just once, but multiple times a day.</p></div></div>
+<div class="tile dark howdrill ctr rw-full rw-side rw-how"><div class="rw-txt"><h2 class="h2">How we drill</h2><p class="p">We use a portable, hand crank borehole drill created by the village drill.</p><p class="p">It allows drilling in 75% more places at 75% less the cost than a typical drilling rig.</p><a class="p" href="https://villagedrill.com" style="color:#9FD3F7">(villagedrill.com)</a><a class="b" href="https://www.rafikioutreach.org/water">Learn more</a></div><div class="ph pt" style="aspect-ratio:0.75;"><img src="/img/w-drill1.jpg" alt="Volunteers and a local crew turn the arms of The Village Drill"></div></div>
+<div class="ptile"><div class="ph " style="aspect-ratio:1.26;"><img src="/img/w-drill2.jpg" alt="The blue Village Drill rig standing on open plains"></div><div class="tb ctr"><h2 class="h2">Sponsor a well</h2><p class="p">Help us promote self reliance by donating to our interest free well loan program, or by sponsoring a well.</p><p class="p">Interest free loans provide communities the opportunity to bring clean water sources to their communities without creating dependency.</p><a class="b" href="https://www.rafikioutreach.org/donate">Sponsor</a></div></div>
 <div class="ptile"><div class="ph" style="aspect-ratio:1.03"><img src="/img/w-field3.jpg" alt="A volunteer's hand holds a child's hand through a vehicle window"></div><div class="tb ctr"><h2 class="h2">Drill a well</h2><p class="p">Interested in drilling a well in person? Join a humanitarian safari in East Africa.</p><a class="b" href="https://www.rafikioutreach.org/trips">Trips</a></div></div>
-<div class="tile dark howdrill ctr"><h2 class="h2">How we drill</h2><p class="p">We use a portable, hand crank borehole drill created by the village drill.</p><p class="p">It allows drilling in 75% more places at 75% less the cost than a typical drilling rig.</p><a class="p" href="https://villagedrill.com" style="color:#9FD3F7">(villagedrill.com)</a><div class="ph pt" style="aspect-ratio:0.75;"><img src="/img/w-drill1.jpg" alt="Volunteers and a local crew turn the arms of The Village Drill"></div><a class="b" href="https://www.rafikioutreach.org/water">Learn more</a></div>
-<div class="tile blue reachout ctr"><h2 class="h2">Stay in touch with us</h2><p class="p">Follow our social media pages to see our latest community projects.</p><div class="bf-social"><a class="soc soc-fb" href="https://www.facebook.com/rafikioutreach" target="_blank" rel="noopener" aria-label="Rafiki Outreach on Facebook"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="#FFFFFF" d="M13.5 21v-7.5h2.6l.4-3h-3V8.6c0-.9.3-1.5 1.6-1.5h1.6V4.4c-.3 0-1.2-.1-2.3-.1-2.3 0-3.9 1.4-3.9 4V10.5H8v3h2.5V21h3z"></path></svg></a><a class="soc soc-ig" href="https://www.instagram.com/rafikioutreach" target="_blank" rel="noopener" aria-label="Rafiki Outreach on Instagram"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.3" cy="6.7" r="1" fill="#FFFFFF" stroke="none"></circle></svg></a></div></div></div></main><section class="wrap xs" id="where-we-work" aria-label="Where we work">
+<div class="tile blue reachout ctr rw-full"><h2 class="h2">Stay in touch with us</h2><p class="p">Follow our social media pages to see our latest community projects.</p><div class="bf-social"><a class="soc soc-fb" href="https://www.facebook.com/rafikioutreach" target="_blank" rel="noopener" aria-label="Rafiki Outreach on Facebook"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="#FFFFFF" d="M13.5 21v-7.5h2.6l.4-3h-3V8.6c0-.9.3-1.5 1.6-1.5h1.6V4.4c-.3 0-1.2-.1-2.3-.1-2.3 0-3.9 1.4-3.9 4V10.5H8v3h2.5V21h3z"></path></svg></a><a class="soc soc-ig" href="https://www.instagram.com/rafikioutreach" target="_blank" rel="noopener" aria-label="Rafiki Outreach on Instagram"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.3" cy="6.7" r="1" fill="#FFFFFF" stroke="none"></circle></svg></a></div></div>
+</main><section class="wrap xs" id="where-we-work" aria-label="Where we work">
 <div class="cc-ww">
 <span class="cc-lab">Where we work</span>
 <h2 class="h2">Four countries, one mission</h2>
