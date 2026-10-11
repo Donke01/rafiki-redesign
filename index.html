@@ -357,7 +357,7 @@ em.hl{font-style:normal;color:#098BE1}
 .rows > .ptile.rw-side > .ph{height:100%;min-height:380px;aspect-ratio:auto !important}
 .rows > .ptile.rw-side > .ph img{height:100%}
 @media (max-width:900px){
-.zh{min-height:640px}.zh-in{padding-top:130px;padding-bottom:84px}
+.zh{min-height:max(640px,100svh)}.zh-in{padding-top:130px;padding-bottom:84px}
 .zh-scrim{background:linear-gradient(0deg,rgba(10,10,10,.82) 0%,rgba(10,10,10,.45) 60%,rgba(10,10,10,.15) 100%)}
 .zh-p{font-size:17px}.zh-stat b{font-size:26px}
 .zq{padding:32px 18px !important}
@@ -654,8 +654,8 @@ em.hl{font-style:normal;color:#098BE1}
 </sc-if>
 </header>
 </div>
-<div class="hd-space" aria-hidden="true"></div><section class="zh" aria-label="Rafiki Outreach">
-<img class="zh-bg" src="/img/w-elder.jpg" alt="An elder, children and a Rafiki volunteer in a village lane">
+<div class="hd-space" aria-hidden="true"></div><section class="zh" id="zh-hero" aria-label="Rafiki Outreach">
+<img class="zh-bg" style="{{zhImg}}" src="/img/w-elder.jpg" alt="An elder, children and a Rafiki volunteer in a village lane">
 <div class="zh-scrim" aria-hidden="true"></div>
 <div class="wrap zh-in">
 <span class="zh-chip"><i aria-hidden="true"></i>Rafiki Outreach · {{cName}}</span>
@@ -879,6 +879,18 @@ class Component extends DCLogic {
   constructor(props) { super(props); this.state = { menu: false, hidden: false, scrolled: false, amount: 50, custom: '', freq: 'once', ppl: 0, hhAll: 0, hh: 0, day: 0, well: 0, five: 0, ixOn: false, ixDone: false, tick: 0, tickPrev: -1, stOpen: false, stI: 0, stFlip: false, ww: 0, fnVal: '', fnNote: '' }; }
   componentDidMount() {
     var self = this; this._lastY = 0;
+    this._fitHero = function () {
+      var el = document.getElementById('zh-hero'); if (!el) return;
+      var r = el.getBoundingClientRect(), W = r.width, H = r.height; if (!W || !H) return;
+      var IW = 2200, IH = 1467, FX = 0.574, FY = 0.34, TY = W < H ? 0.27 : 0.3;
+      var sc = Math.max(W / IW, H / IH, W / (2 * (1 - FX) * IW), W / (2 * FX * IW));
+      var w = IW * sc, h = IH * sc;
+      var ox = Math.min(Math.max(FX * w - W / 2, 0), w - W), oy = Math.min(Math.max(FY * h - TY * H, 0), h - H);
+      var st = 'inset:auto;max-width:none;object-fit:fill;width:' + w.toFixed(1) + 'px;height:' + h.toFixed(1) + 'px;left:' + (-ox).toFixed(1) + 'px;top:' + (-oy).toFixed(1) + 'px;transform-origin:' + (FX * 100) + '% ' + (FY * 100) + '%';
+      if (st !== self.state.zhImg) self.setState({ zhImg: st });
+    };
+    this._fitHero(); setTimeout(this._fitHero, 0);
+    window.addEventListener('resize', this._fitHero);
     this._onScroll = function () {
       var y = window.scrollY || 0, dy = y - self._lastY, st = self.state;
       var hide = st.hidden;
@@ -939,7 +951,7 @@ class Component extends DCLogic {
     }, 0);
     this._ixFallback = setTimeout(run, 4000);
   }
-  componentWillUnmount() { window.removeEventListener('scroll', this._onScroll); window.removeEventListener('keydown', this._onKey); document.body.style.overflow = ''; if (this._raf) cancelAnimationFrame(this._raf); if (this._tickT) clearInterval(this._tickT); if (this._io) this._io.disconnect(); if (this._io2) this._io2.disconnect(); if (this._raf2) cancelAnimationFrame(this._raf2); clearTimeout(this._ixFallback); }
+  componentWillUnmount() { window.removeEventListener('resize', this._fitHero); window.removeEventListener('scroll', this._onScroll); window.removeEventListener('keydown', this._onKey); document.body.style.overflow = ''; if (this._raf) cancelAnimationFrame(this._raf); if (this._tickT) clearInterval(this._tickT); if (this._io) this._io.disconnect(); if (this._io2) this._io2.disconnect(); if (this._raf2) cancelAnimationFrame(this._raf2); clearTimeout(this._ixFallback); }
   stGo(i) {
     if (i < 0) { document.body.style.overflow = ''; this.setState({ stOpen: false }); return; }
     document.body.style.overflow = 'hidden';
@@ -965,6 +977,7 @@ class Component extends DCLogic {
   renderVals() {
     var self = this, s = this.state;
     return Object.assign(countryVals(this), {
+      zhImg: s.zhImg || 'object-position:57% 34%',
       hdStyle: 'transform: translateY(' + (s.hidden ? '-140%' : '0') + ')',
       tileShadow: s.scrolled ? 'box-shadow: 0 2px 4px rgba(10,10,10,0.05), 0 14px 36px rgba(10,10,10,0.12)' : 'box-shadow: 0 1px 2px rgba(10,10,10,0.04)',
       peopleLabel: s.ppl.toLocaleString('en-US'),
