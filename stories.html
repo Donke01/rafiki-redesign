@@ -937,7 +937,7 @@ var CTRY = { ke: { n: 'Kenya', ab: 'KE' }, tz: { n: 'Tanzania', ab: 'TZ' }, ug: 
 var CORDER = ['ke', 'tz', 'ug', 'mw'];
 function countryVals(self) {
   var s = self.state, all = !!s.cAll, cur = CTRY[s.ctry || 'ke'];
-  var pick = function (k) { self.setState({ ctry: k === 'all' ? (self.state.ctry || 'ke') : k, cAll: k === 'all', cs: false }); };
+  var pick = function (k) { self.setState({ ctry: k === 'all' ? (self.state.ctry || 'ke') : k, cAll: k === 'all', cs: false, menu: false, ctryPicked: true }); try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) { window.scrollTo(0, 0); } };
   var list = CORDER.map(function (k) { var on = !all && (s.ctry || 'ke') === k; return { n: CTRY[k].n, sub: k === 'ke' ? 'Main site' : 'rafikioutreach.org/' + CTRY[k].n.toLowerCase(), on: on ? 'true' : 'false', pn: CTRY[k].n, cls: 'cs-it' + (on ? ' on' : ''), pill: 'mm-pill' + (on ? ' on' : ''), pick: function () { pick(k); } }; })
     .concat([{ n: 'All countries', pn: 'All', sub: 'Totals across all four', on: all ? 'true' : 'false', cls: 'cs-it all' + (all ? ' on' : ''), pill: 'mm-pill' + (all ? ' on' : ''), pick: function () { pick('all'); } }]);
   return { menuCls: 'hd-menu' + (s.menu ? ' open' : (self._menuWasOpen ? ' shut' : '')), cName: all ? 'All countries' : cur.n, cCode: all ? 'All' : cur.ab, csOpen: !!s.cs, csExpanded: s.cs ? 'true' : 'false',

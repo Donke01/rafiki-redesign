@@ -710,9 +710,9 @@ em.hl{font-style:normal;color:#098BE1}
 <img class="zh-bg" style="{{zhImg}}" src="/img/w-elder.jpg" alt="An elder, children and a Rafiki volunteer in a village lane">
 <div class="zh-scrim" aria-hidden="true"></div>
 <div class="wrap zh-in">
-<h1 class="zh-h1">Clean water, close to home.</h1>
+<h1 class="zh-h1">{{heroH1}}</h1>
 <p class="zh-p"><span class="zh-long">We drill wells with communities in Kenya, Tanzania, Uganda and Malawi, bringing better health, more time and a way out of poverty.</span><span class="zh-short">Wells with communities in Kenya, Tanzania, Uganda and Malawi</span></p>
-<div class="zh-stat"><b>780,500+</b><span>people reached with clean, safe water</span></div>
+<div class="zh-stat"><b>{{heroNum}}</b><span>{{heroStatTx}}</span></div>
 </div>
 <a class="zh-down" href="#zmain" aria-label="Scroll down"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></a>
 </section>
@@ -919,10 +919,12 @@ var CTRY = { ke: { n: 'Kenya', ab: 'KE', w: 95, u: 3, p: 210000 }, tz: { n: 'Tan
 var CORDER = ['ke', 'tz', 'ug', 'mw'];
 function countryVals(self) {
   var s = self.state, all = !!s.cAll, cur = CTRY[s.ctry || 'ke'];
-  var pick = function (k) { self.setState({ ctry: k === 'all' ? (self.state.ctry || 'ke') : k, cAll: k === 'all', cs: false }); };
+  var pick = function (k) { self.setState({ ctry: k === 'all' ? (self.state.ctry || 'ke') : k, cAll: k === 'all', cs: false, menu: false, ctryPicked: true }); try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) { window.scrollTo(0, 0); } };
   var list = CORDER.map(function (k) { var on = !all && (s.ctry || 'ke') === k; return { n: CTRY[k].n, sub: k === 'ke' ? 'Main site' : 'rafikioutreach.org/' + CTRY[k].n.toLowerCase(), on: on ? 'true' : 'false', pn: CTRY[k].n, cls: 'cs-it' + (on ? ' on' : ''), pill: 'mm-pill' + (on ? ' on' : ''), pick: function () { pick(k); } }; })
     .concat([{ n: 'All countries', pn: 'All', sub: 'Totals across all four', on: all ? 'true' : 'false', cls: 'cs-it all' + (all ? ' on' : ''), pill: 'mm-pill' + (all ? ' on' : ''), pick: function () { pick('all'); } }]);
-  return { menuCls: 'hd-menu' + (s.menu ? ' open' : (self._menuWasOpen ? ' shut' : '')), cName: all ? 'All countries' : cur.n, cCode: all ? 'All' : cur.ab, csOpen: !!s.cs, csExpanded: s.cs ? 'true' : 'false',
+  var picked = !!s.ctryPicked && !all;
+  var heroVals = { heroH1: picked ? 'Clean water across ' + cur.n + '.' : 'Clean water, close to home.', heroNum: picked ? cur.p.toLocaleString('en-US') + '+' : '780,500+', heroStatTx: picked ? 'people reached in ' + cur.n : 'people reached with clean, safe water' };
+  return { heroH1: heroVals.heroH1, heroNum: heroVals.heroNum, heroStatTx: heroVals.heroStatTx, menuCls: 'hd-menu' + (s.menu ? ' open' : (self._menuWasOpen ? ' shut' : '')), cName: all ? 'All countries' : cur.n, cCode: all ? 'All' : cur.ab, csOpen: !!s.cs, csExpanded: s.cs ? 'true' : 'false',
     toggleCs: function () { self.setState({ cs: !self.state.cs }); }, csList: list,
     wwCards: CORDER.map(function (k) { var on = !all && (s.ctry || 'ke') === k; return { n: CTRY[k].n, ab: CTRY[k].ab, w: CTRY[k].w.toLocaleString('en-US'), u: CTRY[k].u.toLocaleString('en-US'), p: CTRY[k].p.toLocaleString('en-US') + '+', on: on ? 'true' : 'false', here: on, cls: 'cc-card' + (on ? ' on' : ''), go: on ? 'You are viewing' : 'Explore ' + CTRY[k].n + ' →', pick: function () { pick(k); } }; }) };
 }
