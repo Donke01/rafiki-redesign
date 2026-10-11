@@ -1,0 +1,950 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rafiki Outreach — Clean water across East Africa</title>
+<script src="/support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200;300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+
+body{margin:0}
+*{box-sizing:border-box}
+img{display:block}
+.ph{overflow:hidden;min-width:0}
+.ph img{width:100%;height:100%;object-fit:cover}
+.prow{display:flex;gap:8px;align-items:flex-start}
+.prow > .ph{min-width:0}
+.wrap{max-width:1240px;margin:0 auto;padding-left:40px;padding-right:40px}
+em.hl{font-style:normal;color:#098BE1}
+.nav .navin{display:flex;align-items:center;justify-content:space-between;gap:24px;padding-top:20px;padding-bottom:20px}
+.nav .logo{height:34px;width:auto}
+.nav .links{display:flex;gap:28px;font-size:15px;font-weight:500}
+.nav .links a{text-decoration:none;color:inherit}
+.navb{margin-left:auto}
+.links + .navb{margin-left:0}
+.foot .footin{display:flex;flex-wrap:wrap;gap:32px 64px;padding-top:64px;padding-bottom:40px;font-size:15px;line-height:1.7}
+.foot .fcol{flex:1 1 220px;display:flex;flex-direction:column;gap:6px}
+.foot .flogo{height:44px;width:auto;align-self:flex-start;margin-bottom:10px}
+.foot .fabout{font-weight:600;text-decoration:none}
+.foot .fcopy{padding-top:20px;padding-bottom:32px;font-size:13px}
+.foot-dark{background:#0A0A0A;color:#B9BEC3}.foot-dark a{color:#9FD3F7}.foot-dark .fabout{color:#FFFFFF}.foot-dark .fcopy{border-top:1px solid #22262A;color:#8A9096}
+.foot-light{background:#FFFFFF;color:#474D53;border-top:1px solid #E5E5E5}.foot-light a{color:#076DB1}.foot-light .fabout{color:#0A0A0A}.foot-light .fcopy{border-top:1px solid #EEEEEE;color:#8A9096}
+@media (max-width: 760px){
+.wrap{padding-left:20px;padding-right:20px}
+.nav .links{display:none}
+.nav .logo{height:28px}
+}
+
+.pg{background:#EEF0F2;color:#0A0A0A;font-family:Montserrat,system-ui,sans-serif}
+.h1{font-size:clamp(22px,2.2vw,32px);line-height:1.3;font-weight:600;letter-spacing:-0.015em;margin:0}
+.h2{font-size:clamp(26px,2.4vw,34px);line-height:1.12;font-weight:700;letter-spacing:-0.02em;margin:0}
+.p{font-size:17px;line-height:1.65;margin:0;color:#3A3F44}
+.b{display:inline-flex;align-items:center;min-height:50px;padding:0 24px;border-radius:999px;background:#0A0A0A;color:#FFFFFF;text-decoration:none;font-weight:700;font-size:15px}
+.nav{background:#EEF0F2}
+.grid{display:flex;gap:14px;align-items:flex-start;padding-top:0;padding-bottom:14px}
+.col{flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:14px}
+.tile{background:#FFFFFF;border-radius:28px;padding:32px;display:flex;flex-direction:column;gap:18px;align-items:flex-start}
+.tile.blue{background:#098BE1}
+.tile.blue .p{color:#0A0A0A}
+.tile.dark{background:#0A0A0A;color:#FFFFFF}
+.tile.dark .p{color:#C9CDD1}
+.tile.dark .b,.tile.blue .b{background:#FFFFFF;color:#0A0A0A}
+.pt{border-radius:28px}
+.ptile{background:#FFFFFF;border-radius:28px;overflow:hidden;display:flex;flex-direction:column}
+.ptile .tb{padding:28px 32px 32px;display:flex;flex-direction:column;gap:16px;align-items:flex-start}
+.att{font-size:14px;font-weight:600;color:#6B7177}
+.tiers{display:flex;flex-direction:column;gap:10px;width:100%}
+.tier{background:#EEF0F2;border-radius:16px;padding:16px 20px;display:flex;gap:14px;align-items:baseline}
+.tile.blue .tier{background:rgba(255,255,255,.25)}
+.amt{font-size:28px;font-weight:800;min-width:3.4em;letter-spacing:-0.03em}
+.tl{font-size:16px}
+@media (max-width:860px){.grid{flex-direction:column}.col{width:100%}}
+
+
+/* ---------- header tile ---------- */
+.hd-wrap{position:fixed;top:0;left:0;right:0;z-index:50;pointer-events:none;transition:transform .45s cubic-bezier(.2,.7,.2,1)}
+.hd{padding-top:16px;pointer-events:none}
+.hd-tile{pointer-events:auto;background:#FFFFFF;border-radius:28px;padding:12px 12px 12px 32px;display:flex;align-items:center;gap:24px;transition:box-shadow .3s}
+.hd-logo{display:block;flex:0 0 auto}
+.hd-logo img{height:32px;width:auto;display:block}
+.hd-links{flex:1 1 auto;display:flex;justify-content:center;gap:4px}
+.hl-link{font-size:15px;font-weight:500;color:#3A3F44;text-decoration:none;padding:0 16px;min-height:44px;display:inline-flex;align-items:center;border-radius:999px;transition:background .2s,color .2s}
+.hl-link:hover{background:#EEF0F2;color:#0A0A0A}
+.hl-link.on{background:#EEF0F2;color:#0A0A0A;font-weight:600}
+.hd-act{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+.hd-donate{display:inline-flex;align-items:center;gap:8px;min-height:50px;padding:0 24px;border-radius:999px;background:#098BE1;color:#0A0A0A;font-weight:700;font-size:15px;text-decoration:none;transition:transform .25s}
+.hd-donate:hover{transform:translateY(-1px)}
+.hd-menu{display:none;width:50px;height:50px;border:0;border-radius:50%;background:#0A0A0A;color:#FFFFFF;align-items:center;justify-content:center;cursor:pointer}
+.hd-space{height:104px}
+.mm-tile{pointer-events:auto;margin-top:10px;background:#FFFFFF;border-radius:28px;padding:10px;display:flex;flex-direction:column;box-shadow:0 20px 50px rgba(10,10,10,.16)}
+.mm-link{display:flex;align-items:center;justify-content:space-between;min-height:54px;padding:0 18px;border-radius:18px;font-size:17px;font-weight:600;color:#0A0A0A;text-decoration:none}
+.mm-link span{color:#9AA0A6}
+.mm-link:hover{background:#EEF0F2}
+.mm-donate{margin-top:6px;min-height:54px;border-radius:999px;background:#0A0A0A;color:#FFFFFF;font-weight:700;display:flex;align-items:center;justify-content:center;text-decoration:none}
+@media (max-width:900px){
+.hd-links{display:none}
+.hd-menu{display:flex}
+.hd-tile{padding:8px 8px 8px 22px;border-radius:24px;justify-content:space-between}
+.hd-logo img{height:26px}
+.hd-donate{min-height:46px;padding:0 18px}
+.hd-menu{width:46px;height:46px}
+.hd{padding-top:12px}
+.hd-space{height:88px}
+}
+@media (min-width:901px){.mm-tile{display:none}}
+@media (prefers-reduced-motion: reduce){.hd-wrap{transition:none}}
+
+/* ---------- access tile: light water ---------- */
+.tile.access{position:relative;overflow:hidden;background:linear-gradient(180deg,#E6F4FE 0%,#CDE9FC 100%)}
+.tile.access > *{position:relative}
+.tile.access .aw{position:absolute;left:0;right:0;bottom:0;width:100%;height:70px}
+.tile.access .tier{background:#FFFFFF}
+.tile.access .b{background:#0A0A0A;color:#FFFFFF}
+
+/* ---------- how we drill: off-white ---------- */
+.tile.howdrill{background:#FAF8F3;color:#0A0A0A}
+.tile.howdrill .p{color:#3A3F44}
+.tile.howdrill a.p{color:#076DB1 !important}
+.tile.howdrill .b{background:#0A0A0A;color:#FFFFFF}
+
+/* ---------- reach out: off-white ---------- */
+.tile.reachout{background:#FAF8F3;color:#0A0A0A}
+.tile.reachout .p{color:#3A3F44}
+.tile.reachout .b{background:#0A0A0A;color:#FFFFFF}
+
+/* ---------- centre alignment ---------- */
+.ctr{align-items:center !important;text-align:center}
+.ctr .tiers{align-items:stretch}
+.ctr .tier{justify-content:center}
+.ctr .amt{min-width:0}
+
+/* ---------- footer: black, end to end ---------- */
+.bf{background:#0A0A0A;color:#B9BEC3;margin-top:24px}
+.bf-tile{padding-top:56px;padding-bottom:28px}
+.bf-row{display:flex;flex-wrap:wrap;gap:32px 48px;align-items:flex-start}
+.bf-col{flex:1 1 220px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;font-size:15px;line-height:1.65;color:#B9BEC3}
+.bf-brand{gap:14px}
+.bf-logo{height:40px;width:auto;align-self:center}
+.bf-about{align-self:center;min-height:40px;padding:0 18px;border-radius:999px;background:#1E2226;color:#FFFFFF;font-weight:600;font-size:14px;text-decoration:none;display:inline-flex;align-items:center}
+.bf-lab{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#6BBDF2;margin-bottom:4px}
+.bf-col a{color:#FFFFFF}
+.bf-copy{margin-top:40px;padding-top:20px;border-top:1px solid #22262A;font-size:13px;color:#8A9096;text-align:center}
+@media (max-width:760px){
+.bf-tile{padding-top:44px;padding-bottom:24px}
+.bf-row{flex-direction:column;align-items:center;gap:28px}
+.bf-col{flex:none;width:100%}
+}
+
+
+/* ---------- footer socials ---------- */
+.bf-social{display:flex;gap:12px;justify-content:center;margin-top:10px}
+.soc{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:transform .2s,box-shadow .2s}
+.soc:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.4)}
+.soc-fb{background:#1877F2}
+.soc-ig{background:radial-gradient(circle at 30% 107%,#FDF497 0%,#FDF497 5%,#FD5949 45%,#D6249F 60%,#285AEB 90%)}
+.bf-handle{font-size:14px;color:#8A9096;margin-top:2px}
+
+/* ---------- footer email ---------- */
+.bf-mail{display:inline-flex;align-items:center;gap:10px;margin-top:14px;min-height:44px;padding:0 20px;border-radius:999px;border:1px solid #2A2E33;background:#141618;color:#FFFFFF !important;text-decoration:none;font-size:15px;font-weight:500;transition:border-color .2s,background .2s}
+.bf-mail svg{color:#098BE1}
+.bf-mail:hover{border-color:#098BE1;background:#0E1A24}
+
+/* ---------- access tile v2: living water ---------- */
+@keyframes aqX{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes aqBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes bubUp{0%{transform:translateY(0) scale(.6);opacity:0}15%{opacity:.9}100%{transform:translateY(-260px) scale(1);opacity:0}}
+@keyframes ring{0%{transform:scale(.7);opacity:.8}100%{transform:scale(1.9);opacity:0}}
+@keyframes tierIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.access2{position:relative;overflow:hidden;padding:44px 32px 40px !important;align-items:center !important;text-align:center;background:linear-gradient(180deg,#F2FAFF 0%,#E1F1FD 48%,#BFE2FA 100%)}
+.aq{position:absolute;left:0;right:0;bottom:0;height:46%;pointer-events:none}
+.aq-w{position:absolute;left:0;width:200%;height:70px;animation:aqX 9s linear infinite}
+.aq-w1{top:-34px;fill:#9FD3F7;opacity:.55;animation-duration:12s}
+.aq-w2{top:-22px;fill:#6BBDF2;opacity:.45;animation-direction:reverse}
+.aq-body{position:absolute;inset:36px 0 0 0;background:linear-gradient(180deg,rgba(107,189,242,.42) 0%,rgba(9,139,225,.38) 100%)}
+.bub{position:absolute;bottom:-10px;width:10px;height:10px;border-radius:50%;border:1.5px solid rgba(255,255,255,.85);background:rgba(255,255,255,.25);animation:bubUp 6s ease-in infinite}
+.b1{left:8%;animation-delay:0s}.b2{left:22%;width:7px;height:7px;animation-delay:2.2s;animation-duration:7s}.b3{left:41%;animation-delay:4s}.b4{left:63%;width:14px;height:14px;animation-delay:1.2s;animation-duration:8s}.b5{left:79%;width:8px;height:8px;animation-delay:3.1s}.b6{left:91%;animation-delay:5.2s;animation-duration:7.5s}
+.ac{position:relative;display:flex;flex-direction:column;align-items:center;gap:20px;width:100%}
+.ac-badge{position:relative;width:64px;height:64px;border-radius:50%;background:#FFFFFF;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 26px rgba(9,139,225,.22);animation:aqBob 4s ease-in-out infinite}
+.ac-ring{position:absolute;inset:0;border-radius:50%;border:2px solid #098BE1;animation:ring 2.6s ease-out infinite}
+.ac-h{font-size:clamp(28px,2.7vw,38px) !important;max-width:14em}
+.ac-h em{font-style:normal;color:#098BE1}
+.ac-p{max-width:34em;color:#2B3238 !important}
+.ac-tiers{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;width:100%;margin-top:6px}
+.ac-tier{background:rgba(255,255,255,.82);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.95);border-radius:20px;padding:20px 12px 18px;display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:0 8px 24px rgba(9,139,225,.12);animation:tierIn .8s cubic-bezier(.2,.7,.2,1) both;transition:transform .25s,box-shadow .25s}
+.ac-tier:nth-child(2){animation-delay:.12s}.ac-tier:nth-child(3){animation-delay:.24s}
+.ac-tier:hover{transform:translateY(-4px);box-shadow:0 16px 34px rgba(9,139,225,.2)}
+.ac-i{color:#076DB1;height:30px;display:flex;align-items:center}
+.ac-amt{font-size:32px;font-weight:800;letter-spacing:-0.03em;line-height:1.1;color:#0A0A0A}
+.ac-tl{font-size:14px;line-height:1.4;color:#3A3F44}
+.ac-star{background:#098BE1;border-color:#098BE1}
+.ac-star .ac-i,.ac-star .ac-amt,.ac-star .ac-tl{color:#0A0A0A}
+.ac-btn{background:#0A0A0A !important;color:#FFFFFF !important;min-height:54px;padding:0 34px;margin-top:4px}
+@media (max-width:760px){
+.access2{padding:36px 20px 32px !important}
+.ac-tiers{grid-template-columns:1fr}
+.ac-tier{flex-direction:row;justify-content:center;gap:12px;padding:16px}
+.ac-amt{font-size:28px}
+}
+@media (prefers-reduced-motion: reduce){.aq-w,.bub,.ac-badge,.ac-ring,.ac-tier{animation:none !important}.bub{display:none}}
+
+/* ---------- access tile: giving options ---------- */
+.gv{width:100%;display:flex;flex-direction:column;align-items:center;gap:14px;margin-top:6px}
+.gv-freq{display:grid;grid-template-columns:1fr 1fr;background:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.95);border-radius:999px;padding:4px;width:min(100%,320px)}
+.gv-freq button{min-height:44px;border:0;border-radius:999px;font:inherit;font-size:15px;font-weight:600;cursor:pointer;background:transparent;color:#3A3F44;transition:background .2s,color .2s}
+.gv-freq button.on{background:#0A0A0A;color:#FFFFFF}
+.ac-tiers{grid-template-columns:repeat(3,minmax(0,1fr)) !important}
+.ac-tier{font:inherit;cursor:pointer;text-align:center;padding:16px 10px 14px !important;animation:none !important}
+.ac-tier.on{background:#0A0A0A !important;border-color:#0A0A0A !important}
+.ac-tier.on .ac-amt,.ac-tier.on .ac-tl{color:#FFFFFF !important}
+.ac-tier .ac-amt{font-size:26px}
+.ac-tier .ac-tl{font-size:13px}
+.gv-other{display:flex;flex-direction:column;align-items:center;gap:6px;width:min(100%,320px)}
+.gv-lab{font-size:13px;font-weight:600;color:#2B3238}
+.gv-inwrap{display:flex;align-items:center;gap:6px;width:100%;background:#FFFFFF;border:1.5px solid #CFE3F2;border-radius:999px;padding:0 18px;min-height:50px}
+.gv-inwrap span{font-weight:700;color:#076DB1}
+.gv-inwrap input{flex:1;min-width:0;border:0;outline:0;font:inherit;font-size:16px;background:transparent;color:#0A0A0A;text-align:center}
+.gv-inwrap:focus-within{border-color:#098BE1}
+.gv-impact{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.9);border-radius:999px;padding:10px 20px;font-size:15px;font-weight:600;color:#0A0A0A}
+@media (max-width:760px){.ac-tiers{grid-template-columns:repeat(2,minmax(0,1fr)) !important}.ac-tier{flex-direction:column !important}}
+
+/* ---------- access tile: compact on phones ---------- */
+@media (max-width:760px){
+.access2{padding:22px 14px 20px !important}
+.ac{gap:12px}
+.ac-badge{width:44px;height:44px}
+.ac-badge svg{width:22px;height:22px}
+.ac-h{font-size:23px !important;line-height:1.15}
+.ac-p{font-size:14px !important;line-height:1.5 !important}
+.gv{gap:10px;margin-top:2px}
+.gv-freq{width:100%;padding:3px}
+.gv-freq button{min-height:38px;font-size:14px}
+.ac-tiers{grid-template-columns:repeat(3,minmax(0,1fr)) !important;gap:6px !important}
+.ac-tier{flex-direction:column !important;gap:2px !important;padding:10px 4px !important;border-radius:14px !important}
+.ac-tier .ac-amt{font-size:19px}
+.ac-tier .ac-tl{font-size:10.5px;line-height:1.3}
+.gv-other{flex-direction:row;width:100%;gap:8px}
+.gv-lab{white-space:nowrap;font-size:12px}
+.gv-inwrap{flex:1 1 auto;width:auto;min-width:0;min-height:42px;padding:0 14px}
+.gv-inwrap input{font-size:15px}
+.gv-impact{padding:8px 14px;font-size:13px;gap:8px}
+.gv-impact svg{width:18px;height:18px}
+.ac-btn{min-height:46px !important;padding:0 28px !important;font-size:15px}
+}
+
+
+/* ---------- impact tile v2 ---------- */
+@keyframes ipIn{0%{opacity:0;transform:translateY(8px) scale(.6)}100%{opacity:1;transform:none}}
+@keyframes ringDraw{from{stroke-dashoffset:327}to{stroke-dashoffset:0}}
+@keyframes ruleGrow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes dotPulse{0%{box-shadow:0 0 0 0 rgba(9,139,225,.55)}100%{box-shadow:0 0 0 9px rgba(9,139,225,0)}}
+@keyframes houseBob{0%,100%{transform:translate(-50%,-50%)}50%{transform:translate(-50%,-56%)}}
+.impact2{position:relative;overflow:hidden;background:linear-gradient(180deg,#FFFFFF 0%,#F1F8FE 55%,#E2F1FC 100%) !important;padding:36px 28px 44px !important;align-items:center !important;text-align:center}
+.iw{position:absolute;left:0;bottom:-6px;width:200%;height:46px;animation:aqX 14s linear infinite}
+.iw1{fill:#CDE7FA;opacity:.8}
+.iw2{fill:#B3DBF8;opacity:.55;bottom:-14px;animation-direction:reverse;animation-duration:10s}
+.ix{position:relative;display:flex;flex-direction:column;align-items:center;gap:18px;width:100%}
+.ix-lab{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#076DB1;background:#E3F1FC;padding:6px 14px;border-radius:999px}
+.ix-dot{width:8px;height:8px;border-radius:50%;background:#098BE1;animation:dotPulse 1.8s ease-out infinite}
+.ix-h{margin:0;font-size:clamp(22px,2vw,28px);font-weight:700;line-height:1.2;letter-spacing:-0.02em;color:#0A0A0A;max-width:16em}
+.ix-stat{display:flex;flex-direction:column;align-items:center;gap:8px;width:100%}
+.ix-people{display:grid;grid-template-columns:repeat(12,14px);gap:6px 8px;justify-content:center;margin-bottom:6px}
+.ip{width:14px;height:19px;opacity:0;animation:ipIn .5s cubic-bezier(.2,.7,.2,1) forwards}
+.ip svg{width:100%;height:100%;display:block;fill:#098BE1}
+.ip1 svg{fill:#076DB1}.ip3 svg{fill:#6BBDF2}.ip4 svg{fill:#054F81}
+.ix-num{font-size:clamp(46px,5vw,64px);font-weight:800;letter-spacing:-0.045em;line-height:1;color:#0A0A0A;font-variant-numeric:tabular-nums}
+.ix-plus{color:#098BE1}
+.ix-tx{font-size:16px;line-height:1.5;color:#3A3F44;max-width:24em;text-wrap:balance}
+.ix-rule{width:100%;display:flex;justify-content:center}
+.ix-rule span{display:block;width:72px;height:3px;border-radius:3px;background:linear-gradient(90deg,#6BBDF2,#098BE1);transform-origin:center;animation:ruleGrow .8s .9s cubic-bezier(.2,.7,.2,1) both}
+.ix-goal{display:flex;align-items:center;justify-content:center;gap:20px;background:rgba(255,255,255,.85);border:1px solid #DDEEFB;border-radius:22px;padding:18px 22px;width:100%;box-sizing:border-box;box-shadow:0 10px 28px rgba(9,139,225,.10)}
+.ix-ring{position:relative;width:92px;height:92px;flex:0 0 92px;color:#098BE1}
+.ix-ring > svg:first-child{width:100%;height:100%;transform:rotate(-90deg)}
+.rg-bg{fill:none;stroke:#E3F1FC;stroke-width:10}
+.rg-fg{fill:none;stroke:#098BE1;stroke-width:10;stroke-linecap:round;stroke-dasharray:327;stroke-dashoffset:327;animation:ringDraw 2.2s .6s cubic-bezier(.4,0,.2,1) forwards}
+.ix-house{position:absolute;left:50%;top:50%;width:34px;height:34px;transform:translate(-50%,-50%);animation:houseBob 3.2s ease-in-out infinite}
+.ix-gtxt{display:flex;flex-direction:column;align-items:center;gap:2px}
+.ix-gl{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#076DB1}
+.ix-gnum{font-size:40px;font-weight:800;letter-spacing:-0.04em;line-height:1.05;color:#0A0A0A;font-variant-numeric:tabular-nums}
+.ix-gtxt .ix-tx{font-size:14px;max-width:15em}
+@media (max-width:760px){
+.impact2{padding:28px 18px 36px !important}
+.ix{gap:14px}
+.ix-people{grid-template-columns:repeat(12,12px);gap:5px 6px}
+.ip{width:12px;height:16px}
+.ix-num{font-size:44px}
+.ix-goal{flex-direction:column;gap:12px;padding:18px}
+}
+@media (prefers-reduced-motion: reduce){.iw,.ip,.ix-dot,.rg-fg,.ix-rule span,.ix-house{animation:none !important}.ip{opacity:1}.rg-fg{stroke-dashoffset:0}}
+
+/* ---------- footer: follow us + more socials ---------- */
+.bf-follow{font-size:14px;font-weight:600;color:#FFFFFF;margin-top:4px}
+.bf-social-f{flex-wrap:wrap;gap:10px;margin-top:8px}
+.soc-x{background:#000000;box-shadow:inset 0 0 0 1px #3A3F44}
+.soc-li{background:#0A66C2}
+.soc-yt{background:#FF0000}
+
+/* ---------- mobile menu: blur + contact ---------- */
+@keyframes bdIn{from{opacity:0}to{opacity:1}}
+@keyframes mmIn{from{opacity:0;transform:translateY(-8px) scale(.98)}to{opacity:1;transform:none}}
+.mm-backdrop{position:fixed;inset:0;z-index:40;background:rgba(238,240,242,.45);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);animation:bdIn .25s ease both}
+.mm-tile{animation:mmIn .28s cubic-bezier(.2,.7,.2,1) both;max-height:calc(100vh - 110px);overflow-y:auto}
+.mm-contact{margin:8px 8px 6px;padding:16px 10px 6px;border-top:1px solid #EEF0F2;display:flex;flex-direction:column;align-items:center;gap:12px}
+.mm-lab{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#076DB1}
+.mm-mail{display:inline-flex;align-items:center;gap:10px;min-height:46px;padding:0 20px;border-radius:999px;background:#EEF0F2;color:#0A0A0A;font-size:15px;font-weight:600;text-decoration:none}
+.mm-mail svg{color:#098BE1}
+.mm-social{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.mm-social .soc{width:42px;height:42px}
+.mm-social .soc-x{box-shadow:none}
+@media (prefers-reduced-motion: reduce){.mm-backdrop,.mm-tile{animation:none}}
+
+/* ---------- impact tile: photo + clear glass ---------- */
+.imp-photo{background:#0A0A0A !important;padding:300px 18px 18px !important;justify-content:flex-end}
+.imp-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 22%}
+.imp-scrim{position:absolute;inset:0;background:linear-gradient(0deg,rgba(10,10,10,.72) 0%,rgba(10,10,10,.38) 45%,rgba(10,10,10,0) 70%)}
+.ix-glass{background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.45);border-radius:24px;padding:24px 20px 22px;box-sizing:border-box;color:#FFFFFF;text-shadow:0 1px 10px rgba(0,0,0,.45)}
+.ix-glass .ix-lab{background:rgba(10,10,10,.42);color:#FFFFFF;text-shadow:none;border:1px solid rgba(255,255,255,.35)}
+.ix-glass .ix-dot{background:#6BBDF2}
+.ix-glass .ix-h,.ix-glass .ix-num,.ix-glass .ix-gnum{color:#FFFFFF}
+.ix-glass .ix-plus{color:#6BBDF2}
+.ix-glass .ix-tx{color:rgba(255,255,255,.92)}
+.ix-glass .ip svg{fill:#FFFFFF}.ix-glass .ip1 svg,.ix-glass .ip4 svg{fill:#9FD3F7}.ix-glass .ip3 svg{fill:#6BBDF2}
+.ix-glass .ix-rule span{background:linear-gradient(90deg,#9FD3F7,#FFFFFF)}
+.ix-glass .ix-goal{background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.35);box-shadow:none}
+.ix-glass .ix-gl{color:#9FD3F7}
+.ix-glass .ix-ring{color:#FFFFFF}
+.ix-glass .rg-bg{stroke:rgba(255,255,255,.25)}
+.ix-glass .rg-fg{stroke:#6BBDF2}
+@media (max-width:760px){.imp-photo{padding:250px 10px 10px !important}.ix-glass{padding:18px 12px 14px;gap:10px}.ix-glass .ix-h{font-size:19px}.ix-glass .ix-people{display:none}.ix-glass .ix-num{font-size:40px}.ix-glass .ix-tx{font-size:14px}.ix-glass .ix-goal{flex-direction:row !important;gap:14px;padding:12px 14px}.ix-glass .ix-ring{width:64px;height:64px;flex:0 0 64px}.ix-glass .ix-house{width:24px;height:24px}.ix-glass .ix-gnum{font-size:30px}.ix-glass .ix-gtxt .ix-tx{font-size:12.5px}}
+
+/* ---------- header: taller tile, bigger bold logo ---------- */
+.hd-tile{padding:16px 16px 16px 36px;min-height:88px;box-sizing:border-box}
+.hd-logo img{height:50px}
+.hd-space{height:118px !important}
+.h2{color:#098BE1}
+
+/* ---------- where we work ---------- */
+.cc-ww{background:#FFFFFF;border-radius:28px;padding:40px 32px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
+.cc-lab{font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#076DB1}
+.cc-ww > .p{max-width:34em}
+.cc-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;width:100%;margin-top:12px}
+.cc-card{position:relative;display:flex;flex-direction:column;align-items:center;gap:10px;padding:24px 14px 18px;border-radius:22px;background:#FAF8F3;border:1.5px solid #EEF0F2;font:inherit;color:#0A0A0A;cursor:pointer;transition:transform .3s cubic-bezier(.2,.7,.2,1),box-shadow .3s,border-color .3s}
+.cc-card:hover{transform:translateY(-5px);box-shadow:0 18px 40px rgba(9,139,225,.14)}
+.cc-card.on{border-color:#098BE1;background:#FFFFFF;box-shadow:0 0 0 4px rgba(9,139,225,.12)}
+.cc-here{position:absolute;top:-11px;left:50%;transform:translateX(-50%);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:#098BE1;color:#FFFFFF;border-radius:999px;padding:4px 10px;white-space:nowrap}
+.cc-ab{width:56px;height:56px;border-radius:50%;background:#E3F1FC;color:#054F81;display:grid;place-items:center;font-size:17px;font-weight:800;letter-spacing:.04em}
+.cc-card.on .cc-ab{background:#098BE1;color:#FFFFFF}
+.cc-cn{font-size:20px;font-weight:800;letter-spacing:-0.01em}
+.cc-rows{display:flex;flex-direction:column;gap:4px;width:100%;font-size:13.5px;color:#3A3F44}
+.cc-rows > div{display:flex;justify-content:space-between;gap:8px;border-top:1px solid #EEF0F2;padding-top:6px}
+.cc-rows b{color:#0A0A0A}
+.cc-go{font-size:14px;font-weight:700;color:#098BE1}
+@media (max-width:1100px){.cc-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:900px){.cc-ww{padding:30px 16px}.cc-grid{gap:10px}.cc-card{padding:22px 10px 14px}.cc-cn{font-size:17px}.cc-rows{font-size:12px}}
+
+/* ---------- country switcher ---------- */
+@keyframes csIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.cs{position:relative}
+.cs-btn{display:inline-flex;align-items:center;gap:8px;min-height:50px;padding:0 16px;border-radius:999px;border:1.5px solid #E1E4E7;background:#FFFFFF;font:inherit;font-size:15px;font-weight:700;color:#0A0A0A;cursor:pointer}
+.cs-btn svg:first-child{color:#098BE1}
+.cs-btn:hover{border-color:#9FD3F7}
+.cs-pop{position:absolute;right:0;top:calc(100% + 10px);width:260px;background:#FFFFFF;border-radius:20px;padding:10px;box-shadow:0 20px 50px rgba(10,10,10,.18);display:flex;flex-direction:column;gap:2px;z-index:60;animation:csIn .2s ease both}
+.cs-h{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#6A7076;padding:8px 12px 6px}
+.cs-it{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-height:48px;justify-content:center;padding:6px 12px;border:0;border-radius:14px;background:transparent;font:inherit;text-align:left;cursor:pointer;color:#0A0A0A}
+.cs-it > span{font-size:15px;font-weight:700}
+.cs-it > small{font-size:12px;color:#5A6066}
+.cs-it:hover{background:#EEF0F2}
+.cs-it.on{background:#E3F1FC}
+.cs-it.on > span{color:#054F81}
+.cs-it.all{border-top:1px solid #EEF0F2;border-radius:0 0 14px 14px;margin-top:4px}
+.mm-cs{display:none}
+@media (min-width:901px){.hl-link{padding:0 12px}}
+@media (max-width:900px){.cs{display:none}.mm-cs{display:flex;flex-direction:column;align-items:center;gap:10px;padding:14px 8px 4px;border-top:1px solid #EEF0F2;margin-top:6px}.mm-cs-row{display:flex;flex-wrap:wrap;justify-content:center;gap:6px}.mm-pill{min-height:40px;padding:0 14px;border-radius:999px;border:1.5px solid #E1E4E7;background:#FFFFFF;font:inherit;font-size:14px;font-weight:600;color:#0A0A0A;cursor:pointer}.mm-pill.on{background:#098BE1;border-color:#098BE1;color:#FFFFFF}}
+@media (prefers-reduced-motion: reduce){.cs-pop{animation:none}}
+/* ---------- footer: bold + visible ---------- */
+.bf-logo{height:52px !important}
+.bf,.bf *{font-weight:700 !important}
+.bf,.bf-col,.bf-col a,.bf-follow,.bf-about,.bf-mail,.bf-legal a,.bf-ein{color:#FFFFFF !important}
+.bf-lab{color:#6BBDF2 !important}
+.bf-copy{color:#D5D9DD !important;border-top-color:#2E3338 !important}
+.bf-legal span{color:#8A9096 !important}
+.bf-mail,.bf-about{border-color:#3A3F44 !important;background:#1A1D20 !important}
+.bf-mail svg{color:#6BBDF2 !important}
+.bf-legal a{text-decoration:underline;text-underline-offset:3px;text-decoration-color:rgba(255,255,255,.35)}
+.bf-legal{display:flex;justify-content:center;align-items:center;gap:10px;margin-bottom:8px}
+.bf-legal a{color:#B9BEC3;text-decoration:none;font-weight:500}
+.bf-legal a:hover{color:#FFFFFF;text-decoration:underline}
+.bf-legal span{color:#5A6066}
+.bf-tel{margin-top:10px}
+.bf-ein{display:block;margin-bottom:8px;color:#B9BEC3}
+.hl-link{white-space:nowrap}
+@media (min-width:901px) and (max-width:1280px){.hl-link{padding:0 11px;font-size:14.5px}.hd-links{gap:2px}}
+@media (min-width:901px) and (max-width:1100px){.hd-links{display:none}.hd-menu{display:flex}.hd-tile{justify-content:space-between}.mm-tile{display:flex !important;max-width:520px;margin-left:auto}}
+.ix-hh{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#FFFFFF;background:rgba(10,10,10,.35);border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:4px 12px;text-shadow:none;font-variant-numeric:tabular-nums}
+.ix-hh b{color:#9FD3F7;font-weight:800}
+
+/* ---------- impact tile: motion graphics + details ---------- */
+@keyframes ixUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes ixSheen{0%,72%{transform:translateX(-120%) skewX(-18deg)}100%{transform:translateX(320%) skewX(-18deg)}}
+@keyframes ixFlow{from{background-position:0 0}to{background-position:-200px 0}}
+@keyframes ixFill{0%,100%{filter:none;transform:none}8%{filter:drop-shadow(0 0 6px rgba(159,211,247,.95)) brightness(1.5);transform:translateY(-3px)}18%{filter:none;transform:none}}
+@keyframes ixDrop{0%{transform:translate(-50%,-34px);opacity:0}15%{opacity:1}55%{transform:translate(-50%,-6px);opacity:1}60%,100%{transform:translate(-50%,-6px);opacity:0}}
+@keyframes ixRipple{0%,55%{transform:translate(-50%,-50%) scale(.4);opacity:0}60%{opacity:.9}100%{transform:translate(-50%,-50%) scale(1.25);opacity:0}}
+@keyframes ixGlow{0%{text-shadow:0 1px 10px rgba(0,0,0,.45)}40%{text-shadow:0 0 22px rgba(107,189,242,.95),0 1px 10px rgba(0,0,0,.45)}100%{text-shadow:0 1px 10px rgba(0,0,0,.45)}}
+@keyframes ixBubble{0%{transform:translateY(0) scale(.6);opacity:0}15%{opacity:.85}100%{transform:translateY(-140px) scale(1);opacity:0}}
+.ix-glass{position:relative;overflow:hidden}
+.ix-glass > *{position:relative;z-index:1}
+.ix-glass > .ix-sheen{position:absolute;z-index:0;top:0;bottom:0;left:0;width:40%;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.16),rgba(255,255,255,0));transform:translateX(-120%) skewX(-18deg);pointer-events:none}
+.ix-glass > .ix-bubs{position:absolute;z-index:0;inset:0;pointer-events:none}
+.ix-bubs i{position:absolute;bottom:-10px;width:8px;height:8px;border-radius:50%;border:1.5px solid rgba(159,211,247,.8);opacity:0}
+.ix-bubs i:nth-child(1){left:8%}.ix-bubs i:nth-child(2){left:22%;width:5px;height:5px}.ix-bubs i:nth-child(3){left:78%}.ix-bubs i:nth-child(4){left:91%;width:6px;height:6px}.ix-bubs i:nth-child(5){left:64%;width:4px;height:4px}
+.ix-pre > .ix-glass > :not(.ix-sheen):not(.ix-bubs){opacity:0}
+.ix-on > .ix-glass > :not(.ix-sheen):not(.ix-bubs){animation:ixUp .7s cubic-bezier(.2,.7,.2,1) both}
+.ix-on > .ix-glass > :nth-child(3){animation-delay:.05s}.ix-on > .ix-glass > :nth-child(4){animation-delay:.15s}.ix-on > .ix-glass > :nth-child(5){animation-delay:.25s}.ix-on > .ix-glass > :nth-child(6){animation-delay:.4s}.ix-on > .ix-glass > :nth-child(7){animation-delay:.55s}.ix-on > .ix-glass > :nth-child(8){animation-delay:.7s}.ix-on > .ix-glass > :nth-child(9){animation-delay:.85s}
+.ix-on .ix-sheen{animation:ixSheen 7s 1.6s ease-in-out infinite}
+.ix-on .ix-bubs i{animation:ixBubble 6s linear infinite}
+.ix-on .ix-bubs i:nth-child(2){animation-delay:1.4s;animation-duration:7s}.ix-on .ix-bubs i:nth-child(3){animation-delay:2.6s}.ix-on .ix-bubs i:nth-child(4){animation-delay:.8s;animation-duration:8s}.ix-on .ix-bubs i:nth-child(5){animation-delay:3.6s;animation-duration:5.5s}
+.ix-pre .ip,.ix-pre .rg-fg{animation-play-state:paused}
+.ix-on .ip{animation:ipIn .5s cubic-bezier(.2,.7,.2,1) forwards,ixFill 4.8s ease-in-out infinite}
+.ix-done .ix-num{animation:ixGlow 1.4s ease-out}
+.ix-glass .ix-rule span{width:120px;background:linear-gradient(90deg,rgba(159,211,247,.2),#FFFFFF,#6BBDF2,rgba(159,211,247,.2)) 0 0/200px 100% repeat-x;animation:ruleGrow .8s .9s cubic-bezier(.2,.7,.2,1) both,ixFlow 2.4s linear infinite}
+.ix-drop{position:absolute;left:50%;top:50%;width:9px;height:12px;transform:translate(-50%,-34px);opacity:0}
+.ix-drop svg{width:100%;height:100%;display:block;fill:#9FD3F7}
+.ix-ripple{position:absolute;left:50%;top:50%;width:56px;height:56px;border-radius:50%;border:1.5px solid rgba(159,211,247,.9);transform:translate(-50%,-50%) scale(.4);opacity:0}
+.ix-on .ix-drop{animation:ixDrop 2.6s 2.4s ease-in infinite}
+.ix-on .ix-ripple{animation:ixRipple 2.6s 2.4s ease-out infinite}
+.ix-facts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%}
+.ix-fact{display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 8px;border-radius:16px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.28)}
+.ix-fact svg{width:20px;height:20px;color:#9FD3F7}
+.ix-fn{font-size:24px;font-weight:800;letter-spacing:-0.03em;line-height:1.1;color:#FFFFFF;font-variant-numeric:tabular-nums}
+.ix-fl{font-size:12px;line-height:1.35;color:rgba(255,255,255,.9);text-wrap:balance}
+.ix-tick{position:relative;width:100%;height:44px;display:flex;align-items:center;justify-content:center;gap:10px;border-top:1px solid rgba(255,255,255,.22);padding-top:12px;box-sizing:content-box}
+.ix-tick-live{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#9FD3F7}
+.ix-tick-live b{width:7px;height:7px;border-radius:50%;background:#6BBDF2;animation:dotPulse 1.8s ease-out infinite}
+.ix-tick-win{position:relative;flex:0 1 22em;height:44px;overflow:hidden}
+.ix-tk{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;line-height:1.35;color:#FFFFFF;opacity:0;transform:translateY(100%);transition:opacity .5s ease,transform .6s cubic-bezier(.2,.7,.2,1);text-wrap:balance}
+.ix-tk.on{opacity:1;transform:none}
+.ix-tk.out{opacity:0;transform:translateY(-100%)}
+@media (max-width:760px){.ix-facts{gap:6px}.ix-fact{padding:9px 4px;border-radius:12px}.ix-fact svg{width:16px;height:16px}.ix-fn{font-size:19px}.ix-fl{font-size:10.5px}.ix-tick{flex-direction:column;gap:4px;height:62px;padding-top:10px}.ix-tick-win{flex:0 0 auto;width:100%;height:40px}.ix-tk{font-size:13px}.ix-ripple{width:40px;height:40px}}
+.ix-glass{gap:12px}
+.ix-glass .ix-stat{gap:6px}
+.ix-fact{padding:8px 6px;text-align:left}
+.ix-fact .ix-fn,.ix-fact .ix-fl{grid-column:2}
+.ix-fact{display:grid;grid-template-columns:auto auto;grid-template-rows:auto auto;column-gap:8px;row-gap:0;align-items:center;justify-content:center}
+.ix-fact svg{grid-row:1 / span 2}
+.ix-fn{font-size:20px}
+.ix-fl{font-size:11px;line-height:1.25}
+.ix-tick{height:34px;padding-top:8px}
+.ix-tick-win{height:34px}
+.ix-tk{font-size:13.5px}
+@media (max-width:760px){.ix-glass{gap:8px}.ix-fact{grid-template-columns:auto;padding:7px 4px;text-align:center}.ix-fact svg{display:none}.ix-fact .ix-fn,.ix-fact .ix-fl{grid-column:1}.ix-fn{font-size:17px}.ix-fl{font-size:10px}.ix-tick{flex-direction:row;height:36px;padding-top:6px;gap:8px}.ix-tick-live{font-size:0;gap:0}.ix-tick-win{flex:1 1 auto;height:36px}.ix-tk{font-size:12px}}
+
+/* ---------- impact stories ---------- */
+@keyframes stKen{0%{transform:scale(1.02)}100%{transform:scale(1.1) translate(-1.5%,-1%)}}
+@keyframes stFade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes stImgA{from{opacity:0;transform:scale(1.03)}to{opacity:1;transform:none}}
+@keyframes stImgB{from{opacity:0;transform:scale(1.03)}to{opacity:1;transform:none}}
+@keyframes stPop{from{opacity:0}to{opacity:1}}
+@keyframes stPanel{from{opacity:0;transform:translateY(24px) scale(.98)}to{opacity:1;transform:none}}
+@keyframes stPulse{0%{box-shadow:0 0 0 0 rgba(255,255,255,.55)}100%{box-shadow:0 0 0 14px rgba(255,255,255,0)}}
+.st-sec{padding-bottom:14px;scroll-margin-top:120px}
+.st-tile{background:#FFFFFF;border-radius:28px;padding:14px;display:grid;grid-template-columns:1.5fr 1fr;gap:14px;align-items:stretch}
+.st-main{position:relative;display:block;text-decoration:none;width:100%;aspect-ratio:1.49;border:0;padding:0;margin:0;border-radius:20px;overflow:hidden;cursor:pointer;background:#0A0A0A;font:inherit;color:#FFFFFF;text-align:left}
+.st-main img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;animation:stKen 14s ease-in-out infinite alternate;transition:filter .4s}
+.st-main:hover img{filter:brightness(1.06)}
+.st-main::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(10,10,10,.68) 0%,rgba(10,10,10,.12) 45%,rgba(10,10,10,0) 70%)}
+.st-chip{position:absolute;z-index:1;left:18px;top:18px;display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;background:rgba(10,10,10,.42);border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:6px 12px}
+.st-chip i{width:8px;height:8px;border-radius:50%;background:#6BBDF2;animation:dotPulse 1.8s ease-out infinite}
+.st-cap{position:absolute;z-index:1;left:22px;right:22px;bottom:20px;display:flex;align-items:flex-end;justify-content:space-between;gap:16px}
+.st-cap b{display:block;font-size:clamp(20px,2vw,26px);font-weight:700;letter-spacing:-0.02em;line-height:1.2;text-shadow:0 1px 10px rgba(0,0,0,.45)}
+.st-play{flex:0 0 auto;display:inline-flex;align-items:center;gap:10px;background:#FFFFFF;color:#0A0A0A;border-radius:999px;padding:8px 8px 8px 16px;font-size:14px;font-weight:700}
+.st-play .st-pi{width:30px;height:30px;border-radius:50%;background:#098BE1;display:grid;place-items:center;animation:stPulse 2s ease-out infinite}
+.st-side{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:16px;padding:18px 14px}
+.st-lab{font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#076DB1}
+.st-side .p{max-width:24em}
+.st-thumbs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%;max-width:340px}
+.st-th{position:relative;aspect-ratio:1;border:0;padding:0;border-radius:14px;overflow:hidden;cursor:pointer;background:#E3F1FC;transition:transform .25s}
+.st-th:hover{transform:translateY(-3px)}
+.st-th img{width:100%;height:100%;object-fit:cover;display:block}
+.st-more{position:absolute;inset:0;display:grid;place-items:center;background:rgba(9,139,225,.78);color:#FFFFFF;font-weight:800;font-size:18px}
+.st-open{border:0;cursor:pointer;font-family:inherit;background:#098BE1 !important;color:#FFFFFF !important}
+.st-modal{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px}
+.st-bd{position:absolute;inset:0;background:rgba(10,10,10,.72);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);animation:stPop .3s ease both}
+.st-panel{position:relative;width:min(1180px,100%);max-height:calc(100vh - 48px);background:#FFFFFF;border-radius:28px;overflow:hidden;display:grid;grid-template-columns:1.45fr 1fr;grid-template-rows:1fr auto;animation:stPanel .45s cubic-bezier(.2,.7,.2,1) both}
+.st-ph{position:relative;background:#0A0A0A;min-height:0;height:min(64vh,620px)}
+.st-ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+.st-ph .stA{animation:stImgA .5s ease both}.st-ph .stB{animation:stImgB .5s ease both}
+.st-nav{position:absolute;top:50%;transform:translateY(-50%);width:46px;height:46px;border-radius:50%;border:1px solid rgba(255,255,255,.5);background:rgba(10,10,10,.45);color:#FFFFFF;display:grid;place-items:center;cursor:pointer}
+.st-nav:hover{background:#098BE1;border-color:#098BE1}
+.st-prev{left:14px}.st-next{right:14px}
+.st-txt{padding:36px 32px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:14px;overflow:auto}
+.st-txt > *{animation:stFade .5s ease both}
+.st-txt > :nth-child(2){animation-delay:.06s}.st-txt > :nth-child(3){animation-delay:.12s}.st-txt > :nth-child(4){animation-delay:.18s}
+.st-count{font-size:13px;font-weight:700;color:#076DB1;font-variant-numeric:tabular-nums;letter-spacing:.08em}
+.st-tag{display:inline-flex;font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#076DB1;background:#E3F1FC;border-radius:999px;padding:6px 12px}
+.st-t{margin:0;font-size:clamp(24px,2.3vw,32px);line-height:1.15;font-weight:700;letter-spacing:-0.02em;color:#098BE1}
+.st-strip{grid-column:1 / -1;display:flex;gap:8px;padding:12px 14px;overflow-x:auto;background:#FAF8F3;border-top:1px solid #EEF0F2}
+.st-sth{flex:0 0 76px;height:56px;border-radius:10px;overflow:hidden;border:2px solid transparent;padding:0;cursor:pointer;opacity:.6;transition:opacity .2s,border-color .2s;background:#E3F1FC}
+.st-sth img{width:100%;height:100%;object-fit:cover;display:block}
+.st-sth.on{opacity:1;border-color:#098BE1}
+.st-sth:hover{opacity:1}
+.st-x{position:absolute;z-index:2;right:14px;top:14px;width:44px;height:44px;border-radius:50%;border:0;background:#FFFFFF;color:#0A0A0A;display:grid;place-items:center;cursor:pointer;box-shadow:0 4px 16px rgba(10,10,10,.25)}
+@media (max-width:900px){
+.st-tile{grid-template-columns:1fr;padding:10px}
+.st-cap{left:14px;right:14px;bottom:14px;flex-direction:column;align-items:flex-start;gap:10px}
+.st-chip{left:12px;top:12px}
+.st-side{padding:10px 8px 18px}
+.st-modal{padding:0;align-items:stretch}
+.st-panel{border-radius:0;max-height:none;height:100%;grid-template-columns:1fr;grid-template-rows:auto 1fr auto}
+.st-ph{height:auto;aspect-ratio:1.2}
+.st-txt{padding:20px 18px;justify-content:flex-start}
+.st-txt .p{font-size:15px}
+.st-strip{grid-column:1}
+.st-nav{width:40px;height:40px}
+}
+@media (prefers-reduced-motion: reduce){.st-main img,.st-chip i,.st-play .st-pi,.st-txt > *,.st-ph img,.st-panel,.st-bd{animation:none !important}}
+
+/* ---------- new sections: why water / help / confidence / field notes ---------- */
+@keyframes wwRing{0%{transform:translate(-50%,-50%) scale(.3);opacity:.7}100%{transform:translate(-50%,-50%) scale(1.6);opacity:0}}
+@keyframes hpBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.xs{padding-bottom:14px}
+.ww{position:relative;border-radius:28px;overflow:hidden;background:#0A0A0A;min-height:440px;display:flex;align-items:center;justify-content:center;text-align:center;color:#FFFFFF}
+.ww-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:40% 50%}
+.ww-scrim{position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(10,10,10,.62) 0%,rgba(10,10,10,.45) 55%,rgba(10,10,10,.25) 100%)}
+.ww-in{position:relative;display:flex;flex-direction:column;align-items:center;gap:14px;padding:48px 24px;max-width:46em}
+.ww-lab{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;background:rgba(10,10,10,.42);border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:6px 14px}
+.ww-lab i{width:8px;height:8px;border-radius:50%;background:#6BBDF2;animation:dotPulse 1.8s ease-out infinite}
+.ww-num{position:relative;font-size:clamp(56px,7vw,96px);font-weight:800;letter-spacing:-0.045em;line-height:1;font-variant-numeric:tabular-nums;text-shadow:0 2px 18px rgba(0,0,0,.45)}
+.ww-num em{font-style:normal;color:#6BBDF2}
+.ww-num::before,.ww-num::after{content:"";position:absolute;left:50%;top:50%;width:240px;height:240px;border-radius:50%;border:1.5px solid rgba(159,211,247,.55);transform:translate(-50%,-50%) scale(.3);opacity:0;animation:wwRing 4s ease-out infinite;pointer-events:none}
+.ww-num::after{animation-delay:2s}
+.ww-h{margin:0;font-size:clamp(20px,2vw,26px);font-weight:700;line-height:1.3;letter-spacing:-0.01em;text-shadow:0 1px 10px rgba(0,0,0,.45);max-width:26em}
+.ww-src{font-size:12px;color:rgba(255,255,255,.8)}
+.ww-src a{color:#9FD3F7}
+.ww .b{background:#FFFFFF;color:#0A0A0A;margin-top:6px}
+.hp{background:#FFFFFF;border-radius:28px;padding:40px 32px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px}
+.hp-lab,.gc-lab,.fn-lab{font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#076DB1}
+.hp > .p{max-width:34em}
+.hp-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;width:100%;margin-top:10px}
+.hp-card{display:flex;flex-direction:column;align-items:center;gap:10px;padding:26px 18px 22px;border-radius:22px;background:#FAF8F3;border:1px solid #EEF0F2;transition:transform .3s cubic-bezier(.2,.7,.2,1),box-shadow .3s,border-color .3s}
+.hp-card:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(9,139,225,.14);border-color:#9FD3F7}
+.hp-ic{width:56px;height:56px;border-radius:50%;background:#E3F1FC;color:#098BE1;display:grid;place-items:center;animation:hpBob 3.6s ease-in-out infinite}
+.hp-card:nth-child(2) .hp-ic{animation-delay:.4s}.hp-card:nth-child(3) .hp-ic{animation-delay:.8s}.hp-card:nth-child(4) .hp-ic{animation-delay:1.2s}
+.hp-t{margin:0;font-size:19px;font-weight:700;letter-spacing:-0.01em;color:#0A0A0A}
+.hp-d{margin:0;font-size:15px;line-height:1.55;color:#3A3F44;flex:1}
+.hp-card .b{min-height:44px;padding:0 20px;font-size:14px;background:#098BE1;color:#FFFFFF}
+.hp-card:last-child .b{background:#0A0A0A}
+.gc{background:#FAF8F3;border-radius:28px;padding:36px 32px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:18px}
+.gc-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;width:100%}
+.gc-it{display:flex;flex-direction:column;align-items:center;gap:8px;padding:8px}
+.gc-it svg{width:30px;height:30px;color:#098BE1}
+.gc-t{font-size:16px;font-weight:700;color:#0A0A0A}
+.gc-d{font-size:14px;line-height:1.5;color:#3A3F44;max-width:18em}
+.fn{border-radius:28px;padding:40px 32px;background:linear-gradient(160deg,#E3F1FC 0%,#CFE8FA 100%);display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;position:relative;overflow:hidden}
+.fn > .p{max-width:30em}
+.fn-form{display:flex;gap:10px;width:100%;max-width:480px;margin-top:6px}
+.fn-form input{flex:1;min-width:0;min-height:52px;border-radius:999px;border:1.5px solid #9FD3F7;background:#FFFFFF;padding:0 20px;font:inherit;font-size:16px;color:#0A0A0A;outline:none}
+.fn-form input:focus{border-color:#098BE1;box-shadow:0 0 0 4px rgba(9,139,225,.15)}
+.fn-form button{min-height:52px;padding:0 26px;border:0;border-radius:999px;background:#098BE1;color:#FFFFFF;font:inherit;font-size:15px;font-weight:700;cursor:pointer}
+.fn-form button:hover{background:#076DB1}
+.fn-note{font-size:13px;color:#054F81;min-height:1.2em}
+@media (max-width:900px){
+.ww{min-height:400px}.ww-bg{object-position:28% 50%}.ww-in{padding:36px 18px}
+.hp,.gc,.fn{padding:30px 18px}
+.hp-grid{grid-template-columns:1fr 1fr;gap:10px}
+.hp-card{padding:20px 12px 16px}
+.hp-t{font-size:17px}.hp-d{font-size:14px}
+.gc-row{grid-template-columns:1fr 1fr;gap:10px}.gc-it:last-child{grid-column:1 / -1}
+.fn-form{flex-direction:column}
+}
+@media (max-width:520px){.hp-card{padding:16px 10px 14px;gap:8px;border-radius:18px}.hp-ic{width:44px;height:44px}.hp-ic svg{width:22px;height:22px}.hp-t{font-size:15px}.hp-d{font-size:12.5px;line-height:1.45}.hp-card .b{min-height:38px;padding:0 14px;font-size:13px}.gc-t{font-size:14.5px}.gc-d{font-size:12.5px}}
+@media (prefers-reduced-motion: reduce){.ww-num::before,.ww-num::after,.ww-lab i,.hp-ic{animation:none !important}}
+@media (prefers-reduced-motion: reduce){.ix-pre > .ix-glass > *{opacity:1 !important}.ix-on > .ix-glass > *,.ix-sheen,.ix-bubs i,.ix-drop,.ix-ripple,.ix-on .ip,.ix-glass .ix-rule span,.ix-done .ix-num,.ix-tick-live b{animation:none !important}.ix-on .ip{opacity:1}.ix-tk{transition:none}}
+.mm-tile{margin-top:12px}
+@media (max-width:900px){
+.hd-tile{padding:12px 12px 12px 22px;min-height:76px}
+.hd-logo img{height:40px}
+.hd-space{height:102px !important}
+}
+</style>
+</helmet>
+<div class="pg">
+<sc-if value="{{menuOpen}}" hint-placeholder-val="{{false}}"><div class="mm-backdrop" onClick="{{closeMenu}}" aria-hidden="true"></div></sc-if>
+<div class="hd-wrap" style="{{hdStyle}}">
+<header class="wrap hd">
+<div class="hd-tile" style="{{tileShadow}}">
+<a href="#" aria-label="Rafiki Outreach home" class="hd-logo"><img src="/img/logo-dark-bold.png" alt="Rafiki Outreach"></a>
+<nav aria-label="Main" class="hd-links"><a class="hl-link on" href="#">Home</a><a class="hl-link" href="https://www.rafikioutreach.org/trips">Who we are</a><a class="hl-link" href="https://www.rafikioutreach.org/water">Water</a><a class="hl-link" href="https://www.rafikioutreach.org/loan">Loan Program</a><a class="hl-link" href="#impact-stories">Impact stories</a><a class="hl-link" href="https://www.rafikioutreach.org/event-list">Events</a><a class="hl-link" href="https://www.rafikioutreach.org/trips">Trips</a></nav>
+<div class="hd-act">
+<div class="cs"><button type="button" class="cs-btn" onClick="{{toggleCs}}" aria-expanded="{{csExpanded}}" aria-haspopup="true" aria-label="Country: {{cName}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18"></path><path d="M12 3a14 14 0 010 18"></path><path d="M12 3a14 14 0 000 18"></path></svg><span class="cs-v">{{cCode}}</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></button><sc-if value="{{csOpen}}" hint-placeholder-val="{{false}}"><div class="cs-pop" role="menu"><span class="cs-h">Choose a country</span><sc-for list="{{csList}}" as="c" hint-placeholder-count="5"><button type="button" role="menuitemradio" aria-checked="{{c.on}}" class="{{c.cls}}" onClick="{{c.pick}}"><span>{{c.n}}</span><small>{{c.sub}}</small></button></sc-for></div></sc-if></div>
+<a class="hd-donate" href="https://www.rafikioutreach.org/donate">Donate<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.7C8 7.5 6 10.7 6 14a6 6 0 0012 0c0-3.3-2-6.5-6-11.3z"></path></svg></a>
+<button type="button" class="hd-menu" onClick="{{toggleMenu}}" aria-expanded="{{menuExpanded}}" aria-controls="bento-menu" aria-label="{{menuLabel}}">
+<sc-if value="{{menuOpen}}" hint-placeholder-val="{{false}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></sc-if>
+<sc-if value="{{menuClosed}}" hint-placeholder-val="{{true}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M4 8h16M4 16h16"></path></svg></sc-if>
+</button>
+</div>
+</div>
+<sc-if value="{{menuOpen}}" hint-placeholder-val="{{false}}">
+<nav id="bento-menu" aria-label="Mobile" class="mm-tile"><a class="mm-link" href="#" onClick="{{closeMenu}}">Home<span aria-hidden="true">→</span></a><a class="mm-link" href="https://www.rafikioutreach.org/trips" onClick="{{closeMenu}}">Who we are<span aria-hidden="true">→</span></a><a class="mm-link" href="https://www.rafikioutreach.org/water" onClick="{{closeMenu}}">Water<span aria-hidden="true">→</span></a><a class="mm-link" href="https://www.rafikioutreach.org/loan" onClick="{{closeMenu}}">Loan Program<span aria-hidden="true">→</span></a><a class="mm-link" href="#impact-stories" onClick="{{closeMenu}}">Impact stories<span aria-hidden="true">→</span></a><a class="mm-link" href="https://www.rafikioutreach.org/event-list" onClick="{{closeMenu}}">Events<span aria-hidden="true">→</span></a><a class="mm-link" href="https://www.rafikioutreach.org/trips" onClick="{{closeMenu}}">Trips<span aria-hidden="true">→</span></a><div class="mm-cs"><span class="mm-lab">Country</span><div class="mm-cs-row"><sc-for list="{{csList}}" as="c" hint-placeholder-count="5"><button type="button" class="{{c.pill}}" aria-pressed="{{c.on}}" onClick="{{c.pick}}">{{c.n}}</button></sc-for></div></div><div class="mm-contact"><span class="mm-lab">Get in touch</span><a class="mm-mail" href="mailto:info@rafikioutreach.org"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"></rect><path d="M3.5 7l8.5 6 8.5-6"></path></svg>info@rafikioutreach.org</a><div class="mm-social"><a class="soc soc-fb" href="https://www.facebook.com/rafikioutreach" target="_blank" rel="noopener" aria-label="Rafiki Outreach on Facebook"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="#FFFFFF" d="M13.5 21v-7.5h2.6l.4-3h-3V8.6c0-.9.3-1.5 1.6-1.5h1.6V4.4c-.3 0-1.2-.1-2.3-.1-2.3 0-3.9 1.4-3.9 4V10.5H8v3h2.5V21h3z"></path></svg></a>
+<a class="soc soc-ig" href="https://www.instagram.com/rafikioutreach" target="_blank" rel="noopener" aria-label="Rafiki Outreach on Instagram"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.3" cy="6.7" r="1" fill="#FFFFFF" stroke="none"></circle></svg></a><a class="soc soc-x" href="https://x.com/rafikioutreach" target="_blank" rel="noopener" aria-label="Rafiki Outreach on X"><svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true"><path fill="#FFFFFF" d="M17.8 3h3.1l-6.8 7.8L22 21h-6.2l-4.9-6.4L5.3 21H2.2l7.3-8.3L2 3h6.4l4.4 5.8L17.8 3zm-1.1 16.2h1.7L7.4 4.7H5.6l11.1 14.5z"></path></svg></a><a class="soc soc-li" href="https://www.linkedin.com/company/rafikioutreach" target="_blank" rel="noopener" aria-label="Rafiki Outreach on LinkedIn"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#FFFFFF" d="M5.2 8.6h3.2V19H5.2V8.6zM6.8 3.6a1.85 1.85 0 110 3.7 1.85 1.85 0 010-3.7zM10.4 8.6h3.1V10h.04c.43-.8 1.5-1.66 3.07-1.66 3.28 0 3.89 2.16 3.89 4.97V19h-3.23v-5.04c0-1.2-.02-2.75-1.68-2.75-1.68 0-1.94 1.31-1.94 2.66V19h-3.23V8.6z"></path></svg></a><a class="soc soc-yt" href="https://www.youtube.com/@rafikioutreach" target="_blank" rel="noopener" aria-label="Rafiki Outreach on YouTube"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="#FFFFFF" d="M21.6 7.2a2.5 2.5 0 00-1.76-1.77C18.27 5 12 5 12 5s-6.27 0-7.84.43A2.5 2.5 0 002.4 7.2 26 26 0 002 12a26 26 0 00.4 4.8 2.5 2.5 0 001.76 1.77C5.73 19 12 19 12 19s6.27 0 7.84-.43a2.5 2.5 0 001.76-1.77A26 26 0 0022 12a26 26 0 00-.4-4.8zM10 15V9l5.2 3L10 15z"></path></svg></a></div></div></nav>
+</sc-if>
+</header>
+</div>
+<div class="hd-space" aria-hidden="true"></div><main class="wrap grid"><div class="col"><div class="tile ctr"><svg width="40" height="31" viewBox="0 0 44 34" aria-hidden="true"><path d="M0 34V20C0 8.6 6 2 18 0l2 5c-6.4 1.7-9.6 5.4-10 11h8v18zm24 0V20C24 8.6 30 2 42 0l2 5c-6.4 1.7-9.6 5.4-10 11h8v18z" fill="#098BE1"></path></svg><blockquote class="h1" style="margin:0">I pass through this world but once. Any good that I can do or any kindness that I can show to any human being, let me do it now. Let me not defer or neglect it, for I shall not pass this way again.</blockquote><span class="att">― Stephen Grellet</span></div>
+<div class="tile impact2 imp-photo {{ixCls}}" id="impact-tile">
+<img class="imp-bg" src="/img/w-team.jpg" alt="A Rafiki Outreach volunteer smiling with five children in a village">
+<div class="imp-scrim" aria-hidden="true"></div>
+<div class="ix ix-glass">
+<span class="ix-sheen" aria-hidden="true"></span><span class="ix-bubs" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+<span class="ix-lab"><span class="ix-dot" aria-hidden="true"></span>Our impact</span>
+<h2 class="ix-h">Clean water, changing lives across East Africa</h2>
+
+<div class="ix-stat">
+<div class="ix-people" aria-hidden="true"><span class="ip ip0" style="animation-delay:0.35s"><svg viewBox="0 0 12 16" aria-hidden="true"><circle cx="6" cy="3.6" r="3"></circle><path d="M0.8 16v-3.6A4.6 4.6 0 015.4 7.8h1.2a4.6 4.6 0 014.6 4.6V16z"></path></svg></span><span class="ip ip1" style="animation-delay:0.39s"><svg viewBox="0 0 12 16" aria-hidden="true"><circle cx="6" cy="3.6" r="3"></circle><path d="M0.8 16v-3.6A4.6 4.6 0 015.4 7.8h1.2a4.6 4.6 0 014.6 4.6V16z"></path></svg></span><span class="ip ip2" style="animation-delay:0.44s"><svg viewBox="0 0 12 16" aria-hidden="true"><circle cx="6" cy="3.6" r="3"></circle><path d="M0.8 16v-3.6A4.6 4.6 0 015.4 7.8h1.2a4.6 4.6 0 014.6 4.6V16z"></path></svg></span><span class="ip ip3" style="animation-delay:0.48s"><svg viewBox="0 0 12 16" aria-hidden="true"><circle cx="6" cy="3.6" r="3"></circle><path d="M0.8 16v-3.6A4.6 4.6 0 015.4 7.8h1.2a4.6 4.6 0 014.6 4.6V16z"></path></svg></span><span class="ip ip4" style="animation-delay:0.53s"><svg viewBox="0 0 12 16" aria-hidden="true"><circle cx="6" cy="3.6" r="3"></circle><path d="M0.8 16v-3.6A4.6 4.6 0 015.4 7.8h1.2a4.6 4.6 0 014.6 4.6V16z"></path></svg></span><span class="ip ip0" style="animation-delay:0.57s"><svg viewBox="0 0 12 16" aria-hidden="true"><circle cx="6" cy="3.6" r="3"></circle><path d="M0.8 16v-3.6A4.6 4.6 0 015.4 7.8h1.2a4.6 4.6 0 014.6 4.6V16z"></path></svg></span><span class="ip ip1" style="animation-delay:0.62s"><svg viewBox="0 0 12 16" aria-hidden="true"><circle cx="6" cy="3.6" r="3"></circle><path d="M0.8 16v-3.6A4.6 4.6 0 015.4 7.8h1.2a4.6 4.6 0 014.6 4.6V16z"></path></svg></span><span class="ip ip2" style="animation-delay:0.67s"><svg viewBox="0 0 12 16" aria-hidden="true"><circle cx="6" cy="3.6" r="3"></circle><path d="M0.8 16v-3.6A4.6 4.6 0 015.4 7.8h1.2a4.6 4.6 0 014.6 4.6V16z"></path></svg></span><span class="ip ip3" style="animation-delay:0.71s"><svg viewBox="0 0 12 16" aria-hidden="true"><circle cx="6" cy="3.6" r="3"></circle><path d="M0.8 16v-3.6A4.6 4.6 0 015.4 7.8h1.2a4.6 4.6 0 014.6 4.6V16z"></path></svg></span><span class="ip ip4" style="animation-delay:0.75s"><svg viewBox="0 0 12 16" aria-hidden="true"><circle cx="6" cy="3.6" r="3"></circle><path d="M0.8 16v-3.6A4.6 4.6 0 015.4 7.8h1.2a4.6 4.6 0 014.6 4.6V16z"></path></svg></span><span class="ip ip0" style="animation-delay:0.80s"><svg viewBox="0 0 12 16" aria-hidden="true"><circle cx="6" cy="3.6" r="3"></circle><path d="M0.8 16v-3.6A4.6 4.6 0 015.4 7.8h1.2a4.6 4.6 0 014.6 4.6V16z"></path></svg></span><span class="ip ip1" style="animation-delay:0.84s"><svg viewBox="0 0 12 16" aria-hidden="true"><circle cx="6" cy="3.6" r="3"></circle><path d="M0.8 16v-3.6A4.6 4.6 0 015.4 7.8h1.2a4.6 4.6 0 014.6 4.6V16z"></path></svg></span><span class="ip ip2" style="animation-delay:0.89s"><svg viewBox="0 0 12 16" aria-hidden="true"><circle cx="6" cy="3.6" r="3"></circle><path d="M0.8 16v-3.6A4.6 4.6 0 015.4 7.8h1.2a4.6 4.6 0 014.6 4.6V16z"></path></svg></span><span class="ip ip3" style="animation-delay:0.93s"><svg viewBox="0 0 12 16" aria-hidden="true"><circle cx="6" cy="3.6" r="3"></circle><path d="M0.8 16v-3.6A4.6 4.6 0 015.4 7.8h1.2a4.6 4.6 0 014.6 4.6V16z"></path></svg></span><span class="ip ip4" style="animation-delay:0.98s"><svg viewBox="0 0 12 16" aria-hidden="true"><circle cx="6" cy="3.6" r="3"></circle><path d="M0.8 16v-3.6A4.6 4.6 0 015.4 7.8h1.2a4.6 4.6 0 014.6 4.6V16z"></path></svg></span><span class="ip ip0" style="animation-delay:1.02s"><svg viewBox="0 0 12 16" aria-hidden="true"><circle cx="6" cy="3.6" r="3"></circle><path d="M0.8 16v-3.6A4.6 4.6 0 015.4 7.8h1.2a4.6 4.6 0 014.6 4.6V16z"></path></svg></span><span class="ip ip1" style="animation-delay:1.07s"><svg viewBox="0 0 12 16" aria-hidden="true"><circle cx="6" cy="3.6" r="3"></circle><path d="M0.8 16v-3.6A4.6 4.6 0 015.4 7.8h1.2a4.6 4.6 0 014.6 4.6V16z"></path></svg></span><span class="ip ip2" style="animation-delay:1.11s"><svg viewBox="0 0 12 16" aria-hidden="true"><circle cx="6" cy="3.6" r="3"></circle><path d="M0.8 16v-3.6A4.6 4.6 0 015.4 7.8h1.2a4.6 4.6 0 014.6 4.6V16z"></path></svg></span><span class="ip ip3" style="animation-delay:1.16s"><svg viewBox="0 0 12 16" aria-hidden="true"><circle cx="6" cy="3.6" r="3"></circle><path d="M0.8 16v-3.6A4.6 4.6 0 015.4 7.8h1.2a4.6 4.6 0 014.6 4.6V16z"></path></svg></span><span class="ip ip4" style="animation-delay:1.21s"><svg viewBox="0 0 12 16" aria-hidden="true"><circle cx="6" cy="3.6" r="3"></circle><path d="M0.8 16v-3.6A4.6 4.6 0 015.4 7.8h1.2a4.6 4.6 0 014.6 4.6V16z"></path></svg></span><span class="ip ip0" style="animation-delay:1.25s"><svg viewBox="0 0 12 16" aria-hidden="true"><circle cx="6" cy="3.6" r="3"></circle><path d="M0.8 16v-3.6A4.6 4.6 0 015.4 7.8h1.2a4.6 4.6 0 014.6 4.6V16z"></path></svg></span><span class="ip ip1" style="animation-delay:1.29s"><svg viewBox="0 0 12 16" aria-hidden="true"><circle cx="6" cy="3.6" r="3"></circle><path d="M0.8 16v-3.6A4.6 4.6 0 015.4 7.8h1.2a4.6 4.6 0 014.6 4.6V16z"></path></svg></span><span class="ip ip2" style="animation-delay:1.34s"><svg viewBox="0 0 12 16" aria-hidden="true"><circle cx="6" cy="3.6" r="3"></circle><path d="M0.8 16v-3.6A4.6 4.6 0 015.4 7.8h1.2a4.6 4.6 0 014.6 4.6V16z"></path></svg></span><span class="ip ip3" style="animation-delay:1.38s"><svg viewBox="0 0 12 16" aria-hidden="true"><circle cx="6" cy="3.6" r="3"></circle><path d="M0.8 16v-3.6A4.6 4.6 0 015.4 7.8h1.2a4.6 4.6 0 014.6 4.6V16z"></path></svg></span></div>
+<span class="ix-num">{{peopleLabel}}<span class="ix-plus">+</span></span>
+<span class="ix-tx">people now have access to clean, safe water</span>
+<span class="ix-hh">That's <b>{{hhAllLabel}}+</b> households</span>
+</div>
+
+<div class="ix-rule" aria-hidden="true"><span></span></div>
+
+<div class="ix-goal">
+<div class="ix-ring" aria-hidden="true">
+<svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="52" class="rg-bg"></circle><circle cx="60" cy="60" r="52" class="rg-fg"></circle></svg>
+<span class="ix-ripple"></span><span class="ix-drop"><svg viewBox="0 0 24 24"><path d="M12 2.7C8 7.5 6 10.7 6 14a6 6 0 0012 0c0-3.3-2-6.5-6-11.3z"></path></svg></span><svg class="ix-house" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"></path><path d="M5 10v10h14V10"></path><path d="M12 13.2c-1.4 1.7-2.1 2.8-2.1 3.8a2.1 2.1 0 004.2 0c0-1-.7-2.1-2.1-3.8z"></path></svg>
+</div>
+<div class="ix-gtxt">
+<span class="ix-gl">Monthly goal</span>
+<span class="ix-gnum">{{hhLabel}}</span>
+<span class="ix-tx">households reached with clean water every month</span>
+</div>
+</div>
+<div class="ix-facts">
+<div class="ix-fact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"></path><path d="M5 10v10h14V10"></path></svg><span class="ix-fn">~{{dayLabel}}</span><span class="ix-fl">households<br>a day</span></div>
+<div class="ix-fact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="M8 7h8"></path><path d="M6 21h12"></path><path d="M9 21l3-6 3 6"></path></svg><span class="ix-fn">{{wellLabel}}</span><span class="ix-fl">people served<br>by one well</span></div>
+<div class="ix-fact"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.7C8 7.5 6 10.7 6 14a6 6 0 0012 0c0-3.3-2-6.5-6-11.3z"></path></svg><span class="ix-fn">${{fiveLabel}}</span><span class="ix-fl">water for one<br>person for life</span></div>
+</div>
+<div class="ix-tick" aria-live="polite">
+<span class="ix-tick-live"><b aria-hidden="true"></b>Did you know</span>
+<div class="ix-tick-win">
+<sc-for list="{{ticks}}" as="t" hint-placeholder-count="4"><span class="{{t.cls}}">{{t.text}}</span></sc-for>
+</div>
+</div>
+</div>
+</div>
+<div class="ph pt" style="aspect-ratio:1.5;"><img src="/img/w-elder.jpg" alt="An elder, children and a Rafiki volunteer in a village lane"></div>
+<div class="tile access2"><div class="aq" aria-hidden="true">
+<svg class="aq-w aq-w1" viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M0 60 Q75 25 150 60 T300 60 T450 60 T600 60 T750 60 T900 60 T1050 60 T1200 60 V120 H0Z"></path></svg>
+<svg class="aq-w aq-w2" viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M0 60 Q75 35 150 60 T300 60 T450 60 T600 60 T750 60 T900 60 T1050 60 T1200 60 V120 H0Z"></path></svg>
+<div class="aq-body"></div>
+<span class="bub b1"></span><span class="bub b2"></span><span class="bub b3"></span><span class="bub b4"></span><span class="bub b5"></span><span class="bub b6"></span>
+</div>
+<div class="ac">
+<span class="ac-badge" aria-hidden="true"><span class="ac-ring"></span><svg width="30" height="30" viewBox="0 0 24 24" fill="#098BE1" aria-hidden="true"><path d="M12 2.7C8 7.5 6 10.7 6 14a6 6 0 0012 0c0-3.3-2-6.5-6-11.3z"></path></svg></span>
+<h2 class="h2 ac-h">Access to <em>clean</em> water; our <em>clear</em> objective.</h2>
+<p class="p ac-p">By making clean water accessible to families, villages, and communities, they experience improved health, have more time, and are better equipped to lift themselves out of poverty.</p>
+<div class="gv">
+<div class="gv-freq" role="group" aria-label="Gift frequency">
+<button type="button" onClick="{{setOnce}}" aria-pressed="{{oncePressed}}" class="{{onceCls}}">One-time</button>
+<button type="button" onClick="{{setMonthly}}" aria-pressed="{{monthlyPressed}}" class="{{monthlyCls}}">Monthly</button>
+</div>
+<div class="ac-tiers" role="group" aria-label="Choose an amount">
+<sc-for list="{{opts}}" as="o" hint-placeholder-count="6">
+<button type="button" onClick="{{o.pick}}" aria-pressed="{{o.pressed}}" class="{{o.cls}}"><span class="ac-amt">{{o.amt}}</span><span class="ac-tl">{{o.label}}</span></button>
+</sc-for>
+</div>
+<div class="gv-other">
+<label for="gv-amt" class="gv-lab">Other amount</label>
+<div class="gv-inwrap"><span aria-hidden="true">$</span><input id="gv-amt" type="number" min="5" step="5" inputmode="numeric" placeholder="Enter amount" value="{{customVal}}" onChange="{{onCustom}}"></div>
+</div>
+<div class="gv-impact" aria-live="polite"><svg width="22" height="22" viewBox="0 0 24 24" fill="#098BE1" aria-hidden="true"><path d="M12 2.7C8 7.5 6 10.7 6 14a6 6 0 0012 0c0-3.3-2-6.5-6-11.3z"></path></svg><span>{{impact}}</span></div>
+<a class="b ac-btn" href="https://www.rafikioutreach.org/donate">{{cta}}</a>
+</div>
+</div>
+</div>
+<div class="ptile"><div class="ph " style="aspect-ratio:1.46;"><img src="/img/collect.jpg" alt="Two men fill yellow jerrycans from a muddy river"></div><div class="tb ctr"><h2 class="h2">Reaching water</h2><p class="p">Even though clean water might only be 50 meters beneath their feet, it is not uncommon for men, women, &amp; children to walk upwards of 3 miles to collect and carry water from contaminated sources. Not just once, but multiple times a day.</p></div></div></div><div class="col"><div class="ptile"><div class="ph " style="aspect-ratio:1.26;"><img src="/img/w-drill2.jpg" alt="The blue Village Drill rig standing on open plains"></div><div class="tb ctr"><h2 class="h2">Sponsor a well</h2><p class="p">Help us promote self reliance by donating to our interest free well loan program, or by sponsoring a well.</p><p class="p">Interest free loans provide communities the opportunity to bring clean water sources to their communities without creating dependency.</p><a class="b" href="https://www.rafikioutreach.org/donate">Sponsor</a></div></div>
+<div class="ptile"><div class="ph" style="aspect-ratio:1.03"><img src="/img/w-field3.jpg" alt="A volunteer's hand holds a child's hand through a vehicle window"></div><div class="tb ctr"><h2 class="h2">Drill a well</h2><p class="p">Interested in drilling a well in person? Join a humanitarian safari in East Africa.</p><a class="b" href="https://www.rafikioutreach.org/trips">Trips</a></div></div>
+<div class="tile dark howdrill ctr"><h2 class="h2">How we drill</h2><p class="p">We use a portable, hand crank borehole drill created by the village drill.</p><p class="p">It allows drilling in 75% more places at 75% less the cost than a typical drilling rig.</p><a class="p" href="https://villagedrill.com" style="color:#9FD3F7">(villagedrill.com)</a><div class="ph pt" style="aspect-ratio:0.75;"><img src="/img/w-drill1.jpg" alt="Volunteers and a local crew turn the arms of The Village Drill"></div><a class="b" href="https://www.rafikioutreach.org/water">Learn more</a></div>
+<div class="tile blue reachout ctr"><h2 class="h2">Stay in touch with us</h2><p class="p">Follow our social media pages to see our latest community projects.</p><div class="bf-social"><a class="soc soc-fb" href="https://www.facebook.com/rafikioutreach" target="_blank" rel="noopener" aria-label="Rafiki Outreach on Facebook"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="#FFFFFF" d="M13.5 21v-7.5h2.6l.4-3h-3V8.6c0-.9.3-1.5 1.6-1.5h1.6V4.4c-.3 0-1.2-.1-2.3-.1-2.3 0-3.9 1.4-3.9 4V10.5H8v3h2.5V21h3z"></path></svg></a><a class="soc soc-ig" href="https://www.instagram.com/rafikioutreach" target="_blank" rel="noopener" aria-label="Rafiki Outreach on Instagram"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.3" cy="6.7" r="1" fill="#FFFFFF" stroke="none"></circle></svg></a></div></div></div></main><section class="wrap xs" id="where-we-work" aria-label="Where we work">
+<div class="cc-ww">
+<span class="cc-lab">Where we work</span>
+<h2 class="h2">Four countries, one mission</h2>
+<p class="p">Rafiki drills wells with communities in Kenya, Tanzania, Uganda and Malawi. Choose a country to see its wells, projects and people.</p>
+<div class="cc-grid"><sc-for list="{{wwCards}}" as="c" hint-placeholder-count="4"><button type="button" class="{{c.cls}}" onClick="{{c.pick}}" aria-pressed="{{c.on}}"><sc-if value="{{c.here}}" hint-placeholder-val="{{false}}"><span class="cc-here">You are viewing</span></sc-if><span class="cc-ab" aria-hidden="true">{{c.ab}}</span><span class="cc-cn">{{c.n}}</span><span class="cc-rows"><div><span>Wells completed</span><b>{{c.w}}</b></div><div><span>Under construction</span><b>{{c.u}}</b></div><div><span>People reached</span><b>{{c.p}}</b></div></span><span class="cc-go">{{c.go}}</span></button></sc-for></div>
+</div>
+</section>
+<section class="wrap xs" id="why-water" aria-label="Why water">
+<div class="ww" id="ww-tile">
+<img class="ww-bg" src="/img/washing.jpg" alt="A woman washing dishes beside yellow jerrycans">
+<div class="ww-scrim" aria-hidden="true"></div>
+<div class="ww-in">
+<span class="ww-lab"><i aria-hidden="true"></i>Why water</span>
+<span class="ww-num">{{wwLabel}}<em> billion</em></span>
+<p class="ww-h">people, about 1 in 4 worldwide, still wait for safe drinking water at home.</p>
+<span class="ww-src">Source: <a href="https://www.who.int/news/item/26-08-2025-1-in-4-people-globally-still-lack-access-to-safe-drinking-water---who--unicef" target="_blank" rel="noopener">WHO &amp; UNICEF, 2025</a></span>
+<a class="b" href="https://www.rafikioutreach.org/water">Why we drill</a>
+</div>
+</div>
+</section>
+<section class="wrap xs" aria-label="How you can help">
+<div class="hp">
+<span class="hp-lab">How you can help</span>
+<h2 class="h2">Be part of the story</h2>
+<p class="p">Choose the way that fits you best. Every path ends at a well.</p>
+<div class="hp-grid">
+<div class="hp-card"><span class="hp-ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.7C8 7.5 6 10.7 6 14a6 6 0 0012 0c0-3.3-2-6.5-6-11.3z"></path></svg></span><h3 class="hp-t">Give a gift</h3><p class="hp-d">Just $5 gives one person clean water for life.</p><a class="b" href="https://www.rafikioutreach.org/donate">Give now</a></div>
+<div class="hp-card"><span class="hp-ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-4.4-9.3-8.6C1 9.3 2.6 5.5 6.2 5.1c2-.2 3.6.9 4.6 2.4h2.4c1-1.5 2.6-2.6 4.6-2.4 3.6.4 5.2 4.2 3.5 7.3C19 16.6 12 21 12 21z"></path></svg></span><h3 class="hp-t">Become a monthly Rafiki</h3><p class="hp-d">A small gift each month helps more communities reach water all year.</p><a class="b" href="https://www.rafikioutreach.org/donate">Give monthly</a></div>
+<div class="hp-card"><span class="hp-ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="M8 7h8"></path><path d="M6 21h12"></path><path d="M9 21l3-6 3 6"></path></svg></span><h3 class="hp-t">Sponsor a well</h3><p class="hp-d">$4,000 to $5,000 funds a complete borehole well for a community.</p><a class="b" href="https://www.rafikioutreach.org/donate">Sponsor</a></div>
+<div class="hp-card"><span class="hp-ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M15.5 8.5l-2 5-5 2 2-5z"></path></svg></span><h3 class="hp-t">Travel with us</h3><p class="hp-d">Drill a well in person on a humanitarian safari in East Africa.</p><a class="b" href="https://www.rafikioutreach.org/trips">See trips</a></div>
+</div>
+</div>
+</section>
+<section class="wrap st-sec" id="impact-stories" aria-label="Impact stories">
+<div class="st-tile">
+<a class="st-main" href="/stories" aria-label="Open the impact stories page">
+<img src="/img/w-child.jpg" alt="A smiling boy in a hooded jacket drinks from a blue cup among other children">
+<span class="st-cap"><b>A cup of clean water</b></span>
+</a>
+<div class="st-side">
+<span class="st-lab">Impact stories</span>
+<h2 class="h2">Stories from the field</h2>
+<p class="p">Moments from the communities, volunteers and wells behind the numbers.</p>
+<div class="st-thumbs">
+<sc-for list="{{stPeek}}" as="t" hint-placeholder-count="4"><button type="button" class="st-th" onClick="{{t.open}}" aria-label="{{t.label}}"><img src="{{t.src}}" alt=""><sc-if value="{{t.last}}" hint-placeholder-val="{{false}}"><span class="st-more">{{t.more}}</span></sc-if></button></sc-for>
+</div>
+<a class="b st-open" href="/stories">Read all stories</a>
+</div>
+</div>
+<sc-if value="{{stOpen}}" hint-placeholder-val="{{false}}">
+<div class="st-modal" role="dialog" aria-modal="true" aria-label="Impact stories">
+<div class="st-bd" onClick="{{stClose}}" aria-hidden="true"></div>
+<div class="st-panel">
+<button type="button" class="st-x" onClick="{{stClose}}" aria-label="Close stories"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+<div class="st-ph">
+<img class="{{stImgCls}}" src="{{st.src}}" alt="{{st.alt}}">
+<button type="button" class="st-nav st-prev" onClick="{{stPrev}}" aria-label="Previous story"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></button>
+<button type="button" class="st-nav st-next" onClick="{{stNext}}" aria-label="Next story"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg></button>
+</div>
+<div class="st-txt {{stImgCls}}" aria-live="polite">
+<span class="st-count">{{stCount}}</span>
+<span class="st-tag">{{st.tag}}</span>
+<h3 class="st-t">{{st.title}}</h3>
+<p class="p">{{st.text}}</p>
+</div>
+<div class="st-strip">
+<sc-for list="{{stAll}}" as="t" hint-placeholder-count="10"><button type="button" class="{{t.cls}}" onClick="{{t.open}}" aria-label="{{t.label}}"><img src="{{t.src}}" alt=""></button></sc-for>
+</div>
+</div>
+</div>
+</sc-if>
+</section>
+<section class="wrap xs" aria-label="Give with confidence">
+<div class="gc">
+<span class="gc-lab">Give with confidence</span>
+<div class="gc-row">
+<div class="gc-it"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z"></path><path d="M8.5 12l2.5 2.5 4.5-5"></path></svg><span class="gc-t">501(c)(3) nonprofit</span><span class="gc-d">EIN #88-3133113</span></div>
+<div class="gc-it"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.7C8 7.5 6 10.7 6 14a6 6 0 0012 0c0-3.3-2-6.5-6-11.3z"></path></svg><span class="gc-t">100% to the well</span><span class="gc-d">Donated funds go directly to drilling and building each well.</span></div>
+<div class="gc-it"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"></path><path d="M5 10v10h14V10"></path><path d="M9 20v-6h6v6"></path></svg><span class="gc-t">Community owned</span><span class="gc-d">Each finished well belongs to the community that maintains it.</span></div>
+
+</div>
+</div>
+</section>
+<section class="wrap xs" aria-label="Field notes">
+<div class="fn">
+<span class="fn-lab">Field notes</span>
+<h2 class="h2">Letters from the field</h2>
+<p class="p">New wells, community stories and trip dates, sent straight to your inbox.</p>
+<form class="fn-form" onSubmit="{{fnSubmit}}">
+<label for="fn-email" class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Email address</label>
+<input id="fn-email" type="email" required placeholder="Your email address" value="{{fnVal}}" onChange="{{fnChange}}">
+<button type="submit">Sign me up</button>
+</form>
+<span class="fn-note" aria-live="polite">{{fnNote}}</span>
+</div>
+</section>
+<footer class="bf">
+<div class="wrap bf-tile">
+<div class="bf-row">
+<div class="bf-col bf-brand"><img src="/img/logo-light-bold.png" alt="Rafiki Outreach" class="bf-logo"><a href="https://www.rafikioutreach.org/trips" class="bf-about">About</a></div>
+<div class="bf-col"><span class="bf-lab">Contact</span><span class="bf-follow">Follow us</span><div class="bf-social bf-social-f"><a class="soc soc-fb" href="https://www.facebook.com/rafikioutreach" target="_blank" rel="noopener" aria-label="Rafiki Outreach on Facebook"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="#FFFFFF" d="M13.5 21v-7.5h2.6l.4-3h-3V8.6c0-.9.3-1.5 1.6-1.5h1.6V4.4c-.3 0-1.2-.1-2.3-.1-2.3 0-3.9 1.4-3.9 4V10.5H8v3h2.5V21h3z"></path></svg></a>
+<a class="soc soc-ig" href="https://www.instagram.com/rafikioutreach" target="_blank" rel="noopener" aria-label="Rafiki Outreach on Instagram"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.3" cy="6.7" r="1" fill="#FFFFFF" stroke="none"></circle></svg></a><a class="soc soc-x" href="https://x.com/rafikioutreach" target="_blank" rel="noopener" aria-label="Rafiki Outreach on X"><svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true"><path fill="#FFFFFF" d="M17.8 3h3.1l-6.8 7.8L22 21h-6.2l-4.9-6.4L5.3 21H2.2l7.3-8.3L2 3h6.4l4.4 5.8L17.8 3zm-1.1 16.2h1.7L7.4 4.7H5.6l11.1 14.5z"></path></svg></a><a class="soc soc-li" href="https://www.linkedin.com/company/rafikioutreach" target="_blank" rel="noopener" aria-label="Rafiki Outreach on LinkedIn"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#FFFFFF" d="M5.2 8.6h3.2V19H5.2V8.6zM6.8 3.6a1.85 1.85 0 110 3.7 1.85 1.85 0 010-3.7zM10.4 8.6h3.1V10h.04c.43-.8 1.5-1.66 3.07-1.66 3.28 0 3.89 2.16 3.89 4.97V19h-3.23v-5.04c0-1.2-.02-2.75-1.68-2.75-1.68 0-1.94 1.31-1.94 2.66V19h-3.23V8.6z"></path></svg></a><a class="soc soc-yt" href="https://www.youtube.com/@rafikioutreach" target="_blank" rel="noopener" aria-label="Rafiki Outreach on YouTube"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="#FFFFFF" d="M21.6 7.2a2.5 2.5 0 00-1.76-1.77C18.27 5 12 5 12 5s-6.27 0-7.84.43A2.5 2.5 0 002.4 7.2 26 26 0 002 12a26 26 0 00.4 4.8 2.5 2.5 0 001.76 1.77C5.73 19 12 19 12 19s6.27 0 7.84-.43a2.5 2.5 0 001.76-1.77A26 26 0 0022 12a26 26 0 00-.4-4.8zM10 15V9l5.2 3L10 15z"></path></svg></a></div>
+<a class="bf-mail" href="mailto:info@rafikioutreach.org"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"></rect><path d="M3.5 7l8.5 6 8.5-6"></path></svg>info@rafikioutreach.org</a><a class="bf-mail bf-tel" href="tel:+18015477847"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2"></path></svg>+1 (801) 547-7847</a></div>
+<div class="bf-col"><span class="bf-lab">Address</span><span>1817 Beck Street</span><span>Salt Lake City, Utah</span><span>84116</span></div>
+</div>
+<div class="bf-copy"><span class="bf-ein">RAFIKI Outreach is a 501(c)(3) tax exempt organization <span style="white-space:nowrap">· EIN #88-3133113</span></span><nav class="bf-legal" aria-label="Legal"><a href="https://www.rafikioutreach.org/privacy-policy">Privacy Policy</a><span aria-hidden="true">·</span><a href="https://www.rafikioutreach.org/terms-of-use">Terms of Use</a></nav>© 2026 Rafiki Outreach</div>
+</div>
+</footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":6482}}'>
+var STORIES = [
+  { src: '/img/w-child.jpg', alt: 'A smiling boy in a hooded jacket drinks from a blue cup among other children', tag: 'Clean water', title: 'A cup of clean water', text: 'By making clean water accessible to families, villages, and communities, they experience improved health, have more time, and are better equipped to lift themselves out of poverty.' },
+  { src: '/img/collect.jpg', alt: 'Two men fill yellow jerrycans from a muddy river', tag: 'The problem', title: 'Reaching water', text: 'Even though clean water might only be 50 meters beneath their feet, it is not uncommon for men, women, & children to walk upwards of 3 miles to collect and carry water from contaminated sources. Not just once, but multiple times a day.' },
+  { src: '/img/w-drill1.jpg', alt: 'Volunteers and a local crew turn the arms of The Village Drill', tag: 'How we drill', title: 'Drilling by hand', text: 'We use a portable, hand crank borehole drill created by the village drill. It allows drilling in 75% more places at 75% less the cost than a typical drilling rig.' },
+  { src: '/img/w-drill2.jpg', alt: 'The blue Village Drill rig standing ready on open plains', tag: 'The well', title: 'Down to the water', text: 'Water is typically found 100 to 400 feet (30 to 120 meters) below ground. Each well moves through site selection, permitting and financing, drilling, pump installation, and capping.' },
+  { src: '/img/w-volunteer.jpg', alt: 'A Rafiki volunteer carries a child on his shoulders as a smiling girl walks beside him', tag: 'Trips', title: 'Volunteers in the field', text: 'Volunteers join humanitarian trips near Lake Manyara, Tanzania, drilling wells, improving schools and helping local families start small businesses.' },
+  { src: '/img/w-field3.jpg', alt: "A volunteer's hand holds a child's hand through a vehicle window", tag: 'Drill a well', title: 'Hand in hand', text: 'Interested in drilling a well in person? Join a humanitarian safari in East Africa.' },
+  { src: '/img/w-team.jpg', alt: 'A Rafiki Outreach volunteer smiling with five children in a village', tag: 'Our reach', title: 'Friends across East Africa', text: 'Rafiki means friend in Swahili. Together with our communities we have reached more than 780,500 people, about 230,000 households.' },
+  { src: '/img/w-elder.jpg', alt: 'An elder, children and a Rafiki volunteer in a village lane', tag: 'Giving', title: 'Every gift reaches the well', text: '100% of donated funds goes directly to the drilling and building of each well. Just $5 gives one person clean water for life.' }
+];
+
+var CTRY = { ke: { n: 'Kenya', ab: 'KE', w: 95, u: 3, p: 210000 }, tz: { n: 'Tanzania', ab: 'TZ', w: 140, u: 6, p: 330000 }, ug: { n: 'Uganda', ab: 'UG', w: 40, u: 2, p: 140000 }, mw: { n: 'Malawi', ab: 'MW', w: 25, u: 1, p: 100500 } };
+var CORDER = ['ke', 'tz', 'ug', 'mw'];
+function countryVals(self) {
+  var s = self.state, all = !!s.cAll, cur = CTRY[s.ctry || 'ke'];
+  var pick = function (k) { self.setState({ ctry: k === 'all' ? (self.state.ctry || 'ke') : k, cAll: k === 'all', cs: false }); };
+  var list = CORDER.map(function (k) { var on = !all && (s.ctry || 'ke') === k; return { n: CTRY[k].n, sub: k === 'ke' ? 'Main site' : 'rafikioutreach.org/' + CTRY[k].n.toLowerCase(), on: on ? 'true' : 'false', cls: 'cs-it' + (on ? ' on' : ''), pill: 'mm-pill' + (on ? ' on' : ''), pick: function () { pick(k); } }; })
+    .concat([{ n: 'All countries', sub: 'Totals across all four', on: all ? 'true' : 'false', cls: 'cs-it all' + (all ? ' on' : ''), pill: 'mm-pill' + (all ? ' on' : ''), pick: function () { pick('all'); } }]);
+  return { cName: all ? 'All countries' : cur.n, cCode: all ? 'All' : cur.ab, csOpen: !!s.cs, csExpanded: s.cs ? 'true' : 'false',
+    toggleCs: function () { self.setState({ cs: !self.state.cs }); }, csList: list,
+    wwCards: CORDER.map(function (k) { var on = !all && (s.ctry || 'ke') === k; return { n: CTRY[k].n, ab: CTRY[k].ab, w: CTRY[k].w.toLocaleString('en-US'), u: CTRY[k].u.toLocaleString('en-US'), p: CTRY[k].p.toLocaleString('en-US') + '+', on: on ? 'true' : 'false', here: on, cls: 'cc-card' + (on ? ' on' : ''), go: on ? 'You are viewing' : 'Explore ' + CTRY[k].n + ' →', pick: function () { pick(k); } }; }) };
+}
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { menu: false, hidden: false, scrolled: false, amount: 50, custom: '', freq: 'once', ppl: 0, hhAll: 0, hh: 0, day: 0, well: 0, five: 0, ixOn: false, ixDone: false, tick: 0, tickPrev: -1, stOpen: false, stI: 0, stFlip: false, ww: 0, fnVal: '', fnNote: '' }; }
+  componentDidMount() {
+    var self = this; this._lastY = 0;
+    this._onScroll = function () {
+      var y = window.scrollY || 0, dy = y - self._lastY, st = self.state;
+      var hide = st.hidden;
+      if (y < Math.max(560, window.innerHeight * 0.9)) hide = false;
+      else if (dy > 6) hide = true;
+      else if (dy < -6) hide = false;
+      if (st.menu) hide = false;
+      var sc = y > 8;
+      if (hide !== st.hidden || sc !== st.scrolled) self.setState({ hidden: hide, scrolled: sc });
+      if (Math.abs(dy) > 6) self._lastY = y;
+    };
+    window.addEventListener('scroll', this._onScroll, { passive: true });
+    this._onKey = function (e) {
+      if (!self.state.stOpen) return;
+      if (e.key === 'Escape') self.stGo(-1);
+      else if (e.key === 'ArrowRight') self.stGo(self.state.stI + 1);
+      else if (e.key === 'ArrowLeft') self.stGo(self.state.stI - 1 + STORIES.length);
+    };
+    window.addEventListener('keydown', this._onKey);
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var full = { ppl: 780500, hhAll: 230000, hh: 10000, day: 330, well: 5000, five: 5 };
+    var run = function () {
+      if (self._ixRan) return; self._ixRan = true;
+      if (reduce) { full.ixOn = true; full.ixDone = true; self.setState(full); }
+      else {
+        self.setState({ ixOn: true });
+        var t0 = null;
+        var step = function (t) {
+          if (t0 === null) t0 = t;
+          var p = Math.min(1, (t - t0 - 400) / 2200); if (p < 0) p = 0;
+          var e = 1 - Math.pow(1 - p, 3);
+          self.setState({ ppl: Math.round(780500 * e), hhAll: Math.round(230000 * e), hh: Math.round(10000 * e), day: Math.round(330 * e), well: Math.round(5000 * e), five: Math.max(1, Math.round(5 * e)), ixDone: p >= 1 });
+          if (p < 1) self._raf = requestAnimationFrame(step);
+        };
+        self._raf = requestAnimationFrame(step);
+      }
+      self._tickT = setInterval(function () { var n = self.state.tick; self.setState({ tickPrev: n, tick: (n + 1) % 4 }); }, reduce ? 6000 : 3800);
+    };
+    var hook = function () {
+      var el = document.getElementById('impact-tile');
+      if (!el || !('IntersectionObserver' in window)) { run(); return; }
+      self._io = new IntersectionObserver(function (es) { es.forEach(function (en) { if (en.isIntersecting) { run(); self._io.disconnect(); } }); }, { threshold: 0.25 });
+      self._io.observe(el);
+    };
+    setTimeout(hook, 0);
+    var wwRun = function () {
+      if (self._wwRan) return; self._wwRan = true;
+      if (reduce) { self.setState({ ww: 21 }); return; }
+      var t1 = null;
+      var st2 = function (t) { if (t1 === null) t1 = t; var p = Math.min(1, (t - t1) / 1800); var e = 1 - Math.pow(1 - p, 3); self.setState({ ww: Math.round(21 * e) }); if (p < 1) self._raf2 = requestAnimationFrame(st2); };
+      self._raf2 = requestAnimationFrame(st2);
+    };
+    setTimeout(function () {
+      var el = document.getElementById('ww-tile');
+      if (!el || !('IntersectionObserver' in window)) { wwRun(); return; }
+      self._io2 = new IntersectionObserver(function (es) { es.forEach(function (en) { if (en.isIntersecting) { wwRun(); self._io2.disconnect(); } }); }, { threshold: 0.3 });
+      self._io2.observe(el);
+    }, 0);
+    this._ixFallback = setTimeout(run, 4000);
+  }
+  componentWillUnmount() { window.removeEventListener('scroll', this._onScroll); window.removeEventListener('keydown', this._onKey); document.body.style.overflow = ''; if (this._raf) cancelAnimationFrame(this._raf); if (this._tickT) clearInterval(this._tickT); if (this._io) this._io.disconnect(); if (this._io2) this._io2.disconnect(); if (this._raf2) cancelAnimationFrame(this._raf2); clearTimeout(this._ixFallback); }
+  stGo(i) {
+    if (i < 0) { document.body.style.overflow = ''; this.setState({ stOpen: false }); return; }
+    document.body.style.overflow = 'hidden';
+    this.setState({ stOpen: true, stI: i % STORIES.length, stFlip: !this.state.stFlip });
+  }
+  giveOpts() {
+    var self = this, s = this.state;
+    var list = [[5,'= water for 1 person for life'],[25,'= water for 5 people'],[50,'= water for 10 people'],[100,'= water for 20 people'],[500,'= water for 100 people'],[5000,'= 1 well for 1,000 people']];
+    return list.map(function (o) {
+      var on = s.custom === '' && s.amount === o[0];
+      return { amt: '$' + o[0].toLocaleString('en-US'), label: o[1], pressed: on ? 'true' : 'false', cls: 'ac-tier' + (o[0] === 5000 ? ' ac-star' : '') + (on ? ' on' : ''), pick: function () { self.setState({ amount: o[0], custom: '' }); } };
+    });
+  }
+  impactText() {
+    var s = this.state, a = s.amount;
+    if (!(a >= 5)) return 'Every $5 = water for 1 person for life';
+    var people = Math.floor(a / 5);
+    var wells = Math.floor(a / 5000);
+    var base = people.toLocaleString('en-US') + (people === 1 ? ' person' : ' people') + ' with water for life';
+    if (s.freq === 'monthly') { var y = people * 12; return y.toLocaleString('en-US') + ' people a year with water for life'; }
+    return (wells >= 1 ? wells + (wells === 1 ? ' well · ' : ' wells · ') : '') + base;
+  }
+  renderVals() {
+    var self = this, s = this.state;
+    return Object.assign(countryVals(this), {
+      hdStyle: 'transform: translateY(' + (s.hidden ? '-140%' : '0') + ')',
+      tileShadow: s.scrolled ? 'box-shadow: 0 2px 4px rgba(10,10,10,0.05), 0 14px 36px rgba(10,10,10,0.12)' : 'box-shadow: 0 1px 2px rgba(10,10,10,0.04)',
+      peopleLabel: s.ppl.toLocaleString('en-US'),
+      hhAllLabel: s.hhAll.toLocaleString('en-US'),
+      hhLabel: s.hh.toLocaleString('en-US'),
+      dayLabel: s.day.toLocaleString('en-US'),
+      wellLabel: s.well.toLocaleString('en-US'),
+      fiveLabel: String(s.five || 5),
+      ixCls: (s.ixOn ? 'ix-on' : 'ix-pre') + (s.ixDone ? ' ix-done' : ''),
+      ticks: ['A new household reaches clean water about every 4 minutes', 'Clean water can be just 50 metres beneath their feet', 'Our hand-crank drill reaches 75% more places at 75% less cost', 'Many walk 3+ miles for water, several times a day'].map(function (x, i) { return { text: x, cls: 'ix-tk' + (i === s.tick ? ' on' : (i === s.tickPrev ? ' out' : '')) }; }),
+      opts: this.giveOpts(),
+      wwLabel: (s.ww / 10).toFixed(1),
+      fnVal: s.fnVal,
+      fnNote: s.fnNote,
+      fnChange: function (e) { self.setState({ fnVal: e.target.value, fnNote: '' }); },
+      fnSubmit: function (e) {
+        if (e && e.preventDefault) e.preventDefault();
+        var v = (self.state.fnVal || '').trim();
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) { self.setState({ fnNote: 'Please enter a valid email address.' }); return; }
+        window.location.href = 'mailto:info@rafikioutreach.org?subject=' + encodeURIComponent('Field notes signup') + '&body=' + encodeURIComponent('Please add me to Rafiki Outreach updates: ' + v);
+        self.setState({ fnNote: 'Opening your email app to confirm your signup.' });
+      },
+      stAllLabel: 'See all ' + STORIES.length + ' stories',
+      stOpen: s.stOpen,
+      st: STORIES[s.stI],
+      stCount: (s.stI + 1) + ' / ' + STORIES.length,
+      stImgCls: s.stFlip ? 'stA' : 'stB',
+      openFirst: function () { self.stGo(0); },
+      stClose: function () { self.stGo(-1); },
+      stPrev: function () { self.stGo(self.state.stI - 1 + STORIES.length); },
+      stNext: function () { self.stGo(self.state.stI + 1); },
+      stPeek: [1, 2, 3, 4].map(function (i, k) { return { src: STORIES[i].src, label: 'Open story: ' + STORIES[i].title, last: k === 3, more: '+' + (STORIES.length - 4), open: function () { self.stGo(k === 3 ? 4 : i); } }; }),
+      stAll: STORIES.map(function (x, i) { return { src: x.src, label: 'Story ' + (i + 1) + ': ' + x.title, cls: 'st-sth' + (i === s.stI ? ' on' : ''), open: function () { self.stGo(i); } }; }),
+      setOnce: function () { self.setState({ freq: 'once' }); },
+      setMonthly: function () { self.setState({ freq: 'monthly' }); },
+      oncePressed: s.freq === 'once' ? 'true' : 'false',
+      monthlyPressed: s.freq === 'monthly' ? 'true' : 'false',
+      onceCls: s.freq === 'once' ? 'on' : '',
+      monthlyCls: s.freq === 'monthly' ? 'on' : '',
+      customVal: s.custom,
+      onCustom: function (e) { var v = e.target.value; var n = Number(v); self.setState({ custom: v, amount: n > 0 ? n : 0 }); },
+      impact: this.impactText(),
+      cta: s.amount >= 1 ? ('Donate $' + Math.round(s.amount).toLocaleString('en-US') + (s.freq === 'monthly' ? ' monthly' : '')) : 'Donate',
+      menuOpen: s.menu, menuClosed: !s.menu,
+      menuExpanded: s.menu ? 'true' : 'false',
+      menuLabel: s.menu ? 'Close menu' : 'Open menu',
+      toggleMenu: function () { self.setState({ menu: !self.state.menu }); },
+      closeMenu: function () { self.setState({ menu: false }); }
+    });
+  }
+}
+</script>
+</body>
+</html>
