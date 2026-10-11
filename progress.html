@@ -328,6 +328,20 @@ em.hl{font-style:normal;color:#098BE1}
 .hd-space{height:118px !important}
 .h2{color:#098BE1}
 
+/* ---------- phone menu: fits on one screen ---------- */
+@media (max-width:900px){
+.mm-tile{padding:8px;max-height:calc(100svh - 104px)}
+.mm-link{min-height:42px;font-size:16px;padding:0 16px;border-radius:14px}
+.mm-cs{padding:10px 6px 2px;gap:8px;margin-top:4px}
+.mm-cs-row{flex-wrap:nowrap !important;justify-content:center;gap:5px !important}
+.mm-pill{min-height:34px !important;padding:0 11px !important;font-size:13px !important;flex:0 0 auto}
+.mm-contact{margin:6px 6px 2px;padding:10px 6px 4px;gap:8px}
+.mm-mail{min-height:38px;padding:0 16px;font-size:14px}
+.mm-social{gap:8px}
+.mm-social .soc{width:36px;height:36px}
+}
+@media (max-width:370px){.mm-pill{padding:0 8px !important;font-size:12px !important}}
+
 /* ---------- menu button: wave bars that morph into a cross ---------- */
 @keyframes mbRipple{0%{transform:scale(0);opacity:.55}100%{transform:scale(2.4);opacity:0}}
 @keyframes mbPop{0%{transform:scale(1)}40%{transform:scale(.86)}100%{transform:scale(1)}}
@@ -388,7 +402,9 @@ em.hl{font-style:normal;color:#098BE1}
 .zh-in{align-items:center !important;text-align:center}
 .zh-h1,.zh-p{margin-left:auto !important;margin-right:auto !important}
 .zh-cta{justify-content:center}
-.zh-scrim{background:radial-gradient(ellipse at center 60%,rgba(10,10,10,.6) 0%,rgba(10,10,10,.42) 55%,rgba(10,10,10,.2) 100%),linear-gradient(0deg,rgba(10,10,10,.45) 0%,rgba(10,10,10,0) 40%) !important}
+.zh-scrim{background:linear-gradient(0deg,rgba(10,10,10,.88) 0%,rgba(10,10,10,.72) 30%,rgba(10,10,10,.35) 52%,rgba(10,10,10,.08) 68%,rgba(10,10,10,0) 80%),linear-gradient(0deg,rgba(10,10,10,.12),rgba(10,10,10,.12)) !important}
+.zh-short{display:none}
+@media (max-width:900px){.zh-long{display:none}.zh-short{display:inline}}
 @media (prefers-reduced-motion: reduce){.zh-bg,.zh-in > *,.zh-down,.zh-chip i{animation:none !important}}
 
 /* ---------- homepage rows: cards side by side ---------- */
@@ -644,6 +660,21 @@ em.hl{font-style:normal;color:#098BE1}
 }
 @media (max-width:520px){.hp-card{padding:16px 10px 14px;gap:8px;border-radius:18px}.hp-ic{width:44px;height:44px}.hp-ic svg{width:22px;height:22px}.hp-t{font-size:15px}.hp-d{font-size:12.5px;line-height:1.45}.hp-card .b{min-height:38px;padding:0 14px;font-size:13px}.gc-t{font-size:14.5px}.gc-d{font-size:12.5px}}
 @media (prefers-reduced-motion: reduce){.ww-num::before,.ww-num::after,.ww-lab i,.hp-ic{animation:none !important}}
+
+/* ---------- impact card: shorter on phones ---------- */
+@media (max-width:760px){
+.imp-photo{padding:150px 10px 10px !important}
+.imp-bg{object-position:center 12%}
+.ix-glass{gap:8px !important;padding:16px 12px 14px !important}
+.ix-glass .ix-h{font-size:17px !important;line-height:1.25}
+.ix-glass .ix-stat{gap:4px}
+.ix-glass .ix-num{font-size:36px !important}
+.ix-glass .ix-stat .ix-tx{font-size:13px !important;line-height:1.4}
+.ix-hh{font-size:12px;padding:3px 10px}
+.ix-glass .ix-rule,.ix-glass .ix-tick{display:none !important}
+.ix-glass .ix-goal{padding:10px 12px !important}
+.ix-glass .ix-gnum{font-size:26px !important}
+}
 @media (prefers-reduced-motion: reduce){.ix-pre > .ix-glass > *{opacity:1 !important}.ix-on > .ix-glass > *,.ix-sheen,.ix-bubs i,.ix-drop,.ix-ripple,.ix-on .ip,.ix-glass .ix-rule span,.ix-done .ix-num,.ix-tick-live b{animation:none !important}.ix-on .ip{opacity:1}.ix-tk{transition:none}}
 .mm-tile{margin-top:12px}
 @media (max-width:900px){
@@ -751,7 +782,7 @@ em.hl{font-style:normal;color:#098BE1}
 </div>
 </div>
 <sc-if value="{{menuOpen}}" hint-placeholder-val="{{false}}">
-<nav id="bento-menu" aria-label="Mobile" class="mm-tile"><a class="mm-link" href="/" onClick="{{closeMenu}}">Home<span aria-hidden="true">→</span></a><a class="mm-link" href="https://www.rafikioutreach.org/trips" onClick="{{closeMenu}}">Who we are<span aria-hidden="true">→</span></a><a class="mm-link" href="https://www.rafikioutreach.org/water" onClick="{{closeMenu}}">Water<span aria-hidden="true">→</span></a><a class="mm-link" href="https://www.rafikioutreach.org/loan" onClick="{{closeMenu}}">Loan Program<span aria-hidden="true">→</span></a><a class="mm-link" href="/stories" onClick="{{closeMenu}}">Impact stories<span aria-hidden="true">→</span></a><a class="mm-link" href="https://www.rafikioutreach.org/event-list" onClick="{{closeMenu}}">Events<span aria-hidden="true">→</span></a><a class="mm-link" href="https://www.rafikioutreach.org/trips" onClick="{{closeMenu}}">Trips<span aria-hidden="true">→</span></a><div class="mm-cs"><span class="mm-lab">Country</span><div class="mm-cs-row"><sc-for list="{{csList}}" as="c" hint-placeholder-count="5"><button type="button" class="{{c.pill}}" aria-pressed="{{c.on}}" onClick="{{c.pick}}">{{c.n}}</button></sc-for></div></div><div class="mm-contact"><span class="mm-lab">Get in touch</span><a class="mm-mail" href="mailto:info@rafikioutreach.org"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"></rect><path d="M3.5 7l8.5 6 8.5-6"></path></svg>info@rafikioutreach.org</a><div class="mm-social"><a class="soc soc-fb" href="https://www.facebook.com/rafikioutreach" target="_blank" rel="noopener" aria-label="Rafiki Outreach on Facebook"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="#FFFFFF" d="M13.5 21v-7.5h2.6l.4-3h-3V8.6c0-.9.3-1.5 1.6-1.5h1.6V4.4c-.3 0-1.2-.1-2.3-.1-2.3 0-3.9 1.4-3.9 4V10.5H8v3h2.5V21h3z"></path></svg></a>
+<nav id="bento-menu" aria-label="Mobile" class="mm-tile"><a class="mm-link" href="/" onClick="{{closeMenu}}">Home<span aria-hidden="true">→</span></a><a class="mm-link" href="https://www.rafikioutreach.org/trips" onClick="{{closeMenu}}">Who we are<span aria-hidden="true">→</span></a><a class="mm-link" href="https://www.rafikioutreach.org/water" onClick="{{closeMenu}}">Water<span aria-hidden="true">→</span></a><a class="mm-link" href="https://www.rafikioutreach.org/loan" onClick="{{closeMenu}}">Loan Program<span aria-hidden="true">→</span></a><a class="mm-link" href="/stories" onClick="{{closeMenu}}">Impact stories<span aria-hidden="true">→</span></a><a class="mm-link" href="https://www.rafikioutreach.org/event-list" onClick="{{closeMenu}}">Events<span aria-hidden="true">→</span></a><a class="mm-link" href="https://www.rafikioutreach.org/trips" onClick="{{closeMenu}}">Trips<span aria-hidden="true">→</span></a><div class="mm-cs"><span class="mm-lab">Country</span><div class="mm-cs-row"><sc-for list="{{csList}}" as="c" hint-placeholder-count="5"><button type="button" class="{{c.pill}}" aria-pressed="{{c.on}}" onClick="{{c.pick}}">{{c.pn}}</button></sc-for></div></div><div class="mm-contact"><span class="mm-lab">Get in touch</span><a class="mm-mail" href="mailto:info@rafikioutreach.org"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"></rect><path d="M3.5 7l8.5 6 8.5-6"></path></svg>info@rafikioutreach.org</a><div class="mm-social"><a class="soc soc-fb" href="https://www.facebook.com/rafikioutreach" target="_blank" rel="noopener" aria-label="Rafiki Outreach on Facebook"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="#FFFFFF" d="M13.5 21v-7.5h2.6l.4-3h-3V8.6c0-.9.3-1.5 1.6-1.5h1.6V4.4c-.3 0-1.2-.1-2.3-.1-2.3 0-3.9 1.4-3.9 4V10.5H8v3h2.5V21h3z"></path></svg></a>
 <a class="soc soc-ig" href="https://www.instagram.com/rafikioutreach" target="_blank" rel="noopener" aria-label="Rafiki Outreach on Instagram"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.3" cy="6.7" r="1" fill="#FFFFFF" stroke="none"></circle></svg></a><a class="soc soc-x" href="https://x.com/rafikioutreach" target="_blank" rel="noopener" aria-label="Rafiki Outreach on X"><svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true"><path fill="#FFFFFF" d="M17.8 3h3.1l-6.8 7.8L22 21h-6.2l-4.9-6.4L5.3 21H2.2l7.3-8.3L2 3h6.4l4.4 5.8L17.8 3zm-1.1 16.2h1.7L7.4 4.7H5.6l11.1 14.5z"></path></svg></a><a class="soc soc-li" href="https://www.linkedin.com/company/rafikioutreach" target="_blank" rel="noopener" aria-label="Rafiki Outreach on LinkedIn"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#FFFFFF" d="M5.2 8.6h3.2V19H5.2V8.6zM6.8 3.6a1.85 1.85 0 110 3.7 1.85 1.85 0 010-3.7zM10.4 8.6h3.1V10h.04c.43-.8 1.5-1.66 3.07-1.66 3.28 0 3.89 2.16 3.89 4.97V19h-3.23v-5.04c0-1.2-.02-2.75-1.68-2.75-1.68 0-1.94 1.31-1.94 2.66V19h-3.23V8.6z"></path></svg></a><a class="soc soc-yt" href="https://www.youtube.com/@rafikioutreach" target="_blank" rel="noopener" aria-label="Rafiki Outreach on YouTube"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="#FFFFFF" d="M21.6 7.2a2.5 2.5 0 00-1.76-1.77C18.27 5 12 5 12 5s-6.27 0-7.84.43A2.5 2.5 0 002.4 7.2 26 26 0 002 12a26 26 0 00.4 4.8 2.5 2.5 0 001.76 1.77C5.73 19 12 19 12 19s6.27 0 7.84-.43a2.5 2.5 0 001.76-1.77A26 26 0 0022 12a26 26 0 00-.4-4.8zM10 15V9l5.2 3L10 15z"></path></svg></a></div></div></nav>
 </sc-if>
 </header>
@@ -822,7 +853,7 @@ em.hl{font-style:normal;color:#098BE1}
 </footer>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"completed":{"editor":"int","default":300,"section":"Numbers"},"underConstruction":{"editor":"int","default":12,"section":"Numbers"},"peopleReached":{"editor":"int","default":780500,"section":"Numbers"},"households":{"editor":"int","default":230000,"section":"Numbers"},"monthlyGoal":{"editor":"int","default":10000,"section":"Numbers"},"$preview":{"width":1440,"height":3336}}'>
+<script type="text/x-dc" data-dc-script data-props='{"completed":{"editor":"int","default":300,"section":"Numbers"},"underConstruction":{"editor":"int","default":12,"section":"Numbers"},"peopleReached":{"editor":"int","default":780500,"section":"Numbers"},"households":{"editor":"int","default":230000,"section":"Numbers"},"monthlyGoal":{"editor":"int","default":10000,"section":"Numbers"},"$preview":{"width":1440,"height":3000}}'>
 var TYPES = ['Community well', 'Sponsored well', 'Volunteer trip'];
 var COUNTRIES = ['Kenya', 'Kenya', 'Tanzania', 'Uganda', 'Malawi'];
 var CLIST = ['Kenya', 'Tanzania', 'Uganda', 'Malawi'];
@@ -842,8 +873,8 @@ var CORDER = ['ke', 'tz', 'ug', 'mw'];
 function countryVals(self) {
   var s = self.state, all = !!s.cAll, cur = CTRY[s.ctry || 'ke'];
   var pick = function (k) { self.setState({ ctry: k === 'all' ? (self.state.ctry || 'ke') : k, cAll: k === 'all', cs: false }); };
-  var list = CORDER.map(function (k) { var on = !all && (s.ctry || 'ke') === k; return { n: CTRY[k].n, sub: k === 'ke' ? 'Main site' : 'rafikioutreach.org/' + CTRY[k].n.toLowerCase(), on: on ? 'true' : 'false', cls: 'cs-it' + (on ? ' on' : ''), pill: 'mm-pill' + (on ? ' on' : ''), pick: function () { pick(k); } }; })
-    .concat([{ n: 'All countries', sub: 'Totals across all four', on: all ? 'true' : 'false', cls: 'cs-it all' + (all ? ' on' : ''), pill: 'mm-pill' + (all ? ' on' : ''), pick: function () { pick('all'); } }]);
+  var list = CORDER.map(function (k) { var on = !all && (s.ctry || 'ke') === k; return { n: CTRY[k].n, sub: k === 'ke' ? 'Main site' : 'rafikioutreach.org/' + CTRY[k].n.toLowerCase(), on: on ? 'true' : 'false', pn: CTRY[k].n, cls: 'cs-it' + (on ? ' on' : ''), pill: 'mm-pill' + (on ? ' on' : ''), pick: function () { pick(k); } }; })
+    .concat([{ n: 'All countries', pn: 'All', sub: 'Totals across all four', on: all ? 'true' : 'false', cls: 'cs-it all' + (all ? ' on' : ''), pill: 'mm-pill' + (all ? ' on' : ''), pick: function () { pick('all'); } }]);
   return { menuCls: 'hd-menu' + (s.menu ? ' open' : (self._menuWasOpen ? ' shut' : '')), cName: all ? 'All countries' : cur.n, cCode: all ? 'All' : cur.ab, csOpen: !!s.cs, csExpanded: s.cs ? 'true' : 'false',
     toggleCs: function () { self.setState({ cs: !self.state.cs }); }, csList: list,
     wwCards: CORDER.map(function (k) { var on = !all && (s.ctry || 'ke') === k; return { n: CTRY[k].n, ab: CTRY[k].ab, on: on ? 'true' : 'false', here: on, cls: 'cc-card' + (on ? ' on' : ''), go: on ? 'You are viewing' : 'Explore ' + CTRY[k].n + ' →', pick: function () { pick(k); } }; }) };
