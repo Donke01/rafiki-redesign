@@ -989,11 +989,11 @@ var STORIES = [
 var CTRY = { ke: { n: 'Kenya', ab: 'KE', w: 95, u: 3, p: 210000 }, tz: { n: 'Tanzania', ab: 'TZ', w: 140, u: 6, p: 330000 }, ug: { n: 'Uganda', ab: 'UG', w: 40, u: 2, p: 140000 }, mw: { n: 'Malawi', ab: 'MW', w: 25, u: 1, p: 100500 } };
 var CORDER = ['ke', 'tz', 'ug', 'mw'];
 var FOUNDERS = [
-  { tag: 'Co-founder', name: 'Reid Anderson', role: 'Co-founder, Rafiki Outreach', email: 'reid@rafikicap.com', img: '/img/reid.jpg', bio: '[Short bio: 2 to 4 sentences about Reid, why he started Rafiki and his role today.]' },
-  { tag: 'Co-founder', name: 'Jessica Anderson', role: 'Co-founder, Rafiki Outreach', email: 'jessica@rafikicap.com', img: '/img/jessica.jpg', bio: '[Short bio: 2 to 4 sentences about Jessica, why she started Rafiki and her role today.]' }
+  { tag: 'Co-founder', name: 'Reid Anderson', role: 'Co-founder, Rafiki Outreach', email: 'reid@rafikicap.com', img: '/img/reid.jpg', bio: 'Reid co-founded Rafiki Outreach to bring clean water to communities across East Africa. Rafiki means friend in Swahili, and Reid builds those friendships on the ground, joining volunteers in the field and working alongside local crews to drill wells with hand-crank equipment.' },
+  { tag: 'Co-founder', name: 'Jessica Anderson', role: 'Co-founder, Rafiki Outreach', email: 'jessica@rafikicap.com', img: '/img/jessica.jpg', bio: 'Jessica co-founded Rafiki Outreach with Reid, believing that clean water is the first step out of poverty. She helps bring donors and volunteers together, so that every gift and every trip ends with a working well for a community that needs one.' }
 ];
 var OFFICES = {
-  ke: { addr: 'Mega Centre, 3rd Floor, Makasembo Road, Kitale', phone: '+254 791 674 001', dir: 'Meril Adoyo', email: 'meril@rafikioutreach.org', img: '/img/meril.jpg' },
+  ke: { addr: 'Mega Centre, 3rd Floor, Makasembo Road, Kitale', phone: '+254 791 674 001', dir: 'Meril Adoyo', email: 'meril@rafikioutreach.org', img: '/img/meril.jpg', bio: 'Meril leads Rafiki Outreach in Kenya from the Kitale office. She works with communities from their first request through site selection and drilling, and stays in touch long after the well is finished, so every project leaves water flowing for years to come.' },
   tz: { addr: '[Office address], Tanzania', phone: '[+255 phone]', dir: '[Tanzania director name]' },
   ug: { addr: '[Office address], Uganda', phone: '[+256 phone]', dir: '[Uganda director name]' },
   mw: { addr: '[Office address], Malawi', phone: '[+265 phone]', dir: '[Malawi director name]' },
@@ -1016,7 +1016,7 @@ function countryVals(self) {
     .concat([{ n: 'All countries', pn: 'All', sub: 'Totals across all four', on: all ? 'true' : 'false', cls: 'cs-it all' + (all ? ' on' : ''), pill: 'mm-pill' + (all ? ' on' : ''), pick: function () { pick('all'); } }]);
   var picked = !!s.ctryPicked && !all;
   var heroVals = { heroH1: picked ? 'Clean water across ' + cur.n + '.' : 'Clean water, close to home.', heroNum: picked ? cur.p.toLocaleString('en-US') + '+' : '780,500+', heroStatTx: picked ? 'people reached in ' + cur.n : 'people reached with clean, safe water' };
-  var dirOf = function (k) { return { tag: 'Country Director', name: OFFICES[k].dir, email: OFFICES[k].email || '', role: 'Country Director, ' + CTRY[k].n, img: OFFICES[k].img || '', bio: '[Short bio: 2 to 4 sentences about the ' + CTRY[k].n + ' country director and the work of the ' + CTRY[k].n + ' team.]' }; };
+  var dirOf = function (k) { return { tag: 'Country Director', name: OFFICES[k].dir, email: OFFICES[k].email || '', role: 'Country Director, ' + CTRY[k].n, img: OFFICES[k].img || '', bio: OFFICES[k].bio || '[Short bio: 2 to 4 sentences about the ' + CTRY[k].n + ' country director and the work of the ' + CTRY[k].n + ' team.]' }; };
   var people = FOUNDERS.concat(all ? CORDER.map(dirOf) : [dirOf(s.ctry || 'ke')]);
   var off = all ? OFFICES.all : OFFICES[s.ctry || 'ke'];
   var mk = function (p, i) { return { tag: p.tag, name: p.name, role: p.role, bio: p.bio, img: p.img, hasImg: !!p.img, noImg: !p.img, email: p.email || '', hasEmail: !!p.email, mailto: p.email ? 'mailto:' + p.email : '', open: function () { self.setState({ bioIdx: i }); } }; };
