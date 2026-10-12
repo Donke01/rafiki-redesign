@@ -797,6 +797,44 @@ em.hl{font-style:normal;color:#098BE1}
 .cc-rows span{color:#5A6066}
 }
 </style>
+<style>
+/* giving card: jerrycan version on phones (option A) */
+.ja,.g-chips{display:none}
+@keyframes jaWave{from{transform:translateX(0)}to{transform:translateX(-80px)}}
+@keyframes jaBub{0%{transform:translateY(0);opacity:0}20%{opacity:.8}100%{transform:translateY(-120px);opacity:0}}
+@keyframes jaDropA{0%{transform:translateY(-60px);opacity:0}20%{opacity:1}100%{transform:translateY(60px);opacity:0}}
+@keyframes jaDropB{0%{transform:translateY(-60px);opacity:0}20%{opacity:1}100%{transform:translateY(60px);opacity:0}}
+@keyframes jaSqA{0%,100%{transform:scale(1,1)}35%{transform:scale(1.04,.96)}70%{transform:scale(.98,1.02)}}
+@keyframes jaSqB{0%,100%{transform:scale(1,1)}35%{transform:scale(1.04,.96)}70%{transform:scale(.98,1.02)}}
+.ja{position:relative;width:180px;height:206px;margin:2px auto -4px}
+.ja svg{width:100%;height:100%;overflow:visible}
+.ja-liq{transition:transform 1.2s cubic-bezier(.3,1.5,.5,1)}
+.ja-wv{animation:jaWave 3.2s linear infinite}
+.ja-wv2{animation-duration:5s;animation-direction:reverse;opacity:.5}
+.ja-bub{animation:jaBub 3s ease-in infinite;opacity:0}
+.ja-bub:nth-child(2){animation-delay:1s}.ja-bub:nth-child(3){animation-delay:2s}
+.ja-drop{opacity:0}
+.ja.kA .ja-drop{animation:jaDropA .7s cubic-bezier(.55,0,.9,.5)}
+.ja.kB .ja-drop{animation:jaDropB .7s cubic-bezier(.55,0,.9,.5)}
+.ja-can{transform-origin:100px 212px;transform-box:view-box}
+.ja.kA .ja-can{animation:jaSqA .6s ease-out .45s}
+.ja.kB .ja-can{animation:jaSqB .6s ease-out .45s}
+.g-chips{gap:8px;width:calc(100% + 28px);margin:0 -14px;padding:2px 14px 6px;overflow-x:auto;scroll-snap-type:x proximity;scrollbar-width:none}
+.g-chips::-webkit-scrollbar{display:none}
+.g-chip{flex:none;scroll-snap-align:center;min-height:44px;padding:0 18px;border-radius:999px;border:1.5px solid rgba(9,139,225,.18);background:#FFFFFF;font:inherit;font-size:16px;font-weight:800;color:#0A0A0A;cursor:pointer;transition:background .25s,color .25s,transform .25s}
+.g-chip.on{background:#0A0A0A;color:#FFFFFF;border-color:#0A0A0A;transform:translateY(-2px)}
+.g-chip.oth{font-weight:700;font-size:14px;color:#076DB1}
+.g-chip.oth.on{color:#FFFFFF}
+.g-chip:focus-visible{outline:3px solid #6BBDF2;outline-offset:3px}
+@media (max-width:600px){
+.ja{display:block}
+.g-chips{display:flex}
+.access2 .ac-tiers,.access2 .gv-ppl,.access2 .aq,.access2 .ac-badge,.access2 .ac-p{display:none !important}
+.access2 .gv-other{display:none}
+.access2 .gv.oth .gv-other{display:flex}
+}
+@media (prefers-reduced-motion: reduce){.ja *{animation:none !important;transition:none !important}}
+</style>
 </helmet>
 <div class="pg">
 <sc-if value="{{menuOpen}}" hint-placeholder-val="{{false}}"><div class="mm-backdrop" onClick="{{closeMenu}}" aria-hidden="true"></div></sc-if><sc-if value="{{wipeOn}}" hint-placeholder-val="{{false}}"><div class="cx-wipe" aria-hidden="true"><div class="cx-in"><div class="{{wipeMapsCls}}"><sc-for list="{{wipeMaps}}" as="m" hint-placeholder-count="1"><svg class="cx-map" viewBox="-4 -4 108 108" aria-hidden="true"><defs><clipPath id="{{m.cid}}"><path d="{{m.d}}"></path></clipPath></defs><g class="cx-flag" style="{{m.clip}}"><g transform="{{m.tr}}"><sc-for list="{{m.rects}}" as="r" hint-placeholder-count="3"><rect x="{{r.x}}" y="{{r.y}}" width="{{r.w}}" height="{{r.h}}" fill="{{r.f}}"></rect></sc-for></g><sc-for list="{{m.circles}}" as="c" hint-placeholder-count="0"><circle cx="{{c.x}}" cy="{{c.y}}" r="{{c.r}}" fill="{{c.f}}"></circle></sc-for></g><path class="cx-ol" d="{{m.d}}" pathLength="1"></path></svg></sc-for></div><span class="cx-k">Rafiki Outreach</span><span class="cx-n">{{wipeName}}</span></div></div></sc-if>
@@ -879,12 +917,12 @@ em.hl{font-style:normal;color:#098BE1}
 <span class="ac-badge" aria-hidden="true"><span class="ac-ring"></span><svg width="30" height="30" viewBox="0 0 24 24" fill="#098BE1" aria-hidden="true"><path d="M12 2.7C8 7.5 6 10.7 6 14a6 6 0 0012 0c0-3.3-2-6.5-6-11.3z"></path></svg></span>
 <h2 class="h2 ac-h">Access to <em>clean</em> water; our <em>clear</em> objective.</h2>
 <p class="p ac-p">By making clean water accessible to families, villages, and communities, they experience improved health, have more time, and are better equipped to lift themselves out of poverty.</p>
-<div class="gv">
+<div class="{{gvCls}}">
 <div class="gv-freq" role="group" aria-label="Gift frequency">
 <button type="button" onClick="{{setOnce}}" aria-pressed="{{oncePressed}}" class="{{onceCls}}">One-time</button>
 <button type="button" onClick="{{setMonthly}}" aria-pressed="{{monthlyPressed}}" class="{{monthlyCls}}">Monthly</button>
 </div>
-<div class="ac-tiers" role="group" aria-label="Choose an amount">
+<div class="{{jaCls}}" aria-hidden="true"><svg viewBox="0 0 200 230"><defs><clipPath id="jaClip"><path d="M44 58 h112 a18 18 0 0 1 18 18 v118 a18 18 0 0 1 -18 18 h-112 a18 18 0 0 1 -18 -18 v-118 a18 18 0 0 1 18 -18 z"></path></clipPath><linearGradient id="jaW" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6BBDF2"></stop><stop offset="1" stop-color="#076DB1"></stop></linearGradient></defs><g class="ja-can"><path d="M56 58 v-26 a10 10 0 0 1 10 -10 h44 a10 10 0 0 1 10 10 v26 h-14 v-22 h-36 v22 z" fill="#F2C230" stroke="#C99A00" stroke-width="3" stroke-linejoin="round"></path><rect x="132" y="34" width="26" height="24" rx="4" fill="#F2C230" stroke="#C99A00" stroke-width="3"></rect><rect x="128" y="26" width="34" height="11" rx="4" fill="#E04B3A"></rect><path d="M44 58 h112 a18 18 0 0 1 18 18 v118 a18 18 0 0 1 -18 18 h-112 a18 18 0 0 1 -18 -18 v-118 a18 18 0 0 1 18 -18 z" fill="#FFF3C4"></path><g clip-path="url(#jaClip)"><g class="ja-liq" style="{{jaStyle}}"><g class="ja-wv"><path d="M0 8 Q20 0 40 8 T80 8 T120 8 T160 8 T200 8 T240 8 T280 8 T320 8 V400 H0 Z" fill="url(#jaW)"></path></g><g class="ja-wv ja-wv2"><path d="M0 10 Q20 2 40 10 T80 10 T120 10 T160 10 T200 10 T240 10 T280 10 T320 10 V400 H0 Z" fill="#9FD3F7"></path></g><g><circle class="ja-bub" cx="70" cy="140" r="4" fill="none" stroke="#FFFFFF" stroke-width="1.5"></circle><circle class="ja-bub" cx="120" cy="150" r="3" fill="none" stroke="#FFFFFF" stroke-width="1.5"></circle><circle class="ja-bub" cx="96" cy="160" r="5" fill="none" stroke="#FFFFFF" stroke-width="1.5"></circle></g></g></g><path d="M44 58 h112 a18 18 0 0 1 18 18 v118 a18 18 0 0 1 -18 18 h-112 a18 18 0 0 1 -18 -18 v-118 a18 18 0 0 1 18 -18 z" fill="none" stroke="#F2C230" stroke-width="8"></path><path d="M48 100 H152 M48 166 H152" stroke="#F2C230" stroke-width="4" stroke-linecap="round" opacity=".7"></path></g><path class="ja-drop" d="M145 -6 C140 2 137 7 137 11 a8 8 0 0 0 16 0 c0 -4 -3 -9 -8 -17z" fill="#098BE1"></path></svg></div><div class="g-chips" role="group" aria-label="Choose an amount"><sc-for list="{{gChips}}" as="c" hint-placeholder-count="7"><button type="button" class="{{c.cls}}" aria-pressed="{{c.on}}" onClick="{{c.pick}}">{{c.l}}</button></sc-for></div><div class="ac-tiers" role="group" aria-label="Choose an amount">
 <sc-for list="{{opts}}" as="o" hint-placeholder-count="6">
 <button type="button" onClick="{{o.pick}}" aria-pressed="{{o.pressed}}" class="{{o.cls}}"><span class="ac-amt">{{o.amt}}</span><span class="ac-tl">{{o.label}}</span></button>
 </sc-for>
@@ -1176,10 +1214,11 @@ class Component extends DCLogic {
     this._gvRaf = requestAnimationFrame(step);
   }
   gvPick(a, e) {
-    var self = this, st = { amount: a, custom: '', slosh: (this.state.slosh || 0) + 1 };
+    var self = this, st = { amount: a, custom: '', gvOther: false, slosh: (this.state.slosh || 0) + 1 };
     var btn = e && (e.currentTarget && e.currentTarget.closest ? e.currentTarget : (e.target && e.target.closest ? e.target.closest('button') : null));
     var card = btn && btn.closest ? btn.closest('.ac') : null, badge = card ? card.querySelector('.ac-badge') : null;
-    if (card && badge && !this.gvReduce()) {
+    var jar = card ? card.querySelector('.ja') : null;
+    if (card && badge && !this.gvReduce() && !(jar && jar.offsetParent)) {
       var c = card.getBoundingClientRect(), b = badge.getBoundingClientRect(), t = btn.getBoundingClientRect();
       var x1 = t.left + t.width / 2 - c.left, y1 = t.top + t.height / 2 - c.top, x0 = b.left + b.width / 2 - c.left, y0 = b.top + b.height / 2 - c.top;
       st.drop = { x: x1, y: y1, dx: x0 - x1, dy: y0 - y1, k: (this.state.drop ? this.state.drop.k + 1 : 0) };
@@ -1211,6 +1250,9 @@ class Component extends DCLogic {
       dropOn: !!d, dropCls: 'gv-drop' + (d && d.k % 2 ? ' dB' : ''),
       dropStyle: d ? 'left:' + d.x.toFixed(0) + 'px;top:' + d.y.toFixed(0) + 'px;--dx:' + d.dx.toFixed(0) + 'px;--dy:' + d.dy.toFixed(0) + 'px' : '',
       figs: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(function (i) { return { cls: 'gv-fig' + (i < filled ? ' on' : ''), st: 'transition-delay:' + (i * 0.04).toFixed(2) + 's' }; }),
+      jaStyle: 'transform:translateY(' + (58 + (1 - (0.06 + 0.88 * r)) * 154).toFixed(1) + 'px)',
+      jaCls: 'ja' + (s.slosh ? (s.slosh % 2 ? ' kA' : ' kB') : ''),
+      gvCls: 'gv' + (s.gvOther ? ' oth' : ''),
       figCap: target > 10 ? 'Each figure = ' + perL + ' people' : (target === 1 ? '1 person' : (target ? target + ' people' : ''))
     };
   }
@@ -1229,7 +1271,9 @@ class Component extends DCLogic {
       ixCls: (s.ixOn ? 'ix-on' : 'ix-pre') + (s.ixDone ? ' ix-done' : ''),
       ticks: ['A new household reaches clean water about every 4 minutes', 'Clean water can be just 50 metres beneath their feet', 'Our hand-crank drill reaches 75% more places at 75% less cost', 'Many walk 3+ miles for water, several times a day'].map(function (x, i) { return { text: x, cls: 'ix-tk' + (i === s.tick ? ' on' : (i === s.tickPrev ? ' out' : '')) }; }),
       opts: this.giveOpts(),
-      aqStyle: this.gvVals().aqStyle, aqCls: this.gvVals().aqCls, dropOn: this.gvVals().dropOn, dropCls: this.gvVals().dropCls, dropStyle: this.gvVals().dropStyle, figs: this.gvVals().figs, figCap: this.gvVals().figCap,
+      aqStyle: this.gvVals().aqStyle, aqCls: this.gvVals().aqCls, dropOn: this.gvVals().dropOn, dropCls: this.gvVals().dropCls, dropStyle: this.gvVals().dropStyle, figs: this.gvVals().figs, figCap: this.gvVals().figCap, jaStyle: this.gvVals().jaStyle, jaCls: this.gvVals().jaCls, gvCls: this.gvVals().gvCls,
+      gChips: [5, 25, 50, 100, 500, 5000].map(function (x) { var on = !s.gvOther && s.custom === '' && s.amount === x; return { l: '$' + x.toLocaleString('en-US'), on: on ? 'true' : 'false', cls: 'g-chip' + (on ? ' on' : ''), pick: function (e) { self.gvPick(x, e); } }; })
+        .concat([{ l: 'Other', on: s.gvOther ? 'true' : 'false', cls: 'g-chip oth' + (s.gvOther ? ' on' : ''), pick: function () { self.setState({ gvOther: true }); setTimeout(function () { var i = document.getElementById('gv-amt'); if (i) i.focus(); }, 60); } }]),
       wwLabel: (s.ww / 10).toFixed(1),
       fnVal: s.fnVal,
       fnNote: s.fnNote,

@@ -798,6 +798,44 @@ em.hl{font-style:normal;color:#098BE1}
 }
 </style>
 <style>
+/* giving card: jerrycan version on phones (option A) */
+.ja,.g-chips{display:none}
+@keyframes jaWave{from{transform:translateX(0)}to{transform:translateX(-80px)}}
+@keyframes jaBub{0%{transform:translateY(0);opacity:0}20%{opacity:.8}100%{transform:translateY(-120px);opacity:0}}
+@keyframes jaDropA{0%{transform:translateY(-60px);opacity:0}20%{opacity:1}100%{transform:translateY(60px);opacity:0}}
+@keyframes jaDropB{0%{transform:translateY(-60px);opacity:0}20%{opacity:1}100%{transform:translateY(60px);opacity:0}}
+@keyframes jaSqA{0%,100%{transform:scale(1,1)}35%{transform:scale(1.04,.96)}70%{transform:scale(.98,1.02)}}
+@keyframes jaSqB{0%,100%{transform:scale(1,1)}35%{transform:scale(1.04,.96)}70%{transform:scale(.98,1.02)}}
+.ja{position:relative;width:180px;height:206px;margin:2px auto -4px}
+.ja svg{width:100%;height:100%;overflow:visible}
+.ja-liq{transition:transform 1.2s cubic-bezier(.3,1.5,.5,1)}
+.ja-wv{animation:jaWave 3.2s linear infinite}
+.ja-wv2{animation-duration:5s;animation-direction:reverse;opacity:.5}
+.ja-bub{animation:jaBub 3s ease-in infinite;opacity:0}
+.ja-bub:nth-child(2){animation-delay:1s}.ja-bub:nth-child(3){animation-delay:2s}
+.ja-drop{opacity:0}
+.ja.kA .ja-drop{animation:jaDropA .7s cubic-bezier(.55,0,.9,.5)}
+.ja.kB .ja-drop{animation:jaDropB .7s cubic-bezier(.55,0,.9,.5)}
+.ja-can{transform-origin:100px 212px;transform-box:view-box}
+.ja.kA .ja-can{animation:jaSqA .6s ease-out .45s}
+.ja.kB .ja-can{animation:jaSqB .6s ease-out .45s}
+.g-chips{gap:8px;width:calc(100% + 28px);margin:0 -14px;padding:2px 14px 6px;overflow-x:auto;scroll-snap-type:x proximity;scrollbar-width:none}
+.g-chips::-webkit-scrollbar{display:none}
+.g-chip{flex:none;scroll-snap-align:center;min-height:44px;padding:0 18px;border-radius:999px;border:1.5px solid rgba(9,139,225,.18);background:#FFFFFF;font:inherit;font-size:16px;font-weight:800;color:#0A0A0A;cursor:pointer;transition:background .25s,color .25s,transform .25s}
+.g-chip.on{background:#0A0A0A;color:#FFFFFF;border-color:#0A0A0A;transform:translateY(-2px)}
+.g-chip.oth{font-weight:700;font-size:14px;color:#076DB1}
+.g-chip.oth.on{color:#FFFFFF}
+.g-chip:focus-visible{outline:3px solid #6BBDF2;outline-offset:3px}
+@media (max-width:600px){
+.ja{display:block}
+.g-chips{display:flex}
+.access2 .ac-tiers,.access2 .gv-ppl,.access2 .aq,.access2 .ac-badge,.access2 .ac-p{display:none !important}
+.access2 .gv-other{display:none}
+.access2 .gv.oth .gv-other{display:flex}
+}
+@media (prefers-reduced-motion: reduce){.ja *{animation:none !important;transition:none !important}}
+</style>
+<style>
 /* ---------- inner pages v2 ---------- */
 @keyframes xhUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}
 @keyframes xmq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
