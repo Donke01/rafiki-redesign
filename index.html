@@ -772,6 +772,13 @@ em.hl{font-style:normal;color:#098BE1}
 @media (max-width:560px){.gv-fig{width:17px;height:17px}.gv-figs{gap:3px}.gv-fcap{font-size:11px}}
 @media (prefers-reduced-motion: reduce){.aq{transition:none}.aq.sA,.aq.sB,.ac-tier.on::after{animation:none}.gv-drop{display:none}.gv-fig,.gv-fig svg{transition:none}}
 </style>
+<style>
+/* footer legal: calmer registration lines */
+.bf-copy{line-height:1.6}
+.bf-copy .bf-ein{display:flex !important;flex-direction:column;align-items:center;gap:2px;margin-bottom:18px;font-size:12.5px !important;font-weight:500 !important;color:#8A9096 !important;letter-spacing:.01em}
+.bf-reg{display:block}
+.bf-copy .bf-legal{margin-bottom:12px}
+</style>
 </helmet>
 <div class="pg">
 <sc-if value="{{menuOpen}}" hint-placeholder-val="{{false}}"><div class="mm-backdrop" onClick="{{closeMenu}}" aria-hidden="true"></div></sc-if><sc-if value="{{wipeOn}}" hint-placeholder-val="{{false}}"><div class="cx-wipe" aria-hidden="true"><div class="cx-in"><div class="{{wipeMapsCls}}"><sc-for list="{{wipeMaps}}" as="m" hint-placeholder-count="1"><svg class="cx-map" viewBox="-4 -4 108 108" aria-hidden="true"><defs><clipPath id="{{m.cid}}"><path d="{{m.d}}"></path></clipPath></defs><g class="cx-flag" style="{{m.clip}}"><g transform="{{m.tr}}"><sc-for list="{{m.rects}}" as="r" hint-placeholder-count="3"><rect x="{{r.x}}" y="{{r.y}}" width="{{r.w}}" height="{{r.h}}" fill="{{r.f}}"></rect></sc-for></g><sc-for list="{{m.circles}}" as="c" hint-placeholder-count="0"><circle cx="{{c.x}}" cy="{{c.y}}" r="{{c.r}}" fill="{{c.f}}"></circle></sc-for></g><path class="cx-ol" d="{{m.d}}" pathLength="1"></path></svg></sc-for></div><span class="cx-k">Rafiki Outreach</span><span class="cx-n">{{wipeName}}</span></div></div></sc-if>
@@ -993,7 +1000,7 @@ em.hl{font-style:normal;color:#098BE1}
 <a class="bf-mail" href="mailto:info@rafikioutreach.org"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"></rect><path d="M3.5 7l8.5 6 8.5-6"></path></svg>info@rafikioutreach.org</a><a class="bf-mail bf-tel" href="tel:+18015477847"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2"></path></svg>+1 (801) 547-7847</a></div>
 <div class="bf-col"><span class="bf-lab">Address</span><span>1817 Beck Street</span><span>Salt Lake City, Utah</span><span>84116</span></div>
 </div>
-<div class="bf-copy"><span class="bf-ein">RAFIKI Outreach is a 501(c)(3) tax exempt organization <span style="white-space:nowrap">· EIN #88-3133113</span><br>Registered NGO in Kenya <span style="white-space:nowrap">· NGO-W5U7NLN</span></span><nav class="bf-legal" aria-label="Legal"><a href="https://www.rafikioutreach.org/privacy-policy">Privacy Policy</a><span aria-hidden="true">·</span><a href="https://www.rafikioutreach.org/terms-of-use">Terms of Use</a></nav>© 2026 Rafiki Outreach</div>
+<div class="bf-copy"><span class="bf-ein"><span class="bf-reg">501(c)(3) tax-exempt nonprofit (US) · EIN 88-3133113</span><span class="bf-reg">Registered NGO (Kenya) · NGO-W5U7NLN</span></span><nav class="bf-legal" aria-label="Legal"><a href="https://www.rafikioutreach.org/privacy-policy">Privacy Policy</a><span aria-hidden="true">·</span><a href="https://www.rafikioutreach.org/terms-of-use">Terms of Use</a></nav>© 2026 Rafiki Outreach</div>
 </div>
 </footer>
 </div>
