@@ -779,6 +779,24 @@ em.hl{font-style:normal;color:#098BE1}
 .bf-reg{display:block}
 .bf-copy .bf-legal{margin-bottom:12px}
 </style>
+<style>
+/* where we work: compact rows on phones */
+@media (max-width:600px){
+.cc-grid{grid-template-columns:1fr !important;gap:10px}
+.cc-card{display:grid;grid-template-columns:44px minmax(0,1fr) auto;grid-template-areas:"ab cn go" "rows rows rows";align-items:center;column-gap:12px;row-gap:14px;padding:16px;text-align:left;border-radius:20px}
+.cc-card:hover{transform:none;box-shadow:none}
+.cc-ab{grid-area:ab;width:44px;height:44px;font-size:14px}
+.cc-cn{grid-area:cn;font-size:19px}
+.cc-here{grid-area:go;position:static;transform:none;font-size:10px;padding:5px 10px}
+.cc-go{grid-area:go;font-size:0;width:36px;height:36px;border-radius:50%;background:#E3F1FC;display:grid;place-items:center}
+.cc-go::after{content:"→";font-size:18px;font-weight:700;color:#076DB1;line-height:1}
+.cc-card.on .cc-go{display:none}
+.cc-rows{grid-area:rows;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding-top:12px;border-top:1px solid #EEF0F2;font-size:11.5px;line-height:1.3}
+.cc-rows > div{flex-direction:column-reverse;justify-content:flex-end;align-items:flex-start;gap:3px;border-top:0;padding-top:0}
+.cc-rows b{font-size:17px;font-weight:800;letter-spacing:-0.01em;color:#0A0A0A !important}
+.cc-rows span{color:#5A6066}
+}
+</style>
 </helmet>
 <div class="pg">
 <sc-if value="{{menuOpen}}" hint-placeholder-val="{{false}}"><div class="mm-backdrop" onClick="{{closeMenu}}" aria-hidden="true"></div></sc-if><sc-if value="{{wipeOn}}" hint-placeholder-val="{{false}}"><div class="cx-wipe" aria-hidden="true"><div class="cx-in"><div class="{{wipeMapsCls}}"><sc-for list="{{wipeMaps}}" as="m" hint-placeholder-count="1"><svg class="cx-map" viewBox="-4 -4 108 108" aria-hidden="true"><defs><clipPath id="{{m.cid}}"><path d="{{m.d}}"></path></clipPath></defs><g class="cx-flag" style="{{m.clip}}"><g transform="{{m.tr}}"><sc-for list="{{m.rects}}" as="r" hint-placeholder-count="3"><rect x="{{r.x}}" y="{{r.y}}" width="{{r.w}}" height="{{r.h}}" fill="{{r.f}}"></rect></sc-for></g><sc-for list="{{m.circles}}" as="c" hint-placeholder-count="0"><circle cx="{{c.x}}" cy="{{c.y}}" r="{{c.r}}" fill="{{c.f}}"></circle></sc-for></g><path class="cx-ol" d="{{m.d}}" pathLength="1"></path></svg></sc-for></div><span class="cx-k">Rafiki Outreach</span><span class="cx-n">{{wipeName}}</span></div></div></sc-if>

@@ -780,6 +780,24 @@ em.hl{font-style:normal;color:#098BE1}
 .bf-copy .bf-legal{margin-bottom:12px}
 </style>
 <style>
+/* where we work: compact rows on phones */
+@media (max-width:600px){
+.cc-grid{grid-template-columns:1fr !important;gap:10px}
+.cc-card{display:grid;grid-template-columns:44px minmax(0,1fr) auto;grid-template-areas:"ab cn go" "rows rows rows";align-items:center;column-gap:12px;row-gap:14px;padding:16px;text-align:left;border-radius:20px}
+.cc-card:hover{transform:none;box-shadow:none}
+.cc-ab{grid-area:ab;width:44px;height:44px;font-size:14px}
+.cc-cn{grid-area:cn;font-size:19px}
+.cc-here{grid-area:go;position:static;transform:none;font-size:10px;padding:5px 10px}
+.cc-go{grid-area:go;font-size:0;width:36px;height:36px;border-radius:50%;background:#E3F1FC;display:grid;place-items:center}
+.cc-go::after{content:"→";font-size:18px;font-weight:700;color:#076DB1;line-height:1}
+.cc-card.on .cc-go{display:none}
+.cc-rows{grid-area:rows;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding-top:12px;border-top:1px solid #EEF0F2;font-size:11.5px;line-height:1.3}
+.cc-rows > div{flex-direction:column-reverse;justify-content:flex-end;align-items:flex-start;gap:3px;border-top:0;padding-top:0}
+.cc-rows b{font-size:17px;font-weight:800;letter-spacing:-0.01em;color:#0A0A0A !important}
+.cc-rows span{color:#5A6066}
+}
+</style>
+<style>
 /* ---------- inner pages v2 ---------- */
 @keyframes xhUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}
 @keyframes xmq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
