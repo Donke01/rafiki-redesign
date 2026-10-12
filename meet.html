@@ -1099,7 +1099,7 @@ function countryVals(self) {
   var people = FOUNDERS.concat(all ? CORDER.filter(hasDir).map(dirOf) : (hasDir(s.ctry || 'ke') ? [dirOf(s.ctry || 'ke')] : []));
   // Team members shown on this page only. Add a photo by setting img, e.g. '/img/morgan.jpg'.
   var STAFF = [
-    { k: 'ke', tag: 'Team', name: 'Morgan Mamati', role: 'Rafiki Kenya', email: 'morgan@rafikioutreach.org', img: '' },
+    { k: 'ke', tag: 'Team', name: 'Morgan Mamati', role: 'Rafiki Kenya', email: 'morgan@rafikioutreach.org', img: '/img/morgan.jpg' },
     { k: 'tz', tag: 'Team', name: 'Medrick Kamili', role: 'Rafiki Tanzania', email: 'medrick@rafikioutreach.org', img: '' }
   ];
   people = people.concat(STAFF.filter(function (p) { return all || p.k === (s.ctry || 'ke'); }));
