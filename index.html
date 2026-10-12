@@ -993,7 +993,7 @@ var FOUNDERS = [
   { tag: 'Co-founder', name: 'Jessica Anderson', role: 'Co-founder, Rafiki Outreach', email: 'jessica@rafikicap.com', img: '/img/jessica.jpg', bio: '[Short bio: 2 to 4 sentences about Jessica, why she started Rafiki and her role today.]' }
 ];
 var OFFICES = {
-  ke: { addr: 'Mega Centre, 3rd Floor, Makasembo Road, Kitale', phone: '+254 791 674 001', dir: 'Meril Adoyo', email: 'meril@rafikioutreach.org' },
+  ke: { addr: 'Mega Centre, 3rd Floor, Makasembo Road, Kitale', phone: '+254 791 674 001', dir: 'Meril Adoyo', email: 'meril@rafikioutreach.org', img: '/img/meril.jpg' },
   tz: { addr: '[Office address], Tanzania', phone: '[+255 phone]', dir: '[Tanzania director name]' },
   ug: { addr: '[Office address], Uganda', phone: '[+256 phone]', dir: '[Uganda director name]' },
   mw: { addr: '[Office address], Malawi', phone: '[+265 phone]', dir: '[Malawi director name]' },
@@ -1016,7 +1016,7 @@ function countryVals(self) {
     .concat([{ n: 'All countries', pn: 'All', sub: 'Totals across all four', on: all ? 'true' : 'false', cls: 'cs-it all' + (all ? ' on' : ''), pill: 'mm-pill' + (all ? ' on' : ''), pick: function () { pick('all'); } }]);
   var picked = !!s.ctryPicked && !all;
   var heroVals = { heroH1: picked ? 'Clean water across ' + cur.n + '.' : 'Clean water, close to home.', heroNum: picked ? cur.p.toLocaleString('en-US') + '+' : '780,500+', heroStatTx: picked ? 'people reached in ' + cur.n : 'people reached with clean, safe water' };
-  var dirOf = function (k) { return { tag: 'Country Director', name: OFFICES[k].dir, email: OFFICES[k].email || '', role: 'Country Director, ' + CTRY[k].n, img: '', bio: '[Short bio: 2 to 4 sentences about the ' + CTRY[k].n + ' country director and the work of the ' + CTRY[k].n + ' team.]' }; };
+  var dirOf = function (k) { return { tag: 'Country Director', name: OFFICES[k].dir, email: OFFICES[k].email || '', role: 'Country Director, ' + CTRY[k].n, img: OFFICES[k].img || '', bio: '[Short bio: 2 to 4 sentences about the ' + CTRY[k].n + ' country director and the work of the ' + CTRY[k].n + ' team.]' }; };
   var people = FOUNDERS.concat(all ? CORDER.map(dirOf) : [dirOf(s.ctry || 'ke')]);
   var off = all ? OFFICES.all : OFFICES[s.ctry || 'ke'];
   var mk = function (p, i) { return { tag: p.tag, name: p.name, role: p.role, bio: p.bio, img: p.img, hasImg: !!p.img, noImg: !p.img, email: p.email || '', hasEmail: !!p.email, mailto: p.email ? 'mailto:' + p.email : '', open: function () { self.setState({ bioIdx: i }); } }; };
