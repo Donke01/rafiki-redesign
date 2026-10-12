@@ -749,6 +749,30 @@ em.hl{font-style:normal;color:#098BE1}
 }
 </style>
 <style>
+/* ---------- giving card motion ---------- */
+@keyframes aqSlA{0%{transform:scaleY(1)}30%{transform:scaleY(1.07)}62%{transform:scaleY(.97)}100%{transform:scaleY(1)}}
+@keyframes aqSlB{0%{transform:scaleY(1)}30%{transform:scaleY(1.07)}62%{transform:scaleY(.97)}100%{transform:scaleY(1)}}
+@keyframes gvDrop{0%{transform:translate(var(--dx),var(--dy)) scale(.5);opacity:0}15%{opacity:1}80%{transform:translate(0,0) scale(1,1.12);opacity:1}100%{transform:translate(0,0) scale(1.5,.4);opacity:0}}
+@keyframes tierRip{from{transform:translate(-50%,-50%) scale(0);opacity:.55}to{transform:translate(-50%,-50%) scale(1);opacity:0}}
+.aq{transition:height 1.1s cubic-bezier(.34,1.45,.5,1);transform-origin:50% 100%}
+.aq.sA{animation:aqSlA 1.1s ease-out}
+.aq.sB{animation:aqSlB 1.1s ease-out}
+.gv-drop{position:absolute;z-index:5;width:22px;height:22px;margin:-11px 0 0 -11px;pointer-events:none;animation:gvDrop .55s cubic-bezier(.55,0,.8,.4) both;filter:drop-shadow(0 4px 8px rgba(9,139,225,.35))}
+.gv-drop.dB{animation-name:gvDrop}
+.ac-tier{position:relative;overflow:hidden}
+.ac-tier > span{position:relative;z-index:1}
+.ac-tier.on::after{content:"";position:absolute;left:50%;top:50%;width:260%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(107,189,242,.9) 0%,rgba(9,139,225,.5) 45%,rgba(9,139,225,0) 70%);animation:tierRip .7s ease-out .42s both;pointer-events:none}
+.gv-ppl{display:flex;flex-direction:column;align-items:center;gap:6px}
+.gv-figs{display:flex;gap:4px}
+.gv-fig{width:22px;height:22px;display:block;transition:transform .35s cubic-bezier(.34,1.6,.5,1)}
+.gv-fig svg{width:100%;height:100%;display:block;fill:rgba(255,255,255,.85);stroke:#6BBDF2;stroke-width:1.2;transition:fill .3s}
+.gv-fig.on svg{fill:#098BE1;stroke:#098BE1}
+.gv-fig.on{transform:translateY(-2px)}
+.gv-fcap{font-size:12px;font-weight:600;color:#054F81;min-height:15px}
+@media (max-width:560px){.gv-fig{width:17px;height:17px}.gv-figs{gap:3px}.gv-fcap{font-size:11px}}
+@media (prefers-reduced-motion: reduce){.aq{transition:none}.aq.sA,.aq.sB,.ac-tier.on::after{animation:none}.gv-drop{display:none}.gv-fig,.gv-fig svg{transition:none}}
+</style>
+<style>
 /* ---------- inner pages v2 ---------- */
 @keyframes xhUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}
 @keyframes xmq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
@@ -949,7 +973,7 @@ em.hl{font-style:normal;color:#098BE1}
 <a class="bf-mail" href="mailto:info@rafikioutreach.org"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"></rect><path d="M3.5 7l8.5 6 8.5-6"></path></svg>info@rafikioutreach.org</a><a class="bf-mail bf-tel" href="tel:+18015477847"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2"></path></svg>+1 (801) 547-7847</a></div>
 <div class="bf-col"><span class="bf-lab">Address</span><span>1817 Beck Street</span><span>Salt Lake City, Utah</span><span>84116</span></div>
 </div>
-<div class="bf-copy"><span class="bf-ein">RAFIKI Outreach is a 501(c)(3) tax exempt organization <span style="white-space:nowrap">· EIN #88-3133113</span></span><nav class="bf-legal" aria-label="Legal"><a href="https://www.rafikioutreach.org/privacy-policy">Privacy Policy</a><span aria-hidden="true">·</span><a href="https://www.rafikioutreach.org/terms-of-use">Terms of Use</a></nav>© 2026 Rafiki Outreach</div>
+<div class="bf-copy"><span class="bf-ein">RAFIKI Outreach is a 501(c)(3) tax exempt organization <span style="white-space:nowrap">· EIN #88-3133113</span><br>Registered NGO in Kenya <span style="white-space:nowrap">· NGO-W5U7NLN</span></span><nav class="bf-legal" aria-label="Legal"><a href="https://www.rafikioutreach.org/privacy-policy">Privacy Policy</a><span aria-hidden="true">·</span><a href="https://www.rafikioutreach.org/terms-of-use">Terms of Use</a></nav>© 2026 Rafiki Outreach</div>
 </div>
 </footer>
 </div>
