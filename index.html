@@ -831,7 +831,9 @@ em.hl{font-style:normal;color:#098BE1}
 .cb-tint{position:absolute;left:0;right:0;bottom:0;height:var(--wet);background:linear-gradient(180deg,rgba(9,139,225,.22),rgba(9,139,225,.05) 40%,rgba(10,10,10,0));transition:height 1.4s cubic-bezier(.3,1.25,.5,1)}
 .cb-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,10,10,.62) 0%,rgba(10,10,10,0) 28%,rgba(10,10,10,0) 46%,rgba(10,10,10,.85) 100%)}
 .cb-hint{display:block;font-size:13px;font-weight:600;color:rgba(255,255,255,.82);margin-top:-2px}
-.g-chips{display:flex;margin-top:auto}
+.g-chips{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;width:100%;margin:auto 0 0;padding:0;overflow:visible}
+.g-chip{padding:0 4px;min-height:44px;font-size:15px}
+.g-chips > .g-chip:nth-of-type(6){grid-column:span 2}
 .access2 .ac-h{color:#FFFFFF !important}
 .access2 .ac-h em{color:#FFFFFF}
 .access2 .gv-freq{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.3);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
