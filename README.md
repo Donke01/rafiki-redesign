@@ -23,6 +23,12 @@ The menu follows the owner's eight sections.
 
 Anything still to be supplied by Rafiki is shown on the page in a yellow "To add" box or tag.
 
+Those boxes and tags only show on previews (localhost, Vercel or Cloudflare preview links). On rafikioutreach.org they are hidden, together with any section that would be empty without them. Add `?live` to a preview link to see the public view, or `?preview` on the live site to see the boxes. Notes that say figures or projects are samples stay visible everywhere until the real data is in. To hide a whole block on the live site, give it the class `draft`.
+
+## Images
+
+Pages use the WebP files in `img/` (photos at most 1200px, logos 120px tall). The original JPG and PNG files are kept for social previews (`og:image`) and as sources. When adding a photo, also save a `.webp` copy and point the page at that.
+
 ## Before going live
 
 - **Donations:** paste the Zeffy embed code into `donate.html`. Search for `ZEFFY:` and replace the "Give today" box under it.

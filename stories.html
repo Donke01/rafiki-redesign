@@ -16,13 +16,15 @@
 <meta property="og:url" content="https://www.rafikioutreach.org/stories">
 <meta property="og:image" content="https://www.rafikioutreach.org/img/w-field3.jpg">
 <meta name="twitter:card" content="summary_large_image">
+<script>window.__resources = {};</script>
+<script>/* Placeholders (yellow 'To add' boxes) show on previews and hide on the live domain. ?live or ?preview overrides. */(function(){var q=location.search,live=/(^|\.)rafikioutreach\.org$/.test(location.hostname);if(/[?&]preview\b/.test(q)||(!live&&!/[?&]live\b/.test(q)))document.documentElement.className+=' draft-mode';})();</script>
 <script src="/support.js"></script>
 </head>
 <body>
 <x-dc>
 <helmet>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200;300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
 <style>
 
 body{margin:0}
@@ -921,16 +923,20 @@ a.vc:focus-visible{outline:3px solid #6BBDF2;outline-offset:3px}
 <style>/* small-phone header */@media (max-width:380px){.hd-tile{padding-left:16px !important;gap:8px}.hd-logo img{height:34px}.hd-act{gap:6px}.hd-donate{padding:0 14px;font-size:14px;gap:6px}}@media (max-width:340px){.hd-logo img{height:28px}.hd-donate{padding:0 12px}.hd-donate svg{display:none}.hd-menu{width:42px;height:42px}}</style>
 <style>/* blue heroes */.xh{background:radial-gradient(120% 120% at 80% 30%,#076DB1 0%,#054F81 35%,#0A0A0A 100%)}</style>
 <style>/* header flags */.cs-flag{display:block;width:30px;height:20px;border-radius:4px;box-shadow:0 0 0 1px rgba(10,10,10,.14);object-fit:cover}</style>
+<style>/* site-wide: skip link, focus, footer */.skip{position:fixed;left:16px;top:-80px;z-index:200;background:#0A0A0A;color:#FFFFFF;padding:12px 20px;border-radius:999px;font-weight:700;font-size:15px;text-decoration:none;transition:top .2s}.skip:focus{top:16px;outline:3px solid #6BBDF2;outline-offset:2px}a:focus-visible,button:focus-visible,select:focus-visible,summary:focus-visible,[tabindex]:focus-visible,.kslider:focus-visible{outline:3px solid #098BE1 !important;outline-offset:3px}main:focus{outline:none !important}.bf-dir{text-align:left !important}.bf-dir div{align-items:flex-start !important}</style>
+<style>/* blue page hero, same as the other inner pages */@keyframes xhUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}.xh{position:relative;min-height:clamp(460px,60svh,600px);display:flex;align-items:flex-end;overflow:hidden;color:#FFFFFF;margin-bottom:14px;font-family:Montserrat,system-ui,sans-serif}.xh-in{position:relative;width:100%;padding-top:160px;padding-bottom:72px;display:flex;flex-direction:column;align-items:flex-start;gap:22px}.xh-crumb{display:flex;gap:10px;font-size:14px;font-weight:600;color:rgba(255,255,255,.78)}.xh-crumb a{color:#FFFFFF;text-decoration:none;border-bottom:1px solid rgba(255,255,255,.4)}.xh-crumb a:hover{border-color:#FFFFFF}.xh-h1{margin:0;font-size:clamp(46px,7.2vw,104px);line-height:.96;font-weight:800;letter-spacing:-0.04em;max-width:11.5ch;animation:xhUp .9s cubic-bezier(.2,.7,.2,1) .15s both}.xh-p{margin:0;font-size:clamp(17px,1.5vw,21px);line-height:1.55;max-width:34em;color:rgba(255,255,255,.9);animation:xhUp .9s cubic-bezier(.2,.7,.2,1) .3s both}.xh-note{display:inline-flex;align-items:center;gap:10px;padding:8px 14px;border-radius:999px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.3);font-size:14px;font-weight:600;color:#FFFFFF}.xh-note b{color:#9FD3F7}.xh-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}.xh a:focus-visible{outline:3px solid #6BBDF2;outline-offset:3px}.xh .pj-how{justify-content:flex-start;color:rgba(255,255,255,.9)}.xh .pj-how .ar{color:#9FD3F7}.xh .pj-link{background:#FFFFFF;color:#0A0A0A}@media (max-width:900px){.xh-in{padding-top:130px;padding-bottom:48px}}@media (prefers-reduced-motion: reduce){.xh-h1,.xh-p{animation:none}}</style>
+<style>/* live view: hide placeholders; sample-data notes stay until real data is in */html:not(.draft-mode) .todo:not(.sample),html:not(.draft-mode) .todo-box,html:not(.draft-mode) .draft{display:none !important}</style>
 </helmet>
+<a class="skip" href="#top">Skip to content</a>
 <div class="pg">
 <sc-if value="{{menuOpen}}" hint-placeholder-val="{{false}}"><div class="mm-backdrop" onClick="{{closeMenu}}" aria-hidden="true"></div></sc-if><sc-if value="{{wipeOn}}" hint-placeholder-val="{{false}}"><div class="cx-wipe" aria-hidden="true"><div class="cx-in"><div class="{{wipeMapsCls}}"><sc-for list="{{wipeMaps}}" as="m" hint-placeholder-count="1"><svg class="cx-map" viewBox="-4 -4 108 108" aria-hidden="true"><defs><clipPath id="{{m.cid}}"><path d="{{m.d}}"></path></clipPath></defs><g class="cx-flag" style="{{m.clip}}"><g transform="{{m.tr}}"><sc-for list="{{m.rects}}" as="r" hint-placeholder-count="3"><rect x="{{r.x}}" y="{{r.y}}" width="{{r.w}}" height="{{r.h}}" fill="{{r.f}}"></rect></sc-for></g><sc-for list="{{m.circles}}" as="c" hint-placeholder-count="0"><circle cx="{{c.x}}" cy="{{c.y}}" r="{{c.r}}" fill="{{c.f}}"></circle></sc-for></g><path class="cx-ol" d="{{m.d}}" pathLength="1"></path></svg></sc-for></div><span class="cx-k">Rafiki Outreach</span><span class="cx-n">{{wipeName}}</span></div></div></sc-if>
 <div class="hd-wrap" style="{{hdStyle}}">
 <header class="wrap hd">
 <div class="hd-tile" style="{{tileShadow}}">
-<a href="/" aria-label="Rafiki Outreach home" class="hd-logo"><img src="/img/logo-dark-bold.png" alt="Rafiki Outreach"></a>
+<a href="/" aria-label="Rafiki Outreach home" class="hd-logo"><img src="/img/logo-dark-bold.webp" alt="Rafiki Outreach"></a>
 <nav aria-label="Main" class="hd-links"><a class="hl-link" href="/about">About</a><a class="hl-link" href="/#where-we-work">Where we work</a><a class="hl-link" href="/projects">Projects</a><a class="hl-link" href="/water">Approach</a><a class="hl-link" href="/progress">Impact</a><a class="hl-link" href="/donate">Get involved</a><a class="hl-link on" href="/stories">Stories</a></nav>
 <div class="hd-act">
-<div class="cs"><button type="button" class="cs-btn" onClick="{{toggleCs}}" aria-expanded="{{csExpanded}}" aria-haspopup="true" aria-label="Country: {{cName}}"><sc-if value="{{cAllOn}}" hint-placeholder-val="{{false}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18"></path><path d="M12 3a14 14 0 010 18"></path><path d="M12 3a14 14 0 000 18"></path></svg><span class="cs-v">All</span></sc-if><sc-if value="{{cFlagOn}}" hint-placeholder-val="{{true}}"><img class="cs-flag" src="{{cFlag}}" alt="" width="30" height="20"></sc-if><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></button><sc-if value="{{csOpen}}" hint-placeholder-val="{{false}}"><div class="cs-pop" role="menu"><span class="cs-h">Choose a country</span><sc-for list="{{csList}}" as="c" hint-placeholder-count="5"><button type="button" role="menuitemradio" aria-checked="{{c.on}}" class="{{c.cls}}" onClick="{{c.pick}}"><span>{{c.n}}</span><small>{{c.sub}}</small></button></sc-for></div></sc-if></div>
+<div class="cs"><button type="button" class="cs-btn" onClick="{{toggleCs}}" aria-expanded="{{csExpanded}}" aria-haspopup="true" aria-label="Country: {{cName}}"><sc-if value="{{cAllOn}}" hint-placeholder-val="{{false}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18"></path><path d="M12 3a14 14 0 010 18"></path><path d="M12 3a14 14 0 000 18"></path></svg><span class="cs-v">All</span></sc-if><sc-if value="{{cFlagOn}}" hint-placeholder-val="{{true}}"><img class="cs-flag" src="{{cFlag}}" loading="lazy" alt="" width="30" height="20"></sc-if><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></button><sc-if value="{{csOpen}}" hint-placeholder-val="{{false}}"><div class="cs-pop" role="menu"><span class="cs-h">Choose a country</span><sc-for list="{{csList}}" as="c" hint-placeholder-count="5"><button type="button" role="menuitemradio" aria-checked="{{c.on}}" class="{{c.cls}}" onClick="{{c.pick}}"><span>{{c.n}}</span><small>{{c.sub}}</small></button></sc-for></div></sc-if></div>
 <a class="hd-donate" href="/donate">Donate<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.7C8 7.5 6 10.7 6 14a6 6 0 0012 0c0-3.3-2-6.5-6-11.3z"></path></svg></a>
 <button type="button" class="{{menuCls}}" onClick="{{toggleMenu}}" aria-expanded="{{menuExpanded}}" aria-controls="bento-menu" aria-label="{{menuLabel}}"><span class="mb" aria-hidden="true"><i></i><i></i><i></i></span></button>
 </div>
@@ -942,16 +948,9 @@ a.vc:focus-visible{outline:3px solid #6BBDF2;outline-offset:3px}
 </header>
 </div>
 <div class="hd-space" aria-hidden="true"></div>
-<main class="wrap pj-main" id="top">
+<sc-if value="{{listView}}" hint-placeholder-val="{{true}}"><section class="xh" aria-label="Project stories"><div class="wrap xh-in"><nav class="xh-crumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><span>Stories &amp; updates</span></nav><h1 class="xh-h1">Every well, every community</h1><p class="xh-p">Browse the boreholes Rafiki has drilled. Each project shows why we chose to drill there, how the work went, and what changed once clean water started flowing.</p><div class="xh-row"><span class="xh-note">Showing projects in <b>{{cName}}</b></span><span class="todo sample">Sample projects: real list to add</span></div><div class="pj-how" aria-label="How each project is told"><span><b>1</b>The need</span><span class="ar" aria-hidden="true">→</span><span><b>2</b>The decision</span><span class="ar" aria-hidden="true">→</span><span><b>3</b>The drilling</span><span class="ar" aria-hidden="true">→</span><span><b>4</b>After the well</span></div><a class="pj-link" href="/progress">See our progress in numbers →</a></div></section></sc-if>
+<main tabindex="-1" class="wrap pj-main" id="top">
 <sc-if value="{{listView}}" hint-placeholder-val="{{true}}">
-<section class="pj-hero" aria-label="Our projects">
-<span class="pj-lab"><i aria-hidden="true"></i>Project stories</span>
-<h1 class="pj-h1">Every well, every community</h1>
-<span class="pj-cnow">Showing projects in <b>{{cName}}</b></span> <span class="todo">Sample projects: real list to add</span> <span class="todo">Sample projects: real list to add</span>
-<p class="pj-lead">Browse the boreholes Rafiki has drilled. Each project shows why we chose to drill there, how the work went, and what changed once clean water started flowing.</p>
-<div class="pj-how" aria-label="How each project is told"><span><b>1</b>The need</span><span class="ar" aria-hidden="true">→</span><span><b>2</b>The decision</span><span class="ar" aria-hidden="true">→</span><span><b>3</b>The drilling</span><span class="ar" aria-hidden="true">→</span><span><b>4</b>After the well</span></div>
-<a class="pj-link" href="/progress">See our progress in numbers →</a>
-</section>
 <section class="pj-bar" aria-label="Find a project">
 <div class="pj-row1">
 <div class="pj-search"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg><label for="pj-q" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Search projects</label><input id="pj-q" type="search" placeholder="Search by village, region or project number" value="{{q}}" onChange="{{onQ}}"></div>
@@ -968,7 +967,7 @@ a.vc:focus-visible{outline:3px solid #6BBDF2;outline-offset:3px}
 </section>
 <sc-if value="{{hasResults}}" hint-placeholder-val="{{true}}">
 <section class="pj-grid" aria-label="Projects">
-<sc-for list="{{cards}}" as="p" hint-placeholder-count="9"><button type="button" class="pj-card" onClick="{{p.open}}" aria-label="{{p.aria}}"><div class="pj-card-ph"><img src="{{p.img}}" alt="{{p.alt}}" loading="lazy" decoding="async"><div class="pj-ba"><span class="{{p.stCls}}">{{p.status}}</span><span>{{p.year}}</span></div></div><div class="pj-card-b"><span class="pj-k">{{p.code}} · {{p.country}} · {{p.type}}</span><span class="pj-t">{{p.title}}</span><span class="pj-loc">{{p.loc}}</span><div class="pj-tags"><span>{{p.pump}} pump</span></div></div></button></sc-for>
+<sc-for list="{{cards}}" as="p" hint-placeholder-count="9"><button type="button" class="pj-card" onClick="{{p.open}}" aria-label="{{p.aria}}"><div class="pj-card-ph"><img src="{{p.img}}" alt="{{p.alt}}" loading="lazy" decoding="async"><div class="pj-ba"><span class="{{p.stCls}}">{{p.status}}</span><span>{{p.year}}</span></div></div><div class="pj-card-b"><span class="pj-k">{{p.code}} · {{p.country}}</span><span class="pj-t">{{p.title}}</span><span class="pj-loc">{{p.loc}}</span><div class="pj-tags"><span>{{p.pump}} pump</span></div></div></button></sc-for>
 </section>
 <sc-if value="{{canMore}}" hint-placeholder-val="{{true}}"><div class="pj-more"><button type="button" onClick="{{more}}">Show more projects</button><small>{{remainLabel}}</small></div></sc-if>
 </sc-if>
@@ -1005,7 +1004,7 @@ a.vc:focus-visible{outline:3px solid #6BBDF2;outline-offset:3px}
 <footer class="bf">
 <div class="wrap bf-tile">
 <div class="bf-row">
-<div class="bf-col bf-brand"><img src="/img/logo-light-bold.png" alt="Rafiki Outreach" class="bf-logo"><a href="/about" class="bf-about">About</a></div>
+<div class="bf-col bf-brand"><img src="/img/logo-light-bold.webp" alt="Rafiki Outreach" class="bf-logo"><a href="/about" class="bf-about">About</a></div>
 <div class="bf-col"><span class="bf-lab">Contact</span><span class="bf-follow">Follow us</span><div class="bf-social bf-social-f"><a class="soc soc-fb" href="https://www.facebook.com/rafikioutreach" target="_blank" rel="noopener" aria-label="Rafiki Outreach on Facebook"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="#FFFFFF" d="M13.5 21v-7.5h2.6l.4-3h-3V8.6c0-.9.3-1.5 1.6-1.5h1.6V4.4c-.3 0-1.2-.1-2.3-.1-2.3 0-3.9 1.4-3.9 4V10.5H8v3h2.5V21h3z"></path></svg></a>
 <a class="soc soc-ig" href="https://www.instagram.com/rafikioutreach" target="_blank" rel="noopener" aria-label="Rafiki Outreach on Instagram"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.3" cy="6.7" r="1" fill="#FFFFFF" stroke="none"></circle></svg></a><a class="soc soc-x" href="https://x.com/rafikioutreach" target="_blank" rel="noopener" aria-label="Rafiki Outreach on X"><svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true"><path fill="#FFFFFF" d="M17.8 3h3.1l-6.8 7.8L22 21h-6.2l-4.9-6.4L5.3 21H2.2l7.3-8.3L2 3h6.4l4.4 5.8L17.8 3zm-1.1 16.2h1.7L7.4 4.7H5.6l11.1 14.5z"></path></svg></a><a class="soc soc-li" href="https://www.linkedin.com/company/rafikioutreach" target="_blank" rel="noopener" aria-label="Rafiki Outreach on LinkedIn"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#FFFFFF" d="M5.2 8.6h3.2V19H5.2V8.6zM6.8 3.6a1.85 1.85 0 110 3.7 1.85 1.85 0 010-3.7zM10.4 8.6h3.1V10h.04c.43-.8 1.5-1.66 3.07-1.66 3.28 0 3.89 2.16 3.89 4.97V19h-3.23v-5.04c0-1.2-.02-2.75-1.68-2.75-1.68 0-1.94 1.31-1.94 2.66V19h-3.23V8.6z"></path></svg></a><a class="soc soc-yt" href="https://www.youtube.com/@rafikioutreach" target="_blank" rel="noopener" aria-label="Rafiki Outreach on YouTube"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="#FFFFFF" d="M21.6 7.2a2.5 2.5 0 00-1.76-1.77C18.27 5 12 5 12 5s-6.27 0-7.84.43A2.5 2.5 0 002.4 7.2 26 26 0 002 12a26 26 0 00.4 4.8 2.5 2.5 0 001.76 1.77C5.73 19 12 19 12 19s6.27 0 7.84-.43a2.5 2.5 0 001.76-1.77A26 26 0 0022 12a26 26 0 00-.4-4.8zM10 15V9l5.2 3L10 15z"></path></svg></a></div>
 <a class="bf-mail" href="mailto:info@rafikioutreach.org"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"></rect><path d="M3.5 7l8.5 6 8.5-6"></path></svg>info@rafikioutreach.org</a><a class="bf-mail bf-tel" href="tel:+18015477847"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2"></path></svg>+1 (801) 547-7847</a></div>
@@ -1018,34 +1017,53 @@ a.vc:focus-visible{outline:3px solid #6BBDF2;outline-offset:3px}
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":3600}}'>
 var PHOTOS = [
-  ['/img/collect.jpg', 'Two men fill yellow jerrycans from a muddy river'],
-  ['/img/washing.jpg', 'A woman washing dishes beside yellow jerrycans'],
-  ['/img/w-elder-portrait.jpg', 'An elder in a bright blue and yellow kanga beside a village wall']
+  ['/img/collect.webp', 'Two men fill yellow jerrycans from a muddy river'],
+  ['/img/washing.webp', 'A woman washing dishes beside yellow jerrycans'],
+  ['/img/w-elder-portrait.webp', 'An elder in a bright blue and yellow kanga beside a village wall']
 ];
 var WORK = [
-  ['/img/w-drill1.jpg', 'Volunteers and a local crew turn the arms of The Village Drill'],
-  ['/img/w-drill2.jpg', 'The blue Village Drill rig standing ready on open plains']
+  ['/img/w-drill1.webp', 'Volunteers and a local crew turn the arms of The Village Drill'],
+  ['/img/w-drill2.webp', 'The blue Village Drill rig standing ready on open plains'],
+  ['/img/pg/g-rig.webp', 'Volunteers work a drilling rig'],
+  ['/img/pg/g-rig2.webp', 'The crew sets up a drilling rig'],
+  ['/img/pg/g-pipe.webp', 'A volunteer fits a water pipe'],
+  ['/img/pg/g-tank.webp', 'Volunteers move a water tank into place']
 ];
 var AFTER = [
-  ['/img/w-child.jpg', 'A smiling boy drinks from a blue cup among other children'],
-  ['/img/w-team.jpg', 'A Rafiki Outreach volunteer smiling with five children in a village'],
-  ['/img/w-elder.jpg', 'An elder, children and a Rafiki volunteer in a village lane'],
-  ['/img/w-volunteer.jpg', 'A Rafiki volunteer carries a child on his shoulders'],
-  ['/img/w-child-sq.jpg', 'A smiling young child in a grey hood'],
-  ['/img/w-field3.jpg', "A volunteer's hand holds a child's hand"]
+  ['/img/w-child.webp', 'A smiling boy drinks from a blue cup among other children'],
+  ['/img/w-team.webp', 'A Rafiki Outreach volunteer smiling with five children in a village'],
+  ['/img/w-elder.webp', 'An elder, children and a Rafiki volunteer in a village lane'],
+  ['/img/w-volunteer.webp', 'A Rafiki volunteer carries a child on his shoulders'],
+  ['/img/w-child-sq.webp', 'A smiling young child in a grey hood'],
+  ['/img/w-field3.webp', "A volunteer's hand holds a child's hand"],
+  ['/img/pg/g-pump.webp', 'Students and a Rafiki team member at a new hand pump'],
+  ['/img/pg/g-kids.webp', 'A volunteer surrounded by smiling children'],
+  ['/img/pg/g-class.webp', 'A volunteer with a class of children'],
+  ['/img/pg/g-elder.webp', 'A volunteer greets a family outside their home'],
+  ['/img/pg/g-friends.webp', 'A villager and a Rafiki volunteer smile together'],
+  ['/img/pg/g-maasai.webp', 'Volunteers with Maasai women'],
+  ['/img/pg/g-group.webp', 'Volunteers with families outside their homes'],
+  ['/img/pg/g-school.webp', 'Volunteers and students at a school'],
+  ['/img/pg/g-team.webp', 'Volunteers outside a school building'],
+  ['/img/pg/g-field.webp', 'Children walk across a school field']
 ];
+// Areas each country page already lists; Uganda and Malawi areas are still to add
+var AREAS = { Kenya: ['near Eldoret', 'near Kisumu', 'near Naivasha', 'near Kitale'], Tanzania: ['in Manyara Region', 'in Arusha Region', 'in Ruvuma Region', 'in Iringa Region'], Uganda: ['in Uganda'], Malawi: ['in Malawi'] };
 var TYPES = ['Community well', 'Sponsored well', 'Volunteer trip'];
 var COUNTRIES = ['Kenya', 'Kenya', 'Tanzania', 'Uganda', 'Malawi'];
 var PUMPS = ['Manual', 'Electric', 'Solar'];
 var YEARS = [2022, 2023, 2024, 2025, 2026];
 var PROJECTS = [];
 (function () {
+  var seen = {};
   for (var i = 0; i < 312; i++) {
     var n = 312 - i;
     var code = 'RW-' + ('000' + n).slice(-3);
-    var a = AFTER[i % AFTER.length], b = PHOTOS[i % PHOTOS.length], w = WORK[i % WORK.length];
-    PROJECTS.push({ n: n, code: code, title: 'Well ' + code, country: COUNTRIES[i % 5], loc: '',
-      type: TYPES[i % 3 === 0 ? 0 : (i % 3 === 1 ? 1 : (i % 7 === 0 ? 2 : 0))], pump: PUMPS[Math.floor(i / 3) % 3],
+    // count per country so cards next to each other (same country filter) get different photos and areas
+    var c = COUNTRIES[i % 5], k = seen[c] = (seen[c] || 0) + 1, ar = AREAS[c], type = TYPES[i % 3 === 0 ? 0 : (i % 3 === 1 ? 1 : (i % 7 === 0 ? 2 : 0))];
+    var off = { Kenya: 0, Tanzania: 2, Uganda: 4, Malawi: 3 }[c], a = AFTER[(k + 3 * off) % AFTER.length], b = PHOTOS[i % PHOTOS.length], w = WORK[(k + off) % WORK.length];
+    PROJECTS.push({ n: n, code: code, title: (type === 'Volunteer trip' ? 'Volunteer trip well' : type) + ' ' + ar[k % ar.length], country: c, loc: '',
+      type: type, pump: PUMPS[Math.floor(i / 3) % 3],
       year: YEARS[4 - Math.min(4, Math.floor(i / 63))], status: i < 12 ? 'Under construction' : 'Completed', stage: i < 12 ? (i % 4) + 1 : 5, img: i < 12 ? w[0] : a[0], alt: i < 12 ? w[1] : a[1], before: b[0], beforeAlt: b[1], work: w[0], workAlt: w[1] });
   }
 })();
