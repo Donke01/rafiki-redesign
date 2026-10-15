@@ -1022,6 +1022,70 @@ em.hl{font-style:normal;color:#098BE1}
 @media (min-width:901px){.hd-links{gap:0}.hl-link{padding:0 10px !important;font-size:14.5px !important}.hd-tile{gap:14px}}
 @media (min-width:901px) and (max-width:1260px){.hl-link{padding:0 7px !important;font-size:13.5px !important}.hd-tile{padding-left:18px !important}}
 </style>
+<style>/* footer link directory */
+.bf-dir{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;margin-top:40px;padding-top:32px;border-top:1px solid #22262A;text-align:center}.bf-dir div{display:flex;flex-direction:column;align-items:center;gap:4px}.bf-dir a{color:#D5D9DD;text-decoration:none;font-size:15px;min-height:34px;display:inline-flex;align-items:center;transition:color .2s}.bf-dir a:hover{color:#FFFFFF;text-decoration:underline;text-underline-offset:4px}.bf-dir a:focus-visible{outline:2px solid #6BBDF2;outline-offset:2px;border-radius:6px}@media (max-width:640px){.bf-dir{grid-template-columns:1fr 1fr;gap:20px 12px}.bf-dir div:last-child{grid-column:1 / -1}}
+</style>
+<style>
+/* ---------- site kit: shared styles for the complete-site pages ---------- */
+.todo{display:inline-block;padding:1px 8px;border-radius:8px;background:#FFF3C4;color:#6B4E00;font-weight:600;font-size:.92em}
+.todo-box{border:2px dashed #E1C46A;background:#FFFBEA;border-radius:18px;padding:20px 22px;color:#5A4400;font-size:15px;line-height:1.55;text-align:left}
+.todo-box b{display:block;margin-bottom:6px;color:#3D2E00}
+.todo-box ul{margin:0;padding-left:20px}
+.xh.ctr .xh-in{align-items:center;text-align:center}
+.xh.ctr .xh-h1{max-width:15ch;margin-left:auto;margin-right:auto}
+.xh.ctr .xh-p{margin-left:auto;margin-right:auto}
+.xh.ctr .xh-row{justify-content:center}
+.sec-h{display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;margin:0 auto 34px;max-width:46em}
+.sec-h .x-h2{max-width:20ch}
+.sec-h .x-p{max-width:38em}
+.ctr-band .sec-h{margin-bottom:0}
+.ctr-band .xc-row{justify-content:center}
+.kicker{display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border-radius:999px;background:#E3F1FC;color:#054F81;font-size:13px;font-weight:700}
+.ink .kicker{background:rgba(255,255,255,.12);color:#9FD3F7}
+/* animated cards */
+.vc{position:relative;border-radius:24px;background:#FFFFFF;padding:28px;display:flex;flex-direction:column;gap:12px;isolation:isolate;transition:transform .45s cubic-bezier(.2,.8,.2,1),box-shadow .45s}
+.vc::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.5px;background:linear-gradient(135deg,#9FD3F7,#098BE1 40%,#E3F1FC 70%,#6BBDF2);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;opacity:.55;transition:opacity .4s;z-index:-1}
+.vc:hover{transform:translateY(-6px);box-shadow:0 24px 50px rgba(9,139,225,.16)}
+.vc:hover::before{opacity:1}
+.vc-ic{width:56px;height:56px;border-radius:18px;display:grid;place-items:center;background:linear-gradient(135deg,#E3F1FC,#FFFFFF);color:#098BE1;box-shadow:inset 0 0 0 1px rgba(9,139,225,.15)}
+.vc b{font-size:19px;font-weight:800;letter-spacing:-0.015em}
+.vc p{margin:0;font-size:15px;line-height:1.6;color:#3A3F44}
+.vc-go{margin-top:auto;font-size:15px;font-weight:700;color:#076DB1;text-decoration:none}
+a.vc{text-decoration:none;color:inherit}
+a.vc:focus-visible{outline:3px solid #6BBDF2;outline-offset:3px}
+.vgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.vgrid.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.vgrid.four{grid-template-columns:repeat(4,minmax(0,1fr))}
+.vgrid.ctr .vc{align-items:center;text-align:center}
+/* reveal on scroll where supported */
+@keyframes kitRise{from{opacity:0;transform:translateY(26px) scale(.98)}to{opacity:1;transform:none}}
+@supports (animation-timeline: view()){
+.rv{animation:kitRise linear both;animation-timeline:view();animation-range:entry 0% entry 38%}
+}
+/* progress bars */
+.fbar{height:12px;border-radius:999px;background:#E3F1FC;overflow:hidden;position:relative}
+.fbar i{position:absolute;inset:0 auto 0 0;border-radius:inherit;background:linear-gradient(90deg,#076DB1,#098BE1,#6BBDF2);background-size:200% 100%;animation:kitFill 1.6s cubic-bezier(.2,.8,.2,1) both,kitShine 3s linear infinite}
+@keyframes kitFill{from{width:0}}
+@keyframes kitShine{from{background-position:200% 0}to{background-position:0 0}}
+/* chips */
+.fchips{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-bottom:26px}
+.fchip{min-height:42px;padding:0 18px;border-radius:999px;border:1.5px solid #E1E4E7;background:#FFFFFF;font:inherit;font-size:14px;font-weight:700;color:#3A3F44;cursor:pointer;transition:background .2s,color .2s,border-color .2s}
+.fchip:hover{border-color:#9FD3F7}
+.fchip.on{background:#0A0A0A;border-color:#0A0A0A;color:#FFFFFF}
+.fchip:focus-visible{outline:3px solid #6BBDF2;outline-offset:2px}
+/* range slider */
+.kslider{-webkit-appearance:none;appearance:none;width:100%;height:14px;border-radius:999px;outline:none;background:linear-gradient(90deg,#098BE1 0,#6BBDF2 var(--p),#E3F1FC var(--p))}
+.kslider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:34px;height:34px;border-radius:50%;background:#FFFFFF;border:3px solid #098BE1;box-shadow:0 6px 16px rgba(9,139,225,.35);cursor:grab}
+.kslider::-moz-range-thumb{width:30px;height:30px;border-radius:50%;background:#FFFFFF;border:3px solid #098BE1}
+.kslider:focus-visible{outline:3px solid #6BBDF2;outline-offset:6px}
+.xe-grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:900px){.xe-grid.two{grid-template-columns:1fr}}
+.bignum{font-size:clamp(40px,5vw,68px);font-weight:800;letter-spacing:-0.04em;line-height:1;color:#098BE1;font-variant-numeric:tabular-nums}
+.ink .bignum{color:#9FD3F7}
+@media (max-width:1000px){.vgrid,.vgrid.four{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){.vgrid,.vgrid.two,.vgrid.four{grid-template-columns:1fr}.vc{padding:22px}.sec-h{margin-bottom:24px}}
+@media (prefers-reduced-motion: reduce){.rv,.fbar i,.vc{animation:none !important;transition:none !important}}
+</style>
 </helmet>
 <div class="pg">
 <sc-if value="{{menuOpen}}" hint-placeholder-val="{{false}}"><div class="mm-backdrop" onClick="{{closeMenu}}" aria-hidden="true"></div></sc-if><sc-if value="{{wipeOn}}" hint-placeholder-val="{{false}}"><div class="cx-wipe" aria-hidden="true"><div class="cx-in"><div class="{{wipeMapsCls}}"><sc-for list="{{wipeMaps}}" as="m" hint-placeholder-count="1"><svg class="cx-map" viewBox="-4 -4 108 108" aria-hidden="true"><defs><clipPath id="{{m.cid}}"><path d="{{m.d}}"></path></clipPath></defs><g class="cx-flag" style="{{m.clip}}"><g transform="{{m.tr}}"><sc-for list="{{m.rects}}" as="r" hint-placeholder-count="3"><rect x="{{r.x}}" y="{{r.y}}" width="{{r.w}}" height="{{r.h}}" fill="{{r.f}}"></rect></sc-for></g><sc-for list="{{m.circles}}" as="c" hint-placeholder-count="0"><circle cx="{{c.x}}" cy="{{c.y}}" r="{{c.r}}" fill="{{c.f}}"></circle></sc-for></g><path class="cx-ol" d="{{m.d}}" pathLength="1"></path></svg></sc-for></div><span class="cx-k">Rafiki Outreach</span><span class="cx-n">{{wipeName}}</span></div></div></sc-if>
@@ -1047,13 +1111,13 @@ em.hl{font-style:normal;color:#098BE1}
 <footer class="bf">
 <div class="wrap bf-tile">
 <div class="bf-row">
-<div class="bf-col bf-brand"><img src="/img/logo-light-bold.png" alt="Rafiki Outreach" class="bf-logo"><a href="/projects" class="bf-about">About</a></div>
+<div class="bf-col bf-brand"><img src="/img/logo-light-bold.png" alt="Rafiki Outreach" class="bf-logo"><a href="/about" class="bf-about">About</a></div>
 <div class="bf-col"><span class="bf-lab">Contact</span><span class="bf-follow">Follow us</span><div class="bf-social bf-social-f"><a class="soc soc-fb" href="https://www.facebook.com/rafikioutreach" target="_blank" rel="noopener" aria-label="Rafiki Outreach on Facebook"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="#FFFFFF" d="M13.5 21v-7.5h2.6l.4-3h-3V8.6c0-.9.3-1.5 1.6-1.5h1.6V4.4c-.3 0-1.2-.1-2.3-.1-2.3 0-3.9 1.4-3.9 4V10.5H8v3h2.5V21h3z"></path></svg></a>
 <a class="soc soc-ig" href="https://www.instagram.com/rafikioutreach" target="_blank" rel="noopener" aria-label="Rafiki Outreach on Instagram"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.3" cy="6.7" r="1" fill="#FFFFFF" stroke="none"></circle></svg></a><a class="soc soc-x" href="https://x.com/rafikioutreach" target="_blank" rel="noopener" aria-label="Rafiki Outreach on X"><svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true"><path fill="#FFFFFF" d="M17.8 3h3.1l-6.8 7.8L22 21h-6.2l-4.9-6.4L5.3 21H2.2l7.3-8.3L2 3h6.4l4.4 5.8L17.8 3zm-1.1 16.2h1.7L7.4 4.7H5.6l11.1 14.5z"></path></svg></a><a class="soc soc-li" href="https://www.linkedin.com/company/rafikioutreach" target="_blank" rel="noopener" aria-label="Rafiki Outreach on LinkedIn"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#FFFFFF" d="M5.2 8.6h3.2V19H5.2V8.6zM6.8 3.6a1.85 1.85 0 110 3.7 1.85 1.85 0 010-3.7zM10.4 8.6h3.1V10h.04c.43-.8 1.5-1.66 3.07-1.66 3.28 0 3.89 2.16 3.89 4.97V19h-3.23v-5.04c0-1.2-.02-2.75-1.68-2.75-1.68 0-1.94 1.31-1.94 2.66V19h-3.23V8.6z"></path></svg></a><a class="soc soc-yt" href="https://www.youtube.com/@rafikioutreach" target="_blank" rel="noopener" aria-label="Rafiki Outreach on YouTube"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="#FFFFFF" d="M21.6 7.2a2.5 2.5 0 00-1.76-1.77C18.27 5 12 5 12 5s-6.27 0-7.84.43A2.5 2.5 0 002.4 7.2 26 26 0 002 12a26 26 0 00.4 4.8 2.5 2.5 0 001.76 1.77C5.73 19 12 19 12 19s6.27 0 7.84-.43a2.5 2.5 0 001.76-1.77A26 26 0 0022 12a26 26 0 00-.4-4.8zM10 15V9l5.2 3L10 15z"></path></svg></a></div>
 <a class="bf-mail" href="mailto:info@rafikioutreach.org"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"></rect><path d="M3.5 7l8.5 6 8.5-6"></path></svg>info@rafikioutreach.org</a><a class="bf-mail bf-tel" href="tel:+18015477847"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2"></path></svg>+1 (801) 547-7847</a></div>
 <div class="bf-col"><span class="bf-lab">Address</span><span>1817 Beck Street</span><span>Salt Lake City, Utah</span><span>84116</span></div>
 </div>
-<div class="bf-copy"><span class="bf-ein"><span class="bf-reg">501(c)(3) tax-exempt nonprofit (US) · EIN 88-3133113</span><sc-if value="{{isKe}}" hint-placeholder-val="{{true}}"><span class="bf-reg">Registered NGO (Kenya) · NGO-W5U7NLN</span></sc-if></span><nav class="bf-legal" aria-label="Legal"><a href="https://www.rafikioutreach.org/privacy-policy">Privacy Policy</a><span aria-hidden="true">·</span><a href="https://www.rafikioutreach.org/terms-of-use">Terms of Use</a><span aria-hidden="true">·</span><a href="/loan">Loan program</a></nav>© 2026 Rafiki Outreach</div>
+<nav class="bf-dir" aria-label="Site"><div><span class="bf-lab">Explore</span><a href="/about">About Rafiki</a><a href="/#where-we-work">Where we work</a><a href="/water">Our approach</a><a href="/projects">Our projects</a><a href="/progress">Our impact</a><a href="/tracker">Well tracker</a></div><div><span class="bf-lab">Get involved</span><a href="/donate">Give</a><a href="/sponsor">Sponsor a well</a><a href="/fundraise">Start a fundraiser</a><a href="/trips">Expeditions</a><a href="/event-list">Events</a></div><div><span class="bf-lab">Learn more</span><a href="/stories">Project stories</a><a href="/updates">Updates</a><a href="/transparency">Transparency</a><a href="/faq">FAQ</a><a href="/contact">Contact</a></div></nav><div class="bf-copy"><span class="bf-ein"><span class="bf-reg">501(c)(3) tax-exempt nonprofit (US) · EIN 88-3133113</span><sc-if value="{{isKe}}" hint-placeholder-val="{{true}}"><span class="bf-reg">Registered NGO (Kenya) · NGO-W5U7NLN</span></sc-if></span><nav class="bf-legal" aria-label="Legal"><a href="/privacy-policy">Privacy Policy</a><span aria-hidden="true">·</span><a href="/terms-of-use">Terms of Use</a><span aria-hidden="true">·</span><a href="/loan">Loan programme</a></nav>© 2026 Rafiki Outreach</div>
 </div>
 </footer>
 </div>
@@ -1065,12 +1129,12 @@ var GAL = [{"src": "/img/pg/g-kids.jpg", "alt": "A volunteer surrounded by smili
 var CTRY = { ke: { n: 'Kenya', ab: 'KE', w: 120, u: 6, p: 312200 }, tz: { n: 'Tanzania', ab: 'TZ', w: 60, u: 2, p: 156100 }, ug: { n: 'Uganda', ab: 'UG', w: 60, u: 2, p: 156100 }, mw: { n: 'Malawi', ab: 'MW', w: 60, u: 2, p: 156100 } };
 var CORDER = ['ke', 'tz', 'ug', 'mw'];
 var FOUNDERS = [
-  { tag: 'Co-founder', name: 'Reid Anderson', role: 'Co-founder, Rafiki Outreach', email: 'reid@rafikicap.com', img: '/img/reid.jpg', bio: 'Reid co-founded Rafiki Outreach to bring clean water to communities across East Africa. Rafiki means friend in Swahili, and Reid builds those friendships on the ground, joining volunteers in the field and working alongside local teams and the communities they serve.' },
-  { tag: 'Co-founder', name: 'Jessica Anderson', role: 'Co-founder, Rafiki Outreach', email: 'jessica@rafikicap.com', img: '/img/jessica.jpg', bio: 'Jessica co-founded Rafiki Outreach with Reid, believing that clean water is the first step out of poverty. She helps bring donors and volunteers together, so that every gift and every trip ends with a working well for a community that needs one.' }
+  { tag: 'Co-founder', name: 'Reid Anderson', role: 'Co-founder, Rafiki Outreach', email: 'reid@rafikioutreach.org', img: '/img/reid.jpg', bio: 'Reid co-founded Rafiki Outreach to bring clean water to communities across East Africa. Rafiki means friend in Swahili, and Reid builds those friendships on the ground, joining volunteers in the field and working alongside local teams and the communities they serve.' },
+  { tag: 'Co-founder', name: 'Jessica Anderson', role: 'Co-founder, Rafiki Outreach', email: 'jessica@rafikioutreach.org', img: '/img/jessica.jpg', bio: 'Jessica co-founded Rafiki Outreach with Reid, believing that clean water is the first step out of poverty. She helps bring donors and volunteers together, so that every gift and every trip ends with a working well for a community that needs one.' }
 ];
 var OFFICES = {
   ke: { addr: 'Mega Centre, 3rd Floor, Makasembo Road, Kitale', phone: '+254 791 674 001', dir: 'Meril Adoyo', email: 'meril@rafikioutreach.org', img: '/img/meril.jpg', bio: 'Meril leads Rafiki Outreach in Kenya from the Kitale office. She works with communities from their first request through site selection and drilling, and stays in touch long after the well is finished, so every project leaves water flowing for years to come.' },
-  tz: { addr: '', phone: '', dir: 'Bertin Ngindu', email: 'ngindu@rafikicap.com', img: '/img/bertin.jpg', bio: 'Bertin leads Rafiki Outreach in Tanzania. He started as our Drill Master and knows every well from the ground up, from choosing the site to the moment clean water reaches the surface. Today he guides the Tanzania team and the communities they serve, making sure each well is built to last.' },
+  tz: { addr: '', phone: '', dir: 'Bertin Ngindu', email: 'bertin@rafikioutreach.org', img: '/img/bertin.jpg', bio: 'Bertin leads Rafiki Outreach in Tanzania. He started as our Drill Master and knows every well from the ground up, from choosing the site to the moment clean water reaches the surface. Today he guides the Tanzania team and the communities they serve, making sure each well is built to last.' },
   ug: { addr: '', phone: '', dir: '' },
   mw: { addr: '', phone: '', dir: '' },
   all: { addr: '1817 Beck Street, Salt Lake City, Utah 84116', phone: '+1 (801) 547-7847' }
