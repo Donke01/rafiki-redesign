@@ -1225,7 +1225,7 @@ function countryVals(self) {
     self._wipeT1 = setTimeout(apply, 560);
     self._wipeT2 = setTimeout(function () { self.setState({ wipeOn: false }); }, 1430);
   };
-  var list = CORDER.map(function (k) { var on = !all && (s.ctry || 'ke') === k; return { n: CTRY[k].n, sub: k === 'ke' ? 'Main site' : 'rafikioutreach.org/' + CTRY[k].n.toLowerCase(), on: on ? 'true' : 'false', pn: CTRY[k].n, cls: 'cs-it' + (on ? ' on' : ''), pill: 'mm-pill' + (on ? ' on' : ''), pick: function () { pick(k); } }; })
+  var list = CORDER.map(function (k) { var on = !all && (s.ctry || 'ke') === k; return { n: CTRY[k].n, sub: 'rafikioutreach.org/' + CTRY[k].n.toLowerCase(), on: on ? 'true' : 'false', pn: CTRY[k].n, cls: 'cs-it' + (on ? ' on' : ''), pill: 'mm-pill' + (on ? ' on' : ''), pick: function () { var u = ({ ke: '/kenya', tz: '/tanzania', ug: '/uganda', mw: '/malawi' })[k]; if (window.location.pathname.split('/').pop() === u.split('/').pop()) { self.setState({ cs: false, menu: false }); return; } window.location.href = u; } }; })
     .concat([{ n: 'All countries', pn: 'All', sub: 'Totals across all four', on: all ? 'true' : 'false', cls: 'cs-it all' + (all ? ' on' : ''), pill: 'mm-pill' + (all ? ' on' : ''), pick: function () { pick('all'); } }]);
   var picked = !!s.ctryPicked && !all;
   var heroVals = { heroH1: picked ? 'Partnering with communities across ' + cur.n + ' to create sustainable access to clean water.' : 'Partnering with African communities to create sustainable access to clean water and opportunities for a brighter future.', heroNum: picked ? cur.p.toLocaleString('en-US') + '+' : '780,500+', heroStatTx: picked ? 'people reached in ' + cur.n : 'people reached with clean, safe water' };
