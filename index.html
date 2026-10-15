@@ -930,6 +930,39 @@ a.vc:focus-visible{outline:3px solid #6BBDF2;outline-offset:3px}
 .tm-grid.rest .tm-card{flex:0 1 calc((100% - 32px) / 3);min-width:0}
 @media (max-width:900px){.tm-grid.boss{grid-template-columns:1fr;max-width:none}.tm-grid.rest{row-gap:56px;margin-top:56px}.tm-grid.rest .tm-card{flex-basis:100%}}
 </style>
+<style>/* founders: premium cards */
+.tm-grid.boss{margin-top:86px;gap:20px}
+.tm-grid.boss .tm-card{padding:86px 26px 30px;gap:8px;border:0;border-radius:28px;color:#FFFFFF;overflow:visible;isolation:isolate;
+  background:radial-gradient(120% 90% at 50% 0%,#098BE1 0%,#076DB1 45%,#054F81 100%);box-shadow:0 22px 50px rgba(5,79,129,.28)}
+.tm-grid.boss .tm-card::before{content:"";position:absolute;inset:0;border-radius:inherit;z-index:-1;pointer-events:none;
+  background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.16) 48%,transparent 66%) no-repeat;background-size:250% 100%;background-position:120% 0;animation:tmSheen 6s ease-in-out infinite}
+@keyframes tmSheen{0%,55%{background-position:120% 0}100%{background-position:-120% 0}}
+.tm-grid.boss .tm-card:hover{transform:translateY(-6px);box-shadow:0 30px 60px rgba(5,79,129,.36)}
+.tm-grid.boss .tm-ph{top:-66px;width:136px;height:136px;box-shadow:0 0 0 5px #FFFFFF,0 0 0 9px #6BBDF2,0 14px 34px rgba(5,79,129,.35)}
+.tm-grid.boss .tm-tag{background:#FFFFFF;color:#054F81;font-size:12px;padding:5px 12px}
+.tm-grid.boss .tm-n{color:#FFFFFF;font-size:clamp(24px,2.2vw,30px);letter-spacing:-0.02em}
+.tm-grid.boss .tm-r{color:#E3F1FC;font-size:15px}
+.tm-grid.boss .tm-mail,.tm-grid.boss .tm-mail svg{color:#FFFFFF}
+.tm-grid.boss .tm-bio{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.45);color:#FFFFFF}
+.tm-grid.boss .tm-bio:hover{background:#FFFFFF;color:#054F81;border-color:#FFFFFF}
+.tm-grid.boss .tm-mail:focus-visible,.tm-grid.boss .tm-bio:focus-visible{outline:3px solid #FFFFFF;outline-offset:3px}
+/* the rest of the team: smaller, four to a row */
+.tm-grid.rest{column-gap:16px;row-gap:52px;margin-top:70px}
+.tm-grid.rest .tm-card{flex:0 1 calc((100% - 48px) / 4);padding:48px 12px 18px;gap:4px}
+.tm-grid.rest .tm-ph{top:-36px;width:76px;height:76px}
+.tm-grid.rest .tm-ph svg{width:34px;height:34px}
+.tm-grid.rest .tm-tag{font-size:10px;padding:3px 9px}
+.tm-grid.rest .tm-n{font-size:18px}
+.tm-grid.rest .tm-r{font-size:13px}
+.tm-grid.rest .tm-mail{font-size:13px}
+.tm-grid.rest .tm-bio{min-height:40px;padding:0 14px;font-size:13px}
+.tm-mail{max-width:100%;overflow-wrap:anywhere;text-align:center}
+@media (max-width:1100px){.tm-grid.rest .tm-card{flex-basis:calc((100% - 16px) / 2)}}
+@media (max-width:900px){.tm-grid.boss{margin-top:80px;gap:80px}.tm-grid.rest{margin-top:60px;row-gap:52px}}
+@media (max-width:560px){.tm-grid.rest .tm-card{flex-basis:100%}}
+@media (prefers-reduced-motion: reduce){.tm-grid.boss .tm-card::before{animation:none}}
+</style>
+<style>/* small-phone header */@media (max-width:380px){.hd-tile{padding-left:16px !important;gap:8px}.hd-logo img{height:34px}.hd-act{gap:6px}.hd-donate{padding:0 14px;font-size:14px;gap:6px}}@media (max-width:340px){.hd-logo img{height:28px}.hd-donate{padding:0 12px}.hd-donate svg{display:none}.hd-menu{width:42px;height:42px}}</style>
 </helmet>
 <div class="pg">
 <sc-if value="{{menuOpen}}" hint-placeholder-val="{{false}}"><div class="mm-backdrop" onClick="{{closeMenu}}" aria-hidden="true"></div></sc-if><sc-if value="{{wipeOn}}" hint-placeholder-val="{{false}}"><div class="cx-wipe" aria-hidden="true"><div class="cx-in"><div class="{{wipeMapsCls}}"><sc-for list="{{wipeMaps}}" as="m" hint-placeholder-count="1"><svg class="cx-map" viewBox="-4 -4 108 108" aria-hidden="true"><defs><clipPath id="{{m.cid}}"><path d="{{m.d}}"></path></clipPath></defs><g class="cx-flag" style="{{m.clip}}"><g transform="{{m.tr}}"><sc-for list="{{m.rects}}" as="r" hint-placeholder-count="3"><rect x="{{r.x}}" y="{{r.y}}" width="{{r.w}}" height="{{r.h}}" fill="{{r.f}}"></rect></sc-for></g><sc-for list="{{m.circles}}" as="c" hint-placeholder-count="0"><circle cx="{{c.x}}" cy="{{c.y}}" r="{{c.r}}" fill="{{c.f}}"></circle></sc-for></g><path class="cx-ol" d="{{m.d}}" pathLength="1"></path></svg></sc-for></div><span class="cx-k">Rafiki Outreach</span><span class="cx-n">{{wipeName}}</span></div></div></sc-if>
