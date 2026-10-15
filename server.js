@@ -21,7 +21,7 @@ function resolve(urlPath) {
 }
 
 http.createServer((req, res) => {
-  const REDIRECTS = { '/about-1': '/communities', '/about-1.html': '/communities' };
+  const REDIRECTS = { '/about-1': '/communities', '/about-1.html': '/communities', '/meet': '/about', '/meet.html': '/about' };
   const target = REDIRECTS[req.url.split('?')[0]];
   if (target) { res.writeHead(301, { Location: target }); return res.end(); }
   const file = resolve(req.url);

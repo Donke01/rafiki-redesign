@@ -2,6 +2,15 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "redirects": [
-    { "source": "/about-1", "destination": "/communities", "permanent": true }
+    {
+      "source": "/about-1",
+      "destination": "/communities",
+      "permanent": true
+    },
+    {
+      "source": "/meet",
+      "destination": "/about",
+      "permanent": true
+    }
   ]
 }

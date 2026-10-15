@@ -4,19 +4,24 @@ Static site for Rafiki Outreach. Kenya is the default country; visitors can swit
 
 ## Pages
 
-| URL | Page |
-| --- | --- |
-| `/` | Home |
-| `/meet` | Who we are (team) |
-| `/projects` | About: where we work, donors and partners |
-| `/water` | Why water, and how we drill |
-| `/stories` | Impact stories: every project, with filters |
-| `/progress` | Our progress in numbers |
-| `/communities` | Impacted communities (Tanzania, 2023). `/about-1` redirects here |
-| `/trips` | Humanitarian trips |
-| `/event-list` | Events |
-| `/donate` | Donate |
-| `/loan` | Loan program (closed; linked from the footer) |
+The menu follows the owner's eight sections.
+
+| URL | Page | Menu |
+| --- | --- | --- |
+| `/` | Home | Home |
+| `/about` | Mission, values, story and leadership. `/meet` redirects here | About |
+| `/#where-we-work` | Country cards on the homepage; each opens its country page | Where we work |
+| `/kenya`, `/tanzania`, `/uganda`, `/malawi` | Country pages: team, work, impact, projects, map, stories, needs | Where we work |
+| `/projects` | Completed, current and upcoming projects, donors and partners | Our projects |
+| `/communities` | Impacted communities (Tanzania, 2023). `/about-1` redirects here | Our projects |
+| `/water` | Our approach: why water, the partnership model, the Community Water Agreement | Our approach |
+| `/progress` | Our impact in numbers, annual reports | Our impact |
+| `/donate` | Get involved: give, sponsor a project, expeditions, volunteer | Get involved |
+| `/trips`, `/event-list` | Expeditions and events | Get involved |
+| `/stories` | Stories and updates: every project, with filters | Stories & updates |
+| `/loan` | Loan program (closed; linked from About and the footer) | |
+
+Anything still to be supplied by Rafiki is shown on the page in a yellow "To add" box or tag.
 
 ## Before going live
 
