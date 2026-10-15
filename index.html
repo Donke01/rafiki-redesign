@@ -457,7 +457,7 @@ em.hl{font-style:normal;color:#098BE1}
 .zh-p{margin:0;font-size:20px;line-height:1.55;max-width:30em;color:rgba(255,255,255,.92)}
 .zh-stat{display:flex;align-items:baseline;gap:12px;padding:12px 18px;border-radius:18px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.35)}
 .zh-stat b{font-size:34px;font-weight:800;letter-spacing:-0.03em;color:#6BBDF2}
-.zh-stat span{font-size:15px;font-weight:600}
+.zh-stat > span{font-size:15px;font-weight:600}
 .zh-cta{display:flex;flex-wrap:wrap;gap:12px}
 .zh-b1,.zh-b2{display:inline-flex;align-items:center;min-height:56px;padding:0 30px;border-radius:999px;font-weight:700;font-size:16px;text-decoration:none}
 .zh-b1{background:#098BE1;color:#FFFFFF}
@@ -964,6 +964,7 @@ a.vc:focus-visible{outline:3px solid #6BBDF2;outline-offset:3px}
 </style>
 <style>/* small-phone header */@media (max-width:380px){.hd-tile{padding-left:16px !important;gap:8px}.hd-logo img{height:34px}.hd-act{gap:6px}.hd-donate{padding:0 14px;font-size:14px;gap:6px}}@media (max-width:340px){.hd-logo img{height:28px}.hd-donate{padding:0 12px}.hd-donate svg{display:none}.hd-menu{width:42px;height:42px}}</style>
 <style>/* blue heroes */.xh{background:radial-gradient(120% 120% at 80% 30%,#076DB1 0%,#054F81 35%,#0A0A0A 100%)}</style>
+<style>/* blue landing hero */.zh{background:radial-gradient(120% 120% at 80% 30%,#076DB1 0%,#054F81 35%,#0A0A0A 100%)}</style>
 </helmet>
 <div class="pg">
 <sc-if value="{{menuOpen}}" hint-placeholder-val="{{false}}"><div class="mm-backdrop" onClick="{{closeMenu}}" aria-hidden="true"></div></sc-if><sc-if value="{{wipeOn}}" hint-placeholder-val="{{false}}"><div class="cx-wipe" aria-hidden="true"><div class="cx-in"><div class="{{wipeMapsCls}}"><sc-for list="{{wipeMaps}}" as="m" hint-placeholder-count="1"><svg class="cx-map" viewBox="-4 -4 108 108" aria-hidden="true"><defs><clipPath id="{{m.cid}}"><path d="{{m.d}}"></path></clipPath></defs><g class="cx-flag" style="{{m.clip}}"><g transform="{{m.tr}}"><sc-for list="{{m.rects}}" as="r" hint-placeholder-count="3"><rect x="{{r.x}}" y="{{r.y}}" width="{{r.w}}" height="{{r.h}}" fill="{{r.f}}"></rect></sc-for></g><sc-for list="{{m.circles}}" as="c" hint-placeholder-count="0"><circle cx="{{c.x}}" cy="{{c.y}}" r="{{c.r}}" fill="{{c.f}}"></circle></sc-for></g><path class="cx-ol" d="{{m.d}}" pathLength="1"></path></svg></sc-for></div><span class="cx-k">Rafiki Outreach</span><span class="cx-n">{{wipeName}}</span></div></div></sc-if>
@@ -985,8 +986,6 @@ a.vc:focus-visible{outline:3px solid #6BBDF2;outline-offset:3px}
 </header>
 </div>
 <div class="hd-space" aria-hidden="true"></div><section class="zh" id="zh-hero" aria-label="Rafiki Outreach">
-<img class="zh-bg" style="{{zhImg}}" src="/img/w-elder.jpg" alt="An elder, children and a Rafiki volunteer in a village lane">
-<div class="zh-scrim" aria-hidden="true"></div>
 <div class="wrap zh-in {{zhSwap}}">
 <p class="zh-kick">Clean water. Stronger communities. Lasting change.</p><h1 class="zh-h1">{{heroH1}}</h1>
 <p class="zh-p"><span class="zh-long">Our own drilling teams and trusted local drilling companies work with community leaders in Kenya, Tanzania, Uganda and Malawi on water projects that communities own and care for.</span><span class="zh-short">Water projects that communities own and care for</span></p>
