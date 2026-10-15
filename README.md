@@ -36,4 +36,5 @@ Anything still to be supplied by Rafiki is shown on the page in a yellow "To add
 ## Deploy
 
 - Vercel: import the repo (framework preset: Other, no build command). `vercel.json` holds clean URLs and redirects.
+- Cloudflare Pages (free, unlimited traffic): connect the repo, build command `npm run build:pages`, output directory `dist`. `_redirects` holds the redirects and `_headers` the Content-Security-Policy; `404.html` is served for unknown pages. Only the site files are copied into `dist`, so `server.js`, `package.json` and this README are not published.
 - Railway or any Node host: `npm start` runs `server.js`, a small static server. It sends a Content-Security-Policy that allows `'unsafe-eval'`, which the page runtime (`support.js`) needs.
