@@ -31,7 +31,7 @@ Anything still to be supplied by Rafiki is shown on the page in a yellow "To add
   - Per country (`var CTRY` in every page): Kenya 120 + 6, Tanzania 60 + 2, Uganda 60 + 2, Malawi 60 + 2 wells; people 312,200 / 156,100 / 156,100 / 156,100.
   - The 312 projects on `/stories` and `/progress` are sample data (`var PROJECTS`), generated in the page script. Replace with real projects.
 - **Team:** Uganda and Malawi directors and the Tanzania, Uganda and Malawi office details are hidden until added to `var OFFICES`.
-- **Newsletter:** the homepage signup opens the visitor's email app. Connect a mailing list service for real signups.
+- **Newsletter (Mailchimp):** in Mailchimp go to Audience → Signup forms → Embedded forms and copy the form `action` URL (`https://….list-manage.com/subscribe/post?u=…&id=…`). Paste it into `var MAILCHIMP_URL = ''` in `index.html` (source: `D06-Bento.dc.html`). Until then the signup opens the visitor's email app. Mailchimp sends its own confirmation email (double opt-in). The /updates page links to this signup (`/#field-notes`).
 
 ## Deploy
 
