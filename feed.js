@@ -24,4 +24,18 @@
     return pending;
   };
   window.rafikiPhoto = function (id) { return '/api/photo/' + encodeURIComponent(id); };
+
+  // Header pop-ups: Escape closes the country selector or the menu and puts focus back on
+  // its button; a click outside the country selector closes it too.
+  function openBtn(sel) { return document.querySelector(sel + '[aria-expanded="true"]'); }
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape' && e.key !== 'Esc') return;
+    var b = openBtn('.cs-btn') || openBtn('button[aria-controls="bento-menu"]');
+    if (!b) return;
+    b.click(); setTimeout(function () { b.focus(); }, 0);
+  });
+  document.addEventListener('pointerdown', function (e) {
+    var b = openBtn('.cs-btn'), pop = document.querySelector('.cs-pop');
+    if (b && !b.contains(e.target) && !(pop && pop.contains(e.target))) b.click();
+  });
 })();

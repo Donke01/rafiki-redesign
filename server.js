@@ -31,6 +31,9 @@ http.createServer((req, res) => {
   const [p0, q0] = req.url.split('?');
   // trailing slash: /about/ -> /about (same as Vercel's trailingSlash:false)
   if (p0.length > 1 && p0.endsWith('/')) { const t = p0.replace(/\/+$/, '') || '/'; res.writeHead(301, { Location: (REDIRECTS[t] || t) + (q0 ? '?' + q0 : '') }); return res.end(); }
+  // share links /project/<id>: on Cloudflare functions/project/[id].js adds link-preview tags; here just go to the project
+  const pj = /^\/project\/(\d{1,20})$/.exec(p0);
+  if (pj) { res.writeHead(302, { Location: '/stories?project=' + pj[1], 'Cache-Control': 'no-store' }); return res.end(); }
   const target = REDIRECTS[p0];
   if (target) { res.writeHead(301, { Location: target }); return res.end(); }
   const file = resolve(req.url);
