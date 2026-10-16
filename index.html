@@ -1631,7 +1631,7 @@ class Component extends DCLogic {
         var cb = 'rfmc' + Date.now(), sc = document.createElement('script'), done = false;
         var finish = function (note, clear) { if (done) return; done = true; self._mcBusy = false; try { delete window[cb]; } catch (x) { window[cb] = undefined; } if (sc.parentNode) sc.parentNode.removeChild(sc); self.setState(clear ? { fnNote: note, fnVal: '' } : { fnNote: note }); };
         window[cb] = function (r) {
-          if (r && r.result === 'success') finish('Almost done: check your inbox and tap the link to confirm.', true);
+          if (r && r.result === 'success') finish(/confirm/i.test(String(r.msg || '')) ? 'Almost done: check your inbox and tap the link to confirm.' : 'You\u2019re on the list. Thank you!', true);
           else { var m = String((r && r.msg) || '').replace(/<[^>]*>/g, '').replace(/^\d+\s*-\s*/, ''); finish(/already subscribed/i.test(m) ? 'You are already on the list. Thank you!' : (m || 'Something went wrong. Please try again.')); }
         };
         sc.src = MAILCHIMP_URL.replace('/subscribe/post?', '/subscribe/post-json?') + '&EMAIL=' + encodeURIComponent(v) + '&c=' + cb;
