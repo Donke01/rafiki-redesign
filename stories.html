@@ -767,12 +767,22 @@ em.hl{font-style:normal;color:#098BE1}
 .pj-ba > span{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#FFFFFF;background:rgba(10,10,10,.55);border-radius:999px;padding:4px 9px}
 .pj-ba > span.ok{background:#098BE1}
 .pj-ba > span.uc{background:#FFFFFF;color:#054F81}
-.pd-track{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.pd-track{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
 .pd-tk{display:flex;flex-direction:column;gap:8px;font-size:13px;font-weight:600;color:#6A7076}
 .pd-tk i{height:8px;border-radius:8px;background:#E3F1FC}
 .pd-tk.done{color:#054F81}.pd-tk.done i{background:#098BE1}
 .pd-tk.now{color:#0A0A0A}.pd-tk.now i{background:linear-gradient(90deg,#098BE1 50%,#E3F1FC 50%)}
 .pd-soon{border-radius:20px;border:2px dashed #9FD3F7;padding:26px;text-align:center;color:#054F81;font-weight:600}
+.pj-noph{position:absolute;inset:0;display:grid;place-items:center;background:linear-gradient(160deg,#E3F1FC,#CDE7FA);color:#098BE1}
+.pj-ba > span.up{background:#054F81;color:#FFFFFF}
+.pj-skel{cursor:default;animation:none}.pj-skel:hover{transform:none;box-shadow:none}
+.pj-skel .pj-card-b i{display:block;height:12px;border-radius:6px;background:#EEF0F2}.pj-skel .pj-card-b i:nth-child(1){width:40%}.pj-skel .pj-card-b i:nth-child(2){width:80%;height:18px}.pj-skel .pj-card-b i:nth-child(3){width:55%}
+.pd-facts{margin:0}.pd-f{flex-direction:column-reverse}.pd-f dt,.pd-f dd{margin:0}
+.pd-gal{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.pd-noph{border-radius:22px;background:linear-gradient(160deg,#E3F1FC,#CDE7FA);min-height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:24px;text-align:center;font-weight:600;color:#054F81}.pd-noph svg{color:#098BE1}
+.pd{padding-top:118px}@media (max-width:900px){.pd{padding-top:100px}}
+.pd-h2:focus{outline:none}.pd-h2:focus-visible{outline:3px solid #6BBDF2;outline-offset:4px;border-radius:8px}
+@media (max-width:900px){.pd-gal{grid-template-columns:repeat(2,minmax(0,1fr))}}@media (max-width:560px){.pd-gal{grid-template-columns:1fr}}
 .pj-link{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 18px;border-radius:999px;background:#0A0A0A;color:#FFFFFF;text-decoration:none;font-weight:700;font-size:14px}
 @media (max-width:900px){.pd-track{grid-template-columns:1fr}.pd-tk{flex-direction:row;align-items:center}.pd-tk i{flex:0 0 60px}}
 .pj-card-b{padding:16px 18px 18px;display:flex;flex-direction:column;gap:6px}
@@ -796,7 +806,7 @@ em.hl{font-style:normal;color:#098BE1}
 .pd-head{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px}
 .pd-kick{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#076DB1}
 .pd-h2{margin:0;font-size:clamp(28px,3vw,42px);line-height:1.12;font-weight:800;letter-spacing:-0.025em;color:#098BE1}
-.pd-facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.pd-facts{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
 .pd-f{background:#FAF8F3;border:1px solid #EEF0F2;border-radius:18px;padding:14px 10px;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
 .pd-f .fv{font-size:18px;font-weight:800;color:#0A0A0A}
 .pd-f .fl{font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#5A6066}
@@ -948,17 +958,17 @@ a.vc:focus-visible{outline:3px solid #6BBDF2;outline-offset:3px}
 </div>
 <sc-if value="{{menuOpen}}" hint-placeholder-val="{{false}}">
 <nav id="bento-menu" aria-label="Mobile" class="mm-tile"><a class="mm-link" href="/" onClick="{{closeMenu}}">Home<span aria-hidden="true">→</span></a><a class="mm-link" href="/about" onClick="{{closeMenu}}">About<span aria-hidden="true">→</span></a><a class="mm-link" href="/#where-we-work" onClick="{{closeMenu}}">Where we work<span aria-hidden="true">→</span></a><a class="mm-link" href="/projects" onClick="{{closeMenu}}">Our projects<span aria-hidden="true">→</span></a><a class="mm-link" href="/water" onClick="{{closeMenu}}">Our approach<span aria-hidden="true">→</span></a><a class="mm-link" href="/progress" onClick="{{closeMenu}}">Our impact<span aria-hidden="true">→</span></a><a class="mm-link" href="/donate" onClick="{{closeMenu}}">Get involved<span aria-hidden="true">→</span></a><a class="mm-link on" href="/stories" onClick="{{closeMenu}}">Stories &amp; updates<span aria-hidden="true">→</span></a><div class="mm-cs"><span class="mm-lab">Country</span><div class="mm-cs-row"><sc-for list="{{csList}}" as="c" hint-placeholder-count="5"><button type="button" class="{{c.pill}}" aria-pressed="{{c.on}}" onClick="{{c.pick}}">{{c.pn}}</button></sc-for></div></div><div class="mm-contact"><span class="mm-lab">Get in touch</span><a class="mm-mail" href="mailto:info@rafikioutreach.org"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"></rect><path d="M3.5 7l8.5 6 8.5-6"></path></svg>info@rafikioutreach.org</a><div class="mm-social"><a class="soc soc-fb" href="https://www.facebook.com/rafikioutreach" target="_blank" rel="noopener" aria-label="Rafiki Outreach on Facebook"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="#FFFFFF" d="M13.5 21v-7.5h2.6l.4-3h-3V8.6c0-.9.3-1.5 1.6-1.5h1.6V4.4c-.3 0-1.2-.1-2.3-.1-2.3 0-3.9 1.4-3.9 4V10.5H8v3h2.5V21h3z"></path></svg></a>
-<a class="soc soc-ig" href="https://www.instagram.com/rafikioutreach" target="_blank" rel="noopener" aria-label="Rafiki Outreach on Instagram"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.3" cy="6.7" r="1" fill="#FFFFFF" stroke="none"></circle></svg></a><a class="soc soc-x" href="https://x.com/rafikioutreach" target="_blank" rel="noopener" aria-label="Rafiki Outreach on X"><svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true"><path fill="#FFFFFF" d="M17.8 3h3.1l-6.8 7.8L22 21h-6.2l-4.9-6.4L5.3 21H2.2l7.3-8.3L2 3h6.4l4.4 5.8L17.8 3zm-1.1 16.2h1.7L7.4 4.7H5.6l11.1 14.5z"></path></svg></a><a class="soc soc-li" href="https://www.linkedin.com/company/rafikioutreach" target="_blank" rel="noopener" aria-label="Rafiki Outreach on LinkedIn"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#FFFFFF" d="M5.2 8.6h3.2V19H5.2V8.6zM6.8 3.6a1.85 1.85 0 110 3.7 1.85 1.85 0 010-3.7zM10.4 8.6h3.1V10h.04c.43-.8 1.5-1.66 3.07-1.66 3.28 0 3.89 2.16 3.89 4.97V19h-3.23v-5.04c0-1.2-.02-2.75-1.68-2.75-1.68 0-1.94 1.31-1.94 2.66V19h-3.23V8.6z"></path></svg></a><a class="soc soc-yt" href="https://www.youtube.com/@rafikioutreach" target="_blank" rel="noopener" aria-label="Rafiki Outreach on YouTube"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="#FFFFFF" d="M21.6 7.2a2.5 2.5 0 00-1.76-1.77C18.27 5 12 5 12 5s-6.27 0-7.84.43A2.5 2.5 0 002.4 7.2 26 26 0 002 12a26 26 0 00.4 4.8 2.5 2.5 0 001.76 1.77C5.73 19 12 19 12 19s6.27 0 7.84-.43a2.5 2.5 0 001.76-1.77A26 26 0 0022 12a26 26 0 00-.4-4.8zM10 15V9l5.2 3L10 15z"></path></svg></a></div></div></nav>
+<a class="soc soc-ig" href="https://www.instagram.com/rafikioutreach" target="_blank" rel="noopener" aria-label="Rafiki Outreach on Instagram"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.3" cy="6.7" r="1" fill="#FFFFFF" stroke="none"></circle></svg></a><a class="soc soc-yt" href="https://www.youtube.com/@rafikioutreach" target="_blank" rel="noopener" aria-label="Rafiki Outreach on YouTube"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="#FFFFFF" d="M21.6 7.2a2.5 2.5 0 00-1.76-1.77C18.27 5 12 5 12 5s-6.27 0-7.84.43A2.5 2.5 0 002.4 7.2 26 26 0 002 12a26 26 0 00.4 4.8 2.5 2.5 0 001.76 1.77C5.73 19 12 19 12 19s6.27 0 7.84-.43a2.5 2.5 0 001.76-1.77A26 26 0 0022 12a26 26 0 00-.4-4.8zM10 15V9l5.2 3L10 15z"></path></svg></a></div></div></nav>
 </sc-if>
 </header>
 </div>
 <div class="hd-space" aria-hidden="true"></div>
-<sc-if value="{{listView}}" hint-placeholder-val="{{true}}"><section class="xh" aria-label="Project stories"><div class="wrap xh-in"><nav class="xh-crumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><span>Stories &amp; updates</span></nav><h1 class="xh-h1">Every well, every community</h1><p class="xh-p">Browse the boreholes Rafiki has drilled. Each project shows why we chose to drill there, how the work went, and what changed once clean water started flowing.</p><div class="xh-row"><span class="xh-note">Showing projects in <b>{{cName}}</b></span><span class="todo sample">Sample projects: real list to add</span></div><div class="pj-how" aria-label="How each project is told"><span><b>1</b>The need</span><span class="ar" aria-hidden="true">→</span><span><b>2</b>The decision</span><span class="ar" aria-hidden="true">→</span><span><b>3</b>The drilling</span><span class="ar" aria-hidden="true">→</span><span><b>4</b>After the well</span></div><a class="pj-link" href="/progress">See our progress in numbers →</a></div></section></sc-if>
+<sc-if value="{{listView}}" hint-placeholder-val="{{true}}"><section class="xh" aria-label="Project stories"><div class="wrap xh-in"><nav class="xh-crumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><span>Stories &amp; updates</span></nav><h1 class="xh-h1">Every well, every community</h1><p class="xh-p">Browse the water projects Rafiki has built with communities: borehole wells and water collection. Each project shows what we know about it: where it is, when it was built, the pump, how many people it serves, and photos from the project.</p><div class="xh-row"><span class="xh-note">Showing projects in <b>{{cName}}</b></span></div><a class="pj-link" href="/progress">See our progress in numbers →</a></div></section></sc-if>
 <main tabindex="-1" class="wrap pj-main" id="top">
 <sc-if value="{{listView}}" hint-placeholder-val="{{true}}">
-<section class="pj-bar" aria-label="Find a project">
+<sc-if value="{{showBar}}" hint-placeholder-val="{{true}}"><section class="pj-bar" aria-label="Find a project">
 <div class="pj-row1">
-<div class="pj-search"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg><label for="pj-q" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Search projects</label><input id="pj-q" type="search" placeholder="Search by village, region or project number" value="{{q}}" onChange="{{onQ}}"></div>
+<div class="pj-search"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg><label for="pj-q" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Search projects</label><input id="pj-q" type="search" placeholder="Search by name, village or region" value="{{q}}" onChange="{{onQ}}"></div>
 <div class="pj-sel"><label for="pj-country">Country</label><select id="pj-country" value="{{ctryVal}}" onChange="{{onCountry}}"><option value="all">All countries</option><option value="ke">Kenya</option><option value="tz">Tanzania</option><option value="ug">Uganda</option><option value="mw">Malawi</option></select></div>
 <div class="pj-sel"><label for="pj-year">Year</label><select id="pj-year" value="{{year}}" onChange="{{onYear}}"><sc-for list="{{yearOpts}}" as="o" hint-placeholder-count="6"><option value="{{o.v}}">{{o.l}}</option></sc-for></select></div>
 <div class="pj-sel"><label for="pj-pump">Pump</label><select id="pj-pump" value="{{pump}}" onChange="{{onPump}}"><sc-for list="{{pumpOpts}}" as="o" hint-placeholder-count="4"><option value="{{o.v}}">{{o.l}}</option></sc-for></select></div>
@@ -967,12 +977,14 @@ a.vc:focus-visible{outline:3px solid #6BBDF2;outline-offset:3px}
 </div>
 <div class="pj-row1" style="justify-content:space-between">
 <div class="pj-chips" role="group" aria-label="Project type"><sc-for list="{{typeChips}}" as="c" hint-placeholder-count="4"><button type="button" class="{{c.cls}}" aria-pressed="{{c.pressed}}" onClick="{{c.pick}}">{{c.l}}<span>{{c.n}}</span></button></sc-for></div>
-<span class="pj-count" aria-live="polite">Showing <b>{{shown}}</b> of <b>{{matched}}</b> projects</span>
+<span class="pj-count" aria-live="polite"><sc-if value="{{loading}}" hint-placeholder-val="{{false}}">Loading projects…</sc-if><sc-if value="{{hasCount}}" hint-placeholder-val="{{true}}">Showing <b>{{shown}}</b> of <b>{{matched}}</b> projects</sc-if></span>
 </div>
-</section>
+</section></sc-if>
+<sc-if value="{{loading}}" hint-placeholder-val="{{false}}"><section class="pj-grid" aria-label="Loading projects" aria-busy="true"><sc-for list="{{skeletons}}" as="k" hint-placeholder-count="6"><div class="pj-card pj-skel" aria-hidden="true"><div class="pj-card-ph"></div><div class="pj-card-b"><i></i><i></i><i></i></div></div></sc-for></section></sc-if>
+<sc-if value="{{feedDown}}" hint-placeholder-val="{{false}}"><div class="pj-empty" role="status"><p style="margin:0;font-weight:700">The project list could not be loaded just now.</p><p style="margin:8px 0 0">Our projects come straight from our project records. Please try again in a few minutes.</p><button type="button" onClick="{{retry}}">Try again</button></div></sc-if>
 <sc-if value="{{hasResults}}" hint-placeholder-val="{{true}}">
 <section class="pj-grid" aria-label="Projects">
-<sc-for list="{{cards}}" as="p" hint-placeholder-count="9"><button type="button" class="pj-card" onClick="{{p.open}}" aria-label="{{p.aria}}"><div class="pj-card-ph"><img src="{{p.img}}" alt="{{p.alt}}" loading="lazy" decoding="async"><div class="pj-ba"><span class="{{p.stCls}}">{{p.status}}</span><span>{{p.year}}</span></div></div><div class="pj-card-b"><span class="pj-k">{{p.code}} · {{p.country}}</span><span class="pj-t">{{p.title}}</span><span class="pj-loc">{{p.loc}}</span><div class="pj-tags"><sc-if value="{{p.hasPump}}" hint-placeholder-val="{{true}}"><span>{{p.pump}} pump</span></sc-if></div></div></button></sc-for>
+<sc-for list="{{cards}}" as="p" hint-placeholder-count="9"><button type="button" class="pj-card" onClick="{{p.open}}" aria-label="{{p.aria}}"><div class="pj-card-ph"><sc-if value="{{p.hasImg}}" hint-placeholder-val="{{true}}"><img src="{{p.img}}" srcset="{{p.srcset}}" sizes="(max-width:900px) calc(100vw - 32px), (max-width:1100px) 50vw, 460px" alt="{{p.alt}}" width="480" height="320" loading="lazy" decoding="async"></sc-if><sc-if value="{{p.noImg}}" hint-placeholder-val="{{false}}"><div class="pj-noph" aria-hidden="true"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2c3.3 4 5.6 7.3 5.6 10.3a5.6 5.6 0 01-11.2 0c0-3 2.3-6.3 5.6-10.3z"></path></svg></div></sc-if><div class="pj-ba"><span class="{{p.stCls}}">{{p.status}}</span><sc-if value="{{p.hasYear}}" hint-placeholder-val="{{true}}"><span>{{p.year}}</span></sc-if></div></div><div class="pj-card-b"><span class="pj-k">{{p.kick}}</span><span class="pj-t">{{p.title}}</span><span class="pj-loc">{{p.loc}}</span><div class="pj-tags"><span>{{p.type}}</span><sc-if value="{{p.hasPump}}" hint-placeholder-val="{{true}}"><span>{{p.pump}} pump</span></sc-if></div></div></button></sc-for>
 </section>
 <sc-if value="{{canMore}}" hint-placeholder-val="{{true}}"><div class="pj-more"><button type="button" onClick="{{more}}">Show more projects</button><small>{{remainLabel}}</small></div></sc-if>
 </sc-if>
@@ -982,25 +994,12 @@ a.vc:focus-visible{outline:3px solid #6BBDF2;outline-offset:3px}
 <article class="pd" aria-label="Project">
 <div class="pd-top"><button type="button" class="pd-back" onClick="{{back}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>All projects</button><div class="pd-nav"><button type="button" onClick="{{prev}}">← Previous</button><button type="button" onClick="{{next}}">Next →</button></div></div>
 <div class="pd-card">
-<header class="pd-head"><span class="pd-kick">{{d.code}} · {{d.type}} · {{d.year}} · {{d.status}}</span><h1 class="pd-h2">{{d.title}}</h1><p class="pd-p" style="text-align:center;max-width:36em">{{d.loc}}</p></header>
-<sc-if value="{{d.uc}}" hint-placeholder-val="{{false}}"><div class="pd-track" aria-label="Construction progress"><sc-for list="{{d.track}}" as="t" hint-placeholder-count="5"><div class="{{t.cls}}"><i></i><span>{{t.l}}</span></div></sc-for></div></sc-if>
-<div class="pd-facts"><div class="pd-f"><b class="fv">{{d.country}}</b><span class="fl">Country</span></div><div class="pd-f"><b class="fv">{{d.year}}</b><span class="fl">Year</span></div><div class="pd-f"><b class="fv">{{d.status}}</b><span class="fl">Status</span></div><div class="pd-f"><b class="fv">{{d.pump}}</b><span class="fl">Pump</span></div></div>
-<section class="pd-sec" aria-label="The need"><div class="pd-sh"><span class="pd-n c">1</span><h2 class="pd-st">The need</h2></div>
-<div class="pd-split"><figure class="pd-ph"><img src="{{d.before}}" alt="{{d.beforeAlt}}" loading="lazy" decoding="async"><span class="pd-tag b">Before</span></figure><div style="display:flex;flex-direction:column;gap:12px"><p class="pd-p">Before the well, families here walked long distances to collect water from open sources, several times a day. The water was often contaminated, and illnesses like typhoid and diarrhoea were common.</p></div></div></section>
-<section class="pd-sec" aria-label="How we decided to drill"><div class="pd-sh"><span class="pd-n d">2</span><h2 class="pd-st">How we decided to drill</h2></div>
-<div class="pd-checks">
-<div class="pd-ck"><i>1</i><div><b>Community request</b><span>The community asks Rafiki for help, and our team visits to meet local leaders.</span></div></div>
-<div class="pd-ck"><i>2</i><div><b>Need assessment</b><span>We look at how far families walk for water and how safe their current source is.</span></div></div>
-<div class="pd-ck"><i>3</i><div><b>Site selection</b><span>We study the local geology and choose a spot close to the people who will use it. Typical wells reach 100 to 400 feet.</span></div></div>
-<div class="pd-ck"><i>4</i><div><b>Permits and financing</b><span>Permits are secured and funding is confirmed before drilling begins.</span></div></div>
-<div class="pd-ck"><i>5</i><div><b>Community commitment</b><span>A well committee agrees to look after, protect and maintain the well.</span></div></div>
-</div>
-<div class="pd-verdict"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M8 12.5l2.7 2.7L16 10"></path></svg><span>Decision: approved for drilling.</span></div></section>
-<section class="pd-sec" aria-label="The drilling"><div class="pd-sh"><span class="pd-n w">3</span><h2 class="pd-st">The drilling</h2></div>
-<div class="pd-split"><div style="display:flex;flex-direction:column;gap:12px"><p class="pd-p">Our drilling crew, or a trusted local drilling partner, works side by side with the community until they reach clean water.</p><p class="pd-p">The team then installs the pump ({{d.pumpLower}}) and caps the well with cement to keep the water safe.</p></div><figure class="pd-ph"><img src="{{d.work}}" alt="{{d.workAlt}}" loading="lazy" decoding="async"></figure></div></section>
-<section class="pd-sec" aria-label="After the well"><div class="pd-sh"><span class="pd-n a">4</span><h2 class="pd-st">After the well</h2></div>
-<sc-if value="{{d.done}}" hint-placeholder-val="{{true}}"><div class="pd-ba"><figure class="pd-ph"><img src="{{d.before}}" alt="{{d.beforeAlt}}" loading="lazy" decoding="async"><span class="pd-tag b">Before</span></figure><figure class="pd-ph"><img src="{{d.after}}" alt="{{d.afterAlt}}" loading="lazy" decoding="async"><span class="pd-tag a">After</span></figure></div>
-<p class="pd-p" style="text-align:center;max-width:42em;align-self:center">Today the community draws safe water close to home, with fewer waterborne illnesses and more time for school, work and family.</p></sc-if><sc-if value="{{d.uc}}" hint-placeholder-val="{{false}}"><div class="pd-soon">Water is not flowing here yet. After photos and the community’s story will be added once the well is finished.</div></sc-if></section>
+<header class="pd-head"><span class="pd-kick">{{d.kick}}</span><h1 class="pd-h2" tabindex="-1" id="pd-title">{{d.title}}</h1><p class="pd-p" style="text-align:center;max-width:36em">{{d.place}}</p></header>
+<div class="pd-track" role="list" aria-label="Project progress: {{d.status}}"><sc-for list="{{d.track}}" as="t" hint-placeholder-count="3"><div class="{{t.cls}}" role="listitem" aria-current="{{t.cur}}"><i></i><span>{{t.l}}</span></div></sc-for></div>
+<dl class="pd-facts"><sc-for list="{{d.facts}}" as="f" hint-placeholder-count="8"><div class="pd-f"><dt class="fl">{{f.l}}</dt><dd class="fv">{{f.v}}</dd></div></sc-for></dl>
+<section class="pd-sec" aria-label="Photos"><div class="pd-sh"><h2 class="pd-st">Photos</h2></div>
+<sc-if value="{{d.hasPhotos}}" hint-placeholder-val="{{true}}"><div class="pd-gal"><sc-for list="{{d.photos}}" as="ph" hint-placeholder-count="3"><figure class="pd-ph"><img src="{{ph.src}}" srcset="{{ph.srcset}}" sizes="(max-width:900px) calc(100vw - 72px), 400px" alt="{{ph.alt}}" width="960" height="720" loading="lazy" decoding="async"></figure></sc-for></div></sc-if>
+<sc-if value="{{d.noPhotos}}" hint-placeholder-val="{{false}}"><div class="pd-noph"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.2c3.3 4 5.6 7.3 5.6 10.3a5.6 5.6 0 01-11.2 0c0-3 2.3-6.3 5.6-10.3z"></path></svg><span>No photos of this project yet.</span></div></sc-if></section>
 <div class="pd-cta"><a class="b" href="/donate">Fund the next well</a><button type="button" class="b ghost" style="border:0;cursor:pointer;font:inherit;font-weight:700" onClick="{{back}}">Back to all projects</button></div>
 </div>
 </article>
@@ -1011,7 +1010,7 @@ a.vc:focus-visible{outline:3px solid #6BBDF2;outline-offset:3px}
 <div class="bf-row">
 <div class="bf-col bf-brand"><img src="/img/logo-light-bold.webp" alt="Rafiki Outreach" class="bf-logo"><a href="/about" class="bf-about">About</a></div>
 <div class="bf-col"><span class="bf-lab">Contact</span><span class="bf-follow">Follow us</span><div class="bf-social bf-social-f"><a class="soc soc-fb" href="https://www.facebook.com/rafikioutreach" target="_blank" rel="noopener" aria-label="Rafiki Outreach on Facebook"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="#FFFFFF" d="M13.5 21v-7.5h2.6l.4-3h-3V8.6c0-.9.3-1.5 1.6-1.5h1.6V4.4c-.3 0-1.2-.1-2.3-.1-2.3 0-3.9 1.4-3.9 4V10.5H8v3h2.5V21h3z"></path></svg></a>
-<a class="soc soc-ig" href="https://www.instagram.com/rafikioutreach" target="_blank" rel="noopener" aria-label="Rafiki Outreach on Instagram"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.3" cy="6.7" r="1" fill="#FFFFFF" stroke="none"></circle></svg></a><a class="soc soc-x" href="https://x.com/rafikioutreach" target="_blank" rel="noopener" aria-label="Rafiki Outreach on X"><svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true"><path fill="#FFFFFF" d="M17.8 3h3.1l-6.8 7.8L22 21h-6.2l-4.9-6.4L5.3 21H2.2l7.3-8.3L2 3h6.4l4.4 5.8L17.8 3zm-1.1 16.2h1.7L7.4 4.7H5.6l11.1 14.5z"></path></svg></a><a class="soc soc-li" href="https://www.linkedin.com/company/rafikioutreach" target="_blank" rel="noopener" aria-label="Rafiki Outreach on LinkedIn"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#FFFFFF" d="M5.2 8.6h3.2V19H5.2V8.6zM6.8 3.6a1.85 1.85 0 110 3.7 1.85 1.85 0 010-3.7zM10.4 8.6h3.1V10h.04c.43-.8 1.5-1.66 3.07-1.66 3.28 0 3.89 2.16 3.89 4.97V19h-3.23v-5.04c0-1.2-.02-2.75-1.68-2.75-1.68 0-1.94 1.31-1.94 2.66V19h-3.23V8.6z"></path></svg></a><a class="soc soc-yt" href="https://www.youtube.com/@rafikioutreach" target="_blank" rel="noopener" aria-label="Rafiki Outreach on YouTube"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="#FFFFFF" d="M21.6 7.2a2.5 2.5 0 00-1.76-1.77C18.27 5 12 5 12 5s-6.27 0-7.84.43A2.5 2.5 0 002.4 7.2 26 26 0 002 12a26 26 0 00.4 4.8 2.5 2.5 0 001.76 1.77C5.73 19 12 19 12 19s6.27 0 7.84-.43a2.5 2.5 0 001.76-1.77A26 26 0 0022 12a26 26 0 00-.4-4.8zM10 15V9l5.2 3L10 15z"></path></svg></a></div>
+<a class="soc soc-ig" href="https://www.instagram.com/rafikioutreach" target="_blank" rel="noopener" aria-label="Rafiki Outreach on Instagram"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.3" cy="6.7" r="1" fill="#FFFFFF" stroke="none"></circle></svg></a><a class="soc soc-yt" href="https://www.youtube.com/@rafikioutreach" target="_blank" rel="noopener" aria-label="Rafiki Outreach on YouTube"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="#FFFFFF" d="M21.6 7.2a2.5 2.5 0 00-1.76-1.77C18.27 5 12 5 12 5s-6.27 0-7.84.43A2.5 2.5 0 002.4 7.2 26 26 0 002 12a26 26 0 00.4 4.8 2.5 2.5 0 001.76 1.77C5.73 19 12 19 12 19s6.27 0 7.84-.43a2.5 2.5 0 001.76-1.77A26 26 0 0022 12a26 26 0 00-.4-4.8zM10 15V9l5.2 3L10 15z"></path></svg></a></div>
 <a class="bf-mail" href="mailto:info@rafikioutreach.org"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"></rect><path d="M3.5 7l8.5 6 8.5-6"></path></svg>info@rafikioutreach.org</a><a class="bf-mail bf-tel" href="tel:+18015477847"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2"></path></svg>+1 (801) 547-7847</a></div>
 <div class="bf-col"><span class="bf-lab">Address</span><span>1817 Beck Street</span><span>Salt Lake City, Utah</span><span>84116</span></div>
 </div>
@@ -1021,57 +1020,17 @@ a.vc:focus-visible{outline:3px solid #6BBDF2;outline-offset:3px}
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":3600}}'>
-var PHOTOS = [
-  ['/img/collect.webp', 'Two men fill yellow jerrycans from a muddy river'],
-  ['/img/washing.webp', 'A woman washing dishes beside yellow jerrycans'],
-  ['/img/w-elder-portrait.webp', 'An elder in a bright blue and yellow kanga beside a village wall']
-];
-var WORK = [
-  ['/img/w-drill1.webp', 'Volunteers and a local crew turn the arms of The Village Drill'],
-  ['/img/w-drill2.webp', 'The blue Village Drill rig standing ready on open plains'],
-  ['/img/pg/g-rig.webp', 'Volunteers work a drilling rig'],
-  ['/img/pg/g-rig2.webp', 'The crew sets up a drilling rig'],
-  ['/img/pg/g-pipe.webp', 'A volunteer fits a water pipe'],
-  ['/img/pg/g-tank.webp', 'Volunteers move a water tank into place']
-];
-var AFTER = [
-  ['/img/w-child.webp', 'A smiling boy drinks from a blue cup among other children'],
-  ['/img/w-team.webp', 'A Rafiki Outreach volunteer smiling with five children in a village'],
-  ['/img/w-elder.webp', 'An elder, children and a Rafiki volunteer in a village lane'],
-  ['/img/w-volunteer.webp', 'A Rafiki volunteer carries a child on his shoulders'],
-  ['/img/w-child-sq.webp', 'A smiling young child in a grey hood'],
-  ['/img/w-field3.webp', "A volunteer's hand holds a child's hand"],
-  ['/img/pg/g-pump.webp', 'Students and a Rafiki team member at a new hand pump'],
-  ['/img/pg/g-kids.webp', 'A volunteer surrounded by smiling children'],
-  ['/img/pg/g-class.webp', 'A volunteer with a class of children'],
-  ['/img/pg/g-elder.webp', 'A volunteer greets a family outside their home'],
-  ['/img/pg/g-friends.webp', 'A villager and a Rafiki volunteer smile together'],
-  ['/img/pg/g-maasai.webp', 'Volunteers with Maasai women'],
-  ['/img/pg/g-group.webp', 'Volunteers with families outside their homes'],
-  ['/img/pg/g-school.webp', 'Volunteers and students at a school'],
-  ['/img/pg/g-team.webp', 'Volunteers outside a school building'],
-  ['/img/pg/g-field.webp', 'Children walk across a school field']
-];
-// Areas each country page already lists; Uganda and Malawi areas are still to add
-var AREAS = { Kenya: ['in Eldoret', 'in Kisumu', 'in Naivasha', 'in Kitale'], Tanzania: ['in Manyara Region', 'in Arusha Region', 'in Ruvuma Region', 'in Iringa Region'], Uganda: ['in Uganda'], Malawi: ['in Malawi'] };
-var TYPES = ['Community well', 'Sponsored well', 'Volunteer trip'];
-var COUNTRIES = ['Kenya', 'Kenya', 'Tanzania', 'Uganda', 'Malawi'];
-var PUMPS = ['Manual', 'Electric', 'Solar'];
-var YEARS = [2022, 2023, 2024, 2025, 2026];
+// Projects come only from the live feed (monday.com); there is no sample list.
 var PROJECTS = [];
-(function () {
-  var seen = {};
-  for (var i = 0; i < 312; i++) {
-    var n = 312 - i;
-    var code = 'RW-' + ('000' + n).slice(-3);
-    // count per country so cards next to each other (same country filter) get different photos and areas
-    var c = COUNTRIES[i % 5], k = seen[c] = (seen[c] || 0) + 1, ar = AREAS[c], type = TYPES[i % 3 === 0 ? 0 : (i % 3 === 1 ? 1 : (i % 7 === 0 ? 2 : 0))];
-    var off = { Kenya: 0, Tanzania: 2, Uganda: 4, Malawi: 3 }[c], a = AFTER[(k + 3 * off) % AFTER.length], b = PHOTOS[i % PHOTOS.length], w = WORK[(k + off) % WORK.length];
-    PROJECTS.push({ n: n, code: code, title: (type === 'Volunteer trip' ? 'Volunteer trip well' : type) + ' ' + ar[k % ar.length], country: c, loc: '',
-      type: type, pump: PUMPS[Math.floor(i / 3) % 3],
-      year: YEARS[4 - Math.min(4, Math.floor(i / 63))], status: i < 12 ? 'Under construction' : 'Completed', stage: i < 12 ? (i % 4) + 1 : 5, img: i < 12 ? w[0] : a[0], alt: i < 12 ? w[1] : a[1], before: b[0], beforeAlt: b[1], work: w[0], workAlt: w[1] });
-  }
-})();
+var TYPES = ['Borehole well', 'Water collection'];
+var TYPE_LABEL = { 'Borehole well': 'Borehole wells', 'Water collection': 'Water collection' };
+var PUMPS = [];
+var YEARS = [];
+var STATUS_LABEL = { 'Completed': 'Completed', 'Under construction': 'Under construction', 'Upcoming': 'Looking for funding' };
+var STEPS = ['Looking for funding', 'Under construction', 'Completed'];
+var STEP_AT = { 'Upcoming': 0, 'Under construction': 1, 'Completed': 3 };
+function photoUrl(id, w) { return (window.rafikiPhoto ? window.rafikiPhoto(id) : '/api/photo/' + encodeURIComponent(id)) + '?w=' + w; }
+function num(n) { return Number(n).toLocaleString('en-US'); }
 
 var CTRY = { ke: { n: 'Kenya', ab: 'KE', w: 120, u: 6, p: 312200 }, tz: { n: 'Tanzania', ab: 'TZ', w: 60, u: 2, p: 156100 }, ug: { n: 'Uganda', ab: 'UG', w: 60, u: 2, p: 156100 }, mw: { n: 'Malawi', ab: 'MW', w: 60, u: 2, p: 156100 } };
 var CORDER = ['ke', 'tz', 'ug', 'mw'];
@@ -1147,33 +1106,53 @@ function countryVals(self) {
     wwCards: CORDER.map(function (k) { var on = !all && (s.ctry || 'ke') === k; return { n: CTRY[k].n, ab: CTRY[k].ab, w: CTRY[k].w.toLocaleString('en-US'), u: CTRY[k].u.toLocaleString('en-US'), p: CTRY[k].p ? CTRY[k].p.toLocaleString('en-US') + '+' : '–', on: on ? 'true' : 'false', here: on, cls: 'cc-card' + (on ? ' on' : ''), go: 'Visit the ' + CTRY[k].n + ' page →', pick: function () { window.location.href = ({ ke: '/kenya', tz: '/tanzania', ug: '/uganda', mw: '/malawi' })[k]; } }; }) };
 }
 class Component extends DCLogic {
-  constructor(props) { super(props); this.state = { menu: false, scrolled: false, q: '', year: 'all', pump: 'all', type: 'all', sort: 'new', status: 'all', limit: 12, sel: -1 }; }
+  constructor(props) {
+    super(props);
+    this.state = { menu: false, scrolled: false, q: '', year: 'all', pump: 'all', type: 'all', sort: 'new', status: 'all', limit: 12, sel: -1, feed: 'loading' };
+    // deep link from other pages: /stories?country=ke|tz|ug|mw (or all)
+    var m = /[?&]country=([a-z]+)/i.exec(window.location.search || ''), c = m && m[1].toLowerCase();
+    if (c && CTRY[c]) { this.state.ctry = c; this.state.cAll = false; this.state.ctryPicked = true; }
+    else if (c === 'all') this.state.cAll = true;
+  }
   componentDidMount() {
     var self = this;
     this._onScroll = function () { var sc = (window.scrollY || 0) > 8; if (sc !== self.state.scrolled) self.setState({ scrolled: sc }); };
     window.addEventListener('scroll', this._onScroll, { passive: true });
+    this.watchFeed();
   }
   componentWillUnmount() { window.removeEventListener('scroll', this._onScroll); }
+  componentDidUpdate() {
+    // keyboard focus follows the view: the project title when one opens, its card when going back
+    var was = this._seenSel == null ? -1 : this._seenSel;
+    this._seenSel = this.state.sel;
+    if (was === this.state.sel) return;
+    var self = this;
+    setTimeout(function () {
+      var el = self.state.sel >= 0 ? document.getElementById('pd-title') : document.querySelectorAll('.pj-grid .pj-card')[self._lastSel || 0];
+      if (el && el.focus) { try { el.focus({ preventScroll: self.state.sel >= 0 }); } catch (e) { el.focus(); } }
+    }, 30);
+  }
+  watchFeed() {
+    var self = this;
+    if (!window.rafikiFeed) { this.setState({ feed: 'down' }); return; }
+    window.rafikiFeed().then(function (d) { if (!d || !d.projects) self.setState({ feed: 'down' }); });
+  }
   onFeed(d) {
-    // real borehole wells from monday.com replace the sample projects
-    var wells = d.projects.filter(function (p) { return p.type === 'Borehole well'; });
-    if (!wells.length) return;
-    var seen = {}, years = {}, pumps = {};
+    // the water projects (borehole wells and water collection) from monday.com
+    var water = d.projects.filter(function (p) { return p.water || p.type === 'Borehole well' || p.type === 'Water collection'; });
+    var years = {}, pumps = {};
     PROJECTS.length = 0;
-    wells.forEach(function (p, i) {
-      var k = seen[p.country] = (seen[p.country] || 0) + 1, ph = p.photos.map(window.rafikiPhoto);
-      var stock = p.status === 'Completed' ? AFTER[k % AFTER.length] : WORK[k % WORK.length], before = PHOTOS[k % PHOTOS.length], work = WORK[k % WORK.length];
+    water.forEach(function (p) {
       if (p.year) years[p.year] = 1;
       if (p.pump) pumps[p.pump] = 1;
-      PROJECTS.push({ n: wells.length - i, code: p.area || p.country, title: p.title, country: p.country,
-        loc: p.people ? p.people.toLocaleString('en-US') + ' people served' : '', type: p.type, pump: p.pump, year: p.year || '',
-        status: p.status, stage: 0, img: ph[0] || stock[0], alt: ph[0] ? p.title + ', project photo' : stock[1],
-        before: ph[1] || before[0], beforeAlt: ph[1] ? p.title + ', project photo' : before[1], work: ph[2] || work[0], workAlt: ph[2] ? p.title + ', project photo' : work[1] });
+      var done = p.status === 'Completed';
+      PROJECTS.push({ id: p.id, title: p.title, country: p.country, area: p.area || '', type: p.type, pump: p.pump || '', year: p.year || '',
+        status: p.status, label: STATUS_LABEL[p.status] || p.status, people: p.people || 0, done: done,
+        depth: p.depth || 0, flow: p.flow || 0, photos: (p.photos || []).slice() });
     });
-    TYPES.length = 0;
     YEARS.length = 0; Object.keys(years).map(Number).sort().forEach(function (y) { YEARS.push(y); });
     var order = ['Manual', 'Electric', 'Solar']; PUMPS.length = 0; order.forEach(function (x) { if (pumps[x]) PUMPS.push(x); });
-    this.setState({ limit: 12, sel: -1, type: 'all', year: 'all', pump: 'all' });
+    this.setState({ feed: 'live', limit: 12, sel: -1, type: 'all', year: 'all', pump: 'all' });
   }
   filtered(skipType) {
     var s = this.state, q = s.q.trim().toLowerCase();
@@ -1183,31 +1162,52 @@ class Component extends DCLogic {
       if (s.pump !== 'all' && p.pump !== s.pump) return false;
       if (s.status !== 'all' && p.status !== s.status) return false;
       if (!s.cAll && p.country !== CTRY[s.ctry || 'ke'].n) return false;
-      if (q && (p.code + ' ' + p.title + ' ' + p.loc + ' ' + p.type + ' ' + p.status + ' ' + p.country).toLowerCase().indexOf(q) < 0) return false;
+      if (q && (p.title + ' ' + p.area + ' ' + p.type + ' ' + p.label + ' ' + p.country).toLowerCase().indexOf(q) < 0) return false;
       return true;
     });
     if (s.sort === 'old') out = out.slice().reverse();
     return out;
   }
-  go(i) { this.setState({ sel: i }); try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) { window.scrollTo(0, 0); } }
+  go(i) { if (i >= 0) this._lastSel = i; this.setState({ sel: i }); try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) { window.scrollTo(0, 0); } }
   renderVals() {
     var self = this, s = this.state;
     var list = this.filtered(false), base = this.filtered(true);
     var shown = list.slice(0, s.limit);
-    var det = s.sel >= 0 ? list[s.sel] || PROJECTS[0] : PROJECTS[0];
-    var chips = [['all', 'All projects']].concat(TYPES.map(function (t) { return [t, t]; })).map(function (c) {
+    var det = s.sel >= 0 ? list[s.sel] : null;
+    var live = s.feed === 'live';
+    var chips = [['all', 'All water projects']].concat(TYPES.map(function (t) { return [t, TYPE_LABEL[t] || t]; })).map(function (c) {
       var n = c[0] === 'all' ? base.length : base.filter(function (p) { return p.type === c[0]; }).length;
       var on = s.type === c[0];
-      return { l: c[1], n: n, cls: 'pj-chip' + (on ? ' on' : ''), pressed: on ? 'true' : 'false', pick: function () { self.setState({ type: c[0], limit: 12 }); } };
+      return { l: c[1], n: live ? n : '', cls: 'pj-chip' + (on ? ' on' : ''), pressed: on ? 'true' : 'false', pick: function () { self.setState({ type: c[0], limit: 12 }); } };
     });
     var remain = list.length - shown.length;
+    var people = function (p) { return p.people ? num(p.people) + (p.done ? ' people served' : ' people expected') : ''; };
+    var d = { kick: '', title: '', place: '', status: '', track: [], facts: [], photos: [], hasPhotos: false, noPhotos: true };
+    if (det) {
+      var at = STEP_AT[det.status] || 0, facts = [];
+      var add = function (l, v) { if (v !== '' && v != null && v !== 0) facts.push({ l: l, v: String(v) }); };
+      add('Country', det.country);
+      add('Area', det.area);
+      add('Year', det.year);
+      add('Type', det.type);
+      add('Pump', det.pump);
+      add(det.done ? 'People served' : 'People expected', det.people ? num(det.people) : '');
+      add('Status', det.label);
+      add(det.done ? 'Depth' : 'Planned depth', det.depth ? num(det.depth) + ' m' : '');
+      add(det.done ? 'Flow rate' : 'Expected flow rate', det.flow ? num(det.flow) + ' litres per hour' : '');
+      d = { kick: [det.type, det.year, det.label].filter(Boolean).join(' · '), title: det.title, place: [det.area, det.country].filter(Boolean).join(', '), status: det.label,
+        track: STEPS.map(function (l, k) { var cur = k === at; return { l: l, cur: cur ? 'step' : 'false', cls: 'pd-tk' + (k < at ? ' done' : (cur ? ' now' : '')) }; }),
+        facts: facts,
+        photos: det.photos.map(function (id, k) { return { src: photoUrl(id, 960), srcset: photoUrl(id, 480) + ' 480w, ' + photoUrl(id, 960) + ' 960w', alt: 'Photo ' + (k + 1) + ' of ' + det.photos.length + ' from ' + det.title }; }),
+        hasPhotos: det.photos.length > 0, noPhotos: !det.photos.length };
+    }
     return Object.assign(countryVals(this), {
       hdStyle: 'transform: translateY(0)',
       tileShadow: s.scrolled ? 'box-shadow: 0 2px 4px rgba(10,10,10,0.05), 0 14px 36px rgba(10,10,10,0.12)' : 'box-shadow: 0 1px 2px rgba(10,10,10,0.04)',
       menuOpen: s.menu, menuClosed: !s.menu, menuExpanded: s.menu ? 'true' : 'false', menuLabel: s.menu ? 'Close menu' : 'Open menu',
       toggleMenu: function () { self._menuWasOpen = true; self.setState({ menu: !self.state.menu }); },
       closeMenu: function () { self.setState({ menu: false, sel: -1 }); },
-      listView: s.sel < 0, detailView: s.sel >= 0,
+      listView: !det, detailView: !!det,
       q: s.q, year: s.year, pump: s.pump, sort: s.sort, status: s.status,
       ctryVal: s.cAll ? 'all' : (s.ctry || 'ke'),
       onCountry: function (e) { var v = e.target.value; self.setState(v === 'all' ? { cAll: true, limit: 12 } : { ctry: v, cAll: false, limit: 12 }); },
@@ -1219,16 +1219,25 @@ class Component extends DCLogic {
       yearOpts: [{ v: 'all', l: 'All years' }].concat(YEARS.slice().reverse().map(function (y) { return { v: String(y), l: String(y) }; })),
       pumpOpts: [{ v: 'all', l: 'All pumps' }].concat(PUMPS.map(function (p) { return { v: p, l: p }; })),
       typeChips: chips,
-      shown: shown.length.toLocaleString('en-US'), matched: list.length.toLocaleString('en-US'),
-      hasResults: list.length > 0, noResults: list.length === 0,
-      canMore: remain > 0, remainLabel: remain.toLocaleString('en-US') + ' more to explore',
+      loading: s.feed === 'loading', feedDown: s.feed === 'down', showBar: s.feed !== 'down', hasCount: live,
+      skeletons: [1, 2, 3, 4, 5, 6],
+      retry: function () { try { sessionStorage.removeItem('rfFeed'); } catch (e) {} window.location.reload(); },
+      shown: live ? num(shown.length) : '0', matched: live ? num(list.length) : '0',
+      hasResults: live && list.length > 0, noResults: live && list.length === 0,
+      canMore: live && remain > 0, remainLabel: num(remain) + ' more to explore',
       more: function () { self.setState({ limit: self.state.limit + 12 }); },
       reset: function () { self.setState({ q: '', year: 'all', pump: 'all', type: 'all', status: 'all', cAll: true, limit: 12 }); },
-      cards: shown.map(function (p, i) { return { hasPump: !!p.pump, code: p.code, title: p.title, loc: p.loc, type: p.type, pump: p.pump, year: p.year, img: p.img, alt: p.alt, country: p.country, status: p.status, stCls: p.status === 'Completed' ? 'ok' : 'uc', aria: 'Open project: ' + p.title, open: function () { self.go(i); } }; }),
-      d: { code: det.code, title: det.title, loc: det.loc, country: det.country, type: det.type, year: det.year, pump: det.pump || '–', pumpLower: det.pump ? det.pump.toLowerCase() : 'chosen for the site', before: det.before, beforeAlt: det.beforeAlt, work: det.work, workAlt: det.workAlt, after: det.img, afterAlt: det.alt, status: det.status, uc: det.status !== 'Completed' && det.stage > 0, done: det.status === 'Completed', track: ['Site survey', 'Permits and financing', 'Drilling', 'Pump installed', 'Capped and handed over'].map(function (l, k) { return { l: l, cls: 'pd-tk' + (k + 1 < det.stage ? ' done' : (k + 1 === det.stage ? ' now' : '')) }; }) },
+      cards: shown.map(function (p, i) {
+        var ph = p.photos[0];
+        return { hasPump: !!p.pump, kick: p.area ? p.area + ' · ' + p.country : p.country, title: p.title, loc: people(p), type: p.type, pump: p.pump,
+          hasYear: !!p.year, year: p.year, hasImg: !!ph, noImg: !ph, img: ph ? photoUrl(ph, 480) : '', srcset: ph ? photoUrl(ph, 480) + ' 480w, ' + photoUrl(ph, 960) + ' 960w' : '',
+          alt: ph ? 'Photo from ' + p.title : '', country: p.country, status: p.label, stCls: p.status === 'Completed' ? 'ok' : (p.status === 'Upcoming' ? 'up' : 'uc'),
+          aria: 'Open project: ' + p.title + ', ' + p.label, open: function () { self.go(i); } };
+      }),
+      d: d,
       back: function () { self.setState({ sel: -1 }); },
-      prev: function () { self.go((s.sel - 1 + list.length) % list.length); },
-      next: function () { self.go((s.sel + 1) % list.length); }
+      prev: function () { if (list.length) self.go((s.sel - 1 + list.length) % list.length); },
+      next: function () { if (list.length) self.go((s.sel + 1) % list.length); }
     });
   }
 }
