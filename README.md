@@ -41,6 +41,13 @@ Pages use the WebP files in `img/` (photos at most 1200px, logos 120px tall). Th
 
 ## Deploy
 
-- Vercel: import the repo (framework preset: Other, no build command). `vercel.json` holds clean URLs and redirects.
-- Cloudflare Pages (free, unlimited traffic): connect the repo, build command `npm run build:pages`, output directory `dist`. `_redirects` holds the redirects and `_headers` the Content-Security-Policy; `404.html` is served for unknown pages. Only the site files are copied into `dist`, so `server.js`, `package.json` and this README are not published.
-- Railway or any Node host: `npm start` runs `server.js`, a small static server. It sends a Content-Security-Policy that allows `'unsafe-eval'`, which the page runtime (`support.js`) needs.
+The site is hosted on **Cloudflare Pages** (free, unlimited traffic).
+
+1. Cloudflare dashboard → Workers & Pages → Create → Pages → Connect to Git → choose `donke01/rafiki-redesign`.
+2. Production branch `main`, framework preset None, build command `npm run build:pages`, build output directory `dist`.
+3. Every push to `main` redeploys. Other branches get their own preview link.
+4. Custom domain: the project → Custom domains → add `rafikioutreach.org` (and `www`). The yellow "To add" boxes only hide on that domain.
+
+`_redirects` holds the redirects, `_headers` the Content-Security-Policy (the page runtime `support.js` needs `'unsafe-eval'`), and `404.html` is served for unknown pages. Only the site files are copied into `dist`, so `server.js`, `package.json` and this README are not published.
+
+Local preview: `npm start` runs `server.js`, a small static server with the same headers, on port 3000. `vercel.json` is kept only in case the site moves to Vercel.
