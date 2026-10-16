@@ -3,3 +3,7 @@
   X-Content-Type-Options: nosniff
 /img/*
   Cache-Control: public, max-age=86400
+/support.js
+  Cache-Control: public, max-age=3600
+/feed.js
+  Cache-Control: public, max-age=3600

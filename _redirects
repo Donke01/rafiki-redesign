@@ -2,3 +2,12 @@
 /about-1.html /communities 301
 /meet /about 301
 /meet.html /about 301
+/home / 301
+/blog /updates 301
+/rally /event-list 301
+/book-online /trips 301
+/submit-your-application /contact 301
+/artificial-intelligence-researcher /donate 301
+/deep-learning-engineer /contact 301
+/donate-1 /donate 301
+/post/* /updates 301

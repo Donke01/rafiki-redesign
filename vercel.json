@@ -11,6 +11,14 @@
       "source": "/meet",
       "destination": "/about",
       "permanent": true
-    }
+    },
+    { "source": "/home", "destination": "/", "permanent": true },
+    { "source": "/blog", "destination": "/updates", "permanent": true },
+    { "source": "/rally", "destination": "/event-list", "permanent": true },
+    { "source": "/book-online", "destination": "/trips", "permanent": true },
+    { "source": "/submit-your-application", "destination": "/contact", "permanent": true },
+    { "source": "/artificial-intelligence-researcher", "destination": "/donate", "permanent": true },
+    { "source": "/deep-learning-engineer", "destination": "/contact", "permanent": true },
+    { "source": "/donate-1", "destination": "/donate", "permanent": true }
   ]
 }
