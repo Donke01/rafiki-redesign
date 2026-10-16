@@ -42,6 +42,43 @@ footer.bf .bf-legal a:hover{color:#FFFFFF !important}
 footer.bf :focus-visible{outline-color:#04263F !important}
 footer.bf .bf-copy :focus-visible{outline-color:#FFFFFF !important}
 </style>
+<style>/* design layer: one type scale, buttons, cards, tap targets and anchor offsets across all pages */
+button,input,select,textarea{font-family:inherit}
+.skip{font-family:'Montserrat',system-ui,sans-serif !important}
+html{scroll-padding-top:124px}
+@media (max-width:800px){html{scroll-padding-top:96px}}
+/* headings: black, one weight; section headings use .x-h2, panel headings use .h2 */
+html .h2{color:#0A0A0A;font-weight:800;letter-spacing:-0.03em;font-size:clamp(28px,3vw,44px);line-height:1.05}
+html .tm .h2{font-size:clamp(32px,4vw,58px);line-height:1.02;letter-spacing:-0.035em}
+.pr-ct{color:#0A0A0A !important}
+/* smallest text is 12px */
+.cc-here,.tk-st,.tm-tag,.tm-grid.rest .tm-tag,.lw-yr,.pj-sel label,.pj-ba span{font-size:12px !important}
+.im-facts span,.cc-rows span{font-size:13px !important}
+.hp-d{font-size:15px !important}@media (max-width:600px){.hp-d{font-size:14px !important}}
+/* buttons: one height and padding */
+.b:not(.ac-btn),.xb,.xb2,.sp-btn{min-height:50px !important;padding-left:24px !important;padding-right:24px !important;font-size:15px !important;font-weight:700 !important;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.fchip,.pj-chip,.gv-freq button{min-height:44px !important}
+/* cards: one corner size for cards, one for panels */
+.lw-card,.cc-card,.sp-card,.pj-card,.up-card,.pr-it,.ps-it,.sg-well,.hp-card{border-radius:22px !important}
+.pr-card,.sg-panel,.xe-card,.lf-tile{border-radius:28px !important}
+/* cards in a row line up */
+.pj-grid{align-items:stretch}.pj-card{height:100%}.pj-card-b{flex:1}
+/* the whole card opens its link */
+.hp-card,.sp-card,.pr-it{position:relative}
+.hp-card > .b::after,.sp-card .sp-btn::after,.pr-it > .cw-go::after{content:"";position:absolute;inset:0;border-radius:inherit}
+.hp-card,.sp-card{cursor:pointer}
+/* tap targets on phones */
+@media (max-width:800px){
+  .bf-dir a{min-height:44px !important}
+  .xh-crumb a{min-height:44px;display:inline-flex !important;align-items:center}
+  .tm-mail,.nd-src,.ww-src a,.fx-ext,.gc-d a,.gc-it a,.pr-sl a,.office a,.ct-off a,.cw-go,.mp-src a{display:inline-flex !important;align-items:center;min-height:44px !important}
+  .tk-un-h{min-height:44px !important;display:flex !important;align-items:center}
+  .hp-card .b{min-height:44px !important}
+}
+/* phone heroes: no empty blue space above the title, nothing under the header */
+@media (max-width:700px){html .xh:not(.cn-hero){min-height:0 !important;align-items:flex-start}html .xh:not(.cn-hero) .xh-in{padding-top:124px !important;padding-bottom:52px !important}html .zh-in{padding-top:132px !important}}
+.tk-pin::after{content:"";position:absolute;inset:-10px;border-radius:50%}
+</style>
 </head>
 <body>
 <x-dc>
@@ -1276,7 +1313,8 @@ function EXTRA(self, s) {
   };
 }
 
-var CTRY = { ke: { n: 'Kenya', ab: 'KE', w: 120, u: 6, p: 312200 }, tz: { n: 'Tanzania', ab: 'TZ', w: 60, u: 2, p: 156100 }, ug: { n: 'Uganda', ab: 'UG', w: 60, u: 2, p: 156100 }, mw: { n: 'Malawi', ab: 'MW', w: 60, u: 2, p: 156100 } };
+// Before the live feed loads (or if it can't), these are the October 2026 figures from monday.com.
+var CTRY = { ke: { n: 'Kenya', ab: 'KE', w: 26, u: 2, p: 77088 }, tz: { n: 'Tanzania', ab: 'TZ', w: 83, u: 0, p: 99444 }, ug: { n: 'Uganda', ab: 'UG', w: 0, u: 2, p: 0 }, mw: { n: 'Malawi', ab: 'MW', w: 0, u: 0, p: 0 } };
 var CORDER = ['ke', 'tz', 'ug', 'mw'];
 var FOUNDERS = [
   { tag: 'Co-founder', name: 'Reid Anderson', role: 'Co-founder, Rafiki Outreach', email: 'reid@rafikioutreach.org', img: '/img/reid.webp', bio: 'Reid co-founded Rafiki Outreach to bring clean water to communities across East Africa. Rafiki means friend in Swahili, and Reid builds those friendships on the ground, joining volunteers in the field and working alongside local teams and the communities they serve.' },

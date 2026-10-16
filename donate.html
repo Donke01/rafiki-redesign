@@ -42,6 +42,43 @@ footer.bf .bf-legal a:hover{color:#FFFFFF !important}
 footer.bf :focus-visible{outline-color:#04263F !important}
 footer.bf .bf-copy :focus-visible{outline-color:#FFFFFF !important}
 </style>
+<style>/* design layer: one type scale, buttons, cards, tap targets and anchor offsets across all pages */
+button,input,select,textarea{font-family:inherit}
+.skip{font-family:'Montserrat',system-ui,sans-serif !important}
+html{scroll-padding-top:124px}
+@media (max-width:800px){html{scroll-padding-top:96px}}
+/* headings: black, one weight; section headings use .x-h2, panel headings use .h2 */
+html .h2{color:#0A0A0A;font-weight:800;letter-spacing:-0.03em;font-size:clamp(28px,3vw,44px);line-height:1.05}
+html .tm .h2{font-size:clamp(32px,4vw,58px);line-height:1.02;letter-spacing:-0.035em}
+.pr-ct{color:#0A0A0A !important}
+/* smallest text is 12px */
+.cc-here,.tk-st,.tm-tag,.tm-grid.rest .tm-tag,.lw-yr,.pj-sel label,.pj-ba span{font-size:12px !important}
+.im-facts span,.cc-rows span{font-size:13px !important}
+.hp-d{font-size:15px !important}@media (max-width:600px){.hp-d{font-size:14px !important}}
+/* buttons: one height and padding */
+.b:not(.ac-btn),.xb,.xb2,.sp-btn{min-height:50px !important;padding-left:24px !important;padding-right:24px !important;font-size:15px !important;font-weight:700 !important;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.fchip,.pj-chip,.gv-freq button{min-height:44px !important}
+/* cards: one corner size for cards, one for panels */
+.lw-card,.cc-card,.sp-card,.pj-card,.up-card,.pr-it,.ps-it,.sg-well,.hp-card{border-radius:22px !important}
+.pr-card,.sg-panel,.xe-card,.lf-tile{border-radius:28px !important}
+/* cards in a row line up */
+.pj-grid{align-items:stretch}.pj-card{height:100%}.pj-card-b{flex:1}
+/* the whole card opens its link */
+.hp-card,.sp-card,.pr-it{position:relative}
+.hp-card > .b::after,.sp-card .sp-btn::after,.pr-it > .cw-go::after{content:"";position:absolute;inset:0;border-radius:inherit}
+.hp-card,.sp-card{cursor:pointer}
+/* tap targets on phones */
+@media (max-width:800px){
+  .bf-dir a{min-height:44px !important}
+  .xh-crumb a{min-height:44px;display:inline-flex !important;align-items:center}
+  .tm-mail,.nd-src,.ww-src a,.fx-ext,.gc-d a,.gc-it a,.pr-sl a,.office a,.ct-off a,.cw-go,.mp-src a{display:inline-flex !important;align-items:center;min-height:44px !important}
+  .tk-un-h{min-height:44px !important;display:flex !important;align-items:center}
+  .hp-card .b{min-height:44px !important}
+}
+/* phone heroes: no empty blue space above the title, nothing under the header */
+@media (max-width:700px){html .xh:not(.cn-hero){min-height:0 !important;align-items:flex-start}html .xh:not(.cn-hero) .xh-in{padding-top:124px !important;padding-bottom:52px !important}html .zh-in{padding-top:132px !important}}
+.tk-pin::after{content:"";position:absolute;inset:-10px;border-radius:50%}
+</style>
 </head>
 <body>
 <x-dc>
@@ -1198,7 +1235,7 @@ a.vc:focus-visible{outline:3px solid #6BBDF2;outline-offset:3px}
 </header>
 </div>
 <div class="hd-space" aria-hidden="true"></div>
-<section class="xh" aria-label="Get involved"><div class="wrap xh-in"><nav class="xh-crumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><span>Get involved</span></nav><h1 class="xh-h1">Give clean water</h1><p class="xh-p">On average, {{costPP}} brings safe water to one person. Give once or every month, or bring your school, business or friend group together to sponsor a whole well.</p></div></section><main tabindex="-1" class="wrap xm" id="top"><section class="xs" id="give"><div class="xd"><div class="x-col"><h2 class="x-h2">Your gift at work</h2><p class="x-p">Working with local teams and communities, we make sure every donation goes directly to the projects.</p><div class="xd-list"><div><b>{{costPP}}</b><span>brings safe water to one person, on average across {{costWells}} wells</span></div><div><b>100%</b><span>of every donation goes directly to the projects. <a href="/transparency" style="color:#076DB1;font-weight:600">See how</a></span></div><div><b>501(c)(3)</b><span>Donations to Rafiki Outreach are tax deductible</span></div></div></div><div class="xd-form"><h3 class="x-h3">Give now</h3><!-- ZEFFY: replace this whole div with the iframe embed code from Zeffy (Form > Share > Embed) --><div class="xd-slot" style="border-style:solid"><b>Give today</b> <span class="todo">Zeffy giving form to add here</span><span>Email us and we will send you a secure link to give online, one-time or monthly. Tell us if you would like to sponsor a whole well.</span><a class="b" style="margin-top:10px" href="mailto:info@rafikioutreach.org?subject=I%20would%20like%20to%20donate">Email us to give</a><span style="font-size:13px;color:#5A6066">info@rafikioutreach.org · +1 (801) 547-7847</span></div></div></div></section><section class="xs"><div class="sec-h"><h2 class="x-h2">More ways to get involved</h2></div><div class="xe-grid two"><a class="xe-card" href="/sponsor"><img src="/img/pg/g-school.webp" alt="" loading="lazy" decoding="async"><div><b>Sponsor a project</b><span>Schools, businesses, churches and friend groups can fund a whole well together.</span></div></a><a class="xe-card" href="/fundraise"><img src="/img/pg/g-kids.webp" alt="" loading="lazy" decoding="async"><div><b>Start a fundraiser</b><span>A birthday, a school challenge, a church drive or a walk for water.</span></div></a><a class="xe-card" href="/trips"><img src="/img/pg/tr-plains.webp" alt="" loading="lazy" decoding="async"><div><b>Join an expedition</b><span>Drill a well, serve a community, then see the savannah on safari.</span></div></a><a class="xe-card" href="mailto:info@rafikioutreach.org?subject=Volunteering"><img src="/img/pg/g-paint.webp" alt="" loading="lazy" decoding="async"><div><b>Volunteer</b><span>Share your skills from home or in the field. Tell us what you would like to do.</span></div></a></div></section><section class="xs"><div class="x-split even"><img class="x-photo" src="/img/washing.webp" alt="Washing dishes with clean water" loading="lazy" decoding="async"><div class="x-col"><h2 class="x-h2">Clean water, a clear objective</h2><p class="x-lead">When communities have clean water, they thrive.</p><p class="x-p">Clean water brings better sanitation and hygiene, more time for school and work, and farms and herds that prosper. It brings communities one step closer to healthier living and the end of poverty.</p></div></div></section><section class="xs ink"><div class="xc"><div class="x-col"><h2 class="x-h2">Events and updates</h2><p class="x-p">Fundraisers, talks and trip info sessions are listed on our events page. Field reports and stories are posted to Stories and updates.</p></div><div class="xc-row"><a class="xb lt" href="/event-list">See events</a><a class="xb2" href="/stories">Stories and updates</a></div></div></section></main>
+<section class="xh" aria-label="Get involved"><div class="wrap xh-in"><nav class="xh-crumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><span>Get involved</span></nav><h1 class="xh-h1">Give clean water</h1><p class="xh-p">On average, {{costPP}} brings safe water to one person. Give once or every month, or bring your school, business or friend group together to sponsor a whole well.</p></div></section><main tabindex="-1" class="wrap xm" id="top"><section class="xs" id="give"><div class="xd"><div class="x-col"><h2 class="x-h2">Your gift at work</h2><p class="x-p">Working with local teams and communities, we make sure every donation goes directly to the projects.</p><div class="xd-list"><div><b>{{costPP}}</b><span>brings safe water to one person, on average across {{costWells}} wells</span></div><div><b>100%</b><span>of every donation goes directly to the projects. <a href="/transparency" style="color:#076DB1;font-weight:600">See how</a></span></div><div><b>501(c)(3)</b><span>Donations to Rafiki Outreach are tax deductible</span></div></div></div><div class="xd-form"><h3 class="x-h3">Give now</h3><!-- ZEFFY: replace this whole div with the iframe embed code from Zeffy (Form > Share > Embed) --><div class="xd-slot" style="border-style:solid"><b>Give today</b> <span class="todo">Zeffy giving form to add here</span><span>Email us and we will send you a secure link to give online, one-time or monthly. Tell us if you would like to sponsor a whole well.</span><a class="b" style="margin-top:10px" href="mailto:info@rafikioutreach.org?subject=I%20would%20like%20to%20donate">Email us to give</a><span style="font-size:13px;color:#5A6066">info@rafikioutreach.org · +1 (801) 547-7847</span></div></div></div></section><section class="xs"><div class="sec-h"><h2 class="x-h2">More ways to get involved</h2></div><div class="xe-grid two"><a class="xe-card" href="/sponsor"><img src="/img/pg/g-school.webp" srcset="/img/pg/g-school-600.webp 600w, /img/pg/g-school.webp 1200w" sizes="(max-width: 700px) 92vw, 50vw" alt="" loading="lazy" decoding="async"><div><b>Sponsor a project</b><span>Schools, businesses, churches and friend groups can fund a whole well together.</span></div></a><a class="xe-card" href="/fundraise"><img src="/img/pg/g-kids.webp" srcset="/img/pg/g-kids-600.webp 600w, /img/pg/g-kids.webp 1200w" sizes="(max-width: 700px) 92vw, 50vw" alt="" loading="lazy" decoding="async"><div><b>Start a fundraiser</b><span>A birthday, a school challenge, a church drive or a walk for water.</span></div></a><a class="xe-card" href="/trips"><img src="/img/pg/tr-plains.webp" srcset="/img/pg/tr-plains-600.webp 600w, /img/pg/tr-plains.webp 1200w" sizes="(max-width: 700px) 92vw, 50vw" alt="" loading="lazy" decoding="async"><div><b>Join an expedition</b><span>Drill a well, serve a community, then see the savannah on safari.</span></div></a><a class="xe-card" href="mailto:info@rafikioutreach.org?subject=Volunteering"><img src="/img/pg/g-paint.webp" srcset="/img/pg/g-paint-600.webp 600w, /img/pg/g-paint.webp 1200w" sizes="(max-width: 700px) 92vw, 50vw" alt="" loading="lazy" decoding="async"><div><b>Volunteer</b><span>Share your skills from home or in the field. Tell us what you would like to do.</span></div></a></div></section><section class="xs"><div class="x-split even"><img class="x-photo" src="/img/washing.webp" srcset="/img/washing-600.webp 600w, /img/washing.webp 1200w" sizes="(max-width: 700px) 92vw, 50vw" alt="Washing dishes with clean water" loading="lazy" decoding="async"><div class="x-col"><h2 class="x-h2">Clean water, a clear objective</h2><p class="x-lead">When communities have clean water, they thrive.</p><p class="x-p">Clean water brings better sanitation and hygiene, more time for school and work, and farms and herds that prosper. It brings communities one step closer to healthier living and the end of poverty.</p></div></div></section><section class="xs ink"><div class="xc"><div class="x-col"><h2 class="x-h2">Events and updates</h2><p class="x-p">Fundraisers, talks and trip info sessions are listed on our events page. Field reports and stories are posted to Stories and updates.</p></div><div class="xc-row"><a class="xb lt" href="/event-list">See events</a><a class="xb2" href="/stories">Stories and updates</a></div></div></section></main>
 <footer class="bf">
 <div class="wrap bf-tile">
 <div class="bf-row">
@@ -1215,7 +1252,8 @@ a.vc:focus-visible{outline:3px solid #6BBDF2;outline-offset:3px}
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":3000}}'>
 
-var CTRY = { ke: { n: 'Kenya', ab: 'KE', w: 120, u: 6, p: 312200 }, tz: { n: 'Tanzania', ab: 'TZ', w: 60, u: 2, p: 156100 }, ug: { n: 'Uganda', ab: 'UG', w: 60, u: 2, p: 156100 }, mw: { n: 'Malawi', ab: 'MW', w: 60, u: 2, p: 156100 } };
+// Before the live feed loads (or if it can't), these are the October 2026 figures from monday.com.
+var CTRY = { ke: { n: 'Kenya', ab: 'KE', w: 26, u: 2, p: 77088 }, tz: { n: 'Tanzania', ab: 'TZ', w: 83, u: 0, p: 99444 }, ug: { n: 'Uganda', ab: 'UG', w: 0, u: 2, p: 0 }, mw: { n: 'Malawi', ab: 'MW', w: 0, u: 0, p: 0 } };
 var CORDER = ['ke', 'tz', 'ug', 'mw'];
 var FOUNDERS = [
   { tag: 'Co-founder', name: 'Reid Anderson', role: 'Co-founder, Rafiki Outreach', email: 'reid@rafikioutreach.org', img: '/img/reid.webp', bio: 'Reid co-founded Rafiki Outreach to bring clean water to communities across East Africa. Rafiki means friend in Swahili, and Reid builds those friendships on the ground, joining volunteers in the field and working alongside local teams and the communities they serve.' },

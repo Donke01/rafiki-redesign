@@ -42,6 +42,43 @@ footer.bf .bf-legal a:hover{color:#FFFFFF !important}
 footer.bf :focus-visible{outline-color:#04263F !important}
 footer.bf .bf-copy :focus-visible{outline-color:#FFFFFF !important}
 </style>
+<style>/* design layer: one type scale, buttons, cards, tap targets and anchor offsets across all pages */
+button,input,select,textarea{font-family:inherit}
+.skip{font-family:'Montserrat',system-ui,sans-serif !important}
+html{scroll-padding-top:124px}
+@media (max-width:800px){html{scroll-padding-top:96px}}
+/* headings: black, one weight; section headings use .x-h2, panel headings use .h2 */
+html .h2{color:#0A0A0A;font-weight:800;letter-spacing:-0.03em;font-size:clamp(28px,3vw,44px);line-height:1.05}
+html .tm .h2{font-size:clamp(32px,4vw,58px);line-height:1.02;letter-spacing:-0.035em}
+.pr-ct{color:#0A0A0A !important}
+/* smallest text is 12px */
+.cc-here,.tk-st,.tm-tag,.tm-grid.rest .tm-tag,.lw-yr,.pj-sel label,.pj-ba span{font-size:12px !important}
+.im-facts span,.cc-rows span{font-size:13px !important}
+.hp-d{font-size:15px !important}@media (max-width:600px){.hp-d{font-size:14px !important}}
+/* buttons: one height and padding */
+.b:not(.ac-btn),.xb,.xb2,.sp-btn{min-height:50px !important;padding-left:24px !important;padding-right:24px !important;font-size:15px !important;font-weight:700 !important;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.fchip,.pj-chip,.gv-freq button{min-height:44px !important}
+/* cards: one corner size for cards, one for panels */
+.lw-card,.cc-card,.sp-card,.pj-card,.up-card,.pr-it,.ps-it,.sg-well,.hp-card{border-radius:22px !important}
+.pr-card,.sg-panel,.xe-card,.lf-tile{border-radius:28px !important}
+/* cards in a row line up */
+.pj-grid{align-items:stretch}.pj-card{height:100%}.pj-card-b{flex:1}
+/* the whole card opens its link */
+.hp-card,.sp-card,.pr-it{position:relative}
+.hp-card > .b::after,.sp-card .sp-btn::after,.pr-it > .cw-go::after{content:"";position:absolute;inset:0;border-radius:inherit}
+.hp-card,.sp-card{cursor:pointer}
+/* tap targets on phones */
+@media (max-width:800px){
+  .bf-dir a{min-height:44px !important}
+  .xh-crumb a{min-height:44px;display:inline-flex !important;align-items:center}
+  .tm-mail,.nd-src,.ww-src a,.fx-ext,.gc-d a,.gc-it a,.pr-sl a,.office a,.ct-off a,.cw-go,.mp-src a{display:inline-flex !important;align-items:center;min-height:44px !important}
+  .tk-un-h{min-height:44px !important;display:flex !important;align-items:center}
+  .hp-card .b{min-height:44px !important}
+}
+/* phone heroes: no empty blue space above the title, nothing under the header */
+@media (max-width:700px){html .xh:not(.cn-hero){min-height:0 !important;align-items:flex-start}html .xh:not(.cn-hero) .xh-in{padding-top:124px !important;padding-bottom:52px !important}html .zh-in{padding-top:132px !important}}
+.tk-pin::after{content:"";position:absolute;inset:-10px;border-radius:50%}
+</style>
 </head>
 <body>
 <x-dc>
@@ -1159,7 +1196,8 @@ a.vc:focus-visible{outline:3px solid #6BBDF2;outline-offset:3px}
 var PROJ = [{"name": "Kisese Village, borehole #3", "region": "Manyara Region, Tanzania", "date": "Aug 2023", "impact": "About 250 people", "facts": [["Project type", "Borehole #3"], ["Location", "Kisese, Tanzania"], ["Drilling", "Rafiki Drilling and Services"], ["Funding", "Donated well"], ["Donors", "Rafiki Outreach donors"], ["Water analysis", "Passed on all accounts. Mineral and fluoride levels all safe."]], "story": ["The community no longer has to drink the alkaline water from their ground water well, or the contaminated and alkaline water from Lake Manyara. The borehole is close to the village but further from the lake, so people reach water more safely, away from the hippos and hyenas along the shore."]}, {"name": "Kisese Village, borehole #2", "region": "Southwest of Lake Manyara, Tanzania", "date": "May 2023", "impact": "1,000+ people", "facts": [["Project type", "Borehole #2"], ["Location", "Kisese Village, Tanzania"], ["Drilling", "Rafiki Drilling and Services"], ["Funding", "Donated well"], ["Donors", "Ricks Family and Bybee Family"], ["Water analysis", "Clean of all contaminants; mineral levels within safe limits."]], "story": ["People used to collect drinking water from a nearby river. For six months of the year it slowed and dried up, and they dug down into the mud to find dirty water.", "Now the community charges a small amount when villagers fill their containers. They have saved enough for an electrical transformer, so homes can slowly be connected. Before the well, only one home had electricity."]}, {"name": "Oldonyosambu Village", "region": "Monduli, Arusha Region, Tanzania", "date": "Jul–Aug 2023", "impact": "2,000+ people", "facts": [["Project type", "Water storage project"], ["Built by", "Rafiki Outreach volunteers and Rafiki Drilling and Services"], ["Funding", "Donated supplies and labour"], ["Donors", "Rafiki Outreach and expedition volunteers"], ["Water analysis", "For now, rainwater is a much safer alternative to the mountain water piped into the village."]], "story": ["The mountain water and water table here are high in fluoride, at 17 to 20 times the safe level of 0.7–1.5 mg/L, which damages bones and teeth over time. Rafiki Outreach is helping the community improve its rainwater storage until a proper filtration system can be installed."]}, {"name": "I Am a Child of God Preschool", "region": "Arusha Region, Tanzania", "date": "May 2023", "impact": "About 150 people", "facts": [["Project type", "Well"], ["Location", "Arusha, Tanzania"], ["Drilling", "Amalpha Drilling TZ"], ["Funding", "Donated well"], ["Donors", "ROAM Humanitarian and Rafiki Outreach donors"], ["Water analysis", "Passed on all accounts except fluoride (2.58 mg/L against a recommended 1.50 mg/L). Government approval was still granted."], ["Flow", "400 L per hour"]], "story": []}, {"name": "Maweni Village", "region": "Manyara Region, Tanzania", "date": "Jul 2023", "impact": "About 1,100 people", "facts": [["Project type", "Borehole"], ["Drilling", "Rafiki Drilling and Services and Amalpha Drilling"], ["Funding", "Donated well"], ["Donors", "Money Insights Group and Rafiki (January–February drilling); the Maynes family and Rafiki (Amalpha drilling)"], ["Water analysis", "The water is clear and clean."]], "story": ["People no longer drink dirty pond water or walk long distances for safe water. The well is used in the dry season to grow more crops, and neighbouring communities use it too.", "We drilled here three times. In January 2023 our team hit an empty cavity. In February we hit water, but not enough. In July, Amalpha Drilling Ltd. TZ returned with a stronger machine that could pass through the hard rock, and it worked. The community and village leader were overjoyed."]}, {"name": "Mipotopoto Village", "region": "Nyasa, Ruvuma Region, Tanzania", "date": "Aug 2023", "impact": "568 pupils", "facts": [["Project type", "Borehole"], ["Drilling", "Rafiki Drilling and Services and Amalpha Drilling"], ["Funding", "Donated well"]], "story": ["Women in the village fetch water every day for the 568 pupils at Mipotopoto Primary School, and they are among the most vulnerable. They were glad when Fr. Erasto Matembo visited on 25 August 2023 to talk about bringing water to the village."]}, {"name": "A Joy School", "region": "Mafinga, Iringa Region, Tanzania", "date": "Oct 2023", "impact": "About 450 people", "facts": [["Project type", "Borehole"], ["Drilling", "Kitosi Drilling Co."], ["Flow", "5,000 L every 2 hours"]], "story": []}];
 var GAL = [{"src": "/img/pg/g-kids.webp", "alt": "A volunteer surrounded by smiling children", "sz": "b"}, {"src": "/img/pg/g-pump.webp", "alt": "Students and a Rafiki team member at a new hand pump", "sz": "t"}, {"src": "/img/pg/g-lake.webp", "alt": "Two men collect water at the lake shore", "sz": ""}, {"src": "/img/pg/g-maasai.webp", "alt": "Volunteers with Maasai women in traditional dress", "sz": ""}, {"src": "/img/pg/g-pole.webp", "alt": "A volunteer smiles beside a new wooden railing", "sz": "t"}, {"src": "/img/pg/g-group.webp", "alt": "Volunteers with families outside a home", "sz": "w"}, {"src": "/img/pg/g-tyres.webp", "alt": "Volunteers build a playground from old tyres", "sz": ""}, {"src": "/img/pg/g-paint.webp", "alt": "Volunteers paint a classroom", "sz": ""}, {"src": "/img/pg/g-rig.webp", "alt": "Volunteers work a drilling rig", "sz": "t"}, {"src": "/img/pg/g-saw.webp", "alt": "Two volunteers saw a log", "sz": ""}, {"src": "/img/pg/g-school.webp", "alt": "Volunteers and students at a school", "sz": "w"}, {"src": "/img/pg/g-pipe.webp", "alt": "A volunteer fits a water pipe", "sz": ""}, {"src": "/img/pg/g-play.webp", "alt": "Building a playground at a school", "sz": ""}, {"src": "/img/pg/g-elder.webp", "alt": "A volunteer greets a family outside their home", "sz": "w"}, {"src": "/img/pg/g-fence.webp", "alt": "Volunteers build a fence at a school", "sz": ""}, {"src": "/img/pg/g-tank.webp", "alt": "Volunteers move a water tank", "sz": ""}, {"src": "/img/pg/g-rig2.webp", "alt": "The crew sets up a drilling rig", "sz": "t"}, {"src": "/img/pg/g-class.webp", "alt": "A volunteer with a class of children", "sz": "w"}, {"src": "/img/pg/g-team.webp", "alt": "A group of volunteers at a school", "sz": ""}, {"src": "/img/pg/g-field.webp", "alt": "Children play in a schoolyard", "sz": ""}, {"src": "/img/pg/g-friends.webp", "alt": "A villager and a Rafiki volunteer smile together", "sz": ""}];
 
-var CTRY = { ke: { n: 'Kenya', ab: 'KE', w: 120, u: 6, p: 312200 }, tz: { n: 'Tanzania', ab: 'TZ', w: 60, u: 2, p: 156100 }, ug: { n: 'Uganda', ab: 'UG', w: 60, u: 2, p: 156100 }, mw: { n: 'Malawi', ab: 'MW', w: 60, u: 2, p: 156100 } };
+// Before the live feed loads (or if it can't), these are the October 2026 figures from monday.com.
+var CTRY = { ke: { n: 'Kenya', ab: 'KE', w: 26, u: 2, p: 77088 }, tz: { n: 'Tanzania', ab: 'TZ', w: 83, u: 0, p: 99444 }, ug: { n: 'Uganda', ab: 'UG', w: 0, u: 2, p: 0 }, mw: { n: 'Malawi', ab: 'MW', w: 0, u: 0, p: 0 } };
 var CORDER = ['ke', 'tz', 'ug', 'mw'];
 var FOUNDERS = [
   { tag: 'Co-founder', name: 'Reid Anderson', role: 'Co-founder, Rafiki Outreach', email: 'reid@rafikioutreach.org', img: '/img/reid.webp', bio: 'Reid co-founded Rafiki Outreach to bring clean water to communities across East Africa. Rafiki means friend in Swahili, and Reid builds those friendships on the ground, joining volunteers in the field and working alongside local teams and the communities they serve.' },
@@ -1281,7 +1319,7 @@ class Component extends DCLogic {
         facts: p.facts.map(function (f) { return { k: f[0], v: f[1] }; }), story: p.story, hasStory: p.story.length > 0, toggle: function () { self.setState({ open: self.state.open === i ? -1 : i }); } }; });
     }
     if (typeof GAL !== 'undefined') {
-      v.gal = GAL.map(function (g, i) { return { src: g.src, alt: g.alt, label: 'View photo: ' + g.alt, cls: 'xmo-it' + (g.sz ? ' ' + g.sz : ''), open: function () { self.setState({ lb: i }); } }; });
+      v.gal = GAL.map(function (g, i) { return { src: g.src.replace(/\.webp$/, '-600.webp'), alt: g.alt, label: 'View photo: ' + g.alt, cls: 'xmo-it' + (g.sz ? ' ' + g.sz : ''), open: function () { self.setState({ lb: i }); } }; });
       var cur = s.lb != null ? GAL[s.lb] : GAL[0];
       v.lbOpen = s.lb != null; v.lbSrc = cur.src; v.lbAlt = cur.alt; v.lbPos = ((s.lb || 0) + 1) + ' of ' + GAL.length;
       v.lbClose = function () { self.setState({ lb: null }); };

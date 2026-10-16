@@ -42,6 +42,43 @@ footer.bf .bf-legal a:hover{color:#FFFFFF !important}
 footer.bf :focus-visible{outline-color:#04263F !important}
 footer.bf .bf-copy :focus-visible{outline-color:#FFFFFF !important}
 </style>
+<style>/* design layer: one type scale, buttons, cards, tap targets and anchor offsets across all pages */
+button,input,select,textarea{font-family:inherit}
+.skip{font-family:'Montserrat',system-ui,sans-serif !important}
+html{scroll-padding-top:124px}
+@media (max-width:800px){html{scroll-padding-top:96px}}
+/* headings: black, one weight; section headings use .x-h2, panel headings use .h2 */
+html .h2{color:#0A0A0A;font-weight:800;letter-spacing:-0.03em;font-size:clamp(28px,3vw,44px);line-height:1.05}
+html .tm .h2{font-size:clamp(32px,4vw,58px);line-height:1.02;letter-spacing:-0.035em}
+.pr-ct{color:#0A0A0A !important}
+/* smallest text is 12px */
+.cc-here,.tk-st,.tm-tag,.tm-grid.rest .tm-tag,.lw-yr,.pj-sel label,.pj-ba span{font-size:12px !important}
+.im-facts span,.cc-rows span{font-size:13px !important}
+.hp-d{font-size:15px !important}@media (max-width:600px){.hp-d{font-size:14px !important}}
+/* buttons: one height and padding */
+.b:not(.ac-btn),.xb,.xb2,.sp-btn{min-height:50px !important;padding-left:24px !important;padding-right:24px !important;font-size:15px !important;font-weight:700 !important;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.fchip,.pj-chip,.gv-freq button{min-height:44px !important}
+/* cards: one corner size for cards, one for panels */
+.lw-card,.cc-card,.sp-card,.pj-card,.up-card,.pr-it,.ps-it,.sg-well,.hp-card{border-radius:22px !important}
+.pr-card,.sg-panel,.xe-card,.lf-tile{border-radius:28px !important}
+/* cards in a row line up */
+.pj-grid{align-items:stretch}.pj-card{height:100%}.pj-card-b{flex:1}
+/* the whole card opens its link */
+.hp-card,.sp-card,.pr-it{position:relative}
+.hp-card > .b::after,.sp-card .sp-btn::after,.pr-it > .cw-go::after{content:"";position:absolute;inset:0;border-radius:inherit}
+.hp-card,.sp-card{cursor:pointer}
+/* tap targets on phones */
+@media (max-width:800px){
+  .bf-dir a{min-height:44px !important}
+  .xh-crumb a{min-height:44px;display:inline-flex !important;align-items:center}
+  .tm-mail,.nd-src,.ww-src a,.fx-ext,.gc-d a,.gc-it a,.pr-sl a,.office a,.ct-off a,.cw-go,.mp-src a{display:inline-flex !important;align-items:center;min-height:44px !important}
+  .tk-un-h{min-height:44px !important;display:flex !important;align-items:center}
+  .hp-card .b{min-height:44px !important}
+}
+/* phone heroes: no empty blue space above the title, nothing under the header */
+@media (max-width:700px){html .xh:not(.cn-hero){min-height:0 !important;align-items:flex-start}html .xh:not(.cn-hero) .xh-in{padding-top:124px !important;padding-bottom:52px !important}html .zh-in{padding-top:132px !important}}
+.tk-pin::after{content:"";position:absolute;inset:-10px;border-radius:50%}
+</style>
 </head>
 <body>
 <x-dc>
@@ -1005,7 +1042,7 @@ a.vc:focus-visible{outline:3px solid #6BBDF2;outline-offset:3px}
 <div class="pr-stat"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="M8 7h8"></path><path d="M6 21h12"></path><path d="M9 21l3-6 3 6"></path></svg><span class="pr-num">{{doneL}}</span><span class="pr-sl">Wells completed</span></div>
 <div class="pr-stat"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"></path><path d="M6 21V10l6-5 6 5v11"></path><path d="M10 21v-5h4v5"></path></svg><span class="pr-num">{{ucL}}</span><span class="pr-sl">Under construction</span></div>
 <div class="pr-stat"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"></circle><circle cx="17" cy="9" r="2.5"></circle><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"></path><path d="M15 20c0-2.4 1.1-4.4 3-5.3"></path></svg><span class="pr-num">{{peopleL}}<em>+</em></span><span class="pr-sl">People reached</span></div>
-<div class="pr-stat live-hide"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"></path><path d="M5 10v10h14V10"></path><path d="M12 13.2c-1.4 1.7-2.1 2.8-2.1 3.8a2.1 2.1 0 004.2 0c0-1-.7-2.1-2.1-3.8z"></path></svg><span class="pr-num">{{hhL}}<em>+</em></span><span class="pr-sl">Households with clean water</span></div>
+<div class="pr-stat live-hide draft"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"></path><path d="M5 10v10h14V10"></path><path d="M12 13.2c-1.4 1.7-2.1 2.8-2.1 3.8a2.1 2.1 0 004.2 0c0-1-.7-2.1-2.1-3.8z"></path></svg><span class="pr-num">{{hhL}}<em>+</em></span><span class="pr-sl">Households with clean water</span></div>
 </section>
 <section class="pr-card" aria-label="Project status">
 <div class="pr-ch"><h2 class="pr-ct">Project status</h2><span class="pr-cs">{{totalL}} wells in total</span></div>
@@ -1055,7 +1092,7 @@ a.vc:focus-visible{outline:3px solid #6BBDF2;outline-offset:3px}
 </footer>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"completed":{"editor":"int","default":300,"section":"Numbers"},"underConstruction":{"editor":"int","default":12,"section":"Numbers"},"peopleReached":{"editor":"int","default":780500,"section":"Numbers"},"households":{"editor":"int","default":230000,"section":"Numbers"},"monthlyGoal":{"editor":"int","default":10000,"section":"Numbers"},"$preview":{"width":1440,"height":3000}}'>
+<script type="text/x-dc" data-dc-script data-props='{"completed":{"editor":"int","default":109,"section":"Numbers"},"underConstruction":{"editor":"int","default":4,"section":"Numbers"},"peopleReached":{"editor":"int","default":176532,"section":"Numbers"},"households":{"editor":"int","default":230000,"section":"Numbers"},"monthlyGoal":{"editor":"int","default":10000,"section":"Numbers"},"$preview":{"width":1440,"height":3000}}'>
 var TYPES = ['Community well', 'Sponsored well', 'Volunteer trip'];
 var COUNTRIES = ['Kenya', 'Kenya', 'Tanzania', 'Uganda', 'Malawi'];
 var CLIST = ['Kenya', 'Tanzania', 'Uganda', 'Malawi'];
@@ -1070,7 +1107,8 @@ var PROJECTS = [];
   }
 })();
 
-var CTRY = { ke: { n: 'Kenya', ab: 'KE', w: 120, u: 6, p: 312200 }, tz: { n: 'Tanzania', ab: 'TZ', w: 60, u: 2, p: 156100 }, ug: { n: 'Uganda', ab: 'UG', w: 60, u: 2, p: 156100 }, mw: { n: 'Malawi', ab: 'MW', w: 60, u: 2, p: 156100 } };
+// Before the live feed loads (or if it can't), these are the October 2026 figures from monday.com.
+var CTRY = { ke: { n: 'Kenya', ab: 'KE', w: 26, u: 2, p: 77088 }, tz: { n: 'Tanzania', ab: 'TZ', w: 83, u: 0, p: 99444 }, ug: { n: 'Uganda', ab: 'UG', w: 0, u: 2, p: 0 }, mw: { n: 'Malawi', ab: 'MW', w: 0, u: 0, p: 0 } };
 var CORDER = ['ke', 'tz', 'ug', 'mw'];
 var CFLAGS = {"ke": {"tr": "", "rects": [{"x": -60, "y": -60, "w": 220, "h": 90, "f": "#000000"}, {"x": -60, "y": 30, "w": 220, "h": 4, "f": "#FFFFFF"}, {"x": -60, "y": 34, "w": 220, "h": 32, "f": "#BB0000"}, {"x": -60, "y": 66, "w": 220, "h": 4, "f": "#FFFFFF"}, {"x": -60, "y": 70, "w": 220, "h": 90, "f": "#006600"}], "circles": []}, "tz": {"tr": "rotate(-40 50 50)", "rects": [{"x": -60, "y": -60, "w": 220, "h": 98, "f": "#1EB53A"}, {"x": -60, "y": 38, "w": 220, "h": 4.5, "f": "#FCD116"}, {"x": -60, "y": 42.5, "w": 220, "h": 15.0, "f": "#000000"}, {"x": -60, "y": 57.5, "w": 220, "h": 4.5, "f": "#FCD116"}, {"x": -60, "y": 62, "w": 220, "h": 98, "f": "#00A3DD"}], "circles": []}, "ug": {"tr": "", "rects": [{"x": -60, "y": -60, "w": 220, "h": 76.7, "f": "#000000"}, {"x": -60, "y": 16.7, "w": 220, "h": 16.599999999999998, "f": "#FCDC04"}, {"x": -60, "y": 33.3, "w": 220, "h": 16.700000000000003, "f": "#D90000"}, {"x": -60, "y": 50, "w": 220, "h": 16.700000000000003, "f": "#000000"}, {"x": -60, "y": 66.7, "w": 220, "h": 16.599999999999994, "f": "#FCDC04"}, {"x": -60, "y": 83.3, "w": 220, "h": 76.7, "f": "#D90000"}], "circles": [{"x": 50, "y": 50, "r": 9, "f": "#FFFFFF"}]}, "mw": {"tr": "", "rects": [{"x": -60, "y": -60, "w": 220, "h": 93.3, "f": "#000000"}, {"x": -60, "y": 33.3, "w": 220, "h": 33.400000000000006, "f": "#CE1126"}, {"x": -60, "y": 66.7, "w": 220, "h": 93.3, "f": "#339E35"}], "circles": []}};
 var CMAPS = {"ke": "M10.8,63.8 11.2,52.2 13.4,48.0 15.8,45.4 16.5,43.7 19.6,41.7 19.5,40.4 21.3,37.8 21.4,36.5 20.3,28.5 19.1,26.3 17.6,25.2 16.9,23.3 16.2,22.9 15.7,20.4 16.1,18.1 13.4,16.5 13.6,15.9 11.5,12.5 24.2,0.0 24.2,0.8 24.8,1.2 26.2,0.7 28.9,1.4 29.5,3.3 29.1,6.7 31.7,10.1 40.3,10.6 51.9,18.1 65.7,20.0 67.3,18.8 69.2,16.1 78.2,12.0 81.9,15.0 89.2,14.9 83.9,22.5 80.2,26.3 80.3,62.5 85.6,69.4 85.7,70.6 83.2,73.0 80.5,73.1 80.0,74.1 79.4,73.8 79.5,76.2 77.0,78.9 74.7,79.0 72.9,80.3 72.6,83.6 71.8,85.9 70.6,86.8 69.3,89.1 68.1,93.1 64.6,99.4 63.7,99.2 62.8,99.9 49.1,90.0 48.2,88.7 47.2,88.3 47.9,86.4 47.6,83.8 12.3,64.1 10.8,63.8Z", "tz": "M91.3,48.4 92.0,50.3 91.2,50.9 88.5,48.4 88.6,46.2 89.7,44.3 91.3,48.4ZM94.6,36.9 94.5,40.1 93.6,41.8 92.7,41.1 92.9,37.1 94.6,36.9ZM32.3,77.6 27.9,75.3 23.5,74.4 23.3,73.4 21.1,73.1 19.8,71.3 18.2,70.3 15.7,70.4 14.8,69.8 13.5,68.4 8.0,56.2 3.5,52.4 1.9,49.6 1.4,47.0 2.6,44.3 0.0,36.8 0.7,32.8 3.5,32.8 5.6,31.5 7.4,29.5 9.9,25.0 13.3,21.5 13.1,19.5 10.1,18.7 9.9,18.1 10.3,16.9 9.9,16.4 10.9,14.5 13.5,13.7 13.9,11.9 13.3,6.7 10.6,3.5 10.3,2.8 10.7,2.2 13.3,1.6 41.8,1.6 74.7,20.1 75.0,22.5 74.4,24.2 88.8,35.0 85.1,47.4 85.7,49.8 88.0,51.8 89.5,54.2 91.1,54.7 91.8,56.0 89.5,60.5 89.4,62.9 89.9,62.6 90.7,63.2 90.8,65.0 89.6,68.9 90.3,71.4 91.2,72.7 90.9,73.4 92.6,75.7 92.5,77.6 93.8,81.5 93.4,82.9 94.6,83.1 95.7,84.4 97.8,85.1 100.0,87.1 97.3,89.2 94.2,91.2 91.9,91.8 89.8,93.1 85.0,94.1 82.3,95.7 79.5,94.5 77.2,94.7 75.4,97.2 72.3,98.4 68.7,97.1 66.0,98.2 62.7,98.4 59.1,96.1 58.0,96.1 56.0,97.4 50.6,97.2 50.0,95.5 48.9,95.1 47.4,92.7 47.9,89.4 47.2,87.7 47.1,85.1 46.7,83.2 44.9,80.5 42.0,78.4 41.6,79.9 41.0,80.0 39.3,79.3 36.8,79.4 36.0,78.6 32.3,77.6Z", "ug": "M78.7,91.8 24.4,91.6 20.6,93.0 16.4,93.0 11.9,98.2 8.9,100.0 8.0,99.7 7.0,97.7 2.7,98.6 2.4,91.3 3.9,83.6 3.7,81.9 5.1,72.5 6.2,71.3 9.0,65.4 9.1,59.8 13.4,57.1 14.3,54.8 15.8,53.4 18.5,52.4 26.7,44.6 32.1,38.3 32.5,36.5 30.8,34.3 29.1,34.0 27.0,31.9 24.7,32.0 22.9,31.0 22.9,29.7 25.1,23.3 23.3,20.7 24.7,16.5 26.1,14.3 25.8,13.3 24.9,12.8 26.4,10.3 28.5,8.7 30.4,7.7 31.6,7.7 37.3,9.5 41.7,7.4 44.2,10.8 47.6,12.3 48.7,10.8 51.2,9.0 60.0,7.4 62.7,6.0 65.5,7.8 71.4,8.2 79.9,0.0 82.7,5.8 83.6,6.2 83.3,7.2 88.0,10.0 87.4,14.2 88.2,18.6 89.6,19.3 90.8,22.8 93.4,24.6 94.7,28.1 95.6,28.7 96.3,30.6 95.9,31.7 97.3,37.9 97.5,44.0 97.3,45.3 94.2,49.9 94.4,52.3 91.0,53.8 88.9,55.9 87.6,58.9 85.2,62.1 83.2,63.5 81.0,69.0 79.4,71.1 78.7,91.8Z", "mw": "M36.4,59.7 35.7,58.8 33.7,59.8 32.1,57.2 30.9,56.4 31.3,55.5 29.7,54.2 32.0,52.5 33.4,49.5 33.8,45.3 33.1,44.1 34.1,41.8 38.9,40.0 40.3,38.2 38.1,37.7 37.0,35.1 37.7,31.1 37.4,28.7 36.7,27.7 36.8,26.1 38.6,22.8 37.1,19.4 38.2,18.3 39.7,18.0 42.2,15.0 40.6,12.4 40.5,10.9 37.8,8.3 38.3,6.0 36.3,3.0 33.8,2.9 32.8,0.2 33.5,0.0 35.5,1.3 38.0,1.6 39.1,2.8 42.6,2.6 45.0,3.6 45.8,3.4 46.4,1.3 50.5,4.4 53.0,8.2 53.8,14.6 54.8,17.0 54.1,21.8 56.2,25.2 57.6,25.8 58.5,28.2 54.2,28.8 53.4,31.5 50.9,35.8 52.5,42.3 53.5,51.3 54.8,52.9 57.9,53.7 62.1,58.2 69.7,68.2 70.3,71.1 69.2,75.9 69.5,77.9 69.0,84.9 68.0,86.6 63.1,87.9 61.1,92.6 62.6,95.8 62.7,99.6 60.6,100.0 59.6,98.5 60.5,97.0 60.1,96.2 58.2,95.2 53.1,89.5 52.0,88.9 51.4,88.0 51.5,86.4 49.6,83.9 49.5,83.2 50.9,81.6 53.2,76.3 53.5,72.7 52.8,67.3 50.6,64.8 41.9,66.9 36.4,59.7Z"};
@@ -1174,7 +1212,7 @@ class Component extends DCLogic {
   renderVals() {
     var self = this, s = this.state, P = this.props;
     var L = s.live, isWell = function (p) { return !L || p.type === 'Borehole well'; };
-    var done = L ? L.wells : (P.completed ?? 300), uc = L ? L.wellsUnderConstruction : (P.underConstruction ?? 12), ppl = L ? L.people : (P.peopleReached ?? 780500), hh = P.households ?? 230000, goal = P.monthlyGoal ?? 10000;
+    var done = L ? L.wells : (P.completed ?? 109), uc = L ? L.wellsUnderConstruction : (P.underConstruction ?? 4), ppl = L ? L.people : (P.peopleReached ?? 176532), hh = P.households ?? 230000, goal = P.monthlyGoal ?? 10000;
     var total = done + uc, f = function (x) { return Math.round(x * s.t).toLocaleString('en-US'); };
     var comp = PROJECTS.filter(function (p) { return p.status === 'Completed' && isWell(p); });
     var byYear = YEARS.map(function (y) { return comp.filter(function (p) { return p.year === y; }).length; });
