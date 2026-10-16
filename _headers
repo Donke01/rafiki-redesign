@@ -7,3 +7,5 @@
   Cache-Control: public, max-age=3600
 /feed.js
   Cache-Control: public, max-age=3600
+/motion.js
+  Cache-Control: public, max-age=3600
