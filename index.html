@@ -27,6 +27,7 @@
 <style>/* mobile hero: keep the tagline below the header */@media (max-width:600px){.zh{align-items:flex-start !important}.zh-in{padding-top:120px !important;padding-bottom:72px !important}}</style>
 <style>/* a11y: contrast, focus, tap targets */.blue,.xs.blue{background:#0A78C2 !important}.blue p,.blue .x-p,.blue .x-sm{color:#FFFFFF !important}.blue :focus-visible,.xh :focus-visible,.cn-hero :focus-visible{outline-color:#FFFFFF !important}@media (max-width:600px){.bf-legal a,.xh-crumb a{display:inline-block;padding:10px 4px}}</style>
 <style>/* no black: buttons on blue panels */.xs.ink .xb:not(.lt),.xs.ink .b,.fx-card .b,.tile.dark .b,.sg-panel.ink .xb,.ww .b,.xe-card .b{background:#FFFFFF !important;color:#0A78C2 !important}.access2 .ac-btn,.access2 .ac-btn *{color:#FFFFFF !important}.fx-k{color:#FFFFFF !important}.fx-txt .p{color:#FFFFFF !important}.cc-card .cc-go{color:#076DB1}.xs.ink .kicker,.sg-panel.ink .kicker{color:#FFFFFF !important;background:rgba(255,255,255,.18) !important}.xs.ink .bignum,.xs.ink .bignum *{color:#FFFFFF !important}.xs.ink .wd-facts b{color:#FFFFFF !important}</style>
+<style>/* newsletter: white button on the blue band */.fn-band .fn-form button{background:#FFFFFF !important;color:#0A78C2 !important}.fn-band .fn-form button:hover{background:#E3F1FC !important}.fn-cap{margin-top:12px;min-height:48px;padding:0 24px;border-radius:999px;border:2px solid #FFFFFF;background:transparent;color:#FFFFFF;font:inherit;font-size:15px;font-weight:700;cursor:pointer}.fn-cap:hover{background:rgba(255,255,255,.14)}</style>
 </head>
 <body>
 <x-dc>
@@ -1304,7 +1305,7 @@ a.lw-card:hover .lw-ph > img{transform:scale(1.05)}
 <input id="fn-email" type="email" required placeholder="Your email address" value="{{fnVal}}" onChange="{{fnChange}}">
 <button type="submit">Sign me up</button>
 </form>
-<span class="fn-note" aria-live="polite">{{fnNote}}</span>
+<span class="fn-note" aria-live="polite">{{fnNote}}</span><sc-if value="{{fnCapOn}}" hint-placeholder-val="{{false}}"><button type="button" class="fn-cap" onClick="{{fnCapGo}}">Finish signing up</button></sc-if>
 </div>
 <div class="fn-wave" aria-hidden="true"><svg class="wv wv1" viewBox="0 0 2880 80" preserveAspectRatio="none"><path d="M0 40 Q 360 4 720 40 T 1440 40 T 2160 40 T 2880 40 V80 H0 Z" fill="#0A0A0A" opacity=".45"></path></svg><svg class="wv wv2" viewBox="0 0 2880 80" preserveAspectRatio="none"><path d="M0 40 Q 360 4 720 40 T 1440 40 T 2160 40 T 2880 40 V80 H0 Z" fill="#0A0A0A"></path></svg></div>
 </section>
@@ -1618,6 +1619,15 @@ class Component extends DCLogic {
         .concat([{ l: 'Other', on: s.gvOther ? 'true' : 'false', cls: 'g-chip oth' + (s.gvOther ? ' on' : ''), pick: function () { self.setState({ gvOther: true }); setTimeout(function () { var i = document.getElementById('gv-amt'); if (i) i.focus(); }, 60); } }]),
       fnVal: s.fnVal,
       fnNote: s.fnNote,
+      fnCapOn: !!s.fnCap,
+      fnCapGo: function () {
+        // Mailchimp's own signup page, in a new tab, with the address filled in; it shows the check there
+        var fm = document.createElement('form'), add = function (n, val) { var i = document.createElement('input'); i.type = 'hidden'; i.name = n; i.value = val; fm.appendChild(i); };
+        fm.method = 'post'; fm.action = MAILCHIMP_URL; fm.target = '_blank'; fm.rel = 'noopener';
+        add('EMAIL', self.state.fnCap); add('b_' + (/[?&]u=([^&]+)/.exec(MAILCHIMP_URL) || [])[1] + '_' + (/[?&]id=([^&]+)/.exec(MAILCHIMP_URL) || [])[1], '');
+        document.body.appendChild(fm); fm.submit(); fm.parentNode.removeChild(fm);
+        self.setState({ fnCap: '', fnVal: '', fnNote: 'Finish in the Mailchimp tab, then check your inbox for the confirmation email.' });
+      },
       fnChange: function (e) { self.setState({ fnVal: e.target.value, fnNote: '' }); },
       fnSubmit: function (e) {
         if (e && e.preventDefault) e.preventDefault();
@@ -1629,8 +1639,9 @@ class Component extends DCLogic {
         }
         if (self._mcBusy) return; self._mcBusy = true;
         var cb = 'rfmc' + Date.now(), sc = document.createElement('script'), done = false;
-        var finish = function (note, clear) { if (done) return; done = true; self._mcBusy = false; try { delete window[cb]; } catch (x) { window[cb] = undefined; } if (sc.parentNode) sc.parentNode.removeChild(sc); self.setState(clear ? { fnNote: note, fnVal: '' } : { fnNote: note }); };
+        var finish = function (note, clear, cap) { if (done) return; done = true; self._mcBusy = false; try { delete window[cb]; } catch (x) { window[cb] = undefined; } if (sc.parentNode) sc.parentNode.removeChild(sc); var st = clear ? { fnNote: note, fnVal: '' } : { fnNote: note }; st.fnCap = cap || ''; self.setState(st); };
         window[cb] = function (r) {
+          if (r && (r.result === 'redirect' || /captcha/i.test(String(r.msg || '')))) { finish('Mailchimp needs a quick check that you\u2019re not a robot. Tap the button to finish on Mailchimp\u2019s page.', false, v); return; }
           if (r && r.result === 'success') finish(/confirm/i.test(String(r.msg || '')) ? 'Almost done: check your inbox and tap the link to confirm.' : 'You\u2019re on the list. Thank you!', true);
           else { var m = String((r && r.msg) || '').replace(/<[^>]*>/g, '').replace(/^\d+\s*-\s*/, ''); finish(/already subscribed/i.test(m) ? 'You are already on the list. Thank you!' : (m || 'Something went wrong. Please try again.')); }
         };
