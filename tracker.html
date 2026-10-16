@@ -54,7 +54,7 @@ html .tm .h2{font-size:clamp(32px,4vw,58px);line-height:1.02;letter-spacing:-0.0
 .pr-ct{color:#0A0A0A !important}
 /* smallest text is 12px */
 .cc-here,.tk-st,.tm-tag,.tm-grid.rest .tm-tag,.lw-yr,.pj-sel label,.pj-ba span{font-size:12px !important}
-.im-facts span,.cc-rows span{font-size:13px !important}
+.im-facts > div > span,.cc-rows > div > span{font-size:13px !important}
 .hp-d{font-size:15px !important}@media (max-width:600px){.hp-d{font-size:14px !important}}
 /* buttons: one height and padding */
 .b:not(.ac-btn),.xb,.xb2,.sp-btn{min-height:50px !important;padding-left:24px !important;padding-right:24px !important;font-size:15px !important;font-weight:700 !important;display:inline-flex;align-items:center;justify-content:center;gap:8px}
@@ -1330,6 +1330,19 @@ details.tk-un[open] .tk-un-h{margin-bottom:8px}
 <style>/* country wipe across pages */html.cx-arriving body::after{content:"";position:fixed;inset:0;z-index:199;background:linear-gradient(160deg,#098BE1 0%,#076DB1 55%,#054F81 100%)}.cx-wipe.arrive,.cx-wipe.arrive *{animation-delay:-.87s !important}</style>
 <style>/* header menu: larger, darker text (bar height unchanged) */.hl-link{color:#1F2428}@media (min-width:1261px){.hl-link{font-size:16px !important;padding:0 12px !important}}@media (min-width:1101px) and (max-width:1260px){.hl-link{font-size:15px !important;padding:0 9px !important}}</style>
 <style>/* live view: hide placeholders; sample-data notes stay until real data is in */html:not(.draft-mode) .todo:not(.sample),html:not(.draft-mode) .todo-box,html:not(.draft-mode) .draft{display:none !important}html.feed-live .todo.sample,html.feed-live .live-hide{display:none !important}.feed-only{display:none}html.feed-live .feed-only{display:block}</style>
+<style>/* links into the project explorer: figures open the projects behind them; group filter */
+a.tk-stat{color:inherit;text-decoration:none;transition:transform .35s cubic-bezier(.2,.7,.2,1),box-shadow .35s}
+a.tk-stat > .x-sm{text-decoration:underline;text-decoration-color:#9FD3F7;text-decoration-thickness:2px;text-underline-offset:3px}
+a.tk-stat:hover{transform:translateY(-5px);box-shadow:0 18px 40px rgba(5,79,129,.16)}
+.tk-mini > a{display:flex;flex-direction:column;gap:4px;padding:14px 16px;border-radius:16px;background:#EEF6FD;color:inherit;text-decoration:none;transition:transform .3s cubic-bezier(.2,.7,.2,1),box-shadow .3s,background .2s}
+.tk-mini > a > span{font-size:13px;font-weight:600;color:#3A3F44;line-height:1.35;text-decoration:underline;text-decoration-color:#9FD3F7;text-underline-offset:3px}
+.tk-mini > a:hover{background:#E3F1FC;transform:translateY(-3px);box-shadow:0 12px 28px rgba(5,79,129,.14)}
+.tk-grp{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:30px}
+.tk-grp-h{margin:0;font-weight:700;color:#3A3F44}
+.tk-grp .fchips{margin-bottom:0}
+.tk-grp-go{margin:0;text-align:center}
+@media (prefers-reduced-motion: reduce){a.tk-stat,.tk-mini > a{transition:none}a.tk-stat:hover,.tk-mini > a:hover{transform:none}}
+</style>
 </helmet>
 <a class="skip" href="#top">Skip to content</a>
 <div class="pg">
@@ -1357,12 +1370,13 @@ details.tk-un[open] .tk-un-h{margin-bottom:8px}
 <sc-if value="{{tkDown}}" hint-placeholder-val="{{false}}"><section class="xs tk-down" role="status"><div class="sec-h"><h2 class="x-h2">Live project data is not available right now</h2><p class="x-p">We could not reach our project records just now, so there is nothing to show here yet. Please try again in a few minutes, or browse <a href="/projects">our projects</a> in the meantime.</p></div></section></sc-if>
 <sc-if value="{{tkLive}}" hint-placeholder-val="{{false}}">
 <div class="tk-top">
-<div class="tk-stat rv"><b style="color:#0A7A3D">{{tot.wells}}</b><span class="x-sm">wells completed</span></div>
-<div class="tk-stat rv"><b style="color:#8A5A00">{{tot.uc}}</b><span class="x-sm">wells under construction</span></div>
-<div class="tk-stat rv"><b style="color:#076DB1">{{tot.up}}</b><span class="x-sm">projects looking for funding</span></div>
-<div class="tk-stat rv"><b>{{tot.people}}</b><span class="x-sm">people reached</span></div>
+<a class="tk-stat rv" href="/stories?kind=borehole&amp;status=completed"><b style="color:#0A7A3D">{{tot.wells}}</b><span class="x-sm">wells completed</span></a>
+<a class="tk-stat rv" href="/stories?kind=borehole&amp;status=underway"><b style="color:#8A5A00">{{tot.uc}}</b><span class="x-sm">wells under construction</span></a>
+<a class="tk-stat rv" href="/stories?status=funding"><b style="color:#076DB1">{{tot.up}}</b><span class="x-sm">projects looking for funding</span></a>
+<a class="tk-stat rv" href="/stories?cat=water&amp;status=completed"><b>{{tot.people}}</b><span class="x-sm">people reached</span></a>
 </div>
 <p class="x-sm tk-src">Across Kenya, Tanzania, Uganda and Malawi, live from our project records{{tkUpdated}}. Some pins mark the village or town rather than the exact site (place data &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener" style="color:#076DB1">OpenStreetMap</a> contributors). <span class="todo">Condition checks will appear here once field visits are logged</span></p>
+<div class="tk-grp"><p class="x-sm tk-grp-h" id="tk-grp-h">Show</p><div class="fchips" role="group" aria-labelledby="tk-grp-h"><sc-for list="{{tgChips}}" as="c" hint-placeholder-count="4"><button type="button" class="{{c.cls}}" aria-pressed="{{c.on}}" onClick="{{c.pick}}">{{c.l}}</button></sc-for></div><p class="tk-grp-go"><a class="tk-story" href="{{tgHref}}">{{tgL}}</a></p></div>
 <section class="xs sky" aria-labelledby="tk-find-h">
 <div class="sec-h "><h2 class="x-h2" id="tk-find-h">Find your well</h2><p class="x-p">Search by the project’s name, or by its village or area, to see where it stands.</p></div>
 <form class="tk-find" role="search" onSubmit="{{onFind}}"><label class="tk-vh" for="tk-q">Project name, village or area</label><input id="tk-q" type="search" autocomplete="off" placeholder="{{tkPh}}" value="{{tqVal}}" onChange="{{onTq}}" onInput="{{onTq}}"><button type="submit" class="xb">Find</button></form>
@@ -1387,7 +1401,7 @@ details.tk-un[open] .tk-un-h{margin-bottom:8px}
 </div>
 <div class="tk-side">
 <h3 class="tk-ch">{{tcName}}</h3>
-<div class="tk-mini"><div><b>{{cs.wells}}</b><span>wells completed</span></div><div><b>{{cs.uc}}</b><span>wells under construction</span></div><div><b>{{cs.up}}</b><span>projects looking for funding</span></div><div><b>{{cs.people}}</b><span>people reached</span></div></div>
+<div class="tk-mini"><sc-for list="{{csT}}" as="t" hint-placeholder-count="4"><sc-if value="{{t.lk}}" hint-placeholder-val="{{true}}"><a href="{{t.href}}"><b>{{t.b}}</b><span>{{t.l}}</span></a></sc-if><sc-if value="{{t.nolk}}" hint-placeholder-val="{{false}}"><div><b>{{t.b}}</b><span>{{t.l}}</span></div></sc-if></sc-for></div>
 <div class="tk-leg" role="list" aria-label="{{legAria}}"><sc-for list="{{leg}}" as="l" hint-placeholder-count="3"><span role="listitem"><i style="{{l.dot}}"></i>{{l.l}} <b>{{l.n}}</b></span></sc-for></div>
 </div>
 </div>
@@ -1408,7 +1422,12 @@ details.tk-un[open] .tk-un-h{margin-bottom:8px}
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":3600}}'>
-var INIT = { tc: 'ke', tq: '', tf: null, tpin: -1, tkTried: false };
+var INIT = { tc: 'ke', tq: '', tf: null, tpin: -1, tkTried: false, tg: 'all' };
+// project groups (feed field cat): water, and everything beyond the well
+var TKG = { all: 'All projects', water: 'Water', beyond: 'Beyond the well', health: 'Health', school: 'Schools', children: 'Children’s homes', livelihoods: 'Livelihoods', community: 'Community' };
+var TKGO = ['all', 'water', 'beyond', 'health', 'school', 'children', 'livelihoods', 'community'];
+function tkCat(p) { return p.cat || (p.water ? 'water' : 'community'); }
+function tkInG(p, g) { return g === 'all' || (g === 'beyond' ? tkCat(p) !== 'water' : tkCat(p) === g); }
 var TKN = { ke: 'Kenya', tz: 'Tanzania', ug: 'Uganda', mw: 'Malawi' }, TKO = ['ke', 'tz', 'ug', 'mw'];
 var TSTEPS = ['Site survey', 'Permits and financing', 'Drilling', 'Pump installed', 'Capped and handed over'];
 var TKST = { 'Completed': { c: '#1FA463', h: 'ok', l: 'Completed' }, 'Under construction': { c: '#F2B01E', h: 'mid', l: 'Under construction' }, 'Upcoming': { c: '#098BE1', h: 'new', l: 'Looking for funding' } };
@@ -1423,8 +1442,8 @@ function tkNorm(t) { var x = String(t || '').toLowerCase(); try { x = x.normaliz
 function tkXY(k, ll) { var p = TKPROJ[k]; return [p.x0 + (ll[1] - p.lng0) * p.s, p.y0 + (p.lat0 - ll[0]) * p.s]; }
 function tkOnMap(k, p) { var ll = TKLOC[p.id]; if (!ll || !TKPROJ[k]) return null; var xy = tkXY(k, ll); return xy[0] >= -2 && xy[0] <= 102 && xy[1] >= -2 && xy[1] <= 102 ? xy : null; }
 function tkDot(st) { return 'background:' + ((TKST[st] || TKST.Completed).c); }
-// water projects have a page on /stories (photos, facts, share link); other project types are not shown there
-function tkStory(p) { return p && p.id && (p.water || p.type === 'Borehole well' || p.type === 'Water collection') ? '/stories?project=' + encodeURIComponent(p.id) : ''; }
+// every project, water or beyond the well, has its page in the project explorer (photos, facts, share link)
+function tkStory(p) { return p && p.id ? '/stories?project=' + encodeURIComponent(p.id) : ''; }
 function tkRow(p) { var h = tkStory(p); return { t: p.title, a: [p.area, (TKST[p.status] || {}).l].filter(Boolean).join(' · '), dot: tkDot(p.status), href: h, link: !!h, nolink: !h }; }
 function tkByStatus(a, b) { return TKSO.indexOf(a.status) - TKSO.indexOf(b.status) || String(a.title).localeCompare(String(b.title)); }
 // group projects that share a point (or sit within 4 map units of each other) into one dot with a count
@@ -1458,6 +1477,16 @@ function tkSum(feed, k) {
   if (!c) c = { wells: n('Completed'), wellsUnderConstruction: n('Under construction'), upcoming: n('Upcoming'), people: ps.reduce(function (a, p) { return a + (p.status === 'Completed' ? (+p.people || 0) : 0); }, 0) };
   return { wells: tkNum(c.wells), uc: tkNum(c.wellsUnderConstruction), up: tkNum(c.upcoming), people: tkNum(c.people) };
 }
+// the country tiles beside the map, each opening its projects in the explorer (a figure of 0 is not a link)
+function tkTiles(feed, k) {
+  var c = feed ? tkSum(feed, k) : { wells: '', uc: '', up: '', people: '' }, ps = feed ? feed.projects.filter(function (p) { return p.ck === k; }) : [];
+  var n = function (f) { return ps.filter(f).length; };
+  return [[c.wells, 'wells completed', 'kind=borehole&status=completed', n(function (p) { return p.type === 'Borehole well' && p.status === 'Completed'; })],
+    [c.uc, 'wells under construction', 'kind=borehole&status=underway', n(function (p) { return p.type === 'Borehole well' && p.status === 'Under construction'; })],
+    [c.up, 'projects looking for funding', 'status=funding', n(function (p) { return p.status === 'Upcoming'; })],
+    [c.people, 'people reached', 'cat=water&status=completed', n(function (p) { return tkCat(p) === 'water' && p.status === 'Completed'; })]]
+    .map(function (t) { return { b: t[0], l: t[1], href: '/stories?country=' + k + '&' + t[2], lk: t[3] > 0, nolk: !(t[3] > 0) }; });
+}
 function tkCard(p) {
   var st = TKST[p.status] ? p.status : 'Completed', done = st === 'Completed', uc = st === 'Under construction';
   var meta = [['Country', p.country || TKN[p.ck] || ''], ['Area', p.area], ['Type', p.type], ['Pump', p.pump], ['People', p.people ? (done ? 'Serves ' : 'Will serve ') + tkNum(p.people) : ''], ['Year', p.year ? String(p.year) : '']]
@@ -1475,7 +1504,8 @@ function MOUNT(self) {
 }
 function EXTRA(self, s) {
   var feed = self._feed || self._tkFeed || null, live = !!(feed && Array.isArray(feed.projects));
-  var all = live ? feed.projects.filter(function (p) { return TKN[p.ck]; }) : [];
+  var every = live ? feed.projects.filter(function (p) { return TKN[p.ck]; }) : [];
+  var tg = TKG[s.tg] ? s.tg : 'all', all = every.filter(function (p) { return tkInG(p, tg); });
   var tc = TKN[s.tc] ? s.tc : 'ke', mine = all.filter(function (p) { return p.ck === tc; });
   var ex = (all.filter(function (p) { return p.status === 'Completed' && p.title; })[0] || all[0] || { title: '' }).title;
   var run = function (q) { self.setState({ tq: q, tf: q }); };
@@ -1492,6 +1522,7 @@ function EXTRA(self, s) {
         : (res.length > TKMAX ? 'Showing ' + TKMAX + ' of ' + res.length + ' projects matching ' + qq + '. Add more of the name to narrow it down.' : res.length + (res.length === 1 ? ' project matches ' : ' projects match ') + qq + '.');
     }
   }
+  if (msg && nq && tg !== 'all') msg += ' Showing: ' + TKG[tg] + '.';
   res = res.slice(0, TKMAX).map(tkCard);
   // map for the chosen country
   var cl = live ? tkCluster(mine, tc) : [], onMap = cl.reduce(function (a, c) { return a + c.m.length; }, 0);
@@ -1523,8 +1554,10 @@ function EXTRA(self, s) {
     tcChips: TKO.map(function (k) { return { l: TKN[k], cls: 'fchip' + (k === tc ? ' on' : ''), on: k === tc ? 'true' : 'false', pick: function () { self.setState({ tc: k, tpin: -1 }); } }; }),
     tcName: TKN[tc], tkPath: CMAPS[tc], tkMapLabel: 'Map of Rafiki projects in ' + TKN[tc] + ': ' + pins.length + (pins.length === 1 ? ' dot' : ' dots'),
     tkPins: pins,
-    tkCap: TKN[tc] + ': ' + onMap + ' of ' + mine.length + (mine.length === 1 ? ' project' : ' projects') + ' on the map. ' + (cl.some(function (c) { return c.m.length > 1; }) ? 'Numbers show several projects at one place.' : (mine.length ? '' : 'No projects in our records yet.')),
-    cs: live ? tkSum(feed, tc) : { wells: '', uc: '', up: '', people: '' },
+    tkCap: TKN[tc] + (tg !== 'all' ? ' (' + TKG[tg] + ')' : '') + ': ' + onMap + ' of ' + mine.length + (mine.length === 1 ? ' project' : ' projects') + ' on the map. ' + (cl.some(function (c) { return c.m.length > 1; }) ? 'Numbers show several projects at one place.' : (mine.length ? '' : (tg === 'all' ? 'No projects in our records yet.' : 'None in this group here yet.'))),
+    cs: live ? tkSum(feed, tc) : { wells: '', uc: '', up: '', people: '' }, csT: tkTiles(live ? feed : null, tc),
+    tgChips: TKGO.map(function (g) { var n = every.filter(function (p) { return tkInG(p, g); }).length; return { g: g, n: n, l: TKG[g] + (live ? ' · ' + tkNum(n) : ''), cls: 'fchip' + (g === tg ? ' on' : ''), on: g === tg ? 'true' : 'false', pick: function () { self.setState({ tg: g, tpin: -1 }); } }; }).filter(function (c) { return c.g === 'all' || c.n > 0; }),
+    tgHref: '/stories' + (tg !== 'all' ? '?cat=' + tg : ''), tgL: (live ? 'Open ' + (all.length === 1 ? 'this project' : 'these ' + tkNum(all.length) + ' projects') : 'Open every project') + ' in the project explorer →',
     leg: TKSO.map(function (st, j) { return { l: TKST[st].l, n: String(cnt[j]), dot: tkDot(st) }; }), legAria: 'Projects in ' + TKN[tc] + ' by status',
     selOn: !!pin, selOff: !pin && pins.length > 0, selHint: 'Choose a dot to see the projects there.',
     selH: pin ? (pin.m.length === 1 ? '1 project at this point' : pin.m.length + ' projects at this point') : '', sel: pin ? pin.m.map(tkRow) : [],

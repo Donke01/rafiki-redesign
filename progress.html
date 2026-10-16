@@ -54,7 +54,7 @@ html .tm .h2{font-size:clamp(32px,4vw,58px);line-height:1.02;letter-spacing:-0.0
 .pr-ct{color:#0A0A0A !important}
 /* smallest text is 12px */
 .cc-here,.tk-st,.tm-tag,.tm-grid.rest .tm-tag,.lw-yr,.pj-sel label,.pj-ba span{font-size:12px !important}
-.im-facts span,.cc-rows span{font-size:13px !important}
+.im-facts > div > span,.cc-rows > div > span{font-size:13px !important}
 .hp-d{font-size:15px !important}@media (max-width:600px){.hp-d{font-size:14px !important}}
 /* buttons: one height and padding */
 .b:not(.ac-btn),.xb,.xb2,.sp-btn{min-height:50px !important;padding-left:24px !important;padding-right:24px !important;font-size:15px !important;font-weight:700 !important;display:inline-flex;align-items:center;justify-content:center;gap:8px}
@@ -114,6 +114,32 @@ footer.bf::before{content:"";position:absolute;left:0;right:0;top:-38px;height:4
   a.lw-card img,.pj-card img,.up-card img,a.ps-it img,a.xe-card img,.sp-card img{transition:transform 1.1s cubic-bezier(.2,.7,.2,1)}
   a.lw-card:hover img,.pj-card:hover img,.up-card:hover img,a.ps-it:hover img,a.xe-card:hover img,.sp-card:hover img{transform:scale(1.05)}
 }
+</style>
+<style>/* explorer links: numbers, cards and list items that open the real projects behind them (/stories?…) */
+a.ex-card{color:inherit;text-decoration:none;cursor:pointer;transition:transform .3s cubic-bezier(.2,.7,.2,1),box-shadow .3s,border-color .3s,background-color .3s}
+a.ex-card:hover{box-shadow:0 18px 40px rgba(9,139,225,.14);border-color:#9FD3F7}
+a.ex-tx{color:inherit;text-decoration:underline;text-decoration-thickness:2px;text-decoration-color:rgba(9,139,225,.45);text-underline-offset:.2em;transition:text-decoration-color .2s}
+a.ex-tx:hover{text-decoration-color:currentColor}
+.ex-arw{display:inline-block;margin-left:.35em;font-weight:700;transition:transform .2s}
+a.ex-card:focus-visible,a.ex-tx:focus-visible{outline:3px solid #098BE1;outline-offset:3px;border-radius:6px}
+@media (prefers-reduced-motion:no-preference){a.ex-card:hover{transform:translateY(-4px)}a.ex-card:hover .ex-arw,a.ex-tx:hover .ex-arw{transform:translateX(3px)}}
+/* impact page: stats, legend, chart rows and year bars open the matching projects */
+a.pr-stat{border:1.5px solid transparent}
+a.pr-stat .pr-sl{color:#076DB1}
+.pr-split a{display:block;height:100%;transform-origin:left;animation:pgGrowX 1.2s cubic-bezier(.2,.7,.2,1) both;transition:filter .2s}
+.pr-split a:hover{filter:brightness(1.15)}
+.pr-leg a.ex-tx{display:inline-flex;align-items:center;gap:8px;min-height:32px}
+a.pr-hr{color:inherit;text-decoration:none;border-radius:8px;padding:4px 6px;margin:-4px -6px;transition:background-color .2s}
+a.pr-hr .l{text-decoration:underline;text-decoration-thickness:2px;text-decoration-color:rgba(9,139,225,.35);text-underline-offset:.2em}
+a.pr-hr:hover{background:#F2F9FE}
+a.pr-hr:hover .l{text-decoration-color:currentColor}
+a.pr-hr:hover .t i{background:#054F81}
+a.pr-col{color:inherit;text-decoration:none;border-radius:6px}
+a.pr-col b{text-decoration:underline;text-decoration-thickness:2px;text-decoration-color:rgba(9,139,225,.35);text-underline-offset:.2em}
+a.pr-col:hover b{text-decoration-color:currentColor}
+a.pr-hr:focus-visible,a.pr-col:focus-visible{outline:3px solid #098BE1;outline-offset:2px}
+.pr-gt a.pr-num{color:#0A0A0A}
+@media (prefers-reduced-motion: reduce){.pr-split a{animation:none !important}}
 </style>
 </head>
 <body>
@@ -1075,38 +1101,38 @@ a.vc:focus-visible{outline:3px solid #6BBDF2;outline-offset:3px}
 <section class="xh" aria-label="Our impact"><div class="wrap xh-in"><nav class="xh-crumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><span>Our impact</span></nav><h1 class="xh-h1">Rafiki in numbers</h1><p class="xh-p">A running count of every well we have finished, every well being drilled right now, and the people they serve.</p><div class="xh-row"><span class="xh-note">All countries</span><span class="todo sample">Sample figures: real numbers and date to add</span><span class="xh-note">{{updL}}</span></div></div></section>
 <main tabindex="-1" class="wrap pr-main" id="top">
 <section class="pr-stats" aria-label="Key numbers">
-<div class="pr-stat"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="M8 7h8"></path><path d="M6 21h12"></path><path d="M9 21l3-6 3 6"></path></svg><span class="pr-num">{{doneL}}</span><span class="pr-sl">Wells completed</span></div>
-<div class="pr-stat"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"></path><path d="M6 21V10l6-5 6 5v11"></path><path d="M10 21v-5h4v5"></path></svg><span class="pr-num">{{ucL}}</span><span class="pr-sl">Under construction</span></div>
-<div class="pr-stat"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"></circle><circle cx="17" cy="9" r="2.5"></circle><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"></path><path d="M15 20c0-2.4 1.1-4.4 3-5.3"></path></svg><span class="pr-num">{{peopleL}}<em>+</em></span><span class="pr-sl">People reached</span></div>
+<a class="pr-stat ex-card" href="/stories?kind=borehole&amp;status=completed"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="M8 7h8"></path><path d="M6 21h12"></path><path d="M9 21l3-6 3 6"></path></svg><span class="pr-num">{{doneL}}</span><span class="pr-sl">Wells completed<span class="ex-arw" aria-hidden="true">→</span></span></a>
+<a class="pr-stat ex-card" href="/stories?kind=borehole&amp;status=underway"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"></path><path d="M6 21V10l6-5 6 5v11"></path><path d="M10 21v-5h4v5"></path></svg><span class="pr-num">{{ucL}}</span><span class="pr-sl">Under construction<span class="ex-arw" aria-hidden="true">→</span></span></a>
+<a class="pr-stat ex-card" href="/stories?cat=water&amp;status=completed"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"></circle><circle cx="17" cy="9" r="2.5"></circle><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"></path><path d="M15 20c0-2.4 1.1-4.4 3-5.3"></path></svg><span class="pr-num">{{peopleL}}<em>+</em></span><span class="pr-sl">People reached<span class="ex-arw" aria-hidden="true">→</span></span></a>
 <div class="pr-stat live-hide draft"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"></path><path d="M5 10v10h14V10"></path><path d="M12 13.2c-1.4 1.7-2.1 2.8-2.1 3.8a2.1 2.1 0 004.2 0c0-1-.7-2.1-2.1-3.8z"></path></svg><span class="pr-num">{{hhL}}<em>+</em></span><span class="pr-sl">Households with clean water</span></div>
 </section>
 <section class="pr-card" aria-label="Project status">
 <div class="pr-ch"><h2 class="pr-ct">Project status</h2><span class="pr-cs">{{totalL}} wells in total</span></div>
-<div class="pr-split" role="img" aria-label="{{splitAria}}"><span style="{{doneW}};background:#0A78C2" title="Completed: {{doneL}}"></span><span style="{{ucW}};background:#054F81;animation-delay:.3s" title="Under construction: {{ucL}}"></span></div>
-<div class="pr-leg"><span><i style="background:#0A78C2"></i>Completed <b>{{doneL}}</b> {{donePct}}</span><span><i style="background:#054F81"></i>Under construction <b>{{ucL}}</b> {{ucPct}}</span></div>
+<div class="pr-split" role="img" aria-label="{{splitAria}}"><a href="/stories?kind=borehole&amp;status=completed" tabindex="-1" style="{{doneW}};background:#0A78C2" title="Completed: {{doneL}}"></a><a href="/stories?kind=borehole&amp;status=underway" tabindex="-1" style="{{ucW}};background:#054F81;animation-delay:.3s" title="Under construction: {{ucL}}"></a></div>
+<div class="pr-leg"><a class="ex-tx" href="/stories?kind=borehole&amp;status=completed"><i style="background:#0A78C2"></i>Completed <b>{{doneL}}</b> {{donePct}}</a><a class="ex-tx" href="/stories?kind=borehole&amp;status=underway"><i style="background:#054F81"></i>Under construction <b>{{ucL}}</b> {{ucPct}}</a></div>
 </section>
 <section class="pr-card" aria-label="Projects by country">
 <div class="pr-ch"><h2 class="pr-ct">By country</h2><span class="pr-cs">Completed wells, with wells under construction alongside</span></div>
-<div class="pr-hb"><sc-for list="{{byCountry}}" as="t" hint-placeholder-count="4"><div class="{{t.cls}}" title="{{t.tip}}"><span class="l">{{t.l}}</span><span class="t"><i style="{{t.w}}"></i></span><span class="v">{{t.v}}</span><span class="u">+{{t.u}} in progress</span></div></sc-for></div>
+<div class="pr-hb"><sc-for list="{{byCountry}}" as="t" hint-placeholder-count="4"><sc-if value="{{t.link}}" hint-placeholder-val="{{false}}"><a class="{{t.cls}}" href="{{t.href}}" title="{{t.tip}}" aria-label="{{t.aria}}"><span class="l">{{t.l}}</span><span class="t"><i style="{{t.w}}"></i></span><span class="v">{{t.v}}</span><span class="u">+{{t.u}} in progress</span></a></sc-if><sc-if value="{{t.nolink}}" hint-placeholder-val="{{true}}"><div class="{{t.cls}}" title="{{t.tip}}"><span class="l">{{t.l}}</span><span class="t"><i style="{{t.w}}"></i></span><span class="v">{{t.v}}</span><span class="u">+{{t.u}} in progress</span></div></sc-if></sc-for></div>
 </section>
 <div class="pr-two">
 <section class="pr-card" aria-label="Wells completed by year">
 <div class="pr-ch"><h2 class="pr-ct">Wells completed by year</h2><span class="pr-cs">Completed wells only</span></div>
-<div class="pr-bars"><sc-for list="{{years}}" as="y" hint-placeholder-count="5"><div class="pr-col" title="{{y.tip}}"><b>{{y.v}}</b><span class="bar" style="{{y.h}}"></span></div></sc-for></div>
+<div class="pr-bars"><sc-for list="{{years}}" as="y" hint-placeholder-count="5"><sc-if value="{{y.link}}" hint-placeholder-val="{{false}}"><a class="pr-col" href="{{y.href}}" title="{{y.tip}}" aria-label="{{y.aria}}"><b>{{y.v}}</b><span class="bar" style="{{y.h}}"></span></a></sc-if><sc-if value="{{y.nolink}}" hint-placeholder-val="{{true}}"><div class="pr-col" title="{{y.tip}}"><b>{{y.v}}</b><span class="bar" style="{{y.h}}"></span></div></sc-if></sc-for></div>
 <div class="pr-xl"><sc-for list="{{years}}" as="y" hint-placeholder-count="5"><span>{{y.l}}</span></sc-for></div>
 </section>
 <section class="pr-card" aria-label="Projects by type and pump">
 <div class="pr-ch"><h2 class="pr-ct">By project type</h2></div>
-<div class="pr-hb"><sc-for list="{{types}}" as="t" hint-placeholder-count="3"><div class="pr-hr" title="{{t.tip}}"><span class="l">{{t.l}}</span><span class="t"><i style="{{t.w}}"></i></span><span class="v">{{t.v}}</span></div></sc-for></div>
+<div class="pr-hb"><sc-for list="{{types}}" as="t" hint-placeholder-count="3"><sc-if value="{{t.link}}" hint-placeholder-val="{{false}}"><a class="pr-hr" href="{{t.href}}" title="{{t.tip}}" aria-label="{{t.aria}}"><span class="l">{{t.l}}</span><span class="t"><i style="{{t.w}}"></i></span><span class="v">{{t.v}}</span></a></sc-if><sc-if value="{{t.nolink}}" hint-placeholder-val="{{true}}"><div class="pr-hr" title="{{t.tip}}"><span class="l">{{t.l}}</span><span class="t"><i style="{{t.w}}"></i></span><span class="v">{{t.v}}</span></div></sc-if></sc-for></div>
 <div class="pr-ch" style="margin-top:8px"><h2 class="pr-ct">By pump type</h2></div>
 <div class="pr-hb"><sc-for list="{{pumps}}" as="t" hint-placeholder-count="3"><div class="pr-hr" title="{{t.tip}}"><span class="l">{{t.l}}</span><span class="t"><i style="{{t.w}}"></i></span><span class="v">{{t.v}}</span></div></sc-for></div>
 </section>
 </div>
 <section class="pr-card" aria-label="Under construction now">
 <div class="pr-ch"><h2 class="pr-ct">Under construction now</h2><span class="pr-cs">Site survey → Permits → Drilling → Pump → Handed over</span></div>
-<div class="pr-list"><sc-for list="{{ucList}}" as="p" hint-placeholder-count="6"><div class="pr-li"><span class="pr-code">{{p.code}}</span><div class="pr-name"><b>{{p.title}}</b><span>{{p.country}} · {{p.type}}{{p.pumpTx}}</span></div><div class="pr-prog"><div class="pr-steps" role="img" aria-label="{{p.aria}}"><sc-for list="{{p.steps}}" as="s" hint-placeholder-count="5"><i class="{{s}}"></i></sc-for></div><div class="pr-stage">{{p.stage}}</div></div><a class="pr-go" href="/stories">View project</a></div></sc-for></div>
+<div class="pr-list"><sc-for list="{{ucList}}" as="p" hint-placeholder-count="6"><div class="pr-li"><span class="pr-code">{{p.code}}</span><div class="pr-name"><b>{{p.title}}</b><span>{{p.country}} · {{p.type}}{{p.pumpTx}}</span></div><div class="pr-prog"><div class="pr-steps" role="img" aria-label="{{p.aria}}"><sc-for list="{{p.steps}}" as="s" hint-placeholder-count="5"><i class="{{s}}"></i></sc-for></div><div class="pr-stage">{{p.stage}}</div></div><a class="pr-go" href="{{p.href}}">View project</a></div></sc-for></div>
 </section>
-<section class="pr-card" aria-label="Looking for funding"> <div class="pr-goal">  <div class="pr-gt"><span class="pr-cs" style="font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#076DB1">Looking for funding</span><span class="pr-num">{{fundL}} projects</span><span class="pr-sl">are ready to start as soon as they are funded. <a href="/sponsor" style="color:#076DB1;font-weight:700">See them</a></span></div> </div> </section>
+<section class="pr-card" aria-label="Looking for funding"> <div class="pr-goal">  <div class="pr-gt"><span class="pr-cs" style="font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#076DB1">Looking for funding</span><a class="pr-num ex-tx" href="/stories?status=funding">{{fundL}} projects<span class="ex-arw" aria-hidden="true">→</span></a><span class="pr-sl">are ready to start as soon as they are funded. <a href="/sponsor" style="color:#076DB1;font-weight:700">See them</a></span></div> </div> </section>
 <section class="pr-card" aria-label="Annual reports"><div class="pr-ch"><h2 class="pr-ct">Annual reports and how we count</h2></div><p class="pr-lead" style="max-width:none">People reached is estimated from each well’s community size. Wells still working are checked on follow-up visits. <span class="todo">Follow-up schedule to add</span></p><div class="todo-box"><b>To add</b><ul><li>Annual reports to download, newest first</li><li>The date these numbers were last updated, and confirmed figures for each country</li></ul></div></section>
 <section class="pr-cta" aria-label="Help us grow these numbers">
 <h2 class="pr-ct" style="font-size:clamp(26px,3vw,38px)">Help us grow these numbers</h2>
@@ -1238,7 +1264,7 @@ class Component extends DCLogic {
       types[p.type] = (types[p.type] || 0) + 1;
       if (p.year && p.status === 'Completed' && p.type === 'Borehole well') years[p.year] = 1;
       if (p.pump) pumps[p.pump] = 1;
-      PROJECTS.push({ code: p.area || p.ck.toUpperCase(), country: p.country, title: p.title, type: p.type, pump: p.pump, year: p.year, status: p.status, stage: 0 });
+      PROJECTS.push({ id: p.id, ck: p.ck, cat: p.cat, code: p.area || p.ck.toUpperCase(), country: p.country, title: p.title, type: p.type, pump: p.pump, year: p.year, status: p.status, stage: 0 });
     });
     TYPES.length = 0; Object.keys(types).sort(function (a, b) { return types[b] - types[a]; }).forEach(function (t) { TYPES.push(t); });
     YEARS.length = 0; Object.keys(years).map(Number).sort().slice(-5).forEach(function (y) { YEARS.push(y); });
@@ -1256,6 +1282,12 @@ class Component extends DCLogic {
     var cnt = function (key, vals) { var m = Math.max.apply(null, vals.map(function (v) { return PROJECTS.filter(function (p) { return p[key] === v; }).length; })) || 1;
       return vals.map(function (v, i) { var c = PROJECTS.filter(function (p) { return p[key] === v; }).length; return { l: v, v: c, w: 'width:' + (c / m * 100).toFixed(1) + '%;animation-delay:' + (i * 0.12) + 's', tip: v + ': ' + c + ' projects' }; }); };
     var pct = function (a) { return '(' + (total ? Math.round(a / total * 100) : 0) + '%)'; };
+    // links into the project explorer, only for the real projects from the feed (sample figures stay plain)
+    var X = '/stories?', KIND = { 'Borehole well': 'kind=borehole', 'Water collection': 'kind=collection' };
+    var linkOf = function (o, href, aria) { o.link = !!(L && href); o.nolink = !o.link; o.href = o.link ? href : ''; o.aria = aria || ''; return o; };
+    var typeQ = function (t) { var mine = PROJECTS.filter(function (p) { return p.type === t; }); var c = mine.length && mine[0].cat;
+      var q = KIND[t] || (c && c !== 'water' && mine.every(function (p) { return p.cat === c; }) ? 'cat=' + c : '');
+      return q ? q + (mine.every(function (p) { return p.status === 'Completed'; }) ? '&status=completed' : '') : ''; };
     return Object.assign(countryVals(this), {
       hdStyle: 'transform: translateY(0)',
       tileShadow: s.scrolled ? 'box-shadow: 0 2px 4px rgba(10,10,10,0.05), 0 14px 36px rgba(10,10,10,0.12)' : 'box-shadow: 0 1px 2px rgba(10,10,10,0.04)',
@@ -1266,14 +1298,19 @@ class Component extends DCLogic {
       doneW: 'width:' + (total ? done / total * 100 : 0).toFixed(2) + '%', ucW: 'width:' + (total ? uc / total * 100 : 0).toFixed(2) + '%; min-width:6px',
       donePct: pct(done), ucPct: pct(uc),
       splitAria: done + ' completed and ' + uc + ' under construction',
-      years: YEARS.map(function (y, i) { return { l: String(y), v: byYear[i], h: 'height:' + (byYear[i] / maxY * 100).toFixed(1) + '%;animation-delay:' + (i * 0.1) + 's', tip: y + ': ' + byYear[i] + ' wells completed' }; }),
-      types: cnt('type', TYPES), pumps: cnt('pump', PUMPS),
+      years: YEARS.map(function (y, i) { return linkOf({ l: String(y), v: byYear[i], h: 'height:' + (byYear[i] / maxY * 100).toFixed(1) + '%;animation-delay:' + (i * 0.1) + 's', tip: y + ': ' + byYear[i] + ' wells completed' }, byYear[i] ? X + 'kind=borehole&status=completed&year=' + y : '', y + ': ' + byYear[i] + ' wells completed. See them'); }),
+      types: cnt('type', TYPES).map(function (t) { var q = typeQ(t.l); return linkOf(t, q ? X + q : '', t.l + ': ' + t.v + ' projects. See them'); }), pumps: cnt('pump', PUMPS),
       byCountry: (function () { var sel = s.cAll ? '' : CTRY[s.ctry || 'ke'].n; var rows = CLIST.map(function (c) { return { c: c, d: PROJECTS.filter(function (p) { return p.country === c && p.status === 'Completed' && isWell(p); }).length, u: PROJECTS.filter(function (p) { return p.country === c && p.status === 'Under construction' && isWell(p); }).length }; }); var m = Math.max.apply(null, rows.map(function (r) { return r.d; })) || 1;
-        return rows.map(function (r, i) { return { l: r.c, v: r.d, u: r.u, cls: 'pr-hr pr-hc' + (r.c === sel ? ' sel' : ''), w: 'width:' + (r.d / m * 100).toFixed(1) + '%;animation-delay:' + (i * 0.12) + 's', tip: r.c + ': ' + r.d + ' completed, ' + r.u + ' under construction' }; }); })(),
+        return rows.map(function (r, i) {
+          // completed wells when there are some, else the wells under way, else whatever the country has (e.g. projects looking for funding)
+          var ck = ({ Kenya: 'ke', Tanzania: 'tz', Uganda: 'ug', Malawi: 'mw' })[r.c], any = !!(self._feed && self._feed.projects.some(function (p) { return p.ck === ck; }));
+          var q = r.d ? 'kind=borehole&status=completed' : (r.u ? 'kind=borehole&status=underway' : '');
+          var href = ck && (r.d || r.u || any) ? X + 'country=' + ck + (q ? '&' + q : '') : '';
+          return linkOf({ l: r.c, v: r.d, u: r.u, cls: 'pr-hr pr-hc' + (r.c === sel ? ' sel' : ''), w: 'width:' + (r.d / m * 100).toFixed(1) + '%;animation-delay:' + (i * 0.12) + 's', tip: r.c + ': ' + r.d + ' completed, ' + r.u + ' under construction' }, href, r.c + ': ' + r.d + ' wells completed, ' + r.u + ' under construction. See them'); }); })(),
       ucList: PROJECTS.filter(function (p) { return p.status === 'Under construction'; }).map(function (p) {
         // the board has no build stage, so live projects show their status without the step bar
         var st = p.stage > 0;
-        return { code: p.code, country: p.country, title: p.title, type: p.type, pump: p.pump, pumpTx: p.pump ? ' · ' + p.pump + ' pump' : '', stage: st ? 'Now: ' + STAGES[p.stage - 1] + ' (step ' + p.stage + ' of 5)' : 'Under construction', aria: st ? 'Step ' + p.stage + ' of 5: ' + STAGES[p.stage - 1] : 'Under construction',
+        return { href: p.id ? '/stories?project=' + encodeURIComponent(p.id) : '/stories', code: p.code, country: p.country, title: p.title, type: p.type, pump: p.pump, pumpTx: p.pump ? ' · ' + p.pump + ' pump' : '', stage: st ? 'Now: ' + STAGES[p.stage - 1] + ' (step ' + p.stage + ' of 5)' : 'Under construction', aria: st ? 'Step ' + p.stage + ' of 5: ' + STAGES[p.stage - 1] : 'Under construction',
           steps: st ? STAGES.map(function (x, k) { return k + 1 < p.stage ? 'd' : (k + 1 === p.stage ? 'n' : ''); }) : [] }; }),
       ringOff: 'stroke-dashoffset:327'
     });

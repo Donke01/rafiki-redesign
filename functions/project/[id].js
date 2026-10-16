@@ -1,4 +1,4 @@
-// GET /project/<id>: the share link for one water project. Link previews (WhatsApp,
+// GET /project/<id>: the share link for one project (water or Beyond the well). Link previews (WhatsApp,
 // Facebook, X, Slack...) read the title, description and photo from this small page;
 // people are sent straight on to the project on /stories?project=<id>.
 // The project comes from the same cached monday.com feed as /api/projects
@@ -9,6 +9,11 @@ import { getFeed } from '../../lib/feed-cache.js';
 const SITE = 'Rafiki Outreach';
 const FALLBACK_IMAGE = '/img/w-field3.jpg'; // the og:image of /stories
 const WATER = { 'Borehole well': true, 'Water collection': true };
+// Beyond the well: how each group is named in a description ("School project in Ndalat, Kenya, ...")
+const GROUP = { health: 'Health project', school: 'School project', children: "Children's home project", livelihoods: 'Livelihoods project', community: 'Community project' };
+const CAT_OF_TYPE = { Health: 'health', School: 'school', Orphanage: 'children', Farming: 'livelihoods' };
+const isWater = p => p.cat ? p.cat === 'water' : !!(p.water || WATER[p.type]);
+const catOf = p => (p.cat && (p.cat === 'water' || GROUP[p.cat])) ? p.cat : (isWater(p) ? 'water' : CAT_OF_TYPE[p.type] || 'community');
 
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const num = n => Math.round(Number(n) || 0).toLocaleString('en-US');
@@ -19,11 +24,28 @@ function redirect(to, cache) {
 
 // e.g. "Borehole well in Sigowet, Kenya, finished 2026, serving about 5,000 people."
 function describe(p) {
-  const type = p.type || 'Water project';
   const area = p.area && p.area !== p.title ? p.area : '';
   const where = [area, p.country].filter(Boolean).join(', ');
   const people = Number(p.people) > 0 ? num(p.people) : '';
   const parts = [];
+  const cat = catOf(p);
+  if (cat !== 'water') {
+    // e.g. "School project in Ndalat, Kenya, under construction." / "Health project in Kapsaret, Kenya, finished 2025."
+    parts.push(GROUP[cat] + (where ? ' in ' + where : ''));
+    if (p.status === 'Completed') {
+      parts.push(p.year ? 'finished ' + p.year : 'completed');
+      if (people) parts.push('serving about ' + people + ' people');
+    } else if (p.status === 'Under construction') {
+      parts.push('under construction');
+      if (people) parts.push('expected to serve about ' + people + ' people');
+    } else {
+      parts.push('looking for funding');
+      if (people) parts.push('expected to serve about ' + people + ' people');
+      if (Number(p.needed) > 0) parts.push('$' + num(p.needed) + ' still to raise');
+    }
+    return parts.join(', ') + '.';
+  }
+  const type = p.type || 'Water project';
   if (p.status === 'Completed') {
     parts.push(type + (where ? ' in ' + where : ''));
     if (p.year) parts.push('finished ' + p.year);
@@ -46,7 +68,7 @@ function page(p, origin) {
   const desc = describe(p);
   const photo = (p.photos || [])[0];
   const image = origin + (photo ? '/api/photo/' + encodeURIComponent(photo) + '?w=1600' : FALLBACK_IMAGE);
-  const alt = photo ? 'Photo from ' + p.title : 'A Rafiki Outreach water project';
+  const alt = photo ? 'Photo from ' + p.title : (isWater(p) ? 'A Rafiki Outreach water project' : 'A Rafiki Outreach project');
   const share = origin + '/project/' + encodeURIComponent(id);
   return `<!doctype html>
 <html lang="en-GB">
@@ -94,8 +116,8 @@ export async function onRequestGet({ env, params, request, waitUntil }) {
     console.error('project page feed:', e && e.message);
     return redirect(target);
   }
-  // the same projects /stories shows: borehole wells and water collection
-  const p = ((feed && feed.projects) || []).find(x => String(x.id) === id && (x.water || WATER[x.type]));
+  // the same projects /stories shows: every project in the feed, water and Beyond the well
+  const p = ((feed && feed.projects) || []).find(x => String(x.id) === id);
   if (!p) return redirect('/stories');
   const origin = new URL(request.url).origin;
   return new Response(page(p, origin), {

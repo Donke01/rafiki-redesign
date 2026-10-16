@@ -23,6 +23,7 @@
 <script>/* coming from the country picker: keep the screen blue until the wipe finishes on this page */try{if(sessionStorage.getItem('rfWipe'))document.documentElement.className+=' cx-arriving';}catch(e){}</script>
 <script src="/support.js"></script>
 <script src="/feed.js"></script>
+<script src="/places.js"></script>
 <script src="/motion.js" defer></script>
 <style>/* a11y: contrast, focus, tap targets */.blue,.xs.blue{background:#0A78C2 !important}.blue p,.blue .x-p,.blue .x-sm{color:#FFFFFF !important}.blue :focus-visible,.xh :focus-visible,.cn-hero :focus-visible{outline-color:#FFFFFF !important}@media (max-width:600px){.bf-legal a,.xh-crumb a{display:inline-block;padding:10px 4px}}</style>
 <style>/* no black: buttons on blue panels */.xs.ink .xb:not(.lt),.xs.ink .b,.fx-card .b,.tile.dark .b,.sg-panel.ink .xb,.ww .b,.xe-card .b{background:#FFFFFF !important;color:#0A78C2 !important}.access2 .ac-btn,.access2 .ac-btn *{color:#FFFFFF !important}.fx-k{color:#FFFFFF !important}.fx-txt .p{color:#FFFFFF !important}.cc-card .cc-go{color:#076DB1}.xs.ink .kicker,.sg-panel.ink .kicker{color:#FFFFFF !important;background:rgba(255,255,255,.18) !important}.xs.ink .bignum,.xs.ink .bignum *{color:#FFFFFF !important}.xs.ink .wd-facts b{color:#FFFFFF !important}</style>
@@ -54,7 +55,7 @@ html .tm .h2{font-size:clamp(32px,4vw,58px);line-height:1.02;letter-spacing:-0.0
 .pr-ct{color:#0A0A0A !important}
 /* smallest text is 12px */
 .cc-here,.tk-st,.tm-tag,.tm-grid.rest .tm-tag,.lw-yr,.pj-sel label,.pj-ba span{font-size:12px !important}
-.im-facts span,.cc-rows span{font-size:13px !important}
+.im-facts > div > span,.cc-rows > div > span{font-size:13px !important}
 .hp-d{font-size:15px !important}@media (max-width:600px){.hp-d{font-size:14px !important}}
 /* buttons: one height and padding */
 .b:not(.ac-btn),.xb,.xb2,.sp-btn{min-height:50px !important;padding-left:24px !important;padding-right:24px !important;font-size:15px !important;font-weight:700 !important;display:inline-flex;align-items:center;justify-content:center;gap:8px}
@@ -1359,6 +1360,71 @@ a.vc:focus-visible{outline:3px solid #6BBDF2;outline-offset:3px}
 @media (max-width:900px){.x-split.ow{grid-template-areas:"h" "c" "m";grid-template-rows:auto}.mp{margin:0 auto}.sg-two,.sg-wells{grid-template-columns:1fr}}
 @media (max-width:640px){.sg-grid,.ps{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 10px}.nd-figs{grid-template-columns:1fr}.tk-steps{gap:4px}.tk-st{font-size:10px}.sg-ol li{padding:12px}}
 @media (prefers-reduced-motion: reduce){.tk-pin,.tk-sel{animation:none !important}.ph img{transition:none}}
+/* links into the project explorer (/stories): pills, figures, lists and cards open the projects behind them */
+.x-pills > a.xp{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:8px 18px;border-radius:999px;border:1.5px solid #E1E4E7;background:#FFFFFF;font-size:15px;font-weight:700;color:#0A0A0A;text-decoration:none;transition:background .2s,border-color .2s,color .2s}
+.xp-n{font-weight:600;color:#5A6066;font-variant-numeric:tabular-nums;white-space:nowrap}
+a.xp:hover{background:#E3F1FC;border-color:#9FD3F7;color:#054F81}
+a.xp:hover .xp-n{color:#054F81}
+.wd-facts > a.wd-a{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr) auto;gap:16px;align-items:baseline;padding:18px 12px;border-bottom:1px solid rgba(255,255,255,.18);border-radius:14px;color:inherit;text-decoration:none;transition:background .2s}
+.wd-a > span{font-size:15px;line-height:1.5;color:rgba(255,255,255,.84)}
+.wd-a > i{align-self:center;font-style:normal;font-size:20px;font-weight:800;color:#9FD3F7;transition:transform .2s}
+.wd-a:hover{background:rgba(255,255,255,.09)}
+.wd-a:hover > span{color:#FFFFFF;text-decoration:underline;text-underline-offset:3px}
+.wd-a:hover > i{transform:translateX(4px)}
+@media (max-width:560px){.wd-facts > a.wd-a{grid-template-columns:minmax(0,1fr) auto;gap:4px 16px}.wd-a > b,.wd-a > span{grid-column:1}.wd-a > i{grid-column:2;grid-row:1 / span 2}}
+.wd-a:focus-visible,.sg-panel.ink a:focus-visible{outline-color:#FFFFFF !important}
+.pr-it > a.pr-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;font-size:20px;font-weight:800;letter-spacing:-0.015em;color:#0A0A0A;text-decoration:none}
+.pr-hn{flex:none;font-size:13px;font-weight:700;letter-spacing:0;color:#076DB1;white-space:nowrap}
+a.pr-h:hover{color:#054F81}
+a.pr-h:hover .pr-hn{text-decoration:underline;text-underline-offset:3px}
+.pr-it > a.pr-x{display:block;margin:0 -12px;padding:10px 12px;border-radius:14px;font-size:15px;line-height:1.6;color:#3A3F44;text-decoration:none;transition:transform .3s cubic-bezier(.2,.7,.2,1),box-shadow .3s,background .2s}
+.pr-x strong{color:#0A0A0A}
+a.pr-x:hover{background:#FFFFFF;transform:translateY(-3px);box-shadow:0 12px 28px rgba(5,79,129,.14)}
+a.pr-x:hover strong{text-decoration:underline;text-underline-offset:3px}
+.mp-leg a.mp-la{display:inline-flex;align-items:center;gap:8px;min-height:32px;padding:4px 10px;margin:-4px -10px;border-radius:999px;color:inherit;text-decoration:none;transition:background .2s}
+.mp-leg a.mp-la:hover{background:#E3F1FC;text-decoration:underline;text-underline-offset:3px}
+.tk-ul li > a.tk-lk{font-weight:600;overflow-wrap:anywhere;color:#0A0A0A;text-decoration:underline;text-decoration-color:#9FD3F7;text-decoration-thickness:2px;text-underline-offset:3px}
+.tk-ul li > a.tk-lk:hover{color:#076DB1;text-decoration-color:currentColor}
+.sg-card{position:relative;border-radius:18px;transition:transform .35s cubic-bezier(.2,.7,.2,1),box-shadow .35s}
+.sg-lk{color:inherit;text-decoration:none}
+.sg-lk::after{content:"";position:absolute;inset:0;border-radius:18px}
+.sg-card:hover{transform:translateY(-5px);box-shadow:0 18px 40px rgba(5,79,129,.16)}
+.sg-card:hover .sg-lk{text-decoration:underline;text-underline-offset:3px}
+.sg-card:hover img,.sg-phs a.ph:hover img{transform:scale(1.04)}
+.sg-nums > a{display:flex;flex-direction:column;gap:6px;min-width:0;padding:10px;margin:-10px;border-radius:14px;color:inherit;text-decoration:none;transition:background .2s}
+.sg-nums > a > span{font-size:14px;line-height:1.45;font-weight:600}
+.sg-nums > a:hover{background:#FFFFFF}
+.sg-panel.ink .sg-nums > a:hover{background:rgba(255,255,255,.12)}
+.sg-nums > a:hover > span{text-decoration:underline;text-underline-offset:3px}
+.sg-phs a.ph{display:block}
+.sg-next li > a{font-weight:700;color:#0A0A0A;text-decoration:underline;text-decoration-color:#9FD3F7;text-decoration-thickness:2px;text-underline-offset:3px}
+.sg-next li > a:hover{color:#076DB1;text-decoration-color:currentColor}
+.sg-well{position:relative}
+.sg-wl{color:inherit;text-decoration:none}
+.sg-wl::after{content:"";position:absolute;inset:0;border-radius:22px}
+.sg-well:hover{transform:translateY(-5px);box-shadow:0 18px 40px rgba(5,79,129,.16)}
+.sg-well:hover .sg-wl{text-decoration:underline;text-underline-offset:4px}
+a.sg-goal{color:inherit;text-decoration:none;padding:14px 16px;margin:-14px -16px;border-radius:18px;transition:background .2s}
+a.sg-goal:hover{background:#FFFFFF}
+a.sg-goal:hover > span{text-decoration:underline;text-underline-offset:3px}
+.bw-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-top:30px}
+a.bw-t{display:flex;flex-direction:column;gap:6px;padding:24px;border-radius:22px;background:#FAF8F3;color:#0A0A0A;text-decoration:none;min-width:0;transition:transform .35s cubic-bezier(.2,.7,.2,1),box-shadow .35s}
+.bw-t > b{font-size:clamp(34px,3.4vw,48px);font-weight:800;letter-spacing:-0.04em;line-height:1;color:#076DB1;font-variant-numeric:tabular-nums}
+.bw-t > span{font-size:18px;font-weight:800}
+.bw-t > span::after{content:" \2192";color:#076DB1}
+.bw-t > small{font-size:13.5px;line-height:1.45;color:#3A3F44}
+.bw-rh{margin:34px 0 0}
+.bw-list{list-style:none;margin:14px 0 0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.bw-list > li{display:flex;min-width:0}
+a.bw-r{flex:1;display:flex;flex-direction:column;gap:6px;padding:20px 22px;border-radius:22px;background:#FFFFFF;border:1.5px solid #E1E4E7;color:#0A0A0A;text-decoration:none;min-width:0;transition:transform .35s cubic-bezier(.2,.7,.2,1),box-shadow .35s}
+.bw-r > b{font-size:17px;font-weight:800;line-height:1.3;overflow-wrap:anywhere}
+.bw-r > .bw-d{font-size:14.5px;line-height:1.5;color:#3A3F44}
+.bw-r > small{font-size:13px;font-weight:600;color:#5A6066}
+a.bw-t:hover,a.bw-r:hover{transform:translateY(-5px);box-shadow:0 18px 40px rgba(5,79,129,.16)}
+a.bw-t:hover > span,a.bw-r:hover > b{text-decoration:underline;text-underline-offset:3px}
+.sg-k.c{background:#FDE8EF;color:#9B1D4A}.sg-k.l{background:#EAF3DE;color:#3F6212}.sg-k.m{background:#EEF0F2;color:#3A3F44}
+@media (max-width:640px){.bw-list{grid-template-columns:1fr}.bw-tiles{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}a.bw-t{padding:18px}}
+@media (prefers-reduced-motion: reduce){a.bw-t,a.bw-r,.sg-card,a.pr-x{transition:none}a.bw-t:hover,a.bw-r:hover,.sg-card:hover,a.pr-x:hover,.sg-well:hover{transform:none}}
 </style>
 </helmet>
 <a class="skip" href="#top">Skip to content</a>
@@ -1382,7 +1448,7 @@ a.vc:focus-visible{outline:3px solid #6BBDF2;outline-offset:3px}
 </header>
 </div>
 <div class="hd-space" aria-hidden="true"></div>
-<section class="xh cn-hero" aria-label="Rafiki in Kenya"><div class="wrap xh-in"><div class="xh-txt"><nav class="xh-crumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><a href="/#where-we-work">Where we work</a><span aria-hidden="true">/</span><span>Kenya</span></nav><h1 class="xh-h1">Rafiki in Kenya</h1><p class="xh-p">School wells, community water projects and filtration systems, led by our Kenya team from the Kitale office.</p></div><svg class="cn-map" viewBox="-4 -4 108 108" role="img" aria-label="Map of Kenya in the colours of its flag"><defs><clipPath id="cm-cn-map-ke"><path d="M10.8,63.8 11.2,52.2 13.4,48.0 15.8,45.4 16.5,43.7 19.6,41.7 19.5,40.4 21.3,37.8 21.4,36.5 20.3,28.5 19.1,26.3 17.6,25.2 16.9,23.3 16.2,22.9 15.7,20.4 16.1,18.1 13.4,16.5 13.6,15.9 11.5,12.5 24.2,0.0 24.2,0.8 24.8,1.2 26.2,0.7 28.9,1.4 29.5,3.3 29.1,6.7 31.7,10.1 40.3,10.6 51.9,18.1 65.7,20.0 67.3,18.8 69.2,16.1 78.2,12.0 81.9,15.0 89.2,14.9 83.9,22.5 80.2,26.3 80.3,62.5 85.6,69.4 85.7,70.6 83.2,73.0 80.5,73.1 80.0,74.1 79.4,73.8 79.5,76.2 77.0,78.9 74.7,79.0 72.9,80.3 72.6,83.6 71.8,85.9 70.6,86.8 69.3,89.1 68.1,93.1 64.6,99.4 63.7,99.2 62.8,99.9 49.1,90.0 48.2,88.7 47.2,88.3 47.9,86.4 47.6,83.8 12.3,64.1 10.8,63.8Z"></path></clipPath></defs><g clip-path="url(#cm-cn-map-ke)"><g><rect x="-60" y="-60" width="220" height="90" fill="#000000"></rect><rect x="-60" y="30" width="220" height="4" fill="#FFFFFF"></rect><rect x="-60" y="34" width="220" height="32" fill="#BB0000"></rect><rect x="-60" y="66" width="220" height="4" fill="#FFFFFF"></rect><rect x="-60" y="70" width="220" height="90" fill="#006600"></rect></g></g><path d="M10.8,63.8 11.2,52.2 13.4,48.0 15.8,45.4 16.5,43.7 19.6,41.7 19.5,40.4 21.3,37.8 21.4,36.5 20.3,28.5 19.1,26.3 17.6,25.2 16.9,23.3 16.2,22.9 15.7,20.4 16.1,18.1 13.4,16.5 13.6,15.9 11.5,12.5 24.2,0.0 24.2,0.8 24.8,1.2 26.2,0.7 28.9,1.4 29.5,3.3 29.1,6.7 31.7,10.1 40.3,10.6 51.9,18.1 65.7,20.0 67.3,18.8 69.2,16.1 78.2,12.0 81.9,15.0 89.2,14.9 83.9,22.5 80.2,26.3 80.3,62.5 85.6,69.4 85.7,70.6 83.2,73.0 80.5,73.1 80.0,74.1 79.4,73.8 79.5,76.2 77.0,78.9 74.7,79.0 72.9,80.3 72.6,83.6 71.8,85.9 70.6,86.8 69.3,89.1 68.1,93.1 64.6,99.4 63.7,99.2 62.8,99.9 49.1,90.0 48.2,88.7 47.2,88.3 47.9,86.4 47.6,83.8 12.3,64.1 10.8,63.8Z" fill="none" stroke="#FFFFFF" stroke-width="1.2" stroke-linejoin="round"></path></svg></div></section><main tabindex="-1" class="wrap xm" id="top"><section class="xs" id="team"><div class="dir"><img class="dir-ph" src="/img/meril.webp" alt="Meril Adoyo"><div class="x-col"><span class="x-sm">Country Director, Kenya</span><h2 class="x-h2">Meril Adoyo</h2><p class="x-p">Meril leads Rafiki Outreach in Kenya from the Kitale office. She works with communities from their first request through site selection and drilling, and stays in touch long after the well is finished, so every project leaves water flowing for years to come.</p><a class="xb2" href="mailto:meril@rafikioutreach.org" style="align-self:flex-start;color:#0A0A0A">meril@rafikioutreach.org</a></div></div><div class="staff"><div><img src="/img/morgan.webp" alt="Morgan Mamati"><span><b>Morgan Mamati</b>Rafiki Kenya</span></div></div><div class="office"><span><b>Kenya office</b></span><span>Mega Centre, 3rd Floor, Makasembo Road, Kitale</span><span><a href="tel:+254791674001" style="color:#076DB1">+254 791 674 001</a></span></div></section><section class="xs"><div class="x-split ow"><h2 class="x-h2">Our work in Kenya</h2><div class="x-col"><p class="x-lead">In Kenya, Rafiki works on school wells, community water projects and filtration systems, with most of our work around Eldoret in Uasin Gishu and Nandi counties, and projects near Kisumu and Naivasha. Our Kenya management team builds long relationships with schools and communities, from the first request to years after the water flows.</p><h3 class="x-h3" style="margin-top:8px">What we do</h3><div class="x-pills"><span>School wells</span><span>Community water projects</span><span>Filtration systems</span></div><h3 class="x-h3" style="margin-top:8px">Who we serve</h3><div class="x-pills"><span>Schools</span><span>Villages</span><span>Communities</span></div><h3 class="x-h3" style="margin-top:8px">Where we work</h3><div class="x-pills"><span>Uasin Gishu (Eldoret)</span><span>Nandi</span><span>Kisumu area</span><span>Naivasha area</span></div></div><div class="mp"><h3 class="x-h3 mp-h">Where our projects are</h3><div class="tk-mapbox"><svg class="tk-svg" viewBox="-4 -4 108 108" aria-hidden="true" focusable="false"><path d="M10.8,63.8 11.2,52.2 13.4,48.0 15.8,45.4 16.5,43.7 19.6,41.7 19.5,40.4 21.3,37.8 21.4,36.5 20.3,28.5 19.1,26.3 17.6,25.2 16.9,23.3 16.2,22.9 15.7,20.4 16.1,18.1 13.4,16.5 13.6,15.9 11.5,12.5 24.2,0.0 24.2,0.8 24.8,1.2 26.2,0.7 28.9,1.4 29.5,3.3 29.1,6.7 31.7,10.1 40.3,10.6 51.9,18.1 65.7,20.0 67.3,18.8 69.2,16.1 78.2,12.0 81.9,15.0 89.2,14.9 83.9,22.5 80.2,26.3 80.3,62.5 85.6,69.4 85.7,70.6 83.2,73.0 80.5,73.1 80.0,74.1 79.4,73.8 79.5,76.2 77.0,78.9 74.7,79.0 72.9,80.3 72.6,83.6 71.8,85.9 70.6,86.8 69.3,89.1 68.1,93.1 64.6,99.4 63.7,99.2 62.8,99.9 49.1,90.0 48.2,88.7 47.2,88.3 47.9,86.4 47.6,83.8 12.3,64.1 10.8,63.8Z" fill="#E3F1FC" stroke="#9FD3F7" stroke-width=".8" stroke-linejoin="round"></path></svg><div class="tk-pins" role="group" aria-label="{{mpLabel}}"><sc-for list="{{mpPins}}" as="p" hint-placeholder-count="0"><button type="button" class="{{p.cls}}" style="{{p.st}}" aria-label="{{p.label}}" aria-pressed="{{p.on}}" title="{{p.tip}}" onClick="{{p.pick}}"><span>{{p.n}}</span></button></sc-for></div></div><p class="x-sm tk-cap">{{mpCap}}</p><sc-if value="{{mpLegOn}}" hint-placeholder-val="{{true}}"><div class="mp-leg" role="list" aria-label="{{mpLegAria}}"><sc-for list="{{mpLeg}}" as="l" hint-placeholder-count="3"><span role="listitem"><i style="{{l.dot}}"></i>{{l.l}} <b>{{l.n}}</b></span></sc-for></div></sc-if><p class="x-sm mp-src" style="margin-top:8px;color:#5A6066">Some pins mark the village or town rather than the exact site. Place data &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener" style="color:#076DB1">OpenStreetMap</a> contributors.</p><p class="tk-vh" aria-live="polite">{{mpSelLive}}</p><sc-if value="{{mpSelOn}}" hint-placeholder-val="{{false}}"><div class="tk-sel"><div class="tk-sel-h"><b>{{mpSelH}}</b><button type="button" class="tk-x" onClick="{{mpSelClose}}" aria-label="Close this list"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div><ul class="tk-ul"><sc-for list="{{mpSel}}" as="r" hint-placeholder-count="0"><li><i style="{{r.dot}}"></i><span>{{r.t}}</span><small>{{r.a}}</small></li></sc-for></ul></div></sc-if><sc-if value="{{mpHintOn}}" hint-placeholder-val="{{false}}"><p class="x-sm tk-hint">Choose a dot to see the projects there.</p></sc-if><sc-if value="{{mpUnOn}}" hint-placeholder-val="{{false}}"><details class="tk-un"><summary class="tk-un-h">{{mpUnH}}</summary><ul class="tk-ul"><sc-for list="{{mpUn}}" as="r" hint-placeholder-count="0"><li><i style="{{r.dot}}"></i><span>{{r.t}}</span><small>{{r.a}}</small></li></sc-for></ul></details></sc-if></div></div></section><section class="xs ink"><div class="wd"><div class="x-col"><h2 class="x-h2">Our impact in Kenya</h2><p class="x-p draft">Rafiki has worked in Kenya since <span class="todo">year</span>.</p><sc-if value="{{impMoreOn}}" hint-placeholder-val="{{false}}"><p class="x-p">{{impMore}}</p></sc-if></div><div class="wd-facts"><sc-for list="{{imp}}" as="f" hint-placeholder-count="3"><div><b>{{f.b}}</b><span>{{f.l}}</span></div></sc-for><sc-if value="{{impWait}}" hint-placeholder-val="{{false}}"><div class="imp-wait"><span>{{impWaitL}}</span></div></sc-if></div></div></section><section class="xs sg" aria-labelledby="sg-h"><div class="x-split"><div class="x-col"><span class="kicker" style="align-self:flex-start">Kapsaret, near Eldoret</span><h2 class="x-h2" id="sg-h">{{sgH}}</h2></div><div class="x-col"><p class="x-lead">Chepkongi is a community in Kapsaret, near Eldoret. Our work there began with water: a borehole and elevated tower for the dispensary, and another for the primary school. With water on site, we went on to work with the dispensary and the school on what came next.</p><sc-if value="{{sgWellOn}}" hint-placeholder-val="{{true}}"><p class="x-p">{{sgWell}}</p></sc-if><p class="x-p draft"><span class="todo">Rafiki to confirm: the dispensary and school wells each list 10,000 people, so the Kenya total may count the same catchment twice</span></p><p class="x-p draft"><span class="todo">A few words from the dispensary or school on what changed, to add</span></p><div class="xc-row"><a class="xb2" href="/stories?country=ke">See every Kenya project</a></div></div></div><sc-if value="{{sgOn}}" hint-placeholder-val="{{true}}"><div class="sg-grid"><sc-for list="{{sgCards}}" as="c" hint-placeholder-count="8"><figure class="sg-card"><div class="ph"><sc-if value="{{c.hasImg}}" hint-placeholder-val="{{true}}"><img src="{{c.img}}" alt="{{c.alt}}" loading="lazy" decoding="async" width="480" height="360"></sc-if></div><figcaption><span class="{{c.kcls}}">{{c.k}}</span><b>{{c.t}}</b><small>{{c.a}}</small></figcaption></figure></sc-for></div></sc-if></section><section class="xs feed-only"><h2 class="x-h2">Projects in Kenya</h2><div class="{{prCls}}"><sc-for list="{{prCols}}" as="c" hint-placeholder-count="3"><div class="pr-it"><b>{{c.h}}</b><sc-for list="{{c.it}}" as="x" hint-placeholder-count="2"><p><strong>{{x.t}}</strong><br>{{x.a}}<br>{{x.n}} {{x.need}}</p></sc-for><sc-if value="{{c.isNone}}" hint-placeholder-val="{{false}}"><p>{{c.none}}</p></sc-if></div></sc-for></div><div class="xc-row" style="margin-top:24px"><a class="xb" href="/stories?country=ke">See every project</a></div></section><section class="xs draft live-hide"><h2 class="x-h2">Projects in Kenya</h2><div class="pr-grid"><div class="pr-it"><b>Completed</b><p><span class="todo">Project name, place, year</span><br><span class="todo">People served</span></p></div><div class="pr-it"><b>Active</b><p><span class="todo">Project name, place, year</span><br><span class="todo">People served</span></p></div><div class="pr-it"><b>Upcoming</b><p><span class="todo">Project name, place, year</span><br><span class="todo">People served</span></p></div></div></section><section class="xs" aria-labelledby="st-h"><div class="x-split even"><div class="x-col"><h2 class="x-h2" id="st-h">Community stories</h2><p class="x-p">Recently finished wells in Kenya. Each photo opens our full list of Kenya projects.</p></div><div class="xc-row"><a class="xb" href="/stories?country=ke">Read project stories</a></div></div><sc-if value="{{psOn}}" hint-placeholder-val="{{true}}"><div class="ps"><sc-for list="{{ps}}" as="c" hint-placeholder-count="3"><a class="ps-it" href="/stories?country=ke"><div class="ph"><img src="{{c.img}}" alt="" loading="lazy" decoding="async" width="480" height="360"></div><b>{{c.t}}</b><small>{{c.a}}</small></a></sc-for></div></sc-if><div class="todo-box ps-todo"><b>To add</b><ul><li>Two or three written stories from Kenya, each with a photo and a few words from the community</li></ul></div></section><section class="xs nd" aria-labelledby="nd-h"><div class="x-split"><div class="x-col"><h2 class="x-h2" id="nd-h">The need for safe water in Kenya</h2><p class="x-p">More Kenyans drink straight from rivers, dams and ponds than in any other country where Rafiki works, and the gaps are widest in the countryside around our projects.</p></div><div class="x-col"><div class="nd-figs"><div class="nd-f"><b>~19 million</b><p>Kenyans lack even a basic drinking-water service. About 9 in 10 of them live in rural areas.</p><a class="nd-src" href="https://washdata.org/data/country/KEN/household/download" target="_blank" rel="noopener">WHO/UNICEF JMP, 2024 (our calculation)</a></div><div class="nd-f"><b>18.9%</b><p>of Kenyans drink untreated surface water from rivers, dams, ponds or streams. In rural areas it is 1 in 4.</p><a class="nd-src" href="https://washdata.org/data/country/KEN/household/download" target="_blank" rel="noopener">WHO/UNICEF JMP, 2024</a></div><div class="nd-f"><b>46%</b><p>of people in Nandi County have a basic water service, compared with 79% in neighbouring Uasin Gishu.</p><a class="nd-src" href="https://www.knbs.or.ke/reports/kdhs-2022/" target="_blank" rel="noopener">Kenya DHS, 2022</a></div><div class="nd-f"><b>Over 40%</b><p>of shallow groundwater samples in Kenya’s Rift Valley exceed WHO’s fluoride limit of 1.5 mg/L.</p><a class="nd-src" href="https://pubmed.ncbi.nlm.nih.gov/34875514/" target="_blank" rel="noopener">Mwiathi et al., 2022</a></div></div><p class="x-p">Basic access in Kenya rose from 58% of people in 2015 to 66% in 2024, but the divide between town and country is wide: 89% of people in urban areas have a basic service, against 56% in rural areas. There is not yet enough water-quality data for WHO and UNICEF to estimate how many Kenyans have safely managed water.</p><p class="nd-cite">Sources: <a href="https://washdata.org/data/country/KEN/household/download" target="_blank" rel="noopener">WHO/UNICEF JMP, 2024</a></p><p class="x-p">Most of our Kenyan wells are in Uasin Gishu and Nandi counties, around Eldoret. Uasin Gishu’s averages are lifted by Eldoret town, yet about 12% of people there still use unprotected wells. In Nandi, fewer than half of people have a basic service and about 1 in 4 drink surface water. In Trans Nzoia, home to our Kitale office, 40% depend on protected hand-dug wells and nearly 1 in 5 live more than 30 minutes from water. Where water has to be fetched, a woman or girl does it for 75% of Kenyans, and for nearly 9 in 10 people in Nandi.</p><p class="nd-cite">Sources: <a href="https://www.knbs.or.ke/reports/kdhs-2022/" target="_blank" rel="noopener">Kenya DHS, 2022</a></p><p class="x-p">At Mt Longonot, near Naivasha, the problem is what is in the water. The Rift Valley’s volcanic rocks release fluoride into groundwater. Nakuru County names Naivasha as its worst-affected area, with Longonot and Maai Mahiu among the high-risk places. Water can look clean and still harm teeth and bones over time, and boiling does not remove fluoride, yet a 2026 study in Nakuru found 65% of residents relying on fixes like this that do not work. Our project at Longonot is a water purification system. <span class="todo">Rafiki to confirm what the Longonot system treats, for example fluoride</span></p><p class="nd-cite">Sources: <a href="https://pubmed.ncbi.nlm.nih.gov/34875514/" target="_blank" rel="noopener">Mwiathi et al., 2022</a> · <a href="https://www.kenyanews.go.ke/governor-kihika-announces-multi-million-plan-to-provide-fluoride-free-water/" target="_blank" rel="noopener">Kenya News Agency (Nakuru County)</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/41939973/" target="_blank" rel="noopener">Okore et al., 2026</a></p><p class="nd-def">“Basic” water means an improved source, such as a borehole, protected well or tap, that takes 30 minutes or less to reach and collect from, including queuing. “Safely managed” means water at home, available when needed and free from contamination. Figures marked “our calculation” apply the WHO/UNICEF percentage to the population estimate WHO/UNICEF use. National surveys (DHS) and WHO/UNICEF estimates are measured differently, so their figures can differ slightly.</p></div></div></section><section class="xs blue"><div class="xc"><div class="x-col"><h2 class="x-h2">Current needs in Kenya</h2><p class="x-p">{{cp.ke.needL}}</p></div><div class="xc-row"><a class="xb lt" href="/sponsor">See projects looking for funding</a><a class="xb2" href="/donate" style="color:#FFFFFF">Ways to get involved</a></div></div></section></main>
+<section class="xh cn-hero" aria-label="Rafiki in Kenya"><div class="wrap xh-in"><div class="xh-txt"><nav class="xh-crumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><a href="/#where-we-work">Where we work</a><span aria-hidden="true">/</span><span>Kenya</span></nav><h1 class="xh-h1">Rafiki in Kenya</h1><p class="xh-p">School wells, community water projects and filtration systems, led by our Kenya team from the Kitale office.</p></div><svg class="cn-map" viewBox="-4 -4 108 108" role="img" aria-label="Map of Kenya in the colours of its flag"><defs><clipPath id="cm-cn-map-ke"><path d="M10.8,63.8 11.2,52.2 13.4,48.0 15.8,45.4 16.5,43.7 19.6,41.7 19.5,40.4 21.3,37.8 21.4,36.5 20.3,28.5 19.1,26.3 17.6,25.2 16.9,23.3 16.2,22.9 15.7,20.4 16.1,18.1 13.4,16.5 13.6,15.9 11.5,12.5 24.2,0.0 24.2,0.8 24.8,1.2 26.2,0.7 28.9,1.4 29.5,3.3 29.1,6.7 31.7,10.1 40.3,10.6 51.9,18.1 65.7,20.0 67.3,18.8 69.2,16.1 78.2,12.0 81.9,15.0 89.2,14.9 83.9,22.5 80.2,26.3 80.3,62.5 85.6,69.4 85.7,70.6 83.2,73.0 80.5,73.1 80.0,74.1 79.4,73.8 79.5,76.2 77.0,78.9 74.7,79.0 72.9,80.3 72.6,83.6 71.8,85.9 70.6,86.8 69.3,89.1 68.1,93.1 64.6,99.4 63.7,99.2 62.8,99.9 49.1,90.0 48.2,88.7 47.2,88.3 47.9,86.4 47.6,83.8 12.3,64.1 10.8,63.8Z"></path></clipPath></defs><g clip-path="url(#cm-cn-map-ke)"><g><rect x="-60" y="-60" width="220" height="90" fill="#000000"></rect><rect x="-60" y="30" width="220" height="4" fill="#FFFFFF"></rect><rect x="-60" y="34" width="220" height="32" fill="#BB0000"></rect><rect x="-60" y="66" width="220" height="4" fill="#FFFFFF"></rect><rect x="-60" y="70" width="220" height="90" fill="#006600"></rect></g></g><path d="M10.8,63.8 11.2,52.2 13.4,48.0 15.8,45.4 16.5,43.7 19.6,41.7 19.5,40.4 21.3,37.8 21.4,36.5 20.3,28.5 19.1,26.3 17.6,25.2 16.9,23.3 16.2,22.9 15.7,20.4 16.1,18.1 13.4,16.5 13.6,15.9 11.5,12.5 24.2,0.0 24.2,0.8 24.8,1.2 26.2,0.7 28.9,1.4 29.5,3.3 29.1,6.7 31.7,10.1 40.3,10.6 51.9,18.1 65.7,20.0 67.3,18.8 69.2,16.1 78.2,12.0 81.9,15.0 89.2,14.9 83.9,22.5 80.2,26.3 80.3,62.5 85.6,69.4 85.7,70.6 83.2,73.0 80.5,73.1 80.0,74.1 79.4,73.8 79.5,76.2 77.0,78.9 74.7,79.0 72.9,80.3 72.6,83.6 71.8,85.9 70.6,86.8 69.3,89.1 68.1,93.1 64.6,99.4 63.7,99.2 62.8,99.9 49.1,90.0 48.2,88.7 47.2,88.3 47.9,86.4 47.6,83.8 12.3,64.1 10.8,63.8Z" fill="none" stroke="#FFFFFF" stroke-width="1.2" stroke-linejoin="round"></path></svg></div></section><main tabindex="-1" class="wrap xm" id="top"><section class="xs" id="team"><div class="dir"><img class="dir-ph" src="/img/meril.webp" alt="Meril Adoyo"><div class="x-col"><span class="x-sm">Country Director, Kenya</span><h2 class="x-h2">Meril Adoyo</h2><p class="x-p">Meril leads Rafiki Outreach in Kenya from the Kitale office. She works with communities from their first request through site selection and drilling, and stays in touch long after the well is finished, so every project leaves water flowing for years to come.</p><a class="xb2" href="mailto:meril@rafikioutreach.org" style="align-self:flex-start;color:#0A0A0A">meril@rafikioutreach.org</a></div></div><div class="staff"><div><img src="/img/morgan.webp" alt="Morgan Mamati"><span><b>Morgan Mamati</b>Rafiki Kenya</span></div></div><div class="office"><span><b>Kenya office</b></span><span>Mega Centre, 3rd Floor, Makasembo Road, Kitale</span><span><a href="tel:+254791674001" style="color:#076DB1">+254 791 674 001</a></span></div></section><section class="xs"><div class="x-split ow"><h2 class="x-h2">Our work in Kenya</h2><div class="x-col"><p class="x-lead">In Kenya, Rafiki works on school wells, community water projects and filtration systems, with most of our work around Eldoret in Uasin Gishu and Nandi counties, and projects near Kisumu and Naivasha. Our Kenya management team builds long relationships with schools and communities, from the first request to years after the water flows.</p><h3 class="x-h3" style="margin-top:8px">What we do</h3><div class="x-pills"><sc-for list="{{pWhat}}" as="x" hint-placeholder-count="3"><a class="xp" href="{{x.href}}" aria-label="{{x.aria}}">{{x.l}}<span class="xp-n" aria-hidden="true">{{x.c}}</span></a></sc-for></div><h3 class="x-h3" style="margin-top:8px">Who we serve</h3><div class="x-pills"><sc-for list="{{pWho}}" as="x" hint-placeholder-count="3"><a class="xp" href="{{x.href}}" aria-label="{{x.aria}}">{{x.l}}<span class="xp-n" aria-hidden="true">{{x.c}}</span></a></sc-for></div><h3 class="x-h3" style="margin-top:8px">Where we work</h3><div class="x-pills"><sc-for list="{{pWhere}}" as="x" hint-placeholder-count="3"><a class="xp" href="{{x.href}}" aria-label="{{x.aria}}">{{x.l}}<span class="xp-n" aria-hidden="true">{{x.c}}</span></a></sc-for></div></div><div class="mp"><h3 class="x-h3 mp-h">Where our projects are</h3><div class="tk-mapbox"><svg class="tk-svg" viewBox="-4 -4 108 108" aria-hidden="true" focusable="false"><path d="M10.8,63.8 11.2,52.2 13.4,48.0 15.8,45.4 16.5,43.7 19.6,41.7 19.5,40.4 21.3,37.8 21.4,36.5 20.3,28.5 19.1,26.3 17.6,25.2 16.9,23.3 16.2,22.9 15.7,20.4 16.1,18.1 13.4,16.5 13.6,15.9 11.5,12.5 24.2,0.0 24.2,0.8 24.8,1.2 26.2,0.7 28.9,1.4 29.5,3.3 29.1,6.7 31.7,10.1 40.3,10.6 51.9,18.1 65.7,20.0 67.3,18.8 69.2,16.1 78.2,12.0 81.9,15.0 89.2,14.9 83.9,22.5 80.2,26.3 80.3,62.5 85.6,69.4 85.7,70.6 83.2,73.0 80.5,73.1 80.0,74.1 79.4,73.8 79.5,76.2 77.0,78.9 74.7,79.0 72.9,80.3 72.6,83.6 71.8,85.9 70.6,86.8 69.3,89.1 68.1,93.1 64.6,99.4 63.7,99.2 62.8,99.9 49.1,90.0 48.2,88.7 47.2,88.3 47.9,86.4 47.6,83.8 12.3,64.1 10.8,63.8Z" fill="#E3F1FC" stroke="#9FD3F7" stroke-width=".8" stroke-linejoin="round"></path></svg><div class="tk-pins" role="group" aria-label="{{mpLabel}}"><sc-for list="{{mpPins}}" as="p" hint-placeholder-count="0"><button type="button" class="{{p.cls}}" style="{{p.st}}" aria-label="{{p.label}}" aria-pressed="{{p.on}}" title="{{p.tip}}" onClick="{{p.pick}}"><span>{{p.n}}</span></button></sc-for></div></div><p class="x-sm tk-cap">{{mpCap}}</p><sc-if value="{{mpLegOn}}" hint-placeholder-val="{{true}}"><div class="mp-leg" role="list" aria-label="{{mpLegAria}}"><sc-for list="{{mpLeg}}" as="l" hint-placeholder-count="3"><span role="listitem"><sc-if value="{{l.lk}}" hint-placeholder-val="{{true}}"><a class="mp-la" href="{{l.href}}"><i style="{{l.dot}}"></i>{{l.l}} <b>{{l.n}}</b></a></sc-if><sc-if value="{{l.nolk}}" hint-placeholder-val="{{false}}"><i style="{{l.dot}}"></i>{{l.l}} <b>{{l.n}}</b></sc-if></span></sc-for></div></sc-if><p class="x-sm mp-src" style="margin-top:8px;color:#5A6066">Some pins mark the village or town rather than the exact site. Place data &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener" style="color:#076DB1">OpenStreetMap</a> contributors.</p><p class="tk-vh" aria-live="polite">{{mpSelLive}}</p><sc-if value="{{mpSelOn}}" hint-placeholder-val="{{false}}"><div class="tk-sel"><div class="tk-sel-h"><b>{{mpSelH}}</b><button type="button" class="tk-x" onClick="{{mpSelClose}}" aria-label="Close this list"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div><ul class="tk-ul"><sc-for list="{{mpSel}}" as="r" hint-placeholder-count="0"><li><i style="{{r.dot}}"></i><a class="tk-lk" href="{{r.href}}">{{r.t}}</a><small>{{r.a}}</small></li></sc-for></ul></div></sc-if><sc-if value="{{mpHintOn}}" hint-placeholder-val="{{false}}"><p class="x-sm tk-hint">Choose a dot to see the projects there.</p></sc-if><sc-if value="{{mpUnOn}}" hint-placeholder-val="{{false}}"><details class="tk-un"><summary class="tk-un-h">{{mpUnH}}</summary><ul class="tk-ul"><sc-for list="{{mpUn}}" as="r" hint-placeholder-count="0"><li><i style="{{r.dot}}"></i><a class="tk-lk" href="{{r.href}}">{{r.t}}</a><small>{{r.a}}</small></li></sc-for></ul></details></sc-if></div></div></section><section class="xs ink"><div class="wd"><div class="x-col"><h2 class="x-h2">Our impact in Kenya</h2><p class="x-p draft">Rafiki has worked in Kenya since <span class="todo">year</span>.</p><sc-if value="{{impMoreOn}}" hint-placeholder-val="{{false}}"><p class="x-p">{{impMore}}</p></sc-if></div><div class="wd-facts"><sc-for list="{{imp}}" as="f" hint-placeholder-count="3"><a class="wd-a" href="{{f.href}}"><b>{{f.b}}</b><span>{{f.l}}</span><i aria-hidden="true">→</i></a></sc-for><sc-if value="{{impWait}}" hint-placeholder-val="{{false}}"><div class="imp-wait"><span>{{impWaitL}}</span></div></sc-if></div></div></section><section class="xs sg" aria-labelledby="sg-h"><div class="x-split"><div class="x-col"><span class="kicker" style="align-self:flex-start">Kapsaret, near Eldoret</span><h2 class="x-h2" id="sg-h">{{sgH}}</h2></div><div class="x-col"><p class="x-lead">Chepkongi is a community in Kapsaret, near Eldoret. Our work there began with water: a borehole and elevated tower for the dispensary, and another for the primary school. With water on site, we went on to work with the dispensary and the school on what came next.</p><sc-if value="{{sgWellOn}}" hint-placeholder-val="{{true}}"><p class="x-p">{{sgWell}}</p></sc-if><p class="x-p draft"><span class="todo">Rafiki to confirm: the dispensary and school wells each list 10,000 people, so the Kenya total may count the same catchment twice</span></p><p class="x-p draft"><span class="todo">A few words from the dispensary or school on what changed, to add</span></p><div class="xc-row"><sc-if value="{{sgAllOn}}" hint-placeholder-val="{{false}}"><a class="xb" href="{{sgAllHref}}">{{sgAllL}}</a></sc-if><a class="xb2" href="/stories?country=ke">See every Kenya project</a></div></div></div><sc-if value="{{sgOn}}" hint-placeholder-val="{{true}}"><div class="sg-grid"><sc-for list="{{sgCards}}" as="c" hint-placeholder-count="8"><figure class="sg-card"><div class="ph"><sc-if value="{{c.hasImg}}" hint-placeholder-val="{{true}}"><img src="{{c.img}}" alt="{{c.alt}}" loading="lazy" decoding="async" width="480" height="360"></sc-if></div><figcaption><span class="{{c.kcls}}">{{c.k}}</span><b><a class="sg-lk" href="{{c.href}}">{{c.t}}</a></b><small>{{c.a}}</small></figcaption></figure></sc-for></div></sc-if></section><sc-if value="{{bwOn}}" hint-placeholder-val="{{false}}"><section class="xs bw" aria-labelledby="bw-h"><div class="x-split"><div class="x-col"><span class="kicker" style="align-self:flex-start">Beyond the well</span><h2 class="x-h2" id="bw-h">{{bwH}}</h2></div><div class="x-col"><p class="x-lead">{{bwLead}}</p><div class="xc-row"><a class="xb2" href="{{bwAll}}">{{bwAllL}}</a></div></div></div><div class="bw-tiles"><sc-for list="{{bwTiles}}" as="t" hint-placeholder-count="3"><a class="bw-t" href="{{t.href}}"><b>{{t.n}}</b><span>{{t.l}}</span><small>{{t.s}}</small></a></sc-for></div><sc-if value="{{bwRecOn}}" hint-placeholder-val="{{false}}"><h3 class="x-h3 bw-rh">Under way, next and recent</h3><ul class="bw-list"><sc-for list="{{bwRec}}" as="r" hint-placeholder-count="4"><li><a class="bw-r" href="{{r.href}}"><span class="{{r.kcls}}">{{r.k}}</span><b>{{r.t}}</b><span class="bw-d">{{r.d}}</span><small>{{r.m}}</small></a></li></sc-for></ul></sc-if></section></sc-if><section class="xs feed-only"><h2 class="x-h2">Projects in Kenya</h2><div class="{{prCls}}"><sc-for list="{{prCols}}" as="c" hint-placeholder-count="3"><div class="pr-it"><sc-if value="{{c.lk}}" hint-placeholder-val="{{true}}"><a class="pr-h" href="{{c.href}}">{{c.h}}<span class="pr-hn">{{c.all}}</span></a></sc-if><sc-if value="{{c.nolk}}" hint-placeholder-val="{{false}}"><b>{{c.h}}</b></sc-if><sc-for list="{{c.it}}" as="x" hint-placeholder-count="2"><a class="pr-x" href="{{x.href}}"><strong>{{x.t}}</strong><br>{{x.a}}<br>{{x.n}} {{x.need}}</a></sc-for><sc-if value="{{c.isNone}}" hint-placeholder-val="{{false}}"><p>{{c.none}}</p></sc-if></div></sc-for></div><div class="xc-row" style="margin-top:24px"><a class="xb" href="/stories?country=ke">See every project</a></div></section><section class="xs draft live-hide"><h2 class="x-h2">Projects in Kenya</h2><div class="pr-grid"><div class="pr-it"><b>Completed</b><p><span class="todo">Project name, place, year</span><br><span class="todo">People served</span></p></div><div class="pr-it"><b>Active</b><p><span class="todo">Project name, place, year</span><br><span class="todo">People served</span></p></div><div class="pr-it"><b>Upcoming</b><p><span class="todo">Project name, place, year</span><br><span class="todo">People served</span></p></div></div></section><section class="xs" aria-labelledby="st-h"><div class="x-split even"><div class="x-col"><h2 class="x-h2" id="st-h">Community stories</h2><p class="x-p">Recently finished wells in Kenya. Each photo opens that project.</p></div><div class="xc-row"><a class="xb" href="/stories?country=ke">Read project stories</a></div></div><sc-if value="{{psOn}}" hint-placeholder-val="{{true}}"><div class="ps"><sc-for list="{{ps}}" as="c" hint-placeholder-count="3"><a class="ps-it" href="{{c.href}}"><div class="ph"><img src="{{c.img}}" alt="" loading="lazy" decoding="async" width="480" height="360"></div><b>{{c.t}}</b><small>{{c.a}}</small></a></sc-for></div></sc-if><div class="todo-box ps-todo"><b>To add</b><ul><li>Two or three written stories from Kenya, each with a photo and a few words from the community</li></ul></div></section><section class="xs nd" aria-labelledby="nd-h"><div class="x-split"><div class="x-col"><h2 class="x-h2" id="nd-h">The need for safe water in Kenya</h2><p class="x-p">More Kenyans drink straight from rivers, dams and ponds than in any other country where Rafiki works, and the gaps are widest in the countryside around our projects.</p></div><div class="x-col"><div class="nd-figs"><div class="nd-f"><b>~19 million</b><p>Kenyans lack even a basic drinking-water service. About 9 in 10 of them live in rural areas.</p><a class="nd-src" href="https://washdata.org/data/country/KEN/household/download" target="_blank" rel="noopener">WHO/UNICEF JMP, 2024 (our calculation)</a></div><div class="nd-f"><b>18.9%</b><p>of Kenyans drink untreated surface water from rivers, dams, ponds or streams. In rural areas it is 1 in 4.</p><a class="nd-src" href="https://washdata.org/data/country/KEN/household/download" target="_blank" rel="noopener">WHO/UNICEF JMP, 2024</a></div><div class="nd-f"><b>46%</b><p>of people in Nandi County have a basic water service, compared with 79% in neighbouring Uasin Gishu.</p><a class="nd-src" href="https://www.knbs.or.ke/reports/kdhs-2022/" target="_blank" rel="noopener">Kenya DHS, 2022</a></div><div class="nd-f"><b>Over 40%</b><p>of shallow groundwater samples in Kenya’s Rift Valley exceed WHO’s fluoride limit of 1.5 mg/L.</p><a class="nd-src" href="https://pubmed.ncbi.nlm.nih.gov/34875514/" target="_blank" rel="noopener">Mwiathi et al., 2022</a></div></div><p class="x-p">Basic access in Kenya rose from 58% of people in 2015 to 66% in 2024, but the divide between town and country is wide: 89% of people in urban areas have a basic service, against 56% in rural areas. There is not yet enough water-quality data for WHO and UNICEF to estimate how many Kenyans have safely managed water.</p><p class="nd-cite">Sources: <a href="https://washdata.org/data/country/KEN/household/download" target="_blank" rel="noopener">WHO/UNICEF JMP, 2024</a></p><p class="x-p">Most of our Kenyan wells are in Uasin Gishu and Nandi counties, around Eldoret. Uasin Gishu’s averages are lifted by Eldoret town, yet about 12% of people there still use unprotected wells. In Nandi, fewer than half of people have a basic service and about 1 in 4 drink surface water. In Trans Nzoia, home to our Kitale office, 40% depend on protected hand-dug wells and nearly 1 in 5 live more than 30 minutes from water. Where water has to be fetched, a woman or girl does it for 75% of Kenyans, and for nearly 9 in 10 people in Nandi.</p><p class="nd-cite">Sources: <a href="https://www.knbs.or.ke/reports/kdhs-2022/" target="_blank" rel="noopener">Kenya DHS, 2022</a></p><p class="x-p">At Mt Longonot, near Naivasha, the problem is what is in the water. The Rift Valley’s volcanic rocks release fluoride into groundwater. Nakuru County names Naivasha as its worst-affected area, with Longonot and Maai Mahiu among the high-risk places. Water can look clean and still harm teeth and bones over time, and boiling does not remove fluoride, yet a 2026 study in Nakuru found 65% of residents relying on fixes like this that do not work. Our project at Longonot is a water purification system. <span class="todo">Rafiki to confirm what the Longonot system treats, for example fluoride</span></p><p class="nd-cite">Sources: <a href="https://pubmed.ncbi.nlm.nih.gov/34875514/" target="_blank" rel="noopener">Mwiathi et al., 2022</a> · <a href="https://www.kenyanews.go.ke/governor-kihika-announces-multi-million-plan-to-provide-fluoride-free-water/" target="_blank" rel="noopener">Kenya News Agency (Nakuru County)</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/41939973/" target="_blank" rel="noopener">Okore et al., 2026</a></p><p class="nd-def">“Basic” water means an improved source, such as a borehole, protected well or tap, that takes 30 minutes or less to reach and collect from, including queuing. “Safely managed” means water at home, available when needed and free from contamination. Figures marked “our calculation” apply the WHO/UNICEF percentage to the population estimate WHO/UNICEF use. National surveys (DHS) and WHO/UNICEF estimates are measured differently, so their figures can differ slightly.</p></div></div></section><section class="xs blue"><div class="xc"><div class="x-col"><h2 class="x-h2">Current needs in Kenya</h2><p class="x-p">{{cp.ke.needL}}</p></div><div class="xc-row"><a class="xb lt" href="{{cnHref}}">{{cnL}}</a><a class="xb2" href="/donate" style="color:#FFFFFF">Ways to get involved</a></div></div></section></main>
 <footer class="bf">
 <div class="wrap bf-tile">
 <div class="bf-row">
@@ -1427,7 +1493,7 @@ function cpVals(feed) {
   var o = {};
   CORDER.forEach(function (k) {
     var mine = feed ? feed.projects.filter(function (p) { return p.ck === k; }) : [];
-    var row = function (p) { return { t: p.title, a: [p.area, p.type, p.year].filter(Boolean).join(' · '), n: p.people ? p.people.toLocaleString('en-US') + ' people' : '', need: p.needed ? '$' + p.needed.toLocaleString('en-US') + ' to raise' : '' }; };
+    var row = function (p) { return { href: '/stories?project=' + encodeURIComponent(p.id), t: p.title, a: [p.area, p.type, p.year].filter(Boolean).join(' · '), n: p.people ? p.people.toLocaleString('en-US') + ' people' : '', need: p.needed ? '$' + p.needed.toLocaleString('en-US') + ' to raise' : '' }; };
     var by = function (st, max) { return mine.filter(function (p) { return p.status === st; }).slice(0, max).map(row); };
     o[k] = { done: by('Completed', 5), uc: by('Under construction', 8), up: by('Upcoming', 8) };
     o[k].noUc = !o[k].uc.length; o[k].noUp = !o[k].up.length;
@@ -1501,6 +1567,12 @@ function countryVals(self) {
     wwCards: CORDER.map(function (k) { var on = !all && (s.ctry || 'ke') === k; return { n: CTRY[k].n, ab: CTRY[k].ab, w: CTRY[k].w.toLocaleString('en-US'), u: CTRY[k].u.toLocaleString('en-US'), p: CTRY[k].p ? CTRY[k].p.toLocaleString('en-US') + '+' : '–', on: on ? 'true' : 'false', here: on, cls: 'cc-card' + (on ? ' on' : ''), go: 'Visit the ' + CTRY[k].n + ' page →', pick: function () { window.location.href = ({ ke: '/kenya', tz: '/tanzania', ug: '/uganda', mw: '/malawi' })[k]; } }; }) });
 }
 // ---------- country page: project map, impact figures, signature module, photo strip (all live from the feed) ----------
+var CXP = {
+  names: { '12480701913': ['Job’s School for the needy in Ndalat', 'A dormitory and kitchen'] },
+  what: [['School wells', { cat: 'water', serve: 'school' }], ['Community water projects', { cat: 'water', serve: 'village' }], ['Filtration systems', { kind: 'collection' }], ['Beyond the well', { cat: 'beyond' }]],
+  who: [['Schools', { serve: 'school' }], ['Health clinics', { serve: 'clinic' }], ['Churches', { serve: 'church' }], ['Villages and communities', { serve: 'village' }], ['Families', { serve: 'families' }]],
+  where: [['Uasin Gishu (Eldoret)', { region: 'uasin-gishu' }], ['Nandi', { region: 'nandi' }], ['Kisumu area', { region: 'kisumu' }], ['Naivasha area', { region: 'naivasha' }], ['Mombasa', { region: 'mombasa' }]]
+};
 var CPK = 'ke', CPN = 'Kenya', CPHIDE = false;
 var TKST = { 'Completed': { c: '#1FA463', l: 'Completed' }, 'Under construction': { c: '#F2B01E', l: 'Under construction' }, 'Upcoming': { c: '#098BE1', l: 'Looking for funding' } };
 var TKSO = ['Completed', 'Under construction', 'Upcoming'];
@@ -1513,7 +1585,7 @@ function tkNum(n) { return (+n || 0).toLocaleString('en-US'); }
 function tkXY(k, ll) { var p = TKPROJ[k]; return [p.x0 + (ll[1] - p.lng0) * p.s, p.y0 + (p.lat0 - ll[0]) * p.s]; }
 function tkOnMap(k, p) { var ll = TKLOC[p.id]; if (!ll || !TKPROJ[k]) return null; var xy = tkXY(k, ll); return xy[0] >= -2 && xy[0] <= 102 && xy[1] >= -2 && xy[1] <= 102 ? xy : null; }
 function tkDot(st) { return 'background:' + ((TKST[st] || TKST.Completed).c); }
-function tkRow(p) { return { t: p.title, a: [p.area, (TKST[p.status] || {}).l].filter(Boolean).join(' · '), dot: tkDot(p.status) }; }
+function tkRow(p) { return { t: p.title, a: [p.area, (TKST[p.status] || {}).l].filter(Boolean).join(' · '), dot: tkDot(p.status), href: '/stories?project=' + encodeURIComponent(p.id) }; }
 function tkByStatus(a, b) { return TKSO.indexOf(a.status) - TKSO.indexOf(b.status) || String(a.title).localeCompare(String(b.title)); }
 function tkPinSize(n) { return n > 1 ? Math.round(Math.min(40, 22 + 2.4 * Math.sqrt(n))) : 16; }
 // group projects that share a point (or sit close together) into one dot with a count, as on /tracker
@@ -1551,40 +1623,42 @@ function cpDone(p) { return p.status === 'Completed'; }
 // impact figures per country
 var CPIMP = {
   ke: function (c, mine) {
-    var wells = mine.filter(function (p) { return cpDone(p) && p.type === 'Borehole well'; });
-    var sch = wells.filter(function (p) { return /school|ecde|primary|secondary|academy/i.test(p.title); }).length;
-    var hc = wells.filter(function (p) { return /dispensary|clinic|health/i.test(p.title); }).length;
-    var f = [{ b: tkNum(c.wells), l: 'wells completed' }, { b: tkNum(c.people) + '+', l: 'people with clean water' }];
-    if (sch) f.push({ b: tkNum(sch), l: sch === 1 ? 'of those wells is at a school' : 'of those wells are at schools' });
-    if (hc) f.push({ b: tkNum(hc), l: hc === 1 ? 'is at a health dispensary' : 'are at health dispensaries' });
+    var wells = mine.filter(function (p) { return cpDone(p) && p.type === 'Borehole well'; }), P = cxPl();
+    var at = function (sv, re) { return wells.filter(function (p) { return P ? P.serves(p) === sv : re.test(p.title); }).length; };
+    var sch = at('school', /school|ecde|primary|secondary|academy/i), hc = at('clinic', /dispensary|clinic|health/i);
+    var f = cpBase(c, 'ke');
+    if (sch) f.push({ b: tkNum(sch), l: sch === 1 ? 'of those wells is at a school' : 'of those wells are at schools', href: cxHref({ country: 'ke', kind: 'borehole', status: 'completed', serve: 'school' }) });
+    if (hc) f.push({ b: tkNum(hc), l: hc === 1 ? 'is at a health dispensary' : 'are at health dispensaries', href: cxHref({ country: 'ke', kind: 'borehole', status: 'completed', serve: 'clinic' }) });
     return f;
   },
   tz: function (c, mine) {
     var tanks = mine.filter(function (p) { return cpDone(p) && p.type === 'Water collection'; }).length;
     var next = mine.filter(function (p) { return p.status === 'Upcoming' && p.type === 'Borehole well'; }).length;
-    var f = [{ b: tkNum(c.wells), l: 'wells completed' }, { b: tkNum(c.people) + '+', l: 'people with clean water' }];
-    if (tanks) f.push({ b: tkNum(tanks), l: 'rainwater tanks for Maasai bomas' });
-    if (next) f.push({ b: tkNum(next), l: 'boreholes looking for funding' });
+    var f = cpBase(c, 'tz');
+    if (tanks) f.push({ b: tkNum(tanks), l: 'rainwater tanks for Maasai bomas', href: cxHref({ country: 'tz', kind: 'collection', status: 'completed' }) });
+    if (next) f.push({ b: tkNum(next), l: 'boreholes looking for funding', href: cxHref({ country: 'tz', kind: 'borehole', status: 'funding' }) });
     return f;
   },
   ug: function (c, mine) {
-    var uc = mine.filter(function (p) { return p.status === 'Under construction'; });
-    var f = c.wells ? [{ b: tkNum(c.wells), l: 'wells completed' }, { b: tkNum(c.people) + '+', l: 'people with clean water' }] : [];
+    var uc = mine.filter(function (p) { return p.status === 'Under construction'; }), h = cxHref({ country: 'ug', status: 'underway' });
+    var f = c.wells ? cpBase(c, 'ug') : [];
     if (uc.length) {
-      f.push({ b: tkNum(uc.length), l: (c.wells ? 'more' : 'first') + (uc.length === 1 ? ' well' : ' wells') + ' under construction' });
-      f.push({ b: tkNum(uc.length), l: (uc.length === 1 ? 'community: ' : 'communities: ') + uc.map(function (p) { return p.title; }).join(' and ') });
+      f.push({ b: tkNum(uc.length), l: (c.wells ? 'more' : 'first') + (uc.length === 1 ? ' well' : ' wells') + ' under construction', href: h });
+      f.push({ b: tkNum(uc.length), l: (uc.length === 1 ? 'community: ' : 'communities: ') + uc.map(function (p) { return p.title; }).join(' and '), href: h });
     }
     return f;
   },
   mw: function (c, mine) {
-    var up = mine.filter(function (p) { return p.status === 'Upcoming'; }), sum = 0;
+    var up = mine.filter(function (p) { return p.status === 'Upcoming'; }), sum = 0, h = cxHref({ country: 'mw', status: 'funding' });
     up.forEach(function (p) { if (p.needed > 0) sum += p.needed; });
-    var f = c.wells ? [{ b: tkNum(c.wells), l: 'wells completed' }, { b: tkNum(c.people) + '+', l: 'people with clean water' }] : [];
-    if (up.length) f.push({ b: tkNum(up.length), l: 'community ' + (up.length === 1 ? 'well' : 'wells') + ' planned' });
-    if (sum) f.push({ b: cpUsd(sum), l: 'to raise to drill ' + (up.length === 1 ? 'it' : 'them') });
+    var f = c.wells ? cpBase(c, 'mw') : [];
+    if (up.length) f.push({ b: tkNum(up.length), l: 'community ' + (up.length === 1 ? 'well' : 'wells') + ' planned', href: h });
+    if (sum) f.push({ b: cpUsd(sum), l: 'to raise to drill ' + (up.length === 1 ? 'it' : 'them'), href: h });
     return f;
   }
 };
+// the two headline figures: finished boreholes, and the people their water projects serve
+function cpBase(c, k) { return [{ b: tkNum(c.wells), l: 'wells completed', href: cxHref({ country: k, kind: 'borehole', status: 'completed' }) }, { b: tkNum(c.people) + '+', l: 'people with clean water', href: cxHref({ country: k, cat: 'water', status: 'completed' }) }]; }
 // signature module per country
 var CPSIG = {
   ke: function (live, mine) {
@@ -1595,7 +1669,7 @@ var CPSIG = {
       var m = /^chepkongi\s+(dispens\w*|primary school|school)\s*[-–:]\s*(.+)$/i.exec(p.title || ''), t = p.title;
       if (m) { var what = m[2].replace(/\s*&\s*/g, ' and ').trim(); t = (/dispens/i.test(m[1]) ? 'Dispensary' : 'Primary school') + ': ' + what.toLowerCase(); }
       var g = grp(p), ph = (p.photos || [])[0];
-      return { g: g, k: KL[g], kcls: 'sg-k ' + KC[g], t: t, a: p.year ? String(p.year) : '', img: ph ? cpPh(ph) : '', hasImg: !!ph, alt: 'Photo: Chepkongi ' + t.charAt(0).toLowerCase() + t.slice(1) };
+      return { g: g, k: KL[g], kcls: 'sg-k ' + KC[g], t: t, href: cxProj(p), a: p.year ? String(p.year) : '', img: ph ? cpPh(ph) : '', hasImg: !!ph, alt: 'Photo: Chepkongi ' + t.charAt(0).toLowerCase() + t.slice(1) };
     }).sort(function (a, b) { return a.g - b.g || a.t.localeCompare(b.t); });
     var wl = ch.filter(function (p) { return grp(p) === 0; }), well = '';
     if (wl.length && wl[0].depth && wl.every(function (p) { return p.depth === wl[0].depth && p.pump === wl[0].pump; })) {
@@ -1604,29 +1678,30 @@ var CPSIG = {
         + (wl[0].pump ? ', with ' + (wl.length === 1 ? 'an ' : '') + wl[0].pump.toLowerCase() + (wl.length === 1 ? ' pump' : ' pumps') : '')
         + (tower ? (wl.length === 1 ? ' and an elevated water tower.' : ' and elevated water towers.') : '.');
     }
-    return { sgOn: live && cards.length > 0, sgCards: cards, sgH: live && ch.length > 1 ? 'One community, ' + cpWord(ch.length) + ' projects: Chepkongi' : 'One community, step by step: Chepkongi', sgWell: well, sgWellOn: !!well };
+    return { sgAllOn: live && ch.length > 1, sgAllHref: cxHref({ country: 'ke', q: 'chepkongi' }), sgAllL: 'See all ' + cpWord(ch.length) + ' Chepkongi projects', sgOn: live && cards.length > 0, sgCards: cards, sgH: live && ch.length > 1 ? 'One community, ' + cpWord(ch.length) + ' projects: Chepkongi' : 'One community, step by step: Chepkongi', sgWell: well, sgWellOn: !!well };
   },
   tz: function (live, mine) {
     var done = mine.filter(cpDone);
     var tanks = done.filter(function (p) { return p.type === 'Water collection'; });
     var tp = tanks.map(function (p) { return +p.people || 0; }).filter(Boolean), tsum = tp.reduce(function (a, n) { return a + n; }, 0);
     var tph = tanks.filter(function (p) { return p.photos && p.photos.length; }).sort(function (a, b) { return b.photos.length - a.photos.length; }).slice(0, 3)
-      .map(function (p) { return { img: cpPh(p.photos[0]), alt: 'Rainwater tank: ' + p.title }; });
-    var bab = done.filter(function (p) { return p.type === 'Borehole well' && cpBabati(p); });
+      .map(function (p) { return { img: cpPh(p.photos[0]), alt: 'Rainwater tank: ' + p.title, href: cxProj(p) }; });
+    // finished boreholes in Manyara Region (the region the explorer link opens); Babati by name if the places list is missing
+    var PL = cxPl(), bab = done.filter(function (p) { return p.type === 'Borehole well' && (PL ? PL.region(p) === 'manyara' : cpBabati(p)); });
     var bsum = bab.reduce(function (a, p) { return a + (+p.people || 0); }, 0);
     var pumps = [['electric', /electric/i], ['manual', /manual|hand/i], ['solar', /solar/i]].map(function (x) { var n = bab.filter(function (p) { return x[1].test(p.pump || ''); }).length; return n ? n + ' ' + x[0] : ''; }).filter(Boolean);
     var next = mine.filter(function (p) { return p.status === 'Upcoming' && p.type === 'Borehole well' && cpBabati(p); });
     return {
-      sgTankOn: live && tanks.length > 0, sgTanks: tkNum(tanks.length), sgTankPpl: tkNum(tsum), sgTankAvg: tp.length ? tkNum(Math.round(tsum / tp.length)) : '',
+      sgTankHref: cxHref({ country: 'tz', kind: 'collection', status: 'completed' }), sgTankOn: live && tanks.length > 0, sgTanks: tkNum(tanks.length), sgTankPpl: tkNum(tsum), sgTankAvg: tp.length ? tkNum(Math.round(tsum / tp.length)) : '',
       sgTankPh: tph, sgTankPhOn: tph.length > 0,
-      sgBabOn: live && bab.length > 0, sgBab: tkNum(bab.length), sgBabPpl: tkNum(bsum), sgBabPump: pumps.length ? 'Pumps: ' + pumps.join(', ') + '.' : '',
-      sgNextOn: live && next.length > 0, sgNext: next.map(function (p) { return { t: p.title, d: [p.needed ? cpUsd(p.needed) + ' to raise' : 'Being costed', p.people ? 'will serve ' + tkNum(p.people) + ' people' : ''].filter(Boolean).join(' · ') }; })
+      sgBabHref: cxHref({ country: 'tz', region: PL ? 'manyara' : '', kind: 'borehole', status: 'completed' }), sgBabL: PL ? 'boreholes finished in Manyara Region' : 'boreholes finished', sgBabOn: live && bab.length > 0, sgBab: tkNum(bab.length), sgBabPpl: tkNum(bsum), sgBabPump: pumps.length ? 'Pumps: ' + pumps.join(', ') + '.' : '',
+      sgNextOn: live && next.length > 0, sgNext: next.map(function (p) { return { href: cxProj(p), t: p.title, d: [p.needed ? cpUsd(p.needed) + ' to raise' : 'Being costed', p.people ? 'will serve ' + tkNum(p.people) + ' people' : ''].filter(Boolean).join(' · ') }; })
     };
   },
   ug: function (live, mine) {
     var w = mine.filter(function (p) { return p.status === 'Under construction'; }).sort(function (a, b) { return String(a.title).localeCompare(String(b.title)); });
     return { sgOn: live && w.length > 0, sgWells: w.map(function (p) {
-      return { t: p.title, a: [cpSame(p.title, p.area) ? '' : p.area, p.type, p.year ? String(p.year) : ''].filter(Boolean).join(' · '),
+      return { t: p.title, href: cxProj(p), a: [cpSame(p.title, p.area) ? '' : p.area, p.type, p.year ? String(p.year) : ''].filter(Boolean).join(' · '),
         steps: TSTEPS.map(function (t) { return { t: t, cls: 'tk-st u' }; }), aria: 'Progress: under construction; the current stage is not recorded yet',
         note: 'Under construction. We will show the current stage here once it is recorded.' };
     }) };
@@ -1637,7 +1712,7 @@ var CPSIG = {
     var each = priced > 1 && priced === up.length && up.every(function (p) { return p.needed === up[0].needed; }) ? ', ' + cpUsd(up[0].needed) + ' each' : '';
     var lead = 'The people who fund our first boreholes in Malawi will be our founding supporters there.';
     if (live && up.length && !done) lead = 'Rafiki has not built a well in Malawi yet. ' + cpCap(cpWord(up.length)) + (up.length === 1 ? ' community is' : ' communities are') + ' waiting for a first borehole, and the people who fund ' + (up.length === 1 ? 'it' : 'them') + ' will be our founding supporters here.';
-    return { sgOn: live && sum > 0, sgSum: cpUsd(sum), sgSumL: 'to drill Malawi’s first ' + (up.length === 1 ? 'community borehole' : cpWord(up.length) + ' community boreholes') + each + (priced < up.length ? ' (' + (up.length - priced) + ' still being costed)' : ''), sgLead: lead };
+    return { sgHref: cxHref({ country: 'mw', status: 'funding' }), sgOn: live && sum > 0, sgSum: cpUsd(sum), sgSumL: 'to drill Malawi’s first ' + (up.length === 1 ? 'community borehole' : cpWord(up.length) + ' community boreholes') + each + (priced < up.length ? ' (' + (up.length - priced) + ' still being costed)' : ''), sgLead: lead };
   }
 };
 // photo strip: which finished projects to leave out (already shown in the signature module)
@@ -1664,13 +1739,93 @@ function cpMap(self, s, live, mine) {
     mpPins: pins, mpLabel: 'Map of Rafiki projects in ' + CPN + ': ' + pins.length + (pins.length === 1 ? ' dot' : ' dots'),
     mpCap: live ? onMap + ' of our ' + mine.length + ' ' + CPN + ' projects ' + (onMap === 1 ? 'is' : 'are') + ' on the map so far.' + (cl.some(function (c) { return c.m.length > 1; }) ? ' Numbers show several projects at one place.' : '')
       : (s.cpTried ? 'The live project map could not be loaded just now. Please try again shortly.' : 'Loading project locations…'),
-    mpLegOn: live, mpLeg: TKSO.map(function (st, j) { return { l: TKST[st].l, n: String(cnt[j]), dot: tkDot(st) }; }), mpLegAria: 'Projects in ' + CPN + ' by status',
+    mpLegOn: live, mpLeg: TKSO.map(function (st, j) { return { l: TKST[st].l, n: String(cnt[j]), dot: tkDot(st), href: cxHref({ country: k, status: CXSTK[st] }), lk: cnt[j] > 0, nolk: !cnt[j] }; }), mpLegAria: 'Projects in ' + CPN + ' by status',
     mpSelOn: !!pin, mpHintOn: live && !pin && pins.length > 0,
     mpSelH: pin ? (pin.m.length === 1 ? '1 project at this point' : pin.m.length + ' projects at this point') : '', mpSel: pin ? pin.m.map(tkRow) : [],
     mpSelLive: pin ? (pin.m.length === 1 ? '1 project at this point: ' + pin.m[0].title : pin.m.length + ' projects at this point, listed under the map') : '',
     mpSelClose: function () { self.setState({ mpPin: -1 }); },
     mpUnOn: unm.length > 0, mpUnH: 'Not yet on the map: ' + unm.length + (unm.length === 1 ? ' project' : ' projects'), mpUn: unm.map(tkRow)
   };
+}
+// ---------- links into the project explorer: /stories?country=&cat=&kind=&status=&serve=&region=&q=&year= or ?project=<id> ----------
+var CXST = { completed: 'Completed', underway: 'Under construction', funding: 'Upcoming' };
+var CXSTK = { 'Completed': 'completed', 'Under construction': 'underway', 'Upcoming': 'funding' };
+var CXKIND = { borehole: 'Borehole well', collection: 'Water collection' };
+var CXGO = ['health', 'school', 'children', 'livelihoods', 'community'];
+var CXGRP = { water: 'Water', health: 'Health', school: 'Schools', children: 'Children’s homes', livelihoods: 'Livelihoods', community: 'Community' };
+var CXFOR = { health: 'health', school: 'schools', children: 'children’s homes', livelihoods: 'livelihoods', community: 'the wider community' };
+var CXK = { health: 'h', school: 's', children: 'c', livelihoods: 'l', community: 'm' };
+function cxHref(f) {
+  var q = ['project', 'country', 'cat', 'kind', 'status', 'serve', 'region', 'q', 'year'].filter(function (k) { return f[k] != null && f[k] !== ''; })
+    .map(function (k) { return k + '=' + encodeURIComponent(f[k]); });
+  return '/stories' + (q.length ? '?' + q.join('&') : '');
+}
+function cxProj(p) { return cxHref({ project: p.id }); }
+function cxPl() { return window.rafikiPlaces || null; }
+function cxCat(p) { return p.cat || (p.water ? 'water' : 'community'); }
+// the explorer's own filters, so a count shown here is what the link opens (null if the places list did not load)
+function cxMatch(list, f) {
+  var P = cxPl();
+  if ((f.serve || f.region) && !P) return null;
+  return list.filter(function (p) {
+    if (f.project) return String(p.id) === String(f.project);
+    if (f.country && p.ck !== f.country) return false;
+    if (f.cat && (f.cat === 'beyond' ? cxCat(p) === 'water' : cxCat(p) !== f.cat)) return false;
+    if (f.kind && p.type !== CXKIND[f.kind]) return false;
+    if (f.status && p.status !== CXST[f.status]) return false;
+    if (f.serve && P.serves(p) !== f.serve) return false;
+    if (f.region && P.region(p) !== f.region) return false;
+    if (f.q && ((p.title || '') + ' ' + (p.area || '')).toLowerCase().indexOf(String(f.q).toLowerCase()) < 0) return false;
+    if (f.year && String(p.year) !== String(f.year)) return false;
+    return true;
+  });
+}
+// "What we do / Who we serve / Where we work" pills: each opens the explorer. With the feed each shows its live count,
+// a pill with no projects is left out, and a region or group of people with projects but no pill is added.
+// A pill marked 'live' only shows when the feed says it has projects.
+function cxPills(live, mine, defs, add) {
+  var P = cxPl(), out = defs.filter(function (d) { return live || !d[2]; }).map(function (d) { return { l: d[0], f: Object.assign({ country: CPK }, d[1]) }; });
+  if (live && P && add === 'serve') Object.keys(P.serveNames).forEach(function (k) { if (!out.some(function (x) { return x.f.serve === k; })) out.push({ l: P.serveNames[k].replace(/'/g, '’'), f: { country: CPK, serve: k } }); });
+  if (live && P && add === 'region') Object.keys(P.names).forEach(function (k) { if (P.names[k][0] === CPK && !out.some(function (x) { return x.f.region === k; })) out.push({ l: P.names[k][1], f: { country: CPK, region: k } }); });
+  return out.map(function (x) {
+    var m = live ? cxMatch(mine, x.f) : null, n = m ? m.length : -1;
+    return { l: x.l, n: n, href: cxHref(x.f), c: n >= 0 ? '· ' + tkNum(n) : '→', aria: x.l + (n >= 0 ? ': ' + tkNum(n) + (n === 1 ? ' project' : ' projects') : ': see the projects') };
+  }).filter(function (x) { return x.n !== 0; });
+}
+// "Beyond the well": schools, clinics, children's homes and livelihoods projects in this country, live from the feed
+function cxBeyond(live, feed, mine) {
+  var off = { bwOn: false, bwTiles: [], bwRec: [], bwRecOn: false };
+  var by = live ? mine.filter(function (p) { return cxCat(p) !== 'water'; }) : [];
+  if (!by.length) return off;
+  var sb = ((((feed.summary || {}).countries || {})[CPK] || {}).beyond || {}).cats || {};
+  var tiles = CXGO.map(function (g) {
+    var a = by.filter(function (p) { return cxCat(p) === g; }), c = sb[g];
+    var n3 = c ? [+c.completed || 0, +c.underConstruction || 0, +c.upcoming || 0]
+      : ['Completed', 'Under construction', 'Upcoming'].map(function (st) { return a.filter(function (p) { return p.status === st; }).length; });
+    var n = n3[0] + n3[1] + n3[2];
+    return { g: g, num: n, n: tkNum(n), l: CXGRP[g], href: cxHref({ country: CPK, cat: g }),
+      s: [[n3[0], 'completed'], [n3[1], 'under construction'], [n3[2], 'looking for funding']].filter(function (x) { return x[0]; }).map(function (x) { return x[0] + ' ' + x[1]; }).join(' · ') };
+  }).filter(function (t) { return t.num > 0; });
+  // named projects (some named by Rafiki in CXP.names, keyed on the project id): parts of one place ("Chepkongi Dispensary - Incinerator", "- Gate & Fencing") count as one entry
+  var grp = {}, order = [];
+  by.forEach(function (p, i) {
+    var nm = (CXP.names || {})[p.id], t = String(p.title || ''), m = nm ? [t, nm[0], nm[1]] : /^(.+?)\s+[-–]\s+(.+)$/.exec(t), base = m ? m[1] : t, key = nm ? 'id|' + p.id : base + '|' + cxCat(p) + '|' + p.status;
+    if (!grp[key]) { grp[key] = { t: base, parts: [], ps: [], i: i, cat: cxCat(p), status: p.status, year: 0 }; order.push(key); }
+    var G = grp[key]; G.ps.push(p); if (m) G.parts.push(m[2]); if ((+p.year || 0) > G.year) G.year = +p.year;
+  });
+  var rank = { 'Under construction': 0, 'Upcoming': 1, 'Completed': 2 };
+  var rec = order.map(function (k) { return grp[k]; }).sort(function (a, b) { return ((rank[a.status] || 0) - (rank[b.status] || 0)) || (b.year - a.year) || (a.i - b.i); }).slice(0, 4)
+    .map(function (G) {
+      return { k: CXGRP[G.cat], kcls: 'sg-k ' + (CXK[G.cat] || 'm'), t: G.t,
+        d: G.parts.length ? cpCap(G.parts.join('; ').replace(/\s*&\s*/g, ' and ').toLowerCase()) : '',
+        m: [(TKST[G.status] || TKST.Completed).l, G.year ? String(G.year) : '', G.ps.length > 1 ? G.ps.length + ' projects' : ''].filter(Boolean).join(' · '),
+        href: G.ps.length === 1 ? cxProj(G.ps[0]) : cxHref({ country: CPK, cat: G.cat, q: G.t }) };
+    });
+  var fl = tiles.map(function (t) { return t.n + ' for ' + CXFOR[t.g]; });
+  var fs = fl.length > 1 ? fl.slice(0, -1).join(', ') + ' and ' + fl[fl.length - 1] : fl[0];
+  return { bwOn: true, bwH: 'Beyond the well in ' + CPN, bwTiles: tiles, bwRec: rec, bwRecOn: rec.length > 0,
+    bwLead: 'Water is our main work, and for some communities it is where a longer partnership begins. In ' + CPN + ' we have also taken on ' + tkNum(by.length) + (by.length === 1 ? ' project' : ' projects') + ' beyond the well so far: ' + fs + '.',
+    bwAll: cxHref({ country: CPK, cat: 'beyond' }), bwAllL: 'See all ' + tkNum(by.length) + ' in the project explorer' };
 }
 function MOUNT(self) {
   // know when the feed has failed, so the page can say so instead of waiting
@@ -1698,17 +1853,23 @@ function EXTRA(self, s) {
   Object.assign(v, CPSIG[k](live, mine));
   // project columns: hide empty ones where the country is new
   var px = cpVals(live ? feed : null)[k];
-  var cols = [{ h: 'Recently completed', it: px.done, none: '' }, { h: 'Under construction', it: px.uc, none: 'Nothing under construction right now.' }, { h: 'Looking for funding', it: px.up, none: 'No projects waiting for funding right now.' }];
+  var cols = [{ h: 'Recently completed', it: px.done, none: '', st: 'completed' }, { h: 'Under construction', it: px.uc, none: 'Nothing under construction right now.', st: 'underway' }, { h: 'Looking for funding', it: px.up, none: 'No projects waiting for funding right now.', st: 'funding' }];
   if (CPHIDE) cols = cols.filter(function (c) { return c.it.length; });
-  v.prCols = cols.map(function (c) { return { h: c.h, it: c.it, none: c.none, isNone: !c.it.length && !!c.none }; });
+  v.prCols = cols.map(function (c) { var n = mine.filter(function (p) { return p.status === CXST[c.st]; }).length; return { h: c.h, it: c.it, none: c.none, isNone: !c.it.length && !!c.none, href: cxHref({ country: k, status: c.st }), lk: n > 0, nolk: !n, all: 'All ' + tkNum(n) + ' →' }; });
   v.prCls = 'pr-grid' + (cols.length === 1 ? ' one' : (cols.length === 2 ? ' two' : ''));
   // photo strip: recent finished water projects with photos
   var skip = CPPSX[k] || function () { return false; };
   var pool = mine.filter(function (p) { return cpDone(p) && p.water && p.photos && p.photos.length && !skip(p); })
     .sort(function (a, b) { return (b.year || 0) - (a.year || 0) || b.photos.length - a.photos.length || String(a.title).localeCompare(String(b.title)); });
-  v.ps = pool.slice(0, 6).map(function (p) { return { img: cpPh(p.photos[0]), t: p.title, a: [cpWhere(p), p.people ? tkNum(p.people) + ' people' : ''].filter(Boolean).join(' · ') }; });
+  v.ps = pool.slice(0, 6).map(function (p) { return { href: cxProj(p), img: cpPh(p.photos[0]), t: p.title, a: [cpWhere(p), p.people ? tkNum(p.people) + ' people' : ''].filter(Boolean).join(' · ') }; });
   if (v.ps.length > 3 && v.ps.length < 6) v.ps = v.ps.slice(0, 3);
   v.psOn = v.ps.length >= 3;
+  // pills, Beyond the well, and the Current needs button: all open the matching projects in the explorer
+  v.pWhat = cxPills(live, mine, CXP.what); v.pWho = cxPills(live, mine, CXP.who, 'serve'); v.pWhere = cxPills(live, mine, CXP.where, 'region');
+  Object.assign(v, cxBeyond(live, feed, mine));
+  var nUp = mine.filter(function (p) { return p.status === 'Upcoming'; }).length, nUc = mine.filter(function (p) { return p.status === 'Under construction'; }).length;
+  v.cnHref = nUp ? cxHref({ country: k, status: 'funding' }) : (nUc ? cxHref({ country: k, status: 'underway' }) : '/sponsor');
+  v.cnL = !nUp && nUc ? 'See the projects under way' : 'See projects looking for funding';
   return v;
 }
 class Component extends DCLogic {
