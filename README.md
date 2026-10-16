@@ -39,6 +39,25 @@ Pages use the WebP files in `img/` (photos at most 1200px, logos 120px tall). Th
 - **Team:** Uganda and Malawi directors and the Tanzania, Uganda and Malawi office details are hidden until added to `var OFFICES`.
 - **Newsletter (Mailchimp):** in Mailchimp go to Audience → Signup forms → Embedded forms and copy the form `action` URL (`https://….list-manage.com/subscribe/post?u=…&id=…`). Paste it into `var MAILCHIMP_URL = ''` in `index.html` (source: `D06-Bento.dc.html`). Until then the signup opens the visitor's email app. Mailchimp sends its own confirmation email (double opt-in). The /updates page links to this signup (`/#field-notes`).
 
+## Live project data (monday.com)
+
+The Stories, Impact, country pages and homepage totals can read the **Projects** board in the RAFIKI Outreach workspace on monday.com. Until it is set up, the pages show their sample data.
+
+Setup, in the Cloudflare Pages project:
+1. Settings → Variables and Secrets → Add → type **Secret**, name `MONDAY_API_TOKEN`, value: the token from monday.com (profile picture → Developers → My access tokens).
+2. Strongly recommended (free): Workers & Pages → KV → Create namespace (e.g. `rafiki-feed`), then in the Pages project Settings → Bindings → Add → KV namespace, variable name `FEED`. It keeps one shared copy of the board and serves the last good copy if monday.com is down.
+3. Redeploy (Deployments → Retry deployment). `/api/projects` should now return JSON.
+
+How it works:
+- `functions/api/projects.js` returns the public feed; `functions/api/photo/[id].js` passes project photos on (monday.com files need a login). Both use `lib/monday.js` and `lib/feed-cache.js`; `feed.js` loads the feed in the browser.
+- The board is read at most every 10 minutes (`FEED_TTL_SECONDS` to change it).
+- Only these fields are published: name, country, village/location (no GPS), project type, pump, estimated impact, year, status, photos, and the total cost of projects still looking for funding. Costs of other projects, invoices, people, drilling companies, co-sponsors and notes never leave monday.com. Only photos of published projects can be fetched.
+- Statuses: Completed/Operational → Completed; Under Construction → Under construction; Planned and/or Permitted, Approved – Ready to Fund and Recommended to Fund → Looking for funding. Due diligence, failed attempts, needs attention and blank statuses are not shown.
+- To choose projects one by one, add a **Checkbox** column titled `Show on website` to the board; once it exists, only ticked projects are published.
+- Photos must be uploaded to monday.com as JPG, PNG or WebP. HEIC (iPhone) photos, videos and Google Drive links are skipped.
+- "Wells" counts Water (Drilling) projects; "people reached" adds up Estimated Impact of completed water projects, so a community entered as several projects with the same number is counted more than once.
+- Column ids are listed at the top of `lib/monday.js`; update them there if columns on the board are replaced.
+
 ## Deploy
 
 The site is hosted on **Cloudflare Pages** (free, unlimited traffic).

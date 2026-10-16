@@ -20,6 +20,7 @@
 <script>/* Placeholders (yellow 'To add' boxes) show on previews and hide on the live domain. ?live or ?preview overrides. */(function(){var q=location.search,live=/(^|\.)rafikioutreach\.org$/.test(location.hostname);if(/[?&]preview\b/.test(q)||(!live&&!/[?&]live\b/.test(q)))document.documentElement.className+=' draft-mode';})();</script>
 <script>/* coming from the country picker: keep the screen blue until the wipe finishes on this page */try{if(sessionStorage.getItem('rfWipe'))document.documentElement.className+=' cx-arriving';}catch(e){}</script>
 <script src="/support.js"></script>
+<script src="/feed.js"></script>
 </head>
 <body>
 <x-dc>
@@ -1056,7 +1057,8 @@ a.vc:focus-visible{outline:3px solid #6BBDF2;outline-offset:3px}
 @media (max-width:760px){.gc-it + .gc-it{border-left:0}.gc-it:last-child{border-top:1px solid #D5DBE0;padding-top:18px !important}.gc{padding:28px 0 !important}}
 @media (prefers-reduced-motion: reduce){.wv,.fb-ripples i,.fb-orbs i,#why-water .ww-bg{animation:none !important}.fb-ripples{display:none}.fx-card > img{transition:none}}
 </style>
-<style>/* live view: hide placeholders; sample-data notes stay until real data is in */html:not(.draft-mode) .todo:not(.sample),html:not(.draft-mode) .todo-box,html:not(.draft-mode) .draft{display:none !important}</style>
+<style>html.feed-live .im-hh{display:none}</style>
+<style>/* live view: hide placeholders; sample-data notes stay until real data is in */html:not(.draft-mode) .todo:not(.sample),html:not(.draft-mode) .todo-box,html:not(.draft-mode) .draft{display:none !important}html.feed-live .todo.sample,html.feed-live .live-hide{display:none !important}.feed-only{display:none}html.feed-live .feed-only{display:block}</style>
 </helmet>
 <a class="skip" href="#zmain">Skip to content</a>
 <div class="pg">
@@ -1279,6 +1281,23 @@ var CMAPS = {"ke": "M10.8,63.8 11.2,52.2 13.4,48.0 15.8,45.4 16.5,43.7 19.6,41.7
 var FLAGS = {"ke": "data:image/svg+xml,%3Csvg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 30 20\"%3E%3Crect width=\"30\" height=\"20\" fill=\"%23006600\"/%3E%3Crect width=\"30\" height=\"14\" fill=\"%23FFFFFF\"/%3E%3Crect width=\"30\" height=\"6\" fill=\"%23000000\"/%3E%3Crect y=\"7\" width=\"30\" height=\"6\" fill=\"%23BB0000\"/%3E%3Cline x1=\"10.5\" y1=\"16.5\" x2=\"19.5\" y2=\"3.5\" stroke=\"%23FFFFFF\" stroke-width=\".8\"/%3E%3Cline x1=\"19.5\" y1=\"16.5\" x2=\"10.5\" y2=\"3.5\" stroke=\"%23FFFFFF\" stroke-width=\".8\"/%3E%3Cellipse cx=\"15\" cy=\"10\" rx=\"3.3\" ry=\"6.4\" fill=\"%23000000\"/%3E%3Cellipse cx=\"15\" cy=\"10\" rx=\"1.7\" ry=\"6.4\" fill=\"%23BB0000\"/%3E%3Cellipse cx=\"15\" cy=\"10\" rx=\".6\" ry=\"2\" fill=\"%23FFFFFF\"/%3E%3C/svg%3E", "tz": "data:image/svg+xml,%3Csvg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 30 20\"%3E%3Crect width=\"30\" height=\"20\" fill=\"%231EB53A\"/%3E%3Cpolygon points=\"30,0 30,20 0,20\" fill=\"%2300A3DD\"/%3E%3Cline x1=\"-1\" y1=\"20.7\" x2=\"31\" y2=\"-0.7\" stroke=\"%23FCD116\" stroke-width=\"7.4\"/%3E%3Cline x1=\"-1\" y1=\"20.7\" x2=\"31\" y2=\"-0.7\" stroke=\"%23000000\" stroke-width=\"5\"/%3E%3C/svg%3E", "ug": "data:image/svg+xml,%3Csvg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 30 20\"%3E%3Crect width=\"30\" height=\"20\" fill=\"%23000000\"/%3E%3Crect y=\"3.33\" width=\"30\" height=\"3.34\" fill=\"%23FCDC04\"/%3E%3Crect y=\"6.67\" width=\"30\" height=\"3.33\" fill=\"%23D90000\"/%3E%3Crect y=\"13.33\" width=\"30\" height=\"3.34\" fill=\"%23FCDC04\"/%3E%3Crect y=\"16.67\" width=\"30\" height=\"3.33\" fill=\"%23D90000\"/%3E%3Ccircle cx=\"15\" cy=\"10\" r=\"4.3\" fill=\"%23FFFFFF\"/%3E%3Cpath d=\"M14.2 7.6c.6-.6 1.5-.4 1.6.3l-.6.5.4 2.6 1.4 1.4-1.2.2-.9-1.2-.8 1.6h-.8l.9-2-.1-2.4z\" fill=\"%23000000\"/%3E%3Ccircle cx=\"14.6\" cy=\"7.4\" r=\".45\" fill=\"%23D90000\"/%3E%3C/svg%3E", "mw": "data:image/svg+xml,%3Csvg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 30 20\"%3E%3Crect width=\"30\" height=\"20\" fill=\"%23339E35\"/%3E%3Crect width=\"30\" height=\"13.33\" fill=\"%23CE1126\"/%3E%3Crect width=\"30\" height=\"6.67\" fill=\"%23000000\"/%3E%3Cpath d=\"M10.4 6.67a4.6 4.6 0 0 1 9.2 0z\" fill=\"%23CE1126\"/%3E%3Cg stroke=\"%23CE1126\" stroke-width=\".7\"%3E%3Cline x1=\"15\" y1=\"1.2\" x2=\"15\" y2=\"0\"/%3E%3Cline x1=\"11.5\" y1=\"2.6\" x2=\"10.6\" y2=\"1.8\"/%3E%3Cline x1=\"18.5\" y1=\"2.6\" x2=\"19.4\" y2=\"1.8\"/%3E%3Cline x1=\"9.6\" y1=\"5\" x2=\"8.4\" y2=\"4.6\"/%3E%3Cline x1=\"20.4\" y1=\"5\" x2=\"21.6\" y2=\"4.6\"/%3E%3C/g%3E%3C/svg%3E"};
 // Mailchimp: Audience > Signup forms > Embedded form > copy the form action URL (…list-manage.com/subscribe/post?u=…&id=…). Empty = email-app fallback.
 var MAILCHIMP_URL = '';
+// country figures and project lists for the templates ({{cn.ke.w}}, {{cp.ke.done}})
+function cnVals() {
+  var o = {};
+  CORDER.forEach(function (k) { var c = CTRY[k]; o[k] = { w: c.w.toLocaleString('en-US'), u: c.u.toLocaleString('en-US'), p: c.p ? c.p.toLocaleString('en-US') + '+' : '–' }; });
+  return o;
+}
+function cpVals(feed) {
+  var o = {};
+  CORDER.forEach(function (k) {
+    var mine = feed ? feed.projects.filter(function (p) { return p.ck === k; }) : [];
+    var row = function (p) { return { t: p.title, a: [p.area, p.type, p.year].filter(Boolean).join(' · '), n: p.people ? p.people.toLocaleString('en-US') + ' people' : '', need: p.needed ? '$' + p.needed.toLocaleString('en-US') + ' to raise' : '' }; };
+    var by = function (st, max) { return mine.filter(function (p) { return p.status === st; }).slice(0, max).map(row); };
+    o[k] = { done: by('Completed', 5), uc: by('Under construction', 8), up: by('Upcoming', 8) };
+    o[k].noUc = !o[k].uc.length; o[k].noUp = !o[k].up.length;
+  });
+  return o;
+}
 function countryVals(self) {
   var s = self.state, all = !!s.cAll, cur = CTRY[s.ctry || 'ke'];
   if (!self._wipeIn) {
@@ -1287,6 +1306,17 @@ function countryVals(self) {
     var uncover = function () { document.documentElement.classList.remove('cx-arriving'); };
     if (wk && CTRY[wk]) setTimeout(function () { self.setState({ wipeOn: true, wipeArrive: true, wipeKey: wk, wipeName: CTRY[wk].n }); setTimeout(uncover, 60); self._wipeT2 = setTimeout(function () { self.setState({ wipeOn: false, wipeArrive: false }); }, 600); }, 0);
     else uncover();
+  }
+  if (!self._feedOn && window.rafikiFeed) {
+    // live numbers from monday.com; without the feed the sample figures above stay
+    self._feedOn = true;
+    window.rafikiFeed().then(function (d) {
+      if (!d) return;
+      CORDER.forEach(function (k) { var c = d.summary.countries[k]; if (c) { CTRY[k].w = c.wells; CTRY[k].u = c.wellsUnderConstruction; CTRY[k].p = c.people; } });
+      self._feed = d;
+      if (self.onFeed) self.onFeed(d);
+      self.setState({ feedAt: d.updated });
+    });
   }
   var pick = function (k, url) {
     var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1303,7 +1333,7 @@ function countryVals(self) {
   var list = CORDER.map(function (k) { var on = !all && (s.ctry || 'ke') === k; return { n: CTRY[k].n, sub: 'rafikioutreach.org/' + CTRY[k].n.toLowerCase(), on: on ? 'true' : 'false', pn: CTRY[k].n, cls: 'cs-it' + (on ? ' on' : ''), pill: 'mm-pill' + (on ? ' on' : ''), pick: function () { var u = ({ ke: '/kenya', tz: '/tanzania', ug: '/uganda', mw: '/malawi' })[k]; if (window.location.pathname.split('/').pop() === u.split('/').pop()) { self.setState({ cs: false, menu: false }); return; } pick(k, u); } }; })
     .concat([{ n: 'All countries', pn: 'All', sub: 'Totals across all four', on: all ? 'true' : 'false', cls: 'cs-it all' + (all ? ' on' : ''), pill: 'mm-pill' + (all ? ' on' : ''), pick: function () { pick('all'); } }]);
   var picked = !!s.ctryPicked && !all;
-  var heroVals = { heroH1: picked ? 'Clean water in ' + cur.n + ', owned by the communities who use it.' : 'Clean water, owned by the communities who use it.', heroNum: picked ? cur.p.toLocaleString('en-US') + '+' : '780,500+', heroStatTx: picked ? 'people reached in ' + cur.n : 'people reached with clean, safe water' };
+  var heroVals = { heroH1: picked ? 'Clean water in ' + cur.n + ', owned by the communities who use it.' : 'Clean water, owned by the communities who use it.', heroNum: (picked ? cur.p : CORDER.reduce(function (a, k) { return a + CTRY[k].p; }, 0)).toLocaleString('en-US') + '+', heroStatTx: picked ? 'people reached in ' + cur.n : 'people reached with clean, safe water' };
   var dirOf = function (k) { return { tag: 'Country Director', name: OFFICES[k].dir, email: OFFICES[k].email || '', role: 'Country Director, ' + CTRY[k].n, img: OFFICES[k].img || '', bio: OFFICES[k].bio || '' }; };
   var hasDir = function (k) { return !!OFFICES[k].dir; };
   var people = (all ? CORDER.filter(hasDir).map(dirOf) : (hasDir(s.ctry || 'ke') ? [dirOf(s.ctry || 'ke')] : [])).concat(FOUNDERS);
@@ -1313,9 +1343,9 @@ function countryVals(self) {
   people = FOUNDERS.concat(people.filter(function (p) { return FOUNDERS.indexOf(p) < 0; }));
   var plist = people.map(mk), nBoss = FOUNDERS.length;
   var teamVals = { tmTitle: all ? 'The people behind Rafiki' : 'Our team in ' + cur.n, tmOfficeTitle: offOwn ? cur.n + ' office' : 'Head office', tmAddr: off.addr, tmPhone: off.phone, tmBoss: plist.slice(0, nBoss), tmPeople: plist.slice(nBoss), tmSwap: s.swapN ? (s.swapN % 2 ? 'swA' : 'swB') : '', bioOpen: s.bioIdx != null && s.bioIdx < plist.length, bio: plist[s.bioIdx != null && s.bioIdx < plist.length ? s.bioIdx : 0], bioClose: function () { self.setState({ bioIdx: null }); } };
-  return Object.assign(teamVals, { isKe: !all && (s.ctry || 'ke') === 'ke', wipeMaps: (s.wipeKey === 'all' ? CORDER : (s.wipeKey ? [s.wipeKey] : [])).map(function (k) { var fl = CFLAGS[k]; return { d: CMAPS[k], cid: 'cxclip-' + k, clip: 'clip-path:url(#cxclip-' + k + ')', tr: fl.tr, rects: fl.rects, circles: fl.circles }; }), wipeMapsCls: 'cx-maps' + (s.wipeKey === 'all' ? ' all' : ''), wipeOn: !!s.wipeOn, wipeCls: 'cx-wipe' + (s.wipeArrive ? ' arrive' : ''), wipeName: s.wipeName || '', zhSwap: s.swapN ? (s.swapN % 2 ? 'swA' : 'swB') : '', heroH1: heroVals.heroH1, heroNum: heroVals.heroNum, heroStatTx: heroVals.heroStatTx, menuCls: 'hd-menu' + (s.menu ? ' open' : (self._menuWasOpen ? ' shut' : '')), cName: all ? 'All countries' : cur.n, cCode: all ? 'All' : cur.ab, cAllOn: all, cFlagOn: !all, cFlag: all ? '' : FLAGS[s.ctry || 'ke'], csOpen: !!s.cs, csExpanded: s.cs ? 'true' : 'false',
+  return Object.assign(teamVals, { cn: cnVals(), cp: cpVals(self._feed), isKe: !all && (s.ctry || 'ke') === 'ke', wipeMaps: (s.wipeKey === 'all' ? CORDER : (s.wipeKey ? [s.wipeKey] : [])).map(function (k) { var fl = CFLAGS[k]; return { d: CMAPS[k], cid: 'cxclip-' + k, clip: 'clip-path:url(#cxclip-' + k + ')', tr: fl.tr, rects: fl.rects, circles: fl.circles }; }), wipeMapsCls: 'cx-maps' + (s.wipeKey === 'all' ? ' all' : ''), wipeOn: !!s.wipeOn, wipeCls: 'cx-wipe' + (s.wipeArrive ? ' arrive' : ''), wipeName: s.wipeName || '', zhSwap: s.swapN ? (s.swapN % 2 ? 'swA' : 'swB') : '', heroH1: heroVals.heroH1, heroNum: heroVals.heroNum, heroStatTx: heroVals.heroStatTx, menuCls: 'hd-menu' + (s.menu ? ' open' : (self._menuWasOpen ? ' shut' : '')), cName: all ? 'All countries' : cur.n, cCode: all ? 'All' : cur.ab, cAllOn: all, cFlagOn: !all, cFlag: all ? '' : FLAGS[s.ctry || 'ke'], csOpen: !!s.cs, csExpanded: s.cs ? 'true' : 'false',
     toggleCs: function () { self.setState({ cs: !self.state.cs }); }, csList: list,
-    wwCards: CORDER.map(function (k) { var on = !all && (s.ctry || 'ke') === k; return { n: CTRY[k].n, ab: CTRY[k].ab, w: CTRY[k].w.toLocaleString('en-US'), u: CTRY[k].u.toLocaleString('en-US'), p: CTRY[k].p.toLocaleString('en-US') + '+', on: on ? 'true' : 'false', here: on, cls: 'cc-card' + (on ? ' on' : ''), go: 'Visit the ' + CTRY[k].n + ' page →', href: ({ ke: '/kenya', tz: '/tanzania', ug: '/uganda', mw: '/malawi' })[k] }; }) });
+    wwCards: CORDER.map(function (k) { var on = !all && (s.ctry || 'ke') === k; return { n: CTRY[k].n, ab: CTRY[k].ab, w: CTRY[k].w.toLocaleString('en-US'), u: CTRY[k].u.toLocaleString('en-US'), p: CTRY[k].p ? CTRY[k].p.toLocaleString('en-US') + '+' : '–', on: on ? 'true' : 'false', here: on, cls: 'cc-card' + (on ? ' on' : ''), go: 'Visit the ' + CTRY[k].n + ' page →', href: ({ ke: '/kenya', tz: '/tanzania', ug: '/uganda', mw: '/malawi' })[k] }; }) });
 }
 class Component extends DCLogic {
   constructor(props) { super(props); this.state = { menu: false, hidden: false, scrolled: false, amount: 50, custom: '', freq: 'once', ppl: 0, hhAll: 0, hh: 0, day: 0, well: 0, five: 0, ixOn: false, ixDone: false, tick: 0, tickPrev: -1, stOpen: false, stI: 0, stFlip: false, fnVal: '', fnNote: '' }; }
@@ -1353,7 +1383,7 @@ class Component extends DCLogic {
     };
     window.addEventListener('keydown', this._onKey);
     var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    var full = { ppl: 780500, hhAll: 230000, hh: 10000, day: 330, well: 2600, five: 5 };
+    var full = this._full = { ppl: 780500, hhAll: 230000, hh: 10000, day: 330, well: 2600, five: 5 };
     var run = function () {
       if (self._ixRan) return; self._ixRan = true;
       if (reduce) { full.ixOn = true; full.ixDone = true; self.setState(full); }
@@ -1364,7 +1394,7 @@ class Component extends DCLogic {
           if (t0 === null) t0 = t;
           var p = Math.min(1, (t - t0 - 400) / 2200); if (p < 0) p = 0;
           var e = 1 - Math.pow(1 - p, 3);
-          self.setState({ ppl: Math.round(780500 * e), hhAll: Math.round(230000 * e), hh: Math.round(10000 * e), day: Math.round(330 * e), well: Math.round(2600 * e), five: Math.max(1, Math.round(5 * e)), ixDone: p >= 1 });
+          self.setState({ ppl: Math.round(full.ppl * e), hhAll: Math.round(full.hhAll * e), hh: Math.round(full.hh * e), day: Math.round(full.day * e), well: Math.round(full.well * e), five: Math.max(1, Math.round(5 * e)), ixDone: p >= 1 });
           if (p < 1) self._raf = requestAnimationFrame(step);
         };
         self._raf = requestAnimationFrame(step);
@@ -1378,6 +1408,13 @@ class Component extends DCLogic {
     };
     setTimeout(hook, 0);
     this._ixFallback = setTimeout(run, 4000);
+  }
+  onFeed(d) {
+    // live totals: people with clean water and the average per well; households aren't tracked on the board
+    var self = this, t = d.summary.total, full = this._full;
+    if (!full) { setTimeout(function () { self.onFeed(d); }, 50); return; }
+    full.ppl = t.people; if (t.peoplePerWell) full.well = t.peoplePerWell;
+    if (this.state.ixDone) this.setState({ ppl: full.ppl, well: full.well });
   }
   componentWillUnmount() { window.removeEventListener('resize', this._fitHero); window.removeEventListener('scroll', this._onScroll); window.removeEventListener('keydown', this._onKey); document.body.style.overflow = ''; if (this._raf) cancelAnimationFrame(this._raf); if (this._tickT) clearInterval(this._tickT); if (this._io) this._io.disconnect(); clearTimeout(this._ixFallback); clearTimeout(this._dropT); if (this._gvRaf) cancelAnimationFrame(this._gvRaf); }
   stGo(i) {

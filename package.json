@@ -5,7 +5,7 @@
   "description": "Rafiki Outreach homepage redesign - design preview",
   "scripts": {
     "start": "node server.js",
-    "build:pages": "rm -rf dist && mkdir dist && cp -r *.html img support.js favicon.svg apple-touch-icon.png _redirects _headers dist/"
+    "build:pages": "rm -rf dist && mkdir dist && cp -r *.html img support.js feed.js favicon.svg apple-touch-icon.png _redirects _headers dist/"
   },
   "engines": {
     "node": ">=18"
