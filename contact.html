@@ -1258,6 +1258,17 @@ function cpVals(feed) {
   });
   return o;
 }
+// Cost figures: live from monday.com (summary.cost); these defaults are the October 2026 figures.
+function rfCost(self) {
+  var c = (self && self._feed && self._feed.summary && self._feed.summary.cost) || null;
+  var d = { perPerson: 3.96, wells: 102, shallow: { cost: 4000, people: 1000, depth: 28 }, deep: { cost: 12000, people: 1600, depth: 150 } };
+  if (!c || !c.perPerson) c = d;
+  var sh = c.shallow || d.shallow, dp = c.deep || d.deep, usd = function (n) { return '$' + Math.round(n).toLocaleString('en-US'); };
+  return { pp: c.perPerson, shallow: sh.cost, deep: dp.cost,
+    vals: { costPP: usd(c.perPerson), costWells: String(c.wells), costShallow: usd(sh.cost), costDeep: usd(dp.cost),
+      costShallowDepth: String(sh.depth || 28), costDeepDepth: String(dp.depth || 150),
+      costShallowPeople: (sh.people || 1000).toLocaleString('en-US'), costDeepPeople: (dp.people || 1600).toLocaleString('en-US') } };
+}
 function countryVals(self) {
   var s = self.state, all = !!s.cAll, cur = CTRY[s.ctry || 'ke'];
   if (!self._wipeIn) {
@@ -1302,7 +1313,7 @@ function countryVals(self) {
   var mk = function (p, i) { return { tag: p.tag, name: p.name, role: p.role, bio: p.bio, img: p.img, hasImg: !!p.img, noImg: !p.img, email: p.email || '', hasEmail: !!p.email, mailto: p.email ? 'mailto:' + p.email : '', open: function () { self.setState({ bioIdx: i }); } }; };
   var plist = people.map(mk);
   var teamVals = { tmTitle: all ? 'The people behind Rafiki' : 'Our team in ' + cur.n, tmOfficeTitle: offOwn ? cur.n + ' office' : 'Head office', tmAddr: off.addr, tmPhone: off.phone, tmPeople: plist, tmSwap: s.swapN ? (s.swapN % 2 ? 'swA' : 'swB') : '', bioOpen: s.bioIdx != null && s.bioIdx < plist.length, bio: plist[s.bioIdx != null && s.bioIdx < plist.length ? s.bioIdx : 0], bioClose: function () { self.setState({ bioIdx: null }); } };
-  return Object.assign(teamVals, { cn: cnVals(), cp: cpVals(self._feed), isKe: !all && (s.ctry || 'ke') === 'ke', wipeMaps: (s.wipeKey === 'all' ? CORDER : (s.wipeKey ? [s.wipeKey] : [])).map(function (k) { var fl = CFLAGS[k]; return { d: CMAPS[k], cid: 'cxclip-' + k, clip: 'clip-path:url(#cxclip-' + k + ')', tr: fl.tr, rects: fl.rects, circles: fl.circles }; }), wipeMapsCls: 'cx-maps' + (s.wipeKey === 'all' ? ' all' : ''), wipeOn: !!s.wipeOn, wipeCls: 'cx-wipe' + (s.wipeArrive ? ' arrive' : ''), wipeName: s.wipeName || '', zhSwap: s.swapN ? (s.swapN % 2 ? 'swA' : 'swB') : '', heroH1: heroVals.heroH1, heroNum: heroVals.heroNum, heroStatTx: heroVals.heroStatTx, menuCls: 'hd-menu' + (s.menu ? ' open' : (self._menuWasOpen ? ' shut' : '')), cName: all ? 'All countries' : cur.n, cCode: all ? 'All' : cur.ab, cAllOn: all, cFlagOn: !all, cFlag: all ? '' : FLAGS[s.ctry || 'ke'], csOpen: !!s.cs, csExpanded: s.cs ? 'true' : 'false',
+  return Object.assign(teamVals, rfCost(self).vals, { cn: cnVals(), cp: cpVals(self._feed), isKe: !all && (s.ctry || 'ke') === 'ke', wipeMaps: (s.wipeKey === 'all' ? CORDER : (s.wipeKey ? [s.wipeKey] : [])).map(function (k) { var fl = CFLAGS[k]; return { d: CMAPS[k], cid: 'cxclip-' + k, clip: 'clip-path:url(#cxclip-' + k + ')', tr: fl.tr, rects: fl.rects, circles: fl.circles }; }), wipeMapsCls: 'cx-maps' + (s.wipeKey === 'all' ? ' all' : ''), wipeOn: !!s.wipeOn, wipeCls: 'cx-wipe' + (s.wipeArrive ? ' arrive' : ''), wipeName: s.wipeName || '', zhSwap: s.swapN ? (s.swapN % 2 ? 'swA' : 'swB') : '', heroH1: heroVals.heroH1, heroNum: heroVals.heroNum, heroStatTx: heroVals.heroStatTx, menuCls: 'hd-menu' + (s.menu ? ' open' : (self._menuWasOpen ? ' shut' : '')), cName: all ? 'All countries' : cur.n, cCode: all ? 'All' : cur.ab, cAllOn: all, cFlagOn: !all, cFlag: all ? '' : FLAGS[s.ctry || 'ke'], csOpen: !!s.cs, csExpanded: s.cs ? 'true' : 'false',
     toggleCs: function () { self.setState({ cs: !self.state.cs }); }, csList: list,
     wwCards: CORDER.map(function (k) { var on = !all && (s.ctry || 'ke') === k; return { n: CTRY[k].n, ab: CTRY[k].ab, w: CTRY[k].w.toLocaleString('en-US'), u: CTRY[k].u.toLocaleString('en-US'), p: CTRY[k].p ? CTRY[k].p.toLocaleString('en-US') + '+' : '–', on: on ? 'true' : 'false', here: on, cls: 'cc-card' + (on ? ' on' : ''), go: 'Visit the ' + CTRY[k].n + ' page →', pick: function () { window.location.href = ({ ke: '/kenya', tz: '/tanzania', ug: '/uganda', mw: '/malawi' })[k]; } }; }) });
 }

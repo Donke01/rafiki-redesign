@@ -1095,6 +1095,17 @@ function cpVals(feed) {
   });
   return o;
 }
+// Cost figures: live from monday.com (summary.cost); these defaults are the October 2026 figures.
+function rfCost(self) {
+  var c = (self && self._feed && self._feed.summary && self._feed.summary.cost) || null;
+  var d = { perPerson: 3.96, wells: 102, shallow: { cost: 4000, people: 1000, depth: 28 }, deep: { cost: 12000, people: 1600, depth: 150 } };
+  if (!c || !c.perPerson) c = d;
+  var sh = c.shallow || d.shallow, dp = c.deep || d.deep, usd = function (n) { return '$' + Math.round(n).toLocaleString('en-US'); };
+  return { pp: c.perPerson, shallow: sh.cost, deep: dp.cost,
+    vals: { costPP: usd(c.perPerson), costWells: String(c.wells), costShallow: usd(sh.cost), costDeep: usd(dp.cost),
+      costShallowDepth: String(sh.depth || 28), costDeepDepth: String(dp.depth || 150),
+      costShallowPeople: (sh.people || 1000).toLocaleString('en-US'), costDeepPeople: (dp.people || 1600).toLocaleString('en-US') } };
+}
 function countryVals(self) {
   var s = self.state, all = !!s.cAll, cur = CTRY[s.ctry || 'ke'];
   if (!self._wipeIn) {
