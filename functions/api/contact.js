@@ -1,10 +1,11 @@
 // POST /api/contact: the contact form on /contact.
 // Sends the message by email through Resend (secret RESEND_API_KEY) and keeps a copy in
 // the FEED KV namespace for 90 days (keys "msg:..."), so nothing is lost if email fails.
-// Optional settings: CONTACT_TO (default info@rafikioutreach.org) and CONTACT_FROM
-// (default "Rafiki website <onboarding@resend.dev>", which Resend only delivers to the
-// address the Resend account was opened with; verify rafikioutreach.org in Resend to use
-// your own sender). Without RESEND_API_KEY the form falls back to the visitor's email app.
+// Until rafikioutreach.org is verified in Resend, mail goes from Resend's test sender
+// (onboarding@resend.dev), which only delivers to the Resend account's own address,
+// morgan@rafikioutreach.org. Once the domain is verified, set CONTACT_FROM (for example
+// "Rafiki website <website@rafikioutreach.org>") and CONTACT_TO (for example
+// info@rafikioutreach.org). Without RESEND_API_KEY the form falls back to the visitor's email app.
 
 const TOPICS = ['General question', 'Giving', 'Sponsor a well', 'Fundraising', 'Expeditions', 'Partnerships', 'Media'];
 const EMAIL = /^[^\s@<>()",;:]+@[^\s@<>()",;:]+\.[a-z]{2,}$/i;
@@ -68,7 +69,7 @@ export async function onRequestPost({ request, env }) {
       headers: { Authorization: 'Bearer ' + env.RESEND_API_KEY, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         from: env.CONTACT_FROM || 'Rafiki website <onboarding@resend.dev>',
-        to: [env.CONTACT_TO || 'info@rafikioutreach.org'],
+        to: [env.CONTACT_TO || (env.CONTACT_FROM ? 'info@rafikioutreach.org' : 'morgan@rafikioutreach.org')],
         reply_to: msg.email,
         subject: 'Website: ' + msg.topic + ' from ' + who,
         text
