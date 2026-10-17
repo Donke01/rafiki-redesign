@@ -169,6 +169,7 @@ footer.bf .bf-legal{column-gap:14px !important}
 footer.bf .bf-legal a{padding:12px 2px !important}
 }
 </style>
+<style>/* Shared fix pass, October 2026: breadcrumb items line up, gap under the footer logo, 44px menu country pills */html .xh-crumb{align-items:center;flex-wrap:wrap}@media (max-width:640px){html footer.bf .bf-about{margin-top:12px !important}}@media (max-width:900px){html .mm-pill{min-height:44px !important;font-size:clamp(12px,3.3vw,13px) !important}}@media (max-width:340px){html .mm-pill{padding:0 !important;letter-spacing:-.02em}}</style>
 </head>
 <body>
 <x-dc>
@@ -568,7 +569,7 @@ em.hl{font-style:normal;color:#0A78C2}
 .mm-social{gap:8px}
 .mm-social .soc{width:36px;height:36px}
 }
-@media (max-width:340px){.mm-pill{font-size:10px !important}.mm-cs-row{gap:3px !important}}
+@media (max-width:340px){.mm-cs-row{gap:3px !important}}
 
 
 /* ---------- menu button: wave bars that morph into a cross ---------- */
@@ -1341,7 +1342,7 @@ a.vc:focus-visible{outline:3px solid #6BBDF2;outline-offset:3px}
 </helmet>
 <a class="skip" href="#top">Skip to content</a>
 <div class="pg">
-<sc-if value="{{menuOpen}}" hint-placeholder-val="{{false}}"><div class="mm-backdrop" onClick="{{closeMenu}}" aria-hidden="true"></div></sc-if><sc-if value="{{wipeOn}}" hint-placeholder-val="{{false}}"><div class="{{wipeCls}}" aria-hidden="true"><div class="cx-in"><div class="{{wipeMapsCls}}"><sc-for list="{{wipeMaps}}" as="m" hint-placeholder-count="1"><svg class="cx-map" viewBox="-4 -4 108 108" aria-hidden="true"><defs><clipPath id="{{m.cid}}"><path d="{{m.d}}"></path></clipPath></defs><g class="cx-flag" style="{{m.clip}}"><g transform="{{m.tr}}"><sc-for list="{{m.rects}}" as="r" hint-placeholder-count="3"><rect x="{{r.x}}" y="{{r.y}}" width="{{r.w}}" height="{{r.h}}" fill="{{r.f}}"></rect></sc-for></g><sc-for list="{{m.circles}}" as="c" hint-placeholder-count="0"><circle cx="{{c.x}}" cy="{{c.y}}" r="{{c.r}}" fill="{{c.f}}"></circle></sc-for></g><path class="cx-ol" d="{{m.d}}" pathLength="1"></path></svg></sc-for></div><span class="cx-k">Rafiki Outreach</span><span class="cx-n">{{wipeName}}</span></div></div></sc-if>
+<sc-if value="{{menuOpen}}" hint-placeholder-val="{{false}}"><div class="mm-backdrop" onClick="{{closeMenu}}" aria-hidden="true"></div></sc-if><sc-if value="{{wipeOn}}" hint-placeholder-val="{{false}}"><div class="{{wipeCls}}" aria-hidden="true"><div class="cx-in"><div class="{{wipeMapsCls}}"><sc-for list="{{wipeMaps}}" as="m" hint-placeholder-count="1"><svg class="cx-map" viewBox="-4 -4 108 108" aria-hidden="true"><defs><clipPath id="{{m.cid}}"><path sc-camel-d="{{m.d}}"></path></clipPath></defs><g class="cx-flag" style="{{m.clip}}"><g sc-camel-transform="{{m.tr}}"><sc-for list="{{m.rects}}" as="r" hint-placeholder-count="3"><rect sc-camel-x="{{r.x}}" sc-camel-y="{{r.y}}" sc-camel-width="{{r.w}}" sc-camel-height="{{r.h}}" fill="{{r.f}}"></rect></sc-for></g><sc-for list="{{m.circles}}" as="c" hint-placeholder-count="0"><circle sc-camel-cx="{{c.x}}" sc-camel-cy="{{c.y}}" sc-camel-r="{{c.r}}" fill="{{c.f}}"></circle></sc-for></g><path class="cx-ol" sc-camel-d="{{m.d}}" pathLength="1"></path></svg></sc-for></div><span class="cx-k">Rafiki Outreach</span><span class="cx-n">{{wipeName}}</span></div></div></sc-if>
 <div class="hd-wrap" style="{{hdStyle}}">
 <header class="wrap hd">
 <div class="hd-tile" style="{{tileShadow}}">
@@ -1424,7 +1425,7 @@ function EXTRA(self, s) {
 }
 
 // Before the live feed loads (or if it can't), these are the October 2026 figures from monday.com.
-var CTRY = { ke: { n: 'Kenya', ab: 'KE', w: 26, u: 2, p: 77088 }, tz: { n: 'Tanzania', ab: 'TZ', w: 83, u: 0, p: 99444 }, ug: { n: 'Uganda', ab: 'UG', w: 0, u: 2, p: 0 }, mw: { n: 'Malawi', ab: 'MW', w: 0, u: 0, p: 0 } };
+var CTRY = { ke: { n: 'Kenya', ab: 'KE', w: 26, u: 2, p: 78588 }, tz: { n: 'Tanzania', ab: 'TZ', w: 83, u: 0, p: 99444 }, ug: { n: 'Uganda', ab: 'UG', w: 0, u: 2, p: 0 }, mw: { n: 'Malawi', ab: 'MW', w: 0, u: 0, p: 0 } };
 var CORDER = ['ke', 'tz', 'ug', 'mw'];
 var FOUNDERS = [
   { tag: 'Co-founder', name: 'Reid Anderson', role: 'Co-founder, Rafiki Outreach', email: 'reid@rafikioutreach.org', img: '/img/reid.webp', bio: 'Reid co-founded Rafiki Outreach to bring clean water to communities across East Africa. Rafiki means friend in Swahili, and Reid builds those friendships on the ground, joining volunteers in the field and working alongside local teams and the communities they serve.' },
