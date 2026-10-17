@@ -110,3 +110,23 @@
     }, m ? 60 : 0);
   });
 })();
+
+// Header on scroll: slims down once the page moves, slides away while reading down,
+// and comes back as soon as the visitor scrolls up (never while a menu is open).
+(function () {
+  var html = document.documentElement, last = window.scrollY || 0, ticking = false;
+  function menuOpen() { return !!document.querySelector('button[aria-controls="bento-menu"][aria-expanded="true"],.cs-btn[aria-expanded="true"]'); }
+  function update() {
+    ticking = false;
+    var y = window.scrollY || 0, dy = y - last;
+    html.classList.toggle('hd-compact', y > 40);
+    if (menuOpen() || y < 140) html.classList.remove('hd-hide');
+    else if (dy > 8) html.classList.add('hd-hide');
+    else if (dy < -8) html.classList.remove('hd-hide');
+    if (Math.abs(dy) > 8) last = y;
+  }
+  addEventListener('scroll', function () { if (!ticking) { ticking = true; requestAnimationFrame(update); } }, { passive: true });
+  document.addEventListener('focusin', function (e) { if (e.target.closest && e.target.closest('.hd-wrap')) html.classList.remove('hd-hide'); });
+  document.addEventListener('click', function () { setTimeout(update, 0); });
+  update();
+})();

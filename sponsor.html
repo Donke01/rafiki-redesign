@@ -186,6 +186,18 @@ html main.wrap:has(+ footer.bf) > section:last-child{position:relative;border-ra
 html main.wrap:has(+ footer.bf) > section:last-child::before{content:"";position:absolute;top:0;bottom:0;left:calc(50% - 50vw);right:calc(50% - 50vw);background:inherit;z-index:-1;pointer-events:none}
 html main.wrap:has(+ footer.bf):has(> section:last-child){padding-bottom:0 !important}
 html main.wrap:has(> section:last-child) + footer.bf{margin-top:0 !important}
+</style><style>/* Header: slims on scroll, hides while reading down, white-on-blue buttons */
+html .hd-wrap{transition:transform .35s cubic-bezier(.2,.7,.2,1)}
+html.hd-hide .hd-wrap{transform:translateY(-140%) !important}
+html .hd-tile{transition:padding .3s ease,min-height .3s ease,box-shadow .3s}
+html .hd-logo img{transition:height .3s ease}
+html.hd-compact .hd-tile{min-height:0 !important;padding:8px 8px 8px 26px !important}
+html.hd-compact .hd-logo img{height:36px !important}
+@media (max-width:800px){html.hd-compact .hd{padding-top:8px !important}html.hd-compact .hd-tile{padding:6px 6px 6px 18px !important}html.hd-compact .hd-logo img{height:30px !important}html.hd-compact .hd-donate{min-height:44px !important}html.hd-compact .hd-menu{width:44px !important;height:44px !important}}
+html .hd-donate{background:#0A78C2 !important;color:#FFFFFF !important}
+html .hd-donate:hover{background:#076DB1 !important}
+html .hd-menu .mb i{background:#FFFFFF !important}
+@media (prefers-reduced-motion: reduce){html .hd-wrap,html .hd-tile,html .hd-logo img{transition:none !important}}
 </style></head>
 <body>
 <x-dc>

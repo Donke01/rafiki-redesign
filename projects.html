@@ -258,6 +258,18 @@ html .xs-donors .dn-big b{display:block;font-size:clamp(34px,3.4vw,46px);font-we
 html .xs-donors .dn-sm{margin:0;font-size:15px;color:#FFFFFF}
 html .xs-donors .dn-btn{align-self:flex-start;margin-top:12px}
 @media (max-width:900px){html .xs-donors .dn-grid{grid-template-columns:1fr;gap:28px}html .xs-donors .dn-impact img{height:240px}}
+</style><style>/* Header: slims on scroll, hides while reading down, white-on-blue buttons */
+html .hd-wrap{transition:transform .35s cubic-bezier(.2,.7,.2,1)}
+html.hd-hide .hd-wrap{transform:translateY(-140%) !important}
+html .hd-tile{transition:padding .3s ease,min-height .3s ease,box-shadow .3s}
+html .hd-logo img{transition:height .3s ease}
+html.hd-compact .hd-tile{min-height:0 !important;padding:8px 8px 8px 26px !important}
+html.hd-compact .hd-logo img{height:36px !important}
+@media (max-width:800px){html.hd-compact .hd{padding-top:8px !important}html.hd-compact .hd-tile{padding:6px 6px 6px 18px !important}html.hd-compact .hd-logo img{height:30px !important}html.hd-compact .hd-donate{min-height:44px !important}html.hd-compact .hd-menu{width:44px !important;height:44px !important}}
+html .hd-donate{background:#0A78C2 !important;color:#FFFFFF !important}
+html .hd-donate:hover{background:#076DB1 !important}
+html .hd-menu .mb i{background:#FFFFFF !important}
+@media (prefers-reduced-motion: reduce){html .hd-wrap,html .hd-tile,html .hd-logo img{transition:none !important}}
 </style></head>
 <body>
 <x-dc>
