@@ -194,7 +194,9 @@ html .xs.nd{overflow:clip}
 </style>
 <style>/* Shared fix pass, October 2026: breadcrumb items line up, gap under the footer logo, 44px menu country pills */html .xh-crumb{align-items:center;flex-wrap:wrap}@media (max-width:640px){html footer.bf .bf-about{margin-top:12px !important}}@media (max-width:900px){html .mm-pill{min-height:44px !important;font-size:clamp(12px,3.3vw,13px) !important}}@media (max-width:340px){html .mm-pill{padding:0 !important;letter-spacing:-.02em}}</style>
 <style>/* Kenya fix pass: map list links are full tap targets on phones; no under-construction pulse on mixed clusters */@media (max-width:800px){html .tk-ul li > a.tk-lk{display:flex !important;align-items:center;min-height:44px}}html .tk-pin[style*="gradient"]::before{display:none !important;animation:none !important}</style>
-</head>
+<style>/* Follow-up after live review */
+html .tk-pin:not([style*="gradient"]){z-index:3}
+</style></head>
 <body>
 <x-dc>
 <helmet>

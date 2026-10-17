@@ -1372,7 +1372,7 @@ a.lw-card:hover .lw-ph > img{transform:scale(1.05)}
 </div>
 <div class="gv-other">
 <label for="gv-amt" class="gv-lab">Other amount</label>
-<div class="gv-inwrap"><span aria-hidden="true">$</span><input id="gv-amt" type="number" min="5" step="5" inputmode="numeric" placeholder="Enter amount" value="{{customVal}}" onChange="{{onCustom}}"></div>
+<div class="gv-inwrap"><span aria-hidden="true">$</span><input id="gv-amt" type="number" min="5" step="5" inputmode="numeric" placeholder="Enter amount" sc-camel-value="{{customVal}}" onChange="{{onCustom}}"></div>
 </div>
 <sc-if value="{{dropOn}}" hint-placeholder-val="{{false}}"><span class="{{dropCls}}" style="{{dropStyle}}" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="#098BE1"><path d="M12 2.7C8 7.5 6 10.7 6 14a6 6 0 0012 0c0-3.3-2-6.5-6-11.3z"></path></svg></span></sc-if><div class="gv-ppl" aria-hidden="true"><div class="gv-figs"><sc-for list="{{figs}}" as="f" hint-placeholder-count="10"><span class="{{f.cls}}" style="{{f.st}}"><svg viewBox="0 0 24 24"><circle cx="12" cy="6.5" r="3.6"></circle><path d="M5 21.5c0-4.4 3.1-8 7-8s7 3.6 7 8z"></path></svg></span></sc-for></div><span class="gv-fcap">{{figCap}}</span></div><div class="gv-impact" aria-live="polite"><svg width="22" height="22" viewBox="0 0 24 24" fill="#098BE1" aria-hidden="true"><path d="M12 2.7C8 7.5 6 10.7 6 14a6 6 0 0012 0c0-3.3-2-6.5-6-11.3z"></path></svg><span>{{impact}}</span></div>
 <a class="b ac-btn" href="/donate#give">{{cta}}</a>
