@@ -201,6 +201,44 @@ html .xmq-band .xmq:active .xmq-tr{animation-play-state:paused}
 </style><style>/* Donors: full-width white band joined to the partner logo strip */
 html .xs.xs-donors{border-radius:0 !important;box-shadow:0 0 0 100vmax #FFFFFF !important;clip-path:inset(0 -100vmax);margin-bottom:0 !important;padding-bottom:28px !important}
 html .xs-donors + .xmq-band{margin-top:-14px !important;border-top:0 !important}
+</style><style>/* Projects page: "Looking for funding" row on country cards (same as home) */
+</style>
+<style>
+/* where we work: "Looking for funding" row for countries with no wells yet (links to the explorer) */
+.cc-rows > .cc-fund{cursor:pointer;border-radius:10px}
+.cc-card .cc-rows > .cc-fund b *{color:inherit !important}
+.cc-card .cc-rows > .cc-fund b{color:#076DB1 !important;text-decoration:underline;text-decoration-thickness:2px;text-decoration-color:rgba(9,139,225,.35);text-underline-offset:.2em}
+.cc-rows > .cc-fund b i{font-style:normal;text-decoration:none;display:inline-block;margin-left:4px}
+.cc-rows > .cc-fund:hover b{text-decoration-color:currentColor}
+.cc-rows > .cc-fund:focus-visible{outline:3px solid #6BBDF2;outline-offset:3px}
+.cc-rows > .cc-fund{grid-column:1 / -1;min-height:44px}
+.cc-rows > .cc-fund{min-height:44px}
+.cc-rows > .cc-fund{align-items:center}
+.cc-rows > .cc-fund{justify-content:center}
+</style><style>/* Projects page on phones: wider text, single-column tiles, aligned headers and buttons */
+@media (max-width:600px){
+html .xs{padding:30px 22px !important}
+html .cc-ww{padding:30px 18px !important}
+html .pr-it{padding:22px 20px !important}
+html .pt-h{flex-direction:column;align-items:flex-start;gap:4px}
+html .pr-up-need,html .pr-up-tbc{margin-left:0 !important}
+html .xs.blue .xc{flex-direction:column;align-items:stretch}
+html .xs.blue .xc-row{flex-direction:column;align-items:stretch}
+html .xs.blue .xc-row{width:100%}
+html .xs.blue .xc-row > a{width:100%;justify-content:center;text-align:center}
+}
+@media (max-width:480px){
+html .pt-grid{grid-template-columns:1fr !important}
+html .pt-card{padding:18px 18px 16px !important}
+}
+</style><style>/* Donors card: heading, short explanation, calm list of names; partners label sits on the logo strip */
+html .xs-donors .dn-lead{margin-top:12px;max-width:560px}
+html .xs-donors .dn-list{list-style:none;margin:24px 0 0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,max-content));gap:14px 56px}
+html .xs-donors .dn-list li{display:flex;align-items:center;gap:12px;font-size:18px;font-weight:600;line-height:1.35;color:#0A0A0A}
+html .xs-donors .dn-list li::before{content:"";flex:0 0 18px;width:18px;height:18px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23098BE1' d='M12 2.7C8 7.5 6 10.7 6 14a6 6 0 0012 0c0-3.3-2-6.5-6-11.3z'/%3E%3C/svg%3E") center/contain no-repeat}
+html .xs-donors .dn-give{display:inline-flex;align-items:center;gap:6px;margin-top:26px;font-size:15px;font-weight:700;color:#076DB1;min-height:44px}
+html .xmq-band .xmq-lab{margin:0 0 14px;text-align:center;font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#076DB1}
+@media (max-width:640px){html .xs-donors .dn-list{grid-template-columns:1fr;gap:12px}html .xs-donors .dn-list li{font-size:17px}html .xmq-band .xmq-lab{margin-bottom:10px}}
 </style></head>
 <body>
 <x-dc>
@@ -1375,9 +1413,9 @@ a.vc:focus-visible{outline:3px solid #6BBDF2;outline-offset:3px}
 <span class="cc-lab">Where we work</span>
 <h2 class="h2">Four countries, one mission</h2> <span class="todo sample">Sample figures</span>
 <p class="p">Rafiki partners with communities in Kenya, Tanzania, Uganda and Malawi. Choose a country to see its projects and people.</p>
-<div class="cc-grid"><sc-for list="{{wwCards}}" as="c" hint-placeholder-count="4"><a class="{{c.cls}}" href="{{c.href}}"><sc-if value="{{c.here}}" hint-placeholder-val="{{false}}"><span class="cc-here">You are viewing</span></sc-if><span class="cc-ab" aria-hidden="true">{{c.ab}}</span><span class="cc-cn">{{c.n}}</span><span class="cc-rows"><div><span>Wells completed</span><b>{{c.w}}</b></div><div><span>Under construction</span><b>{{c.u}}</b></div><div><span>People reached</span><b>{{c.p}}</b></div></span><span class="cc-go">{{c.go}}</span></a></sc-for></div>
+<div class="cc-grid"><sc-for list="{{wwCards}}" as="c" hint-placeholder-count="4"><a class="{{c.cls}}" href="{{c.href}}"><sc-if value="{{c.here}}" hint-placeholder-val="{{false}}"><span class="cc-here">You are viewing</span></sc-if><span class="cc-ab" aria-hidden="true">{{c.ab}}</span><span class="cc-cn">{{c.n}}</span><span class="cc-rows"><sc-if value="{{c.stats}}" hint-placeholder-val="{{true}}"><div><span>Wells completed</span><b>{{c.w}}</b></div><div><span>Under construction</span><b>{{c.u}}</b></div><div><span>People reached</span><b>{{c.p}}</b></div></sc-if><sc-if value="{{c.fund}}" hint-placeholder-val="{{false}}"><div class="cc-fund" role="link" tabindex="0" aria-label="{{c.fAria}}" onClick="{{c.fGo}}" onKeyDown="{{c.fKey}}"><span>Looking for funding</span><b>{{c.fTx}}<i aria-hidden="true"> →</i></b></div></sc-if></span><span class="cc-go">{{c.go}}</span></a></sc-for></div>
 </div>
-</section><section class="xs xs-donors"><h2 class="x-h2">Thank you to our donors</h2><div class="xp-names"><span>The Maynes Family</span><span>The Do Good Foundation</span><span>Our expedition members</span><span>The Blaser Family</span><span>The Haslem Family</span></div><p class="x-sm" style="margin-top:32px">With support from our partners and sponsors</p></section><div class="xmq-band" role="region" aria-label="Our partners and sponsors"><div class="xmq"><div class="xmq-tr"><img src="/img/pg/lg-bigge.webp" alt="Bigge" loading="lazy" decoding="async"><img src="/img/pg/lg-reliable.webp" alt="Reliable Crane Service" loading="lazy" decoding="async"><img src="/img/pg/lg-money.webp" alt="Money Insights" loading="lazy" decoding="async"><img src="/img/pg/lg-fcd.webp" alt="Falling Creek Dental" loading="lazy" decoding="async"><img src="/img/pg/lg-mountain.webp" alt="Mountain Crane" loading="lazy" decoding="async"><img src="/img/pg/lg-urban.webp" alt="Urban Property Management" loading="lazy" decoding="async"><img src="/img/pg/lg-bigge.webp" alt="" aria-hidden="true" loading="lazy" decoding="async"><img src="/img/pg/lg-reliable.webp" alt="" aria-hidden="true" loading="lazy" decoding="async"><img src="/img/pg/lg-money.webp" alt="" aria-hidden="true" loading="lazy" decoding="async"><img src="/img/pg/lg-fcd.webp" alt="" aria-hidden="true" loading="lazy" decoding="async"><img src="/img/pg/lg-mountain.webp" alt="" aria-hidden="true" loading="lazy" decoding="async"><img src="/img/pg/lg-urban.webp" alt="" aria-hidden="true" loading="lazy" decoding="async"></div></div></div><section class="xs blue"><div class="xc"><div class="x-col"><h2 class="x-h2">Every well has a story</h2><p class="x-p">Meet the villages and schools behind our wells, or follow every project from survey to handover.</p></div><div class="xc-row"><a class="xb lt" href="/communities">Partner communities</a><a class="xb2" href="/progress">Our impact</a></div></div></section></main>
+</section><section class="xs xs-donors"><h2 class="x-h2">Thank you to our donors</h2><p class="x-p dn-lead">These families and organisations fund wells and projects with us.</p><ul class="dn-list"><li>The Maynes Family</li><li>The Do Good Foundation</li><li>Our expedition members</li><li>The Blaser Family</li><li>The Haslem Family</li></ul><a class="ex-tx dn-give" href="/donate">Become a donor<span class="ex-arw" aria-hidden="true">→</span></a></section><div class="xmq-band" role="region" aria-labelledby="xmq-lab"><p class="xmq-lab" id="xmq-lab">Our partners and sponsors</p><div class="xmq"><div class="xmq-tr"><img src="/img/pg/lg-bigge.webp" alt="Bigge" loading="lazy" decoding="async"><img src="/img/pg/lg-reliable.webp" alt="Reliable Crane Service" loading="lazy" decoding="async"><img src="/img/pg/lg-money.webp" alt="Money Insights" loading="lazy" decoding="async"><img src="/img/pg/lg-fcd.webp" alt="Falling Creek Dental" loading="lazy" decoding="async"><img src="/img/pg/lg-mountain.webp" alt="Mountain Crane" loading="lazy" decoding="async"><img src="/img/pg/lg-urban.webp" alt="Urban Property Management" loading="lazy" decoding="async"><img src="/img/pg/lg-bigge.webp" alt="" aria-hidden="true" loading="lazy" decoding="async"><img src="/img/pg/lg-reliable.webp" alt="" aria-hidden="true" loading="lazy" decoding="async"><img src="/img/pg/lg-money.webp" alt="" aria-hidden="true" loading="lazy" decoding="async"><img src="/img/pg/lg-fcd.webp" alt="" aria-hidden="true" loading="lazy" decoding="async"><img src="/img/pg/lg-mountain.webp" alt="" aria-hidden="true" loading="lazy" decoding="async"><img src="/img/pg/lg-urban.webp" alt="" aria-hidden="true" loading="lazy" decoding="async"></div></div></div><section class="xs blue"><div class="xc"><div class="x-col"><h2 class="x-h2">Every well has a story</h2><p class="x-p">Meet the villages and schools behind our wells, or follow every project from survey to handover.</p></div><div class="xc-row"><a class="xb lt" href="/communities">Partner communities</a><a class="xb2" href="/progress">Our impact</a></div></div></section></main>
 <footer class="bf">
 <div class="wrap bf-tile">
 <div class="bf-row">
@@ -1395,7 +1433,7 @@ a.vc:focus-visible{outline:3px solid #6BBDF2;outline-offset:3px}
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":3600}}'>
 
 // Before the live feed loads (or if it can't), these are the October 2026 figures from monday.com.
-var CTRY = { ke: { n: 'Kenya', ab: 'KE', w: 26, u: 2, p: 78588 }, tz: { n: 'Tanzania', ab: 'TZ', w: 83, u: 0, p: 99444 }, ug: { n: 'Uganda', ab: 'UG', w: 0, u: 2, p: 0 }, mw: { n: 'Malawi', ab: 'MW', w: 0, u: 0, p: 0 } };
+var CTRY = { ke: { n: 'Kenya', ab: 'KE', w: 26, u: 2, p: 78588, fw: 2, fa: 3 }, tz: { n: 'Tanzania', ab: 'TZ', w: 83, u: 0, p: 99444, fw: 3, fa: 4 }, ug: { n: 'Uganda', ab: 'UG', w: 0, u: 2, p: 0, fw: 0, fa: 0 }, mw: { n: 'Malawi', ab: 'MW', w: 0, u: 0, p: 0, fw: 2, fa: 2 } };
 var CORDER = ['ke', 'tz', 'ug', 'mw'];
 var FOUNDERS = [
   { tag: 'Co-founder', name: 'Reid Anderson', role: 'Co-founder, Rafiki Outreach', email: 'reid@rafikioutreach.org', img: '/img/reid.webp', bio: 'Reid co-founded Rafiki Outreach to bring clean water to communities across East Africa. Rafiki means friend in Swahili, and Reid builds those friendships on the ground, joining volunteers in the field and working alongside local teams and the communities they serve.' },
@@ -1428,7 +1466,7 @@ function ptTiles(feed, groups) {
     if (done) parts.push(done + ' completed');
     if (uc) parts.push(uc + ' under way');
     if (up) parts.push(up + ' looking for funding');
-    return mine.length ? { name: g[0], href: '/stories?' + g[1], counts: parts.join(' · ') } : null;
+    return mine.length ? { name: g[0], href: '/stories?' + g[1], counts: parts.map(function (x) { return x.replace(/ /g, '\u00a0'); }).join('\u00a0· ') } : null;
   }).filter(Boolean);
 }
 function EXTRA(self, s) {
@@ -1486,6 +1524,7 @@ function countryVals(self) {
     window.rafikiFeed().then(function (d) {
       if (!d) return;
       CORDER.forEach(function (k) { var c = d.summary.countries[k]; if (c) { CTRY[k].w = c.wells; CTRY[k].u = c.wellsUnderConstruction; CTRY[k].p = c.people; } });
+      if (d.projects) CORDER.forEach(function (k) { var up = d.projects.filter(function (p) { return p.ck === k && p.status === 'Upcoming'; }); CTRY[k].fa = up.length; CTRY[k].fw = up.filter(function (p) { return p.type === 'Borehole well'; }).length; });
       self._feed = d;
       if (self.onFeed) self.onFeed(d);
       self.setState({ feedAt: d.updated });
@@ -1517,7 +1556,7 @@ function countryVals(self) {
   var teamVals = { tmTitle: all ? 'The people behind Rafiki' : 'Our team in ' + cur.n, tmOfficeTitle: offOwn ? cur.n + ' office' : 'Head office', tmAddr: off.addr, tmPhone: off.phone, tmPeople: plist, tmSwap: s.swapN ? (s.swapN % 2 ? 'swA' : 'swB') : '', bioOpen: s.bioIdx != null && s.bioIdx < plist.length, bio: plist[s.bioIdx != null && s.bioIdx < plist.length ? s.bioIdx : 0], bioClose: function () { self.setState({ bioIdx: null }); } };
   return Object.assign(teamVals, rfCost(self).vals, { cn: cnVals(), cp: cpVals(self._feed), isKe: !all && (s.ctry || 'ke') === 'ke', wipeMaps: (s.wipeKey === 'all' ? CORDER : (s.wipeKey ? [s.wipeKey] : [])).map(function (k) { var fl = CFLAGS[k]; return { d: CMAPS[k], cid: 'cxclip-' + k, clip: 'clip-path:url(#cxclip-' + k + ')', tr: fl.tr, rects: fl.rects, circles: fl.circles }; }), wipeMapsCls: 'cx-maps' + (s.wipeKey === 'all' ? ' all' : ''), wipeOn: !!s.wipeOn, wipeCls: 'cx-wipe' + (s.wipeArrive ? ' arrive' : ''), wipeName: s.wipeName || '', zhSwap: s.swapN ? (s.swapN % 2 ? 'swA' : 'swB') : '', heroH1: heroVals.heroH1, heroNum: heroVals.heroNum, heroStatTx: heroVals.heroStatTx, menuCls: 'hd-menu' + (s.menu ? ' open' : (self._menuWasOpen ? ' shut' : '')), cName: all ? 'All countries' : cur.n, cCode: all ? 'All' : cur.ab, cAllOn: all, cFlagOn: !all, cFlag: all ? '' : FLAGS[s.ctry || 'ke'], csOpen: !!s.cs, csExpanded: s.cs ? 'true' : 'false',
     toggleCs: function () { self.setState({ cs: !self.state.cs }); }, csList: list,
-    wwCards: CORDER.map(function (k) { var on = !all && (s.ctry || 'ke') === k; return { n: CTRY[k].n, ab: CTRY[k].ab, w: CTRY[k].w.toLocaleString('en-US'), u: CTRY[k].u.toLocaleString('en-US'), p: CTRY[k].p ? CTRY[k].p.toLocaleString('en-US') + '+' : '–', on: on ? 'true' : 'false', here: on, cls: 'cc-card' + (on ? ' on' : ''), go: 'Visit the ' + CTRY[k].n + ' page →', href: ({ ke: '/kenya', tz: '/tanzania', ug: '/uganda', mw: '/malawi' })[k] }; }) });
+    wwCards: CORDER.map(function (k) { var on = picked && (s.ctry || 'ke') === k, C = CTRY[k], fund = !C.w && !C.u && C.fa > 0, fHref = '/stories?country=' + k + '&status=funding', fTx = C.fw ? C.fw + (C.fw === 1 ? ' well' : ' wells') : C.fa + (C.fa === 1 ? ' project' : ' projects'), fGo = function (e) { if (e) { e.preventDefault(); e.stopPropagation(); } window.location.href = fHref; }; return { n: C.n, ab: C.ab, w: C.w.toLocaleString('en-US'), u: C.u.toLocaleString('en-US'), p: C.p ? C.p.toLocaleString('en-US') + '+' : '–', stats: !fund, fund: fund, fTx: fTx, fAria: 'Looking for funding: ' + fTx + ' in ' + C.n + '. See them', fGo: fGo, fKey: function (e) { if (e && (e.key === 'Enter' || e.key === ' ')) fGo(e); }, on: on ? 'true' : 'false', here: on, cls: 'cc-card' + (on ? ' on' : ''), go: 'Visit the ' + C.n + ' page →', href: ({ ke: '/kenya', tz: '/tanzania', ug: '/uganda', mw: '/malawi' })[k] }; }) });
 }
 class Component extends DCLogic {
   constructor(props) { super(props); this.state = Object.assign({ menu: false, scrolled: false, step: 0, open: 0, lb: null }, typeof INIT !== 'undefined' ? INIT : {}); }
