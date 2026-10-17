@@ -1486,7 +1486,7 @@ function countryVals(self) {
   people = people.concat(STAFF.filter(function (p) { return all || p.k === (s.ctry || 'ke'); })).concat(FOUNDERS);
   var offOwn = !all && !!OFFICES[s.ctry || 'ke'].addr;
   var off = offOwn ? OFFICES[s.ctry || 'ke'] : OFFICES.all;
-  var mk = function (p, i) { return { cardCls: 'tm-card' + (p.name === 'Meril Adoyo' ? ' tm-hi' : ''), tag: p.tag, name: p.name, role: p.role, bio: p.bio, img: p.img, hasImg: !!p.img, noImg: !p.img, email: p.email || '', hasEmail: !!p.email, mailto: p.email ? 'mailto:' + p.email : '', open: function () { self.setState({ bioIdx: i }); } }; };
+  var mk = function (p, i) { return { cardCls: 'tm-card' + (p.name === 'Meril Adoyo' || p.name === 'Bertin Ngindu' ? ' tm-hi' : ''), tag: p.tag, name: p.name, role: p.role, bio: p.bio, img: p.img, hasImg: !!p.img, noImg: !p.img, email: p.email || '', hasEmail: !!p.email, mailto: p.email ? 'mailto:' + p.email : '', open: function () { self.setState({ bioIdx: i }); } }; };
   people = FOUNDERS.concat(people.filter(function (p) { return FOUNDERS.indexOf(p) < 0; }));
   var plist = people.map(mk), nBoss = FOUNDERS.length;
   var teamVals = { tmTitle: all ? 'The people behind Rafiki' : 'Our team in ' + cur.n, tmOfficeTitle: offOwn ? cur.n + ' office' : 'Head office', tmAddr: off.addr, tmPhone: off.phone, tmBoss: plist.slice(0, nBoss), tmPeople: plist.slice(nBoss), tmSwap: s.swapN ? (s.swapN % 2 ? 'swA' : 'swB') : '', bioOpen: s.bioIdx != null && s.bioIdx < plist.length, bio: plist[s.bioIdx != null && s.bioIdx < plist.length ? s.bioIdx : 0], bioClose: function () { self.setState({ bioIdx: null }); } };
