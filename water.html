@@ -166,6 +166,12 @@ html .pj-chips,html .g-chips,html .ws-tabs{scroll-snap-type:x proximity !importa
 html .lw-row,html .st-strip,html .pj-chips,html .g-chips,html .ws-tabs{overscroll-behavior-x:contain;scroll-behavior:auto;-webkit-overflow-scrolling:touch}
 html.mo .lw-row .mo-pre,html.mo .st-strip .mo-pre{opacity:1 !important;transform:none !important}
 @media (hover:none){html .lw-row > *:hover,html .st-strip > *:hover,html .lw-row a:hover,html .st-strip a:hover{transform:none !important}}
+</style><style>/* Last card on the page runs edge to edge and meets the footer wave */
+html body{overflow-x:clip}
+html main.wrap:has(+ footer.bf) > section:last-child{position:relative;border-radius:0 !important;overflow:visible !important;isolation:isolate;clip-path:inset(0 -100vmax);margin-bottom:0 !important;padding-bottom:calc(clamp(30px,5.2vw,76px) + 40px) !important}
+html main.wrap:has(+ footer.bf) > section:last-child::before{content:"";position:absolute;top:0;bottom:0;left:calc(50% - 50vw);right:calc(50% - 50vw);background:inherit;z-index:-1;pointer-events:none}
+html main.wrap:has(+ footer.bf):has(> section:last-child){padding-bottom:0 !important}
+html main.wrap:has(> section:last-child) + footer.bf{margin-top:0 !important}
 </style></head>
 <body>
 <x-dc>
