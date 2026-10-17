@@ -14,6 +14,20 @@
   }, true);
 
   if (reduce || !('IntersectionObserver' in window)) return;
+
+  // page change: fade the page out, then follow the link (normal clicks to other pages only)
+  addEventListener('pageshow', function () { html.classList.remove('mo-leave'); });
+  document.addEventListener('click', function (e) {
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    var a = e.target.closest && e.target.closest('a[href]'); if (!a || (a.target && a.target !== '_self') || a.hasAttribute('download')) return;
+    var u; try { u = new URL(a.getAttribute('href'), location.href); } catch (x) { return; }
+    if (u.origin !== location.origin || !/^https?:$/.test(u.protocol)) return;
+    if (u.pathname === location.pathname && u.search === location.search) return; // same page: handled elsewhere
+    if (/^\/(api|project)\//.test(u.pathname)) return;
+    e.preventDefault();
+    html.classList.add('mo-leave');
+    setTimeout(function () { location.href = u.href; }, 180);
+  });
   html.classList.add('mo');
 
   // 1. water-line scroll bar

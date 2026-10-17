@@ -38,4 +38,59 @@
     var b = openBtn('.cs-btn'), pop = document.querySelector('.cs-pop');
     if (b && !b.contains(e.target) && !(pop && pop.contains(e.target))) b.click();
   });
+
+  // Page position: a page opened from a link always starts at the top (or exactly at the
+  // section a link points to, e.g. /#where-we-work, below the header). Back/forward keeps
+  // the place you were. The pages draw themselves after loading, so this is re-applied
+  // until the page has settled, unless the visitor has already started scrolling.
+  addEventListener('pagehide', function () { try { sessionStorage.setItem('rfY:' + location.pathname + location.search, String(Math.round(scrollY))); } catch (e) {} });
+  (function () {
+    var nav = (performance.getEntriesByType && performance.getEntriesByType('navigation')[0]) || {};
+    if (nav.type === 'back_forward' || nav.type === 'reload') {
+      // Back/forward: return to where the visitor was, once the page has drawn itself
+      var key = 'rfY:' + location.pathname + location.search, y = 0;
+      try { y = Number(sessionStorage.getItem(key)) || 0; } catch (e) {}
+      if (y) [0, 200, 600, 1200].forEach(function (t) { setTimeout(function () { if (Math.abs(scrollY - y) > 40 && scrollY < 40) scrollTo(0, y); }, t); });
+      return;
+    }
+    try { history.scrollRestoration = 'manual'; } catch (e) {}
+    var touched = false, want = null, stop = function () { touched = true; };
+    addEventListener('scroll', function () { if (want !== null && Math.abs(scrollY - want) > 4) touched = true; }, { passive: true });
+    ['wheel', 'touchstart', 'keydown', 'mousedown'].forEach(function (t) { addEventListener(t, stop, { passive: true, once: true }); });
+    function place() {
+      if (touched) return;
+      var id = decodeURIComponent((location.hash || '').slice(1)), el = id && document.getElementById(id);
+      if (el) {
+        var hd = document.querySelector('.hd-wrap'), off = (hd ? hd.getBoundingClientRect().height : 0) + 16;
+        want = Math.max(0, Math.round(el.getBoundingClientRect().top + scrollY - off)); scrollTo(0, want);
+      } else if (!id) { want = 0; scrollTo(0, 0); }
+    }
+    place();
+    document.addEventListener('DOMContentLoaded', place);
+    addEventListener('load', place);
+    [150, 400, 900, 1600].forEach(function (t) { setTimeout(place, t); });
+    // give the browser back its normal behaviour, so Back returns to where you were
+    var auto = function () { try { history.scrollRestoration = 'auto'; } catch (e) {} };
+    setTimeout(auto, 2000); addEventListener('pagehide', auto);
+  })();
+
+  // Links to a place on the same page scroll there smoothly (below the header) instead of
+  // jumping; a link to the page you are already on goes back to its top. The menu closes first.
+  document.addEventListener('click', function (e) {
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    var a = e.target.closest && e.target.closest('a[href]'); if (!a || a.target === '_blank' || a.hasAttribute('download')) return;
+    var u; try { u = new URL(a.getAttribute('href'), location.href); } catch (x) { return; }
+    if (u.origin !== location.origin || u.pathname.replace(/\.html$/, '') !== location.pathname.replace(/\.html$/, '') || u.search !== location.search) return;
+    var id = decodeURIComponent(u.hash.slice(1)), el = id && document.getElementById(id);
+    if (id && !el) return;
+    e.preventDefault();
+    var m = document.querySelector('button[aria-controls="bento-menu"][aria-expanded="true"]'); if (m) m.click();
+    var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    setTimeout(function () {
+      var hd = document.querySelector('.hd-wrap'), off = (hd ? hd.getBoundingClientRect().height : 0) + 16;
+      var y = el ? Math.max(0, el.getBoundingClientRect().top + scrollY - off) : 0;
+      scrollTo({ top: y, behavior: reduce ? 'auto' : 'smooth' });
+      if (u.hash !== location.hash) history.pushState(null, '', u.hash || location.pathname + location.search);
+    }, m ? 60 : 0);
+  });
 })();
