@@ -111,7 +111,7 @@ footer.bf::before{content:"";position:absolute;left:0;right:0;top:-38px;height:4
   .tk-pin[style*="242, 176, 30"]::before{content:"";position:absolute;inset:-3px;border-radius:50%;border:2px solid #F2B01E;animation:moPulse 2.2s ease-out infinite;pointer-events:none}
   @keyframes moPulse{0%{transform:scale(1);opacity:.9}100%{transform:scale(2.1);opacity:0}}
   html.mo .lw-ph:not(.mo-noimg),html.mo .pj-card-ph:not(.mo-noimg),html.mo .ps-it .ph:not(.mo-noimg),html.mo .sg-card .ph:not(.mo-noimg),html.mo .sp-ph:not(.mo-noimg){background-image:linear-gradient(100deg,rgba(255,255,255,0) 30%,rgba(255,255,255,.55) 50%,rgba(255,255,255,0) 70%),linear-gradient(160deg,#E3F1FC,#C9E4F8);background-size:220% 100%,100% 100%;animation:moShimmer 1.6s linear infinite}
-  html.mo .mo-imgok{animation:none !important}
+  html.mo .lw-ph.mo-imgok,html.mo .pj-card-ph.mo-imgok,html.mo .ps-it .ph.mo-imgok,html.mo .sg-card .ph.mo-imgok,html.mo .sp-ph.mo-imgok{animation:none !important}
   @keyframes moShimmer{from{background-position:120% 0,0 0}to{background-position:-120% 0,0 0}}
 }
 @media (hover:hover) and (prefers-reduced-motion:no-preference){
@@ -179,7 +179,9 @@ html body{text-wrap:balance}
 html p,html li,html blockquote{text-wrap:pretty}
 html a,html .ex-tx{text-decoration-skip-ink:none}
 html .pr-up-n{overflow-wrap:break-word !important}
-html .lw-row,html .st-strip,html .pj-chips,html .g-chips,html .ws-tabs{scroll-snap-type:x proximity !important;overscroll-behavior-x:contain;scroll-behavior:auto;-webkit-overflow-scrolling:touch}
+html .lw-row,html .st-strip{scroll-snap-type:none !important}
+html .pj-chips,html .g-chips,html .ws-tabs{scroll-snap-type:x proximity !important}
+html .lw-row,html .st-strip,html .pj-chips,html .g-chips,html .ws-tabs{overscroll-behavior-x:contain;scroll-behavior:auto;-webkit-overflow-scrolling:touch}
 html.mo .lw-row .mo-pre,html.mo .st-strip .mo-pre{opacity:1 !important;transform:none !important}
 @media (hover:none){html .lw-row > *:hover,html .st-strip > *:hover,html .lw-row a:hover,html .st-strip a:hover{transform:none !important}}
 </style></head>
