@@ -74,6 +74,21 @@
     setTimeout(auto, 2000); addEventListener('pagehide', auto);
   })();
 
+  // A slower, eased scroll (used by the hero's scroll-down arrow); stops if the visitor scrolls
+  function glide(to, dur) {
+    var from = scrollY, t0 = null, stopped = false;
+    var halt = function () { stopped = true; };
+    ['wheel', 'touchstart', 'keydown'].forEach(function (t) { addEventListener(t, halt, { passive: true, once: true }); });
+    document.documentElement.style.scrollBehavior = 'auto';
+    (function step(t) {
+      if (stopped) return;
+      if (t0 === null) t0 = t;
+      var p = Math.min(1, (t - t0) / dur), e = p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+      scrollTo(0, from + (to - from) * e);
+      if (p < 1) requestAnimationFrame(step); else document.documentElement.style.scrollBehavior = '';
+    })(performance.now());
+  }
+
   // Links to a place on the same page scroll there smoothly (below the header) instead of
   // jumping; a link to the page you are already on goes back to its top. The menu closes first.
   document.addEventListener('click', function (e) {
@@ -89,7 +104,8 @@
     setTimeout(function () {
       var hd = document.querySelector('.hd-wrap'), off = (hd ? hd.getBoundingClientRect().height : 0) + 16;
       var y = el ? Math.max(0, el.getBoundingClientRect().top + scrollY - off) : 0;
-      scrollTo({ top: y, behavior: reduce ? 'auto' : 'smooth' });
+      if (a.classList.contains('zh-down') && !reduce) glide(y, 900);
+      else scrollTo({ top: y, behavior: reduce ? 'auto' : 'smooth' });
       if (u.hash !== location.hash) history.pushState(null, '', u.hash || location.pathname + location.search);
     }, m ? 60 : 0);
   });
