@@ -196,6 +196,14 @@ html .xs.nd{overflow:clip}
 <style>/* Kenya fix pass: map list links are full tap targets on phones; no under-construction pulse on mixed clusters */@media (max-width:800px){html .tk-ul li > a.tk-lk{display:flex !important;align-items:center;min-height:44px}}html .tk-pin[style*="gradient"]::before{display:none !important;animation:none !important}</style>
 <style>/* Follow-up after live review */
 html .tk-pin:not([style*="gradient"]){z-index:3}
+</style><style>/* Text wrapping (no lonely last words, no split words, unbroken underlines) and smooth sideways scrolling */
+html body{text-wrap:balance}
+html p,html li,html blockquote{text-wrap:pretty}
+html a,html .ex-tx{text-decoration-skip-ink:none}
+html .pr-up-n{overflow-wrap:break-word !important}
+html .lw-row,html .st-strip,html .pj-chips,html .g-chips,html .ws-tabs{scroll-snap-type:x proximity !important;overscroll-behavior-x:contain;scroll-behavior:auto;-webkit-overflow-scrolling:touch}
+html.mo .lw-row .mo-pre,html.mo .st-strip .mo-pre{opacity:1 !important;transform:none !important}
+@media (hover:none){html .lw-row > *:hover,html .st-strip > *:hover,html .lw-row a:hover,html .st-strip a:hover{transform:none !important}}
 </style></head>
 <body>
 <x-dc>

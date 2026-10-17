@@ -180,7 +180,15 @@ footer.bf .bf-legal a{padding:12px 2px !important}
 .tm-grid.rest .tm-card.tm-soft .tm-r{color:#3A3F44}
 .tm-grid.rest .tm-card.tm-soft .tm-mail{color:#054F81}
 </style><style>/* Shared fix pass, October 2026: breadcrumb items line up, gap under the footer logo, 44px menu country pills */html .xh-crumb{align-items:center;flex-wrap:wrap}@media (max-width:640px){html footer.bf .bf-about{margin-top:12px !important}}@media (max-width:900px){html .mm-pill{min-height:44px !important;font-size:clamp(12px,3.3vw,13px) !important}}@media (max-width:340px){html .mm-pill{padding:0 !important;letter-spacing:-.02em}}</style>
-</head>
+<style>/* Text wrapping (no lonely last words, no split words, unbroken underlines) and smooth sideways scrolling */
+html body{text-wrap:balance}
+html p,html li,html blockquote{text-wrap:pretty}
+html a,html .ex-tx{text-decoration-skip-ink:none}
+html .pr-up-n{overflow-wrap:break-word !important}
+html .lw-row,html .st-strip,html .pj-chips,html .g-chips,html .ws-tabs{scroll-snap-type:x proximity !important;overscroll-behavior-x:contain;scroll-behavior:auto;-webkit-overflow-scrolling:touch}
+html.mo .lw-row .mo-pre,html.mo .st-strip .mo-pre{opacity:1 !important;transform:none !important}
+@media (hover:none){html .lw-row > *:hover,html .st-strip > *:hover,html .lw-row a:hover,html .st-strip a:hover{transform:none !important}}
+</style></head>
 <body>
 <x-dc>
 <helmet>

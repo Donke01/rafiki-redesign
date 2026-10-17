@@ -199,6 +199,14 @@ footer.bf .bf-legal a{padding:12px 2px !important}
 <style>/* Tanzania fix pass: white arrows in the impact list on the blue panel */html .wd-a > i{color:#FFFFFF !important}</style>
 <style>/* Follow-up after live review */
 html .sg-panel.ink,html .xs.ink{background:linear-gradient(160deg,#0773B9 0%,#076DB1 55%,#05508A 100%) !important}
+</style><style>/* Text wrapping (no lonely last words, no split words, unbroken underlines) and smooth sideways scrolling */
+html body{text-wrap:balance}
+html p,html li,html blockquote{text-wrap:pretty}
+html a,html .ex-tx{text-decoration-skip-ink:none}
+html .pr-up-n{overflow-wrap:break-word !important}
+html .lw-row,html .st-strip,html .pj-chips,html .g-chips,html .ws-tabs{scroll-snap-type:x proximity !important;overscroll-behavior-x:contain;scroll-behavior:auto;-webkit-overflow-scrolling:touch}
+html.mo .lw-row .mo-pre,html.mo .st-strip .mo-pre{opacity:1 !important;transform:none !important}
+@media (hover:none){html .lw-row > *:hover,html .st-strip > *:hover,html .lw-row a:hover,html .st-strip a:hover{transform:none !important}}
 </style></head>
 <body>
 <x-dc>
