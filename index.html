@@ -191,7 +191,20 @@ footer.bf .bf-legal{column-gap:14px !important}
 footer.bf .bf-legal a{padding:12px 2px !important}
 }
 </style>
-</head>
+<style>/* "Be part of the story": white cards on the blue band (no blue on blue) */
+html .fb-dark .hp-card{background:#FFFFFF !important;border:1px solid rgba(255,255,255,.9) !important;-webkit-backdrop-filter:none !important;backdrop-filter:none !important;box-shadow:0 14px 34px rgba(4,38,63,.28)}
+html .fb-dark .hp-card:hover{background:#FFFFFF !important;border-color:#9FD3F7 !important;box-shadow:0 22px 50px rgba(4,38,63,.38)}
+html .fb-dark .hp-t{color:#0A0A0A !important}
+html .fb-dark .hp-d{color:#3A3F44 !important}
+html .fb-dark .hp-ic{background:#E3F1FC !important;color:#0A78C2 !important}
+html .fb-dark .hp-card .b,html .fb-dark .hp-card:last-child .b{background:#0A78C2 !important;color:#FFFFFF !important}
+html .fb-dark .hp-card .b:hover{background:#076DB1 !important}
+</style><style>/* Morgan and Medrick: light blue tint, card size unchanged */
+.tm-grid.rest .tm-card.tm-soft{background:#E3F1FC !important;border:1px solid #9FD3F7 !important;box-shadow:0 12px 30px rgba(5,79,129,.10)}
+.tm-grid.rest .tm-card.tm-soft .tm-ph{box-shadow:0 0 0 4px #FFFFFF,0 0 0 7px #098BE1,0 10px 22px rgba(5,79,129,.18)}
+.tm-grid.rest .tm-card.tm-soft .tm-r{color:#3A3F44}
+.tm-grid.rest .tm-card.tm-soft .tm-mail{color:#054F81}
+</style></head>
 <body>
 <x-dc>
 <helmet>
@@ -1594,7 +1607,7 @@ function countryVals(self) {
   var people = (all ? CORDER.filter(hasDir).map(dirOf) : (hasDir(s.ctry || 'ke') ? [dirOf(s.ctry || 'ke')] : [])).concat(FOUNDERS);
   var offOwn = !all && !!OFFICES[s.ctry || 'ke'].addr;
   var off = offOwn ? OFFICES[s.ctry || 'ke'] : OFFICES.all;
-  var mk = function (p, i) { return { cardCls: 'tm-card' + (p.name === 'Meril Adoyo' || p.name === 'Bertin Ngindu' ? ' tm-hi' : ''), tag: p.tag, name: p.name, role: p.role, bio: p.bio, img: p.img, hasImg: !!p.img, noImg: !p.img, email: p.email || '', hasEmail: !!p.email, mailto: p.email ? 'mailto:' + p.email : '', open: function () { self.setState({ bioIdx: i }); } }; };
+  var mk = function (p, i) { return { cardCls: 'tm-card' + (p.name === 'Meril Adoyo' || p.name === 'Bertin Ngindu' ? ' tm-hi' : (p.name === 'Morgan Mamati' || p.name === 'Medrick Kamili' ? ' tm-soft' : '')), tag: p.tag, name: p.name, role: p.role, bio: p.bio, img: p.img, hasImg: !!p.img, noImg: !p.img, email: p.email || '', hasEmail: !!p.email, mailto: p.email ? 'mailto:' + p.email : '', open: function () { self.setState({ bioIdx: i }); } }; };
   people = FOUNDERS.concat(people.filter(function (p) { return FOUNDERS.indexOf(p) < 0; }));
   var plist = people.map(mk), nBoss = FOUNDERS.length;
   var teamVals = { tmTitle: all ? 'The people behind Rafiki' : 'Our team in ' + cur.n, tmOfficeTitle: offOwn ? cur.n + ' office' : 'Head office', tmAddr: off.addr, tmPhone: off.phone, tmBoss: plist.slice(0, nBoss), tmPeople: plist.slice(nBoss), tmSwap: s.swapN ? (s.swapN % 2 ? 'swA' : 'swB') : '', bioOpen: s.bioIdx != null && s.bioIdx < plist.length, bio: plist[s.bioIdx != null && s.bioIdx < plist.length ? s.bioIdx : 0], bioClose: function () { self.setState({ bioIdx: null }); } };
