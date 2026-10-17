@@ -2,6 +2,7 @@
 // The design runtime (support.js) builds each page's logic with `new Function`, so the
 // Content-Security-Policy must allow 'unsafe-eval'; some host templates block it by default.
 const http = require('http');
+const https = require('https');
 const fs = require('fs');
 const path = require('path');
 
@@ -23,6 +24,24 @@ function resolve(urlPath) {
   return fs.existsSync(file) ? file : null;
 }
 
+// This host has no data functions of its own, so /api/* is forwarded to the Cloudflare site.
+const API_ORIGIN = new URL(process.env.API_ORIGIN || 'https://rafiki-redesign.pages.dev');
+function proxyApi(req, res) {
+  const fwd = {};
+  ['accept', 'content-type', 'content-length', 'user-agent', 'accept-language'].forEach(h => { if (req.headers[h]) fwd[h] = req.headers[h]; });
+  const ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim();
+  if (ip) fwd['x-forwarded-for'] = ip;
+  const up = https.request({ hostname: API_ORIGIN.hostname, port: 443, path: req.url, method: req.method, headers: { ...fwd, host: API_ORIGIN.hostname }, timeout: 25000 }, r => {
+    const h = {};
+    ['content-type', 'cache-control', 'etag', 'last-modified', 'content-length'].forEach(k => { if (r.headers[k]) h[k] = r.headers[k]; });
+    res.writeHead(r.statusCode || 502, h);
+    r.pipe(res);
+  });
+  up.on('timeout', () => up.destroy(new Error('timeout')));
+  up.on('error', () => { if (!res.headersSent) { res.writeHead(502, { 'Content-Type': 'application/json' }); } res.end('{"error":"unavailable"}'); });
+  req.pipe(up);
+}
+
 http.createServer((req, res) => {
   const REDIRECTS = { '/about-1': '/communities', '/about-1.html': '/communities', '/meet': '/about', '/meet.html': '/about',
     // old Wix URLs (keep in step with _redirects and vercel.json)
@@ -34,6 +53,8 @@ http.createServer((req, res) => {
   // share links /project/<id>: on Cloudflare functions/project/[id].js adds link-preview tags; here just go to the project
   const pj = /^\/project\/(\d{1,20})$/.exec(p0);
   if (pj) { res.writeHead(302, { Location: '/stories?project=' + pj[1], 'Cache-Control': 'no-store' }); return res.end(); }
+  // live data (/api/projects, photos, contact form, newsletter) runs on Cloudflare: pass it through
+  if (p0.startsWith('/api/')) return proxyApi(req, res);
   const target = REDIRECTS[p0];
   if (target) { res.writeHead(301, { Location: target }); return res.end(); }
   const file = resolve(req.url);
