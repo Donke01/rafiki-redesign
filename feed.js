@@ -130,3 +130,10 @@
   document.addEventListener('click', function () { setTimeout(update, 0); });
   update();
 })();
+
+// Footer back-to-top button
+document.addEventListener('click', function (e) {
+  var b = e.target.closest && e.target.closest('.bf-top'); if (!b) return;
+  var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+});
