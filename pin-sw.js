@@ -1,7 +1,7 @@
 // Rafiki Pin: keeps the app itself (page, map code, logo) on the phone so it opens with no
 // signal. Data (/api/*) is never cached here: changes wait in the app's own outbox instead.
 // Map tiles already seen are kept too (up to ~400), so a site visited before still shows a map.
-var APP = 'rafiki-pin-app-v13', TILES = 'rafiki-pin-tiles-v1';
+var APP = 'rafiki-pin-app-v14', TILES = 'rafiki-pin-tiles-v1';
 var SHELL = ['/pin', '/vendor/leaflet/leaflet.js', '/vendor/leaflet/leaflet.css', '/img/logo-dark-bold.webp', '/pin.webmanifest', '/favicon.svg', '/img/logo-light-bold.webp', '/img/pin/icon-192.png'];
 
 self.addEventListener('install', function (e) {
@@ -16,7 +16,7 @@ self.addEventListener('fetch', function (e) {
   if (r.method !== 'GET') return;
   if (u.origin === location.origin && u.pathname.indexOf('/api/') === 0) return;
   // tiles: from the phone first, then the network
-  if (/tile\.openstreetmap\.org$|arcgisonline\.com$/.test(u.hostname)) {
+  if (/tile\.openstreetmap\.org$|arcgisonline\.com$/.test(u.hostname) || (u.hostname === 'www.google.com' && u.pathname === '/s2/favicons')) {
     e.respondWith(caches.open(TILES).then(function (c) {
       return c.match(r).then(function (hit) {
         return hit || fetch(r).then(function (res) { if (res.ok || res.type === 'opaque') { c.put(r, res.clone()); trim(c); } return res; });

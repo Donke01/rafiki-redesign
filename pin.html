@@ -646,6 +646,19 @@ html[data-theme=sun] .phead{background:#002A57}
 .states.big .chip .ei svg{width:24px;height:24px}
 .states.big .chip .ei.c-ok{background:var(--okbg)}.states.big .chip .ei.c-warn{background:var(--warnbg)}.states.big .chip .ei.c-bad{background:var(--badbg)}
 .states.big .chip[aria-pressed=true] .ei,.states.big .chip[aria-checked=true] .ei{background:#FFFFFF}
+
+/* brand icons: the company's own icon, a drawn one when offline */
+.bi{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;width:26px;height:26px;border-radius:8px;background:#FFFFFF;box-shadow:0 0 0 1px rgba(4,38,63,.08);vertical-align:middle}
+.bi img{width:18px;height:18px;display:block}
+.bi svg{display:none;width:16px;height:16px;color:#0A78C2}
+.bi.off img{display:none}.bi.off svg{display:block}
+.btn .bi{margin-right:2px}
+.btn:not(.light) .bi{box-shadow:none}
+.bi-sm{width:20px;height:20px;border-radius:6px;margin-left:4px;vertical-align:-4px}
+.bi-sm img{width:14px;height:14px}
+.mtile .mi .bi{width:auto;height:auto;background:none;box-shadow:none;border-radius:0}
+.mtile .mi .bi img{width:24px;height:24px}
+.mtile .mi .bi svg{width:21px;height:21px}
 </style>
 </head>
 <body class="locked">
@@ -669,7 +682,7 @@ html[data-theme=sun] .phead{background:#002A57}
         <svg class="lk-wave" viewBox="0 0 480 40" preserveAspectRatio="none" aria-hidden="true"><path class="w2" d="M0 20 Q60 4 120 20 T240 20 T360 20 T480 20 V40 H0z"/><path class="w1" d="M0 24 Q60 40 120 24 T240 24 T360 24 T480 24 V40 H0z"/></svg>
       </div>
       <div id="mondayBox" class="hidden">
-        <a class="btn block" id="bMonday" href="/api/pin-auth/start">Sign in with monday.com</a>
+        <a class="btn block" id="bMonday" href="/api/pin-auth/start"><span class="bi bi-monday" aria-hidden="true"><img src="https://www.google.com/s2/favicons?domain=monday.com&amp;sz=64" alt="" referrerpolicy="no-referrer" onerror="this.parentNode.classList.add('off')"></span>Sign in with monday.com</a>
         <p class="muted" style="margin:10px 2px 0">Use your own monday.com login. What you save shows in monday.com under your name.</p>
       </div>
       <p class="msg" id="mSign" aria-live="polite"></p>
@@ -772,7 +785,7 @@ html[data-theme=sun] .phead{background:#002A57}
         <p class="gpsline" id="pGpsLine" aria-live="polite"></p>
         <button class="btn light hidden" id="pGpsAny" type="button" style="margin-top:8px"></button>
         <div class="paste" id="pPasteBox">
-          <label for="pPasteIn">Coordinates or a Google Maps link</label>
+          <label for="pPasteIn">Coordinates or a Google Maps link <span class="bi bi-gmaps bi-sm" aria-hidden="true"><img src="https://www.google.com/s2/favicons?domain=maps.google.com&amp;sz=64" alt="" referrerpolicy="no-referrer" onerror="this.parentNode.classList.add('off')"></span></label>
           <div class="rowf"><input type="text" id="pPasteIn" placeholder="0.561368, 35.065480" autocomplete="off"><button class="btn light" id="pPasteGo" type="button">Use</button></div>
         </div>
         <div class="map" id="pMap" role="application" aria-label="Map: tap to place the pin, or drag the pin"></div>
@@ -827,7 +840,7 @@ html[data-theme=sun] .phead{background:#002A57}
       <p class="gpsline" id="nGpsLine" aria-live="polite"></p>
       <button class="btn light hidden" id="nGpsAny" type="button" style="margin-top:8px"></button>
       <div class="paste" id="nPasteBox">
-        <label for="nPasteIn">Coordinates or a Google Maps link</label>
+        <label for="nPasteIn">Coordinates or a Google Maps link <span class="bi bi-gmaps bi-sm" aria-hidden="true"><img src="https://www.google.com/s2/favicons?domain=maps.google.com&amp;sz=64" alt="" referrerpolicy="no-referrer" onerror="this.parentNode.classList.add('off')"></span></label>
         <div class="rowf"><input type="text" id="nPasteIn" placeholder="0.561368, 35.065480" autocomplete="off"><button class="btn light" id="nPasteGo" type="button">Use</button></div>
       </div>
       <div class="map" id="nMap" role="application" aria-label="Map: tap to place the new site"></div>
@@ -932,6 +945,36 @@ html[data-theme=sun] .phead{background:#002A57}
 (function () {
   var $ = function (id) { return document.getElementById(id); };
   var qa = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
+  var OIC = {
+    wrench: '<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/>',
+    inbox: '<path d="M4 13l2.5-7.5h11L20 13v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/><path d="M4 13h4.5l1.5 2.5h4l1.5-2.5H20"/>',
+    cal: '<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M12 13.2v2.6l1.8 1.1"/>',
+    clip: '<rect x="5" y="4.5" width="14" height="16.5" rx="2.5"/><path d="M9 4.5V3.5h6v1M8.5 12l2.2 2.2L15.5 9.5"/>',
+    pin: '<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.6"/>',
+    drop: '<path d="M12 3.5s6 6.6 6 11a6 6 0 0 1-12 0c0-4.4 6-11 6-11z"/>',
+    check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+    plus: '<path d="M12 5v14M5 12h14"/>',
+    undo: '<path d="M9 7L4.5 11.5 9 16"/><path d="M4.5 11.5H15a4.5 4.5 0 0 1 0 9h-2"/>',
+    people: '<circle cx="9" cy="8.5" r="3.2"/><path d="M3.5 19.5c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5"/><circle cx="17" cy="9.5" r="2.4"/><path d="M15.8 14.6c2.4.2 4 1.8 4.6 4.4"/>',
+    arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>'
+  };
+  Object.assign(OIC, {
+    alert: '<path d="M12 4l9 16H3z"/><path d="M12 10v4.5M12 17.6v.1"/>',
+    xc: '<circle cx="12" cy="12" r="8.5"/><path d="M9 9l6 6M15 9l-6 6"/>',
+    okc: '<circle cx="12" cy="12" r="8.5"/><path d="M8 12.3l2.8 2.8L16.2 9.6"/>',
+    map: '<path d="M3.5 6.5l5.5-2.5 6 2.5 5.5-2.5v13.5L15 20l-6-2.5-5.5 2.5z"/><path d="M9 4v13.5M15 6.5V20"/>',
+    lock: '<rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/>',
+    camera: '<path d="M4 8.5h3l1.6-2.5h6.8L17 8.5h3v10.5H4z"/><circle cx="12" cy="13.5" r="3.3"/>',
+    mic: '<rect x="9" y="3.5" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"/>',
+    compass: '<circle cx="12" cy="12" r="8.5"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/>',
+    spark: '<path d="M12 3.5l1.9 5.6 5.6 1.9-5.6 1.9L12 18.5l-1.9-5.6L4.5 11l5.6-1.9z"/><path d="M18.5 16.5l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/>',
+    down: '<path d="M12 4v11M7 10.5l5 5 5-5M5 20h14"/>',
+    search: '<circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/>',
+    flask: '<path d="M9.5 3.5h5M10 3.5v5.5L4.8 18.2A1.5 1.5 0 0 0 6.1 20.5h11.8a1.5 1.5 0 0 0 1.3-2.3L14 9V3.5"/><path d="M7.5 14.5h9"/>',
+    clipf: '<path d="M16.5 7.5l-7.6 7.6a2 2 0 0 0 2.8 2.8l7.9-7.9a4 4 0 0 0-5.7-5.7l-7.9 7.9a6 6 0 0 0 8.5 8.5l6-6"/>',
+    stop: '<circle cx="12" cy="12" r="8.5"/><path d="M6 6l12 12"/>',
+    clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>'
+  });
   var store = { get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} }, del: function (k) { try { localStorage.removeItem(k); } catch (e) {} } };
   var jget = function (k, d) { try { return JSON.parse(store.get(k) || 'null') || d; } catch (e) { return d; } };
   var S = { mode: store.get('rfPinMode') || '', photo: store.get('rfPinPhoto') || '', pin: store.get('rfPin') || '', name: store.get('rfPinName') || '', who: store.get('rfPinWho') || '', projects: jget('rfPinList', []), repairs: jget('rfPinRepairs', {}), visits: jget('rfPinVisits', {}), admin: jget('rfPinRole', {}).admin || false, jobs: jget('rfPinRole', {}).jobs || [], assigned: jget('rfPinRole', {}).assigned || [], confirmed: jget('rfPinRole', {}).confirmed || {}, reviewOpen: 0, lang: store.get('rfPinLang') || '', units: store.get('rfPinUnits') || 'km', srvHome: store.get('rfPinSrvHome') || '', gpsHome: '',
@@ -1295,7 +1338,7 @@ html[data-theme=sun] .phead{background:#002A57}
     box.innerHTML = '<label for="' + o.map + 'Q">Village, school, clinic, church or landmark</label>' +
       '<div class="rowf"><input type="search" id="' + o.map + 'Q" placeholder="e.g. Kiptoo Primary School, Nandi" autocomplete="off" enterkeyhint="search"><button class="btn light" type="button" data-f="go">Search</button></div>' +
       '<div class="presults" id="' + o.map + 'R" aria-live="polite"></div>' +
-      '<div class="ext"><span class="muted">Not found? Look it up in</span> <a class="btn light small" data-f="g" target="_blank" rel="noopener" href="#">Google Maps</a> <a class="btn light small" data-f="a" target="_blank" rel="noopener" href="#">Apple Maps</a>' +
+      '<div class="ext"><span class="muted">Not found? Look it up in</span> <a class="btn light small" data-f="g" target="_blank" rel="noopener" href="#">' + brand('gmaps') + 'Google Maps</a> <a class="btn light small" data-f="a" target="_blank" rel="noopener" href="#">' + brand('amaps') + 'Apple Maps</a>' +
       '<p class="muted" style="margin:8px 0 0">There, press and hold the exact spot to drop a pin, copy the coordinates or tap Share → Copy link, then come back and use <b>Paste a point</b>.</p></div>' +
       '<p class="muted credit">Search: © OpenStreetMap contributors</p>';
     $(o.pasteBox).after(box);
@@ -1681,7 +1724,7 @@ html[data-theme=sun] .phead{background:#002A57}
     // Google Maps takes up to 9 stops on the way, so long routes are split into parts
     var legs = [], i = 0, origin = null;
     while (i < stops.length) { var part = stops.slice(i, i + 10); legs.push({ url: gmaps(part, origin), from: i + 1, to: i + part.length }); origin = part[part.length - 1].gps; i += 10; }
-    $('routeLegs').innerHTML = legs.map(function (l, k) { return '<a class="btn block" href="' + l.url + '" target="_blank" rel="noopener">🧭 ' + (legs.length > 1 ? 'Part ' + (k + 1) + ': stops ' + l.from + '–' + l.to + ' in Google Maps' : 'Start in Google Maps') + '</a>'; }).join('');
+    $('routeLegs').innerHTML = legs.map(function (l, k) { return '<a class="btn block" href="' + l.url + '" target="_blank" rel="noopener">' + brand('gmaps') + (legs.length > 1 ? 'Part ' + (k + 1) + ': stops ' + l.from + '–' + l.to + ' in Google Maps' : 'Start in Google Maps') + '</a>'; }).join('');
   }
   $('routeStops').addEventListener('click', function (e) { var b = e.target.closest('[data-open]'); if (b) openProj(b.getAttribute('data-open')); });
   $('routeBack').addEventListener('click', function () { goBack(function () { show('vList', 'replace'); }); });
@@ -1735,9 +1778,9 @@ html[data-theme=sun] .phead{background:#002A57}
     var p = S.cur, ll = p.gps && p.gps[0].toFixed(6) + ',' + p.gps[1].toFixed(6);
     $('pCur').textContent = p.gps ? 'Saved location: ' + fmt(p.gps) : 'No location saved yet.';
     $('pLinks').innerHTML = p.gps
-      ? '<a class="mtile" href="https://www.google.com/maps/dir/?api=1&destination=' + ll + '" target="_blank" rel="noopener"><span class="mi">' + oic('compass') + '</span>Directions</a>' +
-        '<a class="mtile" href="https://www.google.com/maps?q=' + ll + '" target="_blank" rel="noopener" aria-label="Open in Google Maps"><span class="mi">' + oic('map') + '</span>Google Maps</a>' +
-        '<a class="mtile" href="https://maps.apple.com/?daddr=' + ll + '&dirflg=d" target="_blank" rel="noopener" aria-label="Open in Apple Maps"><span class="mi">' + oic('pin') + '</span>Apple Maps</a>'
+      ? '<a class="mtile" href="https://www.google.com/maps/dir/?api=1&destination=' + ll + '" target="_blank" rel="noopener" aria-label="Directions in Google Maps"><span class="mi">' + brand('gmaps') + '</span>Directions</a>' +
+        '<a class="mtile" href="https://www.google.com/maps?q=' + ll + '" target="_blank" rel="noopener" aria-label="Open in Google Maps"><span class="mi">' + brand('gmaps') + '</span>Google Maps</a>' +
+        '<a class="mtile" href="https://maps.apple.com/?daddr=' + ll + '&dirflg=d" target="_blank" rel="noopener" aria-label="Open in Apple Maps"><span class="mi">' + brand('amaps') + '</span>Apple Maps</a>'
       : '';
     distUi(); confirmUi();
   }
@@ -2119,7 +2162,7 @@ html[data-theme=sun] .phead{background:#002A57}
     var q = V.sent === 'queued';
     $('vw').innerHTML = '<div class="card wiz done-card"><div class="okmark' + (q ? ' queued' : '') + '" aria-hidden="true"><svg viewBox="0 0 88 88"><circle cx="44" cy="44" r="40"/><path d="' + (q ? 'M44 26v22M44 60v2' : 'M27 45l11 11 23-24') + '"/></svg></div><h2>' + (q ? tr('Saved on this phone', 'Imehifadhiwa kwenye simu') : tr('Visit report sent', 'Ripoti ya ziara imetumwa')) + '</h2>' +
       '<p class="muted">' + (q ? tr('It will be sent to monday.com when you have signal.', 'Itatumwa monday.com ukipata mtandao.') : tr('It’s on the project in monday.com.', 'Iko kwenye mradi katika monday.com.')) + '</p>' +
-      '<button class="btn block" type="button" data-act="share">↗ ' + tr('Share with the team (WhatsApp)', 'Shiriki na timu (WhatsApp)') + '</button>' +
+      '<button class="btn block" type="button" data-act="share">' + brand('whatsapp') + tr('Share with the team (WhatsApp)', 'Shiriki na timu (WhatsApp)') + '</button>' +
       '<button class="btn block light" type="button" data-act="again" style="margin-top:10px">' + tr('Start another visit here', 'Anza ziara nyingine hapa') + '</button></div>';
   }
   function shareText() {
@@ -2338,37 +2381,8 @@ html[data-theme=sun] .phead{background:#002A57}
 
   // overview
   var oMap = null;
-  var OIC = {
-    wrench: '<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/>',
-    inbox: '<path d="M4 13l2.5-7.5h11L20 13v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/><path d="M4 13h4.5l1.5 2.5h4l1.5-2.5H20"/>',
-    cal: '<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M12 13.2v2.6l1.8 1.1"/>',
-    clip: '<rect x="5" y="4.5" width="14" height="16.5" rx="2.5"/><path d="M9 4.5V3.5h6v1M8.5 12l2.2 2.2L15.5 9.5"/>',
-    pin: '<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.6"/>',
-    drop: '<path d="M12 3.5s6 6.6 6 11a6 6 0 0 1-12 0c0-4.4 6-11 6-11z"/>',
-    check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
-    plus: '<path d="M12 5v14M5 12h14"/>',
-    undo: '<path d="M9 7L4.5 11.5 9 16"/><path d="M4.5 11.5H15a4.5 4.5 0 0 1 0 9h-2"/>',
-    people: '<circle cx="9" cy="8.5" r="3.2"/><path d="M3.5 19.5c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5"/><circle cx="17" cy="9.5" r="2.4"/><path d="M15.8 14.6c2.4.2 4 1.8 4.6 4.4"/>',
-    arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>'
-  };
   function oic(n) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + OIC[n] + '</svg>'; }
-  Object.assign(OIC, {
-    alert: '<path d="M12 4l9 16H3z"/><path d="M12 10v4.5M12 17.6v.1"/>',
-    xc: '<circle cx="12" cy="12" r="8.5"/><path d="M9 9l6 6M15 9l-6 6"/>',
-    okc: '<circle cx="12" cy="12" r="8.5"/><path d="M8 12.3l2.8 2.8L16.2 9.6"/>',
-    map: '<path d="M3.5 6.5l5.5-2.5 6 2.5 5.5-2.5v13.5L15 20l-6-2.5-5.5 2.5z"/><path d="M9 4v13.5M15 6.5V20"/>',
-    lock: '<rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/>',
-    camera: '<path d="M4 8.5h3l1.6-2.5h6.8L17 8.5h3v10.5H4z"/><circle cx="12" cy="13.5" r="3.3"/>',
-    mic: '<rect x="9" y="3.5" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"/>',
-    compass: '<circle cx="12" cy="12" r="8.5"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/>',
-    spark: '<path d="M12 3.5l1.9 5.6 5.6 1.9-5.6 1.9L12 18.5l-1.9-5.6L4.5 11l5.6-1.9z"/><path d="M18.5 16.5l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/>',
-    down: '<path d="M12 4v11M7 10.5l5 5 5-5M5 20h14"/>',
-    search: '<circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/>',
-    flask: '<path d="M9.5 3.5h5M10 3.5v5.5L4.8 18.2A1.5 1.5 0 0 0 6.1 20.5h11.8a1.5 1.5 0 0 0 1.3-2.3L14 9V3.5"/><path d="M7.5 14.5h9"/>',
-    clipf: '<path d="M16.5 7.5l-7.6 7.6a2 2 0 0 0 2.8 2.8l7.9-7.9a4 4 0 0 0-5.7-5.7l-7.9 7.9a6 6 0 0 0 8.5 8.5l6-6"/>',
-    stop: '<circle cx="12" cy="12" r="8.5"/><path d="M6 6l12 12"/>',
-    clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>'
-  });
+  function brand(k) { var b = { gmaps: ['maps.google.com', 'map'], amaps: ['maps.apple.com', 'pin'], monday: ['monday.com', 'people'], whatsapp: ['whatsapp.com', 'clip'] }[k]; return '<span class="bi bi-' + k + '" aria-hidden="true"><img src="https://www.google.com/s2/favicons?domain=' + b[0] + '&amp;sz=64" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentNode.classList.add(\'off\')">' + oic(b[1]) + '</span>'; }
   var EMO = [['⚠️', 'alert', 'c-warn'], ['⚠', 'alert', 'c-warn'], ['❌', 'xc', 'c-bad'], ['✅', 'okc', 'c-ok'], ['📍', 'pin'], ['🔧', 'wrench'], ['🗺️', 'map'], ['🗺', 'map'], ['🔒', 'lock'], ['🗓️', 'cal'], ['🗓', 'cal'], ['📷', 'camera'], ['🎙️', 'mic'], ['🎙', 'mic'], ['🧭', 'compass'], ['✨', 'spark'], ['⬇️', 'down'], ['⬇', 'down'], ['🔎', 'search'], ['💧', 'drop'], ['🧪', 'flask'], ['📎', 'clipf'], ['⛔', 'stop', 'c-bad'], ['📋', 'clip'], ['🩺', 'clip'], ['🕑', 'clock']];
   var ICON_SEL = 'button, .btn, .chip, h1, h2, h3, summary, .here b, .alert b, .th, .slot .cam, .tag, .oh b';
   function iconize() {
@@ -2552,7 +2566,7 @@ html[data-theme=sun] .phead{background:#002A57}
       if (!j.ok) { b.innerHTML = '<p class="msg bad">' + esc(why(j)) + '</p>'; return; }
       O.review = j.items; var open = j.items.filter(function (x) { return x.status === 'open'; }), done = j.items.filter(function (x) { return x.status !== 'open'; }).slice(0, 15);
       S.reviewOpen = open.length; adminUi(); oSeg();
-      var ll = function (v) { var m = /(-?\d+\.\d+),\s*(-?\d+\.\d+)/.exec(v || ''); return m ? '<a href="https://www.google.com/maps?q=' + m[1] + ',' + m[2] + '&t=k" target="_blank" rel="noopener">' + esc(v) + '</a>' : esc(v || 'none'); };
+      var ll = function (v) { var m = /(-?\d+\.\d+),\s*(-?\d+\.\d+)/.exec(v || ''); return m ? '<a href="https://www.google.com/maps?q=' + m[1] + ',' + m[2] + '&t=k" target="_blank" rel="noopener">' + brand('gmaps') + ' ' + esc(v) + '</a>' : esc(v || 'none'); };
       b.innerHTML = (open.length ? '<div class="ocards">' + open.map(function (x) {
         var d = x.data || {}, det = '';
         if (x.kind === 'new') det = '<p>' + esc([d.type, d.village, CNAME[d.ck]].filter(Boolean).join(' · ')) + '</p><p>Location: ' + ll(d.gps) + '</p>' + (d.note ? '<p>“' + esc(d.note) + '”</p>' : '');
