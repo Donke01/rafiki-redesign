@@ -2767,19 +2767,22 @@ html[data-theme=sun] .phead{background:#002A57}
     if (note) msg('mSign', back === 'ok' ? 'ok' : 'bad', note);
   }
   show('vLock');
+  // already signed in on this phone: open straight on the same screen from what's saved, and check with the server in the background
+  var quick = !!((S.pin || S.mode === 'monday') && (S.name || S.who) && S.projects.length && back !== 'out');
+  if (quick) { $('who').textContent = S.name || S.who; adminUi(); applyHash(true); }
   fetch('/api/pin-auth/me', { headers: { Accept: 'application/json' } }).then(function (r) { return r.json(); }).then(function (a) {
     lockScreen(a.available, back && back !== 'ok' ? SIGNIN[back] || SIGNIN.token : '');
     if (a.user) {
       S.mode = 'monday'; S.pin = ''; S.name = a.user.name; S.who = a.user.name; S.photo = a.user.photo || '';
       store.set('rfPinMode', 'monday'); store.set('rfPinPhoto', S.photo); store.del('rfPin');
-      msg('mSign', '', 'Signing in…'); load(true); return;
+      if (!quick) msg('mSign', '', 'Signing in…'); load(!quick); return;
     }
-    if (S.mode === 'monday') { forget(); msg('mSign', 'bad', 'Please sign in with monday.com again.'); }
-    if (S.pin && (S.name || S.who)) { msg('mLock', '', 'Unlocking…'); load(true); }
+    if (S.mode === 'monday') { forget(); show('vLock'); msg('mSign', 'bad', 'Please sign in with monday.com again.'); return; }
+    if (S.pin && (S.name || S.who)) { if (!quick) msg('mLock', '', 'Unlocking…'); load(!quick); }
   }).catch(function () {
     // no signal: carry on with what this phone already knows
     lockScreen(false, '');
-    if ((S.mode === 'monday' || S.pin) && (S.name || S.who)) load(true);
+    if ((S.mode === 'monday' || S.pin) && (S.name || S.who)) load(!quick);
   });
 })();
 </script>
