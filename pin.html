@@ -659,6 +659,20 @@ html[data-theme=sun] .phead{background:#002A57}
 .mtile .mi .bi{width:auto;height:auto;background:none;box-shadow:none;border-radius:0}
 .mtile .mi .bi img{width:24px;height:24px}
 .mtile .mi .bi svg{width:21px;height:21px}
+
+/* Office sections: every section visible at once on a phone */
+.otabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.otab{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-height:64px;padding:8px 4px;border-radius:16px;border:var(--bw) solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-size:.74rem;font-weight:700;cursor:pointer;transition:background .15s,transform .12s}
+.otab svg{width:22px;height:22px;color:var(--blue)}
+.otab span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.otab:active{transform:scale(.95)}
+.otab[aria-pressed=true]{background:var(--g-blue);border-color:transparent;color:#FFFFFF;box-shadow:0 4px 10px rgba(10,120,194,.22)}
+.otab[aria-pressed=true] svg{color:#FFFFFF}
+.otab .n{position:absolute;top:6px;right:calc(50% - 22px);min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--bad);color:#FFFFFF;font-size:.66rem;font-style:normal;line-height:18px;text-align:center}
+.otab[aria-pressed=true] .n{background:#FFFFFF;color:var(--bad)}
+@media (min-width:700px){.otabs{grid-template-columns:repeat(7,minmax(0,1fr))}}
+html[data-theme=dark] .otab[aria-pressed=true]{box-shadow:none}
+html[data-theme=sun] .otab[aria-pressed=true]{background:var(--blue)}
 </style>
 </head>
 <body class="locked">
@@ -854,7 +868,7 @@ html[data-theme=sun] .phead{background:#002A57}
     <!-- office (admins) -->
     <section id="vOffice" class="hidden" aria-labelledby="h-off">
       <h1 id="h-off" style="margin:4px 2px 10px">Office</h1>
-      <div class="chips" id="oTabs" role="group" aria-label="Office sections"></div>
+      <div class="otabs" id="oTabs" role="group" aria-label="Office sections"></div>
       <div id="oBody" style="margin-top:12px"></div>
     </section>
 
@@ -2358,8 +2372,11 @@ html[data-theme=sun] .phead{background:#002A57}
     var n = S.reviewOpen || 0; $('offDot').textContent = n; $('offDot').classList.toggle('hidden', !n);
   }
   function oSeg() {
-    var T = [['overview', 'Overview'], ['repairs', 'Repairs'], ['visits', 'Visits'], ['review', 'Review'], ['team', 'Team'], ['cleanup', 'Clean-up'], ['export', 'Export']];
-    $('oTabs').innerHTML = T.map(function (t) { var n = t[0] === 'review' && S.reviewOpen ? '<span class="n">' + S.reviewOpen + '</span>' : t[0] === 'repairs' && Object.keys(S.repairs).length ? '<span class="n">' + Object.keys(S.repairs).length + '</span>' : ''; return '<button class="chip" type="button" data-o="' + t[0] + '" aria-pressed="' + (O.tab === t[0]) + '">' + t[1] + n + '</button>'; }).join('');
+    var T = [['overview', 'Overview', 'drop'], ['repairs', 'Repairs', 'wrench'], ['visits', 'Visits', 'cal'], ['review', 'Review', 'inbox'], ['team', 'Team', 'people'], ['cleanup', 'Clean-up', 'spark'], ['export', 'Export', 'down']];
+    $('oTabs').innerHTML = T.map(function (t) {
+      var c = t[0] === 'review' ? (S.reviewOpen || 0) : t[0] === 'repairs' ? Object.keys(S.repairs).length : 0;
+      return '<button class="otab" type="button" data-o="' + t[0] + '" aria-pressed="' + (O.tab === t[0]) + '"' + (c ? ' aria-label="' + t[1] + ', ' + c + ' open"' : '') + '>' + oic(t[2]) + '<span>' + t[1] + '</span>' + (c ? '<i class="n" aria-hidden="true">' + c + '</i>' : '') + '</button>';
+    }).join('');
   }
   $('oTabs').addEventListener('click', function (e) { var b = e.target.closest('[data-o]'); if (!b) return; O.tab = b.getAttribute('data-o'); store.set('rfPinOTab', O.tab); renderOffice(); });
   function oNeedTeam(cb) { if (O.team) return cb(); adminApi('GET', null, '?view=team').then(function (j) { if (j.ok) { O.team = j.team; O.mail = j.mail; O.cron = j.cron; } cb(); }); }
