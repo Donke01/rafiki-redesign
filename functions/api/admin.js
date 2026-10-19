@@ -124,7 +124,13 @@ export async function onRequestPost({ request, env, waitUntil }) {
         if (!ch.length && !extra) return json({ ok: true, job });
         await createUpdate(token, id, '🔧 Repair job updated by ' + by + ' (RAFIKI pin app): ' + (ch.join('; ') || 'note added') + '.' + (extra ? ' Notes: ' + said(extra) : ''), api);
         if (step === 'fixed') { delete r[id]; await log(env, { by, a: 'fixed', id, t: job.t }); }
-        else { Object.assign(job, { step, assignee, due, budget }); r[id] = job; await log(env, { by, a: 'job', id, t: job.t, s: step }); }
+        else {
+          // when each step was reached, for the repair timeline in the app
+          const at = Object.assign({}, job.stepAt), now = new Date().toISOString(), order = Object.keys(STEPS);
+          if (step !== (job.step || 'reported')) order.slice(1, order.indexOf(step) + 1).forEach(k => { if (!at[k]) at[k] = now; });
+          if (assignee && assignee !== (job.assignee || '')) at.assigned = at.assigned || now;
+          Object.assign(job, { step, assignee, due, budget, stepAt: at }); r[id] = job; await log(env, { by, a: 'job', id, t: job.t, s: step });
+        }
         await putJson(env, 'pinrepairs', r);
         return json({ ok: true, job: step === 'fixed' ? null : job });
       }
