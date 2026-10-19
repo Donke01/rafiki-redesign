@@ -2093,10 +2093,10 @@ html[data-theme=sun] .pk{border:2px solid #000;box-shadow:none}
         inp('q.fluoride', tr('Fluoride (mg/L)', 'Floraidi (mg/L)'), { num: 1, dec: 1 }) + inp('q.turbidity', tr('Turbidity (NTU)', 'Uchafu (NTU)'), { num: 1, dec: 1 }) + '</div>' +
         '<p class="muted">' + tr('Add a photo of the test strip in the next step.', 'Ongeza picha ya kipimo katika hatua inayofuata.') + '</p></details>';
     } else if (st === 'photos') {
-      h += '<h2>' + tr('Photos', 'Picha') + '</h2><p class="muted">' + tr('Tap a box to take that photo. Each one is labelled in monday.com.', 'Gusa kisanduku kupiga picha hiyo. Kila moja inapewa jina kwenye monday.com.') + '</p><div class="slots">' +
+      h += '<h2>' + tr('Photos', 'Picha') + '</h2><p class="muted">' + tr('Tap a box to take that photo or choose one from your gallery. Each one is labelled in monday.com.', 'Gusa kisanduku kupiga picha hiyo au kuchagua kutoka kwenye picha zako. Kila moja inapewa jina kwenye monday.com.') + '</p><div class="slots">' +
         slots(p).map(function (s) {
           var f = V.files.filter(function (x) { return x.slot === s[0]; })[0];
-          return '<div class="slot' + (f ? ' has' : '') + '"><input type="file" accept="image/*" capture="environment" class="vh" id="sl_' + s[0] + '" data-slot="' + s[0] + '">' +
+          return '<div class="slot' + (f ? ' has' : '') + '"><input type="file" accept="image/*" class="vh" id="sl_' + s[0] + '" data-slot="' + s[0] + '">' +
             '<label for="sl_' + s[0] + '">' + (f ? '<img src="' + f.url + '" alt="">' : '<span class="cam">📷</span>') + '<b>' + tr(s[1][0], s[1][1]) + '</b>' + (s[2][0] && !f ? '<small>' + tr(s[2][0], s[2][1]) + '</small>' : '') + '</label>' +
             (f ? '<button type="button" class="x" data-rm="' + s[0] + '" aria-label="' + tr('Remove', 'Ondoa') + '">×</button>' : '') + '</div>';
         }).join('') + '</div><div class="voice" id="wVoice"></div>';
