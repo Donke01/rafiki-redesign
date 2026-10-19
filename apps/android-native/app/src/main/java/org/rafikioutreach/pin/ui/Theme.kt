@@ -7,6 +7,8 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -38,6 +40,16 @@ val Dark = Palette(
     bg = Color(0xFF0D1318), card = Color(0xFF161E25), text = Color(0xFFE8EDF1), muted = Color(0xFF9CA8B2), line = Color(0xFF26323C), edge = Color(0xFF3A4955),
     ok = Color(0xFF5FD08F), okBg = Color(0xFF123222), warn = Color(0xFFF2B35B), warnBg = Color(0xFF3A2A10), bad = Color(0xFFFF8A80), badBg = Color(0xFF3D1715), off = Color(0xFF33485A), dark = true,
 )
+
+/** Bright sun: black text and strong edges for reading outdoors, the same as the web app. */
+val Sun = Palette(
+    blue = Color(0xFF0050A0), blue2 = Color(0xFF003E7E), deep = Color(0xFF002A57), ink = Color.Black, tint = Color(0xFFDCEBFF),
+    bg = Color.White, card = Color.White, text = Color.Black, muted = Color(0xFF1E1E1E), line = Color.Black, edge = Color.Black,
+    ok = Color(0xFF00562A), okBg = Color(0xFFD8F5E3), warn = Color(0xFF6B3A00), warnBg = Color(0xFFFFE8C2), bad = Color(0xFF8C0000), badBg = Color(0xFFFFDCDC), off = Color(0xFF8A99A6), dark = false,
+)
+
+/** The colours chosen on the Me page: "" follows the phone, or "light", "dark", "sun". */
+object Look { var mode by androidx.compose.runtime.mutableStateOf("") }
 
 val LocalPalette = staticCompositionLocalOf { Light }
 val C: Palette @Composable get() = LocalPalette.current
@@ -73,9 +85,16 @@ private val type = Typography(
 
 @Composable
 fun RafikiTheme(dark: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
-    val p = if (dark) Dark else Light
-    val scheme = if (dark) darkColorScheme(primary = p.blue, background = p.bg, surface = p.card, onSurface = p.text, onBackground = p.text)
+    val p = when (Look.mode) { "light" -> Light; "dark" -> Dark; "sun" -> Sun; else -> if (dark) Dark else Light }
+    val scheme = if (p.dark) darkColorScheme(primary = p.blue, background = p.bg, surface = p.card, onSurface = p.text, onBackground = p.text)
     else lightColorScheme(primary = p.blue, background = p.bg, surface = p.card, onSurface = p.text, onBackground = p.text)
+    // status-bar and navigation-bar icons follow the chosen colours, not the phone's
+    val view = androidx.compose.ui.platform.LocalView.current
+    if (!view.isInEditMode) androidx.compose.runtime.SideEffect {
+        (view.context as? android.app.Activity)?.window?.let { w ->
+            androidx.core.view.WindowCompat.getInsetsController(w, view).apply { isAppearanceLightStatusBars = !p.dark; isAppearanceLightNavigationBars = !p.dark }
+        }
+    }
     androidx.compose.runtime.CompositionLocalProvider(LocalPalette provides p) {
         MaterialTheme(colorScheme = scheme, typography = type, content = content)
     }

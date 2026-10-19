@@ -167,4 +167,21 @@ class OfficeTest {
         m.api.list()
         assertTrue(posts.last().contains("rfpin=SESSION123456789012345"))
     }
+
+    @Test fun colours_light_dark_and_bright_sun() {
+        Lang.sw = false
+        val m = model(); show(m)
+        rule.onNodeWithTag("nav_me").performClick()
+        rule.onNodeWithTag("theme_sun").performScrollTo().performClick()
+        assertEquals("sun", m.prefs.theme)
+        shot("27-me-sun")
+        rule.onNodeWithTag("theme_dark").performClick()
+        assertEquals("dark", m.prefs.theme)
+        rule.onNodeWithTag("nav_list").performClick()
+        shot("28-projects-dark")
+        rule.onNodeWithTag("nav_me").performClick()
+        rule.onNodeWithTag("theme_light").performScrollTo().performClick()
+        assertEquals("light", m.prefs.theme)
+        org.rafikioutreach.pin.ui.Look.mode = ""
+    }
 }

@@ -19,6 +19,7 @@ class Prefs(context: Context) {
     var session: String get() = sp.getString("session", "") ?: ""; set(v) = sp.edit().putString("session", v).apply()
     var verifier: String get() = sp.getString("verifier", "") ?: ""; set(v) = sp.edit().putString("verifier", v).apply()
     var route: String get() = sp.getString("route", "") ?: ""; set(v) = sp.edit().putString("route", v).apply()
+    var theme: String get() = sp.getString("theme", "") ?: ""; set(v) = sp.edit().putString("theme", v).apply()
     var lang: String get() = sp.getString("lang", "") ?: ""; set(v) = sp.edit().putString("lang", v).apply()
 
     fun saveSnapshot(raw: JSONObject) = runCatching { listFile.writeText(raw.toString()) }

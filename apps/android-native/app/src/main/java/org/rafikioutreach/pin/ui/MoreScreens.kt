@@ -1,6 +1,7 @@
 package org.rafikioutreach.pin.ui
 
 import android.content.Intent
+import androidx.compose.ui.platform.testTag
 import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -122,7 +123,15 @@ fun MeScreen(m: AppModel, report: () -> Unit = {}) {
             Btn(t("Lock the app", "Funga programu"), { m.lock() }, Modifier.padding(top = 14.dp), icon = "lock", light = true, small = true)
         }
         Card(Modifier.padding(top = 14.dp)) {
-            H2(t("Language", "Lugha"))
+            H2(t("Colours", "Rangi"))
+            val sysDark = androidx.compose.foundation.isSystemInDarkTheme()
+            val cur = Look.mode.ifBlank { if (sysDark) "dark" else "light" }
+            Row(Modifier.padding(top = 6.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                listOf("light" to t("Light", "Mwanga"), "dark" to t("Dark", "Giza"), "sun" to t("Bright sun", "Jua kali")).forEach { (k, l) ->
+                    Pill(l, cur == k, Modifier.weight(1f).testTag("theme_$k")) { Look.mode = k; m.prefs.theme = k }
+                }
+            }
+            H2(t("Language", "Lugha"), Modifier.padding(top = 18.dp))
             LangSwitch(m.prefs, Modifier.padding(top = 6.dp))
             H2(t("Distances", "Umbali"), Modifier.padding(top = 18.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
