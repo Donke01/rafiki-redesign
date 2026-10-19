@@ -125,7 +125,7 @@ h3{margin:0 0 8px;font-size:.95rem;font-weight:800;color:var(--ink)}
 p{margin:0 0 12px;line-height:1.5}
 .muted{color:var(--muted);font-size:.88rem}
 label,.lbl{display:block;font-size:.8rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);margin:16px 0 6px}
-input[type=text],input[type=password],input[type=search],input[type=number],select,textarea{width:100%;min-height:52px;padding:0 16px;border-radius:14px;border:var(--bw) solid var(--edge);background:var(--field);font-size:1rem}
+input[type=text],input[type=password],input[type=search],input[type=number],input[type=tel],select,textarea{width:100%;min-height:52px;padding:0 16px;border-radius:14px;border:var(--bw) solid var(--edge);background:var(--field);font-size:1rem}
 textarea{padding:12px 16px;min-height:96px;resize:vertical;line-height:1.45}
 :focus-visible{outline:3px solid #098BE1;outline-offset:2px}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:0 22px;border-radius:999px;border:var(--bw) solid transparent;background:var(--blue);color:#FFFFFF;font-size:1rem;font-weight:700;cursor:pointer;text-decoration:none;text-align:center;line-height:1.2}
@@ -168,8 +168,8 @@ body.locked .tabs{display:none}
 .prog .row1 span{color:var(--muted);font-weight:600}
 .meter{height:10px;border-radius:999px;background:var(--line);overflow:hidden}
 .meter i{display:block;height:100%;background:var(--ok);border-radius:999px;transition:width .4s}
-.cmeters{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-.cmeters div{font-size:.75rem;font-weight:700;color:var(--muted)}
+.cmeters{display:grid;grid-template-columns:repeat(auto-fit,minmax(78px,1fr));gap:12px}
+.cmeters div{font-size:.75rem;font-weight:700;color:var(--muted);white-space:nowrap}
 .cmeters .meter{height:6px;margin-top:4px}
 
 /* map home */
@@ -274,7 +274,9 @@ html[data-theme=dark] .leaflet-bar a,html[data-theme=dark] .leaflet-control-laye
 .newpt{font-size:.88rem;margin-bottom:8px;color:var(--ink);font-weight:600}
 .confirm{margin-top:8px}
 .confirm p{font-weight:600}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+.two > *{min-width:0}
+
 .states{display:grid;grid-template-columns:1fr;gap:8px}
 .states .chip{text-align:left;font-size:.95rem;min-height:52px}
 details.more{margin-top:14px;border:var(--bw) solid var(--line);border-radius:16px;padding:0 14px}
@@ -326,6 +328,71 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
 @media (max-width:600px){.phead .t{font-size:1.15rem}.map{height:38vh}.hero{aspect-ratio:auto;height:110px}}
 @media (max-width:600px) and (max-height:780px){.map{height:30vh;min-height:200px}}
 @media (min-width:761px){.tabs nav{border-left:var(--bw) solid var(--line);border-right:var(--bw) solid var(--line)}}
+/* ---- motion and card design (all switched off for "reduce motion") ---- */
+@keyframes viewIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes rowIn{from{opacity:0;transform:translateY(12px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes slideL{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:none}}
+@keyframes slideR{from{opacity:0;transform:translateX(-16px)}to{opacity:1;transform:none}}
+@keyframes popIn{0%{opacity:0;transform:scale(.6)}70%{transform:scale(1.06)}100%{opacity:1;transform:none}}
+@keyframes drop{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:none}}
+@keyframes wave{to{background-position:40px 0}}
+@keyframes pulseRing{0%{stroke-width:2;stroke-opacity:1}100%{stroke-width:14;stroke-opacity:0}}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes ripple{from{transform:scale(.4);opacity:.5}to{transform:scale(1.6);opacity:0}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@keyframes shimmer{to{background-position:-200% 0}}
+.view-in{animation:viewIn .32s cubic-bezier(.2,.7,.2,1) backwards}
+.stagger .row,.stagger .note,.stagger .stop{animation:rowIn .42s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(min(var(--i,0),12) * 32ms)}
+.wiz.go-l{animation:slideL .22s cubic-bezier(.2,.7,.2,1) both}.wiz.go-r{animation:slideR .22s cubic-bezier(.2,.7,.2,1) both}
+.here{animation:drop .38s cubic-bezier(.2,.7,.2,1) both}
+.here b::first-letter{display:inline-block}
+.toast{animation:drop .3s cubic-bezier(.2,.7,.2,1) both}
+.btn,.row,.chip,.cl-b button,.seg button,.tabs button{transition:transform .12s ease,background-color .2s,border-color .2s,box-shadow .2s,color .2s}
+.btn:active,.row:active,.chip:active,.cl-b button:active,.seg button:active{transform:scale(.97)}
+.tabs button[aria-current=page] svg{animation:popIn .35s both}
+.tabs .plus span.ic{box-shadow:0 6px 14px rgba(10,120,194,.35)}
+/* water-style progress bars */
+.meter i{position:relative;overflow:hidden;background:linear-gradient(90deg,#1C7C4A,#2FA866);transition:width 1s cubic-bezier(.2,.7,.2,1)}
+.meter i::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(115deg,rgba(255,255,255,0) 0 12px,rgba(255,255,255,.22) 12px 20px);background-size:40px 100%;animation:wave 1.6s linear infinite}
+/* cards with a little depth and a colour edge */
+.card{box-shadow:0 1px 2px rgba(4,38,63,.04),0 6px 22px rgba(4,38,63,.05)}
+.row{position:relative;overflow:hidden;box-shadow:0 1px 2px rgba(4,38,63,.04)}
+.row::before{content:"";position:absolute;left:0;top:10px;bottom:10px;width:4px;border-radius:0 4px 4px 0;background:var(--st,transparent)}
+.row.st-pin{--st:#1C7C4A}.row.st-miss{--st:#D98200}.row.st-rep{--st:#B3261E}
+.row:hover{box-shadow:0 6px 18px rgba(4,38,63,.08);transform:translateY(-1px)}
+.row .th{transition:transform .3s}.row:hover .th{transform:scale(1.04)}
+.prog-card{background:linear-gradient(135deg,var(--card) 0%,var(--card) 55%,var(--tint) 100%)}
+.prog .row1 b{font-variant-numeric:tabular-nums}
+/* project hero: soft fade at the bottom of the photo */
+.hero{position:relative}
+.hero::after{content:"";position:absolute;inset:auto 0 0 0;height:40%;background:linear-gradient(transparent,rgba(4,38,63,.28));pointer-events:none}
+.hero img{transition:transform 6s ease}.hero:hover img{transform:scale(1.05)}
+/* "You" card */
+.me-card{background:linear-gradient(135deg,#076DB1,#054F81 70%);color:#FFFFFF;border:0}
+.me-card h2,.me-card .kv,.me-card .kv b,.me-card .kv span{color:#FFFFFF}
+.me-card .kv{border-color:rgba(255,255,255,.18)}
+.me-card .btn.light{background:rgba(255,255,255,.12);color:#FFFFFF;border-color:rgba(255,255,255,.35)}
+.me-av{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.me-av i{width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-style:normal;font-weight:800;font-size:1.1rem;box-shadow:inset 0 0 0 2px rgba(255,255,255,.35)}
+.me-av img{width:48px;height:48px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 2px rgba(255,255,255,.5)}
+/* map dots: open repairs pulse */
+.dot-alert{animation:pulseRing 1.8s ease-out infinite}
+/* visit done: a drawn tick inside a ripple */
+.okmark{position:relative;width:88px;height:88px;margin:6px auto 12px}
+.okmark::before{content:"";position:absolute;inset:0;border-radius:50%;background:var(--ok);animation:ripple 1.4s ease-out .2s 2 both}
+.okmark svg{position:relative;width:88px;height:88px}
+.okmark circle{fill:var(--ok)}
+.okmark path{fill:none;stroke:#FFFFFF;stroke-width:6;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:60;stroke-dashoffset:60;animation:draw .5s .25s ease-out forwards}
+.okmark.queued circle{fill:var(--warn)}
+.done-card h2{animation:viewIn .4s .3s both}
+/* skeleton rows while the list first loads */
+.skel{height:72px;border-radius:16px;background:linear-gradient(90deg,var(--card) 0%,var(--tint) 50%,var(--card) 100%);background-size:200% 100%;animation:shimmer 1.2s linear infinite}
+/* checklist marks */
+.cl-row{transition:background-color .25s,border-color .25s}
+.cl-b button.pop,.seg button.pop{animation:popIn .3s both}
+.kpi{position:relative;overflow:hidden;animation:rowIn .4s both;animation-delay:calc(var(--i,0) * 50ms)}
+.kpi b{font-variant-numeric:tabular-nums}
+@media (prefers-reduced-motion: reduce){.view-in,.stagger .row,.stagger .note,.stagger .stop,.wiz.go-l,.wiz.go-r,.here,.toast,.kpi,.dot-alert,.okmark::before,.done-card h2,.skel,.meter i::after,.tabs button svg{animation:none !important}.okmark path{stroke-dashoffset:0;animation:none}.row:hover,.hero:hover img{transform:none}}
 @media (prefers-reduced-motion: reduce){*{scroll-behavior:auto !important;animation:none !important;transition:none !important}}
 </style>
 </head>
@@ -388,7 +455,7 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
       <div id="instBox"></div>
       <div class="outbox hidden" id="outbox" role="status"><span id="outboxTx"></span><button class="btn small light" id="bFlush" type="button">Send now</button></div>
       <div class="listhead"><h1 id="h-list">Projects</h1><button class="btn small light" id="bRouteMode" type="button" aria-pressed="false">🗺 Plan a route</button></div>
-      <div class="card" style="padding:16px"><div class="prog" id="lProg"></div><div class="cmeters" id="cProg" style="margin-top:12px"></div></div>
+      <div class="card prog-card" style="padding:16px"><div class="prog" id="lProg"></div><div class="cmeters" id="cProg" style="margin-top:12px"></div></div>
       <div class="tools">
         <input type="search" id="iSearch" placeholder="Search by project name or place" aria-label="Search by project name or place">
         <div class="chips" role="group" aria-label="Show">
@@ -523,8 +590,8 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
     <section id="vMe" class="hidden" aria-labelledby="h-me">
       <h1 id="h-me" style="margin:4px 2px 12px">Me &amp; team</h1>
       <div class="stack">
-        <div class="card">
-          <h2>You</h2>
+        <div class="card me-card">
+          <div class="me-av"><span id="meAv"></span><h2 style="margin:0">You</h2></div>
           <div class="kv"><span>Name</span><b id="meName"></b></div>
           <div class="kv"><span>Signed in with</span><span id="mePin"></span></div>
           <div class="kv"><span>Waiting to send</span><span id="meOut">Nothing</span></div>
@@ -665,6 +732,8 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
     $('who').textContent = v === 'vLock' ? '' : S.name;
     $('routeBar').classList.toggle('hidden', !(v === 'vList' && S.routeMode)); document.body.classList.toggle('routing', v === 'vList' && S.routeMode);
     window.scrollTo(0, 0);
+    var sec = $(v); if (sec && v !== 'vMap') { sec.classList.remove('view-in'); void sec.offsetWidth; sec.classList.add('view-in'); }
+    if (v === 'vList') S.animList = true;
     if (v === 'vMap') homeMap();
     if (v === 'vList') renderList();
     if (v === 'vMe') renderMe();
@@ -1002,14 +1071,26 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
   // --- progress ----------------------------------------------------------------------------
   function progHtml(list, label) {
     var n = list.length, have = list.filter(function (p) { return p.gps; }).length, pc = n ? Math.round(have / n * 100) : 0;
-    return '<div class="row1">' + have + ' of ' + n + ' ' + (label || 'projects pinned') + '<span>' + (n - have) + ' to go</span></div><div class="meter" role="meter" aria-valuemin="0" aria-valuemax="' + n + '" aria-valuenow="' + have + '" aria-label="Projects with a location"><i style="width:' + pc + '%"></i></div>';
+    return '<div class="row1"><span style="color:inherit;font-weight:inherit"><b data-count="' + have + '">' + have + '</b> of ' + n + ' ' + (label || 'projects pinned') + '</span><span>' + (n - have) + ' to go</span></div><div class="meter" role="meter" aria-valuemin="0" aria-valuemax="' + n + '" aria-valuenow="' + have + '" aria-label="Projects with a location"><i data-w="' + pc + '" style="width:0"></i></div>';
+  }
+  var reduceMo = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches, lastHave = {};
+  // bars fill from empty, numbers count up (only when they change)
+  function grow() {
+    requestAnimationFrame(function () { requestAnimationFrame(function () { qa('.meter i[data-w]').forEach(function (i) { i.style.width = i.getAttribute('data-w') + '%'; i.removeAttribute('data-w'); }); }); });
+    qa('[data-count]').forEach(function (el) {
+      var to = +el.getAttribute('data-count'), key = el.closest('[id]') ? el.closest('[id]').id : '', from = lastHave[key] == null ? 0 : lastHave[key];
+      lastHave[key] = to; el.removeAttribute('data-count');
+      if (reduceMo || from === to) { el.textContent = to; return; }
+      var t0 = null; (function step(t) { if (t0 === null) t0 = t; var k = Math.min(1, (t - t0) / 900), e = 1 - Math.pow(1 - k, 3); el.textContent = Math.round(from + (to - from) * e); if (k < 1) requestAnimationFrame(step); })(performance.now());
+    });
   }
   function progUi() {
     $('mProg').innerHTML = progHtml(S.projects); $('lProg').innerHTML = progHtml(S.projects);
     $('cProg').innerHTML = ['ke', 'tz', 'ug', 'mw'].map(function (ck) {
       var l = S.projects.filter(function (p) { return p.ck === ck; }), h = l.filter(function (p) { return p.gps; }).length;
-      return l.length ? '<div>' + CNAME[ck] + ' ' + h + '/' + l.length + '<div class="meter"><i style="width:' + Math.round(h / l.length * 100) + '%"></i></div></div>' : '';
+      return l.length ? '<div>' + CNAME[ck] + ' ' + h + '/' + l.length + '<div class="meter"><i data-w="' + Math.round(h / l.length * 100) + '" style="width:0"></i></div></div>' : '';
     }).join('');
+    grow();
     var nr = Object.keys(S.repairs).length; $('repN').textContent = nr; $('repN').classList.toggle('hidden', !nr);
   }
 
@@ -1079,6 +1160,7 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
       S.projects.forEach(function (p) {
         if (!p.gps) return;
         var r = S.repairs[p.id];
+        if (r) L.circleMarker(p.gps, { radius: 9, color: COLORS[r.state] || COLORS.repair, weight: 2, fill: false, interactive: false, className: 'dot-alert' }).addTo(hLayer);
         L.circleMarker(p.gps, dotStyle(p)).bindPopup(function () {
           return '<div class="pop">' + (p.photo ? '<img src="' + photoUrl(p, 480) + '" alt="" onerror="this.remove()">' : '') + '<b>' + esc(p.title) + '</b><span>' + esc(sub(p)) +
             (r ? '<br><strong style="color:#B3261E">' + (r.state === 'notworking' ? '❌ Not working' : '⚠️ Needs repair') + '</strong>' : '') +
@@ -1103,9 +1185,11 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
 
   // --- 2. list ---------------------------------------------------------------------------------
   function thumb(p) { return '<span class="th" aria-hidden="true">' + (p.photo ? '<img loading="lazy" src="' + photoUrl(p, 480) + '" alt="" onerror="this.remove()">' : '💧') + '</span>'; }
+  var rowI = 0;
   function rowHtml(p, tag, check) {
     var dis = check && !p.gps, on = check && S.pickedRoute.indexOf(p.id) >= 0;
-    return '<button class="row" type="button" data-id="' + esc(p.id) + '"' + (check ? ' role="checkbox" aria-checked="' + on + '"' + (dis ? ' aria-disabled="true"' : '') : '') + '>' +
+    var stc = S.repairs[p.id] ? ' st-rep' : p.gps ? ' st-pin' : ' st-miss';
+    return '<button class="row' + stc + '" style="--i:' + (rowI++) + '" type="button" data-id="' + esc(p.id) + '"' + (check ? ' role="checkbox" aria-checked="' + on + '"' + (dis ? ' aria-disabled="true"' : '') : '') + '>' +
       (check ? '<span class="ck" aria-hidden="true">' + (on ? '✓' : '') + '</span>' : '') + thumb(p) +
       '<span class="tx"><span class="t">' + esc(p.title) + '</span><span class="s">' + esc(sub(p)) + '</span></span>' + (tag || '') + '</button>';
   }
@@ -1135,7 +1219,9 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
       : rows.length + ' projects';
     if (ck) $('count').textContent = CNAME[ck] + ' · ' + $('count').textContent;
     if (S.routeMode) $('count').textContent += ' · tick the pinned ones to visit';
-    if (near && !S.here) { $('list').innerHTML = ''; return; }
+    if (near && !S.here) { $('list').innerHTML = '<div class="skel"></div><div class="skel"></div><div class="skel"></div>'; return; }
+    if (!S.projects.length) { $('list').innerHTML = '<div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div>'; return; }
+    rowI = 0; $('list').classList.toggle('stagger', !!S.animList); S.animList = false;
     $('list').innerHTML = rows.length ? rows.map(function (p) {
       var r = S.repairs[p.id];
       var tag = r ? '<span class="tag bad">' + (r.urgency === 'urgent' ? 'Urgent · ' : '') + (r.state === 'notworking' ? 'Not working' : 'Needs repair') + '</span>'
@@ -1156,7 +1242,7 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
   applyHome();
   qa('.chips .chip').forEach(function (c) {
     c.addEventListener('click', function () {
-      S.filter = c.getAttribute('data-f'); store.set('rfPinFilter', S.filter);
+      S.filter = c.getAttribute('data-f'); store.set('rfPinFilter', S.filter); S.animList = true;
       qa('.chips .chip').forEach(function (x) { x.setAttribute('aria-pressed', x === c ? 'true' : 'false'); });
       renderList();
       if (S.filter === 'near') locate(function (ll) { if (!ll) msg('mList', 'warn', 'Couldn’t get your location. Allow location for this site, then try again.'); renderList(); });
@@ -1470,7 +1556,7 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
     h += '<div class="wiz-top"><div class="wiz-steps" aria-label="' + tr('Step', 'Hatua') + ' ' + (V.step + 1) + ' / ' + STEPS.length + '">' +
       STEPS.map(function (s, i) { return '<button type="button" data-go="' + i + '" class="' + (i === V.step ? 'on' : i < V.step ? 'done' : '') + '" aria-label="' + tr(s[1], s[2]) + '"' + (i === V.step ? ' aria-current="step"' : '') + '><i></i><span>' + tr(s[1], s[2]) + '</span></button>'; }).join('') + '</div></div>';
     if (V.resumed && V.step === 0) h += '<div class="alert warn" role="status"><b>' + tr('Unfinished visit', 'Ziara ambayo haijakamilika') + '</b><p>' + tr('Started', 'Ilianza') + ' ' + esc(when(V.started)) + '. ' + tr('Carry on, or start again.', 'Endelea, au anza upya.') + '</p><button class="btn small light" type="button" data-act="restart">' + tr('Start again', 'Anza upya') + '</button></div>';
-    h += '<div class="card wiz">';
+    h += '<div class="card wiz ' + stepDir + '">'; stepDir = '';
     if (st === 'arrive') {
       h += '<h2>' + tr('Check in', 'Thibitisha kufika') + '</h2>';
       if (!V.arrive) h += '<p class="muted">' + tr('Records the time you arrived and where you are.', 'Inarekodi saa uliyofika na mahali ulipo.') + '</p><button class="btn block big" type="button" data-act="arrive">📍 ' + tr('I’ve arrived', 'Nimefika') + '</button>';
@@ -1546,7 +1632,8 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
     $('vw').innerHTML = h;
     if ($('wVoice')) recDraw();
   }
-  function goStep(n) { V.step = Math.max(0, Math.min(STEPS.length - 1, n)); V.resumed = false; draftSoon(); vRender(); $('paneVisit').scrollIntoView({ block: 'start' }); window.scrollBy(0, -70); }
+  var stepDir = '';
+  function goStep(n) { stepDir = n > V.step ? 'go-l' : n < V.step ? 'go-r' : ''; V.step = Math.max(0, Math.min(STEPS.length - 1, n)); V.resumed = false; draftSoon(); vRender(); $('paneVisit').scrollIntoView({ block: 'start' }); window.scrollBy(0, -70); }
 
   // voice note for the visit
   var rec = null, recChunks = [], recT = null, recT0 = 0;
@@ -1581,7 +1668,7 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
     if (b.hasAttribute('data-ck')) {
       var k = b.getAttribute('data-ck'), v = b.getAttribute('data-v'); V.check[k] = V.check[k] === v ? '' : v;
       if (v === 'bad' && V.check[k] === 'bad' && (!V.state || V.state === 'working')) { V.state = 'repair'; toast(tr('Marked as “Needs repair”', 'Imewekwa “Inahitaji matengenezo”')); }
-      draftSoon(); return vRender();
+      draftSoon(); vRender(); var nb = $('vw').querySelector('[data-ck="' + k + '"][data-v="' + v + '"]'); if (nb && V.check[k]) nb.classList.add('pop'); return;
     }
     if (b.hasAttribute('data-seg')) { var pth = b.getAttribute('data-seg'), sv = b.getAttribute('data-v'); set(pth, get(pth) === sv ? '' : sv); return vRender(); }
     if (b.hasAttribute('data-rm')) { var sl = b.getAttribute('data-rm'); V.files = V.files.filter(function (f) { return f.slot !== sl; }); draftSoon(); return vRender(); }
@@ -1651,7 +1738,7 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
   }
   function vDone() {
     var q = V.sent === 'queued';
-    $('vw').innerHTML = '<div class="card wiz done-card"><div class="big-ok">' + (q ? '📱' : '✅') + '</div><h2>' + (q ? tr('Saved on this phone', 'Imehifadhiwa kwenye simu') : tr('Visit report sent', 'Ripoti ya ziara imetumwa')) + '</h2>' +
+    $('vw').innerHTML = '<div class="card wiz done-card"><div class="okmark' + (q ? ' queued' : '') + '" aria-hidden="true"><svg viewBox="0 0 88 88"><circle cx="44" cy="44" r="40"/><path d="' + (q ? 'M44 26v22M44 60v2' : 'M27 45l11 11 23-24') + '"/></svg></div><h2>' + (q ? tr('Saved on this phone', 'Imehifadhiwa kwenye simu') : tr('Visit report sent', 'Ripoti ya ziara imetumwa')) + '</h2>' +
       '<p class="muted">' + (q ? tr('It will be sent to monday.com when you have signal.', 'Itatumwa monday.com ukipata mtandao.') : tr('It’s on the project in monday.com.', 'Iko kwenye mradi katika monday.com.')) + '</p>' +
       '<button class="btn block" type="button" data-act="share">↗ ' + tr('Share with the team (WhatsApp)', 'Shiriki na timu (WhatsApp)') + '</button>' +
       '<button class="btn block light" type="button" data-act="again" style="margin-top:10px">' + tr('Start another visit here', 'Anza ziara nyingine hapa') + '</button></div>';
@@ -1689,13 +1776,14 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
   var AUDIO = /^(webm|m4a|mp3|ogg|aac|wav|mp4)$/, IMG = /^(jpe?g|png|webp|gif)$/;
   function histDraw(notes, stale) {
     $('hInfo').textContent = stale ? 'No signal: showing the notes saved on this phone (photos need a signal).' : 'Notes on this project in monday.com, newest first.';
+    $('hList').classList.add('stagger'); var ni = 0;
     $('hList').innerHTML = notes.length ? notes.map(function (n) {
       var files = (n.files || []).map(function (f) {
         if (IMG.test(f.ext)) return '<a href="' + esc(f.url) + '" target="_blank" rel="noopener"><img loading="lazy" src="' + esc(f.url) + '" alt="' + esc(f.name) + '"></a>';
         if (AUDIO.test(f.ext)) return '<audio controls preload="none" src="' + esc(f.url) + '"></audio>';
         return '<a class="btn light small" href="' + esc(f.url) + '" target="_blank" rel="noopener">📎 ' + esc(f.name) + '</a>';
       }).join('');
-      return '<article class="note"><div class="meta">' + esc(when(n.at)) + (n.by ? ' · ' + esc(n.by) : '') + '</div><p>' + esc(n.text) + '</p>' + (files ? '<div class="files">' + files + '</div>' : '') + '</article>';
+      return '<article class="note" style="--i:' + (ni++) + '"><div class="meta">' + esc(when(n.at)) + (n.by ? ' · ' + esc(n.by) : '') + '</div><p>' + esc(n.text) + '</p>' + (files ? '<div class="files">' + files + '</div>' : '') + '</article>';
     }).join('') : '<p class="muted">No notes on this project yet.</p>';
   }
   function histUi() {
@@ -1761,7 +1849,7 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
   $('meHome').addEventListener('change', function () { if (this.value) store.set('rfPinHomeSet', this.value); else store.del('rfPinHomeSet'); store.del('rfPinCountry'); fitted = false; applyHome(); homeTx(); });
   function homeTx() { var h = homeCk(); $('meHomeTx').textContent = h ? 'Lists and the map start with ' + CNAME[h] + '. You can still pick any country in Projects.' + (store.get('rfPinHomeSet') ? '' : ' (Found from ' + (S.srvHome ? 'your sign-in' : 'where your phone is') + '.)') : 'Not known yet: choose one, or allow location.'; }
   // months for the report
-  (function () { var d = new Date(), o = ''; for (var i = 0; i < 12; i++) { var m = new Date(d.getFullYear(), d.getMonth() - i, 1); o += '<option value="' + m.getFullYear() + '-' + ('0' + (m.getMonth() + 1)).slice(-2) + '">' + m.toLocaleDateString(undefined, { month: 'long', year: 'numeric' }) + '</option>'; } $('repMonth').innerHTML = o; })();
+  (function () { var d = new Date(), o = ''; for (var i = 0; i < 12; i++) { var m = new Date(d.getFullYear(), d.getMonth() - i, 1); o += '<option value="' + m.getFullYear() + '-' + ('0' + (m.getMonth() + 1)).slice(-2) + '">' + m.toLocaleDateString(undefined, { month: 'short', year: 'numeric' }) + '</option>'; } $('repMonth').innerHTML = o; })();
   $('repOpen').addEventListener('click', function () { openReport(); });
   $('repBack').addEventListener('click', function () { goBack(function () { show('vMe', 'replace'); }); });
   $('repPrint').addEventListener('click', function () { window.print(); });
@@ -1786,7 +1874,7 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
     var due = projs.filter(function (p) { return p.gps && ageDays(p) >= DUE_DAYS; }).length;
     var n = function (a) { return ev.filter(function (e) { return e.a === a; }).length; };
     var pc = ids.length ? Math.round(cnt.working / ids.length * 100) + '%' : '–';
-    var tile = function (v, l, cls) { return '<div class="kpi ' + (cls || '') + '"><b>' + v + '</b><span>' + l + '</span></div>'; };
+    var ti = 0, tile = function (v, l, cls) { return '<div class="kpi ' + (cls || '') + '" style="--i:' + (ti++) + '"><b>' + v + '</b><span>' + l + '</span></div>'; };
     var title = new Date(y, m, 1).toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
     var h = '<header class="rep-h"><h1 id="repTitle">Field report · ' + esc(title) + '</h1><p>' + (ck ? esc(CNAME[ck]) : 'All countries') + ' · Rafiki Outreach · Prepared by ' + esc(S.name) + ', ' + new Date().toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' }) + '</p></header>';
     var pl = function (k, one, many) { return k === 1 ? one : many; };
@@ -1823,6 +1911,7 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
   function renderMe() {
     $('meName').textContent = S.name;
     homeTx();
+    $('meAv').innerHTML = S.photo && S.mode === 'monday' ? '<img src="' + esc(S.photo) + '" alt="">' : '<i>' + esc((S.name || '?').split(/\s+/).map(function (w) { return w.charAt(0); }).slice(0, 2).join('').toUpperCase()) + '</i>';
     $('mePin').innerHTML = S.mode === 'monday' ? (S.photo ? '<img class="avatar" src="' + esc(S.photo) + '" alt="" onerror="this.remove()">' : '') + 'monday.com' : S.who ? 'Your own PIN' : 'Shared team PIN';
     $('lockBtn').textContent = S.mode === 'monday' ? 'Sign out' : 'Lock the app';
     outboxUi(); installUi();
