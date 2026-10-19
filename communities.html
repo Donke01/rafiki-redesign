@@ -207,7 +207,47 @@ html footer.bf .bf-top{position:absolute;right:0;top:50%;transform:translateY(-5
 html footer.bf .bf-top:hover{background:#E3F1FC}
 html footer.bf .bf-top:focus-visible{outline:3px solid #6BBDF2;outline-offset:3px}
 @media (max-width:640px){html footer.bf .bf-top{position:static;transform:none;margin:18px auto 0;box-shadow:none}}
-</style></head>
+</style><style id="cards-v2">/* cards v2: card placement fixes and card motion */
+/* projects: Completed and Current stack beside the long Upcoming list */
+@media (min-width:900px){.pr-grid:has(> .pr-it:nth-child(3) .pr-up-go){grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;align-items:stretch}.pr-grid:has(> .pr-it:nth-child(3) .pr-up-go) > .pr-it:nth-child(3){grid-column:2;grid-row:1 / span 2;align-self:stretch}}
+.pt-grid{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+@media (min-width:900px){.pr-grid.one > .pr-it:has(> .pr-x ~ .pr-x){display:grid;grid-template-columns:1fr 1fr;column-gap:40px;align-content:start}.pr-grid.one > .pr-it > .pr-h{grid-column:1 / -1}}
+/* step cards the same height, starting level */
+.vgrid.ctr{align-items:stretch !important}
+/* "Give now" box hugs its message when no form is loaded */
+.xd-slot:not(:has(iframe)){height:auto !important;min-height:0 !important;padding:32px 24px}
+/* links and buttons line up at the bottom of cards */
+.cc-card .cc-go,.pt-card .cw-go,.ex-card > .cw-go,a.pr-it > .cw-go{margin-top:auto}
+/* "See how" stays on its line, with a big tap area */
+.gc-d a{display:inline !important;min-height:0 !important;padding:12px 0;margin:-12px 0}
+@media (min-width:1024px){.wrap.hp,.cc-ww{padding-left:40px;padding-right:40px}}
+/* numbers that wrapped in small tiles */
+.wd-a.wd-nl{grid-template-columns:max-content minmax(0,1fr) auto !important;column-gap:14px}.wd-a.wd-nl b{font-size:22px;white-space:nowrap}
+.ws-out b{white-space:nowrap}
+@media (max-width:480px){.ws-out b{font-size:19px}}
+.tk-stat b{font-size:clamp(24px,7.5vw,40px)}
+/* photo captions stay readable over busy photos */
+.xe-card::after{background:linear-gradient(0deg,rgba(4,38,63,.9) 0%,rgba(4,38,63,.55) 35%,rgba(4,38,63,0) 70%)}
+@media (max-width:600px){
+  .hp-card{padding:20px 14px 16px}
+  .hp-card .b{padding:0 14px;font-size:14px;white-space:nowrap}
+  .tm-oi{flex-direction:column;gap:4px;text-align:center}
+  .fchips{flex-wrap:nowrap !important;overflow-x:auto;min-width:0;max-width:100%;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .fchips::-webkit-scrollbar{display:none}
+  .fchips > *{flex:0 0 auto}
+}
+@media (max-width:480px){.xc-row{flex-direction:column;align-items:stretch}.xc-row .xb{justify-content:center;text-align:center}}
+/* card motion: a blue line draws across the top, a soft light follows the pointer, icons ripple */
+@media (hover:hover) and (prefers-reduced-motion:no-preference){
+  html body :is(.pt-card,.pr-it,.fq-it,.ct-off,.sg-well,.hp-card,.cc-card,.gc-it):not(#cv2){background-image:linear-gradient(90deg,#0A78C2,#6BBDF2),radial-gradient(280px circle at var(--mx,50%) var(--my,-300px),rgba(10,120,194,.09),rgba(10,120,194,0) 70%);background-repeat:no-repeat;background-size:0% 3px,100% 100%;background-position:0 0,0 0;transition:background-size .45s cubic-bezier(.2,.7,.2,1),box-shadow .3s,transform .3s cubic-bezier(.2,.7,.2,1),border-color .3s}
+  html body :is(.pt-card,.pr-it,.fq-it,.ct-off,.sg-well,.hp-card,.cc-card,.gc-it):not(#cv2):is(:hover,:focus-visible,:focus-within){background-size:100% 3px,100% 100%}
+  .hp-card:hover .hp-ic,.vc:hover .vc-ic,.gc-it:hover svg,.cc-card:hover .cc-ab{animation:cv2Ring .8s ease-out}
+  .cc-go{transition:transform .25s}.cc-card:hover .cc-go{transform:translateX(4px)}
+  .tm-ph img{transition:transform .6s cubic-bezier(.2,.7,.2,1)}.tm-card:hover .tm-ph img{transform:scale(1.06)}
+}
+@keyframes cv2Ring{0%{box-shadow:0 0 0 0 rgba(10,120,194,.35)}100%{box-shadow:0 0 0 16px rgba(10,120,194,0)}}
+</style>
+</head>
 <body>
 <x-dc>
 <helmet>

@@ -100,6 +100,15 @@
     });
   }
 
+  // 10. a soft light follows the pointer over cards (mouse and trackpad only)
+  if (window.matchMedia && matchMedia('(hover: hover)').matches) {
+    var LIT = '.pt-card,.pr-it,.fq-it,.ct-off,.sg-well,.hp-card,.cc-card,.gc-it';
+    document.addEventListener('pointermove', function (e) {
+      var c = e.target.closest && e.target.closest(LIT); if (!c) return;
+      var r = c.getBoundingClientRect(); c.style.setProperty('--mx', (e.clientX - r.left) + 'px'); c.style.setProperty('--my', (e.clientY - r.top) + 'px');
+    }, { passive: true });
+  }
+
   // pages render after this script runs, and again when live data arrives: keep looking for new cards
   var pending = false;
   function scanAll() {
