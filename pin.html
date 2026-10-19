@@ -39,6 +39,15 @@ a{color:var(--blue2)}
 .top b{font-size:.95rem;font-weight:800;color:var(--ink)}
 .top .sp{flex:1}
 .top .who{font-size:.82rem;font-weight:600;color:var(--muted);max-width:40vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rf{width:44px;height:44px;border:0;border-radius:12px;background:transparent;color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;margin-right:-8px}
+.rf svg{width:22px;height:22px}
+.rf.spin svg{animation:spin .9s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+body.locked .rf{display:none}
+.toast{position:fixed;left:50%;top:calc(66px + env(safe-area-inset-top));transform:translateX(-50%);z-index:1300;background:var(--ink);color:var(--card);padding:10px 16px;border-radius:999px;font-size:.85rem;font-weight:700;box-shadow:0 4px 18px rgba(0,0,0,.2);max-width:90vw;text-align:center}
+.live{display:inline-flex;align-items:center;gap:6px;font-size:.78rem;font-weight:700;color:var(--ok)}
+.live:empty{display:none}
+.live::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--ok);animation:blink 1.4s infinite}
 .net{display:none;padding:8px 16px;font-size:.82rem;font-weight:700;text-align:center;background:var(--warnbg);color:var(--warn)}
 .net.on{display:block}
 main{flex:1;padding:16px 16px calc(var(--tabh) + 24px + env(safe-area-inset-bottom))}
@@ -251,7 +260,7 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
 .feed li:last-child{border-bottom:0}
 .feed small{display:block;color:var(--muted);font-size:.75rem}
 
-@media (max-width:600px){.phead .t{font-size:1.15rem}.map{height:38vh}}
+@media (max-width:600px){.phead .t{font-size:1.15rem}.map{height:38vh}.hero{aspect-ratio:auto;height:110px}}
 @media (max-width:600px) and (max-height:780px){.map{height:30vh;min-height:200px}}
 @media (min-width:761px){.tabs nav{border-left:var(--bw) solid var(--line);border-right:var(--bw) solid var(--line)}}
 @media (prefers-reduced-motion: reduce){*{scroll-behavior:auto !important;animation:none !important;transition:none !important}}
@@ -264,6 +273,7 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
     <b>Pin</b>
     <span class="sp"></span>
     <span class="who" id="who"></span>
+    <button class="rf" id="bRefresh" type="button" aria-label="Refresh projects from monday.com" title="Refresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg></button>
   </header>
   <div class="net" id="net" role="status">No signal. Keep working: changes are saved on this phone and sent when you're back online.</div>
   <main id="main">
@@ -345,7 +355,8 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
         <span class="t" id="pTitle"></span>
         <span class="muted" id="pSub"></span>
         <span class="cur" id="pCur"></span>
-        <span class="dist" id="pDist" aria-live="polite"></span>
+        <span class="dist" id="pDist"></span>
+        <span class="live" id="pLive"></span>
         <div class="links" id="pLinks"></div>
         <div class="lastch" id="pLast"></div>
       </div>
@@ -514,7 +525,7 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
   var store = { get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} }, del: function (k) { try { localStorage.removeItem(k); } catch (e) {} } };
   var jget = function (k, d) { try { return JSON.parse(store.get(k) || 'null') || d; } catch (e) { return d; } };
   var S = { pin: store.get('rfPin') || '', name: store.get('rfPinName') || '', who: store.get('rfPinWho') || '', projects: jget('rfPinList', []), repairs: jget('rfPinRepairs', {}),
-    filter: 'missing', cur: null, here: null, hereAt: 0, view: 'vLock', prev: 'vMap', routeMode: false, pickedRoute: [], route: jget('rfPinRoute', []), dismissed: {} };
+    filter: store.get('rfPinFilter') || 'missing', cur: null, here: null, hereAt: 0, view: 'vLock', prev: 'vMap', routeMode: false, pickedRoute: [], route: jget('rfPinRoute', []), dismissed: {} };
   var CENTER = { ke: [0.3, 37.9, 7], tz: [-6.3, 34.8, 6], ug: [1.4, 32.3, 7], mw: [-13.3, 34.3, 7] };
   var CNAME = { ke: 'Kenya', tz: 'Tanzania', ug: 'Uganda', mw: 'Malawi' };
   var COLORS = { pinned: '#1C7C4A', repair: '#D98200', notworking: '#B3261E' };
@@ -548,10 +559,30 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
 
   // --- views and tab bar -------------------------------------------------------------------
   var MAIN = ['vMap', 'vList', 'vNew', 'vMe'];
-  function show(v) {
+  // Each screen has its own address (#map, #list, #p/<id>…), so the phone's Back button and a
+  // page refresh keep you where you were.
+  function hashFor(v) { return v === 'vProj' && S.cur ? '#p/' + S.cur.id + (S.tab && S.tab !== 'pin' ? '/' + S.tab : '') : '#' + ({ vMap: 'map', vList: 'list', vRoute: 'route', vNew: 'new', vMe: 'me' }[v] || 'map'); }
+  function nav(v, how) {
+    if (v === 'vLock' || how === 'none') return;
+    var h = hashFor(v); if (location.hash === h) return;
+    try { if (how === 'replace') history.replaceState({ pin: 1 }, '', h); else { history.pushState({ pin: 1 }, '', h); S.depth++; } } catch (e) {}
+  }
+  S.depth = 0;
+  function goBack(fallback) { if (S.depth > 0) history.back(); else fallback(); }
+  function applyHash(first) {
+    if (S.view === 'vLock' && !first) return;
+    var m = /^#p\/(\d+)(?:\/(visit|hist))?$/.exec(location.hash), v = { '#map': 'vMap', '#list': 'vList', '#route': 'vRoute', '#new': 'vNew', '#me': 'vMe' }[location.hash];
+    if (m && byId(m[1])) { openProj(m[1], m[2] || 'pin', 'none'); return; }
+    if (v === 'vRoute') renderRoute();
+    show(v || 'vMap', 'none');
+    if (!v) nav('vMap', 'replace');
+  }
+  addEventListener('popstate', function () { if (S.depth > 0) S.depth--; applyHash(false); });
+  function show(v, how) {
     if (S.view !== v && MAIN.indexOf(S.view) >= 0) S.prev = S.view;
-    if (v !== 'vProj') pick.stop(); if (v !== 'vNew') nPick.stop();
+    if (v !== 'vProj') { pick.stop(); liveStop(); } if (v !== 'vNew') nPick.stop();
     S.view = v;
+    nav(v, how);
     ['vLock', 'vMap', 'vList', 'vRoute', 'vProj', 'vNew', 'vMe'].forEach(function (x) { $(x).classList.toggle('hidden', x !== v); });
     document.body.classList.toggle('locked', v === 'vLock');
     $('main').classList.toggle('bare', v === 'vMap');
@@ -829,6 +860,11 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
     };
     P.saved = function (ll) { if (oldMk) map.removeLayer(oldMk); oldMk = ll ? L.circleMarker(ll, { radius: 9, color: '#1C7C4A', weight: 2, fillColor: '#7FD1A3', fillOpacity: .9 }).addTo(map).bindTooltip('Saved location') : null; if (newMk) { map.removeLayer(newMk); newMk = null; } [youMk, accC].forEach(function (m) { if (m) map.removeLayer(m); }); youMk = accC = null; P.pick = null; line('', ''); };
     P.stop = stop;
+    P.you = function (ll, acc) {
+      if (!map || watch !== null) return;
+      if (!youMk) youMk = L.marker(ll, { icon: L.divIcon({ className: '', html: '<div class="you"></div>', iconSize: [16, 16] }), interactive: false }).addTo(map); else youMk.setLatLng(ll);
+      if (!accC) accC = L.circle(ll, { radius: acc || 10, color: '#098BE1', weight: 1, fillOpacity: .12, interactive: false }).addTo(map); else { accC.setLatLng(ll); accC.setRadius(acc || 10); }
+    };
     P.resize = function () { if (map) map.invalidateSize(); };
     return P;
   }
@@ -851,7 +887,7 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
       if (!j.ok) {
         if (j.status === 401 || j.status === 429 || j.status === 503) { lockOut(j); return; }
         if (j.reason === 'offline' && S.projects.length && S.pin && (S.name || S.who)) { // no signal: keep working from the saved list
-          if (S.view === 'vLock') show('vMap'); else if (S.view === 'vList') renderList();
+          if (S.view === 'vLock') applyHash(true); else if (S.view === 'vList') renderList();
           msg('mList', 'warn', 'No signal: showing the list saved on this phone.'); return;
         }
         if (fromLock) msg('mLock', 'bad', why(j)); else msg('mList', 'bad', why(j));
@@ -863,7 +899,8 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
       store.set('rfPin', S.pin); store.set('rfPinName', S.name); store.set('rfPinWho', S.who);
       S.projects = j.projects || []; S.repairs = j.repairs || {}; saveList();
       msg('mList', '', '');
-      if (S.view === 'vLock') show('vMap'); else { if (S.view === 'vList') renderList(); if (S.view === 'vMap') homeMap(); }
+      if (S.view === 'vLock') applyHash(true); else { if (S.view === 'vList') renderList(); if (S.view === 'vMap') homeMap(); if (S.view === 'vProj' && S.cur && byId(S.cur.id)) { S.cur = byId(S.cur.id); curUi(); repairUi(); } if (S.view === 'vRoute') renderRoute(); }
+      if (refreshing) { refreshing(); refreshing = null; }
       $('who').textContent = S.name;
       flush();
     });
@@ -1005,12 +1042,13 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
   $('iCountry').addEventListener('change', renderList);
   qa('.chips .chip').forEach(function (c) {
     c.addEventListener('click', function () {
-      S.filter = c.getAttribute('data-f');
+      S.filter = c.getAttribute('data-f'); store.set('rfPinFilter', S.filter);
       qa('.chips .chip').forEach(function (x) { x.setAttribute('aria-pressed', x === c ? 'true' : 'false'); });
       renderList();
       if (S.filter === 'near') locate(function (ll) { if (!ll) msg('mList', 'warn', 'Couldn’t get your location. Allow location for this site, then try again.'); renderList(); });
     });
   });
+  qa('.chips .chip').forEach(function (x) { x.setAttribute('aria-pressed', x.getAttribute('data-f') === S.filter ? 'true' : 'false'); });
   $('list').addEventListener('click', function (e) {
     var b = e.target.closest('.row'); if (!b) return;
     var id = b.getAttribute('data-id');
@@ -1067,7 +1105,7 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
     $('routeLegs').innerHTML = legs.map(function (l, k) { return '<a class="btn block" href="' + l.url + '" target="_blank" rel="noopener">🧭 ' + (legs.length > 1 ? 'Part ' + (k + 1) + ': stops ' + l.from + '–' + l.to + ' in Google Maps' : 'Start in Google Maps') + '</a>'; }).join('');
   }
   $('routeStops').addEventListener('click', function (e) { var b = e.target.closest('[data-open]'); if (b) openProj(b.getAttribute('data-open')); });
-  $('routeBack').addEventListener('click', function () { show('vList'); });
+  $('routeBack').addEventListener('click', function () { goBack(function () { show('vList', 'replace'); }); });
   $('routeEdit').addEventListener('click', function () { show('vList'); if (!S.routeMode) $('bRouteMode').click(); });
   $('routeClear').addEventListener('click', function () { S.route = []; S.pickedRoute = []; store.del('rfPinRoute'); renderRoute(); show('vList'); });
 
@@ -1083,6 +1121,7 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
     $('newPt').textContent = pick.pick ? 'New location: ' + fmt(pick.pick) + (pick.how === 'gps' && pick.acc ? ' (±' + pick.acc + ' m)' : '') : 'Choose a spot on the map, or use your location.';
   }
   function tab(which) {
+    S.tab = which; if (S.view === 'vProj') nav('vProj', 'replace');
     [['pin', 'tabPin', 'panePin'], ['visit', 'tabVisit', 'paneVisit'], ['hist', 'tabHist', 'paneHist']].forEach(function (t) {
       $(t[1]).setAttribute('aria-selected', t[0] === which ? 'true' : 'false'); $(t[2]).classList.toggle('hidden', t[0] !== which);
     });
@@ -1094,10 +1133,10 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
   $('tabVisit').addEventListener('click', function () { tab('visit'); });
   $('tabHist').addEventListener('click', function () { tab('hist'); });
 
-  function openProj(id, pane) {
+  function openProj(id, pane, how) {
     var p = byId(id); if (!p) return;
     if (S.view !== 'vProj') S.from = S.view;
-    S.cur = p;
+    S.cur = p; S.tab = pane || 'pin';
     $('pTitle').textContent = p.title;
     $('pSub').textContent = sub(p);
     $('pHero').classList.toggle('hidden', !p.photo);
@@ -1105,13 +1144,14 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
     curUi(); repairUi(); $('pLast').innerHTML = '';
     msg('mSave', '', ''); $('confirm').classList.add('hidden'); $('bSave').classList.remove('hidden'); pMedia.clear();
     visitReset(); $('hList').innerHTML = '';
-    show('vProj');
+    show('vProj', how);
     tab(pane || 'pin');
     var c = CENTER[p.ck] || [-2, 35, 6];
     pick.open(p.gps || [c[0], c[1]], p.gps ? 16 : c[2], p.gps);
     pickUi();
     locate(function () { distUi(); });
     lastUi();
+    liveStart();
   }
   function curUi() {
     var p = S.cur, ll = p.gps && p.gps[0].toFixed(6) + ',' + p.gps[1].toFixed(6);
@@ -1123,13 +1163,33 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
       : '';
     distUi();
   }
+  var DIRS = ['north', 'north-east', 'east', 'south-east', 'south', 'south-west', 'west', 'north-west'];
+  function heading(a, b) {
+    var r = function (x) { return x * Math.PI / 180; }, y = Math.sin(r(b[1] - a[1])) * Math.cos(r(b[0])),
+      x = Math.cos(r(a[0])) * Math.sin(r(b[0])) - Math.sin(r(a[0])) * Math.cos(r(b[0])) * Math.cos(r(b[1] - a[1]));
+    return DIRS[Math.round(((Math.atan2(y, x) * 180 / Math.PI + 360) % 360) / 45) % 8];
+  }
   function distUi() {
     var p = S.cur; if (!p) return;
     if (!p.gps || !S.here) { $('pDist').textContent = ''; return; }
-    var m = metres(S.here, p.gps);
+    var m = metres(S.here, p.gps), acc = S.hereAcc || 0;
     $('pDist').className = 'dist' + (m > 2000 ? ' far' : '');
-    $('pDist').textContent = m < 50 ? 'You’re at the saved point (' + Math.round(m) + ' m away).' : 'You’re ' + dist(m) + ' from the saved point.' + (m > 2000 && m < 20000 ? ' If you’re standing at the site, the saved location may be wrong.' : '');
+    $('pDist').textContent = m < Math.max(25, acc) ? 'You’re at the saved point (' + Math.round(m) + ' m away).'
+      : 'You’re ' + dist(m) + ' from the saved point · head ' + heading(S.here, p.gps) + '.' + (m > 2000 && m < 20000 ? ' If you’re standing at the site, the saved location may be wrong.' : '');
   }
+  // live distance while a project is open: updates as you walk
+  var lw = null;
+  function liveStart() {
+    liveStop();
+    if (!navigator.geolocation || !S.cur || !S.cur.gps) return;
+    $('pLive').textContent = 'Finding you…';
+    lw = navigator.geolocation.watchPosition(function (pos) {
+      S.here = [pos.coords.latitude, pos.coords.longitude]; S.hereAt = Date.now(); S.hereAcc = Math.round(pos.coords.accuracy || 0);
+      distUi(); pick.you(S.here, S.hereAcc);
+      $('pLive').textContent = 'Live · GPS ±' + S.hereAcc + ' m';
+    }, function (err) { if (err.code === 1) { $('pLive').textContent = ''; liveStop(); } }, { enableHighAccuracy: true, maximumAge: 0, timeout: 30000 });
+  }
+  function liveStop() { if (lw !== null && navigator.geolocation) navigator.geolocation.clearWatch(lw); lw = null; if ($('pLive')) $('pLive').textContent = ''; }
   function lastUi() {
     var p = S.cur; if (!p || !navigator.onLine) return;
     api('GET', null, '?id=' + encodeURIComponent(p.id)).then(function (j) {
@@ -1145,7 +1205,7 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
       });
     });
   }
-  $('back').addEventListener('click', function () { if (S.from === 'vRoute') { renderRoute(); show('vRoute'); } else show(S.from && S.from !== 'vProj' ? S.from : 'vList'); });
+  $('back').addEventListener('click', function () { goBack(function () { if (S.from === 'vRoute') { renderRoute(); show('vRoute', 'replace'); } else show(S.from && S.from !== 'vProj' ? S.from : 'vList', 'replace'); }); });
 
   $('bSave').addEventListener('click', function () {
     if (!pick.pick) return;
@@ -1338,6 +1398,17 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
   netUi(); outboxUi(); progUi(); installUi();
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('/pin-sw.js', { scope: '/pin' }).catch(function () {});
   addEventListener('resize', function () { if (hMap && S.view === 'vMap') hMap.invalidateSize(); });
+  // refresh button: pull the latest from monday.com without leaving the screen
+  var refreshing = null;
+  function toast(t) { var d = document.createElement('div'); d.className = 'toast'; d.setAttribute('role', 'status'); d.textContent = t; document.body.appendChild(d); setTimeout(function () { d.remove(); }, 2200); }
+  $('bRefresh').addEventListener('click', function () {
+    var b = this; if (b.classList.contains('spin')) return;
+    if (!navigator.onLine) { toast('No signal: showing what’s saved on this phone.'); return; }
+    b.classList.add('spin');
+    refreshing = function () { b.classList.remove('spin'); toast('Up to date ✓'); };
+    flush().then(function () { load(false); });
+    setTimeout(function () { if (refreshing) { refreshing = null; b.classList.remove('spin'); toast('Couldn’t refresh. Please try again.'); } }, 20000);
+  });
   if (S.pin && (S.name || S.who)) { msg('mLock', '', 'Unlocking…'); load(true); } else show('vLock');
 })();
 </script>
