@@ -143,6 +143,7 @@ input[type=text],input[type=password],input[type=search],select{width:100%;heigh
         <button class="btn light" id="bPaste" type="button">Paste coordinates</button>
       </div>
       <p class="gpsline" id="gpsLine" aria-live="polite"></p>
+      <button class="btn light hidden" id="bGpsAny" type="button" style="margin-top:8px"></button>
       <div class="paste" id="pasteBox">
         <label for="iPaste">Coordinates or a Google Maps link</label>
         <div class="rowf"><input type="text" id="iPaste" placeholder="0.561368, 35.065480" autocomplete="off"><button class="btn light" id="bPasteGo" type="button">Use</button></div>
@@ -283,25 +284,66 @@ input[type=text],input[type=password],input[type=search],select{width:100%;heigh
   }
   $('back').addEventListener('click', function () { stopGps(); renderList(); show('vList'); });
 
-  // GPS: keep the most accurate fix while the visitor stands at the site
-  function stopGps() { if (watch !== null && navigator.geolocation) navigator.geolocation.clearWatch(watch); watch = null; $('bGps').textContent = '📍 Use my location'; }
+  // GPS: the first readings from a phone are rough (Wi-Fi / mast estimates). Keep listening,
+  // ignore readings worse than GOOD metres, then average the good ones for SETTLE seconds.
+  var GOOD = 30, SETTLE = 15000, gps = null;
+  function stopGps() {
+    if (watch !== null && navigator.geolocation) navigator.geolocation.clearWatch(watch);
+    watch = null; if (gps && gps.timer) clearInterval(gps.timer); gps = null;
+    $('bGps').textContent = '📍 Use my location'; $('bGpsAny').classList.add('hidden');
+  }
+  function gpsLine(cls, t) { $('gpsLine').className = 'gpsline ' + (cls || ''); $('gpsLine').textContent = t; }
+  function gpsTick() {
+    if (!gps) return;
+    var secs = Math.round((Date.now() - gps.t0) / 1000);
+    if (!gps.good.length) {
+      var a = gps.bestAcc ? 'currently about ±' + gps.bestAcc + ' m' : 'no reading yet';
+      gpsLine('warn', 'Getting a precise fix… ' + a + ' (' + secs + ' s). Stand still outdoors, away from buildings and trees.');
+      if (secs >= 45 && gps.bestAcc) { $('bGpsAny').textContent = 'Use anyway (±' + gps.bestAcc + ' m)'; $('bGpsAny').classList.remove('hidden'); }
+      if (secs >= 45 && gps.bestAcc > 200) gpsLine('warn', 'This device is only giving a rough position (±' + gps.bestAcc + ' m), as indoors or on a computer. Go outdoors with a phone, or tap the spot on the map instead.');
+      return;
+    }
+    var left = Math.max(0, Math.ceil((SETTLE - (Date.now() - gps.firstGood)) / 1000));
+    var avg = gps.avg;
+    setPick(avg.ll, 'gps', avg.acc);
+    if (left > 0) gpsLine('good', 'Good signal. Averaging ' + gps.good.length + ' readings… ±' + avg.acc + ' m · ' + left + ' s to go. Keep still.');
+    else { gpsLine('good', 'Done: averaged ' + gps.good.length + ' readings, accurate to about ±' + avg.acc + ' m. Check the pin, then save.'); var keep = avg; stopGps(); setPick(keep.ll, 'gps', keep.acc); }
+  }
+  function average(list) {
+    // weighted by 1/accuracy², so sharper readings count more
+    var w = 0, la = 0, ln = 0, best = 1e9;
+    list.forEach(function (r) { var k = 1 / (r.acc * r.acc); w += k; la += r.ll[0] * k; ln += r.ll[1] * k; best = Math.min(best, r.acc); });
+    var n = list.length, acc = Math.max(3, Math.round(best / Math.sqrt(Math.min(n, 9)) * 1.5));
+    return { ll: [la / w, ln / w], acc: Math.min(acc, best) };
+  }
   $('bGps').addEventListener('click', function () {
-    if (watch !== null) { stopGps(); return; }
-    if (!navigator.geolocation) { $('gpsLine').className = 'gpsline warn'; $('gpsLine').textContent = 'This phone can’t share its location. Tap the map instead.'; return; }
-    var best = null;
-    $('gpsLine').className = 'gpsline'; $('gpsLine').textContent = 'Finding you… stand still for a few seconds outdoors.';
+    if (watch !== null) { stopGps(); gpsLine('', ''); return; }
+    if (!navigator.geolocation) { gpsLine('warn', 'This phone can’t share its location. Tap the map instead.'); return; }
+    gps = { t0: Date.now(), good: [], bestAcc: 0, firstGood: 0, avg: null, timer: setInterval(gpsTick, 1000) };
     $('bGps').textContent = 'Stop';
+    gpsTick();
     watch = navigator.geolocation.watchPosition(function (pos) {
-      var ll = [pos.coords.latitude, pos.coords.longitude], acc = Math.round(pos.coords.accuracy || 0);
+      if (!gps) return;
+      var ll = [pos.coords.latitude, pos.coords.longitude], acc = Math.round(pos.coords.accuracy || 9999);
+      if (!gps.bestAcc || acc < gps.bestAcc) { gps.bestAcc = acc; gps.bestLl = ll; }
       if (!youMk) youMk = L.marker(ll, { icon: L.divIcon({ className: '', html: '<div class="you"></div>', iconSize: [16, 16] }), interactive: false }).addTo(map); else youMk.setLatLng(ll);
       if (!accCircle) accCircle = L.circle(ll, { radius: acc, color: '#098BE1', weight: 1, fillOpacity: .12 }).addTo(map); else { accCircle.setLatLng(ll); accCircle.setRadius(acc); }
-      if (!best || acc <= best.acc) { best = { ll: ll, acc: acc }; setPick(ll, 'gps', acc); map.setView(ll, Math.max(map.getZoom(), 17)); }
-      $('gpsLine').className = 'gpsline ' + (best.acc <= 25 ? 'good' : 'warn');
-      $('gpsLine').textContent = best.acc <= 25 ? 'Good fix: accurate to about ' + best.acc + ' m. You can save now.' : 'Accurate to about ' + best.acc + ' m so far. Waiting for a better fix… (move into the open if you can)';
+      if (acc <= GOOD) {
+        if (!gps.firstGood) { gps.firstGood = Date.now(); map.setView(ll, Math.max(map.getZoom(), 18)); }
+        gps.good.push({ ll: ll, acc: acc }); if (gps.good.length > 60) gps.good.shift();
+        gps.avg = average(gps.good);
+      } else if (!gps.firstGood) map.setView(ll, Math.max(map.getZoom(), acc > 500 ? 13 : 16));
+      gpsTick();
     }, function (err) {
-      stopGps(); $('gpsLine').className = 'gpsline warn';
-      $('gpsLine').textContent = err.code === 1 ? 'Location is blocked for this site. Allow location in your browser settings, or tap the map instead.' : 'Couldn’t get your location. Tap the map instead, or try again outdoors.';
-    }, { enableHighAccuracy: true, maximumAge: 0, timeout: 30000 });
+      if (err.code !== 1) return; // no reading yet or a brief signal loss: keep listening
+      stopGps();
+      gpsLine('warn', err.code === 1 ? 'Location is blocked for this site. Allow location in your browser settings, or tap the map instead.' : 'Couldn’t get your location. Tap the map instead, or try again outdoors.');
+    }, { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 });
+  });
+  $('bGpsAny').addEventListener('click', function () {
+    if (!gps || !gps.bestLl) return;
+    var ll = gps.bestLl, acc = gps.bestAcc; stopGps(); setPick(ll, 'gps', acc);
+    gpsLine('warn', 'Using a rough position (±' + acc + ' m). Drag the pin onto the exact spot if you can see it on the map.');
   });
 
   // paste "lat, lng" or a Google Maps link
