@@ -674,7 +674,8 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function inRange(ll) { return ll && ll[0] >= -18 && ll[0] <= 6 && ll[1] >= 28 && ll[1] <= 42; }
   function metres(a, b) { var R = 6371000, r = function (x) { return x * Math.PI / 180; }, dLa = r(b[0] - a[0]), dLo = r(b[1] - a[1]); var h = Math.pow(Math.sin(dLa / 2), 2) + Math.cos(r(a[0])) * Math.cos(r(b[0])) * Math.pow(Math.sin(dLo / 2), 2); return 2 * R * Math.asin(Math.sqrt(h)); }
-  function dist(m) { return m < 1000 ? Math.round(m) + ' m' : m < 10000 ? (m / 1000).toFixed(1) + ' km' : Math.round(m / 1000) + ' km'; }
+  // to the metre up to 10 km (e.g. 910 m, 9,312 m), then in km
+  function dist(m) { return m < 10000 ? Math.round(m).toLocaleString('en-US') + ' m' : m < 100000 ? (m / 1000).toFixed(1) + ' km' : Math.round(m / 1000) + ' km'; }
   function msg(id, cls, t) { $(id).className = 'msg ' + (cls || ''); $(id).textContent = t || ''; }
   function photoUrl(p, w) { return p && p.photo ? '/api/photo/' + encodeURIComponent(p.photo) + '?w=' + (w || 480) : ''; }
   function when(iso) { var d = new Date(iso); return isNaN(d) ? '' : d.toLocaleDateString(undefined, { day: 'numeric', month: 'short' }) + ', ' + d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }); }
@@ -1099,7 +1100,7 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
   function hereWatch(on) {
     if (!on || !navigator.geolocation) { if (hw !== null) navigator.geolocation.clearWatch(hw); hw = null; return; }
     if (hw !== null) return;
-    hw = navigator.geolocation.watchPosition(function (p) { S.here = [p.coords.latitude, p.coords.longitude]; S.hereAt = Date.now(); S.hereAcc = Math.round(p.coords.accuracy || 0); hereUi(); freshUi(); }, function () {}, { enableHighAccuracy: true, maximumAge: 10000, timeout: 30000 });
+    hw = navigator.geolocation.watchPosition(function (p) { S.here = [p.coords.latitude, p.coords.longitude]; S.hereAt = Date.now(); S.hereAcc = Math.round(p.coords.accuracy || 0); hereUi(); freshUi(); }, function () {}, { enableHighAccuracy: true, maximumAge: 0, timeout: 30000 });
   }
   // Phones (especially iPhones) quietly stop sending positions when the app goes to the background,
   // and don't always start again. So: restart location when the app comes back, and if no position
