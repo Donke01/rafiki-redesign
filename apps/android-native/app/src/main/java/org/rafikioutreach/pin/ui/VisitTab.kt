@@ -111,6 +111,7 @@ class VisitDraft {
     var quote by mutableStateOf(""); var quoteBy by mutableStateOf(""); var consent by mutableStateOf(false)
     var note by mutableStateOf("")
     var shots by mutableStateOf(listOf<Shot>())
+    var voice by mutableStateOf<java.io.File?>(null)
     var sent by mutableStateOf<String?>(null)
 }
 
@@ -210,6 +211,7 @@ fun VisitTab(m: AppModel, p: Project) {
                 H2(t("Photos", "Picha"))
                 Text(t("Tap a box to take that photo or choose one from your gallery. Each one is labelled in monday.com.", "Gusa kisanduku kupiga picha hiyo au kuchagua kutoka kwenye picha zako. Kila moja inapewa jina kwenye monday.com."), style = MaterialTheme.typography.bodyMedium, color = C.muted, modifier = Modifier.padding(bottom = 10.dp))
                 PhotoSlots(m, slots(p), v.shots, { v.shots = it })
+                VoiceNote(v.voice) { v.voice = it }
             }
             5 -> {
                 H2(t("Water committee", "Kamati ya maji"))
@@ -235,7 +237,7 @@ fun VisitTab(m: AppModel, p: Project) {
                 H2(t("Check and send", "Hakiki na utume"))
                 SumRow(t("Condition", "Hali"), if (v.state.isBlank()) t("Not chosen yet", "Bado haijachaguliwa") else stateName(v.state), bad = v.state.isBlank())
                 SumRow(t("Problems", "Matatizo"), (v.check.count { it.value == "bad" } + if (v.other.isNotBlank()) 1 else 0).toString())
-                SumRow(t("Photos", "Picha"), v.shots.size.toString())
+                SumRow(t("Photos", "Picha"), v.shots.size.toString() + if (v.voice != null) t(" + voice note", " + ujumbe wa sauti") else "")
                 Field(v.note, { v.note = it }, t("Notes", "Maelezo"), placeholder = t("Anything else the office should know", "Kitu kingine chochote ofisi inapaswa kujua"), lines = 3)
                 Btn(if (busy) t("Sending…", "Inatuma…") else t("Send visit report", "Tuma ripoti ya ziara"), {
                     busy = true
@@ -253,7 +255,7 @@ fun VisitTab(m: AppModel, p: Project) {
                             .put("note", v.note.trim()).put("leave", Instant.now().toString())
                         v.arrived?.let { body.put("arrive", it) }
                         (v.arrivedAt ?: fix?.ll)?.let { body.put("lat", it.lat).put("lng", it.lng) }
-                        val files = v.shots.map { OutFile(it.file.path, "photo", it.label) }
+                        val files = v.shots.map { OutFile(it.file.path, "photo", it.label) } + listOfNotNull(v.voice?.let { OutFile(it.path, "voice", "Voice note") })
                         when (val o = m.submit(body, files)) {
                             is Outcome.Sent -> { m.localVisit(p, v.state, v.note, v.urgency, bad); v.sent = "sent"; msg = o.note?.let { "warn" to it } }
                             Outcome.Queued -> { m.localVisit(p, v.state, v.note, v.urgency, bad); v.sent = "queued" }

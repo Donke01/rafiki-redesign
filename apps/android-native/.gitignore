@@ -5,3 +5,4 @@ keystore.properties
 build/
 app/build/
 local.properties
+.kotlin/

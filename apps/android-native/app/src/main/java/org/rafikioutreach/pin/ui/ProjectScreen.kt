@@ -90,6 +90,15 @@ fun ProjectScreen(m: AppModel, id: String, startTab: String, back: () -> Unit) {
             Text(if (v != null) t("Last visit: ", "Ziara ya mwisho: ") + whenText(v.at) + " · " + v.by + " · " + stateName(v.state) else t("No visit recorded in the app yet.", "Bado hakuna ziara iliyorekodiwa kwenye programu."),
                 style = MaterialTheme.typography.bodyMedium, color = Color(0xFFCFE8FA))
             if (snap.confirmed.contains(p.id)) Text(t("Location confirmed by the office", "Mahali pamethibitishwa na ofisi"), color = Color(0xFF9BE7BC), style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(top = 4.dp))
+            if (snap.admin && p.gps != null) {
+                val scope = rememberScope(); var cm by remember(p.id) { mutableStateOf<String?>(null) }
+                val on = snap.confirmed.contains(p.id)
+                Text(if (on) t("Unlock this location", "Ondoa uthibitisho wa mahali") else t("Confirm this location", "Thibitisha mahali hapa"), color = Color.White, style = MaterialTheme.typography.labelLarge,
+                    modifier = Modifier.padding(top = 8.dp).clip(RoundedCornerShape(99.dp)).background(Color(0x26FFFFFF)).clickable(role = Role.Button) {
+                        scope.launch { val x = m.api.admin(JSONObject().put("action", "confirm").put("id", p.id).put("on", !on)); if (x.ok) m.reload() else cm = org.rafikioutreach.pin.data.reasonText(x.reason) }
+                    }.padding(horizontal = 14.dp, vertical = 10.dp))
+                cm?.let { Text(it, color = Color(0xFFFFE1DD), style = MaterialTheme.typography.bodySmall) }
+            }
             if (here != null && p.gps != null) {
                 val d = Geo.metres(here, p.gps)
                 val far = d > 300

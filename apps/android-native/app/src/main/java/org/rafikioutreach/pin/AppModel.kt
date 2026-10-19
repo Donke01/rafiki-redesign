@@ -43,14 +43,14 @@ sealed class Outcome {
 
 class AppModel(app: Application) : AndroidViewModel(app) {
     val prefs = Prefs(app)
-    val api = Api(BuildConfig.SERVER) { prefs.pin }
+    val api = Api(BuildConfig.SERVER, { prefs.pin }, { prefs.session })
     val outbox = Outbox(File(app.filesDir, "outbox.json"))
     val locator = Locator(app)
     private val sendLock = Mutex()
 
     private val _snap = MutableStateFlow<Snapshot?>(prefs.loadSnapshot()?.let { runCatching { Snapshot.from(it) }.getOrNull() })
     val snap: StateFlow<Snapshot?> = _snap
-    private val _signedIn = MutableStateFlow(prefs.pin.isNotBlank() && _snap.value != null)
+    private val _signedIn = MutableStateFlow((prefs.pin.isNotBlank() || prefs.session.isNotBlank()) && _snap.value != null)
     val signedIn: StateFlow<Boolean> = _signedIn
     private val _waiting = MutableStateFlow(outbox.count())
     val waiting: StateFlow<Int> = _waiting
@@ -82,7 +82,54 @@ class AppModel(app: Application) : AndroidViewModel(app) {
         return null
     }
 
-    fun lock() { prefs.forget(); _signedIn.value = false }
+    fun lock() {
+        val s = prefs.session
+        prefs.forget(); _signedIn.value = false
+        if (s.isNotBlank()) viewModelScope.launch { Api(BuildConfig.SERVER, { "" }, { s }).also { it.transport = api.transport }.logout() }
+    }
+
+    /** Is "Sign in with monday.com" switched on for this server? */
+    suspend fun mondayAvailable(): Boolean = api.authMe().json.optBoolean("available")
+
+    /** The address that starts a monday.com sign-in. A secret stays on the phone; only its fingerprint goes out. */
+    fun mondayStartUrl(): String {
+        val rnd = java.security.SecureRandom(); val b = ByteArray(48); rnd.nextBytes(b)
+        val verifier = android.util.Base64.encodeToString(b, android.util.Base64.URL_SAFE or android.util.Base64.NO_PADDING or android.util.Base64.NO_WRAP)
+        prefs.verifier = verifier
+        val cc = android.util.Base64.encodeToString(java.security.MessageDigest.getInstance("SHA-256").digest(verifier.toByteArray()), android.util.Base64.URL_SAFE or android.util.Base64.NO_PADDING or android.util.Base64.NO_WRAP)
+        return BuildConfig.SERVER + "/api/pin-auth/start?app=1&cc=" + cc
+    }
+
+    /** monday.com sent the person back to the app. Returns an error text, or null when signed in. */
+    suspend fun mondayReturn(code: String?, fail: String?): String? {
+        if (fail != null || code.isNullOrBlank()) return when (fail) {
+            "denied" -> t("Sign-in was cancelled.", "Kuingia kumeghairiwa.")
+            "account" -> t("That monday.com login isn’t part of RAFIKI’s monday.com account. Sign in with your RAFIKI login.", "Akaunti hiyo ya monday.com si sehemu ya akaunti ya RAFIKI. Ingia kwa akaunti yako ya RAFIKI.")
+            "board" -> t("Your monday.com login can’t see the projects board yet. Ask an admin to add you to it, then try again.", "Akaunti yako ya monday.com bado haioni bodi ya miradi. Muombe msimamizi akuongeze, kisha ujaribu tena.")
+            "expired" -> t("Sign-in took too long. Please try again.", "Kuingia kumechukua muda mrefu. Tafadhali jaribu tena.")
+            else -> t("monday.com didn’t finish the sign-in. Please try again.", "monday.com haikukamilisha kuingia. Tafadhali jaribu tena.")
+        }
+        val x = api.authExchange(code, prefs.verifier)
+        prefs.verifier = ""
+        val sid = x.json.optString("sid")
+        if (!x.ok || sid.isBlank()) return if (x.status == 0) reasonText("offline") else t("Sign-in took too long. Please try again.", "Kuingia kumechukua muda mrefu. Tafadhali jaribu tena.")
+        prefs.pin = ""; prefs.session = sid
+        val r = api.list()
+        if (!r.ok) { prefs.session = ""; return reasonText(r.reason) }
+        prefs.name = r.json.optString("who")
+        accept(r.json); _signedIn.value = true
+        return null
+    }
+
+    // --- activity (for the Office overview and the monthly report) ---------------------------
+    private val _activity = MutableStateFlow<List<JSONObject>?>(null)
+    val activity: StateFlow<List<JSONObject>?> = _activity
+    suspend fun loadActivity(): Boolean {
+        val r = api.activity(); val a = r.json.optJSONArray("activity") ?: return false
+        _activity.value = (0 until a.length()).map { a.getJSONObject(it) }; return true
+    }
+    /** Apply a fresh copy of the list (after an Office change). */
+    fun reload() = refresh()
 
     private fun accept(raw: JSONObject) {
         prefs.saveSnapshot(raw); _snap.value = Snapshot.from(raw)

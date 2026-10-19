@@ -101,7 +101,7 @@ fun NewSiteScreen(m: AppModel, done: (String?) -> Unit) {
 }
 
 @Composable
-fun MeScreen(m: AppModel) {
+fun MeScreen(m: AppModel, report: () -> Unit = {}) {
     val waiting by m.waiting.collectAsState()
     val s by m.snap.collectAsState()
     var miles by remember { mutableStateOf(m.prefs.miles) }
@@ -130,10 +130,10 @@ fun MeScreen(m: AppModel) {
                 Pill(t("Miles", "Maili"), miles, Modifier.weight(1f)) { miles = true; m.prefs.miles = true }
             }
         }
-        if (s?.admin == true) Card(Modifier.padding(top = 14.dp)) {
-            H2(t("Office tools", "Zana za ofisi"))
-            Text(t("Repairs, assigning visits, the review queue, the team and exports are in the Office section of the web app.", "Matengenezo, kugawa ziara, foleni ya kuidhinisha, timu na ripoti ziko kwenye sehemu ya Ofisi ya programu ya wavuti."), style = MaterialTheme.typography.bodyMedium, color = C.muted)
-            Btn(t("Open the Office", "Fungua Ofisi"), { runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(BuildConfig.SERVER + "/pin#office"))) } }, Modifier.padding(top = 10.dp), icon = "inbox", small = true)
+        Card(Modifier.padding(top = 14.dp)) {
+            H2(t("Monthly report", "Ripoti ya mwezi"))
+            Text(t("Visits, repairs and how projects are doing for one month, ready to share as a PDF.", "Ziara, matengenezo na hali ya miradi kwa mwezi mmoja, tayari kushiriki kama PDF."), style = MaterialTheme.typography.bodyMedium, color = C.muted)
+            Btn(t("Open report", "Fungua ripoti"), report, Modifier.padding(top = 10.dp), icon = "clip", small = true)
         }
         Text("RAFIKI Pin " + BuildConfig.VERSION_NAME, style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 18.dp))
     }

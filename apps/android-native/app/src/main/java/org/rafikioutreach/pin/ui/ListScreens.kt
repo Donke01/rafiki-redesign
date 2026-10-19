@@ -131,7 +131,7 @@ private val FILTERS = listOf(
 )
 
 @Composable
-fun ProjectsScreen(m: AppModel, open: (String) -> Unit) {
+fun ProjectsScreen(m: AppModel, open: (String) -> Unit, planRoute: () -> Unit = {}) {
     val s by m.snap.collectAsState()
     val fix by m.fix.collectAsState()
     val waiting by m.waiting.collectAsState()
@@ -186,7 +186,12 @@ fun ProjectsScreen(m: AppModel, open: (String) -> Unit) {
                 } }
             }
         }
-        item { Text(t("Projects", "Miradi"), style = MaterialTheme.typography.headlineLarge, color = C.ink, modifier = Modifier.padding(top = 4.dp)) }
+        item {
+            Row(Modifier.padding(top = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                Text(t("Projects", "Miradi"), style = MaterialTheme.typography.headlineLarge, color = C.ink, modifier = Modifier.weight(1f))
+                Btn(t("Plan a route", "Panga njia"), planRoute, small = true, light = true, icon = "map")
+            }
+        }
         item {
             val pinned = snap.projects.count { it.gps != null }
             Card(brush = DeepBrush) {

@@ -9,6 +9,8 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -65,7 +67,7 @@ import org.rafikioutreach.pin.ui.ProjectsScreen
 import org.rafikioutreach.pin.ui.RafikiTheme
 
 /** Where you are in the app: a tab, or a project on top of it. */
-data class Place(val tab: String, val project: String? = null, val projectTab: String = "pin")
+data class Place(val tab: String, val project: String? = null, val projectTab: String = "pin", val sub: String? = null)
 
 class MainActivity : ComponentActivity() {
     private val model: AppModel by viewModels()
@@ -75,6 +77,18 @@ class MainActivity : ComponentActivity() {
         Lang.sw = model.prefs.lang.ifBlank { if (java.util.Locale.getDefault().language == "sw") "sw" else "en" } == "sw"
         enableEdgeToEdge()
         setContent { RafikiTheme { App(model) } }
+        handle(intent)
+    }
+
+    override fun onNewIntent(intent: android.content.Intent) { super.onNewIntent(intent); handle(intent) }
+
+    /** monday.com sign-in sends the person back with org.rafikioutreach.pin://signin?code=… */
+    private fun handle(i: android.content.Intent?) {
+        val u = i?.data ?: return
+        if (u.scheme != "org.rafikioutreach.pin" || u.host != "signin") return
+        i.data = null
+        model.showBanner(t("Signing in…", "Inaingia…"))
+        lifecycleScope.launch { model.showBanner(model.mondayReturn(u.getQueryParameter("code"), u.getQueryParameter("fail"))) }
     }
 }
 
@@ -123,20 +137,27 @@ fun Shell(m: AppModel) {
             val pid = here.project
             when {
                 pid != null -> ProjectScreen(m, pid, here.projectTab) { stack.removeAt(stack.lastIndex) }
+                here.sub == "report" -> org.rafikioutreach.pin.ui.ReportScreen(m) { stack.removeAt(stack.lastIndex) }
+                here.sub == "route" -> org.rafikioutreach.pin.ui.RouteScreen(m, { go(Place(here.tab, it)) }) { stack.removeAt(stack.lastIndex) }
                 here.tab == "map" -> MapScreen(m) { go(Place("map", it)) }
                 here.tab == "new" -> NewSiteScreen(m) { id -> if (id != null) { tab("list"); go(Place("list", id)) } }
-                here.tab == "me" -> MeScreen(m)
-                else -> ProjectsScreen(m) { go(Place("list", it)) }
+                here.tab == "me" -> MeScreen(m) { go(Place("me", sub = "report")) }
+                here.tab == "office" -> org.rafikioutreach.pin.ui.OfficeScreen(m) { go(Place("office", it)) }
+                else -> ProjectsScreen(m, { go(Place("list", it)) }) { go(Place("list", sub = "route")) }
             }
         }
         // bottom tabs
         Row(Modifier.fillMaxWidth().background(C.card).border(1.dp, C.line).height(68.dp), verticalAlignment = Alignment.CenterVertically) {
-            listOf(Triple("map", t("Map", "Ramani"), "map"), Triple("list", t("Projects", "Miradi"), "list"), Triple("new", t("New site", "Eneo jipya"), "plus"), Triple("me", t("Me", "Mimi"), "person")).forEach { (k, label, icon) ->
+            val admin = m.snap.collectAsState().value?.admin == true
+            val review = m.snap.collectAsState().value?.reviewOpen ?: 0
+            (listOf(Triple("map", t("Map", "Ramani"), "map"), Triple("list", t("Projects", "Miradi"), "list"), Triple("new", t("New site", "Eneo jipya"), "plus"), Triple("me", t("Me", "Mimi"), "person")) +
+                (if (admin) listOf(Triple("office", t("Office", "Ofisi"), "inbox")) else emptyList())).forEach { (k, label, icon) ->
                 val on = here.tab == k && here.project == null
                 Column(Modifier.weight(1f).clickable(role = Role.Tab) { tab(k) }.padding(vertical = 6.dp).testTag("nav_$k"), horizontalAlignment = Alignment.CenterHorizontally) {
                     Box {
                         if (k == "new") Box(Modifier.size(48.dp, 34.dp).clip(RoundedCornerShape(14.dp)).background(BlueBrush), contentAlignment = Alignment.Center) { Icon(Ic.get(icon), null, tint = Color.White, modifier = Modifier.size(20.dp)) }
                         else Box(Modifier.size(52.dp, 30.dp).clip(RoundedCornerShape(99.dp)).background(if (on) C.tint else Color.Transparent), contentAlignment = Alignment.Center) { Icon(Ic.get(icon), null, tint = if (on) C.blue else C.muted, modifier = Modifier.size(24.dp)) }
+                        if (k == "office" && review > 0) Text("$review", color = Color.White, fontSize = 10.sp, modifier = Modifier.align(Alignment.TopEnd).clip(RoundedCornerShape(99.dp)).background(C.warn).padding(horizontal = 5.dp))
                         if (k == "me" && waiting > 0) Text("$waiting", color = Color.White, fontSize = 10.sp, modifier = Modifier.align(Alignment.TopEnd).clip(RoundedCornerShape(99.dp)).background(C.warn).padding(horizontal = 5.dp))
                     }
                     Text(label, style = MaterialTheme.typography.labelSmall, color = if (on) C.blue else C.muted, modifier = Modifier.padding(top = 3.dp))

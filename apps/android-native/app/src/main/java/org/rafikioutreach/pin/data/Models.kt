@@ -54,12 +54,17 @@ data class LatLng(val lat: Double, val lng: Double) {
 }
 
 /** An open repair (needs repair / not working), from the last visit. */
-data class Repair(val state: String, val by: String, val at: String, val note: String, val urgency: String, val problems: List<String>, val assignee: String, val step: String) {
+data class Repair(
+    val state: String, val by: String, val at: String, val note: String, val urgency: String, val problems: List<String>,
+    val assignee: String = "", val step: String = "reported", val due: String = "", val budget: Long? = null, val parts: String = "", val cost: Long? = null, val title: String = "",
+) {
     companion object {
         fun from(o: JSONObject) = Repair(
             o.optString("state"), o.optString("by"), o.optString("at"), o.optString("note"), o.optString("urgency"),
             o.optJSONArray("problems")?.let { a -> (0 until a.length()).map { a.optString(it) } } ?: emptyList(),
-            o.optString("assignee"), o.optString("step"),
+            o.optString("assignee"), o.optString("step").ifBlank { "reported" }, o.optString("due"),
+            if (o.has("budget") && !o.isNull("budget")) o.optLong("budget") else null, o.optString("parts"),
+            if (o.has("cost") && !o.isNull("cost")) o.optLong("cost") else null, o.optString("t"),
         )
     }
 }

@@ -50,7 +50,7 @@ class LogicTest {
         val photo = File(dir, "a.jpg").apply { writeBytes(ByteArray(100) { 1 }) }
         var online = false
         val calls = mutableListOf<String>()
-        val api = Api("https://x") { "1111" }
+        val api = Api("https://x", { "1111" })
         api.transport = { method, url, headers, body ->
             calls += "$method $url ${headers["X-Pin"]}"
             if (!online) 0 to ""
@@ -70,7 +70,7 @@ class LogicTest {
     @Test fun wrong_pin_stops_sending_and_keeps_the_change() = runBlocking {
         val ctx = ApplicationProvider.getApplicationContext<android.app.Application>()
         val ob = Outbox(File(ctx.cacheDir, "o" + System.nanoTime() + ".json"))
-        val api = Api("https://x") { "0000" }
+        val api = Api("https://x", { "0000" })
         api.transport = { _, _, _, _ -> 401 to "{\"ok\":false,\"reason\":\"pin\"}" }
         ob.add(JSONObject().put("action", "pin").put("id", "1"), emptyList())
         val r = ob.flush(api)
@@ -80,7 +80,7 @@ class LogicTest {
     @Test fun refused_change_is_reported_not_retried() = runBlocking {
         val ctx = ApplicationProvider.getApplicationContext<android.app.Application>()
         val ob = Outbox(File(ctx.cacheDir, "r" + System.nanoTime() + ".json"))
-        val api = Api("https://x") { "1111" }
+        val api = Api("https://x", { "1111" })
         api.transport = { _, _, _, _ -> 404 to "{\"ok\":false,\"reason\":\"project\"}" }
         val k = ob.add(JSONObject().put("action", "pin").put("id", "999"), emptyList())
         val r = ob.flush(api)

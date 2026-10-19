@@ -26,6 +26,7 @@ object Ic {
         "people" to listOf(circle(9f, 8.5f, 3.2f), "M3.5 19.5c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5", circle(17f, 9.5f, 2.4f), "M15.8 14.6c2.4.2 4 1.8 4.6 4.4"),
         "person" to listOf(circle(12f, 8f, 3.6f), "M5 20c.8-3.8 3.6-6 7-6s6.2 2.2 7 6"),
         "map" to listOf("M3.5 6.5l5.5-2.5 6 2.5 5.5-2.5v13.5L15 20l-6-2.5-5.5 2.5z", "M9 4v13.5M15 6.5V20"),
+        "mic" to listOf(rect(9f, 3.5f, 6f, 11f, 3f), "M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"),
         "camera" to listOf("M4 8.5h3l1.6-2.5h6.8L17 8.5h3v10.5H4z", circle(12f, 13.5f, 3.3f)),
         "compass" to listOf(circle(12f, 12f, 8.5f), "M15.5 8.5l-2 5-5 2 2-5z"),
         "search" to listOf(circle(11f, 11f, 6.5f), "M16 16l4 4"),

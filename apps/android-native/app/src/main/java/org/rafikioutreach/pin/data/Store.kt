@@ -16,11 +16,14 @@ class Prefs(context: Context) {
     var miles: Boolean get() = sp.getBoolean("miles", false); set(v) = sp.edit().putBoolean("miles", v).apply()
     var filter: String get() = sp.getString("filter", "missing") ?: "missing"; set(v) = sp.edit().putString("filter", v).apply()
     var country: String get() = sp.getString("country", "") ?: ""; set(v) = sp.edit().putString("country", v).apply()
+    var session: String get() = sp.getString("session", "") ?: ""; set(v) = sp.edit().putString("session", v).apply()
+    var verifier: String get() = sp.getString("verifier", "") ?: ""; set(v) = sp.edit().putString("verifier", v).apply()
+    var route: String get() = sp.getString("route", "") ?: ""; set(v) = sp.edit().putString("route", v).apply()
     var lang: String get() = sp.getString("lang", "") ?: ""; set(v) = sp.edit().putString("lang", v).apply()
 
     fun saveSnapshot(raw: JSONObject) = runCatching { listFile.writeText(raw.toString()) }
     fun loadSnapshot(): JSONObject? = runCatching { JSONObject(listFile.readText()) }.getOrNull()
-    fun forget() { pin = ""; }
+    fun forget() { pin = ""; session = "" }
 }
 
 /** One change waiting to be sent: the action, its photos, and how far it got. */

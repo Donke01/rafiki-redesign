@@ -15,7 +15,7 @@ data class Reply(val ok: Boolean, val status: Int, val json: JSONObject, val rea
 }
 
 /** Talks to the same endpoints as the web app: /api/pin, /api/pin-photo, /api/place. */
-class Api(private val server: String, private val pin: () -> String) {
+class Api(val server: String, private val pin: () -> String, private val session: () -> String = { "" }) {
 
     /** Lets tests swap the network for a fake one. */
     var transport: (method: String, url: String, headers: Map<String, String>, body: ByteArray?) -> Pair<Int, String> = ::http
@@ -27,11 +27,24 @@ class Api(private val server: String, private val pin: () -> String) {
     suspend fun place(q: String, near: LatLng?, ck: String): Reply =
         call("GET", "/api/place?q=" + enc(q) + (if (ck.isNotBlank()) "&cc=$ck" else "") + (near?.let { "&near=${it.lat},${it.lng}" } ?: ""), null)
 
+    suspend fun activity(): Reply = call("GET", "/api/pin?activity=1", null)
+    suspend fun adminGet(view: String): Reply = call("GET", "/api/admin?view=" + enc(view), null)
+    suspend fun admin(body: JSONObject): Reply = call("POST", "/api/admin", body)
+    suspend fun authMe(): Reply = call("GET", "/api/pin-auth/me", null)
+    suspend fun authExchange(code: String, verifier: String): Reply = call("POST", "/api/pin-auth/exchange", JSONObject().put("code", code).put("verifier", verifier))
+    suspend fun logout(): Reply = call("POST", "/api/pin-auth/logout", JSONObject())
+
     fun photoUrl(photo: String, w: Int = 480) = "$server/api/photo/${enc(photo)}?w=$w"
+
+    /** Who is asking: a PIN, or the monday.com session (sent the way a browser sends its cookie). */
+    private fun auth(h: MutableMap<String, String>) {
+        pin().takeIf { it.isNotBlank() }?.let { h["X-Pin"] = it }
+        session().takeIf { it.isNotBlank() }?.let { h["Cookie"] = "rfpin=$it"; h["Origin"] = server }
+    }
 
     private suspend fun call(method: String, path: String, body: JSONObject?): Reply = withContext(Dispatchers.IO) {
         val h = mutableMapOf("Accept" to "application/json")
-        pin().takeIf { it.isNotBlank() }?.let { h["X-Pin"] = it }
+        auth(h)
         if (body != null) h["Content-Type"] = "application/json"
         val (status, text) = transport(method, server + path, h, body?.toString()?.toByteArray())
         toReply(status, text)
@@ -52,7 +65,7 @@ class Api(private val server: String, private val pin: () -> String) {
         out.write(file.readBytes())
         out.write("\r\n--$boundary--\r\n".toByteArray())
         val h = mutableMapOf("Accept" to "application/json", "Content-Type" to "multipart/form-data; boundary=$boundary")
-        pin().takeIf { it.isNotBlank() }?.let { h["X-Pin"] = it }
+        auth(h)
         val (status, text) = transport("POST", "$server/api/pin-photo", h, out.toByteArray())
         toReply(status, text)
     }

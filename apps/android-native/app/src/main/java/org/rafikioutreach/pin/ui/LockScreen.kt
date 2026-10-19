@@ -28,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -60,6 +61,10 @@ fun LockScreen(m: AppModel) {
     var msg by remember { mutableStateOf(m.banner.value) }
     var working by remember { mutableStateOf(false) }
     val shake = remember { Animatable(0f) }
+    val banner by m.banner.collectAsState()
+    var monday by remember { mutableStateOf(false) }
+    val ctx = androidx.compose.ui.platform.LocalContext.current
+    androidx.compose.runtime.LaunchedEffect(Unit) { monday = runCatching { m.mondayAvailable() }.getOrDefault(false) }
 
     fun go() {
         if (working || pin.isEmpty()) return
@@ -107,6 +112,7 @@ fun LockScreen(m: AppModel) {
                 }
             }
             Msg(msg, if (msg == t("Checking…", "Inakagua…")) "" else "bad")
+            if (msg == null && banner != null) Msg(banner, if (banner == t("Signing in…", "Inaingia…")) "" else "bad")
             if (needName) Field(name, { name = it }, t("Your name", "Jina lako"), placeholder = t("e.g. Meril", "mf. Meril"))
             Spacer(Modifier.height(14.dp))
 
@@ -117,7 +123,15 @@ fun LockScreen(m: AppModel) {
                         r.forEach { d ->
                             val mod = Modifier.weight(1f).height(72.dp)
                             when (d) {
-                                "" -> Spacer(mod)
+                                "" -> if (monday) Column(
+                                    mod.clip(RoundedCornerShape(22.dp)).clickable(role = Role.Button) {
+                                        runCatching { ctx.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(m.mondayStartUrl()))) }
+                                    }.testTag("monday"),
+                                    horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center,
+                                ) {
+                                    NetImage("https://www.google.com/s2/favicons?domain=monday.com&sz=64", Modifier.size(26.dp).clip(RoundedCornerShape(7.dp))) { Icon(Ic.get("people"), null, tint = C.blue) }
+                                    Text(t("monday.com\nsign-in", "Ingia kwa\nmonday.com"), style = MaterialTheme.typography.labelSmall, color = C.blue2, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 4.dp))
+                                } else Spacer(mod)
                                 "del" -> Box(mod.clip(RoundedCornerShape(22.dp)).clickable(role = Role.Button) { key("del") }.semantics { contentDescription = t("Delete last digit", "Futa tarakimu ya mwisho") }, contentAlignment = Alignment.Center) {
                                     Icon(Ic.get("del"), null, tint = C.ink, modifier = Modifier.size(30.dp))
                                 }
