@@ -11,139 +11,310 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Rafiki Pin">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/vendor/leaflet/leaflet.css">
+<script>
+// theme and text size before first paint
+(function () { try { var t = localStorage.getItem('rfPinTheme'), z = localStorage.getItem('rfPinSize'); if (t) document.documentElement.setAttribute('data-theme', t); if (z) document.documentElement.setAttribute('data-size', z); } catch (e) {} })();
+</script>
 <style>
-:root{--blue:#0A78C2;--blue2:#076DB1;--deep:#054F81;--ink:#04263F;--tint:#E3F1FC;--bg:#EEF0F2;--text:#141618;--muted:#5A6066;--line:#DCE1E5;--ok:#1C7C4A;--warn:#9A5B00;--bad:#B3261E}
+:root{--blue:#0A78C2;--blue2:#076DB1;--deep:#054F81;--ink:#04263F;--tint:#E3F1FC;--bg:#EEF0F2;--card:#FFFFFF;--field:#FFFFFF;--text:#141618;--muted:#5A6066;--line:#DCE1E5;--edge:#C9D1D8;--ok:#1C7C4A;--okbg:#E2F4EA;--warn:#8A5200;--warnbg:#FDF0DC;--bad:#B3261E;--badbg:#FBE7E5;--off:#AFC4D3;--bar:rgba(255,255,255,.97);--tabh:68px;--bw:1px;color-scheme:light}
+html[data-theme=dark]{--blue:#2F9BE6;--blue2:#4AAAEE;--deep:#9FD3F7;--ink:#E6EEF4;--tint:#12324A;--bg:#0D1318;--card:#161E25;--field:#0F161C;--text:#E8EDF1;--muted:#9CA8B2;--line:#26323C;--edge:#3A4955;--ok:#5FD08F;--okbg:#123222;--warn:#F2B35B;--warnbg:#3A2A10;--bad:#FF8A80;--badbg:#3D1715;--off:#33485A;--bar:rgba(22,30,37,.97);color-scheme:dark}
+html[data-theme=sun]{--blue:#0050A0;--blue2:#003E7E;--deep:#002A57;--ink:#000000;--tint:#DCEBFF;--bg:#FFFFFF;--card:#FFFFFF;--field:#FFFFFF;--text:#000000;--muted:#1E1E1E;--line:#000000;--edge:#000000;--ok:#00562A;--okbg:#D8F5E3;--warn:#6B3A00;--warnbg:#FFE8C2;--bad:#8C0000;--badbg:#FFDCDC;--off:#8A99A6;--bar:#FFFFFF;--bw:2px}
+html{font-size:16px}html[data-size=l]{font-size:18px}html[data-size=xl]{font-size:20px}
 *{box-sizing:border-box}
-html,body{margin:0;height:100%}
-body{font-family:Montserrat,system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
-button,input,select,textarea{font:inherit}
-.app{max-width:720px;margin:0 auto;min-height:100%;display:flex;flex-direction:column}
-.top{position:sticky;top:0;z-index:1000;display:flex;align-items:center;gap:12px;padding:calc(10px + env(safe-area-inset-top)) 16px 10px;background:#FFFFFF;border-bottom:1px solid var(--line)}
-.top img{height:26px;width:auto}
-.top b{font-size:15px;font-weight:800;color:var(--ink);letter-spacing:-0.01em}
+html,body{margin:0}
+body{font-family:Montserrat,system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;min-height:100vh;min-height:100dvh}
+html[data-theme=sun] body{font-weight:500}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--blue2)}
+.app{max-width:760px;margin:0 auto;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
+.top{position:sticky;top:0;z-index:1100;display:flex;align-items:center;gap:10px;padding:calc(8px + env(safe-area-inset-top)) 16px 8px;background:var(--card);border-bottom:var(--bw) solid var(--line);min-height:56px}
+.top img{height:24px;width:auto}
+.top .lg-l{display:none}html[data-theme=dark] .top .lg-d{display:none}html[data-theme=dark] .top .lg-l{display:block}
+.top b{font-size:.95rem;font-weight:800;color:var(--ink)}
 .top .sp{flex:1}
-.top .who{font-size:13px;color:var(--muted);max-width:34vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.icon-btn{min-width:44px;min-height:44px;border:0;border-radius:12px;background:transparent;color:var(--ink);font-weight:700;font-size:14px;cursor:pointer;padding:0 10px}
-.icon-btn:focus-visible,.btn:focus-visible,.row:focus-visible,.chip:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,.seg button:focus-visible{outline:3px solid #098BE1;outline-offset:2px}
-.net{display:none;padding:8px 16px;font-size:13px;font-weight:700;text-align:center;background:#FDF0DC;color:var(--warn)}
+.top .who{font-size:.82rem;font-weight:600;color:var(--muted);max-width:40vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.net{display:none;padding:8px 16px;font-size:.82rem;font-weight:700;text-align:center;background:var(--warnbg);color:var(--warn)}
 .net.on{display:block}
-main{flex:1;padding:16px}
-.card{background:#FFFFFF;border-radius:22px;padding:22px 20px;box-shadow:0 1px 2px rgba(10,10,10,.04)}
-h1{margin:0 0 6px;font-size:24px;font-weight:800;letter-spacing:-0.02em;color:#0A0A0A}
-h2{margin:0 0 10px;font-size:18px;font-weight:800;letter-spacing:-0.01em}
+main{flex:1;padding:16px 16px calc(var(--tabh) + 24px + env(safe-area-inset-bottom))}
+main.bare{padding:0}
+body.locked main{padding-bottom:24px}
+body.routing main{padding-bottom:calc(var(--tabh) + 110px + env(safe-area-inset-bottom))}
+.card{background:var(--card);border-radius:22px;padding:20px;border:var(--bw) solid transparent}
+html[data-theme=sun] .card,html[data-theme=dark] .card{border-color:var(--line)}
+h1{margin:0 0 6px;font-size:1.5rem;font-weight:800;letter-spacing:-0.02em;color:var(--ink)}
+h2{margin:0 0 10px;font-size:1.12rem;font-weight:800;letter-spacing:-0.01em;color:var(--ink)}
+h3{margin:0 0 8px;font-size:.95rem;font-weight:800;color:var(--ink)}
 p{margin:0 0 12px;line-height:1.5}
-.muted{color:var(--muted);font-size:14px}
-label{display:block;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);margin:16px 0 6px}
-input[type=text],input[type=password],input[type=search],select,textarea{width:100%;min-height:50px;padding:0 16px;border-radius:14px;border:1px solid #C9D1D8;background:#FFFFFF;font-size:16px;color:var(--text)}
+.muted{color:var(--muted);font-size:.88rem}
+label,.lbl{display:block;font-size:.8rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);margin:16px 0 6px}
+input[type=text],input[type=password],input[type=search],input[type=number],select,textarea{width:100%;min-height:52px;padding:0 16px;border-radius:14px;border:var(--bw) solid var(--edge);background:var(--field);font-size:1rem}
 textarea{padding:12px 16px;min-height:96px;resize:vertical;line-height:1.45}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:50px;padding:0 22px;border-radius:999px;border:0;background:var(--blue);color:#FFFFFF;font-size:16px;font-weight:700;cursor:pointer;text-decoration:none}
+:focus-visible{outline:3px solid #098BE1;outline-offset:2px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:0 22px;border-radius:999px;border:var(--bw) solid transparent;background:var(--blue);color:#FFFFFF;font-size:1rem;font-weight:700;cursor:pointer;text-decoration:none;text-align:center;line-height:1.2}
 .btn:hover{background:var(--blue2)}
-.btn[disabled]{background:#AFC4D3;cursor:not-allowed}
-.btn.light{background:#FFFFFF;color:var(--ink);border:1px solid #C9D1D8}
+.btn[disabled]{background:var(--off);cursor:not-allowed}
+.btn.light{background:var(--card);color:var(--ink);border-color:var(--edge)}
 .btn.light:hover{background:var(--tint)}
-.btn.small{min-height:44px;padding:0 16px;font-size:14px}
+.btn.ok{background:var(--ok)}
+.btn.small{min-height:44px;padding:0 16px;font-size:.88rem}
 .btn.block{width:100%}
-.msg{margin-top:10px;font-size:14px;font-weight:600;min-height:1em}
+.btn svg{width:18px;height:18px;flex:0 0 auto}
+.lnk{background:none;border:0;padding:8px 0;min-height:44px;color:var(--blue2);font-weight:700;font-size:.92rem;cursor:pointer}
+.msg{margin-top:10px;font-size:.88rem;font-weight:600}
+.msg:empty{display:none}
 .msg.bad{color:var(--bad)}.msg.ok{color:var(--ok)}.msg.warn{color:var(--warn)}
-.tools{display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
-.chips{display:flex;gap:8px;flex-wrap:wrap}
-.chip{min-height:44px;padding:0 16px;border-radius:999px;border:1px solid #C9D1D8;background:#FFFFFF;color:var(--ink);font-weight:700;font-size:14px;cursor:pointer}
-.chip[aria-pressed=true]{background:var(--blue);border-color:var(--blue);color:#FFFFFF}
-.listhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:4px 2px 12px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 4px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;min-height:44px;padding:0 16px;border-radius:999px;border:var(--bw) solid var(--edge);background:var(--card);color:var(--ink);font-weight:700;font-size:.88rem;cursor:pointer;white-space:nowrap}
+.chip[aria-pressed=true],.chip[aria-checked=true]{background:var(--blue);border-color:var(--blue);color:#FFFFFF}
+.chip .n{display:inline-block;min-width:22px;padding:1px 6px;margin-left:4px;border-radius:999px;background:var(--badbg);color:var(--bad);font-size:.75rem}
+.chip[aria-pressed=true] .n{background:rgba(255,255,255,.22);color:#FFFFFF}
+.hidden{display:none !important}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* tab bar */
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:1200;background:var(--bar);border-top:var(--bw) solid var(--line);padding:0 0 env(safe-area-inset-bottom);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.tabs nav{max-width:760px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);height:var(--tabh)}
+.tabs button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:0;background:none;color:var(--muted);font-size:.72rem;font-weight:700;cursor:pointer;position:relative}
+.tabs button svg{width:24px;height:24px}
+.tabs button[aria-current=page]{color:var(--blue)}
+.tabs button[aria-current=page]::before{content:"";position:absolute;top:0;left:30%;right:30%;height:3px;border-radius:0 0 3px 3px;background:var(--blue)}
+.tabs .plus span.ic{display:flex;align-items:center;justify-content:center;width:40px;height:30px;border-radius:12px;background:var(--blue);color:#FFFFFF}
+.tabs .plus span.ic svg{width:20px;height:20px}
+.tabs .dot{position:absolute;top:8px;left:calc(50% + 8px);min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--warn);color:#FFFFFF;font-size:.68rem;line-height:18px}
+body.locked .tabs{display:none}
+
+/* progress */
+.prog{display:flex;flex-direction:column;gap:8px}
+.prog .row1{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:.88rem;font-weight:700;color:var(--ink)}
+.prog .row1 span{color:var(--muted);font-weight:600}
+.meter{height:10px;border-radius:999px;background:var(--line);overflow:hidden}
+.meter i{display:block;height:100%;background:var(--ok);border-radius:999px;transition:width .4s}
+.cmeters{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.cmeters div{font-size:.75rem;font-weight:700;color:var(--muted)}
+.cmeters .meter{height:6px;margin-top:4px}
+
+/* map home */
+.mapwrap{position:relative}
+#hMap{height:calc(100vh - 56px - var(--tabh));height:calc(100dvh - 56px - var(--tabh) - env(safe-area-inset-top) - env(safe-area-inset-bottom));min-height:360px;background:#DDE6EC;z-index:0;isolation:isolate}
+.ov{position:absolute;left:10px;right:58px;z-index:800;pointer-events:none}
+.ov.bot{right:10px}
+.ov > *{pointer-events:auto}
+.ov.top{top:12px;display:flex;flex-direction:column;gap:8px}
+.ov.bot{bottom:12px}
+.pill{background:var(--card);border-radius:16px;padding:10px 12px;box-shadow:0 4px 18px rgba(4,38,63,.16);border:var(--bw) solid transparent}
+html[data-theme=sun] .pill{border-color:#000}
+.pill .prog .row1{font-size:.82rem}
+.legend{display:flex;gap:10px;flex-wrap:wrap;font-size:.7rem;font-weight:600;color:var(--muted);margin-top:6px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px;border:2px solid #FFFFFF;box-shadow:0 0 0 1px rgba(0,0,0,.25)}
+.sheet{background:var(--card);border-radius:20px;box-shadow:0 -2px 22px rgba(4,38,63,.18);overflow:hidden;border:var(--bw) solid transparent}
+html[data-theme=sun] .sheet{border-color:#000}
+.sheet .hd{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:52px;padding:0 16px;border:0;background:none;font-weight:800;font-size:.92rem;color:var(--ink);cursor:pointer}
+.sheet .hd small{font-weight:600;color:var(--muted)}
+.sheet .bd{padding:0 10px 10px;display:flex;flex-direction:column;gap:6px;max-height:42vh;overflow:auto}
+.sheet.shut .bd{display:none}
+.pop{min-width:200px}
+.pop img{display:block;width:100%;height:110px;object-fit:cover;border-radius:10px;margin-bottom:8px;background:#DDE6EC}
+.pop b{display:block;font-size:.95rem;margin-bottom:2px}
+.pop span{display:block;font-size:.8rem;color:#5A6066;margin-bottom:8px}
+.pop .btn{min-height:40px;width:100%;font-size:.88rem}
+.leaflet-container{font-family:inherit}
+html[data-theme=dark] .leaflet-bar a,html[data-theme=dark] .leaflet-control-layers{background:#161E25;color:#E8EDF1;border-color:#26323C}
+.you{width:16px;height:16px;border-radius:50%;background:#098BE1;border:3px solid #FFFFFF;box-shadow:0 0 0 2px rgba(9,139,225,.35)}
+.lc-me a{display:flex !important;align-items:center;justify-content:center;font-size:18px}
+
+/* banners */
+.here{display:flex;flex-direction:column;gap:8px;padding:10px 12px;border-radius:16px;background:var(--ok);color:#FFFFFF;box-shadow:0 4px 18px rgba(4,38,63,.2)}
+.here b{font-size:.9rem;line-height:1.3}
+.here .acts{display:flex;gap:6px}
+.here .btn{min-height:44px;padding:0 14px;font-size:.85rem;background:#FFFFFF;color:#0E4A2B}
+.here .btn.x{margin-left:auto;padding:0;width:44px;font-size:1.2rem}
+.here .btn.ghost{background:transparent;color:#FFFFFF;border-color:rgba(255,255,255,.6)}
+.install{display:flex;gap:12px;align-items:center;padding:14px 16px;border-radius:18px;background:var(--tint);color:var(--ink);margin-bottom:12px}
+.install img{width:44px;height:44px;border-radius:10px}
+.install div{flex:1;font-size:.88rem;line-height:1.4}
+.install b{display:block;font-size:.95rem}
+.outbox{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;margin-bottom:12px;border-radius:16px;background:var(--warnbg);color:var(--warn);font-size:.88rem;font-weight:700}
+
+/* list */
+.listhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 2px 12px}
 .listhead h1{margin:0}
-.outbox{display:none;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;margin-bottom:12px;border-radius:16px;background:#FDF0DC;color:var(--warn);font-size:14px;font-weight:700}
-.outbox.on{display:flex}
+.tools{display:flex;flex-direction:column;gap:10px;margin:12px 0}
+.count{font-size:.82rem;color:var(--muted);margin:2px 2px 10px;font-weight:600}
 .list{display:flex;flex-direction:column;gap:8px}
-.row{display:flex;align-items:center;gap:12px;width:100%;text-align:left;min-height:64px;padding:12px 14px;border-radius:16px;border:1px solid var(--line);background:#FFFFFF;cursor:pointer;color:var(--text)}
+.row{display:flex;align-items:center;gap:12px;width:100%;text-align:left;min-height:72px;padding:10px 12px;border-radius:16px;border:var(--bw) solid var(--line);background:var(--card);cursor:pointer;color:var(--text)}
 .row:hover{border-color:#9FD3F7}
+.row .th{flex:0 0 auto;width:52px;height:52px;border-radius:12px;background:var(--tint) center/cover no-repeat;display:flex;align-items:center;justify-content:center;color:var(--deep);font-size:1.3rem;overflow:hidden}
+.row .th img{width:100%;height:100%;object-fit:cover}
 .row .tx{flex:1;min-width:0}
-.row .t{display:block;font-weight:700;font-size:15px;line-height:1.3}
-.row .s{display:block;font-size:13px;color:var(--muted);margin-top:2px}
-.tag{flex:0 0 auto;font-size:12px;font-weight:700;padding:5px 10px;border-radius:999px;background:#FDF0DC;color:var(--warn);white-space:nowrap}
+.row .t{display:block;font-weight:700;font-size:.95rem;line-height:1.3}
+.row .s{display:block;font-size:.8rem;color:var(--muted);margin-top:2px}
+.row .ck{flex:0 0 auto;width:28px;height:28px;border-radius:8px;border:2px solid var(--edge);display:flex;align-items:center;justify-content:center;color:#FFFFFF;font-weight:800}
+.row[aria-checked=true]{border-color:var(--blue);background:var(--tint)}
+.row[aria-checked=true] .ck{background:var(--blue);border-color:var(--blue)}
+.row[aria-disabled=true]{opacity:.5;cursor:not-allowed}
+.tag{flex:0 0 auto;font-size:.75rem;font-weight:700;padding:5px 10px;border-radius:999px;background:var(--warnbg);color:var(--warn);white-space:nowrap}
 .tag.has{background:var(--tint);color:var(--deep)}
-.count{font-size:13px;color:var(--muted);margin:4px 2px 10px}
-.phead{display:flex;flex-direction:column;gap:2px;margin-bottom:10px}
-.phead .t{font-size:20px;font-weight:800;letter-spacing:-0.01em;line-height:1.25}
-.cur{font-size:14px;color:var(--muted)}
-.cur a{color:var(--blue2);font-weight:700}
-.dist{font-size:14px;font-weight:700;color:var(--ink)}
+.tag.bad{background:var(--badbg);color:var(--bad)}
+.tag.ok{background:var(--okbg);color:var(--ok)}
+.routebar{position:fixed;left:0;right:0;bottom:calc(var(--tabh) + env(safe-area-inset-bottom));z-index:1150;padding:10px 16px;background:var(--bar);border-top:var(--bw) solid var(--line)}
+.routebar > div{max-width:728px;margin:0 auto;display:flex;gap:10px;align-items:center}
+.routebar span{flex:1;font-size:.88rem;font-weight:700;color:var(--ink)}
+
+/* project */
+.back{display:inline-flex;align-items:center;gap:6px;min-height:44px;border:0;background:none;color:var(--ink);font-weight:700;font-size:.92rem;cursor:pointer;padding:0}
+.hero{border-radius:20px;overflow:hidden;margin:6px 0 12px;background:var(--tint);aspect-ratio:16/9}
+.hero img{width:100%;height:100%;object-fit:cover;display:block}
+.phead{display:flex;flex-direction:column;gap:3px;margin-bottom:12px}
+.phead .t{font-size:1.3rem;font-weight:800;letter-spacing:-0.01em;line-height:1.25;color:var(--ink)}
+.cur{font-size:.88rem;color:var(--muted)}
+.dist{font-size:.88rem;font-weight:700;color:var(--ink)}
 .dist.far{color:var(--bad)}
 .links{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
-.lastch{font-size:13px;color:var(--muted);margin-top:6px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.seg{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;margin:6px 0 12px;border-radius:999px;background:#FFFFFF;border:1px solid var(--line)}
-.seg button{min-height:44px;border:0;border-radius:999px;background:transparent;color:var(--ink);font-weight:700;font-size:14px;cursor:pointer}
-.seg button[aria-selected=true]{background:var(--blue);color:#FFFFFF}
-.map{position:relative;z-index:0;isolation:isolate;height:52vh;min-height:260px;margin-top:12px;border-radius:18px;overflow:hidden;border:1px solid var(--line);background:#DDE6EC}
-.maptip{font-size:13px;color:var(--muted);margin:8px 2px 12px}
+.lastch{font-size:.8rem;color:var(--muted);margin-top:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.lastch:empty{display:none}
+.alert{border-radius:16px;padding:14px 16px;margin:4px 0 12px;background:var(--badbg);color:var(--bad)}
+.alert.warn{background:var(--warnbg);color:var(--warn)}
+.alert b{display:block;font-size:.95rem;margin-bottom:2px}
+.alert p{margin:0 0 10px;font-size:.88rem;color:var(--text)}
+.alert textarea{min-height:64px;margin-bottom:8px}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:4px;padding:4px;margin:6px 0 14px;border-radius:999px;background:var(--card);border:var(--bw) solid var(--line)}
+.seg button{min-height:44px;border:0;border-radius:999px;background:transparent;color:var(--ink);font-weight:700;font-size:.88rem;cursor:pointer;padding:0 6px}
+.seg button[aria-selected=true],.seg button[aria-pressed=true]{background:var(--blue);color:#FFFFFF}
+.map{position:relative;z-index:0;isolation:isolate;height:46vh;min-height:240px;margin-top:12px;border-radius:18px;overflow:hidden;border:var(--bw) solid var(--line);background:#DDE6EC}
+.maptip{font-size:.8rem;color:var(--muted);margin:8px 2px 12px}
 .actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.actions .btn{padding:0 12px;font-size:15px;white-space:nowrap}
-.gpsline{font-size:14px;margin-top:10px;font-weight:600}
+.actions .btn{padding:0 10px;font-size:.95rem}
+.gpsline{font-size:.88rem;margin-top:10px;font-weight:600}
 .gpsline:empty{display:none}
 .gpsline.warn{color:var(--warn)}.gpsline.good{color:var(--ok)}
 .paste{display:none;margin-top:12px}
 .paste.on{display:block}
 .paste .rowf{display:flex;gap:8px}
 .paste input{flex:1}
-.savebar{position:sticky;bottom:0;z-index:500;margin:16px -16px -16px;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:rgba(255,255,255,.96);border-top:1px solid var(--line);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
-.newpt{font-size:14px;margin-bottom:8px;color:var(--ink);font-weight:600}
-.photo{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-.photo img{width:52px;height:52px;border-radius:10px;object-fit:cover;border:1px solid var(--line)}
-.photo .x{font-size:13px}
-.confirm{display:none;margin-top:8px}
-.confirm.on{display:block}
+.savebar{position:sticky;bottom:calc(var(--tabh) + env(safe-area-inset-bottom));z-index:500;margin:16px -16px 0;padding:12px 16px;background:var(--bar);border-top:var(--bw) solid var(--line);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.newpt{font-size:.88rem;margin-bottom:8px;color:var(--ink);font-weight:600}
+.confirm{margin-top:8px}
 .confirm p{font-weight:600}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .states{display:grid;grid-template-columns:1fr;gap:8px}
-.states .chip{text-align:left;padding:0 16px;font-size:15px}
-.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-.hidden{display:none !important}
-.leaflet-container{font-family:inherit}
-.you{width:16px;height:16px;border-radius:50%;background:#098BE1;border:3px solid #FFFFFF;box-shadow:0 0 0 2px rgba(9,139,225,.35)}
-@media (max-width:600px){.map{height:40vh}.phead .t{font-size:18px}}
-@media (max-width:600px) and (max-height:780px){.map{height:30vh;min-height:210px}}
-@media (prefers-reduced-motion: reduce){*{scroll-behavior:auto !important}}
+.states .chip{text-align:left;font-size:.95rem;min-height:52px}
+details.more{margin-top:14px;border:var(--bw) solid var(--line);border-radius:16px;padding:0 14px}
+details.more summary{min-height:52px;display:flex;align-items:center;font-weight:700;font-size:.92rem;cursor:pointer;color:var(--ink)}
+details.more[open]{padding-bottom:14px}
+.media{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.thumbs{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.thumbs:empty{display:none}
+.thumbs figure{position:relative;margin:0;width:64px;height:64px}
+.thumbs img{width:64px;height:64px;border-radius:12px;object-fit:cover;border:var(--bw) solid var(--line)}
+.thumbs button{position:absolute;top:-8px;right:-8px;width:28px;height:28px;border-radius:50%;border:2px solid var(--card);background:var(--ink);color:var(--card);font-weight:800;cursor:pointer;line-height:1;padding:0}
+.voice{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px}
+.voice audio{height:40px;max-width:220px}
+.rec{color:var(--bad);font-weight:700;font-size:.88rem}
+.rec::before{content:"";display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--bad);margin-right:6px;animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.2}}
+
+/* history */
+.hist{display:flex;flex-direction:column;gap:10px}
+.note{background:var(--card);border-radius:16px;padding:14px 16px;border:var(--bw) solid var(--line)}
+.note .meta{font-size:.75rem;font-weight:700;color:var(--muted);margin-bottom:6px;letter-spacing:.02em}
+.note p{margin:0;font-size:.9rem;white-space:pre-line;overflow-wrap:anywhere}
+.note .files{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.note .files img{width:88px;height:88px;object-fit:cover;border-radius:10px;border:var(--bw) solid var(--line)}
+.note .files audio{width:100%;max-width:300px}
+
+/* route */
+.stops{display:flex;flex-direction:column;gap:8px;counter-reset:s}
+.stop{display:flex;align-items:center;gap:12px;padding:12px;border-radius:16px;background:var(--card);border:var(--bw) solid var(--line)}
+.stop::before{counter-increment:s;content:counter(s);flex:0 0 auto;width:32px;height:32px;border-radius:50%;background:var(--blue);color:#FFFFFF;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:.88rem}
+.stop .tx{flex:1;min-width:0}
+.stop .t{display:block;font-weight:700;font-size:.92rem}
+.stop .s{display:block;font-size:.78rem;color:var(--muted)}
+.legs{display:flex;flex-direction:column;gap:8px;margin:14px 0}
+
+/* me */
+.stack{display:flex;flex-direction:column;gap:12px}
+.kv{display:flex;justify-content:space-between;gap:10px;font-size:.9rem;padding:8px 0;border-bottom:var(--bw) solid var(--line)}
+.kv:last-child{border-bottom:0}
+table.act{width:100%;border-collapse:collapse;font-size:.85rem}
+table.act th,table.act td{padding:8px 4px;text-align:right;border-bottom:var(--bw) solid var(--line)}
+table.act th:first-child,table.act td:first-child{text-align:left}
+table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.feed{list-style:none;margin:0;padding:0}
+.feed li{font-size:.85rem;padding:8px 0;border-bottom:var(--bw) solid var(--line)}
+.feed li:last-child{border-bottom:0}
+.feed small{display:block;color:var(--muted);font-size:.75rem}
+
+@media (max-width:600px){.phead .t{font-size:1.15rem}.map{height:38vh}}
+@media (max-width:600px) and (max-height:780px){.map{height:30vh;min-height:200px}}
+@media (min-width:761px){.tabs nav{border-left:var(--bw) solid var(--line);border-right:var(--bw) solid var(--line)}}
+@media (prefers-reduced-motion: reduce){*{scroll-behavior:auto !important;animation:none !important;transition:none !important}}
 </style>
 </head>
-<body>
+<body class="locked">
 <div class="app">
   <header class="top">
-    <img src="/img/logo-dark-bold.webp" alt="Rafiki Outreach">
+    <img class="lg-d" src="/img/logo-dark-bold.webp" alt="Rafiki Outreach"><img class="lg-l" src="/img/logo-light-bold.webp" alt="Rafiki Outreach">
     <b>Pin</b>
     <span class="sp"></span>
     <span class="who" id="who"></span>
-    <button class="icon-btn hidden" id="lockBtn" type="button">Lock</button>
   </header>
-  <div class="net" id="net" role="status">No signal. You can keep working: changes are saved on this phone and sent when you're back online.</div>
-  <main>
+  <div class="net" id="net" role="status">No signal. Keep working: changes are saved on this phone and sent when you're back online.</div>
+  <main id="main">
 
-    <!-- 1. unlock -->
+    <!-- unlock -->
     <section class="card" id="vLock" aria-labelledby="h-lock">
       <h1 id="h-lock">Rafiki Pin</h1>
-      <p class="muted">For the Rafiki team: pin project locations, report site visits and add new sites. Everything goes straight into monday.com.</p>
+      <p class="muted">For the Rafiki team: find sites, pin locations, report visits, track repairs and add new sites. Everything goes straight into monday.com.</p>
       <form id="fLock" novalidate>
+        <label for="iPin">Your PIN</label>
+        <input type="password" id="iPin" inputmode="numeric" autocomplete="one-time-code" placeholder="PIN" required>
         <label for="iName">Your name</label>
-        <input type="text" id="iName" autocomplete="name" placeholder="e.g. Meril" required>
-        <label for="iPin">Team PIN</label>
-        <input type="password" id="iPin" inputmode="numeric" autocomplete="one-time-code" placeholder="Team PIN" required>
-        <div style="margin-top:18px"><button class="btn block" type="submit">Unlock</button></div>
+        <input type="text" id="iName" autocomplete="name" placeholder="e.g. Meril">
+        <p class="muted" style="margin-top:6px">Not needed if you have your own PIN.</p>
+        <div style="margin-top:14px"><button class="btn block" type="submit">Unlock</button></div>
         <p class="msg" id="mLock" aria-live="polite"></p>
       </form>
     </section>
 
-    <!-- 2. project list -->
+    <!-- map home -->
+    <section id="vMap" class="hidden" aria-label="Map of projects">
+      <div class="mapwrap">
+        <div id="hMap" role="application" aria-label="Map of Rafiki projects. Tap a dot to open a project."></div>
+        <div class="ov top">
+          <div class="pill"><div class="prog" id="mProg"></div>
+            <div class="legend"><span><i style="background:#1C7C4A"></i>Pinned</span><span><i style="background:#D98200"></i>Needs repair</span><span><i style="background:#B3261E"></i>Not working</span></div>
+          </div>
+          <div id="mHere"></div>
+        </div>
+        <div class="ov bot">
+          <div class="sheet shut" id="nearSheet">
+            <button class="hd" type="button" id="nearHd" aria-expanded="false" aria-controls="nearList"><span>Nearest to you</span><small id="nearHint">Show</small></button>
+            <div class="bd" id="nearList"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- list -->
     <section id="vList" class="hidden" aria-labelledby="h-list">
-      <div class="listhead"><h1 id="h-list">Projects</h1><button class="btn small" id="bNew" type="button">+ New site</button></div>
-      <div class="outbox" id="outbox" role="status"><span id="outboxTx"></span><button class="btn small light" id="bFlush" type="button">Send now</button></div>
+      <div id="lHere"></div>
+      <div id="instBox"></div>
+      <div class="outbox hidden" id="outbox" role="status"><span id="outboxTx"></span><button class="btn small light" id="bFlush" type="button">Send now</button></div>
+      <div class="listhead"><h1 id="h-list">Projects</h1><button class="btn small light" id="bRouteMode" type="button" aria-pressed="false">🗺 Plan a route</button></div>
+      <div class="card" style="padding:16px"><div class="prog" id="lProg"></div><div class="cmeters" id="cProg" style="margin-top:12px"></div></div>
       <div class="tools">
         <input type="search" id="iSearch" placeholder="Search by project name or place" aria-label="Search by project name or place">
         <div class="chips" role="group" aria-label="Show">
           <button class="chip" type="button" data-f="missing" aria-pressed="true">Needs a location</button>
           <button class="chip" type="button" data-f="near" aria-pressed="false">📍 Nearby</button>
+          <button class="chip" type="button" data-f="repairs" aria-pressed="false">🔧 Repairs<span class="n" id="repN">0</span></button>
           <button class="chip" type="button" data-f="all" aria-pressed="false">All</button>
         </div>
         <select id="iCountry" aria-label="Country">
@@ -153,11 +324,23 @@ textarea{padding:12px 16px;min-height:96px;resize:vertical;line-height:1.45}
       <p class="count" id="count" aria-live="polite"></p>
       <div class="list" id="list"></div>
       <p class="msg" id="mList" aria-live="polite"></p>
+      <div class="routebar hidden" id="routeBar"><div><span id="routeN">Choose pinned projects to visit</span><button class="btn small" id="bRouteGo" type="button" disabled>Plan route</button></div></div>
     </section>
 
-    <!-- 3. one project -->
+    <!-- route -->
+    <section id="vRoute" class="hidden" aria-labelledby="h-route">
+      <button class="back" id="routeBack" type="button">← Projects</button>
+      <h1 id="h-route" style="margin-top:4px">Today's route</h1>
+      <p class="muted" id="routeSum"></p>
+      <div class="legs" id="routeLegs"></div>
+      <div class="stops" id="routeStops"></div>
+      <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap"><button class="btn light small" id="routeEdit" type="button">Change stops</button><button class="btn light small" id="routeClear" type="button">Clear route</button></div>
+    </section>
+
+    <!-- one project -->
     <section id="vProj" class="hidden" aria-labelledby="pTitle">
-      <button class="icon-btn" id="back" type="button" style="padding-left:0">← All projects</button>
+      <button class="back" id="back" type="button">← Back</button>
+      <div class="hero hidden" id="pHero"><img id="pImg" alt=""></div>
       <div class="phead">
         <span class="t" id="pTitle"></span>
         <span class="muted" id="pSub"></span>
@@ -166,9 +349,11 @@ textarea{padding:12px 16px;min-height:96px;resize:vertical;line-height:1.45}
         <div class="links" id="pLinks"></div>
         <div class="lastch" id="pLast"></div>
       </div>
+      <div id="pRepair"></div>
       <div class="seg" role="tablist" aria-label="What do you want to do?">
         <button type="button" role="tab" id="tabPin" aria-selected="true" aria-controls="panePin">Pin location</button>
         <button type="button" role="tab" id="tabVisit" aria-selected="false" aria-controls="paneVisit">Site visit</button>
+        <button type="button" role="tab" id="tabHist" aria-selected="false" aria-controls="paneHist">History</button>
       </div>
 
       <div id="panePin" role="tabpanel" aria-labelledby="tabPin">
@@ -183,16 +368,13 @@ textarea{padding:12px 16px;min-height:96px;resize:vertical;line-height:1.45}
           <div class="rowf"><input type="text" id="pPasteIn" placeholder="0.561368, 35.065480" autocomplete="off"><button class="btn light" id="pPasteGo" type="button">Use</button></div>
         </div>
         <div class="map" id="pMap" role="application" aria-label="Map: tap to place the pin, or drag the pin"></div>
-        <p class="maptip">Tap the map to place the pin, or drag it. Use the layers button (top right) for satellite view.</p>
+        <p class="maptip">Tap the map to place the pin, or drag it. The layers button (top right) switches to satellite.</p>
         <div class="savebar">
           <div class="newpt" id="newPt">Choose a spot on the map, or use your location.</div>
-          <div class="photo">
-            <input type="file" id="pPhoto" accept="image/*" capture="environment" class="vh">
-            <label for="pPhoto" class="btn light small" style="margin:0;text-transform:none;letter-spacing:0">📷 Add a photo</label>
-            <img id="pPhotoImg" class="hidden" alt="Photo to send"><button class="icon-btn x hidden" id="pPhotoX" type="button">Remove</button>
-          </div>
-          <button class="btn block" id="bSave" type="button" disabled>Save this location</button>
-          <div class="confirm" id="confirm">
+          <div class="media"><span id="pPhotoBtn"></span></div>
+          <div class="thumbs" id="pThumbs"></div>
+          <div style="margin-top:10px"><button class="btn block" id="bSave" type="button" disabled>Save this location</button></div>
+          <div class="confirm hidden" id="confirm">
             <p id="confirmTx"></p>
             <div class="two"><button class="btn" id="bYes" type="button">Yes, save</button><button class="btn light" id="bNo" type="button">Cancel</button></div>
           </div>
@@ -203,30 +385,43 @@ textarea{padding:12px 16px;min-height:96px;resize:vertical;line-height:1.45}
       <div id="paneVisit" role="tabpanel" aria-labelledby="tabVisit" class="hidden">
         <div class="card">
           <h2>Report a site visit</h2>
-          <p class="muted">Leaves a dated note on this project in monday.com, with where you reported it from.</p>
+          <p class="muted">Leaves a dated note on this project in monday.com, with where you sent it from.</p>
           <div class="states" role="radiogroup" aria-label="How is it?">
-            <button class="chip" type="button" role="radio" aria-checked="false" aria-pressed="false" data-s="working">✅ Working well</button>
-            <button class="chip" type="button" role="radio" aria-checked="false" aria-pressed="false" data-s="repair">⚠️ Needs repair</button>
-            <button class="chip" type="button" role="radio" aria-checked="false" aria-pressed="false" data-s="notworking">❌ Not working</button>
+            <button class="chip" type="button" role="radio" aria-checked="false" data-s="working">✅ Working well</button>
+            <button class="chip" type="button" role="radio" aria-checked="false" data-s="repair">⚠️ Needs repair</button>
+            <button class="chip" type="button" role="radio" aria-checked="false" data-s="notworking">❌ Not working</button>
           </div>
+          <details class="more" id="vMore">
+            <summary>Add readings (optional)</summary>
+            <div class="two">
+              <div><label for="rStrokes">Pump strokes to fill 20 L</label><input type="number" id="rStrokes" inputmode="numeric" min="0" max="1000" placeholder="e.g. 35"></div>
+              <div><label for="rFlow">Flow (litres a minute)</label><input type="number" id="rFlow" inputmode="decimal" min="0" max="1000" step="0.1" placeholder="e.g. 12"></div>
+              <div><label for="rQueue">People queuing</label><input type="number" id="rQueue" inputmode="numeric" min="0" max="2000" placeholder="e.g. 8"></div>
+              <div><label for="rUsers">People using it (estimate)</label><input type="number" id="rUsers" inputmode="numeric" min="0" max="100000" placeholder="e.g. 600"></div>
+            </div>
+            <label for="rClarity">How does the water look?</label>
+            <select id="rClarity"><option value="">Not checked</option><option value="clear">Clear</option><option value="cloudy">Cloudy</option><option value="dirty">Dirty or coloured</option></select>
+          </details>
           <label for="vNote">Notes (optional)</label>
-          <textarea id="vNote" placeholder="What did you see? e.g. pump handle loose, queue at 7am, committee meeting monthly"></textarea>
-          <div class="photo" style="margin-top:12px">
-            <input type="file" id="vPhoto" accept="image/*" capture="environment" class="vh">
-            <label for="vPhoto" class="btn light small" style="margin:0;text-transform:none;letter-spacing:0">📷 Add a photo</label>
-            <img id="vPhotoImg" class="hidden" alt="Photo to send"><button class="icon-btn x hidden" id="vPhotoX" type="button">Remove</button>
-          </div>
-          <button class="btn block" id="bVisit" type="button" disabled style="margin-top:6px">Send visit report</button>
+          <textarea id="vNote" placeholder="What did you see? e.g. pump handle loose, queue at 7am, committee meets monthly"></textarea>
+          <div class="media"><span id="vPhotoBtn"></span><span id="vVoiceBtn"></span></div>
+          <div class="thumbs" id="vThumbs"></div>
+          <div class="voice" id="vVoice"></div>
+          <button class="btn block" id="bVisit" type="button" disabled style="margin-top:14px">Send visit report</button>
           <p class="msg" id="mVisit" aria-live="polite"></p>
         </div>
       </div>
+
+      <div id="paneHist" role="tabpanel" aria-labelledby="tabHist" class="hidden">
+        <p class="muted" id="hInfo">Notes on this project in monday.com, newest first.</p>
+        <div class="hist" id="hList"></div>
+      </div>
     </section>
 
-    <!-- 4. new site -->
+    <!-- new site -->
     <section id="vNew" class="hidden" aria-labelledby="h-new">
-      <button class="icon-btn" id="newBack" type="button" style="padding-left:0">← All projects</button>
       <h1 id="h-new" style="margin:4px 2px 4px">Add a new site</h1>
-      <p class="muted" style="margin:0 2px 8px">It goes onto the monday.com board as “Due Diligence”, so it isn't on the website until you move it on.</p>
+      <p class="muted" style="margin:0 2px 12px">It goes onto the monday.com board as “Due Diligence”, so it isn't on the website until you move it on.</p>
       <div class="card">
         <label for="nName" style="margin-top:0">Site name</label>
         <input type="text" id="nName" placeholder="e.g. Kiptoo Primary School" autocomplete="off">
@@ -238,6 +433,9 @@ textarea{padding:12px 16px;min-height:96px;resize:vertical;line-height:1.45}
         <input type="text" id="nVillage" placeholder="e.g. Kiptoo, Nandi" autocomplete="off">
         <label for="nNote">Notes (optional)</label>
         <textarea id="nNote" placeholder="Who asked, how many people, current water source…"></textarea>
+        <div class="media"><span id="nPhotoBtn"></span><span id="nVoiceBtn"></span></div>
+        <div class="thumbs" id="nThumbs"></div>
+        <div class="voice" id="nVoice"></div>
       </div>
       <h2 style="margin:18px 2px 8px">Where is it?</h2>
       <div class="actions">
@@ -253,41 +451,89 @@ textarea{padding:12px 16px;min-height:96px;resize:vertical;line-height:1.45}
       <div class="map" id="nMap" role="application" aria-label="Map: tap to place the new site"></div>
       <div class="savebar">
         <div class="newpt" id="nPt">Add the name, then choose where it is.</div>
-        <div class="photo">
-          <input type="file" id="nPhoto" accept="image/*" capture="environment" class="vh">
-          <label for="nPhoto" class="btn light small" style="margin:0;text-transform:none;letter-spacing:0">📷 Add a photo</label>
-          <img id="nPhotoImg" class="hidden" alt="Photo to send"><button class="icon-btn x hidden" id="nPhotoX" type="button">Remove</button>
-        </div>
         <button class="btn block" id="bNewSave" type="button" disabled>Add this site</button>
         <p class="msg" id="mNew" aria-live="polite"></p>
       </div>
     </section>
 
+    <!-- me -->
+    <section id="vMe" class="hidden" aria-labelledby="h-me">
+      <h1 id="h-me" style="margin:4px 2px 12px">Me &amp; team</h1>
+      <div class="stack">
+        <div class="card">
+          <h2>You</h2>
+          <div class="kv"><span>Name</span><b id="meName"></b></div>
+          <div class="kv"><span>PIN</span><span id="mePin"></span></div>
+          <div class="kv"><span>Waiting to send</span><span id="meOut">Nothing</span></div>
+          <div style="margin-top:12px"><button class="btn light small" id="lockBtn" type="button">Lock the app</button></div>
+        </div>
+        <div class="card">
+          <h2>Display</h2>
+          <span class="lbl" id="l-theme">Colours</span>
+          <div class="seg" role="group" aria-labelledby="l-theme" id="segTheme">
+            <button type="button" data-v="" aria-pressed="true">Light</button>
+            <button type="button" data-v="dark" aria-pressed="false">Dark</button>
+            <button type="button" data-v="sun" aria-pressed="false">Bright sun</button>
+          </div>
+          <span class="lbl" id="l-size">Text size</span>
+          <div class="seg" role="group" aria-labelledby="l-size" id="segSize">
+            <button type="button" data-v="" aria-pressed="true">Normal</button>
+            <button type="button" data-v="l" aria-pressed="false">Large</button>
+            <button type="button" data-v="xl" aria-pressed="false">Larger</button>
+          </div>
+        </div>
+        <div class="card" id="meInstall"></div>
+        <div class="card">
+          <h2>Team activity</h2>
+          <div class="seg" role="group" aria-label="Period" id="segPeriod">
+            <button type="button" data-v="7" aria-pressed="true">This week</button>
+            <button type="button" data-v="30" aria-pressed="false">Last 30 days</button>
+          </div>
+          <div id="actTable"><p class="muted">Loading…</p></div>
+          <h3 style="margin-top:16px">Latest</h3>
+          <ul class="feed" id="actFeed"></ul>
+        </div>
+      </div>
+    </section>
+
   </main>
+  <div class="tabs" id="tabs">
+    <nav aria-label="Main">
+      <button type="button" data-v="vMap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg>Map</button>
+      <button type="button" data-v="vList"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="3.5" cy="6" r="1"/><circle cx="3.5" cy="12" r="1"/><circle cx="3.5" cy="18" r="1"/></svg>Projects<span class="dot hidden" id="tabDot"></span></button>
+      <button type="button" data-v="vNew" class="plus"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span>New site</button>
+      <button type="button" data-v="vMe"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>Me</button>
+    </nav>
+  </div>
 </div>
 <script src="/vendor/leaflet/leaflet.js"></script>
 <script>
 (function () {
   var $ = function (id) { return document.getElementById(id); };
+  var qa = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
   var store = { get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} }, del: function (k) { try { localStorage.removeItem(k); } catch (e) {} } };
-  var S = { pin: store.get('rfPin') || '', name: store.get('rfPinName') || '', projects: [], filter: 'missing', cur: null, here: null, hereAt: 0 };
-  try { S.projects = JSON.parse(store.get('rfPinList') || '[]') || []; } catch (e) { S.projects = []; }
+  var jget = function (k, d) { try { return JSON.parse(store.get(k) || 'null') || d; } catch (e) { return d; } };
+  var S = { pin: store.get('rfPin') || '', name: store.get('rfPinName') || '', who: store.get('rfPinWho') || '', projects: jget('rfPinList', []), repairs: jget('rfPinRepairs', {}),
+    filter: 'missing', cur: null, here: null, hereAt: 0, view: 'vLock', prev: 'vMap', routeMode: false, pickedRoute: [], route: jget('rfPinRoute', []), dismissed: {} };
   var CENTER = { ke: [0.3, 37.9, 7], tz: [-6.3, 34.8, 6], ug: [1.4, 32.3, 7], mw: [-13.3, 34.3, 7] };
+  var CNAME = { ke: 'Kenya', tz: 'Tanzania', ug: 'Uganda', mw: 'Malawi' };
+  var COLORS = { pinned: '#1C7C4A', repair: '#D98200', notworking: '#B3261E' };
 
-  function show(v) {
-    ['vLock', 'vList', 'vProj', 'vNew'].forEach(function (x) { $(x).classList.toggle('hidden', x !== v); });
-    $('lockBtn').classList.toggle('hidden', v === 'vLock'); $('who').textContent = v === 'vLock' ? '' : S.name; window.scrollTo(0, 0);
-  }
+  function byId(id) { return S.projects.filter(function (x) { return x.id === id; })[0]; }
   function fmt(ll) { return ll[0].toFixed(6) + ', ' + ll[1].toFixed(6); }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function inRange(ll) { return ll && ll[0] >= -18 && ll[0] <= 6 && ll[1] >= 28 && ll[1] <= 42; }
   function metres(a, b) { var R = 6371000, r = function (x) { return x * Math.PI / 180; }, dLa = r(b[0] - a[0]), dLo = r(b[1] - a[1]); var h = Math.pow(Math.sin(dLa / 2), 2) + Math.cos(r(a[0])) * Math.cos(r(b[0])) * Math.pow(Math.sin(dLo / 2), 2); return 2 * R * Math.asin(Math.sqrt(h)); }
   function dist(m) { return m < 1000 ? Math.round(m) + ' m' : m < 10000 ? (m / 1000).toFixed(1) + ' km' : Math.round(m / 1000) + ' km'; }
   function msg(id, cls, t) { $(id).className = 'msg ' + (cls || ''); $(id).textContent = t || ''; }
+  function photoUrl(p, w) { return p && p.photo ? '/api/photo/' + encodeURIComponent(p.photo) + '?w=' + (w || 480) : ''; }
+  function when(iso) { var d = new Date(iso); return isNaN(d) ? '' : d.toLocaleDateString(undefined, { day: 'numeric', month: 'short' }) + ', ' + d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }); }
+  function sub(p) { return [p.area, p.country, p.status].filter(Boolean).join(' · '); }
+  function saveList() { store.set('rfPinList', JSON.stringify(S.projects)); store.set('rfPinRepairs', JSON.stringify(S.repairs)); }
   function why(j) {
     return j.reason === 'pin' ? 'That PIN isn’t right. Please check it with your team.'
       : j.reason === 'locked' ? 'Too many wrong PINs from this connection. Please try again in an hour.'
-      : j.reason === 'not-set-up' ? 'The pin app isn’t switched on yet: the team PIN still needs to be set in Cloudflare.'
+      : j.reason === 'not-set-up' ? 'The pin app isn’t switched on yet: PINs still need to be set in Cloudflare.'
       : j.reason === 'no-monday' ? 'The pin app can’t reach monday.com yet (the monday.com connection isn’t set up).'
       : j.reason === 'offline' ? 'No connection. Check your signal and try again.'
       : j.reason === 'place' ? 'That spot is outside East Africa. Please check the point.'
@@ -295,10 +541,32 @@ textarea{padding:12px 16px;min-height:96px;resize:vertical;line-height:1.45}
       : j.reason === 'rate' ? 'Too many changes from this connection. Please try again in an hour.'
       : j.reason === 'nothing-to-undo' ? 'There’s nothing to undo for this project.'
       : j.reason === 'changed' ? 'The location was changed on monday.com since, so it can’t be undone from here.'
-      : j.reason === 'too-large' ? 'That photo is too large.'
-      : j.reason === 'type' ? 'That file isn’t a photo.'
+      : j.reason === 'too-large' ? 'That file is too large.'
+      : j.reason === 'type' ? 'That kind of file can’t be added.'
       : 'Something went wrong. Please try again in a moment.';
   }
+
+  // --- views and tab bar -------------------------------------------------------------------
+  var MAIN = ['vMap', 'vList', 'vNew', 'vMe'];
+  function show(v) {
+    if (S.view !== v && MAIN.indexOf(S.view) >= 0) S.prev = S.view;
+    if (v !== 'vProj') pick.stop(); if (v !== 'vNew') nPick.stop();
+    S.view = v;
+    ['vLock', 'vMap', 'vList', 'vRoute', 'vProj', 'vNew', 'vMe'].forEach(function (x) { $(x).classList.toggle('hidden', x !== v); });
+    document.body.classList.toggle('locked', v === 'vLock');
+    $('main').classList.toggle('bare', v === 'vMap');
+    var tabFor = v === 'vRoute' || v === 'vProj' ? (S.prev === 'vMap' ? 'vMap' : 'vList') : v;
+    qa('#tabs button').forEach(function (b) { if (b.getAttribute('data-v') === tabFor) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
+    $('who').textContent = v === 'vLock' ? '' : S.name;
+    $('routeBar').classList.toggle('hidden', !(v === 'vList' && S.routeMode)); document.body.classList.toggle('routing', v === 'vList' && S.routeMode);
+    window.scrollTo(0, 0);
+    if (v === 'vMap') homeMap();
+    if (v === 'vList') renderList();
+    if (v === 'vMe') renderMe();
+    if (v === 'vNew') openNew();
+    hereWatch(v === 'vMap' || v === 'vList');
+  }
+  qa('#tabs button').forEach(function (b) { b.addEventListener('click', function () { show(b.getAttribute('data-v')); }); });
 
   // --- talking to the server -------------------------------------------------------------
   function api(method, body, q) {
@@ -306,8 +574,10 @@ textarea{padding:12px 16px;min-height:96px;resize:vertical;line-height:1.45}
       .then(function (r) { return r.json().catch(function () { return { ok: false, reason: 'down' }; }).then(function (j) { j.status = r.status; return j; }); })
       .catch(function () { return { ok: false, reason: 'offline', status: 0 }; });
   }
-  function sendPhoto(updateId, blob) {
-    var fd = new FormData(); fd.append('update', updateId); fd.append('file', blob, 'photo.jpg');
+  function sendFile(updateId, blob, kind) {
+    var fd = new FormData(); fd.append('update', updateId);
+    var ext = kind === 'voice' ? (/mp4|m4a|aac/.test(blob.type) ? 'm4a' : /ogg/.test(blob.type) ? 'ogg' : 'webm') : 'jpg';
+    fd.append('file', blob, (kind === 'voice' ? 'voice.' : 'photo.') + ext);
     return fetch('/api/pin-photo', { method: 'POST', headers: { 'X-Pin': S.pin }, body: fd })
       .then(function (r) { return r.json().catch(function () { return { ok: false, reason: 'down' }; }).then(function (j) { j.status = r.status; return j; }); })
       .catch(function () { return { ok: false, reason: 'offline', status: 0 }; });
@@ -333,7 +603,7 @@ textarea{padding:12px 16px;min-height:96px;resize:vertical;line-height:1.45}
   function outPut(item) { var i = mem.findIndex(function (x) { return x.k === item.k; }); if (i >= 0) { mem[i] = item; return Promise.resolve(); } return tx('readwrite', function (s) { return s.put(item); }).catch(function () {}); }
 
   var flushing = null;
-  // Sends everything waiting. Resolves with { sent: [keys], failed: { key: reason }, waiting: n, locked }.
+  // Sends everything waiting. Resolves with { sent: [keys], failed: { key: reason }, waiting, locked, results }.
   function flush() {
     if (flushing) return flushing;
     flushing = outAll().then(function (items) {
@@ -346,15 +616,30 @@ textarea{padding:12px 16px;min-height:96px;resize:vertical;line-height:1.45}
           return step.then(function (j) {
             if (!j.ok) {
               if (j.status === 0 || j.status >= 500 || j.status === 429) { out.waiting++; return; }
-              if (j.status === 401 || j.status === 503) { out.locked = true; out.waiting++; return; }
+              if (j.status === 401) { out.locked = true; out.waiting++; return; }
               out.failed[it.k] = why(j); return outDel(it.k);
             }
-            out.results[it.k] = j;
-            if (!it.photo || !j.updateId) { out.sent.push(it.k); return outDel(it.k); }
-            it.updateId = j.updateId; it.result = j;
-            return sendPhoto(j.updateId, it.photo).then(function (p) {
-              if (p.ok || (p.status >= 400 && p.status < 500 && p.status !== 401)) { out.sent.push(it.k); if (!p.ok) out.failed[it.k] = 'Saved, but the photo couldn’t be added: ' + why(p); return outDel(it.k); }
-              out.waiting++; return outPut(it); // the change is saved; only the photo is still waiting
+            out.results[it.k] = it.result || j;
+            var files = it.files || [];
+            if (!files.length || !j.updateId) { out.sent.push(it.k); return outDel(it.k); }
+            if (!it.updateId) { it.updateId = j.updateId; it.result = j; it.done = 0; }
+            // send the photos and voice note one by one; keep what's left if the signal drops
+            var lost = 0;
+            var up = Promise.resolve();
+            files.forEach(function (f, i) {
+              up = up.then(function (stop) {
+                if (stop || i < (it.done || 0)) return stop;
+                return sendFile(it.updateId, f.blob, f.kind).then(function (p) {
+                  if (p.ok) { it.done = i + 1; return false; }
+                  if (p.status === 0 || p.status >= 500 || p.status === 429 || p.status === 401) return true;
+                  lost++; it.done = i + 1; return false; // rejected (e.g. too large): skip it
+                });
+              });
+            });
+            return up.then(function (stopped) {
+              if (stopped) { out.waiting++; return outPut(it); } // the change is saved; only files are still waiting
+              out.sent.push(it.k); if (lost) out.failed[it.k] = 'Saved, but ' + (lost === 1 ? 'one file' : lost + ' files') + ' couldn’t be added.';
+              return outDel(it.k);
             });
           });
         });
@@ -365,14 +650,15 @@ textarea{padding:12px 16px;min-height:96px;resize:vertical;line-height:1.45}
   }
   function outboxUi() {
     outAll().then(function (a) {
-      var n = a.length;
-      $('outbox').classList.toggle('on', n > 0);
-      $('outboxTx').textContent = n === 1 ? '1 change waiting to send' : n + ' changes waiting to send';
+      var n = a.length, t = n === 1 ? '1 change waiting to send' : n + ' changes waiting to send';
+      $('outbox').classList.toggle('hidden', !n); $('outboxTx').textContent = t;
+      $('tabDot').classList.toggle('hidden', !n); $('tabDot').textContent = n;
+      $('meOut').textContent = n ? t : 'Nothing';
     });
   }
-  // queue a change and try to send it straight away; tells the caller what happened to it
-  function submit(body, photo, label) {
-    var item = { body: body, photo: photo || null, label: label, at: Date.now() };
+  // queue a change and try to send it straight away; says what happened to it
+  function submit(body, files) {
+    var item = { body: body, files: files || [], at: Date.now() };
     return outAdd(item).then(function (k) {
       item.k = k;
       return flush().then(function (r) {
@@ -385,11 +671,11 @@ textarea{padding:12px 16px;min-height:96px;resize:vertical;line-height:1.45}
   }
   $('bFlush').addEventListener('click', function () { flush().then(function (r) { msg('mList', r.waiting ? 'warn' : 'ok', r.waiting ? (navigator.onLine ? 'Couldn’t reach the server yet. It will keep trying.' : 'Still no signal. It will send when you’re back online.') : 'All sent ✓'); }); });
   function netUi() { $('net').classList.toggle('on', !navigator.onLine); }
-  addEventListener('online', function () { netUi(); flush().then(function () { load(false); }); });
+  addEventListener('online', function () { netUi(); flush().then(function () { if (S.pin) load(false); }); });
   addEventListener('offline', netUi);
-  setInterval(function () { if (navigator.onLine) flush(); }, 60000);
+  setInterval(function () { if (navigator.onLine && S.pin) flush(); }, 60000);
 
-  // --- photos: shrink before sending so they upload on a weak signal ----------------------
+  // --- photos (up to 5, shrunk before sending) and a voice note ------------------------------
   function shrink(file) {
     return new Promise(function (ok) {
       var url = URL.createObjectURL(file), img = new Image();
@@ -403,30 +689,75 @@ textarea{padding:12px 16px;min-height:96px;resize:vertical;line-height:1.45}
       img.src = url;
     });
   }
-  function photoPicker(inputId, imgId, xId) {
-    var st = { blob: null };
-    $(inputId).addEventListener('change', function () {
-      var f = this.files && this.files[0]; if (!f) return;
-      shrink(f).then(function (b) { st.blob = b; $(imgId).src = URL.createObjectURL(b); $(imgId).classList.remove('hidden'); $(xId).classList.remove('hidden'); });
+  function Media(o) {
+    var M = { photos: [], voice: null }, MAX = 5, uid = o.key;
+    $(o.photoBtn).innerHTML = '<input type="file" id="' + uid + 'Pf" accept="image/*" multiple class="vh"><label for="' + uid + 'Pf" class="btn light small" style="margin:0;text-transform:none;letter-spacing:0;font-size:.88rem">📷 Add photos</label>';
+    function draw() {
+      $(o.thumbs).innerHTML = M.photos.map(function (b, i) { return '<figure><img src="' + b.url + '" alt="Photo ' + (i + 1) + '"><button type="button" data-i="' + i + '" aria-label="Remove photo ' + (i + 1) + '">×</button></figure>'; }).join('');
+      $(uid + 'Pf').disabled = M.photos.length >= MAX;
+      if (o.onChange) o.onChange();
+    }
+    $(uid + 'Pf').addEventListener('change', function () {
+      var fs = Array.prototype.slice.call(this.files || []).slice(0, MAX - M.photos.length); this.value = '';
+      Promise.all(fs.map(shrink)).then(function (bs) { bs.forEach(function (b) { M.photos.push({ blob: b, url: URL.createObjectURL(b) }); }); draw(); });
     });
-    $(xId).addEventListener('click', function () { st.blob = null; $(inputId).value = ''; $(imgId).classList.add('hidden'); $(xId).classList.add('hidden'); });
-    st.clear = function () { $(xId).click(); };
-    return st;
+    $(o.thumbs).addEventListener('click', function (e) { var b = e.target.closest('button[data-i]'); if (!b) return; M.photos.splice(+b.getAttribute('data-i'), 1); draw(); });
+    // voice note
+    var rec = null, chunks = [], timer = null, t0 = 0;
+    var canRec = o.voiceBtn && window.MediaRecorder && navigator.mediaDevices && navigator.mediaDevices.getUserMedia;
+    function vdraw() {
+      if (!o.voiceBtn) return;
+      if (!canRec) { $(o.voiceBtn).innerHTML = ''; return; }
+      if (rec) { $(o.voiceBtn).innerHTML = '<button class="btn small" type="button" data-a="stop">■ Stop</button>'; return; }
+      $(o.voiceBtn).innerHTML = M.voice ? '' : '<button class="btn light small" type="button" data-a="rec">🎙 Voice note</button>';
+      $(o.voice).innerHTML = M.voice ? '<audio controls src="' + M.voice.url + '"></audio><button class="lnk" type="button" data-a="del">Remove voice note</button>' : '';
+    }
+    function stopRec() { if (rec && rec.state !== 'inactive') rec.stop(); }
+    if (o.voiceBtn) {
+      $(o.voiceBtn).addEventListener('click', function (e) {
+        var a = e.target.closest('[data-a]'); if (!a) return;
+        if (a.getAttribute('data-a') === 'stop') return stopRec();
+        navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
+          var type = ['audio/webm;codecs=opus', 'audio/mp4', 'audio/webm', 'audio/ogg'].filter(function (t) { return MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t); })[0];
+          chunks = []; rec = type ? new MediaRecorder(stream, { mimeType: type }) : new MediaRecorder(stream);
+          rec.ondataavailable = function (ev) { if (ev.data && ev.data.size) chunks.push(ev.data); };
+          rec.onstop = function () {
+            stream.getTracks().forEach(function (t) { t.stop(); }); clearInterval(timer);
+            var b = new Blob(chunks, { type: (rec.mimeType || type || 'audio/webm').split(';')[0] }); rec = null;
+            if (b.size) M.voice = { blob: b, url: URL.createObjectURL(b) };
+            vdraw(); if (o.onChange) o.onChange();
+          };
+          rec.start(); t0 = Date.now(); vdraw();
+          $(o.voice).innerHTML = '<span class="rec" id="' + uid + 'Rt">Recording 0:00 (up to 2 min)</span>';
+          timer = setInterval(function () { var s = Math.floor((Date.now() - t0) / 1000); var el = $(uid + 'Rt'); if (el) el.textContent = 'Recording ' + Math.floor(s / 60) + ':' + ('0' + s % 60).slice(-2) + ' (up to 2 min)'; if (s >= 120) stopRec(); }, 500);
+        }).catch(function () { $(o.voice).innerHTML = '<span class="msg warn">Microphone is blocked. Allow it in your browser settings to record a voice note.</span>'; });
+      });
+      $(o.voice).addEventListener('click', function (e) { var a = e.target.closest('[data-a=del]'); if (!a) return; M.voice = null; vdraw(); if (o.onChange) o.onChange(); });
+    }
+    M.files = function () { var f = M.photos.map(function (p) { return { blob: p.blob, kind: 'photo' }; }); if (M.voice) f.push({ blob: M.voice.blob, kind: 'voice' }); return f; };
+    M.count = function () { return M.photos.length + (M.voice ? 1 : 0); };
+    M.clear = function () { stopRec(); M.photos = []; M.voice = null; draw(); vdraw(); };
+    M.busy = function () { return !!rec; };
+    draw(); vdraw();
+    return M;
   }
-  var pPhoto = photoPicker('pPhoto', 'pPhotoImg', 'pPhotoX'), vPhoto = photoPicker('vPhoto', 'vPhotoImg', 'vPhotoX'), nPhoto = photoPicker('nPhoto', 'nPhotoImg', 'nPhotoX');
 
-  // --- a map with "use my location" and "paste a point" (used for pinning and new sites) --
+  // --- map tiles: street and satellite --------------------------------------------------------
+  function layers(map) {
+    var street = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' });
+    var sat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, maxNativeZoom: 18, attribution: 'Imagery &copy; Esri, Maxar, Earthstar Geographics' });
+    (store.get('rfPinLayer') === 'sat' ? sat : street).addTo(map);
+    L.control.layers({ 'Map': street, 'Satellite': sat }, null, { position: 'topright' }).addTo(map);
+    map.on('baselayerchange', function (e) { store.set('rfPinLayer', e.layer === sat ? 'sat' : 'street'); });
+  }
+
+  // --- a map with "use my location" and "paste a point" (pinning and new sites) -------------
   function Picker(o) {
     var P = { pick: null, how: 'map', acc: 0 }, map = null, oldMk = null, newMk = null, youMk = null, accC = null, watch = null, g = null;
     var GOOD = 30, SETTLE = 15000;
     function ensure() {
       if (map) { map.invalidateSize(); return map; }
-      map = L.map(o.map, { zoomControl: true });
-      var street = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' });
-      var sat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, maxNativeZoom: 18, attribution: 'Imagery &copy; Esri, Maxar, Earthstar Geographics' });
-      (store.get('rfPinLayer') === 'sat' ? sat : street).addTo(map);
-      L.control.layers({ 'Map': street, 'Satellite': sat }, null, { position: 'topright' }).addTo(map);
-      map.on('baselayerchange', function (e) { store.set('rfPinLayer', e.layer === sat ? 'sat' : 'street'); });
+      map = L.map(o.map, { zoomControl: true }); layers(map);
       map.on('click', function (e) { set([e.latlng.lat, e.latlng.lng], 'map', 0); });
       return map;
     }
@@ -480,7 +811,7 @@ textarea{padding:12px 16px;min-height:96px;resize:vertical;line-height:1.45}
     $(o.any).addEventListener('click', function () { if (!g || !g.bestLl) return; var ll = g.bestLl, acc = g.bestAcc; stop(); set(ll, 'gps', acc); line('warn', 'Using a rough position (±' + acc + ' m). Drag the pin onto the exact spot if you can see it on the map.'); });
     function parseAny(t) {
       t = String(t || '');
-      var m = /@(-?\d+\.\d+),(-?\d+\.\d+)/.exec(t) || /!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/.exec(t) || /[?&](?:q|query|ll|destination)=(-?\d+\.\d+)(?:,|%2C)\s*(-?\d+\.\d+)/i.exec(t) || /(-?\d{1,2}\.\d+)\s*[, ]\s*(-?\d{1,3}\.\d+)/.exec(t);
+      var m = /@(-?\d+\.\d+),(-?\d+\.\d+)/.exec(t) || /!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/.exec(t) || /[?&](?:q|query|ll|destination|daddr)=(-?\d+\.\d+)(?:,|%2C)\s*(-?\d+\.\d+)/i.exec(t) || /(-?\d{1,2}\.\d+)\s*[, ]\s*(-?\d{1,3}\.\d+)/.exec(t);
       return m ? [Number(m[1]), Number(m[2])] : null;
     }
     $(o.paste).addEventListener('click', function () { $(o.pasteBox).classList.toggle('on'); if ($(o.pasteBox).classList.contains('on')) $(o.pasteIn).focus(); });
@@ -498,80 +829,253 @@ textarea{padding:12px 16px;min-height:96px;resize:vertical;line-height:1.45}
     };
     P.saved = function (ll) { if (oldMk) map.removeLayer(oldMk); oldMk = ll ? L.circleMarker(ll, { radius: 9, color: '#1C7C4A', weight: 2, fillColor: '#7FD1A3', fillOpacity: .9 }).addTo(map).bindTooltip('Saved location') : null; if (newMk) { map.removeLayer(newMk); newMk = null; } [youMk, accC].forEach(function (m) { if (m) map.removeLayer(m); }); youMk = accC = null; P.pick = null; line('', ''); };
     P.stop = stop;
+    P.resize = function () { if (map) map.invalidateSize(); };
     return P;
   }
 
-  // --- 1. unlock ---------------------------------------------------------------------------
+  // --- unlock ----------------------------------------------------------------------------------
   $('iName').value = S.name;
   $('fLock').addEventListener('submit', function (e) {
     e.preventDefault();
     var name = $('iName').value.trim(), pin = $('iPin').value.trim();
-    if (!name) { msg('mLock', 'bad', 'Please add your name, so the team knows who made each change.'); $('iName').focus(); return; }
-    if (!pin) { msg('mLock', 'bad', 'Please enter the team PIN.'); $('iPin').focus(); return; }
+    if (!pin) { msg('mLock', 'bad', 'Please enter your PIN.'); $('iPin').focus(); return; }
     S.name = name; S.pin = pin; msg('mLock', '', 'Checking…');
     load(true);
   });
-  $('lockBtn').addEventListener('click', function () { pick.stop(); nPick.stop(); S.pin = ''; store.del('rfPin'); $('iPin').value = ''; msg('mLock', '', ''); show('vLock'); });
+  function lock() { pick.stop(); nPick.stop(); S.pin = ''; store.del('rfPin'); $('iPin').value = ''; msg('mLock', '', ''); show('vLock'); }
+  $('lockBtn').addEventListener('click', lock);
   function lockOut(j) { store.del('rfPin'); show('vLock'); msg('mLock', 'bad', why(j)); }
 
   function load(fromLock) {
     api('GET').then(function (j) {
       if (!j.ok) {
         if (j.status === 401 || j.status === 429 || j.status === 503) { lockOut(j); return; }
-        if (j.reason === 'offline' && S.projects.length && S.pin) { // no signal: keep working from the saved list
-          store.set('rfPinName', S.name); if (fromLock || !$('vLock').classList.contains('hidden')) { renderList(); show('vList'); }
+        if (j.reason === 'offline' && S.projects.length && S.pin && (S.name || S.who)) { // no signal: keep working from the saved list
+          if (S.view === 'vLock') show('vMap'); else if (S.view === 'vList') renderList();
           msg('mList', 'warn', 'No signal: showing the list saved on this phone.'); return;
         }
         if (fromLock) msg('mLock', 'bad', why(j)); else msg('mList', 'bad', why(j));
         return;
       }
-      store.set('rfPin', S.pin); store.set('rfPinName', S.name);
-      S.projects = j.projects || []; store.set('rfPinList', JSON.stringify(S.projects));
-      msg('mList', '', ''); renderList(); if (fromLock || !$('vLock').classList.contains('hidden')) show('vList');
+      S.who = j.who || '';
+      if (S.who) S.name = S.who;
+      else if (!S.name) { store.del('rfPin'); show('vLock'); msg('mLock', 'bad', 'This is the shared team PIN, so please add your name too.'); $('iName').focus(); return; }
+      store.set('rfPin', S.pin); store.set('rfPinName', S.name); store.set('rfPinWho', S.who);
+      S.projects = j.projects || []; S.repairs = j.repairs || {}; saveList();
+      msg('mList', '', '');
+      if (S.view === 'vLock') show('vMap'); else { if (S.view === 'vList') renderList(); if (S.view === 'vMap') homeMap(); }
+      $('who').textContent = S.name;
       flush();
     });
   }
 
-  // --- 2. list -------------------------------------------------------------------------------
+  // --- progress ----------------------------------------------------------------------------
+  function progHtml(list, label) {
+    var n = list.length, have = list.filter(function (p) { return p.gps; }).length, pc = n ? Math.round(have / n * 100) : 0;
+    return '<div class="row1">' + have + ' of ' + n + ' ' + (label || 'projects pinned') + '<span>' + (n - have) + ' to go</span></div><div class="meter" role="meter" aria-valuemin="0" aria-valuemax="' + n + '" aria-valuenow="' + have + '" aria-label="Projects with a location"><i style="width:' + pc + '%"></i></div>';
+  }
+  function progUi() {
+    $('mProg').innerHTML = progHtml(S.projects); $('lProg').innerHTML = progHtml(S.projects);
+    $('cProg').innerHTML = ['ke', 'tz', 'ug', 'mw'].map(function (ck) {
+      var l = S.projects.filter(function (p) { return p.ck === ck; }), h = l.filter(function (p) { return p.gps; }).length;
+      return l.length ? '<div>' + CNAME[ck] + ' ' + h + '/' + l.length + '<div class="meter"><i style="width:' + Math.round(h / l.length * 100) + '%"></i></div></div>' : '';
+    }).join('');
+    var nr = Object.keys(S.repairs).length; $('repN').textContent = nr; $('repN').classList.toggle('hidden', !nr);
+  }
+
+  // --- where am I: "I'm here" banner and nearest projects --------------------------------------
+  var hw = null;
+  function hereWatch(on) {
+    if (!on || !navigator.geolocation) { if (hw !== null) navigator.geolocation.clearWatch(hw); hw = null; return; }
+    if (hw !== null) return;
+    hw = navigator.geolocation.watchPosition(function (p) { S.here = [p.coords.latitude, p.coords.longitude]; S.hereAt = Date.now(); hereUi(); }, function () {}, { enableHighAccuracy: false, maximumAge: 60000, timeout: 30000 });
+  }
   function locate(cb) {
     if (S.here && Date.now() - S.hereAt < 120000) return cb(S.here);
     if (!navigator.geolocation) return cb(null);
     navigator.geolocation.getCurrentPosition(function (p) { S.here = [p.coords.latitude, p.coords.longitude]; S.hereAt = Date.now(); cb(S.here); }, function () { cb(null); }, { enableHighAccuracy: false, maximumAge: 120000, timeout: 15000 });
   }
+  function nearest(n) {
+    if (!S.here) return [];
+    return S.projects.filter(function (p) { return p.gps; }).map(function (p) { return { p: p, d: metres(S.here, p.gps) }; }).sort(function (a, b) { return a.d - b.d; }).slice(0, n);
+  }
+  function hereUi() {
+    var top = nearest(1)[0], html = '';
+    if (top && top.d <= 200 && !S.dismissed[top.p.id]) {
+      html = '<div class="here" role="status"><b>📍 You’re at ' + esc(top.p.title) + ' · ' + dist(top.d) + '</b><div class="acts">' +
+        '<button class="btn small" type="button" data-here="visit" data-id="' + esc(top.p.id) + '">Report a visit</button>' +
+        '<button class="btn small ghost" type="button" data-here="open" data-id="' + esc(top.p.id) + '">Open</button>' +
+        '<button class="btn small ghost x" type="button" data-here="x" data-id="' + esc(top.p.id) + '" aria-label="Not now">×</button></div></div>';
+    }
+    $('mHere').innerHTML = html; $('lHere').innerHTML = html ? '<div style="margin-bottom:12px">' + html + '</div>' : '';
+    nearUi();
+    if (S.view === 'vList' && S.filter === 'near') renderList();
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-here]'); if (!b) return;
+    var a = b.getAttribute('data-here'), id = b.getAttribute('data-id');
+    if (a === 'x') { S.dismissed[id] = 1; hereUi(); return; }
+    openProj(id, a === 'visit' ? 'visit' : 'pin');
+  });
+
+  // --- 1. map home -------------------------------------------------------------------------------
+  var hMap = null, hLayer = null, meCtl = null, fitted = false;
+  function dotStyle(p) {
+    var r = S.repairs[p.id], c = r ? COLORS[r.state] || COLORS.repair : COLORS.pinned;
+    return { radius: r ? 9 : 7, color: '#FFFFFF', weight: 2, fillColor: c, fillOpacity: 1 };
+  }
+  function homeMap() {
+    progUi();
+    setTimeout(function () {
+      if (!hMap) {
+        hMap = L.map('hMap', { zoomControl: true }); layers(hMap);
+        hMap.zoomControl.setPosition('topright');
+        var Me = L.Control.extend({ options: { position: 'topright' }, onAdd: function () {
+          var d = L.DomUtil.create('div', 'leaflet-bar lc-me'); d.innerHTML = '<a href="#" role="button" title="Show where I am" aria-label="Show where I am">◎</a>';
+          L.DomEvent.on(d, 'click', function (e) { L.DomEvent.preventDefault(e); L.DomEvent.stopPropagation(e); locate(function (ll) { if (ll) hMap.setView(ll, 13); else msg('mList', 'warn', 'Couldn’t get your location.'); }); });
+          return d; } });
+        meCtl = new Me().addTo(hMap);
+        hMap.setView([-3.5, 35.5], 5);
+        hMap.on('popupopen', function (e) { var el = e.popup.getElement(); var b = el && el.querySelector('[data-open]'); if (b) b.addEventListener('click', function () { openProj(b.getAttribute('data-open')); }); });
+      }
+      hMap.invalidateSize();
+      if (hLayer) hMap.removeLayer(hLayer);
+      hLayer = L.featureGroup();
+      var you = null;
+      S.projects.forEach(function (p) {
+        if (!p.gps) return;
+        var r = S.repairs[p.id];
+        L.circleMarker(p.gps, dotStyle(p)).bindPopup(function () {
+          return '<div class="pop">' + (p.photo ? '<img src="' + photoUrl(p, 480) + '" alt="" onerror="this.remove()">' : '') + '<b>' + esc(p.title) + '</b><span>' + esc(sub(p)) +
+            (r ? '<br><strong style="color:#B3261E">' + (r.state === 'notworking' ? '❌ Not working' : '⚠️ Needs repair') + '</strong>' : '') +
+            (S.here ? '<br>' + dist(metres(S.here, p.gps)) + ' from you' : '') + '</span><button class="btn" type="button" data-open="' + esc(p.id) + '">Open</button></div>';
+        }, { maxWidth: 260 }).addTo(hLayer);
+      });
+      hLayer.addTo(hMap);
+      if (S.here) { you = L.marker(S.here, { icon: L.divIcon({ className: '', html: '<div class="you"></div>', iconSize: [16, 16] }), interactive: false }).addTo(hLayer); }
+      if (!fitted && hLayer.getLayers().length) { hMap.fitBounds(hLayer.getBounds(), { paddingTopLeft: [24, 170], paddingBottomRight: [70, 80], maxZoom: 13 }); fitted = true; }
+      nearUi();
+    }, 30);
+  }
+  function nearUi() {
+    var list = nearest(3);
+    $('nearList').innerHTML = !S.here ? '<p class="muted" style="margin:0 6px 8px">Allow location to see the projects closest to you.</p>'
+      : list.map(function (x) { return rowHtml(x.p, '<span class="tag has">' + dist(x.d) + '</span>'); }).join('');
+  }
+  $('nearHd').addEventListener('click', function () { var s = $('nearSheet'), shut = !s.classList.contains('shut'); s.classList.toggle('shut', shut); this.setAttribute('aria-expanded', shut ? 'false' : 'true'); $('nearHint').textContent = shut ? 'Show' : 'Hide'; });
+  $('nearList').addEventListener('click', function (e) { var b = e.target.closest('.row'); if (b) openProj(b.getAttribute('data-id')); });
+
+  // --- 2. list ---------------------------------------------------------------------------------
+  function thumb(p) { return '<span class="th" aria-hidden="true">' + (p.photo ? '<img loading="lazy" src="' + photoUrl(p, 480) + '" alt="" onerror="this.remove()">' : '💧') + '</span>'; }
+  function rowHtml(p, tag, check) {
+    var dis = check && !p.gps, on = check && S.pickedRoute.indexOf(p.id) >= 0;
+    return '<button class="row" type="button" data-id="' + esc(p.id) + '"' + (check ? ' role="checkbox" aria-checked="' + on + '"' + (dis ? ' aria-disabled="true"' : '') : '') + '>' +
+      (check ? '<span class="ck" aria-hidden="true">' + (on ? '✓' : '') + '</span>' : '') + thumb(p) +
+      '<span class="tx"><span class="t">' + esc(p.title) + '</span><span class="s">' + esc(sub(p)) + '</span></span>' + (tag || '') + '</button>';
+  }
   function renderList() {
-    var q = $('iSearch').value.trim().toLowerCase(), ck = $('iCountry').value, near = S.filter === 'near';
+    progUi();
+    var q = $('iSearch').value.trim().toLowerCase(), ck = $('iCountry').value, f = S.filter, near = f === 'near';
     var rows = S.projects.filter(function (p) {
-      if (S.filter === 'missing' && p.gps) return false;
+      if (f === 'missing' && p.gps) return false;
       if (near && !p.gps) return false;
+      if (f === 'repairs' && !S.repairs[p.id]) return false;
       if (ck && p.ck !== ck) return false;
       if (q && (p.title + ' ' + p.area + ' ' + p.country).toLowerCase().indexOf(q) < 0) return false;
       return true;
     });
-    if (near && S.here) { rows.forEach(function (p) { p._d = metres(S.here, p.gps); }); rows.sort(function (a, b) { return a._d - b._d; }); rows = rows.slice(0, 30); }
-    var missing = S.projects.filter(function (p) { return !p.gps; }).length;
+    if (S.here) rows.forEach(function (p) { p._d = p.gps ? metres(S.here, p.gps) : null; });
+    if (near && S.here) { rows.sort(function (a, b) { return a._d - b._d; }); rows = rows.slice(0, 30); }
+    if (f === 'repairs') rows.sort(function (a, b) { return (S.repairs[b.id].at || '').localeCompare(S.repairs[a.id].at || ''); });
     $('count').textContent = near ? (S.here ? 'Closest pinned projects to you' : 'Finding where you are…')
-      : S.filter === 'missing' ? rows.length + ' still need a location' : rows.length + ' projects · ' + missing + ' need a location';
+      : f === 'missing' ? rows.length + ' still need a location'
+      : f === 'repairs' ? rows.length + (rows.length === 1 ? ' project reported' : ' projects reported') + ' as needing repair or not working'
+      : rows.length + ' projects';
+    if (S.routeMode) $('count').textContent += ' · tick the pinned ones to visit';
     if (near && !S.here) { $('list').innerHTML = ''; return; }
     $('list').innerHTML = rows.length ? rows.map(function (p) {
-      var tag = near ? '<span class="tag has">' + dist(p._d) + '</span>' : p.gps ? '<span class="tag has">Pinned</span>' : '<span class="tag">No location</span>';
-      return '<button class="row" type="button" data-id="' + esc(p.id) + '"><span class="tx"><span class="t">' + esc(p.title) + '</span><span class="s">' + esc([p.area, p.country, p.status].filter(Boolean).join(' · ')) + '</span></span>' + tag + '</button>';
-    }).join('') : '<p class="muted">' + (S.filter === 'missing' && !q && !ck ? 'Every project has a location. 🎉' : 'No projects match.') + '</p>';
+      var r = S.repairs[p.id];
+      var tag = r ? '<span class="tag bad">' + (r.state === 'notworking' ? 'Not working' : 'Needs repair') + '</span>'
+        : near ? '<span class="tag has">' + dist(p._d) + '</span>' : p.gps ? '<span class="tag has">' + (p._d != null ? dist(p._d) : 'Pinned') + '</span>' : '<span class="tag">No location</span>';
+      return rowHtml(p, tag, S.routeMode);
+    }).join('') : '<p class="muted">' + (f === 'missing' && !q && !ck ? 'Every project has a location. 🎉' : f === 'repairs' && !q && !ck ? 'No open repairs. 🎉' : 'No projects match.') + '</p>';
+    routeBarUi();
   }
   $('iSearch').addEventListener('input', renderList);
   $('iCountry').addEventListener('change', renderList);
-  document.querySelectorAll('.chips .chip').forEach(function (c) {
+  qa('.chips .chip').forEach(function (c) {
     c.addEventListener('click', function () {
       S.filter = c.getAttribute('data-f');
-      document.querySelectorAll('.chips .chip').forEach(function (x) { x.setAttribute('aria-pressed', x === c ? 'true' : 'false'); });
+      qa('.chips .chip').forEach(function (x) { x.setAttribute('aria-pressed', x === c ? 'true' : 'false'); });
       renderList();
       if (S.filter === 'near') locate(function (ll) { if (!ll) msg('mList', 'warn', 'Couldn’t get your location. Allow location for this site, then try again.'); renderList(); });
     });
   });
-  $('list').addEventListener('click', function (e) { var b = e.target.closest('.row'); if (b) openProj(b.getAttribute('data-id')); });
+  $('list').addEventListener('click', function (e) {
+    var b = e.target.closest('.row'); if (!b) return;
+    var id = b.getAttribute('data-id');
+    if (!S.routeMode) return openProj(id);
+    if (b.getAttribute('aria-disabled') === 'true') { msg('mList', 'warn', 'Only projects with a location can go on a route.'); return; }
+    var i = S.pickedRoute.indexOf(id); if (i >= 0) S.pickedRoute.splice(i, 1); else S.pickedRoute.push(id);
+    renderList();
+  });
 
-  // --- 3. one project ----------------------------------------------------------------------
+  // --- 3. route planner ----------------------------------------------------------------------------
+  function routeBarUi() { var n = S.pickedRoute.length; $('routeN').textContent = n ? n + (n === 1 ? ' stop chosen' : ' stops chosen') : 'Tick the projects to visit'; $('bRouteGo').disabled = n < 1; }
+  $('bRouteMode').addEventListener('click', function () {
+    S.routeMode = !S.routeMode; this.setAttribute('aria-pressed', S.routeMode ? 'true' : 'false'); this.textContent = S.routeMode ? 'Done' : '🗺 Plan a route';
+    if (S.routeMode) { S.pickedRoute = S.route.slice(); if (S.filter === 'missing') qa('.chips .chip[data-f=all]')[0].click(); }
+    $('routeBar').classList.toggle('hidden', !S.routeMode); document.body.classList.toggle('routing', S.routeMode); renderList();
+  });
+  function order(ids, start) {
+    var pts = ids.map(byId).filter(function (p) { return p && p.gps; }), out = [], cur = start || (pts[0] && pts[0].gps);
+    while (pts.length) { var bi = 0, bd = Infinity; pts.forEach(function (p, i) { var d = metres(cur, p.gps); if (d < bd) { bd = d; bi = i; } }); var nx = pts.splice(bi, 1)[0]; out.push(nx); cur = nx.gps; }
+    // tidy crossings (2-opt)
+    var len = function (a) { var s = start ? metres(start, a[0].gps) : 0; for (var i = 1; i < a.length; i++) s += metres(a[i - 1].gps, a[i].gps); return s; };
+    for (var pass = 0, better = true; better && pass < 20; pass++) {
+      better = false;
+      for (var i = 0; i < out.length - 1; i++) for (var k = i + 1; k < out.length; k++) {
+        var t = out.slice(0, i).concat(out.slice(i, k + 1).reverse(), out.slice(k + 1));
+        if (len(t) + 1 < len(out)) { out = t; better = true; }
+      }
+    }
+    return out;
+  }
+  $('bRouteGo').addEventListener('click', function () {
+    locate(function (here) {
+      S.route = order(S.pickedRoute, here).map(function (p) { return p.id; }); store.set('rfPinRoute', JSON.stringify(S.route));
+      S.routeMode = false; $('bRouteMode').setAttribute('aria-pressed', 'false'); $('bRouteMode').textContent = '🗺 Plan a route';
+      renderRoute(); show('vRoute');
+    });
+  });
+  function gmaps(stops, origin) {
+    var dest = stops[stops.length - 1].gps, w = stops.slice(0, -1).map(function (p) { return p.gps[0].toFixed(6) + ',' + p.gps[1].toFixed(6); });
+    return 'https://www.google.com/maps/dir/?api=1' + (origin ? '&origin=' + origin[0].toFixed(6) + ',' + origin[1].toFixed(6) : '') + '&destination=' + dest[0].toFixed(6) + ',' + dest[1].toFixed(6) + (w.length ? '&waypoints=' + encodeURIComponent(w.join('|')) : '') + '&travelmode=driving';
+  }
+  function renderRoute() {
+    var stops = S.route.map(byId).filter(function (p) { return p && p.gps; });
+    if (!stops.length) { $('routeSum').textContent = 'No route yet. Go to Projects and tap “Plan a route”.'; $('routeStops').innerHTML = ''; $('routeLegs').innerHTML = ''; return; }
+    var total = 0, prev = S.here;
+    $('routeStops').innerHTML = stops.map(function (p) {
+      var d = prev ? metres(prev, p.gps) : 0; total += d; prev = p.gps;
+      return '<div class="stop"><span class="tx"><span class="t">' + esc(p.title) + '</span><span class="s">' + esc(p.area || p.country) + (d ? ' · ' + dist(d) + ' from the last stop' : '') + '</span></span><button class="btn small light" type="button" data-open="' + esc(p.id) + '">Open</button></div>';
+    }).join('');
+    $('routeSum').textContent = stops.length + (stops.length === 1 ? ' stop' : ' stops') + ' · about ' + dist(total) + ' in straight lines' + (S.here ? ' from where you are' : '') + '. Roads will be longer. Saved on this phone, so it works offline.';
+    // Google Maps takes up to 9 stops on the way, so long routes are split into parts
+    var legs = [], i = 0, origin = null;
+    while (i < stops.length) { var part = stops.slice(i, i + 10); legs.push({ url: gmaps(part, origin), from: i + 1, to: i + part.length }); origin = part[part.length - 1].gps; i += 10; }
+    $('routeLegs').innerHTML = legs.map(function (l, k) { return '<a class="btn block" href="' + l.url + '" target="_blank" rel="noopener">🧭 ' + (legs.length > 1 ? 'Part ' + (k + 1) + ': stops ' + l.from + '–' + l.to + ' in Google Maps' : 'Start in Google Maps') + '</a>'; }).join('');
+  }
+  $('routeStops').addEventListener('click', function (e) { var b = e.target.closest('[data-open]'); if (b) openProj(b.getAttribute('data-open')); });
+  $('routeBack').addEventListener('click', function () { show('vList'); });
+  $('routeEdit').addEventListener('click', function () { show('vList'); if (!S.routeMode) $('bRouteMode').click(); });
+  $('routeClear').addEventListener('click', function () { S.route = []; S.pickedRoute = []; store.del('rfPinRoute'); renderRoute(); show('vList'); });
+
+  // --- 4. one project ----------------------------------------------------------------------------
+  var pMedia = Media({ key: 'p', photoBtn: 'pPhotoBtn', thumbs: 'pThumbs' });
+  var vMedia = Media({ key: 'v', photoBtn: 'vPhotoBtn', thumbs: 'vThumbs', voiceBtn: 'vVoiceBtn', voice: 'vVoice' });
   var pick = Picker({ map: 'pMap', gps: 'pGps', any: 'pGpsAny', line: 'pGpsLine', paste: 'pPaste', pasteBox: 'pPasteBox', pasteIn: 'pPasteIn', pasteGo: 'pPasteGo',
-    onPick: function (P) { msg('mSave', '', ''); $('confirm').classList.remove('on'); $('bSave').classList.remove('hidden'); pickUi(); },
+    onPick: function () { msg('mSave', '', ''); $('confirm').classList.add('hidden'); $('bSave').classList.remove('hidden'); pickUi(); },
     onError: function (t) { msg('mSave', 'bad', t); },
     onHere: function () { distUi(); } });
   function pickUi() {
@@ -579,23 +1083,30 @@ textarea{padding:12px 16px;min-height:96px;resize:vertical;line-height:1.45}
     $('newPt').textContent = pick.pick ? 'New location: ' + fmt(pick.pick) + (pick.how === 'gps' && pick.acc ? ' (±' + pick.acc + ' m)' : '') : 'Choose a spot on the map, or use your location.';
   }
   function tab(which) {
-    $('tabPin').setAttribute('aria-selected', which === 'pin' ? 'true' : 'false'); $('tabVisit').setAttribute('aria-selected', which === 'visit' ? 'true' : 'false');
-    $('panePin').classList.toggle('hidden', which !== 'pin'); $('paneVisit').classList.toggle('hidden', which !== 'visit');
-    if (which === 'pin') setTimeout(function () { window.dispatchEvent(new Event('resize')); }, 20); else pick.stop();
+    [['pin', 'tabPin', 'panePin'], ['visit', 'tabVisit', 'paneVisit'], ['hist', 'tabHist', 'paneHist']].forEach(function (t) {
+      $(t[1]).setAttribute('aria-selected', t[0] === which ? 'true' : 'false'); $(t[2]).classList.toggle('hidden', t[0] !== which);
+    });
+    if (which === 'pin') setTimeout(pick.resize, 20); else pick.stop();
+    if (which === 'visit') locate(function () { distUi(); });
+    if (which === 'hist') histUi();
   }
   $('tabPin').addEventListener('click', function () { tab('pin'); });
-  $('tabVisit').addEventListener('click', function () { tab('visit'); locate(function () { distUi(); }); });
+  $('tabVisit').addEventListener('click', function () { tab('visit'); });
+  $('tabHist').addEventListener('click', function () { tab('hist'); });
 
-  function openProj(id) {
-    var p = S.projects.filter(function (x) { return x.id === id; })[0]; if (!p) return;
+  function openProj(id, pane) {
+    var p = byId(id); if (!p) return;
+    if (S.view !== 'vProj') S.from = S.view;
     S.cur = p;
     $('pTitle').textContent = p.title;
-    $('pSub').textContent = [p.area, p.country, p.status].filter(Boolean).join(' · ');
-    curUi(); $('pLast').innerHTML = '';
-    msg('mSave', '', ''); $('confirm').classList.remove('on'); $('bSave').classList.remove('hidden'); pPhoto.clear();
-    visitReset();
-    tab('pin');
+    $('pSub').textContent = sub(p);
+    $('pHero').classList.toggle('hidden', !p.photo);
+    if (p.photo) { $('pImg').onerror = function () { $('pHero').classList.add('hidden'); }; $('pImg').src = photoUrl(p, 960); }
+    curUi(); repairUi(); $('pLast').innerHTML = '';
+    msg('mSave', '', ''); $('confirm').classList.add('hidden'); $('bSave').classList.remove('hidden'); pMedia.clear();
+    visitReset(); $('hList').innerHTML = '';
     show('vProj');
+    tab(pane || 'pin');
     var c = CENTER[p.ck] || [-2, 35, 6];
     pick.open(p.gps || [c[0], c[1]], p.gps ? 16 : c[2], p.gps);
     pickUi();
@@ -603,12 +1114,12 @@ textarea{padding:12px 16px;min-height:96px;resize:vertical;line-height:1.45}
     lastUi();
   }
   function curUi() {
-    var p = S.cur;
+    var p = S.cur, ll = p.gps && p.gps[0].toFixed(6) + ',' + p.gps[1].toFixed(6);
     $('pCur').textContent = p.gps ? 'Saved location: ' + fmt(p.gps) : 'No location saved yet.';
     $('pLinks').innerHTML = p.gps
-      ? '<a class="btn light small" href="https://www.google.com/maps/dir/?api=1&destination=' + p.gps[0].toFixed(6) + ',' + p.gps[1].toFixed(6) + '" target="_blank" rel="noopener">🧭 Directions</a>' +
-        '<a class="btn light small" href="https://www.google.com/maps?q=' + p.gps[0].toFixed(6) + ',' + p.gps[1].toFixed(6) + '" target="_blank" rel="noopener">Open in Google Maps</a>' +
-        '<a class="btn light small" href="https://maps.apple.com/?daddr=' + p.gps[0].toFixed(6) + ',' + p.gps[1].toFixed(6) + '&dirflg=d" target="_blank" rel="noopener">Apple Maps</a>'
+      ? '<a class="btn light small" href="https://www.google.com/maps/dir/?api=1&destination=' + ll + '" target="_blank" rel="noopener">🧭 Directions</a>' +
+        '<a class="btn light small" href="https://www.google.com/maps?q=' + ll + '" target="_blank" rel="noopener">Open in Google Maps</a>' +
+        '<a class="btn light small" href="https://maps.apple.com/?daddr=' + ll + '&dirflg=d" target="_blank" rel="noopener">Apple Maps</a>'
       : '';
     distUi();
   }
@@ -617,106 +1128,217 @@ textarea{padding:12px 16px;min-height:96px;resize:vertical;line-height:1.45}
     if (!p.gps || !S.here) { $('pDist').textContent = ''; return; }
     var m = metres(S.here, p.gps);
     $('pDist').className = 'dist' + (m > 2000 ? ' far' : '');
-    $('pDist').textContent = m < 50 ? 'You’re at the saved point (' + Math.round(m) + ' m away).' : 'You’re ' + dist(m) + ' from the saved point.' + (m > 2000 ? ' If you’re standing at the site, the saved location may be wrong.' : '');
+    $('pDist').textContent = m < 50 ? 'You’re at the saved point (' + Math.round(m) + ' m away).' : 'You’re ' + dist(m) + ' from the saved point.' + (m > 2000 && m < 20000 ? ' If you’re standing at the site, the saved location may be wrong.' : '');
   }
   function lastUi() {
     var p = S.cur; if (!p || !navigator.onLine) return;
     api('GET', null, '?id=' + encodeURIComponent(p.id)).then(function (j) {
       if (!S.cur || S.cur.id !== p.id || !j.ok || !j.last) { $('pLast').innerHTML = ''; return; }
-      var when = new Date(j.last.at), w = when.toLocaleDateString(undefined, { day: 'numeric', month: 'short' }) + ', ' + when.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
-      $('pLast').innerHTML = '<span>Last pinned by ' + esc(j.last.by) + ' · ' + esc(w) + '</span><button class="btn light small" id="bUndo" type="button">↩ Undo</button>';
+      $('pLast').innerHTML = '<span>Last pinned by ' + esc(j.last.by) + ' · ' + esc(when(j.last.at)) + '</span><button class="btn light small" id="bUndo" type="button">↩ Undo</button>';
       $('bUndo').addEventListener('click', function () {
         if (!confirm('Undo the last pin? The location goes back to ' + (j.last.prev || 'empty') + '.')) return;
         api('POST', { action: 'undo', id: p.id, by: S.name }).then(function (r) {
           if (!r.ok) { if (r.status === 401) return lockOut(r); msg('mSave', 'bad', r.reason === 'offline' ? 'Undo needs a signal. Please try again when you’re online.' : why(r)); return; }
-          p.gps = r.gps || null; store.set('rfPinList', JSON.stringify(S.projects)); curUi(); pick.saved(p.gps); pickUi(); $('pLast').innerHTML = '';
+          p.gps = r.gps || null; saveList(); curUi(); pick.saved(p.gps); pickUi(); $('pLast').innerHTML = ''; fitted = false;
           msg('mSave', 'ok', 'Undone ✓ ' + (p.gps ? 'Back to ' + fmt(p.gps) + '.' : 'The location is empty again.'));
         });
       });
     });
   }
-  $('back').addEventListener('click', function () { pick.stop(); renderList(); show('vList'); });
+  $('back').addEventListener('click', function () { if (S.from === 'vRoute') { renderRoute(); show('vRoute'); } else show(S.from && S.from !== 'vProj' ? S.from : 'vList'); });
 
   $('bSave').addEventListener('click', function () {
     if (!pick.pick) return;
-    $('confirmTx').textContent = 'Save ' + fmt(pick.pick) + ' as the location of ' + S.cur.title + '?' + (S.cur.gps ? ' This replaces ' + fmt(S.cur.gps) + '.' : '') + (pPhoto.blob ? ' The photo goes with it.' : '');
-    $('bSave').classList.add('hidden'); $('confirm').classList.add('on'); $('bYes').focus();
+    var n = pMedia.count();
+    $('confirmTx').textContent = 'Save ' + fmt(pick.pick) + ' as the location of ' + S.cur.title + '?' + (S.cur.gps ? ' This replaces ' + fmt(S.cur.gps) + '.' : '') + (n ? ' ' + (n === 1 ? 'The photo goes' : 'The ' + n + ' photos go') + ' with it.' : '');
+    $('bSave').classList.add('hidden'); $('confirm').classList.remove('hidden'); $('bYes').focus();
   });
-  $('bNo').addEventListener('click', function () { $('confirm').classList.remove('on'); $('bSave').classList.remove('hidden'); });
+  $('bNo').addEventListener('click', function () { $('confirm').classList.add('hidden'); $('bSave').classList.remove('hidden'); });
   $('bYes').addEventListener('click', function () {
     var p = S.cur, ll = pick.pick;
     $('bYes').disabled = true; msg('mSave', '', 'Saving…');
-    submit({ action: 'pin', id: p.id, lat: ll[0], lng: ll[1], acc: pick.acc, how: pick.how, by: S.name }, pPhoto.blob, 'Location for ' + p.title).then(function (r) {
-      $('bYes').disabled = false; $('confirm').classList.remove('on'); $('bSave').classList.remove('hidden');
+    submit({ action: 'pin', id: p.id, lat: ll[0], lng: ll[1], acc: pick.acc, how: pick.how, by: S.name }, pMedia.files()).then(function (r) {
+      $('bYes').disabled = false; $('confirm').classList.add('hidden'); $('bSave').classList.remove('hidden');
       if (r.state === 'locked') return lockOut({ reason: 'pin' });
       if (r.state === 'failed') { msg('mSave', 'bad', r.text); return; }
-      p.gps = ll; store.set('rfPinList', JSON.stringify(S.projects)); curUi(); pick.saved(ll); pPhoto.clear(); pickUi();
+      p.gps = ll; saveList(); curUi(); pick.saved(ll); pMedia.clear(); pickUi(); fitted = false;
       if (r.state === 'queued') msg('mSave', 'warn', 'Saved on this phone. It will be sent to monday.com when you have signal.');
       else { msg('mSave', 'ok', 'Saved to monday.com ✓ The website map will show it on the next visit.' + (r.note ? ' ' + r.note : '')); lastUi(); }
     });
   });
 
+  // open repair on this project
+  function repairUi() {
+    var p = S.cur, r = p && S.repairs[p.id];
+    if (!r) { $('pRepair').innerHTML = ''; return; }
+    $('pRepair').innerHTML = '<div class="alert' + (r.state === 'repair' ? ' warn' : '') + '" role="status"><b>' + (r.state === 'notworking' ? '❌ Reported not working' : '⚠️ Reported as needing repair') + '</b>' +
+      '<p>By ' + esc(r.by) + ' · ' + esc(when(r.at)) + (r.note ? ': “' + esc(r.note) + '”' : '') + '</p>' +
+      '<div id="fixBox" class="hidden"><label for="fixNote" style="margin-top:0">What was done? (optional)</label><textarea id="fixNote" placeholder="e.g. replaced the pump handle"></textarea></div>' +
+      '<button class="btn ok small" type="button" id="bFixed">🔧 Mark fixed</button><p class="msg" id="mFix" aria-live="polite"></p></div>';
+    $('bFixed').addEventListener('click', function () {
+      if ($('fixBox').classList.contains('hidden')) { $('fixBox').classList.remove('hidden'); this.textContent = 'Save as fixed'; $('fixNote').focus(); return; }
+      var b = this; b.disabled = true;
+      submit({ action: 'fixed', id: p.id, note: $('fixNote').value.trim(), by: S.name }, []).then(function (x) {
+        b.disabled = false;
+        if (x.state === 'locked') return lockOut({ reason: 'pin' });
+        if (x.state === 'failed') { msg('mFix', 'bad', x.text); return; }
+        delete S.repairs[p.id]; saveList(); progUi();
+        $('pRepair').innerHTML = '<div class="alert warn" style="background:var(--okbg);color:var(--ok)" role="status"><b>🔧 Marked fixed ✓</b>' + (x.state === 'queued' ? '<p>Saved on this phone. It will be sent when you have signal.</p>' : '') + '</div>';
+      });
+    });
+  }
+
   // site visit
   var visitState = '';
-  function visitReset() { visitState = ''; document.querySelectorAll('.states .chip').forEach(function (x) { x.setAttribute('aria-pressed', 'false'); x.setAttribute('aria-checked', 'false'); }); $('vNote').value = ''; vPhoto.clear(); $('bVisit').disabled = true; msg('mVisit', '', ''); }
-  document.querySelectorAll('.states .chip').forEach(function (c) {
+  function visitReset() { visitState = ''; qa('.states .chip').forEach(function (x) { x.setAttribute('aria-checked', 'false'); }); ['vNote', 'rStrokes', 'rFlow', 'rQueue', 'rUsers', 'rClarity'].forEach(function (x) { $(x).value = ''; }); $('vMore').open = false; vMedia.clear(); $('bVisit').disabled = true; msg('mVisit', '', ''); }
+  qa('.states .chip').forEach(function (c) {
     c.addEventListener('click', function () {
       visitState = c.getAttribute('data-s');
-      document.querySelectorAll('.states .chip').forEach(function (x) { var on = x === c; x.setAttribute('aria-pressed', on ? 'true' : 'false'); x.setAttribute('aria-checked', on ? 'true' : 'false'); });
+      qa('.states .chip').forEach(function (x) { x.setAttribute('aria-checked', x === c ? 'true' : 'false'); });
       $('bVisit').disabled = false;
     });
   });
   $('bVisit').addEventListener('click', function () {
     var p = S.cur; if (!visitState) return;
+    if (vMedia.busy()) { msg('mVisit', 'warn', 'Stop the recording first.'); return; }
     $('bVisit').disabled = true; msg('mVisit', '', 'Sending…');
+    var readings = {}; [['strokes', 'rStrokes'], ['flow', 'rFlow'], ['queue', 'rQueue'], ['users', 'rUsers'], ['clarity', 'rClarity']].forEach(function (x) { var v = $(x[1]).value.trim(); if (v !== '') readings[x[0]] = x[0] === 'clarity' ? v : Number(v); });
     locate(function (here) {
-      var body = { action: 'visit', id: p.id, state: visitState, note: $('vNote').value.trim(), by: S.name };
+      var body = { action: 'visit', id: p.id, state: visitState, note: $('vNote').value.trim(), readings: readings, by: S.name };
       if (here) { body.lat = here[0]; body.lng = here[1]; }
-      submit(body, vPhoto.blob, 'Visit report for ' + p.title).then(function (r) {
+      var st = visitState;
+      submit(body, vMedia.files()).then(function (r) {
         $('bVisit').disabled = false;
         if (r.state === 'locked') return lockOut({ reason: 'pin' });
         if (r.state === 'failed') { msg('mVisit', 'bad', r.text); return; }
-        visitReset();
+        if (st === 'working') delete S.repairs[p.id]; else S.repairs[p.id] = { state: st, by: S.name, at: new Date().toISOString(), note: body.note };
+        saveList(); progUi(); repairUi(); visitReset();
         msg('mVisit', r.state === 'queued' ? 'warn' : 'ok', r.state === 'queued' ? 'Saved on this phone. It will be sent when you have signal.' : 'Visit report sent ✓ It’s on the project in monday.com.' + (r.note ? ' ' + r.note : ''));
       });
     });
   });
 
-  // --- 4. new site -------------------------------------------------------------------------
+  // history from monday.com (the last copy is kept on the phone for offline)
+  var AUDIO = /^(webm|m4a|mp3|ogg|aac|wav|mp4)$/, IMG = /^(jpe?g|png|webp|gif)$/;
+  function histDraw(notes, stale) {
+    $('hInfo').textContent = stale ? 'No signal: showing the notes saved on this phone (photos need a signal).' : 'Notes on this project in monday.com, newest first.';
+    $('hList').innerHTML = notes.length ? notes.map(function (n) {
+      var files = (n.files || []).map(function (f) {
+        if (IMG.test(f.ext)) return '<a href="' + esc(f.url) + '" target="_blank" rel="noopener"><img loading="lazy" src="' + esc(f.url) + '" alt="' + esc(f.name) + '"></a>';
+        if (AUDIO.test(f.ext)) return '<audio controls preload="none" src="' + esc(f.url) + '"></audio>';
+        return '<a class="btn light small" href="' + esc(f.url) + '" target="_blank" rel="noopener">📎 ' + esc(f.name) + '</a>';
+      }).join('');
+      return '<article class="note"><div class="meta">' + esc(when(n.at)) + (n.by ? ' · ' + esc(n.by) : '') + '</div><p>' + esc(n.text) + '</p>' + (files ? '<div class="files">' + files + '</div>' : '') + '</article>';
+    }).join('') : '<p class="muted">No notes on this project yet.</p>';
+  }
+  function histUi() {
+    var p = S.cur, key = 'rfPinHist:' + p.id, saved = jget(key, null);
+    if (saved) histDraw(saved, !navigator.onLine); else $('hList').innerHTML = '<p class="muted">Loading…</p>';
+    if (!navigator.onLine) { if (!saved) $('hList').innerHTML = '<p class="muted">History needs a signal the first time.</p>'; return; }
+    api('GET', null, '?history=' + encodeURIComponent(p.id)).then(function (j) {
+      if (!S.cur || S.cur.id !== p.id) return;
+      if (!j.ok) { if (!saved) $('hList').innerHTML = '<p class="msg bad">' + esc(why(j)) + '</p>'; return; }
+      store.set(key, JSON.stringify(j.notes.map(function (n) { return { at: n.at, by: n.by, text: n.text, files: [] }; })));
+      histDraw(j.notes, false);
+    });
+  }
+
+  // --- 5. new site -------------------------------------------------------------------------------
+  var nMedia = Media({ key: 'n', photoBtn: 'nPhotoBtn', thumbs: 'nThumbs', voiceBtn: 'nVoiceBtn', voice: 'nVoice' });
   var nPick = Picker({ map: 'nMap', gps: 'nGps', any: 'nGpsAny', line: 'nGpsLine', paste: 'nPaste', pasteBox: 'nPasteBox', pasteIn: 'nPasteIn', pasteGo: 'nPasteGo',
     onPick: function () { newUi(); msg('mNew', '', ''); }, onError: function (t) { msg('mNew', 'bad', t); } });
+  var newOpen = false;
   function newUi() {
     var ok = $('nName').value.trim() && nPick.pick;
     $('bNewSave').disabled = !ok;
     $('nPt').textContent = !$('nName').value.trim() ? 'Add the name, then choose where it is.' : nPick.pick ? 'Location: ' + fmt(nPick.pick) + (nPick.how === 'gps' && nPick.acc ? ' (±' + nPick.acc + ' m)' : '') : 'Now choose where it is: use your location or tap the map.';
   }
   $('nName').addEventListener('input', newUi);
-  $('bNew').addEventListener('click', function () {
-    ['nName', 'nVillage', 'nNote'].forEach(function (x) { $(x).value = ''; }); nPhoto.clear(); msg('mNew', '', '');
-    var ck = $('iCountry').value || 'ke'; $('nCountry').value = ck;
-    show('vNew'); var c = CENTER[ck];
+  function openNew() {
+    if (newOpen) { setTimeout(nPick.resize, 30); return; } // keep what was typed when switching tabs
+    newOpen = true; msg('mNew', '', '');
+    var ck = $('iCountry').value || 'ke'; $('nCountry').value = ck; var c = CENTER[ck];
     nPick.open(S.here || [c[0], c[1]], S.here ? 15 : c[2], null); newUi();
-    setTimeout(function () { $('nName').focus(); }, 60);
-  });
+  }
   $('nCountry').addEventListener('change', function () { if (!nPick.pick && !S.here) { var c = CENTER[$('nCountry').value]; nPick.open([c[0], c[1]], c[2], null); } });
-  $('newBack').addEventListener('click', function () { nPick.stop(); show('vList'); });
   $('bNewSave').addEventListener('click', function () {
     var ll = nPick.pick, name = $('nName').value.trim(); if (!ll || !name) return;
+    if (nMedia.busy()) { msg('mNew', 'warn', 'Stop the recording first.'); return; }
     if (!confirm('Add “' + name + '” at ' + fmt(ll) + ' to monday.com?')) return;
     $('bNewSave').disabled = true; msg('mNew', '', 'Adding…');
-    submit({ action: 'new', name: name, ck: $('nCountry').value, village: $('nVillage').value.trim(), type: $('nType').value, note: $('nNote').value.trim(), lat: ll[0], lng: ll[1], by: S.name }, nPhoto.blob, 'New site ' + name).then(function (r) {
+    submit({ action: 'new', name: name, ck: $('nCountry').value, village: $('nVillage').value.trim(), type: $('nType').value, note: $('nNote').value.trim(), lat: ll[0], lng: ll[1], by: S.name }, nMedia.files()).then(function (r) {
       $('bNewSave').disabled = false;
       if (r.state === 'locked') return lockOut({ reason: 'pin' });
       if (r.state === 'failed') { msg('mNew', 'bad', r.text); return; }
-      nPick.saved(ll); ['nName', 'nVillage', 'nNote'].forEach(function (x) { $(x).value = ''; }); nPhoto.clear(); newUi();
+      nPick.saved(ll); ['nName', 'nVillage', 'nNote'].forEach(function (x) { $(x).value = ''; }); nMedia.clear(); newUi();
       msg('mNew', r.state === 'queued' ? 'warn' : 'ok', r.state === 'queued' ? 'Saved on this phone. It will be added to monday.com when you have signal.' : 'Added to monday.com as “Due Diligence” ✓' + (r.note ? ' ' + r.note : ''));
     });
   });
 
-  // --- start ----------------------------------------------------------------------------------
-  netUi(); outboxUi();
+  // --- 6. me & team -------------------------------------------------------------------------------
+  function segInit(id, key, attr) {
+    var cur = store.get(key) || '';
+    qa('#' + id + ' button').forEach(function (b) {
+      b.setAttribute('aria-pressed', b.getAttribute('data-v') === cur ? 'true' : 'false');
+      b.addEventListener('click', function () {
+        var v = b.getAttribute('data-v');
+        if (v) { store.set(key, v); document.documentElement.setAttribute(attr, v); } else { store.del(key); document.documentElement.removeAttribute(attr); }
+        qa('#' + id + ' button').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+        var tc = document.querySelector('meta[name=theme-color]'); if (tc) tc.content = v === 'dark' ? '#0D1318' : '#076DB1';
+      });
+    });
+  }
+  segInit('segTheme', 'rfPinTheme', 'data-theme'); segInit('segSize', 'rfPinSize', 'data-size');
+  var period = 7, actCache = null;
+  qa('#segPeriod button').forEach(function (b) { b.addEventListener('click', function () { period = +b.getAttribute('data-v'); qa('#segPeriod button').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); }); actDraw(); }); });
+  var VERB = { pin: 'pinned', visit: 'reported a visit to', fixed: 'marked fixed', new: 'added a new site:', undo: 'undid a pin on' };
+  function actDraw() {
+    var a = actCache; if (!a) return;
+    var cut = Date.now() - period * 864e5, rows = a.filter(function (e) { return Date.parse(e.at) > cut; }), by = {};
+    rows.forEach(function (e) { var k = e.by || '—'; by[k] = by[k] || { pin: 0, visit: 0, fixed: 0, new: 0 }; if (by[k][e.a] != null) by[k][e.a]++; });
+    var names = Object.keys(by).sort(function (x, y) { var s = function (n) { var o = by[n]; return o.pin + o.visit + o.fixed + o.new; }; return s(y) - s(x); });
+    $('actTable').innerHTML = names.length ? '<table class="act"><thead><tr><th scope="col">Who</th><th scope="col">Pins</th><th scope="col">Visits</th><th scope="col">Fixed</th><th scope="col">New</th></tr></thead><tbody>' +
+      names.map(function (n) { var o = by[n]; return '<tr><td>' + esc(n) + '</td><td>' + o.pin + '</td><td>' + o.visit + '</td><td>' + o.fixed + '</td><td>' + o.new + '</td></tr>'; }).join('') + '</tbody></table>'
+      : '<p class="muted">Nothing yet in this period.</p>';
+    $('actFeed').innerHTML = a.slice(-15).reverse().map(function (e) {
+      var extra = e.a === 'visit' ? (e.s === 'working' ? ' ✅' : e.s === 'repair' ? ' ⚠️' : ' ❌') : '';
+      return '<li><b>' + esc(e.by) + '</b> ' + (VERB[e.a] || e.a) + ' ' + esc(e.t || '') + extra + '<small>' + esc(when(e.at)) + '</small></li>';
+    }).join('') || '<li class="muted">Nothing yet.</li>';
+  }
+  function renderMe() {
+    $('meName').textContent = S.name;
+    $('mePin').textContent = S.who ? 'Your own PIN' : 'Shared team PIN';
+    outboxUi(); installUi();
+    if (!navigator.onLine) { if (!actCache) $('actTable').innerHTML = '<p class="muted">Team activity needs a signal.</p>'; return; }
+    api('GET', null, '?activity=1').then(function (j) { if (j.ok) { actCache = j.activity || []; actDraw(); } else if (!actCache) $('actTable').innerHTML = '<p class="msg bad">' + esc(why(j)) + '</p>'; });
+  }
+
+  // --- 7. install on the home screen ----------------------------------------------------------------
+  var deferred = null, standalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+  var ios = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); deferred = e; installUi(); });
+  addEventListener('appinstalled', function () { standalone = true; deferred = null; installUi(); });
+  function installHtml(full) {
+    if (standalone) return full ? '<h2>On your home screen</h2><p class="muted" style="margin:0">Rafiki Pin is installed on this phone ✓</p>' : '';
+    if (deferred) return '<div class="install"><img src="/img/pin/icon-192.png" alt=""><div><b>Add Rafiki Pin to your home screen</b>Opens like a normal app, and works with no signal.</div></div><div style="display:flex;gap:8px"><button class="btn small" type="button" data-inst="go">Install</button>' + (full ? '' : '<button class="btn small light" type="button" data-inst="x">Not now</button>') + '</div>';
+    if (ios) return '<div class="install"><img src="/img/pin/icon-192.png" alt=""><div><b>Add Rafiki Pin to your home screen</b>In Safari, tap the Share button <span aria-hidden="true">(□↑)</span>, then “Add to Home Screen”.</div></div>' + (full ? '' : '<button class="btn small light" type="button" data-inst="x">Got it</button>');
+    return full ? '<h2>Home screen</h2><p class="muted" style="margin:0">Use your browser menu’s “Install app” or “Add to Home screen”.</p>' : '';
+  }
+  function installUi() {
+    $('meInstall').innerHTML = installHtml(true);
+    $('instBox').innerHTML = store.get('rfPinInstX') ? '' : (function (h) { return h ? '<div style="margin-bottom:12px">' + h + '</div>' : ''; })(installHtml(false));
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-inst]'); if (!b) return;
+    if (b.getAttribute('data-inst') === 'x') { store.set('rfPinInstX', '1'); installUi(); return; }
+    if (deferred) { deferred.prompt(); deferred.userChoice.then(function () { deferred = null; installUi(); }); }
+  });
+
+  // --- start ----------------------------------------------------------------------------------------
+  netUi(); outboxUi(); progUi(); installUi();
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('/pin-sw.js', { scope: '/pin' }).catch(function () {});
-  if (S.pin && S.name) { msg('mLock', '', 'Unlocking…'); load(true); } else show('vLock');
+  addEventListener('resize', function () { if (hMap && S.view === 'vMap') hMap.invalidateSize(); });
+  if (S.pin && (S.name || S.who)) { msg('mLock', '', 'Unlocking…'); load(true); } else show('vLock');
 })();
 </script>
 </body>
