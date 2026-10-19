@@ -9,3 +9,7 @@
   Cache-Control: public, max-age=3600
 /motion.js
   Cache-Control: public, max-age=3600
+/pin
+  X-Robots-Tag: noindex, nofollow
+/vendor/*
+  Cache-Control: public, max-age=604800

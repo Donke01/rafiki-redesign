@@ -1,4 +1,6 @@
 User-agent: *
 Allow: /
+Disallow: /pin
+Disallow: /api/
 
 Sitemap: https://www.rafikioutreach.org/sitemap.xml

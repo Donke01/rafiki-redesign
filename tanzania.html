@@ -1978,7 +1978,7 @@ function cxBeyond(live, feed, mine) {
 }
 function MOUNT(self) {
   // know when the feed has failed, so the page can say so instead of waiting
-  if (window.rafikiFeed) window.rafikiFeed().then(function (d) { self._cpFeed = d || null; self.setState({ cpTried: true }); }, function () { self.setState({ cpTried: true }); });
+  if (window.rafikiFeed) window.rafikiFeed().then(function (d) { if (d && d.projects) d.projects.forEach(function (p) { if (p.gps) TKLOC[p.id] = p.gps; }); self._cpFeed = d || null; self.setState({ cpTried: true }); }, function () { self.setState({ cpTried: true }); });
   else self.setState({ cpTried: true });
   // the map's rendered width, so overlapping dots can be nudged apart
   var mpMeasure = function () { var bx = document.querySelector('.tk-mapbox'), w = bx ? Math.round(bx.getBoundingClientRect().width) : 0; if (w && w !== self.state.mpW) self.setState({ mpW: w }); };

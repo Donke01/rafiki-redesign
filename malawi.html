@@ -1912,7 +1912,7 @@ function cxBeyond(live, feed, mine) {
 }
 function MOUNT(self) {
   // know when the feed has failed, so the page can say so instead of waiting
-  if (window.rafikiFeed) window.rafikiFeed().then(function (d) { self._cpFeed = d || null; self.setState({ cpTried: true }); }, function () { self.setState({ cpTried: true }); });
+  if (window.rafikiFeed) window.rafikiFeed().then(function (d) { if (d && d.projects) d.projects.forEach(function (p) { if (p.gps) TKLOC[p.id] = p.gps; }); self._cpFeed = d || null; self.setState({ cpTried: true }); }, function () { self.setState({ cpTried: true }); });
   else self.setState({ cpTried: true });
   // a photo that fails to load: hide it and keep the tinted frame
   document.addEventListener('error', function (e) { var t = e.target, f = t && t.tagName === 'IMG' && t.closest ? t.closest('.ph') : null; if (f) f.classList.add('ph-x'); }, true);

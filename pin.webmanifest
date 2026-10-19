@@ -1,0 +1,14 @@
+{
+  "name": "Rafiki Pin",
+  "short_name": "Rafiki Pin",
+  "description": "Pin Rafiki Outreach project locations.",
+  "start_url": "/pin",
+  "scope": "/pin",
+  "display": "standalone",
+  "background_color": "#EEF0F2",
+  "theme_color": "#076DB1",
+  "icons": [
+    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

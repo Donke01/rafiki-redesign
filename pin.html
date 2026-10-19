@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="format-detection" content="telephone=no">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#076DB1">
+<title>Rafiki Pin</title>
+<link rel="manifest" href="/pin.webmanifest">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Rafiki Pin">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/vendor/leaflet/leaflet.css">
+<style>
+:root{--blue:#0A78C2;--blue2:#076DB1;--deep:#054F81;--ink:#04263F;--tint:#E3F1FC;--bg:#EEF0F2;--text:#141618;--muted:#5A6066;--line:#DCE1E5;--ok:#1C7C4A;--warn:#9A5B00;--bad:#B3261E}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:Montserrat,system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit}
+.app{max-width:720px;margin:0 auto;min-height:100%;display:flex;flex-direction:column}
+.top{position:sticky;top:0;z-index:1000;display:flex;align-items:center;gap:12px;padding:calc(10px + env(safe-area-inset-top)) 16px 10px;background:#FFFFFF;border-bottom:1px solid var(--line)}
+.top img{height:26px;width:auto}
+.top b{font-size:15px;font-weight:800;color:var(--ink);letter-spacing:-0.01em}
+.top .sp{flex:1}
+.top .who{font-size:13px;color:var(--muted);max-width:40vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.icon-btn{min-width:44px;min-height:44px;border:0;border-radius:12px;background:transparent;color:var(--ink);font-weight:700;font-size:14px;cursor:pointer;padding:0 10px}
+.icon-btn:focus-visible,.btn:focus-visible,.row:focus-visible,.chip:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #098BE1;outline-offset:2px}
+main{flex:1;padding:16px}
+.card{background:#FFFFFF;border-radius:22px;padding:22px 20px;box-shadow:0 1px 2px rgba(10,10,10,.04)}
+h1{margin:0 0 6px;font-size:24px;font-weight:800;letter-spacing:-0.02em;color:#0A0A0A}
+p{margin:0 0 12px;line-height:1.5}
+.muted{color:var(--muted);font-size:14px}
+label{display:block;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);margin:16px 0 6px}
+input[type=text],input[type=password],input[type=search],select{width:100%;height:50px;padding:0 16px;border-radius:14px;border:1px solid #C9D1D8;background:#FFFFFF;font-size:16px;color:var(--text)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:50px;padding:0 22px;border-radius:999px;border:0;background:var(--blue);color:#FFFFFF;font-size:16px;font-weight:700;cursor:pointer;text-decoration:none}
+.btn:hover{background:var(--blue2)}
+.btn[disabled]{background:#AFC4D3;cursor:not-allowed}
+.btn.light{background:#FFFFFF;color:var(--ink);border:1px solid #C9D1D8}
+.btn.light:hover{background:var(--tint)}
+.btn.block{width:100%}
+.msg{margin-top:12px;font-size:14px;font-weight:600;min-height:1em}
+.msg.bad{color:var(--bad)}.msg.ok{color:var(--ok)}
+.tools{display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{min-height:44px;padding:0 16px;border-radius:999px;border:1px solid #C9D1D8;background:#FFFFFF;color:var(--ink);font-weight:700;font-size:14px;cursor:pointer}
+.chip[aria-pressed=true]{background:var(--blue);border-color:var(--blue);color:#FFFFFF}
+.list{display:flex;flex-direction:column;gap:8px}
+.row{display:flex;align-items:center;gap:12px;width:100%;text-align:left;min-height:64px;padding:12px 14px;border-radius:16px;border:1px solid var(--line);background:#FFFFFF;cursor:pointer;color:var(--text)}
+.row:hover{border-color:#9FD3F7}
+.row .tx{flex:1;min-width:0}
+.row .t{display:block;font-weight:700;font-size:15px;line-height:1.3}
+.row .s{display:block;font-size:13px;color:var(--muted);margin-top:2px}
+.tag{flex:0 0 auto;font-size:12px;font-weight:700;padding:5px 10px;border-radius:999px;background:#FDF0DC;color:var(--warn);white-space:nowrap}
+.tag.has{background:var(--tint);color:var(--deep)}
+.count{font-size:13px;color:var(--muted);margin:4px 2px 10px}
+.phead{display:flex;flex-direction:column;gap:2px;margin-bottom:12px}
+.phead .t{font-size:20px;font-weight:800;letter-spacing:-0.01em;line-height:1.25}
+.cur{font-size:14px;color:var(--muted)}
+.cur a{color:var(--blue2);font-weight:700}
+#map{height:52vh;min-height:300px;border-radius:18px;overflow:hidden;border:1px solid var(--line);background:#DDE6EC}
+.maptip{font-size:13px;color:var(--muted);margin:8px 2px 12px}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.gpsline{font-size:14px;margin-top:10px;font-weight:600}
+.gpsline.warn{color:var(--warn)}.gpsline.good{color:var(--ok)}
+.paste{display:none;margin-top:12px}
+.paste.on{display:block}
+.paste .rowf{display:flex;gap:8px}
+.paste input{flex:1}
+.savebar{position:sticky;bottom:0;margin:16px -16px -16px;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:rgba(255,255,255,.96);border-top:1px solid var(--line);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.newpt{font-size:14px;margin-bottom:8px;color:var(--ink);font-weight:600}
+.confirm{display:none;margin-top:8px}
+.confirm.on{display:block}
+.confirm p{font-weight:600}
+.confirm .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hidden{display:none !important}
+.leaflet-container{font-family:inherit}
+.you{width:16px;height:16px;border-radius:50%;background:#098BE1;border:3px solid #FFFFFF;box-shadow:0 0 0 2px rgba(9,139,225,.35)}
+@media (max-width:420px){.actions{grid-template-columns:1fr}}
+@media (prefers-reduced-motion: reduce){*{scroll-behavior:auto !important}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <img src="/img/logo-dark-bold.webp" alt="Rafiki Outreach">
+    <b>Pin</b>
+    <span class="sp"></span>
+    <span class="who" id="who"></span>
+    <button class="icon-btn hidden" id="lockBtn" type="button">Lock</button>
+  </header>
+  <main>
+
+    <!-- 1. unlock -->
+    <section class="card" id="vLock" aria-labelledby="h-lock">
+      <h1 id="h-lock">Pin a project location</h1>
+      <p class="muted">For the Rafiki team. Saves the location straight into the project on monday.com, and the website maps update by themselves.</p>
+      <form id="fLock" novalidate>
+        <label for="iName">Your name</label>
+        <input type="text" id="iName" autocomplete="name" placeholder="e.g. Meril" required>
+        <label for="iPin">Team PIN</label>
+        <input type="password" id="iPin" inputmode="numeric" autocomplete="one-time-code" placeholder="Team PIN" required>
+        <div style="margin-top:18px"><button class="btn block" type="submit">Unlock</button></div>
+        <p class="msg" id="mLock" aria-live="polite"></p>
+      </form>
+    </section>
+
+    <!-- 2. project list -->
+    <section id="vList" class="hidden" aria-labelledby="h-list">
+      <h1 id="h-list" style="margin:4px 2px 12px">Choose a project</h1>
+      <div class="tools">
+        <label for="iSearch" style="margin:0" class="hidden">Search projects</label>
+        <input type="search" id="iSearch" placeholder="Search by project name or place" aria-label="Search by project name or place">
+        <div class="chips" role="group" aria-label="Show">
+          <button class="chip" type="button" data-f="missing" aria-pressed="true">Needs a location</button>
+          <button class="chip" type="button" data-f="all" aria-pressed="false">All projects</button>
+        </div>
+        <select id="iCountry" aria-label="Country">
+          <option value="">All countries</option><option value="ke">Kenya</option><option value="tz">Tanzania</option><option value="ug">Uganda</option><option value="mw">Malawi</option>
+        </select>
+      </div>
+      <p class="count" id="count" aria-live="polite"></p>
+      <div class="list" id="list"></div>
+      <p class="msg" id="mList" aria-live="polite"></p>
+    </section>
+
+    <!-- 3. one project -->
+    <section id="vProj" class="hidden" aria-labelledby="pTitle">
+      <button class="icon-btn" id="back" type="button" style="padding-left:0">← All projects</button>
+      <div class="phead">
+        <span class="t" id="pTitle"></span>
+        <span class="muted" id="pSub"></span>
+        <span class="cur" id="pCur"></span>
+      </div>
+      <div id="map" role="application" aria-label="Map: tap to place the pin, or drag the pin"></div>
+      <p class="maptip">Tap the map to place the pin, or drag it. Zoom in close for the exact spot.</p>
+      <div class="actions">
+        <button class="btn" id="bGps" type="button">📍 Use my location</button>
+        <button class="btn light" id="bPaste" type="button">Paste coordinates</button>
+      </div>
+      <p class="gpsline" id="gpsLine" aria-live="polite"></p>
+      <div class="paste" id="pasteBox">
+        <label for="iPaste">Coordinates or a Google Maps link</label>
+        <div class="rowf"><input type="text" id="iPaste" placeholder="0.561368, 35.065480" autocomplete="off"><button class="btn light" id="bPasteGo" type="button">Use</button></div>
+      </div>
+      <div class="savebar">
+        <div class="newpt" id="newPt">Choose a spot on the map, or use your location.</div>
+        <button class="btn block" id="bSave" type="button" disabled>Save this location</button>
+        <div class="confirm" id="confirm">
+          <p id="confirmTx"></p>
+          <div class="two"><button class="btn" id="bYes" type="button">Yes, save</button><button class="btn light" id="bNo" type="button">Cancel</button></div>
+        </div>
+        <p class="msg" id="mSave" aria-live="polite"></p>
+      </div>
+    </section>
+
+  </main>
+</div>
+<script src="/vendor/leaflet/leaflet.js"></script>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var store = { get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} }, del: function (k) { try { localStorage.removeItem(k); } catch (e) {} } };
+  var S = { pin: store.get('rfPin') || '', name: store.get('rfPinName') || '', projects: [], filter: 'missing', cur: null, pick: null, how: 'map', acc: 0 };
+  var CENTER = { ke: [0.3, 37.9, 7], tz: [-6.3, 34.8, 6], ug: [1.4, 32.3, 7], mw: [-13.3, 34.3, 7] };
+  var map = null, oldMk = null, newMk = null, youMk = null, accCircle = null, watch = null;
+
+  function show(v) { ['vLock', 'vList', 'vProj'].forEach(function (x) { $(x).classList.toggle('hidden', x !== v); }); $('lockBtn').classList.toggle('hidden', v === 'vLock'); $('who').textContent = v === 'vLock' ? '' : S.name; window.scrollTo(0, 0); }
+  function fmt(ll) { return ll[0].toFixed(6) + ', ' + ll[1].toFixed(6); }
+  function gmaps(ll) { return 'https://www.google.com/maps?q=' + ll[0].toFixed(6) + ',' + ll[1].toFixed(6); }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function inRange(ll) { return ll && ll[0] >= -18 && ll[0] <= 6 && ll[1] >= 28 && ll[1] <= 42; }
+
+  function api(method, body) {
+    return fetch('/api/pin', { method: method, headers: Object.assign({ 'X-Pin': S.pin, Accept: 'application/json' }, body ? { 'Content-Type': 'application/json' } : {}), body: body ? JSON.stringify(body) : undefined })
+      .then(function (r) { return r.json().catch(function () { return { ok: false, reason: 'down' }; }).then(function (j) { j.status = r.status; return j; }); })
+      .catch(function () { return { ok: false, reason: 'offline' }; });
+  }
+  function why(j) {
+    return j.reason === 'pin' ? 'That PIN isn’t right. Please check it with your team.'
+      : j.reason === 'locked' ? 'Too many wrong PINs from this connection. Please try again in an hour.'
+      : j.reason === 'not-set-up' ? 'The pin app isn’t switched on yet: the team PIN still needs to be set in Cloudflare.'
+      : j.reason === 'no-monday' ? 'The pin app can’t reach monday.com yet (the monday.com connection isn’t set up).'
+      : j.reason === 'offline' ? 'No connection. Check your signal and try again.'
+      : j.reason === 'place' ? 'That spot is outside East Africa. Please check the point.'
+      : j.reason === 'project' ? 'That project wasn’t found on monday.com.'
+      : j.reason === 'rate' ? 'Too many saves from this connection. Please try again in an hour.'
+      : 'Something went wrong. Please try again in a moment.';
+  }
+
+  // 1. unlock
+  $('iName').value = S.name;
+  $('fLock').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var name = $('iName').value.trim(), pin = $('iPin').value.trim();
+    if (!name) { $('mLock').className = 'msg bad'; $('mLock').textContent = 'Please add your name, so the team knows who pinned it.'; $('iName').focus(); return; }
+    if (!pin) { $('mLock').className = 'msg bad'; $('mLock').textContent = 'Please enter the team PIN.'; $('iPin').focus(); return; }
+    S.name = name; S.pin = pin; $('mLock').className = 'msg'; $('mLock').textContent = 'Checking…';
+    load(true);
+  });
+  $('lockBtn').addEventListener('click', function () { stopGps(); S.pin = ''; store.del('rfPin'); $('iPin').value = ''; $('mLock').textContent = ''; show('vLock'); });
+
+  function load(fromLock) {
+    api('GET').then(function (j) {
+      if (!j.ok) {
+        if (j.status === 401 || j.status === 429 || j.status === 503) { store.del('rfPin'); show('vLock'); $('mLock').className = 'msg bad'; $('mLock').textContent = why(j); return; }
+        if (fromLock) { $('mLock').className = 'msg bad'; $('mLock').textContent = why(j); } else { $('mList').className = 'msg bad'; $('mList').textContent = why(j); }
+        return;
+      }
+      store.set('rfPin', S.pin); store.set('rfPinName', S.name);
+      S.projects = j.projects || []; $('mList').textContent = ''; renderList(); if (fromLock || $('vList').classList.contains('hidden')) show('vList');
+    });
+  }
+
+  // 2. list
+  function renderList() {
+    var q = $('iSearch').value.trim().toLowerCase(), ck = $('iCountry').value;
+    var rows = S.projects.filter(function (p) {
+      if (S.filter === 'missing' && p.gps) return false;
+      if (ck && p.ck !== ck) return false;
+      if (q && (p.title + ' ' + p.area + ' ' + p.country).toLowerCase().indexOf(q) < 0) return false;
+      return true;
+    });
+    var missing = S.projects.filter(function (p) { return !p.gps; }).length;
+    $('count').textContent = (S.filter === 'missing' ? rows.length + ' still need a location' : rows.length + ' projects') + (S.filter === 'all' ? ' · ' + missing + ' need a location' : '');
+    $('list').innerHTML = rows.length ? rows.map(function (p) {
+      return '<button class="row" type="button" data-id="' + esc(p.id) + '"><span class="tx"><span class="t">' + esc(p.title) + '</span><span class="s">' + esc([p.area, p.country, p.status].filter(Boolean).join(' · ')) + '</span></span>' +
+        (p.gps ? '<span class="tag has">Pinned</span>' : '<span class="tag">No location</span>') + '</button>';
+    }).join('') : '<p class="muted">' + (S.filter === 'missing' && !q && !ck ? 'Every project has a location. 🎉' : 'No projects match.') + '</p>';
+  }
+  $('iSearch').addEventListener('input', renderList);
+  $('iCountry').addEventListener('change', renderList);
+  document.querySelectorAll('.chip').forEach(function (c) { c.addEventListener('click', function () { S.filter = c.getAttribute('data-f'); document.querySelectorAll('.chip').forEach(function (x) { x.setAttribute('aria-pressed', x === c ? 'true' : 'false'); }); renderList(); }); });
+  $('list').addEventListener('click', function (e) { var b = e.target.closest('.row'); if (b) openProj(b.getAttribute('data-id')); });
+
+  // 3. one project
+  function openProj(id) {
+    var p = S.projects.filter(function (x) { return x.id === id; })[0]; if (!p) return;
+    S.cur = p; S.pick = null; S.how = 'map'; S.acc = 0;
+    $('pTitle').textContent = p.title;
+    $('pSub').textContent = [p.area, p.country, p.status].filter(Boolean).join(' · ');
+    curLine();
+    $('gpsLine').textContent = ''; $('pasteBox').classList.remove('on'); $('iPaste').value = '';
+    $('mSave').textContent = ''; $('confirm').classList.remove('on'); $('bSave').classList.remove('hidden');
+    pickChanged();
+    show('vProj');
+    setTimeout(function () {
+      if (!map) {
+        map = L.map('map', { zoomControl: true, tap: true });
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' }).addTo(map);
+        map.on('click', function (e) { setPick([e.latlng.lat, e.latlng.lng], 'map', 0); });
+      }
+      map.invalidateSize();
+      if (oldMk) { map.removeLayer(oldMk); oldMk = null; }
+      if (newMk) { map.removeLayer(newMk); newMk = null; }
+      if (p.gps) {
+        oldMk = L.circleMarker(p.gps, { radius: 9, color: '#5A6066', weight: 2, fillColor: '#B9BEC3', fillOpacity: .9 }).addTo(map).bindTooltip('Saved location');
+        map.setView(p.gps, 16);
+      } else { var c = CENTER[p.ck] || [-2, 35, 6]; map.setView([c[0], c[1]], c[2]); }
+    }, 30);
+  }
+  function curLine() {
+    var p = S.cur;
+    $('pCur').innerHTML = p.gps ? 'Saved location: ' + fmt(p.gps) + ' · <a href="' + gmaps(p.gps) + '" target="_blank" rel="noopener">Open in Google Maps</a>' : 'No location saved yet.';
+  }
+  function setPick(ll, how, acc) {
+    if (!inRange(ll)) { $('mSave').className = 'msg bad'; $('mSave').textContent = why({ reason: 'place' }); return; }
+    S.pick = [Math.round(ll[0] * 1e6) / 1e6, Math.round(ll[1] * 1e6) / 1e6]; S.how = how; S.acc = acc || 0;
+    if (!newMk) {
+      newMk = L.marker(S.pick, { draggable: true, autoPan: true, title: 'New location' }).addTo(map);
+      newMk.on('dragend', function () { var x = newMk.getLatLng(); setPick([x.lat, x.lng], 'map', 0); });
+    } else newMk.setLatLng(S.pick);
+    $('mSave').textContent = ''; $('confirm').classList.remove('on'); $('bSave').classList.remove('hidden');
+    pickChanged();
+  }
+  function pickChanged() {
+    $('bSave').disabled = !S.pick;
+    $('newPt').textContent = S.pick ? 'New location: ' + fmt(S.pick) + (S.how === 'gps' && S.acc ? ' (±' + S.acc + ' m)' : '') : 'Choose a spot on the map, or use your location.';
+  }
+  $('back').addEventListener('click', function () { stopGps(); renderList(); show('vList'); });
+
+  // GPS: keep the most accurate fix while the visitor stands at the site
+  function stopGps() { if (watch !== null && navigator.geolocation) navigator.geolocation.clearWatch(watch); watch = null; $('bGps').textContent = '📍 Use my location'; }
+  $('bGps').addEventListener('click', function () {
+    if (watch !== null) { stopGps(); return; }
+    if (!navigator.geolocation) { $('gpsLine').className = 'gpsline warn'; $('gpsLine').textContent = 'This phone can’t share its location. Tap the map instead.'; return; }
+    var best = null;
+    $('gpsLine').className = 'gpsline'; $('gpsLine').textContent = 'Finding you… stand still for a few seconds outdoors.';
+    $('bGps').textContent = 'Stop';
+    watch = navigator.geolocation.watchPosition(function (pos) {
+      var ll = [pos.coords.latitude, pos.coords.longitude], acc = Math.round(pos.coords.accuracy || 0);
+      if (!youMk) youMk = L.marker(ll, { icon: L.divIcon({ className: '', html: '<div class="you"></div>', iconSize: [16, 16] }), interactive: false }).addTo(map); else youMk.setLatLng(ll);
+      if (!accCircle) accCircle = L.circle(ll, { radius: acc, color: '#098BE1', weight: 1, fillOpacity: .12 }).addTo(map); else { accCircle.setLatLng(ll); accCircle.setRadius(acc); }
+      if (!best || acc <= best.acc) { best = { ll: ll, acc: acc }; setPick(ll, 'gps', acc); map.setView(ll, Math.max(map.getZoom(), 17)); }
+      $('gpsLine').className = 'gpsline ' + (best.acc <= 25 ? 'good' : 'warn');
+      $('gpsLine').textContent = best.acc <= 25 ? 'Good fix: accurate to about ' + best.acc + ' m. You can save now.' : 'Accurate to about ' + best.acc + ' m so far. Waiting for a better fix… (move into the open if you can)';
+    }, function (err) {
+      stopGps(); $('gpsLine').className = 'gpsline warn';
+      $('gpsLine').textContent = err.code === 1 ? 'Location is blocked for this site. Allow location in your browser settings, or tap the map instead.' : 'Couldn’t get your location. Tap the map instead, or try again outdoors.';
+    }, { enableHighAccuracy: true, maximumAge: 0, timeout: 30000 });
+  });
+
+  // paste "lat, lng" or a Google Maps link
+  function parseAny(t) {
+    t = String(t || '');
+    var m = /@(-?\d+\.\d+),(-?\d+\.\d+)/.exec(t) || /!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/.exec(t) || /[?&](?:q|query|ll)=(-?\d+\.\d+)(?:,|%2C)\s*(-?\d+\.\d+)/i.exec(t) || /(-?\d{1,2}\.\d+)\s*[, ]\s*(-?\d{1,3}\.\d+)/.exec(t);
+    return m ? [Number(m[1]), Number(m[2])] : null;
+  }
+  $('bPaste').addEventListener('click', function () { $('pasteBox').classList.toggle('on'); if ($('pasteBox').classList.contains('on')) $('iPaste').focus(); });
+  $('bPasteGo').addEventListener('click', function () {
+    var ll = parseAny($('iPaste').value);
+    if (!ll) { $('mSave').className = 'msg bad'; $('mSave').textContent = 'Couldn’t read those coordinates. Try a format like 0.561368, 35.065480.'; return; }
+    setPick(ll, 'paste', 0); if (S.pick) map.setView(S.pick, 17);
+  });
+  $('iPaste').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); $('bPasteGo').click(); } });
+
+  // save, with a confirm step
+  $('bSave').addEventListener('click', function () {
+    if (!S.pick) return;
+    $('confirmTx').textContent = 'Save ' + fmt(S.pick) + ' as the location of ' + S.cur.title + '?' + (S.cur.gps ? ' This replaces ' + fmt(S.cur.gps) + '.' : '');
+    $('bSave').classList.add('hidden'); $('confirm').classList.add('on'); $('bYes').focus();
+  });
+  $('bNo').addEventListener('click', function () { $('confirm').classList.remove('on'); $('bSave').classList.remove('hidden'); });
+  $('bYes').addEventListener('click', function () {
+    $('bYes').disabled = true; $('mSave').className = 'msg'; $('mSave').textContent = 'Saving…';
+    api('POST', { id: S.cur.id, lat: S.pick[0], lng: S.pick[1], acc: S.acc, how: S.how, by: S.name }).then(function (j) {
+      $('bYes').disabled = false; $('confirm').classList.remove('on'); $('bSave').classList.remove('hidden');
+      if (!j.ok) { $('mSave').className = 'msg bad'; $('mSave').textContent = why(j); if (j.status === 401) { store.del('rfPin'); show('vLock'); $('mLock').className = 'msg bad'; $('mLock').textContent = why(j); } return; }
+      stopGps(); $('gpsLine').textContent = '';
+      if (youMk) { map.removeLayer(youMk); youMk = null; } if (accCircle) { map.removeLayer(accCircle); accCircle = null; }
+      S.cur.gps = j.gps; curLine();
+      if (oldMk) map.removeLayer(oldMk);
+      oldMk = L.circleMarker(j.gps, { radius: 9, color: '#1C7C4A', weight: 2, fillColor: '#7FD1A3', fillOpacity: .9 }).addTo(map).bindTooltip('Saved location');
+      if (newMk) { map.removeLayer(newMk); newMk = null; }
+      S.pick = null; pickChanged();
+      $('mSave').className = 'msg ok'; $('mSave').textContent = 'Saved to monday.com ✓ The website map will show it on the next visit.';
+    });
+  });
+
+  // start
+  if (S.pin && S.name) { $('mLock').textContent = 'Unlocking…'; load(true); } else show('vLock');
+})();
+</script>
+</body>
+</html>

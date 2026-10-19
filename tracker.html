@@ -1577,7 +1577,7 @@ function tkCard(p) {
     isUp: st === 'Upcoming', upL:p.needed > 0 ? 'Help fund it: $' + Math.round(p.needed).toLocaleString('en-US') + ' to raise' : 'Help fund a project like this' };
 }
 function MOUNT(self) {
-  if (window.rafikiFeed) window.rafikiFeed().then(function (d) { self._tkFeed = d || null; self.setState({ tkTried: true }); }, function () { self.setState({ tkTried: true }); });
+  if (window.rafikiFeed) window.rafikiFeed().then(function (d) { if (d && d.projects) d.projects.forEach(function (p) { if (p.gps) TKLOC[p.id] = p.gps; }); self._tkFeed = d || null; self.setState({ tkTried: true }); }, function () { self.setState({ tkTried: true }); });
   else self.setState({ tkTried: true });
 }
 function EXTRA(self, s) {
