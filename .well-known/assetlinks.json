@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "org.rafikioutreach.pin",
+      "sha256_cert_fingerprints": [
+        "36:D3:B6:78:00:D4:A2:FF:22:E6:38:7B:34:CB:64:B1:2F:2C:CF:EB:DA:53:06:72:31:F7:57:90:05:33:E8:A3"
+      ]
+    }
+  }
+]

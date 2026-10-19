@@ -1,0 +1,33 @@
+plugins { id 'com.android.application' }
+def host = 'rafiki-redesign.pages.dev'
+def keyProps = new Properties()
+def kp = rootProject.file('keystore.properties')
+if (kp.exists()) keyProps.load(new FileInputStream(kp))
+android {
+    namespace 'org.rafikioutreach.pin'
+    compileSdk 35
+    defaultConfig {
+        applicationId 'org.rafikioutreach.pin'
+        minSdk 21
+        targetSdk 35
+        versionCode 1
+        versionName '1.0'
+        manifestPlaceholders = [host: host, launchUrl: 'https://' + host + '/pin']
+        resValue 'string', 'host', host
+    }
+    signingConfigs {
+        release {
+            if (kp.exists()) {
+                storeFile file(keyProps['storeFile'])
+                storePassword keyProps['storePassword']
+                keyAlias keyProps['keyAlias']
+                keyPassword keyProps['keyPassword']
+            }
+        }
+    }
+    buildTypes {
+        release { minifyEnabled false; signingConfig signingConfigs.release }
+    }
+    compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+}
+dependencies { implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.5.0' }

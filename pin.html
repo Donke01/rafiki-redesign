@@ -9,7 +9,8 @@
 <title>RAFIKI Pin</title>
 <link rel="manifest" href="/pin.webmanifest">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="apple-touch-icon" href="/img/pin/apple-touch-180.png">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="RAFIKI Pin">
@@ -2803,14 +2804,17 @@ html[data-theme=sun] .pk{border:2px solid #000;box-shadow:none}
   $('myWork').addEventListener('click', function (e) { var b = e.target.closest('.row'); if (b) openProj(b.getAttribute('data-id'), b.hasAttribute('data-visit') ? 'visit' : 'pin'); });
 
   // --- 7. install on the home screen ----------------------------------------------------------------
-  var deferred = null, standalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+  var deferred = null, standalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true || /^android-app:\/\//.test(document.referrer || '');
+  var android = /android/i.test(navigator.userAgent);
+  var APK = '<a class="btn small' + ' light" href="/app/rafiki-pin.apk" download>' + '<span class="ei" aria-hidden="true">' + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10.5l5 5 5-5M5 20h14"/></svg></span>Android app (APK)</a>';
   var ios = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); deferred = e; installUi(); });
   addEventListener('appinstalled', function () { standalone = true; deferred = null; installUi(); });
   function installHtml(full) {
     if (standalone) return full ? '<h2>On your home screen</h2><p class="muted" style="margin:0">RAFIKI Pin is installed on this phone ✓</p>' : '';
-    if (deferred) return '<div class="install"><img src="/img/pin/icon-192.png" alt=""><div><b>Add RAFIKI Pin to your home screen</b>Opens like a normal app, and works with no signal.</div></div><div style="display:flex;gap:8px"><button class="btn small" type="button" data-inst="go">Install</button>' + (full ? '' : '<button class="btn small light" type="button" data-inst="x">Not now</button>') + '</div>';
+    if (deferred) return '<div class="install"><img src="/img/pin/icon-192.png" alt=""><div><b>Add RAFIKI Pin to your home screen</b>Opens like a normal app, and works with no signal.</div></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn small" type="button" data-inst="go">Install</button>' + (android ? APK : '') + (full ? '' : '<button class="btn small light" type="button" data-inst="x">Not now</button>') + '</div>';
     if (ios) return '<div class="install"><img src="/img/pin/icon-192.png" alt=""><div><b>Add RAFIKI Pin to your home screen</b>In Safari, tap the Share button <span aria-hidden="true">(□↑)</span>, then “Add to Home Screen”.</div></div>' + (full ? '' : '<button class="btn small light" type="button" data-inst="x">Got it</button>');
+    if (android) return '<div class="install"><img src="/img/pin/icon-192.png" alt=""><div><b>Get the RAFIKI Pin app</b>Download the Android app, open the file and tap Install.</div></div><div style="display:flex;gap:8px;flex-wrap:wrap">' + APK + (full ? '' : '<button class="btn small light" type="button" data-inst="x">Not now</button>') + '</div>';
     return full ? '<h2>Home screen</h2><p class="muted" style="margin:0">Use your browser menu’s “Install app” or “Add to Home screen”.</p>' : '';
   }
   function installUi() {

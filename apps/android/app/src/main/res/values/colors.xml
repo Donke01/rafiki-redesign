@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="status">#04263F</color>
+    <color name="navbar">#FFFFFF</color>
+    <color name="splash_bg">#04263F</color>
+</resources>
