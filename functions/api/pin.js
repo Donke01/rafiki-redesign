@@ -196,7 +196,7 @@ export async function onRequestPost({ request, env }) {
       const g = parseGps(Number(b.lat) + ', ' + Number(b.lng));
       if (!g) return json({ ok: false, reason: 'place' }, 400);
       const acc = Math.round(Number(b.acc) || 0);
-      const how = b.how === 'gps' ? 'phone GPS' : b.how === 'paste' ? 'pasted coordinates' : 'map';
+      const how = b.how === 'gps' ? 'phone GPS' : b.how === 'paste' ? 'pasted coordinates' : b.how === 'search' ? 'place search' + (clean(b.found, 80) ? ': ' + clean(b.found, 80) : '') + ', then placed on the map' : 'map';
       const value = fmt(g);
       const note = '📍 Location pinned with the Rafiki pin app by ' + by + ': ' + value +
         ' (' + how + (b.how === 'gps' && acc ? ', about ±' + acc + ' m' : '') + ').' +

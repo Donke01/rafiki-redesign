@@ -269,6 +269,15 @@ html[data-theme=dark] .leaflet-bar a,html[data-theme=dark] .leaflet-control-laye
 .paste{display:none;margin-top:12px}
 .paste.on{display:block}
 .paste .rowf{display:flex;gap:8px}
+.findbtn{grid-column:1 / -1}
+.presults{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.prow{display:grid;grid-template-columns:1fr auto;gap:2px 10px;text-align:left;padding:10px 12px;border-radius:14px;border:var(--bw) solid var(--line);background:var(--card);cursor:pointer;color:var(--text);min-height:52px}
+.prow b{font-size:.92rem}.prow span{grid-column:1;font-size:.78rem;color:var(--muted)}.prow em{grid-row:1 / span 2;grid-column:2;align-self:center;font-style:normal;font-size:.78rem;font-weight:700;color:var(--deep)}
+.prow:hover{border-color:#9FD3F7}
+.sim{font-size:.68rem;font-weight:700;color:var(--warn);background:var(--warnbg);padding:2px 6px;border-radius:6px;margin-left:4px;white-space:nowrap}
+.ext{margin-top:12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.ext p{flex-basis:100%}
+.credit{font-size:.7rem;margin:8px 0 0}
 .paste input{flex:1}
 .savebar{position:sticky;bottom:calc(var(--tabh) + env(safe-area-inset-bottom));z-index:500;margin:16px -16px 0;padding:12px 16px;background:var(--bar);border-top:var(--bw) solid var(--line);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
 .newpt{font-size:.88rem;margin-bottom:8px;color:var(--ink);font-weight:600}
@@ -605,6 +614,11 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
             <button type="button" data-v="dark" aria-pressed="false">Dark</button>
             <button type="button" data-v="sun" aria-pressed="false">Bright sun</button>
           </div>
+          <span class="lbl" id="l-units">Distances</span>
+          <div class="seg" role="group" aria-labelledby="l-units" id="segUnits">
+            <button type="button" data-v="" aria-pressed="true">Kilometres</button>
+            <button type="button" data-v="mi" aria-pressed="false">Miles</button>
+          </div>
           <span class="lbl" id="l-size">Text size</span>
           <div class="seg" role="group" aria-labelledby="l-size" id="segSize">
             <button type="button" data-v="" aria-pressed="true">Normal</button>
@@ -663,7 +677,7 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
   var qa = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
   var store = { get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} }, del: function (k) { try { localStorage.removeItem(k); } catch (e) {} } };
   var jget = function (k, d) { try { return JSON.parse(store.get(k) || 'null') || d; } catch (e) { return d; } };
-  var S = { mode: store.get('rfPinMode') || '', photo: store.get('rfPinPhoto') || '', pin: store.get('rfPin') || '', name: store.get('rfPinName') || '', who: store.get('rfPinWho') || '', projects: jget('rfPinList', []), repairs: jget('rfPinRepairs', {}), visits: jget('rfPinVisits', {}), lang: store.get('rfPinLang') || '', srvHome: store.get('rfPinSrvHome') || '', gpsHome: '',
+  var S = { mode: store.get('rfPinMode') || '', photo: store.get('rfPinPhoto') || '', pin: store.get('rfPin') || '', name: store.get('rfPinName') || '', who: store.get('rfPinWho') || '', projects: jget('rfPinList', []), repairs: jget('rfPinRepairs', {}), visits: jget('rfPinVisits', {}), lang: store.get('rfPinLang') || '', units: store.get('rfPinUnits') || 'km', srvHome: store.get('rfPinSrvHome') || '', gpsHome: '',
     filter: store.get('rfPinFilter') || 'missing', cur: null, here: null, hereAt: 0, view: 'vLock', prev: 'vMap', routeMode: false, pickedRoute: [], route: jget('rfPinRoute', []), dismissed: {} };
   var CENTER = { ke: [0.3, 37.9, 7], tz: [-6.3, 34.8, 6], ug: [1.4, 32.3, 7], mw: [-13.3, 34.3, 7] };
   var CNAME = { ke: 'Kenya', tz: 'Tanzania', ug: 'Uganda', mw: 'Malawi' };
@@ -675,7 +689,12 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
   function inRange(ll) { return ll && ll[0] >= -18 && ll[0] <= 6 && ll[1] >= 28 && ll[1] <= 42; }
   function metres(a, b) { var R = 6371000, r = function (x) { return x * Math.PI / 180; }, dLa = r(b[0] - a[0]), dLo = r(b[1] - a[1]); var h = Math.pow(Math.sin(dLa / 2), 2) + Math.cos(r(a[0])) * Math.cos(r(b[0])) * Math.pow(Math.sin(dLo / 2), 2); return 2 * R * Math.asin(Math.sqrt(h)); }
   // to the metre up to 10 km (e.g. 910 m, 9,312 m), then in km
-  function dist(m) { return m < 10000 ? Math.round(m).toLocaleString('en-US') + ' m' : m < 100000 ? (m / 1000).toFixed(1) + ' km' : Math.round(m / 1000) + ' km'; }
+  // kilometres: to the metre up to 10 km; miles: to the foot up to 1 mile (switch in Me → Display)
+  function dist(m) {
+    if (S.units === 'mi') { var mi = m / 1609.344; return mi < 1 ? Math.round(m * 3.28084).toLocaleString('en-US') + ' ft' : mi < 10 ? mi.toFixed(2) + ' mi' : mi < 100 ? mi.toFixed(1) + ' mi' : Math.round(mi) + ' mi'; }
+    return m < 10000 ? Math.round(m).toLocaleString('en-US') + ' m' : m < 100000 ? (m / 1000).toFixed(1) + ' km' : Math.round(m / 1000) + ' km';
+  }
+  function acct(m) { return S.units === 'mi' ? '±' + Math.round(m * 3.28084) + ' ft' : '±' + m + ' m'; }
   function msg(id, cls, t) { $(id).className = 'msg ' + (cls || ''); $(id).textContent = t || ''; }
   function photoUrl(p, w) { return p && p.photo ? '/api/photo/' + encodeURIComponent(p.photo) + '?w=' + (w || 480) : ''; }
   function when(iso) { var d = new Date(iso); return isNaN(d) ? '' : d.toLocaleDateString(undefined, { day: 'numeric', month: 'short' }) + ', ' + d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }); }
@@ -746,6 +765,11 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
   // --- talking to the server -------------------------------------------------------------
   function api(method, body, q) {
     return fetch('/api/pin' + (q || ''), { method: method, headers: Object.assign({ Accept: 'application/json' }, S.pin ? { 'X-Pin': S.pin } : {}, body ? { 'Content-Type': 'application/json' } : {}), body: body ? JSON.stringify(body) : undefined })
+      .then(function (r) { return r.json().catch(function () { return { ok: false, reason: 'down' }; }).then(function (j) { j.status = r.status; return j; }); })
+      .catch(function () { return { ok: false, reason: 'offline', status: 0 }; });
+  }
+  function placeApi(q) {
+    return fetch('/api/place' + q, { headers: Object.assign({ Accept: 'application/json' }, S.pin ? { 'X-Pin': S.pin } : {}) })
       .then(function (r) { return r.json().catch(function () { return { ok: false, reason: 'down' }; }).then(function (j) { j.status = r.status; return j; }); })
       .catch(function () { return { ok: false, reason: 'offline', status: 0 }; });
   }
@@ -950,15 +974,15 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
       if (!g) return;
       var secs = Math.round((Date.now() - g.t0) / 1000);
       if (!g.good.length) {
-        line('warn', 'Getting a precise fix… ' + (g.bestAcc ? 'currently about ±' + g.bestAcc + ' m' : 'no reading yet') + ' (' + secs + ' s). Stand still outdoors, away from buildings and trees.');
-        if (secs >= 45 && g.bestAcc) { $(o.any).textContent = 'Use anyway (±' + g.bestAcc + ' m)'; $(o.any).classList.remove('hidden'); }
-        if (secs >= 45 && g.bestAcc > 200) line('warn', 'This device is only giving a rough position (±' + g.bestAcc + ' m), as indoors or on a computer. Go outdoors with a phone, or tap the spot on the map instead.');
+        line('warn', 'Getting a precise fix… ' + (g.bestAcc ? 'currently about ' + acct(g.bestAcc) : 'no reading yet') + ' (' + secs + ' s). Stand still outdoors, away from buildings and trees.');
+        if (secs >= 45 && g.bestAcc) { $(o.any).textContent = 'Use anyway (' + acct(g.bestAcc) + ')'; $(o.any).classList.remove('hidden'); }
+        if (secs >= 45 && g.bestAcc > 200) line('warn', 'This device is only giving a rough position (' + acct(g.bestAcc) + '), as indoors or on a computer. Go outdoors with a phone, or tap the spot on the map instead.');
         return;
       }
       var left = Math.max(0, Math.ceil((SETTLE - (Date.now() - g.firstGood)) / 1000)), a = g.avg;
       set(a.ll, 'gps', a.acc);
-      if (left > 0) line('good', 'Good signal. Averaging ' + g.good.length + ' readings… ±' + a.acc + ' m · ' + left + ' s to go. Keep still.');
-      else { var keep = a, n = g.good.length; stop(); set(keep.ll, 'gps', keep.acc); line('good', 'Done: averaged ' + n + ' readings, accurate to about ±' + keep.acc + ' m. Check the pin, then save.'); }
+      if (left > 0) line('good', 'Good signal. Averaging ' + g.good.length + ' readings… ' + acct(a.acc) + ' · ' + left + ' s to go. Keep still.');
+      else { var keep = a, n = g.good.length; stop(); set(keep.ll, 'gps', keep.acc); line('good', 'Done: averaged ' + n + ' readings, accurate to about ' + acct(keep.acc) + '. Check the pin, then save.'); }
     }
     $(o.gps).addEventListener('click', function () {
       if (watch !== null) { stop(); line('', ''); return; }
@@ -983,17 +1007,71 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
         stop(); line('warn', 'Location is blocked for this site. Allow location in your browser settings, or tap the map instead.');
       }, { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 });
     });
-    $(o.any).addEventListener('click', function () { if (!g || !g.bestLl) return; var ll = g.bestLl, acc = g.bestAcc; stop(); set(ll, 'gps', acc); line('warn', 'Using a rough position (±' + acc + ' m). Drag the pin onto the exact spot if you can see it on the map.'); });
+    $(o.any).addEventListener('click', function () { if (!g || !g.bestLl) return; var ll = g.bestLl, acc = g.bestAcc; stop(); set(ll, 'gps', acc); line('warn', 'Using a rough position (' + acct(acc) + '). Drag the pin onto the exact spot if you can see it on the map.'); });
     function parseAny(t) {
       t = String(t || '');
       var m = /@(-?\d+\.\d+),(-?\d+\.\d+)/.exec(t) || /!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/.exec(t) || /[?&](?:q|query|ll|destination|daddr)=(-?\d+\.\d+)(?:,|%2C)\s*(-?\d+\.\d+)/i.exec(t) || /(-?\d{1,2}\.\d+)\s*[, ]\s*(-?\d{1,3}\.\d+)/.exec(t);
+      if (!m) m = /\/(?:search|place|dir)\/(-?\d+\.\d+),\+?\s*(-?\d+\.\d+)/.exec(t) || /[?&](?:coordinate|sll|center)=(-?\d+\.\d+)(?:,|%2C)\s*(-?\d+\.\d+)/i.exec(t);
       return m ? [Number(m[1]), Number(m[2])] : null;
     }
-    $(o.paste).addEventListener('click', function () { $(o.pasteBox).classList.toggle('on'); if ($(o.pasteBox).classList.contains('on')) $(o.pasteIn).focus(); });
-    $(o.pasteGo).addEventListener('click', function () { var ll = parseAny($(o.pasteIn).value); if (!ll) { o.onError('Couldn’t read those coordinates. Try a format like 0.561368, 35.065480.'); return; } ensure(); set(ll, 'paste', 0); if (P.pick) map.setView(P.pick, 17); });
+    $(o.paste).addEventListener('click', function () { $(o.findBox).classList.remove('on'); $(o.pasteBox).classList.toggle('on'); if ($(o.pasteBox).classList.contains('on')) $(o.pasteIn).focus(); });
+    $(o.pasteGo).addEventListener('click', function () {
+      var t = $(o.pasteIn).value.trim(), ll = parseAny(t);
+      var use = function (x) { ensure(); set(x, 'paste', 0); if (P.pick) { map.setView(P.pick, 17); line('good', 'Point placed from the link. Check it on the map (Satellite helps), then save.'); } };
+      if (ll) return use(ll);
+      // a short share link (maps.app.goo.gl/…): ask the server where it points, then read the coordinates
+      var url = /https:\/\/[^\s]+/.exec(t);
+      if (!url) { o.onError('Couldn’t read those coordinates. Try a format like 0.561368, 35.065480, or paste a Google or Apple Maps link.'); return; }
+      line('', 'Opening the link…');
+      placeApi('?resolve=' + encodeURIComponent(url[0])).then(function (j) {
+        var x = j.ok && parseAny(decodeURIComponent(j.url || ''));
+        if (x) return use(x);
+        line('warn', j.reason === 'offline' ? 'Opening a link needs a signal. You can paste plain coordinates instead.' : 'That link doesn’t include a precise point. In Google Maps, press and hold the exact spot so a red pin drops, then copy the numbers shown (like 0.5614, 35.0655) and paste them here.');
+      });
+    });
+    // find a place by name: OpenStreetMap search here, or look it up in Google / Apple Maps and paste it back
+    var fb = document.createElement('button'); fb.type = 'button'; fb.className = 'btn light findbtn'; fb.textContent = '🔎 Find a place by name';
+    $(o.gps).parentNode.appendChild(fb);
+    var box = document.createElement('div'); box.className = 'paste findbox'; box.id = o.findBox;
+    box.innerHTML = '<label for="' + o.map + 'Q">Village, school, clinic, church or landmark</label>' +
+      '<div class="rowf"><input type="search" id="' + o.map + 'Q" placeholder="e.g. Kiptoo Primary School, Nandi" autocomplete="off" enterkeyhint="search"><button class="btn light" type="button" data-f="go">Search</button></div>' +
+      '<div class="presults" id="' + o.map + 'R" aria-live="polite"></div>' +
+      '<div class="ext"><span class="muted">Not found? Look it up in</span> <a class="btn light small" data-f="g" target="_blank" rel="noopener" href="#">Google Maps</a> <a class="btn light small" data-f="a" target="_blank" rel="noopener" href="#">Apple Maps</a>' +
+      '<p class="muted" style="margin:8px 0 0">There, press and hold the exact spot to drop a pin, copy the coordinates or tap Share → Copy link, then come back and use <b>Paste a point</b>.</p></div>' +
+      '<p class="muted credit">Search: © OpenStreetMap contributors</p>';
+    $(o.pasteBox).after(box);
+    o.findBox = box.id;
+    var qIn = $(o.map + 'Q'), res = $(o.map + 'R'), found = [];
+    function ext() {
+      var q = qIn.value.trim(), cc = o.cc ? o.cc() : '', where = q + (cc && CNAME[cc] ? ', ' + CNAME[cc] : '');
+      box.querySelector('[data-f=g]').href = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(where || (cc ? CNAME[cc] : 'Kenya'));
+      box.querySelector('[data-f=a]').href = 'https://maps.apple.com/?q=' + encodeURIComponent(where || (cc ? CNAME[cc] : 'Kenya'));
+    }
+    qIn.addEventListener('input', ext);
+    function search() {
+      var q = qIn.value.trim(); if (q.length < 2) { qIn.focus(); return; }
+      if (!navigator.onLine) { res.innerHTML = '<p class="msg warn">Search needs a signal. You can tap the map or paste coordinates instead.</p>'; return; }
+      res.innerHTML = '<div class="skel" style="height:56px"></div><div class="skel" style="height:56px"></div>';
+      var nr = S.here || (o.near && o.near());
+      placeApi('?q=' + encodeURIComponent(q) + '&cc=' + encodeURIComponent(o.cc ? o.cc() : '') + (nr ? '&near=' + nr[0].toFixed(4) + ',' + nr[1].toFixed(4) : '')).then(function (j) {
+        if (!j.ok) { res.innerHTML = '<p class="msg bad">' + esc(j.reason === 'offline' ? 'No signal.' : why(j)) + '</p>'; return; }
+        found = (j.places || []).slice(); if (S.here) found.sort(function (a, b) { return (a.similar - b.similar) || (metres(S.here, [a.lat, a.lng]) - metres(S.here, [b.lat, b.lng])); });
+        res.innerHTML = found.length ? found.map(function (x, i) { return '<button type="button" class="prow" data-i="' + i + '"><b>' + esc(x.name) + (x.similar ? ' <small class="sim">similar name</small>' : '') + '</b><span>' + esc([x.type, x.where].filter(Boolean).join(' · ')) + '</span>' + (S.here ? '<em>' + dist(metres(S.here, [x.lat, x.lng])) + '</em>' : '') + '</button>'; }).join('')
+          : '<p class="muted">Nothing found on OpenStreetMap. Try a nearby town or school, or look it up in Google or Apple Maps below.</p>';
+      });
+    }
+    box.querySelector('[data-f=go]').addEventListener('click', search);
+    qIn.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); search(); } });
+    res.addEventListener('click', function (e) {
+      var b = e.target.closest('.prow'); if (!b) return; var x = found[+b.getAttribute('data-i')];
+      ensure(); set([x.lat, x.lng], 'search', 0); P.found = x.name; if (P.pick) map.setView(P.pick, 17);
+      line('warn', 'Pin placed at “' + x.name + '” from OpenStreetMap. This is often the middle of the place, not the well: switch to Satellite and drag the pin onto the exact spot.');
+      box.classList.remove('on');
+    });
+    fb.addEventListener('click', function () { $(o.pasteBox).classList.remove('on'); box.classList.toggle('on'); if (!qIn.value && o.start) qIn.value = o.start(); ext(); if (box.classList.contains('on')) { qIn.focus(); qIn.select(); } });
     $(o.pasteIn).addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); $(o.pasteGo).click(); } });
     P.open = function (center, zoom, saved) {
-      stop(); line('', ''); $(o.pasteBox).classList.remove('on'); $(o.pasteIn).value = '';
+      stop(); line('', ''); $(o.pasteBox).classList.remove('on'); $(o.pasteIn).value = ''; $(o.findBox).classList.remove('on'); P.found = ''; $(o.map + 'Q').value = ''; $(o.map + 'R').innerHTML = '';
       P.pick = null; P.how = 'map'; P.acc = 0;
       setTimeout(function () {
         ensure();
@@ -1120,7 +1198,7 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
   // "updated 3 s ago" so it's clear the distances are live
   function ago() { if (!S.hereAt) return ''; var s = Math.round((Date.now() - S.hereAt) / 1000); return s < 5 ? 'just now' : s < 60 ? s + ' s ago' : Math.round(s / 60) + ' min ago'; }
   function freshUi() {
-    if (S.view === 'vProj' && lw !== null && S.hereAt) $('pLive').textContent = 'Live · GPS ±' + (S.hereAcc || '?') + ' m · updated ' + ago();
+    if (S.view === 'vProj' && lw !== null && S.hereAt) $('pLive').textContent = 'Live · GPS ' + (S.hereAcc ? acct(S.hereAcc) : '') + ' · updated ' + ago();
     if (S.view === 'vList' && S.filter === 'near' && S.here) $('count').textContent = ($('iCountry').value ? CNAME[$('iCountry').value] + ' · ' : '') + 'Closest to you · live, updated ' + ago();
   }
   function locate(cb) {
@@ -1350,13 +1428,13 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
 
   // --- 4. one project ----------------------------------------------------------------------------
   var pMedia = Media({ key: 'p', photoBtn: 'pPhotoBtn', thumbs: 'pThumbs' });
-  var pick = Picker({ map: 'pMap', gps: 'pGps', any: 'pGpsAny', line: 'pGpsLine', paste: 'pPaste', pasteBox: 'pPasteBox', pasteIn: 'pPasteIn', pasteGo: 'pPasteGo',
+  var pick = Picker({ map: 'pMap', gps: 'pGps', any: 'pGpsAny', line: 'pGpsLine', paste: 'pPaste', pasteBox: 'pPasteBox', pasteIn: 'pPasteIn', pasteGo: 'pPasteGo', findBox: 'pFind', cc: function () { return S.cur ? S.cur.ck : ''; }, start: function () { return S.cur ? String(S.cur.area || '').split(',')[0].trim() : ''; }, near: function () { return S.cur && S.cur.gps; },
     onPick: function () { msg('mSave', '', ''); $('confirm').classList.add('hidden'); $('bSave').classList.remove('hidden'); pickUi(); },
     onError: function (t) { msg('mSave', 'bad', t); },
     onHere: function () { distUi(); } });
   function pickUi() {
     $('bSave').disabled = !pick.pick;
-    $('newPt').textContent = pick.pick ? 'New location: ' + fmt(pick.pick) + (pick.how === 'gps' && pick.acc ? ' (±' + pick.acc + ' m)' : '') : 'Choose a spot on the map, or use your location.';
+    $('newPt').textContent = pick.pick ? 'New location: ' + fmt(pick.pick) + (pick.how === 'gps' && pick.acc ? ' (' + acct(pick.acc) + ')' : '') : 'Choose a spot on the map, or use your location.';
   }
   function tab(which) {
     S.tab = which; if (S.view === 'vProj') nav('vProj', 'replace');
@@ -1412,7 +1490,7 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
     if (!p.gps || !S.here) { $('pDist').textContent = ''; return; }
     var m = metres(S.here, p.gps), acc = S.hereAcc || 0;
     $('pDist').className = 'dist' + (m > 2000 ? ' far' : '');
-    $('pDist').textContent = m < Math.max(25, acc) ? 'You’re at the saved point (' + Math.round(m) + ' m away).'
+    $('pDist').textContent = m < Math.max(25, acc) ? 'You’re at the saved point (' + dist(m) + ' away).'
       : 'You’re ' + dist(m) + ' from the saved point · head ' + heading(S.here, p.gps) + '.' + (m > 2000 && m < 20000 ? ' If you’re standing at the site, the saved location may be wrong.' : '');
   }
   // live distance while a project is open: updates as you walk
@@ -1455,7 +1533,7 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
   $('bYes').addEventListener('click', function () {
     var p = S.cur, ll = pick.pick;
     $('bYes').disabled = true; msg('mSave', '', 'Saving…');
-    submit({ action: 'pin', id: p.id, lat: ll[0], lng: ll[1], acc: pick.acc, how: pick.how, by: S.name }, pMedia.files()).then(function (r) {
+    submit({ action: 'pin', id: p.id, lat: ll[0], lng: ll[1], acc: pick.acc, how: pick.how, found: pick.how === 'search' ? pick.found : '', by: S.name }, pMedia.files()).then(function (r) {
       $('bYes').disabled = false; $('confirm').classList.add('hidden'); $('bSave').classList.remove('hidden');
       if (r.state === 'locked') return lockOut({ reason: 'pin' });
       if (r.state === 'failed') { msg('mSave', 'bad', r.text); return; }
@@ -1838,13 +1916,13 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
 
   // --- 5. new site -------------------------------------------------------------------------------
   var nMedia = Media({ key: 'n', photoBtn: 'nPhotoBtn', thumbs: 'nThumbs', voiceBtn: 'nVoiceBtn', voice: 'nVoice' });
-  var nPick = Picker({ map: 'nMap', gps: 'nGps', any: 'nGpsAny', line: 'nGpsLine', paste: 'nPaste', pasteBox: 'nPasteBox', pasteIn: 'nPasteIn', pasteGo: 'nPasteGo',
+  var nPick = Picker({ map: 'nMap', gps: 'nGps', any: 'nGpsAny', line: 'nGpsLine', paste: 'nPaste', pasteBox: 'nPasteBox', pasteIn: 'nPasteIn', pasteGo: 'nPasteGo', findBox: 'nFind', cc: function () { return $('nCountry').value; }, start: function () { return $('nVillage').value.trim() || $('nName').value.trim(); },
     onPick: function () { newUi(); msg('mNew', '', ''); }, onError: function (t) { msg('mNew', 'bad', t); } });
   var newOpen = false;
   function newUi() {
     var ok = $('nName').value.trim() && nPick.pick;
     $('bNewSave').disabled = !ok;
-    $('nPt').textContent = !$('nName').value.trim() ? 'Add the name, then choose where it is.' : nPick.pick ? 'Location: ' + fmt(nPick.pick) + (nPick.how === 'gps' && nPick.acc ? ' (±' + nPick.acc + ' m)' : '') : 'Now choose where it is: use your location or tap the map.';
+    $('nPt').textContent = !$('nName').value.trim() ? 'Add the name, then choose where it is.' : nPick.pick ? 'Location: ' + fmt(nPick.pick) + (nPick.how === 'gps' && nPick.acc ? ' (' + acct(nPick.acc) + ')' : '') : 'Now choose where it is: use your location or tap the map.';
   }
   $('nName').addEventListener('input', newUi);
   function openNew() {
@@ -1881,7 +1959,8 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
       });
     });
   }
-  segInit('segTheme', 'rfPinTheme', 'data-theme'); segInit('segSize', 'rfPinSize', 'data-size'); segInit('segLang', 'rfPinLang', 'data-lang');
+  segInit('segTheme', 'rfPinTheme', 'data-theme'); segInit('segSize', 'rfPinSize', 'data-size'); segInit('segLang', 'rfPinLang', 'data-lang'); segInit('segUnits', 'rfPinUnits', 'data-units');
+  qa('#segUnits button').forEach(function (b) { b.addEventListener('click', function () { S.units = b.getAttribute('data-v') || 'km'; nearUi(); if (S.cur) distUi(); freshUi(); }); });
   qa('#segLang button').forEach(function (b) { b.addEventListener('click', function () { S.lang = b.getAttribute('data-v'); if (V) vRender(); }); });
   $('meHome').value = store.get('rfPinHomeSet') || '';
   $('meHome').addEventListener('change', function () { if (this.value) store.set('rfPinHomeSet', this.value); else store.del('rfPinHomeSet'); store.del('rfPinCountry'); fitted = false; applyHome(); homeTx(); });
