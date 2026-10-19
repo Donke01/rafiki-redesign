@@ -29,7 +29,7 @@ export async function onRequestPost({ request, env }) {
   if (!ext) return json({ ok: false, reason: 'type' }, 415);
   const name = (type.indexOf('audio/') === 0 ? 'voice-note-' : 'site-photo-') + new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-') + '.' + ext;
   try {
-    await addFileToUpdate(env.MONDAY_API_TOKEN, update, file, name, env.MONDAY_API_URL);
+    await addFileToUpdate(chk.token || env.MONDAY_API_TOKEN, update, file, name, env.MONDAY_API_URL);
     return json({ ok: true }, 200);
   } catch (e) {
     console.error('pin photo:', e && e.message);

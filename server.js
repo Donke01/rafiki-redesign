@@ -28,12 +28,12 @@ function resolve(urlPath) {
 const API_ORIGIN = new URL(process.env.API_ORIGIN || 'https://rafiki-redesign.pages.dev');
 function proxyApi(req, res) {
   const fwd = {};
-  ['accept', 'content-type', 'content-length', 'user-agent', 'accept-language'].forEach(h => { if (req.headers[h]) fwd[h] = req.headers[h]; });
+  ['accept', 'content-type', 'content-length', 'user-agent', 'accept-language', 'cookie', 'sec-fetch-site', 'x-pin'].forEach(h => { if (req.headers[h]) fwd[h] = req.headers[h]; });
   const ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim();
   if (ip) fwd['x-forwarded-for'] = ip;
   const up = https.request({ hostname: API_ORIGIN.hostname, port: 443, path: req.url, method: req.method, headers: { ...fwd, host: API_ORIGIN.hostname }, timeout: 25000 }, r => {
     const h = {};
-    ['content-type', 'cache-control', 'etag', 'last-modified', 'content-length'].forEach(k => { if (r.headers[k]) h[k] = r.headers[k]; });
+    ['content-type', 'cache-control', 'etag', 'last-modified', 'content-length', 'location', 'set-cookie'].forEach(k => { if (r.headers[k]) h[k] = r.headers[k]; });
     res.writeHead(r.statusCode || 502, h);
     r.pipe(res);
   });

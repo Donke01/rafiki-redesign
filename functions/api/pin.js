@@ -12,13 +12,16 @@
 // Every change also leaves a note on the monday.com item (who, what, the old value). The answer
 // carries that note's id, so photos and voice notes can be attached to it with /api/pin-photo.
 //
-// PINs (Cloudflare secrets): PIN_USERS gives each person their own PIN, written as
+// Signing in: people who signed in with monday.com (lib/pin-auth.js) are recognised by their session
+// cookie, and their changes are written with their own monday.com token, so they show as the author.
+// PINs (Cloudflare secrets), the fallback: PIN_USERS gives each person their own PIN, written as
 // "Meril:1234, Bertin:5678"; removing someone's entry switches off just their access, and their
 // name is taken from the PIN. PIN_CODE is an optional shared team PIN. Until one of them is set
 // the app stays locked. Wrong PINs are limited per connection.
 // Open repairs and the activity log are kept in Workers KV (FEED), not on the board.
 import { getFeed, dropFeed } from '../../lib/feed-cache.js';
 import { parseGps, readGps, writeGps, createUpdate, createSite, readUpdates, BOARD_ID } from '../../lib/monday.js';
+import { session, configured } from '../../lib/pin-auth.js';
 
 const MAX_FAILS = 8; // wrong PINs per connection per hour
 const MAX_SAVES = 120; // changes per connection per hour
@@ -66,12 +69,20 @@ function people(env) {
   }).filter(p => p && p.name && p.pin);
 }
 
-// Returns { res } with a Response to send back, or { who } (a name, or '' for the shared team PIN).
+// Returns { res } with a Response to send back, or { who, token? } — who is a name ('' for the shared
+// team PIN); token is the person's own monday.com token when they signed in with monday.com.
 // Shared with /api/pin-photo.
 export async function checkPin(request, env) {
   const list = people(env);
-  if (!env.PIN_CODE && !list.length) return { res: json({ ok: false, reason: 'not-set-up' }, 503) };
   if (!env.MONDAY_API_TOKEN) return { res: json({ ok: false, reason: 'no-monday' }, 503) };
+  const s = await session(request, env).catch(() => null);
+  if (s) {
+    // the cookie is sent automatically, so changes must come from the app's own pages
+    if (request.method !== 'GET' && !request.headers.get('Origin') && request.headers.get('Sec-Fetch-Site') !== 'same-origin') return { res: json({ ok: false, reason: 'origin' }, 403) };
+    return { who: s.name, token: s.token, monday: true };
+  }
+  if (!(request.headers.get('X-Pin') || '').trim() && configured(env)) return { res: json({ ok: false, reason: 'signin' }, 401) };
+  if (!env.PIN_CODE && !list.length) return { res: json({ ok: false, reason: configured(env) ? 'signin' : 'not-set-up' }, configured(env) ? 401 : 503) };
   const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
   const failKey = 'rl:pinfail:' + ip;
   if (await count(env, failKey) >= MAX_FAILS) return { res: json({ ok: false, reason: 'locked' }, 429) };
@@ -115,9 +126,9 @@ export async function onRequestGet({ request, env, waitUntil }) {
   try {
     const hist = (q.get('history') || '').replace(/\D/g, '');
     if (hist) {
-      const cur = await readGps(env.MONDAY_API_TOKEN, hist, env.MONDAY_API_URL);
+      const cur = await readGps(chk.token || env.MONDAY_API_TOKEN, hist, env.MONDAY_API_URL);
       if (!cur || (cur.board && cur.board !== String(env.MONDAY_BOARD_ID || BOARD_ID))) return json({ ok: false, reason: 'project' }, 404);
-      return json({ ok: true, notes: await readUpdates(env.MONDAY_API_TOKEN, hist, env.MONDAY_API_URL) }, 200);
+      return json({ ok: true, notes: await readUpdates(chk.token || env.MONDAY_API_TOKEN, hist, env.MONDAY_API_URL) }, 200);
     }
     if (q.get('activity')) return json({ ok: true, activity: await getJson(env, 'pinact', []) }, 200);
     const feed = await getFeed(env, waitUntil);
@@ -125,7 +136,7 @@ export async function onRequestGet({ request, env, waitUntil }) {
       id: p.id, title: p.title, country: p.country, ck: p.ck, area: p.area || '', type: p.type, status: p.status, year: p.year || null,
       gps: p.gps || null, photo: (p.photos && p.photos[0]) || null
     }));
-    return json({ ok: true, who: chk.who, projects, repairs: await getJson(env, 'pinrepairs', {}) }, 200);
+    return json({ ok: true, who: chk.who, monday: !!chk.monday, projects, repairs: await getJson(env, 'pinrepairs', {}) }, 200);
   } catch (e) {
     console.error('pin get:', e && e.message);
     return json({ ok: false, reason: 'down' }, 502);
@@ -146,7 +157,7 @@ export async function onRequestPost({ request, env }) {
   const action = b.action || 'pin';
   // a personal PIN decides the name; with the shared team PIN the app sends it
   const by = chk.who || clean(b.by, 60) || 'someone on the team';
-  const token = env.MONDAY_API_TOKEN, api = env.MONDAY_API_URL, board = String(env.MONDAY_BOARD_ID || BOARD_ID);
+  const token = chk.token || env.MONDAY_API_TOKEN, api = env.MONDAY_API_URL, board = String(env.MONDAY_BOARD_ID || BOARD_ID);
   const id = String(b.id || '').replace(/\D/g, '');
 
   try {

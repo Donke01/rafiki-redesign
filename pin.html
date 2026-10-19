@@ -48,6 +48,11 @@ body.locked .rf{display:none}
 .live{display:inline-flex;align-items:center;gap:6px;font-size:.78rem;font-weight:700;color:var(--ok)}
 .live:empty{display:none}
 .live::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--ok);animation:blink 1.4s infinite}
+#pinAlt > summary{display:none;list-style:none}
+#pinAlt.alt{margin-top:16px;border-top:var(--bw) solid var(--line);padding-top:6px}
+#pinAlt.alt > summary{display:flex;align-items:center;min-height:48px;font-weight:700;font-size:.9rem;color:var(--blue2);cursor:pointer}
+#pinAlt.alt > summary::-webkit-details-marker{display:none}
+.avatar{width:28px;height:28px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:8px}
 .net{display:none;padding:8px 16px;font-size:.82rem;font-weight:700;text-align:center;background:var(--warnbg);color:var(--warn)}
 .net.on{display:block}
 main{flex:1;padding:16px 16px calc(var(--tabh) + 24px + env(safe-area-inset-bottom))}
@@ -282,6 +287,12 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
     <section class="card" id="vLock" aria-labelledby="h-lock">
       <h1 id="h-lock">Rafiki Pin</h1>
       <p class="muted">For the Rafiki team: find sites, pin locations, report visits, track repairs and add new sites. Everything goes straight into monday.com.</p>
+      <div id="mondayBox" class="hidden">
+        <a class="btn block" id="bMonday" href="/api/pin-auth/start">Sign in with monday.com</a>
+        <p class="muted" style="margin:10px 2px 0">Use your own monday.com login. What you save shows in monday.com under your name.</p>
+      </div>
+      <p class="msg" id="mSign" aria-live="polite"></p>
+      <details id="pinAlt" open><summary>Use a PIN instead</summary>
       <form id="fLock" novalidate>
         <label for="iPin">Your PIN</label>
         <input type="password" id="iPin" inputmode="numeric" autocomplete="one-time-code" placeholder="PIN" required>
@@ -291,6 +302,7 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
         <div style="margin-top:14px"><button class="btn block" type="submit">Unlock</button></div>
         <p class="msg" id="mLock" aria-live="polite"></p>
       </form>
+      </details>
     </section>
 
     <!-- map home -->
@@ -474,7 +486,7 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
         <div class="card">
           <h2>You</h2>
           <div class="kv"><span>Name</span><b id="meName"></b></div>
-          <div class="kv"><span>PIN</span><span id="mePin"></span></div>
+          <div class="kv"><span>Signed in with</span><span id="mePin"></span></div>
           <div class="kv"><span>Waiting to send</span><span id="meOut">Nothing</span></div>
           <div style="margin-top:12px"><button class="btn light small" id="lockBtn" type="button">Lock the app</button></div>
         </div>
@@ -524,7 +536,7 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
   var qa = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
   var store = { get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} }, del: function (k) { try { localStorage.removeItem(k); } catch (e) {} } };
   var jget = function (k, d) { try { return JSON.parse(store.get(k) || 'null') || d; } catch (e) { return d; } };
-  var S = { pin: store.get('rfPin') || '', name: store.get('rfPinName') || '', who: store.get('rfPinWho') || '', projects: jget('rfPinList', []), repairs: jget('rfPinRepairs', {}),
+  var S = { mode: store.get('rfPinMode') || '', photo: store.get('rfPinPhoto') || '', pin: store.get('rfPin') || '', name: store.get('rfPinName') || '', who: store.get('rfPinWho') || '', projects: jget('rfPinList', []), repairs: jget('rfPinRepairs', {}),
     filter: store.get('rfPinFilter') || 'missing', cur: null, here: null, hereAt: 0, view: 'vLock', prev: 'vMap', routeMode: false, pickedRoute: [], route: jget('rfPinRoute', []), dismissed: {} };
   var CENTER = { ke: [0.3, 37.9, 7], tz: [-6.3, 34.8, 6], ug: [1.4, 32.3, 7], mw: [-13.3, 34.3, 7] };
   var CNAME = { ke: 'Kenya', tz: 'Tanzania', ug: 'Uganda', mw: 'Malawi' };
@@ -543,6 +555,7 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
   function saveList() { store.set('rfPinList', JSON.stringify(S.projects)); store.set('rfPinRepairs', JSON.stringify(S.repairs)); }
   function why(j) {
     return j.reason === 'pin' ? 'That PIN isn’t right. Please check it with your team.'
+      : j.reason === 'signin' ? 'Please sign in with monday.com.'
       : j.reason === 'locked' ? 'Too many wrong PINs from this connection. Please try again in an hour.'
       : j.reason === 'not-set-up' ? 'The pin app isn’t switched on yet: PINs still need to be set in Cloudflare.'
       : j.reason === 'no-monday' ? 'The pin app can’t reach monday.com yet (the monday.com connection isn’t set up).'
@@ -601,7 +614,7 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
 
   // --- talking to the server -------------------------------------------------------------
   function api(method, body, q) {
-    return fetch('/api/pin' + (q || ''), { method: method, headers: Object.assign({ 'X-Pin': S.pin, Accept: 'application/json' }, body ? { 'Content-Type': 'application/json' } : {}), body: body ? JSON.stringify(body) : undefined })
+    return fetch('/api/pin' + (q || ''), { method: method, headers: Object.assign({ Accept: 'application/json' }, S.pin ? { 'X-Pin': S.pin } : {}, body ? { 'Content-Type': 'application/json' } : {}), body: body ? JSON.stringify(body) : undefined })
       .then(function (r) { return r.json().catch(function () { return { ok: false, reason: 'down' }; }).then(function (j) { j.status = r.status; return j; }); })
       .catch(function () { return { ok: false, reason: 'offline', status: 0 }; });
   }
@@ -609,7 +622,7 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
     var fd = new FormData(); fd.append('update', updateId);
     var ext = kind === 'voice' ? (/mp4|m4a|aac/.test(blob.type) ? 'm4a' : /ogg/.test(blob.type) ? 'ogg' : 'webm') : 'jpg';
     fd.append('file', blob, (kind === 'voice' ? 'voice.' : 'photo.') + ext);
-    return fetch('/api/pin-photo', { method: 'POST', headers: { 'X-Pin': S.pin }, body: fd })
+    return fetch('/api/pin-photo', { method: 'POST', headers: S.pin ? { 'X-Pin': S.pin } : {}, body: fd })
       .then(function (r) { return r.json().catch(function () { return { ok: false, reason: 'down' }; }).then(function (j) { j.status = r.status; return j; }); })
       .catch(function () { return { ok: false, reason: 'offline', status: 0 }; });
   }
@@ -875,18 +888,34 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
     e.preventDefault();
     var name = $('iName').value.trim(), pin = $('iPin').value.trim();
     if (!pin) { msg('mLock', 'bad', 'Please enter your PIN.'); $('iPin').focus(); return; }
-    S.name = name; S.pin = pin; msg('mLock', '', 'Checking…');
+    S.name = name; S.pin = pin; S.mode = 'pin'; msg('mLock', '', 'Checking…');
     load(true);
   });
-  function lock() { pick.stop(); nPick.stop(); S.pin = ''; store.del('rfPin'); $('iPin').value = ''; msg('mLock', '', ''); show('vLock'); }
+  function forget() { S.pin = ''; store.del('rfPin'); if (S.mode === 'monday') { S.mode = ''; store.del('rfPinMode'); store.del('rfPinPhoto'); } }
+  function lock() {
+    pick.stop(); nPick.stop();
+    var wasMonday = S.mode === 'monday'; forget(); $('iPin').value = ''; msg('mLock', '', ''); msg('mSign', '', '');
+    if (wasMonday) fetch('/api/pin-auth/logout', { method: 'POST' }).catch(function () {});
+    show('vLock');
+  }
   $('lockBtn').addEventListener('click', lock);
-  function lockOut(j) { store.del('rfPin'); show('vLock'); msg('mLock', 'bad', why(j)); }
+  function lockOut(j) { var wasMonday = S.mode === 'monday'; forget(); show('vLock'); msg(wasMonday || j.reason === 'signin' ? 'mSign' : 'mLock', 'bad', wasMonday ? 'Please sign in with monday.com again.' : why(j)); }
+  // sign in with monday.com: come back to the same screen afterwards
+  $('bMonday').addEventListener('click', function () { this.href = '/api/pin-auth/start?return=' + encodeURIComponent(location.hash || ''); });
+  var SIGNIN = { denied: 'Sign-in was cancelled.', expired: 'Sign-in took too long. Please try again.', token: 'monday.com didn’t finish the sign-in. Please try again.',
+    account: 'That monday.com login isn’t part of Rafiki’s monday.com account. Sign in with your Rafiki login.', board: 'Your monday.com login can’t see the projects board yet. Ask an admin to add you to it, then try again.',
+    off: 'Sign in with monday.com isn’t switched on yet. Use your PIN for now.' };
+  function signinReturn() {
+    var m = /[?&]signin=([a-z]+)/.exec(location.search); if (!m) return '';
+    try { history.replaceState(null, '', '/pin' + location.hash); } catch (e) {}
+    return m[1];
+  }
 
   function load(fromLock) {
     api('GET').then(function (j) {
       if (!j.ok) {
         if (j.status === 401 || j.status === 429 || j.status === 503) { lockOut(j); return; }
-        if (j.reason === 'offline' && S.projects.length && S.pin && (S.name || S.who)) { // no signal: keep working from the saved list
+        if (j.reason === 'offline' && S.projects.length && (S.pin || S.mode === 'monday') && (S.name || S.who)) { // no signal: keep working from the saved list
           if (S.view === 'vLock') applyHash(true); else if (S.view === 'vList') renderList();
           msg('mList', 'warn', 'No signal: showing the list saved on this phone.'); return;
         }
@@ -894,9 +923,11 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
         return;
       }
       S.who = j.who || '';
+      if (j.monday) { S.mode = 'monday'; S.pin = ''; store.del('rfPin'); store.set('rfPinMode', 'monday'); }
       if (S.who) S.name = S.who;
       else if (!S.name) { store.del('rfPin'); show('vLock'); msg('mLock', 'bad', 'This is the shared team PIN, so please add your name too.'); $('iName').focus(); return; }
-      store.set('rfPin', S.pin); store.set('rfPinName', S.name); store.set('rfPinWho', S.who);
+      if (S.pin) { store.set('rfPin', S.pin); store.set('rfPinMode', 'pin'); }
+      store.set('rfPinName', S.name); store.set('rfPinWho', S.who);
       S.projects = j.projects || []; S.repairs = j.repairs || {}; saveList();
       msg('mList', '', '');
       if (S.view === 'vLock') applyHash(true); else { if (S.view === 'vList') renderList(); if (S.view === 'vMap') homeMap(); if (S.view === 'vProj' && S.cur && byId(S.cur.id)) { S.cur = byId(S.cur.id); curUi(); repairUi(); } if (S.view === 'vRoute') renderRoute(); }
@@ -1367,7 +1398,8 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
   }
   function renderMe() {
     $('meName').textContent = S.name;
-    $('mePin').textContent = S.who ? 'Your own PIN' : 'Shared team PIN';
+    $('mePin').innerHTML = S.mode === 'monday' ? (S.photo ? '<img class="avatar" src="' + esc(S.photo) + '" alt="" onerror="this.remove()">' : '') + 'monday.com' : S.who ? 'Your own PIN' : 'Shared team PIN';
+    $('lockBtn').textContent = S.mode === 'monday' ? 'Sign out' : 'Lock the app';
     outboxUi(); installUi();
     if (!navigator.onLine) { if (!actCache) $('actTable').innerHTML = '<p class="muted">Team activity needs a signal.</p>'; return; }
     api('GET', null, '?activity=1').then(function (j) { if (j.ok) { actCache = j.activity || []; actDraw(); } else if (!actCache) $('actTable').innerHTML = '<p class="msg bad">' + esc(why(j)) + '</p>'; });
@@ -1409,7 +1441,28 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
     flush().then(function () { load(false); });
     setTimeout(function () { if (refreshing) { refreshing = null; b.classList.remove('spin'); toast('Couldn’t refresh. Please try again.'); } }, 20000);
   });
-  if (S.pin && (S.name || S.who)) { msg('mLock', '', 'Unlocking…'); load(true); } else show('vLock');
+  // startup: a monday.com sign-in first, then a saved PIN
+  var back = signinReturn();
+  function lockScreen(available, note) {
+    $('mondayBox').classList.toggle('hidden', !available);
+    $('pinAlt').classList.toggle('alt', !!available); $('pinAlt').open = !available;
+    if (note) msg('mSign', back === 'ok' ? 'ok' : 'bad', note);
+  }
+  show('vLock');
+  fetch('/api/pin-auth/me', { headers: { Accept: 'application/json' } }).then(function (r) { return r.json(); }).then(function (a) {
+    lockScreen(a.available, back && back !== 'ok' ? SIGNIN[back] || SIGNIN.token : '');
+    if (a.user) {
+      S.mode = 'monday'; S.pin = ''; S.name = a.user.name; S.who = a.user.name; S.photo = a.user.photo || '';
+      store.set('rfPinMode', 'monday'); store.set('rfPinPhoto', S.photo); store.del('rfPin');
+      msg('mSign', '', 'Signing in…'); load(true); return;
+    }
+    if (S.mode === 'monday') { forget(); msg('mSign', 'bad', 'Please sign in with monday.com again.'); }
+    if (S.pin && (S.name || S.who)) { msg('mLock', '', 'Unlocking…'); load(true); }
+  }).catch(function () {
+    // no signal: carry on with what this phone already knows
+    lockScreen(false, '');
+    if ((S.mode === 'monday' || S.pin) && (S.name || S.who)) load(true);
+  });
 })();
 </script>
 </body>
