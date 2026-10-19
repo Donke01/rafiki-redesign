@@ -607,7 +607,8 @@ textarea{padding:12px 16px;min-height:96px;resize:vertical;line-height:1.45}
     $('pCur').textContent = p.gps ? 'Saved location: ' + fmt(p.gps) : 'No location saved yet.';
     $('pLinks').innerHTML = p.gps
       ? '<a class="btn light small" href="https://www.google.com/maps/dir/?api=1&destination=' + p.gps[0].toFixed(6) + ',' + p.gps[1].toFixed(6) + '" target="_blank" rel="noopener">🧭 Directions</a>' +
-        '<a class="btn light small" href="https://www.google.com/maps?q=' + p.gps[0].toFixed(6) + ',' + p.gps[1].toFixed(6) + '" target="_blank" rel="noopener">Open in Google Maps</a>'
+        '<a class="btn light small" href="https://www.google.com/maps?q=' + p.gps[0].toFixed(6) + ',' + p.gps[1].toFixed(6) + '" target="_blank" rel="noopener">Open in Google Maps</a>' +
+        '<a class="btn light small" href="https://maps.apple.com/?daddr=' + p.gps[0].toFixed(6) + ',' + p.gps[1].toFixed(6) + '&dirflg=d" target="_blank" rel="noopener">Apple Maps</a>'
       : '';
     distUi();
   }
