@@ -552,9 +552,6 @@ h2 .ei.c-ok,h3 .ei.c-ok{background:var(--okbg)}h2 .ei.c-warn,h3 .ei.c-warn{backg
 .tabs .plus:active span.ic{transform:scale(.92)}
 html[data-theme=dark] .tabs .plus span.ic{box-shadow:none}
 /* sign-in */
-#vLock{padding:0;overflow:hidden}
-#vLock > :not(.lockhero){margin-left:20px;margin-right:20px}
-#vLock > :last-child{margin-bottom:20px}
 .lockhero{position:relative;padding:26px 22px 46px;background:var(--g-deep);color:#FFFFFF;margin-bottom:6px;overflow:hidden}
 .lockhero h1{color:#FFFFFF;margin-top:14px}
 .lockhero p{color:#CFE8FA;font-size:.9rem;margin:0}
@@ -681,6 +678,41 @@ html[data-theme=sun] .otab[aria-pressed=true]{background:var(--blue)}
 .fgrid .otab .n{margin:0;padding:0 5px;background:var(--bad);color:#FFFFFF;font-size:.66rem;line-height:18px}
 .fgrid .otab[aria-pressed=true] .n{background:#FFFFFF;color:var(--bad)}
 .fgrid .otab .n.hidden{display:none}
+
+/* sign-in: PIN pad */
+#vLock{max-width:420px;width:100%;margin:0 auto;padding:28px 8px 12px;display:flex;flex-direction:column;align-items:center;text-align:center}
+.pp-brand{display:flex;align-items:center;gap:10px;font-size:1.1rem;font-weight:800;letter-spacing:.08em;color:var(--ink)}
+.pp-brand b{color:var(--blue);letter-spacing:0}
+.pp-mark{display:flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:18px;background:var(--g-deep);box-shadow:0 8px 20px rgba(4,38,63,.22)}
+.pp-mark svg{width:30px;height:30px}
+#vLock h1{margin:20px 0 4px;font-size:1.5rem}
+.pp-hi{margin:0;color:var(--muted);font-size:.9rem}
+#fLock{position:relative;width:100%;display:flex;flex-direction:column;align-items:center}
+.pp-dots{display:flex;gap:16px;justify-content:center;margin:26px 0 8px;min-height:18px}
+.pp-dots i{width:18px;height:18px;border-radius:50%;box-shadow:inset 0 0 0 2px var(--off);transition:background .15s,box-shadow .15s,transform .15s}
+.pp-dots i.on{background:var(--blue);box-shadow:none;transform:scale(1.08)}
+.pp-dots.shake{animation:ppShake .4s}
+@keyframes ppShake{20%,60%{transform:translateX(-9px)}40%,80%{transform:translateX(9px)}}
+#iPin{position:absolute;top:18px;left:50%;transform:translateX(-50%);width:220px;height:40px;min-height:0;opacity:0;border:0;padding:0;caret-color:transparent}
+#mLock{min-height:1.2em;margin:4px 0 10px}
+.pp-name{width:100%;text-align:left;margin-bottom:12px}
+.pp-name label{margin-top:0}
+.pp-pad{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;width:100%}
+.pk{display:flex;flex-direction:column;align-items:center;justify-content:center;height:72px;border-radius:22px;border:0;background:var(--card);box-shadow:0 2px 6px rgba(4,38,63,.08);font:inherit;font-size:1.65rem;font-weight:700;color:var(--ink);cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;transition:transform .08s,background .12s}
+.pk:active{transform:scale(.93);background:var(--tint)}
+html[data-theme=dark] .pk{box-shadow:none;border:1px solid var(--line)}
+html[data-theme=sun] .pk{border:2px solid #000;box-shadow:none}
+.pk-del,.pk-m{background:transparent;box-shadow:none !important;border:0 !important}
+.pk-del svg{width:30px;height:30px}
+.pk-side{display:flex}
+.pk-side .pk{flex:1;text-decoration:none;gap:4px}
+.pk-m small{font-size:.66rem;font-weight:700;line-height:1.2;color:var(--blue2)}
+.pk-side.off .pk{visibility:hidden}
+.pp-go{margin-top:16px}
+.pp-links{display:flex;justify-content:center;gap:18px;flex-wrap:wrap;margin-top:4px}
+.pp-links .lnk{font-size:.82rem}
+#mSign{margin-top:6px}
+@media (prefers-reduced-motion: reduce){.pp-dots.shake{animation:none}.pk{transition:none}}
 </style>
 </head>
 <body class="locked">
@@ -696,29 +728,29 @@ html[data-theme=sun] .otab[aria-pressed=true]{background:var(--blue)}
   <main id="main">
 
     <!-- unlock -->
-    <section class="card" id="vLock" aria-labelledby="h-lock">
-      <div class="lockhero">
-        <span class="lk-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><path d="M12 6.6s2.4 2.6 2.4 4.3a2.4 2.4 0 0 1-4.8 0c0-1.7 2.4-4.3 2.4-4.3z"/></svg></span>
-        <h1 id="h-lock">RAFIKI Pin</h1>
-        <p>For the RAFIKI team: find sites, pin locations, report visits, track repairs and add new sites. Everything goes straight into monday.com.</p>
-        <svg class="lk-wave" viewBox="0 0 480 40" preserveAspectRatio="none" aria-hidden="true"><path class="w2" d="M0 20 Q60 4 120 20 T240 20 T360 20 T480 20 V40 H0z"/><path class="w1" d="M0 24 Q60 40 120 24 T240 24 T360 24 T480 24 V40 H0z"/></svg>
-      </div>
-      <div id="mondayBox" class="hidden">
-        <a class="btn block" id="bMonday" href="/api/pin-auth/start"><span class="bi bi-monday" aria-hidden="true"><img src="https://www.google.com/s2/favicons?domain=monday.com&amp;sz=64" alt="" referrerpolicy="no-referrer" onerror="this.parentNode.classList.add('off')"></span>Sign in with monday.com</a>
-        <p class="muted" style="margin:10px 2px 0">Use your own monday.com login. What you save shows in monday.com under your name.</p>
-      </div>
-      <p class="msg" id="mSign" aria-live="polite"></p>
-      <details id="pinAlt" open><summary>Use a PIN instead</summary>
+    <section id="vLock" aria-labelledby="h-lock">
+      <div class="pp-brand"><span class="pp-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3.5s6 6.6 6 11a6 6 0 0 1-12 0c0-4.4 6-11 6-11z" fill="#FFFFFF"/></svg></span></div>
+      <h1 id="h-lock">Enter your PIN</h1>
+      <p class="pp-hi" id="ppHi">Habari, karibu tena.</p>
       <form id="fLock" novalidate>
-        <label for="iPin">Your PIN</label>
-        <input type="password" id="iPin" inputmode="numeric" autocomplete="one-time-code" placeholder="PIN" required>
-        <label for="iName">Your name</label>
-        <input type="text" id="iName" autocomplete="name" placeholder="e.g. Meril">
-        <p class="muted" style="margin-top:6px">Not needed if you have your own PIN.</p>
-        <div style="margin-top:14px"><button class="btn block" type="submit">Unlock</button></div>
+        <div class="pp-dots" id="ppDots" aria-hidden="true"></div>
+        <label for="iPin" class="vh">Your PIN</label>
+        <input type="password" id="iPin" inputmode="none" autocomplete="one-time-code" required aria-describedby="mLock">
         <p class="msg" id="mLock" aria-live="polite"></p>
+        <div class="pp-name hidden" id="ppName">
+          <label for="iName">Your name</label>
+          <input type="text" id="iName" autocomplete="name" placeholder="e.g. Meril">
+        </div>
+        <div class="pp-pad" role="group" aria-label="Number pad">
+          <button type="button" class="pk" data-k="1">1</button><button type="button" class="pk" data-k="2">2</button><button type="button" class="pk" data-k="3">3</button><button type="button" class="pk" data-k="4">4</button><button type="button" class="pk" data-k="5">5</button><button type="button" class="pk" data-k="6">6</button><button type="button" class="pk" data-k="7">7</button><button type="button" class="pk" data-k="8">8</button><button type="button" class="pk" data-k="9">9</button>
+          <span class="pk-side off" id="mondayBox"><a class="pk pk-m" id="bMonday" href="/api/pin-auth/start"><span class="bi bi-monday" aria-hidden="true"><img src="https://www.google.com/s2/favicons?domain=monday.com&amp;sz=64" alt="" referrerpolicy="no-referrer" onerror="this.parentNode.classList.add('off')"></span><small>monday.com<br>sign-in</small></a></span>
+          <button type="button" class="pk" data-k="0">0</button>
+          <button type="button" class="pk pk-del" data-k="del" aria-label="Delete last digit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5h11v14H9l-6-7z"/><path d="M12.5 9.5l5 5M17.5 9.5l-5 5"/></svg></button>
+        </div>
+        <button class="btn block pp-go" type="submit">Unlock</button>
+        <div class="pp-links"><button type="button" class="lnk" id="ppLong">My PIN is longer</button><button type="button" class="lnk" id="ppWho">Shared PIN? Add your name</button></div>
       </form>
-      </details>
+      <p class="msg" id="mSign" aria-live="polite"></p>
     </section>
 
     <!-- map home -->
@@ -1424,15 +1456,37 @@ html[data-theme=sun] .otab[aria-pressed=true]{background:var(--blue)}
     S.name = name; S.pin = pin; S.mode = 'pin'; msg('mLock', '', 'Checking…');
     load(true);
   });
+  // number pad: 4 digits unlock by themselves; "My PIN is longer" for older 6-digit PINs
+  var PP = { long: false };
+  function ppDraw() {
+    var n = $('iPin').value.length, slots = PP.long ? Math.max(6, n) : 4, h = '';
+    for (var i = 0; i < slots; i++) h += '<i' + (i < n ? ' class="on"' : '') + '></i>';
+    $('ppDots').innerHTML = h;
+  }
+  $('iPin').addEventListener('input', function () { this.value = this.value.replace(/\D/g, '').slice(0, 8); ppDraw(); });
+  $('fLock').addEventListener('click', function (e) {
+    var k = e.target.closest('[data-k]'); if (!k) return;
+    var v = $('iPin').value, d = k.getAttribute('data-k');
+    if (navigator.vibrate) try { navigator.vibrate(8); } catch (x) {}
+    if (d === 'del') v = v.slice(0, -1); else if (v.length < (PP.long ? 8 : 4)) v += d;
+    $('iPin').value = v; ppDraw(); msg('mLock', '', '');
+    if (d !== 'del' && !PP.long && v.length === 4) setTimeout(function () { if ($('iPin').value.length === 4) $('fLock').requestSubmit ? $('fLock').requestSubmit() : $('fLock').dispatchEvent(new Event('submit', { cancelable: true })); }, 120);
+  });
+  $('ppLong').addEventListener('click', function () { PP.long = !PP.long; this.textContent = PP.long ? 'My PIN has 4 digits' : 'My PIN is longer'; ppDraw(); });
+  $('ppWho').addEventListener('click', function () { $('ppName').classList.remove('hidden'); this.classList.add('hidden'); $('iName').focus(); });
+  function ppNeedName() { $('ppName').classList.remove('hidden'); $('ppWho').classList.add('hidden'); }
+  function ppReset() { $('iPin').value = ''; ppDraw(); }
+  ppDraw();
+  if (S.name) $('ppHi').textContent = 'Habari ' + S.name.split(' ')[0] + ', karibu tena.';
   function forget() { S.pin = ''; store.del('rfPin'); if (S.mode === 'monday') { S.mode = ''; store.del('rfPinMode'); store.del('rfPinPhoto'); } }
   function lock() {
     pick.stop(); nPick.stop();
-    var wasMonday = S.mode === 'monday'; forget(); $('iPin').value = ''; msg('mLock', '', ''); msg('mSign', '', '');
+    var wasMonday = S.mode === 'monday'; forget(); ppReset(); msg('mLock', '', ''); msg('mSign', '', '');
     if (wasMonday) fetch('/api/pin-auth/logout', { method: 'POST' }).catch(function () {});
     show('vLock');
   }
   $('lockBtn').addEventListener('click', lock);
-  function lockOut(j) { var wasMonday = S.mode === 'monday'; forget(); show('vLock'); msg(wasMonday || j.reason === 'signin' ? 'mSign' : 'mLock', 'bad', wasMonday ? 'Please sign in with monday.com again.' : why(j)); }
+  function lockOut(j) { var wasMonday = S.mode === 'monday'; forget(); show('vLock'); if (!wasMonday) { ppReset(); var dd = $('ppDots'); dd.classList.remove('shake'); void dd.offsetWidth; dd.classList.add('shake'); } msg(wasMonday || j.reason === 'signin' ? 'mSign' : 'mLock', 'bad', wasMonday ? 'Please sign in with monday.com again.' : why(j)); }
   // sign in with monday.com: come back to the same screen afterwards
   $('bMonday').addEventListener('click', function () { this.href = '/api/pin-auth/start?return=' + encodeURIComponent(location.hash || ''); });
   var SIGNIN = { denied: 'Sign-in was cancelled.', expired: 'Sign-in took too long. Please try again.', token: 'monday.com didn’t finish the sign-in. Please try again.',
@@ -1458,7 +1512,7 @@ html[data-theme=sun] .otab[aria-pressed=true]{background:var(--blue)}
       S.who = j.who || '';
       if (j.monday) { S.mode = 'monday'; S.pin = ''; store.del('rfPin'); store.set('rfPinMode', 'monday'); }
       if (S.who) S.name = S.who;
-      else if (!S.name) { store.del('rfPin'); show('vLock'); msg('mLock', 'bad', 'This is the shared team PIN, so please add your name too.'); $('iName').focus(); return; }
+      else if (!S.name) { store.del('rfPin'); show('vLock'); ppNeedName(); msg('mLock', 'bad', 'This is the shared team PIN, so please add your name too.'); $('iName').focus(); return; }
       if (S.pin) { store.set('rfPin', S.pin); store.set('rfPinMode', 'pin'); }
       store.set('rfPinName', S.name); store.set('rfPinWho', S.who);
       S.projects = j.projects || []; S.repairs = j.repairs || {}; S.visits = j.visits || {}; saveList();
@@ -2631,7 +2685,7 @@ html[data-theme=sun] .otab[aria-pressed=true]{background:var(--blue)}
           '<div class="oact"><button class="btn small" type="button" data-t="team-update">Save</button><button class="btn small light" type="button" data-t="team-pin">New PIN</button><button class="btn small light" type="button" data-t="team-remove">Remove</button><span class="msg" aria-live="polite"></span></div>'
           : '<p class="muted">' + (p.source === 'cloudflare' ? 'To change or remove, edit PIN_USERS in Cloudflare, or add them here with an app PIN and remove the Cloudflare entry.' : 'Signs in with monday.com. Admin role comes from PIN_ADMINS in Cloudflare.') + '</p>') + '</article>';
     }).join('') + '</div></div>' +
-      '<div><div class="card"><h2>Add a person</h2><p class="muted">They get their own 6-digit PIN, shown once. Send it to them privately.</p>' +
+      '<div><div class="card"><h2>Add a person</h2><p class="muted">They get their own 4-digit PIN, shown once. Send it to them privately.</p>' +
       '<label>Name<input type="text" id="tName" autocomplete="off" placeholder="e.g. Jessica Anderson"></label>' +
       '<div class="ofields"><label>Home country<select id="tHome"><option value="">All countries</option><option value="ke">Kenya</option><option value="tz">Tanzania</option><option value="ug">Uganda</option><option value="mw">Malawi</option></select></label>' +
       '<label>E-mail (optional)<input type="email" id="tEmail" placeholder="for alerts"></label></div>' +
@@ -2787,8 +2841,7 @@ html[data-theme=sun] .otab[aria-pressed=true]{background:var(--blue)}
   // startup: a monday.com sign-in first, then a saved PIN
   var back = signinReturn();
   function lockScreen(available, note) {
-    $('mondayBox').classList.toggle('hidden', !available);
-    $('pinAlt').classList.toggle('alt', !!available); $('pinAlt').open = !available;
+    $('mondayBox').classList.toggle('off', !available);
     if (note) msg('mSign', back === 'ok' ? 'ok' : 'bad', note);
   }
   show('vLock');

@@ -15,7 +15,7 @@
 import { checkPin } from './pin.js';
 import { getFeed, dropFeed } from '../../lib/feed-cache.js';
 import { parseGps, readGps, writeGps, createUpdate, BOARD_ID } from '../../lib/monday.js';
-import { getJson, putJson, team, saveTeam, hashPin, newPin, adminNames, sameName, sendMail, alertHtml, escHtml, recipients } from '../../lib/pin-store.js';
+import { getJson, putJson, team, saveTeam, hashPin, newPin, freshPin, adminNames, sameName, sendMail, alertHtml, escHtml, recipients } from '../../lib/pin-store.js';
 
 const STEPS = { reported: 'Reported', assigned: 'Assigned', parts: 'Parts ordered', fixed: 'Fixed' };
 const CC = ['ke', 'tz', 'ug', 'mw'];
@@ -172,15 +172,15 @@ export async function onRequestPost({ request, env, waitUntil }) {
         let p = t.find(x => sameName(x.name, name));
         if (b.action === 'team-add') {
           if (p) return json({ ok: false, reason: 'exists' }, 409);
-          const pin = newPin();
-          p = { name, home: CC.includes(b.home) ? b.home : '', admin: !!b.admin, email: clean(b.email, 120), h: await hashPin(env, pin), added: new Date().toISOString(), by };
+          const { pin, h } = await freshPin(env, t);
+          p = { name, home: CC.includes(b.home) ? b.home : '', admin: !!b.admin, email: clean(b.email, 120), h, added: new Date().toISOString(), by };
           t.push(p); await saveTeam(env, t);
           await log(env, { by, a: 'team', t: 'added ' + name });
           return json({ ok: true, pin });
         }
         if (!p) return json({ ok: false, reason: 'not-in-app' }, 404);
         if (b.action === 'team-remove') { await saveTeam(env, t.filter(x => x !== p)); await log(env, { by, a: 'team', t: 'removed ' + name }); return json({ ok: true }); }
-        if (b.action === 'team-pin') { const pin = newPin(); p.h = await hashPin(env, pin); await saveTeam(env, t); await log(env, { by, a: 'team', t: 'new PIN for ' + name }); return json({ ok: true, pin }); }
+        if (b.action === 'team-pin') { const { pin, h } = await freshPin(env, t.filter(x => x !== p)); p.h = h; await saveTeam(env, t); await log(env, { by, a: 'team', t: 'new PIN for ' + name }); return json({ ok: true, pin }); }
         if (sameName(name, by) && p.admin && !b.admin && !adminNames(env).includes(name.toLowerCase())) return json({ ok: false, reason: 'self' }, 409);
         p.home = CC.includes(b.home) ? b.home : ''; p.admin = !!b.admin; p.email = clean(b.email, 120);
         await saveTeam(env, t);
