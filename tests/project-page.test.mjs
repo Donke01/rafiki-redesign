@@ -33,7 +33,7 @@ test('known completed project: preview tags and redirect to /stories', async () 
   assert.match(r.headers.get('Content-Type'), /text\/html/);
   assert.match(r.headers.get('Cache-Control'), /max-age=300/);
   const h = await r.text();
-  assert.match(h, /<title>ACK St John&#39;s Sigowet Church, Kenya — Rafiki Outreach<\/title>/);
+  assert.match(h, /<title>ACK St John&#39;s Sigowet Church, Kenya — RAFIKI Outreach<\/title>/);
   if (!process.env.FEED_FIXTURE) assert.equal(meta(h, 'name', 'description'), 'Borehole well in Sigowet, Kenya, finished 2026, serving about 5,000 people.');
   assert.equal(meta(h, 'property', 'og:description'), meta(h, 'name', 'description'));
   assert.equal(meta(h, 'property', 'og:image'), 'https://example.org/api/photo/3210378757?w=1600');
@@ -81,7 +81,7 @@ test('Beyond the well projects get a share page too, worded by group', { skip: !
   }
   const h = await (await run('12480701913')).text();
   assert.equal(meta(h, 'property', 'og:image'), 'https://example.org/img/w-field3.jpg');
-  assert.equal(meta(h, 'property', 'og:image:alt'), 'A Rafiki Outreach project');
+  assert.equal(meta(h, 'property', 'og:image:alt'), 'A RAFIKI Outreach project');
   assert.equal(meta(h, 'property', 'og:image'), meta(h, 'name', 'twitter:image'));
   const up = await (await run('9634364385')).text();
   assert.equal(meta(up, 'property', 'og:image'), 'https://example.org/api/photo/2300306706?w=1600');

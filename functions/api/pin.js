@@ -1,4 +1,4 @@
-// /api/pin: the Rafiki pin app (/pin), for the Rafiki team only.
+// /api/pin: the RAFIKI pin app (/pin), for the RAFIKI team only.
 //   GET  /api/pin               → projects shown on the website (with their point and first photo),
 //                                  open repairs, and who the PIN belongs to
 //   GET  /api/pin?id=<item>     → the last pin made with the app on that project (for undo)
@@ -199,7 +199,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
       const village = clean(b.village, 120), typeLabel = TYPES[b.type] || '';
       const newId = await createSite(token, board, { name, cc: c[0], countryName: c[1], village, typeLabel, gps: fmt(g) }, api);
       if (!newId) return json({ ok: false, reason: 'down' }, 502);
-      const note = '🆕 New site added from the field with the Rafiki pin app by ' + by + '. Location: ' + fmt(g) + '.' +
+      const note = '🆕 New site added from the field with the RAFIKI pin app by ' + by + '. Location: ' + fmt(g) + '.' +
         (village ? ' Village/community: ' + village + '.' : '') + (clean(b.note, 1000) ? ' Notes: ' + said(clean(b.note, 1000)) : '') +
         ' It starts as "Due Diligence", so it is not on the website yet.';
       const updateId = await createUpdate(token, newId, note, api);
@@ -223,14 +223,14 @@ export async function onRequestPost({ request, env, waitUntil }) {
       // a location an admin has confirmed: field changes wait for approval
       const conf = (await getJson(env, 'pinconfirmed', {}))[id];
       if (conf && !chk.admin) {
-        const n2 = '📍 Location change requested with the Rafiki pin app by ' + by + ': ' + value + ' (' + how + '). The current location was confirmed by ' + conf.by + ', so this waits for an admin to approve it. Current value: ' + (cur.text || 'none') + '.';
+        const n2 = '📍 Location change requested with the RAFIKI pin app by ' + by + ': ' + value + ' (' + how + '). The current location was confirmed by ' + conf.by + ', so this waits for an admin to approve it. Current value: ' + (cur.text || 'none') + '.';
         const uid = await createUpdate(token, id, n2, api);
         await addReview(env, { kind: 'request', id, t: title, by, data: { to: value, from: cur.text || '', how } });
         await bump(env, 'rl:pinsave:' + ip);
         await log(env, { by, a: 'request', id, t: title });
         return json({ ok: true, id, pending: true, updateId: uid }, 200);
       }
-      const note = '📍 Location pinned with the Rafiki pin app by ' + by + ': ' + value +
+      const note = '📍 Location pinned with the RAFIKI pin app by ' + by + ': ' + value +
         ' (' + how + (b.how === 'gps' && acc ? ', about ±' + acc + ' m' : '') + ').' +
         (cur.text ? ' Previous value: ' + cur.text + '.' : ' There was no location before.');
       const updateId = await writeGps(token, board, id, value, note, api);
@@ -247,7 +247,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
       const last = env.FEED ? await env.FEED.get('pinlast:' + id, 'json') : null;
       if (!last) return json({ ok: false, reason: 'nothing-to-undo' }, 409);
       if ((cur.text || '').replace(/\s/g, '') !== String(last.value).replace(/\s/g, '')) return json({ ok: false, reason: 'changed' }, 409);
-      const note = '↩️ Pin undone with the Rafiki pin app by ' + by + '. ' + (last.prev ? 'Back to ' + last.prev + '.' : 'The location is empty again.') + ' (It was ' + last.value + '.)';
+      const note = '↩️ Pin undone with the RAFIKI pin app by ' + by + '. ' + (last.prev ? 'Back to ' + last.prev + '.' : 'The location is empty again.') + ' (It was ' + last.value + '.)';
       const updateId = await writeGps(token, board, id, last.prev || '', note, api);
       await env.FEED.delete('pinlast:' + id);
       await bump(env, 'rl:pinsave:' + ip);
@@ -262,7 +262,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
       const here = parseGps(Number(b.lat) + ', ' + Number(b.lng)), saved = parseGps(cur.text);
       const L = []; // one line each in the monday.com note
       const urg = URGENCY[b.urgency] && b.state !== 'working' ? b.urgency : '';
-      L.push('🩺 Site visit by ' + by + ' (Rafiki pin app): ' + state + '.' + (urg ? ' Urgency: ' + URGENCY[urg] + '.' : ''));
+      L.push('🩺 Site visit by ' + by + ' (RAFIKI pin app): ' + state + '.' + (urg ? ' Urgency: ' + URGENCY[urg] + '.' : ''));
       const list = (a, n) => (Array.isArray(a) ? a : []).map(x => clean(x, 60)).filter(Boolean).slice(0, n);
       const bad = list(b.problems, 30), okk = list(b.checked, 30), other = clean(b.other, 300);
       if (bad.length || other) L.push('Problems found: ' + bad.concat(other ? [other] : []).join(', ') + '.');
@@ -353,7 +353,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
     }
 
     if (action === 'fixed') {
-      const note = '🔧 Marked as fixed with the Rafiki pin app by ' + by + '.' + (clean(b.note, 1000) ? ' Notes: ' + said(clean(b.note, 1000)) : '');
+      const note = '🔧 Marked as fixed with the RAFIKI pin app by ' + by + '.' + (clean(b.note, 1000) ? ' Notes: ' + said(clean(b.note, 1000)) : '');
       const updateId = await createUpdate(token, id, note, api);
       if (!updateId) return json({ ok: false, reason: 'down' }, 502);
       await setRepair(env, id, null);

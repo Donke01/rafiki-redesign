@@ -1,4 +1,4 @@
-// POST /api/pin-photo: attaches one photo or voice note from the Rafiki pin app to a note on a monday.com
+// POST /api/pin-photo: attaches one photo or voice note from the RAFIKI pin app to a note on a monday.com
 // project (the note returned by /api/pin). Photos go on the note, not into the public
 // "Photos of the project" column, so nothing from the field reaches the website by itself.
 // Form fields: update (note id), label (optional, e.g. "Water flowing", used in the file name), file (JPEG/PNG/HEIC/WebP photo, or a WebM/MP4/AAC/MP3/OGG voice note; up to 8 MB). Needs the team PIN in "X-Pin".

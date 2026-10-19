@@ -1,7 +1,7 @@
 {
-  "name": "Rafiki Pin",
-  "short_name": "Rafiki Pin",
-  "description": "Rafiki Outreach field app: pin project locations, report site visits, track repairs and add new sites.",
+  "name": "RAFIKI Pin",
+  "short_name": "RAFIKI Pin",
+  "description": "RAFIKI Outreach field app: pin project locations, report site visits, track repairs and add new sites.",
   "start_url": "/pin",
   "scope": "/pin",
   "display": "standalone",

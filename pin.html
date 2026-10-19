@@ -6,13 +6,13 @@
 <meta name="format-detection" content="telephone=no">
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#076DB1">
-<title>Rafiki Pin</title>
+<title>RAFIKI Pin</title>
 <link rel="manifest" href="/pin.webmanifest">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Rafiki Pin">
+<meta name="apple-mobile-web-app-title" content="RAFIKI Pin">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -664,7 +664,7 @@ html[data-theme=sun] .phead{background:#002A57}
 <body class="locked">
 <div class="app">
   <header class="top">
-    <a class="home" href="/" aria-label="Rafiki Outreach home page"><img class="lg-d" src="/img/logo-dark-bold.webp" alt=""><img class="lg-l" src="/img/logo-light-bold.webp" alt=""></a>
+    <a class="home" href="/" aria-label="RAFIKI Outreach home page"><img class="lg-d" src="/img/logo-dark-bold.webp" alt=""><img class="lg-l" src="/img/logo-light-bold.webp" alt=""></a>
     <b>Pin</b>
     <span class="sp"></span>
     <span class="who" id="who"></span>
@@ -677,8 +677,8 @@ html[data-theme=sun] .phead{background:#002A57}
     <section class="card" id="vLock" aria-labelledby="h-lock">
       <div class="lockhero">
         <span class="lk-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><path d="M12 6.6s2.4 2.6 2.4 4.3a2.4 2.4 0 0 1-4.8 0c0-1.7 2.4-4.3 2.4-4.3z"/></svg></span>
-        <h1 id="h-lock">Rafiki Pin</h1>
-        <p>For the Rafiki team: find sites, pin locations, report visits, track repairs and add new sites. Everything goes straight into monday.com.</p>
+        <h1 id="h-lock">RAFIKI Pin</h1>
+        <p>For the RAFIKI team: find sites, pin locations, report visits, track repairs and add new sites. Everything goes straight into monday.com.</p>
         <svg class="lk-wave" viewBox="0 0 480 40" preserveAspectRatio="none" aria-hidden="true"><path class="w2" d="M0 20 Q60 4 120 20 T240 20 T360 20 T480 20 V40 H0z"/><path class="w1" d="M0 24 Q60 40 120 24 T240 24 T360 24 T480 24 V40 H0z"/></svg>
       </div>
       <div id="mondayBox" class="hidden">
@@ -702,7 +702,7 @@ html[data-theme=sun] .phead{background:#002A57}
     <!-- map home -->
     <section id="vMap" class="hidden" aria-label="Map of projects">
       <div class="mapwrap">
-        <div id="hMap" role="application" aria-label="Map of Rafiki projects. Tap a dot to open a project."></div>
+        <div id="hMap" role="application" aria-label="Map of RAFIKI projects. Tap a dot to open a project."></div>
         <div class="ov top">
           <div class="pill"><div class="prog" id="mProg"></div>
             <div class="legend"><span><i style="background:#1C7C4A"></i>Pinned</span><span><i style="background:#D98200"></i>Needs repair</span><span><i style="background:#B3261E"></i>Not working</span></div>
@@ -1414,7 +1414,7 @@ html[data-theme=sun] .phead{background:#002A57}
   // sign in with monday.com: come back to the same screen afterwards
   $('bMonday').addEventListener('click', function () { this.href = '/api/pin-auth/start?return=' + encodeURIComponent(location.hash || ''); });
   var SIGNIN = { denied: 'Sign-in was cancelled.', expired: 'Sign-in took too long. Please try again.', token: 'monday.com didn’t finish the sign-in. Please try again.',
-    account: 'That monday.com login isn’t part of Rafiki’s monday.com account. Sign in with your Rafiki login.', board: 'Your monday.com login can’t see the projects board yet. Ask an admin to add you to it, then try again.',
+    account: 'That monday.com login isn’t part of RAFIKI’s monday.com account. Sign in with your RAFIKI login.', board: 'Your monday.com login can’t see the projects board yet. Ask an admin to add you to it, then try again.',
     off: 'Sign in with monday.com isn’t switched on yet. Use your PIN for now.' };
   function signinReturn() {
     var m = /[?&]signin=([a-z]+)/.exec(location.search); if (!m) return '';
@@ -2032,7 +2032,7 @@ html[data-theme=sun] .phead{background:#002A57}
         '<h2 style="margin-top:22px">✨ ' + tr('Story moment (optional)', 'Kisa (si lazima)') + '</h2><p class="muted">' + tr('A few words from someone who uses the water, for the website.', 'Maneno machache kutoka kwa mtumiaji wa maji, kwa ajili ya tovuti.') + '</p>' +
         inp('story.quote', tr('What they said', 'Walichosema'), { area: 1, ph: tr('e.g. “Now my girls get to school on time.”', 'mf. “Sasa wasichana wangu wanafika shuleni kwa wakati.”') }) +
         inp('story.by', tr('Who said it', 'Aliyesema'), { ph: tr('e.g. Mary, mother of three', 'mf. Mary, mama wa watoto watatu') }) +
-        '<label class="tick"><input type="checkbox" data-p="story.consent"' + (V.story.consent ? ' checked' : '') + '> ' + tr('They agreed to be quoted and photographed for Rafiki’s website', 'Wamekubali kunukuliwa na kupigwa picha kwa tovuti ya Rafiki') + '</label>';
+        '<label class="tick"><input type="checkbox" data-p="story.consent"' + (V.story.consent ? ' checked' : '') + '> ' + tr('They agreed to be quoted and photographed for RAFIKI’s website', 'Wamekubali kunukuliwa na kupigwa picha kwa tovuti ya RAFIKI') + '</label>';
     } else if (st === 'review') {
       var pr = problems().map(function (k) { return tr(I[k][0], I[k][1]); }).concat(V.other ? [V.other] : []);
       var rows = [];
@@ -2299,7 +2299,7 @@ html[data-theme=sun] .phead{background:#002A57}
     var pc = ids.length ? Math.round(cnt.working / ids.length * 100) + '%' : '–';
     var ti = 0, tile = function (v, l, cls) { return '<div class="kpi ' + (cls || '') + '" style="--i:' + (ti++) + '"><b>' + v + '</b><span>' + l + '</span></div>'; };
     var title = new Date(y, m, 1).toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
-    var h = '<header class="rep-h"><h1 id="repTitle">Field report · ' + esc(title) + '</h1><p>' + (ck ? esc(CNAME[ck]) : 'All countries') + ' · Rafiki Outreach · Prepared by ' + esc(S.name) + ', ' + new Date().toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' }) + '</p></header>';
+    var h = '<header class="rep-h"><h1 id="repTitle">Field report · ' + esc(title) + '</h1><p>' + (ck ? esc(CNAME[ck]) : 'All countries') + ' · RAFIKI Outreach · Prepared by ' + esc(S.name) + ', ' + new Date().toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' }) + '</p></header>';
     var pl = function (k, one, many) { return k === 1 ? one : many; };
     h += '<div class="kpis">' + tile(visits.length, pl(visits.length, 'site visit', 'site visits')) + tile(ids.length, pl(ids.length, 'project visited', 'projects visited')) + tile(pc, 'of visited projects working', ids.length && cnt.working / ids.length < .8 ? 'warn' : '') + tile(open.length, pl(open.length, 'open repair', 'open repairs') + (urgent ? ' (' + urgent + ' urgent)' : ''), urgent ? 'bad' : '') +
       tile(n('fixed'), pl(n('fixed'), 'repair fixed', 'repairs fixed')) + tile(n('new'), pl(n('new'), 'new site added', 'new sites added')) + tile(n('pin'), pl(n('pin'), 'location pinned', 'locations pinned')) + tile(due, 'due a visit (6+ months)') + '</div>';
@@ -2312,7 +2312,7 @@ html[data-theme=sun] .phead{background:#002A57}
       open.map(function (x) { return '<tr><td><b>' + esc(x.p ? x.p.title : x.r.t || x.id) + '</b><br><small>' + esc(x.p ? x.p.country : '') + ' · ' + (x.r.state === 'notworking' ? '❌ not working' : '⚠️ needs repair') + '</small></td><td>' + esc(new Date(x.r.at).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })) + '<br><small>' + esc(x.r.by) + '</small></td><td>' + esc(x.r.urgency ? URG[x.r.urgency][0] : '–') + '</td><td>' + esc((x.r.problems || []).join(', ') || x.r.note || '–') + '</td><td>' + esc(x.r.parts || '–') + '</td><td>' + (x.r.cost ? Number(x.r.cost).toLocaleString() : '–') + '</td></tr>'; }).join('') + '</tbody></table></div>' : '<p class="muted">None. 🎉</p>');
     h += '<h2>Visits this month</h2>' + (visits.length ? '<div class="tw"><table class="rt"><thead><tr><th>Date</th><th>Project</th><th>By</th><th>Result</th></tr></thead><tbody>' +
       visits.slice().sort(function (a, b) { return a.at.localeCompare(b.at); }).map(function (e) { var p = byId(e.id); return '<tr><td>' + esc(new Date(e.at).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })) + '</td><td>' + esc(p ? p.title : e.t) + '</td><td>' + esc(e.by) + '</td><td>' + (STATES[e.s] ? STATES[e.s][0] + ' ' + STATES[e.s][1] : '') + (e.u ? ' · ' + URG[e.u][0] : '') + '</td></tr>'; }).join('') + '</tbody></table></div>' : '<p class="muted">No visits recorded in the app this month.</p>');
-    h += '<p class="muted rep-f">Only visits, repairs and pins made with the Rafiki Pin app are counted.</p>';
+    h += '<p class="muted rep-f">Only visits, repairs and pins made with the RAFIKI Pin app are counted.</p>';
     return h;
   }
   var period = 7, actCache = null;
@@ -2729,9 +2729,9 @@ html[data-theme=sun] .phead{background:#002A57}
   addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); deferred = e; installUi(); });
   addEventListener('appinstalled', function () { standalone = true; deferred = null; installUi(); });
   function installHtml(full) {
-    if (standalone) return full ? '<h2>On your home screen</h2><p class="muted" style="margin:0">Rafiki Pin is installed on this phone ✓</p>' : '';
-    if (deferred) return '<div class="install"><img src="/img/pin/icon-192.png" alt=""><div><b>Add Rafiki Pin to your home screen</b>Opens like a normal app, and works with no signal.</div></div><div style="display:flex;gap:8px"><button class="btn small" type="button" data-inst="go">Install</button>' + (full ? '' : '<button class="btn small light" type="button" data-inst="x">Not now</button>') + '</div>';
-    if (ios) return '<div class="install"><img src="/img/pin/icon-192.png" alt=""><div><b>Add Rafiki Pin to your home screen</b>In Safari, tap the Share button <span aria-hidden="true">(□↑)</span>, then “Add to Home Screen”.</div></div>' + (full ? '' : '<button class="btn small light" type="button" data-inst="x">Got it</button>');
+    if (standalone) return full ? '<h2>On your home screen</h2><p class="muted" style="margin:0">RAFIKI Pin is installed on this phone ✓</p>' : '';
+    if (deferred) return '<div class="install"><img src="/img/pin/icon-192.png" alt=""><div><b>Add RAFIKI Pin to your home screen</b>Opens like a normal app, and works with no signal.</div></div><div style="display:flex;gap:8px"><button class="btn small" type="button" data-inst="go">Install</button>' + (full ? '' : '<button class="btn small light" type="button" data-inst="x">Not now</button>') + '</div>';
+    if (ios) return '<div class="install"><img src="/img/pin/icon-192.png" alt=""><div><b>Add RAFIKI Pin to your home screen</b>In Safari, tap the Share button <span aria-hidden="true">(□↑)</span>, then “Add to Home Screen”.</div></div>' + (full ? '' : '<button class="btn small light" type="button" data-inst="x">Got it</button>');
     return full ? '<h2>Home screen</h2><p class="muted" style="margin:0">Use your browser menu’s “Install app” or “Add to Home screen”.</p>' : '';
   }
   function installUi() {

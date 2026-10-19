@@ -87,7 +87,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
         if (!it || it.status !== 'open') return json({ ok: false, reason: 'gone' }, 404);
         const ok = b.decision === 'approve', reason = clean(b.reason, 300), d = it.data || {};
         let note = '';
-        if (it.kind === 'new') note = ok ? '✅ New site reviewed and approved by ' + by + ' (Rafiki pin app).' : '⛔ New site rejected by ' + by + (reason ? ': ' + said(reason) : '.') + ' Please archive it on the board if it should not be followed up.';
+        if (it.kind === 'new') note = ok ? '✅ New site reviewed and approved by ' + by + ' (RAFIKI pin app).' : '⛔ New site rejected by ' + by + (reason ? ': ' + said(reason) : '.') + ' Please archive it on the board if it should not be followed up.';
         if (it.kind === 'move') {
           if (ok) note = '✅ Location change to ' + d.to + ' approved by ' + by + '.';
           else { await writeGps(token, board, it.id, d.from || '', null, api); await dropFeed(env); note = '↩️ Location change rejected by ' + by + (reason ? ' (' + reason + ')' : '') + '. Back to ' + (d.from || 'no location') + '.'; }
@@ -122,7 +122,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
         if (budget !== (job.budget == null ? null : job.budget)) ch.push(budget == null ? 'no budget' : 'budget approved: KES ' + budget.toLocaleString('en-US'));
         const extra = clean(b.note, 600);
         if (!ch.length && !extra) return json({ ok: true, job });
-        await createUpdate(token, id, '🔧 Repair job updated by ' + by + ' (Rafiki pin app): ' + (ch.join('; ') || 'note added') + '.' + (extra ? ' Notes: ' + said(extra) : ''), api);
+        await createUpdate(token, id, '🔧 Repair job updated by ' + by + ' (RAFIKI pin app): ' + (ch.join('; ') || 'note added') + '.' + (extra ? ' Notes: ' + said(extra) : ''), api);
         if (step === 'fixed') { delete r[id]; await log(env, { by, a: 'fixed', id, t: job.t }); }
         else { Object.assign(job, { step, assignee, due, budget }); r[id] = job; await log(env, { by, a: 'job', id, t: job.t, s: step }); }
         await putJson(env, 'pinrepairs', r);
@@ -187,7 +187,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
         return json({ ok: true });
       }
       case 'test-mail': {
-        const r = await sendMail(env, 'Rafiki Pin: test alert', alertHtml('Test alert from Rafiki Pin', ['If you can read this, e-mail alerts are working.', 'Sent by ' + by + '.'], new URL('/pin#me', request.url).toString()), 'Test alert from Rafiki Pin. Sent by ' + by + '.');
+        const r = await sendMail(env, 'RAFIKI Pin: test alert', alertHtml('Test alert from RAFIKI Pin', ['If you can read this, e-mail alerts are working.', 'Sent by ' + by + '.'], new URL('/pin#me', request.url).toString()), 'Test alert from RAFIKI Pin. Sent by ' + by + '.');
         return json(r, r.ok ? 200 : 503);
       }
     }
@@ -218,7 +218,7 @@ async function monthly(request, env) {
     n('pin') + ' locations pinned, ' + n('new') + ' new sites added.',
     review ? review + ' items waiting for review in the Office tab.' : 'Nothing waiting for review.'
   ];
-  const r = await sendMail(env, 'Rafiki Pin: ' + label + ' summary', alertHtml('Field summary: ' + label, lines, new URL('/pin#report', request.url).toString()), lines.join('\n'));
+  const r = await sendMail(env, 'RAFIKI Pin: ' + label + ' summary', alertHtml('Field summary: ' + label, lines, new URL('/pin#report', request.url).toString()), lines.join('\n'));
   return json(Object.assign({ month: label }, r), r.ok ? 200 : 503);
 }
 

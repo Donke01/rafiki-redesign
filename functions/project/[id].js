@@ -6,7 +6,7 @@
 // used, and no project cost except `needed` on projects still looking for funding.
 import { getFeed } from '../../lib/feed-cache.js';
 
-const SITE = 'Rafiki Outreach';
+const SITE = 'RAFIKI Outreach';
 const FALLBACK_IMAGE = '/img/w-field3.jpg'; // the og:image of /stories
 const WATER = { 'Borehole well': true, 'Water collection': true };
 // Beyond the well: how each group is named in a description ("School project in Ndalat, Kenya, ...")
@@ -68,7 +68,7 @@ function page(p, origin) {
   const desc = describe(p);
   const photo = (p.photos || [])[0];
   const image = origin + (photo ? '/api/photo/' + encodeURIComponent(photo) + '?w=1600' : FALLBACK_IMAGE);
-  const alt = photo ? 'Photo from ' + p.title : (isWater(p) ? 'A Rafiki Outreach water project' : 'A Rafiki Outreach project');
+  const alt = photo ? 'Photo from ' + p.title : (isWater(p) ? 'A RAFIKI Outreach water project' : 'A RAFIKI Outreach project');
   const share = origin + '/project/' + encodeURIComponent(id);
   return `<!doctype html>
 <html lang="en-GB">
@@ -98,7 +98,7 @@ function page(p, origin) {
 <main>
 <h1 style="font-size:22px;margin:0 0 8px">${esc(p.title)}</h1>
 <p style="margin:0 0 12px">${esc(desc)}</p>
-<p style="margin:0"><a href="${esc(target)}">See this project on Rafiki Outreach</a></p>
+<p style="margin:0"><a href="${esc(target)}">See this project on RAFIKI Outreach</a></p>
 </main>
 </body>
 </html>

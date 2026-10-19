@@ -5,7 +5,7 @@
 // e.g. "abc123…-us7"; audience id below). Until the API key is set, signups are kept in the
 // FEED KV namespace ("sub:<email>") and added to Mailchimp on the first signup after it is set.
 // Signups are added as subscribed straight away: Mailchimp's own confirmation email carries
-// Mailchimp branding, so a Rafiki-branded confirmation can be added once rafikioutreach.org
+// Mailchimp branding, so a RAFIKI-branded confirmation can be added once rafikioutreach.org
 // is verified in Resend.
 
 const LIST_ID = '7e30ec875e';
