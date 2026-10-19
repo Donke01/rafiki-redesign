@@ -441,6 +441,74 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
 .kpi b{font-variant-numeric:tabular-nums}
 @media (prefers-reduced-motion: reduce){.view-in,.stagger .row,.stagger .note,.stagger .stop,.wiz.go-l,.wiz.go-r,.here,.toast,.kpi,.dot-alert,.okmark::before,.done-card h2,.skel,.meter i::after,.tabs button svg{animation:none !important}.okmark path{stroke-dashoffset:0;animation:none}.row:hover,.hero:hover img{transform:none}}
 @media (prefers-reduced-motion: reduce){*{scroll-behavior:auto !important;animation:none !important;transition:none !important}}
+
+/* Office overview */
+.oview{display:flex;flex-direction:column;gap:14px}
+.oview h2{margin:8px 2px 0;font-size:1.02rem}
+.tank{position:relative;display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center;width:100%;padding:18px;border:0;border-radius:24px;text-align:left;font:inherit;color:#FFFFFF;cursor:pointer;background:radial-gradient(120% 140% at 100% 0%,#0A78C2 0%,#054F81 45%,#04263F 100%);box-shadow:0 10px 28px rgba(4,38,63,.28);overflow:hidden;isolation:isolate}
+.tank::after{content:"";position:absolute;inset:auto -40px -60px auto;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.06);z-index:-1}
+.tank:focus-visible{outline:3px solid #9FD3F7;outline-offset:3px}
+.tank .orb{position:relative;width:112px;height:112px;border-radius:50%;background:rgba(255,255,255,.1);box-shadow:inset 0 0 0 3px rgba(255,255,255,.35),inset 0 0 0 9px rgba(4,38,63,.35);overflow:hidden}
+.tank .lvl{position:absolute;left:0;right:0;bottom:0;height:var(--lvl,0%);transition:height 1.6s cubic-bezier(.2,.7,.2,1)}
+.tank .lvl svg{position:absolute;left:0;bottom:calc(100% - 7px);width:200%;height:16px}
+.tank .lvl .w1{fill:#5DB8F2;animation:wave 3.6s linear infinite}
+.tank .lvl .w2{fill:#9FD3F7;opacity:.55;animation:wave 5.2s linear infinite reverse}
+.tank .lvl i{position:absolute;inset:8px 0 0;background:linear-gradient(#5DB8F2,#2F9BE6 60%,#0A78C2)}
+.tank .pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.7rem;font-weight:800;letter-spacing:-.02em;text-shadow:0 1px 6px rgba(4,38,63,.55);font-variant-numeric:tabular-nums}
+.tank .tx b{display:block;font-size:1.12rem;line-height:1.3}
+.tank .tx p{margin:6px 0 0;font-size:.84rem;line-height:1.45;color:#CFE8FA}
+.tank .tx .go{display:inline-flex;align-items:center;gap:6px;margin-top:12px;padding:7px 12px;border-radius:999px;background:rgba(255,255,255,.14);font-size:.78rem;font-weight:700;color:#FFFFFF}
+.tank .tx .go svg{width:14px;height:14px}
+@keyframes wave{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.ohealth{background:var(--card);border:var(--bw) solid var(--line);border-radius:20px;padding:16px}
+.ohealth .hd{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.ohealth .hd b{font-size:.95rem;color:var(--ink)}
+.ohealth .hd span{font-size:.75rem;color:var(--muted)}
+.hbar{display:flex;height:14px;border-radius:999px;overflow:hidden;background:var(--line);margin:12px 0 12px;gap:2px}
+.hbar i{display:block;height:100%;width:0;transition:width 1.1s cubic-bezier(.2,.7,.2,1)}
+.hbar .g{background:#1C9C5A}.hbar .a{background:#E39A1E}.hbar .r{background:#D23C32}.hbar .n{background:var(--off)}
+.hleg{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;margin:0;padding:0;list-style:none}
+.hleg li{display:flex;align-items:center;gap:8px;font-size:.8rem;color:var(--muted)}
+.hleg li b{color:var(--ink);font-size:.95rem;font-variant-numeric:tabular-nums;min-width:1.6em}
+.hleg li i{width:10px;height:10px;border-radius:3px;flex:0 0 auto}
+.otiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+#vOffice .otile{position:relative;display:flex;flex-direction:column;gap:2px;width:100%;padding:14px;border:var(--bw) solid var(--line);border-radius:20px;background:var(--card);text-align:left;font:inherit;color:inherit;cursor:pointer;transition:transform .18s,box-shadow .18s,border-color .18s}
+#vOffice .otile:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(4,38,63,.1);border-color:#9FD3F7}
+#vOffice .otile:active{transform:scale(.98)}
+#vOffice .otile:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+#vOffice .otile .ic{width:40px;height:40px;border-radius:13px;display:flex;align-items:center;justify-content:center;background:var(--tint);color:var(--blue);margin-bottom:10px}
+#vOffice .otile .ic svg{width:22px;height:22px}
+#vOffice .otile b{font-size:1.65rem;font-weight:800;color:var(--ink);line-height:1.1;font-variant-numeric:tabular-nums}
+#vOffice .otile span{font-size:.8rem;font-weight:600;color:var(--muted);line-height:1.35}
+#vOffice .otile small{font-size:.74rem;color:var(--muted);margin-top:2px}
+#vOffice .otile.hot{border-color:transparent;background:linear-gradient(var(--card),var(--card)) padding-box,linear-gradient(135deg,#E39A1E,#D23C32) border-box;border:2px solid transparent}
+#vOffice .otile.hot .ic{background:var(--warnbg);color:var(--warn)}
+#vOffice .otile.hot.red .ic{background:var(--badbg);color:var(--bad)}
+#vOffice .otile .pulse{position:absolute;top:14px;right:14px;width:9px;height:9px;border-radius:50%;background:#D23C32;box-shadow:0 0 0 0 rgba(210,60,50,.5);animation:pulse 2s infinite}
+@keyframes pulse{70%{box-shadow:0 0 0 10px rgba(210,60,50,0)}100%{box-shadow:0 0 0 0 rgba(210,60,50,0)}}
+.ctry{display:flex;flex-direction:column;gap:10px}
+.crow{display:grid;grid-template-columns:44px 1fr;gap:12px;align-items:center;padding:14px;background:var(--card);border:var(--bw) solid var(--line);border-radius:20px}
+.crow .fl{width:44px;height:44px;border-radius:14px;background:var(--tint);display:flex;align-items:center;justify-content:center;font-size:1.5rem}
+.crow .top2{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.crow .top2 b{font-size:.98rem;color:var(--ink)}
+.crow .top2 span{font-size:.76rem;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.crow .bar{height:8px;border-radius:999px;background:var(--line);margin:8px 0;overflow:hidden}
+.crow .bar i{display:block;height:100%;width:0;border-radius:999px;background:linear-gradient(90deg,#0A78C2,#5DB8F2);transition:width 1.2s cubic-bezier(.2,.7,.2,1)}
+.crow .pills{display:flex;flex-wrap:wrap;gap:6px}
+.crow .pills em{font-style:normal;display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:999px;background:var(--bg);font-size:.72rem;font-weight:600;color:var(--muted)}
+.crow .pills em::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--c,var(--off))}
+.crow .pills em.z{opacity:.55}
+.otl{list-style:none;margin:0;padding:4px 0 0;position:relative}
+.otl::before{content:"";position:absolute;left:17px;top:10px;bottom:10px;width:2px;background:var(--line)}
+.otl li{position:relative;display:grid;grid-template-columns:36px 1fr;gap:12px;padding:6px 0 12px;font-size:.86rem;line-height:1.4}
+.otl li .dt{position:relative;z-index:1;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--card);border:2px solid var(--c,var(--blue));color:var(--c,var(--blue))}
+.otl li .dt svg{width:17px;height:17px}
+.otl li small{display:block;color:var(--muted);font-size:.74rem;margin-top:2px}
+.otl li.muted{display:block;padding-left:48px}
+#vOffice .tank span{font-weight:inherit}#vOffice .tank .tx,#vOffice .tank .tx b{color:#FFFFFF;font-size:inherit}#vOffice .tank .tx b{font-size:1.12rem}#vOffice .tank .tx p{color:#CFE8FA}#vOffice .tank .pct{color:#FFFFFF;font-size:1.7rem;font-weight:800}button.kpi.tank[data-go]:hover{box-shadow:0 12px 30px rgba(4,38,63,.34)}
+html[data-theme=dark] .kpi.tank{background:radial-gradient(120% 140% at 100% 0%,#0A78C2 0%,#054F81 45%,#04263F 100%);box-shadow:none}html[data-theme=dark] #vOffice .otile:not(.hot){background:var(--card)}
+html[data-theme=dark] #vOffice .otile:hover{box-shadow:none}
+@media (prefers-reduced-motion: reduce){.tank .lvl,.hbar i,.crow .bar i,#vOffice .otile{transition:none !important}.tank .lvl .w1,.tank .lvl .w2,#vOffice .otile .pulse{animation:none !important}}
 </style>
 </head>
 <body class="locked">
@@ -2129,30 +2197,82 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
 
   // overview
   var oMap = null;
+  var OIC = {
+    wrench: '<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/>',
+    inbox: '<path d="M4 13l2.5-7.5h11L20 13v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/><path d="M4 13h4.5l1.5 2.5h4l1.5-2.5H20"/>',
+    cal: '<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M12 13.2v2.6l1.8 1.1"/>',
+    clip: '<rect x="5" y="4.5" width="14" height="16.5" rx="2.5"/><path d="M9 4.5V3.5h6v1M8.5 12l2.2 2.2L15.5 9.5"/>',
+    pin: '<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.6"/>',
+    drop: '<path d="M12 3.5s6 6.6 6 11a6 6 0 0 1-12 0c0-4.4 6-11 6-11z"/>',
+    check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+    plus: '<path d="M12 5v14M5 12h14"/>',
+    undo: '<path d="M9 7L4.5 11.5 9 16"/><path d="M4.5 11.5H15a4.5 4.5 0 0 1 0 9h-2"/>',
+    people: '<circle cx="9" cy="8.5" r="3.2"/><path d="M3.5 19.5c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5"/><circle cx="17" cy="9.5" r="2.4"/><path d="M15.8 14.6c2.4.2 4 1.8 4.6 4.4"/>',
+    arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>'
+  };
+  function oic(n) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + OIC[n] + '</svg>'; }
+  var FEEDIC = { pin: ['pin', '#0A78C2'], visit: ['clip', '#1C9C5A'], fixed: ['check', '#1C9C5A'], new: ['plus', '#7A4FD0'], undo: ['undo', '#5A6066'], request: ['pin', '#E39A1E'], approve: ['check', '#0A78C2'], reject: ['undo', '#D23C32'], job: ['wrench', '#E39A1E'], assign: ['cal', '#0A78C2'], team: ['people', '#5A6066'] };
+  var FLAG = { ke: '🇰🇪', tz: '🇹🇿', ug: '🇺🇬', mw: '🇲🇼' };
+  function countUp(root) {
+    var still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    qa('[data-n]', root).forEach(function (el) {
+      var to = +el.getAttribute('data-n'), pre = el.getAttribute('data-pre') || '', suf = el.getAttribute('data-suf') || '';
+      var put = function (v) { el.textContent = pre + Math.round(v).toLocaleString('en-US') + suf; };
+      if (still || !to) return put(to);
+      var t0 = performance.now(), d = 900;
+      (function step(t) { var k = Math.min(1, (t - t0) / d); put(to * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(step); })(t0);
+    });
+  }
   function oOverview(b) {
     var P = S.projects, pinned = P.filter(function (p) { return p.gps; }).length, rep = Object.keys(S.repairs).map(function (k) { return S.repairs[k]; });
     var st = { working: 0, repair: 0, notworking: 0 }; Object.keys(S.visits).forEach(function (k) { var v = S.visits[k]; if (st[v.state] != null) st[v.state]++; });
     var urgent = rep.filter(function (r) { return r.urgency === 'urgent'; }).length, cost = rep.reduce(function (s, r) { return s + (Number(r.cost) || 0); }, 0);
     var due = P.filter(function (p) { return p.gps && ageDays(p) >= DUE_DAYS; }).length;
     var mFrom = new Date(); mFrom = new Date(mFrom.getFullYear(), mFrom.getMonth(), 1).getTime();
-    var acts = (actCache || []).filter(function (e) { return Date.parse(e.at) >= mFrom; }), vm = acts.filter(function (e) { return e.a === 'visit'; }).length;
-    var ti = 0, tile = function (v, l, cls, go) { return '<button type="button" class="kpi ' + (cls || '') + '" style="--i:' + (ti++) + '"' + (go ? ' data-go="' + go + '"' : '') + '><b>' + v + '</b><span>' + l + '</span></button>'; };
-    b.innerHTML = '<div class="o-grid"><div>' +
-      '<div class="kpis">' + tile(Math.round(pinned / Math.max(1, P.length) * 100) + '%', pinned + ' of ' + P.length + ' projects have a location', '', 'list-missing') +
-      tile(st.working, '✅ working at last visit') + tile(st.repair, '⚠️ needed repair at last visit', st.repair ? 'warn' : '') + tile(st.notworking, '❌ not working at last visit', st.notworking ? 'bad' : '') +
-      tile(rep.length, 'open repairs' + (urgent ? ' · ' + urgent + ' urgent' : ''), urgent ? 'bad' : '', 'o-repairs') + tile(cost ? 'KES ' + cost.toLocaleString() : '–', 'estimated repair cost') +
-      tile(actCache ? vm : '…', 'visits this month') + tile(due, 'due a visit (6+ months)', '', 'list-due') + tile(S.reviewOpen || 0, 'waiting for review', S.reviewOpen ? 'warn' : '', 'o-review') + '</div>' +
-      '<h2 style="margin-top:20px">By country</h2><div class="tw"><table class="rt"><thead><tr><th>Country</th><th>Projects</th><th>Located</th><th>✅</th><th>⚠️</th><th>❌</th><th>Repairs</th><th>Due</th></tr></thead><tbody>' +
+    var vmOf = function () { return (actCache || []).filter(function (e) { return e.a === 'visit' && Date.parse(e.at) >= mFrom; }).length; };
+    var pct = Math.round(pinned / Math.max(1, P.length) * 100), missing = P.length - pinned;
+    var seen = st.working + st.repair + st.notworking, unseen = Math.max(0, P.length - seen), tot = Math.max(1, P.length);
+    var n = function (v, pre) { return '<b data-n="' + v + '"' + (pre ? ' data-pre="' + pre + '"' : '') + '>' + (pre || '') + v.toLocaleString('en-US') + '</b>'; };
+    var ti = 0, act = function (o) {
+      return '<button type="button" class="kpi otile' + (o.hot ? ' hot' + (o.red ? ' red' : '') : '') + '" style="--i:' + (ti++) + '"' + (o.go ? ' data-go="' + o.go + '"' : '') + '>' + (o.red ? '<i class="pulse" aria-hidden="true"></i>' : '') +
+        '<span class="ic">' + oic(o.ic) + '</span>' + o.v + '<span>' + o.l + '</span>' + (o.sub ? '<small>' + o.sub + '</small>' : '') + '</button>';
+    };
+    b.innerHTML = '<div class="o-grid"><div class="oview">' +
+      '<button type="button" class="kpi tank" data-go="list-missing" aria-label="' + pct + '% of projects have a location. Show the ' + missing + ' without one.">' +
+        '<span class="orb" aria-hidden="true"><span class="lvl" id="oLvl"><svg viewBox="0 0 240 16" preserveAspectRatio="none"><path class="w2" d="M0 8 Q30 0 60 8 T120 8 T180 8 T240 8 V16 H0z"/><path class="w1" d="M0 8 Q30 16 60 8 T120 8 T180 8 T240 8 V16 H0z"/></svg><i></i></span><span class="pct" data-n="' + pct + '" data-suf="%">' + pct + '%</span></span>' +
+        '<span class="tx"><b>' + pinned.toLocaleString('en-US') + ' of ' + P.length.toLocaleString('en-US') + ' projects are on the map</b><p>' + (missing ? missing + ' still need a location pinned in the field.' : 'Every project has a location.') + '</p>' + (missing ? '<span class="go">Show them ' + oic('arrow') + '</span>' : '') + '</span></button>' +
+      '<div class="otiles">' +
+        act({ ic: 'wrench', v: n(rep.length), l: 'open repairs', sub: (urgent ? urgent + ' urgent' : '') + (urgent && cost ? ', ' : '') + (cost ? 'KES ' + cost.toLocaleString('en-US') + ' estimated' : (urgent ? '' : 'no cost estimate yet')), go: 'o-repairs', hot: rep.length > 0, red: urgent > 0 }) +
+        act({ ic: 'inbox', v: n(S.reviewOpen || 0), l: 'waiting for your review', go: 'o-review', hot: (S.reviewOpen || 0) > 0 }) +
+        act({ ic: 'cal', v: n(due), l: 'due a visit', sub: 'not seen for 6+ months', go: 'list-due' }) +
+        act({ ic: 'clip', v: '<b id="oVm"' + (actCache ? ' data-n="' + vmOf() + '"' : '') + '>' + (actCache ? vmOf() : '…') + '</b>', l: 'visits this month', go: 'o-visits' }) +
+      '</div>' +
+      '<div class="ohealth"><div class="hd"><b>Condition at last visit</b><span>' + seen + ' of ' + P.length + ' visited in the app</span></div>' +
+        '<div class="hbar" role="img" aria-label="' + st.working + ' working, ' + st.repair + ' needed repair, ' + st.notworking + ' not working, ' + unseen + ' not visited yet">' +
+          '<i class="g" data-w="' + (st.working / tot * 100) + '"></i><i class="a" data-w="' + (st.repair / tot * 100) + '"></i><i class="r" data-w="' + (st.notworking / tot * 100) + '"></i><i class="n" data-w="' + (unseen / tot * 100) + '"></i></div>' +
+        '<ul class="hleg"><li><i style="background:#1C9C5A"></i><b>' + st.working + '</b>working</li><li><i style="background:#E39A1E"></i><b>' + st.repair + '</b>needed repair</li><li><i style="background:#D23C32"></i><b>' + st.notworking + '</b>not working</li><li><i style="background:var(--off)"></i><b>' + unseen + '</b>not visited yet</li></ul></div>' +
+      '<h2>By country</h2><div class="ctry">' +
       ['ke', 'tz', 'ug', 'mw'].map(function (c) {
         var l = P.filter(function (p) { return p.ck === c; }); if (!l.length) return '';
         var k = function (s) { return l.filter(function (p) { return S.visits[p.id] && S.visits[p.id].state === s; }).length; };
-        return '<tr><td><b>' + CNAME[c] + '</b></td><td>' + l.length + '</td><td>' + l.filter(function (p) { return p.gps; }).length + '</td><td>' + k('working') + '</td><td>' + k('repair') + '</td><td>' + k('notworking') + '</td><td>' + l.filter(function (p) { return S.repairs[p.id]; }).length + '</td><td>' + l.filter(function (p) { return p.gps && ageDays(p) >= DUE_DAYS; }).length + '</td></tr>';
-      }).join('') + '</tbody></table></div>' +
-      '<h2 style="margin-top:20px">Latest from the field</h2><ul class="feed" id="oFeed"><li class="muted">Loading…</li></ul></div>' +
+        var loc = l.filter(function (p) { return p.gps; }).length, rp = l.filter(function (p) { return S.repairs[p.id]; }).length, du = l.filter(function (p) { return p.gps && ageDays(p) >= DUE_DAYS; }).length;
+        var pill = function (v, txt, col) { return v ? '<em style="--c:' + col + '">' + v + ' ' + txt + '</em>' : ''; };
+        return '<div class="crow"><span class="fl" aria-hidden="true">' + (FLAG[c] || '') + '</span><div><div class="top2"><b>' + CNAME[c] + '</b><span>' + loc + ' of ' + l.length + ' mapped</span></div>' +
+          '<div class="bar" role="img" aria-label="' + loc + ' of ' + l.length + ' mapped"><i data-w="' + (loc / l.length * 100) + '"></i></div>' +
+          '<div class="pills">' + ((rp || du || k('working') || k('repair') || k('notworking')) ? '' : '<em style="--c:#1C9C5A">Nothing needs attention</em>') + pill(k('working'), 'working', '#1C9C5A') + pill(k('repair'), 'needed repair', '#E39A1E') + pill(k('notworking'), 'not working', '#D23C32') + pill(rp, 'open ' + (rp === 1 ? 'repair' : 'repairs'), '#E39A1E') + pill(du, 'due a visit', '#0A78C2') + '</div></div></div>';
+      }).join('') + '</div>' +
+      '<h2>Latest from the field</h2><ul class="otl" id="oFeed"><li class="muted">Loading…</li></ul></div>' +
       '<div class="o-side"><div class="map o-map" id="oMap" role="application" aria-label="Map of projects: open repairs in orange and red"></div><p class="muted" style="margin-top:6px">Orange and red: open repairs. Green: other projects with a location.</p></div></div>';
-    var feedDraw = function () { $('oFeed').innerHTML = (actCache || []).slice(-12).reverse().map(function (e) { return '<li><b>' + esc(e.by) + '</b> ' + (VERB[e.a] || e.a) + ' ' + esc(e.t || '') + '<small>' + esc(when(e.at)) + '</small></li>'; }).join('') || '<li class="muted">Nothing yet.</li>'; };
+    countUp(b);
+    requestAnimationFrame(function () { requestAnimationFrame(function () {
+      var lv = $('oLvl'); if (lv) lv.style.setProperty('--lvl', Math.max(pct, 4) + '%');
+      qa('[data-w]', b).forEach(function (el) { el.style.width = el.getAttribute('data-w') + '%'; });
+    }); });
+    var feedDraw = function () {
+      $('oFeed').innerHTML = (actCache || []).slice(-12).reverse().map(function (e) { var f = FEEDIC[e.a] || ['drop', '#0A78C2']; return '<li><span class="dt" style="--c:' + f[1] + '">' + oic(f[0]) + '</span><div><b>' + esc(e.by) + '</b> ' + (VERB[e.a] || e.a) + ' ' + esc(e.t || '') + '<small>' + esc(when(e.at)) + '</small></div></li>'; }).join('') || '<li class="muted">Nothing yet.</li>';
+    };
     if (actCache) feedDraw();
-    if (navigator.onLine) api('GET', null, '?activity=1').then(function (j) { if (j.ok) { actCache = j.activity || []; if (O.tab === 'overview' && S.view === 'vOffice') { feedDraw(); var k = b.querySelector('.kpi:nth-child(7) b'); if (k) k.textContent = (actCache || []).filter(function (e) { return e.a === 'visit' && Date.parse(e.at) >= mFrom; }).length; } } });
+    if (navigator.onLine) api('GET', null, '?activity=1').then(function (j) { if (j.ok) { actCache = j.activity || []; if (O.tab === 'overview' && S.view === 'vOffice') { feedDraw(); var k = $('oVm'); if (k) { k.setAttribute('data-n', vmOf()); countUp(k.parentNode); } } } });
     setTimeout(function () {
       if (oMap) { oMap.remove(); oMap = null; }
       oMap = L.map('oMap', { zoomControl: true }); layers(oMap);
