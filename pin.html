@@ -1177,8 +1177,23 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
   }
   function nearUi() {
     var list = nearest(3);
-    $('nearList').innerHTML = !S.here ? '<p class="muted" style="margin:0 6px 8px">Allow location to see the projects closest to you.</p>'
-      : list.map(function (x) { return rowHtml(x.p, '<span class="tag has">' + dist(x.d) + '</span>'); }).join('');
+    if (!S.here) { $('nearList').innerHTML = '<p class="muted" style="margin:0 6px 8px">Allow location to see the projects closest to you.</p>'; $('nearList').dataset.k = ''; return; }
+    paint($('nearList'), list.map(function (x) { var tag = '<span class="tag has">' + dist(x.d) + '</span>'; return { html: rowHtml(x.p, tag), tag: tag, id: x.p.id }; }), '');
+  }
+  // Redraws a list of project rows. When only the distances changed (e.g. as you walk), just those
+  // labels are updated, so the photos stay put instead of reloading and blinking.
+  function paint(box, items, empty) {
+    if (!items.length) { box.innerHTML = empty; return; }
+    var key = function (it) { return it.html.replace(it.tag, '').replace(/ style="--i:\d+"/, ''); };
+    var have = {};
+    qa(':scope > .row', box).forEach(function (el) { have[el.getAttribute('data-id')] = el; });
+    var reuse = !box.classList.contains('stagger') && items.every(function (it) { var el = have[it.id]; return el && el._k === key(it); });
+    if (reuse && Object.keys(have).length === items.length) {
+      items.forEach(function (it) { var el = have[it.id], t = el.querySelector('.tag'); if (t && t.outerHTML !== it.tag) t.outerHTML = it.tag; box.appendChild(el); }); // same rows: move them, keep their photos
+      return;
+    }
+    box.innerHTML = items.map(function (it) { return it.html; }).join('');
+    qa(':scope > .row', box).forEach(function (el, i) { el._k = key(items[i]); });
   }
   $('nearHd').addEventListener('click', function () { var s = $('nearSheet'), shut = !s.classList.contains('shut'); s.classList.toggle('shut', shut); this.setAttribute('aria-expanded', shut ? 'false' : 'true'); $('nearHint').textContent = shut ? 'Show' : 'Hide'; });
   $('nearList').addEventListener('click', function (e) { var b = e.target.closest('.row'); if (b) openProj(b.getAttribute('data-id')); });
@@ -1222,13 +1237,14 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
     if (near && !S.here) { $('list').innerHTML = '<div class="skel"></div><div class="skel"></div><div class="skel"></div>'; return; }
     if (!S.projects.length) { $('list').innerHTML = '<div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div>'; return; }
     rowI = 0; $('list').classList.toggle('stagger', !!S.animList); S.animList = false;
-    $('list').innerHTML = rows.length ? rows.map(function (p) {
+    var items = rows.map(function (p) {
       var r = S.repairs[p.id];
       var tag = r ? '<span class="tag bad">' + (r.urgency === 'urgent' ? 'Urgent · ' : '') + (r.state === 'notworking' ? 'Not working' : 'Needs repair') + '</span>'
         : f === 'due' ? '<span class="tag">' + ageText(p) + '</span>'
         : near ? '<span class="tag has">' + dist(p._d) + '</span>' : p.gps ? '<span class="tag has">' + (p._d != null ? dist(p._d) : 'Pinned') + '</span>' : '<span class="tag">No location</span>';
-      return rowHtml(p, tag, S.routeMode);
-    }).join('') : '<p class="muted">' + (f === 'missing' && !q && !ck ? 'Every project has a location. 🎉' : f === 'repairs' && !q && !ck ? 'No open repairs. 🎉' : f === 'due' && !q ? 'Everything has been visited in the last 6 months. 🎉' : 'No projects match.') + '</p>';
+      return { html: rowHtml(p, tag, S.routeMode), tag: tag, id: p.id };
+    });
+    paint($('list'), items, '<p class="muted">' + (f === 'missing' && !q && !ck ? 'Every project has a location. 🎉' : f === 'repairs' && !q && !ck ? 'No open repairs. 🎉' : f === 'due' && !q ? 'Everything has been visited in the last 6 months. 🎉' : 'No projects match.') + '</p>');
     routeBarUi();
   }
   $('iSearch').addEventListener('input', renderList);
