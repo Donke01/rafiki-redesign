@@ -1,0 +1,19 @@
+01-lock -signedin no
+02-projects -screen list
+03-map -screen map
+04-project -screen project:104:pin
+05-visit -screen project:101:visit
+06-history -screen project:101:hist
+07-new -screen new
+08-me -screen me
+09-office -screen office
+10-office-repairs -screen office -section repairs
+11-office-review -screen office -section review
+12-office-team -screen office -section team
+13-office-visits -screen office -section visits
+14-report -screen report
+15-route -screen route
+16-sw-projects -screen list -lang sw
+17-sw-office -screen office -lang sw
+18-dark -screen list -theme dark
+19-sun -screen me -theme sun

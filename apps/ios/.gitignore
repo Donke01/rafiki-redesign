@@ -1,0 +1,6 @@
+build/
+shots/
+build-errors.txt
+job.*
+*.xcuserstate
+xcuserdata/
