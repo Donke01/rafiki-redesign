@@ -53,6 +53,64 @@ body.locked .rf{display:none}
 #pinAlt.alt > summary{display:flex;align-items:center;min-height:48px;font-weight:700;font-size:.9rem;color:var(--blue2);cursor:pointer}
 #pinAlt.alt > summary::-webkit-details-marker{display:none}
 .avatar{width:28px;height:28px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:8px}
+.wiz-top{position:sticky;top:calc(56px + env(safe-area-inset-top));z-index:600;background:var(--bg);padding:6px 0 8px;margin:0 -4px}
+.wiz-steps{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.wiz-steps button{border:0;background:none;padding:4px 0;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--muted);font-size:.62rem;font-weight:700;min-height:44px}
+.wiz-steps i{display:block;width:100%;height:6px;border-radius:3px;background:var(--line)}
+.wiz-steps .done i{background:var(--ok)}.wiz-steps .on i{background:var(--blue)}.wiz-steps .on{color:var(--blue)}
+.wiz h2{margin-bottom:6px}
+.wiz .fld{margin-top:4px}
+.two > .fld{display:flex;flex-direction:column;justify-content:flex-end}
+.wiz-nav{position:sticky;bottom:calc(var(--tabh) + env(safe-area-inset-bottom));z-index:500;display:flex;justify-content:space-between;gap:10px;margin:14px -16px 0;padding:12px 16px;background:var(--bar);border-top:var(--bw) solid var(--line)}
+.wiz-nav .btn{flex:1}
+.btn.big{min-height:60px;font-size:1.05rem}
+.states.big .chip{min-height:64px;font-size:1.05rem}
+.ok-line{font-weight:700;color:var(--ok)}
+.cl{display:flex;flex-direction:column;gap:8px;margin:10px 0}
+.cl-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:14px;border:var(--bw) solid var(--line)}
+.cl-row > span{flex:1;font-size:.9rem;font-weight:600}
+.cl-row.ok{border-color:var(--ok);background:var(--okbg)}.cl-row.bad{border-color:var(--bad);background:var(--badbg)}
+.cl-b{display:flex;gap:6px}
+.cl-b button{min-height:44px;min-width:44px;padding:0 10px;border-radius:12px;border:var(--bw) solid var(--edge);background:var(--card);color:var(--ink);font-weight:700;font-size:.8rem;cursor:pointer;white-space:nowrap}
+.cl-b button[data-v=ok][aria-pressed=true]{background:var(--ok);border-color:var(--ok);color:#FFFFFF}
+.cl-b button[data-v=bad][aria-pressed=true]{background:var(--bad);border-color:var(--bad);color:#FFFFFF}
+.repairbox{margin-top:16px;padding:14px;border-radius:16px;background:var(--warnbg)}
+.repairbox h3{color:var(--warn)}
+.cmp{display:block;font-size:.75rem;font-weight:600;color:var(--muted);margin-top:4px}
+.cmp.worse{color:var(--bad)}.cmp.better{color:var(--ok)}
+.slots{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.slot{position:relative}
+.slot label{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;margin:0;min-height:128px;padding:10px;border-radius:16px;border:2px dashed var(--edge);text-transform:none;letter-spacing:0;text-align:center;cursor:pointer;background:var(--field)}
+.slot.has label{border-style:solid;border-color:var(--ok);padding:6px}
+.slot img{width:100%;height:92px;object-fit:cover;border-radius:10px}
+.slot .cam{font-size:1.6rem}
+.slot b{font-size:.82rem;color:var(--ink)}
+.slot small{font-size:.7rem;color:var(--muted);font-weight:500}
+.slot .x{position:absolute;top:-8px;right:-8px;width:32px;height:32px;border-radius:50%;border:2px solid var(--card);background:var(--ink);color:var(--card);font-weight:800;cursor:pointer}
+.tick{display:flex;gap:10px;align-items:flex-start;text-transform:none;letter-spacing:0;font-weight:600;font-size:.9rem;margin-top:14px;line-height:1.4}
+.tick input{width:22px;height:22px;flex:0 0 auto;margin-top:1px}
+.sum{margin:6px 0 4px}
+.bad-t{color:var(--bad)}
+.done-card{text-align:center}
+.big-ok{font-size:3rem;line-height:1;margin:8px 0 10px}
+.repbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
+.rep{background:#FFFFFF;color:#141618;border-radius:18px;padding:22px 18px}
+.rep h1{font-size:1.35rem;color:#04263F;margin:0 0 4px}
+.rep h2{font-size:1rem;color:#076DB1;margin:22px 0 8px}
+.rep-h p{color:#5A6066;font-size:.85rem;margin:0}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:16px}
+.kpi{background:#E3F1FC;border-radius:12px;padding:10px}
+.kpi b{display:block;font-size:1.3rem;color:#04263F}
+.kpi span{font-size:.72rem;color:#3A3F44;font-weight:600}
+.kpi.warn{background:#FDF0DC}.kpi.bad{background:#FBE7E5}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -4px;padding:0 4px}
+.rt{width:100%;min-width:480px;border-collapse:collapse;font-size:.78rem}
+.rt th{background:#076DB1;color:#FFFFFF;text-align:left;padding:6px;font-size:.7rem}
+.rt td{padding:6px;border-bottom:1px solid #DCE1E5;vertical-align:top}
+.rt tr:nth-child(even) td{background:#F4F9FD}
+.rep-f{margin-top:18px;font-size:.75rem}
+@media (max-width:600px){.kpis{grid-template-columns:1fr 1fr}.rt{font-size:.72rem}}
+@media print{.tw{overflow:visible}.rt{min-width:0}.top,.tabs,.net,.noprint,.toast,.routebar{display:none !important}body,html{background:#FFFFFF !important}main{padding:0 !important}.rep{padding:0;border-radius:0}.kpis{grid-template-columns:repeat(4,1fr)}.rt{font-size:9pt}.rt tr{break-inside:avoid}}
 .net{display:none;padding:8px 16px;font-size:.82rem;font-weight:700;text-align:center;background:var(--warnbg);color:var(--warn)}
 .net.on{display:block}
 main{flex:1;padding:16px 16px calc(var(--tabh) + 24px + env(safe-area-inset-bottom))}
@@ -337,6 +395,7 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
           <button class="chip" type="button" data-f="missing" aria-pressed="true">Needs a location</button>
           <button class="chip" type="button" data-f="near" aria-pressed="false">📍 Nearby</button>
           <button class="chip" type="button" data-f="repairs" aria-pressed="false">🔧 Repairs<span class="n" id="repN">0</span></button>
+          <button class="chip" type="button" data-f="due" aria-pressed="false">🗓 Due a visit</button>
           <button class="chip" type="button" data-f="all" aria-pressed="false">All</button>
         </div>
         <select id="iCountry" aria-label="Country">
@@ -367,6 +426,7 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
         <span class="t" id="pTitle"></span>
         <span class="muted" id="pSub"></span>
         <span class="cur" id="pCur"></span>
+        <span class="cur" id="pVisit"></span>
         <span class="dist" id="pDist"></span>
         <span class="live" id="pLive"></span>
         <div class="links" id="pLinks"></div>
@@ -406,33 +466,7 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
       </div>
 
       <div id="paneVisit" role="tabpanel" aria-labelledby="tabVisit" class="hidden">
-        <div class="card">
-          <h2>Report a site visit</h2>
-          <p class="muted">Leaves a dated note on this project in monday.com, with where you sent it from.</p>
-          <div class="states" role="radiogroup" aria-label="How is it?">
-            <button class="chip" type="button" role="radio" aria-checked="false" data-s="working">✅ Working well</button>
-            <button class="chip" type="button" role="radio" aria-checked="false" data-s="repair">⚠️ Needs repair</button>
-            <button class="chip" type="button" role="radio" aria-checked="false" data-s="notworking">❌ Not working</button>
-          </div>
-          <details class="more" id="vMore">
-            <summary>Add readings (optional)</summary>
-            <div class="two">
-              <div><label for="rStrokes">Pump strokes to fill 20 L</label><input type="number" id="rStrokes" inputmode="numeric" min="0" max="1000" placeholder="e.g. 35"></div>
-              <div><label for="rFlow">Flow (litres a minute)</label><input type="number" id="rFlow" inputmode="decimal" min="0" max="1000" step="0.1" placeholder="e.g. 12"></div>
-              <div><label for="rQueue">People queuing</label><input type="number" id="rQueue" inputmode="numeric" min="0" max="2000" placeholder="e.g. 8"></div>
-              <div><label for="rUsers">People using it (estimate)</label><input type="number" id="rUsers" inputmode="numeric" min="0" max="100000" placeholder="e.g. 600"></div>
-            </div>
-            <label for="rClarity">How does the water look?</label>
-            <select id="rClarity"><option value="">Not checked</option><option value="clear">Clear</option><option value="cloudy">Cloudy</option><option value="dirty">Dirty or coloured</option></select>
-          </details>
-          <label for="vNote">Notes (optional)</label>
-          <textarea id="vNote" placeholder="What did you see? e.g. pump handle loose, queue at 7am, committee meets monthly"></textarea>
-          <div class="media"><span id="vPhotoBtn"></span><span id="vVoiceBtn"></span></div>
-          <div class="thumbs" id="vThumbs"></div>
-          <div class="voice" id="vVoice"></div>
-          <button class="btn block" id="bVisit" type="button" disabled style="margin-top:14px">Send visit report</button>
-          <p class="msg" id="mVisit" aria-live="polite"></p>
-        </div>
+        <div id="vw"></div>
       </div>
 
       <div id="paneHist" role="tabpanel" aria-labelledby="tabHist" class="hidden">
@@ -479,6 +513,12 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
       </div>
     </section>
 
+    <!-- monthly report -->
+    <section id="vReport" class="hidden" aria-labelledby="repTitle">
+      <div class="noprint repbar"><button class="back" id="repBack" type="button">← Me</button><button class="btn small" id="repPrint" type="button">⬇ Save as PDF</button></div>
+      <div id="repBody" class="rep"></div>
+    </section>
+
     <!-- me -->
     <section id="vMe" class="hidden" aria-labelledby="h-me">
       <h1 id="h-me" style="margin:4px 2px 12px">Me &amp; team</h1>
@@ -504,6 +544,26 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
             <button type="button" data-v="l" aria-pressed="false">Large</button>
             <button type="button" data-v="xl" aria-pressed="false">Larger</button>
           </div>
+        </div>
+        <div class="card">
+          <h2>Language and country</h2>
+          <span class="lbl" id="l-lang">Site visit form</span>
+          <div class="seg" role="group" aria-labelledby="l-lang" id="segLang">
+            <button type="button" data-v="" aria-pressed="true">English</button>
+            <button type="button" data-v="sw" aria-pressed="false">Kiswahili</button>
+          </div>
+          <label for="meHome">My country</label>
+          <select id="meHome"><option value="">Automatic</option><option value="ke">Kenya</option><option value="tz">Tanzania</option><option value="ug">Uganda</option><option value="mw">Malawi</option></select>
+          <p class="muted" id="meHomeTx" style="margin-top:6px"></p>
+        </div>
+        <div class="card">
+          <h2>Monthly report</h2>
+          <p class="muted">Visits, repairs and how projects are doing for one month, ready to save as a PDF.</p>
+          <div class="two">
+            <div><label for="repMonth">Month</label><select id="repMonth"></select></div>
+            <div><label for="repCountry">Country</label><select id="repCountry"><option value="">All countries</option><option value="ke">Kenya</option><option value="tz">Tanzania</option><option value="ug">Uganda</option><option value="mw">Malawi</option></select></div>
+          </div>
+          <button class="btn block" id="repOpen" type="button" style="margin-top:14px">Open report</button>
         </div>
         <div class="card" id="meInstall"></div>
         <div class="card">
@@ -536,7 +596,7 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
   var qa = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
   var store = { get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} }, del: function (k) { try { localStorage.removeItem(k); } catch (e) {} } };
   var jget = function (k, d) { try { return JSON.parse(store.get(k) || 'null') || d; } catch (e) { return d; } };
-  var S = { mode: store.get('rfPinMode') || '', photo: store.get('rfPinPhoto') || '', pin: store.get('rfPin') || '', name: store.get('rfPinName') || '', who: store.get('rfPinWho') || '', projects: jget('rfPinList', []), repairs: jget('rfPinRepairs', {}),
+  var S = { mode: store.get('rfPinMode') || '', photo: store.get('rfPinPhoto') || '', pin: store.get('rfPin') || '', name: store.get('rfPinName') || '', who: store.get('rfPinWho') || '', projects: jget('rfPinList', []), repairs: jget('rfPinRepairs', {}), visits: jget('rfPinVisits', {}), lang: store.get('rfPinLang') || '', srvHome: store.get('rfPinSrvHome') || '', gpsHome: '',
     filter: store.get('rfPinFilter') || 'missing', cur: null, here: null, hereAt: 0, view: 'vLock', prev: 'vMap', routeMode: false, pickedRoute: [], route: jget('rfPinRoute', []), dismissed: {} };
   var CENTER = { ke: [0.3, 37.9, 7], tz: [-6.3, 34.8, 6], ug: [1.4, 32.3, 7], mw: [-13.3, 34.3, 7] };
   var CNAME = { ke: 'Kenya', tz: 'Tanzania', ug: 'Uganda', mw: 'Malawi' };
@@ -552,7 +612,7 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
   function photoUrl(p, w) { return p && p.photo ? '/api/photo/' + encodeURIComponent(p.photo) + '?w=' + (w || 480) : ''; }
   function when(iso) { var d = new Date(iso); return isNaN(d) ? '' : d.toLocaleDateString(undefined, { day: 'numeric', month: 'short' }) + ', ' + d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }); }
   function sub(p) { return [p.area, p.country, p.status].filter(Boolean).join(' · '); }
-  function saveList() { store.set('rfPinList', JSON.stringify(S.projects)); store.set('rfPinRepairs', JSON.stringify(S.repairs)); }
+  function saveList() { store.set('rfPinList', JSON.stringify(S.projects)); store.set('rfPinRepairs', JSON.stringify(S.repairs)); store.set('rfPinVisits', JSON.stringify(S.visits)); }
   function why(j) {
     return j.reason === 'pin' ? 'That PIN isn’t right. Please check it with your team.'
       : j.reason === 'signin' ? 'Please sign in with monday.com.'
@@ -574,7 +634,7 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
   var MAIN = ['vMap', 'vList', 'vNew', 'vMe'];
   // Each screen has its own address (#map, #list, #p/<id>…), so the phone's Back button and a
   // page refresh keep you where you were.
-  function hashFor(v) { return v === 'vProj' && S.cur ? '#p/' + S.cur.id + (S.tab && S.tab !== 'pin' ? '/' + S.tab : '') : '#' + ({ vMap: 'map', vList: 'list', vRoute: 'route', vNew: 'new', vMe: 'me' }[v] || 'map'); }
+  function hashFor(v) { return v === 'vProj' && S.cur ? '#p/' + S.cur.id + (S.tab && S.tab !== 'pin' ? '/' + S.tab : '') : '#' + ({ vMap: 'map', vList: 'list', vRoute: 'route', vNew: 'new', vMe: 'me', vReport: 'report' }[v] || 'map'); }
   function nav(v, how) {
     if (v === 'vLock' || how === 'none') return;
     var h = hashFor(v); if (location.hash === h) return;
@@ -584,7 +644,8 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
   function goBack(fallback) { if (S.depth > 0) history.back(); else fallback(); }
   function applyHash(first) {
     if (S.view === 'vLock' && !first) return;
-    var m = /^#p\/(\d+)(?:\/(visit|hist))?$/.exec(location.hash), v = { '#map': 'vMap', '#list': 'vList', '#route': 'vRoute', '#new': 'vNew', '#me': 'vMe' }[location.hash];
+    var m = /^#p\/(\d+)(?:\/(visit|hist))?$/.exec(location.hash), v = { '#map': 'vMap', '#list': 'vList', '#route': 'vRoute', '#new': 'vNew', '#me': 'vMe', '#report': 'vReport' }[location.hash];
+    if (v === 'vReport') { openReport('none'); return; }
     if (m && byId(m[1])) { openProj(m[1], m[2] || 'pin', 'none'); return; }
     if (v === 'vRoute') renderRoute();
     show(v || 'vMap', 'none');
@@ -596,10 +657,10 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
     if (v !== 'vProj') { pick.stop(); liveStop(); } if (v !== 'vNew') nPick.stop();
     S.view = v;
     nav(v, how);
-    ['vLock', 'vMap', 'vList', 'vRoute', 'vProj', 'vNew', 'vMe'].forEach(function (x) { $(x).classList.toggle('hidden', x !== v); });
+    ['vLock', 'vMap', 'vList', 'vRoute', 'vProj', 'vNew', 'vMe', 'vReport'].forEach(function (x) { $(x).classList.toggle('hidden', x !== v); });
     document.body.classList.toggle('locked', v === 'vLock');
     $('main').classList.toggle('bare', v === 'vMap');
-    var tabFor = v === 'vRoute' || v === 'vProj' ? (S.prev === 'vMap' ? 'vMap' : 'vList') : v;
+    var tabFor = v === 'vReport' ? 'vMe' : v === 'vRoute' || v === 'vProj' ? (S.prev === 'vMap' ? 'vMap' : 'vList') : v;
     qa('#tabs button').forEach(function (b) { if (b.getAttribute('data-v') === tabFor) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
     $('who').textContent = v === 'vLock' ? '' : S.name;
     $('routeBar').classList.toggle('hidden', !(v === 'vList' && S.routeMode)); document.body.classList.toggle('routing', v === 'vList' && S.routeMode);
@@ -618,8 +679,8 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
       .then(function (r) { return r.json().catch(function () { return { ok: false, reason: 'down' }; }).then(function (j) { j.status = r.status; return j; }); })
       .catch(function () { return { ok: false, reason: 'offline', status: 0 }; });
   }
-  function sendFile(updateId, blob, kind) {
-    var fd = new FormData(); fd.append('update', updateId);
+  function sendFile(updateId, blob, kind, label) {
+    var fd = new FormData(); fd.append('update', updateId); if (label) fd.append('label', label);
     var ext = kind === 'voice' ? (/mp4|m4a|aac/.test(blob.type) ? 'm4a' : /ogg/.test(blob.type) ? 'ogg' : 'webm') : 'jpg';
     fd.append('file', blob, (kind === 'voice' ? 'voice.' : 'photo.') + ext);
     return fetch('/api/pin-photo', { method: 'POST', headers: S.pin ? { 'X-Pin': S.pin } : {}, body: fd })
@@ -633,8 +694,8 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
     if (DB) return DB;
     DB = new Promise(function (ok, no) {
       if (!window.indexedDB) return no(new Error('no indexedDB'));
-      var r = indexedDB.open('rafiki-pin', 1);
-      r.onupgradeneeded = function () { r.result.createObjectStore('out', { keyPath: 'k', autoIncrement: true }); };
+      var r = indexedDB.open('rafiki-pin', 2);
+      r.onupgradeneeded = function () { var d = r.result; if (!d.objectStoreNames.contains('out')) d.createObjectStore('out', { keyPath: 'k', autoIncrement: true }); if (!d.objectStoreNames.contains('draft')) d.createObjectStore('draft', { keyPath: 'id' }); };
       r.onsuccess = function () { ok(r.result); }; r.onerror = function () { no(r.error); };
     });
     return DB;
@@ -673,7 +734,7 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
             files.forEach(function (f, i) {
               up = up.then(function (stop) {
                 if (stop || i < (it.done || 0)) return stop;
-                return sendFile(it.updateId, f.blob, f.kind).then(function (p) {
+                return sendFile(it.updateId, f.blob, f.kind, f.label).then(function (p) {
                   if (p.ok) { it.done = i + 1; return false; }
                   if (p.status === 0 || p.status >= 500 || p.status === 429 || p.status === 401) return true;
                   lost++; it.done = i + 1; return false; // rejected (e.g. too large): skip it
@@ -928,7 +989,8 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
       else if (!S.name) { store.del('rfPin'); show('vLock'); msg('mLock', 'bad', 'This is the shared team PIN, so please add your name too.'); $('iName').focus(); return; }
       if (S.pin) { store.set('rfPin', S.pin); store.set('rfPinMode', 'pin'); }
       store.set('rfPinName', S.name); store.set('rfPinWho', S.who);
-      S.projects = j.projects || []; S.repairs = j.repairs || {}; saveList();
+      S.projects = j.projects || []; S.repairs = j.repairs || {}; S.visits = j.visits || {}; saveList();
+      S.srvHome = j.home || ''; store.set('rfPinSrvHome', S.srvHome); applyHome();
       msg('mList', '', '');
       if (S.view === 'vLock') applyHash(true); else { if (S.view === 'vList') renderList(); if (S.view === 'vMap') homeMap(); if (S.view === 'vProj' && S.cur && byId(S.cur.id)) { S.cur = byId(S.cur.id); curUi(); repairUi(); } if (S.view === 'vRoute') renderRoute(); }
       if (refreshing) { refreshing(); refreshing = null; }
@@ -968,6 +1030,10 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
     return S.projects.filter(function (p) { return p.gps; }).map(function (p) { return { p: p, d: metres(S.here, p.gps) }; }).sort(function (a, b) { return a.d - b.d; }).slice(0, n);
   }
   function hereUi() {
+    if (!S.gpsHome && S.here) {
+      var n = nearest(1)[0];
+      if (n && n.d < 300000) { S.gpsHome = n.p.ck; var before = $('iCountry').value; applyHome(); if (S.view === 'vList' && before !== $('iCountry').value) renderList(); }
+    }
     var top = nearest(1)[0], html = '';
     if (top && top.d <= 200 && !S.dismissed[top.p.id]) {
       html = '<div class="here" role="status"><b>📍 You’re at ' + esc(top.p.title) + ' · ' + dist(top.d) + '</b><div class="acts">' +
@@ -1021,6 +1087,8 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
       });
       hLayer.addTo(hMap);
       if (S.here) { you = L.marker(S.here, { icon: L.divIcon({ className: '', html: '<div class="you"></div>', iconSize: [16, 16] }), interactive: false }).addTo(hLayer); }
+      var hk = homeCk(), mine = hk ? S.projects.filter(function (p) { return p.gps && p.ck === hk; }) : [];
+      if (!fitted && mine.length > 1) { hMap.fitBounds(L.latLngBounds(mine.map(function (p) { return p.gps; })), { paddingTopLeft: [24, 170], paddingBottomRight: [70, 80], maxZoom: 13 }); fitted = true; }
       if (!fitted && hLayer.getLayers().length) { hMap.fitBounds(hLayer.getBounds(), { paddingTopLeft: [24, 170], paddingBottomRight: [70, 80], maxZoom: 13 }); fitted = true; }
       nearUi();
     }, 30);
@@ -1041,6 +1109,9 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
       (check ? '<span class="ck" aria-hidden="true">' + (on ? '✓' : '') + '</span>' : '') + thumb(p) +
       '<span class="tx"><span class="t">' + esc(p.title) + '</span><span class="s">' + esc(sub(p)) + '</span></span>' + (tag || '') + '</button>';
   }
+  var DUE_DAYS = 180, URGO = { urgent: 0, month: 1, watch: 2 };
+  function ageDays(p) { var v = S.visits[p.id]; return v ? (Date.now() - Date.parse(v.at)) / 864e5 : 1e6; }
+  function ageText(p) { var d = ageDays(p); if (d >= 1e6) return 'No visit yet'; var m = Math.floor(d / 30.4); return m >= 12 ? Math.floor(m / 12) + ' yr ago' : m + ' mo ago'; }
   function renderList() {
     progUi();
     var q = $('iSearch').value.trim().toLowerCase(), ck = $('iCountry').value, f = S.filter, near = f === 'near';
@@ -1048,29 +1119,41 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
       if (f === 'missing' && p.gps) return false;
       if (near && !p.gps) return false;
       if (f === 'repairs' && !S.repairs[p.id]) return false;
+      if (f === 'due' && (!p.gps || ageDays(p) < DUE_DAYS)) return false;
       if (ck && p.ck !== ck) return false;
       if (q && (p.title + ' ' + p.area + ' ' + p.country).toLowerCase().indexOf(q) < 0) return false;
       return true;
     });
     if (S.here) rows.forEach(function (p) { p._d = p.gps ? metres(S.here, p.gps) : null; });
     if (near && S.here) { rows.sort(function (a, b) { return a._d - b._d; }); rows = rows.slice(0, 30); }
-    if (f === 'repairs') rows.sort(function (a, b) { return (S.repairs[b.id].at || '').localeCompare(S.repairs[a.id].at || ''); });
+    if (f === 'repairs') rows.sort(function (a, b) { var ra = S.repairs[a.id], rb = S.repairs[b.id]; return (URGO[ra.urgency] || 3) - (URGO[rb.urgency] || 3) || (rb.at || '').localeCompare(ra.at || ''); });
+    if (f === 'due') rows.sort(function (a, b) { return ageDays(b) - ageDays(a); });
     $('count').textContent = near ? (S.here ? 'Closest pinned projects to you' : 'Finding where you are…')
       : f === 'missing' ? rows.length + ' still need a location'
-      : f === 'repairs' ? rows.length + (rows.length === 1 ? ' project reported' : ' projects reported') + ' as needing repair or not working'
+      : f === 'repairs' ? rows.length + (rows.length === 1 ? ' project reported' : ' projects reported') + ' as needing repair or not working, most urgent first'
+      : f === 'due' ? rows.length + ' not visited in the last 6 months (or not yet in the app), longest first'
       : rows.length + ' projects';
+    if (ck) $('count').textContent = CNAME[ck] + ' · ' + $('count').textContent;
     if (S.routeMode) $('count').textContent += ' · tick the pinned ones to visit';
     if (near && !S.here) { $('list').innerHTML = ''; return; }
     $('list').innerHTML = rows.length ? rows.map(function (p) {
       var r = S.repairs[p.id];
-      var tag = r ? '<span class="tag bad">' + (r.state === 'notworking' ? 'Not working' : 'Needs repair') + '</span>'
+      var tag = r ? '<span class="tag bad">' + (r.urgency === 'urgent' ? 'Urgent · ' : '') + (r.state === 'notworking' ? 'Not working' : 'Needs repair') + '</span>'
+        : f === 'due' ? '<span class="tag">' + ageText(p) + '</span>'
         : near ? '<span class="tag has">' + dist(p._d) + '</span>' : p.gps ? '<span class="tag has">' + (p._d != null ? dist(p._d) : 'Pinned') + '</span>' : '<span class="tag">No location</span>';
       return rowHtml(p, tag, S.routeMode);
-    }).join('') : '<p class="muted">' + (f === 'missing' && !q && !ck ? 'Every project has a location. 🎉' : f === 'repairs' && !q && !ck ? 'No open repairs. 🎉' : 'No projects match.') + '</p>';
+    }).join('') : '<p class="muted">' + (f === 'missing' && !q && !ck ? 'Every project has a location. 🎉' : f === 'repairs' && !q && !ck ? 'No open repairs. 🎉' : f === 'due' && !q ? 'Everything has been visited in the last 6 months. 🎉' : 'No projects match.') + '</p>';
     routeBarUi();
   }
   $('iSearch').addEventListener('input', renderList);
-  $('iCountry').addEventListener('change', renderList);
+  $('iCountry').addEventListener('change', function () { store.set('rfPinCountry', this.value || 'all'); renderList(); });
+  // home country: chosen in Me, or from the monday.com profile / personal PIN, or from where the phone is
+  function homeCk() { return store.get('rfPinHomeSet') || S.srvHome || S.gpsHome || ''; }
+  function applyHome() {
+    var chosen = store.get('rfPinCountry');
+    if (chosen == null && homeCk()) $('iCountry').value = homeCk(); else if (chosen != null) $('iCountry').value = chosen === 'all' ? '' : chosen;
+  }
+  applyHome();
   qa('.chips .chip').forEach(function (c) {
     c.addEventListener('click', function () {
       S.filter = c.getAttribute('data-f'); store.set('rfPinFilter', S.filter);
@@ -1142,7 +1225,6 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
 
   // --- 4. one project ----------------------------------------------------------------------------
   var pMedia = Media({ key: 'p', photoBtn: 'pPhotoBtn', thumbs: 'pThumbs' });
-  var vMedia = Media({ key: 'v', photoBtn: 'vPhotoBtn', thumbs: 'vThumbs', voiceBtn: 'vVoiceBtn', voice: 'vVoice' });
   var pick = Picker({ map: 'pMap', gps: 'pGps', any: 'pGpsAny', line: 'pGpsLine', paste: 'pPaste', pasteBox: 'pPasteBox', pasteIn: 'pPasteIn', pasteGo: 'pPasteGo',
     onPick: function () { msg('mSave', '', ''); $('confirm').classList.add('hidden'); $('bSave').classList.remove('hidden'); pickUi(); },
     onError: function (t) { msg('mSave', 'bad', t); },
@@ -1174,7 +1256,7 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
     if (p.photo) { $('pImg').onerror = function () { $('pHero').classList.add('hidden'); }; $('pImg').src = photoUrl(p, 960); }
     curUi(); repairUi(); $('pLast').innerHTML = '';
     msg('mSave', '', ''); $('confirm').classList.add('hidden'); $('bSave').classList.remove('hidden'); pMedia.clear();
-    visitReset(); $('hList').innerHTML = '';
+    visitOpen(); visitLine(); $('hList').innerHTML = '';
     show('vProj', how);
     tab(pane || 'pin');
     var c = CENTER[p.ck] || [-2, 35, 6];
@@ -1224,6 +1306,7 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
   function lastUi() {
     var p = S.cur; if (!p || !navigator.onLine) return;
     api('GET', null, '?id=' + encodeURIComponent(p.id)).then(function (j) {
+      if (S.cur && S.cur.id === p.id && j.ok && j.visits) { prevVisits[p.id] = j.visits; if (V && STEPS[V.step][0] === 'read') vRender(); }
       if (!S.cur || S.cur.id !== p.id || !j.ok || !j.last) { $('pLast').innerHTML = ''; return; }
       $('pLast').innerHTML = '<span>Last pinned by ' + esc(j.last.by) + ' · ' + esc(when(j.last.at)) + '</span><button class="btn light small" id="bUndo" type="button">↩ Undo</button>';
       $('bUndo').addEventListener('click', function () {
@@ -1263,7 +1346,9 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
     var p = S.cur, r = p && S.repairs[p.id];
     if (!r) { $('pRepair').innerHTML = ''; return; }
     $('pRepair').innerHTML = '<div class="alert' + (r.state === 'repair' ? ' warn' : '') + '" role="status"><b>' + (r.state === 'notworking' ? '❌ Reported not working' : '⚠️ Reported as needing repair') + '</b>' +
-      '<p>By ' + esc(r.by) + ' · ' + esc(when(r.at)) + (r.note ? ': “' + esc(r.note) + '”' : '') + '</p>' +
+      '<p>By ' + esc(r.by) + ' · ' + esc(when(r.at)) + (r.urgency ? ' · <strong>' + esc(URG[r.urgency] ? URG[r.urgency][0] : r.urgency) + '</strong>' : '') + (r.note ? ': “' + esc(r.note) + '”' : '') + '</p>' +
+      (r.problems && r.problems.length ? '<p>Problems: ' + esc(r.problems.join(', ')) + '</p>' : '') +
+      (r.parts || r.cost ? '<p>' + (r.parts ? 'Parts: ' + esc(r.parts) : '') + (r.parts && r.cost ? ' · ' : '') + (r.cost ? 'About KES ' + Number(r.cost).toLocaleString() : '') + '</p>' : '') +
       '<div id="fixBox" class="hidden"><label for="fixNote" style="margin-top:0">What was done? (optional)</label><textarea id="fixNote" placeholder="e.g. replaced the pump handle"></textarea></div>' +
       '<button class="btn ok small" type="button" id="bFixed">🔧 Mark fixed</button><p class="msg" id="mFix" aria-live="polite"></p></div>';
     $('bFixed').addEventListener('click', function () {
@@ -1279,35 +1364,326 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
     });
   }
 
-  // site visit
-  var visitState = '';
-  function visitReset() { visitState = ''; qa('.states .chip').forEach(function (x) { x.setAttribute('aria-checked', 'false'); }); ['vNote', 'rStrokes', 'rFlow', 'rQueue', 'rUsers', 'rClarity'].forEach(function (x) { $(x).value = ''; }); $('vMore').open = false; vMedia.clear(); $('bVisit').disabled = true; msg('mVisit', '', ''); }
-  qa('.states .chip').forEach(function (c) {
-    c.addEventListener('click', function () {
-      visitState = c.getAttribute('data-s');
-      qa('.states .chip').forEach(function (x) { x.setAttribute('aria-checked', x === c ? 'true' : 'false'); });
-      $('bVisit').disabled = false;
+  // --- site visit: a step-by-step report ------------------------------------------------------
+  // Arrive → Condition → Checklist → Readings → Photos → People → Review & send.
+  // Everything typed is kept on the phone as a draft (photos too) until it is sent.
+  function tr(en, sw) { return S.lang === 'sw' && sw ? sw : en; }
+  var STEPS = [['arrive', 'Arrive', 'Kufika'], ['cond', 'Condition', 'Hali'], ['check', 'Checklist', 'Ukaguzi'], ['read', 'Readings', 'Vipimo'], ['photos', 'Photos', 'Picha'], ['people', 'People', 'Watu'], ['review', 'Send', 'Tuma']];
+  var STATES = { working: ['✅', 'Working well', 'Inafanya kazi vizuri'], repair: ['⚠️', 'Needs repair', 'Inahitaji matengenezo'], notworking: ['❌', 'Not working', 'Haifanyi kazi'] };
+  var URG = { urgent: ['Urgent', 'Haraka'], month: ['This month', 'Mwezi huu'], watch: ['Keep an eye on it', 'Fuatilia tu'] };
+  var I = {
+    handle: ['Pump handle and pivot pins', 'Mkono wa pampu na pini zake'], rods: ['Chain or rods, pump head', 'Mnyororo au fimbo, kichwa cha pampu'],
+    spout: ['Spout and water flow', 'Mdomo wa bomba na mtiririko wa maji'], pumpworks: ['Pump works', 'Pampu inafanya kazi'],
+    apron: ['Concrete apron or platform (no cracks)', 'Sakafu ya saruji (bila nyufa)'], drain: ['Drainage and soak pit', 'Mfereji na shimo la maji machafu'],
+    fence: ['Fence and gate', 'Uzio na lango'], lock: ['Lock and opening hours kept', 'Kufuli na saa za kufungua zinafuatwa'], clean: ['Area clean, no standing water', 'Eneo ni safi, hakuna maji yaliyosimama'],
+    power: ['Power supply (mains or generator)', 'Umeme (KPLC au jenereta)'], panels: ['Solar panels clean and undamaged', 'Paneli za sola ni safi na nzima'],
+    pumpruns: ['Pump starts and runs smoothly', 'Pampu inawaka na kufanya kazi vizuri'], control: ['Control box and wiring', 'Kisanduku cha kudhibiti na nyaya'],
+    tank: ['Storage tank and tower', 'Tangi la maji na mnara wake'], taps: ['Taps and water kiosk', 'Mabomba na kioski cha maji'],
+    pipes: ['Pipes and joints (no leaks)', 'Mabomba na viungo (hakuna kuvuja)'], meter: ['Water meter', 'Mita ya maji'],
+    gutters: ['Gutters and downpipes', 'Mifereji ya paa na mabomba ya kushusha maji'], firstflush: ['First-flush diverter', 'Kifaa cha kuondoa maji ya kwanza'],
+    tankwalls: ['Tank walls (no cracks or leaks)', 'Kuta za tangi (bila nyufa wala kuvuja)'], tap: ['Tap', 'Bomba'], lid: ['Tank cover and inlet screen', 'Kifuniko cha tangi na chujio'],
+    base: ['Tank base or stand', 'Msingi wa tangi'], waterpoint: ['Water point works', 'Kituo cha maji kinafanya kazi'],
+    handwash: ['Handwashing station (water and soap)', 'Kituo cha kunawa mikono (maji na sabuni)'], latrines: ['Latrines clean and usable', 'Vyoo ni safi na vinatumika'],
+    storage: ['Water storage tank', 'Tangi la kuhifadhi maji'], roof: ['Roof and building', 'Paa na jengo']
+  };
+  function kind(p) {
+    var t = String(p.type || '').toLowerCase(), pump = String(p.pump || '').toLowerCase();
+    if (/borehole/.test(t)) return pump === 'manual' ? 'manual' : pump === 'solar' ? 'solar' : pump === 'electric' ? 'electric' : 'borehole';
+    if (/collection/.test(t)) return 'tankk';
+    return 'building';
+  }
+  var LISTS = {
+    manual: ['handle', 'rods', 'spout', 'apron', 'drain', 'fence', 'lock', 'clean'],
+    electric: ['power', 'pumpruns', 'control', 'tank', 'taps', 'pipes', 'meter', 'fence', 'clean'],
+    solar: ['panels', 'pumpruns', 'control', 'tank', 'taps', 'pipes', 'fence', 'clean'],
+    borehole: ['pumpworks', 'spout', 'apron', 'drain', 'fence', 'lock', 'clean'],
+    tankk: ['gutters', 'firstflush', 'tankwalls', 'tap', 'lid', 'base', 'clean'],
+    building: ['waterpoint', 'handwash', 'latrines', 'storage', 'roof', 'clean']
+  };
+  function slots(p) {
+    var b = kind(p) === 'building';
+    return [
+      ['close', b ? ['The water point', 'Kituo cha maji'] : ['Pump or tank, close up', 'Pampu au tangi, kwa karibu'], ['Fill the frame with it', 'Ijaze picha nzima']],
+      ['flow', ['Water flowing', 'Maji yakitiririka'], ['Water coming out of the spout or tap', 'Maji yakitoka kwenye bomba']],
+      ['site', b ? ['Building and people', 'Jengo na watu'] : ['The site with people', 'Eneo pamoja na watu'], ['Step back: the water point and people using it', 'Rudi nyuma: kituo na watu wakikitumia']],
+      ['damage', ['Any damage', 'Uharibifu wowote'], ['Close up of anything broken', 'Karibu na kilichoharibika']],
+      ['strip', ['Water test strip', 'Kipimo cha maji'], ['Only if you tested the water', 'Ikiwa tu umepima maji']],
+      ['extra1', ['Other photo', 'Picha nyingine'], ['', '']], ['extra2', ['Other photo', 'Picha nyingine'], ['', '']]
+    ];
+  }
+
+  // drafts: text in localStorage, photos and the voice note in IndexedDB
+  function dstore(mode, fn) { return db().then(function (d) { return new Promise(function (ok, no) { var t = d.transaction('draft', mode), s = t.objectStore('draft'), res = fn(s); t.oncomplete = function () { ok(res && res.result); }; t.onerror = function () { no(t.error); }; }); }); }
+  function draftSave() {
+    if (!V || V.sent) return;
+    var copy = {}; Object.keys(V).forEach(function (k) { if (k !== 'files' && k !== 'voice') copy[k] = V[k]; });
+    store.set('rfPinDraft:' + V.id, JSON.stringify(copy));
+    dstore('readwrite', function (s) { return s.put({ id: V.id, files: V.files.map(function (f) { return { slot: f.slot, blob: f.blob }; }), voice: V.voice ? V.voice.blob : null }); }).catch(function () {});
+  }
+  var saveT = null; function draftSoon() { clearTimeout(saveT); saveT = setTimeout(draftSave, 400); }
+  function draftDrop(id) { store.del('rfPinDraft:' + id); dstore('readwrite', function (s) { return s.delete(id); }).catch(function () {}); }
+  function draftLoad(id, cb) {
+    var d = jget('rfPinDraft:' + id, null); if (!d) return cb(null);
+    dstore('readonly', function (s) { return s.get(id); }).then(function (b) {
+      d.files = ((b && b.files) || []).map(function (f) { return { slot: f.slot, blob: f.blob, url: URL.createObjectURL(f.blob) }; });
+      d.voice = b && b.voice ? { blob: b.voice, url: URL.createObjectURL(b.voice) } : null; cb(d);
+    }, function () { d.files = []; d.voice = null; cb(d); });
+  }
+
+  var V = null, prevVisits = {};
+  function blank(p) { return { id: p.id, step: 0, started: new Date().toISOString(), arrive: null, state: '', check: {}, other: '', urgency: '', parts: '', cost: '', r: {}, q: {}, c: {}, story: {}, note: '', files: [], voice: null }; }
+  function visitOpen() {
+    var p = S.cur; V = null;
+    draftLoad(p.id, function (d) {
+      if (!S.cur || S.cur.id !== p.id) return;
+      if (d && (d.state || d.arrive || d.files.length || d.note)) { V = d; V.resumed = true; } else V = blank(p);
+      vRender();
     });
+  }
+  function set(path, val) { var o = V, k = path.split('.'); for (var i = 0; i < k.length - 1; i++) o = o[k[i]]; o[k[k.length - 1]] = val; draftSoon(); }
+  function get(path) { var o = V, k = path.split('.'); for (var i = 0; i < k.length; i++) { if (o == null) return ''; o = o[k[i]]; } return o == null ? '' : o; }
+  function problems() { return Object.keys(V.check).filter(function (k) { return V.check[k] === 'bad'; }); }
+  function inp(path, label, opts) {
+    opts = opts || {};
+    var id = 'w_' + path.replace(/\W/g, '_'), v = get(path);
+    var field = opts.area ? '<textarea id="' + id + '" data-p="' + path + '" placeholder="' + esc(opts.ph || '') + '">' + esc(v) + '</textarea>'
+      : '<input id="' + id + '" data-p="' + path + '" type="' + (opts.type || 'text') + '"' + (opts.num ? ' inputmode="' + (opts.dec ? 'decimal' : 'numeric') + '" data-num="1"' : '') + (opts.dec ? ' step="0.1"' : '') + ' value="' + esc(v) + '" placeholder="' + esc(opts.ph || '') + '" autocomplete="off">';
+    return '<div class="fld"><label for="' + id + '">' + label + '</label>' + field + (opts.after || '') + '</div>';
+  }
+  function seg(path, opts) {
+    var v = get(path);
+    return '<div class="seg" role="radiogroup">' + opts.map(function (o) { return '<button type="button" role="radio" data-seg="' + path + '" data-v="' + o[0] + '" aria-checked="' + (v === o[0]) + '" aria-pressed="' + (v === o[0]) + '">' + o[1] + '</button>'; }).join('') + '</div>';
+  }
+  function cmp(k) {
+    var pv = prevVisits[S.cur.id] && prevVisits[S.cur.id].filter(function (x) { return x.readings; })[0];
+    if (!pv || pv.readings[k] == null) return '';
+    var now = Number(V.r[k]), was = pv.readings[k], txt = tr('Last visit', 'Ziara iliyopita') + ' (' + new Date(pv.at).toLocaleDateString(undefined, { day: 'numeric', month: 'short' }) + '): ' + was;
+    if (V.r[k] === '' || V.r[k] == null || isNaN(now) || now === was) return '<span class="cmp" id="cmp_' + k + '">' + txt + '</span>';
+    var worse = k === 'strokes' ? now > was : k === 'flow' ? now < was : null;
+    return '<span class="cmp ' + (worse === true ? 'worse' : worse === false ? 'better' : '') + '" id="cmp_' + k + '">' + txt + ' → ' + now + ' ' + (now > was ? '↑' : '↓') + (worse === true ? ' ' + tr('worse', 'mbaya zaidi') : worse === false ? ' ' + tr('better', 'bora zaidi') : '') + '</span>';
+  }
+
+  function vRender() {
+    if (!V) return;
+    var p = S.cur, st = STEPS[V.step][0], h = '';
+    if (V.sent) return vDone();
+    h += '<div class="wiz-top"><div class="wiz-steps" aria-label="' + tr('Step', 'Hatua') + ' ' + (V.step + 1) + ' / ' + STEPS.length + '">' +
+      STEPS.map(function (s, i) { return '<button type="button" data-go="' + i + '" class="' + (i === V.step ? 'on' : i < V.step ? 'done' : '') + '" aria-label="' + tr(s[1], s[2]) + '"' + (i === V.step ? ' aria-current="step"' : '') + '><i></i><span>' + tr(s[1], s[2]) + '</span></button>'; }).join('') + '</div></div>';
+    if (V.resumed && V.step === 0) h += '<div class="alert warn" role="status"><b>' + tr('Unfinished visit', 'Ziara ambayo haijakamilika') + '</b><p>' + tr('Started', 'Ilianza') + ' ' + esc(when(V.started)) + '. ' + tr('Carry on, or start again.', 'Endelea, au anza upya.') + '</p><button class="btn small light" type="button" data-act="restart">' + tr('Start again', 'Anza upya') + '</button></div>';
+    h += '<div class="card wiz">';
+    if (st === 'arrive') {
+      h += '<h2>' + tr('Check in', 'Thibitisha kufika') + '</h2>';
+      if (!V.arrive) h += '<p class="muted">' + tr('Records the time you arrived and where you are.', 'Inarekodi saa uliyofika na mahali ulipo.') + '</p><button class="btn block big" type="button" data-act="arrive">📍 ' + tr('I’ve arrived', 'Nimefika') + '</button>';
+      else {
+        var far = V.arrive.d != null && V.arrive.d > 500;
+        h += '<p class="ok-line">✓ ' + tr('Arrived', 'Umefika') + ' ' + new Date(V.arrive.at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }) + (V.arrive.d != null ? ' · ' + dist(V.arrive.d) + ' ' + tr('from the saved point', 'kutoka mahali palipohifadhiwa') : '') + '</p>' +
+          (far ? '<p class="msg warn">' + tr('That’s more than 500 m from the saved point. If you’re at the site, pin the right location in the Pin location tab.', 'Ni zaidi ya mita 500 kutoka mahali palipohifadhiwa. Ikiwa uko eneo hili, weka mahali sahihi kwenye kichupo cha Pin location.') + '</p>' : '') +
+          '<button class="lnk" type="button" data-act="arrive">' + tr('Check in again', 'Thibitisha tena') + '</button>';
+      }
+    } else if (st === 'cond') {
+      h += '<h2>' + tr('How is it?', 'Iko hali gani?') + '</h2><div class="states big">' + Object.keys(STATES).map(function (k) {
+        return '<button class="chip" type="button" role="radio" data-state="' + k + '" aria-checked="' + (V.state === k) + '">' + STATES[k][0] + ' ' + tr(STATES[k][1], STATES[k][2]) + '</button>'; }).join('') + '</div>';
+    } else if (st === 'check') {
+      var list = LISTS[kind(p)];
+      h += '<h2>' + tr('Checklist', 'Ukaguzi') + '</h2><p class="muted">' + tr('Tap OK or Problem for each. Skip anything you couldn’t check.', 'Gusa Sawa au Tatizo kwa kila kimoja. Ruka usichoweza kukagua.') + '</p><div class="cl">' +
+        list.map(function (k) { var v = V.check[k] || ''; return '<div class="cl-row' + (v === 'bad' ? ' bad' : v === 'ok' ? ' ok' : '') + '"><span>' + tr(I[k][0], I[k][1]) + '</span><div class="cl-b"><button type="button" data-ck="' + k + '" data-v="ok" aria-pressed="' + (v === 'ok') + '">✓ ' + tr('OK', 'Sawa') + '</button><button type="button" data-ck="' + k + '" data-v="bad" aria-pressed="' + (v === 'bad') + '">⚠ ' + tr('Problem', 'Tatizo') + '</button></div></div>'; }).join('') + '</div>';
+      h += inp('other', tr('Anything else wrong?', 'Kuna tatizo jingine?'), { ph: tr('e.g. tap drips', 'mf. bomba linavuja') });
+      if (V.state && V.state !== 'working' || problems().length || V.other) {
+        h += '<div class="repairbox"><h3>' + tr('Repair details', 'Maelezo ya matengenezo') + '</h3><span class="lbl">' + tr('How urgent?', 'Ni ya haraka kiasi gani?') + '</span>' +
+          seg('urgency', Object.keys(URG).map(function (k) { return [k, tr(URG[k][0], URG[k][1])]; })) +
+          inp('parts', tr('Parts needed', 'Vipuri vinavyohitajika'), { ph: tr('e.g. handle bush, 2 rods', 'mf. bushi ya mkono, fimbo 2') }) +
+          inp('cost', tr('Estimated cost (KES)', 'Gharama inayokadiriwa (KES)'), { num: 1, ph: 'e.g. 4500' }) + '</div>';
+      }
+    } else if (st === 'read') {
+      var manual = /manual|borehole/.test(kind(p));
+      h += '<h2>' + tr('Readings', 'Vipimo') + '</h2><p class="muted">' + tr('All optional. Compared with the last visit as you type.', 'Vyote si lazima. Vinalinganishwa na ziara iliyopita unapoandika.') + '</p><div class="two">' +
+        (manual ? inp('r.strokes', tr('Pump strokes to fill 20 L', 'Mipigo ya pampu kujaza lita 20'), { num: 1, ph: 'e.g. 35', after: cmp('strokes') }) : '') +
+        inp('r.flow', tr('Flow (litres a minute)', 'Mtiririko (lita kwa dakika)'), { num: 1, dec: 1, ph: 'e.g. 12', after: cmp('flow') }) +
+        inp('r.queue', tr('People queuing', 'Watu kwenye foleni'), { num: 1, ph: 'e.g. 8', after: cmp('queue') }) +
+        inp('r.users', tr('People using it (estimate)', 'Watu wanaoitumia (makadirio)'), { num: 1, ph: 'e.g. 600', after: cmp('users') }) + '</div>' +
+        '<span class="lbl">' + tr('How does the water look?', 'Maji yanaonekanaje?') + '</span>' + seg('r.clarity', [['clear', tr('Clear', 'Safi')], ['cloudy', tr('Cloudy', 'Machafu kidogo')], ['dirty', tr('Dirty', 'Machafu')]]) +
+        '<details class="more"' + (Object.keys(V.q).some(function (k) { return V.q[k] !== '' && V.q[k] != null; }) ? ' open' : '') + '><summary>🧪 ' + tr('Water tests (if you have a kit)', 'Vipimo vya maji (ikiwa una vifaa)') + '</summary>' +
+        '<span class="lbl">E. coli</span>' + seg('q.ecoli', [['neg', tr('Not found', 'Haikupatikana')], ['pos', tr('Found', 'Imepatikana')]]) +
+        '<div class="two">' + inp('q.chlorine', tr('Free chlorine (mg/L)', 'Klorini (mg/L)'), { num: 1, dec: 1 }) + inp('q.ph', 'pH', { num: 1, dec: 1 }) +
+        inp('q.fluoride', tr('Fluoride (mg/L)', 'Floraidi (mg/L)'), { num: 1, dec: 1 }) + inp('q.turbidity', tr('Turbidity (NTU)', 'Uchafu (NTU)'), { num: 1, dec: 1 }) + '</div>' +
+        '<p class="muted">' + tr('Add a photo of the test strip in the next step.', 'Ongeza picha ya kipimo katika hatua inayofuata.') + '</p></details>';
+    } else if (st === 'photos') {
+      h += '<h2>' + tr('Photos', 'Picha') + '</h2><p class="muted">' + tr('Tap a box to take that photo. Each one is labelled in monday.com.', 'Gusa kisanduku kupiga picha hiyo. Kila moja inapewa jina kwenye monday.com.') + '</p><div class="slots">' +
+        slots(p).map(function (s) {
+          var f = V.files.filter(function (x) { return x.slot === s[0]; })[0];
+          return '<div class="slot' + (f ? ' has' : '') + '"><input type="file" accept="image/*" capture="environment" class="vh" id="sl_' + s[0] + '" data-slot="' + s[0] + '">' +
+            '<label for="sl_' + s[0] + '">' + (f ? '<img src="' + f.url + '" alt="">' : '<span class="cam">📷</span>') + '<b>' + tr(s[1][0], s[1][1]) + '</b>' + (s[2][0] && !f ? '<small>' + tr(s[2][0], s[2][1]) + '</small>' : '') + '</label>' +
+            (f ? '<button type="button" class="x" data-rm="' + s[0] + '" aria-label="' + tr('Remove', 'Ondoa') + '">×</button>' : '') + '</div>';
+        }).join('') + '</div><div class="voice" id="wVoice"></div>';
+    } else if (st === 'people') {
+      h += '<h2>' + tr('Water committee', 'Kamati ya maji') + '</h2>' +
+        '<span class="lbl">' + tr('Is the committee active?', 'Je, kamati iko hai?') + '</span>' + seg('c.active', [['yes', tr('Yes', 'Ndiyo')], ['no', tr('No', 'Hapana')], ['unsure', tr('Not sure', 'Sina uhakika')]]) +
+        '<div class="two">' + inp('c.chair', tr('Chairperson', 'Mwenyekiti'), { ph: tr('Name', 'Jina') }) + inp('c.phone', tr('Their phone', 'Simu yake'), { type: 'tel', ph: '07…' }) + '</div>' +
+        '<span class="lbl">' + tr('Is a user fee collected?', 'Je, ada ya matumizi inakusanywa?') + '</span>' + seg('c.fee', [['yes', tr('Yes', 'Ndiyo')], ['no', tr('No', 'Hapana')], ['unsure', tr('Not sure', 'Sina uhakika')]]) +
+        inp('c.fund', tr('Maintenance fund now (KES)', 'Mfuko wa matengenezo sasa (KES)'), { num: 1, ph: 'e.g. 3000' }) +
+        '<h2 style="margin-top:22px">✨ ' + tr('Story moment (optional)', 'Kisa (si lazima)') + '</h2><p class="muted">' + tr('A few words from someone who uses the water, for the website.', 'Maneno machache kutoka kwa mtumiaji wa maji, kwa ajili ya tovuti.') + '</p>' +
+        inp('story.quote', tr('What they said', 'Walichosema'), { area: 1, ph: tr('e.g. “Now my girls get to school on time.”', 'mf. “Sasa wasichana wangu wanafika shuleni kwa wakati.”') }) +
+        inp('story.by', tr('Who said it', 'Aliyesema'), { ph: tr('e.g. Mary, mother of three', 'mf. Mary, mama wa watoto watatu') }) +
+        '<label class="tick"><input type="checkbox" data-p="story.consent"' + (V.story.consent ? ' checked' : '') + '> ' + tr('They agreed to be quoted and photographed for Rafiki’s website', 'Wamekubali kunukuliwa na kupigwa picha kwa tovuti ya Rafiki') + '</label>';
+    } else if (st === 'review') {
+      var pr = problems().map(function (k) { return tr(I[k][0], I[k][1]); }).concat(V.other ? [V.other] : []);
+      var rows = [];
+      rows.push([tr('Condition', 'Hali'), V.state ? STATES[V.state][0] + ' ' + tr(STATES[V.state][1], STATES[V.state][2]) + (V.urgency && V.state !== 'working' ? ' · ' + tr(URG[V.urgency][0], URG[V.urgency][1]) : '') : '<span class="bad-t">' + tr('Not chosen yet', 'Bado haijachaguliwa') + '</span>']);
+      if (pr.length) rows.push([tr('Problems', 'Matatizo'), esc(pr.join(', '))]);
+      var okc = Object.keys(V.check).filter(function (k) { return V.check[k] === 'ok'; }).length; if (okc) rows.push([tr('Checked OK', 'Imekaguliwa sawa'), okc]);
+      var rd = ['strokes', 'flow', 'queue', 'users'].filter(function (k) { return V.r[k] !== '' && V.r[k] != null; }); if (rd.length || V.r.clarity) rows.push([tr('Readings', 'Vipimo'), rd.length + (V.r.clarity ? 1 : 0)]);
+      if (V.q.ecoli === 'pos') rows.push(['E. coli', '<span class="bad-t">' + tr('Found: not safe untreated', 'Imepatikana: si salama bila kutibiwa') + '</span>']);
+      rows.push([tr('Photos', 'Picha'), V.files.length + (V.voice ? ' + ' + tr('voice note', 'sauti') : '')]);
+      if (V.arrive) rows.push([tr('On site since', 'Uko eneo tangu'), new Date(V.arrive.at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })]);
+      h += '<h2>' + tr('Check and send', 'Hakiki na utume') + '</h2><div class="sum">' + rows.map(function (r) { return '<div class="kv"><span>' + r[0] + '</span><b>' + r[1] + '</b></div>'; }).join('') + '</div>' +
+        inp('note', tr('Anything else? (optional)', 'Jambo jingine? (si lazima)'), { area: 1, ph: tr('What did you see or agree with the community?', 'Uliona nini au mlikubaliana nini na jamii?') }) +
+        '<div class="voice" id="wVoice"></div>' +
+        '<button class="btn block big" type="button" data-act="send"' + (V.state ? '' : ' disabled') + '>' + tr('Send visit report', 'Tuma ripoti ya ziara') + '</button><p class="msg" id="mVisit" aria-live="polite"></p>';
+    }
+    h += '</div>';
+    h += '<div class="wiz-nav">' + (V.step > 0 ? '<button class="btn light" type="button" data-act="prev">← ' + tr('Back', 'Rudi') + '</button>' : '<span></span>') +
+      (V.step < STEPS.length - 1 ? '<button class="btn" type="button" data-act="next"' + (st === 'cond' && !V.state ? ' disabled' : '') + '>' + (st === 'arrive' && !V.arrive ? tr('Skip', 'Ruka') : tr('Next', 'Endelea')) + ' →</button>' : '') + '</div>';
+    $('vw').innerHTML = h;
+    if ($('wVoice')) recDraw();
+  }
+  function goStep(n) { V.step = Math.max(0, Math.min(STEPS.length - 1, n)); V.resumed = false; draftSoon(); vRender(); $('paneVisit').scrollIntoView({ block: 'start' }); window.scrollBy(0, -70); }
+
+  // voice note for the visit
+  var rec = null, recChunks = [], recT = null, recT0 = 0;
+  var canRec = !!(window.MediaRecorder && navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+  function recDraw() {
+    var el = $('wVoice'); if (!el) return;
+    if (rec) { el.innerHTML = '<span class="rec" id="wRt">' + tr('Recording', 'Inarekodi') + ' 0:00</span><button class="btn small" type="button" data-act="recstop">■ ' + tr('Stop', 'Simamisha') + '</button>'; return; }
+    el.innerHTML = V.voice ? '<audio controls src="' + V.voice.url + '"></audio><button class="lnk" type="button" data-act="recdel">' + tr('Remove voice note', 'Ondoa sauti') + '</button>'
+      : canRec ? '<button class="btn light small" type="button" data-act="rec">🎙 ' + tr('Add a voice note', 'Ongeza ujumbe wa sauti') + '</button>' : '';
+  }
+  function recStart() {
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
+      var type = ['audio/webm;codecs=opus', 'audio/mp4', 'audio/webm', 'audio/ogg'].filter(function (t) { return MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t); })[0];
+      recChunks = []; rec = type ? new MediaRecorder(stream, { mimeType: type }) : new MediaRecorder(stream);
+      rec.ondataavailable = function (ev) { if (ev.data && ev.data.size) recChunks.push(ev.data); };
+      rec.onstop = function () {
+        stream.getTracks().forEach(function (t) { t.stop(); }); clearInterval(recT);
+        var b = new Blob(recChunks, { type: ((rec && rec.mimeType) || type || 'audio/webm').split(';')[0] }); rec = null;
+        if (b.size && V) { V.voice = { blob: b, url: URL.createObjectURL(b) }; draftSoon(); }
+        recDraw();
+      };
+      rec.start(); recT0 = Date.now(); recDraw();
+      recT = setInterval(function () { var s = Math.floor((Date.now() - recT0) / 1000), el = $('wRt'); if (el) el.textContent = tr('Recording', 'Inarekodi') + ' ' + Math.floor(s / 60) + ':' + ('0' + s % 60).slice(-2); if (s >= 120 && rec) rec.stop(); }, 500);
+    }).catch(function () { var el = $('wVoice'); if (el) el.innerHTML = '<span class="msg warn">' + tr('Microphone is blocked. Allow it in your browser settings.', 'Kipaza sauti kimezuiwa. Kiruhusu kwenye mipangilio ya kivinjari.') + '</span>'; });
+  }
+
+  $('vw').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b || !V) return;
+    var act = b.getAttribute('data-act');
+    if (b.hasAttribute('data-go')) return goStep(+b.getAttribute('data-go'));
+    if (b.hasAttribute('data-state')) { V.state = b.getAttribute('data-state'); if (V.state === 'working') V.urgency = ''; draftSoon(); return goStep(V.step + 1); }
+    if (b.hasAttribute('data-ck')) {
+      var k = b.getAttribute('data-ck'), v = b.getAttribute('data-v'); V.check[k] = V.check[k] === v ? '' : v;
+      if (v === 'bad' && V.check[k] === 'bad' && (!V.state || V.state === 'working')) { V.state = 'repair'; toast(tr('Marked as “Needs repair”', 'Imewekwa “Inahitaji matengenezo”')); }
+      draftSoon(); return vRender();
+    }
+    if (b.hasAttribute('data-seg')) { var pth = b.getAttribute('data-seg'), sv = b.getAttribute('data-v'); set(pth, get(pth) === sv ? '' : sv); return vRender(); }
+    if (b.hasAttribute('data-rm')) { var sl = b.getAttribute('data-rm'); V.files = V.files.filter(function (f) { return f.slot !== sl; }); draftSoon(); return vRender(); }
+    if (act === 'next') return goStep(V.step + 1);
+    if (act === 'prev') return goStep(V.step - 1);
+    if (act === 'restart') { draftDrop(V.id); V = blank(S.cur); return vRender(); }
+    if (act === 'rec') return recStart();
+    if (act === 'recstop') { if (rec) rec.stop(); return; }
+    if (act === 'recdel') { V.voice = null; draftSoon(); return recDraw(); }
+    if (act === 'arrive') {
+      b.disabled = true; b.textContent = tr('Finding you…', 'Inakutafuta…');
+      var done = function (ll, acc) { V.arrive = { at: new Date().toISOString(), ll: ll, acc: acc || 0, d: ll && S.cur.gps ? Math.round(metres(ll, S.cur.gps)) : null }; draftSoon(); vRender(); };
+      if (S.here && Date.now() - S.hereAt < 30000) return done(S.here, S.hereAcc);
+      if (!navigator.geolocation) return done(null);
+      navigator.geolocation.getCurrentPosition(function (pos) { S.here = [pos.coords.latitude, pos.coords.longitude]; S.hereAt = Date.now(); S.hereAcc = Math.round(pos.coords.accuracy || 0); done(S.here, S.hereAcc); }, function () { done(null); }, { enableHighAccuracy: true, maximumAge: 15000, timeout: 20000 });
+      return;
+    }
+    if (act === 'send') return visitSend(b);
+    if (act === 'share') return visitShare();
+    if (act === 'again') { V = blank(S.cur); return vRender(); }
   });
-  $('bVisit').addEventListener('click', function () {
-    var p = S.cur; if (!visitState) return;
-    if (vMedia.busy()) { msg('mVisit', 'warn', 'Stop the recording first.'); return; }
-    $('bVisit').disabled = true; msg('mVisit', '', 'Sending…');
-    var readings = {}; [['strokes', 'rStrokes'], ['flow', 'rFlow'], ['queue', 'rQueue'], ['users', 'rUsers'], ['clarity', 'rClarity']].forEach(function (x) { var v = $(x[1]).value.trim(); if (v !== '') readings[x[0]] = x[0] === 'clarity' ? v : Number(v); });
+  $('vw').addEventListener('input', function (e) {
+    var el = e.target, pth = el.getAttribute && el.getAttribute('data-p'); if (!pth || !V) return;
+    var val = el.type === 'checkbox' ? el.checked : el.value;
+    set(pth, val);
+    if (/^r\./.test(pth)) { var k = pth.slice(2), c = $('cmp_' + k); if (c) c.outerHTML = cmp(k); }
+    if (pth === 'other' && val && (!V.state || V.state === 'working') && e.type === 'input') { /* keep typing; the repair box appears on the next screen change */ }
+  });
+  $('vw').addEventListener('change', function (e) {
+    var el = e.target; if (!el.hasAttribute || !el.hasAttribute('data-slot') || !V) return;
+    var f = el.files && el.files[0], sl = el.getAttribute('data-slot'); if (!f) return;
+    shrink(f).then(function (b) { V.files = V.files.filter(function (x) { return x.slot !== sl; }).concat([{ slot: sl, blob: b, url: URL.createObjectURL(b) }]); draftSoon(); vRender(); });
+  });
+
+  function slotLabel(sl) { var s = slots(S.cur).filter(function (x) { return x[0] === sl; })[0]; return s ? s[1][0] : 'Photo'; }
+  function visitSend(btn) {
+    var p = S.cur; if (!V.state) return;
+    if (rec) { msg('mVisit', 'warn', tr('Stop the recording first.', 'Simamisha kurekodi kwanza.')); return; }
+    btn.disabled = true; msg('mVisit', '', tr('Sending…', 'Inatuma…'));
+    var num = function (v) { return v === '' || v == null || isNaN(Number(v)) ? undefined : Number(v); };
     locate(function (here) {
-      var body = { action: 'visit', id: p.id, state: visitState, note: $('vNote').value.trim(), readings: readings, by: S.name };
-      if (here) { body.lat = here[0]; body.lng = here[1]; }
-      var st = visitState;
-      submit(body, vMedia.files()).then(function (r) {
-        $('bVisit').disabled = false;
+      var bad = problems();
+      var body = { action: 'visit', id: p.id, ck: p.ck, state: V.state, urgency: V.state === 'working' ? '' : V.urgency, by: S.name,
+        problems: bad.map(function (k) { return I[k][0]; }), checked: Object.keys(V.check).filter(function (k) { return V.check[k] === 'ok'; }).map(function (k) { return I[k][0]; }),
+        other: V.other.trim(), parts: V.parts.trim(), cost: num(V.cost),
+        readings: { strokes: num(V.r.strokes), flow: num(V.r.flow), queue: num(V.r.queue), users: num(V.r.users), clarity: V.r.clarity || undefined },
+        quality: { ecoli: V.q.ecoli || undefined, chlorine: num(V.q.chlorine), ph: num(V.q.ph), fluoride: num(V.q.fluoride), turbidity: num(V.q.turbidity) },
+        committee: { active: V.c.active || undefined, chair: (V.c.chair || '').trim(), phone: (V.c.phone || '').trim(), fee: V.c.fee || undefined, fund: num(V.c.fund) },
+        story: { quote: (V.story.quote || '').trim(), by: (V.story.by || '').trim(), consent: !!V.story.consent },
+        note: V.note.trim(), arrive: V.arrive ? V.arrive.at : undefined, leave: new Date().toISOString() };
+      var at = V.arrive && V.arrive.ll ? V.arrive.ll : here; if (at) { body.lat = at[0]; body.lng = at[1]; }
+      var files = V.files.map(function (f) { return { blob: f.blob, kind: 'photo', label: slotLabel(f.slot) }; });
+      if (V.voice) files.push({ blob: V.voice.blob, kind: 'voice', label: 'Voice note' });
+      var sent = V;
+      submit(body, files).then(function (r) {
+        btn.disabled = false;
         if (r.state === 'locked') return lockOut({ reason: 'pin' });
         if (r.state === 'failed') { msg('mVisit', 'bad', r.text); return; }
-        if (st === 'working') delete S.repairs[p.id]; else S.repairs[p.id] = { state: st, by: S.name, at: new Date().toISOString(), note: body.note };
-        saveList(); progUi(); repairUi(); visitReset();
-        msg('mVisit', r.state === 'queued' ? 'warn' : 'ok', r.state === 'queued' ? 'Saved on this phone. It will be sent when you have signal.' : 'Visit report sent ✓ It’s on the project in monday.com.' + (r.note ? ' ' + r.note : ''));
+        if (sent.state === 'working') delete S.repairs[p.id];
+        else S.repairs[p.id] = { state: sent.state, by: S.name, at: new Date().toISOString(), note: body.note, urgency: body.urgency, problems: body.problems.concat(body.other ? [body.other] : []), parts: body.parts, cost: body.cost || null };
+        S.visits[p.id] = { at: new Date().toISOString(), by: S.name, state: sent.state };
+        prevVisits[p.id] = [{ at: new Date().toISOString(), readings: body.readings }].concat(prevVisits[p.id] || []);
+        saveList(); progUi(); repairUi(); visitLine(); draftDrop(p.id);
+        sent.sent = r.state; sent.body = body; vRender();
       });
     });
-  });
+  }
+  function vDone() {
+    var q = V.sent === 'queued';
+    $('vw').innerHTML = '<div class="card wiz done-card"><div class="big-ok">' + (q ? '📱' : '✅') + '</div><h2>' + (q ? tr('Saved on this phone', 'Imehifadhiwa kwenye simu') : tr('Visit report sent', 'Ripoti ya ziara imetumwa')) + '</h2>' +
+      '<p class="muted">' + (q ? tr('It will be sent to monday.com when you have signal.', 'Itatumwa monday.com ukipata mtandao.') : tr('It’s on the project in monday.com.', 'Iko kwenye mradi katika monday.com.')) + '</p>' +
+      '<button class="btn block" type="button" data-act="share">↗ ' + tr('Share with the team (WhatsApp)', 'Shiriki na timu (WhatsApp)') + '</button>' +
+      '<button class="btn block light" type="button" data-act="again" style="margin-top:10px">' + tr('Start another visit here', 'Anza ziara nyingine hapa') + '</button></div>';
+  }
+  function shareText() {
+    var p = S.cur, b = V.body, st = STATES[b.state];
+    var t = st[0] + ' ' + p.title + ' (' + [p.area, p.country].filter(Boolean).join(', ') + ')\n' + st[1] + (b.urgency ? ' · ' + URG[b.urgency][0] : '') + '\n';
+    var pr = b.problems.concat(b.other ? [b.other] : []); if (pr.length) t += 'Problems: ' + pr.join(', ') + '\n';
+    if (b.readings.strokes != null) t += 'Pump strokes to fill 20 L: ' + b.readings.strokes + '\n';
+    if (b.readings.flow != null) t += 'Flow: ' + b.readings.flow + ' L/min\n';
+    if (b.quality.ecoli === 'pos') t += '⚠️ E. coli found\n';
+    if (b.parts) t += 'Parts: ' + b.parts + '\n';
+    if (b.note) t += b.note + '\n';
+    t += 'Visited by ' + S.name + ', ' + when(b.leave) + '\n';
+    if (p.gps) t += 'https://www.google.com/maps?q=' + p.gps[0].toFixed(6) + ',' + p.gps[1].toFixed(6);
+    return t;
+  }
+  function visitShare() {
+    var text = shareText(), first = V.files[0];
+    if (navigator.share) {
+      var data = { text: text };
+      try { if (first && navigator.canShare) { var file = new File([first.blob], 'site-visit.jpg', { type: 'image/jpeg' }); if (navigator.canShare({ files: [file] })) data.files = [file]; } } catch (e) {}
+      navigator.share(data).catch(function () {});
+      return;
+    }
+    window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank', 'noopener');
+  }
+  // "Last visit" line on the project, and the previous readings for comparing
+  function visitLine() {
+    var p = S.cur, v = p && S.visits[p.id];
+    $('pVisit').textContent = v ? tr('Last visit', 'Ziara iliyopita') + ': ' + when(v.at) + ' · ' + v.by + ' · ' + STATES[v.state][0] : tr('No visit recorded in the app yet.', 'Hakuna ziara iliyorekodiwa bado.');
+  }
 
   // history from monday.com (the last copy is kept on the phone for offline)
   var AUDIO = /^(webm|m4a|mp3|ogg|aac|wav|mp4)$/, IMG = /^(jpe?g|png|webp|gif)$/;
@@ -1348,7 +1724,7 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
   function openNew() {
     if (newOpen) { setTimeout(nPick.resize, 30); return; } // keep what was typed when switching tabs
     newOpen = true; msg('mNew', '', '');
-    var ck = $('iCountry').value || 'ke'; $('nCountry').value = ck; var c = CENTER[ck];
+    var ck = $('iCountry').value || homeCk() || 'ke'; $('nCountry').value = ck; var c = CENTER[ck];
     nPick.open(S.here || [c[0], c[1]], S.here ? 15 : c[2], null); newUi();
   }
   $('nCountry').addEventListener('change', function () { if (!nPick.pick && !S.here) { var c = CENTER[$('nCountry').value]; nPick.open([c[0], c[1]], c[2], null); } });
@@ -1379,7 +1755,55 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
       });
     });
   }
-  segInit('segTheme', 'rfPinTheme', 'data-theme'); segInit('segSize', 'rfPinSize', 'data-size');
+  segInit('segTheme', 'rfPinTheme', 'data-theme'); segInit('segSize', 'rfPinSize', 'data-size'); segInit('segLang', 'rfPinLang', 'data-lang');
+  qa('#segLang button').forEach(function (b) { b.addEventListener('click', function () { S.lang = b.getAttribute('data-v'); if (V) vRender(); }); });
+  $('meHome').value = store.get('rfPinHomeSet') || '';
+  $('meHome').addEventListener('change', function () { if (this.value) store.set('rfPinHomeSet', this.value); else store.del('rfPinHomeSet'); store.del('rfPinCountry'); fitted = false; applyHome(); homeTx(); });
+  function homeTx() { var h = homeCk(); $('meHomeTx').textContent = h ? 'Lists and the map start with ' + CNAME[h] + '. You can still pick any country in Projects.' + (store.get('rfPinHomeSet') ? '' : ' (Found from ' + (S.srvHome ? 'your sign-in' : 'where your phone is') + '.)') : 'Not known yet: choose one, or allow location.'; }
+  // months for the report
+  (function () { var d = new Date(), o = ''; for (var i = 0; i < 12; i++) { var m = new Date(d.getFullYear(), d.getMonth() - i, 1); o += '<option value="' + m.getFullYear() + '-' + ('0' + (m.getMonth() + 1)).slice(-2) + '">' + m.toLocaleDateString(undefined, { month: 'long', year: 'numeric' }) + '</option>'; } $('repMonth').innerHTML = o; })();
+  $('repOpen').addEventListener('click', function () { openReport(); });
+  $('repBack').addEventListener('click', function () { goBack(function () { show('vMe', 'replace'); }); });
+  $('repPrint').addEventListener('click', function () { window.print(); });
+  function openReport(how) {
+    if (!$('repCountry').dataset.set) { $('repCountry').value = homeCk() || ''; $('repCountry').dataset.set = '1'; }
+    show('vReport', how);
+    $('repBody').innerHTML = '<p class="muted">Loading…</p>';
+    var draw = function () { $('repBody').innerHTML = reportHtml($('repMonth').value, $('repCountry').value); };
+    if (!navigator.onLine && actCache) return draw();
+    api('GET', null, '?activity=1').then(function (j) { if (j.ok) actCache = j.activity || []; if (actCache) draw(); else $('repBody').innerHTML = '<p class="msg bad">' + esc(why(j)) + '</p>'; });
+  }
+  function reportHtml(month, ck) {
+    var y = +month.slice(0, 4), m = +month.slice(5) - 1, from = new Date(y, m, 1).getTime(), to = new Date(y, m + 1, 1).getTime();
+    var inC = function (id) { var p = byId(id); return !ck || (p && p.ck === ck); };
+    var ev = (actCache || []).filter(function (e) { var t = Date.parse(e.at); return t >= from && t < to && (e.a === 'new' ? true : inC(e.id)); });
+    var visits = ev.filter(function (e) { return e.a === 'visit'; }), latest = {};
+    visits.forEach(function (e) { if (!latest[e.id] || latest[e.id].at < e.at) latest[e.id] = e; });
+    var ids = Object.keys(latest), cnt = { working: 0, repair: 0, notworking: 0 }; ids.forEach(function (id) { cnt[latest[id].s] = (cnt[latest[id].s] || 0) + 1; });
+    var projs = S.projects.filter(function (p) { return !ck || p.ck === ck; });
+    var open = Object.keys(S.repairs).filter(inC).map(function (id) { return { id: id, r: S.repairs[id], p: byId(id) }; }).sort(function (a, b) { return (URGO[a.r.urgency] || 3) - (URGO[b.r.urgency] || 3); });
+    var urgent = open.filter(function (x) { return x.r.urgency === 'urgent'; }).length, cost = open.reduce(function (s, x) { return s + (Number(x.r.cost) || 0); }, 0);
+    var due = projs.filter(function (p) { return p.gps && ageDays(p) >= DUE_DAYS; }).length;
+    var n = function (a) { return ev.filter(function (e) { return e.a === a; }).length; };
+    var pc = ids.length ? Math.round(cnt.working / ids.length * 100) + '%' : '–';
+    var tile = function (v, l, cls) { return '<div class="kpi ' + (cls || '') + '"><b>' + v + '</b><span>' + l + '</span></div>'; };
+    var title = new Date(y, m, 1).toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+    var h = '<header class="rep-h"><h1 id="repTitle">Field report · ' + esc(title) + '</h1><p>' + (ck ? esc(CNAME[ck]) : 'All countries') + ' · Rafiki Outreach · Prepared by ' + esc(S.name) + ', ' + new Date().toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' }) + '</p></header>';
+    var pl = function (k, one, many) { return k === 1 ? one : many; };
+    h += '<div class="kpis">' + tile(visits.length, pl(visits.length, 'site visit', 'site visits')) + tile(ids.length, pl(ids.length, 'project visited', 'projects visited')) + tile(pc, 'of visited projects working', ids.length && cnt.working / ids.length < .8 ? 'warn' : '') + tile(open.length, pl(open.length, 'open repair', 'open repairs') + (urgent ? ' (' + urgent + ' urgent)' : ''), urgent ? 'bad' : '') +
+      tile(n('fixed'), pl(n('fixed'), 'repair fixed', 'repairs fixed')) + tile(n('new'), pl(n('new'), 'new site added', 'new sites added')) + tile(n('pin'), pl(n('pin'), 'location pinned', 'locations pinned')) + tile(due, 'due a visit (6+ months)') + '</div>';
+    h += '<h2>By country</h2><div class="tw"><table class="rt"><thead><tr><th>Country</th><th>Projects</th><th>Visited</th><th>✅ Working</th><th>⚠️ Repair</th><th>❌ Not working</th><th>Open repairs</th></tr></thead><tbody>' +
+      ['ke', 'tz', 'ug', 'mw'].filter(function (c) { return !ck || c === ck; }).map(function (c) {
+        var cid = ids.filter(function (id) { var p = byId(id); return p && p.ck === c; }), k = function (s) { return cid.filter(function (id) { return latest[id].s === s; }).length; };
+        return '<tr><td>' + CNAME[c] + '</td><td>' + S.projects.filter(function (p) { return p.ck === c; }).length + '</td><td>' + cid.length + '</td><td>' + k('working') + '</td><td>' + k('repair') + '</td><td>' + k('notworking') + '</td><td>' + open.filter(function (x) { return x.p && x.p.ck === c; }).length + '</td></tr>';
+      }).join('') + '</tbody></table></div>';
+    h += '<h2>Open repairs' + (cost ? ' · about KES ' + cost.toLocaleString() + ' estimated' : '') + '</h2>' + (open.length ? '<div class="tw"><table class="rt"><thead><tr><th>Project</th><th>Reported</th><th>Urgency</th><th>Problems</th><th>Parts</th><th>Est. KES</th></tr></thead><tbody>' +
+      open.map(function (x) { return '<tr><td><b>' + esc(x.p ? x.p.title : x.r.t || x.id) + '</b><br><small>' + esc(x.p ? x.p.country : '') + ' · ' + (x.r.state === 'notworking' ? '❌ not working' : '⚠️ needs repair') + '</small></td><td>' + esc(new Date(x.r.at).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })) + '<br><small>' + esc(x.r.by) + '</small></td><td>' + esc(x.r.urgency ? URG[x.r.urgency][0] : '–') + '</td><td>' + esc((x.r.problems || []).join(', ') || x.r.note || '–') + '</td><td>' + esc(x.r.parts || '–') + '</td><td>' + (x.r.cost ? Number(x.r.cost).toLocaleString() : '–') + '</td></tr>'; }).join('') + '</tbody></table></div>' : '<p class="muted">None. 🎉</p>');
+    h += '<h2>Visits this month</h2>' + (visits.length ? '<div class="tw"><table class="rt"><thead><tr><th>Date</th><th>Project</th><th>By</th><th>Result</th></tr></thead><tbody>' +
+      visits.slice().sort(function (a, b) { return a.at.localeCompare(b.at); }).map(function (e) { var p = byId(e.id); return '<tr><td>' + esc(new Date(e.at).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })) + '</td><td>' + esc(p ? p.title : e.t) + '</td><td>' + esc(e.by) + '</td><td>' + (STATES[e.s] ? STATES[e.s][0] + ' ' + STATES[e.s][1] : '') + (e.u ? ' · ' + URG[e.u][0] : '') + '</td></tr>'; }).join('') + '</tbody></table></div>' : '<p class="muted">No visits recorded in the app this month.</p>');
+    h += '<p class="muted rep-f">Only visits, repairs and pins made with the Rafiki Pin app are counted.</p>';
+    return h;
+  }
   var period = 7, actCache = null;
   qa('#segPeriod button').forEach(function (b) { b.addEventListener('click', function () { period = +b.getAttribute('data-v'); qa('#segPeriod button').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); }); actDraw(); }); });
   var VERB = { pin: 'pinned', visit: 'reported a visit to', fixed: 'marked fixed', new: 'added a new site:', undo: 'undid a pin on' };
@@ -1398,6 +1822,7 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
   }
   function renderMe() {
     $('meName').textContent = S.name;
+    homeTx();
     $('mePin').innerHTML = S.mode === 'monday' ? (S.photo ? '<img class="avatar" src="' + esc(S.photo) + '" alt="" onerror="this.remove()">' : '') + 'monday.com' : S.who ? 'Your own PIN' : 'Shared team PIN';
     $('lockBtn').textContent = S.mode === 'monday' ? 'Sign out' : 'Lock the app';
     outboxUi(); installUi();

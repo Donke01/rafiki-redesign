@@ -29,6 +29,10 @@ const COUNTRIES = { ke: ['KE', 'Kenya'], tz: ['TZ', 'Tanzania'], ug: ['UG', 'Uga
 const TYPES = { borehole: 'Water (Drilling)', collection: 'Water (Collection)', school: 'Educational', health: 'Medical', children: 'Orphanage', farming: 'Agricultural', community: 'Community', other: 'Other' };
 const VISIT = { working: '✅ Working well', notworking: '❌ Not working', repair: '⚠️ Needs repair' };
 const CLARITY = { clear: 'clear', cloudy: 'cloudy', dirty: 'dirty or coloured' };
+const URGENCY = { urgent: 'urgent', month: 'within a month', watch: 'keep an eye on it' };
+const ECOLI = { neg: 'not found', pos: 'found' };
+const YN = { yes: 1, no: 1, unsure: 1 };
+const HOME = { KE: 'ke', TZ: 'tz', UG: 'ug', MW: 'mw' };
 
 function json(body, status) {
   return new Response(JSON.stringify(body), {
@@ -63,9 +67,12 @@ const num = (v, max) => { const n = Number(v); return isFinite(n) && n >= 0 && n
 
 // "Meril:1234, Bertin:5678" → [{ name, pin }]
 function people(env) {
+  // "Meril:4821" or, with a home country, "Meril:4821:ke"
   return String(env.PIN_USERS || '').split(/[,;\n]/).map(s => {
-    const i = s.lastIndexOf(':');
-    return i > 0 ? { name: s.slice(0, i).trim(), pin: s.slice(i + 1).trim() } : null;
+    const a = s.split(':').map(x => x.trim());
+    let home = '';
+    if (a.length > 2 && /^(ke|tz|ug|mw)$/i.test(a[a.length - 1])) home = a.pop().toLowerCase();
+    return a.length >= 2 ? { name: a.slice(0, -1).join(':'), pin: a[a.length - 1], home } : null;
   }).filter(p => p && p.name && p.pin);
 }
 
@@ -79,7 +86,7 @@ export async function checkPin(request, env) {
   if (s) {
     // the cookie is sent automatically, so changes must come from the app's own pages
     if (request.method !== 'GET' && !request.headers.get('Origin') && request.headers.get('Sec-Fetch-Site') !== 'same-origin') return { res: json({ ok: false, reason: 'origin' }, 403) };
-    return { who: s.name, token: s.token, monday: true };
+    return { who: s.name, token: s.token, monday: true, home: s.home || '' };
   }
   if (!(request.headers.get('X-Pin') || '').trim() && configured(env)) return { res: json({ ok: false, reason: 'signin' }, 401) };
   if (!env.PIN_CODE && !list.length) return { res: json({ ok: false, reason: configured(env) ? 'signin' : 'not-set-up' }, configured(env) ? 401 : 503) };
@@ -87,25 +94,25 @@ export async function checkPin(request, env) {
   const failKey = 'rl:pinfail:' + ip;
   if (await count(env, failKey) >= MAX_FAILS) return { res: json({ ok: false, reason: 'locked' }, 429) };
   const given = (request.headers.get('X-Pin') || '').trim();
-  let who = null;
+  let who = null, home = '';
   // check every entry (no early exit), so timing doesn't reveal which matched
-  for (const p of list) if (given && sameText(given, p.pin) && who === null) who = p.name;
+  for (const p of list) if (given && sameText(given, p.pin) && who === null) { who = p.name; home = p.home; }
   if (who === null && given && env.PIN_CODE && sameText(given, String(env.PIN_CODE).trim())) who = '';
   if (who === null) {
     await bump(env, failKey);
     return { res: json({ ok: false, reason: 'pin' }, 401) };
   }
-  return { who };
+  return { who, home };
 }
 
 // --- open repairs and the activity log (KV) ------------------------------------------------
 async function getJson(env, key, dflt) { if (!env.FEED) return dflt; return (await env.FEED.get(key, 'json')) || dflt; }
 async function log(env, entry) {
   if (!env.FEED) return;
-  const cut = Date.now() - 31 * 864e5;
+  const cut = Date.now() - 400 * 864e5; // a year and a bit, for the monthly reports
   const a = (await getJson(env, 'pinact', [])).filter(e => Date.parse(e.at) > cut);
   a.push(Object.assign({ at: new Date().toISOString() }, entry));
-  await env.FEED.put('pinact', JSON.stringify(a.slice(-1500)));
+  await env.FEED.put('pinact', JSON.stringify(a.slice(-5000)));
 }
 async function setRepair(env, id, val) {
   if (!env.FEED) return;
@@ -121,7 +128,8 @@ export async function onRequestGet({ request, env, waitUntil }) {
   const id = (q.get('id') || '').replace(/\D/g, '');
   if (id) {
     const last = env.FEED ? await env.FEED.get('pinlast:' + id, 'json') : null;
-    return json({ ok: true, last: last ? { value: last.value, prev: last.prev, by: last.by, at: last.at } : null, canUndo: !!env.FEED }, 200);
+    const visits = env.FEED ? ((await env.FEED.get('pinvisit:' + id, 'json')) || []).slice(0, 3) : [];
+    return json({ ok: true, last: last ? { value: last.value, prev: last.prev, by: last.by, at: last.at } : null, canUndo: !!env.FEED, visits }, 200);
   }
   try {
     const hist = (q.get('history') || '').replace(/\D/g, '');
@@ -134,9 +142,9 @@ export async function onRequestGet({ request, env, waitUntil }) {
     const feed = await getFeed(env, waitUntil);
     const projects = (feed.projects || []).map(p => ({
       id: p.id, title: p.title, country: p.country, ck: p.ck, area: p.area || '', type: p.type, status: p.status, year: p.year || null,
-      gps: p.gps || null, photo: (p.photos && p.photos[0]) || null
+      gps: p.gps || null, photo: (p.photos && p.photos[0]) || null, pump: p.pump || ''
     }));
-    return json({ ok: true, who: chk.who, monday: !!chk.monday, projects, repairs: await getJson(env, 'pinrepairs', {}) }, 200);
+    return json({ ok: true, who: chk.who, monday: !!chk.monday, home: chk.home || '', projects, repairs: await getJson(env, 'pinrepairs', {}), visits: await getJson(env, 'pinlastvisit', {}) }, 200);
   } catch (e) {
     console.error('pin get:', e && e.message);
     return json({ ok: false, reason: 'down' }, 502);
@@ -218,24 +226,79 @@ export async function onRequestPost({ request, env }) {
       const state = VISIT[b.state];
       if (!state) return json({ ok: false, reason: 'bad-request' }, 400);
       const here = parseGps(Number(b.lat) + ', ' + Number(b.lng)), saved = parseGps(cur.text);
+      const L = []; // one line each in the monday.com note
+      const urg = URGENCY[b.urgency] && b.state !== 'working' ? b.urgency : '';
+      L.push('🩺 Site visit by ' + by + ' (Rafiki pin app): ' + state + '.' + (urg ? ' Urgency: ' + URGENCY[urg] + '.' : ''));
+      const list = (a, n) => (Array.isArray(a) ? a : []).map(x => clean(x, 60)).filter(Boolean).slice(0, n);
+      const bad = list(b.problems, 30), okk = list(b.checked, 30), other = clean(b.other, 300);
+      if (bad.length || other) L.push('Problems found: ' + bad.concat(other ? [other] : []).join(', ') + '.');
+      if (okk.length) L.push('Checked and OK: ' + okk.join(', ') + '.');
+      const partsNeeded = clean(b.parts, 300), cost = num(b.cost, 10000000);
+      if (partsNeeded) L.push('Parts needed: ' + said(partsNeeded));
+      if (cost) L.push('Estimated cost: KES ' + cost.toLocaleString('en-US') + '.');
+      // readings, compared with the last visit
       const r = b.readings && typeof b.readings === 'object' ? b.readings : {};
+      const R = { strokes: num(r.strokes, 1000), flow: num(r.flow, 1000), queue: num(r.queue, 2000), users: num(r.users, 100000), clarity: CLARITY[r.clarity] ? r.clarity : '' };
       const parts = [];
-      const strokes = num(r.strokes, 1000), flow = num(r.flow, 1000), queue = num(r.queue, 2000), users = num(r.users, 100000);
-      if (strokes !== null) parts.push('pump strokes to fill 20 L: ' + strokes);
-      if (flow !== null) parts.push('flow: ' + flow + ' L/min');
-      if (CLARITY[r.clarity]) parts.push('water looks ' + CLARITY[r.clarity]);
-      if (queue !== null) parts.push('people queuing: ' + queue);
-      if (users !== null) parts.push('people using it (estimate): ' + users);
-      const note = '🩺 Site visit by ' + by + ' (Rafiki pin app): ' + state + '.' +
-        (parts.length ? ' Readings: ' + parts.join('; ') + '.' : '') +
-        (clean(b.note, 2000) ? ' Notes: ' + said(clean(b.note, 2000)) : '') +
-        (here ? ' Reported from ' + fmt(here) + (saved ? ', ' + dist(metres(here, saved)) + ' from the saved location' : '') + '.' : '');
+      if (R.strokes !== null) parts.push('pump strokes to fill 20 L: ' + R.strokes);
+      if (R.flow !== null) parts.push('flow: ' + R.flow + ' L/min');
+      if (R.clarity) parts.push('water looks ' + CLARITY[R.clarity]);
+      if (R.queue !== null) parts.push('people queuing: ' + R.queue);
+      if (R.users !== null) parts.push('people using it (estimate): ' + R.users);
+      if (parts.length) L.push('Readings: ' + parts.join('; ') + '.');
+      const past = env.FEED ? (await env.FEED.get('pinvisit:' + id, 'json')) || [] : [];
+      const prev = past.filter(v => v.readings)[0];
+      if (prev) {
+        const ch = [];
+        [['strokes', 'pump strokes'], ['flow', 'flow'], ['queue', 'queue'], ['users', 'people using it']].forEach(([k, label]) => {
+          if (R[k] !== null && prev.readings[k] != null && prev.readings[k] !== R[k]) ch.push(label + ' ' + prev.readings[k] + ' → ' + R[k]);
+        });
+        if (ch.length) L.push('Since the last visit (' + new Date(prev.at).toISOString().slice(0, 10) + '): ' + ch.join('; ') + '.');
+      }
+      const q = b.quality && typeof b.quality === 'object' ? b.quality : {};
+      const Q = { ecoli: ECOLI[q.ecoli] ? q.ecoli : '', chlorine: num(q.chlorine, 50), ph: num(q.ph, 14), fluoride: num(q.fluoride, 50), turbidity: num(q.turbidity, 4000) };
+      const qs = [];
+      if (Q.ecoli) qs.push('E. coli ' + ECOLI[Q.ecoli]);
+      if (Q.chlorine !== null) qs.push('free chlorine ' + Q.chlorine + ' mg/L');
+      if (Q.ph !== null) qs.push('pH ' + Q.ph);
+      if (Q.fluoride !== null) qs.push('fluoride ' + Q.fluoride + ' mg/L' + (Q.fluoride > 1.5 ? ' (above the 1.5 mg/L WHO guideline)' : ''));
+      if (Q.turbidity !== null) qs.push('turbidity ' + Q.turbidity + ' NTU');
+      if (qs.length) L.push('Water tests: ' + qs.join('; ') + '.' + (Q.ecoli === 'pos' ? ' ⚠️ E. coli found: water is not safe to drink untreated.' : ''));
+      // water committee and upkeep
+      const c = b.committee && typeof b.committee === 'object' ? b.committee : {};
+      const cs = [];
+      if (YN[c.active]) cs.push(c.active === 'yes' ? 'active' : c.active === 'no' ? 'not active' : 'not sure if active');
+      if (clean(c.chair, 80)) cs.push('chair: ' + clean(c.chair, 80) + (clean(c.phone, 30) ? ' (' + clean(c.phone, 30) + ')' : ''));
+      if (YN[c.fee]) cs.push('user fee ' + (c.fee === 'yes' ? 'collected' : c.fee === 'no' ? 'not collected' : 'not sure'));
+      const fund = num(c.fund, 100000000);
+      if (fund !== null) cs.push('maintenance fund: KES ' + fund.toLocaleString('en-US'));
+      if (cs.length) L.push('Water committee: ' + cs.join('; ') + '.');
+      // story moment
+      const st = b.story && typeof b.story === 'object' ? b.story : {};
+      if (clean(st.quote, 600)) L.push('Story moment: “' + clean(st.quote, 600) + '”' + (clean(st.by, 80) ? ' (' + clean(st.by, 80) + ')' : '') + '. Consent to quote and photograph: ' + (st.consent ? 'given' : 'not given') + '.');
+      if (clean(b.note, 2000)) L.push('Notes: ' + said(clean(b.note, 2000)));
+      // time on site and where it was sent from
+      const tz = b.ck === 'mw' ? 'Africa/Blantyre' : 'Africa/Nairobi';
+      const t = iso => { const d = new Date(iso); return isNaN(d) ? '' : d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: tz }); };
+      const arr = b.arrive ? new Date(b.arrive) : null, lv = b.leave ? new Date(b.leave) : null;
+      if (arr && !isNaN(arr) && lv && !isNaN(lv) && lv > arr) L.push('On site ' + t(b.arrive) + '–' + t(b.leave) + ' (' + Math.round((lv - arr) / 60000) + ' min).');
+      if (here) {
+        const d = saved ? metres(here, saved) : 0;
+        L.push('Reported from ' + fmt(here) + (saved ? ', ' + dist(d) + ' from the saved location' : '') + '.' + (saved && d > 500 ? ' ⚠️ This is more than 500 m from the saved location.' : ''));
+      }
+      const note = L.join('<br>');
       const updateId = await createUpdate(token, id, note, api);
       if (!updateId) return json({ ok: false, reason: 'down' }, 502);
+      const at = new Date().toISOString();
       if (b.state === 'working') await setRepair(env, id, null);
-      else await setRepair(env, id, { state: b.state, by, at: new Date().toISOString(), note: clean(b.note, 300), t: title });
+      else await setRepair(env, id, { state: b.state, by, at, note: clean(b.note, 300), t: title, urgency: urg, problems: bad.concat(other ? [other] : []).slice(0, 12), parts: partsNeeded, cost: cost || null });
+      if (env.FEED) {
+        const rec = { at, by, state: b.state, urgency: urg, readings: parts.length ? R : null, quality: qs.length ? Q : null };
+        await env.FEED.put('pinvisit:' + id, JSON.stringify([rec].concat(past).slice(0, 5)));
+        const lv2 = await getJson(env, 'pinlastvisit', {}); lv2[id] = { at, by, state: b.state }; await env.FEED.put('pinlastvisit', JSON.stringify(lv2));
+      }
       await bump(env, 'rl:pinsave:' + ip);
-      await log(env, { by, a: 'visit', s: b.state, id, t: title });
+      await log(env, { by, a: 'visit', s: b.state, u: urg, id, t: title });
       return json({ ok: true, id, updateId }, 200);
     }
 

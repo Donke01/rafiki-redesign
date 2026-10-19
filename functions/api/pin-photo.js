@@ -1,7 +1,7 @@
 // POST /api/pin-photo: attaches one photo or voice note from the Rafiki pin app to a note on a monday.com
 // project (the note returned by /api/pin). Photos go on the note, not into the public
 // "Photos of the project" column, so nothing from the field reaches the website by itself.
-// Form fields: update (note id), file (JPEG/PNG/HEIC/WebP photo, or a WebM/MP4/AAC/MP3/OGG voice note; up to 8 MB). Needs the team PIN in "X-Pin".
+// Form fields: update (note id), label (optional, e.g. "Water flowing", used in the file name), file (JPEG/PNG/HEIC/WebP photo, or a WebM/MP4/AAC/MP3/OGG voice note; up to 8 MB). Needs the team PIN in "X-Pin".
 import { checkPin } from './pin.js';
 import { addFileToUpdate } from '../../lib/monday.js';
 
@@ -27,7 +27,8 @@ export async function onRequestPost({ request, env }) {
   if (file.size > MAX_BYTES) return json({ ok: false, reason: 'too-large' }, 413);
   const type = String(file.type || '').split(';')[0].trim().toLowerCase(), ext = EXT[type];
   if (!ext) return json({ ok: false, reason: 'type' }, 415);
-  const name = (type.indexOf('audio/') === 0 ? 'voice-note-' : 'site-photo-') + new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-') + '.' + ext;
+  const label = String(form.get('label') || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40);
+  const name = (type.indexOf('audio/') === 0 ? 'voice-note-' : 'site-photo-' + (label ? label + '-' : '')) + new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-') + '.' + ext;
   try {
     await addFileToUpdate(chk.token || env.MONDAY_API_TOKEN, update, file, name, env.MONDAY_API_URL);
     return json({ ok: true }, 200);
