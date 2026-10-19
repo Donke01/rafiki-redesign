@@ -21,7 +21,7 @@
 // Open repairs and the activity log are kept in Workers KV (FEED), not on the board.
 // Admins (PIN_ADMINS, or made admin in the app) also get the Office tools in /api/admin.
 import { getFeed, dropFeed } from '../../lib/feed-cache.js';
-import { parseGps, readGps, writeGps, createUpdate, createSite, readUpdates, BOARD_ID } from '../../lib/monday.js';
+import { parseGps, readGps, writeGps, createUpdate, createSite, readUpdates, tidyTitle, BOARD_ID } from '../../lib/monday.js';
 import { session, configured } from '../../lib/pin-auth.js';
 import { getJson as gj, putJson, team, hashPin, isAdminName, sameName, seen, addReview, sendMail, alertHtml } from '../../lib/pin-store.js';
 
@@ -55,6 +55,9 @@ async function bump(env, key) {
   if (!env.FEED) return;
   await env.FEED.put(key, String((Number(await env.FEED.get(key)) || 0) + 1), { expirationTtl: 3600 });
 }
+// project names saved before names were tidied can start with monday.com's ** or ##
+const strip = s => String(s || '').replace(/^[\s*#_-]+|[\s*#_]+$/g, '');
+const stripT = x => (x && typeof x.t === 'string' && x.id ? Object.assign({}, x, { t: strip(x.t) }) : x);
 const clean = (s, n) => String(s || '').replace(/[<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, n);
 const said = s => s ? (/[.!?]$/.test(s) ? s : s + '.') : '';
 const fmt = g => g[0].toFixed(6) + ', ' + g[1].toFixed(6);
@@ -144,7 +147,7 @@ export async function onRequestGet({ request, env, waitUntil }) {
       if (!cur || (cur.board && cur.board !== String(env.MONDAY_BOARD_ID || BOARD_ID))) return json({ ok: false, reason: 'project' }, 404);
       return json({ ok: true, notes: await readUpdates(chk.token || env.MONDAY_API_TOKEN, hist, env.MONDAY_API_URL) }, 200);
     }
-    if (q.get('activity')) return json({ ok: true, activity: await getJson(env, 'pinact', []) }, 200);
+    if (q.get('activity')) return json({ ok: true, activity: (await getJson(env, 'pinact', [])).map(stripT) }, 200);
     const feed = await getFeed(env, waitUntil);
     const projects = (feed.projects || []).map(p => ({
       id: p.id, title: p.title, country: p.country, ck: p.ck, area: p.area || '', type: p.type, status: p.status, year: p.year || null,
@@ -152,6 +155,7 @@ export async function onRequestGet({ request, env, waitUntil }) {
     }));
     if (chk.who && waitUntil) waitUntil(seen(env, chk.who));
     const repairs = await getJson(env, 'pinrepairs', {});
+    Object.keys(repairs).forEach(k => { if (repairs[k] && repairs[k].t) repairs[k].t = strip(repairs[k].t); });
     const assigns = (await getJson(env, 'pinassign', [])).filter(a => !a.done);
     const extra = {
       admin: !!chk.admin,
@@ -208,7 +212,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
     if (!id) return json({ ok: false, reason: 'bad-request' }, 400);
     const cur = await readGps(token, id, api);
     if (!cur || (cur.board && cur.board !== board)) return json({ ok: false, reason: 'project' }, 404);
-    const title = clean(cur.name, 120);
+    const title = clean(tidyTitle(cur.name), 120);
 
     if (action === 'pin') {
       const g = parseGps(Number(b.lat) + ', ' + Number(b.lng));

@@ -114,7 +114,7 @@ body.locked .rf{display:none}
 @media print{.tw{overflow:visible}.rt{min-width:0}.top,.tabs,.net,.noprint,.toast,.routebar{display:none !important}body,html{background:#FFFFFF !important}main{padding:0 !important}.rep{padding:0;border-radius:0}.kpis{grid-template-columns:repeat(4,1fr)}.rt{font-size:9pt}.rt tr{break-inside:avoid}}
 .tabs button.hidden{display:none !important}
 body.wide .app,body.wide .tabs nav{max-width:1180px}
-.o-grid{display:grid;grid-template-columns:1fr;gap:16px}
+.o-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}.o-grid>*{min-width:0}
 @media (min-width:1000px){body.wide .o-grid{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr)}body.wide .o-side{position:sticky;top:72px;align-self:start}}
 .o-map{height:420px}
 button.kpi{border:0;text-align:left;width:100%;cursor:pointer;font:inherit;color:inherit}

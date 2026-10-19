@@ -48,7 +48,7 @@ export async function onRequestGet({ request, env }) {
   const chk = await admin(request, env);
   if (chk.res) return chk.res;
   const view = new URL(request.url).searchParams.get('view');
-  if (view === 'review') return json({ ok: true, items: (await getJson(env, 'pinreview', [])).slice().reverse() });
+  if (view === 'review') return json({ ok: true, items: (await getJson(env, 'pinreview', [])).slice().reverse().map(x => (x.t ? Object.assign({}, x, { t: String(x.t).replace(/^[\s*#_-]+|[\s*#_]+$/g, '') }) : x)) });
   if (view === 'assign') return json({ ok: true, items: await getJson(env, 'pinassign', []) });
   if (view === 'team') {
     const t = await team(env), seenAt = await getJson(env, 'pinseen', {}), admins = adminNames(env);
