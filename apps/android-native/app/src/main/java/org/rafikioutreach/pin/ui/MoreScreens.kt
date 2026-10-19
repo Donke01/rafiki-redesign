@@ -1,0 +1,151 @@
+package org.rafikioutreach.pin.ui
+
+import android.content.Intent
+import android.net.Uri
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
+import org.json.JSONObject
+import org.rafikioutreach.pin.AppModel
+import org.rafikioutreach.pin.BuildConfig
+import org.rafikioutreach.pin.Outcome
+import org.rafikioutreach.pin.data.COUNTRIES
+import org.rafikioutreach.pin.data.OutFile
+import org.rafikioutreach.pin.t
+
+private val TYPES = listOf(
+    "borehole" to ("Borehole well" to "Kisima cha borehole"), "collection" to ("Water collection" to "Ukusanyaji wa maji"), "school" to ("School" to "Shule"),
+    "health" to ("Health" to "Afya"), "children" to ("Children's home" to "Makao ya watoto"), "farming" to ("Farming" to "Kilimo"),
+    "community" to ("Community" to "Jamii"), "other" to ("Other" to "Nyingine"),
+)
+
+@Composable
+fun NewSiteScreen(m: AppModel, done: (String?) -> Unit) {
+    val scope = rememberScope()
+    var name by remember { mutableStateOf("") }
+    var ck by remember { mutableStateOf(m.prefs.country.ifBlank { "ke" }) }
+    var type by remember { mutableStateOf("borehole") }
+    var village by remember { mutableStateOf("") }
+    var note by remember { mutableStateOf("") }
+    var shots by remember { mutableStateOf(listOf<Shot>()) }
+    val spot = remember { Spot() }
+    var msg by remember { mutableStateOf<Pair<String, String>?>(null) }
+    var busy by remember { mutableStateOf(false) }
+    val fix by m.fix.collectAsState()
+
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
+        Text(t("Add a new site", "Ongeza eneo jipya"), style = MaterialTheme.typography.headlineLarge, color = C.ink)
+        Text(t("It goes onto the monday.com board as “Due Diligence”, so it isn’t on the website until the office moves it on.", "Inaingia kwenye monday.com kama “Due Diligence”, kwa hiyo haionekani kwenye tovuti hadi ofisi iisogeze."), style = MaterialTheme.typography.bodyMedium, color = C.muted)
+        Card(Modifier.padding(top = 14.dp)) {
+            Field(name, { name = it }, t("Site name", "Jina la eneo"), placeholder = t("e.g. Kiptoo Primary School", "mf. Shule ya Msingi Kiptoo"))
+            Text(t("Country", "Nchi"), style = MaterialTheme.typography.labelMedium, color = C.ink, modifier = Modifier.padding(top = 14.dp, bottom = 6.dp))
+            COUNTRIES.entries.chunked(2).forEach { row -> Row(Modifier.padding(bottom = 6.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) { row.forEach { (k, n) -> Pill(n, ck == k, Modifier.weight(1f)) { ck = k } } } }
+            Text(t("Type", "Aina"), style = MaterialTheme.typography.labelMedium, color = C.ink, modifier = Modifier.padding(top = 14.dp, bottom = 6.dp))
+            TYPES.chunked(2).forEach { row -> Row(Modifier.padding(bottom = 6.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) { row.forEach { (k, l) -> Pill(t(l.first, l.second), type == k, Modifier.weight(1f)) { type = k } } } }
+            Field(village, { village = it }, t("Village / community", "Kijiji / jamii"), placeholder = t("e.g. Kiptoo, Nandi", "mf. Kiptoo, Nandi"))
+            Field(note, { note = it }, t("Notes (optional)", "Maelezo (si lazima)"), placeholder = t("Who asked, how many people, current water source…", "Nani aliomba, watu wangapi, chanzo cha maji sasa…"), lines = 3)
+        }
+        Card(Modifier.padding(top = 14.dp)) {
+            H2(t("Where is it?", "Iko wapi?"))
+            SpotPicker(m, spot, fix?.ll, ck)
+        }
+        Card(Modifier.padding(top = 14.dp)) {
+            H2(t("Photos (optional)", "Picha (si lazima)"))
+            PhotoSlots(m, emptyList(), shots, { shots = it }, max = 5)
+        }
+        Btn(t("Add this site", "Ongeza eneo hili"), {
+            val ll = spot.ll ?: return@Btn
+            busy = true
+            scope.launch {
+                val body = JSONObject().put("action", "new").put("name", name.trim()).put("ck", ck).put("village", village.trim()).put("type", type).put("note", note.trim()).put("lat", ll.lat).put("lng", ll.lng)
+                when (val o = m.submit(body, shots.map { OutFile(it.file.path, "photo", "Site photo") })) {
+                    is Outcome.Sent -> { busy = false; m.refresh(); done(o.reply.optString("id").takeIf { it.isNotBlank() }) }
+                    Outcome.Queued -> { busy = false; msg = "warn" to t("Saved on this phone. It will be added when you have signal.", "Imehifadhiwa kwenye simu. Itaongezwa ukipata mtandao."); name = ""; shots = emptyList() }
+                    is Outcome.Failed -> { busy = false; msg = "bad" to o.text }
+                    Outcome.Locked -> busy = false
+                }
+            }
+        }, Modifier.fillMaxWidth().padding(top = 16.dp), icon = "plus", enabled = name.isNotBlank() && spot.ll != null && !busy)
+        if (name.isBlank() || spot.ll == null) Msg(t("Add the name, then choose where it is.", "Weka jina, kisha chagua mahali lilipo."))
+        msg?.let { (tone, text) -> Msg(text, tone) }
+        Spacer(Modifier.height(24.dp))
+    }
+}
+
+@Composable
+fun MeScreen(m: AppModel) {
+    val waiting by m.waiting.collectAsState()
+    val s by m.snap.collectAsState()
+    var miles by remember { mutableStateOf(m.prefs.miles) }
+    val ctx = LocalContext.current
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
+        Text(t("Me & team", "Mimi na timu"), style = MaterialTheme.typography.headlineLarge, color = C.ink)
+        Card(Modifier.padding(top = 12.dp), brush = DeepBrush) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(Modifier.size(48.dp).clip(CircleShape).background(Color(0x26FFFFFF)), contentAlignment = Alignment.Center) {
+                    Text(m.prefs.name.split(" ").mapNotNull { it.firstOrNull()?.uppercase() }.take(2).joinToString(""), color = Color.White, style = MaterialTheme.typography.titleMedium)
+                }
+                Spacer(Modifier.width(12.dp))
+                Text(t("You", "Wewe"), color = Color.White, style = MaterialTheme.typography.titleLarge)
+            }
+            MeRow(t("Name", "Jina"), m.prefs.name)
+            MeRow(t("Role", "Nafasi"), if (s?.admin == true) t("Admin", "Msimamizi") else t("Field team", "Timu ya uwanjani"))
+            MeRow(t("Waiting to send", "Inasubiri kutumwa"), if (waiting == 0) t("Nothing", "Hakuna") else waiting.toString())
+            Btn(t("Lock the app", "Funga programu"), { m.lock() }, Modifier.padding(top = 14.dp), icon = "lock", light = true, small = true)
+        }
+        Card(Modifier.padding(top = 14.dp)) {
+            H2(t("Language", "Lugha"))
+            LangSwitch(m.prefs, Modifier.padding(top = 6.dp))
+            H2(t("Distances", "Umbali"), Modifier.padding(top = 18.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Pill(t("Kilometres", "Kilomita"), !miles, Modifier.weight(1f)) { miles = false; m.prefs.miles = false }
+                Pill(t("Miles", "Maili"), miles, Modifier.weight(1f)) { miles = true; m.prefs.miles = true }
+            }
+        }
+        if (s?.admin == true) Card(Modifier.padding(top = 14.dp)) {
+            H2(t("Office tools", "Zana za ofisi"))
+            Text(t("Repairs, assigning visits, the review queue, the team and exports are in the Office section of the web app.", "Matengenezo, kugawa ziara, foleni ya kuidhinisha, timu na ripoti ziko kwenye sehemu ya Ofisi ya programu ya wavuti."), style = MaterialTheme.typography.bodyMedium, color = C.muted)
+            Btn(t("Open the Office", "Fungua Ofisi"), { runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(BuildConfig.SERVER + "/pin#office"))) } }, Modifier.padding(top = 10.dp), icon = "inbox", small = true)
+        }
+        Text("RAFIKI Pin " + BuildConfig.VERSION_NAME, style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 18.dp))
+    }
+}
+
+@Composable
+private fun MeRow(k: String, v: String) {
+    Column {
+        Row(Modifier.fillMaxWidth().padding(vertical = 10.dp)) {
+            Text(k, color = Color(0xFFCFE8FA), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
+            Text(v, color = Color.White, style = MaterialTheme.typography.titleSmall)
+        }
+        HorizontalDivider(color = Color(0x26FFFFFF))
+    }
+}
