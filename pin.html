@@ -673,6 +673,14 @@ html[data-theme=sun] .phead{background:#002A57}
 @media (min-width:700px){.otabs{grid-template-columns:repeat(7,minmax(0,1fr))}}
 html[data-theme=dark] .otab[aria-pressed=true]{box-shadow:none}
 html[data-theme=sun] .otab[aria-pressed=true]{background:var(--blue)}
+
+/* Projects filters: all five visible at once on a phone */
+.chips.fgrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;overflow:visible;padding:0}
+.fgrid .chip.otab{min-height:66px;padding:8px 2px;border-radius:16px;white-space:normal;font-size:.7rem;line-height:1.15;text-align:center}
+.fgrid .otab span{white-space:normal;overflow:visible}
+.fgrid .otab .n{margin:0;padding:0 5px;background:var(--bad);color:#FFFFFF;font-size:.66rem;line-height:18px}
+.fgrid .otab[aria-pressed=true] .n{background:#FFFFFF;color:var(--bad)}
+.fgrid .otab .n.hidden{display:none}
 </style>
 </head>
 <body class="locked">
@@ -742,12 +750,12 @@ html[data-theme=sun] .otab[aria-pressed=true]{background:var(--blue)}
       <div class="card prog-card" style="padding:16px"><div class="prog" id="lProg"></div><div class="cmeters" id="cProg" style="margin-top:12px"></div></div>
       <div class="tools">
         <input type="search" id="iSearch" placeholder="Search by project name or place" aria-label="Search by project name or place">
-        <div class="chips" role="group" aria-label="Show">
-          <button class="chip" type="button" data-f="missing" aria-pressed="true">Needs a location</button>
-          <button class="chip" type="button" data-f="near" aria-pressed="false">📍 Nearby</button>
-          <button class="chip" type="button" data-f="repairs" aria-pressed="false">🔧 Repairs<span class="n" id="repN">0</span></button>
-          <button class="chip" type="button" data-f="due" aria-pressed="false">🗓 Due a visit</button>
-          <button class="chip" type="button" data-f="all" aria-pressed="false">All</button>
+        <div class="chips otabs fgrid" role="group" aria-label="Show">
+          <button class="chip otab" type="button" data-f="missing" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><path d="M10.3 8.4a1.9 1.9 0 1 1 2.6 1.8c-.6.3-.9.7-.9 1.3M12 13.6v.1"/></svg><span>Needs a location</span></button>
+          <button class="chip otab" type="button" data-f="near" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg><span>Nearby</span></button>
+          <button class="chip otab" type="button" data-f="repairs" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></svg><span>Repairs</span><i class="n" id="repN">0</i></button>
+          <button class="chip otab" type="button" data-f="due" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M12 13.2v2.6l1.8 1.1"/></svg><span>Due a visit</span></button>
+          <button class="chip otab" type="button" data-f="all" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6.5h11M9 12h11M9 17.5h11"/><circle cx="4.8" cy="6.5" r="1.2"/><circle cx="4.8" cy="12" r="1.2"/><circle cx="4.8" cy="17.5" r="1.2"/></svg><span>All</span></button>
         </div>
         <select id="iCountry" aria-label="Country">
           <option value="">All countries</option><option value="ke">Kenya</option><option value="tz">Tanzania</option><option value="ug">Uganda</option><option value="mw">Malawi</option>
