@@ -1,0 +1,19 @@
+# Sends the Rafiki Pin monthly summary e-mail to admins on the 1st of each month (06:00 Nairobi time).
+# Needs a repository secret CRON_KEY (Settings → Secrets and variables → Actions) with the same value
+# as the Cloudflare secret CRON_KEY. Optional repository variable SITE_URL (default: the preview site).
+name: Monthly field report
+on:
+  schedule:
+    - cron: '0 3 1 * *'
+  workflow_dispatch:
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ask the site to send the summary
+        env:
+          CRON_KEY: ${{ secrets.CRON_KEY }}
+          SITE_URL: ${{ vars.SITE_URL || 'https://rafiki-redesign.pages.dev' }}
+        run: |
+          if [ -z "$CRON_KEY" ]; then echo "CRON_KEY is not set; skipping."; exit 0; fi
+          curl -sS -f -X POST -H "X-Cron-Key: $CRON_KEY" "$SITE_URL/api/admin?cron=monthly"

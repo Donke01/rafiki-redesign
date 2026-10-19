@@ -112,6 +112,43 @@ body.locked .rf{display:none}
 .rep-f{margin-top:18px;font-size:.75rem}
 @media (max-width:600px){.kpis{grid-template-columns:1fr 1fr}.rt{font-size:.72rem}}
 @media print{.tw{overflow:visible}.rt{min-width:0}.top,.tabs,.net,.noprint,.toast,.routebar{display:none !important}body,html{background:#FFFFFF !important}main{padding:0 !important}.rep{padding:0;border-radius:0}.kpis{grid-template-columns:repeat(4,1fr)}.rt{font-size:9pt}.rt tr{break-inside:avoid}}
+.tabs button.hidden{display:none !important}
+body.wide .app,body.wide .tabs nav{max-width:1180px}
+.o-grid{display:grid;grid-template-columns:1fr;gap:16px}
+@media (min-width:1000px){body.wide .o-grid{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr)}body.wide .o-side{position:sticky;top:72px;align-self:start}}
+.o-map{height:420px}
+button.kpi{border:0;text-align:left;width:100%;cursor:pointer;font:inherit;color:inherit}
+button.kpi[data-go]:hover{box-shadow:0 0 0 2px #9FD3F7}
+#vOffice .kpis{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+html[data-theme=dark] .kpi{background:#12324A}html[data-theme=dark] .kpi b,html[data-theme=dark] .kpi span{color:#E8EDF1}
+.ocards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.ocards .card{padding:16px;display:flex;flex-direction:column;gap:6px}
+.ocards .card p{margin:0;font-size:.88rem}
+.oh{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.oh .lnk{padding:0;min-height:0;text-align:left;font-size:.98rem}
+.ofields{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.ofields label,.ocards label,#vOffice .card > label{margin:8px 0 0;font-size:.72rem}
+.ofields select,.ofields input,.ocards input,#vOffice .card > label input{margin-top:4px;min-height:44px}
+#vOffice label.tick{display:flex;align-items:center;gap:10px;font-size:.88rem;text-transform:none;letter-spacing:0;margin-top:12px}
+.oact{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px}
+.oact .msg{margin:0}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin:6px 0}
+.steps button{min-height:40px;border-radius:10px;border:var(--bw) solid var(--edge);background:var(--card);font-size:.72rem;font-weight:700;color:var(--muted);cursor:pointer;padding:0 4px}
+.steps button.on{background:var(--tint);border-color:#9FD3F7;color:var(--deep)}
+.steps button[aria-checked=true]{background:var(--blue);border-color:var(--blue);color:#FFFFFF}
+.orev blockquote{margin:4px 0;padding:10px 12px;border-left:4px solid var(--blue);background:var(--tint);border-radius:0 10px 10px 0;font-size:.92rem}
+.orev.gone{opacity:.3;transition:opacity .4s}
+.pinbox{display:flex;flex-direction:column;align-items:flex-start;gap:4px;margin-top:12px;padding:14px;border-radius:14px;background:var(--okbg);color:var(--ok)}
+.pinbox b{font-size:2rem;letter-spacing:.2em;color:var(--ink)}
+.pinbox small{color:var(--text)}
+.xbtns{display:flex;flex-direction:column;gap:8px}
+.xbtns .btn{justify-content:flex-start}
+.conf{color:var(--ok);font-weight:700}
+#pConf:empty{display:none}
+#pConf .lnk{margin-left:6px;min-height:0;padding:0}
+.mywork{margin-bottom:12px;border:2px solid #9FD3F7}
+.mywork h2{margin-bottom:8px}
+.mywork .row + .row{margin-top:6px}
 .net{display:none;padding:8px 16px;font-size:.82rem;font-weight:700;text-align:center;background:var(--warnbg);color:var(--warn)}
 .net.on{display:block}
 main{flex:1;padding:16px 16px calc(var(--tabh) + 24px + env(safe-area-inset-bottom))}
@@ -126,7 +163,7 @@ h3{margin:0 0 8px;font-size:.95rem;font-weight:800;color:var(--ink)}
 p{margin:0 0 12px;line-height:1.5}
 .muted{color:var(--muted);font-size:.88rem}
 label,.lbl{display:block;font-size:.8rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);margin:16px 0 6px}
-input[type=text],input[type=password],input[type=search],input[type=number],input[type=tel],select,textarea{width:100%;min-height:52px;padding:0 16px;border-radius:14px;border:var(--bw) solid var(--edge);background:var(--field);font-size:1rem}
+input[type=text],input[type=password],input[type=search],input[type=number],input[type=tel],input[type=email],input[type=date],select,textarea{width:100%;min-height:52px;padding:0 16px;border-radius:14px;border:var(--bw) solid var(--edge);background:var(--field);font-size:1rem}
 textarea{padding:12px 16px;min-height:96px;resize:vertical;line-height:1.45}
 :focus-visible{outline:3px solid #098BE1;outline-offset:2px}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:0 22px;border-radius:999px;border:var(--bw) solid transparent;background:var(--blue);color:#FFFFFF;font-size:1rem;font-weight:700;cursor:pointer;text-decoration:none;text-align:center;line-height:1.2}
@@ -153,7 +190,7 @@ textarea{padding:12px 16px;min-height:96px;resize:vertical;line-height:1.45}
 
 /* tab bar */
 .tabs{position:fixed;left:0;right:0;bottom:0;z-index:1200;background:var(--bar);border-top:var(--bw) solid var(--line);padding:0 0 env(safe-area-inset-bottom);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
-.tabs nav{max-width:760px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);height:var(--tabh)}
+.tabs nav{max-width:760px;margin:0 auto;display:grid;grid-template-columns:repeat(var(--tc,4),1fr);height:var(--tabh)}
 .tabs button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:0;background:none;color:var(--muted);font-size:.72rem;font-weight:700;cursor:pointer;position:relative}
 .tabs button svg{width:24px;height:24px}
 .tabs button[aria-current=page]{color:var(--blue)}
@@ -462,6 +499,7 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
     <!-- list -->
     <section id="vList" class="hidden" aria-labelledby="h-list">
       <div id="lHere"></div>
+      <div id="myWork"></div>
       <div id="instBox"></div>
       <div class="outbox hidden" id="outbox" role="status"><span id="outboxTx"></span><button class="btn small light" id="bFlush" type="button">Send now</button></div>
       <div class="listhead"><h1 id="h-list">Projects</h1><button class="btn small light" id="bRouteMode" type="button" aria-pressed="false">🗺 Plan a route</button></div>
@@ -504,6 +542,7 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
         <span class="muted" id="pSub"></span>
         <span class="cur" id="pCur"></span>
         <span class="cur" id="pVisit"></span>
+        <span class="cur" id="pConf"></span>
         <span class="dist" id="pDist"></span>
         <span class="live" id="pLive"></span>
         <div class="links" id="pLinks"></div>
@@ -590,6 +629,13 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
       </div>
     </section>
 
+    <!-- office (admins) -->
+    <section id="vOffice" class="hidden" aria-labelledby="h-off">
+      <h1 id="h-off" style="margin:4px 2px 10px">Office</h1>
+      <div class="chips" id="oTabs" role="group" aria-label="Office sections"></div>
+      <div id="oBody" style="margin-top:12px"></div>
+    </section>
+
     <!-- monthly report -->
     <section id="vReport" class="hidden" aria-labelledby="repTitle">
       <div class="noprint repbar"><button class="back" id="repBack" type="button">← Me</button><button class="btn small" id="repPrint" type="button">⬇ Save as PDF</button></div>
@@ -668,6 +714,7 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
       <button type="button" data-v="vList"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="3.5" cy="6" r="1"/><circle cx="3.5" cy="12" r="1"/><circle cx="3.5" cy="18" r="1"/></svg>Projects<span class="dot hidden" id="tabDot"></span></button>
       <button type="button" data-v="vNew" class="plus"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span>New site</button>
       <button type="button" data-v="vMe"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>Me</button>
+      <button type="button" data-v="vOffice" id="tabOffice" class="hidden"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Office<span class="dot hidden" id="offDot"></span></button>
     </nav>
   </div>
 </div>
@@ -678,7 +725,7 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
   var qa = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
   var store = { get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} }, del: function (k) { try { localStorage.removeItem(k); } catch (e) {} } };
   var jget = function (k, d) { try { return JSON.parse(store.get(k) || 'null') || d; } catch (e) { return d; } };
-  var S = { mode: store.get('rfPinMode') || '', photo: store.get('rfPinPhoto') || '', pin: store.get('rfPin') || '', name: store.get('rfPinName') || '', who: store.get('rfPinWho') || '', projects: jget('rfPinList', []), repairs: jget('rfPinRepairs', {}), visits: jget('rfPinVisits', {}), lang: store.get('rfPinLang') || '', units: store.get('rfPinUnits') || 'km', srvHome: store.get('rfPinSrvHome') || '', gpsHome: '',
+  var S = { mode: store.get('rfPinMode') || '', photo: store.get('rfPinPhoto') || '', pin: store.get('rfPin') || '', name: store.get('rfPinName') || '', who: store.get('rfPinWho') || '', projects: jget('rfPinList', []), repairs: jget('rfPinRepairs', {}), visits: jget('rfPinVisits', {}), admin: jget('rfPinRole', {}).admin || false, jobs: jget('rfPinRole', {}).jobs || [], assigned: jget('rfPinRole', {}).assigned || [], confirmed: jget('rfPinRole', {}).confirmed || {}, reviewOpen: 0, lang: store.get('rfPinLang') || '', units: store.get('rfPinUnits') || 'km', srvHome: store.get('rfPinSrvHome') || '', gpsHome: '',
     filter: store.get('rfPinFilter') || 'missing', cur: null, here: null, hereAt: 0, view: 'vLock', prev: 'vMap', routeMode: false, pickedRoute: [], route: jget('rfPinRoute', []), dismissed: {} };
   var CENTER = { ke: [0.3, 37.9, 7], tz: [-6.3, 34.8, 6], ug: [1.4, 32.3, 7], mw: [-13.3, 34.3, 7] };
   var CNAME = { ke: 'Kenya', tz: 'Tanzania', ug: 'Uganda', mw: 'Malawi' };
@@ -719,10 +766,10 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
   }
 
   // --- views and tab bar -------------------------------------------------------------------
-  var MAIN = ['vMap', 'vList', 'vNew', 'vMe'];
+  var MAIN = ['vMap', 'vList', 'vNew', 'vMe', 'vOffice'];
   // Each screen has its own address (#map, #list, #p/<id>…), so the phone's Back button and a
   // page refresh keep you where you were.
-  function hashFor(v) { return v === 'vProj' && S.cur ? '#p/' + S.cur.id + (S.tab && S.tab !== 'pin' ? '/' + S.tab : '') : '#' + ({ vMap: 'map', vList: 'list', vRoute: 'route', vNew: 'new', vMe: 'me', vReport: 'report' }[v] || 'map'); }
+  function hashFor(v) { return v === 'vProj' && S.cur ? '#p/' + S.cur.id + (S.tab && S.tab !== 'pin' ? '/' + S.tab : '') : '#' + ({ vMap: 'map', vList: 'list', vRoute: 'route', vNew: 'new', vMe: 'me', vReport: 'report', vOffice: 'office' }[v] || 'map'); }
   function nav(v, how) {
     if (v === 'vLock' || how === 'none') return;
     var h = hashFor(v); if (location.hash === h) return;
@@ -732,7 +779,7 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
   function goBack(fallback) { if (S.depth > 0) history.back(); else fallback(); }
   function applyHash(first) {
     if (S.view === 'vLock' && !first) return;
-    var m = /^#p\/(\d+)(?:\/(visit|hist))?$/.exec(location.hash), v = { '#map': 'vMap', '#list': 'vList', '#route': 'vRoute', '#new': 'vNew', '#me': 'vMe', '#report': 'vReport' }[location.hash];
+    var m = /^#p\/(\d+)(?:\/(visit|hist))?$/.exec(location.hash), v = { '#map': 'vMap', '#list': 'vList', '#route': 'vRoute', '#new': 'vNew', '#me': 'vMe', '#report': 'vReport', '#office': 'vOffice' }[location.hash];
     if (v === 'vReport') { openReport('none'); return; }
     if (m && byId(m[1])) { openProj(m[1], m[2] || 'pin', 'none'); return; }
     if (v === 'vRoute') renderRoute();
@@ -745,7 +792,7 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
     if (v !== 'vProj') { pick.stop(); liveStop(); } if (v !== 'vNew') nPick.stop();
     S.view = v;
     nav(v, how);
-    ['vLock', 'vMap', 'vList', 'vRoute', 'vProj', 'vNew', 'vMe', 'vReport'].forEach(function (x) { $(x).classList.toggle('hidden', x !== v); });
+    ['vLock', 'vMap', 'vList', 'vRoute', 'vProj', 'vNew', 'vMe', 'vReport', 'vOffice'].forEach(function (x) { $(x).classList.toggle('hidden', x !== v); });
     document.body.classList.toggle('locked', v === 'vLock');
     $('main').classList.toggle('bare', v === 'vMap');
     var tabFor = v === 'vReport' ? 'vMe' : v === 'vRoute' || v === 'vProj' ? (S.prev === 'vMap' ? 'vMap' : 'vList') : v;
@@ -758,6 +805,8 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
     if (v === 'vMap') homeMap();
     if (v === 'vList') renderList();
     if (v === 'vMe') renderMe();
+    if (v === 'vOffice') renderOffice();
+    document.body.classList.toggle('wide', v === 'vOffice');
     if (v === 'vNew') openNew();
     hereWatch(v === 'vMap' || v === 'vList');
   }
@@ -1139,6 +1188,9 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
       if (S.pin) { store.set('rfPin', S.pin); store.set('rfPinMode', 'pin'); }
       store.set('rfPinName', S.name); store.set('rfPinWho', S.who);
       S.projects = j.projects || []; S.repairs = j.repairs || {}; S.visits = j.visits || {}; saveList();
+      S.admin = !!j.admin; S.jobs = j.jobs || []; S.assigned = j.assigned || []; S.confirmed = j.confirmed || {}; S.reviewOpen = j.reviewOpen || 0;
+      store.set('rfPinRole', JSON.stringify({ admin: S.admin, jobs: S.jobs, assigned: S.assigned, confirmed: S.confirmed }));
+      adminUi(); myWorkUi(); if (S.view === 'vOffice') renderOffice(); if (S.view === 'vProj') confirmUi();
       S.srvHome = j.home || ''; store.set('rfPinSrvHome', S.srvHome); applyHome();
       msg('mList', '', '');
       if (S.view === 'vLock') applyHash(true); else { if (S.view === 'vList') renderList(); if (S.view === 'vMap') homeMap(); if (S.view === 'vProj' && S.cur && byId(S.cur.id)) { S.cur = byId(S.cur.id); curUi(); repairUi(); } if (S.view === 'vRoute') renderRoute(); }
@@ -1313,7 +1365,7 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
   function ageDays(p) { var v = S.visits[p.id]; return v ? (Date.now() - Date.parse(v.at)) / 864e5 : 1e6; }
   function ageText(p) { var d = ageDays(p); if (d >= 1e6) return 'No visit yet'; var m = Math.floor(d / 30.4); return m >= 12 ? Math.floor(m / 12) + ' yr ago' : m + ' mo ago'; }
   function renderList() {
-    progUi();
+    progUi(); myWorkUi();
     var q = $('iSearch').value.trim().toLowerCase(), ck = $('iCountry').value, f = S.filter, near = f === 'near';
     var rows = S.projects.filter(function (p) {
       if (f === 'missing' && p.gps) return false;
@@ -1478,7 +1530,7 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
         '<a class="btn light small" href="https://www.google.com/maps?q=' + ll + '" target="_blank" rel="noopener">Open in Google Maps</a>' +
         '<a class="btn light small" href="https://maps.apple.com/?daddr=' + ll + '&dirflg=d" target="_blank" rel="noopener">Apple Maps</a>'
       : '';
-    distUi();
+    distUi(); confirmUi();
   }
   var DIRS = ['north', 'north-east', 'east', 'south-east', 'south', 'south-west', 'west', 'north-west'];
   function heading(a, b) {
@@ -1538,6 +1590,7 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
       $('bYes').disabled = false; $('confirm').classList.add('hidden'); $('bSave').classList.remove('hidden');
       if (r.state === 'locked') return lockOut({ reason: 'pin' });
       if (r.state === 'failed') { msg('mSave', 'bad', r.text); return; }
+      if (r.result && r.result.pending) { pick.saved(p.gps); pMedia.clear(); pickUi(); msg('mSave', 'warn', 'This location was confirmed by an admin, so your change has been sent to them for approval. It isn’t changed yet.'); return; }
       p.gps = ll; saveList(); curUi(); pick.saved(ll); pMedia.clear(); pickUi(); fitted = false;
       if (r.state === 'queued') msg('mSave', 'warn', 'Saved on this phone. It will be sent to monday.com when you have signal.');
       else { msg('mSave', 'ok', 'Saved to monday.com ✓ The website map will show it on the next visit.' + (r.note ? ' ' + r.note : '')); lastUi(); }
@@ -2012,7 +2065,7 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
   }
   var period = 7, actCache = null;
   qa('#segPeriod button').forEach(function (b) { b.addEventListener('click', function () { period = +b.getAttribute('data-v'); qa('#segPeriod button').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); }); actDraw(); }); });
-  var VERB = { pin: 'pinned', visit: 'reported a visit to', fixed: 'marked fixed', new: 'added a new site:', undo: 'undid a pin on' };
+  var VERB = { pin: 'pinned', visit: 'reported a visit to', fixed: 'marked fixed', new: 'added a new site:', undo: 'undid a pin on', request: 'asked to move the confirmed location of', approve: 'approved', reject: 'turned down', job: 'updated the repair job on', assign: 'assigned', team: 'team:' };
   function actDraw() {
     var a = actCache; if (!a) return;
     var cut = Date.now() - period * 864e5, rows = a.filter(function (e) { return Date.parse(e.at) > cut; }), by = {};
@@ -2036,6 +2089,327 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
     if (!navigator.onLine) { if (!actCache) $('actTable').innerHTML = '<p class="muted">Team activity needs a signal.</p>'; return; }
     api('GET', null, '?activity=1').then(function (j) { if (j.ok) { actCache = j.activity || []; actDraw(); } else if (!actCache) $('actTable').innerHTML = '<p class="msg bad">' + esc(why(j)) + '</p>'; });
   }
+
+  // --- 8. Office (admins only) ----------------------------------------------------------------------
+  // Overview · Repairs · Visits · Review · Team · Clean-up · Export. The server checks every admin action.
+  var O = { tab: store.get('rfPinOTab') || 'overview', team: null, review: null, assign: null, mail: null, cron: false, pick: [] };
+  var STEP = [['reported', 'Reported'], ['assigned', 'Assigned'], ['parts', 'Parts ordered'], ['fixed', 'Fixed']];
+  var BOXES = { ke: [-4.8, 33.9, 5.1, 41.9], tz: [-11.8, 29.3, -0.9, 40.5], ug: [-1.5, 29.5, 4.3, 35.1], mw: [-17.2, 32.6, -9.3, 36] };
+  function adminApi(method, body, q) {
+    return fetch('/api/admin' + (q || ''), { method: method, headers: Object.assign({ Accept: 'application/json' }, S.pin ? { 'X-Pin': S.pin } : {}, body ? { 'Content-Type': 'application/json' } : {}), body: body ? JSON.stringify(body) : undefined })
+      .then(function (r) { return r.json().catch(function () { return { ok: false, reason: 'down' }; }).then(function (j) { j.status = r.status; return j; }); })
+      .catch(function () { return { ok: false, reason: 'offline', status: 0 }; });
+  }
+  function adminUi() {
+    $('tabOffice').classList.toggle('hidden', !S.admin);
+    $('tabs').style.setProperty('--tc', S.admin ? 5 : 4);
+    var n = S.reviewOpen || 0; $('offDot').textContent = n; $('offDot').classList.toggle('hidden', !n);
+  }
+  function oSeg() {
+    var T = [['overview', 'Overview'], ['repairs', 'Repairs'], ['visits', 'Visits'], ['review', 'Review'], ['team', 'Team'], ['cleanup', 'Clean-up'], ['export', 'Export']];
+    $('oTabs').innerHTML = T.map(function (t) { var n = t[0] === 'review' && S.reviewOpen ? '<span class="n">' + S.reviewOpen + '</span>' : t[0] === 'repairs' && Object.keys(S.repairs).length ? '<span class="n">' + Object.keys(S.repairs).length + '</span>' : ''; return '<button class="chip" type="button" data-o="' + t[0] + '" aria-pressed="' + (O.tab === t[0]) + '">' + t[1] + n + '</button>'; }).join('');
+  }
+  $('oTabs').addEventListener('click', function (e) { var b = e.target.closest('[data-o]'); if (!b) return; O.tab = b.getAttribute('data-o'); store.set('rfPinOTab', O.tab); renderOffice(); });
+  function oNeedTeam(cb) { if (O.team) return cb(); adminApi('GET', null, '?view=team').then(function (j) { if (j.ok) { O.team = j.team; O.mail = j.mail; O.cron = j.cron; } cb(); }); }
+  function names() { return (O.team || []).map(function (p) { return p.name; }).sort(); }
+  function pname(id) { var p = byId(id); return p ? p.title : 'Project ' + id; }
+  function renderOffice() {
+    if (!S.admin) { show('vMap'); return; }
+    oSeg(); adminUi();
+    var b = $('oBody'), t = O.tab;
+    if (!navigator.onLine && t !== 'overview' && t !== 'cleanup') { b.innerHTML = '<p class="msg warn">The Office needs a signal for this. Overview and Clean-up work offline.</p>'; return; }
+    if (t === 'overview') return oOverview(b);
+    if (t === 'repairs') return oNeedTeam(function () { oRepairs(b); });
+    if (t === 'visits') return oNeedTeam(function () { oVisits(b); });
+    if (t === 'review') return oReview(b);
+    if (t === 'team') return oNeedTeam(function () { oTeam(b); });
+    if (t === 'cleanup') return oCleanup(b);
+    if (t === 'export') return oNeedTeam(function () { oExport(b); });
+  }
+
+  // overview
+  var oMap = null;
+  function oOverview(b) {
+    var P = S.projects, pinned = P.filter(function (p) { return p.gps; }).length, rep = Object.keys(S.repairs).map(function (k) { return S.repairs[k]; });
+    var st = { working: 0, repair: 0, notworking: 0 }; Object.keys(S.visits).forEach(function (k) { var v = S.visits[k]; if (st[v.state] != null) st[v.state]++; });
+    var urgent = rep.filter(function (r) { return r.urgency === 'urgent'; }).length, cost = rep.reduce(function (s, r) { return s + (Number(r.cost) || 0); }, 0);
+    var due = P.filter(function (p) { return p.gps && ageDays(p) >= DUE_DAYS; }).length;
+    var mFrom = new Date(); mFrom = new Date(mFrom.getFullYear(), mFrom.getMonth(), 1).getTime();
+    var acts = (actCache || []).filter(function (e) { return Date.parse(e.at) >= mFrom; }), vm = acts.filter(function (e) { return e.a === 'visit'; }).length;
+    var ti = 0, tile = function (v, l, cls, go) { return '<button type="button" class="kpi ' + (cls || '') + '" style="--i:' + (ti++) + '"' + (go ? ' data-go="' + go + '"' : '') + '><b>' + v + '</b><span>' + l + '</span></button>'; };
+    b.innerHTML = '<div class="o-grid"><div>' +
+      '<div class="kpis">' + tile(Math.round(pinned / Math.max(1, P.length) * 100) + '%', pinned + ' of ' + P.length + ' projects have a location', '', 'list-missing') +
+      tile(st.working, '✅ working at last visit') + tile(st.repair, '⚠️ needed repair at last visit', st.repair ? 'warn' : '') + tile(st.notworking, '❌ not working at last visit', st.notworking ? 'bad' : '') +
+      tile(rep.length, 'open repairs' + (urgent ? ' · ' + urgent + ' urgent' : ''), urgent ? 'bad' : '', 'o-repairs') + tile(cost ? 'KES ' + cost.toLocaleString() : '–', 'estimated repair cost') +
+      tile(actCache ? vm : '…', 'visits this month') + tile(due, 'due a visit (6+ months)', '', 'list-due') + tile(S.reviewOpen || 0, 'waiting for review', S.reviewOpen ? 'warn' : '', 'o-review') + '</div>' +
+      '<h2 style="margin-top:20px">By country</h2><div class="tw"><table class="rt"><thead><tr><th>Country</th><th>Projects</th><th>Located</th><th>✅</th><th>⚠️</th><th>❌</th><th>Repairs</th><th>Due</th></tr></thead><tbody>' +
+      ['ke', 'tz', 'ug', 'mw'].map(function (c) {
+        var l = P.filter(function (p) { return p.ck === c; }); if (!l.length) return '';
+        var k = function (s) { return l.filter(function (p) { return S.visits[p.id] && S.visits[p.id].state === s; }).length; };
+        return '<tr><td><b>' + CNAME[c] + '</b></td><td>' + l.length + '</td><td>' + l.filter(function (p) { return p.gps; }).length + '</td><td>' + k('working') + '</td><td>' + k('repair') + '</td><td>' + k('notworking') + '</td><td>' + l.filter(function (p) { return S.repairs[p.id]; }).length + '</td><td>' + l.filter(function (p) { return p.gps && ageDays(p) >= DUE_DAYS; }).length + '</td></tr>';
+      }).join('') + '</tbody></table></div>' +
+      '<h2 style="margin-top:20px">Latest from the field</h2><ul class="feed" id="oFeed"><li class="muted">Loading…</li></ul></div>' +
+      '<div class="o-side"><div class="map o-map" id="oMap" role="application" aria-label="Map of projects: open repairs in orange and red"></div><p class="muted" style="margin-top:6px">Orange and red: open repairs. Green: other projects with a location.</p></div></div>';
+    var feedDraw = function () { $('oFeed').innerHTML = (actCache || []).slice(-12).reverse().map(function (e) { return '<li><b>' + esc(e.by) + '</b> ' + (VERB[e.a] || e.a) + ' ' + esc(e.t || '') + '<small>' + esc(when(e.at)) + '</small></li>'; }).join('') || '<li class="muted">Nothing yet.</li>'; };
+    if (actCache) feedDraw();
+    if (navigator.onLine) api('GET', null, '?activity=1').then(function (j) { if (j.ok) { actCache = j.activity || []; if (O.tab === 'overview' && S.view === 'vOffice') { feedDraw(); var k = b.querySelector('.kpi:nth-child(7) b'); if (k) k.textContent = (actCache || []).filter(function (e) { return e.a === 'visit' && Date.parse(e.at) >= mFrom; }).length; } } });
+    setTimeout(function () {
+      if (oMap) { oMap.remove(); oMap = null; }
+      oMap = L.map('oMap', { zoomControl: true }); layers(oMap);
+      var g = L.featureGroup();
+      P.forEach(function (p) { if (p.gps) L.circleMarker(p.gps, dotStyle(p)).bindTooltip(esc(p.title)).on('click', function () { openProj(p.id); }).addTo(g); });
+      g.addTo(oMap); if (g.getLayers().length) oMap.fitBounds(g.getBounds().pad(0.1)); else oMap.setView([-3, 35], 5);
+    }, 40);
+  }
+
+  // repairs: jobs with steps, a person, a due date and a budget
+  function oRepairs(b) {
+    var ids = Object.keys(S.repairs).sort(function (a, c) { var ra = S.repairs[a], rc = S.repairs[c]; return (URGO[ra.urgency] || 3) - (URGO[rc.urgency] || 3) || (ra.at || '').localeCompare(rc.at || ''); });
+    if (!ids.length) { b.innerHTML = '<p class="muted">No open repairs. 🎉</p>'; return; }
+    var opts = function (cur) { return '<option value="">Not assigned</option>' + names().map(function (n) { return '<option' + (n === cur ? ' selected' : '') + '>' + esc(n) + '</option>'; }).join(''); };
+    b.innerHTML = '<p class="muted">Most urgent first. Changes leave a note on the project in monday.com, and the person assigned sees the job in their app.</p><div class="ocards">' + ids.map(function (id) {
+      var r = S.repairs[id], p = byId(id), step = r.step || 'reported';
+      return '<article class="card ojob" data-id="' + esc(id) + '"><div class="oh"><button class="lnk" type="button" data-open="' + esc(id) + '">' + esc(p ? p.title : r.t || id) + '</button>' +
+        '<span class="tag ' + (r.state === 'notworking' ? 'bad' : '') + '">' + (r.urgency === 'urgent' ? 'Urgent · ' : r.urgency === 'month' ? 'This month · ' : '') + (r.state === 'notworking' ? 'Not working' : 'Needs repair') + '</span></div>' +
+        '<p class="muted">' + esc(p ? p.country : '') + ' · reported by ' + esc(r.by) + ', ' + esc(when(r.at)) + '</p>' +
+        (r.problems && r.problems.length ? '<p><b>Problems:</b> ' + esc(r.problems.join(', ')) + '</p>' : r.note ? '<p>“' + esc(r.note) + '”</p>' : '') +
+        (r.parts ? '<p><b>Parts:</b> ' + esc(r.parts) + (r.cost ? ' · field estimate KES ' + Number(r.cost).toLocaleString() : '') + '</p>' : r.cost ? '<p>Field estimate KES ' + Number(r.cost).toLocaleString() + '</p>' : '') +
+        '<div class="steps" role="radiogroup" aria-label="Job step">' + STEP.map(function (s, i) { var idx = STEP.findIndex(function (x) { return x[0] === step; }); return '<button type="button" role="radio" data-step="' + s[0] + '" aria-checked="' + (s[0] === step) + '" class="' + (i <= idx ? 'on' : '') + '">' + s[1] + '</button>'; }).join('') + '</div>' +
+        '<div class="ofields"><label>Assigned to<select data-f="assignee">' + opts(r.assignee || '') + '</select></label>' +
+        '<label>Due<input type="date" data-f="due" value="' + esc(r.due || '') + '"></label>' +
+        '<label>Approved budget (KES)<input type="number" inputmode="numeric" data-f="budget" value="' + (r.budget == null ? '' : r.budget) + '" placeholder="' + (r.cost ? r.cost : '') + '"></label></div>' +
+        '<label>Note (optional)<input type="text" data-f="note" placeholder="e.g. parts bought in Eldoret"></label>' +
+        '<div class="oact"><button class="btn small" type="button" data-save>Save</button><span class="msg" aria-live="polite"></span></div></article>';
+    }).join('') + '</div>';
+  }
+  $('oBody').addEventListener('click', function (e) {
+    var t = e.target;
+    var go = t.closest('[data-go]'); if (go && go.classList.contains('kpi')) { var g = go.getAttribute('data-go'); if (g.indexOf('o-') === 0) { O.tab = g.slice(2); renderOffice(); } else { S.filter = g.slice(5); store.set('rfPinFilter', S.filter); qa('.chips .chip').forEach(function (x) { x.setAttribute('aria-pressed', x.getAttribute('data-f') === S.filter ? 'true' : 'false'); }); show('vList'); } return; }
+    var op = t.closest('[data-open]'); if (op) { openProj(op.getAttribute('data-open')); return; }
+    var sb = t.closest('[data-step]'); if (sb) { var card = sb.closest('.ojob'); qa('[data-step]', card).forEach(function (x) { x.setAttribute('aria-checked', x === sb ? 'true' : 'false'); }); var i = STEP.findIndex(function (s) { return s[0] === sb.getAttribute('data-step'); }); qa('[data-step]', card).forEach(function (x, k) { x.classList.toggle('on', k <= i); }); return; }
+    var sv = t.closest('[data-save]'); if (sv) {
+      var c = sv.closest('.ojob'), id = c.getAttribute('data-id'), m = c.querySelector('.msg'), stp = c.querySelector('[data-step][aria-checked=true]');
+      var body = { action: 'job', id: id, step: stp ? stp.getAttribute('data-step') : 'reported', assignee: c.querySelector('[data-f=assignee]').value, due: c.querySelector('[data-f=due]').value, budget: c.querySelector('[data-f=budget]').value, note: c.querySelector('[data-f=note]').value };
+      sv.disabled = true; m.className = 'msg'; m.textContent = 'Saving…';
+      adminApi('POST', body).then(function (j) {
+        sv.disabled = false;
+        if (!j.ok) { m.className = 'msg bad'; m.textContent = why(j); return; }
+        if (j.job) S.repairs[id] = j.job; else delete S.repairs[id];
+        saveList(); progUi(); m.className = 'msg ok'; m.textContent = j.job ? 'Saved ✓' : 'Marked fixed ✓';
+        if (!j.job) setTimeout(renderOffice, 900);
+      });
+      return;
+    }
+  });
+
+  // visits: assign projects to a field officer for a date
+  function oVisits(b) {
+    var tomorrow = new Date(Date.now() + 864e5).toISOString().slice(0, 10);
+    b.innerHTML = '<div class="o-grid"><div class="card"><h2>Assign visits</h2>' +
+      '<div class="ofields"><label>Field officer<select id="aTo">' + names().map(function (n) { return '<option>' + esc(n) + '</option>'; }).join('') + '</select></label>' +
+      '<label>Date<input type="date" id="aDate" value="' + tomorrow + '"></label></div>' +
+      '<label>Note (optional)<input type="text" id="aNote" placeholder="e.g. check the pump and meet the committee"></label>' +
+      '<div class="ofields"><label>Show<select id="aF"><option value="due">Due a visit</option><option value="repairs">Open repairs</option><option value="all">All with a location</option></select></label>' +
+      '<label>Country<select id="aC"><option value="">All</option><option value="ke">Kenya</option><option value="tz">Tanzania</option><option value="ug">Uganda</option><option value="mw">Malawi</option></select></label></div>' +
+      '<input type="search" id="aQ" placeholder="Search projects" aria-label="Search projects" style="margin-top:10px">' +
+      '<div class="list" id="aList" style="margin-top:10px;max-height:420px;overflow:auto"></div>' +
+      '<div class="oact"><button class="btn" type="button" id="aGo" disabled>Assign</button><span class="msg" id="aMsg" aria-live="polite"></span></div></div>' +
+      '<div class="card"><h2>Planned visits</h2><div id="aPlan"><p class="muted">Loading…</p></div></div></div>';
+    if (!names().length) $('aTo').outerHTML = '<p class="msg warn">Add people in the Team tab first.</p>';
+    $('aC').value = homeCk() || '';
+    var draw = function () {
+      var f = $('aF').value, c = $('aC').value, q = $('aQ').value.trim().toLowerCase();
+      var rows = S.projects.filter(function (p) { return p.gps && (!c || p.ck === c) && (!q || (p.title + ' ' + p.area).toLowerCase().indexOf(q) >= 0) && (f === 'all' || (f === 'repairs' ? S.repairs[p.id] : ageDays(p) >= DUE_DAYS)); });
+      if (f === 'due') rows.sort(function (a, z) { return ageDays(z) - ageDays(a); });
+      $('aList').innerHTML = rows.slice(0, 150).map(function (p) { var on = O.pick.indexOf(p.id) >= 0; return '<button class="row" type="button" role="checkbox" aria-checked="' + on + '" data-pick="' + esc(p.id) + '"><span class="ck" aria-hidden="true">' + (on ? '✓' : '') + '</span><span class="tx"><span class="t">' + esc(p.title) + '</span><span class="s">' + esc(sub(p)) + '</span></span><span class="tag">' + (S.repairs[p.id] ? 'Repair' : ageText(p)) + '</span></button>'; }).join('') || '<p class="muted">No projects match.</p>';
+      $('aGo').disabled = !O.pick.length || !$('aTo').value; $('aGo').textContent = O.pick.length ? 'Assign ' + O.pick.length + ' visit' + (O.pick.length === 1 ? '' : 's') : 'Assign';
+    };
+    ['aF', 'aC'].forEach(function (x) { $(x).addEventListener('change', draw); }); $('aQ').addEventListener('input', draw);
+    $('aList').addEventListener('click', function (e) { var r = e.target.closest('[data-pick]'); if (!r) return; var id = r.getAttribute('data-pick'), i = O.pick.indexOf(id); if (i >= 0) O.pick.splice(i, 1); else O.pick.push(id); draw(); });
+    $('aGo').addEventListener('click', function () {
+      var btn = this; btn.disabled = true; msg('aMsg', '', 'Assigning…');
+      adminApi('POST', { action: 'assign', ids: O.pick, to: $('aTo').value, date: $('aDate').value, note: $('aNote').value }).then(function (j) {
+        if (!j.ok) { btn.disabled = false; msg('aMsg', 'bad', why(j)); return; }
+        msg('aMsg', 'ok', 'Assigned ✓ ' + $('aTo').value + ' will see ' + (j.items.length === 1 ? 'it' : 'them') + ' in their app.'); O.pick = []; O.assign = null; draw(); plan();
+      });
+    });
+    var plan = function () {
+      adminApi('GET', null, '?view=assign').then(function (j) {
+        if (!j.ok) { $('aPlan').innerHTML = '<p class="msg bad">' + esc(why(j)) + '</p>'; return; }
+        var open = j.items.filter(function (a) { return !a.done; }).sort(function (a, z) { return a.date.localeCompare(z.date); }), today = new Date().toISOString().slice(0, 10);
+        var done = j.items.filter(function (a) { return a.done; }).sort(function (a, z) { return z.done.localeCompare(a.done); }).slice(0, 10);
+        $('aPlan').innerHTML = (open.length ? open.map(function (a) { return '<div class="kv"><span><b>' + esc(a.date) + '</b>' + (a.date < today ? ' <span class="tag bad">overdue</span>' : '') + ' · ' + esc(a.to) + '<br><small>' + esc(a.t || pname(a.id)) + (a.note ? ' — ' + esc(a.note) : '') + '</small></span><button class="lnk" type="button" data-unassign="' + esc(a.aid) + '">Remove</button></div>'; }).join('') : '<p class="muted">No visits planned.</p>') +
+          (done.length ? '<h3 style="margin-top:14px">Recently done</h3>' + done.map(function (a) { return '<div class="kv"><span>✅ ' + esc(a.t || pname(a.id)) + '<br><small>' + esc(a.to) + ' · ' + esc(when(a.done)) + '</small></span></div>'; }).join('') : '');
+      });
+    };
+    $('aPlan').addEventListener('click', function (e) { var u = e.target.closest('[data-unassign]'); if (!u) return; adminApi('POST', { action: 'unassign', aid: u.getAttribute('data-unassign') }).then(function () { plan(); }); });
+    draw(); plan();
+  }
+
+  // review queue
+  var KIND = { new: '🆕 New site', move: '📍 Location moved over 500 m', request: '🔒 Change to a confirmed location', story: '✨ Story moment' };
+  function oReview(b) {
+    b.innerHTML = '<p class="muted">Loading…</p>';
+    adminApi('GET', null, '?view=review').then(function (j) {
+      if (!j.ok) { b.innerHTML = '<p class="msg bad">' + esc(why(j)) + '</p>'; return; }
+      O.review = j.items; var open = j.items.filter(function (x) { return x.status === 'open'; }), done = j.items.filter(function (x) { return x.status !== 'open'; }).slice(0, 15);
+      S.reviewOpen = open.length; adminUi(); oSeg();
+      var ll = function (v) { var m = /(-?\d+\.\d+),\s*(-?\d+\.\d+)/.exec(v || ''); return m ? '<a href="https://www.google.com/maps?q=' + m[1] + ',' + m[2] + '&t=k" target="_blank" rel="noopener">' + esc(v) + '</a>' : esc(v || 'none'); };
+      b.innerHTML = (open.length ? '<div class="ocards">' + open.map(function (x) {
+        var d = x.data || {}, det = '';
+        if (x.kind === 'new') det = '<p>' + esc([d.type, d.village, CNAME[d.ck]].filter(Boolean).join(' · ')) + '</p><p>Location: ' + ll(d.gps) + '</p>' + (d.note ? '<p>“' + esc(d.note) + '”</p>' : '');
+        if (x.kind === 'move' || x.kind === 'request') det = '<p>From ' + ll(d.from) + '<br>to ' + ll(d.to) + (d.dist ? ' (' + dist(d.dist) + ' away)' : '') + '</p>' + (d.how ? '<p class="muted">How: ' + esc(d.how) + '</p>' : '');
+        if (x.kind === 'story') det = '<blockquote>“' + esc(d.quote) + '”' + (d.who ? '<br><small>— ' + esc(d.who) + '</small>' : '') + '</blockquote><p class="muted">Consent to quote and photograph: given.</p>';
+        var verb = x.kind === 'move' ? ['Keep the new location', 'Put the old one back'] : x.kind === 'request' ? ['Approve the change', 'Keep the confirmed location'] : x.kind === 'story' ? ['Approve for the website', 'Don’t use'] : ['Approve', 'Reject'];
+        return '<article class="card orev" data-rid="' + esc(x.rid) + '"><div class="oh"><b>' + KIND[x.kind] + '</b><span class="muted">' + esc(when(x.at)) + '</span></div>' +
+          '<p><button class="lnk" type="button" data-open="' + esc(x.id) + '">' + esc(x.t || pname(x.id)) + '</button> · by ' + esc(x.by) + '</p>' + det +
+          '<label class="hidden" data-reason>Reason (optional)<input type="text" placeholder="e.g. wrong school"></label>' +
+          '<div class="oact"><button class="btn small ok" type="button" data-dec="approve">' + verb[0] + '</button><button class="btn small light" type="button" data-dec="reject">' + verb[1] + '</button><span class="msg" aria-live="polite"></span></div></article>';
+      }).join('') + '</div>' : '<p class="muted">Nothing waiting for review. 🎉</p>') +
+        (done.length ? '<h2 style="margin-top:20px">Recently decided</h2><ul class="feed">' + done.map(function (x) { return '<li>' + (x.status === 'approved' ? '✅' : '⛔') + ' ' + KIND[x.kind] + ': ' + esc(x.t || pname(x.id)) + '<small>' + esc(x.doneBy) + ' · ' + esc(when(x.done)) + (x.reason ? ' · ' + esc(x.reason) : '') + '</small></li>'; }).join('') + '</ul>' : '');
+    });
+  }
+  $('oBody').addEventListener('click', function (e) {
+    var d = e.target.closest('[data-dec]'); if (!d) return;
+    var c = d.closest('.orev'), dec = d.getAttribute('data-dec'), rs = c.querySelector('[data-reason]'), m = c.querySelector('.msg');
+    if (dec === 'reject' && rs.classList.contains('hidden')) { rs.classList.remove('hidden'); rs.querySelector('input').focus(); d.textContent = 'Confirm'; return; }
+    qa('[data-dec]', c).forEach(function (x) { x.disabled = true; }); m.className = 'msg'; m.textContent = 'Saving…';
+    adminApi('POST', { action: 'review', rid: c.getAttribute('data-rid'), decision: dec, reason: rs.querySelector('input').value }).then(function (j) {
+      if (!j.ok) { qa('[data-dec]', c).forEach(function (x) { x.disabled = false; }); m.className = 'msg bad'; m.textContent = why(j); return; }
+      c.classList.add('gone'); setTimeout(function () { oReview($('oBody')); load(false); }, 500);
+    });
+  });
+
+  // team: people, roles, PINs
+  function oTeam(b) {
+    var rows = (O.team || []).slice().sort(function (a, z) { return (z.admin - a.admin) || a.name.localeCompare(z.name); });
+    var src = { app: 'PIN from this app', cloudflare: 'PIN set in Cloudflare', monday: 'monday.com sign-in' };
+    b.innerHTML = '<div class="o-grid"><div><div class="ocards">' + rows.map(function (p) {
+      var editable = p.source === 'app';
+      return '<article class="card oteam" data-name="' + esc(p.name) + '"><div class="oh"><b>' + esc(p.name) + '</b><span class="tag ' + (p.admin ? 'has' : '') + '">' + (p.admin ? 'Admin' : 'Field') + '</span></div>' +
+        '<p class="muted">' + src[p.source] + ' · last active ' + (p.lastSeen ? esc(when(p.lastSeen)) : 'never') + '</p>' +
+        (editable ? '<div class="ofields"><label>Home country<select data-f="home"><option value="">All countries</option>' + ['ke', 'tz', 'ug', 'mw'].map(function (c) { return '<option value="' + c + '"' + (p.home === c ? ' selected' : '') + '>' + CNAME[c] + '</option>'; }).join('') + '</select></label>' +
+          '<label>E-mail (for alerts)<input type="email" data-f="email" value="' + esc(p.email) + '" placeholder="name@rafikioutreach.org"></label></div>' +
+          '<label class="tick"><input type="checkbox" data-f="admin"' + (p.admin ? ' checked' : '') + '> Admin (sees the Office tab)</label>' +
+          '<div class="oact"><button class="btn small" type="button" data-t="team-update">Save</button><button class="btn small light" type="button" data-t="team-pin">New PIN</button><button class="btn small light" type="button" data-t="team-remove">Remove</button><span class="msg" aria-live="polite"></span></div>'
+          : '<p class="muted">' + (p.source === 'cloudflare' ? 'To change or remove, edit PIN_USERS in Cloudflare, or add them here with an app PIN and remove the Cloudflare entry.' : 'Signs in with monday.com. Admin role comes from PIN_ADMINS in Cloudflare.') + '</p>') + '</article>';
+    }).join('') + '</div></div>' +
+      '<div><div class="card"><h2>Add a person</h2><p class="muted">They get their own 6-digit PIN, shown once. Send it to them privately.</p>' +
+      '<label>Name<input type="text" id="tName" autocomplete="off" placeholder="e.g. Jessica Anderson"></label>' +
+      '<div class="ofields"><label>Home country<select id="tHome"><option value="">All countries</option><option value="ke">Kenya</option><option value="tz">Tanzania</option><option value="ug">Uganda</option><option value="mw">Malawi</option></select></label>' +
+      '<label>E-mail (optional)<input type="email" id="tEmail" placeholder="for alerts"></label></div>' +
+      '<label class="tick"><input type="checkbox" id="tAdmin"> Admin</label>' +
+      '<div class="oact"><button class="btn" type="button" id="tAdd">Add and create PIN</button><span class="msg" id="tMsg" aria-live="polite"></span></div><div id="tPin"></div></div>' +
+      '<div class="card" style="margin-top:12px"><h2>E-mail alerts</h2>' + (O.mail && O.mail.ready ? '<p>Alerts go to: <b>' + esc((O.mail.to || []).join(', ') || 'nobody yet: add an admin with an e-mail') + '</b></p><button class="btn small light" type="button" id="tTest">Send a test e-mail</button><span class="msg" id="tTestMsg" aria-live="polite"></span>' : '<p class="muted">Not switched on yet. Add RESEND_API_KEY and ALERT_FROM in Cloudflare (see the set-up notes).</p>') + '</div></div></div>';
+    $('tAdd').addEventListener('click', function () {
+      var n = $('tName').value.trim(); if (!n) { $('tName').focus(); return; }
+      msg('tMsg', '', 'Adding…');
+      adminApi('POST', { action: 'team-add', name: n, home: $('tHome').value, email: $('tEmail').value, admin: $('tAdmin').checked }).then(function (j) {
+        if (!j.ok) { msg('tMsg', 'bad', j.reason === 'exists' ? 'Someone with that name is already on the team.' : why(j)); return; }
+        pinBox($('tPin'), n, j.pin); O.team = null; msg('tMsg', 'ok', 'Added ✓');
+        oNeedTeam(function () { var keep = $('tPin').innerHTML; oTeam(b); $('tPin').innerHTML = keep; });
+      });
+    });
+    if ($('tTest')) $('tTest').addEventListener('click', function () { msg('tTestMsg', '', 'Sending…'); adminApi('POST', { action: 'test-mail' }).then(function (j) { msg('tTestMsg', j.ok ? 'ok' : 'bad', j.ok ? 'Sent ✓ Check the inbox.' : j.reason === 'no-recipients' ? 'No e-mail addresses yet.' : why(j)); }); });
+  }
+  function pinBox(el, name, pin) {
+    el.innerHTML = '<div class="pinbox" role="status"><span>PIN for ' + esc(name) + '</span><b>' + esc(pin) + '</b><small>Shown once. Send it privately; they can’t see it again.</small><button class="btn small light" type="button">Copy</button></div>';
+    el.querySelector('button').addEventListener('click', function () { try { navigator.clipboard.writeText(pin); this.textContent = 'Copied ✓'; } catch (e) {} });
+  }
+  $('oBody').addEventListener('click', function (e) {
+    var tb = e.target.closest('[data-t]'); if (!tb) return;
+    var c = tb.closest('.oteam'), n = c.getAttribute('data-name'), act = tb.getAttribute('data-t'), m = c.querySelector('.msg');
+    if (act === 'team-remove' && !confirm('Remove ' + n + '? Their PIN stops working straight away.')) return;
+    if (act === 'team-pin' && !confirm('Make a new PIN for ' + n + '? Their old PIN stops working.')) return;
+    var body = { action: act, name: n };
+    if (act === 'team-update') { body.home = c.querySelector('[data-f=home]').value; body.email = c.querySelector('[data-f=email]').value; body.admin = c.querySelector('[data-f=admin]').checked; }
+    m.className = 'msg'; m.textContent = 'Saving…';
+    adminApi('POST', body).then(function (j) {
+      if (!j.ok) { m.className = 'msg bad'; m.textContent = j.reason === 'self' ? 'You can’t remove your own admin role.' : why(j); return; }
+      if (act === 'team-pin') { var box = document.createElement('div'); c.appendChild(box); pinBox(box, n, j.pin); m.textContent = ''; return; }
+      O.team = null; m.className = 'msg ok'; m.textContent = act === 'team-remove' ? 'Removed ✓' : 'Saved ✓';
+      setTimeout(function () { oNeedTeam(function () { oTeam($('oBody')); }); }, 600);
+    });
+  });
+
+  // clean-up lists, worked out on the phone from the project list
+  function oCleanup(b) {
+    var P = S.projects, out = function (p) { var x = BOXES[p.ck]; return p.gps && x && (p.gps[0] < x[0] || p.gps[0] > x[2] || p.gps[1] < x[1] || p.gps[1] > x[3]); };
+    var groups = {}; P.forEach(function (p) { if (p.gps) { var k = p.gps[0].toFixed(4) + ',' + p.gps[1].toFixed(4); (groups[k] = groups[k] || []).push(p); } });
+    var dup = []; Object.keys(groups).forEach(function (k) { if (groups[k].length > 1) dup = dup.concat(groups[k]); });
+    var stale = P.filter(function (p) { var v = S.visits[p.id]; return v && ageDays(p) > 365; });
+    var sec = function (title, help, list, tag) {
+      return '<details class="more" ' + (list.length && list.length < 30 ? 'open' : '') + '><summary>' + title + ' <span class="tag ' + (list.length ? '' : 'has') + '" style="margin-left:8px">' + list.length + '</span></summary><p class="muted">' + help + '</p><div class="list">' +
+        list.slice(0, 80).map(function (p) { return rowHtml(p, '<span class="tag">' + (tag ? tag(p) : 'Fix') + '</span>'); }).join('') + (list.length > 80 ? '<p class="muted">…and ' + (list.length - 80) + ' more.</p>' : '') + '</div></details>';
+    };
+    b.innerHTML = sec('No location', 'Open each one and pin it (Find a place by name helps).', P.filter(function (p) { return !p.gps; })) +
+      sec('Location outside its country', 'Usually latitude and longitude swapped, or a typing slip.', P.filter(out), function (p) { return fmt(p.gps); }) +
+      sec('Same point as another project', 'Probably a copied location. Check which one is right.', dup, function (p) { return p.gps[0].toFixed(4) + ', ' + p.gps[1].toFixed(4); }) +
+      sec('No photo', 'Add a photo to the “Photos of the project” column in monday.com.', P.filter(function (p) { return !p.photo; })) +
+      sec('No visit for over a year', 'Only visits made with the app are known.', stale, ageText);
+  }
+  $('oBody').addEventListener('click', function (e) { var r = e.target.closest('.row[data-id]'); if (r && !e.target.closest('[data-pick]') && S.view === 'vOffice' && O.tab === 'cleanup') openProj(r.getAttribute('data-id')); });
+
+  // exports (CSV opens in Excel and Google Sheets)
+  function csv(rows) { return '﻿' + rows.map(function (r) { return r.map(function (v) { v = v == null ? '' : String(v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }).join(','); }).join('\r\n'); }
+  function download(name, text) { var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type: 'text/csv;charset=utf-8' })); a.download = name; document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500); }
+  var stamp = function () { return new Date().toISOString().slice(0, 10); };
+  function oExport(b) {
+    b.innerHTML = '<div class="o-grid"><div class="card"><h2>Download a spreadsheet</h2><p class="muted">CSV files open in Excel and Google Sheets.</p><div class="xbtns">' +
+      '<button class="btn light" type="button" data-x="projects">📋 Projects with locations and status</button>' +
+      '<button class="btn light" type="button" data-x="visits">🩺 Site visits with readings</button>' +
+      '<button class="btn light" type="button" data-x="repairs">🔧 Open repairs and jobs</button>' +
+      '<button class="btn light" type="button" data-x="activity">🕑 Everything the team did (last 13 months)</button></div><p class="msg" id="xMsg" aria-live="polite"></p></div>' +
+      '<div class="card"><h2>Reports</h2><p>The monthly report (to save as a PDF) is in <b>Me → Monthly report</b>.</p><button class="btn small light" type="button" id="xRep">Open the monthly report</button>' +
+      '<h3 style="margin-top:16px">Monthly e-mail summary</h3><p class="muted">' + (O.cron && O.mail && O.mail.ready ? 'On: a summary of last month goes to the admins on the 1st of each month.' : 'Not switched on yet: needs the e-mail keys and CRON_KEY in Cloudflare and GitHub (see the set-up notes).') + '</p></div></div>';
+    $('xRep').addEventListener('click', function () { openReport(); });
+    qa('[data-x]', b).forEach(function (x) { x.addEventListener('click', function () { exportX(x.getAttribute('data-x')); }); });
+  }
+  function exportX(k) {
+    var P = S.projects;
+    if (k === 'projects') return download('rafiki-projects-' + stamp() + '.csv', csv([['Project ID', 'Project', 'Country', 'Area', 'Type', 'Status', 'Latitude', 'Longitude', 'Location confirmed', 'Has photo', 'Last visit', 'Last visit result', 'Open repair', 'Urgency']].concat(P.map(function (p) {
+      var v = S.visits[p.id], r = S.repairs[p.id], c = S.confirmed[p.id];
+      return [p.id, p.title, p.country, p.area, p.type, p.status, p.gps ? p.gps[0] : '', p.gps ? p.gps[1] : '', c ? 'yes (' + c.by + ')' : '', p.photo ? 'yes' : 'no', v ? v.at.slice(0, 10) : '', v ? STATES[v.state][1] : '', r ? (r.state === 'notworking' ? 'Not working' : 'Needs repair') : '', r && r.urgency ? URG[r.urgency][0] : ''];
+    }))));
+    if (k === 'repairs') return download('rafiki-repairs-' + stamp() + '.csv', csv([['Project', 'Country', 'Reported', 'Reported by', 'Condition', 'Urgency', 'Problems', 'Parts', 'Field estimate (KES)', 'Step', 'Assigned to', 'Due', 'Approved budget (KES)']].concat(Object.keys(S.repairs).map(function (id) {
+      var r = S.repairs[id], p = byId(id); return [p ? p.title : r.t, p ? p.country : '', (r.at || '').slice(0, 10), r.by, r.state === 'notworking' ? 'Not working' : 'Needs repair', r.urgency ? URG[r.urgency][0] : '', (r.problems || []).join('; '), r.parts || '', r.cost || '', (STEP.filter(function (s) { return s[0] === (r.step || 'reported'); })[0] || [])[1], r.assignee || '', r.due || '', r.budget == null ? '' : r.budget];
+    }))));
+    if (k === 'activity') { var go = function () { download('rafiki-activity-' + stamp() + '.csv', csv([['Date', 'Time', 'Who', 'What', 'Project', 'Result']].concat((actCache || []).map(function (e) { return [e.at.slice(0, 10), e.at.slice(11, 16), e.by, VERB[e.a] || e.a, e.t || '', e.s ? (STATES[e.s] ? STATES[e.s][1] : e.s) : '']; })))); }; if (actCache) return go(); return api('GET', null, '?activity=1').then(function (j) { if (j.ok) { actCache = j.activity; go(); } else msg('xMsg', 'bad', why(j)); }); }
+    if (k === 'visits') {
+      msg('xMsg', '', 'Gathering visit records…');
+      adminApi('GET', null, '?view=export').then(function (j) {
+        if (!j.ok) { msg('xMsg', 'bad', why(j)); return; }
+        msg('xMsg', 'ok', j.visits.length + ' visit records ✓');
+        download('rafiki-visits-' + stamp() + '.csv', csv([['Date', 'Project', 'Country', 'By', 'Result', 'Urgency', 'Pump strokes (20 L)', 'Flow (L/min)', 'Queue', 'People using it', 'Water looks', 'E. coli', 'Chlorine (mg/L)', 'pH', 'Fluoride (mg/L)', 'Turbidity (NTU)']].concat(j.visits.sort(function (a, z) { return z.at.localeCompare(a.at); }).map(function (v) {
+          var p = byId(v.id), r = v.readings || {}, q = v.quality || {};
+          return [v.at.slice(0, 10), p ? p.title : v.id, p ? p.country : '', v.by, STATES[v.state] ? STATES[v.state][1] : v.state, v.urgency ? URG[v.urgency][0] : '', r.strokes, r.flow, r.queue, r.users, r.clarity, q.ecoli === 'pos' ? 'found' : q.ecoli === 'neg' ? 'not found' : '', q.chlorine, q.ph, q.fluoride, q.turbidity];
+        }))));
+      });
+    }
+  }
+
+  // confirmed locations on the project page
+  function confirmUi() {
+    var p = S.cur; if (!p) return;
+    var c = S.confirmed[p.id], h = '';
+    if (c) h = '<span class="conf">🔒 Location confirmed by ' + esc(c.by) + (S.admin ? '' : '. Changes go to an admin for approval.') + '</span>';
+    if (S.admin && p.gps) h += '<button class="lnk" type="button" id="bConf">' + (c ? 'Unlock' : '🔒 Confirm this location') + '</button>';
+    $('pConf').innerHTML = h;
+    if ($('bConf')) $('bConf').addEventListener('click', function () {
+      var on = !c, b = this; b.disabled = true;
+      adminApi('POST', { action: 'confirm', id: p.id, on: on }).then(function (j) { b.disabled = false; if (!j.ok) { toast(j.reason === 'no-location' ? 'Save a location first.' : why(j)); return; } if (j.confirmed) S.confirmed[p.id] = j.confirmed; else delete S.confirmed[p.id]; confirmUi(); toast(on ? 'Location confirmed ✓' : 'Unlocked'); });
+    });
+  }
+
+  // "Your jobs and visits" for the field team
+  function myWorkUi() {
+    var today = new Date().toISOString().slice(0, 10), as = (S.assigned || []).slice().sort(function (a, z) { return a.date.localeCompare(z.date); }), jobs = (S.jobs || []).filter(function (id) { return S.repairs[id]; });
+    if (!as.length && !jobs.length) { $('myWork').innerHTML = ''; return; }
+    $('myWork').innerHTML = '<div class="card mywork"><h2>Your work</h2>' +
+      as.map(function (a) { return '<button class="row" type="button" data-id="' + esc(a.id) + '" data-visit="1"><span class="th" aria-hidden="true">🗓</span><span class="tx"><span class="t">' + esc(a.t || pname(a.id)) + '</span><span class="s">Visit · ' + esc(a.date) + (a.note ? ' · ' + esc(a.note) : '') + ' · from ' + esc(a.by) + '</span></span><span class="tag ' + (a.date < today ? 'bad' : a.date === today ? 'has' : '') + '">' + (a.date < today ? 'Overdue' : a.date === today ? 'Today' : a.date.slice(5)) + '</span></button>'; }).join('') +
+      jobs.map(function (id) { var r = S.repairs[id]; return '<button class="row" type="button" data-id="' + esc(id) + '"><span class="th" aria-hidden="true">🔧</span><span class="tx"><span class="t">' + esc(pname(id)) + '</span><span class="s">Repair · ' + esc((STEP.filter(function (s) { return s[0] === (r.step || 'reported'); })[0] || [])[1]) + (r.due ? ' · due ' + esc(r.due) : '') + (r.budget != null ? ' · budget KES ' + Number(r.budget).toLocaleString() : '') + '</span></span><span class="tag bad">Job</span></button>'; }).join('') + '</div>';
+  }
+  $('myWork').addEventListener('click', function (e) { var b = e.target.closest('.row'); if (b) openProj(b.getAttribute('data-id'), b.hasAttribute('data-visit') ? 'visit' : 'pin'); });
 
   // --- 7. install on the home screen ----------------------------------------------------------------
   var deferred = null, standalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;

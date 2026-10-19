@@ -19,9 +19,11 @@
 // name is taken from the PIN. PIN_CODE is an optional shared team PIN. Until one of them is set
 // the app stays locked. Wrong PINs are limited per connection.
 // Open repairs and the activity log are kept in Workers KV (FEED), not on the board.
+// Admins (PIN_ADMINS, or made admin in the app) also get the Office tools in /api/admin.
 import { getFeed, dropFeed } from '../../lib/feed-cache.js';
 import { parseGps, readGps, writeGps, createUpdate, createSite, readUpdates, BOARD_ID } from '../../lib/monday.js';
 import { session, configured } from '../../lib/pin-auth.js';
+import { getJson as gj, putJson, team, hashPin, isAdminName, sameName, seen, addReview, sendMail, alertHtml } from '../../lib/pin-store.js';
 
 const MAX_FAILS = 8; // wrong PINs per connection per hour
 const MAX_SAVES = 120; // changes per connection per hour
@@ -86,10 +88,12 @@ export async function checkPin(request, env) {
   if (s) {
     // the cookie is sent automatically, so changes must come from the app's own pages
     if (request.method !== 'GET' && !request.headers.get('Origin') && request.headers.get('Sec-Fetch-Site') !== 'same-origin') return { res: json({ ok: false, reason: 'origin' }, 403) };
-    return { who: s.name, token: s.token, monday: true, home: s.home || '' };
+    const t = await team(env), mine = t.find(p => sameName(p.name, s.name));
+    return { who: s.name, token: s.token, monday: true, home: s.home || (mine && mine.home) || '', admin: isAdminName(env, t, s.name) };
   }
+  const t = await team(env);
   if (!(request.headers.get('X-Pin') || '').trim() && configured(env)) return { res: json({ ok: false, reason: 'signin' }, 401) };
-  if (!env.PIN_CODE && !list.length) return { res: json({ ok: false, reason: configured(env) ? 'signin' : 'not-set-up' }, configured(env) ? 401 : 503) };
+  if (!env.PIN_CODE && !list.length && !t.length) return { res: json({ ok: false, reason: configured(env) ? 'signin' : 'not-set-up' }, configured(env) ? 401 : 503) };
   const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
   const failKey = 'rl:pinfail:' + ip;
   if (await count(env, failKey) >= MAX_FAILS) return { res: json({ ok: false, reason: 'locked' }, 429) };
@@ -97,12 +101,14 @@ export async function checkPin(request, env) {
   let who = null, home = '';
   // check every entry (no early exit), so timing doesn't reveal which matched
   for (const p of list) if (given && sameText(given, p.pin) && who === null) { who = p.name; home = p.home; }
+  // PINs given out in the app (stored hashed)
+  if (given && t.length) { const h = await hashPin(env, given); for (const p of t) if (p.h && sameText(h, p.h) && who === null) { who = p.name; home = p.home || ''; } }
   if (who === null && given && env.PIN_CODE && sameText(given, String(env.PIN_CODE).trim())) who = '';
   if (who === null) {
     await bump(env, failKey);
     return { res: json({ ok: false, reason: 'pin' }, 401) };
   }
-  return { who, home };
+  return { who, home, admin: !!who && isAdminName(env, t, who) };
 }
 
 // --- open repairs and the activity log (KV) ------------------------------------------------
@@ -144,14 +150,25 @@ export async function onRequestGet({ request, env, waitUntil }) {
       id: p.id, title: p.title, country: p.country, ck: p.ck, area: p.area || '', type: p.type, status: p.status, year: p.year || null,
       gps: p.gps || null, photo: (p.photos && p.photos[0]) || null, pump: p.pump || ''
     }));
-    return json({ ok: true, who: chk.who, monday: !!chk.monday, home: chk.home || '', projects, repairs: await getJson(env, 'pinrepairs', {}), visits: await getJson(env, 'pinlastvisit', {}) }, 200);
+    if (chk.who && waitUntil) waitUntil(seen(env, chk.who));
+    const repairs = await getJson(env, 'pinrepairs', {});
+    const assigns = (await getJson(env, 'pinassign', [])).filter(a => !a.done);
+    const extra = {
+      admin: !!chk.admin,
+      jobs: chk.who ? Object.keys(repairs).filter(k => sameName(repairs[k].assignee, chk.who)) : [],
+      assigned: chk.who ? assigns.filter(a => sameName(a.to, chk.who)) : [],
+      confirmed: await getJson(env, 'pinconfirmed', {})
+    };
+    if (chk.admin) extra.reviewOpen = (await getJson(env, 'pinreview', [])).filter(x => x.status === 'open').length;
+    return json(Object.assign({ ok: true, who: chk.who, monday: !!chk.monday, home: chk.home || '', projects, repairs, visits: await getJson(env, 'pinlastvisit', {}) }, extra), 200);
   } catch (e) {
     console.error('pin get:', e && e.message);
     return json({ ok: false, reason: 'down' }, 502);
   }
 }
 
-export async function onRequestPost({ request, env }) {
+export async function onRequestPost({ request, env, waitUntil }) {
+  const later = p => (waitUntil ? waitUntil(p) : p);
   const origin = request.headers.get('Origin');
   if (origin && new URL(origin).host !== new URL(request.url).host) return json({ ok: false, reason: 'origin' }, 403);
   const chk = await checkPin(request, env);
@@ -184,6 +201,7 @@ export async function onRequestPost({ request, env }) {
       const updateId = await createUpdate(token, newId, note, api);
       await bump(env, 'rl:pinsave:' + ip);
       await log(env, { by, a: 'new', id: newId, t: name });
+      if (!chk.admin) await addReview(env, { kind: 'new', id: newId, t: name, by, data: { ck: b.ck, village, gps: fmt(g), type: typeLabel, note: clean(b.note, 300) } });
       return json({ ok: true, id: newId, updateId }, 200);
     }
 
@@ -198,6 +216,16 @@ export async function onRequestPost({ request, env }) {
       const acc = Math.round(Number(b.acc) || 0);
       const how = b.how === 'gps' ? 'phone GPS' : b.how === 'paste' ? 'pasted coordinates' : b.how === 'search' ? 'place search' + (clean(b.found, 80) ? ': ' + clean(b.found, 80) : '') + ', then placed on the map' : 'map';
       const value = fmt(g);
+      // a location an admin has confirmed: field changes wait for approval
+      const conf = (await getJson(env, 'pinconfirmed', {}))[id];
+      if (conf && !chk.admin) {
+        const n2 = '📍 Location change requested with the Rafiki pin app by ' + by + ': ' + value + ' (' + how + '). The current location was confirmed by ' + conf.by + ', so this waits for an admin to approve it. Current value: ' + (cur.text || 'none') + '.';
+        const uid = await createUpdate(token, id, n2, api);
+        await addReview(env, { kind: 'request', id, t: title, by, data: { to: value, from: cur.text || '', how } });
+        await bump(env, 'rl:pinsave:' + ip);
+        await log(env, { by, a: 'request', id, t: title });
+        return json({ ok: true, id, pending: true, updateId: uid }, 200);
+      }
       const note = '📍 Location pinned with the Rafiki pin app by ' + by + ': ' + value +
         ' (' + how + (b.how === 'gps' && acc ? ', about ±' + acc + ' m' : '') + ').' +
         (cur.text ? ' Previous value: ' + cur.text + '.' : ' There was no location before.');
@@ -206,6 +234,8 @@ export async function onRequestPost({ request, env }) {
       await bump(env, 'rl:pinsave:' + ip);
       await dropFeed(env);
       await log(env, { by, a: 'pin', id, t: title });
+      const was = parseGps(cur.text);
+      if (was && !chk.admin && metres(was, g) > 500) await addReview(env, { kind: 'move', id, t: title, by, data: { from: cur.text, to: value, dist: Math.round(metres(was, g)) } });
       return json({ ok: true, id, gps: g, value, previous: cur.text || '', updateId }, 200);
     }
 
@@ -299,6 +329,22 @@ export async function onRequestPost({ request, env }) {
       }
       await bump(env, 'rl:pinsave:' + ip);
       await log(env, { by, a: 'visit', s: b.state, u: urg, id, t: title });
+      if (clean(st.quote, 600) && st.consent) await addReview(env, { kind: 'story', id, t: title, by, data: { quote: clean(st.quote, 600), who: clean(st.by, 80), update: updateId } });
+      // a visit someone was asked to make is done
+      if (env.FEED) {
+        const as = await getJson(env, 'pinassign', []); let ch = false;
+        as.forEach(a => { if (!a.done && a.id === id && sameName(a.to, by)) { a.done = at; ch = true; } });
+        if (ch) await putJson(env, 'pinassign', as);
+      }
+      // tell the admins straight away about serious problems
+      const why = [];
+      if (b.state === 'notworking') why.push('reported NOT WORKING');
+      if (urg === 'urgent') why.push('marked as an URGENT repair');
+      if (Q.ecoli === 'pos') why.push('E. coli FOUND in the water');
+      if (why.length) {
+        const link = new URL('/pin#p/' + id + '/hist', request.url).toString();
+        later(sendMail(env, '⚠️ ' + title + ': ' + why.join(', '), alertHtml(title + ': ' + why.join(', '), L.map(x => x.replace(/<br>/g, ' ')), link), L.join('\n') + '\n' + link).catch(e => console.error('alert:', e && e.message)));
+      }
       return json({ ok: true, id, updateId }, 200);
     }
 
