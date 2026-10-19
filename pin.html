@@ -1099,7 +1099,28 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
   function hereWatch(on) {
     if (!on || !navigator.geolocation) { if (hw !== null) navigator.geolocation.clearWatch(hw); hw = null; return; }
     if (hw !== null) return;
-    hw = navigator.geolocation.watchPosition(function (p) { S.here = [p.coords.latitude, p.coords.longitude]; S.hereAt = Date.now(); hereUi(); }, function () {}, { enableHighAccuracy: false, maximumAge: 60000, timeout: 30000 });
+    hw = navigator.geolocation.watchPosition(function (p) { S.here = [p.coords.latitude, p.coords.longitude]; S.hereAt = Date.now(); S.hereAcc = Math.round(p.coords.accuracy || 0); hereUi(); freshUi(); }, function () {}, { enableHighAccuracy: true, maximumAge: 10000, timeout: 30000 });
+  }
+  // Phones (especially iPhones) quietly stop sending positions when the app goes to the background,
+  // and don't always start again. So: restart location when the app comes back, and if no position
+  // has arrived for a while, restart it anyway.
+  function restartLocation() {
+    if (S.view === 'vProj' && lw !== null) liveStart();
+    if ((S.view === 'vMap' || S.view === 'vList') && hw !== null) { hereWatch(false); hereWatch(true); }
+  }
+  document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') { restartLocation(); freshUi(); } });
+  addEventListener('pageshow', function (e) { if (e.persisted) restartLocation(); });
+  setInterval(function () {
+    if (document.visibilityState !== 'visible') return;
+    var watching = (S.view === 'vProj' && lw !== null) || ((S.view === 'vMap' || S.view === 'vList') && hw !== null);
+    if (watching && S.hereAt && Date.now() - S.hereAt > 25000) restartLocation();
+    freshUi();
+  }, 5000);
+  // "updated 3 s ago" so it's clear the distances are live
+  function ago() { if (!S.hereAt) return ''; var s = Math.round((Date.now() - S.hereAt) / 1000); return s < 5 ? 'just now' : s < 60 ? s + ' s ago' : Math.round(s / 60) + ' min ago'; }
+  function freshUi() {
+    if (S.view === 'vProj' && lw !== null && S.hereAt) $('pLive').textContent = 'Live · GPS ±' + (S.hereAcc || '?') + ' m · updated ' + ago();
+    if (S.view === 'vList' && S.filter === 'near' && S.here) $('count').textContent = ($('iCountry').value ? CNAME[$('iCountry').value] + ' · ' : '') + 'Closest to you · live, updated ' + ago();
   }
   function locate(cb) {
     if (S.here && Date.now() - S.hereAt < 120000) return cb(S.here);
@@ -1245,6 +1266,7 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
       return { html: rowHtml(p, tag, S.routeMode), tag: tag, id: p.id };
     });
     paint($('list'), items, '<p class="muted">' + (f === 'missing' && !q && !ck ? 'Every project has a location. 🎉' : f === 'repairs' && !q && !ck ? 'No open repairs. 🎉' : f === 'due' && !q ? 'Everything has been visited in the last 6 months. 🎉' : 'No projects match.') + '</p>');
+    freshUi();
     routeBarUi();
   }
   $('iSearch').addEventListener('input', renderList);
@@ -1400,8 +1422,7 @@ table.act th{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;colo
     $('pLive').textContent = 'Finding you…';
     lw = navigator.geolocation.watchPosition(function (pos) {
       S.here = [pos.coords.latitude, pos.coords.longitude]; S.hereAt = Date.now(); S.hereAcc = Math.round(pos.coords.accuracy || 0);
-      distUi(); pick.you(S.here, S.hereAcc);
-      $('pLive').textContent = 'Live · GPS ±' + S.hereAcc + ' m';
+      distUi(); pick.you(S.here, S.hereAcc); freshUi();
     }, function (err) { if (err.code === 1) { $('pLive').textContent = ''; liveStop(); } }, { enableHighAccuracy: true, maximumAge: 0, timeout: 30000 });
   }
   function liveStop() { if (lw !== null && navigator.geolocation) navigator.geolocation.clearWatch(lw); lw = null; if ($('pLive')) $('pLive').textContent = ''; }
