@@ -148,6 +148,18 @@ class AppModel(app: Application) : AndroidViewModel(app) {
         }.filter { it.name.isNotBlank() }
         return true
     }
+    /** Me › Connect monday.com: link this person's own monday.com token to their PIN. Returns an error text, or null. */
+    suspend fun linkMonday(token: String): String? {
+        val r = api.post(JSONObject().put("action", "monday-link").put("token", token.trim()))
+        if (!r.ok) return reasonText(r.reason)
+        _snap.value?.let { _snap.value = it.copy(linked = r.json.optString("name").ifBlank { prefs.name }) }
+        return null
+    }
+    suspend fun unlinkMonday(): Boolean {
+        val r = api.post(JSONObject().put("action", "monday-unlink"))
+        if (r.ok) _snap.value?.let { _snap.value = it.copy(linked = "") }
+        return r.ok
+    }
     /** Apply a fresh copy of the list (after an Office change). */
     fun reload() = refresh()
 

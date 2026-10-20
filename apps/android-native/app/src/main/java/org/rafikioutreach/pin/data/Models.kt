@@ -86,6 +86,8 @@ data class Snapshot(
     val assigned: List<Assignment>,
     val confirmed: Set<String>,
     val reviewOpen: Int,
+    /** The monday.com name their own token is connected as ("" if not connected). */
+    val linked: String = "",
 ) {
     companion object {
         fun from(o: JSONObject): Snapshot {
@@ -105,6 +107,7 @@ data class Snapshot(
                 assigned = (0 until asg.length()).map { i -> asg.getJSONObject(i).let { Assignment(it.optString("aid"), it.optString("id"), it.optString("t"), it.optString("date"), it.optString("by"), it.optString("note")) } },
                 confirmed = conf.keys().asSequence().toSet(),
                 reviewOpen = o.optInt("reviewOpen"),
+                linked = o.optString("linked"),
             )
         }
     }
@@ -180,6 +183,11 @@ fun urgencyName(k: String) = when (k) { "urgent" -> t("Urgent", "Haraka"); "mont
 const val DUE_DAYS = 180
 
 fun reasonText(reason: String?): String = when (reason) {
+    "token-format" -> t("That doesn’t look like a monday.com token. On the token page tap Copy, then try again.", "Hiyo haionekani kama tokeni ya monday.com. Kwenye ukurasa wa tokeni gusa Copy, kisha jaribu tena.")
+    "token-bad" -> t("monday.com didn’t accept that token. Copy it again from the token page.", "monday.com haikukubali tokeni hiyo. Inakili tena kutoka ukurasa wa tokeni.")
+    "account" -> t("That token is for a different monday.com account. Use your RAFIKI login.", "Tokeni hiyo ni ya akaunti nyingine ya monday.com. Tumia akaunti yako ya RAFIKI.")
+    "board" -> t("Your monday.com login can’t see the Projects board yet. Ask the office to invite you to it.", "Akaunti yako ya monday.com bado haioni ubao wa Projects. Omba ofisi ikualike.")
+    "own-pin" -> t("You need your own PIN for this. Ask the office for one.", "Unahitaji PIN yako mwenyewe kwa hili. Omba ofisi ikupe.")
     "pin" -> t("That PIN isn’t right. Please check it with your team.", "PIN hiyo si sahihi. Tafadhali hakikisha na timu yako.")
     "locked" -> t("Too many wrong PINs from this connection. Please try again in an hour.", "PIN nyingi zisizo sahihi kutoka mtandao huu. Jaribu tena baada ya saa moja.")
     "not-set-up" -> t("The pin app isn’t switched on yet: PINs still need to be set up.", "Programu bado haijawashwa: PIN bado hazijawekwa.")

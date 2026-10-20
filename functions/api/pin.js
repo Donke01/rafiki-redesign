@@ -23,7 +23,7 @@
 // Admins (PIN_ADMINS, or made admin in the app) also get the Office tools in /api/admin.
 import { getFeed, dropFeed } from '../../lib/feed-cache.js';
 import { parseGps, readGps, writeGps, createUpdate, createSite, readUpdates, tidyTitle, BOARD_ID } from '../../lib/monday.js';
-import { session, configured } from '../../lib/pin-auth.js';
+import { session, configured, linkToken, linkedFor, unlink } from '../../lib/pin-auth.js';
 import { getJson as gj, putJson, team, hashPin, isAdminName, sameName, seen, addReview, sendMail, alertHtml } from '../../lib/pin-store.js';
 
 const MAX_FAILS = 8; // wrong PINs per connection per hour
@@ -112,7 +112,11 @@ export async function checkPin(request, env) {
     await bump(env, failKey);
     return { res: json({ ok: false, reason: 'pin' }, 401) };
   }
-  return { who, home, admin: !!who && isAdminName(env, t, who) };
+  const admin = !!who && isAdminName(env, t, who);
+  // their own monday.com token, if they connected one: changes go in under their own name
+  const ln = who ? await linkedFor(env, who).catch(() => null) : null;
+  if (ln) return { who, home: home || ln.home || '', admin, token: ln.tok, linked: ln.name };
+  return { who, home, admin };
 }
 
 // --- open repairs and the activity log (KV) ------------------------------------------------
@@ -182,7 +186,7 @@ export async function onRequestGet({ request, env, waitUntil }) {
       confirmed: await getJson(env, 'pinconfirmed', {})
     };
     if (chk.admin) extra.reviewOpen = (await getJson(env, 'pinreview', [])).filter(x => x.status === 'open').length;
-    return json(Object.assign({ ok: true, who: chk.who, monday: !!chk.monday, home: chk.home || '', projects, repairs, visits: await getJson(env, 'pinlastvisit', {}) }, extra), 200);
+    return json(Object.assign({ ok: true, who: chk.who, monday: !!chk.monday, linked: chk.linked || '', home: chk.home || '', projects, repairs, visits: await getJson(env, 'pinlastvisit', {}) }, extra), 200);
   } catch (e) {
     console.error('pin get:', e && e.message);
     return json({ ok: false, reason: 'down' }, 502);
@@ -202,6 +206,18 @@ export async function onRequestPost({ request, env, waitUntil }) {
   try { b = await request.json(); } catch (e) { return json({ ok: false, reason: 'bad-request' }, 400); }
   if (!b || typeof b !== 'object') return json({ ok: false, reason: 'bad-request' }, 400);
   const action = b.action || 'pin';
+  // Me › Connect monday.com: link (or unlink) this person's own monday.com token to their PIN
+  if (action === 'monday-link' || action === 'monday-unlink') {
+    if (chk.monday) return json({ ok: false, reason: 'already' }, 400);
+    if (!chk.who) return json({ ok: false, reason: 'own-pin' }, 400);
+    if (!env.FEED) return json({ ok: false, reason: 'not-set-up' }, 503);
+    if (action === 'monday-unlink') { await unlink(env, chk.who); return json({ ok: true }, 200); }
+    const lk = 'rl:pinlink:' + ip;
+    if (await count(env, lk) >= 10) return json({ ok: false, reason: 'rate' }, 429);
+    const r = await linkToken(env, chk.who, b.token);
+    if (r.fail) { await bump(env, lk); return json({ ok: false, reason: r.fail }, 400); }
+    return json({ ok: true, name: r.name, photo: r.photo }, 200);
+  }
   // a personal PIN decides the name; with the shared team PIN the app sends it
   const by = chk.who || clean(b.by, 60) || 'someone on the team';
   const token = chk.token || env.MONDAY_API_TOKEN, api = env.MONDAY_API_URL, board = String(env.MONDAY_BOARD_ID || BOARD_ID);

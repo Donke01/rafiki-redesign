@@ -944,6 +944,15 @@ html[data-theme=dark] .stp .stin{background:radial-gradient(circle,transparent 3
 
 
 
+/* --- connect monday.com --- */
+.mcon .mh{display:flex;gap:12px;align-items:flex-start}.mcon .mh h2{margin:0 0 2px}.mcon .mh p{margin:0}
+.mcon .mi{width:40px;height:40px;border-radius:12px;flex:none;display:flex;align-items:center;justify-content:center;background:var(--hb-purple);color:var(--hu-purple)}.mcon .mi svg{width:20px;height:20px}
+.mcon .ok{color:var(--ok);font-weight:700}
+.msteps{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-direction:column;gap:10px}.msteps small{display:block;color:var(--muted);font-size:.78rem;margin-top:4px;text-align:center}
+.msteps a.btn{text-decoration:none;text-align:center;justify-content:center}
+.mman{margin-top:10px}.mman summary{cursor:pointer;color:var(--blue);font-size:.85rem}.mman input{width:100%;margin:8px 0}
+.mnote{font-size:.78rem;margin:10px 0 0}
+
 /* --- me & team: my month, waiting list, team today, totals, feed --- */
 .mmtiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:4px 0 14px}
 .mmt{border-radius:16px;background:var(--hb);color:var(--hu);display:flex;flex-direction:column;align-items:center;padding:12px 4px}
@@ -1372,6 +1381,7 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
           <div class="kv"><span>Waiting to send</span><span id="meOut">Nothing</span></div>
           <div style="margin-top:12px"><button class="btn light small wide" id="lockBtn" type="button">Lock the app</button></div>
         </div>
+        <div class="card mcon hidden" id="meMonday"></div>
         <div id="meWait"></div>
         <div id="meWork"></div>
         <div class="card mm" id="meMonth"><h2>My month</h2><div id="mmBody"><p class="muted">Loading…</p></div></div>
@@ -1513,6 +1523,11 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
   function why(j) {
     return j.reason === 'pin' ? 'That PIN isn’t right. Please check it with your team.'
       : j.reason === 'signin' ? 'Please sign in with monday.com.'
+      : j.reason === 'token-format' ? tr('That doesn’t look like a monday.com token. On the token page tap Copy, then try again.', 'Hiyo haionekani kama tokeni ya monday.com. Kwenye ukurasa wa tokeni gusa Copy, kisha jaribu tena.')
+      : j.reason === 'token-bad' ? tr('monday.com didn’t accept that token. Copy it again from the token page.', 'monday.com haikukubali tokeni hiyo. Inakili tena kutoka ukurasa wa tokeni.')
+      : j.reason === 'account' ? tr('That token is for a different monday.com account. Use your RAFIKI login.', 'Tokeni hiyo ni ya akaunti nyingine ya monday.com. Tumia akaunti yako ya RAFIKI.')
+      : j.reason === 'board' ? tr('Your monday.com login can’t see the Projects board yet. Ask the office to invite you to it.', 'Akaunti yako ya monday.com bado haioni ubao wa Projects. Omba ofisi ikualike.')
+      : j.reason === 'own-pin' ? tr('You need your own PIN for this. Ask the office for one.', 'Unahitaji PIN yako mwenyewe kwa hili. Omba ofisi ikupe.')
       : j.reason === 'locked' ? 'Too many wrong PINs from this connection. Please try again in an hour.'
       : j.reason === 'not-set-up' ? 'The pin app isn’t switched on yet: PINs still need to be set in Cloudflare.'
       : j.reason === 'no-monday' ? 'The pin app can’t reach monday.com yet (the monday.com connection isn’t set up).'
@@ -1984,7 +1999,7 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
         if (fromLock) msg('mLock', 'bad', why(j)); else msg('mList', 'bad', why(j));
         return;
       }
-      S.who = j.who || '';
+      S.who = j.who || ''; S.linked = j.linked || '';
       if (j.monday) { S.mode = 'monday'; S.pin = ''; store.del('rfPin'); store.set('rfPinMode', 'monday'); }
       if (S.who) S.name = S.who;
       else if (!S.name) { store.del('rfPin'); show('vLock'); ppNeedName(); msg('mLock', 'bad', 'This is the shared team PIN, so please add your name too.'); $('iName').focus(); return; }
@@ -3349,8 +3364,50 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
   }
   $('feedMore').addEventListener('click', function () { feedN = feedN > 8 ? 8 : 40; actDraw(); });
   $('actFeed').addEventListener('click', function (e) { var g = e.target.closest('.go'); if (g) openProj(g.getAttribute('data-id'), 'pin'); });
+  // --- Me › Connect monday.com (personal token, until the app is installed for everyone) ---
+  var TOKURL = 'https://rafikicap-company.monday.com/apps/manage/tokens', tokWait = false;
+  var looksTok = function (t) { return /^[A-Za-z0-9._-]{40,4000}$/.test(String(t || '').trim()); };
+  function monUi() {
+    var c = $('meMonday'); if (!c) return;
+    if (S.mode === 'monday') { c.classList.add('hidden'); return; }
+    c.classList.remove('hidden');
+    var head = '<div class="mh"><span class="mi">' + oic('people') + '</span><div><h2>' + tr('Your name on monday.com', 'Jina lako kwenye monday.com') + '</h2>';
+    if (S.linked) { c.innerHTML = head + '<p class="ok">' + tr('Connected as ', 'Imeunganishwa kama ') + esc(S.linked) + ' ✓</p></div></div><p class="muted">' + tr('Everything you save goes to monday.com under your own name.', 'Kila unachohifadhi kinaenda monday.com kwa jina lako.') + '</p><button class="lnk" id="monOff" type="button">' + tr('Disconnect', 'Tenganisha') + '</button>'; return; }
+    if (!S.who) { c.innerHTML = head + '<p class="muted">' + tr('Your changes go in under the shared account. To use your own name, ask the office for your own PIN.', 'Mabadiliko yako yanaingia kwa akaunti ya pamoja. Kutumia jina lako, omba ofisi PIN yako mwenyewe.') + '</p></div></div>'; return; }
+    c.innerHTML = head + '<p class="muted">' + tr('Takes 20 seconds, once. Your changes then show on monday.com under your own name.', 'Inachukua sekunde 20, mara moja. Mabadiliko yako yataonekana monday.com kwa jina lako.') + '</p></div></div>' +
+      '<ol class="msteps"><li><a class="btn wide" id="monOpen" href="' + TOKURL + '" target="_blank" rel="noopener">1 · ' + tr('Open my monday.com token', 'Fungua tokeni yangu ya monday.com') + '</a><small>' + tr('Tap Copy on that page, then come back here.', 'Gusa Copy kwenye ukurasa huo, kisha rudi hapa.') + '</small></li>' +
+      '<li><button class="btn wide light" id="monPaste" type="button">2 · ' + tr('Paste and connect', 'Bandika na uunganishe') + '</button></li></ol>' +
+      '<details class="mman"><summary>' + tr('Or paste it yourself', 'Au ibandike mwenyewe') + '</summary><input type="password" id="monTok" autocomplete="off" spellcheck="false" placeholder="' + tr('monday.com token', 'tokeni ya monday.com') + '"><button class="btn small" id="monGo" type="button">' + tr('Connect', 'Unganisha') + '</button></details>' +
+      '<span class="msg" id="monMsg" aria-live="polite"></span>' +
+      '<p class="muted mnote">' + tr('On a phone, monday.com may only open this page on a computer. You can do this step on any computer: sign in with your PIN there and connect. It then works on every phone that uses your PIN.', 'Kwenye simu, monday.com inaweza kufungua ukurasa huu kwenye kompyuta tu. Unaweza kufanya hatua hii kwenye kompyuta yoyote: ingia kwa PIN yako huko na uunganishe. Kisha itafanya kazi kwenye kila simu inayotumia PIN yako.') + '</p>';
+  }
+  function monSend(tok) {
+    tok = String(tok || '').trim();
+    if (!looksTok(tok)) return msg('monMsg', 'bad', why({ reason: 'token-format' }));
+    msg('monMsg', '', tr('Checking with monday.com…', 'Inakagua na monday.com…'));
+    api('POST', { action: 'monday-link', token: tok }).then(function (j) {
+      if (!j.ok) return msg('monMsg', 'bad', why(j));
+      tokWait = false; S.linked = j.name || S.name; buzz(); monUi();
+      try { navigator.clipboard.writeText('').catch(function () {}); } catch (e) {} // don't leave the token on the clipboard
+    });
+  }
+  function monPaste() {
+    if (!navigator.clipboard || !navigator.clipboard.readText) { var d = $('meMonday').querySelector('details'); if (d) d.open = true; return msg('monMsg', 'warn', tr('Paste the token in the box below.', 'Bandika tokeni kwenye kisanduku hapa chini.')); }
+    navigator.clipboard.readText().then(monSend, function () { var d = $('meMonday').querySelector('details'); if (d) d.open = true; msg('monMsg', 'warn', tr('Couldn’t read the clipboard. Paste the token in the box below.', 'Haikuweza kusoma ubao wa kunakili. Bandika tokeni kwenye kisanduku hapa chini.')); });
+  }
+  $('meMonday').addEventListener('click', function (e) {
+    if (e.target.closest('#monOpen')) { tokWait = true; return; }
+    if (e.target.closest('#monPaste')) return monPaste();
+    if (e.target.closest('#monGo')) return monSend($('monTok').value);
+    if (e.target.closest('#monOff')) api('POST', { action: 'monday-unlink' }).then(function (j) { if (j.ok) { S.linked = ''; monUi(); } });
+  });
+  // coming back from the token page: try the clipboard straight away (the browser may ask first)
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState !== 'visible' || !tokWait || S.view !== 'vMe' || !navigator.clipboard || !navigator.clipboard.readText) return;
+    navigator.clipboard.readText().then(function (t) { if (looksTok(t)) monSend(t); }, function () {});
+  });
   function renderMe() {
-    $('meName').textContent = S.name;
+    $('meName').textContent = S.name; monUi();
     homeTx();
     $('meAv').innerHTML = S.photo && S.mode === 'monday' ? '<img src="' + esc(S.photo) + '" alt="">' : '<i>' + esc((S.name || '?').split(/\s+/).map(function (w) { return w.charAt(0); }).slice(0, 2).join('').toUpperCase()) + '</i>';
     $('mePin').innerHTML = S.mode === 'monday' ? (S.photo ? '<img class="avatar" src="' + esc(S.photo) + '" alt="" onerror="this.remove()">' : '') + 'monday.com' : S.who ? 'Your own PIN' : 'Shared team PIN';

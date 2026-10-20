@@ -12,6 +12,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -311,5 +312,72 @@ fun TeamFeed(act: List<JSONObject>?, snap: Snapshot?, open: (String) -> Unit) {
         }
         if (list.size > 8) Text(if (more) t("Show less", "Onyesha kidogo") else t("Show more", "Onyesha zaidi"), style = MaterialTheme.typography.labelLarge, color = C.blue,
             modifier = Modifier.padding(top = 10.dp).clip(RoundedCornerShape(10.dp)).clickable { more = !more }.padding(8.dp).testTag("feed_more"))
+    }
+}
+
+private const val TOKEN_PAGE = "https://rafikicap-company.monday.com/apps/manage/tokens"
+private fun looksToken(s: String?) = s != null && Regex("^[A-Za-z0-9._-]{40,4000}$").matches(s.trim())
+
+/** Me › Your name on monday.com: open the token page, copy, come back, and the app connects by itself. */
+@Composable
+fun ConnectMonday(m: AppModel, snap: Snapshot?) {
+    snap ?: return
+    if (m.prefs.session.isNotBlank()) return   // signed in with monday.com already
+    val ctx = LocalContext.current
+    val scope = rememberScope()
+    var waiting by remember { mutableStateOf(false) }
+    var busy by remember { mutableStateOf(false) }
+    var msg by remember { mutableStateOf<String?>(null) }
+    var manual by remember { mutableStateOf(false) }
+    var typed by remember { mutableStateOf("") }
+    val clip = remember { ctx.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager }
+    fun send(tok: String) {
+        if (!looksToken(tok)) { msg = org.rafikioutreach.pin.data.reasonText("token-format"); return }
+        busy = true; msg = t("Checking with monday.com…", "Inakagua na monday.com…")
+        scope.launch {
+            val err = m.linkMonday(tok); busy = false; msg = err
+            if (err == null) { waiting = false; runCatching { clip.setPrimaryClip(android.content.ClipData.newPlainText("", "")) } }
+        }
+    }
+    fun paste() = send(clip.primaryClip?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.coerceToText(ctx)?.toString().orEmpty())
+    // back from the token page: read the clipboard straight away
+    val owner = androidx.compose.ui.platform.LocalLifecycleOwner.current
+    DisposableEffect(owner, waiting) {
+        val o = androidx.lifecycle.LifecycleEventObserver { _, e -> if (e == androidx.lifecycle.Lifecycle.Event.ON_RESUME && waiting && !busy) {
+            val txt = clip.primaryClip?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.coerceToText(ctx)?.toString()
+            if (looksToken(txt)) send(txt!!)
+        } }
+        owner.lifecycle.addObserver(o); onDispose { owner.lifecycle.removeObserver(o) }
+    }
+    Card(Modifier.padding(top = 14.dp).testTag("connect_monday")) {
+        Row(verticalAlignment = Alignment.Top) {
+            val hu = C.hue("new"); IconTile("people", hu.fg, hu.bg, 40.dp); Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                H2(t("Your name on monday.com", "Jina lako kwenye monday.com"))
+                when {
+                    snap.linked.isNotBlank() -> Text(t("Connected as ${snap.linked} ✓", "Imeunganishwa kama ${snap.linked} ✓"), style = MaterialTheme.typography.titleSmall, color = C.ok, modifier = Modifier.testTag("monday_connected"))
+                    snap.who.isBlank() -> Text(t("Your changes go in under the shared account. To use your own name, ask the office for your own PIN.", "Mabadiliko yako yanaingia kwa akaunti ya pamoja. Kutumia jina lako, omba ofisi PIN yako mwenyewe."), style = MaterialTheme.typography.bodySmall, color = C.muted)
+                    else -> Text(t("Takes 20 seconds, once. Your changes then show on monday.com under your own name.", "Inachukua sekunde 20, mara moja. Mabadiliko yako yataonekana monday.com kwa jina lako."), style = MaterialTheme.typography.bodySmall, color = C.muted)
+                }
+            }
+        }
+        if (snap.linked.isNotBlank()) {
+            Text(t("Everything you save goes to monday.com under your own name.", "Kila unachohifadhi kinaenda monday.com kwa jina lako."), style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 8.dp))
+            Text(t("Disconnect", "Tenganisha"), style = MaterialTheme.typography.labelLarge, color = C.blue, modifier = Modifier.padding(top = 8.dp).clip(RoundedCornerShape(10.dp)).clickable { scope.launch { m.unlinkMonday() } }.padding(6.dp).testTag("monday_off"))
+            return@Card
+        }
+        if (snap.who.isBlank()) return@Card
+        Btn("1 · " + t("Open my monday.com token", "Fungua tokeni yangu ya monday.com"), { waiting = true; runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(TOKEN_PAGE))) } }, Modifier.padding(top = 12.dp).fillMaxWidth().testTag("monday_open"))
+        Text(t("Tap Copy on that page, then come back here.", "Gusa Copy kwenye ukurasa huo, kisha rudi hapa."), style = MaterialTheme.typography.labelSmall, color = C.muted, modifier = Modifier.padding(top = 4.dp).align(Alignment.CenterHorizontally))
+        Btn(if (busy) t("Checking…", "Inakagua…") else "2 · " + t("Paste and connect", "Bandika na uunganishe"), { paste() }, Modifier.padding(top = 10.dp).fillMaxWidth().testTag("monday_paste"), light = true, enabled = !busy)
+        Text(t("Or paste it yourself", "Au ibandike mwenyewe"), style = MaterialTheme.typography.labelLarge, color = C.blue, modifier = Modifier.padding(top = 8.dp).clip(RoundedCornerShape(10.dp)).clickable { manual = !manual }.padding(6.dp))
+        if (manual) {
+            androidx.compose.material3.OutlinedTextField(typed, { typed = it }, Modifier.fillMaxWidth().testTag("monday_token"), singleLine = true, placeholder = { Text(t("monday.com token", "tokeni ya monday.com")) },
+                visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation())
+            Btn(t("Connect", "Unganisha"), { send(typed) }, Modifier.padding(top = 8.dp), small = true, enabled = !busy)
+        }
+        msg?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = if (busy) C.muted else C.bad, modifier = Modifier.padding(top = 8.dp).testTag("monday_msg")) }
+        Text(t("On a phone, monday.com may only open this page on a computer. You can do this step on any computer: sign in with your PIN at pin.rafikioutreach.org and connect. It then works on every phone that uses your PIN.", "Kwenye simu, monday.com inaweza kufungua ukurasa huu kwenye kompyuta tu. Unaweza kufanya hatua hii kwenye kompyuta yoyote: ingia kwa PIN yako kwenye pin.rafikioutreach.org na uunganishe. Kisha itafanya kazi kwenye kila simu inayotumia PIN yako."),
+            style = MaterialTheme.typography.labelSmall, color = C.muted, modifier = Modifier.padding(top = 10.dp))
     }
 }

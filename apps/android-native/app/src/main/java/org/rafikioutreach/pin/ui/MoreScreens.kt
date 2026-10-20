@@ -130,6 +130,7 @@ fun MeScreen(m: AppModel, open: (String) -> Unit = {}, report: () -> Unit = {}) 
         val act by m.activity.collectAsState()
         val mates by m.team.collectAsState()
         LaunchedEffect(Unit) { launch { m.loadActivity() }; launch { m.loadTeam() } }
+        ConnectMonday(m, s)
         WaitingList(m, s)
         MyWork(s, open)
         MyMonth(m, act)
