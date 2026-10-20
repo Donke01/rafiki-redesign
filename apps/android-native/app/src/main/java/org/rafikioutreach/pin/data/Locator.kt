@@ -24,7 +24,10 @@ class Locator(context: Context) {
             val f = Fix(LatLng(l.latitude, l.longitude), l.accuracy.toInt().coerceAtLeast(1), System.currentTimeMillis())
             val cur = _fix.value
             // keep a better recent fix rather than jumping to a vague network one
-            if (cur == null || l.provider == LocationManager.GPS_PROVIDER || f.acc <= cur.acc || f.at - cur.at > 20000) _fix.value = f
+            if (!(cur == null || l.provider == LocationManager.GPS_PROVIDER || f.acc <= cur.acc || f.at - cur.at > 20000)) return
+            // tiny GPS wobbles don't redraw the screens: only real moves or clearly better accuracy
+            if (cur != null && Geo.metres(cur.ll, f.ll) < 4 && kotlin.math.abs(cur.acc - f.acc) < 5 && f.at - cur.at < 15000) return
+            _fix.value = f
         }
         @Deprecated("old API") override fun onStatusChanged(p: String?, s: Int, e: Bundle?) {}
         override fun onProviderEnabled(p: String) {}

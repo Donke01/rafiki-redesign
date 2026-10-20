@@ -194,5 +194,13 @@ private fun RoundBtn(icon: String, label: String, tag: String, turn: Boolean = f
         Modifier.size(40.dp).clip(androidx.compose.foundation.shape.CircleShape).background(C.card.copy(alpha = .8f)).border(1.dp, C.line, androidx.compose.foundation.shape.CircleShape)
             .clickable(role = Role.Button, onClick = onClick).semantics { contentDescription = label }.testTag(tag),
         contentAlignment = Alignment.Center,
-    ) { Icon(Ic.get(icon), null, tint = C.ink, modifier = Modifier.size(20.dp).then(if (turn) Modifier.rotate(180f) else Modifier)) }
+    ) {
+        // turns smoothly while refreshing, then settles
+        val spin = androidx.compose.runtime.remember { androidx.compose.animation.core.Animatable(0f) }
+        androidx.compose.runtime.LaunchedEffect(turn) {
+            if (turn) while (true) { spin.animateTo(spin.value + 360f, androidx.compose.animation.core.tween(900, easing = androidx.compose.animation.core.LinearEasing)) }
+            else spin.animateTo((kotlin.math.ceil(spin.value / 360f) * 360f), androidx.compose.animation.core.tween(300))
+        }
+        Icon(Ic.get(icon), null, tint = C.ink, modifier = Modifier.size(20.dp).rotate(spin.value))
+    }
 }

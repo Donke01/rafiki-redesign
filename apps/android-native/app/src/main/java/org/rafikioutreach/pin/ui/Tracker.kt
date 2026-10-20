@@ -13,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -57,7 +58,7 @@ private fun StillMap(ll: LatLng, color: Int, modifier: Modifier) {
         }
     }
     DisposableEffect(Unit) { map.onResume(); onDispose { map.onPause(); map.onDetach() } }
-    AndroidView({ map }, modifier)
+    AndroidView({ map }, modifier.clipToBounds())
 }
 
 /** An open repair: where it is, who has it, and how far the job has got. */

@@ -101,9 +101,7 @@ fun MapScreen(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit = ope
                 Legend(Color(0xFF1C7C4A), t("Pinned", "Ina mahali")); Legend(Color(0xFFD98200), t("Needs repair", "Inahitaji matengenezo")); Legend(Color(0xFFB3261E), t("Not working", "Haifanyi kazi"))
             }
         }
-        nearHere(snap, fix?.ll)?.takeIf { !m.dismissed.contains(it.first.id) }?.let { (p, d) ->
-            HereBanner(p, d, m.prefs.miles, Modifier.padding(top = 10.dp), { visit(p.id) }, { open(p.id) }) { m.dismissed.add(p.id) }
-        }
+        HereSlot(m, snap, fix?.ll, Modifier.padding(top = 10.dp), visit, open)
         }
         NearestSheet(m, snap, fix?.ll, Modifier.align(Alignment.BottomCenter).padding(12.dp), open)
     }
@@ -123,6 +121,23 @@ private fun NearestSheet(m: AppModel, snap: Snapshot, here: LatLng?, modifier: M
             if (here == null) Text(t("Allow location to see the projects closest to you.", "Ruhusu mahali ili uone miradi iliyo karibu nawe."), style = MaterialTheme.typography.bodyMedium, color = C.muted, modifier = Modifier.padding(6.dp))
             list.forEach { (p, _) -> ProjectRow(m, snap, p, here) { open(p.id) } }
         }
+    }
+}
+
+private class HereKeep { var id: String? = null; var last: Pair<Project, Double>? = null }
+
+/** The "You’re at …" banner. It appears within 200 m and stays until you are 260 m away, so GPS wobble
+ *  near the edge doesn’t make it blink; it slides in and out instead of popping. */
+@Composable
+fun HereSlot(m: AppModel, snap: Snapshot, here: LatLng?, modifier: Modifier, visit: (String) -> Unit, open: (String) -> Unit) {
+    val keep = remember { HereKeep() }
+    val near = here?.let { h -> snap.projects.filter { it.gps != null }.map { it to Geo.metres(h, it.gps!!) }.minByOrNull { it.second } }
+    val now = near?.takeIf { (it.second <= 200 || (it.first.id == keep.id && it.second <= 260)) && !m.dismissed.contains(it.first.id) }
+    keep.id = now?.first?.id
+    if (now != null) keep.last = now
+    androidx.compose.animation.AnimatedVisibility(now != null, modifier, enter = androidx.compose.animation.fadeIn() + androidx.compose.animation.expandVertically(), exit = androidx.compose.animation.fadeOut() + androidx.compose.animation.shrinkVertically()) {
+        val (p, d) = now ?: keep.last ?: return@AnimatedVisibility
+        HereBanner(p, d, m.prefs.miles, Modifier, { visit(p.id) }, { open(p.id) }) { m.dismissed.add(p.id) }
     }
 }
 
@@ -213,7 +228,7 @@ fun ProjectsScreen(m: AppModel, open: (String) -> Unit, planRoute: () -> Unit = 
     fun pick(k: String) { f = k; m.prefs.filter = k; scope.launch { list.animateScrollToItem(maxOf(0, list.layoutInfo.totalItemsCount - rows.size - 2)) } }
     LazyColumn(Modifier.fillMaxSize().testTag("projects"), state = list, contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         item { HomeTop(m, snap, here, { scope.launch { list.animateScrollToItem(6); runCatching { focus.requestFocus() } } }, { pick(it) }, newSite) }
-        nearHere(snap, here)?.takeIf { !m.dismissed.contains(it.first.id) }?.let { (p, d) -> item { HereBanner(p, d, m.prefs.miles, Modifier, { visit(p.id) }, { open(p.id) }) { m.dismissed.add(p.id) } } }
+        item(key = "here") { HereSlot(m, snap, here, Modifier, visit, open) }
         if (banner != null) item { Card(border = C.warnBg) { Text(banner!!, color = C.warn, style = MaterialTheme.typography.bodyMedium) } }
         if (waiting > 0) item {
             Card(brush = SolidColor(C.warnBg)) {
