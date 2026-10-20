@@ -1080,6 +1080,7 @@ html[data-theme=dark] body.titled header.top{background:rgba(11,17,22,.96) !impo
 #nearSheet .grab,.bsh .grab{position:absolute;left:50%;top:6px;width:40px;height:5px;margin-left:-20px;border-radius:99px;background:var(--edge,#C9D1D8)}
 #nearSheet.shut .bd{display:block}
 #nearSheet.shut .bd > .row:not(:first-child),#nearSheet.shut .bd > p{display:none}
+#nearSheet.shut .bd > p.gw{display:block}
 .mstyle{width:44px;height:44px;border-radius:14px;border:1px solid rgba(0,0,0,.18);background:#FFFFFF;color:#04263F;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(4,38,63,.12)}
 .mstyle svg{width:22px;height:22px}
 .bsh{position:fixed;inset:0;z-index:2000}
@@ -2033,8 +2034,17 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
   function hereWatch(on) {
     if (!on || !navigator.geolocation) { if (hw !== null) navigator.geolocation.clearWatch(hw); hw = null; return; }
     if (hw !== null) return;
-    hw = navigator.geolocation.watchPosition(function (p) { S.here = [p.coords.latitude, p.coords.longitude]; S.hereAt = Date.now(); S.hereAcc = Math.round(p.coords.accuracy || 0); hereUi(); freshUi(); }, function () {}, { enableHighAccuracy: true, maximumAge: 0, timeout: 30000 });
+    var got = function (p) { S.geoErr = 0; S.here = [p.coords.latitude, p.coords.longitude]; S.hereAt = Date.now(); S.hereAcc = Math.round(p.coords.accuracy || 0); hereUi(); freshUi(); };
+    hw = navigator.geolocation.watchPosition(got, function (e) {
+      // Computers have no GPS: they work it out from Wi-Fi, which can be slow or fail. Ask once more the easy way, and say what went wrong.
+      if (S.here) return;
+      if (e.code === 1) { S.geoErr = 1; return nearUi(); }
+      if (geoOnce) return; geoOnce = true;
+      navigator.geolocation.getCurrentPosition(function (p) { geoOnce = false; got(p); }, function (e2) { geoOnce = false; if (!S.here) { S.geoErr = e2.code || 2; nearUi(); } }, { enableHighAccuracy: false, maximumAge: 600000, timeout: 60000 });
+    }, { enableHighAccuracy: true, maximumAge: 0, timeout: 30000 });
   }
+  var geoOnce = false;
+  function geoRetry() { S.geoErr = 0; geoOnce = false; nearUi(); hereWatch(false); hereWatch(true); }
   // Phones (especially iPhones) quietly stop sending positions when the app goes to the background,
   // and don't always start again. So: restart location when the app comes back, and if no position
   // has arrived for a while, restart it anyway.
@@ -2131,7 +2141,16 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
   }
   function nearUi() {
     var list = nearest(5);
-    if (!S.here) { $('nearList').innerHTML = '<p class="muted" style="margin:0 6px 8px">Allow location to see the projects closest to you.</p>'; $('nearList').dataset.k = ''; return; }
+    if (!S.here) {
+      var mac = /Macintosh|Windows|CrOS|Linux x86/.test(navigator.userAgent) && !('ontouchend' in document);
+      var why = !navigator.geolocation ? tr('This browser can’t share your location.', 'Kivinjari hiki hakiwezi kushiriki mahali ulipo.')
+        : S.geoErr === 1 ? tr('Location is blocked for this site. Allow it in the browser’s site settings (the icon left of the address), then try again.', 'Mahali pamezuiwa kwa tovuti hii. Paruhusu kwenye mipangilio ya tovuti ya kivinjari (alama iliyo kushoto ya anwani), kisha jaribu tena.')
+        : S.geoErr ? (mac ? tr('This computer couldn’t work out where it is. Turn on Wi-Fi, and on a Mac allow your browser in System Settings › Privacy & Security › Location Services. Then try again.', 'Kompyuta hii haikuweza kujua mahali ilipo. Washa Wi-Fi, na kwenye Mac ruhusu kivinjari chako kwenye System Settings › Privacy & Security › Location Services. Kisha jaribu tena.')
+          : tr('Your phone couldn’t find where you are. Turn on location, step outside if you can, then try again.', 'Simu yako haikuweza kupata mahali ulipo. Washa mahali, toka nje ukiweza, kisha jaribu tena.'))
+        : tr('Finding where you are…', 'Inatafuta mahali ulipo…');
+      $('nearList').innerHTML = '<p class="muted gw" style="margin:0 6px 8px">' + why + '</p>' + (S.geoErr ? '<button class="btn small light" id="geoRetry" type="button" style="margin:0 6px 8px">' + tr('Try again', 'Jaribu tena') + '</button>' : '');
+      $('nearList').dataset.k = ''; return;
+    }
     paint($('nearList'), list.map(function (x) { var tag = '<span class="tag has">' + dist(x.d) + '</span>'; return { html: rowHtml(x.p, tag), tag: tag, id: x.p.id }; }), '');
   }
   // Redraws a list of project rows. When only the distances changed (e.g. as you walk), just those
@@ -2150,7 +2169,7 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
     qa(':scope > .row', box).forEach(function (el, i) { el._k = key(items[i]); });
   }
   $('nearHd').addEventListener('click', function () { var s = $('nearSheet'), shut = !s.classList.contains('shut'); s.classList.toggle('shut', shut); this.setAttribute('aria-expanded', shut ? 'false' : 'true'); $('nearHint').textContent = shut ? 'Show' : 'Hide'; });
-  $('nearList').addEventListener('click', function (e) { var b = e.target.closest('.row'); if (b) openProj(b.getAttribute('data-id')); });
+  $('nearList').addEventListener('click', function (e) { if (e.target.closest('#geoRetry')) return geoRetry(); var b = e.target.closest('.row'); if (b) openProj(b.getAttribute('data-id')); });
 
 
 
