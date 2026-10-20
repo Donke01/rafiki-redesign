@@ -213,7 +213,7 @@ with sync_playwright() as p:
     pg.click('#tabs [data-v=vMe]'); pg.locator('#segLang [data-v=""]').click()
     # me: activity, theme, text size
     pg.click('#tabs [data-v=vMe]'); pg.wait_for_timeout(600)
-    check(pg.locator('#actTable tbody tr').count() >= 1 or 'Nothing yet' in pg.inner_text('#actTable'), 'activity table')
+    check(pg.locator('#actTable .tots li').count() >= 1 or 'Nothing yet' in pg.inner_text('#actTable'), 'activity table')
     check('Your own PIN' in pg.inner_text('#mePin'), 'Me shows own PIN')
     pg.locator('#segTheme [data-v=dark]').click(); pg.locator('#segSize [data-v=l]').click(); pg.wait_for_timeout(200)
     check(pg.evaluate("document.documentElement.getAttribute('data-theme')") == 'dark', 'dark mode')

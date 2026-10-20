@@ -214,7 +214,7 @@ fun Shell(m: AppModel) {
                         pl.sub == "route" -> org.rafikioutreach.pin.ui.RouteScreen(m, { go(Place(pl.tab, it)) }) { pop() }
                         pl.tab == "map" -> MapScreen(m, { go(Place("map", it)) }) { go(Place("map", it, "visit")) }
                         pl.tab == "new" -> NewSiteScreen(m) { id -> if (id != null) { tab("list"); go(Place("list", id)) } }
-                        pl.tab == "me" -> MeScreen(m) { go(Place("me", sub = "report")) }
+                        pl.tab == "me" -> MeScreen(m, { go(Place("me", it)) }) { go(Place("me", sub = "report")) }
                         pl.tab == "office" -> org.rafikioutreach.pin.ui.OfficeScreen(m) { go(Place("office", it)) }
                         else -> ProjectsScreen(m, { go(Place("list", it)) }, { go(Place("list", sub = "route")) }, { tab("new") }, { go(Place("list", it, "visit")) }) { go(Place("list", sub = "search")) }
                     }

@@ -944,6 +944,35 @@ html[data-theme=dark] .stp .stin{background:radial-gradient(circle,transparent 3
 
 
 
+/* --- me & team: my month, waiting list, team today, totals, feed --- */
+.mmtiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:4px 0 14px}
+.mmt{border-radius:16px;background:var(--hb);color:var(--hu);display:flex;flex-direction:column;align-items:center;padding:12px 4px}
+.mmt svg{width:18px;height:18px}.mmt b{font-size:1.6rem;font-weight:800;line-height:1.15}.mmt span{font-size:.75rem;color:var(--ink)}
+.wk{display:flex;align-items:flex-end;gap:8px;height:72px;margin-top:6px}
+.wk div{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center}
+.wk small{font-size:.7rem;color:var(--muted)}.wk i{display:block;width:100%;border-radius:6px 6px 0 0;background:color-mix(in srgb,var(--hu-blue) 35%,transparent);transform-origin:bottom;animation:barUp .7s cubic-bezier(.2,.8,.2,1) both}
+.wk i.now{background:var(--hu-blue)}
+@keyframes barUp{from{transform:scaleY(0)}to{transform:none}}
+.wkl{display:flex;justify-content:space-between;font-size:.72rem;color:var(--muted);margin-top:4px}
+.streak{margin-top:12px;border-radius:14px;background:var(--hb-coral);color:var(--hu-coral);padding:10px 14px;font-weight:700}
+.waitc{border:2px solid var(--hb-amber)}.waitc h2{color:var(--hu-amber)}
+.wl,.mates,.tots{list-style:none;margin:8px 0 0;padding:0}
+.wl li,.mates li{display:flex;align-items:center;gap:10px;padding:8px 0}
+.wl .ic{width:36px;height:36px;border-radius:12px;flex:none;display:flex;align-items:center;justify-content:center;background:var(--hb-amber);color:var(--hu-amber)}.wl .ic svg,.ca svg,.fi svg,.cv svg{width:18px;height:18px}
+.wl li div,.mates li>div{flex:1;min-width:0}.wl b,.mates b{display:block}.wl small,.mates small,.tfeed small{display:block;color:var(--muted);font-size:.78rem}
+.mates .av{position:relative;width:42px;height:42px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;color:#FFFFFF;font-weight:700;background:linear-gradient(135deg,#47B4F5,#0A78C2)}
+.mates .av.live::after{content:"";position:absolute;right:-1px;bottom:-1px;width:10px;height:10px;border-radius:50%;background:#1C9C5A;border:2px solid var(--card)}
+.mates .go{cursor:pointer}
+.ca{width:40px;height:40px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;background:var(--hb-green);color:var(--hu-green)}
+.together{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:12px;border-radius:14px;background:var(--tint,#E3F1FC);color:var(--deep,#0B3A5B);padding:10px 14px;font-size:.85rem}
+.tots li{display:flex;align-items:center;gap:6px;padding:8px 0}.tots li b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tp{display:inline-flex;align-items:center;gap:4px;border-radius:99px;background:var(--hb);color:var(--hu);padding:4px 9px;font-weight:700;font-size:.8rem}.tp svg{width:13px;height:13px}
+.tfeed li{display:flex;align-items:center;gap:10px;border-bottom:0}.tfeed li.go{cursor:pointer;border-radius:14px}.tfeed li.go:active{background:var(--line)}
+.tfeed li>div{flex:1;min-width:0}
+.fi{width:34px;height:34px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;background:var(--hb);color:var(--hu)}
+.cv{color:var(--muted);display:flex}
+@media (prefers-reduced-motion:reduce){.wk i{animation:none}}
+
 /* --- home fits one screen: smaller question, slimmer search, the four actions in one row --- */
 #homeTop .hello{margin:0 0 4px}
 #homeTop .bigq{margin:0 0 10px}
@@ -1341,6 +1370,23 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
           <div class="kv"><span>Waiting to send</span><span id="meOut">Nothing</span></div>
           <div style="margin-top:12px"><button class="btn light small wide" id="lockBtn" type="button">Lock the app</button></div>
         </div>
+        <div id="meWait"></div>
+        <div id="meWork"></div>
+        <div class="card mm" id="meMonth"><h2>My month</h2><div id="mmBody"><p class="muted">Loading…</p></div></div>
+        <div class="card tt" id="teamToday"><h2>Team today</h2><div id="ttBody"><p class="muted">Loading…</p></div></div>
+        <div class="card">
+          <h2>Team totals</h2>
+          <div class="seg" role="group" aria-label="Period" id="segPeriod">
+            <button type="button" data-v="w" aria-pressed="false">This week</button>
+            <button type="button" data-v="m" aria-pressed="true">This month</button>
+          </div>
+          <div id="actTable"><p class="muted">Loading…</p></div>
+        </div>
+        <div class="card">
+          <h2>Team feed</h2>
+          <ul class="feed tfeed" id="actFeed"></ul>
+          <button class="lnk hidden" id="feedMore" type="button">Show more</button>
+        </div>
         <div class="card stamps-card"><h2>Your stamps</h2><p class="muted" style="margin:0 0 4px">Every point you pin and every visit you report adds to your collection.</p><div class="stamps" id="meStamps"></div>
           <button class="lnk" id="meWelcome" type="button">Show the welcome screens again</button></div>
         <div class="card">
@@ -1384,16 +1430,6 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
           <button class="btn block" id="repOpen" type="button" style="margin-top:14px">Open report</button>
         </div>
         <div class="card" id="meInstall"></div>
-        <div class="card">
-          <h2>Team activity</h2>
-          <div class="seg" role="group" aria-label="Period" id="segPeriod">
-            <button type="button" data-v="7" aria-pressed="true">This week</button>
-            <button type="button" data-v="30" aria-pressed="false">Last 30 days</button>
-          </div>
-          <div id="actTable"><p class="muted">Loading…</p></div>
-          <h3 style="margin-top:16px">Latest</h3>
-          <ul class="feed" id="actFeed"></ul>
-        </div>
       </div>
     </section>
 
@@ -1442,6 +1478,9 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
     clipf: '<path d="M16.5 7.5l-7.6 7.6a2 2 0 0 0 2.8 2.8l7.9-7.9a4 4 0 0 0-5.7-5.7l-7.9 7.9a6 6 0 0 0 8.5 8.5l6-6"/>',
     stop: '<circle cx="12" cy="12" r="8.5"/><path d="M6 6l12 12"/>',
     clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
+    phone: '<path d="M6.6 3.5h2.6l1.4 4-2 1.4a11 11 0 0 0 6.5 6.5l1.4-2 4 1.4v2.6a2 2 0 0 1-2.2 2A16.5 16.5 0 0 1 4.6 5.7a2 2 0 0 1 2-2.2z"/>',
+    chat: '<path d="M4.5 19.5l1.2-3.6A7.8 7.8 0 1 1 8.6 18.6z"/><path d="M9 10.5h6M9 13.5h4"/>',
+    chev: '<path d="M9 6l6 6-6 6"/>',
     layers: '<path d="M12 4l9 5-9 5-9-5z"/><path d="M3 14l9 5 9-5"/>'
   });
   var store = { get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} }, del: function (k) { try { localStorage.removeItem(k); } catch (e) {} } };
@@ -1952,7 +1991,7 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
       S.projects = j.projects || []; S.repairs = j.repairs || {}; S.visits = j.visits || {}; saveList();
       S.admin = !!j.admin; S.jobs = j.jobs || []; S.assigned = j.assigned || []; S.confirmed = j.confirmed || {}; S.reviewOpen = j.reviewOpen || 0;
       store.set('rfPinRole', JSON.stringify({ admin: S.admin, jobs: S.jobs, assigned: S.assigned, confirmed: S.confirmed }));
-      adminUi(); myWorkUi(); if (S.view === 'vOffice') renderOffice(); if (S.view === 'vProj') confirmUi();
+      adminUi(); myWorkUi(); meWorkDraw(); if (S.view === 'vOffice') renderOffice(); if (S.view === 'vProj') confirmUi();
       S.srvHome = j.home || ''; store.set('rfPinSrvHome', S.srvHome); applyHome();
       msg('mList', '', '');
       if (S.view === 'vLock') applyHash(true); else { if (S.view === 'vList') renderList(); if (S.view === 'vMap') homeMap(); if (S.view === 'vProj' && S.cur && byId(S.cur.id)) { S.cur = byId(S.cur.id); curUi(); repairUi(); } if (S.view === 'vRoute') renderRoute(); }
@@ -2377,7 +2416,7 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
   function ageDays(p) { var v = S.visits[p.id]; return v ? (Date.now() - Date.parse(v.at)) / 864e5 : 1e6; }
   function ageText(p) { var d = ageDays(p); if (d >= 1e6) return 'No visit yet'; var m = Math.floor(d / 30.4); return m >= 12 ? Math.floor(m / 12) + ' yr ago' : m + ' mo ago'; }
   function renderList() {
-    progUi(); myWorkUi(); homeUi(); countryChipUi();
+    progUi(); myWorkUi(); meWorkDraw(); homeUi(); countryChipUi();
     var q = $('iSearch').value.trim().toLowerCase(), ck = $('iCountry').value, f = S.filter, near = f === 'near';
     var rows = S.projects.filter(function (p) {
       if (f === 'missing' && p.gps) return false;
@@ -3086,6 +3125,7 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
   Object.assign(SW, {"Back": "Rudi", "Get started": "Anza", "Takes 30 seconds": "Inachukua sekunde 30", "Every water point.": "Kila kituo cha maji.", "One map.": "Ramani moja.", "Right in your pocket.": "Mfukoni mwako.", "What will you do most?": "Utafanya nini zaidi?", "We’ll open the app on it. You can change this anytime.": "Tutafungua programu hapo. Unaweza kubadilisha wakati wowote.", "Pin locations": "Weka mahali", "Put every project on the map": "Weka kila mradi kwenye ramani", "Site visits": "Ziara", "Check water points and report": "Kagua vituo vya maji na uripoti", "Follow what needs fixing": "Fuatilia kinachohitaji kurekebishwa", "Office work": "Kazi za ofisi", "Review, assign and report": "Idhinisha, gawa na ripoti", "Continue": "Endelea", "Pick one": "Chagua kimoja", "Which language?": "Lugha gani?", "That’s my language": "Hiyo ndiyo lugha yangu", "Swipe to see both. Switch anytime in Me.": "Telezesha kuona zote. Badilisha wakati wowote kwenye Mimi.", "Hello! Let’s find today’s water points.": "Hello! Let’s find today’s water points.", "Where do you work?": "Unafanya kazi wapi?", "Lists and the map start there. You still see every country.": "Orodha na ramani zinaanzia hapo. Bado unaona nchi zote.", "Skip": "Ruka", "Water points near you": "Vituo vya maji karibu nawe", "RAFIKI Pin uses your location only while it’s open, to show the closest projects and save exact points.": "RAFIKI Pin inatumia mahali ulipo tu ikiwa wazi, kuonyesha miradi iliyo karibu na kuhifadhi mahali kamili.", "Allow location": "Ruhusu mahali", "Not now": "Si sasa", "A good start": "Mwanzo mzuri", "Your first stamp": "Stempu yako ya kwanza", "Every point you pin and every visit you report adds to your collection.": "Kila mahali unapoweka na kila ziara unayoripoti inaongeza kwenye mkusanyiko wako.", "Open RAFIKI Pin": "Fungua RAFIKI Pin", "Small steps, clean water.": "Hatua ndogo, maji safi.", "Me": "Mimi"}); SWP.push([/^You’re all set, (.+)\.$/,"Uko tayari, $1."]);
   Object.assign(SW, {"Search a project or place": "Tafuta mradi au mahali", "Report": "Ripoti"}); SWP.push([/^YOU’RE AT · (.+)$/, "UKO · $1"], [/^(.+) · saved location$/, "$1 · mahali palipohifadhiwa"]);
   Object.assign(SW, {"Map style": "Mtindo wa ramani", "Street map": "Ramani ya barabara", "Satellite photos": "Picha za satelaiti", "Country": "Nchi", "Near you": "Karibu nawe", "Type a project name, a village or a county.": "Andika jina la mradi, kijiji au kaunti.", "Clear": "Futa", "Search": "Tafuta"}); SWP.push([/^No projects match “(.+)”\.$/, "Hakuna mradi unaolingana na “$1”."]);
+  Object.assign(SW, {"My month": "Mwezi wangu", "My work": "Kazi yangu", "Team today": "Timu leo", "Team totals": "Jumla ya timu", "Team feed": "Habari za timu", "This month": "Mwezi huu", "Show more": "Onyesha zaidi"});
   Object.assign(SW, {"Your stamps": "Stempu zako", "Show the welcome screens again": "Onyesha skrini za kukaribisha tena", "Sign in": "Ingia", "New here? Ask your team for a PIN.": "Mgeni hapa? Omba PIN kwa timu yako.", "First drop": "Tone la kwanza", "Pin a location": "Weka mahali", "First visit": "Ziara ya kwanza", "Report a site visit": "Ripoti ziara", "Fixer": "Mrekebishaji", "Mark a repair fixed": "Weka matengenezo kuwa yamekamilika", "Explorer": "Mvumbuzi", "Add a new site": "Ongeza eneo jipya", "Mapper": "Mchora ramani", "Pin 10 locations": "Weka mahali 10", "Regular": "Mzoefu", "Report 10 visits": "Ripoti ziara 10", "Earned": "Umepata"}); SWP.push([/^Habari (.+), karibu tena\.$/,"Habari $1, karibu tena."]);
   var MON = {Jan:'Jan',Feb:'Feb',Mar:'Mac',Apr:'Apr',May:'Mei',Jun:'Jun',Jul:'Jul',Aug:'Ago',Sep:'Sep',Oct:'Okt',Nov:'Nov',Dec:'Des',January:'Januari',February:'Februari',March:'Machi',April:'Aprili',June:'Juni',July:'Julai',August:'Agosti',September:'Septemba',October:'Oktoba',November:'Novemba',December:'Desemba'};
   function swOne(x) {
@@ -3185,30 +3225,107 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
     h += '<p class="muted rep-f">Only visits, repairs and pins made with the RAFIKI Pin app are counted.</p>';
     return h;
   }
-  var period = 7, actCache = null;
-  qa('#segPeriod button').forEach(function (b) { b.addEventListener('click', function () { period = +b.getAttribute('data-v'); qa('#segPeriod button').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); }); actDraw(); }); });
+  var period = 'm', actCache = null, teamCache = null, feedN = 8;
+  qa('#segPeriod button').forEach(function (b) { b.addEventListener('click', function () { period = b.getAttribute('data-v'); qa('#segPeriod button').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); }); actDraw(); }); });
   var VERB = { pin: 'pinned', visit: 'reported a visit to', fixed: 'marked fixed', new: 'added a new site:', undo: 'undid a pin on', request: 'asked to move the confirmed location of', approve: 'approved', reject: 'turned down', job: 'updated the repair job on', assign: 'assigned', team: 'team:' };
+  var WORK = { pin: 1, visit: 1, fixed: 1, new: 1 };
+  function same(a, b) { return String(a || '').trim().toLowerCase() === String(b || '').trim().toLowerCase(); }
+  function dayKey(t) { var d = new Date(t); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); }
+  function since(iso) {
+    var t = Date.parse(iso); if (isNaN(t)) return tr('never', 'bado');
+    var m = Math.round((Date.now() - t) / 6e4);
+    return m < 2 ? tr('just now', 'sasa hivi') : m < 60 ? tr(m + ' min ago', 'dakika ' + m + ' zilizopita') : m < 1440 ? tr(Math.floor(m / 60) + ' h ago', 'saa ' + Math.floor(m / 60) + ' zilizopita') : m < 2880 ? tr('yesterday', 'jana') : tr(Math.floor(m / 1440) + ' days ago', 'siku ' + Math.floor(m / 1440) + ' zilizopita');
+  }
+  function actKind(a) { return a === 'new' ? 'pin' : a; }
+  function mateInitials(n) { return esc(String(n || '?').split(/\s+/).map(function (w) { return w.charAt(0); }).slice(0, 2).join('').toUpperCase()); }
+  function monthStart() { var d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1).getTime(); }
+  function weekStart() { var d = new Date(); d.setHours(0, 0, 0, 0); return d.getTime() - ((d.getDay() + 6) % 7) * 864e5; }
+  // My month: pins, visits and fixes this month, the last six weeks, days in a row
+  function myMonthDraw() {
+    var a = actCache; if (!a) return;
+    var mine = a.filter(function (e) { return same(e.by, S.name) && WORK[e.a]; }), from = monthStart(), n = { pin: 0, visit: 0, fixed: 0 };
+    mine.forEach(function (e) { if (Date.parse(e.at) >= from) n[actKind(e.a)]++; });
+    var end = new Date(); end.setHours(23, 59, 59, 999); var weeks = [];
+    for (var w = 5; w >= 0; w--) { var to = end.getTime() - w * 7 * 864e5, fr = to - 7 * 864e5; weeks.push(mine.filter(function (e) { var t = Date.parse(e.at); return t > fr && t <= to; }).length); }
+    var top = Math.max.apply(null, weeks.concat([1]));
+    var days = {}; mine.forEach(function (e) { days[dayKey(e.at)] = 1; });
+    var d = new Date(); if (!days[dayKey(d)]) d = new Date(d.getTime() - 864e5); var streak = 0;
+    while (days[dayKey(d)]) { streak++; d = new Date(d.getTime() - 864e5); }
+    var tile = function (k, hue, ic, l) { return '<div class="mmt" style="--hu:var(--hu-' + hue + ');--hb:var(--hb-' + hue + ')">' + oic(ic) + '<b data-n="' + n[k] + '">' + n[k] + '</b><span>' + l + '</span></div>'; };
+    $('mmBody').innerHTML = '<div class="mmtiles">' + tile('pin', 'blue', 'pin', tr('Pins', 'Mahali')) + tile('visit', 'green', 'clip', tr('Visits', 'Ziara')) + tile('fixed', 'amber', 'wrench', tr('Fixed', 'Zimerekebishwa')) + '</div>' +
+      '<span class="lbl">' + tr('Last 6 weeks', 'Wiki 6 zilizopita') + '</span><div class="wk" role="img" aria-label="' + esc(tr('Work each week: ', 'Kazi kila wiki: ') + weeks.join(', ')) + '">' +
+      weeks.map(function (v, i) { return '<div><small>' + (v || '') + '</small><i style="height:' + Math.max(6, Math.round(v / top * 80)) + '%"' + (i === 5 ? ' class="now"' : '') + '></i></div>'; }).join('') + '</div>' +
+      '<div class="wkl"><span>' + tr('6 wk ago', 'Wiki 6') + '</span><span>' + tr('This week', 'Wiki hii') + '</span></div>' +
+      '<div class="streak">🔥 <span>' + (streak === 0 ? tr('Pin or visit today to start a streak.', 'Weka mahali au tembelea leo kuanza mfululizo.') : streak === 1 ? tr('1 day in a row', 'Siku 1 mfululizo') : tr(streak + ' days in a row', 'Siku ' + streak + ' mfululizo')) + '</span></div>';
+    qa('#mmBody .mmt').forEach(function (t) { if (typeof countUp === 'function') countUp(t); });
+  }
+  // Waiting to send: each change still on this phone
+  function waitDraw() {
+    outAll().then(function (items) {
+      if (!items.length) { $('meWait').innerHTML = ''; return; }
+      var n = items.length, ICW = { pin: ['pin', tr('Location', 'Mahali')], visit: ['clip', tr('Site visit', 'Ziara')], fixed: ['wrench', tr('Marked fixed', 'Imerekebishwa')], new: ['plus', tr('New site', 'Eneo jipya')], undo: ['undo', tr('Undo a pin', 'Tendua mahali')] };
+      $('meWait').innerHTML = '<div class="card waitc"><h2>' + (n === 1 ? tr('1 change waiting to send', 'Badiliko 1 linasubiri kutumwa') : tr(n + ' changes waiting to send', 'Mabadiliko ' + n + ' yanasubiri kutumwa')) + '</h2><p class="muted">' + tr('They are safe on this phone and go as soon as there is signal.', 'Yako salama kwenye simu hii na yatatumwa mara mtandao ukipatikana.') + '</p><ul class="wl">' +
+        items.sort(function (x, y) { return x.k - y.k; }).map(function (it) {
+          var b = it.body || {}, w = ICW[b.action] || ['inbox', tr('Change', 'Badiliko')], f = (it.files || []).length - (it.done || 0);
+          var st = b.action === 'visit' && b.state && STATES[b.state] ? ' · ' + tr(STATES[b.state][1], STATES[b.state][2]) : '';
+          return '<li><span class="ic">' + oic(w[0]) + '</span><div><b>' + esc(b.id && byId(b.id) ? pname(b.id) : (b.name || b.title || b.id || '')) + '</b><small>' + w[1] + st + (f > 0 ? ' · ' + (f === 1 ? tr('1 photo or voice note', 'picha au sauti 1') : tr(f + ' photos or voice notes', 'picha au sauti ' + f)) : '') + (it.at ? ' · ' + tr('saved ', 'imehifadhiwa ') + since(new Date(it.at).toISOString()) : '') + '</small></div></li>';
+        }).join('') + '</ul><button class="btn wide" id="waitSend" type="button">' + oic('arrow') + ' ' + tr('Send now', 'Tuma sasa') + '</button></div>';
+      $('waitSend').addEventListener('click', function () { var b = this; b.disabled = true; b.textContent = tr('Sending…', 'Inatuma…'); flush().then(function () { outboxUi(); waitDraw(); if (S.pin) load(false); }); });
+    });
+  }
+  function meWorkDraw() { var h = $('myWork').innerHTML; $('meWork').innerHTML = h.replace('Your work', tr('My work', 'Kazi yangu')); }
+  $('meWork').addEventListener('click', function (e) { var b = e.target.closest('.row'); if (b) openProj(b.getAttribute('data-id'), b.hasAttribute('data-visit') ? 'visit' : 'pin'); });
+  function waNum(p, home) { var d = String(p).replace(/\D/g, ''), cc = { ke: '254', tz: '255', ug: '256', mw: '265' }[home] || '254'; return /^\s*\+/.test(p) ? d : d.charAt(0) === '0' ? cc + d.slice(1) : d; }
+  function vb(e) { return { pin: tr('Pinned', 'Aliweka mahali'), visit: tr('Visited', 'Alitembelea'), fixed: tr('Fixed', 'Alirekebisha'), new: tr('Added', 'Aliongeza') }[e.a] || e.a; }
+  // Team today: who's working, where, and a call / WhatsApp button
+  function teamTodayDraw() {
+    var t = teamCache; if (!t) return;
+    var today = dayKey(Date.now()), a = actCache || [];
+    var rows = t.filter(function (p) { return !same(p.name, S.name); }).map(function (p) {
+      var last = a.filter(function (e) { return same(e.by, p.name) && WORK[e.a]; }).sort(function (x, y) { return x.at < y.at ? 1 : -1; })[0];
+      return { p: p, e: last, at: (last && last.at > (p.lastSeen || '') ? last.at : p.lastSeen) || '' };
+    }).sort(function (x, y) { return x.at < y.at ? 1 : x.at > y.at ? -1 : 0; });
+    var on = rows.filter(function (r) { return r.at && dayKey(r.at) === today; }).length;
+    $('ttBody').innerHTML = '<p class="muted" style="margin:0 0 4px">' + (on === 0 ? tr('Nobody else has used the app today yet.', 'Hakuna mwingine aliyetumia programu leo bado.') : on === 1 ? tr('1 person active today', 'Mtu 1 yuko kazini leo') : tr(on + ' people active today', 'Watu ' + on + ' wako kazini leo')) + '</p><ul class="mates">' +
+      rows.map(function (r) {
+        var p = r.p, e = r.e, pr = e && byId(e.id), live = r.at && dayKey(r.at) === today;
+        var sub = e ? vb(e) + ' ' + esc(pr ? pr.title : e.t || '') + (pr && pr.area ? ' · ' + esc(pr.area) : '') + ' · ' + since(e.at) : tr('Last seen ', 'Alionekana ') + since(p.lastSeen);
+        return '<li><span class="av' + (live ? ' live' : '') + '">' + mateInitials(p.name) + '</span><div' + (e && pr ? ' class="go" data-id="' + esc(e.id) + '" role="button" tabindex="0"' : '') + '><b>' + esc(p.name) + '</b><small>' + sub + '</small></div>' +
+          (p.phone ? '<a class="ca" href="tel:' + esc(p.phone.replace(/\s/g, '')) + '" aria-label="' + esc(tr('Call ', 'Mpigie ') + p.name) + '">' + oic('phone') + '</a><a class="ca" href="https://wa.me/' + waNum(p.phone, p.home) + '" target="_blank" rel="noopener" aria-label="' + esc('WhatsApp ' + p.name) + '">' + oic('chat') + '</a>' : '') + '</li>';
+      }).join('') + '</ul>' + (S.admin && !rows.some(function (r) { return r.p.phone; }) ? '<p class="muted" style="margin:8px 0 0">' + tr('Add phone numbers in Office › Team to call or WhatsApp from here.', 'Ongeza namba za simu kwenye Ofisi › Timu ili kupiga au kutuma WhatsApp kutoka hapa.') + '</p>' : '');
+  }
+  $('ttBody').addEventListener('click', function (e) { var g = e.target.closest('.go'); if (g) openProj(g.getAttribute('data-id'), 'pin'); });
+  // Team totals (in name order, no ranking) and the team feed
   function actDraw() {
     var a = actCache; if (!a) return;
-    var cut = Date.now() - period * 864e5, rows = a.filter(function (e) { return Date.parse(e.at) > cut; }), by = {};
-    rows.forEach(function (e) { var k = e.by || '—'; by[k] = by[k] || { pin: 0, visit: 0, fixed: 0, new: 0 }; if (by[k][e.a] != null) by[k][e.a]++; });
-    var names = Object.keys(by).sort(function (x, y) { var s = function (n) { var o = by[n]; return o.pin + o.visit + o.fixed + o.new; }; return s(y) - s(x); });
-    $('actTable').innerHTML = names.length ? '<table class="act"><thead><tr><th scope="col">Who</th><th scope="col">Pins</th><th scope="col">Visits</th><th scope="col">Fixed</th><th scope="col">New</th></tr></thead><tbody>' +
-      names.map(function (n) { var o = by[n]; return '<tr><td>' + esc(n) + '</td><td>' + o.pin + '</td><td>' + o.visit + '</td><td>' + o.fixed + '</td><td>' + o.new + '</td></tr>'; }).join('') + '</tbody></table>'
-      : '<p class="muted">Nothing yet in this period.</p>';
-    $('actFeed').innerHTML = a.slice(-15).reverse().map(function (e) {
-      var extra = e.a === 'visit' ? (e.s === 'working' ? ' ✅' : e.s === 'repair' ? ' ⚠️' : ' ❌') : '';
-      return '<li><b>' + esc(e.by) + '</b> ' + (VERB[e.a] || e.a) + ' ' + esc(e.t || '') + extra + '<small>' + esc(when(e.at)) + '</small></li>';
-    }).join('') || '<li class="muted">Nothing yet.</li>';
+    var from = period === 'w' ? weekStart() : monthStart(), rows = a.filter(function (e) { return WORK[e.a] && Date.parse(e.at) >= from; }), by = {}, all = { pin: 0, visit: 0, fixed: 0 };
+    rows.forEach(function (e) { var k = String(e.by || '—').trim(), c = actKind(e.a); by[k] = by[k] || { pin: 0, visit: 0, fixed: 0 }; by[k][c]++; all[c]++; });
+    var names = Object.keys(by).sort(function (x, y) { return x.toLowerCase().localeCompare(y.toLowerCase()); });
+    var pill = function (n, hue, ic) { return '<span class="tp" style="--hu:var(--hu-' + hue + ');--hb:var(--hb-' + hue + ')">' + oic(ic) + n + '</span>'; };
+    $('actTable').innerHTML = '<div class="together"><b>' + tr('Together', 'Pamoja') + '</b><span>' + tr(all.pin + ' pins · ' + all.visit + ' visits · ' + all.fixed + ' fixed', 'mahali ' + all.pin + ' · ziara ' + all.visit + ' · ' + all.fixed + ' zimerekebishwa') + '</span></div>' +
+      (names.length ? '<ul class="tots">' + names.map(function (n) { var o = by[n]; return '<li><b>' + esc(n) + '</b>' + pill(o.pin, 'blue', 'pin') + pill(o.visit, 'green', 'clip') + pill(o.fixed, 'amber', 'wrench') + '</li>'; }).join('') + '</ul>' : '<p class="muted">' + tr('Nothing yet in this period.', 'Hakuna bado katika kipindi hiki.') + '</p>');
+    var list = a.filter(function (e) { return WORK[e.a] || e.a === 'job'; }).sort(function (x, y) { return x.at < y.at ? 1 : -1; });
+    var FI = { pin: ['pin', 'blue'], visit: ['clip', 'green'], fixed: ['check', 'green'], new: ['plus', 'purple'], job: ['wrench', 'amber'] };
+    $('actFeed').innerHTML = list.slice(0, feedN).map(function (e) {
+      var f = FI[e.a], p = byId(e.id), st = e.a === 'visit' && e.s && STATES[e.s] ? ' · ' + tr(STATES[e.s][1], STATES[e.s][2]) : '';
+      return '<li' + (p ? ' class="go" data-id="' + esc(e.id) + '" role="button" tabindex="0"' : '') + '><span class="fi" style="--hu:var(--hu-' + f[1] + ');--hb:var(--hb-' + f[1] + ')">' + oic(f[0]) + '</span><div><b>' + esc(String(e.by || '').split(' ')[0]) + '</b> ' + vb(e).toLowerCase() + ' ' + esc(p ? p.title : e.t || '') + st + '<small>' + since(e.at) + '</small></div>' + (p ? '<span class="cv">' + oic('chev') + '</span>' : '') + '</li>';
+    }).join('') || '<li class="muted">' + tr('Nothing yet. Pins, visits and fixes show here.', 'Bado hakuna. Mahali, ziara na marekebisho yataonekana hapa.') + '</li>';
+    $('feedMore').classList.toggle('hidden', list.length <= 8);
+    $('feedMore').textContent = feedN > 8 ? tr('Show less', 'Onyesha kidogo') : tr('Show more', 'Onyesha zaidi');
+    myMonthDraw(); teamTodayDraw();
   }
+  $('feedMore').addEventListener('click', function () { feedN = feedN > 8 ? 8 : 40; actDraw(); });
+  $('actFeed').addEventListener('click', function (e) { var g = e.target.closest('.go'); if (g) openProj(g.getAttribute('data-id'), 'pin'); });
   function renderMe() {
     $('meName').textContent = S.name;
     homeTx();
     $('meAv').innerHTML = S.photo && S.mode === 'monday' ? '<img src="' + esc(S.photo) + '" alt="">' : '<i>' + esc((S.name || '?').split(/\s+/).map(function (w) { return w.charAt(0); }).slice(0, 2).join('').toUpperCase()) + '</i>';
     $('mePin').innerHTML = S.mode === 'monday' ? (S.photo ? '<img class="avatar" src="' + esc(S.photo) + '" alt="" onerror="this.remove()">' : '') + 'monday.com' : S.who ? 'Your own PIN' : 'Shared team PIN';
     $('lockBtn').textContent = S.mode === 'monday' ? 'Sign out' : 'Lock the app';
-    outboxUi(); installUi(); stampsUi();
-    if (!navigator.onLine) { if (!actCache) $('actTable').innerHTML = '<p class="muted">Team activity needs a signal.</p>'; return; }
+    outboxUi(); installUi(); stampsUi(); waitDraw(); meWorkDraw();
+    if (actCache) actDraw(); if (teamCache) teamTodayDraw();
+    if (!navigator.onLine) { var nos = '<p class="muted">' + tr('This needs a signal.', 'Hii inahitaji mtandao.') + '</p>'; if (!actCache) { $('actTable').innerHTML = nos; $('mmBody').innerHTML = nos; } if (!teamCache) $('ttBody').innerHTML = nos; return; }
+    api('GET', null, '?team=1').then(function (j) { if (j.ok) { teamCache = (j.team || []).filter(function (p) { return p.name; }); teamTodayDraw(); } else if (!teamCache) $('ttBody').innerHTML = '<p class="msg bad">' + esc(why(j)) + '</p>'; });
     api('GET', null, '?activity=1').then(function (j) { if (j.ok) { actCache = j.activity || []; actDraw(); } else if (!actCache) $('actTable').innerHTML = '<p class="msg bad">' + esc(why(j)) + '</p>'; });
   }
 
@@ -3474,7 +3591,8 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
       return '<article class="card oteam" data-name="' + esc(p.name) + '"><div class="oh"><b>' + esc(p.name) + '</b><span class="tag ' + (p.admin ? 'has' : '') + '">' + (p.admin ? 'Admin' : 'Field') + '</span></div>' +
         '<p class="muted">' + src[p.source] + ' · last active ' + (p.lastSeen ? esc(when(p.lastSeen)) : 'never') + '</p>' +
         (editable ? '<div class="ofields"><label>Home country<select data-f="home"><option value="">All countries</option>' + ['ke', 'tz', 'ug', 'mw'].map(function (c) { return '<option value="' + c + '"' + (p.home === c ? ' selected' : '') + '>' + CNAME[c] + '</option>'; }).join('') + '</select></label>' +
-          '<label>E-mail (for alerts)<input type="email" data-f="email" value="' + esc(p.email) + '" placeholder="name@rafikioutreach.org"></label></div>' +
+          '<label>E-mail (for alerts)<input type="email" data-f="email" value="' + esc(p.email) + '" placeholder="name@rafikioutreach.org"></label>' +
+          '<label>Phone (the team sees it, for calls and WhatsApp)<input type="tel" data-f="phone" value="' + esc(p.phone || '') + '" placeholder="+254 712 345 678"></label></div>' +
           '<label class="tick"><input type="checkbox" data-f="admin"' + (p.admin ? ' checked' : '') + '> Admin (sees the Office tab)</label>' +
           '<div class="oact"><button class="btn small" type="button" data-t="team-update">Save</button><button class="btn small light" type="button" data-t="team-pin">New PIN</button><button class="btn small light" type="button" data-t="team-remove">Remove</button><span class="msg" aria-live="polite"></span></div>'
           : '<p class="muted">' + (p.source === 'cloudflare' ? 'To change or remove, edit PIN_USERS in Cloudflare, or add them here with an app PIN and remove the Cloudflare entry.' : 'Signs in with monday.com. Admin role comes from PIN_ADMINS in Cloudflare.') + '</p>') + '</article>';
@@ -3482,14 +3600,15 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
       '<div><div class="card"><h2>Add a person</h2><p class="muted">They get their own 4-digit PIN, shown once. Send it to them privately.</p>' +
       '<label>Name<input type="text" id="tName" autocomplete="off" placeholder="e.g. Jessica Anderson"></label>' +
       '<div class="ofields"><label>Home country<select id="tHome"><option value="">All countries</option><option value="ke">Kenya</option><option value="tz">Tanzania</option><option value="ug">Uganda</option><option value="mw">Malawi</option></select></label>' +
-      '<label>E-mail (optional)<input type="email" id="tEmail" placeholder="for alerts"></label></div>' +
+      '<label>E-mail (optional)<input type="email" id="tEmail" placeholder="for alerts"></label>' +
+      '<label>Phone (optional)<input type="tel" id="tPhone" placeholder="+254 712 345 678"></label></div>' +
       '<label class="tick"><input type="checkbox" id="tAdmin"> Admin</label>' +
       '<div class="oact"><button class="btn" type="button" id="tAdd">Add and create PIN</button><span class="msg" id="tMsg" aria-live="polite"></span></div><div id="tPin"></div></div>' +
       '<div class="card" style="margin-top:12px"><h2>E-mail alerts</h2>' + (O.mail && O.mail.ready ? '<p>Alerts go to: <b>' + esc((O.mail.to || []).join(', ') || 'nobody yet: add an admin with an e-mail') + '</b></p><button class="btn small light" type="button" id="tTest">Send a test e-mail</button><span class="msg" id="tTestMsg" aria-live="polite"></span>' : '<p class="muted">Not switched on yet. Add RESEND_API_KEY and ALERT_FROM in Cloudflare (see the set-up notes).</p>') + '</div></div></div>';
     $('tAdd').addEventListener('click', function () {
       var n = $('tName').value.trim(); if (!n) { $('tName').focus(); return; }
       msg('tMsg', '', 'Adding…');
-      adminApi('POST', { action: 'team-add', name: n, home: $('tHome').value, email: $('tEmail').value, admin: $('tAdmin').checked }).then(function (j) {
+      adminApi('POST', { action: 'team-add', name: n, home: $('tHome').value, email: $('tEmail').value, phone: $('tPhone').value, admin: $('tAdmin').checked }).then(function (j) {
         if (!j.ok) { msg('tMsg', 'bad', j.reason === 'exists' ? 'Someone with that name is already on the team.' : why(j)); return; }
         pinBox($('tPin'), n, j.pin); O.team = null; msg('tMsg', 'ok', 'Added ✓');
         oNeedTeam(function () { var keep = $('tPin').innerHTML; oTeam(b); $('tPin').innerHTML = keep; });
@@ -3507,7 +3626,7 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
     if (act === 'team-remove' && !confirm('Remove ' + n + '? Their PIN stops working straight away.')) return;
     if (act === 'team-pin' && !confirm('Make a new PIN for ' + n + '? Their old PIN stops working.')) return;
     var body = { action: act, name: n };
-    if (act === 'team-update') { body.home = c.querySelector('[data-f=home]').value; body.email = c.querySelector('[data-f=email]').value; body.admin = c.querySelector('[data-f=admin]').checked; }
+    if (act === 'team-update') { body.home = c.querySelector('[data-f=home]').value; body.email = c.querySelector('[data-f=email]').value; body.phone = c.querySelector('[data-f=phone]').value; body.admin = c.querySelector('[data-f=admin]').checked; }
     m.className = 'msg'; m.textContent = 'Saving…';
     adminApi('POST', body).then(function (j) {
       if (!j.ok) { m.className = 'msg bad'; m.textContent = j.reason === 'self' ? 'You can’t remove your own admin role.' : why(j); return; }
@@ -3592,7 +3711,7 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
     if (!as.length && !jobs.length) { $('myWork').innerHTML = ''; return; }
     $('myWork').innerHTML = '<div class="card mywork"><h2>Your work</h2>' +
       as.map(function (a) { return '<button class="row" type="button" data-id="' + esc(a.id) + '" data-visit="1"><span class="th" aria-hidden="true">🗓</span><span class="tx"><span class="t">' + esc(a.t || pname(a.id)) + '</span><span class="s">Visit · ' + esc(a.date) + (a.note ? ' · ' + esc(a.note) : '') + ' · from ' + esc(a.by) + '</span></span><span class="tag ' + (a.date < today ? 'bad' : a.date === today ? 'has' : '') + '">' + (a.date < today ? 'Overdue' : a.date === today ? 'Today' : a.date.slice(5)) + '</span></button>'; }).join('') +
-      jobs.map(function (id) { var r = S.repairs[id]; return '<button class="row" type="button" data-id="' + esc(id) + '"><span class="th" aria-hidden="true">🔧</span><span class="tx"><span class="t">' + esc(pname(id)) + '</span><span class="s">Repair · ' + esc((STEP.filter(function (s) { return s[0] === (r.step || 'reported'); })[0] || [])[1]) + (r.due ? ' · due ' + esc(r.due) : '') + (r.budget != null ? ' · budget KES ' + Number(r.budget).toLocaleString() : '') + '</span></span><span class="tag bad">Job</span></button>'; }).join('') + '</div>';
+      jobs.map(function (id) { var r = S.repairs[id]; return '<button class="row" type="button" data-id="' + esc(id) + '"><span class="th" aria-hidden="true">🔧</span><span class="tx"><span class="t">' + esc(pname(id)) + '</span><span class="s">Repair · ' + esc((STEP.filter(function (s) { return s[0] === (r.step || 'reported'); })[0] || [])[1]) + (r.due ? ' · due ' + esc(r.due) : '') + (r.budget != null ? ' · budget KES ' + Number(r.budget).toLocaleString() : '') + '</span></span><span class="tag bad">' + (r.due && r.due < today ? 'Overdue' : 'Job') + '</span></button>'; }).join('') + '</div>';
   }
   $('myWork').addEventListener('click', function (e) { var b = e.target.closest('.row'); if (b) openProj(b.getAttribute('data-id'), b.hasAttribute('data-visit') ? 'visit' : 'pin'); });
 

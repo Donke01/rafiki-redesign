@@ -405,6 +405,7 @@ private fun TeamSection(m: AppModel) {
     var name by remember { mutableStateOf("") }
     var home by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
+    var phone by remember { mutableStateOf("") }
     var admin by remember { mutableStateOf(false) }
     var shown by remember { mutableStateOf<Pair<String, String>?>(null) }
     var msg by remember { mutableStateOf<Pair<String, String>?>(null) }
@@ -420,6 +421,7 @@ private fun TeamSection(m: AppModel) {
     people.forEach { p ->
         var ph by remember(p.optString("name")) { mutableStateOf(p.optString("home")) }
         var pe by remember(p.optString("name")) { mutableStateOf(p.optString("email")) }
+        var pp by remember(p.optString("name")) { mutableStateOf(p.optString("phone")) }
         var pa by remember(p.optString("name")) { mutableStateOf(p.optBoolean("admin")) }
         val inApp = p.optString("source") == "app"
         Card(Modifier.padding(top = 10.dp)) {
@@ -434,9 +436,10 @@ private fun TeamSection(m: AppModel) {
                     Picker(t("Home country", "Nchi ya nyumbani"), ph, listOf("" to t("All countries", "Nchi zote")) + COUNTRIES.toList(), { ph = it }, Modifier.weight(1f))
                     Field(pe, { pe = it }, t("E-mail (for alerts)", "Barua pepe (kwa taarifa)"), Modifier.weight(1f))
                 }
+                Field(pp, { pp = it }, t("Phone (the team sees it, for calls and WhatsApp)", "Simu (timu inaiona, kwa kupiga na WhatsApp)"), placeholder = "+254 712 345 678")
                 Row(Modifier.padding(top = 8.dp).clickable { pa = !pa }, verticalAlignment = Alignment.CenterVertically) { Checkbox(pa, { pa = it }, colors = CheckboxDefaults.colors(checkedColor = C.blue)); Text(t("Admin (sees the Office)", "Msimamizi (anaona Ofisi)"), style = MaterialTheme.typography.bodyMedium, color = C.text) }
                 Row(Modifier.padding(top = 6.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Btn(t("Save", "Hifadhi"), { scope.launch { val x = m.api.admin(JSONObject().put("action", "team-update").put("name", p.optString("name")).put("home", ph).put("email", pe).put("admin", pa)); msg = if (x.ok) "ok" to t("Saved ✓", "Imehifadhiwa ✓") else "bad" to (if (x.reason == "self") t("You can’t remove your own admin role.", "Huwezi kuondoa nafasi yako mwenyewe ya msimamizi.") else reasonText(x.reason)); again() } }, small = true)
+                    Btn(t("Save", "Hifadhi"), { scope.launch { val x = m.api.admin(JSONObject().put("action", "team-update").put("name", p.optString("name")).put("home", ph).put("email", pe).put("phone", pp).put("admin", pa)); msg = if (x.ok) "ok" to t("Saved ✓", "Imehifadhiwa ✓") else "bad" to (if (x.reason == "self") t("You can’t remove your own admin role.", "Huwezi kuondoa nafasi yako mwenyewe ya msimamizi.") else reasonText(x.reason)); again() } }, small = true)
                     Btn(t("New PIN", "PIN mpya"), { scope.launch { val x = m.api.admin(JSONObject().put("action", "team-pin").put("name", p.optString("name"))); if (x.ok) shown = p.optString("name") to x.json.optString("pin") else msg = "bad" to reasonText(x.reason) } }, small = true, light = true)
                     Btn(t("Remove", "Ondoa"), { scope.launch { m.api.admin(JSONObject().put("action", "team-remove").put("name", p.optString("name"))); again() } }, small = true, light = true)
                 }
@@ -452,11 +455,12 @@ private fun TeamSection(m: AppModel) {
             Picker(t("Home country", "Nchi ya nyumbani"), home, listOf("" to t("All countries", "Nchi zote")) + COUNTRIES.toList(), { home = it }, Modifier.weight(1f))
             Field(email, { email = it }, t("E-mail (optional)", "Barua pepe (si lazima)"), Modifier.weight(1f))
         }
+        Field(phone, { phone = it }, t("Phone (optional)", "Simu (si lazima)"), placeholder = "+254 712 345 678")
         Row(Modifier.padding(top = 8.dp).clickable { admin = !admin }, verticalAlignment = Alignment.CenterVertically) { Checkbox(admin, { admin = it }, colors = CheckboxDefaults.colors(checkedColor = C.blue)); Text(t("Admin (sees the Office)", "Msimamizi (anaona Ofisi)"), style = MaterialTheme.typography.bodyMedium, color = C.text) }
         Btn(t("Add and create PIN", "Ongeza na utengeneze PIN"), {
             scope.launch {
-                val x = m.api.admin(JSONObject().put("action", "team-add").put("name", name.trim()).put("home", home).put("email", email.trim()).put("admin", admin))
-                if (x.ok) { shown = name.trim() to x.json.optString("pin"); name = ""; email = ""; admin = false; again() }
+                val x = m.api.admin(JSONObject().put("action", "team-add").put("name", name.trim()).put("home", home).put("email", email.trim()).put("phone", phone.trim()).put("admin", admin))
+                if (x.ok) { shown = name.trim() to x.json.optString("pin"); name = ""; email = ""; phone = ""; admin = false; again() }
                 else msg = "bad" to (if (x.reason == "exists") t("Someone with that name is already on the team.", "Mtu mwenye jina hilo tayari yuko kwenye timu.") else reasonText(x.reason))
             }
         }, Modifier.padding(top = 10.dp), icon = "plus", enabled = name.isNotBlank())

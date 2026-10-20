@@ -138,6 +138,16 @@ class AppModel(app: Application) : AndroidViewModel(app) {
         val r = api.activity(); val a = r.json.optJSONArray("activity") ?: return false
         _activity.value = (0 until a.length()).map { a.getJSONObject(it) }; return true
     }
+    // --- the team: names, home country, phone and when each was last seen ----------------------
+    private val _team = MutableStateFlow<List<org.rafikioutreach.pin.ui.Mate>?>(null)
+    val team: StateFlow<List<org.rafikioutreach.pin.ui.Mate>?> = _team
+    suspend fun loadTeam(): Boolean {
+        val a = api.team().json.optJSONArray("team") ?: return false
+        _team.value = (0 until a.length()).map { a.getJSONObject(it) }.map { o ->
+            org.rafikioutreach.pin.ui.Mate(o.optString("name"), o.optString("home"), o.optString("phone"), o.optString("lastSeen").takeIf { it.isNotBlank() && it != "null" })
+        }.filter { it.name.isNotBlank() }
+        return true
+    }
     /** Apply a fresh copy of the list (after an Office change). */
     fun reload() = refresh()
 
@@ -173,6 +183,7 @@ class AppModel(app: Application) : AndroidViewModel(app) {
     /** Queue a change, try to send it now, and say what happened. */
     suspend fun submit(body: JSONObject, files: List<OutFile>): Outcome {
         body.put("by", prefs.name)
+        if (!body.has("savedAt")) body.put("savedAt", Instant.now().toString())
         val k = outbox.add(body, files)
         _waiting.value = outbox.count()
         val res = sendWaiting()

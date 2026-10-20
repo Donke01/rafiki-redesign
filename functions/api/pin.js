@@ -4,6 +4,7 @@
 //   GET  /api/pin?id=<item>     → the last pin made with the app on that project (for undo)
 //   GET  /api/pin?history=<item>→ the latest notes on that project in monday.com, with their files
 //   GET  /api/pin?activity=1    → what the team did with the app in the last 30 days
+//   GET  /api/pin?team=1        → who is on the team: name, home country, phone (if the office added one), last seen
 //   POST /api/pin  { action: "pin",   id, lat, lng, acc, how, by }   saves "lat, lng" into "GPS Coordinates"
 //                  { action: "undo",  id, by }                       puts back the value from before the last pin
 //                  { action: "visit", id, state, note, lat, lng, readings, by } leaves a site-visit note
@@ -148,6 +149,18 @@ export async function onRequestGet({ request, env, waitUntil }) {
       return json({ ok: true, notes: await readUpdates(chk.token || env.MONDAY_API_TOKEN, hist, env.MONDAY_API_URL) }, 200);
     }
     if (q.get('activity')) return json({ ok: true, activity: (await getJson(env, 'pinact', [])).map(stripT) }, 200);
+    if (q.get('team')) {
+      // the team list for Me & team: no PINs, no e-mails, no admin flags
+      const t = await team(env), seenAt = await getJson(env, 'pinseen', {});
+      const list = t.map(p => ({ name: p.name, home: p.home || '', phone: p.phone || '', lastSeen: seenAt[p.name] || null }));
+      String(env.PIN_USERS || '').split(/[,;\n]/).forEach(s => {
+        const a = s.split(':').map(x => x.trim()); if (a.length < 2) return;
+        let home = ''; if (a.length > 2 && /^(ke|tz|ug|mw)$/i.test(a[a.length - 1])) home = a.pop().toLowerCase();
+        const name = a.slice(0, -1).join(':'); if (name && !list.some(x => sameName(x.name, name))) list.push({ name, home, phone: '', lastSeen: seenAt[name] || null });
+      });
+      Object.keys(seenAt).forEach(n => { if (!list.some(x => sameName(x.name, n))) list.push({ name: n, home: '', phone: '', lastSeen: seenAt[n] }); });
+      return json({ ok: true, team: list.sort((a, b) => a.name.localeCompare(b.name)) }, 200);
+    }
     const feed = await getFeed(env, waitUntil);
     const projects = (feed.projects || []).map(p => ({
       id: p.id, title: p.title, country: p.country, ck: p.ck, area: p.area || '', type: p.type, status: p.status, year: p.year || null,

@@ -8,7 +8,7 @@
 //                   { action: "assign",  ids: [], to, date, note } / { action: "unassign", aid }
 //                   { action: "confirm", id, on }                                   lock a confirmed location
 //                   { action: "team-add", name, home, admin, email } → { pin } (shown once)
-//                   { action: "team-update", name, home, admin, email } / "team-pin" (new PIN) / "team-remove"
+//                   { action: "team-update", name, home, admin, email, phone } / "team-pin" (new PIN) / "team-remove"
 //                   { action: "test-mail" }
 //   POST /api/admin?cron=monthly with header X-Cron-Key = CRON_KEY → e-mails last month's summary to admins
 //        (run on the 1st of each month by .github/workflows/monthly-report.yml)
@@ -40,6 +40,8 @@ async function log(env, entry) {
   a.push(Object.assign({ at: new Date().toISOString() }, entry));
   await putJson(env, 'pinact', a.slice(-5000));
 }
+// a phone number as typed (+254 712 345 678, 0712…): digits, spaces and one leading +
+function phone(v) { const s = String(v || '').replace(/[^\d+ ]/g, '').replace(/(?!^)\+/g, '').trim().slice(0, 20); return /\d{7,}/.test(s.replace(/\s/g, '')) ? s : ''; }
 function people(env) {
   return String(env.PIN_USERS || '').split(/[,;\n]/).map(s => { const a = s.split(':').map(x => x.trim()); let home = ''; if (a.length > 2 && /^(ke|tz|ug|mw)$/i.test(a[a.length - 1])) home = a.pop().toLowerCase(); return a.length >= 2 ? { name: a.slice(0, -1).join(':'), home } : null; }).filter(Boolean);
 }
@@ -52,7 +54,7 @@ export async function onRequestGet({ request, env }) {
   if (view === 'assign') return json({ ok: true, items: await getJson(env, 'pinassign', []) });
   if (view === 'team') {
     const t = await team(env), seenAt = await getJson(env, 'pinseen', {}), admins = adminNames(env);
-    const list = t.map(p => ({ name: p.name, home: p.home || '', admin: !!p.admin || admins.includes(p.name.toLowerCase()), email: p.email || '', source: 'app', added: p.added, lastSeen: seenAt[p.name] || null }));
+    const list = t.map(p => ({ name: p.name, home: p.home || '', admin: !!p.admin || admins.includes(p.name.toLowerCase()), email: p.email || '', phone: p.phone || '', source: 'app', added: p.added, lastSeen: seenAt[p.name] || null }));
     people(env).forEach(p => { if (!list.some(x => sameName(x.name, p.name))) list.push({ name: p.name, home: p.home, admin: admins.includes(p.name.toLowerCase()), email: '', source: 'cloudflare', lastSeen: seenAt[p.name] || null }); });
     Object.keys(seenAt).forEach(n => { if (!list.some(x => sameName(x.name, n))) list.push({ name: n, home: '', admin: admins.includes(n.toLowerCase()), email: '', source: 'monday', lastSeen: seenAt[n] }); });
     return json({ ok: true, team: list, mail: { ready: !!(env.RESEND_API_KEY && env.ALERT_FROM), to: await recipients(env) }, cron: !!env.CRON_KEY });
@@ -179,7 +181,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
         if (b.action === 'team-add') {
           if (p) return json({ ok: false, reason: 'exists' }, 409);
           const { pin, h } = await freshPin(env, t);
-          p = { name, home: CC.includes(b.home) ? b.home : '', admin: !!b.admin, email: clean(b.email, 120), h, added: new Date().toISOString(), by };
+          p = { name, home: CC.includes(b.home) ? b.home : '', admin: !!b.admin, email: clean(b.email, 120), phone: phone(b.phone), h, added: new Date().toISOString(), by };
           t.push(p); await saveTeam(env, t);
           await log(env, { by, a: 'team', t: 'added ' + name });
           return json({ ok: true, pin });
@@ -188,7 +190,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
         if (b.action === 'team-remove') { await saveTeam(env, t.filter(x => x !== p)); await log(env, { by, a: 'team', t: 'removed ' + name }); return json({ ok: true }); }
         if (b.action === 'team-pin') { const { pin, h } = await freshPin(env, t.filter(x => x !== p)); p.h = h; await saveTeam(env, t); await log(env, { by, a: 'team', t: 'new PIN for ' + name }); return json({ ok: true, pin }); }
         if (sameName(name, by) && p.admin && !b.admin && !adminNames(env).includes(name.toLowerCase())) return json({ ok: false, reason: 'self' }, 409);
-        p.home = CC.includes(b.home) ? b.home : ''; p.admin = !!b.admin; p.email = clean(b.email, 120);
+        p.home = CC.includes(b.home) ? b.home : ''; p.admin = !!b.admin; p.email = clean(b.email, 120); if (b.phone !== undefined) p.phone = phone(b.phone);
         await saveTeam(env, t);
         return json({ ok: true });
       }

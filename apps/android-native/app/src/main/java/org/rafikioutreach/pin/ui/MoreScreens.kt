@@ -26,6 +26,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -106,7 +107,7 @@ fun NewSiteScreen(m: AppModel, done: (String?) -> Unit) {
 }
 
 @Composable
-fun MeScreen(m: AppModel, report: () -> Unit = {}) {
+fun MeScreen(m: AppModel, open: (String) -> Unit = {}, report: () -> Unit = {}) {
     val waiting by m.waiting.collectAsState()
     val s by m.snap.collectAsState()
     var miles by remember { mutableStateOf(m.prefs.miles) }
@@ -126,6 +127,15 @@ fun MeScreen(m: AppModel, report: () -> Unit = {}) {
             MeRow(t("Waiting to send", "Inasubiri kutumwa"), if (waiting == 0) t("Nothing", "Hakuna") else waiting.toString())
             Btn(t("Lock the app", "Funga programu"), { m.lock() }, Modifier.padding(top = 14.dp).fillMaxWidth(), icon = "lock", light = true, small = true)
         }
+        val act by m.activity.collectAsState()
+        val mates by m.team.collectAsState()
+        LaunchedEffect(Unit) { launch { m.loadActivity() }; launch { m.loadTeam() } }
+        WaitingList(m, s)
+        MyWork(s, open)
+        MyMonth(m, act)
+        TeamToday(m, mates, act, s, open)
+        TeamMonth(m, act)
+        TeamFeed(act, s, open)
         Stamps(m)
         Card(Modifier.padding(top = 14.dp)) {
             H2(t("Colours", "Rangi"))

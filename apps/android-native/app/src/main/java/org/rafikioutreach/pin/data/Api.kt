@@ -28,6 +28,7 @@ class Api(val server: String, private val pin: () -> String, private val session
         call("GET", "/api/place?q=" + enc(q) + (if (ck.isNotBlank()) "&cc=$ck" else "") + (near?.let { "&near=${it.lat},${it.lng}" } ?: ""), null)
 
     suspend fun activity(): Reply = call("GET", "/api/pin?activity=1", null)
+    suspend fun team(): Reply = call("GET", "/api/pin?team=1", null)
     suspend fun adminGet(view: String): Reply = call("GET", "/api/admin?view=" + enc(view), null)
     suspend fun admin(body: JSONObject): Reply = call("POST", "/api/admin", body)
     suspend fun authMe(): Reply = call("GET", "/api/pin-auth/me", null)
