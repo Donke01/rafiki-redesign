@@ -51,6 +51,7 @@ class AppModel(app: Application) : AndroidViewModel(app) {
     private val sendLock = Mutex()
 
     private val _snap = MutableStateFlow<Snapshot?>(prefs.loadSnapshot()?.let { runCatching { Snapshot.from(it) }.getOrNull() })
+    init { org.rafikioutreach.pin.ui.GoogleTiles.configure(app, _snap.value?.gmapsAndroid) }
     val snap: StateFlow<Snapshot?> = _snap
     private val _signedIn = MutableStateFlow((prefs.pin.isNotBlank() || prefs.session.isNotBlank()) && _snap.value != null)
     val signedIn: StateFlow<Boolean> = _signedIn
@@ -165,6 +166,7 @@ class AppModel(app: Application) : AndroidViewModel(app) {
 
     private fun accept(raw: JSONObject) {
         prefs.saveSnapshot(raw); _snap.value = Snapshot.from(raw)
+        org.rafikioutreach.pin.ui.GoogleTiles.configure(getApplication(), _snap.value?.gmapsAndroid)
     }
 
     /** When the list was last fetched (ms), so coming back to the app doesn't reload every time. */

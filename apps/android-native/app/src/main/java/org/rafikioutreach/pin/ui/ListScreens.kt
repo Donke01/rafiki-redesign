@@ -48,6 +48,8 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -88,10 +90,12 @@ fun MapScreen(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit = ope
     val fix by m.fix.collectAsState()
     val snap = s ?: return
     val pinned = snap.projects.count { it.gps != null }
+    var sheetH by remember { mutableIntStateOf(0) }
+    val dens = androidx.compose.ui.platform.LocalDensity.current
     Box(Modifier.fillMaxSize()) {
         ProjectsMap(
             snap.projects.filter { it.gps != null }.map { Dot(it.id, it.gps!!, dotColor(snap, it), snap.repairs.containsKey(it.id), it.title) },
-            fix?.ll, open, Modifier.fillMaxSize(), fitKey = snap.projects.size,
+            fix?.ll, open, Modifier.fillMaxSize(), fitKey = snap.projects.size, badgeBottom = with(dens) { sheetH.toDp() } + 12.dp,
         )
         Column(Modifier.padding(12.dp).padding(end = 58.dp).align(Alignment.TopStart)) {
         Card(pad = 12.dp) {
@@ -106,7 +110,7 @@ fun MapScreen(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit = ope
         }
         HereSlot(m, snap, fix?.ll, Modifier.padding(top = 10.dp), visit, open)
         }
-        NearestSheet(m, snap, fix?.ll, Modifier.align(Alignment.BottomCenter).padding(12.dp), open)
+        NearestSheet(m, snap, fix?.ll, Modifier.align(Alignment.BottomCenter).padding(12.dp).onSizeChanged { sheetH = it.height }, open)
     }
 }
 

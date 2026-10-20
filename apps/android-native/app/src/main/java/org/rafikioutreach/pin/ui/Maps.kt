@@ -8,11 +8,14 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -71,10 +74,11 @@ private fun dotDrawable(color: Int, big: Boolean) = GradientDrawable().apply {
 /** A map of project dots. Tap a dot to open the project.
  *  Dots are only rebuilt when the projects change; your own dot just moves, so live updates never flash. */
 @Composable
-fun ProjectsMap(dots: List<Dot>, me: LatLng?, onDot: (String) -> Unit, modifier: Modifier = Modifier, fitKey: Any? = null) {
+fun ProjectsMap(dots: List<Dot>, me: LatLng?, onDot: (String) -> Unit, modifier: Modifier = Modifier, fitKey: Any? = null, badgeBottom: androidx.compose.ui.unit.Dp = 0.dp) {
     val ctx = LocalContext.current
     MapSetup.init(ctx)
     var sat by remember { mutableStateOf(false) }
+    val g by GoogleTiles.maps.collectAsState()
     val onDotNow by androidx.compose.runtime.rememberUpdatedState(onDot)
     val map = remember {
         MapView(ctx).apply {
@@ -87,7 +91,7 @@ fun ProjectsMap(dots: List<Dot>, me: LatLng?, onDot: (String) -> Unit, modifier:
     DisposableEffect(Unit) { map.onResume(); onDispose { map.onPause(); map.onDetach() } }
     Box(modifier.clipToBounds()) {
         AndroidView({ map }, Modifier.fillMaxSize().clipToBounds(), update = { mv ->
-            val src = if (sat) Satellite else TileSourceFactory.MAPNIK
+            val src = g?.let { if (sat) it.sat else it.road } ?: if (sat) Satellite else TileSourceFactory.MAPNIK
             if (mv.tileProvider.tileSource != src) mv.setTileSource(src)
             var changed = false
             if (holder.dots != dots) {
@@ -112,6 +116,7 @@ fun ProjectsMap(dots: List<Dot>, me: LatLng?, onDot: (String) -> Unit, modifier:
             }
             if (changed) mv.invalidate()
         })
+        GoogleBadge(map, g, sat, Modifier.align(Alignment.BottomStart).padding(bottom = badgeBottom))
         var styles by remember { mutableStateOf(false) }
         MapButton("layers", t("Map style", "Mtindo wa ramani"), Modifier.align(Alignment.TopEnd).padding(10.dp)) { styles = true }
         if (styles) PickSheet(t("Map style", "Mtindo wa ramani"), listOf(Triple("street", t("Street map", "Ramani ya barabara"), "map"), Triple("sat", t("Satellite photos", "Picha za satelaiti"), "layers")),
@@ -130,6 +135,7 @@ fun PickMap(start: LatLng?, onMove: (LatLng) -> Unit, modifier: Modifier = Modif
     val ctx = LocalContext.current
     MapSetup.init(ctx)
     var sat by remember { mutableStateOf(true) }
+    val g by GoogleTiles.maps.collectAsState()
     val map = remember {
         MapView(ctx).apply {
             setTileSource(Satellite); setMultiTouchControls(true); zoomController.setVisibility(org.osmdroid.views.CustomZoomButtonsController.Visibility.SHOW_AND_FADEOUT)
@@ -146,7 +152,7 @@ fun PickMap(start: LatLng?, onMove: (LatLng) -> Unit, modifier: Modifier = Modif
     val held = remember { MapState() }
     Box(modifier.clip(RoundedCornerShape(18.dp)).clipToBounds()) {
         AndroidView({ map }, Modifier.fillMaxSize().clipToBounds(), update = { mv ->
-            val src = if (sat) Satellite else TileSourceFactory.MAPNIK
+            val src = g?.let { if (sat) it.sat else it.road } ?: if (sat) Satellite else TileSourceFactory.MAPNIK
             if (mv.tileProvider.tileSource != src) mv.setTileSource(src)
             if (held.dots != others) {
                 held.dots = others
@@ -166,6 +172,7 @@ fun PickMap(start: LatLng?, onMove: (LatLng) -> Unit, modifier: Modifier = Modif
             Icon(Ic.get("target"), null, tint = Color.White, modifier = Modifier.size(44.dp))
             Icon(Ic.get("target"), null, tint = Red, modifier = Modifier.size(38.dp))
         }
+        GoogleBadge(map, g, sat, Modifier.align(Alignment.BottomStart))
         MapButton(if (sat) "map" else "layers", if (sat) t("Show the street map", "Onyesha ramani ya barabara") else t("Show satellite photos", "Onyesha picha za satelaiti"), Modifier.align(Alignment.TopEnd).padding(10.dp)) { sat = !sat }
     }
 }
@@ -181,3 +188,32 @@ private fun MapButton(icon: String, label: String, modifier: Modifier, onClick: 
     ) { Icon(Ic.get(icon), null, tint = Color(0xFF04263F), modifier = Modifier.size(24.dp)) }
 }
 
+
+/** Google's logo and the copyright for what is on screen, shown on Google maps as its terms ask. */
+@Composable
+private fun GoogleBadge(map: MapView, g: GoogleMaps?, sat: Boolean, modifier: Modifier) {
+    g ?: return
+    var text by remember { mutableStateOf("Map data © Google") }
+    var tick by remember { mutableStateOf(0) }
+    DisposableEffect(map) {
+        val l = object : MapListener {
+            override fun onScroll(e: ScrollEvent?): Boolean { tick++; return false }
+            override fun onZoom(e: ZoomEvent?): Boolean { tick++; return false }
+        }
+        map.addMapListener(l); onDispose { map.removeMapListener(l) }
+    }
+    LaunchedEffect(tick, sat, g) {
+        kotlinx.coroutines.delay(500)
+        val b = map.boundingBox
+        val src = if (sat) g.sat else g.road
+        val t = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { GoogleTiles.copyright(src, map.zoomLevelDouble.toInt(), b.latNorth, b.latSouth, b.lonEast, b.lonWest) }
+        if (t != null) text = t
+    }
+    androidx.compose.foundation.layout.Row(modifier.padding(6.dp).fillMaxWidth(), verticalAlignment = Alignment.Bottom) {
+        androidx.compose.foundation.Image(androidx.compose.ui.res.painterResource(if (sat) org.rafikioutreach.pin.R.drawable.google_logo_white else org.rafikioutreach.pin.R.drawable.google_logo), "Google",
+            Modifier.size(width = 59.dp, height = 23.dp).semantics { contentDescription = "Google" })
+        androidx.compose.foundation.layout.Spacer(Modifier.weight(1f))
+        androidx.compose.material3.Text(text, fontSize = androidx.compose.ui.unit.TextUnit(9f, androidx.compose.ui.unit.TextUnitType.Sp), color = Color(0xFF222222), maxLines = 1,
+            modifier = Modifier.clip(RoundedCornerShape(3.dp)).background(Color(0xBFFFFFFF)).padding(horizontal = 4.dp, vertical = 1.dp).semantics { contentDescription = "map_copyright" })
+    }
+}

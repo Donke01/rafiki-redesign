@@ -944,6 +944,11 @@ html[data-theme=dark] .stp .stin{background:radial-gradient(circle,transparent 3
 
 
 
+/* --- Google map attribution --- */
+.leaflet-bottom{bottom:var(--gbot,0px)}
+.glogo{margin:0 0 6px 8px !important;pointer-events:none;line-height:0}.glogo img{width:66px;height:26px}
+.pby{display:flex;align-items:center;justify-content:flex-end;gap:4px;margin:6px 4px 0;font-size:.75rem;color:var(--muted)}.pby img{width:50px;height:20px}
+
 /* --- connect monday.com --- */
 .mcon .mh{display:flex;gap:12px;align-items:flex-start}.mcon .mh h2{margin:0 0 2px}.mcon .mh p{margin:0}
 .mcon .mi{width:40px;height:40px;border-radius:12px;flex:none;display:flex;align-items:center;justify-content:center;background:var(--hb-purple);color:var(--hu-purple)}.mcon .mi svg{width:20px;height:20px}
@@ -1497,7 +1502,7 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
   });
   var store = { get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} }, del: function (k) { try { localStorage.removeItem(k); } catch (e) {} } };
   var jget = function (k, d) { try { return JSON.parse(store.get(k) || 'null') || d; } catch (e) { return d; } };
-  var S = { mode: store.get('rfPinMode') || '', photo: store.get('rfPinPhoto') || '', pin: store.get('rfPin') || '', name: store.get('rfPinName') || '', who: store.get('rfPinWho') || '', projects: jget('rfPinList', []), repairs: jget('rfPinRepairs', {}), visits: jget('rfPinVisits', {}), admin: jget('rfPinRole', {}).admin || false, jobs: jget('rfPinRole', {}).jobs || [], assigned: jget('rfPinRole', {}).assigned || [], confirmed: jget('rfPinRole', {}).confirmed || {}, reviewOpen: 0, lang: store.get('rfPinLang') || '', units: store.get('rfPinUnits') || 'km', srvHome: store.get('rfPinSrvHome') || '', gpsHome: '',
+  var S = { gmaps: null, mode: store.get('rfPinMode') || '', photo: store.get('rfPinPhoto') || '', pin: store.get('rfPin') || '', name: store.get('rfPinName') || '', who: store.get('rfPinWho') || '', projects: jget('rfPinList', []), repairs: jget('rfPinRepairs', {}), visits: jget('rfPinVisits', {}), admin: jget('rfPinRole', {}).admin || false, jobs: jget('rfPinRole', {}).jobs || [], assigned: jget('rfPinRole', {}).assigned || [], confirmed: jget('rfPinRole', {}).confirmed || {}, reviewOpen: 0, lang: store.get('rfPinLang') || '', units: store.get('rfPinUnits') || 'km', srvHome: store.get('rfPinSrvHome') || '', gpsHome: '',
     filter: store.get('rfPinFilter') || 'missing', cur: null, here: null, hereAt: 0, view: 'vLock', prev: 'vMap', routeMode: false, pickedRoute: [], route: jget('rfPinRoute', []), dismissed: {} };
   var CENTER = { ke: [0.3, 37.9, 7], tz: [-6.3, 34.8, 6], ug: [1.4, 32.3, 7], mw: [-13.3, 34.3, 7] };
   var CNAME = { ke: 'Kenya', tz: 'Tanzania', ug: 'Uganda', mw: 'Malawi' };
@@ -1777,10 +1782,58 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
   }
 
   // --- map tiles: street and satellite --------------------------------------------------------
+  // Google maps (Map Tiles API) when the office has set a key; OpenStreetMap and Esri otherwise.
+  var GT = {};
+  function gKey() { if (!S.gmaps) S.gmaps = jget('rfPinGmaps', null); return (S.gmaps && S.gmaps.web) || ''; }
+  function gSession(type) {
+    var k = gKey(); if (!k) return Promise.resolve(null);
+    var c = GT[type]; if (c && c.exp > Date.now() + 36e5) return c.p;
+    var sv = jget('rfPinGT_' + type, null);
+    if (sv && sv.k === k && sv.exp > Date.now() + 36e5) { GT[type] = { exp: sv.exp, p: Promise.resolve(sv) }; return GT[type].p; }
+    var body = type === 'sat' ? { mapType: 'satellite', layerTypes: ['layerRoadmap'], language: 'en-US', region: 'KE' } : { mapType: 'roadmap', language: 'en-US', region: 'KE' };
+    var p = fetch('https://tile.googleapis.com/v1/createSession?key=' + encodeURIComponent(k), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) { if (!j || !j.session) { delete GT[type]; return null; } var o = { k: k, s: j.session, exp: (Number(j.expiry) || 0) * 1000 || Date.now() + 864e5 }; store.set('rfPinGT_' + type, JSON.stringify(o)); return o; })
+      .catch(function () { delete GT[type]; return null; });
+    GT[type] = { exp: Date.now() + 6e5, p: p }; return p;
+  }
+  function gLayer(o, sat) {
+    return L.tileLayer('https://tile.googleapis.com/v1/2dtiles/{z}/{x}/{y}?session=' + encodeURIComponent(o.s) + '&key=' + encodeURIComponent(o.k), { maxZoom: 21, maxNativeZoom: sat ? 21 : 22, attribution: '', gsess: o.s });
+  }
   function layers(map) {
     var street = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' });
     var sat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, maxNativeZoom: 18, attribution: 'Imagery &copy; Esri, Maxar, Earthstar Geographics' });
-    (store.get('rfPinLayer') === 'sat' ? sat : street).addTo(map);
+    var fallback = function () { if (!map.hasLayer(street) && !map.hasLayer(sat)) (store.get('rfPinLayer') === 'sat' ? sat : street).addTo(map); };
+    if (!gKey()) fallback(); else setTimeout(fallback, 5000); // Google not answering: show the free maps meanwhile
+    if (gKey()) Promise.all([gSession('road'), gSession('sat')]).then(function (ss) {
+      if (!ss[0] || !ss[1]) return fallback();
+      var gs = gLayer(ss[0], false), gt = gLayer(ss[1], true), wasSat = map.hasLayer(sat) || (!map.hasLayer(street) && store.get('rfPinLayer') === 'sat');
+      [street, sat].forEach(function (l) { if (map.hasLayer(l)) map.removeLayer(l); });
+      street = gs; sat = gt; (wasSat ? sat : street).addTo(map);
+      // Google's logo and the copyright for what is on screen, as its terms ask
+      var Logo = L.Control.extend({ options: { position: 'bottomleft' }, onAdd: function () { var d = L.DomUtil.create('div', 'glogo'); d.innerHTML = '<img alt="Google" width="66" height="26">'; return d; } });
+      var lg = new Logo().addTo(map), ac = map.attributionControl, cur = '', tm = null;
+      var setCr = function (t) { if (!ac) return; if (cur) ac.removeAttribution(cur); cur = esc(t); ac.addAttribution(cur); };
+      var paint = function () {
+        var on = map.hasLayer(sat), img = lg.getContainer().querySelector('img'); img.src = '/img/pin/google-logo' + (on ? '-white' : '') + '.png';
+        clearTimeout(tm); tm = setTimeout(function () {
+          var o = on ? ss[1] : ss[0], b = map.getBounds();
+          fetch('https://tile.googleapis.com/tile/v1/viewport?session=' + encodeURIComponent(o.s) + '&key=' + encodeURIComponent(o.k) + '&zoom=' + Math.round(map.getZoom()) + '&north=' + b.getNorth().toFixed(5) + '&south=' + b.getSouth().toFixed(5) + '&east=' + b.getEast().toFixed(5) + '&west=' + b.getWest().toFixed(5))
+            .then(function (r) { return r.ok ? r.json() : null; }).then(function (j) { setCr((j && j.copyright) || 'Map data © Google'); }).catch(function () { setCr('Map data © Google'); });
+        }, 400);
+      };
+      // keep the logo and copyright in view: just above whatever covers the bottom of the map (the nearest sheet, the tab bar)
+      var lift = function () {
+        var c = map.getContainer(), r = c.getBoundingClientRect(), top = r.bottom, sec = c.closest('section');
+        [sec && sec.querySelector('.ov.bot'), document.getElementById('tabs')].forEach(function (el) {
+          if (!el || !el.offsetParent) return; var b = el.getBoundingClientRect(); if (b.top < top && b.bottom > r.top + r.height / 2 && b.left < r.right && b.right > r.left) top = b.top;
+        });
+        c.style.setProperty('--gbot', Math.max(0, Math.round(r.bottom - top)) + 'px');
+      };
+      if (window.ResizeObserver) { var sec = map.getContainer().closest('section'), ovb = sec && sec.querySelector('.ov.bot'); var ro = new ResizeObserver(lift); if (ovb) ro.observe(ovb); ro.observe(map.getContainer()); }
+      addEventListener('resize', lift);
+      map.on('moveend baselayerchange layeradd resize', function () { paint(); lift(); }); paint(); lift(); setTimeout(lift, 600);
+    });
     var Btn = L.Control.extend({ options: { position: 'topright' }, onAdd: function () {
       var b = L.DomUtil.create('button', 'mstyle'); b.type = 'button'; b.setAttribute('aria-label', 'Map style');
       b.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4l9 5-9 5-9-5z"/><path d="M3 14l9 5 9-5"/></svg>';
@@ -1788,7 +1841,7 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
       b.addEventListener('click', function () {
         bsheet('Map style', [['street', 'Street map', 'map'], ['sat', 'Satellite photos', 'layers']], map.hasLayer(sat) ? 'sat' : 'street', function (k) {
           var on = k === 'sat' ? sat : street, off = k === 'sat' ? street : sat;
-          if (map.hasLayer(off)) map.removeLayer(off); if (!map.hasLayer(on)) on.addTo(map); store.set('rfPinLayer', k);
+          if (map.hasLayer(off)) map.removeLayer(off); if (!map.hasLayer(on)) on.addTo(map); store.set('rfPinLayer', k); map.fire('baselayerchange');
         });
       });
       return b;
@@ -1903,7 +1956,8 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
         if (!j.ok) { res.innerHTML = '<p class="msg bad">' + esc(j.reason === 'offline' ? 'No signal.' : why(j)) + '</p>'; return; }
         found = (j.places || []).slice(); if (S.here) found.sort(function (a, b) { return (a.similar - b.similar) || (metres(S.here, [a.lat, a.lng]) - metres(S.here, [b.lat, b.lng])); });
         res.innerHTML = found.length ? found.map(function (x, i) { return '<button type="button" class="prow" data-i="' + i + '"><b>' + esc(x.name) + (x.similar ? ' <small class="sim">similar name</small>' : '') + '</b><span>' + esc([x.type, x.where].filter(Boolean).join(' · ')) + '</span>' + (S.here ? '<em>' + dist(metres(S.here, [x.lat, x.lng])) + '</em>' : '') + '</button>'; }).join('')
-          : '<p class="muted">Nothing found on OpenStreetMap. Try a nearby town or school, or look it up in Google or Apple Maps below.</p>';
+          : '<p class="muted">Nothing found. Try a nearby town or school, or look it up in Google or Apple Maps below.</p>';
+        if (found.some(function (x) { return x.src === 'google'; })) res.insertAdjacentHTML('beforeend', '<p class="pby">Powered by <img src="/img/pin/google-logo.png" alt="Google" width="50" height="20"></p>');
       });
     }
     box.querySelector('[data-f=go]').addEventListener('click', search);
@@ -1911,7 +1965,7 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
     res.addEventListener('click', function (e) {
       var b = e.target.closest('.prow'); if (!b) return; var x = found[+b.getAttribute('data-i')];
       ensure(); set([x.lat, x.lng], 'search', 0); P.found = x.name; if (P.pick) map.setView(P.pick, 17);
-      line('warn', 'Pin placed at “' + x.name + '” from OpenStreetMap. This is often the middle of the place, not the well: switch to Satellite and drag the pin onto the exact spot.');
+      line('warn', 'Pin placed at “' + x.name + '” from ' + (x.src === 'google' ? 'Google' : 'OpenStreetMap') + '. This is often the middle of the place, not the well: switch to Satellite and drag the pin onto the exact spot.');
       box.classList.remove('on');
     });
     fb.addEventListener('click', function () { $(o.pasteBox).classList.remove('on'); box.classList.toggle('on'); if (!qIn.value && o.start) qIn.value = o.start(); ext(); if (box.classList.contains('on')) { qIn.focus(); qIn.select(); } });
@@ -1999,7 +2053,7 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
         if (fromLock) msg('mLock', 'bad', why(j)); else msg('mList', 'bad', why(j));
         return;
       }
-      S.who = j.who || ''; S.linked = j.linked || '';
+      S.who = j.who || ''; S.linked = j.linked || ''; S.gmaps = j.gmaps || null; store.set('rfPinGmaps', JSON.stringify(S.gmaps));
       if (j.monday) { S.mode = 'monday'; S.pin = ''; store.del('rfPin'); store.set('rfPinMode', 'monday'); }
       if (S.who) S.name = S.who;
       else if (!S.name) { store.del('rfPin'); show('vLock'); ppNeedName(); msg('mLock', 'bad', 'This is the shared team PIN, so please add your name too.'); $('iName').focus(); return; }

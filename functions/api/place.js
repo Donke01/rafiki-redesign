@@ -43,6 +43,25 @@ async function photon(q, cc, near) {
   }).filter(x => x.name);
 }
 
+// Google Places (New) text search, used when the app's maps are Google maps (Map Tiles API keys are set),
+// because Google's terms allow its place results only on a Google map.
+const googleOn = env => !!(env.GOOGLE_MAPS_KEY && (env.GOOGLE_TILES_WEB_KEY || env.GOOGLE_TILES_ANDROID_KEY));
+async function google(env, q, cc, near) {
+  const body = { textQuery: q, languageCode: 'en', maxResultCount: 8 };
+  if (cc) body.regionCode = cc.toUpperCase();
+  const b = BOX[cc] || BOX.all;
+  body.locationBias = near ? { circle: { center: { latitude: +near[0], longitude: +near[1] }, radius: 50000 } }
+    : { rectangle: { low: { latitude: b[1], longitude: b[0] }, high: { latitude: b[3], longitude: b[2] } } };
+  const r = await fetch('https://places.googleapis.com/v1/places:searchText', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Goog-Api-Key': env.GOOGLE_MAPS_KEY,
+    'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.location,places.primaryTypeDisplayName' }, body: JSON.stringify(body) });
+  if (!r.ok) return null;
+  const j = await r.json();
+  return ((j && j.places) || []).map(p => {
+    const name = (p.displayName && p.displayName.text) || '', addr = String(p.formattedAddress || '');
+    return { name, where: addr.split(',').map(s => s.trim()).filter(s => s && s !== name).slice(0, 3).join(', '), type: (p.primaryTypeDisplayName && p.primaryTypeDisplayName.text) || '', lat: +(p.location && p.location.latitude), lng: +(p.location && p.location.longitude), src: 'google' };
+  }).filter(x => x.name);
+}
+
 export async function onRequestGet({ request, env }) {
   const chk = await checkPin(request, env);
   if (chk.res) return chk.res;
@@ -74,11 +93,13 @@ export async function onRequestGet({ request, env }) {
   const cc = CCS.includes(url.searchParams.get('cc')) ? url.searchParams.get('cc') : '';
   if (q.length < 2) return json({ ok: false, reason: 'bad-request' }, 400);
   const nm = /^(-?\d+\.\d+),(-?\d+\.\d+)$/.exec(url.searchParams.get('near') || ''), near = nm && inAfrica(+nm[1], +nm[2]) ? [(+nm[1]).toFixed(2), (+nm[2]).toFixed(2)] : null;
-  const key = 'place:' + cc + ':' + (near ? near.join(',') + ':' : '') + q.toLowerCase();
+  const g = googleOn(env);
+  const key = 'place:' + (g ? 'g:' : '') + cc + ':' + (near ? near.join(',') + ':' : '') + q.toLowerCase();
   if (env.FEED) { const hit = await env.FEED.get(key, 'json'); if (hit) return json({ ok: true, places: hit, cached: true }); }
   let places = [];
-  try { places = await nominatim(q, cc); } catch (e) { places = []; }
-  if (places.length < 3) {
+  if (g) { try { places = (await google(env, q, cc, near)) || []; } catch (e) { places = []; } }
+  if (!places.length) { try { places = await nominatim(q, cc); } catch (e) { places = []; } }
+  if (places.length < 3 && !places.some(p => p.src === 'google')) {
     try {
       const more = await photon(q, cc, near);
       more.forEach(m => { if (!places.some(p => Math.abs(p.lat - m.lat) < 0.002 && Math.abs(p.lng - m.lng) < 0.002)) places.push(m); });

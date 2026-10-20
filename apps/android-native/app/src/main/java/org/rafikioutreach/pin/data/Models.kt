@@ -88,6 +88,8 @@ data class Snapshot(
     val reviewOpen: Int,
     /** The monday.com name their own token is connected as ("" if not connected). */
     val linked: String = "",
+    /** The Google maps key for this app (Map Tiles API), set by the office in Cloudflare; "" = OpenStreetMap. */
+    val gmapsAndroid: String = "",
 ) {
     companion object {
         fun from(o: JSONObject): Snapshot {
@@ -108,6 +110,7 @@ data class Snapshot(
                 confirmed = conf.keys().asSequence().toSet(),
                 reviewOpen = o.optInt("reviewOpen"),
                 linked = o.optString("linked"),
+                gmapsAndroid = o.optJSONObject("gmaps")?.optString("android").orEmpty(),
             )
         }
     }
