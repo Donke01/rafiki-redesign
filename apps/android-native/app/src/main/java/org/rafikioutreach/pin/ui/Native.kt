@@ -88,15 +88,16 @@ fun PickSheet(title: String, options: List<Triple<String, String, String?>>, sel
 
 /** One filter chip in the swipeable row. */
 @Composable
-fun Chip(label: String, icon: String?, on: Boolean, onClick: () -> Unit, badge: Int = 0, trailing: String? = null, tag: String = "") {
+fun Chip(label: String, icon: String?, on: Boolean, onClick: () -> Unit, badge: Int = 0, trailing: String? = null, tag: String = "", hue: String = "") {
     val h = rememberHaptics()
+    val col = C.hue(hue)
     Row(
-        Modifier.clip(RoundedCornerShape(999.dp)).background(if (on) C.primary else SolidColor(C.card))
+        Modifier.clip(RoundedCornerShape(999.dp)).background(if (on) SolidColor(col.fg) else SolidColor(C.card))
             .then(if (!on) Modifier.border(1.dp, C.line, RoundedCornerShape(999.dp)) else Modifier)
             .clickable(role = Role.Tab) { h.tap(); onClick() }.heightIn(min = 40.dp).padding(horizontal = 14.dp).then(if (tag.isNotEmpty()) Modifier.testTag(tag) else Modifier),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        if (icon != null) { Icon(Ic.get(icon), null, tint = if (on) Color.White else C.blue, modifier = Modifier.size(17.dp)); Spacer(Modifier.width(6.dp)) }
+        if (icon != null) { Icon(Ic.get(icon), null, tint = if (on) Color.White else col.fg, modifier = Modifier.size(17.dp)); Spacer(Modifier.width(6.dp)) }
         Text(label, style = MaterialTheme.typography.labelLarge.copy(fontSize = 14.sp), color = if (on) Color.White else C.ink, maxLines = 1)
         if (badge > 0) { Spacer(Modifier.width(6.dp)); Text("$badge", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold, modifier = Modifier.clip(CircleShape).background(Red).padding(horizontal = 6.dp, vertical = 1.dp)) }
         if (trailing != null) { Spacer(Modifier.width(4.dp)); Icon(Ic.get(trailing), null, tint = if (on) Color.White else C.muted, modifier = Modifier.size(16.dp)) }

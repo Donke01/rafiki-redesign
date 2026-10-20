@@ -278,9 +278,9 @@ fun ProjectsScreen(m: AppModel, open: (String) -> Unit, planRoute: () -> Unit = 
         stickyHeader(key = "chips") {
             Box(Modifier.fillMaxWidth().background(androidx.compose.ui.graphics.Brush.verticalGradient(listOf(C.bg, C.bg, C.bg.copy(alpha = 0f)))).padding(top = 4.dp, bottom = 10.dp)) {
                 androidx.compose.foundation.lazy.LazyRow(Modifier.fillMaxWidth().testTag("chips"), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    item { Chip(COUNTRIES[ck] ?: t("All countries", "Nchi zote"), "map", false, { countrySheet = true }, trailing = "down", tag = "chip_country") }
+                    item { Chip(COUNTRIES[ck] ?: t("All countries", "Nchi zote"), "map", false, { countrySheet = true }, trailing = "down", tag = "chip_country", hue = "country") }
                     FILTERS.sortedBy { if (it.first == "all") 0 else 1 }.forEach { (k, label, icon) ->
-                        item(key = k) { Chip(label.split("|").let { t(it[0], it[1]) }, icon, f == k, { f = k; m.prefs.filter = k }, badge = if (k == "repairs") snap.repairs.size else 0, tag = "chip_$k") }
+                        item(key = k) { Chip(label.split("|").let { t(it[0], it[1]) }, icon, f == k, { f = k; m.prefs.filter = k }, badge = if (k == "repairs") snap.repairs.size else 0, tag = "chip_$k", hue = k) }
                     }
                 }
             }
@@ -363,7 +363,8 @@ private fun HomeTop(m: AppModel, s: Snapshot, here: LatLng?, search: () -> Unit,
                 row.forEach { (k, l, ic) ->
                     Row(Modifier.weight(1f).heightIn(min = 52.dp).clip(RoundedCornerShape(18.dp)).background(if (C.glassy) C.glass2 else C.card).border(1.dp, if (C.glassy) C.glassEdge else C.line, RoundedCornerShape(18.dp))
                         .clickable(role = Role.Button) { if (k == "new") newSite() else filter(k) }.padding(horizontal = 12.dp).testTag("quick_$k"), verticalAlignment = Alignment.CenterVertically) {
-                        Box(Modifier.size(32.dp).clip(RoundedCornerShape(11.dp)).background(C.tint), contentAlignment = Alignment.Center) { Icon(Ic.get(ic), null, tint = C.blue, modifier = Modifier.size(18.dp)) }
+                        val hu = C.hue(k)
+                        Box(Modifier.size(32.dp).clip(RoundedCornerShape(11.dp)).background(hu.bg), contentAlignment = Alignment.Center) { Icon(Ic.get(ic), null, tint = hu.fg, modifier = Modifier.size(18.dp)) }
                         Spacer(Modifier.width(10.dp)); Text(l, style = MaterialTheme.typography.labelLarge.copy(fontSize = 14.sp), color = C.ink)
                     }
                 }

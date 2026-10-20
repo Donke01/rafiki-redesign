@@ -941,6 +941,27 @@ html[data-theme=dark] .onb .opt{background:#18222B;border-color:#26323C}
 html[data-theme=dark] .stp .stin{background:radial-gradient(circle,transparent 3.2px,#E8EDF1 3.7px) -5px -5px/10px 10px}
 
 
+
+/* --- colours that mean the same thing everywhere: blue pinning, green visits & map, purple new sites,
+       amber repairs, teal due a visit, coral you, slate everything --- */
+:root{--hu-blue:#0A78C2;--hb-blue:#E3F1FC;--hu-green:#1C8A50;--hb-green:#E2F4EA;--hu-purple:#6E46C8;--hb-purple:#EEE7FB;--hu-amber:#B86E00;--hb-amber:#FDF0DC;--hu-teal:#0E7F86;--hb-teal:#DCF2F3;--hu-coral:#D2553A;--hb-coral:#FCE9E4;--hu-slate:#36505F;--hb-slate:#E8EDF1}
+html[data-theme=dark]{--hu-blue:#5BB4F2;--hb-blue:#12324A;--hu-green:#5FD08F;--hb-green:#123222;--hu-purple:#B49BFF;--hb-purple:#2A2145;--hu-amber:#F2B35B;--hb-amber:#3A2A10;--hu-teal:#5CD3D6;--hb-teal:#0F3133;--hu-coral:#FF9A82;--hb-coral:#3D1F18;--hu-slate:#A9BAC6;--hb-slate:#22303A}
+@media (prefers-color-scheme: dark){html:not([data-theme]){--hu-blue:#5BB4F2;--hb-blue:#12324A;--hu-green:#5FD08F;--hb-green:#123222;--hu-purple:#B49BFF;--hb-purple:#2A2145;--hu-amber:#F2B35B;--hb-amber:#3A2A10;--hu-teal:#5CD3D6;--hb-teal:#0F3133;--hu-coral:#FF9A82;--hb-coral:#3D1F18;--hu-slate:#A9BAC6;--hb-slate:#22303A}}
+.quick button[data-q=missing],.chip[data-f=missing],#tabs button[data-v=vList]{--hu:var(--hu-blue);--hb:var(--hb-blue)}
+.quick button[data-q=near],.chip[data-f=near],#tabs button[data-v=vMap]{--hu:var(--hu-green);--hb:var(--hb-green)}
+.quick button[data-q=new],#tabs button[data-v=vNew]{--hu:var(--hu-purple);--hb:var(--hb-purple)}
+.quick button[data-q=repairs],.chip[data-f=repairs],#tabs button[data-v=vOffice]{--hu:var(--hu-amber);--hb:var(--hb-amber)}
+.chip[data-f=due]{--hu:var(--hu-teal);--hb:var(--hb-teal)}
+#tabs button[data-v=vMe]{--hu:var(--hu-coral);--hb:var(--hb-coral)}
+.chip[data-f=all],#bCountry{--hu:var(--hu-slate);--hb:var(--hb-slate)}
+.quick button[data-q] i{background:var(--hb) !important;color:var(--hu) !important}
+#vList .tools .chip svg{color:var(--hu)}
+#vList .tools .chip[data-f][aria-pressed=true]{background:var(--hu) !important;border-color:transparent !important;color:#FFFFFF !important;box-shadow:none}
+#vList .tools .chip[data-f][aria-pressed=true] svg{color:#FFFFFF}
+html[data-theme=dark] #vList .tools .chip[data-f][aria-pressed=true]{color:#0B1116 !important}html[data-theme=dark] #vList .tools .chip[data-f][aria-pressed=true] svg{color:#0B1116}
+#tabs button[data-v][aria-current=page]{color:var(--hu) !important}
+#tabs button[data-v][aria-current=page] > svg{background:var(--hb) !important;color:var(--hu) !important}
+html:not([data-theme=sun]) .tabs .plus span.ic{background:linear-gradient(135deg,#9A78F0,#6E46C8) !important;box-shadow:0 6px 14px rgba(110,70,200,.32)}
 /* --- feels like a phone app (Oct 2026) --- */
 @keyframes vFwd{from{transform:translateX(42%);opacity:.2}to{transform:none;opacity:1}}
 @keyframes vBack{from{transform:translateX(-18%);opacity:.3}to{transform:none;opacity:1}}

@@ -132,3 +132,34 @@ fun AppBackground(modifier: Modifier = androidx.compose.ui.Modifier) {
         }
     }
 }
+
+/** Colours that mean the same thing everywhere: blue = pinning, green = visits and the map,
+ *  purple = new sites, amber = repairs, teal = due a visit, coral = you, slate = everything. */
+data class Hue(val fg: Color, val bg: Color)
+
+private val HUE_LIGHT = mapOf(
+    "blue" to Hue(Color(0xFF0A78C2), Color(0xFFE3F1FC)), "green" to Hue(Color(0xFF1C8A50), Color(0xFFE2F4EA)),
+    "purple" to Hue(Color(0xFF6E46C8), Color(0xFFEEE7FB)), "amber" to Hue(Color(0xFFB86E00), Color(0xFFFDF0DC)),
+    "teal" to Hue(Color(0xFF0E7F86), Color(0xFFDCF2F3)), "coral" to Hue(Color(0xFFD2553A), Color(0xFFFCE9E4)),
+    "slate" to Hue(Color(0xFF36505F), Color(0xFFE8EDF1)),
+)
+private val HUE_DARK = mapOf(
+    "blue" to Hue(Color(0xFF5BB4F2), Color(0xFF12324A)), "green" to Hue(Color(0xFF5FD08F), Color(0xFF123222)),
+    "purple" to Hue(Color(0xFFB49BFF), Color(0xFF2A2145)), "amber" to Hue(Color(0xFFF2B35B), Color(0xFF3A2A10)),
+    "teal" to Hue(Color(0xFF5CD3D6), Color(0xFF0F3133)), "coral" to Hue(Color(0xFFFF9A82), Color(0xFF3D1F18)),
+    "slate" to Hue(Color(0xFFA9BAC6), Color(0xFF22303A)),
+)
+
+/** The colour for an action, filter or tab key. */
+fun Palette.hue(key: String): Hue {
+    val name = when (key) {
+        "pin", "missing", "list" -> "blue"
+        "visit", "near", "map" -> "green"
+        "new" -> "purple"
+        "repairs", "office" -> "amber"
+        "due" -> "teal"
+        "me" -> "coral"
+        else -> "slate"
+    }
+    return (if (dark) HUE_DARK else HUE_LIGHT).getValue(name)
+}
