@@ -157,11 +157,11 @@ fun Shell(m: AppModel) {
                 pid != null -> ProjectScreen(m, pid, here.projectTab) { stack.removeAt(stack.lastIndex) }
                 here.sub == "report" -> org.rafikioutreach.pin.ui.ReportScreen(m) { stack.removeAt(stack.lastIndex) }
                 here.sub == "route" -> org.rafikioutreach.pin.ui.RouteScreen(m, { go(Place(here.tab, it)) }) { stack.removeAt(stack.lastIndex) }
-                here.tab == "map" -> MapScreen(m) { go(Place("map", it)) }
+                here.tab == "map" -> MapScreen(m, { go(Place("map", it)) }) { go(Place("map", it, "visit")) }
                 here.tab == "new" -> NewSiteScreen(m) { id -> if (id != null) { tab("list"); go(Place("list", id)) } }
                 here.tab == "me" -> MeScreen(m) { go(Place("me", sub = "report")) }
                 here.tab == "office" -> org.rafikioutreach.pin.ui.OfficeScreen(m) { go(Place("office", it)) }
-                else -> ProjectsScreen(m, { go(Place("list", it)) }, { go(Place("list", sub = "route")) }) { tab("new") }
+                else -> ProjectsScreen(m, { go(Place("list", it)) }, { go(Place("list", sub = "route")) }, { tab("new") }) { go(Place("list", it, "visit")) }
             }
         }
         // bottom tabs, floating

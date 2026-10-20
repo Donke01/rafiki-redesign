@@ -47,5 +47,8 @@ class Locator(context: Context) {
         }
     }
 
+    /** For tests: pretend the phone is here. */
+    fun pretend(f: Fix) { _fix.value = f }
+
     fun stop() { runCatching { lm.removeUpdates(listener) }; running = false }
 }

@@ -71,6 +71,8 @@ class AppModel(app: Application) : AndroidViewModel(app) {
     /** Me → "Show the welcome screens again", and where to go when the welcome ends. */
     var replayOnb by androidx.compose.runtime.mutableStateOf(false)
     var goTab by androidx.compose.runtime.mutableStateOf<String?>(null)
+    /** "You’re at …" banners closed with ×, until the app is closed. */
+    val dismissed = androidx.compose.runtime.mutableStateListOf<String>()
 
     /** Sign in with a PIN; shared team PINs need a name. Returns an error text, or null when in. */
     suspend fun signIn(pin: String, name: String): String? {

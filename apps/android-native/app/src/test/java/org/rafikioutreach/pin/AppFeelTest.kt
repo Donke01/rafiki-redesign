@@ -121,4 +121,23 @@ class AppFeelTest {
         rule.mainClock.autoAdvance = false; shot("43-stamps")
         org.rafikioutreach.pin.ui.Motion.on = true
     }
+
+    @Test fun map_nearest_and_you_are_here() {
+        org.rafikioutreach.pin.ui.Motion.on = false
+        val m = model(signedIn = true, onbDone = true)
+        Onb.enabled = false
+        m.locator.pretend(org.rafikioutreach.pin.data.Fix(org.rafikioutreach.pin.data.LatLng(0.5150, 35.2700), 8, System.currentTimeMillis()))
+        show(m)
+        rule.onNodeWithTag("nav_map").performClick()
+        rule.onNodeWithTag("here").assertExists()
+        rule.onNodeWithText("Nearest to you").performClick()
+        rule.waitUntil(3000) { rule.onAllNodesWithText("Kapsaret Borehole").fetchSemanticsNodes().isNotEmpty() }
+        rule.mainClock.autoAdvance = false; shot("44-map-near"); rule.mainClock.autoAdvance = true
+        rule.onNodeWithTag("here_x").performClick()
+        rule.onNodeWithTag("here").assertDoesNotExist()
+        m.dismissed.clear(); rule.waitForIdle()
+        rule.onNodeWithTag("here_visit").performClick()
+        rule.waitUntil(3000) { rule.onAllNodesWithText("I’ve arrived").fetchSemanticsNodes().isNotEmpty() }
+        org.rafikioutreach.pin.ui.Motion.on = true
+    }
 }

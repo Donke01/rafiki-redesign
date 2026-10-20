@@ -1,5 +1,9 @@
 package org.rafikioutreach.pin.ui
 
+import androidx.compose.ui.semantics.contentDescription
+
+import androidx.compose.ui.semantics.semantics
+
 import androidx.compose.ui.text.withStyle
 
 import androidx.compose.ui.unit.sp
@@ -76,7 +80,7 @@ fun dotColor(s: Snapshot, p: Project): Int = when (s.repairs[p.id]?.state) {
 }
 
 @Composable
-fun MapScreen(m: AppModel, open: (String) -> Unit) {
+fun MapScreen(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit = open) {
     val s by m.snap.collectAsState()
     val fix by m.fix.collectAsState()
     val snap = s ?: return
@@ -86,7 +90,8 @@ fun MapScreen(m: AppModel, open: (String) -> Unit) {
             snap.projects.filter { it.gps != null }.map { Dot(it.id, it.gps!!, dotColor(snap, it), snap.repairs.containsKey(it.id), it.title) },
             fix?.ll, open, Modifier.fillMaxSize(), fitKey = snap.projects.size,
         )
-        Card(Modifier.padding(12.dp).padding(end = 58.dp).align(Alignment.TopStart), pad = 12.dp) {
+        Column(Modifier.padding(12.dp).padding(end = 58.dp).align(Alignment.TopStart)) {
+        Card(pad = 12.dp) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(t("$pinned of ${snap.projects.size} projects pinned", "Miradi $pinned kati ya ${snap.projects.size} ina mahali"), style = MaterialTheme.typography.titleSmall, color = C.ink, modifier = Modifier.weight(1f))
                 Text(t("${snap.projects.size - pinned} to go", "${snap.projects.size - pinned} zimebaki"), style = MaterialTheme.typography.bodySmall, color = C.muted)
@@ -96,30 +101,53 @@ fun MapScreen(m: AppModel, open: (String) -> Unit) {
                 Legend(Color(0xFF1C7C4A), t("Pinned", "Ina mahali")); Legend(Color(0xFFD98200), t("Needs repair", "Inahitaji matengenezo")); Legend(Color(0xFFB3261E), t("Not working", "Haifanyi kazi"))
             }
         }
-        nearHere(snap, fix?.ll)?.let { (p, d) ->
-            HereBanner(p, d, m.prefs.miles, Modifier.align(Alignment.BottomCenter).padding(12.dp)) { open(p.id) }
+        nearHere(snap, fix?.ll)?.takeIf { !m.dismissed.contains(it.first.id) }?.let { (p, d) ->
+            HereBanner(p, d, m.prefs.miles, Modifier.padding(top = 10.dp), { visit(p.id) }, { open(p.id) }) { m.dismissed.add(p.id) }
+        }
+        }
+        NearestSheet(m, snap, fix?.ll, Modifier.align(Alignment.BottomCenter).padding(12.dp), open)
+    }
+}
+
+/** "Nearest to you": the three closest pinned projects, folded away until you open it. */
+@Composable
+private fun NearestSheet(m: AppModel, snap: Snapshot, here: LatLng?, modifier: Modifier, open: (String) -> Unit) {
+    var shut by remember { mutableStateOf(true) }
+    val list = here?.let { h -> snap.projects.filter { it.gps != null }.map { it to Geo.metres(h, it.gps!!) }.sortedBy { it.second }.take(3) } ?: emptyList()
+    Card(modifier.testTag("nearest"), pad = 0.dp) {
+        Row(Modifier.fillMaxWidth().clickable(role = Role.Button) { shut = !shut }.heightIn(min = 56.dp).padding(horizontal = 18.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(t("Nearest to you", "Iliyo karibu nawe"), style = MaterialTheme.typography.titleMedium, color = C.ink, modifier = Modifier.weight(1f))
+            Text(if (shut) t("Show", "Onyesha") else t("Hide", "Ficha"), style = MaterialTheme.typography.labelLarge, color = C.muted)
+        }
+        if (!shut) Column(Modifier.padding(start = 12.dp, end = 12.dp, bottom = 12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (here == null) Text(t("Allow location to see the projects closest to you.", "Ruhusu mahali ili uone miradi iliyo karibu nawe."), style = MaterialTheme.typography.bodyMedium, color = C.muted, modifier = Modifier.padding(6.dp))
+            list.forEach { (p, _) -> ProjectRow(m, snap, p, here) { open(p.id) } }
         }
     }
 }
 
 fun nearHere(s: Snapshot, here: LatLng?): Pair<Project, Double>? {
     here ?: return null
-    return s.projects.filter { it.gps != null }.map { it to Geo.metres(here, it.gps!!) }.minByOrNull { it.second }?.takeIf { it.second < 300 }
+    return s.projects.filter { it.gps != null }.map { it to Geo.metres(here, it.gps!!) }.minByOrNull { it.second }?.takeIf { it.second <= 200 }
 }
 
 @Composable
-fun HereBanner(p: Project, d: Double, miles: Boolean, modifier: Modifier, open: () -> Unit) {
-    Row(
-        modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(OkBrush).clickable(onClick = open).padding(14.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(Ic.get("pin"), null, tint = Color.White, modifier = Modifier.size(22.dp))
-        Spacer(Modifier.width(10.dp))
-        Column(Modifier.weight(1f)) {
-            Text(t("You’re at ${p.title}", "Uko ${p.title}"), color = Color.White, style = MaterialTheme.typography.titleSmall, maxLines = 2)
-            Text(t(Geo.dist(d, miles) + " away · tap to report a visit", "Umbali " + Geo.dist(d, miles) + " · gusa kuripoti ziara"), color = Color(0xFFD7F5E3), style = MaterialTheme.typography.bodySmall)
+fun HereBanner(p: Project, d: Double, miles: Boolean, modifier: Modifier, visit: () -> Unit, open: () -> Unit, dismiss: () -> Unit) {
+    Column(modifier.fillMaxWidth().clip(RoundedCornerShape(22.dp)).background(OkBrush).padding(14.dp).testTag("here")) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(Ic.get("pin"), null, tint = Color.White, modifier = Modifier.size(20.dp)); Spacer(Modifier.width(8.dp))
+            Text(t("You’re at ${p.title}", "Uko ${p.title}") + " · " + Geo.dist(d, miles), color = Color.White, style = MaterialTheme.typography.titleSmall, maxLines = 2)
         }
-        Icon(Ic.get("chev"), null, tint = Color.White)
+        Row(Modifier.padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(t("Report a visit", "Ripoti ziara"), color = Color(0xFF0E4A2B), style = MaterialTheme.typography.labelLarge,
+                modifier = Modifier.clip(RoundedCornerShape(99.dp)).background(Color.White).clickable(role = Role.Button, onClick = visit).heightIn(min = 44.dp).padding(horizontal = 16.dp, vertical = 12.dp).testTag("here_visit"))
+            Text(t("Open", "Fungua"), color = Color.White, style = MaterialTheme.typography.labelLarge,
+                modifier = Modifier.clip(RoundedCornerShape(99.dp)).border(1.dp, Color(0x99FFFFFF), RoundedCornerShape(99.dp)).clickable(role = Role.Button, onClick = open).heightIn(min = 44.dp).padding(horizontal = 16.dp, vertical = 12.dp).testTag("here_open"))
+            Spacer(Modifier.weight(1f))
+            Box(Modifier.size(44.dp).clip(CircleShape).border(1.dp, Color(0x99FFFFFF), CircleShape).clickable(role = Role.Button, onClick = dismiss).semantics { contentDescription = t("Not now", "Si sasa") }.testTag("here_x"), contentAlignment = Alignment.Center) {
+                Icon(Ic.get("x"), null, tint = Color.White, modifier = Modifier.size(18.dp))
+            }
+        }
     }
 }
 
@@ -145,7 +173,7 @@ private val FILTERS = listOf(
 )
 
 @Composable
-fun ProjectsScreen(m: AppModel, open: (String) -> Unit, planRoute: () -> Unit = {}, newSite: () -> Unit = {}) {
+fun ProjectsScreen(m: AppModel, open: (String) -> Unit, planRoute: () -> Unit = {}, newSite: () -> Unit = {}, visit: (String) -> Unit = open) {
     val s by m.snap.collectAsState()
     val fix by m.fix.collectAsState()
     val waiting by m.waiting.collectAsState()
@@ -185,7 +213,7 @@ fun ProjectsScreen(m: AppModel, open: (String) -> Unit, planRoute: () -> Unit = 
     fun pick(k: String) { f = k; m.prefs.filter = k; scope.launch { list.animateScrollToItem(maxOf(0, list.layoutInfo.totalItemsCount - rows.size - 2)) } }
     LazyColumn(Modifier.fillMaxSize().testTag("projects"), state = list, contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         item { HomeTop(m, snap, here, { scope.launch { list.animateScrollToItem(6); runCatching { focus.requestFocus() } } }, { pick(it) }, newSite) }
-        nearHere(snap, here)?.let { (p, d) -> item { HereBanner(p, d, m.prefs.miles, Modifier) { open(p.id) } } }
+        nearHere(snap, here)?.takeIf { !m.dismissed.contains(it.first.id) }?.let { (p, d) -> item { HereBanner(p, d, m.prefs.miles, Modifier, { visit(p.id) }, { open(p.id) }) { m.dismissed.add(p.id) } } }
         if (banner != null) item { Card(border = C.warnBg) { Text(banner!!, color = C.warn, style = MaterialTheme.typography.bodyMedium) } }
         if (waiting > 0) item {
             Card(brush = SolidColor(C.warnBg)) {
