@@ -949,6 +949,15 @@ html[data-theme=dark] .stp .stin{background:radial-gradient(circle,transparent 3
 .glogo{margin:0 0 6px 8px !important;pointer-events:none;line-height:0}.glogo img{width:66px;height:26px}
 .pby{display:flex;align-items:center;justify-content:flex-end;gap:4px;margin:6px 4px 0;font-size:.75rem;color:var(--muted)}.pby img{width:50px;height:20px}
 
+/* --- fingerprint lock --- */
+.mbio .mh{display:flex;gap:12px;align-items:flex-start;margin-bottom:12px}.mbio .mh h2{margin:0 0 2px}.mbio .mh p{margin:0}
+.mbio .mi{width:40px;height:40px;border-radius:12px;flex:none;display:flex;align-items:center;justify-content:center;background:var(--hb-blue);color:var(--hu-blue)}.mbio .mi svg{width:20px;height:20px}
+.biolock{position:fixed;inset:0;z-index:5000;display:flex;align-items:center;justify-content:center;padding:28px;background:var(--bg);background-image:radial-gradient(120% 80% at 50% 0%,var(--tint),transparent)}
+.biolock .bl-in{width:100%;max-width:360px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+.biolock .bl-ic{width:96px;height:96px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--tint);color:var(--blue);margin-bottom:6px}.biolock .bl-ic svg{width:48px;height:48px}
+.biolock h2{margin:0}.biolock p{margin:0}.biolock input{width:100%;text-align:center;font-size:1.2rem;letter-spacing:.3em}
+body.bio-locked > :not(.biolock){visibility:hidden}
+
 /* --- connect monday.com --- */
 .mcon .mh{display:flex;gap:12px;align-items:flex-start}.mcon .mh h2{margin:0 0 2px}.mcon .mh p{margin:0}
 .mcon .mi{width:40px;height:40px;border-radius:12px;flex:none;display:flex;align-items:center;justify-content:center;background:var(--hb-purple);color:var(--hu-purple)}.mcon .mi svg{width:20px;height:20px}
@@ -1387,6 +1396,7 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
           <div class="kv"><span>Waiting to send</span><span id="meOut">Nothing</span></div>
           <div style="margin-top:12px"><button class="btn light small wide" id="lockBtn" type="button">Lock the app</button></div>
         </div>
+        <div class="card mbio hidden" id="meBio"></div>
         <div class="card mcon hidden" id="meMonday"></div>
         <div id="meWait"></div>
         <div id="meWork"></div>
@@ -2023,14 +2033,14 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
   function ppReset() { $('iPin').value = ''; ppDraw(); }
   ppDraw();
   if (S.name) $('ppHi').textContent = 'Habari ' + S.name.split(' ')[0] + ', karibu tena.';
-  function forget() { S.pin = ''; store.del('rfPin'); if (S.mode === 'monday') { S.mode = ''; store.del('rfPinMode'); store.del('rfPinPhoto'); } }
+  function forget() { store.del('rfPinBio'); S.pin = ''; store.del('rfPin'); if (S.mode === 'monday') { S.mode = ''; store.del('rfPinMode'); store.del('rfPinPhoto'); } }
   function lock() {
     pick.stop(); nPick.stop();
     var wasMonday = S.mode === 'monday'; forget(); ppReset(); msg('mLock', '', ''); msg('mSign', '', '');
     if (wasMonday) fetch('/api/pin-auth/logout', { method: 'POST' }).catch(function () {});
     show('vLock');
   }
-  $('lockBtn').addEventListener('click', lock);
+  $('lockBtn').addEventListener('click', function () { if (bioOn()) bioGate(); else lock(); });
   function lockOut(j) { var wasMonday = S.mode === 'monday'; forget(); show('vLock'); if (!wasMonday) { ppReset(); var dd = $('ppDots'); dd.classList.remove('shake'); void dd.offsetWidth; dd.classList.add('shake'); } msg(wasMonday || j.reason === 'signin' ? 'mSign' : 'mLock', 'bad', wasMonday ? 'Please sign in with monday.com again.' : why(j)); }
   // sign in with monday.com: come back to the same screen afterwards
   // monday.com sign-in on the lock screen: with your own monday.com token (works before the app is installed for
@@ -3460,6 +3470,58 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
   }
   $('feedMore').addEventListener('click', function () { feedN = feedN > 8 ? 8 : 40; actDraw(); });
   $('actFeed').addEventListener('click', function (e) { var g = e.target.closest('.go'); if (g) openProj(g.getAttribute('data-id'), 'pin'); });
+  // --- fingerprint / face / Touch ID lock (the device's own check, through WebAuthn) ---------
+  var b64u = function (buf) { return btoa(String.fromCharCode.apply(null, new Uint8Array(buf))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
+  var unb64u = function (s) { s = s.replace(/-/g, '+').replace(/_/g, '/'); while (s.length % 4) s += '='; return Uint8Array.from(atob(s), function (c) { return c.charCodeAt(0); }); };
+  var rnd = function (n) { var a = new Uint8Array(n); crypto.getRandomValues(a); return a; };
+  function bioOn() { return !!store.get('rfPinBio') && !!(S.pin || S.mode === 'monday'); }
+  function bioCan() { return window.PublicKeyCredential && PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable ? PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable().catch(function () { return false; }) : Promise.resolve(false); }
+  function bioCheck() {
+    var id = store.get('rfPinBio'); if (!id) return Promise.resolve(false);
+    return navigator.credentials.get({ publicKey: { challenge: rnd(32), rpId: location.hostname, allowCredentials: [{ type: 'public-key', id: unb64u(id) }], userVerification: 'required', timeout: 60000 } })
+      .then(function (c) { return !!c; }, function () { return false; });
+  }
+  function bioUi() {
+    var c = $('meBio'); if (!c) return;
+    bioCan().then(function (can) {
+      if (!can && !store.get('rfPinBio')) { c.classList.add('hidden'); return; }
+      c.classList.remove('hidden'); var on = !!store.get('rfPinBio');
+      c.innerHTML = '<div class="mh"><span class="mi">' + oic('lock') + '</span><div><h2>' + tr('Unlock with fingerprint or face', 'Fungua kwa alama ya kidole au uso') + '</h2><p class="muted">' +
+        (on ? tr('Asked when the app opens and after a minute away.', 'Inaulizwa programu inapofunguliwa na baada ya dakika moja nje.') : tr('Keeps the app private if someone else picks up your phone or computer. Uses Touch ID, fingerprint, face or the device’s screen lock.', 'Inaweka programu faragha mtu mwingine akishika simu au kompyuta yako. Inatumia Touch ID, alama ya kidole, uso au kufuli ya skrini.')) + '</p></div></div>' +
+        '<button class="btn wide ' + (on ? 'light' : '') + '" id="bioToggle" type="button">' + (on ? tr('Turn off', 'Zima') : tr('Turn on', 'Washa')) + '</button><span class="msg" id="bioMsg" aria-live="polite"></span>';
+    });
+  }
+  $('meBio').addEventListener('click', function (e) {
+    if (!e.target.closest('#bioToggle')) return;
+    if (store.get('rfPinBio')) { store.del('rfPinBio'); bioUi(); $('lockBtn').textContent = S.mode === 'monday' ? 'Sign out' : 'Lock the app'; return; }
+    navigator.credentials.create({ publicKey: { challenge: rnd(32), rp: { name: 'RAFIKI Pin', id: location.hostname }, user: { id: rnd(16), name: S.name || 'RAFIKI Pin', displayName: S.name || 'RAFIKI Pin' },
+      pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }], authenticatorSelection: { authenticatorAttachment: 'platform', userVerification: 'required', residentKey: 'discouraged' }, timeout: 60000, attestation: 'none' } })
+      .then(function (c) { if (!c) throw 0; store.set('rfPinBio', b64u(c.rawId)); buzz(); bioUi(); $('lockBtn').textContent = tr('Lock the app', 'Funga programu'); toast(tr('Fingerprint unlock is on ✓', 'Kufungua kwa alama ya kidole kumewashwa ✓')); },
+        function () { msg('bioMsg', 'bad', tr('Not turned on.', 'Haijawashwa.')); });
+  });
+  // the gate: covers everything until the device check (or the PIN) says it's you
+  function bioGate() {
+    if (!bioOn() || $('bioLock')) return;
+    var g = document.createElement('div'); g.id = 'bioLock'; g.className = 'biolock'; g.setAttribute('role', 'dialog'); g.setAttribute('aria-modal', 'true'); g.setAttribute('aria-label', 'RAFIKI Pin is locked');
+    g.innerHTML = '<div class="bl-in"><span class="bl-ic">' + oic('lock') + '</span><h2>' + tr('RAFIKI Pin is locked', 'RAFIKI Pin imefungwa') + '</h2><p class="muted">' + esc(S.name || '') + '</p>' +
+      '<button class="btn wide" id="blGo" type="button">' + tr('Unlock', 'Fungua') + '</button><span class="msg" id="blMsg" aria-live="polite"></span>' +
+      (S.pin ? '<button class="lnk" id="blPinBtn" type="button">' + tr('Use my RAFIKI PIN instead', 'Tumia PIN yangu ya RAFIKI') + '</button><input class="hidden" id="blPin" type="password" inputmode="numeric" autocomplete="off" placeholder="' + tr('Your PIN', 'PIN yako') + '">' : '') +
+      '<button class="lnk muted" id="blOut" type="button">' + tr('Sign out', 'Toka') + '</button></div>';
+    document.body.appendChild(g); document.body.classList.add('bio-locked'); swApply();
+    var done = function () { g.remove(); document.body.classList.remove('bio-locked'); };
+    var go = function () { msg('blMsg', '', ''); bioCheck().then(function (ok) { if (ok) done(); else msg('blMsg', 'bad', tr('Not unlocked. Try again.', 'Haijafunguliwa. Jaribu tena.')); }); };
+    $('blGo').addEventListener('click', go);
+    if ($('blPinBtn')) $('blPinBtn').addEventListener('click', function () { this.classList.add('hidden'); $('blPin').classList.remove('hidden'); $('blPin').focus(); });
+    if ($('blPin')) $('blPin').addEventListener('input', function () { if (this.value === S.pin) done(); });
+    $('blOut').addEventListener('click', function () { done(); lock(); });
+    $('blGo').focus();
+  }
+  var awayAt = 0;
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'hidden') awayAt = Date.now();
+    else { if (awayAt && Date.now() - awayAt > 60000) bioGate(); awayAt = 0; }
+  });
+
   // --- Me › Connect monday.com (personal token, until the app is installed for everyone) ---
   var TOKURL = 'https://rafikicap-company.monday.com/apps/manage/tokens', tokWait = false;
   var looksTok = function (t) { return /^[A-Za-z0-9._-]{40,4000}$/.test(String(t || '').trim()); };
@@ -3507,7 +3569,7 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
     homeTx();
     $('meAv').innerHTML = S.photo && S.mode === 'monday' ? '<img src="' + esc(S.photo) + '" alt="">' : '<i>' + esc((S.name || '?').split(/\s+/).map(function (w) { return w.charAt(0); }).slice(0, 2).join('').toUpperCase()) + '</i>';
     $('mePin').innerHTML = S.mode === 'monday' ? (S.photo ? '<img class="avatar" src="' + esc(S.photo) + '" alt="" onerror="this.remove()">' : '') + 'monday.com' : S.who ? 'Your own PIN' : 'Shared team PIN';
-    $('lockBtn').textContent = S.mode === 'monday' ? 'Sign out' : 'Lock the app';
+    $('lockBtn').textContent = bioOn() ? tr('Lock the app', 'Funga programu') : S.mode === 'monday' ? 'Sign out' : 'Lock the app'; bioUi();
     outboxUi(); installUi(); stampsUi(); waitDraw(); meWorkDraw();
     if (actCache) actDraw(); if (teamCache) teamTodayDraw();
     if (!navigator.onLine) { var nos = '<p class="muted">' + tr('This needs a signal.', 'Hii inahitaji mtandao.') + '</p>'; if (!actCache) { $('actTable').innerHTML = nos; $('mmBody').innerHTML = nos; } if (!teamCache) $('ttBody').innerHTML = nos; return; }
@@ -3893,7 +3955,7 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
 
   // "Your jobs and visits" for the field team
   function myWorkUi() {
-    var today = new Date().toISOString().slice(0, 10), as = (S.assigned || []).slice().sort(function (a, z) { return a.date.localeCompare(z.date); }), jobs = (S.jobs || []).filter(function (id) { return S.repairs[id]; });
+    var today = (function (d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); })(new Date()), as = (S.assigned || []).slice().sort(function (a, z) { return a.date.localeCompare(z.date); }), jobs = (S.jobs || []).filter(function (id) { return S.repairs[id]; });
     if (!as.length && !jobs.length) { $('myWork').innerHTML = ''; return; }
     $('myWork').innerHTML = '<div class="card mywork"><h2>Your work</h2>' +
       as.map(function (a) { return '<button class="row" type="button" data-id="' + esc(a.id) + '" data-visit="1"><span class="th" aria-hidden="true">🗓</span><span class="tx"><span class="t">' + esc(a.t || pname(a.id)) + '</span><span class="s">Visit · ' + esc(a.date) + (a.note ? ' · ' + esc(a.note) : '') + ' · from ' + esc(a.by) + '</span></span><span class="tag ' + (a.date < today ? 'bad' : a.date === today ? 'has' : '') + '">' + (a.date < today ? 'Overdue' : a.date === today ? 'Today' : a.date.slice(5)) + '</span></button>'; }).join('') +
@@ -3949,7 +4011,7 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
   show('vLock');
   // already signed in on this phone: open straight on the same screen from what's saved, and check with the server in the background
   var quick = !!((S.pin || S.mode === 'monday') && (S.name || S.who) && S.projects.length && back !== 'out');
-  if (quick) { $('who').textContent = S.name || S.who; adminUi(); applyHash(true); }
+  if (quick) { $('who').textContent = S.name || S.who; adminUi(); applyHash(true); bioGate(); }
   fetch('/api/pin-auth/me', { headers: { Accept: 'application/json' } }).then(function (r) { return r.json(); }).then(function (a) {
     lockScreen(a.available, back && back !== 'ok' ? SIGNIN[back] || SIGNIN.token : '');
     if (a.user) {

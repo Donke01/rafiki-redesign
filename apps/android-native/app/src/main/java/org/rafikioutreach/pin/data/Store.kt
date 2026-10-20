@@ -25,7 +25,8 @@ class Prefs(context: Context) {
 
     fun saveSnapshot(raw: JSONObject) = runCatching { listFile.writeText(raw.toString()) }
     fun loadSnapshot(): JSONObject? = runCatching { JSONObject(listFile.readText()) }.getOrNull()
-    fun forget() { pin = ""; session = "" }
+    var bio: Boolean get() = sp.getBoolean("bio", false); set(v) = sp.edit().putBoolean("bio", v).apply()
+    fun forget() { pin = ""; session = ""; bio = false }
 }
 
 /** One change waiting to be sent: the action, its photos, and how far it got. */

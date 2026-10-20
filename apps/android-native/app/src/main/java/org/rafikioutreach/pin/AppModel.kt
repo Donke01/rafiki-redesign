@@ -93,7 +93,19 @@ class AppModel(app: Application) : AndroidViewModel(app) {
         return null
     }
 
+    // --- fingerprint / face lock -----------------------------------------------------------------
+    /** True while the app waits for a fingerprint, face or the phone's screen lock before showing anything. */
+    val bioLocked = MutableStateFlow(prefs.bio && (prefs.pin.isNotBlank() || prefs.session.isNotBlank()))
+    private var awayAt = 0L
+    fun wentAway() { awayAt = System.currentTimeMillis() }
+    /** Back in the app: after a minute away, ask for the fingerprint again. */
+    fun cameBack() { if (prefs.bio && _signedIn.value && awayAt > 0 && System.currentTimeMillis() - awayAt > 60_000) bioLocked.value = true; awayAt = 0 }
+    fun unlocked() { bioLocked.value = false }
+    /** "Lock the app": with the fingerprint lock on it only locks (the PIN stays); otherwise it signs out. */
+    fun lockOrSignOut() { if (prefs.bio) bioLocked.value = true else lock() }
+
     fun lock() {
+        bioLocked.value = false
         val s = prefs.session
         prefs.forget(); _signedIn.value = false
         if (s.isNotBlank()) viewModelScope.launch { Api(BuildConfig.SERVER, { "" }, { s }).also { it.transport = api.transport }.logout() }

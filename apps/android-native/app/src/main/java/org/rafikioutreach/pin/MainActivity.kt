@@ -73,7 +73,7 @@ import org.rafikioutreach.pin.ui.RafikiTheme
 /** Where you are in the app: a tab, or a project on top of it. */
 data class Place(val tab: String, val project: String? = null, val projectTab: String = "pin", val sub: String? = null)
 
-class MainActivity : ComponentActivity() {
+class MainActivity : androidx.fragment.app.FragmentActivity() {
     private val model: AppModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -109,7 +109,7 @@ fun App(m: AppModel) {
                 m.locator.start()
                 // back from the camera, a photo or a permission box: no reload; away a while: fetch quietly
                 if (System.currentTimeMillis() - m.lastRefresh > 5 * 60_000) m.refresh(quiet = true)
-            }; Lifecycle.Event.ON_PAUSE -> m.locator.stop(); else -> {} } }
+            }; Lifecycle.Event.ON_PAUSE -> m.locator.stop(); Lifecycle.Event.ON_STOP -> m.wentAway(); Lifecycle.Event.ON_START -> m.cameBack(); else -> {} } }
         owner.lifecycle.addObserver(o); onDispose { owner.lifecycle.removeObserver(o) }
     }
     // welcome: before signing in, and for a moment every time the app opens; the full one the first time
@@ -118,7 +118,8 @@ fun App(m: AppModel) {
     Box(Modifier.fillMaxSize()) {
         org.rafikioutreach.pin.ui.AppBackground(Modifier.matchParentSize())
         Box(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().imePadding()) {
-            if (!signedIn) LockScreen(m) else Shell(m)
+            val bioLocked by m.bioLocked.collectAsState()
+            if (!signedIn) LockScreen(m) else if (bioLocked) org.rafikioutreach.pin.ui.BioLockScreen(m) else Shell(m)
         }
         when {
             !signedIn && !helloDone -> org.rafikioutreach.pin.ui.Welcome(m, false) { helloDone = true }
