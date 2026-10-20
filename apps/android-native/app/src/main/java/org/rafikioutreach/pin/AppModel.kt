@@ -143,12 +143,17 @@ class AppModel(app: Application) : AndroidViewModel(app) {
         prefs.saveSnapshot(raw); _snap.value = Snapshot.from(raw)
     }
 
-    /** Sends anything waiting, then fetches the latest list. */
-    fun refresh(done: ((Boolean) -> Unit)? = null) = viewModelScope.launch {
-        _busy.value = true
+    /** When the list was last fetched (ms), so coming back to the app doesn't reload every time. */
+    var lastRefresh = 0L
+        private set
+
+    /** Sends anything waiting, then fetches the latest list. [quiet] skips the spinning refresh button. */
+    fun refresh(quiet: Boolean = false, done: ((Boolean) -> Unit)? = null) = viewModelScope.launch {
+        lastRefresh = System.currentTimeMillis()
+        if (!quiet) _busy.value = true
         sendWaiting()
         val r = api.list()
-        _busy.value = false
+        if (!quiet) _busy.value = false
         when {
             r.ok -> { accept(r.json); r.json.optString("who").takeIf { it.isNotBlank() }?.let { prefs.name = it }; done?.invoke(true) }
             r.status == 401 -> { lock(); _banner.value = reasonText(r.reason); done?.invoke(false) }

@@ -103,7 +103,11 @@ fun App(m: AppModel) {
     // GPS only while the app is open, and restarted when coming back to it
     val owner = LocalLifecycleOwner.current
     DisposableEffect(owner) {
-        val o = LifecycleEventObserver { _, e -> when (e) { Lifecycle.Event.ON_RESUME -> if (m.signedIn.value) { m.locator.start(); m.refresh() }; Lifecycle.Event.ON_PAUSE -> m.locator.stop(); else -> {} } }
+        val o = LifecycleEventObserver { _, e -> when (e) { Lifecycle.Event.ON_RESUME -> if (m.signedIn.value) {
+                m.locator.start()
+                // back from the camera, a photo or a permission box: no reload; away a while: fetch quietly
+                if (System.currentTimeMillis() - m.lastRefresh > 5 * 60_000) m.refresh(quiet = true)
+            }; Lifecycle.Event.ON_PAUSE -> m.locator.stop(); else -> {} } }
         owner.lifecycle.addObserver(o); onDispose { owner.lifecycle.removeObserver(o) }
     }
     // welcome: before signing in, and for a moment every time the app opens; the full one the first time
@@ -125,15 +129,29 @@ fun App(m: AppModel) {
     }
 }
 
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
 fun Shell(m: AppModel) {
     val stack = remember { mutableStateListOf(Place("list")) }
     val here = stack.last()
     val waiting by m.waiting.collectAsState()
     val busy by m.busy.collectAsState()
-    BackHandler(stack.size > 1) { stack.removeAt(stack.lastIndex) }
+    // tabs visited before this one, so the phone's back button steps back through them
+    val tabsBefore = remember { mutableStateListOf<String>() }
     fun go(p: Place) { stack.add(p) }
-    fun tab(t: String) { stack.clear(); stack.add(Place(t)) }
+    fun tab(t: String) {
+        val from = stack.first().tab
+        if (from != t) { tabsBefore.remove(t); tabsBefore.add(from) }
+        stack.clear(); stack.add(Place(t))
+    }
+    // back: leave the open screen, then the previous tab, then Projects; only closes the app from Projects
+    BackHandler(stack.size > 1 || tabsBefore.isNotEmpty() || here.tab != "list") {
+        when {
+            stack.size > 1 -> stack.removeAt(stack.lastIndex)
+            tabsBefore.isNotEmpty() -> { val t = tabsBefore.removeAt(tabsBefore.lastIndex); stack.clear(); stack.add(Place(t)) }
+            else -> { stack.clear(); stack.add(Place("list")) }
+        }
+    }
     val goTab = m.goTab
     LaunchedEffect(goTab) { if (goTab != null) { tab(goTab); m.goTab = null } }
     val sub = here.project != null || here.sub != null
@@ -151,7 +169,9 @@ fun Shell(m: AppModel) {
             Box(Modifier.weight(1f), contentAlignment = Alignment.Center) { org.rafikioutreach.pin.ui.Wordmark() }
             RoundBtn("refresh", t("Refresh", "Onyesha upya"), "hrefresh", turn = busy) { m.refresh() }
         }
-        Box(Modifier.weight(1f).fillMaxWidth()) {
+        // pull down to refresh (on screens that scroll)
+        var pulling by remember { androidx.compose.runtime.mutableStateOf(false) }
+        androidx.compose.material3.pulltorefresh.PullToRefreshBox(pulling, { pulling = true; m.refresh { pulling = false } }, Modifier.weight(1f).fillMaxWidth().testTag("pull")) {
             val pid = here.project
             when {
                 pid != null -> ProjectScreen(m, pid, here.projectTab) { stack.removeAt(stack.lastIndex) }

@@ -80,7 +80,6 @@ fun ProjectsMap(dots: List<Dot>, me: LatLng?, onDot: (String) -> Unit, modifier:
         MapView(ctx).apply {
             setTileSource(TileSourceFactory.MAPNIK); setMultiTouchControls(true); zoomController.setVisibility(org.osmdroid.views.CustomZoomButtonsController.Visibility.SHOW_AND_FADEOUT)
             controller.setZoom(6.0); controller.setCenter(GeoPoint(-2.5, 35.5)); minZoomLevel = 3.0
-            isTilesScaledToDpi = true
         }
     }
     val holder = remember { MapState() }

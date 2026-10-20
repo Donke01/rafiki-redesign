@@ -140,4 +140,19 @@ class AppFeelTest {
         rule.waitUntil(3000) { rule.onAllNodesWithText("I’ve arrived").fetchSemanticsNodes().isNotEmpty() }
         org.rafikioutreach.pin.ui.Motion.on = true
     }
+
+    @Test fun phone_back_steps_through_tabs_before_closing() {
+        org.rafikioutreach.pin.ui.Motion.on = false; Onb.enabled = false
+        val m = model(signedIn = true, onbDone = true); show(m)
+        fun back() { rule.runOnUiThread { rule.activity.onBackPressedDispatcher.onBackPressed() }; rule.waitForIdle() }
+        rule.onNodeWithTag("nav_map").performClick(); rule.waitForIdle()
+        rule.onNodeWithTag("nav_me").performClick(); rule.waitForIdle()
+        rule.onNodeWithText("Kapsaret Borehole", substring = true).assertDoesNotExist()
+        back()   // Me -> Map
+        rule.onNodeWithText("projects pinned", substring = true).assertExists()
+        back()   // Map -> Projects
+        rule.onNodeWithTag("projects").assertExists()
+        assertTrue("back on Projects closes the app", !rule.activity.onBackPressedDispatcher.hasEnabledCallbacks())
+        Onb.enabled = true; org.rafikioutreach.pin.ui.Motion.on = true
+    }
 }
