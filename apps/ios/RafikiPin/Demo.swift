@@ -29,6 +29,7 @@ enum Demo {
     static func setUp(_ p: Prefs, _ api: Api) {
         if arg("-signedin") != "no" { p.pin = "9999"; p.name = "Reid Anderson"; p.saveSnapshot(snapshot()) } else { p.pin = ""; p.session = "" }
         p.filter = "all"
+        if arg("-bio") == "1" { p.bio = true; Bio.demoOk = false } else { p.bio = false }
         if let l = arg("-lang") { p.lang = l }
         if let th = arg("-theme") { p.theme = th == "auto" ? "" : th }
         api.transport = { method, url, _, body in
@@ -44,6 +45,12 @@ enum Demo {
                                                  "data": ["quote": "Now the nurses can wash their hands", "who": "Mary"]] as JSON] as [JSON]] as JSON)
             }
             if url.contains("view=assign") { return j(["ok": true, "items": [["aid": "a1", "id": "105", "t": "Turbo Spring", "to": "Meril Kiprop", "date": "2026-10-24", "note": "Meet the committee"]]] as JSON) }
+            if url.contains("team=1") {
+                return j(["ok": true, "team": [["name": "Meril Kiprop", "home": "ke", "phone": "0712 345 678", "lastSeen": When.now()], ["name": "Bertin Mwangi", "home": "tz", "phone": "0754 123 456", "lastSeen": "2026-10-18T08:00:00Z"],
+                                               ["name": "Reid Anderson", "home": "ke", "phone": ""]] as [JSON]] as JSON)
+            }
+            if b.contains("monday-link") { return j(["ok": true, "name": "Reid Anderson"] as JSON) }
+            if url.contains("pin-auth/token") { return j(["ok": true, "sid": "SESSION123456789012345", "name": "Reid Anderson"] as JSON) }
             if url.contains("activity=1") {
                 return j(["ok": true, "activity": [["by": "Meril", "a": "pin", "id": "105", "t": "Turbo Spring", "at": "2026-10-12T10:00:00Z"],
                                                    ["by": "Meril", "a": "visit", "s": "working", "id": "101", "t": "Chepkongi Dispensary", "at": When.now()],

@@ -69,6 +69,8 @@ struct Assignment: Equatable { var aid: String; var id: String; var title: Strin
 struct Snapshot: Equatable {
     var who: String; var admin: Bool; var projects: [Project]; var repairs: [String: Repair]; var visits: [String: LastVisit]
     var jobs: [String]; var assigned: [Assignment]; var confirmed: Set<String>; var reviewOpen: Int
+    /// The monday.com name this person's own token is connected as ("" when not connected).
+    var linked = ""
 
     static func from(_ o: JSON) -> Snapshot {
         var reps: [String: Repair] = [:]; (o.obj("repairs") ?? [:]).forEach { k, v in if let j = v as? JSON { reps[k] = Repair.from(j) } }
@@ -77,7 +79,7 @@ struct Snapshot: Equatable {
             who: o.str("who"), admin: o.bool("admin"), projects: o.objs("projects").map(Project.from), repairs: reps, visits: vis,
             jobs: (o.arr("jobs") ?? []).compactMap { $0 as? String },
             assigned: o.objs("assigned").map { Assignment(aid: $0.str("aid"), id: $0.str("id"), title: $0.str("t"), date: $0.str("date"), by: $0.str("by"), note: $0.str("note")) },
-            confirmed: Set((o.obj("confirmed") ?? [:]).keys), reviewOpen: o.int("reviewOpen"))
+            confirmed: Set((o.obj("confirmed") ?? [:]).keys), reviewOpen: o.int("reviewOpen"), linked: o.str("linked"))
     }
 }
 
@@ -158,6 +160,11 @@ func reasonText(_ reason: String?) -> String {
     case "rate": return t("Too many changes from this phone. Please wait a little and try again.", "Mabadiliko mengi kutoka simu hii. Subiri kidogo kisha ujaribu tena.")
     case "project": return t("That project couldn’t be found.", "Mradi huo haukupatikana.")
     case "no-location": return t("Save a location first.", "Hifadhi mahali kwanza.")
+    case "token-format": return t("That doesn’t look like a monday.com token. On the token page tap Copy, then try again.", "Hiyo haionekani kama tokeni ya monday.com. Kwenye ukurasa wa tokeni gusa Copy, kisha jaribu tena.")
+    case "token-bad": return t("monday.com didn’t accept that token. Copy it again from the token page.", "monday.com haikukubali tokeni hiyo. Inakili tena kutoka ukurasa wa tokeni.")
+    case "account": return t("That token is for a different monday.com account. Use your RAFIKI login.", "Tokeni hiyo ni ya akaunti nyingine ya monday.com. Tumia akaunti yako ya RAFIKI.")
+    case "board": return t("Your monday.com login can’t see the Projects board yet. Ask the office to invite you to it.", "Akaunti yako ya monday.com bado haioni ubao wa Projects. Omba ofisi ikualike.")
+    case "own-pin": return t("You need your own PIN for this. Ask the office for one.", "Unahitaji PIN yako mwenyewe kwa hili. Omba ofisi ikupe.")
     default: return t("Something went wrong on the server. Please try again.", "Kuna hitilafu kwenye seva. Tafadhali jaribu tena.")
     }
 }
@@ -172,5 +179,7 @@ enum When {
         guard let d = parse(s) else { return s }
         let f = DateFormatter(); f.locale = Locale(identifier: "en_GB"); f.dateFormat = "d MMM, HH:mm"; return f.string(from: d)
     }
+    /// Today on this phone (not UTC), as yyyy-MM-dd.
+    static func localDay(_ d: Date = Date()) -> String { let f = DateFormatter(); f.locale = Locale(identifier: "en_US_POSIX"); f.dateFormat = "yyyy-MM-dd"; return f.string(from: d) }
     static func day(_ d: Date = Date()) -> String { let f = DateFormatter(); f.locale = Locale(identifier: "en_US_POSIX"); f.timeZone = TimeZone(identifier: "UTC"); f.dateFormat = "yyyy-MM-dd"; return f.string(from: d) }
 }

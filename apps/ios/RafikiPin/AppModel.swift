@@ -33,6 +33,9 @@ final class AppModel: ObservableObject {
     @Published var banner: String?
     @Published var busy = false
     @Published var activity: [JSON]?
+    @Published var team: [Mate]?
+    /// True while the app waits for Face ID / Touch ID before showing anything.
+    @Published var bioLocked = false
     @Published var stack: [Place] = [Place(tab: "list")]
     /// Bumped when the language or colours change, so every screen redraws.
     @Published var look = 0
@@ -55,6 +58,7 @@ final class AppModel: ObservableObject {
         let l = p.lang.isEmpty ? (Locale.preferredLanguages.first?.hasPrefix("sw") == true ? "sw" : "en") : p.lang
         Lang.sw = l == "sw"
         Look.mode = p.theme
+        bioLocked = p.bio && signedIn
         timer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
             Task { @MainActor in if self?.signedIn == true { _ = await self?.sendWaiting() } }
         }
@@ -90,7 +94,47 @@ final class AppModel: ObservableObject {
         return nil
     }
 
+    // --- Face ID / Touch ID lock ----------------------------------------------------------
+    private var awayAt: Date?
+    func wentAway() { awayAt = Date() }
+    /// Back in the app: after a minute away, ask for Face ID again.
+    func cameBack() { if prefs.bio, signedIn, let a = awayAt, Date().timeIntervalSince(a) > 60 { bioLocked = true }; awayAt = nil }
+    func unlocked() { bioLocked = false }
+    /// "Lock the app": with Face ID on it only locks (the PIN stays); otherwise it signs out.
+    func lockOrSignOut() { if prefs.bio { bioLocked = true } else { lock() } }
+
+    // --- monday.com with a personal token ---------------------------------------------------
+    /// Sign in on the lock screen with a personal monday.com token. Returns an error text, or nil when in.
+    func mondayToken(_ token: String) async -> String? {
+        let x = await api.authToken(token.trimmingCharacters(in: .whitespacesAndNewlines))
+        let sid = x.json.str("sid")
+        if !x.ok || sid.isEmpty { return x.status == 0 ? reasonText("offline") : reasonText(x.reason) }
+        prefs.pin = ""; prefs.session = sid
+        let r = await api.list()
+        if !r.ok { prefs.session = ""; return reasonText(r.reason) }
+        prefs.name = r.json.str("who")
+        accept(r.json); signedIn = true
+        return nil
+    }
+    /// Me › Your name on monday.com: link this person's own token to their PIN. Returns an error text, or nil.
+    func linkMonday(_ token: String) async -> String? {
+        let r = await api.post(["action": "monday-link", "token": token.trimmingCharacters(in: .whitespacesAndNewlines)])
+        if !r.ok { return r.status == 0 ? reasonText("offline") : reasonText(r.reason) }
+        if var s = snap { s.linked = r.json.str("name").isEmpty ? prefs.name : r.json.str("name"); snap = s }
+        return nil
+    }
+    func unlinkMonday() async { let r = await api.post(["action": "monday-unlink"]); if r.ok, var s = snap { s.linked = ""; snap = s } }
+
+    // --- the team: names, home country, phone and when each was last seen -------------------
+    @discardableResult func loadTeam() async -> Bool {
+        let r = await api.team()
+        guard r.ok else { return false }
+        team = r.json.objs("team").map { Mate(name: $0.str("name"), home: $0.str("home"), phone: $0.str("phone"), lastSeen: $0.str("lastSeen").isEmpty || $0.str("lastSeen") == "null" ? nil : $0.str("lastSeen")) }.filter { !$0.name.isEmpty }
+        return true
+    }
+
     func lock() {
+        bioLocked = false
         let s = prefs.session
         prefs.forget(); signedIn = false
         if !s.isEmpty {
@@ -197,6 +241,7 @@ final class AppModel: ObservableObject {
     /// Queue a change, try to send it now, and say what happened.
     func submit(_ body: JSON, _ files: [OutFile]) async -> Outcome {
         var b = body; b["by"] = prefs.name
+        if b["savedAt"] == nil { b["savedAt"] = When.now() }
         let k = outbox.add(b, files)
         waiting = outbox.count()
         let res = await sendWaiting()

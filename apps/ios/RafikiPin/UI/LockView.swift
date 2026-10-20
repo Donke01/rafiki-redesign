@@ -12,6 +12,7 @@ struct LockView: View {
     @State private var working = false
     @State private var shake: CGFloat = 0
     @State private var monday = false
+    @State private var tokenSheet = false
 
     private var checking: String { t("Checking…", "Inakagua…") }
 
@@ -84,16 +85,16 @@ struct LockView: View {
             .padding(.horizontal, 24).padding(.vertical, 28)
             .frame(maxWidth: .infinity)
         }
-        .background(C.bg)
         .onAppear { name = m.prefs.name; msg = m.banner == nil ? nil : msg }
         .task { monday = await m.mondayAvailable() }
+        .sheet(isPresented: $tokenSheet) { MondaySignInSheet() }
     }
 
     @ViewBuilder func keyView(_ d: String) -> some View {
         switch d {
         case "":
             if monday {
-                Button { m.mondaySignIn() } label: {
+                Button { tokenSheet = true } label: {
                     VStack(spacing: 4) {
                         NetImage(url: "https://www.google.com/s2/favicons?domain=monday.com&sz=64") { Icon("people", color: C.blue) }
                             .frame(width: 26, height: 26).clipShape(RoundedRectangle(cornerRadius: 7))

@@ -93,7 +93,8 @@ export async function onRequestGet({ request, env }) {
   const cc = CCS.includes(url.searchParams.get('cc')) ? url.searchParams.get('cc') : '';
   if (q.length < 2) return json({ ok: false, reason: 'bad-request' }, 400);
   const nm = /^(-?\d+\.\d+),(-?\d+\.\d+)$/.exec(url.searchParams.get('near') || ''), near = nm && inAfrica(+nm[1], +nm[2]) ? [(+nm[1]).toFixed(2), (+nm[2]).toFixed(2)] : null;
-  const g = googleOn(env);
+  // the iPhone app shows results on an Apple map, so it asks for the free search (Google's terms: Google results only on a Google map)
+  const g = googleOn(env) && !url.searchParams.get('free');
   const key = 'place:' + (g ? 'g:' : '') + cc + ':' + (near ? near.join(',') + ':' : '') + q.toLowerCase();
   if (env.FEED) { const hit = await env.FEED.get(key, 'json'); if (hit) return json({ ok: true, places: hit, cached: true }); }
   let places = [];

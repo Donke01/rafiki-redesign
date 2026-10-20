@@ -56,7 +56,8 @@ final class Prefs {
         guard let data = try? Data(contentsOf: dir.appendingPathComponent("projects.json")) else { return nil }
         return (try? JSONSerialization.jsonObject(with: data)) as? JSON
     }
-    func forget() { pin = ""; session = "" }
+    var bio: Bool { get { d.bool(forKey: "bio") } set { d.set(newValue, forKey: "bio") } }
+    func forget() { pin = ""; session = ""; bio = false }
 }
 
 /// A photo or voice note waiting to go with a change.

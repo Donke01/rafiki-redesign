@@ -25,13 +25,15 @@ final class Api {
     func last(_ id: String) async -> Reply { await call("GET", "/api/pin?id=" + Api.enc(id), nil) }
     func post(_ body: JSON) async -> Reply { await call("POST", "/api/pin", body) }
     func place(_ q: String, near: LatLng?, ck: String) async -> Reply {
-        await call("GET", "/api/place?q=" + Api.enc(q) + (ck.isEmpty ? "" : "&cc=\(ck)") + (near.map { "&near=\($0.lat),\($0.lng)" } ?? ""), nil)
+        await call("GET", "/api/place?free=1&q=" + Api.enc(q) + (ck.isEmpty ? "" : "&cc=\(ck)") + (near.map { "&near=\($0.lat),\($0.lng)" } ?? ""), nil)
     }
     func activity() async -> Reply { await call("GET", "/api/pin?activity=1", nil) }
     func adminGet(_ view: String) async -> Reply { await call("GET", "/api/admin?view=" + Api.enc(view), nil) }
     func admin(_ body: JSON) async -> Reply { await call("POST", "/api/admin", body) }
     func authMe() async -> Reply { await call("GET", "/api/pin-auth/me", nil) }
     func authExchange(code: String, verifier: String) async -> Reply { await call("POST", "/api/pin-auth/exchange", ["code": code, "verifier": verifier]) }
+    func team() async -> Reply { await call("GET", "/api/pin?team=1", nil) }
+    func authToken(_ token: String) async -> Reply { await call("POST", "/api/pin-auth/token", ["token": token]) }
     func logout() async -> Reply { await call("POST", "/api/pin-auth/logout", [:]) }
 
     func photoUrl(_ photo: String, w: Int = 480) -> String { "\(server)/api/photo/\(Api.enc(photo))?w=\(w)" }
@@ -47,6 +49,7 @@ final class Api {
         auth(&h)
         var data: Data? = nil
         if let body { h["Content-Type"] = "application/json"; data = try? JSONSerialization.data(withJSONObject: body) }
+        if method == "POST" { h["Origin"] = server }
         let (status, out) = await transport(method, server + path, h, data)
         return Api.toReply(status, out)
     }

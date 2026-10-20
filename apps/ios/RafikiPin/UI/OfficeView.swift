@@ -370,6 +370,7 @@ private struct TeamSection: View {
     @State private var name = ""
     @State private var home = ""
     @State private var email = ""
+    @State private var phone = ""
     @State private var admin = false
     @State private var shown: (String, String)?
     @State private var msg: (String, String)?
@@ -396,12 +397,13 @@ private struct TeamSection: View {
                     Picker1(label: t("Home country", "Nchi ya nyumbani"), value: home, options: [("", t("All countries", "Nchi zote"))] + COUNTRIES) { home = $0 }
                     Field(t("E-mail (optional)", "Barua pepe (si lazima)"), $email).keyboardType(.emailAddress).textInputAutocapitalization(.never)
                 }
+                Field(t("Phone (optional)", "Simu (si lazima)"), $phone, placeholder: "+254 712 345 678").keyboardType(.phonePad)
                 Check(label: t("Admin (sees the Office)", "Msimamizi (anaona Ofisi)"), on: admin) { admin.toggle() }.padding(.top, 8)
                 Btn(t("Add and create PIN", "Ongeza na utengeneze PIN"), icon: "plus", enabled: !name.trimmingCharacters(in: .whitespaces).isEmpty) {
                     Task {
                         let nm = name.trimmingCharacters(in: .whitespaces)
-                        let x = await m.api.admin(["action": "team-add", "name": nm, "home": home, "email": email.trimmingCharacters(in: .whitespaces), "admin": admin])
-                        if x.ok { shown = (nm, x.json.str("pin")); name = ""; email = ""; admin = false; await team.load(m) }
+                        let x = await m.api.admin(["action": "team-add", "name": nm, "home": home, "email": email.trimmingCharacters(in: .whitespaces), "phone": phone.trimmingCharacters(in: .whitespaces), "admin": admin])
+                        if x.ok { shown = (nm, x.json.str("pin")); name = ""; email = ""; phone = ""; admin = false; await team.load(m) }
                         else { msg = ("bad", x.reason == "exists" ? t("Someone with that name is already on the team.", "Mtu mwenye jina hilo tayari yuko kwenye timu.") : reasonText(x.reason)) }
                     }
                 }.padding(.top, 10)
@@ -430,6 +432,7 @@ private struct Person: View {
     let again: () async -> Void
     @State private var ph = ""
     @State private var pe = ""
+    @State private var pp = ""
     @State private var pa = false
     @State private var ready = false
     var body: some View {
@@ -444,11 +447,12 @@ private struct Person: View {
                     Picker1(label: t("Home country", "Nchi ya nyumbani"), value: ph, options: [("", t("All countries", "Nchi zote"))] + COUNTRIES) { ph = $0 }
                     Field(t("E-mail (for alerts)", "Barua pepe (kwa taarifa)"), $pe).keyboardType(.emailAddress).textInputAutocapitalization(.never)
                 }
+                Field(t("Phone (for Call and WhatsApp)", "Simu (kwa kupiga na WhatsApp)"), $pp, placeholder: "+254 712 345 678").keyboardType(.phonePad)
                 Check(label: t("Admin (sees the Office)", "Msimamizi (anaona Ofisi)"), on: pa) { pa.toggle() }.padding(.top, 8)
                 HStack(spacing: 8) {
                     Btn(t("Save", "Hifadhi"), small: true) {
                         Task {
-                            let x = await m.api.admin(["action": "team-update", "name": p.str("name"), "home": ph, "email": pe, "admin": pa])
+                            let x = await m.api.admin(["action": "team-update", "name": p.str("name"), "home": ph, "email": pe, "phone": pp, "admin": pa])
                             msg = x.ok ? ("ok", t("Saved ✓", "Imehifadhiwa ✓")) : ("bad", x.reason == "self" ? t("You can’t remove your own admin role.", "Huwezi kuondoa nafasi yako mwenyewe ya msimamizi.") : reasonText(x.reason))
                             await again()
                         }
@@ -463,7 +467,7 @@ private struct Person: View {
             }
         }
         .padding(.top, 10)
-        .onAppear { if !ready { ready = true; ph = p.str("home"); pe = p.str("email"); pa = p.bool("admin") } }
+        .onAppear { if !ready { ready = true; ph = p.str("home"); pe = p.str("email"); pp = p.str("phone"); pa = p.bool("admin") } }
     }
 }
 

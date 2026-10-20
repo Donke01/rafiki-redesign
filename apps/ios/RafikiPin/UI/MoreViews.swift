@@ -97,8 +97,16 @@ struct MeView: View {
                     MeRow(k: t("Name", "Jina"), v: m.prefs.name)
                     MeRow(k: t("Role", "Nafasi"), v: m.snap?.admin == true ? t("Admin", "Msimamizi") : t("Field team", "Timu ya uwanjani"))
                     MeRow(k: t("Waiting to send", "Inasubiri kutumwa"), v: m.waiting == 0 ? t("Nothing", "Hakuna") : "\(m.waiting)")
-                    Btn(t("Lock the app", "Funga programu"), icon: "lock", light: true, small: true) { m.lock() }.padding(.top, 14)
+                    Btn(t("Lock the app", "Funga programu"), icon: "lock", light: true, small: true) { m.lockOrSignOut() }.padding(.top, 14)
                 }.padding(.top, 12)
+                WaitingList(snap: m.snap)
+                if let snap = m.snap { MyWork(snap: snap) }
+                MyMonth(act: m.activity)
+                TeamToday(mates: m.team, act: m.activity, snap: m.snap)
+                TeamMonth(act: m.activity)
+                TeamFeed(act: m.activity, snap: m.snap)
+                if let snap = m.snap { ConnectMonday(snap: snap) }
+                BioCard()
                 CardV {
                     H2(t("Colours", "Rangi"))
                     let cur = Look.mode.isEmpty ? (scheme == .dark ? "dark" : "light") : Look.mode
@@ -124,6 +132,8 @@ struct MeView: View {
             }.padding(16)
         }
         .onAppear { miles = m.prefs.miles }
+        .task { await m.loadActivity(); await m.loadTeam() }
+        .refreshable { await m.refreshNow(); await m.loadActivity(); await m.loadTeam() }
     }
 }
 
