@@ -72,4 +72,34 @@ class ConnectMondayTest {
         rule.waitUntil(5000) { rule.onAllNodesWithTag("monday_paste").fetchSemanticsNodes().isNotEmpty() }
         org.rafikioutreach.pin.ui.Motion.on = true
     }
+
+    @Test fun lock_screen_sign_in_with_token() {
+        org.rafikioutreach.pin.ui.Motion.on = false
+        val app = ApplicationProvider.getApplicationContext<Application>()
+        val snap = JSONObject().put("ok", true).put("who", "Meril Adoyo").put("monday", true).put("admin", false).put("projects", JSONArray()).put("repairs", JSONObject()).put("visits", JSONObject())
+        Prefs(app).apply { pin = ""; session = ""; name = ""; onb = true; lang = "en" }
+        Lang.sw = false
+        val m = AppModel(app); Onb.enabled = false
+        var origin = ""
+        m.api.transport = { method, url, h, body ->
+            when {
+                url.contains("pin-auth/me") -> 200 to "{\"ok\":true,\"available\":true}"
+                url.contains("pin-auth/token") -> { origin = h["Origin"].orEmpty(); if (JSONObject(String(body!!)).optString("token") == tok) 200 to "{\"ok\":true,\"name\":\"Meril Adoyo\",\"sid\":\"SID123456789012345678901234\"}" else 400 to "{\"ok\":false,\"reason\":\"token-bad\"}" }
+                h["Cookie"]?.contains("SID123") == true -> 200 to snap.toString()
+                else -> 401 to "{\"ok\":false,\"reason\":\"signin\"}"
+            }
+        }
+        rule.setContent { RafikiTheme(dark = false) { Box(Modifier.size(390.dp, 844.dp)) { App(m) } } }
+        rule.waitUntil(8000) { rule.onAllNodesWithTag("monday").fetchSemanticsNodes().isNotEmpty() }
+        rule.onNodeWithTag("monday").performClick()
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("ms_paste").fetchSemanticsNodes().isNotEmpty() }
+        val clip = app.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        clip.setPrimaryClip(ClipData.newPlainText("t", tok))
+        rule.onNodeWithTag("ms_paste").performClick()
+        rule.waitUntil(8000) { rule.onAllNodesWithTag("hav").fetchSemanticsNodes().isNotEmpty() }
+        assertEquals("SID123456789012345678901234", m.prefs.session)
+        assertTrue(origin.startsWith("https://"))
+        assertEquals("Meril Adoyo", m.prefs.name)
+        org.rafikioutreach.pin.ui.Motion.on = true
+    }
 }

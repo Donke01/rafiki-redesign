@@ -111,6 +111,19 @@ class AppModel(app: Application) : AndroidViewModel(app) {
         return BuildConfig.SERVER + "/api/pin-auth/start?app=1&cc=" + cc
     }
 
+    /** Sign in on the lock screen with a personal monday.com token. Returns an error text, or null when signed in. */
+    suspend fun mondayToken(token: String): String? {
+        val x = api.authToken(token.trim())
+        val sid = x.json.optString("sid")
+        if (!x.ok || sid.isBlank()) return reasonText(x.reason)
+        prefs.pin = ""; prefs.session = sid
+        val r = api.list()
+        if (!r.ok) { prefs.session = ""; return reasonText(r.reason) }
+        prefs.name = r.json.optString("who")
+        accept(r.json); _signedIn.value = true
+        return null
+    }
+
     /** monday.com sent the person back to the app. Returns an error text, or null when signed in. */
     suspend fun mondayReturn(code: String?, fail: String?): String? {
         if (fail != null || code.isNullOrBlank()) return when (fail) {

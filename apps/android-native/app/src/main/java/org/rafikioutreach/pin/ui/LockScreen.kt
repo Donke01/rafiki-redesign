@@ -63,8 +63,10 @@ fun LockScreen(m: AppModel) {
     val shake = remember { Animatable(0f) }
     val banner by m.banner.collectAsState()
     var monday by remember { mutableStateOf(false) }
+    var mondaySheet by remember { mutableStateOf(false) }
     val ctx = androidx.compose.ui.platform.LocalContext.current
     androidx.compose.runtime.LaunchedEffect(Unit) { monday = runCatching { m.mondayAvailable() }.getOrDefault(false) }
+    if (mondaySheet) MondaySignInSheet(m) { mondaySheet = false }
 
     fun go() {
         if (working || pin.isEmpty()) return
@@ -123,7 +125,7 @@ fun LockScreen(m: AppModel) {
                             when (d) {
                                 "" -> if (monday) Column(
                                     mod.clip(RoundedCornerShape(22.dp)).clickable(role = Role.Button) {
-                                        runCatching { ctx.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(m.mondayStartUrl()))) }
+                                        mondaySheet = true
                                     }.testTag("monday"),
                                     horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center,
                                 ) {

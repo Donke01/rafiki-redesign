@@ -381,3 +381,51 @@ fun ConnectMonday(m: AppModel, snap: Snapshot?) {
             style = MaterialTheme.typography.labelSmall, color = C.muted, modifier = Modifier.padding(top = 10.dp))
     }
 }
+
+/** Lock screen › monday.com sign-in: with the person's own monday.com token (works before the app is installed for the account). */
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@Composable
+fun MondaySignInSheet(m: AppModel, close: () -> Unit) {
+    val ctx = LocalContext.current
+    val scope = rememberScope()
+    var waiting by remember { mutableStateOf(false) }
+    var busy by remember { mutableStateOf(false) }
+    var msg by remember { mutableStateOf<String?>(null) }
+    var manual by remember { mutableStateOf(false) }
+    var typed by remember { mutableStateOf("") }
+    val clip = remember { ctx.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager }
+    fun send(tok: String) {
+        if (!looksToken(tok)) { msg = org.rafikioutreach.pin.data.reasonText("token-format"); return }
+        busy = true; msg = t("Checking with monday.com…", "Inakagua na monday.com…")
+        scope.launch {
+            val err = m.mondayToken(tok); busy = false; msg = err
+            if (err == null) { runCatching { clip.setPrimaryClip(android.content.ClipData.newPlainText("", "")) }; close() }
+        }
+    }
+    fun clipText() = clip.primaryClip?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.coerceToText(ctx)?.toString().orEmpty()
+    val owner = androidx.compose.ui.platform.LocalLifecycleOwner.current
+    DisposableEffect(owner, waiting) {
+        val o = androidx.lifecycle.LifecycleEventObserver { _, e -> if (e == androidx.lifecycle.Lifecycle.Event.ON_RESUME && waiting && !busy) clipText().let { if (looksToken(it)) send(it) } }
+        owner.lifecycle.addObserver(o); onDispose { owner.lifecycle.removeObserver(o) }
+    }
+    androidx.compose.material3.ModalBottomSheet(onDismissRequest = close, containerColor = C.card, modifier = Modifier.testTag("monday_sheet")) {
+        Column(Modifier.padding(start = 20.dp, end = 20.dp, bottom = 28.dp)) {
+            H2(t("Sign in with monday.com", "Ingia kwa monday.com"))
+            Text(t("Takes 20 seconds. Everything you save then goes to monday.com under your own name.", "Inachukua sekunde 20. Kila unachohifadhi kitaenda monday.com kwa jina lako."), style = MaterialTheme.typography.bodySmall, color = C.muted)
+            Btn("1 · " + t("Open my monday.com token", "Fungua tokeni yangu ya monday.com"), { waiting = true; runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(TOKEN_PAGE))) } }, Modifier.padding(top = 14.dp).fillMaxWidth().testTag("ms_open"))
+            Text(t("Tap Copy on that page, then come back here.", "Gusa Copy kwenye ukurasa huo, kisha rudi hapa."), style = MaterialTheme.typography.labelSmall, color = C.muted, modifier = Modifier.padding(top = 4.dp).align(Alignment.CenterHorizontally))
+            Btn(if (busy) t("Checking…", "Inakagua…") else "2 · " + t("Paste and sign in", "Bandika na uingie"), { send(clipText()) }, Modifier.padding(top = 10.dp).fillMaxWidth().testTag("ms_paste"), light = true, enabled = !busy)
+            Text(t("Or paste it yourself", "Au ibandike mwenyewe"), style = MaterialTheme.typography.labelLarge, color = C.blue, modifier = Modifier.padding(top = 8.dp).clip(RoundedCornerShape(10.dp)).clickable { manual = !manual }.padding(6.dp))
+            if (manual) {
+                androidx.compose.material3.OutlinedTextField(typed, { typed = it }, Modifier.fillMaxWidth().testTag("ms_token"), singleLine = true, placeholder = { Text(t("monday.com token", "tokeni ya monday.com")) },
+                    visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation())
+                Btn(t("Sign in", "Ingia"), { send(typed) }, Modifier.padding(top = 8.dp), small = true, enabled = !busy)
+            }
+            msg?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = if (busy) C.muted else C.bad, modifier = Modifier.padding(top = 8.dp).testTag("ms_msg")) }
+            Text(t("If the token page won’t open on your phone, sign in with your PIN for now, then connect it once from any computer under Me › Your name on monday.com.", "Ukurasa wa tokeni usipofunguka kwenye simu yako, ingia kwa PIN yako kwa sasa, kisha uiunganishe mara moja kutoka kompyuta yoyote kwenye Mimi › Jina lako kwenye monday.com."),
+                style = MaterialTheme.typography.labelSmall, color = C.muted, modifier = Modifier.padding(top = 10.dp))
+            Text(t("Or use monday.com’s approve page", "Au tumia ukurasa wa idhini wa monday.com"), style = MaterialTheme.typography.labelLarge, color = C.blue,
+                modifier = Modifier.padding(top = 10.dp).align(Alignment.CenterHorizontally).clip(RoundedCornerShape(10.dp)).clickable { runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(m.mondayStartUrl()))) } }.padding(6.dp))
+        }
+    }
+}

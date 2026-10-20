@@ -957,6 +957,7 @@ html[data-theme=dark] .stp .stin{background:radial-gradient(circle,transparent 3
 .msteps a.btn{text-decoration:none;text-align:center;justify-content:center}
 .mman{margin-top:10px}.mman summary{cursor:pointer;color:var(--blue);font-size:.85rem}.mman input{width:100%;margin:8px 0}
 .mnote{font-size:.78rem;margin:10px 0 0}
+.msi .bsh-p p{margin:4px 0 0}.msi .lnk{display:block;margin-top:12px;text-align:center}
 
 /* --- me & team: my month, waiting list, team today, totals, feed --- */
 .mmtiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:4px 0 14px}
@@ -2032,7 +2033,48 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
   $('lockBtn').addEventListener('click', lock);
   function lockOut(j) { var wasMonday = S.mode === 'monday'; forget(); show('vLock'); if (!wasMonday) { ppReset(); var dd = $('ppDots'); dd.classList.remove('shake'); void dd.offsetWidth; dd.classList.add('shake'); } msg(wasMonday || j.reason === 'signin' ? 'mSign' : 'mLock', 'bad', wasMonday ? 'Please sign in with monday.com again.' : why(j)); }
   // sign in with monday.com: come back to the same screen afterwards
-  $('bMonday').addEventListener('click', function () { this.href = '/api/pin-auth/start?return=' + encodeURIComponent(location.hash || ''); });
+  // monday.com sign-in on the lock screen: with your own monday.com token (works before the app is installed for
+  // the account), or monday.com's own approve page
+  $('bMonday').addEventListener('click', function (e) { e.preventDefault(); monSignin(); });
+  function monSignin() {
+    var oauth = '/api/pin-auth/start?return=' + encodeURIComponent(location.hash || ''), waiting = false;
+    var w = document.createElement('div'); w.className = 'bsh msi'; w.setAttribute('role', 'dialog'); w.setAttribute('aria-modal', 'true'); w.setAttribute('aria-label', 'Sign in with monday.com');
+    w.innerHTML = '<div class="bsh-bg"></div><div class="bsh-p"><i class="grab" aria-hidden="true"></i><h3>' + tr('Sign in with monday.com', 'Ingia kwa monday.com') + '</h3>' +
+      '<p class="muted">' + tr('Takes 20 seconds. Everything you save then goes to monday.com under your own name.', 'Inachukua sekunde 20. Kila unachohifadhi kitaenda monday.com kwa jina lako.') + '</p>' +
+      '<ol class="msteps"><li><a class="btn wide" id="msOpen" href="' + TOKURL + '" target="_blank" rel="noopener">1 · ' + tr('Open my monday.com token', 'Fungua tokeni yangu ya monday.com') + '</a><small>' + tr('Tap Copy on that page, then come back here.', 'Gusa Copy kwenye ukurasa huo, kisha rudi hapa.') + '</small></li>' +
+      '<li><button class="btn wide light" id="msPaste" type="button">2 · ' + tr('Paste and sign in', 'Bandika na uingie') + '</button></li></ol>' +
+      '<details class="mman"><summary>' + tr('Or paste it yourself', 'Au ibandike mwenyewe') + '</summary><input type="password" id="msTok" autocomplete="off" spellcheck="false" placeholder="' + tr('monday.com token', 'tokeni ya monday.com') + '"><button class="btn small" id="msGo" type="button">' + tr('Sign in', 'Ingia') + '</button></details>' +
+      '<span class="msg" id="msMsg" aria-live="polite"></span>' +
+      '<p class="muted mnote">' + tr('If the token page won’t open on your phone, sign in with your PIN for now, then connect it once from any computer under Me › Your name on monday.com.', 'Ukurasa wa tokeni usipofunguka kwenye simu yako, ingia kwa PIN yako kwa sasa, kisha uiunganishe mara moja kutoka kompyuta yoyote kwenye Mimi › Jina lako kwenye monday.com.') + '</p>' +
+      '<a class="lnk" href="' + oauth + '">' + tr('Or use monday.com’s approve page', 'Au tumia ukurasa wa idhini wa monday.com') + '</a></div>';
+    document.body.appendChild(w); swApply();
+    requestAnimationFrame(function () { w.classList.add('in'); });
+    var close = function () { w.classList.add('out'); setTimeout(function () { w.remove(); }, 220); document.removeEventListener('visibilitychange', vis); };
+    w.querySelector('.bsh-bg').addEventListener('click', close);
+    var send = function (tok) {
+      tok = String(tok || '').trim();
+      if (!looksTok(tok)) return msg('msMsg', 'bad', why({ reason: 'token-format' }));
+      msg('msMsg', '', tr('Checking with monday.com…', 'Inakagua na monday.com…'));
+      fetch('/api/pin-auth/token', { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify({ token: tok }), credentials: 'same-origin' })
+        .then(function (r) { return r.json(); }, function () { return { ok: false, reason: 'offline' }; })
+        .then(function (j) {
+          if (!j.ok) return msg('msMsg', 'bad', why(j));
+          try { navigator.clipboard.writeText('').catch(function () {}); } catch (e) {}
+          msg('msMsg', 'ok', tr('Signed in as ', 'Umeingia kama ') + (j.name || '') + ' ✓');
+          location.replace('/pin?signin=ok' + (location.hash || ''));
+        });
+    };
+    var paste = function () {
+      var open = function (t) { var d = w.querySelector('details'); if (d) d.open = true; msg('msMsg', 'warn', t); };
+      if (!navigator.clipboard || !navigator.clipboard.readText) return open(tr('Paste the token in the box below.', 'Bandika tokeni kwenye kisanduku hapa chini.'));
+      navigator.clipboard.readText().then(send, function () { open(tr('Couldn’t read the clipboard. Paste the token in the box below.', 'Haikuweza kusoma ubao wa kunakili. Bandika tokeni kwenye kisanduku hapa chini.')); });
+    };
+    var vis = function () { if (document.visibilityState === 'visible' && waiting && navigator.clipboard && navigator.clipboard.readText) navigator.clipboard.readText().then(function (t) { if (looksTok(t)) send(t); }, function () {}); };
+    document.addEventListener('visibilitychange', vis);
+    $('msOpen').addEventListener('click', function () { waiting = true; });
+    $('msPaste').addEventListener('click', paste);
+    $('msGo').addEventListener('click', function () { send($('msTok').value); });
+  }
   var SIGNIN = { denied: 'Sign-in was cancelled.', expired: 'Sign-in took too long. Please try again.', token: 'monday.com didn’t finish the sign-in. Please try again.',
     account: 'That monday.com login isn’t part of RAFIKI’s monday.com account. Sign in with your RAFIKI login.', board: 'Your monday.com login can’t see the projects board yet. Ask an admin to add you to it, then try again.',
     off: 'Sign in with monday.com isn’t switched on yet. Use your PIN for now.' };

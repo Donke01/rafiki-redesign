@@ -33,6 +33,7 @@ class Api(val server: String, private val pin: () -> String, private val session
     suspend fun admin(body: JSONObject): Reply = call("POST", "/api/admin", body)
     suspend fun authMe(): Reply = call("GET", "/api/pin-auth/me", null)
     suspend fun authExchange(code: String, verifier: String): Reply = call("POST", "/api/pin-auth/exchange", JSONObject().put("code", code).put("verifier", verifier))
+    suspend fun authToken(token: String): Reply = call("POST", "/api/pin-auth/token", JSONObject().put("token", token))
     suspend fun logout(): Reply = call("POST", "/api/pin-auth/logout", JSONObject())
 
     fun photoUrl(photo: String, w: Int = 480) = "$server/api/photo/${enc(photo)}?w=$w"
@@ -47,6 +48,7 @@ class Api(val server: String, private val pin: () -> String, private val session
         val h = mutableMapOf("Accept" to "application/json")
         auth(h)
         if (body != null) h["Content-Type"] = "application/json"
+        if (method == "POST") h["Origin"] = server
         val (status, text) = transport(method, server + path, h, body?.toString()?.toByteArray())
         toReply(status, text)
     }
