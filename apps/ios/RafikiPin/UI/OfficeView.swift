@@ -61,8 +61,7 @@ private struct Overview: View {
         let pinned = s.projects.filter { $0.gps != nil }.count
         let pct = s.projects.isEmpty ? 0 : pinned * 100 / s.projects.count
         let due = s.projects.filter { $0.gps != nil && ageDays(s, $0) >= DUE_DAYS }.count
-        var cal = Calendar(identifier: .gregorian); cal.timeZone = TimeZone(identifier: "UTC")!
-        let ms = cal.date(from: cal.dateComponents([.year, .month], from: Date()))!
+        let ms: Date = monthStartUTC()
         let vm = m.activity.map { a in a.filter { $0.str("a") == "visit" && (When.parse($0.str("at")).map { $0 >= ms } ?? false) }.count }
         let urgent = s.repairs.values.filter { $0.urgency == "urgent" }.count
         let cost = s.repairs.values.reduce(0) { $0 + ($1.cost ?? 0) }
@@ -131,7 +130,7 @@ private struct Overview: View {
                     HStack(alignment: .top, spacing: 10) {
                         IconTile(icon: feedIcon(e.str("a")), tint: C.blue, bg: C.tint, size: 34)
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(e.str("by") + " " + verb(e.str("a")) + " " + e.str("t")).font(.bMedium).foregroundColor(C.text)
+                            Text(feedLine(e)).font(.bMedium).foregroundColor(C.text)
                             Text(When.text(e.str("at"))).font(.bSmall).foregroundColor(C.muted)
                         }
                     }.padding(.top, 8)
@@ -140,6 +139,16 @@ private struct Overview: View {
         }
         .task { await m.loadActivity() }
     }
+}
+
+private func monthStartUTC() -> Date {
+    var cal = Calendar(identifier: .gregorian); cal.timeZone = TimeZone(identifier: "UTC")!
+    return cal.date(from: cal.dateComponents([.year, .month], from: Date()))!
+}
+
+private func feedLine(_ e: [String: Any]) -> String {
+    let by: String = e.str("by"), what: String = verb(e.str("a")), title: String = e.str("t")
+    return "\(by) \(what) \(title)"
 }
 
 private struct Stat: View {
