@@ -90,7 +90,7 @@ with sync_playwright() as p:
     pg.screenshot(path=os.path.join(HERE, 'n1b-popup.png'))
     pg.locator('.leaflet-popup [data-open]').click(); pg.wait_for_timeout(500)
     check(pg.is_visible('#vProj'), 'popup opens the project')
-    pg.click('#back'); pg.wait_for_timeout(300)
+    pg.click('#hBack'); pg.wait_for_timeout(300)
     check(pg.is_visible('#vMap'), 'back returns to the map')
 
     # "I'm here" -> report a visit
@@ -185,7 +185,7 @@ with sync_playwright() as p:
     href = pg.get_attribute('#routeLegs a', 'href') or ''
     check('waypoints=' in href and 'destination=-3.386900,36.683000' in href, 'Google Maps route link')
     pg.screenshot(path=os.path.join(HERE, 'n6-route.png'), full_page=True)
-    pg.locator('#routeStops [data-open]').first.click(); pg.wait_for_timeout(300); pg.click('#back'); pg.wait_for_timeout(300)
+    pg.locator('#routeStops [data-open]').first.click(); pg.wait_for_timeout(300); pg.click('#hBack'); pg.wait_for_timeout(300)
     check(pg.is_visible('#vRoute'), 'back from a stop returns to the route')
 
     # new site with photo + voice
@@ -204,7 +204,7 @@ with sync_playwright() as p:
     check(not pg.evaluate('document.documentElement.scrollWidth > innerWidth'), 'report fits the phone width')
     pg.emulate_media(media='print'); pg.pdf(path=os.path.join(HERE, 'r1-report.pdf'), format='A4', print_background=True); pg.emulate_media(media='screen')
     pg.pdf(path=os.path.join(HERE, 'r1-report.pdf')) if False else None
-    pg.click('#repBack'); pg.wait_for_timeout(300)
+    pg.click('#hBack'); pg.wait_for_timeout(300)
     # Kiswahili
     pg.locator('#segLang [data-v=sw]').click()
     pg.click('#tabs [data-v=vList]'); pg.locator('#list .row').first.click(); pg.wait_for_timeout(400); pg.click('#tabVisit'); pg.wait_for_timeout(400)
