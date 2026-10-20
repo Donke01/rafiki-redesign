@@ -135,6 +135,11 @@ export async function onRequestGet({ request, env, waitUntil }) {
   const chk = await checkPin(request, env);
   if (chk.res) return chk.res;
   const q = new URL(request.url).searchParams;
+  // rough position from the internet connection (city level), for computers that can't find themselves
+  if (q.get('where')) {
+    const cf = request.cf || {}, lat = parseFloat(cf.latitude), lon = parseFloat(cf.longitude);
+    return json(isFinite(lat) && isFinite(lon) ? { ok: true, lat, lon, city: String(cf.city || ''), country: String(cf.country || '') } : { ok: false, reason: 'unknown' }, 200);
+  }
   const id = (q.get('id') || '').replace(/\D/g, '');
   if (id) {
     const last = env.FEED ? await env.FEED.get('pinlast:' + id, 'json') : null;

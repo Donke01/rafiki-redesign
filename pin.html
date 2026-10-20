@@ -1081,6 +1081,7 @@ html[data-theme=dark] body.titled header.top{background:rgba(11,17,22,.96) !impo
 #nearSheet.shut .bd{display:block}
 #nearSheet.shut .bd > .row:not(:first-child),#nearSheet.shut .bd > p{display:none}
 #nearSheet.shut .bd > p.gw{display:block}
+#nearSheet.shut .bd > p.gw + .row{display:flex}
 .mstyle{width:44px;height:44px;border-radius:14px;border:1px solid rgba(0,0,0,.18);background:#FFFFFF;color:#04263F;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(4,38,63,.12)}
 .mstyle svg{width:22px;height:22px}
 .bsh{position:fixed;inset:0;z-index:2000}
@@ -2038,12 +2039,18 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
     hw = navigator.geolocation.watchPosition(got, function (e) {
       // Computers have no GPS: they work it out from Wi-Fi, which can be slow or fail. Ask once more the easy way, and say what went wrong.
       if (S.here) return;
-      if (e.code === 1) { S.geoErr = 1; return nearUi(); }
+      if (e.code === 1) { S.geoErr = 1; approxFetch(); return nearUi(); }
       if (geoOnce) return; geoOnce = true;
-      navigator.geolocation.getCurrentPosition(function (p) { geoOnce = false; got(p); }, function (e2) { geoOnce = false; if (!S.here) { S.geoErr = e2.code || 2; nearUi(); } }, { enableHighAccuracy: false, maximumAge: 600000, timeout: 60000 });
+      navigator.geolocation.getCurrentPosition(function (p) { geoOnce = false; got(p); }, function (e2) { geoOnce = false; if (!S.here) { S.geoErr = e2.code || 2; approxFetch(); nearUi(); } }, { enableHighAccuracy: false, maximumAge: 600000, timeout: 60000 });
     }, { enableHighAccuracy: true, maximumAge: 0, timeout: 30000 });
   }
-  var geoOnce = false;
+  var geoOnce = false, approxAsked = false;
+  // When the device can't find itself, ask the server roughly where the internet connection is (city level).
+  // Only the "nearest" list uses it; pinning and "I'm here" still need a real position.
+  function approxFetch() {
+    if (approxAsked || S.here) return; approxAsked = true;
+    api('GET', null, '?where=1').then(function (j) { if (j.ok && isFinite(j.lat) && isFinite(j.lon)) { S.approx = { ll: [j.lat, j.lon], city: j.city || '' }; nearUi(); } });
+  }
   function geoRetry() { S.geoErr = 0; geoOnce = false; nearUi(); hereWatch(false); hereWatch(true); }
   // Phones (especially iPhones) quietly stop sending positions when the app goes to the background,
   // and don't always start again. So: restart location when the app comes back, and if no position
@@ -2148,6 +2155,13 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
         : S.geoErr ? (mac ? tr('This computer couldn’t work out where it is. Turn on Wi-Fi, and on a Mac allow your browser in System Settings › Privacy & Security › Location Services. Then try again.', 'Kompyuta hii haikuweza kujua mahali ilipo. Washa Wi-Fi, na kwenye Mac ruhusu kivinjari chako kwenye System Settings › Privacy & Security › Location Services. Kisha jaribu tena.')
           : tr('Your phone couldn’t find where you are. Turn on location, step outside if you can, then try again.', 'Simu yako haikuweza kupata mahali ulipo. Washa mahali, toka nje ukiweza, kisha jaribu tena.'))
         : tr('Finding where you are…', 'Inatafuta mahali ulipo…');
+      if (S.geoErr && S.approx) {
+        var al = S.projects.filter(function (p) { return p.gps; }).map(function (p) { return { p: p, d: metres(S.approx.ll, p.gps) }; }).sort(function (a, b) { return a.d - b.d; }).slice(0, 5);
+        why = (S.approx.city ? tr('Roughly, from your internet connection near ' + esc(S.approx.city) + '.', 'Takriban, kutoka kwa mtandao wako karibu na ' + esc(S.approx.city) + '.') : tr('Roughly, from your internet connection.', 'Takriban, kutoka kwa mtandao wako.')) + ' ' + why;
+        $('nearList').innerHTML = '<p class="muted gw" style="margin:0 6px 8px">' + why + ' <button class="lnk" id="geoRetry" type="button">' + tr('Try again', 'Jaribu tena') + '</button></p>' +
+          al.map(function (x) { return rowHtml(x.p, '<span class="tag">≈ ' + dist(x.d) + '</span>'); }).join('');
+        $('nearList').dataset.k = ''; return;
+      }
       $('nearList').innerHTML = '<p class="muted gw" style="margin:0 6px 8px">' + why + '</p>' + (S.geoErr ? '<button class="btn small light" id="geoRetry" type="button" style="margin:0 6px 8px">' + tr('Try again', 'Jaribu tena') + '</button>' : '');
       $('nearList').dataset.k = ''; return;
     }

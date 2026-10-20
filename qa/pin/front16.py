@@ -10,6 +10,7 @@ def check(c, w):
     print(('ok   ' if c else 'FAIL ') + w)
     if not c: problems.append(w)
 def api(route, req):
+    if 'where=' in req.url: return route.fulfill(json={'ok': True, 'lat': 0.52, 'lon': 35.27, 'city': 'Eldoret', 'country': 'KE'})
     if 'activity=' in req.url: return route.fulfill(json={'ok': True, 'activity': []})
     return route.fulfill(json={'ok': True, 'who': 'Meril Kiprop', 'admin': False, 'reviewOpen': 0, 'projects': P, 'repairs': {}, 'visits': {}, 'jobs': [], 'assigned': [], 'confirmed': {}})
 # fake geolocation: watch times out, then the easy one-shot also times out until "fixed" is set
@@ -31,9 +32,11 @@ with sync_playwright() as p:
         t = pg.inner_text('#nearList')
         if mode == 'timeout':
             check('couldn’t work out where it is' in t and 'Location Services' in t, 'computer: explains Wi-Fi / Location Services: ' + t[:80])
-            check(pg.locator('#geoRetry').count() == 1, 'Try again button'); pg.screenshot(path=OUT + '/1-mac.png')
+            check(pg.locator('#geoRetry').count() == 1, 'Try again button')
+            check('Roughly' in t and 'Eldoret' in t and pg.locator('#nearList .row').count() == 1 and '≈' in pg.inner_text('#nearList .row'), 'rough nearest list from the internet connection')
+            check(pg.locator('#mHere .here').count() == 0 if pg.locator('#mHere').count() else True, 'no "I am here" from a rough position'); pg.screenshot(path=OUT + '/1-mac.png')
             pg.evaluate('window.__geoFixed = true'); pg.click('#geoRetry'); pg.wait_for_timeout(800)
-            check(pg.locator('#nearList .row').count() == 1, 'Try again finds the nearest project')
+            check(pg.locator('#nearList .row').count() == 1 and 'Roughly' not in pg.inner_text('#nearList'), 'Try again finds the nearest project exactly')
         else:
             check('blocked' in t, 'blocked: says so: ' + t[:80]); pg.screenshot(path=OUT + '/2-blocked.png')
         check(not errs, 'no errors ' + str(errs[:1])); ctx.close()
