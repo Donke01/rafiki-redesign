@@ -41,6 +41,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
@@ -59,17 +60,26 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 @Composable
-fun Btn(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, icon: String? = null, enabled: Boolean = true, light: Boolean = false, ok: Boolean = false, small: Boolean = false) {
+fun Btn(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, icon: String? = null, enabled: Boolean = true, light: Boolean = false, ok: Boolean = false, small: Boolean = false, saved: String? = null) {
     val src = remember { MutableInteractionSource() }
     val pressed by src.collectIsPressedAsState()
-    val bg: Brush = when { !enabled -> SolidColor(C.off); light -> SolidColor(C.card); ok -> OkBrush; else -> BlueBrush }
+    if (saved != null) {
+        // turned green for a moment after saving
+        Row(modifier.clip(RoundedCornerShape(999.dp)).background(OkBrush).heightIn(min = if (small) 44.dp else 52.dp).padding(horizontal = if (small) 16.dp else 22.dp),
+            horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+            Icon(Ic.get("check"), null, tint = Color.White, modifier = Modifier.size(if (small) 18.dp else 20.dp)); Spacer(Modifier.width(8.dp))
+            Text(saved, color = Color.White, style = if (small) MaterialTheme.typography.labelMedium.copy(fontSize = 14.sp) else MaterialTheme.typography.labelLarge)
+        }
+        return
+    }
+    val bg: Brush = when { !enabled -> SolidColor(C.off); light -> SolidColor(if (C.glassy) C.glass2 else C.card); ok -> OkBrush; else -> C.primary }
     val fg = if (light) C.ink else Color.White
     Row(
         modifier
             .scale(if (pressed) 0.97f else 1f)
             .clip(RoundedCornerShape(999.dp))
             .background(bg)
-            .then(if (light) Modifier.border(1.dp, C.edge, RoundedCornerShape(999.dp)) else Modifier)
+            .then(if (light) Modifier.border(1.dp, if (C.glassy) C.glassEdge else C.edge, RoundedCornerShape(999.dp)) else Modifier)
             .clickable(enabled = enabled, interactionSource = src, indication = androidx.compose.material3.ripple(), role = Role.Button, onClick = onClick)
             .heightIn(min = if (small) 44.dp else 52.dp)
             .padding(horizontal = if (small) 16.dp else 22.dp),
@@ -83,10 +93,13 @@ fun Btn(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, icon: 
 @Composable
 fun Card(modifier: Modifier = Modifier, pad: Dp = 18.dp, brush: Brush? = null, border: Color? = null, content: @Composable ColumnScope.() -> Unit) {
     val shape = RoundedCornerShape(24.dp)
+    val glass = brush == null && C.glassy
     Column(
-        modifier.fillMaxWidth().clip(shape)
-            .then(if (brush != null) Modifier.background(brush) else Modifier.background(C.card))
-            .then(if (brush == null) Modifier.border(1.dp, border ?: C.line, shape) else Modifier)
+        modifier.fillMaxWidth()
+            .then(if (glass) Modifier.shadow(10.dp, shape, ambientColor = Color(0x22144678), spotColor = Color(0x22144678)) else Modifier)
+            .clip(shape)
+            .then(if (brush != null) Modifier.background(brush) else Modifier.background(if (glass) C.glass2 else C.card))
+            .then(if (brush == null) Modifier.border(1.dp, border ?: if (glass) C.glassEdge else C.line, shape) else Modifier)
             .padding(pad),
         content = content,
     )
@@ -98,8 +111,8 @@ fun Tile(label: String, icon: String, selected: Boolean, onClick: () -> Unit, mo
     Box(modifier) {
         Column(
             Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp))
-                .background(if (selected) BlueBrush else SolidColor(C.card))
-                .then(if (!selected) Modifier.border(1.dp, C.line, RoundedCornerShape(16.dp)) else Modifier)
+                .background(if (selected) C.primary else SolidColor(if (C.glassy) C.glass2 else C.card))
+                .then(if (!selected) Modifier.border(1.dp, if (C.glassy) C.glassEdge else C.line, RoundedCornerShape(16.dp)) else Modifier)
                 .clickable(role = Role.Button, onClick = onClick)
                 .heightIn(min = 66.dp).padding(horizontal = 2.dp, vertical = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center,
@@ -181,7 +194,7 @@ fun LangSwitch(prefs: org.rafikioutreach.pin.data.Prefs, modifier: Modifier = Mo
         listOf(false to "English", true to "Kiswahili").forEach { (sw, label) ->
             val on = org.rafikioutreach.pin.Lang.sw == sw
             Text(label, color = if (on) Color.White else C.ink, style = MaterialTheme.typography.labelMedium,
-                modifier = Modifier.clip(RoundedCornerShape(999.dp)).background(if (on) BlueBrush else SolidColor(Color.Transparent))
+                modifier = Modifier.clip(RoundedCornerShape(999.dp)).background(if (on) C.primary else SolidColor(Color.Transparent))
                     .clickable(role = Role.RadioButton) { org.rafikioutreach.pin.Lang.sw = sw; prefs.lang = if (sw) "sw" else "en" }
                     .heightIn(min = 44.dp).padding(horizontal = 18.dp, vertical = 13.dp))
         }

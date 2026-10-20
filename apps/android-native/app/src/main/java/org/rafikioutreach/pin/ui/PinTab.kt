@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -106,6 +107,8 @@ fun PinTab(m: AppModel, p: Project) {
     Spacer(Modifier.height(14.dp))
     Text(t("Photos (optional)", "Picha (si lazima)"), style = MaterialTheme.typography.titleSmall, color = C.ink, modifier = Modifier.padding(bottom = 8.dp))
     PhotoSlots(m, emptyList(), shots, { shots = it }, max = 5)
+    var greenText by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(greenText) { if (greenText != null) { kotlinx.coroutines.delay(2600); greenText = null } }
     Btn(t("Save this location", "Hifadhi mahali hapa"), {
         val ll = spot.ll ?: return@Btn
         busy = true
@@ -115,16 +118,16 @@ fun PinTab(m: AppModel, p: Project) {
             when (val o = m.submit(body, shots.map { OutFile(it.file.path, "photo", "Location photo") })) {
                 is Outcome.Sent -> {
                     if (o.reply.optBoolean("pending")) msg = "warn" to t("This location was confirmed by the office, so your change was sent to them to approve.", "Mahali hapa pamethibitishwa na ofisi, kwa hiyo badiliko lako limetumwa kwao kuidhinisha.")
-                    else { m.localPin(p, ll); saved = true; msg = "ok" to (t("Location saved in monday.com ✓", "Mahali pamehifadhiwa kwenye monday.com ✓") + (o.note?.let { " $it" } ?: "")) }
+                    else { m.localPin(p, ll); saved = true; greenText = t("Saved", "Imehifadhiwa"); msg = "ok" to (t("Location saved in monday.com ✓", "Mahali pamehifadhiwa kwenye monday.com ✓") + (o.note?.let { " $it" } ?: "")) }
                     shots = emptyList()
                 }
-                Outcome.Queued -> { m.localPin(p, ll); saved = true; shots = emptyList(); msg = "warn" to t("Saved on this phone. It will be sent when you have signal.", "Imehifadhiwa kwenye simu. Itatumwa ukipata mtandao.") }
+                Outcome.Queued -> { m.localPin(p, ll); saved = true; greenText = t("Saved on this phone", "Imehifadhiwa kwenye simu"); shots = emptyList(); msg = "warn" to t("Saved on this phone. It will be sent when you have signal.", "Imehifadhiwa kwenye simu. Itatumwa ukipata mtandao.") }
                 is Outcome.Failed -> msg = "bad" to o.text
                 Outcome.Locked -> {}
             }
             busy = false
         }
-    }, Modifier.fillMaxWidth().padding(top = 16.dp), icon = "check", enabled = spot.ll != null && !busy)
+    }, Modifier.fillMaxWidth().padding(top = 16.dp), icon = "check", enabled = spot.ll != null && !busy, saved = greenText)
     msg?.let { (tone, text) -> Msg(text, tone) }
     if (saved) Btn(t("Undo", "Tendua"), {
         scope.launch {

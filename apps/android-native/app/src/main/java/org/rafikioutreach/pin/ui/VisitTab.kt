@@ -289,7 +289,7 @@ private fun SumRow(k: String, v: String, bad: Boolean = false) {
 @Composable
 fun Choice(label: String, icon: String, tint: Color, bg: Color, on: Boolean, onClick: () -> Unit) {
     Row(
-        Modifier.padding(top = 10.dp).fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(if (on) BlueBrush else SolidColor(C.card))
+        Modifier.padding(top = 10.dp).fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(if (on) C.primary else SolidColor(C.card))
             .border(1.dp, if (on) Color.Transparent else C.edge, RoundedCornerShape(20.dp)).clickable(role = Role.RadioButton, onClick = onClick).heightIn(min = 64.dp).padding(horizontal = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -301,9 +301,9 @@ fun Choice(label: String, icon: String, tint: Color, bg: Color, on: Boolean, onC
 
 @Composable
 fun Pill(label: String, on: Boolean, modifier: Modifier = Modifier, color: Color? = null, onClick: () -> Unit) {
-    val c = color ?: C.blue
+    val c = color ?: C.selected
     Box(
-        modifier.clip(RoundedCornerShape(12.dp)).background(if (on) c else C.card).border(1.dp, if (on) c else C.edge, RoundedCornerShape(12.dp))
+        modifier.clip(RoundedCornerShape(12.dp)).background(if (on) c else if (C.glassy) C.glass2 else C.card).border(1.dp, if (on) c else if (C.glassy) C.glassEdge else C.edge, RoundedCornerShape(12.dp))
             .clickable(role = Role.Button, onClick = onClick).heightIn(min = 44.dp).padding(horizontal = 10.dp),
         contentAlignment = Alignment.Center,
     ) { Text(label, color = if (on) Color.White else C.ink, style = MaterialTheme.typography.labelMedium, textAlign = TextAlign.Center) }

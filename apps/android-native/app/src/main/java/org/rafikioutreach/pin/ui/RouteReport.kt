@@ -98,9 +98,6 @@ fun RouteScreen(m: AppModel, open: (String) -> Unit, back: () -> Unit) {
     fun save() { m.prefs.route = picked.joinToString(",") }
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
-        Row(Modifier.clickable(role = Role.Button, onClick = back).padding(vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
-            Icon(Ic.get("back"), null, tint = C.blue2, modifier = Modifier.size(20.dp)); Spacer(Modifier.width(6.dp)); Text(t("Projects", "Miradi"), color = C.blue2, style = MaterialTheme.typography.titleSmall)
-        }
         Text(t("Today's route", "Njia ya leo"), style = MaterialTheme.typography.headlineLarge, color = C.ink)
         if (choosing) {
             Text(t("Tick the projects to visit. The app puts them in order, nearest first.", "Weka alama kwenye miradi utakayotembelea. Programu itaipanga, iliyo karibu kwanza."), style = MaterialTheme.typography.bodyMedium, color = C.muted)
@@ -181,9 +178,6 @@ fun ReportScreen(m: AppModel, back: () -> Unit) {
     )
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
-        Row(Modifier.clickable(role = Role.Button, onClick = back).padding(vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
-            Icon(Ic.get("back"), null, tint = C.blue2, modifier = Modifier.size(20.dp)); Spacer(Modifier.width(6.dp)); Text(t("Me", "Mimi"), color = C.blue2, style = MaterialTheme.typography.titleSmall)
-        }
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             Picker(t("Month", "Mwezi"), ym.toString(), months.map { it.toString() to fmt.format(it) }, { ym = YearMonth.parse(it) }, Modifier.weight(1f))
             Picker(t("Country", "Nchi"), ck, listOf("" to t("All countries", "Nchi zote")) + COUNTRIES.toList(), { ck = it }, Modifier.weight(1f))

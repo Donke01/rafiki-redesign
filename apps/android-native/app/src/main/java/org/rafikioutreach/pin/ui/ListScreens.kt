@@ -1,5 +1,19 @@
 package org.rafikioutreach.pin.ui
 
+import androidx.compose.ui.text.withStyle
+
+import androidx.compose.ui.unit.sp
+
+import androidx.compose.foundation.shape.CircleShape
+
+import androidx.compose.ui.draw.shadow
+
+import androidx.compose.ui.focus.focusRequester
+
+import kotlinx.coroutines.launch
+
+import androidx.compose.runtime.rememberCoroutineScope
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -131,7 +145,7 @@ private val FILTERS = listOf(
 )
 
 @Composable
-fun ProjectsScreen(m: AppModel, open: (String) -> Unit, planRoute: () -> Unit = {}) {
+fun ProjectsScreen(m: AppModel, open: (String) -> Unit, planRoute: () -> Unit = {}, newSite: () -> Unit = {}) {
     val s by m.snap.collectAsState()
     val fix by m.fix.collectAsState()
     val waiting by m.waiting.collectAsState()
@@ -165,7 +179,12 @@ fun ProjectsScreen(m: AppModel, open: (String) -> Unit, planRoute: () -> Unit = 
     val mine = snap.assigned.mapNotNull { a -> snap.projects.firstOrNull { it.id == a.id }?.let { it to t("Visit by ${a.date}", "Tembelea kabla ya ${a.date}") + if (a.note.isNotBlank()) " · ${a.note}" else "" } } +
         snap.jobs.mapNotNull { id -> snap.projects.firstOrNull { it.id == id }?.let { it to t("Repair job", "Kazi ya matengenezo") } }
 
-    LazyColumn(Modifier.fillMaxSize().testTag("projects"), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    val list = androidx.compose.foundation.lazy.rememberLazyListState()
+    val scope = rememberCoroutineScope()
+    val focus = remember { androidx.compose.ui.focus.FocusRequester() }
+    fun pick(k: String) { f = k; m.prefs.filter = k; scope.launch { list.animateScrollToItem(maxOf(0, list.layoutInfo.totalItemsCount - rows.size - 2)) } }
+    LazyColumn(Modifier.fillMaxSize().testTag("projects"), state = list, contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        item { HomeTop(m, snap, here, { scope.launch { list.animateScrollToItem(6); runCatching { focus.requestFocus() } } }, { pick(it) }, newSite) }
         nearHere(snap, here)?.let { (p, d) -> item { HereBanner(p, d, m.prefs.miles, Modifier) { open(p.id) } } }
         if (banner != null) item { Card(border = C.warnBg) { Text(banner!!, color = C.warn, style = MaterialTheme.typography.bodyMedium) } }
         if (waiting > 0) item {
@@ -211,7 +230,7 @@ fun ProjectsScreen(m: AppModel, open: (String) -> Unit, planRoute: () -> Unit = 
         }
         item {
             OutlinedTextField(
-                q, { q = it }, Modifier.fillMaxWidth().heightIn(min = 52.dp), placeholder = { Text(t("Search by project name or place", "Tafuta kwa jina la mradi au mahali"), color = C.muted) },
+                q, { q = it }, Modifier.fillMaxWidth().heightIn(min = 52.dp).focusRequester(focus), placeholder = { Text(t("Search by project name or place", "Tafuta kwa jina la mradi au mahali"), color = C.muted) },
                 leadingIcon = { Icon(Ic.get("search"), null, tint = C.muted) }, singleLine = true, shape = RoundedCornerShape(16.dp),
                 colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = C.blue, unfocusedBorderColor = C.edge, focusedContainerColor = C.card, unfocusedContainerColor = C.card),
             )
@@ -238,6 +257,14 @@ fun ProjectsScreen(m: AppModel, open: (String) -> Unit, planRoute: () -> Unit = 
         }
         item { Text((COUNTRIES[ck]?.let { "$it · " } ?: "") + count, style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold), color = C.muted) }
         items(rows, key = { it.id }) { p -> ProjectRow(m, snap, p, here) { open(p.id) } }
+        if (rows.isEmpty()) item {
+            EmptyDrop(when {
+                f == "missing" && q.isBlank() && ck.isBlank() -> t("Every project has a location.", "Kila mradi una mahali.")
+                f == "repairs" && q.isBlank() && ck.isBlank() -> t("No open repairs.", "Hakuna matengenezo yaliyo wazi.")
+                f == "due" && q.isBlank() -> t("Everything has been visited in the last 6 months.", "Kila kitu kimetembelewa katika miezi 6 iliyopita.")
+                else -> t("No projects match.", "Hakuna mradi unaolingana.")
+            })
+        }
     }
 }
 
@@ -268,5 +295,43 @@ fun ProjectRow(m: AppModel, s: Snapshot, p: Project, here: LatLng?, onClick: () 
             else -> Tag(t("Pinned", "Ina mahali"), C.okBg, C.ok)
         }
         Spacer(Modifier.width(12.dp))
+    }
+}
+
+/** Home: a greeting, where you are, a big question and four quick actions. */
+@Composable
+private fun HomeTop(m: AppModel, s: Snapshot, here: LatLng?, search: () -> Unit, filter: (String) -> Unit, newSite: () -> Unit) {
+    val first = m.prefs.name.substringBefore(' ')
+    val where = here?.let { h -> s.projects.filter { it.gps != null }.minByOrNull { Geo.metres(h, it.gps!!) }?.takeIf { Geo.metres(h, it.gps!!) < 60000 && it.area.isNotBlank() }?.let { it.area + ", " + it.country } }
+        ?: COUNTRIES[m.prefs.country]
+    Column {
+        Text("Habari, " + first.ifBlank { "karibu" }, style = MaterialTheme.typography.bodySmall, color = C.muted)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(Ic.get("pin"), null, tint = C.blue, modifier = Modifier.size(15.dp)); Spacer(Modifier.width(4.dp))
+            Text(where ?: "RAFIKI Pin", style = MaterialTheme.typography.titleSmall, color = C.ink, maxLines = 1)
+        }
+        Row(Modifier.padding(top = 10.dp, bottom = 14.dp), verticalAlignment = Alignment.Bottom) {
+            Text(androidx.compose.ui.text.buildAnnotatedString {
+                withStyle(androidx.compose.ui.text.SpanStyle(fontWeight = FontWeight.Normal)) { append(t("Which water point", "Kituo gani cha maji") + "\n") }
+                append(t("today?", "leo?"))
+            }, style = MaterialTheme.typography.headlineLarge.copy(fontSize = 31.sp, lineHeight = 34.sp, letterSpacing = (-1).sp), color = C.ink, modifier = Modifier.weight(1f))
+            Box(Modifier.size(54.dp).shadow(12.dp, CircleShape, spotColor = Color(0x550C1924)).clip(CircleShape).background(C.primary).clickable(role = Role.Button, onClick = search).testTag("home_search"), contentAlignment = Alignment.Center) {
+                Icon(Ic.get("search"), t("Search projects", "Tafuta miradi"), tint = Color.White, modifier = Modifier.size(22.dp))
+            }
+        }
+        listOf(
+            listOf(Triple("missing", t("Pin a location", "Weka mahali"), "pin"), Triple("near", t("Visit nearby", "Tembelea karibu"), "clip")),
+            listOf(Triple("new", t("Add a site", "Ongeza eneo"), "plus"), Triple("repairs", t("Repairs", "Ukarabati"), "wrench")),
+        ).forEach { row ->
+            Row(Modifier.padding(bottom = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                row.forEach { (k, l, ic) ->
+                    Row(Modifier.weight(1f).heightIn(min = 52.dp).clip(RoundedCornerShape(18.dp)).background(if (C.glassy) C.glass2 else C.card).border(1.dp, if (C.glassy) C.glassEdge else C.line, RoundedCornerShape(18.dp))
+                        .clickable(role = Role.Button) { if (k == "new") newSite() else filter(k) }.padding(horizontal = 12.dp).testTag("quick_$k"), verticalAlignment = Alignment.CenterVertically) {
+                        Box(Modifier.size(32.dp).clip(RoundedCornerShape(11.dp)).background(C.tint), contentAlignment = Alignment.Center) { Icon(Ic.get(ic), null, tint = C.blue, modifier = Modifier.size(18.dp)) }
+                        Spacer(Modifier.width(10.dp)); Text(l, style = MaterialTheme.typography.labelLarge.copy(fontSize = 14.sp), color = C.ink)
+                    }
+                }
+            }
+        }
     }
 }

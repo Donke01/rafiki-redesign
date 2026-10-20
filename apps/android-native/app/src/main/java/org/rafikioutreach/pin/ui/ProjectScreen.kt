@@ -75,10 +75,6 @@ fun ProjectScreen(m: AppModel, id: String, startTab: String, back: () -> Unit) {
     val here = fix?.ll
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
-        Row(Modifier.clip(RoundedCornerShape(12.dp)).clickable(role = Role.Button, onClick = back).heightIn(min = 44.dp).padding(end = 10.dp), verticalAlignment = Alignment.CenterVertically) {
-            Icon(Ic.get("back"), null, tint = C.blue2, modifier = Modifier.size(20.dp)); Spacer(Modifier.width(6.dp))
-            Text(t("Back", "Rudi"), color = C.blue2, style = MaterialTheme.typography.titleSmall)
-        }
         if (p.photo != null) NetImage(m.api.photoUrl(p.photo, 960), Modifier.fillMaxWidth().aspectRatio(16f / 9f).padding(vertical = 6.dp).clip(RoundedCornerShape(24.dp)).background(C.tint)) {}
 
         // the project, on deep blue
@@ -128,14 +124,14 @@ fun ProjectScreen(m: AppModel, id: String, startTab: String, back: () -> Unit) {
             }
         }
 
-        snap.repairs[p.id]?.let { r -> RepairCard(m, p, r) }
+        snap.repairs[p.id]?.let { r -> RepairTracker(m, p, r, here) }
 
         // what to do
         Row(Modifier.padding(top = 14.dp).fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(C.card).border(1.dp, C.line, RoundedCornerShape(18.dp)).padding(5.dp)) {
             listOf("pin" to t("Pin location", "Weka mahali"), "visit" to t("Site visit", "Ziara"), "hist" to t("History", "Historia")).forEach { (k, label) ->
                 val on = tab == k
                 Text(label, color = if (on) Color.White else C.ink, style = MaterialTheme.typography.titleSmall, textAlign = TextAlign.Center,
-                    modifier = Modifier.weight(1f).clip(RoundedCornerShape(14.dp)).background(if (on) BlueBrush else SolidColor(Color.Transparent))
+                    modifier = Modifier.weight(1f).clip(RoundedCornerShape(14.dp)).background(if (on) C.primary else SolidColor(Color.Transparent))
                         .clickable(role = Role.Tab) { tab = k }.heightIn(min = 44.dp).padding(vertical = 12.dp).testTag("tab_$k"))
             }
         }
@@ -199,7 +195,7 @@ fun HistoryTab(m: AppModel, p: Project) {
     Msg(err, "bad")
     val n = notes
     if (n == null && err == null) Text(t("Loading…", "Inapakia…"), color = C.muted, modifier = Modifier.padding(top = 12.dp))
-    if (n != null && n.isEmpty()) Text(t("No notes yet.", "Bado hakuna maelezo."), color = C.muted, modifier = Modifier.padding(top = 12.dp))
+    if (n != null && n.isEmpty()) EmptyDrop(t("No notes on this project yet.", "Bado hakuna maelezo kwenye mradi huu."))
     n?.forEach { note ->
         Card(Modifier.padding(top = 10.dp), pad = 14.dp) {
             Text(whenText(note.at) + " · " + note.by, style = MaterialTheme.typography.labelMedium, color = C.ink)

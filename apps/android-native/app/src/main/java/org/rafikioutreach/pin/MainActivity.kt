@@ -38,11 +38,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
@@ -104,8 +106,22 @@ fun App(m: AppModel) {
         val o = LifecycleEventObserver { _, e -> when (e) { Lifecycle.Event.ON_RESUME -> if (m.signedIn.value) { m.locator.start(); m.refresh() }; Lifecycle.Event.ON_PAUSE -> m.locator.stop(); else -> {} } }
         owner.lifecycle.addObserver(o); onDispose { owner.lifecycle.removeObserver(o) }
     }
-    Box(Modifier.fillMaxSize().background(C.bg).statusBarsPadding().navigationBarsPadding().imePadding()) {
-        if (!signedIn) LockScreen(m) else Shell(m)
+    // welcome: before signing in, and for a moment every time the app opens; the full one the first time
+    var helloDone by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(!org.rafikioutreach.pin.ui.Onb.enabled) }
+    var onbSeen by remember { androidx.compose.runtime.mutableStateOf(m.prefs.onb) }
+    Box(Modifier.fillMaxSize()) {
+        org.rafikioutreach.pin.ui.AppBackground(Modifier.matchParentSize())
+        Box(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().imePadding()) {
+            if (!signedIn) LockScreen(m) else Shell(m)
+        }
+        when {
+            !signedIn && !helloDone -> org.rafikioutreach.pin.ui.Welcome(m, false) { helloDone = true }
+            signedIn && org.rafikioutreach.pin.ui.Onb.enabled && (!onbSeen || m.replayOnb) -> org.rafikioutreach.pin.ui.Onboarding(m) { role ->
+                onbSeen = true; helloDone = true; m.replayOnb = false
+                m.goTab = if (role == "office" && m.snap.value?.admin == true) "office" else "list"
+            }
+            signedIn && !helloDone -> org.rafikioutreach.pin.ui.Welcome(m, true) { helloDone = true }
+        }
     }
 }
 
@@ -118,21 +134,22 @@ fun Shell(m: AppModel) {
     BackHandler(stack.size > 1) { stack.removeAt(stack.lastIndex) }
     fun go(p: Place) { stack.add(p) }
     fun tab(t: String) { stack.clear(); stack.add(Place(t)) }
+    val goTab = m.goTab
+    LaunchedEffect(goTab) { if (goTab != null) { tab(goTab); m.goTab = null } }
+    val sub = here.project != null || here.sub != null
 
     Column(Modifier.fillMaxSize()) {
-        // top bar
-        Row(Modifier.fillMaxWidth().background(C.card).heightIn(min = 56.dp).padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
-            Box(Modifier.size(30.dp).clip(RoundedCornerShape(10.dp)).background(org.rafikioutreach.pin.ui.DeepBrush), contentAlignment = Alignment.Center) {
-                Icon(Ic.dropFill, null, tint = Color.White, modifier = Modifier.size(17.dp))
+        // app header: you (or back), the wordmark, refresh
+        Row(Modifier.fillMaxWidth().heightIn(min = 56.dp).padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+            Box(Modifier.size(42.dp), contentAlignment = Alignment.Center) {
+                if (sub) RoundBtn("back", t("Back", "Rudi"), "hback") { stack.removeAt(stack.lastIndex) }
+                else Box(Modifier.size(40.dp).clip(androidx.compose.foundation.shape.CircleShape).background(androidx.compose.ui.graphics.Brush.linearGradient(listOf(Color(0xFF47B4F5), Color(0xFF0A78C2))))
+                    .clickable(role = Role.Button) { tab("me") }.semantics { contentDescription = t("Me", "Mimi") }.testTag("hav"), contentAlignment = Alignment.Center) {
+                    Text(m.prefs.name.split(" ").mapNotNull { it.firstOrNull()?.uppercase() }.take(2).joinToString(""), color = Color.White, style = MaterialTheme.typography.labelMedium.copy(fontSize = 13.sp))
+                }
             }
-            Spacer(Modifier.width(10.dp))
-            Text("RAFIKI", style = MaterialTheme.typography.titleMedium.copy(letterSpacing = 1.5.sp), color = C.ink)
-            Text(" Pin", style = MaterialTheme.typography.titleMedium, color = C.blue)
-            Spacer(Modifier.weight(1f))
-            Text(m.prefs.name, style = MaterialTheme.typography.labelMedium, color = C.muted, maxLines = 1, modifier = Modifier.widthIn(max = 140.dp))
-            Box(Modifier.size(44.dp).clip(RoundedCornerShape(12.dp)).clickable { m.refresh() }.semantics { contentDescription = t("Refresh", "Onyesha upya") }, contentAlignment = Alignment.Center) {
-                Icon(Ic.get("refresh"), null, tint = C.ink, modifier = Modifier.size(22.dp).then(if (busy) Modifier.rotate(180f) else Modifier))
-            }
+            Box(Modifier.weight(1f), contentAlignment = Alignment.Center) { org.rafikioutreach.pin.ui.Wordmark() }
+            RoundBtn("refresh", t("Refresh", "Onyesha upya"), "hrefresh", turn = busy) { m.refresh() }
         }
         Box(Modifier.weight(1f).fillMaxWidth()) {
             val pid = here.project
@@ -144,11 +161,14 @@ fun Shell(m: AppModel) {
                 here.tab == "new" -> NewSiteScreen(m) { id -> if (id != null) { tab("list"); go(Place("list", id)) } }
                 here.tab == "me" -> MeScreen(m) { go(Place("me", sub = "report")) }
                 here.tab == "office" -> org.rafikioutreach.pin.ui.OfficeScreen(m) { go(Place("office", it)) }
-                else -> ProjectsScreen(m, { go(Place("list", it)) }) { go(Place("list", sub = "route")) }
+                else -> ProjectsScreen(m, { go(Place("list", it)) }, { go(Place("list", sub = "route")) }) { tab("new") }
             }
         }
-        // bottom tabs
-        Row(Modifier.fillMaxWidth().background(C.card).border(1.dp, C.line).height(68.dp), verticalAlignment = Alignment.CenterVertically) {
+        // bottom tabs, floating
+        val glassy = with(org.rafikioutreach.pin.ui.C) { this === org.rafikioutreach.pin.ui.Light || this === org.rafikioutreach.pin.ui.Dark }
+        val barShape = RoundedCornerShape(28.dp)
+        Row(Modifier.padding(start = 12.dp, end = 12.dp, bottom = 10.dp, top = 6.dp).fillMaxWidth().shadow(16.dp, barShape, spotColor = Color(0x33144678)).clip(barShape)
+            .background(if (glassy) (if (C.dark) Color(0xEB1E2A36) else Color(0xF2FFFFFF)) else C.card).border(1.dp, if (glassy) (if (C.dark) Color(0x17FFFFFF) else Color.White) else C.line, barShape).height(68.dp), verticalAlignment = Alignment.CenterVertically) {
             val admin = m.snap.collectAsState().value?.admin == true
             val review = m.snap.collectAsState().value?.reviewOpen ?: 0
             (listOf(Triple("map", t("Map", "Ramani"), "map"), Triple("list", t("Projects", "Miradi"), "list"), Triple("new", t("New site", "Eneo jipya"), "plus"), Triple("me", t("Me", "Mimi"), "person")) +
@@ -156,7 +176,7 @@ fun Shell(m: AppModel) {
                 val on = here.tab == k && here.project == null
                 Column(Modifier.weight(1f).clickable(role = Role.Tab) { tab(k) }.padding(vertical = 6.dp).testTag("nav_$k"), horizontalAlignment = Alignment.CenterHorizontally) {
                     Box {
-                        if (k == "new") Box(Modifier.size(48.dp, 34.dp).clip(RoundedCornerShape(14.dp)).background(BlueBrush), contentAlignment = Alignment.Center) { Icon(Ic.get(icon), null, tint = Color.White, modifier = Modifier.size(20.dp)) }
+                        if (k == "new") Box(Modifier.size(48.dp, 34.dp).clip(RoundedCornerShape(14.dp)).background(with(org.rafikioutreach.pin.ui.C) { if (this === org.rafikioutreach.pin.ui.Light) org.rafikioutreach.pin.ui.InkBrush else BlueBrush }), contentAlignment = Alignment.Center) { Icon(Ic.get(icon), null, tint = Color.White, modifier = Modifier.size(20.dp)) }
                         else Box(Modifier.size(52.dp, 30.dp).clip(RoundedCornerShape(99.dp)).background(if (on) C.tint else Color.Transparent), contentAlignment = Alignment.Center) { Icon(Ic.get(icon), null, tint = if (on) C.blue else C.muted, modifier = Modifier.size(24.dp)) }
                         if (k == "office" && review > 0) Text("$review", color = Color.White, fontSize = 10.sp, modifier = Modifier.align(Alignment.TopEnd).clip(RoundedCornerShape(99.dp)).background(C.warn).padding(horizontal = 5.dp))
                         if (k == "me" && waiting > 0) Text("$waiting", color = Color.White, fontSize = 10.sp, modifier = Modifier.align(Alignment.TopEnd).clip(RoundedCornerShape(99.dp)).background(C.warn).padding(horizontal = 5.dp))
@@ -166,4 +186,13 @@ fun Shell(m: AppModel) {
             }
         }
     }
+}
+
+@Composable
+private fun RoundBtn(icon: String, label: String, tag: String, turn: Boolean = false, onClick: () -> Unit) {
+    Box(
+        Modifier.size(40.dp).clip(androidx.compose.foundation.shape.CircleShape).background(C.card.copy(alpha = .8f)).border(1.dp, C.line, androidx.compose.foundation.shape.CircleShape)
+            .clickable(role = Role.Button, onClick = onClick).semantics { contentDescription = label }.testTag(tag),
+        contentAlignment = Alignment.Center,
+    ) { Icon(Ic.get(icon), null, tint = C.ink, modifier = Modifier.size(20.dp).then(if (turn) Modifier.rotate(180f) else Modifier)) }
 }

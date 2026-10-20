@@ -91,13 +91,11 @@ fun LockScreen(m: AppModel) {
     }
 
     Column(
-        Modifier.fillMaxSize().background(C.bg).verticalScroll(rememberScrollState()).padding(horizontal = 24.dp, vertical = 28.dp),
+        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp, vertical = 28.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Column(Modifier.widthIn(max = 420.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-            Box(Modifier.size(56.dp).shadow(10.dp, RoundedCornerShape(18.dp)).clip(RoundedCornerShape(18.dp)).background(DeepBrush), contentAlignment = Alignment.Center) {
-                Icon(Ic.dropFill, null, tint = androidx.compose.ui.graphics.Color.White, modifier = Modifier.size(30.dp))
-            }
+            Drop(84.dp, DropC.Blue, Mood.Smile)
             Text("RAFIKI Pin", style = MaterialTheme.typography.labelLarge.copy(letterSpacing = 1.5.sp), color = C.ink, modifier = Modifier.padding(top = 12.dp))
             Text(t("Enter your PIN", "Weka PIN yako"), style = MaterialTheme.typography.headlineMedium, color = C.ink, modifier = Modifier.padding(top = 14.dp))
             Text(if (m.prefs.name.isNotBlank()) t("Welcome back, ${m.prefs.name.substringBefore(' ')}.", "Habari ${m.prefs.name.substringBefore(' ')}, karibu tena.") else t("Welcome back.", "Habari, karibu tena."), style = MaterialTheme.typography.bodyMedium, color = C.muted)

@@ -57,6 +57,7 @@ class ScreensTest {
         .put("area", area).put("type", type).put("status", "Completed").put("pump", if (id == "104") "manual" else "").apply { if (gps != null) put("gps", gps) }
 
     private fun model(signedIn: Boolean): AppModel {
+        org.rafikioutreach.pin.ui.Onb.enabled = false
         val app = ApplicationProvider.getApplicationContext<Application>()
         val p = Prefs(app)
         if (signedIn) { p.pin = "1111"; p.name = "Meril Kiprop"; p.saveSnapshot(snapshot()) } else { p.pin = ""; p.name = "" }
@@ -122,7 +123,7 @@ class ScreensTest {
         openRow("Kapsaret Borehole", click = false)
         shot("03-projects")
         openRow("Kapsaret Borehole")
-        rule.onNodeWithText("Reported as needing repair").assertExists()
+        rule.onNodeWithTag("tracker").assertExists(); rule.onNodeWithText("Repair job").assertExists()
         shot("04-project")
         rule.onNodeWithTag("tab_visit").performScrollTo().performClick()
         rule.onNodeWithText("I’ve arrived").performScrollTo().performClick()

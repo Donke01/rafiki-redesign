@@ -57,6 +57,7 @@ data class LatLng(val lat: Double, val lng: Double) {
 data class Repair(
     val state: String, val by: String, val at: String, val note: String, val urgency: String, val problems: List<String>,
     val assignee: String = "", val step: String = "reported", val due: String = "", val budget: Long? = null, val parts: String = "", val cost: Long? = null, val title: String = "",
+    val stepAt: Map<String, String> = emptyMap(),
 ) {
     companion object {
         fun from(o: JSONObject) = Repair(
@@ -65,6 +66,7 @@ data class Repair(
             o.optString("assignee"), o.optString("step").ifBlank { "reported" }, o.optString("due"),
             if (o.has("budget") && !o.isNull("budget")) o.optLong("budget") else null, o.optString("parts"),
             if (o.has("cost") && !o.isNull("cost")) o.optLong("cost") else null, o.optString("t"),
+            o.optJSONObject("stepAt")?.let { j -> j.keys().asSequence().associateWith { j.optString(it) } } ?: emptyMap(),
         )
     }
 }

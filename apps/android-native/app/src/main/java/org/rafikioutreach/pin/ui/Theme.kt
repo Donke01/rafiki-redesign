@@ -6,6 +6,7 @@ import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -97,5 +98,37 @@ fun RafikiTheme(dark: Boolean = isSystemInDarkTheme(), content: @Composable () -
     }
     androidx.compose.runtime.CompositionLocalProvider(LocalPalette provides p) {
         MaterialTheme(colorScheme = scheme, typography = type, content = content)
+    }
+}
+
+// --- 2026 look: glass on a bright, softly tinted background ----------------------------------------
+/** Light glass (and dark glass in Dark); Bright sun stays plain and strong. */
+val Palette.glassy: Boolean get() = this !== Sun
+/** Light colours: buttons and selected items are near-black, the way 2026 apps look. */
+val Palette.inky: Boolean get() = this === Light
+val Palette.glass: Color get() = if (dark) Color(0x94182229) else Color(0x9EFFFFFF)
+val Palette.glass2: Color get() = if (dark) Color(0xB81E2A36) else Color(0xC7FFFFFF)
+val Palette.glassEdge: Color get() = if (dark) Color(0x17FFFFFF) else Color(0xE6FFFFFF)
+val Ink = Color(0xFF0C1924)
+val InkBrush = Brush.verticalGradient(listOf(Color(0xFF1F3242), Color(0xFF0C1924)))
+/** The main button colour for the current colours. */
+val Palette.primary: Brush get() = when { this === Sun -> androidx.compose.ui.graphics.SolidColor(Color(0xFF0050A0)); inky -> InkBrush; else -> BlueBrush }
+/** A selected choice (pill, tab). */
+val Palette.selected: Color get() = when { this === Sun -> Color(0xFF0050A0); inky -> Ink; else -> blue }
+
+/** The app background: bright white with soft blue, mint and lilac light. */
+@Composable
+fun AppBackground(modifier: Modifier = androidx.compose.ui.Modifier) {
+    val p = C
+    androidx.compose.foundation.Canvas(modifier) {
+        if (!p.glassy) { drawRect(p.bg); return@Canvas }
+        drawRect(if (p.dark) Color(0xFF0B1116) else Color(0xFFF4F8FB))
+        fun blob(cx: Float, cy: Float, r: Float, c: Color) = drawCircle(Brush.radialGradient(listOf(c, Color.Transparent), center = androidx.compose.ui.geometry.Offset(cx, cy), radius = r), r, androidx.compose.ui.geometry.Offset(cx, cy))
+        val w = size.width; val h = size.height
+        if (p.dark) {
+            blob(0f, 0f, w * .9f, Color(0x4D1E78C8)); blob(w, h * .12f, w * .7f, Color(0x33148C78)); blob(w * .85f, h, w * .9f, Color(0x296E50C8))
+        } else {
+            blob(0f, 0f, w * .95f, Color(0x616EC3FF)); blob(w, h * .12f, w * .75f, Color(0x4D78E8D2)); blob(w * .85f, h * .98f, w * .95f, Color(0x33B9A5FF)); blob(w * .05f, h * .9f, w * .7f, Color(0x296EC3FF))
+        }
     }
 }

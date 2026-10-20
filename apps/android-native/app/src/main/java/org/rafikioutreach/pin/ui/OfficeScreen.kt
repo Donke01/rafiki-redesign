@@ -247,7 +247,7 @@ private fun Repairs(m: AppModel, s: Snapshot, open: (String) -> Unit) {
     val (people, _) = rememberTeam(m)
     val ids = s.repairs.keys.sortedWith(compareBy({ mapOf("urgent" to 0, "month" to 1, "watch" to 2)[s.repairs[it]?.urgency] ?: 3 }, { s.repairs[it]?.at }))
     Text(t("Most urgent first. Changes leave a note on the project in monday.com, and the person assigned sees the job in their app.", "Za haraka kwanza. Mabadiliko yanaacha maelezo kwenye mradi katika monday.com, na aliyepewa anaona kazi kwenye programu yake."), style = MaterialTheme.typography.bodyMedium, color = C.muted)
-    if (ids.isEmpty()) Text(t("No open repairs.", "Hakuna matengenezo yaliyo wazi."), color = C.muted, modifier = Modifier.padding(top = 12.dp))
+    if (ids.isEmpty()) EmptyDrop(t("No open repairs.", "Hakuna matengenezo yaliyo wazi."))
     ids.forEach { id -> RepairJob(m, s, id, people.map { it.optString("name") }, open) }
 }
 
@@ -282,14 +282,16 @@ private fun RepairJob(m: AppModel, s: Snapshot, id: String, names: List<String>,
         }
         Field(budget, { budget = it.filter { c -> c.isDigit() } }, t("Approved budget (KES)", "Bajeti iliyoidhinishwa (KES)"), number = true)
         Field(note, { note = it }, t("Note (optional)", "Maelezo (si lazima)"), placeholder = t("e.g. parts bought in Eldoret", "mf. vipuri vilinunuliwa Eldoret"))
+        var greenText by remember(id) { mutableStateOf<String?>(null) }
+        LaunchedEffect(greenText) { if (greenText != null) { kotlinx.coroutines.delay(2600); greenText = null } }
         Btn(t("Save", "Hifadhi"), {
             scope.launch {
                 msg = "" to t("Saving…", "Inahifadhi…")
                 val x = m.api.admin(JSONObject().put("action", "job").put("id", id).put("step", step).put("assignee", who).put("due", due).put("budget", budget).put("note", note))
                 msg = if (x.ok) "ok" to t("Saved ✓", "Imehifadhiwa ✓") else "bad" to reasonText(x.reason)
-                if (x.ok) { note = ""; m.reload() }
+                if (x.ok) { note = ""; greenText = if (step == "fixed") t("Fixed", "Imerekebishwa") else t("Saved", "Imehifadhiwa"); m.reload() }
             }
-        }, Modifier.padding(top = 12.dp), small = true, icon = "check")
+        }, Modifier.padding(top = 12.dp), small = true, icon = "check", saved = greenText)
         msg?.let { (tone, text) -> Msg(text, tone) }
     }
 }
@@ -364,7 +366,7 @@ private fun ReviewQueue(m: AppModel, open: (String) -> Unit) {
     LaunchedEffect(tick) { val a = m.api.adminGet("review").json.optJSONArray("items") ?: JSONArray(); items = (0 until a.length()).map { a.getJSONObject(it) }.filter { it.optString("status") == "open" } }
     val list = items
     if (list == null) { Text(t("Loading…", "Inapakia…"), color = C.muted); return }
-    if (list.isEmpty()) Text(t("Nothing waiting for review.", "Hakuna kinachosubiri kuidhinishwa."), color = C.muted)
+    if (list.isEmpty()) EmptyDrop(t("Nothing waiting for review.", "Hakuna kinachosubiri kuidhinishwa."))
     list.forEach { it2 ->
         val d = it2.optJSONObject("data") ?: JSONObject()
         var reason by remember(it2.optString("rid")) { mutableStateOf("") }

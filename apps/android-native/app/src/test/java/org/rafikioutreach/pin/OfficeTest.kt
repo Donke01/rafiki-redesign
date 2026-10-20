@@ -56,6 +56,7 @@ class OfficeTest {
         .put("visits", JSONObject()).put("jobs", JSONArray()).put("assigned", JSONArray()).put("confirmed", JSONObject())
 
     private fun model(): AppModel {
+        org.rafikioutreach.pin.ui.Onb.enabled = false
         val app = ApplicationProvider.getApplicationContext<Application>()
         Prefs(app).apply { pin = "9999"; name = "Reid Anderson"; saveSnapshot(snapshot()); filter = "all" }
         val m = AppModel(app)

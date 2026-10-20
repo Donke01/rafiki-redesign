@@ -5,6 +5,8 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.media.ExifInterface
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
@@ -65,6 +67,10 @@ class AppModel(app: Application) : AndroidViewModel(app) {
     }
 
     fun showBanner(t: String?) { _banner.value = t }
+
+    /** Me → "Show the welcome screens again", and where to go when the welcome ends. */
+    var replayOnb by androidx.compose.runtime.mutableStateOf(false)
+    var goTab by androidx.compose.runtime.mutableStateOf<String?>(null)
 
     /** Sign in with a PIN; shared team PINs need a name. Returns an error text, or null when in. */
     suspend fun signIn(pin: String, name: String): String? {
