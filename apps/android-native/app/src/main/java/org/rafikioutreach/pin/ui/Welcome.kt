@@ -94,7 +94,7 @@ private fun Go(text: String, enabled: Boolean = true, tag: String = "onb_go", on
 }
 
 @Composable
-private fun Cap(text: String) = Text(text, style = MaterialTheme.typography.bodySmall, color = Color(0xFF7A8086), textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(top = 8.dp))
+private fun Cap(text: String) = Text(text, style = MaterialTheme.typography.bodyMedium, color = Color(0xFF7A8086), textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(top = 8.dp))
 
 @Composable
 private fun Link(text: String, tag: String, onClick: () -> Unit) = Text(text, style = MaterialTheme.typography.labelLarge, color = if (C.dark) Color.White else Ink,
@@ -149,6 +149,7 @@ fun Welcome(m: AppModel, splash: Boolean, onSignIn: () -> Unit) {
         val first = m.prefs.name.substringBefore(' ')
         if (splash) Cap(if (first.isNotBlank()) "Habari $first, karibu tena." else "Habari, karibu tena.")
         else {
+            Box(Modifier.fillMaxWidth().padding(bottom = 14.dp), contentAlignment = Alignment.Center) { LangSwitch(m.prefs) }
             Go(t("Sign in", "Ingia"), tag = "onb_signin", onClick = onSignIn)
             Cap(if (first.isNotBlank()) "Habari $first, karibu tena." else t("New here? Ask your team for a PIN.", "Mgeni hapa? Omba PIN kwa timu yako."))
         }

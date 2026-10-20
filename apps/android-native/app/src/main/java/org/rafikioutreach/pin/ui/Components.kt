@@ -96,7 +96,7 @@ fun Card(modifier: Modifier = Modifier, pad: Dp = 18.dp, brush: Brush? = null, b
     val glass = brush == null && C.glassy
     Column(
         modifier.fillMaxWidth()
-            .then(if (glass) Modifier.shadow(10.dp, shape, ambientColor = Color(0x22144678), spotColor = Color(0x22144678)) else Modifier)
+            .then(if (glass) Modifier.shadow(6.dp, shape, ambientColor = Color(0x14144678), spotColor = Color(0x1A144678)) else Modifier)
             .clip(shape)
             .then(if (brush != null) Modifier.background(brush) else Modifier.background(if (glass) C.glass2 else C.card))
             .then(if (brush == null) Modifier.border(1.dp, border ?: if (glass) C.glassEdge else C.line, shape) else Modifier)
@@ -130,7 +130,8 @@ fun Tile(label: String, icon: String, selected: Boolean, onClick: () -> Unit, mo
 
 @Composable
 fun Tag(text: String, bg: Color, fg: Color) {
-    Text(text, color = fg, style = MaterialTheme.typography.labelMedium, modifier = Modifier.clip(RoundedCornerShape(999.dp)).background(bg).padding(horizontal = 10.dp, vertical = 5.dp))
+    Text(text, color = fg, style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp, lineHeight = 16.sp, fontWeight = FontWeight.Bold), maxLines = 1,
+        modifier = Modifier.clip(RoundedCornerShape(999.dp)).background(bg).padding(horizontal = 10.dp, vertical = 4.dp))
 }
 
 @Composable

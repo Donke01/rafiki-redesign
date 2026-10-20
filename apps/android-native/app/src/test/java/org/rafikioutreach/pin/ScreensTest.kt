@@ -127,7 +127,7 @@ class ScreensTest {
         shot("04-project")
         rule.onNodeWithTag("tab_visit").performScrollTo().performClick()
         rule.onNodeWithText("I’ve arrived").performScrollTo().performClick()
-        rule.onNodeWithText("Needs repair").assertExists()
+        rule.onAllNodesWithText("Needs repair").onFirst().assertExists()
         shot("05-visit-condition")
         rule.onNodeWithText("Not working").performScrollTo().performClick()
         rule.onNodeWithText("Urgent").performScrollTo().performClick()

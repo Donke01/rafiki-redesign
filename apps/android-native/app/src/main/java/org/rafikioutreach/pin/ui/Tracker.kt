@@ -125,9 +125,12 @@ fun RepairTracker(m: AppModel, p: Project, r: Repair, here: LatLng?) {
             }
         }
         if (!fixed) {
-            if (r.note.isNotBlank()) Text("“${r.note}”", style = MaterialTheme.typography.bodyMedium, color = C.text)
-            if (r.problems.isNotEmpty()) Text(t("Problems: ", "Matatizo: ") + r.problems.joinToString(", "), style = MaterialTheme.typography.bodySmall, color = C.muted)
-            r.cost?.let { Text(t("About KES ", "Takriban KES ") + "%,d".format(it), style = MaterialTheme.typography.bodySmall, color = C.muted) }
+            // what was reported, in its own box
+            if (r.note.isNotBlank() || r.problems.isNotEmpty() || r.cost != null) Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(if (C.dark) Color(0x14FFFFFF) else Color(0xFFF2F6F9)).padding(horizontal = 14.dp, vertical = 12.dp).testTag("repair_note")) {
+                if (r.note.isNotBlank()) Text("“${r.note}”", style = MaterialTheme.typography.bodyMedium.copy(fontStyle = androidx.compose.ui.text.font.FontStyle.Italic), color = C.text)
+                if (r.problems.isNotEmpty()) Text(t("Problems: ", "Matatizo: ") + r.problems.joinToString(", "), style = MaterialTheme.typography.bodySmall, color = C.muted)
+                r.cost?.let { Text(t("About KES ", "Takriban KES ") + "%,d".format(it), style = MaterialTheme.typography.bodySmall, color = C.muted) }
+            }
             Btn(t("Mark fixed", "Weka imerekebishwa"), {
                 busy = true
                 m.viewModelScope.launch {
@@ -141,7 +144,7 @@ fun RepairTracker(m: AppModel, p: Project, r: Repair, here: LatLng?) {
                     }
                     busy = false
                 }
-            }, Modifier.padding(top = 10.dp), icon = "wrench", ok = true, small = true, enabled = !busy)
+            }, Modifier.padding(top = 12.dp).fillMaxWidth(), icon = "wrench", ok = true, enabled = !busy)
         }
         Msg(msg, "warn")
     }

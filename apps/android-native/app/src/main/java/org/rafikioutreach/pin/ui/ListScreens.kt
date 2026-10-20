@@ -148,20 +148,21 @@ fun nearHere(s: Snapshot, here: LatLng?): Pair<Project, Double>? {
 
 @Composable
 fun HereBanner(p: Project, d: Double, miles: Boolean, modifier: Modifier, visit: () -> Unit, open: () -> Unit, dismiss: () -> Unit) {
-    Column(modifier.fillMaxWidth().clip(RoundedCornerShape(22.dp)).background(OkBrush).padding(14.dp).testTag("here")) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(Ic.get("pin"), null, tint = Color.White, modifier = Modifier.size(20.dp)); Spacer(Modifier.width(8.dp))
-            Text(t("You’re at ${p.title}", "Uko ${p.title}") + " · " + Geo.dist(d, miles), color = Color.White, style = MaterialTheme.typography.titleSmall, maxLines = 2)
-        }
-        Row(Modifier.padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text(t("Report a visit", "Ripoti ziara"), color = Color(0xFF0E4A2B), style = MaterialTheme.typography.labelLarge,
-                modifier = Modifier.clip(RoundedCornerShape(99.dp)).background(Color.White).clickable(role = Role.Button, onClick = visit).heightIn(min = 44.dp).padding(horizontal = 16.dp, vertical = 12.dp).testTag("here_visit"))
-            Text(t("Open", "Fungua"), color = Color.White, style = MaterialTheme.typography.labelLarge,
-                modifier = Modifier.clip(RoundedCornerShape(99.dp)).border(1.dp, Color(0x99FFFFFF), RoundedCornerShape(99.dp)).clickable(role = Role.Button, onClick = open).heightIn(min = 44.dp).padding(horizontal = 16.dp, vertical = 12.dp).testTag("here_open"))
-            Spacer(Modifier.weight(1f))
-            Box(Modifier.size(44.dp).clip(CircleShape).border(1.dp, Color(0x99FFFFFF), CircleShape).clickable(role = Role.Button, onClick = dismiss).semantics { contentDescription = t("Not now", "Si sasa") }.testTag("here_x"), contentAlignment = Alignment.Center) {
-                Icon(Ic.get("x"), null, tint = Color.White, modifier = Modifier.size(18.dp))
+    // one slim strip: where you are (tap to open it), Report, and ×
+    Row(modifier.fillMaxWidth().clip(RoundedCornerShape(22.dp)).background(OkBrush).padding(start = 14.dp, end = 8.dp, top = 8.dp, bottom = 8.dp).testTag("here"), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.weight(1f).clip(RoundedCornerShape(14.dp)).clickable(role = Role.Button, onClick = open).heightIn(min = 44.dp).testTag("here_open"), verticalAlignment = Alignment.CenterVertically) {
+            Icon(Ic.get("pin"), null, tint = Color.White, modifier = Modifier.size(20.dp)); Spacer(Modifier.width(10.dp))
+            Column {
+                Text(t("YOU’RE AT", "UKO") + " · " + Geo.dist(d, miles), color = Color(0xCCFFFFFF), style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, letterSpacing = 0.8.sp, fontWeight = FontWeight.ExtraBold), maxLines = 1)
+                Text(p.title, color = Color.White, style = MaterialTheme.typography.titleSmall, maxLines = 2, overflow = TextOverflow.Ellipsis)
             }
+        }
+        Spacer(Modifier.width(8.dp))
+        Text(t("Report", "Ripoti"), color = Color(0xFF0E4A2B), style = MaterialTheme.typography.labelLarge,
+            modifier = Modifier.clip(RoundedCornerShape(99.dp)).background(Color.White).clickable(role = Role.Button, onClick = visit).heightIn(min = 40.dp).padding(horizontal = 14.dp, vertical = 10.dp).testTag("here_visit"))
+        Spacer(Modifier.width(6.dp))
+        Box(Modifier.size(40.dp).clip(CircleShape).border(1.dp, Color(0x99FFFFFF), CircleShape).clickable(role = Role.Button, onClick = dismiss).semantics { contentDescription = t("Not now", "Si sasa") }.testTag("here_x"), contentAlignment = Alignment.Center) {
+            Icon(Ic.get("x"), null, tint = Color.White, modifier = Modifier.size(16.dp))
         }
     }
 }
@@ -251,7 +252,10 @@ fun ProjectsScreen(m: AppModel, open: (String) -> Unit, planRoute: () -> Unit = 
         item {
             Row(Modifier.padding(top = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                 Text(t("Projects", "Miradi"), style = MaterialTheme.typography.headlineLarge, color = C.ink, modifier = Modifier.weight(1f))
-                Btn(t("Plan a route", "Panga njia"), planRoute, small = true, light = true, icon = "map")
+                Row(Modifier.clip(RoundedCornerShape(12.dp)).clickable(role = Role.Button, onClick = planRoute).heightIn(min = 44.dp).padding(horizontal = 6.dp).testTag("plan_route"), verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Ic.get("map"), null, tint = C.blue, modifier = Modifier.size(18.dp)); Spacer(Modifier.width(6.dp))
+                    Text(t("Plan a route", "Panga njia"), style = MaterialTheme.typography.labelLarge, color = C.blue)
+                }
             }
         }
         item {
@@ -314,30 +318,36 @@ fun ProjectsScreen(m: AppModel, open: (String) -> Unit, planRoute: () -> Unit = 
 @Composable
 fun ProjectRow(m: AppModel, s: Snapshot, p: Project, here: LatLng?, onClick: () -> Unit) {
     val rep = s.repairs[p.id]
-    val edge = when (rep?.state) { "notworking" -> C.bad; null -> if (p.gps != null) C.ok else Amber; else -> Amber }
+    // the icon box carries the state colour; the tag sits under the name so names aren't cut short
+    val (boxBg, boxFg) = when {
+        rep?.state == "notworking" -> C.badBg to C.bad
+        rep != null -> C.warnBg to C.warn
+        p.gps == null -> C.tint to C.blue
+        else -> C.okBg to C.ok
+    }
     Row(
-        Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(C.card).border(1.dp, C.line, RoundedCornerShape(18.dp))
-            .clickable(onClick = onClick).heightIn(min = 76.dp),
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(C.card).border(1.dp, C.line, RoundedCornerShape(20.dp))
+            .clickable(onClick = onClick).heightIn(min = 76.dp).padding(horizontal = 14.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(Modifier.width(4.dp).height(76.dp).background(edge))
-        Spacer(Modifier.width(10.dp))
-        NetImage(p.photo?.let { m.api.photoUrl(it) }, Modifier.size(54.dp).clip(RoundedCornerShape(14.dp)).background(C.tint)) {
-            Icon(Ic.get("drop"), null, tint = C.blue, modifier = Modifier.size(24.dp))
+        NetImage(p.photo?.let { m.api.photoUrl(it) }, Modifier.size(46.dp).clip(RoundedCornerShape(14.dp)).background(boxBg)) {
+            Icon(Ic.get("drop"), null, tint = boxFg, modifier = Modifier.size(22.dp))
         }
         Spacer(Modifier.width(12.dp))
-        Column(Modifier.weight(1f).padding(vertical = 10.dp)) {
-            Text(p.title, style = MaterialTheme.typography.titleSmall.copy(fontSize = androidx.compose.ui.unit.TextUnit(15f, androidx.compose.ui.unit.TextUnitType.Sp)), color = C.text, maxLines = 2, overflow = TextOverflow.Ellipsis)
-            Text(p.sub, style = MaterialTheme.typography.bodySmall, color = C.muted, maxLines = 2)
+        Column(Modifier.weight(1f)) {
+            Text(p.title, style = MaterialTheme.typography.titleSmall.copy(fontSize = 16.sp), color = C.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(p.sub, style = MaterialTheme.typography.bodySmall, color = C.muted, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Box(Modifier.padding(top = 5.dp)) {
+                when {
+                    rep != null -> Tag(if (rep.state == "notworking") t("Not working", "Haifanyi kazi") else t("Needs repair", "Inahitaji matengenezo"), if (rep.state == "notworking") C.badBg else C.warnBg, if (rep.state == "notworking") C.bad else C.warn)
+                    p.gps == null -> Tag(t("No location", "Hakuna mahali"), C.warnBg, C.warn)
+                    here != null -> Tag(Geo.dist(Geo.metres(here, p.gps!!), m.prefs.miles), C.tint, C.deep)
+                    else -> Tag(t("Pinned", "Ina mahali"), C.okBg, C.ok)
+                }
+            }
         }
         Spacer(Modifier.width(8.dp))
-        when {
-            rep != null -> Tag(if (rep.state == "notworking") t("Not working", "Haifanyi kazi") else t("Needs repair", "Inahitaji matengenezo"), if (rep.state == "notworking") C.badBg else C.warnBg, if (rep.state == "notworking") C.bad else C.warn)
-            p.gps == null -> Tag(t("No location", "Hakuna mahali"), C.warnBg, C.warn)
-            here != null -> Tag(Geo.dist(Geo.metres(here, p.gps!!), m.prefs.miles), C.tint, C.deep)
-            else -> Tag(t("Pinned", "Ina mahali"), C.okBg, C.ok)
-        }
-        Spacer(Modifier.width(12.dp))
+        Icon(Ic.get("chev"), null, tint = C.muted, modifier = Modifier.size(20.dp))
     }
 }
 
@@ -348,19 +358,18 @@ private fun HomeTop(m: AppModel, s: Snapshot, here: LatLng?, search: () -> Unit,
     val where = here?.let { h -> s.projects.filter { it.gps != null }.minByOrNull { Geo.metres(h, it.gps!!) }?.takeIf { Geo.metres(h, it.gps!!) < 60000 && it.area.isNotBlank() }?.let { it.area + ", " + it.country } }
         ?: COUNTRIES[m.prefs.country]
     Column {
-        Text("Habari, " + first.ifBlank { "karibu" }, style = MaterialTheme.typography.bodySmall, color = C.muted)
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(Ic.get("pin"), null, tint = C.blue, modifier = Modifier.size(15.dp)); Spacer(Modifier.width(4.dp))
-            Text(where ?: "RAFIKI Pin", style = MaterialTheme.typography.titleSmall, color = C.ink, maxLines = 1)
-        }
-        Row(Modifier.padding(top = 10.dp, bottom = 14.dp), verticalAlignment = Alignment.Bottom) {
+        Text("Habari, " + first.ifBlank { "karibu" }, style = MaterialTheme.typography.bodyMedium, color = C.muted)
+        Row(Modifier.padding(top = 6.dp, bottom = 14.dp), verticalAlignment = Alignment.Bottom) {
             Text(androidx.compose.ui.text.buildAnnotatedString {
                 withStyle(androidx.compose.ui.text.SpanStyle(fontWeight = FontWeight.Normal)) { append(t("Which water point", "Kituo gani cha maji") + "\n") }
                 append(t("today?", "leo?"))
-            }, style = MaterialTheme.typography.headlineLarge.copy(fontSize = 31.sp, lineHeight = 34.sp, letterSpacing = (-1).sp), color = C.ink, modifier = Modifier.weight(1f))
-            Box(Modifier.size(54.dp).shadow(12.dp, CircleShape, spotColor = Color(0x550C1924)).clip(CircleShape).background(C.primary).clickable(role = Role.Button, onClick = search).testTag("home_search"), contentAlignment = Alignment.Center) {
-                Icon(Ic.get("search"), t("Search projects", "Tafuta miradi"), tint = Color.White, modifier = Modifier.size(22.dp))
-            }
+            }, style = MaterialTheme.typography.headlineLarge.copy(fontSize = 31.sp, lineHeight = 36.sp, letterSpacing = (-1).sp), color = C.ink, modifier = Modifier.weight(1f))
+        }
+        // looks like a search box; takes you to the search field above the list
+        Row(Modifier.padding(bottom = 12.dp).fillMaxWidth().heightIn(min = 52.dp).clip(RoundedCornerShape(18.dp)).background(C.card).border(1.dp, C.line, RoundedCornerShape(18.dp))
+            .clickable(role = Role.Button, onClick = search).padding(horizontal = 16.dp).testTag("home_search").semantics { contentDescription = t("Search projects", "Tafuta miradi") }, verticalAlignment = Alignment.CenterVertically) {
+            Icon(Ic.get("search"), null, tint = C.muted, modifier = Modifier.size(20.dp)); Spacer(Modifier.width(10.dp))
+            Text(t("Search a project or place", "Tafuta mradi au mahali"), style = MaterialTheme.typography.bodyLarge, color = C.muted, maxLines = 1)
         }
         listOf(
             listOf(Triple("missing", t("Pin a location", "Weka mahali"), "pin"), Triple("near", t("Visit nearby", "Tembelea karibu"), "clip")),

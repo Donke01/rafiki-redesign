@@ -81,10 +81,17 @@ fun ProjectScreen(m: AppModel, id: String, startTab: String, back: () -> Unit) {
         Card(brush = DeepBrush, modifier = Modifier.padding(top = 6.dp)) {
             Text(p.title, style = MaterialTheme.typography.headlineMedium, color = Color.White)
             Text(p.sub, style = MaterialTheme.typography.bodyMedium, color = Color(0xFFCFE8FA))
-            Text(p.gps?.let { t("Saved location: ", "Mahali palipohifadhiwa: ") + it.text() } ?: t("No location saved yet.", "Bado hakuna mahali palipohifadhiwa."), style = MaterialTheme.typography.bodyMedium, color = Color(0xFFCFE8FA))
             val v = snap.visits[p.id]
+            // the state at a glance
+            val rep = snap.repairs[p.id]
+            when {
+                rep != null -> Box(Modifier.padding(top = 8.dp)) { Tag(if (rep.state == "notworking") t("Not working", "Haifanyi kazi") else t("Needs repair", "Inahitaji matengenezo"), if (rep.state == "notworking") C.badBg else C.warnBg, if (rep.state == "notworking") C.bad else C.warn) }
+                v?.state == "working" -> Box(Modifier.padding(top = 8.dp)) { Tag(t("Working", "Inafanya kazi"), C.okBg, C.ok) }
+                else -> {}
+            }
+            Text(p.gps?.let { it.text() + t(" · saved location", " · mahali palipohifadhiwa") } ?: t("No location saved yet.", "Bado hakuna mahali palipohifadhiwa."), style = MaterialTheme.typography.bodySmall, color = Color(0xB3FFFFFF), modifier = Modifier.padding(top = 8.dp))
             Text(if (v != null) t("Last visit: ", "Ziara ya mwisho: ") + whenText(v.at) + " · " + v.by + " · " + stateName(v.state) else t("No visit recorded in the app yet.", "Bado hakuna ziara iliyorekodiwa kwenye programu."),
-                style = MaterialTheme.typography.bodyMedium, color = Color(0xFFCFE8FA))
+                style = MaterialTheme.typography.bodySmall, color = Color(0xB3FFFFFF))
             if (snap.confirmed.contains(p.id)) Text(t("Location confirmed by the office", "Mahali pamethibitishwa na ofisi"), color = Color(0xFF9BE7BC), style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(top = 4.dp))
             if (snap.admin && p.gps != null) {
                 val scope = rememberScope(); var cm by remember(p.id) { mutableStateOf<String?>(null) }
@@ -149,7 +156,7 @@ fun ProjectScreen(m: AppModel, id: String, startTab: String, back: () -> Unit) {
 private fun MapTile(label: String, icon: String, modifier: Modifier, onClick: () -> Unit) {
     Column(
         modifier.clip(RoundedCornerShape(16.dp)).background(Color(0x1FFFFFFF)).border(1.dp, Color(0x29FFFFFF), RoundedCornerShape(16.dp))
-            .clickable(role = Role.Button, onClick = onClick).padding(vertical = 12.dp, horizontal = 4.dp),
+            .clickable(role = Role.Button, onClick = onClick).padding(vertical = 10.dp, horizontal = 4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Box(Modifier.size(38.dp).clip(RoundedCornerShape(12.dp)).background(Color.White), contentAlignment = Alignment.Center) { Icon(Ic.get(icon), null, tint = Color(0xFF0A78C2), modifier = Modifier.size(21.dp)) }

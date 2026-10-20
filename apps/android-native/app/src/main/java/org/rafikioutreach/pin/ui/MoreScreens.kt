@@ -124,7 +124,7 @@ fun MeScreen(m: AppModel, report: () -> Unit = {}) {
             MeRow(t("Name", "Jina"), m.prefs.name)
             MeRow(t("Role", "Nafasi"), if (s?.admin == true) t("Admin", "Msimamizi") else t("Field team", "Timu ya uwanjani"))
             MeRow(t("Waiting to send", "Inasubiri kutumwa"), if (waiting == 0) t("Nothing", "Hakuna") else waiting.toString())
-            Btn(t("Lock the app", "Funga programu"), { m.lock() }, Modifier.padding(top = 14.dp), icon = "lock", light = true, small = true)
+            Btn(t("Lock the app", "Funga programu"), { m.lock() }, Modifier.padding(top = 14.dp).fillMaxWidth(), icon = "lock", light = true, small = true)
         }
         Stamps(m)
         Card(Modifier.padding(top = 14.dp)) {

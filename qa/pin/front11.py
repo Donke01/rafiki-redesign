@@ -37,7 +37,7 @@ with sync_playwright() as p:
     pg.click('#tabs [data-v=vList]'); pg.wait_for_timeout(900)
     t = pg.inner_text('#homeTop')
     check('Habari, Meril' in t and 'today?' in t and 'Pin a location' in t, 'home greeting and quick actions: ' + t.replace('\n', ' | '))
-    check('Eldoret' in t, 'where you are, from the nearest project')
+    check(pg.locator('#homeTop .sbox').count() == 1, 'search box on home (the place line was dropped in the polished design)')
     pg.screenshot(path=os.path.join(HERE, pf + '2-home.png'))
     pg.click('#homeTop [data-q=repairs]'); pg.wait_for_timeout(500)
     check(pg.locator('.chip[data-f=repairs][aria-pressed=true]').count() == 1, 'quick action sets the Repairs filter')

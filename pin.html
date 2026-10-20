@@ -939,6 +939,46 @@ html[data-theme=dark] .onb .opt{background:#18222B;border-color:#26323C}
 .stp span{font-size:.7rem;color:var(--muted);line-height:1.25}
 .stp.got span{color:var(--ok);font-weight:700}
 html[data-theme=dark] .stp .stin{background:radial-gradient(circle,transparent 3.2px,#E8EDF1 3.7px) -5px -5px/10px 10px}
+
+/* --- polished design (Figma, Oct 2026) --- */
+.bigq{margin:6px 0 12px}
+.sbox{display:flex;align-items:center;gap:10px;width:100%;min-height:52px;margin:0 0 12px;padding:0 16px;border-radius:18px;border:var(--bw) solid var(--line);background:var(--card);color:var(--muted);font:inherit;font-size:1rem;text-align:left;cursor:pointer}
+.sbox svg{width:20px;height:20px;flex:0 0 auto}
+.hello .who2 b{display:none}.hello .who2 small{font-size:.9rem}
+#bRouteMode[aria-pressed=false]{background:none;border-color:transparent;box-shadow:none;color:var(--blue);padding:0 6px}
+.row{gap:12px;padding:12px 14px;border-radius:20px}
+.row::before{display:none}
+.row .th{width:46px;height:46px;border-radius:14px}
+.row.st-pin .th{background-color:var(--okbg)}.row.st-pin .th .ei{color:var(--ok)}
+.row.st-rep .th{background-color:var(--warnbg)}.row.st-rep .th .ei{color:var(--warn)}
+.row.st-bad .th{background-color:var(--badbg)}.row.st-bad .th .ei{color:var(--bad)}
+.row .t{font-size:1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .s{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .tg{display:block;margin-top:5px}
+.row .chev{flex:0 0 auto;width:20px;height:20px;color:var(--muted)}.row .chev svg{width:20px;height:20px}
+.tag{font-size:12px;line-height:16px;font-weight:700;padding:4px 10px}
+.card{box-shadow:0 1px 2px rgba(4,38,63,.04),0 6px 16px -4px rgba(4,38,63,.07)}
+.here.slim{flex-direction:row;align-items:center;gap:8px;padding:8px 8px 8px 14px;border-radius:22px}
+.here.slim .hw{flex:1;min-width:0;display:flex;align-items:center;gap:10px;min-height:44px;padding:0;border:0;background:none;color:#FFFFFF;font:inherit;text-align:left;cursor:pointer}
+.here.slim .hw svg{width:20px;height:20px;flex:0 0 auto}
+.here.slim .hw span{display:flex;flex-direction:column;min-width:0}
+.here.slim .hw small{font-size:10px;font-weight:800;letter-spacing:.08em;opacity:.8}
+.here.slim .hw b{font-size:.92rem;line-height:1.25;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.here.slim .btn{min-height:40px;padding:0 14px}
+.here.slim .btn.x{width:40px;margin:0}
+#pState:empty{display:none}#pState{margin-top:6px}
+.phead .cur{font-size:.82rem;opacity:.85}
+.mtile{padding:10px 6px}
+.trk .rnote{margin:4px 0 2px;padding:12px 14px;border-radius:14px;background:#F2F6F9}
+.trk .rnote .more{margin:0}.trk .rnote .q{font-style:italic;color:var(--text)}
+html[data-theme=dark] .trk .rnote{background:rgba(255,255,255,.06)}
+.btn.wide{width:100%;justify-content:center}
+.tabs .plus span.ic{width:46px;height:30px;border-radius:12px}
+.onb .lsw{display:inline-flex;gap:4px;padding:4px;margin:0 auto 14px;border-radius:999px;background:var(--card);border:1px solid var(--line)}
+.onb .lsw button{min-height:40px;padding:0 18px;border:0;border-radius:999px;background:transparent;color:var(--ink);font:inherit;font-size:.85rem;font-weight:700;cursor:pointer}
+.onb .lsw button[aria-pressed=true]{background:linear-gradient(180deg,#1F3242,#0C1924);color:#FFFFFF}
+html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;color:#0C1924}
+.onb .cap{font-size:.9rem}
 </style>
 </head>
 <body class="locked">
@@ -1055,6 +1095,7 @@ html[data-theme=dark] .stp .stin{background:radial-gradient(circle,transparent 3
       <div class="phead">
         <span class="t" id="pTitle"></span>
         <span class="muted" id="pSub"></span>
+        <span id="pState"></span>
         <span class="cur" id="pCur"></span>
         <span class="cur" id="pVisit"></span>
         <span class="cur" id="pConf"></span>
@@ -1166,7 +1207,7 @@ html[data-theme=dark] .stp .stin{background:radial-gradient(circle,transparent 3
           <div class="kv"><span>Name</span><b id="meName"></b></div>
           <div class="kv"><span>Signed in with</span><span id="mePin"></span></div>
           <div class="kv"><span>Waiting to send</span><span id="meOut">Nothing</span></div>
-          <div style="margin-top:12px"><button class="btn light small" id="lockBtn" type="button">Lock the app</button></div>
+          <div style="margin-top:12px"><button class="btn light small wide" id="lockBtn" type="button">Lock the app</button></div>
         </div>
         <div class="card stamps-card"><h2>Your stamps</h2><p class="muted" style="margin:0 0 4px">Every point you pin and every visit you report adds to your collection.</p><div class="stamps" id="meStamps"></div>
           <button class="lnk" id="meWelcome" type="button">Show the welcome screens again</button></div>
@@ -1842,10 +1883,9 @@ html[data-theme=dark] .stp .stin{background:radial-gradient(circle,transparent 3
     }
     var top = nearest(1)[0], html = '';
     if (top && top.d <= 200 && !S.dismissed[top.p.id]) {
-      html = '<div class="here" role="status"><b>📍 You’re at ' + esc(top.p.title) + ' · ' + dist(top.d) + '</b><div class="acts">' +
-        '<button class="btn small" type="button" data-here="visit" data-id="' + esc(top.p.id) + '">Report a visit</button>' +
-        '<button class="btn small ghost" type="button" data-here="open" data-id="' + esc(top.p.id) + '">Open</button>' +
-        '<button class="btn small ghost x" type="button" data-here="x" data-id="' + esc(top.p.id) + '" aria-label="Not now">×</button></div></div>';
+      html = '<div class="here slim" role="status"><button class="hw" type="button" data-here="open" data-id="' + esc(top.p.id) + '">' + oic('pin') + '<span><small>YOU’RE AT · ' + dist(top.d) + '</small><b>' + esc(top.p.title) + '</b></span></button>' +
+        '<button class="btn small" type="button" data-here="visit" data-id="' + esc(top.p.id) + '">Report</button>' +
+        '<button class="btn small ghost x" type="button" data-here="x" data-id="' + esc(top.p.id) + '" aria-label="Not now">×</button></div>';
     }
     $('mHere').innerHTML = html; $('lHere').innerHTML = html ? '<div style="margin-bottom:12px">' + html + '</div>' : '';
     nearUi();
@@ -1963,6 +2003,11 @@ html[data-theme=dark] .stp .stin{background:radial-gradient(circle,transparent 3
 
   var ONB = { i: 0, role: '', ck: '', lang: '' };
   function helloWanted() { return !navigator.webdriver || /[?&]onb=1/.test(location.search); }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-lsw]'); if (!b) return;
+    var lb = document.querySelector('#segLang button[data-v="' + b.getAttribute('data-lsw') + '"]'); if (lb) lb.click();
+    onbDraw();
+  });
   function onbHello() { ONB.mode = 'hello'; ONB.i = 0; $('onb').classList.remove('hidden'); onbDraw(); }
   function onbSplash() {
     ONB.mode = 'splash'; ONB.i = 0; var b = $('onb'); b.classList.remove('hidden'); onbDraw();
@@ -1987,7 +2032,7 @@ html[data-theme=dark] .stp .stin{background:radial-gradient(circle,transparent 3
         '<div class="note1 g" style="--r:5deg;left:3%;bottom:24%;animation-delay:.2s"><b>✅ WORKING</b>' + esc(names[2]) + '</div>' +
         '<div class="note1 r" style="--r:-6deg;right:3%;bottom:28%;animation-delay:.3s"><b>🔧 REPAIR</b>' + esc(names[3]) + '</div></div>' +
         '<div class="ob1"><p class="hero1" id="onbT">Every water point.<br>One map.<br><span>Right in your pocket.</span></p><div class="mbig" style="margin-top:22px">' + drop('b', 'smile') + '</div></div>' +
-        (ONB.mode === 'splash' ? '<div class="foot"><span class="cap">' + esc('Habari ' + String(S.name || '').split(' ')[0] + ', karibu tena.') + '</span></div>' : ONB.mode === 'hello' ? '<div class="foot"><button class="go1" type="button" data-o="signin">Sign in</button><span class="cap">' + (S.name ? 'Habari ' + esc(String(S.name).split(' ')[0]) + ', karibu tena.' : 'New here? Ask your team for a PIN.') + '</span></div>'
+        (ONB.mode === 'splash' ? '<div class="foot"><span class="cap">' + esc('Habari ' + String(S.name || '').split(' ')[0] + ', karibu tena.') + '</span></div>' : ONB.mode === 'hello' ? '<div class="foot"><div class="lsw" role="group" aria-label="Language"><button type="button" data-lsw="" aria-pressed="' + (S.lang !== 'sw') + '">English</button><button type="button" data-lsw="sw" aria-pressed="' + (S.lang === 'sw') + '">Kiswahili</button></div><button class="go1" type="button" data-o="signin">Sign in</button><span class="cap">' + (S.name ? 'Habari ' + esc(String(S.name).split(' ')[0]) + ', karibu tena.' : 'New here? Ask your team for a PIN.') + '</span></div>'
           : '<div class="foot"><button class="go1" type="button" data-o="next">Get started</button><span class="cap">Takes 30 seconds</span></div>');
     } else if (i === 1) {
       var opts = [['pin', 'Pin locations', 'Put every project on the map', 'b'], ['visit', 'Site visits', 'Check water points and report', 'g'], ['repairs', 'Repairs', 'Follow what needs fixing', 'c']];
@@ -2027,6 +2072,7 @@ html[data-theme=dark] .stp .stin{background:radial-gradient(circle,transparent 3
     }
     if (typeof swApply === 'function') swApply();
   }
+  var RCHEV = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>';
   var CHEV = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>';
   $('onb').addEventListener('click', function (e) {
     var r = e.target.closest('[data-r]'); if (r) { ONB.role = r.getAttribute('data-r'); onbDraw(); return; }
@@ -2067,8 +2113,9 @@ html[data-theme=dark] .stp .stin{background:radial-gradient(circle,transparent 3
   function homeUi() {
     var first = String(S.name || '').trim().split(/\s+/)[0], w = whereNow();
     $('homeTop').innerHTML = '<div class="hello"><span class="av" aria-hidden="true">' + esc(initials(S.name)) + '</span><span class="who2"><small>Habari, ' + esc(first || 'karibu') + '</small>' +
-      (w ? '<b>' + oic('pin') + '<span>' + esc(w) + '</span></b>' : '<b>RAFIKI Pin</b>') + '</span></div>' +
-      '<div class="bigq"><h2>Which water point<b>today?</b></h2><button class="go" type="button" data-q="search" aria-label="Search projects">' + oic('search') + '</button></div>' +
+      '</span></div>' +
+      '<div class="bigq"><h2>Which water point<b>today?</b></h2></div>' +
+      '<button class="sbox" type="button" data-q="search" aria-label="Search projects">' + oic('search') + '<span>Search a project or place</span></button>' +
       '<div class="quick" role="group" aria-label="Quick actions">' +
       '<button type="button" data-q="missing"><i>' + oic('pin') + '</i><span>Pin a location</span></button>' +
       '<button type="button" data-q="near"><i>' + oic('clip') + '</i><span>Visit nearby</span></button>' +
@@ -2090,10 +2137,10 @@ html[data-theme=dark] .stp .stin{background:radial-gradient(circle,transparent 3
   var rowI = 0;
   function rowHtml(p, tag, check) {
     var dis = check && !p.gps, on = check && S.pickedRoute.indexOf(p.id) >= 0;
-    var stc = S.repairs[p.id] ? ' st-rep' : p.gps ? ' st-pin' : ' st-miss';
+    var stc = S.repairs[p.id] ? (S.repairs[p.id].state === 'notworking' ? ' st-rep st-bad' : ' st-rep') : p.gps ? ' st-pin' : ' st-miss';
     return '<button class="row' + stc + '" style="--i:' + (rowI++) + '" type="button" data-id="' + esc(p.id) + '"' + (check ? ' role="checkbox" aria-checked="' + on + '"' + (dis ? ' aria-disabled="true"' : '') : '') + '>' +
       (check ? '<span class="ck" aria-hidden="true">' + (on ? '✓' : '') + '</span>' : '') + thumb(p) +
-      '<span class="tx"><span class="t">' + esc(p.title) + '</span><span class="s">' + esc(sub(p)) + '</span></span>' + (tag || '') + '</button>';
+      '<span class="tx"><span class="t">' + esc(p.title) + '</span><span class="s">' + esc(sub(p)) + '</span>' + (tag ? '<span class="tg">' + tag + '</span>' : '') + '</span>' + (check ? '' : '<span class="chev" aria-hidden="true">' + RCHEV + '</span>') + '</button>';
   }
   var DUE_DAYS = 180, URGO = { urgent: 0, month: 1, watch: 2 };
   function ageDays(p) { var v = S.visits[p.id]; return v ? (Date.now() - Date.parse(v.at)) / 864e5 : 1e6; }
@@ -2126,7 +2173,7 @@ html[data-theme=dark] .stp .stin{background:radial-gradient(circle,transparent 3
     rowI = 0; $('list').classList.toggle('stagger', !!S.animList); S.animList = false;
     var items = rows.map(function (p) {
       var r = S.repairs[p.id];
-      var tag = r ? '<span class="tag bad">' + (r.urgency === 'urgent' ? 'Urgent · ' : '') + (r.state === 'notworking' ? 'Not working' : 'Needs repair') + '</span>'
+      var tag = r ? '<span class="tag' + (r.state === 'notworking' ? ' bad' : '') + '">' + (r.urgency === 'urgent' ? 'Urgent · ' : '') + (r.state === 'notworking' ? 'Not working' : 'Needs repair') + '</span>'
         : f === 'due' ? '<span class="tag">' + ageText(p) + '</span>'
         : near ? '<span class="tag has">' + dist(p._d) + '</span>' : p.gps ? '<span class="tag has">' + (p._d != null ? dist(p._d) : 'Pinned') + '</span>' : '<span class="tag">No location</span>';
       return { html: rowHtml(p, tag, S.routeMode), tag: tag, id: p.id };
@@ -2258,7 +2305,7 @@ html[data-theme=dark] .stp .stin{background:radial-gradient(circle,transparent 3
   }
   function curUi() {
     var p = S.cur, ll = p.gps && p.gps[0].toFixed(6) + ',' + p.gps[1].toFixed(6);
-    $('pCur').textContent = p.gps ? 'Saved location: ' + fmt(p.gps) : 'No location saved yet.';
+    $('pCur').textContent = p.gps ? fmt(p.gps) + ' · saved location' : 'No location saved yet.';
     $('pLinks').innerHTML = p.gps
       ? '<a class="mtile" href="https://www.google.com/maps/dir/?api=1&destination=' + ll + '" target="_blank" rel="noopener" aria-label="Directions in Google Maps"><span class="mi">' + brand('gmaps') + '</span>Directions</a>' +
         '<a class="mtile" href="https://www.google.com/maps?q=' + ll + '" target="_blank" rel="noopener" aria-label="Open in Google Maps"><span class="mi">' + brand('gmaps') + '</span>Google Maps</a>' +
@@ -2351,6 +2398,7 @@ html[data-theme=dark] .stp .stin{background:radial-gradient(circle,transparent 3
 
   // open repair on this project: where it is, who has it, and how far the job has got
   function repairUi() {
+    stateUi();
     var p = S.cur, r = p && S.repairs[p.id];
     if (!r) { $('pRepair').innerHTML = ''; return; }
     var at = r.stepAt || {}, step = r.step || 'reported', order = ['reported', 'assigned', 'parts', 'fixed'], si = Math.max(0, order.indexOf(step));
@@ -2369,11 +2417,12 @@ html[data-theme=dark] .stp .stin{background:radial-gradient(circle,transparent 3
     ];
     $('pRepair').innerHTML = '<div class="card trk" role="status"><div class="th2"><h3>Repair job</h3><span class="tag bad">' + (r.urgency === 'urgent' ? 'Urgent · ' : r.urgency === 'month' ? 'This month · ' : '') + (bad ? 'Not working' : 'Needs repair') + '</span></div>' + map +
       '<ol>' + steps.map(function (x, i) { var cls = i < si ? 'done' : i === si ? 'now' : 'todo'; return '<li class="' + cls + '"><span class="dt">' + (i <= si ? oic('check') : '') + '</span><span><b>' + x[0] + '</b><small>' + x[1] + '</small></span></li>'; }).join('') + '</ol>' +
-      (r.note ? '<p class="more">“' + esc(r.note) + '”</p>' : '') +
+      (r.note || (r.problems && r.problems.length) || r.cost ? '<div class="rnote">' +
+      (r.note ? '<p class="more q">“' + esc(r.note) + '”</p>' : '') +
       (r.problems && r.problems.length ? '<p class="more">Problems: ' + esc(r.problems.join(', ')) + '</p>' : '') +
-      (r.cost ? '<p class="more">About KES ' + Number(r.cost).toLocaleString() + '</p>' : '') +
+      (r.cost ? '<p class="more">About KES ' + Number(r.cost).toLocaleString() + '</p>' : '') + '</div>' : '') +
       '<div id="fixBox" class="hidden"><label for="fixNote" style="margin-top:0">What was done? (optional)</label><textarea id="fixNote" placeholder="e.g. replaced the pump handle"></textarea></div>' +
-      '<button class="btn ok small" type="button" id="bFixed">🔧 Mark fixed</button><p class="msg" id="mFix" aria-live="polite"></p></div>';
+      '<button class="btn ok wide" type="button" id="bFixed">🔧 Mark fixed</button><p class="msg" id="mFix" aria-live="polite"></p></div>';
     $('bFixed').addEventListener('click', function () {
       if ($('fixBox').classList.contains('hidden')) { $('fixBox').classList.remove('hidden'); this.textContent = 'Save as fixed'; $('fixNote').focus(); return; }
       var b = this; b.disabled = true;
@@ -2709,6 +2758,14 @@ html[data-theme=dark] .stp .stin{background:radial-gradient(circle,transparent 3
   function visitLine() {
     var p = S.cur, v = p && S.visits[p.id];
     $('pVisit').textContent = v ? tr('Last visit', 'Ziara iliyopita') + ': ' + when(v.at) + ' · ' + v.by + ' · ' + STATES[v.state][0] : tr('No visit recorded in the app yet.', 'Hakuna ziara iliyorekodiwa bado.');
+    stateUi();
+  }
+  // the state at a glance, under the project name
+  function stateUi() {
+    var p = S.cur; if (!p) return;
+    var r = S.repairs[p.id], v = S.visits[p.id];
+    $('pState').innerHTML = r ? '<span class="tag' + (r.state === 'notworking' ? ' bad' : '') + '">' + (r.state === 'notworking' ? 'Not working' : 'Needs repair') + '</span>'
+      : v && v.state === 'working' ? '<span class="tag ok">Working</span>' : '';
   }
 
   // history from monday.com (the last copy is kept on the phone for offline)
@@ -2789,6 +2846,7 @@ html[data-theme=dark] .stp .stin{background:radial-gradient(circle,transparent 3
   var SWP = [[/^(\d+) urgent$/,"$1 ya haraka"],[/^(\d+) urgent, (.+)$/,"$1 ya haraka, $2"],[/^(.+) from you$/,"$1 kutoka ulipo"],[/^(\d+) working, (\d+) needed repair, (\d+) not working, (\d+) not visited yet$/,"$1 zinafanya kazi, $2 zilihitaji matengenezo, $3 hazifanyi kazi, $4 bado hazijatembelewa"],[/^by (.+)$/,"na $1"],[/^1 change waiting to send$/,"Badiliko 1 linasubiri kutumwa"],[/^(\d[\d,]*) changes waiting to send$/,"Mabadiliko $1 yanasubiri kutumwa"],[/^(\d+) of (\d+) visited in the app$/,"$1 kati ya $2 zimetembelewa kwenye programu"],[/^(\d[\d,]*) to go$/,"$1 zimebaki"],[/^(\d+) due a visit$/,"$1 zinasubiri ziara"],[/^(\d+) of (\d+) mapped$/,"$1 kati ya $2 zina mahali"],[/^(\d+) of (\d+) projects are on the map$/,"Miradi $1 kati ya $2 iko kwenye ramani"],[/^(\d+) open repairs?$/,"Matengenezo $1 yaliyo wazi"],[/^(\d+) still need a location pinned in the field\.$/,"$1 bado zinahitaji mahali kuwekwa uwanjani."],[/^(\d+) still need a location$/,"$1 bado hazina mahali"],[/^(\d+) stops? chosen$/,"Vituo $1 vimechaguliwa"],[/^(\d+) stops? · about (.+) in straight lines from where you are\. Roads will be longer\. Saved on this phone, so it works offline\.$/,"Vituo $1 · takriban $2 kwa mstari ulionyooka kutoka ulipo. Barabara zitakuwa ndefu zaidi. Imehifadhiwa kwenye simu, kwa hiyo inafanya kazi bila mtandao."],[/^(\d+) stops? · about (.+) in straight lines\. Roads will be longer\. Saved on this phone, so it works offline\.$/,"Vituo $1 · takriban $2 kwa mstari ulionyooka. Barabara zitakuwa ndefu zaidi. Imehifadhiwa kwenye simu, kwa hiyo inafanya kazi bila mtandao."],[/^(\d+) \+ voice note$/,"$1 + ujumbe wa sauti"],[/^(\d[\d,]*) projects$/,"Miradi $1"],[/^tick the pinned ones to visit$/,"weka alama kwenye zenye mahali utakazotembelea"],[/^(\d+)% of projects have a location\. Show the (\d+) without one\.$/,"$1% ya miradi ina mahali. Onyesha $2 isiyo na mahali."],[/^Step (\d+) \/ (\d+)$/,"Hatua $1 / $2"],[/^Remove photo (\d+)$/,"Ondoa picha $1"],[/^Photo (\d+)$/,"Picha $1"],[/^Repairs, (\d+) open$/,"Ukarabati, $1 wazi"],[/^Review, (\d+) open$/,"Idhinisha, $1 wazi"],[/^Assign (\d+) visits?$/,"Gawa ziara $1"],[/^Assigned ✓ (.+) will see it in their app\.$/,"Imegawiwa ✓ $1 ataiona kwenye programu yake."],[/^By (.+)$/,"Na $1"],[/^(.+) from the last stop$/,"$1 kutoka kituo cha mwisho"],[/^live, updated (.+)$/,"moja kwa moja, imesasishwa $1"],[/^updated (.+)$/,"imesasishwa $1"],[/^just now$/,"sasa hivi"],[/^(\d+) s ago$/,"sekunde $1 zilizopita"],[/^(\d+) min ago$/,"dakika $1 zilizopita"],[/^(\d+) projects? reported as needing repair or not working, most urgent first$/,"$1 zimeripotiwa kuhitaji matengenezo au kutofanya kazi, za haraka kwanza"],[/^(\d+) not visited in the last 6 months \(or not yet in the app\), longest first$/,"$1 hazijatembelewa miezi 6 iliyopita (au bado kwenye programu), za muda mrefu kwanza"],[/^Prepared by (.+)$/,"Imeandaliwa na $1"],[/^reported by (.+)$/,"imeripotiwa na $1"],[/^Last pinned by (.+)$/,"Mahali paliwekwa mwisho na $1"],[/^Last visit \((.+)\): (.+)$/,"Ziara iliyopita ($1): $2"],[/^Last visit: (.+)$/,"Ziara ya mwisho: $1"],[/^Location: (.+)$/,"Mahali: $1"],[/^New location: (.+)$/,"Mahali papya: $1"],[/^Saved location: (.+)$/,"Mahali palipohifadhiwa: $1"],[/^PIN for (.+)$/,"PIN ya $1"],[/^last active never$/,"bado hajatumia"],[/^last active (.+)$/,"alitumia mwisho $1"],[/^Parts: (.+)$/,"Vipuri: $1"],[/^About KES (.+)$/,"Takriban KES $1"],[/^Problems: (.+)$/,"Matatizo: $1"],[/^Recording (.+)$/,"Inarekodi $1"],[/^Pin placed at “(.+)” from OpenStreetMap\. This is often the middle of the place, not the well: switch to Satellite and drag the pin onto the exact spot\.$/,"Alama imewekwa “$1” kutoka OpenStreetMap. Mara nyingi hapa ni katikati ya mahali, si kisima: badilisha kuwa Satelaiti na uburute alama hadi mahali kamili."],[/^Save (.+) as the location of (.+)\? This replaces (.+)\. The photo goes with it\.$/,"Hifadhi $1 kama mahali pa $2? Inachukua nafasi ya $3. Picha inaenda pamoja nayo."],[/^Save (.+) as the location of (.+)\? This replaces (.+)\.$/,"Hifadhi $1 kama mahali pa $2? Inachukua nafasi ya $3."],[/^Save (.+) as the location of (.+)\?$/,"Hifadhi $1 kama mahali pa $2?"],[/^from (.+)$/,"kutoka kwa $1"],[/^You’re (.+) from the saved point$/,"Uko $1 kutoka mahali palipohifadhiwa"],[/^head ([a-z-]+)\. If you’re standing at the site, the saved location may be wrong\.$/,"elekea $1. Kama uko kwenye eneo, huenda mahali palipohifadhiwa si sahihi."],[/^head ([a-z-]+)\.?$/,"elekea $1."],[/^You’re at (.+)$/,"Uko $1"],[/^of (\d+) projects pinned$/,"kati ya miradi $1 ina mahali"],[/^(\d+) of (\d+) projects pinned$/,"Miradi $1 kati ya $2 ina mahali"],[/^pinned (.+)$/,"aliweka mahali pa $1"],[/^reported a visit to (.+)$/,"aliripoti ziara ya $1"],[/^marked fixed (.+)$/,"aliweka imerekebishwa $1"],[/^added a new site: (.+)$/,"aliongeza eneo jipya: $1"],[/^undid a pin on (.+)$/,"alitendua mahali pa $1"],[/^asked to move the confirmed location of (.+)$/,"aliomba kuhamisha mahali palipothibitishwa pa $1"],[/^approved (.+)$/,"aliidhinisha $1"],[/^turned down (.+)$/,"alikataa $1"],[/^updated the repair job on (.+)$/,"alisasisha kazi ya matengenezo ya $1"],[/^assigned (.+)$/,"aligawa $1"],[/^Arrived (.+)$/,"Umefika $1"],[/^(.+) from the saved point$/,"$1 kutoka mahali palipohifadhiwa"],[/^Location confirmed by (.+)\. Changes go to an admin for approval\.$/,"Mahali pamethibitishwa na $1. Mabadiliko yanaenda kwa msimamizi kuidhinisha."],[/^Location confirmed by (.+)$/,"Mahali pamethibitishwa na $1"],[/^Habari (.+), karibu tena\.$/,"Habari $1, karibu tena."],[/^Field report · (.+)$/,"Ripoti ya uwanjani · $1"],[/^This month · (.+)$/,"Mwezi huu · $1"],[/^Urgent · (.+)$/,"Haraka · $1"],[/^worse$/,"mbaya zaidi"],[/^better$/,"bora zaidi"],[/^Visit · (.+)$/,"Ziara · $1"]];
   Object.assign(SW, {"Which water point": "Kituo gani cha maji", "today?": "leo?", "Pin a location": "Weka mahali", "Visit nearby": "Tembelea karibu", "Add a site": "Ongeza eneo", "Quick actions": "Vitendo vya haraka", "Repair job": "Kazi ya matengenezo", "Not assigned yet": "Bado hajapewa mtu", "The office assigns it": "Ofisi itamgawia mtu", "Waiting for the office": "Inasubiri ofisi", "Mark it fixed when the water is running again": "Weka imerekebishwa maji yakitoka tena", "Saved on this phone": "Imehifadhiwa kwenye simu", "Fixed ✓": "Imerekebishwa ✓", "No notes on this project yet.": "Bado hakuna maelezo kwenye mradi huu.", "Nothing waiting for review.": "Hakuna kinachosubiri kuidhinishwa.", "Repair job · ": "Kazi ya matengenezo · "}); SWP.push([/^Due (.+)$/,"Mwisho $1"],[/^Needs: (.+)$/,"Inahitaji: $1"],[/^(.+) · Live$/,"$1 \u00b7 Moja kwa moja"],[/^Not working · (.+)$/,"Haifanyi kazi \u00b7 $1"],[/^Needs repair · (.+)$/,"Inahitaji matengenezo \u00b7 $1"],[/^Habari, (.+)$/,"Habari, $1"]);
   Object.assign(SW, {"Back": "Rudi", "Get started": "Anza", "Takes 30 seconds": "Inachukua sekunde 30", "Every water point.": "Kila kituo cha maji.", "One map.": "Ramani moja.", "Right in your pocket.": "Mfukoni mwako.", "What will you do most?": "Utafanya nini zaidi?", "We’ll open the app on it. You can change this anytime.": "Tutafungua programu hapo. Unaweza kubadilisha wakati wowote.", "Pin locations": "Weka mahali", "Put every project on the map": "Weka kila mradi kwenye ramani", "Site visits": "Ziara", "Check water points and report": "Kagua vituo vya maji na uripoti", "Follow what needs fixing": "Fuatilia kinachohitaji kurekebishwa", "Office work": "Kazi za ofisi", "Review, assign and report": "Idhinisha, gawa na ripoti", "Continue": "Endelea", "Pick one": "Chagua kimoja", "Which language?": "Lugha gani?", "That’s my language": "Hiyo ndiyo lugha yangu", "Swipe to see both. Switch anytime in Me.": "Telezesha kuona zote. Badilisha wakati wowote kwenye Mimi.", "Hello! Let’s find today’s water points.": "Hello! Let’s find today’s water points.", "Where do you work?": "Unafanya kazi wapi?", "Lists and the map start there. You still see every country.": "Orodha na ramani zinaanzia hapo. Bado unaona nchi zote.", "Skip": "Ruka", "Water points near you": "Vituo vya maji karibu nawe", "RAFIKI Pin uses your location only while it’s open, to show the closest projects and save exact points.": "RAFIKI Pin inatumia mahali ulipo tu ikiwa wazi, kuonyesha miradi iliyo karibu na kuhifadhi mahali kamili.", "Allow location": "Ruhusu mahali", "Not now": "Si sasa", "A good start": "Mwanzo mzuri", "Your first stamp": "Stempu yako ya kwanza", "Every point you pin and every visit you report adds to your collection.": "Kila mahali unapoweka na kila ziara unayoripoti inaongeza kwenye mkusanyiko wako.", "Open RAFIKI Pin": "Fungua RAFIKI Pin", "Small steps, clean water.": "Hatua ndogo, maji safi.", "Me": "Mimi"}); SWP.push([/^You’re all set, (.+)\.$/,"Uko tayari, $1."]);
+  Object.assign(SW, {"Search a project or place": "Tafuta mradi au mahali", "Report": "Ripoti"}); SWP.push([/^YOU’RE AT · (.+)$/, "UKO · $1"], [/^(.+) · saved location$/, "$1 · mahali palipohifadhiwa"]);
   Object.assign(SW, {"Your stamps": "Stempu zako", "Show the welcome screens again": "Onyesha skrini za kukaribisha tena", "Sign in": "Ingia", "New here? Ask your team for a PIN.": "Mgeni hapa? Omba PIN kwa timu yako.", "First drop": "Tone la kwanza", "Pin a location": "Weka mahali", "First visit": "Ziara ya kwanza", "Report a site visit": "Ripoti ziara", "Fixer": "Mrekebishaji", "Mark a repair fixed": "Weka matengenezo kuwa yamekamilika", "Explorer": "Mvumbuzi", "Add a new site": "Ongeza eneo jipya", "Mapper": "Mchora ramani", "Pin 10 locations": "Weka mahali 10", "Regular": "Mzoefu", "Report 10 visits": "Ripoti ziara 10", "Earned": "Umepata"}); SWP.push([/^Habari (.+), karibu tena\.$/,"Habari $1, karibu tena."]);
   var MON = {Jan:'Jan',Feb:'Feb',Mar:'Mac',Apr:'Apr',May:'Mei',Jun:'Jun',Jul:'Jul',Aug:'Ago',Sep:'Sep',Oct:'Okt',Nov:'Nov',Dec:'Des',January:'Januari',February:'Februari',March:'Machi',April:'Aprili',June:'Juni',July:'Julai',August:'Agosti',September:'Septemba',October:'Oktoba',November:'Novemba',December:'Desemba'};
   function swOne(x) {
