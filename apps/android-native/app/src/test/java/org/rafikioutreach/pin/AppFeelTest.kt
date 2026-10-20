@@ -109,10 +109,10 @@ class AppFeelTest {
         rule.mainClock.autoAdvance = true
         rule.waitUntil(8000) { rule.onAllNodesWithTag("quick_missing").fetchSemanticsNodes().isNotEmpty() }
         rule.mainClock.autoAdvance = false; shot("41-home"); rule.mainClock.autoAdvance = true
-        rule.mainClock.autoAdvance = true; rule.onNodeWithTag("projects").performScrollToNode(hasText("Kapsaret Borehole")); rule.mainClock.autoAdvance = false
+        rule.onNodeWithTag("projects").performScrollToNode(hasText("Kapsaret Borehole"))
         rule.onAllNodesWithText("Kapsaret Borehole").onLast().performClick()
         rule.waitUntil(5000) { rule.onAllNodesWithTag("tracker").fetchSemanticsNodes().isNotEmpty() }
-        rule.mainClock.autoAdvance = true; rule.onNodeWithTag("tracker").performScrollTo(); rule.mainClock.autoAdvance = false
+        rule.onNodeWithTag("tracker").performScrollTo()
         rule.mainClock.autoAdvance = false; shot("42-tracker"); rule.mainClock.autoAdvance = true
         rule.onNodeWithTag("hback").performClick()
         rule.onNodeWithTag("hav").performClick()
@@ -146,7 +146,7 @@ class AppFeelTest {
         val m = model(signedIn = true, onbDone = true); show(m)
         fun back() { rule.runOnUiThread { rule.activity.onBackPressedDispatcher.onBackPressed() }; rule.waitForIdle() }
         rule.onNodeWithTag("nav_map").performClick(); rule.waitForIdle()
-        rule.mainClock.autoAdvance = true; rule.onNodeWithTag("nav_me").performClick(); rule.mainClock.autoAdvance = false; rule.waitForIdle()
+        rule.onNodeWithTag("nav_me").performClick(); rule.waitForIdle()
         rule.onNodeWithText("Kapsaret Borehole", substring = true).assertDoesNotExist()
         back()   // Me -> Map
         rule.onNodeWithText("projects pinned", substring = true).assertExists()
@@ -166,7 +166,7 @@ class AppFeelTest {
         rule.onNodeWithTag("search_screen").assertExists()
         rule.onNodeWithTag("search_input").performTextInput("kaps"); rule.waitForIdle()
         shot("50-search")
-        rule.mainClock.autoAdvance = true; rule.onAllNodesWithText("Kapsaret Borehole").onFirst().performClick(); rule.mainClock.autoAdvance = false; rule.waitForIdle()
+        rule.onAllNodesWithText("Kapsaret Borehole").onFirst().performClick(); rule.waitForIdle()
         rule.onNodeWithTag("tracker").assertExists()
         // project tabs swipe
         rule.onNodeWithTag("tab_hist").performScrollTo(); rule.waitForIdle()
