@@ -919,8 +919,26 @@ html[data-theme=dark] .onb .opt{background:#18222B;border-color:#26323C}
 .onb .stamp .in .mascot{width:96px;height:108px;margin:6px auto}
 .onb .stamp .in .row2{display:flex;justify-content:space-between;font-size:.62rem;font-weight:800;letter-spacing:.1em}
 .onb .scr{animation:scrIn .35s both}
+.onb.fade{opacity:0;transition:opacity .3s}
 @keyframes scrIn{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion: reduce){.onb .scr,.onb .note1{animation:none}}
+
+/* stamps in Me */
+.stamps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:12px 0 4px}
+.stp{display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px}
+.stp .stin{position:relative;width:100%;max-width:96px;aspect-ratio:4/5;padding:7px;background:radial-gradient(circle,transparent 3.2px,#FFFFFF 3.7px) -5px -5px/10px 10px;filter:drop-shadow(0 6px 12px rgba(0,0,0,.1));margin-bottom:6px}
+.stp .stin::before{content:"";position:absolute;inset:7px;border-radius:2px;background:#E9EEF2}
+.stp.got .stin.c-b::before{background:linear-gradient(135deg,#1A8BD6,#054F81)}.stp.got .stin.c-g::before{background:linear-gradient(135deg,#2FB872,#0B6B3D)}
+.stp.got .stin.c-c::before{background:linear-gradient(135deg,#F26A4F,#A3261A)}.stp.got .stin.c-y::before{background:linear-gradient(135deg,#F2B13A,#A86200)}.stp.got .stin.c-p::before{background:linear-gradient(135deg,#8C6CF2,#4527B0)}
+.stp .stin .mascot{position:relative;width:62%;height:auto;margin:10% auto 0}
+.stp:not(.got) .stin .mascot{filter:grayscale(1);opacity:.35}
+.stp .stin small{position:absolute;right:12px;bottom:10px;font-size:.55rem;font-weight:800;letter-spacing:.08em;color:#FFFFFF}
+.stp:not(.got) .stin small{color:#9AA4AC}
+.stp:nth-child(odd) .stin{transform:rotate(-2deg)}.stp:nth-child(even) .stin{transform:rotate(2deg)}
+.stp b{font-size:.8rem;color:var(--ink)}
+.stp span{font-size:.7rem;color:var(--muted);line-height:1.25}
+.stp.got span{color:var(--ok);font-weight:700}
+html[data-theme=dark] .stp .stin{background:radial-gradient(circle,transparent 3.2px,#E8EDF1 3.7px) -5px -5px/10px 10px}
 </style>
 </head>
 <body class="locked">
@@ -1150,6 +1168,8 @@ html[data-theme=dark] .onb .opt{background:#18222B;border-color:#26323C}
           <div class="kv"><span>Waiting to send</span><span id="meOut">Nothing</span></div>
           <div style="margin-top:12px"><button class="btn light small" id="lockBtn" type="button">Lock the app</button></div>
         </div>
+        <div class="card stamps-card"><h2>Your stamps</h2><p class="muted" style="margin:0 0 4px">Every point you pin and every visit you report adds to your collection.</p><div class="stamps" id="meStamps"></div>
+          <button class="lnk" id="meWelcome" type="button">Show the welcome screens again</button></div>
         <div class="card">
           <h2>Display</h2>
           <span class="lbl" id="l-theme">Colours</span>
@@ -1326,6 +1346,8 @@ html[data-theme=dark] .onb .opt{background:#18222B;border-color:#26323C}
     qa('#tabs button').forEach(function (b) { if (b.getAttribute('data-v') === tabFor) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
     $('who').textContent = v === 'vLock' ? '' : S.name; headUi(v);
     if (v !== 'vLock' && S.name && onbWanted() && $('onb').classList.contains('hidden')) setTimeout(onbOpen, 50);
+    if (ONB.mode === 'hello' && v !== 'vLock' && !$('onb').classList.contains('hidden')) { $('onb').classList.add('hidden'); ONB.mode = ''; }
+    if (!S.helloShown && helloWanted() && $('onb').classList.contains('hidden')) { S.helloShown = true; if (v === 'vLock') onbHello(); else if (!onbWanted()) onbSplash(); }
     $('routeBar').classList.toggle('hidden', !(v === 'vList' && S.routeMode)); document.body.classList.toggle('routing', v === 'vList' && S.routeMode);
     window.scrollTo(0, 0);
     var sec = $(v); if (sec && v !== 'vMap') { sec.classList.remove('view-in'); void sec.offsetWidth; sec.classList.add('view-in'); }
@@ -1902,6 +1924,25 @@ html[data-theme=dark] .onb .opt{background:#18222B;border-color:#26323C}
   $('nearList').addEventListener('click', function (e) { var b = e.target.closest('.row'); if (b) openProj(b.getAttribute('data-id')); });
 
 
+
+  // stamps: a small collection that grows with what you do in the app
+  var STAMPS = [['pin', 1, 'First drop', 'Pin a location', 'b'], ['visit', 1, 'First visit', 'Report a site visit', 'g'], ['fixed', 1, 'Fixer', 'Mark a repair fixed', 'c'],
+    ['new', 1, 'Explorer', 'Add a new site', 'y'], ['pin', 10, 'Mapper', 'Pin 10 locations', 'p'], ['visit', 10, 'Regular', 'Report 10 visits', 'g']];
+  function stampsUi() {
+    var box = $('meStamps'); if (!box) return;
+    var draw = function () {
+      var me = String(S.name || '').toLowerCase(), n = {};
+      (actCache || []).forEach(function (e) { if (String(e.by || '').toLowerCase() === me) n[e.a] = (n[e.a] || 0) + 1; });
+      box.innerHTML = STAMPS.map(function (st, k) {
+        var have = (n[st[0]] || 0) >= st[1];
+        return '<div class="stp' + (have ? ' got' : '') + '"><div class="stin c-' + st[4] + '">' + drop(have ? st[4] : 'b', have ? ['smile', 'wink', 'o'][k % 3] : 'o') + '<small>' + String(k + 1).padStart(3, '0') + '</small></div><b>' + st[2] + '</b><span>' + (have ? 'Earned' : st[3]) + '</span></div>';
+      }).join('');
+    };
+    draw();
+    if (navigator.onLine) api('GET', null, '?activity=1').then(function (j) { if (j.ok) { actCache = j.activity || []; draw(); } });
+  }
+  $('meWelcome').addEventListener('click', function () { onbOpen(); });
+
   // --- app header and the first run ---------------------------------------------------------------
   function headUi(v) {
     var sub = v === 'vProj' || v === 'vRoute' || v === 'vReport';
@@ -1921,8 +1962,15 @@ html[data-theme=dark] .onb .opt{background:#18222B;border-color:#26323C}
   }
 
   var ONB = { i: 0, role: '', ck: '', lang: '' };
+  function helloWanted() { return !navigator.webdriver || /[?&]onb=1/.test(location.search); }
+  function onbHello() { ONB.mode = 'hello'; ONB.i = 0; $('onb').classList.remove('hidden'); onbDraw(); }
+  function onbSplash() {
+    ONB.mode = 'splash'; ONB.i = 0; var b = $('onb'); b.classList.remove('hidden'); onbDraw();
+    var close = function () { if (ONB.mode !== 'splash') return; ONB.mode = ''; b.classList.add('fade'); setTimeout(function () { b.classList.add('hidden'); b.classList.remove('fade'); }, 320); };
+    b.addEventListener('click', close, { once: true }); setTimeout(close, 1600);
+  }
   function onbWanted() { return !store.get('rfPinOnb') && (!navigator.webdriver || /[?&]onb=1/.test(location.search)); }
-  function onbOpen() { ONB.i = 0; ONB.role = ''; ONB.ck = homeCk(); ONB.lang = S.lang === 'sw' ? 'sw' : 'en'; $('onb').classList.remove('hidden'); onbDraw(); }
+  function onbOpen() { ONB.mode = ''; ONB.i = 0; ONB.role = ''; ONB.ck = homeCk(); ONB.lang = S.lang === 'sw' ? 'sw' : 'en'; $('onb').classList.remove('hidden'); onbDraw(); }
   function onbDone() {
     store.set('rfPinOnb', '1'); $('onb').classList.add('hidden');
     show(ONB.role === 'office' && S.admin ? 'vOffice' : 'vList');
@@ -1939,7 +1987,8 @@ html[data-theme=dark] .onb .opt{background:#18222B;border-color:#26323C}
         '<div class="note1 g" style="--r:5deg;left:3%;bottom:24%;animation-delay:.2s"><b>✅ WORKING</b>' + esc(names[2]) + '</div>' +
         '<div class="note1 r" style="--r:-6deg;right:3%;bottom:28%;animation-delay:.3s"><b>🔧 REPAIR</b>' + esc(names[3]) + '</div></div>' +
         '<div class="ob1"><p class="hero1" id="onbT">Every water point.<br>One map.<br><span>Right in your pocket.</span></p><div class="mbig" style="margin-top:22px">' + drop('b', 'smile') + '</div></div>' +
-        '<div class="foot"><button class="go1" type="button" data-o="next">Get started</button><span class="cap">Takes 30 seconds</span></div>';
+        (ONB.mode === 'splash' ? '<div class="foot"><span class="cap">' + esc('Habari ' + String(S.name || '').split(' ')[0] + ', karibu tena.') + '</span></div>' : ONB.mode === 'hello' ? '<div class="foot"><button class="go1" type="button" data-o="signin">Sign in</button><span class="cap">' + (S.name ? 'Habari ' + esc(String(S.name).split(' ')[0]) + ', karibu tena.' : 'New here? Ask your team for a PIN.') + '</span></div>'
+          : '<div class="foot"><button class="go1" type="button" data-o="next">Get started</button><span class="cap">Takes 30 seconds</span></div>');
     } else if (i === 1) {
       var opts = [['pin', 'Pin locations', 'Put every project on the map', 'b'], ['visit', 'Site visits', 'Check water points and report', 'g'], ['repairs', 'Repairs', 'Follow what needs fixing', 'c']];
       if (S.admin) opts.push(['office', 'Office work', 'Review, assign and report', 'p']);
@@ -1987,6 +2036,7 @@ html[data-theme=dark] .onb .opt{background:#18222B;border-color:#26323C}
     var a = o.getAttribute('data-o');
     if (a === 'back') { ONB.i = Math.max(0, ONB.i - 1); onbDraw(); return; }
     if (a === 'done') { onbDone(); return; }
+    if (a === 'signin') { $('onb').classList.add('hidden'); ONB.mode = ''; var ip = $('iPin'); if (ip) ip.focus(); return; }
     if (ONB.i === 1 && ONB.role) {
       var f = ONB.role === 'pin' ? 'missing' : ONB.role === 'visit' ? 'near' : ONB.role === 'repairs' ? 'repairs' : S.filter;
       S.filter = f; store.set('rfPinFilter', f); qa('.chips .chip').forEach(function (x) { x.setAttribute('aria-pressed', x.getAttribute('data-f') === f ? 'true' : 'false'); });
@@ -2739,6 +2789,7 @@ html[data-theme=dark] .onb .opt{background:#18222B;border-color:#26323C}
   var SWP = [[/^(\d+) urgent$/,"$1 ya haraka"],[/^(\d+) urgent, (.+)$/,"$1 ya haraka, $2"],[/^(.+) from you$/,"$1 kutoka ulipo"],[/^(\d+) working, (\d+) needed repair, (\d+) not working, (\d+) not visited yet$/,"$1 zinafanya kazi, $2 zilihitaji matengenezo, $3 hazifanyi kazi, $4 bado hazijatembelewa"],[/^by (.+)$/,"na $1"],[/^1 change waiting to send$/,"Badiliko 1 linasubiri kutumwa"],[/^(\d[\d,]*) changes waiting to send$/,"Mabadiliko $1 yanasubiri kutumwa"],[/^(\d+) of (\d+) visited in the app$/,"$1 kati ya $2 zimetembelewa kwenye programu"],[/^(\d[\d,]*) to go$/,"$1 zimebaki"],[/^(\d+) due a visit$/,"$1 zinasubiri ziara"],[/^(\d+) of (\d+) mapped$/,"$1 kati ya $2 zina mahali"],[/^(\d+) of (\d+) projects are on the map$/,"Miradi $1 kati ya $2 iko kwenye ramani"],[/^(\d+) open repairs?$/,"Matengenezo $1 yaliyo wazi"],[/^(\d+) still need a location pinned in the field\.$/,"$1 bado zinahitaji mahali kuwekwa uwanjani."],[/^(\d+) still need a location$/,"$1 bado hazina mahali"],[/^(\d+) stops? chosen$/,"Vituo $1 vimechaguliwa"],[/^(\d+) stops? · about (.+) in straight lines from where you are\. Roads will be longer\. Saved on this phone, so it works offline\.$/,"Vituo $1 · takriban $2 kwa mstari ulionyooka kutoka ulipo. Barabara zitakuwa ndefu zaidi. Imehifadhiwa kwenye simu, kwa hiyo inafanya kazi bila mtandao."],[/^(\d+) stops? · about (.+) in straight lines\. Roads will be longer\. Saved on this phone, so it works offline\.$/,"Vituo $1 · takriban $2 kwa mstari ulionyooka. Barabara zitakuwa ndefu zaidi. Imehifadhiwa kwenye simu, kwa hiyo inafanya kazi bila mtandao."],[/^(\d+) \+ voice note$/,"$1 + ujumbe wa sauti"],[/^(\d[\d,]*) projects$/,"Miradi $1"],[/^tick the pinned ones to visit$/,"weka alama kwenye zenye mahali utakazotembelea"],[/^(\d+)% of projects have a location\. Show the (\d+) without one\.$/,"$1% ya miradi ina mahali. Onyesha $2 isiyo na mahali."],[/^Step (\d+) \/ (\d+)$/,"Hatua $1 / $2"],[/^Remove photo (\d+)$/,"Ondoa picha $1"],[/^Photo (\d+)$/,"Picha $1"],[/^Repairs, (\d+) open$/,"Ukarabati, $1 wazi"],[/^Review, (\d+) open$/,"Idhinisha, $1 wazi"],[/^Assign (\d+) visits?$/,"Gawa ziara $1"],[/^Assigned ✓ (.+) will see it in their app\.$/,"Imegawiwa ✓ $1 ataiona kwenye programu yake."],[/^By (.+)$/,"Na $1"],[/^(.+) from the last stop$/,"$1 kutoka kituo cha mwisho"],[/^live, updated (.+)$/,"moja kwa moja, imesasishwa $1"],[/^updated (.+)$/,"imesasishwa $1"],[/^just now$/,"sasa hivi"],[/^(\d+) s ago$/,"sekunde $1 zilizopita"],[/^(\d+) min ago$/,"dakika $1 zilizopita"],[/^(\d+) projects? reported as needing repair or not working, most urgent first$/,"$1 zimeripotiwa kuhitaji matengenezo au kutofanya kazi, za haraka kwanza"],[/^(\d+) not visited in the last 6 months \(or not yet in the app\), longest first$/,"$1 hazijatembelewa miezi 6 iliyopita (au bado kwenye programu), za muda mrefu kwanza"],[/^Prepared by (.+)$/,"Imeandaliwa na $1"],[/^reported by (.+)$/,"imeripotiwa na $1"],[/^Last pinned by (.+)$/,"Mahali paliwekwa mwisho na $1"],[/^Last visit \((.+)\): (.+)$/,"Ziara iliyopita ($1): $2"],[/^Last visit: (.+)$/,"Ziara ya mwisho: $1"],[/^Location: (.+)$/,"Mahali: $1"],[/^New location: (.+)$/,"Mahali papya: $1"],[/^Saved location: (.+)$/,"Mahali palipohifadhiwa: $1"],[/^PIN for (.+)$/,"PIN ya $1"],[/^last active never$/,"bado hajatumia"],[/^last active (.+)$/,"alitumia mwisho $1"],[/^Parts: (.+)$/,"Vipuri: $1"],[/^About KES (.+)$/,"Takriban KES $1"],[/^Problems: (.+)$/,"Matatizo: $1"],[/^Recording (.+)$/,"Inarekodi $1"],[/^Pin placed at “(.+)” from OpenStreetMap\. This is often the middle of the place, not the well: switch to Satellite and drag the pin onto the exact spot\.$/,"Alama imewekwa “$1” kutoka OpenStreetMap. Mara nyingi hapa ni katikati ya mahali, si kisima: badilisha kuwa Satelaiti na uburute alama hadi mahali kamili."],[/^Save (.+) as the location of (.+)\? This replaces (.+)\. The photo goes with it\.$/,"Hifadhi $1 kama mahali pa $2? Inachukua nafasi ya $3. Picha inaenda pamoja nayo."],[/^Save (.+) as the location of (.+)\? This replaces (.+)\.$/,"Hifadhi $1 kama mahali pa $2? Inachukua nafasi ya $3."],[/^Save (.+) as the location of (.+)\?$/,"Hifadhi $1 kama mahali pa $2?"],[/^from (.+)$/,"kutoka kwa $1"],[/^You’re (.+) from the saved point$/,"Uko $1 kutoka mahali palipohifadhiwa"],[/^head ([a-z-]+)\. If you’re standing at the site, the saved location may be wrong\.$/,"elekea $1. Kama uko kwenye eneo, huenda mahali palipohifadhiwa si sahihi."],[/^head ([a-z-]+)\.?$/,"elekea $1."],[/^You’re at (.+)$/,"Uko $1"],[/^of (\d+) projects pinned$/,"kati ya miradi $1 ina mahali"],[/^(\d+) of (\d+) projects pinned$/,"Miradi $1 kati ya $2 ina mahali"],[/^pinned (.+)$/,"aliweka mahali pa $1"],[/^reported a visit to (.+)$/,"aliripoti ziara ya $1"],[/^marked fixed (.+)$/,"aliweka imerekebishwa $1"],[/^added a new site: (.+)$/,"aliongeza eneo jipya: $1"],[/^undid a pin on (.+)$/,"alitendua mahali pa $1"],[/^asked to move the confirmed location of (.+)$/,"aliomba kuhamisha mahali palipothibitishwa pa $1"],[/^approved (.+)$/,"aliidhinisha $1"],[/^turned down (.+)$/,"alikataa $1"],[/^updated the repair job on (.+)$/,"alisasisha kazi ya matengenezo ya $1"],[/^assigned (.+)$/,"aligawa $1"],[/^Arrived (.+)$/,"Umefika $1"],[/^(.+) from the saved point$/,"$1 kutoka mahali palipohifadhiwa"],[/^Location confirmed by (.+)\. Changes go to an admin for approval\.$/,"Mahali pamethibitishwa na $1. Mabadiliko yanaenda kwa msimamizi kuidhinisha."],[/^Location confirmed by (.+)$/,"Mahali pamethibitishwa na $1"],[/^Habari (.+), karibu tena\.$/,"Habari $1, karibu tena."],[/^Field report · (.+)$/,"Ripoti ya uwanjani · $1"],[/^This month · (.+)$/,"Mwezi huu · $1"],[/^Urgent · (.+)$/,"Haraka · $1"],[/^worse$/,"mbaya zaidi"],[/^better$/,"bora zaidi"],[/^Visit · (.+)$/,"Ziara · $1"]];
   Object.assign(SW, {"Which water point": "Kituo gani cha maji", "today?": "leo?", "Pin a location": "Weka mahali", "Visit nearby": "Tembelea karibu", "Add a site": "Ongeza eneo", "Quick actions": "Vitendo vya haraka", "Repair job": "Kazi ya matengenezo", "Not assigned yet": "Bado hajapewa mtu", "The office assigns it": "Ofisi itamgawia mtu", "Waiting for the office": "Inasubiri ofisi", "Mark it fixed when the water is running again": "Weka imerekebishwa maji yakitoka tena", "Saved on this phone": "Imehifadhiwa kwenye simu", "Fixed ✓": "Imerekebishwa ✓", "No notes on this project yet.": "Bado hakuna maelezo kwenye mradi huu.", "Nothing waiting for review.": "Hakuna kinachosubiri kuidhinishwa.", "Repair job · ": "Kazi ya matengenezo · "}); SWP.push([/^Due (.+)$/,"Mwisho $1"],[/^Needs: (.+)$/,"Inahitaji: $1"],[/^(.+) · Live$/,"$1 \u00b7 Moja kwa moja"],[/^Not working · (.+)$/,"Haifanyi kazi \u00b7 $1"],[/^Needs repair · (.+)$/,"Inahitaji matengenezo \u00b7 $1"],[/^Habari, (.+)$/,"Habari, $1"]);
   Object.assign(SW, {"Back": "Rudi", "Get started": "Anza", "Takes 30 seconds": "Inachukua sekunde 30", "Every water point.": "Kila kituo cha maji.", "One map.": "Ramani moja.", "Right in your pocket.": "Mfukoni mwako.", "What will you do most?": "Utafanya nini zaidi?", "We’ll open the app on it. You can change this anytime.": "Tutafungua programu hapo. Unaweza kubadilisha wakati wowote.", "Pin locations": "Weka mahali", "Put every project on the map": "Weka kila mradi kwenye ramani", "Site visits": "Ziara", "Check water points and report": "Kagua vituo vya maji na uripoti", "Follow what needs fixing": "Fuatilia kinachohitaji kurekebishwa", "Office work": "Kazi za ofisi", "Review, assign and report": "Idhinisha, gawa na ripoti", "Continue": "Endelea", "Pick one": "Chagua kimoja", "Which language?": "Lugha gani?", "That’s my language": "Hiyo ndiyo lugha yangu", "Swipe to see both. Switch anytime in Me.": "Telezesha kuona zote. Badilisha wakati wowote kwenye Mimi.", "Hello! Let’s find today’s water points.": "Hello! Let’s find today’s water points.", "Where do you work?": "Unafanya kazi wapi?", "Lists and the map start there. You still see every country.": "Orodha na ramani zinaanzia hapo. Bado unaona nchi zote.", "Skip": "Ruka", "Water points near you": "Vituo vya maji karibu nawe", "RAFIKI Pin uses your location only while it’s open, to show the closest projects and save exact points.": "RAFIKI Pin inatumia mahali ulipo tu ikiwa wazi, kuonyesha miradi iliyo karibu na kuhifadhi mahali kamili.", "Allow location": "Ruhusu mahali", "Not now": "Si sasa", "A good start": "Mwanzo mzuri", "Your first stamp": "Stempu yako ya kwanza", "Every point you pin and every visit you report adds to your collection.": "Kila mahali unapoweka na kila ziara unayoripoti inaongeza kwenye mkusanyiko wako.", "Open RAFIKI Pin": "Fungua RAFIKI Pin", "Small steps, clean water.": "Hatua ndogo, maji safi.", "Me": "Mimi"}); SWP.push([/^You’re all set, (.+)\.$/,"Uko tayari, $1."]);
+  Object.assign(SW, {"Your stamps": "Stempu zako", "Show the welcome screens again": "Onyesha skrini za kukaribisha tena", "Sign in": "Ingia", "New here? Ask your team for a PIN.": "Mgeni hapa? Omba PIN kwa timu yako.", "First drop": "Tone la kwanza", "Pin a location": "Weka mahali", "First visit": "Ziara ya kwanza", "Report a site visit": "Ripoti ziara", "Fixer": "Mrekebishaji", "Mark a repair fixed": "Weka matengenezo kuwa yamekamilika", "Explorer": "Mvumbuzi", "Add a new site": "Ongeza eneo jipya", "Mapper": "Mchora ramani", "Pin 10 locations": "Weka mahali 10", "Regular": "Mzoefu", "Report 10 visits": "Ripoti ziara 10", "Earned": "Umepata"}); SWP.push([/^Habari (.+), karibu tena\.$/,"Habari $1, karibu tena."]);
   var MON = {Jan:'Jan',Feb:'Feb',Mar:'Mac',Apr:'Apr',May:'Mei',Jun:'Jun',Jul:'Jul',Aug:'Ago',Sep:'Sep',Oct:'Okt',Nov:'Nov',Dec:'Des',January:'Januari',February:'Februari',March:'Machi',April:'Aprili',June:'Juni',July:'Julai',August:'Agosti',September:'Septemba',October:'Oktoba',November:'Novemba',December:'Desemba'};
   function swOne(x) {
     if (!x) return null;
@@ -2859,7 +2910,7 @@ html[data-theme=dark] .onb .opt{background:#18222B;border-color:#26323C}
     $('meAv').innerHTML = S.photo && S.mode === 'monday' ? '<img src="' + esc(S.photo) + '" alt="">' : '<i>' + esc((S.name || '?').split(/\s+/).map(function (w) { return w.charAt(0); }).slice(0, 2).join('').toUpperCase()) + '</i>';
     $('mePin').innerHTML = S.mode === 'monday' ? (S.photo ? '<img class="avatar" src="' + esc(S.photo) + '" alt="" onerror="this.remove()">' : '') + 'monday.com' : S.who ? 'Your own PIN' : 'Shared team PIN';
     $('lockBtn').textContent = S.mode === 'monday' ? 'Sign out' : 'Lock the app';
-    outboxUi(); installUi();
+    outboxUi(); installUi(); stampsUi();
     if (!navigator.onLine) { if (!actCache) $('actTable').innerHTML = '<p class="muted">Team activity needs a signal.</p>'; return; }
     api('GET', null, '?activity=1').then(function (j) { if (j.ok) { actCache = j.activity || []; actDraw(); } else if (!actCache) $('actTable').innerHTML = '<p class="msg bad">' + esc(why(j)) + '</p>'; });
   }
