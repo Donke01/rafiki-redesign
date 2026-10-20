@@ -943,6 +943,19 @@ html[data-theme=dark] .stp .stin{background:radial-gradient(circle,transparent 3
 
 
 
+
+/* --- home fits one screen: smaller question, slimmer search, the four actions in one row --- */
+#homeTop .hello{margin:0 0 4px}
+#homeTop .bigq{margin:0 0 10px}
+#homeTop .bigq h2{font-size:1.7rem;line-height:1.1}
+#homeTop .sbox{min-height:48px;margin-bottom:10px}
+#homeTop .quick{grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:12px}
+#homeTop .quick button{flex-direction:column;justify-content:center;gap:6px;min-height:84px;padding:10px 4px;text-align:center;font-size:.75rem;line-height:1.15}
+#homeTop .quick button i{width:38px;height:38px;border-radius:13px}
+#homeTop .quick button i svg{width:20px;height:20px}
+#vList .listhead{margin-bottom:8px}#vList .listhead h1{font-size:1.4rem}
+#vList .prog-card{padding:14px !important}
+#lHere > div{margin-bottom:10px !important}
 /* --- card motion: cards rise in with a soft spring, squish under the finger, light drifts on the deep cards,
        tracker steps and stamps arrive one by one. Only on first showing, never on live updates. --- */
 @keyframes cardRise{0%{opacity:0;transform:translateY(26px) scale(.965)}55%{opacity:1}75%{transform:translateY(-3px) scale(1.004)}100%{opacity:1;transform:none}}
@@ -1956,6 +1969,7 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
   }
   function progUi() {
     $('mProg').innerHTML = progHtml(S.projects); $('lProg').innerHTML = progHtml(S.projects);
+    $('cProg').classList.toggle('hidden', ['ke', 'tz', 'ug', 'mw'].filter(function (ck) { return S.projects.some(function (p) { return p.ck === ck; }); }).length < 2);
     $('cProg').innerHTML = ['ke', 'tz', 'ug', 'mw'].map(function (ck) {
       var l = S.projects.filter(function (p) { return p.ck === ck; }), h = l.filter(function (p) { return p.gps; }).length;
       return l.length ? '<div>' + CNAME[ck] + ' ' + h + '/' + l.length + '<div class="meter"><i data-w="' + Math.round(h / l.length * 100) + '" style="width:0"></i></div></div>' : '';

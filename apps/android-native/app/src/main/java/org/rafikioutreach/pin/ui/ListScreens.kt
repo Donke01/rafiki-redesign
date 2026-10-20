@@ -253,7 +253,7 @@ fun ProjectsScreen(m: AppModel, open: (String) -> Unit, planRoute: () -> Unit = 
         }
         item(key = "head") {
             Row(Modifier.padding(top = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text(t("Projects", "Miradi"), style = MaterialTheme.typography.headlineLarge, color = C.ink, modifier = Modifier.weight(1f))
+                Text(t("Projects", "Miradi"), style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold), color = C.ink, modifier = Modifier.weight(1f))
                 Row(Modifier.clip(RoundedCornerShape(12.dp)).clickable(role = Role.Button, onClick = planRoute).heightIn(min = 44.dp).padding(horizontal = 6.dp).testTag("plan_route"), verticalAlignment = Alignment.CenterVertically) {
                     Icon(Ic.get("map"), null, tint = C.blue, modifier = Modifier.size(18.dp)); Spacer(Modifier.width(6.dp))
                     Text(t("Plan a route", "Panga njia"), style = MaterialTheme.typography.labelLarge, color = C.blue)
@@ -262,11 +262,12 @@ fun ProjectsScreen(m: AppModel, open: (String) -> Unit, planRoute: () -> Unit = 
         }
         item {
             val pinned = snap.projects.count { it.gps != null }
-            Card(brush = DeepBrush) {
+            Card(brush = DeepBrush, pad = 14.dp) {
                 val n = kotlin.math.round(rememberFill(pinned.toFloat())).toInt() // counts up
                 Row { Text(t("$n of ${snap.projects.size} projects pinned", "Miradi $n kati ya ${snap.projects.size} ina mahali"), color = Color.White, style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f)); Text(t("${snap.projects.size - pinned} to go", "${snap.projects.size - pinned} zimebaki"), color = Color(0xFFCFE8FA), style = MaterialTheme.typography.bodySmall) }
                 Meter(pinned.toFloat() / maxOf(1, snap.projects.size), Modifier.padding(top = 10.dp), light = true)
-                Row(Modifier.padding(top = 12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                // one meter per country, only when there is more than one country to compare
+                if (COUNTRIES.keys.count { k -> snap.projects.any { it.ck == k } } > 1) Row(Modifier.padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     COUNTRIES.forEach { (k, n) ->
                         val l = snap.projects.filter { it.ck == k }
                         if (l.isNotEmpty()) Column(Modifier.weight(1f)) {
@@ -348,31 +349,29 @@ private fun HomeTop(m: AppModel, s: Snapshot, here: LatLng?, search: () -> Unit,
         ?: COUNTRIES[m.prefs.country]
     Column {
         Text("Habari, " + first.ifBlank { "karibu" }, style = MaterialTheme.typography.bodyMedium, color = C.muted)
-        Row(Modifier.padding(top = 6.dp, bottom = 14.dp), verticalAlignment = Alignment.Bottom) {
+        Row(Modifier.padding(top = 2.dp, bottom = 10.dp), verticalAlignment = Alignment.Bottom) {
             Text(androidx.compose.ui.text.buildAnnotatedString {
                 withStyle(androidx.compose.ui.text.SpanStyle(fontWeight = FontWeight.Normal)) { append(t("Which water point", "Kituo gani cha maji") + "\n") }
                 append(t("today?", "leo?"))
-            }, style = MaterialTheme.typography.headlineLarge.copy(fontSize = 31.sp, lineHeight = 36.sp, letterSpacing = (-1).sp), color = C.ink, modifier = Modifier.weight(1f))
+            }, style = MaterialTheme.typography.headlineLarge.copy(fontSize = 27.sp, lineHeight = 31.sp, letterSpacing = (-0.8).sp), color = C.ink, modifier = Modifier.weight(1f))
         }
         // looks like a search box; takes you to the search field above the list
-        Row(Modifier.padding(bottom = 12.dp).fillMaxWidth().heightIn(min = 52.dp).clip(RoundedCornerShape(18.dp)).background(C.card).border(1.dp, C.line, RoundedCornerShape(18.dp))
+        Row(Modifier.padding(bottom = 10.dp).fillMaxWidth().heightIn(min = 48.dp).clip(RoundedCornerShape(18.dp)).background(C.card).border(1.dp, C.line, RoundedCornerShape(18.dp))
             .clickable(role = Role.Button, onClick = search).padding(horizontal = 16.dp).testTag("home_search").semantics { contentDescription = t("Search projects", "Tafuta miradi") }, verticalAlignment = Alignment.CenterVertically) {
             Icon(Ic.get("search"), null, tint = C.muted, modifier = Modifier.size(20.dp)); Spacer(Modifier.width(10.dp))
             Text(t("Search a project or place", "Tafuta mradi au mahali"), style = MaterialTheme.typography.bodyLarge, color = C.muted, maxLines = 1)
         }
-        listOf(
-            listOf(Triple("missing", t("Pin a location", "Weka mahali"), "pin"), Triple("near", t("Visit nearby", "Tembelea karibu"), "clip")),
-            listOf(Triple("new", t("Add a site", "Ongeza eneo"), "plus"), Triple("repairs", t("Repairs", "Ukarabati"), "wrench")),
-        ).forEachIndexed { ri, row ->
-            Row(Modifier.padding(bottom = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                row.forEachIndexed { ci, (k, l, ic) ->
-                    val src = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
-                    Row(Modifier.weight(1f).rise(ri * 2 + ci + 1, step = 60).press(src).heightIn(min = 52.dp).clip(RoundedCornerShape(18.dp)).background(if (C.glassy) C.glass2 else C.card).border(1.dp, if (C.glassy) C.glassEdge else C.line, RoundedCornerShape(18.dp))
-                        .clickable(interactionSource = src, indication = androidx.compose.material3.ripple(), role = Role.Button) { if (k == "new") newSite() else filter(k) }.padding(horizontal = 12.dp).testTag("quick_$k"), verticalAlignment = Alignment.CenterVertically) {
-                        val hu = C.hue(k)
-                        Box(Modifier.size(32.dp).clip(RoundedCornerShape(11.dp)).background(hu.bg), contentAlignment = Alignment.Center) { Icon(Ic.get(ic), null, tint = hu.fg, modifier = Modifier.size(18.dp)) }
-                        Spacer(Modifier.width(10.dp)); Text(l, style = MaterialTheme.typography.labelLarge.copy(fontSize = 14.sp), color = C.ink)
-                    }
+        // the four actions in one row, so the whole home fits on one screen
+        Row(Modifier.padding(bottom = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            listOf(Triple("missing", t("Pin a location", "Weka mahali"), "pin"), Triple("near", t("Visit nearby", "Tembelea karibu"), "clip"),
+                Triple("new", t("Add a site", "Ongeza eneo"), "plus"), Triple("repairs", t("Repairs", "Ukarabati"), "wrench")).forEachIndexed { ci, (k, l, ic) ->
+                val src = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+                Column(Modifier.weight(1f).rise(ci + 1, step = 60).press(src).heightIn(min = 84.dp).clip(RoundedCornerShape(18.dp)).background(if (C.glassy) C.glass2 else C.card).border(1.dp, if (C.glassy) C.glassEdge else C.line, RoundedCornerShape(18.dp))
+                    .clickable(interactionSource = src, indication = androidx.compose.material3.ripple(), role = Role.Button) { if (k == "new") newSite() else filter(k) }.padding(horizontal = 4.dp, vertical = 10.dp).testTag("quick_$k"),
+                    horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                    val hu = C.hue(k)
+                    Box(Modifier.size(38.dp).clip(RoundedCornerShape(13.dp)).background(hu.bg), contentAlignment = Alignment.Center) { Icon(Ic.get(ic), null, tint = hu.fg, modifier = Modifier.size(20.dp)) }
+                    Text(l, style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp, lineHeight = 14.sp), color = C.ink, textAlign = androidx.compose.ui.text.style.TextAlign.Center, maxLines = 2, modifier = Modifier.padding(top = 6.dp))
                 }
             }
         }

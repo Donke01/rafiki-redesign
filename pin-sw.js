@@ -1,7 +1,7 @@
 // Rafiki Pin: keeps the app itself (page, map code, logo) on the phone so it opens with no
 // signal. Data (/api/*) is never cached here: changes wait in the app's own outbox instead.
 // Map tiles already seen are kept too (up to ~400), so a site visited before still shows a map.
-var APP = 'rafiki-pin-app-v26', TILES = 'rafiki-pin-tiles-v1';
+var APP = 'rafiki-pin-app-v27', TILES = 'rafiki-pin-tiles-v1';
 var SHELL = ['/pin', '/vendor/leaflet/leaflet.js', '/vendor/leaflet/leaflet.css', '/img/logo-dark-bold.webp', '/pin.webmanifest', '/favicon.svg', '/img/logo-light-bold.webp', '/img/pin/icon-192.png'];
 
 self.addEventListener('install', function (e) {
