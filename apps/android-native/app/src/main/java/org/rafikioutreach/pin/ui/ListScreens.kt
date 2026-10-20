@@ -8,6 +8,7 @@ import androidx.compose.ui.text.withStyle
 
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.derivedStateOf
 
 import androidx.compose.foundation.shape.CircleShape
@@ -172,7 +173,8 @@ private fun Legend(c: Color, t: String) {
 }
 
 @Composable
-fun Meter(f: Float, modifier: Modifier = Modifier, light: Boolean = false) {
+fun Meter(f0: Float, modifier: Modifier = Modifier, light: Boolean = false) {
+    val f = rememberFill(f0)
     Box(modifier.fillMaxWidth().height(if (light) 8.dp else 10.dp).clip(RoundedCornerShape(99.dp)).background(if (light) Color(0x2EFFFFFF) else C.line)) {
         Box(Modifier.fillMaxWidth(f.coerceIn(0f, 1f)).height(if (light) 8.dp else 10.dp).clip(RoundedCornerShape(99.dp))
             .background(if (light) androidx.compose.ui.graphics.Brush.horizontalGradient(listOf(Color(0xFF5DB8F2), Color(0xFFBFE3FB))) else OkBrush))
@@ -221,6 +223,7 @@ fun ProjectsScreen(m: AppModel, open: (String) -> Unit, planRoute: () -> Unit = 
     val list = androidx.compose.foundation.lazy.rememberLazyListState()
     val scope = rememberCoroutineScope()
     var countrySheet by remember { mutableStateOf(false) }
+    val seen = remember { mutableSetOf<Any>() }
     // where the "Projects" heading is in the list, so the top bar can take over the title once it scrolls away
     val headIdx = 2 + (if (banner != null) 1 else 0) + (if (waiting > 0) 1 else 0) + (if (mine.isNotEmpty()) 1 else 0)
     val scrolledPast by remember(headIdx) { derivedStateOf { list.firstVisibleItemIndex > headIdx } }
@@ -260,7 +263,8 @@ fun ProjectsScreen(m: AppModel, open: (String) -> Unit, planRoute: () -> Unit = 
         item {
             val pinned = snap.projects.count { it.gps != null }
             Card(brush = DeepBrush) {
-                Row { Text(t("$pinned of ${snap.projects.size} projects pinned", "Miradi $pinned kati ya ${snap.projects.size} ina mahali"), color = Color.White, style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f)); Text(t("${snap.projects.size - pinned} to go", "${snap.projects.size - pinned} zimebaki"), color = Color(0xFFCFE8FA), style = MaterialTheme.typography.bodySmall) }
+                val n = kotlin.math.round(rememberFill(pinned.toFloat())).toInt() // counts up
+                Row { Text(t("$n of ${snap.projects.size} projects pinned", "Miradi $n kati ya ${snap.projects.size} ina mahali"), color = Color.White, style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f)); Text(t("${snap.projects.size - pinned} to go", "${snap.projects.size - pinned} zimebaki"), color = Color(0xFFCFE8FA), style = MaterialTheme.typography.bodySmall) }
                 Meter(pinned.toFloat() / maxOf(1, snap.projects.size), Modifier.padding(top = 10.dp), light = true)
                 Row(Modifier.padding(top = 12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     COUNTRIES.forEach { (k, n) ->
@@ -286,7 +290,7 @@ fun ProjectsScreen(m: AppModel, open: (String) -> Unit, planRoute: () -> Unit = 
             }
         }
         item { Text((COUNTRIES[ck]?.let { "$it · " } ?: "") + count, style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold), color = C.muted) }
-        items(rows, key = { it.id }) { p -> ProjectRow(m, snap, p, here) { open(p.id) } }
+        itemsIndexed(rows, key = { _, it -> it.id }) { i, p -> Box(Modifier.rise(i, seen, p.id)) { ProjectRow(m, snap, p, here) { open(p.id) } } }
         if (rows.isEmpty()) item {
             EmptyDrop(when {
                 f == "missing" && ck.isBlank() -> t("Every project has a location.", "Kila mradi una mahali.")
@@ -309,9 +313,10 @@ fun ProjectRow(m: AppModel, s: Snapshot, p: Project, here: LatLng?, onClick: () 
         p.gps == null -> C.tint to C.blue
         else -> C.okBg to C.ok
     }
+    val src = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
     Row(
-        Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(C.card).border(1.dp, C.line, RoundedCornerShape(20.dp))
-            .clickable(onClick = onClick).heightIn(min = 76.dp).padding(horizontal = 14.dp, vertical = 12.dp),
+        Modifier.press(src).fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(C.card).border(1.dp, C.line, RoundedCornerShape(20.dp))
+            .clickable(interactionSource = src, indication = androidx.compose.material3.ripple(), onClick = onClick).heightIn(min = 76.dp).padding(horizontal = 14.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         NetImage(p.photo?.let { m.api.photoUrl(it) }, Modifier.size(46.dp).clip(RoundedCornerShape(14.dp)).background(boxBg)) {
@@ -358,11 +363,12 @@ private fun HomeTop(m: AppModel, s: Snapshot, here: LatLng?, search: () -> Unit,
         listOf(
             listOf(Triple("missing", t("Pin a location", "Weka mahali"), "pin"), Triple("near", t("Visit nearby", "Tembelea karibu"), "clip")),
             listOf(Triple("new", t("Add a site", "Ongeza eneo"), "plus"), Triple("repairs", t("Repairs", "Ukarabati"), "wrench")),
-        ).forEach { row ->
+        ).forEachIndexed { ri, row ->
             Row(Modifier.padding(bottom = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                row.forEach { (k, l, ic) ->
-                    Row(Modifier.weight(1f).heightIn(min = 52.dp).clip(RoundedCornerShape(18.dp)).background(if (C.glassy) C.glass2 else C.card).border(1.dp, if (C.glassy) C.glassEdge else C.line, RoundedCornerShape(18.dp))
-                        .clickable(role = Role.Button) { if (k == "new") newSite() else filter(k) }.padding(horizontal = 12.dp).testTag("quick_$k"), verticalAlignment = Alignment.CenterVertically) {
+                row.forEachIndexed { ci, (k, l, ic) ->
+                    val src = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+                    Row(Modifier.weight(1f).rise(ri * 2 + ci + 1, step = 60).press(src).heightIn(min = 52.dp).clip(RoundedCornerShape(18.dp)).background(if (C.glassy) C.glass2 else C.card).border(1.dp, if (C.glassy) C.glassEdge else C.line, RoundedCornerShape(18.dp))
+                        .clickable(interactionSource = src, indication = androidx.compose.material3.ripple(), role = Role.Button) { if (k == "new") newSite() else filter(k) }.padding(horizontal = 12.dp).testTag("quick_$k"), verticalAlignment = Alignment.CenterVertically) {
                         val hu = C.hue(k)
                         Box(Modifier.size(32.dp).clip(RoundedCornerShape(11.dp)).background(hu.bg), contentAlignment = Alignment.Center) { Icon(Ic.get(ic), null, tint = hu.fg, modifier = Modifier.size(18.dp)) }
                         Spacer(Modifier.width(10.dp)); Text(l, style = MaterialTheme.typography.labelLarge.copy(fontSize = 14.sp), color = C.ink)

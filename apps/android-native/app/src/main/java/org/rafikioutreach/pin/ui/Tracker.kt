@@ -78,7 +78,7 @@ fun RepairTracker(m: AppModel, p: Project, r: Repair, here: LatLng?) {
         t("Parts ordered", "Vipuri vimeagizwa") to (r.stepAt["parts"]?.let { whenText(it) } ?: if (r.parts.isNotBlank()) t("Needs: ", "Inahitaji: ") + r.parts else "—"),
         t("Fixed", "Imerekebishwa") to (if (fixed) m.prefs.name else t("Mark it fixed when the water is running again", "Weka imerekebishwa maji yakitoka tena")),
     )
-    val pulse by if (Motion.on) rememberInfiniteTransition(label = "now").animateFloat(0f, 1f, infiniteRepeatable(tween(1800)), label = "p") else remember { mutableFloatStateOf(0f) }
+    val pulse by if (Motion.on && Motion.loops) rememberInfiniteTransition(label = "now").animateFloat(0f, 1f, infiniteRepeatable(tween(1800)), label = "p") else remember { mutableFloatStateOf(0f) }
     Card(Modifier.padding(top = 12.dp).testTag("tracker")) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(t("Repair job", "Kazi ya matengenezo"), style = MaterialTheme.typography.titleMedium, color = C.ink, modifier = Modifier.weight(1f))
@@ -107,11 +107,16 @@ fun RepairTracker(m: AppModel, p: Project, r: Repair, here: LatLng?) {
         Column(Modifier.padding(top = 14.dp)) {
             steps.forEachIndexed { i, (title, sub) ->
                 val done = i < si || fixed; val now = i == si && !fixed
-                Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min).testTag("step_$i")) {
+                Row(Modifier.fillMaxWidth().rise(i + 1, step = 110).height(IntrinsicSize.Min).testTag("step_$i")) {
                     Box(Modifier.width(28.dp).fillMaxHeight()) {
-                        if (i < steps.size - 1) Box(Modifier.align(Alignment.TopCenter).padding(top = 28.dp).width(2.dp).fillMaxHeight().background(if (i < si || fixed) C.ok else C.line))
+                        if (i < steps.size - 1) {
+                            // the line between steps draws itself downwards
+                            val grow = rememberFill(1f, 500 + i * 110)
+                            Box(Modifier.align(Alignment.TopCenter).padding(top = 28.dp).width(2.dp).fillMaxHeight().background(C.line))
+                            if (i < si || fixed) Box(Modifier.align(Alignment.TopCenter).padding(top = 28.dp).width(2.dp).fillMaxHeight(grow).background(C.ok))
+                        }
                         Box(
-                            Modifier.size(28.dp).drawBehind { if (now) drawCircle(Color(0xFF1C7C4A).copy(alpha = .45f * (1 - pulse)), radius = size.minDimension / 2 + 10.dp.toPx() * pulse) }
+                            Modifier.pop(200L + i * 110L).size(28.dp).drawBehind { if (now) drawCircle(Color(0xFF1C7C4A).copy(alpha = .45f * (1 - pulse)), radius = size.minDimension / 2 + 10.dp.toPx() * pulse) }
                                 .clip(CircleShape).background(if (done || now) C.ok else C.line),
                             contentAlignment = Alignment.Center,
                         ) { if (done || now) Icon(Ic.get("check"), null, tint = Color.White, modifier = Modifier.size(15.dp)) }

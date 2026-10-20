@@ -186,7 +186,7 @@ private fun Stamps(m: AppModel) {
                 row.forEachIndexed { c, st ->
                     val k = r * 3 + c; val got = (n[st[0] as String] ?: 0) >= (st[1] as Int)
                     Column(Modifier.weight(1f).testTag(if (got) "stamp_got" else "stamp_no"), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Stamp(84.dp, st[4] as DropC, "", "%03d".format(k + 1), got, listOf(Mood.Smile, Mood.Wink, Mood.O)[k % 3], rot = if (k % 2 == 0) -2f else 2f)
+                        Box(Modifier.stampIn(k, got)) { Stamp(84.dp, st[4] as DropC, "", "%03d".format(k + 1), got, listOf(Mood.Smile, Mood.Wink, Mood.O)[k % 3], rot = if (k % 2 == 0) -2f else 2f) }
                         Text(tt(st[2]), style = MaterialTheme.typography.labelMedium, color = C.ink, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.padding(top = 8.dp))
                         Text(if (got) t("Earned", "Umepata") else tt(st[3]), style = MaterialTheme.typography.bodySmall, color = if (got) C.ok else C.muted, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
                     }

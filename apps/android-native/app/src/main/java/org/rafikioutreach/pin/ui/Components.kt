@@ -95,10 +95,10 @@ fun Card(modifier: Modifier = Modifier, pad: Dp = 18.dp, brush: Brush? = null, b
     val shape = RoundedCornerShape(24.dp)
     val glass = brush == null && C.glassy
     Column(
-        modifier.fillMaxWidth()
+        modifier.rise().fillMaxWidth()
             .then(if (glass) Modifier.shadow(6.dp, shape, ambientColor = Color(0x14144678), spotColor = Color(0x1A144678)) else Modifier)
             .clip(shape)
-            .then(if (brush != null) Modifier.background(brush) else Modifier.background(if (glass) C.glass2 else C.card))
+            .then(if (brush != null) Modifier.background(brush).ambient() else Modifier.background(if (glass) C.glass2 else C.card))
             .then(if (brush == null) Modifier.border(1.dp, border ?: if (glass) C.glassEdge else C.line, shape) else Modifier)
             .padding(pad),
         content = content,

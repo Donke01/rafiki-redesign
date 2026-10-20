@@ -34,12 +34,12 @@ private val dropPath: Path by lazy { PathParser().parsePathString("M12 2.5s7 7.4
 private val shinePath: Path by lazy { PathParser().parsePathString("M8.2 11.4c.5-1.7 1.6-3.4 2.7-4.8").toPath() }
 
 /** Moving drops and pulses; tests switch it off. */
-object Motion { var on = true }
+object Motion { var on = true; /** endless loops (floating, glows); tests can switch only these off */ var loops = true }
 
 /** Draws the drop in a 24×27 box; it floats and blinks unless [still]. */
 @Composable
 fun Drop(size: Dp, color: DropC = DropC.Blue, mood: Mood = Mood.Plain, modifier: Modifier = Modifier, still0: Boolean = false) {
-    val still = still0 || !Motion.on
+    val still = still0 || !Motion.on || !Motion.loops
     val tr = rememberInfiniteTransition(label = "drop")
     val float by if (still) remember { mutableFloatStateOf(0f) } else tr.animateFloat(0f, 1f, infiniteRepeatable(tween(1800, easing = FastOutSlowInEasing), RepeatMode.Reverse), label = "f")
     val blink by if (still) remember { mutableFloatStateOf(1f) } else tr.animateFloat(1f, 1f, infiniteRepeatable(keyframes { durationMillis = 5000; 1f at 2300; 0.1f at 2400; 1f at 2500 }), label = "b")

@@ -109,10 +109,10 @@ class AppFeelTest {
         rule.mainClock.autoAdvance = true
         rule.waitUntil(8000) { rule.onAllNodesWithTag("quick_missing").fetchSemanticsNodes().isNotEmpty() }
         rule.mainClock.autoAdvance = false; shot("41-home"); rule.mainClock.autoAdvance = true
-        rule.onNodeWithTag("projects").performScrollToNode(hasText("Kapsaret Borehole"))
+        rule.mainClock.autoAdvance = true; rule.onNodeWithTag("projects").performScrollToNode(hasText("Kapsaret Borehole")); rule.mainClock.autoAdvance = false
         rule.onAllNodesWithText("Kapsaret Borehole").onLast().performClick()
         rule.waitUntil(5000) { rule.onAllNodesWithTag("tracker").fetchSemanticsNodes().isNotEmpty() }
-        rule.onNodeWithTag("tracker").performScrollTo()
+        rule.mainClock.autoAdvance = true; rule.onNodeWithTag("tracker").performScrollTo(); rule.mainClock.autoAdvance = false
         rule.mainClock.autoAdvance = false; shot("42-tracker"); rule.mainClock.autoAdvance = true
         rule.onNodeWithTag("hback").performClick()
         rule.onNodeWithTag("hav").performClick()
@@ -146,7 +146,7 @@ class AppFeelTest {
         val m = model(signedIn = true, onbDone = true); show(m)
         fun back() { rule.runOnUiThread { rule.activity.onBackPressedDispatcher.onBackPressed() }; rule.waitForIdle() }
         rule.onNodeWithTag("nav_map").performClick(); rule.waitForIdle()
-        rule.onNodeWithTag("nav_me").performClick(); rule.waitForIdle()
+        rule.mainClock.autoAdvance = true; rule.onNodeWithTag("nav_me").performClick(); rule.mainClock.autoAdvance = false; rule.waitForIdle()
         rule.onNodeWithText("Kapsaret Borehole", substring = true).assertDoesNotExist()
         back()   // Me -> Map
         rule.onNodeWithText("projects pinned", substring = true).assertExists()
@@ -166,7 +166,7 @@ class AppFeelTest {
         rule.onNodeWithTag("search_screen").assertExists()
         rule.onNodeWithTag("search_input").performTextInput("kaps"); rule.waitForIdle()
         shot("50-search")
-        rule.onAllNodesWithText("Kapsaret Borehole").onFirst().performClick(); rule.waitForIdle()
+        rule.mainClock.autoAdvance = true; rule.onAllNodesWithText("Kapsaret Borehole").onFirst().performClick(); rule.mainClock.autoAdvance = false; rule.waitForIdle()
         rule.onNodeWithTag("tracker").assertExists()
         // project tabs swipe
         rule.onNodeWithTag("tab_hist").performScrollTo(); rule.waitForIdle()
@@ -190,5 +190,33 @@ class AppFeelTest {
         rule.onNodeWithTag("pick_sat").performClick(); rule.waitForIdle()
         m.prefs.country = ""
         Onb.enabled = true; org.rafikioutreach.pin.ui.Motion.on = true
+    }
+
+    @Test fun motion_frames_for_a_clip() {
+        org.rafikioutreach.pin.ui.Motion.on = true; org.rafikioutreach.pin.ui.Motion.loops = false
+        val m = model(signedIn = true, onbDone = true); Onb.enabled = false
+        rule.mainClock.autoAdvance = false
+        show(m)
+        val dir = File(out, "motion").apply { mkdirs() }
+        var n = 0
+        fun frame() {
+            val v = rule.activity.window.decorView
+            val b = Bitmap.createBitmap(v.width, v.height, Bitmap.Config.ARGB_8888); v.draw(Canvas(b))
+            val s = Bitmap.createScaledBitmap(b, v.width / 3, v.height / 3, true)
+            File(dir, "%03d.png".format(n++)).outputStream().use { s.compress(Bitmap.CompressFormat.PNG, 100, it) }
+        }
+        repeat(22) { rule.mainClock.advanceTimeBy(50); frame() }
+        repeat(6) { rule.mainClock.advanceTimeBy(120); frame() }
+        rule.mainClock.autoAdvance = true; rule.onNodeWithTag("projects").performScrollToNode(hasText("Kapsaret Borehole")); rule.mainClock.autoAdvance = false
+        repeat(12) { rule.mainClock.advanceTimeBy(50); frame() }
+        rule.mainClock.autoAdvance = true; rule.onAllNodesWithText("Kapsaret Borehole").onFirst().performClick(); rule.mainClock.autoAdvance = false
+        repeat(34) { rule.mainClock.advanceTimeBy(50); frame() }
+        rule.mainClock.autoAdvance = true; rule.onNodeWithTag("tracker").performScrollTo(); rule.mainClock.autoAdvance = false
+        repeat(30) { rule.mainClock.advanceTimeBy(50); frame() }
+        rule.mainClock.autoAdvance = true; rule.onNodeWithTag("nav_me").performClick(); rule.mainClock.autoAdvance = false
+        repeat(16) { rule.mainClock.advanceTimeBy(50); frame() }
+        rule.mainClock.autoAdvance = true; rule.onNodeWithText("Your stamps").performScrollTo(); rule.mainClock.autoAdvance = false
+        repeat(34) { rule.mainClock.advanceTimeBy(50); frame() }
+        rule.mainClock.autoAdvance = true; Onb.enabled = true; org.rafikioutreach.pin.ui.Motion.loops = true
     }
 }

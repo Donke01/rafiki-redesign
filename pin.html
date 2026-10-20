@@ -942,6 +942,38 @@ html[data-theme=dark] .stp .stin{background:radial-gradient(circle,transparent 3
 
 
 
+
+/* --- card motion: cards rise in with a soft spring, squish under the finger, light drifts on the deep cards,
+       tracker steps and stamps arrive one by one. Only on first showing, never on live updates. --- */
+@keyframes cardRise{0%{opacity:0;transform:translateY(26px) scale(.965)}55%{opacity:1}75%{transform:translateY(-3px) scale(1.004)}100%{opacity:1;transform:none}}
+@keyframes popDot{0%{transform:scale(0)}60%{transform:scale(1.22)}100%{transform:scale(1)}}
+@keyframes lineGrow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@keyframes stampIn{0%{opacity:0;transform:translateY(-18px) rotate(-14deg) scale(.6)}65%{opacity:1;transform:translateY(2px) rotate(2deg) scale(1.05)}100%{opacity:1;transform:none}}
+@keyframes orbDrift{0%{transform:translate(0,0) scale(1)}100%{transform:translate(-70px,46px) scale(1.25)}}
+@keyframes sheen{0%,62%{transform:translateX(-140%) skewX(-18deg)}100%{transform:translateX(320%) skewX(-18deg)}}
+.view-in > *:not(.hidden):not(script),.view-fwd > *:not(.hidden):not(script){animation:cardRise .62s cubic-bezier(.2,.8,.2,1) both}
+.view-in > :nth-child(2),.view-fwd > :nth-child(2){animation-delay:.05s}.view-in > :nth-child(3),.view-fwd > :nth-child(3){animation-delay:.1s}
+.view-in > :nth-child(4),.view-fwd > :nth-child(4){animation-delay:.15s}.view-in > :nth-child(5),.view-fwd > :nth-child(5){animation-delay:.2s}
+.view-in > :nth-child(6),.view-fwd > :nth-child(6){animation-delay:.25s}.view-in > :nth-child(n+7),.view-fwd > :nth-child(n+7){animation-delay:.3s}
+#vList.view-in > #routeBar,#vList.view-fwd > #routeBar{animation:none}
+.view-in .quick button,.view-fwd .quick button{animation:cardRise .6s cubic-bezier(.2,.8,.2,1) both}
+.quick button:nth-child(1){animation-delay:.08s}.quick button:nth-child(2){animation-delay:.14s}.quick button:nth-child(3){animation-delay:.2s}.quick button:nth-child(4){animation-delay:.26s}
+.stagger .row{animation:cardRise .6s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(min(var(--i,0),10) * 45ms)}
+.row,.quick button,.mtile,.bsh-o,#vOffice .otile{transition:transform .38s cubic-bezier(.34,1.56,.64,1),box-shadow .2s,background-color .2s,border-color .2s}
+.row:active,.quick button:active,.mtile:active,.bsh-o:active,#vOffice .otile:active{transform:scale(.965) !important;transition-duration:.12s}
+.prog-card,.phead,.me-card{position:relative;overflow:hidden;isolation:isolate}
+.prog-card::before,.phead::before,.me-card::before{content:"";position:absolute;top:-30%;left:0;width:34%;height:160%;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.13),rgba(255,255,255,0));pointer-events:none;z-index:0;animation:sheen 7s ease-in-out infinite}
+.prog-card::after{content:"";position:absolute;right:-60px;top:-60px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(99,196,255,.32),rgba(99,196,255,0) 70%);pointer-events:none;z-index:0}
+.prog-card::after,.phead::after,.me-card::after{animation:orbDrift 9s ease-in-out infinite alternate}
+.prog-card > *,.me-card > *{position:relative;z-index:1}
+.trk ol li{animation:cardRise .55s cubic-bezier(.2,.8,.2,1) both}
+.trk ol li:nth-child(1){animation-delay:.1s}.trk ol li:nth-child(2){animation-delay:.21s}.trk ol li:nth-child(3){animation-delay:.32s}.trk ol li:nth-child(4){animation-delay:.43s}
+.trk ol li .dt{animation:popDot .5s cubic-bezier(.34,1.56,.64,1) both;animation-delay:inherit}
+.trk ol li.now .dt{animation:popDot .5s cubic-bezier(.34,1.56,.64,1) both,trkPulse 1.8s .6s infinite}
+.trk ol li.done::before{transform-origin:top;animation:lineGrow .5s ease-out both;animation-delay:.35s}
+.stp.got .stin{animation:stampIn .7s cubic-bezier(.34,1.56,.64,1) both}
+.stp.got:nth-child(1) .stin{animation-delay:.25s}.stp.got:nth-child(2) .stin{animation-delay:.36s}.stp.got:nth-child(3) .stin{animation-delay:.47s}.stp.got:nth-child(4) .stin{animation-delay:.58s}.stp.got:nth-child(5) .stin{animation-delay:.69s}.stp.got:nth-child(6) .stin{animation-delay:.8s}
+@media (prefers-reduced-motion: reduce){.view-in > *,.view-fwd > *,.view-in .quick button,.view-fwd .quick button,.stagger .row,.trk ol li,.trk ol li .dt,.trk ol li.done::before,.stp.got .stin,.prog-card::before,.phead::before,.me-card::before,.prog-card::after,.phead::after,.me-card::after{animation:none !important}}
 /* --- colours that mean the same thing everywhere: blue pinning, green visits & map, purple new sites,
        amber repairs, teal due a visit, coral you, slate everything --- */
 :root{--hu-blue:#0A78C2;--hb-blue:#E3F1FC;--hu-green:#1C8A50;--hb-green:#E2F4EA;--hu-purple:#6E46C8;--hb-purple:#EEE7FB;--hu-amber:#B86E00;--hb-amber:#FDF0DC;--hu-teal:#0E7F86;--hb-teal:#DCF2F3;--hu-coral:#D2553A;--hb-coral:#FCE9E4;--hu-slate:#36505F;--hb-slate:#E8EDF1}
