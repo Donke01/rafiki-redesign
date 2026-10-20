@@ -80,7 +80,7 @@ with sync_playwright() as p:
     check(pg.locator('#hMap path.leaflet-interactive').count() == 4, 'map dots for pinned projects: %d' % pg.locator('#hMap path.leaflet-interactive').count())
     check('Chepkongi' in pg.inner_text('#mHere'), "I'm-here banner: " + pg.inner_text('#mHere')[:80])
     pg.click('#nearHd'); pg.wait_for_timeout(200)
-    check(pg.locator('#nearList .row').count() == 3, 'nearest 3 on the map sheet')
+    check(pg.locator('#nearList .row').count() == 4, 'nearest on the map sheet (up to 5; 4 pinned here)')
     pg.screenshot(path=os.path.join(HERE, 'n1c-near.png'))
     pg.click('#nearHd')
     pg.screenshot(path=os.path.join(HERE, 'n1-map.png'))

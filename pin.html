@@ -940,6 +940,53 @@ html[data-theme=dark] .onb .opt{background:#18222B;border-color:#26323C}
 .stp.got span{color:var(--ok);font-weight:700}
 html[data-theme=dark] .stp .stin{background:radial-gradient(circle,transparent 3.2px,#E8EDF1 3.7px) -5px -5px/10px 10px}
 
+
+/* --- feels like a phone app (Oct 2026) --- */
+@keyframes vFwd{from{transform:translateX(42%);opacity:.2}to{transform:none;opacity:1}}
+@keyframes vBack{from{transform:translateX(-18%);opacity:.3}to{transform:none;opacity:1}}
+@keyframes pL{from{transform:translateX(30%);opacity:0}to{transform:none;opacity:1}}
+@keyframes pR{from{transform:translateX(-30%);opacity:0}to{transform:none;opacity:1}}
+.view-fwd{animation:vFwd .3s cubic-bezier(.2,.7,.2,1) backwards}
+.view-back{animation:vBack .28s cubic-bezier(.2,.7,.2,1) backwards}
+.pane-l{animation:pL .26s cubic-bezier(.2,.7,.2,1) backwards}.pane-r{animation:pR .26s cubic-bezier(.2,.7,.2,1) backwards}
+@media (prefers-reduced-motion: reduce){.view-fwd,.view-back,.pane-l,.pane-r{animation:none}}
+.top .htt{grid-column:2;grid-row:1;justify-self:center;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:1.02rem;font-weight:800;color:var(--ink);opacity:0;transform:translateY(8px);transition:opacity .2s,transform .2s;pointer-events:none}
+.top .ht{transition:opacity .2s,transform .2s}
+body.titled .top .htt{opacity:1;transform:none}body.titled .top .ht{opacity:0;transform:translateY(-8px)}
+#vList .tools{position:sticky;top:var(--hh,62px);z-index:30;display:flex;flex-direction:row;flex-wrap:nowrap;gap:8px;align-items:center;overflow-x:auto;margin:0 -16px 6px;padding:8px 16px 10px;background:rgba(244,248,251,.9);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);scrollbar-width:none;-webkit-overflow-scrolling:touch}
+html[data-theme=dark] #vList .tools{background:rgba(11,17,22,.88)}html[data-theme=sun] #vList .tools{background:#FFFFFF}
+body.titled header.top{background:rgba(244,248,251,.96) !important;box-shadow:0 1px 0 rgba(20,60,100,.08)}
+html[data-theme=dark] body.titled header.top{background:rgba(11,17,22,.96) !important}
+#vList .tools::-webkit-scrollbar{display:none}
+#vList .tools .chips{display:flex;flex-wrap:nowrap;flex:0 0 auto;gap:8px;margin:0;grid-template-columns:none;width:auto}
+#vList .tools > .cchip{flex:0 0 auto;width:auto;margin:0}
+#sQ::-webkit-search-cancel-button{-webkit-appearance:none;display:none}
+#vList .tools .chip{flex:0 0 auto;display:inline-flex;flex-direction:row;align-items:center;gap:6px;min-height:40px;padding:0 14px;border-radius:999px;white-space:nowrap;font-size:.86rem}
+#vList .tools .chip svg{width:17px;height:17px;margin:0}
+#vList .tools .chip[data-f=all]{order:-1}
+#vList .tools .chip .n{position:static;margin-left:2px}
+.cchip .dn{width:15px !important;height:15px !important;opacity:.7}
+.sfield{display:flex;align-items:center;gap:10px;min-height:54px;margin:4px 0 10px;padding:0 8px 0 14px;border-radius:18px;border:1.5px solid var(--blue);background:var(--card);color:var(--blue)}
+.sfield svg{width:20px;height:20px;flex:0 0 auto}
+.sfield input{flex:1;min-width:0;border:0;background:none;padding:0;min-height:50px;font-size:1rem;color:var(--text);box-shadow:none !important}
+.sfield button{width:38px;height:38px;border:0;border-radius:50%;background:none;color:var(--muted);font-size:1.3rem;cursor:pointer}
+#nearSheet .hd{position:relative;padding-top:16px;touch-action:none}
+#nearSheet .grab,.bsh .grab{position:absolute;left:50%;top:6px;width:40px;height:5px;margin-left:-20px;border-radius:99px;background:var(--edge,#C9D1D8)}
+#nearSheet.shut .bd{display:block}
+#nearSheet.shut .bd > .row:not(:first-child),#nearSheet.shut .bd > p{display:none}
+.mstyle{width:44px;height:44px;border-radius:14px;border:1px solid rgba(0,0,0,.18);background:#FFFFFF;color:#04263F;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(4,38,63,.12)}
+.mstyle svg{width:22px;height:22px}
+.bsh{position:fixed;inset:0;z-index:2000}
+.bsh-bg{position:absolute;inset:0;background:rgba(4,20,34,.42);opacity:0;transition:opacity .22s}
+.bsh-p{position:absolute;left:0;right:0;bottom:0;max-width:640px;margin:0 auto;padding:24px 16px calc(18px + env(safe-area-inset-bottom));border-radius:28px 28px 0 0;background:var(--card);box-shadow:0 -10px 40px rgba(4,38,63,.25);transform:translateY(105%);transition:transform .26s cubic-bezier(.2,.8,.2,1);max-height:80vh;overflow:auto}
+.bsh.in .bsh-bg{opacity:1}.bsh.in .bsh-p{transform:none}
+.bsh.out .bsh-bg{opacity:0}.bsh.out .bsh-p{transform:translateY(105%)}
+.bsh h3{margin:2px 6px 10px;font-size:1.2rem;color:var(--ink)}
+.bsh-o{display:flex;align-items:center;gap:12px;width:100%;min-height:56px;margin:3px 0;padding:0 14px;border:0;border-radius:16px;background:transparent;color:var(--ink);font:inherit;font-size:1rem;font-weight:700;text-align:left;cursor:pointer}
+.bsh-o[aria-pressed=true]{background:var(--tint)}
+.bsh-o .ei{width:38px;height:38px;border-radius:12px;background:var(--tint);display:flex;align-items:center;justify-content:center;color:var(--blue);margin:0}
+.bsh-o[aria-pressed=true] .ei{background:var(--card)}
+.bsh-o span{flex:1}.bsh-o b{color:var(--blue);display:flex}.bsh-o b svg,.bsh-o .ei svg{width:22px;height:22px}
 /* --- polished design (Figma, Oct 2026) --- */
 .bigq{margin:6px 0 12px}
 .sbox{display:flex;align-items:center;gap:10px;width:100%;min-height:52px;margin:0 0 12px;padding:0 16px;border-radius:18px;border:var(--bw) solid var(--line);background:var(--card);color:var(--muted);font:inherit;font-size:1rem;text-align:left;cursor:pointer}
@@ -994,7 +1041,7 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
   <header class="top">
     <button class="hb" id="hBack" type="button" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
     <button class="hav" id="hAv" type="button" aria-label="Me"></button>
-    <span class="ht" aria-hidden="true">RAFIKI <i>Pin</i></span>
+    <span class="ht" aria-hidden="true">RAFIKI <i>Pin</i></span><span class="htt" id="hTitle" aria-hidden="true"></span>
     <a class="home" href="/" aria-label="RAFIKI Outreach home page"><img class="lg-d" src="/img/logo-dark-bold.webp" alt=""><img class="lg-l" src="/img/logo-light-bold.webp" alt=""></a>
     <b>Pin</b>
     <span class="sp"></span>
@@ -1043,11 +1090,18 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
         </div>
         <div class="ov bot">
           <div class="sheet shut" id="nearSheet">
-            <button class="hd" type="button" id="nearHd" aria-expanded="false" aria-controls="nearList"><span>Nearest to you</span><small id="nearHint">Show</small></button>
+            <button class="hd" type="button" id="nearHd" aria-expanded="false" aria-controls="nearList"><i class="grab" aria-hidden="true"></i><span>Nearest to you</span><small id="nearHint">Show</small></button>
             <div class="bd" id="nearList"></div>
           </div>
         </div>
       </div>
+    </section>
+
+    <!-- search: its own screen, the keyboard opens straight away -->
+    <section id="vSearch" class="hidden" aria-label="Search">
+      <div class="sfield"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg><input type="search" id="sQ" placeholder="Search a project or place" aria-label="Search a project or place" autocomplete="off" enterkeyhint="search"><button type="button" id="sX" class="hidden" aria-label="Clear">×</button></div>
+      <p class="count" id="sCount"></p>
+      <div class="list" id="sList"></div>
     </section>
 
     <!-- list -->
@@ -1060,7 +1114,8 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
       <div class="listhead"><h1 id="h-list">Projects</h1><button class="btn small light" id="bRouteMode" type="button" aria-pressed="false">🗺 Plan a route</button></div>
       <div class="card prog-card" style="padding:16px"><div class="prog" id="lProg"></div><div class="cmeters" id="cProg" style="margin-top:12px"></div></div>
       <div class="tools">
-        <input type="search" id="iSearch" placeholder="Search by project name or place" aria-label="Search by project name or place">
+        <input type="search" id="iSearch" class="hidden" placeholder="Search by project name or place" aria-label="Search by project name or place">
+        <button class="chip cchip" type="button" id="bCountry" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 6.5l5.5-2.5 6 2.5 5.5-2.5v13.5L15 20l-6-2.5-5.5 2.5z"/><path d="M9 4v13.5M15 6.5V20"/></svg><span id="bCountryTx">All countries</span><svg class="dn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
         <div class="chips otabs fgrid" role="group" aria-label="Show">
           <button class="chip otab" type="button" data-f="missing" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><path d="M10.3 8.4a1.9 1.9 0 1 1 2.6 1.8c-.6.3-.9.7-.9 1.3M12 13.6v.1"/></svg><span>Needs a location</span></button>
           <button class="chip otab" type="button" data-f="near" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg><span>Nearby</span></button>
@@ -1068,7 +1123,7 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
           <button class="chip otab" type="button" data-f="due" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M12 13.2v2.6l1.8 1.1"/></svg><span>Due a visit</span></button>
           <button class="chip otab" type="button" data-f="all" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6.5h11M9 12h11M9 17.5h11"/><circle cx="4.8" cy="6.5" r="1.2"/><circle cx="4.8" cy="12" r="1.2"/><circle cx="4.8" cy="17.5" r="1.2"/></svg><span>All</span></button>
         </div>
-        <select id="iCountry" aria-label="Country">
+        <select id="iCountry" class="vh" aria-label="Country" tabindex="-1">
           <option value="">All countries</option><option value="ke">Kenya</option><option value="tz">Tanzania</option><option value="ug">Uganda</option><option value="mw">Malawi</option>
         </select>
       </div>
@@ -1309,7 +1364,8 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
     flask: '<path d="M9.5 3.5h5M10 3.5v5.5L4.8 18.2A1.5 1.5 0 0 0 6.1 20.5h11.8a1.5 1.5 0 0 0 1.3-2.3L14 9V3.5"/><path d="M7.5 14.5h9"/>',
     clipf: '<path d="M16.5 7.5l-7.6 7.6a2 2 0 0 0 2.8 2.8l7.9-7.9a4 4 0 0 0-5.7-5.7l-7.9 7.9a6 6 0 0 0 8.5 8.5l6-6"/>',
     stop: '<circle cx="12" cy="12" r="8.5"/><path d="M6 6l12 12"/>',
-    clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>'
+    clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
+    layers: '<path d="M12 4l9 5-9 5-9-5z"/><path d="M3 14l9 5 9-5"/>'
   });
   var store = { get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} }, del: function (k) { try { localStorage.removeItem(k); } catch (e) {} } };
   var jget = function (k, d) { try { return JSON.parse(store.get(k) || 'null') || d; } catch (e) { return d; } };
@@ -1355,9 +1411,10 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
 
   // --- views and tab bar -------------------------------------------------------------------
   var MAIN = ['vMap', 'vList', 'vNew', 'vMe', 'vOffice'];
+  var DEEP = { vProj: 1, vRoute: 1, vReport: 1, vSearch: 1 };
   // Each screen has its own address (#map, #list, #p/<id>…), so the phone's Back button and a
   // page refresh keep you where you were.
-  function hashFor(v) { return v === 'vProj' && S.cur ? '#p/' + S.cur.id + (S.tab && S.tab !== 'pin' ? '/' + S.tab : '') : '#' + ({ vMap: 'map', vList: 'list', vRoute: 'route', vNew: 'new', vMe: 'me', vReport: 'report', vOffice: 'office' }[v] || 'map'); }
+  function hashFor(v) { return v === 'vProj' && S.cur ? '#p/' + S.cur.id + (S.tab && S.tab !== 'pin' ? '/' + S.tab : '') : '#' + ({ vMap: 'map', vList: 'list', vRoute: 'route', vSearch: 'search', vNew: 'new', vMe: 'me', vReport: 'report', vOffice: 'office' }[v] || 'map'); }
   function nav(v, how) {
     if (v === 'vLock' || how === 'none') return;
     var h = hashFor(v); if (location.hash === h) return;
@@ -1367,7 +1424,7 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
   function goBack(fallback) { if (S.depth > 0) history.back(); else fallback(); }
   function applyHash(first) {
     if (S.view === 'vLock' && !first) return;
-    var m = /^#p\/(\d+)(?:\/(visit|hist))?$/.exec(location.hash), v = { '#map': 'vMap', '#list': 'vList', '#route': 'vRoute', '#new': 'vNew', '#me': 'vMe', '#report': 'vReport', '#office': 'vOffice' }[location.hash];
+    var m = /^#p\/(\d+)(?:\/(visit|hist))?$/.exec(location.hash), v = { '#map': 'vMap', '#list': 'vList', '#route': 'vRoute', '#search': 'vSearch', '#new': 'vNew', '#me': 'vMe', '#report': 'vReport', '#office': 'vOffice' }[location.hash];
     if (v === 'vReport') { openReport('none'); return; }
     if (m && byId(m[1])) { openProj(m[1], m[2] || 'pin', 'none'); return; }
     if (v === 'vRoute') renderRoute();
@@ -1380,10 +1437,10 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
     if (v !== 'vProj') { pick.stop(); liveStop(); } if (v !== 'vNew') nPick.stop();
     S.view = v;
     nav(v, how);
-    ['vLock', 'vMap', 'vList', 'vRoute', 'vProj', 'vNew', 'vMe', 'vReport', 'vOffice'].forEach(function (x) { $(x).classList.toggle('hidden', x !== v); });
+    ['vLock', 'vMap', 'vList', 'vSearch', 'vRoute', 'vProj', 'vNew', 'vMe', 'vReport', 'vOffice'].forEach(function (x) { $(x).classList.toggle('hidden', x !== v); });
     document.body.classList.toggle('locked', v === 'vLock');
     $('main').classList.toggle('bare', v === 'vMap');
-    var tabFor = v === 'vReport' ? 'vMe' : v === 'vRoute' || v === 'vProj' ? (S.prev === 'vMap' ? 'vMap' : 'vList') : v;
+    var tabFor = v === 'vReport' ? 'vMe' : v === 'vSearch' ? 'vList' : v === 'vRoute' || v === 'vProj' ? (S.prev === 'vMap' ? 'vMap' : 'vList') : v;
     qa('#tabs button').forEach(function (b) { if (b.getAttribute('data-v') === tabFor) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
     $('who').textContent = v === 'vLock' ? '' : S.name; headUi(v);
     if (v !== 'vLock' && S.name && onbWanted() && $('onb').classList.contains('hidden')) setTimeout(onbOpen, 50);
@@ -1391,7 +1448,11 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
     if (!S.helloShown && helloWanted() && $('onb').classList.contains('hidden')) { S.helloShown = true; if (v === 'vLock') onbHello(); else if (!onbWanted()) onbSplash(); }
     $('routeBar').classList.toggle('hidden', !(v === 'vList' && S.routeMode)); document.body.classList.toggle('routing', v === 'vList' && S.routeMode);
     window.scrollTo(0, 0);
-    var sec = $(v); if (sec && v !== 'vMap') { sec.classList.remove('view-in'); void sec.offsetWidth; sec.classList.add('view-in'); }
+    // deeper screens slide in from the right, going back slides them away; tabs fade through
+    var dir = (DEEP[v] || 0) - (DEEP[S.lastShown] || 0); S.lastShown = v;
+    var sec = $(v); if (sec) { sec.classList.remove('view-in', 'view-fwd', 'view-back'); void sec.offsetWidth; sec.classList.add(dir > 0 ? 'view-fwd' : dir < 0 ? 'view-back' : v === 'vMap' ? 'x' : 'view-in'); }
+    if (v === 'vSearch') searchOpen();
+    setTimeout(titleUi, 0);
     if (v === 'vList') S.animList = true;
     if (v === 'vMap') homeMap();
     if (v === 'vList') renderList();
@@ -1587,8 +1648,19 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
     var street = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' });
     var sat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, maxNativeZoom: 18, attribution: 'Imagery &copy; Esri, Maxar, Earthstar Geographics' });
     (store.get('rfPinLayer') === 'sat' ? sat : street).addTo(map);
-    L.control.layers({ 'Map': street, 'Satellite': sat }, null, { position: 'topright' }).addTo(map);
-    map.on('baselayerchange', function (e) { store.set('rfPinLayer', e.layer === sat ? 'sat' : 'street'); });
+    var Btn = L.Control.extend({ options: { position: 'topright' }, onAdd: function () {
+      var b = L.DomUtil.create('button', 'mstyle'); b.type = 'button'; b.setAttribute('aria-label', 'Map style');
+      b.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4l9 5-9 5-9-5z"/><path d="M3 14l9 5 9-5"/></svg>';
+      L.DomEvent.disableClickPropagation(b);
+      b.addEventListener('click', function () {
+        bsheet('Map style', [['street', 'Street map', 'map'], ['sat', 'Satellite photos', 'layers']], map.hasLayer(sat) ? 'sat' : 'street', function (k) {
+          var on = k === 'sat' ? sat : street, off = k === 'sat' ? street : sat;
+          if (map.hasLayer(off)) map.removeLayer(off); if (!map.hasLayer(on)) on.addTo(map); store.set('rfPinLayer', k);
+        });
+      });
+      return b;
+    } });
+    new Btn().addTo(map);
   }
 
   // --- a map with "use my location" and "paste a point" (pinning and new sites) -------------
@@ -1941,7 +2013,7 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
     }, 30);
   }
   function nearUi() {
-    var list = nearest(3);
+    var list = nearest(5);
     if (!S.here) { $('nearList').innerHTML = '<p class="muted" style="margin:0 6px 8px">Allow location to see the projects closest to you.</p>'; $('nearList').dataset.k = ''; return; }
     paint($('nearList'), list.map(function (x) { var tag = '<span class="tag has">' + dist(x.d) + '</span>'; return { html: rowHtml(x.p, tag), tag: tag, id: x.p.id }; }), '');
   }
@@ -1985,11 +2057,11 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
 
   // --- app header and the first run ---------------------------------------------------------------
   function headUi(v) {
-    var sub = v === 'vProj' || v === 'vRoute' || v === 'vReport';
+    var sub = v === 'vProj' || v === 'vRoute' || v === 'vReport' || v === 'vSearch';
     document.body.classList.toggle('sub', sub);
     $('hAv').textContent = initials(S.name);
   }
-  $('hBack').addEventListener('click', function () { var b = S.view === 'vProj' ? 'back' : S.view === 'vRoute' ? 'routeBack' : S.view === 'vReport' ? 'repBack' : null; if (b) $(b).click(); });
+  $('hBack').addEventListener('click', function () { var b = S.view === 'vProj' ? 'back' : S.view === 'vRoute' ? 'routeBack' : S.view === 'vReport' ? 'repBack' : null; if (b) $(b).click(); else if (S.view === 'vSearch') goBack(function () { show('vList', 'replace'); }); });
   $('hAv').addEventListener('click', function () { show('vMe'); });
 
   var DROPC = { b: 'mgA', g: 'mgG', c: 'mgC', p: 'mgP', y: 'mgY' };
@@ -2125,12 +2197,93 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
   $('homeTop').addEventListener('click', function (e) {
     var b = e.target.closest('[data-q]'); if (!b) return;
     var q = b.getAttribute('data-q');
-    if (q === 'search') { $('iSearch').focus(); $('iSearch').scrollIntoView({ block: 'center', behavior: 'smooth' }); return; }
+    if (q === 'search') { show('vSearch'); return; }
     if (q === 'new') { show('vNew'); return; }
     S.filter = q; store.set('rfPinFilter', q);
     qa('.chips .chip').forEach(function (x) { x.setAttribute('aria-pressed', x.getAttribute('data-f') === q ? 'true' : 'false'); });
     renderList(); $('count').scrollIntoView({ block: 'start', behavior: 'smooth' });
   });
+
+
+  // --- feels like a phone app ------------------------------------------------------------------
+  // A choice that slides up from the bottom (country, map style). Tap outside, drag down or Esc closes it.
+  function bsheet(title, opts, sel, cb) {
+    var w = document.createElement('div'); w.className = 'bsh'; w.setAttribute('role', 'dialog'); w.setAttribute('aria-modal', 'true'); w.setAttribute('aria-label', title);
+    w.innerHTML = '<div class="bsh-bg"></div><div class="bsh-p"><i class="grab" aria-hidden="true"></i><h3>' + esc(title) + '</h3>' +
+      opts.map(function (o) { return '<button type="button" class="bsh-o" data-k="' + esc(o[0]) + '" aria-pressed="' + (o[0] === sel) + '">' + (o[2] ? '<i class="ei">' + oic(o[2]) + '</i>' : '') + '<span>' + esc(o[1]) + '</span>' + (o[0] === sel ? '<b aria-hidden="true">' + oic('check') + '</b>' : '') + '</button>'; }).join('') + '</div>';
+    document.body.appendChild(w); swApply();
+    var p = w.querySelector('.bsh-p'), y0 = null, dy = 0;
+    var close = function () { w.classList.add('out'); setTimeout(function () { w.remove(); }, 220); document.removeEventListener('keydown', key); };
+    var key = function (e) { if (e.key === 'Escape') close(); };
+    document.addEventListener('keydown', key);
+    requestAnimationFrame(function () { w.classList.add('in'); var f = w.querySelector('[aria-pressed=true]') || w.querySelector('.bsh-o'); if (f) f.focus(); });
+    w.querySelector('.bsh-bg').addEventListener('click', close);
+    w.addEventListener('click', function (e) { var b = e.target.closest('.bsh-o'); if (!b) return; buzz(); cb(b.getAttribute('data-k')); close(); });
+    p.addEventListener('touchstart', function (e) { y0 = e.touches[0].clientY; dy = 0; p.style.transition = 'none'; }, { passive: true });
+    p.addEventListener('touchmove', function (e) { if (y0 == null) return; dy = Math.max(0, e.touches[0].clientY - y0); p.style.transform = 'translateY(' + dy + 'px)'; }, { passive: true });
+    p.addEventListener('touchend', function () { p.style.transition = ''; p.style.transform = ''; if (dy > 80) close(); y0 = null; });
+  }
+  // a light tick under the finger on phones that support it
+  function buzz() { try { if (navigator.vibrate && matchMedia('(pointer: coarse)').matches) navigator.vibrate(8); } catch (e) {} }
+  document.addEventListener('click', function (e) { if (e.target.closest('.tabs button, .chip, .seg button, .quick button, .bsh-o, .here .btn, #hBack')) buzz(); }, true);
+
+  // search screen: results as you type, closest first when there is no text yet
+  function searchOpen() { var i = $('sQ'); searchDraw(); setTimeout(function () { i.focus(); }, 60); }
+  function searchDraw() {
+    var q = $('sQ').value.trim().toLowerCase(), words = q.split(/\s+/).filter(Boolean);
+    $('sX').classList.toggle('hidden', !q);
+    var tagFor = function (p) { var r = S.repairs[p.id]; return r ? '<span class="tag' + (r.state === 'notworking' ? ' bad' : '') + '">' + (r.state === 'notworking' ? 'Not working' : 'Needs repair') + '</span>' : p.gps ? '<span class="tag has">' + (S.here ? dist(metres(S.here, p.gps)) : 'Pinned') + '</span>' : '<span class="tag">No location</span>'; };
+    var rows;
+    if (!words.length) {
+      rows = S.here ? nearest(6).map(function (x) { return x.p; }) : S.projects.slice(0, 6);
+      $('sCount').textContent = S.here ? 'Near you' : 'Type a project name, a village or a county.';
+    } else {
+      rows = S.projects.filter(function (p) { var h = (p.title + ' ' + (p.area || '') + ' ' + (p.country || '') + ' ' + (p.type || '')).toLowerCase(); return words.every(function (w) { return h.indexOf(w) >= 0; }); })
+        .sort(function (a, b) { return (b.title.toLowerCase().indexOf(words[0]) === 0) - (a.title.toLowerCase().indexOf(words[0]) === 0); });
+      $('sCount').textContent = rows.length === 1 ? '1 project' : rows.length + ' projects';
+    }
+    $('sList').innerHTML = rows.slice(0, 80).map(function (p) { return rowHtml(p, tagFor(p)); }).join('') || (words.length ? emptyHtml('No projects match “' + esc($('sQ').value.trim()) + '”.') : '');
+    swApply();
+  }
+  $('sQ').addEventListener('input', searchDraw);
+  $('sQ').addEventListener('keydown', function (e) { if (e.key === 'Enter') this.blur(); });
+  $('sX').addEventListener('click', function () { $('sQ').value = ''; searchDraw(); $('sQ').focus(); });
+  $('sList').addEventListener('click', function (e) { var b = e.target.closest('.row'); if (b) openProj(b.getAttribute('data-id')); });
+
+  // the screen's big title moves into the top bar once it has scrolled away
+  function titleUi() {
+    var el = S.view === 'vList' ? $('h-list') : S.view === 'vProj' ? $('pTitle') : null, top = document.querySelector('header.top');
+    var on = !!(el && top && el.getBoundingClientRect().bottom < top.getBoundingClientRect().bottom);
+    if (on) $('hTitle').textContent = el.textContent;
+    document.body.classList.toggle('titled', on);
+    if (top) document.documentElement.style.setProperty('--hh', top.offsetHeight + 'px');
+  }
+  var tiQ = 0; addEventListener('scroll', function () { if (!tiQ) tiQ = requestAnimationFrame(function () { tiQ = 0; titleUi(); }); }, { passive: true });
+  addEventListener('resize', titleUi);
+
+  // project tabs: swipe the page left or right (not on a map, a text box or a scrolling row)
+  (function () {
+    var x0 = null, y0 = 0, ORDER = ['pin', 'visit', 'hist'];
+    var skip = function (t) { for (var n = t; n && n !== document.body; n = n.parentElement) { if (n.matches && n.matches('.leaflet-container, input, textarea, select, .map, .photos, .seg')) return true; if (n.scrollWidth > n.clientWidth + 4 && /auto|scroll/.test(getComputedStyle(n).overflowX)) return true; } return false; };
+    $('vProj').addEventListener('touchstart', function (e) { x0 = e.touches.length === 1 && !skip(e.target) ? e.touches[0].clientX : null; y0 = e.touches[0].clientY; }, { passive: true });
+    $('vProj').addEventListener('touchend', function (e) {
+      if (x0 == null) return; var t = e.changedTouches[0], dx = t.clientX - x0, dy = t.clientY - y0; x0 = null;
+      if (Math.abs(dx) < 70 || Math.abs(dy) > 45) return;
+      var i = ORDER.indexOf(S.tab || 'pin') + (dx < 0 ? 1 : -1); if (i < 0 || i >= ORDER.length) return;
+      buzz(); tab(ORDER[i], dx < 0 ? 'l' : 'r');
+    }, { passive: true });
+  })();
+
+  // "Nearest to you" on the map: drag it up for five, down to rest on the closest one
+  (function () {
+    var hd = $('nearHd'), y0 = null;
+    hd.addEventListener('touchstart', function (e) { y0 = e.touches[0].clientY; }, { passive: true });
+    hd.addEventListener('touchend', function (e) {
+      if (y0 == null) return; var dy = e.changedTouches[0].clientY - y0; y0 = null;
+      var shut = $('nearSheet').classList.contains('shut');
+      if ((dy < -24 && shut) || (dy > 24 && !shut)) { e.preventDefault(); hd.click(); }
+    });
+  })();
 
   // --- 2. list ---------------------------------------------------------------------------------
   function thumb(p) { return '<span class="th" aria-hidden="true">' + (p.photo ? '<img loading="lazy" src="' + photoUrl(p, 480) + '" alt="" onerror="this.remove()">' : '💧') + '</span>'; }
@@ -2146,7 +2299,7 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
   function ageDays(p) { var v = S.visits[p.id]; return v ? (Date.now() - Date.parse(v.at)) / 864e5 : 1e6; }
   function ageText(p) { var d = ageDays(p); if (d >= 1e6) return 'No visit yet'; var m = Math.floor(d / 30.4); return m >= 12 ? Math.floor(m / 12) + ' yr ago' : m + ' mo ago'; }
   function renderList() {
-    progUi(); myWorkUi(); homeUi();
+    progUi(); myWorkUi(); homeUi(); countryChipUi();
     var q = $('iSearch').value.trim().toLowerCase(), ck = $('iCountry').value, f = S.filter, near = f === 'near';
     var rows = S.projects.filter(function (p) {
       if (f === 'missing' && p.gps) return false;
@@ -2184,6 +2337,11 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
   }
   $('iSearch').addEventListener('input', renderList);
   $('iCountry').addEventListener('change', function () { store.set('rfPinCountry', this.value || 'all'); renderList(); });
+  function countryChipUi() { var o = $('iCountry').selectedOptions[0]; $('bCountryTx').textContent = o ? o.textContent : 'All countries'; swApply(); }
+  $('bCountry').addEventListener('click', function () {
+    var sel = $('iCountry');
+    bsheet('Country', [].map.call(sel.options, function (o) { return [o.value, o.textContent, o.value ? 'pin' : 'map']; }), sel.value, function (v) { sel.value = v; sel.dispatchEvent(new Event('change')); });
+  });
   // home country: chosen in Me, or from the monday.com profile / personal PIN, or from where the phone is
   function homeCk() { return store.get('rfPinHomeSet') || S.srvHome || S.gpsHome || ''; }
   function applyHome() {
@@ -2270,8 +2428,10 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
     $('bSave').disabled = !pick.pick;
     $('newPt').textContent = pick.pick ? 'New location: ' + fmt(pick.pick) + (pick.how === 'gps' && pick.acc ? ' (' + acct(pick.acc) + ')' : '') : 'Choose a spot on the map, or use your location.';
   }
-  function tab(which) {
+  function tab(which, from) {
+    var was = S.tab;
     S.tab = which; if (S.view === 'vProj') nav('vProj', 'replace');
+    if (S.view === 'vProj' && was && was !== which) { var pn = $({ pin: 'panePin', visit: 'paneVisit', hist: 'paneHist' }[which]); var fwd = from ? from === 'l' : ['pin', 'visit', 'hist'].indexOf(which) > ['pin', 'visit', 'hist'].indexOf(was); pn.classList.remove('pane-l', 'pane-r'); void pn.offsetWidth; pn.classList.add(fwd ? 'pane-l' : 'pane-r'); }
     [['pin', 'tabPin', 'panePin'], ['visit', 'tabVisit', 'paneVisit'], ['hist', 'tabHist', 'paneHist']].forEach(function (t) {
       $(t[1]).setAttribute('aria-selected', t[0] === which ? 'true' : 'false'); $(t[2]).classList.toggle('hidden', t[0] !== which);
     });
@@ -2847,6 +3007,7 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
   Object.assign(SW, {"Which water point": "Kituo gani cha maji", "today?": "leo?", "Pin a location": "Weka mahali", "Visit nearby": "Tembelea karibu", "Add a site": "Ongeza eneo", "Quick actions": "Vitendo vya haraka", "Repair job": "Kazi ya matengenezo", "Not assigned yet": "Bado hajapewa mtu", "The office assigns it": "Ofisi itamgawia mtu", "Waiting for the office": "Inasubiri ofisi", "Mark it fixed when the water is running again": "Weka imerekebishwa maji yakitoka tena", "Saved on this phone": "Imehifadhiwa kwenye simu", "Fixed ✓": "Imerekebishwa ✓", "No notes on this project yet.": "Bado hakuna maelezo kwenye mradi huu.", "Nothing waiting for review.": "Hakuna kinachosubiri kuidhinishwa.", "Repair job · ": "Kazi ya matengenezo · "}); SWP.push([/^Due (.+)$/,"Mwisho $1"],[/^Needs: (.+)$/,"Inahitaji: $1"],[/^(.+) · Live$/,"$1 \u00b7 Moja kwa moja"],[/^Not working · (.+)$/,"Haifanyi kazi \u00b7 $1"],[/^Needs repair · (.+)$/,"Inahitaji matengenezo \u00b7 $1"],[/^Habari, (.+)$/,"Habari, $1"]);
   Object.assign(SW, {"Back": "Rudi", "Get started": "Anza", "Takes 30 seconds": "Inachukua sekunde 30", "Every water point.": "Kila kituo cha maji.", "One map.": "Ramani moja.", "Right in your pocket.": "Mfukoni mwako.", "What will you do most?": "Utafanya nini zaidi?", "We’ll open the app on it. You can change this anytime.": "Tutafungua programu hapo. Unaweza kubadilisha wakati wowote.", "Pin locations": "Weka mahali", "Put every project on the map": "Weka kila mradi kwenye ramani", "Site visits": "Ziara", "Check water points and report": "Kagua vituo vya maji na uripoti", "Follow what needs fixing": "Fuatilia kinachohitaji kurekebishwa", "Office work": "Kazi za ofisi", "Review, assign and report": "Idhinisha, gawa na ripoti", "Continue": "Endelea", "Pick one": "Chagua kimoja", "Which language?": "Lugha gani?", "That’s my language": "Hiyo ndiyo lugha yangu", "Swipe to see both. Switch anytime in Me.": "Telezesha kuona zote. Badilisha wakati wowote kwenye Mimi.", "Hello! Let’s find today’s water points.": "Hello! Let’s find today’s water points.", "Where do you work?": "Unafanya kazi wapi?", "Lists and the map start there. You still see every country.": "Orodha na ramani zinaanzia hapo. Bado unaona nchi zote.", "Skip": "Ruka", "Water points near you": "Vituo vya maji karibu nawe", "RAFIKI Pin uses your location only while it’s open, to show the closest projects and save exact points.": "RAFIKI Pin inatumia mahali ulipo tu ikiwa wazi, kuonyesha miradi iliyo karibu na kuhifadhi mahali kamili.", "Allow location": "Ruhusu mahali", "Not now": "Si sasa", "A good start": "Mwanzo mzuri", "Your first stamp": "Stempu yako ya kwanza", "Every point you pin and every visit you report adds to your collection.": "Kila mahali unapoweka na kila ziara unayoripoti inaongeza kwenye mkusanyiko wako.", "Open RAFIKI Pin": "Fungua RAFIKI Pin", "Small steps, clean water.": "Hatua ndogo, maji safi.", "Me": "Mimi"}); SWP.push([/^You’re all set, (.+)\.$/,"Uko tayari, $1."]);
   Object.assign(SW, {"Search a project or place": "Tafuta mradi au mahali", "Report": "Ripoti"}); SWP.push([/^YOU’RE AT · (.+)$/, "UKO · $1"], [/^(.+) · saved location$/, "$1 · mahali palipohifadhiwa"]);
+  Object.assign(SW, {"Map style": "Mtindo wa ramani", "Street map": "Ramani ya barabara", "Satellite photos": "Picha za satelaiti", "Country": "Nchi", "Near you": "Karibu nawe", "Type a project name, a village or a county.": "Andika jina la mradi, kijiji au kaunti.", "Clear": "Futa", "Search": "Tafuta"}); SWP.push([/^No projects match “(.+)”\.$/, "Hakuna mradi unaolingana na “$1”."]);
   Object.assign(SW, {"Your stamps": "Stempu zako", "Show the welcome screens again": "Onyesha skrini za kukaribisha tena", "Sign in": "Ingia", "New here? Ask your team for a PIN.": "Mgeni hapa? Omba PIN kwa timu yako.", "First drop": "Tone la kwanza", "Pin a location": "Weka mahali", "First visit": "Ziara ya kwanza", "Report a site visit": "Ripoti ziara", "Fixer": "Mrekebishaji", "Mark a repair fixed": "Weka matengenezo kuwa yamekamilika", "Explorer": "Mvumbuzi", "Add a new site": "Ongeza eneo jipya", "Mapper": "Mchora ramani", "Pin 10 locations": "Weka mahali 10", "Regular": "Mzoefu", "Report 10 visits": "Ripoti ziara 10", "Earned": "Umepata"}); SWP.push([/^Habari (.+), karibu tena\.$/,"Habari $1, karibu tena."]);
   var MON = {Jan:'Jan',Feb:'Feb',Mar:'Mac',Apr:'Apr',May:'Mei',Jun:'Jun',Jul:'Jul',Aug:'Ago',Sep:'Sep',Oct:'Okt',Nov:'Nov',Dec:'Des',January:'Januari',February:'Februari',March:'Machi',April:'Aprili',June:'Juni',July:'Julai',August:'Agosti',September:'Septemba',October:'Oktoba',November:'Novemba',December:'Desemba'};
   function swOne(x) {

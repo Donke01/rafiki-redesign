@@ -35,6 +35,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.animation.togetherWith
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -155,6 +156,7 @@ fun Shell(m: AppModel) {
     val goTab = m.goTab
     LaunchedEffect(goTab) { if (goTab != null) { tab(goTab); m.goTab = null } }
     val sub = here.project != null || here.sub != null
+    val hp = org.rafikioutreach.pin.ui.rememberHaptics()
 
     Column(Modifier.fillMaxSize()) {
         // app header: you (or back), the wordmark, refresh
@@ -166,22 +168,56 @@ fun Shell(m: AppModel) {
                     Text(m.prefs.name.split(" ").mapNotNull { it.firstOrNull()?.uppercase() }.take(2).joinToString(""), color = Color.White, style = MaterialTheme.typography.labelMedium.copy(fontSize = 13.sp))
                 }
             }
-            Box(Modifier.weight(1f), contentAlignment = Alignment.Center) { org.rafikioutreach.pin.ui.Wordmark() }
+            // the wordmark, or the screen's title once its big title has scrolled away
+            Box(Modifier.weight(1f).padding(horizontal = 8.dp), contentAlignment = Alignment.Center) {
+                androidx.compose.animation.AnimatedContent(m.bar.text, transitionSpec = {
+                    (androidx.compose.animation.fadeIn(androidx.compose.animation.core.tween(220)) + androidx.compose.animation.slideInVertically { it / 2 }) togetherWith
+                        (androidx.compose.animation.fadeOut(androidx.compose.animation.core.tween(150)) + androidx.compose.animation.slideOutVertically { -it / 2 })
+                }, label = "bar") { title ->
+                    if (title == null) org.rafikioutreach.pin.ui.Wordmark()
+                    else Text(title, style = MaterialTheme.typography.titleMedium, color = C.ink, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis, modifier = Modifier.testTag("bar_title"))
+                }
+            }
             RoundBtn("refresh", t("Refresh", "Onyesha upya"), "hrefresh", turn = busy) { m.refresh() }
         }
         // pull down to refresh (on screens that scroll)
         var pulling by remember { androidx.compose.runtime.mutableStateOf(false) }
         androidx.compose.material3.pulltorefresh.PullToRefreshBox(pulling, { pulling = true; m.refresh { pulling = false } }, Modifier.weight(1f).fillMaxWidth().testTag("pull")) {
-            val pid = here.project
-            when {
-                pid != null -> ProjectScreen(m, pid, here.projectTab) { stack.removeAt(stack.lastIndex) }
-                here.sub == "report" -> org.rafikioutreach.pin.ui.ReportScreen(m) { stack.removeAt(stack.lastIndex) }
-                here.sub == "route" -> org.rafikioutreach.pin.ui.RouteScreen(m, { go(Place(here.tab, it)) }) { stack.removeAt(stack.lastIndex) }
-                here.tab == "map" -> MapScreen(m, { go(Place("map", it)) }) { go(Place("map", it, "visit")) }
-                here.tab == "new" -> NewSiteScreen(m) { id -> if (id != null) { tab("list"); go(Place("list", id)) } }
-                here.tab == "me" -> MeScreen(m) { go(Place("me", sub = "report")) }
-                here.tab == "office" -> org.rafikioutreach.pin.ui.OfficeScreen(m) { go(Place("office", it)) }
-                else -> ProjectsScreen(m, { go(Place("list", it)) }, { go(Place("list", sub = "route")) }, { tab("new") }) { go(Place("list", it, "visit")) }
+            // screens slide in from the right when you go deeper and slide back out when you go back;
+            // switching tabs fades through
+            val pop = { if (stack.size > 1) stack.removeAt(stack.lastIndex) }
+            androidx.compose.animation.AnimatedContent(
+                here to stack.size, Modifier.fillMaxSize(), label = "screens",
+                contentKey = { it.first },
+                transitionSpec = {
+                    val (_, from) = initialState; val (_, to) = targetState
+                    val ms = if (org.rafikioutreach.pin.ui.Motion.on) 300 else 0
+                    val ease = androidx.compose.animation.core.FastOutSlowInEasing
+                    when {
+                        ms == 0 -> androidx.compose.animation.EnterTransition.None togetherWith androidx.compose.animation.ExitTransition.None
+                        to > from -> (androidx.compose.animation.slideInHorizontally(androidx.compose.animation.core.tween(ms, easing = ease)) { it } + androidx.compose.animation.fadeIn(androidx.compose.animation.core.tween(ms / 2))) togetherWith
+                            (androidx.compose.animation.slideOutHorizontally(androidx.compose.animation.core.tween(ms, easing = ease)) { -it / 4 } + androidx.compose.animation.fadeOut(androidx.compose.animation.core.tween(ms)))
+                        to < from -> (androidx.compose.animation.slideInHorizontally(androidx.compose.animation.core.tween(ms, easing = ease)) { -it / 4 } + androidx.compose.animation.fadeIn(androidx.compose.animation.core.tween(ms))) togetherWith
+                            (androidx.compose.animation.slideOutHorizontally(androidx.compose.animation.core.tween(ms, easing = ease)) { it } + androidx.compose.animation.fadeOut(androidx.compose.animation.core.tween(ms / 2)))
+                        else -> (androidx.compose.animation.fadeIn(androidx.compose.animation.core.tween(220, delayMillis = 60)) + androidx.compose.animation.scaleIn(androidx.compose.animation.core.tween(220, delayMillis = 60), initialScale = 0.98f)) togetherWith
+                            androidx.compose.animation.fadeOut(androidx.compose.animation.core.tween(90))
+                    }.using(androidx.compose.animation.SizeTransform(clip = false))
+                },
+            ) { (pl, _) ->
+                Box(Modifier.fillMaxSize()) {
+                    val pid = pl.project
+                    when {
+                        pid != null -> ProjectScreen(m, pid, pl.projectTab) { pop() }
+                        pl.sub == "search" -> { val snap = m.snap.collectAsState().value; val fx = m.fix.collectAsState().value; if (snap != null) org.rafikioutreach.pin.ui.SearchScreen(m, snap, fx?.ll, { go(Place(pl.tab, it)) }) { pop() } }
+                        pl.sub == "report" -> org.rafikioutreach.pin.ui.ReportScreen(m) { pop() }
+                        pl.sub == "route" -> org.rafikioutreach.pin.ui.RouteScreen(m, { go(Place(pl.tab, it)) }) { pop() }
+                        pl.tab == "map" -> MapScreen(m, { go(Place("map", it)) }) { go(Place("map", it, "visit")) }
+                        pl.tab == "new" -> NewSiteScreen(m) { id -> if (id != null) { tab("list"); go(Place("list", id)) } }
+                        pl.tab == "me" -> MeScreen(m) { go(Place("me", sub = "report")) }
+                        pl.tab == "office" -> org.rafikioutreach.pin.ui.OfficeScreen(m) { go(Place("office", it)) }
+                        else -> ProjectsScreen(m, { go(Place("list", it)) }, { go(Place("list", sub = "route")) }, { tab("new") }, { go(Place("list", it, "visit")) }) { go(Place("list", sub = "search")) }
+                    }
+                }
             }
         }
         // bottom tabs, floating
@@ -194,7 +230,7 @@ fun Shell(m: AppModel) {
             (listOf(Triple("map", t("Map", "Ramani"), "map"), Triple("list", t("Projects", "Miradi"), "list"), Triple("new", t("New site", "Eneo jipya"), "plus"), Triple("me", t("Me", "Mimi"), "person")) +
                 (if (admin) listOf(Triple("office", t("Office", "Ofisi"), "inbox")) else emptyList())).forEach { (k, label, icon) ->
                 val on = here.tab == k && here.project == null
-                Column(Modifier.weight(1f).clickable(role = Role.Tab) { tab(k) }.padding(vertical = 6.dp).testTag("nav_$k"), horizontalAlignment = Alignment.CenterHorizontally) {
+                Column(Modifier.weight(1f).clickable(role = Role.Tab) { hp.tap(); tab(k) }.padding(vertical = 6.dp).testTag("nav_$k"), horizontalAlignment = Alignment.CenterHorizontally) {
                     Box {
                         if (k == "new") Box(Modifier.size(48.dp, 30.dp).clip(RoundedCornerShape(14.dp)).background(with(org.rafikioutreach.pin.ui.C) { if (this === org.rafikioutreach.pin.ui.Light) org.rafikioutreach.pin.ui.InkBrush else BlueBrush }), contentAlignment = Alignment.Center) { Icon(Ic.get(icon), null, tint = Color.White, modifier = Modifier.size(20.dp)) }
                         else Box(Modifier.size(52.dp, 30.dp).clip(RoundedCornerShape(99.dp)).background(if (on) C.tint else Color.Transparent), contentAlignment = Alignment.Center) { Icon(Ic.get(icon), null, tint = if (on) C.blue else C.muted, modifier = Modifier.size(24.dp)) }

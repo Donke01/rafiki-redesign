@@ -7,6 +7,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.withStyle
 
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.runtime.derivedStateOf
 
 import androidx.compose.foundation.shape.CircleShape
 
@@ -110,18 +112,12 @@ fun MapScreen(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit = ope
 /** "Nearest to you": the three closest pinned projects, folded away until you open it. */
 @Composable
 private fun NearestSheet(m: AppModel, snap: Snapshot, here: LatLng?, modifier: Modifier, open: (String) -> Unit) {
-    var shut by remember { mutableStateOf(true) }
-    val list = here?.let { h -> snap.projects.filter { it.gps != null }.map { it to Geo.metres(h, it.gps!!) }.sortedBy { it.second }.take(3) } ?: emptyList()
-    Card(modifier.testTag("nearest"), pad = 0.dp) {
-        Row(Modifier.fillMaxWidth().clickable(role = Role.Button) { shut = !shut }.heightIn(min = 56.dp).padding(horizontal = 18.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text(t("Nearest to you", "Iliyo karibu nawe"), style = MaterialTheme.typography.titleMedium, color = C.ink, modifier = Modifier.weight(1f))
-            Text(if (shut) t("Show", "Onyesha") else t("Hide", "Ficha"), style = MaterialTheme.typography.labelLarge, color = C.muted)
-        }
-        if (!shut) Column(Modifier.padding(start = 12.dp, end = 12.dp, bottom = 12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            if (here == null) Text(t("Allow location to see the projects closest to you.", "Ruhusu mahali ili uone miradi iliyo karibu nawe."), style = MaterialTheme.typography.bodyMedium, color = C.muted, modifier = Modifier.padding(6.dp))
-            list.forEach { (p, _) -> ProjectRow(m, snap, p, here) { open(p.id) } }
-        }
-    }
+    val list = here?.let { h -> snap.projects.filter { it.gps != null }.map { it to Geo.metres(h, it.gps!!) }.sortedBy { it.second }.take(5) } ?: emptyList()
+    val none: @Composable ColumnScope.() -> Unit = { Text(t("Allow location to see the projects closest to you.", "Ruhusu mahali ili uone miradi iliyo karibu nawe."), style = MaterialTheme.typography.bodyMedium, color = C.muted, modifier = Modifier.padding(6.dp)) }
+    // drag it up for the five closest; it rests showing the closest one
+    DragSheet(t("Nearest to you", "Iliyo karibu nawe"), modifier,
+        peek = { if (list.isEmpty()) none() else list.first().let { (p, _) -> ProjectRow(m, snap, p, here) { open(p.id) } } },
+        full = { if (list.isEmpty()) none() else list.forEach { (p, _) -> ProjectRow(m, snap, p, here) { open(p.id) } } })
 }
 
 private class HereKeep { var id: String? = null; var last: Pair<Project, Double>? = null }
@@ -188,17 +184,16 @@ private val FILTERS = listOf(
     Triple("due", "Due a visit|Inasubiri ziara", "cal"), Triple("all", "All|Yote", "list"),
 )
 
+@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
-fun ProjectsScreen(m: AppModel, open: (String) -> Unit, planRoute: () -> Unit = {}, newSite: () -> Unit = {}, visit: (String) -> Unit = open) {
+fun ProjectsScreen(m: AppModel, open: (String) -> Unit, planRoute: () -> Unit = {}, newSite: () -> Unit = {}, visit: (String) -> Unit = open, search: () -> Unit = {}) {
     val s by m.snap.collectAsState()
     val fix by m.fix.collectAsState()
     val waiting by m.waiting.collectAsState()
     val banner by m.banner.collectAsState()
     val snap = s ?: return
-    var q by remember { mutableStateOf("") }
     var f by remember { mutableStateOf(m.prefs.filter) }
     var ck by remember { mutableStateOf(m.prefs.country) }
-    var menu by remember { mutableStateOf(false) }
     val here = fix?.ll
 
     var rows = snap.projects.filter { p ->
@@ -208,7 +203,7 @@ fun ProjectsScreen(m: AppModel, open: (String) -> Unit, planRoute: () -> Unit = 
             "repairs" -> snap.repairs.containsKey(p.id)
             "due" -> p.gps != null && ageDays(snap, p) >= DUE_DAYS
             else -> true
-        } && (ck.isBlank() || p.ck == ck) && (q.isBlank() || "${p.title} ${p.area} ${p.country}".contains(q.trim(), ignoreCase = true))
+        } && (ck.isBlank() || p.ck == ck)
     }
     if (f == "near" && here != null) rows = rows.sortedBy { Geo.metres(here, it.gps!!) }.take(30)
     if (f == "repairs") rows = rows.sortedBy { mapOf("urgent" to 0, "month" to 1, "watch" to 2)[snap.repairs[it.id]?.urgency] ?: 3 }
@@ -225,10 +220,14 @@ fun ProjectsScreen(m: AppModel, open: (String) -> Unit, planRoute: () -> Unit = 
 
     val list = androidx.compose.foundation.lazy.rememberLazyListState()
     val scope = rememberCoroutineScope()
-    val focus = remember { androidx.compose.ui.focus.FocusRequester() }
-    fun pick(k: String) { f = k; m.prefs.filter = k; scope.launch { list.animateScrollToItem(maxOf(0, list.layoutInfo.totalItemsCount - rows.size - 2)) } }
-    LazyColumn(Modifier.fillMaxSize().testTag("projects"), state = list, contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        item { HomeTop(m, snap, here, { scope.launch { list.animateScrollToItem(6); runCatching { focus.requestFocus() } } }, { pick(it) }, newSite) }
+    var countrySheet by remember { mutableStateOf(false) }
+    // where the "Projects" heading is in the list, so the top bar can take over the title once it scrolls away
+    val headIdx = 2 + (if (banner != null) 1 else 0) + (if (waiting > 0) 1 else 0) + (if (mine.isNotEmpty()) 1 else 0)
+    val scrolledPast by remember(headIdx) { derivedStateOf { list.firstVisibleItemIndex > headIdx } }
+    ShowInBar(m, t("Projects", "Miradi"), scrolledPast)
+    fun pick(k: String) { f = k; m.prefs.filter = k; scope.launch { list.animateScrollToItem(headIdx + 1) } }
+    LazyColumn(Modifier.fillMaxSize().testTag("projects"), state = list, contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 110.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        item(key = "top") { HomeTop(m, snap, here, search, { pick(it) }, newSite) }
         item(key = "here") { HereSlot(m, snap, here, Modifier, visit, open) }
         if (banner != null) item { Card(border = C.warnBg) { Text(banner!!, color = C.warn, style = MaterialTheme.typography.bodyMedium) } }
         if (waiting > 0) item {
@@ -249,7 +248,7 @@ fun ProjectsScreen(m: AppModel, open: (String) -> Unit, planRoute: () -> Unit = 
                 } }
             }
         }
-        item {
+        item(key = "head") {
             Row(Modifier.padding(top = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                 Text(t("Projects", "Miradi"), style = MaterialTheme.typography.headlineLarge, color = C.ink, modifier = Modifier.weight(1f))
                 Row(Modifier.clip(RoundedCornerShape(12.dp)).clickable(role = Role.Button, onClick = planRoute).heightIn(min = 44.dp).padding(horizontal = 6.dp).testTag("plan_route"), verticalAlignment = Alignment.CenterVertically) {
@@ -275,30 +274,14 @@ fun ProjectsScreen(m: AppModel, open: (String) -> Unit, planRoute: () -> Unit = 
                 }
             }
         }
-        item {
-            OutlinedTextField(
-                q, { q = it }, Modifier.fillMaxWidth().heightIn(min = 52.dp).focusRequester(focus), placeholder = { Text(t("Search by project name or place", "Tafuta kwa jina la mradi au mahali"), color = C.muted) },
-                leadingIcon = { Icon(Ic.get("search"), null, tint = C.muted) }, singleLine = true, shape = RoundedCornerShape(16.dp),
-                colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = C.blue, unfocusedBorderColor = C.edge, focusedContainerColor = C.card, unfocusedContainerColor = C.card),
-            )
-        }
-        item {
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                FILTERS.forEach { (k, label, icon) ->
-                    Tile(label.split("|").let { t(it[0], it[1]) }, icon, f == k, { f = k; m.prefs.filter = k }, Modifier.weight(1f), badge = if (k == "repairs") snap.repairs.size else 0)
-                }
-            }
-        }
-        item {
-            Box {
-                Row(
-                    Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(C.card).border(1.dp, C.edge, RoundedCornerShape(16.dp))
-                        .clickable(role = Role.DropdownList) { menu = true }.heightIn(min = 52.dp).padding(horizontal = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) { Text(COUNTRIES[ck] ?: t("All countries", "Nchi zote"), style = MaterialTheme.typography.bodyLarge, color = C.text, modifier = Modifier.weight(1f)); Icon(Ic.get("down"), null, tint = C.muted) }
-                DropdownMenu(menu, { menu = false }) {
-                    DropdownMenuItem({ Text(t("All countries", "Nchi zote")) }, { ck = ""; m.prefs.country = ""; menu = false })
-                    COUNTRIES.forEach { (k, n) -> DropdownMenuItem({ Text(n) }, { ck = k; m.prefs.country = k; menu = false }) }
+        // filters: a row of chips you can swipe, that stays at the top while the list scrolls
+        stickyHeader(key = "chips") {
+            Box(Modifier.fillMaxWidth().background(androidx.compose.ui.graphics.Brush.verticalGradient(listOf(C.bg, C.bg, C.bg.copy(alpha = 0f)))).padding(top = 4.dp, bottom = 10.dp)) {
+                androidx.compose.foundation.lazy.LazyRow(Modifier.fillMaxWidth().testTag("chips"), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    item { Chip(COUNTRIES[ck] ?: t("All countries", "Nchi zote"), "map", false, { countrySheet = true }, trailing = "down", tag = "chip_country") }
+                    FILTERS.sortedBy { if (it.first == "all") 0 else 1 }.forEach { (k, label, icon) ->
+                        item(key = k) { Chip(label.split("|").let { t(it[0], it[1]) }, icon, f == k, { f = k; m.prefs.filter = k }, badge = if (k == "repairs") snap.repairs.size else 0, tag = "chip_$k") }
+                    }
                 }
             }
         }
@@ -306,13 +289,14 @@ fun ProjectsScreen(m: AppModel, open: (String) -> Unit, planRoute: () -> Unit = 
         items(rows, key = { it.id }) { p -> ProjectRow(m, snap, p, here) { open(p.id) } }
         if (rows.isEmpty()) item {
             EmptyDrop(when {
-                f == "missing" && q.isBlank() && ck.isBlank() -> t("Every project has a location.", "Kila mradi una mahali.")
-                f == "repairs" && q.isBlank() && ck.isBlank() -> t("No open repairs.", "Hakuna matengenezo yaliyo wazi.")
-                f == "due" && q.isBlank() -> t("Everything has been visited in the last 6 months.", "Kila kitu kimetembelewa katika miezi 6 iliyopita.")
+                f == "missing" && ck.isBlank() -> t("Every project has a location.", "Kila mradi una mahali.")
+                f == "repairs" && ck.isBlank() -> t("No open repairs.", "Hakuna matengenezo yaliyo wazi.")
+                f == "due" -> t("Everything has been visited in the last 6 months.", "Kila kitu kimetembelewa katika miezi 6 iliyopita.")
                 else -> t("No projects match.", "Hakuna mradi unaolingana.")
             })
         }
     }
+    if (countrySheet) PickSheet(t("Country", "Nchi"), listOf(Triple("", t("All countries", "Nchi zote"), "map")) + COUNTRIES.map { (k, n) -> Triple(k, n, "pin") }, ck, { ck = it; m.prefs.country = it }) { countrySheet = false }
 }
 
 @Composable

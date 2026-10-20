@@ -6,6 +6,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.boundsInRoot
+import kotlinx.coroutines.launch
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -70,16 +78,23 @@ fun ProjectScreen(m: AppModel, id: String, startTab: String, back: () -> Unit) {
     val fix by m.fix.collectAsState()
     val snap = s ?: return
     val p = snap.projects.firstOrNull { it.id == id } ?: run { back(); return }
+    val tabs = listOf("pin", "visit", "hist")
+    // the three tabs: tap them, or swipe the page left and right
     var tab by rememberSaveable(id) { mutableStateOf(startTab) }
+    val hp = rememberHaptics()
     val ctx = LocalContext.current
     val here = fix?.ll
+    // the project name moves into the top bar once its big title scrolls away
+    var top by remember { mutableFloatStateOf(0f) }
+    var titleBottom by remember { mutableFloatStateOf(Float.MAX_VALUE) }
+    ShowInBar(m, p.title, titleBottom < top)
 
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
+    Column(Modifier.fillMaxSize().onGloballyPositioned { top = it.boundsInRoot().top }.verticalScroll(rememberScrollState()).padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 110.dp)) {
         if (p.photo != null) NetImage(m.api.photoUrl(p.photo, 960), Modifier.fillMaxWidth().aspectRatio(16f / 9f).padding(vertical = 6.dp).clip(RoundedCornerShape(24.dp)).background(C.tint)) {}
 
         // the project, on deep blue
         Card(brush = DeepBrush, modifier = Modifier.padding(top = 6.dp)) {
-            Text(p.title, style = MaterialTheme.typography.headlineMedium, color = Color.White)
+            Text(p.title, style = MaterialTheme.typography.headlineMedium, color = Color.White, modifier = Modifier.onGloballyPositioned { titleBottom = it.boundsInRoot().bottom })
             Text(p.sub, style = MaterialTheme.typography.bodyMedium, color = Color(0xFFCFE8FA))
             val v = snap.visits[p.id]
             // the state at a glance
@@ -135,20 +150,34 @@ fun ProjectScreen(m: AppModel, id: String, startTab: String, back: () -> Unit) {
 
         // what to do
         Row(Modifier.padding(top = 14.dp).fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(C.card).border(1.dp, C.line, RoundedCornerShape(18.dp)).padding(5.dp)) {
-            listOf("pin" to t("Pin location", "Weka mahali"), "visit" to t("Site visit", "Ziara"), "hist" to t("History", "Historia")).forEach { (k, label) ->
+            listOf("pin" to t("Pin location", "Weka mahali"), "visit" to t("Site visit", "Ziara"), "hist" to t("History", "Historia")).forEachIndexed { i, (k, label) ->
                 val on = tab == k
                 Text(label, color = if (on) Color.White else C.ink, style = MaterialTheme.typography.titleSmall, textAlign = TextAlign.Center,
                     modifier = Modifier.weight(1f).clip(RoundedCornerShape(14.dp)).background(if (on) C.primary else SolidColor(Color.Transparent))
-                        .clickable(role = Role.Tab) { tab = k }.heightIn(min = 44.dp).padding(vertical = 12.dp).testTag("tab_$k"))
+                        .clickable(role = Role.Tab) { if (tab != k) { hp.tap(); tab = k } }.heightIn(min = 44.dp).padding(vertical = 12.dp).testTag("tab_$k"))
             }
         }
         Spacer(Modifier.height(14.dp))
-        when (tab) {
-            "pin" -> PinTab(m, p)
-            "visit" -> VisitTab(m, p)
-            else -> HistoryTab(m, p)
+        var dragX by remember { mutableFloatStateOf(0f) }
+        androidx.compose.animation.AnimatedContent(tab, Modifier.fillMaxWidth().pointerInput(tab) {
+            // a sideways swipe on the page (not on a map or a scrolling row) moves to the next tab
+            detectHorizontalDragGestures(onDragStart = { dragX = 0f }, onDragEnd = {
+                val i = tabs.indexOf(tab)
+                if (dragX < -90 && i < tabs.size - 1) { hp.tap(); tab = tabs[i + 1] } else if (dragX > 90 && i > 0) { hp.tap(); tab = tabs[i - 1] }
+            }) { _, d -> dragX += d }
+        }, label = "tabs", transitionSpec = {
+            val fwd = tabs.indexOf(targetState) > tabs.indexOf(initialState); val ms = if (Motion.on) 260 else 0
+            (androidx.compose.animation.slideInHorizontally(androidx.compose.animation.core.tween(ms)) { if (fwd) it / 3 else -it / 3 } + androidx.compose.animation.fadeIn(androidx.compose.animation.core.tween(ms))) togetherWith
+                (androidx.compose.animation.slideOutHorizontally(androidx.compose.animation.core.tween(ms)) { if (fwd) -it / 3 else it / 3 } + androidx.compose.animation.fadeOut(androidx.compose.animation.core.tween(ms / 2)))
+        }, contentAlignment = Alignment.TopStart) { k ->
+            Column(Modifier.fillMaxWidth()) {
+                when (k) {
+                    "pin" -> PinTab(m, p)
+                    "visit" -> VisitTab(m, p)
+                    else -> HistoryTab(m, p)
+                }
+            }
         }
-        Spacer(Modifier.height(24.dp))
     }
 }
 

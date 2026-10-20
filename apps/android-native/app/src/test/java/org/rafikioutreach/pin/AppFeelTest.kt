@@ -155,4 +155,40 @@ class AppFeelTest {
         assertTrue("back on Projects closes the app", !rule.activity.onBackPressedDispatcher.hasEnabledCallbacks())
         Onb.enabled = true; org.rafikioutreach.pin.ui.Motion.on = true
     }
+
+    @Test fun native_touches_search_sheets_and_swipe() {
+        org.rafikioutreach.pin.ui.Motion.on = false; Onb.enabled = false
+        val m = model(signedIn = true, onbDone = true)
+        m.locator.pretend(org.rafikioutreach.pin.data.Fix(org.rafikioutreach.pin.data.LatLng(0.5150, 35.2700), 8, System.currentTimeMillis()))
+        show(m); rule.waitForIdle(); rule.mainClock.advanceTimeBy(2000); rule.waitForIdle()
+        // full-screen search
+        rule.onNodeWithTag("home_search").performClick(); rule.waitForIdle()
+        rule.onNodeWithTag("search_screen").assertExists()
+        rule.onNodeWithTag("search_input").performTextInput("kaps"); rule.waitForIdle()
+        shot("50-search")
+        rule.onAllNodesWithText("Kapsaret Borehole").onFirst().performClick(); rule.waitForIdle()
+        rule.onNodeWithTag("tracker").assertExists()
+        // project tabs swipe
+        rule.onNodeWithTag("tab_hist").performScrollTo(); rule.waitForIdle()
+        rule.onNodeWithText("Pin location").performTouchInput { swipeLeft() }; rule.waitForIdle()
+        rule.onNodeWithTag("hback").performClick(); rule.waitForIdle()
+        rule.onNodeWithTag("hback").performClick(); rule.waitForIdle()
+        // country chip opens a bottom sheet
+        rule.onNodeWithTag("chip_country").performScrollTo().performClick(); rule.waitForIdle()
+        rule.onNodeWithTag("sheet").assertExists(); shot("51-country-sheet")
+        rule.onNodeWithTag("pick_ke").performClick(); rule.waitForIdle()
+        assertEquals("ke", m.prefs.country)
+        // title moves into the top bar once scrolled
+        rule.onNodeWithTag("projects").performScrollToNode(hasText("Turbo Spring")); rule.waitForIdle()
+        rule.onNodeWithTag("bar_title").assertExists(); shot("52-list-scrolled")
+        // map: drag-up sheet and map style sheet
+        rule.onNodeWithTag("nav_map").performClick(); rule.waitForIdle()
+        rule.onNodeWithTag("sheet_handle").performClick(); rule.waitForIdle()
+        rule.onAllNodesWithText("Turbo Spring").onFirst().assertExists(); shot("53-map-sheet")
+        rule.onNodeWithContentDescription("Map style").performClick(); rule.waitForIdle()
+        rule.onNodeWithTag("pick_sat").assertExists(); shot("54-map-style")
+        rule.onNodeWithTag("pick_sat").performClick(); rule.waitForIdle()
+        m.prefs.country = ""
+        Onb.enabled = true; org.rafikioutreach.pin.ui.Motion.on = true
+    }
 }

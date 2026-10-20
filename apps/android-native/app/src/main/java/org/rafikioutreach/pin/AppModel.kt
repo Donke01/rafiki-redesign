@@ -73,6 +73,8 @@ class AppModel(app: Application) : AndroidViewModel(app) {
     var goTab by androidx.compose.runtime.mutableStateOf<String?>(null)
     /** "You’re at …" banners closed with ×, until the app is closed. */
     val dismissed = androidx.compose.runtime.mutableStateListOf<String>()
+    /** A short title for the top bar while a screen's big title is scrolled away. */
+    val bar = org.rafikioutreach.pin.ui.BarTitle()
 
     /** Sign in with a PIN; shared team PINs need a name. Returns an error text, or null when in. */
     suspend fun signIn(pin: String, name: String): String? {
