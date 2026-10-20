@@ -104,6 +104,28 @@ fun Chip(label: String, icon: String?, on: Boolean, onClick: () -> Unit, badge: 
     }
 }
 
+/** A filter in the row of five: icon over a short label, filled with its colour when chosen. */
+@Composable
+fun FilterTile(label: String, icon: String, on: Boolean, onClick: () -> Unit, modifier: Modifier, badge: Int = 0, tag: String = "", hue: String = "") {
+    val h = rememberHaptics()
+    val col = C.hue(hue)
+    val src = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+    Box(modifier) {
+        Column(
+            Modifier.press(src).fillMaxWidth().heightIn(min = 58.dp).clip(RoundedCornerShape(16.dp)).background(if (on) col.fg else C.card)
+                .then(if (!on) Modifier.border(1.dp, C.line, RoundedCornerShape(16.dp)) else Modifier)
+                .clickable(interactionSource = src, indication = androidx.compose.material3.ripple(), role = Role.Tab) { h.tap(); onClick() }
+                .padding(horizontal = 2.dp, vertical = 7.dp).then(if (tag.isNotEmpty()) Modifier.testTag(tag) else Modifier),
+            horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center,
+        ) {
+            Icon(Ic.get(icon), null, tint = if (on) Color.White else col.fg, modifier = Modifier.size(19.dp))
+            Text(label, style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp, lineHeight = 12.sp, fontWeight = FontWeight.Bold), color = if (on) Color.White else C.ink,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center, maxLines = 2, modifier = Modifier.padding(top = 3.dp))
+        }
+        if (badge > 0) Text("$badge", color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold, modifier = Modifier.align(Alignment.TopEnd).padding(top = 3.dp, end = 4.dp).clip(CircleShape).background(Red).padding(horizontal = 5.dp, vertical = 1.dp))
+    }
+}
+
 /** A panel you drag up from the bottom of the map: a peek of the closest project, or the five closest. */
 @Composable
 fun DragSheet(title: String, modifier: Modifier, peek: @Composable ColumnScope.() -> Unit, full: @Composable ColumnScope.() -> Unit) {

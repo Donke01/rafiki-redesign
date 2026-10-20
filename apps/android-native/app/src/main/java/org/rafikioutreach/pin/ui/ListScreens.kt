@@ -182,7 +182,7 @@ fun Meter(f0: Float, modifier: Modifier = Modifier, light: Boolean = false) {
 }
 
 private val FILTERS = listOf(
-    Triple("missing", "Needs a location|Hakuna mahali", "pinq"), Triple("near", "Nearby|Karibu nawe", "compass"), Triple("repairs", "Repairs|Matengenezo", "wrench"),
+    Triple("missing", "Needs a location|Hakuna mahali", "pinq"), Triple("near", "Nearby|Karibu nawe", "compass"), Triple("repairs", "Repairs|Ukarabati", "wrench"),
     Triple("due", "Due a visit|Inasubiri ziara", "cal"), Triple("all", "All|Yote", "list"),
 )
 
@@ -282,15 +282,22 @@ fun ProjectsScreen(m: AppModel, open: (String) -> Unit, planRoute: () -> Unit = 
         // filters: a row of chips you can swipe, that stays at the top while the list scrolls
         stickyHeader(key = "chips") {
             Box(Modifier.fillMaxWidth().background(androidx.compose.ui.graphics.Brush.verticalGradient(listOf(C.bg, C.bg, C.bg.copy(alpha = 0f)))).padding(top = 4.dp, bottom = 10.dp)) {
-                androidx.compose.foundation.lazy.LazyRow(Modifier.fillMaxWidth().testTag("chips"), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    item { Chip(COUNTRIES[ck] ?: t("All countries", "Nchi zote"), "map", false, { countrySheet = true }, trailing = "down", tag = "chip_country", hue = "country") }
+                // all five filters across the width, no sideways scrolling
+                Row(Modifier.fillMaxWidth().testTag("chips"), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     FILTERS.sortedBy { if (it.first == "all") 0 else 1 }.forEach { (k, label, icon) ->
-                        item(key = k) { Chip(label.split("|").let { t(it[0], it[1]) }, icon, f == k, { f = k; m.prefs.filter = k }, badge = if (k == "repairs") snap.repairs.size else 0, tag = "chip_$k", hue = k) }
+                        FilterTile(label.split("|").let { t(it[0], it[1]) }, icon, f == k, { f = k; m.prefs.filter = k }, Modifier.weight(1f), badge = if (k == "repairs") snap.repairs.size else 0, tag = "chip_$k", hue = k)
                     }
                 }
             }
         }
-        item { Text((COUNTRIES[ck]?.let { "$it · " } ?: "") + count, style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold), color = C.muted) }
+        // the country sits with the count: tap it to choose another
+        item {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Chip(COUNTRIES[ck] ?: t("All countries", "Nchi zote"), "map", false, { countrySheet = true }, trailing = "down", tag = "chip_country", hue = "country")
+                Spacer(Modifier.width(10.dp))
+                Text(count, style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold), color = C.muted, modifier = Modifier.weight(1f), maxLines = 2)
+            }
+        }
         itemsIndexed(rows, key = { _, it -> it.id }) { i, p -> Box(Modifier.rise(i, seen, p.id)) { ProjectRow(m, snap, p, here) { open(p.id) } } }
         if (rows.isEmpty()) item {
             EmptyDrop(when {

@@ -169,7 +169,7 @@ with sync_playwright() as p:
     pg.click('[data-f=repairs]'); pg.wait_for_timeout(200)
     check(pg.locator('#list .row').count() == 1 and 'Kapsaret' in pg.inner_text('#list'), 'repairs chip lists open repairs')
     pg.screenshot(path=os.path.join(HERE, 'n4-repairs.png'), full_page=True)
-    check(pg.input_value('#iCountry') == 'ke' and pg.inner_text('#count').startswith('Kenya'), 'list starts with the home country: ' + pg.inner_text('#count'))
+    check(pg.input_value('#iCountry') == 'ke' and 'Kenya' in pg.inner_text('#bCountryTx'), 'list starts with the home country: ' + pg.inner_text('#bCountryTx'))
     pg.click('[data-f=due]'); pg.wait_for_timeout(200)
     check(pg.locator('#list .row').count() >= 1 and ('No visit yet' in pg.inner_text('#list') or 'mo ago' in pg.inner_text('#list')), 'due-a-visit list')
     pg.screenshot(path=os.path.join(HERE, 'n4b-due.png'))

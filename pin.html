@@ -956,6 +956,17 @@ html[data-theme=dark] .stp .stin{background:radial-gradient(circle,transparent 3
 #vList .listhead{margin-bottom:8px}#vList .listhead h1{font-size:1.4rem}
 #vList .prog-card{padding:14px !important}
 #lHere > div{margin-bottom:10px !important}
+
+/* --- five filters across the width (no sideways scrolling); the country sits with the count --- */
+#vList .tools{overflow:visible}
+#vList .tools .chips{display:grid !important;grid-template-columns:repeat(5,minmax(0,1fr)) !important;gap:6px !important;width:100%;flex:1 1 auto !important}
+#vList .tools .chip{flex-direction:column !important;justify-content:center;gap:3px !important;min-height:58px !important;padding:7px 2px !important;border-radius:16px !important;white-space:normal !important;text-align:center;font-size:.69rem !important;line-height:1.1;position:relative}
+#vList .tools .chip svg{width:19px !important;height:19px !important}
+#vList .tools .chip .n{position:absolute !important;top:3px;right:4px;margin:0 !important}
+.countrow{display:flex;align-items:center;gap:10px;margin:2px 0 8px}
+.countrow .count{margin:0;flex:1;min-width:0}
+.countrow .cchip{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 12px;border-radius:999px;font-size:.84rem;white-space:nowrap}
+.countrow .cchip svg{width:16px;height:16px;color:var(--hu)}
 /* --- card motion: cards rise in with a soft spring, squish under the finger, light drifts on the deep cards,
        tracker steps and stamps arrive one by one. Only on first showing, never on live updates. --- */
 @keyframes cardRise{0%{opacity:0;transform:translateY(26px) scale(.965)}55%{opacity:1}75%{transform:translateY(-3px) scale(1.004)}100%{opacity:1;transform:none}}
@@ -1181,7 +1192,7 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
       <div class="card prog-card" style="padding:16px"><div class="prog" id="lProg"></div><div class="cmeters" id="cProg" style="margin-top:12px"></div></div>
       <div class="tools">
         <input type="search" id="iSearch" class="hidden" placeholder="Search by project name or place" aria-label="Search by project name or place">
-        <button class="chip cchip" type="button" id="bCountry" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 6.5l5.5-2.5 6 2.5 5.5-2.5v13.5L15 20l-6-2.5-5.5 2.5z"/><path d="M9 4v13.5M15 6.5V20"/></svg><span id="bCountryTx">All countries</span><svg class="dn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+
         <div class="chips otabs fgrid" role="group" aria-label="Show">
           <button class="chip otab" type="button" data-f="missing" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><path d="M10.3 8.4a1.9 1.9 0 1 1 2.6 1.8c-.6.3-.9.7-.9 1.3M12 13.6v.1"/></svg><span>Needs a location</span></button>
           <button class="chip otab" type="button" data-f="near" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg><span>Nearby</span></button>
@@ -1193,7 +1204,7 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
           <option value="">All countries</option><option value="ke">Kenya</option><option value="tz">Tanzania</option><option value="ug">Uganda</option><option value="mw">Malawi</option>
         </select>
       </div>
-      <p class="count" id="count" aria-live="polite"></p>
+      <div class="countrow"><button class="chip cchip" type="button" id="bCountry" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 6.5l5.5-2.5 6 2.5 5.5-2.5v13.5L15 20l-6-2.5-5.5 2.5z"/><path d="M9 4v13.5M15 6.5V20"/></svg><span id="bCountryTx">All countries</span><svg class="dn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><p class="count" id="count" aria-live="polite"></p></div>
       <div class="list" id="list"></div>
       <p class="msg" id="mList" aria-live="polite"></p>
       <div class="routebar hidden" id="routeBar"><div><span id="routeN">Choose pinned projects to visit</span><button class="btn small" id="bRouteGo" type="button" disabled>Plan route</button></div></div>
@@ -2004,7 +2015,7 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
   function ago() { if (!S.hereAt) return ''; var s = Math.round((Date.now() - S.hereAt) / 1000); return s < 5 ? 'just now' : s < 60 ? s + ' s ago' : Math.round(s / 60) + ' min ago'; }
   function freshUi() {
     if (S.view === 'vProj' && lw !== null && S.hereAt) $('pLive').textContent = 'Live · GPS ' + (S.hereAcc ? acct(S.hereAcc) : '') + ' · updated ' + ago();
-    if (S.view === 'vList' && S.filter === 'near' && S.here) $('count').textContent = ($('iCountry').value ? CNAME[$('iCountry').value] + ' · ' : '') + 'Closest to you · live, updated ' + ago();
+    if (S.view === 'vList' && S.filter === 'near' && S.here) $('count').textContent = 'Closest to you · live, updated ' + ago();
   }
   function locate(cb) {
     if (S.here && Date.now() - S.hereAt < 120000) return cb(S.here);
@@ -2386,7 +2397,7 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
       : f === 'repairs' ? rows.length + (rows.length === 1 ? ' project reported' : ' projects reported') + ' as needing repair or not working, most urgent first'
       : f === 'due' ? rows.length + ' not visited in the last 6 months (or not yet in the app), longest first'
       : rows.length + ' projects';
-    if (ck) $('count').textContent = CNAME[ck] + ' · ' + $('count').textContent;
+    // the country shows on its own button beside the count
     if (S.routeMode) $('count').textContent += ' · tick the pinned ones to visit';
     if (near && !S.here) { $('list').innerHTML = '<div class="skel"></div><div class="skel"></div><div class="skel"></div>'; return; }
     if (!S.projects.length) { $('list').innerHTML = '<div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div>'; return; }
