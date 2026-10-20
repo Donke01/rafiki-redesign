@@ -951,11 +951,42 @@ html[data-theme=dark] .stp .stin{background:radial-gradient(circle,transparent 3
 
 /* --- fingerprint lock --- */
 .mbio .mh{display:flex;gap:12px;align-items:flex-start;margin-bottom:12px}.mbio .mh h2{margin:0 0 2px}.mbio .mh p{margin:0}
-.mbio .mi{width:40px;height:40px;border-radius:12px;flex:none;display:flex;align-items:center;justify-content:center;background:var(--hb-blue);color:var(--hu-blue)}.mbio .mi svg{width:20px;height:20px}
-.biolock{position:fixed;inset:0;z-index:5000;display:flex;align-items:center;justify-content:center;padding:28px;background:var(--bg);background-image:radial-gradient(120% 80% at 50% 0%,var(--tint),transparent)}
-.biolock .bl-in{width:100%;max-width:360px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
-.biolock .bl-ic{width:96px;height:96px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--tint);color:var(--blue);margin-bottom:6px}.biolock .bl-ic svg{width:48px;height:48px}
-.biolock h2{margin:0}.biolock p{margin:0}.biolock input{width:100%;text-align:center;font-size:1.2rem;letter-spacing:.3em}
+.mbio .mi{width:44px;height:44px;border-radius:14px;flex:none;display:flex;align-items:center;justify-content:center;background:var(--hb-blue);color:var(--hu-blue)}.mbio .mi svg{width:24px;height:24px}
+.mbio.on .mi{background:var(--hb-green);color:var(--hu-green)}.mbio h2 .tag{vertical-align:middle;margin-left:4px}.mbio .btn svg{width:20px;height:20px}
+.biolock{position:fixed;inset:0;z-index:5000;display:flex;flex-direction:column;align-items:center;padding:calc(18px + env(safe-area-inset-top)) 16px calc(28px + env(safe-area-inset-bottom));overflow:auto;background:var(--bg);background-image:radial-gradient(90% 55% at 0% 0%,rgba(71,180,245,.22),transparent 70%),radial-gradient(80% 50% at 100% 100%,rgba(28,156,90,.14),transparent 70%);animation:blIn .25s ease both}
+.biolock.out{opacity:0;transition:opacity .2s}
+@keyframes blIn{from{opacity:0}to{opacity:1}}
+.biolock > *{width:100%;max-width:400px}
+.bl-mark{margin:16px 0 0;text-align:center;font-weight:800;letter-spacing:.18em;color:var(--ink);font-size:.95rem}.bl-mark b{color:var(--blue);letter-spacing:.06em}
+.bl-mid{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:8px;padding:12px 0}
+.bl-em{position:relative;width:220px;height:220px;margin-bottom:18px}
+.bl-em i{position:absolute;border-radius:50%;left:50%;top:50%;transform:translate(-50%,-50%)}
+.bl-em .r3{width:220px;height:220px;background:color-mix(in srgb,var(--blue) 7%,transparent);animation:blPulse 2.6s ease-in-out infinite}
+.bl-em .r2{width:168px;height:168px;background:color-mix(in srgb,var(--blue) 12%,transparent)}
+.bl-em .r1{width:116px;height:116px;background:var(--card);box-shadow:0 10px 30px rgba(4,38,63,.12);display:flex;align-items:center;justify-content:center;color:var(--blue)}.bl-em .r1 svg{width:56px;height:56px}
+.bl-em span{position:absolute;left:40px;top:40px;width:140px;height:140px;border-radius:50%;border:3px solid transparent}
+.bl-em .a1{border-top-color:color-mix(in srgb,var(--blue) 70%,transparent);animation:blSpin 3.2s linear infinite}
+.bl-em .a2{border-bottom-color:color-mix(in srgb,var(--blue) 30%,transparent);animation:blSpin 3.2s linear infinite}
+@keyframes blSpin{to{transform:rotate(360deg)}}
+@keyframes blPulse{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.05)}}
+.bl-ov{margin:0;color:var(--blue);font-weight:800;font-size:.72rem;letter-spacing:.14em}
+.biolock h2{margin:0;font-size:2rem;line-height:1.15;font-weight:800;color:var(--ink)}
+.bl-sub{margin:0;color:var(--muted);max-width:310px}
+.bl-who{display:inline-flex;align-items:center;gap:10px;margin-top:8px;padding:6px 14px 6px 6px;border-radius:999px;background:var(--card);border:1px solid var(--line);font-weight:700;font-size:.85rem;color:var(--ink)}
+.bl-who i{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:.7rem;color:#FFFFFF;background:linear-gradient(135deg,#47B4F5,#0A78C2)}
+.bl-act{display:flex;flex-direction:column;align-items:center;gap:12px}
+.bl-act .btn svg{width:20px;height:20px}
+.bl-note{display:flex;align-items:center;gap:6px;margin:0;font-size:.75rem;color:var(--muted)}.bl-note svg{width:14px;height:14px}
+.bl-act .lnk{font-weight:700}
+.bl-pin{flex:0 0 auto;padding-top:40px}.bl-pin h2{font-size:1.6rem}
+.bl-dots{display:flex;gap:18px;padding-top:14px}.bl-dots i{width:16px;height:16px;border-radius:50%;border:2px solid color-mix(in srgb,var(--muted) 60%,transparent)}.bl-dots i.on{background:var(--blue);border-color:var(--blue)}
+.bl-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0}
+.bk{height:64px;border-radius:22px;border:0;background:var(--card);box-shadow:0 2px 6px rgba(4,38,63,.08);font:inherit;font-size:1.6rem;font-weight:700;color:var(--ink);cursor:pointer}
+.bk:active{transform:scale(.96)}
+.bk.bk-x{background:transparent;box-shadow:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--ink)}.bk.bk-x svg{width:26px;height:26px}
+.bk[data-b=fp]{color:var(--blue)}.bk small{font-size:.7rem;font-weight:600}
+html[data-theme=dark] .bk{box-shadow:none;border:1px solid var(--line)}html[data-theme=sun] .bk{border:2px solid #000;box-shadow:none}
+@media (prefers-reduced-motion:reduce){.bl-em .r3,.bl-em .a1,.bl-em .a2{animation:none}}
 body.bio-locked > :not(.biolock){visibility:hidden}
 
 /* --- connect monday.com --- */
@@ -3486,9 +3517,10 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
     bioCan().then(function (can) {
       if (!can && !store.get('rfPinBio')) { c.classList.add('hidden'); return; }
       c.classList.remove('hidden'); var on = !!store.get('rfPinBio');
-      c.innerHTML = '<div class="mh"><span class="mi">' + oic('lock') + '</span><div><h2>' + tr('Unlock with fingerprint or face', 'Fungua kwa alama ya kidole au uso') + '</h2><p class="muted">' +
-        (on ? tr('Asked when the app opens and after a minute away.', 'Inaulizwa programu inapofunguliwa na baada ya dakika moja nje.') : tr('Keeps the app private if someone else picks up your phone or computer. Uses Touch ID, fingerprint, face or the device’s screen lock.', 'Inaweka programu faragha mtu mwingine akishika simu au kompyuta yako. Inatumia Touch ID, alama ya kidole, uso au kufuli ya skrini.')) + '</p></div></div>' +
-        '<button class="btn wide ' + (on ? 'light' : '') + '" id="bioToggle" type="button">' + (on ? tr('Turn off', 'Zima') : tr('Turn on', 'Washa')) + '</button><span class="msg" id="bioMsg" aria-live="polite"></span>';
+      c.classList.toggle('on', on);
+      c.innerHTML = '<div class="mh"><span class="mi">' + oic('finger') + '</span><div><h2>' + tr('Unlock with fingerprint or face', 'Fungua kwa alama ya kidole au uso') + (on ? ' <span class="tag ok">' + tr('On', 'Imewashwa') + '</span>' : '') + '</h2><p class="muted">' +
+        (on ? tr('Asked when the app opens and after a minute away. Lock the app now keeps your PIN, so you’re back in with a touch.', 'Inaulizwa programu inapofunguliwa na baada ya dakika moja nje. Kufunga programu sasa kunahifadhi PIN yako, hivyo unarudi kwa kugusa tu.') : tr('Keeps the app private if someone else picks up your phone or computer. Uses Touch ID, fingerprint, face or the device’s screen lock.', 'Inaweka programu faragha mtu mwingine akishika simu au kompyuta yako. Inatumia Touch ID, alama ya kidole, uso au kufuli ya skrini.')) + '</p></div></div>' +
+        '<button class="btn wide ' + (on ? 'light' : '') + '" id="bioToggle" type="button">' + (on ? '' : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + FPI + '</svg>') + (on ? tr('Turn off', 'Zima') : tr('Turn on', 'Washa')) + '</button><span class="msg" id="bioMsg" aria-live="polite"></span>';
     });
   }
   $('meBio').addEventListener('click', function (e) {
@@ -3499,22 +3531,59 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
       .then(function (c) { if (!c) throw 0; store.set('rfPinBio', b64u(c.rawId)); buzz(); bioUi(); $('lockBtn').textContent = tr('Lock the app', 'Funga programu'); toast(tr('Fingerprint unlock is on ✓', 'Kufungua kwa alama ya kidole kumewashwa ✓')); },
         function () { msg('bioMsg', 'bad', tr('Not turned on.', 'Haijawashwa.')); });
   });
-  // the gate: covers everything until the device check (or the PIN) says it's you
+  // the gate: covers everything until the device check (or the PIN) says it's you (design: Figma 06 / 07)
+  var FPI = '<path d="M7.5 5.5A8 8 0 0 1 20 12v1.5"/><path d="M4 9.5A8 8 0 0 1 5.5 7"/><path d="M4 12.5v.5a8 8 0 0 0 1.5 4.7"/><path d="M8 12a4 4 0 0 1 8 0v1.5a10 10 0 0 1-1.6 5.4"/><path d="M12 12v1.5a14 14 0 0 1-2.7 8"/><path d="M8 15.5a11 11 0 0 1-.9 3.6"/><path d="M16.6 21a14 14 0 0 0 1-3.5"/>';
+  OIC.finger = FPI;
   function bioGate() {
     if (!bioOn() || $('bioLock')) return;
-    var g = document.createElement('div'); g.id = 'bioLock'; g.className = 'biolock'; g.setAttribute('role', 'dialog'); g.setAttribute('aria-modal', 'true'); g.setAttribute('aria-label', 'RAFIKI Pin is locked');
-    g.innerHTML = '<div class="bl-in"><span class="bl-ic">' + oic('lock') + '</span><h2>' + tr('RAFIKI Pin is locked', 'RAFIKI Pin imefungwa') + '</h2><p class="muted">' + esc(S.name || '') + '</p>' +
-      '<button class="btn wide" id="blGo" type="button">' + tr('Unlock', 'Fungua') + '</button><span class="msg" id="blMsg" aria-live="polite"></span>' +
-      (S.pin ? '<button class="lnk" id="blPinBtn" type="button">' + tr('Use my RAFIKI PIN instead', 'Tumia PIN yangu ya RAFIKI') + '</button><input class="hidden" id="blPin" type="password" inputmode="numeric" autocomplete="off" placeholder="' + tr('Your PIN', 'PIN yako') + '">' : '') +
-      '<button class="lnk muted" id="blOut" type="button">' + tr('Sign out', 'Toka') + '</button></div>';
-    document.body.appendChild(g); document.body.classList.add('bio-locked'); swApply();
-    var done = function () { g.remove(); document.body.classList.remove('bio-locked'); };
+    var first = String(S.name || '').split(/\s+/)[0], ck = homeCk(), where = CNAME[ck] ? ' · ' + tr(CNAME[ck], { ke: 'Kenya', tz: 'Tanzania', ug: 'Uganda', mw: 'Malawi' }[ck]) : '';
+    var ini = esc((S.name || '?').split(/\s+/).map(function (w) { return w.charAt(0); }).slice(0, 2).join('').toUpperCase());
+    var g = document.createElement('div'); g.id = 'bioLock'; g.className = 'biolock'; g.setAttribute('role', 'dialog'); g.setAttribute('aria-modal', 'true'); g.setAttribute('aria-label', tr('RAFIKI Pin is locked', 'RAFIKI Pin imefungwa'));
+    document.body.appendChild(g); document.body.classList.add('bio-locked');
+    var done = function () { g.classList.add('out'); document.body.classList.remove('bio-locked'); setTimeout(function () { g.remove(); }, 220); };
+    var pinV = '';
+    var face = function () {
+      g.innerHTML = '<p class="bl-mark">RAFIKI <b>Pin</b></p><div class="bl-mid">' +
+        '<div class="bl-em" aria-hidden="true"><i class="r3"></i><i class="r2"></i><span class="a1"></span><span class="a2"></span><i class="r1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' + FPI + '</svg></i></div>' +
+        '<p class="bl-ov">' + tr('WELCOME BACK', 'KARIBU TENA') + '</p><h2>' + (first ? tr('Habari, ', 'Habari, ') + esc(first) : tr('Welcome back', 'Karibu tena')) + '</h2>' +
+        '<p class="bl-sub">' + tr('Touch the sensor or look at your phone to carry on where you left off.', 'Gusa kitambuzi au tazama simu yako ili kuendelea ulipoishia.') + '</p>' +
+        (S.name ? '<span class="bl-who"><i>' + ini + '</i>' + esc(S.name) + esc(where) + '</span>' : '') + '</div>' +
+        '<div class="bl-act"><button class="btn wide" id="blGo" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + FPI + '</svg>' + tr('Unlock', 'Fungua') + '</button>' +
+        (S.pin ? '<button class="btn wide light" id="blPinBtn" type="button">' + tr('Use my RAFIKI PIN instead', 'Tumia PIN yangu ya RAFIKI') + '</button>' : '') +
+        '<span class="msg" id="blMsg" aria-live="polite"></span>' +
+        '<p class="bl-note">' + oic('lock') + tr('Your fingerprint never leaves this device.', 'Alama ya kidole chako haitoki kwenye kifaa hiki.') + '</p>' +
+        '<button class="lnk" id="blOut" type="button">' + tr('Sign out', 'Toka') + '</button></div>';
+      $('blGo').addEventListener('click', go);
+      if ($('blPinBtn')) $('blPinBtn').addEventListener('click', pinFace);
+      $('blOut').addEventListener('click', function () { done(); lock(); });
+      swApply(); $('blGo').focus();
+    };
+    var pinFace = function () {
+      pinV = '';
+      var keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'fp', '0', 'del'].map(function (k) {
+        return k === 'fp' ? '<button type="button" class="bk bk-x" data-b="fp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + FPI + '</svg><small>' + tr('Fingerprint', 'Alama ya kidole') + '</small></button>'
+          : k === 'del' ? '<button type="button" class="bk bk-x" data-b="del" aria-label="' + tr('Delete last digit', 'Futa tarakimu ya mwisho') + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5h11a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H9l-6-7z"/><path d="M12.5 9.5l5 5M17.5 9.5l-5 5"/></svg></button>'
+          : '<button type="button" class="bk" data-b="' + k + '">' + k + '</button>';
+      }).join('');
+      g.innerHTML = '<p class="bl-mark">RAFIKI <b>Pin</b></p><div class="bl-mid bl-pin"><p class="bl-ov">' + tr('USE YOUR PIN', 'TUMIA PIN YAKO') + '</p><h2>' + tr('Enter your RAFIKI PIN', 'Weka PIN yako ya RAFIKI') + '</h2>' +
+        '<p class="bl-sub">' + tr('The digits the office gave you.', 'Tarakimu ulizopewa na ofisi.') + '</p><div class="bl-dots" id="blDots"></div><span class="msg" id="blMsg" aria-live="polite"></span></div>' +
+        '<div class="bl-pad">' + keys + '</div><div class="bl-act"><button class="lnk" id="blOut" type="button">' + tr('Sign out', 'Toka') + '</button></div>';
+      var n = Math.max(4, S.pin.length);
+      var dots = function () { $('blDots').innerHTML = Array.apply(null, Array(n)).map(function (_, i) { return '<i' + (i < pinV.length ? ' class="on"' : '') + '></i>'; }).join(''); };
+      dots();
+      g.querySelector('.bl-pad').addEventListener('click', function (e) {
+        var b = e.target.closest('.bk'); if (!b) return; var k = b.getAttribute('data-b'); buzz();
+        if (k === 'fp') return face(), go();
+        if (k === 'del') pinV = pinV.slice(0, -1); else if (pinV.length < n) pinV += k;
+        dots(); msg('blMsg', '', '');
+        if (pinV === S.pin) return done();
+        if (pinV.length >= n) { msg('blMsg', 'bad', tr('That PIN isn’t right.', 'PIN hiyo si sahihi.')); pinV = ''; setTimeout(dots, 400); }
+      });
+      $('blOut').addEventListener('click', function () { done(); lock(); });
+      swApply();
+    };
     var go = function () { msg('blMsg', '', ''); bioCheck().then(function (ok) { if (ok) done(); else msg('blMsg', 'bad', tr('Not unlocked. Try again.', 'Haijafunguliwa. Jaribu tena.')); }); };
-    $('blGo').addEventListener('click', go);
-    if ($('blPinBtn')) $('blPinBtn').addEventListener('click', function () { this.classList.add('hidden'); $('blPin').classList.remove('hidden'); $('blPin').focus(); });
-    if ($('blPin')) $('blPin').addEventListener('input', function () { if (this.value === S.pin) done(); });
-    $('blOut').addEventListener('click', function () { done(); lock(); });
-    $('blGo').focus();
+    face();
   }
   var awayAt = 0;
   document.addEventListener('visibilitychange', function () {

@@ -32,6 +32,13 @@ import org.robolectric.annotation.GraphicsMode
 class BioTest {
     @get:Rule val rule = createAndroidComposeRule<androidx.activity.ComponentActivity>()
 
+    private fun shot(name: String) {
+        rule.mainClock.advanceTimeBy(700); rule.waitForIdle()
+        val v = rule.activity.window.decorView
+        val b = android.graphics.Bitmap.createBitmap(v.width, v.height, android.graphics.Bitmap.Config.ARGB_8888); v.draw(android.graphics.Canvas(b))
+        java.io.File(java.io.File(System.getProperty("user.dir"), "build/shots").apply { mkdirs() }, "$name.png").outputStream().use { b.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, it) }
+    }
+
     @Test fun fingerprint_lock() {
         org.rafikioutreach.pin.ui.Motion.on = false
         val app = ApplicationProvider.getApplicationContext<Application>()
@@ -49,6 +56,7 @@ class BioTest {
         rule.waitUntil(5000) { rule.onAllNodesWithTag("bio_switch").fetchSemanticsNodes().isNotEmpty() }
         rule.onNodeWithTag("bio_switch").performScrollTo().performClick(); rule.waitForIdle()
         assertTrue(m.prefs.bio); assertEquals(1, asked)
+        rule.onNodeWithTag("bio_card").performScrollTo(); shot("82-bio-card")
         // Lock the app: only locks, the PIN stays
         rule.onNodeWithText("Lock the app").performScrollTo().performClick(); rule.waitForIdle()
         assertEquals("1111", m.prefs.pin)
@@ -63,8 +71,12 @@ class BioTest {
         // PIN instead of the fingerprint
         answer = false; rule.runOnUiThread { m.lockOrSignOut() }
         rule.waitUntil(3000) { rule.onAllNodesWithTag("bio_usepin").fetchSemanticsNodes().isNotEmpty() }
-        rule.onNodeWithTag("bio_usepin").performClick()
-        rule.onNodeWithTag("bio_pin").performTextInput("1111"); rule.waitForIdle()
+        shot("80-bio-lock")
+        rule.onNodeWithTag("bio_usepin").performClick(); rule.waitForIdle()
+        listOf("1", "1", "1", "2").forEach { rule.onNodeWithTag("bio_key$it").performClick() }
+        rule.onNodeWithTag("bio_msg").assertTextContains("isn’t right", substring = true)
+        shot("81-bio-pin")
+        repeat(4) { rule.onNodeWithTag("bio_key1").performClick() }; rule.waitForIdle()
         assertFalse(m.bioLocked.value)
         // a minute away locks it again
         rule.runOnUiThread { m.wentAway() }
