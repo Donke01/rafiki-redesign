@@ -87,7 +87,7 @@ fun dotColor(s: Snapshot, p: Project): Int = when (s.repairs[p.id]?.state) {
 }
 
 @Composable
-fun MapScreen(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit = open) {
+fun MapScreen(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit = open, offline: () -> Unit = {}) {
     val s by m.snap.collectAsState()
     val fix by m.fix.collectAsState()
     val snap = s ?: return
@@ -113,6 +113,8 @@ fun MapScreen(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit = ope
         HereSlot(m, snap, fix?.ll, Modifier.padding(top = 10.dp), visit, open)
         }
         NearestSheet(m, snap, fix?.ll, Modifier.align(Alignment.BottomCenter).padding(12.dp).onSizeChanged { sheetH = it.height }, open)
+        // Save this area for offline (OfflineMaps.kt)
+        OfflineMapControls(m, offline)
     }
 }
 
@@ -194,7 +196,7 @@ private val FILTERS = listOf(
 
 @OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
-fun ProjectsScreen(m: AppModel, open: (String) -> Unit, planRoute: () -> Unit = {}, newSite: () -> Unit = {}, visit: (String) -> Unit = open, search: () -> Unit = {}) {
+fun ProjectsScreen(m: AppModel, open: (String) -> Unit, planRoute: () -> Unit = {}, newSite: () -> Unit = {}, visit: (String) -> Unit = open, scan: () -> Unit = {}, search: () -> Unit = {}) {
     val s by m.snap.collectAsState()
     val fix by m.fix.collectAsState()
     val waiting by m.waiting.collectAsState()
@@ -239,7 +241,7 @@ fun ProjectsScreen(m: AppModel, open: (String) -> Unit, planRoute: () -> Unit = 
     ShowInBar(m, t("Projects", "Miradi"), scrolledPast)
     fun pick(k: String) { f = k; m.prefs.filter = k; scope.launch { list.animateScrollToItem(headIdx + 1) } }
     LazyColumn(Modifier.fillMaxSize().testTag("projects"), state = list, contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 110.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        item(key = "top") { HomeTop(m, snap, here, search, { pick(it) }, newSite) }
+        item(key = "top") { HomeTop(m, snap, here, search, { pick(it) }, newSite, scan) }
         item(key = "here") { HereSlot(m, snap, here, Modifier, visit, open) }
         if (banner != null) item { Card(border = C.warnBg) { Text(banner!!, color = C.warn, style = MaterialTheme.typography.bodyMedium) } }
         if (waiting > 0) item {
@@ -381,7 +383,7 @@ fun ProjectRow(m: AppModel, s: Snapshot, p: Project, here: LatLng?, onClick: () 
 
 /** Home: a greeting, where you are, a big question and four quick actions. */
 @Composable
-private fun HomeTop(m: AppModel, s: Snapshot, here: LatLng?, search: () -> Unit, filter: (String) -> Unit, newSite: () -> Unit) {
+private fun HomeTop(m: AppModel, s: Snapshot, here: LatLng?, search: () -> Unit, filter: (String) -> Unit, newSite: () -> Unit, scan: () -> Unit = {}) {
     val first = m.prefs.name.substringBefore(' ')
     val where = here?.let { h -> s.projects.filter { it.gps != null }.minByOrNull { Geo.metres(h, it.gps!!) }?.takeIf { Geo.metres(h, it.gps!!) < 60000 && it.area.isNotBlank() }?.let { it.area + ", " + it.country } }
         ?: COUNTRIES[m.prefs.country]
@@ -399,13 +401,13 @@ private fun HomeTop(m: AppModel, s: Snapshot, here: LatLng?, search: () -> Unit,
             Icon(Ic.get("search"), null, tint = C.muted, modifier = Modifier.size(20.dp)); Spacer(Modifier.width(10.dp))
             Text(t("Search a project or place", "Tafuta mradi au mahali"), style = MaterialTheme.typography.bodyLarge, color = C.muted, maxLines = 1)
         }
-        // the four actions in one row, so the whole home fits on one screen
-        Row(Modifier.padding(bottom = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        // the five actions in one row, so the whole home fits on one screen
+        Row(Modifier.padding(bottom = 4.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             listOf(Triple("missing", t("Pin a location", "Weka mahali"), "pin"), Triple("near", t("Visit nearby", "Tembelea karibu"), "clip"),
-                Triple("new", t("Add a site", "Ongeza eneo"), "plus"), Triple("repairs", t("Repairs", "Ukarabati"), "wrench")).forEachIndexed { ci, (k, l, ic) ->
+                Triple("new", t("Add a site", "Ongeza eneo"), "plus"), Triple("repairs", t("Repairs", "Ukarabati"), "wrench"), Triple("scan", t("Scan QR", "Changanua QR"), "scan")).forEachIndexed { ci, (k, l, ic) ->
                 val src = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
                 Column(Modifier.weight(1f).rise(ci + 1, step = 60).press(src).heightIn(min = 84.dp).clip(RoundedCornerShape(18.dp)).background(if (C.glassy) C.glass2 else C.card).border(1.dp, if (C.glassy) C.glassEdge else C.line, RoundedCornerShape(18.dp))
-                    .clickable(interactionSource = src, indication = androidx.compose.material3.ripple(), role = Role.Button) { if (k == "new") newSite() else filter(k) }.padding(horizontal = 4.dp, vertical = 10.dp).testTag("quick_$k"),
+                    .clickable(interactionSource = src, indication = androidx.compose.material3.ripple(), role = Role.Button) { if (k == "new") newSite() else if (k == "scan") scan() else filter(k) }.padding(horizontal = 4.dp, vertical = 10.dp).testTag("quick_$k"),
                     horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
                     val hu = C.hue(k)
                     Box(Modifier.size(38.dp).clip(RoundedCornerShape(13.dp)).background(hu.bg), contentAlignment = Alignment.Center) { Icon(Ic.get(ic), null, tint = hu.fg, modifier = Modifier.size(20.dp)) }

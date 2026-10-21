@@ -58,8 +58,9 @@ object MapSetup {
         val c = Configuration.getInstance()
         c.userAgentValue = "RAFIKI-Pin/" + BuildConfig.VERSION_NAME + " (" + BuildConfig.APPLICATION_ID + ")"
         c.osmdroidBasePath = File(ctx.filesDir, "osm")
-        c.osmdroidTileCache = File(ctx.cacheDir, "tiles")
-        c.tileFileSystemCacheMaxBytes = 120L * 1024 * 1024 // map tiles seen before still show with no signal
+        // map tiles seen before still show with no signal; where they are kept, how much room they get and
+        // the offline areas are set up in OfflineMaps.kt
+        OfflineMaps.configure(ctx, c)
         done = true
     }
 }
@@ -78,7 +79,8 @@ fun ProjectsMap(dots: List<Dot>, me: LatLng?, onDot: (String) -> Unit, modifier:
     val ctx = LocalContext.current
     MapSetup.init(ctx)
     var sat by remember { mutableStateOf(false) }
-    val g by GoogleTiles.maps.collectAsState()
+    val g0 by GoogleTiles.maps.collectAsState()
+    val g = OfflineMaps.google(g0) // the free maps while filling an offline area or with no signal
     val onDotNow by androidx.compose.runtime.rememberUpdatedState(onDot)
     val map = remember {
         MapView(ctx).apply {
@@ -91,7 +93,7 @@ fun ProjectsMap(dots: List<Dot>, me: LatLng?, onDot: (String) -> Unit, modifier:
     DisposableEffect(Unit) { map.onResume(); onDispose { map.onPause(); map.onDetach() } }
     Box(modifier.clipToBounds()) {
         AndroidView({ map }, Modifier.fillMaxSize().clipToBounds(), update = { mv ->
-            val src = g?.let { if (sat) it.sat else it.road } ?: if (sat) Satellite else TileSourceFactory.MAPNIK
+            val src = g?.let { if (sat) it.sat else it.road } ?: if (sat) Satellite else OfflineMaps.street()
             if (mv.tileProvider.tileSource != src) mv.setTileSource(src)
             var changed = false
             if (holder.dots != dots) {
@@ -116,6 +118,7 @@ fun ProjectsMap(dots: List<Dot>, me: LatLng?, onDot: (String) -> Unit, modifier:
             }
             if (changed) mv.invalidate()
         })
+        OfflineMapLayer(map)
         GoogleBadge(map, g, sat, Modifier.align(Alignment.BottomStart).padding(bottom = badgeBottom))
         var styles by remember { mutableStateOf(false) }
         MapButton("layers", t("Map style", "Mtindo wa ramani"), Modifier.align(Alignment.TopEnd).padding(10.dp)) { styles = true }
@@ -135,7 +138,8 @@ fun PickMap(start: LatLng?, onMove: (LatLng) -> Unit, modifier: Modifier = Modif
     val ctx = LocalContext.current
     MapSetup.init(ctx)
     var sat by remember { mutableStateOf(true) }
-    val g by GoogleTiles.maps.collectAsState()
+    val g0 by GoogleTiles.maps.collectAsState()
+    val g = OfflineMaps.google(g0) // the free maps while filling an offline area or with no signal
     val map = remember {
         MapView(ctx).apply {
             setTileSource(Satellite); setMultiTouchControls(true); zoomController.setVisibility(org.osmdroid.views.CustomZoomButtonsController.Visibility.SHOW_AND_FADEOUT)
@@ -152,7 +156,7 @@ fun PickMap(start: LatLng?, onMove: (LatLng) -> Unit, modifier: Modifier = Modif
     val held = remember { MapState() }
     Box(modifier.clip(RoundedCornerShape(18.dp)).clipToBounds()) {
         AndroidView({ map }, Modifier.fillMaxSize().clipToBounds(), update = { mv ->
-            val src = g?.let { if (sat) it.sat else it.road } ?: if (sat) Satellite else TileSourceFactory.MAPNIK
+            val src = g?.let { if (sat) it.sat else it.road } ?: if (sat) Satellite else OfflineMaps.street()
             if (mv.tileProvider.tileSource != src) mv.setTileSource(src)
             if (held.dots != others) {
                 held.dots = others
