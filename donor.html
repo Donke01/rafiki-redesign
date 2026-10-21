@@ -1,0 +1,669 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="format-detection" content="telephone=no">
+<meta name="robots" content="noindex, nofollow">
+<!-- the address carries the donor's private link: only the site's name is ever sent on to map tiles and other sites -->
+<meta name="referrer" content="strict-origin">
+<title>Your projects — RAFIKI Outreach</title>
+<meta name="description" content="Your private RAFIKI Outreach project page.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#0A78C2">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/vendor/leaflet/leaflet.css">
+<style>
+:root{--blue:#0A78C2;--blue2:#076DB1;--deep:#054F81;--ink:#04263F;--sky:#6BBDF2;--tint:#E3F1FC;--bg:#FAF8F3;--card:#FFFFFF;--text:#141618;--muted:#5A6066;--line:#E3E6E9;--edge:#C9D1D8;
+  --ok:#1C7C4A;--okbg:#E2F4EA;--warn:#8A5200;--amber:#D98200;--warnbg:#FDF0DC;--bad:#B3261E;--badbg:#FBE7E5;--build:#7A4FD0;--buildbg:#EFE8FB;--plan:#5A6066;--r:22px;--R:28px}
+*{box-sizing:border-box}
+html{scroll-padding-top:84px;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.55 Montserrat,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased;overflow-x:clip}
+button,input{font:inherit;color:inherit}
+a{color:var(--blue2)}
+img{max-width:100%}
+.vh{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.wrap{max-width:1180px;margin:0 auto;padding:0 16px}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+/* header */
+.top{position:sticky;top:0;z-index:1200;background:rgba(255,255,255,.96);-webkit-backdrop-filter:saturate(1.4) blur(10px);backdrop-filter:saturate(1.4) blur(10px);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:12px;min-height:64px}
+.top .home img{height:30px;width:auto;display:block}
+.top .sp{flex:1}
+.top .priv{display:none;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--muted)}
+.top .priv svg{width:16px;height:16px}
+@media (min-width:760px){.top .priv{display:inline-flex}}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 22px;border-radius:999px;border:0;background:var(--blue);color:#FFFFFF;font-weight:700;font-size:15px;text-decoration:none;cursor:pointer;transition:transform .15s,box-shadow .2s,background .2s;white-space:nowrap}
+.btn:hover{background:var(--blue2);box-shadow:0 8px 20px rgba(10,120,194,.25)}
+.btn:active{transform:scale(.97)}
+.btn.light{background:#FFFFFF;color:var(--ink);border:1px solid var(--edge)}
+.btn.light:hover{background:var(--tint);box-shadow:none}
+.btn.white{background:#FFFFFF;color:var(--blue2)}
+.btn.ghost{background:rgba(255,255,255,.16);color:#FFFFFF;border:1px solid rgba(255,255,255,.45)}
+.btn.ghost:hover{background:rgba(255,255,255,.26)}
+.btn svg{width:18px;height:18px;flex:0 0 auto}
+.btn.sm{min-height:44px;padding:0 16px;font-size:14px}
+/* hero */
+.hero{margin-top:16px;border-radius:var(--R);color:#FFFFFF;background:radial-gradient(120% 140% at 100% 0%,#3EA6EC 0%,#0A78C2 38%,#054F81 75%,#04263F 100%);padding:28px 20px 22px;position:relative;overflow:hidden;isolation:isolate}
+.hero::before{content:"";position:absolute;right:-60px;top:-60px;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.22),rgba(255,255,255,0) 70%);z-index:-1}
+.hero .kick{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.16);border-radius:999px;padding:5px 12px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.hero .kick svg{width:14px;height:14px}
+.hero h1{font-size:clamp(32px,7vw,58px);line-height:1.02;letter-spacing:-.035em;font-weight:800;margin:14px 0 6px}
+.hero .org{margin:0;color:#CFE8FA;font-weight:600}
+.hero .say{font-size:clamp(19px,3.2vw,26px);line-height:1.3;font-weight:700;margin:18px 0 0;max-width:30ch;letter-spacing:-.01em}
+.hero .say b{color:#FFFFFF;background:linear-gradient(transparent 62%,rgba(107,189,242,.55) 62%)}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:22px}
+.stat{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);border-radius:20px;padding:14px 14px 12px;min-width:0}
+.stat b{display:block;font-size:clamp(26px,5.5vw,38px);font-weight:800;letter-spacing:-.03em;line-height:1.05;font-variant-numeric:tabular-nums}
+.stat span{display:block;font-size:13px;font-weight:600;color:#D7ECFB;margin-top:4px;line-height:1.3}
+.hero .acts{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
+.hero-ph{display:none}
+@media (min-width:1000px){.hero.has-ph{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:0 48px;align-items:center}.hero.has-ph .stats,.hero.has-ph .acts{grid-column:1/-1}
+  .hero-ph{display:block;grid-column:2;grid-row:1;margin:0;position:relative;transform:rotate(2deg)}
+  .hero-ph img{width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:24px;border:6px solid rgba(255,255,255,.9);box-shadow:0 20px 40px rgba(4,38,63,.35);display:block}
+  .hero-ph figcaption{position:absolute;left:18px;bottom:18px;background:rgba(4,38,63,.78);border-radius:999px;padding:5px 12px;font-size:13px;font-weight:700}}
+@media (min-width:760px){.hero{padding:40px 40px 34px}.stats{grid-template-columns:repeat(4,1fr);gap:14px}}
+/* anniversary */
+.anni{margin-top:16px;border-radius:var(--R);background:linear-gradient(135deg,#FFF6E0,#FDE7C2);border:1px solid #F3D49A;padding:18px;display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start;color:#5B3600}
+.anni > span{display:block}
+.anni .ph{width:84px;height:84px;border-radius:18px;object-fit:cover;background:#F3D49A;display:flex;align-items:center;justify-content:center;font-size:40px}
+.anni h2{margin:0;font-size:20px;letter-spacing:-.02em;color:#4A2C00}
+.anni p{margin:4px 0 0;font-size:14px}
+.anni button{margin-top:8px}
+/* sections */
+section.blk{margin-top:34px}
+.sh{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:12px}
+.sh h2{margin:0;font-size:clamp(24px,3.4vw,34px);letter-spacing:-.03em;line-height:1.08;font-weight:800;color:#0A0A0A}
+.sh p{margin:4px 0 0;color:var(--muted);font-size:14px}
+/* map */
+.mapbox{position:relative;border-radius:var(--R);overflow:hidden;border:1px solid var(--line);background:#DDE7EE}
+#map{height:420px}
+@media (min-width:900px){#map{height:520px}}
+.leaflet-container{font-family:inherit}
+.mtog{position:absolute;top:12px;left:12px;z-index:1000;display:flex;background:#FFFFFF;border-radius:999px;padding:4px;box-shadow:0 4px 14px rgba(4,38,63,.18)}
+.mtog button{border:0;background:transparent;border-radius:999px;min-height:38px;padding:0 14px;font-size:13px;font-weight:700;color:var(--ink);cursor:pointer}
+.mtog button[aria-pressed=true]{background:var(--ink);color:#FFFFFF}
+.mfit{position:absolute;top:96px;right:10px;z-index:1000;width:46px;height:46px;border-radius:50%;border:0;background:#FFFFFF;box-shadow:0 4px 14px rgba(4,38,63,.18);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink)}
+.mfit svg{width:22px;height:22px}
+.legend{display:flex;flex-wrap:wrap;gap:8px 14px;margin:10px 4px 0;font-size:13px;font-weight:600;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:12px;height:12px;border-radius:50%;background:var(--c);box-shadow:0 0 0 2px #FFFFFF,0 0 0 3px var(--c)}
+.dpin{position:relative;width:34px;height:34px}
+.dpin::before{content:"";position:absolute;left:3px;top:0;width:28px;height:28px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:var(--c);box-shadow:0 3px 8px rgba(0,0,0,.35);border:3px solid #FFFFFF}
+.dpin::after{content:"";position:absolute;left:13px;top:10px;width:8px;height:8px;border-radius:50%;background:#FFFFFF}
+.dpin.on::before{transform:rotate(-45deg) scale(1.18)}
+.pcard{position:absolute;left:10px;right:10px;bottom:10px;z-index:1000;background:#FFFFFF;border-radius:20px;box-shadow:0 12px 32px rgba(4,38,63,.25);display:grid;grid-template-columns:72px 1fr;gap:4px 12px;padding:10px;align-items:start;animation:up .25s ease}
+.pcard.hidden{display:none}
+.pcard img,.pcard .noimg{width:72px;height:72px;border-radius:14px;object-fit:cover;background:var(--tint)}
+.pcard .noimg{display:flex;align-items:center;justify-content:center;color:var(--blue)}
+.pcard .noimg svg{width:34px;height:34px}
+.pcard b{display:block;font-size:16px;line-height:1.25;color:var(--ink);padding-right:30px}
+.pcard small{display:block;color:var(--muted);font-size:13px;margin:2px 0 6px}
+.pcard .row{grid-column:1/-1;display:grid;grid-template-columns:1fr 1.4fr;gap:8px;margin-top:6px}.pcard .row .btn{padding:0 10px;font-size:13.5px}
+.pcard .x{position:absolute;top:6px;right:6px;width:36px;height:36px;border:0;border-radius:50%;background:transparent;cursor:pointer;font-size:20px;line-height:1;color:var(--muted)}
+@media (min-width:760px){.pcard{left:auto;width:420px}}
+@keyframes up{from{transform:translateY(12px);opacity:0}to{transform:none;opacity:1}}
+/* badges */
+.badge{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:4px 10px;font-size:12px;font-weight:700;background:var(--bg2,#EEF0F2);color:var(--fg,#141618);white-space:nowrap}
+.badge::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--c)}
+.b-working{--c:var(--ok);--bg2:var(--okbg);--fg:#0F5432}
+.b-repairing{--c:var(--amber);--bg2:var(--warnbg);--fg:var(--warn)}
+.b-notworking{--c:var(--bad);--bg2:var(--badbg);--fg:var(--bad)}
+.b-building{--c:var(--build);--bg2:var(--buildbg);--fg:#4B2A93}
+.b-planned{--c:var(--plan);--bg2:#EEF0F2;--fg:#3B4045}
+.b-done{--c:var(--blue);--bg2:var(--tint);--fg:var(--deep)}
+.checked{font-size:12px;color:var(--muted);font-weight:600}
+/* project cards */
+.grid{display:grid;grid-template-columns:1fr;gap:14px}
+@media (min-width:640px){.grid{grid-template-columns:1fr 1fr}}
+@media (min-width:1000px){.grid{grid-template-columns:repeat(3,1fr)}}
+.pj{display:flex;flex-direction:column;text-align:left;border:1px solid var(--line);background:var(--card);border-radius:var(--r);overflow:hidden;padding:0;cursor:pointer;transition:transform .2s,box-shadow .2s;color:inherit}
+.pj:hover{transform:translateY(-3px);box-shadow:0 14px 30px rgba(4,38,63,.12)}
+.pj .ph{aspect-ratio:16/10;background:var(--tint);position:relative;overflow:hidden}
+.pj .ph img{width:100%;height:100%;object-fit:cover;display:block}
+.pj .ph .badge{position:absolute;left:12px;top:12px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.pj .ph .noimg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--blue)}
+.pj .ph .noimg svg{width:48px;height:48px;opacity:.6}
+.pj .bd{padding:14px 16px 16px;display:flex;flex-direction:column;gap:4px;flex:1}
+.pj .bd b{font-size:18px;letter-spacing:-.015em;line-height:1.2;color:var(--ink)}
+.pj .bd small{color:var(--muted);font-size:13px;font-weight:600}
+.pj .nums{display:flex;gap:16px;margin-top:10px;flex-wrap:wrap}
+.pj .nums div{min-width:0}
+.pj .nums strong{display:block;font-size:20px;color:var(--ink);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.pj .nums span{font-size:12px;color:var(--muted);font-weight:600}
+.pj .go{margin-top:auto;padding-top:12px;font-weight:700;font-size:14px;color:var(--blue2);display:flex;align-items:center;gap:6px}
+.pj .go svg{width:16px;height:16px}
+/* updates */
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 6px;margin:0 -2px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;min-height:44px;padding:0 18px;border-radius:999px;border:1px solid var(--edge);background:#FFFFFF;font-weight:700;font-size:14px;color:var(--ink);cursor:pointer}
+.chip[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:#FFFFFF}
+.chip i{font-style:normal;opacity:.7;margin-left:4px;font-weight:600}
+.feed{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-direction:column;gap:10px}
+.up{display:grid;grid-template-columns:42px 1fr;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:14px}
+.up .ic{width:42px;height:42px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:var(--b,var(--tint));color:var(--c,var(--blue))}
+.up .ic svg{width:22px;height:22px}
+.up .hd{display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap}
+.up .hd b{font-size:15px;color:var(--ink)}
+.up .hd time{font-size:12px;color:var(--muted);font-weight:600;white-space:nowrap}
+.up .pn{border:0;background:none;padding:0;font-weight:700;font-size:13px;color:var(--blue2);cursor:pointer;text-align:left;min-height:28px}
+.up p{margin:4px 0 0;font-size:14px}
+.up .facts{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.up .facts span{background:#F2F4F6;border-radius:999px;padding:3px 10px;font-size:12px;font-weight:600;color:#3B4045}
+.up blockquote{margin:6px 0 0;font-size:16px;font-weight:600;color:var(--ink);line-height:1.45}
+.up blockquote cite{display:block;font-size:13px;font-style:normal;color:var(--muted);margin-top:2px;font-weight:600}
+.strip{display:flex;gap:6px;margin-top:8px;overflow-x:auto}
+.strip button{border:0;padding:0;background:none;cursor:zoom-in;flex:0 0 auto}
+.strip img{width:84px;height:84px;object-fit:cover;border-radius:12px;display:block;background:var(--tint)}
+.up video,.up .thx{margin-top:8px;max-width:100%;width:340px;border-radius:14px;background:#000;display:block}
+.up .thx{background:var(--tint);aspect-ratio:4/3;object-fit:cover}
+.up.anniv{background:linear-gradient(135deg,#FFF6E0,#FDE7C2);border-color:#F3D49A}
+.empty{background:var(--card);border:1px dashed var(--edge);border-radius:20px;padding:20px;text-align:center;color:var(--muted)}
+.more{margin-top:12px}
+/* help band */
+.band{margin-top:34px;border-radius:var(--R);background:var(--ink);color:#FFFFFF;padding:24px 20px;display:grid;gap:18px}
+.band h2{margin:0;font-size:clamp(24px,3.4vw,34px);letter-spacing:-.03em;line-height:1.1}
+.band p{margin:6px 0 0;color:#CFE8FA}
+.band .acts{display:flex;flex-wrap:wrap;gap:10px}
+@media (min-width:860px){.band{grid-template-columns:1.2fr 1fr;align-items:center;padding:34px 40px}.band .acts{justify-content:flex-end}}
+footer{margin:34px 0 0;padding:22px 16px 34px;text-align:center;color:var(--muted);font-size:13px;border-top:1px solid var(--line)}
+footer a{font-weight:700}
+/* project detail */
+.ov{position:fixed;inset:0;z-index:1400;background:rgba(4,38,63,.45);opacity:0;transition:opacity .2s;display:flex;justify-content:flex-end}
+.ov.on{opacity:1}
+.ov.hidden{display:none}
+.det{background:var(--bg);width:100%;max-width:640px;height:100%;overflow-y:auto;overscroll-behavior:contain;transform:translateX(40px);transition:transform .25s ease;outline:none}
+.ov.on .det{transform:none}
+.dbar{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:8px;padding:10px 12px;background:rgba(250,248,243,.95);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.dbar b{flex:1;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.iconbtn{width:44px;height:44px;border-radius:50%;border:0;background:#FFFFFF;box-shadow:0 1px 4px rgba(4,38,63,.15);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink);flex:0 0 auto}
+.iconbtn svg{width:22px;height:22px}
+.dbody{padding:0 16px 40px}
+.gal{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;margin:12px -16px 0;padding:0 16px;scrollbar-width:thin}
+.gal figure{margin:0;flex:0 0 86%;scroll-snap-align:center;position:relative}
+.gal img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:20px;display:block;background:var(--tint)}
+.gal figcaption{position:absolute;left:10px;bottom:10px;background:rgba(4,38,63,.72);color:#FFFFFF;font-size:12px;font-weight:600;border-radius:999px;padding:3px 10px}
+.gal.one figure{flex-basis:100%}
+.nophoto{margin-top:12px;border-radius:20px;background:var(--tint);color:var(--deep);padding:18px;font-size:14px;display:flex;gap:12px;align-items:center}
+.nophoto svg{width:26px;height:26px;flex:0 0 auto}
+.dt h1{font-size:clamp(28px,6vw,40px);line-height:1.05;letter-spacing:-.03em;margin:18px 0 6px;font-weight:800;color:#0A0A0A}
+.dt .where{color:var(--muted);font-weight:600;margin:0}
+.dt .st{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px}
+.facts2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.facts2 div{background:#FFFFFF;border:1px solid var(--line);border-radius:18px;padding:12px 14px;min-width:0}
+.facts2 span{display:block;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.facts2 b{display:block;font-size:18px;color:var(--ink);letter-spacing:-.01em;overflow-wrap:anywhere}
+.facts2 .big b{font-size:26px}
+.dacts{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.dacts .btn{flex:1 1 auto}
+.coords{margin-top:8px;font-size:13px;color:var(--muted);font-weight:600}
+.dt h2{font-size:21px;letter-spacing:-.02em;margin:28px 0 10px;color:#0A0A0A}
+.tl{list-style:none;margin:0;padding:0 0 0 18px;border-left:2px solid var(--line)}
+.tl li{position:relative;padding:0 0 16px 14px}
+.tl li::before{content:"";position:absolute;left:-26px;top:4px;width:14px;height:14px;border-radius:50%;background:var(--c,var(--blue));box-shadow:0 0 0 3px var(--bg)}
+.tl b{display:block;font-size:15px;color:var(--ink)}
+.tl time{font-size:12px;color:var(--muted);font-weight:600}
+.tl .facts{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.tl .facts span{background:#FFFFFF;border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:12px;font-weight:600}
+.rep{background:#FFFFFF;border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:10px}
+.rep b{color:var(--ink)}
+.rep p{margin:4px 0 0;font-size:14px}
+.quote{margin:0 0 10px;background:var(--tint);border-radius:20px;padding:16px 18px;font-size:17px;font-weight:600;color:var(--ink)}
+.quote cite{display:block;font-size:13px;font-style:normal;color:var(--muted);margin-top:4px}
+.thanks{display:grid;grid-template-columns:1fr;gap:10px}
+.thanks figure{margin:0;background:#FFFFFF;border:1px solid var(--line);border-radius:18px;overflow:hidden}
+.thanks img,.thanks video{width:100%;display:block;max-height:420px;object-fit:cover;background:#000}
+.thanks figcaption{padding:10px 12px;font-size:14px;font-weight:600}
+/* before and after */
+.ba{position:relative;margin-top:12px;border-radius:20px;overflow:hidden;aspect-ratio:4/3;background:var(--tint);user-select:none;touch-action:pan-y}
+.ba img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none}
+.ba .after{clip-path:inset(0 0 0 var(--x,50%))}
+.ba .line{position:absolute;top:0;bottom:0;left:var(--x,50%);width:3px;margin-left:-1.5px;background:#FFFFFF;box-shadow:0 0 6px rgba(0,0,0,.4);pointer-events:none}
+.ba .knob{position:absolute;top:50%;left:var(--x,50%);width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;background:#FFFFFF;box-shadow:0 4px 12px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;color:var(--ink);pointer-events:none}
+.ba .knob svg{width:24px;height:24px}
+.ba .tag{position:absolute;top:10px;background:rgba(4,38,63,.75);color:#FFFFFF;font-size:12px;font-weight:700;border-radius:999px;padding:4px 10px;pointer-events:none}
+.ba .tag.l{left:10px}.ba .tag.r{right:10px}
+.ba input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:ew-resize}
+.ba:focus-within{outline:3px solid var(--blue);outline-offset:2px}
+.lbx{position:fixed;inset:0;z-index:1600;background:rgba(0,0,0,.9);display:flex;align-items:center;justify-content:center;padding:16px}
+.lbx img{max-width:100%;max-height:100%;border-radius:12px}
+.lbx button{position:absolute;top:14px;right:14px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:1700;background:var(--ink);color:#FFFFFF;padding:12px 18px;border-radius:999px;font-weight:700;font-size:14px;box-shadow:0 8px 20px rgba(0,0,0,.25);max-width:90vw;text-align:center}
+/* states */
+.skel{border-radius:var(--R);background:linear-gradient(90deg,#ECEEF0 25%,#F6F7F8 50%,#ECEEF0 75%);background-size:200% 100%;animation:sk 1.2s infinite}
+@keyframes sk{to{background-position:-200% 0}}
+.gone{max-width:520px;margin:60px auto;text-align:center;padding:0 16px}
+.gone .ic{width:72px;height:72px;border-radius:24px;background:var(--tint);color:var(--blue);display:inline-flex;align-items:center;justify-content:center}
+.gone .ic svg{width:36px;height:36px}
+.gone h1{font-size:30px;letter-spacing:-.03em;margin:18px 0 8px}
+.gone p{color:var(--muted)}
+.gone .acts{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:20px}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+/* printed impact report (Download impact report → Save as PDF) */
+#report{display:none}
+.lh-wrap,.lh-wrap>tbody,.lh-wrap>tbody>tr,.lh-wrap>tbody>tr>td{display:block;padding:0}.lh-wrap>tfoot{display:none}
+.lh-top{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;border-bottom:2px solid #1A365D;margin-bottom:18px;font-family:Helvetica,Arial,sans-serif}
+.lh-logo{display:block;width:38%;max-width:220px;height:auto;margin-bottom:10px}
+.lh-adr{font-style:normal;text-align:right;color:#000000;font-size:11px;line-height:1.36}
+.lh-foot{position:relative;display:flex;align-items:center;gap:14px;margin-top:22px;font-family:Helvetica,Arial,sans-serif}
+.lh-foot span{flex:1;border-top:1px solid #1A365D;padding-top:6px;color:#808080;font-size:10px;line-height:1.3}
+.lh-flogo{display:block;width:64px;height:auto;flex:0 0 auto}
+.rp h1{font-size:22pt;letter-spacing:-.02em;margin:0 0 2pt;color:#04263F}
+.rp .sub{color:#5A6066;margin:0 0 14pt;font-size:10pt}
+.rp .kp{display:grid;grid-template-columns:repeat(4,1fr);gap:8pt;margin:0 0 14pt}
+.rp .kp div{border:1pt solid #CFE3F3;background:#F2F9FE;border-radius:8pt;padding:8pt}
+.rp .kp b{display:block;font-size:17pt;color:#04263F}
+.rp .kp span{font-size:8.5pt;color:#3B4045}
+.rp h2{font-size:12.5pt;margin:14pt 0 6pt;color:#04263F}
+.rp table{width:100%;border-collapse:collapse;font-size:8.8pt}
+.rp th{background:#076DB1;color:#FFFFFF;text-align:left;padding:5pt}
+.rp td{padding:5pt;border-bottom:.75pt solid #DCE1E5;vertical-align:top}
+.rp tr{break-inside:avoid}
+.rp ul{margin:0;padding-left:14pt;font-size:9.5pt}
+.rp li{margin-bottom:3pt}
+.rp .thx{margin-top:14pt;font-size:10pt}
+@media print{
+  @page{margin:22pt .6in 18pt}
+  body{background:#FFFFFF;font-size:10pt}
+  body>*:not(#report){display:none!important}
+  #report{display:block}
+  .lh-wrap{display:table;width:100%;table-layout:fixed;border-collapse:collapse}.lh-wrap>tbody{display:table-row-group}.lh-wrap>tfoot{display:table-footer-group}.lh-wrap tr{display:table-row}.lh-wrap>tbody>tr>td,.lh-wrap>tfoot>tr>td{display:table-cell;padding:0}
+  .lh-sp{height:44pt}
+  .lh-top{gap:0;border-bottom-width:1.5pt;margin-bottom:22pt}.lh-logo{width:201.6pt;max-width:none;height:67.96pt;margin-bottom:14.4pt}.lh-adr{font-size:9pt;line-height:12pt}
+  .lh-foot{position:fixed;left:0;right:0;bottom:0;height:24pt;margin:0;display:block;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .lh-foot span{position:absolute;left:0;right:78pt;bottom:5.2pt;height:12.8pt;border-top:.75pt solid #1A365D;padding:0;display:flex;align-items:flex-end;font-size:8pt;line-height:9.6pt}
+  .lh-flogo{position:absolute;right:0;bottom:2pt;width:64pt;height:21.58pt}
+  .rp th,.rp .kp div{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+<a class="vh" href="#main">Skip to content</a>
+<header class="top">
+  <div class="wrap">
+    <a class="home" href="/" aria-label="RAFIKI Outreach home page"><img src="/img/logo-dark-bold.png" alt="RAFIKI Outreach" width="88" height="30"></a>
+    <span class="sp"></span>
+    <span class="priv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></svg>Private page, just for you</span>
+    <a class="btn sm" href="/donate" id="giveTop">Give again</a>
+  </div>
+</header>
+<main id="main" class="wrap" aria-live="polite" aria-busy="true">
+  <div class="skel" style="height:340px;margin-top:16px"></div>
+  <div class="skel" style="height:420px;margin-top:24px"></div>
+</main>
+<div class="ov hidden" id="ov" aria-hidden="true"><div class="det" id="det" role="dialog" aria-modal="true" aria-labelledby="dTitle" tabindex="-1"></div></div>
+<div id="report" aria-hidden="true"></div>
+<footer id="foot" hidden>
+  <p>This page is private to you: please don’t share its address. To share a project, use the <b>Share</b> button on it.</p>
+  <p>RAFIKI Outreach · 501(c)(3) Nonprofit Organization · <a href="mailto:info@rafikioutreach.org">info@rafikioutreach.org</a> · <a href="/privacy-policy">Privacy</a></p>
+</footer>
+<script src="/vendor/leaflet/leaflet.js"></script>
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  var qa = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  var CONTACT = 'info@rafikioutreach.org';
+  var TOKEN = (/^\/donor\/([A-Za-z0-9_-]{20,80})\/?$/.exec(location.pathname) || [])[1] || '';
+  var D = null, map = null, layers = {}, markers = {}, filter = 'all', shown = 20, lastFocus = null;
+  var STILL = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var ICON = {
+    drop: '<path d="M12 3.5s6 6.6 6 11a6 6 0 0 1-12 0c0-4.4 6-11 6-11z"/>',
+    clip: '<rect x="5" y="4.5" width="14" height="16.5" rx="2.5"/><path d="M9 4.5V3.5h6v1M8.5 12l2.2 2.2L15.5 9.5"/>',
+    wrench: '<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/>',
+    quote: '<path d="M9.5 7.5H6a1.5 1.5 0 0 0-1.5 1.5v3A1.5 1.5 0 0 0 6 13.5h2.5V15A2.5 2.5 0 0 1 6 17.5M19.5 7.5H16a1.5 1.5 0 0 0-1.5 1.5v3a1.5 1.5 0 0 0 1.5 1.5h2.5V15a2.5 2.5 0 0 1-2.5 2.5"/>',
+    camera: '<path d="M4 8.5h3l1.6-2.5h6.8L17 8.5h3v10.5H4z"/><circle cx="12" cy="13.5" r="3.3"/>',
+    heart: '<path d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.3a4.3 4.3 0 0 1 7.5 2.5C19.5 15.4 12 20 12 20z"/>',
+    cake: '<path d="M4.5 20.5h15v-7a2 2 0 0 0-2-2h-11a2 2 0 0 0-2 2z"/><path d="M4.5 15.5c1.5 1 3 1 4.5 0s3-1 4.5 0 3 1 4.5 0M12 11.5V8M12 5.5v.1"/>',
+    pin: '<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.6"/>',
+    fit: '<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>',
+    x: '<path d="M6 6l12 12M18 6L6 18"/>',
+    back: '<path d="M19 12H5M11 6l-6 6 6 6"/>',
+    share: '<circle cx="18" cy="5.5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="18.5" r="2.5"/><path d="M8.2 10.8l7.6-4.1M8.2 13.2l7.6 4.1"/>',
+    mail: '<rect x="3.5" y="5.5" width="17" height="13" rx="2"/><path d="M4 7l8 6 8-6"/>',
+    down: '<path d="M12 4v11M7 10.5l5 5 5-5M5 20h14"/>',
+    arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>',
+    map: '<path d="M3.5 6.5l5.5-2.5 6 2.5 5.5-2.5v13.5L15 20l-6-2.5-5.5 2.5z"/><path d="M9 4v13.5M15 6.5V20"/>',
+    lock: '<rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/>',
+    lr: '<path d="M9 7l-5 5 5 5M15 7l5 5-5 5"/>',
+    spark: '<path d="M12 3.5l1.9 5.6 5.6 1.9-5.6 1.9L12 18.5l-1.9-5.6L4.5 11l5.6-1.9z"/>',
+    school: '<path d="M3 9.5L12 5l9 4.5"/><path d="M5 10.5V19h14v-8.5"/><path d="M10 19v-4.5h4V19M3 19h18"/>',
+    house: '<path d="M4 11.5L12 5l8 6.5"/><path d="M6 10v9.5h12V10"/><path d="M10 19.5v-5h4v5"/>'
+  };
+  function ic(n) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICON[n] || ICON.drop) + '</svg>'; }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function n(v) { return Math.round(Number(v) || 0).toLocaleString('en-US'); }
+  function day(iso, yr) { var d = new Date(iso); return isNaN(d) ? '' : d.toLocaleDateString('en-GB', yr === false ? { day: 'numeric', month: 'short' } : { day: 'numeric', month: 'short', year: 'numeric' }); }
+  function toast(t) { var d = document.createElement('div'); d.className = 'toast'; d.setAttribute('role', 'status'); d.textContent = t; document.body.appendChild(d); setTimeout(function () { d.remove(); }, 2600); }
+  function first(name) { return String(name || '').trim().split(/\s+/)[0] || 'friend'; }
+  function boardPhoto(id, w) { return '/api/photo/' + encodeURIComponent(id) + '?w=' + (w || 960); }
+  function visitPhoto(id, w) { return '/api/donor?photo=' + encodeURIComponent(id) + '&w=' + (w || 960) + '&t=' + encodeURIComponent(TOKEN); }
+  function byId(id) { return (D.projects || []).filter(function (p) { return p.id === id; })[0]; }
+  function cover(p) { return p.photos.length ? boardPhoto(p.photos[0], 960) : p.gallery.length ? visitPhoto(p.gallery[0].id, 960) : ''; }
+
+  // status: Working / Being repaired / Not working (with "last checked"), else the project's stage
+  var ST = { working: ['Working', 'b-working', '#1C7C4A'], repairing: ['Being repaired', 'b-repairing', '#D98200'], notworking: ['Not working', 'b-notworking', '#B3261E'],
+    building: ['Being built', 'b-building', '#7A4FD0'], planned: ['Planned', 'b-planned', '#5A6066'], done: ['Completed', 'b-done', '#0A78C2'] };
+  function stKey(p) { return p.health ? p.health.state : p.status === 'Under construction' ? 'building' : p.status === 'Upcoming' ? 'planned' : 'done'; }
+  function badge(p) { var s = ST[stKey(p)]; return '<span class="badge ' + s[1] + '">' + s[0] + '</span>'; }
+  function checked(p) { return p.health ? '<span class="checked">Last checked ' + esc(day(p.health.at)) + '</span>' : ''; }
+  function place(p) { return [p.area, p.country].filter(Boolean).join(', '); }
+  function gmaps(p) { return 'https://www.google.com/maps/search/?api=1&query=' + p.gps[0] + ',' + p.gps[1]; }
+  function typeIcon(p) { return p.water ? 'drop' : p.cat === 'school' ? 'school' : p.cat === 'children' ? 'house' : 'spark'; }
+  var KIND = { 'Borehole well': 'Borehole well', 'Water collection': 'Rainwater collection', School: 'School', Health: 'Health centre', Orphanage: 'Children’s home', Farming: 'Farming', Training: 'Training', Nutrition: 'Nutrition', Community: 'Community' };
+
+  // ---- load ----
+  function gone(kind) {
+    $('main').setAttribute('aria-busy', 'false');
+    var rate = kind === 'rate', down = kind === 'down';
+    $('main').innerHTML = '<div class="gone"><span class="ic">' + ic(rate || down ? 'drop' : 'lock') + '</span>' +
+      '<h1>' + (rate ? 'Please try again in a little while' : down ? 'We couldn’t load your projects just now' : 'This link isn’t working') + '</h1>' +
+      '<p>' + (rate ? 'Too many tries from this connection.' : down ? 'Please try again in a few minutes.' : 'It may have been replaced with a new one, or typed incompletely. We’ll gladly send you a fresh link.') + '</p>' +
+      '<div class="acts"><a class="btn" href="mailto:' + CONTACT + '?subject=' + encodeURIComponent('My RAFIKI project page link') + '">' + ic('mail') + 'Ask for a new link</a><a class="btn light" href="/">RAFIKI Outreach home</a></div></div>';
+    $('foot').hidden = false;
+  }
+  function load() {
+    if (!TOKEN) return gone('link');
+    fetch('/api/donor', { headers: { Accept: 'application/json', 'X-Donor-Token': TOKEN }, credentials: 'omit', cache: 'no-store' })
+      .then(function (r) { return r.json().catch(function () { return { ok: false, reason: 'down' }; }); })
+      .then(function (j) { if (!j || !j.ok) return gone(j && j.reason); D = j; render(); })
+      .catch(function () { gone('down'); });
+  }
+
+  // ---- page ----
+  function render() {
+    var t = D.totals, who = D.donor.viewer || D.donor.name, P = D.projects;
+    document.title = 'Your projects, ' + first(who) + ' — RAFIKI Outreach';
+    var say = t.people ? 'Your ' + (t.projects === 1 ? 'project serves' : '<b>' + t.projects + ' projects</b> serve') + ' about <b>' + n(t.people) + ' people</b>' + (t.water && t.years >= 1 ? ', with <b>' + yrs(t.years) + ' years</b> of clean water delivered so far.' : '.')
+      : 'Thank you for making ' + (t.projects === 1 ? 'this project' : 'these ' + t.projects + ' projects') + ' possible.';
+    var stats = [];
+    stats.push(stat(t.people, 'people served'));
+    if (t.water) stats.push(stat(t.years, t.years === 1 ? 'year of clean water' : 'years of clean water', t.years < 10 ? 1 : 0));
+    if (t.workingPct != null) stats.push(stat(t.workingPct, 'of wells working at the last check', 0, '%'));
+    if (t.litresPerDay) stats.push(stat(t.litresPerDay, 'litres of water a day'));
+    if (t.pupils) stats.push(stat(t.pupils, 'pupils learning'));
+    if (t.patients) stats.push(stat(t.patients, 'patients a week'));
+    if (t.children) stats.push(stat(t.children, 'children cared for'));
+    if (stats.length < 4) stats.push(stat(t.projects, t.projects === 1 ? 'project you funded' : 'projects you funded'));
+    var anni = P.filter(function (p) { return p.anniversary; });
+    var hp = P.filter(function (p) { return cover(p); })[0];
+    var h = '<section class="hero' + (hp ? ' has-ph' : '') + '" aria-labelledby="hi">' + (hp ? '<figure class="hero-ph"><img src="' + esc(cover(hp)) + '" alt="' + esc(hp.title) + '"><figcaption>' + esc(hp.title) + '</figcaption></figure>' : '') +
+      '<div class="hero-tx"><span class="kick">' + ic('lock') + 'Your private project page</span>' +
+      '<h1 id="hi">Welcome, ' + esc(first(who)) + '</h1>' +
+      '<p class="org">' + esc([D.donor.group || D.donor.viewer !== D.donor.name ? D.donor.name : '', D.donor.org && D.donor.org !== D.donor.name ? D.donor.org : ''].filter(Boolean).join(' · ') || 'Thank you for giving with RAFIKI Outreach') + '</p>' +
+      '<p class="say">' + say + '</p></div>' +
+      '<div class="stats">' + stats.slice(0, 4).join('') + '</div>' +
+      '<div class="acts"><a class="btn white" href="#mapsec">' + ic('map') + 'See them on the map</a><button class="btn ghost" type="button" id="pdf">' + ic('down') + 'Download impact report</button></div></section>';
+    anni.forEach(function (p) {
+      var img = cover(p);
+      h += '<section class="anni" aria-label="Anniversary"><span>' + (img ? '<img class="ph" src="' + esc(img) + '" alt="" loading="lazy">' : '<span class="ph" aria-hidden="true">🎉</span>') + '</span><div>' +
+        '<h2>🎉 ' + (p.anniversary.years === 1 ? 'One year' : p.anniversary.years + ' years') + ' of water at ' + esc(p.title) + '</h2>' +
+        '<p>Since ' + esc(day(p.done)) + ', about ' + n(p.impact.people) + ' people have had clean water close to home' + (p.impact.litresPerDay ? ', some ' + n(p.impact.litresPerDay) + ' litres a day' : '') + '. Thank you!</p>' +
+        '<button class="btn sm" type="button" data-open="' + esc(p.id) + '">See the project</button></div></section>';
+    });
+    h += '<section class="blk" id="mapsec" aria-labelledby="hMap"><div class="sh"><div><h2 id="hMap">Your projects on the map</h2><p>Exact locations. Tap a pin to see the project.</p></div></div>' +
+      '<div class="mapbox"><div id="map" role="region" aria-label="Map of your projects"></div>' +
+      '<div class="mtog" role="group" aria-label="Map style"><button type="button" data-l="street" aria-pressed="true">Map</button><button type="button" data-l="sat" aria-pressed="false">Satellite</button></div>' +
+      '<button class="mfit" type="button" id="fit" aria-label="Show all your projects" title="Show all your projects">' + ic('fit') + '</button>' +
+      '<div class="pcard hidden" id="pcard" role="dialog" aria-label="Project"></div></div>' +
+      '<div class="legend" aria-label="Pin colours">' + ['working', 'repairing', 'notworking', 'building', 'done'].filter(function (k) { return P.some(function (p) { return stKey(p) === k; }); }).map(function (k) { return '<span style="--c:' + ST[k][2] + '"><i></i>' + (k === 'done' ? 'Completed, not checked yet' : ST[k][0]) + '</span>'; }).join('') + '</div></section>';
+    h += '<section class="blk" aria-labelledby="hPj"><div class="sh"><div><h2 id="hPj">' + (P.length === 1 ? 'Your project' : 'Your ' + P.length + ' projects') + '</h2><p>Tap one for photos, visits and repairs.</p></div></div><div class="grid">' + P.map(card).join('') + '</div></section>';
+    var cnt = function (f) { return D.updates.filter(function (u) { return inF(u, f); }).length; };
+    h += '<section class="blk" aria-labelledby="hUp"><div class="sh"><div><h2 id="hUp">Latest updates</h2><p>From the RAFIKI field team, newest first.</p></div></div>' +
+      '<div class="chips" role="group" aria-label="Show">' + [['all', 'All'], ['visit', 'Visits'], ['repair', 'Repairs'], ['story', 'Stories']].map(function (f) { return '<button class="chip" type="button" data-f="' + f[0] + '" aria-pressed="' + (filter === f[0]) + '">' + f[1] + '<i>' + cnt(f[0]) + '</i></button>'; }).join('') + '</div>' +
+      '<ul class="feed" id="feed"></ul><button class="btn light more hidden" type="button" id="more">Show more</button></section>';
+    h += '<section class="band" aria-labelledby="hHelp"><div><h2 id="hHelp">Thank you, ' + esc(first(who)) + '.</h2><p>Every well and classroom here started with a gift like yours. Ready to bring water to the next community?</p></div>' +
+      '<div class="acts"><a class="btn white" href="/donate">' + ic('drop') + 'Fund the next well</a><a class="btn ghost" href="' + esc(mailto(null)) + '">' + ic('mail') + 'Ask the office a question</a></div></section>';
+    $('main').innerHTML = h; $('main').setAttribute('aria-busy', 'false'); $('foot').hidden = false;
+    countUp($('main'));
+    drawFeed(); drawMap();
+    $('pdf').addEventListener('click', report);
+    applyHash();
+  }
+  function yrs(v) { return v < 10 ? (Math.round(v * 10) / 10).toLocaleString('en-US') : n(v); }
+  function stat(v, label, dec, suf) { return '<div class="stat"><b data-n="' + (Number(v) || 0) + '" data-d="' + (dec || 0) + '" data-s="' + (suf || '') + '">' + (dec ? (Number(v) || 0).toFixed(1) : n(v)) + (suf || '') + '</b><span>' + esc(label) + '</span></div>'; }
+  function countUp(root) {
+    qa('[data-n]', root).forEach(function (el) {
+      var to = +el.getAttribute('data-n'), d = +el.getAttribute('data-d'), s = el.getAttribute('data-s') || '';
+      var put = function (v) { el.textContent = (d ? v.toFixed(d) : Math.round(v).toLocaleString('en-US')) + s; };
+      if (STILL || !to) return put(to);
+      var t0 = performance.now(), dur = 1200;
+      put(0);
+      (function step(t) { var k = Math.min(1, (t - t0) / dur); put(to * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(step); })(t0);
+    });
+  }
+  function card(p) {
+    var img = cover(p), nums = [];
+    if (p.impact.people) nums.push([n(p.impact.people), 'people served']);
+    if (p.impact.pupils) nums.push([n(p.impact.pupils), 'pupils']);
+    if (p.impact.patients) nums.push([n(p.impact.patients), 'patients a week']);
+    if (p.impact.children) nums.push([n(p.impact.children), 'children']);
+    if (p.impact.litresPerDay) nums.push([n(p.impact.litresPerDay), 'litres a day']);
+    if (p.year) nums.push([p.year, p.status === 'Completed' ? 'completed' : 'year']);
+    return '<button class="pj" type="button" data-open="' + esc(p.id) + '"><span class="ph">' + (img ? '<img src="' + esc(img) + '" alt="" loading="lazy">' : '<span class="noimg">' + ic(typeIcon(p)) + '</span>') + badge(p) + '</span>' +
+      '<span class="bd"><b>' + esc(p.title) + '</b><small>' + esc((KIND[p.type] || p.type) + ' · ' + place(p)) + '</small>' + checked(p) +
+      '<span class="nums">' + nums.slice(0, 3).map(function (x) { return '<div><strong>' + esc(x[0]) + '</strong><span>' + esc(x[1]) + '</span></div>'; }).join('') + '</span>' +
+      '<span class="go">Photos, visits and repairs ' + ic('arrow') + '</span></span></button>';
+  }
+  function mailto(p) {
+    var subj = 'Question about ' + (p ? p.title : 'my RAFIKI projects') + ' (' + D.donor.name + ')';
+    var body = 'Hello RAFIKI team,\n\n\n\n— ' + (D.donor.viewer || D.donor.name) + (D.donor.org && D.donor.org !== D.donor.name ? ', ' + D.donor.org : '') + (p ? '\nProject: ' + p.title + ', ' + place(p) : '');
+    return 'mailto:' + CONTACT + '?subject=' + encodeURIComponent(subj) + '&body=' + encodeURIComponent(body);
+  }
+
+  // ---- map ----
+  function drawMap() {
+    var pts = D.projects.filter(function (p) { return p.gps; });
+    map = L.map('map', { scrollWheelZoom: false, zoomControl: false, tap: true });
+    L.control.zoom({ position: 'topright' }).addTo(map);
+    layers.street = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' }).addTo(map);
+    layers.sat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, maxNativeZoom: 18, attribution: 'Imagery &copy; Esri, Maxar, Earthstar Geographics' });
+    pts.forEach(function (p) {
+      var c = ST[stKey(p)][2];
+      var m = L.marker(p.gps, { icon: L.divIcon({ className: '', html: '<span class="dpin" style="--c:' + c + '"></span>', iconSize: [34, 40], iconAnchor: [17, 38] }), title: p.title, alt: p.title + ', ' + ST[stKey(p)][0], keyboard: true, riseOnHover: true }).addTo(map);
+      m.on('click', function () { pick(p.id); });
+      markers[p.id] = m;
+    });
+    fit();
+    qa('.mtog button').forEach(function (b) { b.addEventListener('click', function () {
+      var sat = b.getAttribute('data-l') === 'sat';
+      if (sat) { map.removeLayer(layers.street); layers.sat.addTo(map); } else { map.removeLayer(layers.sat); layers.street.addTo(map); }
+      qa('.mtog button').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+    }); });
+    $('fit').addEventListener('click', function () { $('pcard').classList.add('hidden'); fit(); });
+    map.on('click', function () { $('pcard').classList.add('hidden'); });
+    if (!pts.length) $('map').insertAdjacentHTML('beforeend', '<p class="empty" style="position:absolute;inset:auto 12px 12px;z-index:900">Locations will appear here once the field team has pinned them.</p>');
+  }
+  function fit() {
+    var pts = D.projects.filter(function (p) { return p.gps; }).map(function (p) { return p.gps; });
+    if (!pts.length) return map.setView([0.3, 37.9], 6);
+    if (pts.length === 1) return map.setView(pts[0], 15);
+    map.fitBounds(L.latLngBounds(pts), { padding: [48, 48], maxZoom: 15 });
+  }
+  function pick(id) {
+    var p = byId(id); if (!p) return;
+    Object.keys(markers).forEach(function (k) { var el = markers[k].getElement(); if (el && el.firstChild) el.firstChild.classList.toggle('on', k === id); });
+    var img = cover(p), c = $('pcard');
+    c.innerHTML = (img ? '<img src="' + esc(img) + '" alt="">' : '<span class="noimg">' + ic(typeIcon(p)) + '</span>') +
+      '<div><b>' + esc(p.title) + '</b><small>' + esc(place(p)) + (p.impact.people ? ' · ' + n(p.impact.people) + ' people' : '') + '</small>' + badge(p) + '</div>' +
+      '<div class="row"><button class="btn sm" type="button" data-open="' + esc(p.id) + '">See project</button><a class="btn sm light" href="' + esc(gmaps(p)) + '" target="_blank" rel="noopener noreferrer">' + ic('map') + 'Open in Google Maps</a></div>' +
+      '<button class="x" type="button" aria-label="Close">×</button>';
+    c.classList.remove('hidden');
+    c.querySelector('.x').addEventListener('click', function () { c.classList.add('hidden'); });
+    if (map) map.panTo(p.gps, { animate: !STILL });
+  }
+
+  // ---- updates ----
+  function inF(u, f) { return f === 'all' || u.type === f || (f === 'story' && (u.type === 'thanks' || u.type === 'anniversary')) || (f === 'visit' && u.type === 'photos'); }
+  var UI = { visit: ['clip', '#E2F4EA', '#1C7C4A'], repair: ['wrench', '#FDF0DC', '#8A5200'], story: ['quote', '#E3F1FC', '#0A78C2'], photos: ['camera', '#EFE8FB', '#7A4FD0'], thanks: ['heart', '#FBE7E5', '#B3261E'], anniversary: ['cake', '#FFF1D6', '#8A5200'] };
+  var STEP = { assigned: 'A repairer has been assigned', parts: 'Parts are on order' };
+  function visitFacts(u) {
+    var f = [];
+    if (u.users) f.push('about ' + n(u.users) + ' people using it');
+    if (u.flow) f.push(u.flow + ' litres a minute');
+    if (u.water === 'safe') f.push('water tested safe');
+    if (u.water === 'unsafe') f.push('water being treated');
+    if (u.clarity) f.push(u.clarity + ' water');
+    var N = u.numbers || {};
+    if (N.pupils) f.push(n(N.pupils) + ' pupils'); if (N.teachers) f.push(n(N.teachers) + ' teachers'); if (N.patients) f.push(n(N.patients) + ' patients a week');
+    if (N.beds) f.push(n(N.beds) + ' beds in use'); if (N.children) f.push(n(N.children) + ' children'); if (N.animals) f.push(n(N.animals) + ' animals');
+    return f;
+  }
+  function visitTitle(u) { return u.build ? 'Building visit' + (u.stage ? ': ' + u.stage.toLowerCase() : '') : 'Site visit: ' + (u.state === 'working' ? 'working well' : u.state === 'repair' ? 'needs a repair' : u.state === 'notworking' ? 'not working' : 'checked'); }
+  function repairText(u) {
+    var what = u.problems && u.problems.length ? u.problems.join(', ') : '';
+    var cost = u.cost ? 'Cost KES ' + n(u.cost) + (u.costKind === 'estimate' ? ' (estimate)' : '') : '';
+    if (u.fixedAt) return { t: 'Repaired', p: (what ? 'What was fixed: ' + what.toLowerCase() + '. ' : '') + 'Problem found ' + day(u.reported || u.at, false) + ', fixed ' + day(u.fixedAt) + '.' + (cost ? ' ' + cost + '.' : '') };
+    if (!u.open) return { t: 'Problem dealt with', p: (what ? what + '. ' : '') + 'Reported ' + day(u.at) + '.' + (cost ? ' ' + cost + '.' : '') };
+    return { t: 'Repair under way', p: (what ? 'What broke: ' + what.toLowerCase() + '. ' : 'A problem was found. ') + (STEP[u.step] || 'The team is arranging the repair') + '.' + (cost ? ' ' + cost + '.' : '') };
+  }
+  function item(u) {
+    var p = byId(u.pid); if (!p) return '';
+    var ui = UI[u.type] || UI.visit, body = '', title = '';
+    if (u.type === 'visit') { title = visitTitle(u); var f = visitFacts(u); body = f.length ? '<div class="facts">' + f.map(function (x) { return '<span>' + esc(x) + '</span>'; }).join('') + '</div>' : ''; }
+    else if (u.type === 'repair') { var r = repairText(u); title = r.t; body = '<p>' + esc(r.p) + '</p>'; }
+    else if (u.type === 'story') { title = 'From the community'; body = '<blockquote>“' + esc(u.quote) + '”' + (u.who ? '<cite>— ' + esc(u.who) + '</cite>' : '') + '</blockquote>'; }
+    else if (u.type === 'photos') { title = u.n + ' new photo' + (u.n === 1 ? '' : 's'); body = '<div class="strip">' + u.photos.map(function (id) { return '<button type="button" data-zoom="' + esc(visitPhoto(id, 1600)) + '" aria-label="Open photo"><img src="' + esc(visitPhoto(id, 480)) + '" alt="Photo from ' + esc(p.title) + '" loading="lazy"></button>'; }).join('') + '</div>'; }
+    else if (u.type === 'thanks') { title = 'A thank-you from the community'; body = (u.caption ? '<p>“' + esc(u.caption) + '”</p>' : '') + media(u, 480); }
+    else if (u.type === 'anniversary') { title = (u.years === 1 ? 'One year' : u.years + ' years') + ' of clean water!'; body = '<p>About ' + n(p.impact.people) + ' people have water close to home. Thank you for making it happen.</p>'; }
+    return '<li class="up' + (u.type === 'anniversary' ? ' anniv' : '') + '"><span class="ic" style="--b:' + ui[1] + ';--c:' + ui[2] + '">' + ic(ui[0]) + '</span><div><div class="hd"><b>' + esc(title) + '</b><time datetime="' + esc(u.at) + '">' + esc(day(u.at)) + '</time></div>' +
+      '<button class="pn" type="button" data-open="' + esc(p.id) + '">' + esc(p.title) + '</button>' + body + '</div></li>';
+  }
+  function media(x, w) {
+    return x.media === 'video' ? '<video controls playsinline preload="metadata" src="' + esc(visitPhoto(x.id)) + '"></video>' : '<img class="thx" src="' + esc(visitPhoto(x.id, w)) + '" alt="Thank-you photo" loading="lazy">';
+  }
+  function drawFeed() {
+    var list = D.updates.filter(function (u) { return inF(u, filter); });
+    $('feed').innerHTML = list.length ? list.slice(0, shown).map(item).join('') : '<li class="empty">' + (filter === 'all' ? 'No updates yet. The field team visits every project at least once a year; their reports will appear here.' : 'Nothing here yet.') + '</li>';
+    $('more').classList.toggle('hidden', list.length <= shown);
+  }
+
+  // ---- project detail ----
+  function openProj(id, push) {
+    var p = byId(id); if (!p) return;
+    lastFocus = document.activeElement;
+    if (push !== false && location.hash !== '#p/' + id) history.pushState(null, '', '#p/' + id);
+    var pics = p.photos.map(function (x) { return { src: boardPhoto(x, 1600), cap: '' }; }).concat(p.gallery.map(function (g) { return { src: visitPhoto(g.id, 1600), cap: (g.label ? g.label.charAt(0).toUpperCase() + g.label.slice(1) + ' · ' : '') + day(g.at) }; }));
+    var h = '<div class="dbar"><button class="iconbtn" type="button" data-close aria-label="Back to all projects">' + ic('back') + '</button><b>' + esc(p.title) + '</b><button class="iconbtn" type="button" data-share="' + esc(p.id) + '" aria-label="Share this project">' + ic('share') + '</button></div><div class="dbody dt">';
+    h += pics.length ? '<div class="gal' + (pics.length === 1 ? ' one' : '') + '" role="list" aria-label="Photos">' + pics.slice(0, 20).map(function (x, i) { return '<figure role="listitem"><img src="' + esc(x.src) + '" alt="Photo ' + (i + 1) + ' of ' + esc(p.title) + '"' + (i ? ' loading="lazy"' : '') + ' data-zoom="' + esc(x.src) + '">' + (x.cap ? '<figcaption>' + esc(x.cap) + '</figcaption>' : '') + '</figure>'; }).join('') + '</div>' : '';
+    if (!p.photosShown && !p.photos.length) h += '<div class="nophoto">' + ic('camera') + '<span>Photos from visits here show children or patients, so we share them only once everyone has agreed. Ask us if you’d like to see some.</span></div>';
+    h += '<h1 id="dTitle">' + esc(p.title) + '</h1><p class="where">' + esc((KIND[p.type] || p.type) + ' · ' + place(p)) + '</p><div class="st">' + badge(p) + checked(p) + '</div>';
+    if (p.anniversary) h += '<div class="anni" style="margin-top:16px"><span class="ph" aria-hidden="true">🎉</span><div><h2 style="margin:0">' + (p.anniversary.years === 1 ? 'One year' : p.anniversary.years + ' years') + ' of water!</h2><p>Finished on ' + esc(day(p.done)) + '. Thank you for every litre since.</p></div></div>';
+    var F = [];
+    if (p.impact.people) F.push(['People served', 'about ' + n(p.impact.people), 1]);
+    if (p.impact.pupils) F.push(['Pupils', n(p.impact.pupils), 1]);
+    if (p.impact.patients) F.push(['Patients a week', n(p.impact.patients), 1]);
+    if (p.impact.children) F.push(['Children', n(p.impact.children), 1]);
+    if (p.impact.litresPerDay) F.push(['Water a day', 'about ' + n(p.impact.litresPerDay) + ' L', 1]);
+    if (p.impact.years >= 0.1) F.push(['Clean water for', yrs(p.impact.years) + (p.impact.years === 1 ? ' year' : ' years'), 1]);
+    F.push(['Type', KIND[p.type] || p.type]);
+    F.push([p.status === 'Completed' ? 'Completed' : 'Status', p.status === 'Completed' ? (p.done ? day(p.done) : p.year || '—') : p.status === 'Upcoming' ? 'Planned' : 'Being built']);
+    F.push(['Village / area', p.area || '—']); F.push(['Country', p.country]);
+    if (p.depth) F.push(['Well depth', p.depth + ' m']);
+    if (p.pump) F.push(['Pump', p.pump]);
+    h += '<div class="facts2">' + F.map(function (f) { return '<div' + (f[2] ? ' class="big"' : '') + '><span>' + esc(f[0]) + '</span><b>' + esc(f[1]) + '</b></div>'; }).join('') + '</div>';
+    if (p.impact.litresPerDay) h += '<p class="coords">Water a day is worked out from the measured flow over 8 hours of pumping.</p>';
+    h += '<div class="dacts">' + (p.gps ? '<button class="btn" type="button" data-onmap="' + esc(p.id) + '">' + ic('pin') + 'Show on the map</button><a class="btn light" href="' + esc(gmaps(p)) + '" target="_blank" rel="noopener noreferrer">' + ic('map') + 'Open in Google Maps</a>' : '') +
+      '<button class="btn light" type="button" data-share="' + esc(p.id) + '">' + ic('share') + 'Share</button><a class="btn light" href="' + esc(mailto(p)) + '">' + ic('mail') + 'Ask a question</a></div>';
+    if (p.gps) h += '<p class="coords">Exact location: ' + p.gps[0].toFixed(6) + ', ' + p.gps[1].toFixed(6) + '</p>';
+    if (p.beforeAfter) {
+      var ba = p.beforeAfter, bs = ba.before.board ? boardPhoto(ba.before.board, 1600) : visitPhoto(ba.before.photo, 1600), as = visitPhoto(ba.after.photo, 1600);
+      h += '<h2>Before and after</h2><div class="ba" id="ba" style="--x:50%"><img src="' + esc(bs) + '" alt="Before' + (ba.before.at ? ', ' + esc(day(ba.before.at)) : '') + '"><img class="after" src="' + esc(as) + '" alt="After, ' + esc(day(ba.after.at)) + '">' +
+        '<span class="line"></span><span class="knob">' + ic('lr') + '</span><span class="tag l">' + (ba.before.at ? esc(day(ba.before.at)) : 'Before') + '</span><span class="tag r">' + esc(day(ba.after.at)) + '</span>' +
+        '<input type="range" min="0" max="100" value="50" step="1" aria-label="Before and after: slide to compare' + (ba.label ? ' (' + esc(ba.label) + ')' : '') + '" aria-valuetext="50% after"></div>';
+    }
+    if (p.thanks.length) h += '<h2>Thank-you from the community</h2><div class="thanks">' + p.thanks.map(function (x) { return '<figure>' + media(x, 960) + (x.caption ? '<figcaption>“' + esc(x.caption) + '”</figcaption>' : '') + '</figure>'; }).join('') + '</div>';
+    if (p.stories.length) h += '<h2>Voices from ' + esc(p.area ? p.area.split(',')[0] : 'the community') + '</h2>' + p.stories.map(function (s) { return '<blockquote class="quote">“' + esc(s.quote) + '”' + (s.who ? '<cite>— ' + esc(s.who) + ', ' + esc(day(s.at)) + '</cite>' : '') + '</blockquote>'; }).join('');
+    h += '<h2>Visits</h2>' + (p.visits.length ? '<ol class="tl">' + p.visits.map(function (v) {
+      var f = visitFacts(v), c = v.state === 'working' ? '#1C7C4A' : v.state === 'repair' ? '#D98200' : v.state === 'notworking' ? '#B3261E' : '#0A78C2';
+      return '<li style="--c:' + c + '"><b>' + esc(visitTitle(v)) + '</b><time datetime="' + esc(v.at) + '">' + esc(day(v.at)) + '</time>' + (f.length ? '<div class="facts">' + f.map(function (x) { return '<span>' + esc(x) + '</span>'; }).join('') + '</div>' : '') + '</li>';
+    }).join('') + '</ol>' : '<p class="empty">No visit recorded yet. The field team checks every project at least once a year.</p>');
+    if (p.repairs.length) h += '<h2>Repairs</h2>' + p.repairs.map(function (r) { var x = repairText(r); return '<div class="rep"><b>' + esc(x.t) + '</b><p>' + esc(x.p) + '</p></div>'; }).join('');
+    h += '</div>';
+    var det = $('det'); det.innerHTML = h; det.scrollTop = 0;
+    var ov = $('ov'); ov.classList.remove('hidden'); ov.setAttribute('aria-hidden', 'false'); document.body.style.overflow = 'hidden';
+    requestAnimationFrame(function () { ov.classList.add('on'); det.focus(); });
+    var bax = $('ba'); if (bax) {
+      var inp = bax.querySelector('input');
+      inp.addEventListener('input', function () { bax.style.setProperty('--x', inp.value + '%'); inp.setAttribute('aria-valuetext', (100 - inp.value) + '% after'); });
+    }
+  }
+  function closeProj(fromHash) {
+    var ov = $('ov'); if (ov.classList.contains('hidden')) return;
+    ov.classList.remove('on'); document.body.style.overflow = '';
+    setTimeout(function () { ov.classList.add('hidden'); ov.setAttribute('aria-hidden', 'true'); }, STILL ? 0 : 200);
+    if (!fromHash && /^#p\//.test(location.hash)) history.back();
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+  function applyHash() { var m = /^#p\/(\d+)$/.exec(location.hash); if (m && D) openProj(m[1], false); else closeProj(true); }
+  addEventListener('popstate', applyHash);
+  function share(id) {
+    var p = byId(id), url = location.origin + p.share;
+    var data = { title: p.title + ' — RAFIKI Outreach', text: 'A RAFIKI Outreach project I support: ' + p.title + ', ' + place(p) + '.', url: url };
+    if (navigator.share) return navigator.share(data).catch(function () {});
+    (navigator.clipboard ? navigator.clipboard.writeText(url) : Promise.reject()).then(function () { toast('Public link copied. It doesn’t include your private page.'); }, function () { prompt('Copy this public link:', url); });
+  }
+
+  // ---- impact report (printed on the RAFIKI letterhead, US office) ----
+  function report() {
+    var t = D.totals, P = D.projects, who = D.donor.name;
+    var adr = ['Rafiki Outreach', '1817 N. Beck Street', 'Salt Lake City, UT 84116, U.S.A.', 'Phone: +1 801 547 7847', 'Email: Info@rafikioutreach.org'];
+    var kp = [[n(t.people), 'people served']];
+    if (t.water) kp.push([yrs(t.years), 'years of clean water']);
+    if (t.workingPct != null) kp.push([t.workingPct + '%', 'of wells working at last check']);
+    kp.push([t.projects, t.projects === 1 ? 'project funded' : 'projects funded']);
+    if (t.litresPerDay && kp.length < 4) kp.push([n(t.litresPerDay), 'litres of water a day']);
+    var rows = P.map(function (p) { return '<tr><td><b>' + esc(p.title) + '</b><br>' + esc(KIND[p.type] || p.type) + '</td><td>' + esc(place(p)) + (p.gps ? '<br><small>' + p.gps[0].toFixed(5) + ', ' + p.gps[1].toFixed(5) + '</small>' : '') + '</td><td>' + esc(ST[stKey(p)][0]) + (p.health ? '<br><small>checked ' + esc(day(p.health.at)) + '</small>' : '') + '</td><td>' + (p.impact.people ? n(p.impact.people) : '–') + '</td><td>' + esc(p.done ? day(p.done) : p.year || '–') + '</td></tr>'; }).join('');
+    var ups = D.updates.slice(0, 14).map(function (u) {
+      var p = byId(u.pid), s = '';
+      if (u.type === 'visit') s = visitTitle(u) + (visitFacts(u).length ? ' (' + visitFacts(u).join(', ') + ')' : '');
+      else if (u.type === 'repair') { var r = repairText(u); s = r.t + ': ' + r.p; }
+      else if (u.type === 'story') s = '“' + u.quote + '”' + (u.who ? ' — ' + u.who : '');
+      else if (u.type === 'photos') s = u.n + ' new photo' + (u.n === 1 ? '' : 's');
+      else if (u.type === 'thanks') s = 'A thank-you ' + u.media + ' from the community' + (u.caption ? ': “' + u.caption + '”' : '');
+      else if (u.type === 'anniversary') s = (u.years === 1 ? 'One year' : u.years + ' years') + ' of clean water';
+      return '<li><b>' + esc(day(u.at)) + ', ' + esc(p ? p.title : '') + ':</b> ' + esc(s) + '</li>';
+    }).join('');
+    $('report').innerHTML = '<table class="lh-wrap"><tfoot aria-hidden="true"><tr><td><div class="lh-sp"></div></td></tr></tfoot><tbody><tr><td>' +
+      '<div class="lh-top"><img class="lh-logo" src="/img/letterhead/rafiki-logo.jpg" alt="RAFIKI Outreach" width="703" height="237"><address class="lh-adr">' + adr.map(esc).join('<br>') + '</address></div>' +
+      '<div class="rp"><h1>Impact report</h1><p class="sub">Prepared for ' + esc(who) + (D.donor.org && D.donor.org !== who ? ', ' + esc(D.donor.org) : '') + ' · ' + esc(day(D.generated)) + '</p>' +
+      '<div class="kp">' + kp.slice(0, 4).map(function (k) { return '<div><b>' + esc(k[0]) + '</b><span>' + esc(k[1]) + '</span></div>'; }).join('') + '</div>' +
+      '<h2>Your projects</h2><table><thead><tr><th>Project</th><th>Where</th><th>Status</th><th>People</th><th>Completed</th></tr></thead><tbody>' + rows + '</tbody></table>' +
+      (ups ? '<h2>Latest updates</h2><ul>' + ups + '</ul>' : '') +
+      '<p class="thx">Thank you for your generosity. Numbers come from the RAFIKI field team’s latest visits and each project’s estimate of the people it serves. Questions: info@rafikioutreach.org.</p></div>' +
+      '</td></tr></tbody></table><div class="lh-foot"><span>501(c)(3) Nonprofit Organization&nbsp; |&nbsp; Providing clean water and community development in East Africa</span><img class="lh-flogo" src="/img/letterhead/rafiki-logo.jpg" alt="" width="703" height="237"></div>';
+    var go = function () { window.print(); };
+    var img = $('report').querySelector('img');
+    if (img && !img.complete) { img.onload = go; img.onerror = go; } else go();
+  }
+  window.dnrReport = report; // for automated PDF checks
+
+  // ---- events ----
+  document.addEventListener('click', function (e) {
+    var o = e.target.closest('[data-open]'); if (o) { e.preventDefault(); return openProj(o.getAttribute('data-open')); }
+    var f = e.target.closest('.chip[data-f]'); if (f) { filter = f.getAttribute('data-f'); shown = 20; qa('.chip[data-f]').forEach(function (b) { b.setAttribute('aria-pressed', b === f ? 'true' : 'false'); }); return drawFeed(); }
+    if (e.target.closest('#more')) { shown += 20; return drawFeed(); }
+    if (e.target.closest('[data-close]')) return closeProj();
+    if (e.target === $('ov')) return closeProj();
+    var s = e.target.closest('[data-share]'); if (s) return share(s.getAttribute('data-share'));
+    var m = e.target.closest('[data-onmap]'); if (m) { var id = m.getAttribute('data-onmap'); closeProj(); setTimeout(function () { $('mapsec').scrollIntoView({ behavior: STILL ? 'auto' : 'smooth' }); var p = byId(id); map.setView(p.gps, 16); pick(id); }, 250); return; }
+    var z = e.target.closest('[data-zoom]'); if (z) {
+      var lb = document.createElement('div'); lb.className = 'lbx'; lb.setAttribute('role', 'dialog'); lb.setAttribute('aria-label', 'Photo');
+      lb.innerHTML = '<img src="' + esc(z.getAttribute('data-zoom')) + '" alt=""><button class="iconbtn" type="button" aria-label="Close photo">' + ic('x') + '</button>';
+      lb.addEventListener('click', function () { lb.remove(); }); document.body.appendChild(lb); lb.querySelector('button').focus();
+    }
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    var lb = document.querySelector('.lbx'); if (lb) return lb.remove();
+    closeProj();
+  });
+  load();
+})();
+</script>
+</body>
+</html>

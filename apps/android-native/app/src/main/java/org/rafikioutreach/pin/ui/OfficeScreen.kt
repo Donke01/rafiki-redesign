@@ -90,6 +90,7 @@ fun OfficeScreen(m: AppModel, open: (String) -> Unit) {
         Triple("teammap", t("Team map", "Ramani ya timu"), "pin"), Triple("plan", t("Plan a week", "Panga wiki"), "compass"),
         Triple("review", t("Review", "Idhinisha"), "inbox"), Triple("team", t("Team", "Timu"), "people"), Triple("cleanup", t("Clean-up", "Usafi"), "spark"), Triple("export", t("Export", "Pakua"), "upload"),
         Triple("sms", t("Community", "Jamii"), "chat"),
+        Triple("donors", t("Donors", "Wafadhili"), "link"),
     )
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
         Text(t("Office", "Ofisi"), style = MaterialTheme.typography.headlineLarge, color = C.ink, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.fillMaxWidth())
@@ -112,6 +113,7 @@ fun OfficeScreen(m: AppModel, open: (String) -> Unit) {
             "team" -> TeamSection(m)
             "cleanup" -> Cleanup(snap, open)
             "sms" -> CommunityReports(m, open)
+            "donors" -> DonorsSection(m, snap)
             else -> Export(m, snap)
         }
         Spacer(Modifier.height(24.dp))

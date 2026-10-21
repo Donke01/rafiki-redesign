@@ -15,14 +15,17 @@
 //                   { action: "team-add", name, home, admin, email } → { pin } (shown once)
 //                   { action: "team-update", name, home, admin, email, phone } / "team-pin" (new PIN) / "team-remove"
 //                   { action: "test-mail" }
+//   GET  /api/admin?view=donors   → donors with their projects and viewers (Office › Donors; see lib/donor.js)
+//   POST /api/admin { action: "donor-add" | "donor-update" | "donor-link" | "donor-rotate" | "donor-revoke" | "donor-viewer-add" | "donor-viewer-remove" | "donor-remove", id, vid, … }
 //   POST /api/admin?cron=monthly with header X-Cron-Key = CRON_KEY → e-mails last month's summary to admins
-//        (run on the 1st of each month by .github/workflows/monthly-report.yml)
+//        (run on the 1st of each month by .github/workflows/monthly-report.yml), and the monthly e-mail to donors
 import { checkPin } from './pin.js';
 import { getFeed, dropFeed } from '../../lib/feed-cache.js';
 import { parseGps, readGps, writeGps, createUpdate, BOARD_ID } from '../../lib/monday.js';
 import { getJson, putJson, team, saveTeam, hashPin, newPin, freshPin, adminNames, sameName, sendMail, alertHtml, escHtml, recipients, addReview } from '../../lib/pin-store.js';
 import { kes, money, estOf, stepBlocked, canDecide, approveLimit, setApproveLimit, askApproval, costRow, addCost, costStats, snapPeople } from '../../lib/pin-office.js';
 import { teamMap, planView } from '../../lib/pin-here.js';
+import { donorAdminGet, donorAdminPost, runDigest } from '../../lib/donor.js';
 
 const STEPS = { reported: 'Reported', assigned: 'Assigned', parts: 'Parts ordered', fixed: 'Fixed' };
 const CC = ['ke', 'tz', 'ug', 'mw'];
@@ -58,6 +61,7 @@ export async function onRequestGet({ request, env }) {
   if (chk.res) return chk.res;
   const view = new URL(request.url).searchParams.get('view');
   if (view === 'review') return json({ ok: true, items: (await getJson(env, 'pinreview', [])).slice().reverse().map(x => (x.t ? Object.assign({}, x, { t: String(x.t).replace(/^[\s*#_-]+|[\s*#_]+$/g, '') }) : x)) });
+  if (view === 'donors') return json(await donorAdminGet(env));
   if (view === 'assign') return json({ ok: true, items: await getJson(env, 'pinassign', []) });
   if (view === 'costs') {
     let feed = null; try { feed = await getFeed(env); } catch (e) {}
@@ -242,6 +246,10 @@ export async function onRequestPost({ request, env, waitUntil }) {
         await log(env, { by, a: 'settings', t: 'second approval above ' + kes(n) });
         return json({ ok: true, approveAbove: n });
       }
+      case 'donor-add': case 'donor-update': case 'donor-link': case 'donor-rotate': case 'donor-revoke': case 'donor-viewer-add': case 'donor-viewer-remove': case 'donor-remove': {
+        const r = await donorAdminPost(env, b, by);
+        return json(r.body, r.status || 200);
+      }
       case 'test-mail': {
         const r = await sendMail(env, 'RAFIKI Pin: test alert', alertHtml('Test alert from RAFIKI Pin', ['If you can read this, e-mail alerts are working.', 'Sent by ' + by + '.'], new URL('/pin#me', request.url).toString()), 'Test alert from RAFIKI Pin. Sent by ' + by + '.');
         return json(r, r.ok ? 200 : 503);
@@ -277,8 +285,11 @@ async function monthly(request, env) {
     n('pin') + ' locations pinned, ' + n('new') + ' new sites added.' + (spent ? ' ' + kes(spent) + ' spent on repairs.' : ''),
     review ? review + ' items waiting for review in the Office tab.' : 'Nothing waiting for review.'
   ];
+  // donors: what changed on their projects last month (skipped cleanly when e-mail isn't set up)
+  let donorsMail;
+  try { donorsMail = await runDigest(env, from, to, new URL(request.url).origin); } catch (e) { console.error('donor digest:', e && e.message); donorsMail = { ok: false, reason: 'down' }; }
   const r = await sendMail(env, 'RAFIKI Pin: ' + label + ' summary', alertHtml('Field summary: ' + label, lines, new URL('/pin#report', request.url).toString(), new URL(request.url).origin), lines.join('\n'));
-  return json(Object.assign({ month: label }, r), r.ok ? 200 : 503);
+  return json(Object.assign({ month: label }, r, { donors: donorsMail }), r.ok ? 200 : 503);
 }
 
 export function onRequest() { return json({ ok: false, reason: 'method' }, 405); }

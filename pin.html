@@ -1522,6 +1522,53 @@ html[data-theme=sun] .ofb-appr,html[data-theme=sun] .ofb-pc{border:2px solid #00
 .ofb-pc b{display:block;font-size:.88rem;color:var(--ink)}.ofb-pc small{display:block;font-size:.75rem;color:var(--muted);margin-top:2px}
 #vOffice .ofb-costs .otile b{font-size:1.35rem}
 @media (prefers-reduced-motion: reduce){.ofb-spark .ln{animation:none;stroke-dashoffset:0}.ofb-bar i em,.ofb-top i em{transition:none}.ofb-people,.ofb-top li{animation:none}}
+<style id="dnrCss">
+/* Office › Donors and Project › Thank-you for donors (dnr) */
+@media (min-width:700px){#oTabs{grid-template-columns:repeat(8,minmax(0,1fr))}}
+.dnr-intro h2{display:flex;align-items:center;gap:8px;margin:0 0 6px}.dnr-intro h2 svg{width:24px;height:24px;color:#D23C32}
+.dnr-intro,.dnr-intro p{text-align:left}.dnr-intro p{margin:0}
+.dnr-list.ocards{grid-template-columns:minmax(0,1fr)}
+.dnr-mail{display:flex;gap:10px;align-items:flex-start;margin:12px 0 0;padding:10px 12px;border-radius:14px;background:var(--warnbg);color:var(--warn);font-size:.85rem}
+.dnr-mail.on{background:var(--okbg);color:var(--ok)}
+.dnr-mail svg{width:20px;height:20px;flex:0 0 auto;margin-top:1px}
+.dnr-list{margin-top:12px}
+.card.dnr.off{opacity:.72}
+.dnr-seen{display:flex;align-items:center;gap:6px}.dnr-seen svg{width:16px;height:16px;flex:0 0 auto}
+.dnr .oact .btn svg{width:18px;height:18px}
+.lnk.dnr-bad{color:var(--bad)}
+.dnr-link code{display:block;max-width:100%;overflow-wrap:anywhere;font-size:.8rem;background:rgba(255,255,255,.7);color:var(--ink);padding:8px 10px;border-radius:10px;margin:4px 0}
+.dnr-link .oact{margin-top:6px}
+.dnr-form h2{margin:0 0 4px}
+.dnr-form > label,.dnr-form .ofields label{display:block;margin-top:10px}
+.dnr-pick{border:0;padding:0;margin:16px 0 0;min-width:0}
+.dnr-pick legend{font-weight:700;font-size:.9rem;color:var(--ink);display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.dnr-f{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-top:8px}
+.dnr-f select{min-height:44px}
+.dnr-plist{margin-top:8px;max-height:320px;overflow-y:auto;border:var(--bw) solid var(--line);border-radius:14px;background:var(--field);overscroll-behavior:contain}
+label.dnr-p{display:flex;gap:12px;align-items:flex-start;padding:10px 12px;border-bottom:1px solid var(--line);margin:0;cursor:pointer;text-transform:none;letter-spacing:0;font-size:.9rem;min-height:52px}
+label.dnr-p:last-child{border-bottom:0}
+label.dnr-p input{width:22px;height:22px;margin:2px 0 0;flex:0 0 auto;accent-color:var(--blue)}
+label.dnr-p b{display:block;font-weight:700;color:var(--ink)}
+label.dnr-p small{display:block;color:var(--muted);font-size:.76rem;font-weight:500}
+.dnr-sw{display:flex;align-items:center;gap:12px;justify-content:space-between;margin-top:16px;padding:12px 14px;border-radius:14px;background:var(--tint)}
+.dnr-sw b{display:block;font-size:.92rem;color:var(--ink)}.dnr-sw small{display:block;font-size:.76rem;color:var(--muted);margin-top:2px}
+.dnr-sens{margin-top:8px;padding:10px 14px;border-radius:14px;border:var(--bw) dashed var(--edge)}
+.dnr-sens b{font-size:.85rem}
+.dnr-viewers{margin-top:20px;border-top:var(--bw) solid var(--line);padding-top:14px}
+.dnr-viewers h3{margin:0 0 4px;font-size:1rem}
+.dnr-v{padding:10px 0;border-bottom:1px solid var(--line)}
+.dnr-v b{display:block;font-size:.92rem}.dnr-v small{display:block;color:var(--muted);font-size:.78rem}
+.dnr-v .oact{margin-top:4px}
+.dnr-danger{margin-top:14px}
+.dnr-thx{margin-top:12px;padding:0}
+.dnr-thx summary{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;list-style:none;min-height:56px}
+.dnr-thx summary::-webkit-details-marker{display:none}
+.dnr-thx summary svg{width:24px;height:24px;color:#D23C32;flex:0 0 auto}
+.dnr-thx summary b{display:block;font-size:.95rem;color:var(--ink)}.dnr-thx summary small{display:block;font-size:.78rem;color:var(--muted)}
+.dnr-thx > :not(summary){margin-left:16px;margin-right:16px}
+.dnr-thx .oact{padding-bottom:14px}
+.dnr-thx input[type=file]{display:block;margin-top:6px;font-size:.9rem;width:100%}
+@media (max-width:420px){.dnr-f{grid-template-columns:1fr 1fr}.dnr-f .chip{grid-column:1/-1}}
 </style>
 </head>
 <body class="locked">
@@ -4844,6 +4891,7 @@ html[data-theme=sun] .ofb-appr,html[data-theme=sun] .ofb-pc{border:2px solid #00
   function oSeg() {
     var T = [['overview', 'Overview', 'drop'], ['repairs', 'Repairs', 'wrench'], ['costs', tr('Costs', 'Gharama'), 'coins'], ['visits', 'Visits', 'cal'], ['review', 'Review', 'inbox'], ['team', 'Team', 'people'], ['cleanup', 'Clean-up', 'spark'], ['export', 'Export', 'down'], ['sms', tr('Community', 'Jamii'), 'chat']];
     T.splice(3, 0, ['teammap', tr('Team map', 'Ramani ya timu'), 'pin'], ['plan', tr('Plan a week', 'Panga wiki'), 'ofaRoute']);
+    T.push(['donors', 'Donors', 'heart']);
     $('oTabs').innerHTML = T.map(function (t) {
       var c = t[0] === 'review' ? (S.reviewOpen || 0) : t[0] === 'repairs' ? Object.keys(S.repairs).length : 0;
       return '<button class="otab" type="button" data-o="' + t[0] + '" aria-pressed="' + (O.tab === t[0]) + '"' + (c ? ' aria-label="' + t[1] + ', ' + c + ' open"' : '') + '>' + oic(t[2]) + '<span>' + t[1] + '</span>' + (c ? '<i class="n" aria-hidden="true">' + c + '</i>' : '') + '</button>';
@@ -4869,6 +4917,7 @@ html[data-theme=sun] .ofb-appr,html[data-theme=sun] .ofb-pc{border:2px solid #00
     if (t === 'sms') return vxOffice(b);
     if (t === 'teammap') return ofaTeamMap(b);
     if (t === 'plan') return oNeedTeam(function () { ofaPlanTab(b); });
+    if (t === 'donors') return dnrOffice(b);
   }
 
   // overview
@@ -5925,6 +5974,267 @@ html[data-theme=sun] .ofb-appr,html[data-theme=sun] .ofb-pc{border:2px solid #00
     if (b.getAttribute('data-inst') === 'x') { store.set('rfPinInstX', '1'); installUi(); return; }
     if (deferred) { deferred.prompt(); deferred.userChoice.then(function () { deferred = null; installUi(); }); }
   });
+
+  // --- Office › Donors: private donor pages (lib/donor.js, /api/admin donor-* actions) ------------------------
+  // Each donor gets a private link (https://www.rafikioutreach.org/donor/<long random token>) to a page with their
+  // projects, an exact-location map and updates. Group donors (a church, a company) can have several viewers,
+  // each with their own link. The server checks every admin action.
+  OIC.heart = '<path d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.3a4.3 4.3 0 0 1 7.5 2.5C19.5 15.4 12 20 12 20z"/>';
+  OIC.link = '<path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/>';
+  var DNR = { list: null, mail: null, cron: false, origin: '', edit: null, form: null, q: '', cat: '', ck: '', only: false };
+  var DNR_CAT = [['', 'All types'], ['water', 'Water'], ['school', 'Schools'], ['health', 'Health'], ['children', 'Children’s homes'], ['other', 'Other']];
+  var DNR_SENS = { school: 1, health: 1, children: 1 };
+  function dnrCat(p) { var t = String(p.type || ''); return /borehole|collection/i.test(t) ? 'water' : /school/i.test(t) ? 'school' : /health/i.test(t) ? 'health' : /orphan/i.test(t) ? 'children' : 'other'; }
+  function dnrLoad(cb) {
+    adminApi('GET', null, '?view=donors').then(function (j) {
+      if (j.ok) { DNR.list = j.donors || []; DNR.mail = j.mail || {}; DNR.cron = !!j.cron; DNR.origin = j.origin || ''; }
+      cb(j);
+    });
+  }
+  function dnrOffice(b) {
+    if (!DNR.list) { b.innerHTML = '<p class="muted">Loading…</p>'; return dnrLoad(function (j) { if (!j.ok) { b.innerHTML = '<p class="msg bad">' + esc(why(j)) + '</p>'; return; } if (O.tab === 'donors') dnrOffice(b); }); }
+    if (!DNR.form) dnrFormReset(null);
+    var L = DNR.list.slice().sort(function (a, z) { return (a.revoked - z.revoked) || String(z.lastOpen || '').localeCompare(String(a.lastOpen || '')) || a.name.localeCompare(z.name); });
+    var mail = DNR.mail && DNR.mail.ready ? '<p class="dnr-mail on">' + oic('check') + '<span><b>E-mail digest: on</b> · each donor gets a monthly update on the 1st' + (DNR.cron ? '' : ' (once CRON_KEY is set)') + '.</span></p>'
+      : '<p class="dnr-mail">' + oic('alert') + '<span><b>E-mail digest: off</b> — add RESEND_API_KEY and ALERT_FROM in Cloudflare.</span></p>';
+    b.innerHTML = '<div class="o-grid dnr-grid"><div>' +
+      '<div class="dnr-intro card"><h2>' + oic('heart') + 'Donors</h2><p class="muted">Each donor gets a private link to a page with their projects, an exact-location map, visit reports, repairs, story moments and photos. No password: anyone with the link can see it, so send it only to them.</p>' + mail + '</div>' +
+      (L.length ? '<div class="ocards dnr-list">' + L.map(dnrCard).join('') + '</div>' : '<p class="muted" style="margin:14px 4px">No donors yet. Add the first one here.</p>') + '</div>' +
+      '<div class="o-side" id="dnrSide">' + dnrFormHtml() + '</div></div>';
+    dnrPickDraw();
+  }
+  function dnrCard(d) {
+    var seen = d.lastOpen ? 'Opened ' + since(d.lastOpen) + (d.opens > 1 ? ' · ' + d.opens + ' times' : '') : 'Not opened yet';
+    var vs = d.viewers.length;
+    return '<article class="card dnr' + (d.revoked ? ' off' : '') + '" data-dn="' + esc(d.id) + '"><div class="oh"><b>' + esc(d.name) + '</b>' +
+      '<span class="tag ' + (d.revoked ? '' : 'has') + '">' + (d.revoked ? 'Link revoked' : d.projects.length + ' project' + (d.projects.length === 1 ? '' : 's')) + '</span></div>' +
+      '<p class="muted">' + esc([d.org && d.org !== d.name ? d.org : '', d.email].filter(Boolean).join(' · ') || 'No e-mail') + '</p>' +
+      '<p class="muted dnr-seen">' + oic('clock') + esc(seen) + (vs > 1 ? ' · group page, ' + vs + ' viewers' : '') + (d.showPhotos ? '' : ' · photos off') + '</p>' +
+      '<div class="oact">' + (d.revoked ? '<button class="btn small" type="button" data-dn-act="rotate">New link</button>'
+        : '<button class="btn small" type="button" data-dn-act="copy">' + oic('link') + 'Copy private link</button><button class="btn small light" type="button" data-dn-act="share">Share link</button>') +
+      '<button class="btn small light" type="button" data-dn-act="edit">Edit</button>' +
+      (d.revoked ? '' : '<button class="lnk" type="button" data-dn-act="rotate">Rotate link</button><button class="lnk dnr-bad" type="button" data-dn-act="revoke">Revoke</button>') +
+      '<span class="msg" aria-live="polite"></span></div><div class="dnr-box"></div></article>';
+  }
+  function dnrFormReset(d) {
+    DNR.edit = d ? d.id : null;
+    DNR.form = d ? { name: d.name, email: d.email, org: d.org, projects: d.projects.slice(), showPhotos: d.showPhotos, photos: Object.assign({}, d.photos), digest: d.digest }
+      : { name: '', email: '', org: '', projects: [], showPhotos: true, photos: {}, digest: true };
+    DNR.q = ''; DNR.only = !!d;
+  }
+  function dnrFormHtml() {
+    var f = DNR.form, d = DNR.edit && DNR.list.filter(function (x) { return x.id === DNR.edit; })[0];
+    var h = '<div class="card dnr-form" id="dnrForm"><h2>' + (d ? 'Edit ' + esc(d.name) : 'Add a donor') + '</h2>' +
+      (d ? '' : '<p class="muted">They get a private link to their own page. You can copy it again, replace it or switch it off at any time.</p>') +
+      '<label>Name<input type="text" id="dnName" autocomplete="off" placeholder="e.g. Grace Community Church" value="' + esc(f.name) + '"></label>' +
+      '<div class="ofields"><label>E-mail<input type="email" id="dnEmail" placeholder="for the monthly update" value="' + esc(f.email) + '"></label>' +
+      '<label>Organisation (optional)<input type="text" id="dnOrg" placeholder="e.g. a church or company" value="' + esc(f.org) + '"></label></div>' +
+      '<fieldset class="dnr-pick"><legend>Projects they funded <span class="tag has" id="dnCount">' + f.projects.length + ' ticked</span></legend>' +
+      '<input type="search" id="dnQ" placeholder="Search by name or place" value="' + esc(DNR.q) + '" aria-label="Search projects">' +
+      '<div class="dnr-f"><select id="dnCk" aria-label="Country"><option value="">All countries</option>' + ['ke', 'tz', 'ug', 'mw'].map(function (c) { return '<option value="' + c + '"' + (DNR.ck === c ? ' selected' : '') + '>' + CNAME[c] + '</option>'; }).join('') + '</select>' +
+      '<select id="dnCat" aria-label="Type">' + DNR_CAT.map(function (c) { return '<option value="' + c[0] + '"' + (DNR.cat === c[0] ? ' selected' : '') + '>' + c[1] + '</option>'; }).join('') + '</select>' +
+      '<button type="button" class="chip" id="dnOnly" aria-pressed="' + DNR.only + '">Ticked only</button></div>' +
+      '<div class="dnr-plist" id="dnList" role="group" aria-label="Projects"></div></fieldset>' +
+      '<div class="dnr-sw"><div><b>Show visit photos</b><small>Water points: shown. Schools, clinics and children’s homes: hidden until you tick “photos OK” below (children’s faces need consent).</small></div>' +
+      '<button class="tgl" type="button" role="switch" id="dnPh" aria-checked="' + f.showPhotos + '" aria-label="Show visit photos to this donor"><i></i></button></div>' +
+      '<div id="dnSens"></div>' +
+      '<label class="tick"><input type="checkbox" id="dnDigest"' + (f.digest ? ' checked' : '') + '> Monthly e-mail update' + (DNR.mail && DNR.mail.ready ? '' : ' (when e-mail is switched on)') + '</label>' +
+      '<div class="oact"><button class="btn" type="button" id="dnSave">' + (d ? 'Save changes' : 'Add and make private link') + '</button>' + (d ? '<button class="btn light" type="button" id="dnCancel">Cancel</button>' : '') + '<span class="msg" id="dnMsg" aria-live="polite"></span></div>' +
+      '<div id="dnLinkNew"></div>';
+    if (d) {
+      h += '<div class="dnr-viewers"><h3>Who can open this page</h3><p class="muted">For a church or company: give each person their own link, so you can switch one off without affecting the others.</p>' +
+        d.viewers.map(function (v) {
+          return '<div class="dnr-v" data-vid="' + esc(v.vid) + '"><div><b>' + esc(v.name || d.name) + (v.primary ? ' <span class="tag has">main</span>' : '') + (v.active ? '' : ' <span class="tag">revoked</span>') + '</b>' +
+            '<small>' + esc([v.email, v.lastOpen ? 'opened ' + since(v.lastOpen) : 'not opened yet', v.unsub ? 'no monthly e-mail' : ''].filter(Boolean).join(' · ')) + '</small></div>' +
+            '<div class="oact">' + (v.active ? '<button class="btn small light" type="button" data-dv="copy">Copy link</button><button class="lnk" type="button" data-dv="rotate">Rotate</button><button class="lnk dnr-bad" type="button" data-dv="revoke">Revoke</button>' : '<button class="btn small light" type="button" data-dv="rotate">New link</button>') +
+            (v.primary ? '' : '<button class="lnk dnr-bad" type="button" data-dv="remove">Remove</button>') + '</div><div class="dnr-box"></div></div>';
+        }).join('') +
+        '<div class="ofields"><label>Add a person: name<input type="text" id="dnVName" placeholder="e.g. Pastor John"></label><label>Their e-mail (optional)<input type="email" id="dnVEmail"></label></div>' +
+        '<div class="oact"><button class="btn small" type="button" id="dnVAdd">Add and make their link</button><span class="msg" id="dnVMsg" aria-live="polite"></span></div><div id="dnVLink"></div>' +
+        '<div class="oact dnr-danger"><button class="lnk dnr-bad" type="button" id="dnDel">Delete this donor</button></div></div>';
+    }
+    return h + '</div>';
+  }
+  function dnrPickDraw() {
+    var f = DNR.form, el = $('dnList'); if (!el) return;
+    var q = DNR.q.trim().toLowerCase(), tick = {}; f.projects.forEach(function (id) { tick[id] = 1; });
+    var P = S.projects.filter(function (p) {
+      if (DNR.only && !tick[p.id]) return false;
+      if (DNR.ck && p.ck !== DNR.ck) return false;
+      if (DNR.cat && dnrCat(p) !== DNR.cat) return false;
+      return !q || (p.title + ' ' + (p.area || '') + ' ' + (p.country || '')).toLowerCase().indexOf(q) >= 0;
+    }).sort(function (a, z) { return (!!tick[z.id] - !!tick[a.id]) || a.title.localeCompare(z.title); });
+    el.innerHTML = P.length ? P.slice(0, 150).map(function (p) {
+      return '<label class="dnr-p"><input type="checkbox" value="' + esc(p.id) + '"' + (tick[p.id] ? ' checked' : '') + '><span><b>' + esc(p.title) + '</b><small>' + esc([p.type, p.area, p.country, p.status].filter(Boolean).join(' · ')) + '</small></span></label>';
+    }).join('') + (P.length > 150 ? '<p class="muted">…and ' + (P.length - 150) + ' more. Search to narrow it down.</p>' : '') : '<p class="muted">No projects match.</p>';
+    $('dnCount').textContent = f.projects.length + ' ticked';
+    dnrSensDraw();
+  }
+  // per-project photo consent for schools, clinics and children's homes
+  function dnrSensDraw() {
+    var f = DNR.form;
+    var sens = f.projects.map(function (id) { return byId(id); }).filter(function (p) { return p && DNR_SENS[dnrCat(p)]; });
+    $('dnSens').innerHTML = sens.length && f.showPhotos ? '<div class="dnr-sens"><b>Photos OK? (consent checked)</b>' + sens.map(function (p) {
+      return '<label class="tick"><input type="checkbox" data-ph="' + esc(p.id) + '"' + (f.photos[p.id] === 'on' ? ' checked' : '') + '> ' + esc(p.title) + '</label>';
+    }).join('') + '</div>' : '';
+  }
+  function dnrRead() {
+    var f = DNR.form; f.name = $('dnName').value; f.email = $('dnEmail').value; f.org = $('dnOrg').value; f.digest = $('dnDigest').checked;
+    var ph = {}, seen = {};
+    qa('#dnSens [data-ph]').forEach(function (c) { var k = c.getAttribute('data-ph'); seen[k] = 1; if (c.checked) ph[k] = 'on'; });
+    Object.keys(f.photos).forEach(function (k) { if (!seen[k] && f.projects.indexOf(k) >= 0) ph[k] = f.photos[k]; });
+    f.photos = ph;
+    return f;
+  }
+  function dnrMsgText(name, link) { return 'Hello ' + (String(name || '').split(/\s+/)[0] || '') + ', here is your private RAFIKI Outreach page with the projects you funded: photos, visit reports and a live map. It’s just for you, so please don’t forward it.\n' + link; }
+  function dnrLinkBox(el, name, email, link, fresh) {
+    var wa = 'https://wa.me/?text=' + encodeURIComponent(dnrMsgText(name, link));
+    var mail = 'mailto:' + encodeURIComponent(email || '') + '?subject=' + encodeURIComponent('Your RAFIKI project page') + '&body=' + encodeURIComponent(dnrMsgText(name, link) + '\n\nWith thanks,\nRAFIKI Outreach');
+    el.innerHTML = '<div class="pinbox dnr-link" role="status"><span>' + (fresh ? 'New private link for ' : 'Private link for ') + esc(name) + '</span><code>' + esc(link) + '</code>' +
+      '<small>Anyone with this link can see the page. Send it only to them.</small><div class="oact"><button class="btn small light" type="button" data-copy>' + oic('link') + 'Copy</button>' +
+      '<a class="btn small light" href="' + esc(wa) + '" target="_blank" rel="noopener noreferrer">WhatsApp</a><a class="btn small light" href="' + esc(mail) + '">E-mail</a>' +
+      (navigator.share ? '<button class="btn small light" type="button" data-native>More…</button>' : '') + '</div></div>';
+    el.querySelector('[data-copy]').addEventListener('click', function () { dnrCopy(link, this); });
+    var nat = el.querySelector('[data-native]'); if (nat) nat.addEventListener('click', function () { navigator.share({ title: 'Your RAFIKI project page', text: dnrMsgText(name, link) }).catch(function () {}); });
+  }
+  function dnrCopy(text, btn) {
+    var done = function () { if (btn) btn.textContent = 'Copied ✓'; toast('Link copied'); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, function () { prompt('Copy this link:', text); });
+    else prompt('Copy this link:', text);
+  }
+  function dnrRefresh(keepForm) {
+    dnrLoad(function () { if (!keepForm) dnrFormReset(null); if (O.tab === 'donors' && S.view === 'vOffice') dnrOffice($('oBody')); });
+  }
+  function dnrSay(el, cls, t) { if (el) { el.className = 'msg ' + (cls || ''); el.textContent = t || ''; } }
+  function dnrWhy(j) { return j.reason === 'revoked' ? 'This link was revoked. Make a new one.' : j.reason === 'rotate' ? 'Make a new link (Rotate) to copy it.' : j.reason === 'full' ? 'Too many already.' : why(j); }
+  $('oBody').addEventListener('input', function (e) {
+    if (O.tab !== 'donors') return;
+    if (e.target.id === 'dnQ') { DNR.q = e.target.value; dnrPickDraw(); }
+  });
+  $('oBody').addEventListener('change', function (e) {
+    if (O.tab !== 'donors') return;
+    var f = DNR.form, t = e.target;
+    if (t.id === 'dnCk') { DNR.ck = t.value; dnrPickDraw(); }
+    else if (t.id === 'dnCat') { DNR.cat = t.value; dnrPickDraw(); }
+    else if (t.closest('#dnList') && t.type === 'checkbox') {
+      var id = t.value, i = f.projects.indexOf(id);
+      if (t.checked && i < 0) f.projects.push(id); if (!t.checked && i >= 0) f.projects.splice(i, 1);
+      dnrRead(); $('dnCount').textContent = f.projects.length + ' ticked'; dnrSensDraw();
+    }
+  });
+  $('oBody').addEventListener('click', function (e) {
+    if (O.tab !== 'donors') return;
+    var t = e.target;
+    if (t.closest('#dnOnly')) { dnrRead(); DNR.only = !DNR.only; t.closest('#dnOnly').setAttribute('aria-pressed', DNR.only); return dnrPickDraw(); }
+    if (t.closest('#dnPh')) { dnrRead(); DNR.form.showPhotos = !DNR.form.showPhotos; t.closest('#dnPh').setAttribute('aria-checked', DNR.form.showPhotos); return dnrSensDraw(); }
+    if (t.closest('#dnCancel')) { dnrFormReset(null); return dnrOffice($('oBody')); }
+    if (t.closest('#dnSave')) return dnrSave();
+    if (t.closest('#dnVAdd')) return dnrViewerAdd();
+    if (t.closest('#dnDel')) {
+      var dd = DNR.list.filter(function (x) { return x.id === DNR.edit; })[0];
+      if (!dd || !confirm('Delete ' + dd.name + '? Their links stop working straight away.')) return;
+      return adminApi('POST', { action: 'donor-remove', id: dd.id }).then(function (j) { if (j.ok) { toast('Deleted'); dnrRefresh(false); } else dnrSay($('dnMsg'), 'bad', dnrWhy(j)); });
+    }
+    var dv = t.closest('[data-dv]'); if (dv) return dnrViewerAct(dv);
+    var a = t.closest('[data-dn-act]'); if (!a) return;
+    var c = a.closest('[data-dn]'), id = c.getAttribute('data-dn'), d = DNR.list.filter(function (x) { return x.id === id; })[0], act = a.getAttribute('data-dn-act'), m = c.querySelector('.msg'), box = c.querySelector('.dnr-box');
+    if (!d) return;
+    if (act === 'edit') { dnrFormReset(d); $('dnrSide').innerHTML = dnrFormHtml(); dnrPickDraw(); $('dnrSide').scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+    if (act === 'revoke' && !confirm('Revoke the link for ' + d.name + '? Their page stops working straight away. You can make a new link later.')) return;
+    if (act === 'rotate' && !d.revoked && !confirm('Make a new link for ' + d.name + '? The old link stops working, so send them the new one.')) return;
+    dnrSay(m, '', act === 'revoke' ? 'Revoking…' : 'Getting the link…');
+    adminApi('POST', { action: act === 'copy' || act === 'share' ? 'donor-link' : 'donor-' + act, id: id }).then(function (j) {
+      if (!j.ok) return dnrSay(m, 'bad', dnrWhy(j));
+      dnrSay(m, '', '');
+      if (act === 'revoke') { toast('Link revoked'); return dnrRefresh(true); }
+      if (act === 'copy') { dnrCopy(j.link, a); return; }
+      dnrLinkBox(box, d.name, d.email, j.link, act === 'rotate');
+      if (act === 'rotate') { toast('New link made'); dnrLoad(function () {}); }
+    });
+  });
+  function dnrSave() {
+    var f = dnrRead(), m = $('dnMsg');
+    if (!f.name.trim()) { $('dnName').focus(); return dnrSay(m, 'bad', 'Add their name.'); }
+    if (!f.projects.length && !confirm('No projects ticked yet. Save anyway?')) return;
+    dnrSay(m, '', 'Saving…');
+    var body = { action: DNR.edit ? 'donor-update' : 'donor-add', id: DNR.edit || undefined, name: f.name, email: f.email, org: f.org, projects: f.projects, showPhotos: f.showPhotos, photos: f.photos, digest: f.digest };
+    adminApi('POST', body).then(function (j) {
+      if (!j.ok) return dnrSay(m, 'bad', dnrWhy(j));
+      if (DNR.edit) { toast('Saved ✓'); return dnrRefresh(false); }
+      var made = j.donor;
+      dnrLoad(function () {
+        dnrFormReset(null); dnrOffice($('oBody'));
+        dnrLinkBox($('dnLinkNew'), made.name, made.email, j.link, true);
+        dnrSay($('dnMsg'), 'ok', 'Added ✓');
+      });
+    });
+  }
+  function dnrViewerAdd() {
+    var name = $('dnVName').value.trim(), m = $('dnVMsg'); if (!name) { $('dnVName').focus(); return; }
+    dnrSay(m, '', 'Adding…');
+    adminApi('POST', { action: 'donor-viewer-add', id: DNR.edit, name: name, email: $('dnVEmail').value }).then(function (j) {
+      if (!j.ok) return dnrSay(m, 'bad', dnrWhy(j));
+      var email = $('dnVEmail').value, link = j.link;
+      DNR.list = DNR.list.map(function (x) { return x.id === j.donor.id ? j.donor : x; });
+      $('dnrSide').innerHTML = dnrFormHtml(); dnrPickDraw();
+      dnrLinkBox($('dnVLink'), name, email, link, true);
+    });
+  }
+  function dnrViewerAct(btn) {
+    var row = btn.closest('[data-vid]'), vid = row.getAttribute('data-vid'), act = btn.getAttribute('data-dv'), d = DNR.list.filter(function (x) { return x.id === DNR.edit; })[0];
+    var v = d && d.viewers.filter(function (x) { return x.vid === vid; })[0]; if (!v) return;
+    if ((act === 'revoke' || act === 'remove') && !confirm((act === 'remove' ? 'Remove ' : 'Revoke the link for ') + (v.name || d.name) + '?')) return;
+    adminApi('POST', { action: act === 'copy' ? 'donor-link' : act === 'remove' ? 'donor-viewer-remove' : 'donor-' + act, id: d.id, vid: vid }).then(function (j) {
+      if (!j.ok) return toast(dnrWhy(j));
+      if (act === 'copy') return dnrCopy(j.link, btn);
+      if (j.donor) DNR.list = DNR.list.map(function (x) { return x.id === j.donor.id ? j.donor : x; });
+      $('dnrSide').innerHTML = dnrFormHtml(); dnrPickDraw();
+      if (act === 'rotate') { var r = $('dnrSide').querySelector('[data-vid="' + vid + '"] .dnr-box'); if (r) dnrLinkBox(r, v.name || d.name, v.email, j.link, true); }
+    });
+  }
+
+  // --- Project › Thank-you for donors: a photo or short video (≤ 60 s) from the community, for this project's donors ---
+  var DNR_THX = { busy: false };
+  function dnrThxDraw() {
+    var p = S.cur, box = $('dnrThx');
+    if (!box) { var r = $('pRepair'); if (!r) return; box = document.createElement('div'); box.id = 'dnrThx'; r.parentNode.insertBefore(box, r.nextSibling); }
+    if (!p || !(S.pin || S.mode === 'monday')) { box.innerHTML = ''; return; }
+    box.innerHTML = '<details class="card dnr-thx"><summary>' + oic('heart') + '<span><b>Thank-you for donors</b><small>A photo or short video (up to 60 seconds) from the community</small></span></summary>' +
+      '<p class="muted">Ask first: only people who agree to be filmed or photographed. It goes to monday.com and appears on the private pages of this project’s donors' + (DNR_SENS[dnrCat(p)] ? ' once an admin has ticked “photos OK”' : '') + '.</p>' +
+      '<label>Photo or video<input type="file" id="dnThxFile" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime,video/3gpp" capture="environment"></label>' +
+      '<label>A few words for the donors (optional)<input type="text" id="dnThxCap" maxlength="140" placeholder="e.g. Asante sana from the water committee!"></label>' +
+      '<div class="oact"><button class="btn small" type="button" id="dnThxGo">Send to donors</button><span class="msg" id="dnThxMsg" aria-live="polite"></span></div></details>';
+    $('dnThxGo').addEventListener('click', dnrThxSend);
+  }
+  function dnrThxLength(file) {
+    return new Promise(function (ok) {
+      if (!/^video\//.test(file.type)) return ok(0);
+      var v = document.createElement('video'), u = URL.createObjectURL(file), done = function (s) { URL.revokeObjectURL(u); ok(s); };
+      v.preload = 'metadata'; v.onloadedmetadata = function () { done(v.duration || 0); }; v.onerror = function () { done(0); }; v.src = u;
+      setTimeout(function () { done(0); }, 4000);
+    });
+  }
+  function dnrThxSend() {
+    var f = $('dnThxFile').files[0], m = 'dnThxMsg', p = S.cur;
+    if (!f) return msg(m, 'bad', 'Choose a photo or video first.');
+    if (!navigator.onLine) return msg(m, 'warn', 'This needs a signal. Try again when you’re online.');
+    var video = /^video\//.test(f.type);
+    if (f.size > (video ? 40 : 8) * 1048576) return msg(m, 'bad', video ? 'That video is too large (40 MB at most). Record a shorter one.' : 'That photo is too large (8 MB at most).');
+    if (DNR_THX.busy) return;
+    dnrThxLength(f).then(function (secs) {
+      if (secs > 61) return msg(m, 'bad', 'Please keep it to 60 seconds or less (this one is ' + Math.round(secs) + ' s).');
+      DNR_THX.busy = true; msg(m, '', 'Sending…');
+      var fd = new FormData(); fd.append('id', p.id); fd.append('file', f); fd.append('caption', $('dnThxCap').value); fd.append('seconds', String(Math.round(secs))); if (!S.who && S.name) fd.append('by', S.name);
+      fetch('/api/pin-thanks', { method: 'POST', headers: Object.assign({ Accept: 'application/json' }, S.pin ? { 'X-Pin': S.pin } : {}), body: fd })
+        .then(function (r) { return r.json().catch(function () { return { ok: false, reason: 'down' }; }); }, function () { return { ok: false, reason: 'offline' }; })
+        .then(function (j) {
+          DNR_THX.busy = false;
+          if (!j.ok) return msg(m, 'bad', j.reason === 'too-long' ? 'Please keep it to 60 seconds or less.' : j.reason === 'too-large' ? 'That file is too large.' : j.reason === 'type' ? 'That kind of file can’t be sent.' : why(j));
+          msg(m, 'ok', 'Sent ✓ Thank you! The donors will see it on their page.'); $('dnThxFile').value = ''; $('dnThxCap').value = '';
+        });
+    });
+  }
+  if (window.MutationObserver && $('pTitle')) new MutationObserver(function () { dnrThxDraw(); }).observe($('pTitle'), { childList: true, characterData: true, subtree: true });
 
   // --- start ----------------------------------------------------------------------------------------
   netUi(); outboxUi(); progUi(); installUi();
