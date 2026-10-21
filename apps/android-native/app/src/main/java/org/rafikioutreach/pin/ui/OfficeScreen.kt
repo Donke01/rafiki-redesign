@@ -95,7 +95,7 @@ fun OfficeScreen(m: AppModel, open: (String) -> Unit) {
         }
         Spacer(Modifier.height(14.dp))
         when (sec) {
-            "overview" -> Overview(m, snap) { sec = it }
+            "overview" -> Overview(m, snap, open) { sec = it }
             "repairs" -> Repairs(m, snap, open)
             "visits" -> AssignVisits(m, snap)
             "review" -> ReviewQueue(m, open)
@@ -120,7 +120,7 @@ private fun rememberTeam(m: AppModel): Pair<List<JSONObject>, () -> Unit> {
 }
 
 @Composable
-private fun Overview(m: AppModel, s: Snapshot, go: (String) -> Unit) {
+private fun Overview(m: AppModel, s: Snapshot, open: (String) -> Unit, go: (String) -> Unit) {
     val act by m.activity.collectAsState()
     LaunchedEffect(Unit) { m.loadActivity() }
     val pinned = s.projects.count { it.gps != null }
@@ -137,7 +137,13 @@ private fun Overview(m: AppModel, s: Snapshot, go: (String) -> Unit) {
             Spacer(Modifier.width(16.dp))
             Column(Modifier.weight(1f)) {
                 Text(t("$pinned of ${s.projects.size} projects are on the map", "Miradi $pinned kati ya ${s.projects.size} iko kwenye ramani"), color = Color.White, style = MaterialTheme.typography.titleMedium)
-                Text(t("${s.projects.size - pinned} still need a location pinned in the field.", "${s.projects.size - pinned} bado zinahitaji mahali kuwekwa uwanjani."), color = Color(0xFFCFE8FA), style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(top = 4.dp))
+                Text(if (pinned < s.projects.size) t("${s.projects.size - pinned} still need a location pinned in the field.", "${s.projects.size - pinned} bado zinahitaji mahali kuwekwa uwanjani.") else t("Every project has a location.", "Kila mradi una mahali."), color = Color(0xFFCFE8FA), style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(top = 4.dp))
+                // "Show them": the projects with no location, in Projects
+                if (pinned < s.projects.size) Row(Modifier.padding(top = 10.dp).clip(RoundedCornerShape(99.dp)).background(Color(0x26FFFFFF)).clickable(role = Role.Button) { m.prefs.filter = "missing"; m.goTab = "list" }
+                    .padding(horizontal = 14.dp, vertical = 8.dp).testTag("show_missing"), verticalAlignment = Alignment.CenterVertically) {
+                    Text(t("Show them", "Zionyeshe"), color = Color.White, style = MaterialTheme.typography.labelLarge); Spacer(Modifier.width(6.dp))
+                    Icon(Ic.get("arrow"), null, tint = Color.White, modifier = Modifier.size(16.dp))
+                }
             }
         }
     }
@@ -216,6 +222,11 @@ private fun Overview(m: AppModel, s: Snapshot, go: (String) -> Unit) {
             }
         }
     } }
+    // the map: open repairs in orange and red, other projects with a location in green
+    Card(Modifier.padding(top = 14.dp).rise(), pad = 0.dp) {
+        ProjectsMap(s.projects.filter { it.gps != null }.map { Dot(it.id, it.gps!!, dotColor(s, it), s.repairs.containsKey(it.id), it.title) }, null, open, Modifier.fillMaxWidth().height(280.dp).testTag("office_map"))
+    }
+    Text(t("Orange and red: open repairs. Green: other projects with a location.", "Machungwa na nyekundu: matengenezo yaliyo wazi. Kijani: miradi mingine yenye mahali."), style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 6.dp))
 }
 
 private fun feedHue(a: String) = when (a) { "pin", "approve", "assign" -> "pin"; "visit", "fixed" -> "near"; "new" -> "new"; "job", "request" -> "repairs"; "reject" -> "me"; else -> "all" }

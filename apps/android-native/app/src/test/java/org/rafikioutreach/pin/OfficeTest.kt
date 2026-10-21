@@ -105,6 +105,7 @@ class OfficeTest {
         rule.onNodeWithTag("nav_office").performClick()
         waitFor("Kapsaret Borehole")
         shot("20-office-overview")
+        rule.onNodeWithTag("show_missing").assertExists(); rule.onNodeWithTag("office_map").assertExists()
         rule.onNodeWithTag("o_repairs").performClick()
         waitFor("Handle loose")
         tap("Parts ordered"); tap("Save")
