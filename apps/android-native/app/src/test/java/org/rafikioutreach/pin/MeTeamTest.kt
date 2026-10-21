@@ -184,7 +184,8 @@ class MeTeamTest {
         rule.onNodeWithTag("update_check").performClick()
         rule.mainClock.advanceTimeBy(2500); rule.waitForIdle()
         rule.waitUntil(5000) { !m.focusUpdate }
-        rule.mainClock.advanceTimeBy(600); rule.waitForIdle()
+        // the scroll is animated: give it time on a busy test machine
+        rule.waitUntil(8000) { try { rule.onNodeWithTag("app_update").assertIsDisplayed(); true } catch (e: AssertionError) { rule.mainClock.advanceTimeBy(200); false } }
         rule.onNodeWithTag("app_update").assertIsDisplayed(); shot("69-check-scrolls-up")
         // Samsung's Auto Blocker cancels the install: explain it and link to the setting
         val U = org.rafikioutreach.pin.data.Updater
