@@ -46,6 +46,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.testTag
 import androidx.core.content.FileProvider
 import org.json.JSONObject
 import org.rafikioutreach.pin.AppModel
@@ -184,6 +186,15 @@ fun ReportScreen(m: AppModel, back: () -> Unit) {
         }
         Msg(err, "warn")
         Card(Modifier.padding(top = 14.dp)) {
+            // the RAFIKI letterhead, as on the shared PDF (address by the reporter's home country)
+            Row(Modifier.fillMaxWidth().testTag("letterhead"), verticalAlignment = Alignment.Bottom) {
+                androidx.compose.foundation.Image(androidx.compose.ui.res.painterResource(if (C.dark) org.rafikioutreach.pin.R.drawable.rafiki_logo_light else org.rafikioutreach.pin.R.drawable.letterhead_logo), "RAFIKI Outreach",
+                    Modifier.weight(0.36f).padding(bottom = 8.dp), contentScale = androidx.compose.ui.layout.ContentScale.FillWidth)
+                Column(Modifier.weight(0.64f).padding(start = 8.dp), horizontalAlignment = Alignment.End) {
+                    letterheadAddress(snap.me.home.ifBlank { m.prefs.country }).forEach { Text(it, style = MaterialTheme.typography.bodySmall.copy(fontSize = 9.sp, lineHeight = 12.sp, fontFamily = androidx.compose.ui.text.font.FontFamily.SansSerif), color = C.text, textAlign = androidx.compose.ui.text.style.TextAlign.End) }
+                }
+            }
+            Box(Modifier.padding(bottom = 14.dp).fillMaxWidth().height(1.5.dp).background(if (C.dark) C.blue2 else Color(0xFF1A365D)))
             Text(t("Field report · ", "Ripoti ya uwanjani · ") + rep.label, style = MaterialTheme.typography.titleLarge, color = C.ink)
             Text((COUNTRIES[ck] ?: t("All countries", "Nchi zote")) + " · RAFIKI Outreach · " + t("Prepared by ", "Imeandaliwa na ") + m.prefs.name, style = MaterialTheme.typography.bodySmall, color = C.muted)
             val pctW = if (rep.ids.isEmpty()) "—" else "${rep.working * 100 / rep.ids.size}%"
@@ -211,21 +222,37 @@ fun ReportScreen(m: AppModel, back: () -> Unit) {
             rep.visits.sortedBy { it.optString("at") }.forEach { e -> Text(whenText(e.optString("at")) + " · " + e.optString("t") + " · " + e.optString("by") + " · " + stateName(e.optString("s")), style = MaterialTheme.typography.bodySmall, color = C.text, modifier = Modifier.padding(top = 4.dp)) }
             Text(t("Only visits, repairs and pins made with the RAFIKI Pin app are counted.", "Ziara, matengenezo na mahali vilivyowekwa kwa programu ya RAFIKI Pin tu ndivyo vinahesabiwa."), style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 12.dp))
         }
-        Btn(t("Share as PDF", "Shiriki kama PDF"), { sharePdf(ctx, rep, (COUNTRIES[ck] ?: t("All countries", "Nchi zote")), m.prefs.name) }, Modifier.fillMaxWidth().padding(top = 14.dp), icon = "upload")
+        Btn(t("Share as PDF", "Shiriki kama PDF"), { sharePdf(ctx, rep, (COUNTRIES[ck] ?: t("All countries", "Nchi zote")), m.prefs.name, snap.me.home.ifBlank { m.prefs.country }) }, Modifier.fillMaxWidth().padding(top = 14.dp), icon = "upload")
         Spacer(Modifier.height(24.dp))
     }
 }
 
 /** Draws the report onto A4 pages and opens the share sheet (WhatsApp, e-mail, Drive…). */
-private fun sharePdf(ctx: android.content.Context, r: ReportData, country: String, by: String) {
-    val doc = PdfDocument(); var pageNo = 0
+private fun sharePdf(ctx: android.content.Context, r: ReportData, country: String, by: String, home: String) {
+    val dir = File(ctx.cacheDir, "exports").apply { mkdirs() }
+    val f = File(dir, "RAFIKI-field-report-" + r.label.replace(' ', '-') + ".pdf")
+    writeReportPdf(ctx, r, country, by, home, f)
+    val uri = FileProvider.getUriForFile(ctx, "org.rafikioutreach.pin.files", f)
+    ctx.startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).setType("application/pdf").putExtra(Intent.EXTRA_STREAM, uri).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION), f.name))
+}
+
+/** The report as an A4 PDF on the RAFIKI letterhead (address by [home], the reporter's home country). */
+internal fun writeReportPdf(ctx: android.content.Context, r: ReportData, country: String, by: String, home: String, f: File) {
+    val doc = PdfDocument(); var pageNo = 0; var page: PdfDocument.Page? = null
+    drawReportPages(ctx, r, country, by, home, { doc.startPage(PdfDocument.PageInfo.Builder(595, 842, ++pageNo).create()).also { page = it }.canvas }, { doc.finishPage(page!!) })
+    f.outputStream().use { doc.writeTo(it) }; doc.close()
+}
+
+/** Draws the report onto 595×842pt pages: letterhead header on page 1, its footer on every page. */
+internal fun drawReportPages(ctx: android.content.Context, r: ReportData, country: String, by: String, home: String, startPage: () -> android.graphics.Canvas, endPage: () -> Unit) {
+    fun newPage() = startPage().also { drawLetterheadFoot(ctx, it) }
     val title = Paint().apply { isAntiAlias = true; textSize = 20f; typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD); color = 0xFF04263F.toInt() }
     val h2 = Paint(title).apply { textSize = 13f; color = 0xFF076DB1.toInt() }
     val body = Paint().apply { isAntiAlias = true; textSize = 10f; color = 0xFF141618.toInt() }
     val muted = Paint(body).apply { color = 0xFF5A6066.toInt() }
-    var page = doc.startPage(PdfDocument.PageInfo.Builder(595, 842, ++pageNo).create()); var c = page.canvas; var y = 56f
+    var c = newPage(); drawLetterheadTop(ctx, c, home); var y = LETTERHEAD_BODY_TOP
     fun line(text: String, p: Paint, gap: Float = 15f) {
-        if (y > 800) { doc.finishPage(page); page = doc.startPage(PdfDocument.PageInfo.Builder(595, 842, ++pageNo).create()); c = page.canvas; y = 56f }
+        if (y > LETTERHEAD_BODY_BOTTOM) { endPage(); c = newPage(); y = 56f }
         c.drawText(text, 48f, y, p); y += gap
     }
     line(t("Field report · ", "Ripoti ya uwanjani · ") + r.label, title, 22f)
@@ -240,10 +267,5 @@ private fun sharePdf(ctx: android.content.Context, r: ReportData, country: Strin
     if (r.visits.isEmpty()) line(t("No visits recorded in the app this month.", "Hakuna ziara zilizorekodiwa kwenye programu mwezi huu."), muted)
     r.visits.sortedBy { it.optString("at") }.forEach { e -> line(whenText(e.optString("at")) + "  " + e.optString("t").take(48) + "  ·  " + e.optString("by") + "  ·  " + stateName(e.optString("s")), body) }
     y += 14; line(t("Only visits, repairs and pins made with the RAFIKI Pin app are counted.", "Ziara, matengenezo na mahali vilivyowekwa kwa programu ya RAFIKI Pin tu ndivyo vinahesabiwa."), muted)
-    doc.finishPage(page)
-    val dir = File(ctx.cacheDir, "exports").apply { mkdirs() }
-    val f = File(dir, "RAFIKI-field-report-" + r.label.replace(' ', '-') + ".pdf")
-    f.outputStream().use { doc.writeTo(it) }; doc.close()
-    val uri = FileProvider.getUriForFile(ctx, "org.rafikioutreach.pin.files", f)
-    ctx.startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).setType("application/pdf").putExtra(Intent.EXTRA_STREAM, uri).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION), f.name))
+    endPage()
 }

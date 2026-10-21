@@ -203,7 +203,7 @@ struct ReportView: View {
                         }
                         Text(t("Only visits, repairs and pins made with the RAFIKI Pin app are counted.", "Ziara, matengenezo na mahali vilivyowekwa kwa programu ya RAFIKI Pin tu ndivyo vinahesabiwa.")).font(.bSmall).foregroundColor(C.muted).padding(.top, 12)
                     }.padding(.top, 14)
-                    Btn(t("Share as PDF", "Shiriki kama PDF"), icon: "upload", wide: true) { sharePdf(rep, country: countryName(ck) ?? t("All countries", "Nchi zote"), by: m.prefs.name) }.padding(.top, 14)
+                    Btn(t("Share as PDF", "Shiriki kama PDF"), icon: "upload", wide: true) { sharePdf(rep, country: countryName(ck) ?? t("All countries", "Nchi zote"), by: m.prefs.name, home: m.prefs.country) }.padding(.top, 14)
                     Spacer().frame(height: 24)
                 }.padding(16)
             }
@@ -212,20 +212,54 @@ struct ReportView: View {
     }
 }
 
-/// Draws the report onto A4 pages and opens the share sheet (WhatsApp, e-mail, Files…).
-func sharePdf(_ r: ReportData, country: String, by: String) {
+/// Letterhead address on reports, by the home country of the person making the report.
+/// Kenya team: the Kitale office (as on rafikioutreach.org/contact). Everyone else: the US head office, as on the printed letterhead.
+/// To give another country its own address, add one line here (e.g. "tz": [...]).
+let LETTERHEAD: [String: [String]] = [
+    "ke": ["Rafiki Outreach", "Mega Centre, 3rd Floor, Makasembo Road", "Kitale, Kenya", "Phone: +254 791 674 001", "Email: info@rafikioutreach.org"],
+    "default": ["Rafiki Outreach", "1817 N. Beck Street", "Salt Lake City, UT 84116, U.S.A.", "Phone: +1 801 547 7847", "Email: Info@rafikioutreach.org"],
+]
+func letterheadAddress(_ home: String) -> [String] { LETTERHEAD[home] ?? LETTERHEAD["default"] ?? [] }
+
+// Page geometry in PDF points, measured from the RAFIKI letterhead (0.6in side margins, logo 2.8in wide, navy rules, seal at the foot).
+private func lhRule(_ x0: CGFloat, _ x1: CGFloat, _ y: CGFloat, _ w: CGFloat) {
+    let p = UIBezierPath(); p.move(to: CGPoint(x: x0, y: y)); p.addLine(to: CGPoint(x: x1, y: y)); p.lineWidth = w
+    UIColor(red: 0x1A / 255, green: 0x36 / 255, blue: 0x5D / 255, alpha: 1).setStroke(); p.stroke()
+}
+/// Logo, address and navy rule across the top of the first page.
+func drawLetterheadTop(_ home: String, pageW: CGFloat = 595) {
+    UIImage(named: "LetterheadLogo")?.draw(in: CGRect(x: 43.2, y: 22, width: 201.6, height: 67.96))
+    let font = UIFont(name: "Helvetica", size: 9) ?? UIFont.systemFont(ofSize: 9)
+    for (i, line) in letterheadAddress(home).enumerated() {
+        let s = NSAttributedString(string: line, attributes: [.font: font, .foregroundColor: UIColor.black])
+        s.draw(at: CGPoint(x: pageW - 43.2 - s.size().width, y: 54 + 12 * CGFloat(i) - font.ascender))
+    }
+    lhRule(43.2, pageW - 43.2, 104.4, 1.5)
+}
+/// Seal, thin navy rule and the grey nonprofit line at the foot of every page.
+func drawLetterheadFoot(pageW: CGFloat = 595, pageH: CGFloat = 842) {
+    let sealR = pageW - 50.4
+    UIImage(named: "LetterheadSeal")?.draw(in: CGRect(x: sealR - 79.2, y: pageH - 36 - 79.2, width: 79.2, height: 79.2))
+    lhRule(43.2, sealR - 79.2 - 21.6, pageH - 36, 0.75)
+    let font = UIFont(name: "Helvetica", size: 8) ?? UIFont.systemFont(ofSize: 8)
+    NSAttributedString(string: "501(c)(3) Nonprofit Organization  |  Providing clean water and community development in East Africa", attributes: [.font: font, .foregroundColor: UIColor(white: 0.5, alpha: 1)])
+        .draw(at: CGPoint(x: 43.2, y: pageH - 25.2 - font.ascender))
+}
+
+/// Draws the report onto A4 pages on the RAFIKI letterhead and opens the share sheet (WhatsApp, e-mail, Files…).
+func sharePdf(_ r: ReportData, country: String, by: String, home: String = "") {
     let page = CGRect(x: 0, y: 0, width: 595, height: 842)
     let title: [NSAttributedString.Key: Any] = [.font: UIFont.boldSystemFont(ofSize: 20), .foregroundColor: UIColor(red: 0x04 / 255, green: 0x26 / 255, blue: 0x3F / 255, alpha: 1)]
     let h2: [NSAttributedString.Key: Any] = [.font: UIFont.boldSystemFont(ofSize: 13), .foregroundColor: UIColor(red: 0x07 / 255, green: 0x6D / 255, blue: 0xB1 / 255, alpha: 1)]
     let body: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 10), .foregroundColor: UIColor(red: 0x14 / 255, green: 0x16 / 255, blue: 0x18 / 255, alpha: 1)]
     let muted: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 10), .foregroundColor: UIColor(red: 0x5A / 255, green: 0x60 / 255, blue: 0x66 / 255, alpha: 1)]
     let data = UIGraphicsPDFRenderer(bounds: page).pdfData { ctx in
-        var y: CGFloat = 48
-        ctx.beginPage()
+        var y: CGFloat = 128
+        ctx.beginPage(); drawLetterheadFoot(); drawLetterheadTop(home)
         func line(_ text: String, _ a: [NSAttributedString.Key: Any], _ gap: CGFloat = 15) {
             let s = NSAttributedString(string: text, attributes: a)
             let h = s.boundingRect(with: CGSize(width: 499, height: 1000), options: [.usesLineFragmentOrigin], context: nil).height
-            if y + h > 800 { ctx.beginPage(); y = 48 }
+            if y + h > 712 { ctx.beginPage(); drawLetterheadFoot(); y = 48 }
             s.draw(with: CGRect(x: 48, y: y, width: 499, height: h + 2), options: [.usesLineFragmentOrigin], context: nil)
             y += max(gap, h + 4)
         }
