@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- RAFIKI Pin widget, medium (4×2). Counts come from the list saved on the phone (no extra data use);
+     the app and the 15-minute background check refresh it, and this every 30 minutes keeps "due" right. -->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="250dp" android:minHeight="110dp" android:targetCellWidth="4" android:targetCellHeight="2"
+    android:minResizeWidth="110dp" android:minResizeHeight="40dp" android:resizeMode="horizontal|vertical"
+    android:widgetCategory="home_screen" android:updatePeriodMillis="1800000"
+    android:initialLayout="@layout/widget_medium" android:previewLayout="@layout/widget_medium"
+    android:previewImage="@drawable/widget_preview" android:description="@string/w_desc" />

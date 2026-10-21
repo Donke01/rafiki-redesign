@@ -958,6 +958,24 @@ html[data-theme=dark] .onb .opt{background:#18222B;border-color:#26323C}
 .stp .stin small{position:absolute;right:12px;bottom:10px;font-size:.55rem;font-weight:800;letter-spacing:.08em;color:#FFFFFF}
 .stp:not(.got) .stin small{color:#9AA4AC}
 .stp:nth-child(odd) .stin{transform:rotate(-2deg)}.stp:nth-child(even) .stin{transform:rotate(2deg)}
+/* badges: progress, a new one landing with confetti, and the "new stamp" note at the top */
+.pol-sum{display:flex;align-items:center;gap:10px;margin:12px 0 2px}.pol-sum b{font-size:.82rem;white-space:nowrap;color:var(--ink)}
+.pol-track{flex:1;height:8px;border-radius:99px;background:var(--line);overflow:hidden}.pol-track i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#2FB872,#3EA7EE,#8C6CF2)}
+.stp .pol-bar{display:block;width:56px;height:4px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:4px}.stp .pol-bar em{display:block;height:100%;border-radius:99px;background:#3EA7EE}
+.stp .pol-bar.c-g em{background:#2FB872}.stp .pol-bar.c-c em{background:#F26A4F}.stp .pol-bar.c-y em{background:#F2B13A}.stp .pol-bar.c-p em{background:#8C6CF2}
+.stp{position:relative}.stp.got.pol-new .stin{animation:polPop .95s cubic-bezier(.34,1.56,.64,1) .35s both}
+@keyframes polPop{0%{opacity:0;transform:scale(.2) rotate(22deg)}55%{opacity:1;transform:scale(1.18) rotate(-4deg)}75%{transform:scale(.96) rotate(3deg)}100%{opacity:1;transform:rotate(-2deg)}}
+.pol-cf{position:absolute;left:50%;top:38%;width:0;height:0;pointer-events:none;z-index:3}
+.pol-cf i{position:absolute;left:-3px;top:-5px;width:6px;height:10px;border-radius:1px;opacity:0;animation:polCf 1.5s cubic-bezier(.2,.7,.3,1) both}
+@keyframes polCf{0%{opacity:1;transform:translate(0,0) rotate(0)}70%{opacity:1}100%{opacity:0;transform:translate(var(--x),calc(var(--y) + 40px)) rotate(calc(var(--r) + 540deg))}}
+.pol-toast{position:fixed;left:50%;top:calc(66px + env(safe-area-inset-top));transform:translateX(-50%);z-index:1310;width:min(420px,calc(100vw - 32px));display:flex;align-items:center;gap:12px;padding:12px 16px 12px 12px;border-radius:22px;background:linear-gradient(135deg,#1A8BD6,#054F81 55%,#04263F);color:#FFFFFF;box-shadow:0 14px 34px rgba(20,70,120,.35);cursor:pointer;animation:polIn .55s cubic-bezier(.34,1.56,.64,1) both}
+.pol-toast.out{opacity:0;transform:translate(-50%,-20px);transition:opacity .3s,transform .3s}
+.pol-toast .pol-tdrop{flex:0 0 46px;height:46px;border-radius:14px;background:rgba(255,255,255,.15);display:grid;place-items:center}.pol-toast .pol-tdrop .mascot{width:28px;height:auto}
+.pol-toast .pol-tx{display:flex;flex-direction:column;min-width:0}.pol-toast small{color:#FFD66B;font-weight:800;font-size:.75rem;letter-spacing:.03em}
+.pol-toast b{font-size:.95rem;line-height:1.25}.pol-toast .pol-tx span{color:#CFE8FA;font-size:.8rem}
+@keyframes polIn{0%{opacity:0;transform:translate(-50%,-40px) scale(.92)}100%{opacity:1;transform:translate(-50%,0) scale(1)}}
+html[data-theme=sun] .pol-toast{background:#000000;box-shadow:none;border:2px solid #000000}
+@media (prefers-reduced-motion: reduce){.stp.got.pol-new .stin,.pol-toast,.pol-cf i{animation:none !important}.pol-cf{display:none}.pol-toast.out{transition:none}}
 .stp b{font-size:.8rem;color:var(--ink)}
 .stp span{font-size:.7rem;color:var(--muted);line-height:1.25}
 .stp.got span{color:var(--ok);font-weight:700}
@@ -2615,21 +2633,108 @@ html[data-theme=sun] .lookpv,html[data-theme=sun] .lookpv .lpv{border-width:2px}
 
 
 
-  // stamps: a small collection that grows with what you do in the app
-  var STAMPS = [['pin', 1, 'First drop', 'Pin a location', 'b'], ['visit', 1, 'First visit', 'Report a site visit', 'g'], ['fixed', 1, 'Fixer', 'Mark a repair fixed', 'c'],
-    ['new', 1, 'Explorer', 'Add a new site', 'y'], ['pin', 10, 'Mapper', 'Pin 10 locations', 'p'], ['visit', 10, 'Regular', 'Report 10 visits', 'g']];
+  // stamps: a small collection that grows with what you do in the app (badges for real work; see polBadges below)
   function stampsUi() {
     var box = $('meStamps'); if (!box) return;
-    var draw = function () {
-      var me = String(S.name || '').toLowerCase(), n = {};
-      (actCache || []).forEach(function (e) { if (String(e.by || '').toLowerCase() === me) n[e.a] = (n[e.a] || 0) + 1; });
-      box.innerHTML = STAMPS.map(function (st, k) {
-        var have = (n[st[0]] || 0) >= st[1];
-        return '<div class="stp' + (have ? ' got' : '') + '"><div class="stin c-' + st[4] + '">' + drop(have ? st[4] : 'b', have ? ['smile', 'wink', 'o'][k % 3] : 'o') + '<small>' + String(k + 1).padStart(3, '0') + '</small></div><b>' + st[2] + '</b><span>' + (have ? 'Earned' : st[3]) + '</span></div>';
-      }).join('');
-    };
+    var draw = function () { polBadgesDraw(box); };
     draw();
     if (navigator.onLine) api('GET', null, '?activity=1').then(function (j) { if (j.ok) { actCache = j.activity || []; draw(); } });
+  }
+
+  // --- badges: earned from the team's activity feed, the same rules as the Android app ------------------
+  // [key, colour, title, how to earn, unit, goal]; feed entries are {by, a: pin|visit|fixed|new, s, id, t, at, wq?, st?}
+  var POL_BADGES = [
+    ['pin1', 'b', ['First drop', 'Tone la kwanza'], ['Pin a location', 'Weka mahali'], ['pins', 'pini'], 1],
+    ['visit1', 'g', ['First visit', 'Ziara ya kwanza'], ['Report a site visit', 'Ripoti ziara'], ['visits', 'ziara'], 1],
+    ['fixed1', 'c', ['Fixer', 'Mrekebishaji'], ['Mark a repair fixed', 'Weka matengenezo kuwa yamekamilika'], ['repairs', 'matengenezo'], 1],
+    ['new1', 'y', ['Explorer', 'Mvumbuzi'], ['Add a new site', 'Ongeza eneo jipya'], ['sites', 'maeneo'], 1],
+    ['pin10', 'p', ['Mapper', 'Mchora ramani'], ['Pin 10 locations', 'Weka mahali 10'], ['pins', 'pini'], 10],
+    ['visit10', 'g', ['Regular', 'Mzoefu'], ['Report 10 visits', 'Ripoti ziara 10'], ['visits', 'ziara'], 10],
+    ['month10', 'b', ['Busy month', 'Mwezi wa kazi'], ['10 visits this month', 'Ziara 10 mwezi huu'], ['visits', 'ziara'], 10],
+    ['streak5', 'y', ['On a roll', 'Mfululizo'], ['Work 5 days in a row', 'Fanya kazi siku 5 mfululizo'], ['days', 'siku'], 5],
+    ['countries4', 'p', ['Four countries', 'Nchi nne'], ['Visit sites in all 4 countries', 'Tembelea maeneo katika nchi zote 4'], ['countries', 'nchi'], 4],
+    ['water3', 'b', ['Water tester', 'Mpimaji wa maji'], ['Test the water on 3 visits', 'Pima maji katika ziara 3'], ['tests', 'vipimo'], 3],
+    ['story3', 'c', ['Story collector', 'Mkusanyaji wa hadithi'], ['Collect 3 story moments', 'Kusanya hadithi 3'], ['stories', 'hadithi'], 3],
+    ['pin100', 'g', ['100 pins', 'Pini 100'], ['Pin 100 locations', 'Weka mahali 100'], ['pins', 'pini'], 100]
+  ];
+  function polDay(iso) { var d = new Date(iso); if (isNaN(d)) return ''; return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  function polRun(days) {
+    var ds = Object.keys(days).sort(), best = 0, run = 0, prev = null;
+    ds.forEach(function (k) { var t = Date.parse(k + 'T12:00:00'); run = prev !== null && Math.round((t - prev) / 864e5) === 1 ? run + 1 : 1; if (run > best) best = run; prev = t; });
+    return best;
+  }
+  function polBadges(act, name, now) {
+    var me = String(name || '').trim().toLowerCase(), ck = {}, n = {}, days = {}, cs = {};
+    (S.projects || []).forEach(function (p) { ck[p.id] = p.ck; });
+    var mine = me ? (act || []).filter(function (e) { return String(e.by || '').trim().toLowerCase() === me; }) : [];
+    var d0 = now || new Date(), mStart = new Date(d0.getFullYear(), d0.getMonth(), 1).getTime();
+    var c = function (k) { n[k] = (n[k] || 0) + 1; };
+    mine.forEach(function (e) {
+      if (e.a === 'pin') { c('pin1'); c('pin10'); c('pin100'); }
+      if (e.a === 'fixed') c('fixed1');
+      if (e.a === 'new') c('new1');
+      if (e.a === 'visit') {
+        c('visit1'); c('visit10');
+        if (Date.parse(e.at) >= mStart) c('month10');
+        if (e.wq) c('water3');
+        if (e.st) c('story3');
+        if ({ ke: 1, tz: 1, ug: 1, mw: 1 }[ck[e.id]]) cs[ck[e.id]] = 1;
+      }
+      if ({ pin: 1, visit: 1, fixed: 1, 'new': 1 }[e.a]) { var dk = polDay(e.at); if (dk) days[dk] = 1; }
+    });
+    n.streak5 = polRun(days); n.countries4 = Object.keys(cs).length;
+    return POL_BADGES.map(function (b) { var v = n[b[0]] || 0; return { k: b[0], c: b[1], title: tr(b[2][0], b[2][1]), how: tr(b[3][0], b[3][1]), unit: b[4], goal: b[5], n: v, got: v >= b[5] }; });
+  }
+  function polProgress(b) {
+    if (b.got) return tr('Earned', 'Umepata');
+    if (b.goal === 1) return b.how;
+    var v = Math.min(b.n, b.goal);
+    return tr(v + '/' + b.goal + ' ' + b.unit[0], b.unit[1] + ' ' + v + '/' + b.goal);
+  }
+  function polSeen(name) { var v = store.get('rfPinBadges:' + String(name || '').trim().toLowerCase()); if (v === null) return null; try { return JSON.parse(v) || []; } catch (e) { return []; } }
+  function polBadgesDraw(box) {
+    var bs = polBadges(actCache || [], S.name), got = bs.filter(function (b) { return b.got; }), fresh = [];
+    // new since this browser last looked: celebrate once (the very first look only remembers)
+    if (actCache && S.name) {
+      var seen = polSeen(S.name);
+      if (seen) fresh = got.filter(function (b) { return seen.indexOf(b.k) < 0; });
+      store.set('rfPinBadges:' + String(S.name).trim().toLowerCase(), JSON.stringify((seen || []).concat(got.map(function (b) { return b.k; }).filter(function (k) { return !seen || seen.indexOf(k) < 0; }))));
+    }
+    var isNew = function (b) { return fresh.some(function (f) { return f.k === b.k; }); };
+    var sum = $('polStampsSum');
+    if (!sum) { sum = document.createElement('div'); sum.id = 'polStampsSum'; sum.className = 'pol-sum'; box.parentNode.insertBefore(sum, box); }
+    sum.innerHTML = '<span class="pol-track"><i style="width:' + Math.round(got.length / bs.length * 100) + '%"></i></span><b>' + esc(tr(got.length + ' of ' + bs.length, got.length + ' kati ya ' + bs.length)) + '</b>';
+    var html = function (mark) {
+      return bs.map(function (b, k) {
+        var bar = !b.got && b.goal > 1 && b.n > 0 ? '<em class="pol-bar c-' + b.c + '"><em style="width:' + Math.round(Math.min(1, b.n / b.goal) * 100) + '%"></em></em>' : '';
+        return '<div class="stp' + (b.got ? ' got' : '') + (mark && isNew(b) ? ' pol-new' : '') + '" data-badge="' + b.k + '"><div class="stin c-' + b.c + '">' + drop(b.got ? b.c : 'b', b.got ? ['smile', 'wink', 'o'][k % 3] : 'o') + '<small>' + String(k + 1).padStart(3, '0') + '</small></div><b>' + esc(b.title) + '</b><span>' + esc(polProgress(b)) + '</span>' + bar + '</div>';
+      }).join('');
+    };
+    // nothing changed (the second draw after the feed arrives): leave a celebration running
+    var plain = html(false); if (!fresh.length && box._polPlain === plain) return;
+    box._polPlain = plain; box.innerHTML = fresh.length ? html(true) : plain;
+    if (fresh.length) polCelebrate(box, fresh);
+  }
+  function polCelebrate(box, fresh) {
+    var still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var COLS = ['#3EA7EE', '#2FB872', '#F26A4F', '#F2B13A', '#8C6CF2', '#5CD3D6'];
+    if (!still) qa('.stp.pol-new', box).forEach(function (el, j) {
+      var cf = document.createElement('span'); cf.className = 'pol-cf'; cf.setAttribute('aria-hidden', 'true');
+      for (var i = 0; i < 22; i++) {
+        var a = (i / 22) * Math.PI * 2 + (i % 3) * 0.12, d = 52 + ((i * 37 + j * 11) % 45), p = document.createElement('i');
+        p.style.cssText = '--x:' + Math.round(Math.cos(a) * d) + 'px;--y:' + Math.round(Math.sin(a) * d) + 'px;--r:' + ((i * 67) % 360) + 'deg;background:' + COLS[i % COLS.length] + ';animation-delay:' + (0.38 + j * 0.06) + 's';
+        cf.appendChild(p);
+      }
+      el.appendChild(cf);
+      setTimeout(function () { cf.remove(); }, 2600);
+    });
+    var old = document.querySelector('.pol-toast'); if (old) old.remove();
+    var t = document.createElement('div'); t.className = 'pol-toast'; t.setAttribute('role', 'status'); t.tabIndex = 0;
+    t.innerHTML = '<span class="pol-tdrop">' + drop(fresh[0].c, 'smile') + '</span><span class="pol-tx"><small>' + esc(fresh.length === 1 ? tr('New stamp earned!', 'Umepata stempu mpya!') : tr(fresh.length + ' new stamps earned!', 'Umepata stempu ' + fresh.length + ' mpya!')) + '</small><b>' + esc(fresh.map(function (b) { return b.title; }).join(' · ')) + '</b>' + (fresh.length === 1 ? '<span>' + esc(fresh[0].how) + '</span>' : '') + '</span>';
+    var go = function () { t.remove(); var c = box.closest('.card'); if (c) c.scrollIntoView({ behavior: still ? 'auto' : 'smooth', block: 'start' }); };
+    t.addEventListener('click', go); t.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') go(); });
+    document.body.appendChild(t);
+    setTimeout(function () { t.classList.add('out'); setTimeout(function () { t.remove(); }, 320); }, 5200);
   }
   $('meWelcome').addEventListener('click', function () { onbOpen(); });
 

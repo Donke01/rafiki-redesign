@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="w_desc">Ziara zinazosubiri, matengenezo ya haraka na kazi zako, pamoja na Tembelea karibu na Weka mahali</string>
+    <string name="w_desc_small">Siku yako kwa haraka, pamoja na Tembelea karibu na Weka mahali</string>
+    <string name="w_visit">Tembelea karibu</string>
+    <string name="w_pin">Weka mahali</string>
+    <string name="w_due">Ziara zinazosubiri</string>
+    <string name="w_urgent">Matengenezo ya haraka</string>
+    <string name="w_yours">Zako</string>
+    <string name="w_line">Ziara 3 zinasubiri · Tengenezo 1 la haraka · 2 umepewa</string>
+    <string name="w_short">3 zinasubiri · 1 haraka · 2 zako</string>
+</resources>

@@ -430,7 +430,8 @@ export async function onRequestPost({ request, env, waitUntil }) {
         const lv2 = await getJson(env, 'pinlastvisit', {}); lv2[id] = { at, by, state: b.state }; await env.FEED.put('pinlastvisit', JSON.stringify(lv2));
       }
       await bump(env, 'rl:pinsave:' + ip);
-      await log(env, { by, a: 'visit', s: b.state, u: urg, id, t: title });
+      // wq: water tests recorded, st: a story moment (for the Water tester and Story collector stamps)
+      await log(env, Object.assign({ by, a: 'visit', s: b.state, u: urg, id, t: title }, qs.length ? { wq: 1 } : {}, clean(st.quote, 600) ? { st: 1 } : {}));
       if (clean(st.quote, 600) && st.consent) await addReview(env, { kind: 'story', id, t: title, by, data: { quote: clean(st.quote, 600), who: clean(st.by, 80), update: updateId } });
       // a visit someone was asked to make is done
       if (env.FEED) {

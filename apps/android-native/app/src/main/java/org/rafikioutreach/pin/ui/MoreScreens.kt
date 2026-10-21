@@ -139,7 +139,7 @@ fun MeScreen(m: AppModel, open: (String) -> Unit = {}, report: () -> Unit = {}, 
                 Text(t("Visits, repairs and how projects are doing for one month, ready to share as a PDF.", "Ziara, matengenezo na hali ya miradi kwa mwezi mmoja, tayari kushiriki kama PDF."), style = MaterialTheme.typography.bodyMedium, color = C.muted)
                 Btn(t("Open report", "Fungua ripoti"), report, Modifier.padding(top = 10.dp), icon = "clip", small = true)
             }
-            Stamps(m)
+            BadgeStamps(m)
             SettingsCard(m, settings)
             UpdateRow(m)
         }
@@ -154,39 +154,5 @@ private fun MeRow(k: String, v: String) {
             Text(v, color = Color.White, style = MaterialTheme.typography.titleSmall)
         }
         HorizontalDivider(color = Color(0x26FFFFFF))
-    }
-}
-
-private val STAMPS = listOf(
-    listOf("pin", 1, "First drop|Tone la kwanza", "Pin a location|Weka mahali", DropC.Blue), listOf("visit", 1, "First visit|Ziara ya kwanza", "Report a site visit|Ripoti ziara", DropC.Green),
-    listOf("fixed", 1, "Fixer|Mrekebishaji", "Mark a repair fixed|Weka matengenezo kuwa yamekamilika", DropC.Coral), listOf("new", 1, "Explorer|Mvumbuzi", "Add a new site|Ongeza eneo jipya", DropC.Amber),
-    listOf("pin", 10, "Mapper|Mchora ramani", "Pin 10 locations|Weka mahali 10", DropC.Purple), listOf("visit", 10, "Regular|Mzoefu", "Report 10 visits|Ripoti ziara 10", DropC.Green),
-)
-private fun tt(s: Any?) = (s as String).split("|").let { t(it[0], it[1]) }
-
-/** A small collection that grows with what you do in the app. */
-@Composable
-private fun Stamps(m: AppModel) {
-    val act by m.activity.collectAsState()
-    androidx.compose.runtime.LaunchedEffect(Unit) { m.loadActivity() }
-    val me = m.prefs.name.lowercase()
-    val n = (act ?: emptyList()).filter { it.optString("by").lowercase() == me }.groupingBy { it.optString("a") }.eachCount()
-    Card(Modifier.padding(top = 14.dp).testTag("stamps")) {
-        H2(t("Your stamps", "Stempu zako"))
-        Text(t("Every point you pin and every visit you report adds to your collection.", "Kila mahali unapoweka na kila ziara unayoripoti inaongeza kwenye mkusanyiko wako."), style = MaterialTheme.typography.bodyMedium, color = C.muted)
-        STAMPS.chunked(3).forEachIndexed { r, row ->
-            Row(Modifier.padding(top = 14.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                row.forEachIndexed { c, st ->
-                    val k = r * 3 + c; val got = (n[st[0] as String] ?: 0) >= (st[1] as Int)
-                    Column(Modifier.weight(1f).testTag(if (got) "stamp_got" else "stamp_no"), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Box(Modifier.stampIn(k, got)) { Stamp(84.dp, st[4] as DropC, "", "%03d".format(k + 1), got, listOf(Mood.Smile, Mood.Wink, Mood.O)[k % 3], rot = if (k % 2 == 0) -2f else 2f) }
-                        Text(tt(st[2]), style = MaterialTheme.typography.labelMedium, color = C.ink, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.padding(top = 8.dp))
-                        Text(if (got) t("Earned", "Umepata") else tt(st[3]), style = MaterialTheme.typography.bodySmall, color = if (got) C.ok else C.muted, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
-                    }
-                }
-            }
-        }
-        Text(t("Show the welcome screens again", "Onyesha skrini za kukaribisha tena"), style = MaterialTheme.typography.labelLarge, color = C.blue2,
-            modifier = Modifier.padding(top = 12.dp).clip(RoundedCornerShape(10.dp)).clickable { m.replayOnb = true }.padding(vertical = 10.dp).testTag("replay"))
     }
 }

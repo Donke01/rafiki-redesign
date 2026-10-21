@@ -238,6 +238,9 @@ fun ProjectsScreen(m: AppModel, open: (String) -> Unit, planRoute: () -> Unit = 
     val scrolledPast by remember(headIdx) { derivedStateOf { list.firstVisibleItemIndex > headIdx } }
     ShowInBar(m, t("Projects", "Miradi"), scrolledPast)
     fun pick(k: String) { f = k; m.prefs.filter = k; scope.launch { list.animateScrollToItem(headIdx + 1) } }
+    // the home-screen widget's Visit nearby / Pin a location
+    val goFilter = m.goFilter
+    androidx.compose.runtime.LaunchedEffect(goFilter) { if (goFilter != null) { pick(goFilter); m.goFilter = null } }
     LazyColumn(Modifier.fillMaxSize().testTag("projects"), state = list, contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 110.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         item(key = "top") { HomeTop(m, snap, here, search, { pick(it) }, newSite) }
         item(key = "here") { HereSlot(m, snap, here, Modifier, visit, open) }

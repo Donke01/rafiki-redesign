@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The home-screen widget: the app's light colours (values-night has the dark ones). -->
+<resources>
+    <color name="w_bg">#FFFFFFFF</color>
+    <color name="w_edge">#FFDCE1E5</color>
+    <color name="w_ink">#FF04263F</color>
+    <color name="w_muted">#FF5A6066</color>
+    <color name="w_teal">#FF0E7F86</color>
+    <color name="w_teal_bg">#FFDCF2F3</color>
+    <color name="w_amber">#FFB86E00</color>
+    <color name="w_amber_bg">#FFFDF0DC</color>
+    <color name="w_coral">#FFD2553A</color>
+    <color name="w_coral_bg">#FFFCE9E4</color>
+    <color name="w_green_hi">#FF2FB872</color>
+    <color name="w_green_lo">#FF1C7C4A</color>
+    <color name="w_blue_hi">#FF1A8BD6</color>
+    <color name="w_blue_lo">#FF076DB1</color>
+    <color name="w_glow">#3347B4F5</color>
+</resources>
