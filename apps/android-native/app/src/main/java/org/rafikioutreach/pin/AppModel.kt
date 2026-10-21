@@ -96,6 +96,9 @@ class AppModel(app: Application) : AndroidViewModel(app) {
     var goTab by androidx.compose.runtime.mutableStateOf<String?>(null)
     /** Open this project (a tap on a notification). */
     var goProject by androidx.compose.runtime.mutableStateOf<String?>(null)
+    /** Open Projects on this list ("near" or "missing"): the widget's Visit nearby and Pin a location. */
+    var goFilter by androidx.compose.runtime.mutableStateOf<String?>(null)
+    fun quick(q: String) { if (q == "near" || q == "missing") { prefs.filter = q; goFilter = q; goTab = "list" } }
     /** Me: scroll to the update card (after "Check" finds one, or "Update now" on the pop-up). */
     var focusUpdate by androidx.compose.runtime.mutableStateOf(false)
     /** The update card should start downloading as soon as it shows ("Update now" on the pop-up). */
@@ -140,6 +143,7 @@ class AppModel(app: Application) : AndroidViewModel(app) {
         bioLocked.value = false
         val s = prefs.session
         prefs.forget(); _signedIn.value = false
+        org.rafikioutreach.pin.widget.PinWidget.update(getApplication())
         if (s.isNotBlank()) viewModelScope.launch { Api(BuildConfig.SERVER, { "" }, { s }).also { it.transport = api.transport }.logout() }
     }
 
@@ -255,6 +259,8 @@ class AppModel(app: Application) : AndroidViewModel(app) {
         val n = raw.optInt("reviewOpen"); if (n > (_snap.value?.reviewOpen ?: 0)) prefs.reviewAt = java.time.Instant.now().toString()
         prefs.saveSnapshot(raw); _snap.value = Snapshot.from(raw)
         org.rafikioutreach.pin.ui.GoogleTiles.configure(getApplication(), _snap.value?.gmapsAndroid)
+        // the home-screen widget counts from this list
+        org.rafikioutreach.pin.widget.PinWidget.update(getApplication())
     }
 
     /** When the list was last fetched (ms), so coming back to the app doesn't reload every time. */

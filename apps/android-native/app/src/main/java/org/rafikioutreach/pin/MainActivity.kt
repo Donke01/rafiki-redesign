@@ -95,6 +95,8 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
     private fun handle(i: android.content.Intent?) {
         // a tap on a phone alert: open that project, or Me
         i?.getStringExtra("open")?.let { id -> i.removeExtra("open"); if (id.isNotBlank()) model.goProject = id else model.goTab = "me" }
+        // the home-screen widget: Visit nearby / Pin a location open Projects on that list (like Home's quick actions)
+        i?.getStringExtra("quick")?.let { q -> i.removeExtra("quick"); model.quick(q) }
         val u = i?.data ?: return
         if (u.scheme != "org.rafikioutreach.pin" || u.host != "signin") return
         i.data = null

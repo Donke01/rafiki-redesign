@@ -46,6 +46,7 @@ class AlertWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx,
         val old = prefs.loadSnapshot()?.optInt("reviewOpen") ?: 0
         if (n > old) prefs.reviewAt = java.time.Instant.now().toString()
         prefs.saveSnapshot(raw)
+        org.rafikioutreach.pin.widget.PinWidget.update(applicationContext)
         val a = api.activity().json.optJSONArray("activity")
         val act = if (a == null) emptyList() else (0 until a.length()).map { a.getJSONObject(it) }
         val list = alertsFor(Snapshot.from(raw), act, prefs.name, prefs.noteOff, prefs.reviewAt)
