@@ -107,7 +107,7 @@ fun NewSiteScreen(m: AppModel, done: (String?) -> Unit) {
 }
 
 @Composable
-fun MeScreen(m: AppModel, open: (String) -> Unit = {}, report: () -> Unit = {}, settings: (String) -> Unit = {}) {
+fun MeScreen(m: AppModel, open: (String) -> Unit = {}, report: () -> Unit = {}, notes: () -> Unit = {}, settings: (String) -> Unit = {}) {
     val s by m.snap.collectAsState()
     val act by m.activity.collectAsState()
     val mates by m.team.collectAsState()
@@ -120,7 +120,7 @@ fun MeScreen(m: AppModel, open: (String) -> Unit = {}, report: () -> Unit = {}, 
         // the title in the middle, the bell on the right, Me | Team under it
         Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
             Text(t("Me & team", "Mimi na timu"), style = MaterialTheme.typography.headlineLarge, color = C.ink, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.padding(horizontal = 52.dp))
-            Box(Modifier.align(Alignment.CenterEnd)) { Bell(m, open) }
+            Box(Modifier.align(Alignment.CenterEnd)) { Bell(m, notes) }
         }
         Box(Modifier.fillMaxWidth().padding(top = 10.dp), contentAlignment = Alignment.Center) {
             SmallSeg(listOf("me" to t("Me", "Mimi"), "team" to t("Team", "Timu")), pane, tag = "pane_") { pane = it; m.prefs.mePane = it; scope.launch { scroll.scrollTo(0) } }

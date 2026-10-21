@@ -1205,7 +1205,7 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
 .mehead{display:grid !important;grid-template-columns:44px 1fr 44px;align-items:center;justify-items:center;row-gap:10px}
 .mehead h1{grid-column:2;text-align:center}.mehead .bell{grid-column:3}.mehead .mesw{grid-column:1/-1}
 .bell{position:relative;width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(4,38,63,.08)}
-.bell svg{width:21px;height:21px}.bell .bn{position:absolute;top:-3px;right:-3px;min-width:19px;height:19px;padding:0 5px;border-radius:99px;background:var(--bad,#C62828);color:#FFFFFF;font:800 .68rem/19px inherit;font-style:normal;text-align:center;border:2px solid var(--card)}
+.bell svg{width:21px;height:21px}.bell .bn{position:absolute;top:-3px;right:-3px;min-width:19px;height:19px;padding:0 5px;border-radius:99px;background:var(--bad,#C62828);color:#FFFFFF;font-family:inherit;font-weight:800;font-size:.68rem;line-height:15px;font-style:normal;text-align:center;border:2px solid var(--card)}
 .bsh-h{display:flex;align-items:center;justify-content:center;position:relative;margin:2px 0 10px}.bsh-h h3{margin:0;text-align:center}
 .bsh-x{position:absolute;right:0;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:50%;border:0;background:var(--hb-slate);color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer}.bsh-x svg{width:18px;height:18px}
 .nl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
@@ -1213,6 +1213,92 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
 .nrow.new{background:var(--tint);border-color:transparent}.nrow .nt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.nrow .nt b{font-size:.9rem;color:var(--ink);font-weight:700}.nrow .nt small{font-size:.75rem;color:var(--muted)}
 .nrow .nd{width:9px;height:9px;border-radius:50%;background:var(--blue);flex:none}
 .nempty{text-align:center;padding:26px 0;color:var(--ok)}.nempty svg{width:40px;height:40px}.nempty p{color:var(--muted);margin:8px 0 0}
+/* Notifications: a full page from the bell. The bell rings while something is unread, rows rise in one after another,
+   unread dots pulse, and when there's nothing the drop sits among little notes that float in and settle. */
+.bell.ring svg{transform-origin:50% 10%;animation:bellRing 5s ease-in-out .5s infinite}
+@keyframes bellRing{0%,24%,100%{transform:none}3%{transform:rotate(17deg)}6%{transform:rotate(-15deg)}9%{transform:rotate(11deg)}12%{transform:rotate(-8deg)}15%{transform:rotate(5deg)}18%{transform:rotate(-2deg)}}
+.bell .bn.pop{animation:bnPop .55s cubic-bezier(.3,1.6,.5,1) both}
+@keyframes bnPop{0%{transform:scale(0)}60%{transform:scale(1.28)}100%{transform:scale(1)}}
+body.npg-on{overflow:hidden}
+.npg{position:fixed;inset:0;z-index:2100;display:flex;flex-direction:column;color:var(--text);overflow:hidden;animation:npIn .34s cubic-bezier(.2,.8,.2,1) both;
+  background:radial-gradient(70% 32% at 0% 0%,rgba(110,195,255,.30),transparent 70%),radial-gradient(55% 28% at 100% 4%,rgba(120,232,210,.24),transparent 70%),radial-gradient(60% 30% at 90% 100%,rgba(185,165,255,.18),transparent 70%),#F4F8FB}
+html[data-theme=dark] .npg{background:radial-gradient(70% 32% at 0% 0%,rgba(30,120,200,.30),transparent 70%),radial-gradient(55% 28% at 100% 4%,rgba(20,140,120,.20),transparent 70%),radial-gradient(60% 30% at 90% 100%,rgba(110,80,200,.16),transparent 70%),#0B1116}
+html[data-theme=sun] .npg{background:#FFFFFF}
+.npg.out{animation:npOut .22s ease both;pointer-events:none}
+@keyframes npIn{from{transform:translateX(34%);opacity:0}to{transform:none;opacity:1}}
+@keyframes npOut{to{transform:translateX(26%);opacity:0}}
+.np-h{position:relative;display:grid;grid-template-columns:44px 1fr 44px;align-items:center;gap:8px;width:100%;max-width:720px;margin:0 auto;padding:calc(12px + env(safe-area-inset-top)) 16px 4px}
+.np-tt{text-align:center;min-width:0}.np-tt h2{margin:0;font-size:1.4rem;font-weight:800;color:var(--ink);letter-spacing:-.01em}
+.np-tt small{display:block;margin-top:2px;font-size:.76rem;font-weight:700;color:var(--muted)}
+.np-b{width:44px;height:44px;padding:0;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(4,38,63,.08)}
+.np-b svg{width:20px;height:20px}html[data-theme=sun] .np-b{border:2px solid #000;box-shadow:none}html[data-theme=dark] .np-b{box-shadow:none}
+.np-f{display:flex;gap:8px;overflow-x:auto;width:100%;max-width:720px;margin:0 auto;padding:10px 16px 8px;scrollbar-width:none}.np-f::-webkit-scrollbar{display:none}
+.np-f button{flex:none;display:inline-flex;align-items:center;gap:7px;min-height:40px;padding:0 15px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-family:inherit;font-weight:700;font-size:.85rem;line-height:1;cursor:pointer;transition:background .2s,color .2s,transform .15s}
+.np-f button:active{transform:scale(.95)}
+.np-f button[aria-pressed=true]{background:var(--ink);color:var(--card);border-color:transparent;box-shadow:0 6px 14px rgba(12,25,36,.18)}
+html[data-theme=dark] .np-f button[aria-pressed=true]{box-shadow:none}
+html[data-theme=sun] .np-f button{border:2px solid #000}html[data-theme=sun] .np-f button[aria-pressed=true]{background:#0050A0;border-color:#0050A0;color:#FFFFFF}
+.np-f .c{min-width:20px;height:20px;padding:0 6px;border-radius:99px;background:var(--bad);color:#FFFFFF;font-family:inherit;font-weight:800;font-size:.7rem;line-height:20px;font-style:normal;text-align:center;animation:bnPop .5s cubic-bezier(.3,1.6,.5,1) both}
+html[data-theme=dark] .np-f .c{color:#2A0B08}
+.np-body{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:0 16px calc(28px + env(safe-area-inset-bottom))}
+.np-in{max-width:688px;margin:0 auto}
+.np-g{margin:16px 4px 8px;font-size:.72rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.np-l{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.np-r{position:relative;width:100%;display:flex;align-items:flex-start;gap:13px;padding:13px 14px 13px 12px;border-radius:20px;border:1px solid var(--line);background:var(--card);color:var(--text);text-align:left;font:inherit;cursor:pointer;
+  animation:npRow .52s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i,0) * 50ms);transition:background .45s,border-color .45s,transform .15s}
+.np-r:active{transform:scale(.985)}
+.np-r.new{background:var(--tint);border-color:transparent}
+html:not([data-theme=sun]) .np-r:not(.new){box-shadow:0 4px 14px rgba(20,60,100,.06)}html[data-theme=dark] .np-r:not(.new){box-shadow:none}
+html[data-theme=sun] .np-r{border:2px solid #000}html[data-theme=sun] .np-r.new{border-color:#0050A0}
+.np-in.still .np-r,.np-in.still .np-g{animation:none}
+@keyframes npRow{from{opacity:0;transform:translateY(16px) scale(.98)}to{opacity:1;transform:none}}
+.np-g{animation:npRow .4s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i,0) * 50ms)}
+.np-av{position:relative;flex:none;width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--hb);color:var(--hu);font-weight:800;font-size:.95rem;letter-spacing:.02em}
+.np-av.tile{border-radius:16px;background:var(--hu);color:var(--card)}.np-av.tile svg{width:23px;height:23px}
+.np-av .bd{position:absolute;right:-5px;bottom:-5px;width:23px;height:23px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--ku);color:var(--card);border:2.5px solid var(--card);transition:border-color .45s}
+.np-r.new .np-av .bd{border-color:var(--tint)}
+.np-av .bd svg{width:12px;height:12px;stroke-width:2.6}
+.np-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.np-t b{font-size:.93rem;font-weight:800;color:var(--ink);line-height:1.3}
+.np-t small{font-size:.75rem;font-weight:600;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.np-t .m{margin-top:4px;font-size:.87rem;line-height:1.42;color:var(--text)}
+.np-d{flex:none;width:10px;height:10px;margin:6px 0 0 2px;border-radius:50%;background:var(--blue);animation:npDot 2.4s ease-out 1s infinite;transition:transform .3s,opacity .3s}
+.np-d.gone{transform:scale(0);opacity:0}
+@keyframes npDot{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--blue) 55%,transparent)}70%,100%{box-shadow:0 0 0 9px color-mix(in srgb,var(--blue) 0%,transparent)}}
+.np-set{display:block;margin:20px auto 0;text-align:center}
+.np-m{position:absolute;top:calc(100% - 2px);right:16px;z-index:3;min-width:236px;padding:6px;border-radius:18px;background:var(--card);border:1px solid var(--line);box-shadow:0 16px 40px rgba(4,38,63,.22);transform-origin:top right;animation:npMenu .2s cubic-bezier(.2,.8,.2,1) both}
+html[data-theme=sun] .np-m{border:2px solid #000;box-shadow:none}html[data-theme=dark] .np-m{box-shadow:0 16px 40px rgba(0,0,0,.5)}
+.np-m button{display:flex;align-items:center;gap:11px;width:100%;min-height:46px;padding:10px 12px;border:0;border-radius:12px;background:none;color:var(--ink);font-family:inherit;font-weight:700;font-size:.88rem;line-height:1.25;text-align:left;cursor:pointer}
+.np-m button:hover,.np-m button:focus-visible{background:var(--tint)}.np-m button[disabled]{opacity:.45;cursor:default;background:none}
+.np-m svg{flex:none;width:19px;height:19px;color:var(--blue)}
+@keyframes npMenu{from{opacity:0;transform:scale(.9) translateY(-6px)}to{opacity:1;transform:none}}
+/* empty: the drop among notes that slide in from the sides, settle, then drift away (and again) */
+.np-e{text-align:center;padding:26px 8px 6px;animation:npRow .5s cubic-bezier(.2,.8,.2,1) both}
+.np-e h3{margin:8px 0 6px;font-size:1.18rem;font-weight:800;color:var(--ink)}
+.np-e p{margin:0 auto;max-width:300px;font-size:.9rem;line-height:1.5;color:var(--muted)}
+.np-st{position:relative;width:272px;height:212px;margin:0 auto}
+.np-st .halo{position:absolute;left:50%;top:50%;width:170px;height:170px;margin:-85px 0 0 -85px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--hu-blue) 24%,transparent) 0%,transparent 68%);animation:npHalo 3.6s ease-in-out infinite}
+.np-st .mascot{position:absolute;z-index:2;left:50%;top:50%;width:96px;height:106px;margin:-58px 0 0 -48px;animation:npBob 3.2s ease-in-out infinite}
+.np-fc{position:absolute;z-index:1;display:flex;align-items:center;gap:8px;width:122px;padding:9px 10px;border-radius:15px;background:var(--card);border:1px solid var(--line);box-shadow:0 10px 22px rgba(4,38,63,.13);transform:rotate(var(--r));animation:npFl 7s cubic-bezier(.2,.8,.2,1) var(--dl,0s) infinite both}
+html[data-theme=dark] .np-fc{box-shadow:0 10px 22px rgba(0,0,0,.35)}html[data-theme=sun] .np-fc{border:2px solid #000;box-shadow:none}
+.np-fc.r{animation-name:npFr}
+.np-fc i{flex:none;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--hu);color:var(--card)}.np-fc i svg{width:13px;height:13px;stroke-width:2.6}
+.np-fc span{flex:1;display:flex;flex-direction:column;gap:5px}
+.np-fc span::before,.np-fc span::after{content:"";display:block;height:6px;border-radius:9px;background:var(--hb)}
+.np-fc span::after{width:62%;background:var(--line)}
+html[data-theme=sun] .np-fc span::after{background:#8A99A6}
+.np-fc.c1{left:-8px;top:14px}.np-fc.c2{right:-18px;top:66px}.np-fc.c3{left:0;bottom:16px}
+.np-ok{position:absolute;z-index:3;left:calc(50% + 26px);top:30px;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--ok);color:var(--card);box-shadow:0 0 0 4px var(--card);animation:npOk 3.5s cubic-bezier(.3,1.5,.5,1) .6s infinite both}
+.np-ok svg{width:16px;height:16px;stroke-width:3}
+.np-st .sp{position:absolute;width:8px;height:8px;border-radius:50%;background:var(--hu-amber);animation:npSp 2.8s ease-in-out infinite}
+.np-st .sp.s1{left:34%;top:8px}.np-st .sp.s2{right:20%;bottom:30px;background:var(--hu-teal);animation-delay:.9s}.np-st .sp.s3{left:24%;bottom:70px;width:6px;height:6px;background:var(--hu-purple);animation-delay:1.7s}
+@keyframes npFl{0%{opacity:0;transform:translateX(-54px) rotate(-16deg) scale(.9)}11%{opacity:1;transform:translateX(5px) rotate(var(--r)) scale(1.02)}17%,74%{opacity:1;transform:rotate(var(--r))}86%,100%{opacity:0;transform:translateY(-14px) rotate(var(--r)) scale(.94)}}
+@keyframes npFr{0%{opacity:0;transform:translateX(54px) rotate(16deg) scale(.9)}11%{opacity:1;transform:translateX(-5px) rotate(var(--r)) scale(1.02)}17%,74%{opacity:1;transform:rotate(var(--r))}86%,100%{opacity:0;transform:translateY(-14px) rotate(var(--r)) scale(.94)}}
+@keyframes npBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+@keyframes npHalo{0%,100%{transform:scale(.92);opacity:.8}50%{transform:scale(1.06);opacity:1}}
+@keyframes npOk{0%{transform:scale(0)}12%{transform:scale(1.15)}18%,80%{transform:scale(1)}92%,100%{transform:scale(0)}}
+@keyframes npSp{0%,100%{transform:scale(0);opacity:0}50%{transform:scale(1);opacity:1}}
+@media (prefers-reduced-motion: reduce){.bell.ring svg,.bell .bn.pop,.npg,.npg.out,.np-r,.np-g,.np-d,.np-e,.np-m,.np-f .c,.np-st .halo,.np-st .mascot,.np-fc,.np-ok,.np-st .sp{animation:none !important}.np-st .sp{display:none}}
 .settings .sgrp{margin-top:6px}.settings .sgl{display:block;text-align:center;font-size:.72rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:14px 0 4px}
 .sr2{width:100%;display:flex;align-items:center;gap:12px;padding:11px 2px;border:0;border-top:1px solid var(--line);background:transparent;color:var(--text);text-align:left;cursor:pointer;font:inherit}
 .sgl+.sr2{border-top:0}.sr2 .st{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.sr2 .st b{font-size:.92rem;color:var(--ink)}.sr2 .st small{font-size:.76rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sr2 .chev{width:18px;height:18px;color:var(--muted);flex:none}
@@ -1703,7 +1789,7 @@ html[data-theme=dark] .waitc{background:var(--card) !important;border-color:var(
     show(v || 'vMap', 'none');
     if (!v) nav('vMap', 'replace');
   }
-  addEventListener('popstate', function () { if (S.depth > 0) S.depth--; applyHash(false); });
+  addEventListener('popstate', function () { if (S.depth > 0) S.depth--; if (npPop()) return; applyHash(false); });
   function show(v, how) {
     if (S.view !== v && MAIN.indexOf(S.view) >= 0) S.prev = S.view;
     if (v !== 'vProj') { pick.stop(); liveStop(); } if (v !== 'vNew') nPick.stop();
@@ -3712,17 +3798,34 @@ html[data-theme=dark] .waitc{background:var(--card) !important;border-color:var(
     var me = S.name, out = [], cut = Date.now() - 30 * 864e5;
     (actCache || []).forEach(function (e) {
       if (!e || !e.at || Date.parse(e.at) < cut || same(e.by, me)) return;
-      if (e.a === 'assign' && same(e.to, me)) out.push({ k: 'assign', at: e.at, t: tr(e.by + ' asked you to make ' + (e.t || 'visits').replace(/ for .*$/, ''), e.by + ' amekuomba ufanye ' + (e.t || 'ziara').replace(/ for .*$/, '')) });
-      else if (e.a === 'visit' && (e.s === 'repair' || e.s === 'notworking')) out.push({ k: 'repair', at: e.at, id: e.id, t: e.by + ': ' + (e.t || '') + ' · ' + (e.s === 'notworking' ? tr('not working', 'haifanyi kazi') : tr('needs repair', 'inahitaji matengenezo')) });
-      else if (e.a === 'fixed') out.push({ k: 'fixed', at: e.at, id: e.id, t: tr(e.by + ' fixed ' + (e.t || ''), e.by + ' amerekebisha ' + (e.t || '')) });
-      else if (e.a === 'new' && S.admin) out.push({ k: 'new', at: e.at, id: e.id, t: tr(e.by + ' added a new site: ' + (e.t || ''), e.by + ' ameongeza eneo jipya: ' + (e.t || '')) });
+      // each one: kind, when, project id, the whole sentence (t), who (by), the project's name (p) and the short message (m)
+      var what = (e.t || 'visits').replace(/ for .*$/, '');
+      if (e.a === 'assign' && same(e.to, me)) out.push({ k: 'assign', at: e.at, id: e.id && byId(e.id) ? e.id : undefined, by: e.by, p: e.id && byId(e.id) ? byId(e.id).title : '', m: tr('Asked you to make ' + what, 'Amekuomba ufanye ' + what.replace(/visits?/, 'ziara')), t: tr(e.by + ' asked you to make ' + what, e.by + ' amekuomba ufanye ' + what.replace(/visits?/, 'ziara')) });
+      else if (e.a === 'visit' && (e.s === 'repair' || e.s === 'notworking')) out.push({ k: 'repair', at: e.at, id: e.id, by: e.by, p: e.t || '', m: e.s === 'notworking' ? tr('Reported it’s not working', 'Ameripoti kuwa haifanyi kazi') : tr('Reported it needs repair', 'Ameripoti kuwa inahitaji matengenezo'), t: e.by + ': ' + (e.t || '') + ' · ' + (e.s === 'notworking' ? tr('not working', 'haifanyi kazi') : tr('needs repair', 'inahitaji matengenezo')) });
+      else if (e.a === 'fixed') out.push({ k: 'fixed', at: e.at, id: e.id, by: e.by, p: e.t || '', m: tr('Marked it fixed ✓', 'Ameiweka kuwa imerekebishwa ✓'), t: tr(e.by + ' fixed ' + (e.t || ''), e.by + ' amerekebisha ' + (e.t || '')) });
+      else if (e.a === 'new' && S.admin) out.push({ k: 'new', at: e.at, id: e.id, by: e.by, p: e.t || '', m: tr('Added a new site', 'Ameongeza eneo jipya'), t: tr(e.by + ' added a new site: ' + (e.t || ''), e.by + ' ameongeza eneo jipya: ' + (e.t || '')) });
     });
-    (S.jobs || []).forEach(function (id) { var r = S.repairs[id]; if (r) out.push({ k: 'job', at: (r.stepAt && r.stepAt.assigned) || r.at, id: id, t: tr('Repair job for you: ', 'Kazi ya matengenezo kwako: ') + (r.t || (byId(id) || {}).title || '') }); });
-    if (S.admin && S.reviewOpen) out.push({ k: 'review', at: store.get('rfPinReviewAt') || new Date().toISOString(), t: S.reviewOpen === 1 ? tr('1 change waiting for your review', 'Badiliko 1 linasubiri uidhinishe') : tr(S.reviewOpen + ' changes waiting for your review', 'Mabadiliko ' + S.reviewOpen + ' yanasubiri uidhinishe') });
+    (S.jobs || []).forEach(function (id) { var r = S.repairs[id]; if (r) { var pt = r.t || (byId(id) || {}).title || ''; out.push({ k: 'job', at: (r.stepAt && r.stepAt.assigned) || r.at, id: id, name: tr('Repair job', 'Kazi ya matengenezo'), p: pt, m: tr('This repair is yours to do', 'Matengenezo haya ni yako kufanya'), t: tr('Repair job for you: ', 'Kazi ya matengenezo kwako: ') + pt }); } });
+    if (S.admin && S.reviewOpen) {
+      var ra = store.get('rfPinReviewAt'); if (!ra) { ra = new Date().toISOString(); store.set('rfPinReviewAt', ra); }   // stays the same, so "mark as read" sticks
+      var rv = S.reviewOpen === 1 ? tr('1 change waiting for your review', 'Badiliko 1 linasubiri uidhinishe') : tr(S.reviewOpen + ' changes waiting for your review', 'Mabadiliko ' + S.reviewOpen + ' yanasubiri uidhinishe');
+      out.push({ k: 'review', at: ra, name: tr('Office review', 'Ukaguzi wa ofisi'), p: '', m: rv, t: rv });
+    }
     return out.filter(function (n) { return noteOn(n.k); }).sort(function (a, b) { return String(b.at).localeCompare(String(a.at)); }).slice(0, 40);
   }
-  function noteUnread() { var seen = store.get('rfPinNoteSeen') || ''; return notes().filter(function (n) { return String(n.at) > seen; }).length; }
-  function bellUi() { var n = noteUnread(), b = $('meBellN'); if (!b) return; b.textContent = n > 9 ? '9+' : n; b.classList.toggle('hidden', !n); $('meBell').setAttribute('aria-label', tr('Notifications', 'Arifa') + (n ? ' · ' + n + ' ' + tr('new', 'mpya') : '')); }
+  // Unread: newer than "Mark all as read" and not opened one by one (rfPinNoteRead keeps those).
+  function nkey(n) { return n.k + '|' + (n.id || '') + '|' + n.at; }
+  function noteNew(n, seen, rd) { return String(n.at) > seen && !rd[nkey(n)]; }
+  function noteUnread() { var seen = store.get('rfPinNoteSeen') || '', rd = jget('rfPinNoteRead', {}); return notes().filter(function (n) { return noteNew(n, seen, rd); }).length; }
+  function noteMark(key) { var rd = jget('rfPinNoteRead', {}), keep = {}; rd[key] = 1; notes().forEach(function (n) { var k = nkey(n); if (rd[k]) keep[k] = 1; }); store.set('rfPinNoteRead', JSON.stringify(keep)); }
+  var bellWas = -1;
+  function bellUi() {
+    var n = noteUnread(), b = $('meBellN'), bell = $('meBell'); if (!b) return;
+    b.textContent = n > 9 ? '9+' : n; b.classList.toggle('hidden', !n);
+    if (n && n !== bellWas) { b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); }   // the red count pops in
+    bellWas = n; bell.classList.toggle('ring', !!n);
+    bell.setAttribute('aria-label', tr('Notifications', 'Arifa') + (n ? ' · ' + n + ' ' + tr('unread', 'hazijasomwa') : ''));
+  }
   function bsheet(title, html, cls) {
     var w = document.createElement('div'); w.className = 'bsh ' + (cls || ''); w.setAttribute('role', 'dialog'); w.setAttribute('aria-modal', 'true'); w.setAttribute('aria-label', title);
     w.innerHTML = '<div class="bsh-bg"></div><div class="bsh-p"><i class="grab" aria-hidden="true"></i><div class="bsh-h"><h3>' + title + '</h3><button type="button" class="bsh-x" aria-label="' + tr('Close', 'Funga') + '">' + oic('xc').replace(/<circle[^>]*\/>/, '') + '</button></div>' + html + '</div>';
@@ -3731,20 +3834,139 @@ html[data-theme=dark] .waitc{background:var(--card) !important;border-color:var(
     w.querySelector('.bsh-bg').addEventListener('click', w.close); w.querySelector('.bsh-x').addEventListener('click', w.close);
     return w;
   }
-  function bellOpen() {
-    var list = notes(), seen = store.get('rfPinNoteSeen') || '', K = {}; NOTE_KINDS.forEach(function (k) { K[k[0]] = k; });
-    var html = list.length ? '<ul class="nl">' + list.map(function (n) {
-      var k = K[n.k];
-      return '<li><button type="button" class="nrow' + (String(n.at) > seen ? ' new' : '') + '"' + (n.id ? ' data-id="' + esc(n.id) + '"' : n.k === 'review' ? ' data-go="review"' : '') + '><span class="pi" style="--hu:var(--hu-' + k[4] + ');--hb:var(--hb-' + k[4] + ')">' + oic(k[3]) + '</span><span class="nt"><b>' + esc(n.t) + '</b><small>' + esc(when(n.at)) + '</small></span>' + (String(n.at) > seen ? '<i class="nd" aria-label="' + tr('new', 'mpya') + '"></i>' : '') + '</button></li>';
-    }).join('') + '</ul>' : '<div class="nempty">' + oic('check') + '<p>' + tr('You’re all caught up.', 'Hakuna jipya kwa sasa.') + '</p></div>';
-    var w = bsheet(tr('Notifications', 'Arifa'), html + '<button class="lnk" type="button" data-set="notify" style="margin-top:12px">' + tr('Choose what to be told about', 'Chagua unachotaka kuarifiwa') + '</button>', 'notes');
-    store.set('rfPinNoteSeen', new Date().toISOString()); bellUi();
-    w.addEventListener('click', function (e) {
-      var r = e.target.closest('[data-id]'); if (r) { w.close(); openProj(r.getAttribute('data-id')); return; }
-      if (e.target.closest('[data-go=review]')) { w.close(); show('vOffice'); O.tab = 'review'; renderOffice(); return; }
-      if (e.target.closest('[data-set]')) { w.close(); setOpen('notify'); }
-    });
+  // The bell opens a full page: All · Unread · For me · Repairs, grouped Today / This week / Earlier.
+  // It's its own step in the phone's history, so Back (or Esc) closes it.
+  var NP = { w: null, f: 'all', menu: false, pushed: false };
+  var NFILT = [['all', 'All', 'Zote'], ['unread', 'Unread', 'Hazijasomwa'], ['me', 'For me', 'Kwangu'], ['repairs', 'Repairs', 'Matengenezo']];
+  var NHUES = ['blue', 'green', 'purple', 'amber', 'teal', 'coral'];
+  var DOTS = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="19" cy="12" r="1.9"/></svg>';
+  function nameHue(s) { var h = 0; String(s || '').trim().toLowerCase().split('').forEach(function (c) { h = (h * 31 + c.charCodeAt(0)) >>> 0; }); return NHUES[h % NHUES.length]; }
+  function ago(iso) {
+    var d = Date.parse(iso); if (isNaN(d)) return '';
+    var m = Math.max(0, Math.floor((Date.now() - d) / 60000)), h = Math.floor(m / 60), dd = Math.floor(h / 24);
+    if (m < 1) return tr('just now', 'sasa hivi');
+    if (m < 60) return tr(m + ' min ago', 'dakika ' + m + ' zilizopita');
+    if (h < 24) return tr(h + ' h ago', 'saa ' + h + ' zilizopita');
+    if (dd < 7) return dd === 1 ? tr('yesterday', 'jana') : tr(dd + ' days ago', 'siku ' + dd + ' zilizopita');
+    return new Date(d).toLocaleDateString(S.lang === 'sw' ? 'sw' : 'en-GB', { day: 'numeric', month: 'short' });
   }
+  function nGroup(iso) { var d = Date.parse(iso), t = new Date(); t.setHours(0, 0, 0, 0); return d >= t.getTime() ? 0 : d >= t.getTime() - 6 * 864e5 ? 1 : 2; }
+  function nPass(n, f, seen, rd) { return f === 'unread' ? noteNew(n, seen, rd) : f === 'me' ? n.k === 'assign' || n.k === 'job' : f === 'repairs' ? n.k === 'repair' || n.k === 'fixed' : true; }
+  function nRow(n, i, seen, rd, K) {
+    var k = K[n.k], nw = noteNew(n, seen, rd), who = n.by, hu = nameHue(who);
+    var av = who ? '<span class="np-av" aria-hidden="true" style="--hu:var(--hu-' + hu + ');--hb:var(--hb-' + hu + ')">' + esc(initials(who)) + '<i class="bd" style="--ku:var(--hu-' + k[4] + ')">' + oic(k[3]) + '</i></span>'
+      : '<span class="np-av tile" aria-hidden="true" style="--hu:var(--hu-' + k[4] + ');--hb:var(--hb-' + k[4] + ')">' + oic(k[3]) + '</span>';
+    return '<li><button type="button" class="np-r' + (nw ? ' new' : '') + '" style="--i:' + Math.min(i, 12) + '" data-key="' + esc(nkey(n)) + '"' + (n.id ? ' data-id="' + esc(n.id) + '"' : n.k === 'review' ? ' data-go="review"' : '') + '>' + av +
+      '<span class="np-t">' + (nw ? '<span class="vh">' + tr('Unread: ', 'Haijasomwa: ') + '</span>' : '') + '<b>' + esc(who || n.name || '') + '</b><small>' + esc([ago(n.at), n.p].filter(Boolean).join(' · ')) + '</small><span class="m">' + esc(n.m || n.t) + '</span></span>' +
+      (nw ? '<i class="np-d" aria-hidden="true"></i>' : '') + '</button></li>';
+  }
+  function npEmpty(f) {
+    var T = {
+      all: [tr('You’re all caught up', 'Hakuna jipya kwa sasa'), tr('When the team reports a repair, fixes a water point or gives you visits, it shows up here.', 'Timu ikiripoti matengenezo, ikirekebisha kituo cha maji au ikikupa ziara, itaonekana hapa.')],
+      unread: [tr('You’re all caught up', 'Umesoma zote'), tr('Nothing unread. Nice work!', 'Hakuna ambayo hujasoma. Kazi nzuri!')],
+      me: [tr('Nothing assigned to you right now', 'Hakuna ulichopewa kwa sasa'), tr('Visits and repair jobs given to you will show up here.', 'Ziara na kazi za matengenezo utakazopewa zitaonekana hapa.')],
+      repairs: [tr('No repair news', 'Hakuna habari za matengenezo'), tr('Repairs the team reports and fixes will show up here.', 'Matengenezo yanayoripotiwa na kurekebishwa na timu yataonekana hapa.')]
+    }[f] || [];
+    var cs = f === 'me' ? [['cal', 'teal'], ['wrench', 'amber'], ['clip', 'blue']] : f === 'repairs' ? [['alert', 'coral'], ['okc', 'green'], ['wrench', 'amber']] : [['okc', 'green'], ['cal', 'teal'], ['alert', 'coral']];
+    var card = function (c, x, r, dl) { return '<div class="np-fc ' + c + '" style="--hu:var(--hu-' + x[1] + ');--hb:var(--hb-' + x[1] + ');--r:' + r + 'deg;--dl:' + dl + 's"><i>' + oic(x[0]) + '</i><span></span></div>'; };
+    return '<div class="np-e" data-empty="' + f + '"><div class="np-st" aria-hidden="true"><span class="halo"></span>' + card('c1', cs[0], -7, 0) + card('c2 r', cs[1], 6, .5) + card('c3', cs[2], 4, 1) +
+      drop('b', 'smile') + '<span class="np-ok">' + oic('check') + '</span><i class="sp s1"></i><i class="sp s2"></i><i class="sp s3"></i></div><h3>' + T[0] + '</h3><p>' + T[1] + '</p></div>';
+  }
+  function npCounts() {
+    var w = NP.w; if (!w) return 0;
+    var seen = store.get('rfPinNoteSeen') || '', rd = jget('rfPinNoteRead', {}), list = notes(), un = list.filter(function (n) { return noteNew(n, seen, rd); }).length;
+    var c = w.querySelector('.np-f .c'); c.textContent = un > 9 ? '9+' : un; c.classList.toggle('hidden', !un);
+    $('npU').textContent = !list.length ? '' : un ? (un === 1 ? tr('1 unread', '1 haijasomwa') : tr(un + ' unread', un + ' hazijasomwa')) : tr('All read ✓', 'Zote zimesomwa ✓');
+    return un;
+  }
+  function npDraw(anim) {
+    var w = NP.w; if (!w) return;
+    var seen = store.get('rfPinNoteSeen') || '', rd = jget('rfPinNoteRead', {}), f = NP.f, K = {}, i = 0, html = '';
+    NOTE_KINDS.forEach(function (k) { K[k[0]] = k; });
+    qa('.np-f button', w).forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-f') === f ? 'true' : 'false'); });
+    var list = notes().filter(function (n) { return nPass(n, f, seen, rd); }), G = [[], [], []];
+    list.forEach(function (n) { G[nGroup(n.at)].push(n); });
+    G.forEach(function (g, gi) {
+      if (!g.length) return;
+      html += '<h3 class="np-g" style="--i:' + Math.min(i, 12) + '">' + [tr('Today', 'Leo'), tr('This week', 'Wiki hii'), tr('Earlier', 'Awali')][gi] + '</h3><ul class="np-l">' + g.map(function (n) { return nRow(n, i++, seen, rd, K); }).join('') + '</ul>';
+    });
+    var box = w.querySelector('.np-in');
+    box.innerHTML = (html || npEmpty(f)) + '<button class="lnk np-set" type="button" data-set="notify">' + tr('Choose what to be told about', 'Chagua unachotaka kuarifiwa') + '</button>';
+    box.classList.toggle('still', !anim);
+    npCounts();
+  }
+  function npMenu(on) {
+    var w = NP.w; if (!w) return;
+    var m = w.querySelector('.np-m'), b = w.querySelector('[data-np=menu]');
+    if (m) m.remove(); NP.menu = false; b.setAttribute('aria-expanded', 'false');
+    if (!on) return;
+    var un = npCounts();
+    m = document.createElement('div'); m.className = 'np-m'; m.setAttribute('role', 'menu');
+    m.innerHTML = '<button type="button" role="menuitem" data-np="all"' + (un ? '' : ' disabled') + '>' + oic('check') + tr('Mark all as read', 'Weka zote kuwa zimesomwa') + '</button>' +
+      '<button type="button" role="menuitem" data-set="notify">' + oic('bell') + tr('Choose what to be told about', 'Chagua unachotaka kuarifiwa') + '</button>';
+    w.querySelector('.np-h').appendChild(m); NP.menu = true; b.setAttribute('aria-expanded', 'true');
+    var f = m.querySelector('button:not([disabled])'); if (f) f.focus();
+  }
+  function npAllRead() {
+    store.set('rfPinNoteSeen', new Date().toISOString()); store.del('rfPinNoteRead');
+    var w = NP.w; if (!w) return;
+    qa('.np-r.new', w).forEach(function (r) { r.classList.remove('new'); var d = r.querySelector('.np-d'), v = r.querySelector('.vh'); if (v) v.remove(); if (d) { d.classList.add('gone'); setTimeout(function () { d.remove(); }, 320); } });
+    npCounts(); bellUi();
+    if (NP.f === 'unread') setTimeout(function () { npDraw(true); }, 340);
+    var b = w.querySelector('[data-np=back]'); if (b) b.focus();
+  }
+  function npKey(e) {
+    if (!NP.w) return;
+    if (e.key === 'Escape') { e.preventDefault(); if (NP.menu) { npMenu(false); NP.w.querySelector('[data-np=menu]').focus(); } else npShut(false); return; }
+    if (e.key !== 'Tab') return;
+    var f = qa('button:not([disabled]),a[href]', NP.w).filter(function (x) { return x.offsetParent !== null; }); if (!f.length) return;
+    var a = f[0], z = f[f.length - 1];
+    if (!NP.w.contains(document.activeElement)) { e.preventDefault(); a.focus(); }
+    else if (e.shiftKey && document.activeElement === a) { e.preventDefault(); z.focus(); }
+    else if (!e.shiftKey && document.activeElement === z) { e.preventDefault(); a.focus(); }
+  }
+  function npClick(e) {
+    var t = e.target, x;
+    if (NP.menu && !t.closest('.np-m') && !t.closest('[data-np=menu]')) npMenu(false);
+    if ((x = t.closest('[data-np]'))) { var a = x.getAttribute('data-np'); if (a === 'back') npShut(false); else if (a === 'menu') { buzz(); npMenu(!NP.menu); } else if (a === 'all') { buzz(); npMenu(false); npAllRead(); } return; }
+    if ((x = t.closest('.np-f [data-f]'))) { if (x.getAttribute('data-f') === NP.f) return; buzz(); NP.f = x.getAttribute('data-f'); npDraw(true); NP.w.querySelector('.np-body').scrollTop = 0; return; }
+    if (t.closest('[data-set]')) { npShut(false); setOpen('notify'); return; }
+    if ((x = t.closest('.np-r'))) {
+      buzz(); noteMark(x.getAttribute('data-key')); bellUi();
+      var id = x.getAttribute('data-id');
+      // the page's history step becomes the project (or Office), so Back from there comes to Me
+      if (id) { npShut(true); openProj(id, null, 'replace'); return; }
+      if (x.getAttribute('data-go') === 'review') { npShut(true); show('vOffice', 'replace'); O.tab = 'review'; renderOffice(); return; }
+      x.classList.remove('new'); var d = x.querySelector('.np-d'), v = x.querySelector('.vh'); if (v) v.remove(); if (d) { d.classList.add('gone'); setTimeout(function () { d.remove(); }, 320); }
+      npCounts();
+    }
+  }
+  function bellOpen() {
+    if (NP.w) return;
+    NP.f = 'all'; NP.menu = false; NP.from = document.activeElement;
+    var w = document.createElement('div'); w.className = 'npg'; w.setAttribute('role', 'dialog'); w.setAttribute('aria-modal', 'true'); w.setAttribute('aria-labelledby', 'npT'); w.setAttribute('data-nosw', '');
+    w.innerHTML = '<div class="np-h"><button type="button" class="np-b" data-np="back" aria-label="' + tr('Back', 'Rudi') + '">' + CHEV + '</button>' +
+      '<div class="np-tt"><h2 id="npT">' + tr('Notifications', 'Arifa') + '</h2><small id="npU" aria-live="polite"></small></div>' +
+      '<button type="button" class="np-b" data-np="menu" aria-haspopup="menu" aria-expanded="false" aria-label="' + tr('More: mark all as read, settings', 'Zaidi: weka zote kuwa zimesomwa, mipangilio') + '">' + DOTS + '</button></div>' +
+      '<div class="np-f" role="group" aria-label="' + tr('Show', 'Onyesha') + '">' + NFILT.map(function (x) { return '<button type="button" data-f="' + x[0] + '" aria-pressed="false">' + tr(x[1], x[2]) + (x[0] === 'unread' ? '<i class="c hidden"></i>' : '') + '</button>'; }).join('') + '</div>' +
+      '<div class="np-body"><div class="np-in"></div></div>';
+    document.body.appendChild(w); document.body.classList.add('npg-on'); NP.w = w;
+    try { history.pushState({ pin: 1, np: 1 }, '', location.hash); S.depth++; NP.pushed = true; } catch (e) { NP.pushed = false; }
+    npDraw(true);
+    w.addEventListener('click', npClick); document.addEventListener('keydown', npKey);
+    setTimeout(function () { var b = w.querySelector('[data-np=back]'); if (b && NP.w === w) b.focus(); }, 40);
+  }
+  // pop: closed by the phone's Back, so the history step is already gone
+  function npShut(pop) {
+    var w = NP.w; if (!w) return false;
+    NP.w = null; NP.menu = false; document.body.classList.remove('npg-on'); document.removeEventListener('keydown', npKey);
+    w.classList.add('out'); setTimeout(function () { w.remove(); }, 240);
+    if (!pop && NP.pushed) { S.npSkip = true; history.back(); }
+    NP.pushed = false; bellUi();
+    var b = $('meBell'); if (b && S.view === 'vMe') b.focus();
+    return true;
+  }
+  function npPop() { if (S.npSkip) { S.npSkip = false; return true; } return npShut(true); }
   $('meBell').addEventListener('click', function () { buzz(); bellOpen(); });
   function bellLoad() { if (navigator.onLine) api('GET', null, '?activity=1').then(function (j) { if (j.ok) { actCache = j.activity || []; bellUi(); } }); else bellUi(); }
 
