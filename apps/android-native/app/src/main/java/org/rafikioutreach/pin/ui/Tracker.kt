@@ -67,6 +67,7 @@ fun RepairTracker(m: AppModel, p: Project, r: Repair, here: LatLng?) {
     var msg by remember { mutableStateOf<String?>(null) }
     var busy by remember { mutableStateOf(false) }
     var fixed by remember(p.id) { mutableStateOf(false) }
+    val money = remember(p.id) { TrackerMoney() }
     val bad = r.state == "notworking"
     val order = listOf("reported", "assigned", "parts", "fixed")
     var si = if (fixed) 3 else maxOf(0, order.indexOf(r.step))
@@ -75,7 +76,7 @@ fun RepairTracker(m: AppModel, p: Project, r: Repair, here: LatLng?) {
     val steps = listOf(
         t("Reported", "Imeripotiwa") to ((if (bad) t("Not working", "Haifanyi kazi") else t("Needs repair", "Inahitaji matengenezo")) + " · " + r.by + ", " + whenText(r.at)),
         t("Assigned", "Imegawiwa") to (if (r.assignee.isNotBlank()) r.assignee + (r.stepAt["assigned"]?.let { ", " + whenText(it) } ?: "") else t("Waiting for the office", "Inasubiri ofisi")),
-        t("Parts ordered", "Vipuri vimeagizwa") to (r.stepAt["parts"]?.let { whenText(it) } ?: if (r.parts.isNotBlank()) t("Needs: ", "Inahitaji: ") + r.parts else "—"),
+        t("Parts ordered", "Vipuri vimeagizwa") to (r.stepAt["parts"]?.let { whenText(it) } ?: if (r.approval?.status == "pending") t("Waiting for a second approval · asked by ", "Inasubiri idhini ya pili · imeombwa na ") + (r.approval?.by ?: "") else if (r.parts.isNotBlank()) t("Needs: ", "Inahitaji: ") + r.parts else "—"),
         t("Fixed", "Imerekebishwa") to (if (fixed) m.prefs.name else (if (isWater(p)) t("Mark it fixed when the water is running again", "Weka imerekebishwa maji yakitoka tena") else t("Mark it fixed when it’s working again", "Weka imerekebishwa ikifanya kazi tena"))),
     )
     val pulse by if (Motion.on && Motion.loops) rememberInfiniteTransition(label = "now").animateFloat(0f, 1f, infiniteRepeatable(tween(1800)), label = "p") else remember { mutableFloatStateOf(0f) }
@@ -136,10 +137,11 @@ fun RepairTracker(m: AppModel, p: Project, r: Repair, here: LatLng?) {
                 if (r.problems.isNotEmpty()) Text(t("Problems: ", "Matatizo: ") + r.problems.joinToString(", "), style = MaterialTheme.typography.bodySmall, color = C.muted)
                 r.cost?.let { Text(t("About KES ", "Takriban KES ") + "%,d".format(it), style = MaterialTheme.typography.bodySmall, color = C.muted) }
             }
+            m.snap.collectAsState().value?.let { sn -> TrackerMoneyBox(m, sn, p, r, money) }
             Btn(t("Mark fixed", "Weka imerekebishwa"), {
                 busy = true
                 m.viewModelScope.launch {
-                    when (val o = m.submit(JSONObject().put("action", "fixed").put("id", p.id).put("note", ""), emptyList())) {
+                    when (val o = m.submit(money.fill(JSONObject().put("action", "fixed").put("id", p.id).put("note", "")), money.files())) {
                         is Outcome.Sent, Outcome.Queued -> {
                             fixed = true; msg = if (o is Outcome.Queued) t("Saved on this phone. It will be sent when you have signal.", "Imehifadhiwa kwenye simu. Itatumwa ukipata mtandao.") else null
                             delay(4000); m.localFixed(p)

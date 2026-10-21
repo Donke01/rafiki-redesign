@@ -58,6 +58,8 @@ data class Repair(
     val state: String, val by: String, val at: String, val note: String, val urgency: String, val problems: List<String>,
     val assignee: String = "", val step: String = "reported", val due: String = "", val budget: Long? = null, val parts: String = "", val cost: Long? = null, val title: String = "",
     val stepAt: Map<String, String> = emptyMap(),
+    /** The second approval, for a repair above the approval limit (Office.kt). */
+    val approval: Approval? = null,
 ) {
     companion object {
         fun from(o: JSONObject) = Repair(
@@ -67,6 +69,7 @@ data class Repair(
             if (o.has("budget") && !o.isNull("budget")) o.optLong("budget") else null, o.optString("parts"),
             if (o.has("cost") && !o.isNull("cost")) o.optLong("cost") else null, o.optString("t"),
             o.optJSONObject("stepAt")?.let { j -> j.keys().asSequence().associateWith { j.optString(it) } } ?: emptyMap(),
+            Approval.from(o.optJSONObject("approval")),
         )
     }
 }
@@ -92,6 +95,10 @@ data class Snapshot(
     val gmapsAndroid: String = "",
     /** This person: how they signed in ("app" PIN, "cloudflare" PIN, "shared" PIN, "monday") and what they set in Settings. */
     val me: Me = Me(),
+    /** Repairs estimated above this need a second admin to approve the cost before parts are ordered. */
+    val approveAbove: Long = Money.APPROVE_DEFAULT,
+    /** People served (admins only): the Office overview. */
+    val people: PeopleServed? = null,
 ) {
     companion object {
         fun from(o: JSONObject): Snapshot {
@@ -114,6 +121,8 @@ data class Snapshot(
                 linked = o.optString("linked"),
                 gmapsAndroid = o.optJSONObject("gmaps")?.optString("android").orEmpty(),
                 me = o.optJSONObject("me")?.let { Me.from(it) } ?: Me(),
+                approveAbove = if (o.has("approveAbove")) o.optLong("approveAbove") else Money.APPROVE_DEFAULT,
+                people = PeopleServed.from(o.optJSONObject("people")),
             )
         }
     }

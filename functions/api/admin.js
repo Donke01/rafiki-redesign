@@ -3,8 +3,11 @@
 //   GET  /api/admin?view=team     → everyone who can sign in, their role, home country and last use
 //   GET  /api/admin?view=assign   → visits assigned to field officers
 //   GET  /api/admin?view=export   → every visit record kept by the app (for the spreadsheet export)
+//   GET  /api/admin?view=costs    → repair spending (last 25 months) with this month / year / country / top 10, and the approval limit
 //   POST /api/admin { action: "review",  rid, decision: "approve"|"reject", reason }
-//                   { action: "job",     id, step, assignee, due, budget, note }      repair jobs
+//                   { action: "job",     id, step, assignee, due, budget, note, actual, what, receipt }  repair jobs
+//                       (above the approval limit, "parts"/"fixed" wait for a second admin: answers { held, asked })
+//                   { action: "settings", approveAbove }                            second approval above KES N
 //                   { action: "assign",  ids: [], to, date, note } / { action: "unassign", aid }
 //                   { action: "confirm", id, on }                                   lock a confirmed location
 //                   { action: "team-add", name, home, admin, email } → { pin } (shown once)
@@ -15,7 +18,8 @@
 import { checkPin } from './pin.js';
 import { getFeed, dropFeed } from '../../lib/feed-cache.js';
 import { parseGps, readGps, writeGps, createUpdate, BOARD_ID } from '../../lib/monday.js';
-import { getJson, putJson, team, saveTeam, hashPin, newPin, freshPin, adminNames, sameName, sendMail, alertHtml, escHtml, recipients } from '../../lib/pin-store.js';
+import { getJson, putJson, team, saveTeam, hashPin, newPin, freshPin, adminNames, sameName, sendMail, alertHtml, escHtml, recipients, addReview } from '../../lib/pin-store.js';
+import { kes, money, estOf, stepBlocked, canDecide, approveLimit, setApproveLimit, askApproval, costRow, addCost, costStats, snapPeople } from '../../lib/pin-office.js';
 
 const STEPS = { reported: 'Reported', assigned: 'Assigned', parts: 'Parts ordered', fixed: 'Fixed' };
 const CC = ['ke', 'tz', 'ug', 'mw'];
@@ -52,6 +56,11 @@ export async function onRequestGet({ request, env }) {
   const view = new URL(request.url).searchParams.get('view');
   if (view === 'review') return json({ ok: true, items: (await getJson(env, 'pinreview', [])).slice().reverse().map(x => (x.t ? Object.assign({}, x, { t: String(x.t).replace(/^[\s*#_-]+|[\s*#_]+$/g, '') }) : x)) });
   if (view === 'assign') return json({ ok: true, items: await getJson(env, 'pinassign', []) });
+  if (view === 'costs') {
+    let feed = null; try { feed = await getFeed(env); } catch (e) {}
+    const rows = await getJson(env, 'pincostidx', []);
+    return json({ ok: true, rows, stats: costStats(rows, feed ? feed.projects : []), approveAbove: await approveLimit(env) });
+  }
   if (view === 'team') {
     const t = await team(env), seenAt = await getJson(env, 'pinseen', {}), admins = adminNames(env);
     const list = t.map(p => ({ name: p.name, home: p.home || '', admin: !!p.admin || admins.includes(p.name.toLowerCase()), email: p.email || '', phone: p.phone || '', source: 'app', added: p.added, lastSeen: seenAt[p.name] || null }));
@@ -89,6 +98,17 @@ export async function onRequestPost({ request, env, waitUntil }) {
         if (!it || it.status !== 'open') return json({ ok: false, reason: 'gone' }, 404);
         const ok = b.decision === 'approve', reason = clean(b.reason, 300), d = it.data || {};
         let note = '';
+        if (it.kind === 'cost') {
+          // the second approval: never the person who asked
+          if (!canDecide(it, chk.who)) return json({ ok: false, reason: 'own' }, 409);
+          const r = await getJson(env, 'pinrepairs', {}), job = r[it.id];
+          if (job && job.approval && job.approval.rid === it.rid) {
+            job.approval = Object.assign({}, job.approval, { status: ok ? 'approved' : 'declined', dec: by, decAt: new Date().toISOString(), note: reason });
+            await putJson(env, 'pinrepairs', r);
+          }
+          note = ok ? '✅ Repair cost of ' + kes(d.est) + ' approved by ' + by + ' (second approval; asked by ' + it.by + '). Parts can be ordered.' + (reason ? ' Note: ' + said(reason) : '')
+            : '⛔ Repair cost of ' + kes(d.est) + ' declined by ' + by + (reason ? ': ' + said(reason) : '.') + ' Parts are not ordered yet.';
+        }
         if (it.kind === 'new') note = ok ? '✅ New site reviewed and approved by ' + by + ' (RAFIKI pin app).' : '⛔ New site rejected by ' + by + (reason ? ': ' + said(reason) : '.') + ' Please archive it on the board if it should not be followed up.';
         if (it.kind === 'move') {
           if (ok) note = '✅ Location change to ' + d.to + ' approved by ' + by + '.';
@@ -112,19 +132,35 @@ export async function onRequestPost({ request, env, waitUntil }) {
         if (!id) return json({ ok: false, reason: 'bad-request' }, 400);
         const r = await getJson(env, 'pinrepairs', {}), job = r[id];
         if (!job) return json({ ok: false, reason: 'gone' }, 404);
-        const step = STEPS[b.step] ? b.step : job.step || 'reported';
+        let step = STEPS[b.step] ? b.step : job.step || 'reported';
         // fields not sent keep their current value
         const assignee = 'assignee' in b ? clean(b.assignee, 60) : job.assignee || '';
         const due = 'due' in b ? day(b.due) : job.due || '';
         const budget = 'budget' in b ? (b.budget !== '' && b.budget != null && Number(b.budget) >= 0 ? Math.round(Number(b.budget)) : null) : (job.budget == null ? null : job.budget);
-        const ch = [];
+        const ch = [], now0 = new Date().toISOString();
+        // big repairs: parts ordered waits for a second admin to approve the cost (asked here, once)
+        const blocked = stepBlocked(Object.assign({}, job, { budget }), step, await approveLimit(env));
+        let held = '', asked = false;
+        if (blocked) {
+          held = step; step = job.step || 'reported';
+          if (blocked !== 'pending') {
+            job.budget = budget; const rid = askApproval(job, by, now0); asked = true;
+            await addReview(env, { rid, kind: 'cost', id, t: job.t, by, data: { est: estOf(job), step: held, note: clean(b.note, 300), parts: job.parts || '' } });
+            ch.push('second approval asked for ' + kes(estOf(job)));
+            await log(env, { by, a: 'ask', k: 'cost', id, t: job.t });
+          }
+        }
+        // what was actually spent at this step (not while the step is held back)
+        const actual = held ? null : money(b.actual);
+        if (actual) ch.push('spent ' + kes(actual) + (b.receipt ? ' (receipt attached)' : ''));
         if (step !== (job.step || 'reported')) ch.push('step: ' + STEPS[step]);
         if (assignee !== (job.assignee || '')) ch.push(assignee ? 'assigned to ' + assignee : 'unassigned');
         if (due !== (job.due || '')) ch.push(due ? 'due ' + due : 'no due date');
         if (budget !== (job.budget == null ? null : job.budget)) ch.push(budget == null ? 'no budget' : 'budget approved: KES ' + budget.toLocaleString('en-US'));
         const extra = clean(b.note, 600);
-        if (!ch.length && !extra) return json({ ok: true, job });
-        await createUpdate(token, id, '🔧 Repair job updated by ' + by + ' (RAFIKI pin app): ' + (ch.join('; ') || 'note added') + '.' + (extra ? ' Notes: ' + said(extra) : ''), api);
+        if (!ch.length && !extra) return json({ ok: true, job, held, asked });
+        const updateId = await createUpdate(token, id, '🔧 Repair job updated by ' + by + ' (RAFIKI pin app): ' + (ch.join('; ') || 'note added') + '.' + (extra ? ' Notes: ' + said(extra) : ''), api);
+        if (actual) await addCost(env, id, costRow({ at: now0, rid: job.at, what: clean(b.what, 120) || STEPS[step], est: estOf(Object.assign({}, job, { budget })), actual, by, step, receipt: !!b.receipt }), { t: job.t });
         if (step === 'fixed') { delete r[id]; await log(env, { by, a: 'fixed', id, t: job.t }); }
         else {
           // when each step was reached, for the repair timeline in the app
@@ -134,7 +170,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
           Object.assign(job, { step, assignee, due, budget, stepAt: at }); r[id] = job; await log(env, { by, a: 'job', id, t: job.t, s: step });
         }
         await putJson(env, 'pinrepairs', r);
-        return json({ ok: true, job: step === 'fixed' ? null : job });
+        return json({ ok: true, job: step === 'fixed' ? null : job, updateId, held, asked });
       }
       case 'assign': {
         const ids = (Array.isArray(b.ids) ? b.ids : []).map(x => String(x).replace(/\D/g, '')).filter(Boolean).slice(0, 40);
@@ -194,6 +230,13 @@ export async function onRequestPost({ request, env, waitUntil }) {
         await saveTeam(env, t);
         return json({ ok: true });
       }
+      case 'settings': {
+        const n = money(b.approveAbove, 1000000000);
+        if (n == null) return json({ ok: false, reason: 'bad-request' }, 400);
+        await setApproveLimit(env, n, by);
+        await log(env, { by, a: 'settings', t: 'second approval above ' + kes(n) });
+        return json({ ok: true, approveAbove: n });
+      }
       case 'test-mail': {
         const r = await sendMail(env, 'RAFIKI Pin: test alert', alertHtml('Test alert from RAFIKI Pin', ['If you can read this, e-mail alerts are working.', 'Sent by ' + by + '.'], new URL('/pin#me', request.url).toString()), 'Test alert from RAFIKI Pin. Sent by ' + by + '.');
         return json(r, r.ok ? 200 : 503);
@@ -220,10 +263,13 @@ async function monthly(request, env) {
   const rep = await getJson(env, 'pinrepairs', {}), open = Object.values(rep), urgent = open.filter(r => r.urgency === 'urgent').length;
   const cost = open.reduce((s, r) => s + (Number(r.cost) || 0), 0);
   const review = (await getJson(env, 'pinreview', [])).filter(x => x.status === 'open').length;
+  const spent = (await getJson(env, 'pincostidx', [])).filter(e => { const t = Date.parse(e.at); return t >= from && t < to; }).reduce((s2, e) => s2 + (Number(e.actual) || 0), 0);
+  // the people-served trend gets this month's total (also kept up to date as visits come in)
+  try { const feed = await getFeed(env); await snapPeople(env, feed.projects || []); } catch (e) { console.error('people:', e && e.message); }
   const lines = [
     visits.length + ' site visits to ' + ids.length + ' projects' + (ids.length ? ' (' + Math.round(working / ids.length * 100) + '% working)' : '') + '.',
     open.length + ' open repairs' + (urgent ? ', ' + urgent + ' urgent' : '') + (cost ? ', about KES ' + cost.toLocaleString('en-US') + ' estimated' : '') + '; ' + n('fixed') + ' fixed during the month.',
-    n('pin') + ' locations pinned, ' + n('new') + ' new sites added.',
+    n('pin') + ' locations pinned, ' + n('new') + ' new sites added.' + (spent ? ' ' + kes(spent) + ' spent on repairs.' : ''),
     review ? review + ' items waiting for review in the Office tab.' : 'Nothing waiting for review.'
   ];
   const r = await sendMail(env, 'RAFIKI Pin: ' + label + ' summary', alertHtml('Field summary: ' + label, lines, new URL('/pin#report', request.url).toString(), new URL(request.url).origin), lines.join('\n'));

@@ -1451,6 +1451,78 @@ html[data-theme=sun] .lookpv,html[data-theme=sun] .lookpv .lpv{border-width:2px}
 #meWork .row .tag.has{background:var(--okbg);color:var(--ok)}
 .mehero .btn.mh-lock,.mehero .btn.mh-rep{white-space:nowrap;font-size:.8rem !important;padding:0 10px !important}
 </style>
+<style id="ofb-css">
+/* Office: repair costs, people served, second approval for big repairs (ofb) */
+@media (min-width:700px){#oTabs.otabs{grid-template-columns:repeat(auto-fit,minmax(74px,1fr))}}
+.ofb-ic{width:40px;height:40px;flex:none;border-radius:13px;display:flex;align-items:center;justify-content:center;background:var(--hb,var(--tint));color:var(--hu,var(--blue))}
+.ofb-ic svg{width:22px;height:22px}
+.ofb-people{background:var(--card);border:var(--bw) solid var(--line);border-radius:20px;padding:16px;animation:rowIn .45s both}
+.ofb-ph{display:flex;gap:12px;align-items:center}
+.ofb-ph h2{margin:0 !important;font-size:1rem;color:var(--ink)}
+.ofb-ph p{margin:2px 0 0;font-size:.75rem;color:var(--muted);line-height:1.35}
+.ofb-big{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:14px 0 2px}
+.ofb-big b{font-size:2.4rem;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1;letter-spacing:-.01em}
+.ofb-big .up{display:inline-flex;align-items:center;gap:4px;font-size:.76rem;font-weight:800;color:var(--ok);background:var(--okbg);border-radius:999px;padding:4px 10px}
+.ofb-big .up svg{width:15px;height:15px}
+.ofb-spark{display:block;width:100%;height:70px;margin:8px 0 2px;overflow:visible}
+.ofb-spark .ar{fill:var(--hu-teal);opacity:.13}
+.ofb-spark .ln{fill:none;stroke:var(--hu-teal);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke;stroke-dasharray:1;stroke-dashoffset:1;animation:ofbDraw 1.4s .25s cubic-bezier(.2,.7,.2,1) forwards}
+.ofb-spark .dt{fill:var(--hu-teal);stroke:var(--card);stroke-width:2;vector-effect:non-scaling-stroke}
+@keyframes ofbDraw{to{stroke-dashoffset:0}}
+.ofb-sl{display:flex;justify-content:space-between;font-size:.68rem;color:var(--muted);font-weight:700}
+.ofb-split{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:14px}
+@media (max-width:520px){.ofb-split{grid-template-columns:1fr}}
+.ofb-split h3{font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:0 0 6px}
+.ofb-bar{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:4px 8px;align-items:center;margin:8px 0;font-size:.84rem}
+.ofb-bar .t{color:var(--ink);font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ofb-bar .v{font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums}
+.ofb-bar i,.ofb-top i{grid-column:2 / 4;display:block;height:8px;border-radius:999px;background:var(--line);overflow:hidden}
+.ofb-bar i em,.ofb-top i em{display:block;height:100%;width:0;border-radius:999px;background:var(--c,var(--blue));transition:width 1.1s cubic-bezier(.2,.7,.2,1)}
+.ofb-types{display:flex;flex-direction:column;gap:8px}
+.ofb-type{display:flex;align-items:center;gap:10px;font-size:.84rem}
+.ofb-type .ofb-ic{width:32px;height:32px;border-radius:10px}.ofb-type .ofb-ic svg{width:18px;height:18px}
+.ofb-type span:not(.ofb-ic){flex:1;color:var(--ink);font-weight:700}
+.ofb-type b{font-variant-numeric:tabular-nums;color:var(--ink)}
+.ofb-appr{display:flex;gap:10px;align-items:flex-start;border-radius:14px;padding:10px 12px;margin:6px 0;background:var(--tint);color:var(--ink);text-align:left}
+.ofb-appr > svg{width:20px;height:20px;flex:none;margin-top:1px}
+.ofb-appr b{display:block;font-size:.86rem}
+.ofb-appr small{display:block;color:var(--muted);font-size:.76rem;margin-top:2px;line-height:1.35}
+.ofb-appr.pending{background:var(--hb-purple)}.ofb-appr.pending > svg{color:var(--hu-purple)}
+.ofb-appr.approved{background:var(--okbg)}.ofb-appr.approved > svg{color:var(--ok)}
+.ofb-appr.declined{background:var(--badbg)}.ofb-appr.declined > svg{color:var(--bad)}
+.ofb-appr.needed{background:var(--warnbg)}.ofb-appr.needed > svg{color:var(--warn)}
+html[data-theme=sun] .ofb-appr,html[data-theme=sun] .ofb-pc{border:2px solid #000}
+.ofb-trk{margin:10px 0 0}.ofb-trk .btn.wide{margin-top:8px}
+.ofb-file{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:4px}
+.ofb-file .btn{margin:0;text-transform:none;letter-spacing:0;font-size:.84rem}
+.ofb-fn{font-size:.76rem;color:var(--ok);font-weight:700;display:inline-flex;align-items:center;gap:6px}
+.ofb-fn img{width:34px;height:34px;object-fit:cover;border-radius:8px}
+.ofb-amt{font-size:1rem}.ofb-amt b{font-size:1.25rem;color:var(--ink)}
+.ofb-top{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:12px}
+.ofb-top li{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:2px 10px;align-items:center;animation:rowIn .4s both;animation-delay:calc(var(--i,0) * 45ms)}
+.ofb-top .rk{grid-row:1 / span 3;width:30px;height:30px;border-radius:10px;background:var(--hb-amber);color:var(--hu-amber);font-weight:800;font-size:.82rem;display:flex;align-items:center;justify-content:center}
+.ofb-top li:first-child .rk{background:var(--hu-coral);color:#FFFFFF}
+.ofb-top button,.ofb-log button{background:none;border:0;padding:0;font:inherit;cursor:pointer;color:var(--ink);font-weight:700;font-size:.9rem;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.ofb-top button:hover,.ofb-log button:hover{text-decoration:underline}
+.ofb-top button:focus-visible,.ofb-log button:focus-visible{outline:3px solid var(--blue);outline-offset:2px;border-radius:4px}
+.ofb-top .v{font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;text-align:right}
+.ofb-top small{grid-column:2 / 4;color:var(--muted);font-size:.74rem}
+.ofb-hd{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.ofb-log{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column}
+.ofb-log li{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:var(--bw) solid var(--line)}
+.ofb-log li:first-child{border-top:0}
+.ofb-log .ofb-ic{width:36px;height:36px;border-radius:12px}.ofb-log .ofb-ic svg{width:19px;height:19px}
+.ofb-log .tx{flex:1;min-width:0;display:flex;flex-direction:column}
+.ofb-log small{color:var(--muted);font-size:.74rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ofb-log b{font-variant-numeric:tabular-nums;color:var(--ink);white-space:nowrap}
+.ofb-set{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap}
+.ofb-set label{flex:1;min-width:150px;margin:0;font-size:.72rem}.ofb-set input{margin-top:4px;min-height:44px}
+.ofb-set .btn{min-height:44px}
+.ofb-pc{display:flex;gap:12px;align-items:center;background:var(--card);border:var(--bw) solid var(--line);border-radius:18px;padding:10px 12px;margin-top:12px}
+.ofb-pc b{display:block;font-size:.88rem;color:var(--ink)}.ofb-pc small{display:block;font-size:.75rem;color:var(--muted);margin-top:2px}
+#vOffice .ofb-costs .otile b{font-size:1.35rem}
+@media (prefers-reduced-motion: reduce){.ofb-spark .ln{animation:none;stroke-dashoffset:0}.ofb-bar i em,.ofb-top i em{transition:none}.ofb-people,.ofb-top li{animation:none}}
+</style>
 </head>
 <body class="locked">
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
@@ -2405,6 +2477,7 @@ html[data-theme=sun] .lookpv,html[data-theme=sun] .lookpv .lpv{border-width:2px}
       setTimeout(bellLoad, 0);   // the bell in the header counts what's new
       if ((j.reviewOpen || 0) > (S.reviewOpen || 0)) store.set('rfPinReviewAt', new Date().toISOString());
       S.admin = !!j.admin; S.jobs = j.jobs || []; S.assigned = j.assigned || []; S.confirmed = j.confirmed || {}; S.reviewOpen = j.reviewOpen || 0;
+      ofbTake(j);
       store.set('rfPinRole', JSON.stringify({ admin: S.admin, jobs: S.jobs, assigned: S.assigned, confirmed: S.confirmed }));
       adminUi(); myWorkUi(); meWorkDraw(); if (S.view === 'vOffice') renderOffice(); if (S.view === 'vProj') confirmUi();
       S.srvHome = j.home || ''; store.set('rfPinSrvHome', S.srvHome); applyHome();
@@ -3217,6 +3290,7 @@ html[data-theme=sun] .lookpv,html[data-theme=sun] .lookpv .lpv{border-width:2px}
   function lastUi() {
     var p = S.cur; if (!p || !navigator.onLine) return;
     api('GET', null, '?id=' + encodeURIComponent(p.id)).then(function (j) {
+      ofbProjCost(p, j);
       if (S.cur && S.cur.id === p.id && j.ok && j.visits) { prevVisits[p.id] = j.visits; if (V && STEPS[V.step][0] === 'read') vRender(); }
       if (!S.cur || S.cur.id !== p.id || !j.ok || !j.last) { $('pLast').innerHTML = ''; return; }
       $('pLast').innerHTML = '<span>Last pinned by ' + esc(j.last.by) + ' · ' + esc(when(j.last.at)) + '</span><button class="btn light small" id="bUndo" type="button">↩ Undo</button>';
@@ -3275,7 +3349,7 @@ html[data-theme=sun] .lookpv,html[data-theme=sun] .lookpv .lpv{border-width:2px}
   function repairUi() {
     stateUi();
     var p = S.cur, r = p && S.repairs[p.id];
-    if (!r) { $('pRepair').innerHTML = ''; return; }
+    if (!r) { $('pRepair').innerHTML = ''; ofbPcEl(p); return; }
     var at = r.stepAt || {}, step = r.step || 'reported', order = ['reported', 'assigned', 'parts', 'fixed'], si = Math.max(0, order.indexOf(step));
     if (r.assignee && si < 1) si = 1;
     var bad = r.state === 'notworking', col = bad ? '#B3261E' : '#D98200';
@@ -3298,10 +3372,11 @@ html[data-theme=sun] .lookpv,html[data-theme=sun] .lookpv .lpv{border-width:2px}
       (r.cost ? '<p class="more">About KES ' + Number(r.cost).toLocaleString() + '</p>' : '') + '</div>' : '') +
       '<div id="fixBox" class="hidden"><label for="fixNote" style="margin-top:0">What was done? (optional)</label><textarea id="fixNote" placeholder="' + (water(p) ? 'e.g. replaced the pump handle' : 'e.g. replaced 6 iron sheets') + '"></textarea></div>' +
       '<button class="btn ok wide" type="button" id="bFixed">🔧 Mark fixed</button><p class="msg" id="mFix" aria-live="polite"></p></div>';
+    ofbTracker(p, r);
     $('bFixed').addEventListener('click', function () {
       if ($('fixBox').classList.contains('hidden')) { $('fixBox').classList.remove('hidden'); this.textContent = 'Save as fixed'; $('fixNote').focus(); return; }
       var b = this; b.disabled = true;
-      submit({ action: 'fixed', id: p.id, note: $('fixNote').value.trim(), by: S.name }, []).then(function (x) {
+      submit(ofbFixBody({ action: 'fixed', id: p.id, note: $('fixNote').value.trim(), by: S.name }), ofbFixFiles()).then(function (x) {
         b.disabled = false;
         if (x.state === 'locked') return lockOut({ reason: 'pin' });
         if (x.state === 'failed') { msg('mFix', 'bad', x.text); return; }
@@ -4503,7 +4578,7 @@ html[data-theme=sun] .lookpv,html[data-theme=sun] .lookpv .lpv{border-width:2px}
     var n = S.reviewOpen || 0; $('offDot').textContent = n; $('offDot').classList.toggle('hidden', !n);
   }
   function oSeg() {
-    var T = [['overview', 'Overview', 'drop'], ['repairs', 'Repairs', 'wrench'], ['visits', 'Visits', 'cal'], ['review', 'Review', 'inbox'], ['team', 'Team', 'people'], ['cleanup', 'Clean-up', 'spark'], ['export', 'Export', 'down'], ['sms', tr('Community', 'Jamii'), 'chat']];
+    var T = [['overview', 'Overview', 'drop'], ['repairs', 'Repairs', 'wrench'], ['costs', tr('Costs', 'Gharama'), 'coins'], ['visits', 'Visits', 'cal'], ['review', 'Review', 'inbox'], ['team', 'Team', 'people'], ['cleanup', 'Clean-up', 'spark'], ['export', 'Export', 'down'], ['sms', tr('Community', 'Jamii'), 'chat']];
     $('oTabs').innerHTML = T.map(function (t) {
       var c = t[0] === 'review' ? (S.reviewOpen || 0) : t[0] === 'repairs' ? Object.keys(S.repairs).length : 0;
       return '<button class="otab" type="button" data-o="' + t[0] + '" aria-pressed="' + (O.tab === t[0]) + '"' + (c ? ' aria-label="' + t[1] + ', ' + c + ' open"' : '') + '>' + oic(t[2]) + '<span>' + t[1] + '</span>' + (c ? '<i class="n" aria-hidden="true">' + c + '</i>' : '') + '</button>';
@@ -4524,6 +4599,7 @@ html[data-theme=sun] .lookpv,html[data-theme=sun] .lookpv .lpv{border-width:2px}
     if (t === 'review') return oReview(b);
     if (t === 'team') return oNeedTeam(function () { oTeam(b); });
     if (t === 'cleanup') return oCleanup(b);
+    if (t === 'costs') return ofbCosts(b);
     if (t === 'export') return oNeedTeam(function () { oExport(b); });
     if (t === 'sms') return vxOffice(b);
   }
@@ -4587,7 +4663,7 @@ html[data-theme=sun] .lookpv,html[data-theme=sun] .lookpv .lpv{border-width:2px}
         act({ ic: 'inbox', v: n(S.reviewOpen || 0), l: 'waiting for your review', go: 'o-review', hot: (S.reviewOpen || 0) > 0 }) +
         act({ ic: 'cal', v: n(due), l: 'due a visit', sub: 'not seen for 6+ months', go: 'list-due' }) +
         act({ ic: 'clip', v: '<b id="oVm"' + (actCache ? ' data-n="' + vmOf() + '"' : '') + '>' + (actCache ? vmOf() : '…') + '</b>', l: 'visits this month', go: 'o-visits' }) +
-      '</div>' +
+      '</div>' + ofbPeopleHtml() +
       '<div class="ohealth"><div class="hd"><b>Condition at last visit</b><span>' + seen + ' of ' + P.length + ' visited in the app</span></div>' +
         '<div class="hbar" role="img" aria-label="' + st.working + ' working, ' + st.repair + ' needed repair, ' + st.notworking + ' not working, ' + unseen + ' not visited yet">' +
           '<i class="g" data-w="' + (st.working / tot * 100) + '"></i><i class="a" data-w="' + (st.repair / tot * 100) + '"></i><i class="r" data-w="' + (st.notworking / tot * 100) + '"></i><i class="n" data-w="' + (unseen / tot * 100) + '"></i></div>' +
@@ -4639,7 +4715,7 @@ html[data-theme=sun] .lookpv,html[data-theme=sun] .lookpv .lpv{border-width:2px}
         '<div class="ofields"><label>Assigned to<select data-f="assignee">' + opts(r.assignee || '') + '</select></label>' +
         '<label>Due<input type="date" data-f="due" value="' + esc(r.due || '') + '"></label>' +
         '<label>Approved budget (KES)<input type="number" inputmode="numeric" data-f="budget" value="' + (r.budget == null ? '' : r.budget) + '" placeholder="' + (r.cost ? r.cost : '') + '"></label></div>' +
-        '<label>Note (optional)<input type="text" data-f="note" placeholder="e.g. parts bought in Eldoret"></label>' +
+        '<label>Note (optional)<input type="text" data-f="note" placeholder="e.g. parts bought in Eldoret"></label>' + ofbJobHtml(id, r) +
         '<div class="oact"><button class="btn small" type="button" data-save>Save</button><span class="msg" aria-live="polite"></span></div></article>';
     }).join('') + '</div>';
   }
@@ -4650,13 +4726,13 @@ html[data-theme=sun] .lookpv,html[data-theme=sun] .lookpv .lpv{border-width:2px}
     var sb = t.closest('[data-step]'); if (sb) { var card = sb.closest('.ojob'); qa('[data-step]', card).forEach(function (x) { x.setAttribute('aria-checked', x === sb ? 'true' : 'false'); }); var i = STEP.findIndex(function (s) { return s[0] === sb.getAttribute('data-step'); }); qa('[data-step]', card).forEach(function (x, k) { x.classList.toggle('on', k <= i); }); return; }
     var sv = t.closest('[data-save]'); if (sv) {
       var c = sv.closest('.ojob'), id = c.getAttribute('data-id'), m = c.querySelector('.msg'), stp = c.querySelector('[data-step][aria-checked=true]');
-      var body = { action: 'job', id: id, step: stp ? stp.getAttribute('data-step') : 'reported', assignee: c.querySelector('[data-f=assignee]').value, due: c.querySelector('[data-f=due]').value, budget: c.querySelector('[data-f=budget]').value, note: c.querySelector('[data-f=note]').value };
+      var body = { action: 'job', id: id, step: stp ? stp.getAttribute('data-step') : 'reported', assignee: c.querySelector('[data-f=assignee]').value, due: c.querySelector('[data-f=due]').value, budget: c.querySelector('[data-f=budget]').value, note: c.querySelector('[data-f=note]').value }; ofbJobBody(c, body);
       sv.disabled = true; m.className = 'msg'; m.textContent = 'Saving…';
       adminApi('POST', body).then(function (j) {
         sv.disabled = false;
         if (!j.ok) { m.className = 'msg bad'; m.textContent = why(j); return; }
         if (j.job) S.repairs[id] = j.job; else delete S.repairs[id];
-        saveList(); progUi(); m.className = 'msg ok'; m.textContent = j.job ? 'Saved ✓' : 'Marked fixed ✓'; savedBtn(sv, j.job ? 'Saved' : 'Fixed');
+        saveList(); progUi(); m.className = 'msg ok'; m.textContent = j.job ? 'Saved ✓' : 'Marked fixed ✓'; savedBtn(sv, j.job ? 'Saved' : 'Fixed'); ofbJobDone(c, id, j, m);
         if (!j.job) setTimeout(renderOffice, 900);
       });
       return;
@@ -4721,13 +4797,15 @@ html[data-theme=sun] .lookpv,html[data-theme=sun] .lookpv .lpv{border-width:2px}
         if (x.kind === 'new') det = '<p>' + esc([d.type, d.village, CNAME[d.ck]].filter(Boolean).join(' · ')) + '</p><p>Location: ' + ll(d.gps) + '</p>' + (d.note ? '<p>“' + esc(d.note) + '”</p>' : '');
         if (x.kind === 'move' || x.kind === 'request') det = '<p>From ' + ll(d.from) + '<br>to ' + ll(d.to) + (d.dist ? ' (' + dist(d.dist) + ' away)' : '') + '</p>' + (d.how ? '<p class="muted">How: ' + esc(d.how) + '</p>' : '');
         if (x.kind === 'story') det = '<blockquote>“' + esc(d.quote) + '”' + (d.who ? '<br><small>— ' + esc(d.who) + '</small>' : '') + '</blockquote><p class="muted">Consent to quote and photograph: given.</p>';
-        var verb = x.kind === 'move' ? ['Keep the new location', 'Put the old one back'] : x.kind === 'request' ? ['Approve the change', 'Keep the confirmed location'] : x.kind === 'story' ? ['Approve for the website', 'Don’t use'] : ['Approve', 'Reject'];
+        if (x.kind === 'cost') det = ofbCostDet(x);
+        var verb = x.kind === 'cost' ? [tr('Approve the cost', 'Idhinisha gharama'), tr('Decline', 'Kataa')] : x.kind === 'move' ? ['Keep the new location', 'Put the old one back'] : x.kind === 'request' ? ['Approve the change', 'Keep the confirmed location'] : x.kind === 'story' ? ['Approve for the website', 'Don’t use'] : ['Approve', 'Reject'];
         return '<article class="card orev" data-rid="' + esc(x.rid) + '"><div class="oh"><b>' + KIND[x.kind] + '</b><span class="muted">' + esc(when(x.at)) + '</span></div>' +
           '<p><button class="lnk" type="button" data-open="' + esc(x.id) + '">' + esc(x.t || pname(x.id)) + '</button> · by ' + esc(x.by) + '</p>' + det +
           '<label class="hidden" data-reason>Reason (optional)<input type="text" placeholder="e.g. wrong school"></label>' +
           '<div class="oact"><button class="btn small ok" type="button" data-dec="approve">' + verb[0] + '</button><button class="btn small light" type="button" data-dec="reject">' + verb[1] + '</button><span class="msg" aria-live="polite"></span></div></article>';
       }).join('') + '</div>' : emptyHtml('Nothing waiting for review.')) +
         (done.length ? '<h2 style="margin-top:20px">Recently decided</h2><ul class="feed">' + done.map(function (x) { return '<li>' + (x.status === 'approved' ? '✅' : '⛔') + ' ' + KIND[x.kind] + ': ' + esc(x.t || pname(x.id)) + '<small>' + esc(x.doneBy) + ' · ' + esc(when(x.done)) + (x.reason ? ' · ' + esc(x.reason) : '') + '</small></li>'; }).join('') + '</ul>' : '');
+      ofbReviewFix(b);
     });
   }
   $('oBody').addEventListener('click', function (e) {
@@ -4736,7 +4814,7 @@ html[data-theme=sun] .lookpv,html[data-theme=sun] .lookpv .lpv{border-width:2px}
     if (dec === 'reject' && rs.classList.contains('hidden')) { rs.classList.remove('hidden'); rs.querySelector('input').focus(); d.textContent = 'Confirm'; return; }
     qa('[data-dec]', c).forEach(function (x) { x.disabled = true; }); m.className = 'msg'; m.textContent = 'Saving…';
     adminApi('POST', { action: 'review', rid: c.getAttribute('data-rid'), decision: dec, reason: rs.querySelector('input').value }).then(function (j) {
-      if (!j.ok) { qa('[data-dec]', c).forEach(function (x) { x.disabled = false; }); m.className = 'msg bad'; m.textContent = why(j); return; }
+      if (!j.ok) { qa('[data-dec]', c).forEach(function (x) { x.disabled = false; }); m.className = 'msg bad'; m.textContent = j.reason === 'own' ? ofbOwnText() : why(j); return; }
       c.classList.add('gone'); setTimeout(function () { oReview($('oBody')); load(false); }, 500);
     });
   });
@@ -4917,7 +4995,7 @@ html[data-theme=sun] .lookpv,html[data-theme=sun] .lookpv .lpv{border-width:2px}
       '<button class="btn light" type="button" data-x="projects">📋 Projects with locations and status</button>' +
       '<button class="btn light" type="button" data-x="visits">🩺 Site visits with readings</button>' +
       '<button class="btn light" type="button" data-x="repairs">🔧 Open repairs and jobs</button>' +
-      '<button class="btn light" type="button" data-x="activity">🕑 Everything the team did (last 13 months)</button></div><p class="msg" id="xMsg" aria-live="polite"></p></div>' +
+      '<button class="btn light" type="button" data-x="activity">🕑 Everything the team did (last 13 months)</button>' + ofbExportBtns() + '</div><p class="msg" id="xMsg" aria-live="polite"></p></div>' +
       '<div class="card"><h2>Reports</h2><p>The monthly report (to save as a PDF) is in <b>Me → Monthly report</b>.</p><button class="btn small light" type="button" id="xRep">Open the monthly report</button>' +
       '<h3 style="margin-top:16px">Monthly e-mail summary</h3><p class="muted">' + (O.cron && O.mail && O.mail.ready ? 'On: a summary of last month goes to the admins on the 1st of each month.' : 'Not switched on yet: needs the e-mail keys and CRON_KEY in Cloudflare and GitHub (see the set-up notes).') + '</p></div></div>';
     $('xRep').addEventListener('click', function () { openReport(); });
@@ -4925,6 +5003,8 @@ html[data-theme=sun] .lookpv,html[data-theme=sun] .lookpv .lpv{border-width:2px}
   }
   function exportX(k) {
     var P = S.projects;
+    if (k === 'costs') return ofbExportCosts();
+    if (k === 'costsum') return ofbExportSummary();
     if (k === 'projects') return download('rafiki-projects-' + stamp() + '.csv', csv([['Project ID', 'Project', 'Country', 'Area', 'Type', 'Status', 'Latitude', 'Longitude', 'Location confirmed', 'Has photo', 'Last visit', 'Last visit result', 'Open repair', 'Urgency']].concat(P.map(function (p) {
       var v = S.visits[p.id], r = S.repairs[p.id], c = S.confirmed[p.id];
       return [p.id, p.title, p.country, p.area, p.type, p.status, p.gps ? p.gps[0] : '', p.gps ? p.gps[1] : '', c ? 'yes (' + c.by + ')' : '', p.photo ? 'yes' : 'no', v ? v.at.slice(0, 10) : '', v ? STATES[v.state][1] : '', r ? (r.state === 'notworking' ? 'Not working' : 'Needs repair') : '', r && r.urgency ? URG[r.urgency][0] : ''];
@@ -4969,6 +5049,287 @@ html[data-theme=sun] .lookpv,html[data-theme=sun] .lookpv .lpv{border-width:2px}
       jobs.map(function (id) { var r = S.repairs[id]; return '<button class="row" type="button" data-id="' + esc(id) + '"><span class="th" aria-hidden="true">🔧</span><span class="tx"><span class="t">' + esc(pname(id)) + '</span><span class="s">Repair · ' + esc((STEP.filter(function (s) { return s[0] === (r.step || 'reported'); })[0] || [])[1]) + (r.due ? ' · due ' + esc(r.due) : '') + (r.budget != null ? ' · budget KES ' + Number(r.budget).toLocaleString() : '') + '</span></span><span class="tag bad">' + (r.due && r.due < today ? 'Overdue' : 'Job') + '</span></button>'; }).join('') + '</div>';
   }
   $('myWork').addEventListener('click', function (e) { var b = e.target.closest('.row'); if (b) openProj(b.getAttribute('data-id'), b.hasAttribute('data-visit') ? 'visit' : 'pin'); });
+
+  // --- Office: repair costs, people served, second approval for big repairs (ofb…) ---------------
+  // Costs: what was actually spent at "Parts ordered" / "Fixed" (with a receipt photo), per project and in
+  // Office › Costs. People served: Office overview. Big repairs: above S.approveAbove a second admin approves.
+  Object.assign(OIC, {
+    coins: '<ellipse cx="9.5" cy="6.5" rx="5.5" ry="2.5"/><path d="M4 6.5v4c0 1.4 2.5 2.5 5.5 2.5s5.5-1.1 5.5-2.5v-4"/><path d="M4 10.5v4c0 1.4 2.5 2.5 5.5 2.5 1 0 1.9-.1 2.7-.3"/><ellipse cx="15.5" cy="14" rx="4.5" ry="2"/><path d="M11 14v3.5c0 1.1 2 2 4.5 2s4.5-.9 4.5-2V14"/>',
+    trend: '<path d="M3.5 17l5.5-5.5 4 4 7.5-7.5"/><path d="M15 8h5.5v5.5"/>',
+    shield: '<path d="M12 3.5l7 2.8v5.2c0 4.4-3 7.9-7 9-4-1.1-7-4.6-7-9V6.3z"/><path d="M9 12l2.2 2.2L15.5 10"/>',
+    hourglass: '<path d="M7 3.5h10M7 20.5h10M8 3.5c0 4.5 8 5 8 8.5s-8 4-8 8.5M16 3.5c0 4.5-8 5-8 8.5s8 4 8 8.5"/>',
+    receipt: '<path d="M6 3.5h12v17l-2-1.3-2 1.3-2-1.3-2 1.3-2-1.3-2 1.3z"/><path d="M9 8h6M9 11.5h6M9 15h4"/>',
+    box: '<path d="M4 7.5l8-4 8 4v9l-8 4-8-4z"/><path d="M4 7.5l8 4 8-4M12 11.5v9"/>',
+    school: '<path d="M3 9.5l9-5 9 5-9 5z"/><path d="M7 11.7v4.3c0 1.4 2.2 2.5 5 2.5s5-1.1 5-2.5v-4.3"/>',
+    heart: '<path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.3 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"/>'
+  });
+  EMO.push(['💰', 'coins'], ['📦', 'box'], ['🧾', 'receipt'], ['⏳', 'hourglass']);
+  VERB.ask = 'asked for a second approval on'; VERB.settings = 'changed a setting:';
+  FEEDIC.ask = ['hourglass', '#7A4FD0']; FEEDIC.settings = ['shield', '#5A6066'];
+  KIND.cost = '🔧 Second approval: repair cost';
+  S.people = jget('rfPinPeople', null); S.approveAbove = Number(store.get('rfPinApprove')) || 50000;
+  var OFB_TYPE = { water: ['Water points', 'Vituo vya maji', 'drop', 'blue'], health: ['Health', 'Afya', 'heart', 'coral'], school: ['Schools', 'Shule', 'school', 'amber'],
+    children: ['Children’s homes', 'Makao ya watoto', 'people', 'purple'], livelihoods: ['Livelihoods', 'Riziki', 'spark', 'green'], community: ['Community', 'Jamii', 'people', 'teal'] };
+  var OFB_CC = { ke: '#0A78C2', tz: '#1C9C5A', ug: '#E39A1E', mw: '#7A4FD0' };
+  var ofbRc = {};   // receipt photos picked, by where they were picked
+  function ofbKes(n) { return 'KES ' + Math.round(Number(n) || 0).toLocaleString('en-US'); }
+  function ofbSame(a, b) { return String(a || '').trim().toLowerCase() === String(b || '').trim().toLowerCase(); }
+  function ofbEst(r) { return Math.max(Number(r && r.cost) || 0, Number(r && r.budget) || 0); }
+  // as the server decides: none, needed, pending, approved, declined
+  function ofbState(r) {
+    var est = ofbEst(r), a = r && r.approval;
+    if (!(est > S.approveAbove)) return 'none';
+    if (a && a.status === 'pending') return 'pending';
+    if (a && (a.status === 'approved' || a.status === 'declined') && Number(a.est) >= est) return a.status;
+    return 'needed';
+  }
+  function ofbPast(step, ref) { var o = ['reported', 'assigned', 'parts', 'fixed']; return o.indexOf(step || 'reported') >= o.indexOf(ref); }
+  function ofbTake(j) {
+    if (j.people) { S.people = j.people; store.set('rfPinPeople', JSON.stringify(j.people)); }
+    if (j.approveAbove != null) { S.approveAbove = Number(j.approveAbove); store.set('rfPinApprove', String(j.approveAbove)); }
+  }
+  // one line about the second approval, for the Office job card and the repair tracker
+  function ofbApprHtml(r) {
+    var st = ofbState(r), a = r.approval || {}, est = ofbKes(ofbEst(r)), lim = ofbKes(S.approveAbove);
+    if (st === 'none') return '';
+    var t = st === 'pending' ? [tr('Waiting for a second approval', 'Inasubiri idhini ya pili') + ' · ' + tr('asked by ', 'imeombwa na ') + (a.by || '—'), tr(est + ' is above ' + lim + ', so another admin approves it before parts are ordered.', est + ' ni zaidi ya ' + lim + ', kwa hiyo msimamizi mwingine aidhinishe kabla vipuri havijaagizwa.'), 'hourglass']
+      : st === 'approved' ? [tr('Cost approved by ', 'Gharama imeidhinishwa na ') + (a.dec || '—'), est + (a.note ? ' · “' + a.note + '”' : '') + ' · ' + tr('asked by ', 'imeombwa na ') + (a.by || '—'), 'shield']
+      : st === 'declined' ? [tr('Cost declined by ', 'Gharama imekataliwa na ') + (a.dec || '—'), (a.note ? '“' + a.note + '” · ' : '') + tr('Ask again with a new estimate or budget.', 'Omba tena kwa makadirio au bajeti mpya.'), 'stop']
+      : [tr('Needs a second approval before parts are ordered', 'Inahitaji idhini ya pili kabla ya kuagiza vipuri'), tr(est + ' is above ' + lim + '. Choosing “Parts ordered” asks another admin.', est + ' ni zaidi ya ' + lim + '. Ukichagua “Vipuri vimeagizwa” msimamizi mwingine ataombwa.'), 'shield'];
+    return '<div class="ofb-appr ' + st + '" role="status">' + oic(t[2]) + '<span><b>' + esc(t[0]) + '</b><small>' + esc(t[1]) + '</small></span></div>';
+  }
+  function ofbFilePick(key, label) {
+    return '<span class="ofb-file"><label class="btn light small"><input type="file" accept="image/*" class="vh" data-rc="' + key + '">🧾 ' + (label || tr('Receipt photo', 'Picha ya risiti')) + '</label><span class="ofb-fn" data-rcn="' + key + '"></span></span>';
+  }
+  document.addEventListener('change', function (e) {
+    var f = e.target.closest && e.target.closest('[data-rc]'); if (!f) return;
+    var k = f.getAttribute('data-rc'), file = f.files && f.files[0], n = document.querySelector('[data-rcn="' + k + '"]');
+    if (!file) { delete ofbRc[k]; if (n) n.textContent = ''; return; }
+    shrink(file).then(function (b) { ofbRc[k] = b; if (n) n.innerHTML = '<img src="' + URL.createObjectURL(b) + '" alt="' + esc(tr('Receipt', 'Risiti')) + '"> ' + esc(tr('Receipt ready ✓', 'Risiti iko tayari ✓')); });
+  });
+
+  // Office › Repairs: the second approval and the money spent, on each job card
+  function ofbJobHtml(id, r) {
+    return '<div data-ofbappr>' + ofbApprHtml(r) + '</div>' +
+      '<div class="ofields"><label>' + tr('Actual cost at this step (KES)', 'Gharama halisi katika hatua hii (KES)') + '<input type="number" inputmode="numeric" min="0" data-f="actual" placeholder="' + esc(tr('what was spent', 'kilichotumika')) + '"></label>' +
+      '<label>' + tr('Receipt (optional)', 'Risiti (si lazima)') + ofbFilePick('job' + id) + '</label></div>';
+  }
+  function ofbJobBody(c, body) {
+    var a = c.querySelector('[data-f=actual]'), id = c.getAttribute('data-id');
+    if (a && a.value) body.actual = a.value;
+    if (ofbRc['job' + id]) body.receipt = true;
+    if (body.note) body.what = body.note;
+    return body;
+  }
+  function ofbJobDone(c, id, j, m) {
+    var blob = ofbRc['job' + id];
+    if (j.held) {
+      m.className = 'msg warn';
+      m.textContent = j.asked ? tr('Saved. This repair is above ' + ofbKes(S.approveAbove) + ', so parts are ordered after a second admin approves the cost. Asked ✓', 'Imehifadhiwa. Ukarabati huu ni zaidi ya ' + ofbKes(S.approveAbove) + ', kwa hiyo vipuri vitaagizwa baada ya msimamizi wa pili kuidhinisha. Imeombwa ✓')
+        : tr('Still waiting for a second admin to approve the cost.', 'Bado inasubiri msimamizi wa pili kuidhinisha gharama.');
+      if (j.asked) { S.reviewOpen = (S.reviewOpen || 0) + 1; adminUi(); oSeg(); }
+      var stp = (j.job && j.job.step) || 'reported', i = STEP.findIndex(function (s) { return s[0] === stp; });
+      qa('[data-step]', c).forEach(function (x, k) { x.setAttribute('aria-checked', x.getAttribute('data-step') === stp ? 'true' : 'false'); x.classList.toggle('on', k <= i); });
+      var ap = c.querySelector('[data-ofbappr]'); if (ap && j.job) ap.innerHTML = ofbApprHtml(j.job);
+      return;
+    }
+    var a = c.querySelector('[data-f=actual]'); if (a) a.value = '';
+    if (blob && j.updateId) sendFile(j.updateId, blob, 'photo', 'receipt').then(function (p) { if (!p.ok) { m.className = 'msg warn'; m.textContent = tr('Saved, but the receipt photo couldn’t be added.', 'Imehifadhiwa, lakini picha ya risiti haikuongezwa.'); } });
+    delete ofbRc['job' + id]; var n = c.querySelector('[data-rcn]'); if (n) n.textContent = '';
+  }
+
+  // Office › Review: a cost waiting for the second approval
+  function ofbCostDet(x) {
+    var d = x.data || {}, own = ofbSame(x.by, S.name);
+    return '<p class="ofb-amt"><b>' + esc(ofbKes(d.est)) + '</b> <span class="muted">' + esc(tr('estimate · above ', 'makadirio · zaidi ya ') + ofbKes(S.approveAbove)) + '</span></p>' +
+      (d.parts ? '<p>' + esc(tr('Parts: ', 'Vipuri: ') + d.parts) + '</p>' : '') + (d.note ? '<p>“' + esc(d.note) + '”</p>' : '') +
+      '<p class="muted">' + esc(tr('Asked before ordering parts. The person who asked can’t approve it.', 'Imeombwa kabla ya kuagiza vipuri. Aliyeomba hawezi kuidhinisha.')) + '</p>' +
+      (own ? '<p class="msg warn" data-own>' + esc(tr('You asked for this, so another admin approves it.', 'Wewe uliomba hili, kwa hiyo msimamizi mwingine ataidhinisha.')) + '</p>' : '');
+  }
+  function ofbReviewFix(b) {
+    qa('.orev', b).forEach(function (c) {
+      if (!c.querySelector('.ofb-amt')) return;
+      var rs = c.querySelector('[data-reason]'); if (rs) { rs.classList.remove('hidden'); rs.firstChild.textContent = tr('Note (optional)', 'Maelezo (si lazima)'); rs.querySelector('input').placeholder = tr('e.g. quote checked with the driller', 'mf. bei imehakikishwa na mchimbaji'); }
+      if (c.querySelector('[data-own]')) qa('[data-dec]', c).forEach(function (x) { x.disabled = true; });
+    });
+  }
+  function ofbOwnText() { return tr('You asked for this, so another admin has to approve it.', 'Wewe uliomba hili, kwa hiyo msimamizi mwingine lazima aidhinishe.'); }
+
+  // Office › Overview: people served, counting up, with a 12-month trend and the split by country and type
+  function ofbSpark(tr12) {
+    var vals = (tr12 || []).map(function (t) { return t.n; }), known = vals.filter(function (v) { return v != null; });
+    if (known.length < 2) return '';
+    var W = 300, H = 70, lo = Math.min.apply(null, known), hi = Math.max.apply(null, known), span = hi - lo || 1;
+    var x = function (i) { return (i * (W - 8) / (vals.length - 1) + 4).toFixed(1); }, y = function (v) { return (H - 8 - (v - lo) / span * (H - 20)).toFixed(1); };
+    var pts = []; vals.forEach(function (v, i) { if (v != null) pts.push([x(i), y(v)]); });
+    var line = 'M' + pts.map(function (p) { return p.join(' '); }).join(' L'), last = pts[pts.length - 1];
+    var mo = function (k) { var d = new Date(k + '-01T12:00:00Z'); return d.toLocaleDateString(S.lang === 'sw' ? 'sw' : 'en-GB', { month: 'short', year: '2-digit' }); };
+    return '<svg class="ofb-spark" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" role="img" aria-label="' + esc(tr('People served over the last 12 months', 'Watu waliohudumiwa katika miezi 12 iliyopita')) + '">' +
+      '<path class="ar" d="' + line + ' L' + last[0] + ' ' + H + ' L' + pts[0][0] + ' ' + H + 'Z"/><path class="ln" pathLength="1" d="' + line + '"/><circle class="dt" cx="' + last[0] + '" cy="' + last[1] + '" r="4.5"/></svg>' +
+      '<div class="ofb-sl"><span>' + esc(mo(tr12[0].m)) + '</span><span>' + esc(tr('12-month trend', 'Mwenendo wa miezi 12')) + '</span><span>' + esc(tr('now', 'sasa')) + '</span></div>';
+  }
+  function ofbPeopleHtml() {
+    var pe = S.people; if (!pe || !pe.total) return '';
+    var first = (pe.trend || []).filter(function (t) { return t.n != null; })[0], up = first ? pe.total - first.n : 0;
+    var cks = ['ke', 'tz', 'ug', 'mw'].filter(function (c) { return pe.byCountry && pe.byCountry[c]; }), cmax = Math.max.apply(null, cks.map(function (c) { return pe.byCountry[c]; }).concat([1]));
+    var tys = Object.keys(pe.byType || {}).sort(function (a, z) { return pe.byType[z] - pe.byType[a]; });
+    return '<section class="ofb-people" aria-labelledby="ofbPh">' +
+      '<div class="ofb-ph"><span class="ofb-ic" style="--hb:var(--hb-teal);--hu:var(--hu-teal)">' + oic('people') + '</span><div><h2 id="ofbPh">' + tr('People served', 'Watu wanaohudumiwa') + '</h2>' +
+        '<p>' + esc(tr('Latest visit counts on ' + (pe.measured || 0) + ' of ' + (pe.counted || 0) + ' projects; the project records for the rest', 'Hesabu za ziara za karibuni kwenye miradi ' + (pe.measured || 0) + ' kati ya ' + (pe.counted || 0) + '; kumbukumbu za miradi kwa mingine')) + '</p></div></div>' +
+      '<div class="ofb-big"><b data-n="' + pe.total + '" id="ofbPeople">' + pe.total.toLocaleString('en-US') + '</b>' + (up > 0 ? '<span class="up">' + oic('trend') + '+' + up.toLocaleString('en-US') + ' ' + esc(tr('in 12 months', 'kwa miezi 12')) + '</span>' : '') + '</div>' +
+      ofbSpark(pe.trend) +
+      '<div class="ofb-split"><div><h3>' + tr('By country', 'Kwa nchi') + '</h3>' + cks.map(function (c) {
+        return '<div class="ofb-bar"><span aria-hidden="true">' + (FLAG[c] || '') + '</span><span class="t">' + CNAME[c] + '</span><span class="v">' + pe.byCountry[c].toLocaleString('en-US') + '</span><i><em style="--c:' + OFB_CC[c] + '" data-w="' + (pe.byCountry[c] / cmax * 100).toFixed(1) + '"></em></i></div>';
+      }).join('') + '</div><div><h3>' + tr('By type', 'Kwa aina') + '</h3><div class="ofb-types">' + tys.map(function (k) {
+        var t = OFB_TYPE[k] || [k, k, 'drop', 'slate'];
+        return '<div class="ofb-type"><span class="ofb-ic" style="--hb:var(--hb-' + t[3] + ');--hu:var(--hu-' + t[3] + ')">' + oic(t[2]) + '</span><span>' + esc(tr(t[0], t[1])) + '</span><b>' + pe.byType[k].toLocaleString('en-US') + '</b></div>';
+      }).join('') + '</div></div></div></section>';
+  }
+
+  // Office › Costs
+  function ofbCosts(b) {
+    b.innerHTML = '<p class="muted">' + tr('Loading…', 'Inapakia…') + '</p>';
+    adminApi('GET', null, '?view=costs').then(function (j) {
+      if (O.tab !== 'costs') return;
+      if (!j.ok) { b.innerHTML = '<p class="msg bad">' + esc(why(j)) + '</p>'; return; }
+      ofbTake(j); O.costs = j;
+      var s = j.stats || {}, ti = 0, rows = (j.rows || []).slice().sort(function (a, z) { return z.at.localeCompare(a.at); });
+      var tile = function (ic, hue, v, l, sub) { return '<div class="kpi otile" style="--i:' + (ti++) + '"><span class="ic" style="background:var(--hb-' + hue + ');color:var(--hu-' + hue + ')">' + oic(ic) + '</span><b data-n="' + v + '" data-pre="KES ">KES ' + v.toLocaleString('en-US') + '</b><span>' + l + '</span>' + (sub ? '<small>' + sub + '</small>' : '') + '</div>'; };
+      var mName = new Date().toLocaleDateString(S.lang === 'sw' ? 'sw' : 'en-GB', { month: 'long' });
+      var cks = ['ke', 'tz', 'ug', 'mw'], cmax = Math.max.apply(null, cks.map(function (c) { return (s.byCountry || {})[c] || 0; }).concat([1]));
+      var top = s.top || [], tmax = top.length ? top[0].sum : 1;
+      b.innerHTML = '<div class="ofb-costs"><div class="otiles">' +
+          tile('coins', 'amber', s.month || 0, tr('spent on repairs in ' + mName, 'zilizotumika kwa ukarabati ' + mName)) +
+          tile('cal', 'blue', s.year || 0, tr('spent this year (' + (s.yearKey || '') + ')', 'zilizotumika mwaka huu (' + (s.yearKey || '') + ')')) +
+          tile('wrench', 'teal', s.avg || 0, tr('average per repair', 'wastani kwa kila ukarabati'), tr((s.repairs || 0) + ' repairs in the last 12 months', 'matengenezo ' + (s.repairs || 0) + ' katika miezi 12')) +
+          tile('trend', 'purple', s.sum12 || 0, tr('spent in the last 12 months', 'zilizotumika katika miezi 12')) +
+        '</div><div class="o-grid" style="margin-top:14px"><div class="card"><h2>' + tr('Most expensive water points to keep running', 'Vituo vya maji vinavyogharimu zaidi kuendesha') + '</h2><p class="muted">' + tr('Top 10 by money actually spent on repairs, last 12 months.', '10 bora kwa pesa halisi zilizotumika kwa ukarabati, miezi 12 iliyopita.') + '</p>' +
+          (top.length ? '<ol class="ofb-top">' + top.map(function (t, i) {
+            return '<li style="--i:' + i + '"><span class="rk">' + (i + 1) + '</span><button type="button" data-open="' + esc(t.id) + '">' + esc(t.t || pname(t.id)) + '</button><span class="v">' + esc(ofbKes(t.sum)) + '</span>' +
+              '<small>' + esc((CNAME[t.ck] || '') + (t.ck ? ' · ' : '') + tr(t.n + (t.n === 1 ? ' repair' : ' repairs'), 'matengenezo ' + t.n)) + '</small><i><em style="--c:var(--hu-coral)" data-w="' + (t.sum / tmax * 100).toFixed(1) + '"></em></i></li>';
+          }).join('') + '</ol>' : emptyHtml(tr('No repair costs recorded yet. Enter the actual cost when parts are ordered or a repair is fixed.', 'Bado hakuna gharama za ukarabati. Andika gharama halisi vipuri vikiagizwa au ukarabati ukikamilika.'))) + '</div>' +
+          '<div><div class="card"><h2>' + tr('By country, this year', 'Kwa nchi, mwaka huu') + '</h2>' + cks.map(function (c) {
+            var v = (s.byCountry || {})[c] || 0;
+            return '<div class="ofb-bar"><span aria-hidden="true">' + FLAG[c] + '</span><span class="t">' + CNAME[c] + '</span><span class="v">' + esc(ofbKes(v)) + '</span><i><em style="--c:' + OFB_CC[c] + '" data-w="' + (v / cmax * 100).toFixed(1) + '"></em></i></div>';
+          }).join('') + '</div>' +
+          '<div class="card" style="margin-top:12px"><h2>' + tr('Second approval', 'Idhini ya pili') + '</h2><p class="muted">' + tr('Repairs estimated above this need a second admin to approve the cost before parts are ordered. The person who asks can’t approve their own.', 'Ukarabati unaokadiriwa zaidi ya kiasi hiki unahitaji msimamizi wa pili kuidhinisha kabla ya kuagiza vipuri. Aliyeomba hawezi kuidhinisha mwenyewe.') + '</p>' +
+            '<div class="ofb-set"><label>' + tr('Second approval above (KES)', 'Idhini ya pili zaidi ya (KES)') + '<input type="number" inputmode="numeric" min="0" id="ofbLim" value="' + S.approveAbove + '"></label><button class="btn small" type="button" id="ofbLimGo">' + tr('Save', 'Hifadhi') + '</button></div><p class="msg" id="ofbLimMsg" aria-live="polite"></p></div></div></div>' +
+        '<div class="card" style="margin-top:14px"><div class="ofb-hd"><h2 style="margin:0">' + tr('Latest spending', 'Matumizi ya karibuni') + '</h2><button class="btn small light" type="button" data-x="costs">⬇️ ' + tr('Download CSV', 'Pakua CSV') + '</button></div>' +
+          (rows.length ? '<ul class="ofb-log">' + rows.slice(0, 12).map(function (r) {
+            return '<li><span class="ofb-ic" style="--hb:var(--hb-' + (r.step === 'fixed' ? 'green' : 'amber') + ');--hu:var(--hu-' + (r.step === 'fixed' ? 'green' : 'amber') + ')">' + oic(r.step === 'fixed' ? 'check' : 'box') + '</span><span class="tx"><button type="button" data-open="' + esc(r.id) + '">' + esc(r.t || pname(r.id)) + '</button><small>' + esc([r.what, r.by, when(r.at)].filter(Boolean).join(' · ')) + (r.receipt ? ' · 🧾' : '') + '</small></span><b>' + esc(ofbKes(r.actual)) + '</b></li>';
+          }).join('') + '</ul>' : '<p class="muted">' + tr('Nothing yet.', 'Bado hakuna kitu.') + '</p>') + '</div></div>';
+      countUp(b);
+      requestAnimationFrame(function () { requestAnimationFrame(function () { qa('[data-w]', b).forEach(function (el) { el.style.width = el.getAttribute('data-w') + '%'; }); }); });
+      $('ofbLimGo').addEventListener('click', function () {
+        var v = $('ofbLim').value, bt = this; if (v === '' || Number(v) < 0) { $('ofbLim').focus(); return; }
+        bt.disabled = true; msg('ofbLimMsg', '', tr('Saving…', 'Inahifadhi…'));
+        adminApi('POST', { action: 'settings', approveAbove: v }).then(function (r) {
+          bt.disabled = false; if (!r.ok) { msg('ofbLimMsg', 'bad', why(r)); return; }
+          ofbTake(r); msg('ofbLimMsg', 'ok', tr('Saved ✓ Second approval above ', 'Imehifadhiwa ✓ Idhini ya pili zaidi ya ') + ofbKes(r.approveAbove)); savedBtn(bt, tr('Saved', 'Imehifadhiwa'));
+        });
+      });
+      qa('[data-x=costs]', b).forEach(function (x) { x.addEventListener('click', ofbExportCosts); });
+    });
+  }
+
+  // Office › Export
+  function ofbExportCosts() {
+    var go = function (j) {
+      var rows = (j.rows || []).slice().sort(function (a, z) { return z.at.localeCompare(a.at); });
+      download('rafiki-repair-costs-' + stamp() + '.csv', csv([['Date', 'Project ID', 'Project', 'Country', 'Repair reported', 'Step', 'What', 'Estimate (KES)', 'Actual (KES)', 'By', 'Receipt']].concat(rows.map(function (r) {
+        var p = byId(r.id); return [r.at.slice(0, 10), r.id, p ? p.title : r.t || '', p ? p.country : '', String(r.rid || '').slice(0, 10), r.step === 'fixed' ? 'Fixed' : r.step === 'parts' ? 'Parts ordered' : (r.step || ''), r.what || '', r.est == null ? '' : r.est, r.actual, r.by, r.receipt ? 'yes' : ''];
+      }))));
+      if ($('xMsg')) msg('xMsg', 'ok', tr(rows.length + ' cost entries ✓', 'Gharama ' + rows.length + ' ✓'));
+    };
+    if (O.costs) return go(O.costs);
+    if ($('xMsg')) msg('xMsg', '', tr('Gathering repair costs…', 'Inakusanya gharama za ukarabati…'));
+    adminApi('GET', null, '?view=costs').then(function (j) { if (!j.ok) { if ($('xMsg')) msg('xMsg', 'bad', why(j)); return; } O.costs = j; go(j); });
+  }
+  function ofbExportSummary() {
+    var go = function (j) {
+      var s = j.stats || {}, pe = S.people || {}, L = [['Section', 'Item', 'Value', 'Repairs']];
+      L.push(['Repair spending', 'This month (' + (s.monthKey || '') + ')', s.month || 0, ''], ['Repair spending', 'This year (' + (s.yearKey || '') + ')', s.year || 0, ''], ['Repair spending', 'Last 12 months', s.sum12 || 0, s.repairs || 0], ['Repair spending', 'Average per repair (last 12 months)', s.avg || 0, '']);
+      ['ke', 'tz', 'ug', 'mw'].forEach(function (c) { L.push(['Spent this year by country', CNAME[c], (s.byCountry || {})[c] || 0, '']); });
+      (s.top || []).forEach(function (t, i) { L.push(['Top 10 water points (last 12 months)', (i + 1) + '. ' + t.t + (t.ck ? ' (' + CNAME[t.ck] + ')' : ''), t.sum, t.n]); });
+      L.push(['Second approval', 'Above (KES)', j.approveAbove != null ? j.approveAbove : S.approveAbove, '']);
+      if (pe.total) {
+        L.push(['People served', 'Total', pe.total, '']);
+        Object.keys(pe.byCountry || {}).forEach(function (c) { L.push(['People served by country', CNAME[c] || c, pe.byCountry[c], '']); });
+        Object.keys(pe.byType || {}).forEach(function (k) { L.push(['People served by type', (OFB_TYPE[k] || [k])[0], pe.byType[k], '']); });
+        (pe.trend || []).forEach(function (t) { if (t.n != null) L.push(['People served by month', t.m, t.n, '']); });
+      }
+      download('rafiki-costs-and-people-' + stamp() + '.csv', csv(L));
+      msg('xMsg', 'ok', tr('Summary ✓', 'Muhtasari ✓'));
+    };
+    if (O.costs) return go(O.costs);
+    msg('xMsg', '', tr('Gathering repair costs…', 'Inakusanya gharama za ukarabati…'));
+    adminApi('GET', null, '?view=costs').then(function (j) { if (!j.ok) { msg('xMsg', 'bad', why(j)); return; } O.costs = j; go(j); });
+  }
+  function ofbExportBtns() {
+    return '<button class="btn light" type="button" data-x="costs">💰 ' + tr('Repair costs (every entry, last 2 years)', 'Gharama za ukarabati (kila kiingilio, miaka 2)') + '</button>' +
+      '<button class="btn light" type="button" data-x="costsum">💰 ' + tr('Costs and people served: summary', 'Gharama na watu wanaohudumiwa: muhtasari') + '</button>';
+  }
+
+  // the project page: what repairs cost here, and the second approval / parts ordered on the tracker
+  function ofbPcEl(p) {
+    var el = $('ofbPc');
+    if (!el) { el = document.createElement('div'); el.id = 'ofbPc'; el.setAttribute('aria-live', 'polite'); $('pRepair').insertAdjacentElement('afterend', el); }
+    if (el.getAttribute('data-id') !== (p && p.id)) { el.innerHTML = ''; el.setAttribute('data-id', p ? p.id : ''); }
+    return el;
+  }
+  function ofbProjCost(p, j) {
+    if (!p || !S.cur || S.cur.id !== p.id || !j || !j.ok || !j.costs) return;
+    var c = j.costs, el = ofbPcEl(p), last = (c.last || [])[0];
+    el.innerHTML = '<div class="ofb-pc"><span class="ofb-ic" style="--hb:var(--hb-amber);--hu:var(--hu-amber)">' + oic('coins') + '</span><span><b>' +
+      (c.n ? esc(tr('Repairs: ' + ofbKes(c.sum) + ' in the last 12 months (' + c.n + (c.n === 1 ? ' repair)' : ' repairs)'), 'Ukarabati: ' + ofbKes(c.sum) + ' katika miezi 12 iliyopita (matengenezo ' + c.n + ')')) : esc(tr('Repairs: nothing spent in the last 12 months', 'Ukarabati: hakuna kilichotumika katika miezi 12 iliyopita'))) + '</b>' +
+      (last ? '<small>' + esc(tr('Latest: ', 'Karibuni: ') + [ofbKes(last.actual), last.what, last.by, when(last.at)].filter(Boolean).join(' · ')) + '</small>' : '') + '</span></div>';
+  }
+  function ofbTracker(p, r) {
+    ofbPcEl(p);
+    var card = $('pRepair').querySelector('.trk'); if (!card) return;
+    var st = ofbState(r), a = r.approval || {};
+    if (st === 'pending') { var li = card.querySelectorAll('ol li')[2]; if (li) li.querySelector('small').textContent = tr('Waiting for a second approval · asked by ', 'Inasubiri idhini ya pili · imeombwa na ') + (a.by || '—'); }
+    var box = document.createElement('div'); box.className = 'ofb-trk'; box.innerHTML = ofbApprHtml(r);
+    // parts ordered: the person on the job or an admin, while the job hasn't got there yet
+    var mine = S.admin || (S.jobs || []).indexOf(p.id) >= 0 || ofbSame(r.assignee, S.name);
+    if (mine && !ofbPast(r.step, 'parts') && st !== 'pending') {
+      box.innerHTML += '<div id="ofbPartsBox" class="hidden"><label for="ofbPartsCost" style="margin-top:0">' + tr('Actual cost (KES, optional)', 'Gharama halisi (KES, si lazima)') + '</label><input id="ofbPartsCost" type="number" inputmode="numeric" min="0" placeholder="' + esc(tr('what the parts cost', 'bei ya vipuri')) + '">' +
+        '<label for="ofbPartsWhat">' + tr('What was ordered? (optional)', 'Nini kimeagizwa? (si lazima)') + '</label><input id="ofbPartsWhat" type="text" placeholder="' + esc(r.parts || tr('e.g. 6 rising main pipes', 'mf. mabomba 6')) + '">' +
+        '<div style="margin-top:8px">' + ofbFilePick('parts' + p.id) + '</div></div>' +
+        '<button class="btn light wide" type="button" id="ofbParts">📦 ' + (st === 'needed' || st === 'declined' ? tr('Parts ordered: ask for approval', 'Vipuri vimeagizwa: omba idhini') : tr('Parts ordered', 'Vipuri vimeagizwa')) + '</button>';
+    }
+    if (mine && !ofbPast(r.step, 'parts')) box.innerHTML += '<p class="msg" id="ofbPartsMsg" aria-live="polite"></p>';
+    card.insertBefore(box, $('fixBox'));
+    // the money spent, when it's marked fixed
+    $('fixBox').insertAdjacentHTML('beforeend', '<label for="ofbFixCost">' + tr('Actual cost (KES, optional)', 'Gharama halisi (KES, si lazima)') + '</label><input id="ofbFixCost" type="number" inputmode="numeric" min="0" placeholder="' + esc(tr('what the repair cost', 'gharama ya ukarabati')) + '"><div style="margin-top:8px">' + ofbFilePick('fix' + p.id) + '</div>');
+    if ($('ofbParts')) $('ofbParts').addEventListener('click', function () {
+      var bt = this, ask = st === 'needed' || st === 'declined';
+      if (!ask && $('ofbPartsBox').classList.contains('hidden')) { $('ofbPartsBox').classList.remove('hidden'); bt.textContent = tr('Save: parts ordered', 'Hifadhi: vipuri vimeagizwa'); $('ofbPartsCost').focus(); return; }
+      var blob = ofbRc['parts' + p.id], body = { action: 'parts', id: p.id, by: S.name };
+      if (!ask) { if ($('ofbPartsCost').value) body.actual = $('ofbPartsCost').value; if ($('ofbPartsWhat').value.trim()) body.what = $('ofbPartsWhat').value.trim(); if (blob) body.receipt = true; }
+      bt.disabled = true; msg('ofbPartsMsg', '', tr('Saving…', 'Inahifadhi…'));
+      submit(body, !ask && blob ? [{ blob: blob, kind: 'photo', label: 'receipt' }] : []).then(function (x) {
+        bt.disabled = false;
+        if (x.state === 'locked') return lockOut({ reason: 'pin' });
+        if (x.state === 'failed') { msg('ofbPartsMsg', 'bad', x.text); return; }
+        if (x.state === 'queued') { msg('ofbPartsMsg', 'warn', tr('Saved on this phone. It will be sent when you have signal.', 'Imehifadhiwa kwenye simu. Itatumwa ukipata mtandao.')); return; }
+        var res = x.result || {}; delete ofbRc['parts' + p.id];
+        if (res.job) { S.repairs[p.id] = res.job; saveList(); }
+        repairUi();
+        if (res.held) msg('ofbPartsMsg', 'warn', res.asked ? tr('Sent for a second approval ✓ Parts can be ordered once another admin approves the cost.', 'Imetumwa kwa idhini ya pili ✓ Vipuri vitaagizwa msimamizi mwingine akiidhinisha.') : tr('Still waiting for a second approval.', 'Bado inasubiri idhini ya pili.'));
+        else toast(tr('Parts ordered ✓', 'Vipuri vimeagizwa ✓'));
+        lastUi();
+      });
+    });
+  }
+  function ofbFixBody(body) {
+    var c = $('ofbFixCost'), p = S.cur;
+    if (c && c.value) body.actual = c.value;
+    if (body.note) body.what = body.note.slice(0, 120);
+    if (p && ofbRc['fix' + p.id]) body.receipt = true;
+    return body;
+  }
+  function ofbFixFiles() { var p = S.cur, b = p && ofbRc['fix' + p.id]; if (b) delete ofbRc['fix' + p.id]; return b ? [{ blob: b, kind: 'photo', label: 'receipt' }] : []; }
 
   // --- 7. install on the home screen ----------------------------------------------------------------
   var deferred = null, standalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true || /^android-app:\/\//.test(document.referrer || '');
