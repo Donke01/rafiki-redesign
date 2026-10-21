@@ -126,6 +126,7 @@ fun MeScreen(m: AppModel, open: (String) -> Unit = {}, report: () -> Unit = {}) 
             TeamFeed(act, s, open)
         } else {
             MeHero(m, act, s, report)
+            AppUpdate(m)
             WaitingList(m, s)
             MyWork(s, open)
             MyMonth(m, act)

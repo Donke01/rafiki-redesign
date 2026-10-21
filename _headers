@@ -21,6 +21,10 @@
   Content-Type: application/json
   Access-Control-Allow-Origin: *
 
+/app/version.json
+  Content-Type: application/json
+  Cache-Control: no-cache
+
 /app/*.apk
   Content-Type: application/vnd.android.package-archive
   Content-Disposition: attachment; filename="RAFIKI-Pin.apk"

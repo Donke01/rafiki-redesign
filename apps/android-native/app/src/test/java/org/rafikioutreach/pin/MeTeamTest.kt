@@ -101,6 +101,31 @@ class MeTeamTest {
         org.rafikioutreach.pin.ui.Motion.on = true
     }
 
+    @Test fun update_button() {
+        org.rafikioutreach.pin.ui.Motion.on = false
+        val app = ApplicationProvider.getApplicationContext<Application>()
+        Prefs(app).apply { pin = "9999"; name = "Meril Kiprop"; saveSnapshot(snapshot()); filter = "all"; onb = true; country = ""; lang = "en"; mePane = "me" }
+        Lang.sw = false
+        val m = AppModel(app); Onb.enabled = false
+        m.api.transport = { _, url, _, _ ->
+            when {
+                url.contains("/app/version.json") -> 200 to "{\"ok\":true,\"versionCode\":99,\"versionName\":\"9.9\"}"
+                url.contains("activity=1") -> 200 to "{\"ok\":true,\"activity\":[]}"
+                url.contains("team=1") -> 200 to "{\"ok\":true,\"team\":[]}"
+                url.contains("pin-auth/me") -> 200 to "{\"ok\":true,\"available\":false}"
+                else -> 200 to snapshot().toString()
+            }
+        }
+        rule.setContent { RafikiTheme(dark = false) { Box(Modifier.size(390.dp, 844.dp)) { App(m) } } }
+        rule.waitUntil(8000) { rule.onAllNodesWithTag("hav").fetchSemanticsNodes().isNotEmpty() }
+        rule.mainClock.advanceTimeBy(2000)
+        rule.onNodeWithTag("hav").performClick()
+        rule.waitUntil(8000) { rule.onAllNodesWithTag("update_go").fetchSemanticsNodes().isNotEmpty() }
+        rule.onNodeWithTag("update_title").assertTextEquals("Update to RAFIKI Pin 9.9")
+        rule.onNodeWithTag("app_update").performScrollTo(); shot("65-app-update")
+        org.rafikioutreach.pin.ui.Motion.on = true
+    }
+
     @Test fun whatsapp_numbers() {
         assertEquals("255754123456", waNumber("0754 123 456", "tz"))
         assertEquals("254712000111", waNumber("+254 712 000 111", "ke"))

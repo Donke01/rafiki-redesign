@@ -3,6 +3,9 @@ package org.rafikioutreach.pin.ui
 import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.foundation.layout.*
+import androidx.compose.ui.text.withStyle
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -84,9 +87,9 @@ fun OfficeScreen(m: AppModel, open: (String) -> Unit) {
     )
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
         Text(t("Office", "Ofisi"), style = MaterialTheme.typography.headlineLarge, color = C.ink)
-        secs.chunked(4).forEach { row ->
+        secs.chunked(4).forEachIndexed { ri, row ->
             Row(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                row.forEach { (k, l, ic) -> Tile(l, ic, sec == k, { sec = k }, Modifier.weight(1f).testTag("o_$k"), badge = when (k) { "review" -> snap.reviewOpen; "repairs" -> snap.repairs.size; else -> 0 }) }
+                row.forEachIndexed { ci, (k, l, ic) -> Tile(l, ic, sec == k, { sec = k }, Modifier.weight(1f).rise(ri * 4 + ci, step = 35).testTag("o_$k"), badge = when (k) { "review" -> snap.reviewOpen; "repairs" -> snap.repairs.size; else -> 0 }) }
                 repeat(4 - row.size) { Spacer(Modifier.weight(1f)) }
             }
         }
@@ -130,10 +133,7 @@ private fun Overview(m: AppModel, s: Snapshot, go: (String) -> Unit) {
 
     Card(brush = DeepBrush) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(Modifier.size(96.dp).clip(CircleShape).background(Color(0x1FFFFFFF)), contentAlignment = Alignment.BottomCenter) {
-                Box(Modifier.fillMaxWidth().height((96 * pct / 100).dp).background(androidx.compose.ui.graphics.Brush.verticalGradient(listOf(Color(0xFF5DB8F2), Color(0xFF0A78C2)))))
-                Text("$pct%", color = Color.White, style = MaterialTheme.typography.headlineMedium, modifier = Modifier.align(Alignment.Center))
-            }
+            Tank(pct)
             Spacer(Modifier.width(16.dp))
             Column(Modifier.weight(1f)) {
                 Text(t("$pinned of ${s.projects.size} projects are on the map", "Miradi $pinned kati ya ${s.projects.size} iko kwenye ramani"), color = Color.White, style = MaterialTheme.typography.titleMedium)
@@ -142,49 +142,83 @@ private fun Overview(m: AppModel, s: Snapshot, go: (String) -> Unit) {
         }
     }
     Row(Modifier.padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        Stat(Modifier.weight(1f), "wrench", "${s.repairs.size}", t("open repairs", "matengenezo yaliyo wazi"), (if (urgent > 0) t("$urgent urgent", "$urgent ya haraka") else "") + (if (cost > 0) " · KES %,d".format(cost) else ""), hot = s.repairs.isNotEmpty()) { go("repairs") }
-        Stat(Modifier.weight(1f), "inbox", "${s.reviewOpen}", t("waiting for your review", "zinasubiri uidhinishe"), "", hot = s.reviewOpen > 0) { go("review") }
+        Stat(Modifier.weight(1f).rise(1), "wrench", s.repairs.size, t("open repairs", "matengenezo yaliyo wazi"), (if (urgent > 0) t("$urgent urgent", "$urgent ya haraka") else "") + (if (cost > 0) " · KES %,d".format(cost) else "").ifBlank { if (s.repairs.isNotEmpty() && urgent == 0) t("no cost estimate yet", "bado hakuna makadirio ya gharama") else "" }, hot = s.repairs.isNotEmpty(), red = urgent > 0, hue = "repairs") { go("repairs") }
+        Stat(Modifier.weight(1f).rise(2), "inbox", s.reviewOpen, t("waiting for your review", "zinasubiri uidhinishe"), "", hot = s.reviewOpen > 0, hue = "new") { go("review") }
     }
     Row(Modifier.padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        Stat(Modifier.weight(1f), "cal", "$due", t("due a visit", "zinasubiri ziara"), t("not seen for 6+ months", "hazijaonekana kwa miezi 6+")) { go("visits") }
-        Stat(Modifier.weight(1f), "clip", vm?.toString() ?: "…", t("visits this month", "ziara za mwezi huu"), "") { }
+        Stat(Modifier.weight(1f).rise(3), "cal", due, t("due a visit", "zinasubiri ziara"), t("not seen for 6+ months", "hazijaonekana kwa miezi 6+"), hue = "due") { go("visits") }
+        Stat(Modifier.weight(1f).rise(4), "clip", vm, t("visits this month", "ziara za mwezi huu"), "", hue = "near") { }
     }
     // condition at last visit
     val st = s.visits.values.groupingBy { it.state }.eachCount()
     val seen = st.values.sum(); val unseen = (s.projects.size - seen).coerceAtLeast(0); val tot = maxOf(1, s.projects.size).toFloat()
     Card(Modifier.padding(top = 10.dp)) {
         Text(t("Condition at last visit", "Hali katika ziara ya mwisho"), style = MaterialTheme.typography.titleSmall, color = C.ink)
-        Row(Modifier.padding(vertical = 10.dp).fillMaxWidth().height(14.dp).clip(RoundedCornerShape(99.dp)).background(C.line)) {
-            listOf((st["working"] ?: 0) to Green, (st["repair"] ?: 0) to Amber, (st["notworking"] ?: 0) to Red, unseen to C.off).forEach { (n, c) -> if (n > 0) Box(Modifier.weight(n / tot).height(14.dp).background(c)) }
+        val grow = rememberFill(1f, 1100)
+        Row(Modifier.padding(vertical = 10.dp).fillMaxWidth().height(14.dp).clip(RoundedCornerShape(99.dp)).background(C.line), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+            listOf((st["working"] ?: 0) to Green, (st["repair"] ?: 0) to Amber, (st["notworking"] ?: 0) to Red, unseen to C.off).forEach { (n, c) -> if (n > 0 && grow > 0.01f) Box(Modifier.weight(n / tot * grow).height(14.dp).background(c)) }
+            if (grow < 0.999f) Spacer(Modifier.weight(1.0001f - grow))
         }
         listOf(Triple(st["working"] ?: 0, Green, t("working", "zinafanya kazi")), Triple(st["repair"] ?: 0, Amber, t("needed repair", "zilihitaji matengenezo")), Triple(st["notworking"] ?: 0, Red, t("not working", "hazifanyi kazi")), Triple(unseen, C.off, t("not visited yet", "bado hazijatembelewa")))
             .chunked(2).forEach { r -> Row { r.forEach { (n, c, l) -> Row(Modifier.weight(1f).padding(vertical = 3.dp), verticalAlignment = Alignment.CenterVertically) { Box(Modifier.size(10.dp).clip(RoundedCornerShape(3.dp)).background(c)); Text(" $n ", style = MaterialTheme.typography.titleSmall, color = C.ink); Text(l, style = MaterialTheme.typography.bodySmall, color = C.muted) } } } }
     }
     H2(t("By country", "Kwa nchi"), Modifier.padding(top = 14.dp))
-    COUNTRIES.forEach { (k, n) ->
-        val l = s.projects.filter { it.ck == k }; if (l.isEmpty()) return@forEach
+    val FLAG = mapOf("ke" to "🇰🇪", "tz" to "🇹🇿", "ug" to "🇺🇬", "mw" to "🇲🇼")
+    COUNTRIES.entries.forEachIndexed { ci, (k, n) ->
+        val l = s.projects.filter { it.ck == k }; if (l.isEmpty()) return@forEachIndexed
         val loc = l.count { it.gps != null }
-        Card(Modifier.padding(top = 8.dp), pad = 14.dp) {
-            Row { Text(n, style = MaterialTheme.typography.titleSmall, color = C.ink, modifier = Modifier.weight(1f)); Text(t("$loc of ${l.size} mapped", "$loc kati ya ${l.size} zina mahali"), style = MaterialTheme.typography.bodySmall, color = C.muted) }
-            Meter(loc.toFloat() / l.size, Modifier.padding(top = 8.dp))
-            val rp = l.count { s.repairs.containsKey(it.id) }; val du = l.count { it.gps != null && ageDays(s, it) >= DUE_DAYS }
-            Text(listOfNotNull(if (rp > 0) t("$rp open repairs", "matengenezo $rp") else null, if (du > 0) t("$du due a visit", "$du zinasubiri ziara") else null).joinToString(" · ").ifBlank { t("Nothing needs attention", "Hakuna kinachohitaji kushughulikiwa") },
-                style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 6.dp))
+        Card(Modifier.padding(top = 8.dp).rise(ci), pad = 14.dp) {
+            Row(verticalAlignment = Alignment.Top) {
+                Box(Modifier.size(48.dp).clip(RoundedCornerShape(14.dp)).background(C.tint), contentAlignment = Alignment.Center) { Text(FLAG[k] ?: "", fontSize = 24.sp) }
+                Spacer(Modifier.width(12.dp))
+                Column(Modifier.weight(1f)) {
+                    Row { Text(n, style = MaterialTheme.typography.titleSmall, color = C.ink, modifier = Modifier.weight(1f)); Text(t("$loc of ${l.size} mapped", "$loc kati ya ${l.size} zina mahali"), style = MaterialTheme.typography.bodySmall, color = C.muted) }
+                    Meter(loc.toFloat() / l.size, Modifier.padding(top = 8.dp), glass = true)
+                    val ks = { st: String -> l.count { s.visits[it.id]?.state == st } }
+                    val rp = l.count { s.repairs.containsKey(it.id) }; val du = l.count { it.gps != null && ageDays(s, it) >= DUE_DAYS }
+                    val pills = listOfNotNull(
+                        ks("working").takeIf { it > 0 }?.let { t("$it working", "$it zinafanya kazi") to Green }, ks("repair").takeIf { it > 0 }?.let { t("$it needed repair", "$it zilihitaji matengenezo") to Amber },
+                        ks("notworking").takeIf { it > 0 }?.let { t("$it not working", "$it hazifanyi kazi") to Red }, rp.takeIf { it > 0 }?.let { t("$it open " + if (it == 1) "repair" else "repairs", "matengenezo $it") to Amber },
+                        du.takeIf { it > 0 }?.let { t("$it due a visit", "$it zinasubiri ziara") to Color(0xFF0A78C2) },
+                    ).ifEmpty { listOf(t("Nothing needs attention", "Hakuna kinachohitaji kushughulikiwa") to Green) }
+                    @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+                    FlowRow(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        pills.forEach { (txt, c) ->
+                            Row(Modifier.clip(RoundedCornerShape(99.dp)).background(c.copy(alpha = 0.12f)).padding(horizontal = 9.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                                Box(Modifier.size(6.dp).clip(CircleShape).background(c)); Spacer(Modifier.width(5.dp))
+                                Text(txt, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = C.ink)
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
     H2(t("Latest from the field", "Habari za karibuni kutoka uwanjani"), Modifier.padding(top = 14.dp))
     val a = act
     if (a == null) Text(t("Loading…", "Inapakia…"), color = C.muted)
     else if (a.isEmpty()) Text(t("Nothing yet.", "Bado hakuna kitu."), color = C.muted)
-    else a.takeLast(12).reversed().forEach { e ->
-        Row(Modifier.padding(top = 8.dp), verticalAlignment = Alignment.Top) {
-            IconTile(feedIcon(e.optString("a")), C.blue, C.tint, 34.dp)
+    else { val list = a.takeLast(12).reversed(); list.forEachIndexed { i, e ->
+        // a timeline: a coloured ring for each kind of change, joined by a thin line
+        val hu = C.hue(feedHue(e.optString("a")))
+        Row(Modifier.padding(top = 2.dp).rise(i, step = 40).height(androidx.compose.foundation.layout.IntrinsicSize.Min), verticalAlignment = Alignment.Top) {
+            Box(Modifier.width(36.dp).fillMaxHeight(), contentAlignment = Alignment.TopCenter) {
+                if (i < list.size - 1) Box(Modifier.padding(top = 36.dp).width(2.dp).fillMaxHeight().background(hu.fg.copy(alpha = 0.25f)))
+                Box(Modifier.padding(top = 4.dp).size(32.dp).clip(CircleShape).background(C.card).border(2.dp, hu.fg, CircleShape), contentAlignment = Alignment.Center) { Icon(Ic.get(feedIcon(e.optString("a"))), null, tint = hu.fg, modifier = Modifier.size(16.dp)) }
+            }
             Spacer(Modifier.width(10.dp))
-            Column { Text(e.optString("by") + " " + verb(e.optString("a")) + " " + e.optString("t"), style = MaterialTheme.typography.bodyMedium, color = C.text); Text(whenText(e.optString("at")), style = MaterialTheme.typography.bodySmall, color = C.muted) }
+            Column(Modifier.padding(top = 6.dp, bottom = 10.dp)) {
+                Text(androidx.compose.ui.text.buildAnnotatedString {
+                    withStyle(androidx.compose.ui.text.SpanStyle(fontWeight = FontWeight.Bold)) { append(e.optString("by")) }
+                    append(" " + verb(e.optString("a")) + " " + e.optString("t"))
+                }, style = MaterialTheme.typography.bodyMedium, color = C.text)
+                Text(whenText(e.optString("at")), style = MaterialTheme.typography.bodySmall, color = C.muted)
+            }
         }
-    }
+    } }
 }
 
+private fun feedHue(a: String) = when (a) { "pin", "approve", "assign" -> "pin"; "visit", "fixed" -> "near"; "new" -> "new"; "job", "request" -> "repairs"; "reject" -> "me"; else -> "all" }
 private fun feedIcon(a: String) = when (a) { "pin" -> "pin"; "visit" -> "clip"; "fixed" -> "check"; "new" -> "plus"; "undo" -> "undo"; "job" -> "wrench"; "assign" -> "cal"; "team" -> "people"; else -> "drop" }
 fun verb(a: String) = when (a) {
     "pin" -> t("pinned", "aliweka mahali pa"); "visit" -> t("reported a visit to", "aliripoti ziara ya"); "fixed" -> t("marked fixed", "aliweka imerekebishwa")
@@ -194,15 +228,58 @@ fun verb(a: String) = when (a) {
 }
 
 @Composable
-private fun Stat(modifier: Modifier, icon: String, n: String, label: String, sub: String, hot: Boolean = false, onClick: () -> Unit) {
-    Column(
-        modifier.clip(RoundedCornerShape(20.dp)).background(C.card).border(if (hot) 2.dp else 1.dp, if (hot) Amber else C.line, RoundedCornerShape(20.dp))
-            .clickable(role = Role.Button, onClick = onClick).padding(14.dp),
-    ) {
-        IconTile(icon, if (hot) C.warn else C.blue, if (hot) C.warnBg else C.tint, 40.dp)
-        Text(n, style = MaterialTheme.typography.headlineMedium, color = C.ink, modifier = Modifier.padding(top = 8.dp))
-        Text(label, style = MaterialTheme.typography.labelMedium, color = C.muted)
-        if (sub.isNotBlank()) Text(sub, style = MaterialTheme.typography.bodySmall, color = C.muted)
+private fun Stat(modifier: Modifier, icon: String, n: Int?, label: String, sub: String, hot: Boolean = false, red: Boolean = false, hue: String = "pin", onClick: () -> Unit) {
+    val hu = C.hue(if (hot) "repairs" else hue)
+    Box(modifier) {
+        Column(
+            Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(C.card).border(if (hot) 2.dp else 1.dp, if (hot) (if (red) Red else Amber) else C.line, RoundedCornerShape(20.dp))
+                .clickable(role = Role.Button, onClick = onClick).padding(14.dp),
+        ) {
+            IconTile(icon, hu.fg, hu.bg, 40.dp)
+            val shown = n?.let { kotlin.math.round(rememberFill(it.toFloat(), 900)).toInt() }
+            Text(shown?.let { "%,d".format(it) } ?: "…", style = MaterialTheme.typography.headlineMedium, color = C.ink, modifier = Modifier.padding(top = 8.dp))
+            Text(label, style = MaterialTheme.typography.labelMedium, color = C.muted)
+            if (sub.isNotBlank()) Text(sub, style = MaterialTheme.typography.bodySmall, color = C.muted)
+        }
+        if (red) Pulse(Modifier.align(Alignment.TopEnd).padding(14.dp))
+    }
+}
+
+/** A red dot that breathes, for something urgent. */
+@Composable
+private fun Pulse(modifier: Modifier) {
+    val k = if (Motion.on && Motion.loops) {
+        val tr = androidx.compose.animation.core.rememberInfiniteTransition(label = "pulse")
+        tr.animateFloat(0f, 1f, androidx.compose.animation.core.infiniteRepeatable(androidx.compose.animation.core.tween(1400)), label = "p").value
+    } else 0f
+    Box(modifier.size(22.dp), contentAlignment = Alignment.Center) {
+        Box(Modifier.size((10 + 12 * k).dp).clip(CircleShape).background(Red.copy(alpha = 0.35f * (1f - k))))
+        Box(Modifier.size(10.dp).clip(CircleShape).background(Red))
+    }
+}
+
+/** The water tank: fills up to the share of projects on the map, with a moving water line. */
+@Composable
+private fun Tank(pct: Int) {
+    val level = rememberFill(maxOf(pct, 4) / 100f, 1400)
+    val shown = kotlin.math.round(rememberFill(pct.toFloat(), 1100)).toInt()
+    val ph = if (Motion.on && Motion.loops) {
+        val tr = androidx.compose.animation.core.rememberInfiniteTransition(label = "wave")
+        tr.animateFloat(0f, (2 * Math.PI).toFloat(), androidx.compose.animation.core.infiniteRepeatable(androidx.compose.animation.core.tween(2600, easing = androidx.compose.animation.core.LinearEasing)), label = "ph").value
+    } else 0f
+    Box(Modifier.size(96.dp).clip(CircleShape).background(Color(0x1FFFFFFF)), contentAlignment = Alignment.Center) {
+        androidx.compose.foundation.Canvas(Modifier.fillMaxSize()) {
+            val w = size.width; val h = size.height; val top = h * (1f - level)
+            for ((amp, shift, col) in listOf(Triple(5f, 1.6f, Color(0x805DB8F2)), Triple(4f, 0f, Color(0xFF2E9BE3)))) {
+                val path = androidx.compose.ui.graphics.Path()
+                path.moveTo(0f, h)
+                var x = 0f
+                while (x <= w) { path.lineTo(x, top + amp * kotlin.math.sin((x / w * 2 * Math.PI + ph + shift).toFloat())); x += 4f }
+                path.lineTo(w, h); path.close()
+                drawPath(path, androidx.compose.ui.graphics.Brush.verticalGradient(listOf(col, Color(0xFF0A78C2)), startY = top, endY = h))
+            }
+        }
+        Text("$shown%", color = Color.White, style = MaterialTheme.typography.headlineMedium)
     }
 }
 

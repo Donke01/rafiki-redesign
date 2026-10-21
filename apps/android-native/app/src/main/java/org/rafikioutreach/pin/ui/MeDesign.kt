@@ -31,6 +31,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.launch
 import org.json.JSONObject
 import org.rafikioutreach.pin.AppModel
 import org.rafikioutreach.pin.data.Snapshot
@@ -206,6 +207,52 @@ fun ThisPhone(m: AppModel, snap: Snapshot?) {
         var miles by remember { mutableStateOf(m.prefs.miles) }
         PhoneRow("nav", "near", t("Distances", "Umbali")) {
             SmallSeg(listOf("km" to "km", "mi" to t("miles", "maili")), if (miles) "mi" else "km", tag = "units_") { miles = it == "mi"; m.prefs.miles = miles }
+        }
+    }
+}
+
+/** Me › App update: is there a newer RAFIKI Pin on the website? One tap downloads it; Android then offers to install it over this one. */
+@Composable
+fun AppUpdate(m: AppModel) {
+    val ctx = LocalContext.current
+    val mine = org.rafikioutreach.pin.BuildConfig.VERSION_CODE
+    var latest by remember { mutableStateOf<Pair<Int, String>?>(null) }
+    var checked by remember { mutableStateOf(false) }
+    var busy by remember { mutableStateOf(false) }
+    val scope = rememberScope()
+    fun check() {
+        busy = true
+        scope.launch {
+            val r = m.api.appVersion()
+            if (r.ok) latest = r.json.optInt("versionCode") to r.json.optString("versionName")
+            checked = true; busy = false
+        }
+    }
+    LaunchedEffect(Unit) { check() }
+    val newer = latest?.let { it.first > mine } == true
+    fun download() = runCatching {
+        ctx.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(org.rafikioutreach.pin.BuildConfig.SERVER + "/app/rafiki-pin.apk")))
+    }
+    Card(Modifier.padding(top = 14.dp).testTag("app_update"), border = if (newer) C.blue else null) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            val hu = C.hue(if (newer) "pin" else "near"); IconTile(if (newer) "upload" else "check", hu.fg, hu.bg, 40.dp); Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                Text(if (newer) t("Update to RAFIKI Pin ${latest!!.second}", "Sasisha hadi RAFIKI Pin ${latest!!.second}") else t("RAFIKI Pin ${org.rafikioutreach.pin.BuildConfig.VERSION_NAME}", "RAFIKI Pin ${org.rafikioutreach.pin.BuildConfig.VERSION_NAME}"),
+                    style = MaterialTheme.typography.titleSmall, color = C.ink, modifier = Modifier.testTag("update_title"))
+                Text(when {
+                    newer -> t("A newer app is ready. You have ${org.rafikioutreach.pin.BuildConfig.VERSION_NAME}. Your PIN and saved work stay.", "Programu mpya iko tayari. Unayo ${org.rafikioutreach.pin.BuildConfig.VERSION_NAME}. PIN yako na kazi iliyohifadhiwa vinabaki.")
+                    busy -> t("Checking for a newer app…", "Inatafuta programu mpya…")
+                    checked && latest != null -> t("You have the latest app ✓", "Una programu ya karibuni ✓")
+                    else -> t("Couldn’t check just now. Needs a signal.", "Haikuweza kuangalia sasa. Inahitaji mtandao.")
+                }, style = MaterialTheme.typography.bodySmall, color = if (newer) C.muted else if (checked && latest != null) C.ok else C.muted)
+            }
+        }
+        if (newer) {
+            Btn(t("Update the app", "Sasisha programu"), { download() }, Modifier.padding(top = 12.dp).fillMaxWidth().testTag("update_go"), icon = "upload")
+            Text(t("It downloads, then tap the file and Install (Update).", "Itapakuliwa, kisha gusa faili na Install (Update)."), style = MaterialTheme.typography.labelSmall, color = C.muted, modifier = Modifier.padding(top = 6.dp).align(Alignment.CenterHorizontally))
+        } else Row(Modifier.padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            Text(t("Check again", "Angalia tena"), style = MaterialTheme.typography.labelLarge, color = C.blue, modifier = Modifier.clip(RoundedCornerShape(10.dp)).clickable(enabled = !busy) { check() }.padding(6.dp).testTag("update_check"))
+            Text(t("Download the app again", "Pakua programu tena"), style = MaterialTheme.typography.labelLarge, color = C.blue, modifier = Modifier.clip(RoundedCornerShape(10.dp)).clickable { download() }.padding(6.dp))
         }
     }
 }

@@ -92,10 +92,15 @@ fun ProjectScreen(m: AppModel, id: String, startTab: String, back: () -> Unit) {
     Column(Modifier.fillMaxSize().onGloballyPositioned { top = it.boundsInRoot().top }.verticalScroll(rememberScrollState()).padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 110.dp)) {
         if (p.photo != null) NetImage(m.api.photoUrl(p.photo, 960), Modifier.fillMaxWidth().aspectRatio(16f / 9f).padding(vertical = 6.dp).clip(RoundedCornerShape(24.dp)).background(C.tint)) {}
 
-        // the project, on deep blue
-        Card(brush = DeepBrush, modifier = Modifier.padding(top = 6.dp)) {
-            Text(p.title, style = MaterialTheme.typography.headlineMedium, color = Color.White, modifier = Modifier.onGloballyPositioned { titleBottom = it.boundsInRoot().bottom })
-            Text(p.sub, style = MaterialTheme.typography.bodyMedium, color = Color(0xFFCFE8FA))
+        // the project: glass in light colours (like the web app), deep blue in dark and bright sun
+        val glass = C.inky
+        val fg = if (glass) C.ink else Color.White
+        val fg2 = if (glass) C.muted else Color(0xFFCFE8FA)
+        val fg3 = if (glass) C.muted else Color(0xB3FFFFFF)
+        val okc = if (glass) C.ok else Color(0xFF9BE7BC)
+        Card(brush = if (glass) null else DeepBrush, modifier = Modifier.padding(top = 6.dp)) {
+            Text(p.title, style = MaterialTheme.typography.headlineMedium, color = fg, modifier = Modifier.onGloballyPositioned { titleBottom = it.boundsInRoot().bottom })
+            Text(p.sub, style = MaterialTheme.typography.bodyMedium, color = fg2)
             val v = snap.visits[p.id]
             // the state at a glance
             val rep = snap.repairs[p.id]
@@ -104,18 +109,20 @@ fun ProjectScreen(m: AppModel, id: String, startTab: String, back: () -> Unit) {
                 v?.state == "working" -> Box(Modifier.padding(top = 8.dp)) { Tag(t("Working", "Inafanya kazi"), C.okBg, C.ok) }
                 else -> {}
             }
-            Text(p.gps?.let { it.text() + t(" · saved location", " · mahali palipohifadhiwa") } ?: t("No location saved yet.", "Bado hakuna mahali palipohifadhiwa."), style = MaterialTheme.typography.bodySmall, color = Color(0xB3FFFFFF), modifier = Modifier.padding(top = 8.dp))
+            Text(p.gps?.let { it.text() + t(" · saved location", " · mahali palipohifadhiwa") } ?: t("No location saved yet.", "Bado hakuna mahali palipohifadhiwa."), style = MaterialTheme.typography.bodySmall, color = fg3, modifier = Modifier.padding(top = 8.dp))
             Text(if (v != null) t("Last visit: ", "Ziara ya mwisho: ") + whenText(v.at) + " · " + v.by + " · " + stateName(v.state) else t("No visit recorded in the app yet.", "Bado hakuna ziara iliyorekodiwa kwenye programu."),
-                style = MaterialTheme.typography.bodySmall, color = Color(0xB3FFFFFF))
-            if (snap.confirmed.contains(p.id)) Text(t("Location confirmed by the office", "Mahali pamethibitishwa na ofisi"), color = Color(0xFF9BE7BC), style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(top = 4.dp))
+                style = MaterialTheme.typography.bodySmall, color = fg3)
+            if (snap.confirmed.contains(p.id)) Text(t("Location confirmed by the office", "Mahali pamethibitishwa na ofisi"), color = okc, style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(top = 4.dp))
             if (snap.admin && p.gps != null) {
                 val scope = rememberScope(); var cm by remember(p.id) { mutableStateOf<String?>(null) }
                 val on = snap.confirmed.contains(p.id)
-                Text(if (on) t("Unlock this location", "Ondoa uthibitisho wa mahali") else t("Confirm this location", "Thibitisha mahali hapa"), color = Color.White, style = MaterialTheme.typography.labelLarge,
-                    modifier = Modifier.padding(top = 8.dp).clip(RoundedCornerShape(99.dp)).background(Color(0x26FFFFFF)).clickable(role = Role.Button) {
-                        scope.launch { val x = m.api.admin(JSONObject().put("action", "confirm").put("id", p.id).put("on", !on)); if (x.ok) m.reload() else cm = org.rafikioutreach.pin.data.reasonText(x.reason) }
-                    }.padding(horizontal = 14.dp, vertical = 10.dp))
-                cm?.let { Text(it, color = Color(0xFFFFE1DD), style = MaterialTheme.typography.bodySmall) }
+                val act = { scope.launch { val x = m.api.admin(JSONObject().put("action", "confirm").put("id", p.id).put("on", !on)); if (x.ok) m.reload() else cm = org.rafikioutreach.pin.data.reasonText(x.reason) }; Unit }
+                if (glass) Row(Modifier.padding(top = 6.dp).clip(RoundedCornerShape(10.dp)).clickable(role = Role.Button) { act() }.padding(vertical = 6.dp, horizontal = 2.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Ic.get("lock"), null, tint = C.blue2, modifier = Modifier.size(18.dp)); Spacer(Modifier.width(8.dp))
+                    Text(if (on) t("Unlock this location", "Ondoa uthibitisho wa mahali") else t("Confirm this location", "Thibitisha mahali hapa"), color = C.blue2, style = MaterialTheme.typography.titleSmall)
+                } else Text(if (on) t("Unlock this location", "Ondoa uthibitisho wa mahali") else t("Confirm this location", "Thibitisha mahali hapa"), color = Color.White, style = MaterialTheme.typography.labelLarge,
+                    modifier = Modifier.padding(top = 8.dp).clip(RoundedCornerShape(99.dp)).background(Color(0x26FFFFFF)).clickable(role = Role.Button) { act() }.padding(horizontal = 14.dp, vertical = 10.dp))
+                cm?.let { Text(it, color = if (glass) C.bad else Color(0xFFFFE1DD), style = MaterialTheme.typography.bodySmall) }
             }
             if (here != null && p.gps != null) {
                 val d = Geo.metres(here, p.gps)
@@ -124,23 +131,23 @@ fun ProjectScreen(m: AppModel, id: String, startTab: String, back: () -> Unit) {
                     if (far) t("You’re ${Geo.dist(d, m.prefs.miles)} from the saved point · head ${Geo.heading(here, p.gps)}. If you’re standing at the site, the saved location may be wrong.",
                         "Uko ${Geo.dist(d, m.prefs.miles)} kutoka mahali palipohifadhiwa · elekea ${Geo.heading(here, p.gps)}. Kama uko kwenye eneo, huenda mahali palipohifadhiwa si sahihi.")
                     else t("You’re ${Geo.dist(d, m.prefs.miles)} away · head ${Geo.heading(here, p.gps)}", "Uko umbali wa ${Geo.dist(d, m.prefs.miles)} · elekea ${Geo.heading(here, p.gps)}"),
-                    color = if (far) Color(0xFFFFE1DD) else Color.White, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                    modifier = Modifier.padding(top = 10.dp).fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(if (far) Color(0x33FF786E) else Color(0x21FFFFFF)).padding(12.dp),
+                    color = if (glass) (if (far) C.bad else C.ink) else if (far) Color(0xFFFFE1DD) else Color.White, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                    modifier = Modifier.padding(top = 10.dp).fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(if (glass) (if (far) C.badBg else Color(0x140A78C2)) else if (far) Color(0x33FF786E) else Color(0x21FFFFFF)).padding(12.dp),
                 )
                 Row(Modifier.padding(top = 6.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Box(Modifier.size(8.dp).clip(CircleShape).background(Color(0xFF9BE7BC))); Spacer(Modifier.width(6.dp))
-                    Text(t("Live · GPS ±${fix!!.acc} m", "Moja kwa moja · GPS ±${fix!!.acc} m"), color = Color(0xFF9BE7BC), style = MaterialTheme.typography.labelSmall)
+                    Box(Modifier.size(8.dp).clip(CircleShape).background(okc)); Spacer(Modifier.width(6.dp))
+                    Text(t("Live · GPS ±${fix!!.acc} m", "Moja kwa moja · GPS ±${fix!!.acc} m"), color = okc, style = MaterialTheme.typography.labelSmall)
                 }
             }
             if (p.gps != null) Row(Modifier.padding(top = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 val ll = "${p.gps.lat},${p.gps.lng}"
-                MapTile(t("Directions", "Maelekezo"), "compass", Modifier.weight(1f)) {
+                MapTile(t("Directions", "Maelekezo"), "compass", Modifier.weight(1f), glass, GMAPS_ICON) {
                     runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com/maps/dir/?api=1&destination=$ll"))) }
                 }
-                MapTile("Google Maps", "map", Modifier.weight(1f)) {
+                MapTile("Google Maps", "map", Modifier.weight(1f), glass, GMAPS_ICON) {
                     runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("geo:$ll?q=$ll(${Uri.encode(p.title)})"))) }
                 }
-                MapTile(t("Share", "Shiriki"), "share", Modifier.weight(1f)) {
+                MapTile(t("Share", "Shiriki"), "share", Modifier.weight(1f), glass, null) {
                     ctx.startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, p.title + "\nhttps://www.google.com/maps?q=$ll"), null))
                 }
             }
@@ -182,16 +189,23 @@ fun ProjectScreen(m: AppModel, id: String, startTab: String, back: () -> Unit) {
 }
 
 @Composable
-private fun MapTile(label: String, icon: String, modifier: Modifier, onClick: () -> Unit) {
+private fun MapTile(label: String, icon: String, modifier: Modifier, glass: Boolean, brandIcon: String?, onClick: () -> Unit) {
     Column(
-        modifier.clip(RoundedCornerShape(16.dp)).background(Color(0x1FFFFFFF)).border(1.dp, Color(0x29FFFFFF), RoundedCornerShape(16.dp))
+        modifier.clip(RoundedCornerShape(16.dp)).background(if (glass) C.card else Color(0x1FFFFFFF)).border(1.dp, if (glass) C.line else Color(0x29FFFFFF), RoundedCornerShape(16.dp))
             .clickable(role = Role.Button, onClick = onClick).padding(vertical = 10.dp, horizontal = 4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Box(Modifier.size(38.dp).clip(RoundedCornerShape(12.dp)).background(Color.White), contentAlignment = Alignment.Center) { Icon(Ic.get(icon), null, tint = Color(0xFF0A78C2), modifier = Modifier.size(21.dp)) }
-        Text(label, color = Color.White, style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(top = 6.dp), textAlign = TextAlign.Center, maxLines = 1)
+        // the app's own coloured icon (Google Maps), as on the web; a coloured line icon when there isn't one
+        Box(Modifier.size(38.dp).clip(RoundedCornerShape(12.dp)).background(if (glass) C.tint else Color.White), contentAlignment = Alignment.Center) {
+            val hu = C.hue("near")
+            if (brandIcon != null) NetImage(brandIcon, Modifier.size(24.dp)) { Icon(Ic.get(icon), null, tint = Color(0xFF0A78C2), modifier = Modifier.size(21.dp)) }
+            else Icon(Ic.get(icon), null, tint = if (glass) hu.fg else Color(0xFF1C8A50), modifier = Modifier.size(21.dp))
+        }
+        Text(label, color = if (glass) C.ink else Color.White, style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(top = 6.dp), textAlign = TextAlign.Center, maxLines = 1)
     }
 }
+
+private const val GMAPS_ICON = "https://www.google.com/s2/favicons?domain=maps.google.com&sz=64"
 
 @Composable
 private fun RepairCard(m: AppModel, p: Project, r: org.rafikioutreach.pin.data.Repair) {

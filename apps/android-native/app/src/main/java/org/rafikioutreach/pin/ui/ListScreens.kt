@@ -177,11 +177,11 @@ private fun Legend(c: Color, t: String) {
 }
 
 @Composable
-fun Meter(f0: Float, modifier: Modifier = Modifier, light: Boolean = false) {
+fun Meter(f0: Float, modifier: Modifier = Modifier, light: Boolean = false, glass: Boolean = false) {
     val f = rememberFill(f0)
-    Box(modifier.fillMaxWidth().height(if (light) 8.dp else 10.dp).clip(RoundedCornerShape(99.dp)).background(if (light) Color(0x2EFFFFFF) else C.line)) {
-        Box(Modifier.fillMaxWidth(f.coerceIn(0f, 1f)).height(if (light) 8.dp else 10.dp).clip(RoundedCornerShape(99.dp))
-            .background(if (light) androidx.compose.ui.graphics.Brush.horizontalGradient(listOf(Color(0xFF5DB8F2), Color(0xFFBFE3FB))) else OkBrush))
+    Box(modifier.fillMaxWidth().height(if (light || glass) 8.dp else 10.dp).clip(RoundedCornerShape(99.dp)).background(if (glass) Color(0x1F0A78C2) else if (light) Color(0x2EFFFFFF) else C.line)) {
+        Box(Modifier.fillMaxWidth(f.coerceIn(0f, 1f)).height(if (light || glass) 8.dp else 10.dp).clip(RoundedCornerShape(99.dp))
+            .background(if (glass) androidx.compose.ui.graphics.Brush.horizontalGradient(listOf(Color(0xFF0A78C2), Color(0xFF47B4F5))) else if (light) androidx.compose.ui.graphics.Brush.horizontalGradient(listOf(Color(0xFF5DB8F2), Color(0xFFBFE3FB))) else OkBrush))
     }
 }
 
@@ -266,18 +266,20 @@ fun ProjectsScreen(m: AppModel, open: (String) -> Unit, planRoute: () -> Unit = 
         }
         item {
             val pinned = snap.projects.count { it.gps != null }
-            Card(brush = DeepBrush, pad = 14.dp) {
+            // light colours: glass, like the web app; dark and bright sun: deep blue
+            val glass = C.inky
+            Card(brush = if (glass) null else DeepBrush, pad = 14.dp) {
                 val n = kotlin.math.round(rememberFill(pinned.toFloat())).toInt() // counts up
-                Row { Text(t("$n of ${snap.projects.size} projects pinned", "Miradi $n kati ya ${snap.projects.size} ina mahali"), color = Color.White, style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f)); Text(t("${snap.projects.size - pinned} to go", "${snap.projects.size - pinned} zimebaki"), color = Color(0xFFCFE8FA), style = MaterialTheme.typography.bodySmall) }
-                Meter(pinned.toFloat() / maxOf(1, snap.projects.size), Modifier.padding(top = 10.dp), light = true)
+                Row { Text(t("$n of ${snap.projects.size} projects pinned", "Miradi $n kati ya ${snap.projects.size} ina mahali"), color = if (glass) C.ink else Color.White, style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f)); Text(t("${snap.projects.size - pinned} to go", "${snap.projects.size - pinned} zimebaki"), color = if (glass) C.muted else Color(0xFFCFE8FA), style = MaterialTheme.typography.bodySmall) }
+                Meter(pinned.toFloat() / maxOf(1, snap.projects.size), Modifier.padding(top = 10.dp), light = !glass, glass = glass)
                 // one meter per country, only when there is more than one country to compare
                 if (COUNTRIES.keys.count { k -> snap.projects.any { it.ck == k } } > 1) Row(Modifier.padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     COUNTRIES.forEach { (k, n) ->
                         val l = snap.projects.filter { it.ck == k }
                         if (l.isNotEmpty()) Column(Modifier.weight(1f)) {
                             val pn = l.count { it.gps != null }
-                            Text("$n $pn/${l.size}", color = Color(0xFFCFE8FA), style = MaterialTheme.typography.labelSmall, maxLines = 1)
-                            Meter(pn.toFloat() / l.size, Modifier.padding(top = 4.dp), light = true)
+                            Text("$n $pn/${l.size}", color = if (glass) C.muted else Color(0xFFCFE8FA), style = MaterialTheme.typography.labelSmall, maxLines = 1)
+                            Meter(pn.toFloat() / l.size, Modifier.padding(top = 4.dp), light = !glass, glass = glass)
                         }
                     }
                 }

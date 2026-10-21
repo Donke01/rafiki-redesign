@@ -35,6 +35,8 @@ class Api(val server: String, private val pin: () -> String, private val session
     suspend fun authExchange(code: String, verifier: String): Reply = call("POST", "/api/pin-auth/exchange", JSONObject().put("code", code).put("verifier", verifier))
     suspend fun authToken(token: String): Reply = call("POST", "/api/pin-auth/token", JSONObject().put("token", token))
     suspend fun logout(): Reply = call("POST", "/api/pin-auth/logout", JSONObject())
+    /** The newest Android app on the website: {versionCode, versionName, apk}. */
+    suspend fun appVersion(): Reply = call("GET", "/app/version.json", null)
 
     fun photoUrl(photo: String, w: Int = 480) = "$server/api/photo/${enc(photo)}?w=$w"
 
