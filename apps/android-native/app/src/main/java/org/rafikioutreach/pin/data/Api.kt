@@ -31,6 +31,8 @@ class Api(val server: String, private val pin: () -> String, private val session
     suspend fun team(): Reply = call("GET", "/api/pin?team=1", null)
     suspend fun adminGet(view: String): Reply = call("GET", "/api/admin?view=" + enc(view), null)
     suspend fun admin(body: JSONObject): Reply = call("POST", "/api/admin", body)
+    /** Office › Community: SMS / WhatsApp reports, set-up status and committee phones. */
+    suspend fun smsAdmin(): Reply = call("GET", "/api/sms-admin", null)
     suspend fun authMe(): Reply = call("GET", "/api/pin-auth/me", null)
     suspend fun authExchange(code: String, verifier: String): Reply = call("POST", "/api/pin-auth/exchange", JSONObject().put("code", code).put("verifier", verifier))
     suspend fun authToken(token: String): Reply = call("POST", "/api/pin-auth/token", JSONObject().put("token", token))
