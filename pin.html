@@ -1221,6 +1221,9 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
 /* Me & team header: the title centred, the bell on the right, Me | Team under it */
 .mehead{display:grid !important;grid-template-columns:44px 1fr 44px;align-items:center;justify-items:center;row-gap:10px}
 .mehead h1{grid-column:2;text-align:center}.mehead .bell{grid-column:3}.mehead .mesw{grid-column:1/-1}
+/* the bell sits in the app header, top right; refresh just to its left */
+.top .bell{grid-column:3;grid-row:1;justify-self:end;width:40px;height:40px;background:var(--gl2,var(--card));border:1px solid var(--glb,var(--line));box-shadow:var(--gls,none)}
+.top .bell svg{width:19px;height:19px}.top .rf{margin-right:48px !important}body.locked .top .bell{display:none}
 .bell{position:relative;width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(4,38,63,.08)}
 .bell svg{width:21px;height:21px}.bell .bn{position:absolute;top:-3px;right:-3px;min-width:19px;height:19px;padding:0 5px;border-radius:99px;background:var(--bad,#C62828);color:#FFFFFF;font-family:inherit;font-weight:800;font-size:.68rem;line-height:15px;font-style:normal;text-align:center;border:2px solid var(--card)}
 .bsh-h{display:flex;align-items:center;justify-content:center;position:relative;margin:2px 0 10px}.bsh-h h3{margin:0;text-align:center}
@@ -1433,6 +1436,7 @@ html[data-theme=sun] .lookpv,html[data-theme=sun] .lookpv .lpv{border-width:2px}
     <span class="sp"></span>
     <span class="who" id="who"></span>
     <button class="rf" id="bRefresh" type="button" aria-label="Refresh projects from monday.com" title="Refresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg></button>
+    <button class="bell" id="meBell" type="button" aria-label="Notifications"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg><i class="bn hidden" id="meBellN">0</i></button>
   </header>
   <div class="onb hidden" id="onb" role="dialog" aria-modal="true" aria-labelledby="onbT"></div>
   <div class="net" id="net" role="status">No signal. Keep working: changes are saved on this phone and sent when you're back online.</div>
@@ -1643,7 +1647,6 @@ html[data-theme=sun] .lookpv,html[data-theme=sun] .lookpv .lpv{border-width:2px}
     <!-- me -->
     <section id="vMe" class="hidden" aria-labelledby="h-me">
       <div class="mehead"><h1 id="h-me">Me &amp; team</h1>
-        <button class="bell" id="meBell" type="button" aria-label="Notifications"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg><i class="bn hidden" id="meBellN">0</i></button>
         <div class="mesw" id="meSw" role="tablist" aria-label="Me or team"><button type="button" role="tab" data-p="me" aria-selected="true">Me</button><button type="button" role="tab" data-p="team" aria-selected="false">Team</button></div></div>
       <div class="stack" id="paneMe">
         <div class="mehero" id="meHero">
@@ -2364,6 +2367,7 @@ html[data-theme=sun] .lookpv,html[data-theme=sun] .lookpv .lpv{border-width:2px}
       store.set('rfPinName', S.name); store.set('rfPinWho', S.who);
       S.projects = j.projects || []; S.repairs = j.repairs || {}; S.visits = j.visits || {}; saveList();
       if (j.me) { S.me = j.me; store.set('rfPinMe', JSON.stringify(j.me)); }
+      setTimeout(bellLoad, 0);   // the bell in the header counts what's new
       if ((j.reviewOpen || 0) > (S.reviewOpen || 0)) store.set('rfPinReviewAt', new Date().toISOString());
       S.admin = !!j.admin; S.jobs = j.jobs || []; S.assigned = j.assigned || []; S.confirmed = j.confirmed || {}; S.reviewOpen = j.reviewOpen || 0;
       store.set('rfPinRole', JSON.stringify({ admin: S.admin, jobs: S.jobs, assigned: S.assigned, confirmed: S.confirmed }));
