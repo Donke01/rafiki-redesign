@@ -303,9 +303,9 @@ class FieldToolsTest {
         put(TileSourceFactory.MAPNIK, outsideOld, now - 40 * day); put(TileSourceFactory.MAPNIK, outsideNew, now - 2 * day)
         val g = GoogleSource("Google Roadmap", "S", "K", 21)
         put(g, inside, now - 3_600_000L); put(g, outsideNew, now + day)
+        // setting keepDays also starts a tidy-up in the background, which may get there first: check what is left
         OfflineMaps.keepDays = 30
-        val gone = OfflineMaps.cleanup(now)
-        assertTrue(gone >= 1)
+        OfflineMaps.cleanup(now)
         assertTrue(w.exists(TileSourceFactory.MAPNIK.name(), inside) && w.exists(Satellite.name(), inside))
         assertFalse(w.exists(TileSourceFactory.MAPNIK.name(), outsideOld))
         assertTrue(w.exists(TileSourceFactory.MAPNIK.name(), outsideNew))
