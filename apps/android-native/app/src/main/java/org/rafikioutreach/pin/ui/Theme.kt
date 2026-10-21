@@ -165,7 +165,7 @@ fun Palette.hue(key: String): Hue {
         "repairs", "office" -> "amber"
         "due" -> "teal"
         "me" -> "coral"
-        else -> "slate"
+        else -> if (key in HUE_LIGHT) key else "slate"
     }
     return (if (dark) HUE_DARK else HUE_LIGHT).getValue(name)
 }

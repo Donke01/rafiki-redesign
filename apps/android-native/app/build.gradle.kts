@@ -12,8 +12,8 @@ android {
         applicationId = "org.rafikioutreach.pin"
         minSdk = 24
         targetSdk = 35
-        versionCode = 29
-        versionName = "2.12.7"
+        versionCode = 30
+        versionName = "2.12.8"
         buildConfigField("String", "SERVER", "\"https://rafiki-redesign.pages.dev\"")
     }
     signingConfigs {

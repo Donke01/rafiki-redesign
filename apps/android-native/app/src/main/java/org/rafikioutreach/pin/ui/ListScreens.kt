@@ -334,7 +334,7 @@ fun ProjectRow(m: AppModel, s: Snapshot, p: Project, here: LatLng?, onClick: () 
         verticalAlignment = Alignment.CenterVertically,
     ) {
         NetImage(p.photo?.let { m.api.photoUrl(it) }, Modifier.size(46.dp).clip(RoundedCornerShape(14.dp)).background(boxBg)) {
-            Icon(Ic.get("drop"), null, tint = boxFg, modifier = Modifier.size(22.dp))
+            Icon(Ic.get(typeLook(p).first), null, tint = boxFg, modifier = Modifier.size(22.dp))
         }
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {

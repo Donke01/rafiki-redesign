@@ -194,6 +194,20 @@ fun Brand(domain: String, size: androidx.compose.ui.unit.Dp, fallback: String, t
 val MondayBlue = Color(0xFF6161FF)
 val WhatsAppGreen = Color(0xFF25D366)
 
+/** The icon and colour for a kind of project: water, school, clinic, children's home, farm, building site. */
+fun typeLook(p: org.rafikioutreach.pin.data.Project): Pair<String, String> {
+    val t = p.type.lowercase()
+    return when {
+        "borehole" in t || "collection" in t -> "drop" to "blue"
+        "under construction" in p.status.lowercase() -> "brick" to "amber"
+        "school" in t -> "school" to "purple"
+        "health" in t -> "cross" to "coral"
+        "orphan" in t -> "house" to "teal"
+        "farm" in t -> "leaf" to "green"
+        else -> "house" to "slate"
+    }
+}
+
 val Pad = PaddingValues(horizontal = 16.dp)
 val Bordered = BorderStroke(1.dp, Color.Transparent)
 

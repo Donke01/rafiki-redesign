@@ -11,6 +11,7 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -97,6 +98,34 @@ class OfficeTest {
         assertEquals(2, legs.size)
         assertTrue(legs[0].second.contains("waypoints=") && legs[0].second.contains("destination=0.000000,0.100000"))
         assertTrue(legs[1].second.contains("origin=0.000000,0.100000"))
+    }
+
+    @Test fun office_cleanup() {
+        Lang.sw = false
+        fun p(id: String, t: String, type: String, area: String, gps: JSONArray?, status: String = "Completed") = JSONObject().put("id", id).put("title", t).put("country", "Kenya").put("ck", "ke").put("area", area)
+            .put("type", type).put("status", status).put("pump", "").apply { if (gps != null) put("gps", gps) }
+        val same = { JSONArray().put(0.4012).put(35.2201) }
+        val ps = JSONArray().put(p("1", "ACK St John's Sigowet Church", "Borehole well", "Sigowet", null)).put(p("2", "AIC Tapsagoi High School", "School", "Tapsagoi", null))
+            .put(p("3", "Calvary Church Magara", "Borehole well", "Magara, Manyara", null)).put(p("4", "Gichameda Majengo", "Water collection", "Babati", null))
+            .put(p("5", "Gichameda Msikitini", "Borehole well", "Babati", null)).put(p("6", "Chepkongi Dispensary - Incinerator", "Health", "Kapsaret, Eldoret", same()))
+            .put(p("7", "Chepkongi Dispensary - Well & Tower", "Borehole well", "Kapsaret, Eldoret", same())).put(p("8", "Chepkongi Primary School - Paint", "School", "Kapsaret, Eldoret", same()))
+            .put(p("9", "Kaptebee Pigsty", "Farming", "Kaptebee", JSONArray().put(0.2).put(35.1))).put(p("10", "Mtakuja Village", "Borehole well", "Mtakuja", JSONArray().put(35.1).put(0.2)))
+            .put(p("11", "Nzoia Bridge Primary School - 6 Classrooms", "School", "Bungoma", JSONArray().put(0.56).put(34.6), "Under construction"))
+        val snap = snapshot().put("projects", ps).put("repairs", JSONObject())
+        org.rafikioutreach.pin.ui.Onb.enabled = false
+        val app = ApplicationProvider.getApplicationContext<Application>()
+        Prefs(app).apply { pin = "9999"; name = "Reid Anderson"; saveSnapshot(snap); filter = "all" }
+        val m = AppModel(app)
+        m.api.transport = { method, url, _, _ -> when { url.contains("activity=1") -> 200 to "{\"ok\":true,\"activity\":[]}"; url.contains("pin-auth/me") -> 200 to "{\"ok\":true,\"available\":false}"; method == "GET" -> 200 to snap.toString(); else -> 200 to "{\"ok\":true}" } }
+        show(m)
+        rule.onNodeWithTag("nav_office").performClick(); rule.waitForIdle()
+        rule.onNodeWithTag("o_cleanup").performScrollTo().performClick(); rule.waitForIdle()
+        rule.mainClock.advanceTimeBy(1500)
+        rule.onNodeWithTag("clean_0").performScrollTo(); shot("28-cleanup-top")
+        rule.onAllNodesWithText("3 projects at 0.4012, 35.2201", substring = true).onFirst().assertExists()
+        rule.onNodeWithTag("clean_2").performScrollTo(); shot("29-cleanup-same-point")
+        rule.onAllNodesWithTag("clean_more").onFirst().performScrollTo().performClick(); rule.waitForIdle()
+        rule.onNodeWithText("Gichameda Msikitini").assertExists()
     }
 
     @Test fun office_overview_repairs_review_team() {

@@ -3,6 +3,9 @@ package org.rafikioutreach.pin.ui
 import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.foundation.layout.*
 import androidx.compose.ui.text.withStyle
@@ -575,17 +578,82 @@ private fun Cleanup(s: Snapshot, open: (String) -> Unit) {
         Triple(t("No photo", "Hakuna picha"), t("Add a photo to the “Photos of the project” column in monday.com.", "Ongeza picha kwenye safu ya “Photos of the project” katika monday.com."), s.projects.filter { it.photo == null }),
         Triple(t("No visit for over a year", "Hakuna ziara kwa zaidi ya mwaka"), t("Only visits made with the app are known.", "Ziara zilizofanywa kwa programu tu ndizo zinajulikana."), s.projects.filter { it.gps != null && ageDays(s, it) > 365 }),
     )
-    lists.forEach { (title, hint, rows) ->
-        var openList by remember(title) { mutableStateOf(false) }
-        Card(Modifier.padding(top = 10.dp)) {
-            Row(Modifier.clickable { openList = !openList }, verticalAlignment = Alignment.CenterVertically) {
-                Text(title, style = MaterialTheme.typography.titleSmall, color = C.ink, modifier = Modifier.weight(1f))
-                Tag("${rows.size}", if (rows.isEmpty()) C.okBg else C.warnBg, if (rows.isEmpty()) C.ok else C.warn)
+    val looks = listOf("pinq" to "blue", "globe" to "coral", "copy" to "amber", "camera" to "purple", "clock" to "teal")
+    val tags: List<(Project) -> String?> = listOf(
+        { null },
+        { p -> "%.4f, %.4f".format(p.gps!!.lat, p.gps.lng) },
+        { null },
+        { null },
+        { p -> s.visits[p.id]?.at?.let { checkedAgo(it) } },
+    )
+    lists.forEachIndexed { i, (title, hint, rows) ->
+        var more by remember(title) { mutableStateOf(false) }
+        val hu = C.hue(looks[i].second)
+        Card(Modifier.padding(top = 12.dp).rise(i).testTag("clean_$i"), pad = 16.dp) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconTile(looks[i].first, hu.fg, hu.bg, 42.dp); Spacer(Modifier.width(12.dp))
+                Column(Modifier.weight(1f)) {
+                    Text(title, style = MaterialTheme.typography.titleSmall, color = C.ink)
+                    Text(hint, style = MaterialTheme.typography.bodySmall, color = C.muted)
+                }
+                Spacer(Modifier.width(8.dp))
+                if (rows.isEmpty()) Tag("✓", C.okBg, C.ok) else Tag("${rows.size}", hu.bg, hu.fg)
             }
-            Text(hint, style = MaterialTheme.typography.bodySmall, color = C.muted)
-            if (openList) rows.take(60).forEach { p -> Text(p.title + " · " + p.sub, style = MaterialTheme.typography.bodyMedium, color = C.blue2, modifier = Modifier.padding(top = 8.dp).clickable { open(p.id) }) }
-            else if (rows.isNotEmpty()) Text(t("Show", "Onyesha"), color = C.blue2, style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(top = 6.dp).clickable { openList = true })
+            if (rows.isEmpty()) {
+                Text(t("All good here.", "Hakuna tatizo hapa."), style = MaterialTheme.typography.labelLarge, color = C.ok, modifier = Modifier.padding(top = 10.dp))
+                return@Card
+            }
+            Spacer(Modifier.height(8.dp))
+            if (i == 2) {
+                // same point: the projects that share it, together
+                val groups = rows.groupBy { "%.4f, %.4f".format(it.gps!!.lat, it.gps.lng) }.entries.toList()
+                (if (more) groups else groups.take(2)).forEach { (pt, ps) ->
+                    Row(Modifier.padding(top = 10.dp, bottom = 2.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Ic.get("pin"), null, tint = hu.fg, modifier = Modifier.size(14.dp)); Spacer(Modifier.width(6.dp))
+                        Text(t("${ps.size} projects at $pt", "Miradi ${ps.size} mahali $pt"), style = MaterialTheme.typography.labelMedium, color = hu.fg)
+                    }
+                    Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).border(1.dp, C.line, RoundedCornerShape(16.dp))) {
+                        ps.forEachIndexed { j, p -> if (j > 0) HorizontalDivider(color = C.line); CleanRow(p, null) { open(p.id) } }
+                    }
+                }
+                if (groups.size > 2) MoreBtn(more, groups.size) { more = !more }
+            } else {
+                Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).border(1.dp, C.line, RoundedCornerShape(16.dp))) {
+                    (if (more) rows.take(120) else rows.take(4)).forEachIndexed { j, p -> if (j > 0) HorizontalDivider(color = C.line); CleanRow(p, tags[i](p)) { open(p.id) } }
+                }
+                if (rows.size > 4) MoreBtn(more, rows.size) { more = !more }
+            }
         }
+    }
+}
+
+private fun checkedAgo(iso: String): String = runCatching {
+    val days = java.time.Duration.between(java.time.Instant.parse(iso), java.time.Instant.now()).toDays()
+    if (days >= 365) t("${days / 365} yr ago", "mwaka ${days / 365} uliopita") else t("$days days ago", "siku $days zilizopita")
+}.getOrDefault("")
+
+/** One project in a clean-up list: its kind, name, where it is, and what to fix. */
+@Composable
+private fun CleanRow(p: Project, tag: String?, onClick: () -> Unit) {
+    val (ic, hk) = typeLook(p); val hu = C.hue(hk)
+    Row(Modifier.fillMaxWidth().clickable(onClick = onClick).padding(horizontal = 12.dp, vertical = 10.dp).testTag("clean_row"), verticalAlignment = Alignment.CenterVertically) {
+        IconTile(ic, hu.fg, hu.bg, 36.dp); Spacer(Modifier.width(12.dp))
+        Column(Modifier.weight(1f)) {
+            Text(p.title, style = MaterialTheme.typography.titleSmall.copy(fontSize = 14.5.sp), color = C.ink, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            Text(listOf(p.area, p.country).filter { it.isNotBlank() }.joinToString(" · "), style = MaterialTheme.typography.bodySmall, color = C.muted, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            if (tag != null) Text(tag, style = MaterialTheme.typography.labelSmall, color = C.muted, modifier = Modifier.padding(top = 2.dp))
+        }
+        Spacer(Modifier.width(8.dp))
+        Icon(Ic.get("chev"), null, tint = C.muted, modifier = Modifier.size(18.dp))
+    }
+}
+
+@Composable
+private fun MoreBtn(more: Boolean, n: Int, onClick: () -> Unit) {
+    Row(Modifier.padding(top = 10.dp).fillMaxWidth().clip(RoundedCornerShape(99.dp)).background(C.tint).clickable(onClick = onClick).padding(vertical = 11.dp).testTag("clean_more"),
+        horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+        Text(if (more) t("Show fewer", "Onyesha machache") else t("Show all $n", "Onyesha zote $n"), style = MaterialTheme.typography.labelLarge, color = C.blue2)
+        Spacer(Modifier.width(6.dp)); Icon(Ic.get("down"), null, tint = C.blue2, modifier = Modifier.size(16.dp).rotate(if (more) 180f else 0f))
     }
 }
 

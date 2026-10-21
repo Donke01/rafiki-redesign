@@ -35,6 +35,14 @@ const CLARITY = { clear: 'clear', cloudy: 'cloudy', dirty: 'dirty or coloured' }
 const URGENCY = { urgent: 'urgent', month: 'within a month', watch: 'keep an eye on it' };
 const ECOLI = { neg: 'not found', pos: 'found' };
 const YN = { yes: 1, no: 1, unsure: 1 };
+// Projects that aren't water: what the visit is checking, the numbers counted, and who looks after it.
+const KINDS = { school: 1, health: 1, home: 1, farm: 1, building: 1, build: 1 };
+const BUILD_STATE = { working: '✅ On track', repair: '⚠️ Problems to fix', notworking: '❌ Work stopped' };
+const STAGE = { foundation: 'foundation', walls: 'walls going up', roof: 'roofing', finishing: 'finishing (plaster, floor, paint, doors, windows)', done: 'finished' };
+const NUMS = { pupils: 'pupils enrolled', teachers: 'teachers', patients: 'patients a week', staff: 'staff on duty', beds: 'beds in use', children: 'children living there',
+  carers: 'carers and staff', animals: 'animals now', born: 'born or hatched since the last visit', died: 'died since the last visit', sold: 'sold since the last visit',
+  income: 'income from sales since the last visit (KES)', users: 'people using it (estimate)', workers: 'workers on site' };
+const CARER = { school: 'Head teacher', health: 'In charge', home: 'Home manager', farm: 'Farmer', building: 'In charge', build: 'Fundi / site foreman' };
 const HOME = { KE: 'ke', TZ: 'tz', UG: 'ug', MW: 'mw' };
 
 function json(body, status) {
@@ -291,12 +299,15 @@ export async function onRequestPost({ request, env, waitUntil }) {
     }
 
     if (action === 'visit') {
-      const state = VISIT[b.state];
+      const kind = KINDS[b.kind] ? b.kind : '';
+      const state = (kind === 'build' ? BUILD_STATE : VISIT)[b.state];
       if (!state) return json({ ok: false, reason: 'bad-request' }, 400);
       const here = parseGps(Number(b.lat) + ', ' + Number(b.lng)), saved = parseGps(cur.text);
       const L = []; // one line each in the monday.com note
       const urg = URGENCY[b.urgency] && b.state !== 'working' ? b.urgency : '';
-      L.push('🩺 Site visit by ' + by + ' (RAFIKI pin app): ' + state + '.' + (urg ? ' Urgency: ' + URGENCY[urg] + '.' : ''));
+      L.push((kind === 'build' ? '🏗️ Construction visit by ' : '🩺 Site visit by ') + by + ' (RAFIKI pin app): ' + state + '.' + (urg ? ' Urgency: ' + URGENCY[urg] + '.' : ''));
+      const stage = kind === 'build' && STAGE[b.stage] ? b.stage : '';
+      if (stage) L.push('Stage: ' + STAGE[stage] + '.');
       const list = (a, n) => (Array.isArray(a) ? a : []).map(x => clean(x, 60)).filter(Boolean).slice(0, n);
       const bad = list(b.problems, 30), okk = list(b.checked, 30), other = clean(b.other, 300);
       if (bad.length || other) L.push('Problems found: ' + bad.concat(other ? [other] : []).join(', ') + '.');
@@ -323,6 +334,17 @@ export async function onRequestPost({ request, env, waitUntil }) {
         });
         if (ch.length) L.push('Since the last visit (' + new Date(prev.at).toISOString().slice(0, 10) + '): ' + ch.join('; ') + '.');
       }
+      // numbers for schools, clinics, homes, farms and building sites, compared with the last visit
+      const nIn = b.numbers && typeof b.numbers === 'object' ? b.numbers : {}, N = {};
+      Object.keys(NUMS).forEach(k => { const v = num(nIn[k], 100000000); if (v !== null) N[k] = v; });
+      if (Object.keys(N).length) {
+        L.push('Numbers: ' + Object.keys(N).map(k => NUMS[k] + ': ' + (k === 'income' ? 'KES ' + N[k].toLocaleString('en-US') : N[k])).join('; ') + '.');
+        const pn = past.filter(v => v.numbers)[0];
+        if (pn) {
+          const ch = Object.keys(N).filter(k => !['born', 'died', 'sold', 'income'].includes(k) && pn.numbers[k] != null && pn.numbers[k] !== N[k]).map(k => NUMS[k] + ' ' + pn.numbers[k] + ' → ' + N[k]);
+          if (ch.length) L.push('Since the last visit (' + new Date(pn.at).toISOString().slice(0, 10) + '): ' + ch.join('; ') + '.');
+        }
+      }
       const q = b.quality && typeof b.quality === 'object' ? b.quality : {};
       const Q = { ecoli: ECOLI[q.ecoli] ? q.ecoli : '', chlorine: num(q.chlorine, 50), ph: num(q.ph, 14), fluoride: num(q.fluoride, 50), turbidity: num(q.turbidity, 4000) };
       const qs = [];
@@ -341,6 +363,8 @@ export async function onRequestPost({ request, env, waitUntil }) {
       const fund = num(c.fund, 100000000);
       if (fund !== null) cs.push('maintenance fund: KES ' + fund.toLocaleString('en-US'));
       if (cs.length) L.push('Water committee: ' + cs.join('; ') + '.');
+      const cr = b.carer && typeof b.carer === 'object' ? b.carer : {};
+      if (kind && clean(cr.name, 80)) L.push((CARER[kind] || 'In charge') + ': ' + clean(cr.name, 80) + (clean(cr.phone, 30) ? ' (' + clean(cr.phone, 30) + ')' : '') + '.');
       // story moment
       const st = b.story && typeof b.story === 'object' ? b.story : {};
       if (clean(st.quote, 600)) L.push('Story moment: “' + clean(st.quote, 600) + '”' + (clean(st.by, 80) ? ' (' + clean(st.by, 80) + ')' : '') + '. Consent to quote and photograph: ' + (st.consent ? 'given' : 'not given') + '.');
@@ -361,7 +385,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
       if (b.state === 'working') await setRepair(env, id, null);
       else await setRepair(env, id, { state: b.state, by, at, note: clean(b.note, 300), t: title, urgency: urg, problems: bad.concat(other ? [other] : []).slice(0, 12), parts: partsNeeded, cost: cost || null });
       if (env.FEED) {
-        const rec = { at, by, state: b.state, urgency: urg, readings: parts.length ? R : null, quality: qs.length ? Q : null };
+        const rec = { at, by, state: b.state, urgency: urg, readings: parts.length ? R : null, quality: qs.length ? Q : null, kind: kind || undefined, stage: stage || undefined, numbers: Object.keys(N).length ? N : null };
         await env.FEED.put('pinvisit:' + id, JSON.stringify([rec].concat(past).slice(0, 5)));
         const lv2 = await getJson(env, 'pinlastvisit', {}); lv2[id] = { at, by, state: b.state }; await env.FEED.put('pinlastvisit', JSON.stringify(lv2));
       }
