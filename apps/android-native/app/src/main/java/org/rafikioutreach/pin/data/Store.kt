@@ -27,6 +27,8 @@ class Prefs(context: Context) {
     var updNotes: String get() = sp.getString("updNotes", "") ?: ""; set(v) = sp.edit().putString("updNotes", v).apply()
     var updSha: String get() = sp.getString("updSha", "") ?: ""; set(v) = sp.edit().putString("updSha", v).apply()
     var updAt: Long get() = sp.getLong("updAt", 0L); set(v) = sp.edit().putLong("updAt", v).apply()
+    /** "Remind me later" on the update pop-up: don't ask again before this time. */
+    var updLater: Long get() = sp.getLong("updLater", 0L); set(v) = sp.edit().putLong("updLater", v).apply()
     /** Text size: "s" small, "" normal, "l" large, "xl" larger. */
     var textSize: String get() = sp.getString("textSize", "") ?: ""; set(v) = sp.edit().putString("textSize", v).apply()
     /** Me & team: which half is showing, "me" or "team". */

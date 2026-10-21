@@ -115,6 +115,7 @@ fun MeScreen(m: AppModel, open: (String) -> Unit = {}, report: () -> Unit = {}) 
     val scroll = rememberScrollState()
     val scope = rememberScope()
     LaunchedEffect(Unit) { launch { m.loadActivity() }; launch { m.loadTeam() } }
+    LaunchedEffect(m.focusUpdate) { if (m.focusUpdate && pane != "me") { pane = "me"; m.prefs.mePane = "me" } }
     Column(Modifier.fillMaxSize().verticalScroll(scroll).padding(16.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(t("Me & team", "Mimi na timu"), style = MaterialTheme.typography.headlineLarge, color = C.ink, modifier = Modifier.weight(1f))

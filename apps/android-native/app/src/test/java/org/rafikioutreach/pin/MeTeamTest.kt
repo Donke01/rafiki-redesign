@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.test.core.app.ApplicationProvider
 import kotlinx.coroutines.runBlocking
 import org.json.JSONArray
@@ -124,7 +125,14 @@ class MeTeamTest {
         }
         rule.setContent { RafikiTheme(dark = false) { Box(Modifier.size(390.dp, 844.dp)) { App(m) } } }
         rule.waitUntil(8000) { rule.onAllNodesWithTag("hav").fetchSemanticsNodes().isNotEmpty() }
+        // the pop-up: Remind me later puts it off until tomorrow
         rule.mainClock.advanceTimeBy(2000)
+        rule.waitUntil(8000) { rule.onAllNodesWithTag("update_prompt").fetchSemanticsNodes().isNotEmpty() }
+        rule.onNodeWithText("Version 9.9", substring = true).assertExists()
+        shotNode("update_prompt", "68-update-popup")
+        rule.onNodeWithTag("update_prompt_later").performClick(); rule.waitForIdle()
+        rule.onAllNodesWithTag("update_prompt").assertCountEquals(0)
+        assert(m.prefs.updLater > System.currentTimeMillis() + 23 * 3600_000L)
         rule.onNodeWithTag("hav").performClick()
         rule.waitUntil(8000) { rule.onAllNodesWithTag("update_go").fetchSemanticsNodes().isNotEmpty() }
         rule.onNodeWithTag("update_title").assertTextEquals("Update available · 9.9")
@@ -132,6 +140,13 @@ class MeTeamTest {
         rule.onNodeWithTag("app_update").performScrollTo(); shot("65-app-update")
         rule.onNodeWithTag("update_row").performScrollTo(); shot("66-update-row")
         rule.onNodeWithTag("update_status", useUnmergedTree = true).assertTextEquals("Update available · 9.9")
+        // Check finds the update: the screen moves up to the update card
+        rule.onNodeWithTag("app_update").assertIsNotDisplayed()
+        rule.onNodeWithTag("update_check").performClick()
+        rule.mainClock.advanceTimeBy(2500); rule.waitForIdle()
+        rule.waitUntil(5000) { !m.focusUpdate }
+        rule.mainClock.advanceTimeBy(600); rule.waitForIdle()
+        rule.onNodeWithTag("app_update").assertIsDisplayed(); shot("69-check-scrolls-up")
         // Samsung's Auto Blocker cancels the install: explain it and link to the setting
         val U = org.rafikioutreach.pin.data.Updater
         U.samsung = false; U.setState(org.rafikioutreach.pin.data.Updater.State.Failed("aborted")); rule.waitForIdle()
@@ -140,6 +155,64 @@ class MeTeamTest {
         rule.onNodeWithTag("auto_blocker").performScrollTo(); rule.onNodeWithTag("auto_blocker_open").assertExists(); shot("67-auto-blocker")
         U.samsung = false; U.reset()
         org.rafikioutreach.pin.ui.Motion.on = true
+    }
+
+    @Test fun popup_update_now() {
+        org.rafikioutreach.pin.ui.Motion.on = false
+        val app = ApplicationProvider.getApplicationContext<Application>()
+        Prefs(app).apply { pin = "9999"; name = "Meril Kiprop"; saveSnapshot(snapshot()); filter = "all"; onb = true; country = ""; lang = "en"; mePane = "team" }
+        Lang.sw = false
+        val m = AppModel(app); Onb.enabled = false
+        m.api.transport = { _, url, _, _ ->
+            when {
+                url.contains("/app/version.json") -> 200 to "{\"ok\":true,\"versionCode\":99,\"versionName\":\"9.9\",\"notes\":\"Office map and faster sync.\"}"
+                url.contains("activity=1") -> 200 to "{\"ok\":true,\"activity\":[]}"
+                url.contains("team=1") -> 200 to "{\"ok\":true,\"team\":[]}"
+                url.contains("pin-auth/me") -> 200 to "{\"ok\":true,\"available\":false}"
+                else -> 200 to snapshot().toString()
+            }
+        }
+        var asked: String? = null
+        org.rafikioutreach.pin.data.Updater.fake = { asked = it }
+        rule.setContent { RafikiTheme(dark = false) { Box(Modifier.size(390.dp, 844.dp)) { App(m) } } }
+        rule.waitUntil(8000) { rule.onAllNodesWithTag("hav").fetchSemanticsNodes().isNotEmpty() }
+        rule.mainClock.advanceTimeBy(2000)
+        rule.waitUntil(8000) { rule.onAllNodesWithTag("update_prompt").fetchSemanticsNodes().isNotEmpty() }
+        // Update now: goes to Me (even from the Team side), shows the card and starts the download
+        rule.onNodeWithTag("update_prompt_go").performClick()
+        rule.mainClock.advanceTimeBy(1000); rule.waitForIdle()
+        rule.waitUntil(5000) { asked != null }
+        rule.onAllNodesWithTag("update_prompt").assertCountEquals(0)
+        rule.onNodeWithTag("app_update").assertIsDisplayed()
+        assertEquals(org.rafikioutreach.pin.BuildConfig.SERVER + "/app/rafiki-pin.apk", asked)
+        org.rafikioutreach.pin.data.Updater.fake = null
+        org.rafikioutreach.pin.ui.Motion.on = true
+    }
+
+    @Test fun popup_close_and_later() {
+        val app = ApplicationProvider.getApplicationContext<Application>()
+        Prefs(app).apply { pin = "9999"; name = "Meril Kiprop"; saveSnapshot(snapshot()); onb = true; lang = "en"; updCode = 99; updName = "9.9"; updAt = System.currentTimeMillis(); updLater = System.currentTimeMillis() + 3600_000L }
+        Lang.sw = false
+        val m = AppModel(app); Onb.enabled = false
+        m.api.transport = { _, _, _, _ -> 200 to snapshot().toString() }
+        rule.setContent { RafikiTheme(dark = false) { Box(Modifier.size(390.dp, 844.dp)) { App(m) } } }
+        rule.waitUntil(8000) { rule.onAllNodesWithTag("hav").fetchSemanticsNodes().isNotEmpty() }
+        rule.mainClock.advanceTimeBy(3000); rule.waitForIdle()
+        rule.onAllNodesWithTag("update_prompt").assertCountEquals(0)   // "Remind me later" still running
+        m.prefs.updLater = 0L; m.updPromptClosed = false
+        m.checkUpdateDaily()
+    }
+
+    private fun shotNode(tag: String, name: String) {
+        rule.mainClock.advanceTimeBy(700); rule.waitForIdle()
+        rule.onNodeWithTag(tag).assertExists()
+        // the pop-up is its own window: draw the app, dim it, then draw the pop-up's window on top
+        val v = rule.activity.window.decorView
+        val b = Bitmap.createBitmap(v.width, v.height, Bitmap.Config.ARGB_8888); val c = Canvas(b); v.draw(c)
+        c.drawColor(0x99000000.toInt())
+        val d = org.robolectric.shadows.ShadowDialog.getLatestDialog()?.window?.decorView ?: return
+        c.save(); c.translate(((v.width - d.width) / 2).toFloat(), ((v.height - d.height) / 2).toFloat()); d.draw(c); c.restore()
+        File(out, "$name.png").outputStream().use { b.compress(Bitmap.CompressFormat.PNG, 100, it) }
     }
 
     @Test fun whatsapp_numbers() {

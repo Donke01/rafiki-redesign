@@ -46,10 +46,13 @@ object Updater {
     /** Security settings, where Samsung lists Auto Blocker (Android has no direct link to the Auto Blocker page). */
     fun securityIntent() = Intent(android.provider.Settings.ACTION_SECURITY_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     internal fun setState(s: State) { _state.value = s }
+    /** Tests: called instead of downloading. */
+    internal var fake: ((String) -> Unit)? = null
     fun reset() { _state.value = State.Idle }
 
     /** Downloads [url] (checking [sha256] when given), then installs it. */
     suspend fun run(ctx: Context, url: String, sha256: String?) {
+        fake?.let { it(url); return }
         cancelled = false
         val out = file(ctx)
         val ok = withContext(Dispatchers.IO) {

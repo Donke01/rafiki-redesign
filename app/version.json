@@ -1,1 +1,1 @@
-{"ok": true, "versionCode": 28, "versionName": "2.12.6", "notes": "On Samsung phones, explains when Auto Blocker stops an update and opens the setting.", "sha256": "a019dc89e5029ab4a810250f2b7e9f02f6bc78cb22226c208e384e8493223c95", "apk": "/app/rafiki-pin.apk"}
+{"ok": true, "versionCode": 29, "versionName": "2.12.7", "notes": "A pop-up tells you when an update is ready (Update now, Remind me later or close), and Check takes you straight to the update.", "sha256": "68406c673ca6541abc91e22959a5192dda38c5c30ed87ac8663f1041d5481f39", "apk": "/app/rafiki-pin.apk"}

@@ -4,6 +4,7 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -236,6 +237,7 @@ private fun checkedText(at: Long): String {
 }
 
 /** Me, near the top, only when a newer app is on the website: what's new, then download and install right here. */
+@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
 fun UpdateCard(m: AppModel) {
     val u by m.update.collectAsState()
@@ -246,13 +248,21 @@ fun UpdateCard(m: AppModel) {
     val scope = rememberScope()
     val U = org.rafikioutreach.pin.data.Updater
     fun start() { scope.launch { U.run(ctx.applicationContext, org.rafikioutreach.pin.BuildConfig.SERVER + "/app/rafiki-pin.apk", up.sha256) } }
+    // brought into view when "Check" finds an update or the pop-up's "Update now" is tapped
+    val seen = remember { androidx.compose.foundation.relocation.BringIntoViewRequester() }
+    var glow by remember { mutableStateOf(false) }
+    LaunchedEffect(m.focusUpdate, m.updateGo) {
+        if (m.updateGo) { m.updateGo = false; if (st is org.rafikioutreach.pin.data.Updater.State.Idle || st is org.rafikioutreach.pin.data.Updater.State.Failed) start() }
+        if (m.focusUpdate) { kotlinx.coroutines.delay(250); seen.bringIntoView(); m.focusUpdate = false; glow = true; kotlinx.coroutines.delay(1400); glow = false }
+    }
+    val ring by androidx.compose.animation.animateColorAsState(if (glow) Color(0xFF47B4F5) else Color.Transparent, androidx.compose.animation.core.tween(if (Motion.on) 450 else 0), label = "updGlow")
     // back from Android's "Install unknown apps" setting: carry on by itself
     val owner = androidx.compose.ui.platform.LocalLifecycleOwner.current
     DisposableEffect(owner) {
         val o = androidx.lifecycle.LifecycleEventObserver { _, e -> if (e == androidx.lifecycle.Lifecycle.Event.ON_RESUME && U.state.value is org.rafikioutreach.pin.data.Updater.State.NeedsPermission && U.allowed(ctx)) U.install(ctx.applicationContext) }
         owner.lifecycle.addObserver(o); onDispose { owner.lifecycle.removeObserver(o) }
     }
-    Card(Modifier.padding(top = 14.dp).testTag("app_update"), border = C.blue) {
+    Card(Modifier.padding(top = 14.dp).bringIntoViewRequester(seen).border(3.dp, ring, RoundedCornerShape(24.dp)).testTag("app_update"), border = C.blue) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             val hu = C.hue("pin"); IconTile("upload", hu.fg, hu.bg, 40.dp); Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
@@ -312,6 +322,41 @@ fun UpdateCard(m: AppModel) {
     }
 }
 
+/** Pops up over the app when a newer version is ready: Update now, Remind me later (tomorrow), or ✕ (until the app is opened again). */
+@Composable
+fun UpdatePrompt(m: AppModel, ready: Boolean) {
+    val u by m.update.collectAsState()
+    val st by org.rafikioutreach.pin.data.Updater.state.collectAsState()
+    var show by remember { mutableStateOf(false) }
+    LaunchedEffect(ready, u?.code) {
+        show = false
+        if (ready && !m.updPromptClosed && System.currentTimeMillis() >= m.prefs.updLater && st is org.rafikioutreach.pin.data.Updater.State.Idle) { kotlinx.coroutines.delay(1200); show = true }
+    }
+    val up = u ?: return
+    if (!show) return
+    fun close() { show = false; m.updPromptClosed = true }
+    androidx.compose.ui.window.Dialog(onDismissRequest = { close() }) {
+        Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(28.dp)).background(C.card).testTag("update_prompt")) {
+            Box(Modifier.fillMaxWidth().background(Brush.linearGradient(listOf(Color(0xFF0A78C2), Color(0xFF054F81), Color(0xFF04263F)))).padding(20.dp)) {
+                Column {
+                    Box(Modifier.size(52.dp).clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.16f)), contentAlignment = Alignment.Center) { Icon(Ic.get("upload"), null, tint = Color.White, modifier = Modifier.size(26.dp)) }
+                    Text(t("A new RAFIKI Pin is ready", "RAFIKI Pin mpya iko tayari"), style = MaterialTheme.typography.titleLarge, color = Color.White, modifier = Modifier.padding(top = 14.dp))
+                    Text(t("Version ${up.name} · you have ${org.rafikioutreach.pin.BuildConfig.VERSION_NAME}", "Toleo ${up.name} · unayo ${org.rafikioutreach.pin.BuildConfig.VERSION_NAME}"), style = MaterialTheme.typography.labelLarge, color = Color(0xFFCFE8FA), modifier = Modifier.padding(top = 4.dp))
+                }
+                Box(Modifier.align(Alignment.TopEnd).size(36.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.16f)).clickable(role = Role.Button) { close() }
+                    .semantics { contentDescription = t("Close", "Funga") }.testTag("update_prompt_close"), contentAlignment = Alignment.Center) { Icon(Ic.get("x"), null, tint = Color.White, modifier = Modifier.size(18.dp)) }
+            }
+            Column(Modifier.padding(20.dp)) {
+                Text(t("What’s new", "Kipya"), style = MaterialTheme.typography.labelLarge, color = C.muted)
+                Text(up.notes.ifBlank { t("Fixes and improvements.", "Marekebisho na maboresho.") }, style = MaterialTheme.typography.bodyMedium, color = C.ink, modifier = Modifier.padding(top = 4.dp))
+                Text(t("Downloads right here in the app. Your PIN and saved work stay.", "Inapakuliwa hapa hapa kwenye programu. PIN yako na kazi iliyohifadhiwa vinabaki."), style = MaterialTheme.typography.labelSmall, color = C.muted, modifier = Modifier.padding(top = 10.dp))
+                Btn(t("Update now", "Sasisha sasa"), { show = false; m.updPromptClosed = true; m.updateGo = true; m.focusUpdate = true; m.goTab = "me" }, Modifier.padding(top = 16.dp).fillMaxWidth().testTag("update_prompt_go"), icon = "upload")
+                Btn(t("Remind me later", "Nikumbushe baadaye"), { show = false; m.updPromptClosed = true; m.prefs.updLater = System.currentTimeMillis() + 24 * 3600_000L }, Modifier.padding(top = 10.dp).fillMaxWidth().testTag("update_prompt_later"), light = true)
+            }
+        }
+    }
+}
+
 /** Me, at the bottom: App updates · up to date · when it was checked · Check for updates. */
 @Composable
 fun UpdateRow(m: AppModel) {
@@ -337,7 +382,7 @@ fun UpdateRow(m: AppModel) {
             }
             Spacer(Modifier.width(8.dp))
             Row(Modifier.clip(RoundedCornerShape(99.dp)).background(C.tint).clickable(enabled = !busy, role = Role.Button) {
-                busy = true; failed = false; scope.launch { failed = !m.checkUpdate(); busy = false }
+                busy = true; failed = false; scope.launch { failed = !m.checkUpdate(); busy = false; if (m.updateReady) m.focusUpdate = true }
             }.padding(horizontal = 12.dp, vertical = 9.dp).testTag("update_check"), verticalAlignment = Alignment.CenterVertically) {
                 if (busy) androidx.compose.material3.CircularProgressIndicator(Modifier.size(14.dp), strokeWidth = 2.dp, color = C.blue)
                 else Icon(Ic.get("refresh"), null, tint = C.blue, modifier = Modifier.size(15.dp))

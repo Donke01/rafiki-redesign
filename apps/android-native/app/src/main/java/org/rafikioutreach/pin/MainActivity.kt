@@ -164,6 +164,7 @@ fun Shell(m: AppModel) {
     LaunchedEffect(goTab) { if (goTab != null) { tab(goTab); m.goTab = null } }
     val sub = here.project != null || here.sub != null
     val hp = org.rafikioutreach.pin.ui.rememberHaptics()
+    org.rafikioutreach.pin.ui.UpdatePrompt(m, updReady)
 
     Column(Modifier.fillMaxSize()) {
         // app header: you (or back), the wordmark, refresh

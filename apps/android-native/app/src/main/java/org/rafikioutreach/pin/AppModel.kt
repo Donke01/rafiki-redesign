@@ -89,6 +89,12 @@ class AppModel(app: Application) : AndroidViewModel(app) {
     /** Me → "Show the welcome screens again", and where to go when the welcome ends. */
     var replayOnb by androidx.compose.runtime.mutableStateOf(false)
     var goTab by androidx.compose.runtime.mutableStateOf<String?>(null)
+    /** Me: scroll to the update card (after "Check" finds one, or "Update now" on the pop-up). */
+    var focusUpdate by androidx.compose.runtime.mutableStateOf(false)
+    /** The update card should start downloading as soon as it shows ("Update now" on the pop-up). */
+    var updateGo by androidx.compose.runtime.mutableStateOf(false)
+    /** The update pop-up was closed with ✕: not again until the app is opened next time. */
+    var updPromptClosed by androidx.compose.runtime.mutableStateOf(false)
     /** "You’re at …" banners closed with ×, until the app is closed. */
     val dismissed = androidx.compose.runtime.mutableStateListOf<String>()
     /** A short title for the top bar while a screen's big title is scrolled away. */
