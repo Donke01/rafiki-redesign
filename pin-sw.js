@@ -2,7 +2,7 @@
 // signal. Data (/api/*) is never cached here: changes wait in the app's own outbox instead.
 // Map tiles already seen are kept too (offline areas and the storage limit: see the end of this file), so a site
 // visited before still shows a map.
-var APP = 'rafiki-pin-app-v50', TILES = 'rafiki-pin-tiles-v1';
+var APP = 'rafiki-pin-app-v51', TILES = 'rafiki-pin-tiles-v1';
 var SHELL = ['/pin', '/vendor/leaflet/leaflet.js', '/vendor/leaflet/leaflet.css', '/img/logo-dark-bold.webp', '/pin.webmanifest', '/favicon.svg', '/img/logo-light-bold.webp', '/img/pin/icon-192.png'];
 
 self.addEventListener('install', function (e) {
