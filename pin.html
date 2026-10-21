@@ -5273,7 +5273,7 @@ label.dnr-p small{display:block;color:var(--muted);font-size:.76rem;font-weight:
         var h = g.querySelector('.tm-sec[data-sec=' + l.getAttribute('data-sec') + ']'); h.querySelector('.n').textContent = n; h.hidden = l.hidden = !!q && !n;
       });
     });
-    if ($('tTest')) $('tTest').addEventListener('click', function () { msg('tTestMsg', '', tr('Sending…', 'Inatuma…')); adminApi('POST', { action: 'test-mail' }).then(function (j) { msg('tTestMsg', j.ok ? 'ok' : 'bad', j.ok ? tr('Sent ✓ Check the inbox.', 'Imetumwa ✓ Angalia barua pepe.') : j.reason === 'no-recipients' ? tr('No e-mail addresses yet.', 'Bado hakuna anwani za barua pepe.') : why(j)); }); });
+    if ($('tTest')) $('tTest').addEventListener('click', function () { msg('tTestMsg', '', tr('Sending…', 'Inatuma…')); adminApi('POST', { action: 'test-mail' }).then(function (j) { msg('tTestMsg', j.ok ? 'ok' : 'bad', j.ok ? tr('Sent ✓ Check the inbox.', 'Imetumwa ✓ Angalia barua pepe.') : j.reason === 'no-recipients' ? tr('No e-mail addresses yet.', 'Bado hakuna anwani za barua pepe.') : j.reason === 'no-mail' ? tr('E-mail is off: add RESEND_API_KEY and ALERT_FROM in Cloudflare, then redeploy.', 'Barua pepe imezimwa: ongeza RESEND_API_KEY na ALERT_FROM kwenye Cloudflare.') : j.detail ? tr('Not sent. Resend said: ', 'Haijatumwa. Resend imesema: ') + j.detail : why(j)); }); });
   }
   function tmRedraw() { if (S.view === 'vOffice' && O.tab === 'team') oNeedTeam(function () { oTeam($('oBody'), true); }); }
   // a sheet that springs up from the bottom (a centred card on a wide screen). Tap outside, drag down or Esc closes it.
