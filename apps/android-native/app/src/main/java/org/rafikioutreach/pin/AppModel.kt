@@ -308,6 +308,7 @@ class AppModel(app: Application) : AndroidViewModel(app) {
         s.copy(repairs = reps, visits = s.visits + (p.id to LastVisit(now, prefs.name, state)))
     }
     fun localFixed(p: Project) = edit { s -> s.copy(repairs = s.repairs - p.id) }
+    fun localTested(p: Project) = edit { s -> s.copy(tests = s.tests + (p.id to Instant.now().toString())) }
     private fun edit(f: (Snapshot) -> Snapshot) { _snap.value?.let { _snap.value = f(it) } }
 
     suspend fun history(id: String): Pair<List<Note>?, String?> {

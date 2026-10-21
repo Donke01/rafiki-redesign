@@ -92,6 +92,8 @@ data class Snapshot(
     val gmapsAndroid: String = "",
     /** This person: how they signed in ("app" PIN, "cloudflare" PIN, "shared" PIN, "monday") and what they set in Settings. */
     val me: Me = Me(),
+    /** When the water was last tested, by project id (ISO time): "Water test due" after 6 months. */
+    val tests: Map<String, String> = emptyMap(),
 ) {
     companion object {
         fun from(o: JSONObject): Snapshot {
@@ -114,6 +116,7 @@ data class Snapshot(
                 linked = o.optString("linked"),
                 gmapsAndroid = o.optJSONObject("gmaps")?.optString("android").orEmpty(),
                 me = o.optJSONObject("me")?.let { Me.from(it) } ?: Me(),
+                tests = o.optJSONObject("tests")?.let { j -> j.keys().asSequence().associateWith { j.optString(it) } } ?: emptyMap(),
             )
         }
     }

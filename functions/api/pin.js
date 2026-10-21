@@ -1,6 +1,7 @@
 // /api/pin: the RAFIKI pin app (/pin), for the RAFIKI team only.
 //   GET  /api/pin               → projects shown on the website (with their point and first photo),
 //                                  open repairs, and who the PIN belongs to
+//                                  (and tests: {id: when the water was last tested}, kept in KV "pintests")
 //   GET  /api/pin?id=<item>     → the last pin made with the app on that project (for undo)
 //   GET  /api/pin?history=<item>→ the latest notes on that project in monday.com, with their files
 //   GET  /api/pin?activity=1    → what the team did with the app in the last 30 days
@@ -202,7 +203,7 @@ export async function onRequestGet({ request, env, waitUntil }) {
       const mine = (await team(env)).find(p => sameName(p.name, chk.who)) || {};
       extra.me = { kind: chk.kind || '', nick: pr.nick || '', phone: pr.phone || mine.phone || '', home: pr.home || chk.home || '' };
     } else extra.me = { kind: chk.kind || 'shared', nick: '', phone: '', home: '' };
-    return json(Object.assign({ ok: true, who: chk.who, monday: !!chk.monday, linked: chk.linked || '', gmaps: env.GOOGLE_TILES_WEB_KEY || env.GOOGLE_TILES_ANDROID_KEY ? { web: env.GOOGLE_TILES_WEB_KEY || '', android: env.GOOGLE_TILES_ANDROID_KEY || '' } : null, home: chk.home || '', projects, repairs, visits: await getJson(env, 'pinlastvisit', {}) }, extra), 200);
+    return json(Object.assign({ ok: true, who: chk.who, monday: !!chk.monday, linked: chk.linked || '', gmaps: env.GOOGLE_TILES_WEB_KEY || env.GOOGLE_TILES_ANDROID_KEY ? { web: env.GOOGLE_TILES_WEB_KEY || '', android: env.GOOGLE_TILES_ANDROID_KEY || '' } : null, home: chk.home || '', projects, repairs, visits: await getJson(env, 'pinlastvisit', {}), tests: await getJson(env, 'pintests', {}) }, extra), 200);
   } catch (e) {
     console.error('pin get:', e && e.message);
     return json({ ok: false, reason: 'down' }, 502);
@@ -428,6 +429,9 @@ export async function onRequestPost({ request, env, waitUntil }) {
         const rec = { at, by, state: b.state, urgency: urg, readings: parts.length ? R : null, quality: qs.length ? Q : null, kind: kind || undefined, stage: stage || undefined, numbers: Object.keys(N).length ? N : null };
         await env.FEED.put('pinvisit:' + id, JSON.stringify([rec].concat(past).slice(0, 5)));
         const lv2 = await getJson(env, 'pinlastvisit', {}); lv2[id] = { at, by, state: b.state }; await env.FEED.put('pinlastvisit', JSON.stringify(lv2));
+        // when the water was last tested (E. coli, chlorine, pH, fluoride, turbidity), one small map for the whole team: "Water test due" after 6 months
+        const tested = qs.length ? at : (past.find(v => v.quality) || {}).at;
+        if (tested) { const ts = await getJson(env, 'pintests', {}); if (!ts[id] || ts[id] < tested) { ts[id] = tested; await env.FEED.put('pintests', JSON.stringify(ts)); } }
       }
       await bump(env, 'rl:pinsave:' + ip);
       await log(env, { by, a: 'visit', s: b.state, u: urg, id, t: title });
