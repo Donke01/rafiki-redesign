@@ -1,8 +1,8 @@
 {
   "ok": true,
-  "versionCode": 36,
-  "versionName": "2.16.0",
-  "notes": "Repair costs and people served, photo timeline and project summary, water test reminders, team map and week planner, donor pages, offline map areas, QR check-in, voice notes, badges and community reports.",
-  "sha256": "70f089227e8b1b445bacea33cca7a8c1aeff1780627b4477fd7aa3945953aa79",
+  "versionCode": 37,
+  "versionName": "2.16.1",
+  "notes": "Office \u203a Team is now a compact list grouped by role, with crowns and tags; tap a name to change details, PIN or admin in a pop-up.",
+  "sha256": "0f55390405f874078a532819b94d2e493b9ac7b55ae099ded9c15268d23bee23",
   "apk": "/app/rafiki-pin.apk"
 }
