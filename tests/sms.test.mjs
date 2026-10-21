@@ -197,6 +197,18 @@ test('Twilio WhatsApp: signature checked, answer in TwiML', async () => {
   assert.equal((await run(off.env, req('x'))).status, 503);
 });
 
+test('Twilio WhatsApp: a hidden number (WhatsApp user ID) still gets through', async () => {
+  const { env } = setup();
+  const url = 'https://rafiki.example/api/sms';
+  const form = { From: 'whatsapp:KE.1461161065410436', To: 'whatsapp:+14155238886', Body: 'BROKEN 104', MessageSid: 'SM2', AccountSid: 'AC1' };
+  const req = new Request(url, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Twilio-Signature': await twilioSignature('tw-secret', url, form) }, body: new URLSearchParams(form).toString() });
+  const r = await run(env, req);
+  assert.equal(r.status, 200);
+  assert.match(await r.text(), /<Response><Message>RAFIKI:/);
+  const e = (await jget(env, 'pinsms'))[0];
+  assert.equal(e.from, 'wa:KE.1461161065410436'); assert.equal(e.result, 'reported-broken');
+});
+
 // ---- the Office ----
 test('Office: admins only; setup shows names, never secret values; phone list', async () => {
   const { env } = setup({ PIN_USERS: 'Reid:4821, Meril:5555', PIN_ADMINS: 'Reid', OPENAI_API_KEY: 'sk-test-secret' });

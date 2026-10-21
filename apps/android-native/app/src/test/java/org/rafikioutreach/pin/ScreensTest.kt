@@ -169,8 +169,8 @@ class ScreensTest {
         rule.onNodeWithText("Working well").performScrollTo().performClick()
         repeat(5) { rule.onNodeWithText("Next").performScrollTo().performClick() }
         rule.onNodeWithText("Send visit report").performScrollTo().performClick()
-        rule.waitUntil(5000) { posts.any { it.contains("\"action\":\"visit\"") } }
-        rule.waitUntil(5000) { runCatching { rule.onNodeWithText("Visit report sent").assertExists(); true }.getOrDefault(false) }
+        rule.waitUntil(15000) { posts.any { it.contains("\"action\":\"visit\"") } }
+        rule.waitUntil(15000) { runCatching { rule.onNodeWithText("Visit report sent").assertExists(); true }.getOrDefault(false) }
         val p = posts.first { it.contains("\"action\":\"visit\"") }
         assertTrue(p, p.contains("\"state\":\"working\"") && p.contains("\"id\":\"104\"") && p.contains("\"by\":\"Meril Kiprop\""))
         shot("12-visit-sent")

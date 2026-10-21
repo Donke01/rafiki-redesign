@@ -1,1 +1,8 @@
-{"ok": true, "versionCode": 35, "versionName": "2.15.1", "notes": "Updates now pop up by themselves (and as a phone notification), and Settings is grouped by priority with monday.com first.", "sha256": "f2b815c4801ea9814e02569c12ec966625a186d86c9f692a405fb5abe8880ce2", "apk": "/app/rafiki-pin.apk"}
+{
+  "ok": true,
+  "versionCode": 36,
+  "versionName": "2.16.0",
+  "notes": "Repair costs and people served, photo timeline and project summary, water test reminders, team map and week planner, donor pages, offline map areas, QR check-in, voice notes, badges and community reports.",
+  "sha256": "70f089227e8b1b445bacea33cca7a8c1aeff1780627b4477fd7aa3945953aa79",
+  "apk": "/app/rafiki-pin.apk"
+}
