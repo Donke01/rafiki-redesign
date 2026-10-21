@@ -203,6 +203,7 @@ class OfficeTest {
         Lang.sw = false
         val m = model(); show(m)
         rule.onNodeWithTag("nav_me").performClick()
+        rule.onNodeWithTag("set_look").performScrollTo().performClick(); rule.waitForIdle()   // Me › Settings › This phone › Appearance
         rule.onNodeWithTag("theme_sun").performScrollTo().performClick()
         assertEquals("sun", m.prefs.theme)
         shot("27-me-sun")
@@ -211,6 +212,7 @@ class OfficeTest {
         rule.onNodeWithTag("nav_list").performClick()
         shot("28-projects-dark")
         rule.onNodeWithTag("nav_me").performClick()
+        rule.onNodeWithTag("set_look").performScrollTo().performClick(); rule.waitForIdle()
         rule.onNodeWithTag("theme_light").performScrollTo().performClick()
         assertEquals("light", m.prefs.theme)
         org.rafikioutreach.pin.ui.Look.mode = ""

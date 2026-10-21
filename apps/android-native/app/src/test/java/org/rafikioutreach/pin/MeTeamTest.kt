@@ -89,12 +89,51 @@ class MeTeamTest {
         rule.onNodeWithTag("my_month").performScrollTo(); shot("61-me-month")
         if (LocalDate.now().dayOfMonth > 2) { rule.onNodeWithTag("my_visit").assertTextEquals("2"); rule.onNodeWithTag("hero_visit").assertTextEquals("2") }
         rule.onNodeWithTag("my_streak").assertTextContains("in a row", substring = true)
+        // the phone's own settings live in Settings › This phone, after the report and the stamps
+        rule.onAllNodesWithText("Colours").assertCountEquals(0)
+        rule.onNodeWithTag("stamps").performScrollTo(); shot("61a-me-stamps")
         rule.onNodeWithTag("this_phone").performScrollTo(); shot("61b-this-phone")
+        rule.onNodeWithTag("set_look", useUnmergedTree = true).assertExists()
+        rule.onNode(hasTestTag("set_lang") and hasText("English", substring = true)).assertExists()
+        rule.onNode(hasTestTag("set_units") and hasText("Kilometres (km)", substring = true)).assertExists()
         rule.onNodeWithTag("monday_open").performScrollTo(); shot("61c-monday")
+        // Appearance: colours and text size, with a live preview
+        rule.onNodeWithTag("set_look").performScrollTo().performClick(); rule.waitForIdle()
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("look_preview").fetchSemanticsNodes().isNotEmpty() }
+        shot("61e-appearance")
         rule.onNodeWithTag("size_s").performScrollTo().performClick(); rule.waitForIdle()
         assertEquals("s", org.rafikioutreach.pin.ui.TextSize.value); assertEquals("s", m.prefs.textSize); shot("61d-text-small")
+        rule.onNodeWithTag("size_xl").performScrollTo().performClick(); rule.waitForIdle()
+        rule.onNodeWithTag("theme_dark").performScrollTo().performClick(); rule.waitForIdle()
+        assertEquals("dark", m.prefs.theme); assertEquals("dark", org.rafikioutreach.pin.ui.Look.mode)
+        rule.onNodeWithTag("look_preview").performScrollTo(); shot("61f-appearance-dark-larger")
+        rule.onNodeWithTag("theme_light").performScrollTo().performClick(); rule.waitForIdle()
         rule.onNodeWithTag("size_").performScrollTo().performClick(); rule.waitForIdle()
-        assertEquals("", m.prefs.textSize)
+        assertEquals("", m.prefs.textSize); assertEquals("light", m.prefs.theme)
+        rule.onNodeWithTag("hback").performClick(); rule.waitForIdle()
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("set_look").fetchSemanticsNodes().isNotEmpty() }
+        rule.onNode(hasTestTag("set_look") and hasText("Light · normal text", substring = true)).assertExists()
+        // Language
+        rule.onNodeWithTag("set_lang").performScrollTo().performClick(); rule.waitForIdle()
+        rule.onNodeWithTag("lang_sw").performClick(); rule.waitForIdle()
+        assertEquals(true, Lang.sw); assertEquals("sw", m.prefs.lang); shot("61g-language-sw")
+        rule.onNodeWithTag("lang_en").performClick(); rule.waitForIdle()
+        assertEquals(false, Lang.sw); assertEquals("en", m.prefs.lang)
+        rule.onNodeWithTag("hback").performClick(); rule.waitForIdle()
+        // Distances
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("set_units").fetchSemanticsNodes().isNotEmpty() }
+        rule.onNodeWithTag("set_units").performScrollTo().performClick(); rule.waitForIdle()
+        rule.onNodeWithTag("units_mi").performClick(); rule.waitForIdle()
+        assertEquals(true, m.prefs.miles); shot("61h-distances")
+        rule.onNodeWithTag("hback").performClick(); rule.waitForIdle()
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("set_units").fetchSemanticsNodes().isNotEmpty() }
+        rule.onNode(hasTestTag("set_units") and hasText("Miles", substring = true)).assertExists()
+        rule.onNodeWithTag("set_units").performScrollTo().performClick(); rule.waitForIdle()
+        rule.onNodeWithTag("units_km").performClick(); rule.waitForIdle()
+        assertEquals(false, m.prefs.miles)
+        rule.onNodeWithTag("hback").performClick(); rule.waitForIdle()
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("pane_me").fetchSemanticsNodes().isNotEmpty() }
+        org.rafikioutreach.pin.ui.Look.mode = ""
         rule.onNodeWithTag("pane_me").performScrollTo()
         rule.onNodeWithTag("pane_team").performScrollTo().performClick(); rule.waitForIdle()
         rule.waitUntil(8000) { rule.onAllNodesWithTag("mate_row").fetchSemanticsNodes().size == 2 }

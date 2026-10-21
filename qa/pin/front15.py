@@ -74,7 +74,8 @@ with sync_playwright() as p:
     pg.goto(BASE + '/pin#me'); pg.wait_for_timeout(1500); pg.tap('#meSw [data-p=me]'); pg.wait_for_timeout(300)
     post_ok[0] = True; pg.tap('#waitSend'); pg.wait_for_timeout(1500); check(pg.inner_text('#meWait').strip() == '', 'send now empties the list')
     # Kiswahili
-    pg.tap('#segLang button[data-v=sw]'); pg.wait_for_timeout(300); pg.goto(BASE + '/pin#me'); pg.wait_for_timeout(2500)
+    pg.tap('[data-set=lang]'); pg.wait_for_timeout(400); pg.tap('#segLang button[data-v=sw]'); pg.wait_for_timeout(300);   # Me › Settings › Language
+    pg.goto(BASE + '/pin#me'); pg.wait_for_timeout(2500)
     s = pg.text_content('#vMe'); check('Mwezi wangu' in s and 'Timu leo' in s and 'Pamoja' in s and 'Habari za timu' in s, 'Kiswahili'); pg.screenshot(path=OUT + '/6-sw.png', full_page=True)
     check(not errs, 'no page errors ' + str(errs[:2]))
     br.close()

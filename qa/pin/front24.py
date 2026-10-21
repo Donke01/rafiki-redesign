@@ -117,7 +117,8 @@ with sync_playwright() as p:
     # sun
     theme(pg, 'sun'); openp(pg); pg.screenshot(path=os.path.join(OUT, '08-page-sun.png')); shut(pg)
     # Kiswahili
-    theme(pg, ''); pg.click('#segLang button[data-v=sw]'); pg.wait_for_timeout(300); openp(pg)
+    theme(pg, ''); pg.click('[data-set=lang]'); pg.wait_for_timeout(400); pg.click('#segLang button[data-v=sw]'); pg.wait_for_timeout(300)   # Me › Settings › Language
+    pg.click('.bsh.kits .bsh-x'); pg.wait_for_timeout(400); openp(pg)
     t = pg.inner_text('.npg'); check('Arifa' in t and 'Zote' in t and 'Hazijasomwa' in t and 'Kwangu' in t and 'Ameripoti kuwa haifanyi kazi' in t, 'Kiswahili')
     pg.screenshot(path=os.path.join(OUT, '09-page-sw.png')); shut(pg)
     pg.evaluate("document.querySelector('#segLang button[data-v=\"\"]').click()"); pg.wait_for_timeout(200)

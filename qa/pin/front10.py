@@ -34,7 +34,7 @@ with sync_playwright() as p:
     pg.goto(BASE + '/pin'); pg.wait_for_timeout(500)
     for d in '9999': pg.click('.pk[data-k="%s"]' % d)
     pg.wait_for_selector('#vLock.hidden', state='attached'); pg.wait_for_timeout(600)
-    pg.click('#tabs [data-v=vMe]'); pg.click('#segLang [data-v=sw]'); pg.wait_for_timeout(400)
+    pg.click('#tabs [data-v=vMe]'); pg.click('[data-set=lang]'); pg.wait_for_timeout(400); pg.click('#segLang [data-v=sw]'); pg.click('.bsh.kits .bsh-x'); pg.wait_for_timeout(500)   # Me › Settings › Language
     check('Lugha' in pg.inner_text('#vMe') and 'Mimi na timu' in pg.inner_text('#vMe'), 'Me page in Kiswahili')
     pg.screenshot(path=os.path.join(HERE, 'sw-me.png'))
     shots = {}
@@ -51,7 +51,7 @@ with sync_playwright() as p:
     pg.reload(); pg.wait_for_timeout(1200)
     check('Miradi' in pg.inner_text('#tabs'), 'Kiswahili stays after a refresh')
     # back to English
-    pg.click('#tabs [data-v=vMe]'); pg.click('#segLang [data-v=""]'); pg.wait_for_timeout(400)
+    pg.click('#tabs [data-v=vMe]'); pg.click('[data-set=lang]'); pg.wait_for_timeout(400); pg.click('#segLang [data-v=""]'); pg.click('.bsh.kits .bsh-x'); pg.wait_for_timeout(500)   # Me › Settings › Language
     pg.click('#tabs [data-v=vList]'); pg.wait_for_timeout(500)
     check('Projects' in pg.inner_text('#vList') and 'Map' in pg.inner_text('#tabs'), 'English comes back')
     check(not errs, 'no page errors: ' + str(errs))
