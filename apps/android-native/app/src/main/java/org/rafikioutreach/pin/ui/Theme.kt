@@ -163,7 +163,8 @@ fun Palette.hue(key: String): Hue {
         "visit", "near", "map" -> "green"
         "new" -> "purple"
         "repairs", "office" -> "amber"
-        "due" -> "teal"
+        "due", "scan", "qr" -> "teal"
+        "offline" -> "green"
         "me" -> "coral"
         else -> if (key in HUE_LIGHT) key else "slate"
     }

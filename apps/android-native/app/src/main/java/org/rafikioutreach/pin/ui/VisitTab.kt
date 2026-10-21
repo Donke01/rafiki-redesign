@@ -194,6 +194,8 @@ fun VisitTab(m: AppModel, p: Project) {
     val steps = listOf(t("Arrive", "Fika"), t("Condition", "Hali"), t("Checklist", "Ukaguzi"), if (isWater(p)) t("Readings", "Vipimo") else t("Numbers", "Idadi"), t("Photos", "Picha"), t("People", "Watu"), t("Send", "Tuma"))
     val items = LISTS.getValue(kind(p))
     val wet = isWater(p); val k0 = kind(p)
+    // scanned the site's QR sticker (Scan QR): that counts as arriving
+    androidx.compose.runtime.LaunchedEffect(p.id) { QrCheckin.at(p.id)?.takeIf { QrCheckin.isFor(p.id) && v.arrived == null }?.let { v.arrived = Instant.ofEpochMilli(it).toString(); v.arrivedAt = fix?.ll } }
 
     if (v.sent != null) {
         Card {
@@ -220,6 +222,7 @@ fun VisitTab(m: AppModel, p: Project) {
             0 -> {
                 H2(t("Check in", "Ingia"))
                 Text(t("Records the time you arrived and where you are.", "Inarekodi muda ulipofika na mahali ulipo."), style = MaterialTheme.typography.bodyMedium, color = C.muted)
+                QrCheckedIn(p.id)
                 if (v.arrived == null) Btn(t("I’ve arrived", "Nimefika"), { v.arrived = Instant.now().toString(); v.arrivedAt = fix?.ll; v.step = 1 }, Modifier.fillMaxWidth().padding(top = 14.dp), icon = "pin")
                 else Text(t("Arrived ", "Umefika ") + whenText(v.arrived!!) + (v.arrivedAt?.let { " · " + it.text() } ?: ""), color = C.ok, style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(top = 12.dp))
             }
@@ -362,6 +365,7 @@ fun VisitTab(m: AppModel, p: Project) {
                             }
                             .put("note", v.note.trim()).put("leave", Instant.now().toString())
                         v.arrived?.let { body.put("arrive", it) }
+                        if (QrCheckin.isFor(p.id)) body.put("qr", true)
                         (v.arrivedAt ?: fix?.ll)?.let { body.put("lat", it.lat).put("lng", it.lng) }
                         val files = v.shots.map { OutFile(it.file.path, "photo", it.label) } + listOfNotNull(v.voice?.let { OutFile(it.path, "voice", "Voice note") })
                         when (val o = m.submit(body, files)) {
@@ -370,6 +374,7 @@ fun VisitTab(m: AppModel, p: Project) {
                             is Outcome.Failed -> msg = "bad" to o.text
                             Outcome.Locked -> {}
                         }
+                        if (v.sent != null) QrCheckin.clear(p.id)
                         busy = false
                     }
                 }, Modifier.fillMaxWidth().padding(top = 16.dp), icon = "upload", enabled = v.state.isNotBlank() && !busy)

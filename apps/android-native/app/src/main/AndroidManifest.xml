@@ -24,6 +24,14 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="org.rafikioutreach.pin" android:host="signin" />
             </intent-filter>
+            <!-- RAFIKI QR stickers scanned with the phone's own camera (https://pin.rafikioutreach.org/pin#p=<id>);
+                 verified through /.well-known/assetlinks.json on that address -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="pin.rafikioutreach.org" android:path="/pin" />
+            </intent-filter>
         </activity>
         <receiver android:name=".data.InstallResult" android:exported="false" />
         <!-- the RAFIKI Pin home-screen widget: medium (4×2) and small (2×1) -->

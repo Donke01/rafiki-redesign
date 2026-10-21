@@ -98,6 +98,8 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
         // the home-screen widget: Visit nearby / Pin a location open Projects on that list (like Home's quick actions)
         i?.getStringExtra("quick")?.let { q -> i.removeExtra("quick"); model.quick(q) }
         val u = i?.data ?: return
+        // a RAFIKI QR sticker scanned with the phone's own camera: https://pin.rafikioutreach.org/pin#p=<id>
+        if (org.rafikioutreach.pin.ui.QrCheckin.fromLink(u)) { i.data = null; return }
         if (u.scheme != "org.rafikioutreach.pin" || u.host != "signin") return
         i.data = null
         model.showBanner(t("Signing in…", "Inaingia…"))
@@ -184,6 +186,15 @@ fun Shell(m: AppModel) {
     LaunchedEffect(goTab) { if (goTab != null) { tab(goTab); m.goTab = null } }
     val goProject = m.goProject
     LaunchedEffect(goProject) { if (goProject != null) { go(Place(here.tab, goProject)); m.goProject = null } }
+    // a QR sticker opened from outside the app: that project's Site visit, checked in by QR
+    val qrOpen = org.rafikioutreach.pin.ui.QrCheckin.openReq
+    LaunchedEffect(qrOpen) {
+        if (qrOpen != null) {
+            org.rafikioutreach.pin.ui.QrCheckin.openReq = null
+            if (m.snap.value?.projects?.any { it.id == qrOpen } == true) { org.rafikioutreach.pin.ui.QrCheckin.mark(qrOpen); go(Place(here.tab, qrOpen, "visit")) }
+            else m.showBanner(t("That QR code’s project isn’t in your list. Pull down to refresh, then scan again.", "Mradi wa msimbo huo wa QR haupo kwenye orodha yako. Vuta chini kuonyesha upya, kisha changanua tena."))
+        }
+    }
     val sub = here.project != null || here.sub != null
     val hp = org.rafikioutreach.pin.ui.rememberHaptics()
     org.rafikioutreach.pin.ui.UpdatePrompt(m, updReady)
@@ -247,11 +258,13 @@ fun Shell(m: AppModel) {
                         pl.sub == "set_share" -> org.rafikioutreach.pin.ui.ShareSettingsPage(m) { pop() }
                         pl.sub?.startsWith("set_") == true -> org.rafikioutreach.pin.ui.SettingsPage(m, pl.sub.removePrefix("set_")) { pop() }
                         pl.sub == "route" -> org.rafikioutreach.pin.ui.RouteScreen(m, { go(Place(pl.tab, it)) }) { pop() }
-                        pl.tab == "map" -> MapScreen(m, { go(Place("map", it)) }) { go(Place("map", it, "visit")) }
+                        pl.sub == "offline" -> org.rafikioutreach.pin.ui.OfflineScreen(m) { pop() }
+                        pl.sub == "scan" -> org.rafikioutreach.pin.ui.ScanScreen(m, { id -> pop(); go(Place(pl.tab, id, "visit")) }) { pop() }
+                        pl.tab == "map" -> MapScreen(m, { go(Place("map", it)) }, { go(Place("map", it, "visit")) }) { go(Place("map", sub = "offline")) }
                         pl.tab == "new" -> NewSiteScreen(m) { id -> if (id != null) { tab("list"); go(Place("list", id)) } }
                         pl.tab == "me" -> MeScreen(m, { go(Place("me", it)) }, { go(Place("me", sub = "report")) }, notes = { go(Place("me", sub = "notes")) }) { go(Place("me", sub = "set_$it")) }
                         pl.tab == "office" -> org.rafikioutreach.pin.ui.OfficeScreen(m) { go(Place("office", it)) }
-                        else -> ProjectsScreen(m, { go(Place("list", it)) }, { go(Place("list", sub = "route")) }, { tab("new") }, { go(Place("list", it, "visit")) }) { go(Place("list", sub = "search")) }
+                        else -> ProjectsScreen(m, { go(Place("list", it)) }, { go(Place("list", sub = "route")) }, { tab("new") }, { go(Place("list", it, "visit")) }, scan = { go(Place("list", sub = "scan")) }) { go(Place("list", sub = "search")) }
                     }
                 }
             }

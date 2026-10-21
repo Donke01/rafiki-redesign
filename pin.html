@@ -1983,6 +1983,7 @@ label.dnr-p small{display:block;color:var(--muted);font-size:.76rem;font-weight:
   function goBack(fallback) { if (S.depth > 0) history.back(); else fallback(); }
   function applyHash(first) {
     if (S.view === 'vLock' && !first) return;
+    if (fldQrHash()) return; // a QR sticker: #p=<id> (field tools)
     var m = /^#p\/(\d+)(?:\/(visit|hist))?$/.exec(location.hash), v = { '#map': 'vMap', '#list': 'vList', '#route': 'vRoute', '#search': 'vSearch', '#new': 'vNew', '#me': 'vMe', '#report': 'vReport', '#office': 'vOffice' }[location.hash];
     if (v === 'vReport') { openReport('none'); return; }
     if (m && byId(m[1])) { openProj(m[1], m[2] || 'pin', 'none'); return; }
@@ -2704,6 +2705,7 @@ label.dnr-p small{display:block;color:var(--muted);font-size:.76rem;font-weight:
           L.DomEvent.on(d, 'click', function (e) { L.DomEvent.preventDefault(e); L.DomEvent.stopPropagation(e); locate(function (ll) { if (ll) hMap.setView(ll, 13); else msg('mList', 'warn', 'Couldn’t get your location.'); }); });
           return d; } });
         meCtl = new Me().addTo(hMap);
+        fldMapCtl(hMap); // Save this area for offline (field tools)
         hMap.setView([-3.5, 35.5], 5);
         hMap.on('popupopen', function (e) { var el = e.popup.getElement(); var b = el && el.querySelector('[data-open]'); if (b) b.addEventListener('click', function () { openProj(b.getAttribute('data-open')); }); });
       }
@@ -3014,13 +3016,15 @@ label.dnr-p small{display:block;color:var(--muted);font-size:.76rem;font-weight:
       '<button type="button" data-q="missing"><i>' + oic('pin') + '</i><span>Pin a location</span></button>' +
       '<button type="button" data-q="near"><i>' + oic('clip') + '</i><span>Visit nearby</span></button>' +
       '<button type="button" data-q="new"><i>' + oic('plus') + '</i><span>Add a site</span></button>' +
-      '<button type="button" data-q="repairs"><i>' + oic('wrench') + '</i><span>Repairs</span></button></div>';
+      '<button type="button" data-q="repairs"><i>' + oic('wrench') + '</i><span>Repairs</span></button>' +
+      '<button type="button" data-q="scan"><i>' + oic('scan') + '</i><span>Scan QR</span></button></div>';
   }
   $('homeTop').addEventListener('click', function (e) {
     var b = e.target.closest('[data-q]'); if (!b) return;
     var q = b.getAttribute('data-q');
     if (q === 'search') { show('vSearch'); return; }
     if (q === 'new') { show('vNew'); return; }
+    if (q === 'scan') { fldScan(); return; }
     S.filter = q; store.set('rfPinFilter', q);
     qa('.chips .chip').forEach(function (x) { x.setAttribute('aria-pressed', x.getAttribute('data-f') === q ? 'true' : 'false'); });
     renderList(); $('count').scrollIntoView({ block: 'start', behavior: 'smooth' });
@@ -3612,7 +3616,7 @@ label.dnr-p small{display:block;color:var(--muted);font-size:.76rem;font-weight:
     if (V.resumed && V.step === 0) h += '<div class="alert warn" role="status"><b>' + tr('Unfinished visit', 'Ziara ambayo haijakamilika') + '</b><p>' + tr('Started', 'Ilianza') + ' ' + esc(when(V.started)) + '. ' + tr('Carry on, or start again.', 'Endelea, au anza upya.') + '</p><button class="btn small light" type="button" data-act="restart">' + tr('Start again', 'Anza upya') + '</button></div>';
     h += '<div class="card wiz ' + stepDir + '">'; stepDir = '';
     if (st === 'arrive') {
-      h += '<h2>' + tr('Check in', 'Thibitisha kufika') + '</h2>';
+      h += '<h2>' + tr('Check in', 'Thibitisha kufika') + '</h2>' + fldQrBadge(S.cur.id);
       if (!V.arrive) h += '<p class="muted">' + tr('Records the time you arrived and where you are.', 'Inarekodi saa uliyofika na mahali ulipo.') + '</p><button class="btn block big" type="button" data-act="arrive">📍 ' + tr('I’ve arrived', 'Nimefika') + '</button>';
       else {
         var far = V.arrive.d != null && V.arrive.d > 500;
@@ -3793,6 +3797,7 @@ label.dnr-p small{display:block;color:var(--muted);font-size:.76rem;font-weight:
         story: { quote: (V.story.quote || '').trim(), by: (V.story.by || '').trim(), consent: !!V.story.consent },
         note: V.note.trim(), arrive: V.arrive ? V.arrive.at : undefined, leave: new Date().toISOString() };
       var at = V.arrive && V.arrive.ll ? V.arrive.ll : here; if (at) { body.lat = at[0]; body.lng = at[1]; }
+      if (fldQrFor(p.id)) body.qr = true; // checked in by scanning the site's QR sticker
       var files = V.files.map(function (f) { return { blob: f.blob, kind: 'photo', label: slotLabel(f.slot) }; });
       if (V.voice) files.push({ blob: V.voice.blob, kind: 'voice', label: 'Voice note' });
       var sent = V;
@@ -3800,6 +3805,7 @@ label.dnr-p small{display:block;color:var(--muted);font-size:.76rem;font-weight:
         btn.disabled = false;
         if (r.state === 'locked') return lockOut({ reason: 'pin' });
         if (r.state === 'failed') { msg('mVisit', 'bad', r.text); return; }
+        if (body.qr) fldQrClear(p.id);
         if (sent.state === 'working') delete S.repairs[p.id];
         else S.repairs[p.id] = { state: sent.state, by: S.name, at: new Date().toISOString(), note: body.note, urgency: body.urgency, problems: body.problems.concat(body.other ? [body.other] : []), parts: body.parts, cost: body.cost || null };
         S.visits[p.id] = { at: new Date().toISOString(), by: S.name, state: sent.state }; prjTestSent(p, body.quality);
@@ -4892,6 +4898,7 @@ label.dnr-p small{display:block;color:var(--muted);font-size:.76rem;font-weight:
     var T = [['overview', 'Overview', 'drop'], ['repairs', 'Repairs', 'wrench'], ['costs', tr('Costs', 'Gharama'), 'coins'], ['visits', 'Visits', 'cal'], ['review', 'Review', 'inbox'], ['team', 'Team', 'people'], ['cleanup', 'Clean-up', 'spark'], ['export', 'Export', 'down'], ['sms', tr('Community', 'Jamii'), 'chat']];
     T.splice(3, 0, ['teammap', tr('Team map', 'Ramani ya timu'), 'pin'], ['plan', tr('Plan a week', 'Panga wiki'), 'ofaRoute']);
     T.push(['donors', 'Donors', 'heart']);
+    T.push(['qr', tr('QR codes', 'Misimbo ya QR'), 'qr']);
     $('oTabs').innerHTML = T.map(function (t) {
       var c = t[0] === 'review' ? (S.reviewOpen || 0) : t[0] === 'repairs' ? Object.keys(S.repairs).length : 0;
       return '<button class="otab" type="button" data-o="' + t[0] + '" aria-pressed="' + (O.tab === t[0]) + '"' + (c ? ' aria-label="' + t[1] + ', ' + c + ' open"' : '') + '>' + oic(t[2]) + '<span>' + t[1] + '</span>' + (c ? '<i class="n" aria-hidden="true">' + c + '</i>' : '') + '</button>';
@@ -4918,6 +4925,7 @@ label.dnr-p small{display:block;color:var(--muted);font-size:.76rem;font-weight:
     if (t === 'teammap') return ofaTeamMap(b);
     if (t === 'plan') return oNeedTeam(function () { ofaPlanTab(b); });
     if (t === 'donors') return dnrOffice(b);
+    if (t === 'qr') return fldQrOffice(b);
   }
 
   // overview
@@ -6235,6 +6243,368 @@ label.dnr-p small{display:block;color:var(--muted);font-size:.76rem;font-weight:
     });
   }
   if (window.MutationObserver && $('pTitle')) new MutationObserver(function () { dnrThxDraw(); }).observe($('pTitle'), { childList: true, characterData: true, subtree: true });
+  // ===== Field tools (feat-field): offline map areas, QR check-in stickers, Scan QR =======================
+  // All names here start with fld, so they don't clash with the rest of the app.
+  //
+  // Offline maps. What the map servers allow decides how this works (checked October 2026):
+  //  · tile.openstreetmap.org (street map) forbids bulk downloading and prefetching areas; Esri World Imagery
+  //    (satellite) is for viewing; Google Map Tiles (when the office sets a key) may only be cached as Google's
+  //    cache headers say and never stored for offline use.
+  //  · So "Save this area for offline" downloads nothing by itself. It marks the area, and the service worker
+  //    (pin-sw.js) keeps every street and satellite tile you look at inside it until you delete the area.
+  //    Tiles you look at elsewhere are kept for the chosen number of days, up to the storage limit.
+  //    Google tiles are never stored; while you fill an area, or with no signal, the free map is shown on top.
+  //  · Downloading whole areas from an office tile server (PIN_OFFLINE_TILES) is in the Android app only.
+  var FLD = { areas: jget('rfPinFldAreas', []), set: jget('rfPinFldSet', { limit: 250, keep: 30 }), fill: null, rect: null, free: null, map: null, timer: 0 };
+  var FLD_TILE_KB = 15, FLD_CAP = 700;
+  Object.assign(SW, { 'QR codes': 'Misimbo ya QR', 'Scan QR': 'Changanua QR' });
+  Object.assign(OIC, {
+    qr: '<rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><path d="M14 14h2.5v2.5H14zM17.5 17.5H20V20h-2.5zM14 20h.5M20 14h.5M6.8 7h.4M16.8 7h.4M6.8 17h.4"/>',
+    scan: '<path d="M4 8.5V6a2 2 0 0 1 2-2h2.5M15.5 4H18a2 2 0 0 1 2 2v2.5M20 15.5V18a2 2 0 0 1-2 2h-2.5M8.5 20H6a2 2 0 0 1-2-2v-2.5"/><path d="M7 12h10"/>',
+    offline: '<path d="M7.5 18.5H7a4.5 4.5 0 0 1-.6-9 6 6 0 0 1 11.4 1.5 3.8 3.8 0 0 1-.8 7.5"/><path d="M12 11v8.5M9 16.5l3 3 3-3"/>',
+    trash: '<path d="M4.5 7h15M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13"/><path d="M10 11v5.5M14 11v5.5"/>'
+  });
+  function fldTX(lon, z) { return Math.min(Math.pow(2, z) - 1, Math.max(0, Math.floor((lon + 180) / 360 * Math.pow(2, z)))); }
+  function fldTY(lat, z) { var r = Math.max(-85, Math.min(85, lat)) * Math.PI / 180; return Math.min(Math.pow(2, z) - 1, Math.max(0, Math.floor((1 - Math.log(Math.tan(r) + 1 / Math.cos(r)) / Math.PI) / 2 * Math.pow(2, z)))); }
+  function fldCount(b, z) { return (fldTX(b.e, z) - fldTX(b.w, z) + 1) * (fldTY(b.s, z) - fldTY(b.n, z) + 1); }
+  // the zooms kept for a box: the deepest has at most 700 tiles (about 10 MB for the whole area); null = too big
+  function fldZooms(b) { var top = -1; for (var z = 10; z <= 17; z++) if (fldCount(b, z) <= FLD_CAP) top = z; return top < 0 ? null : [Math.max(6, top - 5), top]; }
+  function fldTiles(a) { var n = 0; for (var z = a.minZ; z <= a.maxZ; z++) n += fldCount(a, z); return n; }
+  function fldMb(kb) { return kb < 1024 ? tr('under 1 MB', 'chini ya MB 1') : kb < 10240 ? (kb / 1024).toFixed(1) + ' MB' : Math.round(kb / 1024) + ' MB'; }
+  function fldLim(mb) { return mb >= 1000 ? mb / 1000 + ' GB' : mb + ' MB'; }
+  // the tile in a map server address: [z, x, y] (OpenStreetMap z/x/y, Esri z/y/x)
+  function fldZXY(url) {
+    var m = /tile\.openstreetmap\.org\/(\d+)\/(\d+)\/(\d+)\.png/.exec(url); if (m) return [+m[1], +m[2], +m[3], 's'];
+    m = /arcgisonline\.com\/.*\/tile\/(\d+)\/(\d+)\/(\d+)/.exec(url); if (m) return [+m[1], +m[3], +m[2], 'i'];
+    return null;
+  }
+  // what the service worker needs: the areas, how long to keep viewed tiles, and how many
+  function fldCfgSave() {
+    store.set('rfPinFldAreas', JSON.stringify(FLD.areas)); store.set('rfPinFldSet', JSON.stringify(FLD.set));
+    var cfg = { areas: FLD.areas.map(function (a) { return { id: a.id, n: a.n, s: a.s, e: a.e, w: a.w, minZ: a.minZ, maxZ: a.maxZ }; }), keep: FLD.set.keep, max: Math.round(FLD.set.limit * 1024 / 20) };
+    if (!window.caches) return Promise.resolve();
+    return caches.open('rafiki-pin-fld').then(function (c) { return c.put('/__fld/cfg', new Response(JSON.stringify(cfg), { headers: { 'Content-Type': 'application/json' } })); })
+      .then(function () { var sw = navigator.serviceWorker && navigator.serviceWorker.controller; if (sw) sw.postMessage({ fld: 'cfg' }); }).catch(function () {});
+  }
+  // how much of an area is kept on this device: street map and satellite, 0..1
+  function fldCover(a) {
+    if (!window.caches) return Promise.resolve({ s: 0, i: 0 });
+    return caches.open('rafiki-pin-area-' + a.id).then(function (c) { return c.keys(); }).then(function (ks) {
+      var seen = { s: {}, i: {} }, n = { s: 0, i: 0 };
+      ks.forEach(function (r) { var t = fldZXY(r.url); if (!t || t[0] < a.minZ || t[0] > a.maxZ) return; var k = t[0] + '/' + t[1] + '/' + t[2]; if (!seen[t[3]][k]) { seen[t[3]][k] = 1; n[t[3]]++; } });
+      var all = Math.max(1, fldTiles(a)); return { s: Math.min(1, n.s / all), i: Math.min(1, n.i / all) };
+    }).catch(function () { return { s: 0, i: 0 }; });
+  }
+  function fldUsage() { return navigator.storage && navigator.storage.estimate ? navigator.storage.estimate().then(function (e) { return e.usage || 0; }).catch(function () { return 0; }) : Promise.resolve(0); }
+
+  // the map button (under map style and "where I am")
+  function fldMapCtl(map) {
+    FLD.map = map;
+    var Ctl = L.Control.extend({ options: { position: 'topright' }, onAdd: function () {
+      var b = L.DomUtil.create('button', 'mstyle fld-ob'); b.type = 'button'; b.id = 'fldOb';
+      b.setAttribute('aria-label', tr('Save this area for offline', 'Hifadhi eneo hili kwa matumizi bila mtandao')); b.innerHTML = '<i>' + oic('offline') + '</i>';
+      L.DomEvent.disableClickPropagation(b); b.addEventListener('click', fldOffSheet); return b;
+    } });
+    new Ctl().addTo(map);
+    addEventListener('offline', fldFreeUi); addEventListener('online', fldFreeUi); fldFreeUi();
+    if (FLD.fill) fldFill(FLD.fill, true);
+  }
+  // Google tiles can't be kept: while filling an area (or with no signal) the free street map goes on top
+  function fldFreeUi() {
+    var m = FLD.map; if (!m) return;
+    var want = !!gKey() && (!!FLD.fill || !navigator.onLine);
+    if (want && !FLD.free) FLD.free = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, zIndex: 50, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' }).addTo(m);
+    if (!want && FLD.free) { m.removeLayer(FLD.free); FLD.free = null; }
+  }
+  function fldBox(which) {
+    if (which === 'me') return S.here ? { n: S.here[0] + 0.225, s: S.here[0] - 0.225, e: S.here[1] + 0.225, w: S.here[1] - 0.225 } : null;
+    if (!FLD.map) return null;
+    var b = FLD.map.getBounds(); return { n: b.getNorth(), s: b.getSouth(), e: b.getEast(), w: b.getWest() };
+  }
+  function fldOffSheet() {
+    var which = 'screen', w;
+    var body = '<div class="fld-in"><p class="muted">' + tr('Before a trip, so the map works with no signal.', 'Kabla ya safari, ili ramani ifanye kazi bila mtandao.') + '</p>' +
+      '<div class="seg" role="radiogroup" id="fldWhich"><button type="button" data-fa="screen" aria-pressed="true">' + tr('Area on screen', 'Eneo lililo kwenye skrini') + '</button><button type="button" data-fa="me" aria-pressed="false">' + tr('Around me', 'Karibu nami') + '</button></div>' +
+      '<label class="fld-l" for="fldName">' + tr('Name', 'Jina') + '</label><input id="fldName" type="text" autocomplete="off" maxlength="40">' +
+      '<div class="fld-est" id="fldEst"></div>' +
+      '<p class="muted fld-note">' + tr('The free map servers don’t allow downloading whole areas, so the app keeps what you look at. After saving, move and zoom around the area while you have signal: everything you see stays on this device until you delete the area.',
+        'Seva za ramani za bure haziruhusu kupakua maeneo yote, kwa hiyo programu inahifadhi unachoangalia. Baada ya kuhifadhi, sogeza na kuza ramani ndani ya eneo ukiwa na mtandao: kila unachoona kinabaki kwenye kifaa hiki hadi utakapofuta eneo.') + '</p>' +
+      '<button class="btn block" type="button" id="fldSave">' + oic('offline') + tr('Save this area', 'Hifadhi eneo hili') + '</button>' +
+      '<button class="btn block light" type="button" id="fldList">' + oic('list') + tr('Saved areas', 'Maeneo yaliyohifadhiwa') + ' (' + FLD.areas.length + ')</button><p class="msg" id="fldMsg"></p></div>';
+    w = panel(tr('Save this area for offline', 'Hifadhi eneo hili kwa matumizi bila mtandao'), body, 'fld-sh');
+    var draw = function () {
+      var b = fldBox(which), zs = b && fldZooms(b), est = $('fldEst');
+      var name = (function () { if (!b) return ''; var c = [(b.n + b.s) / 2, (b.e + b.w) / 2], best = null; S.projects.forEach(function (p) { if (p.gps && p.area && p.gps[0] <= b.n && p.gps[0] >= b.s && p.gps[1] <= b.e && p.gps[1] >= b.w) { var d = metres(c, p.gps); if (!best || d < best.d) best = { d: d, a: p.area }; } }); return best ? best.a : tr('Area', 'Eneo') + ' ' + (FLD.areas.length + 1); })();
+      if (!$('fldName').dataset.typed) $('fldName').value = name;
+      var used = FLD.areas.reduce(function (s, a) { return s + fldTiles(a) * FLD_TILE_KB; }, 0), h = '';
+      if (!b) h = '<b class="bad">' + tr('Allow location to save the area around you.', 'Ruhusu mahali ili uhifadhi eneo linalokuzunguka.') + '</b>';
+      else if (!zs) h = '<b class="bad">' + tr('That area is too big. Zoom in on the map, or choose Around me.', 'Eneo hilo ni kubwa mno. Kuza ramani, au chagua Karibu nami.') + '</b>';
+      else {
+        var a = { n: b.n, s: b.s, e: b.e, w: b.w, minZ: zs[0], maxZ: zs[1] }, n = fldTiles(a), kb = n * FLD_TILE_KB;
+        h = '<b>' + tr('About ' + n.toLocaleString('en-US') + ' map tiles · up to ' + fldMb(kb), 'Takriban vigae ' + n.toLocaleString('en-US') + ' vya ramani · hadi ' + fldMb(kb)) + '</b>' +
+          '<span>' + (zs[1] >= 14 ? tr('Zoom ' + zs[0] + '–' + zs[1] + ': from the whole area down to villages and roads.', 'Ukuzaji ' + zs[0] + '–' + zs[1] + ': kutoka eneo zima hadi vijiji na barabara.')
+            : tr('Zoom ' + zs[0] + '–' + zs[1] + ': a wide area, so only down to towns. Zoom in on the map first to keep village roads.', 'Ukuzaji ' + zs[0] + '–' + zs[1] + ': eneo pana, kwa hiyo hadi miji tu. Kuza ramani kwanza ili kuhifadhi barabara za vijijini.')) +
+            (which === 'me' ? ' ' + tr('About 50 × 50 km around you.', 'Takriban km 50 × 50 kukuzunguka.') : '') + '</span>';
+        if (kb + used > FLD.set.limit * 1024) h += '<b class="bad">' + tr('Not enough room: raise the storage limit or delete an area in Saved areas.', 'Nafasi haitoshi: ongeza kikomo cha hifadhi au futa eneo kwenye Maeneo yaliyohifadhiwa.') + '</b>';
+        else h += '<span>' + (used ? tr('Saved areas: up to ' + fldMb(used) + ' of the ' + fldLim(FLD.set.limit) + ' limit.', 'Maeneo yaliyohifadhiwa: hadi ' + fldMb(used) + ' kati ya kikomo cha ' + fldLim(FLD.set.limit) + '.')
+          : tr('Storage limit for maps: ' + fldLim(FLD.set.limit) + '.', 'Kikomo cha hifadhi ya ramani: ' + fldLim(FLD.set.limit) + '.')) + '</span>';
+        a.ok = kb + used <= FLD.set.limit * 1024; FLD.pending = a;
+      }
+      if (!b || !zs) FLD.pending = null;
+      est.innerHTML = h; $('fldSave').disabled = !(FLD.pending && FLD.pending.ok);
+    };
+    w.querySelector('#fldWhich').addEventListener('click', function (e) { var x = e.target.closest('[data-fa]'); if (!x) return; which = x.getAttribute('data-fa'); qa('#fldWhich button').forEach(function (y) { y.setAttribute('aria-pressed', y === x ? 'true' : 'false'); }); if (which === 'me' && !S.here) locate(function () { draw(); }); draw(); });
+    $('fldName').addEventListener('input', function () { this.dataset.typed = '1'; });
+    $('fldSave').addEventListener('click', function () {
+      var p = FLD.pending; if (!p || !p.ok) return;
+      var a = { id: 'a' + Date.now().toString(36), name: ($('fldName').value || '').trim().slice(0, 40) || tr('My area', 'Eneo langu'), n: p.n, s: p.s, e: p.e, w: p.w, minZ: p.minZ, maxZ: p.maxZ, at: new Date().toISOString() };
+      FLD.areas.push(a); fldCfgSave(); w.close(); fldFill(a);
+    });
+    $('fldList').addEventListener('click', function () { w.close(); fldListSheet(); });
+    draw(); swApply();
+  }
+  // filling an area: the green box on the map and how much of it is kept, until Done
+  function fldFill(a, quiet) {
+    var m = FLD.map; if (!m) return;
+    fldStop(true); FLD.fill = a; fldFreeUi();
+    FLD.rect = L.rectangle([[a.s, a.w], [a.n, a.e]], { color: '#1C8A50', weight: 2, fillColor: '#1C8A50', fillOpacity: 0.07, interactive: false }).addTo(m);
+    if (!quiet) m.fitBounds(FLD.rect.getBounds(), { padding: [20, 20] });
+    var bar = document.createElement('div'); bar.className = 'fld-bar'; bar.id = 'fldBar';
+    bar.innerHTML = '<div class="fld-bh"><i>' + oic('offline') + '</i><div><b>' + esc(tr('Keeping “' + a.name + '” for offline', 'Inahifadhi “' + a.name + '” kwa matumizi bila mtandao')) + '</b><span id="fldBt"></span></div></div>' +
+      '<div class="meter"><i id="fldBm" style="width:0%"></i></div><div class="fld-bf"><b id="fldBp">…</b><button class="btn small" type="button" id="fldDone">' + oic('check') + tr('Done', 'Imekamilika') + '</button></div>';
+    var top = document.querySelector('#vMap .ov.top'); top.insertBefore(bar, top.firstChild);
+    var tick = function () {
+      $('fldBt').textContent = navigator.onLine ? tr('Move and zoom around the green box while you have signal. The map you see is kept on this device.', 'Sogeza na kuza ramani ndani ya kisanduku kijani ukiwa na mtandao. Ramani unayoona inahifadhiwa kwenye kifaa hiki.')
+        : tr('No signal: only what is already kept shows. Carry on when you have signal.', 'Hakuna mtandao: kinachoonekana ni kile kilichohifadhiwa tu. Endelea ukipata mtandao.');
+      fldCover(a).then(function (c) { if (FLD.fill !== a) return; FLD.pct = c; $('fldBm').style.width = Math.round(c.s * 100) + '%'; $('fldBp').textContent = tr('Street map ' + Math.round(c.s * 100) + '% · Satellite ' + Math.round(c.i * 100) + '%', 'Ramani ya barabara ' + Math.round(c.s * 100) + '% · Satelaiti ' + Math.round(c.i * 100) + '%'); });
+    };
+    tick(); FLD.timer = setInterval(tick, 2500);
+    $('fldDone').addEventListener('click', function () { var c = FLD.pct || { s: 0 }; fldStop(); toast(tr('“' + a.name + '” saved: ' + Math.round(c.s * 100) + '% kept. Look over it again any time to keep more.', '“' + a.name + '” imehifadhiwa: ' + Math.round(c.s * 100) + '% imehifadhiwa. Iangalie tena wakati wowote ili kuhifadhi zaidi.')); });
+    swApply();
+  }
+  function fldStop(keepFree) {
+    clearInterval(FLD.timer); FLD.fill = null; FLD.pct = null;
+    if (FLD.rect && FLD.map) FLD.map.removeLayer(FLD.rect); FLD.rect = null;
+    var b = $('fldBar'); if (b) b.remove();
+    if (!keepFree) fldFreeUi();
+  }
+  // Offline maps: saved areas (how much is kept, delete), the storage limit and how long viewed tiles stay
+  function fldListSheet() {
+    var w, html = function () {
+      return '<div class="fld-in"><div class="fld-use" id="fldUse">' + tr('Checking storage…', 'Inaangalia hifadhi…') + '</div>' +
+        (FLD.areas.length ? FLD.areas.map(function (a, i) {
+          var hu = ['green', 'blue', 'purple', 'teal', 'amber'][i % 5];
+          return '<div class="fld-a" data-id="' + esc(a.id) + '" style="--hu:var(--hu-' + hu + ');--hb:var(--hb-' + hu + ')"><div class="fld-ah"><i>' + oic('map') + '</i><div><b>' + esc(a.name) + '</b><span>' + tr('Saved', 'Imehifadhiwa') + ' ' + esc(new Date(a.at).toLocaleDateString(S.lang === 'sw' ? 'sw' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' })) + ' · ' + tr('zoom', 'ukuzaji') + ' ' + a.minZ + '–' + a.maxZ + '</span></div>' +
+            '<button type="button" class="fld-del" data-del="' + esc(a.id) + '" aria-label="' + esc(tr('Delete ' + a.name, 'Futa ' + a.name)) + '">' + oic('trash') + '</button></div>' +
+            '<div class="meter"><i style="width:0%"></i></div><p class="fld-ap">…</p>' +
+            '<div class="fld-ab"><button class="btn small light" type="button" data-show="' + esc(a.id) + '">' + oic('map') + tr('Show on map', 'Onyesha kwenye ramani') + '</button><button class="btn small" type="button" data-more="' + esc(a.id) + '">' + oic('offline') + tr('Keep more', 'Hifadhi zaidi') + '</button></div></div>';
+        }).join('') : '<p class="muted">' + tr('No areas saved yet. On the Map, tap the green download button to save an area before a trip.', 'Bado hakuna eneo lililohifadhiwa. Kwenye Ramani, gusa kitufe kijani cha kupakua ili uhifadhi eneo kabla ya safari.') + '</p>') +
+        '<h4>' + tr('Storage limit for maps', 'Kikomo cha hifadhi ya ramani') + '</h4><div class="seg" id="fldLimit">' + [100, 250, 500, 1000].map(function (v) { return '<button type="button" data-v="' + v + '" aria-pressed="' + (FLD.set.limit === v) + '">' + fldLim(v) + '</button>'; }).join('') + '</div>' +
+        '<h4>' + tr('Keep map tiles I’ve viewed for', 'Hifadhi vigae vya ramani nilivyoangalia kwa') + '</h4><div class="seg" id="fldKeep">' + [7, 30, 90].map(function (v) { return '<button type="button" data-v="' + v + '" aria-pressed="' + (FLD.set.keep === v) + '">' + tr(v + ' days', 'siku ' + v) + '</button>'; }).join('') + '</div>' +
+        '<p class="muted">' + tr('Outside saved areas, map tiles you have looked at are cleared after this long. Saved areas stay until you delete them.', 'Nje ya maeneo yaliyohifadhiwa, vigae vya ramani ulivyoangalia vinafutwa baada ya muda huu. Maeneo yaliyohifadhiwa yanabaki hadi utakapoyafuta.') + '</p>' +
+        '<div class="fld-why"><b>' + tr('Why the app doesn’t download whole areas', 'Kwa nini programu haipakui maeneo yote') + '</b><p>' + tr('OpenStreetMap, Esri and Google don’t allow apps to download map areas in bulk. RAFIKI Pin keeps the tiles you look at instead, and shows the free map when there is no signal. Google maps are never kept.', 'OpenStreetMap, Esri na Google haziruhusu programu kupakua maeneo ya ramani kwa wingi. RAFIKI Pin badala yake inahifadhi vigae unavyoangalia, na inaonyesha ramani ya bure pasipo na mtandao. Ramani za Google hazihifadhiwi kamwe.') + '</p></div></div>';
+    };
+    w = panel(tr('Offline maps', 'Ramani bila mtandao'), html(), 'fld-sh');
+    var fill = function () {
+      fldUsage().then(function (u) { var e = $('fldUse'); if (e) e.innerHTML = '<b>' + tr('This app uses ' + fldMb(u / 1024) + ' on this device', 'Programu hii inatumia ' + fldMb(u / 1024) + ' kwenye kifaa hiki') + '</b><span>' + tr('Limit for maps: ' + fldLim(FLD.set.limit), 'Kikomo cha ramani: ' + fldLim(FLD.set.limit)) + '</span>'; });
+      FLD.areas.forEach(function (a) {
+        fldCover(a).then(function (c) { var row = w.querySelector('.fld-a[data-id="' + a.id + '"]'); if (!row) return; row.querySelector('.meter i').style.width = Math.round(c.s * 100) + '%'; row.querySelector('.fld-ap').textContent = tr(Math.round(c.s * 100) + '% of the street map kept · satellite ' + Math.round(c.i * 100) + '%', Math.round(c.s * 100) + '% ya ramani ya barabara imehifadhiwa · satelaiti ' + Math.round(c.i * 100) + '%'); });
+      });
+    };
+    var redraw = function () { w.querySelector('.bsh-p').lastChild.outerHTML = html(); fill(); swApply(); };
+    w.addEventListener('click', function (e) {
+      var t = e.target, x;
+      if ((x = t.closest('#fldLimit [data-v]'))) { FLD.set.limit = +x.getAttribute('data-v'); fldCfgSave(); return redraw(); }
+      if ((x = t.closest('#fldKeep [data-v]'))) { FLD.set.keep = +x.getAttribute('data-v'); fldCfgSave(); return redraw(); }
+      var id, a;
+      if ((x = t.closest('[data-del]'))) {
+        if (!x.classList.contains('sure')) { x.classList.add('sure'); x.innerHTML = tr('Delete?', 'Futa?'); return; }
+        id = x.getAttribute('data-del'); if (FLD.fill && FLD.fill.id === id) fldStop();
+        FLD.areas = FLD.areas.filter(function (y) { return y.id !== id; }); fldCfgSave();
+        if (window.caches) caches.delete('rafiki-pin-area-' + id);
+        return redraw();
+      }
+      if ((x = t.closest('[data-show],[data-more]'))) {
+        id = x.getAttribute('data-show') || x.getAttribute('data-more'); a = FLD.areas.filter(function (y) { return y.id === id; })[0]; if (!a) return;
+        w.close(); if (S.view !== 'vMap') show('vMap');
+        setTimeout(function () { if (x.hasAttribute('data-more')) fldFill(a); else if (FLD.map) FLD.map.fitBounds([[a.s, a.w], [a.n, a.e]]); }, 120);
+      }
+    });
+    fill(); swApply();
+  }
+
+  // --- QR check-in: stickers hold https://pin.rafikioutreach.org/pin#p=<id> ------------------------
+  function fldQrUrl(id) { return 'https://pin.rafikioutreach.org/pin#p=' + id; }
+  function fldQrParse(t) { t = String(t || '').trim(); var m = /#p[=/](\d{1,15})/.exec(t); if (m) return m[1]; return /^\d{1,15}$/.test(t) ? t : null; }
+  function fldQrFor(id) { var q = jget('rfPinQr', {}); return !!q[id] && Date.now() - q[id] < 12 * 36e5; }
+  function fldQrMark(id) { var q = jget('rfPinQr', {}); q[id] = Date.now(); store.set('rfPinQr', JSON.stringify(q)); }
+  function fldQrClear(id) { var q = jget('rfPinQr', {}); delete q[id]; store.set('rfPinQr', JSON.stringify(q)); }
+  // a sticker scanned with the phone's own camera opens /pin#p=<id>: that project's Site visit, checked in
+  function fldQrHash() {
+    var m = /^#p=(\d{1,15})/.exec(location.hash); if (!m) return false;
+    try { history.replaceState({ pin: 1 }, '', '#map'); } catch (e) {}
+    if (!byId(m[1])) { show('vMap', 'none'); toast(tr('That QR code’s project isn’t in your list. Refresh, then scan again.', 'Mradi wa msimbo huo wa QR haupo kwenye orodha yako. Onyesha upya, kisha changanua tena.')); return true; }
+    fldQrOpen(m[1], 'replace'); return true;
+  }
+  function fldQrOpen(id, how) {
+    fldQrMark(id); openProj(id, 'visit', how);
+    // scanning counts as arriving: the visit's check-in is filled in
+    var n = 0, t = setInterval(function () { var b = document.querySelector('#vProj [data-act=arrive]'); if (++n > 30 || (V && V.arrive)) return clearInterval(t); if (b && V && !V.arrive) { clearInterval(t); b.click(); } }, 100);
+  }
+  function fldQrBadge(id) { return fldQrFor(id) ? '<p class="fld-qrok">' + oic('qr') + tr('Checked in by scanning the site’s QR code', 'Umeingia kwa kuchanganua msimbo wa QR wa eneo') + '</p>' : ''; }
+  function fldLoad(src) { FLD.libs = FLD.libs || {}; return FLD.libs[src] || (FLD.libs[src] = new Promise(function (ok, no) { var s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = function () { delete FLD.libs[src]; no(); }; document.head.appendChild(s); })); }
+
+  // Scan QR: the camera (where the browser can read QR codes), a photo of the sticker, or the number typed in
+  function fldScan() {
+    var live = 'BarcodeDetector' in window && navigator.mediaDevices && navigator.mediaDevices.getUserMedia, stream = null, det = null, loop = 0;
+    var w = document.createElement('div'); w.className = 'fld-scan'; w.id = 'fldScan'; w.setAttribute('role', 'dialog'); w.setAttribute('aria-modal', 'true'); w.setAttribute('aria-label', tr('Scan QR', 'Changanua QR'));
+    w.innerHTML = '<div class="fld-sh2"><button type="button" class="bsh-x" id="fldScX" aria-label="' + tr('Close', 'Funga') + '">' + oic('xc').replace(/<circle[^>]*\/>/, '') + '</button><h3>' + tr('Check in by QR', 'Ingia kwa QR') + '</h3>' +
+      '<p>' + tr('Scan the RAFIKI sticker at the site. The project’s Site visit opens, checked in.', 'Changanua kibandiko cha RAFIKI kilicho eneo la mradi. Ziara ya mradi inafunguka, ukiwa umeingia.') + '</p></div>' +
+      '<div class="fld-cam"><video id="fldVid" playsinline muted></video><div class="fld-aim"><i></i><i></i><i></i><i></i>' + oic('qr') + '</div></div>' +
+      '<div class="fld-sb"><p class="fld-st" id="fldSt" role="status"></p>' +
+      '<label class="btn block' + (live ? ' light' : '') + '" for="fldPh">' + oic('camera') + tr('Take a photo of the code', 'Piga picha ya msimbo') + '</label><input id="fldPh" type="file" accept="image/*" capture="environment" hidden>' +
+      '<div class="fld-type"><input id="fldId" type="text" inputmode="numeric" autocomplete="off" placeholder="' + tr('Or type the project number', 'Au andika namba ya mradi') + '" aria-label="' + tr('Project number', 'Namba ya mradi') + '"><button class="btn small light" type="button" id="fldGo">' + tr('Open', 'Fungua') + '</button></div>' +
+      '<p class="fld-hint">' + tr('Typing the number opens the visit too, but it isn’t marked as checked in by QR.', 'Kuandika namba kunafungua ziara pia, lakini haiandikwi kuwa umeingia kwa QR.') + '</p></div>';
+    document.body.appendChild(w); requestAnimationFrame(function () { w.classList.add('in'); });
+    var st = function (cls, t) { var e = $('fldSt'); e.className = 'fld-st ' + (cls || ''); e.textContent = t || ''; };
+    var close = function () { cancelAnimationFrame(loop); loop = -1; if (stream) stream.getTracks().forEach(function (k) { k.stop(); }); w.remove(); document.removeEventListener('keydown', key); };
+    var key = function (e) { if (e.key === 'Escape') close(); };
+    document.addEventListener('keydown', key);
+    var got = function (text, typed) {
+      var id = fldQrParse(text);
+      if (!id) return st('bad', tr('That QR code isn’t a RAFIKI project sticker.', 'Msimbo huo wa QR si kibandiko cha mradi wa RAFIKI.'));
+      if (!byId(id)) return st('warn', tr('Project ' + id + ' isn’t in your list. Refresh, then scan again.', 'Mradi ' + id + ' haupo kwenye orodha yako. Onyesha upya, kisha changanua tena.'));
+      close(); buzz();
+      if (typed) openProj(id, 'visit'); else fldQrOpen(id);
+    };
+    FLD.scanGot = got;
+    $('fldScX').addEventListener('click', close);
+    $('fldGo').addEventListener('click', function () { var v = $('fldId').value.replace(/\D/g, ''); if (v) got(v, true); });
+    $('fldId').addEventListener('keydown', function (e) { if (e.key === 'Enter') $('fldGo').click(); });
+    $('fldPh').addEventListener('change', function () {
+      var f = this.files && this.files[0]; if (!f) return; st('', tr('Reading the code…', 'Inasoma msimbo…'));
+      fldReadPhoto(f).then(function (t) { if (t) got(t); else st('bad', tr('No QR code found in that photo. Hold the phone closer, keep the code flat and in good light, then try again.', 'Hakuna msimbo wa QR kwenye picha hiyo. Shika simu karibu zaidi, msimbo uwe tambarare na kwenye mwanga mzuri, kisha jaribu tena.')); });
+      this.value = '';
+    });
+    if (!live) { w.classList.add('nocam'); st('', tr('This browser can’t scan with the camera. Take a photo of the code instead.', 'Kivinjari hiki hakiwezi kuchanganua kwa kamera. Piga picha ya msimbo badala yake.')); swApply(); return; }
+    st('', tr('Point the camera at the QR code.', 'Elekeza kamera kwenye msimbo wa QR.'));
+    try { det = new BarcodeDetector({ formats: ['qr_code'] }); } catch (e) { det = null; }
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false }).then(function (s) {
+      if (loop === -1) { s.getTracks().forEach(function (k) { k.stop(); }); return; }
+      stream = s; var v = $('fldVid'); v.srcObject = s; v.play().catch(function () {});
+      var last = 0, step = function (t) {
+        if (loop === -1) return;
+        if (det && t - last > 250 && v.readyState >= 2) { last = t; det.detect(v).then(function (r) { if (r && r[0] && loop !== -1) got(r[0].rawValue); }).catch(function () {}); }
+        loop = requestAnimationFrame(step);
+      };
+      loop = requestAnimationFrame(step);
+    }).catch(function () { w.classList.add('nocam'); st('warn', tr('The camera isn’t available (allow it for this site), so take a photo of the code instead.', 'Kamera haipatikani (iruhusu kwa tovuti hii), kwa hiyo piga picha ya msimbo badala yake.')); });
+    swApply();
+  }
+  // the text in a QR code in a photo: the browser's own reader, else jsQR (loaded only when needed)
+  function fldReadPhoto(file) {
+    return new Promise(function (ok) {
+      var img = new Image(), url = URL.createObjectURL(file);
+      img.onload = function () {
+        var k = Math.min(1, 1600 / Math.max(img.naturalWidth, img.naturalHeight)), c = document.createElement('canvas');
+        c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
+        var x = c.getContext('2d'); x.drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(url);
+        var viaJs = function () { fldLoad('/vendor/qr/jsQR.min.js').then(function () { var d = x.getImageData(0, 0, c.width, c.height), r = window.jsQR(d.data, c.width, c.height, { inversionAttempts: 'attemptBoth' }); ok(r && r.data || null); }).catch(function () { ok(null); }); };
+        if ('BarcodeDetector' in window) { try { new BarcodeDetector({ formats: ['qr_code'] }).detect(c).then(function (r) { if (r && r[0]) ok(r[0].rawValue); else viaJs(); }).catch(viaJs); return; } catch (e) {} }
+        viaJs();
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); ok(null); };
+      img.src = url;
+    });
+  }
+
+  // Office › QR codes: choose projects, see a sticker, print the A4 sheet (or save it as a PDF from the print box)
+  var FQ = { ck: null, off: {} };
+  function fldQrSvg(id) { var q = window.qrcode(0, 'M'); q.addData(fldQrUrl(id)); q.make(); return q.createSvgTag({ cellSize: 4, margin: 0, scalable: true }).replace('<svg ', '<svg role="img" aria-label="QR code" '); }
+  function fldSticker(p) {
+    return '<div class="fq-s"><img src="/img/letterhead/rafiki-logo.jpg" alt="RAFIKI Outreach"><div class="fq-c">' + fldQrSvg(p.id) + '</div><b>' + esc(p.title) + '</b><span>ID ' + esc(p.id) + (p.country ? ' · ' + esc(p.country) : '') + '</span><em>Scan to check in · Changanua uingie</em></div>';
+  }
+  function fldQrOffice(b) {
+    if (FQ.ck === null) FQ.ck = homeCk() || '';
+    b.innerHTML = '<p class="muted">' + tr('Loading…', 'Inapakia…') + '</p>';
+    fldLoad('/vendor/qr/qrcode.min.js').then(function () { fldQrDraw(b); }).catch(function () { b.innerHTML = '<p class="msg bad">' + tr('Couldn’t load the QR maker. Check your signal and try again.', 'Imeshindwa kupakia kitengeneza QR. Angalia mtandao wako na ujaribu tena.') + '</p>'; });
+  }
+  function fldQrDraw(b) {
+    var list = S.projects.filter(function (p) { return !FQ.ck || p.ck === FQ.ck; }).slice().sort(function (x, y) { return x.title.localeCompare(y.title); });
+    var on = list.filter(function (p) { return !FQ.off[p.id]; }), pages = Math.ceil(on.length / 12);
+    b.innerHTML = '<div class="card fq-intro"><i class="fq-ic">' + oic('qr') + '</i><div><h3>' + tr('QR check-in stickers', 'Vibandiko vya QR vya kuingia') + '</h3><p class="muted">' +
+      tr('Print one for each project and fix it at the site (pump house, sign or office door). Scanning it opens the project’s Site visit, and monday.com notes the visit was checked in by QR.',
+        'Chapisha kimoja kwa kila mradi na ukibandike eneo la mradi (nyumba ya pampu, bango au mlango wa ofisi). Kukichanganua kunafungua Ziara ya mradi, na monday.com inaandika kuwa ziara iliingizwa kwa QR.') + '</p></div></div>' +
+      '<div class="fq-ck">' + [['', tr('All countries', 'Nchi zote')]].concat(Object.keys(CNAME).map(function (k) { return [k, CNAME[k]]; })).map(function (c) { return '<button type="button" class="chip" data-fqck="' + c[0] + '" aria-pressed="' + (FQ.ck === c[0]) + '">' + esc(c[1]) + '</button>'; }).join('') + '</div>' +
+      '<div class="fq-grid"><div class="card fq-list"><div class="fq-lh"><b id="fqCount">' + tr(on.length + ' of ' + list.length + ' chosen', on.length + ' kati ya ' + list.length + ' zimechaguliwa') + '</b><button type="button" class="lnk" data-fq="all">' + tr('All', 'Zote') + '</button><button type="button" class="lnk" data-fq="none">' + tr('None', 'Hakuna') + '</button></div>' +
+      list.slice(0, 300).map(function (p) { return '<label class="fq-r"><input type="checkbox" data-fqid="' + esc(p.id) + '"' + (FQ.off[p.id] ? '' : ' checked') + '><span><b>' + esc(p.title) + '</b><small>ID ' + esc(p.id) + (p.area ? ' · ' + esc(p.area) : '') + '</small></span></label>'; }).join('') +
+      (list.length > 300 ? '<p class="muted">' + tr('Showing the first 300. Choose a country to see the rest.', 'Inaonyesha 300 za kwanza. Chagua nchi kuona zilizobaki.') + '</p>' : '') + '</div>' +
+      '<div class="fq-side">' + (on[0] ? '<p class="fq-cap">' + tr('How a sticker looks', 'Jinsi kibandiko kinavyoonekana') + '</p>' + fldSticker(on[0]) : '') +
+      '<p class="fq-n" id="fqN">' + tr(on.length + ' stickers on ' + pages + ' A4 ' + (pages === 1 ? 'page' : 'pages'), 'Vibandiko ' + on.length + ' kwenye kurasa ' + pages + ' za A4') + '</p>' +
+      '<button class="btn block" type="button" id="fqPrint"' + (on.length ? '' : ' disabled') + '>' + oic('file') + tr('Print or save as PDF', 'Chapisha au hifadhi kama PDF') + '</button>' +
+      '<p class="muted fq-tip">' + tr('In the print box choose A4, 100% scale, and “Save as PDF” to keep a file. Cut along the dotted lines.', 'Kwenye kisanduku cha kuchapisha chagua A4, ukubwa 100%, na “Save as PDF” ili kuhifadhi faili. Kata kwenye mistari ya nukta.') + '</p></div></div>';
+    b.onclick = function (e) {
+      var t = e.target, x;
+      if ((x = t.closest('[data-fqck]'))) { FQ.ck = x.getAttribute('data-fqck'); return fldQrDraw(b); }
+      if ((x = t.closest('[data-fq]'))) { var none = x.getAttribute('data-fq') === 'none'; list.forEach(function (p) { if (none) FQ.off[p.id] = 1; else delete FQ.off[p.id]; }); return fldQrDraw(b); }
+      if (t.closest('#fqPrint')) return fldQrPrint(on);
+    };
+    b.onchange = function (e) { var x = e.target.closest('[data-fqid]'); if (!x) return; if (x.checked) delete FQ.off[x.getAttribute('data-fqid')]; else FQ.off[x.getAttribute('data-fqid')] = 1; fldQrDraw(b); };
+    swApply();
+  }
+  function fldQrPrint(list) {
+    var old = $('fldPrint'); if (old) old.remove();
+    var d = document.createElement('div'); d.id = 'fldPrint'; d.setAttribute('data-nosw', '');
+    var pages = []; for (var i = 0; i < list.length; i += 12) pages.push(list.slice(i, i + 12));
+    d.innerHTML = pages.map(function (pg, k) { return '<section class="fq-page">' + pg.map(fldSticker).join('') + '<footer>RAFIKI Pin · QR check-in stickers · page ' + (k + 1) + ' of ' + pages.length + ' · cut along the dotted lines</footer></section>'; }).join('');
+    document.body.appendChild(d); document.body.classList.add('fld-printing');
+    var done = function () { document.body.classList.remove('fld-printing'); removeEventListener('afterprint', done); };
+    addEventListener('afterprint', done);
+    setTimeout(function () { window.print(); }, 150);
+  }
+
+  (function () {
+    var css = '' +
+      '#homeTop .quick{grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}#homeTop .quick button{padding:10px 2px;font-size:.72rem}' +
+      '.quick button[data-q=scan]{--hu:var(--hu-teal);--hb:var(--hb-teal)}.quick button:nth-child(5){animation-delay:.32s}' +
+      '.fld-ob i{display:flex;width:32px;height:32px;border-radius:10px;align-items:center;justify-content:center;background:#E2F4EA;color:#1C8A50}.fld-ob i svg{width:21px;height:21px}' +
+      '.fld-in{display:flex;flex-direction:column;gap:10px;padding-bottom:6px}.fld-in .seg{margin:4px 0 2px}.fld-in .btn.block{width:100%}.fld-in .btn svg{width:20px;height:20px}.fld-in h4{margin:10px 0 0;font-size:.95rem;color:var(--ink)}.fld-in p{margin:0}' +
+      '.fld-l{font-weight:700;font-size:.82rem;color:var(--ink)}#fldName{width:100%;min-height:48px;border-radius:14px;border:1px solid var(--edge);background:var(--card);color:var(--text);padding:0 14px;font:inherit}' +
+      '.fld-est,.fld-use{display:flex;flex-direction:column;gap:4px;border-radius:16px;background:var(--hb-green);color:var(--ink);padding:12px 14px;font-size:.85rem}.fld-est span,.fld-use span{color:var(--muted)}.fld-est .bad{color:var(--bad,#B3261E)}.fld-note{font-size:.8rem}' +
+      '.fld-bar{background:var(--card);border-radius:18px;padding:12px 14px;box-shadow:0 4px 18px rgba(4,38,63,.18);border:var(--bw) solid var(--line);display:flex;flex-direction:column;gap:8px}' +
+      '.fld-bh{display:flex;gap:10px;align-items:flex-start}.fld-bh i{flex:none;width:36px;height:36px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:var(--hb-green);color:var(--hu-green)}.fld-bh i svg{width:20px;height:20px}' +
+      '.fld-bh b{display:block;font-size:.9rem;color:var(--ink)}.fld-bh span{display:block;font-size:.76rem;color:var(--muted);line-height:1.35}.fld-bf{display:flex;align-items:center;gap:8px}.fld-bf b{flex:1;font-size:.8rem;color:var(--ink)}.fld-bf .btn{background:var(--ok,#1C7C4A);min-height:40px}.fld-bf .btn svg{width:18px;height:18px}' +
+      '.fld-a{border:1px solid var(--line);border-radius:18px;padding:12px;display:flex;flex-direction:column;gap:8px;background:var(--card)}.fld-ah{display:flex;gap:10px;align-items:center}.fld-ah > i{flex:none;width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:var(--hb);color:var(--hu)}.fld-ah > i svg{width:20px;height:20px}' +
+      '.fld-ah > div{flex:1;min-width:0}.fld-ah b{display:block;color:var(--ink)}.fld-ah span{font-size:.76rem;color:var(--muted)}.fld-del{flex:none;min-width:44px;height:44px;border-radius:12px;border:0;background:transparent;color:var(--bad,#B3261E);font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center}.fld-del svg{width:22px;height:22px}.fld-del.sure{background:var(--bad,#B3261E);color:#fff;padding:0 12px}' +
+      '.fld-ap{font-size:.8rem;font-weight:700;color:var(--ink)}.fld-ab{display:flex;gap:8px}.fld-ab .btn{flex:1}.fld-ab .btn svg{width:18px;height:18px}.fld-why{border-radius:16px;background:var(--hb-slate);padding:12px 14px;font-size:.8rem;color:var(--ink)}.fld-why p{margin:4px 0 0;color:var(--muted)}' +
+      '.fld-qrok{display:flex;align-items:center;gap:8px;margin:8px 0;padding:10px 12px;border-radius:14px;background:var(--hb-teal);color:var(--hu-teal);font-weight:700;font-size:.88rem}.fld-qrok svg{width:20px;height:20px;flex:none}' +
+      '.fld-scan{position:fixed;inset:0;z-index:1400;background:#04131F;color:#fff;display:flex;flex-direction:column;opacity:0;transition:opacity .2s}.fld-scan.in{opacity:1}' +
+      '.fld-sh2{position:relative;padding:calc(14px + env(safe-area-inset-top)) 64px 8px 18px}.fld-sh2 h3{margin:0;font-size:1.25rem;color:#fff}.fld-sh2 p{margin:4px 0 0;font-size:.85rem;color:#B9D3E6}.fld-sh2 .bsh-x{right:14px;top:calc(18px + env(safe-area-inset-top));transform:none;background:rgba(255,255,255,.14);color:#fff}' +
+      '.fld-cam{position:relative;flex:1;min-height:200px;overflow:hidden;display:flex;align-items:center;justify-content:center}.fld-cam video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}' +
+      '.fld-aim{position:relative;width:min(64vw,280px);aspect-ratio:1;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.35)}.fld-aim > svg{width:34%;height:34%}' +
+      '.fld-aim i{position:absolute;width:34px;height:34px;border:4px solid #5CD3D6;border-radius:6px}.fld-aim i:nth-child(1){left:0;top:0;border-right:0;border-bottom:0}.fld-aim i:nth-child(2){right:0;top:0;border-left:0;border-bottom:0}.fld-aim i:nth-child(3){left:0;bottom:0;border-right:0;border-top:0}.fld-aim i:nth-child(4){right:0;bottom:0;border-left:0;border-top:0}' +
+      '.fld-aim::after{content:"";position:absolute;left:8%;right:8%;top:50%;height:2px;background:#5CD3D6;box-shadow:0 0 12px #5CD3D6;animation:fldSweep 2.2s ease-in-out infinite}@keyframes fldSweep{0%,100%{transform:translateY(-110px)}50%{transform:translateY(110px)}}' +
+      '@media (prefers-reduced-motion: reduce){.fld-aim::after{animation:none}.fld-scan{transition:none}}' +
+      '.fld-scan.nocam .fld-cam{flex:0 0 220px}.fld-sb{padding:14px 18px calc(18px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:10px;background:var(--bg);color:var(--text);border-radius:24px 24px 0 0}' +
+      '.fld-sb .btn.block{width:100%}.fld-scan.nocam .fld-sb{flex:1}.fld-scan.nocam .fld-aim{width:150px}.fld-sb .btn svg{width:20px;height:20px}.fld-st{margin:0;font-weight:700;font-size:.88rem;color:var(--ink);min-height:1.2em}.fld-st.bad{color:var(--bad,#B3261E)}.fld-st.warn{color:var(--warn,#8A5200)}' +
+      '.fld-type{display:flex;gap:8px}.fld-type .btn{flex:none;min-height:48px}.fld-type input{flex:1;min-width:0;min-height:48px;border-radius:14px;border:1px solid var(--edge);background:var(--card);color:var(--text);padding:0 14px;font:inherit}.fld-hint{margin:0;font-size:.76rem;color:var(--muted)}' +
+      '.fq-intro{display:flex;gap:12px;align-items:flex-start;margin-bottom:12px}.fq-intro h3{margin:0 0 4px}.fq-intro p{margin:0;font-size:.85rem}.fq-ic{flex:none;width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:var(--hb-teal);color:var(--hu-teal)}.fq-ic svg{width:24px;height:24px}' +
+      '.fq-ck{display:flex;gap:8px;overflow-x:auto;margin-bottom:12px;padding-bottom:2px}.fq-ck .chip{flex:none}.fq-ck .chip{--hu:var(--hu-teal);--hb:var(--hb-teal)}' +
+      '.fq-grid{display:grid;gap:12px}@media (min-width:860px){.fq-grid{grid-template-columns:1fr 300px;align-items:start}}' +
+      '.fq-list{padding:12px 14px;max-height:62vh;overflow:auto}.fq-lh{display:flex;align-items:center;gap:6px;margin-bottom:6px}.fq-lh b{flex:1;color:var(--ink)}.fq-lh .lnk{min-height:40px;padding:0 8px}' +
+      '.fq-r{display:flex;gap:10px;align-items:center;min-height:48px;border-top:1px solid var(--line);cursor:pointer}.fq-r input{width:20px;height:20px;accent-color:var(--hu-teal);flex:none}.fq-r span{min-width:0}.fq-r b{display:block;font-size:.9rem;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.fq-r small{color:var(--muted)}' +
+      '.fq-side{display:flex;flex-direction:column;gap:10px;align-items:stretch}.fq-cap{margin:0;text-align:center;font-weight:700;color:var(--ink)}.fq-side .fq-s{width:220px;margin:0 auto}.fq-side .btn svg{width:20px;height:20px}.fq-tip{font-size:.78rem;margin:0}.fq-n{margin:4px 0 0;text-align:center;font-weight:700;color:var(--ink);font-size:.88rem}' +
+      '.fq-s{background:#fff;color:#04263F;border:1px dashed #B8C4CE;border-radius:14px;padding:12px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:3px}.fq-s img{width:58%;height:auto}.fq-c{width:62%;margin:6px 0 4px}.fq-c svg{display:block;width:100%;height:auto}' +
+      '.fq-s b{font-size:.9rem;line-height:1.2;max-height:2.4em;overflow:hidden}.fq-s span{font-size:.72rem;color:#5A6066}.fq-s em{font-style:normal;font-size:.72rem;font-weight:700;color:#0A78C2}' +
+      '#fldPrint{display:none}' +
+      '@page fldA4{size:A4;margin:0}' +
+      '@media print{body.fld-printing > *:not(#fldPrint){display:none !important}body.fld-printing{background:#fff !important}body.fld-printing #fldPrint{display:block}' +
+      '.fq-page{page:fldA4;width:210mm;height:297mm;box-sizing:border-box;padding:12mm 10mm 14mm;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(4,1fr);gap:0;position:relative;break-after:page}' +
+      '.fq-page .fq-s{border-radius:4mm;margin:1.5mm;padding:3mm;justify-content:center;-webkit-print-color-adjust:exact;print-color-adjust:exact}.fq-page .fq-s b{font-size:10.5pt}.fq-page .fq-s span,.fq-page .fq-s em{font-size:7.5pt}' +
+      '.fq-page footer{position:absolute;left:0;right:0;bottom:6mm;text-align:center;font-size:7pt;color:#808080}}';
+    var st = document.createElement('style'); st.id = 'fldCss'; st.textContent = css; document.head.appendChild(st);
+  })();
+  // ===== end of field tools ========================================================================
 
   // --- start ----------------------------------------------------------------------------------------
   netUi(); outboxUi(); progUi(); installUi();

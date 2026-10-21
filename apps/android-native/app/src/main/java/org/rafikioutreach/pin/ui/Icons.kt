@@ -28,6 +28,11 @@ object Ic {
         "map" to listOf("M3.5 6.5l5.5-2.5 6 2.5 5.5-2.5v13.5L15 20l-6-2.5-5.5 2.5z", "M9 4v13.5M15 6.5V20"),
         "mic" to listOf(rect(9f, 3.5f, 6f, 11f, 3f), "M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"),
         "camera" to listOf("M4 8.5h3l1.6-2.5h6.8L17 8.5h3v10.5H4z", circle(12f, 13.5f, 3.3f)),
+        // QR stickers and offline maps
+        "qr" to listOf(rect(4f, 4f, 6f, 6f, 1f), rect(14f, 4f, 6f, 6f, 1f), rect(4f, 14f, 6f, 6f, 1f), "M14 14h2.5v2.5H14zM17.5 17.5H20V20h-2.5zM14 20h.5M20 14h.5M6.8 7h.4M16.8 7h.4M6.8 17h.4"),
+        "scan" to listOf("M4 8.5V6a2 2 0 0 1 2-2h2.5M15.5 4H18a2 2 0 0 1 2 2v2.5M20 15.5V18a2 2 0 0 1-2 2h-2.5M8.5 20H6a2 2 0 0 1-2-2v-2.5", "M7 12h10"),
+        "offline" to listOf("M7.5 18.5H7a4.5 4.5 0 0 1-.6-9 6 6 0 0 1 11.4 1.5 3.8 3.8 0 0 1-.8 7.5", "M12 11v8.5M9 16.5l3 3 3-3"),
+        "trash" to listOf("M4.5 7h15M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13", "M10 11v5.5M14 11v5.5"),
         "compass" to listOf(circle(12f, 12f, 8.5f), "M15.5 8.5l-2 5-5 2 2-5z"),
         "search" to listOf(circle(11f, 11f, 6.5f), "M16 16l4 4"),
         "list" to listOf("M9 6.5h11M9 12h11M9 17.5h11", circle(4.8f, 6.5f, 1.2f), circle(4.8f, 12f, 1.2f), circle(4.8f, 17.5f, 1.2f)),

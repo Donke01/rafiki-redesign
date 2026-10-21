@@ -85,6 +85,22 @@ function metres(a, b) {
 const dist = m => m < 1000 ? Math.round(m) + ' m' : (m / 1000).toFixed(1) + ' km';
 const num = (v, max) => { const n = Number(v); return isFinite(n) && n >= 0 && n <= max ? Math.round(n * 10) / 10 : null; };
 
+// Offline map areas (Map › Save this area for offline). The public map servers the app uses don't allow
+// bulk downloading (tile.openstreetmap.org, Esri, Google), so by default the app only keeps the tiles you
+// look at. If the office runs (or rents) a tile server whose terms allow saving areas for offline use, put
+// its address in PIN_OFFLINE_TILES, e.g. "https://tiles.example.org/{z}/{x}/{y}.png" (PIN_OFFLINE_TILES_ATTR:
+// the credit line, PIN_OFFLINE_TILES_MAXZOOM: the deepest zoom, default 16); the Android app then downloads
+// whole areas from it. Servers known to forbid bulk downloads are refused here.
+const NO_BULK = /(^|\.)(openstreetmap\.(org|fr)|arcgisonline\.com|arcgis\.com|googleapis\.com|google\.com|opentopomap\.org|basemaps\.cartocdn\.com|cartocdn\.com)$/i;
+export function offlineTiles(env) {
+  const url = String(env.PIN_OFFLINE_TILES || '').trim();
+  if (!/^https:\/\/[^/]+\/.*\{z\}.*\{x\}.*\{y\}/.test(url)) return null;
+  let host = ''; try { host = new URL(url.replace(/\{[a-z]\}/g, '0')).hostname; } catch (e) { return null; }
+  if (NO_BULK.test(host)) return null;
+  const mz = Math.round(Number(env.PIN_OFFLINE_TILES_MAXZOOM) || 16);
+  return { url, attr: clean(env.PIN_OFFLINE_TILES_ATTR || '', 160), maxZoom: Math.min(18, Math.max(10, mz)) };
+}
+
 // "Meril:1234, Bertin:5678" → [{ name, pin }]
 function people(env) {
   // "Meril:4821" or, with a home country, "Meril:4821:ke"
@@ -218,7 +234,7 @@ export async function onRequestGet({ request, env, waitUntil }) {
       const mine = (await team(env)).find(p => sameName(p.name, chk.who)) || {};
       extra.me = { kind: chk.kind || '', nick: pr.nick || '', phone: pr.phone || mine.phone || '', home: pr.home || chk.home || '' };
     } else extra.me = { kind: chk.kind || 'shared', nick: '', phone: '', home: '' };
-    return json(Object.assign({ ok: true, who: chk.who, monday: !!chk.monday, linked: chk.linked || '', gmaps: env.GOOGLE_TILES_WEB_KEY || env.GOOGLE_TILES_ANDROID_KEY ? { web: env.GOOGLE_TILES_WEB_KEY || '', android: env.GOOGLE_TILES_ANDROID_KEY || '' } : null, home: chk.home || '', projects, repairs, visits: await getJson(env, 'pinlastvisit', {}), tests: await getJson(env, 'pintests', {}) }, extra), 200);
+    return json(Object.assign({ ok: true, who: chk.who, monday: !!chk.monday, linked: chk.linked || '', gmaps: env.GOOGLE_TILES_WEB_KEY || env.GOOGLE_TILES_ANDROID_KEY ? { web: env.GOOGLE_TILES_WEB_KEY || '', android: env.GOOGLE_TILES_ANDROID_KEY || '' } : null, offlineTiles: offlineTiles(env), home: chk.home || '', projects, repairs, visits: await getJson(env, 'pinlastvisit', {}), tests: await getJson(env, 'pintests', {}) }, extra), 200);
   } catch (e) {
     console.error('pin get:', e && e.message);
     return json({ ok: false, reason: 'down' }, 502);
@@ -364,6 +380,8 @@ export async function onRequestPost({ request, env, waitUntil }) {
       const L = []; // one line each in the monday.com note
       const urg = URGENCY[b.urgency] && b.state !== 'working' ? b.urgency : '';
       L.push((kind === 'build' ? '🏗️ Construction visit by ' : '🩺 Site visit by ') + by + ' (RAFIKI pin app): ' + state + '.' + (urg ? ' Urgency: ' + URGENCY[urg] + '.' : ''));
+      // checked in by scanning the QR sticker on the site (Office › QR codes)
+      if (b.qr === true) L.push('Checked in by scanning the site’s QR code.');
       const stage = kind === 'build' && STAGE[b.stage] ? b.stage : '';
       if (stage) L.push('Stage: ' + STAGE[stage] + '.');
       const list = (a, n) => (Array.isArray(a) ? a : []).map(x => clean(x, 60)).filter(Boolean).slice(0, n);
@@ -444,6 +462,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
       else await setRepair(env, id, { state: b.state, by, at, note: clean(b.note, 300), t: title, urgency: urg, problems: bad.concat(other ? [other] : []).slice(0, 12), parts: partsNeeded, cost: cost || null });
       if (env.FEED) {
         const rec = { at, by, state: b.state, urgency: urg, readings: parts.length ? R : null, quality: qs.length ? Q : null, kind: kind || undefined, stage: stage || undefined, numbers: Object.keys(N).length ? N : null };
+        if (b.qr === true) rec.qr = true;
         await env.FEED.put('pinvisit:' + id, JSON.stringify([rec].concat(past).slice(0, 5)));
         // people served: this project's latest count, and this month's total for the trend
         later(notePeople(env, id, [rec].concat(past)).then(m => (m ? getFeed(env).then(f => snapPeople(env, f.projects || [], m)) : null)).catch(e => console.error('people:', e && e.message)));
