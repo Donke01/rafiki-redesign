@@ -289,6 +289,16 @@ fun UpdateCard(m: AppModel) {
                     "aborted" -> t("The update was cancelled.", "Sasisho limeghairiwa.")
                     else -> t("Android couldn’t install the update.", "Android haikuweza kusakinisha sasisho.")
                 }, style = MaterialTheme.typography.bodySmall, color = C.bad, modifier = Modifier.padding(top = 12.dp).testTag("update_error"))
+                if (s.why == "aborted" && U.samsung) {
+                    val hu = C.hue("due")
+                    Column(Modifier.padding(top = 10.dp).fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(hu.bg).padding(12.dp).testTag("auto_blocker")) {
+                        Text(t("Tapped Update? Samsung’s Auto Blocker stopped it.", "Uligusa Sasisha? Auto Blocker ya Samsung imelizuia."), style = MaterialTheme.typography.labelLarge, color = hu.fg)
+                        Text(t("Turn Auto Blocker off for a moment (Security and privacy › Auto Blocker), come back and tap Try again. It turns itself back on later.",
+                               "Zima Auto Blocker kwa muda (Security and privacy › Auto Blocker), rudi kisha uguse Jaribu tena. Itajiwasha tena baadaye."),
+                            style = MaterialTheme.typography.bodySmall, color = C.ink, modifier = Modifier.padding(top = 4.dp))
+                        Btn(t("Open Security settings", "Fungua mipangilio ya usalama"), { runCatching { ctx.startActivity(U.securityIntent()) } }, Modifier.padding(top = 10.dp).fillMaxWidth().testTag("auto_blocker_open"), icon = "lock", light = true, small = true)
+                    }
+                }
                 Btn(t("Try again", "Jaribu tena"), { if (s.why == "aborted" && U.file(ctx).exists()) U.install(ctx.applicationContext) else start() }, Modifier.padding(top = 10.dp).fillMaxWidth(), icon = "refresh")
                 Text(t("Having trouble? Download the app from the website", "Una tatizo? Pakua programu kutoka kwenye tovuti"), style = MaterialTheme.typography.labelMedium, color = C.blue,
                     modifier = Modifier.padding(top = 8.dp).clip(RoundedCornerShape(8.dp)).clickable { openApk(ctx) }.padding(vertical = 6.dp))

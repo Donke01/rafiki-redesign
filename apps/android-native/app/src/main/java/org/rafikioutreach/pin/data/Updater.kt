@@ -40,6 +40,12 @@ object Updater {
     fun permissionIntent(ctx: Context) = Intent(android.provider.Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, android.net.Uri.parse("package:" + ctx.packageName)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
     fun cancel() { cancelled = true }
+
+    /** Samsung phones have Auto Blocker, which quietly cancels installs that don't come from the Play Store or Galaxy Store. */
+    var samsung = Build.MANUFACTURER.equals("samsung", ignoreCase = true)
+    /** Security settings, where Samsung lists Auto Blocker (Android has no direct link to the Auto Blocker page). */
+    fun securityIntent() = Intent(android.provider.Settings.ACTION_SECURITY_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    internal fun setState(s: State) { _state.value = s }
     fun reset() { _state.value = State.Idle }
 
     /** Downloads [url] (checking [sha256] when given), then installs it. */

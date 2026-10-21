@@ -132,6 +132,13 @@ class MeTeamTest {
         rule.onNodeWithTag("app_update").performScrollTo(); shot("65-app-update")
         rule.onNodeWithTag("update_row").performScrollTo(); shot("66-update-row")
         rule.onNodeWithTag("update_status", useUnmergedTree = true).assertTextEquals("Update available · 9.9")
+        // Samsung's Auto Blocker cancels the install: explain it and link to the setting
+        val U = org.rafikioutreach.pin.data.Updater
+        U.samsung = false; U.setState(org.rafikioutreach.pin.data.Updater.State.Failed("aborted")); rule.waitForIdle()
+        rule.onAllNodesWithTag("auto_blocker").assertCountEquals(0)
+        U.samsung = true; U.setState(org.rafikioutreach.pin.data.Updater.State.Idle); U.setState(org.rafikioutreach.pin.data.Updater.State.Failed("aborted")); rule.waitForIdle()
+        rule.onNodeWithTag("auto_blocker").performScrollTo(); rule.onNodeWithTag("auto_blocker_open").assertExists(); shot("67-auto-blocker")
+        U.samsung = false; U.reset()
         org.rafikioutreach.pin.ui.Motion.on = true
     }
 
