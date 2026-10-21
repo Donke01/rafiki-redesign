@@ -209,6 +209,8 @@ fun Shell(m: AppModel) {
             // notifications, top right (pull a screen down to refresh it)
             org.rafikioutreach.pin.ui.Bell(m) { go(Place(here.tab, sub = "notes")) }
         }
+        // "Sharing location with the office · Stop", on every screen while sharing (Me › Settings › Share my location)
+        org.rafikioutreach.pin.ui.SharingBar(m)
         // pull down to refresh (on screens that scroll)
         var pulling by remember { androidx.compose.runtime.mutableStateOf(false) }
         androidx.compose.material3.pulltorefresh.PullToRefreshBox(pulling, { pulling = true; m.refresh { pulling = false } }, Modifier.weight(1f).fillMaxWidth().testTag("pull")) {
@@ -240,6 +242,7 @@ fun Shell(m: AppModel) {
                         pl.sub == "search" -> { val snap = m.snap.collectAsState().value; val fx = m.fix.collectAsState().value; if (snap != null) org.rafikioutreach.pin.ui.SearchScreen(m, snap, fx?.ll, { go(Place(pl.tab, it)) }) { pop() } }
                         pl.sub == "report" -> org.rafikioutreach.pin.ui.ReportScreen(m) { pop() }
                         pl.sub == "notes" -> org.rafikioutreach.pin.ui.NotificationsScreen(m, { go(Place(pl.tab, it)) }, { go(Place(pl.tab, sub = "set_notify")) }) { pop() }
+                        pl.sub == "set_share" -> org.rafikioutreach.pin.ui.ShareSettingsPage(m) { pop() }
                         pl.sub?.startsWith("set_") == true -> org.rafikioutreach.pin.ui.SettingsPage(m, pl.sub.removePrefix("set_")) { pop() }
                         pl.sub == "route" -> org.rafikioutreach.pin.ui.RouteScreen(m, { go(Place(pl.tab, it)) }) { pop() }
                         pl.tab == "map" -> MapScreen(m, { go(Place("map", it)) }) { go(Place("map", it, "visit")) }

@@ -41,6 +41,8 @@ class AlertWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx,
                 showUpdate(applicationContext, v.json.optString("versionName"), v.json.optString("notes")); prefs.updNotified = code
             }
         }
+        // Share my location with the office: only if turned on, in work hours, with the permission already given
+        runCatching { ShareHere.fromWorker(applicationContext, prefs, api) }
         val snapR = api.list(); if (!snapR.ok) return Result.success()
         val raw = snapR.json; val n = raw.optInt("reviewOpen")
         val old = prefs.loadSnapshot()?.optInt("reviewOpen") ?: 0

@@ -96,6 +96,7 @@ fun SettingsCard(m: AppModel, go: (String) -> Unit) {
             Group(t("Security and alerts", "Usalama na arifa"))
             BioRow(m)
             SetRow("bell", "amber", t("Notifications", "Arifa"), if (m.prefs.phoneAlerts && AlertWorker.allowed(ctx)) t("On this phone too", "Pia kwenye simu hii") else t("In the app only", "Ndani ya programu tu"), "set_notify") { go("notify") }
+            ShareRow(m) { go("share") }
             Group(t("Display", "Mwonekano"))
             SetRow("sun", "amber", t("Appearance", "Mwonekano"), lookText(), "set_look") { go("look") }
             SetRow("globe", "blue", t("Language", "Lugha"), if (org.rafikioutreach.pin.Lang.sw) "Kiswahili" else "English", "set_lang") { go("lang") }

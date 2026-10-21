@@ -30,6 +30,8 @@ class Api(val server: String, private val pin: () -> String, private val session
     suspend fun activity(): Reply = call("GET", "/api/pin?activity=1", null)
     suspend fun team(): Reply = call("GET", "/api/pin?team=1", null)
     suspend fun adminGet(view: String): Reply = call("GET", "/api/admin?view=" + enc(view), null)
+    /** An admin view with more to ask, e.g. adminGet("plan", mapOf("ck" to "ke", "days" to "5")). */
+    suspend fun adminGet(view: String, q: Map<String, String>): Reply = call("GET", "/api/admin?view=" + enc(view) + q.entries.joinToString("") { "&" + enc(it.key) + "=" + enc(it.value) }, null)
     suspend fun admin(body: JSONObject): Reply = call("POST", "/api/admin", body)
     suspend fun authMe(): Reply = call("GET", "/api/pin-auth/me", null)
     suspend fun authExchange(code: String, verifier: String): Reply = call("POST", "/api/pin-auth/exchange", JSONObject().put("code", code).put("verifier", verifier))
