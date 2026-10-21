@@ -76,7 +76,7 @@ fun RepairTracker(m: AppModel, p: Project, r: Repair, here: LatLng?) {
         t("Reported", "Imeripotiwa") to ((if (bad) t("Not working", "Haifanyi kazi") else t("Needs repair", "Inahitaji matengenezo")) + " · " + r.by + ", " + whenText(r.at)),
         t("Assigned", "Imegawiwa") to (if (r.assignee.isNotBlank()) r.assignee + (r.stepAt["assigned"]?.let { ", " + whenText(it) } ?: "") else t("Waiting for the office", "Inasubiri ofisi")),
         t("Parts ordered", "Vipuri vimeagizwa") to (r.stepAt["parts"]?.let { whenText(it) } ?: if (r.parts.isNotBlank()) t("Needs: ", "Inahitaji: ") + r.parts else "—"),
-        t("Fixed", "Imerekebishwa") to (if (fixed) m.prefs.name else t("Mark it fixed when the water is running again", "Weka imerekebishwa maji yakitoka tena")),
+        t("Fixed", "Imerekebishwa") to (if (fixed) m.prefs.name else (if (isWater(p)) t("Mark it fixed when the water is running again", "Weka imerekebishwa maji yakitoka tena") else t("Mark it fixed when it’s working again", "Weka imerekebishwa ikifanya kazi tena"))),
     )
     val pulse by if (Motion.on && Motion.loops) rememberInfiniteTransition(label = "now").animateFloat(0f, 1f, infiniteRepeatable(tween(1800)), label = "p") else remember { mutableFloatStateOf(0f) }
     Card(Modifier.padding(top = 12.dp).testTag("tracker")) {

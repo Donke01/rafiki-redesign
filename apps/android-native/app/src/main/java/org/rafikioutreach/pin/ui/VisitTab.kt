@@ -29,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
@@ -66,13 +67,59 @@ private val ITEMS = mapOf(
     "base" to ("Tank base or stand" to "Msingi wa tangi"), "waterpoint" to ("Water point works" to "Kituo cha maji kinafanya kazi"),
     "handwash" to ("Handwashing station (water and soap)" to "Kituo cha kunawa mikono (maji na sabuni)"), "latrines" to ("Latrines clean and usable" to "Vyoo ni safi na vinatumika"),
     "storage" to ("Water storage tank" to "Tangi la kuhifadhi maji"), "roof" to ("Roof and building" to "Paa na jengo"),
+    // schools
+    "sroof" to ("Roof, gutters and ceiling" to "Paa, mifereji na dari"), "walls" to ("Walls and floor (no cracks)" to "Kuta na sakafu (bila nyufa)"),
+    "doors" to ("Doors, windows and locks" to "Milango, madirisha na kufuli"), "desks" to ("Desks and furniture" to "Madawati na samani"),
+    "boards" to ("Chalkboards and paint" to "Ubao na rangi"), "inuse" to ("Classrooms in use" to "Madarasa yanatumika"),
+    // clinics
+    "bldg" to ("Building, roof and walls" to "Jengo, paa na kuta"), "equip" to ("Equipment and beds working" to "Vifaa na vitanda vinafanya kazi"),
+    "supplies" to ("Medicines and supplies stocked and in date" to "Dawa na vifaa vipo na havijaisha muda"), "washrooms" to ("Water and washrooms" to "Maji na vyoo"),
+    "light" to ("Power and lighting" to "Umeme na taa"), "waste" to ("Incinerator and waste disposal" to "Kichomea taka na utupaji wa taka"),
+    // children's homes
+    "dorm" to ("Dormitories" to "Mabweni"), "beds" to ("Beds, mattresses and bedding" to "Vitanda, magodoro na matandiko"),
+    "kitchen" to ("Kitchen and food store" to "Jiko na stoo ya chakula"), "wallgate" to ("Wall, fence and gate" to "Ukuta, uzio na lango"),
+    // farms
+    "pen" to ("Pen or coop: roof, walls and floor" to "Banda: paa, kuta na sakafu"), "animals" to ("Animals healthy" to "Mifugo ni wazima"),
+    "feed" to ("Feed and water for the animals" to "Chakula na maji ya mifugo"), "drained" to ("Clean and drained" to "Safi na maji hayatuami"),
+    "records" to ("Records kept (births, deaths, sales)" to "Kumbukumbu zinawekwa (kuzaliwa, vifo, mauzo)"),
+    // any other building
+    "furniture" to ("Equipment and furniture" to "Vifaa na samani"), "used" to ("Being used as planned" to "Inatumika kama ilivyopangwa"),
+    // building sites
+    "materials" to ("Materials on site and stored safely" to "Vifaa vya ujenzi vipo na vimehifadhiwa salama"), "workers" to ("Workers on site" to "Mafundi wako kazini"),
+    "plumb" to ("Walls straight, no cracks" to "Kuta zimenyooka, bila nyufa"), "timber" to ("Roof and timber" to "Paa na mbao"),
+    "fitted" to ("Doors and windows fitted" to "Milango na madirisha yamewekwa"), "plan" to ("Built to the plan and size agreed" to "Inajengwa kulingana na mpango na ukubwa uliokubaliwa"),
+    "safety" to ("Site safe and tidy" to "Eneo ni salama na nadhifu"), "schedule" to ("On schedule" to "Inaenda kwa ratiba"),
 )
+
+/** Numbers counted on visits that aren't water (key → English, Kiswahili). */
+private val NUM = mapOf(
+    "pupils" to ("Pupils enrolled" to "Wanafunzi waliosajiliwa"), "teachers" to ("Teachers" to "Walimu"), "patients" to ("Patients a week" to "Wagonjwa kwa wiki"),
+    "staff" to ("Staff on duty" to "Wafanyakazi kazini"), "beds" to ("Beds in use" to "Vitanda vinavyotumika"), "children" to ("Children living there" to "Watoto wanaoishi hapo"),
+    "carers" to ("Carers and staff" to "Walezi na wafanyakazi"), "animals" to ("Animals now" to "Mifugo sasa"), "born" to ("Born or hatched since the last visit" to "Waliozaliwa au kuanguliwa tangu ziara iliyopita"),
+    "died" to ("Died since the last visit" to "Waliokufa tangu ziara iliyopita"), "sold" to ("Sold since the last visit" to "Waliouzwa tangu ziara iliyopita"),
+    "income" to ("Income from sales since the last visit (KES)" to "Mapato ya mauzo tangu ziara iliyopita (KES)"), "users" to ("People using it (estimate)" to "Watu wanaoitumia (makadirio)"),
+    "workers" to ("Workers on site today" to "Mafundi kazini leo"),
+)
+private val NUMS = mapOf("school" to listOf("pupils", "teachers"), "health" to listOf("patients", "staff", "beds"), "home" to listOf("children", "carers"),
+    "farm" to listOf("animals", "born", "died", "sold", "income"), "building" to listOf("users"), "build" to listOf("workers"))
+private val CARER = mapOf("school" to ("Head teacher" to "Mwalimu mkuu"), "health" to ("Person in charge (e.g. clinical officer)" to "Msimamizi (mf. afisa wa kliniki)"),
+    "home" to ("Home manager" to "Msimamizi wa makao"), "farm" to ("Farmer" to "Mkulima"), "building" to ("Person in charge" to "Msimamizi"), "build" to ("Fundi or site foreman" to "Fundi au msimamizi wa ujenzi"))
+private val STAGES = listOf("foundation" to ("Foundation" to "Msingi"), "walls" to ("Walls" to "Kuta"), "roof" to ("Roof" to "Paa"), "finishing" to ("Finishing" to "Umaliziaji"), "done" to ("Finished" to "Imekamilika"))
+internal fun isWater(p: Project) = "borehole" in p.type.lowercase() || "collection" in p.type.lowercase()
+/** On a building site the condition reads On track / Problems to fix / Work stopped. */
+private fun stateLabel(p: Project, k: String) = if (kind(p) == "build") when (k) { "working" -> t("On track", "Inaendelea vizuri"); "repair" -> t("Problems to fix", "Kuna matatizo ya kurekebisha"); else -> t("Work stopped", "Kazi imesimama") } else stateName(k)
 
 private fun kind(p: Project): String {
     val ty = p.type.lowercase(); val pump = p.pump.lowercase()
     return when {
         "borehole" in ty -> when (pump) { "manual" -> "manual"; "solar" -> "solar"; "electric" -> "electric"; else -> "borehole" }
         "collection" in ty -> "tankk"
+        // not water: a building site while under construction, otherwise by type
+        "under construction" in p.status.lowercase() -> "build"
+        "school" in ty -> "school"
+        "health" in ty -> "health"
+        "orphan" in ty -> "home"
+        "farm" in ty -> "farm"
         else -> "building"
     }
 }
@@ -82,11 +129,28 @@ private val LISTS = mapOf(
     "solar" to listOf("panels", "pumpruns", "control", "tank", "taps", "pipes", "fence", "clean"),
     "borehole" to listOf("pumpworks", "spout", "apron", "drain", "fence", "lock", "clean"),
     "tankk" to listOf("gutters", "firstflush", "tankwalls", "tap", "lid", "base", "clean"),
-    "building" to listOf("waterpoint", "handwash", "latrines", "storage", "roof", "clean"),
+    "school" to listOf("sroof", "walls", "doors", "desks", "boards", "latrines", "handwash", "inuse"),
+    "health" to listOf("bldg", "equip", "supplies", "washrooms", "light", "waste", "fence", "clean"),
+    "home" to listOf("dorm", "beds", "bldg", "kitchen", "washrooms", "wallgate", "clean"),
+    "farm" to listOf("pen", "animals", "feed", "drained", "records", "fence"),
+    "building" to listOf("bldg", "doors", "furniture", "washrooms", "used", "clean"),
+    "build" to listOf("materials", "workers", "plumb", "timber", "fitted", "plan", "safety", "schedule"),
 )
 
 private fun slots(p: Project): List<Slot> {
-    val b = kind(p) == "building"
+    fun s(en: String, sw: String, hen: String = "", hsw: String = "") = Slot(en, t(en, sw), if (hen.isBlank()) "" else t(hen, hsw))
+    val damage = Slot("Any damage", t("Any damage", "Uharibifu wowote"), t("Close up of anything broken", "Karibu na kilichoharibika"))
+    val out = s("Outside, the whole building", "Nje, jengo lote")
+    when (kind(p)) {
+        "school" -> return listOf(out, s("A classroom inside", "Ndani ya darasa"), s("Desks and boards", "Madawati na ubao"), s("Pupils and teachers", "Wanafunzi na walimu", "Only with the school’s permission", "Kwa ruhusa ya shule tu"), damage)
+        "health" -> return listOf(out, s("Equipment and beds", "Vifaa na vitanda"), s("Medicine and supplies store", "Stoo ya dawa na vifaa"), s("Water and washrooms", "Maji na vyoo"), damage)
+        "home" -> return listOf(out, s("Dormitory and beds", "Bweni na vitanda"), s("Kitchen", "Jiko"), s("Water and latrines", "Maji na vyoo"), damage)
+        "farm" -> return listOf(s("The animals", "Mifugo"), s("The pen or coop", "Banda"), s("Feed and water for the animals", "Chakula na maji ya mifugo"), s("The farmer at work", "Mkulima kazini"), damage)
+        "building" -> return listOf(out, s("Inside", "Ndani"), s("People using it", "Watu wakiitumia"), damage)
+        "build" -> return listOf(s("The whole building now", "Jengo lote sasa", "Same spot as last time, so progress shows", "Mahali pale pale kama mara iliyopita, ili maendeleo yaonekane"),
+            s("Work done since the last visit", "Kazi iliyofanyika tangu ziara iliyopita", "Close up", "Kwa karibu"), s("Materials on site", "Vifaa vya ujenzi"), s("Anything wrong", "Kitu chochote kibaya", "Cracks, leaks, poor work", "Nyufa, kuvuja, kazi mbaya"))
+    }
+    val b = false
     return listOf(
         Slot(if (b) "The water point" else "Pump or tank, close up", if (b) t("The water point", "Kituo cha maji") else t("Pump or tank, close up", "Pampu au tangi, kwa karibu"), t("Fill the frame with it", "Ijaze picha nzima")),
         Slot("Water flowing", t("Water flowing", "Maji yakitiririka"), t("Water coming out of the spout or tap", "Maji yakitoka kwenye bomba")),
@@ -110,6 +174,8 @@ class VisitDraft {
     var active by mutableStateOf(""); var chair by mutableStateOf(""); var phone by mutableStateOf(""); var fee by mutableStateOf(""); var fund by mutableStateOf("")
     var quote by mutableStateOf(""); var quoteBy by mutableStateOf(""); var consent by mutableStateOf(false)
     var note by mutableStateOf("")
+    var stage by mutableStateOf("")
+    val nums = mutableStateMapOf<String, String>()
     var shots by mutableStateOf(listOf<Shot>())
     var voice by mutableStateOf<java.io.File?>(null)
     var sent by mutableStateOf<String?>(null)
@@ -125,8 +191,9 @@ fun VisitTab(m: AppModel, p: Project) {
     val scope = rememberScope()
     var msg by remember { mutableStateOf<Pair<String, String>?>(null) }
     var busy by remember { mutableStateOf(false) }
-    val steps = listOf(t("Arrive", "Fika"), t("Condition", "Hali"), t("Checklist", "Ukaguzi"), t("Readings", "Vipimo"), t("Photos", "Picha"), t("People", "Watu"), t("Send", "Tuma"))
+    val steps = listOf(t("Arrive", "Fika"), t("Condition", "Hali"), t("Checklist", "Ukaguzi"), if (isWater(p)) t("Readings", "Vipimo") else t("Numbers", "Idadi"), t("Photos", "Picha"), t("People", "Watu"), t("Send", "Tuma"))
     val items = LISTS.getValue(kind(p))
+    val wet = isWater(p); val k0 = kind(p)
 
     if (v.sent != null) {
         Card {
@@ -157,10 +224,10 @@ fun VisitTab(m: AppModel, p: Project) {
                 else Text(t("Arrived ", "Umefika ") + whenText(v.arrived!!) + (v.arrivedAt?.let { " · " + it.text() } ?: ""), color = C.ok, style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(top = 12.dp))
             }
             1 -> {
-                H2(t("How is it?", "Iko hali gani?"))
+                H2(if (k0 == "build") t("How is the building going?", "Ujenzi unaendeleaje?") else t("How is it?", "Iko hali gani?"))
                 STATES.forEach { k ->
                     val (icon, tint, bg) = when (k) { "working" -> Triple("okc", C.ok, C.okBg); "repair" -> Triple("alert", Amber, C.warnBg); else -> Triple("xc", C.bad, C.badBg) }
-                    Choice(stateName(k), icon, tint, bg, v.state == k) { v.state = k }
+                    Choice(stateLabel(p, k), icon, tint, bg, v.state == k) { v.state = k }
                 }
                 if (v.state.isNotBlank() && v.state != "working") {
                     Text(t("How urgent?", "Ni haraka kiasi gani?"), style = MaterialTheme.typography.titleSmall, color = C.ink, modifier = Modifier.padding(top = 14.dp))
@@ -171,6 +238,16 @@ fun VisitTab(m: AppModel, p: Project) {
             }
             2 -> {
                 H2(t("Checklist", "Ukaguzi"))
+                if (k0 == "build") {
+                    Text(t("Stage the building has reached", "Hatua ambayo jengo limefikia"), style = MaterialTheme.typography.titleSmall, color = C.ink, modifier = Modifier.padding(top = 4.dp))
+                    STAGES.chunked(3).forEach { row ->
+                        Row(Modifier.padding(top = 8.dp).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            row.forEach { (k, l) -> Pill(t(l.first, l.second), v.stage == k, Modifier.weight(1f).testTag("stage_$k")) { v.stage = if (v.stage == k) "" else k } }
+                            repeat(3 - row.size) { Spacer(Modifier.weight(1f)) }
+                        }
+                    }
+                    Spacer(Modifier.height(10.dp))
+                }
                 Text(t("Tap OK or Problem for each. Skip anything you couldn’t check.", "Gusa Sawa au Tatizo kwa kila kimoja. Ruka usichoweza kukagua."), style = MaterialTheme.typography.bodyMedium, color = C.muted)
                 items.forEach { k ->
                     val (en, sw) = ITEMS.getValue(k); val cur = v.check[k]
@@ -181,13 +258,18 @@ fun VisitTab(m: AppModel, p: Project) {
                         Pill(t("Problem", "Tatizo"), cur == "bad", Modifier.padding(start = 6.dp), color = C.bad) { v.check[k] = if (cur == "bad") "" else "bad" }
                     }
                 }
-                Field(v.other, { v.other = it }, t("Anything else wrong?", "Kuna kingine kibaya?"), placeholder = t("e.g. tap drips", "mf. bomba linavuja"))
+                Field(v.other, { v.other = it }, t("Anything else wrong?", "Kuna kingine kibaya?"), placeholder = if (wet) t("e.g. tap drips", "mf. bomba linavuja") else if (k0 == "farm") t("e.g. feeder broken", "mf. chombo cha chakula kimevunjika") else t("e.g. window glass broken", "mf. kioo cha dirisha kimevunjika"))
                 if (v.state != "working" && v.state.isNotBlank()) {
-                    Field(v.parts, { v.parts = it }, t("Parts needed", "Vipuri vinavyohitajika"), placeholder = t("e.g. 2 pump rods, handle bolt", "mf. fimbo 2 za pampu, boliti ya mkono"))
+                    Field(v.parts, { v.parts = it }, if (wet) t("Parts needed", "Vipuri vinavyohitajika") else t("Materials or parts needed", "Vifaa vinavyohitajika"),
+                        placeholder = if (wet) t("e.g. 2 pump rods, handle bolt", "mf. fimbo 2 za pampu, boliti ya mkono") else if (k0 == "farm") t("e.g. 4 iron sheets, wire mesh", "mf. mabati 4, wavu wa waya") else t("e.g. 6 iron sheets, 2 door hinges", "mf. mabati 6, bawaba 2 za mlango"))
                     Field(v.cost, { v.cost = it }, t("Rough cost (KES)", "Gharama ya makadirio (KES)"), number = true)
                 }
             }
-            3 -> {
+            3 -> if (!wet) {
+                H2(t("Numbers", "Idadi"))
+                Text(t("All optional.", "Vyote si lazima."), style = MaterialTheme.typography.bodyMedium, color = C.muted)
+                NUMS.getValue(k0).forEach { k -> val (en, sw) = NUM.getValue(k); Field(v.nums[k] ?: "", { v.nums[k] = it }, t(en, sw), Modifier.testTag("num_$k"), if (k == "income") "e.g. 12000" else "e.g. 12", number = true) }
+            } else {
                 H2(t("Readings", "Vipimo"))
                 Text(t("All optional.", "Vyote si lazima."), style = MaterialTheme.typography.bodyMedium, color = C.muted)
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -210,10 +292,27 @@ fun VisitTab(m: AppModel, p: Project) {
             4 -> {
                 H2(t("Photos", "Picha"))
                 Text(t("Tap a box to take that photo or choose one from your gallery. Each one is labelled in monday.com.", "Gusa kisanduku kupiga picha hiyo au kuchagua kutoka kwenye picha zako. Kila moja inapewa jina kwenye monday.com."), style = MaterialTheme.typography.bodyMedium, color = C.muted, modifier = Modifier.padding(bottom = 10.dp))
+                if (k0 == "home") Text(t("Children: no close-up faces unless the home has agreed.", "Watoto: usipige picha za nyuso kwa karibu isipokuwa makao yamekubali."), style = MaterialTheme.typography.labelLarge, color = C.warn,
+                    modifier = Modifier.padding(bottom = 10.dp).fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(C.warnBg).padding(12.dp).testTag("children_note"))
                 PhotoSlots(m, slots(p), v.shots, { v.shots = it })
                 VoiceNote(v.voice) { v.voice = it }
             }
-            5 -> {
+            5 -> if (!wet) {
+                val (cen, csw) = CARER.getValue(k0)
+                H2(t("Who looks after it", "Anayeisimamia"))
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Field(v.chair, { v.chair = it }, t(cen, csw), Modifier.weight(1f).testTag("carer_name"), t("Name", "Jina"))
+                    Field(v.phone, { v.phone = it }, t("Their phone", "Simu yake"), Modifier.weight(1f))
+                }
+                H2(t("Story moment (optional)", "Hadithi (si lazima)"), Modifier.padding(top = 18.dp))
+                Text(t("A few words from someone it helps, for the website.", "Maneno machache kutoka kwa mtu anayesaidiwa, kwa ajili ya tovuti."), style = MaterialTheme.typography.bodyMedium, color = C.muted)
+                Field(v.quote, { v.quote = it }, t("What they said", "Walichosema"), placeholder = t("e.g. “Our children learn in a dry classroom now.”", "mf. “Watoto wetu sasa wanasoma darasani pasipo kuvuja.”"), lines = 3)
+                Field(v.quoteBy, { v.quoteBy = it }, t("Who said it", "Aliyesema"), placeholder = t("e.g. Mary, a parent", "mf. Mary, mzazi"))
+                Row(Modifier.padding(top = 12.dp).clickable { v.consent = !v.consent }, verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(v.consent, { v.consent = it }, colors = CheckboxDefaults.colors(checkedColor = C.blue))
+                    Text(t("They agreed to be quoted and photographed for RAFIKI’s website", "Wamekubali kunukuliwa na kupigwa picha kwa tovuti ya RAFIKI"), style = MaterialTheme.typography.bodyMedium, color = C.text)
+                }
+            } else {
                 H2(t("Water committee", "Kamati ya maji"))
                 Text(t("Is the committee active?", "Je, kamati iko hai?"), style = MaterialTheme.typography.titleSmall, color = C.ink, modifier = Modifier.padding(top = 4.dp))
                 Row(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -235,7 +334,9 @@ fun VisitTab(m: AppModel, p: Project) {
             }
             else -> {
                 H2(t("Check and send", "Hakiki na utume"))
-                SumRow(t("Condition", "Hali"), if (v.state.isBlank()) t("Not chosen yet", "Bado haijachaguliwa") else stateName(v.state), bad = v.state.isBlank())
+                STAGES.firstOrNull { it.first == v.stage }?.let { SumRow(t("Stage", "Hatua"), t(it.second.first, it.second.second)) }
+                SumRow(t("Condition", "Hali"), if (v.state.isBlank()) t("Not chosen yet", "Bado haijachaguliwa") else stateLabel(p, v.state), bad = v.state.isBlank())
+                v.nums.count { it.value.trim().toDoubleOrNull() != null }.takeIf { it > 0 }?.let { SumRow(t("Numbers", "Idadi"), it.toString()) }
                 SumRow(t("Problems", "Matatizo"), (v.check.count { it.value == "bad" } + if (v.other.isNotBlank()) 1 else 0).toString())
                 SumRow(t("Photos", "Picha"), v.shots.size.toString() + if (v.voice != null) t(" + voice note", " + ujumbe wa sauti") else "")
                 Field(v.note, { v.note = it }, t("Notes", "Maelezo"), placeholder = t("Anything else the office should know", "Kitu kingine chochote ofisi inapaswa kujua"), lines = 3)
@@ -252,6 +353,13 @@ fun VisitTab(m: AppModel, p: Project) {
                             .put("quality", JSONObject().apply { if (v.ecoli.isNotBlank()) put("ecoli", v.ecoli) })
                             .put("committee", JSONObject().apply { if (v.active.isNotBlank()) put("active", v.active); put("chair", v.chair.trim()); put("phone", v.phone.trim()); num(v.fund)?.let { put("fund", it) } })
                             .put("story", JSONObject().put("quote", v.quote.trim()).put("by", v.quoteBy.trim()).put("consent", v.consent))
+                            .apply {
+                                if (!wet) {
+                                    put("kind", k0); if (v.stage.isNotBlank()) put("stage", v.stage)
+                                    put("numbers", JSONObject().apply { v.nums.forEach { (k, s) -> num(s)?.let { put(k, if (it % 1.0 == 0.0) it.toLong() else it) } } })
+                                    put("carer", JSONObject().put("name", v.chair.trim()).put("phone", v.phone.trim()))
+                                }
+                            }
                             .put("note", v.note.trim()).put("leave", Instant.now().toString())
                         v.arrived?.let { body.put("arrive", it) }
                         (v.arrivedAt ?: fix?.ll)?.let { body.put("lat", it.lat).put("lng", it.lng) }

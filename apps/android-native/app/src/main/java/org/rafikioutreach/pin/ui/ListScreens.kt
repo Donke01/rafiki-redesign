@@ -23,6 +23,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -200,7 +202,10 @@ fun ProjectsScreen(m: AppModel, open: (String) -> Unit, planRoute: () -> Unit = 
     val snap = s ?: return
     var f by remember { mutableStateOf(m.prefs.filter) }
     var ck by remember { mutableStateOf(m.prefs.country) }
+    var ty by remember { mutableStateOf(m.prefs.ftype) }
     val here = fix?.ll
+    val tcount = snap.projects.filter { ck.isBlank() || it.ck == ck }.groupingBy { tgroup(it) }.eachCount()
+    if (ty.isNotBlank() && (tcount[ty] ?: 0) == 0) ty = ""
 
     var rows = snap.projects.filter { p ->
         when (f) {
@@ -209,7 +214,7 @@ fun ProjectsScreen(m: AppModel, open: (String) -> Unit, planRoute: () -> Unit = 
             "repairs" -> snap.repairs.containsKey(p.id)
             "due" -> p.gps != null && ageDays(snap, p) >= DUE_DAYS
             else -> true
-        } && (ck.isBlank() || p.ck == ck)
+        } && (ck.isBlank() || p.ck == ck) && (ty.isBlank() || tgroup(p) == ty)
     }
     if (f == "near" && here != null) rows = rows.sortedBy { Geo.metres(here, it.gps!!) }.take(30)
     if (f == "repairs") rows = rows.sortedBy { mapOf("urgent" to 0, "month" to 1, "watch" to 2)[snap.repairs[it.id]?.urgency] ?: 3 }
@@ -304,6 +309,13 @@ fun ProjectsScreen(m: AppModel, open: (String) -> Unit, planRoute: () -> Unit = 
                 Text(count, style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold), color = C.muted, modifier = Modifier.weight(1f), maxLines = 2)
             }
         }
+        // type of project: only the kinds there are
+        if (tcount.size > 1) item(key = "types") {
+            Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).testTag("type_chips"), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                TypeChip(t("All types", "Aina zote"), null, ty.isBlank(), "type_") { ty = ""; m.prefs.ftype = "" }
+                TGROUPS.filter { (tcount[it.first] ?: 0) > 0 }.forEach { (k, en, sw) -> TypeChip(t(en, sw), tcount[k], ty == k, "type_$k") { ty = k; m.prefs.ftype = k } }
+            }
+        }
         itemsIndexed(rows, key = { _, it -> it.id }) { i, p -> Box(Modifier.rise(i, seen, p.id)) { ProjectRow(m, snap, p, here) { open(p.id) } } }
         if (rows.isEmpty()) item {
             EmptyDrop(when {
@@ -315,6 +327,19 @@ fun ProjectsScreen(m: AppModel, open: (String) -> Unit, planRoute: () -> Unit = 
         }
     }
     if (countrySheet) PickSheet(t("Country", "Nchi"), listOf(Triple("", t("All countries", "Nchi zote"), "map")) + COUNTRIES.map { (k, n) -> Triple(k, n, "pin") }, ck, { ck = it; m.prefs.country = it }) { countrySheet = false }
+}
+
+/** Kinds of project for the type filter. */
+val TGROUPS = listOf(Triple("water", "Water", "Maji"), Triple("school", "Schools", "Shule"), Triple("health", "Health", "Afya"), Triple("home", "Children’s homes", "Makao ya watoto"), Triple("farm", "Farming", "Kilimo"), Triple("other", "Other", "Nyingine"))
+fun tgroup(p: Project): String { val t = p.type.lowercase(); return when { "borehole" in t || "collection" in t -> "water"; "school" in t -> "school"; "health" in t -> "health"; "orphan" in t -> "home"; "farm" in t -> "farm"; else -> "other" } }
+
+@Composable
+private fun TypeChip(label: String, n: Int?, on: Boolean, tag: String, onClick: () -> Unit) {
+    Row(Modifier.clip(RoundedCornerShape(99.dp)).background(if (on) C.ink else C.card).border(1.dp, if (on) C.ink else C.line, RoundedCornerShape(99.dp)).clickable(role = Role.Button, onClick = onClick)
+        .heightIn(min = 36.dp).padding(horizontal = 14.dp).testTag(tag), verticalAlignment = Alignment.CenterVertically) {
+        Text(label, style = MaterialTheme.typography.labelLarge, color = if (on) C.card else C.ink)
+        if (n != null) { Spacer(Modifier.width(6.dp)); Text("$n", style = MaterialTheme.typography.labelMedium, color = if (on) C.card.copy(alpha = 0.75f) else C.muted) }
+    }
 }
 
 @Composable
@@ -364,7 +389,7 @@ private fun HomeTop(m: AppModel, s: Snapshot, here: LatLng?, search: () -> Unit,
         Text("Habari, " + first.ifBlank { "karibu" }, style = MaterialTheme.typography.bodyMedium, color = C.muted)
         Row(Modifier.padding(top = 2.dp, bottom = 10.dp), verticalAlignment = Alignment.Bottom) {
             Text(androidx.compose.ui.text.buildAnnotatedString {
-                withStyle(androidx.compose.ui.text.SpanStyle(fontWeight = FontWeight.Normal)) { append(t("Which water point", "Kituo gani cha maji") + "\n") }
+                withStyle(androidx.compose.ui.text.SpanStyle(fontWeight = FontWeight.Normal)) { append(t("Which project", "Mradi gani") + "\n") }
                 append(t("today?", "leo?"))
             }, style = MaterialTheme.typography.headlineLarge.copy(fontSize = 27.sp, lineHeight = 31.sp, letterSpacing = (-0.8).sp), color = C.ink, modifier = Modifier.weight(1f))
         }
