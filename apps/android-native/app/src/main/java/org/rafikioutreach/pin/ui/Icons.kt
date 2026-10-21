@@ -55,6 +55,13 @@ object Ic {
         "chat" to listOf("M4.5 19.5l1.2-3.6A7.8 7.8 0 1 1 8.6 18.6z", "M9 10.5h6M9 13.5h4"),
         "down" to listOf("M6 9l6 6 6-6"),
         "share" to listOf(circle(18f, 5.5f, 2.5f), circle(6f, 12f, 2.5f), circle(18f, 18.5f, 2.5f), "M8.2 10.8l7.6-4.1M8.2 13.2l7.6 4.1"),
+        "sun" to listOf(circle(12f, 12f, 4f), "M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"),
+        "globe" to listOf(circle(12f, 12f, 9f), "M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"),
+        "nav" to listOf("M3 11l18-8-8 18-2-8z"),
+        "file" to listOf("M14 2.5H6.5a2 2 0 0 0-2 2v15a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V8z", "M14 2.5V8h5.5M15.5 13h-7M15.5 17h-7"),
+        "link" to listOf("M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7", "M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"),
+        "flame" to listOf("M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.4-.5-2-1-3-1.1-2.1-.2-4 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.2.4-2.3 1-3a2.5 2.5 0 0 0 2.5 2.5z"),
+        "text" to listOf("M4 18 9 6l5 12M5.6 14h6.8M15 18l3-7 3 7M15.9 16h4.2"),
     )
 
     fun get(name: String): ImageVector = cache.getOrPut(name) {

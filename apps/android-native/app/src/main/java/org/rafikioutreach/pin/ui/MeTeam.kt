@@ -62,7 +62,10 @@ fun ago(iso: String?): String {
 fun MyMonth(m: AppModel, act: List<JSONObject>?) {
     val mine = act?.filter { same(it.optString("by"), m.prefs.name) && it.optString("a") in WORK }
     Card(Modifier.padding(top = 14.dp).testTag("my_month")) {
-        H2(t("My month", "Mwezi wangu"))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            H2(t("My month", "Mwezi wangu"), Modifier.weight(1f))
+            Text(LocalDate.now().month.getDisplayName(java.time.format.TextStyle.FULL, if (org.rafikioutreach.pin.Lang.sw) java.util.Locale("sw") else java.util.Locale.UK), style = MaterialTheme.typography.labelLarge, color = C.muted)
+        }
         if (mine == null) { Text(t("Loading…", "Inapakia…"), color = C.muted, style = MaterialTheme.typography.bodyMedium); return@Card }
         val today = LocalDate.now(); val start = today.withDayOfMonth(1)
         val month = mine.filter { day(it.optString("at"))?.let { d -> !d.isBefore(start) } == true }
@@ -95,15 +98,6 @@ fun MyMonth(m: AppModel, act: List<JSONObject>?) {
             Text(t("6 wk ago", "Wiki 6"), style = MaterialTheme.typography.labelSmall, color = C.muted, modifier = Modifier.weight(1f))
             Text(t("This week", "Wiki hii"), style = MaterialTheme.typography.labelSmall, color = C.muted)
         }
-        // days in a row
-        val days = mine.mapNotNull { day(it.optString("at")) }.toSet()
-        var d = if (today in days) today else today.minusDays(1); var streak = 0
-        while (d in days) { streak++; d = d.minusDays(1) }
-        Row(Modifier.padding(top = 12.dp).fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(C.hue("me").bg).padding(horizontal = 14.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text("🔥", fontSize = 18.sp); Spacer(Modifier.width(10.dp))
-            Text(when (streak) { 0 -> t("Pin or visit today to start a streak.", "Weka mahali au tembelea leo kuanza mfululizo."); 1 -> t("1 day in a row", "Siku 1 mfululizo"); else -> t("$streak days in a row", "Siku $streak mfululizo") },
-                style = MaterialTheme.typography.titleSmall, color = C.hue("me").fg, modifier = Modifier.testTag("my_streak"))
-        }
     }
 }
 
@@ -116,7 +110,7 @@ fun MyWork(snap: Snapshot?, open: (String) -> Unit) {
     val jobs = snap.jobs.mapNotNull { id -> snap.projects.firstOrNull { it.id == id }?.let { p -> p to snap.repairs[id] } }
     if (visits.isEmpty() && jobs.isEmpty()) return
     Card(Modifier.padding(top = 14.dp).testTag("my_work")) {
-        H2(t("My work", "Kazi yangu"))
+        Row(verticalAlignment = Alignment.CenterVertically) { H2(t("My work", "Kazi yangu"), Modifier.weight(1f)); Tag("${visits.size + jobs.size}", C.tint, C.deep) }
         visits.sortedByDescending { it.third }.forEach { (a, date, late) ->
             WorkRow("cal", "due", a.title.ifBlank { snap.projects.firstOrNull { it.id == a.id }?.title ?: a.id },
                 t("Visit", "Ziara") + (if (a.note.isNotBlank()) " · " + a.note else "") + " · " + t("from ", "kutoka ") + a.by,
@@ -153,12 +147,15 @@ fun WaitingList(m: AppModel, snap: Snapshot?) {
     val items = remember(waiting) { m.outbox.all() }
     var busy by remember { mutableStateOf(false) }
     val scope = rememberScope()
-    Card(Modifier.padding(top = 14.dp), border = C.warnBg) {
+    Card(Modifier.padding(top = 14.dp), brush = androidx.compose.ui.graphics.SolidColor(if (C.dark) C.card else Color(0xFFFFFBF4)), border = Color(0xFFF2C98A)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(if (waiting == 1) t("1 change waiting to send", "Badiliko 1 linasubiri kutumwa") else t("$waiting changes waiting to send", "Mabadiliko $waiting yanasubiri kutumwa"),
-                style = MaterialTheme.typography.titleMedium, color = C.warn, modifier = Modifier.weight(1f))
+            val hu = C.hue("repairs"); IconTile("upload", hu.fg, hu.bg, 40.dp); Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                Text(if (waiting == 1) t("1 change waiting to send", "Badiliko 1 linasubiri kutumwa") else t("$waiting changes waiting to send", "Mabadiliko $waiting yanasubiri kutumwa"),
+                    style = MaterialTheme.typography.titleMedium, color = C.warn)
+                Text(t("Safe on this phone. They go as soon as there’s signal.", "Yako salama kwenye simu hii. Yatatumwa mara mtandao ukipatikana."), style = MaterialTheme.typography.bodySmall, color = C.muted)
+            }
         }
-        Text(t("They are safe on this phone and go as soon as there is signal.", "Yako salama kwenye simu hii na yatatumwa mara mtandao ukipatikana."), style = MaterialTheme.typography.bodySmall, color = C.muted)
         items.forEach { it ->
             val b = it.body; val id = b.optString("id")
             val title = snap?.projects?.firstOrNull { p -> p.id == id }?.title ?: b.optString("name").ifBlank { b.optString("title").ifBlank { id } }
@@ -168,8 +165,8 @@ fun WaitingList(m: AppModel, snap: Snapshot?) {
                 else -> "inbox" to t("Change", "Badiliko")
             }
             val files = it.files.size - it.done
-            Row(Modifier.padding(top = 10.dp).testTag("waiting_row"), verticalAlignment = Alignment.CenterVertically) {
-                IconTile(icon, C.warn, C.warnBg, 36.dp); Spacer(Modifier.width(10.dp))
+            Row(Modifier.padding(top = 8.dp).fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(C.warnBg).padding(horizontal = 12.dp, vertical = 10.dp).testTag("waiting_row"), verticalAlignment = Alignment.CenterVertically) {
+                Icon(Ic.get(icon), null, tint = C.warn, modifier = Modifier.size(18.dp)); Spacer(Modifier.width(10.dp))
                 Column(Modifier.weight(1f)) {
                     Text(title, style = MaterialTheme.typography.titleSmall, color = C.ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     Text(what + (if (files > 0) " · " + (if (files == 1) t("1 photo or voice note", "picha au sauti 1") else t("$files photos or voice notes", "picha au sauti $files")) else "") +
@@ -186,13 +183,15 @@ fun WaitingList(m: AppModel, snap: Snapshot?) {
 fun TeamToday(m: AppModel, mates: List<Mate>?, act: List<JSONObject>?, snap: Snapshot?, open: (String) -> Unit) {
     val ctx = LocalContext.current
     Card(Modifier.padding(top = 14.dp).testTag("team_today")) {
-        H2(t("Team today", "Timu leo"))
+        val head = remember { mutableStateOf(0) }
+        Row(verticalAlignment = Alignment.CenterVertically) { H2(t("Team today", "Timu leo"), Modifier.weight(1f)); if (head.value > 0) Tag(t("${head.value} active", "${head.value} kazini"), C.okBg, C.ok) }
         if (mates == null) { Text(t("Loading…", "Inapakia…"), color = C.muted, style = MaterialTheme.typography.bodyMedium); return@Card }
         val today = LocalDate.now()
         val last = mates.associateWith { p -> act?.filter { same(it.optString("by"), p.name) && it.optString("a") in WORK }?.maxByOrNull { it.optString("at") } }
         val sorted = mates.filter { !same(it.name, m.prefs.name) }.sortedWith(compareByDescending<Mate> { p -> (last[p]?.optString("at") ?: p.lastSeen ?: "") })
         val active = sorted.count { p -> listOfNotNull(last[p]?.optString("at"), p.lastSeen).any { day(it) == today } }
-        Text(when (active) { 0 -> t("Nobody else has used the app today yet.", "Hakuna mwingine aliyetumia programu leo bado."); 1 -> t("1 person active today", "Mtu 1 yuko kazini leo"); else -> t("$active people active today", "Watu $active wako kazini leo") },
+        head.value = active
+        Text(when { active == 0 -> t("Nobody else has used the app today yet.", "Hakuna mwingine aliyetumia programu leo bado."); sorted.any { it.phone.isNotBlank() } -> t("Tap someone to call or WhatsApp them. Tap what they did to open the project.", "Gusa mtu kumpigia au kumtumia WhatsApp. Gusa alichofanya kufungua mradi."); active == 1 -> t("1 person active today", "Mtu 1 yuko kazini leo"); else -> t("$active people active today", "Watu $active wako kazini leo") },
             style = MaterialTheme.typography.bodySmall, color = C.muted)
         sorted.forEachIndexed { i, p ->
             val e = last[p]
@@ -252,10 +251,7 @@ fun TeamMonth(m: AppModel, act: List<JSONObject>?) {
     var month by remember { mutableStateOf(true) }
     Card(Modifier.padding(top = 14.dp).testTag("team_month")) {
         H2(t("Team totals", "Jumla ya timu"))
-        Row(Modifier.padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            Pill(t("This week", "Wiki hii"), !month, Modifier.weight(1f)) { month = false }
-            Pill(t("This month", "Mwezi huu"), month, Modifier.weight(1f).testTag("tm_month")) { month = true }
-        }
+        SmallSeg(listOf("w" to t("This week", "Wiki hii"), "m" to t("This month", "Mwezi huu")), if (month) "m" else "w", Modifier.padding(top = 4.dp).fillMaxWidth(), tag = "tm_") { month = it == "m" }
         if (act == null) { Text(t("Loading…", "Inapakia…"), color = C.muted, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 8.dp)); return@Card }
         val today = LocalDate.now(); val from = if (month) today.withDayOfMonth(1) else today.minusDays((today.dayOfWeek.value - 1).toLong())
         val rows = act.filter { it.optString("a") in WORK && day(it.optString("at"))?.let { d -> !d.isBefore(from) } == true }
@@ -320,7 +316,7 @@ private fun looksToken(s: String?) = s != null && Regex("^[A-Za-z0-9._-]{40,4000
 
 /** Me › Your name on monday.com: open the token page, copy, come back, and the app connects by itself. */
 @Composable
-fun ConnectMonday(m: AppModel, snap: Snapshot?) {
+fun ConnectMonday(m: AppModel, snap: Snapshot?, inline: Boolean = false) {
     snap ?: return
     if (m.prefs.session.isNotBlank()) return   // signed in with monday.com already
     val ctx = LocalContext.current
@@ -349,8 +345,8 @@ fun ConnectMonday(m: AppModel, snap: Snapshot?) {
         } }
         owner.lifecycle.addObserver(o); onDispose { owner.lifecycle.removeObserver(o) }
     }
-    Card(Modifier.padding(top = 14.dp).testTag("connect_monday")) {
-        Row(verticalAlignment = Alignment.Top) {
+    Wrap(inline) {
+        if (!inline) Row(verticalAlignment = Alignment.Top) {
             val hu = C.hue("new"); IconTile("people", hu.fg, hu.bg, 40.dp); Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
                 H2(t("Your name on monday.com", "Jina lako kwenye monday.com"))
@@ -362,11 +358,11 @@ fun ConnectMonday(m: AppModel, snap: Snapshot?) {
             }
         }
         if (snap.linked.isNotBlank()) {
-            Text(t("Everything you save goes to monday.com under your own name.", "Kila unachohifadhi kinaenda monday.com kwa jina lako."), style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 8.dp))
+            Text(t("Everything you save goes to monday.com under your own name.", "Kila unachohifadhi kinaenda monday.com kwa jina lako."), style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = if (inline) 0.dp else 8.dp))
             Text(t("Disconnect", "Tenganisha"), style = MaterialTheme.typography.labelLarge, color = C.blue, modifier = Modifier.padding(top = 8.dp).clip(RoundedCornerShape(10.dp)).clickable { scope.launch { m.unlinkMonday() } }.padding(6.dp).testTag("monday_off"))
-            return@Card
+            return@Wrap
         }
-        if (snap.who.isBlank()) return@Card
+        if (snap.who.isBlank()) return@Wrap
         Btn("1 · " + t("Open my monday.com token", "Fungua tokeni yangu ya monday.com"), { waiting = true; runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(TOKEN_PAGE))) } }, Modifier.padding(top = 12.dp).fillMaxWidth().testTag("monday_open"))
         Text(t("Tap Copy on that page, then come back here.", "Gusa Copy kwenye ukurasa huo, kisha rudi hapa."), style = MaterialTheme.typography.labelSmall, color = C.muted, modifier = Modifier.padding(top = 4.dp).align(Alignment.CenterHorizontally))
         Btn(if (busy) t("Checking…", "Inakagua…") else "2 · " + t("Paste and connect", "Bandika na uunganishe"), { paste() }, Modifier.padding(top = 10.dp).fillMaxWidth().testTag("monday_paste"), light = true, enabled = !busy)
@@ -380,6 +376,11 @@ fun ConnectMonday(m: AppModel, snap: Snapshot?) {
         Text(t("On a phone, monday.com may only open this page on a computer. You can do this step on any computer: sign in with your PIN at pin.rafikioutreach.org and connect. It then works on every phone that uses your PIN.", "Kwenye simu, monday.com inaweza kufungua ukurasa huu kwenye kompyuta tu. Unaweza kufanya hatua hii kwenye kompyuta yoyote: ingia kwa PIN yako kwenye pin.rafikioutreach.org na uunganishe. Kisha itafanya kazi kwenye kila simu inayotumia PIN yako."),
             style = MaterialTheme.typography.labelSmall, color = C.muted, modifier = Modifier.padding(top = 10.dp))
     }
+}
+
+@Composable
+private fun Wrap(inline: Boolean, content: @Composable ColumnScope.() -> Unit) {
+    if (inline) Column(Modifier.fillMaxWidth().testTag("connect_monday"), content = content) else Card(Modifier.padding(top = 14.dp).testTag("connect_monday"), content = content)
 }
 
 /** Lock screen › monday.com sign-in: with the person's own monday.com token (works before the app is installed for the account). */

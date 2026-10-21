@@ -21,6 +21,8 @@ class Prefs(context: Context) {
     var route: String get() = sp.getString("route", "") ?: ""; set(v) = sp.edit().putString("route", v).apply()
     var onb: Boolean get() = sp.getBoolean("onb", false); set(v) = sp.edit().putBoolean("onb", v).apply()
     var theme: String get() = sp.getString("theme", "") ?: ""; set(v) = sp.edit().putString("theme", v).apply()
+    /** Me & team: which half is showing, "me" or "team". */
+    var mePane: String get() = sp.getString("mePane", "me") ?: "me"; set(v) = sp.edit().putString("mePane", v).apply()
     var lang: String get() = sp.getString("lang", "") ?: ""; set(v) = sp.edit().putString("lang", v).apply()
 
     fun saveSnapshot(raw: JSONObject) = runCatching { listFile.writeText(raw.toString()) }

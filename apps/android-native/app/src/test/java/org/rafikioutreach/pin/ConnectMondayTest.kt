@@ -64,11 +64,11 @@ class ConnectMondayTest {
         rule.onNodeWithTag("monday_msg").assertTextContains("doesn’t look like", substring = true)
         clip.setPrimaryClip(ClipData.newPlainText("t", tok))
         rule.onNodeWithTag("monday_paste").performClick()
-        rule.waitUntil(5000) { rule.onAllNodesWithTag("monday_connected").fetchSemanticsNodes().isNotEmpty() }
-        rule.onNodeWithTag("monday_connected").assertTextEquals("Connected as Meril Adoyo ✓")
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("monday_connected", useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
+        rule.onNodeWithTag("monday_connected", useUnmergedTree = true).assertTextEquals("Connected as Meril Adoyo ✓")
         assertTrue(sent.contains("monday-link:eyJhbG"))
         assertEquals("", clip.primaryClip?.getItemAt(0)?.text?.toString().orEmpty())
-        rule.onNodeWithTag("monday_off").performClick()
+        rule.onNodeWithTag("monday_off").performScrollTo().performClick()
         rule.waitUntil(5000) { rule.onAllNodesWithTag("monday_paste").fetchSemanticsNodes().isNotEmpty() }
         org.rafikioutreach.pin.ui.Motion.on = true
     }

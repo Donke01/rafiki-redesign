@@ -79,13 +79,19 @@ class MeTeamTest {
         rule.waitUntil(8000) { rule.onAllNodesWithTag("hav").fetchSemanticsNodes().isNotEmpty() }
         rule.mainClock.advanceTimeBy(2000)
         rule.onNodeWithTag("hav").performClick()
-        rule.waitUntil(8000) { rule.onAllNodesWithTag("mate_row").fetchSemanticsNodes().size == 2 }
+        rule.waitUntil(8000) { rule.onAllNodesWithTag("hero_visit").fetchSemanticsNodes().isNotEmpty() }
         rule.onAllNodesWithTag("waiting_row").assertCountEquals(1)
         rule.onNodeWithText("Send now").assertExists()
+        rule.mainClock.advanceTimeBy(1500)
         shot("60-me-top")
         rule.onNodeWithTag("my_work").performScrollTo(); rule.onNodeWithText("Overdue").assertExists(); rule.onNodeWithText("Today").assertExists()
         rule.onNodeWithTag("my_month").performScrollTo(); shot("61-me-month")
-        if (LocalDate.now().dayOfMonth > 2) rule.onNodeWithTag("my_visit").assertTextEquals("2")
+        if (LocalDate.now().dayOfMonth > 2) { rule.onNodeWithTag("my_visit").assertTextEquals("2"); rule.onNodeWithTag("hero_visit").assertTextEquals("2") }
+        rule.onNodeWithTag("my_streak").assertTextContains("in a row", substring = true)
+        rule.onNodeWithTag("this_phone").performScrollTo(); shot("61b-this-phone")
+        rule.onNodeWithTag("pane_team").performScrollTo().performClick(); rule.waitForIdle()
+        rule.waitUntil(8000) { rule.onAllNodesWithTag("mate_row").fetchSemanticsNodes().size == 2 }
+        rule.onAllNodesWithTag("my_work").assertCountEquals(0)
         rule.onNodeWithTag("team_today").performScrollTo(); shot("62-team-today")
         rule.onAllNodesWithTag("call_phone").assertCountEquals(2)
         rule.onNodeWithTag("team_month").performScrollTo(); shot("63-team-month")

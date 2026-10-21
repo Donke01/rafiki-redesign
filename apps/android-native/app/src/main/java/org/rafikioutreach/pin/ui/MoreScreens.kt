@@ -108,60 +108,36 @@ fun NewSiteScreen(m: AppModel, done: (String?) -> Unit) {
 
 @Composable
 fun MeScreen(m: AppModel, open: (String) -> Unit = {}, report: () -> Unit = {}) {
-    val waiting by m.waiting.collectAsState()
     val s by m.snap.collectAsState()
-    var miles by remember { mutableStateOf(m.prefs.miles) }
-    val ctx = LocalContext.current
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
-        Text(t("Me & team", "Mimi na timu"), style = MaterialTheme.typography.headlineLarge, color = C.ink)
-        Card(Modifier.padding(top = 12.dp), brush = DeepBrush) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(Modifier.size(48.dp).clip(CircleShape).background(Color(0x26FFFFFF)), contentAlignment = Alignment.Center) {
-                    Text(m.prefs.name.split(" ").mapNotNull { it.firstOrNull()?.uppercase() }.take(2).joinToString(""), color = Color.White, style = MaterialTheme.typography.titleMedium)
-                }
-                Spacer(Modifier.width(12.dp))
-                Text(t("You", "Wewe"), color = Color.White, style = MaterialTheme.typography.titleLarge)
-            }
-            MeRow(t("Name", "Jina"), m.prefs.name)
-            MeRow(t("Role", "Nafasi"), if (s?.admin == true) t("Admin", "Msimamizi") else t("Field team", "Timu ya uwanjani"))
-            MeRow(t("Waiting to send", "Inasubiri kutumwa"), if (waiting == 0) t("Nothing", "Hakuna") else waiting.toString())
-            Btn(t("Lock the app", "Funga programu"), { m.lockOrSignOut() }, Modifier.padding(top = 14.dp).fillMaxWidth(), icon = "lock", light = true, small = true)
+    val act by m.activity.collectAsState()
+    val mates by m.team.collectAsState()
+    var pane by remember { mutableStateOf(m.prefs.mePane) }
+    val scroll = rememberScrollState()
+    val scope = rememberScope()
+    LaunchedEffect(Unit) { launch { m.loadActivity() }; launch { m.loadTeam() } }
+    Column(Modifier.fillMaxSize().verticalScroll(scroll).padding(16.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(t("Me & team", "Mimi na timu"), style = MaterialTheme.typography.headlineLarge, color = C.ink, modifier = Modifier.weight(1f))
+            SmallSeg(listOf("me" to t("Me", "Mimi"), "team" to t("Team", "Timu")), pane, tag = "pane_") { pane = it; m.prefs.mePane = it; scope.launch { scroll.scrollTo(0) } }
         }
-        val act by m.activity.collectAsState()
-        val mates by m.team.collectAsState()
-        LaunchedEffect(Unit) { launch { m.loadActivity() }; launch { m.loadTeam() } }
-        BioCard(m)
-        ConnectMonday(m, s)
-        WaitingList(m, s)
-        MyWork(s, open)
-        MyMonth(m, act)
-        TeamToday(m, mates, act, s, open)
-        TeamMonth(m, act)
-        TeamFeed(act, s, open)
-        Stamps(m)
-        Card(Modifier.padding(top = 14.dp)) {
-            H2(t("Colours", "Rangi"))
-            val sysDark = androidx.compose.foundation.isSystemInDarkTheme()
-            val cur = Look.mode.ifBlank { if (sysDark) "dark" else "light" }
-            Row(Modifier.padding(top = 6.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                listOf("light" to t("Light", "Mwanga"), "dark" to t("Dark", "Giza"), "sun" to t("Bright sun", "Jua kali")).forEach { (k, l) ->
-                    Pill(l, cur == k, Modifier.weight(1f).testTag("theme_$k")) { Look.mode = k; m.prefs.theme = k }
-                }
+        if (pane == "team") {
+            TeamToday(m, mates, act, s, open)
+            TeamMonth(m, act)
+            TeamFeed(act, s, open)
+        } else {
+            MeHero(m, act, s, report)
+            WaitingList(m, s)
+            MyWork(s, open)
+            MyMonth(m, act)
+            ThisPhone(m, s)
+            Card(Modifier.padding(top = 14.dp)) {
+                H2(t("Monthly report", "Ripoti ya mwezi"))
+                Text(t("Visits, repairs and how projects are doing for one month, ready to share as a PDF.", "Ziara, matengenezo na hali ya miradi kwa mwezi mmoja, tayari kushiriki kama PDF."), style = MaterialTheme.typography.bodyMedium, color = C.muted)
+                Btn(t("Open report", "Fungua ripoti"), report, Modifier.padding(top = 10.dp), icon = "clip", small = true)
             }
-            H2(t("Language", "Lugha"), Modifier.padding(top = 18.dp))
-            LangSwitch(m.prefs, Modifier.padding(top = 6.dp))
-            H2(t("Distances", "Umbali"), Modifier.padding(top = 18.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                Pill(t("Kilometres", "Kilomita"), !miles, Modifier.weight(1f)) { miles = false; m.prefs.miles = false }
-                Pill(t("Miles", "Maili"), miles, Modifier.weight(1f)) { miles = true; m.prefs.miles = true }
-            }
+            Stamps(m)
+            Text("RAFIKI Pin " + BuildConfig.VERSION_NAME, style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 18.dp))
         }
-        Card(Modifier.padding(top = 14.dp)) {
-            H2(t("Monthly report", "Ripoti ya mwezi"))
-            Text(t("Visits, repairs and how projects are doing for one month, ready to share as a PDF.", "Ziara, matengenezo na hali ya miradi kwa mwezi mmoja, tayari kushiriki kama PDF."), style = MaterialTheme.typography.bodyMedium, color = C.muted)
-            Btn(t("Open report", "Fungua ripoti"), report, Modifier.padding(top = 10.dp), icon = "clip", small = true)
-        }
-        Text("RAFIKI Pin " + BuildConfig.VERSION_NAME, style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 18.dp))
     }
 }
 
