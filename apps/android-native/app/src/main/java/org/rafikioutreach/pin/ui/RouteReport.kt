@@ -98,7 +98,7 @@ fun RouteScreen(m: AppModel, open: (String) -> Unit, back: () -> Unit) {
     fun save() { m.prefs.route = picked.joinToString(",") }
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
-        Text(t("Today's route", "Njia ya leo"), style = MaterialTheme.typography.headlineLarge, color = C.ink)
+        Text(t("Today's route", "Njia ya leo"), style = MaterialTheme.typography.headlineLarge, color = C.ink, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.fillMaxWidth())
         if (choosing) {
             Text(t("Tick the projects to visit. The app puts them in order, nearest first.", "Weka alama kwenye miradi utakayotembelea. Programu itaipanga, iliyo karibu kwanza."), style = MaterialTheme.typography.bodyMedium, color = C.muted)
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {

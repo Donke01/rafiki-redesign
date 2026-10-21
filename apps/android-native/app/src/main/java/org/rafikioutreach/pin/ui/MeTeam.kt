@@ -62,8 +62,8 @@ fun ago(iso: String?): String {
 fun MyMonth(m: AppModel, act: List<JSONObject>?) {
     val mine = act?.filter { same(it.optString("by"), m.prefs.name) && it.optString("a") in WORK }
     Card(Modifier.padding(top = 14.dp).testTag("my_month")) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            H2(t("My month", "Mwezi wangu"), Modifier.weight(1f))
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally), verticalAlignment = Alignment.CenterVertically) {
+            H2(t("My month", "Mwezi wangu"), wide = false)
             Text(LocalDate.now().month.getDisplayName(java.time.format.TextStyle.FULL, if (org.rafikioutreach.pin.Lang.sw) java.util.Locale("sw") else java.util.Locale.UK), style = MaterialTheme.typography.labelLarge, color = C.muted)
         }
         if (mine == null) { Text(t("Loading…", "Inapakia…"), color = C.muted, style = MaterialTheme.typography.bodyMedium); return@Card }
@@ -110,7 +110,7 @@ fun MyWork(snap: Snapshot?, open: (String) -> Unit) {
     val jobs = snap.jobs.mapNotNull { id -> snap.projects.firstOrNull { it.id == id }?.let { p -> p to snap.repairs[id] } }
     if (visits.isEmpty() && jobs.isEmpty()) return
     Card(Modifier.padding(top = 14.dp).testTag("my_work")) {
-        Row(verticalAlignment = Alignment.CenterVertically) { H2(t("My work", "Kazi yangu"), Modifier.weight(1f)); Tag("${visits.size + jobs.size}", C.tint, C.deep) }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally), verticalAlignment = Alignment.CenterVertically) { H2(t("My work", "Kazi yangu"), wide = false); Tag("${visits.size + jobs.size}", C.tint, C.deep) }
         visits.sortedByDescending { it.third }.forEach { (a, date, late) ->
             WorkRow("cal", "due", a.title.ifBlank { snap.projects.firstOrNull { it.id == a.id }?.title ?: a.id },
                 t("Visit", "Ziara") + (if (a.note.isNotBlank()) " · " + a.note else "") + " · " + t("from ", "kutoka ") + a.by,
@@ -184,7 +184,7 @@ fun TeamToday(m: AppModel, mates: List<Mate>?, act: List<JSONObject>?, snap: Sna
     val ctx = LocalContext.current
     Card(Modifier.padding(top = 14.dp).testTag("team_today")) {
         val head = remember { mutableStateOf(0) }
-        Row(verticalAlignment = Alignment.CenterVertically) { H2(t("Team today", "Timu leo"), Modifier.weight(1f)); if (head.value > 0) Tag(t("${head.value} active", "${head.value} kazini"), C.okBg, C.ok) }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally), verticalAlignment = Alignment.CenterVertically) { H2(t("Team today", "Timu leo"), wide = false); if (head.value > 0) Tag(t("${head.value} active", "${head.value} kazini"), C.okBg, C.ok) }
         if (mates == null) { Text(t("Loading…", "Inapakia…"), color = C.muted, style = MaterialTheme.typography.bodyMedium); return@Card }
         val today = LocalDate.now()
         val last = mates.associateWith { p -> act?.filter { same(it.optString("by"), p.name) && it.optString("a") in WORK }?.maxByOrNull { it.optString("at") } }

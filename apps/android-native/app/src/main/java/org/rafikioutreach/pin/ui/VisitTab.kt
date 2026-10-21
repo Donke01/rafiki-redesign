@@ -384,7 +384,8 @@ fun VisitTab(m: AppModel, p: Project) {
 }
 
 @Composable
-fun H2(text: String, modifier: Modifier = Modifier) = Text(text, style = MaterialTheme.typography.titleLarge, color = C.ink, modifier = modifier.padding(bottom = 4.dp))
+/** A card heading, centred (set [wide] = false when it sits in a row beside a count). */
+fun H2(text: String, modifier: Modifier = Modifier, wide: Boolean = true) = Text(text, style = MaterialTheme.typography.titleLarge, color = C.ink, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = (if (wide) modifier.fillMaxWidth() else modifier).padding(bottom = 4.dp))
 
 @Composable
 private fun SumRow(k: String, v: String, bad: Boolean = false) {

@@ -252,7 +252,7 @@ fun ProjectsScreen(m: AppModel, open: (String) -> Unit, planRoute: () -> Unit = 
         }
         if (mine.isNotEmpty()) item {
             Card(border = Color(0xFF9FD3F7)) {
-                Text(t("Your work", "Kazi yako"), style = MaterialTheme.typography.titleLarge, color = C.ink)
+                Text(t("Your work", "Kazi yako"), style = MaterialTheme.typography.titleLarge, color = C.ink, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.fillMaxWidth())
                 mine.forEach { (p, why) -> Row(Modifier.fillMaxWidth().padding(top = 8.dp).clip(RoundedCornerShape(14.dp)).clickable { open(p.id) }.padding(6.dp), verticalAlignment = Alignment.CenterVertically) {
                     IconTile(if (why == t("Repair job", "Kazi ya matengenezo")) "wrench" else "cal", C.blue, C.tint)
                     Spacer(Modifier.width(12.dp))
@@ -261,8 +261,8 @@ fun ProjectsScreen(m: AppModel, open: (String) -> Unit, planRoute: () -> Unit = 
             }
         }
         item(key = "head") {
-            Row(Modifier.padding(top = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text(t("Projects", "Miradi"), style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold), color = C.ink, modifier = Modifier.weight(1f))
+            Column(Modifier.fillMaxWidth().padding(top = 4.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(t("Projects", "Miradi"), style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold), color = C.ink)
                 Row(Modifier.clip(RoundedCornerShape(12.dp)).clickable(role = Role.Button, onClick = planRoute).heightIn(min = 44.dp).padding(horizontal = 6.dp).testTag("plan_route"), verticalAlignment = Alignment.CenterVertically) {
                     Icon(Ic.get("map"), null, tint = C.blue, modifier = Modifier.size(18.dp)); Spacer(Modifier.width(6.dp))
                     Text(t("Plan a route", "Panga njia"), style = MaterialTheme.typography.labelLarge, color = C.blue)
@@ -385,13 +385,13 @@ private fun HomeTop(m: AppModel, s: Snapshot, here: LatLng?, search: () -> Unit,
     val first = m.prefs.name.substringBefore(' ')
     val where = here?.let { h -> s.projects.filter { it.gps != null }.minByOrNull { Geo.metres(h, it.gps!!) }?.takeIf { Geo.metres(h, it.gps!!) < 60000 && it.area.isNotBlank() }?.let { it.area + ", " + it.country } }
         ?: COUNTRIES[m.prefs.country]
-    Column {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text("Habari, " + first.ifBlank { "karibu" }, style = MaterialTheme.typography.bodyMedium, color = C.muted)
         Row(Modifier.padding(top = 2.dp, bottom = 10.dp), verticalAlignment = Alignment.Bottom) {
             Text(androidx.compose.ui.text.buildAnnotatedString {
                 withStyle(androidx.compose.ui.text.SpanStyle(fontWeight = FontWeight.Normal)) { append(t("Which project", "Mradi gani") + "\n") }
                 append(t("today?", "leo?"))
-            }, style = MaterialTheme.typography.headlineLarge.copy(fontSize = 27.sp, lineHeight = 31.sp, letterSpacing = (-0.8).sp), color = C.ink, modifier = Modifier.weight(1f))
+            }, style = MaterialTheme.typography.headlineLarge.copy(fontSize = 27.sp, lineHeight = 31.sp, letterSpacing = (-0.8).sp), color = C.ink, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.weight(1f))
         }
         // looks like a search box; takes you to the search field above the list
         Row(Modifier.padding(bottom = 10.dp).fillMaxWidth().heightIn(min = 48.dp).clip(RoundedCornerShape(18.dp)).background(C.card).border(1.dp, C.line, RoundedCornerShape(18.dp))

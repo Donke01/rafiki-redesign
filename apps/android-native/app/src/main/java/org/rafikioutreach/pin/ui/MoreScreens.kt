@@ -68,7 +68,7 @@ fun NewSiteScreen(m: AppModel, done: (String?) -> Unit) {
     val fix by m.fix.collectAsState()
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
-        Text(t("Add a new site", "Ongeza eneo jipya"), style = MaterialTheme.typography.headlineLarge, color = C.ink)
+        Text(t("Add a new site", "Ongeza eneo jipya"), style = MaterialTheme.typography.headlineLarge, color = C.ink, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.fillMaxWidth())
         Text(t("It goes onto the monday.com board as “Due Diligence”, so it isn’t on the website until the office moves it on.", "Inaingia kwenye monday.com kama “Due Diligence”, kwa hiyo haionekani kwenye tovuti hadi ofisi iisogeze."), style = MaterialTheme.typography.bodyMedium, color = C.muted)
         Card(Modifier.padding(top = 14.dp)) {
             Field(name, { name = it }, t("Site name", "Jina la eneo"), placeholder = t("e.g. Kiptoo Primary School", "mf. Shule ya Msingi Kiptoo"))
@@ -107,7 +107,7 @@ fun NewSiteScreen(m: AppModel, done: (String?) -> Unit) {
 }
 
 @Composable
-fun MeScreen(m: AppModel, open: (String) -> Unit = {}, report: () -> Unit = {}) {
+fun MeScreen(m: AppModel, open: (String) -> Unit = {}, report: () -> Unit = {}, settings: (String) -> Unit = {}) {
     val s by m.snap.collectAsState()
     val act by m.activity.collectAsState()
     val mates by m.team.collectAsState()
@@ -117,8 +117,12 @@ fun MeScreen(m: AppModel, open: (String) -> Unit = {}, report: () -> Unit = {}) 
     LaunchedEffect(Unit) { launch { m.loadActivity() }; launch { m.loadTeam() } }
     LaunchedEffect(m.focusUpdate) { if (m.focusUpdate && pane != "me") { pane = "me"; m.prefs.mePane = "me" } }
     Column(Modifier.fillMaxSize().verticalScroll(scroll).padding(16.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(t("Me & team", "Mimi na timu"), style = MaterialTheme.typography.headlineLarge, color = C.ink, modifier = Modifier.weight(1f))
+        // the title in the middle, the bell on the right, Me | Team under it
+        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+            Text(t("Me & team", "Mimi na timu"), style = MaterialTheme.typography.headlineLarge, color = C.ink, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.padding(horizontal = 52.dp))
+            Box(Modifier.align(Alignment.CenterEnd)) { Bell(m, open) }
+        }
+        Box(Modifier.fillMaxWidth().padding(top = 10.dp), contentAlignment = Alignment.Center) {
             SmallSeg(listOf("me" to t("Me", "Mimi"), "team" to t("Team", "Timu")), pane, tag = "pane_") { pane = it; m.prefs.mePane = it; scope.launch { scroll.scrollTo(0) } }
         }
         if (pane == "team") {
@@ -138,6 +142,7 @@ fun MeScreen(m: AppModel, open: (String) -> Unit = {}, report: () -> Unit = {}) 
                 Btn(t("Open report", "Fungua ripoti"), report, Modifier.padding(top = 10.dp), icon = "clip", small = true)
             }
             Stamps(m)
+            SettingsCard(m, settings)
             UpdateRow(m)
         }
     }

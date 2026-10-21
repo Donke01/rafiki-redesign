@@ -85,12 +85,16 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
         org.rafikioutreach.pin.ui.TextSize.value = model.prefs.textSize
         setContent { RafikiTheme { App(model) } }
         handle(intent)
+        // phone alerts while the app is closed (Me › Settings › Notifications)
+        if (model.prefs.phoneAlerts) org.rafikioutreach.pin.data.AlertWorker.schedule(applicationContext)
     }
 
     override fun onNewIntent(intent: android.content.Intent) { super.onNewIntent(intent); handle(intent) }
 
     /** monday.com sign-in sends the person back with org.rafikioutreach.pin://signin?code=… */
     private fun handle(i: android.content.Intent?) {
+        // a tap on a phone alert: open that project, or Me
+        i?.getStringExtra("open")?.let { id -> i.removeExtra("open"); if (id.isNotBlank()) model.goProject = id else model.goTab = "me" }
         val u = i?.data ?: return
         if (u.scheme != "org.rafikioutreach.pin" || u.host != "signin") return
         i.data = null
@@ -162,6 +166,8 @@ fun Shell(m: AppModel) {
     }
     val goTab = m.goTab
     LaunchedEffect(goTab) { if (goTab != null) { tab(goTab); m.goTab = null } }
+    val goProject = m.goProject
+    LaunchedEffect(goProject) { if (goProject != null) { go(Place(here.tab, goProject)); m.goProject = null } }
     val sub = here.project != null || here.sub != null
     val hp = org.rafikioutreach.pin.ui.rememberHaptics()
     org.rafikioutreach.pin.ui.UpdatePrompt(m, updReady)
@@ -218,10 +224,11 @@ fun Shell(m: AppModel) {
                         pid != null -> ProjectScreen(m, pid, pl.projectTab) { pop() }
                         pl.sub == "search" -> { val snap = m.snap.collectAsState().value; val fx = m.fix.collectAsState().value; if (snap != null) org.rafikioutreach.pin.ui.SearchScreen(m, snap, fx?.ll, { go(Place(pl.tab, it)) }) { pop() } }
                         pl.sub == "report" -> org.rafikioutreach.pin.ui.ReportScreen(m) { pop() }
+                        pl.sub?.startsWith("set_") == true -> org.rafikioutreach.pin.ui.SettingsPage(m, pl.sub.removePrefix("set_")) { pop() }
                         pl.sub == "route" -> org.rafikioutreach.pin.ui.RouteScreen(m, { go(Place(pl.tab, it)) }) { pop() }
                         pl.tab == "map" -> MapScreen(m, { go(Place("map", it)) }) { go(Place("map", it, "visit")) }
                         pl.tab == "new" -> NewSiteScreen(m) { id -> if (id != null) { tab("list"); go(Place("list", id)) } }
-                        pl.tab == "me" -> MeScreen(m, { go(Place("me", it)) }) { go(Place("me", sub = "report")) }
+                        pl.tab == "me" -> MeScreen(m, { go(Place("me", it)) }, { go(Place("me", sub = "report")) }) { go(Place("me", sub = "set_$it")) }
                         pl.tab == "office" -> org.rafikioutreach.pin.ui.OfficeScreen(m) { go(Place("office", it)) }
                         else -> ProjectsScreen(m, { go(Place("list", it)) }, { go(Place("list", sub = "route")) }, { tab("new") }, { go(Place("list", it, "visit")) }) { go(Place("list", sub = "search")) }
                     }

@@ -89,7 +89,7 @@ fun OfficeScreen(m: AppModel, open: (String) -> Unit) {
         Triple("review", t("Review", "Idhinisha"), "inbox"), Triple("team", t("Team", "Timu"), "people"), Triple("cleanup", t("Clean-up", "Usafi"), "spark"), Triple("export", t("Export", "Pakua"), "upload"),
     )
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
-        Text(t("Office", "Ofisi"), style = MaterialTheme.typography.headlineLarge, color = C.ink)
+        Text(t("Office", "Ofisi"), style = MaterialTheme.typography.headlineLarge, color = C.ink, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.fillMaxWidth())
         secs.chunked(4).forEachIndexed { ri, row ->
             Row(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 row.forEachIndexed { ci, (k, l, ic) -> Tile(l, ic, sec == k, { sec = k }, Modifier.weight(1f).rise(ri * 4 + ci, step = 35).testTag("o_$k"), badge = when (k) { "review" -> snap.reviewOpen; "repairs" -> snap.repairs.size; else -> 0 }) }

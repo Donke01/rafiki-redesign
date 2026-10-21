@@ -46,7 +46,7 @@ import java.io.File
 class OfficeTest {
     @get:Rule val rule = createAndroidComposeRule<ComponentActivity>()
     private val out = File(System.getProperty("user.dir"), "build/shots").apply { mkdirs() }
-    private val posts = mutableListOf<String>()
+    private val posts = java.util.concurrent.CopyOnWriteArrayList<String>()
 
     private fun proj(id: String, t: String, gps: JSONArray?) = JSONObject().put("id", id).put("title", t).put("country", "Kenya").put("ck", "ke").put("area", "Eldoret")
         .put("type", "borehole").put("status", "Completed").put("pump", "manual").apply { if (gps != null) put("gps", gps) }

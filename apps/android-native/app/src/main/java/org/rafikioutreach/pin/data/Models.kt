@@ -90,6 +90,8 @@ data class Snapshot(
     val linked: String = "",
     /** The Google maps key for this app (Map Tiles API), set by the office in Cloudflare; "" = OpenStreetMap. */
     val gmapsAndroid: String = "",
+    /** This person: how they signed in ("app" PIN, "cloudflare" PIN, "shared" PIN, "monday") and what they set in Settings. */
+    val me: Me = Me(),
 ) {
     companion object {
         fun from(o: JSONObject): Snapshot {
@@ -111,9 +113,15 @@ data class Snapshot(
                 reviewOpen = o.optInt("reviewOpen"),
                 linked = o.optString("linked"),
                 gmapsAndroid = o.optJSONObject("gmaps")?.optString("android").orEmpty(),
+                me = o.optJSONObject("me")?.let { Me.from(it) } ?: Me(),
             )
         }
     }
+}
+
+/** Me › Settings › Personal details, and how this person signs in. */
+data class Me(val kind: String = "", val nick: String = "", val phone: String = "", val home: String = "") {
+    companion object { fun from(o: JSONObject) = Me(o.optString("kind"), o.optString("nick"), o.optString("phone"), o.optString("home")) }
 }
 
 /** A note on a project in monday.com (the History tab). */
@@ -190,6 +198,10 @@ fun reasonText(reason: String?): String = when (reason) {
     "token-bad" -> t("monday.com didn’t accept that token. Copy it again from the token page.", "monday.com haikukubali tokeni hiyo. Inakili tena kutoka ukurasa wa tokeni.")
     "account" -> t("That token is for a different monday.com account. Use your RAFIKI login.", "Tokeni hiyo ni ya akaunti nyingine ya monday.com. Tumia akaunti yako ya RAFIKI.")
     "board" -> t("Your monday.com login can’t see the Projects board yet. Ask the office to invite you to it.", "Akaunti yako ya monday.com bado haioni ubao wa Projects. Omba ofisi ikualike.")
+    "pin-current" -> t("Your current PIN isn’t right.", "PIN yako ya sasa si sahihi.")
+    "pin-weak" -> t("Choose 4 to 6 digits that aren’t easy to guess (not 1234 or 0000).", "Chagua tarakimu 4 hadi 6 zisizo rahisi kubahatisha (si 1234 wala 0000).")
+    "pin-taken" -> t("That PIN can’t be used. Choose another.", "PIN hiyo haiwezi kutumika. Chagua nyingine.")
+    "pin-cloudflare" -> t("Your PIN was set by the office, so only they can change it.", "PIN yako iliwekwa na ofisi, kwa hiyo wao pekee wanaweza kuibadilisha.")
     "own-pin" -> t("You need your own PIN for this. Ask the office for one.", "Unahitaji PIN yako mwenyewe kwa hili. Omba ofisi ikupe.")
     "pin" -> t("That PIN isn’t right. Please check it with your team.", "PIN hiyo si sahihi. Tafadhali hakikisha na timu yako.")
     "locked" -> t("Too many wrong PINs from this connection. Please try again in an hour.", "PIN nyingi zisizo sahihi kutoka mtandao huu. Jaribu tena baada ya saa moja.")

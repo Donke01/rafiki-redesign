@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="app-version" content="2.14">
 <meta name="format-detection" content="telephone=no">
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#076DB1">
@@ -1200,6 +1201,29 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
 
 /* Me & team (Figma: RAFIKI Pin — Me & team) */
 .mehead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:4px 2px 12px}.mehead h1{margin:0}
+/* Me & team header: the title centred, the bell on the right, Me | Team under it */
+.mehead{display:grid !important;grid-template-columns:44px 1fr 44px;align-items:center;justify-items:center;row-gap:10px}
+.mehead h1{grid-column:2;text-align:center}.mehead .bell{grid-column:3}.mehead .mesw{grid-column:1/-1}
+.bell{position:relative;width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(4,38,63,.08)}
+.bell svg{width:21px;height:21px}.bell .bn{position:absolute;top:-3px;right:-3px;min-width:19px;height:19px;padding:0 5px;border-radius:99px;background:var(--bad,#C62828);color:#FFFFFF;font:800 .68rem/19px inherit;font-style:normal;text-align:center;border:2px solid var(--card)}
+.bsh-h{display:flex;align-items:center;justify-content:center;position:relative;margin:2px 0 10px}.bsh-h h3{margin:0;text-align:center}
+.bsh-x{position:absolute;right:0;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:50%;border:0;background:var(--hb-slate);color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer}.bsh-x svg{width:18px;height:18px}
+.nl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.nrow{width:100%;display:flex;align-items:center;gap:12px;text-align:left;padding:10px 12px;border-radius:16px;border:1px solid var(--line);background:var(--card);color:var(--text);cursor:pointer;font:inherit}
+.nrow.new{background:var(--tint);border-color:transparent}.nrow .nt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.nrow .nt b{font-size:.9rem;color:var(--ink);font-weight:700}.nrow .nt small{font-size:.75rem;color:var(--muted)}
+.nrow .nd{width:9px;height:9px;border-radius:50%;background:var(--blue);flex:none}
+.nempty{text-align:center;padding:26px 0;color:var(--ok)}.nempty svg{width:40px;height:40px}.nempty p{color:var(--muted);margin:8px 0 0}
+.settings .sgrp{margin-top:6px}.settings .sgl{display:block;text-align:center;font-size:.72rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:14px 0 4px}
+.sr2{width:100%;display:flex;align-items:center;gap:12px;padding:11px 2px;border:0;border-top:1px solid var(--line);background:transparent;color:var(--text);text-align:left;cursor:pointer;font:inherit}
+.sgl+.sr2{border-top:0}.sr2 .st{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.sr2 .st b{font-size:.92rem;color:var(--ink)}.sr2 .st small{font-size:.76rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sr2 .chev{width:18px;height:18px;color:var(--muted);flex:none}
+.faq details{border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:8px;background:var(--card)}.faq summary{font-weight:700;color:var(--ink);cursor:pointer}.faq p{margin:8px 0 0;color:var(--text);line-height:1.5}
+.bsh .pr{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--line)}.bsh .pr b{flex:1;color:var(--ink);font-size:.92rem}.bsh .fld small{display:block;margin-top:4px}.bsh .fld{margin-bottom:12px}
+.about{text-align:center}.about img{height:34px;margin:6px auto 10px}
+/* headings centred where they stand alone */
+.card > h2:first-child,.card > h2:first-child + p.muted,.mmh,.card .wh h2{text-align:center}
+.mmh{justify-content:center !important;gap:10px}
+#homeTop .hello,#homeTop .bigq{justify-content:center;text-align:center}
+#vList .listhead{flex-direction:column;gap:2px}#vList .listhead h1{text-align:center}
 .mesw,.seg.sm{display:inline-flex !important;gap:0 !important;padding:4px !important;margin:0 !important;border-radius:999px !important;background:var(--hb-slate) !important;border:0 !important;box-shadow:none !important;flex:none;width:auto}
 .mesw button,.seg.sm button{min-height:0 !important;border:0;border-radius:999px !important;background:transparent !important;box-shadow:none !important;color:var(--muted) !important;font:700 .82rem/1 inherit;padding:9px 16px !important;cursor:pointer}
 .seg.sm button{font-size:.74rem !important;padding:8px 11px !important}
@@ -1492,6 +1516,7 @@ html[data-theme=dark] .waitc{background:var(--card) !important;border-color:var(
     <!-- me -->
     <section id="vMe" class="hidden" aria-labelledby="h-me">
       <div class="mehead"><h1 id="h-me">Me &amp; team</h1>
+        <button class="bell" id="meBell" type="button" aria-label="Notifications"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg><i class="bn hidden" id="meBellN">0</i></button>
         <div class="mesw" id="meSw" role="tablist" aria-label="Me or team"><button type="button" role="tab" data-p="me" aria-selected="true">Me</button><button type="button" role="tab" data-p="team" aria-selected="false">Team</button></div></div>
       <div class="stack" id="paneMe">
         <div class="mehero" id="meHero">
@@ -1520,6 +1545,7 @@ html[data-theme=dark] .waitc{background:var(--card) !important;border-color:var(
           <div class="pr"><span class="pi" style="--hu:var(--hu-teal);--hb:var(--hb-teal)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 6.5l5.5-2.5 6 2.5 5.5-2.5v13.5L15 20l-6-2.5-5.5 2.5z"/><path d="M9 4v13.5M15 6.5V20"/></svg></span><div class="prt"><label for="meHome" style="margin:0">My country</label><small id="meHomeTx"></small></div>
             <select id="meHome"><option value="">Automatic</option><option value="ke">Kenya</option><option value="tz">Tanzania</option><option value="ug">Uganda</option><option value="mw">Malawi</option></select></div>
         </div>
+        <div class="card settings" id="meSet"></div>
         <div class="card">
           <h2>Monthly report</h2>
           <p class="muted">Visits, repairs and how projects are doing for one month, ready to save as a PDF.</p>
@@ -1568,6 +1594,7 @@ html[data-theme=dark] .waitc{background:var(--card) !important;border-color:var(
   var $ = function (id) { return document.getElementById(id); };
   var qa = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
   var OIC = {
+    bell: '<path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/>',
     wrench: '<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/>',
     inbox: '<path d="M4 13l2.5-7.5h11L20 13v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/><path d="M4 13h4.5l1.5 2.5h4l1.5-2.5H20"/>',
     cal: '<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M12 13.2v2.6l1.8 1.1"/>',
@@ -1606,7 +1633,7 @@ html[data-theme=dark] .waitc{background:var(--card) !important;border-color:var(
   // the RAFIKI logo (dark and light versions) for headers
   var LOGO = '<img class="lg-d" src="/img/logo-dark-bold.webp" alt="RAFIKI" width="64" height="22"><img class="lg-l" src="/img/logo-light-bold.webp" alt="" width="64" height="22">';
   var S = { gmaps: null, mode: store.get('rfPinMode') || '', photo: store.get('rfPinPhoto') || '', pin: store.get('rfPin') || '', name: store.get('rfPinName') || '', who: store.get('rfPinWho') || '', projects: jget('rfPinList', []), repairs: jget('rfPinRepairs', {}), visits: jget('rfPinVisits', {}), admin: jget('rfPinRole', {}).admin || false, jobs: jget('rfPinRole', {}).jobs || [], assigned: jget('rfPinRole', {}).assigned || [], confirmed: jget('rfPinRole', {}).confirmed || {}, reviewOpen: 0, lang: store.get('rfPinLang') || '', units: store.get('rfPinUnits') || 'km', srvHome: store.get('rfPinSrvHome') || '', gpsHome: '',
-    filter: store.get('rfPinFilter') || 'missing', ftype: store.get('rfPinType') || '', cur: null, here: null, hereAt: 0, view: 'vLock', prev: 'vMap', routeMode: false, pickedRoute: [], route: jget('rfPinRoute', []), dismissed: {} };
+    me: jget('rfPinMe', null), filter: store.get('rfPinFilter') || 'missing', ftype: store.get('rfPinType') || '', cur: null, here: null, hereAt: 0, view: 'vLock', prev: 'vMap', routeMode: false, pickedRoute: [], route: jget('rfPinRoute', []), dismissed: {} };
   var CENTER = { ke: [0.3, 37.9, 7], tz: [-6.3, 34.8, 6], ug: [1.4, 32.3, 7], mw: [-13.3, 34.3, 7] };
   var CNAME = { ke: 'Kenya', tz: 'Tanzania', ug: 'Uganda', mw: 'Malawi' };
   var COLORS = { pinned: '#1C7C4A', repair: '#D98200', notworking: '#B3261E' };
@@ -1635,6 +1662,10 @@ html[data-theme=dark] .waitc{background:var(--card) !important;border-color:var(
       : j.reason === 'token-bad' ? tr('monday.com didn’t accept that token. Copy it again from the token page.', 'monday.com haikukubali tokeni hiyo. Inakili tena kutoka ukurasa wa tokeni.')
       : j.reason === 'account' ? tr('That token is for a different monday.com account. Use your RAFIKI login.', 'Tokeni hiyo ni ya akaunti nyingine ya monday.com. Tumia akaunti yako ya RAFIKI.')
       : j.reason === 'board' ? tr('Your monday.com login can’t see the Projects board yet. Ask the office to invite you to it.', 'Akaunti yako ya monday.com bado haioni ubao wa Projects. Omba ofisi ikualike.')
+      : j.reason === 'pin-current' ? tr('Your current PIN isn’t right.', 'PIN yako ya sasa si sahihi.')
+      : j.reason === 'pin-weak' ? tr('Choose 4 to 6 digits that aren’t easy to guess (not 1234 or 0000).', 'Chagua tarakimu 4 hadi 6 zisizo rahisi kubahatisha (si 1234 wala 0000).')
+      : j.reason === 'pin-taken' ? tr('That PIN can’t be used. Choose another.', 'PIN hiyo haiwezi kutumika. Chagua nyingine.')
+      : j.reason === 'pin-cloudflare' ? tr('Your PIN was set by the office, so only they can change it.', 'PIN yako iliwekwa na ofisi, kwa hiyo wao pekee wanaweza kuibadilisha.')
       : j.reason === 'own-pin' ? tr('You need your own PIN for this. Ask the office for one.', 'Unahitaji PIN yako mwenyewe kwa hili. Omba ofisi ikupe.')
       : j.reason === 'locked' ? 'Too many wrong PINs from this connection. Please try again in an hour.'
       : j.reason === 'not-set-up' ? 'The pin app isn’t switched on yet: PINs still need to be set in Cloudflare.'
@@ -2204,6 +2235,8 @@ html[data-theme=dark] .waitc{background:var(--card) !important;border-color:var(
       if (S.pin) { store.set('rfPin', S.pin); store.set('rfPinMode', 'pin'); }
       store.set('rfPinName', S.name); store.set('rfPinWho', S.who);
       S.projects = j.projects || []; S.repairs = j.repairs || {}; S.visits = j.visits || {}; saveList();
+      if (j.me) { S.me = j.me; store.set('rfPinMe', JSON.stringify(j.me)); }
+      if ((j.reviewOpen || 0) > (S.reviewOpen || 0)) store.set('rfPinReviewAt', new Date().toISOString());
       S.admin = !!j.admin; S.jobs = j.jobs || []; S.assigned = j.assigned || []; S.confirmed = j.confirmed || {}; S.reviewOpen = j.reviewOpen || 0;
       store.set('rfPinRole', JSON.stringify({ admin: S.admin, jobs: S.jobs, assigned: S.assigned, confirmed: S.confirmed }));
       adminUi(); myWorkUi(); meWorkDraw(); if (S.view === 'vOffice') renderOffice(); if (S.view === 'vProj') confirmUi();
@@ -3669,6 +3702,141 @@ html[data-theme=dark] .waitc{background:var(--card) !important;border-color:var(
   }
   $('meSw').addEventListener('click', function (e) { var b = e.target.closest('[data-p]'); if (!b) return; buzz(); mePane(b.getAttribute('data-p')); window.scrollTo(0, 0); });
   $('meRep').addEventListener('click', function () { openReport(); });
+  // --- notifications: the bell in Me & team ----------------------------------------------------
+  // Worked out on the phone from what the team did, jobs and visits for you, and the review queue.
+  var NOTE_KINDS = [['assign', 'Visits assigned to me', 'Ziara nilizopewa', 'cal', 'teal'], ['job', 'Repair jobs for me', 'Kazi za matengenezo kwangu', 'wrench', 'amber'], ['repair', 'Repairs reported', 'Matengenezo yaliyoripotiwa', 'alert', 'coral'],
+    ['fixed', 'Repairs fixed', 'Matengenezo yaliyokamilika', 'okc', 'green'], ['new', 'New sites added', 'Maeneo mapya', 'plus', 'purple'], ['review', 'Waiting for review (admins)', 'Zinasubiri kuidhinishwa (wasimamizi)', 'inbox', 'blue']];
+  function noteOn(k) { var o = jget('rfPinNoteKinds', {}); return o[k] !== 0; }
+  function same(a, b) { return String(a || '').trim().toLowerCase() === String(b || '').trim().toLowerCase(); }
+  function notes() {
+    var me = S.name, out = [], cut = Date.now() - 30 * 864e5;
+    (actCache || []).forEach(function (e) {
+      if (!e || !e.at || Date.parse(e.at) < cut || same(e.by, me)) return;
+      if (e.a === 'assign' && same(e.to, me)) out.push({ k: 'assign', at: e.at, t: tr(e.by + ' asked you to make ' + (e.t || 'visits').replace(/ for .*$/, ''), e.by + ' amekuomba ufanye ' + (e.t || 'ziara').replace(/ for .*$/, '')) });
+      else if (e.a === 'visit' && (e.s === 'repair' || e.s === 'notworking')) out.push({ k: 'repair', at: e.at, id: e.id, t: e.by + ': ' + (e.t || '') + ' · ' + (e.s === 'notworking' ? tr('not working', 'haifanyi kazi') : tr('needs repair', 'inahitaji matengenezo')) });
+      else if (e.a === 'fixed') out.push({ k: 'fixed', at: e.at, id: e.id, t: tr(e.by + ' fixed ' + (e.t || ''), e.by + ' amerekebisha ' + (e.t || '')) });
+      else if (e.a === 'new' && S.admin) out.push({ k: 'new', at: e.at, id: e.id, t: tr(e.by + ' added a new site: ' + (e.t || ''), e.by + ' ameongeza eneo jipya: ' + (e.t || '')) });
+    });
+    (S.jobs || []).forEach(function (id) { var r = S.repairs[id]; if (r) out.push({ k: 'job', at: (r.stepAt && r.stepAt.assigned) || r.at, id: id, t: tr('Repair job for you: ', 'Kazi ya matengenezo kwako: ') + (r.t || (byId(id) || {}).title || '') }); });
+    if (S.admin && S.reviewOpen) out.push({ k: 'review', at: store.get('rfPinReviewAt') || new Date().toISOString(), t: S.reviewOpen === 1 ? tr('1 change waiting for your review', 'Badiliko 1 linasubiri uidhinishe') : tr(S.reviewOpen + ' changes waiting for your review', 'Mabadiliko ' + S.reviewOpen + ' yanasubiri uidhinishe') });
+    return out.filter(function (n) { return noteOn(n.k); }).sort(function (a, b) { return String(b.at).localeCompare(String(a.at)); }).slice(0, 40);
+  }
+  function noteUnread() { var seen = store.get('rfPinNoteSeen') || ''; return notes().filter(function (n) { return String(n.at) > seen; }).length; }
+  function bellUi() { var n = noteUnread(), b = $('meBellN'); if (!b) return; b.textContent = n > 9 ? '9+' : n; b.classList.toggle('hidden', !n); $('meBell').setAttribute('aria-label', tr('Notifications', 'Arifa') + (n ? ' · ' + n + ' ' + tr('new', 'mpya') : '')); }
+  function bsheet(title, html, cls) {
+    var w = document.createElement('div'); w.className = 'bsh ' + (cls || ''); w.setAttribute('role', 'dialog'); w.setAttribute('aria-modal', 'true'); w.setAttribute('aria-label', title);
+    w.innerHTML = '<div class="bsh-bg"></div><div class="bsh-p"><i class="grab" aria-hidden="true"></i><div class="bsh-h"><h3>' + title + '</h3><button type="button" class="bsh-x" aria-label="' + tr('Close', 'Funga') + '">' + oic('xc').replace(/<circle[^>]*\/>/, '') + '</button></div>' + html + '</div>';
+    document.body.appendChild(w); requestAnimationFrame(function () { w.classList.add('in'); });
+    w.close = function () { w.classList.add('out'); setTimeout(function () { w.remove(); }, 220); };
+    w.querySelector('.bsh-bg').addEventListener('click', w.close); w.querySelector('.bsh-x').addEventListener('click', w.close);
+    return w;
+  }
+  function bellOpen() {
+    var list = notes(), seen = store.get('rfPinNoteSeen') || '', K = {}; NOTE_KINDS.forEach(function (k) { K[k[0]] = k; });
+    var html = list.length ? '<ul class="nl">' + list.map(function (n) {
+      var k = K[n.k];
+      return '<li><button type="button" class="nrow' + (String(n.at) > seen ? ' new' : '') + '"' + (n.id ? ' data-id="' + esc(n.id) + '"' : n.k === 'review' ? ' data-go="review"' : '') + '><span class="pi" style="--hu:var(--hu-' + k[4] + ');--hb:var(--hb-' + k[4] + ')">' + oic(k[3]) + '</span><span class="nt"><b>' + esc(n.t) + '</b><small>' + esc(when(n.at)) + '</small></span>' + (String(n.at) > seen ? '<i class="nd" aria-label="' + tr('new', 'mpya') + '"></i>' : '') + '</button></li>';
+    }).join('') + '</ul>' : '<div class="nempty">' + oic('check') + '<p>' + tr('You’re all caught up.', 'Hakuna jipya kwa sasa.') + '</p></div>';
+    var w = bsheet(tr('Notifications', 'Arifa'), html + '<button class="lnk" type="button" data-set="notify" style="margin-top:12px">' + tr('Choose what to be told about', 'Chagua unachotaka kuarifiwa') + '</button>', 'notes');
+    store.set('rfPinNoteSeen', new Date().toISOString()); bellUi();
+    w.addEventListener('click', function (e) {
+      var r = e.target.closest('[data-id]'); if (r) { w.close(); openProj(r.getAttribute('data-id')); return; }
+      if (e.target.closest('[data-go=review]')) { w.close(); show('vOffice'); O.tab = 'review'; renderOffice(); return; }
+      if (e.target.closest('[data-set]')) { w.close(); setOpen('notify'); }
+    });
+  }
+  $('meBell').addEventListener('click', function () { buzz(); bellOpen(); });
+  function bellLoad() { if (navigator.onLine) api('GET', null, '?activity=1').then(function (j) { if (j.ok) { actCache = j.activity || []; bellUi(); } }); else bellUi(); }
+
+  // --- Me › Settings ------------------------------------------------------------------------------
+  var FAQ = [
+    ['How do I pin a project’s location?', 'Ninawekaje mahali pa mradi?', 'Stand at the site, open the project, then Pin location › Use my location. Check the point on the map and save. You can also tap the map, or paste a Google Maps link.', 'Simama kwenye eneo, fungua mradi, kisha Weka mahali › Tumia mahali nilipo. Hakikisha kwenye ramani kisha hifadhi. Unaweza pia kugusa ramani, au kubandika kiungo cha Google Maps.'],
+    ['How do I report a site visit?', 'Ninaripotije ziara?', 'Open the project › Site visit. Tap “I’ve arrived”, choose how it is, go through the checklist, add photos, then Send. Each kind of project has its own checklist.', 'Fungua mradi › Ziara. Gusa “Nimefika”, chagua hali, pitia orodha ya ukaguzi, ongeza picha, kisha Tuma. Kila aina ya mradi ina orodha yake.'],
+    ['What happens with no signal?', 'Nini kinatokea bila mtandao?', 'Keep working. Everything is saved on this phone and sent to monday.com by itself when there’s signal. Me shows what is still waiting.', 'Endelea kufanya kazi. Kila kitu kinahifadhiwa kwenye simu na kutumwa monday.com chenyewe mtandao ukipatikana. Mimi inaonyesha kinachosubiri.'],
+    ['Why does my change need approval?', 'Kwa nini badiliko langu linahitaji kuidhinishwa?', 'If an admin confirmed a location, moving it by more than 500 m goes to the office for approval first. New sites and story moments are checked too.', 'Ikiwa msimamizi amethibitisha mahali, kuhamisha zaidi ya mita 500 kunaenda ofisini kuidhinishwa kwanza. Maeneo mapya na hadithi pia hukaguliwa.'],
+    ['How do I update the app?', 'Ninasasishaje programu?', 'Android: Me › App updates › Update now. It downloads and installs in the app. On Samsung phones, turn Auto Blocker off for a moment if the update is cancelled.', 'Android: Mimi › Masasisho › Sasisha sasa. Inapakuliwa na kusakinishwa ndani ya programu. Kwenye simu za Samsung, zima Auto Blocker kwa muda ikiwa sasisho limeghairiwa.'],
+    ['I forgot my PIN', 'Nimesahau PIN yangu', 'Ask an admin in the office. They can give you a new PIN in Office › Team.', 'Muombe msimamizi ofisini. Anaweza kukupa PIN mpya kwenye Ofisi › Timu.'],
+    ['Who can see my phone number?', 'Nani anaweza kuona namba yangu ya simu?', 'Only the RAFIKI team in this app, so they can call or WhatsApp you from Me & team. It isn’t shown on the website.', 'Timu ya RAFIKI pekee kwenye programu hii, ili wakupigie au wakutumie WhatsApp kutoka Mimi na timu. Haionyeshwi kwenye tovuti.']
+  ];
+  var CN = { ke: 'Kenya', tz: 'Tanzania', ug: 'Uganda', mw: 'Malawi' };
+  function setRow(k, icon, hue, title, sub) { return '<button type="button" class="sr2" data-set="' + k + '"><span class="pi" style="--hu:var(--hu-' + hue + ');--hb:var(--hb-' + hue + ')">' + oic(icon) + '</span><span class="st"><b>' + title + '</b>' + (sub ? '<small>' + sub + '</small>' : '') + '</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>'; }
+  function setUi() {
+    var me = S.me || {}, kind = me.kind || (S.mode === 'monday' ? 'monday' : S.who ? '' : 'shared');
+    $('meSet').innerHTML = '<h2>' + tr('Settings', 'Mipangilio') + '</h2>' +
+      '<div class="sgrp"><span class="sgl">' + tr('Account', 'Akaunti') + '</span>' +
+      setRow('profile', 'people', 'blue', tr('Personal details', 'Taarifa zangu'), esc(me.nick || S.name || '') + (me.phone ? ' · ' + esc(me.phone) : '')) +
+      setRow('pin', 'lock', 'purple', kind === 'monday' ? tr('Sign-in', 'Kuingia') : tr('Change my PIN', 'Badilisha PIN yangu'), kind === 'monday' ? tr('Signed in with monday.com', 'Umeingia kwa monday.com') : kind === 'app' ? tr('Your own 4-digit PIN', 'PIN yako ya tarakimu 4') : kind === 'cloudflare' ? tr('Set by the office', 'Imewekwa na ofisi') : tr('Shared team PIN', 'PIN ya timu')) +
+      setRow('notify', 'clock', 'amber', tr('Notifications', 'Arifa'), tr('What the bell tells you about', 'Kengele inakuarifu nini')) + '</div>' +
+      '<div class="sgrp"><span class="sgl">' + tr('Help', 'Msaada') + '</span>' +
+      setRow('help', 'search', 'teal', tr('Help and FAQs', 'Msaada na maswali'), tr('Pinning, visits, no signal, updates', 'Kuweka mahali, ziara, bila mtandao, masasisho')) +
+      setRow('contact', 'chat', 'green', tr('Contact the office', 'Wasiliana na ofisi'), 'info@rafikioutreach.org') +
+      setRow('problem', 'alert', 'coral', tr('Report a problem with the app', 'Ripoti tatizo la programu'), tr('Sends the app version with your message', 'Inatuma toleo la programu pamoja na ujumbe wako')) + '</div>' +
+      '<div class="sgrp"><span class="sgl">' + tr('About', 'Kuhusu') + '</span>' +
+      setRow('privacy', 'lock', 'slate', tr('Privacy policy', 'Sera ya faragha'), '') +
+      setRow('terms', 'clip', 'slate', tr('Terms of use', 'Masharti ya matumizi'), '') +
+      setRow('about', 'drop', 'blue', tr('About RAFIKI Pin', 'Kuhusu RAFIKI Pin'), tr('Version ', 'Toleo ') + APPV) +
+      setRow('signout', 'undo', 'coral', S.mode === 'monday' ? tr('Sign out of this phone', 'Toka kwenye simu hii') : tr('Sign out of this phone', 'Toka kwenye simu hii'), tr('You’ll need your PIN to come back in', 'Utahitaji PIN yako kurudi')) + '</div>';
+  }
+  var APPV = (function () { var s = document.querySelector('meta[name=app-version]'); return s ? s.content : 'web'; })();
+  function setOpen(k) {
+    var me = S.me || {}, kind = me.kind || (S.mode === 'monday' ? 'monday' : S.who ? '' : 'shared'), w;
+    if (k === 'profile') {
+      var own = !!S.who;
+      w = bsheet(tr('Personal details', 'Taarifa zangu'),
+        '<div class="fld"><label for="pfName">' + tr('Full name', 'Jina kamili') + '</label><input id="pfName" type="text" value="' + esc(S.name || '') + '"' + (own ? ' readonly' : '') + ' autocomplete="name"><small class="muted">' + (own ? tr('Your name comes from your sign-in. Ask the office to change it.', 'Jina lako linatoka kwenye kuingia kwako. Omba ofisi ibadilishe.') : tr('With the shared team PIN, this is the name your changes go in under.', 'Kwa PIN ya timu, haya ndiyo majina yanayoonekana kwenye mabadiliko yako.')) + '</small></div>' +
+        (own ? '<div class="fld"><label for="pfNick">' + tr('What the team calls you (optional)', 'Jina la kuitwa na timu (si lazima)') + '</label><input id="pfNick" type="text" value="' + esc(me.nick || '') + '" placeholder="' + tr('e.g. Mery', 'mf. Mery') + '" maxlength="40"></div>' +
+        '<div class="fld"><label for="pfPhone">' + tr('Phone (for calls and WhatsApp from the team)', 'Simu (kwa simu na WhatsApp kutoka kwa timu)') + '</label><input id="pfPhone" type="tel" inputmode="tel" value="' + esc(me.phone || '') + '" placeholder="07… / +254 7…" autocomplete="tel"></div>' +
+        '<div class="fld"><label for="pfHome">' + tr('Home country', 'Nchi ya nyumbani') + '</label><select id="pfHome"><option value="">' + tr('Not set', 'Haijawekwa') + '</option>' + Object.keys(CN).map(function (c) { return '<option value="' + c + '"' + ((me.home || S.srvHome) === c ? ' selected' : '') + '>' + CN[c] + '</option>'; }).join('') + '</select></div>' : '<p class="msg">' + tr('Ask the office for your own PIN to add a phone number and the rest.', 'Omba ofisi ikupe PIN yako mwenyewe ili kuongeza namba ya simu na mengine.') + '</p>') +
+        '<button class="btn block" type="button" id="pfSave" style="margin-top:14px">' + tr('Save', 'Hifadhi') + '</button><p class="msg" id="pfMsg" aria-live="polite"></p>');
+      $('pfSave').addEventListener('click', function () {
+        if (!own) { var n = $('pfName').value.trim(); if (n.length < 2) return msg('pfMsg', 'bad', tr('Please write your name.', 'Tafadhali andika jina lako.')); S.name = n; store.set('rfPinName', n); $('who').textContent = n; setUi(); toast(tr('Saved ✓', 'Imehifadhiwa ✓')); return w.close(); }
+        var b = this; b.disabled = true; msg('pfMsg', '', tr('Saving…', 'Inahifadhi…'));
+        api('POST', { action: 'profile', nick: $('pfNick').value.trim(), phone: $('pfPhone').value.trim(), home: $('pfHome').value }).then(function (j) {
+          b.disabled = false; if (!j.ok) return msg('pfMsg', 'bad', why(j));
+          S.me = j.me; store.set('rfPinMe', JSON.stringify(j.me)); setUi(); toast(tr('Saved ✓', 'Imehifadhiwa ✓')); w.close();
+        });
+      });
+    } else if (k === 'pin') {
+      if (kind !== 'app') { bsheet(kind === 'monday' ? tr('Sign-in', 'Kuingia') : tr('Change my PIN', 'Badilisha PIN yangu'), '<p>' + (kind === 'monday' ? tr('You sign in with your monday.com account, so there’s no PIN to change. To change your monday.com password, use monday.com.', 'Unaingia kwa akaunti yako ya monday.com, kwa hiyo hakuna PIN ya kubadilisha. Kubadilisha nenosiri la monday.com, tumia monday.com.') : kind === 'cloudflare' ? tr('Your PIN was set up by the office, so only they can change it. Ask an admin for a new one in Office › Team.', 'PIN yako iliwekwa na ofisi, kwa hiyo wao pekee wanaweza kuibadilisha. Muombe msimamizi akupe mpya kwenye Ofisi › Timu.') : tr('You’re using the shared team PIN. Ask the office for your own PIN, then you can change it here.', 'Unatumia PIN ya timu. Omba ofisi ikupe PIN yako mwenyewe, kisha unaweza kuibadilisha hapa.')) + '</p>'); return; }
+      w = bsheet(tr('Change my PIN', 'Badilisha PIN yangu'),
+        '<div class="fld"><label for="cpOld">' + tr('Current PIN', 'PIN ya sasa') + '</label><input id="cpOld" type="password" inputmode="numeric" maxlength="6" autocomplete="current-password"></div>' +
+        '<div class="fld"><label for="cpNew">' + tr('New PIN (4 to 6 digits)', 'PIN mpya (tarakimu 4 hadi 6)') + '</label><input id="cpNew" type="password" inputmode="numeric" maxlength="6" autocomplete="new-password"></div>' +
+        '<div class="fld"><label for="cpNew2">' + tr('New PIN again', 'PIN mpya tena') + '</label><input id="cpNew2" type="password" inputmode="numeric" maxlength="6" autocomplete="new-password"></div>' +
+        '<p class="muted">' + tr('Avoid easy ones like 1234 or 0000. Don’t share it: your changes go in under your name.', 'Epuka rahisi kama 1234 au 0000. Usimpe mtu: mabadiliko yako yanaingia kwa jina lako.') + '</p>' +
+        '<button class="btn block" type="button" id="cpSave">' + tr('Change PIN', 'Badilisha PIN') + '</button><p class="msg" id="cpMsg" aria-live="polite"></p>');
+      $('cpSave').addEventListener('click', function () {
+        var o = $('cpOld').value.trim(), n = $('cpNew').value.trim();
+        if (n !== $('cpNew2').value.trim()) return msg('cpMsg', 'bad', tr('The two new PINs aren’t the same.', 'PIN mpya mbili hazifanani.'));
+        var b = this; b.disabled = true; msg('cpMsg', '', tr('Changing…', 'Inabadilisha…'));
+        api('POST', { action: 'pin-change', current: o, pin: n }).then(function (j) {
+          b.disabled = false; if (!j.ok) return msg('cpMsg', 'bad', why(j));
+          S.pin = n; store.set('rfPin', n); toast(tr('PIN changed ✓ Use the new one next time.', 'PIN imebadilishwa ✓ Tumia mpya wakati ujao.')); w.close();
+        });
+      });
+    } else if (k === 'notify') {
+      var o = jget('rfPinNoteKinds', {});
+      w = bsheet(tr('Notifications', 'Arifa'), '<p class="muted">' + tr('The bell in Me & team shows these. On Android the phone can also tell you when the app is closed (turn that on in the Android app).', 'Kengele kwenye Mimi na timu inaonyesha haya. Kwenye Android simu inaweza pia kukuarifu programu ikiwa imefungwa (washa kwenye programu ya Android).') + '</p>' +
+        NOTE_KINDS.filter(function (n) { return n[0] !== 'review' || S.admin; }).map(function (n) { return '<div class="pr"><span class="pi" style="--hu:var(--hu-' + n[4] + ');--hb:var(--hb-' + n[4] + ')">' + oic(n[3]) + '</span><b>' + tr(n[1], n[2]) + '</b><button type="button" class="tgl" role="switch" data-nk="' + n[0] + '" aria-checked="' + (o[n[0]] !== 0) + '" aria-label="' + tr(n[1], n[2]) + '"><i></i></button></div>'; }).join(''));
+      w.addEventListener('click', function (e) { var t = e.target.closest('[data-nk]'); if (!t) return; var kk = t.getAttribute('data-nk'), on = t.getAttribute('aria-checked') !== 'true'; t.setAttribute('aria-checked', on); o[kk] = on ? 1 : 0; store.set('rfPinNoteKinds', JSON.stringify(o)); bellUi(); buzz(); });
+    } else if (k === 'help') {
+      bsheet(tr('Help and FAQs', 'Msaada na maswali'), '<div class="faq">' + FAQ.map(function (f) { return '<details><summary>' + tr(f[0], f[1]) + '</summary><p>' + tr(f[2], f[3]) + '</p></details>'; }).join('') + '</div><a class="btn light block" href="/faq" target="_blank" rel="noopener" style="margin-top:12px">' + tr('More questions on the website', 'Maswali zaidi kwenye tovuti') + '</a>');
+    } else if (k === 'contact') {
+      location.href = 'mailto:info@rafikioutreach.org?subject=' + encodeURIComponent('RAFIKI Pin: ' + (S.name || ''));
+    } else if (k === 'problem') {
+      location.href = 'mailto:info@rafikioutreach.org?subject=' + encodeURIComponent('RAFIKI Pin problem') + '&body=' + encodeURIComponent('\n\nWhat happened:\n\n\n---\n' + (S.name || '') + ' · web app ' + APPV + ' · ' + navigator.userAgent);
+    } else if (k === 'privacy' || k === 'terms') {
+      window.open(k === 'privacy' ? '/privacy-policy' : '/terms-of-use', '_blank', 'noopener');
+    } else if (k === 'about') {
+      bsheet(tr('About RAFIKI Pin', 'Kuhusu RAFIKI Pin'), '<div class="about">' + LOGO + '<p><b>RAFIKI Pin</b> · ' + tr('version ', 'toleo ') + esc(APPV) + '</p><p class="muted">' + tr('The field app for RAFIKI Outreach: pin projects, report visits and repairs, and keep monday.com up to date, even with no signal.', 'Programu ya uwanjani ya RAFIKI Outreach: weka mahali pa miradi, ripoti ziara na matengenezo, na usasishe monday.com, hata bila mtandao.') + '</p><a class="lnk" href="https://www.rafikioutreach.org" target="_blank" rel="noopener">rafikioutreach.org</a></div>');
+    } else if (k === 'signout') {
+      w = bsheet(tr('Sign out of this phone?', 'Toka kwenye simu hii?'), '<p class="muted">' + tr('Changes waiting to send stay on this phone and go when you sign in again.', 'Mabadiliko yanayosubiri yanabaki kwenye simu na kutumwa ukiingia tena.') + '</p><button class="btn block" type="button" id="soGo">' + tr('Sign out', 'Toka') + '</button><button class="btn light block" type="button" id="soNo" style="margin-top:8px">' + tr('Stay signed in', 'Baki ndani') + '</button>');
+      $('soNo').addEventListener('click', w.close);
+      $('soGo').addEventListener('click', function () { w.close(); signOutAll(); });
+    }
+  }
+  function signOutAll() { forget(); store.del('rfPinName'); store.del('rfPinWho'); store.del('rfPinMe'); S.name = ''; S.who = ''; S.me = null; if (window.fetch) fetch('/api/pin-auth/logout', { method: 'POST' }).catch(function () {}); show('vLock'); }
+  $('meSet').addEventListener('click', function (e) { var b = e.target.closest('[data-set]'); if (!b) return; buzz(); setOpen(b.getAttribute('data-set')); });
+
   // Waiting to send: each change still on this phone
   function waitDraw() {
     outAll().then(function (items) {
@@ -3863,7 +4031,7 @@ html[data-theme=dark] .waitc{background:var(--card) !important;border-color:var(
     navigator.clipboard.readText().then(function (t) { if (looksTok(t)) monSend(t); }, function () {});
   });
   function renderMe() {
-    $('meName').textContent = S.name; monUi(); mePane();
+    $('meName').textContent = S.name; monUi(); mePane(); setUi(); bellLoad();
     var hk = homeCk(); $('meRole').textContent = (S.admin ? tr('Admin', 'Msimamizi') : tr('Field team', 'Timu ya uwanjani')) + (CNAME[hk] ? ' · ' + CNAME[hk] : '');
     homeTx();
     $('meAv').innerHTML = S.photo && S.mode === 'monday' ? '<img src="' + esc(S.photo) + '" alt="">' : '<i>' + esc((S.name || '?').split(/\s+/).map(function (w) { return w.charAt(0); }).slice(0, 2).join('').toUpperCase()) + '</i>';

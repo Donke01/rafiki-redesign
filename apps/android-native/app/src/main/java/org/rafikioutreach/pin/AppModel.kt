@@ -31,6 +31,9 @@ import org.rafikioutreach.pin.data.Repair
 import org.rafikioutreach.pin.data.LastVisit
 import org.rafikioutreach.pin.data.Snapshot
 import org.rafikioutreach.pin.data.reasonText
+import org.rafikioutreach.pin.data.Me
+import org.rafikioutreach.pin.data.Alert
+import org.rafikioutreach.pin.data.alertsFor
 import java.io.File
 import java.io.FileOutputStream
 import java.time.Instant
@@ -89,6 +92,8 @@ class AppModel(app: Application) : AndroidViewModel(app) {
     /** Me → "Show the welcome screens again", and where to go when the welcome ends. */
     var replayOnb by androidx.compose.runtime.mutableStateOf(false)
     var goTab by androidx.compose.runtime.mutableStateOf<String?>(null)
+    /** Open this project (a tap on a notification). */
+    var goProject by androidx.compose.runtime.mutableStateOf<String?>(null)
     /** Me: scroll to the update card (after "Check" finds one, or "Update now" on the pop-up). */
     var focusUpdate by androidx.compose.runtime.mutableStateOf(false)
     /** The update card should start downloading as soon as it shows ("Update now" on the pop-up). */
@@ -209,10 +214,36 @@ class AppModel(app: Application) : AndroidViewModel(app) {
         if (r.ok) _snap.value?.let { _snap.value = it.copy(linked = "") }
         return r.ok
     }
+    // --- Me › Settings ------------------------------------------------------------------------
+    /** Personal details: a display name, phone and home country. Returns an error text, or null. */
+    suspend fun saveProfile(nick: String, phone: String, home: String): String? {
+        val r = api.post(JSONObject().put("action", "profile").put("nick", nick.trim()).put("phone", phone.trim()).put("home", home))
+        if (!r.ok) return reasonText(r.reason)
+        r.json.optJSONObject("me")?.let { m -> edit { it.copy(me = Me.from(m)) } }
+        return null
+    }
+    /** Change my PIN (a PIN given out in the app). Returns an error text, or null. */
+    suspend fun changePin(current: String, new: String): String? {
+        val r = api.post(JSONObject().put("action", "pin-change").put("current", current.trim()).put("pin", new.trim()))
+        if (!r.ok) return reasonText(r.reason)
+        prefs.pin = new.trim(); return null
+    }
+    /** Sign out of this phone: forgets the PIN and name (changes waiting to send stay). */
+    fun signOut() { lock(); prefs.name = "" }
+
+    // --- notifications: the bell in Me & team ---------------------------------------------------
+    private val _noteTick = MutableStateFlow(0)
+    val noteTick: StateFlow<Int> = _noteTick
+    fun alerts(): List<Alert> = _snap.value?.let { alertsFor(it, _activity.value.orEmpty(), prefs.name, prefs.noteOff, prefs.reviewAt) }.orEmpty()
+    fun unread(): Int { val seen = prefs.noteSeen; return alerts().count { it.at > seen } }
+    fun markRead() { prefs.noteSeen = java.time.Instant.now().toString(); _noteTick.value++ }
+    fun noteChanged() { _noteTick.value++ }
+
     /** Apply a fresh copy of the list (after an Office change). */
     fun reload() = refresh()
 
     private fun accept(raw: JSONObject) {
+        val n = raw.optInt("reviewOpen"); if (n > (_snap.value?.reviewOpen ?: 0)) prefs.reviewAt = java.time.Instant.now().toString()
         prefs.saveSnapshot(raw); _snap.value = Snapshot.from(raw)
         org.rafikioutreach.pin.ui.GoogleTiles.configure(getApplication(), _snap.value?.gmapsAndroid)
     }

@@ -142,13 +142,14 @@ fun IconTile(icon: String, tint: Color, bg: Color, size: Dp = 42.dp) {
 }
 
 @Composable
-fun Field(value: String, onChange: (String) -> Unit, label: String, modifier: Modifier = Modifier, placeholder: String = "", number: Boolean = false, lines: Int = 1) {
+fun Field(value: String, onChange: (String) -> Unit, label: String, modifier: Modifier = Modifier, placeholder: String = "", number: Boolean = false, lines: Int = 1, secret: Boolean = false, readOnly: Boolean = false, phone: Boolean = false) {
     Column(modifier.fillMaxWidth()) {
         Text(label, style = MaterialTheme.typography.labelMedium.copy(fontSize = 13.sp), color = C.ink, modifier = Modifier.padding(bottom = 6.dp, top = 12.dp))
         OutlinedTextField(
             value, onChange, Modifier.fillMaxWidth().defaultMinSize(minHeight = 52.dp),
             placeholder = { Text(placeholder, color = C.muted) }, singleLine = lines == 1, minLines = lines,
-            keyboardOptions = if (number) KeyboardOptions(keyboardType = KeyboardType.Decimal) else KeyboardOptions.Default,
+            keyboardOptions = if (secret) KeyboardOptions(keyboardType = KeyboardType.NumberPassword) else if (phone) KeyboardOptions(keyboardType = KeyboardType.Phone) else if (number) KeyboardOptions(keyboardType = KeyboardType.Decimal) else KeyboardOptions.Default,
+            visualTransformation = if (secret) androidx.compose.ui.text.input.PasswordVisualTransformation() else androidx.compose.ui.text.input.VisualTransformation.None, readOnly = readOnly,
             shape = RoundedCornerShape(16.dp), textStyle = MaterialTheme.typography.bodyLarge,
             colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = C.blue, unfocusedBorderColor = C.edge, focusedContainerColor = C.card, unfocusedContainerColor = C.card),
         )

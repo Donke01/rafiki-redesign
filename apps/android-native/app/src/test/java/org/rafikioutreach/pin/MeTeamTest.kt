@@ -215,6 +215,78 @@ class MeTeamTest {
         File(out, "$name.png").outputStream().use { b.compress(Bitmap.CompressFormat.PNG, 100, it) }
     }
 
+    @Test fun bell_and_settings() {
+        org.rafikioutreach.pin.ui.Motion.on = false
+        val app = ApplicationProvider.getApplicationContext<Application>()
+        val snap = snapshot().put("me", JSONObject().put("kind", "app").put("nick", "").put("phone", "").put("home", "ke"))
+            .put("jobs", JSONArray().put("104")).put("repairs", JSONObject().put("104", JSONObject().put("state", "notworking").put("by", "Bertin").put("at", ago(3)).put("t", "Kapsaret Borehole").put("assignee", "Meril Kiprop").put("stepAt", JSONObject().put("assigned", ago(1)))))
+        Prefs(app).apply { pin = "9999"; name = "Meril Kiprop"; saveSnapshot(snap); filter = "all"; onb = true; country = ""; lang = "en"; mePane = "me"; noteSeen = ""; noteOff = emptySet() }
+        Lang.sw = false
+        val m = AppModel(app); Onb.enabled = false
+        val feed = JSONArray().put(act("Bertin Mwangi", "visit", "104", "Kapsaret Borehole", 2, "notworking")).put(act("Grace Achieng", "fixed", "105", "Turbo Spring", 5))
+            .put(act("Meril Kiprop", "pin", "101", "Chepkongi Dispensary", 1)).put(JSONObject().put("by", "Reid Anderson").put("a", "assign").put("to", "Meril Kiprop").put("n", 2).put("t", "2 visits for Meril Kiprop").put("at", ago(1)))
+        val posted = java.util.concurrent.CopyOnWriteArrayList<String>()
+        m.api.transport = { method, url, _, body ->
+            if (body != null) posted += String(body)
+            when {
+                url.contains("activity=1") -> 200 to JSONObject().put("ok", true).put("activity", feed).toString()
+                url.contains("team=1") -> 200 to "{\"ok\":true,\"team\":[]}"
+                url.contains("pin-auth/me") -> 200 to "{\"ok\":true,\"available\":false}"
+                method == "POST" && body != null && String(body).contains("\"profile\"") -> 200 to "{\"ok\":true,\"me\":{\"kind\":\"app\",\"nick\":\"Mery\",\"phone\":\"0712 345 678\",\"home\":\"ke\"}}"
+                method == "POST" && body != null && String(body).contains("pin-change") -> 200 to "{\"ok\":true}"
+                else -> 200 to snap.toString()
+            }
+        }
+        rule.setContent { RafikiTheme(dark = false) { Box(Modifier.size(390.dp, 844.dp)) { App(m) } } }
+        rule.waitUntil(8000) { rule.onAllNodesWithTag("hav").fetchSemanticsNodes().isNotEmpty() }
+        rule.mainClock.advanceTimeBy(2000); rule.onNodeWithTag("hav").performClick()
+        rule.waitUntil(8000) { rule.onAllNodesWithTag("bell_count", useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
+        assertEquals(4, m.unread())   // assign, job, repair, fixed (not my own pin)
+        rule.onNode(hasText("4") and hasAnyAncestor(hasTestTag("bell_count")), useUnmergedTree = true).assertExists()
+        shot("80-me-bell")
+        rule.onNodeWithTag("bell").performClick(); rule.waitForIdle(); rule.mainClock.advanceTimeBy(800)
+        rule.onAllNodesWithTag("alert_row").assertCountEquals(4)
+        rule.onNodeWithText("Reid Anderson asked you to make 2 visits").assertExists()
+        shot("81-bell-list")
+        org.junit.Assert.assertEquals(0, m.unread())
+        rule.onNodeWithText("Grace Achieng fixed Turbo Spring").performClick(); rule.waitForIdle()
+        rule.onNodeWithTag("hback").performClick(); rule.waitForIdle()
+        // Settings
+        rule.onNodeWithTag("settings").performScrollTo(); shot("82-settings")
+        rule.onNodeWithTag("set_profile").performScrollTo().performClick(); rule.waitForIdle()
+        rule.onNode(hasSetTextAction() and hasAnyAncestor(hasTestTag("pf_nick"))).performTextInput("Mery")
+        rule.onNode(hasSetTextAction() and hasAnyAncestor(hasTestTag("pf_phone"))).performTextInput("0712 345 678")
+        shot("83-profile")
+        rule.onNodeWithTag("pf_save").performScrollTo().performClick()
+        rule.waitUntil(5000) { posted.any { it.contains("\"profile\"") } }
+        org.junit.Assert.assertTrue(posted.first { it.contains("\"profile\"") }.let { it.contains("0712 345 678") && it.contains("Mery") })
+        rule.waitUntil(5000) { m.snap.value?.me?.phone == "0712 345 678" }
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("set_pin").fetchSemanticsNodes().isNotEmpty() }
+        rule.onNodeWithTag("set_pin").performScrollTo().performClick(); rule.waitForIdle()
+        rule.onNode(hasSetTextAction() and hasAnyAncestor(hasTestTag("cp_old"))).performTextInput("9999")
+        rule.onNode(hasSetTextAction() and hasAnyAncestor(hasTestTag("cp_new"))).performTextInput("4826")
+        rule.onNode(hasSetTextAction() and hasAnyAncestor(hasTestTag("cp_new2"))).performTextInput("4826")
+        shot("84-change-pin")
+        rule.onNodeWithTag("cp_save").performScrollTo().performClick()
+        rule.waitUntil(5000) { m.prefs.pin == "4826" }
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("set_notify").fetchSemanticsNodes().isNotEmpty() }
+        rule.onNodeWithTag("set_notify").performScrollTo().performClick(); rule.waitForIdle(); shot("85-notify")
+        rule.onNodeWithTag("nk_fixed").performScrollTo().performClick()
+        org.junit.Assert.assertTrue("fixed" in m.prefs.noteOff)
+        rule.onNodeWithTag("hback").performClick(); rule.waitForIdle()
+        rule.onNodeWithTag("set_help").performScrollTo().performClick(); rule.waitForIdle(); shot("86-help")
+        rule.onNodeWithTag("hback").performClick(); rule.waitForIdle()
+        rule.onNodeWithTag("set_about").performScrollTo().performClick(); rule.waitForIdle(); shot("87-about")
+        org.rafikioutreach.pin.ui.Motion.on = true
+    }
+
+    @Test fun alerts_rules() {
+        val s = org.rafikioutreach.pin.data.Snapshot.from(snapshot().put("admin", true).put("reviewOpen", 2))
+        val a = org.rafikioutreach.pin.data.alertsFor(s, listOf(act("Meril Kiprop", "visit", "1", "A", 1, "repair"), act("Bertin", "new", "2", "B", 2), act("Bertin", "visit", "3", "C", 3, "working")), "Meril Kiprop", emptySet(), "")
+        assertEquals(listOf("job", "new", "review"), a.map { it.kind }.sorted())   // not my own, not a working visit
+        assertEquals(listOf("new"), org.rafikioutreach.pin.data.alertsFor(s, listOf(act("Bertin", "new", "2", "B", 2)), "Meril Kiprop", setOf("review", "job"), "").map { it.kind })
+    }
+
     @Test fun whatsapp_numbers() {
         assertEquals("255754123456", waNumber("0754 123 456", "tz"))
         assertEquals("254712000111", waNumber("+254 712 000 111", "ke"))

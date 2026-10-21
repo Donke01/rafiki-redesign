@@ -24,7 +24,7 @@
 import { getFeed, dropFeed } from '../../lib/feed-cache.js';
 import { parseGps, readGps, writeGps, createUpdate, createSite, readUpdates, tidyTitle, BOARD_ID } from '../../lib/monday.js';
 import { session, configured, linkToken, linkedFor, unlink } from '../../lib/pin-auth.js';
-import { getJson as gj, putJson, team, hashPin, isAdminName, sameName, seen, addReview, sendMail, alertHtml } from '../../lib/pin-store.js';
+import { getJson as gj, putJson, team, saveTeam, hashPin, isAdminName, sameName, seen, addReview, sendMail, alertHtml } from '../../lib/pin-store.js';
 
 const MAX_FAILS = 8; // wrong PINs per connection per hour
 const MAX_SAVES = 120; // changes per connection per hour
@@ -101,7 +101,7 @@ export async function checkPin(request, env) {
     // the cookie is sent automatically, so changes must come from the app's own pages
     if (request.method !== 'GET' && !request.headers.get('Origin') && request.headers.get('Sec-Fetch-Site') !== 'same-origin') return { res: json({ ok: false, reason: 'origin' }, 403) };
     const t = await team(env), mine = t.find(p => sameName(p.name, s.name));
-    return { who: s.name, token: s.token, monday: true, home: s.home || (mine && mine.home) || '', admin: isAdminName(env, t, s.name) };
+    return { who: s.name, token: s.token, monday: true, kind: 'monday', home: s.home || (mine && mine.home) || '', admin: isAdminName(env, t, s.name) };
   }
   const t = await team(env);
   if (!(request.headers.get('X-Pin') || '').trim() && configured(env)) return { res: json({ ok: false, reason: 'signin' }, 401) };
@@ -110,12 +110,12 @@ export async function checkPin(request, env) {
   const failKey = 'rl:pinfail:' + ip;
   if (await count(env, failKey) >= MAX_FAILS) return { res: json({ ok: false, reason: 'locked' }, 429) };
   const given = (request.headers.get('X-Pin') || '').trim();
-  let who = null, home = '';
+  let who = null, home = '', kind = '';
   // check every entry (no early exit), so timing doesn't reveal which matched
-  for (const p of list) if (given && sameText(given, p.pin) && who === null) { who = p.name; home = p.home; }
+  for (const p of list) if (given && sameText(given, p.pin) && who === null) { who = p.name; home = p.home; kind = 'cloudflare'; }
   // PINs given out in the app (stored hashed)
-  if (given && t.length) { const h = await hashPin(env, given); for (const p of t) if (p.h && sameText(h, p.h) && who === null) { who = p.name; home = p.home || ''; } }
-  if (who === null && given && env.PIN_CODE && sameText(given, String(env.PIN_CODE).trim())) who = '';
+  if (given && t.length) { const h = await hashPin(env, given); for (const p of t) if (p.h && sameText(h, p.h) && who === null) { who = p.name; home = p.home || ''; kind = 'app'; } }
+  if (who === null && given && env.PIN_CODE && sameText(given, String(env.PIN_CODE).trim())) { who = ''; kind = 'shared'; }
   if (who === null) {
     await bump(env, failKey);
     return { res: json({ ok: false, reason: 'pin' }, 401) };
@@ -123,8 +123,8 @@ export async function checkPin(request, env) {
   const admin = !!who && isAdminName(env, t, who);
   // their own monday.com token, if they connected one: changes go in under their own name
   const ln = who ? await linkedFor(env, who).catch(() => null) : null;
-  if (ln) return { who, home: home || ln.home || '', admin, token: ln.tok, linked: ln.name };
-  return { who, home, admin };
+  if (ln) return { who, home: home || ln.home || '', admin, kind, token: ln.tok, linked: ln.name };
+  return { who, home, admin, kind };
 }
 
 // --- open repairs and the activity log (KV) ------------------------------------------------
@@ -168,7 +168,7 @@ export async function onRequestGet({ request, env, waitUntil }) {
     if (q.get('activity')) return json({ ok: true, activity: (await getJson(env, 'pinact', [])).map(stripT) }, 200);
     if (q.get('team')) {
       // the team list for Me & team: no PINs, no e-mails, no admin flags
-      const t = await team(env), seenAt = await getJson(env, 'pinseen', {});
+      const t = await team(env), seenAt = await getJson(env, 'pinseen', {}), prof = await getJson(env, 'pinprofiles', {});
       const list = t.map(p => ({ name: p.name, home: p.home || '', phone: p.phone || '', lastSeen: seenAt[p.name] || null }));
       String(env.PIN_USERS || '').split(/[,;\n]/).forEach(s => {
         const a = s.split(':').map(x => x.trim()); if (a.length < 2) return;
@@ -176,6 +176,8 @@ export async function onRequestGet({ request, env, waitUntil }) {
         const name = a.slice(0, -1).join(':'); if (name && !list.some(x => sameName(x.name, name))) list.push({ name, home, phone: '', lastSeen: seenAt[name] || null });
       });
       Object.keys(seenAt).forEach(n => { if (!list.some(x => sameName(x.name, n))) list.push({ name: n, home: '', phone: '', lastSeen: seenAt[n] }); });
+      // what people set for themselves in Me › Settings › Personal details
+      list.forEach(x => { const k = Object.keys(prof).find(n => sameName(n, x.name)), pr = k && prof[k]; if (pr) { if (pr.phone) x.phone = pr.phone; if (pr.home) x.home = pr.home; if (pr.nick) x.nick = pr.nick; } });
       return json({ ok: true, team: list.sort((a, b) => a.name.localeCompare(b.name)) }, 200);
     }
     const feed = await getFeed(env, waitUntil);
@@ -194,6 +196,12 @@ export async function onRequestGet({ request, env, waitUntil }) {
       confirmed: await getJson(env, 'pinconfirmed', {})
     };
     if (chk.admin) extra.reviewOpen = (await getJson(env, 'pinreview', [])).filter(x => x.status === 'open').length;
+    // this person's own details (Me › Settings): how they signed in, and what they've set
+    if (chk.who) {
+      const prof = await getJson(env, 'pinprofiles', {}), k = Object.keys(prof).find(n => sameName(n, chk.who)), pr = (k && prof[k]) || {};
+      const mine = (await team(env)).find(p => sameName(p.name, chk.who)) || {};
+      extra.me = { kind: chk.kind || '', nick: pr.nick || '', phone: pr.phone || mine.phone || '', home: pr.home || chk.home || '' };
+    } else extra.me = { kind: chk.kind || 'shared', nick: '', phone: '', home: '' };
     return json(Object.assign({ ok: true, who: chk.who, monday: !!chk.monday, linked: chk.linked || '', gmaps: env.GOOGLE_TILES_WEB_KEY || env.GOOGLE_TILES_ANDROID_KEY ? { web: env.GOOGLE_TILES_WEB_KEY || '', android: env.GOOGLE_TILES_ANDROID_KEY || '' } : null, home: chk.home || '', projects, repairs, visits: await getJson(env, 'pinlastvisit', {}) }, extra), 200);
   } catch (e) {
     console.error('pin get:', e && e.message);
@@ -225,6 +233,38 @@ export async function onRequestPost({ request, env, waitUntil }) {
     const r = await linkToken(env, chk.who, b.token);
     if (r.fail) { await bump(env, lk); return json({ ok: false, reason: r.fail }, 400); }
     return json({ ok: true, name: r.name, photo: r.photo }, 200);
+  }
+  // Me › Settings › Personal details: a display name, phone and home country, for your own name
+  if (action === 'profile') {
+    if (!chk.who) return json({ ok: false, reason: 'own-pin' }, 400);
+    if (!env.FEED) return json({ ok: false, reason: 'not-set-up' }, 503);
+    const phone = clean(b.phone, 30).replace(/[^\d+ ()-]/g, ''), nick = clean(b.nick, 40), home = /^(ke|tz|ug|mw)$/.test(b.home) ? b.home : '';
+    const prof = await getJson(env, 'pinprofiles', {}), k = Object.keys(prof).find(n => sameName(n, chk.who)) || chk.who;
+    prof[k] = { nick, phone, home, at: new Date().toISOString() };
+    await putJson(env, 'pinprofiles', prof);
+    // keep the admin's team list in step for people with an app PIN
+    const t = await team(env), mine = t.find(p => sameName(p.name, chk.who));
+    if (mine) { mine.phone = phone; if (home) mine.home = home; await saveTeam(env, t); }
+    await bump(env, 'rl:pinsave:' + ip);
+    return json({ ok: true, me: { kind: chk.kind || '', nick, phone, home } }, 200);
+  }
+  // Me › Settings › Change my PIN: only for a PIN given out in the app (stored hashed here)
+  if (action === 'pin-change') {
+    if (chk.kind !== 'app') return json({ ok: false, reason: chk.kind === 'cloudflare' ? 'pin-cloudflare' : 'own-pin' }, 400);
+    const ck = 'rl:pinchange:' + ip;
+    if (await count(env, ck) >= 6) return json({ ok: false, reason: 'rate' }, 429);
+    await bump(env, ck);
+    const cur = String(b.current || '').trim(), nw = String(b.pin || '').trim();
+    if (!sameText(cur, (request.headers.get('X-Pin') || '').trim())) return json({ ok: false, reason: 'pin-current' }, 400);
+    if (!/^\d{4,6}$/.test(nw) || /^(\d)\1+$/.test(nw) || '0123456789'.includes(nw) || '9876543210'.includes(nw)) return json({ ok: false, reason: 'pin-weak' }, 400);
+    const t = await team(env), mine = t.find(p => sameName(p.name, chk.who));
+    if (!mine) return json({ ok: false, reason: 'own-pin' }, 400);
+    const h = await hashPin(env, nw);
+    const taken = people(env).some(p => sameText(nw, p.pin)) || (env.PIN_CODE && sameText(nw, String(env.PIN_CODE).trim())) || t.some(p => p !== mine && p.h === h);
+    if (taken) return json({ ok: false, reason: 'pin-taken' }, 400);
+    mine.h = h; await saveTeam(env, t);
+    await log(env, { by: chk.who, a: 'team', t: chk.who + ' changed their PIN' });
+    return json({ ok: true }, 200);
   }
   // a personal PIN decides the name; with the shared team PIN the app sends it
   const by = chk.who || clean(b.by, 60) || 'someone on the team';
