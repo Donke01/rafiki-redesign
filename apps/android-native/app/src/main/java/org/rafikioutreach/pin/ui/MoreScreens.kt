@@ -134,7 +134,6 @@ fun MeScreen(m: AppModel, open: (String) -> Unit = {}, report: () -> Unit = {}, 
             WaitingList(m, s)
             MyWork(s, open)
             MyMonth(m, act)
-            ThisPhone(m, s)
             Card(Modifier.padding(top = 14.dp)) {
                 H2(t("Monthly report", "Ripoti ya mwezi"))
                 Text(t("Visits, repairs and how projects are doing for one month, ready to share as a PDF.", "Ziara, matengenezo na hali ya miradi kwa mwezi mmoja, tayari kushiriki kama PDF."), style = MaterialTheme.typography.bodyMedium, color = C.muted)
