@@ -27,6 +27,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -68,12 +71,16 @@ private fun OnbFrame(back: (() -> Unit)?, content: @Composable ColumnScope.() ->
     }
 }
 
+/** The RAFIKI logo and "Pin": the black logo on light screens, the white one on dark. */
 @Composable
-fun Wordmark(modifier: Modifier = Modifier, color: Color = C.ink) {
-    Text(buildAnnotatedString {
-        withStyle(SpanStyle(letterSpacing = 2.sp)) { append("RAFIKI ") }
-        withStyle(SpanStyle(color = Color(0xFF0A78C2))) { append("Pin") }
-    }, color = color, style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold), modifier = modifier)
+fun Wordmark(modifier: Modifier = Modifier, color: Color = C.ink, height: androidx.compose.ui.unit.Dp = 24.dp) {
+    val light = color.luminance() > 0.5f
+    Row(modifier.semantics(mergeDescendants = true) { contentDescription = "RAFIKI Pin" }.testTag("wordmark"), verticalAlignment = Alignment.CenterVertically) {
+        androidx.compose.foundation.Image(androidx.compose.ui.res.painterResource(if (light) org.rafikioutreach.pin.R.drawable.rafiki_logo_light else org.rafikioutreach.pin.R.drawable.rafiki_logo_dark), null,
+            modifier = Modifier.height(height), contentScale = androidx.compose.ui.layout.ContentScale.FillHeight)
+        Spacer(Modifier.width(height / 3))
+        Text("Pin", color = if (light) Color(0xFF5BB4F2) else Color(0xFF0A78C2), style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold, fontSize = (height.value * 0.72f).sp))
+    }
 }
 
 @Composable

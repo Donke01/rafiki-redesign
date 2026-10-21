@@ -70,9 +70,7 @@ fun BioLockScreen(m: AppModel) {
     val first = name.split(" ").firstOrNull().orEmpty()
     val country = mapOf("ke" to "Kenya", "tz" to "Tanzania", "ug" to "Uganda", "mw" to "Malawi")[m.prefs.country]
     Column(Modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 20.dp).testTag("bio_lock"), horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(androidx.compose.ui.text.buildAnnotatedString {
-            append("RAFIKI "); withStyle(androidx.compose.ui.text.SpanStyle(color = C.blue)) { append("Pin") }
-        }, style = MaterialTheme.typography.titleMedium.copy(letterSpacing = androidx.compose.ui.unit.TextUnit(3f, androidx.compose.ui.unit.TextUnitType.Sp)), color = C.ink, modifier = Modifier.padding(top = 12.dp))
+        Wordmark(Modifier.padding(top = 12.dp), height = 28.dp)
         if (!usePin) {
             Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
                 FingerEmblem()

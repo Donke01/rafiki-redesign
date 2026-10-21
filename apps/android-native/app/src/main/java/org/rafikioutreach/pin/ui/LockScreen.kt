@@ -98,7 +98,7 @@ fun LockScreen(m: AppModel) {
     ) {
         Column(Modifier.widthIn(max = 420.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             Drop(84.dp, DropC.Blue, Mood.Smile)
-            Text("RAFIKI Pin", style = MaterialTheme.typography.labelLarge.copy(letterSpacing = 1.5.sp), color = C.ink, modifier = Modifier.padding(top = 12.dp))
+            Wordmark(Modifier.padding(top = 14.dp), height = 26.dp)
             Text(t("Enter your PIN", "Weka PIN yako"), style = MaterialTheme.typography.headlineMedium, color = C.ink, modifier = Modifier.padding(top = 14.dp))
             Text(if (m.prefs.name.isNotBlank()) t("Welcome back, ${m.prefs.name.substringBefore(' ')}.", "Habari ${m.prefs.name.substringBefore(' ')}, karibu tena.") else t("Welcome back.", "Habari, karibu tena."), style = MaterialTheme.typography.bodyMedium, color = C.muted)
 

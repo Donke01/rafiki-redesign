@@ -37,7 +37,9 @@ a{color:var(--blue2)}
 .top{position:sticky;top:0;z-index:1100;display:flex;align-items:center;gap:10px;padding:calc(8px + env(safe-area-inset-top)) 16px 8px;background:var(--card);border-bottom:var(--bw) solid var(--line);min-height:56px}
 .top img{height:24px;width:auto}
 .top .home{display:flex;align-items:center;min-height:44px;border-radius:8px}
-.top .lg-l{display:none}html[data-theme=dark] .top .lg-d{display:none}html[data-theme=dark] .top .lg-l{display:block}
+.lg-l{display:none}html[data-theme=dark] .lg-d{display:none}html[data-theme=dark] .lg-l{display:block}
+.ht img,.wm img,.bl-mark img{height:24px;width:auto;flex:0 0 auto}.bl-mark img{height:26px}
+.top .ht,.onb .obar .wm,.bl-mark{display:flex;align-items:center;justify-content:center;gap:8px}
 .top b{font-size:.95rem;font-weight:800;color:var(--ink)}
 .top .sp{flex:1}
 .top .who{font-size:.82rem;font-weight:600;color:var(--muted);max-width:40vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -1274,7 +1276,7 @@ html[data-theme=dark] .waitc{background:var(--card) !important;border-color:var(
   <header class="top">
     <button class="hb" id="hBack" type="button" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
     <button class="hav" id="hAv" type="button" aria-label="Me"></button>
-    <span class="ht" aria-hidden="true">RAFIKI <i>Pin</i></span><span class="htt" id="hTitle" aria-hidden="true"></span>
+    <span class="ht" aria-hidden="true"><img class="lg-d" src="/img/logo-dark-bold.webp" alt="RAFIKI" width="64" height="22"><img class="lg-l" src="/img/logo-light-bold.webp" alt="" width="64" height="22"><i>Pin</i></span><span class="htt" id="hTitle" aria-hidden="true"></span>
     <a class="home" href="/" aria-label="RAFIKI Outreach home page"><img class="lg-d" src="/img/logo-dark-bold.webp" alt=""><img class="lg-l" src="/img/logo-light-bold.webp" alt=""></a>
     <b>Pin</b>
     <span class="sp"></span>
@@ -1601,6 +1603,8 @@ html[data-theme=dark] .waitc{background:var(--card) !important;border-color:var(
   });
   var store = { get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} }, del: function (k) { try { localStorage.removeItem(k); } catch (e) {} } };
   var jget = function (k, d) { try { return JSON.parse(store.get(k) || 'null') || d; } catch (e) { return d; } };
+  // the RAFIKI logo (dark and light versions) for headers
+  var LOGO = '<img class="lg-d" src="/img/logo-dark-bold.webp" alt="RAFIKI" width="64" height="22"><img class="lg-l" src="/img/logo-light-bold.webp" alt="" width="64" height="22">';
   var S = { gmaps: null, mode: store.get('rfPinMode') || '', photo: store.get('rfPinPhoto') || '', pin: store.get('rfPin') || '', name: store.get('rfPinName') || '', who: store.get('rfPinWho') || '', projects: jget('rfPinList', []), repairs: jget('rfPinRepairs', {}), visits: jget('rfPinVisits', {}), admin: jget('rfPinRole', {}).admin || false, jobs: jget('rfPinRole', {}).jobs || [], assigned: jget('rfPinRole', {}).assigned || [], confirmed: jget('rfPinRole', {}).confirmed || {}, reviewOpen: 0, lang: store.get('rfPinLang') || '', units: store.get('rfPinUnits') || 'km', srvHome: store.get('rfPinSrvHome') || '', gpsHome: '',
     filter: store.get('rfPinFilter') || 'missing', ftype: store.get('rfPinType') || '', cur: null, here: null, hereAt: 0, view: 'vLock', prev: 'vMap', routeMode: false, pickedRoute: [], route: jget('rfPinRoute', []), dismissed: {} };
   var CENTER = { ke: [0.3, 37.9, 7], tz: [-6.3, 34.8, 6], ug: [1.4, 32.3, 7], mw: [-13.3, 34.3, 7] };
@@ -2503,7 +2507,7 @@ html[data-theme=dark] .waitc{background:var(--card) !important;border-color:var(
   }
   function onbDraw() {
     var b = $('onb'), i = ONB.i, back = i > 0 ? '<button class="ob" type="button" data-o="back" aria-label="Back">' + CHEV + '</button>' : '<span></span>';
-    var bar = '<div class="obar">' + back + '<span class="wm">RAFIKI <i>Pin</i></span><span></span></div>', h = '';
+    var bar = '<div class="obar">' + back + '<span class="wm">' + LOGO + '<i>Pin</i></span><span></span></div>', h = '';
     if (i === 0) {
       var names = S.projects.slice(0, 4).map(function (p) { return p.title; });
       while (names.length < 4) names.push(['Kiptoo Well', 'Turbo Spring', 'Chepkongi Dispensary', 'Kapsaret Borehole'][names.length]);
@@ -3765,7 +3769,7 @@ html[data-theme=dark] .waitc{background:var(--card) !important;border-color:var(
     var done = function () { g.classList.add('out'); document.body.classList.remove('bio-locked'); setTimeout(function () { g.remove(); }, 220); };
     var pinV = '';
     var face = function () {
-      g.innerHTML = '<p class="bl-mark">RAFIKI <b>Pin</b></p><div class="bl-mid">' +
+      g.innerHTML = '<p class="bl-mark">' + LOGO + '<b>Pin</b></p><div class="bl-mid">' +
         '<div class="bl-em" aria-hidden="true"><i class="r3"></i><i class="r2"></i><span class="a1"></span><span class="a2"></span><i class="r1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' + FPI + '</svg></i></div>' +
         '<p class="bl-ov">' + tr('WELCOME BACK', 'KARIBU TENA') + '</p><h2>' + (first ? tr('Habari, ', 'Habari, ') + esc(first) : tr('Welcome back', 'Karibu tena')) + '</h2>' +
         '<p class="bl-sub">' + tr('Touch the sensor or look at your phone to carry on where you left off.', 'Gusa kitambuzi au tazama simu yako ili kuendelea ulipoishia.') + '</p>' +
@@ -3787,7 +3791,7 @@ html[data-theme=dark] .waitc{background:var(--card) !important;border-color:var(
           : k === 'del' ? '<button type="button" class="bk bk-x" data-b="del" aria-label="' + tr('Delete last digit', 'Futa tarakimu ya mwisho') + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5h11a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H9l-6-7z"/><path d="M12.5 9.5l5 5M17.5 9.5l-5 5"/></svg></button>'
           : '<button type="button" class="bk" data-b="' + k + '">' + k + '</button>';
       }).join('');
-      g.innerHTML = '<p class="bl-mark">RAFIKI <b>Pin</b></p><div class="bl-mid bl-pin"><p class="bl-ov">' + tr('USE YOUR PIN', 'TUMIA PIN YAKO') + '</p><h2>' + tr('Enter your RAFIKI PIN', 'Weka PIN yako ya RAFIKI') + '</h2>' +
+      g.innerHTML = '<p class="bl-mark">' + LOGO + '<b>Pin</b></p><div class="bl-mid bl-pin"><p class="bl-ov">' + tr('USE YOUR PIN', 'TUMIA PIN YAKO') + '</p><h2>' + tr('Enter your RAFIKI PIN', 'Weka PIN yako ya RAFIKI') + '</h2>' +
         '<p class="bl-sub">' + tr('The digits the office gave you.', 'Tarakimu ulizopewa na ofisi.') + '</p><div class="bl-dots" id="blDots"></div><span class="msg" id="blMsg" aria-live="polite"></span></div>' +
         '<div class="bl-pad">' + keys + '</div><div class="bl-act"><button class="lnk" id="blOut" type="button">' + tr('Sign out', 'Toka') + '</button></div>';
       var n = Math.max(4, S.pin.length);
