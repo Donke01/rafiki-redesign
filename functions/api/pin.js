@@ -13,6 +13,7 @@
 //                  { action: "parts", id, actual, what, receipt, by } the person on the job (or an admin): parts ordered;
 //                                                                     above the approval limit it asks for a second approval first
 //                  { action: "new",   name, ck, village, type, lat, lng, note, by }  adds a new site as "Due Diligence"
+//                  { action: "here",  lat, lng, acc } / { action: "here", off: true }  your latest position for the office's team map (opt-in)
 // Every change also leaves a note on the monday.com item (who, what, the old value). The answer
 // carries that note's id, so photos and voice notes can be attached to it with /api/pin-photo.
 //
@@ -29,6 +30,7 @@ import { parseGps, readGps, writeGps, createUpdate, createSite, readUpdates, tid
 import { session, configured, linkToken, linkedFor, unlink } from '../../lib/pin-auth.js';
 import { getJson as gj, putJson, team, saveTeam, hashPin, isAdminName, sameName, seen, addReview, sendMail, alertHtml } from '../../lib/pin-store.js';
 import { kes, money, estOf, stepAtOrAfter, stepBlocked, approveLimit, askApproval, costRow, addCost, projectCosts, peopleServed, notePeople, snapPeople, monthKey } from '../../lib/pin-office.js';
+import { postHere } from '../../lib/pin-here.js';
 
 const MAX_FAILS = 8; // wrong PINs per connection per hour
 const MAX_SAVES = 120; // changes per connection per hour
@@ -280,6 +282,8 @@ export async function onRequestPost({ request, env, waitUntil }) {
     await log(env, { by: chk.who, a: 'team', t: chk.who + ' changed their PIN' });
     return json({ ok: true }, 200);
   }
+  // Me › Settings › Share my location with the office: only the latest point, gone after 12 h (lib/pin-here.js)
+  if (action === 'here') { const r = await postHere(env, chk, b, ip); return json(r.body, r.status); }
   // a personal PIN decides the name; with the shared team PIN the app sends it
   const by = chk.who || clean(b.by, 60) || 'someone on the team';
   const token = chk.token || env.MONDAY_API_TOKEN, api = env.MONDAY_API_URL, board = String(env.MONDAY_BOARD_ID || BOARD_ID);

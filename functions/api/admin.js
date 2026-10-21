@@ -4,6 +4,8 @@
 //   GET  /api/admin?view=assign   → visits assigned to field officers
 //   GET  /api/admin?view=export   → every visit record kept by the app (for the spreadsheet export)
 //   GET  /api/admin?view=costs    → repair spending (last 25 months) with this month / year / country / top 10, and the approval limit
+//   GET  /api/admin?view=teammap  → teammates sharing their location (latest point only) and today's visits
+//   GET  /api/admin?view=plan&ck=&area=&days=&per= → suggested visits for a week, grouped into days (lib/pin-plan.js)
 //   POST /api/admin { action: "review",  rid, decision: "approve"|"reject", reason }
 //                   { action: "job",     id, step, assignee, due, budget, note, actual, what, receipt }  repair jobs
 //                       (above the approval limit, "parts"/"fixed" wait for a second admin: answers { held, asked })
@@ -20,6 +22,7 @@ import { getFeed, dropFeed } from '../../lib/feed-cache.js';
 import { parseGps, readGps, writeGps, createUpdate, BOARD_ID } from '../../lib/monday.js';
 import { getJson, putJson, team, saveTeam, hashPin, newPin, freshPin, adminNames, sameName, sendMail, alertHtml, escHtml, recipients, addReview } from '../../lib/pin-store.js';
 import { kes, money, estOf, stepBlocked, canDecide, approveLimit, setApproveLimit, askApproval, costRow, addCost, costStats, snapPeople } from '../../lib/pin-office.js';
+import { teamMap, planView } from '../../lib/pin-here.js';
 
 const STEPS = { reported: 'Reported', assigned: 'Assigned', parts: 'Parts ordered', fixed: 'Fixed' };
 const CC = ['ke', 'tz', 'ug', 'mw'];
@@ -61,6 +64,8 @@ export async function onRequestGet({ request, env }) {
     const rows = await getJson(env, 'pincostidx', []);
     return json({ ok: true, rows, stats: costStats(rows, feed ? feed.projects : []), approveAbove: await approveLimit(env) });
   }
+  if (view === 'teammap') return json(Object.assign({ ok: true }, await teamMap(env)));
+  if (view === 'plan') { let feed = null; try { feed = await getFeed(env); } catch (e) {} const r = await planView(env, new URL(request.url).searchParams, feed); return json(r.body, r.status); }
   if (view === 'team') {
     const t = await team(env), seenAt = await getJson(env, 'pinseen', {}), admins = adminNames(env);
     const list = t.map(p => ({ name: p.name, home: p.home || '', admin: !!p.admin || admins.includes(p.name.toLowerCase()), email: p.email || '', phone: p.phone || '', source: 'app', added: p.added, lastSeen: seenAt[p.name] || null }));

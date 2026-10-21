@@ -4530,6 +4530,7 @@ html[data-theme=sun] .ofb-appr,html[data-theme=sun] .ofb-pc{border:2px solid #00
       setRow('pin', 'lock', 'purple', kind === 'monday' ? tr('Sign-in', 'Kuingia') : tr('Change my PIN', 'Badilisha PIN yangu'), kind === 'monday' ? tr('Signed in with monday.com', 'Umeingia kwa monday.com') : kind === 'app' ? tr('Your own 4-digit PIN', 'PIN yako ya tarakimu 4') : kind === 'cloudflare' ? tr('Set by the office', 'Imewekwa na ofisi') : tr('Shared team PIN', 'PIN ya timu')) + '</div>' +
       '<div class="sgrp" id="setPhone"><span class="sgl">' + tr('Security and alerts', 'Usalama na arifa') + '</span><i data-slot="bio"></i>' +
       setRow('notify', 'clock', 'amber', tr('Notifications', 'Arifa'), tr('What the bell tells you about', 'Kengele inakuarifu nini')) +
+      ofaSetRow() +
       '<span class="sgl">' + tr('Display', 'Mwonekano') + '</span>' +
       setRow('look', 'sun', 'amber', tr('Appearance', 'Mwonekano'), lookTx()) +
       setRow('lang', 'globe', 'blue', tr('Language', 'Lugha'), S.lang === 'sw' ? 'Kiswahili' : 'English') +
@@ -4842,6 +4843,7 @@ html[data-theme=sun] .ofb-appr,html[data-theme=sun] .ofb-pc{border:2px solid #00
   }
   function oSeg() {
     var T = [['overview', 'Overview', 'drop'], ['repairs', 'Repairs', 'wrench'], ['costs', tr('Costs', 'Gharama'), 'coins'], ['visits', 'Visits', 'cal'], ['review', 'Review', 'inbox'], ['team', 'Team', 'people'], ['cleanup', 'Clean-up', 'spark'], ['export', 'Export', 'down'], ['sms', tr('Community', 'Jamii'), 'chat']];
+    T.splice(3, 0, ['teammap', tr('Team map', 'Ramani ya timu'), 'pin'], ['plan', tr('Plan a week', 'Panga wiki'), 'ofaRoute']);
     $('oTabs').innerHTML = T.map(function (t) {
       var c = t[0] === 'review' ? (S.reviewOpen || 0) : t[0] === 'repairs' ? Object.keys(S.repairs).length : 0;
       return '<button class="otab" type="button" data-o="' + t[0] + '" aria-pressed="' + (O.tab === t[0]) + '"' + (c ? ' aria-label="' + t[1] + ', ' + c + ' open"' : '') + '>' + oic(t[2]) + '<span>' + t[1] + '</span>' + (c ? '<i class="n" aria-hidden="true">' + c + '</i>' : '') + '</button>';
@@ -4865,6 +4867,8 @@ html[data-theme=sun] .ofb-appr,html[data-theme=sun] .ofb-pc{border:2px solid #00
     if (t === 'costs') return ofbCosts(b);
     if (t === 'export') return oNeedTeam(function () { oExport(b); });
     if (t === 'sms') return vxOffice(b);
+    if (t === 'teammap') return ofaTeamMap(b);
+    if (t === 'plan') return oNeedTeam(function () { ofaPlanTab(b); });
   }
 
   // overview
@@ -5289,6 +5293,309 @@ html[data-theme=sun] .ofb-appr,html[data-theme=sun] .ofb-pc{border:2px solid #00
         }))));
       });
     }
+  }
+
+  // --- Live team map · Plan a week · Share my location (ofa…) ---------------------------------------
+  // Sharing is opt-in: off unless the person turns it on in Me › Settings › Security and alerts, only in the
+  // work hours they set (Mon–Sat 07:00–18:00 to start with), only while this page is open, at most every
+  // 10 minutes. The server keeps only the latest point per person, for 12 hours, never a history
+  // (lib/pin-here.js), and only admins see it, in Office › Team map. While sharing, a pill under the header
+  // says so, with Stop. Plan a week asks the server for suggested visits (lib/pin-plan.js), keeps each day in
+  // driving order with the route planner's order(), and sends them with the Office's "assign" action.
+  var OFA = { tm: null, map: null, open: '', plan: null, pmap: null, day: -1, done: false };
+  var OFA_WD = [['Sun', 'Jpl'], ['Mon', 'Jtt'], ['Tue', 'Jnn'], ['Wed', 'Jtn'], ['Thu', 'Alh'], ['Fri', 'Ijm'], ['Sat', 'Jms']];
+  var OFA_COL = ['#0A78C2', '#1C9C5A', '#D98200', '#7A4FD0', '#D23C32', '#0E8F96'];
+  Object.assign(OIC, { ofaRoute: '<circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M8 19h7.5a3.5 3.5 0 0 0 0-7h-7a3.5 3.5 0 0 1 0-7H16"/>' });
+  document.head.insertAdjacentHTML('beforeend', '<style id="ofaCss">' +
+    '.ofa-share{position:absolute;left:50%;top:calc(100% + 8px);transform:translateX(-50%);display:flex;align-items:center;gap:8px;max-width:calc(100vw - 24px);padding:4px 4px 4px 12px;border-radius:999px;background:var(--okbg);color:var(--ok);border:1px solid var(--line);font-size:.78rem;font-weight:800;white-space:nowrap;box-shadow:0 6px 18px rgba(4,38,63,.14)}' +
+    '.ofa-share span{overflow:hidden;text-overflow:ellipsis}.ofa-share button{flex:none;border:0;border-radius:999px;background:var(--card);color:var(--ink);font:inherit;font-weight:800;padding:0 12px;min-height:30px;cursor:pointer}' +
+    '.ofa-pulse{flex:none;position:relative;width:9px;height:9px;border-radius:50%;background:var(--ok)}.ofa-pulse::after{content:"";position:absolute;inset:-5px;border-radius:50%;border:2px solid var(--ok);opacity:0;animation:ofaPing 2.2s ease-out infinite}' +
+    '@keyframes ofaPing{0%{transform:scale(.45);opacity:.85}100%{transform:scale(1.5);opacity:0}}body.locked .ofa-share{display:none}body.ofa-on:not(.locked) main{padding-top:56px}' +
+    '@media (prefers-reduced-motion:reduce){.ofa-pulse::after{animation:none}}' +
+    '.otabs:has(>.otab:nth-child(9):last-child){grid-template-columns:repeat(3,minmax(0,1fr))}@media (min-width:700px){.otabs:has(>.otab:nth-child(9):last-child){grid-template-columns:repeat(9,minmax(0,1fr))}}' +
+    '.leaflet-popup-content .ofa-act{min-width:230px}' +
+    '.ofa-days{display:flex;flex-wrap:wrap;gap:6px}.ofa-days button{min-width:46px;min-height:40px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-size:.82rem;font-weight:700;cursor:pointer}.ofa-days button[aria-pressed=true]{background:var(--blue);border-color:transparent;color:#FFFFFF}' +
+    '.ofa-av{display:inline-flex;align-items:center;justify-content:center;flex:none;width:40px;height:40px;border-radius:50%;background:var(--c,#0A78C2);color:#FFFFFF;font-size:.8rem;font-weight:800;border:3px solid #FFFFFF;box-shadow:0 2px 8px rgba(4,38,63,.3)}.ofa-av.sm{width:22px;height:22px;font-size:.55rem;border-width:2px}' +
+    '.ofa-mk{background:none;border:0}.ofa-mk .ofa-av{position:absolute;left:0;top:0}.ofa-mk em{position:absolute;left:50%;top:42px;transform:translateX(-50%);white-space:nowrap;font-style:normal;font-size:10px;font-weight:800;padding:1px 6px;border-radius:999px;background:#FFFFFF;color:#04263F;box-shadow:0 1px 4px rgba(0,0,0,.25)}.ofa-mk.old .ofa-av{filter:grayscale(.7);opacity:.75}' +
+    '.ofa-leg{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.8rem;color:var(--muted)}.ofa-leg li{display:flex;align-items:center;gap:6px}.ofa-leg i{width:11px;height:11px;border-radius:50%;border:2px solid #FFFFFF;box-shadow:0 0 0 1px var(--line)}' +
+    '.ofa-hd{display:flex;align-items:center;justify-content:space-between;gap:10px}.ofa-hd h2{margin:0}' +
+    '.ofa-mates{list-style:none;margin:10px 0 0;padding:0}.ofa-mates>li{padding:12px 0;border-top:1px solid var(--line)}.ofa-mates>li:first-child{border-top:0}' +
+    '.ofa-who{display:flex;align-items:center;gap:12px;width:100%;border:0;background:none;padding:0;font:inherit;color:inherit;text-align:left;cursor:pointer}.ofa-who b{display:block;color:var(--ink)}.ofa-who small{display:block;color:var(--muted);font-size:.8rem;margin-top:2px}' +
+    '.ofa-act{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0 52px}.ofa-act a,.ofa-act button{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-size:.8rem;font-weight:700;text-decoration:none;cursor:pointer}.ofa-act svg{width:16px;height:16px;color:var(--blue)}' +
+    '.ofa-act button[aria-expanded=true]{background:var(--tint);border-color:var(--blue)}.ofa-vt{list-style:none;margin:8px 0 0 52px;padding:0;font-size:.84rem}.ofa-vt li{display:flex;gap:8px;align-items:baseline;padding:4px 0}.ofa-vt i{flex:none;width:9px;height:9px;border-radius:50%}.ofa-vt small{color:var(--muted);margin-left:auto;white-space:nowrap}' +
+    '.ofa-priv{display:flex;gap:8px;align-items:flex-start;margin-top:10px}.ofa-priv svg{flex:none;width:16px;height:16px;margin-top:2px}' +
+    '.ofa-pmap{height:320px;margin-top:12px}.ofa-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.ofa-chips button{min-height:36px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-size:.8rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px}.ofa-chips button i{width:10px;height:10px;border-radius:50%;background:var(--c)}.ofa-chips button[aria-pressed=true]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}' +
+    '#ofaRes{scroll-margin-top:76px}.ofa-sum b{display:block;color:var(--ink);font-size:1.05rem}.ofa-sum small{color:var(--muted)}' +
+    '.ofa-day{margin-top:12px;border-left:5px solid var(--c) !important}.ofa-day .oh{display:flex;justify-content:space-between;gap:8px;align-items:center}.ofa-day .oh b{color:var(--ink)}' +
+    '.ofa-stops{list-style:none;margin:8px 0 0;padding:0}.ofa-stops li{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)}.ofa-stops li:first-child{border-top:0}.ofa-stops .n{flex:none;width:26px;height:26px;border-radius:50%;background:var(--c);color:#FFFFFF;font-size:.78rem;font-weight:800;display:flex;align-items:center;justify-content:center}' +
+    '.ofa-stops .tx{flex:1;min-width:0}.ofa-stops .tx b{display:block;color:var(--text);font-size:.92rem}.ofa-stops .tx small{color:var(--muted);font-size:.78rem}.ofa-why{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}.ofa-why .tag{font-size:11px;padding:2px 8px}' +
+    '.ofa-x{flex:none;width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--muted);font-size:1.1rem;cursor:pointer}.ofa-dayf{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}.ofa-dayf select{flex:1;min-width:180px}' +
+    '.ofa-num{background:none;border:0}.ofa-num span{display:flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:var(--c);color:#FFFFFF;font:800 11px Montserrat,system-ui,sans-serif;border:2px solid #FFFFFF;box-shadow:0 1px 4px rgba(0,0,0,.3)}.ofa-num.dim{opacity:.35}' +
+    '</style>');
+
+  // Me › Settings › Security and alerts › Share my location with the office (kept on this phone)
+  function ofaShareGet() {
+    var o = jget('rfPinShare', {}) || {}, ok = function (t) { return /^([01]\d|2[0-3]):[0-5]\d$/.test(t || ''); };
+    return { on: !!o.on, days: Array.isArray(o.days) ? o.days.filter(function (d) { return d >= 0 && d <= 6; }) : [1, 2, 3, 4, 5, 6], from: ok(o.from) ? o.from : '07:00', to: ok(o.to) ? o.to : '18:00' };
+  }
+  function ofaShareSet(o) { store.set('rfPinShare', JSON.stringify(o)); }
+  function ofaMin(t) { var a = t.split(':'); return +a[0] * 60 + +a[1]; }
+  function ofaInHours(o, d) {
+    d = d || new Date(); var m = d.getHours() * 60 + d.getMinutes(), f = ofaMin(o.from), t = ofaMin(o.to);
+    return o.days.indexOf(d.getDay()) >= 0 && (f <= t ? m >= f && m < t : m >= f || m < t);
+  }
+  function ofaHoursTx(o) {
+    var ds = o.days.slice().sort(function (a, z) { return ((a + 6) % 7) - ((z + 6) % 7); }), w = function (d) { return tr(OFA_WD[d][0], OFA_WD[d][1]); };
+    var run = ds.length > 2 && ds.every(function (d, i) { return i === 0 || (d + 6) % 7 === (ds[i - 1] + 6) % 7 + 1; });
+    return (!ds.length ? tr('No days', 'Hakuna siku') : run ? w(ds[0]) + '–' + w(ds[ds.length - 1]) : ds.map(w).join(', ')) + ' · ' + o.from + '–' + o.to;
+  }
+  function ofaOwn() { return !!S.who && !!(S.pin || S.mode === 'monday'); }
+  function ofaSharing() { var o = ofaShareGet(); return o.on && ofaOwn() && ofaInHours(o); }
+  function ofaSetRow() {
+    var o = ofaShareGet(); setTimeout(ofaPill, 0);
+    return setRow('share', 'pin', 'green', tr('Share my location with the office', 'Shiriki mahali nilipo na ofisi'), o.on ? tr('On · ', 'Imewashwa · ') + ofaHoursTx(o) : tr('Off', 'Imezimwa'));
+  }
+  function ofaPill() {
+    var el = $('ofaShare'), on = ofaSharing();
+    document.body.classList.toggle('ofa-on', on);
+    if (!on) { if (el) el.remove(); return; }
+    if (!el) { el = document.createElement('div'); el.id = 'ofaShare'; el.className = 'ofa-share'; el.setAttribute('role', 'status'); document.querySelector('.top').appendChild(el); }
+    el.innerHTML = '<i class="ofa-pulse" aria-hidden="true"></i><span>' + tr('Sharing location with the office', 'Unashiriki mahali na ofisi') + '</span><button type="button" data-ofa="stop">' + tr('Stop', 'Acha') + '</button>';
+  }
+  // at most every 10 minutes, only while the page is open and in work hours
+  function ofaTick(force) {
+    ofaPill();
+    if (!ofaSharing() || document.hidden || !navigator.onLine || S.view === 'vLock') return;
+    if (!force && Date.now() - (+store.get('rfPinShareAt') || 0) < 6e5) return;
+    var send = function (ll, acc) { store.set('rfPinShareAt', String(Date.now())); api('POST', { action: 'here', lat: ll[0], lng: ll[1], acc: acc || 0 }); };
+    if (S.here && Date.now() - S.hereAt < 120000) return send(S.here, S.hereAcc);
+    if (navigator.geolocation) navigator.geolocation.getCurrentPosition(function (p) { send([p.coords.latitude, p.coords.longitude], Math.round(p.coords.accuracy || 0)); }, function () {}, { enableHighAccuracy: false, maximumAge: 300000, timeout: 20000 });
+  }
+  function ofaStop() {
+    var o = ofaShareGet(); o.on = false; ofaShareSet(o); store.del('rfPinShareAt'); ofaPill();
+    if (ofaOwn()) api('POST', { action: 'here', off: true });
+    if ($('meSet')) setUi();
+  }
+  setInterval(ofaTick, 60000); setTimeout(ofaTick, 3000);
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) ofaTick(); });
+  document.addEventListener('click', function (e) { if (e.target.closest('[data-ofa=stop]')) { ofaStop(); toast(tr('Location sharing is off', 'Kushiriki mahali kumezimwa')); } });
+  $('meSet').addEventListener('click', function (e) { var b = e.target.closest('[data-set=share]'); if (b) ofaShareSheet(); });
+  function ofaShareSheet() {
+    var o = ofaShareGet(), own = ofaOwn();
+    var w = panel(tr('Share my location', 'Shiriki mahali nilipo'),
+      '<p class="muted" style="margin-top:0">' + tr('While you work, the office can see where you are on a map, to plan visits and keep the team safe. Only admins see it. Only your latest position is kept, for 12 hours, never a history. It is off unless you turn it on, and only shared while this app is open.', 'Unapofanya kazi, ofisi inaweza kuona ulipo kwenye ramani, ili kupanga ziara na kuilinda timu. Wasimamizi pekee wanaona. Mahali pako pa mwisho tu panahifadhiwa, kwa saa 12, si historia. Imezimwa usipoiwasha, na inashirikiwa tu programu hii ikiwa wazi.') + '</p>' +
+      (own ? '<div class="pr"><span class="pi" style="--hu:var(--hu-green);--hb:var(--hb-green)">' + oic('pin') + '</span><b>' + tr('Share my location with the office during work hours', 'Shiriki mahali nilipo na ofisi wakati wa saa za kazi') + '</b><button type="button" class="tgl" role="switch" id="ofaTgl" aria-checked="' + o.on + '" aria-label="' + tr('Share my location with the office', 'Shiriki mahali nilipo na ofisi') + '"><i></i></button></div>' +
+        '<div class="fld"><label>' + tr('Work days', 'Siku za kazi') + '</label><div class="ofa-days" id="ofaDays">' + [1, 2, 3, 4, 5, 6, 0].map(function (d) { return '<button type="button" data-d="' + d + '" aria-pressed="' + (o.days.indexOf(d) >= 0) + '">' + tr(OFA_WD[d][0], OFA_WD[d][1]) + '</button>'; }).join('') + '</div></div>' +
+        '<div class="ofields"><div class="fld"><label for="ofaFrom">' + tr('From', 'Kuanzia') + '</label><input type="time" id="ofaFrom" value="' + o.from + '"></div><div class="fld"><label for="ofaTo2">' + tr('Until', 'Hadi') + '</label><input type="time" id="ofaTo2" value="' + o.to + '"></div></div>' +
+        '<p class="msg" id="ofaShMsg" aria-live="polite"></p>'
+        : '<p class="msg warn">' + tr('You need your own PIN (or monday.com sign-in) to share your location, so the office knows it’s you.', 'Unahitaji PIN yako mwenyewe (au kuingia kwa monday.com) ili kushiriki mahali, ili ofisi ijue ni wewe.') + '</p>'));
+    if (!own) return;
+    var status = function () {
+      var x = ofaShareGet(), at = +store.get('rfPinShareAt') || 0;
+      msg('ofaShMsg', x.on ? (ofaInHours(x) ? 'ok' : '') : '', !x.on ? tr('Off. The office can’t see where you are.', 'Imezimwa. Ofisi haioni ulipo.') : !x.days.length ? tr('Choose at least one work day.', 'Chagua angalau siku moja ya kazi.') : ofaInHours(x) ? tr('Sharing now', 'Inashiriki sasa') + (at ? ' · ' + tr('last sent ', 'ilitumwa ') + since(new Date(at).toISOString()) : '') : tr('Outside your work hours: not sharing now.', 'Nje ya saa zako za kazi: haishiriki sasa.'));
+    };
+    var save = function (x) { ofaShareSet(x); setUi(); ofaPill(); status(); };
+    status();
+    $('ofaTgl').addEventListener('click', function () {
+      var t = this, x = ofaShareGet();
+      if (x.on) { ofaStop(); t.setAttribute('aria-checked', 'false'); status(); return; }
+      x.on = true; t.setAttribute('aria-checked', 'true'); save(x);
+      if (navigator.geolocation) navigator.geolocation.getCurrentPosition(function (p) { S.here = [p.coords.latitude, p.coords.longitude]; S.hereAt = Date.now(); S.hereAcc = Math.round(p.coords.accuracy || 0); ofaTick(true); status(); },
+        function (err) { if (err.code === 1) { var y = ofaShareGet(); y.on = false; ofaShareSet(y); t.setAttribute('aria-checked', 'false'); setUi(); ofaPill(); msg('ofaShMsg', 'bad', tr('Allow location for this site first, then turn it on again.', 'Ruhusu mahali kwa tovuti hii kwanza, kisha uiwashe tena.')); } }, { enableHighAccuracy: false, maximumAge: 120000, timeout: 20000 });
+    });
+    $('ofaDays').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-d]'); if (!b) return; var x = ofaShareGet(), d = +b.getAttribute('data-d'), i = x.days.indexOf(d);
+      if (i >= 0) x.days.splice(i, 1); else x.days.push(d); b.setAttribute('aria-pressed', i < 0); save(x);
+    });
+    ['ofaFrom', 'ofaTo2'].forEach(function (id) { $(id).addEventListener('change', function () { var x = ofaShareGet(), v = this.value; if (!/^\d\d:\d\d$/.test(v)) return; if (id === 'ofaFrom') x.from = v; else x.to = v; save(x); }); });
+    return w;
+  }
+
+  // Office › Team map: who is sharing, where they were last seen, and today's visits
+  // each teammate on the map gets their own colour (in list order), others a colour from their name
+  function ofaHue(n) { if (OFA.hue && OFA.hue[n]) return OFA.hue[n]; var h = 5381; String(n || '').split('').forEach(function (c) { h = (h * 33 + c.charCodeAt(0)) % 100003; }); return OFA_COL[h % OFA_COL.length]; }
+  function ofaAvatar(n, cls) { return '<span class="ofa-av' + (cls ? ' ' + cls : '') + '" style="--c:' + ofaHue(n) + '" aria-hidden="true">' + mateInitials(n) + '</span>'; }
+  function ofaStateCol(s) { return s === 'notworking' ? '#B3261E' : s === 'repair' ? '#D98200' : '#1C9C5A'; }
+  function ofaClock(iso) { var d = new Date(iso); return isNaN(d) ? '' : d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }); }
+  function ofaTeamMap(b) {
+    b.innerHTML = '<div class="o-grid"><div class="o-side"><div class="map o-map" id="ofaTmMap" role="application" aria-label="' + tr('Map of teammates sharing their location, and today’s visits', 'Ramani ya wenzako wanaoshiriki mahali, na ziara za leo') + '"></div>' +
+      '<ul class="ofa-leg"><li>' + ofaAvatar('A B', 'sm') + tr('Teammate, when last seen', 'Mwenzako, alipoonekana mwisho') + '</li><li><i style="background:#1C9C5A"></i>' + tr('Visit today: working', 'Ziara ya leo: inafanya kazi') + '</li><li><i style="background:#D98200"></i>' + tr('needs repair', 'inahitaji matengenezo') + '</li><li><i style="background:#B3261E"></i>' + tr('not working', 'haifanyi kazi') + '</li></ul></div>' +
+      '<div><div class="card"><div class="ofa-hd"><h2>' + tr('Team map', 'Ramani ya timu') + '</h2><button class="btn small light" type="button" id="ofaTmR">' + tr('Refresh', 'Onyesha upya') + '</button></div><p class="muted" id="ofaTmSum" style="margin:8px 0 0">' + tr('Loading…', 'Inapakia…') + '</p><ul class="ofa-mates" id="ofaTmList"></ul></div>' +
+      '<p class="muted ofa-priv">' + oic('lock') + '<span>' + tr('Only people who turned on “Share my location” in their Settings show here, and only in their work hours. Only the latest position is kept, for 12 hours. Field officers never see this map.', 'Wanaoonekana hapa ni wale tu waliowasha “Shiriki mahali nilipo” kwenye Mipangilio yao, na wakati wa saa zao za kazi tu. Mahali pa mwisho tu panahifadhiwa, kwa saa 12. Maafisa wa uwanjani hawaoni ramani hii.') + '</span></p></div></div>';
+    $('ofaTmR').addEventListener('click', function () { ofaTmLoad(); });
+    ofaTmLoad();
+  }
+  function ofaTmLoad() {
+    adminApi('GET', null, '?view=teammap').then(function (j) {
+      if (S.view !== 'vOffice' || O.tab !== 'teammap' || !$('ofaTmList')) return;
+      if (!j.ok) { $('ofaTmSum').innerHTML = '<span class="msg bad">' + esc(why(j)) + '</span>'; return; }
+      OFA.tm = j; ofaTmDraw();
+    });
+  }
+  function ofaTmVisits(n) { return ((OFA.tm && OFA.tm.visits) || []).filter(function (v) { return same(v.by, n); }); }
+  function ofaTmDraw() {
+    var t = OFA.tm, ppl = t.people || [], vis = t.visits || [];
+    OFA.hue = {}; ppl.forEach(function (p, i) { OFA.hue[p.name] = OFA_COL[i % OFA_COL.length]; });
+    $('ofaTmSum').textContent = (ppl.length ? (ppl.length === 1 ? tr('1 teammate sharing their location', 'Mwenzako 1 anashiriki mahali') : tr(ppl.length + ' teammates sharing their location', 'Wenzako ' + ppl.length + ' wanashiriki mahali')) : tr('Nobody is sharing their location right now.', 'Hakuna anayeshiriki mahali kwa sasa.')) +
+      ' · ' + (vis.length === 1 ? tr('1 visit today', 'ziara 1 leo') : tr(vis.length + ' visits today', 'ziara ' + vis.length + ' leo'));
+    $('ofaTmList').innerHTML = ppl.map(function (p) {
+      var v = ofaTmVisits(p.name), open = OFA.open === p.name;
+      return '<li data-ofa-p="' + esc(p.name) + '"><button type="button" class="ofa-who" data-ofa-go="' + esc(p.name) + '">' + ofaAvatar(p.name) + '<span><b>' + esc(p.name) + '</b><small>' + tr('Last seen ', 'Alionekana ') + since(p.at) + (p.acc ? ' · ±' + (p.acc < 1000 ? p.acc + ' m' : Math.round(p.acc / 1000) + ' km') : '') + '</small></span></button>' +
+        '<div class="ofa-act">' + (p.phone ? '<a href="tel:' + esc(p.phone.replace(/\s/g, '')) + '">' + oic('phone') + tr('Call', 'Piga simu') + '</a><a href="https://wa.me/' + waNum(p.phone, p.home) + '" target="_blank" rel="noopener">' + oic('chat') + 'WhatsApp</a>' : '') +
+        '<button type="button" data-ofa-vt="' + esc(p.name) + '" aria-expanded="' + open + '">' + oic('clip') + tr('Visits today', 'Ziara za leo') + ' · ' + v.length + '</button></div>' +
+        (open ? '<ul class="ofa-vt">' + (v.length ? v.map(function (x) { var pr = byId(x.id); return '<li><i style="background:' + ofaStateCol(x.s) + '"></i><span>' + esc(pr ? pr.title : x.t || x.id) + '</span><small>' + ofaClock(x.at) + '</small></li>'; }).join('') : '<li class="muted">' + tr('No visits reported yet today.', 'Hakuna ziara zilizoripotiwa leo bado.') + '</li>') + '</ul>' : '') + '</li>';
+    }).join('') || '<li class="muted" style="border:0">' + tr('People turn it on in Me › Settings › Security and alerts. It’s off unless they choose it.', 'Watu wanaiwasha kwenye Mimi › Mipangilio › Usalama na arifa. Imezimwa wasipochagua.') + '</li>';
+    setTimeout(function () {
+      if (!$('ofaTmMap')) return;
+      if (OFA.map) { OFA.map.remove(); OFA.map = null; }
+      var m = OFA.map = L.map('ofaTmMap', { zoomControl: true }); layers(m);
+      var g = L.featureGroup(), focus = [];
+      vis.forEach(function (x) {
+        var pr = byId(x.id); if (!pr || !pr.gps) return;
+        var mk = L.circleMarker(pr.gps, { radius: 7, color: '#FFFFFF', weight: 2, fillColor: ofaStateCol(x.s), fillOpacity: 1 }).bindTooltip(esc(pr.title) + ' · ' + esc(x.by) + ' · ' + ofaClock(x.at)).addTo(g);
+        if (OFA.open && same(x.by, OFA.open)) focus.push(mk.getLatLng());
+      });
+      ppl.forEach(function (p) {
+        var old = Date.now() - Date.parse(p.at) > 36e5;
+        var mk = L.marker([p.lat, p.lng], { icon: L.divIcon({ className: 'ofa-mk' + (old ? ' old' : ''), html: ofaAvatar(p.name) + '<em>' + esc(since(p.at)) + '</em>', iconSize: [40, 56], iconAnchor: [20, 20], popupAnchor: [0, -18] }), title: p.name, zIndexOffset: 1000 }).addTo(g);
+        mk.bindPopup('<b>' + esc(p.name) + '</b><br><small>' + tr('Last seen ', 'Alionekana ') + since(p.at) + '</small><div class="ofa-act" style="margin:8px 0 0">' + (p.phone ? '<a href="tel:' + esc(p.phone.replace(/\s/g, '')) + '">' + oic('phone') + tr('Call', 'Piga simu') + '</a><a href="https://wa.me/' + waNum(p.phone, p.home) + '" target="_blank" rel="noopener">' + oic('chat') + 'WhatsApp</a>' : '') + '<button type="button" data-ofa-vt="' + esc(p.name) + '">' + oic('clip') + tr('Visits today', 'Ziara za leo') + ' · ' + ofaTmVisits(p.name).length + '</button></div>');
+        p._mk = mk; if (OFA.open && same(p.name, OFA.open)) focus.push(mk.getLatLng());
+      });
+      g.addTo(m);
+      if (focus.length > 1) m.fitBounds(L.latLngBounds(focus).pad(0.3), { maxZoom: 14 }); else if (focus.length) m.setView(focus[0], 13);
+      else if (g.getLayers().length) m.fitBounds(g.getBounds().pad(0.15), { maxZoom: 13 }); else { var c = CENTER[homeCk()] || [-3, 35, 5]; m.setView([c[0], c[1]], c[2]); }
+    }, 40);
+  }
+  $('oBody').addEventListener('click', function (e) {
+    var go = e.target.closest('[data-ofa-go]'), vt = e.target.closest('[data-ofa-vt]');
+    if (go && OFA.tm) { var n = go.getAttribute('data-ofa-go'), p = (OFA.tm.people || []).filter(function (x) { return x.name === n; })[0]; if (p && p._mk && OFA.map) { OFA.map.setView(p._mk.getLatLng(), Math.max(OFA.map.getZoom(), 13)); p._mk.openPopup(); var mp = $('ofaTmMap'); if (mp && mp.scrollIntoView) mp.scrollIntoView({ block: 'nearest' }); } return; }
+    if (vt) { var k = vt.getAttribute('data-ofa-vt'); OFA.open = OFA.open === k ? '' : k; ofaTmDraw(); }
+  });
+
+  // Office › Plan a week
+  function ofaArea(p) { return String(p.area || '').split(',')[0].trim(); }
+  function ofaYmd(d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+  // working days from the first day on, skipping Sundays
+  function ofaDates(start, n) { var d = new Date(start + 'T12:00:00'), out = []; if (isNaN(d)) d = new Date(); while (out.length < n) { if (d.getDay() !== 0) out.push(ofaYmd(d)); d.setDate(d.getDate() + 1); } return out; }
+  function ofaDayName(ymd) { var d = new Date(ymd + 'T12:00:00'); return tr(OFA_WD[d.getDay()][0], OFA_WD[d.getDay()][1]) + ' ' + d.getDate() + ' ' + d.toLocaleDateString(S.lang === 'sw' ? 'sw' : 'en-GB', { month: 'short' }); }
+  function ofaKm(ids) { var s = 0; for (var i = 1; i < ids.length; i++) { var a = byId(ids[i - 1]), z = byId(ids[i]); if (a && z && a.gps && z.gps) s += metres(a.gps, z.gps); } return s; }
+  function ofaWhy(id) {
+    var info = (OFA.plan && OFA.plan.info[id]) || {}, r = S.repairs[id], out = [];
+    (info.why || []).forEach(function (w) {
+      if (w === 'repair') out.push(['bad', r && r.state !== 'notworking' ? tr('Needs repair', 'Inahitaji matengenezo') : tr('Not working', 'Haifanyi kazi')]);
+      if (w === 'urgent') out.push(['bad', tr('Urgent', 'Haraka')]);
+      if (w === 'overdue') out.push(['', tr('Not visited for ' + Math.round(info.age / 30.4) + ' months', 'Haijatembelewa kwa miezi ' + Math.round(info.age / 30.4))]);
+      if (w === 'never') out.push(['', tr('No visit in the app yet', 'Bado haijatembelewa kwenye programu')]);
+      if (w === 'test') out.push(['has', tr('Water test due', 'Kipimo cha maji kinahitajika')]);
+    });
+    return out;
+  }
+  function ofaPlanTab(b) {
+    var ck = OFA.ck || homeCk() || 'ke', nm = names(), tm = new Date(Date.now() + 864e5); if (tm.getDay() === 0) tm = new Date(tm.getTime() + 864e5);
+    var sel = function (id, opts, v) { return '<select id="' + id + '">' + opts.map(function (o) { return '<option value="' + esc(o[0]) + '"' + (String(o[0]) === String(v) ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') + '</select>'; };
+    b.innerHTML = '<div class="card"><h2>' + tr('Plan a week', 'Panga wiki') + '</h2><p class="muted" style="margin-top:0">' + tr('Suggests visits for one person: open repairs first, then sites not visited for 6 months or more, and water tests that are due. Sites close together go on the same day, in driving order.', 'Inapendekeza ziara kwa mtu mmoja: matengenezo yaliyo wazi kwanza, kisha maeneo yasiyotembelewa kwa miezi 6 au zaidi, na vipimo vya maji vinavyohitajika. Maeneo yaliyo karibu yanawekwa siku moja, kwa mpangilio wa safari.') + '</p>' +
+      (nm.length ? '' : '<p class="msg warn">' + tr('Add people in the Team tab first.', 'Ongeza watu kwenye kichupo cha Timu kwanza.') + '</p>') +
+      '<div class="ofields"><label>' + tr('Field officer', 'Afisa wa uwanjani') + sel('ofaTo', nm.map(function (n) { return [n, n]; }), OFA.to || '') + '</label>' +
+      '<label>' + tr('Country', 'Nchi') + sel('ofaCk', ['ke', 'tz', 'ug', 'mw'].map(function (c) { return [c, CNAME[c]]; }), ck) + '</label></div>' +
+      '<label>' + tr('Area', 'Eneo') + '<select id="ofaArea"></select></label>' +
+      '<div class="ofields"><label>' + tr('Days', 'Siku') + sel('ofaDaysN', [1, 2, 3, 4, 5, 6].map(function (n) { return [n, n]; }), OFA.days || 5) + '</label>' +
+      '<label>' + tr('Stops a day', 'Vituo kwa siku') + sel('ofaPer', [3, 4, 5, 6, 7, 8].map(function (n) { return [n, n]; }), OFA.per || 5) + '</label>' +
+      '<label>' + tr('First day', 'Siku ya kwanza') + '<input type="date" id="ofaStart" value="' + (OFA.start || ofaYmd(tm)) + '"></label></div>' +
+      '<div class="oact"><button class="btn" type="button" id="ofaGo"' + (nm.length ? '' : ' disabled') + '>' + oic('spark') + ' ' + tr('Suggest visits', 'Pendekeza ziara') + '</button><span class="msg" id="ofaMsg" aria-live="polite"></span></div></div><div id="ofaRes"></div>';
+    var areas = function () {
+      var c = $('ofaCk').value, n = {}; S.projects.forEach(function (p) { var a = ofaArea(p); if (p.ck === c && p.gps && a) n[a] = (n[a] || 0) + 1; });
+      var ks = Object.keys(n).sort(function (a, z) { return n[z] - n[a] || a.localeCompare(z); }).slice(0, 80);
+      $('ofaArea').innerHTML = '<option value="">' + tr('All of ', 'Yote ya ') + CNAME[c] + '</option>' + ks.map(function (a) { return '<option value="' + esc(a) + '"' + (a === OFA.area ? ' selected' : '') + '>' + esc(a) + ' (' + n[a] + ')</option>'; }).join('');
+    };
+    areas(); $('ofaCk').addEventListener('change', function () { OFA.area = ''; areas(); });
+    $('ofaGo').addEventListener('click', ofaSuggest);
+    if (OFA.plan) ofaPlanDraw();
+  }
+  function ofaSuggest() {
+    OFA.to = $('ofaTo').value; OFA.ck = $('ofaCk').value; OFA.area = $('ofaArea').value; OFA.days = +$('ofaDaysN').value; OFA.per = +$('ofaPer').value; OFA.start = $('ofaStart').value || ofaYmd(new Date(Date.now() + 864e5));
+    var btn = $('ofaGo'); btn.disabled = true; msg('ofaMsg', '', tr('Working it out…', 'Inapanga…'));
+    adminApi('GET', null, '?view=plan&ck=' + encodeURIComponent(OFA.ck) + '&area=' + encodeURIComponent(OFA.area) + '&days=' + OFA.days + '&per=' + OFA.per).then(function (j) {
+      btn.disabled = false;
+      if (!j.ok) { msg('ofaMsg', 'bad', why(j)); return; }
+      var info = {}; (j.days || []).forEach(function (d) { d.stops.forEach(function (s) { info[s.id] = s; }); }); (j.spare || []).forEach(function (s) { info[s.id] = s; });
+      OFA.plan = { to: OFA.to, info: info, total: j.total || 0, days: (j.days || []).map(function (d) { return ofaOrder(d.stops.map(function (s) { return s.id; })); }), spare: (j.spare || []).map(function (s) { return s.id; }).filter(function (id) { return byId(id); }) };
+      OFA.plan.dates = ofaDates(OFA.start, OFA.plan.days.length); OFA.day = -1; OFA.done = false;
+      msg('ofaMsg', '', j.total ? '' : tr('Nothing needs a visit there right now.', 'Hakuna kinachohitaji ziara huko kwa sasa.'));
+      ofaPlanDraw();
+      var res = $('ofaRes'); if (res && res.firstChild && res.scrollIntoView) res.scrollIntoView({ block: 'start', behavior: window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    });
+  }
+  function ofaOrder(ids) { return order(ids.filter(function (id) { var p = byId(id); return p && p.gps; }), null).map(function (p) { return p.id; }); }
+  function ofaPlanDraw() {
+    var P = OFA.plan, box = $('ofaRes'); if (!P || !box) return;
+    var n = P.days.reduce(function (s, d) { return s + d.length; }, 0), km = P.days.reduce(function (s, d) { return s + ofaKm(d); }, 0);
+    if (!P.days.length) { box.innerHTML = ''; return; }
+    box.innerHTML = '<div class="card" style="margin-top:12px"><div class="ofa-sum"><b>' + tr(n + ' visits over ' + P.days.length + (P.days.length === 1 ? ' day' : ' days') + ' · about ' + dist(km), 'Ziara ' + n + ' kwa siku ' + P.days.length + ' · takriban ' + dist(km)) + '</b><small>' + tr('For ' + P.to + '. Straight lines between sites; roads are longer.', 'Kwa ' + P.to + '. Mistari iliyonyooka kati ya maeneo; barabara ni ndefu zaidi.') + (P.total > n ? ' ' + tr((P.total - n) + ' more sites need a visit: add them below.', 'Maeneo mengine ' + (P.total - n) + ' yanahitaji ziara: yaongeze hapa chini.') : '') + '</small></div>' +
+      '<div class="map ofa-pmap" id="ofaPMap" role="application" aria-label="' + tr('Map of the planned days', 'Ramani ya siku zilizopangwa') + '"></div>' +
+      '<div class="ofa-chips" role="group" aria-label="' + tr('Show a day on the map', 'Onyesha siku kwenye ramani') + '"><button type="button" data-ofa-day="-1" aria-pressed="' + (OFA.day < 0) + '">' + tr('All days', 'Siku zote') + '</button>' + P.days.map(function (d, i) { return '<button type="button" data-ofa-day="' + i + '" aria-pressed="' + (OFA.day === i) + '" style="--c:' + OFA_COL[i % 6] + '"><i></i>' + tr('Day ', 'Siku ') + (i + 1) + '</button>'; }).join('') + '</div></div>' +
+      P.days.map(function (d, i) {
+        var c = OFA_COL[i % 6], ctr = d.length ? [d.reduce(function (s, id) { return s + byId(id).gps[0]; }, 0) / d.length, d.reduce(function (s, id) { return s + byId(id).gps[1]; }, 0) / d.length] : null;
+        var spare = P.spare.slice().sort(function (a, z) { return ctr ? metres(ctr, byId(a).gps) - metres(ctr, byId(z).gps) : 0; });
+        var stops = d.map(byId);
+        return '<article class="card ofa-day" style="--c:' + c + '"><div class="oh"><b>' + tr('Day ', 'Siku ') + (i + 1) + ' · ' + ofaDayName(P.dates[i]) + '</b><span class="tag has">' + (d.length === 1 ? tr('1 stop', 'kituo 1') : tr(d.length + ' stops', 'vituo ' + d.length)) + (d.length > 1 ? ' · ≈ ' + dist(ofaKm(d)) : '') + '</span></div>' +
+          '<ol class="ofa-stops">' + stops.map(function (p, k) {
+            return '<li><span class="n">' + (k + 1) + '</span><span class="tx"><b>' + esc(p.title) + '</b><small>' + esc(p.area || p.country) + (k ? ' · ' + dist(metres(stops[k - 1].gps, p.gps)) + tr(' from the last stop', ' kutoka kituo cha mwisho') : '') + '</small><span class="ofa-why">' + ofaWhy(p.id).map(function (w) { return '<span class="tag ' + w[0] + '">' + esc(w[1]) + '</span>'; }).join('') + '</span></span>' +
+              '<button type="button" class="ofa-x" data-ofa-rm="' + i + ':' + esc(p.id) + '" aria-label="' + esc(tr('Remove ', 'Ondoa ') + p.title) + '">×</button></li>';
+          }).join('') + '</ol>' + (d.length ? '' : '<p class="muted">' + tr('No stops on this day.', 'Hakuna vituo siku hii.') + '</p>') +
+          '<div class="ofa-dayf">' + (spare.length ? '<select data-ofa-add="' + i + '" aria-label="' + tr('Add a stop to day ', 'Ongeza kituo siku ya ') + (i + 1) + '"><option value="">+ ' + tr('Add a stop…', 'Ongeza kituo…') + '</option>' + spare.slice(0, 30).map(function (id) { var p = byId(id); return '<option value="' + esc(id) + '">' + esc(p.title) + (ctr ? ' · ' + dist(metres(ctr, p.gps)) : '') + '</option>'; }).join('') + '</select>' : '') +
+          (d.length ? '<a class="btn small light" href="' + gmaps(stops, null) + '" target="_blank" rel="noopener">' + brand('gmaps') + tr('Route in Google Maps', 'Njia kwenye Google Maps') + '</a>' : '') + '</div></article>';
+      }).join('') +
+      '<div class="card" style="margin-top:12px"><label>' + tr('Note for ', 'Maelezo kwa ') + esc(P.to) + ' ' + tr('(optional)', '(si lazima)') + '<input type="text" id="ofaNote" placeholder="' + tr('e.g. take the water test kit', 'mf. beba vifaa vya kupima maji') + '"></label>' +
+      '<button class="btn block" type="button" id="ofaAssign" style="margin-top:12px"' + (n && !OFA.done ? '' : ' disabled') + '>' + oic('cal') + ' ' + (OFA.done ? tr('Assigned', 'Imegawiwa') : tr('Assign ' + n + ' visits to ' + P.to, 'Mpe ' + P.to + ' ziara ' + n)) + '</button><p class="msg" id="ofaAMsg" aria-live="polite"></p></div>';
+    $('ofaAssign').addEventListener('click', ofaAssign);
+    setTimeout(ofaPlanMap, 40);
+  }
+  function ofaPlanMap() {
+    var P = OFA.plan; if (!P || !$('ofaPMap')) return;
+    if (OFA.pmap) { OFA.pmap.remove(); OFA.pmap = null; }
+    var m = OFA.pmap = L.map('ofaPMap', { zoomControl: true }); layers(m);
+    var all = L.featureGroup(), sel = L.featureGroup();
+    P.days.forEach(function (d, i) {
+      var c = OFA_COL[i % 6], dim = OFA.day >= 0 && OFA.day !== i, pts = d.map(function (id) { return byId(id).gps; });
+      if (pts.length > 1) L.polyline(pts, { color: c, weight: 4, opacity: dim ? 0.25 : 0.85, dashArray: dim ? '4 6' : null }).addTo(all);
+      d.forEach(function (id, k) {
+        var p = byId(id), mk = L.marker(p.gps, { icon: L.divIcon({ className: 'ofa-num' + (dim ? ' dim' : ''), html: '<span style="--c:' + c + '">' + (k + 1) + '</span>', iconSize: [24, 24], iconAnchor: [12, 12] }), zIndexOffset: dim ? 0 : 500 })
+          .bindTooltip(esc(tr('Day ', 'Siku ') + (i + 1) + ' · ' + (k + 1) + '. ' + p.title)).addTo(all);
+        if (!dim) sel.addLayer(L.marker(p.gps));
+      });
+    });
+    all.addTo(m);
+    var fit = OFA.day >= 0 && sel.getLayers().length ? sel : all;
+    if (fit.getLayers().length) m.fitBounds(fit.getBounds().pad(0.15), { maxZoom: 13 }); else { var c = CENTER[OFA.ck] || [-3, 35, 5]; m.setView([c[0], c[1]], c[2]); }
+  }
+  $('oBody').addEventListener('click', function (e) {
+    var dy = e.target.closest('[data-ofa-day]'), rm = e.target.closest('[data-ofa-rm]');
+    if (dy && OFA.plan) { OFA.day = +dy.getAttribute('data-ofa-day'); qa('[data-ofa-day]').forEach(function (x) { x.setAttribute('aria-pressed', x === dy); }); ofaPlanMap(); return; }
+    if (rm && OFA.plan && !OFA.done) { var a = rm.getAttribute('data-ofa-rm').split(':'), d = OFA.plan.days[+a[0]], i = d.indexOf(a[1]); if (i >= 0) { d.splice(i, 1); OFA.plan.spare.unshift(a[1]); } OFA.plan.days[+a[0]] = ofaOrder(d); ofaPlanDraw(); }
+  });
+  $('oBody').addEventListener('change', function (e) {
+    var ad = e.target.closest('[data-ofa-add]'); if (!ad || !ad.value || !OFA.plan || OFA.done) return;
+    var di = +ad.getAttribute('data-ofa-add'), id = ad.value, P = OFA.plan;
+    P.spare = P.spare.filter(function (x) { return x !== id; }); P.days[di] = ofaOrder(P.days[di].concat([id])); OFA.day = di; ofaPlanDraw();
+  });
+  function ofaAssign() {
+    var P = OFA.plan, btn = $('ofaAssign'), note = $('ofaNote').value.trim(), k = 0, made = 0, total = P.days.length;
+    if (!P || OFA.done) return;
+    btn.disabled = true; msg('ofaAMsg', '', tr('Assigning…', 'Inagawa…'));
+    var next = function () {
+      while (k < total && !P.days[k].length) k++;
+      if (k >= total) {
+        OFA.done = true; O.assign = null; btn.innerHTML = oic('check') + ' ' + tr('Assigned', 'Imegawiwa');
+        msg('ofaAMsg', 'ok', tr('Assigned ✓ ' + made + ' visits. ' + P.to + ' sees them in “Your work” and gets a notification.', 'Imegawiwa ✓ ziara ' + made + '. ' + P.to + ' anaziona kwenye “Kazi yangu” na anapata arifa.'));
+        return;
+      }
+      var day = k;
+      adminApi('POST', { action: 'assign', ids: P.days[day], to: P.to, date: P.dates[day], note: (note ? note + ' · ' : '') + 'Week plan, day ' + (day + 1) + ' of ' + total }).then(function (j) {
+        if (!j.ok) { btn.disabled = false; msg('ofaAMsg', 'bad', why(j) + (made ? ' ' + tr('(' + made + ' assigned before this.)', '(' + made + ' zimegawiwa kabla ya hili.)') : '')); P.days = P.days.map(function (d, i) { return i < day ? [] : d; }); return; }
+        made += (j.items || []).length; k++; next();
+      });
+    };
+    next();
   }
 
   // confirmed locations on the project page

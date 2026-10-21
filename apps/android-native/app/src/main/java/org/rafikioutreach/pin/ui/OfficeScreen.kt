@@ -87,15 +87,17 @@ fun OfficeScreen(m: AppModel, open: (String) -> Unit) {
     val snap = s ?: return
     val secs = listOf(
         Triple("overview", t("Overview", "Muhtasari"), "drop"), Triple("repairs", t("Repairs", "Ukarabati"), "wrench"), Triple("costs", t("Costs", "Gharama"), "coins"), Triple("visits", t("Visits", "Ziara"), "cal"),
+        Triple("teammap", t("Team map", "Ramani ya timu"), "pin"), Triple("plan", t("Plan a week", "Panga wiki"), "compass"),
         Triple("review", t("Review", "Idhinisha"), "inbox"), Triple("team", t("Team", "Timu"), "people"), Triple("cleanup", t("Clean-up", "Usafi"), "spark"), Triple("export", t("Export", "Pakua"), "upload"),
         Triple("sms", t("Community", "Jamii"), "chat"),
     )
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
         Text(t("Office", "Ofisi"), style = MaterialTheme.typography.headlineLarge, color = C.ink, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.fillMaxWidth())
-        secs.chunked(4).forEachIndexed { ri, row ->
+        val per = if (secs.size % 3 == 0 && secs.size % 4 != 0) 3 else 4
+        secs.chunked(per).forEachIndexed { ri, row ->
             Row(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                row.forEachIndexed { ci, (k, l, ic) -> Tile(l, ic, sec == k, { sec = k }, Modifier.weight(1f).rise(ri * 4 + ci, step = 35).testTag("o_$k"), badge = when (k) { "review" -> snap.reviewOpen; "repairs" -> snap.repairs.size; else -> 0 }) }
-                repeat(4 - row.size) { Spacer(Modifier.weight(1f)) }
+                row.forEachIndexed { ci, (k, l, ic) -> Tile(l, ic, sec == k, { sec = k }, Modifier.weight(1f).rise(ri * per + ci, step = 35).testTag("o_$k"), badge = when (k) { "review" -> snap.reviewOpen; "repairs" -> snap.repairs.size; else -> 0 }) }
+                repeat(per - row.size) { Spacer(Modifier.weight(1f)) }
             }
         }
         Spacer(Modifier.height(14.dp))
@@ -104,6 +106,8 @@ fun OfficeScreen(m: AppModel, open: (String) -> Unit) {
             "repairs" -> Repairs(m, snap, open)
             "costs" -> CostsSection(m, snap, open)
             "visits" -> AssignVisits(m, snap)
+            "teammap" -> TeamMapSection(m, snap, open)
+            "plan" -> PlanWeekSection(m, snap, open)
             "review" -> ReviewQueue(m, open)
             "team" -> TeamSection(m)
             "cleanup" -> Cleanup(snap, open)
