@@ -126,7 +126,7 @@ fun MeScreen(m: AppModel, open: (String) -> Unit = {}, report: () -> Unit = {}) 
             TeamFeed(act, s, open)
         } else {
             MeHero(m, act, s, report)
-            AppUpdate(m)
+            UpdateCard(m)
             WaitingList(m, s)
             MyWork(s, open)
             MyMonth(m, act)
@@ -137,7 +137,7 @@ fun MeScreen(m: AppModel, open: (String) -> Unit = {}, report: () -> Unit = {}) 
                 Btn(t("Open report", "Fungua ripoti"), report, Modifier.padding(top = 10.dp), icon = "clip", small = true)
             }
             Stamps(m)
-            Text("RAFIKI Pin " + BuildConfig.VERSION_NAME, style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 18.dp))
+            UpdateRow(m)
         }
     }
 }

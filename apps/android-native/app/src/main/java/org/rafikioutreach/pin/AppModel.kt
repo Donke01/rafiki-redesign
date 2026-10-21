@@ -67,6 +67,23 @@ class AppModel(app: Application) : AndroidViewModel(app) {
         viewModelScope.launch { while (true) { delay(60000); if (_signedIn.value) sendWaiting() } }
     }
 
+    // --- app updates: the newest Android app on the website ----------------------------------
+    data class Update(val code: Int, val name: String, val notes: String, val at: Long)
+    private val _update = MutableStateFlow(prefs.updCode.takeIf { it > 0 }?.let { Update(it, prefs.updName, prefs.updNotes, prefs.updAt) })
+    val update: StateFlow<Update?> = _update
+    /** Is there a newer app than this one? */
+    val updateReady: Boolean get() = (_update.value?.code ?: 0) > BuildConfig.VERSION_CODE
+    /** Asks the website. Returns false when it couldn't (no signal). */
+    suspend fun checkUpdate(): Boolean {
+        val r = api.appVersion()
+        if (!r.ok || r.json.optInt("versionCode") <= 0) return false
+        val u = Update(r.json.optInt("versionCode"), r.json.optString("versionName"), r.json.optString("notes"), System.currentTimeMillis())
+        prefs.updCode = u.code; prefs.updName = u.name; prefs.updNotes = u.notes; prefs.updAt = u.at
+        _update.value = u; return true
+    }
+    /** Once a day, quietly, when the app opens. */
+    fun checkUpdateDaily() { if (System.currentTimeMillis() - prefs.updAt > 24 * 3600_000L) viewModelScope.launch { checkUpdate() } }
+
     fun showBanner(t: String?) { _banner.value = t }
 
     /** Me → "Show the welcome screens again", and where to go when the welcome ends. */

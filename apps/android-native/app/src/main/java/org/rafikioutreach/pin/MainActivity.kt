@@ -31,6 +31,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -138,6 +139,9 @@ fun Shell(m: AppModel) {
     val stack = remember { mutableStateListOf(Place("list")) }
     val here = stack.last()
     val waiting by m.waiting.collectAsState()
+    val upd by m.update.collectAsState()
+    val updReady = (upd?.code ?: 0) > BuildConfig.VERSION_CODE
+    LaunchedEffect(Unit) { m.checkUpdateDaily() }
     val busy by m.busy.collectAsState()
     // tabs visited before this one, so the phone's back button steps back through them
     val tabsBefore = remember { mutableStateListOf<String>() }
@@ -238,6 +242,7 @@ fun Shell(m: AppModel) {
                         if (k == "new") Box(Modifier.size(48.dp, 30.dp).clip(RoundedCornerShape(14.dp)).background(androidx.compose.ui.graphics.Brush.linearGradient(listOf(Color(0xFF9A78F0), Color(0xFF6E46C8)))), contentAlignment = Alignment.Center) { Icon(Ic.get(icon), null, tint = Color.White, modifier = Modifier.size(20.dp)) }
                         else Box(Modifier.size(52.dp, 30.dp).clip(RoundedCornerShape(99.dp)).background(if (on) hu.bg else Color.Transparent), contentAlignment = Alignment.Center) { Icon(Ic.get(icon), null, tint = if (on) hu.fg else C.muted, modifier = Modifier.size(24.dp)) }
                         if (k == "office" && review > 0) Text("$review", color = Color.White, fontSize = 10.sp, modifier = Modifier.align(Alignment.TopEnd).clip(RoundedCornerShape(99.dp)).background(C.warn).padding(horizontal = 5.dp))
+                        if (k == "me" && waiting == 0 && updReady) Box(Modifier.align(Alignment.TopEnd).padding(top = 2.dp, end = 10.dp).size(10.dp).clip(CircleShape).background(Color.White).padding(2.dp).clip(CircleShape).background(C.blue).testTag("update_dot"))
                         if (k == "me" && waiting > 0) Text("$waiting", color = Color.White, fontSize = 10.sp, modifier = Modifier.align(Alignment.TopEnd).clip(RoundedCornerShape(99.dp)).background(C.warn).padding(horizontal = 5.dp))
                     }
                     Text(label, style = MaterialTheme.typography.labelSmall, color = if (on) hu.fg else C.muted, modifier = Modifier.padding(top = 3.dp))

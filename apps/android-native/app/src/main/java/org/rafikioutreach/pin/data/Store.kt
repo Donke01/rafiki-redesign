@@ -21,6 +21,11 @@ class Prefs(context: Context) {
     var route: String get() = sp.getString("route", "") ?: ""; set(v) = sp.edit().putString("route", v).apply()
     var onb: Boolean get() = sp.getBoolean("onb", false); set(v) = sp.edit().putBoolean("onb", v).apply()
     var theme: String get() = sp.getString("theme", "") ?: ""; set(v) = sp.edit().putString("theme", v).apply()
+    /** The newest app on the website, as last seen: version code, name, what's new, and when it was checked (ms). */
+    var updCode: Int get() = sp.getInt("updCode", 0); set(v) = sp.edit().putInt("updCode", v).apply()
+    var updName: String get() = sp.getString("updName", "") ?: ""; set(v) = sp.edit().putString("updName", v).apply()
+    var updNotes: String get() = sp.getString("updNotes", "") ?: ""; set(v) = sp.edit().putString("updNotes", v).apply()
+    var updAt: Long get() = sp.getLong("updAt", 0L); set(v) = sp.edit().putLong("updAt", v).apply()
     /** Me & team: which half is showing, "me" or "team". */
     var mePane: String get() = sp.getString("mePane", "me") ?: "me"; set(v) = sp.edit().putString("mePane", v).apply()
     var lang: String get() = sp.getString("lang", "") ?: ""; set(v) = sp.edit().putString("lang", v).apply()

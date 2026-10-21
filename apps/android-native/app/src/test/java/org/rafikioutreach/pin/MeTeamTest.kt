@@ -109,7 +109,7 @@ class MeTeamTest {
         val m = AppModel(app); Onb.enabled = false
         m.api.transport = { _, url, _, _ ->
             when {
-                url.contains("/app/version.json") -> 200 to "{\"ok\":true,\"versionCode\":99,\"versionName\":\"9.9\"}"
+                url.contains("/app/version.json") -> 200 to "{\"ok\":true,\"versionCode\":99,\"versionName\":\"9.9\",\"notes\":\"Office map and faster sync.\"}"
                 url.contains("activity=1") -> 200 to "{\"ok\":true,\"activity\":[]}"
                 url.contains("team=1") -> 200 to "{\"ok\":true,\"team\":[]}"
                 url.contains("pin-auth/me") -> 200 to "{\"ok\":true,\"available\":false}"
@@ -121,8 +121,11 @@ class MeTeamTest {
         rule.mainClock.advanceTimeBy(2000)
         rule.onNodeWithTag("hav").performClick()
         rule.waitUntil(8000) { rule.onAllNodesWithTag("update_go").fetchSemanticsNodes().isNotEmpty() }
-        rule.onNodeWithTag("update_title").assertTextEquals("Update to RAFIKI Pin 9.9")
+        rule.onNodeWithTag("update_title").assertTextEquals("Update available · 9.9")
+        rule.onAllNodesWithTag("update_dot", useUnmergedTree = true).assertCountEquals(1) // the dot on Me
         rule.onNodeWithTag("app_update").performScrollTo(); shot("65-app-update")
+        rule.onNodeWithTag("update_row").performScrollTo(); shot("66-update-row")
+        rule.onNodeWithTag("update_status", useUnmergedTree = true).assertTextEquals("Update available · 9.9")
         org.rafikioutreach.pin.ui.Motion.on = true
     }
 
