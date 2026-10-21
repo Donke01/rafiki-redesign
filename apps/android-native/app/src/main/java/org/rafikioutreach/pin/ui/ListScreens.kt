@@ -212,7 +212,7 @@ fun ProjectsScreen(m: AppModel, open: (String) -> Unit, planRoute: () -> Unit = 
             "missing" -> p.gps == null
             "near" -> p.gps != null
             "repairs" -> snap.repairs.containsKey(p.id)
-            "due" -> p.gps != null && ageDays(snap, p) >= DUE_DAYS
+            "due" -> p.gps != null && (ageDays(snap, p) >= DUE_DAYS || testDue(snap, p))
             else -> true
         } && (ck.isBlank() || p.ck == ck) && (ty.isBlank() || tgroup(p) == ty)
     }
@@ -223,7 +223,8 @@ fun ProjectsScreen(m: AppModel, open: (String) -> Unit, planRoute: () -> Unit = 
         "near" -> if (here != null) t("Closest pinned projects to you", "Miradi iliyo karibu nawe zaidi") else t("Finding where you are…", "Inatafuta mahali ulipo…")
         "missing" -> t("${rows.size} still need a location", "${rows.size} bado hazina mahali")
         "repairs" -> t("${rows.size} reported as needing repair or not working, most urgent first", "${rows.size} zimeripotiwa kuhitaji matengenezo au kutofanya kazi, za haraka kwanza")
-        "due" -> t("${rows.size} not visited in the last 6 months, longest first", "${rows.size} hazijatembelewa miezi 6 iliyopita, za muda mrefu kwanza")
+        "due" -> testCount(snap, rows).let { n -> if (n > 0) t("${rows.size} due a visit · $n need a water test", "${rows.size} zinasubiri ziara · $n zinahitaji kipimo cha maji")
+            else t("${rows.size} not visited in the last 6 months, longest first", "${rows.size} hazijatembelewa miezi 6 iliyopita, za muda mrefu kwanza") }
         else -> t("${rows.size} projects", "Miradi ${rows.size}")
     }
     val mine = snap.assigned.mapNotNull { a -> snap.projects.firstOrNull { it.id == a.id }?.let { it to t("Visit by ${a.date}", "Tembelea kabla ya ${a.date}") + if (a.note.isNotBlank()) " · ${a.note}" else "" } } +
@@ -368,13 +369,14 @@ fun ProjectRow(m: AppModel, s: Snapshot, p: Project, here: LatLng?, onClick: () 
         Column(Modifier.weight(1f)) {
             Text(p.title, style = MaterialTheme.typography.titleSmall.copy(fontSize = 16.sp), color = C.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Text(p.sub, style = MaterialTheme.typography.bodySmall, color = C.muted, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Box(Modifier.padding(top = 5.dp)) {
+            Row(Modifier.padding(top = 5.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 when {
                     rep != null -> Tag(if (rep.state == "notworking") t("Not working", "Haifanyi kazi") else t("Needs repair", "Inahitaji matengenezo"), if (rep.state == "notworking") C.badBg else C.warnBg, if (rep.state == "notworking") C.bad else C.warn)
                     p.gps == null -> Tag(t("No location", "Hakuna mahali"), C.warnBg, C.warn)
                     here != null -> Tag(Geo.dist(Geo.metres(here, p.gps!!), m.prefs.miles), C.tint, C.deep)
                     else -> Tag(t("Pinned", "Ina mahali"), C.okBg, C.ok)
                 }
+                if (testDue(s, p)) WaterTestTag()
             }
         }
         Spacer(Modifier.width(8.dp))

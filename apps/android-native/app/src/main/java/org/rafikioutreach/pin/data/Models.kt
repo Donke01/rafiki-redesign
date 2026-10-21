@@ -99,6 +99,8 @@ data class Snapshot(
     val approveAbove: Long = Money.APPROVE_DEFAULT,
     /** People served (admins only): the Office overview. */
     val people: PeopleServed? = null,
+    /** When the water was last tested, by project id (ISO time): "Water test due" after 6 months. */
+    val tests: Map<String, String> = emptyMap(),
 ) {
     companion object {
         fun from(o: JSONObject): Snapshot {
@@ -123,6 +125,7 @@ data class Snapshot(
                 me = o.optJSONObject("me")?.let { Me.from(it) } ?: Me(),
                 approveAbove = if (o.has("approveAbove")) o.optLong("approveAbove") else Money.APPROVE_DEFAULT,
                 people = PeopleServed.from(o.optJSONObject("people")),
+                tests = o.optJSONObject("tests")?.let { j -> j.keys().asSequence().associateWith { j.optString(it) } } ?: emptyMap(),
             )
         }
     }

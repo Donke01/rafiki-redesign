@@ -365,8 +365,8 @@ fun VisitTab(m: AppModel, p: Project) {
                         (v.arrivedAt ?: fix?.ll)?.let { body.put("lat", it.lat).put("lng", it.lng) }
                         val files = v.shots.map { OutFile(it.file.path, "photo", it.label) } + listOfNotNull(v.voice?.let { OutFile(it.path, "voice", "Voice note") })
                         when (val o = m.submit(body, files)) {
-                            is Outcome.Sent -> { m.localVisit(p, v.state, v.note, v.urgency, bad); v.sent = "sent"; msg = o.note?.let { "warn" to it } }
-                            Outcome.Queued -> { m.localVisit(p, v.state, v.note, v.urgency, bad); v.sent = "queued" }
+                            is Outcome.Sent -> { m.localVisit(p, v.state, v.note, v.urgency, bad); testedNow(m, p, body); v.sent = "sent"; msg = o.note?.let { "warn" to it } }
+                            Outcome.Queued -> { m.localVisit(p, v.state, v.note, v.urgency, bad); testedNow(m, p, body); v.sent = "queued" }
                             is Outcome.Failed -> msg = "bad" to o.text
                             Outcome.Locked -> {}
                         }

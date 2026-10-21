@@ -163,6 +163,12 @@ private fun Overview(m: AppModel, s: Snapshot, open: (String) -> Unit, go: (Stri
         Stat(Modifier.weight(1f).rise(4), "clip", vm, t("visits this month", "ziara za mwezi huu"), "", hue = "near") { }
     }
     s.people?.takeIf { it.total > 0 }?.let { PeopleServedCard(it, Modifier.padding(top = 10.dp).rise(5)) }
+    // water points with no water test in 6 months: open Projects › Due a visit, where they carry the tag
+    Row(Modifier.padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        val wt = testCount(s)
+        Stat(Modifier.weight(1f).rise(5).testTag("o_tests"), "drop", wt, t("water tests due", "vipimo vya maji vinahitajika"), t("water points not tested for 6+ months", "vituo vya maji havijapimwa kwa miezi 6+"), hot = wt > 0, hue = "due") { m.prefs.filter = "due"; m.goTab = "list" }
+        Spacer(Modifier.weight(1f))
+    }
     // condition at last visit
     val st = s.visits.values.groupingBy { it.state }.eachCount()
     val seen = st.values.sum(); val unseen = (s.projects.size - seen).coerceAtLeast(0); val tot = maxOf(1, s.projects.size).toFloat()
