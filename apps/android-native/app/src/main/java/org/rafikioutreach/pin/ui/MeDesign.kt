@@ -228,13 +228,23 @@ private fun checkedText(at: Long): String {
     }
 }
 
-/** Me, near the top, only when a newer app is on the website: what's new, Update now, and the three steps. */
+/** Me, near the top, only when a newer app is on the website: what's new, then download and install right here. */
 @Composable
 fun UpdateCard(m: AppModel) {
     val u by m.update.collectAsState()
+    val st by org.rafikioutreach.pin.data.Updater.state.collectAsState()
     val up = u ?: return
     if (up.code <= org.rafikioutreach.pin.BuildConfig.VERSION_CODE) return
     val ctx = LocalContext.current
+    val scope = rememberScope()
+    val U = org.rafikioutreach.pin.data.Updater
+    fun start() { scope.launch { U.run(ctx.applicationContext, org.rafikioutreach.pin.BuildConfig.SERVER + "/app/rafiki-pin.apk", up.sha256) } }
+    // back from Android's "Install unknown apps" setting: carry on by itself
+    val owner = androidx.compose.ui.platform.LocalLifecycleOwner.current
+    DisposableEffect(owner) {
+        val o = androidx.lifecycle.LifecycleEventObserver { _, e -> if (e == androidx.lifecycle.Lifecycle.Event.ON_RESUME && U.state.value is org.rafikioutreach.pin.data.Updater.State.NeedsPermission && U.allowed(ctx)) U.install(ctx.applicationContext) }
+        owner.lifecycle.addObserver(o); onDispose { owner.lifecycle.removeObserver(o) }
+    }
     Card(Modifier.padding(top = 14.dp).testTag("app_update"), border = C.blue) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             val hu = C.hue("pin"); IconTile("upload", hu.fg, hu.bg, 40.dp); Spacer(Modifier.width(12.dp))
@@ -244,16 +254,44 @@ fun UpdateCard(m: AppModel) {
                     style = MaterialTheme.typography.bodySmall, color = C.muted)
             }
         }
-        Btn(t("Update now", "Sasisha sasa"), { openApk(ctx) }, Modifier.padding(top = 12.dp).fillMaxWidth().testTag("update_go"), icon = "upload")
-        Row(Modifier.padding(top = 10.dp).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            listOf(t("Download", "Pakua"), t("Open it", "Ifungue"), t("Install", "Sakinisha")).forEachIndexed { i, l ->
-                Row(Modifier.weight(1f).clip(RoundedCornerShape(12.dp)).background(C.tint).padding(horizontal = 8.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Box(Modifier.size(18.dp).clip(CircleShape).background(C.blue), contentAlignment = Alignment.Center) { Text("${i + 1}", color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold) }
-                    Spacer(Modifier.width(6.dp)); Text(l, style = MaterialTheme.typography.labelSmall, color = C.deep, maxLines = 1)
+        when (val s = st) {
+            is org.rafikioutreach.pin.data.Updater.State.Downloading -> {
+                val f = s.f
+                Row(Modifier.padding(top = 14.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Text(t("Downloading…", "Inapakua…"), style = MaterialTheme.typography.labelLarge, color = C.ink, modifier = Modifier.weight(1f))
+                    Text(if (s.total > 0) "${(f * 100).toInt()}% · ${"%.1f".format(s.done / 1048576.0)} of ${"%.1f".format(s.total / 1048576.0)} MB" else "${"%.1f".format(s.done / 1048576.0)} MB", style = MaterialTheme.typography.labelMedium, color = C.muted, modifier = Modifier.testTag("update_progress"))
                 }
+                Box(Modifier.padding(top = 8.dp).fillMaxWidth().height(10.dp).clip(RoundedCornerShape(99.dp)).background(C.tint)) {
+                    Box(Modifier.fillMaxWidth(f).height(10.dp).clip(RoundedCornerShape(99.dp)).background(Brush.horizontalGradient(listOf(Color(0xFF0A78C2), Color(0xFF47B4F5)))))
+                }
+                Text(t("Cancel", "Ghairi"), style = MaterialTheme.typography.labelLarge, color = C.blue, modifier = Modifier.padding(top = 8.dp).clip(RoundedCornerShape(8.dp)).clickable { U.cancel() }.padding(6.dp))
+            }
+            org.rafikioutreach.pin.data.Updater.State.NeedsPermission -> {
+                Text(t("One more step: Android asks you to allow RAFIKI Pin to install updates. Turn on “Allow from this source”, then come back. The update carries on by itself.", "Hatua moja zaidi: Android inakuomba uruhusu RAFIKI Pin kusakinisha masasisho. Washa “Allow from this source”, kisha urudi. Sasisho litaendelea lenyewe."),
+                    style = MaterialTheme.typography.bodySmall, color = C.text, modifier = Modifier.padding(top = 12.dp))
+                Btn(t("Allow updates", "Ruhusu masasisho"), { runCatching { ctx.startActivity(U.permissionIntent(ctx)) } }, Modifier.padding(top = 10.dp).fillMaxWidth().testTag("update_allow"), icon = "lock")
+            }
+            org.rafikioutreach.pin.data.Updater.State.Installing -> Row(Modifier.padding(top = 14.dp), verticalAlignment = Alignment.CenterVertically) {
+                androidx.compose.material3.CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp, color = C.blue); Spacer(Modifier.width(10.dp))
+                Text(t("Installing… tap Update when Android asks.", "Inasakinisha… gusa Update Android ikiuliza."), style = MaterialTheme.typography.labelLarge, color = C.ink)
+            }
+            is org.rafikioutreach.pin.data.Updater.State.Failed -> {
+                Text(when (s.why) {
+                    "offline", "http", "short" -> t("The download didn’t finish. Check your signal and try again.", "Upakuaji haukukamilika. Angalia mtandao kisha ujaribu tena.")
+                    "check" -> t("The download didn’t match the app on the website, so it wasn’t installed. Try again.", "Kilichopakuliwa hakilingani na programu kwenye tovuti, kwa hiyo hakikusakinishwa. Jaribu tena.")
+                    "aborted" -> t("The update was cancelled.", "Sasisho limeghairiwa.")
+                    else -> t("Android couldn’t install the update.", "Android haikuweza kusakinisha sasisho.")
+                }, style = MaterialTheme.typography.bodySmall, color = C.bad, modifier = Modifier.padding(top = 12.dp).testTag("update_error"))
+                Btn(t("Try again", "Jaribu tena"), { if (s.why == "aborted" && U.file(ctx).exists()) U.install(ctx.applicationContext) else start() }, Modifier.padding(top = 10.dp).fillMaxWidth(), icon = "refresh")
+                Text(t("Having trouble? Download the app from the website", "Una tatizo? Pakua programu kutoka kwenye tovuti"), style = MaterialTheme.typography.labelMedium, color = C.blue,
+                    modifier = Modifier.padding(top = 8.dp).clip(RoundedCornerShape(8.dp)).clickable { openApk(ctx) }.padding(vertical = 6.dp))
+            }
+            else -> {
+                Btn(t("Update now", "Sasisha sasa"), { start() }, Modifier.padding(top = 12.dp).fillMaxWidth().testTag("update_go"), icon = "upload")
+                Text(t("Downloads here in the app, then Android asks once to update. Your PIN and saved work stay.", "Inapakuliwa hapa kwenye programu, kisha Android inauliza mara moja kusasisha. PIN yako na kazi iliyohifadhiwa vinabaki."),
+                    style = MaterialTheme.typography.labelSmall, color = C.muted, modifier = Modifier.padding(top = 8.dp))
             }
         }
-        Text(t("Your PIN and saved work stay. If the phone asks, allow installs from your browser.", "PIN yako na kazi iliyohifadhiwa vinabaki. Simu ikiuliza, ruhusu kusakinisha kutoka kwa kivinjari chako."), style = MaterialTheme.typography.labelSmall, color = C.muted, modifier = Modifier.padding(top = 8.dp))
     }
 }
 
@@ -289,7 +327,7 @@ fun UpdateRow(m: AppModel) {
                 Spacer(Modifier.width(6.dp)); Text(t("Check", "Angalia"), style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = C.blue)
             }
         }
-        if (failed || ready) Text(t("Having trouble? Download the app from the website", "Una tatizo? Pakua programu kutoka kwenye tovuti"), style = MaterialTheme.typography.labelMedium, color = C.blue,
+        if (failed) Text(t("Having trouble? Download the app from the website", "Una tatizo? Pakua programu kutoka kwenye tovuti"), style = MaterialTheme.typography.labelMedium, color = C.blue,
             modifier = Modifier.padding(top = 8.dp).clip(RoundedCornerShape(8.dp)).clickable { openApk(ctx) }.padding(vertical = 6.dp).testTag("update_web"))
     }
 }

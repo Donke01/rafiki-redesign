@@ -68,8 +68,8 @@ class AppModel(app: Application) : AndroidViewModel(app) {
     }
 
     // --- app updates: the newest Android app on the website ----------------------------------
-    data class Update(val code: Int, val name: String, val notes: String, val at: Long)
-    private val _update = MutableStateFlow(prefs.updCode.takeIf { it > 0 }?.let { Update(it, prefs.updName, prefs.updNotes, prefs.updAt) })
+    data class Update(val code: Int, val name: String, val notes: String, val at: Long, val sha256: String = "")
+    private val _update = MutableStateFlow(prefs.updCode.takeIf { it > 0 }?.let { Update(it, prefs.updName, prefs.updNotes, prefs.updAt, prefs.updSha) })
     val update: StateFlow<Update?> = _update
     /** Is there a newer app than this one? */
     val updateReady: Boolean get() = (_update.value?.code ?: 0) > BuildConfig.VERSION_CODE
@@ -77,8 +77,8 @@ class AppModel(app: Application) : AndroidViewModel(app) {
     suspend fun checkUpdate(): Boolean {
         val r = api.appVersion()
         if (!r.ok || r.json.optInt("versionCode") <= 0) return false
-        val u = Update(r.json.optInt("versionCode"), r.json.optString("versionName"), r.json.optString("notes"), System.currentTimeMillis())
-        prefs.updCode = u.code; prefs.updName = u.name; prefs.updNotes = u.notes; prefs.updAt = u.at
+        val u = Update(r.json.optInt("versionCode"), r.json.optString("versionName"), r.json.optString("notes"), System.currentTimeMillis(), r.json.optString("sha256"))
+        prefs.updCode = u.code; prefs.updName = u.name; prefs.updNotes = u.notes; prefs.updAt = u.at; prefs.updSha = u.sha256
         _update.value = u; return true
     }
     /** Once a day, quietly, when the app opens. */
