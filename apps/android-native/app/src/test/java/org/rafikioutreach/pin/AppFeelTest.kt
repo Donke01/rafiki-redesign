@@ -141,7 +141,7 @@ class AppFeelTest {
         org.rafikioutreach.pin.ui.Motion.on = true
     }
 
-    @Test fun phone_back_steps_through_tabs_before_closing() {
+    @Test fun phone_back_steps_through_tabs_and_never_quits() {
         org.rafikioutreach.pin.ui.Motion.on = false; Onb.enabled = false
         val m = model(signedIn = true, onbDone = true); show(m)
         fun back() { rule.runOnUiThread { rule.activity.onBackPressedDispatcher.onBackPressed() }; rule.waitForIdle() }
@@ -152,7 +152,8 @@ class AppFeelTest {
         rule.onNodeWithText("projects pinned", substring = true).assertExists()
         back()   // Map -> Projects
         rule.onNodeWithTag("projects").assertExists()
-        assertTrue("back on Projects closes the app", !rule.activity.onBackPressedDispatcher.hasEnabledCallbacks())
+        back(); back()   // on Projects, back never quits the app (it only goes to the background)
+        assertTrue("back on Projects must not close the app", !rule.activity.isFinishing)
         Onb.enabled = true; org.rafikioutreach.pin.ui.Motion.on = true
     }
 

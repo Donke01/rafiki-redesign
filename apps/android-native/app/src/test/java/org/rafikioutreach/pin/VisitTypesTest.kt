@@ -124,6 +124,27 @@ class VisitTypesTest {
         assertTrue(p, p.contains("\"kind\":\"build\"") && p.contains("\"stage\":\"roof\"") && p.contains("\"workers\":9"))
     }
 
+    @Test fun back_never_quits_and_bell_top_right() {
+        Lang.sw = false
+        val m = model(); rule.setContent { RafikiTheme(dark = false) { Box(Modifier.size(390.dp, 844.dp)) { App(m) } } }
+        rule.waitForIdle()
+        rule.onNodeWithTag("bell").assertExists()
+        // from another tab, back goes to Projects; on Projects, back twice only sends the app to the background
+        rule.onNodeWithTag("hav").performClick(); rule.waitForIdle()
+        rule.runOnUiThread { rule.activity.onBackPressedDispatcher.onBackPressed() }; rule.waitForIdle()
+        rule.onNodeWithTag("projects").assertExists()
+        rule.runOnUiThread { rule.activity.onBackPressedDispatcher.onBackPressed() }; rule.waitForIdle()
+        org.junit.Assert.assertFalse(rule.activity.isFinishing)
+        rule.runOnUiThread { rule.activity.onBackPressedDispatcher.onBackPressed() }; rule.waitForIdle()
+        org.junit.Assert.assertFalse(rule.activity.isFinishing)
+        // the bell opens Notifications, and back closes it again
+        rule.onNodeWithTag("bell").performClick(); rule.waitForIdle()
+        rule.onNodeWithTag("hback").assertExists()
+        rule.runOnUiThread { rule.activity.onBackPressedDispatcher.onBackPressed() }; rule.waitForIdle()
+        rule.onNodeWithTag("projects").assertExists()
+        shot("79-header-bell")
+    }
+
     @Test fun childrens_home_and_water_unchanged() {
         Lang.sw = false
         val m = model(); rule.setContent { RafikiTheme(dark = false) { Box(Modifier.size(390.dp, 844.dp)) { App(m) } } }

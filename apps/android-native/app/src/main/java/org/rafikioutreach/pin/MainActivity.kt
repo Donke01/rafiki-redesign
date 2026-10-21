@@ -156,14 +156,21 @@ fun Shell(m: AppModel) {
         if (from != t) { tabsBefore.remove(t); tabsBefore.add(from) }
         stack.clear(); stack.add(Place(t))
     }
-    // back: leave the open screen, then the previous tab, then Projects; only closes the app from Projects
-    BackHandler(stack.size > 1 || tabsBefore.isNotEmpty() || here.tab != "list") {
+    // back: leave the open screen, then the previous tab, then Projects. On Projects it never quits:
+    // the first press says "Press back again to leave", the second puts the app in the background (still running).
+    val act = androidx.compose.ui.platform.LocalContext.current as? android.app.Activity
+    var backAt by remember { androidx.compose.runtime.mutableLongStateOf(0L) }
+    BackHandler(true) {
         when {
             stack.size > 1 -> stack.removeAt(stack.lastIndex)
             tabsBefore.isNotEmpty() -> { val t = tabsBefore.removeAt(tabsBefore.lastIndex); stack.clear(); stack.add(Place(t)) }
-            else -> { stack.clear(); stack.add(Place("list")) }
+            here.tab != "list" -> { stack.clear(); stack.add(Place("list")) }
+            System.currentTimeMillis() - backAt < 2000 -> { backAt = 0L; act?.moveTaskToBack(true) }
+            else -> { backAt = System.currentTimeMillis(); act?.let { android.widget.Toast.makeText(it, t("Press back again to leave", "Bonyeza rudi tena kuondoka"), android.widget.Toast.LENGTH_SHORT).show() } }
         }
     }
+    // notifications: the bell (top right) needs what the team did, so keep it fresh
+    LaunchedEffect(Unit) { while (true) { runCatching { m.loadActivity() }; kotlinx.coroutines.delay(5 * 60_000L) } }
     val goTab = m.goTab
     LaunchedEffect(goTab) { if (goTab != null) { tab(goTab); m.goTab = null } }
     val goProject = m.goProject
@@ -192,7 +199,8 @@ fun Shell(m: AppModel) {
                     else Text(title, style = MaterialTheme.typography.titleMedium, color = C.ink, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis, modifier = Modifier.testTag("bar_title"))
                 }
             }
-            RoundBtn("refresh", t("Refresh", "Onyesha upya"), "hrefresh", turn = busy) { m.refresh() }
+            // notifications, top right (pull a screen down to refresh it)
+            org.rafikioutreach.pin.ui.Bell(m) { go(Place(here.tab, sub = "notes")) }
         }
         // pull down to refresh (on screens that scroll)
         var pulling by remember { androidx.compose.runtime.mutableStateOf(false) }

@@ -117,10 +117,9 @@ fun MeScreen(m: AppModel, open: (String) -> Unit = {}, report: () -> Unit = {}, 
     LaunchedEffect(Unit) { launch { m.loadActivity() }; launch { m.loadTeam() } }
     LaunchedEffect(m.focusUpdate) { if (m.focusUpdate && pane != "me") { pane = "me"; m.prefs.mePane = "me" } }
     Column(Modifier.fillMaxSize().verticalScroll(scroll).padding(16.dp)) {
-        // the title in the middle, the bell on the right, Me | Team under it
+        // the title in the middle, Me | Team under it (the bell is in the app header, top right)
         Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-            Text(t("Me & team", "Mimi na timu"), style = MaterialTheme.typography.headlineLarge, color = C.ink, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.padding(horizontal = 52.dp))
-            Box(Modifier.align(Alignment.CenterEnd)) { Bell(m, notes) }
+            Text(t("Me & team", "Mimi na timu"), style = MaterialTheme.typography.headlineLarge, color = C.ink, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
         }
         Box(Modifier.fillMaxWidth().padding(top = 10.dp), contentAlignment = Alignment.Center) {
             SmallSeg(listOf("me" to t("Me", "Mimi"), "team" to t("Team", "Timu")), pane, tag = "pane_") { pane = it; m.prefs.mePane = it; scope.launch { scroll.scrollTo(0) } }
