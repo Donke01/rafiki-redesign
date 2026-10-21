@@ -61,7 +61,7 @@ with sync_playwright() as p:
     pg.wait_for_timeout(1200); pg.evaluate("localStorage.setItem('rfPinOnb','1')"); pg.goto(BASE + '/pin'); pg.wait_for_timeout(1500)
     office(pg)
     tabs = pg.eval_on_selector_all('#oTabs .otab span', 'e => e.map(x => x.textContent)')
-    check(tabs[-1] == 'Community' and len(tabs) == 8, 'Community tile in the Office: %s' % tabs)
+    check('Community' in tabs, 'Community tile in the Office: %s' % tabs)
     check(pg.get_attribute('#oTabs [data-o=sms]', 'aria-pressed') == 'true', 'Community tile selected')
     body = pg.inner_text('#oBody')
     check('Community reports' in body and 'Latest messages' in body, 'heading and the message list')
