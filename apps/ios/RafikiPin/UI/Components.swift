@@ -10,6 +10,7 @@ enum Ic {
         "alert": "exclamationmark.triangle", "back": "arrow.left", "arrow": "play.fill", "lock": "lock", "refresh": "arrow.clockwise", "target": "scope",
         "layers": "square.3.layers.3d", "del": "delete.left", "clock": "clock", "upload": "square.and.arrow.up", "inbox": "tray", "spark": "sparkle",
         "chev": "chevron.right", "finger": "touchid", "face": "faceid", "phone": "phone", "chat": "message", "down": "chevron.down", "share": "square.and.arrow.up", "satellite": "globe.europe.africa",
+        "sun": "sun.max", "globe": "globe", "nav": "location", "file": "doc.text", "link": "link", "flame": "flame", "text": "textformat.size",
     ]
     static func name(_ k: String) -> String { map[k] ?? "drop" }
 }

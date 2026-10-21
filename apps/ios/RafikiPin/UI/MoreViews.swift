@@ -82,56 +82,37 @@ struct NewSiteView: View {
 
 struct MeView: View {
     @EnvironmentObject var m: AppModel
-    @Environment(\.colorScheme) var scheme
-    @State private var miles = false
+    @State private var pane = "me"
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 0) {
-                Text(t("Me & team", "Mimi na timu")).font(.hLarge).foregroundColor(C.ink)
-                CardV(deep: true) {
-                    HStack(spacing: 12) {
-                        Text(m.prefs.name.split(separator: " ").compactMap { $0.first.map { String($0).uppercased() } }.prefix(2).joined())
-                            .font(.tMedium).foregroundColor(.white).frame(width: 48, height: 48).background(Color.white.opacity(0.15)).clipShape(Circle())
-                        Text(t("You", "Wewe")).font(.tLarge).foregroundColor(.white)
+        ScrollViewReader { sv in
+            ScrollView {
+                VStack(alignment: .leading, spacing: 0) {
+                    HStack {
+                        Text(t("Me & team", "Mimi na timu")).font(.hLarge).foregroundColor(C.ink).id("top")
+                        Spacer(minLength: 8)
+                        SmallSeg(items: [("me", t("Me", "Mimi")), ("team", t("Team", "Timu"))], sel: pane) { p in pane = p; m.prefs.mePane = p; sv.scrollTo("top", anchor: .top) }
                     }
-                    MeRow(k: t("Name", "Jina"), v: m.prefs.name)
-                    MeRow(k: t("Role", "Nafasi"), v: m.snap?.admin == true ? t("Admin", "Msimamizi") : t("Field team", "Timu ya uwanjani"))
-                    MeRow(k: t("Waiting to send", "Inasubiri kutumwa"), v: m.waiting == 0 ? t("Nothing", "Hakuna") : "\(m.waiting)")
-                    Btn(t("Lock the app", "Funga programu"), icon: "lock", light: true, small: true) { m.lockOrSignOut() }.padding(.top, 14)
-                }.padding(.top, 12)
-                WaitingList(snap: m.snap)
-                if let snap = m.snap { MyWork(snap: snap) }
-                MyMonth(act: m.activity)
-                TeamToday(mates: m.team, act: m.activity, snap: m.snap)
-                TeamMonth(act: m.activity)
-                TeamFeed(act: m.activity, snap: m.snap)
-                if let snap = m.snap { ConnectMonday(snap: snap) }
-                BioCard()
-                CardV {
-                    H2(t("Colours", "Rangi"))
-                    let cur = Look.mode.isEmpty ? (scheme == .dark ? "dark" : "light") : Look.mode
-                    HStack(spacing: 6) {
-                        ForEach([("light", t("Light", "Mwanga")), ("dark", t("Dark", "Giza")), ("sun", t("Bright sun", "Jua kali"))], id: \.0) { k, l in
-                            Pill(l, on: cur == k) { m.setTheme(k) }.accessibilityIdentifier("theme_\(k)")
-                        }
-                    }.padding(.top, 6)
-                    H2(t("Language", "Lugha")).padding(.top, 18)
-                    LangSwitch().padding(.top, 6)
-                    H2(t("Distances", "Umbali")).padding(.top, 18)
-                    HStack(spacing: 6) {
-                        Pill(t("Kilometres", "Kilomita"), on: !miles) { miles = false; m.prefs.miles = false }
-                        Pill(t("Miles", "Maili"), on: miles) { miles = true; m.prefs.miles = true }
+                    if pane == "team" {
+                        TeamToday(mates: m.team, act: m.activity, snap: m.snap)
+                        TeamMonth(act: m.activity)
+                        TeamFeed(act: m.activity, snap: m.snap)
+                    } else {
+                        MeHero(act: m.activity)
+                        WaitingList(snap: m.snap)
+                        if let snap = m.snap { MyWork(snap: snap) }
+                        MyMonth(act: m.activity)
+                        ThisPhone(snap: m.snap)
+                        CardV {
+                            H2(t("Monthly report", "Ripoti ya mwezi"))
+                            Text(t("Visits, repairs and how projects are doing for one month, ready to share as a PDF.", "Ziara, matengenezo na hali ya miradi kwa mwezi mmoja, tayari kushiriki kama PDF.")).font(.bMedium).foregroundColor(C.muted)
+                            Btn(t("Open report", "Fungua ripoti"), icon: "clip", small: true) { m.go(Place(tab: "me", sub: "report")) }.padding(.top, 10)
+                        }.padding(.top, 14)
+                        Text("RAFIKI Pin " + ((Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String) ?? "")).font(.bSmall).foregroundColor(C.muted).padding(.top, 18)
                     }
-                }.padding(.top, 14)
-                CardV {
-                    H2(t("Monthly report", "Ripoti ya mwezi"))
-                    Text(t("Visits, repairs and how projects are doing for one month, ready to share as a PDF.", "Ziara, matengenezo na hali ya miradi kwa mwezi mmoja, tayari kushiriki kama PDF.")).font(.bMedium).foregroundColor(C.muted)
-                    Btn(t("Open report", "Fungua ripoti"), icon: "clip", small: true) { m.go(Place(tab: "me", sub: "report")) }.padding(.top, 10)
-                }.padding(.top, 14)
-                Text("RAFIKI Pin " + ((Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String) ?? "")).font(.bSmall).foregroundColor(C.muted).padding(.top, 18)
-            }.padding(16)
+                }.padding(16)
+            }
         }
-        .onAppear { miles = m.prefs.miles }
+        .onAppear { pane = m.prefs.mePane }
         .task { await m.loadActivity(); await m.loadTeam() }
         .refreshable { await m.refreshNow(); await m.loadActivity(); await m.loadTeam() }
     }

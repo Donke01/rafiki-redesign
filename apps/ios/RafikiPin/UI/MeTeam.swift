@@ -39,7 +39,7 @@ struct MyMonth: View {
     let act: [JSON]?
     var body: some View {
         CardV {
-            H2(t("My month", "Mwezi wangu"))
+            HStack { H2(t("My month", "Mwezi wangu")); Spacer(); Text(Date().formatted(.dateTime.month(.wide).locale(Locale(identifier: Lang.sw ? "sw" : "en_GB")))).font(.lMedium).foregroundColor(C.muted) }
             if let act {
                 let mine = act.filter { same($0.str("by"), m.prefs.name) && WORK.contains($0.str("a")) }
                 let cal = Calendar.current, today = cal.startOfDay(for: Date())
@@ -71,18 +71,6 @@ struct MyMonth: View {
                     }
                 }.frame(height: 64)
                 HStack { Text(t("6 wk ago", "Wiki 6")).font(.lSmall).foregroundColor(C.muted); Spacer(); Text(t("This week", "Wiki hii")).font(.lSmall).foregroundColor(C.muted) }.padding(.top, 4)
-                let days = Set(mine.compactMap { dayOf($0.str("at")) })
-                let streak: Int = {
-                    var d = days.contains(today) ? today : cal.date(byAdding: .day, value: -1, to: today)!; var n = 0
-                    while days.contains(d) { n += 1; d = cal.date(byAdding: .day, value: -1, to: d)! }
-                    return n
-                }()
-                HStack(spacing: 10) {
-                    Text("🔥").font(.system(size: 18))
-                    Text(streak == 0 ? t("Pin or visit today to start a streak.", "Weka mahali au tembelea leo kuanza mfululizo.") : streak == 1 ? t("1 day in a row", "Siku 1 mfululizo") : t("\(streak) days in a row", "Siku \(streak) mfululizo"))
-                        .font(.tSmall).foregroundColor(C.hue("me").fg)
-                    Spacer()
-                }.padding(.horizontal, 14).padding(.vertical, 10).background(C.hue("me").bg).clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous)).padding(.top, 12)
             } else { Text(t("Loading…", "Inapakia…")).font(.bMedium).foregroundColor(C.muted) }
         }.padding(.top, 14)
     }
@@ -115,7 +103,7 @@ struct MyWork: View {
         let jobs = snap.jobs.compactMap { id in snap.projects.first { $0.id == id }.map { ($0, snap.repairs[id]) } }
         if !visits.isEmpty || !jobs.isEmpty {
             CardV {
-                H2(t("My work", "Kazi yangu"))
+                HStack { H2(t("My work", "Kazi yangu")); Spacer(); Tag("\(visits.count + jobs.count)", bg: C.tint, fg: C.deep) }
                 ForEach(visits, id: \.aid) { a in
                     let late = a.date < today, now = a.date == today
                     WorkRow(icon: "cal", hue: "due", title: a.title.isEmpty ? (snap.projects.first { $0.id == a.id }?.title ?? a.id) : a.title,
@@ -163,9 +151,14 @@ struct WaitingList: View {
     var body: some View {
         if m.waiting > 0 {
             let items = m.outbox.all()
-            CardV(border: C.warnBg) {
-                Text(m.waiting == 1 ? t("1 change waiting to send", "Badiliko 1 linasubiri kutumwa") : t("\(m.waiting) changes waiting to send", "Mabadiliko \(m.waiting) yanasubiri kutumwa")).font(.tMedium).foregroundColor(C.warn)
-                Text(t("They are safe on this phone and go as soon as there is signal.", "Yako salama kwenye simu hii na yatatumwa mara mtandao ukipatikana.")).font(.bSmall).foregroundColor(C.muted)
+            CardV(fill: C.dark ? C.card : Color(hex: 0xFFFBF4), border: Color(hex: 0xF2C98A)) {
+                HStack(spacing: 12) {
+                    IconTile(icon: "upload", tint: C.hue("repairs").fg, bg: C.hue("repairs").bg, size: 40)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(m.waiting == 1 ? t("1 change waiting to send", "Badiliko 1 linasubiri kutumwa") : t("\(m.waiting) changes waiting to send", "Mabadiliko \(m.waiting) yanasubiri kutumwa")).font(.tMedium).foregroundColor(C.warn)
+                        Text(t("Safe on this phone. They go as soon as there’s signal.", "Yako salama kwenye simu hii. Yatatumwa mara mtandao ukipatikana.")).font(.bSmall).foregroundColor(C.muted)
+                    }
+                }
                 ForEach(items, id: \.k) { it in
                     let b = it.body, id = b.str("id")
                     let title = snap?.projects.first { $0.id == id }?.title ?? (b.str("name").isEmpty ? (b.str("title").isEmpty ? id : b.str("title")) : b.str("name"))
@@ -181,14 +174,14 @@ struct WaitingList: View {
                     }()
                     let files = it.files.count - it.done
                     HStack(spacing: 10) {
-                        IconTile(icon: w.0, tint: C.warn, bg: C.warnBg, size: 36)
+                        Icon(w.0, size: 18, color: C.warn)
                         VStack(alignment: .leading, spacing: 2) {
                             Text(title).font(.tSmall).foregroundColor(C.ink).lineLimit(1)
                             Text(w.1 + (files > 0 ? " · " + (files == 1 ? t("1 photo or voice note", "picha au sauti 1") : t("\(files) photos or voice notes", "picha au sauti \(files)")) : "")
                                  + (b.str("savedAt").isEmpty ? "" : " · " + t("saved ", "imehifadhiwa ") + ago(b.str("savedAt")))).font(.bSmall).foregroundColor(C.muted)
                         }
                         Spacer(minLength: 0)
-                    }.padding(.top, 10)
+                    }.padding(.horizontal, 12).padding(.vertical, 10).background(C.warnBg).clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous)).padding(.top, 8)
                 }
                 Btn(busy ? t("Sending…", "Inatuma…") : t("Send now", "Tuma sasa"), icon: "upload", enabled: !busy, wide: true) {
                     busy = true; Task { await m.refreshNow(); busy = false }
@@ -203,18 +196,19 @@ struct WaitingList: View {
 struct TeamToday: View {
     @EnvironmentObject var m: AppModel
     let mates: [Mate]?; let act: [JSON]?; let snap: Snapshot?
+    private var rows: [(Mate, JSON?, String)] {
+        (mates ?? []).filter { !same($0.name, m.prefs.name) }.map { p in
+            let last = (act ?? []).filter { same($0.str("by"), p.name) && WORK.contains($0.str("a")) }.max { $0.str("at") < $1.str("at") }
+            return (p, last, max(last?.str("at") ?? "", p.lastSeen ?? ""))
+        }.sorted { $0.2 > $1.2 }
+    }
+    private var active: Int { let today = Calendar.current.startOfDay(for: Date()); return rows.filter { dayOf($0.2) == today }.count }
     var body: some View {
         CardV {
-            H2(t("Team today", "Timu leo"))
+            HStack { H2(t("Team today", "Timu leo")); Spacer(); if active > 0 { Tag(t("\(active) active", "\(active) kazini"), bg: C.okBg, fg: C.ok) } }
             if let mates {
-                let today = Calendar.current.startOfDay(for: Date())
-                let rows: [(Mate, JSON?, String)] = mates.filter { !same($0.name, m.prefs.name) }.map { p in
-                    let last = (act ?? []).filter { same($0.str("by"), p.name) && WORK.contains($0.str("a")) }.max { $0.str("at") < $1.str("at") }
-                    let at = max(last?.str("at") ?? "", p.lastSeen ?? "")
-                    return (p, last, at)
-                }.sorted { $0.2 > $1.2 }
-                let active = rows.filter { dayOf($0.2) == today }.count
-                Text(active == 0 ? t("Nobody else has used the app today yet.", "Hakuna mwingine aliyetumia programu leo bado.") : active == 1 ? t("1 person active today", "Mtu 1 yuko kazini leo") : t("\(active) people active today", "Watu \(active) wako kazini leo"))
+                let today = Calendar.current.startOfDay(for: Date()); let _ = mates
+                Text(active == 0 ? t("Nobody else has used the app today yet.", "Hakuna mwingine aliyetumia programu leo bado.") : rows.contains(where: { !$0.0.phone.isEmpty }) ? t("Tap someone to call or WhatsApp them. Tap what they did to open the project.", "Gusa mtu kumpigia au kumtumia WhatsApp. Gusa alichofanya kufungua mradi.") : active == 1 ? t("1 person active today", "Mtu 1 yuko kazini leo") : t("\(active) people active today", "Watu \(active) wako kazini leo"))
                     .font(.bSmall).foregroundColor(C.muted)
                 ForEach(Array(rows.enumerated()), id: \.element.0.name) { i, r in
                     let (p, e, at) = r
@@ -261,10 +255,7 @@ struct TeamMonth: View {
     var body: some View {
         CardV {
             H2(t("Team totals", "Jumla ya timu"))
-            HStack(spacing: 6) {
-                Pill(t("This week", "Wiki hii"), on: !month) { month = false }
-                Pill(t("This month", "Mwezi huu"), on: month) { month = true }
-            }.padding(.top, 4)
+            SmallSeg(items: [("w", t("This week", "Wiki hii")), ("m", t("This month", "Mwezi huu"))], sel: month ? "m" : "w", fill: true) { month = $0 == "m" }.padding(.top, 4)
             if let act {
                 let cal = Calendar.current, today = cal.startOfDay(for: Date())
                 let from = month ? cal.date(from: cal.dateComponents([.year, .month], from: today))! : cal.date(byAdding: .day, value: -((cal.component(.weekday, from: today) + 5) % 7), to: today)!
@@ -337,6 +328,7 @@ struct ConnectMonday: View {
     @EnvironmentObject var m: AppModel
     @Environment(\.scenePhase) private var phase
     let snap: Snapshot
+    var inline = false
     @State private var waiting = false
     @State private var busy = false
     @State private var msg: String?
@@ -344,8 +336,8 @@ struct ConnectMonday: View {
     @State private var typed = ""
     var body: some View {
         if m.prefs.session.isEmpty {
-            CardV {
-                HStack(alignment: .top, spacing: 12) {
+            Wrap(inline: inline) {
+                if !inline { HStack(alignment: .top, spacing: 12) {
                     IconTile(icon: "people", tint: C.hue("new").fg, bg: C.hue("new").bg, size: 40)
                     VStack(alignment: .leading, spacing: 4) {
                         Text(t("Your name on monday.com", "Jina lako kwenye monday.com")).font(.tLarge).foregroundColor(C.ink)
@@ -353,7 +345,7 @@ struct ConnectMonday: View {
                         else if snap.who.isEmpty { Text(t("Your changes go in under the shared account. To use your own name, ask the office for your own PIN.", "Mabadiliko yako yanaingia kwa akaunti ya pamoja. Kutumia jina lako, omba ofisi PIN yako mwenyewe.")).font(.bSmall).foregroundColor(C.muted) }
                         else { Text(t("Takes 20 seconds, once. Your changes then show on monday.com under your own name.", "Inachukua sekunde 20, mara moja. Mabadiliko yako yataonekana monday.com kwa jina lako.")).font(.bSmall).foregroundColor(C.muted) }
                     }
-                }
+                } }
                 if !snap.linked.isEmpty {
                     Text(t("Everything you save goes to monday.com under your own name.", "Kila unachohifadhi kinaenda monday.com kwa jina lako.")).font(.bSmall).foregroundColor(C.muted).padding(.top, 8)
                     Button(t("Disconnect", "Tenganisha")) { Task { await m.unlinkMonday() } }.font(.lMedium).foregroundColor(C.blue).padding(.top, 8)
@@ -371,7 +363,7 @@ struct ConnectMonday: View {
                         .font(.lSmall).foregroundColor(C.muted).padding(.top, 10)
                 }
             }
-            .padding(.top, 14)
+            .padding(.top, inline ? 0 : 14)
             .onChange(of: phase) { p in if p == .active, waiting, !busy, looksToken(UIPasteboard.general.string) { send(UIPasteboard.general.string!) } }
         }
     }
@@ -382,5 +374,14 @@ struct ConnectMonday: View {
             let err = await m.linkMonday(tok); busy = false; msg = err
             if err == nil { waiting = false; UIPasteboard.general.string = ""; Haptic.ok() }
         }
+    }
+}
+
+/// A card, or just the content when it sits inside another card.
+private struct Wrap<Content: View>: View {
+    let inline: Bool
+    @ViewBuilder var content: () -> Content
+    var body: some View {
+        if inline { VStack(alignment: .leading, spacing: 0) { content() }.frame(maxWidth: .infinity, alignment: .leading) } else { CardV { content() } }
     }
 }

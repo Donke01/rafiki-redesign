@@ -57,6 +57,8 @@ final class Prefs {
         return (try? JSONSerialization.jsonObject(with: data)) as? JSON
     }
     var bio: Bool { get { d.bool(forKey: "bio") } set { d.set(newValue, forKey: "bio") } }
+    /// Me & team: which half is showing, "me" or "team".
+    var mePane: String { get { d.string(forKey: "mePane") ?? "me" } set { d.set(newValue, forKey: "mePane") } }
     func forget() { pin = ""; session = ""; bio = false }
 }
 

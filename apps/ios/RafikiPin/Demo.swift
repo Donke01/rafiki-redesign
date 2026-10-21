@@ -32,6 +32,7 @@ enum Demo {
         if arg("-bio") == "1" { p.bio = true; Bio.demoOk = false } else { p.bio = false }
         if let l = arg("-lang") { p.lang = l }
         if let th = arg("-theme") { p.theme = th == "auto" ? "" : th }
+        p.mePane = arg("-pane") ?? "me"
         api.transport = { method, url, _, body in
             try? await Task.sleep(nanoseconds: 150_000_000)
             let b = body.flatMap { String(data: $0, encoding: .utf8) } ?? ""
