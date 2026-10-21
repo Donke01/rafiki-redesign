@@ -1,7 +1,7 @@
 # Office › Team: a compact list grouped by role (crown on admins), a person sheet that springs up, add a person.
 import json, os, re, sys, datetime
 from playwright.sync_api import sync_playwright
-HERE = os.path.dirname(os.path.abspath(__file__)); BASE = os.environ.get('BASE', 'http://localhost:8799'); OUT = os.path.join(HERE, 'team'); os.makedirs(OUT, exist_ok=True)
+HERE = os.path.dirname(os.path.abspath(__file__)); BASE = os.environ.get('BASE', 'http://localhost:8825'); OUT = os.path.join(HERE, 'team'); os.makedirs(OUT, exist_ok=True)
 now = datetime.datetime.now(datetime.timezone.utc)
 iso = lambda h: (now - datetime.timedelta(hours=h)).strftime('%Y-%m-%dT%H:%M:%SZ')
 P = [{'id': '104', 'title': 'Kapsaret Borehole', 'country': 'Kenya', 'ck': 'ke', 'area': 'Eldoret', 'type': 'Borehole well', 'status': 'Completed', 'gps': [0.47, 35.25]}]
@@ -15,7 +15,7 @@ def team():
 problems = []
 def check(c, w): print(('ok   ' if c else 'FAIL ') + w); (None if c else problems.append(w))
 
-def run(theme, width, full):
+def run(theme, width, full, sw=False):
     posts = []
     def api(route, req):
         if req.method == 'GET':
@@ -31,11 +31,11 @@ def run(theme, width, full):
         if b['action'] == 'team-pin': return route.fulfill(json={'ok': True, 'pin': '5307'})
         if b['action'] == 'team-add': return route.fulfill(json={'ok': True, 'pin': '4821'})
         route.fulfill(json={'ok': True})
-    tag = '%s-%d' % (theme, width)
+    tag = '%s-%d' % (theme, width) + ('-sw' if sw else '')
     with sync_playwright() as p:
         br = p.chromium.launch(); mobile = width < 700
         ctx = br.new_context(viewport={'width': width, 'height': 844 if mobile else 860}, device_scale_factor=2, is_mobile=mobile, has_touch=mobile, service_workers='block')
-        ctx.add_init_script("localStorage.setItem('rfPinTheme','%s');localStorage.setItem('rfPinOnb','1');localStorage.setItem('rfPinOTab','team')" % ('' if theme == 'light' else theme))
+        ctx.add_init_script("localStorage.setItem('rfPinTheme','%s');localStorage.setItem('rfPinOnb','1');localStorage.setItem('rfPinOTab','team');localStorage.setItem('rfPinLang','%s')" % ('' if theme == 'light' else theme, 'sw' if sw else ''))
         pg = ctx.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)))
         pg.route('**/api/pin-auth/me', lambda r, q: r.fulfill(json={'available': False})); pg.route(re.compile(r'/api/pin(\?.*)?$'), api)
         pg.route('**/api/admin**', admin); pg.route('**/arcgisonline.com/**', lambda r, q: r.abort())
@@ -52,8 +52,11 @@ def run(theme, width, full):
         check(pg.locator('.tm-list[data-sec=adm] .tm-row .tm-av .cr svg').count() == 2 and pg.locator('.tm-list[data-sec=fld] .tm-av .cr').count() == 0, tag + ': crown (vector) only on admins')
         check(pg.locator('.tm-sec.adm svg path[fill=currentColor]').count() == 1, tag + ': crown in the Admins header')
         rt = pg.inner_text('.tm-row[data-who="Reid Anderson"]')
-        check('PIN in Cloudflare' in rt and 'Admin' in rt, tag + ': tags on a row: ' + rt.replace('\n', ' | '))
-        check('KE' in pg.inner_text('.tm-row[data-who="Meril Kiprop"]') and 'Last active' in pg.inner_text('.tm-row[data-who="Meril Kiprop"]'), tag + ': country code and last active')
+        check(('PIN iko Cloudflare' if sw else 'PIN in Cloudflare') in rt and ('Msimamizi' if sw else 'Admin') in rt, tag + ': tags on a row: ' + rt.replace('\n', ' | '))
+        check('KE' in pg.inner_text('.tm-row[data-who="Meril Kiprop"]') and ('Alitumia mwisho' if sw else 'Last active') in pg.inner_text('.tm-row[data-who="Meril Kiprop"]'), tag + ': country code and last active')
+        if sw: check(pg.text_content('.tm-sec.adm') .startswith('Wasimamizi') and 'Ongeza mtu' in pg.inner_text('#tmAdd') and 'Taarifa kwa barua pepe' in pg.inner_text('.tm-mail'), tag + ': list in Kiswahili')
+        small = pg.eval_on_selector_all('.tm-row, #tmAdd, #tTest', 'e => e.filter(x => x.getBoundingClientRect().height < 44).map(x => x.id || x.className)')
+        check(not small, tag + ': list touch targets 44px+ %s' % small)
         hmax = max(pg.eval_on_selector_all('.tm-row', 'e => e.map(x => x.getBoundingClientRect().height)'))
         check(hmax < 120, tag + ': rows are small cards (%dpx tall)' % hmax)
         check(pg.evaluate('document.documentElement.scrollWidth <= innerWidth'), tag + ': no sideways scroll')
@@ -64,6 +67,9 @@ def run(theme, width, full):
         box = pg.locator('.tsh-p').bounding_box()
         if mobile: check(abs(box['y'] + box['height'] - 844) < 2, tag + ': bottom sheet sits on the bottom edge')
         else: check(abs((box['x'] + box['width'] / 2) - width / 2) < 2 and box['y'] > 20, tag + ': centred card on a wide screen')
+        small = pg.eval_on_selector_all('.tsh button, .tsh select, .tsh input', 'e => e.filter(x => { const r = x.getBoundingClientRect(); return r.height < 44 || r.width < 44; }).map(x => x.className || x.tagName)')
+        check(not small, tag + ': sheet touch targets 44px+ %s' % small)
+        if sw: check(all(w in pg.inner_text('.tsh') for w in ['Nchi ya nyumbani', 'Hifadhi', 'PIN mpya', 'Ondoa', 'Msimamizi']) and pg.get_attribute('.tsh-x', 'aria-label') == 'Funga', tag + ': sheet in Kiswahili')
         pg.screenshot(path=os.path.join(OUT, tag + '-2-person.png'))
         if full:
             pg.fill('.tsh [data-f=phone]', '+256 777 888 999'); pg.select_option('.tsh [data-f=home]', 'ke')
@@ -119,7 +125,7 @@ def run(theme, width, full):
             check(pg.evaluate("getComputedStyle(document.querySelector('.tsh-p')).transitionDuration") in ('0s',), tag + ': reduced motion: no slide')
         check(not errs, tag + ': no page errors %s' % errs[:2]); br.close()
 
-for theme, width, full in [('light', 390, True), ('dark', 390, False), ('light', 1280, True), ('dark', 1280, False), ('sun', 390, False)]:
-    run(theme, width, full)
+for theme, width, full, *sw in [('light', 390, True), ('dark', 390, False), ('light', 1280, True), ('dark', 1280, False), ('sun', 390, False), ('light', 390, False, True)]:
+    run(theme, width, full, *sw)
 print('PROBLEMS', problems)
 sys.exit(1 if problems else 0)

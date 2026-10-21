@@ -5229,41 +5229,40 @@ label.dnr-p small{display:block;color:var(--muted);font-size:.76rem;font-weight:
   // team: people, roles, PINs. A short list grouped by role (admins wear a crown); tap a person for a sheet with their details and actions.
   Object.assign(OIC, {
     key: '<circle cx="8" cy="15.5" r="4.5"/><path d="M11.2 12.3 19.5 4M16 7.5l2.5 2.5M13.8 9.7l2 2"/>',
-    trash: '<path d="M4.5 6.5h15M9.5 6.5v-2h5v2M6.5 6.5l1 13.5h9l1-13.5M10 10.5v6M14 10.5v6"/>',
     mail: '<rect x="3.5" y="5.5" width="17" height="13" rx="2.5"/><path d="M4 7.5l8 6 8-6"/>',
     cloud: '<path d="M7 18.5a4.5 4.5 0 0 1-.6-9A6 6 0 0 1 18 9.6a4.5 4.5 0 0 1-.5 8.9z"/>',
     x: '<path d="M6 6l12 12M18 6L6 18"/>'
   });
   var CROWN = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3.4 8.9 8.1 12.4l3.9-6.6 3.9 6.6 4.7-3.5-1.6 9.1H5z"/><rect fill="currentColor" x="5" y="19.3" width="14" height="2.2" rx="1.1"/><circle fill="currentColor" cx="3.1" cy="7.7" r="1.6"/><circle fill="currentColor" cx="12" cy="4.3" r="1.7"/><circle fill="currentColor" cx="20.9" cy="7.7" r="1.6"/></svg>';
   var TM_HUES = ['blue', 'green', 'purple', 'teal', 'coral', 'slate'];
-  var TM_SRC = { app: ['PIN from app', 'key'], cloudflare: ['PIN in Cloudflare', 'cloud'], monday: ['monday.com', 'people'] };
+  var TM_SRC = { app: ['PIN from app', 'key', 'PIN ya programu'], cloudflare: ['PIN in Cloudflare', 'cloud', 'PIN iko Cloudflare'], monday: ['monday.com', 'people'] };
   function tmHue(n) { var h = 7; String(n || '').toLowerCase().split('').forEach(function (c) { h = (h * 31 + c.charCodeAt(0)) >>> 0; }); return TM_HUES[h % TM_HUES.length]; }
   function tmAv(p) { var h = tmHue(p.name); return '<span class="tm-av" style="--hu:var(--hu-' + h + ');--hb:var(--hb-' + h + ')" aria-hidden="true">' + esc(initials(p.name)) + (p.admin ? '<i class="cr">' + CROWN + '</i>' : '') + '</span>'; }
   function tmTags(p, long) {
     var s = TM_SRC[p.source] || TM_SRC.app;
-    return '<span class="tm-tags">' + (p.admin ? '<span class="tm-t adm">' + CROWN + 'Admin</span>' : '') + '<span class="tm-t s-' + esc(p.source || 'app') + '">' + oic(s[1]) + s[0] + '</span>' +
+    return '<span class="tm-tags">' + (p.admin ? '<span class="tm-t adm">' + CROWN + tr('Admin', 'Msimamizi') + '</span>' : '') + '<span class="tm-t s-' + esc(p.source || 'app') + '">' + oic(s[1]) + tr(s[0], s[2]) + '</span>' +
       (CNAME[p.home] ? '<span class="tm-t" title="' + CNAME[p.home] + '">' + oic('pin') + (long ? CNAME[p.home] : p.home.toUpperCase()) + '</span>' : '') + '</span>';
   }
-  function tmSeen(p) { return p.lastSeen ? 'Last active ' + esc(since(p.lastSeen)) : 'Not signed in yet'; }
-  function tmHomes(sel) { return '<option value="">All countries</option>' + ['ke', 'tz', 'ug', 'mw'].map(function (c) { return '<option value="' + c + '"' + (sel === c ? ' selected' : '') + '>' + CNAME[c] + '</option>'; }).join(''); }
-  function tmSwitch(on) { return '<button type="button" class="tm-sw" role="switch" aria-checked="' + !!on + '" data-f="admin"><span class="ic">' + CROWN + '</span><span><b>Admin</b><small>Sees the Office tab and can manage the team</small></span><i aria-hidden="true"></i></button>'; }
+  function tmSeen(p) { return p.lastSeen ? tr('Last active ', 'Alitumia mwisho ') + esc(since(p.lastSeen)) : tr('Not signed in yet', 'Bado hajaingia'); }
+  function tmHomes(sel) { return '<option value="">' + tr('All countries', 'Nchi zote') + '</option>' + ['ke', 'tz', 'ug', 'mw'].map(function (c) { return '<option value="' + c + '"' + (sel === c ? ' selected' : '') + '>' + CNAME[c] + '</option>'; }).join(''); }
+  function tmSwitch(on) { return '<button type="button" class="tm-sw" role="switch" aria-checked="' + !!on + '" data-f="admin"><span class="ic">' + CROWN + '</span><span><b>' + tr('Admin', 'Msimamizi') + '</b><small>' + tr('Sees the Office tab and can manage the team', 'Anaona Ofisi na anaweza kusimamia timu') + '</small></span><i aria-hidden="true"></i></button>'; }
   function oTeam(b, quiet) {
     var all = (O.team || []).slice().sort(function (a, z) { return a.name.localeCompare(z.name); }), i = 0;
     var adm = all.filter(function (p) { return p.admin; }), fld = all.filter(function (p) { return !p.admin; });
     var row = function (p) {
-      return '<button type="button" class="tm-row" data-who="' + esc(p.name) + '" style="--i:' + Math.min(i++, 12) + '" aria-label="' + esc(p.name) + (p.admin ? ', admin' : '') + '">' + tmAv(p) +
+      return '<button type="button" class="tm-row" data-who="' + esc(p.name) + '" style="--i:' + Math.min(i++, 12) + '" aria-label="' + esc(p.name) + (p.admin ? ', ' + tr('admin', 'msimamizi') : '') + '">' + tmAv(p) +
         '<span class="tm-mid"><b class="tm-nm">' + esc(p.name) + '</b>' + tmTags(p) + '<small class="tm-seen">' + tmSeen(p) + '</small></span><span class="tm-chev" aria-hidden="true">' + oic('chev') + '</span></button>';
     };
     var sec = function (k, title, ic, list) {
       return '<h3 class="tm-sec ' + k + '" data-sec="' + k + '">' + ic + '<span>' + title + '</span><span class="n">' + list.length + '</span></h3><div class="tm-list' + (quiet ? ' still' : '') + '" data-sec="' + k + '">' +
-        (list.length ? list.map(row).join('') : '<p class="tm-empty">' + (k === 'adm' ? 'No admins yet.' : 'Nobody here yet. Add a person above.') + '</p>') + '</div>';
+        (list.length ? list.map(row).join('') : '<p class="tm-empty">' + (k === 'adm' ? tr('No admins yet.', 'Bado hakuna wasimamizi.') : tr('Nobody here yet. Add a person above.', 'Hakuna mtu bado. Ongeza mtu hapo juu.')) + '</p>') + '</div>';
     };
-    b.innerHTML = '<div class="o-grid tm"><div><div class="tm-top"><button class="btn" type="button" id="tmAdd">' + oic('plus') + 'Add a person</button>' +
-      (all.length > 8 ? '<input type="search" id="tmQ" placeholder="Find a person" aria-label="Find a person" autocomplete="off">' : '') + '</div>' +
-      sec('adm', 'Admins', CROWN, adm) + sec('fld', 'Field team', oic('people'), fld) + '</div>' +
-      '<div class="o-side"><div class="card"><div class="tm-mail"><span class="ic">' + oic('mail') + '</span><div><h2>E-mail alerts</h2>' +
-      (O.mail && O.mail.ready ? '<p class="muted">Alerts go to: <b>' + esc((O.mail.to || []).join(', ') || 'nobody yet: add an admin with an e-mail') + '</b></p><button class="btn small light" type="button" id="tTest">Send a test e-mail</button> <span class="msg" id="tTestMsg" aria-live="polite"></span>'
-        : '<p class="muted">Not switched on yet. Add RESEND_API_KEY and ALERT_FROM in Cloudflare (see the set-up notes).</p>') + '</div></div></div></div></div>';
+    b.innerHTML = '<div class="o-grid tm"><div><div class="tm-top"><button class="btn" type="button" id="tmAdd">' + oic('plus') + tr('Add a person', 'Ongeza mtu') + '</button>' +
+      (all.length > 8 ? '<input type="search" id="tmQ" placeholder="' + tr('Find a person', 'Tafuta mtu') + '" aria-label="' + tr('Find a person', 'Tafuta mtu') + '" autocomplete="off">' : '') + '</div>' +
+      sec('adm', tr('Admins', 'Wasimamizi'), CROWN, adm) + sec('fld', tr('Field team', 'Timu ya uwanjani'), oic('people'), fld) + '</div>' +
+      '<div class="o-side"><div class="card"><div class="tm-mail"><span class="ic">' + oic('mail') + '</span><div><h2>' + tr('E-mail alerts', 'Taarifa kwa barua pepe') + '</h2>' +
+      (O.mail && O.mail.ready ? '<p class="muted">' + tr('Alerts go to: ', 'Taarifa zinaenda kwa: ') + '<b>' + esc((O.mail.to || []).join(', ') || tr('nobody yet: add an admin with an e-mail', 'bado hakuna: ongeza msimamizi mwenye barua pepe')) + '</b></p><button class="btn small light" type="button" id="tTest">' + tr('Send a test e-mail', 'Tuma barua pepe ya majaribio') + '</button> <span class="msg" id="tTestMsg" aria-live="polite"></span>'
+        : '<p class="muted">' + tr('Not switched on yet. Add RESEND_API_KEY and ALERT_FROM in Cloudflare (see the set-up notes).', 'Bado haijawashwa. Ongeza RESEND_API_KEY na ALERT_FROM kwenye Cloudflare (angalia maelezo ya kuweka).') + '</p>') + '</div></div></div></div></div>';
     var g = b.querySelector('.o-grid');
     g.addEventListener('click', function (e) { var r = e.target.closest('.tm-row'); if (r) { buzz(); tmOpen(r.getAttribute('data-who')); } });
     $('tmAdd').addEventListener('click', function () { buzz(); tmAddOpen(); });
@@ -5274,13 +5273,13 @@ label.dnr-p small{display:block;color:var(--muted);font-size:.76rem;font-weight:
         var h = g.querySelector('.tm-sec[data-sec=' + l.getAttribute('data-sec') + ']'); h.querySelector('.n').textContent = n; h.hidden = l.hidden = !!q && !n;
       });
     });
-    if ($('tTest')) $('tTest').addEventListener('click', function () { msg('tTestMsg', '', 'Sending…'); adminApi('POST', { action: 'test-mail' }).then(function (j) { msg('tTestMsg', j.ok ? 'ok' : 'bad', j.ok ? 'Sent ✓ Check the inbox.' : j.reason === 'no-recipients' ? 'No e-mail addresses yet.' : why(j)); }); });
+    if ($('tTest')) $('tTest').addEventListener('click', function () { msg('tTestMsg', '', tr('Sending…', 'Inatuma…')); adminApi('POST', { action: 'test-mail' }).then(function (j) { msg('tTestMsg', j.ok ? 'ok' : 'bad', j.ok ? tr('Sent ✓ Check the inbox.', 'Imetumwa ✓ Angalia barua pepe.') : j.reason === 'no-recipients' ? tr('No e-mail addresses yet.', 'Bado hakuna anwani za barua pepe.') : why(j)); }); });
   }
   function tmRedraw() { if (S.view === 'vOffice' && O.tab === 'team') oNeedTeam(function () { oTeam($('oBody'), true); }); }
   // a sheet that springs up from the bottom (a centred card on a wide screen). Tap outside, drag down or Esc closes it.
   function tSheet(label, html) {
     var w = document.createElement('div'), back = document.activeElement; w.className = 'tsh'; w.setAttribute('role', 'dialog'); w.setAttribute('aria-modal', 'true'); w.setAttribute('aria-label', label);
-    w.innerHTML = '<div class="tsh-bg"></div><div class="tsh-p" tabindex="-1"><i class="grab" aria-hidden="true"></i><button type="button" class="tsh-x" aria-label="Close">' + oic('x') + '</button><div class="tsh-c">' + html + '</div></div>';
+    w.innerHTML = '<div class="tsh-bg"></div><div class="tsh-p" tabindex="-1"><i class="grab" aria-hidden="true"></i><button type="button" class="tsh-x" aria-label="' + tr('Close', 'Funga') + '">' + oic('x') + '</button><div class="tsh-c">' + html + '</div></div>';
     document.body.appendChild(w); void w.offsetWidth;
     var p = w.querySelector('.tsh-p'), y0 = null, dy = 0, key = function (e) { if (e.key === 'Escape') w.close(); };
     requestAnimationFrame(function () { w.classList.add('in'); try { p.focus({ preventScroll: true }); } catch (e) {} });
@@ -5297,25 +5296,25 @@ label.dnr-p small{display:block;color:var(--muted);font-size:.76rem;font-weight:
   }
   // ask before something that can't be undone, inside the sheet
   function tmAsk(box, q, label, red, go) {
-    box.innerHTML = '<div class="tm-ask' + (red ? ' bad' : '') + '" role="group" aria-label="' + esc(label) + '"><p>' + esc(q) + '</p><div class="tm-go"><button class="btn small light" type="button" data-k="no">Cancel</button><button class="btn small' + (red ? ' red' : '') + '" type="button" data-k="yes">' + esc(label) + '</button><span class="msg" aria-live="polite"></span></div></div>';
+    box.innerHTML = '<div class="tm-ask' + (red ? ' bad' : '') + '" role="group" aria-label="' + esc(label) + '"><p>' + esc(q) + '</p><div class="tm-go"><button class="btn small light" type="button" data-k="no">' + tr('Cancel', 'Ghairi') + '</button><button class="btn small' + (red ? ' red' : '') + '" type="button" data-k="yes">' + esc(label) + '</button><span class="msg" aria-live="polite"></span></div></div>';
     var m = box.querySelector('.msg');
     box.querySelector('[data-k=no]').addEventListener('click', function () { box.innerHTML = ''; });
-    box.querySelector('[data-k=yes]').addEventListener('click', function () { qa('button', box).forEach(function (x) { x.disabled = true; }); m.className = 'msg'; m.textContent = 'Working…'; go(m); });
+    box.querySelector('[data-k=yes]').addEventListener('click', function () { qa('button', box).forEach(function (x) { x.disabled = true; }); m.className = 'msg'; m.textContent = tr('Working…', 'Inafanya kazi…'); go(m); });
     box.querySelector('[data-k=yes]').focus({ preventScroll: true }); box.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   }
   function tmOpen(name) {
     var p = (O.team || []).filter(function (x) { return x.name === name; })[0]; if (!p) return;
     var app = p.source === 'app', hd = function () { return '<div class="tm-hd">' + tmAv(p) + '<h3>' + esc(p.name) + '</h3>' + tmTags(p, true) + '<small class="tm-seen">' + tmSeen(p) + '</small></div>'; };
     var html = hd() + (app
-      ? '<div class="tm-f"><label>Home country<select data-f="home">' + tmHomes(p.home) + '</select></label>' +
-        '<div class="row2"><label>E-mail (for alerts)<input type="email" data-f="email" value="' + esc(p.email || '') + '" placeholder="name@rafikioutreach.org" autocomplete="off"></label>' +
-        '<label>Phone<input type="tel" data-f="phone" value="' + esc(p.phone || '') + '" placeholder="+254 712 345 678" autocomplete="off"></label></div>' +
-        '<small class="muted">The team sees the phone number, for calls and WhatsApp.</small>' + tmSwitch(p.admin) +
-        '<div class="tm-go"><button class="btn" type="button" data-a="save">' + oic('check') + 'Save</button><span class="msg" aria-live="polite"></span></div>' +
-        '<div class="tm-ab"><button type="button" data-a="pin">' + oic('key') + 'New PIN</button><button type="button" data-a="rm">' + oic('trash') + 'Remove</button></div><div class="tm-cf" aria-live="polite"></div></div>'
-      : '<div class="tm-note ' + esc(p.source) + '">' + oic(p.source === 'cloudflare' ? 'cloud' : 'people') + '<span>' + (p.source === 'cloudflare' ? 'Set in Cloudflare — change it there, or re-add here with an app PIN.' : 'Signs in with monday.com. The Admin role comes from PIN_ADMINS in Cloudflare.') + '</span></div>' +
-        (p.email || p.phone ? '<dl class="tm-kv">' + (p.email ? '<div><dt>E-mail</dt><dd>' + esc(p.email) + '</dd></div>' : '') + (p.phone ? '<div><dt>Phone</dt><dd>' + esc(p.phone) + '</dd></div>' : '') + '</dl>' : '') +
-        '<div class="tm-go"><button class="btn light" type="button" data-a="readd">' + oic('key') + (p.source === 'cloudflare' ? 'Re-add with an app PIN' : 'Give them an app PIN') + '</button></div>');
+      ? '<div class="tm-f"><label>' + tr('Home country', 'Nchi ya nyumbani') + '<select data-f="home">' + tmHomes(p.home) + '</select></label>' +
+        '<div class="row2"><label>' + tr('E-mail (for alerts)', 'Barua pepe (kwa taarifa)') + '<input type="email" data-f="email" value="' + esc(p.email || '') + '" placeholder="name@rafikioutreach.org" autocomplete="off"></label>' +
+        '<label>' + tr('Phone', 'Simu') + '<input type="tel" data-f="phone" value="' + esc(p.phone || '') + '" placeholder="+254 712 345 678" autocomplete="off"></label></div>' +
+        '<small class="muted">' + tr('The team sees the phone number, for calls and WhatsApp.', 'Timu inaona namba ya simu, kwa kupiga na WhatsApp.') + '</small>' + tmSwitch(p.admin) +
+        '<div class="tm-go"><button class="btn" type="button" data-a="save">' + oic('check') + tr('Save', 'Hifadhi') + '</button><span class="msg" aria-live="polite"></span></div>' +
+        '<div class="tm-ab"><button type="button" data-a="pin">' + oic('key') + tr('New PIN', 'PIN mpya') + '</button><button type="button" data-a="rm">' + oic('trash') + tr('Remove', 'Ondoa') + '</button></div><div class="tm-cf" aria-live="polite"></div></div>'
+      : '<div class="tm-note ' + esc(p.source) + '">' + oic(p.source === 'cloudflare' ? 'cloud' : 'people') + '<span>' + (p.source === 'cloudflare' ? tr('Set in Cloudflare — change it there, or re-add here with an app PIN.', 'Imewekwa Cloudflare — ibadilishe huko, au mwongeze hapa kwa PIN ya programu.') : tr('Signs in with monday.com. The Admin role comes from PIN_ADMINS in Cloudflare.', 'Anaingia kwa monday.com. Nafasi ya msimamizi inatoka PIN_ADMINS kwenye Cloudflare.')) + '</span></div>' +
+        (p.email || p.phone ? '<dl class="tm-kv">' + (p.email ? '<div><dt>' + tr('E-mail', 'Barua pepe') + '</dt><dd>' + esc(p.email) + '</dd></div>' : '') + (p.phone ? '<div><dt>' + tr('Phone', 'Simu') + '</dt><dd>' + esc(p.phone) + '</dd></div>' : '') + '</dl>' : '') +
+        '<div class="tm-go"><button class="btn light" type="button" data-a="readd">' + oic('key') + (p.source === 'cloudflare' ? tr('Re-add with an app PIN', 'Mwongeze kwa PIN ya programu') : tr('Give them an app PIN', 'Mpe PIN ya programu')) + '</button></div>');
     var w = tSheet(p.name, html), c = w.querySelector('.tsh-c'), cf = c.querySelector('.tm-cf'), m = c.querySelector('.tm-go .msg');
     c.addEventListener('click', function (e) {
       var sw = e.target.closest('.tm-sw'); if (sw) { sw.setAttribute('aria-checked', String(sw.getAttribute('aria-checked') !== 'true')); buzz(); return; }
@@ -5324,22 +5323,22 @@ label.dnr-p small{display:block;color:var(--muted);font-size:.76rem;font-weight:
       if (k === 'readd') { w.close(); setTimeout(function () { tmAddOpen(p); }, 200); return; }
       if (k === 'save') {
         var body = { action: 'team-update', name: p.name, home: f('home').value, email: f('email').value.trim(), phone: f('phone').value.trim(), admin: f('admin').getAttribute('aria-checked') === 'true' };
-        a.disabled = true; m.className = 'msg'; m.textContent = 'Saving…';
+        a.disabled = true; m.className = 'msg'; m.textContent = tr('Saving…', 'Inahifadhi…');
         adminApi('POST', body).then(function (j) {
           a.disabled = false;
-          if (!j.ok) { m.className = 'msg bad'; m.textContent = j.reason === 'self' ? 'You can’t remove your own admin role.' : why(j); return; }
+          if (!j.ok) { m.className = 'msg bad'; m.textContent = j.reason === 'self' ? tr('You can’t remove your own admin role.', 'Huwezi kuondoa nafasi yako mwenyewe ya msimamizi.') : why(j); return; }
           p.home = body.home; p.email = body.email; p.phone = body.phone; p.admin = body.admin;
-          c.querySelector('.tm-hd').outerHTML = hd(); m.className = 'msg ok'; m.textContent = 'Saved ✓';
+          c.querySelector('.tm-hd').outerHTML = hd(); m.className = 'msg ok'; m.textContent = tr('Saved ✓', 'Imehifadhiwa ✓');
           tmRedraw(); setTimeout(w.close, 800);
         });
       }
-      if (k === 'pin') tmAsk(cf, 'Make a new PIN for ' + p.name + '? Their old PIN stops working.', 'Make a new PIN', false, function (am) {
+      if (k === 'pin') tmAsk(cf, tr('Make a new PIN for ' + p.name + '? Their old PIN stops working.', 'Tengeneza PIN mpya ya ' + p.name + '? PIN ya zamani itaacha kufanya kazi.'), tr('Make a new PIN', 'Tengeneza PIN mpya'), false, function (am) {
         adminApi('POST', { action: 'team-pin', name: p.name }).then(function (j) { if (!j.ok) { am.className = 'msg bad'; am.textContent = why(j); qa('button', cf).forEach(function (x) { x.disabled = false; }); return; } pinBox(cf, p.name, j.pin); cf.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); });
       });
-      if (k === 'rm') tmAsk(cf, 'Remove ' + p.name + ' from the team? Their PIN stops working straight away.', 'Remove', true, function (am) {
+      if (k === 'rm') tmAsk(cf, tr('Remove ' + p.name + ' from the team? Their PIN stops working straight away.', 'Ondoa ' + p.name + ' kwenye timu? PIN yake itaacha kufanya kazi mara moja.'), tr('Remove', 'Ondoa'), true, function (am) {
         adminApi('POST', { action: 'team-remove', name: p.name }).then(function (j) {
           if (!j.ok) { am.className = 'msg bad'; am.textContent = why(j); qa('button', cf).forEach(function (x) { x.disabled = false; }); return; }
-          am.className = 'msg ok'; am.textContent = 'Removed ✓'; O.team = null; tmRedraw(); setTimeout(w.close, 700);
+          am.className = 'msg ok'; am.textContent = tr('Removed ✓', 'Imeondolewa ✓'); O.team = null; tmRedraw(); setTimeout(w.close, 700);
         });
       });
     });
@@ -5347,11 +5346,11 @@ label.dnr-p small{display:block;color:var(--muted);font-size:.76rem;font-weight:
   function tmAddOpen(pre) {
     pre = pre || {};
     var av = function (n, adm) { var h = tmHue(n); return '<span class="tm-av" style="--hu:var(--hu-' + h + ');--hb:var(--hb-' + h + ')" aria-hidden="true">' + (n.trim() ? esc(initials(n)) : oic('plus')) + (adm ? '<i class="cr">' + CROWN + '</i>' : '') + '</span>'; };
-    var w = tSheet('Add a person', '<div class="tm-hd">' + av(pre.name || '', pre.admin) + '<h3>Add a person</h3><small class="tm-seen">They get their own 4-digit PIN, shown once. Send it to them privately.</small></div>' +
-      '<div class="tm-f"><label>Name<input type="text" data-f="name" autocomplete="off" placeholder="e.g. Jessica Anderson" value="' + esc(pre.name || '') + '"></label>' +
-      '<label>Home country<select data-f="home">' + tmHomes(pre.home || '') + '</select></label>' +
-      '<div class="row2"><label>E-mail (optional)<input type="email" data-f="email" placeholder="for alerts" autocomplete="off"></label><label>Phone (optional)<input type="tel" data-f="phone" placeholder="+254 712 345 678" autocomplete="off"></label></div>' +
-      tmSwitch(pre.admin) + '<div class="tm-go"><button class="btn" type="button" data-a="add">' + oic('plus') + 'Add and create PIN</button><span class="msg" aria-live="polite"></span></div></div>');
+    var w = tSheet(tr('Add a person', 'Ongeza mtu'), '<div class="tm-hd">' + av(pre.name || '', pre.admin) + '<h3>' + tr('Add a person', 'Ongeza mtu') + '</h3><small class="tm-seen">' + tr('They get their own 4-digit PIN, shown once. Send it to them privately.', 'Wanapata PIN yao ya tarakimu 4, inaonyeshwa mara moja. Wapelekee kwa siri.') + '</small></div>' +
+      '<div class="tm-f"><label>' + tr('Name', 'Jina') + '<input type="text" data-f="name" autocomplete="off" placeholder="' + tr('e.g. Jessica Anderson', 'mf. Jessica Anderson') + '" value="' + esc(pre.name || '') + '"></label>' +
+      '<label>' + tr('Home country', 'Nchi ya nyumbani') + '<select data-f="home">' + tmHomes(pre.home || '') + '</select></label>' +
+      '<div class="row2"><label>' + tr('E-mail (optional)', 'Barua pepe (si lazima)') + '<input type="email" data-f="email" placeholder="' + tr('for alerts', 'kwa taarifa') + '" autocomplete="off"></label><label>' + tr('Phone (optional)', 'Simu (si lazima)') + '<input type="tel" data-f="phone" placeholder="+254 712 345 678" autocomplete="off"></label></div>' +
+      tmSwitch(pre.admin) + '<div class="tm-go"><button class="btn" type="button" data-a="add">' + oic('plus') + tr('Add and create PIN', 'Ongeza na utengeneze PIN') + '</button><span class="msg" aria-live="polite"></span></div></div>');
     var c = w.querySelector('.tsh-c'), f = function (n) { return c.querySelector('[data-f=' + n + ']'); }, m = c.querySelector('.msg'), nm = f('name');
     var avNow = function () { c.querySelector('.tm-hd .tm-av').outerHTML = av(nm.value, f('admin').getAttribute('aria-checked') === 'true'); };
     nm.addEventListener('input', avNow);
@@ -5360,13 +5359,13 @@ label.dnr-p small{display:block;color:var(--muted);font-size:.76rem;font-weight:
       var sw = e.target.closest('.tm-sw'); if (sw) { sw.setAttribute('aria-checked', String(sw.getAttribute('aria-checked') !== 'true')); buzz(); avNow(); return; }
       var a = e.target.closest('[data-a]'); if (!a) return;
       if (a.getAttribute('data-a') === 'done') { w.close(); return; }
-      var n = nm.value.trim(); if (!n) { nm.focus(); m.className = 'msg bad'; m.textContent = 'Type their name first.'; return; }
+      var n = nm.value.trim(); if (!n) { nm.focus(); m.className = 'msg bad'; m.textContent = tr('Type their name first.', 'Andika jina lake kwanza.'); return; }
       var adm = f('admin').getAttribute('aria-checked') === 'true';
-      a.disabled = true; m.className = 'msg'; m.textContent = 'Adding…';
+      a.disabled = true; m.className = 'msg'; m.textContent = tr('Adding…', 'Inaongeza…');
       adminApi('POST', { action: 'team-add', name: n, home: f('home').value, email: f('email').value.trim(), phone: f('phone').value.trim(), admin: adm }).then(function (j) {
         a.disabled = false;
-        if (!j.ok) { m.className = 'msg bad'; m.textContent = j.reason === 'exists' ? 'Someone with that name is already on the team.' : why(j); return; }
-        c.innerHTML = '<div class="tm-hd">' + tmAv({ name: n, admin: adm }) + '<h3>' + esc(n) + '</h3><small class="tm-seen">Added to the team ✓</small></div><div class="tm-cf"></div><div class="tm-go"><button class="btn light" type="button" data-a="done">Done</button></div>';
+        if (!j.ok) { m.className = 'msg bad'; m.textContent = j.reason === 'exists' ? tr('Someone with that name is already on the team.', 'Mtu mwenye jina hilo tayari yuko kwenye timu.') : why(j); return; }
+        c.innerHTML = '<div class="tm-hd">' + tmAv({ name: n, admin: adm }) + '<h3>' + esc(n) + '</h3><small class="tm-seen">' + tr('Added to the team ✓', 'Ameongezwa kwenye timu ✓') + '</small></div><div class="tm-cf"></div><div class="tm-go"><button class="btn light" type="button" data-a="done">' + tr('Done', 'Imekamilika') + '</button></div>';
         pinBox(c.querySelector('.tm-cf'), n, j.pin); O.team = null; tmRedraw();
       });
     });

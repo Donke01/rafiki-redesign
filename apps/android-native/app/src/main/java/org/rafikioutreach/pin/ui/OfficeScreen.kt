@@ -636,7 +636,7 @@ private fun PersonRow(p: JSONObject, i: Int, onClick: () -> Unit) {
 @Composable
 private fun AdminSwitch(on: Boolean, flip: () -> Unit) {
     val hu = C.hue("amber")
-    Row(Modifier.padding(top = 14.dp).fillMaxWidth().clip(RoundedCornerShape(16.dp)).border(if (C.glassy) 1.dp else 2.dp, C.line, RoundedCornerShape(16.dp)).clickable(role = Role.Switch, onClick = flip).padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(Modifier.padding(top = 14.dp).fillMaxWidth().clip(RoundedCornerShape(16.dp)).border(if (C.glassy) 1.dp else 2.dp, C.line, RoundedCornerShape(16.dp)).clickable(role = Role.Switch, onClick = flip).testTag("tm_admin_row").padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
         Box(Modifier.size(36.dp).clip(RoundedCornerShape(12.dp)).background(hu.bg).padding(8.dp)) { Icon(Ic.crownFill, null, tint = hu.fg, modifier = Modifier.fillMaxSize()) }
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
@@ -644,7 +644,7 @@ private fun AdminSwitch(on: Boolean, flip: () -> Unit) {
             Text(t("Sees the Office and can manage the team", "Anaona Ofisi na anaweza kusimamia timu"), style = MaterialTheme.typography.bodySmall, color = C.muted)
         }
         Spacer(Modifier.width(8.dp))
-        Toggle(on, t("Admin", "Msimamizi"), Modifier.minimumInteractiveComponentSize().testTag("tm_admin"), flip)
+        Toggle(on, t("Admin", "Msimamizi"), Modifier.testTag("tm_admin").minimumInteractiveComponentSize(), flip)
     }
 }
 

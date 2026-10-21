@@ -217,6 +217,27 @@ class OfficeTest {
         rule.onNodeWithTag("tm_readd").assertDoesNotExist()
     }
 
+    @Test fun team_list_and_sheet_dark_and_sun() {
+        Lang.sw = false
+        org.rafikioutreach.pin.ui.Look.mode = "dark"
+        try {
+            val m = model(); show(m)
+            rule.onNodeWithTag("nav_office").performClick()
+            rule.onNodeWithTag("o_team").performScrollTo().performClick()
+            waitFor("Meril Kiprop")
+            rule.mainClock.advanceTimeBy(1500)
+            rule.onNodeWithTag("tm_Meril Kiprop").performScrollTo()
+            shot("23h-team-dark")
+            rule.onNodeWithTag("tm_Meril Kiprop").performClick()
+            rule.waitUntil(5000) { rule.onAllNodesWithTag("team_sheet").fetchSemanticsNodes().isNotEmpty() }
+            sheetShot("23i-team-person-dark")
+            // the whole admin row flips the switch, so the target is big enough
+            assertTrue(rule.onNodeWithTag("tm_admin_row").fetchSemanticsNode().size.height >= with(rule.density) { 44.dp.roundToPx() })
+            org.rafikioutreach.pin.ui.Look.mode = "sun"
+            sheetShot("23j-team-person-sun")
+        } finally { org.rafikioutreach.pin.ui.Look.mode = "" }
+    }
+
     @Test fun office_in_kiswahili_and_report() {
         Lang.sw = true
         val m = model(); show(m)
