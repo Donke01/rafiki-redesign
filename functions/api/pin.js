@@ -1,6 +1,7 @@
 // /api/pin: the RAFIKI pin app (/pin), for the RAFIKI team only.
 //   GET  /api/pin               → projects shown on the website (with their point and first photo),
 //                                  open repairs, and who the PIN belongs to
+//                                  (and tests: {id: when the water was last tested}, kept in KV "pintests")
 //   GET  /api/pin?id=<item>     → the last pin made with the app on that project (for undo)
 //   GET  /api/pin?history=<item>→ the latest notes on that project in monday.com, with their files
 //   GET  /api/pin?activity=1    → what the team did with the app in the last 30 days
@@ -8,8 +9,11 @@
 //   POST /api/pin  { action: "pin",   id, lat, lng, acc, how, by }   saves "lat, lng" into "GPS Coordinates"
 //                  { action: "undo",  id, by }                       puts back the value from before the last pin
 //                  { action: "visit", id, state, note, lat, lng, readings, by } leaves a site-visit note
-//                  { action: "fixed", id, note, by }                 marks a reported problem as fixed
+//                  { action: "fixed", id, note, actual, what, receipt, by }  marks a reported problem as fixed (actual = KES spent)
+//                  { action: "parts", id, actual, what, receipt, by } the person on the job (or an admin): parts ordered;
+//                                                                     above the approval limit it asks for a second approval first
 //                  { action: "new",   name, ck, village, type, lat, lng, note, by }  adds a new site as "Due Diligence"
+//                  { action: "here",  lat, lng, acc } / { action: "here", off: true }  your latest position for the office's team map (opt-in)
 // Every change also leaves a note on the monday.com item (who, what, the old value). The answer
 // carries that note's id, so photos and voice notes can be attached to it with /api/pin-photo.
 //
@@ -25,6 +29,8 @@ import { getFeed, dropFeed } from '../../lib/feed-cache.js';
 import { parseGps, readGps, writeGps, createUpdate, createSite, readUpdates, tidyTitle, BOARD_ID } from '../../lib/monday.js';
 import { session, configured, linkToken, linkedFor, unlink } from '../../lib/pin-auth.js';
 import { getJson as gj, putJson, team, saveTeam, hashPin, isAdminName, sameName, seen, addReview, sendMail, alertHtml } from '../../lib/pin-store.js';
+import { kes, money, estOf, stepAtOrAfter, stepBlocked, approveLimit, askApproval, costRow, addCost, projectCosts, peopleServed, notePeople, snapPeople, monthKey } from '../../lib/pin-office.js';
+import { postHere } from '../../lib/pin-here.js';
 
 const MAX_FAILS = 8; // wrong PINs per connection per hour
 const MAX_SAVES = 120; // changes per connection per hour
@@ -78,6 +84,22 @@ function metres(a, b) {
 }
 const dist = m => m < 1000 ? Math.round(m) + ' m' : (m / 1000).toFixed(1) + ' km';
 const num = (v, max) => { const n = Number(v); return isFinite(n) && n >= 0 && n <= max ? Math.round(n * 10) / 10 : null; };
+
+// Offline map areas (Map › Save this area for offline). The public map servers the app uses don't allow
+// bulk downloading (tile.openstreetmap.org, Esri, Google), so by default the app only keeps the tiles you
+// look at. If the office runs (or rents) a tile server whose terms allow saving areas for offline use, put
+// its address in PIN_OFFLINE_TILES, e.g. "https://tiles.example.org/{z}/{x}/{y}.png" (PIN_OFFLINE_TILES_ATTR:
+// the credit line, PIN_OFFLINE_TILES_MAXZOOM: the deepest zoom, default 16); the Android app then downloads
+// whole areas from it. Servers known to forbid bulk downloads are refused here.
+const NO_BULK = /(^|\.)(openstreetmap\.(org|fr)|arcgisonline\.com|arcgis\.com|googleapis\.com|google\.com|opentopomap\.org|basemaps\.cartocdn\.com|cartocdn\.com)$/i;
+export function offlineTiles(env) {
+  const url = String(env.PIN_OFFLINE_TILES || '').trim();
+  if (!/^https:\/\/[^/]+\/.*\{z\}.*\{x\}.*\{y\}/.test(url)) return null;
+  let host = ''; try { host = new URL(url.replace(/\{[a-z]\}/g, '0')).hostname; } catch (e) { return null; }
+  if (NO_BULK.test(host)) return null;
+  const mz = Math.round(Number(env.PIN_OFFLINE_TILES_MAXZOOM) || 16);
+  return { url, attr: clean(env.PIN_OFFLINE_TILES_ATTR || '', 160), maxZoom: Math.min(18, Math.max(10, mz)) };
+}
 
 // "Meril:1234, Bertin:5678" → [{ name, pin }]
 function people(env) {
@@ -156,7 +178,9 @@ export async function onRequestGet({ request, env, waitUntil }) {
   if (id) {
     const last = env.FEED ? await env.FEED.get('pinlast:' + id, 'json') : null;
     const visits = env.FEED ? ((await env.FEED.get('pinvisit:' + id, 'json')) || []).slice(0, 3) : [];
-    return json({ ok: true, last: last ? { value: last.value, prev: last.prev, by: last.by, at: last.at } : null, canUndo: !!env.FEED, visits }, 200);
+    // what repairs here cost in the last 12 months, and the latest few entries
+    const spend = env.FEED ? (await env.FEED.get('pincost:' + id, 'json')) || [] : [];
+    return json({ ok: true, last: last ? { value: last.value, prev: last.prev, by: last.by, at: last.at } : null, canUndo: !!env.FEED, visits, costs: Object.assign(projectCosts(spend), { last: spend.slice(-5).reverse() }) }, 200);
   }
   try {
     const hist = (q.get('history') || '').replace(/\D/g, '');
@@ -196,13 +220,21 @@ export async function onRequestGet({ request, env, waitUntil }) {
       confirmed: await getJson(env, 'pinconfirmed', {})
     };
     if (chk.admin) extra.reviewOpen = (await getJson(env, 'pinreview', [])).filter(x => x.status === 'open').length;
+    // big repairs need a second approval above this (everyone sees it on the repair tracker)
+    extra.approveAbove = await approveLimit(env);
+    // Office overview: people served, from the latest visit counts and the board (two small KV reads)
+    if (chk.admin) {
+      const latest = await getJson(env, 'pinpeople', {}), hist = await getJson(env, 'pinpeoplehist', {});
+      extra.people = peopleServed(feed.projects || [], latest, hist);
+      if (!hist[monthKey(Date.now())] && waitUntil) waitUntil(snapPeople(env, feed.projects || [], latest).catch(() => {}));
+    }
     // this person's own details (Me › Settings): how they signed in, and what they've set
     if (chk.who) {
       const prof = await getJson(env, 'pinprofiles', {}), k = Object.keys(prof).find(n => sameName(n, chk.who)), pr = (k && prof[k]) || {};
       const mine = (await team(env)).find(p => sameName(p.name, chk.who)) || {};
       extra.me = { kind: chk.kind || '', nick: pr.nick || '', phone: pr.phone || mine.phone || '', home: pr.home || chk.home || '' };
     } else extra.me = { kind: chk.kind || 'shared', nick: '', phone: '', home: '' };
-    return json(Object.assign({ ok: true, who: chk.who, monday: !!chk.monday, linked: chk.linked || '', gmaps: env.GOOGLE_TILES_WEB_KEY || env.GOOGLE_TILES_ANDROID_KEY ? { web: env.GOOGLE_TILES_WEB_KEY || '', android: env.GOOGLE_TILES_ANDROID_KEY || '' } : null, home: chk.home || '', projects, repairs, visits: await getJson(env, 'pinlastvisit', {}) }, extra), 200);
+    return json(Object.assign({ ok: true, who: chk.who, monday: !!chk.monday, linked: chk.linked || '', gmaps: env.GOOGLE_TILES_WEB_KEY || env.GOOGLE_TILES_ANDROID_KEY ? { web: env.GOOGLE_TILES_WEB_KEY || '', android: env.GOOGLE_TILES_ANDROID_KEY || '' } : null, offlineTiles: offlineTiles(env), home: chk.home || '', projects, repairs, visits: await getJson(env, 'pinlastvisit', {}), tests: await getJson(env, 'pintests', {}) }, extra), 200);
   } catch (e) {
     console.error('pin get:', e && e.message);
     return json({ ok: false, reason: 'down' }, 502);
@@ -266,6 +298,8 @@ export async function onRequestPost({ request, env, waitUntil }) {
     await log(env, { by: chk.who, a: 'team', t: chk.who + ' changed their PIN' });
     return json({ ok: true }, 200);
   }
+  // Me › Settings › Share my location with the office: only the latest point, gone after 12 h (lib/pin-here.js)
+  if (action === 'here') { const r = await postHere(env, chk, b, ip); return json(r.body, r.status); }
   // a personal PIN decides the name; with the shared team PIN the app sends it
   const by = chk.who || clean(b.by, 60) || 'someone on the team';
   const token = chk.token || env.MONDAY_API_TOKEN, api = env.MONDAY_API_URL, board = String(env.MONDAY_BOARD_ID || BOARD_ID);
@@ -346,6 +380,8 @@ export async function onRequestPost({ request, env, waitUntil }) {
       const L = []; // one line each in the monday.com note
       const urg = URGENCY[b.urgency] && b.state !== 'working' ? b.urgency : '';
       L.push((kind === 'build' ? '🏗️ Construction visit by ' : '🩺 Site visit by ') + by + ' (RAFIKI pin app): ' + state + '.' + (urg ? ' Urgency: ' + URGENCY[urg] + '.' : ''));
+      // checked in by scanning the QR sticker on the site (Office › QR codes)
+      if (b.qr === true) L.push('Checked in by scanning the site’s QR code.');
       const stage = kind === 'build' && STAGE[b.stage] ? b.stage : '';
       if (stage) L.push('Stage: ' + STAGE[stage] + '.');
       const list = (a, n) => (Array.isArray(a) ? a : []).map(x => clean(x, 60)).filter(Boolean).slice(0, n);
@@ -426,11 +462,18 @@ export async function onRequestPost({ request, env, waitUntil }) {
       else await setRepair(env, id, { state: b.state, by, at, note: clean(b.note, 300), t: title, urgency: urg, problems: bad.concat(other ? [other] : []).slice(0, 12), parts: partsNeeded, cost: cost || null });
       if (env.FEED) {
         const rec = { at, by, state: b.state, urgency: urg, readings: parts.length ? R : null, quality: qs.length ? Q : null, kind: kind || undefined, stage: stage || undefined, numbers: Object.keys(N).length ? N : null };
+        if (b.qr === true) rec.qr = true;
         await env.FEED.put('pinvisit:' + id, JSON.stringify([rec].concat(past).slice(0, 5)));
+        // people served: this project's latest count, and this month's total for the trend
+        later(notePeople(env, id, [rec].concat(past)).then(m => (m ? getFeed(env).then(f => snapPeople(env, f.projects || [], m)) : null)).catch(e => console.error('people:', e && e.message)));
         const lv2 = await getJson(env, 'pinlastvisit', {}); lv2[id] = { at, by, state: b.state }; await env.FEED.put('pinlastvisit', JSON.stringify(lv2));
+        // when the water was last tested (E. coli, chlorine, pH, fluoride, turbidity), one small map for the whole team: "Water test due" after 6 months
+        const tested = qs.length ? at : (past.find(v => v.quality) || {}).at;
+        if (tested) { const ts = await getJson(env, 'pintests', {}); if (!ts[id] || ts[id] < tested) { ts[id] = tested; await env.FEED.put('pintests', JSON.stringify(ts)); } }
       }
       await bump(env, 'rl:pinsave:' + ip);
-      await log(env, { by, a: 'visit', s: b.state, u: urg, id, t: title });
+      // wq: water tests recorded, st: a story moment (for the Water tester and Story collector stamps)
+      await log(env, Object.assign({ by, a: 'visit', s: b.state, u: urg, id, t: title }, qs.length ? { wq: 1 } : {}, clean(st.quote, 600) ? { st: 1 } : {}));
       if (clean(st.quote, 600) && st.consent) await addReview(env, { kind: 'story', id, t: title, by, data: { quote: clean(st.quote, 600), who: clean(st.by, 80), update: updateId } });
       // a visit someone was asked to make is done
       if (env.FEED) {
@@ -451,13 +494,42 @@ export async function onRequestPost({ request, env, waitUntil }) {
     }
 
     if (action === 'fixed') {
-      const note = '🔧 Marked as fixed with the RAFIKI pin app by ' + by + '.' + (clean(b.note, 1000) ? ' Notes: ' + said(clean(b.note, 1000)) : '');
+      const job = (await getJson(env, 'pinrepairs', {}))[id], actual = money(b.actual), at = new Date().toISOString();
+      const note = '🔧 Marked as fixed with the RAFIKI pin app by ' + by + '.' + (actual ? ' Spent: ' + kes(actual) + (b.receipt ? ' (receipt attached).' : '.') : '') + (clean(b.note, 1000) ? ' Notes: ' + said(clean(b.note, 1000)) : '');
       const updateId = await createUpdate(token, id, note, api);
       if (!updateId) return json({ ok: false, reason: 'down' }, 502);
+      if (actual) await addCost(env, id, costRow({ at, rid: job ? job.at : at, what: clean(b.what, 120) || clean(b.note, 120) || 'Fixed', est: job ? estOf(job) : null, actual, by, step: 'fixed', receipt: !!b.receipt }), { t: title });
       await setRepair(env, id, null);
       await bump(env, 'rl:pinsave:' + ip);
       await log(env, { by, a: 'fixed', id, t: title });
       return json({ ok: true, id, updateId }, 200);
+    }
+
+    // parts ordered, from the repair tracker: the person on the job or an admin
+    if (action === 'parts') {
+      const reps = await getJson(env, 'pinrepairs', {}), job = reps[id];
+      if (!job) return json({ ok: false, reason: 'gone' }, 404);
+      if (!chk.admin && !sameName(job.assignee, by)) return json({ ok: false, reason: 'not-yours' }, 403);
+      const at = new Date().toISOString(), bl = stepBlocked(job, 'parts', await approveLimit(env));
+      if (bl) {
+        if (bl === 'pending') return json({ ok: true, id, held: 'parts', asked: false, job }, 200);
+        const rid = askApproval(job, by, at);
+        await addReview(env, { rid, kind: 'cost', id, t: title, by, data: { est: estOf(job), step: 'parts', note: clean(b.note, 300), parts: job.parts || '' } });
+        await setRepair(env, id, job);
+        await createUpdate(token, id, '🔒 ' + by + ' asked for a second approval of ' + kes(estOf(job)) + ' before ordering parts (RAFIKI pin app).', api);
+        await log(env, { by, a: 'ask', k: 'cost', id, t: title });
+        await bump(env, 'rl:pinsave:' + ip);
+        return json({ ok: true, id, held: 'parts', asked: true, job }, 200);
+      }
+      const actual = money(b.actual);
+      const updateId = await createUpdate(token, id, '📦 Parts ordered, reported by ' + by + ' (RAFIKI pin app).' + (actual ? ' Spent: ' + kes(actual) + (b.receipt ? ' (receipt attached).' : '.') : '') + (clean(b.what, 300) ? ' ' + said(clean(b.what, 300)) : ''), api);
+      if (!updateId) return json({ ok: false, reason: 'down' }, 502);
+      if (!stepAtOrAfter(job.step, 'parts')) { job.step = 'parts'; job.stepAt = Object.assign({}, job.stepAt, { parts: at }); if (job.assignee) job.stepAt.assigned = job.stepAt.assigned || at; }
+      await setRepair(env, id, job);
+      if (actual) await addCost(env, id, costRow({ at, rid: job.at, what: clean(b.what, 120) || 'Parts ordered', est: estOf(job), actual, by, step: 'parts', receipt: !!b.receipt }), { t: title });
+      await bump(env, 'rl:pinsave:' + ip);
+      await log(env, { by, a: 'job', id, t: title, s: 'parts' });
+      return json({ ok: true, id, updateId, job }, 200);
     }
 
     return json({ ok: false, reason: 'bad-request' }, 400);

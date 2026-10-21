@@ -73,6 +73,7 @@ import org.rafikioutreach.pin.data.Snapshot
 import org.rafikioutreach.pin.data.reasonText
 import org.rafikioutreach.pin.data.stateName
 import org.rafikioutreach.pin.data.urgencyName
+import org.rafikioutreach.pin.data.Money
 import org.rafikioutreach.pin.t
 import java.io.File
 import java.time.Instant
@@ -86,25 +87,36 @@ fun OfficeScreen(m: AppModel, open: (String) -> Unit) {
     val s by m.snap.collectAsState()
     val snap = s ?: return
     val secs = listOf(
-        Triple("overview", t("Overview", "Muhtasari"), "drop"), Triple("repairs", t("Repairs", "Ukarabati"), "wrench"), Triple("visits", t("Visits", "Ziara"), "cal"),
+        Triple("overview", t("Overview", "Muhtasari"), "drop"), Triple("repairs", t("Repairs", "Ukarabati"), "wrench"), Triple("costs", t("Costs", "Gharama"), "coins"), Triple("visits", t("Visits", "Ziara"), "cal"),
+        Triple("teammap", t("Team map", "Ramani ya timu"), "pin"), Triple("plan", t("Plan a week", "Panga wiki"), "compass"),
         Triple("review", t("Review", "Idhinisha"), "inbox"), Triple("team", t("Team", "Timu"), "people"), Triple("cleanup", t("Clean-up", "Usafi"), "spark"), Triple("export", t("Export", "Pakua"), "upload"),
+        Triple("sms", t("Community", "Jamii"), "chat"),
+        Triple("donors", t("Donors", "Wafadhili"), "link"),
+        Triple("qr", t("QR codes", "Misimbo ya QR"), "qr"), // QR check-in stickers (QrCheckin.kt)
     )
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
         Text(t("Office", "Ofisi"), style = MaterialTheme.typography.headlineLarge, color = C.ink, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.fillMaxWidth())
-        secs.chunked(4).forEachIndexed { ri, row ->
+        val per = if (secs.size % 3 == 0 && secs.size % 4 != 0) 3 else 4
+        secs.chunked(per).forEachIndexed { ri, row ->
             Row(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                row.forEachIndexed { ci, (k, l, ic) -> Tile(l, ic, sec == k, { sec = k }, Modifier.weight(1f).rise(ri * 4 + ci, step = 35).testTag("o_$k"), badge = when (k) { "review" -> snap.reviewOpen; "repairs" -> snap.repairs.size; else -> 0 }) }
-                repeat(4 - row.size) { Spacer(Modifier.weight(1f)) }
+                row.forEachIndexed { ci, (k, l, ic) -> Tile(l, ic, sec == k, { sec = k }, Modifier.weight(1f).rise(ri * per + ci, step = 35).testTag("o_$k"), badge = when (k) { "review" -> snap.reviewOpen; "repairs" -> snap.repairs.size; else -> 0 }) }
+                repeat(per - row.size) { Spacer(Modifier.weight(1f)) }
             }
         }
         Spacer(Modifier.height(14.dp))
         when (sec) {
             "overview" -> Overview(m, snap, open) { sec = it }
             "repairs" -> Repairs(m, snap, open)
+            "costs" -> CostsSection(m, snap, open)
             "visits" -> AssignVisits(m, snap)
+            "teammap" -> TeamMapSection(m, snap, open)
+            "plan" -> PlanWeekSection(m, snap, open)
             "review" -> ReviewQueue(m, open)
             "team" -> TeamSection(m)
             "cleanup" -> Cleanup(snap, open)
+            "sms" -> CommunityReports(m, open)
+            "donors" -> DonorsSection(m, snap)
+            "qr" -> QrStickerSection(m, snap)
             else -> Export(m, snap)
         }
         Spacer(Modifier.height(24.dp))
@@ -158,6 +170,13 @@ private fun Overview(m: AppModel, s: Snapshot, open: (String) -> Unit, go: (Stri
     Row(Modifier.padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         Stat(Modifier.weight(1f).rise(3), "cal", due, t("due a visit", "zinasubiri ziara"), t("not seen for 6+ months", "hazijaonekana kwa miezi 6+"), hue = "due") { go("visits") }
         Stat(Modifier.weight(1f).rise(4), "clip", vm, t("visits this month", "ziara za mwezi huu"), "", hue = "near") { }
+    }
+    s.people?.takeIf { it.total > 0 }?.let { PeopleServedCard(it, Modifier.padding(top = 10.dp).rise(5)) }
+    // water points with no water test in 6 months: open Projects › Due a visit, where they carry the tag
+    Row(Modifier.padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        val wt = testCount(s)
+        Stat(Modifier.weight(1f).rise(5).testTag("o_tests"), "drop", wt, t("water tests due", "vipimo vya maji vinahitajika"), t("water points not tested for 6+ months", "vituo vya maji havijapimwa kwa miezi 6+"), hot = wt > 0, hue = "due") { m.prefs.filter = "due"; m.goTab = "list" }
+        Spacer(Modifier.weight(1f))
     }
     // condition at last visit
     val st = s.visits.values.groupingBy { it.state }.eachCount()
@@ -234,12 +253,12 @@ private fun Overview(m: AppModel, s: Snapshot, open: (String) -> Unit, go: (Stri
 }
 
 private fun feedHue(a: String) = when (a) { "pin", "approve", "assign" -> "pin"; "visit", "fixed" -> "near"; "new" -> "new"; "job", "request" -> "repairs"; "reject" -> "me"; else -> "all" }
-private fun feedIcon(a: String) = when (a) { "pin" -> "pin"; "visit" -> "clip"; "fixed" -> "check"; "new" -> "plus"; "undo" -> "undo"; "job" -> "wrench"; "assign" -> "cal"; "team" -> "people"; else -> "drop" }
+private fun feedIcon(a: String) = when (a) { "pin" -> "pin"; "visit" -> "clip"; "fixed" -> "check"; "new" -> "plus"; "undo" -> "undo"; "job" -> "wrench"; "assign" -> "cal"; "team" -> "people"; "ask" -> "hourglass"; "settings" -> "shield"; else -> "drop" }
 fun verb(a: String) = when (a) {
     "pin" -> t("pinned", "aliweka mahali pa"); "visit" -> t("reported a visit to", "aliripoti ziara ya"); "fixed" -> t("marked fixed", "aliweka imerekebishwa")
     "new" -> t("added a new site:", "aliongeza eneo jipya:"); "undo" -> t("undid a pin on", "alitendua mahali pa"); "request" -> t("asked to move the confirmed location of", "aliomba kuhamisha mahali palipothibitishwa pa")
     "approve" -> t("approved", "aliidhinisha"); "reject" -> t("turned down", "alikataa"); "job" -> t("updated the repair job on", "alisasisha kazi ya matengenezo ya")
-    "assign" -> t("assigned", "aligawa"); "team" -> t("team:", "timu:"); else -> a
+    "assign" -> t("assigned", "aligawa"); "team" -> t("team:", "timu:"); "ask" -> t("asked for a second approval on", "aliomba idhini ya pili ya"); "settings" -> t("changed a setting:", "alibadilisha mpangilio:"); else -> a
 }
 
 @Composable
@@ -354,6 +373,7 @@ private fun RepairJob(m: AppModel, s: Snapshot, id: String, names: List<String>,
     var budget by remember(id, r.budget) { mutableStateOf(r.budget?.toString() ?: "") }
     var note by remember(id) { mutableStateOf("") }
     var msg by remember(id) { mutableStateOf<Pair<String, String>?>(null) }
+    val money = remember(id) { JobMoney() }
     Card(Modifier.padding(top = 12.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(p?.title ?: r.title, style = MaterialTheme.typography.titleMedium, color = C.blue2, modifier = Modifier.weight(1f).clickable { open(id) })
@@ -374,13 +394,16 @@ private fun RepairJob(m: AppModel, s: Snapshot, id: String, names: List<String>,
         }
         Field(budget, { budget = it.filter { c -> c.isDigit() } }, t("Approved budget (KES)", "Bajeti iliyoidhinishwa (KES)"), number = true)
         Field(note, { note = it }, t("Note (optional)", "Maelezo (si lazima)"), placeholder = t("e.g. parts bought in Eldoret", "mf. vipuri vilinunuliwa Eldoret"))
+        JobMoneyFields(m, r, s.approveAbove, money)
         var greenText by remember(id) { mutableStateOf<String?>(null) }
         LaunchedEffect(greenText) { if (greenText != null) { kotlinx.coroutines.delay(2600); greenText = null } }
         Btn(t("Save", "Hifadhi"), {
             scope.launch {
                 msg = "" to t("Saving…", "Inahifadhi…")
-                val x = m.api.admin(JSONObject().put("action", "job").put("id", id).put("step", step).put("assignee", who).put("due", due).put("budget", budget).put("note", note))
-                msg = if (x.ok) "ok" to t("Saved ✓", "Imehifadhiwa ✓") else "bad" to reasonText(x.reason)
+                val x = m.api.admin(JSONObject().put("action", "job").put("id", id).put("step", step).put("assignee", who).put("due", due).put("budget", budget).put("note", note)
+                    .apply { Money.parse(money.actual)?.let { put("actual", it) }; if (money.shots.isNotEmpty()) put("receipt", true); if (note.isNotBlank()) put("what", note) })
+                msg = if (x.ok) (jobMoneyDone(m, x, money, s.approveAbove) ?: ("ok" to t("Saved ✓", "Imehifadhiwa ✓"))) else "bad" to reasonText(x.reason)
+                if (x.ok && x.json.optString("held").isNotBlank()) step = x.json.optJSONObject("job")?.optString("step")?.ifBlank { null } ?: r.step
                 if (x.ok) { note = ""; greenText = if (step == "fixed") t("Fixed", "Imerekebishwa") else t("Saved", "Imehifadhiwa"); m.reload() }
             }
         }, Modifier.padding(top = 12.dp), small = true, icon = "check", saved = greenText)
@@ -466,24 +489,26 @@ private fun ReviewQueue(m: AppModel, open: (String) -> Unit) {
         Card(Modifier.padding(top = 10.dp)) {
             val (icon, kind) = when (it2.optString("kind")) {
                 "new" -> "plus" to t("New site", "Eneo jipya"); "move" -> "pin" to t("Big location change", "Mabadiliko makubwa ya mahali")
-                "request" -> "lock" to t("Change to a confirmed location", "Badiliko la mahali palipothibitishwa"); else -> "spark" to t("Story moment", "Hadithi")
+                "request" -> "lock" to t("Change to a confirmed location", "Badiliko la mahali palipothibitishwa"); "cost" -> "shield" to t("Second approval: repair cost", "Idhini ya pili: gharama ya ukarabati"); else -> "spark" to t("Story moment", "Hadithi")
             }
             Row(verticalAlignment = Alignment.CenterVertically) { IconTile(icon, C.blue, C.tint, 36.dp); Spacer(Modifier.width(10.dp)); Text(kind, style = MaterialTheme.typography.titleSmall, color = C.ink, modifier = Modifier.weight(1f)); Text(whenText(it2.optString("at")), style = MaterialTheme.typography.bodySmall, color = C.muted) }
             Text(it2.optString("t") + " · " + t("by ", "na ") + it2.optString("by"), style = MaterialTheme.typography.titleSmall, color = C.blue2, modifier = Modifier.padding(top = 8.dp).clickable { open(it2.optString("id")) })
+            val canApprove = if (it2.optString("kind") == "cost") CostReviewDetail(it2, m.prefs.name, m.snap.value?.approveAbove ?: org.rafikioutreach.pin.data.Money.APPROVE_DEFAULT) else true
             when (it2.optString("kind")) {
+                "cost" -> {}
                 "move" -> Text(t("From ", "Kutoka ") + d.optString("from").ifBlank { "—" } + t(" to ", " hadi ") + d.optString("to") + (if (d.has("dist")) " · " + Geo.dist(d.optDouble("dist"), m.prefs.miles) else ""), style = MaterialTheme.typography.bodySmall, color = C.muted)
                 "request" -> Text(t("Wants ", "Anataka ") + d.optString("to") + t(" instead of ", " badala ya ") + d.optString("from"), style = MaterialTheme.typography.bodySmall, color = C.muted)
                 "story" -> Text("“" + d.optString("quote") + "”" + (d.optString("who").takeIf { it.isNotBlank() }?.let { " — $it" } ?: ""), style = MaterialTheme.typography.bodyMedium, color = C.text, modifier = Modifier.padding(top = 6.dp).clip(RoundedCornerShape(10.dp)).background(C.tint).padding(10.dp))
                 else -> Text(listOf(d.optString("type"), d.optString("village"), COUNTRIES[d.optString("ck")] ?: "").filter { it.isNotBlank() }.joinToString(" · "), style = MaterialTheme.typography.bodySmall, color = C.muted)
             }
-            Field(reason, { reason = it }, t("Reason (optional)", "Sababu (si lazima)"), placeholder = t("e.g. wrong school", "mf. shule isiyo sahihi"))
+            Field(reason, { reason = it }, if (it2.optString("kind") == "cost") t("Note (optional)", "Maelezo (si lazima)") else t("Reason (optional)", "Sababu (si lazima)"), placeholder = if (it2.optString("kind") == "cost") t("e.g. quote checked with the driller", "mf. bei imehakikishwa na mchimbaji") else t("e.g. wrong school", "mf. shule isiyo sahihi"))
             Row(Modifier.padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 fun decide(dec: String) = scope.launch {
                     val x = m.api.admin(JSONObject().put("action", "review").put("rid", it2.optString("rid")).put("decision", dec).put("reason", reason))
-                    if (x.ok) { tick++; m.reload() } else msg = reasonText(x.reason)
+                    if (x.ok) { tick++; m.reload() } else msg = if (x.reason == "own") t("You asked for this, so another admin has to approve it.", "Wewe uliomba hili, kwa hiyo msimamizi mwingine lazima aidhinishe.") else reasonText(x.reason)
                 }
-                Btn(if (it2.optString("kind") == "story") t("Approve for the website", "Idhinisha kwa tovuti") else t("Approve", "Idhinisha"), { decide("approve") }, ok = true, small = true, icon = "check")
-                Btn(if (it2.optString("kind") == "story") t("Don’t use", "Usitumie") else t("Reject", "Kataa"), { decide("reject") }, light = true, small = true)
+                Btn(if (it2.optString("kind") == "story") t("Approve for the website", "Idhinisha kwa tovuti") else if (it2.optString("kind") == "cost") t("Approve the cost", "Idhinisha gharama") else t("Approve", "Idhinisha"), { decide("approve") }, ok = true, small = true, icon = "check", enabled = canApprove)
+                Btn(if (it2.optString("kind") == "story") t("Don’t use", "Usitumie") else if (it2.optString("kind") == "cost") t("Decline", "Kataa") else t("Reject", "Kataa"), { decide("reject") }, light = true, small = true, enabled = canApprove)
             }
             Msg(msg, "bad")
         }
@@ -897,6 +922,7 @@ private fun Export(m: AppModel, s: Snapshot) {
                 share("rafiki-activity-$stamp.csv", csv(listOf(listOf("Date", "Time", "Who", "What", "Project", "Result")) + (m.activity.value ?: emptyList()).map { e -> listOf(e.optString("at").take(10), e.optString("at").drop(11).take(5), e.optString("by"), e.optString("a"), e.optString("t"), e.optString("s")) }))
             }
         }, Modifier.fillMaxWidth(), light = true, icon = "upload")
+        CostExports(m, s) { msg = it }
         Msg(msg)
     }
 }

@@ -41,7 +41,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 
-// Me & team, to the Figma design "RAFIKI Pin — Me & team": a Me | Team switch, the profile card, and "This phone".
+// Me & team, to the Figma design "RAFIKI Pin — Me & team": a Me | Team switch and the profile card (the phone's own settings are in Me › Settings › This phone).
 
 private val WORKS = setOf("pin", "visit", "fixed", "new")
 private fun dayOf(iso: String): LocalDate? = runCatching { Instant.parse(iso).atZone(ZoneId.systemDefault()).toLocalDate() }.getOrNull()
@@ -131,22 +131,6 @@ private fun HeroBtn(text: String, icon: String, solid: Boolean, modifier: Modifi
     }
 }
 
-/** One row of "This phone": a coloured icon, a name (and a line under it), and a control on the right. */
-@Composable
-private fun PhoneRow(icon: String, hue: String, title: String, sub: String? = null, subOk: Boolean = false, modifier: Modifier = Modifier, subTag: String = "", brand: String? = null, brandColor: Color = Color.Unspecified, right: @Composable () -> Unit) {
-    Row(modifier.fillMaxWidth().padding(vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
-        val hu = C.hue(hue)
-        if (brand != null) Box(Modifier.size(40.dp).clip(RoundedCornerShape(14.dp)).background(brandColor.copy(alpha = 0.10f)), contentAlignment = Alignment.Center) { Brand(brand, 24.dp, icon, brandColor) }
-        else IconTile(icon, hu.fg, hu.bg, 40.dp)
-        Spacer(Modifier.width(12.dp))
-        Column(Modifier.weight(1f)) {
-            Text(title, style = MaterialTheme.typography.titleSmall, color = C.ink)
-            if (sub != null) Text(sub, style = MaterialTheme.typography.bodySmall, color = if (subOk) C.ok else C.muted, modifier = if (subTag.isNotBlank()) Modifier.testTag(subTag) else Modifier)
-        }
-        Spacer(Modifier.width(8.dp)); right()
-    }
-}
-
 /** An on/off switch drawn like the design: green when on. */
 @Composable
 fun Toggle(on: Boolean, label: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
@@ -154,68 +138,6 @@ fun Toggle(on: Boolean, label: String, modifier: Modifier = Modifier, onClick: (
     Box(modifier.size(50.dp, 30.dp).clip(RoundedCornerShape(99.dp)).background(if (on) Green else Color(0xFFC9D1D8))
         .clickable(role = Role.Switch, onClick = onClick).semantics { contentDescription = label; stateDescription = if (on) "on" else "off" }) {
         Box(Modifier.offset(x = x, y = 3.dp).size(24.dp).shadow(1.dp, CircleShape).clip(CircleShape).background(Color.White))
-    }
-}
-
-/** This phone: Face ID / fingerprint, your name on monday.com, colours, language, distances. */
-@Composable
-fun ThisPhone(m: AppModel, snap: Snapshot?) {
-    val ctx = LocalContext.current
-    Card(Modifier.padding(top = 14.dp).testTag("this_phone")) {
-        H2(t("This phone", "Simu hii"))
-        var first = true
-        @Composable fun line() { if (!first) HorizontalDivider(color = C.line); first = false }
-        // fingerprint or face
-        val can = remember { Bio.available(ctx) }
-        var bio by remember { mutableStateOf(m.prefs.bio) }
-        var bioMsg by remember { mutableStateOf<String?>(null) }
-        if (can || bio) {
-            line()
-            PhoneRow("finger", "due", t("Unlock with fingerprint or face", "Fungua kwa alama ya kidole au uso"),
-                bioMsg ?: if (bio) t("Asked when the app opens and after a minute away.", "Inaulizwa programu inapofunguliwa na baada ya dakika moja nje.") else t("Keeps the app private if someone else picks up your phone.", "Inaweka programu faragha mtu mwingine akishika simu yako."),
-                modifier = Modifier.testTag("bio_card")) {
-                Toggle(bio, if (bio) t("Turn off", "Zima") else t("Turn on", "Washa"), Modifier.testTag("bio_switch")) {
-                    if (bio) { bio = false; m.prefs.bio = false; bioMsg = null }
-                    else Bio.ask(ctx, t("Turn on fingerprint unlock", "Washa kufungua kwa alama ya kidole")) { ok -> if (ok) { bio = true; m.prefs.bio = true; bioMsg = null } else bioMsg = t("Not turned on.", "Haijawashwa.") }
-                }
-            }
-        }
-        // your name on monday.com (not when signed in with monday.com itself)
-        if (snap != null && m.prefs.session.isBlank()) {
-            line()
-            var open by remember { mutableStateOf(snap.linked.isBlank() && snap.who.isNotBlank()) }
-            val turn by animateFloatAsState(if (open) 90f else 0f, label = "chev")
-            Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).clickable(role = Role.Button) { open = !open }.testTag("monday_row")) {
-                PhoneRow("link", "new", t("Your name on monday.com", "Jina lako kwenye monday.com"),
-                    when { snap.linked.isNotBlank() -> t("Connected as ${snap.linked} ✓", "Imeunganishwa kama ${snap.linked} ✓"); snap.who.isBlank() -> t("Changes go in under the shared account", "Mabadiliko yanaingia kwa akaunti ya pamoja"); else -> t("Takes 20 seconds, once", "Inachukua sekunde 20, mara moja") },
-                    subOk = snap.linked.isNotBlank(), subTag = if (snap.linked.isNotBlank()) "monday_connected" else "", brand = "monday.com", brandColor = MondayBlue) {
-                    Icon(Ic.get("chev"), null, tint = C.muted, modifier = Modifier.size(18.dp).rotate(turn))
-                }
-            }
-            if (open) Column(Modifier.padding(start = 52.dp, bottom = 12.dp)) { ConnectMonday(m, snap, inline = true) }
-        }
-        // colours
-        line()
-        val sysDark = androidx.compose.foundation.isSystemInDarkTheme()
-        PhoneRow("sun", "repairs", t("Colours", "Rangi")) {
-            SmallSeg(listOf("light" to t("Light", "Mwanga"), "dark" to t("Dark", "Giza"), "sun" to t("Sun", "Jua")), Look.mode.ifBlank { if (sysDark) "dark" else "light" }, tag = "theme_") { Look.mode = it; m.prefs.theme = it }
-        }
-        // language
-        line()
-        var sw by remember { mutableStateOf(org.rafikioutreach.pin.Lang.sw) }
-        PhoneRow("globe", "pin", t("Language", "Lugha")) {
-            SmallSeg(listOf("en" to "English", "sw" to "Kiswahili"), if (sw) "sw" else "en", tag = "lang_") { org.rafikioutreach.pin.Lang.sw = it == "sw"; m.prefs.lang = it; sw = it == "sw" }
-        }
-        // text size: small to larger, for every screen
-        line()
-        PhoneRow("text", "all", t("Text size", "Ukubwa wa maandishi")) {}
-        SmallSeg(listOf("s" to t("Small", "Ndogo"), "" to t("Normal", "Kawaida"), "l" to t("Large", "Kubwa"), "xl" to t("Larger", "Kubwa zaidi")), TextSize.value, Modifier.fillMaxWidth().padding(bottom = 12.dp), tag = "size_") { TextSize.value = it; m.prefs.textSize = it }
-        // distances
-        line()
-        var miles by remember { mutableStateOf(m.prefs.miles) }
-        PhoneRow("nav", "near", t("Distances", "Umbali")) {
-            SmallSeg(listOf("km" to "km", "mi" to t("miles", "maili")), if (miles) "mi" else "km", tag = "units_") { miles = it == "mi"; m.prefs.miles = miles }
-        }
     }
 }
 
@@ -330,11 +252,14 @@ fun UpdatePrompt(m: AppModel, ready: Boolean) {
     var show by remember { mutableStateOf(false) }
     LaunchedEffect(ready, u?.code) {
         show = false
-        if (ready && !m.updPromptClosed && System.currentTimeMillis() >= m.prefs.updLater && st is org.rafikioutreach.pin.data.Updater.State.Idle) { kotlinx.coroutines.delay(1200); show = true }
+        val code = u?.code ?: 0
+        val closed = m.updPromptClosed && m.updPromptClosedCode >= code
+        val later = System.currentTimeMillis() < m.prefs.updLater && m.prefs.updLaterCode >= code   // "Remind me later" only holds back the same version
+        if (ready && !closed && !later && st is org.rafikioutreach.pin.data.Updater.State.Idle) { kotlinx.coroutines.delay(1200); show = true }
     }
     val up = u ?: return
     if (!show) return
-    fun close() { show = false; m.updPromptClosed = true }
+    fun close() { show = false; m.updPromptClosed = true; m.updPromptClosedCode = up.code }
     androidx.compose.ui.window.Dialog(onDismissRequest = { close() }) {
         Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(28.dp)).background(C.card).testTag("update_prompt")) {
             Box(Modifier.fillMaxWidth().background(Brush.linearGradient(listOf(Color(0xFF0A78C2), Color(0xFF054F81), Color(0xFF04263F)))).padding(20.dp)) {
@@ -351,7 +276,7 @@ fun UpdatePrompt(m: AppModel, ready: Boolean) {
                 Text(up.notes.ifBlank { t("Fixes and improvements.", "Marekebisho na maboresho.") }, style = MaterialTheme.typography.bodyMedium, color = C.ink, modifier = Modifier.padding(top = 4.dp))
                 Text(t("Downloads right here in the app. Your PIN and saved work stay.", "Inapakuliwa hapa hapa kwenye programu. PIN yako na kazi iliyohifadhiwa vinabaki."), style = MaterialTheme.typography.labelSmall, color = C.muted, modifier = Modifier.padding(top = 10.dp))
                 Btn(t("Update now", "Sasisha sasa"), { show = false; m.updPromptClosed = true; m.updateGo = true; m.focusUpdate = true; m.goTab = "me" }, Modifier.padding(top = 16.dp).fillMaxWidth().testTag("update_prompt_go"), icon = "upload")
-                Btn(t("Remind me later", "Nikumbushe baadaye"), { show = false; m.updPromptClosed = true; m.prefs.updLater = System.currentTimeMillis() + 24 * 3600_000L }, Modifier.padding(top = 10.dp).fillMaxWidth().testTag("update_prompt_later"), light = true)
+                Btn(t("Remind me later", "Nikumbushe baadaye"), { show = false; m.updPromptClosed = true; m.updPromptClosedCode = up.code; m.prefs.updLater = System.currentTimeMillis() + 24 * 3600_000L; m.prefs.updLaterCode = up.code }, Modifier.padding(top = 10.dp).fillMaxWidth().testTag("update_prompt_later"), light = true)
             }
         }
     }

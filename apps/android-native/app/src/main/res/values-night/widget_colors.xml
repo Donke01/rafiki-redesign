@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="w_bg">#FF161E25</color>
+    <color name="w_edge">#FF26323C</color>
+    <color name="w_ink">#FFE6EEF4</color>
+    <color name="w_muted">#FF9CA8B2</color>
+    <color name="w_teal">#FF5CD3D6</color>
+    <color name="w_teal_bg">#FF0F3133</color>
+    <color name="w_amber">#FFF2B35B</color>
+    <color name="w_amber_bg">#FF3A2A10</color>
+    <color name="w_coral">#FFFF9A82</color>
+    <color name="w_coral_bg">#FF3D1F18</color>
+    <color name="w_green_hi">#FF27A866</color>
+    <color name="w_green_lo">#FF16683D</color>
+    <color name="w_blue_hi">#FF1A8BD6</color>
+    <color name="w_blue_lo">#FF0A5E9C</color>
+    <color name="w_glow">#401E78C8</color>
+</resources>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- RAFIKI Pin widget, small (2×1): one line of counts and the two quick actions. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/w_root"
+    android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:gravity="center_vertical"
+    android:background="@drawable/w_bg" android:paddingStart="10dp" android:paddingEnd="10dp" android:paddingTop="6dp" android:paddingBottom="6dp" android:clipToOutline="true">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
+        <ImageView android:id="@+id/w_drop" android:layout_width="19dp" android:layout_height="21dp" android:src="@drawable/w_drop" android:importantForAccessibility="no" />
+        <TextView android:id="@+id/w_short" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginStart="6dp" android:text="@string/w_short"
+            android:textColor="@color/w_ink" android:textSize="11.5sp" android:letterSpacing="-0.02" android:fontFamily="sans-serif-black" android:maxLines="1" android:ellipsize="end" />
+    </LinearLayout>
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginTop="5dp">
+        <LinearLayout android:id="@+id/w_go_near" android:layout_width="0dp" android:layout_height="28dp" android:layout_weight="1" android:orientation="horizontal"
+            android:gravity="center" android:background="@drawable/w_btn_green" android:paddingStart="6dp" android:paddingEnd="6dp" android:contentDescription="@string/w_visit">
+            <ImageView android:layout_width="14dp" android:layout_height="14dp" android:src="@drawable/w_ic_near" android:importantForAccessibility="no" />
+            <TextView android:id="@+id/w_go_near_t" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="5dp" android:text="@string/w_visit"
+                android:textColor="#FFFFFFFF" android:textSize="11.5sp" android:fontFamily="sans-serif-black" android:maxLines="1" android:ellipsize="end" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/w_go_pin" android:layout_width="0dp" android:layout_height="28dp" android:layout_weight="1" android:layout_marginStart="6dp" android:orientation="horizontal"
+            android:gravity="center" android:background="@drawable/w_btn_blue" android:paddingStart="6dp" android:paddingEnd="6dp" android:contentDescription="@string/w_pin">
+            <ImageView android:layout_width="14dp" android:layout_height="14dp" android:src="@drawable/w_ic_pin" android:importantForAccessibility="no" />
+            <TextView android:id="@+id/w_go_pin_t" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="5dp" android:text="@string/w_pin"
+                android:textColor="#FFFFFFFF" android:textSize="11.5sp" android:fontFamily="sans-serif-black" android:maxLines="1" android:ellipsize="end" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

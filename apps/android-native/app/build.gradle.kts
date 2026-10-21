@@ -12,8 +12,8 @@ android {
         applicationId = "org.rafikioutreach.pin"
         minSdk = 24
         targetSdk = 35
-        versionCode = 33
-        versionName = "2.14.0"
+        versionCode = 35
+        versionName = "2.15.1"
         buildConfigField("String", "SERVER", "\"https://rafiki-redesign.pages.dev\"")
     }
     signingConfigs {
@@ -47,6 +47,10 @@ dependencies {
     implementation("androidx.biometric:biometric:1.1.0")
     implementation("androidx.fragment:fragment-ktx:1.8.5")
     implementation("androidx.work:work-runtime-ktx:2.9.1")
+    // QR stickers: ZXing makes the codes (and reads a photo of one); Google's code scanner reads them with the
+    // camera through Google Play services, so the app needs no camera permission and stays small
+    implementation("com.google.zxing:core:3.5.3")
+    implementation("com.google.android.gms:play-services-code-scanner:16.1.0")
     testImplementation(bom)
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.robolectric:robolectric:4.14.1")

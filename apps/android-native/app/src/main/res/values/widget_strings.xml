@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="w_name">RAFIKI Pin</string>
+    <string name="w_desc">Visits due, urgent repairs and work for you, with Visit nearby and Pin a location</string>
+    <string name="w_desc_small">Your day at a glance, with Visit nearby and Pin a location</string>
+    <string name="w_visit">Visit nearby</string>
+    <string name="w_pin">Pin a location</string>
+    <string name="w_due">Visits due</string>
+    <string name="w_urgent">Urgent repairs</string>
+    <string name="w_yours">For you</string>
+    <string name="w_line">3 visits due · 1 urgent repair · 2 assigned to you</string>
+    <string name="w_short">3 due · 1 urgent · 2 yours</string>
+</resources>

@@ -53,6 +53,11 @@ http.createServer((req, res) => {
   // share links /project/<id>: on Cloudflare functions/project/[id].js adds link-preview tags; here just go to the project
   const pj = /^\/project\/(\d{1,20})$/.exec(p0);
   if (pj) { res.writeHead(302, { Location: '/stories?project=' + pj[1], 'Cache-Control': 'no-store' }); return res.end(); }
+  // a donor's private page (on Cloudflare functions/donor/[token].js serves the same file with private headers)
+  if (/^\/donor\/[A-Za-z0-9_-]{10,80}$/.test(p0)) { res.writeHead(200, { 'Content-Security-Policy': CSP, 'X-Content-Type-Options': 'nosniff', 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'private, no-store', 'X-Robots-Tag': 'noindex, nofollow', 'Referrer-Policy': 'strict-origin' }); return fs.createReadStream(path.join(ROOT, 'donor.html')).pipe(res); }
+  // public project cards /p/<id>-<name> are made on Cloudflare (functions/p/[slug].js); here just go to the project
+  const pc = /^\/p\/(\d{1,20})(-[a-z0-9-]*)?$/.exec(p0);
+  if (pc) { res.writeHead(302, { Location: '/stories?project=' + pc[1], 'Cache-Control': 'no-store' }); return res.end(); }
   // live data (/api/projects, photos, contact form, newsletter) runs on Cloudflare: pass it through
   if (p0.startsWith('/api/')) return proxyApi(req, res);
   const target = REDIRECTS[p0];

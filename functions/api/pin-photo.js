@@ -4,6 +4,8 @@
 // Form fields: update (note id), label (optional, e.g. "Water flowing", used in the file name), file (JPEG/PNG/HEIC/WebP photo, or a WebM/MP4/AAC/MP3/OGG voice note; up to 8 MB). Needs the team PIN in "X-Pin".
 import { checkPin } from './pin.js';
 import { addFileToUpdate } from '../../lib/monday.js';
+// voice notes are typed out in the background (Kiswahili or English) and added to the same note: lib/voice-note.js
+import { typeOutVoiceNote } from '../../lib/voice-note.js';
 
 const MAX_BYTES = 8 * 1024 * 1024;
 const EXT = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/heic': 'heic', 'image/heif': 'heif',
@@ -13,7 +15,7 @@ function json(body, status) {
   return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' } });
 }
 
-export async function onRequestPost({ request, env }) {
+export async function onRequestPost({ request, env, waitUntil }) {
   const origin = request.headers.get('Origin');
   if (origin && new URL(origin).host !== new URL(request.url).host) return json({ ok: false, reason: 'origin' }, 403);
   const chk = await checkPin(request, env);
@@ -30,7 +32,9 @@ export async function onRequestPost({ request, env }) {
   const label = String(form.get('label') || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40);
   const name = (type.indexOf('audio/') === 0 ? 'voice-note-' : 'site-photo-' + (label ? label + '-' : '')) + new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-') + '.' + ext;
   try {
+    const voice = type.indexOf('audio/') === 0, bytes = voice ? await file.arrayBuffer() : null;
     await addFileToUpdate(chk.token || env.MONDAY_API_TOKEN, update, file, name, env.MONDAY_API_URL);
+    if (voice && waitUntil) waitUntil(typeOutVoiceNote(env, { token: chk.token || env.MONDAY_API_TOKEN, update, bytes, mime: type, ip: request.headers.get('CF-Connecting-IP') || 'unknown', by: chk.who || '', apiUrl: env.MONDAY_API_URL, secs: Number(form.get('secs')) || 0 }).catch(e => console.error('voice note typing:', e && e.message)));
     return json({ ok: true }, 200);
   } catch (e) {
     console.error('pin photo:', e && e.message);

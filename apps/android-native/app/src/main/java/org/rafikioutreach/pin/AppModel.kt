@@ -86,6 +86,8 @@ class AppModel(app: Application) : AndroidViewModel(app) {
     }
     /** Once a day, quietly, when the app opens. */
     fun checkUpdateDaily() { if (System.currentTimeMillis() - prefs.updAt > 24 * 3600_000L) viewModelScope.launch { checkUpdate() } }
+    /** Checks for a newer app if the last check was more than [minutes] ago (on open, on coming back, and every 15 minutes). */
+    fun checkUpdateSoon(minutes: Int = 2) { if (System.currentTimeMillis() - prefs.updAt > minutes * 60_000L) viewModelScope.launch { checkUpdate() } }
 
     fun showBanner(t: String?) { _banner.value = t }
 
@@ -94,12 +96,17 @@ class AppModel(app: Application) : AndroidViewModel(app) {
     var goTab by androidx.compose.runtime.mutableStateOf<String?>(null)
     /** Open this project (a tap on a notification). */
     var goProject by androidx.compose.runtime.mutableStateOf<String?>(null)
+    /** Open Projects on this list ("near" or "missing"): the widget's Visit nearby and Pin a location. */
+    var goFilter by androidx.compose.runtime.mutableStateOf<String?>(null)
+    fun quick(q: String) { if (q == "near" || q == "missing") { prefs.filter = q; goFilter = q; goTab = "list" } }
     /** Me: scroll to the update card (after "Check" finds one, or "Update now" on the pop-up). */
     var focusUpdate by androidx.compose.runtime.mutableStateOf(false)
     /** The update card should start downloading as soon as it shows ("Update now" on the pop-up). */
     var updateGo by androidx.compose.runtime.mutableStateOf(false)
     /** The update pop-up was closed with ✕: not again until the app is opened next time. */
     var updPromptClosed by androidx.compose.runtime.mutableStateOf(false)
+    /** The version the pop-up was closed (✕) for in this session: a newer one pops up again. */
+    var updPromptClosedCode = 0
     /** "You’re at …" banners closed with ×, until the app is closed. */
     val dismissed = androidx.compose.runtime.mutableStateListOf<String>()
     /** A short title for the top bar while a screen's big title is scrolled away. */
@@ -136,6 +143,7 @@ class AppModel(app: Application) : AndroidViewModel(app) {
         bioLocked.value = false
         val s = prefs.session
         prefs.forget(); _signedIn.value = false
+        org.rafikioutreach.pin.widget.PinWidget.update(getApplication())
         if (s.isNotBlank()) viewModelScope.launch { Api(BuildConfig.SERVER, { "" }, { s }).also { it.transport = api.transport }.logout() }
     }
 
@@ -235,8 +243,13 @@ class AppModel(app: Application) : AndroidViewModel(app) {
     private val _noteTick = MutableStateFlow(0)
     val noteTick: StateFlow<Int> = _noteTick
     fun alerts(): List<Alert> = _snap.value?.let { alertsFor(it, _activity.value.orEmpty(), prefs.name, prefs.noteOff, prefs.reviewAt) }.orEmpty()
-    fun unread(): Int { val seen = prefs.noteSeen; return alerts().count { it.at > seen } }
-    fun markRead() { prefs.noteSeen = java.time.Instant.now().toString(); _noteTick.value++ }
+    /** Unread: newer than "Mark all as read" and not opened one by one. Opening the list doesn't read them. */
+    fun isNew(a: Alert): Boolean = org.rafikioutreach.pin.data.alertNew(a, prefs.noteSeen, prefs.noteRead)
+    fun unread(): Int { val seen = prefs.noteSeen; val read = prefs.noteRead; return alerts().count { org.rafikioutreach.pin.data.alertNew(it, seen, read) } }
+    /** Mark all as read. */
+    fun markRead() { prefs.noteSeen = java.time.Instant.now().toString(); prefs.noteRead = emptySet(); _noteTick.value++ }
+    /** One opened: read (only keys still in the list are kept). */
+    fun markRead(a: Alert) { val keys = alerts().map { it.key }.toSet(); prefs.noteRead = (prefs.noteRead + a.key).filter { it in keys }.toSet(); _noteTick.value++ }
     fun noteChanged() { _noteTick.value++ }
 
     /** Apply a fresh copy of the list (after an Office change). */
@@ -246,6 +259,8 @@ class AppModel(app: Application) : AndroidViewModel(app) {
         val n = raw.optInt("reviewOpen"); if (n > (_snap.value?.reviewOpen ?: 0)) prefs.reviewAt = java.time.Instant.now().toString()
         prefs.saveSnapshot(raw); _snap.value = Snapshot.from(raw)
         org.rafikioutreach.pin.ui.GoogleTiles.configure(getApplication(), _snap.value?.gmapsAndroid)
+        // the home-screen widget counts from this list
+        org.rafikioutreach.pin.widget.PinWidget.update(getApplication())
     }
 
     /** When the list was last fetched (ms), so coming back to the app doesn't reload every time. */
@@ -299,6 +314,7 @@ class AppModel(app: Application) : AndroidViewModel(app) {
         s.copy(repairs = reps, visits = s.visits + (p.id to LastVisit(now, prefs.name, state)))
     }
     fun localFixed(p: Project) = edit { s -> s.copy(repairs = s.repairs - p.id) }
+    fun localTested(p: Project) = edit { s -> s.copy(tests = s.tests + (p.id to Instant.now().toString())) }
     private fun edit(f: (Snapshot) -> Snapshot) { _snap.value?.let { _snap.value = f(it) } }
 
     suspend fun history(id: String): Pair<List<Note>?, String?> {

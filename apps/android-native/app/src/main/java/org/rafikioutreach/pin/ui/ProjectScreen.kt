@@ -109,6 +109,7 @@ fun ProjectScreen(m: AppModel, id: String, startTab: String, back: () -> Unit) {
                 v?.state == "working" -> Box(Modifier.padding(top = 8.dp)) { Tag(t("Working", "Inafanya kazi"), C.okBg, C.ok) }
                 else -> {}
             }
+            if (testDue(snap, p)) WaterTestTag(Modifier.padding(top = 6.dp))
             Text(p.gps?.let { it.text() + t(" · saved location", " · mahali palipohifadhiwa") } ?: t("No location saved yet.", "Bado hakuna mahali palipohifadhiwa."), style = MaterialTheme.typography.bodySmall, color = fg3, modifier = Modifier.padding(top = 8.dp))
             Text(if (v != null) t("Last visit: ", "Ziara ya mwisho: ") + whenText(v.at) + " · " + v.by + " · " + stateName(v.state) else t("No visit recorded in the app yet.", "Bado hakuna ziara iliyorekodiwa kwenye programu."),
                 style = MaterialTheme.typography.bodySmall, color = fg3)
@@ -154,6 +155,9 @@ fun ProjectScreen(m: AppModel, id: String, startTab: String, back: () -> Unit) {
         }
 
         snap.repairs[p.id]?.let { r -> RepairTracker(m, p, r, here) }
+        ProjectCostLine(m, p)
+        ProjectExtrasBar(m, p) { if (tab != "hist") { hp.tap(); tab = "hist" } }
+        DonorThanks(m, p)
 
         // what to do
         Row(Modifier.padding(top = 14.dp).fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(C.card).border(1.dp, C.line, RoundedCornerShape(18.dp)).padding(5.dp)) {
@@ -245,6 +249,7 @@ fun HistoryTab(m: AppModel, p: Project) {
     Msg(err, "bad")
     val n = notes
     if (n == null && err == null) Text(t("Loading…", "Inapakia…"), color = C.muted, modifier = Modifier.padding(top = 12.dp))
+    n?.let { PhotoTimeline(m, p, it) }
     if (n != null && n.isEmpty()) EmptyDrop(t("No notes on this project yet.", "Bado hakuna maelezo kwenye mradi huu."))
     n?.forEach { note ->
         Card(Modifier.padding(top = 10.dp), pad = 14.dp) {
