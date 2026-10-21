@@ -251,7 +251,7 @@ struct HomeTop: View {
         let first = m.prefs.name.split(separator: " ").first.map(String.init) ?? ""
         VStack(alignment: .leading, spacing: 0) {
             Text("Habari, " + (first.isEmpty ? "karibu" : first)).font(.bMedium).foregroundColor(C.muted)
-            (Text(t("Which water point\n", "Kituo gani cha maji\n")).font(.mont(27, .regular)) + Text(t("today?", "leo?")).font(.mont(27, .heavy)))
+            (Text(t("Which project\n", "Mradi gani\n")).font(.mont(27, .regular)) + Text(t("today?", "leo?")).font(.mont(27, .heavy)))
                 .foregroundColor(C.ink).lineSpacing(0).padding(.top, 2).padding(.bottom, 10)
             Button { m.go(Place(tab: "list", sub: "search")) } label: {
                 HStack(spacing: 10) {

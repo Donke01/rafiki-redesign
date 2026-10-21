@@ -15,12 +15,61 @@ let ITEMS: [String: (String, String)] = [
     "base": ("Tank base or stand", "Msingi wa tangi"), "waterpoint": ("Water point works", "Kituo cha maji kinafanya kazi"),
     "handwash": ("Handwashing station (water and soap)", "Kituo cha kunawa mikono (maji na sabuni)"), "latrines": ("Latrines clean and usable", "Vyoo ni safi na vinatumika"),
     "storage": ("Water storage tank", "Tangi la kuhifadhi maji"), "roof": ("Roof and building", "Paa na jengo"),
+    // schools
+    "sroof": ("Roof, gutters and ceiling", "Paa, mifereji na dari"), "walls": ("Walls and floor (no cracks)", "Kuta na sakafu (bila nyufa)"),
+    "doors": ("Doors, windows and locks", "Milango, madirisha na kufuli"), "desks": ("Desks and furniture", "Madawati na samani"),
+    "boards": ("Chalkboards and paint", "Ubao na rangi"), "inuse": ("Classrooms in use", "Madarasa yanatumika"),
+    // clinics
+    "bldg": ("Building, roof and walls", "Jengo, paa na kuta"), "equip": ("Equipment and beds working", "Vifaa na vitanda vinafanya kazi"),
+    "supplies": ("Medicines and supplies stocked and in date", "Dawa na vifaa vipo na havijaisha muda"), "washrooms": ("Water and washrooms", "Maji na vyoo"),
+    "light": ("Power and lighting", "Umeme na taa"), "waste": ("Incinerator and waste disposal", "Kichomea taka na utupaji wa taka"),
+    // children's homes
+    "dorm": ("Dormitories", "Mabweni"), "beds": ("Beds, mattresses and bedding", "Vitanda, magodoro na matandiko"),
+    "kitchen": ("Kitchen and food store", "Jiko na stoo ya chakula"), "wallgate": ("Wall, fence and gate", "Ukuta, uzio na lango"),
+    // farms
+    "pen": ("Pen or coop: roof, walls and floor", "Banda: paa, kuta na sakafu"), "animals": ("Animals healthy", "Mifugo ni wazima"),
+    "feed": ("Feed and water for the animals", "Chakula na maji ya mifugo"), "drained": ("Clean and drained", "Safi na maji hayatuami"),
+    "records": ("Records kept (births, deaths, sales)", "Kumbukumbu zinawekwa (kuzaliwa, vifo, mauzo)"),
+    // any other building
+    "furniture": ("Equipment and furniture", "Vifaa na samani"), "used": ("Being used as planned", "Inatumika kama ilivyopangwa"),
+    // building sites
+    "materials": ("Materials on site and stored safely", "Vifaa vya ujenzi vipo na vimehifadhiwa salama"), "workers": ("Workers on site", "Mafundi wako kazini"),
+    "plumb": ("Walls straight, no cracks", "Kuta zimenyooka, bila nyufa"), "timber": ("Roof and timber", "Paa na mbao"),
+    "fitted": ("Doors and windows fitted", "Milango na madirisha yamewekwa"), "plan": ("Built to the plan and size agreed", "Inajengwa kulingana na mpango na ukubwa uliokubaliwa"),
+    "safety": ("Site safe and tidy", "Eneo ni salama na nadhifu"), "schedule": ("On schedule", "Inaenda kwa ratiba"),
 ]
+
+/// Numbers counted on visits that aren't water.
+private let NUM: [String: (String, String)] = [
+    "pupils": ("Pupils enrolled", "Wanafunzi waliosajiliwa"), "teachers": ("Teachers", "Walimu"), "patients": ("Patients a week", "Wagonjwa kwa wiki"),
+    "staff": ("Staff on duty", "Wafanyakazi kazini"), "beds": ("Beds in use", "Vitanda vinavyotumika"), "children": ("Children living there", "Watoto wanaoishi hapo"),
+    "carers": ("Carers and staff", "Walezi na wafanyakazi"), "animals": ("Animals now", "Mifugo sasa"), "born": ("Born or hatched since the last visit", "Waliozaliwa au kuanguliwa tangu ziara iliyopita"),
+    "died": ("Died since the last visit", "Waliokufa tangu ziara iliyopita"), "sold": ("Sold since the last visit", "Waliouzwa tangu ziara iliyopita"),
+    "income": ("Income from sales since the last visit (KES)", "Mapato ya mauzo tangu ziara iliyopita (KES)"), "users": ("People using it (estimate)", "Watu wanaoitumia (makadirio)"),
+    "workers": ("Workers on site today", "Mafundi kazini leo"),
+]
+private let NUMS: [String: [String]] = ["school": ["pupils", "teachers"], "health": ["patients", "staff", "beds"], "home": ["children", "carers"],
+    "farm": ["animals", "born", "died", "sold", "income"], "building": ["users"], "build": ["workers"]]
+private let CARER: [String: (String, String)] = ["school": ("Head teacher", "Mwalimu mkuu"), "health": ("Person in charge (e.g. clinical officer)", "Msimamizi (mf. afisa wa kliniki)"),
+    "home": ("Home manager", "Msimamizi wa makao"), "farm": ("Farmer", "Mkulima"), "building": ("Person in charge", "Msimamizi"), "build": ("Fundi or site foreman", "Fundi au msimamizi wa ujenzi")]
+private let STAGES: [(String, String, String)] = [("foundation", "Foundation", "Msingi"), ("walls", "Walls", "Kuta"), ("roof", "Roof", "Paa"), ("finishing", "Finishing", "Umaliziaji"), ("done", "Finished", "Imekamilika")]
+func isWater(_ p: Project) -> Bool { let ty = p.type.lowercased(); return ty.contains("borehole") || ty.contains("collection") }
+/// On a building site the condition reads On track / Problems to fix / Work stopped.
+private func stateLabel(_ p: Project, _ k: String) -> String {
+    guard kind(p) == "build" else { return stateName(k) }
+    return k == "working" ? t("On track", "Inaendelea vizuri") : k == "repair" ? t("Problems to fix", "Kuna matatizo ya kurekebisha") : t("Work stopped", "Kazi imesimama")
+}
 
 private func kind(_ p: Project) -> String {
     let ty = p.type.lowercased(), pump = p.pump.lowercased()
     if ty.contains("borehole") { return ["manual": "manual", "solar": "solar", "electric": "electric"][pump] ?? "borehole" }
     if ty.contains("collection") { return "tankk" }
+    // not water: a building site while under construction, otherwise by type
+    if p.status.lowercased().contains("under construction") { return "build" }
+    if ty.contains("school") { return "school" }
+    if ty.contains("health") { return "health" }
+    if ty.contains("orphan") { return "home" }
+    if ty.contains("farm") { return "farm" }
     return "building"
 }
 private let LISTS: [String: [String]] = [
@@ -29,11 +78,29 @@ private let LISTS: [String: [String]] = [
     "solar": ["panels", "pumpruns", "control", "tank", "taps", "pipes", "fence", "clean"],
     "borehole": ["pumpworks", "spout", "apron", "drain", "fence", "lock", "clean"],
     "tankk": ["gutters", "firstflush", "tankwalls", "tap", "lid", "base", "clean"],
-    "building": ["waterpoint", "handwash", "latrines", "storage", "roof", "clean"],
+    "school": ["sroof", "walls", "doors", "desks", "boards", "latrines", "handwash", "inuse"],
+    "health": ["bldg", "equip", "supplies", "washrooms", "light", "waste", "fence", "clean"],
+    "home": ["dorm", "beds", "bldg", "kitchen", "washrooms", "wallgate", "clean"],
+    "farm": ["pen", "animals", "feed", "drained", "records", "fence"],
+    "building": ["bldg", "doors", "furniture", "washrooms", "used", "clean"],
+    "build": ["materials", "workers", "plumb", "timber", "fitted", "plan", "safety", "schedule"],
 ]
 
 private func slots(_ p: Project) -> [Slot] {
-    let b = kind(p) == "building"
+    func s(_ en: String, _ sw: String, _ hen: String = "", _ hsw: String = "") -> Slot { Slot(label: en, title: t(en, sw), hint: hen.isEmpty ? "" : t(hen, hsw)) }
+    let damage = Slot(label: "Any damage", title: t("Any damage", "Uharibifu wowote"), hint: t("Close up of anything broken", "Karibu na kilichoharibika"))
+    let out = s("Outside, the whole building", "Nje, jengo lote")
+    switch kind(p) {
+    case "school": return [out, s("A classroom inside", "Ndani ya darasa"), s("Desks and boards", "Madawati na ubao"), s("Pupils and teachers", "Wanafunzi na walimu", "Only with the school’s permission", "Kwa ruhusa ya shule tu"), damage]
+    case "health": return [out, s("Equipment and beds", "Vifaa na vitanda"), s("Medicine and supplies store", "Stoo ya dawa na vifaa"), s("Water and washrooms", "Maji na vyoo"), damage]
+    case "home": return [out, s("Dormitory and beds", "Bweni na vitanda"), s("Kitchen", "Jiko"), s("Water and latrines", "Maji na vyoo"), damage]
+    case "farm": return [s("The animals", "Mifugo"), s("The pen or coop", "Banda"), s("Feed and water for the animals", "Chakula na maji ya mifugo"), s("The farmer at work", "Mkulima kazini"), damage]
+    case "building": return [out, s("Inside", "Ndani"), s("People using it", "Watu wakiitumia"), damage]
+    case "build": return [s("The whole building now", "Jengo lote sasa", "Same spot as last time, so progress shows", "Mahali pale pale kama mara iliyopita, ili maendeleo yaonekane"),
+        s("Work done since the last visit", "Kazi iliyofanyika tangu ziara iliyopita", "Close up", "Kwa karibu"), s("Materials on site", "Vifaa vya ujenzi"), s("Anything wrong", "Kitu chochote kibaya", "Cracks, leaks, poor work", "Nyufa, kuvuja, kazi mbaya")]
+    default: break
+    }
+    let b = false
     return [
         Slot(label: b ? "The water point" : "Pump or tank, close up", title: b ? t("The water point", "Kituo cha maji") : t("Pump or tank, close up", "Pampu au tangi, kwa karibu"), hint: t("Fill the frame with it", "Ijaze picha nzima")),
         Slot(label: "Water flowing", title: t("Water flowing", "Maji yakitiririka"), hint: t("Water coming out of the spout or tap", "Maji yakitoka kwenye bomba")),
@@ -57,6 +124,8 @@ final class VisitDraft: ObservableObject {
     @Published var active = ""; @Published var chair = ""; @Published var phone = ""; @Published var fund = ""
     @Published var quote = ""; @Published var quoteBy = ""; @Published var consent = false
     @Published var note = ""
+    @Published var stage = ""
+    @Published var nums: [String: String] = [:]
     @Published var shots: [Shot] = []
     @Published var voice: String?
     @Published var sent: String?
@@ -78,7 +147,9 @@ private struct VisitForm: View {
     @State private var msg: (String, String)?
     @State private var busy = false
 
-    var steps: [String] { [t("Arrive", "Fika"), t("Condition", "Hali"), t("Checklist", "Ukaguzi"), t("Readings", "Vipimo"), t("Photos", "Picha"), t("People", "Watu"), t("Send", "Tuma")] }
+    var wet: Bool { isWater(p) }
+    var k0: String { kind(p) }
+    var steps: [String] { [t("Arrive", "Fika"), t("Condition", "Hali"), t("Checklist", "Ukaguzi"), wet ? t("Readings", "Vipimo") : t("Numbers", "Idadi"), t("Photos", "Picha"), t("People", "Watu"), t("Send", "Tuma")] }
     var items: [String] { LISTS[kind(p)] ?? [] }
 
     var body: some View {
@@ -121,10 +192,10 @@ private struct VisitForm: View {
                 Btn(t("I’ve arrived", "Nimefika"), icon: "pin", wide: true) { v.arrived = When.now(); v.arrivedAt = loc.fix?.ll; v.step = 1 }.padding(.top, 14)
             }
         case 1:
-            H2(t("How is it?", "Iko hali gani?"))
+            H2(k0 == "build" ? t("How is the building going?", "Ujenzi unaendeleaje?") : t("How is it?", "Iko hali gani?"))
             ForEach(STATES, id: \.self) { k in
                 let st: (String, Color, Color) = k == "working" ? ("okc", C.ok, C.okBg) : k == "repair" ? ("alert", Amber, C.warnBg) : ("xc", C.bad, C.badBg)
-                Choice(label: stateName(k), icon: st.0, tint: st.1, bg: st.2, on: v.state == k) { v.state = k }
+                Choice(label: stateLabel(p, k), icon: st.0, tint: st.1, bg: st.2, on: v.state == k) { v.state = k }
             }
             if !v.state.isEmpty && v.state != "working" {
                 Text(t("How urgent?", "Ni haraka kiasi gani?")).font(.tSmall).foregroundColor(C.ink).padding(.top, 14)
@@ -132,6 +203,12 @@ private struct VisitForm: View {
             }
         case 2:
             H2(t("Checklist", "Ukaguzi"))
+            if k0 == "build" {
+                Text(t("Stage the building has reached", "Hatua ambayo jengo limefikia")).font(.tSmall).foregroundColor(C.ink).padding(.top, 4)
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 6), count: 3), spacing: 6) {
+                    ForEach(STAGES, id: \.0) { k, en, sw in Pill(t(en, sw), on: v.stage == k) { v.stage = v.stage == k ? "" : k } }
+                }.padding(.top, 8).padding(.bottom, 10)
+            }
             Text(t("Tap OK or Problem for each. Skip anything you couldn’t check.", "Gusa Sawa au Tatizo kwa kila kimoja. Ruka usichoweza kukagua.")).font(.bMedium).foregroundColor(C.muted)
             ForEach(items, id: \.self) { k in
                 let cur = v.check[k] ?? ""
@@ -144,10 +221,17 @@ private struct VisitForm: View {
                 .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                 .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(cur == "ok" ? C.ok : cur == "bad" ? C.bad : C.line, lineWidth: 1)).padding(.top, 8)
             }
-            Field(t("Anything else wrong?", "Kuna kingine kibaya?"), $v.other, placeholder: t("e.g. tap drips", "mf. bomba linavuja"))
+            Field(t("Anything else wrong?", "Kuna kingine kibaya?"), $v.other, placeholder: wet ? t("e.g. tap drips", "mf. bomba linavuja") : k0 == "farm" ? t("e.g. feeder broken", "mf. chombo cha chakula kimevunjika") : t("e.g. window glass broken", "mf. kioo cha dirisha kimevunjika"))
             if v.state != "working" && !v.state.isEmpty {
-                Field(t("Parts needed", "Vipuri vinavyohitajika"), $v.parts, placeholder: t("e.g. 2 pump rods, handle bolt", "mf. fimbo 2 za pampu, boliti ya mkono"))
+                Field(wet ? t("Parts needed", "Vipuri vinavyohitajika") : t("Materials or parts needed", "Vifaa vinavyohitajika"), $v.parts,
+                      placeholder: wet ? t("e.g. 2 pump rods, handle bolt", "mf. fimbo 2 za pampu, boliti ya mkono") : k0 == "farm" ? t("e.g. 4 iron sheets, wire mesh", "mf. mabati 4, wavu wa waya") : t("e.g. 6 iron sheets, 2 door hinges", "mf. mabati 6, bawaba 2 za mlango"))
                 Field(t("Rough cost (KES)", "Gharama ya makadirio (KES)"), $v.cost, number: true)
+            }
+        case 3 where !wet:
+            H2(t("Numbers", "Idadi"))
+            Text(t("All optional.", "Vyote si lazima.")).font(.bMedium).foregroundColor(C.muted)
+            ForEach(NUMS[k0] ?? [], id: \.self) { k in
+                Field(t(NUM[k]!.0, NUM[k]!.1), Binding(get: { v.nums[k] ?? "" }, set: { v.nums[k] = $0 }), placeholder: k == "income" ? "e.g. 12000" : "e.g. 12", number: true)
             }
         case 3:
             H2(t("Readings", "Vipimo"))
@@ -171,8 +255,24 @@ private struct VisitForm: View {
         case 4:
             H2(t("Photos", "Picha"))
             Text(t("Tap a box to take that photo or choose one from your photos. Each one is labelled in monday.com.", "Gusa kisanduku kupiga picha hiyo au kuchagua kutoka kwenye picha zako. Kila moja inapewa jina kwenye monday.com.")).font(.bMedium).foregroundColor(C.muted).padding(.bottom, 10)
+            if k0 == "home" {
+                Text(t("Children: no close-up faces unless the home has agreed.", "Watoto: usipige picha za nyuso kwa karibu isipokuwa makao yamekubali.")).font(.tSmall).foregroundColor(C.warn)
+                    .padding(12).frame(maxWidth: .infinity, alignment: .leading).background(C.warnBg).clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous)).padding(.bottom, 10)
+            }
             PhotoSlots(slots: slots(p), shots: $v.shots)
             VoiceNote(path: $v.voice)
+        case 5 where !wet:
+            let cr = CARER[k0] ?? CARER["building"]!
+            H2(t("Who looks after it", "Anayeisimamia"))
+            HStack(alignment: .bottom, spacing: 10) {
+                Field(t(cr.0, cr.1), $v.chair, placeholder: t("Name", "Jina"))
+                Field(t("Their phone", "Simu yake"), $v.phone)
+            }
+            H2(t("Story moment (optional)", "Hadithi (si lazima)")).padding(.top, 18)
+            Text(t("A few words from someone it helps, for the website.", "Maneno machache kutoka kwa mtu anayesaidiwa, kwa ajili ya tovuti.")).font(.bMedium).foregroundColor(C.muted)
+            Field(t("What they said", "Walichosema"), $v.quote, placeholder: t("e.g. “Our children learn in a dry classroom now.”", "mf. “Watoto wetu sasa wanasoma darasani pasipo kuvuja.”"), lines: 3)
+            Field(t("Who said it", "Aliyesema"), $v.quoteBy, placeholder: t("e.g. Mary, a parent", "mf. Mary, mzazi"))
+            Check(label: t("They agreed to be quoted and photographed for RAFIKI’s website", "Wamekubali kunukuliwa na kupigwa picha kwa tovuti ya RAFIKI"), on: v.consent) { v.consent.toggle() }.padding(.top, 12)
         case 5:
             H2(t("Water committee", "Kamati ya maji"))
             Text(t("Is the committee active?", "Je, kamati iko hai?")).font(.tSmall).foregroundColor(C.ink).padding(.top, 4)
@@ -191,7 +291,10 @@ private struct VisitForm: View {
             Check(label: t("They agreed to be quoted and photographed for RAFIKI’s website", "Wamekubali kunukuliwa na kupigwa picha kwa tovuti ya RAFIKI"), on: v.consent) { v.consent.toggle() }.padding(.top, 12)
         default:
             H2(t("Check and send", "Hakiki na utume"))
-            SumRow(k: t("Condition", "Hali"), v: v.state.isEmpty ? t("Not chosen yet", "Bado haijachaguliwa") : stateName(v.state), bad: v.state.isEmpty)
+            if let sg = STAGES.first(where: { $0.0 == v.stage }) { SumRow(k: t("Stage", "Hatua"), v: t(sg.1, sg.2)) }
+            SumRow(k: t("Condition", "Hali"), v: v.state.isEmpty ? t("Not chosen yet", "Bado haijachaguliwa") : stateLabel(p, v.state), bad: v.state.isEmpty)
+            let nn = v.nums.values.filter { Double($0.trimmingCharacters(in: .whitespaces)) != nil }.count
+            if nn > 0 { SumRow(k: t("Numbers", "Idadi"), v: "\(nn)") }
             SumRow(k: t("Problems", "Matatizo"), v: "\(v.check.values.filter { $0 == "bad" }.count + (v.other.trimmingCharacters(in: .whitespaces).isEmpty ? 0 : 1))")
             SumRow(k: t("Photos", "Picha"), v: "\(v.shots.count)" + (v.voice != nil ? t(" + voice note", " + ujumbe wa sauti") : ""))
             Field(t("Notes", "Maelezo"), $v.note, placeholder: t("Anything else the office should know", "Kitu kingine chochote ofisi inapaswa kujua"), lines: 3)
@@ -220,6 +323,11 @@ private struct VisitForm: View {
                 "story": ["quote": trim(v.quote), "by": trim(v.quoteBy), "consent": v.consent] as JSON, "note": trim(v.note), "leave": When.now(),
             ]
             if let c = num(v.cost) { body["cost"] = c }
+            if !wet {
+                body["kind"] = k0; if !v.stage.isEmpty { body["stage"] = v.stage }
+                var ns: JSON = [:]; for (k, s) in v.nums { if let x = num(s) { ns[k] = x } }
+                body["numbers"] = ns; body["carer"] = ["name": trim(v.chair), "phone": trim(v.phone)] as JSON
+            }
             if let a = v.arrived { body["arrive"] = a }
             if let ll = v.arrivedAt ?? loc.fix?.ll { body["lat"] = ll.lat; body["lng"] = ll.lng }
             let files = v.shots.map { OutFile(path: $0.path, kind: "photo", label: $0.label) } + (v.voice.map { [OutFile(path: $0, kind: "voice", label: "Voice note")] } ?? [])
