@@ -3723,7 +3723,7 @@ html[data-theme=dark] .waitc{background:var(--card) !important;border-color:var(
   }
   function noteUnread() { var seen = store.get('rfPinNoteSeen') || ''; return notes().filter(function (n) { return String(n.at) > seen; }).length; }
   function bellUi() { var n = noteUnread(), b = $('meBellN'); if (!b) return; b.textContent = n > 9 ? '9+' : n; b.classList.toggle('hidden', !n); $('meBell').setAttribute('aria-label', tr('Notifications', 'Arifa') + (n ? ' · ' + n + ' ' + tr('new', 'mpya') : '')); }
-  function bsheet(title, html, cls) {
+  function panel(title, html, cls) {
     var w = document.createElement('div'); w.className = 'bsh ' + (cls || ''); w.setAttribute('role', 'dialog'); w.setAttribute('aria-modal', 'true'); w.setAttribute('aria-label', title);
     w.innerHTML = '<div class="bsh-bg"></div><div class="bsh-p"><i class="grab" aria-hidden="true"></i><div class="bsh-h"><h3>' + title + '</h3><button type="button" class="bsh-x" aria-label="' + tr('Close', 'Funga') + '">' + oic('xc').replace(/<circle[^>]*\/>/, '') + '</button></div>' + html + '</div>';
     document.body.appendChild(w); requestAnimationFrame(function () { w.classList.add('in'); });
@@ -3737,7 +3737,7 @@ html[data-theme=dark] .waitc{background:var(--card) !important;border-color:var(
       var k = K[n.k];
       return '<li><button type="button" class="nrow' + (String(n.at) > seen ? ' new' : '') + '"' + (n.id ? ' data-id="' + esc(n.id) + '"' : n.k === 'review' ? ' data-go="review"' : '') + '><span class="pi" style="--hu:var(--hu-' + k[4] + ');--hb:var(--hb-' + k[4] + ')">' + oic(k[3]) + '</span><span class="nt"><b>' + esc(n.t) + '</b><small>' + esc(when(n.at)) + '</small></span>' + (String(n.at) > seen ? '<i class="nd" aria-label="' + tr('new', 'mpya') + '"></i>' : '') + '</button></li>';
     }).join('') + '</ul>' : '<div class="nempty">' + oic('check') + '<p>' + tr('You’re all caught up.', 'Hakuna jipya kwa sasa.') + '</p></div>';
-    var w = bsheet(tr('Notifications', 'Arifa'), html + '<button class="lnk" type="button" data-set="notify" style="margin-top:12px">' + tr('Choose what to be told about', 'Chagua unachotaka kuarifiwa') + '</button>', 'notes');
+    var w = panel(tr('Notifications', 'Arifa'), html + '<button class="lnk" type="button" data-set="notify" style="margin-top:12px">' + tr('Choose what to be told about', 'Chagua unachotaka kuarifiwa') + '</button>', 'notes');
     store.set('rfPinNoteSeen', new Date().toISOString()); bellUi();
     w.addEventListener('click', function (e) {
       var r = e.target.closest('[data-id]'); if (r) { w.close(); openProj(r.getAttribute('data-id')); return; }
@@ -3782,7 +3782,7 @@ html[data-theme=dark] .waitc{background:var(--card) !important;border-color:var(
     var me = S.me || {}, kind = me.kind || (S.mode === 'monday' ? 'monday' : S.who ? '' : 'shared'), w;
     if (k === 'profile') {
       var own = !!S.who;
-      w = bsheet(tr('Personal details', 'Taarifa zangu'),
+      w = panel(tr('Personal details', 'Taarifa zangu'),
         '<div class="fld"><label for="pfName">' + tr('Full name', 'Jina kamili') + '</label><input id="pfName" type="text" value="' + esc(S.name || '') + '"' + (own ? ' readonly' : '') + ' autocomplete="name"><small class="muted">' + (own ? tr('Your name comes from your sign-in. Ask the office to change it.', 'Jina lako linatoka kwenye kuingia kwako. Omba ofisi ibadilishe.') : tr('With the shared team PIN, this is the name your changes go in under.', 'Kwa PIN ya timu, haya ndiyo majina yanayoonekana kwenye mabadiliko yako.')) + '</small></div>' +
         (own ? '<div class="fld"><label for="pfNick">' + tr('What the team calls you (optional)', 'Jina la kuitwa na timu (si lazima)') + '</label><input id="pfNick" type="text" value="' + esc(me.nick || '') + '" placeholder="' + tr('e.g. Mery', 'mf. Mery') + '" maxlength="40"></div>' +
         '<div class="fld"><label for="pfPhone">' + tr('Phone (for calls and WhatsApp from the team)', 'Simu (kwa simu na WhatsApp kutoka kwa timu)') + '</label><input id="pfPhone" type="tel" inputmode="tel" value="' + esc(me.phone || '') + '" placeholder="07… / +254 7…" autocomplete="tel"></div>' +
@@ -3797,8 +3797,8 @@ html[data-theme=dark] .waitc{background:var(--card) !important;border-color:var(
         });
       });
     } else if (k === 'pin') {
-      if (kind !== 'app') { bsheet(kind === 'monday' ? tr('Sign-in', 'Kuingia') : tr('Change my PIN', 'Badilisha PIN yangu'), '<p>' + (kind === 'monday' ? tr('You sign in with your monday.com account, so there’s no PIN to change. To change your monday.com password, use monday.com.', 'Unaingia kwa akaunti yako ya monday.com, kwa hiyo hakuna PIN ya kubadilisha. Kubadilisha nenosiri la monday.com, tumia monday.com.') : kind === 'cloudflare' ? tr('Your PIN was set up by the office, so only they can change it. Ask an admin for a new one in Office › Team.', 'PIN yako iliwekwa na ofisi, kwa hiyo wao pekee wanaweza kuibadilisha. Muombe msimamizi akupe mpya kwenye Ofisi › Timu.') : tr('You’re using the shared team PIN. Ask the office for your own PIN, then you can change it here.', 'Unatumia PIN ya timu. Omba ofisi ikupe PIN yako mwenyewe, kisha unaweza kuibadilisha hapa.')) + '</p>'); return; }
-      w = bsheet(tr('Change my PIN', 'Badilisha PIN yangu'),
+      if (kind !== 'app') { panel(kind === 'monday' ? tr('Sign-in', 'Kuingia') : tr('Change my PIN', 'Badilisha PIN yangu'), '<p>' + (kind === 'monday' ? tr('You sign in with your monday.com account, so there’s no PIN to change. To change your monday.com password, use monday.com.', 'Unaingia kwa akaunti yako ya monday.com, kwa hiyo hakuna PIN ya kubadilisha. Kubadilisha nenosiri la monday.com, tumia monday.com.') : kind === 'cloudflare' ? tr('Your PIN was set up by the office, so only they can change it. Ask an admin for a new one in Office › Team.', 'PIN yako iliwekwa na ofisi, kwa hiyo wao pekee wanaweza kuibadilisha. Muombe msimamizi akupe mpya kwenye Ofisi › Timu.') : tr('You’re using the shared team PIN. Ask the office for your own PIN, then you can change it here.', 'Unatumia PIN ya timu. Omba ofisi ikupe PIN yako mwenyewe, kisha unaweza kuibadilisha hapa.')) + '</p>'); return; }
+      w = panel(tr('Change my PIN', 'Badilisha PIN yangu'),
         '<div class="fld"><label for="cpOld">' + tr('Current PIN', 'PIN ya sasa') + '</label><input id="cpOld" type="password" inputmode="numeric" maxlength="6" autocomplete="current-password"></div>' +
         '<div class="fld"><label for="cpNew">' + tr('New PIN (4 to 6 digits)', 'PIN mpya (tarakimu 4 hadi 6)') + '</label><input id="cpNew" type="password" inputmode="numeric" maxlength="6" autocomplete="new-password"></div>' +
         '<div class="fld"><label for="cpNew2">' + tr('New PIN again', 'PIN mpya tena') + '</label><input id="cpNew2" type="password" inputmode="numeric" maxlength="6" autocomplete="new-password"></div>' +
@@ -3815,11 +3815,11 @@ html[data-theme=dark] .waitc{background:var(--card) !important;border-color:var(
       });
     } else if (k === 'notify') {
       var o = jget('rfPinNoteKinds', {});
-      w = bsheet(tr('Notifications', 'Arifa'), '<p class="muted">' + tr('The bell in Me & team shows these. On Android the phone can also tell you when the app is closed (turn that on in the Android app).', 'Kengele kwenye Mimi na timu inaonyesha haya. Kwenye Android simu inaweza pia kukuarifu programu ikiwa imefungwa (washa kwenye programu ya Android).') + '</p>' +
+      w = panel(tr('Notifications', 'Arifa'), '<p class="muted">' + tr('The bell in Me & team shows these. On Android the phone can also tell you when the app is closed (turn that on in the Android app).', 'Kengele kwenye Mimi na timu inaonyesha haya. Kwenye Android simu inaweza pia kukuarifu programu ikiwa imefungwa (washa kwenye programu ya Android).') + '</p>' +
         NOTE_KINDS.filter(function (n) { return n[0] !== 'review' || S.admin; }).map(function (n) { return '<div class="pr"><span class="pi" style="--hu:var(--hu-' + n[4] + ');--hb:var(--hb-' + n[4] + ')">' + oic(n[3]) + '</span><b>' + tr(n[1], n[2]) + '</b><button type="button" class="tgl" role="switch" data-nk="' + n[0] + '" aria-checked="' + (o[n[0]] !== 0) + '" aria-label="' + tr(n[1], n[2]) + '"><i></i></button></div>'; }).join(''));
       w.addEventListener('click', function (e) { var t = e.target.closest('[data-nk]'); if (!t) return; var kk = t.getAttribute('data-nk'), on = t.getAttribute('aria-checked') !== 'true'; t.setAttribute('aria-checked', on); o[kk] = on ? 1 : 0; store.set('rfPinNoteKinds', JSON.stringify(o)); bellUi(); buzz(); });
     } else if (k === 'help') {
-      bsheet(tr('Help and FAQs', 'Msaada na maswali'), '<div class="faq">' + FAQ.map(function (f) { return '<details><summary>' + tr(f[0], f[1]) + '</summary><p>' + tr(f[2], f[3]) + '</p></details>'; }).join('') + '</div><a class="btn light block" href="/faq" target="_blank" rel="noopener" style="margin-top:12px">' + tr('More questions on the website', 'Maswali zaidi kwenye tovuti') + '</a>');
+      panel(tr('Help and FAQs', 'Msaada na maswali'), '<div class="faq">' + FAQ.map(function (f) { return '<details><summary>' + tr(f[0], f[1]) + '</summary><p>' + tr(f[2], f[3]) + '</p></details>'; }).join('') + '</div><a class="btn light block" href="/faq" target="_blank" rel="noopener" style="margin-top:12px">' + tr('More questions on the website', 'Maswali zaidi kwenye tovuti') + '</a>');
     } else if (k === 'contact') {
       location.href = 'mailto:info@rafikioutreach.org?subject=' + encodeURIComponent('RAFIKI Pin: ' + (S.name || ''));
     } else if (k === 'problem') {
@@ -3827,9 +3827,9 @@ html[data-theme=dark] .waitc{background:var(--card) !important;border-color:var(
     } else if (k === 'privacy' || k === 'terms') {
       window.open(k === 'privacy' ? '/privacy-policy' : '/terms-of-use', '_blank', 'noopener');
     } else if (k === 'about') {
-      bsheet(tr('About RAFIKI Pin', 'Kuhusu RAFIKI Pin'), '<div class="about">' + LOGO + '<p><b>RAFIKI Pin</b> · ' + tr('version ', 'toleo ') + esc(APPV) + '</p><p class="muted">' + tr('The field app for RAFIKI Outreach: pin projects, report visits and repairs, and keep monday.com up to date, even with no signal.', 'Programu ya uwanjani ya RAFIKI Outreach: weka mahali pa miradi, ripoti ziara na matengenezo, na usasishe monday.com, hata bila mtandao.') + '</p><a class="lnk" href="https://www.rafikioutreach.org" target="_blank" rel="noopener">rafikioutreach.org</a></div>');
+      panel(tr('About RAFIKI Pin', 'Kuhusu RAFIKI Pin'), '<div class="about">' + LOGO + '<p><b>RAFIKI Pin</b> · ' + tr('version ', 'toleo ') + esc(APPV) + '</p><p class="muted">' + tr('The field app for RAFIKI Outreach: pin projects, report visits and repairs, and keep monday.com up to date, even with no signal.', 'Programu ya uwanjani ya RAFIKI Outreach: weka mahali pa miradi, ripoti ziara na matengenezo, na usasishe monday.com, hata bila mtandao.') + '</p><a class="lnk" href="https://www.rafikioutreach.org" target="_blank" rel="noopener">rafikioutreach.org</a></div>');
     } else if (k === 'signout') {
-      w = bsheet(tr('Sign out of this phone?', 'Toka kwenye simu hii?'), '<p class="muted">' + tr('Changes waiting to send stay on this phone and go when you sign in again.', 'Mabadiliko yanayosubiri yanabaki kwenye simu na kutumwa ukiingia tena.') + '</p><button class="btn block" type="button" id="soGo">' + tr('Sign out', 'Toka') + '</button><button class="btn light block" type="button" id="soNo" style="margin-top:8px">' + tr('Stay signed in', 'Baki ndani') + '</button>');
+      w = panel(tr('Sign out of this phone?', 'Toka kwenye simu hii?'), '<p class="muted">' + tr('Changes waiting to send stay on this phone and go when you sign in again.', 'Mabadiliko yanayosubiri yanabaki kwenye simu na kutumwa ukiingia tena.') + '</p><button class="btn block" type="button" id="soGo">' + tr('Sign out', 'Toka') + '</button><button class="btn light block" type="button" id="soNo" style="margin-top:8px">' + tr('Stay signed in', 'Baki ndani') + '</button>');
       $('soNo').addEventListener('click', w.close);
       $('soGo').addEventListener('click', function () { w.close(); signOutAll(); });
     }
