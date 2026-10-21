@@ -145,6 +145,88 @@ html[data-theme=dark] .kpi{background:#12324A}html[data-theme=dark] .kpi b,html[
 .pinbox{display:flex;flex-direction:column;align-items:flex-start;gap:4px;margin-top:12px;padding:14px;border-radius:14px;background:var(--okbg);color:var(--ok)}
 .pinbox b{font-size:2rem;letter-spacing:.2em;color:var(--ink)}
 .pinbox small{color:var(--text)}
+/* Office › Team: a compact list grouped by role; tap a person for a sheet that springs up */
+.tm-top{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.tm-top .btn{flex:0 0 auto}.tm-top .btn svg{width:20px;height:20px}
+.tm-top input[type=search]{flex:1 1 180px;min-height:48px;width:auto}
+.tm-sec{display:flex;align-items:center;gap:8px;margin:20px 4px 8px;font-size:.76rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.tm-sec svg{width:18px;height:18px;color:var(--hu-slate)}.tm-sec.adm svg{color:var(--hu-amber)}
+.tm-sec .n{min-width:22px;padding:2px 8px;border-radius:99px;background:var(--hb-slate);color:var(--hu-slate);font-size:.72rem;letter-spacing:0;text-align:center}
+.tm-sec.adm .n{background:var(--hb-amber);color:var(--hu-amber)}
+.tm-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px}
+.tm-row{display:flex;align-items:center;gap:12px;width:100%;min-height:68px;padding:10px 12px;border:var(--bw) solid var(--line);border-radius:18px;background:var(--card);color:inherit;font:inherit;text-align:left;cursor:pointer;
+  animation:tmIn .52s cubic-bezier(.34,1.4,.64,1) both;animation-delay:calc(var(--i,0) * 45ms);transition:transform .25s cubic-bezier(.34,1.56,.64,1),box-shadow .2s,border-color .2s}
+.tm-row:hover{border-color:var(--blue);box-shadow:0 6px 18px rgba(4,38,63,.08)}
+.tm-row:active{transform:scale(.97);transition-duration:.1s}
+.tm-row:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.tm-list.still .tm-row{animation:none}
+.tm-row[hidden],.tm-sec[hidden]{display:none}
+@keyframes tmIn{from{opacity:0;transform:translateY(16px) scale(.97)}to{opacity:1;transform:none}}
+.tm-av{position:relative;flex:none;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--hb);color:var(--hu);font-weight:800;font-size:.95rem;letter-spacing:.02em}
+.tm-av .cr{position:absolute;top:-8px;right:-6px;width:22px;height:22px;padding:3px;border-radius:50%;background:var(--card);color:#E0A100;box-shadow:0 1px 4px rgba(4,38,63,.22)}
+.tm-av .cr svg{width:100%;height:100%;display:block}
+.tm-mid{flex:1;min-width:0}
+.tm-nm{display:block;font-weight:800;color:var(--ink);font-size:.98rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tm-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.tm-t{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:99px;background:var(--hb,var(--hb-slate));color:var(--hu,var(--hu-slate));font-size:.7rem;font-weight:800;line-height:1.5;white-space:nowrap}
+.tm-t svg{width:12px;height:12px;flex:none}
+.tm-t.adm{--hu:var(--hu-amber);--hb:var(--hb-amber)}.tm-t.s-app{--hu:var(--hu-green);--hb:var(--hb-green)}.tm-t.s-cloudflare{--hu:var(--hu-purple);--hb:var(--hb-purple)}.tm-t.s-monday{--hu:var(--hu-blue);--hb:var(--hb-blue)}
+.tm-seen{display:block;margin-top:3px;font-size:.76rem;color:var(--muted)}
+.tm-chev{flex:none;color:var(--muted);display:flex;transition:transform .2s}.tm-chev svg{width:18px;height:18px}
+.tm-row:hover .tm-chev{transform:translateX(3px);color:var(--blue)}
+.tm-empty{padding:14px;color:var(--muted)}
+.tm-mail{display:flex;gap:12px;align-items:flex-start}.tm-mail .ic{flex:none;width:40px;height:40px;border-radius:13px;display:flex;align-items:center;justify-content:center;background:var(--hb-teal);color:var(--hu-teal)}.tm-mail .ic svg{width:22px;height:22px}
+.tm-mail h2{font-size:1rem;margin:0 0 2px}.tm-mail p{margin:0 0 8px;font-size:.86rem}.tm-mail .btn{min-height:44px}
+html[data-theme=sun] .tm-t{border:1.5px solid currentColor}
+html[data-theme=sun] .tm-av{border:2px solid #000}
+html[data-theme=dark] .tm-av .cr{background:#26323C;color:#F2C14E}
+html[data-theme=dark] .tm-row:hover{box-shadow:none}
+/* the person sheet: slides up on a phone, a centred card on a wide screen */
+.tsh{position:fixed;inset:0;z-index:2100;display:flex;align-items:flex-end;justify-content:center}
+.tsh-bg{position:absolute;inset:0;background:rgba(4,20,34,.46);opacity:0;transition:opacity .25s}
+.tsh-p{position:relative;display:flex;flex-direction:column;width:100%;max-width:560px;max-height:90vh;overflow:hidden;border-radius:28px 28px 0 0;background:var(--card);color:var(--text);box-shadow:0 -12px 40px rgba(4,38,63,.28);
+  transform:translateY(105%);transition:transform .55s cubic-bezier(.3,1.3,.5,1)}
+.tsh-p{padding-top:22px}.tsh-c{flex:1 1 auto;min-height:0;overflow:auto;overscroll-behavior:contain;padding:6px 18px calc(18px + env(safe-area-inset-bottom))}
+.tsh.in .tsh-bg{opacity:1}.tsh.in .tsh-p{transform:none}
+.tsh.out .tsh-bg{opacity:0}.tsh.out .tsh-p{transform:translateY(105%);transition:transform .22s cubic-bezier(.4,0,1,1)}
+.tsh .grab{position:absolute;left:50%;top:8px;width:40px;height:5px;margin-left:-20px;border-radius:99px;background:var(--edge)}
+.tsh-x{position:absolute;right:12px;top:12px;width:44px;height:44px;border-radius:50%;border:0;background:var(--hb-slate);color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:1}.tsh-x svg{width:18px;height:18px}
+@media (min-width:700px){.tsh{align-items:center;padding:24px}.tsh-p{max-width:470px;border-radius:26px;box-shadow:0 24px 60px rgba(4,38,63,.3);transform:translateY(14px) scale(.9);opacity:0;transition:transform .45s cubic-bezier(.34,1.45,.64,1),opacity .2s}
+  .tsh.in .tsh-p{transform:none;opacity:1}.tsh.out .tsh-p{transform:scale(.94);opacity:0;transition:transform .18s,opacity .18s}.tsh .grab{display:none}.tsh-p{padding-top:0}.tsh-c{padding:26px 22px 22px}}
+html[data-theme=dark] .tsh-p{border:1px solid var(--line);box-shadow:0 -12px 40px rgba(0,0,0,.5)}
+html[data-theme=sun] .tsh-p{border:2px solid #000;box-shadow:none}
+.tm-hd{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;padding:4px 30px 10px}
+.tm-hd .tm-av{width:68px;height:68px;font-size:1.4rem;animation:tmPop .5s cubic-bezier(.34,1.56,.64,1) .08s both}
+.tm-hd .tm-av .cr{width:28px;height:28px;top:-9px;right:-7px;padding:4px}
+.tm-hd h3{margin:4px 0 0;font-size:1.3rem;color:var(--ink)}
+.tm-hd .tm-tags{justify-content:center}
+@keyframes tmPop{from{transform:scale(.6);opacity:0}to{transform:none;opacity:1}}
+.tm-f label{margin:12px 0 0}.tm-f input,.tm-f select{margin-top:6px;min-height:48px}
+.tm-f .row2{display:grid;grid-template-columns:1fr;gap:0 10px}
+@media (min-width:420px){.tm-f .row2{grid-template-columns:1fr 1fr}}
+.tm-sw{display:flex;align-items:center;gap:12px;width:100%;margin:14px 0 0;padding:12px 14px;border:var(--bw) solid var(--line);border-radius:16px;background:var(--card);color:inherit;font:inherit;text-align:left;cursor:pointer}
+.tm-sw .ic{flex:none;width:36px;height:36px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:var(--hb-amber);color:var(--hu-amber)}.tm-sw .ic svg{width:20px;height:20px}
+.tm-sw span{flex:1;min-width:0}.tm-sw b{display:block;color:var(--ink);font-size:.95rem}.tm-sw small{display:block;color:var(--muted);font-size:.8rem}
+.tm-sw i{position:relative;flex:none;width:52px;height:32px;border-radius:99px;background:var(--edge);transition:background-color .25s}
+.tm-sw i::after{content:"";position:absolute;left:3px;top:3px;width:26px;height:26px;border-radius:50%;background:#FFFFFF;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .35s cubic-bezier(.34,1.56,.64,1)}
+.tm-sw[aria-checked=true] i{background:var(--ok)}.tm-sw[aria-checked=true] i::after{transform:translateX(20px)}
+.tm-sw:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+html[data-theme=sun] .tm-sw i{border:2px solid #000}
+.tm-go{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:16px}.tm-go .btn{flex:1 1 auto}.tm-go .msg{margin:0;flex-basis:100%}
+.tm-ab{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+.tm-ab button{display:flex;align-items:center;justify-content:center;gap:8px;min-height:46px;border-radius:14px;border:var(--bw) solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-size:.9rem;font-weight:700;cursor:pointer}
+.tm-ab button svg{width:18px;height:18px}.tm-ab [data-a=pin] svg{color:var(--hu-blue)}.tm-ab [data-a=rm]{color:var(--bad)}
+.tm-ab button:hover{background:var(--tint)}.tm-ab [data-a=rm]:hover{background:var(--badbg)}
+.tm-cf{overflow:hidden}
+.tm-ask{margin-top:12px;padding:14px;border-radius:16px;background:var(--hb-slate);animation:tmAsk .32s cubic-bezier(.34,1.3,.64,1) both}
+.tm-ask.bad{background:var(--badbg)}.tm-ask p{margin:0 0 10px;color:var(--ink);font-weight:600;font-size:.92rem}
+.tm-ask .tm-go{margin-top:0}.tm-ask .btn.red{background:var(--bad) !important;color:#FFFFFF !important;box-shadow:none !important}
+@keyframes tmAsk{from{opacity:0;transform:translateY(-6px) scale(.98)}to{opacity:1;transform:none}}
+.tm-note{display:flex;gap:10px;align-items:flex-start;margin-top:8px;padding:12px 14px;border-radius:16px;background:var(--hb-purple);color:var(--ink);font-size:.9rem}.tm-note svg{flex:none;width:20px;height:20px;color:var(--hu-purple);margin-top:1px}
+.tm-note.monday{background:var(--hb-blue)}.tm-note.monday svg{color:var(--hu-blue)}
+.tm-kv{margin:12px 0 0;display:grid;gap:6px;font-size:.9rem}.tm-kv div{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}.tm-kv dt{color:var(--muted)}.tm-kv dd{margin:0;font-weight:700;color:var(--ink)}
+.tsh .pinbox{animation:tmAsk .4s cubic-bezier(.34,1.4,.64,1) both}
+@media (prefers-reduced-motion: reduce){.tm-row,.tm-hd .tm-av,.tm-ask,.tsh .pinbox{animation:none !important}.tsh-p,.tsh-bg,.tm-sw i,.tm-sw i::after,.tm-row{transition:none !important}}
 .xbtns{display:flex;flex-direction:column;gap:8px}
 .xbtns .btn{justify-content:flex-start}
 .conf{color:var(--ok);font-weight:700}
@@ -4297,59 +4379,155 @@ html[data-theme=dark] .waitc{background:var(--card) !important;border-color:var(
     });
   });
 
-  // team: people, roles, PINs
-  function oTeam(b) {
-    var rows = (O.team || []).slice().sort(function (a, z) { return (z.admin - a.admin) || a.name.localeCompare(z.name); });
-    var src = { app: 'PIN from this app', cloudflare: 'PIN set in Cloudflare', monday: 'monday.com sign-in' };
-    b.innerHTML = '<div class="o-grid"><div><div class="ocards">' + rows.map(function (p) {
-      var editable = p.source === 'app';
-      return '<article class="card oteam" data-name="' + esc(p.name) + '"><div class="oh"><b>' + esc(p.name) + '</b><span class="tag ' + (p.admin ? 'has' : '') + '">' + (p.admin ? 'Admin' : 'Field') + '</span></div>' +
-        '<p class="muted">' + src[p.source] + ' · last active ' + (p.lastSeen ? esc(when(p.lastSeen)) : 'never') + '</p>' +
-        (editable ? '<div class="ofields"><label>Home country<select data-f="home"><option value="">All countries</option>' + ['ke', 'tz', 'ug', 'mw'].map(function (c) { return '<option value="' + c + '"' + (p.home === c ? ' selected' : '') + '>' + CNAME[c] + '</option>'; }).join('') + '</select></label>' +
-          '<label>E-mail (for alerts)<input type="email" data-f="email" value="' + esc(p.email) + '" placeholder="name@rafikioutreach.org"></label>' +
-          '<label>Phone (the team sees it, for calls and WhatsApp)<input type="tel" data-f="phone" value="' + esc(p.phone || '') + '" placeholder="+254 712 345 678"></label></div>' +
-          '<label class="tick"><input type="checkbox" data-f="admin"' + (p.admin ? ' checked' : '') + '> Admin (sees the Office tab)</label>' +
-          '<div class="oact"><button class="btn small" type="button" data-t="team-update">Save</button><button class="btn small light" type="button" data-t="team-pin">New PIN</button><button class="btn small light" type="button" data-t="team-remove">Remove</button><span class="msg" aria-live="polite"></span></div>'
-          : '<p class="muted">' + (p.source === 'cloudflare' ? 'To change or remove, edit PIN_USERS in Cloudflare, or add them here with an app PIN and remove the Cloudflare entry.' : 'Signs in with monday.com. Admin role comes from PIN_ADMINS in Cloudflare.') + '</p>') + '</article>';
-    }).join('') + '</div></div>' +
-      '<div><div class="card"><h2>Add a person</h2><p class="muted">They get their own 4-digit PIN, shown once. Send it to them privately.</p>' +
-      '<label>Name<input type="text" id="tName" autocomplete="off" placeholder="e.g. Jessica Anderson"></label>' +
-      '<div class="ofields"><label>Home country<select id="tHome"><option value="">All countries</option><option value="ke">Kenya</option><option value="tz">Tanzania</option><option value="ug">Uganda</option><option value="mw">Malawi</option></select></label>' +
-      '<label>E-mail (optional)<input type="email" id="tEmail" placeholder="for alerts"></label>' +
-      '<label>Phone (optional)<input type="tel" id="tPhone" placeholder="+254 712 345 678"></label></div>' +
-      '<label class="tick"><input type="checkbox" id="tAdmin"> Admin</label>' +
-      '<div class="oact"><button class="btn" type="button" id="tAdd">Add and create PIN</button><span class="msg" id="tMsg" aria-live="polite"></span></div><div id="tPin"></div></div>' +
-      '<div class="card" style="margin-top:12px"><h2>E-mail alerts</h2>' + (O.mail && O.mail.ready ? '<p>Alerts go to: <b>' + esc((O.mail.to || []).join(', ') || 'nobody yet: add an admin with an e-mail') + '</b></p><button class="btn small light" type="button" id="tTest">Send a test e-mail</button><span class="msg" id="tTestMsg" aria-live="polite"></span>' : '<p class="muted">Not switched on yet. Add RESEND_API_KEY and ALERT_FROM in Cloudflare (see the set-up notes).</p>') + '</div></div></div>';
-    $('tAdd').addEventListener('click', function () {
-      var n = $('tName').value.trim(); if (!n) { $('tName').focus(); return; }
-      msg('tMsg', '', 'Adding…');
-      adminApi('POST', { action: 'team-add', name: n, home: $('tHome').value, email: $('tEmail').value, phone: $('tPhone').value, admin: $('tAdmin').checked }).then(function (j) {
-        if (!j.ok) { msg('tMsg', 'bad', j.reason === 'exists' ? 'Someone with that name is already on the team.' : why(j)); return; }
-        pinBox($('tPin'), n, j.pin); O.team = null; msg('tMsg', 'ok', 'Added ✓');
-        oNeedTeam(function () { var keep = $('tPin').innerHTML; oTeam(b); $('tPin').innerHTML = keep; });
+  // team: people, roles, PINs. A short list grouped by role (admins wear a crown); tap a person for a sheet with their details and actions.
+  Object.assign(OIC, {
+    key: '<circle cx="8" cy="15.5" r="4.5"/><path d="M11.2 12.3 19.5 4M16 7.5l2.5 2.5M13.8 9.7l2 2"/>',
+    trash: '<path d="M4.5 6.5h15M9.5 6.5v-2h5v2M6.5 6.5l1 13.5h9l1-13.5M10 10.5v6M14 10.5v6"/>',
+    mail: '<rect x="3.5" y="5.5" width="17" height="13" rx="2.5"/><path d="M4 7.5l8 6 8-6"/>',
+    cloud: '<path d="M7 18.5a4.5 4.5 0 0 1-.6-9A6 6 0 0 1 18 9.6a4.5 4.5 0 0 1-.5 8.9z"/>',
+    x: '<path d="M6 6l12 12M18 6L6 18"/>'
+  });
+  var CROWN = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3.4 8.9 8.1 12.4l3.9-6.6 3.9 6.6 4.7-3.5-1.6 9.1H5z"/><rect fill="currentColor" x="5" y="19.3" width="14" height="2.2" rx="1.1"/><circle fill="currentColor" cx="3.1" cy="7.7" r="1.6"/><circle fill="currentColor" cx="12" cy="4.3" r="1.7"/><circle fill="currentColor" cx="20.9" cy="7.7" r="1.6"/></svg>';
+  var TM_HUES = ['blue', 'green', 'purple', 'teal', 'coral', 'slate'];
+  var TM_SRC = { app: ['PIN from app', 'key'], cloudflare: ['PIN in Cloudflare', 'cloud'], monday: ['monday.com', 'people'] };
+  function tmHue(n) { var h = 7; String(n || '').toLowerCase().split('').forEach(function (c) { h = (h * 31 + c.charCodeAt(0)) >>> 0; }); return TM_HUES[h % TM_HUES.length]; }
+  function tmAv(p) { var h = tmHue(p.name); return '<span class="tm-av" style="--hu:var(--hu-' + h + ');--hb:var(--hb-' + h + ')" aria-hidden="true">' + esc(initials(p.name)) + (p.admin ? '<i class="cr">' + CROWN + '</i>' : '') + '</span>'; }
+  function tmTags(p, long) {
+    var s = TM_SRC[p.source] || TM_SRC.app;
+    return '<span class="tm-tags">' + (p.admin ? '<span class="tm-t adm">' + CROWN + 'Admin</span>' : '') + '<span class="tm-t s-' + esc(p.source || 'app') + '">' + oic(s[1]) + s[0] + '</span>' +
+      (CNAME[p.home] ? '<span class="tm-t" title="' + CNAME[p.home] + '">' + oic('pin') + (long ? CNAME[p.home] : p.home.toUpperCase()) + '</span>' : '') + '</span>';
+  }
+  function tmSeen(p) { return p.lastSeen ? 'Last active ' + esc(since(p.lastSeen)) : 'Not signed in yet'; }
+  function tmHomes(sel) { return '<option value="">All countries</option>' + ['ke', 'tz', 'ug', 'mw'].map(function (c) { return '<option value="' + c + '"' + (sel === c ? ' selected' : '') + '>' + CNAME[c] + '</option>'; }).join(''); }
+  function tmSwitch(on) { return '<button type="button" class="tm-sw" role="switch" aria-checked="' + !!on + '" data-f="admin"><span class="ic">' + CROWN + '</span><span><b>Admin</b><small>Sees the Office tab and can manage the team</small></span><i aria-hidden="true"></i></button>'; }
+  function oTeam(b, quiet) {
+    var all = (O.team || []).slice().sort(function (a, z) { return a.name.localeCompare(z.name); }), i = 0;
+    var adm = all.filter(function (p) { return p.admin; }), fld = all.filter(function (p) { return !p.admin; });
+    var row = function (p) {
+      return '<button type="button" class="tm-row" data-who="' + esc(p.name) + '" style="--i:' + Math.min(i++, 12) + '" aria-label="' + esc(p.name) + (p.admin ? ', admin' : '') + '">' + tmAv(p) +
+        '<span class="tm-mid"><b class="tm-nm">' + esc(p.name) + '</b>' + tmTags(p) + '<small class="tm-seen">' + tmSeen(p) + '</small></span><span class="tm-chev" aria-hidden="true">' + oic('chev') + '</span></button>';
+    };
+    var sec = function (k, title, ic, list) {
+      return '<h3 class="tm-sec ' + k + '" data-sec="' + k + '">' + ic + '<span>' + title + '</span><span class="n">' + list.length + '</span></h3><div class="tm-list' + (quiet ? ' still' : '') + '" data-sec="' + k + '">' +
+        (list.length ? list.map(row).join('') : '<p class="tm-empty">' + (k === 'adm' ? 'No admins yet.' : 'Nobody here yet. Add a person above.') + '</p>') + '</div>';
+    };
+    b.innerHTML = '<div class="o-grid tm"><div><div class="tm-top"><button class="btn" type="button" id="tmAdd">' + oic('plus') + 'Add a person</button>' +
+      (all.length > 8 ? '<input type="search" id="tmQ" placeholder="Find a person" aria-label="Find a person" autocomplete="off">' : '') + '</div>' +
+      sec('adm', 'Admins', CROWN, adm) + sec('fld', 'Field team', oic('people'), fld) + '</div>' +
+      '<div class="o-side"><div class="card"><div class="tm-mail"><span class="ic">' + oic('mail') + '</span><div><h2>E-mail alerts</h2>' +
+      (O.mail && O.mail.ready ? '<p class="muted">Alerts go to: <b>' + esc((O.mail.to || []).join(', ') || 'nobody yet: add an admin with an e-mail') + '</b></p><button class="btn small light" type="button" id="tTest">Send a test e-mail</button> <span class="msg" id="tTestMsg" aria-live="polite"></span>'
+        : '<p class="muted">Not switched on yet. Add RESEND_API_KEY and ALERT_FROM in Cloudflare (see the set-up notes).</p>') + '</div></div></div></div></div>';
+    var g = b.querySelector('.o-grid');
+    g.addEventListener('click', function (e) { var r = e.target.closest('.tm-row'); if (r) { buzz(); tmOpen(r.getAttribute('data-who')); } });
+    $('tmAdd').addEventListener('click', function () { buzz(); tmAddOpen(); });
+    if ($('tmQ')) $('tmQ').addEventListener('input', function () {
+      var q = this.value.trim().toLowerCase();
+      qa('.tm-list', g).forEach(function (l) {
+        var n = 0; qa('.tm-row', l).forEach(function (r) { var hit = !q || r.getAttribute('data-who').toLowerCase().indexOf(q) >= 0; r.hidden = !hit; if (hit) n++; });
+        var h = g.querySelector('.tm-sec[data-sec=' + l.getAttribute('data-sec') + ']'); h.querySelector('.n').textContent = n; h.hidden = l.hidden = !!q && !n;
       });
     });
     if ($('tTest')) $('tTest').addEventListener('click', function () { msg('tTestMsg', '', 'Sending…'); adminApi('POST', { action: 'test-mail' }).then(function (j) { msg('tTestMsg', j.ok ? 'ok' : 'bad', j.ok ? 'Sent ✓ Check the inbox.' : j.reason === 'no-recipients' ? 'No e-mail addresses yet.' : why(j)); }); });
+  }
+  function tmRedraw() { if (S.view === 'vOffice' && O.tab === 'team') oNeedTeam(function () { oTeam($('oBody'), true); }); }
+  // a sheet that springs up from the bottom (a centred card on a wide screen). Tap outside, drag down or Esc closes it.
+  function tSheet(label, html) {
+    var w = document.createElement('div'), back = document.activeElement; w.className = 'tsh'; w.setAttribute('role', 'dialog'); w.setAttribute('aria-modal', 'true'); w.setAttribute('aria-label', label);
+    w.innerHTML = '<div class="tsh-bg"></div><div class="tsh-p" tabindex="-1"><i class="grab" aria-hidden="true"></i><button type="button" class="tsh-x" aria-label="Close">' + oic('x') + '</button><div class="tsh-c">' + html + '</div></div>';
+    document.body.appendChild(w); void w.offsetWidth;
+    var p = w.querySelector('.tsh-p'), y0 = null, dy = 0, key = function (e) { if (e.key === 'Escape') w.close(); };
+    requestAnimationFrame(function () { w.classList.add('in'); try { p.focus({ preventScroll: true }); } catch (e) {} });
+    w.close = function () {
+      if (w.gone) return; w.gone = true; document.removeEventListener('keydown', key); w.classList.add('out');
+      setTimeout(function () { w.remove(); try { if (back && back.isConnected) back.focus({ preventScroll: true }); } catch (e) {} }, 230);
+    };
+    document.addEventListener('keydown', key);
+    w.querySelector('.tsh-bg').addEventListener('click', w.close); w.querySelector('.tsh-x').addEventListener('click', w.close);
+    p.addEventListener('touchstart', function (e) { y0 = p.querySelector('.tsh-c').scrollTop > 0 || e.target.closest('input, select, textarea') ? null : e.touches[0].clientY; dy = 0; }, { passive: true });
+    p.addEventListener('touchmove', function (e) { if (y0 === null) return; dy = Math.max(0, e.touches[0].clientY - y0); if (dy > 4) { p.style.transition = 'none'; p.style.transform = 'translateY(' + dy + 'px)'; } }, { passive: true });
+    p.addEventListener('touchend', function () { if (y0 === null) return; y0 = null; p.style.transition = ''; p.style.transform = ''; if (dy > 90) w.close(); });
+    return w;
+  }
+  // ask before something that can't be undone, inside the sheet
+  function tmAsk(box, q, label, red, go) {
+    box.innerHTML = '<div class="tm-ask' + (red ? ' bad' : '') + '" role="group" aria-label="' + esc(label) + '"><p>' + esc(q) + '</p><div class="tm-go"><button class="btn small light" type="button" data-k="no">Cancel</button><button class="btn small' + (red ? ' red' : '') + '" type="button" data-k="yes">' + esc(label) + '</button><span class="msg" aria-live="polite"></span></div></div>';
+    var m = box.querySelector('.msg');
+    box.querySelector('[data-k=no]').addEventListener('click', function () { box.innerHTML = ''; });
+    box.querySelector('[data-k=yes]').addEventListener('click', function () { qa('button', box).forEach(function (x) { x.disabled = true; }); m.className = 'msg'; m.textContent = 'Working…'; go(m); });
+    box.querySelector('[data-k=yes]').focus({ preventScroll: true }); box.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+  function tmOpen(name) {
+    var p = (O.team || []).filter(function (x) { return x.name === name; })[0]; if (!p) return;
+    var app = p.source === 'app', hd = function () { return '<div class="tm-hd">' + tmAv(p) + '<h3>' + esc(p.name) + '</h3>' + tmTags(p, true) + '<small class="tm-seen">' + tmSeen(p) + '</small></div>'; };
+    var html = hd() + (app
+      ? '<div class="tm-f"><label>Home country<select data-f="home">' + tmHomes(p.home) + '</select></label>' +
+        '<div class="row2"><label>E-mail (for alerts)<input type="email" data-f="email" value="' + esc(p.email || '') + '" placeholder="name@rafikioutreach.org" autocomplete="off"></label>' +
+        '<label>Phone<input type="tel" data-f="phone" value="' + esc(p.phone || '') + '" placeholder="+254 712 345 678" autocomplete="off"></label></div>' +
+        '<small class="muted">The team sees the phone number, for calls and WhatsApp.</small>' + tmSwitch(p.admin) +
+        '<div class="tm-go"><button class="btn" type="button" data-a="save">' + oic('check') + 'Save</button><span class="msg" aria-live="polite"></span></div>' +
+        '<div class="tm-ab"><button type="button" data-a="pin">' + oic('key') + 'New PIN</button><button type="button" data-a="rm">' + oic('trash') + 'Remove</button></div><div class="tm-cf" aria-live="polite"></div></div>'
+      : '<div class="tm-note ' + esc(p.source) + '">' + oic(p.source === 'cloudflare' ? 'cloud' : 'people') + '<span>' + (p.source === 'cloudflare' ? 'Set in Cloudflare — change it there, or re-add here with an app PIN.' : 'Signs in with monday.com. The Admin role comes from PIN_ADMINS in Cloudflare.') + '</span></div>' +
+        (p.email || p.phone ? '<dl class="tm-kv">' + (p.email ? '<div><dt>E-mail</dt><dd>' + esc(p.email) + '</dd></div>' : '') + (p.phone ? '<div><dt>Phone</dt><dd>' + esc(p.phone) + '</dd></div>' : '') + '</dl>' : '') +
+        '<div class="tm-go"><button class="btn light" type="button" data-a="readd">' + oic('key') + (p.source === 'cloudflare' ? 'Re-add with an app PIN' : 'Give them an app PIN') + '</button></div>');
+    var w = tSheet(p.name, html), c = w.querySelector('.tsh-c'), cf = c.querySelector('.tm-cf'), m = c.querySelector('.tm-go .msg');
+    c.addEventListener('click', function (e) {
+      var sw = e.target.closest('.tm-sw'); if (sw) { sw.setAttribute('aria-checked', String(sw.getAttribute('aria-checked') !== 'true')); buzz(); return; }
+      var a = e.target.closest('[data-a]'); if (!a) return;
+      var k = a.getAttribute('data-a'), f = function (n) { return c.querySelector('[data-f=' + n + ']'); };
+      if (k === 'readd') { w.close(); setTimeout(function () { tmAddOpen(p); }, 200); return; }
+      if (k === 'save') {
+        var body = { action: 'team-update', name: p.name, home: f('home').value, email: f('email').value.trim(), phone: f('phone').value.trim(), admin: f('admin').getAttribute('aria-checked') === 'true' };
+        a.disabled = true; m.className = 'msg'; m.textContent = 'Saving…';
+        adminApi('POST', body).then(function (j) {
+          a.disabled = false;
+          if (!j.ok) { m.className = 'msg bad'; m.textContent = j.reason === 'self' ? 'You can’t remove your own admin role.' : why(j); return; }
+          p.home = body.home; p.email = body.email; p.phone = body.phone; p.admin = body.admin;
+          c.querySelector('.tm-hd').outerHTML = hd(); m.className = 'msg ok'; m.textContent = 'Saved ✓';
+          tmRedraw(); setTimeout(w.close, 800);
+        });
+      }
+      if (k === 'pin') tmAsk(cf, 'Make a new PIN for ' + p.name + '? Their old PIN stops working.', 'Make a new PIN', false, function (am) {
+        adminApi('POST', { action: 'team-pin', name: p.name }).then(function (j) { if (!j.ok) { am.className = 'msg bad'; am.textContent = why(j); qa('button', cf).forEach(function (x) { x.disabled = false; }); return; } pinBox(cf, p.name, j.pin); cf.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); });
+      });
+      if (k === 'rm') tmAsk(cf, 'Remove ' + p.name + ' from the team? Their PIN stops working straight away.', 'Remove', true, function (am) {
+        adminApi('POST', { action: 'team-remove', name: p.name }).then(function (j) {
+          if (!j.ok) { am.className = 'msg bad'; am.textContent = why(j); qa('button', cf).forEach(function (x) { x.disabled = false; }); return; }
+          am.className = 'msg ok'; am.textContent = 'Removed ✓'; O.team = null; tmRedraw(); setTimeout(w.close, 700);
+        });
+      });
+    });
+  }
+  function tmAddOpen(pre) {
+    pre = pre || {};
+    var av = function (n, adm) { var h = tmHue(n); return '<span class="tm-av" style="--hu:var(--hu-' + h + ');--hb:var(--hb-' + h + ')" aria-hidden="true">' + (n.trim() ? esc(initials(n)) : oic('plus')) + (adm ? '<i class="cr">' + CROWN + '</i>' : '') + '</span>'; };
+    var w = tSheet('Add a person', '<div class="tm-hd">' + av(pre.name || '', pre.admin) + '<h3>Add a person</h3><small class="tm-seen">They get their own 4-digit PIN, shown once. Send it to them privately.</small></div>' +
+      '<div class="tm-f"><label>Name<input type="text" data-f="name" autocomplete="off" placeholder="e.g. Jessica Anderson" value="' + esc(pre.name || '') + '"></label>' +
+      '<label>Home country<select data-f="home">' + tmHomes(pre.home || '') + '</select></label>' +
+      '<div class="row2"><label>E-mail (optional)<input type="email" data-f="email" placeholder="for alerts" autocomplete="off"></label><label>Phone (optional)<input type="tel" data-f="phone" placeholder="+254 712 345 678" autocomplete="off"></label></div>' +
+      tmSwitch(pre.admin) + '<div class="tm-go"><button class="btn" type="button" data-a="add">' + oic('plus') + 'Add and create PIN</button><span class="msg" aria-live="polite"></span></div></div>');
+    var c = w.querySelector('.tsh-c'), f = function (n) { return c.querySelector('[data-f=' + n + ']'); }, m = c.querySelector('.msg'), nm = f('name');
+    var avNow = function () { c.querySelector('.tm-hd .tm-av').outerHTML = av(nm.value, f('admin').getAttribute('aria-checked') === 'true'); };
+    nm.addEventListener('input', avNow);
+    if (matchMedia('(pointer: fine)').matches) setTimeout(function () { nm.focus(); }, 300);
+    c.addEventListener('click', function (e) {
+      var sw = e.target.closest('.tm-sw'); if (sw) { sw.setAttribute('aria-checked', String(sw.getAttribute('aria-checked') !== 'true')); buzz(); avNow(); return; }
+      var a = e.target.closest('[data-a]'); if (!a) return;
+      if (a.getAttribute('data-a') === 'done') { w.close(); return; }
+      var n = nm.value.trim(); if (!n) { nm.focus(); m.className = 'msg bad'; m.textContent = 'Type their name first.'; return; }
+      var adm = f('admin').getAttribute('aria-checked') === 'true';
+      a.disabled = true; m.className = 'msg'; m.textContent = 'Adding…';
+      adminApi('POST', { action: 'team-add', name: n, home: f('home').value, email: f('email').value.trim(), phone: f('phone').value.trim(), admin: adm }).then(function (j) {
+        a.disabled = false;
+        if (!j.ok) { m.className = 'msg bad'; m.textContent = j.reason === 'exists' ? 'Someone with that name is already on the team.' : why(j); return; }
+        c.innerHTML = '<div class="tm-hd">' + tmAv({ name: n, admin: adm }) + '<h3>' + esc(n) + '</h3><small class="tm-seen">Added to the team ✓</small></div><div class="tm-cf"></div><div class="tm-go"><button class="btn light" type="button" data-a="done">Done</button></div>';
+        pinBox(c.querySelector('.tm-cf'), n, j.pin); O.team = null; tmRedraw();
+      });
+    });
   }
   function pinBox(el, name, pin) {
     el.innerHTML = '<div class="pinbox" role="status"><span>PIN for ' + esc(name) + '</span><b>' + esc(pin) + '</b><small>Shown once. Send it privately; they can’t see it again.</small><button class="btn small light" type="button">Copy</button></div>';
     el.querySelector('button').addEventListener('click', function () { try { navigator.clipboard.writeText(pin); this.textContent = 'Copied ✓'; } catch (e) {} });
   }
-  $('oBody').addEventListener('click', function (e) {
-    var tb = e.target.closest('[data-t]'); if (!tb) return;
-    var c = tb.closest('.oteam'), n = c.getAttribute('data-name'), act = tb.getAttribute('data-t'), m = c.querySelector('.msg');
-    if (act === 'team-remove' && !confirm('Remove ' + n + '? Their PIN stops working straight away.')) return;
-    if (act === 'team-pin' && !confirm('Make a new PIN for ' + n + '? Their old PIN stops working.')) return;
-    var body = { action: act, name: n };
-    if (act === 'team-update') { body.home = c.querySelector('[data-f=home]').value; body.email = c.querySelector('[data-f=email]').value; body.phone = c.querySelector('[data-f=phone]').value; body.admin = c.querySelector('[data-f=admin]').checked; }
-    m.className = 'msg'; m.textContent = 'Saving…';
-    adminApi('POST', body).then(function (j) {
-      if (!j.ok) { m.className = 'msg bad'; m.textContent = j.reason === 'self' ? 'You can’t remove your own admin role.' : why(j); return; }
-      if (act === 'team-pin') { var box = document.createElement('div'); c.appendChild(box); pinBox(box, n, j.pin); m.textContent = ''; return; }
-      O.team = null; m.className = 'msg ok'; m.textContent = act === 'team-remove' ? 'Removed ✓' : 'Saved ✓';
-      setTimeout(function () { oNeedTeam(function () { oTeam($('oBody')); }); }, 600);
-    });
-  });
 
   // clean-up lists, worked out on the phone from the project list
   function oCleanup(b) {

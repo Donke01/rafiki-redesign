@@ -37,6 +37,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -489,78 +490,276 @@ private fun ReviewQueue(m: AppModel, open: (String) -> Unit) {
     }
 }
 
+/** Office › Team: a short list grouped by role (admins wear a crown). Tap a person for a sheet with their details and actions. */
 @Composable
 private fun TeamSection(m: AppModel) {
     val scope = rememberScope()
     val (people, again) = rememberTeam(m)
-    var name by remember { mutableStateOf("") }
-    var home by remember { mutableStateOf("") }
+    var open by remember { mutableStateOf<JSONObject?>(null) }
+    var adding by remember { mutableStateOf<JSONObject?>(null) }
+    var q by remember { mutableStateOf("") }
+    Btn(t("Add a person", "Ongeza mtu"), { adding = JSONObject() }, Modifier.testTag("team_add"), icon = "plus")
+    if (people.size > 8) Field(q, { q = it }, t("Find a person", "Tafuta mtu"), placeholder = t("Name", "Jina"))
+    val list = people.filter { q.isBlank() || it.optString("name").contains(q.trim(), ignoreCase = true) }.sortedBy { it.optString("name").lowercase() }
+    val admins = list.filter { it.optBoolean("admin") }
+    val field = list.filterNot { it.optBoolean("admin") }
+    var i = 0
+    TeamHead("crown", t("Admins", "Wasimamizi"), admins.size, C.hue("amber"), "team_admins")
+    admins.forEach { p -> PersonRow(p, i++) { open = p } }
+    TeamHead("people", t("Field team", "Timu ya uwanjani"), field.size, C.hue("slate"), "team_field")
+    field.forEach { p -> PersonRow(p, i++) { open = p } }
+    if (people.isNotEmpty() && field.isEmpty()) Text(t("Nobody here yet. Add a person above.", "Hakuna mtu bado. Ongeza mtu hapo juu."), style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(4.dp))
+    Card(Modifier.padding(top = 16.dp), pad = 14.dp) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            val hu = C.hue("teal")
+            IconTile("mail", hu.fg, hu.bg, 40.dp)
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                Text(t("E-mail alerts", "Taarifa kwa barua pepe"), style = MaterialTheme.typography.titleSmall, color = C.ink)
+                Text(t("Admins with an e-mail get an alert when a site stops working.", "Wasimamizi wenye barua pepe wanapata taarifa eneo likiacha kufanya kazi."), style = MaterialTheme.typography.bodySmall, color = C.muted)
+            }
+        }
+        var tm by remember { mutableStateOf<String?>(null) }
+        Btn(t("Send a test e-mail", "Tuma barua pepe ya majaribio"), { scope.launch { tm = t("Sending…", "Inatuma…"); val x = m.api.admin(JSONObject().put("action", "test-mail")); tm = if (x.ok) t("Sent ✓ Check the inbox.", "Imetumwa ✓ Angalia barua pepe.") else t("Not sent: the e-mail settings aren’t finished in Cloudflare.", "Haijatumwa: mipangilio ya barua pepe haijakamilika Cloudflare.") } }, Modifier.padding(top = 10.dp), small = true, light = true, icon = "upload")
+        Msg(tm)
+    }
+    open?.let { p -> PersonSheet(m, p, close = { open = null }, changed = again, readd = { open = null; adding = it }) }
+    adding?.let { pre -> AddSheet(m, pre, close = { adding = null }, added = again) }
+}
+
+private val CrownGold = Color(0xFFE0A100)
+private val CrownGoldDark = Color(0xFFF2C14E)
+private fun teamHue(name: String): String { var h = 7L; name.lowercase().forEach { h = (h * 31 + it.code) % 4294967296L }; return listOf("blue", "green", "purple", "teal", "coral", "slate")[(h % 6).toInt()] }
+private fun inits(name: String) = name.trim().split(Regex("\\s+")).filter { it.isNotBlank() }.take(2).joinToString("") { it.take(1).uppercase() }.ifBlank { "·" }
+private fun seenText(p: JSONObject) = p.optString("lastSeen").takeIf { it.isNotBlank() && it != "null" }?.let { t("Last active ", "Alitumia mwisho ") + whenText(it) } ?: t("Not signed in yet", "Bado hajaingia")
+
+@Composable
+private fun TeamHead(icon: String, title: String, n: Int, hu: Hue, tag: String) {
+    Row(Modifier.padding(top = 20.dp, bottom = 2.dp, start = 4.dp).testTag(tag), verticalAlignment = Alignment.CenterVertically) {
+        if (icon == "crown") Icon(Ic.crownFill, null, tint = if (C.dark) CrownGoldDark else CrownGold, modifier = Modifier.size(18.dp))
+        else Icon(Ic.get(icon), null, tint = hu.fg, modifier = Modifier.size(18.dp))
+        Spacer(Modifier.width(8.dp))
+        Text(title.uppercase(), style = MaterialTheme.typography.labelMedium.copy(letterSpacing = 1.2.sp, fontWeight = FontWeight.ExtraBold), color = C.muted)
+        Spacer(Modifier.width(8.dp))
+        Text("$n", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold), color = hu.fg, modifier = Modifier.clip(RoundedCornerShape(99.dp)).background(hu.bg).padding(horizontal = 8.dp, vertical = 2.dp))
+    }
+}
+
+/** A round picture with initials; admins get a little crown on top. */
+@Composable
+private fun Avatar(name: String, admin: Boolean, size: androidx.compose.ui.unit.Dp = 44.dp) {
+    val hu = C.hue(teamHue(name))
+    Box(Modifier.size(size + size * 0.18f)) {
+        Box(Modifier.align(Alignment.BottomStart).size(size).clip(CircleShape).background(hu.bg).then(if (!C.glassy) Modifier.border(2.dp, C.ink, CircleShape) else Modifier), contentAlignment = Alignment.Center) {
+            if (name.isBlank()) Icon(Ic.get("plus"), null, tint = hu.fg, modifier = Modifier.size(size * 0.45f))
+            else Text(inits(name), color = hu.fg, fontWeight = FontWeight.ExtraBold, fontSize = (size.value * 0.34f).sp)
+        }
+        if (admin) Box(Modifier.align(Alignment.TopEnd).size(size * 0.5f).clip(CircleShape).background(C.card).border(1.dp, C.line, CircleShape).padding(size * 0.08f), contentAlignment = Alignment.Center) {
+            Icon(Ic.crownFill, t("Admin", "Msimamizi"), tint = if (C.dark) CrownGoldDark else CrownGold, modifier = Modifier.fillMaxSize())
+        }
+    }
+}
+
+@Composable
+private fun Chip(text: String, hu: Hue, icon: String? = null, crown: Boolean = false) {
+    Row(Modifier.clip(RoundedCornerShape(99.dp)).background(hu.bg).then(if (!C.glassy) Modifier.border(1.5.dp, hu.fg, RoundedCornerShape(99.dp)) else Modifier).padding(horizontal = 8.dp, vertical = 3.dp), verticalAlignment = Alignment.CenterVertically) {
+        if (crown) Icon(Ic.crownFill, null, tint = hu.fg, modifier = Modifier.size(12.dp)) else if (icon != null) Icon(Ic.get(icon), null, tint = hu.fg, modifier = Modifier.size(12.dp))
+        Spacer(Modifier.width(4.dp))
+        Text(text, color = hu.fg, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold, fontSize = 11.sp), maxLines = 1)
+    }
+}
+
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+@Composable
+private fun Chips(p: JSONObject, long: Boolean = false, center: Boolean = false) {
+    FlowRow(Modifier.padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy(4.dp, if (center) Alignment.CenterHorizontally else Alignment.Start), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        if (p.optBoolean("admin")) Chip(t("Admin", "Msimamizi"), C.hue("amber"), crown = true)
+        when (p.optString("source")) {
+            "cloudflare" -> Chip(t("PIN in Cloudflare", "PIN iko Cloudflare"), C.hue("purple"), "cloud")
+            "monday" -> Chip("monday.com", C.hue("blue"), "people")
+            else -> Chip(t("PIN from app", "PIN ya programu"), C.hue("green"), "key")
+        }
+        val h = p.optString("home")
+        if (h.isNotBlank() && h != "null") Chip(if (long) COUNTRIES[h] ?: h.uppercase() else h.uppercase(), C.hue("slate"), "pin")
+    }
+}
+
+@Composable
+private fun PersonRow(p: JSONObject, i: Int, onClick: () -> Unit) {
+    val src = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+    val name = p.optString("name")
+    val shape = RoundedCornerShape(18.dp)
+    Row(
+        Modifier.padding(top = 8.dp).rise(i, step = 40).press(src).fillMaxWidth().clip(shape)
+            .background(if (C.glassy) C.glass2 else C.card).border(if (C.glassy) 1.dp else 2.dp, if (C.glassy) C.glassEdge else C.line, shape)
+            .clickable(interactionSource = src, indication = androidx.compose.material3.ripple(), role = Role.Button, onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 10.dp).testTag("tm_$name"),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Avatar(name, p.optBoolean("admin"))
+        Spacer(Modifier.width(10.dp))
+        Column(Modifier.weight(1f)) {
+            Text(name, style = MaterialTheme.typography.titleSmall, color = C.ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Chips(p)
+            Text(seenText(p), style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 3.dp))
+        }
+        Icon(Ic.get("chev"), null, tint = C.muted, modifier = Modifier.size(18.dp))
+    }
+}
+
+/** Admin on or off, as a switch with a crown. */
+@Composable
+private fun AdminSwitch(on: Boolean, flip: () -> Unit) {
+    val hu = C.hue("amber")
+    Row(Modifier.padding(top = 14.dp).fillMaxWidth().clip(RoundedCornerShape(16.dp)).border(if (C.glassy) 1.dp else 2.dp, C.line, RoundedCornerShape(16.dp)).clickable(role = Role.Switch, onClick = flip).padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+        Box(Modifier.size(36.dp).clip(RoundedCornerShape(12.dp)).background(hu.bg).padding(8.dp)) { Icon(Ic.crownFill, null, tint = hu.fg, modifier = Modifier.fillMaxSize()) }
+        Spacer(Modifier.width(12.dp))
+        Column(Modifier.weight(1f)) {
+            Text(t("Admin", "Msimamizi"), style = MaterialTheme.typography.titleSmall, color = C.ink)
+            Text(t("Sees the Office and can manage the team", "Anaona Ofisi na anaweza kusimamia timu"), style = MaterialTheme.typography.bodySmall, color = C.muted)
+        }
+        Spacer(Modifier.width(8.dp))
+        Toggle(on, t("Admin", "Msimamizi"), Modifier.minimumInteractiveComponentSize().testTag("tm_admin"), flip)
+    }
+}
+
+@Composable
+private fun PinShown(who: String, pin: String) {
+    Card(Modifier.padding(top = 12.dp), brush = SolidColor(C.okBg)) {
+        Text(t("PIN for ", "PIN ya ") + who, style = MaterialTheme.typography.titleSmall, color = C.ok)
+        Text(pin, style = MaterialTheme.typography.headlineLarge.copy(letterSpacing = 8.sp), color = C.ink, modifier = Modifier.padding(vertical = 6.dp).testTag("tm_pin_shown"))
+        Text(t("Shown once. Send it privately; they can’t see it again.", "Inaonyeshwa mara moja. Mtumie kwa siri; hawezi kuiona tena."), style = MaterialTheme.typography.bodySmall, color = C.text)
+    }
+}
+
+@Composable
+private fun SheetHead(name: String, admin: Boolean, title: String, sub: String, chips: (@Composable () -> Unit)? = null) {
+    Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+        Box(Modifier.rise(0)) { Avatar(name, admin, 64.dp) }
+        Text(title, style = MaterialTheme.typography.titleLarge, color = C.ink, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 6.dp))
+        chips?.invoke()
+        Text(sub, style = MaterialTheme.typography.bodySmall, color = C.muted, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 4.dp))
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun PersonSheet(m: AppModel, p: JSONObject, close: () -> Unit, changed: () -> Unit, readd: (JSONObject) -> Unit) {
+    val scope = rememberScope()
+    val state = androidx.compose.material3.rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    fun hide(then: () -> Unit = close) { scope.launch { state.hide() }.invokeOnCompletion { then() } }
+    val name = p.optString("name")
+    val source = p.optString("source")
+    var home by remember { mutableStateOf(p.optString("home").takeIf { it != "null" } ?: "") }
+    var email by remember { mutableStateOf(p.optString("email").takeIf { it != "null" } ?: "") }
+    var phone by remember { mutableStateOf(p.optString("phone").takeIf { it != "null" } ?: "") }
+    var admin by remember { mutableStateOf(p.optBoolean("admin")) }
+    var ask by remember { mutableStateOf<String?>(null) }
+    var pin by remember { mutableStateOf<String?>(null) }
+    var msg by remember { mutableStateOf<Pair<String, String>?>(null) }
+    var askMsg by remember { mutableStateOf<String?>(null) }
+    var busy by remember { mutableStateOf(false) }
+    androidx.compose.material3.ModalBottomSheet(onDismissRequest = close, sheetState = state, containerColor = C.card, modifier = Modifier.testTag("team_sheet")) {
+        Column(Modifier.verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, bottom = 28.dp)) {
+            SheetHead(name, if (source == "app") admin else p.optBoolean("admin"), name, seenText(p)) { Chips(p, long = true, center = true) }
+            if (source == "app") {
+                Picker(t("Home country", "Nchi ya nyumbani"), home, listOf("" to t("All countries", "Nchi zote")) + COUNTRIES.toList(), { home = it })
+                Field(email, { email = it }, t("E-mail (for alerts)", "Barua pepe (kwa taarifa)"), placeholder = "name@rafikioutreach.org")
+                Field(phone, { phone = it }, t("Phone", "Simu"), placeholder = "+254 712 345 678", phone = true)
+                Text(t("The team sees the phone number, for calls and WhatsApp.", "Timu inaona namba ya simu, kwa kupiga na WhatsApp."), style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 4.dp))
+                AdminSwitch(admin) { admin = !admin }
+                Btn(t("Save", "Hifadhi"), {
+                    busy = true; msg = "" to t("Saving…", "Inahifadhi…")
+                    scope.launch {
+                        val x = m.api.admin(JSONObject().put("action", "team-update").put("name", name).put("home", home).put("email", email.trim()).put("phone", phone.trim()).put("admin", admin))
+                        busy = false
+                        if (x.ok) { msg = "ok" to t("Saved ✓", "Imehifadhiwa ✓"); changed(); kotlinx.coroutines.delay(700); hide() }
+                        else msg = "bad" to (if (x.reason == "self") t("You can’t remove your own admin role.", "Huwezi kuondoa nafasi yako mwenyewe ya msimamizi.") else reasonText(x.reason))
+                    }
+                }, Modifier.padding(top = 14.dp).fillMaxWidth().testTag("tm_save"), icon = "check", enabled = !busy)
+                msg?.let { (tone, text) -> Msg(text, tone) }
+                HorizontalDivider(color = C.line, modifier = Modifier.padding(top = 14.dp))
+                Row(Modifier.padding(top = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Btn(t("New PIN", "PIN mpya"), { ask = "pin"; askMsg = null }, Modifier.weight(1f).testTag("tm_newpin"), icon = "key", light = true, small = true)
+                    Btn(t("Remove", "Ondoa"), { ask = "rm"; askMsg = null }, Modifier.weight(1f).testTag("tm_remove"), icon = "trash", light = true, small = true)
+                }
+                ask?.let { a ->
+                    val red = a == "rm"
+                    Column(Modifier.padding(top = 12.dp).rise(0).fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(if (red) C.badBg else C.hue("slate").bg).padding(14.dp).testTag("tm_ask")) {
+                        Text(if (red) t("Remove $name from the team? Their PIN stops working straight away.", "Ondoa $name kwenye timu? PIN yake itaacha kufanya kazi mara moja.")
+                             else t("Make a new PIN for $name? Their old PIN stops working.", "Tengeneza PIN mpya ya $name? PIN ya zamani itaacha kufanya kazi."), style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = C.ink)
+                        Row(Modifier.padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Btn(t("Cancel", "Ghairi"), { ask = null }, Modifier.weight(1f), light = true, small = true)
+                            Btn(if (red) t("Remove", "Ondoa") else t("Make a new PIN", "Tengeneza PIN mpya"), {
+                                busy = true
+                                scope.launch {
+                                    val x = m.api.admin(JSONObject().put("action", if (red) "team-remove" else "team-pin").put("name", name))
+                                    busy = false
+                                    if (!x.ok) askMsg = reasonText(x.reason)
+                                    else if (red) { changed(); hide() }
+                                    else { pin = x.json.optString("pin"); ask = null }
+                                }
+                            }, Modifier.weight(1f).testTag("tm_yes"), small = true, enabled = !busy, color = if (red) C.bad else null)
+                        }
+                        Msg(askMsg, "bad")
+                    }
+                }
+                pin?.let { PinShown(name, it) }
+            } else {
+                val cf = source == "cloudflare"
+                val hu = C.hue(if (cf) "purple" else "blue")
+                Row(Modifier.padding(top = 14.dp).fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(hu.bg).padding(14.dp), verticalAlignment = Alignment.Top) {
+                    Icon(Ic.get(if (cf) "cloud" else "people"), null, tint = hu.fg, modifier = Modifier.size(20.dp))
+                    Spacer(Modifier.width(10.dp))
+                    Text(if (cf) t("Set in Cloudflare — change it there, or re-add here with an app PIN.", "Imewekwa Cloudflare — ibadilishe huko, au mwongeze hapa kwa PIN ya programu.")
+                         else t("Signs in with monday.com. The Admin role comes from PIN_ADMINS in Cloudflare.", "Anaingia kwa monday.com. Nafasi ya msimamizi inatoka PIN_ADMINS kwenye Cloudflare."), style = MaterialTheme.typography.bodyMedium, color = C.ink)
+                }
+                Btn(if (cf) t("Re-add with an app PIN", "Mwongeze kwa PIN ya programu") else t("Give them an app PIN", "Mpe PIN ya programu"), { hide { readd(p) } }, Modifier.padding(top = 14.dp).fillMaxWidth().testTag("tm_readd"), icon = "key", light = true)
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun AddSheet(m: AppModel, pre: JSONObject, close: () -> Unit, added: () -> Unit) {
+    val scope = rememberScope()
+    val state = androidx.compose.material3.rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var name by remember { mutableStateOf(pre.optString("name")) }
+    var home by remember { mutableStateOf(pre.optString("home").takeIf { it != "null" } ?: "") }
     var email by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
-    var admin by remember { mutableStateOf(false) }
-    var shown by remember { mutableStateOf<Pair<String, String>?>(null) }
-    var msg by remember { mutableStateOf<Pair<String, String>?>(null) }
-    shown?.let { (who, pin) ->
-        Card(brush = SolidColor(C.okBg)) {
-            Text(t("PIN for ", "PIN ya ") + who, style = MaterialTheme.typography.titleSmall, color = C.ok)
-            Text(pin, style = MaterialTheme.typography.headlineLarge.copy(letterSpacing = 8.sp), color = C.ink, modifier = Modifier.padding(vertical = 6.dp))
-            Text(t("Shown once. Send it privately; they can’t see it again.", "Inaonyeshwa mara moja. Mtumie kwa siri; hawezi kuiona tena."), style = MaterialTheme.typography.bodySmall, color = C.text)
-            Btn(t("Done", "Imekamilika"), { shown = null }, Modifier.padding(top = 8.dp), small = true, light = true)
-        }
-        Spacer(Modifier.height(10.dp))
-    }
-    people.forEach { p ->
-        var ph by remember(p.optString("name")) { mutableStateOf(p.optString("home")) }
-        var pe by remember(p.optString("name")) { mutableStateOf(p.optString("email")) }
-        var pp by remember(p.optString("name")) { mutableStateOf(p.optString("phone")) }
-        var pa by remember(p.optString("name")) { mutableStateOf(p.optBoolean("admin")) }
-        val inApp = p.optString("source") == "app"
-        Card(Modifier.padding(top = 10.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(p.optString("name"), style = MaterialTheme.typography.titleMedium, color = C.ink, modifier = Modifier.weight(1f))
-                if (p.optBoolean("admin")) Tag(t("Admin", "Msimamizi"), C.tint, C.deep)
+    var admin by remember { mutableStateOf(pre.optBoolean("admin")) }
+    var done by remember { mutableStateOf<Pair<String, String>?>(null) }
+    var msg by remember { mutableStateOf<String?>(null) }
+    var busy by remember { mutableStateOf(false) }
+    androidx.compose.material3.ModalBottomSheet(onDismissRequest = close, sheetState = state, containerColor = C.card, modifier = Modifier.testTag("team_add_sheet")) {
+        Column(Modifier.verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, bottom = 28.dp)) {
+            val d = done
+            if (d != null) {
+                SheetHead(d.first, admin, d.first, t("Added to the team ✓", "Ameongezwa kwenye timu ✓"))
+                PinShown(d.first, d.second)
+                Btn(t("Done", "Imekamilika"), { scope.launch { state.hide() }.invokeOnCompletion { close() } }, Modifier.padding(top = 12.dp).fillMaxWidth().testTag("tm_done"), light = true)
+            } else {
+                SheetHead(name, admin, t("Add a person", "Ongeza mtu"), t("They get their own 4-digit PIN, shown once. Send it to them privately.", "Wanapata PIN yao ya tarakimu 4, inaonyeshwa mara moja. Wapelekee kwa siri."))
+                Field(name, { name = it }, t("Name", "Jina"), placeholder = t("e.g. Jessica Anderson", "mf. Jessica Anderson"))
+                Picker(t("Home country", "Nchi ya nyumbani"), home, listOf("" to t("All countries", "Nchi zote")) + COUNTRIES.toList(), { home = it })
+                Field(email, { email = it }, t("E-mail (optional)", "Barua pepe (si lazima)"), placeholder = t("for alerts", "kwa taarifa"))
+                Field(phone, { phone = it }, t("Phone (optional)", "Simu (si lazima)"), placeholder = "+254 712 345 678", phone = true)
+                AdminSwitch(admin) { admin = !admin }
+                Btn(t("Add and create PIN", "Ongeza na utengeneze PIN"), {
+                    busy = true
+                    scope.launch {
+                        val n = name.trim()
+                        val x = m.api.admin(JSONObject().put("action", "team-add").put("name", n).put("home", home).put("email", email.trim()).put("phone", phone.trim()).put("admin", admin))
+                        busy = false
+                        if (x.ok) { done = n to x.json.optString("pin"); added() }
+                        else msg = if (x.reason == "exists") t("Someone with that name is already on the team.", "Mtu mwenye jina hilo tayari yuko kwenye timu.") else reasonText(x.reason)
+                    }
+                }, Modifier.padding(top = 14.dp).fillMaxWidth().testTag("tm_add_go"), icon = "plus", enabled = name.isNotBlank() && !busy)
+                Msg(msg, "bad")
             }
-            Text(when (p.optString("source")) { "app" -> t("PIN from this app", "PIN ya programu hii"); "cloudflare" -> t("PIN set in Cloudflare", "PIN iliyowekwa Cloudflare"); else -> t("Signs in with monday.com", "Anaingia kwa monday.com") } +
-                " · " + (p.optString("lastSeen").takeIf { it.isNotBlank() && it != "null" }?.let { t("last active ", "alitumia mwisho ") + whenText(it) } ?: t("last active never", "bado hajatumia")), style = MaterialTheme.typography.bodySmall, color = C.muted)
-            if (inApp) {
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Picker(t("Home country", "Nchi ya nyumbani"), ph, listOf("" to t("All countries", "Nchi zote")) + COUNTRIES.toList(), { ph = it }, Modifier.weight(1f))
-                    Field(pe, { pe = it }, t("E-mail (for alerts)", "Barua pepe (kwa taarifa)"), Modifier.weight(1f))
-                }
-                Field(pp, { pp = it }, t("Phone (the team sees it, for calls and WhatsApp)", "Simu (timu inaiona, kwa kupiga na WhatsApp)"), placeholder = "+254 712 345 678")
-                Row(Modifier.padding(top = 8.dp).clickable { pa = !pa }, verticalAlignment = Alignment.CenterVertically) { Checkbox(pa, { pa = it }, colors = CheckboxDefaults.colors(checkedColor = C.blue)); Text(t("Admin (sees the Office)", "Msimamizi (anaona Ofisi)"), style = MaterialTheme.typography.bodyMedium, color = C.text) }
-                Row(Modifier.padding(top = 6.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Btn(t("Save", "Hifadhi"), { scope.launch { val x = m.api.admin(JSONObject().put("action", "team-update").put("name", p.optString("name")).put("home", ph).put("email", pe).put("phone", pp).put("admin", pa)); msg = if (x.ok) "ok" to t("Saved ✓", "Imehifadhiwa ✓") else "bad" to (if (x.reason == "self") t("You can’t remove your own admin role.", "Huwezi kuondoa nafasi yako mwenyewe ya msimamizi.") else reasonText(x.reason)); again() } }, small = true)
-                    Btn(t("New PIN", "PIN mpya"), { scope.launch { val x = m.api.admin(JSONObject().put("action", "team-pin").put("name", p.optString("name"))); if (x.ok) shown = p.optString("name") to x.json.optString("pin") else msg = "bad" to reasonText(x.reason) } }, small = true, light = true)
-                    Btn(t("Remove", "Ondoa"), { scope.launch { m.api.admin(JSONObject().put("action", "team-remove").put("name", p.optString("name"))); again() } }, small = true, light = true)
-                }
-            } else Text(t("To change or remove, edit PIN_USERS in Cloudflare, or add them here with an app PIN and remove the Cloudflare entry.", "Kubadilisha au kuondoa, hariri PIN_USERS kwenye Cloudflare, au waongeze hapa kwa PIN ya programu na uondoe kwenye Cloudflare."), style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 6.dp))
         }
-    }
-    msg?.let { (tone, text) -> Msg(text, tone) }
-    Card(Modifier.padding(top = 14.dp)) {
-        H2(t("Add a person", "Ongeza mtu"))
-        Text(t("They get their own 4-digit PIN, shown once. Send it to them privately.", "Wanapata PIN yao ya tarakimu 4, inaonyeshwa mara moja. Wapelekee kwa siri."), style = MaterialTheme.typography.bodyMedium, color = C.muted)
-        Field(name, { name = it }, t("Name", "Jina"), placeholder = t("e.g. Jessica Anderson", "mf. Jessica Anderson"))
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            Picker(t("Home country", "Nchi ya nyumbani"), home, listOf("" to t("All countries", "Nchi zote")) + COUNTRIES.toList(), { home = it }, Modifier.weight(1f))
-            Field(email, { email = it }, t("E-mail (optional)", "Barua pepe (si lazima)"), Modifier.weight(1f))
-        }
-        Field(phone, { phone = it }, t("Phone (optional)", "Simu (si lazima)"), placeholder = "+254 712 345 678")
-        Row(Modifier.padding(top = 8.dp).clickable { admin = !admin }, verticalAlignment = Alignment.CenterVertically) { Checkbox(admin, { admin = it }, colors = CheckboxDefaults.colors(checkedColor = C.blue)); Text(t("Admin (sees the Office)", "Msimamizi (anaona Ofisi)"), style = MaterialTheme.typography.bodyMedium, color = C.text) }
-        Btn(t("Add and create PIN", "Ongeza na utengeneze PIN"), {
-            scope.launch {
-                val x = m.api.admin(JSONObject().put("action", "team-add").put("name", name.trim()).put("home", home).put("email", email.trim()).put("phone", phone.trim()).put("admin", admin))
-                if (x.ok) { shown = name.trim() to x.json.optString("pin"); name = ""; email = ""; phone = ""; admin = false; again() }
-                else msg = "bad" to (if (x.reason == "exists") t("Someone with that name is already on the team.", "Mtu mwenye jina hilo tayari yuko kwenye timu.") else reasonText(x.reason))
-            }
-        }, Modifier.padding(top = 10.dp), icon = "plus", enabled = name.isNotBlank())
-    }
-    Card(Modifier.padding(top = 14.dp)) {
-        H2(t("E-mail alerts", "Taarifa kwa barua pepe"))
-        var tm by remember { mutableStateOf<String?>(null) }
-        Btn(t("Send a test e-mail", "Tuma barua pepe ya majaribio"), { scope.launch { tm = t("Sending…", "Inatuma…"); val x = m.api.admin(JSONObject().put("action", "test-mail")); tm = if (x.ok) t("Sent ✓ Check the inbox.", "Imetumwa ✓ Angalia barua pepe.") else t("Not sent: the e-mail settings aren’t finished in Cloudflare.", "Haijatumwa: mipangilio ya barua pepe haijakamilika Cloudflare.") } }, small = true, light = true, icon = "upload")
-        Msg(tm)
     }
 }
 

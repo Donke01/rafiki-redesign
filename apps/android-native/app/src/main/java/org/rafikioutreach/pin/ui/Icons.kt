@@ -25,6 +25,11 @@ object Ic {
         "clip" to listOf(rect(5f, 4.5f, 14f, 16.5f, 2.5f), "M9 4.5V3.5h6v1M8.5 12l2.2 2.2L15.5 9.5"),
         "people" to listOf(circle(9f, 8.5f, 3.2f), "M3.5 19.5c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5", circle(17f, 9.5f, 2.4f), "M15.8 14.6c2.4.2 4 1.8 4.6 4.4"),
         "person" to listOf(circle(12f, 8f, 3.6f), "M5 20c.8-3.8 3.6-6 7-6s6.2 2.2 7 6"),
+        "crown" to listOf("M4.5 18 3 8l5 3.8L12 5l4 6.8L21 8l-1.5 10z", "M5 21h14"),
+        "key" to listOf(circle(8f, 15.5f, 4.5f), "M11.2 12.3 19.5 4M16 7.5l2.5 2.5M13.8 9.7l2 2"),
+        "trash" to listOf("M4.5 6.5h15M9.5 6.5v-2h5v2M6.5 6.5l1 13.5h9l1-13.5M10 10.5v6M14 10.5v6"),
+        "mail" to listOf(rect(3.5f, 5.5f, 17f, 13f, 2.5f), "M4 7.5l8 6 8-6"),
+        "cloud" to listOf("M7 18.5a4.5 4.5 0 0 1-.6-9A6 6 0 0 1 18 9.6a4.5 4.5 0 0 1-.5 8.9z"),
         "map" to listOf("M3.5 6.5l5.5-2.5 6 2.5 5.5-2.5v13.5L15 20l-6-2.5-5.5 2.5z", "M9 4v13.5M15 6.5V20"),
         "mic" to listOf(rect(9f, 3.5f, 6f, 11f, 3f), "M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"),
         "camera" to listOf("M4 8.5h3l1.6-2.5h6.8L17 8.5h3v10.5H4z", circle(12f, 13.5f, 3.3f)),
@@ -76,6 +81,14 @@ object Ic {
             (D[name] ?: D.getValue("drop")).forEach { d ->
                 addPath(addPathNodes(d), stroke = SolidColor(Color.Black), strokeLineWidth = 1.9f, strokeLineCap = StrokeCap.Round, strokeLineJoin = StrokeJoin.Round)
             }
+        }.build()
+    }
+
+    /** A filled crown, for admins (the same drawing as the web app). */
+    val crownFill: ImageVector by lazy {
+        ImageVector.Builder("crownFill", 24.dp, 24.dp, 24f, 24f).apply {
+            listOf("M3.4 8.9 8.1 12.4l3.9-6.6 3.9 6.6 4.7-3.5-1.6 9.1H5z", "M6.1 19.3h11.8a1.1 1.1 0 0 1 0 2.2H6.1a1.1 1.1 0 0 1 0-2.2z", circle(3.1f, 7.7f, 1.6f), circle(12f, 4.3f, 1.7f), circle(20.9f, 7.7f, 1.6f))
+                .forEach { addPath(addPathNodes(it), fill = SolidColor(Color.Black)) }
         }.build()
     }
 

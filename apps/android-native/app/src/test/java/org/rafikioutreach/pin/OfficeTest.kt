@@ -17,6 +17,8 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.unit.dp
 import androidx.test.core.app.ApplicationProvider
 import kotlinx.coroutines.runBlocking
@@ -74,6 +76,7 @@ class OfficeTest {
                 url.contains("pin-auth/me") -> 200 to "{\"ok\":true,\"available\":true,\"user\":null}"
                 url.contains("pin-auth/exchange") -> if (String(body!!).contains("\"code\":\"good\"")) 200 to "{\"ok\":true,\"sid\":\"SESSION123456789012345\"}" else 400 to "{\"ok\":false,\"reason\":\"expired\"}"
                 url.contains("team-add") || (body != null && String(body).contains("team-add")) -> 200 to "{\"ok\":true,\"pin\":\"4821\"}"
+                body != null && String(body).contains("\"team-pin\"") -> 200 to "{\"ok\":true,\"pin\":\"5307\"}"
                 method == "GET" -> 200 to snapshot().toString()
                 else -> 200 to "{\"ok\":true}"
             }
@@ -85,6 +88,15 @@ class OfficeTest {
         rule.waitForIdle()
         val v = rule.activity.window.decorView
         val b = Bitmap.createBitmap(v.width, v.height, Bitmap.Config.ARGB_8888); v.draw(Canvas(b))
+        File(out, "$name.png").outputStream().use { b.compress(Bitmap.CompressFormat.PNG, 100, it) }
+    }
+    /** The sheet is its own window: draw the app, then the sheet's window on top. */
+    private fun sheetShot(name: String) {
+        rule.mainClock.advanceTimeBy(800); rule.waitForIdle()
+        val v = rule.activity.window.decorView
+        val b = Bitmap.createBitmap(v.width, v.height, Bitmap.Config.ARGB_8888); val c = Canvas(b); v.draw(c)
+        val d = org.robolectric.shadows.ShadowDialog.getLatestDialog()?.window?.decorView
+        if (d != null) { c.save(); c.translate(0f, (v.height - d.height).toFloat()); d.draw(c); c.restore() }
         File(out, "$name.png").outputStream().use { b.compress(Bitmap.CompressFormat.PNG, 100, it) }
     }
     private fun tap(text: String) = rule.onNodeWithText(text).performScrollTo().performClick()
@@ -148,11 +160,61 @@ class OfficeTest {
         rule.waitUntil(5000) { posts.any { it.contains("\"action\":\"review\"") && it.contains("\"decision\":\"approve\"") } }
         rule.onNodeWithTag("o_team").performScrollTo().performClick()
         waitFor("Meril Kiprop")
-        rule.onNodeWithText("e.g. Jessica Anderson").performScrollTo().performTextInput("Jessica Anderson")
-        tap("Add and create PIN")
-        waitFor("4821")
+        // a short list grouped by role: Reid (admin, Cloudflare PIN) under Admins, Meril under Field team
+        rule.onNodeWithTag("team_admins").assertExists(); rule.onNodeWithTag("team_field").assertExists()
+        rule.onNodeWithTag("tm_Reid Anderson").assertExists(); rule.onNodeWithText("PIN in Cloudflare").assertExists()
+        assertTrue(rule.onNodeWithTag("team_admins").fetchSemanticsNode().boundsInRoot.top < rule.onNodeWithTag("tm_Reid Anderson").fetchSemanticsNode().boundsInRoot.top)
+        assertTrue(rule.onNodeWithTag("tm_Reid Anderson").fetchSemanticsNode().boundsInRoot.top < rule.onNodeWithTag("team_field").fetchSemanticsNode().boundsInRoot.top)
+        assertTrue(rule.onNodeWithTag("team_field").fetchSemanticsNode().boundsInRoot.top < rule.onNodeWithTag("tm_Meril Kiprop").fetchSemanticsNode().boundsInRoot.top)
+        rule.onNodeWithTag("tm_Meril Kiprop").performScrollTo()
         shot("23-office-team")
-        assertTrue(posts.any { it.contains("\"action\":\"team-add\"") && it.contains("Jessica Anderson") })
+        // tap a person: a sheet with their details and actions
+        rule.onNodeWithTag("tm_Meril Kiprop").performClick()
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("team_sheet").fetchSemanticsNodes().isNotEmpty() }
+        sheetShot("23b-team-person")
+        rule.onNodeWithTag("tm_newpin").performScrollTo().performClick()
+        rule.onNodeWithText("Make a new PIN for Meril Kiprop? Their old PIN stops working.").assertExists()
+        assertTrue(posts.none { it.contains("\"action\":\"team-pin\"") })
+        rule.onNodeWithTag("tm_yes").performScrollTo().performClick()
+        waitFor("5307")
+        sheetShot("23c-team-new-pin")
+        rule.onNodeWithTag("tm_remove").performScrollTo().performClick()
+        rule.onNodeWithText("Remove Meril Kiprop from the team? Their PIN stops working straight away.").assertExists()
+        sheetShot("23d-team-remove-ask")
+        rule.onNodeWithText("Cancel").performScrollTo().performClick()
+        rule.onAllNodesWithTag("tm_ask").assertCountEquals(0)
+        assertTrue(posts.none { it.contains("\"action\":\"team-remove\"") })
+        rule.onNodeWithText("+254 712 345 678").performScrollTo().performTextInput("0712 000 111")
+        rule.onNodeWithTag("tm_admin").performScrollTo().performClick()
+        rule.onNodeWithTag("tm_save").performScrollTo().performClick()
+        rule.waitUntil(5000) { posts.any { it.contains("\"action\":\"team-update\"") } }
+        posts.first { it.contains("\"action\":\"team-update\"") }.let { assertTrue(it, it.contains("\"name\":\"Meril Kiprop\"") && it.contains("\"phone\":\"0712 000 111\"") && it.contains("\"admin\":true") && it.contains("\"home\":\"ke\"")) }
+        rule.mainClock.advanceTimeBy(2000)
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("team_sheet").fetchSemanticsNodes().isEmpty() }
+        // Add a person: its own sheet, then the PIN shown once
+        rule.onNodeWithTag("team_add").performScrollTo().performClick()
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("team_add_sheet").fetchSemanticsNodes().isNotEmpty() }
+        rule.onNodeWithText("e.g. Jessica Anderson").performScrollTo().performTextInput("Jessica Anderson")
+        rule.onNodeWithTag("tm_admin").performScrollTo().performClick()
+        sheetShot("23f-team-add")
+        rule.onNodeWithTag("tm_add_go").performScrollTo().performClick()
+        waitFor("4821")
+        sheetShot("23g-team-added")
+        posts.first { it.contains("\"action\":\"team-add\"") }.let { assertTrue(it, it.contains("\"name\":\"Jessica Anderson\"") && it.contains("\"admin\":true")) }
+        rule.onNodeWithTag("tm_done").performScrollTo().performClick()
+        rule.mainClock.advanceTimeBy(1500)
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("team_add_sheet").fetchSemanticsNodes().isEmpty() }
+        // Cloudflare person: a short note and only the re-add action, which opens Add a person already filled in
+        rule.onNodeWithTag("tm_Reid Anderson").performScrollTo().performClick()
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("team_sheet").fetchSemanticsNodes().isNotEmpty() }
+        rule.onNodeWithText("Set in Cloudflare — change it there, or re-add here with an app PIN.").assertExists()
+        rule.onAllNodesWithTag("tm_save").assertCountEquals(0); rule.onAllNodesWithTag("tm_newpin").assertCountEquals(0)
+        sheetShot("23e-team-cloudflare")
+        rule.onNodeWithTag("tm_readd").performScrollTo().performClick()
+        rule.mainClock.advanceTimeBy(1000)
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("team_add_sheet").fetchSemanticsNodes().isNotEmpty() }
+        rule.onNode(hasSetTextAction() and hasText("Reid Anderson")).assertExists()
+        rule.onNodeWithTag("tm_readd").assertDoesNotExist()
     }
 
     @Test fun office_in_kiswahili_and_report() {
