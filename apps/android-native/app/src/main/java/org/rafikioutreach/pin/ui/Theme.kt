@@ -52,6 +52,10 @@ val Sun = Palette(
 /** The colours chosen on the Me page: "" follows the phone, or "light", "dark", "sun". */
 object Look { var mode by androidx.compose.runtime.mutableStateOf("") }
 
+/** Text size chosen in Me › This phone: "s" small, "" normal, "l" large, "xl" larger (the same steps as the web app). */
+val TextSize = androidx.compose.runtime.mutableStateOf("")
+fun textScale(k: String) = when (k) { "s" -> 0.875f; "l" -> 1.125f; "xl" -> 1.25f; else -> 1f }
+
 val LocalPalette = staticCompositionLocalOf { Light }
 val C: Palette @Composable get() = LocalPalette.current
 
@@ -96,7 +100,9 @@ fun RafikiTheme(dark: Boolean = isSystemInDarkTheme(), content: @Composable () -
             androidx.core.view.WindowCompat.getInsetsController(w, view).apply { isAppearanceLightStatusBars = !p.dark; isAppearanceLightNavigationBars = !p.dark }
         }
     }
-    androidx.compose.runtime.CompositionLocalProvider(LocalPalette provides p) {
+    val d = androidx.compose.ui.platform.LocalDensity.current
+    val dens = androidx.compose.ui.unit.Density(d.density, d.fontScale * textScale(TextSize.value))
+    androidx.compose.runtime.CompositionLocalProvider(LocalPalette provides p, androidx.compose.ui.platform.LocalDensity provides dens) {
         MaterialTheme(colorScheme = scheme, typography = type, content = content)
     }
 }

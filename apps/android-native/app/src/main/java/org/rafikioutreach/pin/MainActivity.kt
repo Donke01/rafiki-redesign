@@ -82,6 +82,7 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
         Lang.sw = model.prefs.lang.ifBlank { if (java.util.Locale.getDefault().language == "sw") "sw" else "en" } == "sw"
         enableEdgeToEdge()
         org.rafikioutreach.pin.ui.Look.mode = model.prefs.theme
+        org.rafikioutreach.pin.ui.TextSize.value = model.prefs.textSize
         setContent { RafikiTheme { App(model) } }
         handle(intent)
     }

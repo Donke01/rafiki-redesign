@@ -214,7 +214,7 @@ fun TeamToday(m: AppModel, mates: List<Mate>?, act: List<JSONObject>?, snap: Sna
                     Spacer(Modifier.width(6.dp))
                     RoundAction("phone", t("Call ${p.name}", "Mpigie ${p.name}"), C.hue("near")) { runCatching { ctx.startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + p.phone.replace(" ", "")))) } }
                     Spacer(Modifier.width(6.dp))
-                    RoundAction("chat", t("WhatsApp ${p.name}", "WhatsApp ${p.name}"), C.hue("near")) { runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://wa.me/" + waNumber(p.phone, p.home)))) } }
+                    RoundAction("chat", t("WhatsApp ${p.name}", "WhatsApp ${p.name}"), Hue(WhatsAppGreen, WhatsAppGreen.copy(alpha = 0.14f)), brand = "business.whatsapp.com") { runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://wa.me/" + waNumber(p.phone, p.home)))) } }
                 }
             }
         }
@@ -230,10 +230,10 @@ fun waNumber(phone: String, home: String): String {
 }
 
 @Composable
-private fun RoundAction(icon: String, label: String, hu: Hue, onClick: () -> Unit) {
+private fun RoundAction(icon: String, label: String, hu: Hue, brand: String? = null, onClick: () -> Unit) {
     val h = rememberHaptics()
     Box(Modifier.size(40.dp).clip(CircleShape).background(hu.bg).clickable(role = Role.Button) { h.tap(); onClick() }.semantics { contentDescription = label }.testTag("call_$icon"), contentAlignment = Alignment.Center) {
-        Icon(Ic.get(icon), null, tint = hu.fg, modifier = Modifier.size(19.dp))
+        if (brand != null) Brand(brand, 22.dp, icon, hu.fg) else Icon(Ic.get(icon), null, tint = hu.fg, modifier = Modifier.size(19.dp))
     }
 }
 
@@ -347,7 +347,7 @@ fun ConnectMonday(m: AppModel, snap: Snapshot?, inline: Boolean = false) {
     }
     Wrap(inline) {
         if (!inline) Row(verticalAlignment = Alignment.Top) {
-            val hu = C.hue("new"); IconTile("people", hu.fg, hu.bg, 40.dp); Spacer(Modifier.width(12.dp))
+            Box(Modifier.size(40.dp).clip(RoundedCornerShape(14.dp)).background(MondayBlue.copy(alpha = 0.10f)), contentAlignment = Alignment.Center) { Brand("monday.com", 24.dp, "people", MondayBlue) }; Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
                 H2(t("Your name on monday.com", "Jina lako kwenye monday.com"))
                 when {
@@ -363,7 +363,7 @@ fun ConnectMonday(m: AppModel, snap: Snapshot?, inline: Boolean = false) {
             return@Wrap
         }
         if (snap.who.isBlank()) return@Wrap
-        Btn("1 · " + t("Open my monday.com token", "Fungua tokeni yangu ya monday.com"), { waiting = true; runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(TOKEN_PAGE))) } }, Modifier.padding(top = 12.dp).fillMaxWidth().testTag("monday_open"))
+        Btn("1 · " + t("Open my monday.com token", "Fungua tokeni yangu ya monday.com"), { waiting = true; runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(TOKEN_PAGE))) } }, Modifier.padding(top = 12.dp).fillMaxWidth().testTag("monday_open"), color = MondayBlue)
         Text(t("Tap Copy on that page, then come back here.", "Gusa Copy kwenye ukurasa huo, kisha rudi hapa."), style = MaterialTheme.typography.labelSmall, color = C.muted, modifier = Modifier.padding(top = 4.dp).align(Alignment.CenterHorizontally))
         Btn(if (busy) t("Checking…", "Inakagua…") else "2 · " + t("Paste and connect", "Bandika na uunganishe"), { paste() }, Modifier.padding(top = 10.dp).fillMaxWidth().testTag("monday_paste"), light = true, enabled = !busy)
         Text(t("Or paste it yourself", "Au ibandike mwenyewe"), style = MaterialTheme.typography.labelLarge, color = C.blue, modifier = Modifier.padding(top = 8.dp).clip(RoundedCornerShape(10.dp)).clickable { manual = !manual }.padding(6.dp))

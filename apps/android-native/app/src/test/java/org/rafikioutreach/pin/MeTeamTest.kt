@@ -89,10 +89,16 @@ class MeTeamTest {
         if (LocalDate.now().dayOfMonth > 2) { rule.onNodeWithTag("my_visit").assertTextEquals("2"); rule.onNodeWithTag("hero_visit").assertTextEquals("2") }
         rule.onNodeWithTag("my_streak").assertTextContains("in a row", substring = true)
         rule.onNodeWithTag("this_phone").performScrollTo(); shot("61b-this-phone")
+        rule.onNodeWithTag("monday_open").performScrollTo(); shot("61c-monday")
+        rule.onNodeWithTag("size_s").performScrollTo().performClick(); rule.waitForIdle()
+        assertEquals("s", org.rafikioutreach.pin.ui.TextSize.value); assertEquals("s", m.prefs.textSize); shot("61d-text-small")
+        rule.onNodeWithTag("size_").performScrollTo().performClick(); rule.waitForIdle()
+        assertEquals("", m.prefs.textSize)
+        rule.onNodeWithTag("pane_me").performScrollTo()
         rule.onNodeWithTag("pane_team").performScrollTo().performClick(); rule.waitForIdle()
         rule.waitUntil(8000) { rule.onAllNodesWithTag("mate_row").fetchSemanticsNodes().size == 2 }
         rule.onAllNodesWithTag("my_work").assertCountEquals(0)
-        rule.onNodeWithTag("team_today").performScrollTo(); shot("62-team-today")
+        rule.onNodeWithTag("team_today").performScrollTo(); Thread.sleep(4000); rule.mainClock.advanceTimeBy(500); shot("62-team-today")
         rule.onAllNodesWithTag("call_phone").assertCountEquals(2)
         rule.onNodeWithTag("team_month").performScrollTo(); shot("63-team-month")
         rule.onNodeWithTag("team_feed").performScrollTo(); shot("64-team-feed")

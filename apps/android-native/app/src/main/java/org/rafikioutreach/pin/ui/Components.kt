@@ -60,7 +60,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 @Composable
-fun Btn(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, icon: String? = null, enabled: Boolean = true, light: Boolean = false, ok: Boolean = false, small: Boolean = false, saved: String? = null) {
+fun Btn(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, icon: String? = null, enabled: Boolean = true, light: Boolean = false, ok: Boolean = false, small: Boolean = false, saved: String? = null, color: Color? = null) {
     val src = remember { MutableInteractionSource() }
     val pressed by src.collectIsPressedAsState()
     if (saved != null) {
@@ -72,7 +72,7 @@ fun Btn(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, icon: 
         }
         return
     }
-    val bg: Brush = when { !enabled -> SolidColor(C.off); light -> SolidColor(if (C.glassy) C.glass2 else C.card); ok -> OkBrush; else -> C.primary }
+    val bg: Brush = when { !enabled -> SolidColor(C.off); light -> SolidColor(if (C.glassy) C.glass2 else C.card); ok -> OkBrush; color != null -> SolidColor(color); else -> C.primary }
     val fg = if (light) C.ink else Color.White
     Row(
         modifier
@@ -184,6 +184,15 @@ fun NetImage(url: String?, modifier: Modifier, placeholder: @Composable () -> Un
         if (b != null) Image(b.asImageBitmap(), null, contentScale = ContentScale.Crop, modifier = Modifier.matchParentSize()) else placeholder()
     }
 }
+
+/** A company's own icon (monday.com, WhatsApp, Google Maps), as on the web; [fallback] is drawn while it loads or with no signal. */
+@Composable
+fun Brand(domain: String, size: androidx.compose.ui.unit.Dp, fallback: String, tint: Color) {
+    NetImage("https://www.google.com/s2/favicons?domain=$domain&sz=128", Modifier.size(size).clip(RoundedCornerShape(size * 0.22f))) { Icon(Ic.get(fallback), null, tint = tint, modifier = Modifier.size(size)) }
+}
+/** monday.com's own colours. */
+val MondayBlue = Color(0xFF6161FF)
+val WhatsAppGreen = Color(0xFF25D366)
 
 val Pad = PaddingValues(horizontal = 16.dp)
 val Bordered = BorderStroke(1.dp, Color.Transparent)

@@ -132,9 +132,12 @@ private fun HeroBtn(text: String, icon: String, solid: Boolean, modifier: Modifi
 
 /** One row of "This phone": a coloured icon, a name (and a line under it), and a control on the right. */
 @Composable
-private fun PhoneRow(icon: String, hue: String, title: String, sub: String? = null, subOk: Boolean = false, modifier: Modifier = Modifier, subTag: String = "", right: @Composable () -> Unit) {
+private fun PhoneRow(icon: String, hue: String, title: String, sub: String? = null, subOk: Boolean = false, modifier: Modifier = Modifier, subTag: String = "", brand: String? = null, brandColor: Color = Color.Unspecified, right: @Composable () -> Unit) {
     Row(modifier.fillMaxWidth().padding(vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
-        val hu = C.hue(hue); IconTile(icon, hu.fg, hu.bg, 40.dp); Spacer(Modifier.width(12.dp))
+        val hu = C.hue(hue)
+        if (brand != null) Box(Modifier.size(40.dp).clip(RoundedCornerShape(14.dp)).background(brandColor.copy(alpha = 0.10f)), contentAlignment = Alignment.Center) { Brand(brand, 24.dp, icon, brandColor) }
+        else IconTile(icon, hu.fg, hu.bg, 40.dp)
+        Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
             Text(title, style = MaterialTheme.typography.titleSmall, color = C.ink)
             if (sub != null) Text(sub, style = MaterialTheme.typography.bodySmall, color = if (subOk) C.ok else C.muted, modifier = if (subTag.isNotBlank()) Modifier.testTag(subTag) else Modifier)
@@ -184,7 +187,7 @@ fun ThisPhone(m: AppModel, snap: Snapshot?) {
             Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).clickable(role = Role.Button) { open = !open }.testTag("monday_row")) {
                 PhoneRow("link", "new", t("Your name on monday.com", "Jina lako kwenye monday.com"),
                     when { snap.linked.isNotBlank() -> t("Connected as ${snap.linked} ✓", "Imeunganishwa kama ${snap.linked} ✓"); snap.who.isBlank() -> t("Changes go in under the shared account", "Mabadiliko yanaingia kwa akaunti ya pamoja"); else -> t("Takes 20 seconds, once", "Inachukua sekunde 20, mara moja") },
-                    subOk = snap.linked.isNotBlank(), subTag = if (snap.linked.isNotBlank()) "monday_connected" else "") {
+                    subOk = snap.linked.isNotBlank(), subTag = if (snap.linked.isNotBlank()) "monday_connected" else "", brand = "monday.com", brandColor = MondayBlue) {
                     Icon(Ic.get("chev"), null, tint = C.muted, modifier = Modifier.size(18.dp).rotate(turn))
                 }
             }
@@ -202,6 +205,10 @@ fun ThisPhone(m: AppModel, snap: Snapshot?) {
         PhoneRow("globe", "pin", t("Language", "Lugha")) {
             SmallSeg(listOf("en" to "English", "sw" to "Kiswahili"), if (sw) "sw" else "en", tag = "lang_") { org.rafikioutreach.pin.Lang.sw = it == "sw"; m.prefs.lang = it; sw = it == "sw" }
         }
+        // text size: small to larger, for every screen
+        line()
+        PhoneRow("text", "all", t("Text size", "Ukubwa wa maandishi")) {}
+        SmallSeg(listOf("s" to t("Small", "Ndogo"), "" to t("Normal", "Kawaida"), "l" to t("Large", "Kubwa"), "xl" to t("Larger", "Kubwa zaidi")), TextSize.value, Modifier.fillMaxWidth().padding(bottom = 12.dp), tag = "size_") { TextSize.value = it; m.prefs.textSize = it }
         // distances
         line()
         var miles by remember { mutableStateOf(m.prefs.miles) }
