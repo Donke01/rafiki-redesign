@@ -31,7 +31,7 @@ with sync_playwright() as p:
         pg.wait_for_timeout(1200); pg.evaluate("localStorage.setItem('rfPinOnb','1')"); pg.goto(BASE + '/pin#map'); pg.wait_for_timeout(2000)
         t = pg.inner_text('#nearList')
         if mode == 'timeout':
-            check('couldn’t work out where it is' in t and 'Location Services' in t, 'computer: explains Wi-Fi / Location Services: ' + t[:80])
+            check('couldn’t work out exactly where it is' in t and pg.locator('#spotSet').count() == 1, 'computer: says so and offers Set where I am: ' + t[:80])
             check(pg.locator('#geoRetry').count() == 1, 'Try again button')
             check('Roughly' in t and 'Eldoret' in t and pg.locator('#nearList .row').count() == 1 and '≈' in pg.inner_text('#nearList .row'), 'rough nearest list from the internet connection')
             check(pg.locator('#mHere .here').count() == 0 if pg.locator('#mHere').count() else True, 'no "I am here" from a rough position'); pg.screenshot(path=OUT + '/1-mac.png')

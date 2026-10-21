@@ -313,6 +313,8 @@ html[data-theme=dark] .leaflet-bar a,html[data-theme=dark] .leaflet-control-laye
 .prow{display:grid;grid-template-columns:1fr auto;gap:2px 10px;text-align:left;padding:10px 12px;border-radius:14px;border:var(--bw) solid var(--line);background:var(--card);cursor:pointer;color:var(--text);min-height:52px}
 .prow b{font-size:.92rem}.prow span{grid-column:1;font-size:.78rem;color:var(--muted)}.prow em{grid-row:1 / span 2;grid-column:2;align-self:center;font-style:normal;font-size:.78rem;font-weight:700;color:var(--deep)}
 .prow:hover{border-color:#9FD3F7}
+.spot .bsh-p h3{margin:0}.spot .sq{display:flex;gap:8px;margin-top:12px}.spot .sq input{flex:1;min-width:0}.spot .sr{display:grid;gap:8px;margin-top:12px}.spot .sh{font-size:.72rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:6px 2px 0}
+.gwb{display:flex;flex-wrap:wrap;gap:8px;margin:0 6px 10px}
 .sim{font-size:.68rem;font-weight:700;color:var(--warn);background:var(--warnbg);padding:2px 6px;border-radius:6px;margin-left:4px;white-space:nowrap}
 .ext{margin-top:12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .ext p{flex-basis:100%}
@@ -2187,6 +2189,7 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
   function hereWatch(on) {
     if (!on || !navigator.geolocation) { if (hw !== null) navigator.geolocation.clearWatch(hw); hw = null; return; }
     if (hw !== null) return;
+    if (DESK) approxFetch();
     var got = function (p) { S.geoErr = 0; S.here = [p.coords.latitude, p.coords.longitude]; S.hereAt = Date.now(); S.hereAcc = Math.round(p.coords.accuracy || 0); hereUi(); freshUi(); };
     hw = navigator.geolocation.watchPosition(got, function (e) {
       // Computers have no GPS: they work it out from Wi-Fi, which can be slow or fail. Ask once more the easy way, and say what went wrong.
@@ -2197,6 +2200,53 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
     }, { enableHighAccuracy: true, maximumAge: 0, timeout: 30000 });
   }
   var geoOnce = false, approxAsked = false;
+  // Computers usually can't find themselves (no GPS, and Wi-Fi location is patchy in Kenya), so on a
+  // computer you can set where you are: a project or a place. It's only used for the nearest lists,
+  // never for pinning a location.
+  var DESK = /Macintosh|Windows|CrOS|Linux x86/.test(navigator.userAgent) && !('ontouchend' in document);
+  S.spot = jget('rfPinSpot', null);
+  function spotLL() { return S.here || (S.spot && S.spot.ll) || (S.approx && S.approx.ll) || null; }
+  function spotName() { return S.here ? '' : S.spot ? S.spot.name : S.approx ? (S.approx.city || tr('your internet connection', 'mtandao wako')) : ''; }
+  function setSpot(ll, name) {
+    S.spot = ll ? { ll: [+ll[0], +ll[1]], name: String(name || '').slice(0, 80) } : null;
+    if (S.spot) store.set('rfPinSpot', JSON.stringify(S.spot)); else store.del('rfPinSpot');
+    nearUi(); if (S.view === 'vList') renderList();
+  }
+  function spotSheet() {
+    var w = document.createElement('div'); w.className = 'bsh spot'; w.setAttribute('role', 'dialog'); w.setAttribute('aria-modal', 'true'); w.setAttribute('aria-label', tr('Set where you are', 'Weka mahali ulipo'));
+    w.innerHTML = '<div class="bsh-bg"></div><div class="bsh-p"><i class="grab" aria-hidden="true"></i><h3>' + tr('Where are you?', 'Uko wapi?') + '</h3>' +
+      '<p class="muted">' + tr('This computer can’t find its own location. Choose a project or type a town, and the nearest lists measure from there. Pinning a location still needs the phone at the site.', 'Kompyuta hii haiwezi kujua mahali ilipo. Chagua mradi au andika mji, na orodha za karibu zitapima kutoka hapo. Kuweka mahali bado kunahitaji simu ikiwa kwenye eneo.') + '</p>' +
+      '<div class="sq"><input id="spQ" type="search" autocomplete="off" placeholder="' + tr('Project, town or village', 'Mradi, mji au kijiji') + '"><button class="btn small" id="spGo" type="button">' + tr('Search', 'Tafuta') + '</button></div>' +
+      '<div class="sr" id="spR"></div>' + (S.spot ? '<button class="lnk" id="spClear" type="button" style="margin-top:12px">' + tr('Forget “' + esc(S.spot.name) + '”', 'Sahau “' + esc(S.spot.name) + '”') + '</button>' : '') + '</div>';
+    document.body.appendChild(w); requestAnimationFrame(function () { w.classList.add('in'); });
+    var close = function () { w.classList.add('out'); setTimeout(function () { w.remove(); }, 220); };
+    w.querySelector('.bsh-bg').addEventListener('click', close);
+    var found = [], q = $('spQ'), res = $('spR');
+    var row = function (i, name, sub) { return '<button type="button" class="prow" data-i="' + i + '"><b>' + esc(name) + '</b><span>' + esc(sub) + '</span></button>'; };
+    var show = function (places) {
+      var t = q.value.trim().toLowerCase();
+      var pr = S.projects.filter(function (p) { return p.gps && (!t || (p.title + ' ' + p.area).toLowerCase().indexOf(t) >= 0); }).slice(0, t ? 6 : 4);
+      found = pr.map(function (p) { return { ll: p.gps, name: p.title, sub: [p.area, p.country].filter(Boolean).join(', ') }; });
+      var html = pr.length ? '<div class="sh">' + tr('Projects', 'Miradi') + '</div>' + found.map(function (x, i) { return row(i, x.name, x.sub); }).join('') : '';
+      if (places) {
+        var n = found.length;
+        places.forEach(function (x) { found.push({ ll: [x.lat, x.lng], name: x.name, sub: x.where || '' }); });
+        html += '<div class="sh">' + tr('Places', 'Maeneo') + '</div>' + (places.length ? places.map(function (x, i) { return row(n + i, x.name, x.where || ''); }).join('') : '<p class="muted">' + tr('No places found. Try a nearby town.', 'Hakuna maeneo. Jaribu mji ulio karibu.') + '</p>');
+      }
+      res.innerHTML = html;
+    };
+    var search = function () {
+      var t = q.value.trim(); if (t.length < 2) return show();
+      res.innerHTML = '<div class="skel" style="height:52px"></div>';
+      placeApi('?free=1&q=' + encodeURIComponent(t) + '&cc=' + encodeURIComponent($('iCountry').value || '')).then(function (j) { show(j.ok ? (j.places || []).slice(0, 6) : []); });
+    };
+    q.addEventListener('input', function () { show(); });
+    q.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); search(); } });
+    $('spGo').addEventListener('click', search);
+    res.addEventListener('click', function (e) { var b = e.target.closest('.prow'); if (!b) return; var x = found[+b.getAttribute('data-i')]; setSpot(x.ll, x.name); close(); });
+    if ($('spClear')) $('spClear').addEventListener('click', function () { setSpot(null); close(); });
+    show(); setTimeout(function () { q.focus(); }, 250);
+  }
   // When the device can't find itself, ask the server roughly where the internet connection is (city level).
   // Only the "nearest" list uses it; pinning and "I'm here" still need a real position.
   function approxFetch() {
@@ -2301,20 +2351,22 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
   function nearUi() {
     var list = nearest(5);
     if (!S.here) {
-      var mac = /Macintosh|Windows|CrOS|Linux x86/.test(navigator.userAgent) && !('ontouchend' in document);
       var why = !navigator.geolocation ? tr('This browser can’t share your location.', 'Kivinjari hiki hakiwezi kushiriki mahali ulipo.')
         : S.geoErr === 1 ? tr('Location is blocked for this site. Allow it in the browser’s site settings (the icon left of the address), then try again.', 'Mahali pamezuiwa kwa tovuti hii. Paruhusu kwenye mipangilio ya tovuti ya kivinjari (alama iliyo kushoto ya anwani), kisha jaribu tena.')
-        : S.geoErr ? (mac ? tr('This computer couldn’t work out where it is. Turn on Wi-Fi, and on a Mac allow your browser in System Settings › Privacy & Security › Location Services. Then try again.', 'Kompyuta hii haikuweza kujua mahali ilipo. Washa Wi-Fi, na kwenye Mac ruhusu kivinjari chako kwenye System Settings › Privacy & Security › Location Services. Kisha jaribu tena.')
+        : S.geoErr ? (DESK ? tr('This computer couldn’t work out exactly where it is.', 'Kompyuta hii haikuweza kujua mahali ilipo hasa.')
           : tr('Your phone couldn’t find where you are. Turn on location, step outside if you can, then try again.', 'Simu yako haikuweza kupata mahali ulipo. Washa mahali, toka nje ukiweza, kisha jaribu tena.'))
         : tr('Finding where you are…', 'Inatafuta mahali ulipo…');
-      if (S.geoErr && S.approx) {
-        var al = S.projects.filter(function (p) { return p.gps; }).map(function (p) { return { p: p, d: metres(S.approx.ll, p.gps) }; }).sort(function (a, b) { return a.d - b.d; }).slice(0, 5);
-        why = (S.approx.city ? tr('Roughly, from your internet connection near ' + esc(S.approx.city) + '.', 'Takriban, kutoka kwa mtandao wako karibu na ' + esc(S.approx.city) + '.') : tr('Roughly, from your internet connection.', 'Takriban, kutoka kwa mtandao wako.')) + ' ' + why;
-        $('nearList').innerHTML = '<p class="muted gw" style="margin:0 6px 8px">' + why + ' <button class="lnk" id="geoRetry" type="button">' + tr('Try again', 'Jaribu tena') + '</button></p>' +
-          al.map(function (x) { return rowHtml(x.p, '<span class="tag">≈ ' + dist(x.d) + '</span>'); }).join('');
+      var from = spotLL();
+      var btns = '<div class="gwb">' + (DESK || S.geoErr ? '<button class="btn small" id="spotSet" type="button">' + (S.spot ? tr('Change where I am', 'Badilisha nilipo') : tr('Set where I am', 'Weka nilipo')) + '</button>' : '') +
+        (S.geoErr ? '<button class="btn small light" id="geoRetry" type="button">' + tr('Try again', 'Jaribu tena') + '</button>' : '') + '</div>';
+      if (from) {
+        var al = S.projects.filter(function (p) { return p.gps; }).map(function (p) { return { p: p, d: metres(from, p.gps) }; }).sort(function (a, b) { return a.d - b.d; }).slice(0, 5);
+        var head = S.spot ? tr('From ' + esc(S.spot.name) + ', the place you set.', 'Kutoka ' + esc(S.spot.name) + ', mahali ulipoweka.')
+          : (S.approx.city ? tr('Roughly, from your internet connection near ' + esc(S.approx.city) + '.', 'Takriban, kutoka kwa mtandao wako karibu na ' + esc(S.approx.city) + '.') : tr('Roughly, from your internet connection.', 'Takriban, kutoka kwa mtandao wako.')) + ' ' + why;
+        $('nearList').innerHTML = '<p class="muted gw" style="margin:0 6px 8px">' + head + '</p>' + btns + al.map(function (x) { return rowHtml(x.p, '<span class="tag">≈ ' + dist(x.d) + '</span>'); }).join('');
         $('nearList').dataset.k = ''; return;
       }
-      $('nearList').innerHTML = '<p class="muted gw" style="margin:0 6px 8px">' + why + '</p>' + (S.geoErr ? '<button class="btn small light" id="geoRetry" type="button" style="margin:0 6px 8px">' + tr('Try again', 'Jaribu tena') + '</button>' : '');
+      $('nearList').innerHTML = '<p class="muted gw" style="margin:0 6px 8px">' + why + '</p>' + btns;
       $('nearList').dataset.k = ''; return;
     }
     paint($('nearList'), list.map(function (x) { var tag = '<span class="tag has">' + dist(x.d) + '</span>'; return { html: rowHtml(x.p, tag), tag: tag, id: x.p.id }; }), '');
@@ -2335,7 +2387,7 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
     qa(':scope > .row', box).forEach(function (el, i) { el._k = key(items[i]); });
   }
   $('nearHd').addEventListener('click', function () { var s = $('nearSheet'), shut = !s.classList.contains('shut'); s.classList.toggle('shut', shut); this.setAttribute('aria-expanded', shut ? 'false' : 'true'); $('nearHint').textContent = shut ? 'Show' : 'Hide'; });
-  $('nearList').addEventListener('click', function (e) { if (e.target.closest('#geoRetry')) return geoRetry(); var b = e.target.closest('.row'); if (b) openProj(b.getAttribute('data-id')); });
+  $('nearList').addEventListener('click', function (e) { if (e.target.closest('#geoRetry')) return geoRetry(); if (e.target.closest('#spotSet')) return spotSheet(); var b = e.target.closest('.row'); if (b) openProj(b.getAttribute('data-id')); });
 
 
 
@@ -2612,25 +2664,26 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
       if (q && (p.title + ' ' + p.area + ' ' + p.country).toLowerCase().indexOf(q) < 0) return false;
       return true;
     });
-    if (S.here) rows.forEach(function (p) { p._d = p.gps ? metres(S.here, p.gps) : null; });
-    if (near && S.here) { rows.sort(function (a, b) { return a._d - b._d; }); rows = rows.slice(0, 30); }
+    var from = near ? spotLL() : S.here;
+    if (from) rows.forEach(function (p) { p._d = p.gps ? metres(from, p.gps) : null; });
+    if (near && from) { rows.sort(function (a, b) { return a._d - b._d; }); rows = rows.slice(0, 30); }
     if (f === 'repairs') rows.sort(function (a, b) { var ra = S.repairs[a.id], rb = S.repairs[b.id]; return (URGO[ra.urgency] || 3) - (URGO[rb.urgency] || 3) || (rb.at || '').localeCompare(ra.at || ''); });
     if (f === 'due') rows.sort(function (a, b) { return ageDays(b) - ageDays(a); });
-    $('count').textContent = near ? (S.here ? 'Closest pinned projects to you' : 'Finding where you are…')
+    $('count').textContent = near ? (S.here ? 'Closest pinned projects to you' : from ? tr('Closest to ', 'Karibu zaidi na ') + spotName() : 'Finding where you are…')
       : f === 'missing' ? rows.length + ' still need a location'
       : f === 'repairs' ? rows.length + (rows.length === 1 ? ' project reported' : ' projects reported') + ' as needing repair or not working, most urgent first'
       : f === 'due' ? rows.length + ' not visited in the last 6 months (or not yet in the app), longest first'
       : rows.length + ' projects';
     // the country shows on its own button beside the count
     if (S.routeMode) $('count').textContent += ' · tick the pinned ones to visit';
-    if (near && !S.here) { $('list').innerHTML = '<div class="skel"></div><div class="skel"></div><div class="skel"></div>'; return; }
+    if (near && !from) { $('list').innerHTML = DESK || S.geoErr ? '<div class="gwb" style="margin:8px 0"><button class="btn small" id="spotSet2" type="button">' + tr('Set where I am', 'Weka nilipo') + '</button></div>' : '<div class="skel"></div><div class="skel"></div><div class="skel"></div>'; return; }
     if (!S.projects.length) { $('list').innerHTML = '<div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div>'; return; }
     rowI = 0; $('list').classList.toggle('stagger', !!S.animList); S.animList = false;
     var items = rows.map(function (p) {
       var r = S.repairs[p.id];
       var tag = r ? '<span class="tag' + (r.state === 'notworking' ? ' bad' : '') + '">' + (r.urgency === 'urgent' ? 'Urgent · ' : '') + (r.state === 'notworking' ? 'Not working' : 'Needs repair') + '</span>'
         : f === 'due' ? '<span class="tag">' + ageText(p) + '</span>'
-        : near ? '<span class="tag has">' + dist(p._d) + '</span>' : p.gps ? '<span class="tag has">' + (p._d != null ? dist(p._d) : 'Pinned') + '</span>' : '<span class="tag">No location</span>';
+        : near ? '<span class="tag' + (S.here ? ' has' : '') + '">' + (S.here ? '' : '≈ ') + dist(p._d) + '</span>' : p.gps ? '<span class="tag has">' + (p._d != null ? dist(p._d) : 'Pinned') + '</span>' : '<span class="tag">No location</span>';
       return { html: rowHtml(p, tag, S.routeMode), tag: tag, id: p.id };
     });
     paint($('list'), items, emptyHtml(f === 'missing' && !q && !ck ? 'Every project has a location.' : f === 'repairs' && !q && !ck ? 'No open repairs.' : f === 'due' && !q ? 'Everything has been visited in the last 6 months.' : 'No projects match.'));
@@ -2656,11 +2709,12 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
       S.filter = c.getAttribute('data-f'); store.set('rfPinFilter', S.filter); S.animList = true;
       qa('.chips .chip').forEach(function (x) { x.setAttribute('aria-pressed', x === c ? 'true' : 'false'); });
       renderList();
-      if (S.filter === 'near') locate(function (ll) { if (!ll) msg('mList', 'warn', 'Couldn’t get your location. Allow location for this site, then try again.'); renderList(); });
+      if (S.filter === 'near') { if (DESK) approxFetch(); locate(function (ll) { if (!ll && !spotLL()) msg('mList', 'warn', DESK ? tr('This computer can’t find its location. Tap “Set where I am”.', 'Kompyuta hii haiwezi kupata mahali ilipo. Gusa “Weka nilipo”.') : 'Couldn’t get your location. Allow location for this site, then try again.'); renderList(); }); }
     });
   });
   qa('.chips .chip').forEach(function (x) { x.setAttribute('aria-pressed', x.getAttribute('data-f') === S.filter ? 'true' : 'false'); });
   $('list').addEventListener('click', function (e) {
+    if (e.target.closest('#spotSet2')) return spotSheet();
     var b = e.target.closest('.row'); if (!b) return;
     var id = b.getAttribute('data-id');
     if (!S.routeMode) return openProj(id);
