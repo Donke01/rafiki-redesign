@@ -226,7 +226,7 @@ async function monthly(request, env) {
     n('pin') + ' locations pinned, ' + n('new') + ' new sites added.',
     review ? review + ' items waiting for review in the Office tab.' : 'Nothing waiting for review.'
   ];
-  const r = await sendMail(env, 'RAFIKI Pin: ' + label + ' summary', alertHtml('Field summary: ' + label, lines, new URL('/pin#report', request.url).toString()), lines.join('\n'));
+  const r = await sendMail(env, 'RAFIKI Pin: ' + label + ' summary', alertHtml('Field summary: ' + label, lines, new URL('/pin#report', request.url).toString(), new URL(request.url).origin), lines.join('\n'));
   return json(Object.assign({ month: label }, r), r.ok ? 200 : 503);
 }
 
