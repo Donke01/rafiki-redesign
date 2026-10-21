@@ -517,7 +517,7 @@ footer a{font-weight:700}
   function repairText(u) {
     var what = u.problems && u.problems.length ? u.problems.join(', ') : '';
     var cost = u.cost ? 'Cost KES ' + n(u.cost) + (u.costKind === 'estimate' ? ' (estimate)' : '') : '';
-    if (u.fixedAt) return { t: 'Repaired', p: (what ? 'Fixed: ' + what.toLowerCase() + '. ' : '') + 'Problem found ' + day(u.at || u.fixedAt, false) + ', fixed ' + day(u.fixedAt) + '.' + (cost ? ' ' + cost + '.' : '') };
+    if (u.fixedAt) return { t: 'Repaired', p: (what ? 'What was fixed: ' + what.toLowerCase() + '. ' : '') + 'Problem found ' + day(u.reported || u.at, false) + ', fixed ' + day(u.fixedAt) + '.' + (cost ? ' ' + cost + '.' : '') };
     if (!u.open) return { t: 'Problem dealt with', p: (what ? what + '. ' : '') + 'Reported ' + day(u.at) + '.' + (cost ? ' ' + cost + '.' : '') };
     return { t: 'Repair under way', p: (what ? 'What broke: ' + what.toLowerCase() + '. ' : 'A problem was found. ') + (STEP[u.step] || 'The team is arranging the repair') + '.' + (cost ? ' ' + cost + '.' : '') };
   }

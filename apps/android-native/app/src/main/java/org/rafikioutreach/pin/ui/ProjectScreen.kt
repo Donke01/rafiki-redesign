@@ -154,6 +154,7 @@ fun ProjectScreen(m: AppModel, id: String, startTab: String, back: () -> Unit) {
         }
 
         snap.repairs[p.id]?.let { r -> RepairTracker(m, p, r, here) }
+        DonorThanks(m, p)
 
         // what to do
         Row(Modifier.padding(top = 14.dp).fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(C.card).border(1.dp, C.line, RoundedCornerShape(18.dp)).padding(5.dp)) {

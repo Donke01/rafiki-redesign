@@ -75,6 +75,22 @@ class Api(val server: String, private val pin: () -> String, private val session
         toReply(status, text)
     }
 
+    /** A thank-you photo or short video (≤ 60 s) from the community, for the project's donors (/api/pin-thanks). */
+    suspend fun thanks(id: String, bytes: ByteArray, mime: String, caption: String, seconds: Int): Reply = withContext(Dispatchers.IO) {
+        val boundary = "----rafiki" + System.nanoTime()
+        val out = ByteArrayOutputStream()
+        fun field(name: String, value: String) { out.write("--$boundary\r\nContent-Disposition: form-data; name=\"$name\"\r\n\r\n$value\r\n".toByteArray()) }
+        field("id", id); field("caption", caption); field("seconds", seconds.toString())
+        val ext = when (mime) { "video/mp4" -> "mp4"; "video/webm" -> "webm"; "video/quicktime" -> "mov"; "video/3gpp" -> "3gp"; "image/png" -> "png"; "image/webp" -> "webp"; else -> "jpg" }
+        out.write("--$boundary\r\nContent-Disposition: form-data; name=\"file\"; filename=\"thanks.$ext\"\r\nContent-Type: $mime\r\n\r\n".toByteArray())
+        out.write(bytes)
+        out.write("\r\n--$boundary--\r\n".toByteArray())
+        val h = mutableMapOf("Accept" to "application/json", "Content-Type" to "multipart/form-data; boundary=$boundary", "Origin" to server)
+        auth(h)
+        val (status, text) = transport("POST", "$server/api/pin-thanks", h, out.toByteArray())
+        toReply(status, text)
+    }
+
     private fun toReply(status: Int, text: String): Reply {
         if (status == 0) return Reply(false, 0, JSONObject(), "offline")
         val j = try { JSONObject(text) } catch (e: Exception) { JSONObject().put("ok", false).put("reason", "down") }

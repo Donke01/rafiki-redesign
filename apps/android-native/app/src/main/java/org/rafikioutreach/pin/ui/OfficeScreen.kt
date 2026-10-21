@@ -87,6 +87,7 @@ fun OfficeScreen(m: AppModel, open: (String) -> Unit) {
     val secs = listOf(
         Triple("overview", t("Overview", "Muhtasari"), "drop"), Triple("repairs", t("Repairs", "Ukarabati"), "wrench"), Triple("visits", t("Visits", "Ziara"), "cal"),
         Triple("review", t("Review", "Idhinisha"), "inbox"), Triple("team", t("Team", "Timu"), "people"), Triple("cleanup", t("Clean-up", "Usafi"), "spark"), Triple("export", t("Export", "Pakua"), "upload"),
+        Triple("donors", t("Donors", "Wafadhili"), "link"),
     )
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
         Text(t("Office", "Ofisi"), style = MaterialTheme.typography.headlineLarge, color = C.ink, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.fillMaxWidth())
@@ -104,6 +105,7 @@ fun OfficeScreen(m: AppModel, open: (String) -> Unit) {
             "review" -> ReviewQueue(m, open)
             "team" -> TeamSection(m)
             "cleanup" -> Cleanup(snap, open)
+            "donors" -> DonorsSection(m, snap)
             else -> Export(m, snap)
         }
         Spacer(Modifier.height(24.dp))
