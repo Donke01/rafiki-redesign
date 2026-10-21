@@ -1191,6 +1191,70 @@ html[data-theme=dark] .trk .rnote{background:rgba(255,255,255,.06)}
 .onb .lsw button[aria-pressed=true]{background:linear-gradient(180deg,#1F3242,#0C1924);color:#FFFFFF}
 html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;color:#0C1924}
 .onb .cap{font-size:.9rem}
+
+/* Me & team (Figma: RAFIKI Pin — Me & team) */
+.mehead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:4px 2px 12px}.mehead h1{margin:0}
+.mesw,.seg.sm{display:inline-flex !important;gap:0 !important;padding:4px !important;margin:0 !important;border-radius:999px !important;background:var(--hb-slate) !important;border:0 !important;box-shadow:none !important;flex:none;width:auto}
+.mesw button,.seg.sm button{min-height:0 !important;border:0;border-radius:999px !important;background:transparent !important;box-shadow:none !important;color:var(--muted) !important;font:700 .82rem/1 inherit;padding:9px 16px !important;cursor:pointer}
+.seg.sm button{font-size:.74rem !important;padding:8px 11px !important}
+.mesw button[aria-selected=true],.seg.sm button[aria-pressed=true]{background:var(--card) !important;color:var(--ink) !important;box-shadow:0 1px 4px rgba(4,38,63,.14) !important}
+html[data-theme=sun] .mesw,html[data-theme=sun] .seg.sm{background:#FFFFFF !important;border:2px solid #000 !important}
+.mehero{position:relative;border-radius:28px;padding:20px;color:#FFFFFF;background:linear-gradient(140deg,#0A78C2 0%,#054F81 55%,#04263F 100%);box-shadow:0 10px 24px rgba(5,79,129,.28)}
+html[data-theme=dark] .mehero{box-shadow:none}
+.mh-who{display:flex;align-items:center;gap:14px}.mh-who>div{min-width:0}
+.mh-who b{display:block;font-size:1.2rem;font-weight:800;line-height:1.2}.mh-who small{display:block;margin-top:3px;font-size:.82rem;font-weight:600;color:#CFE8FA}
+.mh-av{width:56px;height:56px;flex:none;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.16);box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.35);overflow:hidden}
+.mh-av i{font-style:normal;font-weight:800;font-size:1.15rem;color:#FFFFFF}.mh-av img{width:100%;height:100%;object-fit:cover}
+.mh-lbl{display:block;margin:18px 0 8px;font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#9FD3F7}
+.mh-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.mh-stats div{border-radius:16px;background:rgba(255,255,255,.12);padding:12px 6px;text-align:center}
+.mh-stats b{display:block;font-size:1.65rem;font-weight:800;line-height:1.15}.mh-stats span{font-size:.75rem;font-weight:700;color:#CFE8FA}
+.mh-streak{display:flex;align-items:center;gap:10px;margin-top:12px;padding:10px 14px;border-radius:14px;background:rgba(255,255,255,.10);font-size:.82rem;font-weight:700}
+.mh-streak:empty{display:none}.mh-streak svg{width:18px;height:18px;flex:none;color:#FFB27A}
+.mh-act{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
+.mehero .btn.mh-lock,.mehero .btn.mh-rep{min-height:46px;border-radius:999px !important;font-size:.84rem;box-shadow:none !important;margin:0;width:100%}
+.mehero .btn.mh-lock{background:#FFFFFF !important;color:#04263F !important;border:0 !important}
+.mehero .btn.mh-rep{background:transparent !important;color:#FFFFFF !important;border:1.5px solid rgba(255,255,255,.5) !important}
+.mehero .btn svg,.mehero .btn .ei{width:16px;height:16px}
+#paneMe>*,#paneTeam>*{margin-top:0}
+.pi{width:40px;height:40px;flex:none;border-radius:14px;display:flex;align-items:center;justify-content:center;background:var(--hb);color:var(--hu)}.pi svg{width:20px;height:20px}
+.waitc{border:1px solid #F2C98A !important;background:#FFFBF4 !important}
+html[data-theme=dark] .waitc{background:var(--card) !important;border-color:var(--hb-amber) !important}
+.waitc .wh{display:flex;gap:12px;align-items:center}.waitc .wh h2{margin:0;color:var(--warn)}.waitc .wh p{margin:2px 0 0;font-size:.8rem}
+.waitc .wl li{margin-top:8px;padding:10px 12px;border-radius:14px;background:var(--warnbg)}
+.waitc .btn{margin-top:12px}
+.mmh{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}.mmh h2{margin:0}.mmh>span:not(.tag){font-size:.82rem;font-weight:700;color:var(--muted)}
+.phone>h2{margin-bottom:2px}
+.phone .pr{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--line)}
+.phone>h2+.pr,.phone>h2+.hidden+.pr{border-top:0}
+.phone .pr>b{flex:1;min-width:0;color:var(--ink);font-size:.92rem}
+.phone .prt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.phone .prt b,.phone .prt label{color:var(--ink);font-size:.92rem;font-weight:700}.phone .prt small{color:var(--muted);font-size:.76rem;font-weight:500}.phone .prt small.ok{color:var(--ok);font-weight:600}
+.phone .prt .msg:empty{display:none}
+.phone select{width:auto;max-width:132px;min-height:40px;margin:0;padding:6px 10px;font-size:.82rem}
+.tgl{position:relative;flex:none;width:50px;height:30px;border:0;border-radius:999px;background:#C9D1D8;cursor:pointer;padding:0;transition:background .2s}
+.tgl i{position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#FFFFFF;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:left .2s}
+.tgl[aria-checked=true]{background:#1C9C5A}.tgl[aria-checked=true] i{left:23px}
+.pr-mon{border-top:1px solid var(--line)}.phone>h2+.pr-mon,.phone>h2+.hidden+.pr-mon{border-top:0}
+.pr-mon .mrow{width:100%;border:0 !important;background:none;text-align:left;font:inherit;cursor:pointer;color:inherit}
+.pr-mon .cv{flex:none;color:var(--muted);display:flex}.pr-mon .cv svg{width:18px;height:18px;transition:transform .2s}
+.pr-mon.open .cv svg{transform:rotate(90deg)}
+.pr-mon .mbody{display:none;padding:0 0 12px 52px}.pr-mon.open .mbody{display:block}
+.pr-mon .mbody>p{margin:0 0 10px}.pr-mon .msteps{margin-top:0}
+.tt .tag{margin:0}
+@media (prefers-reduced-motion: reduce){.tgl,.tgl i,.pr-mon .cv svg{transition:none}}
+
+.mehero .btn.mh-lock::before{content:"";width:16px;height:16px;flex:none;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'%3E%3Crect x='4' y='11' width='16' height='10' rx='2'/%3E%3Cpath d='M8 11V7a4 4 0 0 1 8 0v4'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'%3E%3Crect x='4' y='11' width='16' height='10' rx='2'/%3E%3Cpath d='M8 11V7a4 4 0 0 1 8 0v4'/%3E%3C/svg%3E") center/contain no-repeat}
+.mehero .btn{gap:8px;display:inline-flex;align-items:center;justify-content:center}
+.seg.sm.wide{display:flex !important;width:100%;margin:6px 0 4px !important}.seg.sm.wide button{flex:1;font-size:.8rem !important;padding:9px 10px !important}
+#meWork .mywork{border:1px solid var(--line) !important;background:var(--card) !important}
+#meWork .tag.cnt{background:var(--tint);color:var(--deep)}
+#meWork .row{background:transparent !important;border:0 !important;box-shadow:none !important;padding:8px 2px !important;margin:0 !important;min-height:0}
+#meWork .row .th{width:44px;height:44px;flex:none;border-radius:14px;background:var(--hb-amber) !important;color:var(--hu-amber);font-size:0}
+#meWork .row[data-visit] .th{background:var(--hb-teal) !important;color:var(--hu-teal)}
+#meWork .row .th .ei svg,#meWork .row .th svg{width:22px;height:22px}
+#meWork .row .s{white-space:normal}
+#meWork .row .tag.has{background:var(--okbg);color:var(--ok)}
+.mehero .btn.mh-lock,.mehero .btn.mh-rep{white-space:nowrap;font-size:.8rem !important;padding:0 10px !important}
 </style>
 </head>
 <body class="locked">
@@ -1420,66 +1484,34 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
 
     <!-- me -->
     <section id="vMe" class="hidden" aria-labelledby="h-me">
-      <h1 id="h-me" style="margin:4px 2px 12px">Me &amp; team</h1>
-      <div class="stack">
-        <div class="card me-card">
-          <div class="me-av"><span id="meAv"></span><h2 style="margin:0">You</h2></div>
-          <div class="kv"><span>Name</span><b id="meName"></b></div>
-          <div class="kv"><span>Signed in with</span><span id="mePin"></span></div>
-          <div class="kv"><span>Waiting to send</span><span id="meOut">Nothing</span></div>
-          <div style="margin-top:12px"><button class="btn light small wide" id="lockBtn" type="button">Lock the app</button></div>
+      <div class="mehead"><h1 id="h-me">Me &amp; team</h1>
+        <div class="mesw" id="meSw" role="tablist" aria-label="Me or team"><button type="button" role="tab" data-p="me" aria-selected="true">Me</button><button type="button" role="tab" data-p="team" aria-selected="false">Team</button></div></div>
+      <div class="stack" id="paneMe">
+        <div class="mehero" id="meHero">
+          <div class="mh-who"><span class="mh-av" id="meAv"></span><div><b id="meName"></b><small id="meRole"></small></div></div>
+          <span class="mh-lbl">This month</span>
+          <div class="mh-stats" id="meStats"><div><b>–</b><span>Pins</span></div><div><b>–</b><span>Visits</span></div><div><b>–</b><span>Fixed</span></div></div>
+          <div class="mh-streak" id="meStreak"></div>
+          <div class="mh-act"><button class="btn small mh-lock" id="lockBtn" type="button">Lock the app</button><button class="btn small mh-rep" id="meRep" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8"/></svg>Monthly report</button></div>
+          <span class="vh"><span id="mePin"></span><span id="meOut">Nothing</span></span>
         </div>
-        <div class="card mbio hidden" id="meBio"></div>
-        <div class="card mcon hidden" id="meMonday"></div>
         <div id="meWait"></div>
         <div id="meWork"></div>
-        <div class="card mm" id="meMonth"><h2>My month</h2><div id="mmBody"><p class="muted">Loading…</p></div></div>
-        <div class="card tt" id="teamToday"><h2>Team today</h2><div id="ttBody"><p class="muted">Loading…</p></div></div>
-        <div class="card">
-          <h2>Team totals</h2>
-          <div class="seg" role="group" aria-label="Period" id="segPeriod">
-            <button type="button" data-v="w" aria-pressed="false">This week</button>
-            <button type="button" data-v="m" aria-pressed="true">This month</button>
-          </div>
-          <div id="actTable"><p class="muted">Loading…</p></div>
-        </div>
-        <div class="card">
-          <h2>Team feed</h2>
-          <ul class="feed tfeed" id="actFeed"></ul>
-          <button class="lnk hidden" id="feedMore" type="button">Show more</button>
-        </div>
-        <div class="card stamps-card"><h2>Your stamps</h2><p class="muted" style="margin:0 0 4px">Every point you pin and every visit you report adds to your collection.</p><div class="stamps" id="meStamps"></div>
-          <button class="lnk" id="meWelcome" type="button">Show the welcome screens again</button></div>
-        <div class="card">
-          <h2>Display</h2>
-          <span class="lbl" id="l-theme">Colours</span>
-          <div class="seg" role="group" aria-labelledby="l-theme" id="segTheme">
-            <button type="button" data-v="" aria-pressed="true">Light</button>
-            <button type="button" data-v="dark" aria-pressed="false">Dark</button>
-            <button type="button" data-v="sun" aria-pressed="false">Bright sun</button>
-          </div>
-          <span class="lbl" id="l-units">Distances</span>
-          <div class="seg" role="group" aria-labelledby="l-units" id="segUnits">
-            <button type="button" data-v="" aria-pressed="true">Kilometres</button>
-            <button type="button" data-v="mi" aria-pressed="false">Miles</button>
-          </div>
-          <span class="lbl" id="l-size">Text size</span>
-          <div class="seg" role="group" aria-labelledby="l-size" id="segSize">
-            <button type="button" data-v="" aria-pressed="true">Normal</button>
-            <button type="button" data-v="l" aria-pressed="false">Large</button>
-            <button type="button" data-v="xl" aria-pressed="false">Larger</button>
-          </div>
-        </div>
-        <div class="card">
-          <h2>Language and country</h2>
-          <span class="lbl" id="l-lang">Language</span>
-          <div class="seg" role="group" aria-labelledby="l-lang" id="segLang">
-            <button type="button" data-v="" aria-pressed="true">English</button>
-            <button type="button" data-v="sw" aria-pressed="false">Kiswahili</button>
-          </div>
-          <label for="meHome">My country</label>
-          <select id="meHome"><option value="">Automatic</option><option value="ke">Kenya</option><option value="tz">Tanzania</option><option value="ug">Uganda</option><option value="mw">Malawi</option></select>
-          <p class="muted" id="meHomeTx" style="margin-top:6px"></p>
+        <div class="card mm" id="meMonth"><div class="mmh"><h2>My month</h2><span id="mmName"></span></div><div id="mmBody"><p class="muted">Loading…</p></div></div>
+        <div class="card phone" id="mePhone">
+          <h2>This phone</h2>
+          <div class="pr bio hidden" id="meBio"></div>
+          <div class="pr-mon hidden" id="meMonday"></div>
+          <div class="pr"><span class="pi" style="--hu:var(--hu-amber);--hb:var(--hb-amber)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/></svg></span><b id="l-theme">Colours</b>
+            <div class="seg sm" role="group" aria-labelledby="l-theme" id="segTheme"><button type="button" data-v="" aria-pressed="true">Light</button><button type="button" data-v="dark" aria-pressed="false">Dark</button><button type="button" data-v="sun" aria-pressed="false">Sun</button></div></div>
+          <div class="pr"><span class="pi" style="--hu:var(--hu-blue);--hb:var(--hb-blue)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></span><b id="l-lang">Language</b>
+            <div class="seg sm" role="group" aria-labelledby="l-lang" id="segLang"><button type="button" data-v="" aria-pressed="true">English</button><button type="button" data-v="sw" aria-pressed="false">Kiswahili</button></div></div>
+          <div class="pr"><span class="pi" style="--hu:var(--hu-green);--hb:var(--hb-green)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 11 18-8-8 18-2-8z"/></svg></span><b id="l-units">Distances</b>
+            <div class="seg sm" role="group" aria-labelledby="l-units" id="segUnits"><button type="button" data-v="" aria-pressed="true">km</button><button type="button" data-v="mi" aria-pressed="false">miles</button></div></div>
+          <div class="pr"><span class="pi" style="--hu:var(--hu-slate);--hb:var(--hb-slate)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M4 18 9 6l5 12M5.6 14h6.8M15 18l3-7 3 7M15.9 16h4.2"/></svg></span><b id="l-size">Text size</b>
+            <div class="seg sm" role="group" aria-labelledby="l-size" id="segSize"><button type="button" data-v="" aria-pressed="true">Normal</button><button type="button" data-v="l" aria-pressed="false">Large</button><button type="button" data-v="xl" aria-pressed="false">Larger</button></div></div>
+          <div class="pr"><span class="pi" style="--hu:var(--hu-teal);--hb:var(--hb-teal)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 6.5l5.5-2.5 6 2.5 5.5-2.5v13.5L15 20l-6-2.5-5.5 2.5z"/><path d="M9 4v13.5M15 6.5V20"/></svg></span><div class="prt"><label for="meHome" style="margin:0">My country</label><small id="meHomeTx"></small></div>
+            <select id="meHome"><option value="">Automatic</option><option value="ke">Kenya</option><option value="tz">Tanzania</option><option value="ug">Uganda</option><option value="mw">Malawi</option></select></div>
         </div>
         <div class="card">
           <h2>Monthly report</h2>
@@ -1490,7 +1522,25 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
           </div>
           <button class="btn block" id="repOpen" type="button" style="margin-top:14px">Open report</button>
         </div>
+        <div class="card stamps-card"><h2>Your stamps</h2><p class="muted" style="margin:0 0 4px">Every point you pin and every visit you report adds to your collection.</p><div class="stamps" id="meStamps"></div>
+          <button class="lnk" id="meWelcome" type="button">Show the welcome screens again</button></div>
         <div class="card" id="meInstall"></div>
+      </div>
+      <div class="stack hidden" id="paneTeam">
+        <div class="card tt" id="teamToday"><div class="mmh"><h2>Team today</h2><span class="tag ok hidden" id="ttOn"></span></div><div id="ttBody"><p class="muted">Loading…</p></div></div>
+        <div class="card">
+          <h2>Team totals</h2>
+          <div class="seg sm wide" role="group" aria-label="Period" id="segPeriod">
+            <button type="button" data-v="w" aria-pressed="false">This week</button>
+            <button type="button" data-v="m" aria-pressed="true">This month</button>
+          </div>
+          <div id="actTable"><p class="muted">Loading…</p></div>
+        </div>
+        <div class="card">
+          <h2>Team feed</h2>
+          <ul class="feed tfeed" id="actFeed"></ul>
+          <button class="lnk hidden" id="feedMore" type="button">Show more</button>
+        </div>
       </div>
     </section>
 
@@ -3364,7 +3414,7 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
   Object.assign(SW, {"Back": "Rudi", "Get started": "Anza", "Takes 30 seconds": "Inachukua sekunde 30", "Every water point.": "Kila kituo cha maji.", "One map.": "Ramani moja.", "Right in your pocket.": "Mfukoni mwako.", "What will you do most?": "Utafanya nini zaidi?", "We’ll open the app on it. You can change this anytime.": "Tutafungua programu hapo. Unaweza kubadilisha wakati wowote.", "Pin locations": "Weka mahali", "Put every project on the map": "Weka kila mradi kwenye ramani", "Site visits": "Ziara", "Check water points and report": "Kagua vituo vya maji na uripoti", "Follow what needs fixing": "Fuatilia kinachohitaji kurekebishwa", "Office work": "Kazi za ofisi", "Review, assign and report": "Idhinisha, gawa na ripoti", "Continue": "Endelea", "Pick one": "Chagua kimoja", "Which language?": "Lugha gani?", "That’s my language": "Hiyo ndiyo lugha yangu", "Swipe to see both. Switch anytime in Me.": "Telezesha kuona zote. Badilisha wakati wowote kwenye Mimi.", "Hello! Let’s find today’s water points.": "Hello! Let’s find today’s water points.", "Where do you work?": "Unafanya kazi wapi?", "Lists and the map start there. You still see every country.": "Orodha na ramani zinaanzia hapo. Bado unaona nchi zote.", "Skip": "Ruka", "Water points near you": "Vituo vya maji karibu nawe", "RAFIKI Pin uses your location only while it’s open, to show the closest projects and save exact points.": "RAFIKI Pin inatumia mahali ulipo tu ikiwa wazi, kuonyesha miradi iliyo karibu na kuhifadhi mahali kamili.", "Allow location": "Ruhusu mahali", "Not now": "Si sasa", "A good start": "Mwanzo mzuri", "Your first stamp": "Stempu yako ya kwanza", "Every point you pin and every visit you report adds to your collection.": "Kila mahali unapoweka na kila ziara unayoripoti inaongeza kwenye mkusanyiko wako.", "Open RAFIKI Pin": "Fungua RAFIKI Pin", "Small steps, clean water.": "Hatua ndogo, maji safi.", "Me": "Mimi"}); SWP.push([/^You’re all set, (.+)\.$/,"Uko tayari, $1."]);
   Object.assign(SW, {"Search a project or place": "Tafuta mradi au mahali", "Report": "Ripoti"}); SWP.push([/^YOU’RE AT · (.+)$/, "UKO · $1"], [/^(.+) · saved location$/, "$1 · mahali palipohifadhiwa"]);
   Object.assign(SW, {"Map style": "Mtindo wa ramani", "Street map": "Ramani ya barabara", "Satellite photos": "Picha za satelaiti", "Country": "Nchi", "Near you": "Karibu nawe", "Type a project name, a village or a county.": "Andika jina la mradi, kijiji au kaunti.", "Clear": "Futa", "Search": "Tafuta"}); SWP.push([/^No projects match “(.+)”\.$/, "Hakuna mradi unaolingana na “$1”."]);
-  Object.assign(SW, {"My month": "Mwezi wangu", "My work": "Kazi yangu", "Team today": "Timu leo", "Team totals": "Jumla ya timu", "Team feed": "Habari za timu", "This month": "Mwezi huu", "Show more": "Onyesha zaidi"});
+  Object.assign(SW, {"My month": "Mwezi wangu", "My work": "Kazi yangu", "Team today": "Timu leo", "Team totals": "Jumla ya timu", "Team feed": "Habari za timu", "This month": "Mwezi huu", "Show more": "Onyesha zaidi", "Me": "Mimi", "Team": "Timu", "This phone": "Simu hii", "Colours": "Rangi", "Language": "Lugha", "Distances": "Umbali", "Text size": "Ukubwa wa maandishi", "My country": "Nchi yangu", "Monthly report": "Ripoti ya mwezi", "Lock the app": "Funga programu", "Pins": "Mahali", "Visits": "Ziara", "Light": "Mwanga", "Dark": "Giza", "Sun": "Jua", "Normal": "Kawaida", "Large": "Kubwa", "Larger": "Kubwa zaidi"});
   Object.assign(SW, {"Your stamps": "Stempu zako", "Show the welcome screens again": "Onyesha skrini za kukaribisha tena", "Sign in": "Ingia", "New here? Ask your team for a PIN.": "Mgeni hapa? Omba PIN kwa timu yako.", "First drop": "Tone la kwanza", "Pin a location": "Weka mahali", "First visit": "Ziara ya kwanza", "Report a site visit": "Ripoti ziara", "Fixer": "Mrekebishaji", "Mark a repair fixed": "Weka matengenezo kuwa yamekamilika", "Explorer": "Mvumbuzi", "Add a new site": "Ongeza eneo jipya", "Mapper": "Mchora ramani", "Pin 10 locations": "Weka mahali 10", "Regular": "Mzoefu", "Report 10 visits": "Ripoti ziara 10", "Earned": "Umepata"}); SWP.push([/^Habari (.+), karibu tena\.$/,"Habari $1, karibu tena."]);
   var MON = {Jan:'Jan',Feb:'Feb',Mar:'Mac',Apr:'Apr',May:'Mei',Jun:'Jun',Jul:'Jul',Aug:'Ago',Sep:'Sep',Oct:'Okt',Nov:'Nov',Dec:'Des',January:'Januari',February:'Februari',March:'Machi',April:'Aprili',June:'Juni',July:'Julai',August:'Agosti',September:'Septemba',October:'Oktoba',November:'Novemba',December:'Desemba'};
   function swOne(x) {
@@ -3491,19 +3541,30 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
     var d = new Date(); if (!days[dayKey(d)]) d = new Date(d.getTime() - 864e5); var streak = 0;
     while (days[dayKey(d)]) { streak++; d = new Date(d.getTime() - 864e5); }
     var tile = function (k, hue, ic, l) { return '<div class="mmt" style="--hu:var(--hu-' + hue + ');--hb:var(--hb-' + hue + ')">' + oic(ic) + '<b data-n="' + n[k] + '">' + n[k] + '</b><span>' + l + '</span></div>'; };
+    $('meStats').innerHTML = [['pin', tr('Pins', 'Mahali')], ['visit', tr('Visits', 'Ziara')], ['fixed', tr('Fixed', 'Zimerekebishwa')]].map(function (x) { return '<div><b data-n="' + n[x[0]] + '">' + n[x[0]] + '</b><span>' + x[1] + '</span></div>'; }).join('');
+    $('meStreak').innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg><span>' + (streak === 0 ? tr('Pin or visit today to start a streak.', 'Weka mahali au tembelea leo kuanza mfululizo.') : streak === 1 ? tr('1 day in a row. Keep it going!', 'Siku 1 mfululizo. Endelea hivyo!') : tr(streak + ' days in a row. Keep it going!', 'Siku ' + streak + ' mfululizo. Endelea hivyo!')) + '</span>';
+    countUp($('meStats'));
+    $('mmName').textContent = new Date().toLocaleDateString(S.lang === 'sw' ? 'sw' : 'en-GB', { month: 'long' });
     $('mmBody').innerHTML = '<div class="mmtiles">' + tile('pin', 'blue', 'pin', tr('Pins', 'Mahali')) + tile('visit', 'green', 'clip', tr('Visits', 'Ziara')) + tile('fixed', 'amber', 'wrench', tr('Fixed', 'Zimerekebishwa')) + '</div>' +
       '<span class="lbl">' + tr('Last 6 weeks', 'Wiki 6 zilizopita') + '</span><div class="wk" role="img" aria-label="' + esc(tr('Work each week: ', 'Kazi kila wiki: ') + weeks.join(', ')) + '">' +
       weeks.map(function (v, i) { return '<div><small>' + (v || '') + '</small><i style="height:' + Math.max(6, Math.round(v / top * 80)) + '%"' + (i === 5 ? ' class="now"' : '') + '></i></div>'; }).join('') + '</div>' +
-      '<div class="wkl"><span>' + tr('6 wk ago', 'Wiki 6') + '</span><span>' + tr('This week', 'Wiki hii') + '</span></div>' +
-      '<div class="streak">🔥 <span>' + (streak === 0 ? tr('Pin or visit today to start a streak.', 'Weka mahali au tembelea leo kuanza mfululizo.') : streak === 1 ? tr('1 day in a row', 'Siku 1 mfululizo') : tr(streak + ' days in a row', 'Siku ' + streak + ' mfululizo')) + '</span></div>';
+      '<div class="wkl"><span>' + tr('6 wk ago', 'Wiki 6') + '</span><span>' + tr('This week', 'Wiki hii') + '</span></div>';
     qa('#mmBody .mmt').forEach(function (t) { if (typeof countUp === 'function') countUp(t); });
   }
+  // Me | Team switch at the top of Me & team
+  function mePane(p) {
+    if (p) store.set('rfPinMePane', p); p = store.get('rfPinMePane') === 'team' ? 'team' : 'me';
+    qa('#meSw button').forEach(function (b) { b.setAttribute('aria-selected', b.getAttribute('data-p') === p ? 'true' : 'false'); });
+    $('paneMe').classList.toggle('hidden', p !== 'me'); $('paneTeam').classList.toggle('hidden', p !== 'team');
+  }
+  $('meSw').addEventListener('click', function (e) { var b = e.target.closest('[data-p]'); if (!b) return; buzz(); mePane(b.getAttribute('data-p')); window.scrollTo(0, 0); });
+  $('meRep').addEventListener('click', function () { openReport(); });
   // Waiting to send: each change still on this phone
   function waitDraw() {
     outAll().then(function (items) {
       if (!items.length) { $('meWait').innerHTML = ''; return; }
       var n = items.length, ICW = { pin: ['pin', tr('Location', 'Mahali')], visit: ['clip', tr('Site visit', 'Ziara')], fixed: ['wrench', tr('Marked fixed', 'Imerekebishwa')], new: ['plus', tr('New site', 'Eneo jipya')], undo: ['undo', tr('Undo a pin', 'Tendua mahali')] };
-      $('meWait').innerHTML = '<div class="card waitc"><h2>' + (n === 1 ? tr('1 change waiting to send', 'Badiliko 1 linasubiri kutumwa') : tr(n + ' changes waiting to send', 'Mabadiliko ' + n + ' yanasubiri kutumwa')) + '</h2><p class="muted">' + tr('They are safe on this phone and go as soon as there is signal.', 'Yako salama kwenye simu hii na yatatumwa mara mtandao ukipatikana.') + '</p><ul class="wl">' +
+      $('meWait').innerHTML = '<div class="card waitc"><div class="wh"><span class="pi" style="--hu:var(--hu-amber);--hb:var(--hb-amber)">' + oic('down').replace('M12 4v11M7 10.5l5 5 5-5', 'M12 15V4M7 8.5l5-5 5 5') + '</span><div><h2>' + (n === 1 ? tr('1 change waiting to send', 'Badiliko 1 linasubiri kutumwa') : tr(n + ' changes waiting to send', 'Mabadiliko ' + n + ' yanasubiri kutumwa')) + '</h2><p class="muted">' + tr('Safe on this phone. They go as soon as there’s signal.', 'Yako salama kwenye simu hii. Yatatumwa mara mtandao ukipatikana.') + '</p></div></div><ul class="wl">' +
         items.sort(function (x, y) { return x.k - y.k; }).map(function (it) {
           var b = it.body || {}, w = ICW[b.action] || ['inbox', tr('Change', 'Badiliko')], f = (it.files || []).length - (it.done || 0);
           var st = b.action === 'visit' && b.state && STATES[b.state] ? ' · ' + tr(STATES[b.state][1], STATES[b.state][2]) : '';
@@ -3512,7 +3573,7 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
       $('waitSend').addEventListener('click', function () { var b = this; b.disabled = true; b.textContent = tr('Sending…', 'Inatuma…'); flush().then(function () { outboxUi(); waitDraw(); if (S.pin) load(false); }); });
     });
   }
-  function meWorkDraw() { var h = $('myWork').innerHTML; $('meWork').innerHTML = h.replace('Your work', tr('My work', 'Kazi yangu')); }
+  function meWorkDraw() { var h = $('myWork').innerHTML, n = (h.match(/class="row"/g) || []).length; $('meWork').innerHTML = h.replace('<h2>Your work</h2>', '<div class="mmh"><h2>' + tr('My work', 'Kazi yangu') + '</h2><span class="tag cnt">' + n + '</span></div>'); }
   $('meWork').addEventListener('click', function (e) { var b = e.target.closest('.row'); if (b) openProj(b.getAttribute('data-id'), b.hasAttribute('data-visit') ? 'visit' : 'pin'); });
   function waNum(p, home) { var d = String(p).replace(/\D/g, ''), cc = { ke: '254', tz: '255', ug: '256', mw: '265' }[home] || '254'; return /^\s*\+/.test(p) ? d : d.charAt(0) === '0' ? cc + d.slice(1) : d; }
   function vb(e) { return { pin: tr('Pinned', 'Aliweka mahali'), visit: tr('Visited', 'Alitembelea'), fixed: tr('Fixed', 'Alirekebisha'), new: tr('Added', 'Aliongeza') }[e.a] || e.a; }
@@ -3525,7 +3586,8 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
       return { p: p, e: last, at: (last && last.at > (p.lastSeen || '') ? last.at : p.lastSeen) || '' };
     }).sort(function (x, y) { return x.at < y.at ? 1 : x.at > y.at ? -1 : 0; });
     var on = rows.filter(function (r) { return r.at && dayKey(r.at) === today; }).length;
-    $('ttBody').innerHTML = '<p class="muted" style="margin:0 0 4px">' + (on === 0 ? tr('Nobody else has used the app today yet.', 'Hakuna mwingine aliyetumia programu leo bado.') : on === 1 ? tr('1 person active today', 'Mtu 1 yuko kazini leo') : tr(on + ' people active today', 'Watu ' + on + ' wako kazini leo')) + '</p><ul class="mates">' +
+    $('ttOn').textContent = tr(on + ' active', on + ' kazini'); $('ttOn').classList.toggle('hidden', !on);
+    $('ttBody').innerHTML = '<p class="muted" style="margin:0 0 4px">' + (on === 0 ? tr('Nobody else has used the app today yet.', 'Hakuna mwingine aliyetumia programu leo bado.') : rows.some(function (r) { return r.p.phone; }) ? tr('Tap someone to call or WhatsApp them. Tap what they did to open the project.', 'Gusa mtu kumpigia au kumtumia WhatsApp. Gusa alichofanya kufungua mradi.') : on === 1 ? tr('1 person active today', 'Mtu 1 yuko kazini leo') : tr(on + ' people active today', 'Watu ' + on + ' wako kazini leo')) + '</p><ul class="mates">' +
       rows.map(function (r) {
         var p = r.p, e = r.e, pr = e && byId(e.id), live = r.at && dayKey(r.at) === today;
         var sub = e ? vb(e) + ' ' + esc(pr ? pr.title : e.t || '') + (pr && pr.area ? ' · ' + esc(pr.area) : '') + ' · ' + since(e.at) : tr('Last seen ', 'Alionekana ') + since(p.lastSeen);
@@ -3572,9 +3634,9 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
       if (!can && !store.get('rfPinBio')) { c.classList.add('hidden'); return; }
       c.classList.remove('hidden'); var on = !!store.get('rfPinBio');
       c.classList.toggle('on', on);
-      c.innerHTML = '<div class="mh"><span class="mi">' + oic('finger') + '</span><div><h2>' + tr('Unlock with fingerprint or face', 'Fungua kwa alama ya kidole au uso') + (on ? ' <span class="tag ok">' + tr('On', 'Imewashwa') + '</span>' : '') + '</h2><p class="muted">' +
-        (on ? tr('Asked when the app opens and after a minute away. Lock the app now keeps your PIN, so you’re back in with a touch.', 'Inaulizwa programu inapofunguliwa na baada ya dakika moja nje. Kufunga programu sasa kunahifadhi PIN yako, hivyo unarudi kwa kugusa tu.') : tr('Keeps the app private if someone else picks up your phone or computer. Uses Touch ID, fingerprint, face or the device’s screen lock.', 'Inaweka programu faragha mtu mwingine akishika simu au kompyuta yako. Inatumia Touch ID, alama ya kidole, uso au kufuli ya skrini.')) + '</p></div></div>' +
-        '<button class="btn wide ' + (on ? 'light' : '') + '" id="bioToggle" type="button">' + (on ? '' : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + FPI + '</svg>') + (on ? tr('Turn off', 'Zima') : tr('Turn on', 'Washa')) + '</button><span class="msg" id="bioMsg" aria-live="polite"></span>';
+      c.innerHTML = '<span class="pi" style="--hu:var(--hu-teal);--hb:var(--hb-teal)">' + oic('finger') + '</span><div class="prt"><b>' + tr('Unlock with fingerprint or face', 'Fungua kwa alama ya kidole au uso') + '</b><small>' +
+        (on ? tr('Asked when the app opens and after a minute away.', 'Inaulizwa programu inapofunguliwa na baada ya dakika moja nje.') : tr('Keeps the app private if someone else picks up your phone or computer.', 'Inaweka programu faragha mtu mwingine akishika simu au kompyuta yako.')) + '</small><span class="msg" id="bioMsg" aria-live="polite"></span></div>' +
+        '<button class="tgl" id="bioToggle" type="button" role="switch" aria-checked="' + on + '" aria-label="' + (on ? tr('Turn off', 'Zima') : tr('Turn on', 'Washa')) + '"><i></i></button>';
     });
   }
   $('meBio').addEventListener('click', function (e) {
@@ -3652,15 +3714,17 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
     var c = $('meMonday'); if (!c) return;
     if (S.mode === 'monday') { c.classList.add('hidden'); return; }
     c.classList.remove('hidden');
-    var head = '<div class="mh"><span class="mi">' + oic('people') + '</span><div><h2>' + tr('Your name on monday.com', 'Jina lako kwenye monday.com') + '</h2>';
-    if (S.linked) { c.innerHTML = head + '<p class="ok">' + tr('Connected as ', 'Imeunganishwa kama ') + esc(S.linked) + ' ✓</p></div></div><p class="muted">' + tr('Everything you save goes to monday.com under your own name.', 'Kila unachohifadhi kinaenda monday.com kwa jina lako.') + '</p><button class="lnk" id="monOff" type="button">' + tr('Disconnect', 'Tenganisha') + '</button>'; return; }
-    if (!S.who) { c.innerHTML = head + '<p class="muted">' + tr('Your changes go in under the shared account. To use your own name, ask the office for your own PIN.', 'Mabadiliko yako yanaingia kwa akaunti ya pamoja. Kutumia jina lako, omba ofisi PIN yako mwenyewe.') + '</p></div></div>'; return; }
-    c.innerHTML = head + '<p class="muted">' + tr('Takes 20 seconds, once. Your changes then show on monday.com under your own name.', 'Inachukua sekunde 20, mara moja. Mabadiliko yako yataonekana monday.com kwa jina lako.') + '</p></div></div>' +
+    var head = function (sub, ok) { return '<button class="pr mrow" type="button" id="monRow" aria-expanded="' + c.classList.contains('open') + '"><span class="pi" style="--hu:var(--hu-purple);--hb:var(--hb-purple)">' + oic('clipf') + '</span><span class="prt"><b>' + tr('Your name on monday.com', 'Jina lako kwenye monday.com') + '</b><small' + (ok ? ' class="ok"' : '') + '>' + sub + '</small></span><span class="cv">' + oic('chev') + '</span></button><div class="mbody">'; };
+    if (S.linked) { if (!c.dataset.seen) { c.dataset.seen = '1'; c.classList.remove('open'); } c.innerHTML = head(tr('Connected as ', 'Imeunganishwa kama ') + esc(S.linked) + ' ✓', 1) + '<p class="muted">' + tr('Everything you save goes to monday.com under your own name.', 'Kila unachohifadhi kinaenda monday.com kwa jina lako.') + '</p><button class="lnk" id="monOff" type="button">' + tr('Disconnect', 'Tenganisha') + '</button></div>'; return; }
+    if (!S.who) { c.innerHTML = head(tr('Changes go in under the shared account', 'Mabadiliko yanaingia kwa akaunti ya pamoja')) + '<p class="muted">' + tr('To use your own name, ask the office for your own PIN.', 'Kutumia jina lako, omba ofisi PIN yako mwenyewe.') + '</p></div>'; return; }
+    if (!c.dataset.seen) { c.dataset.seen = '1'; c.classList.add('open'); }
+    c.innerHTML = head(tr('Takes 20 seconds, once', 'Inachukua sekunde 20, mara moja')) + '<p class="muted">' + tr('Your changes then show on monday.com under your own name.', 'Mabadiliko yako yataonekana monday.com kwa jina lako.') + '</p>' +
       '<ol class="msteps"><li><a class="btn wide" id="monOpen" href="' + TOKURL + '" target="_blank" rel="noopener">1 · ' + tr('Open my monday.com token', 'Fungua tokeni yangu ya monday.com') + '</a><small>' + tr('Tap Copy on that page, then come back here.', 'Gusa Copy kwenye ukurasa huo, kisha rudi hapa.') + '</small></li>' +
       '<li><button class="btn wide light" id="monPaste" type="button">2 · ' + tr('Paste and connect', 'Bandika na uunganishe') + '</button></li></ol>' +
       '<details class="mman"><summary>' + tr('Or paste it yourself', 'Au ibandike mwenyewe') + '</summary><input type="password" id="monTok" autocomplete="off" spellcheck="false" placeholder="' + tr('monday.com token', 'tokeni ya monday.com') + '"><button class="btn small" id="monGo" type="button">' + tr('Connect', 'Unganisha') + '</button></details>' +
       '<span class="msg" id="monMsg" aria-live="polite"></span>' +
-      '<p class="muted mnote">' + tr('On a phone, monday.com may only open this page on a computer. You can do this step on any computer: sign in with your PIN there and connect. It then works on every phone that uses your PIN.', 'Kwenye simu, monday.com inaweza kufungua ukurasa huu kwenye kompyuta tu. Unaweza kufanya hatua hii kwenye kompyuta yoyote: ingia kwa PIN yako huko na uunganishe. Kisha itafanya kazi kwenye kila simu inayotumia PIN yako.') + '</p>';
+      '<p class="muted mnote">' + tr('On a phone, monday.com may only open this page on a computer. You can do this step on any computer: sign in with your PIN there and connect. It then works on every phone that uses your PIN.', 'Kwenye simu, monday.com inaweza kufungua ukurasa huu kwenye kompyuta tu. Unaweza kufanya hatua hii kwenye kompyuta yoyote: ingia kwa PIN yako huko na uunganishe. Kisha itafanya kazi kwenye kila simu inayotumia PIN yako.') + '</p></div>';
+    var r = $('monRow'); if (r) r.setAttribute('aria-expanded', c.classList.contains('open'));
   }
   function monSend(tok) {
     tok = String(tok || '').trim();
@@ -3677,6 +3741,7 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
     navigator.clipboard.readText().then(monSend, function () { var d = $('meMonday').querySelector('details'); if (d) d.open = true; msg('monMsg', 'warn', tr('Couldn’t read the clipboard. Paste the token in the box below.', 'Haikuweza kusoma ubao wa kunakili. Bandika tokeni kwenye kisanduku hapa chini.')); });
   }
   $('meMonday').addEventListener('click', function (e) {
+    if (e.target.closest('#monRow')) { var c = $('meMonday'); c.classList.toggle('open'); e.target.closest('#monRow').setAttribute('aria-expanded', c.classList.contains('open')); buzz(); return; }
     if (e.target.closest('#monOpen')) { tokWait = true; return; }
     if (e.target.closest('#monPaste')) return monPaste();
     if (e.target.closest('#monGo')) return monSend($('monTok').value);
@@ -3688,7 +3753,8 @@ html[data-theme=dark] .onb .lsw button[aria-pressed=true]{background:#FFFFFF;col
     navigator.clipboard.readText().then(function (t) { if (looksTok(t)) monSend(t); }, function () {});
   });
   function renderMe() {
-    $('meName').textContent = S.name; monUi();
+    $('meName').textContent = S.name; monUi(); mePane();
+    var hk = homeCk(); $('meRole').textContent = (S.admin ? tr('Admin', 'Msimamizi') : tr('Field team', 'Timu ya uwanjani')) + (CNAME[hk] ? ' · ' + CNAME[hk] : '');
     homeTx();
     $('meAv').innerHTML = S.photo && S.mode === 'monday' ? '<img src="' + esc(S.photo) + '" alt="">' : '<i>' + esc((S.name || '?').split(/\s+/).map(function (w) { return w.charAt(0); }).slice(0, 2).join('').toUpperCase()) + '</i>';
     $('mePin').innerHTML = S.mode === 'monday' ? (S.photo ? '<img class="avatar" src="' + esc(S.photo) + '" alt="" onerror="this.remove()">' : '') + 'monday.com' : S.who ? 'Your own PIN' : 'Shared team PIN';

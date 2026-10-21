@@ -22,7 +22,7 @@ with sync_playwright() as p:
     for d in '1111': pg.click('.pk[data-k="%s"]' % d)
     pg.wait_for_timeout(1200); pg.evaluate("localStorage.setItem('rfPinOnb','1')"); pg.goto(BASE + '/pin#me'); pg.wait_for_timeout(1500)
     check(pg.locator('#meBio:not(.hidden) #bioToggle').count() == 1, 'Me offers fingerprint unlock'); pg.click('#bioToggle'); pg.wait_for_timeout(800)
-    check(pg.evaluate("!!localStorage.getItem('rfPinBio')") and 'Turn off' in pg.inner_text('#meBio') and 'On' in pg.inner_text('#meBio h2'), 'turned on with the device check')
+    check(pg.evaluate("!!localStorage.getItem('rfPinBio')") and pg.get_attribute('#bioToggle', 'aria-checked') == 'true', 'turned on with the device check')
     pg.screenshot(path=OUT + '/1-me.png')
     pg.click('#lockBtn'); pg.wait_for_timeout(400)
     check(pg.locator('#bioLock').count() == 1 and pg.evaluate("!!localStorage.getItem('rfPin')"), 'Lock the app locks but keeps the PIN'); pg.screenshot(path=OUT + '/2-locked.png')
