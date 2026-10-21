@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.unit.dp
 import androidx.test.core.app.ApplicationProvider
@@ -20,9 +21,11 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.rafikioutreach.pin.data.Prefs
+import org.rafikioutreach.pin.data.Snapshot
 import org.rafikioutreach.pin.ui.RafikiTheme
 import org.rafikioutreach.pin.ui.ReportData
 import org.rafikioutreach.pin.ui.ReportScreen
+import org.rafikioutreach.pin.ui.buildReport
 import org.rafikioutreach.pin.ui.drawReportPages
 import org.rafikioutreach.pin.ui.letterheadAddress
 import org.rafikioutreach.pin.ui.writeReportPdf
@@ -30,8 +33,11 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import java.io.File
+import java.time.LocalDate
+import java.time.YearMonth
+import java.time.ZoneOffset
 
-/** The monthly report on the RAFIKI letterhead: Kenya team → Kitale office, everyone else → the US head office. */
+/** The monthly report on the RAFIKI letterhead, laid out like the web report: tiles, tables, page numbers, the RAFIKI logo at the foot (no seal). */
 @RunWith(RobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [34], qualifiers = "w390dp-h844dp-xxhdpi")
@@ -40,11 +46,42 @@ class LetterheadTest {
     private val out = File(System.getProperty("user.dir"), "build/shots").apply { mkdirs() }
     private val app get() = ApplicationProvider.getApplicationContext<Application>()
 
-    private fun report(): ReportData {
-        val names = listOf("Kapsaret Borehole", "Turbo Spring", "Chepkongi Dispensary"); val st = listOf("working", "repair", "notworking")
-        val visits = (0 until 46).map { i -> JSONObject().put("a", "visit").put("id", "10$i").put("t", names[i % 3]).put("by", listOf("Meril Kiprop", "Bertin Ngindu")[i % 2]).put("s", st[i % 3]).put("at", "2026-10-%02dT09:00:00Z".format(1 + i % 20)) }
-        return ReportData("October 2026", visits, setOf("101", "104", "105"), 2, 1, 1, 0, 1, 2, listOf(listOf("Kenya", "4", "3", "2", "0", "1", "1")))
+    // a realistic month: projects in all four countries, four open repairs, 46 visits, fixes, pins and new sites
+    private val projects = listOf(
+        listOf("104", "Kapsaret Borehole", "Kenya", "ke", "Eldoret"), listOf("105", "Turbo Spring", "Kenya", "ke", "Turbo"), listOf("106", "Chepkongi Dispensary Well", "Kenya", "ke", "Kitale"),
+        listOf("107", "Moi's Bridge Primary School Rainwater Tank", "Kenya", "ke", "Moi's Bridge"), listOf("108", "Kiminini Borehole", "Kenya", "ke", "Kiminini"),
+        listOf("201", "Mwanza Primary Well", "Tanzania", "tz", "Mwanza"), listOf("202", "Geita Spring", "Tanzania", "tz", "Geita"), listOf("203", "Shinyanga Borehole", "Tanzania", "tz", "Shinyanga"),
+        listOf("301", "Jinja Borehole", "Uganda", "ug", "Jinja"), listOf("302", "Mbale Spring", "Uganda", "ug", "Mbale"), listOf("401", "Zomba Well", "Malawi", "mw", "Zomba"),
+    )
+    private fun snapJson(home: String, who: String): JSONObject {
+        val ps = JSONArray(); projects.forEachIndexed { i, p -> ps.put(JSONObject().put("id", p[0]).put("title", p[1]).put("country", p[2]).put("ck", p[3]).put("area", p[4]).put("type", "Borehole well").put("status", "Completed").apply { if (i != 4) put("gps", JSONArray().put(0.4 + i * .1).put(35.0 + i * .1)) }) }
+        fun rep(state: String, by: String, at: String, urg: String, probs: List<String>, parts: String, cost: Long?) = JSONObject().put("state", state).put("by", by).put("at", at).put("urgency", urg).put("problems", JSONArray(probs)).put("parts", parts).apply { cost?.let { put("cost", it) } }
+        val repairs = JSONObject()
+            .put("105", rep("repair", "Bertin Ngindu", "2026-10-09T08:00:00Z", "month", listOf("Slow flow", "Leaking pipe joint near the tank stand"), "Pipe joint, PTFE tape", 3200))
+            .put("104", rep("notworking", "Meril Kiprop", "2026-10-18T09:30:00Z", "urgent", listOf("Pump handle broken"), "Handle, bolts", 4500))
+            .put("202", rep("repair", "Grace Achieng", "2026-10-12T11:00:00Z", "watch", listOf("Apron cracked"), "", null))
+            .put("301", rep("notworking", "Joseph Okello", "2026-10-20T07:15:00Z", "urgent", listOf("Cylinder worn", "No water"), "Cylinder, rods", 28000))
+        val visits = JSONObject().put("104", JSONObject().put("at", "2026-10-18T09:30:00Z").put("by", "Meril Kiprop").put("state", "notworking"))
+        return JSONObject().put("ok", true).put("who", who).put("admin", false).put("me", JSONObject().put("kind", "app").put("home", home))
+            .put("projects", ps).put("repairs", repairs).put("visits", visits).put("jobs", JSONArray()).put("assigned", JSONArray()).put("confirmed", JSONObject())
     }
+    private fun activity(): List<JSONObject> {
+        val ids = listOf("104", "105", "106", "107", "201", "202", "203", "301", "302", "401")
+        val by = listOf("Meril Kiprop", "Bertin Ngindu", "Grace Achieng", "Joseph Okello"); val st = listOf("working", "working", "repair", "working", "notworking")
+        val a = (0 until 46).map { i ->
+            val id = ids[i % ids.size]
+            JSONObject().put("a", "visit").put("id", id).put("t", projects.first { it[0] == id }[1]).put("by", by[i % 4]).put("s", st[i % 5]).put("at", "2026-10-%02dT%02d:00:00Z".format(1 + i % 28, 7 + i % 9))
+                .apply { if (st[i % 5] != "working") put("u", listOf("urgent", "month", "watch")[i % 3]) }
+        }.toMutableList()
+        a += JSONObject().put("a", "fixed").put("id", "106").put("by", "Bertin Ngindu").put("at", "2026-10-14T10:00:00Z")
+        a += JSONObject().put("a", "fixed").put("id", "302").put("by", "Joseph Okello").put("at", "2026-10-16T10:00:00Z")
+        a += JSONObject().put("a", "pin").put("id", "108").put("by", "Meril Kiprop").put("at", "2026-10-05T10:00:00Z")
+        a += JSONObject().put("a", "new").put("id", "N1").put("t", "Kipsaina Spring").put("by", "Meril Kiprop").put("at", "2026-10-06T10:00:00Z")
+        a += JSONObject().put("a", "visit").put("id", "104").put("by", "Meril Kiprop").put("s", "working").put("at", "2026-09-28T10:00:00Z") // last month: not counted
+        return a
+    }
+    private fun report(ck: String = "", home: String = "ke"): ReportData =
+        buildReport(Snapshot.from(snapJson(home, "Meril Kiprop")), activity(), YearMonth.of(2026, 10), ck, "Meril Kiprop", LocalDate.of(2026, 10, 21), ZoneOffset.UTC)
 
     @Test fun address_by_home_country() {
         assertEquals("Mega Centre, 3rd Floor, Makasembo Road", letterheadAddress("ke")[1])
@@ -52,20 +89,56 @@ class LetterheadTest {
         listOf("tz", "ug", "mw", "").forEach { assertEquals(listOf("Rafiki Outreach", "1817 N. Beck Street", "Salt Lake City, UT 84116, U.S.A.", "Phone: +1 801 547 7847", "Email: Info@rafikioutreach.org"), letterheadAddress(it)) }
     }
 
+    /** The same sums as reportHtml in pin.html. */
+    @Test fun report_counts_like_the_web_report() {
+        Lang.sw = false
+        val r = report()
+        assertEquals("October 2026", r.label); assertEquals("All countries", r.country); assertEquals("21 October 2026", r.date)
+        val k = r.kpis.associate { it.label to it }
+        assertEquals("46", k.getValue("site visits").value)
+        assertEquals("10", k.getValue("projects visited").value)
+        // % working: from each project's latest visit this month
+        val latest = activity().filter { it.optString("a") == "visit" && it.optString("at").startsWith("2026-10") }.groupBy { it.optString("id") }.values.map { l -> l.maxBy { it.optString("at") } }
+        val pct = Math.round(latest.count { it.optString("s") == "working" } * 100.0 / latest.size)
+        assertEquals("$pct%", k.getValue("of visited projects working").value)
+        assertEquals(if (pct < 80) "warn" else "", k.getValue("of visited projects working").tone)
+        assertEquals("4", k.getValue("open repairs (2 urgent)").value); assertEquals("bad", k.getValue("open repairs (2 urgent)").tone)
+        assertEquals("2", k.getValue("repairs fixed").value)
+        assertEquals("1", k.getValue("new site added").value)
+        assertEquals("1", k.getValue("location pinned").value)
+        assertEquals(listOf("Kenya", "Tanzania", "Uganda", "Malawi"), r.byCountry.map { it.name })
+        assertEquals(listOf(5, 3, 2, 1), r.byCountry.map { it.projects }); assertEquals(listOf(4, 3, 2, 1), r.byCountry.map { it.visited })
+        assertEquals(listOf(2, 1, 1, 0), r.byCountry.map { it.open })
+        assertEquals(10, r.byCountry.sumOf { it.working + it.repair + it.notWorking })
+        // urgent first, then this month, then keep an eye on it; KES total of the estimates
+        assertEquals(listOf("Urgent", "Urgent", "This month", "Keep an eye on it"), r.repairs.map { it.urgency })
+        assertEquals(35700L, r.cost)
+        assertEquals("–", r.repairs.last().cost?.toString() ?: "–")
+        assertEquals("1 Oct", r.visits.first().date)
+        // one country: only its projects and repairs, but new sites still count
+        val ke = report("ke")
+        assertEquals(listOf("Kenya"), ke.byCountry.map { it.name }); assertEquals(2, ke.repairs.size); assertEquals("1", ke.kpis[5].value)
+        assertTrue(ke.visits.all { v -> projects.first { it[1] == v.title }[3] == "ke" })
+    }
+
     @Test fun report_pdf_on_letterhead() {
         Lang.sw = false
-        listOf("ke" to "Kenya", "tz" to "Tanzania").forEach { (home, country) ->
+        listOf(Triple("ke", "", "all"), Triple("tz", "", "all"), Triple("ke", "ke", "kenya")).forEach { (home, ck, tag) ->
+            val r = report(ck, home)
             // the PDF exactly as shared from the app (Android's PdfDocument; Robolectric has no PDF back end, so this only works on a phone)
-            val real = File(out, "letterhead-report-$home-device.pdf"); real.delete()
-            runCatching { writeReportPdf(app, report(), country, "Meril Kiprop", home, real) }.onFailure { println("PdfDocument not available here: $it") }
+            val real = File(out, "report-$home-$tag-device.pdf"); real.delete()
+            runCatching { writeReportPdf(app, r, home, real) }.onFailure { println("PdfDocument not available here: $it") }
             if (real.exists() && real.length() > 0) assertTrue("PDF written", real.readBytes().copyOfRange(0, 4).decodeToString() == "%PDF")
             // the same drawing code onto 2x bitmaps: saved as PNGs and as an A4 PDF to look at
             val pages = mutableListOf<Bitmap>()
-            drawReportPages(app, report(), country, "Meril Kiprop", home, {
+            drawReportPages(app, r, home, {
                 val b = Bitmap.createBitmap(1190, 1684, Bitmap.Config.ARGB_8888); pages += b; Canvas(b).apply { drawColor(Color.WHITE); scale(2f, 2f) }
-            }, { File(out, "letterhead-report-$home-p${pages.size}.png").outputStream().use { pages.last().compress(Bitmap.CompressFormat.PNG, 100, it) } })
-            assertTrue("report runs onto a second page", pages.size >= 2)
-            val f = File(out, "letterhead-report-$home.pdf"); pdfOf(pages, f)
+            }, { File(out, "report-$home-$tag-p${pages.size}.png").outputStream().use { pages.last().compress(Bitmap.CompressFormat.PNG, 100, it) } })
+            assertTrue("46 visits run onto a second page (${pages.size})", pages.size in 2..3 || (ck == "ke" && pages.size in 1..3))
+            // the foot of every page: the RAFIKI logo (black wordmark, bottom right), and the round seal is gone from the app
+            pages.forEach { b -> assertTrue("logo at the foot", (1000 until 1100).any { x -> (1610 until 1640).any { y -> Color.red(b.getPixel(x, y)) < 60 } }) }
+            assertEquals(0, app.resources.getIdentifier("letterhead_seal", "drawable", app.packageName))
+            val f = File(out, "report-$home-$tag.pdf"); pdfOf(pages, f)
             assertTrue("PDF written", f.readBytes().copyOfRange(0, 4).decodeToString() == "%PDF")
         }
     }
@@ -89,18 +162,19 @@ class LetterheadTest {
         f.writeBytes(bos.toByteArray())
     }
 
-    private fun showReport(home: String, name: String) {
+    private fun showReport(home: String, name: String, height: Int = 844) {
         org.rafikioutreach.pin.ui.Onb.enabled = false
-        val snap = JSONObject().put("ok", true).put("who", name).put("admin", false).put("me", JSONObject().put("kind", "app").put("home", home))
-            .put("projects", JSONArray().put(JSONObject().put("id", "104").put("title", "Kapsaret Borehole").put("country", "Kenya").put("ck", "ke").put("area", "Eldoret").put("type", "borehole").put("status", "Completed").put("gps", JSONArray().put(0.47).put(35.25))))
-            .put("repairs", JSONObject()).put("visits", JSONObject()).put("jobs", JSONArray()).put("assigned", JSONArray()).put("confirmed", JSONObject())
+        val snap = snapJson(home, name)
         Prefs(app).apply { pin = "9999"; this.name = name; saveSnapshot(snap); filter = "all" }
         val m = AppModel(app)
+        // this month's activity, so the default month shows the tables
+        val now = YearMonth.now()
+        val act = JSONArray(); activity().forEach { e -> act.put(JSONObject(e.toString()).put("at", e.optString("at").replace("2026-10", now.toString()).replace("2026-09", now.minusMonths(1).toString()))) }
         m.api.transport = { _, url, _, _ ->
-            if (url.contains("activity=1")) 200 to JSONObject().put("ok", true).put("activity", JSONArray().put(JSONObject().put("by", name).put("a", "visit").put("s", "working").put("id", "104").put("t", "Kapsaret Borehole").put("at", java.time.Instant.now().toString()))).toString()
+            if (url.contains("activity=1")) 200 to JSONObject().put("ok", true).put("activity", act).toString()
             else 200 to snap.toString()
         }
-        rule.setContent { RafikiTheme(dark = false) { Box(Modifier.size(390.dp, 844.dp)) { ReportScreen(m) {} } } }
+        rule.setContent { RafikiTheme(dark = false) { Box(Modifier.size(390.dp, height.dp)) { ReportScreen(m) {} } } }
         rule.waitForIdle()
     }
 
@@ -118,7 +192,11 @@ class LetterheadTest {
         rule.onNodeWithText("Mega Centre, 3rd Floor, Makasembo Road").assertExists()
         rule.onNodeWithText("Email: info@rafikioutreach.org").assertExists()
         assertTrue(runCatching { rule.onNodeWithText("1817 N. Beck Street").assertExists() }.isFailure)
-        shot("letterhead-screen-ke")
+        rule.onNodeWithText("Share PDF").assertExists(); rule.onNodeWithText("Save as PDF").assertExists()
+        rule.onNodeWithText("By country").assertExists(); rule.onNodeWithText("Visits this month").assertExists()
+        rule.onNodeWithText("site visits").assertExists()
+        rule.onNodeWithTag("footLogo").assertExists()
+        shot("report-screen-ke")
     }
 
     @Test fun report_screen_other_countries() {
@@ -127,6 +205,15 @@ class LetterheadTest {
         rule.onNodeWithText("1817 N. Beck Street").assertExists()
         rule.onNodeWithText("Salt Lake City, UT 84116, U.S.A.").assertExists()
         assertTrue(runCatching { rule.onNodeWithText("Kitale, Kenya").assertExists() }.isFailure)
-        shot("letterhead-screen-tz")
+        shot("report-screen-tz")
+    }
+
+    /** The whole report sheet on a tall window, to look at. */
+    @Config(qualifiers = "w390dp-h3000dp-xxhdpi")
+    @Test fun report_screen_full() {
+        Lang.sw = false
+        showReport("ke", "Meril Kiprop", 3000)
+        rule.onNodeWithText("Open repairs · about KES 35,700 estimated").assertExists()
+        shot("report-screen-full")
     }
 }

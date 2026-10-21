@@ -1,11 +1,6 @@
 package org.rafikioutreach.pin.ui
 
-import androidx.compose.foundation.horizontalScroll
-
 import android.content.Intent
-import android.graphics.Paint
-import android.graphics.Typeface
-import android.graphics.pdf.PdfDocument
 import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -31,7 +26,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -43,26 +37,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.platform.testTag
-import androidx.core.content.FileProvider
-import org.json.JSONObject
 import org.rafikioutreach.pin.AppModel
 import org.rafikioutreach.pin.data.COUNTRIES
 import org.rafikioutreach.pin.data.DUE_DAYS
 import org.rafikioutreach.pin.data.Geo
 import org.rafikioutreach.pin.data.LatLng
 import org.rafikioutreach.pin.data.Project
-import org.rafikioutreach.pin.data.stateName
 import org.rafikioutreach.pin.t
-import java.io.File
-import java.time.Instant
-import java.time.YearMonth
-import java.time.ZoneOffset
-import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 /** Nearest stop next, starting from where you are (or the first chosen stop). */
@@ -144,128 +126,4 @@ fun RouteScreen(m: AppModel, open: (String) -> Unit, back: () -> Unit) {
         }
         Spacer(Modifier.height(24.dp))
     }
-}
-
-// --- monthly report -----------------------------------------------------------------------------
-
-data class ReportData(val label: String, val visits: List<JSONObject>, val ids: Set<String>, val working: Int, val fixed: Int, val pins: Int, val newSites: Int, val openRepairs: Int, val due: Int, val byCountry: List<List<String>>)
-
-@Composable
-fun ReportScreen(m: AppModel, back: () -> Unit) {
-    val s by m.snap.collectAsState()
-    val act by m.activity.collectAsState()
-    val snap = s ?: return
-    val ctx = LocalContext.current
-    var ym by remember { mutableStateOf(YearMonth.now()) }
-    var ck by remember { mutableStateOf("") }
-    var err by remember { mutableStateOf<String?>(null) }
-    LaunchedEffect(Unit) { if (!m.loadActivity()) err = t("No signal: the report needs a connection the first time.", "Hakuna mtandao: ripoti inahitaji mtandao mara ya kwanza.") }
-    val months = (0 until 13).map { YearMonth.now().minusMonths(it.toLong()) }
-    val fmt = DateTimeFormatter.ofPattern("MMMM yyyy", if (org.rafikioutreach.pin.Lang.sw) Locale("sw") else Locale.UK)
-
-    val inCountry = { id: String -> ck.isBlank() || snap.projects.firstOrNull { it.id == id }?.ck == ck }
-    val from = ym.atDay(1).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli(); val to = ym.plusMonths(1).atDay(1).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli()
-    val ev = (act ?: emptyList()).filter { e -> runCatching { Instant.parse(e.optString("at")).toEpochMilli() in from until to }.getOrDefault(false) && (e.optString("id").isBlank() || inCountry(e.optString("id"))) }
-    val visits = ev.filter { it.optString("a") == "visit" }
-    val latest = visits.groupBy { it.optString("id") }.mapValues { (_, v) -> v.maxBy { it.optString("at") } }
-    val rep = ReportData(
-        fmt.format(ym), visits, latest.keys, latest.values.count { it.optString("s") == "working" }, ev.count { it.optString("a") == "fixed" }, ev.count { it.optString("a") == "pin" }, ev.count { it.optString("a") == "new" },
-        snap.repairs.keys.count { inCountry(it) }, snap.projects.count { it.gps != null && inCountry(it.id) && ageDays(snap, it) >= DUE_DAYS },
-        COUNTRIES.filter { ck.isBlank() || it.key == ck }.mapNotNull { (k, n) ->
-            val l = snap.projects.filter { it.ck == k }; if (l.isEmpty()) null else {
-                val v = latest.filterKeys { id -> l.any { it.id == id } }
-                listOf(n, "${l.size}", "${v.size}", "${v.values.count { it.optString("s") == "working" }}", "${v.values.count { it.optString("s") == "repair" }}", "${v.values.count { it.optString("s") == "notworking" }}", "${l.count { snap.repairs.containsKey(it.id) }}")
-            }
-        },
-    )
-
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            Picker(t("Month", "Mwezi"), ym.toString(), months.map { it.toString() to fmt.format(it) }, { ym = YearMonth.parse(it) }, Modifier.weight(1f))
-            Picker(t("Country", "Nchi"), ck, listOf("" to t("All countries", "Nchi zote")) + COUNTRIES.toList(), { ck = it }, Modifier.weight(1f))
-        }
-        Msg(err, "warn")
-        Card(Modifier.padding(top = 14.dp)) {
-            // the RAFIKI letterhead, as on the shared PDF (address by the reporter's home country)
-            Row(Modifier.fillMaxWidth().testTag("letterhead"), verticalAlignment = Alignment.Bottom) {
-                androidx.compose.foundation.Image(androidx.compose.ui.res.painterResource(if (C.dark) org.rafikioutreach.pin.R.drawable.rafiki_logo_light else org.rafikioutreach.pin.R.drawable.letterhead_logo), "RAFIKI Outreach",
-                    Modifier.weight(0.36f).padding(bottom = 8.dp), contentScale = androidx.compose.ui.layout.ContentScale.FillWidth)
-                Column(Modifier.weight(0.64f).padding(start = 8.dp), horizontalAlignment = Alignment.End) {
-                    letterheadAddress(snap.me.home.ifBlank { m.prefs.country }).forEach { Text(it, style = MaterialTheme.typography.bodySmall.copy(fontSize = 9.sp, lineHeight = 12.sp, fontFamily = androidx.compose.ui.text.font.FontFamily.SansSerif), color = C.text, textAlign = androidx.compose.ui.text.style.TextAlign.End) }
-                }
-            }
-            Box(Modifier.padding(bottom = 14.dp).fillMaxWidth().height(1.5.dp).background(if (C.dark) C.blue2 else Color(0xFF1A365D)))
-            Text(t("Field report · ", "Ripoti ya uwanjani · ") + rep.label, style = MaterialTheme.typography.titleLarge, color = C.ink)
-            Text((COUNTRIES[ck] ?: t("All countries", "Nchi zote")) + " · RAFIKI Outreach · " + t("Prepared by ", "Imeandaliwa na ") + m.prefs.name, style = MaterialTheme.typography.bodySmall, color = C.muted)
-            val pctW = if (rep.ids.isEmpty()) "—" else "${rep.working * 100 / rep.ids.size}%"
-            listOf(
-                listOf("${rep.visits.size}" to t("site visits", "ziara"), "${rep.ids.size}" to t("projects visited", "miradi iliyotembelewa")),
-                listOf(pctW to t("of visited projects working", "ya miradi iliyotembelewa inafanya kazi"), "${rep.openRepairs}" to t("open repairs", "matengenezo yaliyo wazi")),
-                listOf("${rep.fixed}" to t("repairs fixed", "matengenezo yaliyokamilika"), "${rep.newSites}" to t("new sites added", "maeneo mapya yaliyoongezwa")),
-                listOf("${rep.pins}" to t("locations pinned", "mahali palipowekwa"), "${rep.due}" to t("due a visit (6+ months)", "zinasubiri ziara (miezi 6+)")),
-            ).forEach { row ->
-                Row(Modifier.padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    row.forEach { (n, l) -> Column(Modifier.weight(1f).clip(RoundedCornerShape(14.dp)).background(C.tint).padding(12.dp)) { Text(n, style = MaterialTheme.typography.headlineMedium, color = C.ink); Text(l, style = MaterialTheme.typography.bodySmall, color = C.muted) } }
-                }
-            }
-            H2(t("By country", "Kwa nchi"), Modifier.padding(top = 16.dp))
-            val head = listOf(t("Country", "Nchi"), t("Projects", "Miradi"), t("Visited", "Zimetembelewa"), t("Working", "Zinafanya kazi"), t("Repair", "Matengenezo"), t("Not working", "Hazifanyi kazi"), t("Open repairs", "Matengenezo wazi"))
-            Column(Modifier.horizontalScroll(rememberScrollState())) {
-                (listOf(head) + rep.byCountry).forEachIndexed { i, r ->
-                    Row(Modifier.background(if (i == 0) C.blue2 else if (i % 2 == 0) C.tint else Color.Transparent).padding(vertical = 6.dp, horizontal = 4.dp)) {
-                        r.forEachIndexed { j, c -> Text(c, style = MaterialTheme.typography.bodySmall.copy(fontWeight = if (i == 0 || j == 0) FontWeight.Bold else FontWeight.Medium), color = if (i == 0) Color.White else C.text, modifier = Modifier.width(if (j == 0) 104.dp else 118.dp).padding(end = 6.dp), maxLines = 2) }
-                    }
-                }
-            }
-            H2(t("Visits this month", "Ziara za mwezi huu"), Modifier.padding(top = 16.dp))
-            if (rep.visits.isEmpty()) Text(t("No visits recorded in the app this month.", "Hakuna ziara zilizorekodiwa kwenye programu mwezi huu."), color = C.muted, style = MaterialTheme.typography.bodyMedium)
-            rep.visits.sortedBy { it.optString("at") }.forEach { e -> Text(whenText(e.optString("at")) + " · " + e.optString("t") + " · " + e.optString("by") + " · " + stateName(e.optString("s")), style = MaterialTheme.typography.bodySmall, color = C.text, modifier = Modifier.padding(top = 4.dp)) }
-            Text(t("Only visits, repairs and pins made with the RAFIKI Pin app are counted.", "Ziara, matengenezo na mahali vilivyowekwa kwa programu ya RAFIKI Pin tu ndivyo vinahesabiwa."), style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 12.dp))
-        }
-        Btn(t("Share as PDF", "Shiriki kama PDF"), { sharePdf(ctx, rep, (COUNTRIES[ck] ?: t("All countries", "Nchi zote")), m.prefs.name, snap.me.home.ifBlank { m.prefs.country }) }, Modifier.fillMaxWidth().padding(top = 14.dp), icon = "upload")
-        Spacer(Modifier.height(24.dp))
-    }
-}
-
-/** Draws the report onto A4 pages and opens the share sheet (WhatsApp, e-mail, Drive…). */
-private fun sharePdf(ctx: android.content.Context, r: ReportData, country: String, by: String, home: String) {
-    val dir = File(ctx.cacheDir, "exports").apply { mkdirs() }
-    val f = File(dir, "RAFIKI-field-report-" + r.label.replace(' ', '-') + ".pdf")
-    writeReportPdf(ctx, r, country, by, home, f)
-    val uri = FileProvider.getUriForFile(ctx, "org.rafikioutreach.pin.files", f)
-    ctx.startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).setType("application/pdf").putExtra(Intent.EXTRA_STREAM, uri).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION), f.name))
-}
-
-/** The report as an A4 PDF on the RAFIKI letterhead (address by [home], the reporter's home country). */
-internal fun writeReportPdf(ctx: android.content.Context, r: ReportData, country: String, by: String, home: String, f: File) {
-    val doc = PdfDocument(); var pageNo = 0; var page: PdfDocument.Page? = null
-    drawReportPages(ctx, r, country, by, home, { doc.startPage(PdfDocument.PageInfo.Builder(595, 842, ++pageNo).create()).also { page = it }.canvas }, { doc.finishPage(page!!) })
-    f.outputStream().use { doc.writeTo(it) }; doc.close()
-}
-
-/** Draws the report onto 595×842pt pages: letterhead header on page 1, its footer on every page. */
-internal fun drawReportPages(ctx: android.content.Context, r: ReportData, country: String, by: String, home: String, startPage: () -> android.graphics.Canvas, endPage: () -> Unit) {
-    fun newPage() = startPage().also { drawLetterheadFoot(ctx, it) }
-    val title = Paint().apply { isAntiAlias = true; textSize = 20f; typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD); color = 0xFF04263F.toInt() }
-    val h2 = Paint(title).apply { textSize = 13f; color = 0xFF076DB1.toInt() }
-    val body = Paint().apply { isAntiAlias = true; textSize = 10f; color = 0xFF141618.toInt() }
-    val muted = Paint(body).apply { color = 0xFF5A6066.toInt() }
-    var c = newPage(); drawLetterheadTop(ctx, c, home); var y = LETTERHEAD_BODY_TOP
-    fun line(text: String, p: Paint, gap: Float = 15f) {
-        if (y > LETTERHEAD_BODY_BOTTOM) { endPage(); c = newPage(); y = 56f }
-        c.drawText(text, 48f, y, p); y += gap
-    }
-    line(t("Field report · ", "Ripoti ya uwanjani · ") + r.label, title, 22f)
-    line("$country · RAFIKI Outreach · " + t("Prepared by ", "Imeandaliwa na ") + by, muted, 26f)
-    val pct = if (r.ids.isEmpty()) "—" else "${r.working * 100 / r.ids.size}%"
-    listOf("${r.visits.size} " + t("site visits", "ziara"), "${r.ids.size} " + t("projects visited", "miradi iliyotembelewa"), "$pct " + t("of visited projects working", "ya miradi iliyotembelewa inafanya kazi"),
-        "${r.openRepairs} " + t("open repairs", "matengenezo yaliyo wazi"), "${r.fixed} " + t("repairs fixed", "matengenezo yaliyokamilika"), "${r.newSites} " + t("new sites added", "maeneo mapya yaliyoongezwa"),
-        "${r.pins} " + t("locations pinned", "mahali palipowekwa"), "${r.due} " + t("due a visit (6+ months)", "zinasubiri ziara (miezi 6+)")).forEach { line("•  $it", body) }
-    y += 10; line(t("By country", "Kwa nchi"), h2, 18f)
-    r.byCountry.forEach { row -> line(row[0] + ": " + t("${row[1]} projects, ${row[2]} visited, ${row[3]} working, ${row[4]} needed repair, ${row[5]} not working, ${row[6]} open repairs", "miradi ${row[1]}, ${row[2]} zimetembelewa, ${row[3]} zinafanya kazi, ${row[4]} zilihitaji matengenezo, ${row[5]} hazifanyi kazi, matengenezo ${row[6]} wazi"), body) }
-    y += 10; line(t("Visits", "Ziara"), h2, 18f)
-    if (r.visits.isEmpty()) line(t("No visits recorded in the app this month.", "Hakuna ziara zilizorekodiwa kwenye programu mwezi huu."), muted)
-    r.visits.sortedBy { it.optString("at") }.forEach { e -> line(whenText(e.optString("at")) + "  " + e.optString("t").take(48) + "  ·  " + e.optString("by") + "  ·  " + stateName(e.optString("s")), body) }
-    y += 14; line(t("Only visits, repairs and pins made with the RAFIKI Pin app are counted.", "Ziara, matengenezo na mahali vilivyowekwa kwa programu ya RAFIKI Pin tu ndivyo vinahesabiwa."), muted)
-    endPage()
 }

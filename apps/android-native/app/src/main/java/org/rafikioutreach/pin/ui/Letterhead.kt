@@ -22,12 +22,14 @@ fun letterheadAddress(home: String): List<String> = LETTERHEAD[home] ?: LETTERHE
 const val LETTERHEAD_FOOT = "501(c)(3) Nonprofit Organization  |  Providing clean water and community development in East Africa"
 
 // Page geometry in PDF points, measured from the RAFIKI letterhead (0.6in side margins; logo 2.8in wide, 22pt from the top;
-// address 9pt, 12pt apart; navy rule 1.5pt; seal 1.1in square 0.5in from the bottom; thin rule and grey line at the foot).
+// address 9pt, 12pt apart; navy rule 1.5pt). At the foot: a thin navy rule, the grey nonprofit line and the RAFIKI logo, small, on the right.
 private const val M = 43.2f
 private const val NAVY = 0xFF1A365D.toInt()
-/** Where the report text may start on page 1 (first baseline) and where it must stop on every page (above the seal). */
+/** Width of the small RAFIKI logo at the foot of every page (points). */
+const val FOOT_LOGO_W = 64f
+/** Where the report text may start on page 1 (first baseline) and where it must stop on every page (above the foot). */
 const val LETTERHEAD_BODY_TOP = 146f
-const val LETTERHEAD_BODY_BOTTOM = 712f
+const val LETTERHEAD_BODY_BOTTOM = 784f
 
 private fun art(ctx: Context, id: Int): Bitmap? = runCatching { BitmapFactory.decodeResource(ctx.resources, id) }.getOrNull()
 
@@ -40,10 +42,13 @@ fun drawLetterheadTop(ctx: Context, c: Canvas, home: String, pageW: Float = 595f
     c.drawLine(M, 104.4f, pageW - M, 104.4f, Paint().apply { isAntiAlias = true; color = NAVY; strokeWidth = 1.5f })
 }
 
-/** Seal, thin navy rule and the grey nonprofit line at the foot of every page. */
-fun drawLetterheadFoot(ctx: Context, c: Canvas, pageW: Float = 595f, pageH: Float = 842f) {
-    val sealR = pageW - 50.4f
-    art(ctx, R.drawable.letterhead_seal)?.let { c.drawBitmap(it, null, RectF(sealR - 79.2f, pageH - 36f - 79.2f, sealR, pageH - 36f), Paint().apply { isAntiAlias = true; isFilterBitmap = true }) }
-    c.drawLine(M, pageH - 36f, sealR - 79.2f - 21.6f, pageH - 36f, Paint().apply { isAntiAlias = true; color = NAVY; strokeWidth = 0.75f })
-    c.drawText(LETTERHEAD_FOOT, M, pageH - 25.2f, Paint().apply { isAntiAlias = true; textSize = 8f; typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL); color = 0xFF808080.toInt() })
+/** Thin navy rule, the grey nonprofit line and the small RAFIKI logo at the foot of every page; "Page n of N" when [pages] is given. */
+fun drawLetterheadFoot(ctx: Context, c: Canvas, pageW: Float = 595f, pageH: Float = 842f, page: Int = 0, pages: Int = 0) {
+    val right = pageW - M; val logoH = FOOT_LOGO_W * 237f / 703f
+    art(ctx, R.drawable.letterhead_logo)?.let { c.drawBitmap(it, null, RectF(right - FOOT_LOGO_W, pageH - 20f - logoH, right, pageH - 20f), Paint().apply { isAntiAlias = true; isFilterBitmap = true }) }
+    val ruleEnd = right - FOOT_LOGO_W - 14f
+    c.drawLine(M, pageH - 36f, ruleEnd, pageH - 36f, Paint().apply { isAntiAlias = true; color = NAVY; strokeWidth = 0.75f })
+    val grey = Paint().apply { isAntiAlias = true; textSize = 8f; typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL); color = 0xFF808080.toInt() }
+    c.drawText(LETTERHEAD_FOOT, M, pageH - 25.2f, grey)
+    if (pages > 0) c.drawText(org.rafikioutreach.pin.t("Page $page of $pages", "Ukurasa $page kati ya $pages"), ruleEnd, pageH - 25.2f, grey.apply { textAlign = Paint.Align.RIGHT })
 }

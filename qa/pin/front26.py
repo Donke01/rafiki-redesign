@@ -38,7 +38,8 @@ def run(br, home, who, tag):
         pg.goto(BASE + '/pin#report'); pg.wait_for_timeout(1800)
         adr = pg.inner_text('.lh-adr') if pg.locator('.lh-adr').count() else ''
         out['adr'] = adr
-        check(pg.evaluate("[...document.querySelectorAll('.lh-logo,.lh-seal')].every(i => i.complete && i.naturalWidth > 0)"), '%s %s: letterhead logo and seal loaded' % (tag, name))
+        check(pg.evaluate("[...document.querySelectorAll('.lh-logo,.lh-flogo')].length === 2 && [...document.querySelectorAll('.lh-logo,.lh-flogo')].every(i => i.complete && i.naturalWidth > 0)"), '%s %s: letterhead logo and the small footer logo loaded' % (tag, name))
+        check(pg.evaluate("!document.querySelector('.lh-seal,img[src*=\"seal\"]') && /rafiki-logo/.test(document.querySelector('.lh-foot img').src)"), '%s %s: footer uses the RAFIKI logo, no round seal' % (tag, name))
         pg.screenshot(path=os.path.join(OUT, '%s-screen-%s.png' % (tag, name)), full_page=True)
         pg.locator('.lh-top').screenshot(path=os.path.join(OUT, '%s-screen-%s-head.png' % (tag, name)))
         if name == 'desktop':
@@ -53,6 +54,10 @@ def run(br, home, who, tag):
                 check(txt.count(FOOT) >= pages and pages >= 2, '%s %s PDF: %d pages, footer on each page (%d)' % (tag, fmt, pages, txt.count(FOOT)))
                 check(txt.count('Mega Centre') + txt.count('1817 N. Beck') == 1, '%s %s PDF: address only once (page 1 header)' % (tag, fmt))
                 check('Field report' in txt and 'Visits this month' in txt and 'Only visits, repairs and pins' in txt, '%s %s PDF: report contents intact' % (tag, fmt))
+                imgs = [l.split() for l in subprocess.run(['pdfimages', '-list', f], capture_output=True, text=True).stdout.splitlines()[2:]]
+                per = {}
+                for l in imgs: per[l[0]] = per.get(l[0], 0) + 1
+                check(len(per) == pages and per.get('1', 0) >= 2 and all(v >= 1 for v in per.values()) and all(int(l[3]) == 703 for l in imgs), '%s %s PDF: RAFIKI logo in the header and on every page foot, nothing else (%s)' % (tag, fmt, per))
         check(not errs, '%s %s: no page errors %s' % (tag, name, errs[:2]))
         ctx.close()
     return out

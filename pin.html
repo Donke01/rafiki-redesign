@@ -114,23 +114,23 @@ body.locked .rf{display:none}
 .rt td{padding:6px;border-bottom:1px solid #DCE1E5;vertical-align:top}
 .rt tr:nth-child(even) td{background:#F4F9FD}
 .rep-f{margin-top:18px;font-size:.75rem}
-/* RAFIKI letterhead on the monthly report (same layout as the printed letterhead: logo left, address right, navy rule; seal and line at the foot) */
+/* RAFIKI letterhead on the monthly report (same layout as the printed letterhead: logo left, address right, navy rule; line and a small RAFIKI logo at the foot) */
 .lh-wrap,.lh-wrap>tbody,.lh-wrap>tbody>tr,.lh-wrap>tbody>tr>td{display:block;padding:0}.lh-wrap>tfoot{display:none}
 .lh-top{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;border-bottom:2px solid #1A365D;margin-bottom:18px;font-family:Helvetica,Arial,sans-serif}
 .lh-logo{display:block;width:38%;max-width:220px;height:auto;margin-bottom:10px}
 .lh-adr{font-style:normal;text-align:right;color:#000000;font-size:11px;line-height:1.36}
-.lh-foot{position:relative;display:flex;align-items:flex-end;gap:16px;margin-top:22px;font-family:Helvetica,Arial,sans-serif}
+.lh-foot{position:relative;display:flex;align-items:center;gap:14px;margin-top:22px;font-family:Helvetica,Arial,sans-serif}
 .lh-foot span{flex:1;border-top:1px solid #1A365D;padding-top:6px;color:#808080;font-size:10px;line-height:1.3}
-.lh-seal{display:block;width:72px;height:72px;flex:0 0 auto}
-@media (max-width:600px){.lh-adr{font-size:10px}.lh-seal{width:60px;height:60px}}
+.lh-flogo{display:block;width:64px;height:auto;flex:0 0 auto}
+@media (max-width:600px){.lh-adr{font-size:10px}.lh-flogo{width:56px}}
 @media print{@page{margin:22pt .6in 18pt}
 #vReport,#repBody{animation:none !important;transform:none !important}
 .lh-wrap{display:table;width:100%;table-layout:fixed;border-collapse:collapse}.lh-wrap>tbody{display:table-row-group}.lh-wrap>tfoot{display:table-footer-group}.lh-wrap tr{display:table-row}.lh-wrap>tbody>tr>td,.lh-wrap>tfoot>tr>td{display:table-cell;padding:0}
-.lh-sp{height:104pt}
+.lh-sp{height:44pt}
 .lh-top{gap:0;border-bottom-width:1.5pt;margin-bottom:22pt}.lh-logo{width:201.6pt;max-width:none;height:67.96pt;margin-bottom:14.4pt}.lh-adr{font-size:9pt;line-height:12pt}
-.lh-foot{position:fixed;left:0;right:0;bottom:0;height:97.2pt;margin:0;display:block;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-.lh-foot span{position:absolute;left:0;right:108pt;bottom:5.2pt;height:12.8pt;border-top:.75pt solid #1A365D;padding:0;display:flex;align-items:flex-end;font-size:8pt;line-height:9.6pt}
-.lh-seal{position:absolute;right:7.2pt;bottom:18pt;width:79.2pt;height:79.2pt}}
+.lh-foot{position:fixed;left:0;right:0;bottom:0;height:24pt;margin:0;display:block;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.lh-foot span{position:absolute;left:0;right:78pt;bottom:5.2pt;height:12.8pt;border-top:.75pt solid #1A365D;padding:0;display:flex;align-items:flex-end;font-size:8pt;line-height:9.6pt}
+.lh-flogo{position:absolute;right:0;bottom:2pt;width:64pt;height:21.58pt}}
 @media (max-width:600px){.kpis{grid-template-columns:1fr 1fr}.rt{font-size:.72rem}}
 @media print{.tw{overflow:visible}.rt{min-width:0}.top,.tabs,.net,.noprint,.toast,.routebar{display:none !important}body,html{background:#FFFFFF !important}main{padding:0 !important}.rep{padding:0;border-radius:0}.kpis{grid-template-columns:repeat(4,1fr)}.rt{font-size:9pt}.rt tr{break-inside:avoid}}
 .tabs button.hidden{display:none !important}
@@ -3772,7 +3772,7 @@ html[data-theme=dark] .waitc{background:var(--card) !important;border-color:var(
     return '<table class="lh-wrap"><tfoot aria-hidden="true"><tr><td><div class="lh-sp"></div></td></tr></tfoot><tbody><tr><td>' +
       '<div class="lh-top"><img class="lh-logo" src="/img/letterhead/rafiki-logo.jpg" alt="RAFIKI Outreach" width="703" height="237"><address class="lh-adr" data-home="' + esc(home || '') + '">' + adr.map(esc).join('<br>') + '</address></div>' +
       body + '</td></tr></tbody></table>' +
-      '<div class="lh-foot"><span>501(c)(3) Nonprofit Organization&nbsp; |&nbsp; Providing clean water and community development in East Africa</span><img class="lh-seal" src="/img/letterhead/rafiki-seal.jpg" alt="RAFIKI Outreach nonprofit seal, Utah, USA" width="285" height="284"></div>';
+      '<div class="lh-foot"><span>501(c)(3) Nonprofit Organization&nbsp; |&nbsp; Providing clean water and community development in East Africa</span><img class="lh-flogo" src="/img/letterhead/rafiki-logo.jpg" alt="RAFIKI Outreach" width="703" height="237"></div>';
   }
   var period = 'm', actCache = null, teamCache = null, feedN = 8;
   qa('#segPeriod button').forEach(function (b) { b.addEventListener('click', function () { period = b.getAttribute('data-v'); qa('#segPeriod button').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); }); actDraw(); }); });

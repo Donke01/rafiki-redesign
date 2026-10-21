@@ -221,7 +221,7 @@ let LETTERHEAD: [String: [String]] = [
 ]
 func letterheadAddress(_ home: String) -> [String] { LETTERHEAD[home] ?? LETTERHEAD["default"] ?? [] }
 
-// Page geometry in PDF points, measured from the RAFIKI letterhead (0.6in side margins, logo 2.8in wide, navy rules, seal at the foot).
+// Page geometry in PDF points, measured from the RAFIKI letterhead (0.6in side margins, logo 2.8in wide, navy rules, small logo at the foot).
 private func lhRule(_ x0: CGFloat, _ x1: CGFloat, _ y: CGFloat, _ w: CGFloat) {
     let p = UIBezierPath(); p.move(to: CGPoint(x: x0, y: y)); p.addLine(to: CGPoint(x: x1, y: y)); p.lineWidth = w
     UIColor(red: 0x1A / 255, green: 0x36 / 255, blue: 0x5D / 255, alpha: 1).setStroke(); p.stroke()
@@ -236,11 +236,11 @@ func drawLetterheadTop(_ home: String, pageW: CGFloat = 595) {
     }
     lhRule(43.2, pageW - 43.2, 104.4, 1.5)
 }
-/// Seal, thin navy rule and the grey nonprofit line at the foot of every page.
+/// Thin navy rule, the grey nonprofit line and the small RAFIKI logo (right) at the foot of every page.
 func drawLetterheadFoot(pageW: CGFloat = 595, pageH: CGFloat = 842) {
-    let sealR = pageW - 50.4
-    UIImage(named: "LetterheadSeal")?.draw(in: CGRect(x: sealR - 79.2, y: pageH - 36 - 79.2, width: 79.2, height: 79.2))
-    lhRule(43.2, sealR - 79.2 - 21.6, pageH - 36, 0.75)
+    let logoW: CGFloat = 64, logoH: CGFloat = 64 * 237 / 703, right = pageW - 43.2
+    UIImage(named: "LetterheadLogo")?.draw(in: CGRect(x: right - logoW, y: pageH - 20 - logoH, width: logoW, height: logoH))
+    lhRule(43.2, right - logoW - 14, pageH - 36, 0.75)
     let font = UIFont(name: "Helvetica", size: 8) ?? UIFont.systemFont(ofSize: 8)
     NSAttributedString(string: "501(c)(3) Nonprofit Organization  |  Providing clean water and community development in East Africa", attributes: [.font: font, .foregroundColor: UIColor(white: 0.5, alpha: 1)])
         .draw(at: CGPoint(x: 43.2, y: pageH - 25.2 - font.ascender))
