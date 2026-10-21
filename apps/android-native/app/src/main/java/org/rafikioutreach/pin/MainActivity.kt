@@ -146,7 +146,14 @@ fun Shell(m: AppModel) {
     val waiting by m.waiting.collectAsState()
     val upd by m.update.collectAsState()
     val updReady = (upd?.code ?: 0) > BuildConfig.VERSION_CODE
-    LaunchedEffect(Unit) { m.checkUpdateDaily() }
+    // a newer app: checked on opening, whenever the app comes back to the front, and every 15 minutes while open,
+    // so the pop-up appears by itself (no need to tap Check)
+    LaunchedEffect(Unit) { m.checkUpdateSoon(0); while (true) { kotlinx.coroutines.delay(15 * 60_000L); m.checkUpdateSoon(10) } }
+    val life = androidx.compose.ui.platform.LocalLifecycleOwner.current
+    androidx.compose.runtime.DisposableEffect(life) {
+        val o = androidx.lifecycle.LifecycleEventObserver { _, e -> if (e == androidx.lifecycle.Lifecycle.Event.ON_RESUME) m.checkUpdateSoon(2) }
+        life.lifecycle.addObserver(o); onDispose { life.lifecycle.removeObserver(o) }
+    }
     val busy by m.busy.collectAsState()
     // tabs visited before this one, so the phone's back button steps back through them
     val tabsBefore = remember { mutableStateListOf<String>() }

@@ -252,11 +252,14 @@ fun UpdatePrompt(m: AppModel, ready: Boolean) {
     var show by remember { mutableStateOf(false) }
     LaunchedEffect(ready, u?.code) {
         show = false
-        if (ready && !m.updPromptClosed && System.currentTimeMillis() >= m.prefs.updLater && st is org.rafikioutreach.pin.data.Updater.State.Idle) { kotlinx.coroutines.delay(1200); show = true }
+        val code = u?.code ?: 0
+        val closed = m.updPromptClosed && m.updPromptClosedCode >= code
+        val later = System.currentTimeMillis() < m.prefs.updLater && m.prefs.updLaterCode >= code   // "Remind me later" only holds back the same version
+        if (ready && !closed && !later && st is org.rafikioutreach.pin.data.Updater.State.Idle) { kotlinx.coroutines.delay(1200); show = true }
     }
     val up = u ?: return
     if (!show) return
-    fun close() { show = false; m.updPromptClosed = true }
+    fun close() { show = false; m.updPromptClosed = true; m.updPromptClosedCode = up.code }
     androidx.compose.ui.window.Dialog(onDismissRequest = { close() }) {
         Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(28.dp)).background(C.card).testTag("update_prompt")) {
             Box(Modifier.fillMaxWidth().background(Brush.linearGradient(listOf(Color(0xFF0A78C2), Color(0xFF054F81), Color(0xFF04263F)))).padding(20.dp)) {
@@ -273,7 +276,7 @@ fun UpdatePrompt(m: AppModel, ready: Boolean) {
                 Text(up.notes.ifBlank { t("Fixes and improvements.", "Marekebisho na maboresho.") }, style = MaterialTheme.typography.bodyMedium, color = C.ink, modifier = Modifier.padding(top = 4.dp))
                 Text(t("Downloads right here in the app. Your PIN and saved work stay.", "Inapakuliwa hapa hapa kwenye programu. PIN yako na kazi iliyohifadhiwa vinabaki."), style = MaterialTheme.typography.labelSmall, color = C.muted, modifier = Modifier.padding(top = 10.dp))
                 Btn(t("Update now", "Sasisha sasa"), { show = false; m.updPromptClosed = true; m.updateGo = true; m.focusUpdate = true; m.goTab = "me" }, Modifier.padding(top = 16.dp).fillMaxWidth().testTag("update_prompt_go"), icon = "upload")
-                Btn(t("Remind me later", "Nikumbushe baadaye"), { show = false; m.updPromptClosed = true; m.prefs.updLater = System.currentTimeMillis() + 24 * 3600_000L }, Modifier.padding(top = 10.dp).fillMaxWidth().testTag("update_prompt_later"), light = true)
+                Btn(t("Remind me later", "Nikumbushe baadaye"), { show = false; m.updPromptClosed = true; m.updPromptClosedCode = up.code; m.prefs.updLater = System.currentTimeMillis() + 24 * 3600_000L; m.prefs.updLaterCode = up.code }, Modifier.padding(top = 10.dp).fillMaxWidth().testTag("update_prompt_later"), light = true)
             }
         }
     }

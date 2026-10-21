@@ -230,7 +230,7 @@ class MeTeamTest {
 
     @Test fun popup_close_and_later() {
         val app = ApplicationProvider.getApplicationContext<Application>()
-        Prefs(app).apply { pin = "9999"; name = "Meril Kiprop"; saveSnapshot(snapshot()); onb = true; lang = "en"; updCode = 99; updName = "9.9"; updAt = System.currentTimeMillis(); updLater = System.currentTimeMillis() + 3600_000L }
+        Prefs(app).apply { pin = "9999"; name = "Meril Kiprop"; saveSnapshot(snapshot()); onb = true; lang = "en"; updCode = 99; updName = "9.9"; updAt = System.currentTimeMillis(); updLater = System.currentTimeMillis() + 3600_000L; updLaterCode = 99 }
         Lang.sw = false
         val m = AppModel(app); Onb.enabled = false
         m.api.transport = { _, _, _, _ -> 200 to snapshot().toString() }

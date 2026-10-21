@@ -84,31 +84,35 @@ fun SettingsCard(m: AppModel, go: (String) -> Unit) {
     val ctx = LocalContext.current
     Card(Modifier.padding(top = 14.dp).testTag("settings")) {
         Text(t("Settings", "Mipangilio"), style = MaterialTheme.typography.titleLarge, color = C.ink, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+        // most used first: who you are, then keeping the app safe and telling you things, then how it looks, then help
         Group(t("Account", "Akaunti"))
+        MondayRow(m, s)
         SetRow("person", "blue", t("Personal details", "Taarifa zangu"), listOf(me.nick.ifBlank { m.prefs.name }, me.phone).filter { it.isNotBlank() }.joinToString(" · "), "set_profile") { go("profile") }
         SetRow("lock", "purple", if (me.kind == "monday") t("Sign-in", "Kuingia") else t("Change my PIN", "Badilisha PIN yangu"), when (me.kind) {
             "monday" -> t("Signed in with monday.com", "Umeingia kwa monday.com"); "app" -> t("Your own PIN", "PIN yako mwenyewe")
             "cloudflare" -> t("Set by the office", "Imewekwa na ofisi"); else -> t("Shared team PIN", "PIN ya timu") }, "set_pin") { go("pin") }
-        MondayRow(m, s)
-        SetRow("bell", "amber", t("Notifications", "Arifa"), if (m.prefs.phoneAlerts && AlertWorker.allowed(ctx)) t("On this phone too", "Pia kwenye simu hii") else t("In the app only", "Ndani ya programu tu"), "set_notify") { go("notify") }
-        // This phone: what only this phone remembers (fingerprint, colours, text size, language, distances)
+        // This phone: what only this phone remembers
         Column(Modifier.testTag("this_phone")) {
-            Group(t("This phone", "Simu hii"))
+            Group(t("Security and alerts", "Usalama na arifa"))
             BioRow(m)
+            SetRow("bell", "amber", t("Notifications", "Arifa"), if (m.prefs.phoneAlerts && AlertWorker.allowed(ctx)) t("On this phone too", "Pia kwenye simu hii") else t("In the app only", "Ndani ya programu tu"), "set_notify") { go("notify") }
+            Group(t("Display", "Mwonekano"))
             SetRow("sun", "amber", t("Appearance", "Mwonekano"), lookText(), "set_look") { go("look") }
             SetRow("globe", "blue", t("Language", "Lugha"), if (org.rafikioutreach.pin.Lang.sw) "Kiswahili" else "English", "set_lang") { go("lang") }
             SetRow("nav", "green", t("Distances", "Umbali"), if (m.prefs.miles) t("Miles", "Maili") else t("Kilometres (km)", "Kilomita (km)"), "set_units") { go("units") }
         }
-        Group(t("Help", "Msaada"))
+        Group(t("Help and support", "Msaada"))
         SetRow("search", "teal", t("Help and FAQs", "Msaada na maswali"), t("Pinning, visits, no signal, updates", "Kuweka mahali, ziara, bila mtandao, masasisho"), "set_help") { go("help") }
         SetRow("chat", "green", t("Contact the office", "Wasiliana na ofisi"), "info@rafikioutreach.org", "set_contact") { mail(ctx, "RAFIKI Pin: " + m.prefs.name, "") }
         SetRow("alert", "coral", t("Report a problem with the app", "Ripoti tatizo la programu"), t("Sends the app version with your message", "Inatuma toleo la programu pamoja na ujumbe wako"), "set_problem") {
             mail(ctx, "RAFIKI Pin problem", "\n\nWhat happened:\n\n\n---\n${m.prefs.name} · Android app ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE}) · ${Build.MANUFACTURER} ${Build.MODEL} · Android ${Build.VERSION.RELEASE}")
         }
         Group(t("About", "Kuhusu"))
+        SetRow("drop", "blue", t("About RAFIKI Pin", "Kuhusu RAFIKI Pin"), t("Version ", "Toleo ") + BuildConfig.VERSION_NAME, "set_about") { go("about") }
         SetRow("lock", "slate", t("Privacy policy", "Sera ya faragha"), "", "set_privacy") { web(ctx, "/privacy-policy") }
         SetRow("clip", "slate", t("Terms of use", "Masharti ya matumizi"), "", "set_terms") { web(ctx, "/terms-of-use") }
-        SetRow("drop", "blue", t("About RAFIKI Pin", "Kuhusu RAFIKI Pin"), t("Version ", "Toleo ") + BuildConfig.VERSION_NAME, "set_about") { go("about") }
+        // last, on its own
+        HorizontalDivider(color = C.line, modifier = Modifier.padding(top = 12.dp, bottom = 4.dp))
         SetRow("undo", "coral", t("Sign out of this phone", "Toka kwenye simu hii"), t("You’ll need your PIN to come back in", "Utahitaji PIN yako kurudi"), "set_signout") { go("signout") }
     }
 }

@@ -86,6 +86,8 @@ class AppModel(app: Application) : AndroidViewModel(app) {
     }
     /** Once a day, quietly, when the app opens. */
     fun checkUpdateDaily() { if (System.currentTimeMillis() - prefs.updAt > 24 * 3600_000L) viewModelScope.launch { checkUpdate() } }
+    /** Checks for a newer app if the last check was more than [minutes] ago (on open, on coming back, and every 15 minutes). */
+    fun checkUpdateSoon(minutes: Int = 2) { if (System.currentTimeMillis() - prefs.updAt > minutes * 60_000L) viewModelScope.launch { checkUpdate() } }
 
     fun showBanner(t: String?) { _banner.value = t }
 
@@ -100,6 +102,8 @@ class AppModel(app: Application) : AndroidViewModel(app) {
     var updateGo by androidx.compose.runtime.mutableStateOf(false)
     /** The update pop-up was closed with ✕: not again until the app is opened next time. */
     var updPromptClosed by androidx.compose.runtime.mutableStateOf(false)
+    /** The version the pop-up was closed (✕) for in this session: a newer one pops up again. */
+    var updPromptClosedCode = 0
     /** "You’re at …" banners closed with ×, until the app is closed. */
     val dismissed = androidx.compose.runtime.mutableStateListOf<String>()
     /** A short title for the top bar while a screen's big title is scrolled away. */

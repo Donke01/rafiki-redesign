@@ -1321,7 +1321,7 @@ html[data-theme=sun] .np-fc span::after{background:#8A99A6}
 @media (prefers-reduced-motion: reduce){.bell.ring svg,.bell .bn.pop,.npg,.npg.out,.np-r,.np-g,.np-d,.np-e,.np-m,.np-f .c,.np-st .halo,.np-st .mascot,.np-fc,.np-ok,.np-st .sp{animation:none !important}.np-st .sp{display:none}}
 .settings .sgrp{margin-top:6px}.settings .sgl{display:block;text-align:center;font-size:.72rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:14px 0 4px}
 .sr2{width:100%;display:flex;align-items:center;gap:12px;padding:11px 2px;border:0;border-top:1px solid var(--line);background:transparent;color:var(--text);text-align:left;cursor:pointer;font:inherit}
-.sgl+.sr2{border-top:0}.sr2 .st{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.sr2 .st b{font-size:.92rem;color:var(--ink)}.sr2 .st small{font-size:.76rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sr2 .chev{width:18px;height:18px;color:var(--muted);flex:none}
+.sgl+.sr2{border-top:0}.settings .sgrp.so{margin-top:14px;border-top:1px solid var(--line);padding-top:4px}.settings .sgrp.so .sr2{border-top:0}.settings .sgrp.so{margin-top:14px;border-top:1px solid var(--line);padding-top:4px}.settings .sgrp.so .sr2{border-top:0}.sr2 .st{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.sr2 .st b{font-size:.92rem;color:var(--ink)}.sr2 .st small{font-size:.76rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sr2 .chev{width:18px;height:18px;color:var(--muted);flex:none}
 .faq details{border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:8px;background:var(--card)}.faq summary{font-weight:700;color:var(--ink);cursor:pointer}.faq p{margin:8px 0 0;color:var(--text);line-height:1.5}
 .bsh .pr{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--line)}.bsh .pr b{flex:1;color:var(--ink);font-size:.92rem}.bsh .fld small{display:block;margin-top:4px}.bsh .fld{margin-bottom:12px}
 .about{text-align:center}.about img{height:34px;margin:6px auto 10px}
@@ -4062,26 +4062,28 @@ html[data-theme=sun] .lookpv,html[data-theme=sun] .lookpv .lpv{border-width:2px}
   function setUi() {
     var me = S.me || {}, kind = me.kind || (S.mode === 'monday' ? 'monday' : S.who ? '' : 'shared');
     var bio = $('meBio'), mon = $('meMonday'), hs = store.get('rfPinHomeSet'), hk = homeCk();   // kept, with their listeners, across redraws
+    // most used first: who you are, then keeping the app safe and telling you things, then how it looks, then help
+    // most used first: who you are, then keeping the app safe and telling you things, then how it looks, then help
     $('meSet').innerHTML = '<h2>' + tr('Settings', 'Mipangilio') + '</h2>' +
-      '<div class="sgrp"><span class="sgl">' + tr('Account', 'Akaunti') + '</span>' +
+      '<div class="sgrp"><span class="sgl">' + tr('Account', 'Akaunti') + '</span><i data-slot="mon"></i>' +
       setRow('profile', 'people', 'blue', tr('Personal details', 'Taarifa zangu'), esc(me.nick || S.name || '') + (me.phone ? ' · ' + esc(me.phone) : '')) +
-      setRow('pin', 'lock', 'purple', kind === 'monday' ? tr('Sign-in', 'Kuingia') : tr('Change my PIN', 'Badilisha PIN yangu'), kind === 'monday' ? tr('Signed in with monday.com', 'Umeingia kwa monday.com') : kind === 'app' ? tr('Your own 4-digit PIN', 'PIN yako ya tarakimu 4') : kind === 'cloudflare' ? tr('Set by the office', 'Imewekwa na ofisi') : tr('Shared team PIN', 'PIN ya timu')) +
-      '<i data-slot="mon"></i>' +
-      setRow('notify', 'clock', 'amber', tr('Notifications', 'Arifa'), tr('What the bell tells you about', 'Kengele inakuarifu nini')) + '</div>' +
-      '<div class="sgrp" id="setPhone"><span class="sgl">' + tr('This phone', 'Simu hii') + '</span><i data-slot="bio"></i>' +
+      setRow('pin', 'lock', 'purple', kind === 'monday' ? tr('Sign-in', 'Kuingia') : tr('Change my PIN', 'Badilisha PIN yangu'), kind === 'monday' ? tr('Signed in with monday.com', 'Umeingia kwa monday.com') : kind === 'app' ? tr('Your own 4-digit PIN', 'PIN yako ya tarakimu 4') : kind === 'cloudflare' ? tr('Set by the office', 'Imewekwa na ofisi') : tr('Shared team PIN', 'PIN ya timu')) + '</div>' +
+      '<div class="sgrp" id="setPhone"><span class="sgl">' + tr('Security and alerts', 'Usalama na arifa') + '</span><i data-slot="bio"></i>' +
+      setRow('notify', 'clock', 'amber', tr('Notifications', 'Arifa'), tr('What the bell tells you about', 'Kengele inakuarifu nini')) +
+      '<span class="sgl">' + tr('Display', 'Mwonekano') + '</span>' +
       setRow('look', 'sun', 'amber', tr('Appearance', 'Mwonekano'), lookTx()) +
       setRow('lang', 'globe', 'blue', tr('Language', 'Lugha'), S.lang === 'sw' ? 'Kiswahili' : 'English') +
       setRow('units', 'nav', 'green', tr('Distances', 'Umbali'), S.units === 'mi' ? tr('Miles', 'Maili') : tr('Kilometres (km)', 'Kilomita (km)')) +
       setRow('home', 'map', 'teal', tr('My country', 'Nchi yangu'), hs ? CNAME[hs] : tr('Automatic', 'Kiotomatiki') + (hk ? ' · ' + CNAME[hk] : '')) + '</div>' +
-      '<div class="sgrp"><span class="sgl">' + tr('Help', 'Msaada') + '</span>' +
+      '<div class="sgrp"><span class="sgl">' + tr('Help and support', 'Msaada') + '</span>' +
       setRow('help', 'search', 'teal', tr('Help and FAQs', 'Msaada na maswali'), tr('Pinning, visits, no signal, updates', 'Kuweka mahali, ziara, bila mtandao, masasisho')) +
       setRow('contact', 'chat', 'green', tr('Contact the office', 'Wasiliana na ofisi'), 'info@rafikioutreach.org') +
       setRow('problem', 'alert', 'coral', tr('Report a problem with the app', 'Ripoti tatizo la programu'), tr('Sends the app version with your message', 'Inatuma toleo la programu pamoja na ujumbe wako')) + '</div>' +
       '<div class="sgrp"><span class="sgl">' + tr('About', 'Kuhusu') + '</span>' +
-      setRow('privacy', 'lock', 'slate', tr('Privacy policy', 'Sera ya faragha'), '') +
-      setRow('terms', 'clip', 'slate', tr('Terms of use', 'Masharti ya matumizi'), '') +
       setRow('about', 'drop', 'blue', tr('About RAFIKI Pin', 'Kuhusu RAFIKI Pin'), tr('Version ', 'Toleo ') + APPV) +
-      setRow('signout', 'undo', 'coral', S.mode === 'monday' ? tr('Sign out of this phone', 'Toka kwenye simu hii') : tr('Sign out of this phone', 'Toka kwenye simu hii'), tr('You’ll need your PIN to come back in', 'Utahitaji PIN yako kurudi')) + '</div>';
+      setRow('privacy', 'lock', 'slate', tr('Privacy policy', 'Sera ya faragha'), '') +
+      setRow('terms', 'clip', 'slate', tr('Terms of use', 'Masharti ya matumizi'), '') + '</div>' +
+      '<div class="sgrp so">' + setRow('signout', 'undo', 'coral', tr('Sign out of this phone', 'Toka kwenye simu hii'), tr('You’ll need your PIN to come back in', 'Utahitaji PIN yako kurudi')) + '</div>';
     [['mon', mon], ['bio', bio]].forEach(function (x) { var sl = $('meSet').querySelector('[data-slot=' + x[0] + ']'); if (sl && x[1]) sl.parentNode.replaceChild(x[1], sl); });
   }
   var APPV = (function () { var s = document.querySelector('meta[name=app-version]'); return s ? s.content : 'web'; })();

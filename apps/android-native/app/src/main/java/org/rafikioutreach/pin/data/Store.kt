@@ -29,6 +29,9 @@ class Prefs(context: Context) {
     var updAt: Long get() = sp.getLong("updAt", 0L); set(v) = sp.edit().putLong("updAt", v).apply()
     /** "Remind me later" on the update pop-up: don't ask again before this time. */
     var updLater: Long get() = sp.getLong("updLater", 0L); set(v) = sp.edit().putLong("updLater", v).apply()
+    var updLaterCode: Int get() = sp.getInt("updLaterCode", 0); set(v) = sp.edit().putInt("updLaterCode", v).apply()
+    /** The newest version the phone has already shown a notification for. */
+    var updNotified: Int get() = sp.getInt("updNotified", 0); set(v) = sp.edit().putInt("updNotified", v).apply()
     /** Notifications: when the list was last opened, kinds turned off, phone alerts on, and the newest one the phone was told about. */
     var noteSeen: String get() = sp.getString("noteSeen", "") ?: ""; set(v) = sp.edit().putString("noteSeen", v).apply()
     var noteOff: Set<String> get() = (sp.getString("noteOff", "") ?: "").split(",").filter { it.isNotBlank() }.toSet(); set(v) = sp.edit().putString("noteOff", v.joinToString(",")).apply()

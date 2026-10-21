@@ -33,7 +33,7 @@ with sync_playwright() as p:
     check(pg.locator('#phoneKit').is_hidden(), 'the controls wait out of sight')
     # Settings › This phone
     t = pg.inner_text('#setPhone')
-    check('THIS PHONE' in t.upper() and 'Appearance' in t and 'Language' in t and 'Distances' in t and 'My country' in t, 'This phone group')
+    check('SECURITY AND ALERTS' in t.upper() and 'DISPLAY' in t.upper() and 'Notifications' in t and 'Appearance' in t and 'Language' in t and 'Distances' in t and 'My country' in t, 'Security and alerts + Display groups')
     check(sub(pg, 'look') == 'Light · normal text' and sub(pg, 'lang') == 'English' and sub(pg, 'units') == 'Kilometres (km)', 'rows show the current values: %s / %s / %s' % (sub(pg, 'look'), sub(pg, 'lang'), sub(pg, 'units')))
     check(pg.locator('#setPhone #meBio:not(.hidden) #bioToggle').count() == 1, 'fingerprint switch right in the row')
     pg.click('#bioToggle'); pg.wait_for_timeout(800)

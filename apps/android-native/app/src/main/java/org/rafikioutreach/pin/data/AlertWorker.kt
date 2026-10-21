@@ -32,6 +32,15 @@ class AlertWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx,
         if (!prefs.phoneAlerts || (prefs.pin.isBlank() && prefs.session.isBlank())) return Result.success()
         org.rafikioutreach.pin.Lang.sw = prefs.lang == "sw"
         val api = Api(BuildConfig.SERVER, { prefs.pin }, { prefs.session })
+        // a newer app on the website: one notification per version, even when the app is closed
+        runCatching {
+            val v = api.appVersion()
+            val code = v.json.optInt("versionCode")
+            if (v.ok && code > BuildConfig.VERSION_CODE && code > prefs.updNotified) {
+                prefs.updCode = code; prefs.updName = v.json.optString("versionName"); prefs.updNotes = v.json.optString("notes"); prefs.updSha = v.json.optString("sha256"); prefs.updAt = System.currentTimeMillis()
+                showUpdate(applicationContext, v.json.optString("versionName"), v.json.optString("notes")); prefs.updNotified = code
+            }
+        }
         val snapR = api.list(); if (!snapR.ok) return Result.success()
         val raw = snapR.json; val n = raw.optInt("reviewOpen")
         val old = prefs.loadSnapshot()?.optInt("reviewOpen") ?: 0
@@ -63,6 +72,20 @@ class AlertWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx,
 
         /** May this app show notifications? (Android 13+ asks once.) */
         fun allowed(ctx: Context) = Build.VERSION.SDK_INT < 33 || ctx.checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+
+        /** "Update available · 2.15.1": opens the app, where the update pop-up is waiting. */
+        fun showUpdate(ctx: Context, name: String, notes: String) {
+            if (!allowed(ctx)) return
+            val nm = ctx.getSystemService(NotificationManager::class.java)
+            if (Build.VERSION.SDK_INT >= 26 && nm.getNotificationChannel(CHANNEL) == null)
+                nm.createNotificationChannel(NotificationChannel(CHANNEL, t("Team news", "Habari za timu"), NotificationManager.IMPORTANCE_DEFAULT))
+            val open = Intent(ctx, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP).putExtra("open", "").putExtra("tab", "me")
+            val pi = PendingIntent.getActivity(ctx, 7001, open, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+            val text = notes.ifBlank { t("Tap to update. It installs right in the app.", "Gusa kusasisha. Inasakinishwa ndani ya programu.") }
+            val n = NotificationCompat.Builder(ctx, CHANNEL).setSmallIcon(R.drawable.ic_stat_pin).setContentTitle(t("RAFIKI Pin update · $name", "Sasisho la RAFIKI Pin · $name")).setContentText(text)
+                .setStyle(NotificationCompat.BigTextStyle().bigText(text)).setContentIntent(pi).setAutoCancel(true).setColor(0xFF0A78C2.toInt()).build()
+            runCatching { NotificationManagerCompat.from(ctx).notify(7001, n) }
+        }
 
         fun show(ctx: Context, items: List<Alert>) {
             if (!allowed(ctx)) return
