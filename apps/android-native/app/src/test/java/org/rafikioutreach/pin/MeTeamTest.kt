@@ -244,13 +244,43 @@ class MeTeamTest {
         assertEquals(4, m.unread())   // assign, job, repair, fixed (not my own pin)
         rule.onNode(hasText("4") and hasAnyAncestor(hasTestTag("bell_count")), useUnmergedTree = true).assertExists()
         shot("80-me-bell")
+        // the bell opens the full Notifications screen; opening it doesn't read them
         rule.onNodeWithTag("bell").performClick(); rule.waitForIdle(); rule.mainClock.advanceTimeBy(800)
+        rule.onNodeWithTag("notes_screen").assertExists()
         rule.onAllNodesWithTag("alert_row").assertCountEquals(4)
-        rule.onNodeWithText("Reid Anderson asked you to make 2 visits").assertExists()
-        shot("81-bell-list")
-        org.junit.Assert.assertEquals(0, m.unread())
-        rule.onNodeWithText("Grace Achieng fixed Turbo Spring").performClick(); rule.waitForIdle()
+        rule.onNodeWithText("Reid Anderson").assertExists(); rule.onNodeWithText("Asked you to make 2 visits").assertExists()
+        rule.onNodeWithText("Bertin Mwangi").assertExists(); rule.onNodeWithText("Reported it’s not working").assertExists()
+        rule.onNodeWithText("Repair job").assertExists(); rule.onNodeWithText("This repair is yours to do").assertExists()
+        rule.onNodeWithText("2 h ago · Kapsaret Borehole", substring = true).assertExists()
+        rule.onAllNodesWithTag("note_avatar", useUnmergedTree = true).assertCountEquals(3)   // people; the repair job has its tile
+        rule.onAllNodesWithTag("note_dot", useUnmergedTree = true).assertCountEquals(4)
+        rule.onNodeWithTag("notes_sub").assertTextEquals("4 unread")
+        org.junit.Assert.assertTrue(rule.onAllNodesWithTag("note_group").fetchSemanticsNodes().isNotEmpty())
+        assertEquals(4, m.unread())
+        shot("81-notes-light")
+        // filters: For me = visits assigned + repair jobs; Repairs = reported + fixed
+        rule.onNodeWithTag("nf_me").performClick(); rule.waitForIdle()
+        rule.onAllNodesWithTag("alert_row").assertCountEquals(2); shot("81b-notes-for-me")
+        rule.onNodeWithTag("nf_repairs").performClick(); rule.waitForIdle()
+        rule.onAllNodesWithTag("alert_row").assertCountEquals(2); rule.onNodeWithText("Grace Achieng").assertExists()
+        rule.onNodeWithTag("nf_all").performClick(); rule.waitForIdle()
+        // tap one: the project opens and that one is read; Back comes to Notifications
+        rule.onNodeWithText("Grace Achieng").performClick(); rule.waitForIdle()
+        assertEquals(3, m.unread())
+        rule.onNodeWithTag("hback").performClick(); rule.waitForIdle(); rule.mainClock.advanceTimeBy(600)
+        rule.onNodeWithTag("notes_screen").assertExists()
+        rule.onAllNodesWithTag("note_dot", useUnmergedTree = true).assertCountEquals(3)
+        // … › Mark all as read
+        rule.onNodeWithTag("notes_menu").performClick(); rule.waitForIdle(); rule.mainClock.advanceTimeBy(400); shot("81c-notes-menu")
+        rule.onNodeWithTag("mark_all").performClick(); rule.waitForIdle(); rule.mainClock.advanceTimeBy(800)
+        assertEquals(0, m.unread())
+        rule.onAllNodesWithTag("note_dot", useUnmergedTree = true).assertCountEquals(0)
+        rule.onNodeWithTag("notes_sub").assertTextEquals("All read ✓")
+        rule.onNodeWithTag("nf_unread").performClick(); rule.waitForIdle()
+        rule.onNodeWithTag("notes_empty").assertExists(); rule.onNodeWithText("You’re all caught up").assertExists()
+        shot("81d-notes-empty")
         rule.onNodeWithTag("hback").performClick(); rule.waitForIdle()
+        rule.onAllNodesWithTag("bell_count", useUnmergedTree = true).assertCountEquals(0)
         // Settings
         rule.onNodeWithTag("settings").performScrollTo(); shot("82-settings")
         rule.onNodeWithTag("set_profile").performScrollTo().performClick(); rule.waitForIdle()
@@ -280,11 +310,87 @@ class MeTeamTest {
         org.rafikioutreach.pin.ui.Motion.on = true
     }
 
+    @Test fun notes_screen_themes() {
+        org.rafikioutreach.pin.ui.Motion.on = true; org.rafikioutreach.pin.ui.Motion.loops = false
+        val app = ApplicationProvider.getApplicationContext<Application>()
+        val snap = snapshot().put("reviewOpen", 2).put("jobs", JSONArray()).put("repairs", JSONObject())
+        Prefs(app).apply { pin = "9999"; name = "Meril Kiprop"; saveSnapshot(snap); filter = "all"; onb = true; country = ""; lang = "en"; mePane = "me"; noteSeen = ""; noteRead = emptySet(); noteOff = emptySet(); reviewAt = ago(0) }
+        Lang.sw = false
+        val m = AppModel(app); Onb.enabled = false
+        val feed = JSONArray().put(act("Bertin Mwangi", "visit", "104", "Kapsaret Borehole", 1, "repair")).put(act("Grace Achieng", "fixed", "105", "Turbo Spring", 50))
+            .put(act("Amina Wanjiru", "new", "101", "Chepkongi Dispensary", 240))
+        m.api.transport = { _, url, _, _ ->
+            when {
+                url.contains("activity=1") -> 200 to JSONObject().put("ok", true).put("activity", feed).toString()
+                url.contains("team=1") -> 200 to "{\"ok\":true,\"team\":[]}"
+                url.contains("pin-auth/me") -> 200 to "{\"ok\":true,\"available\":false}"
+                else -> 200 to snap.toString()
+            }
+        }
+        org.rafikioutreach.pin.ui.Look.mode = "dark"
+        rule.setContent { RafikiTheme { Box(Modifier.size(390.dp, 844.dp)) { App(m) } } }
+        rule.waitUntil(8000) { rule.onAllNodesWithTag("hav").fetchSemanticsNodes().isNotEmpty() }
+        rule.mainClock.advanceTimeBy(2000); rule.onNodeWithTag("hav").performClick()
+        rule.waitUntil(8000) { rule.onAllNodesWithTag("bell_count", useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
+        assertEquals(4, m.unread())   // repair, fixed, new site, review
+        rule.mainClock.advanceTimeBy(1000); shot("88-me-bell-dark")
+        rule.onNodeWithTag("bell").performClick(); rule.waitForIdle(); rule.mainClock.advanceTimeBy(1500)
+        rule.onAllNodesWithTag("alert_row").assertCountEquals(4)
+        rule.onAllNodesWithTag("note_group").assertCountEquals(3)   // today, this week, earlier
+        rule.onNodeWithText("Office review").assertExists()
+        shot("89-notes-dark")
+        rule.onNodeWithTag("nf_me").performClick(); rule.waitForIdle(); rule.mainClock.advanceTimeBy(1200)
+        rule.onNodeWithTag("notes_empty").assertExists(); rule.onNodeWithText("Nothing assigned to you right now").assertExists()
+        shot("90-notes-empty-dark")
+        // bright sun
+        org.rafikioutreach.pin.ui.Look.mode = "sun"; rule.onNodeWithTag("nf_all").performClick(); rule.waitForIdle(); rule.mainClock.advanceTimeBy(1500)
+        shot("91-notes-sun")
+        // the review row goes to Office
+        rule.onNodeWithText("Office review").performClick(); rule.waitForIdle(); rule.mainClock.advanceTimeBy(800)
+        assertEquals(3, m.unread())
+        // Kiswahili
+        org.rafikioutreach.pin.ui.Look.mode = "light"; Lang.sw = true
+        rule.onNodeWithTag("hav").performClick(); rule.waitForIdle(); rule.mainClock.advanceTimeBy(800)
+        rule.onNodeWithTag("bell").performClick(); rule.waitForIdle(); rule.mainClock.advanceTimeBy(1500)
+        rule.onNodeWithTag("notes_screen").assert(hasAnyDescendant(hasText("Arifa"))); rule.onNodeWithTag("nf_all").assertTextContains("Zote"); rule.onNodeWithText("Ameripoti kuwa inahitaji matengenezo").assertExists()
+        shot("92-notes-sw")
+        Lang.sw = false; org.rafikioutreach.pin.ui.Look.mode = ""
+        org.rafikioutreach.pin.ui.Motion.loops = true; org.rafikioutreach.pin.ui.Motion.on = true
+    }
+
+    @Test fun notes_helpers() {
+        val now = Instant.parse("2026-10-21T12:00:00Z")
+        Lang.sw = false
+        assertEquals("just now", org.rafikioutreach.pin.ui.agoText("2026-10-21T11:59:40Z", now))
+        assertEquals("30 min ago", org.rafikioutreach.pin.ui.agoText("2026-10-21T11:30:00Z", now))
+        assertEquals("3 h ago", org.rafikioutreach.pin.ui.agoText("2026-10-21T09:00:00Z", now))
+        assertEquals("yesterday", org.rafikioutreach.pin.ui.agoText("2026-10-20T10:00:00Z", now))
+        assertEquals("3 days ago", org.rafikioutreach.pin.ui.agoText("2026-10-18T10:00:00Z", now))
+        Lang.sw = true; assertEquals("saa 3 zilizopita", org.rafikioutreach.pin.ui.agoText("2026-10-21T09:00:00Z", now)); Lang.sw = false
+        assertEquals("MK", org.rafikioutreach.pin.ui.initialsOf("Meril  Kiprop"))
+        assertEquals(org.rafikioutreach.pin.ui.nameHue("Grace Achieng"), org.rafikioutreach.pin.ui.nameHue(" grace achieng "))
+        val today = LocalDate.now()
+        assertEquals(0, org.rafikioutreach.pin.ui.noteGroup(Instant.now().toString(), today))
+        assertEquals(1, org.rafikioutreach.pin.ui.noteGroup(Instant.now().minus(3, ChronoUnit.DAYS).toString(), today))
+        assertEquals(2, org.rafikioutreach.pin.ui.noteGroup(Instant.now().minus(10, ChronoUnit.DAYS).toString(), today))
+        val a = org.rafikioutreach.pin.data.Alert("fixed", "2026-10-21T10:00:00Z", "105", "x", "Grace")
+        assertEquals(true, org.rafikioutreach.pin.data.alertNew(a, "2026-10-21T09:00:00Z", emptySet()))
+        assertEquals(false, org.rafikioutreach.pin.data.alertNew(a, "2026-10-21T11:00:00Z", emptySet()))   // marked all read after it
+        assertEquals(false, org.rafikioutreach.pin.data.alertNew(a, "", setOf(a.key)))                     // opened
+        assertEquals(true, org.rafikioutreach.pin.ui.notePass(a.copy(kind = "job"), "me", false))
+        assertEquals(false, org.rafikioutreach.pin.ui.notePass(a.copy(kind = "new"), "repairs", true))
+        assertEquals(true, org.rafikioutreach.pin.ui.notePass(a, "unread", true))
+    }
+
     @Test fun alerts_rules() {
         val s = org.rafikioutreach.pin.data.Snapshot.from(snapshot().put("admin", true).put("reviewOpen", 2))
         val a = org.rafikioutreach.pin.data.alertsFor(s, listOf(act("Meril Kiprop", "visit", "1", "A", 1, "repair"), act("Bertin", "new", "2", "B", 2), act("Bertin", "visit", "3", "C", 3, "working")), "Meril Kiprop", emptySet(), "")
         assertEquals(listOf("job", "new", "review"), a.map { it.kind }.sorted())   // not my own, not a working visit
         assertEquals(listOf("new"), org.rafikioutreach.pin.data.alertsFor(s, listOf(act("Bertin", "new", "2", "B", 2)), "Meril Kiprop", setOf("review", "job"), "").map { it.kind })
+        // rows show who, the project and a short message; a repair job and the review queue have no person
+        val n = a.first { it.kind == "new" }; assertEquals("Bertin", n.by); assertEquals("B", n.title); assertEquals("Added a new site", n.msg)
+        val j = a.first { it.kind == "job" }; assertEquals("", j.by); assertEquals("Kapsaret Borehole", j.title); assertEquals("Repair job", j.name)
+        val r = a.first { it.kind == "review" }; assertEquals("Office review", r.name); assertEquals("2 changes waiting for your review", r.msg)
     }
 
     @Test fun whatsapp_numbers() {

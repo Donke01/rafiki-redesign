@@ -24,6 +24,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
@@ -43,52 +46,30 @@ import org.rafikioutreach.pin.t
 
 // Me & team: the notifications bell, and Me › Settings (personal details, PIN, notifications, help, about).
 
-/** The bell beside "Me & team": a red count of what's new; tap for the list. */
+/** The bell beside "Me & team": a red count of what's unread (it pops in, and the bell rings now and then); tap for Notifications. */
 @Composable
-fun Bell(m: AppModel, open: (String) -> Unit) {
+fun Bell(m: AppModel, onOpen: () -> Unit) {
     val tick by m.noteTick.collectAsState()
     val act by m.activity.collectAsState()
     val s by m.snap.collectAsState()
     val n = remember(tick, act, s) { m.unread() }
-    var sheet by remember { mutableStateOf(false) }
     val h = rememberHaptics()
+    val ring = n > 0 && Motion.on && Motion.loops
+    val tr = androidx.compose.animation.core.rememberInfiniteTransition(label = "bell")
+    val swing by if (!ring) remember { mutableFloatStateOf(0f) } else tr.animateFloat(0f, 0f, androidx.compose.animation.core.infiniteRepeatable(androidx.compose.animation.core.keyframes {
+        durationMillis = 5000; 0f at 500; 17f at 650; -15f at 800; 11f at 950; -8f at 1100; 5f at 1250; -2f at 1400; 0f at 1550
+    }), label = "swing")
     Box(Modifier.size(46.dp)) {
         Box(Modifier.size(44.dp).align(Alignment.Center).clip(CircleShape).background(C.card).border(1.dp, C.line, CircleShape)
-            .clickable(role = Role.Button) { h.tap(); sheet = true }.semantics { contentDescription = t("Notifications", "Arifa") + if (n > 0) " · $n" else "" }.testTag("bell"),
-            contentAlignment = Alignment.Center) { Icon(Ic.get("bell"), null, tint = C.ink, modifier = Modifier.size(21.dp)) }
-        if (n > 0) Box(Modifier.align(Alignment.TopEnd).defaultMinSize(minWidth = 20.dp, minHeight = 20.dp).clip(RoundedCornerShape(99.dp)).background(Color.White).padding(2.dp)
-            .clip(RoundedCornerShape(99.dp)).background(C.bad).padding(horizontal = 5.dp).testTag("bell_count"), contentAlignment = Alignment.Center) {
-            Text(if (n > 9) "9+" else "$n", color = Color.White, style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp))
+            .clickable(role = Role.Button) { h.tap(); onOpen() }.semantics { contentDescription = t("Notifications", "Arifa") + if (n > 0) " · $n " + t("unread", "hazijasomwa") else "" }.testTag("bell"),
+            contentAlignment = Alignment.Center) {
+            Icon(Ic.get("bell"), null, tint = C.ink, modifier = Modifier.size(21.dp).graphicsLayer { rotationZ = swing; transformOrigin = TransformOrigin(0.5f, 0.1f) })
         }
-    }
-    if (sheet) AlertsSheet(m, { sheet = false }, open)
-}
-
-@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
-@Composable
-private fun AlertsSheet(m: AppModel, close: () -> Unit, open: (String) -> Unit) {
-    val list = remember { m.alerts() }
-    val seen = remember { m.prefs.noteSeen }
-    LaunchedEffect(Unit) { m.markRead() }
-    val kinds = ALERT_KINDS.associateBy { it[0] }
-    androidx.compose.material3.ModalBottomSheet(onDismissRequest = close, containerColor = C.card, modifier = Modifier.testTag("alerts_sheet")) {
-        Column(Modifier.padding(horizontal = 16.dp).padding(bottom = 24.dp).verticalScroll(rememberScrollState())) {
-            Text(t("Notifications", "Arifa"), style = MaterialTheme.typography.titleLarge, color = C.ink, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp))
-            if (list.isEmpty()) Column(Modifier.fillMaxWidth().padding(vertical = 24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                IconTile("okc", C.ok, C.okBg, 56.dp)
-                Text(t("You’re all caught up.", "Hakuna jipya kwa sasa."), style = MaterialTheme.typography.bodyMedium, color = C.muted, modifier = Modifier.padding(top = 10.dp))
-            }
-            list.forEach { a ->
-                val k = kinds[a.kind] ?: ALERT_KINDS[0]; val hu = C.hue(k[4]); val new = a.at > seen
-                Row(Modifier.padding(bottom = 8.dp).fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(if (new) C.tint else C.card).border(1.dp, if (new) Color.Transparent else C.line, RoundedCornerShape(16.dp))
-                    .clickable { close(); if (a.id != null) open(a.id) else if (a.kind == "review") m.goTab = "office" }.padding(12.dp).testTag("alert_row"), verticalAlignment = Alignment.CenterVertically) {
-                    IconTile(k[3], hu.fg, hu.bg, 38.dp); Spacer(Modifier.width(12.dp))
-                    Column(Modifier.weight(1f)) {
-                        Text(a.text, style = MaterialTheme.typography.titleSmall.copy(fontSize = 14.sp), color = C.ink)
-                        Text(whenText(a.at), style = MaterialTheme.typography.labelSmall, color = C.muted)
-                    }
-                    if (new) Box(Modifier.padding(start = 8.dp).size(9.dp).clip(CircleShape).background(C.blue))
-                }
+        // keyed on the number, so a new count pops in again
+        if (n > 0) key(n) {
+            Box(Modifier.align(Alignment.TopEnd).pop().defaultMinSize(minWidth = 20.dp, minHeight = 20.dp).clip(RoundedCornerShape(99.dp)).background(C.card).padding(2.dp)
+                .clip(RoundedCornerShape(99.dp)).background(C.bad).padding(horizontal = 5.dp).testTag("bell_count"), contentAlignment = Alignment.Center) {
+                Text(if (n > 9) "9+" else "$n", color = if (C.dark) Color(0xFF2A0B08) else Color.White, style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp))
             }
         }
     }

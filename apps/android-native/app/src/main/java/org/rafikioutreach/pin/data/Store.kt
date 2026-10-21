@@ -32,6 +32,8 @@ class Prefs(context: Context) {
     /** Notifications: when the list was last opened, kinds turned off, phone alerts on, and the newest one the phone was told about. */
     var noteSeen: String get() = sp.getString("noteSeen", "") ?: ""; set(v) = sp.edit().putString("noteSeen", v).apply()
     var noteOff: Set<String> get() = (sp.getString("noteOff", "") ?: "").split(",").filter { it.isNotBlank() }.toSet(); set(v) = sp.edit().putString("noteOff", v.joinToString(",")).apply()
+    /** Notifications opened one by one since "Mark all as read" (their keys). */
+    var noteRead: Set<String> get() = sp.getStringSet("noteRead", emptySet())?.toSet() ?: emptySet(); set(v) = sp.edit().putStringSet("noteRead", v).apply()
     var phoneAlerts: Boolean get() = sp.getBoolean("phoneAlerts", true); set(v) = sp.edit().putBoolean("phoneAlerts", v).apply()
     var notifiedAt: String get() = sp.getString("notifiedAt", "") ?: ""; set(v) = sp.edit().putString("notifiedAt", v).apply()
     var reviewAt: String get() = sp.getString("reviewAt", "") ?: ""; set(v) = sp.edit().putString("reviewAt", v).apply()

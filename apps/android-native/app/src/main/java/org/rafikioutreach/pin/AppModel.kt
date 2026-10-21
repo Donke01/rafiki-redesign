@@ -235,8 +235,13 @@ class AppModel(app: Application) : AndroidViewModel(app) {
     private val _noteTick = MutableStateFlow(0)
     val noteTick: StateFlow<Int> = _noteTick
     fun alerts(): List<Alert> = _snap.value?.let { alertsFor(it, _activity.value.orEmpty(), prefs.name, prefs.noteOff, prefs.reviewAt) }.orEmpty()
-    fun unread(): Int { val seen = prefs.noteSeen; return alerts().count { it.at > seen } }
-    fun markRead() { prefs.noteSeen = java.time.Instant.now().toString(); _noteTick.value++ }
+    /** Unread: newer than "Mark all as read" and not opened one by one. Opening the list doesn't read them. */
+    fun isNew(a: Alert): Boolean = org.rafikioutreach.pin.data.alertNew(a, prefs.noteSeen, prefs.noteRead)
+    fun unread(): Int { val seen = prefs.noteSeen; val read = prefs.noteRead; return alerts().count { org.rafikioutreach.pin.data.alertNew(it, seen, read) } }
+    /** Mark all as read. */
+    fun markRead() { prefs.noteSeen = java.time.Instant.now().toString(); prefs.noteRead = emptySet(); _noteTick.value++ }
+    /** One opened: read (only keys still in the list are kept). */
+    fun markRead(a: Alert) { val keys = alerts().map { it.key }.toSet(); prefs.noteRead = (prefs.noteRead + a.key).filter { it in keys }.toSet(); _noteTick.value++ }
     fun noteChanged() { _noteTick.value++ }
 
     /** Apply a fresh copy of the list (after an Office change). */
