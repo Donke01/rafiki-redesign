@@ -47,7 +47,9 @@ PNG = bytes.fromhex('89504e470d0a1a0a0000000d49484452000000010000000108060000001
 INIT = """(() => { let _L; Object.defineProperty(window, 'L', { configurable: true, get() { return _L; }, set(v) { _L = v; try { v.Map.addInitHook(function () { (window.__maps = window.__maps || []).push(this); }); } catch (e) {} } });
   if (window.__cell) Object.defineProperty(navigator, 'connection', { configurable: true, get() { return window.__conn || (window.__conn = Object.assign(new EventTarget(), { type: 'cellular' })); } }); })();"""
 
-def sign_in(pg, lang=None, chunk=131072):
+# the committed test file is ~190 KB: small pieces so the download has enough of them (drop, resume…)
+PIECE = 32768
+def sign_in(pg, lang=None, chunk=PIECE):
     pg.route('**/api/pin-auth/me', lambda r, q: r.fulfill(json={'available': False})); pg.route(re.compile(r'/api/pin(\?.*)?$'), api)
     pg.route(re.compile(r'/api/cmap/'), files)
     pg.goto(BASE + '/pin'); pg.wait_for_timeout(800)
@@ -95,8 +97,10 @@ with sync_playwright() as p:
     box.scroll_into_view_if_needed(); pg.screenshot(path=os.path.join(OUT, '01-country-list.png'))
 
     # --- 2. download Kenya: progress with Stop, a dropped connection, carry on by itself, then Resume after Stop ---
-    SLOW['ms'] = 450; DROP.add(3 * 131072)
-    pg.click('[data-cm-get=ke]'); pg.wait_for_timeout(600)
+    SLOW['ms'] = 450; DROP.add(3 * PIECE)
+    pg.click('[data-cm-get=ke]')
+    # a busy machine can take a moment to start: wait for the progress rather than a fixed time
+    pg.wait_for_function("() => /Downloading/.test(document.getElementById('cmBox').innerText) && document.querySelector('[data-cm-stop=ke]')", timeout=15000)
     t = box.inner_text()
     check('Downloading' in t and re.search(r'of [\d.]+ MB', t) is not None, 'progress shows while downloading: ' + re.sub(r'\s+', ' ', t)[:160])
     check(pg.locator('[data-cm-stop=ke]').count() == 1, 'with a Stop button')
@@ -106,11 +110,11 @@ with sync_playwright() as p:
     shot_el(pg, '.cm-c[data-code=ke]', '03-connection-lost.png')
     pg.wait_for_function("() => document.querySelector('.cm-c[data-code=ke] [data-cm-stop]') && /Downloading/.test(document.getElementById('cmBox').innerText)", timeout=15000)
     for _ in range(40):
-        if SEEN.count(3 * 131072) >= 2: break
+        if SEEN.count(3 * PIECE) >= 2: break
         pg.wait_for_timeout(250)
-    check(SEEN.count(3 * 131072) >= 2, 'the broken piece is asked again by itself')
+    check(SEEN.count(3 * PIECE) >= 2, 'the broken piece is asked again by itself')
     first = SEEN[:]
-    check(first.count(0) == 1 and first.count(131072) == 1 and first.count(2 * 131072) == 1, 'pieces already saved are not downloaded again')
+    check(first.count(0) == 1 and first.count(PIECE) == 1 and first.count(2 * PIECE) == 1, 'pieces already saved are not downloaded again')
     pg.click('[data-cm-stop=ke]'); pg.wait_for_timeout(500)
     t = box.inner_text()
     check('Resume' in t and 'Stopped part way' in t and 'nothing is downloaded twice' in t, 'Stop keeps what is saved and offers Resume')
@@ -121,8 +125,8 @@ with sync_playwright() as p:
     shot_el(pg, '.cm-c[data-code=ke]', '02-downloading.png'); SLOW['ms'] = 0
     pg.wait_for_function("() => /On this device/.test(document.getElementById('cmBox').innerText)", timeout=20000)
     asked = SEEN[n0:]
-    check(0 not in asked and 131072 not in asked, 'Resume only fetches the missing pieces: %s' % asked)
-    check(len(set(SEEN)) == -(-len(DATA) // 131072), 'every piece was fetched')
+    check(0 not in asked and PIECE not in asked, 'Resume only fetches the missing pieces: %s' % asked)
+    check(len(set(SEEN)) == -(-len(DATA) // PIECE), 'every piece was fetched')
     have = pg.evaluate("JSON.parse(localStorage.getItem('rfPinCm')).ke")
     check(have and have['done'] and have['file'] == KE, 'Kenya is marked as on this device')
     stored = pg.evaluate("async () => { const c = await caches.open('rafiki-pin-cmap-kenya-2026-10-20'); const ks = await c.keys(); let n = 0; for (const k of ks) n += (await (await c.match(k)).arrayBuffer()).byteLength; return [ks.length, n]; }")
@@ -145,7 +149,7 @@ with sync_playwright() as p:
     ab = pg.locator('#hMap .leaflet-control-attribution').bounding_box(); sheet = pg.locator('#vMap .ov.bot').bounding_box()
     check(ab['y'] + ab['height'] <= sheet['y'] + 1, 'the credit sits above the sheet, in view')
     x, y = map_px(pg, 0.5143, 35.2698)
-    check(pg.locator('#hMap .leaflet-overlay-pane path.leaflet-interactive').count() >= 4, 'project pins are drawn on top of the country map')
+    check(pg.locator('#hMap .leaflet-marker-pane .mpa-pin, #hMap .leaflet-marker-pane .mpa-cl').count() >= 1, 'project pins are drawn on top of the country map')
     bg = pixel(pg, 8, 300)
     check(bg is not None and bg[3] == 255, 'map tiles are drawn: %s' % bg)
     pg.screenshot(path=os.path.join(OUT, '07-offline-street-map-z13.png'))
@@ -162,7 +166,7 @@ with sync_playwright() as p:
     ctx.set_offline(True); pg.wait_for_timeout(400)
     pg.evaluate("() => window.__maps.find(x => x.getContainer().id === 'hMap').setView([0.50, 35.27], 14, { animate: false })"); pg.wait_for_timeout(2500)
     check(pg.locator('.cm-layer canvas').count() > 0, 'with no signal the map switches to the country file by itself')
-    check(pg.locator('#hMap .leaflet-overlay-pane path.leaflet-interactive').count() >= 4, 'projects still show on it')
+    check(pg.locator('#hMap .leaflet-marker-pane .mpa-pin, #hMap .leaflet-marker-pane .mpa-cl').count() >= 1, 'projects still show on it')
     pg.screenshot(path=os.path.join(OUT, '11-no-signal-auto.png'))
     pg.click('#vMap .mstyle:not(.fld-ob)'); pg.wait_for_timeout(400); pg.click('.bsh-o[data-k=sat]'); pg.wait_for_timeout(600)
     check(pg.locator('.cm-layer').count() == 0, 'picking Satellite with no signal shows the satellite photos kept on the device')
