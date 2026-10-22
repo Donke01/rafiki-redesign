@@ -1581,6 +1581,98 @@ html[data-theme=sun] .lookpv,html[data-theme=sun] .lookpv .lpv{border-width:2px}
 #meWork .row .tag.has{background:var(--okbg);color:var(--ok)}
 .mehero .btn.mh-lock,.mehero .btn.mh-rep{white-space:nowrap;font-size:.8rem !important;padding:0 10px !important}
 </style>
+<style id="rr-css">
+/* Office › Repairs and Review: a head with numbers, filter chips, calm cards that open a sheet, extras folded away */
+.rr-hero{padding:16px}
+.rr-hd{display:flex;gap:12px;align-items:center}.rr-hd h2{margin:0 0 2px;font-size:1.1rem}.rr-hd p{margin:0;font-size:.88rem;line-height:1.4}
+.rr-big{flex:none;width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:var(--hb-amber);color:var(--hu-amber)}.rr-big svg{width:24px;height:24px}
+.rr-big.k-review{background:var(--tint);color:var(--blue2)}
+.rr-nums{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}
+.rr-num{display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;min-height:64px;margin:0;padding:8px 10px;border-radius:14px;border:var(--bw) solid var(--line);background:var(--bg);color:inherit;font:inherit;text-align:left}
+button.rr-num{cursor:pointer;transition:border-color .2s,box-shadow .2s,transform .12s}button.rr-num:hover{border-color:var(--blue)}button.rr-num:active{transform:scale(.97)}
+button.rr-num:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.rr-num[aria-pressed=true]{border-color:var(--blue);box-shadow:inset 0 0 0 1px var(--blue)}
+.rr-num b{display:block;font-size:1.3rem;line-height:1.25;color:var(--ink)}
+.rr-num small{display:block;font-size:.72rem;line-height:1.3;color:var(--muted);font-weight:600;overflow-wrap:normal;word-break:normal;hyphens:none}
+.rr-num.bad b{color:var(--bad)}.rr-num.purple b{color:var(--hu-purple)}.rr-num.off b{color:var(--muted)}
+.rr-chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:6px -16px 0;padding:8px 16px 14px}.rr-chips::-webkit-scrollbar{display:none}
+@media (min-width:700px){.rr-chips{flex-wrap:wrap;overflow:visible;margin:6px 0 0;padding:8px 0 14px}}
+.rr-chips .chip .n{background:var(--hb-slate);color:var(--ink);margin-left:2px}
+html[data-theme=dark] #oBody .rr-chips .chip[aria-pressed=true]{background:var(--blue2);border-color:transparent;color:#0B1116}html[data-theme=dark] #oBody .rr-chips .chip[aria-pressed=true] .n{background:rgba(11,17,22,.18);color:#0B1116}
+.rr-list{display:grid;gap:8px}.rr-more{margin-top:10px}
+.rr-card{display:grid;grid-template-columns:40px minmax(0,1fr) auto;grid-template-areas:"ic tt wh" "ic pl pl" "ic d1 d1" "ic d2 d2";column-gap:12px;row-gap:4px;align-items:center;width:100%;margin:0;padding:14px;border:var(--bw) solid var(--line);border-radius:20px;background:var(--card);color:inherit;font:inherit;text-align:left;cursor:pointer;
+  transition:border-color .2s,box-shadow .2s,transform .12s;animation:rrIn .46s cubic-bezier(.34,1.3,.64,1) both;animation-delay:calc(var(--i,0) * 40ms)}
+.rr-list.still .rr-card{animation:none}
+@keyframes rrIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.rr-card:hover{border-color:var(--blue);box-shadow:0 6px 18px rgba(4,38,63,.08)}.rr-card:active{transform:scale(.985)}.rr-card:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+html[data-theme=dark] .rr-card:hover{box-shadow:none}
+.rr-ic{grid-area:ic;align-self:start;width:40px;height:40px;border-radius:13px;display:grid;place-items:center}.rr-ic svg{width:20px;height:20px}
+.rr-tt{grid-area:tt;min-width:0;font-weight:800;color:var(--ink);font-size:.98rem;line-height:1.3;overflow-wrap:break-word;hyphens:none}
+.rr-when{grid-area:wh;align-self:start;display:flex;align-items:center;gap:2px;margin-top:1px;font-size:.78rem;font-weight:600;color:var(--muted);white-space:nowrap}.rr-when svg{width:16px;height:16px;transition:transform .2s}
+.rr-card:hover .rr-when svg{transform:translateX(2px);color:var(--blue)}
+.rr-pill{grid-area:pl;justify-self:start;display:inline-flex;align-items:flex-start;gap:6px;max-width:100%;padding:3px 10px 3px 8px;border-radius:12px;font-size:.74rem;font-weight:800;line-height:1.35}
+.rr-pill i{flex:none;width:7px;height:7px;margin-top:.38em;border-radius:50%;background:currentColor}
+.rr-d{min-width:0;font-size:.8rem;line-height:1.45;color:var(--muted)}.rr-d1{grid-area:d1}.rr-d2{grid-area:d2}
+.rr-d .nw,.rr-kv .nw,.rr-how .nw,.rr-rt .nw,.rr-amt .nw{white-space:nowrap}
+.rr-d.q{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rr-d .late{color:var(--bad);font-weight:700}.rr-d .ap{color:var(--hu-purple);font-weight:700}
+.rr-t-bad{background:var(--badbg);color:var(--bad)}.rr-t-warn{background:var(--warnbg);color:var(--warn)}.rr-t-ok{background:var(--okbg);color:var(--ok)}
+.rr-h-purple{background:var(--hb-purple);color:var(--hu-purple)}.rr-h-green{background:var(--hb-green);color:var(--hu-green)}.rr-h-blue{background:var(--hb-blue);color:var(--hu-blue)}
+.rr-h-amber{background:var(--hb-amber);color:var(--hu-amber)}.rr-h-coral{background:var(--hb-coral);color:var(--hu-coral)}.rr-h-slate{background:var(--hb-slate);color:var(--hu-slate)}.rr-h-teal{background:var(--hb-teal);color:var(--hu-teal)}
+html[data-theme=sun] .rr-pill,html[data-theme=sun] .rr-ic,html[data-theme=sun] .rr-shi{border:1.5px solid currentColor}
+/* folded rows: a title with a one-line summary under it, and a chevron that turns */
+.rr-sets{padding:4px 16px}
+.rr-sec+.rr-sec{border-top:var(--bw) solid var(--line)}
+.rr-row{display:flex;align-items:center;gap:12px;width:100%;min-height:64px;margin:0;padding:10px 0;border:0;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.rr-row:focus-visible{outline:3px solid var(--blue);outline-offset:2px;border-radius:12px}
+.rr-ri{flex:none;width:38px;height:38px;border-radius:12px;display:grid;place-items:center}.rr-ri svg{width:20px;height:20px}
+.rr-rt{flex:1 1 auto;min-width:0;display:flex;flex-direction:column}.rr-rt b{font-weight:800;font-size:.95rem;line-height:1.3;color:var(--ink)}.rr-rt small{margin-top:1px;font-size:.8rem;font-weight:600;line-height:1.4;color:var(--muted)}
+.rr-rc{flex:none;display:flex;color:var(--muted);transform:rotate(90deg);transition:transform .28s cubic-bezier(.2,.8,.2,1)}.rr-rc svg{width:18px;height:18px}
+.rr-sec.open .rr-rc{transform:rotate(-90deg)}
+.rr-drop{display:grid;grid-template-rows:0fr;transition:grid-template-rows .3s cubic-bezier(.2,.8,.2,1)}.rr-sec.open .rr-drop{grid-template-rows:1fr}
+.rr-in{min-height:0;overflow:hidden}.rr-pad{padding:0 0 16px}
+.rr-how{margin:0;padding-left:18px;font-size:.88rem;line-height:1.5}.rr-how li{margin-bottom:6px}
+.rr-done{list-style:none;margin:0;padding:0}.rr-done li{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:var(--bw) solid var(--line)}.rr-done li:last-child{border-bottom:0}
+.rr-done li>span:last-child{min-width:0;display:flex;flex-direction:column}.rr-done b{font-size:.9rem;color:var(--ink);overflow-wrap:break-word}.rr-done small{font-size:.78rem;line-height:1.4;color:var(--muted)}
+.rr-dk{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center}.rr-dk svg{width:15px;height:15px}.rr-dk.ok{background:var(--okbg);color:var(--ok)}.rr-dk.no{background:var(--badbg);color:var(--bad)}
+/* the sheet */
+.rr-shd{display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;padding:4px 36px 6px}
+.rr-shi{width:64px;height:64px;border-radius:20px;display:grid;place-items:center;margin-bottom:6px;animation:tmPop .5s cubic-bezier(.34,1.56,.64,1) .08s both}.rr-shi svg{width:32px;height:32px}
+.rr-shd h3{margin:0;font-size:1.25rem;line-height:1.3;color:var(--ink);overflow-wrap:break-word}.rr-shd small{font-size:.9rem;color:var(--muted)}
+.rr-sh [data-ofbappr]:not(:empty){margin-top:14px}.rr-sh [data-ofbappr] .ofb-appr{margin:0}
+.rr-lab{margin:18px 0 8px;font-size:.72rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.rr-kv{margin:12px 0 0;font-size:.9rem}.rr-kv div{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:10px 0;border-bottom:1px solid var(--line)}
+.rr-kv dt{flex:none;color:var(--muted)}.rr-kv dd{margin:0;min-width:0;font-weight:700;color:var(--ink);text-align:right;overflow-wrap:break-word}.rr-kv dd small{display:block;margin-top:2px;font-size:.8rem;font-weight:500;color:var(--muted)}
+.rr-kv div.long{display:block}.rr-kv div.long dd{margin-top:3px;text-align:left;font-weight:600}
+.rr-kv a{color:var(--blue2);font-weight:700;overflow-wrap:anywhere}
+.rr-amt{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;margin-top:14px}.rr-amt b{font-size:1.6rem;line-height:1.2;color:var(--ink)}.rr-amt span{font-size:.85rem;color:var(--muted)}
+.rr-why{display:flex;gap:10px;align-items:flex-start;margin-top:14px;padding:12px 14px;border-radius:16px;background:var(--hb-slate);font-size:.88rem;font-weight:600;line-height:1.45;color:var(--ink)}.rr-why svg{flex:none;width:20px;height:20px;margin-top:1px;color:var(--muted)}
+html[data-theme=sun] .rr-why{border:2px solid #000}
+.rr-quote{margin:14px 0 0;padding:12px 14px;border-left:4px solid var(--hu-coral);border-radius:0 14px 14px 0;background:var(--hb-coral);color:var(--ink);font-size:1rem;line-height:1.45}.rr-quote small{display:block;margin-top:4px;color:var(--muted);font-size:.85rem}
+.rr-steps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.rr-steps button{display:flex;align-items:center;gap:8px;min-height:50px;margin:0;padding:8px 12px;border-radius:14px;border:var(--bw) solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-size:.88rem;font-weight:700;line-height:1.25;text-align:left;cursor:pointer;transition:border-color .2s,background-color .2s,transform .12s}
+.rr-steps button:active{transform:scale(.97)}.rr-steps button:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.rr-steps i{flex:none;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--bg);color:var(--muted);font-style:normal;font-size:.75rem;font-weight:800;transition:background-color .2s,color .2s}
+.rr-steps button.on i{background:var(--okbg);color:var(--ok)}
+.rr-steps button[aria-checked=true]{border-color:var(--blue);background:var(--tint)}.rr-steps button[aria-checked=true] i{background:var(--blue);color:#FFFFFF}
+html[data-theme=sun] .rr-steps button[aria-checked=true]{border:2px solid #000}
+.rr-f label{margin:12px 0 0}.rr-f input,.rr-f select{margin-top:6px;min-height:48px}
+.rr-f .row2{display:grid;grid-template-columns:1fr;gap:0 10px}
+@media (min-width:420px){.rr-f .row2{grid-template-columns:1fr 1fr}}
+.rr-f .ofb-file{display:flex;flex-wrap:wrap;align-items:center;gap:8px}.rr-f .ofb-file label{margin:0}
+.rr-box{margin-top:16px;padding:0 14px;border:var(--bw) solid var(--line);border-radius:16px}
+.rr-box .rr-row{min-height:60px}
+.rr-dec{margin-top:12px;padding:14px;border-radius:16px;background:var(--hb-purple)}.rr-dec label{margin:0}.rr-dec input{margin-top:6px;min-height:48px}
+html[data-theme=sun] .rr-dec{border:2px solid #000}
+.rr-two{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;margin-top:10px}
+.rr-acts{display:grid;gap:8px;margin-top:18px}.rr-acts .btn,.rr-two .btn{width:100%;min-height:52px}.rr-acts .msg{margin:0}.rr-acts .msg:empty{display:none}
+.rr-acts .tm-ask{margin-top:0}
+.rr-reason{display:grid;grid-template-rows:0fr;transition:grid-template-rows .3s cubic-bezier(.2,.8,.2,1)}.rr-reason.on{grid-template-rows:1fr}
+.rr-reason label{margin:14px 0 0}.rr-reason input{margin-top:6px;min-height:48px}
+.rr-sh.done .rr-acts .btn{opacity:.55}
+.rr-own{margin:12px 0 0}
+@media (prefers-reduced-motion: reduce){.rr-card,.rr-shi{animation:none !important}.rr-drop,.rr-rc,.rr-card,.rr-reason,.rr-when svg,.rr-steps button,.rr-steps i{transition:none !important}}
+</style>
 <style id="ofb-css">
 /* Office: repair costs, people served, second approval for big repairs (ofb) */
 @media (min-width:700px){#oTabs.otabs{grid-template-columns:repeat(auto-fit,minmax(74px,1fr))}}
@@ -5154,44 +5246,12 @@ label.dnr-p small{display:block;color:var(--muted);font-size:.76rem;font-weight:
     }, 40);
   }
 
-  // repairs: jobs with steps, a person, a due date and a budget
-  function oRepairs(b) {
-    var ids = Object.keys(S.repairs).sort(function (a, c) { var ra = S.repairs[a], rc = S.repairs[c]; return (URGO[ra.urgency] || 3) - (URGO[rc.urgency] || 3) || (ra.at || '').localeCompare(rc.at || ''); });
-    if (!ids.length) { b.innerHTML = emptyHtml('No open repairs.'); return; }
-    var opts = function (cur) { return '<option value="">Not assigned</option>' + names().map(function (n) { return '<option' + (n === cur ? ' selected' : '') + '>' + esc(n) + '</option>'; }).join(''); };
-    b.innerHTML = '<p class="muted">Most urgent first. Changes leave a note on the project in monday.com, and the person assigned sees the job in their app.</p><div class="ocards">' + ids.map(function (id) {
-      var r = S.repairs[id], p = byId(id), step = r.step || 'reported';
-      return '<article class="card ojob" data-id="' + esc(id) + '"><div class="oh"><button class="lnk" type="button" data-open="' + esc(id) + '">' + esc(p ? p.title : r.t || id) + '</button>' +
-        '<span class="tag ' + (r.state === 'notworking' ? 'bad' : '') + '">' + (r.urgency === 'urgent' ? 'Urgent · ' : r.urgency === 'month' ? 'This month · ' : '') + (r.state === 'notworking' ? 'Not working' : 'Needs repair') + '</span></div>' +
-        '<p class="muted">' + esc(p ? p.country : '') + ' · reported by ' + esc(r.by) + ', ' + esc(when(r.at)) + '</p>' +
-        (r.problems && r.problems.length ? '<p><b>Problems:</b> ' + esc(r.problems.join(', ')) + '</p>' : r.note ? '<p>“' + esc(r.note) + '”</p>' : '') +
-        (r.parts ? '<p><b>Parts:</b> ' + esc(r.parts) + (r.cost ? ' · field estimate KES ' + Number(r.cost).toLocaleString() : '') + '</p>' : r.cost ? '<p>Field estimate KES ' + Number(r.cost).toLocaleString() + '</p>' : '') +
-        '<div class="steps" role="radiogroup" aria-label="Job step">' + STEP.map(function (s, i) { var idx = STEP.findIndex(function (x) { return x[0] === step; }); return '<button type="button" role="radio" data-step="' + s[0] + '" aria-checked="' + (s[0] === step) + '" class="' + (i <= idx ? 'on' : '') + '">' + s[1] + '</button>'; }).join('') + '</div>' +
-        '<div class="ofields"><label>Assigned to<select data-f="assignee">' + opts(r.assignee || '') + '</select></label>' +
-        '<label>Due<input type="date" data-f="due" value="' + esc(r.due || '') + '"></label>' +
-        '<label>Approved budget (KES)<input type="number" inputmode="numeric" data-f="budget" value="' + (r.budget == null ? '' : r.budget) + '" placeholder="' + (r.cost ? r.cost : '') + '"></label></div>' +
-        '<label>Note (optional)<input type="text" data-f="note" placeholder="e.g. parts bought in Eldoret"></label>' + ofbJobHtml(id, r) +
-        '<div class="oact"><button class="btn small" type="button" data-save>Save</button><span class="msg" aria-live="polite"></span></div></article>';
-    }).join('') + '</div>';
-  }
+  // repairs: jobs with steps, a person, a due date and a budget (the list and each job's sheet: rrRepairs, rrJob below)
+  function oRepairs(b) { rrRepairs(b); }
   $('oBody').addEventListener('click', function (e) {
     var t = e.target;
     var go = t.closest('[data-go]'); if (go && go.classList.contains('kpi')) { var g = go.getAttribute('data-go'); if (g.indexOf('o-') === 0) { O.tab = g.slice(2); renderOffice(); } else { S.filter = g.slice(5); store.set('rfPinFilter', S.filter); qa('.chips .chip').forEach(function (x) { x.setAttribute('aria-pressed', x.getAttribute('data-f') === S.filter ? 'true' : 'false'); }); show('vList'); } return; }
     var op = t.closest('[data-open]'); if (op) { openProj(op.getAttribute('data-open')); return; }
-    var sb = t.closest('[data-step]'); if (sb) { var card = sb.closest('.ojob'); qa('[data-step]', card).forEach(function (x) { x.setAttribute('aria-checked', x === sb ? 'true' : 'false'); }); var i = STEP.findIndex(function (s) { return s[0] === sb.getAttribute('data-step'); }); qa('[data-step]', card).forEach(function (x, k) { x.classList.toggle('on', k <= i); }); return; }
-    var sv = t.closest('[data-save]'); if (sv) {
-      var c = sv.closest('.ojob'), id = c.getAttribute('data-id'), m = c.querySelector('.msg'), stp = c.querySelector('[data-step][aria-checked=true]');
-      var body = { action: 'job', id: id, step: stp ? stp.getAttribute('data-step') : 'reported', assignee: c.querySelector('[data-f=assignee]').value, due: c.querySelector('[data-f=due]').value, budget: c.querySelector('[data-f=budget]').value, note: c.querySelector('[data-f=note]').value }; ofbJobBody(c, body);
-      sv.disabled = true; m.className = 'msg'; m.textContent = 'Saving…';
-      adminApi('POST', body).then(function (j) {
-        sv.disabled = false;
-        if (!j.ok) { m.className = 'msg bad'; m.textContent = why(j); return; }
-        if (j.job) S.repairs[id] = j.job; else delete S.repairs[id];
-        saveList(); progUi(); m.className = 'msg ok'; m.textContent = j.job ? 'Saved ✓' : 'Marked fixed ✓'; savedBtn(sv, j.job ? 'Saved' : 'Fixed'); ofbJobDone(c, id, j, m);
-        if (!j.job) setTimeout(renderOffice, 900);
-      });
-      return;
-    }
   });
 
   // visits: assign projects to a field officer for a date
@@ -5240,38 +5300,261 @@ label.dnr-p small{display:block;color:var(--muted);font-size:.76rem;font-weight:
 
   // review queue
   var KIND = { new: '🆕 New site', move: '📍 Location moved over 500 m', request: '🔒 Change to a confirmed location', story: '✨ Story moment' };
-  function oReview(b) {
-    b.innerHTML = '<p class="muted">Loading…</p>';
+  function oReview(b) { rrReview(b); }   // the list and each item's sheet: rrReview, rrRev below
+
+  // --- Office › Repairs and Review (rr…) ------------------------------------------------------------------------
+  // A head with the numbers that matter, filter chips with counts, and calm cards (one title, one status pill, two
+  // short lines) that open a sheet holding every action: the job's step, person, due date, budget, cost and receipt,
+  // mark fixed and the second approval; approve or turn down what waits for review. Extras are folded away.
+  var RR = { f: 'all', more: false, rf: 'all', rmore: false, open: {} };
+  var RRF = [['all', 'All', 'Zote'], ['urgent', 'Urgent', 'Za haraka'], ['notworking', 'Not working', 'Hazifanyi kazi'], ['unassigned', 'Not assigned', 'Hazijagawiwa'], ['approval', 'Needs approval', 'Zinahitaji idhini'], ['parts', 'Parts ordered', 'Vipuri vimeagizwa']];
+  // kind: sheet title (en, sw), card label (en, sw), icon, hue
+  var RRK = { cost: ['Second approval: repair cost', 'Idhini ya pili: gharama ya ukarabati', 'Repair cost', 'Gharama ya ukarabati', 'shield', 'purple'],
+    new: ['New site', 'Eneo jipya', 'New site', 'Eneo jipya', 'plus', 'green'],
+    move: ['Location moved over 500 m', 'Mahali pamehamishwa zaidi ya m 500', 'Location moved', 'Mahali pamehamishwa', 'pin', 'blue'],
+    request: ['Change to a confirmed location', 'Badiliko la mahali palipothibitishwa', 'Confirmed location', 'Mahali palipothibitishwa', 'lock', 'amber'],
+    story: ['Story moment', 'Hadithi', 'Story', 'Hadithi', 'spark', 'coral'] };
+  var RRKF = [['all', 'All', 'Zote'], ['cost', 'Costs', 'Gharama'], ['new', 'New sites', 'Maeneo mapya'], ['loc', 'Locations', 'Mahali'], ['story', 'Stories', 'Hadithi']];
+  function rrK(k) { return RRK[k] || [k, k, k, k, 'inbox', 'slate']; }
+  function rrKf(x) { return x.kind === 'move' || x.kind === 'request' ? 'loc' : x.kind; }
+  function rrStep(k) { var m = { reported: ['Reported', 'Imeripotiwa'], assigned: ['Assigned', 'Imegawiwa'], parts: ['Parts ordered', 'Vipuri vimeagizwa'], fixed: ['Fixed', 'Imerekebishwa'] }[k || 'reported'] || [k, k]; return tr(m[0], m[1]); }
+  function rrUrg(r) { return r.urgency in URGO ? URGO[r.urgency] : 3; }
+  function rrAppr(r) { var s = ofbState(r); return s === 'needed' || s === 'pending' || s === 'declined'; }
+  function rrIs(f, r) { return f === 'all' || (f === 'urgent' ? r.urgency === 'urgent' : f === 'notworking' ? r.state === 'notworking' : f === 'unassigned' ? !r.assignee : f === 'approval' ? rrAppr(r) : f === 'parts' && r.step === 'parts'); }
+  function rrCond(r) { return (r.urgency === 'urgent' ? tr('Urgent', 'Haraka') + ' · ' : r.urgency === 'month' ? tr('This month', 'Mwezi huu') + ' · ' : '') + (r.state === 'notworking' ? tr('Not working', 'Haifanyi kazi') : tr('Needs repair', 'Inahitaji ukarabati')); }
+  function rrTone(r) { return r.state === 'notworking' || r.urgency === 'urgent' ? 'bad' : 'warn'; }
+  function rrApprWord(r) { var s = ofbState(r); return s === 'pending' ? tr('waiting for approval', 'inasubiri idhini') : s === 'needed' ? tr('needs approval', 'inahitaji idhini') : s === 'declined' ? tr('cost declined', 'gharama imekataliwa') : s === 'approved' ? tr('cost approved', 'gharama imeidhinishwa') : ''; }
+  function rrDay(s) { var d = new Date(s + 'T12:00:00'); return isNaN(d) ? s : d.toLocaleDateString(vxLoc(), { day: 'numeric', month: 'short' }); }
+  // pieces of a line that never split inside themselves, joined by "·"
+  function rrNw(a) { return a.filter(Boolean).map(function (s) { return '<span class="nw">' + s + '</span>'; }).join(' · '); }
+  function rrNum(n, label, cls, f, cur) {
+    var tag = f ? 'button' : 'div';
+    return '<' + tag + (f ? ' type="button" data-rrnf="' + f + '" data-testid="rr_n_' + f + '" aria-pressed="' + (cur === f) + '"' : ' data-testid="rr_n_age"') + ' class="rr-num ' + (cls || '') + '"><b>' + n + '</b><small>' + label + '</small></' + tag + '>';
+  }
+  function rrChips(list, cur, cnt, attr) {
+    return '<div class="rr-chips" role="group" aria-label="' + tr('Show', 'Onyesha') + '">' + list.map(function (f) {
+      return '<button type="button" class="chip" data-' + attr + '="' + f[0] + '" data-testid="' + attr + '_' + f[0] + '" aria-pressed="' + (cur === f[0]) + '">' + tr(f[1], f[2]) + ' <span class="n">' + (cnt[f[0]] || 0) + '</span></button>';
+    }).join('') + '</div>';
+  }
+  // the chip row keeps its place, and the chosen chip stays in sight
+  function rrKeep(b, sl) {
+    var nc = b.querySelector('.rr-chips'), pc = nc && nc.querySelector('[aria-pressed=true]'); if (!nc || !pc) return;
+    nc.scrollLeft = sl; var cr = nc.getBoundingClientRect(), r2 = pc.getBoundingClientRect();
+    if (r2.left < cr.left + 16 || r2.right > cr.right - 16) nc.scrollLeft += r2.left < cr.left + 16 ? r2.left - cr.left - 16 : r2.right - cr.right + 16;
+  }
+  function rrSec(k, ic, hue, title, sum, body) {
+    var on = !!RR.open[k];
+    return '<div class="rr-sec' + (on ? ' open' : '') + '"><button type="button" class="rr-row" data-rrsec="' + k + '" data-testid="rr_' + k + '_toggle" aria-expanded="' + on + '" aria-controls="rrSec_' + k + '">' +
+      '<span class="rr-ri rr-h-' + hue + '" aria-hidden="true">' + oic(ic) + '</span><span class="rr-rt"><b>' + title + '</b><small>' + sum + '</small></span><span class="rr-rc" aria-hidden="true">' + oic('chev') + '</span></button>' +
+      '<div class="rr-drop" id="rrSec_' + k + '"' + (on ? '' : ' inert') + '><div class="rr-in"><div class="rr-pad" data-testid="rr_' + k + '">' + body + '</div></div></div></div>';
+  }
+  function rrFold(s) {
+    var k = s.getAttribute('data-rrsec'), sec = s.parentNode, on = !sec.classList.contains('open'), dr = sec.querySelector('.rr-drop');
+    RR.open[k] = on; sec.classList.toggle('open', on); s.setAttribute('aria-expanded', String(on));
+    if (on) dr.removeAttribute('inert'); else dr.setAttribute('inert', '');
+  }
+  function rrMore(n) { return '<button class="btn light block rr-more" type="button" data-rrmore="1" data-testid="rr_more">' + tr('Show ' + n + ' more', 'Onyesha ' + n + ' zaidi') + '</button>'; }
+
+  // Repairs: the list
+  function rrRepairs(b, anim) {
+    var still = !anim && !!b.querySelector('[data-testid=rr_repairs]'), oc = b.querySelector('[data-testid=rr_repairs] .rr-chips'), sl = oc ? oc.scrollLeft : 0;
+    var ids = Object.keys(S.repairs).sort(function (a, c) { var ra = S.repairs[a], rc = S.repairs[c]; return rrUrg(ra) - rrUrg(rc) || (ra.at || '').localeCompare(rc.at || ''); });
+    var cnt = {}; RRF.forEach(function (f) { cnt[f[0]] = ids.filter(function (id) { return rrIs(f[0], S.repairs[id]); }).length; });
+    var shown = ids.filter(function (id) { return rrIs(RR.f, S.repairs[id]); }), lim = RR.more ? shown.length : 30;
+    var head = '<div class="card rr-hero" data-testid="rr_head"><div class="rr-hd"><span class="rr-big" aria-hidden="true">' + oic('wrench') + '</span><div><h2>' + tr('Repair jobs', 'Kazi za ukarabati') + '</h2><p class="muted">' +
+        tr('Most urgent first. Tap a job to move it on, assign it or mark it fixed.', 'Za haraka kwanza. Gusa kazi kuisogeza, kuigawa au kuiweka imerekebishwa.') + '</p></div></div>' +
+      '<div class="rr-nums">' + rrNum(ids.length, tr('Open', 'Zilizo wazi'), '', 'all', RR.f) + rrNum(cnt.urgent, tr('Urgent', 'Za haraka'), cnt.urgent ? 'bad' : '', 'urgent', RR.f) +
+        rrNum(cnt.approval, tr('Need approval', 'Zinahitaji idhini'), cnt.approval ? 'purple' : '', 'approval', RR.f) + '</div></div>';
+    var list = !ids.length ? emptyHtml(tr('No open repairs.', 'Hakuna matengenezo yaliyo wazi.'))
+      : !shown.length ? '<div class="rr-none">' + emptyHtml(tr('No repairs here. Try another filter.', 'Hakuna matengenezo hapa. Jaribu kichujio kingine.')) + '</div>'
+      : '<div class="rr-list' + (still ? ' still' : '') + '">' + shown.slice(0, lim).map(rrJobCard).join('') + '</div>' + (shown.length > lim ? rrMore(shown.length - lim) : '');
+    var lk = '<span class="nw">' + esc(ofbKes(S.approveAbove)) + '</span>';
+    var how = tr('<ol class="rr-how"><li>Changes leave a note on the project in monday.com, and the person assigned sees the job in their app.</li><li>Repairs estimated above ' + lk + ' need a second admin to approve the cost before parts are ordered. The person who asks can’t approve their own. The amount is set in Costs.</li><li>Add the actual cost and a receipt photo when parts are ordered or the repair is fixed: they add up in Costs.</li><li>“Mark fixed” closes the job and takes it off this list.</li></ol>',
+      '<ol class="rr-how"><li>Mabadiliko yanaacha maelezo kwenye mradi katika monday.com, na aliyepewa anaona kazi kwenye programu yake.</li><li>Ukarabati unaokadiriwa zaidi ya ' + lk + ' unahitaji msimamizi wa pili kuidhinisha gharama kabla ya kuagiza vipuri. Aliyeomba hawezi kuidhinisha mwenyewe. Kiasi kinawekwa kwenye Gharama.</li><li>Ongeza gharama halisi na picha ya risiti vipuri vikiagizwa au ukarabati ukikamilika: zinajumlishwa kwenye Gharama.</li><li>“Weka imerekebishwa” inafunga kazi na kuiondoa kwenye orodha hii.</li></ol>');
+    var side = '<div class="card rr-sets">' + rrSec('how', 'vxinfo', 'blue', tr('How repair jobs work', 'Jinsi kazi za ukarabati zinavyoenda'), tr('Second approval above ', 'Idhini ya pili zaidi ya ') + lk, how) + '</div>';
+    b.innerHTML = '<div class="o-grid rr" data-testid="rr_repairs"><div>' + head + (ids.length ? rrChips(RRF, RR.f, cnt, 'rrf') : '') + list + '</div><div class="o-side">' + side + '</div></div>';
+    rrKeep(b, sl);
+  }
+  function rrJobCard(id, i) {
+    var r = S.repairs[id], p = byId(id), tone = rrTone(r), est = ofbEst(r), aw = rrApprWord(r), late = r.due && r.due < new Date().toISOString().slice(0, 10);
+    var d1 = rrNw([esc(rrStep(r.step)), r.assignee ? esc(r.assignee) : tr('not assigned', 'hajapewa mtu'), r.due ? (late ? '<b class="late">' : '') + tr('due ', 'mwisho ') + esc(rrDay(r.due)) + (late ? '</b>' : '') : '']);
+    var d2 = rrNw([esc(p ? p.country : ''), est ? esc(ofbKes(est)) : '', aw ? '<b class="ap">' + esc(aw) + '</b>' : '']);
+    return '<button type="button" class="rr-card" data-rrjob="' + esc(id) + '" data-testid="rr_job" style="--i:' + Math.min(i, 10) + '">' +
+      '<span class="rr-ic rr-t-' + tone + '" aria-hidden="true">' + oic('wrench') + '</span><span class="rr-tt">' + esc(p ? p.title : r.t || id) + '</span>' +
+      '<span class="rr-when">' + esc(vxAgo(r.at)) + oic('chev') + '</span>' +
+      '<span class="rr-pill rr-t-' + tone + '"><i aria-hidden="true"></i><span>' + rrCond(r) + '</span></span>' +
+      '<span class="rr-d rr-d1">' + d1 + '</span>' + (d2 ? '<span class="rr-d rr-d2">' + d2 + '</span>' : '') + '</button>';
+  }
+  // Repairs: one job's sheet. Same server calls as before: { action: 'job', … } and, for the second approval, { action: 'review', … }
+  function rrJob(id) {
+    var r = S.repairs[id]; if (!r) return;
+    var p = byId(id), tone = rrTone(r), step = r.step || 'reported', st = ofbState(r), a = r.approval || {}, title = p ? p.title : r.t || id, own = ofbSame(a.by, S.name);
+    var nm = names(); if (r.assignee && nm.indexOf(r.assignee) < 0) nm = [r.assignee].concat(nm);   // keep the person on the job even if they're not in the team list
+    var opts = '<option value="">' + tr('Not assigned', 'Hajapewa mtu') + '</option>' + nm.map(function (n) { return '<option' + (n === r.assignee ? ' selected' : '') + '>' + esc(n) + '</option>'; }).join('');
+    var si = STEP.findIndex(function (s) { return s[0] === step; });
+    var kv = function (k, v, long) { return v ? '<div' + (long ? ' class="long"' : '') + '><dt>' + k + '</dt><dd>' + v + '</dd></div>' : ''; };
+    var msum = (r.budget != null ? tr('Budget ', 'Bajeti ') + '<span class="nw">' + esc(ofbKes(r.budget)) + '</span>' : tr('No budget yet', 'Bado hakuna bajeti')) + ' · ' + tr('add what was spent', 'ongeza kilichotumika');
+    var money = '<label>' + tr('Approved budget (KES)', 'Bajeti iliyoidhinishwa (KES)') + '<input type="number" inputmode="numeric" min="0" data-f="budget" value="' + (r.budget == null ? '' : r.budget) + '" placeholder="' + (r.cost ? r.cost : '') + '"></label>' +
+      '<label>' + tr('Actual cost at this step (KES)', 'Gharama halisi katika hatua hii (KES)') + '<input type="number" inputmode="numeric" min="0" data-f="actual" placeholder="' + esc(tr('what was spent', 'kilichotumika')) + '"></label>' +
+      '<p class="rr-lab">' + tr('Receipt (optional)', 'Risiti (si lazima)') + '</p>' + ofbFilePick('job' + id);
+    var html = '<div class="rr-sh" data-id="' + esc(id) + '" data-testid="rr_job_sheet">' +
+      '<div class="rr-shd"><span class="rr-shi rr-t-' + tone + '" aria-hidden="true">' + oic('wrench') + '</span><h3>' + esc(title) + '</h3><small>' + rrCond(r) + '</small></div>' +
+      '<div data-ofbappr>' + ofbApprHtml(r) + '</div>' +
+      (st === 'pending' && a.rid ? (own ? '<p class="msg warn rr-own">' + esc(ofbOwnText()) + '</p>'
+        : '<div class="rr-dec" data-testid="rr_cost_dec"><label>' + tr('Note (optional)', 'Maelezo (si lazima)') + '<input type="text" data-f="dnote" placeholder="' + esc(tr('e.g. quote checked with the driller', 'mf. bei imehakikishwa na mchimbaji')) + '"></label>' +
+          '<div class="rr-two"><button class="btn ok" type="button" data-a="capp" data-testid="rr_cost_approve">' + oic('check') + '<span>' + tr('Approve the cost', 'Idhinisha gharama') + '</span></button>' +
+          '<button class="btn light" type="button" data-a="cdec" data-testid="rr_cost_decline"><span>' + tr('Decline', 'Kataa') + '</span></button></div></div>') : '') +
+      '<dl class="rr-kv">' + kv(tr('Reported by', 'Imeripotiwa na'), esc(r.by || '—') + '<small>' + esc(vxWhen(r.at)) + '</small>') + kv(tr('Country', 'Nchi'), esc(p ? p.country : '')) +
+        kv(tr('Problems', 'Matatizo'), esc((r.problems || []).join(', ')), true) + kv(tr('Their note', 'Maelezo yao'), r.note ? '“' + esc(r.note) + '”' : '', true) +
+        kv(tr('Parts', 'Vipuri'), esc(r.parts || ''), true) + kv(tr('Field estimate', 'Makadirio ya uwanjani'), r.cost ? '<span class="nw">' + esc(ofbKes(r.cost)) + '</span>' : '') + '</dl>' +
+      '<p class="rr-lab">' + tr('Job step', 'Hatua ya kazi') + '</p><div class="rr-steps" role="radiogroup" aria-label="' + tr('Job step', 'Hatua ya kazi') + '">' + STEP.map(function (s, k) {
+        return '<button type="button" role="radio" data-step="' + s[0] + '" aria-checked="' + (s[0] === step) + '" class="' + (k <= si ? 'on' : '') + '"><i aria-hidden="true">' + (k + 1) + '</i><span>' + rrStep(s[0]) + '</span></button>';
+      }).join('') + '</div>' +
+      '<div class="rr-f"><div class="row2"><label>' + tr('Assigned to', 'Amepewa') + '<select data-f="assignee">' + opts + '</select></label><label>' + tr('Due', 'Tarehe ya mwisho') + '<input type="date" data-f="due" value="' + esc(r.due || '') + '"></label></div>' +
+        '<label>' + tr('Note (optional)', 'Maelezo (si lazima)') + '<input type="text" data-f="note" placeholder="' + esc(tr('e.g. parts bought in Eldoret', 'mf. vipuri vilinunuliwa Eldoret')) + '"></label></div>' +
+      '<div class="rr-box">' + rrSec('money', 'coins', 'amber', tr('Budget, cost and receipt', 'Bajeti, gharama na risiti'), msum, '<div class="rr-f">' + money + '</div>') + '</div>' +
+      '<div class="rr-acts"><button class="btn" type="button" data-a="save" data-testid="rr_save">' + oic('check') + '<span>' + tr('Save', 'Hifadhi') + '</span></button>' +
+        '<button class="btn ok" type="button" data-a="fixed" data-testid="rr_fixed">' + oic('okc') + '<span>' + tr('Mark fixed', 'Weka imerekebishwa') + '</span></button>' +
+        '<button class="btn light" type="button" data-a="open" data-testid="rr_open">' + oic('arrow') + '<span>' + tr('Open project', 'Fungua mradi') + '</span></button>' +
+        '<div class="rr-ask"></div><span class="msg" aria-live="polite" data-testid="rr_msg"></span></div></div>';
+    var w = tSheet(title, html), c = w.querySelector('.rr-sh'), m = c.querySelector('[data-testid=rr_msg]'), ask = c.querySelector('.rr-ask');
+    var f = function (n) { return c.querySelector('[data-f=' + n + ']'); };
+    var busy = function (on) { qa('[data-a]', c).forEach(function (x) { x.disabled = on; }); };
+    var redraw = function () { if (O.tab === 'repairs' && S.view === 'vOffice') rrRepairs($('oBody')); };
+    var save = function (bt, stp) {
+      var body = { action: 'job', id: id, step: stp, assignee: f('assignee').value, due: f('due').value, budget: f('budget').value, note: f('note').value }; ofbJobBody(c, body);
+      busy(true); m.className = 'msg'; m.textContent = tr('Saving…', 'Inahifadhi…');
+      adminApi('POST', body).then(function (j) {
+        busy(false);
+        if (!j.ok) { m.className = 'msg bad'; m.textContent = why(j); return; }
+        if (j.job) S.repairs[id] = j.job; else delete S.repairs[id];
+        saveList(); progUi(); m.className = 'msg ok'; m.textContent = j.job ? tr('Saved ✓', 'Imehifadhiwa ✓') : tr('Marked fixed ✓', 'Imewekwa imerekebishwa ✓');
+        savedBtn(bt, j.job ? tr('Saved', 'Imehifadhiwa') : tr('Fixed', 'Imerekebishwa')); ofbJobDone(c, id, j, m);
+        if (j.job) { f('note').value = ''; if (!j.held) c.querySelector('[data-ofbappr]').innerHTML = ofbApprHtml(j.job); redraw(); }
+        else setTimeout(function () { w.close(); renderOffice(); }, 900);
+      });
+    };
+    var askFixed = function (bt) {
+      tmAsk(ask, tr('Mark ' + title + ' as fixed? The job closes and leaves this list.', 'Weka ' + title + ' kama imerekebishwa? Kazi inafungwa na kuondoka kwenye orodha hii.'), tr('Mark fixed', 'Weka imerekebishwa'), false, function () { ask.innerHTML = ''; save(bt, 'fixed'); });
+    };
+    c.addEventListener('click', function (e) {
+      var s = e.target.closest('[data-step]');
+      if (s) { var i = STEP.findIndex(function (x) { return x[0] === s.getAttribute('data-step'); }); qa('[data-step]', c).forEach(function (x, k) { x.setAttribute('aria-checked', x === s ? 'true' : 'false'); x.classList.toggle('on', k <= i); }); buzz(); return; }
+      var fd = e.target.closest('[data-rrsec]'); if (fd) { rrFold(fd); return; }
+      var b = e.target.closest('[data-a]'); if (!b || b.disabled) return;
+      var k = b.getAttribute('data-a');
+      if (k === 'open') { w.close(); setTimeout(function () { openProj(id); }, 200); return; }
+      if (k === 'fixed') { askFixed(b); return; }
+      if (k === 'save') { var on = c.querySelector('[data-step][aria-checked=true]'), stp = on ? on.getAttribute('data-step') : 'reported'; if (stp === 'fixed') askFixed(b); else save(b, stp); return; }
+      if (k === 'capp' || k === 'cdec') {
+        var dec = k === 'capp' ? 'approve' : 'reject', note = f('dnote').value;
+        busy(true); m.className = 'msg'; m.textContent = tr('Saving…', 'Inahifadhi…');
+        adminApi('POST', { action: 'review', rid: a.rid, decision: dec, reason: note }).then(function (j) {
+          busy(false);
+          if (!j.ok) { m.className = 'msg bad'; m.textContent = j.reason === 'own' ? ofbOwnText() : why(j); return; }
+          var jb = S.repairs[id]; if (jb) { jb.approval = Object.assign({}, jb.approval, { status: dec === 'approve' ? 'approved' : 'declined', dec: S.name, note: note }); saveList(); c.querySelector('[data-ofbappr]').innerHTML = ofbApprHtml(jb); }
+          var dc = c.querySelector('.rr-dec'); if (dc) dc.remove();
+          m.className = 'msg ok'; m.textContent = dec === 'approve' ? tr('Cost approved ✓ Parts can be ordered.', 'Gharama imeidhinishwa ✓ Vipuri vinaweza kuagizwa.') : tr('Cost declined ✓', 'Gharama imekataliwa ✓');
+          S.reviewOpen = Math.max(0, (S.reviewOpen || 0) - 1); adminUi(); oSeg(); redraw(); load(false);
+        });
+      }
+    });
+  }
+
+  // Review: the list
+  function rrReview(b) {
+    if (!O.review) b.innerHTML = '<p class="muted">' + tr('Loading…', 'Inapakia…') + '</p>'; else rrRevDraw(b);
     adminApi('GET', null, '?view=review').then(function (j) {
-      if (!j.ok) { b.innerHTML = '<p class="msg bad">' + esc(why(j)) + '</p>'; return; }
-      O.review = j.items; var open = j.items.filter(function (x) { return x.status === 'open'; }), done = j.items.filter(function (x) { return x.status !== 'open'; }).slice(0, 15);
-      S.reviewOpen = open.length; adminUi(); oSeg();
-      var ll = function (v) { var m = /(-?\d+\.\d+),\s*(-?\d+\.\d+)/.exec(v || ''); return m ? '<a href="https://www.google.com/maps?q=' + m[1] + ',' + m[2] + '&t=k" target="_blank" rel="noopener">' + brand('gmaps') + ' ' + esc(v) + '</a>' : esc(v || 'none'); };
-      b.innerHTML = (open.length ? '<div class="ocards">' + open.map(function (x) {
-        var d = x.data || {}, det = '';
-        if (x.kind === 'new') det = '<p>' + esc([d.type, d.village, CNAME[d.ck]].filter(Boolean).join(' · ')) + '</p><p>Location: ' + ll(d.gps) + '</p>' + (d.note ? '<p>“' + esc(d.note) + '”</p>' : '');
-        if (x.kind === 'move' || x.kind === 'request') det = '<p>From ' + ll(d.from) + '<br>to ' + ll(d.to) + (d.dist ? ' (' + dist(d.dist) + ' away)' : '') + '</p>' + (d.how ? '<p class="muted">How: ' + esc(d.how) + '</p>' : '');
-        if (x.kind === 'story') det = '<blockquote>“' + esc(d.quote) + '”' + (d.who ? '<br><small>— ' + esc(d.who) + '</small>' : '') + '</blockquote><p class="muted">Consent to quote and photograph: given.</p>';
-        if (x.kind === 'cost') det = ofbCostDet(x);
-        var verb = x.kind === 'cost' ? [tr('Approve the cost', 'Idhinisha gharama'), tr('Decline', 'Kataa')] : x.kind === 'move' ? ['Keep the new location', 'Put the old one back'] : x.kind === 'request' ? ['Approve the change', 'Keep the confirmed location'] : x.kind === 'story' ? ['Approve for the website', 'Don’t use'] : ['Approve', 'Reject'];
-        return '<article class="card orev" data-rid="' + esc(x.rid) + '"><div class="oh"><b>' + KIND[x.kind] + '</b><span class="muted">' + esc(when(x.at)) + '</span></div>' +
-          '<p><button class="lnk" type="button" data-open="' + esc(x.id) + '">' + esc(x.t || pname(x.id)) + '</button> · by ' + esc(x.by) + '</p>' + det +
-          '<label class="hidden" data-reason>Reason (optional)<input type="text" placeholder="e.g. wrong school"></label>' +
-          '<div class="oact"><button class="btn small ok" type="button" data-dec="approve">' + verb[0] + '</button><button class="btn small light" type="button" data-dec="reject">' + verb[1] + '</button><span class="msg" aria-live="polite"></span></div></article>';
-      }).join('') + '</div>' : emptyHtml('Nothing waiting for review.')) +
-        (done.length ? '<h2 style="margin-top:20px">Recently decided</h2><ul class="feed">' + done.map(function (x) { return '<li>' + (x.status === 'approved' ? '✅' : '⛔') + ' ' + KIND[x.kind] + ': ' + esc(x.t || pname(x.id)) + '<small>' + esc(x.doneBy) + ' · ' + esc(when(x.done)) + (x.reason ? ' · ' + esc(x.reason) : '') + '</small></li>'; }).join('') + '</ul>' : '');
-      ofbReviewFix(b);
+      if (!j.ok) { if (O.tab === 'review' && S.view === 'vOffice') b.innerHTML = '<p class="msg bad">' + esc(why(j)) + '</p>'; return; }
+      O.review = j.items; S.reviewOpen = j.items.filter(function (x) { return x.status === 'open'; }).length; adminUi(); oSeg();
+      if (O.tab === 'review' && S.view === 'vOffice') rrRevDraw(b);
+    });
+  }
+  function rrAge(ms) { var h = Math.floor(ms / 36e5); return h < 1 ? tr('< 1 h', '< saa 1') : h < 24 ? tr(h + ' h', 'saa ' + h) : tr(Math.floor(h / 24) + ' d', 'siku ' + Math.floor(h / 24)); }
+  function rrRevDraw(b, anim) {
+    var still = !anim && !!b.querySelector('[data-testid=rr_review]'), oc = b.querySelector('[data-testid=rr_review] .rr-chips'), sl = oc ? oc.scrollLeft : 0;
+    var items = O.review || [], open = items.filter(function (x) { return x.status === 'open'; }), done = items.filter(function (x) { return x.status !== 'open'; }).slice(0, 15);
+    var cnt = { all: open.length }; RRKF.forEach(function (f) { if (f[0] !== 'all') cnt[f[0]] = open.filter(function (x) { return rrKf(x) === f[0]; }).length; });
+    var shown = open.filter(function (x) { return RR.rf === 'all' || rrKf(x) === RR.rf; }), lim = RR.rmore ? shown.length : 30;
+    var t0 = open.reduce(function (m, x) { var t = Date.parse(x.at); return isNaN(t) ? m : Math.min(m, t); }, Infinity);
+    var head = '<div class="card rr-hero" data-testid="rr_head"><div class="rr-hd"><span class="rr-big k-review" aria-hidden="true">' + oic('inbox') + '</span><div><h2>' + tr('Waiting for review', 'Zinasubiri kuidhinishwa') + '</h2><p class="muted">' +
+        tr('New sites, moved locations, stories and big repair costs wait here for an admin.', 'Maeneo mapya, mahali palipohamishwa, hadithi na gharama kubwa za ukarabati zinasubiri msimamizi hapa.') + '</p></div></div>' +
+      '<div class="rr-nums">' + rrNum(open.length, tr('Waiting', 'Zinasubiri'), '', 'all', RR.rf) + rrNum(cnt.cost, tr('Repair costs', 'Gharama za ukarabati'), cnt.cost ? 'purple' : '', 'cost', RR.rf) +
+        rrNum(isFinite(t0) ? esc(rrAge(Date.now() - t0)) : '—', tr('Oldest waiting', 'Iliyosubiri zaidi'), 'off') + '</div></div>';
+    var list = !open.length ? emptyHtml(tr('Nothing waiting for review.', 'Hakuna kinachosubiri kuidhinishwa.'))
+      : !shown.length ? '<div class="rr-none">' + emptyHtml(tr('Nothing here. Try another filter.', 'Hakuna kitu hapa. Jaribu kichujio kingine.')) + '</div>'
+      : '<div class="rr-list' + (still ? ' still' : '') + '">' + shown.slice(0, lim).map(rrRevCard).join('') + '</div>' + (shown.length > lim ? rrMore(shown.length - lim) : '');
+    var dl = done.length ? '<ul class="rr-done">' + done.map(function (x) {
+      var ok = x.status === 'approved', k = rrK(x.kind);
+      return '<li><span class="rr-dk ' + (ok ? 'ok' : 'no') + '" aria-hidden="true">' + oic(ok ? 'check' : 'stop') + '</span><span><b>' + esc(x.t || pname(x.id)) + '</b><small>' + rrNw([esc(tr(k[2], k[3])), esc(ok ? tr('approved', 'imeidhinishwa') : tr('turned down', 'imekataliwa')), esc(x.doneBy || ''), esc(vxAgo(x.done))]) + (x.reason ? '<br>“' + esc(x.reason) + '”' : '') + '</small></span></li>';
+    }).join('') + '</ul>' : '<p class="muted" style="margin:0">' + tr('Nothing decided yet.', 'Bado hakuna kilichoamuliwa.') + '</p>';
+    var dsum = done.length ? tr(done.length + ' lately', done.length + ' karibuni') + (done[0].doneBy ? ' · ' + tr('last by ', 'mwisho na ') + esc(done[0].doneBy) : '') : tr('None yet', 'Bado hakuna');
+    b.innerHTML = '<div class="o-grid rr" data-testid="rr_review"><div>' + head + (open.length ? rrChips(RRKF, RR.rf, cnt, 'rrkf') : '') + list + '</div><div class="o-side"><div class="card rr-sets">' +
+      rrSec('done', 'check', 'green', tr('Recently decided', 'Vilivyoamuliwa karibuni'), dsum, dl) + '</div></div></div>';
+    rrKeep(b, sl);
+  }
+  function rrRevCard(x, i) {
+    var k = rrK(x.kind), d = x.data || {}, own = x.kind === 'cost' && ofbSame(x.by, S.name);
+    var gist = x.kind === 'cost' ? esc(ofbKes(d.est)) + (d.parts ? ' · ' + esc(d.parts) : '')
+      : x.kind === 'new' ? esc([d.type, d.village, CNAME[d.ck]].filter(Boolean).join(' · '))
+      : x.kind === 'story' ? (d.quote ? '“' + esc(d.quote) + '”' : '')
+      : d.dist ? tr('Moved ', 'Imehamishwa ') + esc(dist(d.dist)) : esc(d.to || '');
+    return '<button type="button" class="rr-card" data-rrrev="' + esc(x.rid) + '" data-testid="rr_rev" style="--i:' + Math.min(i, 10) + '">' +
+      '<span class="rr-ic rr-h-' + k[5] + '" aria-hidden="true">' + oic(k[4]) + '</span><span class="rr-tt">' + esc(x.t || pname(x.id)) + '</span>' +
+      '<span class="rr-when">' + esc(vxAgo(x.at)) + oic('chev') + '</span>' +
+      '<span class="rr-pill rr-h-' + k[5] + '"><i aria-hidden="true"></i><span>' + tr(k[2], k[3]) + '</span></span>' +
+      '<span class="rr-d rr-d1">' + (own ? '<b class="ap">' + tr('You asked: another admin approves', 'Uliomba wewe: msimamizi mwingine aidhinishe') + '</b>' : tr('by ', 'na ') + esc(x.by || '—')) + '</span>' +
+      (gist ? '<span class="rr-d rr-d2 q">' + gist + '</span>' : '') + '</button>';
+  }
+  // Review: one item's sheet. Same server call as before: { action: 'review', rid, decision, reason }
+  function rrRev(x) {
+    var k = rrK(x.kind), d = x.data || {}, cost = x.kind === 'cost', own = cost && ofbSame(x.by, S.name), title = x.t || pname(x.id);
+    var ll = function (v) { var mm = /(-?\d+\.\d+),\s*(-?\d+\.\d+)/.exec(v || ''); return mm ? '<a href="https://www.google.com/maps?q=' + mm[1] + ',' + mm[2] + '&t=k" target="_blank" rel="noopener">' + esc(v) + '</a>' : esc(v || tr('none', 'hakuna')); };
+    var kv = function (key, v, long) { return v ? '<div' + (long ? ' class="long"' : '') + '><dt>' + key + '</dt><dd>' + v + '</dd></div>' : ''; };
+    var who = kv(cost ? tr('Asked by', 'Imeombwa na') : tr('Sent by', 'Imetumwa na'), esc(x.by || '—') + '<small>' + esc(vxWhen(x.at)) + '</small>');
+    var det = cost ? '<div class="rr-amt"><b class="nw">' + esc(ofbKes(d.est)) + '</b><span>' + esc(tr('estimate · above ', 'makadirio · zaidi ya ')) + '<span class="nw">' + esc(ofbKes(S.approveAbove)) + '</span></span></div>' +
+        '<dl class="rr-kv">' + kv(tr('Parts', 'Vipuri'), esc(d.parts || ''), true) + kv(tr('Their note', 'Maelezo yao'), d.note ? '“' + esc(d.note) + '”' : '', true) + who + '</dl>' +
+        '<div class="rr-why">' + oic('vxinfo') + '<span>' + tr('Asked before ordering parts. The person who asked can’t approve it.', 'Imeombwa kabla ya kuagiza vipuri. Aliyeomba hawezi kuidhinisha.') + '</span></div>'
+      : x.kind === 'story' ? '<blockquote class="rr-quote">“' + esc(d.quote || '') + '”' + (d.who ? '<small>— ' + esc(d.who) + '</small>' : '') + '</blockquote>' +
+        '<dl class="rr-kv">' + who + kv(tr('Consent', 'Ridhaa'), tr('Given, to quote and photograph', 'Imetolewa, kunukuu na kupiga picha')) + '</dl>'
+      : x.kind === 'new' ? '<dl class="rr-kv">' + kv(tr('Type', 'Aina'), esc(d.type || '')) + kv(tr('Village', 'Kijiji'), esc(d.village || '')) + kv(tr('Country', 'Nchi'), esc(CNAME[d.ck] || '')) +
+        kv(tr('Location', 'Mahali'), ll(d.gps)) + kv(tr('Their note', 'Maelezo yao'), d.note ? '“' + esc(d.note) + '”' : '', true) + who + '</dl>'
+      : '<dl class="rr-kv">' + kv(tr('From', 'Kutoka'), ll(d.from)) + kv(tr('To', 'Hadi'), ll(d.to)) + kv(tr('Distance', 'Umbali'), d.dist ? '<span class="nw">' + esc(dist(d.dist)) + '</span>' : '') +
+        kv(tr('How', 'Jinsi'), esc(d.how || ''), true) + who + '</dl>';
+    var verb = cost ? [tr('Approve the cost', 'Idhinisha gharama'), tr('Decline', 'Kataa')] : x.kind === 'move' ? [tr('Keep the new location', 'Baki na mahali papya'), tr('Put the old one back', 'Rudisha mahali pa zamani')]
+      : x.kind === 'request' ? [tr('Approve the change', 'Idhinisha badiliko'), tr('Keep the confirmed location', 'Baki na mahali palipothibitishwa')] : x.kind === 'story' ? [tr('Approve for the website', 'Idhinisha kwa tovuti'), tr('Don’t use', 'Usitumie')] : [tr('Approve', 'Idhinisha'), tr('Reject', 'Kataa')];
+    var html = '<div class="rr-sh" data-testid="rr_rev_sheet"><div class="rr-shd"><span class="rr-shi rr-h-' + k[5] + '" aria-hidden="true">' + oic(k[4]) + '</span><h3>' + tr(k[0], k[1]) + '</h3><small>' + esc(title) + '</small></div>' + det +
+      (own ? '<p class="msg warn rr-own" data-own>' + esc(tr('You asked for this, so another admin approves it.', 'Wewe uliomba hili, kwa hiyo msimamizi mwingine ataidhinisha.')) + '</p>' : '') +
+      '<div class="rr-reason' + (cost ? ' on' : '') + '" data-reason' + (cost ? '' : ' inert') + '><div class="rr-in"><label>' + (cost ? tr('Note (optional)', 'Maelezo (si lazima)') : tr('Reason (optional)', 'Sababu (si lazima)')) +
+        '<input type="text" data-testid="rr_reason" placeholder="' + esc(cost ? tr('e.g. quote checked with the driller', 'mf. bei imehakikishwa na mchimbaji') : tr('e.g. wrong school', 'mf. shule isiyo sahihi')) + '"></label></div></div>' +
+      '<div class="rr-acts"><button class="btn ok" type="button" data-dec="approve" data-testid="rr_approve"' + (own ? ' disabled' : '') + '>' + oic('check') + '<span>' + verb[0] + '</span></button>' +
+        '<button class="btn light" type="button" data-dec="reject" data-testid="rr_reject"' + (own ? ' disabled' : '') + '><span>' + verb[1] + '</span></button>' +
+        (x.id ? '<button class="btn light" type="button" data-a="open" data-testid="rr_open">' + oic('arrow') + '<span>' + tr('Open project', 'Fungua mradi') + '</span></button>' : '') +
+        '<span class="msg" aria-live="polite" data-testid="rr_msg"></span></div></div>';
+    var w = tSheet(tr(k[0], k[1]), html), c = w.querySelector('.rr-sh'), m = c.querySelector('[data-testid=rr_msg]'), rs = c.querySelector('[data-reason]');
+    c.addEventListener('click', function (e) {
+      if (e.target.closest('[data-a=open]')) { w.close(); setTimeout(function () { openProj(x.id); }, 200); return; }
+      var b = e.target.closest('[data-dec]'); if (!b || b.disabled) return;
+      var dec = b.getAttribute('data-dec');
+      // turning something down asks first, with room for a reason
+      if (dec === 'reject' && !rs.classList.contains('on')) { rs.classList.add('on'); rs.removeAttribute('inert'); rs.querySelector('input').focus({ preventScroll: true }); b.querySelector('span').textContent = tr('Confirm: ', 'Thibitisha: ') + verb[1]; return; }
+      qa('[data-dec]', c).forEach(function (z) { z.disabled = true; }); m.className = 'msg'; m.textContent = tr('Saving…', 'Inahifadhi…');
+      adminApi('POST', { action: 'review', rid: x.rid, decision: dec, reason: rs.querySelector('input').value }).then(function (j) {
+        if (!j.ok) { qa('[data-dec]', c).forEach(function (z) { z.disabled = false; }); m.className = 'msg bad'; m.textContent = j.reason === 'own' ? ofbOwnText() : why(j); return; }
+        c.classList.add('done'); m.className = 'msg ok'; m.textContent = dec === 'approve' ? tr('Approved ✓', 'Imeidhinishwa ✓') : tr('Turned down ✓', 'Imekataliwa ✓');
+        setTimeout(function () { w.close(); if (O.tab === 'review' && S.view === 'vOffice') rrReview($('oBody')); load(false); }, 700);
+      });
     });
   }
   $('oBody').addEventListener('click', function (e) {
-    var d = e.target.closest('[data-dec]'); if (!d) return;
-    var c = d.closest('.orev'), dec = d.getAttribute('data-dec'), rs = c.querySelector('[data-reason]'), m = c.querySelector('.msg');
-    if (dec === 'reject' && rs.classList.contains('hidden')) { rs.classList.remove('hidden'); rs.querySelector('input').focus(); d.textContent = 'Confirm'; return; }
-    qa('[data-dec]', c).forEach(function (x) { x.disabled = true; }); m.className = 'msg'; m.textContent = 'Saving…';
-    adminApi('POST', { action: 'review', rid: c.getAttribute('data-rid'), decision: dec, reason: rs.querySelector('input').value }).then(function (j) {
-      if (!j.ok) { qa('[data-dec]', c).forEach(function (x) { x.disabled = false; }); m.className = 'msg bad'; m.textContent = j.reason === 'own' ? ofbOwnText() : why(j); return; }
-      c.classList.add('gone'); setTimeout(function () { oReview($('oBody')); load(false); }, 500);
-    });
+    if (O.tab !== 'repairs' && O.tab !== 'review') return;
+    var t = e.target, rp = O.tab === 'repairs';
+    var j = t.closest('[data-rrjob]'); if (j) { buzz(); rrJob(j.getAttribute('data-rrjob')); return; }
+    var r = t.closest('[data-rrrev]'); if (r) { var x = (O.review || []).filter(function (z) { return z.rid === r.getAttribute('data-rrrev'); })[0]; if (x) { buzz(); rrRev(x); } return; }
+    var f = t.closest('[data-rrf],[data-rrkf],[data-rrnf]');
+    if (f) { var v = f.getAttribute('data-rrf') || f.getAttribute('data-rrkf') || f.getAttribute('data-rrnf'); buzz(); if (rp) { RR.f = v; RR.more = false; rrRepairs($('oBody'), true); } else { RR.rf = v; RR.rmore = false; rrRevDraw($('oBody'), true); } return; }
+    if (t.closest('[data-rrmore]')) { if (rp) { RR.more = true; rrRepairs($('oBody'), true); } else { RR.rmore = true; rrRevDraw($('oBody'), true); } return; }
+    var s = t.closest('[data-rrsec]'); if (s) rrFold(s);
   });
 
   // team: people, roles, PINs. A short list grouped by role (admins wear a crown); tap a person for a sheet with their details and actions.
