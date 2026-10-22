@@ -99,6 +99,7 @@ fun parseMailOverview(j: JSONObject): MlOverview {
 
 /** donors: all · project · pick; admins; team: all · pick → the server's audience name. */
 fun mailAudience(aud: String, sub: String, project: String): String = when (aud) {
+    "pick" -> "pick" // Choose people: admins, team and donors picked one by one (feat-teama)
     "admins" -> "admins"
     "team" -> if (sub == "pick") "people:pick" else "team"
     else -> if (sub == "project" && project.isNotBlank()) "donors:project:$project" else if (sub == "pick") "donors:pick" else "donors:all"
@@ -107,7 +108,10 @@ fun mailAudience(aud: String, sub: String, project: String): String = when (aud)
 fun mailCount(ov: MlOverview, audience: String, picks: Collection<String>): Pair<Int, Map<String, Int>> {
     val skip = mutableMapOf("unsub" to 0, "revoked" to 0, "no-email" to 0)
     var n = 0
-    if (audience.startsWith("donors")) {
+    if (audience == "pick") {
+        ov.people.filter { it.key in picks }.forEach { if (it.email) n++ else skip["no-email"] = skip["no-email"]!! + 1 }
+        ov.donors.flatMap { it.viewers }.filter { it.key in picks }.forEach { v -> if (v.why.isBlank()) n++ else skip[v.why] = (skip[v.why] ?: 0) + 1 }
+    } else if (audience.startsWith("donors")) {
         ov.donors.forEach { d -> d.viewers.forEach { v ->
             val on = audience == "donors:all" || (audience == "donors:pick" && (v.key in picks || d.id in picks)) || (audience.startsWith("donors:project:") && audience.removePrefix("donors:project:") in d.projects)
             if (on) { if (v.why.isBlank()) n++ else skip[v.why] = (skip[v.why] ?: 0) + 1 }
@@ -130,6 +134,11 @@ fun mailCountWord(kind: String, n: Int): String = when (kind) {
     else -> if (n == 1) t("1 person", "mtu 1") else t("$n people", "watu $n")
 }
 fun mailKind(audience: String) = if (audience.startsWith("donors")) "donor" else if (audience == "admins") "admin" else "team"
+/** Choose people: the server's shape, { aud: 'pick', people: [team ids], donors: [viewer keys] }. */
+fun mailPickBody(ov: MlOverview, picks: Collection<String>): Pair<JSONArray, JSONArray> {
+    val people = ov.people.map { it.key }.toSet()
+    return JSONArray(picks.filter { it in people }) to JSONArray(picks.filterNot { it in people })
+}
 /** {first} and {name}, as the server replaces them. */
 fun mailPersonalise(s: String, name: String): String {
     val n = name.trim(); val first = n.split(Regex("\\s+")).firstOrNull().orEmpty()
@@ -209,10 +218,11 @@ fun MailSection(m: AppModel, snap: Snapshot) {
     val audience = mailAudience(aud, sub, project)
 
     fun draft(action: String) = JSONObject().put("action", action).put("audience", audience).put("picks", JSONArray(picks.toList())).put("subject", subject).put("body", body)
+        .apply { if (audience == "pick") ov?.let { o -> val (pp, dd) = mailPickBody(o, picks); put("aud", "pick").put("people", pp).put("donors", dd) } }
         .put("button", if (btnOn) JSONObject().put("label", btnLabel).put("href", btnHref) else JSONObject.NULL)
         .put("photo", photo?.let { JSONObject().put("kind", it.first).put("id", it.second) } ?: JSONObject.NULL).put("includeLink", aud == "donors" && link)
     fun check(full: Boolean): String? = when {
-        (audience == "donors:pick" || audience == "people:pick") && picks.isEmpty() -> t("Tick who it goes to.", "Chagua anaotumiwa.")
+        (audience == "donors:pick" || audience == "people:pick" || audience == "pick") && picks.isEmpty() -> t("Tick who it goes to.", "Chagua anaotumiwa.")
         aud == "donors" && sub == "project" && project.isBlank() -> t("Choose a project.", "Chagua mradi.")
         full && (subject.isBlank() || body.isBlank()) -> t("Add a subject and a message.", "Ongeza kichwa na ujumbe.")
         btnOn && (btnLabel.isBlank() || !Regex("^https?://\\S+\\.\\S+").containsMatchIn(btnHref.trim())) -> t("Give the button a text and a link starting with https://", "Kipe kitufe maandishi na kiungo kinachoanza na https://")
@@ -244,12 +254,17 @@ fun MailSection(m: AppModel, snap: Snapshot) {
     Card(Modifier.padding(top = 12.dp).testTag("ml_form"), pad = 16.dp) {
         Text(t("To", "Kwa"), style = MaterialTheme.typography.titleSmall, color = C.ink)
         // who it goes to: a segmented choice, then which ones
-        Row(Modifier.padding(top = 8.dp).fillMaxWidth().height(IntrinsicSize.Min).clip(RoundedCornerShape(999.dp)).background(C.bg).border(1.dp, C.line, RoundedCornerShape(999.dp)).padding(4.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            listOf("donors" to t("Donors", "Wafadhili"), "admins" to t("Admins", "Wasimamizi"), "team" to t("Team", "Timu")).forEach { (k, l) ->
-                val on = aud == k
-                Box(Modifier.weight(1f).fillMaxHeight().clip(RoundedCornerShape(999.dp)).background(if (on) C.blue else Color.Transparent).clickable(role = Role.Tab) { aud = k; sub = "all"; picks.clear(); q = ""; if (k != "donors") link = false }
-                    .heightIn(min = 44.dp).padding(horizontal = 4.dp).testTag("ml_aud_$k"), contentAlignment = Alignment.Center) {
-                    FitWords(l, MaterialTheme.typography.labelLarge.copy(fontSize = 14.sp, textAlign = TextAlign.Center), if (on) Color.White else C.ink, lines = 1)
+        // four choices in two rows of two, so no label has to shrink (Choose people: feat-teama)
+        Column(Modifier.padding(top = 8.dp).fillMaxWidth().clip(RoundedCornerShape(26.dp)).background(C.bg).border(1.dp, C.line, RoundedCornerShape(26.dp)).padding(4.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            listOf("donors" to t("Donors", "Wafadhili"), "admins" to t("Admins", "Wasimamizi"), "team" to t("Team", "Timu"), "pick" to t("Choose people", "Chagua watu")).chunked(2).forEach { row ->
+                Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    row.forEach { (k, l) ->
+                        val on = aud == k
+                        Box(Modifier.weight(1f).fillMaxHeight().clip(RoundedCornerShape(999.dp)).background(if (on) C.blue else Color.Transparent).clickable(role = Role.Tab) { aud = k; sub = "all"; picks.clear(); q = ""; if (k != "donors") link = false }
+                            .heightIn(min = 44.dp).padding(horizontal = 4.dp).testTag("ml_aud_$k"), contentAlignment = Alignment.Center) {
+                            FitWords(l, MaterialTheme.typography.labelLarge.copy(fontSize = 14.sp, textAlign = TextAlign.Center), if (on) Color.White else C.ink, lines = 1)
+                        }
+                    }
                 }
             }
         }
@@ -283,10 +298,11 @@ fun MailSection(m: AppModel, snap: Snapshot) {
                 if (rows.isEmpty()) Text(t("Nobody matches.", "Hakuna anayelingana."), color = C.muted, modifier = Modifier.padding(12.dp))
             }
         }
+        if (aud == "pick") MailPickList(o, picks, q) { q = it }
         // the live count
         val (n, skip) = mailCount(o, audience, picks)
         val countText = when {
-            (audience == "donors:pick" || audience == "people:pick") && picks.isEmpty() -> t("Tick who it goes to below.", "Chagua anaotumiwa hapa chini.")
+            (audience == "donors:pick" || audience == "people:pick" || audience == "pick") && picks.isEmpty() -> t("Tick who it goes to below.", "Chagua anaotumiwa hapa chini.")
             aud == "donors" && sub == "project" && project.isBlank() -> t("Choose a project.", "Chagua mradi.")
             else -> (listOf(if (n > 0) t("Goes to ", "Inaenda kwa ") + mailCountWord(mailKind(audience), n) else t("Nobody to send to yet", "Bado hakuna wa kutumiwa")) + mailSkipText(skip)).joinToString(" · ")
         }
@@ -432,6 +448,7 @@ private fun mailAudWord(a: String, snap: Snapshot): String = when {
     a.startsWith("donors:project:") -> a.removePrefix("donors:project:").let { id -> t("Donors of ", "Wafadhili wa ") + (snap.projects.firstOrNull { it.id == id }?.title ?: id) }
     a == "admins" -> t("Admins", "Wasimamizi")
     a == "team" -> t("The whole team", "Timu nzima")
+    a == "pick" -> t("Chosen people", "Watu waliochaguliwa")
     else -> t("Chosen team members", "Wanatimu waliochaguliwa")
 }
 
@@ -479,5 +496,52 @@ fun MailPreview(subject: String, body: String, donor: Boolean, by: String, butto
             Text("1817 N. Beck Street, Salt Lake City, UT 84116, U.S.A.", color = Color(0xFFC9D6E2), fontSize = 11.sp, textAlign = TextAlign.Center)
             Text("info@rafikioutreach.org", color = Color(0xFF8FD3FF), fontSize = 11.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(top = 4.dp))
         }
+    }
+}
+
+/** Choose people: one searchable list of everyone who can get e-mail, under Admins, Team and Donors, each group with
+ *  "Select all"; then the people picked as chips that can be taken off (feat-teama). */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun MailPickList(o: MlOverview, picks: androidx.compose.runtime.snapshots.SnapshotStateList<String>, q: String, setQ: (String) -> Unit) {
+    // row: key, name, what (role or donor), why it can't get e-mail ("" when it can)
+    val groups = listOf(
+        Triple("admins", t("Admins", "Wasimamizi"), o.people.filter { it.role == "admin" }.map { listOf(it.key, it.name, t("Admin", "Msimamizi"), if (it.email) "" else "no-email") }),
+        Triple("team", t("Team", "Timu"), o.people.filter { it.role != "admin" }.map { listOf(it.key, it.name, t("Field team", "Timu ya uwanjani"), if (it.email) "" else "no-email") }),
+        Triple("donors", t("Donors", "Wafadhili"), o.donors.flatMap { d -> d.viewers.map { v -> listOf(v.key, v.name, if (d.name != v.name) d.name else t("Donor", "Mfadhili"), v.why) } }),
+    )
+    val names = groups.flatMap { it.third }.associate { it[0] to it[1] }
+    Field(q, setQ, t("Find a name", "Tafuta jina"), Modifier.testTag("ml_q"), placeholder = t("Name, role or donor", "Jina, nafasi au mfadhili"))
+    val why = mapOf("unsub" to t("unsubscribed", "amejiondoa"), "revoked" to t("link revoked", "kiungo kimezimwa"), "no-email" to mailNb(t("no e-mail", "hana barua pepe")))
+    groups.forEach { (gk, title, all) ->
+        val rows = all.filter { q.isBlank() || (it[1] + " " + it[2]).contains(q.trim(), true) }.sortedWith(compareBy({ it[3].isNotBlank() }, { it[1].lowercase() }))
+        if (rows.isEmpty()) return@forEach
+        val ok = rows.filter { it[3].isBlank() }.map { it[0] }
+        val allOn = ok.isNotEmpty() && ok.all { it in picks }
+        Row(Modifier.padding(top = 14.dp, bottom = 4.dp).fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Text(title.uppercase(), style = MaterialTheme.typography.labelMedium.copy(letterSpacing = 1.sp, fontWeight = FontWeight.ExtraBold), color = C.muted, modifier = Modifier.weight(1f).testTag("ml_g_$gk"))
+            if (ok.isNotEmpty()) Text(if (allOn) t("Clear", "Ondoa wote") else t("Select all", "Chagua wote"), style = MaterialTheme.typography.labelLarge, color = C.blue, maxLines = 1,
+                modifier = Modifier.clip(RoundedCornerShape(10.dp)).clickable(role = Role.Button) { if (allOn) picks.removeAll(ok) else ok.filterNot { it in picks }.forEach { picks.add(it) } }
+                    .heightIn(min = 40.dp).padding(horizontal = 10.dp, vertical = 10.dp).testTag("ml_all_$gk"))
+        }
+        Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).border(1.dp, C.line, RoundedCornerShape(14.dp))) {
+            rows.take(80).forEachIndexed { i, r ->
+                val off = r[3].isNotBlank(); val on = r[0] in picks && !off
+                if (i > 0) HorizontalDivider(color = C.line)
+                Row(Modifier.fillMaxWidth().clickable(enabled = !off, role = Role.Checkbox) { if (on) picks.remove(r[0]) else picks.add(r[0]) }.heightIn(min = 52.dp).padding(horizontal = 6.dp, vertical = 4.dp).testTag("ml_pk_" + r[0]),
+                    verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(on, { if (it) picks.add(r[0]) else picks.remove(r[0]) }, enabled = !off, colors = CheckboxDefaults.colors(checkedColor = C.blue))
+                    Column(Modifier.weight(1f)) {
+                        Text(r[1], style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold), color = if (off) C.muted else C.ink)
+                        listOf(r[2], why[r[3]] ?: "").filter { it.isNotBlank() }.joinToString(" · ").let { Text(it, style = MaterialTheme.typography.bodySmall, color = C.muted) }
+                    }
+                }
+            }
+        }
+    }
+    if (groups.all { g -> g.third.none { q.isBlank() || (it[1] + " " + it[2]).contains(q.trim(), true) } }) Text(t("Nobody matches.", "Hakuna anayelingana."), color = C.muted, modifier = Modifier.padding(12.dp))
+    // the people picked, as chips above the subject
+    if (picks.isNotEmpty()) FlowRow(Modifier.padding(top = 10.dp).testTag("ml_chips"), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        picks.toList().forEach { k -> Chip(names[k] ?: k, null, false, { picks.remove(k) }, trailing = "x", tag = "ml_chip_$k", hue = "blue") }
     }
 }
