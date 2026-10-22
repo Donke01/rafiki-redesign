@@ -87,7 +87,7 @@ test('codes: viewers made before codes existed get one when an admin opens Donor
   [...e.FEED.m.keys()].filter(k => k.startsWith('donorcode:')).forEach(k => e.FEED.m.delete(k));
   assert.equal(await redeemCode(e, add.body.code), null);
   const g = await donorAdminGet(e);
-  assert.equal(g.donors[0].viewers[0].code, add.body.code); assert.equal(g.app.apk, '/app/rafiki-pin.apk');
+  assert.equal(g.donors[0].viewers[0].code, add.body.code); assert.equal(g.app.apk, 'https://pin.rafikioutreach.org/app/rafiki-pin.apk');
   assert.ok(await redeemCode(e, add.body.code));
 });
 

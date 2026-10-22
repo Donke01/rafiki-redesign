@@ -397,7 +397,9 @@ footer a{font-weight:700}
       '<p class="org">' + esc([D.donor.group || D.donor.viewer !== D.donor.name ? D.donor.name : '', D.donor.org && D.donor.org !== D.donor.name ? D.donor.org : ''].filter(Boolean).join(' · ') || 'Thank you for giving with RAFIKI Outreach') + '</p>' +
       '<p class="say">' + say + '</p></div>' +
       '<div class="stats">' + stats.slice(0, 4).join('') + '</div>' +
-      '<div class="acts"><a class="btn white" href="#mapsec">' + ic('map') + 'See them on the map</a><button class="btn ghost" type="button" id="pdf">' + ic('down') + 'Download impact report</button></div></section>';
+      '<div class="acts"><a class="btn white" href="#mapsec">' + ic('map') + 'See them on the map</a><button class="btn ghost" type="button" id="pdf">' + ic('down') + 'Download impact report</button>' +
+      // feat-donorapp: on a phone, the same private link opens the RAFIKI Pin app in donor mode (Android App Link; the web app on an iPhone)
+      (window.matchMedia && matchMedia('(pointer: coarse)').matches ? '<a class="btn ghost" id="inApp" href="https://pin.rafikioutreach.org/pin#donor=' + encodeURIComponent(TOKEN) + '" rel="noreferrer">' + ic('drop') + 'Open in the RAFIKI app</a>' : '') + '</div></section>';
     anni.forEach(function (p) {
       var img = cover(p);
       h += '<section class="anni" aria-label="Anniversary"><span>' + (img ? '<img class="ph" src="' + esc(img) + '" alt="" loading="lazy">' : '<span class="ph" aria-hidden="true">🎉</span>') + '</span><div>' +
