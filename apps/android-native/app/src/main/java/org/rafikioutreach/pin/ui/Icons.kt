@@ -25,6 +25,8 @@ object Ic {
         "clip" to listOf(rect(5f, 4.5f, 14f, 16.5f, 2.5f), "M9 4.5V3.5h6v1M8.5 12l2.2 2.2L15.5 9.5"),
         "people" to listOf(circle(9f, 8.5f, 3.2f), "M3.5 19.5c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5", circle(17f, 9.5f, 2.4f), "M15.8 14.6c2.4.2 4 1.8 4.6 4.4"),
         "person" to listOf(circle(12f, 8f, 3.6f), "M5 20c.8-3.8 3.6-6 7-6s6.2 2.2 7 6"),
+        "cog" to listOf(circle(12f, 12f, 3f), "M12 3.5v2.2M12 18.3v2.2M3.5 12h2.2M18.3 12h2.2M6 6l1.6 1.6M16.4 16.4 18 18M6 18l1.6-1.6M16.4 7.6 18 6"),
+        "info" to listOf(circle(12f, 12f, 8.5f), "M12 11v5.5M12 7.8v.1"),
         "crown" to listOf("M4.5 18 3 8l5 3.8L12 5l4 6.8L21 8l-1.5 10z", "M5 21h14"),
         "key" to listOf(circle(8f, 15.5f, 4.5f), "M11.2 12.3 19.5 4M16 7.5l2.5 2.5M13.8 9.7l2 2"),
         "mail" to listOf(rect(3.5f, 5.5f, 17f, 13f, 2.5f), "M4 7.5l8 6 8-6"),
