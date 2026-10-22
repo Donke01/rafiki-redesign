@@ -154,23 +154,21 @@ object Geo {
         return 2 * r * atan2(sqrt(h), sqrt(1 - h))
     }
 
-    /** "910 m", "12.4 km", or in miles. Exact to the metre under 10 km, like the web app. */
+    /** "850 m" under 1 km, "5.5 km" under 10 km, then "12 km"; in miles "250 ft" under 0.1 mi, then "1.4 mi".
+     *  The same as the web app. */
     fun dist(m: Double, miles: Boolean): String {
         if (miles) {
             val mi = m / 1609.344
-            return when {
-                mi < 1 -> "%,d ft".format(java.util.Locale.US, (m * 3.28084).roundToInt())
-                mi < 10 -> "%.2f mi".format(java.util.Locale.US, mi)
-                mi < 100 -> "%.1f mi".format(java.util.Locale.US, mi)
-                else -> "${mi.roundToInt()} mi"
-            }
+            return if (mi < 0.1) "%,d ft".format(java.util.Locale.US, (m * 3.28084).roundToInt()) else "%,.1f mi".format(java.util.Locale.US, mi)
         }
-        return when {
-            m < 10000 -> "%,d m".format(java.util.Locale.US, m.roundToInt())
-            m < 100000 -> "%.1f km".format(java.util.Locale.US, m / 1000)
-            else -> "${(m / 1000).roundToInt()} km"
-        }
+        val whole = m.roundToInt()
+        if (whole < 1000) return "%,d m".format(java.util.Locale.US, whole)
+        val tenths = Math.round(m / 100.0) // in 0.1 km
+        return if (tenths < 100) "%.1f km".format(java.util.Locale.US, tenths / 10.0) else "%,d km".format(java.util.Locale.US, Math.round(m / 1000.0))
     }
+
+    /** GPS accuracy: "±8 m" or "±1.2 km" (never rounded down to whole km). */
+    fun acc(m: Int): String = "±" + dist(m.toDouble(), false)
 
     private val DIRS = listOf("north" to "kaskazini", "north-east" to "kaskazini-mashariki", "east" to "mashariki", "south-east" to "kusini-mashariki",
         "south" to "kusini", "south-west" to "kusini-magharibi", "west" to "magharibi", "north-west" to "kaskazini-magharibi")

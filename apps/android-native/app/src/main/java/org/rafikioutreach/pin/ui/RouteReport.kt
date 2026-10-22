@@ -37,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import org.rafikioutreach.pin.AppModel
 import org.rafikioutreach.pin.data.COUNTRIES
@@ -80,6 +81,8 @@ fun RouteScreen(m: AppModel, open: (String) -> Unit, back: () -> Unit) {
     var show by remember { mutableStateOf("due") }
     var ck by remember { mutableStateOf(m.prefs.country) }
     fun save() { m.prefs.route = picked.joinToString(",") }
+    val undo = remember { UndoState() }
+    UndoSnack(undo, "route_undo")
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
         Text(t("Today's route", "Njia ya leo"), style = MaterialTheme.typography.headlineLarge, color = C.ink, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.fillMaxWidth())
@@ -121,7 +124,13 @@ fun RouteScreen(m: AppModel, open: (String) -> Unit, back: () -> Unit) {
             }
             Row(Modifier.padding(top = 14.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 Btn(t("Change stops", "Badilisha vituo"), { choosing = true }, light = true, small = true)
-                Btn(t("Clear route", "Futa njia"), { picked.clear(); save(); choosing = true }, light = true, small = true)
+                Btn(t("Clear route", "Futa njia"), {
+                    // reversible: an Undo bar puts the stops back
+                    val had = picked.toList(); picked.clear(); save(); choosing = true
+                    undo.show(if (had.size == 1) t("Route cleared: 1 stop", "Njia imefutwa: kituo 1") else t("Route cleared: ${had.size} stops", "Njia imefutwa: vituo ${had.size}")) {
+                        picked.clear(); picked.addAll(had); save(); choosing = false
+                    }
+                }, Modifier.testTag("route_clear"), light = true, small = true)
             }
         }
         Spacer(Modifier.height(24.dp))

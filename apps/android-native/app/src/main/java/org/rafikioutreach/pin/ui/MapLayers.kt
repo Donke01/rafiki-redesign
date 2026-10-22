@@ -523,14 +523,30 @@ private fun BoxScope.HomeLayersOverlay(m: AppModel, snap: Snapshot, fix: Fix?, m
         }
     }
     val tm = if (HomeLayers.team && snap.admin) HomeLayers.tm else null
-    val teamKey = tm to (System.currentTimeMillis() / 60000)
+    // teammates close together sit side by side, so their names and times never run into each other; laid out
+    // again when the zoom changes
+    var teamZoom by remember(mv) { mutableIntStateOf((mv.zoomLevelDouble * 2).roundToInt()) }
+    if (tm != null) DisposableEffect(mv) {
+        val l = object : org.osmdroid.events.MapListener {
+            override fun onScroll(e: org.osmdroid.events.ScrollEvent?) = false
+            override fun onZoom(e: org.osmdroid.events.ZoomEvent?): Boolean { mv.post { teamZoom = (mv.zoomLevelDouble * 2).roundToInt() }; return false }
+        }
+        mv.addMapListener(l); onDispose { mv.removeMapListener(l) }
+    }
+    val teamKey = Triple(tm, System.currentTimeMillis() / 60000, teamZoom to (mv.width > 0))
     if (st.teamKey != teamKey) {
         st.teamKey = teamKey
         mv.overlays.removeAll(st.team)
-        st.team = tm?.people.orEmpty().mapIndexed { i, p ->
+        val ppl = tm?.people.orEmpty()
+        val icons = ppl.mapIndexed { i, p -> mateIcon(ctx, p.name, MATE[i % MATE.size], ago(p.at), minutesSince(p.at) > 60) }
+        val shift = if (mv.width > 0 && ppl.size > 1) {
+            val pts = ppl.map { mv.projection.toPixels(GeoPoint(it.ll.lat, it.ll.lng), null) }
+            mateSpread(pts.map { it.x.toFloat() }, pts.map { it.y.toFloat() }, icons.map { it.bitmap.width.toFloat() }, 66 * d, 4 * d)
+        } else List(ppl.size) { 0f }
+        st.team = ppl.mapIndexed { i, p ->
             Marker(mv).apply {
-                position = GeoPoint(p.ll.lat, p.ll.lng); icon = mateIcon(ctx, p.name, MATE[i % MATE.size], ago(p.at), minutesSince(p.at) > 60)
-                setAnchor(Marker.ANCHOR_CENTER, 23f / 66f); setInfoWindow(null); title = p.name
+                position = GeoPoint(p.ll.lat, p.ll.lng); icon = icons[i]
+                setAnchor(0.5f - shift[i] / icons[i].bitmap.width, 23f / 66f); setInfoWindow(null); title = p.name
                 setOnMarkerClickListener { _, _ -> HomeLayers.pick = if (pickNow == "t:" + p.name) null else "t:" + p.name; true }
             }
         }
@@ -598,6 +614,24 @@ private fun BoxScope.HomeLayersOverlay(m: AppModel, snap: Snapshot, fix: Fix?, m
     }
 }
 
+/** How far (px, sideways) to move each teammate's marker so none of them overlap: markers whose boxes ([ws] wide,
+ *  [h] tall, centred on [xs], [ys]) touch are put side by side, [gap] apart, centred where they were. */
+fun mateSpread(xs: List<Float>, ys: List<Float>, ws: List<Float>, h: Float, gap: Float): List<Float> {
+    val n = xs.size
+    val group = IntArray(n) { it }
+    fun root(i: Int): Int { var k = i; while (group[k] != k) k = group[k]; return k }
+    for (i in 0 until n) for (j in i + 1 until n)
+        if (abs(xs[i] - xs[j]) < (ws[i] + ws[j]) / 2 + gap && abs(ys[i] - ys[j]) < h) group[root(j)] = root(i)
+    val out = MutableList(n) { 0f }
+    (0 until n).groupBy { root(it) }.values.filter { it.size > 1 }.forEach { g ->
+        val order = g.sortedWith(compareBy({ xs[it] }, { it }))
+        val total = order.sumOf { ws[it].toDouble() }.toFloat() + gap * (order.size - 1)
+        var x = order.map { xs[it] }.average().toFloat() - total / 2
+        order.forEach { k -> out[k] = x + ws[k] / 2 - xs[k]; x += ws[k] + gap }
+    }
+    return out
+}
+
 private fun minutesSince(iso: String) = runCatching { java.time.Duration.between(Instant.parse(iso), Instant.now()).toMinutes() }.getOrDefault(0L)
 
 @Composable
@@ -629,7 +663,7 @@ private fun Caps(text: String, color: Color = C.muted) = Text(text.uppercase(), 
 private fun NextCard(m: AppModel, snap: Snapshot, stops: List<Project>, nextIdx: Int, here: LatLng?) {
     val near = if (stops.isEmpty() && here != null) snap.projects.filter { it.gps != null }.minByOrNull { Geo.metres(here, it.gps!!) } else null
     val p = if (nextIdx >= 0) stops[nextIdx] else near
-    val label = when { nextIdx >= 0 -> t("Next stop · ${nextIdx + 1} of ${stops.size}", "Kituo kijacho · ${nextIdx + 1} kati ya ${stops.size}"); stops.isNotEmpty() -> t("Today’s route is done", "Njia ya leo imekamilika"); near != null -> t("Closest site", "Eneo la karibu zaidi"); else -> t("Following you", "Inakufuata") }
+    val label = when { nextIdx >= 0 -> t("Next stop · ${nextIdx + 1}/${stops.size}", "Kituo ${nextIdx + 1}/${stops.size}"); stops.isNotEmpty() -> t("Today’s route is done", "Njia ya leo imekamilika"); near != null -> t("Closest site", "Eneo la karibu zaidi"); else -> t("Following you", "Inakufuata") }
     MapCard("ml_next") {
         Row(Modifier.padding(start = 12.dp, end = 8.dp, top = 8.dp, bottom = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.size(40.dp).clip(RoundedCornerShape(12.dp)).background(Color(0xFF7A4FD0)), contentAlignment = Alignment.Center) { Icon(Ic.get("nav"), null, tint = Color.White, modifier = Modifier.size(22.dp)) }
@@ -682,7 +716,7 @@ private fun MateCard(p: Sharer) {
                 Spacer(Modifier.width(10.dp))
                 Column(Modifier.weight(1f)) {
                     Text(p.name, style = MaterialTheme.typography.titleSmall, color = C.ink)
-                    Text(t("Last seen ", "Alionekana ") + ago(p.at) + (if (p.acc > 0) " · ±" + (if (p.acc < 1000) "${p.acc} m" else "${p.acc / 1000} km") else ""), style = MaterialTheme.typography.bodySmall, color = C.muted)
+                    Text(t("Last seen ", "Alionekana ") + ago(p.at) + (if (p.acc > 0) " · " + Geo.acc(p.acc) else ""), style = MaterialTheme.typography.bodySmall, color = C.muted)
                 }
                 CloseX(t("Close", "Funga")) { HomeLayers.pick = null }
             }
@@ -742,7 +776,8 @@ private fun YearsCard(snap: Snapshot, span: IntRange) {
             Slider(y.toFloat(), { HomeLayers.playing = false; HomeLayers.year = it.roundToInt() }, valueRange = span.first.toFloat()..span.last.toFloat(), steps = max(0, span.last - span.first - 1),
                 colors = SliderDefaults.colors(thumbColor = Color(0xFF0A78C2), activeTrackColor = Color(0xFF0A78C2)),
                 modifier = Modifier.padding(end = 4.dp).heightIn(min = 44.dp).testTag("ml_slider").semantics { contentDescription = t("Year", "Mwaka") })
-            Row(Modifier.padding(end = 4.dp).offset(y = (-8).dp)) {
+            // the first and last year under the ends of the track, clear of the thumb
+            Row(Modifier.padding(start = 2.dp, end = 4.dp, top = 2.dp, bottom = 4.dp).testTag("ml_year_ends")) {
                 Text("${span.first}", style = MaterialTheme.typography.labelSmall, color = C.muted); Spacer(Modifier.weight(1f)); Text("${span.last}", style = MaterialTheme.typography.labelSmall, color = C.muted)
             }
         }

@@ -105,10 +105,13 @@ class VisitTypesTest {
     @Test fun building_site_visit() {
         Lang.sw = false
         val m = model(); rule.setContent { RafikiTheme(dark = false) { Box(Modifier.size(390.dp, 844.dp)) { App(m) } } }
-        rule.onNodeWithTag("projects").performScrollToNode(hasTestTag("type_chips")); shot("78-type-chips")
-        rule.onNodeWithTag("type_school").performClick(); rule.waitForIdle()
+        rule.onNodeWithTag("projects").performScrollToNode(hasTestTag("proj_filter")); rule.onNodeWithTag("proj_filter").performClick(); rule.waitForIdle(); shot("78-type-chips")
+        rule.onNodeWithTag("type_school").performScrollTo().performClick(); rule.waitForIdle()
+        rule.onNodeWithTag("proj_filter_done").performScrollTo().performClick(); rule.mainClock.advanceTimeBy(800); rule.waitForIdle()
         assertTrue(!has("Kaptebee Pigsty") && has("Which project"))
-        rule.onNodeWithTag("type_").performClick(); rule.waitForIdle()
+        rule.onNodeWithTag("proj_filter").performClick(); rule.waitForIdle()
+        rule.onNodeWithTag("type_").performScrollTo().performClick(); rule.waitForIdle()
+        rule.onNodeWithTag("proj_filter_done").performScrollTo().performClick(); rule.mainClock.advanceTimeBy(800); rule.waitForIdle()
         open("Nzoia Bridge Primary School")
         assertTrue(has("How is the building going") && has("On track") && has("Work stopped"))
         rule.onNodeWithText("Problems to fix").performScrollTo().performClick(); shot("74-build-state"); next()

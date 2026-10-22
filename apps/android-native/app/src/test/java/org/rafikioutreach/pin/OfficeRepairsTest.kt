@@ -246,7 +246,7 @@ class OfficeRepairsTest {
         rule.waitUntil(5000) { posts.any { it.contains("\"rid\":\"r1\"") && it.contains("\"decision\":\"reject\"") && it.contains("\"reason\":\"Not their words\"") } }
         rule.mainClock.advanceTimeBy(2000); rule.waitUntil(5000) { !has("rr_rev_sheet") }
         // a moved location
-        tag("rr_rev_r3").performScrollTo().performClick(); waitTag("rr_rev_sheet"); waitText("Keep the new location"); waitText("1,912 m")
+        tag("rr_rev_r3").performScrollTo().performClick(); waitTag("rr_rev_sheet"); waitText("Keep the new location"); waitText("1.9 km")
         sheetShot("78-review-move-sheet")
     }
 

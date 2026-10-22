@@ -346,6 +346,7 @@ fun MapHome(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit, offlin
     var keyOpen by remember { mutableStateOf(false) }
     var tray by remember { mutableStateOf(false) }
     var typing by remember { mutableStateOf(false) }
+    var suggOpen by remember { mutableStateOf(false) } // the search's suggestions are showing: "You're at" steps aside
     var askSearch by remember { mutableStateOf(false) }
     val styleSheet = remember { mutableStateOf(false) }
     val offlineSheet = remember { mutableStateOf(false) }
@@ -357,6 +358,11 @@ fun MapHome(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit, offlin
     // today's route, follow me, heat, the time slider and live team (MapLayers.kt)
     val extras = rememberMapExtras(m, snap, fix, open, visit)
     val clean = MapClean.on
+    val online by OfflineMaps.online.collectAsState()
+    val offlineAreas by OfflineMaps.areas.collectAsState()
+    val cmOn = countryMapOn(false)
+    // a small phone (360 dp): "You're at" folds into a chip after 5 seconds
+    val narrow = androidx.compose.ui.platform.LocalConfiguration.current.screenWidthDp < 380
 
     val pinned = remember(snap) { snap.projects.filter { it.gps != null } }
     val conds = remember(snap) { pinned.associate { it.id to mapCondition(snap, it) } }
@@ -479,7 +485,8 @@ fun MapHome(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit, offlin
                     }
                 } ?: Box(Modifier)
                 "none" -> Box(Modifier)
-                else -> NearestSheet(m, snap, here, Modifier, open, slim = filtered, expanded = nearOpen, onExpand = { nearOpen = it; if (it) { tray = false; keyOpen = false } }, maxFull = maxFull)
+                else -> NearestSheet(m, snap, here, Modifier, open, slim = filtered, expanded = nearOpen, onExpand = { nearOpen = it; if (it) { tray = false; keyOpen = false } }, maxFull = maxFull,
+                    pool = if (filtered) visible else null, emptyText = nearNone(tyOn, status))
             }
         }
         // 2. the Key button, bottom left above the credit (and the layers' cards: MapLayers.kt)
@@ -505,7 +512,9 @@ fun MapHome(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit, offlin
                     modifier = Modifier.padding(top = 8.dp).clip(RoundedCornerShape(12.dp)).background(C.card).padding(horizontal = 12.dp, vertical = 8.dp).testTag("map_none"))
             // the pinned bar: one slim line, only with no filter and Nearest to you resting
             if (!filtered && !sheetOpen && !clean) PinnedBar(snap, pinned.size)
-            if (!clean) HereSlot(m, snap, here, Modifier.padding(top = 10.dp), visit, open)
+            if (!clean && !suggOpen) HereSlot(m, snap, here, Modifier.padding(top = 10.dp), visit, open, chipAfter = narrow)
+            // no signal and no map kept on this phone: say so, and where to save one
+            if (!clean && !online && !cmOn && !extras.years) NoSignalNote(offlineAreas.isNotEmpty(), Modifier.padding(top = 8.dp), offline)
         }
         // 4. the column on the right: Map style, where I am, More; the compass and Follow me while they are on
         MapSide(m, mv, here, tray, { tray = it; if (it) { keyOpen = false; nearOpen = false } }, { styleSheet.value = true },
@@ -516,7 +525,7 @@ fun MapHome(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit, offlin
                 .clickable(role = Role.Button) { hp.tap(); MapClean.on = false; askSearch = true }.semantics { contentDescription = t("Search a village or project", "Tafuta kijiji au mradi") }.testTag("map_search_btn"),
             contentAlignment = Alignment.Center,
         ) { Icon(Ic.get("search"), null, tint = C.ink, modifier = Modifier.size(20.dp)) }
-        else MapSearch(m, snap, here, Modifier.align(Alignment.TopStart).padding(12.dp).padding(end = 64.dp), askSearch, { askSearch = false }, { typing = it }, { pick(it, true) }, { pts -> HomeLayers.follow = false; mv?.let { mapFlyAll(it, pts, anim, 14.0) }; closeCards() }) { ll ->
+        else MapSearch(m, snap, here, Modifier.align(Alignment.TopStart).padding(12.dp).padding(end = 64.dp), askSearch, { askSearch = false }, { typing = it }, { suggOpen = it }, { pick(it, true) }, { pts -> HomeLayers.follow = false; mv?.let { mapFlyAll(it, pts, anim, 14.0) }; closeCards() }) { ll ->
             HomeLayers.follow = false; mv?.let { mapFly(it, ll, 13.0, anim) }; closeCards()
         }
         // Save this area for offline: the sheet (opened from More) and the bar while an area fills (OfflineMaps.kt)
@@ -524,7 +533,8 @@ fun MapHome(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit, offlin
         // 6. on top: the tray under More and the key's colours; a tap anywhere else closes them
         if (tray || keyOpen) Box(Modifier.matchParentSize().pointerInput(Unit) { awaitPointerEventScope { awaitPointerEvent(); tray = false; keyOpen = false } }.testTag("map_tap_away"))
         MapTray(m, here, anim, tray, Modifier.align(Alignment.TopEnd).padding(top = with(dens) { maxOf(sidePx, leftPx).toDp() } + 8.dp, end = 10.dp), { tray = false }) { offlineSheet.value = true }
-        MapKeyPop(keyOpen && keyShown, anim, Modifier.align(Alignment.BottomStart).padding(start = 12.dp, bottom = keyBottom + 56.dp))
+        MapKeyPop(keyOpen && keyShown, anim, Modifier.align(Alignment.BottomStart).padding(start = 12.dp, bottom = keyBottom + 56.dp),
+            stops = HomeLayers.route && snap.assigned.any { it.date == java.time.LocalDate.now().toString() }, team = HomeLayers.team && snap.admin)
     }
 }
 
@@ -575,10 +585,11 @@ private fun PinnedBar(snap: Snapshot, pn: Int) {
     val all = snap.projects.size
     Card(Modifier.padding(top = 8.dp).testTag("map_pinned"), pad = 9.dp) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(t("$pn of $all projects pinned", "Miradi $pn kati ya $all ina mahali"), style = MaterialTheme.typography.labelLarge.copy(fontSize = 13.sp), color = C.ink, maxLines = 1,
-                overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
-            Spacer(Modifier.width(8.dp)) // a gap, so "… ina mahali" and "0 zimebaki" never run together in Kiswahili
-            Text(t("${all - pn} to go", "${all - pn} zimebaki"), style = MaterialTheme.typography.bodySmall, color = C.muted, maxLines = 1, softWrap = false)
+            // never "…": on a small phone the shorter wording
+            FirstFitText(listOf(t("$pn of $all projects pinned", "Miradi $pn kati ya $all ina mahali"), t("$pn/$all pinned", "$pn/$all zina mahali")),
+                MaterialTheme.typography.labelLarge.copy(fontSize = 13.sp), C.ink, Modifier.weight(1f))
+            Spacer(Modifier.width(8.dp)) // a gap, so "… ina mahali" and "0 imebaki" never run together in Kiswahili
+            Text(t("${all - pn} to go", "${all - pn} imebaki"), style = MaterialTheme.typography.bodySmall, color = C.muted, maxLines = 1, softWrap = false)
         }
         Box(Modifier.padding(top = 6.dp).fillMaxWidth().height(4.dp).clip(RoundedCornerShape(99.dp)).background(C.line)) {
             Box(Modifier.fillMaxWidth(pn.toFloat() / maxOf(1, all)).height(4.dp).clip(RoundedCornerShape(99.dp)).background(OkBrush))
@@ -603,7 +614,7 @@ private fun MapKeyButton(open: Boolean, modifier: Modifier, toggle: () -> Unit) 
 
 /** The colours of the pins, over the map above the Key button; closes on a tap anywhere else or by itself. */
 @Composable
-private fun MapKeyPop(show: Boolean, anim: Boolean, modifier: Modifier) {
+private fun MapKeyPop(show: Boolean, anim: Boolean, modifier: Modifier, stops: Boolean = false, team: Boolean = false) {
     androidx.compose.animation.AnimatedVisibility(show, modifier,
         enter = if (anim) fadeIn(tween(150)) + androidx.compose.animation.scaleIn(tween(180), initialScale = 0.94f, transformOrigin = androidx.compose.ui.graphics.TransformOrigin(0f, 1f)) else EnterTransition.None,
         exit = if (anim) fadeOut(tween(120)) else ExitTransition.None) {
@@ -619,8 +630,63 @@ private fun MapKeyPop(show: Boolean, anim: Boolean, modifier: Modifier) {
                     Text(condName(c), style = MaterialTheme.typography.labelSmall.copy(fontSize = 12.sp), color = C.ink, maxLines = 1, softWrap = false)
                 }
             }
+            // the other marks on the map: a group of pins, you, today's route stops and (office) teammates
+            KeyRow(t("A group: tap to zoom in", "Kundi: gusa ili kukuza"), "key_cluster") {
+                Box(Modifier.size(16.dp).shadow(1.dp, CircleShape).clip(CircleShape).background(Color.White).padding(1.5.dp).clip(CircleShape).background(Color(condArgb(PinCond.OK))), contentAlignment = Alignment.Center) {
+                    Text("3", color = Color.White, style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp, lineHeight = 9.sp, fontWeight = FontWeight.ExtraBold), maxLines = 1, softWrap = false)
+                }
+            }
+            KeyRow(t("You", "Wewe"), "key_you") { Box(Modifier.size(14.dp).clip(CircleShape).background(Color(0x38098BE1)).padding(2.dp).clip(CircleShape).background(Color.White).padding(2.dp).clip(CircleShape).background(Color(0xFF098BE1))) }
+            if (stops) KeyRow(t("Today’s route stop", "Kituo cha njia ya leo"), "key_stop") {
+                Box(Modifier.size(16.dp).clip(CircleShape).background(Color.White).padding(1.5.dp).clip(CircleShape).background(Color(0xFF0A78C2)), contentAlignment = Alignment.Center) {
+                    Text("1", color = Color.White, style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp, lineHeight = 9.sp, fontWeight = FontWeight.ExtraBold), maxLines = 1, softWrap = false)
+                }
+            }
+            if (team) KeyRow(t("Teammate, last seen", "Mwenzako, alionekana"), "key_team") {
+                Box(Modifier.size(16.dp).clip(CircleShape).background(Color.White).padding(1.5.dp).clip(CircleShape).background(Color(0xFF7A4FD0)), contentAlignment = Alignment.Center) {
+                    Text("A", color = Color.White, style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp, lineHeight = 9.sp, fontWeight = FontWeight.ExtraBold), maxLines = 1, softWrap = false)
+                }
+            }
         }
     }
+}
+
+@Composable
+private fun KeyRow(label: String, tag: String, mark: @Composable () -> Unit) {
+    Row(Modifier.testTag(tag), verticalAlignment = Alignment.CenterVertically) {
+        Box(Modifier.size(16.dp), contentAlignment = Alignment.Center) { mark() }
+        Spacer(Modifier.width(6.dp))
+        Text(label, style = MaterialTheme.typography.labelSmall.copy(fontSize = 12.sp), color = C.ink, maxLines = 1, softWrap = false)
+    }
+}
+
+/** With no signal and no map kept on this phone the map is a blank grid: this says why, and opens Offline maps. */
+@Composable
+private fun NoSignalNote(saved: Boolean, modifier: Modifier, offline: () -> Unit) {
+    val hu = C.hue("offline")
+    Row(
+        modifier.fillMaxWidth().shadow(4.dp, RoundedCornerShape(16.dp)).clip(RoundedCornerShape(16.dp)).background(C.card).border(1.dp, C.line, RoundedCornerShape(16.dp))
+            .clickable(role = Role.Button, onClick = offline).heightIn(min = 48.dp).padding(start = 10.dp, end = 12.dp, top = 8.dp, bottom = 8.dp).testTag("map_nosignal"),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(Modifier.size(32.dp).clip(RoundedCornerShape(10.dp)).background(hu.bg), contentAlignment = Alignment.Center) { Icon(Ic.get("offline"), null, tint = hu.fg, modifier = Modifier.size(18.dp)) }
+        Spacer(Modifier.width(10.dp))
+        Column(Modifier.weight(1f)) {
+            Text(if (saved) t("No signal: showing pins and saved map areas only.", "Hakuna mtandao: inaonyesha alama za miradi na maeneo yaliyohifadhiwa tu.")
+                else t("No signal: showing pins only.", "Hakuna mtandao: inaonyesha alama za miradi tu."), style = MaterialTheme.typography.labelLarge.copy(fontSize = 13.sp), color = C.ink)
+            Text(t("Save an offline map", "Hifadhi ramani ya bila mtandao") + " ›", style = MaterialTheme.typography.labelLarge.copy(fontSize = 13.sp, fontWeight = FontWeight.ExtraBold), color = C.blue, modifier = Modifier.testTag("map_nosignal_go"))
+        }
+    }
+}
+
+/** Nearest to you with a filter on and nothing of that kind: "No water points near you". */
+fun nearNone(ty: String, status: String): String = if (status.isNotBlank()) t("Nothing near you matches these filters", "Hakuna kilicho karibu nawe kinacholingana na vichujio hivi") else when (ty) {
+    "water" -> t("No water points near you", "Hakuna vituo vya maji karibu nawe")
+    "school" -> t("No schools near you", "Hakuna shule karibu nawe")
+    "health" -> t("No health centres near you", "Hakuna vituo vya afya karibu nawe")
+    "home" -> t("No children’s homes near you", "Hakuna makao ya watoto karibu nawe")
+    "farm" -> t("No farms near you", "Hakuna mashamba karibu nawe")
+    else -> t("No projects near you", "Hakuna miradi karibu nawe")
 }
 
 /** The column of buttons on the right: Map style, Go to where I am and More in one compact strip; under it the
@@ -764,7 +830,7 @@ private fun MapChip(label: String, icon: String, n: Int, on: Boolean, hu: Hue, t
 /** Search on the map: projects and their villages or areas as you type (from the list on this phone, so it works
  *  with no signal), and places by name when there is signal. Choosing one flies the map there. */
 @Composable
-private fun MapSearch(m: AppModel, snap: Snapshot, here: LatLng?, modifier: Modifier, ask: Boolean, asked: () -> Unit, onFocus: (Boolean) -> Unit,
+private fun MapSearch(m: AppModel, snap: Snapshot, here: LatLng?, modifier: Modifier, ask: Boolean, asked: () -> Unit, onFocus: (Boolean) -> Unit, onSugg: (Boolean) -> Unit,
                       onProject: (String) -> Unit, onArea: (List<LatLng>) -> Unit, onPlace: (LatLng) -> Unit) {
     var q by remember { mutableStateOf("") }
     var focused by remember { mutableStateOf(false) }
@@ -794,6 +860,8 @@ private fun MapSearch(m: AppModel, snap: Snapshot, here: LatLng?, modifier: Modi
         places = (0 until a.length()).mapNotNull { i -> a.optJSONObject(i)?.let { o -> if (o.has("lat")) Triple(o.optString("name"), o.optString("where"), LatLng(o.getDouble("lat"), o.getDouble("lng"))) else null } }.take(3)
     }
     fun done(text: String) { q = text; focus.clearFocus() }
+    val suggShown = focused && words.isNotEmpty()
+    LaunchedEffect(suggShown) { onSugg(suggShown) }
     Column(modifier.fillMaxWidth()) {
         Row(
             Modifier.fillMaxWidth().heightIn(min = 48.dp).shadow(4.dp, RoundedCornerShape(16.dp)).clip(RoundedCornerShape(16.dp)).background(C.card)
@@ -814,7 +882,7 @@ private fun MapSearch(m: AppModel, snap: Snapshot, here: LatLng?, modifier: Modi
                 Icon(Ic.get("x"), null, tint = C.muted, modifier = Modifier.size(16.dp))
             }
         }
-        if (focused && words.isNotEmpty()) Column(
+        if (suggShown) Column(
             Modifier.padding(top = 6.dp).fillMaxWidth().shadow(8.dp, RoundedCornerShape(18.dp)).clip(RoundedCornerShape(18.dp)).background(C.card).border(1.dp, C.line, RoundedCornerShape(18.dp))
                 .padding(vertical = 6.dp).testTag("map_sugg"),
         ) {

@@ -204,7 +204,7 @@ class MapLayersTest {
         followOn(); rule.mainClock.advanceTimeBy(1500); rule.waitForIdle()
         here(0.5206, 35.2699)
         waitTag("ml_next")
-        assertTrue(hasText("Next stop · 1 of 3") && hasText("Chepkongi Dispensary"))
+        assertTrue(hasText("Next stop · 1/3") && hasText("Chepkongi Dispensary"))
         assertTrue(rule.onAllNodesWithText("≈ ", substring = true).fetchSemanticsNodes().isNotEmpty())
         assertFalse("Nearest to you steps aside", has("nearest"))
         val c = map().mapCenter; assertEquals(0.5206, c.latitude, 0.002); assertEquals(35.2699, c.longitude, 0.002)
@@ -224,7 +224,7 @@ class MapLayersTest {
         // checked in at the first stop: it ticks, the card moves on to stop 2
         visits = JSONObject(visits.toString()).put("102", JSONObject().put("at", ago(1)).put("by", "Meril Kiprop").put("state", "working")); assigned = assigned.drop(1)
         rule.runOnIdle { m.refresh(quiet = true) }; rule.mainClock.advanceTimeBy(1500); rule.waitForIdle()
-        rule.waitUntil(6000) { hasText("Next stop · 2 of 3") }
+        rule.waitUntil(6000) { hasText("Next stop · 2/3") }
         assertEquals(3, markers("Stop ").size)
         // dragging the map stops following
         rule.runOnIdle {
@@ -262,6 +262,11 @@ class MapLayersTest {
         assertEquals(11, markers("").count { (it.title ?: "").contains(" · 20") })
         assertFalse("Nearest to you steps aside for the presentation", has("nearest"))
         shot("ml_13_years_all")
+        // the first and last year sit under the track, clear of the slider's thumb
+        run {
+            val sl = rule.onNodeWithTag("ml_slider").fetchSemanticsNode().boundsInRoot; val ends = rule.onNodeWithTag("ml_year_ends").fetchSemanticsNode().boundsInRoot
+            assertTrue("year labels under the slider: ${ends.top} >= ${sl.bottom}", ends.top >= sl.bottom - 0.5f)
+        }
         rule.onNodeWithTag("ml_slider").performSemanticsAction(SemanticsActions.SetProgress) { it(2017f) }; rule.mainClock.advanceTimeBy(1500); rule.waitForIdle()
         assertTrue(hasText("By 2017") && hasText("4 projects completed"))
         assertEquals(4, markers("").count { (it.title ?: "").contains(" · 20") })
@@ -280,6 +285,22 @@ class MapLayersTest {
         rule.waitUntil(5000) { markers("Bertin").isNotEmpty() }
         assertEquals(setOf("Bertin Mwangi", "Grace Achieng", "Meril Kiprop"), map().overlays.filterIsInstance<Marker>().map { it.title }.filter { it in setOf("Bertin Mwangi", "Grace Achieng", "Meril Kiprop") }.toSet())
         shot("ml_16_team")
+        // teammates close together sit side by side: no two markers (initials and time) overlap on screen
+        run {
+            val mv = map()
+            val boxes = mutableListOf<android.graphics.RectF>()
+            rule.runOnUiThread {
+                mv.overlays.filterIsInstance<Marker>().filter { it.title in setOf("Bertin Mwangi", "Grace Achieng", "Meril Kiprop") }.forEach { mk ->
+                    val pt = mv.projection.toPixels(mk.position, null)
+                    fun f(n: String) = Marker::class.java.getDeclaredField(n).apply { isAccessible = true }.getFloat(mk)
+                    val w = mk.icon.intrinsicWidth.toFloat(); val h = mk.icon.intrinsicHeight.toFloat()
+                    val l = pt.x - f("mAnchorU") * w; val tp = pt.y - f("mAnchorV") * h
+                    boxes += android.graphics.RectF(l, tp, l + w, tp + h)
+                }
+            }
+            val hits = boxes.indices.flatMap { i -> (i + 1 until boxes.size).filter { j -> android.graphics.RectF.intersects(boxes[i], boxes[j]) }.map { i to it } }
+            assertTrue("team markers overlap: $hits $boxes", boxes.size == 3 && hits.isEmpty())
+        }
         rule.runOnIdle { HomeLayers.pick = "t:Bertin Mwangi" }; rule.waitForIdle()
         waitTag("ml_mate"); assertTrue(has("ml_call") && has("ml_wa") && hasText("Last seen 12 min ago"))
         shot("ml_17_team_card")
@@ -352,7 +373,7 @@ class MapLayersTest {
         here(0.5205, 35.2699)
         followOn(); rule.waitForIdle()
         here(0.5215, 35.2709, 300f)
-        waitTag("ml_next"); assertTrue(hasText("Kituo kijacho · 1 kati ya 3"))
+        waitTag("ml_next"); assertTrue(hasText("Kituo 1/3"))
         assertEquals("no motion: turned straight away", 60f, map().mapOrientation, 1.5f)
         shot("ml_30_follow_sw_still")
         openSheet(); assertTrue(hasText("Ziara 3 zako leo · 0 zimekamilika")); sheetShot("ml_31_sheet_sw")

@@ -364,7 +364,8 @@ object OfflineMaps {
     }
 }
 
-fun mbText(b: Long): String = if (b < 1024L * 1024) t("under 1 MB", "chini ya MB 1") else if (b < 10L * 1024 * 1024) "%.1f MB".format(java.util.Locale.US, b / 1048576.0) else "${(b / 1048576.0).roundToInt()} MB"
+/** Storage: "under 1 MB", "4.2 MB", "250 MB", then "8.0 GB" from 1 GB (the same as the web app). */
+fun mbText(b: Long): String = if (b < 1024L * 1024) t("under 1 MB", "chini ya 1 MB") else org.rafikioutreach.pin.cmap.CountryMaps.mb(b)
 private fun limitText(mb: Int) = if (mb >= 1000) "${mb / 1000} GB" else "$mb MB"
 private fun dayText(ms: Long) = runCatching { Instant.ofEpochMilli(ms).atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("d MMM yyyy", if (org.rafikioutreach.pin.Lang.sw) java.util.Locale("sw") else java.util.Locale.UK)) }.getOrDefault("")
 
@@ -471,6 +472,7 @@ fun OfflineSheet(m: AppModel, close: () -> Unit, openList: () -> Unit) {
     }
     var name by remember(suggested) { mutableStateOf(suggested) }
     var err by remember { mutableStateOf<String?>(null) }
+    val xScope = androidx.compose.runtime.rememberCoroutineScope()
     ModalBottomSheet(close, sheetState = state, containerColor = C.card, shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)) {
         Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, bottom = 24.dp).testTag("offline_sheet")) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -479,6 +481,8 @@ fun OfflineSheet(m: AppModel, close: () -> Unit, openList: () -> Unit) {
                     Text(t("Save this area for offline", "Hifadhi eneo hili kwa matumizi bila mtandao"), style = MaterialTheme.typography.titleLarge, color = C.ink)
                     Text(t("Before a trip, so the map works with no signal.", "Kabla ya safari, ili ramani ifanye kazi bila mtandao."), style = MaterialTheme.typography.bodySmall, color = C.muted)
                 }
+                Spacer(Modifier.width(8.dp))
+                SheetCloseX("oa_x") { sheetHide(xScope, state, close) }
             }
             SmallSeg(listOf("screen" to t("Area on screen", "Eneo lililo kwenye skrini"), "me" to t("Around me", "Karibu nami")), which, Modifier.fillMaxWidth().padding(top = 16.dp), tag = "oa_") { which = it }
             if (which == "me" && me == null) Msg(t("Allow location to save the area around you.", "Ruhusu mahali ili uhifadhi eneo linalokuzunguka."), "warn")
@@ -530,8 +534,11 @@ fun OfflineScreen(m: AppModel, back: () -> Unit) {
     var limit by remember { mutableIntStateOf(OfflineMaps.limitMb) }
     var keep by remember { mutableIntStateOf(OfflineMaps.keepDays) }
     var ask by remember { mutableStateOf<OfflineArea?>(null) }
-    ShowInBar(m, t("Offline maps", "Ramani bila mtandao"), true)
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 110.dp).testTag("offline_screen")) {
+    // one title: the page's own heading, and the top bar takes it over only once it has scrolled away
+    val scroll = rememberScrollState()
+    val headPx = with(androidx.compose.ui.platform.LocalDensity.current) { 56.dp.roundToPx() }
+    ShowInBar(m, t("Offline maps", "Ramani bila mtandao"), scroll.value > headPx)
+    Column(Modifier.fillMaxSize().verticalScroll(scroll).padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 110.dp).testTag("offline_screen")) {
         Text(t("Offline maps", "Ramani bila mtandao"), style = MaterialTheme.typography.headlineLarge, color = C.ink, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
         Text(t("Map areas kept on this phone for places with no signal.", "Maeneo ya ramani yaliyohifadhiwa kwenye simu hii kwa mahali pasipo na mtandao."), style = MaterialTheme.typography.bodyMedium, color = C.muted, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(top = 4.dp, bottom = 12.dp))
         Card {

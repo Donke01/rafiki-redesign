@@ -156,8 +156,11 @@ data class MapPin(val ll: LatLng, val color: Int, val number: String?, val title
 data class MapLine(val pts: List<LatLng>, val color: Int, val dim: Boolean)
 
 private fun avatarIcon(ctx: android.content.Context, a: MapAvatar): BitmapDrawable {
-    val d = ctx.resources.displayMetrics.density; val w = (64 * d).toInt(); val h = (60 * d).toInt(); val r = 20 * d
-    val b = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888); val c = android.graphics.Canvas(b); val p = Paint(Paint.ANTI_ALIAS_FLAG)
+    val d = ctx.resources.displayMetrics.density; val h = (60 * d).toInt(); val r = 20 * d
+    val p = Paint(Paint.ANTI_ALIAS_FLAG)
+    // as wide as its label ("dakika 12 zilizopita"), so the label is never cut off
+    val w = maxOf(64 * d, Paint(Paint.ANTI_ALIAS_FLAG).apply { textSize = 10 * d; typeface = Typeface.DEFAULT_BOLD }.measureText(a.label) + 16 * d).toInt()
+    val b = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888); val c = android.graphics.Canvas(b)
     val cx = w / 2f; val cy = r + 2 * d
     p.color = 0x55000000; c.drawCircle(cx, cy + 1.5f * d, r, p)
     p.color = android.graphics.Color.WHITE; c.drawCircle(cx, cy, r, p)
@@ -402,7 +405,7 @@ fun TeamMapSection(m: AppModel, s: Snapshot, open: (String) -> Unit) {
     sheet?.let { n -> d.people.firstOrNull { it.name == n }?.let { p -> PersonMapSheet(p, Color(colors.getValue(p.name)), d.visits.filter { it.by.equals(p.name, true) }, s, { sheet = null }, { who = p.name }, open) } }
 }
 
-private fun accText(acc: Int) = if (acc > 0) " · ±" + (if (acc < 1000) "$acc m" else "${acc / 1000} km") else ""
+private fun accText(acc: Int) = if (acc > 0) " · " + Geo.acc(acc) else ""
 
 /** A teammate on the map: call, WhatsApp, show them on the map, and today's visits (tap one to open the project). */
 @Composable
@@ -543,6 +546,8 @@ fun PlanWeekSection(m: AppModel, s: Snapshot, open: (String) -> Unit) {
 
     pickAt?.let { at -> PlanPickSheet(s, ck, areas, pick, at) { pickAt = null } }
 
+    val undo = remember { UndoState() }
+    UndoSnack(undo, "plan_undo")
     val p = plan ?: return
     if (p.days.isEmpty()) return
     val n = p.days.sumOf { it.size }; val km = p.days.sumOf { planMetres(it, s) }
@@ -628,6 +633,13 @@ fun PlanWeekSection(m: AppModel, s: Snapshot, open: (String) -> Unit) {
         if (pr != null && d != null && k >= 0) StopSheet(m, p, di, k, pr, s, { stop = null }, open) {
             plan = p.copy(days = p.days.mapIndexed { j, dd -> if (j == di) planOrder(dd - id, s) else dd }, spare = listOf(id) + p.spare)
             amsg = "ok" to t("Taken off day ${di + 1}. It’s back in “Add a stop”.", "Imeondolewa siku ya ${di + 1}. Iko tena kwenye “Ongeza kituo”.")
+            // reversible: Undo puts the stop back where it was on that day
+            undo.show(t("${pr.title} taken off day ${di + 1}", "${pr.title} imeondolewa siku ya ${di + 1}")) {
+                plan?.let { cur -> if (!cur.assigned && cur.days.getOrNull(di)?.contains(id) == false) {
+                    plan = cur.copy(days = cur.days.mapIndexed { j, dd -> if (j == di) dd.toMutableList().apply { add(k.coerceAtMost(size), id) } else dd }, spare = cur.spare - id)
+                    amsg = null
+                } }
+            }
         }
     }
 }

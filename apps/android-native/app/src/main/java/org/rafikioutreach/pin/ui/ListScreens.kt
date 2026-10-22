@@ -14,6 +14,10 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.foundation.shape.CircleShape
 
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInParent
 
 import androidx.compose.ui.focus.focusRequester
 
@@ -96,17 +100,27 @@ fun MapScreen(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit = ope
  *  and, open, grows no taller than [maxFull], so it stays under the controls at the top (MapHome.kt). */
 @Composable
 fun NearestSheet(m: AppModel, snap: Snapshot, here: LatLng?, modifier: Modifier, open: (String) -> Unit,
-                 slim: Boolean = false, expanded: Boolean? = null, onExpand: ((Boolean) -> Unit)? = null, maxFull: androidx.compose.ui.unit.Dp = androidx.compose.ui.unit.Dp.Unspecified) {
-    val list = here?.let { h -> snap.projects.filter { it.gps != null }.map { it to Geo.metres(h, it.gps!!) }.sortedBy { it.second }.take(5) } ?: emptyList()
-    val none: @Composable ColumnScope.() -> Unit = { Text(t("Allow location to see the projects closest to you.", "Ruhusu mahali ili uone miradi iliyo karibu nawe."), style = MaterialTheme.typography.bodyMedium, color = C.muted, modifier = Modifier.padding(6.dp)) }
+                 slim: Boolean = false, expanded: Boolean? = null, onExpand: ((Boolean) -> Unit)? = null, maxFull: androidx.compose.ui.unit.Dp = androidx.compose.ui.unit.Dp.Unspecified,
+                 pool: List<Project>? = null, emptyText: String = "") {
+    // with a filter on the map, the closest of what the filter leaves ([pool])
+    val list = here?.let { h -> (pool ?: snap.projects).filter { it.gps != null }.map { it to Geo.metres(h, it.gps!!) }.sortedBy { it.second }.take(5) } ?: emptyList()
+    val none: @Composable ColumnScope.() -> Unit = {
+        if (here != null) Text(emptyText.ifBlank { t("No projects near you", "Hakuna miradi karibu nawe") }, style = MaterialTheme.typography.bodyMedium, color = C.muted, modifier = Modifier.padding(6.dp).testTag("nearest_empty"))
+        else Row(Modifier.fillMaxWidth().padding(start = 6.dp, top = 2.dp, bottom = 2.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(t("See the projects closest to you.", "Ona miradi iliyo karibu nawe."), style = MaterialTheme.typography.bodyMedium, color = C.muted, modifier = Modifier.weight(1f))
+            Spacer(Modifier.width(10.dp))
+            AllowLocationBtn(m, Modifier, "nearest_allow")
+        }
+    }
     val line: @Composable androidx.compose.foundation.layout.RowScope.() -> Unit = {
         val first = list.firstOrNull()
-        if (first == null) Text(t("Nearest to you", "Iliyo karibu nawe"), style = MaterialTheme.typography.titleSmall, color = C.ink, maxLines = 1, softWrap = false, modifier = Modifier.weight(1f))
+        if (first == null) Text(if (here != null && emptyText.isNotBlank()) emptyText else t("Nearest to you", "Iliyo karibu nawe"), style = MaterialTheme.typography.titleSmall, color = C.ink, maxLines = 2,
+            modifier = Modifier.weight(1f).testTag("nearest_name"))
         else Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
             Text(t("Nearest:", "Karibu zaidi:"), style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold), color = C.ink, maxLines = 1, softWrap = false)
             Spacer(Modifier.width(6.dp))
-            // a long name ends with "…"; the distance always shows
-            Text(first.first.title, style = MaterialTheme.typography.titleSmall, color = C.ink, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false).testTag("nearest_name"))
+            // a long name takes two lines (never "…"); the distance always shows
+            WordFitText(first.first.title, MaterialTheme.typography.titleSmall.copy(lineHeight = 17.sp), C.ink, 2, Modifier.weight(1f, fill = false), minSp = 11f, tag = "nearest_name")
             Text(" · " + Geo.dist(first.second, m.prefs.miles), style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold), color = C.deep, maxLines = 1, softWrap = false)
         }
     }
@@ -122,7 +136,7 @@ private class HereKeep { var id: String? = null; var last: Pair<Project, Double>
 /** The "You’re at …" banner. It appears within 200 m and stays until you are 260 m away, so GPS wobble
  *  near the edge doesn’t make it blink; it slides in and out instead of popping. */
 @Composable
-fun HereSlot(m: AppModel, snap: Snapshot, here: LatLng?, modifier: Modifier, visit: (String) -> Unit, open: (String) -> Unit) {
+fun HereSlot(m: AppModel, snap: Snapshot, here: LatLng?, modifier: Modifier, visit: (String) -> Unit, open: (String) -> Unit, chipAfter: Boolean = false) {
     val keep = remember { HereKeep() }
     val near = here?.let { h -> snap.projects.filter { it.gps != null }.map { it to Geo.metres(h, it.gps!!) }.minByOrNull { it.second } }
     val now = near?.takeIf { (it.second <= 200 || (it.first.id == keep.id && it.second <= 260)) && !m.dismissed.contains(it.first.id) }
@@ -130,7 +144,11 @@ fun HereSlot(m: AppModel, snap: Snapshot, here: LatLng?, modifier: Modifier, vis
     if (now != null) keep.last = now
     androidx.compose.animation.AnimatedVisibility(now != null, modifier, enter = androidx.compose.animation.fadeIn() + androidx.compose.animation.expandVertically(), exit = androidx.compose.animation.fadeOut() + androidx.compose.animation.shrinkVertically()) {
         val (p, d) = now ?: keep.last ?: return@AnimatedVisibility
-        HereBanner(p, d, m.prefs.miles, Modifier, { visit(p.id) }, { open(p.id) }) { m.dismissed.add(p.id) }
+        // on a small phone's map it folds into a chip after 5 seconds, leaving the map room; a tap opens it again
+        var folded by remember(p.id) { mutableStateOf(false) }
+        if (chipAfter) androidx.compose.runtime.LaunchedEffect(p.id, folded) { if (!folded) { kotlinx.coroutines.delay(5000); folded = true } }
+        if (chipAfter && folded) HereChip(p) { folded = false }
+        else HereBanner(p, d, m.prefs.miles, Modifier, { visit(p.id) }, { open(p.id) }) { m.dismissed.add(p.id) }
     }
 }
 
@@ -141,22 +159,56 @@ fun nearHere(s: Snapshot, here: LatLng?): Pair<Project, Double>? {
 
 @Composable
 fun HereBanner(p: Project, d: Double, miles: Boolean, modifier: Modifier, visit: () -> Unit, open: () -> Unit, dismiss: () -> Unit) {
-    // one slim strip: where you are (tap to open it), Report, and ×
-    Row(modifier.fillMaxWidth().clip(RoundedCornerShape(22.dp)).background(OkBrush).padding(start = 14.dp, end = 8.dp, top = 8.dp, bottom = 8.dp).testTag("here"), verticalAlignment = Alignment.CenterVertically) {
-        Row(Modifier.weight(1f).clip(RoundedCornerShape(14.dp)).clickable(role = Role.Button, onClick = open).heightIn(min = 44.dp).testTag("here_open"), verticalAlignment = Alignment.CenterVertically) {
-            Icon(Ic.get("pin"), null, tint = Color.White, modifier = Modifier.size(20.dp)); Spacer(Modifier.width(10.dp))
-            Column {
-                Text(t("YOU’RE AT", "UKO") + " · " + Geo.dist(d, miles), color = Color(0xCCFFFFFF), style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, letterSpacing = 0.8.sp, fontWeight = FontWeight.ExtraBold), maxLines = 1)
-                Text(p.title, color = Color.White, style = MaterialTheme.typography.titleSmall, maxLines = 2, overflow = TextOverflow.Ellipsis)
-            }
-        }
-        Spacer(Modifier.width(8.dp))
-        Text(t("Report", "Ripoti"), color = Color(0xFF0E4A2B), style = MaterialTheme.typography.labelLarge,
+    // one slim strip: where you are (tap to open it), Report, and ×. The whole name, never cut short: a name too long
+    // for two lines beside Report gets the strip's full width, and Report moves under it
+    val nameStyle = MaterialTheme.typography.titleSmall.copy(lineHeight = 18.sp)
+    val status: @Composable (Modifier) -> Unit = { mod -> Text(t("YOU’RE AT", "UKO") + " · " + Geo.dist(d, miles), color = Color(0xCCFFFFFF), style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, letterSpacing = 0.8.sp, fontWeight = FontWeight.ExtraBold), maxLines = 1, modifier = mod.testTag("here_status")) }
+    val report: @Composable () -> Unit = {
+        Text(t("Report", "Ripoti"), color = Color(0xFF0E4A2B), style = MaterialTheme.typography.labelLarge, maxLines = 1, softWrap = false,
             modifier = Modifier.clip(RoundedCornerShape(99.dp)).background(Color.White).clickable(role = Role.Button, onClick = visit).heightIn(min = 40.dp).padding(horizontal = 14.dp, vertical = 10.dp).testTag("here_visit"))
-        Spacer(Modifier.width(6.dp))
+    }
+    val x: @Composable () -> Unit = {
         Box(Modifier.size(40.dp).clip(CircleShape).border(1.dp, Color(0x99FFFFFF), CircleShape).clickable(role = Role.Button, onClick = dismiss).semantics { contentDescription = t("Not now", "Si sasa") }.testTag("here_x"), contentAlignment = Alignment.Center) {
             Icon(Ic.get("x"), null, tint = Color.White, modifier = Modifier.size(16.dp))
         }
+    }
+    androidx.compose.foundation.layout.BoxWithConstraints(modifier.fillMaxWidth()) {
+        val dens = androidx.compose.ui.platform.LocalDensity.current
+        val measurer = androidx.compose.ui.text.rememberTextMeasurer()
+        val reportW = with(dens) { measurer.measure(t("Report", "Ripoti"), MaterialTheme.typography.labelLarge).size.width + 28.dp.roundToPx() }
+        val slimW = with(dens) { (maxWidth - 22.dp - 30.dp - 8.dp - 6.dp - 40.dp).roundToPx() } - reportW
+        val fits = rememberWordFitSize(listOf(p.title), nameStyle, slimW, 2, minSp = nameStyle.fontSize.value) >= nameStyle.fontSize.value &&
+            !measurer.measure(p.title, nameStyle, maxLines = 2, constraints = androidx.compose.ui.unit.Constraints(maxWidth = slimW.coerceAtLeast(1))).hasVisualOverflow
+        val shape = RoundedCornerShape(22.dp)
+        if (fits) Row(Modifier.fillMaxWidth().clip(shape).background(OkBrush).padding(start = 14.dp, end = 8.dp, top = 8.dp, bottom = 8.dp).testTag("here"), verticalAlignment = Alignment.CenterVertically) {
+            Row(Modifier.weight(1f).clip(RoundedCornerShape(14.dp)).clickable(role = Role.Button, onClick = open).heightIn(min = 44.dp).testTag("here_open"), verticalAlignment = Alignment.CenterVertically) {
+                Icon(Ic.get("pin"), null, tint = Color.White, modifier = Modifier.size(20.dp)); Spacer(Modifier.width(10.dp))
+                Column { status(Modifier); Text(p.title, color = Color.White, style = nameStyle, maxLines = 2, modifier = Modifier.testTag("here_name")) }
+            }
+            Spacer(Modifier.width(8.dp)); report(); Spacer(Modifier.width(6.dp)); x()
+        }
+        else Column(Modifier.fillMaxWidth().clip(shape).background(OkBrush).padding(start = 14.dp, end = 8.dp, top = 8.dp, bottom = 8.dp).testTag("here")) {
+            Row(verticalAlignment = Alignment.Top) {
+                Row(Modifier.weight(1f).clip(RoundedCornerShape(14.dp)).clickable(role = Role.Button, onClick = open).heightIn(min = 44.dp).testTag("here_open"), verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Ic.get("pin"), null, tint = Color.White, modifier = Modifier.size(20.dp)); Spacer(Modifier.width(10.dp))
+                    WordFitText(p.title, nameStyle, Color.White, 3, Modifier.weight(1f), minSp = 11f, tag = "here_name")
+                }
+                Spacer(Modifier.width(6.dp)); x()
+            }
+            Row(Modifier.padding(top = 4.dp), verticalAlignment = Alignment.CenterVertically) { status(Modifier.weight(1f).padding(start = 30.dp)); report() }
+        }
+    }
+}
+
+/** "You're at" folded: a small green chip; a tap opens the full strip again. */
+@Composable
+private fun HereChip(p: Project, open: () -> Unit) {
+    Row(Modifier.clip(RoundedCornerShape(99.dp)).background(OkBrush).clickable(role = Role.Button, onClick = open).heightIn(min = 44.dp).padding(start = 12.dp, end = 14.dp)
+        .semantics { contentDescription = t("You’re at ", "Uko ") + p.title }.testTag("here_chip"), verticalAlignment = Alignment.CenterVertically) {
+        Icon(Ic.get("pin"), null, tint = Color.White, modifier = Modifier.size(18.dp)); Spacer(Modifier.width(6.dp))
+        Text(t("You’re at a project", "Uko kwenye mradi"), color = Color.White, style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold), maxLines = 1, softWrap = false)
+        Spacer(Modifier.width(4.dp))
+        Icon(Ic.get("down"), null, tint = Color.White.copy(alpha = 0.85f), modifier = Modifier.size(15.dp))
     }
 }
 
@@ -172,8 +224,8 @@ fun Meter(f0: Float, modifier: Modifier = Modifier, light: Boolean = false, glas
 }
 
 private val FILTERS = listOf(
-    Triple("missing", "Needs a location|Hakuna mahali", "pinq"), Triple("near", "Nearby|Karibu nawe", "compass"), Triple("repairs", "Repairs|Ukarabati", "wrench"),
-    Triple("due", "Due a visit|Inasubiri ziara", "cal"), Triple("all", "All|Yote", "list"),
+    Triple("all", "All|Yote", "list"), Triple("missing", "Needs a location|Hakuna mahali", "pinq"), Triple("near", "Nearby|Karibu nawe", "compass"),
+    Triple("repairs", "Repairs|Matengenezo", "wrench"), Triple("due", "Due a visit|Inasubiri ziara", "cal"),
 )
 
 @OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
@@ -191,15 +243,16 @@ fun ProjectsScreen(m: AppModel, open: (String) -> Unit, planRoute: () -> Unit = 
     val tcount = snap.projects.filter { ck.isBlank() || it.ck == ck }.groupingBy { tgroup(it) }.eachCount()
     if (ty.isNotBlank() && (tcount[ty] ?: 0) == 0) ty = ""
 
-    var rows = snap.projects.filter { p ->
-        when (f) {
-            "missing" -> p.gps == null
-            "near" -> p.gps != null
-            "repairs" -> snap.repairs.containsKey(p.id)
-            "due" -> p.gps != null && (ageDays(snap, p) >= DUE_DAYS || testDue(snap, p))
-            else -> true
-        } && (ck.isBlank() || p.ck == ck) && (ty.isBlank() || tgroup(p) == ty)
+    fun inFilter(p: Project, k: String) = when (k) {
+        "missing" -> p.gps == null
+        "near" -> p.gps != null
+        "repairs" -> snap.repairs.containsKey(p.id)
+        "due" -> p.gps != null && (ageDays(snap, p) >= DUE_DAYS || testDue(snap, p))
+        else -> true
     }
+    // what the Filter pill (country, type) leaves; the chips count within it
+    val scoped = snap.projects.filter { p -> (ck.isBlank() || p.ck == ck) && (ty.isBlank() || tgroup(p) == ty) }
+    var rows = scoped.filter { inFilter(it, f) }
     if (f == "near" && here != null) rows = rows.sortedBy { Geo.metres(here, it.gps!!) }.take(30)
     if (f == "repairs") rows = rows.sortedBy { mapOf("urgent" to 0, "month" to 1, "watch" to 2)[snap.repairs[it.id]?.urgency] ?: 3 }
     if (f == "due") rows = rows.sortedByDescending { ageDays(snap, it) }
@@ -216,7 +269,7 @@ fun ProjectsScreen(m: AppModel, open: (String) -> Unit, planRoute: () -> Unit = 
 
     val list = androidx.compose.foundation.lazy.rememberLazyListState()
     val scope = rememberCoroutineScope()
-    var countrySheet by remember { mutableStateOf(false) }
+    var filterSheet by remember { mutableStateOf(false) }
     val seen = remember { mutableSetOf<Any>() }
     // where the "Projects" heading is in the list, so the top bar can take over the title once it scrolls away
     val headIdx = 2 + (if (banner != null) 1 else 0) + (if (waiting > 0) 1 else 0) + (if (mine.isNotEmpty()) 1 else 0)
@@ -248,63 +301,50 @@ fun ProjectsScreen(m: AppModel, open: (String) -> Unit, planRoute: () -> Unit = 
                 } }
             }
         }
+        // the head, like Office's tabs: the title, how many are pinned, and three numbers that set the filter
         item(key = "head") {
-            Column(Modifier.fillMaxWidth().padding(top = 4.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(t("Projects", "Miradi"), style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold), color = C.ink)
-                Row(Modifier.clip(RoundedCornerShape(12.dp)).clickable(role = Role.Button, onClick = planRoute).heightIn(min = 44.dp).padding(horizontal = 6.dp).testTag("plan_route"), verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Ic.get("map"), null, tint = C.blue, modifier = Modifier.size(18.dp)); Spacer(Modifier.width(6.dp))
-                    Text(t("Plan a route", "Panga njia"), style = MaterialTheme.typography.labelLarge, color = C.blue)
-                }
-            }
+            val pn = snap.projects.count { it.gps != null }; val all = snap.projects.size
+            fun n(k: String) = scoped.count { inFilter(it, k) }
+            DqmHead("projects_head", "list", "blue", t("Projects", "Miradi"),
+                t("$pn of $all projects pinned · ${all - pn} to go", "Miradi $pn kati ya $all ina mahali · ${all - pn} imebaki"),
+                listOf(
+                    n("missing").let { DqmNum(it, if (it == 1) t("needs a location", "haina mahali") else t("need a location", "hazina mahali"), if (it > 0) "has" else "off", "missing") },
+                    n("repairs").let { DqmNum(it, if (it == 1) t("open repair", "ina hitilafu") else t("open repairs", "zina hitilafu"), if (it > 0) "bad" else "off", "repairs") },
+                    n("due").let { DqmNum(it, t("due a visit", "bila ziara"), if (it > 0) "" else "off", "due") },
+                ), picked = f, onNum = { pick(it) },
+                actions = {
+                    Row(Modifier.padding(top = 10.dp).clip(RoundedCornerShape(12.dp)).clickable(role = Role.Button, onClick = planRoute).heightIn(min = 44.dp).padding(horizontal = 4.dp).testTag("plan_route"), verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Ic.get("map"), null, tint = C.blue, modifier = Modifier.size(18.dp)); Spacer(Modifier.width(6.dp))
+                        Text(t("Plan a route", "Panga njia"), style = MaterialTheme.typography.labelLarge, color = C.blue)
+                    }
+                })
         }
-        item {
-            val pinned = snap.projects.count { it.gps != null }
-            // light colours: glass, like the web app; dark and bright sun: deep blue
-            val glass = C.inky
-            Card(brush = if (glass) null else DeepBrush, pad = 14.dp) {
-                val n = kotlin.math.round(rememberFill(pinned.toFloat())).toInt() // counts up
-                Row { Text(t("$n of ${snap.projects.size} projects pinned", "Miradi $n kati ya ${snap.projects.size} ina mahali"), color = if (glass) C.ink else Color.White, style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f)); Text(t("${snap.projects.size - pinned} to go", "${snap.projects.size - pinned} zimebaki"), color = if (glass) C.muted else Color(0xFFCFE8FA), style = MaterialTheme.typography.bodySmall) }
-                Meter(pinned.toFloat() / maxOf(1, snap.projects.size), Modifier.padding(top = 10.dp), light = !glass, glass = glass)
-                // one meter per country, only when there is more than one country to compare
-                if (COUNTRIES.keys.count { k -> snap.projects.any { it.ck == k } } > 1) Row(Modifier.padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    COUNTRIES.forEach { (k, n) ->
-                        val l = snap.projects.filter { it.ck == k }
-                        if (l.isNotEmpty()) Column(Modifier.weight(1f)) {
-                            val pn = l.count { it.gps != null }
-                            Text("$n $pn/${l.size}", color = if (glass) C.muted else Color(0xFFCFE8FA), style = MaterialTheme.typography.labelSmall, maxLines = 1)
-                            Meter(pn.toFloat() / l.size, Modifier.padding(top = 4.dp), light = !glass, glass = glass)
+        // one row of filters with their counts, that stays at the top while the list scrolls; country and type are under Filter
+        stickyHeader(key = "chips") {
+            Box(Modifier.fillMaxWidth().background(androidx.compose.ui.graphics.Brush.verticalGradient(listOf(C.bg, C.bg, C.bg.copy(alpha = 0f)))).padding(top = 4.dp, bottom = 8.dp)) {
+                // the row fades at its right edge ("swipe for more", not cut off) and brings the chosen chip into view
+                val rowScroll = rememberScrollState()
+                val chipX = remember { mutableMapOf<String, Int>() }
+                androidx.compose.runtime.LaunchedEffect(f) { chipX[f]?.let { x -> rowScroll.animateScrollTo((x - 48).coerceAtLeast(0)) } }
+                Row(Modifier.fillMaxWidth().graphicsLayer(compositingStrategy = androidx.compose.ui.graphics.CompositingStrategy.Offscreen).drawWithContent {
+                        drawContent()
+                        if (rowScroll.value < rowScroll.maxValue) drawRect(androidx.compose.ui.graphics.Brush.horizontalGradient(0f to Color.Black, 1f - 28.dp.toPx() / size.width to Color.Black, 1f to Color.Transparent), blendMode = androidx.compose.ui.graphics.BlendMode.DstIn)
+                    }.horizontalScroll(rowScroll).padding(end = 20.dp).testTag("chips"), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    ProjFilterPill(listOfNotNull(COUNTRIES[ck], TGROUPS.firstOrNull { it.first == ty }?.let { t(it.second, it.third) })) { filterSheet = true }
+                    FILTERS.forEach { (k, label, icon) ->
+                        Box(Modifier.onGloballyPositioned { chipX[k] = it.positionInParent().x.toInt() }) {
+                            ProjChip(label.split("|").let { t(it[0], it[1]) }, icon, scoped.count { inFilter(it, k) }, f == k, "chip_$k") { f = k; m.prefs.filter = k }
                         }
                     }
                 }
             }
         }
-        // filters: a row of chips you can swipe, that stays at the top while the list scrolls
-        stickyHeader(key = "chips") {
-            Box(Modifier.fillMaxWidth().background(androidx.compose.ui.graphics.Brush.verticalGradient(listOf(C.bg, C.bg, C.bg.copy(alpha = 0f)))).padding(top = 4.dp, bottom = 10.dp)) {
-                // all five filters across the width, no sideways scrolling
-                Row(Modifier.fillMaxWidth().testTag("chips"), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    FILTERS.sortedBy { if (it.first == "all") 0 else 1 }.forEach { (k, label, icon) ->
-                        FilterTile(label.split("|").let { t(it[0], it[1]) }, icon, f == k, { f = k; m.prefs.filter = k }, Modifier.weight(1f), badge = if (k == "repairs") snap.repairs.size else 0, tag = "chip_$k", hue = k)
-                    }
-                }
-            }
+        item(key = "count") {
+            Text(count, style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold), color = C.muted, modifier = Modifier.padding(start = 4.dp).testTag("proj_count"))
         }
-        // the country sits with the count: tap it to choose another
-        item {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Chip(COUNTRIES[ck] ?: t("All countries", "Nchi zote"), "map", false, { countrySheet = true }, trailing = "down", tag = "chip_country", hue = "country")
-                Spacer(Modifier.width(10.dp))
-                Text(count, style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold), color = C.muted, modifier = Modifier.weight(1f), maxLines = 2)
-            }
-        }
-        // type of project: only the kinds there are
-        if (tcount.size > 1) item(key = "types") {
-            Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).testTag("type_chips"), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                TypeChip(t("All types", "Aina zote"), null, ty.isBlank(), "type_") { ty = ""; m.prefs.ftype = "" }
-                TGROUPS.filter { (tcount[it.first] ?: 0) > 0 }.forEach { (k, en, sw) -> TypeChip(t(en, sw), tcount[k], ty == k, "type_$k") { ty = k; m.prefs.ftype = k } }
-            }
-        }
-        itemsIndexed(rows, key = { _, it -> it.id }) { i, p -> Box(Modifier.rise(i, seen, p.id)) { ProjectRow(m, snap, p, here) { open(p.id) } } }
+                // "Pinned" only says something when some rows aren't
+        val allPinned = rows.all { it.gps != null }
+        itemsIndexed(rows, key = { _, it -> it.id }) { i, p -> Box(Modifier.rise(i, seen, p.id)) { ProjectRow(m, snap, p, here, showPinned = !allPinned) { open(p.id) } } }
         if (rows.isEmpty()) item {
             EmptyDrop(when {
                 f == "missing" && ck.isBlank() -> t("Every project has a location.", "Kila mradi una mahali.")
@@ -314,24 +354,88 @@ fun ProjectsScreen(m: AppModel, open: (String) -> Unit, planRoute: () -> Unit = 
             })
         }
     }
-    if (countrySheet) PickSheet(t("Country", "Nchi"), listOf(Triple("", t("All countries", "Nchi zote"), "map")) + COUNTRIES.map { (k, n) -> Triple(k, n, "pin") }, ck, { ck = it; m.prefs.country = it }) { countrySheet = false }
+    if (filterSheet) ProjFilterSheet(snap, ck, ty, rows.size, { ck = it; m.prefs.country = it }, { ty = it; m.prefs.ftype = it }) { filterSheet = false }
 }
 
 /** Kinds of project for the type filter. */
 val TGROUPS = listOf(Triple("water", "Water", "Maji"), Triple("school", "Schools", "Shule"), Triple("health", "Health", "Afya"), Triple("home", "Children’s homes", "Makao ya watoto"), Triple("farm", "Farming", "Kilimo"), Triple("other", "Other", "Nyingine"))
 fun tgroup(p: Project): String { val t = p.type.lowercase(); return when { "borehole" in t || "collection" in t -> "water"; "school" in t -> "school"; "health" in t -> "health"; "orphan" in t -> "home"; "farm" in t -> "farm"; else -> "other" } }
 
+/** A filter in the Projects row, with its count: blue when chosen, as on Office's tabs. Never wraps. */
 @Composable
-private fun TypeChip(label: String, n: Int?, on: Boolean, tag: String, onClick: () -> Unit) {
-    Row(Modifier.clip(RoundedCornerShape(99.dp)).background(if (on) C.ink else C.card).border(1.dp, if (on) C.ink else C.line, RoundedCornerShape(99.dp)).clickable(role = Role.Button, onClick = onClick)
-        .heightIn(min = 36.dp).padding(horizontal = 14.dp).testTag(tag), verticalAlignment = Alignment.CenterVertically) {
-        Text(label, style = MaterialTheme.typography.labelLarge, color = if (on) C.card else C.ink)
-        if (n != null) { Spacer(Modifier.width(6.dp)); Text("$n", style = MaterialTheme.typography.labelMedium, color = if (on) C.card.copy(alpha = 0.75f) else C.muted) }
+private fun ProjChip(label: String, icon: String, n: Int, on: Boolean, tag: String, onClick: () -> Unit) {
+    val h = rememberHaptics()
+    val shape = RoundedCornerShape(999.dp)
+    Row(
+        Modifier.clip(shape).background(if (on) C.blue else C.card).border(1.dp, if (on) C.blue else C.line, shape).clickable(role = Role.Tab) { h.tap(); onClick() }
+            .heightIn(min = 44.dp).padding(start = 12.dp, end = 12.dp).testTag(tag).semantics(mergeDescendants = true) {},
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(Ic.get(icon), null, tint = if (on) Color.White else C.blue, modifier = Modifier.size(17.dp)); Spacer(Modifier.width(6.dp))
+        Text(label, style = MaterialTheme.typography.labelLarge.copy(fontSize = 14.sp), color = if (on) Color.White else C.ink, maxLines = 1, softWrap = false)
+        Spacer(Modifier.width(6.dp))
+        Text("$n", style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp, fontWeight = FontWeight.Bold), color = if (on) C.blue else C.muted, maxLines = 1, softWrap = false,
+            modifier = Modifier.clip(shape).background(if (on) Color.White else C.bg).padding(horizontal = 7.dp, vertical = 1.dp))
     }
 }
 
+/** Country and type in one pill: "Filter", or what is chosen ("Kenya · Water"), blue while anything is chosen. */
 @Composable
-fun ProjectRow(m: AppModel, s: Snapshot, p: Project, here: LatLng?, onClick: () -> Unit) {
+private fun ProjFilterPill(chosen: List<String>, onClick: () -> Unit) {
+    val h = rememberHaptics()
+    val on = chosen.isNotEmpty()
+    val shape = RoundedCornerShape(999.dp)
+    Row(
+        Modifier.clip(shape).background(if (on) C.blue else C.card).border(1.dp, if (on) C.blue else C.line, shape).clickable(role = Role.Button) { h.tap(); onClick() }
+            .heightIn(min = 44.dp).padding(start = 12.dp, end = 10.dp).testTag("proj_filter")
+            .semantics { contentDescription = t("Filter by country and type", "Chuja kwa nchi na aina") + if (on) ": " + chosen.joinToString(", ") else "" },
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(Ic.get("filter"), null, tint = if (on) Color.White else C.blue, modifier = Modifier.size(17.dp)); Spacer(Modifier.width(6.dp))
+        Text(if (on) chosen.joinToString(" · ") else t("Filter", "Chuja"), style = MaterialTheme.typography.labelLarge.copy(fontSize = 14.sp), color = if (on) Color.White else C.ink, maxLines = 1, softWrap = false)
+        Spacer(Modifier.width(4.dp))
+        Icon(Ic.get("down"), null, tint = if (on) Color.White else C.muted, modifier = Modifier.size(15.dp))
+    }
+}
+
+/** The Filter sheet: country and type of project, each with how many there are; a close X and "Show N projects". */
+@Composable
+private fun ProjFilterSheet(snap: Snapshot, ck: String, ty: String, shown: Int, onCountry: (String) -> Unit, onType: (String) -> Unit, close: () -> Unit) {
+    val h = rememberHaptics()
+    DqmSheet("proj_filter_sheet", close) { hide ->
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(t("Filter", "Chuja"), style = MaterialTheme.typography.titleLarge, color = C.ink, modifier = Modifier.weight(1f))
+            SheetCloseX("proj_filter_x") { hide {} }
+        }
+        @Composable
+        fun opt(k: String, label: String, n: Int, on: Boolean, tag: String, pick: () -> Unit) {
+            Row(
+                Modifier.fillMaxWidth().padding(vertical = 2.dp).clip(RoundedCornerShape(14.dp)).background(if (on) C.tint else Color.Transparent)
+                    .clickable(role = Role.RadioButton) { h.tap(); pick() }.heightIn(min = 48.dp).padding(horizontal = 12.dp).testTag(tag),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(label, style = MaterialTheme.typography.titleSmall, color = C.ink, modifier = Modifier.weight(1f))
+                Text("$n", style = MaterialTheme.typography.labelLarge, color = C.muted)
+                Spacer(Modifier.width(10.dp))
+                Box(Modifier.size(22.dp), contentAlignment = Alignment.Center) { if (on) Icon(Ic.get("check"), null, tint = C.blue, modifier = Modifier.size(22.dp)) }
+            }
+        }
+        DqmLabel(t("Country", "Nchi"))
+        opt("", t("All countries", "Nchi zote"), snap.projects.size, ck.isBlank(), "pick_") { onCountry("") }
+        COUNTRIES.forEach { (k, n) -> val c = snap.projects.count { it.ck == k }; if (c > 0 || ck == k) opt(k, n, c, ck == k, "pick_$k") { onCountry(k) } }
+        val tcount = snap.projects.filter { ck.isBlank() || it.ck == ck }.groupingBy { tgroup(it) }.eachCount()
+        if (tcount.size > 1) {
+            DqmLabel(t("Type of project", "Aina ya mradi"))
+            opt("", t("All types", "Aina zote"), tcount.values.sum(), ty.isBlank(), "type_") { onType("") }
+            TGROUPS.filter { (tcount[it.first] ?: 0) > 0 }.forEach { (k, en, sw) -> opt(k, t(en, sw), tcount[k] ?: 0, ty == k, "type_$k") { onType(k) } }
+        }
+        Btn(if (shown == 1) t("Show 1 project", "Onyesha mradi 1") else t("Show $shown projects", "Onyesha miradi $shown"), { hide {} }, Modifier.fillMaxWidth().padding(top = 14.dp).testTag("proj_filter_done"))
+    }
+}
+
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+@Composable
+fun ProjectRow(m: AppModel, s: Snapshot, p: Project, here: LatLng?, showPinned: Boolean = true, onClick: () -> Unit) {
     val rep = s.repairs[p.id]
     // the icon box carries the state colour; the tag sits under the name so names aren't cut short
     val (boxBg, boxFg) = when {
@@ -351,16 +455,18 @@ fun ProjectRow(m: AppModel, s: Snapshot, p: Project, here: LatLng?, onClick: () 
         }
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
-            Text(p.title, style = MaterialTheme.typography.titleSmall.copy(fontSize = 16.sp), color = C.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text(p.sub, style = MaterialTheme.typography.bodySmall, color = C.muted, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Row(Modifier.padding(top = 5.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                when {
-                    rep != null -> Tag(if (rep.state == "notworking") t("Not working", "Haifanyi kazi") else t("Needs repair", "Inahitaji matengenezo"), if (rep.state == "notworking") C.badBg else C.warnBg, if (rep.state == "notworking") C.bad else C.warn)
-                    p.gps == null -> Tag(t("No location", "Hakuna mahali"), C.warnBg, C.warn)
-                    here != null -> Tag(Geo.dist(Geo.metres(here, p.gps!!), m.prefs.miles), C.tint, C.deep)
-                    else -> Tag(t("Pinned", "Ina mahali"), C.okBg, C.ok)
-                }
-                if (testDue(s, p)) WaterTestTag()
+            // the whole name, on two lines if needed; a long place line drops the status before anything is cut
+            Text(p.title, style = MaterialTheme.typography.titleSmall.copy(fontSize = 16.sp), color = C.text, maxLines = 3, modifier = Modifier.testTag("row_title"))
+            FirstFitText(listOf(p.sub, listOf(p.area, p.country).filter { it.isNotBlank() }.joinToString(" · "), p.area.ifBlank { p.country }).distinct(), MaterialTheme.typography.bodySmall, C.muted)
+            // how far first, then how it is: both show (they wrap to a second line rather than squeeze)
+            val dist = if (here != null && p.gps != null) Geo.dist(Geo.metres(here, p.gps), m.prefs.miles) else null
+            val due = testDue(s, p)
+            if (dist != null || rep != null || p.gps == null || showPinned || due) androidx.compose.foundation.layout.FlowRow(Modifier.padding(top = 5.dp).testTag("row_tags"), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                if (dist != null) Tag(dist, C.tint, C.deep)
+                if (rep != null) Tag(if (rep.state == "notworking") t("Not working", "Haifanyi kazi") else t("Needs repair", "Inahitaji matengenezo"), if (rep.state == "notworking") C.badBg else C.warnBg, if (rep.state == "notworking") C.bad else C.warn)
+                if (p.gps == null) Tag(t("No location", "Hakuna mahali"), C.warnBg, C.warn)
+                else if (dist == null && rep == null && showPinned) Tag(t("Pinned", "Ina mahali"), C.okBg, C.ok)
+                if (due) WaterTestTag()
             }
         }
         Spacer(Modifier.width(8.dp))
@@ -388,19 +494,27 @@ private fun HomeTop(m: AppModel, s: Snapshot, here: LatLng?, search: () -> Unit,
             Icon(Ic.get("search"), null, tint = C.muted, modifier = Modifier.size(20.dp)); Spacer(Modifier.width(10.dp))
             Text(t("Search a project or place", "Tafuta mradi au mahali"), style = MaterialTheme.typography.bodyLarge, color = C.muted, maxLines = 1)
         }
-        // the five actions in one row, so the whole home fits on one screen
+        // the five actions in one row, so the whole home fits on one screen. Labels wrap only between words and all
+        // shrink together until the longest word fits, so no word is ever split ("Matengenezo" on a 360 dp phone)
+        val acts = listOf(Triple("missing", t("Pin a location", "Weka mahali"), "pin"), Triple("near", t("Visit nearby", "Tembelea karibu"), "clip"),
+            Triple("new", t("New site", "Eneo jipya"), "plus"), Triple("repairs", t("Repairs", "Rekebisha"), "wrench"), Triple("scan", t("Scan QR", "Soma QR"), "scan"))
+        val labelStyle = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp, lineHeight = 14.sp)
+        androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxWidth()) {
+        val tileText = with(androidx.compose.ui.platform.LocalDensity.current) { ((maxWidth - 6.dp * 4) / 5 - 4.dp).roundToPx() }
+        val fit = rememberWordFitSize(acts.map { it.second }, labelStyle, tileText, 2)
         Row(Modifier.padding(bottom = 4.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            listOf(Triple("missing", t("Pin a location", "Weka mahali"), "pin"), Triple("near", t("Visit nearby", "Tembelea karibu"), "clip"),
-                Triple("new", t("Add a site", "Ongeza eneo"), "plus"), Triple("repairs", t("Repairs", "Ukarabati"), "wrench"), Triple("scan", t("Scan QR", "Changanua QR"), "scan")).forEachIndexed { ci, (k, l, ic) ->
+            acts.forEachIndexed { ci, (k, l, ic) ->
                 val src = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
                 Column(Modifier.weight(1f).rise(ci + 1, step = 60).press(src).heightIn(min = 84.dp).clip(RoundedCornerShape(18.dp)).background(if (C.glassy) C.glass2 else C.card).border(1.dp, if (C.glassy) C.glassEdge else C.line, RoundedCornerShape(18.dp))
-                    .clickable(interactionSource = src, indication = androidx.compose.material3.ripple(), role = Role.Button) { if (k == "new") newSite() else if (k == "scan") scan() else filter(k) }.padding(horizontal = 4.dp, vertical = 10.dp).testTag("quick_$k"),
+                    .clickable(interactionSource = src, indication = androidx.compose.material3.ripple(), role = Role.Button) { if (k == "new") newSite() else if (k == "scan") scan() else filter(k) }.padding(horizontal = 2.dp, vertical = 10.dp).testTag("quick_$k"),
                     horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
                     val hu = C.hue(k)
                     Box(Modifier.size(38.dp).clip(RoundedCornerShape(13.dp)).background(hu.bg), contentAlignment = Alignment.Center) { Icon(Ic.get(ic), null, tint = hu.fg, modifier = Modifier.size(20.dp)) }
-                    Text(l, style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp, lineHeight = 14.sp), color = C.ink, textAlign = androidx.compose.ui.text.style.TextAlign.Center, maxLines = 2, modifier = Modifier.padding(top = 6.dp))
+                    Text(l, style = labelStyle.copy(fontSize = fit.sp, lineHeight = (fit * 14f / 12f).sp), color = C.ink, textAlign = androidx.compose.ui.text.style.TextAlign.Center, maxLines = 2,
+                        modifier = Modifier.padding(top = 6.dp).testTag("quick_label_$k"))
                 }
             }
+        }
         }
     }
 }

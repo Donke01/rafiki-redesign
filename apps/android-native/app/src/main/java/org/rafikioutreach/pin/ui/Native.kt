@@ -65,12 +65,19 @@ fun rememberHaptics(): Haptics { val v = LocalView.current; return remember(v) {
 /** A choice that slides up from the bottom of the screen (country, map style…). */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PickSheet(title: String, options: List<Triple<String, String, String?>>, selected: String, onPick: (String) -> Unit, extra: (@Composable ColumnScope.() -> Unit)? = null, onDismiss: () -> Unit) {
+fun PickSheet(title: String, options: List<Triple<String, String, String?>>, selected: String, onPick: (String) -> Unit, extra: (@Composable ColumnScope.() -> Unit)? = null,
+              closeTag: String? = null, onDismiss: () -> Unit) {
     val state = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val h = rememberHaptics()
+    val xScope = androidx.compose.runtime.rememberCoroutineScope()
     ModalBottomSheet(onDismiss, sheetState = state, containerColor = C.card, shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)) {
         Column(Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, bottom = 24.dp).testTag("sheet")) {
-            Text(title, style = MaterialTheme.typography.titleLarge, color = C.ink, modifier = Modifier.padding(bottom = 10.dp))
+            // with a [closeTag], a close X at the top right (the map style sheet)
+            if (closeTag != null) Row(Modifier.fillMaxWidth().padding(bottom = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+                Text(title, style = MaterialTheme.typography.titleLarge, color = C.ink, modifier = Modifier.weight(1f))
+                SheetCloseX(closeTag) { sheetHide(xScope, state, onDismiss) }
+            }
+            else Text(title, style = MaterialTheme.typography.titleLarge, color = C.ink, modifier = Modifier.padding(bottom = 10.dp))
             options.forEach { (k, label, icon) ->
                 val on = k == selected
                 Row(
