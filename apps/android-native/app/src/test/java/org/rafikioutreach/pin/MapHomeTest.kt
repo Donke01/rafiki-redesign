@@ -101,7 +101,7 @@ class MapHomeTest {
         .put("jobs", JSONArray()).put("assigned", JSONArray().put(JSONObject().put("aid", "a1").put("id", "105").put("t", "Tamiha Children’s Home").put("date", "2026-10-30").put("by", "Reid").put("note", "")))
         .put("confirmed", JSONObject()).put("me", JSONObject().put("kind", "app").put("home", "ke"))
 
-    private fun model(): AppModel {
+    private fun model(fix: Boolean = true): AppModel {
         org.rafikioutreach.pin.ui.Onb.enabled = false
         org.rafikioutreach.pin.ui.Motion.on = false
         Prefs(app).apply { pin = "1111"; name = "Meril Kiprop"; saveSnapshot(snapshot()); filter = "all"; country = ""; lang = "en"; ftype = "" }
@@ -118,7 +118,7 @@ class MapHomeTest {
                 else -> 200 to "{\"ok\":true,\"updateId\":\"9001\"}"
             }
         }
-        m.locator.pretend(Fix(LatLng(0.5150, 35.2700), 8, System.currentTimeMillis()))
+        if (fix) m.locator.pretend(Fix(LatLng(0.5150, 35.2700), 8, System.currentTimeMillis()))
         return m
     }
     private fun show(m: AppModel, dark: Boolean = false, w: Int = 390, h: Int = 844) {
@@ -282,9 +282,15 @@ class MapHomeTest {
         Lang.sw = false
         val m = model(); show(m)
         OfflineMaps.setOnline(false); rule.waitForIdle()
+        // no signal and no map kept: the map says why it is a blank grid, and where to save one
+        assertTrue(tagged("map_nosignal") && has("No signal: showing pins only.") && has("Save an offline map"))
+        assertEquals("no signal: nothing overlaps", emptyList<String>(), overlaps())
+        shot("map-40-no-signal")
+        assertTrue("You’re at shows before the search opens", tagged("here"))
         rule.onNodeWithTag("map_search_input").performClick(); rule.onNodeWithTag("map_search_input").performTextInput("Kitale")
         rule.mainClock.advanceTimeBy(1200); rule.waitForIdle()
         assertTrue(tagged("sugg_a_Kitale") && tagged("sugg_p_105") && tagged("map_sugg_offline"))
+        assertFalse("You’re at steps aside while the suggestions show", tagged("here"))
         assertFalse("no place search with no signal", calls.any { it.contains("/api/place") })
         shot("map-07-search-offline")
         OfflineMaps.setOnline(true); rule.waitForIdle()
@@ -296,6 +302,55 @@ class MapHomeTest {
         rule.onNodeWithTag("sugg_g_0").performClick(); rule.waitForIdle()
         assertEquals(13.0, mv.zoomLevelDouble, 0.01)
         assertEquals(1.0157, mv.mapCenter.latitude, 0.001)
+    }
+
+    /** No signal: the note opens Offline maps. */
+    @Test fun no_signal_note_opens_offline_maps() {
+        Lang.sw = true
+        val m = model(); show(m, dark = true)
+        OfflineMaps.setOnline(false); rule.waitForIdle()
+        assertTrue(has("Hakuna mtandao: inaonyesha alama za miradi tu.") && has("Hifadhi ramani ya bila mtandao"))
+        assertEquals(emptyList<String>(), overlaps())
+        shot("map-41-no-signal-sw-dark")
+        rule.onNodeWithTag("map_nosignal").performClick(); rule.waitForIdle()
+        rule.waitUntil(4000) { tagged("offline_screen") }
+    }
+
+    /** Nearest to you with no location: "Allow location" is a real button. It asks; asked and refused before, it opens
+     *  the app's settings. */
+    @Test fun allow_location_is_a_button() {
+        Lang.sw = false
+        val m = model(fix = false); show(m)
+        rule.waitUntil(4000) { tagged("nearest_allow") }
+        shot("map-42-allow-location")
+        rule.onNodeWithTag("nearest_allow").performClick(); rule.waitForIdle()
+        val asked = shadowOf(rule.activity).lastRequestedPermission
+        assertTrue("it asks for the location permission", asked != null && asked.requestedPermissions.contains(android.Manifest.permission.ACCESS_FINE_LOCATION))
+        // refused (Android won't ask again): the app's settings
+        rule.onNodeWithTag("nearest_allow").performClick(); rule.waitForIdle()
+        val started = generateSequence { shadowOf(rule.activity).nextStartedActivity }.map { it.action }.toList()
+        assertTrue("the app's settings open: $started", android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS in started)
+    }
+
+    /** Nearest to you follows the filter: with Water on it is the nearest water point; nothing left says so. */
+    @Test fun nearest_follows_the_filter() {
+        Lang.sw = false
+        val m = model(); show(m)
+        rule.onNodeWithTag("mchip_water").performScrollTo().performClick(); rule.waitForIdle()
+        assertEquals("Water: the nearest water point", "Kapsaret Borehole", text("nearest_name"))
+        rule.onNodeWithTag("nearest_peek").performClick(); rule.waitForIdle(); rule.mainClock.advanceTimeBy(600); rule.waitForIdle()
+        val inList = { txt: String -> rule.onAllNodes(androidx.compose.ui.test.hasText(txt) and androidx.compose.ui.test.hasAnyAncestor(androidx.compose.ui.test.hasTestTag("nearest_list")), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
+        assertTrue("open: water points only", inList("Kapsaret Borehole") && !inList("Chepkongi Dispensary and Maternity Wing, Kapsaret Ward") && !inList("Chepkongi Dispensary") && !inList("Kapsaret Primary School"))
+        // distance first, then how it is: both show
+        assertTrue(has("Not working") && has("5.5 km"))
+        shot("map-43-nearest-water")
+        rule.onNodeWithTag("sheet_handle").performClick(); rule.waitForIdle()
+        rule.onNodeWithTag("map_pill_open").performClick(); rule.waitForIdle()
+        rule.onNodeWithTag("mchip_mine").performScrollTo().performClick(); rule.waitForIdle()
+        assertEquals("Water + My visits leaves nothing: it says so", "Nothing near you matches these filters", text("nearest_name"))
+        assertEquals("No water points near you", org.rafikioutreach.pin.ui.nearNone("water", ""))
+        Lang.sw = true; assertEquals("Hakuna vituo vya maji karibu nawe", org.rafikioutreach.pin.ui.nearNone("water", "")); Lang.sw = false
+        shot("map-44-nearest-none")
     }
 
     @Test fun long_press_measure_and_new_site() {
@@ -348,7 +403,7 @@ class MapHomeTest {
     private fun box(tag: String): Rect? = rule.onAllNodesWithTag(tag, useUnmergedTree = true).fetchSemanticsNodes().firstOrNull()?.boundsInRoot?.takeIf { it.width > 1f && it.height > 1f }
     private fun meet(a: Rect, b: Rect) = a.left < b.right - 0.5f && b.left < a.right - 0.5f && a.top < b.bottom - 0.5f && b.top < a.bottom - 0.5f
     /** Everything drawn over the map, by its tag. */
-    private val over = listOf("map_search", "map_search_btn", "map_chips", "map_pill", "map_none", "map_pinned", "here", "map_side", "ml_compass", "ml_tray", "map_key", "map_legend", "nearest", "map_card", "spot_card", "map_credit")
+    private val over = listOf("map_search", "map_search_btn", "map_chips", "map_pill", "map_none", "map_pinned", "here", "here_chip", "map_nosignal", "map_side", "ml_compass", "ml_tray", "map_key", "map_legend", "nearest", "map_card", "spot_card", "map_credit")
     /** Pairs of things over the map whose boxes overlap (none should). */
     private fun overlaps(): List<String> {
         val b = over.mapNotNull { t -> box(t)?.let { t to it } }
@@ -387,6 +442,14 @@ class MapHomeTest {
         n.config.getOrNull(androidx.compose.ui.semantics.SemanticsActions.GetTextLayoutResult)?.action?.invoke(r)
         return r.firstOrNull()?.hasVisualOverflow == true
     }
+    /** The text is cut short: a line ends with "…", or not all of it is laid out in the lines it may use. */
+    private fun cutShort(tag: String): Boolean {
+        val n = rule.onNodeWithTag(tag, useUnmergedTree = true).fetchSemanticsNode()
+        val r = mutableListOf<androidx.compose.ui.text.TextLayoutResult>()
+        n.config.getOrNull(androidx.compose.ui.semantics.SemanticsActions.GetTextLayoutResult)?.action?.invoke(r)
+        val l = r.firstOrNull() ?: return true
+        return l.didOverflowHeight || (0 until l.lineCount).any { l.isLineEllipsized(it) } || l.getLineEnd(l.lineCount - 1) < l.layoutInput.text.length
+    }
     /** A sheet lives in its own window: draw it over the dimmed screen, the way it looks on the phone. */
     private fun sheetShot(name: String) {
         rule.mainClock.advanceTimeBy(700); rule.waitForIdle()
@@ -415,7 +478,8 @@ class MapHomeTest {
         assertTrue("the pill: " + text("map_pill_label"), text("map_pill_label") == "Water" && has(" · 4"))
         assertFalse("the pinned bar steps aside", tagged("map_pinned"))
         assertTrue("Nearest to you is one slim line", tagged("nearest_peek") && has("Nearest:") && box("nearest")!!.height / rule.density.density <= 52f)
-        assertTrue("a long name ends with …", ellipsized("nearest_name"))
+        assertEquals("Nearest follows the filter: a water point", "Kapsaret Borehole", text("nearest_name"))
+        assertFalse("never cut short with …", cutShort("nearest_name"))
         val (n, outside) = pinsOutside(mv)
         assertTrue("the map fits the water projects, clear of what is over it ($n shown, $outside outside)", n > 0 && outside == 0)
         assertEquals("Water: nothing overlaps", emptyList<String>(), overlaps()); assertTrue("Water: the credit shows", creditClear())
@@ -517,6 +581,17 @@ class MapHomeTest {
     @Test fun kiswahili_dark_360() {
         Lang.sw = true; longName = true
         val m = model(); show(m, dark = true, w = 360, h = 740)
+        // You're at: the whole long name (no …), then after 5 seconds a chip, leaving the map room; a tap opens it again
+        assertTrue("here: ${tagged("here")} chip: ${tagged("here_chip")}", tagged("here"))
+        assertFalse("the name is whole", cutShort("here_name"))
+        assertTrue(text("here_name"), text("here_name").startsWith("Chepkongi Dispensary and Maternity Wing"))
+        shot("map-34-sw-dark-360-here")
+        rule.mainClock.advanceTimeBy(5300); rule.waitForIdle()
+        assertTrue("folded into a chip", tagged("here_chip") && !tagged("here"))
+        assertEquals(emptyList<String>(), overlaps())
+        shot("map-35-sw-dark-360-here-chip")
+        rule.onNodeWithTag("here_chip").performClick(); rule.waitForIdle()
+        assertTrue(tagged("here")); rule.mainClock.advanceTimeBy(5300); rule.waitForIdle(); assertTrue(tagged("here_chip"))
         rule.onNodeWithTag("mchip_home").performScrollTo().performClick(); rule.waitForIdle()
         assertEquals("Makao ya watoto", text("map_pill_label")); assertTrue(has("Karibu zaidi:") && has("Rangi"))
         rule.onNodeWithTag("map_pill_open").performClick(); rule.waitForIdle()
@@ -538,6 +613,7 @@ class MapHomeTest {
         tapAway(); assertFalse("a tap away only closes the tray", tagged("ml_tray") || org.rafikioutreach.pin.ui.HomeLayers.follow); rule.waitForIdle()
         rule.onNodeWithTag("map_key").performClick(); rule.waitForIdle()
         assertTrue(has("Bila ziara miezi 6") && listOf("map_search", "map_side").mapNotNull { box(it) }.none { meet(it, box("map_legend")!!) })
+        assertTrue("the key shows groups and you as well", tagged("key_cluster") && tagged("key_you") && has("Wewe"))
         shot("map-33-sw-dark-360-key")
     }
 }

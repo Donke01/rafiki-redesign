@@ -302,5 +302,10 @@ object CountryMaps {
         }
     }
 
-    fun mb(b: Long): String = if (b >= 10L * 1048576) "${Math.round(b / 1048576.0)} MB" else "%.1f MB".format(java.util.Locale.US, b / 1048576.0)
+    /** "4.2 MB", "250 MB", then "8.0 GB" from 1 GB (MB under 1 GB, as everywhere in the app). */
+    fun mb(b: Long): String = when {
+        Math.round(b / 1048576.0) >= 1024 -> "%.1f GB".format(java.util.Locale.US, b / 1073741824.0)
+        b >= 10L * 1048576 -> "${Math.round(b / 1048576.0)} MB"
+        else -> "%.1f MB".format(java.util.Locale.US, b / 1048576.0)
+    }
 }

@@ -214,7 +214,7 @@ class ProjectExtrasTest {
     @Test fun due_list_and_office_count() {
         Lang.sw = false
         val m = model(); show(m)
-        rule.onNodeWithTag("projects").performScrollToNode(hasTestTag("chips")); rule.onNodeWithText("Due a visit").performClick(); rule.waitForIdle()
+        rule.onNodeWithTag("projects").performScrollToNode(hasTestTag("chips")); rule.onNodeWithText("Due a visit").performScrollTo().performClick(); rule.waitForIdle()
         // Kapsaret (visited 40 days ago, never tested) and Moiben (never visited, not finished so no test)
         assertTrue("count line", has("2 due a visit · 1 need a water test"))
         rule.onNodeWithTag("projects").performScrollToNode(hasText("Kapsaret Borehole")); assertTrue(has("Kapsaret Borehole"))

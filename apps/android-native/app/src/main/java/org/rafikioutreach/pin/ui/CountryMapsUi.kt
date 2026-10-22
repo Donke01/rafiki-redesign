@@ -151,7 +151,7 @@ fun CountryMapsSection(m: AppModel) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
                     Text(t("Use mobile data too", "Tumia data ya simu pia"), style = MaterialTheme.typography.titleSmall, color = C.ink)
-                    Text(if (mobile) t("On: country maps also download on mobile data. A country is 50–300 MB.", "Imewashwa: ramani za nchi zinapakuliwa pia kwa data ya simu. Nchi moja ni MB 50–300.")
+                    Text(if (mobile) t("On: country maps also download on mobile data. A country is 50–300 MB.", "Imewashwa: ramani za nchi zinapakuliwa pia kwa data ya simu. Nchi moja ni 50–300 MB.")
                         else t("Off: country maps download only on Wi-Fi.", "Imezimwa: ramani za nchi zinapakuliwa kwenye Wi-Fi tu."), style = MaterialTheme.typography.bodySmall, color = C.muted)
                 }
                 Spacer(Modifier.width(10.dp))

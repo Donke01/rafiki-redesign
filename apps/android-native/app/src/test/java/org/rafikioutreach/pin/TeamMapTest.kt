@@ -323,6 +323,14 @@ class TeamMapTest {
         rule.waitUntil(5000) { rule.onAllNodesWithTag("plan_sheet").fetchSemanticsNodes().isEmpty() }
         rule.onAllNodesWithTag("plan_stop_101").assertCountEquals(0)
         waitFor("Taken off day 1")
+        // reversible: Undo puts it back where it was, then it comes off again
+        waitTag("plan_undo"); rule.onNodeWithTag("plan_undo_undo").performClick(); rule.waitForIdle()
+        rule.onAllNodesWithTag("plan_stop_101").assertCountEquals(1)
+        rule.onNodeWithTag("plan_stop_101").performScrollTo().performClick(); waitTag("plan_sheet")
+        rule.onNodeWithTag("plan_rm").performScrollTo().performClick(); rule.mainClock.advanceTimeBy(1500)
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("plan_sheet").fetchSemanticsNodes().isEmpty() }
+        rule.onAllNodesWithTag("plan_stop_101").assertCountEquals(0)
+        rule.mainClock.advanceTimeBy(6500); rule.waitForIdle()
         rule.onNodeWithTag("plan_add_1").performScrollTo().performClick(); rule.waitForIdle()
         rule.onAllNodesWithText("Moi’s Bridge Kiosk", substring = true).onFirst().performClick(); rule.waitForIdle()
         rule.onNodeWithTag("plan_day_1").performScrollTo()

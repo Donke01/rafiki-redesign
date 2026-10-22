@@ -175,10 +175,11 @@ class AppFeelTest {
         rule.onNodeWithTag("hback").performClick(); rule.waitForIdle()
         rule.onNodeWithTag("hback").performClick(); rule.waitForIdle()
         // country chip opens a bottom sheet
-        rule.onNodeWithTag("chip_country").performScrollTo().performClick(); rule.waitForIdle()
-        rule.onNodeWithTag("sheet").assertExists(); shot("51-country-sheet")
+        rule.onNodeWithTag("projects").performScrollToNode(androidx.compose.ui.test.hasTestTag("proj_filter")); rule.onNodeWithTag("proj_filter").performClick(); rule.waitForIdle()
+        rule.onNodeWithTag("proj_filter_sheet").assertExists(); shot("51-country-sheet")
         rule.onNodeWithTag("pick_ke").performClick(); rule.waitForIdle()
         assertEquals("ke", m.prefs.country)
+        rule.onNodeWithTag("proj_filter_done").performClick(); rule.mainClock.advanceTimeBy(800); rule.waitForIdle()
         // title moves into the top bar once scrolled
         rule.onNodeWithTag("projects").performScrollToNode(hasText("Turbo Spring")); rule.waitForIdle()
         // the title moves into the top bar once the "Projects" heading has scrolled away (with only four projects it may still be on screen)

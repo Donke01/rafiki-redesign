@@ -145,7 +145,7 @@ fun ProjectsMap(dots: List<Dot>, me: LatLng?, onDot: (String) -> Unit, modifier:
             if (cm && picked) "cmap" else if (sat) "sat" else "street", {
                 if (it == "cmap") { org.rafikioutreach.pin.cmap.CountryMaps.pick(true); skip = false }
                 else { sat = it == "sat"; org.rafikioutreach.pin.cmap.CountryMaps.pick(false); skip = !online }
-            }, extras?.sheet) { styles = false }
+            }, extras?.sheet, closeTag = "style_x") { styles = false }
         if (me != null && styleSheet == null) MapButton("target", t("Go to where I am", "Nenda nilipo"), Modifier.align(Alignment.TopEnd).padding(top = 66.dp, end = 10.dp)) {
             map.controller.animateTo(GeoPoint(me.lat, me.lng), 15.0, 600L)
         }

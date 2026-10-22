@@ -20,10 +20,20 @@ import java.io.File
 @RunWith(RobolectricTestRunner::class)
 class LogicTest {
     @Test fun distances_like_the_web_app() {
+        // the shared convention: whole metres under 1 km, one decimal under 10 km, then whole km
         assertEquals("910 m", Geo.dist(910.4, false))
-        assertEquals("9,999 m", Geo.dist(9999.0, false))
-        assertEquals("12.4 km", Geo.dist(12400.0, false))
-        assertEquals("2,986 ft", Geo.dist(910.0, true))
+        assertEquals("1.0 km", Geo.dist(999.6, false))
+        assertEquals("4.8 km", Geo.dist(4750.0, false))
+        assertEquals("5.5 km", Geo.dist(5512.0, false))
+        assertEquals("10 km", Geo.dist(9999.0, false))
+        assertEquals("12 km", Geo.dist(12400.0, false))
+        assertEquals("1,234 km", Geo.dist(1234000.0, false))
+        // miles: feet under 0.1 mi, then one decimal
+        assertEquals("328 ft", Geo.dist(100.0, true))
+        assertEquals("0.6 mi", Geo.dist(910.0, true))
+        assertEquals("12.4 mi", Geo.dist(19956.0, true))
+        // GPS accuracy, never rounded with integer division
+        assertEquals("±8 m", Geo.acc(8)); assertEquals("±1.2 km", Geo.acc(1240)); assertEquals("±1.9 km", Geo.acc(1900))
         val d = Geo.metres(LatLng(0.5143, 35.2698), LatLng(0.47, 35.25))
         assertTrue(d in 5300.0..5600.0)
     }
