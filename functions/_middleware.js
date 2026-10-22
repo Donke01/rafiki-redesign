@@ -9,7 +9,21 @@ const PROD = 'https://www.rafikioutreach.org';
 const FIELD = 'pin.rafikioutreach.org';
 const HIDDEN = /^(pin|test)\.rafikioutreach\.org$/;
 
-export async function onRequest({ request, next }) {
+// Google Analytics (GA4) for the public website. Off until GA_MEASUREMENT_ID (G-…) is set in Cloudflare.
+// Never on the field app, the API, or private links (donor pages, project share links, the repair tracker).
+const GA_ID = /^G-[A-Z0-9]{4,20}$/;
+const GA_SKIP = /^\/(pin|app|api|donor|p|project|tracker|vendor)(\/|$|\.|-)/;
+function gaTag(env, url) {
+  const id = String((env && env.GA_MEASUREMENT_ID) || '').trim().toUpperCase();
+  if (!GA_ID.test(id) || url.hostname === FIELD || HIDDEN.test(url.hostname) || GA_SKIP.test(url.pathname)) return '';
+  return '<script async src="https://www.googletagmanager.com/gtag/js?id=' + id + '"></script>' +
+    '<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date());gtag("config","' + id + '");' +
+    // a tap on any Give / Sponsor / Fundraise link counts as donate_click (the gift itself is donation_complete on /thank-you)
+    'document.addEventListener("click",function(e){var a=e.target&&e.target.closest&&e.target.closest("a[href]");if(!a)return;var h=a.getAttribute("href")||"";' +
+    'if(/^(https?:\\/\\/(www\\.)?rafikioutreach\\.org)?\\/(donate|sponsor|fundraise)([?#\\/]|$)/.test(h))gtag("event","donate_click",{link_url:h});},true);</script>';
+}
+
+export async function onRequest({ request, next, env }) {
   const url = new URL(request.url);
   // on the field app's address, any website page goes to the app; the app's own files, the API and assets still load
   if (url.hostname === FIELD && !/^\/(pin|api|app|vendor|img|fonts|\.well-known)(\/|$|\.|-)/.test(url.pathname) && !/\.[a-z0-9]{2,12}$/i.test(url.pathname)) {
@@ -17,18 +31,21 @@ export async function onRequest({ request, next }) {
   }
   let res = await next();
   if (HIDDEN.test(url.hostname)) { res = new Response(res.body, res); res.headers.set('X-Robots-Tag', 'noindex, nofollow'); }
-  if (/(^|\.)rafikioutreach\.org$/.test(url.hostname)) return res;
   if (!(res.headers.get('Content-Type') || '').includes('text/html')) return res;
-  const here = url.origin;
-  const swap = {
-    element(el) {
-      const c = el.getAttribute('content');
-      if (c && c.startsWith(PROD)) el.setAttribute('content', here + c.slice(PROD.length));
-    }
-  };
-  return new HTMLRewriter()
-    .on('meta[property="og:image"]', swap)
-    .on('meta[property="og:url"]', swap)
-    .on('meta[name="twitter:image"]', swap)
-    .transform(res);
+  const rw = new HTMLRewriter();
+  let changed = false;
+  if (!/(^|\.)rafikioutreach\.org$/.test(url.hostname)) {
+    const here = url.origin;
+    const swap = {
+      element(el) {
+        const c = el.getAttribute('content');
+        if (c && c.startsWith(PROD)) el.setAttribute('content', here + c.slice(PROD.length));
+      }
+    };
+    rw.on('meta[property="og:image"]', swap).on('meta[property="og:url"]', swap).on('meta[name="twitter:image"]', swap);
+    changed = true;
+  }
+  const ga = gaTag(env, url);
+  if (ga) { rw.on('head', { element(el) { el.append(ga, { html: true }); } }); changed = true; }
+  return changed ? rw.transform(res) : res;
 }
