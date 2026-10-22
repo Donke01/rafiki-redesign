@@ -2570,23 +2570,24 @@ html[data-theme=dark] #vList .rr-chips .chip[aria-pressed=true]{background:var(-
         <span class="t" id="pTitle"></span>
         <span class="muted" id="pSub"></span>
         <span id="pState"></span>
-        <span class="cur" id="pCur"></span>
-        <span class="cur" id="pVisit"></span>
-        <span class="cur" id="pConf"></span>
-        <span class="dist" id="pDist"></span>
-        <span class="live" id="pLive"></span>
+        <div class="ptiles" id="pTiles"></div>
         <div class="links" id="pLinks"></div>
-        <div class="lastch" id="pLast"></div>
       </div>
       <div id="pRepair"></div>
-      <div id="prjBar"></div>
-      <div class="seg" role="tablist" aria-label="What do you want to do?">
+      <div class="seg ptabs" role="tablist" aria-label="What do you want to do?">
         <button type="button" role="tab" id="tabPin" aria-selected="true" aria-controls="panePin">Pin location</button>
         <button type="button" role="tab" id="tabVisit" aria-selected="false" aria-controls="paneVisit">Site visit</button>
         <button type="button" role="tab" id="tabHist" aria-selected="false" aria-controls="paneHist">History</button>
       </div>
 
       <div id="panePin" role="tabpanel" aria-labelledby="tabPin">
+        <div class="ploc card">
+          <span class="cur" id="pCur"></span>
+          <span class="cur" id="pConf"></span>
+          <span class="dist" id="pDist"></span>
+          <span class="live" id="pLive"></span>
+          <div class="lastch" id="pLast"></div>
+        </div>
         <div class="actions">
           <button class="btn" id="pGps" type="button">📍 Use my location</button>
           <button class="btn light" id="pPaste" type="button">Paste a point</button>
@@ -2595,7 +2596,7 @@ html[data-theme=dark] #vList .rr-chips .chip[aria-pressed=true]{background:var(-
         <button class="btn light hidden" id="pGpsAny" type="button" style="margin-top:8px"></button>
         <div class="paste" id="pPasteBox">
           <label for="pPasteIn">Coordinates or a Google Maps link <span class="bi bi-gmaps bi-sm" aria-hidden="true"><img src="https://www.google.com/s2/favicons?domain=maps.google.com&amp;sz=64" alt="" referrerpolicy="no-referrer" onerror="this.parentNode.classList.add('off')"></span></label>
-          <div class="rowf"><input type="text" id="pPasteIn" placeholder="0.561368, 35.065480" autocomplete="off"><button class="btn light" id="pPasteGo" type="button">Use</button></div>
+          <div class="rowf"><input type="text" id="pPasteIn" placeholder="0.56137, 35.06548" autocomplete="off"><button class="btn light" id="pPasteGo" type="button">Use</button></div>
         </div>
         <div class="map" id="pMap" role="application" aria-label="Map: tap to place the pin, or drag the pin"></div>
         <p class="maptip">Tap the map to place the pin, or drag it. The layers button (top right) switches to satellite.</p>
@@ -2613,11 +2614,15 @@ html[data-theme=dark] #vList .rr-chips .chip[aria-pressed=true]{background:var(-
       </div>
 
       <div id="paneVisit" role="tabpanel" aria-labelledby="tabVisit" class="hidden">
+        <p class="cur pvisit" id="pVisit"></p>
         <div id="vw"></div>
       </div>
 
       <div id="paneHist" role="tabpanel" aria-labelledby="tabHist" class="hidden">
+        <div id="prjBar"></div>
         <div id="prjTl"></div>
+        <div id="ofbPc" aria-live="polite"></div>
+        <div id="dnrThx"></div>
         <p class="muted" id="hInfo">Notes on this project in monday.com, newest first.</p>
         <div class="hist" id="hList"></div>
       </div>
@@ -2630,7 +2635,7 @@ html[data-theme=dark] #vList .rr-chips .chip[aria-pressed=true]{background:var(-
       <div class="card">
         <label for="nName" style="margin-top:0">Site name</label>
         <input type="text" id="nName" placeholder="e.g. Kiptoo Primary School" autocomplete="off">
-        <div class="two">
+        <div class="two nsel">
           <div><label for="nCountry">Country</label><select id="nCountry"><option value="ke">Kenya</option><option value="tz">Tanzania</option><option value="ug">Uganda</option><option value="mw">Malawi</option></select></div>
           <div><label for="nType">Type</label><select id="nType"><option value="borehole">Borehole well</option><option value="collection">Water collection</option><option value="school">School</option><option value="health">Health</option><option value="children">Children's home</option><option value="farming">Farming</option><option value="community">Community</option><option value="other">Other</option></select></div>
         </div>
@@ -2642,6 +2647,7 @@ html[data-theme=dark] #vList .rr-chips .chip[aria-pressed=true]{background:var(-
         <div class="thumbs" id="nThumbs"></div>
         <div class="voice" id="nVoice"></div>
       </div>
+      <div class="nwhere">
       <h2 style="margin:18px 2px 8px">Where is it?</h2>
       <div class="actions">
         <button class="btn" id="nGps" type="button">📍 Use my location</button>
@@ -2651,13 +2657,14 @@ html[data-theme=dark] #vList .rr-chips .chip[aria-pressed=true]{background:var(-
       <button class="btn light hidden" id="nGpsAny" type="button" style="margin-top:8px"></button>
       <div class="paste" id="nPasteBox">
         <label for="nPasteIn">Coordinates or a Google Maps link <span class="bi bi-gmaps bi-sm" aria-hidden="true"><img src="https://www.google.com/s2/favicons?domain=maps.google.com&amp;sz=64" alt="" referrerpolicy="no-referrer" onerror="this.parentNode.classList.add('off')"></span></label>
-        <div class="rowf"><input type="text" id="nPasteIn" placeholder="0.561368, 35.065480" autocomplete="off"><button class="btn light" id="nPasteGo" type="button">Use</button></div>
+        <div class="rowf"><input type="text" id="nPasteIn" placeholder="0.56137, 35.06548" autocomplete="off"><button class="btn light" id="nPasteGo" type="button">Use</button></div>
       </div>
       <div class="map" id="nMap" role="application" aria-label="Map: tap to place the new site"></div>
       <div class="savebar">
         <div class="newpt" id="nPt">Add the name, then choose where it is.</div>
         <button class="btn block" id="bNewSave" type="button" disabled>Add this site</button>
         <p class="msg" id="mNew" aria-live="polite"></p>
+      </div>
       </div>
     </section>
 
@@ -2800,7 +2807,8 @@ html[data-theme=dark] #vList .rr-chips .chip[aria-pressed=true]{background:var(-
   var COLORS = { pinned: '#1C7C4A', repair: '#D98200', notworking: '#B3261E' };
 
   function byId(id) { return S.projects.filter(function (x) { return x.id === id; })[0]; }
-  function fmt(ll) { return ll[0].toFixed(6) + ', ' + ll[1].toFixed(6); }
+  // coordinates on screen: at most 5 decimals (about 1 m), no trailing zeros
+  function fmt(ll) { var f = function (x) { return String(+(+x).toFixed(5)); }; return f(ll[0]) + ', ' + f(ll[1]); }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function inRange(ll) { return ll && ll[0] >= -18 && ll[0] <= 6 && ll[1] >= 28 && ll[1] <= 42; }
   function metres(a, b) { var R = 6371000, r = function (x) { return x * Math.PI / 180; }, dLa = r(b[0] - a[0]), dLo = r(b[1] - a[1]); var h = Math.pow(Math.sin(dLa / 2), 2) + Math.cos(r(a[0])) * Math.cos(r(b[0])) * Math.pow(Math.sin(dLo / 2), 2); return 2 * R * Math.asin(Math.sqrt(h)); }
@@ -2894,6 +2902,7 @@ html[data-theme=dark] #vList .rr-chips .chip[aria-pressed=true]{background:var(-
     if (v === 'vMe') renderMe();
     if (v === 'vOffice') renderOffice();
     document.body.classList.toggle('wide', v === 'vOffice');
+    visitBarUi();
     if (v === 'vNew') openNew();
     hereWatch(v === 'vMap' || v === 'vList');
     setTimeout(function () { crReset(v); }, 0); // chip rows start at the beginning again (pwmap)
@@ -3169,19 +3178,23 @@ html[data-theme=dark] #vList .rr-chips .chip[aria-pressed=true]{background:var(-
     function line(cls, t) { $(o.line).className = 'gpsline ' + (cls || ''); $(o.line).textContent = t || ''; }
     function stop() { if (watch !== null && navigator.geolocation) navigator.geolocation.clearWatch(watch); watch = null; if (g && g.timer) clearInterval(g.timer); g = null; $(o.gps).textContent = '📍 Use my location'; $(o.any).classList.add('hidden'); }
     function average(list) { var w = 0, la = 0, ln = 0, best = 1e9; list.forEach(function (r) { var k = 1 / (r.acc * r.acc); w += k; la += r.ll[0] * k; ln += r.ll[1] * k; best = Math.min(best, r.acc); }); var n = list.length; return { ll: [la / w, ln / w], acc: Math.min(best, Math.max(3, Math.round(best / Math.sqrt(Math.min(n, 9)) * 1.5))) }; }
+    // "±8 m" never splits across two lines
+    function acnb(m) { return acct(m).replace(/ /g, '\u00a0'); }
     function tick() {
       if (!g) return;
       var secs = Math.round((Date.now() - g.t0) / 1000);
       if (!g.good.length) {
-        line('warn', 'Getting a precise fix… ' + (g.bestAcc ? 'currently about ' + acct(g.bestAcc) : 'no reading yet') + ' (' + secs + ' s). Stand still outdoors, away from buildings and trees.');
-        if (secs >= 45 && g.bestAcc) { $(o.any).textContent = 'Use anyway (' + acct(g.bestAcc) + ')'; $(o.any).classList.remove('hidden'); }
-        if (secs >= 45 && g.bestAcc > 200) line('warn', 'This device is only giving a rough position (' + acct(g.bestAcc) + '), as indoors or on a computer. Go outdoors with a phone, or tap the spot on the map instead.');
+        line('warn', g.bestAcc ? tr('Getting a precise fix… currently about ' + acnb(g.bestAcc) + ' (' + secs + ' s). Stand still outdoors, away from buildings and trees.', 'Inatafuta mahali sahihi… kwa sasa takriban ' + acnb(g.bestAcc) + ' (sekunde ' + secs + '). Simama tuli nje, mbali na majengo na miti.')
+          : tr('Getting a precise fix… no reading yet (' + secs + ' s). Stand still outdoors, away from buildings and trees.', 'Inatafuta mahali sahihi… bado hakuna kipimo (sekunde ' + secs + '). Simama tuli nje, mbali na majengo na miti.'));
+        if (secs >= 45 && g.bestAcc) { $(o.any).textContent = tr('Use anyway (' + acnb(g.bestAcc) + ')', 'Tumia hivyo hivyo (' + acnb(g.bestAcc) + ')'); $(o.any).classList.remove('hidden'); }
+        if (secs >= 45 && g.bestAcc > 200) line('warn', tr('This device is only giving a rough position (' + acnb(g.bestAcc) + '), as indoors or on a computer. Go outdoors with a phone, or tap the spot on the map instead.', 'Kifaa hiki kinatoa mahali pa kukadiria tu (' + acnb(g.bestAcc) + '), kama ndani ya jengo au kwenye kompyuta. Toka nje na simu, au gusa mahali kwenye ramani.'));
         return;
       }
       var left = Math.max(0, Math.ceil((SETTLE - (Date.now() - g.firstGood)) / 1000)), a = g.avg;
       set(a.ll, 'gps', a.acc);
-      if (left > 0) line('good', 'Good signal. Averaging ' + g.good.length + ' readings… ' + acct(a.acc) + ' · ' + left + ' s to go. Keep still.');
-      else { var keep = a, n = g.good.length; stop(); set(keep.ll, 'gps', keep.acc); line('good', 'Done: averaged ' + n + ' readings, accurate to about ' + acct(keep.acc) + '. Check the pin, then save.'); }
+      var rd = function (k) { return tr(k === 1 ? '1 reading' : k + ' readings', k === 1 ? 'kipimo 1' : 'vipimo ' + k); };
+      if (left > 0) line('good', tr('Good signal. Averaging ' + rd(g.good.length) + '… ' + acnb(a.acc) + ' · ' + left + ' s to go. Keep still.', 'GPS iko vizuri. Inachukua wastani wa ' + rd(g.good.length) + '… ' + acnb(a.acc) + ' · sekunde ' + left + ' zimebaki. Tulia.'));
+      else { var keep = a, n = g.good.length; stop(); set(keep.ll, 'gps', keep.acc); line('good', tr('Done: averaged ' + rd(n) + ', accurate to about ' + acnb(keep.acc) + '. Check the pin, then save.', 'Tayari: wastani wa ' + rd(n) + ', sahihi kwa takriban ' + acnb(keep.acc) + '. Kagua alama, kisha hifadhi.')); }
     }
     $(o.gps).addEventListener('click', function () {
       if (watch !== null) { stop(); line('', ''); return; }
@@ -4597,7 +4610,10 @@ html[data-theme=dark] #vList .rr-chips .chip[aria-pressed=true]{background:var(-
     if (which === 'pin') setTimeout(pick.resize, 20); else pick.stop();
     if (which === 'visit') locate(function () { distUi(); });
     if (which === 'hist') histUi();
+    visitBarUi();
   }
+  // during a site visit the bottom tab bar steps aside, so the visit's own Back / Next bar has the room
+  function visitBarUi() { document.body.classList.toggle('visiting', S.view === 'vProj' && S.tab === 'visit' && !(V && V.sent)); }
   $('tabPin').addEventListener('click', function () { tab('pin'); });
   $('tabVisit').addEventListener('click', function () { tab('visit'); });
   $('tabHist').addEventListener('click', function () { tab('hist'); });
@@ -4610,7 +4626,7 @@ html[data-theme=dark] #vList .rr-chips .chip[aria-pressed=true]{background:var(-
     $('pSub').textContent = sub(p);
     $('pHero').classList.toggle('hidden', !p.photo);
     if (p.photo) { $('pImg').onerror = function () { $('pHero').classList.add('hidden'); }; $('pImg').src = photoUrl(p, 960); }
-    curUi(); repairUi(); $('pLast').innerHTML = '';
+    $('pTiles')._c = undefined; curUi(); repairUi(); $('pLast').innerHTML = '';
     msg('mSave', '', ''); $('confirm').classList.add('hidden'); $('bSave').classList.remove('hidden'); pMedia.clear();
     visitOpen(); visitLine(); $('hList').innerHTML = ''; prjOpen(p);
     show('vProj', how);
@@ -4632,6 +4648,30 @@ html[data-theme=dark] #vList .rr-chips .chip[aria-pressed=true]{background:var(-
       : '';
     distUi(); confirmUi();
   }
+  // the calm head: three numbers, each one opens the tab it belongs to
+  function tilesUi(costs) {
+    var p = S.cur, el = $('pTiles'); if (!p || !el) return;
+    if (costs !== undefined) el._c = costs;
+    var c = el._c, v = S.visits[p.id], d = p.gps && S.here ? metres(S.here, p.gps) : null, ago = v ? pwSince(v.at) : null;
+    var t = function (go, ic, hue, b, s, cls) { return '<button type="button" class="ptile' + (cls ? ' ' + cls : '') + '" data-pt="' + go + '"><i style="--hu:var(--hu-' + hue + ');--hb:var(--hb-' + hue + ')">' + oic(ic) + '</i><b' + (String(b).length > 5 ? ' class="sm"' : '') + '>' + esc(b) + '</b><small>' + esc(s) + '</small></button>'; };
+    el.innerHTML = t('pin', p.gps ? 'compass' : 'pin', p.gps ? 'blue' : 'amber', p.gps ? (d != null ? dist(d) : '–') : '–', p.gps ? tr('from you', 'kutoka ulipo') : tr('No location', 'Hakuna mahali'), p.gps ? '' : 'warn') +
+      t('visit', 'clip', 'green', ago ? ago[0] : '–', ago ? ago[1] : tr('No visit yet', 'Bado hakuna ziara')) +
+      t('hist', 'wrench', 'amber', c ? String(c.n || 0) : '–', tr('repairs in 12 months', 'matengenezo, miezi 12'));
+  }
+  // "3 d" / "since the last visit": the shared short style (just now, 5 min, 3 h, 2 d, 6 wk, 1 yr), split for a tile
+  function pwSince(iso) {
+    var ms = Date.now() - Date.parse(iso); if (isNaN(ms)) return null;
+    var m = Math.floor(Math.max(0, ms) / 60000), h = Math.floor(m / 60), d = Math.floor(h / 24), sw = S.lang === 'sw';
+    if (m < 1) return [tr('just now', 'sasa hivi'), tr('last visit', 'ziara ya mwisho')];
+    var b = m < 60 ? (sw ? 'dakika ' + m : m + ' min') : h < 24 ? (sw ? 'saa ' + h : h + ' h') : d < 14 ? (sw ? 'siku ' + d : d + ' d') : d < 365 ? (sw ? 'wiki ' + Math.floor(d / 7) : Math.floor(d / 7) + ' wk') : (function (y) { return sw ? (y === 1 ? 'mwaka 1' : 'miaka ' + y) : y + ' yr'; })(Math.floor(d / 365));
+    return [b, tr('since the last visit', 'tangu ziara ya mwisho')];
+  }
+  $('pTiles').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-pt]'); if (!b) return;
+    var k = b.getAttribute('data-pt'); tab(k);
+    var to = k === 'hist' ? $('ofbPc') : $({ pin: 'panePin', visit: 'paneVisit' }[k]);
+    setTimeout(function () { if (!to || !to.getClientRects().length) return; var top = document.querySelector('header.top'), bar = document.querySelector('#vProj .ptabs'); window.scrollTo({ top: Math.max(0, to.getBoundingClientRect().top + window.scrollY - (top ? top.offsetHeight : 56) - (bar ? bar.offsetHeight : 0) - 12) }); }, 60);
+  });
   var DIRS = ['north', 'north-east', 'east', 'south-east', 'south', 'south-west', 'west', 'north-west'];
   function heading(a, b) {
     var r = function (x) { return x * Math.PI / 180; }, y = Math.sin(r(b[1] - a[1])) * Math.cos(r(b[0])),
@@ -4640,6 +4680,7 @@ html[data-theme=dark] #vList .rr-chips .chip[aria-pressed=true]{background:var(-
   }
   function distUi() {
     var p = S.cur; if (!p) return;
+    tilesUi();
     if (!p.gps || !S.here) { $('pDist').textContent = ''; return; }
     var m = metres(S.here, p.gps), acc = S.hereAcc || 0;
     $('pDist').className = 'dist' + (m > 2000 ? ' far' : '');
@@ -4661,19 +4702,30 @@ html[data-theme=dark] #vList .rr-chips .chip[aria-pressed=true]{background:var(-
   function lastUi() {
     var p = S.cur; if (!p || !navigator.onLine) return;
     api('GET', null, '?id=' + encodeURIComponent(p.id)).then(function (j) {
-      ofbProjCost(p, j);
+      ofbProjCost(p, j); if (S.cur && S.cur.id === p.id && j && j.ok) tilesUi(j.costs || null);
       if (S.cur && S.cur.id === p.id && j.ok && j.visits) { prevVisits[p.id] = j.visits; if (V && STEPS[V.step][0] === 'read') vRender(); }
       if (!S.cur || S.cur.id !== p.id || !j.ok || !j.last) { $('pLast').innerHTML = ''; return; }
-      $('pLast').innerHTML = '<span>Last pinned by ' + esc(j.last.by) + ' · ' + esc(when(j.last.at)) + '</span><button class="btn light small" id="bUndo" type="button">↩ Undo</button>';
+      $('pLast').innerHTML = '<span>' + esc(tr('Last pinned by ' + j.last.by, 'Mahali paliwekwa mwisho na ' + j.last.by)) + ' · ' + esc(when(j.last.at)) + '</span><button class="btn light small" id="bUndo" type="button">' + oic('undo') + '<span>' + tr('Undo', 'Tendua') + '</span></button>';
       $('bUndo').addEventListener('click', function () {
-        if (!confirm('Undo the last pin? The location goes back to ' + (j.last.prev || 'empty') + '.')) return;
+        var pv = j.last.prev, pl = Array.isArray(pv) ? pv : /^\s*-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?\s*$/.test(String(pv || '')) ? String(pv).split(',').map(Number) : null, pt = pl ? fmt(pl) : pv ? String(pv) : '';
+        pwAsk(tr('Undo the last pin?', 'Tendua mahali palipowekwa mwisho?'), pt ? tr('The location goes back to ' + pt + '.', 'Mahali panarudi kuwa ' + pt + '.') : tr('The location will be empty again.', 'Mahali patakuwa tupu tena.'), tr('Undo the pin', 'Tendua mahali'), tr('Keep it', 'Paache'), function () {
         api('POST', { action: 'undo', id: p.id, by: S.name }).then(function (r) {
           if (!r.ok) { if (r.status === 401) return lockOut(r); msg('mSave', 'bad', r.reason === 'offline' ? 'Undo needs a signal. Please try again when you’re online.' : why(r)); return; }
           p.gps = r.gps || null; saveList(); curUi(); pick.saved(p.gps); pickUi(); $('pLast').innerHTML = ''; fitted = false;
           msg('mSave', 'ok', 'Undone ✓ ' + (p.gps ? 'Back to ' + fmt(p.gps) + '.' : 'The location is empty again.'));
         });
+        });
       });
     });
+  }
+  // the app's own "are you sure?" sheet (never the browser's confirm box)
+  function pwAsk(title, text, yes, no, cb) {
+    var w = panel(esc(title), '<p class="muted ask-t">' + esc(text) + '</p><button class="btn block" type="button" data-ask="y">' + esc(yes) + '</button><button class="btn light block" type="button" data-ask="n" style="margin-top:8px">' + esc(no) + '</button>', 'ask');
+    var key = function (e) { if (e.key === 'Escape') { document.removeEventListener('keydown', key); w.close(); } };
+    document.addEventListener('keydown', key);
+    w.addEventListener('click', function (e) { var b = e.target.closest('[data-ask]'); if (!b) return; document.removeEventListener('keydown', key); w.close(); if (b.getAttribute('data-ask') === 'y') cb(); });
+    setTimeout(function () { var y = w.querySelector('[data-ask=y]'); if (y) y.focus(); }, 60);
+    return w;
   }
   $('back').addEventListener('click', function () { goBack(function () { if (S.from === 'vRoute') { renderRoute(); show('vRoute', 'replace'); } else show(S.from && S.from !== 'vProj' ? S.from : 'vList', 'replace'); }); });
 
@@ -4735,14 +4787,18 @@ html[data-theme=dark] #vList .rr-chips .chip[aria-pressed=true]{background:var(-
       ['Parts ordered', at.parts ? esc(when(at.parts)) : (r.parts ? 'Needs: ' + esc(r.parts) : '—')],
       ['Fixed', water(p) ? 'Mark it fixed when the water is running again' : 'Mark it fixed when it’s working again']
     ];
-    $('pRepair').innerHTML = '<div class="card trk" role="status"><div class="th2"><h3>Repair job</h3><span class="tag bad">' + (r.urgency === 'urgent' ? 'Urgent · ' : r.urgency === 'month' ? 'This month · ' : '') + (bad ? 'Not working' : 'Needs repair') + '</span></div>' + map +
+    // folded under the head so the tabs stay near the top; the summary line says how far the job has got
+    var tagTx = r.urgency === 'month' ? tr('Fix this month', 'Rekebisha mwezi huu') : (r.urgency === 'urgent' ? tr('Urgent', 'Haraka') + ' · ' : '') + (bad ? tr('Not working', 'Haifanyi kazi') : tr('Needs repair', 'Inahitaji matengenezo'));
+    var subTx = [tr(steps[si][0], { Reported: 'Imeripotiwa', Assigned: 'Imegawiwa', 'Parts ordered': 'Vipuri vimeagizwa', Fixed: 'Imerekebishwa' }[steps[si][0]]), r.assignee || '', r.due ? tr('Due ', 'Mwisho ') + new Date(r.due + 'T12:00:00').toLocaleDateString(undefined, { day: 'numeric', month: 'short' }).replace(/ /g, '\u00a0') : ''].filter(Boolean).join(' · ');
+    var wasOpen = !!$('pRepair').querySelector('details.trkf[open]');
+    $('pRepair').innerHTML = '<details class="card trk trkf" role="status"' + (wasOpen ? ' open' : '') + '><summary class="th2"><span class="trk-h"><span class="trk-t"><h3>' + tr('Repair job', 'Kazi ya matengenezo') + '</h3><span class="tag bad">' + esc(tagTx) + '</span></span><small>' + esc(subTx) + '</small></span><i class="trk-chev" aria-hidden="true">' + oic('chev') + '</i></summary>' + map +
       '<ol>' + steps.map(function (x, i) { var cls = i < si ? 'done' : i === si ? 'now' : 'todo'; return '<li class="' + cls + '"><span class="dt">' + (i <= si ? oic('check') : '') + '</span><span><b>' + x[0] + '</b><small>' + x[1] + '</small></span></li>'; }).join('') + '</ol>' +
       (r.note || (r.problems && r.problems.length) || r.cost ? '<div class="rnote">' +
       (r.note ? '<p class="more q">“' + esc(r.note) + '”</p>' : '') +
-      (r.problems && r.problems.length ? '<p class="more">Problems: ' + esc(r.problems.join(', ')) + '</p>' : '') +
+      (r.problems && r.problems.length ? '<p class="more">' + tr('Problems', 'Matatizo') + ': ' + esc(r.problems.map(prbName).join(', ')) + '</p>' : '') +
       (r.cost ? '<p class="more">About KES ' + Number(r.cost).toLocaleString() + '</p>' : '') + '</div>' : '') +
       '<div id="fixBox" class="hidden"><label for="fixNote" style="margin-top:0">What was done? (optional)</label><textarea id="fixNote" placeholder="' + (water(p) ? 'e.g. replaced the pump handle' : 'e.g. replaced 6 iron sheets') + '"></textarea></div>' +
-      '<button class="btn ok wide" type="button" id="bFixed">🔧 Mark fixed</button><p class="msg" id="mFix" aria-live="polite"></p></div>';
+      '<button class="btn ok wide" type="button" id="bFixed">🔧 Mark fixed</button><p class="msg" id="mFix" aria-live="polite"></p></details>';
     ofbTracker(p, r);
     $('bFixed').addEventListener('click', function () {
       if ($('fixBox').classList.contains('hidden')) { $('fixBox').classList.remove('hidden'); this.textContent = 'Save as fixed'; $('fixNote').focus(); return; }
@@ -4760,10 +4816,10 @@ html[data-theme=dark] #vList .rr-chips .chip[aria-pressed=true]{background:var(-
   }
 
   // --- site visit: a step-by-step report ------------------------------------------------------
-  // Arrive → Condition → Checklist → Readings → Photos → People → Review & send.
+  // Check in → Condition → Checklist → Readings → Photos → People → Send. One name per step, on the bar and the card.
   // Everything typed is kept on the phone as a draft (photos too) until it is sent.
   function tr(en, sw) { return S.lang === 'sw' && sw ? sw : en; }
-  var STEPS = [['arrive', 'Arrive', 'Kufika'], ['cond', 'Condition', 'Hali'], ['check', 'Checklist', 'Ukaguzi'], ['read', 'Readings', 'Vipimo'], ['photos', 'Photos', 'Picha'], ['people', 'People', 'Watu'], ['review', 'Send', 'Tuma']];
+  var STEPS = [['arrive', 'Check in', 'Ingia'], ['cond', 'Condition', 'Hali'], ['check', 'Checklist', 'Ukaguzi'], ['read', 'Readings', 'Vipimo'], ['photos', 'Photos', 'Picha'], ['people', 'People', 'Watu'], ['review', 'Send', 'Tuma']];
   var STATES = { working: ['✅', 'Working well', 'Inafanya kazi vizuri'], repair: ['⚠️', 'Needs repair', 'Inahitaji matengenezo'], notworking: ['❌', 'Not working', 'Haifanyi kazi'] };
   var URG = { urgent: ['Urgent', 'Haraka'], month: ['This month', 'Mwezi huu'], watch: ['Keep an eye on it', 'Fuatilia tu'] };
   var I = {
@@ -4818,6 +4874,8 @@ html[data-theme=dark] #vList .rr-chips .chip[aria-pressed=true]{background:var(-
   var STAGES = [['foundation', 'Foundation', 'Msingi'], ['walls', 'Walls', 'Kuta'], ['roof', 'Roof', 'Paa'], ['finishing', 'Finishing', 'Umaliziaji'], ['done', 'Finished', 'Imekamilika']];
   var BSTATES = { working: ['✅', 'On track', 'Inaendelea vizuri'], repair: ['⚠️', 'Problems to fix', 'Kuna matatizo ya kurekebisha'], notworking: ['❌', 'Work stopped', 'Kazi imesimama'] };
   function water(p) { return /borehole|collection/i.test(String(p.type || '')); }
+  // a problem as it was sent (the English checklist name), in the app's language
+  function prbName(x) { if (S.lang !== 'sw') return x; for (var k in I) if (I[k][0] === x) return I[k][1]; return x; }
   function stOf(p) { return kind(p) === 'build' ? BSTATES : STATES; }
   function kind(p) {
     var t = String(p.type || '').toLowerCase(), pump = String(p.pump || '').toLowerCase();
@@ -4929,12 +4987,13 @@ html[data-theme=dark] #vList .rr-chips .chip[aria-pressed=true]{background:var(-
     if (!V) return;
     var p = S.cur, st = STEPS[V.step][0], h = '';
     if (V.sent) return vDone();
-    h += '<div class="wiz-top"><div class="wiz-steps" aria-label="' + tr('Step', 'Hatua') + ' ' + (V.step + 1) + ' / ' + STEPS.length + '">' +
-      STEPS.map(function (s, i) { return '<button type="button" data-go="' + i + '" class="' + (i === V.step ? 'on' : i < V.step ? 'done' : '') + '" aria-label="' + tr(s[1], s[2]) + '"' + (i === V.step ? ' aria-current="step"' : '') + '><i></i><span>' + tr(s[1], s[2]) + '</span></button>'; }).join('') + '</div></div>';
+    visitBarUi();
+    h += '<div class="wiz-top"><p class="wiz-now">' + tr('Step ' + (V.step + 1) + ' of ' + STEPS.length, 'Hatua ' + (V.step + 1) + ' kati ya ' + STEPS.length) + ' · <b>' + esc(stepName(V.step)) + '</b></p><div class="wiz-steps" aria-label="' + tr('Step ' + (V.step + 1) + ' of ' + STEPS.length, 'Hatua ' + (V.step + 1) + ' kati ya ' + STEPS.length) + '">' +
+      STEPS.map(function (s, i) { return '<button type="button" data-go="' + i + '" class="' + (i === V.step ? 'on' : i < V.step ? 'done' : '') + '" aria-label="' + esc(stepName(i)) + '"' + (i === V.step ? ' aria-current="step"' : '') + '><i></i><span>' + esc(stepName(i)) + '</span></button>'; }).join('') + '</div></div>';
     if (V.resumed && V.step === 0) h += '<div class="alert warn" role="status"><b>' + tr('Unfinished visit', 'Ziara ambayo haijakamilika') + '</b><p>' + tr('Started', 'Ilianza') + ' ' + esc(when(V.started)) + '. ' + tr('Carry on, or start again.', 'Endelea, au anza upya.') + '</p><button class="btn small light" type="button" data-act="restart">' + tr('Start again', 'Anza upya') + '</button></div>';
     h += '<div class="card wiz ' + stepDir + '">'; stepDir = '';
     if (st === 'arrive') {
-      h += '<h2>' + tr('Check in', 'Thibitisha kufika') + '</h2>' + fldQrBadge(S.cur.id);
+      h += '<h2>' + esc(stepName(0)) + '</h2>' + fldQrBadge(S.cur.id);
       if (!V.arrive) h += '<p class="muted">' + tr('Records the time you arrived and where you are.', 'Inarekodi saa uliyofika na mahali ulipo.') + '</p><button class="btn block big" type="button" data-act="arrive">📍 ' + tr('I’ve arrived', 'Nimefika') + '</button>';
       else {
         var far = V.arrive.d != null && V.arrive.d > 500;
@@ -4965,7 +5024,7 @@ html[data-theme=dark] #vList .rr-chips .chip[aria-pressed=true]{background:var(-
     } else if (st === 'read') {
       var manual = /manual|borehole/.test(kind(p));
       h += '<h2>' + tr('Readings', 'Vipimo') + '</h2><p class="muted">' + tr('All optional. Compared with the last visit as you type.', 'Vyote si lazima. Vinalinganishwa na ziara iliyopita unapoandika.') + '</p><div class="two">' +
-        (manual ? inp('r.strokes', tr('Pump strokes to fill 20 L', 'Mipigo ya pampu kujaza lita 20'), { num: 1, ph: 'e.g. 35', after: cmp('strokes') }) : '') +
+        (manual ? inp('r.strokes', tr('Pump strokes to fill 20\u00a0L', 'Mipigo ya pampu kujaza lita\u00a020'), { num: 1, ph: 'e.g. 35', after: cmp('strokes') }) : '') +
         inp('r.flow', tr('Flow (litres a minute)', 'Mtiririko (lita kwa dakika)'), { num: 1, dec: 1, ph: 'e.g. 12', after: cmp('flow') }) +
         inp('r.queue', tr('People queuing', 'Watu kwenye foleni'), { num: 1, ph: 'e.g. 8', after: cmp('queue') }) +
         inp('r.users', tr('People using it (estimate)', 'Watu wanaoitumia (makadirio)'), { num: 1, ph: 'e.g. 600', after: cmp('users') }) + '</div>' +
@@ -5006,7 +5065,7 @@ html[data-theme=dark] #vList .rr-chips .chip[aria-pressed=true]{background:var(-
       var rows = [];
       var SR = stOf(p);
       if (V.stage) rows.push([tr('Stage', 'Hatua'), STAGES.filter(function (s) { return s[0] === V.stage; }).map(function (s) { return tr(s[1], s[2]); })[0] || '']);
-      rows.push([tr('Condition', 'Hali'), V.state ? SR[V.state][0] + ' ' + tr(SR[V.state][1], SR[V.state][2]) + (V.urgency && V.state !== 'working' ? ' · ' + tr(URG[V.urgency][0], URG[V.urgency][1]) : '') : '<span class="bad-t">' + tr('Not chosen yet', 'Bado haijachaguliwa') + '</span>']);
+      rows.push([tr('Condition', 'Hali'), V.state ? stIc(V.state) + tr(SR[V.state][1], SR[V.state][2]) + (V.urgency && V.state !== 'working' ? ' · ' + tr(URG[V.urgency][0], URG[V.urgency][1]) : '') : '<span class="bad-t">' + tr('Not chosen yet', 'Bado haijachaguliwa') + '</span>']);
       if (pr.length) rows.push([tr('Problems', 'Matatizo'), esc(pr.join(', '))]);
       var okc = Object.keys(V.check).filter(function (k) { return V.check[k] === 'ok'; }).length; if (okc) rows.push([tr('Checked OK', 'Imekaguliwa sawa'), okc]);
       var nn = Object.keys(V.n || {}).filter(function (k) { return V.n[k] !== '' && V.n[k] != null; }); if (nn.length) rows.push([tr('Numbers', 'Idadi'), nn.length]);
@@ -5016,16 +5075,21 @@ html[data-theme=dark] #vList .rr-chips .chip[aria-pressed=true]{background:var(-
       if (V.arrive) rows.push([tr('On site since', 'Uko eneo tangu'), new Date(V.arrive.at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })]);
       h += '<h2>' + tr('Check and send', 'Hakiki na utume') + '</h2><div class="sum">' + rows.map(function (r) { return '<div class="kv"><span>' + r[0] + '</span><b>' + r[1] + '</b></div>'; }).join('') + '</div>' +
         inp('note', tr('Anything else? (optional)', 'Jambo jingine? (si lazima)'), { area: 1, ph: tr('What did you see or agree with the community?', 'Uliona nini au mlikubaliana nini na jamii?') }) +
-        '<div class="voice" id="wVoice"></div>' +
-        '<button class="btn block big" type="button" data-act="send"' + (V.state ? '' : ' disabled') + '>' + tr('Send visit report', 'Tuma ripoti ya ziara') + '</button><p class="msg" id="mVisit" aria-live="polite"></p>';
+        '<div class="voice" id="wVoice"></div><p class="msg" id="mVisit" aria-live="polite"></p>';
     }
     h += '</div>';
-    h += '<div class="wiz-nav">' + (V.step > 0 ? '<button class="btn light" type="button" data-act="prev">← ' + tr('Back', 'Rudi') + '</button>' : '<span></span>') +
-      (V.step < STEPS.length - 1 ? '<button class="btn" type="button" data-act="next"' + (st === 'cond' && !V.state ? ' disabled' : '') + '>' + (st === 'arrive' && !V.arrive ? tr('Skip', 'Ruka') : tr('Next', 'Endelea')) + ' →</button>' : '') + '</div>';
+    // on the last step Send takes Next's place in the bar, so it's never under anything
+    h += '<div class="wiz-nav' + (st === 'review' ? ' last' : '') + '">' + (V.step > 0 ? '<button class="btn light" type="button" data-act="prev">← ' + tr('Back', 'Rudi') + '</button>' : '<span></span>') +
+      (V.step < STEPS.length - 1 ? '<button class="btn" type="button" data-act="next"' + (st === 'cond' && !V.state ? ' disabled' : '') + '>' + (st === 'arrive' && !V.arrive ? tr('Skip', 'Ruka') : tr('Next', 'Endelea')) + ' →</button>'
+        : '<button class="btn" type="button" data-act="send"' + (V.state ? '' : ' disabled') + '>' + tr('Send visit report', 'Tuma ripoti ya ziara') + '</button>') + '</div>';
     $('vw').innerHTML = h;
     if ($('wVoice')) recDraw();
   }
   var stepDir = '';
+  // a step's one name: on the bar, in "Step 2 of 7 · Condition" and as the card's title
+  function stepName(i) { var s = STEPS[i]; return s[0] === 'read' && S.cur && !water(S.cur) ? tr('Numbers', 'Idadi') : tr(s[1], s[2]); }
+  // a condition as an icon (the app's own, not an emoji): working, needs repair, not working
+  function stIc(k) { var c = { working: ['okc', 'ok'], repair: ['alert', 'warn'], notworking: ['xc', 'bad'] }[k]; return c ? '<span class="sti ' + c[1] + '">' + oic(c[0]) + '</span>' : ''; }
   function goStep(n) { stepDir = n > V.step ? 'go-l' : n < V.step ? 'go-r' : ''; V.step = Math.max(0, Math.min(STEPS.length - 1, n)); V.resumed = false; draftSoon(); vRender(); $('paneVisit').scrollIntoView({ block: 'start' }); window.scrollBy(0, -70); }
 
   // voice note for the visit
@@ -5134,7 +5198,7 @@ html[data-theme=dark] #vList .rr-chips .chip[aria-pressed=true]{background:var(-
     });
   }
   function vDone() {
-    var q = V.sent === 'queued';
+    var q = V.sent === 'queued'; visitBarUi();
     $('vw').innerHTML = '<div class="card wiz done-card"><div class="okmark' + (q ? ' queued' : '') + '" aria-hidden="true"><svg viewBox="0 0 88 88"><circle cx="44" cy="44" r="40"/><path d="' + (q ? 'M44 26v22M44 60v2' : 'M27 45l11 11 23-24') + '"/></svg></div><h2>' + (q ? tr('Saved on this phone', 'Imehifadhiwa kwenye simu') : tr('Visit report sent', 'Ripoti ya ziara imetumwa')) + '</h2>' +
       '<p class="muted">' + (q ? tr('It will be sent to monday.com when you have signal.', 'Itatumwa monday.com ukipata mtandao.') : tr('It’s on the project in monday.com.', 'Iko kwenye mradi katika monday.com.')) + '</p>' +
       '<button class="btn block" type="button" data-act="share">' + brand('whatsapp') + tr('Share with the team (WhatsApp)', 'Shiriki na timu (WhatsApp)') + '</button>' +
@@ -5168,7 +5232,7 @@ html[data-theme=dark] #vList .rr-chips .chip[aria-pressed=true]{background:var(-
   // "Last visit" line on the project, and the previous readings for comparing
   function visitLine() {
     var p = S.cur, v = p && S.visits[p.id];
-    $('pVisit').textContent = v ? tr('Last visit', 'Ziara iliyopita') + ': ' + when(v.at) + ' · ' + v.by + ' · ' + STATES[v.state][0] : tr('No visit recorded in the app yet.', 'Hakuna ziara iliyorekodiwa bado.');
+    $('pVisit').innerHTML = v ? esc(tr('Last visit', 'Ziara iliyopita') + ': ' + when(v.at) + ' · ' + v.by) + (STATES[v.state] ? ' · <span class="stn">' + stIc(v.state) + esc(tr(stOf(p)[v.state][1], stOf(p)[v.state][2])) + '</span>' : '') : esc(tr('No visit recorded in the app yet.', 'Hakuna ziara iliyorekodiwa bado.'));
     stateUi();
   }
   // the state at a glance, under the project name
@@ -5328,17 +5392,17 @@ html[data-theme=dark] #vList .rr-chips .chip[aria-pressed=true]{background:var(-
     w.addEventListener('touchend', function (e) { if (x0 == null) return; var dx = e.changedTouches[0].clientX - x0; x0 = null; if (dx < -50) go(1); else if (dx > 50) go(-1); });
     prjLb = { el: w, back: document.activeElement, key: function (e) { if (e.key === 'Escape') prjClose(); else if (e.key === 'ArrowLeft') go(-1); else if (e.key === 'ArrowRight') go(1); } };
     document.addEventListener('keydown', prjLb.key);
-    document.body.appendChild(w); put(0); w.querySelector('.prj-x').focus();
+    document.body.appendChild(w); document.body.classList.add('prj-lbopen'); put(0); w.querySelector('.prj-x').focus();
   }
-  function prjClose() { if (!prjLb) return; var l = prjLb; prjLb = null; document.removeEventListener('keydown', l.key); l.el.remove(); if (l.back && l.back.focus) try { l.back.focus(); } catch (e) {} }
+  function prjClose() { if (!prjLb) return; var l = prjLb; prjLb = null; document.removeEventListener('keydown', l.key); l.el.remove(); document.body.classList.remove('prj-lbopen'); if (l.back && l.back.focus) try { l.back.focus(); } catch (e) {} }
 
   // the buttons under the project card
   function prjOpen(p) {
     prjClose(); prjSumClose();
     if ($('prjTl')) { $('prjTl').innerHTML = ''; $('prjTl')._g = null; }
     var b = $('prjBar'); if (!b) return;
-    b.innerHTML = '<button class="btn light small" type="button" id="prjTlGo">' + prjIc('photos') + '<span>' + tr('Photo timeline', 'Picha kwa wakati') + '</span></button>' +
-      '<button class="btn light small" type="button" id="prjSumGo">' + prjIc('share') + '<span>' + tr('Share project summary', 'Shiriki muhtasari wa mradi') + '</span></button>';
+    // History: the photo timeline is right under this, so only the summary needs a button
+    b.innerHTML = '<button class="btn light small" type="button" id="prjSumGo">' + prjIc('share') + '<span>' + tr('Share project summary', 'Shiriki muhtasari wa mradi') + '</span></button>';
   }
   function prjBarClick(e) {
     if (e.target.closest('#prjSumGo') && S.cur) return prjSum(S.cur);
@@ -5354,7 +5418,7 @@ html[data-theme=dark] #vList .rr-chips .chip[aria-pressed=true]{background:var(-
     if (main) out.push({ url: main.items[0].url, cap: tr('RAFIKI project photo', 'Picha ya mradi wa RAFIKI') });
     var pr = function (g) { var i = PRJ_PREF.indexOf(g.key); return g.k === 'other' ? 98 : i < 0 ? 60 : i; };
     gs.filter(function (g) { return g.k !== 'main' && !PRJ_NO.test(g.k) && !PRJ_NO.test(g.key); }).sort(function (a, b) { return pr(a) - pr(b); }).forEach(function (g) {
-      if (out.length < 3) out.push({ url: g.items[0].url, cap: tr(g.en, g.sw) + (g.items[0].at ? ' · ' + prjDay(g.items[0].at) : '') });
+      if (out.length < 3) out.push({ url: g.items[0].url, cap: tr(g.en, g.sw) + (g.items[0].at ? ' · ' + prjDay(g.items[0].at).replace(/ /g, '\u00a0') : '') });
     });
     return out;
   }
@@ -5374,7 +5438,7 @@ html[data-theme=dark] #vList .rr-chips .chip[aria-pressed=true]{background:var(-
     }
     return null;
   }
-  function prjStateName(p, s) { var st = (kind(p) === 'build' ? BSTATES : STATES)[s]; return st ? st[0] + ' ' + tr(st[1], st[2]) : ''; }
+  function prjStateName(p, s) { var st = (kind(p) === 'build' ? BSTATES : STATES)[s]; return st ? tr(st[1], st[2]) : ''; }
   function prjFacts(p, visits, notes) {
     var v = S.visits[p.id], r = S.repairs[p.id], t = prjTests()[p.id], rows = [];
     if (p.type) rows.push([tr('Type', 'Aina'), p.type]);
@@ -5382,7 +5446,7 @@ html[data-theme=dark] #vList .rr-chips .chip[aria-pressed=true]{background:var(-
     if (p.status || p.year) rows.push([tr('Project', 'Mradi'), [p.status, p.year].filter(Boolean).join(' · ')]);
     if (v) rows.push([tr('Last visit', 'Ziara ya mwisho'), prjDay(v.at) + ' · ' + prjStateName(p, v.state)]);
     if (t) rows.push([tr('Water last tested', 'Maji yalipimwa mwisho'), prjDay(t)]);
-    if (r) rows.push([tr('Open repair', 'Matengenezo yaliyo wazi'), (r.state === 'notworking' ? '❌ ' + tr('Not working', 'Haifanyi kazi') : '⚠️ ' + tr('Needs repair', 'Inahitaji matengenezo')) + ', ' + tr('reported ', 'iliripotiwa ') + prjDay(r.at) + (r.problems && r.problems.length ? ': ' + r.problems.join(', ') : '')]);
+    if (r) rows.push([tr('Open repair', 'Matengenezo yaliyo wazi'), (r.state === 'notworking' ? tr('Not working', 'Haifanyi kazi') : tr('Needs repair', 'Inahitaji matengenezo')) + ', ' + tr('reported ', 'iliripotiwa ') + prjDay(r.at) + (r.problems && r.problems.length ? ': ' + r.problems.map(prbName).join(', ') : '')]);
     return rows;
   }
   function prjSumHtml(p, notes, visits) {
@@ -5406,7 +5470,7 @@ html[data-theme=dark] #vList .rr-chips .chip[aria-pressed=true]{background:var(-
   function prjSum(p) {
     prjSumClose(); prjClose();
     var w = document.createElement('div'); w.id = 'prjSum'; w.setAttribute('role', 'dialog'); w.setAttribute('aria-modal', 'true'); w.setAttribute('aria-labelledby', 'prjSumT');
-    w.innerHTML = '<div class="prj-sbar"><button class="back" type="button" data-x>← ' + tr('Back', 'Rudi') + '</button><span class="sp"></span>' +
+    w.innerHTML = '<div class="prj-sbar"><button class="prj-bk" type="button" data-x aria-label="' + tr('Back', 'Rudi') + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><span class="sp"></span>' +
       '<button class="btn light small" type="button" data-share disabled>' + prjIc('share') + '<span>' + tr('Share', 'Shiriki') + '</span></button><button class="btn small" type="button" data-print disabled>' + prjIc('print') + '<span>' + tr('Save as PDF', 'Hifadhi kama PDF') + '</span></button></div>' +
       '<div class="rep prj-rep"><h1 id="prjSumT" class="vh">' + esc(p.title) + '</h1><p class="muted">' + tr('Gathering photos and visits…', 'Inakusanya picha na ziara…') + '</p></div>';
     document.body.appendChild(w); document.body.classList.add('prj-open');
@@ -5465,6 +5529,63 @@ html[data-theme=dark] #vList .rr-chips .chip[aria-pressed=true]{background:var(-
       '@media print{body.prj-open>*:not(#prjSum){display:none !important}body.prj-open{overflow:visible}body.prj-open::before{display:none !important}.prj-ph3{grid-template-columns:repeat(3,1fr)}.prj-ph3 figure:first-child{grid-column:auto}.prj-ph3 figure:first-child img{aspect-ratio:4/3}.prj-ph3.n1{grid-template-columns:1fr 1fr}#prjSum{position:static;overflow:visible;background:#FFFFFF;padding:0;animation:none}.prj-sbar{display:none !important}.prj-rep{max-width:none}.prj-ph3 img{border-radius:4pt}.prj-ph3 figure,.prj-q,.prj-facts,.prj-big{break-inside:avoid}.prj-big,.prj-q{-webkit-print-color-adjust:exact;print-color-adjust:exact}}';
     var st = document.createElement('style'); st.id = 'prjCss'; st.textContent = css; document.head.appendChild(st);
   })();
+  // polish-pwproj: the project's calm head and sticky tabs, the visit flow, New site, the photo viewer, 44 px touch targets
+  (function () {
+    var css = [
+      // head: three number tiles (Office style), the tabs stick right under the app bar
+      '.ptiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}.ptiles:empty{display:none}',
+      '.ptile{display:flex;flex-direction:column;align-items:flex-start;gap:1px;min-width:0;min-height:44px;padding:10px 10px 9px;border-radius:16px;border:0;background:rgba(255,255,255,.12);color:#FFFFFF;font:inherit;text-align:left;cursor:pointer;transition:background .15s,transform .12s}',
+      '.ptile:active{transform:scale(.97)}.ptile:focus-visible{outline:3px solid #9FD3F7;outline-offset:2px}',
+      '.ptile i{display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:10px;background:var(--hb,#E3F1FC);color:var(--hu,#0A78C2);margin-bottom:5px}.ptile i svg{width:18px;height:18px}',
+      '.ptile b{display:block;max-width:100%;font-size:1.12rem;line-height:1.2;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}',
+      '.ptile b.sm{font-size:1rem}@media (max-width:380px){.ptile b.sm{font-size:.92rem}}.ptile small{font-size:.72rem;line-height:1.25;font-weight:600;color:#CFE8FA}',
+      '.ptile.warn b{color:#FFD08A}',
+      ':root:not([data-theme]) .ptile{background:rgba(255,255,255,.72);border:1px solid var(--glb);color:var(--ink);box-shadow:0 1px 2px rgba(20,60,100,.05)}:root:not([data-theme]) .ptile small{color:var(--muted)}:root:not([data-theme]) .ptile.warn b{color:var(--warn)}:root:not([data-theme]) .ptile:focus-visible{outline-color:var(--blue)}',
+      'html[data-theme=sun] .ptile{background:#FFFFFF;color:#000000}html[data-theme=sun] .ptile small{color:#1E1E1E}html[data-theme=sun] .ptile.warn b{color:#6B3A00}html[data-theme=sun] .ptile i{box-shadow:inset 0 0 0 2px #000000}',
+      '#vProj .ptabs{position:sticky;top:var(--hh,56px);z-index:640;margin:0 0 14px;background:var(--card);-webkit-backdrop-filter:none;backdrop-filter:none}',
+      'html[data-theme=dark] #vProj .ptabs{background:#161E25}',
+      'body.visiting #vProj .ptabs{position:static}',
+      // the repair job, folded under the head
+      '.trkf > summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;min-height:44px;margin:0}.trkf > summary::-webkit-details-marker{display:none}',
+      '.trkf[open] > summary{margin-bottom:12px}.trkf .trk-h{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.trkf .trk-h small{font-size:.78rem;font-weight:600;color:var(--muted)}',
+      '.trk-t{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px}.trkf > summary .tag{flex:0 0 auto;white-space:nowrap}.trk-chev{display:flex;flex:0 0 auto;color:var(--muted)}.trk-chev svg{width:18px;height:18px;transition:transform .2s}.trkf[open] .trk-chev svg{transform:rotate(90deg)}',
+      '.trkf > summary:focus-visible{outline:3px solid var(--blue);outline-offset:4px;border-radius:10px}',
+      // Pin location: the saved point, who pinned it, Undo
+      '.ploc{display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:14px 16px;margin:0 0 12px}.ploc > :empty{display:none}',
+      '.ploc .dist{display:flex;align-items:center;gap:8px;margin-top:4px;padding:10px 12px;border-radius:14px;background:var(--tint);color:var(--ink);line-height:1.4;width:100%;box-sizing:border-box}.ploc .dist.far{background:var(--badbg);color:var(--bad)}.ploc .dist:empty{display:none}',
+      '.ploc .lastch{margin-top:4px;width:100%}',
+      '#pConf{display:flex;flex-wrap:wrap;align-items:center;gap:0 12px}#pConf .conf{display:inline-flex;align-items:center;gap:6px}#pConf svg{width:16px;height:16px;flex:0 0 auto}',
+      '#pConf .lnk{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 2px;margin:0}',
+      '#bUndo{display:inline-flex;align-items:center;gap:6px;min-height:44px}#bUndo svg{width:18px;height:18px;flex:0 0 auto}',
+      '.pvisit{margin:0 2px 10px;line-height:1.45}.pvisit:empty{display:none}',
+      '.stn{white-space:nowrap}.sti{display:inline-flex;vertical-align:-3px;margin-right:5px}.sti svg{width:17px;height:17px}.sti.ok{color:var(--ok)}.sti.warn{color:var(--warn)}.sti.bad{color:var(--bad)}',
+      // History: the summary button, repair costs and the donors' card in their own rows
+      '#paneHist #prjBar{margin:0 0 12px}#paneHist #ofbPc:empty,#paneHist #dnrThx:empty{display:none}#paneHist #ofbPc,#paneHist #dnrThx{margin-bottom:12px}',
+      // visit flow: "Step 2 of 7 · Condition", no bottom tab bar, Send in the sticky bar on the last step
+      '.wiz-now{margin:2px 4px 6px;font-size:.84rem;font-weight:700;color:var(--muted)}.wiz-now b{color:var(--ink)}',
+      '.wiz-steps span{display:none}@media (min-width:600px){.wiz-steps span{display:block;font-size:11px;white-space:nowrap}}',
+      '.wiz-steps{gap:0}.wiz-steps button{justify-content:center;padding:4px 2px}',
+      '.wiz-nav .btn{white-space:nowrap}.wiz-nav.last .btn.light{flex:0 0 auto;padding-left:18px;padding-right:18px}',
+      'body.visiting .tabs{display:none}body.visiting main{padding-bottom:calc(24px + env(safe-area-inset-bottom))}body.visiting .wiz-nav{bottom:calc(8px + env(safe-area-inset-bottom))}',
+      // two-column readings and people: the labels' bottoms line up, and so do the boxes
+      '@supports (grid-template-rows:subgrid){.wiz .two{row-gap:0;align-items:stretch}.wiz .two > .fld{display:grid;grid-row:span 3;grid-template-rows:subgrid;row-gap:0;justify-content:stretch}.wiz .two > .fld > label{align-self:end}.wiz .two > .fld > .cmp{align-self:start}}',
+      // dark: readable chosen answers on the checklist
+      'html[data-theme=dark] .cl-b button[data-v=ok][aria-pressed=true]{color:#06210F}html[data-theme=dark] .cl-b button[data-v=bad][aria-pressed=true]{color:#3A0B07}',
+      // New site: Country and Type one under the other, so "Borehole well" fits; the Add bar stays below the form
+      '@media (max-width:520px){#vNew .two.nsel{grid-template-columns:minmax(0,1fr);gap:0}}',
+      // photo viewer: solid, above everything, the page under it doesn't scroll
+      '.prj-lb{background:#05090D;z-index:2600}body.prj-lbopen{overflow:hidden}.prj-lbt{padding-right:12px}.prj-lbt b{line-height:1.3}',
+      // summary: the round back button, like the app bar's
+      '.prj-bk{width:44px;height:44px;flex:0 0 auto;border-radius:50%;border:1px solid var(--glb,var(--line));background:var(--gl2,var(--card));color:var(--ink);box-shadow:var(--gls,none);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}.prj-bk svg{width:20px;height:20px}.prj-bk:focus-visible{outline:3px solid var(--blue);outline-offset:2px}',
+      'html[data-theme=sun] .prj-bk{background:#FFFFFF;border:2px solid #000000;color:#000000}',
+      // 44 px touch targets: sheet close, app bar buttons, map zoom, chips, the "You're at" strip
+      '.bsh-x{width:44px;height:44px}.bsh-h{padding:0 52px;min-height:44px}.top .hb,.top .hav,.top .rf,.top .bell{width:44px;height:44px}.top .htt{max-width:calc(100% - 100px)}@media (max-width:380px){.top .htt{font-size:.94rem}}',
+      '.leaflet-control-zoom.leaflet-bar a{width:44px;height:44px;line-height:44px;font-size:22px}',
+      '.tchip{min-height:44px}.countrow .cchip{min-height:44px}',
+      '.here.slim .btn{min-height:44px}.here.slim .btn.x{width:44px}'
+    ].join('');
+    var st = document.createElement('style'); st.id = 'pwprojCss'; st.textContent = css; document.head.appendChild(st);
+  })();
 
   // --- 5. new site -------------------------------------------------------------------------------
   var nMedia = Media({ key: 'n', photoBtn: 'nPhotoBtn', thumbs: 'nThumbs', voiceBtn: 'nVoiceBtn', voice: 'nVoice' });
@@ -5487,7 +5608,9 @@ html[data-theme=dark] #vList .rr-chips .chip[aria-pressed=true]{background:var(-
   $('bNewSave').addEventListener('click', function () {
     var ll = nPick.pick, name = $('nName').value.trim(); if (!ll || !name) return;
     if (nMedia.busy()) { msg('mNew', 'warn', 'Stop the recording first.'); return; }
-    if (!confirm('Add “' + name + '” at ' + fmt(ll) + ' to monday.com?')) return;
+    pwAsk(tr('Add this site to monday.com?', 'Ongeza eneo hili kwenye monday.com?'), tr('“' + name + '” at ' + fmt(ll) + '. It goes onto the board as “Due Diligence”.', '“' + name + '” mahali ' + fmt(ll) + '. Linaingia kwenye ubao kama “Due Diligence”.'), tr('Add this site', 'Ongeza eneo hili'), tr('Not yet', 'Bado'), function () { newSend(ll, name); });
+  });
+  function newSend(ll, name) {
     $('bNewSave').disabled = true; msg('mNew', '', 'Adding…');
     submit({ action: 'new', name: name, ck: $('nCountry').value, village: $('nVillage').value.trim(), type: $('nType').value, note: $('nNote').value.trim(), lat: ll[0], lng: ll[1], by: S.name }, nMedia.files()).then(function (r) {
       $('bNewSave').disabled = false;
@@ -5496,7 +5619,7 @@ html[data-theme=dark] #vList .rr-chips .chip[aria-pressed=true]{background:var(-
       nPick.saved(ll); ['nName', 'nVillage', 'nNote'].forEach(function (x) { $(x).value = ''; }); nMedia.clear(); newUi();
       msg('mNew', r.state === 'queued' ? 'warn' : 'ok', r.state === 'queued' ? 'Saved on this phone. It will be added to monday.com when you have signal.' : 'Added to monday.com as “Due Diligence” ✓' + (r.note ? ' ' + r.note : ''));
     });
-  });
+  }
 
   // --- 6. me & team -------------------------------------------------------------------------------
   function segInit(id, key, attr) {
@@ -5525,6 +5648,23 @@ html[data-theme=dark] #vList .rr-chips .chip[aria-pressed=true]{background:var(-
   Object.assign(SW, {"Kilometres (km)": "Kilomita (km)", "e.g. 2.4 km away": "mf. km 2.4 kutoka ulipo", "e.g. 1.5 miles away": "mf. maili 1.5 kutoka ulipo"});
   // polish-pwmap
   Object.assign(SW, {"Scan QR": "Changanua QR"});
+  // polish-pwproj
+  Object.assign(SW, {"from you": "kutoka ulipo", "No visit yet": "Bado hakuna ziara", "repairs in 12 months": "matengenezo, miezi 12", "since the last visit": "tangu ziara ya mwisho", "last visit": "ziara ya mwisho", "just now": "sasa hivi",
+    "Fix this month": "Rekebisha mwezi huu", "Undo the last pin?": "Tendua mahali palipowekwa mwisho?", "Undo the pin": "Tendua mahali", "Keep it": "Paache", "The location will be empty again.": "Mahali patakuwa tupu tena.",
+    "Add this site to monday.com?": "Ongeza eneo hili kwenye monday.com?", "Not yet": "Bado", "Numbers": "Idadi", "Thank-you for donors": "Shukrani kwa wafadhili",
+    "A photo or short video (up to 60 seconds) from the community": "Picha au video fupi (hadi sekunde 60) kutoka kwa jamii", "Photo or video": "Picha au video", "A few words for the donors (optional)": "Maneno machache kwa wafadhili (si lazima)",
+    "e.g. Asante sana from the water committee!": "mf. Asante sana kutoka kamati ya maji!", "Send to donors": "Tuma kwa wafadhili", "Choose a photo or video first.": "Chagua picha au video kwanza.",
+    "Ask first: only people who agree to be filmed or photographed. It goes to monday.com and appears on the private pages of this project’s donors.": "Omba ruhusa kwanza: watu waliokubali kurekodiwa au kupigwa picha tu. Inaenda monday.com na kuonekana kwenye kurasa za faragha za wafadhili wa mradi huu.",
+    "Ask first: only people who agree to be filmed or photographed. It goes to monday.com and appears on the private pages of this project’s donors once an admin has ticked “photos OK”.": "Omba ruhusa kwanza: watu waliokubali kurekodiwa au kupigwa picha tu. Inaenda monday.com na kuonekana kwenye kurasa za faragha za wafadhili wa mradi huu baada ya msimamizi kuweka alama “picha sawa”.",
+    "That file is too large.": "Faili hilo ni kubwa mno.", "That kind of file can’t be sent.": "Aina hiyo ya faili haiwezi kutumwa.", "Please keep it to 60 seconds or less.": "Tafadhali isizidi sekunde 60.",
+    "Sent ✓ Thank you! The donors will see it on their page.": "Imetumwa ✓ Asante! Wafadhili wataiona kwenye ukurasa wao.", "Share project summary": "Shiriki muhtasari wa mradi"});
+  SWP.push([/^Step (\d+) of (\d+)( ·)?$/, "Hatua $1 kati ya $2$3"], [/^The location goes back to (.+)\.$/, "Mahali panarudi kuwa $1."], [/^“(.+)” at (.+)\. It goes onto the board as “Due Diligence”\.$/, "“$1” mahali $2. Linaingia kwenye ubao kama “Due Diligence”."],
+    [/^(\d+) min$/, "dakika $1"], [/^(\d+) h$/, "saa $1"], [/^(\d+) d$/, "siku $1"], [/^(\d+) wk$/, "wiki $1"], [/^1 yr$/, "mwaka 1"], [/^(\d+) yr$/, "miaka $1"],
+    [/^Good signal\. Averaging (\d+) readings?… (.+) · (\d+) s to go\. Keep still\.$/, "GPS iko vizuri. Inachukua wastani wa vipimo $1… $2 · sekunde $3 zimebaki. Tulia."],
+    [/^Done: averaged (\d+) readings?, accurate to about (.+)\. Check the pin, then save\.$/, "Tayari: wastani wa vipimo $1, sahihi kwa takriban $2. Kagua alama, kisha hifadhi."],
+    [/^Getting a precise fix… currently about (.+) \((\d+) s\)\. Stand still outdoors, away from buildings and trees\.$/, "Inatafuta mahali sahihi… kwa sasa takriban $1 (sekunde $2). Simama tuli nje, mbali na majengo na miti."],
+    [/^Getting a precise fix… no reading yet \((\d+) s\)\. Stand still outdoors, away from buildings and trees\.$/, "Inatafuta mahali sahihi… bado hakuna kipimo (sekunde $1). Simama tuli nje, mbali na majengo na miti."],
+    [/^Use anyway \((.+)\)$/, "Tumia hivyo hivyo ($1)"], [/^Location confirmed by (.+)\. Changes go to an admin for approval\.$/, "Mahali pamethibitishwa na $1. Mabadiliko yanaenda kwa msimamizi kuidhinisha."]);
   var MON = {Jan:'Jan',Feb:'Feb',Mar:'Mac',Apr:'Apr',May:'Mei',Jun:'Jun',Jul:'Jul',Aug:'Ago',Sep:'Sep',Oct:'Okt',Nov:'Nov',Dec:'Des',January:'Januari',February:'Februari',March:'Machi',April:'Aprili',June:'Juni',July:'Julai',August:'Agosti',September:'Septemba',October:'Oktoba',November:'Novemba',December:'Desemba'};
   function swOne(x) {
     if (!x) return null;
@@ -7567,9 +7707,9 @@ html[data-theme=dark] #vList .rr-chips .chip[aria-pressed=true]{background:var(-
   // confirmed locations on the project page
   function confirmUi() {
     var p = S.cur; if (!p) return;
-    var c = S.confirmed[p.id], h = '';
-    if (c) h = '<span class="conf">🔒 Location confirmed by ' + esc(c.by) + (S.admin ? '' : '. Changes go to an admin for approval.') + '</span>';
-    if (S.admin && p.gps) h += '<button class="lnk" type="button" id="bConf">' + (c ? 'Unlock' : '🔒 Confirm this location') + '</button>';
+    var c = S.confirmed[p.id], h = '', by = c && c.by ? String(c.by) : '';
+    if (c) h = '<span class="conf">' + oic('lock') + '<span>' + esc(by ? tr('Location confirmed by ' + by, 'Mahali pamethibitishwa na ' + by) : tr('Location confirmed', 'Mahali pamethibitishwa')) + (S.admin ? '' : esc(tr('. Changes go to an admin for approval.', '. Mabadiliko yanaenda kwa msimamizi kuidhinisha.'))) + '</span></span>';
+    if (S.admin && p.gps) h += '<button class="lnk" type="button" id="bConf">' + (c ? '<span>' + tr('Unlock', 'Fungua') + '</span>' : oic('lock') + '<span>' + tr('Confirm this location', 'Thibitisha mahali hapa') + '</span>') + '</button>';
     $('pConf').innerHTML = h;
     if ($('bConf')) $('bConf').addEventListener('click', function () {
       var on = !c, b = this; b.disabled = true;
@@ -8573,11 +8713,12 @@ html[data-theme=dark] #vList .rr-chips .chip[aria-pressed=true]{background:var(-
     var p = S.cur, box = $('dnrThx');
     if (!box) { var r = $('pRepair'); if (!r) return; box = document.createElement('div'); box.id = 'dnrThx'; r.parentNode.insertBefore(box, r.nextSibling); }
     if (!p || !(S.pin || S.mode === 'monday')) { box.innerHTML = ''; return; }
-    box.innerHTML = '<details class="card dnr-thx"><summary>' + oic('heart') + '<span><b>Thank-you for donors</b><small>A photo or short video (up to 60 seconds) from the community</small></span></summary>' +
-      '<p class="muted">Ask first: only people who agree to be filmed or photographed. It goes to monday.com and appears on the private pages of this project’s donors' + (DNR_SENS[dnrCat(p)] ? ' once an admin has ticked “photos OK”' : '') + '.</p>' +
-      '<label>Photo or video<input type="file" id="dnThxFile" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime,video/3gpp" capture="environment"></label>' +
-      '<label>A few words for the donors (optional)<input type="text" id="dnThxCap" maxlength="140" placeholder="e.g. Asante sana from the water committee!"></label>' +
-      '<div class="oact"><button class="btn small" type="button" id="dnThxGo">Send to donors</button><span class="msg" id="dnThxMsg" aria-live="polite"></span></div></details>';
+    box.innerHTML = '<details class="card dnr-thx"><summary>' + oic('heart') + '<span><b>' + tr('Thank-you for donors', 'Shukrani kwa wafadhili') + '</b><small>' + tr('A photo or short video (up to 60 seconds) from the community', 'Picha au video fupi (hadi sekunde 60) kutoka kwa jamii') + '</small></span></summary>' +
+      '<p class="muted">' + (DNR_SENS[dnrCat(p)] ? tr('Ask first: only people who agree to be filmed or photographed. It goes to monday.com and appears on the private pages of this project’s donors once an admin has ticked “photos OK”.', 'Omba ruhusa kwanza: watu waliokubali kurekodiwa au kupigwa picha tu. Inaenda monday.com na kuonekana kwenye kurasa za faragha za wafadhili wa mradi huu baada ya msimamizi kuweka alama “picha sawa”.')
+        : tr('Ask first: only people who agree to be filmed or photographed. It goes to monday.com and appears on the private pages of this project’s donors.', 'Omba ruhusa kwanza: watu waliokubali kurekodiwa au kupigwa picha tu. Inaenda monday.com na kuonekana kwenye kurasa za faragha za wafadhili wa mradi huu.')) + '</p>' +
+      '<label>' + tr('Photo or video', 'Picha au video') + '<input type="file" id="dnThxFile" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime,video/3gpp" capture="environment"></label>' +
+      '<label>' + tr('A few words for the donors (optional)', 'Maneno machache kwa wafadhili (si lazima)') + '<input type="text" id="dnThxCap" maxlength="140" placeholder="' + esc(tr('e.g. Asante sana from the water committee!', 'mf. Asante sana kutoka kamati ya maji!')) + '"></label>' +
+      '<div class="oact"><button class="btn small" type="button" id="dnThxGo">' + tr('Send to donors', 'Tuma kwa wafadhili') + '</button><span class="msg" id="dnThxMsg" aria-live="polite"></span></div></details>';
     $('dnThxGo').addEventListener('click', dnrThxSend);
   }
   function dnrThxLength(file) {
@@ -8590,21 +8731,21 @@ html[data-theme=dark] #vList .rr-chips .chip[aria-pressed=true]{background:var(-
   }
   function dnrThxSend() {
     var f = $('dnThxFile').files[0], m = 'dnThxMsg', p = S.cur;
-    if (!f) return msg(m, 'bad', 'Choose a photo or video first.');
-    if (!navigator.onLine) return msg(m, 'warn', 'This needs a signal. Try again when you’re online.');
+    if (!f) return msg(m, 'bad', tr('Choose a photo or video first.', 'Chagua picha au video kwanza.'));
+    if (!navigator.onLine) return msg(m, 'warn', tr('This needs a signal. Try again when you’re online.', 'Hii inahitaji mtandao. Jaribu tena ukiwa mtandaoni.'));
     var video = /^video\//.test(f.type);
-    if (f.size > (video ? 40 : 8) * 1048576) return msg(m, 'bad', video ? 'That video is too large (40 MB at most). Record a shorter one.' : 'That photo is too large (8 MB at most).');
+    if (f.size > (video ? 40 : 8) * 1048576) return msg(m, 'bad', video ? tr('That video is too large (40 MB at most). Record a shorter one.', 'Video hiyo ni kubwa mno (MB 40 zaidi). Rekodi fupi zaidi.') : tr('That photo is too large (8 MB at most).', 'Picha hiyo ni kubwa mno (MB 8 zaidi).'));
     if (DNR_THX.busy) return;
     dnrThxLength(f).then(function (secs) {
-      if (secs > 61) return msg(m, 'bad', 'Please keep it to 60 seconds or less (this one is ' + Math.round(secs) + ' s).');
-      DNR_THX.busy = true; msg(m, '', 'Sending…');
+      if (secs > 61) return msg(m, 'bad', tr('Please keep it to 60 seconds or less (this one is ' + Math.round(secs) + ' s).', 'Tafadhali isizidi sekunde 60 (hii ni sekunde ' + Math.round(secs) + ').'));
+      DNR_THX.busy = true; msg(m, '', tr('Sending…', 'Inatuma…'));
       var fd = new FormData(); fd.append('id', p.id); fd.append('file', f); fd.append('caption', $('dnThxCap').value); fd.append('seconds', String(Math.round(secs))); if (!S.who && S.name) fd.append('by', S.name);
       fetch('/api/pin-thanks', { method: 'POST', headers: Object.assign({ Accept: 'application/json' }, S.pin ? { 'X-Pin': S.pin } : {}), body: fd })
         .then(function (r) { return r.json().catch(function () { return { ok: false, reason: 'down' }; }); }, function () { return { ok: false, reason: 'offline' }; })
         .then(function (j) {
           DNR_THX.busy = false;
-          if (!j.ok) return msg(m, 'bad', j.reason === 'too-long' ? 'Please keep it to 60 seconds or less.' : j.reason === 'too-large' ? 'That file is too large.' : j.reason === 'type' ? 'That kind of file can’t be sent.' : why(j));
-          msg(m, 'ok', 'Sent ✓ Thank you! The donors will see it on their page.'); $('dnThxFile').value = ''; $('dnThxCap').value = '';
+          if (!j.ok) return msg(m, 'bad', j.reason === 'too-long' ? tr('Please keep it to 60 seconds or less.', 'Tafadhali isizidi sekunde 60.') : j.reason === 'too-large' ? tr('That file is too large.', 'Faili hilo ni kubwa mno.') : j.reason === 'type' ? tr('That kind of file can’t be sent.', 'Aina hiyo ya faili haiwezi kutumwa.') : why(j));
+          msg(m, 'ok', tr('Sent ✓ Thank you! The donors will see it on their page.', 'Imetumwa ✓ Asante! Wafadhili wataiona kwenye ukurasa wao.')); $('dnThxFile').value = ''; $('dnThxCap').value = '';
         });
     });
   }
