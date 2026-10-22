@@ -1,8 +1,8 @@
 {
   "ok": true,
-  "versionCode": 37,
-  "versionName": "2.16.1",
-  "notes": "Office \u203a Team is now a compact list grouped by role, with crowns and tags; tap a name to change details, PIN or admin in a pop-up.",
-  "sha256": "0f55390405f874078a532819b94d2e493b9ac7b55ae099ded9c15268d23bee23",
+  "versionCode": 38,
+  "versionName": "2.16.2",
+  "notes": "Send a test e-mail now says why an e-mail wasn't sent.",
+  "sha256": "95d667f1db6072039e7819449d7e3f4d35d532bfad8685a7d593050af613050b",
   "apk": "/app/rafiki-pin.apk"
 }

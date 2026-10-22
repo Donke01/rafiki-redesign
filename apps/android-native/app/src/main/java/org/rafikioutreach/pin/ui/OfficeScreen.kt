@@ -545,7 +545,7 @@ private fun TeamSection(m: AppModel) {
             }
         }
         var tm by remember { mutableStateOf<String?>(null) }
-        Btn(t("Send a test e-mail", "Tuma barua pepe ya majaribio"), { scope.launch { tm = t("Sending…", "Inatuma…"); val x = m.api.admin(JSONObject().put("action", "test-mail")); tm = if (x.ok) t("Sent ✓ Check the inbox.", "Imetumwa ✓ Angalia barua pepe.") else t("Not sent: the e-mail settings aren’t finished in Cloudflare.", "Haijatumwa: mipangilio ya barua pepe haijakamilika Cloudflare.") } }, Modifier.padding(top = 10.dp), small = true, light = true, icon = "upload")
+        Btn(t("Send a test e-mail", "Tuma barua pepe ya majaribio"), { scope.launch { tm = t("Sending…", "Inatuma…"); val x = m.api.admin(JSONObject().put("action", "test-mail")); tm = mailResult(x) } }, Modifier.padding(top = 10.dp), small = true, light = true, icon = "upload")
         Msg(tm)
     }
     open?.let { p -> PersonSheet(m, p, close = { open = null }, changed = again, readd = { open = null; adding = it }) }
@@ -924,5 +924,18 @@ private fun Export(m: AppModel, s: Snapshot) {
         }, Modifier.fillMaxWidth(), light = true, icon = "upload")
         CostExports(m, s) { msg = it }
         Msg(msg)
+    }
+}
+
+/** What the test e-mail did: sent, or why not (Resend's own words when it refused). */
+internal fun mailResult(x: org.rafikioutreach.pin.data.Reply): String {
+    val detail = x.json.optString("detail", "")
+    return when {
+        x.ok -> t("Sent ✓ Check the inbox.", "Imetumwa ✓ Angalia barua pepe.")
+        x.reason == "no-recipients" -> t("No e-mail addresses yet.", "Bado hakuna anwani za barua pepe.")
+        x.reason == "no-mail" -> t("E-mail is off: add RESEND_API_KEY and ALERT_FROM in Cloudflare, then redeploy.", "Barua pepe imezimwa: ongeza RESEND_API_KEY na ALERT_FROM kwenye Cloudflare.")
+        detail.isNotBlank() -> t("Not sent. Resend said: ", "Haijatumwa. Resend imesema: ") + detail
+        x.status == 0 -> t("Not sent: no connection. Try again with signal.", "Haijatumwa: hakuna mtandao. Jaribu tena ukiwa na mtandao.")
+        else -> t("Not sent. Please try again in a moment.", "Haijatumwa. Tafadhali jaribu tena baadaye.")
     }
 }
