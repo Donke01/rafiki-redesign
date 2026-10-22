@@ -34,6 +34,10 @@ class Api(val server: String, private val pin: () -> String, private val session
     /** An admin view with more to ask, e.g. adminGet("plan", mapOf("ck" to "ke", "days" to "5")). */
     suspend fun adminGet(view: String, q: Map<String, String>): Reply = call("GET", "/api/admin?view=" + enc(view) + q.entries.joinToString("") { "&" + enc(it.key) + "=" + enc(it.value) }, null)
     suspend fun admin(body: JSONObject): Reply = call("POST", "/api/admin", body)
+    /** Office › Send an e-mail: who can be reached, the limits and what was sent (/api/mail). */
+    suspend fun mailGet(): Reply = call("GET", "/api/mail?view=overview", null)
+    /** Office › Send an e-mail: preview, test, send or a photo ({action, audience, picks, subject, body, …}). */
+    suspend fun mail(body: JSONObject): Reply = call("POST", "/api/mail", body)
     /** Office › Community: SMS / WhatsApp reports, set-up status and committee phones. */
     suspend fun smsAdmin(): Reply = call("GET", "/api/sms-admin", null)
     /** Office › Community: add or remove a committee phone ({action: "phone-add", phone, id, name, cc}). */

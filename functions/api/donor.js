@@ -42,7 +42,7 @@ export async function onRequestGet({ request, env, waitUntil }) {
   if (q.get('unsub')) {
     const r = await unsubscribe(env, q.get('unsub'), true);
     if (!r.ok) return page('Link not recognised', '<h1>That link isn’t recognised</h1><p>To stop the e-mails, write to <a href="mailto:' + CONTACT + '">' + CONTACT + '</a>.</p>', 404);
-    return page('Monthly e-mail', '<h1>Stop the monthly e-mail?</h1><p>You won’t get the monthly project update any more. Your private page keeps working.</p><form method="post"><button type="submit">Yes, stop the e-mails</button></form>');
+    return page('E-mails from RAFIKI', '<h1>Stop e-mails from RAFIKI?</h1><p>You won’t get project updates or news from RAFIKI Outreach by e-mail any more. Your private page keeps working.</p><form method="post"><button type="submit">Yes, stop the e-mails</button></form>');
   }
   const photo = (q.get('photo') || '').replace(/\D/g, '');
   const token = photo ? q.get('t') || '' : request.headers.get('X-Donor-Token') || q.get('t') || '';
@@ -72,7 +72,7 @@ export async function onRequestPost({ request, env }) {
   if (!code) return json({ ok: false, reason: 'method' }, 405);
   const r = await unsubscribe(env, code, false);
   if (!r.ok) return page('Link not recognised', '<h1>That link isn’t recognised</h1><p>To stop the e-mails, write to <a href="mailto:' + CONTACT + '">' + CONTACT + '</a>.</p>', 404);
-  return page('Monthly e-mail', '<h1>Done</h1><p>You won’t get the monthly e-mail any more. Changed your mind? Write to <a href="mailto:' + CONTACT + '">' + CONTACT + '</a>.</p>');
+  return page('E-mails from RAFIKI', '<h1>Done</h1><p>You won’t get e-mails from RAFIKI Outreach any more. Changed your mind? Write to <a href="mailto:' + CONTACT + '">' + CONTACT + '</a>.</p>');
 }
 
 // A visit photo, or a thank-you photo or video, of one of the donor's projects (only where photos are allowed).

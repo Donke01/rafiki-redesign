@@ -2112,6 +2112,37 @@ html[data-theme=sun] .dqm-pgh{background:#FFFFFF;border-bottom-width:2px}
 .dqm-nogps{display:flex;gap:8px;align-items:flex-start;margin:10px 0 0;padding:10px 12px;border-radius:14px;background:var(--warnbg);color:var(--ink);font-size:.86rem;line-height:1.45}.dqm-nogps svg{flex:none;width:18px;height:18px;color:var(--warn);margin-top:1px}
 @media (prefers-reduced-motion: reduce){.dqm-drop,.dqm-rc,.dqm-card,.dqm-end svg,.dqm-nums button,.dqm-stop{transition:none !important}.dqm-card,.dqm-shi,.dqm-shd .ofa-av.lg{animation:none !important}}
 </style>
+<style id="ml-css">
+/* Office › Send an e-mail (ml): the composer, the live count, the preview sheet and the sent list */
+.ml-nw,.otab span.ml-nw,.dqm-hd h2 .ml-nw{white-space:nowrap}
+.ml-card{padding:16px;margin-top:12px}
+.ml .ml-h{margin:0 0 8px;font-size:1rem;line-height:1.3;color:var(--ink)}
+.ml-seg{margin:0}.ml-seg button{white-space:nowrap}
+.ml-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.ml-chips .chip{white-space:nowrap}
+.ml-count{display:flex;gap:10px;align-items:flex-start;margin-top:12px;padding:10px 12px;border-radius:14px;background:var(--tint);color:var(--ink);font-size:.88rem;font-weight:600;line-height:1.45}
+.ml-count svg{flex:none;width:20px;height:20px;color:var(--blue2);margin-top:1px}.ml-count .nw{white-space:nowrap}
+.ml-pick{margin-top:8px;max-height:280px}.ml .dnr-p.ml-dim{opacity:.6;cursor:default}
+#mlQ{margin-top:10px}
+.ml-hint{margin:6px 0 0;font-size:.8rem;line-height:1.45;color:var(--muted)}.ml-hint b{color:var(--ink);white-space:nowrap}
+.ml textarea{display:block;width:100%;margin-top:6px;min-height:160px}
+.ml-photo{margin-top:14px}.ml-pl{display:block;font-size:.8rem;font-weight:700;color:var(--ink);margin-bottom:6px}
+.ml-photo .dqm-two .btn{width:100%;gap:6px}.ml-photo .btn svg{width:18px;height:18px;flex:none}.ml .ml-photo label.ml-up{display:flex;align-items:center;justify-content:center;gap:6px;margin:0;font-size:.88rem;cursor:pointer}.ml .ml-up input{display:none!important}
+.ml-ph{display:flex;gap:12px;align-items:center}.ml-ph img{width:96px;height:64px;object-fit:cover;border-radius:12px;flex:none;background:var(--tint)}.ml-ph span{flex:1;min-width:0;font-size:.88rem;font-weight:600}
+.ml .tick small.ml-sm{display:block;font-size:.78rem;font-weight:500;color:var(--muted)}
+.ml-acts .btn{gap:8px}
+.ml-say{font-size:.88rem;font-weight:600;line-height:1.45}.ml-say:empty{display:none}.ml-say.bad{color:var(--bad)}.ml-say.ok{color:var(--ok)}.ml-say.warn{color:var(--warn)}.ml-say .po-tech{margin-top:6px;font-weight:500}
+.ml-off{margin-top:12px;padding:12px 14px;border-radius:14px;background:var(--warnbg);color:var(--warn);font-size:.88rem;font-weight:600;line-height:1.45}.ml-off .po-tech{margin-top:6px;font-weight:500;color:var(--ink)}
+.ml-sent{padding:16px}
+.ml-frame{display:block;width:100%;height:68vh;min-height:420px;margin-top:12px;border:0;border-radius:16px;background:#EEF2F6}
+.ml-ppl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}
+.ml-ppi{display:flex;flex-direction:column;gap:6px;padding:6px;border:var(--bw) solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);font:inherit;font-size:.8rem;font-weight:700;text-align:left;cursor:pointer;line-height:1.3}
+.ml-ppi img{width:100%;aspect-ratio:3/2;object-fit:cover;border-radius:10px;background:var(--tint)}.ml-ppi:hover{border-color:var(--blue)}
+#mlPpQ{margin-top:12px}
+.ml-rc{list-style:none;margin:0;padding:0}.ml-rc li{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:4px 10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:.9rem}
+.ml-rc li i{width:8px;height:8px;border-radius:50%;background:var(--ok)}.ml-rc li.bad i{background:var(--bad)}.ml-rc li span{color:var(--muted);font-size:.82rem;font-weight:600;white-space:nowrap}.ml-rc li.bad span{color:var(--bad)}
+.ml-rc li small{grid-column:2/-1;color:var(--muted);font-size:.78rem}
+.ml-lg .ml-h{margin-top:18px}
+</style>
 <style id="mpa-css">
 /* Map home: search, filter chips, pins by condition, bubbles, the card, long press and the key (mpa…) */
 #vMap{--mc-ok:#1C7C4A;--mc-repair:#B86E00;--mc-bad:#B3261E;--mc-old:#66727C}
@@ -5781,6 +5812,8 @@ html[data-theme=sun] .btn[disabled]{color:#000000}
     "Today": "Leo", "Tomorrow": "Kesho", "1 day late": "Imechelewa siku 1", "Website PIN": "PIN ya tovuti", "Community report": "Ripoti ya jamii", "Community (SMS)": "Jamii (SMS)",
     "Mar": "Mac", "May": "Mei", "Aug": "Ago", "Oct": "Okt", "Dec": "Des"});
   SWP.unshift([/^Repairs, (\d+) open$/, "Matengenezo, $1 wazi"], [/^Review, (\d+) open$/, "Kagua, $1 wazi"], [/^(\d+) with no location$/, "$1 bila mahali"]);
+  // polish-mail
+  Object.assign(SW, {"Send an e-mail": "Tuma barua pepe", "E-mail donors": "Tuma barua pepe", "Send me a test": "Nitumie jaribio", "Include their private project link": "Weka kiungo cha siri cha miradi yao"});
   // dates in the app's own style ("Thu 24 Oct", "24 Oct, 18:34") and relative times, when the language changes after they're drawn
   [['Sun', 'Jpl'], ['Mon', 'Jtt'], ['Tue', 'Jnn'], ['Wed', 'Jtn'], ['Thu', 'Alh'], ['Fri', 'Iju'], ['Sat', 'Jmo']].forEach(function (w) { SWP.push([new RegExp('^' + w[0] + ' (\\d{1,2}) ([A-Z][a-z]{2})$'), w[1] + ' $1 $2']); });
   SWP.push([/^(\d{1,2}) ([A-Z][a-z]{2})((?: \d{4})?(?:, \d{2}:\d{2})?)$/, "$1 $2$3"], [/^(\d+) h ago$/, "saa $1 zilizopita"], [/^(\d+) d ago$/, "siku $1 zilizopita"], [/^(\d+) wk ago$/, "wiki $1 zilizopita"],
@@ -6508,6 +6541,7 @@ html[data-theme=sun] .btn[disabled]{color:#000000}
     T.splice(3, 0, ['teammap', tr('Team map', 'Ramani ya timu'), 'pin'], ['plan', tr('Plan a week', 'Panga wiki'), 'ofaRoute']);
     T.push(['donors', tr('Donors', 'Wafadhili'), 'heart']);
     T.push(['qr', tr('QR codes', 'Misimbo ya QR'), 'qr']);
+    T.push(['mail', tr('Send an <span class="ml-nw">e-mail</span>', 'Tuma barua pepe'), 'mail']);
     $('oTabs').innerHTML = T.map(function (t) {
       var c = t[0] === 'review' ? (S.reviewOpen || 0) : t[0] === 'repairs' ? Object.keys(S.repairs).length : 0;
       return '<button class="otab" type="button" data-o="' + t[0] + '" aria-pressed="' + (O.tab === t[0]) + '"' + (c ? ' aria-label="' + t[1] + ', ' + c + ' open"' : '') + '>' + oic(t[2]) + '<span>' + t[1] + '</span>' + (c ? '<i class="n" aria-hidden="true">' + c + '</i>' : '') + '</button>';
@@ -6535,6 +6569,7 @@ html[data-theme=sun] .btn[disabled]{color:#000000}
     if (t === 'plan') return oNeedTeam(function () { ofaPlanTab(b); });
     if (t === 'donors') return dnrOffice(b);
     if (t === 'qr') return fldQrOffice(b);
+    if (t === 'mail') return mlOffice(b);
   }
 
   // overview
@@ -8592,7 +8627,8 @@ html[data-theme=sun] .btn[disabled]{color:#000000}
     var shown = L.filter(function (d) { return DQM.df === 'all' || dqmDnState(d) === DQM.df; }), on = DNR.mail && DNR.mail.ready;
     var head = dqmHead('dn', 'heart', 'coral', tr('Donors', 'Wafadhili'), tr('Each donor gets a private page with their projects, a map and updates.', 'Kila mfadhili anapata ukurasa wa siri wenye miradi yake, ramani na taarifa.'),
       [[cnt.all, tr('Donors', 'Wafadhili'), '', 'all'], [cnt.opened, tr('Opened their page', 'Wamefungua ukurasa'), cnt.opened ? 'ok' : 'off', 'opened'], [cnt.not, tr('Not opened yet', 'Bado hawajafungua'), cnt.not ? 'has' : 'off', 'not']], DQM.df,
-      '<button class="btn" type="button" data-dqm="dnadd" data-testid="dn_add">' + oic('plus') + tr('Add a donor', 'Ongeza mfadhili') + '</button>');
+      '<button class="btn" type="button" data-dqm="dnadd" data-testid="dn_add">' + oic('plus') + tr('Add a donor', 'Ongeza mfadhili') + '</button>' +
+      (L.length ? '<button class="btn light" type="button" data-dqm="dnmail" data-testid="dn_mail_all">' + oic('mail') + tr('E-mail donors', 'Tuma barua pepe') + '</button>' : ''));
     var chips = L.length ? dqmChips('dn', [['all', 'All', 'Wote'], ['opened', 'Opened', 'Wamefungua'], ['not', 'Not opened', 'Hawajafungua'], ['revoked', 'Revoked', 'Vimezimwa']], cnt, DQM.df) : '';
     var list = !L.length ? '<div class="dqm-none">' + emptyHtml(tr('No donors yet. Tap “Add a donor” to make the first private page.', 'Bado hakuna wafadhili. Gusa “Ongeza mfadhili” kutengeneza ukurasa wa kwanza wa siri.')) + '</div>'
       : !shown.length ? '<div class="dqm-none">' + emptyHtml(DQM.df === 'revoked' ? tr('No revoked links. Good.', 'Hakuna viungo vilivyozimwa.') : DQM.df === 'not' ? tr('Everyone has opened their page.', 'Wote wamefungua ukurasa wao.') : tr('Nobody has opened their page yet.', 'Bado hakuna aliyefungua ukurasa wake.')) + '</div>'
@@ -8710,6 +8746,7 @@ html[data-theme=sun] .btn[disabled]{color:#000000}
     if ((x = t.closest('[data-dqm]'))) {
       if (x.getAttribute('data-dqm') === 'dnadd') { buzz(); dqmDnForm(null); }
       if (x.getAttribute('data-dqm') === 'dnmore') { DQM.dmore = true; dnrOffice($('oBody')); }
+      if (x.getAttribute('data-dqm') === 'dnmail') { buzz(); mlGo({ aud: 'donors', sub: 'all' }); }
       return;
     }
     if ((x = t.closest('[data-dqmf^="dn:"]'))) { buzz(); DQM.df = x.getAttribute('data-dqmf').slice(3); DQM.dmore = false; dnrOffice($('oBody')); }
@@ -8778,6 +8815,7 @@ html[data-theme=sun] .btn[disabled]{color:#000000}
       var a = e.target.closest('[data-a]'); if (!a) return;
       var act = a.getAttribute('data-a'), m = c.querySelector('.dqm-acts .msg'), cf = c.querySelector('.tm-cf'), lb = c.querySelector('.dqm-dnlink');
       if (act === 'edit') { w.close(); setTimeout(function () { dqmDnForm(d); }, 200); return; }
+      if (act === 'mail') { w.close(); mlGo({ aud: 'donors', sub: 'pick', picks: [d.id] }); return; }
       var go = function (am) {
         var say = am || m;
         dnrSay(say, '', act === 'revoke' ? tr('Revoking…', 'Inazima…') : act === 'del' ? tr('Deleting…', 'Inafuta…') : tr('Getting the link…', 'Inaleta kiungo…'));
@@ -8807,6 +8845,7 @@ html[data-theme=sun] .btn[disabled]{color:#000000}
       '<div class="dqm-acts">' + (on ? '<button class="btn" type="button" data-a="copy" data-testid="dn_copy">' + oic('link') + '<span>' + tr('Copy private link', 'Nakili kiungo cha siri') + '</span></button>' +
         '<div class="dqm-two"><button class="btn light" type="button" data-a="share" data-testid="dn_share">' + oic('dqmshare') + '<span>' + tr('Share link', 'Shiriki kiungo') + '</span></button><button class="btn light" type="button" data-a="edit" data-testid="dn_edit">' + oic('dqmedit') + '<span>' + tr('Edit', 'Hariri') + '</span></button></div>'
         : '<button class="btn" type="button" data-a="rotate" data-testid="dn_newlink">' + oic('link') + '<span>' + tr('Make a new link', 'Tengeneza kiungo kipya') + '</span></button><button class="btn light" type="button" data-a="edit" data-testid="dn_edit">' + oic('dqmedit') + '<span>' + tr('Edit', 'Hariri') + '</span></button>') +
+      '<button class="btn light" type="button" data-a="mail" data-testid="dn_email">' + oic('mail') + '<span>' + tr('E-mail', 'Barua pepe') + '</span></button>' +
       '<span class="msg" aria-live="polite"></span></div>' +
       dqmKv([[tr('Projects', 'Miradi'), esc(dqmDnProj(ps.length)), ps.length ? esc(ps.slice(0, 3).join(', ') + (ps.length > 3 ? ' …' : '')) : ''],
         [tr('Last opened', 'Ilifunguliwa mwisho'), d.lastOpen ? esc(vxWhen(d.lastOpen)) : tr('Not yet', 'Bado'), d.opens > 1 ? tr(d.opens + ' times', 'mara ' + d.opens) : ''],
@@ -8857,6 +8896,280 @@ html[data-theme=sun] .btn[disabled]{color:#000000}
     go();
   }
 
+  // --- Office › Send an e-mail (ml…): one message to donors, the admins or team members (functions/api/mail.js) ---
+  // A calm head with three numbers, then the composer: who it goes to (and how many, live), subject, message, an
+  // optional button and photo, the donors' private link (donors only). Preview shows the real e-mail in a sheet,
+  // Send asks in a styled sheet with the count. Each person gets their own e-mail; the server checks everything.
+  var ML = { ov: null, aud: 'donors', sub: 'all', project: '', picks: [], q: '', subject: '', body: '', btnOn: false, btnLabel: '', btnHref: '', photo: null, link: false, busy: false };
+  (function () { try { var d = JSON.parse(store.get('rfPinMailDraft') || 'null'); if (d) ['aud', 'sub', 'project', 'subject', 'body', 'btnOn', 'btnLabel', 'btnHref', 'link'].forEach(function (k) { if (k in d) ML[k] = d[k]; }); } catch (e) {} })();
+  // "e-mail" never splits at its hyphen (a non-breaking hyphen, as elsewhere in the app)
+  function mlHyph(root) {
+    if (!root) return root;
+    var w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT), t;
+    while ((t = w.nextNode())) if (/[Ee]-mail/.test(t.data) && !t.parentNode.closest('input, textarea, iframe')) t.data = t.data.replace(/([Ee])-mail/g, '$1\u2011mail');
+    return root;
+  }
+  function mlKeep() { store.set('rfPinMailDraft', JSON.stringify({ aud: ML.aud, sub: ML.sub, project: ML.project, subject: ML.subject, body: ML.body, btnOn: ML.btnOn, btnLabel: ML.btnLabel, btnHref: ML.btnHref, link: ML.link })); }
+  function mlApi(method, body, q) {
+    return fetch('/api/mail' + (q || ''), { method: method, headers: Object.assign({ Accept: 'application/json' }, S.pin ? { 'X-Pin': S.pin } : {}, body ? { 'Content-Type': 'application/json' } : {}), body: body ? JSON.stringify(body) : undefined })
+      .then(function (r) { return r.json().catch(function () { return { ok: false, reason: 'down' }; }).then(function (j) { j.status = r.status; return j; }); })
+      .catch(function () { return { ok: false, reason: 'offline', status: 0 }; });
+  }
+  function mlLoad(cb) { mlApi('GET', null, '?view=overview').then(function (j) { if (j.ok) ML.ov = j; cb(j); }); }
+  // open the tab with an audience chosen (from Office › Donors or a project's donor area)
+  function mlGo(o) {
+    ML.aud = o.aud || 'donors'; ML.sub = o.sub || 'all'; ML.project = o.project || ''; ML.picks = (o.picks || []).slice(); if (ML.aud !== 'donors') ML.link = false; mlKeep();
+    O.tab = 'mail'; store.set('rfPinOTab', 'mail');
+    if (S.view === 'vOffice') renderOffice(); else show('vOffice');
+    try { window.scrollTo(0, 0); } catch (e) {}
+  }
+  function mlAudience() { return ML.aud === 'admins' ? 'admins' : ML.aud === 'team' ? (ML.sub === 'pick' ? 'people:pick' : 'team') : ML.sub === 'project' && ML.project ? 'donors:project:' + ML.project : ML.sub === 'pick' ? 'donors:pick' : 'donors:all'; }
+  function mlDonorRows() {
+    var out = []; ((ML.ov && ML.ov.donors.list) || []).forEach(function (d) { d.viewers.forEach(function (v) { out.push({ key: v.key, did: d.id, name: v.name, donor: d.name, projects: d.projects, why: v.why }); }); }); return out;
+  }
+  // who it goes to, worked out here for the live count (the server works it out again, and its count is the one confirmed)
+  function mlWho() {
+    var a = mlAudience(), rows, skip = { unsub: 0, revoked: 0, 'no-email': 0 }, n = 0;
+    if (a.indexOf('donors') === 0) {
+      rows = mlDonorRows().filter(function (r) { return a === 'donors:all' || (a === 'donors:pick' ? ML.picks.indexOf(r.key) >= 0 || ML.picks.indexOf(r.did) >= 0 : r.projects.map(String).indexOf(String(ML.project)) >= 0); });
+      rows.forEach(function (r) { if (r.why) skip[r.why]++; else n++; });
+      return { kind: 'donor', n: n, skip: skip };
+    }
+    rows = ((ML.ov && ML.ov.team.people) || []).filter(function (p) { return a === 'team' || (a === 'admins' ? p.role === 'admin' : ML.picks.indexOf(p.key) >= 0); });
+    rows.forEach(function (p) { if (p.email) n++; else skip['no-email']++; });
+    return { kind: a === 'admins' ? 'admin' : 'team', n: n, skip: skip };
+  }
+  function mlCountWord(kind, n) {
+    return kind === 'donor' ? (n === 1 ? tr('1 donor', 'mfadhili 1') : tr(n + ' donors', 'wafadhili ' + n)) : kind === 'admin' ? (n === 1 ? tr('1 admin', 'msimamizi 1') : tr(n + ' admins', 'wasimamizi ' + n)) : (n === 1 ? tr('1 person', 'mtu 1') : tr(n + ' people', 'watu ' + n));
+  }
+  // "2 unsubscribed are skipped": the number keeps its word, and the last two words stay together
+  function mlSkipText(s) {
+    var a = [], k = s['no-email'] || s.noEmail || 0;
+    if (s.unsub) a.push(tr(s.unsub + ' unsubscribed ' + (s.unsub === 1 ? 'is' : 'are') + ' skipped', s.unsub + ' waliojiondoa wanarukwa'));
+    if (s.revoked) a.push(tr(s.revoked + ' with a revoked link', s.revoked + ' wenye kiungo kilichozimwa'));
+    if (k) a.push(tr(k + ' without an e-mail', k + ' bila barua pepe'));
+    return a.map(function (x) { return x.replace(/^(\S+) /, '$1\u00a0').replace(/ (\S+)$/, '\u00a0$1'); });
+  }
+  function mlCountHtml() {
+    if (!ML.ov) return '';
+    var w = mlWho(), a = mlAudience();
+    if ((a === 'donors:pick' || a === 'people:pick') && !ML.picks.length) return oic('people') + '<span>' + tr('Tick who it goes to below.', 'Chagua anaotumiwa hapa chini.') + '</span>';
+    if (ML.aud === 'donors' && ML.sub === 'project' && !ML.project) return oic('people') + '<span>' + tr('Choose a project.', 'Chagua mradi.') + '</span>';
+    var parts = [(w.n ? tr('Goes to ', 'Inaenda kwa ') + mlCountWord(w.kind, w.n) : tr('Nobody to send to yet', 'Bado hakuna wa kutumiwa'))].concat(mlSkipText(w.skip));
+    return oic('mail') + '<span data-testid="ml_count">' + parts.map(function (s) { return '<span class="nw">' + esc(s) + '</span>'; }).join(' · ') + '</span>';
+  }
+  function mlProjects() {
+    var seen = {}, out = [];
+    ((ML.ov && ML.ov.donors.list) || []).forEach(function (d) { d.projects.forEach(function (id) { id = String(id); if (!seen[id]) { seen[id] = 0; out.push(id); } d.viewers.forEach(function (v) { if (!v.why) seen[id]++; }); }); });
+    return out.map(function (id) { return { id: id, title: pname(id), n: seen[id] }; }).sort(function (a, z) { return a.title.localeCompare(z.title); });
+  }
+  function mlWhyText(j) {
+    var c = j.cap || 0, l = j.left;
+    return j.reason === 'no-mail' ? tr('E-mail isn’t switched on yet. Whoever looks after the website can turn it on.', 'Barua pepe bado haijawashwa. Anayesimamia tovuti anaweza kuiwasha.')
+      : j.reason === 'cap' ? tr('One send can go to at most ' + c + ' people. Choose fewer, or send it in parts.', 'Utumaji mmoja unaweza kwenda kwa watu ' + c + ' tu. Chagua wachache, au utume kwa sehemu.')
+      : j.reason === 'day-cap' ? tr('Today’s e-mail allowance is nearly used up: ' + l + ' left today. Choose fewer people or send it tomorrow.', 'Kiwango cha barua pepe cha leo kinakaribia kwisha: ' + l + ' zimebaki leo. Chagua watu wachache au utume kesho.')
+      : j.reason === 'month-cap' ? tr('This month’s e-mail allowance is nearly used up: ' + l + ' left this month.', 'Kiwango cha barua pepe cha mwezi huu kinakaribia kwisha: ' + l + ' zimebaki mwezi huu.')
+      : j.reason === 'rate' ? tr('That’s a lot of e-mails in the last hour. Please wait a while and try again.', 'Barua pepe nyingi ndani ya saa iliyopita. Tafadhali subiri kidogo kisha ujaribu tena.')
+      : j.reason === 'no-own-email' ? tr('Add your own e-mail in Office › Team first, so the test can reach you.', 'Ongeza barua pepe yako kwenye Ofisi › Timu kwanza, ili jaribio likufikie.')
+      : j.reason === 'empty' ? tr('Add a subject and a message.', 'Ongeza kichwa na ujumbe.')
+      : j.reason === 'nobody' ? tr('Nobody to send to. Choose who it goes to.', 'Hakuna wa kutumiwa. Chagua anaotumiwa.')
+      : j.reason === 'changed' ? tr('The list changed. Check the count and send again.', 'Orodha imebadilika. Angalia idadi kisha utume tena.')
+      : j.reason === 'not-admin' ? tr('Only admins can send e-mails.', 'Wasimamizi tu ndio wanaweza kutuma barua pepe.')
+      : j.reason === 'too-large' ? tr('That photo is too large.', 'Picha hiyo ni kubwa mno.') : j.reason === 'type' ? tr('That kind of file can’t be added.', 'Aina hiyo ya faili haiwezi kuongezwa.')
+      : j.detail ? tr('Not sent. Resend said: ', 'Haijatumwa. Resend imesema: ') + j.detail : why(j);
+  }
+  // set-up names only under a fold
+  function mlTech(j) {
+    return j.reason === 'no-mail' ? poTech(tr('Add <span class="ml-nw">RESEND_API_KEY</span> and <span class="ml-nw">ALERT_FROM</span> in Cloudflare.', 'Ongeza <span class="ml-nw">RESEND_API_KEY</span> na <span class="ml-nw">ALERT_FROM</span> kwenye Cloudflare.'))
+      : j.reason === 'cap' || j.reason === 'day-cap' || j.reason === 'month-cap' ? poTech(tr('Resend’s free plan allows 100 e-mails a day and 3,000 a month. The limits are <span class="ml-nw">MAIL_CAP</span>, <span class="ml-nw">MAIL_DAY_CAP</span> and <span class="ml-nw">MAIL_MONTH_CAP</span> in Cloudflare.', 'Mpango wa bure wa Resend unaruhusu barua pepe 100 kwa siku na 3,000 kwa mwezi. Viwango ni <span class="ml-nw">MAIL_CAP</span>, <span class="ml-nw">MAIL_DAY_CAP</span> na <span class="ml-nw">MAIL_MONTH_CAP</span> kwenye Cloudflare.')) : '';
+  }
+  function mlSay(cls, text, tech) { var m = $('mlMsg'); if (!m) return; m.className = 'ml-say ' + (cls || ''); m.innerHTML = text ? '<span>' + esc(text) + '</span>' + (tech || '') : ''; mlHyph(m); }
+  function mlOffice(b) {
+    if (!ML.ov) { b.innerHTML = '<p class="muted">' + tr('Loading…', 'Inapakia…') + '</p>'; return mlLoad(function (j) { if (O.tab !== 'mail') return; if (!j.ok) { b.innerHTML = '<p class="msg bad">' + esc(mlWhyText(j)) + '</p>'; return; } mlOffice(b); }); }
+    var ov = ML.ov, d = ov.donors, tm = ov.team;
+    var head = dqmHead('ml', 'mail', 'blue', tr('Send an <span class="ml-nw">e-mail</span>', 'Tuma barua pepe'), tr('Write to donors, the admins or the team. Everyone gets their own\u00a0e-mail.', 'Waandikie wafadhili, wasimamizi au timu. Kila mtu anapata barua pepe\u00a0yake.'),
+      [[ov.use.month, tr('sent this month', 'zilizotumwa mwezi huu'), ov.use.month ? 'has' : 'off'], [d.reachable, tr('donors reachable', 'wafadhili wanaofikiwa'), d.reachable ? 'ok' : 'off'], [tm.reachable, tr('team reachable', 'timu inayofikiwa'), tm.reachable ? 'ok' : 'off']]);
+    var off = ov.ready ? '' : '<div class="ml-off" data-testid="ml_off"><span>' + tr('E-mail isn’t switched on yet. You can write and preview; whoever looks after the website can turn sending on.', 'Barua pepe bado haijawashwa. Unaweza kuandika na kuhakiki; anayesimamia tovuti anaweza kuwasha utumaji.') + '</span>' + mlTech({ reason: 'no-mail' }) + '</div>';
+    b.innerHTML = '<div class="o-grid dqm ml"><div>' + head + off + '<div class="card ml-card dqm-f" id="mlForm" data-testid="ml_form"></div></div><div class="o-side"><div class="card ml-sent" id="mlSent" data-testid="ml_sent"></div></div></div>';
+    mlForm(); mlSentDraw(); mlHyph(b);
+  }
+  function mlForm() {
+    var f = $('mlForm'); if (!f) return;
+    var seg = function (k, en, sw) { return '<button type="button" data-mlaud="' + k + '" data-testid="ml_aud_' + k + '" aria-pressed="' + (ML.aud === k) + '">' + tr(en, sw) + '</button>'; };
+    var chip = function (k, en, sw) { return '<button type="button" class="chip" data-mlsub="' + k + '" data-testid="ml_sub_' + k + '" aria-pressed="' + (ML.sub === k) + '">' + tr(en, sw) + '</button>'; };
+    var sub = ML.aud === 'donors' ? '<div class="ml-chips" role="group" aria-label="' + tr('Which donors', 'Wafadhili gani') + '">' + chip('all', 'All donors', 'Wafadhili wote') + chip('project', 'One project', 'Mradi mmoja') + chip('pick', 'Choose people', 'Chagua watu') + '</div>'
+      : ML.aud === 'team' ? '<div class="ml-chips" role="group" aria-label="' + tr('Who on the team', 'Nani kwenye timu') + '">' + chip('all', 'Everyone', 'Wote') + chip('pick', 'Choose people', 'Chagua watu') + '</div>' : '';
+    var proj = ML.aud === 'donors' && ML.sub === 'project' ? '<label>' + tr('Project', 'Mradi') + '<select id="mlProj" data-testid="ml_project"><option value="">' + tr('Choose a project…', 'Chagua mradi…') + '</option>' +
+      mlProjects().map(function (p) { return '<option value="' + esc(p.id) + '"' + (String(ML.project) === p.id ? ' selected' : '') + '>' + esc(p.title) + ' (' + p.n + ')</option>'; }).join('') + '</select></label>' : '';
+    var pick = (ML.aud === 'donors' || ML.aud === 'team') && ML.sub === 'pick' ? '<input type="search" id="mlQ" placeholder="' + tr('Find a name', 'Tafuta jina') + '" aria-label="' + tr('Find a name', 'Tafuta jina') + '" value="' + esc(ML.q) + '"><div class="ml-pick dnr-plist" id="mlPick" role="group" aria-label="' + tr('People', 'Watu') + '"></div>' : '';
+    var isD = ML.aud === 'donors';
+    f.innerHTML = '<h3 class="ml-h">' + tr('To', 'Kwa') + '</h3><div class="seg ml-seg" role="group" aria-label="' + tr('Who it goes to', 'Inaenda kwa nani') + '">' + seg('donors', 'Donors', 'Wafadhili') + seg('admins', 'Admins', 'Wasimamizi') + seg('team', 'Team', 'Timu') + '</div>' +
+      sub + proj + pick + '<div class="ml-count" id="mlCount" aria-live="polite">' + mlCountHtml() + '</div>' +
+      '<label>' + tr('Subject', 'Kichwa') + '<input type="text" id="mlSubj" maxlength="150" autocomplete="off" data-testid="ml_subject" placeholder="' + esc(isD ? tr('e.g. Water is flowing in Kapsaret', 'mf. Maji yanatiririka Kapsaret') : tr('e.g. Team meeting on Friday', 'mf. Mkutano wa timu Ijumaa')) + '" value="' + esc(ML.subject) + '"></label>' +
+      '<label>' + tr('Message', 'Ujumbe') + '<textarea id="mlBody" rows="8" maxlength="6000" data-testid="ml_body" placeholder="' + esc(isD ? tr('Dear {first},', 'Mpendwa {first},') : tr('Hello {first},', 'Habari {first},')) + '">' + esc(ML.body) + '</textarea></label>' +
+      '<p class="ml-hint">' + tr('<b>{first}</b> becomes each person’s first name and <b>{name}</b> their full name. Start a line with “- ” for a bullet.', '<b>{first}</b> inakuwa jina la kwanza la kila mtu na <b>{name}</b> jina lake kamili. Anza mstari kwa “- ” kupata kitone.') + '</p>' +
+      '<label class="tick"><input type="checkbox" id="mlBtnOn"' + (ML.btnOn ? ' checked' : '') + '> ' + tr('Add a button', 'Ongeza kitufe') + '</label>' +
+      (ML.btnOn ? '<div class="ml-btnf"><label>' + tr('Button text', 'Maandishi ya kitufe') + '<input type="text" id="mlBtnL" maxlength="40" value="' + esc(ML.btnLabel) + '" placeholder="' + tr('e.g. Read the story', 'mf. Soma hadithi') + '"></label><label>' + tr('Link', 'Kiungo') + '<input type="text" id="mlBtnH" inputmode="url" autocomplete="off" spellcheck="false" maxlength="500" value="' + esc(ML.btnHref) + '" placeholder="https://"></label></div>' : '') +
+      '<div class="ml-photo" id="mlPhoto"></div>' +
+      (isD ? '<label class="tick"><input type="checkbox" id="mlLink" data-testid="ml_link"' + (ML.link ? ' checked' : '') + '> <span>' + tr('Include their private project link', 'Weka kiungo cha siri cha miradi yao') + '<small class="ml-sm">' + tr('Each donor gets their own link.', 'Kila mfadhili anapata kiungo chake.') + '</small></span></label>' : '') +
+      '<div class="dqm-acts ml-acts"><div class="dqm-two"><button class="btn light" type="button" id="mlPrev" data-testid="ml_preview">' + oic('search') + '<span>' + tr('Preview', 'Hakiki') + '</span></button><button class="btn light" type="button" id="mlTest" data-testid="ml_test">' + oic('mail') + '<span>' + tr('Send me a test', 'Nitumie jaribio') + '</span></button></div>' +
+      '<button class="btn" type="button" id="mlSend" data-testid="ml_send">' + oic('check') + '<span>' + tr('Send', 'Tuma') + '</span></button><div class="ml-say" id="mlMsg" aria-live="polite"></div></div>';
+    mlPickDraw(); mlPhotoDraw(); mlHyph(f);
+  }
+  function mlPickDraw() {
+    var el = $('mlPick'); if (!el) return;
+    var q = ML.q.trim().toLowerCase(), why = { unsub: tr('unsubscribed', 'amejiondoa'), revoked: tr('link revoked', 'kiungo kimezimwa'), 'no-email': tr('no e-mail', 'hana barua pepe') };
+    var rows = ML.aud === 'donors' ? mlDonorRows().map(function (r) { return { key: r.key, name: r.name, sub: r.donor !== r.name ? r.donor : '', why: r.why }; })
+      : ML.ov.team.people.map(function (p) { return { key: p.key, name: p.name, sub: p.role === 'admin' ? tr('Admin', 'Msimamizi') : tr('Field team', 'Timu ya uwanjani'), why: p.email ? '' : 'no-email' }; });
+    rows = rows.filter(function (r) { return !q || (r.name + ' ' + r.sub).toLowerCase().indexOf(q) >= 0; }).sort(function (a, z) { return (!!a.why - !!z.why) || a.name.localeCompare(z.name); });
+    el.innerHTML = rows.length ? rows.slice(0, 200).map(function (r) {
+      return '<label class="dnr-p' + (r.why ? ' ml-dim' : '') + '"><input type="checkbox" value="' + esc(r.key) + '"' + (ML.picks.indexOf(r.key) >= 0 && !r.why ? ' checked' : '') + (r.why ? ' disabled' : '') + '><span><b>' + esc(r.name) + '</b><small>' + esc([r.sub, r.why ? why[r.why] : ''].filter(Boolean).join(' · ')) + '</small></span></label>';
+    }).join('') : '<p class="muted dqm-note">' + (q ? tr('Nobody matches.', 'Hakuna anayelingana.') : ML.aud === 'donors' ? tr('No donors yet.', 'Bado hakuna wafadhili.') : tr('Nobody on the team yet.', 'Bado hakuna mtu kwenye timu.')) + '</p>';
+  }
+  function mlPhotoDraw() {
+    var el = $('mlPhoto'); if (!el) return;
+    var p = ML.photo;
+    el.innerHTML = '<span class="ml-pl">' + tr('Photo (optional)', 'Picha (si lazima)') + '</span>' + (p ? '<div class="ml-ph"><img src="' + esc(p.src) + '" alt=""><span>' + esc(p.label || '') + '</span><button class="btn small light" type="button" id="mlPhX">' + tr('Remove', 'Ondoa') + '</button></div>'
+      : '<div class="dqm-two"><button class="btn small light" type="button" id="mlPhP" data-testid="ml_photo_project">' + oic('camera') + '<span>' + tr('Project photo', 'Picha ya mradi') + '</span></button><label class="btn small light ml-up">' + oic('plus') + '<span>' + tr('Upload', 'Pakia') + '</span><input type="file" id="mlPhU" accept="image/jpeg,image/png,image/webp" hidden></label></div><span class="msg" id="mlPhMsg" aria-live="polite"></span>');
+  }
+  function mlUpdateCount() { var c = $('mlCount'); if (c) { c.innerHTML = mlCountHtml(); mlHyph(c); } }
+  function mlDraft() {
+    return { audience: mlAudience(), picks: ML.picks, subject: ML.subject, body: ML.body, button: ML.btnOn ? { label: ML.btnLabel, href: ML.btnHref } : null, photo: ML.photo ? { kind: ML.photo.kind, id: ML.photo.id } : null, includeLink: ML.aud === 'donors' && ML.link };
+  }
+  function mlCheck(full) {
+    if ((mlAudience() === 'donors:pick' || mlAudience() === 'people:pick') && !ML.picks.length) return tr('Tick who it goes to.', 'Chagua anaotumiwa.');
+    if (ML.aud === 'donors' && ML.sub === 'project' && !ML.project) return tr('Choose a project.', 'Chagua mradi.');
+    if (full && (!ML.subject.trim() || !ML.body.trim())) return tr('Add a subject and a message.', 'Ongeza kichwa na ujumbe.');
+    if (ML.btnOn && (!ML.btnLabel.trim() || !/^https?:\/\/\S+\.\S+/.test(ML.btnHref.trim()))) return tr('Give the button a text and a link starting with https://', 'Kipe kitufe maandishi na kiungo kinachoanza na https://');
+    return '';
+  }
+  function mlPreview() {
+    var bad = mlCheck(false); if (bad) return mlSay('bad', bad);
+    mlSay('', tr('Getting the preview…', 'Inaleta hakikisho…'));
+    mlApi('POST', Object.assign({ action: 'preview' }, mlDraft())).then(function (j) {
+      if (!j.ok) return mlSay('bad', mlWhyText(j), mlTech(j));
+      mlSay('', '');
+      var names = j.names.slice(0, 5).join(', ') + (j.count > 5 ? tr(' and ' + (j.count - 5) + ' more', ' na wengine ' + (j.count - 5)) : '');
+      var w = tSheet(tr('Preview', 'Hakikisho'), '<div class="ml-pv" data-testid="ml_preview_sheet"><div class="dqm-shd"><span class="dqm-shi dqm-t-has" aria-hidden="true">' + oic('mail') + '</span><h3>' + esc(j.subject || tr('(no subject)', '(hakuna kichwa)')) + '</h3>' +
+        '<small>' + esc(j.count ? tr('Goes to ', 'Inaenda kwa ') + mlCountWord(j.kind === 'donor' ? 'donor' : mlAudience() === 'admins' ? 'admin' : 'team', j.count) + ': ' + names : tr('Nobody to send to yet', 'Bado hakuna wa kutumiwa')) + '</small>' +
+        '<small>' + esc(tr('Shown as ' + j.sample + ' gets it. Links in the preview are samples.', 'Inaonyeshwa kama ' + j.sample + ' atakavyoipata. Viungo kwenye hakikisho ni mifano.')) + '</small></div>' +
+        '<iframe class="ml-frame" title="' + tr('The e-mail', 'Barua pepe') + '" sandbox="" referrerpolicy="no-referrer"></iframe></div>');
+      w.querySelector('iframe').srcdoc = j.html; mlHyph(w);
+    });
+  }
+  function mlTest() {
+    var bad = mlCheck(true); if (bad) return mlSay('bad', bad);
+    mlSay('', tr('Sending you a test…', 'Inakutumia jaribio…'));
+    mlApi('POST', Object.assign({ action: 'test' }, mlDraft())).then(function (j) {
+      if (!j.ok) return mlSay('bad', mlWhyText(j), mlTech(j));
+      mlSay('ok', tr('Test sent to ' + j.to + ' ✓ Check your inbox.', 'Jaribio limetumwa kwa ' + j.to + ' ✓ Angalia barua pepe yako.'));
+    });
+  }
+  function mlSend() {
+    var bad = mlCheck(true); if (bad) return mlSay('bad', bad);
+    if (ML.busy) return;
+    if (!ML.ov.ready) return mlSay('bad', mlWhyText({ reason: 'no-mail' }), mlTech({ reason: 'no-mail' }));
+    mlSay('', tr('Checking who it goes to…', 'Inakagua inaenda kwa nani…'));
+    mlApi('POST', Object.assign({ action: 'preview' }, mlDraft())).then(function (p) {
+      if (!p.ok) return mlSay('bad', mlWhyText(p), mlTech(p));
+      mlSay('', '');
+      if (!p.count) return mlSay('bad', mlWhyText({ reason: 'nobody' }));
+      var kind = p.kind === 'donor' ? 'donor' : mlAudience() === 'admins' ? 'admin' : 'team', who = mlCountWord(kind, p.count), skip = mlSkipText(p.skipped);
+      var ask = poAsk(tr('Send to ' + who + '?', 'Tuma kwa ' + who + '?'), tr('Each person gets their own e-mail, so nobody sees anyone else’s address. ', 'Kila mtu anapata barua pepe yake, kwa hiyo hakuna anayeona anwani ya mwingine. ') + (skip.length ? skip.join(' · ') + '. ' : '') + tr('It can’t be called back once sent.', 'Haiwezi kurudishwa ikishatumwa.'), tr('Send to ' + who, 'Tuma kwa ' + who));
+      var pa = qa('.po-ask'); mlHyph(pa[pa.length - 1]);
+      ask.then(function (ok) {
+        if (!ok) return;
+        ML.busy = true; var btn = $('mlSend'); if (btn) btn.disabled = true;
+        mlSay('', tr('Sending…', 'Inatuma…'));
+        mlApi('POST', Object.assign({ action: 'send', expect: p.count }, mlDraft())).then(function (j) {
+          ML.busy = false; if ($('mlSend')) $('mlSend').disabled = false;
+          if (!j.ok) return mlSay('bad', mlWhyText(j), mlTech(j));
+          toast(tr('Sent ✓', 'Imetumwa ✓')); buzz();
+          ML.subject = ''; ML.body = ''; ML.photo = null; ML.btnOn = false; ML.btnLabel = ''; ML.btnHref = ''; mlKeep();
+          var res = tr(j.sent + ' sent', 'zimetumwa ' + j.sent) + (j.skipped ? ' · ' + tr(j.skipped + ' skipped', 'zimerukwa ' + j.skipped) : '') + (j.failed ? ' · ' + tr(j.failed + ' failed', 'hazikufika ' + j.failed) : '');
+          mlLoad(function () { if (O.tab === 'mail' && S.view === 'vOffice') { mlOffice($('oBody')); mlSay(j.failed ? 'warn' : 'ok', tr('Sent ✓ ', 'Imetumwa ✓ ') + res); } });
+        });
+      });
+    });
+  }
+  function mlUpload(file) {
+    if (!file) return;
+    if (!/^image\/(jpeg|png|webp)$/.test(file.type)) return msg('mlPhMsg', 'bad', tr('That kind of file can’t be added.', 'Aina hiyo ya faili haiwezi kuongezwa.'));
+    msg('mlPhMsg', '', tr('Adding the photo…', 'Inaongeza picha…'));
+    shrink(file).then(function (blob) {
+      var r = new FileReader();
+      r.onload = function () {
+        mlApi('POST', { action: 'photo', type: 'image/jpeg', data: String(r.result) }).then(function (j) {
+          if (!j.ok) return msg('mlPhMsg', 'bad', mlWhyText(j));
+          ML.photo = { kind: 'upload', id: j.id, src: j.url, label: tr('Your photo', 'Picha yako') }; mlPhotoDraw();
+        });
+      };
+      r.readAsDataURL(blob);
+    });
+  }
+  // a project's photo: the chosen project first, then search
+  function mlPhotoPick() {
+    var P = S.projects.filter(function (p) { return p.photo; }), first = ML.aud === 'donors' && ML.project ? String(ML.project) : '';
+    var w = tSheet(tr('Project photo', 'Picha ya mradi'), '<div class="ml-pp" data-testid="ml_photo_sheet"><div class="dqm-shd"><span class="dqm-shi dqm-t-has" aria-hidden="true">' + oic('camera') + '</span><h3>' + tr('Project photo', 'Picha ya mradi') + '</h3><small>' + tr('The photo shown on the website for that project.', 'Picha inayoonyeshwa kwenye tovuti kwa mradi huo.') + '</small></div>' +
+      '<input type="search" id="mlPpQ" placeholder="' + tr('Search projects', 'Tafuta miradi') + '" aria-label="' + tr('Search projects', 'Tafuta miradi') + '"><div class="ml-ppl" id="mlPpL"></div></div>'), c = w.querySelector('.tsh-c');
+    var draw = function () {
+      var q = ($('mlPpQ').value || '').trim().toLowerCase();
+      var L = P.filter(function (p) { return !q || (p.title + ' ' + (p.area || '')).toLowerCase().indexOf(q) >= 0; }).sort(function (a, z) { return (z.id === first) - (a.id === first) || a.title.localeCompare(z.title); }).slice(0, 40);
+      $('mlPpL').innerHTML = L.length ? L.map(function (p) { return '<button type="button" class="ml-ppi" data-pp="' + esc(p.id) + '"><img src="/api/photo/' + encodeURIComponent(p.photo) + '?w=480" alt="" loading="lazy"><span>' + esc(p.title) + '</span></button>'; }).join('') : '<p class="muted">' + tr('No projects match.', 'Hakuna mradi unaolingana.') + '</p>';
+    };
+    draw();
+    c.addEventListener('input', function (e) { if (e.target.id === 'mlPpQ') draw(); });
+    c.addEventListener('click', function (e) { var x = e.target.closest('[data-pp]'); if (!x) return; var p = byId(x.getAttribute('data-pp')); if (!p) return; ML.photo = { kind: 'project', id: String(p.photo), src: '/api/photo/' + encodeURIComponent(p.photo) + '?w=480', label: p.title }; w.close(); mlPhotoDraw(); });
+  }
+  function mlAudWord(e) { var a = String(e.audience || ''); return a === 'donors:all' ? tr('All donors', 'Wafadhili wote') : a === 'donors:pick' ? tr('Chosen donors', 'Wafadhili waliochaguliwa') : a.indexOf('donors:project:') === 0 ? tr('Donors of ', 'Wafadhili wa ') + pname(a.slice(15)) : a === 'admins' ? tr('Admins', 'Wasimamizi') : a === 'team' ? tr('The whole team', 'Timu nzima') : tr('Chosen team members', 'Wanatimu waliochaguliwa'); }
+  function mlSentDraw() {
+    var el = $('mlSent'); if (!el) return;
+    var L = ML.ov.log || [];
+    el.innerHTML = '<h3 class="ml-h">' + tr('Sent', 'Zilizotumwa') + '</h3>' + (L.length ? '<div class="dqm-list">' + L.map(function (e, i) {
+      var tone = e.failed && !e.sent ? 'bad' : e.failed ? 'has' : 'ok';
+      return '<button type="button" class="dqm-card" data-mllog="' + esc(e.id) + '" data-testid="ml_log" style="--i:' + Math.min(i, 10) + '">' + dqmIc(e.kind === 'donor' ? 'heart' : 'people', e.kind === 'donor' ? 'coral' : 'blue') +
+        '<span class="dqm-mid"><span class="dqm-tt">' + esc(e.subject || '') + '</span>' + dqmPill(tone, rrNw([tr((e.sent || 0) + ' sent', 'zimetumwa ' + (e.sent || 0)), e.failed ? tr(e.failed + ' failed', 'hazikufika ' + e.failed) : '', e.skipped ? tr(e.skipped + ' skipped', 'zimerukwa ' + e.skipped) : ''])) +
+        '<span class="dqm-sub">' + esc(mlAudWord(e)) + '</span><span class="dqm-sub">' + esc((e.by || '') + ' · ' + vxWhen(e.at)) + '</span></span><span class="dqm-end">' + oic('chev') + '</span></button>';
+    }).join('') + '</div>' : '<div class="dqm-none">' + emptyHtml(tr('Nothing sent yet. What you send shows here.', 'Bado hakuna kilichotumwa. Unachotuma kinaonekana hapa.')) + '</div>');
+    mlHyph(el);
+  }
+  function mlLogOpen(id) {
+    var e = (ML.ov.log || []).filter(function (x) { return x.id === id; })[0]; if (!e) return;
+    var st = { sent: tr('Sent', 'Imetumwa'), failed: tr('Not delivered', 'Haikufika') };
+    mlHyph(tSheet(e.subject || '', '<div class="ml-lg" data-testid="ml_log_sheet"><div class="dqm-shd"><span class="dqm-shi dqm-t-' + (e.failed ? 'has' : 'ok') + '" aria-hidden="true">' + oic('mail') + '</span><h3>' + esc(e.subject || '') + '</h3><small>' + esc(mlAudWord(e)) + '</small></div>' +
+      dqmKv([[tr('Sent by', 'Imetumwa na'), esc(e.by || '')], [tr('When', 'Lini'), esc(vxWhen(e.at))], [tr('Sent', 'Zimetumwa'), String(e.sent || 0), e.failed ? esc(tr(e.failed + ' not delivered', e.failed + ' hazikufika')) : ''],
+        e.skipped ? [tr('Skipped', 'Zimerukwa'), String(e.skipped), esc(mlSkipText(e.skippedBy || {}).join(' · '))] : null, e.link ? [tr('Private link', 'Kiungo cha siri'), tr('Included', 'Kimewekwa')] : null]) +
+      '<h3 class="ml-h">' + tr('Each person', 'Kila mtu') + '</h3><ul class="ml-rc">' + (e.rcpt || []).map(function (r) { return '<li class="' + (r.s === 'sent' ? 'ok' : 'bad') + '"><i aria-hidden="true"></i><b>' + esc(r.name) + '</b><span>' + esc(st[r.s] || r.s) + '</span>' + (r.e ? '<small>' + esc(r.e) + '</small>' : '') + '</li>'; }).join('') + '</ul></div>'));
+  }
+  $('oBody').addEventListener('click', function (e) {
+    if (O.tab !== 'mail') return;
+    var t = e.target, x;
+    if ((x = t.closest('[data-mlaud]'))) { buzz(); ML.aud = x.getAttribute('data-mlaud'); ML.sub = 'all'; ML.picks = []; ML.q = ''; if (ML.aud !== 'donors') ML.link = false; mlKeep(); return mlForm(); }
+    if ((x = t.closest('[data-mlsub]'))) { buzz(); ML.sub = x.getAttribute('data-mlsub'); ML.picks = []; ML.q = ''; mlKeep(); return mlForm(); }
+    if ((x = t.closest('[data-mllog]'))) { buzz(); return mlLogOpen(x.getAttribute('data-mllog')); }
+    if (t.closest('#mlPrev')) return mlPreview();
+    if (t.closest('#mlTest')) return mlTest();
+    if (t.closest('#mlSend')) return mlSend();
+    if (t.closest('#mlPhP')) return mlPhotoPick();
+    if (t.closest('#mlPhX')) { ML.photo = null; return mlPhotoDraw(); }
+  });
+  $('oBody').addEventListener('input', function (e) {
+    if (O.tab !== 'mail') return;
+    var id = e.target.id;
+    if (id === 'mlSubj') ML.subject = e.target.value; else if (id === 'mlBody') ML.body = e.target.value; else if (id === 'mlBtnL') ML.btnLabel = e.target.value; else if (id === 'mlBtnH') ML.btnHref = e.target.value;
+    else if (id === 'mlQ') { ML.q = e.target.value; return mlPickDraw(); } else return;
+    mlKeep();
+  });
+  $('oBody').addEventListener('change', function (e) {
+    if (O.tab !== 'mail') return;
+    var t = e.target;
+    if (t.id === 'mlProj') { ML.project = t.value; mlKeep(); return mlUpdateCount(); }
+    if (t.id === 'mlBtnOn') { ML.btnOn = t.checked; mlKeep(); return mlForm(); }
+    if (t.id === 'mlLink') { ML.link = t.checked; return mlKeep(); }
+    if (t.id === 'mlPhU') return mlUpload(t.files && t.files[0]);
+    if (t.closest('#mlPick') && t.type === 'checkbox') { var i = ML.picks.indexOf(t.value); if (t.checked && i < 0) ML.picks.push(t.value); if (!t.checked && i >= 0) ML.picks.splice(i, 1); return mlUpdateCount(); }
+  });
+
   // --- Project › Thank-you for donors: a photo or short video (≤ 60 s) from the community, for this project's donors ---
   var DNR_THX = { busy: false };
   function dnrThxDraw() {
@@ -8868,8 +9181,10 @@ html[data-theme=sun] .btn[disabled]{color:#000000}
         : tr('Ask first: only people who agree to be filmed or photographed. It goes to monday.com and appears on the private pages of this project’s donors.', 'Omba ruhusa kwanza: watu waliokubali kurekodiwa au kupigwa picha tu. Inaenda monday.com na kuonekana kwenye kurasa za faragha za wafadhili wa mradi huu.')) + '</p>' +
       '<label>' + tr('Photo or video', 'Picha au video') + '<input type="file" id="dnThxFile" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime,video/3gpp" capture="environment"></label>' +
       '<label>' + tr('A few words for the donors (optional)', 'Maneno machache kwa wafadhili (si lazima)') + '<input type="text" id="dnThxCap" maxlength="140" placeholder="' + esc(tr('e.g. Asante sana from the water committee!', 'mf. Asante sana kutoka kamati ya maji!')) + '"></label>' +
-      '<div class="oact"><button class="btn small" type="button" id="dnThxGo">' + tr('Send to donors', 'Tuma kwa wafadhili') + '</button><span class="msg" id="dnThxMsg" aria-live="polite"></span></div></details>';
+      '<div class="oact"><button class="btn small" type="button" id="dnThxGo">' + tr('Send to donors', 'Tuma kwa wafadhili') + '</button><span class="msg" id="dnThxMsg" aria-live="polite"></span></div>' +
+      (S.admin ? '<div class="oact ml-pj"><button class="btn small light" type="button" id="dnMailGo" data-testid="pj_mail_donors">' + oic('mail') + '<span>' + tr('E-mail this project’s donors', 'Tuma barua pepe kwa wafadhili wa mradi huu') + '</span></button></div>' : '') + '</details>';
     $('dnThxGo').addEventListener('click', dnrThxSend);
+    if ($('dnMailGo')) $('dnMailGo').addEventListener('click', function () { buzz(); mlGo({ aud: 'donors', sub: 'project', project: p.id }); });
   }
   function dnrThxLength(file) {
     return new Promise(function (ok) {

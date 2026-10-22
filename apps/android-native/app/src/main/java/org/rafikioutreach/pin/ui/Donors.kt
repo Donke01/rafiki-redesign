@@ -176,6 +176,7 @@ fun DonorsSection(m: AppModel, snap: Snapshot) {
         listOf(DqmNum(L.size, t("donors", "wafadhili"), "", "all"), DqmNum(count["opened"] ?: 0, t("opened", "wamefungua"), if ((count["opened"] ?: 0) > 0) "ok" else "off", "opened"),
             DqmNum(count["not"] ?: 0, t("not opened", "hawajafungua"), if ((count["not"] ?: 0) > 0) "has" else "off", "not")), filter, { filter = it; more = false }) {
         Btn(t("Add a donor", "Ongeza mfadhili"), { reset(null); formOpen = true }, Modifier.padding(top = 14.dp).fillMaxWidth().testTag("dn_add"), icon = "plus")
+        if (L.isNotEmpty()) Btn(mailNb(t("E-mail donors", "Tuma barua pepe")), { MailNav.preset = MailPreset("donors") }, Modifier.padding(top = 8.dp).fillMaxWidth().testTag("dn_mail_all"), icon = "mail", light = true)
     }
     loadMsg?.let { Msg(it, "bad") }
     msg?.let { (tone, text) -> Msg(text, tone) }
@@ -355,6 +356,7 @@ private fun DonorSheet(m: AppModel, d: Donor, link: List<String>?, close: () -> 
                 DqmLineBtn(t("Edit", "Hariri"), "edit", { hide { edit() } }, Modifier.fillMaxWidth().testTag("dn_edit"))
             }
         }
+        DqmLineBtn(mailNb(t("E-mail", "Barua pepe")), "mail", { hide { MailNav.preset = MailPreset("donors", "pick", picks = listOf(d.id)) } }, Modifier.padding(top = 8.dp).fillMaxWidth().testTag("dn_email"))
         msg?.let { (tone, text) -> Box(Modifier.testTag("dn_msg")) { Msg(text, tone) } }
         // facts
         Column(Modifier.padding(top = 12.dp)) {
@@ -484,6 +486,9 @@ fun DonorThanks(m: AppModel, p: Project) {
                 }
             }, Modifier.padding(top = 10.dp).fillMaxWidth().testTag("dn_thanks_send"), icon = "upload", enabled = picked != null && !busy)
             msg?.let { (tone, text) -> Msg(text, tone) }
+            // admins: write to this project's donors (Office › Send an e-mail)
+            if (m.snap.value?.admin == true) Btn(mailNb(t("E-mail this project’s donors", "Tuma barua pepe kwa wafadhili wa mradi huu")), { MailNav.preset = MailPreset("donors", "project", p.id); m.goTab = "office" },
+                Modifier.padding(top = 10.dp).fillMaxWidth().testTag("pj_mail_donors"), icon = "mail", light = true, small = true)
         }
     }
 }
