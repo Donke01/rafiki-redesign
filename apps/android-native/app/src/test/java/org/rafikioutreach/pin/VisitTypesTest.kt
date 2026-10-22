@@ -132,10 +132,10 @@ class VisitTypesTest {
         val m = model(); rule.setContent { RafikiTheme(dark = false) { Box(Modifier.size(390.dp, 844.dp)) { App(m) } } }
         rule.waitForIdle()
         rule.onNodeWithTag("bell").assertExists()
-        // from another tab, back goes to Projects; on Projects, back twice only sends the app to the background
+        // from another tab, back goes to Map home (feat-nava); on Map home, back twice only sends the app to the background
         rule.onNodeWithTag("hav").performClick(); rule.waitForIdle()
         rule.runOnUiThread { rule.activity.onBackPressedDispatcher.onBackPressed() }; rule.waitForIdle()
-        rule.onNodeWithTag("projects").assertExists()
+        rule.onNodeWithTag("map_home").assertExists()
         rule.runOnUiThread { rule.activity.onBackPressedDispatcher.onBackPressed() }; rule.waitForIdle()
         org.junit.Assert.assertFalse(rule.activity.isFinishing)
         rule.runOnUiThread { rule.activity.onBackPressedDispatcher.onBackPressed() }; rule.waitForIdle()
@@ -144,7 +144,7 @@ class VisitTypesTest {
         rule.onNodeWithTag("bell").performClick(); rule.waitForIdle()
         rule.onNodeWithTag("hback").assertExists()
         rule.runOnUiThread { rule.activity.onBackPressedDispatcher.onBackPressed() }; rule.waitForIdle()
-        rule.onNodeWithTag("projects").assertExists()
+        rule.onNodeWithTag("map_home").assertExists()
         shot("79-header-bell")
     }
 
@@ -155,7 +155,12 @@ class VisitTypesTest {
         rule.onNodeWithText("Working well").performScrollTo().performClick(); next()
         assertTrue(has("Beds, mattresses and bedding")); next(); next()
         rule.onNodeWithTag("children_note").assertExists(); shot("77-home-photos")
-        rule.onNodeWithTag("hback").performClick(); rule.waitForIdle()
+        // ← steps back like the phone's back (feat-nava): the visit's steps, then Pin location, then Projects
+        // (on step 1 it asks before leaving the visit, which stays on the phone: Leave)
+        repeat(8) {
+            if (rule.onAllNodes(hasTestTag("visit_leave_go")).fetchSemanticsNodes().isNotEmpty()) { rule.onNode(hasTestTag("visit_leave_go")).performScrollTo().performClick(); rule.mainClock.advanceTimeBy(800); rule.waitForIdle() }
+            else if (rule.onAllNodes(hasTestTag("projects")).fetchSemanticsNodes().isEmpty()) { rule.onNode(hasTestTag("hback")).performClick(); rule.mainClock.advanceTimeBy(800); rule.waitForIdle() }
+        }
         open("Kapsaret Borehole")
         rule.onNodeWithText("Working well").performScrollTo().performClick(); next()
         assertTrue(has("Pump works")); next(); assertTrue(has("Pump strokes"))

@@ -86,6 +86,8 @@ import java.time.ZoneOffset
 fun OfficeScreen(m: AppModel, open: (String) -> Unit) {
     var sec by rememberSaveable { mutableStateOf("overview") }
     var strip by rememberSaveable { mutableStateOf(false) }
+    // back from a tab picked on the grid: the grid again (on Overview), not Map home
+    BackStep(strip) { strip = false; sec = "overview" }
     val s by m.snap.collectAsState()
     val snap = s ?: return
     val secs = listOf(

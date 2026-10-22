@@ -407,6 +407,7 @@ private fun RrLight(text: String, onClick: () -> Unit, modifier: Modifier = Modi
 private fun RrFold(tag: String, icon: String, hue: String, title: String, summary: String, content: @Composable () -> Unit) {
     var openNow by remember { mutableStateOf(false) }
     val h = rememberHaptics()
+    BackStep(openNow) { openNow = false }
     val turn by animateFloatAsState(if (openNow) 90f else 0f, tween(if (Motion.on) 220 else 0), label = "chev")
     val hu = C.hue(hue)
     Column(Modifier.fillMaxWidth().testTag(tag)) {

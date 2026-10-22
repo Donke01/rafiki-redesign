@@ -284,6 +284,7 @@ private fun OcvFact(label: String, value: String, valueColor: Color = C.ink, sub
 private fun OcvFold(tag: String, icon: String, hue: String, title: String, summary: String, content: @Composable () -> Unit) {
     var openNow by remember { mutableStateOf(false) }
     val h = rememberHaptics()
+    BackStep(openNow) { openNow = false }
     val turn by animateFloatAsState(if (openNow) 90f else 0f, tween(if (Motion.on) 220 else 0), label = "chev")
     val hu = C.hue(hue)
     Column(Modifier.fillMaxWidth().testTag(tag)) {
@@ -325,6 +326,7 @@ fun OcvOverview(m: AppModel, s: Snapshot, open: (String) -> Unit, go: (String) -
     var people by remember { mutableStateOf(false) }
     var country by remember { mutableStateOf<String?>(null) }
     var feedMore by remember { mutableStateOf(false) }
+    BackStep(feedMore) { feedMore = false }
     fun toList(f: String, ck: String? = null) { m.prefs.filter = f; if (ck != null) m.prefs.country = ck; m.goTab = "list" }
     val pinned = s.projects.count { it.gps != null }
     val missing = s.projects.size - pinned

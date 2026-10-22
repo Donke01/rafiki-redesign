@@ -274,6 +274,25 @@ fun VisitTab(m: AppModel, p: Project) {
         }
     }
 
+    // back: one step back (what was typed stays); on the first step, ask before leaving the visit (it is kept on the phone)
+    val backs = androidx.activity.compose.LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
+    var askLeave by remember(p.id) { mutableStateOf(false) }
+    var leaving by remember(p.id) { mutableStateOf(false) }
+    val inSteps = offer == null && v.sent == null
+    BackStep(inSteps && v.step > 0) { v.step-- }
+    BackStep(inSteps && v.step == 0 && !v.blank() && !leaving) { askLeave = true }
+    androidx.compose.runtime.LaunchedEffect(leaving) {
+        if (!leaving) return@LaunchedEffect
+        androidx.compose.runtime.withFrameNanos { }  // the question has stepped off the back stack: the next back leaves
+        backs?.onBackPressed(); leaving = false
+    }
+    if (askLeave) DqmSheet("visit_leave_sheet", { askLeave = false }) { hide ->
+        DqmSheetHead(t("Leave this visit?", "Uondoke kwenye ziara hii?"), listOf(t("It’s kept on this phone. Open Site visit again to carry on.", "Imehifadhiwa kwenye simu hii. Fungua Ziara tena kuendelea.")),
+            null, "visit_leave_x", { hide {} }) { IconTile("clock", C.blue, C.tint, 56.dp) }
+        Btn(t("Keep going", "Endelea na ziara"), { hide {} }, Modifier.fillMaxWidth().padding(top = 18.dp).testTag("visit_leave_stay"), icon = "arrow")
+        Btn(t("Leave", "Ondoka"), { hide { leaving = true } }, Modifier.fillMaxWidth().padding(top = 10.dp).testTag("visit_leave_go"), icon = "back", light = true, outline = true)
+    }
+
     offer?.let { o ->
         Card(Modifier.testTag("visit_resume")) {
             IconTile("clock", C.blue, C.tint, 56.dp)

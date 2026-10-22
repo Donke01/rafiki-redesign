@@ -82,6 +82,9 @@ fun ProjectScreen(m: AppModel, id: String, startTab: String, back: () -> Unit) {
     val ctx = LocalContext.current
     // a half-done visit kept on the phone: open on Site visit, where it offers to carry on
     var tab by rememberSaveable(id) { mutableStateOf(if (startTab == "pin" && VisitDrafts.has(ctx, id)) "visit" else startTab) }
+    // back from a tab chosen here: the tab the project opened on (Pin location), then the screen before
+    val opened = rememberSaveable(id) { tab }
+    BackStep(tab != opened) { tab = opened }
     val hp = rememberHaptics()
     val here = fix?.ll
     // the project name moves into the top bar once its big title scrolls away
@@ -232,6 +235,7 @@ private fun DirRow(title: String, sub: String, tag: String, brandIcon: String?, 
 private fun ProjectMore(id: String, content: @Composable () -> Unit) {
     var open by rememberSaveable(id) { mutableStateOf(false) }
     val hp = rememberHaptics()
+    BackStep(open) { open = false }
     Card(Modifier.padding(top = 12.dp).testTag("prj_more"), pad = 0.dp) {
         Row(Modifier.fillMaxWidth().clickable(role = Role.Button) { hp.tap(); open = !open }.heightIn(min = 60.dp).padding(horizontal = 14.dp, vertical = 8.dp).testTag("prj_more_toggle"),
             verticalAlignment = Alignment.CenterVertically) {

@@ -124,6 +124,8 @@ fun MeScreen(m: AppModel, open: (String) -> Unit = {}, report: () -> Unit = {}, 
     val act by m.activity.collectAsState()
     val mates by m.team.collectAsState()
     var pane by remember { mutableStateOf(m.prefs.mePane) }
+    // back on Team: Me again (the switch's first side)
+    BackStep(pane == "team") { pane = "me"; m.prefs.mePane = "me" }
     val scroll = rememberScrollState()
     val scope = rememberScope()
     LaunchedEffect(Unit) { launch { m.loadActivity() }; launch { m.loadTeam() } }

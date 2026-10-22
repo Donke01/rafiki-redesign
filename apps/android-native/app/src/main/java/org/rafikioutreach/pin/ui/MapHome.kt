@@ -393,6 +393,14 @@ fun MapHome(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit, offlin
     }
     fun closeCards() { sel = null; anchor = null; spot = null; measuring = false }
     fun clearFilters() { status = ""; ty = ""; prefs.edit().putString("mapf", "").apply(); m.prefs.ftype = ""; rowOpen = false }
+    // back closes what is open over the map, the last opened first: the card, Nearest to you, the tray or key,
+    // the chip row, a stop or teammate, the map alone; only then does back leave the map (Nav.kt)
+    BackStep(sel != null || spot != null) { closeCards() }
+    BackStep(nearOpen) { nearOpen = false }
+    BackStep(tray || keyOpen) { tray = false; keyOpen = false }
+    BackStep(rowOpen && (status.isNotBlank() || ty.isNotBlank())) { rowOpen = false }
+    BackStep(HomeLayers.pick != null) { HomeLayers.pick = null }
+    BackStep(MapClean.on) { MapClean.on = false }
 
     val pickNow by rememberUpdatedState<(String) -> Unit> { pick(it, false) }
     // a tap on empty map: put the card away, fold the open chip row, or else show the map alone (and back)
@@ -860,6 +868,8 @@ private fun MapSearch(m: AppModel, snap: Snapshot, here: LatLng?, modifier: Modi
         places = (0 until a.length()).mapNotNull { i -> a.optJSONObject(i)?.let { o -> if (o.has("lat")) Triple(o.optString("name"), o.optString("where"), LatLng(o.getDouble("lat"), o.getDouble("lng"))) else null } }.take(3)
     }
     fun done(text: String) { q = text; focus.clearFocus() }
+    // back closes the search box (and what was typed)
+    BackStep(focused) { q = ""; focus.clearFocus() }
     val suggShown = focused && words.isNotEmpty()
     LaunchedEffect(suggShown) { onSugg(suggShown) }
     Column(modifier.fillMaxWidth()) {
