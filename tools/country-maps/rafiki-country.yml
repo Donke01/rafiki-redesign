@@ -1,0 +1,457 @@
+# RAFIKI Pin: whole-country street maps for working with no signal.
+#
+# A slim vector-tile schema for Planetiler (https://github.com/onthegomap/planetiler), made from
+# OpenStreetMap data (© OpenStreetMap contributors, ODbL). It keeps what field teams need and leaves out
+# what makes country files big (buildings, house numbers, shops):
+#   water     lakes, dams, wetlands and the sea
+#   waterway  rivers, streams, canals
+#   land      national parks and reserves, forests, built-up areas
+#   roads     roads, tracks and footpaths, railways
+#   boundary  country and county / region borders
+#   places    cities, towns, villages, hamlets
+#   pois      schools, clinics and hospitals, churches and mosques, water points (wells, taps, springs, kiosks)
+#
+# Build one country (see build.sh and README.md next to this file):
+#   java -jar planetiler.jar generate-custom --schema=rafiki-country.yml --area=kenya --output=kenya.pmtiles --download
+# Check the rules with the examples at the end:
+#   java -jar planetiler.jar verify rafiki-country.yml
+
+schema_name: RAFIKI country map
+schema_description: Roads, tracks, villages, schools, clinics, churches, rivers and water points for RAFIKI Pin
+attribution: <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>
+version: 1.0.0
+
+args:
+  area:
+    description: Geofabrik area to build (kenya, uganda, tanzania or malawi)
+    default: kenya
+  osm_path:
+    description: Where the country's .osm.pbf is (downloaded from Geofabrik with --download)
+    default: '${ "data/sources/" + args.area + ".osm.pbf" }'
+  ocean_path:
+    description: Where the sea outlines are (water-polygons-split-4326.zip from osmdata.openstreetmap.de)
+    default: data/sources/water-polygons-split-4326.zip
+  minzoom: 0
+  # zoom 14 holds every road and village; the app draws closer zooms from it ("over-zoom")
+  maxzoom: 14
+
+sources:
+  osm:
+    type: osm
+    url: '${ "geofabrik:" + args.area }'
+    local_path: '${ args.osm_path }'
+  ocean:
+    type: shapefile
+    url: https://osmdata.openstreetmap.de/download/water-polygons-split-4326.zip
+    local_path: '${ args.ocean_path }'
+    projection: EPSG:4326
+
+definitions:
+  name: &name
+    key: name
+    tag_value: name
+  school_tags: &school_tags
+    amenity: [school, kindergarten, college, university]
+  health_amenity: &health_amenity [clinic, hospital, doctors, health_post, dispensary]
+  health_care: &health_care [clinic, hospital, doctor, centre, birthing_centre, health_post, dispensary]
+  water_amenity: &water_amenity [drinking_water, water_point]
+  water_man_made: &water_man_made [water_well, water_tap, water_tower, water_works, water_tank, borehole]
+  poi_tags: &poi_tags
+    amenity: [school, kindergarten, college, university, clinic, hospital, doctors, health_post, dispensary, place_of_worship, drinking_water, water_point]
+    healthcare: *health_care
+    man_made: *water_man_made
+    natural: [spring]
+  poi_attrs: &poi_attrs
+    - key: kind
+      value:
+        school:
+          amenity: [school, kindergarten, college, university]
+        health:
+          amenity: *health_amenity
+          healthcare: *health_care
+        worship:
+          amenity: place_of_worship
+        water: otherwise
+    - key: sub
+      value: '${ match_value }'
+    - key: rel
+      tag_value: religion
+      include_when:
+        amenity: place_of_worship
+    - *name
+  poi_zoom: &poi_zoom
+    default_value: 13
+    overrides:
+      12:
+        amenity: [hospital, college, university]
+  place_tags: &place_tags
+    place: [city, town, village, hamlet, suburb, neighbourhood, locality]
+  place_zoom: &place_zoom
+    default_value: 13
+    overrides:
+      3:
+        __all__:
+          - place: city
+          - capital: ["yes", "2"]
+      5:
+        place: city
+      7:
+        place: town
+      10:
+        place: village
+      12:
+        place: [hamlet, suburb]
+  place_attrs: &place_attrs
+    - key: kind
+      value: '${ match_value }'
+    - *name
+    - key: pop
+      tag_value: population
+      type: integer
+      include_when:
+        population: __any__
+    - key: capital
+      tag_value: capital
+      include_when:
+        capital: ["yes", "2", "4"]
+  area_zoom: &area_zoom
+    default_value: 12
+    overrides:
+      1: '${ feature.area("km2") >= 5000.0 }'
+      4: '${ feature.area("km2") >= 300.0 }'
+      6: '${ feature.area("km2") >= 40.0 }'
+      8: '${ feature.area("km2") >= 4.0 }'
+      10: '${ feature.area("km2") >= 0.3 }'
+
+layers:
+  - id: water
+    features:
+      - source: ocean
+        geometry: polygon
+        attributes:
+          - key: kind
+            value: ocean
+      - source: osm
+        geometry: polygon
+        include_when:
+          natural: [water, wetland]
+          landuse: [reservoir, basin]
+          waterway: [riverbank, dock]
+        min_zoom: *area_zoom
+        attributes:
+          - key: kind
+            value:
+              wetland:
+                natural: wetland
+              water: otherwise
+    tile_post_process:
+      merge_polygons:
+        min_area: 1
+        min_area_at_max_zoom: 0.25
+        tolerance: 0.5
+        tolerance_at_max_zoom: 0.125
+
+  - id: waterway
+    features:
+      - source: osm
+        geometry: line
+        include_when:
+          waterway: [river, stream, canal, ditch, drain]
+        min_zoom:
+          default_value: 13
+          overrides:
+            8:
+              waterway: river
+            11:
+              waterway: canal
+            12:
+              waterway: stream
+        attributes:
+          - key: kind
+            value: '${ match_value }'
+          - key: name
+            tag_value: name
+            min_zoom: 12
+    tile_post_process:
+      merge_line_strings:
+        min_length: 1
+        tolerance: 0.5
+        buffer: 4
+
+  - id: land
+    features:
+      - source: osm
+        geometry: polygon
+        include_when:
+          boundary: [national_park, protected_area]
+          leisure: [nature_reserve, park]
+          landuse: [forest, residential]
+          natural: [wood]
+        min_zoom: *area_zoom
+        attributes:
+          - key: kind
+            value:
+              forest:
+                landuse: forest
+                natural: wood
+              town:
+                landuse: residential
+              park: otherwise
+    tile_post_process:
+      merge_polygons:
+        min_area: 1
+        min_area_at_max_zoom: 0.25
+        tolerance: 0.5
+        tolerance_at_max_zoom: 0.125
+
+  - id: roads
+    features:
+      - source: osm
+        geometry: line
+        include_when:
+          highway: [motorway, motorway_link, trunk, trunk_link, primary, primary_link, secondary, secondary_link,
+                    tertiary, tertiary_link, unclassified, residential, living_street, road, service, track,
+                    path, footway, bridleway, cycleway, pedestrian, steps]
+        exclude_when:
+          area: "yes"
+        min_zoom:
+          default_value: 14
+          overrides:
+            5:
+              highway: [motorway, trunk]
+            7:
+              highway: [primary, motorway_link, trunk_link]
+            9:
+              highway: [secondary, primary_link]
+            10:
+              highway: [tertiary, secondary_link]
+            12:
+              highway: [unclassified, residential, living_street, road, tertiary_link]
+            13:
+              highway: [track, service]
+        attributes:
+          - key: kind
+            value:
+              major:
+                highway: [motorway, motorway_link, trunk, trunk_link]
+              primary:
+                highway: [primary, primary_link]
+              secondary:
+                highway: [secondary, secondary_link]
+              tertiary:
+                highway: [tertiary, tertiary_link]
+              minor:
+                highway: [unclassified, residential, living_street, road]
+              service:
+                highway: service
+              track:
+                highway: track
+              path: otherwise
+          - key: name
+            tag_value: name
+            min_zoom: 13
+          - key: ref
+            tag_value: ref
+            min_zoom: 8
+      - source: osm
+        geometry: line
+        include_when:
+          railway: rail
+        min_zoom: 8
+        attributes:
+          - key: kind
+            value: rail
+    tile_post_process:
+      merge_line_strings:
+        min_length: 0.5
+        tolerance: 0.5
+        buffer: 4
+
+  - id: boundary
+    features:
+      - source: osm
+        geometry: polygon
+        include_when:
+          __all__:
+            - boundary: administrative
+            - admin_level: ["2", "4"]
+        min_zoom:
+          default_value: 6
+          overrides:
+            0:
+              admin_level: "2"
+        attributes:
+          - key: level
+            tag_value: admin_level
+            type: integer
+
+  - id: places
+    buffer: 64
+    features:
+      - source: osm
+        geometry: point
+        include_when: *place_tags
+        exclude_when:
+          name: ""
+        min_zoom: *place_zoom
+        attributes: *place_attrs
+      - source: osm
+        geometry: polygon_point_on_surface
+        include_when: *place_tags
+        exclude_when:
+          name: ""
+        min_zoom: *place_zoom
+        attributes: *place_attrs
+
+  - id: pois
+    buffer: 32
+    features:
+      - source: osm
+        geometry: point
+        include_when: *poi_tags
+        min_zoom: *poi_zoom
+        attributes: *poi_attrs
+      - source: osm
+        geometry: polygon_point_on_surface
+        include_when: *poi_tags
+        min_zoom: *poi_zoom
+        attributes: *poi_attrs
+
+examples:
+  - name: a borehole is a water point
+    input:
+      source: osm
+      geometry: point
+      tags:
+        man_made: water_well
+        pump: manual
+    output:
+      - layer: pois
+        geometry: point
+        min_zoom: 13
+        tags:
+          kind: water
+          sub: water_well
+  - name: a school drawn as an area becomes one point
+    input:
+      source: osm
+      geometry: polygon
+      tags:
+        amenity: school
+        name: Kapsaret Primary School
+    output:
+      - layer: pois
+        geometry: point
+        tags:
+          kind: school
+          name: Kapsaret Primary School
+  - name: a health centre tagged only with healthcare
+    input:
+      source: osm
+      geometry: point
+      tags:
+        healthcare: centre
+        name: Chepkongi Health Centre
+    output:
+      - layer: pois
+        geometry: point
+        tags:
+          kind: health
+          sub: centre
+  - name: a church
+    input:
+      source: osm
+      geometry: point
+      tags:
+        amenity: place_of_worship
+        religion: christian
+        name: AIC Kapsaret
+    output:
+      - layer: pois
+        geometry: point
+        tags:
+          kind: worship
+          rel: christian
+  - name: a village
+    input:
+      source: osm
+      geometry: point
+      tags:
+        place: village
+        name: Kapsaret
+    output:
+      - layer: places
+        geometry: point
+        min_zoom: 10
+        tags:
+          kind: village
+          name: Kapsaret
+  - name: the capital shows from far out
+    input:
+      source: osm
+      geometry: point
+      tags:
+        place: city
+        capital: "yes"
+        name: Nairobi
+        population: "4397073"
+    output:
+      - layer: places
+        geometry: point
+        min_zoom: 3
+        tags:
+          kind: city
+          pop: 4397073
+  - name: a track
+    input:
+      source: osm
+      geometry: line
+      tags:
+        highway: track
+    output:
+      - layer: roads
+        geometry: line
+        min_zoom: 13
+        tags:
+          kind: track
+  - name: a trunk road keeps its number
+    input:
+      source: osm
+      geometry: line
+      tags:
+        highway: trunk
+        ref: A104
+    output:
+      - layer: roads
+        geometry: line
+        min_zoom: 5
+        tags:
+          kind: major
+          ref: A104
+  - name: a river
+    input:
+      source: osm
+      geometry: line
+      tags:
+        waterway: river
+        name: Sosiani
+    output:
+      - layer: waterway
+        geometry: line
+        min_zoom: 8
+        tags:
+          kind: river
+  - name: buildings are left out
+    input:
+      source: osm
+      geometry: polygon
+      tags:
+        building: "yes"
+    output: []
+  - name: shops are left out
+    input:
+      source: osm
+      geometry: point
+      tags:
+        shop: general
+    output: []

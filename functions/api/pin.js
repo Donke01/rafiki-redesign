@@ -101,6 +101,26 @@ export function offlineTiles(env) {
   return { url, attr: clean(env.PIN_OFFLINE_TILES_ATTR || '', 160), maxZoom: Math.min(18, Math.max(10, mz)) };
 }
 
+// Whole-country street maps (Offline maps › Whole country maps): one map file per country, made from OpenStreetMap
+// data with tools/country-maps (see the README there). The files are too big for Pages (25 MiB a file), so they live
+// in a Cloudflare R2 bucket, in one of two ways:
+//  · bind the bucket to this Pages project as COUNTRY_MAPS: the files are then served from /api/cmap/ on this same
+//    address (functions/api/cmap), so no public bucket and no CORS rule are needed; or
+//  · make the bucket public (its own domain, or the r2.dev address) and put that address in PIN_COUNTRY_MAPS,
+//    e.g. "https://maps.example.org/" (the bucket then needs the CORS rule in tools/country-maps/README.md).
+// The apps read <base>countries.json, then download a country file in pieces (HTTP range requests).
+// Neither set: "countryMaps" is null, and the apps don’t show the feature.
+export function countryMaps(env) {
+  const raw = String(env.PIN_COUNTRY_MAPS || '').trim();
+  if (raw) {
+    let u; try { u = new URL(raw); } catch (e) { return null; }
+    if (u.protocol !== 'https:' || NO_BULK.test(u.hostname) || u.search || u.hash || u.username) return null;
+    return { base: u.href.endsWith('/') ? u.href : u.href + '/' };
+  }
+  if (env.COUNTRY_MAPS && typeof env.COUNTRY_MAPS.get === 'function') return { base: '/api/cmap/' };
+  return null;
+}
+
 // "Meril:1234, Bertin:5678" → [{ name, pin }]
 function people(env) {
   // "Meril:4821" or, with a home country, "Meril:4821:ke"
@@ -234,7 +254,7 @@ export async function onRequestGet({ request, env, waitUntil }) {
       const mine = (await team(env)).find(p => sameName(p.name, chk.who)) || {};
       extra.me = { kind: chk.kind || '', nick: pr.nick || '', phone: pr.phone || mine.phone || '', home: pr.home || chk.home || '' };
     } else extra.me = { kind: chk.kind || 'shared', nick: '', phone: '', home: '' };
-    return json(Object.assign({ ok: true, who: chk.who, monday: !!chk.monday, linked: chk.linked || '', gmaps: env.GOOGLE_TILES_WEB_KEY || env.GOOGLE_TILES_ANDROID_KEY ? { web: env.GOOGLE_TILES_WEB_KEY || '', android: env.GOOGLE_TILES_ANDROID_KEY || '' } : null, offlineTiles: offlineTiles(env), home: chk.home || '', projects, repairs, visits: await getJson(env, 'pinlastvisit', {}), tests: await getJson(env, 'pintests', {}) }, extra), 200);
+    return json(Object.assign({ ok: true, who: chk.who, monday: !!chk.monday, linked: chk.linked || '', gmaps: env.GOOGLE_TILES_WEB_KEY || env.GOOGLE_TILES_ANDROID_KEY ? { web: env.GOOGLE_TILES_WEB_KEY || '', android: env.GOOGLE_TILES_ANDROID_KEY || '' } : null, offlineTiles: offlineTiles(env), countryMaps: countryMaps(env), home: chk.home || '', projects, repairs, visits: await getJson(env, 'pinlastvisit', {}), tests: await getJson(env, 'pintests', {}) }, extra), 200);
   } catch (e) {
     console.error('pin get:', e && e.message);
     return json({ ok: false, reason: 'down' }, 502);

@@ -2,6 +2,7 @@
 // signal. Data (/api/*) is never cached here: changes wait in the app's own outbox instead.
 // Map tiles already seen are kept too (offline areas and the storage limit: see the end of this file), so a site
 // visited before still shows a map.
+// Whole-country maps (pin.html, feat-cmap) live in their own caches, rafiki-pin-cmap-<file>, kept until deleted in the app.
 var APP = 'rafiki-pin-app-v53', TILES = 'rafiki-pin-tiles-v1';
 var SHELL = ['/pin', '/vendor/leaflet/leaflet.js', '/vendor/leaflet/leaflet.css', '/img/logo-dark-bold.webp', '/pin.webmanifest', '/favicon.svg', '/img/logo-light-bold.webp', '/img/pin/icon-192.png'];
 
@@ -9,7 +10,7 @@ self.addEventListener('install', function (e) {
   e.waitUntil(caches.open(APP).then(function (c) { return c.addAll(SHELL); }).then(function () { return self.skipWaiting(); }));
 });
 self.addEventListener('activate', function (e) {
-  e.waitUntil(caches.keys().then(function (ks) { return Promise.all(ks.filter(function (k) { return k !== APP && k !== TILES && !/^rafiki-pin-(tiles-w|area-|fld$)/.test(k); }).map(function (k) { return caches.delete(k); })); }).then(function () { return self.clients.claim(); }));
+  e.waitUntil(caches.keys().then(function (ks) { return Promise.all(ks.filter(function (k) { return k !== APP && k !== TILES && !/^rafiki-pin-(tiles-w|area-|fld$|cmap-)/.test(k); }).map(function (k) { return caches.delete(k); })); }).then(function () { return self.clients.claim(); }));
 });
 self.addEventListener('fetch', function (e) {
   var r = e.request, u = new URL(r.url);

@@ -61,6 +61,7 @@ object MapSetup {
         // map tiles seen before still show with no signal; where they are kept, how much room they get and
         // the offline areas are set up in OfflineMaps.kt
         OfflineMaps.configure(ctx, c)
+        org.rafikioutreach.pin.cmap.CountryMaps.configure(ctx) // whole-country street maps
         done = true
     }
 }
@@ -85,6 +86,10 @@ fun ProjectsMap(dots: List<Dot>, me: LatLng?, onDot: (String) -> Unit, modifier:
     val g0 by GoogleTiles.maps.collectAsState()
     val g = OfflineMaps.google(g0) // the free maps while filling an offline area or with no signal
     val onDotNow by androidx.compose.runtime.rememberUpdatedState(onDot)
+    // the whole-country map (feat-cmap): as a map style, or by itself with no signal
+    val online by OfflineMaps.online.collectAsState(); val picked by org.rafikioutreach.pin.cmap.CountryMaps.picked.collectAsState()
+    var skip by remember { mutableStateOf(false) }; LaunchedEffect(online) { skip = false }
+    val cm = countryMapOn(skip)
     val map = remember {
         MapView(ctx).apply {
             setTileSource(TileSourceFactory.MAPNIK); setMultiTouchControls(true); zoomController.setVisibility(org.osmdroid.views.CustomZoomButtonsController.Visibility.SHOW_AND_FADEOUT)
@@ -98,6 +103,7 @@ fun ProjectsMap(dots: List<Dot>, me: LatLng?, onDot: (String) -> Unit, modifier:
         AndroidView({ map }, Modifier.fillMaxSize().clipToBounds(), update = { mv ->
             val src = g?.let { if (sat) it.sat else it.road } ?: if (sat) Satellite else OfflineMaps.street()
             if (mv.tileProvider.tileSource != src) mv.setTileSource(src)
+            org.rafikioutreach.pin.cmap.CountryMaps.apply(mv, cm)
             var changed = false
             if (holder.dots != dots) {
                 holder.dots = dots; changed = true
@@ -123,10 +129,16 @@ fun ProjectsMap(dots: List<Dot>, me: LatLng?, onDot: (String) -> Unit, modifier:
         })
         OfflineMapLayer(map)
         GoogleBadge(map, g, sat, Modifier.align(Alignment.BottomStart).padding(bottom = badgeBottom))
+        if (cm) CountryCredit(Modifier.align(Alignment.BottomEnd).padding(bottom = badgeBottom))
         var styles by remember { mutableStateOf(false) }
         MapButton("layers", t("Map style", "Mtindo wa ramani"), Modifier.align(Alignment.TopEnd).padding(10.dp)) { styles = true }
-        if (styles) PickSheet(t("Map style", "Mtindo wa ramani"), listOf(Triple("street", t("Street map", "Ramani ya barabara"), "map"), Triple("sat", t("Satellite photos", "Picha za satelaiti"), "layers")),
-            if (sat) "sat" else "street", { sat = it == "sat" }) { styles = false }
+        val have by org.rafikioutreach.pin.cmap.CountryMaps.have.collectAsState()
+        if (styles) PickSheet(t("Map style", "Mtindo wa ramani"), listOf(Triple("street", t("Street map", "Ramani ya barabara"), "map"), Triple("sat", t("Satellite photos", "Picha za satelaiti"), "layers"))
+            + (if (have.isNotEmpty()) listOf(Triple("cmap", t("Offline street map", "Ramani ya barabara bila mtandao"), "offline")) else emptyList()),
+            if (cm && picked) "cmap" else if (sat) "sat" else "street", {
+                if (it == "cmap") { org.rafikioutreach.pin.cmap.CountryMaps.pick(true); skip = false }
+                else { sat = it == "sat"; org.rafikioutreach.pin.cmap.CountryMaps.pick(false); skip = !online }
+            }) { styles = false }
         if (me != null) MapButton("target", t("Go to where I am", "Nenda nilipo"), Modifier.align(Alignment.TopEnd).padding(top = 66.dp, end = 10.dp)) {
             map.controller.animateTo(GeoPoint(me.lat, me.lng), 15.0, 600L)
         }
@@ -143,6 +155,11 @@ fun PickMap(start: LatLng?, onMove: (LatLng) -> Unit, modifier: Modifier = Modif
     var sat by remember { mutableStateOf(true) }
     val g0 by GoogleTiles.maps.collectAsState()
     val g = OfflineMaps.google(g0) // the free maps while filling an offline area or with no signal
+    // the whole-country map (feat-cmap): with no signal (or picked as the map style), until satellite is chosen here
+    val online by OfflineMaps.online.collectAsState(); val picked by org.rafikioutreach.pin.cmap.CountryMaps.picked.collectAsState()
+    val have by org.rafikioutreach.pin.cmap.CountryMaps.have.collectAsState()
+    var skip by remember { mutableStateOf(false) }; LaunchedEffect(online) { skip = false }
+    val cm = countryMapOn(skip)
     val map = remember {
         MapView(ctx).apply {
             setTileSource(Satellite); setMultiTouchControls(true); zoomController.setVisibility(org.osmdroid.views.CustomZoomButtonsController.Visibility.SHOW_AND_FADEOUT)
@@ -161,6 +178,7 @@ fun PickMap(start: LatLng?, onMove: (LatLng) -> Unit, modifier: Modifier = Modif
         AndroidView({ map }, Modifier.fillMaxSize().clipToBounds(), update = { mv ->
             val src = g?.let { if (sat) it.sat else it.road } ?: if (sat) Satellite else OfflineMaps.street()
             if (mv.tileProvider.tileSource != src) mv.setTileSource(src)
+            org.rafikioutreach.pin.cmap.CountryMaps.apply(mv, cm)
             if (held.dots != others) {
                 held.dots = others
                 held.markers.forEach { mv.overlays.remove(it) }
@@ -180,7 +198,15 @@ fun PickMap(start: LatLng?, onMove: (LatLng) -> Unit, modifier: Modifier = Modif
             Icon(Ic.get("target"), null, tint = Red, modifier = Modifier.size(38.dp))
         }
         GoogleBadge(map, g, sat, Modifier.align(Alignment.BottomStart))
-        MapButton(if (sat) "map" else "layers", if (sat) t("Show the street map", "Onyesha ramani ya barabara") else t("Show satellite photos", "Onyesha picha za satelaiti"), Modifier.align(Alignment.TopEnd).padding(10.dp)) { sat = !sat }
+        if (cm) CountryCredit(Modifier.align(Alignment.BottomEnd))
+        val showSat = sat && !cm
+        MapButton(if (showSat) "map" else "layers", if (showSat) t("Show the street map", "Onyesha ramani ya barabara") else t("Show satellite photos", "Onyesha picha za satelaiti"), Modifier.align(Alignment.TopEnd).padding(10.dp)) {
+            when {
+                cm -> { skip = true; sat = true }                                         // country map → satellite
+                sat && skip && have.isNotEmpty() && (picked || !online) -> skip = false  // satellite → back to the country map
+                else -> sat = !sat
+            }
+        }
     }
 }
 

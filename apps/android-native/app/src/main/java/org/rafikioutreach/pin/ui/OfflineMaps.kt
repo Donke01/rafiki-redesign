@@ -553,6 +553,7 @@ fun OfflineScreen(m: AppModel, back: () -> Unit) {
             }
             Meter((used.toFloat() / (limit * 1048576f)).coerceIn(0f, 1f), Modifier.padding(top = 10.dp))
         }
+        CountryMapsSection(m) // whole-country street maps (CountryMapsUi.kt); hidden until the office sets them up
         H2(t("Saved areas", "Maeneo yaliyohifadhiwa"), Modifier.padding(top = 18.dp))
         if (areas.isEmpty()) Card {
             Text(t("No areas saved yet. On the Map, tap the green download button to save an area before a trip.", "Bado hakuna eneo lililohifadhiwa. Kwenye Ramani, gusa kitufe kijani cha kupakua ili uhifadhi eneo kabla ya safari."), style = MaterialTheme.typography.bodyMedium, color = C.muted)

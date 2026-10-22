@@ -2802,7 +2802,8 @@ html[data-theme=sun] .dqm-pgh{background:#FFFFFF;border-bottom-width:2px}
       b.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4l9 5-9 5-9-5z"/><path d="M3 14l9 5 9-5"/></svg>';
       L.DomEvent.disableClickPropagation(b);
       b.addEventListener('click', function () {
-        bsheet('Map style', [['street', 'Street map', 'map'], ['sat', 'Satellite photos', 'layers']], map.hasLayer(sat) ? 'sat' : 'street', function (k) {
+        bsheet('Map style', [['street', 'Street map', 'map'], ['sat', 'Satellite photos', 'layers']].concat(cmReady() ? [['cmap', 'Offline street map', 'offline']] : []), cmPicked(map) ? 'cmap' : map.hasLayer(sat) ? 'sat' : 'street', function (k) {
+          if (cmPick(map, k)) return; // the whole-country map (feat-cmap)
           var on = k === 'sat' ? sat : street, off = k === 'sat' ? street : sat;
           if (map.hasLayer(off)) map.removeLayer(off); if (!map.hasLayer(on)) on.addTo(map); store.set('rfPinLayer', k); map.fire('baselayerchange');
         });
@@ -2810,6 +2811,7 @@ html[data-theme=sun] .dqm-pgh{background:#FFFFFF;border-bottom-width:2px}
       return b;
     } });
     new Btn().addTo(map);
+    cmAttach(map); // the whole-country map: as a map style, and by itself when there is no signal (feat-cmap)
   }
 
   // --- a map with "use my location" and "paste a point" (pinning and new sites) -------------
@@ -3058,6 +3060,7 @@ html[data-theme=sun] .dqm-pgh{background:#FFFFFF;border-bottom-width:2px}
         return;
       }
       S.who = j.who || ''; S.linked = j.linked || ''; S.gmaps = j.gmaps || null; store.set('rfPinGmaps', JSON.stringify(S.gmaps));
+      S.cmaps = j.countryMaps || null; store.set('rfPinCmaps', JSON.stringify(S.cmaps)); // whole-country maps (feat-cmap)
       if (j.monday) { S.mode = 'monday'; S.pin = ''; store.del('rfPin'); store.set('rfPinMode', 'monday'); }
       if (S.who) S.name = S.who;
       else if (!S.name) { store.del('rfPin'); show('vLock'); ppNeedName(); msg('mLock', 'bad', 'This is the shared team PIN, so please add your name too.'); $('iName').focus(); return; }
@@ -7978,7 +7981,7 @@ html[data-theme=sun] .dqm-pgh{background:#FFFFFF;border-bottom-width:2px}
   // Offline maps: saved areas (how much is kept, delete), the storage limit and how long viewed tiles stay
   function fldListSheet() {
     var w, html = function () {
-      return '<div class="fld-in"><div class="fld-use" id="fldUse">' + tr('Checking storage…', 'Inaangalia hifadhi…') + '</div>' +
+      return '<div class="fld-in"><div class="fld-use" id="fldUse">' + tr('Checking storage…', 'Inaangalia hifadhi…') + '</div>' + cmBoxHtml() +
         (FLD.areas.length ? FLD.areas.map(function (a, i) {
           var hu = ['green', 'blue', 'purple', 'teal', 'amber'][i % 5];
           return '<div class="fld-a" data-id="' + esc(a.id) + '" style="--hu:var(--hu-' + hu + ');--hb:var(--hb-' + hu + ')"><div class="fld-ah"><i>' + oic('map') + '</i><div><b>' + esc(a.name) + '</b><span>' + tr('Saved', 'Imehifadhiwa') + ' ' + esc(new Date(a.at).toLocaleDateString(S.lang === 'sw' ? 'sw' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' })) + ' · ' + tr('zoom', 'ukuzaji') + ' ' + a.minZ + '–' + a.maxZ + '</span></div>' +
@@ -7993,6 +7996,7 @@ html[data-theme=sun] .dqm-pgh{background:#FFFFFF;border-bottom-width:2px}
     };
     w = panel(tr('Offline maps', 'Ramani bila mtandao'), html(), 'fld-sh');
     var fill = function () {
+      cmUi();
       fldUsage().then(function (u) { var e = $('fldUse'); if (e) e.innerHTML = '<b>' + tr('This app uses ' + fldMb(u / 1024) + ' on this device', 'Programu hii inatumia ' + fldMb(u / 1024) + ' kwenye kifaa hiki') + '</b><span>' + tr('Limit for maps: ' + fldLim(FLD.set.limit), 'Kikomo cha ramani: ' + fldLim(FLD.set.limit)) + '</span>'; });
       FLD.areas.forEach(function (a) {
         fldCover(a).then(function (c) { var row = w.querySelector('.fld-a[data-id="' + a.id + '"]'); if (!row) return; row.querySelector('.meter i').style.width = Math.round(c.s * 100) + '%'; row.querySelector('.fld-ap').textContent = tr(Math.round(c.s * 100) + '% of the street map kept · satellite ' + Math.round(c.i * 100) + '%', Math.round(c.s * 100) + '% ya ramani ya barabara imehifadhiwa · satelaiti ' + Math.round(c.i * 100) + '%'); });
@@ -8201,6 +8205,493 @@ html[data-theme=sun] .dqm-pgh{background:#FFFFFF;border-bottom-width:2px}
     var st = document.createElement('style'); st.id = 'fldCss'; st.textContent = css; document.head.appendChild(st);
   })();
   // ===== end of field tools ========================================================================
+
+  // ===== Whole-country street maps (feat-cmap) ======================================================
+  // One map file per country, made from OpenStreetMap data (© OpenStreetMap contributors, ODbL) with
+  // tools/country-maps and kept by RAFIKI in Cloudflare R2. /api/pin says where ("countryMaps": { base }); until the
+  // office sets it up the feature stays hidden. Offline maps › Whole country maps downloads a country once (on Wi-Fi
+  // unless mobile data is allowed) in 4 MB pieces into this browser's storage (Cache API, one cache per file, kept by
+  // pin-sw.js), so a dropped connection only loses the piece in progress. The map then draws streets, villages,
+  // schools, clinics, churches, rivers and water points from that file (vector tiles in a PMTiles archive) whenever
+  // there is no signal, or when "Offline street map" is picked in Map style. Satellite photos and Google maps are
+  // never stored. All names here start with cm.
+  var CM = { list: jget('rfPinCmList', null), have: jget('rfPinCm', {}), dl: null, mobile: store.get('rfPinCmMobile') === '1', maps: [], src: {}, tiles: {}, order: [], box: null, free: null };
+  var CM_CHUNK = +store.get('rfPinCmChunk') || 4 * 1048576; // the piece size (tests make it smaller)
+  // the same credit as the online street map, so it shows once (ODbL: it must be visible on the map)
+  var CM_ATTR = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+  Object.assign(SW, { 'Offline street map': 'Ramani ya barabara bila mtandao' });
+  OIC.cpause = '<path d="M9 6v12M15 6v12"/>';
+  function cmBase() { var c = S.cmaps || jget('rfPinCmaps', null); return c && typeof c.base === 'string' ? c.base : ''; }
+  function cmSave() { store.set('rfPinCm', JSON.stringify(CM.have)); }
+  function cmCache(file) { return 'rafiki-pin-cmap-' + String(file).replace(/\.pmtiles$/, ''); }
+  function cmDone() { return Object.keys(CM.have).filter(function (k) { return CM.have[k].done; }).map(function (k) { return CM.have[k]; }); }
+  function cmReady() { return !!window.caches && cmDone().length > 0; }
+  function cmMb(b) { return b >= 1073741824 ? (b / 1073741824).toFixed(1) + ' GB' : b >= 10485760 ? Math.round(b / 1048576) + ' MB' : (b / 1048576).toFixed(1) + ' MB'; }
+  function cmDay(d) { var t = Date.parse(d); return isNaN(t) ? '' : new Date(t).toLocaleDateString(S.lang === 'sw' ? 'sw' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' }); }
+
+  // --- reading a PMTiles v3 archive (github.com/protomaps/PMTiles/blob/main/spec/v3/spec.md) -----------------
+  function cmVar(b, p) { var v = 0, m = 1, x; do { x = b[p.i++]; v += (x & 0x7f) * m; m *= 128; } while (x & 0x80); return v; }
+  function cmUnzip(buf) {
+    if (!window.DecompressionStream) return Promise.reject(new Error('gzip'));
+    return new Response(new Blob([buf]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();
+  }
+  function cmDir(buf) {
+    var b = new Uint8Array(buf), p = { i: 0 }, n = cmVar(b, p), id = [], run = [], len = [], off = [], last = 0, i;
+    for (i = 0; i < n; i++) { last += cmVar(b, p); id.push(last); }
+    for (i = 0; i < n; i++) run.push(cmVar(b, p));
+    for (i = 0; i < n; i++) len.push(cmVar(b, p));
+    for (i = 0; i < n; i++) { var v = cmVar(b, p); off.push(v === 0 && i > 0 ? off[i - 1] + len[i - 1] : v - 1); }
+    return { id: id, run: run, len: len, off: off };
+  }
+  // the tile number along the Hilbert curve, as PMTiles counts them
+  function cmTileId(z, x, y) {
+    var acc = 0, n = Math.pow(2, z), d = 0, s, rx, ry, t;
+    for (var k = 0; k < z; k++) acc += Math.pow(4, k);
+    for (s = n / 2; s >= 1; s /= 2) {
+      rx = (x & s) > 0 ? 1 : 0; ry = (y & s) > 0 ? 1 : 0; d += s * s * ((3 * rx) ^ ry);
+      if (ry === 0) { if (rx === 1) { x = s - 1 - x; y = s - 1 - y; } t = x; x = y; y = t; }
+    }
+    return acc + d;
+  }
+  function cmFind(dir, id) {
+    var lo = 0, hi = dir.id.length - 1, best = -1;
+    while (lo <= hi) { var m = (lo + hi) >> 1; if (dir.id[m] <= id) { best = m; lo = m + 1; } else hi = m - 1; }
+    if (best < 0) return null;
+    if (dir.run[best] === 0) return { leaf: true, off: dir.off[best], len: dir.len[best] };
+    return id - dir.id[best] < dir.run[best] ? { off: dir.off[best], len: dir.len[best] } : null;
+  }
+  // a downloaded country: its pieces in the Cache API, read back as Blobs (kept on disk by the browser)
+  function cmSrc(h) {
+    var s = CM.src[h.file]; if (s) return s;
+    s = CM.src[h.file] = { h: h, blobs: {}, used: [], leaves: {} };
+    s.cache = caches.open(cmCache(h.file));
+    s.read = function (off, len) {
+      var a = Math.floor(off / h.chunk), b = Math.floor((off + len - 1) / h.chunk), parts = [];
+      for (var i = a; i <= b; i++) parts.push(s.blob(i));
+      return Promise.all(parts).then(function (bl) {
+        var start = off - a * h.chunk;
+        return (bl.length === 1 ? bl[0] : new Blob(bl)).slice(start, start + len).arrayBuffer();
+      });
+    };
+    s.blob = function (i) {
+      if (!s.blobs[i]) {
+        s.blobs[i] = s.cache.then(function (c) { return c.match('/__cmap/' + h.file + '/' + i); }).then(function (r) { if (!r) throw new Error('missing piece'); return r.blob(); });
+        s.blobs[i].catch(function () { delete s.blobs[i]; });
+        s.used.push(i); if (s.used.length > 8) delete s.blobs[s.used.shift()];
+      }
+      return s.blobs[i];
+    };
+    s.head = s.read(0, 127).then(function (buf) {
+      var v = new DataView(buf), u = new Uint8Array(buf), n = function (o) { return v.getUint32(o, true) + v.getUint32(o + 4, true) * 4294967296; };
+      if (String.fromCharCode.apply(null, u.subarray(0, 7)) !== 'PMTiles' || u[7] !== 3) throw new Error('not a map file');
+      var hd = { root: n(8), rootLen: n(16), leafOff: n(40), dataOff: n(56), inner: u[97], comp: u[98], type: u[99], minz: u[100], maxz: u[101] };
+      return s.read(hd.root, hd.rootLen).then(function (d) { return hd.inner === 2 ? cmUnzip(d) : d; }).then(function (d) { hd.dir = cmDir(d); return hd; });
+    });
+    return s;
+  }
+  function cmTile(s, z, x, y) {
+    return s.head.then(function (hd) {
+      var id = cmTileId(z, x, y), depth = 0;
+      var look = function (dir) {
+        var e = cmFind(dir, id); if (!e) return null;
+        if (!e.leaf) return s.read(hd.dataOff + e.off, e.len).then(function (t) { return hd.comp === 2 ? cmUnzip(t) : t; });
+        if (++depth > 3) return null;
+        var k = e.off + ':' + e.len;
+        if (!s.leaves[k]) s.leaves[k] = s.read(hd.leafOff + e.off, e.len).then(function (d) { return hd.inner === 2 ? cmUnzip(d) : d; }).then(cmDir);
+        return s.leaves[k].then(look);
+      };
+      return look(hd.dir);
+    });
+  }
+
+  // --- Mapbox vector tiles (github.com/mapbox/vector-tile-spec) -----------------------------------------
+  function cmPbf(buf) {
+    var b = buf instanceof Uint8Array ? buf : new Uint8Array(buf), p = { i: 0 };
+    return {
+      b: b, p: p, end: b.length,
+      more: function () { return p.i < this.end; },
+      tag: function () { var t = cmVar(b, p); return [t >> 3, t & 7]; },
+      v: function () { return cmVar(b, p); },
+      sub: function () { var n = cmVar(b, p), r = cmPbf(b.subarray(p.i, p.i + n)); p.i += n; return r; },
+      str: function () { var n = cmVar(b, p), r = new TextDecoder().decode(b.subarray(p.i, p.i + n)); p.i += n; return r; },
+      skip: function (w) { if (w === 0) cmVar(b, p); else if (w === 1) p.i += 8; else if (w === 2) p.i += cmVar(b, p); else if (w === 5) p.i += 4; else throw new Error('pbf'); },
+      packed: function () { var n = cmVar(b, p), e = p.i + n, a = []; while (p.i < e) a.push(cmVar(b, p)); return a; }
+    };
+  }
+  function cmValue(r) {
+    var v = null;
+    while (r.more()) {
+      var t = r.tag();
+      if (t[0] === 1) v = r.str();
+      else if (t[0] === 2) { v = new DataView(r.b.buffer, r.b.byteOffset + r.p.i, 4).getFloat32(0, true); r.p.i += 4; }
+      else if (t[0] === 3) { v = new DataView(r.b.buffer, r.b.byteOffset + r.p.i, 8).getFloat64(0, true); r.p.i += 8; }
+      else if (t[0] === 4 || t[0] === 5) v = r.v();
+      else if (t[0] === 6) { var z = r.v(); v = z % 2 ? -(z + 1) / 2 : z / 2; }
+      else if (t[0] === 7) v = !!r.v();
+      else r.skip(t[1]);
+    }
+    return v;
+  }
+  function cmGeom(cmd) {
+    var parts = [], cur = null, x = 0, y = 0, i = 0;
+    while (i < cmd.length) {
+      var c = cmd[i++], id = c & 7, n = c >> 3;
+      if (id === 7) { if (cur) cur.closed = true; continue; }
+      for (var k = 0; k < n; k++) {
+        var dx = cmd[i++], dy = cmd[i++]; x += (dx >> 1) ^ -(dx & 1); y += (dy >> 1) ^ -(dy & 1);
+        if (id === 1) { cur = [x, y]; parts.push(cur); } else cur.push(x, y);
+      }
+    }
+    return parts;
+  }
+  function cmMvt(buf) {
+    var r = cmPbf(buf), out = {};
+    while (r.more()) {
+      var t = r.tag(); if (t[0] !== 3) { r.skip(t[1]); continue; }
+      var l = r.sub(), name = '', ext = 4096, keys = [], vals = [], feats = [];
+      while (l.more()) {
+        var u = l.tag();
+        if (u[0] === 1) name = l.str();
+        else if (u[0] === 2) feats.push(l.sub());
+        else if (u[0] === 3) keys.push(l.str());
+        else if (u[0] === 4) vals.push(cmValue(l.sub()));
+        else if (u[0] === 5) ext = l.v();
+        else l.skip(u[1]);
+      }
+      out[name] = { ext: ext, f: feats.map(function (f) {
+        var o = { type: 0, p: {}, g: null };
+        while (f.more()) {
+          var w = f.tag();
+          if (w[0] === 2) { var tg = f.packed(); for (var j = 0; j + 1 < tg.length; j += 2) o.p[keys[tg[j]]] = vals[tg[j + 1]]; }
+          else if (w[0] === 3) o.type = f.v();
+          else if (w[0] === 4) o.g = cmGeom(f.packed());
+          else f.skip(w[1]);
+        }
+        return o;
+      }) };
+    }
+    return out;
+  }
+
+  // --- drawing a map tile ------------------------------------------------------------------------------
+  var CMS = {
+    bg: '#F2EFE9', water: '#A9D3E7', wetland: '#CFE7EA', wline: '#7DB7D8', land: { park: '#D3EBC5', forest: '#C3DDAF', town: '#E8E2DB' }, bound: { 2: '#8A6AAF', 4: '#A996C6' },
+    road: { major: ['#F4A259', '#B5703A', 7], primary: ['#F8CD6C', '#B39245', 6], secondary: ['#FAE88F', '#B2A25E', 5], tertiary: ['#FFFFFF', '#B1A99B', 4], minor: ['#FFFFFF', '#BFB8AB', 3], service: ['#FFFFFF', '#CBC4B8', 2], track: ['#99734D', null, 1], path: ['#A6856A', null, 0], rail: ['#8A8A8A', null, 1] },
+    poi: { school: '#DB7614', health: '#D63333', worship: '#7756B5', water: '#1683D6' },
+    place: { city: [16, 700, '#1D2125'], town: [14, 700, '#24292D'], village: [12.5, 650, '#2E3338'], hamlet: [11.5, 600, '#3B4146'], suburb: [11.5, 600, '#495056'], neighbourhood: [11, 600, '#535A60'], locality: [11, 600, '#535A60'] },
+    rank: { city: 0, town: 1, village: 2, suburb: 3, hamlet: 4, neighbourhood: 5, locality: 6 }
+  };
+  var CMW = { major: [[5, .8], [8, 1.6], [10, 2.6], [12, 4], [14, 7], [16, 12], [18, 22]], primary: [[7, .8], [10, 2], [12, 3.4], [14, 6], [16, 10], [18, 18]],
+    secondary: [[9, .8], [11, 1.6], [12, 2.6], [14, 5], [16, 9], [18, 16]], tertiary: [[10, .7], [12, 2], [14, 4.4], [16, 8], [18, 14]], minor: [[12, .8], [13, 1.6], [14, 3.2], [16, 7], [18, 12]],
+    service: [[13, .6], [14, 1.6], [16, 4], [18, 8]], track: [[13, .9], [14, 1.3], [16, 2.2], [18, 3.2]], path: [[14, .8], [16, 1.3], [18, 2]], rail: [[8, .6], [12, 1.2], [16, 2.5]],
+    river: [[8, .6], [10, 1], [12, 1.6], [14, 2.6], [16, 5], [18, 9]], stream: [[12, .5], [14, 1], [16, 2], [18, 3]], canal: [[11, .6], [14, 1.6], [16, 3], [18, 5]] };
+  function cmW(k, z) { var st = CMW[k] || CMW.stream; if (z <= st[0][0]) return st[0][1]; for (var i = 1; i < st.length; i++) if (z <= st[i][0]) { var a = st[i - 1], b = st[i]; return a[1] + (b[1] - a[1]) * (z - a[0]) / (b[0] - a[0]); } return st[st.length - 1][1]; }
+  function cmFont(px, w) { return w + ' ' + px + 'px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif'; }
+  // the small pictures inside the school, clinic, church and water point dots (drawn white, in a box of -1..1)
+  function cmGlyph(c, kind, rel, x, y, r, col) {
+    c.save(); c.translate(x, y); c.scale(r, r); c.fillStyle = '#fff'; c.beginPath();
+    if (kind === 'school') { c.moveTo(-.8, -.45); c.lineTo(0, -.25); c.lineTo(.8, -.45); c.lineTo(.8, .55); c.lineTo(0, .75); c.lineTo(-.8, .55); c.closePath(); c.fill(); c.strokeStyle = col; c.lineWidth = .16; c.beginPath(); c.moveTo(0, -.25); c.lineTo(0, .75); c.stroke(); }
+    else if (kind === 'health') { c.rect(-.24, -.72, .48, 1.44); c.rect(-.72, -.24, 1.44, .48); c.fill(); }
+    else if (kind === 'worship' && rel === 'muslim') { c.arc(0, 0, .66, 0, 2 * Math.PI); c.fill(); c.fillStyle = col; c.beginPath(); c.arc(.28, -.12, .56, 0, 2 * Math.PI); c.fill(); }
+    else if (kind === 'worship') { c.rect(-.16, -.8, .32, 1.6); c.rect(-.56, -.4, 1.12, .3); c.fill(); }
+    else { c.moveTo(0, -.82); c.bezierCurveTo(.42, -.28, .62, .02, .62, .3); c.arc(0, .3, .62, 0, Math.PI); c.bezierCurveTo(-.62, .02, -.42, -.28, 0, -.82); c.fill(); }
+    c.restore();
+  }
+  function cmDraw(cv, tiles, z, x, y, r, sz) {
+    var c = cv.getContext('2d'), size = cv.width, d = z - sz, f = Math.pow(2, d), ox = (x - Math.floor(x / f) * f) * size, oy = (y - Math.floor(y / f) * f) * size;
+    c.fillStyle = CMS.bg; c.fillRect(0, 0, size, size);
+    var layer = function (n) { var a = []; tiles.forEach(function (t) { if (t && t[n]) t[n].f.forEach(function (ft) { a.push({ f: ft, k: size * f / t[n].ext }); }); }); return a; };
+    var path = function (it, close) {
+      c.beginPath();
+      it.f.g.forEach(function (pt) { for (var i = 0; i < pt.length; i += 2) { var px = pt[i] * it.k - ox, py = pt[i + 1] * it.k - oy; if (i) c.lineTo(px, py); else c.moveTo(px, py); } if (close) c.closePath(); });
+    };
+    var fill = function (items, col) { items.forEach(function (it) { if (it.f.type !== 3) return; path(it, true); c.fillStyle = col(it.f.p); c.fill('evenodd'); }); };
+    fill(layer('land'), function (p) { return CMS.land[p.kind] || CMS.land.park; });
+    fill(layer('water'), function (p) { return p.kind === 'wetland' ? CMS.wetland : CMS.water; });
+    c.lineCap = 'round'; c.lineJoin = 'round';
+    layer('waterway').forEach(function (it) { if (it.f.type !== 2) return; path(it); c.strokeStyle = CMS.wline; c.lineWidth = cmW(it.f.p.kind === 'river' ? 'river' : it.f.p.kind === 'canal' ? 'canal' : 'stream', z) * r; c.stroke(); });
+    layer('boundary').forEach(function (it) { if (it.f.type !== 3) return; var lv = it.f.p.level === 2 ? 2 : 4; path(it, true); c.strokeStyle = CMS.bound[lv]; c.lineWidth = (lv === 2 ? (z < 8 ? 1.4 : 2.2) : (z < 10 ? .9 : 1.4)) * r; c.setLineDash(lv === 2 ? [6 * r, 3 * r, 1.5 * r, 3 * r] : [4 * r, 3 * r]); c.stroke(); c.setLineDash([]); });
+    var roads = layer('roads').filter(function (it) { return it.f.type === 2; });
+    roads.sort(function (a, b) { return ((CMS.road[a.f.p.kind] || CMS.road.minor)[2]) - ((CMS.road[b.f.p.kind] || CMS.road.minor)[2]); });
+    // casings first, so crossings join cleanly
+    roads.forEach(function (it) { var st = CMS.road[it.f.p.kind] || CMS.road.minor, w = cmW(it.f.p.kind, z); if (!st[1] || w < 1.8) return; path(it); c.strokeStyle = st[1]; c.lineWidth = (w + (z >= 15 ? 2.2 : 1.6)) * r; c.stroke(); });
+    roads.forEach(function (it) {
+      var k = it.f.p.kind, st = CMS.road[k] || CMS.road.minor, w = cmW(k, z);
+      path(it); c.strokeStyle = st[1] && w < 1.8 ? st[1] : st[0]; c.lineWidth = w * r;
+      if (k === 'track') c.setLineDash([5 * r, 3 * r]); else if (k === 'path') c.setLineDash([1.5 * r, 3 * r]); else if (k === 'rail') c.setLineDash([]);
+      c.stroke(); c.setLineDash([]);
+      if (k === 'rail' && z >= 12) { c.strokeStyle = '#fff'; c.lineWidth = w * .5 * r; c.setLineDash([4 * r, 4 * r]); c.stroke(); c.setLineDash([]); }
+    });
+    // labels: places by importance, road numbers, then names of schools and the like when close in
+    var boxes = [], free = function (b) { for (var i = 0; i < boxes.length; i++) { var o = boxes[i]; if (b[0] < o[2] && b[2] > o[0] && b[1] < o[3] && b[3] > o[1]) return false; } boxes.push(b); return true; };
+    var text = function (t, px, py, font, col, halo) { c.font = font; c.lineWidth = halo * r; c.strokeStyle = 'rgba(255,255,255,.92)'; c.strokeText(t, px, py); c.fillStyle = col; c.fillText(t, px, py); };
+    c.textAlign = 'center'; c.textBaseline = 'middle';
+    // POI dots (labels for them later), placed before the place names so names avoid them
+    var pois = layer('pois').filter(function (it) { return it.f.type === 1 && it.f.g && it.f.g[0]; }), pr = z >= 15 ? 8.5 : z >= 14 ? 7 : z >= 13 ? 5.5 : 3;
+    pois.forEach(function (it) {
+      var px = it.f.g[0][0] * it.k - ox, py = it.f.g[0][1] * it.k - oy, col = CMS.poi[it.f.p.kind] || CMS.poi.water, rr = pr * r;
+      if (px < -rr || py < -rr || px > size + rr || py > size + rr) return;
+      c.beginPath(); c.arc(px, py, rr, 0, 2 * Math.PI); c.fillStyle = col; c.fill(); c.lineWidth = 1.4 * r; c.strokeStyle = '#fff'; c.stroke();
+      if (pr >= 5) cmGlyph(c, it.f.p.kind, it.f.p.rel, px, py, rr * .62, col);
+      boxes.push([px - rr, py - rr, px + rr, py + rr]); it.px = px; it.py = py;
+    });
+    var places = layer('places').filter(function (it) { return it.f.type === 1 && it.f.p.name && it.f.g && it.f.g[0]; });
+    places.sort(function (a, b) { var ra = CMS.rank[a.f.p.kind], rb = CMS.rank[b.f.p.kind]; if (ra !== rb) return (ra == null ? 9 : ra) - (rb == null ? 9 : rb); var pa = +a.f.p.pop || 0, pb = +b.f.p.pop || 0; return pa !== pb ? pb - pa : a.f.p.name < b.f.p.name ? -1 : 1; });
+    places.forEach(function (it) {
+      var st = CMS.place[it.f.p.kind] || CMS.place.locality, px = it.f.g[0][0] * it.k - ox, py = it.f.g[0][1] * it.k - oy, sz2 = st[0] * (z < 7 ? .85 : 1) * r;
+      var font = cmFont(sz2, st[1]); c.font = font; var w = c.measureText(it.f.p.name).width, h = sz2 * 1.25;
+      if (px + w / 2 < -40 * r || px - w / 2 > size + 40 * r || py < -30 * r || py > size + 30 * r) return;
+      if (!free([px - w / 2 - 2 * r, py - h / 2, px + w / 2 + 2 * r, py + h / 2])) return;
+      text(it.f.p.name, px, py, font, st[2], 3.2);
+    });
+    if (z >= 9) {
+      var seen = {};
+      roads.forEach(function (it) {
+        var ref = it.f.p.ref, k = it.f.p.kind; if (!ref || seen[ref] || !/^(major|primary|secondary)$/.test(k)) return;
+        var best = null, bl = 0; it.f.g.forEach(function (pt) { for (var i = 2; i < pt.length; i += 2) { var dx = pt[i] - pt[i - 2], dy = pt[i + 1] - pt[i - 1], l = dx * dx + dy * dy; if (l > bl) { bl = l; best = [(pt[i] + pt[i - 2]) / 2, (pt[i + 1] + pt[i - 1]) / 2]; } } });
+        if (!best) return; var px = best[0] * it.k - ox, py = best[1] * it.k - oy; if (px < 20 * r || py < 12 * r || px > size - 20 * r || py > size - 12 * r) return;
+        var font = cmFont(10 * r, 700); c.font = font; var w = c.measureText(ref).width + 8 * r, h = 15 * r;
+        if (!free([px - w / 2, py - h / 2, px + w / 2, py + h / 2])) return; seen[ref] = 1;
+        c.fillStyle = '#fff'; c.strokeStyle = (CMS.road[k] || CMS.road.minor)[1]; c.lineWidth = 1.2 * r; c.beginPath(); if (c.roundRect) c.roundRect(px - w / 2, py - h / 2, w, h, 3 * r); else c.rect(px - w / 2, py - h / 2, w, h); c.fill(); c.stroke();
+        c.fillStyle = '#3A3226'; c.fillText(ref, px, py + .5 * r);
+      });
+    }
+    if (z >= 16) pois.forEach(function (it) {
+      if (!it.f.p.name || it.px == null) return; var font = cmFont(10.5 * r, 600), py = it.py + (pr + 8) * r; c.font = font; var w = c.measureText(it.f.p.name).width;
+      if (!free([it.px - w / 2, py - 7 * r, it.px + w / 2, py + 7 * r])) return; text(it.f.p.name, it.px, py, font, '#3A3F44', 3);
+    });
+  }
+  // the decoded tiles of every downloaded country that covers a tile (border tiles can need two)
+  function cmTiles(z, x, y) {
+    var out = [], n = Math.pow(2, z), w = x / n * 360 - 180, e = (x + 1) / n * 360 - 180;
+    var lat = function (t) { var m = Math.PI - 2 * Math.PI * t / n; return 180 / Math.PI * Math.atan(.5 * (Math.exp(m) - Math.exp(-m))); };
+    var nn = lat(y), ss = lat(y + 1);
+    cmDone().forEach(function (h) {
+      var b = h.bounds || [-180, -85, 180, 85]; if (e < b[0] || w > b[2] || nn < b[1] || ss > b[3]) return;
+      var mz = h.maxzoom || 14, sz = Math.min(z, mz), d = z - sz, sx = Math.floor(x / Math.pow(2, d)), sy = Math.floor(y / Math.pow(2, d)), key = h.file + '/' + sz + '/' + sx + '/' + sy;
+      if (!CM.tiles[key]) {
+        CM.tiles[key] = cmTile(cmSrc(h), sz, sx, sy).then(function (buf) { return buf ? cmMvt(buf) : {}; }).catch(function () { delete CM.tiles[key]; return null; });
+        CM.order.push(key); if (CM.order.length > 64) delete CM.tiles[CM.order.shift()];
+      }
+      out.push({ sz: sz, p: CM.tiles[key] });
+    });
+    return out;
+  }
+  var CmLayer = window.L ? L.GridLayer.extend({
+    createTile: function (co, done) {
+      var cv = document.createElement('canvas'), r = Math.min(2, window.devicePixelRatio || 1); cv.width = cv.height = 256 * r;
+      var list = cmTiles(co.z, co.x, co.y);
+      if (!list.length) { setTimeout(function () { done(null, cv); }, 0); return cv; } // not in a downloaded country: what lies under shows
+      Promise.all(list.map(function (t) { return t.p; })).then(function (ts) {
+        try { cmDraw(cv, ts.filter(Boolean), co.z, co.x, co.y, r, list[0].sz); } catch (e) {}
+        done(null, cv);
+      });
+      return cv;
+    }
+  }) : null;
+
+  // --- on the maps: a map style, and automatically with no signal ------------------------------------------
+  function cmPicked(map) { return !!map._cm && store.get('rfPinCmPick') === '1'; }
+  function cmPick(map, k) {
+    if (k === 'cmap') { store.set('rfPinCmPick', '1'); map._cmNo = false; cmSync(map); map.fire('baselayerchange'); return true; }
+    store.del('rfPinCmPick'); map._cmNo = !navigator.onLine; cmSync(map); return false;
+  }
+  function cmSync(map) {
+    var want = cmReady() && !!CmLayer && (store.get('rfPinCmPick') === '1' || (!navigator.onLine && !map._cmNo));
+    if (want && !map._cm) { map._cm = new CmLayer({ maxZoom: 21, zIndex: 60, attribution: CM_ATTR, className: 'cm-layer', keepBuffer: 1 }).addTo(map); cmLift(map); }
+    if (!want && map._cm) { map.removeLayer(map._cm); map._cm = null; }
+  }
+  // keep the credit in view: just above whatever covers the bottom of the map (the nearest sheet, the tab bar)
+  function cmLift(map) {
+    var c = map.getContainer();
+    var lift = function () {
+      if (!map._cm) return;
+      var r = c.getBoundingClientRect(), top = r.bottom, sec = c.closest('section');
+      [sec && sec.querySelector('.ov.bot'), document.getElementById('tabs')].forEach(function (el) {
+        if (!el || !el.offsetParent) return; var b = el.getBoundingClientRect(); if (b.top < top && b.bottom > r.top + r.height / 2 && b.left < r.right && b.right > r.left) top = b.top;
+      });
+      c.style.setProperty('--gbot', Math.max(0, Math.round(r.bottom - top)) + 'px');
+    };
+    if (!map._cmLift) {
+      map._cmLift = lift; map.on('moveend resize layeradd', lift); addEventListener('resize', lift);
+      if (window.ResizeObserver) { var sec = c.closest('section'), ovb = sec && sec.querySelector('.ov.bot'), ro = new ResizeObserver(lift); if (ovb) ro.observe(ovb); ro.observe(c); }
+    }
+    lift(); setTimeout(lift, 600);
+  }
+  function cmSyncAll(redraw) { CM.maps.forEach(function (m) { if (redraw && m._cm) { m.removeLayer(m._cm); m._cm = null; } cmSync(m); }); }
+  function cmAttach(map) { CM.maps.push(map); cmSync(map); }
+  addEventListener('online', function () { CM.maps.forEach(function (m) { m._cmNo = false; }); cmSyncAll(); cmResume(); });
+  addEventListener('offline', function () { CM.maps.forEach(function (m) { m._cmNo = false; }); cmSyncAll(); });
+
+  // --- downloading ----------------------------------------------------------------------------------------
+  function cmNet() { var c = navigator.connection; return c && c.type ? c.type : ''; }
+  // Wi-Fi only (unless mobile data is allowed): browsers that can tell (Chrome on Android) say "cellular"
+  function cmNetOk() { return CM.mobile || cmNet() !== 'cellular'; }
+  if (navigator.connection && navigator.connection.addEventListener) navigator.connection.addEventListener('change', function () {
+    var d = CM.dl; if (!d) return;
+    if (d.state === 'run' && !cmNetOk()) { d.wifi = true; cmStop(true); }
+    else if (d.state === 'wait' && cmNetOk()) cmResume();
+  });
+  function cmFreeSpace() {
+    if (!navigator.storage || !navigator.storage.estimate) return Promise.resolve(null);
+    return navigator.storage.estimate().then(function (e) { return e.quota ? Math.max(0, e.quota - (e.usage || 0)) : null; }).catch(function () { return null; });
+  }
+  function cmLoadList() {
+    var b = cmBase(); if (!b || !navigator.onLine) return Promise.resolve(CM.list);
+    return fetch(b + 'countries.json', { cache: 'no-cache' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+      if (j && Array.isArray(j.countries)) { CM.list = j; store.set('rfPinCmList', JSON.stringify(j)); }
+      return CM.list;
+    }).catch(function () { return CM.list; });
+  }
+  function cmStart(c) {
+    if (CM.dl && CM.dl.state === 'run') return;
+    if (!navigator.onLine) return cmMsg('warn', tr('Downloading needs a signal. Try again on Wi-Fi.', 'Kupakua kunahitaji mtandao. Jaribu tena ukiwa kwenye Wi-Fi.'));
+    if (!cmNetOk()) return cmMsg('warn', tr('Waiting for Wi-Fi. To use mobile data instead, switch on “Use mobile data too”.', 'Inasubiri Wi-Fi. Kutumia data ya simu badala yake, washa “Tumia data ya simu pia”.'));
+    cmFreeSpace().then(function (free) {
+      if (free != null && free < c.bytes * 1.1) return cmMsg('bad', tr('Not enough free space for ' + c.name + ' (' + cmMb(c.bytes) + ').', 'Nafasi haitoshi kwa ' + c.name + ' (' + cmMb(c.bytes) + ').'));
+      if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function () {});
+      var old = CM.have[c.code];
+      CM.dl = { code: c.code, c: c, done: 0, total: c.bytes, state: 'run', tries: 0, part: old && !old.done && old.file === c.file ? old : null };
+      cmMsg('', ''); cmRun(); cmUi();
+    });
+  }
+  function cmRun() {
+    var d = CM.dl, c = d.c, n = Math.ceil(c.bytes / CM_CHUNK), url = cmBase() + c.file;
+    d.ctrl = window.AbortController ? new AbortController() : null; d.state = 'run'; d.wifi = false;
+    var rec = CM.have[c.code] && CM.have[c.code].file === c.file ? CM.have[c.code] : null;
+    if (!rec && CM.have[c.code] && !CM.have[c.code].done) caches.delete(cmCache(CM.have[c.code].file)); // a part-download of an older file
+    if (!rec || rec.done) {
+      // a first download, or an update: the old file stays usable until the new one is complete
+      if (!rec) { rec = { code: c.code, name: c.name, file: c.file, bytes: c.bytes, date: c.date, bounds: c.bounds, maxzoom: c.maxzoom || 14, chunk: CM_CHUNK, etag: '', done: false }; }
+      if (CM.have[c.code] && CM.have[c.code].done && CM.have[c.code].file !== c.file) { d.prev = CM.have[c.code]; CM.have['~' + c.code] = d.prev; }
+      CM.have[c.code] = rec; cmSave();
+    }
+    var chunk = rec.chunk || CM_CHUNK; n = Math.ceil(c.bytes / chunk);
+    caches.open(cmCache(c.file)).then(function (cache) {
+      return cache.keys().then(function (ks) {
+        var got = {}; ks.forEach(function (q) { var m = /\/(\d+)$/.exec(q.url); if (m) got[+m[1]] = 1; });
+        var bytesOf = function (i) { return Math.min(chunk, c.bytes - i * chunk); };
+        d.done = Object.keys(got).reduce(function (s, i) { return s + bytesOf(+i); }, 0); cmUi();
+        var next = function (i) {
+          if (d.state !== 'run') return null;
+          while (i < n && got[i]) i++;
+          if (i >= n) return finish();
+          var a = i * chunk, b = a + bytesOf(i) - 1, base = d.done;
+          return fetch(url, { headers: { Range: 'bytes=' + a + '-' + b }, cache: 'no-store', signal: d.ctrl ? d.ctrl.signal : undefined }).then(function (r) {
+            if (r.status !== 206 && !(r.status === 200 && a === 0 && b === c.bytes - 1)) throw new Error(r.status === 200 ? 'norange' : 'http' + r.status);
+            var et = (r.headers.get('ETag') || '').replace(/^W\//, '');
+            if (et && rec.etag && et !== rec.etag) throw new Error('changed');
+            if (et && !rec.etag) { rec.etag = et; cmSave(); }
+            var rd = r.body && r.body.getReader ? r.body.getReader() : null, parts = [], have = 0;
+            var pump = function () {
+              if (!rd) return r.arrayBuffer().then(function (x) { parts.push(new Uint8Array(x)); have = x.byteLength; });
+              return rd.read().then(function (s) { if (s.done) return; parts.push(s.value); have += s.value.length; d.done = base + have; cmUiSoon(); return pump(); });
+            };
+            return pump().then(function () {
+              var blob = new Blob(parts); if (blob.size !== b - a + 1) throw new Error('short');
+              return cache.put('/__cmap/' + c.file + '/' + i, new Response(blob, { headers: { 'Content-Type': 'application/octet-stream' } }));
+            });
+          }).then(function () { got[i] = 1; d.done = base + bytesOf(i); d.tries = 0; cmUi(); return next(i + 1); });
+        };
+        var finish = function () {
+          rec.done = true; rec.at = new Date().toISOString(); cmSave();
+          if (d.prev) { caches.delete(cmCache(d.prev.file)); delete CM.src[d.prev.file]; delete CM.have['~' + c.code]; cmSave(); }
+          CM.dl = null; CM.tiles = {}; CM.order = []; cmSyncAll(true);
+          toast(tr(c.name + ' street map saved ✓ It works with no signal.', 'Ramani ya ' + c.name + ' imehifadhiwa ✓ Inafanya kazi bila mtandao.'));
+          cmUi(); return null;
+        };
+        return next(0);
+      });
+    }).catch(function (e) {
+      if (d.state !== 'run' && d.state !== 'err') return cmUi(); // stopped
+      var why = String(e && e.message || e);
+      if (why === 'changed') { caches.delete(cmCache(c.file)); rec.etag = ''; cmSave(); d.state = 'err'; cmMsg('warn', tr('The map file changed on the server. Tap Download to start again.', 'Faili la ramani limebadilika kwenye seva. Gusa Pakua kuanza upya.')); return cmUi(); }
+      if (why === 'norange' || /^http4/.test(why)) { d.state = 'err'; cmMsg('bad', tr('The map server didn’t answer as expected (' + why + '). Ask the office to check the country maps set-up.', 'Seva ya ramani haikujibu kama inavyotarajiwa (' + why + '). Omba ofisi iangalie mipangilio ya ramani za nchi.')); return cmUi(); }
+      // the connection dropped: carry on by itself when it is back, keeping the pieces already saved
+      d.state = 'wait'; d.tries++;
+      var wait = Math.min(60000, 3000 * Math.pow(2, Math.min(5, d.tries - 1)));
+      clearTimeout(d.timer); d.timer = setTimeout(function () { if (CM.dl === d && d.state === 'wait' && navigator.onLine && cmNetOk()) cmRun(); }, wait);
+      cmUi();
+    });
+  }
+  function cmResume() { var d = CM.dl; if (d && d.state === 'wait' && navigator.onLine && cmNetOk()) { clearTimeout(d.timer); cmRun(); } }
+  function cmStop(wait) { var d = CM.dl; if (!d) return; d.state = wait ? 'wait' : 'stop'; clearTimeout(d.timer); if (d.ctrl) d.ctrl.abort(); if (!wait) CM.dl = null; cmUi(); }
+  function cmDelete(code) {
+    var h = CM.have[code]; if (!h) return;
+    if (CM.dl && CM.dl.code === code) cmStop();
+    [h, CM.have['~' + code]].forEach(function (x) { if (x) { caches.delete(cmCache(x.file)); delete CM.src[x.file]; } });
+    delete CM.have[code]; delete CM.have['~' + code]; cmSave(); CM.tiles = {}; CM.order = []; cmSyncAll(true); cmUi();
+  }
+
+  // --- Offline maps › Whole country maps ----------------------------------------------------------------
+  function cmBoxHtml() { return '<div id="cmBox" class="cm-box"></div>'; }
+  function cmMsg(k, t) { CM.msg = t ? [k, t] : null; cmUi(); }
+  var cmUiT = 0; function cmUiSoon() { if (!cmUiT) cmUiT = setTimeout(function () { cmUiT = 0; cmUi(); }, 250); }
+  function cmUi() {
+    var box = $('cmBox'); if (!box) return;
+    var on = !!cmBase(), mine = Object.keys(CM.have).filter(function (k) { return k[0] !== '~'; });
+    if (!on && !mine.length) { box.innerHTML = ''; box.hidden = true; return; }
+    box.hidden = false;
+    if (!window.caches || !window.DecompressionStream || !CmLayer) { box.innerHTML = '<h4>' + tr('Whole country maps', 'Ramani za nchi nzima') + '</h4><p class="muted">' + tr('This browser can’t keep a whole country map. Use the RAFIKI Pin Android app, or a recent Chrome, Safari or Firefox.', 'Kivinjari hiki hakiwezi kuhifadhi ramani ya nchi nzima. Tumia programu ya RAFIKI Pin ya Android, au Chrome, Safari au Firefox ya karibuni.') + '</p>'; return; }
+    if (!box.__wired) { box.__wired = true; box.addEventListener('click', cmClick); box.addEventListener('change', cmClick); if (on && !CM.loading) { CM.loading = true; cmLoadList().then(function () { CM.loading = false; cmUi(); }); } cmFreeSpace().then(function (f) { CM.free = f; cmUi(); }); }
+    var list = (CM.list && CM.list.countries) || [], rows = list.slice();
+    mine.forEach(function (k) { if (!rows.some(function (c) { return c.code === k; })) rows.push(CM.have[k]); });
+    var d = CM.dl, hu = ['green', 'blue', 'amber', 'purple', 'teal'];
+    var h = '<div class="cm-hd"><h4>' + tr('Whole country maps', 'Ramani za nchi nzima') + '</h4><span class="cm-new">' + tr('No signal needed', 'Bila mtandao') + '</span></div>' +
+      '<p class="muted">' + tr('Download a country once on Wi-Fi: the street map then works anywhere in it with no signal, with villages, roads and tracks, schools, clinics, churches, rivers and water points. Your projects, routes and location show on top as usual.', 'Pakua nchi mara moja ukiwa kwenye Wi-Fi: ramani ya barabara itafanya kazi popote ndani yake bila mtandao, ikiwa na vijiji, barabara na njia, shule, zahanati, makanisa, mito na vituo vya maji. Miradi, njia na mahali ulipo vinaonekana juu kama kawaida.') + '</p>';
+    if (CM.msg) h += '<p class="msg ' + CM.msg[0] + '">' + esc(CM.msg[1]) + '</p>';
+    if (!rows.length) h += '<p class="muted cm-wait">' + (CM.loading ? tr('Loading the list of countries…', 'Inapakia orodha ya nchi…') : navigator.onLine ? tr('No country maps yet. The office adds them.', 'Bado hakuna ramani za nchi. Ofisi inaziongeza.') : tr('The list of countries needs a signal the first time.', 'Orodha ya nchi inahitaji mtandao mara ya kwanza.')) + '</p>';
+    rows.forEach(function (c, i) {
+      var have = CM.have[c.code], ok = have && have.done, upd = ok && list.some(function (x) { return x.code === c.code && x.file !== have.file; }), busy = d && d.code === c.code;
+      var part = !ok && have && !busy, info = c.bytes ? cmMb(c.bytes) : '';
+      var st = busy ? (d.state === 'wait' ? (d.wifi || !cmNetOk() ? tr('Waiting for Wi-Fi…', 'Inasubiri Wi-Fi…') : tr('Connection lost: carries on when the signal is back', 'Mtandao umekatika: itaendelea mtandao ukirudi')) : tr('Downloading…', 'Inapakua…'))
+        : ok ? (upd ? tr('A newer map is ready', 'Ramani mpya iko tayari') : tr('On this device · ', 'Kwenye kifaa hiki · ') + cmDay(have.date))
+        : part ? tr('Stopped part way', 'Imesimama katikati') : tr('Map of ', 'Ramani ya ') + cmDay(c.date);
+      var b = busy ? '<button class="btn small light" type="button" data-cm-stop="' + esc(c.code) + '">' + oic('cpause') + tr('Stop', 'Simamisha') + '</button>'
+        : (ok ? (upd ? '<button class="btn small" type="button" data-cm-get="' + esc(c.code) + '">' + oic('offline') + tr('Update', 'Sasisha') + '</button>' : '')
+          : '<button class="btn small" type="button" data-cm-get="' + esc(c.code) + '"' + (c.file ? '' : ' disabled') + '>' + oic('offline') + (part ? tr('Resume', 'Endelea') : tr('Download', 'Pakua')) + '</button>') +
+          (have ? '<button type="button" class="fld-del" data-cm-del="' + esc(c.code) + '" aria-label="' + esc(tr('Delete ' + c.name + ' map', 'Futa ramani ya ' + c.name)) + '">' + oic('trash') + '</button>' : '');
+      var pct = busy ? Math.min(100, Math.round(d.done / Math.max(1, d.total) * 100)) : ok ? 100 : 0;
+      var x = hu[i % hu.length];
+      h += '<div class="cm-c' + (ok ? ' ok' : '') + '" data-code="' + esc(c.code) + '" style="--hu:var(--hu-' + x + ');--hb:var(--hb-' + x + ')"><div class="cm-ch"><i>' + oic('map') + '</i><div><b>' + esc(c.name) + '</b><span>' + esc(info ? info + ' · ' + st : st) + '</span></div>' + '<div class="cm-b">' + b + '</div></div>' +
+        (busy || part ? '<div class="meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + pct + '"><i style="width:' + pct + '%"></i></div><p class="cm-p">' + (busy ? tr(cmMb(d.done) + ' of ' + cmMb(d.total) + ' · ' + pct + '%', cmMb(d.done) + ' kati ya ' + cmMb(d.total) + ' · ' + pct + '%') : tr('Part of it is saved; nothing is downloaded twice.', 'Sehemu imehifadhiwa; hakuna kinachopakuliwa mara mbili.')) + '</p>' : '') + '</div>';
+    });
+    var t = cmNet();
+    h += '<label class="cm-sw"><input type="checkbox" id="cmMobile"' + (CM.mobile ? ' checked' : '') + '><span><b>' + tr('Use mobile data too', 'Tumia data ya simu pia') + '</b><em>' + tr('Off: country maps download only on Wi-Fi.', 'Imezimwa: ramani za nchi zinapakuliwa kwenye Wi-Fi tu.') + (t ? '' : ' ' + tr('This browser can’t tell Wi-Fi from mobile data, so check you’re on Wi-Fi.', 'Kivinjari hiki hakitofautishi Wi-Fi na data ya simu, kwa hiyo hakikisha uko kwenye Wi-Fi.')) + '</em></span></label>';
+    h += '<p class="cm-free">' + (CM.free != null ? tr('Free space for maps on this device: ' + cmMb(CM.free), 'Nafasi iliyo wazi kwa ramani kwenye kifaa hiki: ' + cmMb(CM.free)) : tr('Free space: not known in this browser', 'Nafasi iliyo wazi: haijulikani kwenye kivinjari hiki')) + '</p>';
+    h += '<p class="cm-warn">' + tr('A country map is big (about 50–300 MB). In a browser it can be cleared when the device runs low on space or the site’s data is cleared; the RAFIKI Pin Android app keeps it safely.', 'Ramani ya nchi ni kubwa (takriban MB 50–300). Kwenye kivinjari inaweza kufutwa kifaa kikikosa nafasi au data ya tovuti ikifutwa; programu ya RAFIKI Pin ya Android inaihifadhi salama.') + '</p>';
+    h += '<p class="cm-osm">' + tr('Map data © OpenStreetMap contributors (ODbL).', 'Data ya ramani © OpenStreetMap contributors (ODbL).') + '</p>';
+    box.innerHTML = h; swApply();
+  }
+  function cmClick(e) {
+    var t = e.target, x, code;
+    if (t.id === 'cmMobile' && e.type === 'change') { CM.mobile = t.checked; store.set('rfPinCmMobile', CM.mobile ? '1' : ''); if (CM.mobile) cmResume(); return cmUi(); }
+    if (e.type !== 'click') return;
+    if ((x = t.closest('[data-cm-get]'))) {
+      code = x.getAttribute('data-cm-get');
+      var c = ((CM.list && CM.list.countries) || []).filter(function (y) { return y.code === code; })[0] || CM.have[code];
+      if (c && c.file) cmStart(c); return;
+    }
+    if ((x = t.closest('[data-cm-stop]'))) return cmStop();
+    if ((x = t.closest('[data-cm-del]'))) {
+      if (!x.classList.contains('sure')) { x.classList.add('sure'); x.innerHTML = tr('Delete?', 'Futa?'); return; }
+      code = x.getAttribute('data-cm-del'); var nm = (CM.have[code] || {}).name || ''; cmDelete(code); toast(tr(nm + ' map deleted from this device.', 'Ramani ya ' + nm + ' imefutwa kwenye kifaa hiki.'));
+    }
+  }
+  (function () {
+    var css = '' +
+      '.cm-box{display:flex;flex-direction:column;gap:8px}.cm-box[hidden]{display:none}.cm-box h4{margin:4px 0 0}.cm-hd{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.cm-new{font-size:.7rem;font-weight:800;border-radius:999px;padding:3px 9px;background:var(--hb-green);color:var(--hu-green)}' +
+      '.cm-c{border:1px solid var(--line);border-radius:18px;padding:12px;display:flex;flex-direction:column;gap:8px;background:var(--card)}.cm-c.ok{border-color:var(--hu-green)}' +
+      '.cm-ch{display:flex;gap:10px;align-items:center}.cm-ch > i{flex:none;width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:var(--hb);color:var(--hu)}.cm-ch > i svg{width:20px;height:20px}' +
+      '.cm-ch > div:not(.cm-b){flex:1 1 auto;min-width:0}.cm-ch b{display:block;color:var(--ink)}.cm-ch span{display:block;font-size:.78rem;color:var(--muted);overflow-wrap:normal;word-break:normal;hyphens:none}' +
+      '.cm-b{display:flex;gap:6px;align-items:center;margin-left:auto;flex:none}.cm-b .btn{min-height:44px}.cm-b .btn svg{width:18px;height:18px}.cm-p{margin:0;font-size:.8rem;font-weight:700;color:var(--ink)}' +
+      '.cm-sw{display:flex;gap:10px;align-items:flex-start;border-radius:16px;background:var(--hb-slate);padding:12px 14px;cursor:pointer}.cm-sw input{width:22px;height:22px;flex:none;margin:1px 0 0;accent-color:var(--ok)}.cm-sw b{display:block;color:var(--ink);font-size:.9rem}.cm-sw em{display:block;font-style:normal;color:var(--muted);font-size:.78rem}' +
+      '.cm-free{margin:0;font-size:.8rem;font-weight:700;color:var(--ink)}.cm-warn{margin:0;font-size:.78rem;border-radius:14px;padding:10px 12px;background:var(--warnbg);color:var(--warn)}.cm-osm{margin:0;font-size:.72rem;color:var(--muted)}.cm-wait{margin:0}' +
+      'html[data-theme=sun] .cm-c{border:2px solid #000}html[data-theme=sun] .cm-warn{border:2px solid currentColor}html[data-theme=sun] .cm-new{border:1.5px solid currentColor}' +
+      '.cm-layer{background:transparent}';
+    var st = document.createElement('style'); st.id = 'cmCss'; st.textContent = css; document.head.appendChild(st);
+  })();
+  // ===== end of whole-country street maps ============================================================
 
   // --- start ----------------------------------------------------------------------------------------
   netUi(); outboxUi(); progUi(); installUi();
