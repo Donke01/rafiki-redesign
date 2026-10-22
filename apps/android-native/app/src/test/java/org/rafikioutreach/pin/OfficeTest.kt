@@ -11,6 +11,7 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -49,6 +50,9 @@ class OfficeTest {
     @get:Rule val rule = createAndroidComposeRule<ComponentActivity>()
     private val out = File(System.getProperty("user.dir"), "build/shots").apply { mkdirs() }
     private val posts = java.util.concurrent.CopyOnWriteArrayList<String>()
+    private var assign = JSONArray()
+    private fun visit(aid: String, id: String, t: String, to: String, date: java.time.LocalDate, note: String = "", done: String? = null) = JSONObject().put("aid", aid).put("id", id).put("t", t).put("to", to)
+        .put("date", date.toString()).put("note", note).put("by", "Jessica").put("at", "2026-10-15T08:00:00Z").apply { if (done != null) put("done", done) }
 
     private fun proj(id: String, t: String, gps: JSONArray?) = JSONObject().put("id", id).put("title", t).put("country", "Kenya").put("ck", "ke").put("area", "Eldoret")
         .put("type", "borehole").put("status", "Completed").put("pump", "manual").apply { if (gps != null) put("gps", gps) }
@@ -71,7 +75,7 @@ class OfficeTest {
                     .put(JSONObject().put("name", "Reid Anderson").put("admin", true).put("source", "cloudflare"))).toString()
                 url.contains("view=review") -> 200 to JSONObject().put("ok", true).put("items", JSONArray().put(JSONObject().put("rid", "r1").put("kind", "story").put("id", "101").put("t", "Chepkongi Dispensary").put("by", "Meril").put("at", "2026-10-19T09:00:00Z").put("status", "open")
                     .put("data", JSONObject().put("quote", "Now the nurses can wash their hands").put("who", "Mary")))).toString()
-                url.contains("view=assign") -> 200 to "{\"ok\":true,\"items\":[]}"
+                url.contains("view=assign") -> 200 to JSONObject().put("ok", true).put("items", assign).toString()
                 url.contains("activity=1") -> 200 to JSONObject().put("ok", true).put("activity", JSONArray().put(JSONObject().put("by", "Meril").put("a", "visit").put("s", "notworking").put("id", "104").put("t", "Kapsaret Borehole").put("at", java.time.Instant.now().toString()))).toString()
                 url.contains("pin-auth/me") -> 200 to "{\"ok\":true,\"available\":true,\"user\":null}"
                 url.contains("pin-auth/exchange") -> if (String(body!!).contains("\"code\":\"good\"")) 200 to "{\"ok\":true,\"sid\":\"SESSION123456789012345\"}" else 400 to "{\"ok\":false,\"reason\":\"expired\"}"
@@ -228,6 +232,114 @@ class OfficeTest {
         rule.waitUntil(5000) { rule.onAllNodesWithTag("team_add_sheet").fetchSemanticsNodes().isNotEmpty() }
         rule.onNode(hasSetTextAction() and hasText("Reid Anderson")).assertExists()
         rule.onNodeWithTag("tm_readd").assertDoesNotExist()
+    }
+
+    /** Overview tiles and the country sheet; Visits as cards with filters, a sheet to reassign or cancel, and the assign sheet. */
+    @Test fun office_overview_tiles_and_visits() {
+        Lang.sw = false
+        val today = java.time.LocalDate.now()
+        assign = JSONArray().put(visit("a1", "104", "Kapsaret Borehole", "Meril Kiprop", today.minusDays(3), "Check the pump and meet the committee"))
+            .put(visit("a2", "101", "Chepkongi Dispensary", "Reid Anderson", today)).put(visit("a3", "105", "Turbo Spring", "Meril Kiprop", today.plusDays(4)))
+            .put(visit("a4", "101", "Chepkongi Dispensary", "Meril Kiprop", today.minusDays(9), done = java.time.Instant.now().minusSeconds(5 * 86400).toString()))
+        val m = model(); show(m)
+        rule.onNodeWithTag("nav_office").performClick()
+        waitFor("Kapsaret Borehole"); rule.mainClock.advanceTimeBy(1500)
+        rule.onNodeWithTag("ocv_overview_head").assertExists(); rule.onNodeWithText("3 of 4 projects on the map").assertExists(); rule.onNodeWithText("1 still needs a location").assertExists()
+        rule.onNodeWithText("1 urgent · KES 4,500").assertExists()
+        shot("ocv-01-overview")
+        rule.onNodeWithTag("ocv_countries").performScrollTo(); shot("ocv-01b-overview-countries")
+        rule.onNodeWithTag("ocv_c_ke").performScrollTo().performClick()
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("ocv_country_sheet").fetchSemanticsNodes().isNotEmpty() }
+        rule.onNodeWithText("4 projects").assertExists(); rule.onNodeWithText("3 of 4").assertExists()
+        sheetShot("ocv-02-country-sheet")
+        rule.onNodeWithTag("ocv_country_all").performScrollTo().performClick(); rule.mainClock.advanceTimeBy(1000); rule.waitForIdle()
+        assertEquals("all", m.prefs.filter); assertEquals("ke", m.prefs.country)
+        m.prefs.country = ""
+        rule.onNodeWithTag("nav_office").performClick(); rule.waitForIdle()
+        rule.onNodeWithTag("ocv_t_visits").performScrollTo().performClick()
+        waitFor("Assign a visit"); rule.mainClock.advanceTimeBy(1000)
+        rule.onAllNodesWithTag("ocv_visit").assertCountEquals(3)
+        rule.onNodeWithText("Meril Kiprop · 3 days late").assertExists(); rule.onNodeWithText("“Check the pump and meet the committee”").assertExists()
+        shot("ocv-03-visits")
+        rule.onAllNodesWithTag("ocv_visit").onFirst().performScrollTo(); shot("ocv-03a-visit-cards")
+        rule.onNodeWithTag("ocv_vf_late").performClick(); rule.onAllNodesWithTag("ocv_visit").assertCountEquals(1)
+        rule.onNodeWithTag("ocv_vf_done").performClick(); rule.onAllNodesWithTag("ocv_visit").assertCountEquals(1)
+        shot("ocv-03b-visits-done")
+        rule.onNodeWithTag("ocv_vf_open").performClick(); rule.onNodeWithTag("ocv_vp_Meril Kiprop").performClick(); rule.onAllNodesWithTag("ocv_visit").assertCountEquals(2)
+        rule.onNodeWithTag("ocv_vf_today").performClick(); rule.onAllNodesWithTag("ocv_visit").assertCountEquals(0); rule.onNodeWithText("Nothing here for Meril Kiprop. Try another filter.").assertExists()
+        rule.onNodeWithTag("ocv_vp_all").performClick(); rule.onNodeWithTag("ocv_vf_open").performClick(); rule.waitForIdle()
+        // a visit: reassign it to someone else
+        rule.onAllNodesWithTag("ocv_visit").onFirst().performClick()
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("ocv_visit_sheet").fetchSemanticsNodes().isNotEmpty() }
+        rule.onNodeWithText("Check the pump and meet the committee").assertExists(); rule.onNodeWithTag("ocv_v_open").assertExists()
+        sheetShot("ocv-04-visit-sheet")
+        rule.onNodeWithTag("ocv_v_re").performScrollTo().performClick(); rule.mainClock.advanceTimeBy(500)
+        rule.onNode(hasText("Meril Kiprop") and androidx.compose.ui.test.hasClickAction() and androidx.compose.ui.test.hasAnyAncestor(androidx.compose.ui.test.hasTestTag("ocv_v_re_box"))).performScrollTo().performClick(); rule.waitForIdle()
+        rule.onAllNodes(hasText("Reid Anderson") and androidx.compose.ui.test.hasClickAction()).onLast().performClick(); rule.waitForIdle()
+        rule.onNode(hasText("Reid Anderson") and androidx.compose.ui.test.hasAnyAncestor(androidx.compose.ui.test.hasTestTag("ocv_v_re_box"))).assertExists()
+        rule.onNodeWithTag("ocv_v_re_go").performScrollTo()
+        sheetShot("ocv-05-visit-reassign")
+        rule.onNodeWithTag("ocv_v_re_go").performClick()
+        rule.waitUntil(5000) { posts.any { it.contains("\"action\":\"unassign\"") && it.contains("\"aid\":\"a1\"") } }
+        posts.first { it.contains("\"action\":\"assign\"") }.let { assertTrue(it, it.contains("\"ids\":[\"104\"]") && it.contains("\"to\":\"Reid Anderson\"") && it.contains("\"note\":\"Check the pump and meet the committee\"") && it.contains("\"date\":\"" + today.minusDays(3) + "\"")) }
+        rule.mainClock.advanceTimeBy(2000)
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("ocv_visit_sheet").fetchSemanticsNodes().isEmpty() }
+        // cancel: asks first
+        rule.onAllNodesWithTag("ocv_visit").onFirst().performClick()
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("ocv_visit_sheet").fetchSemanticsNodes().isNotEmpty() }
+        rule.onNodeWithTag("ocv_v_rm").performScrollTo().performClick()
+        rule.onNodeWithTag("ocv_v_ask").assertExists()
+        assertTrue(posts.count { it.contains("\"action\":\"unassign\"") } == 1)
+        rule.onNodeWithTag("ocv_v_yes").performScrollTo()
+        sheetShot("ocv-06-visit-cancel-ask")
+        rule.onNodeWithTag("ocv_v_yes").performClick()
+        rule.waitUntil(5000) { posts.count { it.contains("\"action\":\"unassign\"") } == 2 }
+        rule.mainClock.advanceTimeBy(2000)
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("ocv_visit_sheet").fetchSemanticsNodes().isEmpty() }
+        // assign a visit, in its own sheet
+        rule.onNodeWithTag("ocv_assign").performScrollTo().performClick()
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("ocv_assign_sheet").fetchSemanticsNodes().isNotEmpty() }
+        rule.mainClock.advanceTimeBy(800)
+        rule.onNodeWithTag("ocv_pick_105").performScrollTo().performClick(); rule.onNodeWithTag("ocv_pick_101").performScrollTo().performClick()
+        rule.onNodeWithText("Assign 2 visits").assertExists()
+        sheetShot("ocv-07-assign-sheet")
+        rule.onNodeWithTag("ocv_assign_go").performClick()
+        rule.waitUntil(5000) { posts.any { it.contains("\"action\":\"assign\"") && it.contains("\"ids\":[\"105\",\"101\"]") } }
+        posts.last { it.contains("\"action\":\"assign\"") }.let { assertTrue(it, it.contains("\"to\":\"Meril Kiprop\"") && it.contains("\"date\":\"" + today.plusDays(1) + "\"")) }
+        assign = JSONArray()
+    }
+
+    @Test fun office_overview_and_visits_dark_sun_kiswahili() {
+        val today = java.time.LocalDate.now()
+        assign = JSONArray().put(visit("a1", "104", "Kapsaret Borehole", "Meril Kiprop", today.minusDays(3), "Check the pump and meet the committee"))
+            .put(visit("a3", "105", "Turbo Spring", "Reid Anderson", today.plusDays(4)))
+        try {
+            for ((mode, sw) in listOf("dark" to false, "sun" to false, "" to true)) {
+                org.rafikioutreach.pin.ui.Look.mode = mode; Lang.sw = sw
+                val tagName = if (sw) "sw" else mode
+                if (mode == "dark") { val m = model(); show(m) }
+                rule.onNodeWithTag("nav_office").performClick(); rule.waitForIdle()
+                rule.onNodeWithTag("o_overview").performScrollTo().performClick(); rule.mainClock.advanceTimeBy(1500); rule.waitForIdle()
+                rule.onNodeWithTag("ocv_overview_head").performScrollTo(); shot("ocv-08-overview-$tagName")
+                rule.onNodeWithTag("o_visits").performScrollTo().performClick()
+                rule.waitUntil(5000) { rule.onAllNodesWithTag("ocv_visit").fetchSemanticsNodes().isNotEmpty() }
+                rule.mainClock.advanceTimeBy(1000)
+                rule.onNodeWithTag("ocv_visits_head").performScrollTo(); shot("ocv-09-visits-$tagName")
+                rule.onAllNodesWithTag("ocv_visit").onFirst().performScrollTo(); shot("ocv-09b-visit-cards-$tagName")
+                rule.onAllNodesWithTag("ocv_visit").onFirst().performScrollTo().performClick()
+                rule.waitUntil(5000) { rule.onAllNodesWithTag("ocv_visit_sheet").fetchSemanticsNodes().isNotEmpty() }
+                rule.onNodeWithTag("ocv_v_re").performScrollTo().performClick()
+                sheetShot("ocv-10-visit-sheet-$tagName")
+                rule.onNodeWithTag("ocv_close").performClick(); rule.mainClock.advanceTimeBy(1000)
+                rule.waitUntil(5000) { rule.onAllNodesWithTag("ocv_visit_sheet").fetchSemanticsNodes().isEmpty() }
+                if (sw) {
+                    assertTrue(rule.onAllNodesWithText("Gawa ziara").fetchSemanticsNodes().isNotEmpty() && rule.onAllNodesWithText("Zimechelewa · 1").fetchSemanticsNodes().isNotEmpty())
+                    rule.onNodeWithTag("ocv_assign").performScrollTo().performClick()
+                    rule.waitUntil(5000) { rule.onAllNodesWithTag("ocv_assign_sheet").fetchSemanticsNodes().isNotEmpty() }
+                    sheetShot("ocv-11-assign-sheet-sw")
+                }
+            }
+        } finally { org.rafikioutreach.pin.ui.Look.mode = ""; Lang.sw = false; assign = JSONArray() }
     }
 
     @Test fun team_list_and_sheet_dark_and_sun() {
