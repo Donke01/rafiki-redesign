@@ -48,10 +48,20 @@ import org.rafikioutreach.pin.data.OutFile
 import org.rafikioutreach.pin.t
 
 private val TYPES = listOf(
-    "borehole" to ("Borehole well" to "Kisima cha borehole"), "collection" to ("Water collection" to "Ukusanyaji wa maji"), "school" to ("School" to "Shule"),
+    "borehole" to ("Borehole well" to "Kisima kirefu"), "collection" to ("Water collection" to "Ukusanyaji wa maji"), "school" to ("School" to "Shule"),
     "health" to ("Health" to "Afya"), "children" to ("Children's home" to "Makao ya watoto"), "farming" to ("Farming" to "Kilimo"),
     "community" to ("Community" to "Jamii"), "other" to ("Other" to "Nyingine"),
 )
+
+/** A project type as monday.com names it ("Borehole well"), in the app's language ("Kisima kirefu"). Unknown types stay as they are. */
+fun typeName(type: String): String {
+    val ty = type.lowercase()
+    val k = when {
+        "borehole" in ty -> "borehole"; "collection" in ty -> "collection"; "school" in ty -> "school"; "health" in ty -> "health"
+        "orphan" in ty || "children" in ty -> "children"; "farm" in ty -> "farming"; ty == "community" -> "community"; else -> ""
+    }
+    return TYPES.firstOrNull { it.first == k }?.second?.let { t(type, it.second) } ?: type
+}
 
 @Composable
 fun NewSiteScreen(m: AppModel, done: (String?) -> Unit) {
@@ -71,7 +81,7 @@ fun NewSiteScreen(m: AppModel, done: (String?) -> Unit) {
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
         Text(t("Add a new site", "Ongeza eneo jipya"), style = MaterialTheme.typography.headlineLarge, color = C.ink, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.fillMaxWidth())
-        Text(t("It goes onto the monday.com board as “Due Diligence”, so it isn’t on the website until the office moves it on.", "Inaingia kwenye monday.com kama “Due Diligence”, kwa hiyo haionekani kwenye tovuti hadi ofisi iisogeze."), style = MaterialTheme.typography.bodyMedium, color = C.muted)
+        Text(t("The office checks every new site first. It isn’t on the website until they approve it.", "Ofisi hukagua kila eneo jipya kwanza. Halionekani kwenye tovuti hadi ofisi iliidhinishe."), style = MaterialTheme.typography.bodyMedium, color = C.muted)
         Card(Modifier.padding(top = 14.dp)) {
             Field(name, { name = it }, t("Site name", "Jina la eneo"), placeholder = t("e.g. Kiptoo Primary School", "mf. Shule ya Msingi Kiptoo"))
             Text(t("Country", "Nchi"), style = MaterialTheme.typography.labelMedium, color = C.ink, modifier = Modifier.padding(top = 14.dp, bottom = 6.dp))

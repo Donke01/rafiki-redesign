@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -37,6 +38,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONObject
@@ -97,7 +99,7 @@ private val NUM = mapOf(
     "staff" to ("Staff on duty" to "Wafanyakazi kazini"), "beds" to ("Beds in use" to "Vitanda vinavyotumika"), "children" to ("Children living there" to "Watoto wanaoishi hapo"),
     "carers" to ("Carers and staff" to "Walezi na wafanyakazi"), "animals" to ("Animals now" to "Mifugo sasa"), "born" to ("Born or hatched since the last visit" to "Waliozaliwa au kuanguliwa tangu ziara iliyopita"),
     "died" to ("Died since the last visit" to "Waliokufa tangu ziara iliyopita"), "sold" to ("Sold since the last visit" to "Waliouzwa tangu ziara iliyopita"),
-    "income" to ("Income from sales since the last visit (KES)" to "Mapato ya mauzo tangu ziara iliyopita (KES)"), "users" to ("People using it (estimate)" to "Watu wanaoitumia (makadirio)"),
+    "income" to ("Income from sales since the last visit" to "Mapato ya mauzo tangu ziara iliyopita"), "users" to ("People using it (estimate)" to "Watu wanaoitumia (makadirio)"),
     "workers" to ("Workers on site today" to "Mafundi kazini leo"),
 )
 private val NUMS = mapOf("school" to listOf("pupils", "teachers"), "health" to listOf("patients", "staff", "beds"), "home" to listOf("children", "carers"),
@@ -179,10 +181,76 @@ class VisitDraft {
     var shots by mutableStateOf(listOf<Shot>())
     var voice by mutableStateOf<java.io.File?>(null)
     var sent by mutableStateOf<String?>(null)
+
+    private fun texts() = mapOf(
+        "state" to state, "urgency" to urgency, "other" to other, "parts" to parts, "cost" to cost, "strokes" to strokes, "flow" to flow, "queue" to queue, "users" to users,
+        "clarity" to clarity, "ecoli" to ecoli, "active" to active, "chair" to chair, "phone" to phone, "fee" to fee, "fund" to fund, "quote" to quote, "quoteBy" to quoteBy, "note" to note, "stage" to stage,
+    )
+    /** Nothing typed or chosen yet (so there's nothing to keep). */
+    fun blank() = step == 0 && arrived == null && texts().values.all { it.isBlank() } && check.values.all { it.isBlank() } && nums.values.all { it.isBlank() } && shots.isEmpty() && voice == null && !consent
+
+    /** Everything in the visit, with the paths of its photos and voice note, to keep on the phone. */
+    fun toJson(): JSONObject = JSONObject().put("v", 1).put("step", step).put("consent", consent).apply {
+        arrived?.let { put("arrived", it) }; arrivedAt?.let { put("lat", it.lat).put("lng", it.lng) }
+        texts().forEach { (k, s) -> if (s.isNotEmpty()) put(k, s) }
+        put("check", JSONObject().apply { check.forEach { (k, s) -> if (s.isNotBlank()) put(k, s) } })
+        put("nums", JSONObject().apply { nums.forEach { (k, s) -> if (s.isNotBlank()) put(k, s) } })
+        put("shots", JSONArray().apply { shots.forEach { put(JSONObject().put("path", it.file.path).put("label", it.label)) } })
+        voice?.let { put("voice", it.path) }
+    }
+
+    /** Puts a kept visit back; photos that are no longer on the phone are left out. */
+    fun fill(j: JSONObject) {
+        step = j.optInt("step"); consent = j.optBoolean("consent")
+        arrived = j.optString("arrived").ifBlank { null }
+        arrivedAt = if (j.has("lat") && j.has("lng")) LatLng(j.optDouble("lat"), j.optDouble("lng")) else null
+        state = j.optString("state"); urgency = j.optString("urgency"); other = j.optString("other"); parts = j.optString("parts"); cost = j.optString("cost")
+        strokes = j.optString("strokes"); flow = j.optString("flow"); queue = j.optString("queue"); users = j.optString("users"); clarity = j.optString("clarity"); ecoli = j.optString("ecoli")
+        active = j.optString("active"); chair = j.optString("chair"); phone = j.optString("phone"); fee = j.optString("fee"); fund = j.optString("fund")
+        quote = j.optString("quote"); quoteBy = j.optString("quoteBy"); note = j.optString("note"); stage = j.optString("stage")
+        check.clear(); j.optJSONObject("check")?.let { o -> o.keys().forEach { check[it] = o.optString(it) } }
+        nums.clear(); j.optJSONObject("nums")?.let { o -> o.keys().forEach { nums[it] = o.optString(it) } }
+        shots = j.optJSONArray("shots")?.let { a -> (0 until a.length()).mapNotNull { i -> a.optJSONObject(i)?.let { Shot(java.io.File(it.optString("path")), it.optString("label")) } } }.orEmpty().filter { it.file.exists() }
+        voice = j.optString("voice").ifBlank { null }?.let { java.io.File(it) }?.takeIf { it.exists() }
+        sent = null
+    }
 }
 
 private val drafts = HashMap<String, VisitDraft>()
 internal fun clearDrafts() = drafts.clear()
+
+/**
+ * A half-done visit kept on the phone (files/visits/<project>.json), so it survives Android closing the app.
+ * It's written on every change, removed once the visit is sent or saved to send, or when "Start again" is chosen.
+ */
+object VisitDrafts {
+    /** A kept visit: what was typed and when it was last changed (ms). */
+    data class Kept(val json: JSONObject, val saved: Long) {
+        val started: Long get() = json.optString("arrived").takeIf { it.isNotBlank() }?.let { runCatching { Instant.parse(it).toEpochMilli() }.getOrNull() } ?: saved
+        val photos: Int get() = json.optJSONArray("shots")?.length() ?: 0
+    }
+    private fun file(ctx: android.content.Context, id: String) = java.io.File(java.io.File(ctx.filesDir, "visits").apply { mkdirs() }, id.replace(Regex("[^A-Za-z0-9_-]"), "_") + ".json")
+    fun save(ctx: android.content.Context, id: String, json: JSONObject) = runCatching {
+        val f = file(ctx, id); val tmp = java.io.File(f.path + ".tmp")
+        tmp.writeText(JSONObject(json.toString()).put("saved", System.currentTimeMillis()).toString()); tmp.renameTo(f)
+    }.isSuccess
+    fun load(ctx: android.content.Context, id: String): Kept? = runCatching {
+        val j = JSONObject(file(ctx, id).readText()); Kept(j, j.optLong("saved"))
+    }.getOrNull()
+    fun has(ctx: android.content.Context, id: String) = file(ctx, id).exists()
+    fun remove(ctx: android.content.Context, id: String) { runCatching { file(ctx, id).delete() } }
+    /** Start again: the kept visit and its photos and voice note go. */
+    fun discard(ctx: android.content.Context, id: String) {
+        load(ctx, id)?.json?.let { j ->
+            j.optJSONArray("shots")?.let { a -> (0 until a.length()).forEach { i -> a.optJSONObject(i)?.optString("path")?.takeIf { it.isNotBlank() }?.let { runCatching { java.io.File(it).delete() } } } }
+            j.optString("voice").takeIf { it.isNotBlank() }?.let { runCatching { java.io.File(it).delete() } }
+        }
+        remove(ctx, id)
+    }
+}
+
+/** A checklist problem as monday.com keeps it (English, "Pump works"), in the app's language. Anything else stays as it is. */
+fun problemName(en: String): String = ITEMS.values.firstOrNull { it.first.equals(en.trim(), ignoreCase = true) }?.let { t(it.first, it.second) } ?: en
 
 @Composable
 fun VisitTab(m: AppModel, p: Project) {
@@ -196,26 +264,50 @@ fun VisitTab(m: AppModel, p: Project) {
     val wet = isWater(p); val k0 = kind(p)
     // scanned the site's QR sticker (Scan QR): that counts as arriving
     androidx.compose.runtime.LaunchedEffect(p.id) { QrCheckin.at(p.id)?.takeIf { QrCheckin.isFor(p.id) && v.arrived == null }?.let { v.arrived = Instant.ofEpochMilli(it).toString(); v.arrivedAt = fix?.ll } }
+    // a visit kept on the phone from before Android closed the app: offer to carry on with it
+    val ctx = androidx.compose.ui.platform.LocalContext.current
+    var offer by remember(p.id) { mutableStateOf(if (v.blank() && v.sent == null) VisitDrafts.load(ctx, p.id) else null) }
+    androidx.compose.runtime.LaunchedEffect(p.id, offer == null) {
+        if (offer != null) return@LaunchedEffect
+        androidx.compose.runtime.snapshotFlow { if (v.sent != null || v.blank()) null else v.toJson() }.collectLatest { j ->
+            if (j != null) kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { VisitDrafts.save(ctx, p.id, j) }
+        }
+    }
+
+    offer?.let { o ->
+        Card(Modifier.testTag("visit_resume")) {
+            IconTile("clock", C.blue, C.tint, 56.dp)
+            val at = Dates.timeOrDateTime(Instant.ofEpochMilli(o.started))
+            Text(t("Carry on with your visit from $at?", "Uendelee na ziara uliyoanza $at?"), style = MaterialTheme.typography.titleLarge, color = C.ink, modifier = Modifier.padding(top = 12.dp))
+            val n = o.photos; val stepNo = o.json.optInt("step") + 1
+            Text(t("It was kept on this phone: step $stepNo of ${steps.size}" + if (n > 0) ", $n ${if (n == 1) "photo" else "photos"}." else ".", "Ilihifadhiwa kwenye simu hii: hatua $stepNo kati ya ${steps.size}" + if (n > 0) ", picha $n." else "."),
+                style = MaterialTheme.typography.bodyMedium, color = C.muted, modifier = Modifier.padding(top = 4.dp))
+            Btn(t("Resume", "Endelea nayo"), { v.fill(o.json); offer = null }, Modifier.fillMaxWidth().padding(top = 16.dp).testTag("resume_yes"), icon = "arrow")
+            Btn(t("Start again", "Anza upya"), { VisitDrafts.discard(ctx, p.id); offer = null }, Modifier.fillMaxWidth().padding(top = 10.dp).testTag("resume_no"), icon = "refresh", light = true, outline = true)
+        }
+        return
+    }
 
     if (v.sent != null) {
         Card {
             IconTile("okc", C.ok, C.okBg, 64.dp)
             Text(if (v.sent == "sent") t("Visit report sent", "Ripoti ya ziara imetumwa") else t("Saved on this phone", "Imehifadhiwa kwenye simu"), style = MaterialTheme.typography.titleLarge, color = C.ink, modifier = Modifier.padding(top = 12.dp))
             Text(if (v.sent == "sent") t("It’s on the project in monday.com.", "Iko kwenye mradi katika monday.com.") else t("It will be sent to monday.com when you have signal.", "Itatumwa monday.com ukipata mtandao."), style = MaterialTheme.typography.bodyMedium, color = C.muted)
-            Btn(t("Start another visit here", "Anza ziara nyingine hapa"), { drafts.remove(p.id); v.sent = null; v.step = 0; v.state = ""; v.shots = emptyList(); v.check.clear(); v.note = "" }, Modifier.padding(top = 14.dp), light = true, small = true)
+            Btn(t("Start another visit here", "Anza ziara nyingine hapa"), { drafts.remove(p.id); VisitDrafts.remove(ctx, p.id); v.sent = null; v.step = 0; v.state = ""; v.shots = emptyList(); v.check.clear(); v.note = "" }, Modifier.padding(top = 14.dp), light = true, small = true)
         }
         return
     }
 
-    // step bar
+    // step bar: the segments, and only the current step named ("Step 2 of 7 · Condition")
     Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
         steps.forEachIndexed { i, s ->
-            Column(Modifier.weight(1f).clickable(role = Role.Tab) { v.step = i }.padding(vertical = 4.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            Box(Modifier.weight(1f).clickable(role = Role.Tab, onClickLabel = s) { v.step = i }.padding(vertical = 8.dp).testTag("stepbar_$i")) {
                 Box(Modifier.fillMaxWidth().height(5.dp).clip(RoundedCornerShape(3.dp)).background(when { i < v.step -> SolidColor(C.ok); i == v.step -> BlueBrush; else -> SolidColor(C.line) }))
-                Text(s, fontSize = 9.sp, color = if (i == v.step) C.blue else C.muted, style = MaterialTheme.typography.labelSmall, maxLines = 1, modifier = Modifier.padding(top = 4.dp))
             }
         }
     }
+    Text(t("Step ${v.step + 1} of ${steps.size}", "Hatua ${v.step + 1} kati ya ${steps.size}") + " · " + steps[v.step], style = MaterialTheme.typography.labelLarge.copy(fontSize = 13.sp), color = C.blue2,
+        maxLines = 1, softWrap = false, modifier = Modifier.padding(top = 2.dp).testTag("step_label"))
     Spacer(Modifier.height(12.dp))
     Card {
         when (v.step) {
@@ -254,30 +346,29 @@ fun VisitTab(m: AppModel, p: Project) {
                 Text(t("Tap OK or Problem for each. Skip anything you couldn’t check.", "Gusa Sawa au Tatizo kwa kila kimoja. Ruka usichoweza kukagua."), style = MaterialTheme.typography.bodyMedium, color = C.muted)
                 items.forEach { k ->
                     val (en, sw) = ITEMS.getValue(k); val cur = v.check[k]
-                    Row(Modifier.padding(top = 8.dp).fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(when (cur) { "ok" -> C.okBg; "bad" -> C.badBg; else -> C.card })
-                        .border(1.dp, when (cur) { "ok" -> C.ok; "bad" -> C.bad; else -> C.line }, RoundedCornerShape(16.dp)).padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Text(t(en, sw), style = MaterialTheme.typography.bodyMedium, color = C.text, modifier = Modifier.weight(1f))
-                        Pill(t("OK", "Sawa"), cur == "ok", Modifier.padding(start = 6.dp), color = C.ok) { v.check[k] = if (cur == "ok") "" else "ok" }
-                        Pill(t("Problem", "Tatizo"), cur == "bad", Modifier.padding(start = 6.dp), color = C.bad) { v.check[k] = if (cur == "bad") "" else "bad" }
+                    Column(Modifier.padding(top = 8.dp).fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(when (cur) { "ok" -> C.okBg; "bad" -> C.badBg; else -> C.card })
+                        .border(1.dp, when (cur) { "ok" -> C.ok; "bad" -> C.bad; else -> C.line }, RoundedCornerShape(16.dp)).padding(10.dp).testTag("ck_$k")) {
+                        Text(t(en, sw), style = MaterialTheme.typography.bodyMedium, color = C.text, modifier = Modifier.padding(start = 2.dp, bottom = 8.dp))
+                        OkProblem(cur, k) { v.check[k] = if (cur == it) "" else it }
                     }
                 }
                 Field(v.other, { v.other = it }, t("Anything else wrong?", "Kuna kingine kibaya?"), placeholder = if (wet) t("e.g. tap drips", "mf. bomba linavuja") else if (k0 == "farm") t("e.g. feeder broken", "mf. chombo cha chakula kimevunjika") else t("e.g. window glass broken", "mf. kioo cha dirisha kimevunjika"))
                 if (v.state != "working" && v.state.isNotBlank()) {
                     Field(v.parts, { v.parts = it }, if (wet) t("Parts needed", "Vipuri vinavyohitajika") else t("Materials or parts needed", "Vifaa vinavyohitajika"),
                         placeholder = if (wet) t("e.g. 2 pump rods, handle bolt", "mf. fimbo 2 za pampu, boliti ya mkono") else if (k0 == "farm") t("e.g. 4 iron sheets, wire mesh", "mf. mabati 4, wavu wa waya") else t("e.g. 6 iron sheets, 2 door hinges", "mf. mabati 6, bawaba 2 za mlango"))
-                    Field(v.cost, { v.cost = it }, t("Rough cost (KES)", "Gharama ya makadirio (KES)"), number = true)
+                    Field(v.cost, { v.cost = it }, t("Rough cost", "Gharama ya makadirio"), Modifier.testTag("cost"), money = true)
                 }
             }
             3 -> if (!wet) {
                 H2(t("Numbers", "Idadi"))
                 Text(t("All optional.", "Vyote si lazima."), style = MaterialTheme.typography.bodyMedium, color = C.muted)
-                NUMS.getValue(k0).forEach { k -> val (en, sw) = NUM.getValue(k); Field(v.nums[k] ?: "", { v.nums[k] = it }, t(en, sw), Modifier.testTag("num_$k"), if (k == "income") "e.g. 12000" else "e.g. 12", number = true) }
+                NUMS.getValue(k0).forEach { k -> val (en, sw) = NUM.getValue(k); Field(v.nums[k] ?: "", { v.nums[k] = it }, t(en, sw), Modifier.testTag("num_$k"), if (k == "income") "" else t("e.g. 12", "mf. 12"), number = k != "income", money = k == "income") }
             } else {
                 H2(t("Readings", "Vipimo"))
                 Text(t("All optional.", "Vyote si lazima."), style = MaterialTheme.typography.bodyMedium, color = C.muted)
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Field(v.strokes, { v.strokes = it }, t("Pump strokes to fill 20 L", "Mipigo ya pampu kujaza lita 20"), Modifier.weight(1f), "e.g. 35", number = true)
-                    Field(v.flow, { v.flow = it }, t("Flow (litres a minute)", "Mtiririko (lita kwa dakika)"), Modifier.weight(1f), "e.g. 12", number = true)
+                    Field(v.strokes, { v.strokes = it }, t("Pump strokes to fill 20 L", "Mipigo ya pampu kujaza lita 20"), Modifier.weight(1f), t("e.g. 35", "mf. 35"), number = true)
+                    Field(v.flow, { v.flow = it }, t("Flow (litres a minute)", "Mtiririko (lita kwa dakika)"), Modifier.weight(1f), t("e.g. 12", "mf. 12"), number = true)
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     Field(v.users, { v.users = it }, t("People using it a day", "Watu wanaotumia kwa siku"), Modifier.weight(1f), number = true)
@@ -325,7 +416,7 @@ fun VisitTab(m: AppModel, p: Project) {
                     Field(v.chair, { v.chair = it }, t("Chairperson", "Mwenyekiti"), Modifier.weight(1f))
                     Field(v.phone, { v.phone = it }, t("Their phone", "Simu yake"), Modifier.weight(1f))
                 }
-                Field(v.fund, { v.fund = it }, t("Maintenance fund now (KES)", "Mfuko wa matengenezo sasa (KES)"), placeholder = "e.g. 3000", number = true)
+                Field(v.fund, { v.fund = it }, t("Maintenance fund now", "Mfuko wa matengenezo sasa"), Modifier.testTag("fund"), money = true)
                 H2(t("Story moment (optional)", "Hadithi (si lazima)"), Modifier.padding(top = 18.dp))
                 Text(t("A few words from someone who uses the water, for the website.", "Maneno machache kutoka kwa mtu anayetumia maji, kwa ajili ya tovuti."), style = MaterialTheme.typography.bodyMedium, color = C.muted)
                 Field(v.quote, { v.quote = it }, t("What they said", "Walichosema"), placeholder = t("e.g. “Now my girls get to school on time.”", "mf. “Sasa wasichana wangu wanafika shuleni kwa wakati.”"), lines = 3)
@@ -374,7 +465,7 @@ fun VisitTab(m: AppModel, p: Project) {
                             is Outcome.Failed -> msg = "bad" to o.text
                             Outcome.Locked -> {}
                         }
-                        if (v.sent != null) QrCheckin.clear(p.id)
+                        if (v.sent != null) { QrCheckin.clear(p.id); VisitDrafts.remove(ctx, p.id) }
                         busy = false
                     }
                 }, Modifier.fillMaxWidth().padding(top = 16.dp), icon = "upload", enabled = v.state.isNotBlank() && !busy)
@@ -413,11 +504,30 @@ fun Choice(label: String, icon: String, tint: Color, bg: Color, on: Boolean, onC
     }
 }
 
+/** A checklist row's answer: one 48 dp pill in two halves, OK (turns green) and Problem (turns red). */
+@Composable
+private fun OkProblem(cur: String?, key: String, pick: (String) -> Unit) {
+    val shape = RoundedCornerShape(999.dp)
+    Row(Modifier.fillMaxWidth().height(48.dp).clip(shape).background(C.card).border(1.dp, C.edge, shape)) {
+        listOf(Triple("ok", t("OK", "Sawa"), C.ok), Triple("bad", t("Problem", "Tatizo"), C.bad)).forEachIndexed { i, (k, label, col) ->
+            val on = cur == k
+            val onText = if (C.dark) Color(0xFF0D1318) else Color.White // dark text on the light green and red of dark mode
+            if (i == 1) Box(Modifier.width(1.dp).fillMaxHeight().background(if (cur.isNullOrBlank()) C.edge else Color.Transparent))
+            Row(Modifier.weight(1f).fillMaxHeight().background(if (on) col else Color.Transparent).clickable(role = Role.RadioButton, onClickLabel = label) { pick(k) }.testTag("ck_${key}_$k"),
+                horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+                Icon(Ic.get(if (k == "ok") "check" else "alert"), null, tint = if (on) onText else col, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(6.dp))
+                Text(label, color = if (on) onText else C.ink, style = MaterialTheme.typography.labelLarge, maxLines = 1, softWrap = false)
+            }
+        }
+    }
+}
+
 @Composable
 fun Pill(label: String, on: Boolean, modifier: Modifier = Modifier, color: Color? = null, onClick: () -> Unit) {
     val c = color ?: C.selected
     Box(
-        modifier.clip(RoundedCornerShape(12.dp)).background(if (on) c else if (C.glassy) C.glass2 else C.card).border(1.dp, if (on) c else if (C.glassy) C.glassEdge else C.edge, RoundedCornerShape(12.dp))
+        modifier.clip(RoundedCornerShape(12.dp)).background(if (on) c else if (C.glassy) C.glass2 else C.card).border(1.dp, if (on) c else C.edge, RoundedCornerShape(12.dp))
             .clickable(role = Role.Button, onClick = onClick).heightIn(min = 44.dp).padding(horizontal = 10.dp),
         contentAlignment = Alignment.Center,
     ) { Text(label, color = if (on) Color.White else C.ink, style = MaterialTheme.typography.labelMedium, textAlign = TextAlign.Center) }

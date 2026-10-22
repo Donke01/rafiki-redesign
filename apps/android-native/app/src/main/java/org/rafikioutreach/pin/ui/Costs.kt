@@ -220,7 +220,7 @@ fun TrackerMoneyBox(m: AppModel, s: Snapshot, p: Project, r: Repair, money: Trac
     if (mine && !Money.past(r.step, "parts") && st != "pending") {
         val ask = st == "needed" || st == "declined"
         if (open && !ask) {
-            Field(cost, { cost = it.filter { c -> c.isDigit() } }, t("Actual cost (KES, optional)", "Gharama halisi (KES, si lazima)"), number = true, placeholder = t("what the parts cost", "bei ya vipuri"))
+            Field(cost, { cost = it.filter { c -> c.isDigit() } }, t("Actual cost (optional)", "Gharama halisi (si lazima)"), money = true, placeholder = t("what the parts cost", "bei ya vipuri"))
             Field(what, { what = it }, t("What was ordered? (optional)", "Nini kimeagizwa? (si lazima)"), placeholder = r.parts.ifBlank { t("e.g. 6 rising main pipes", "mf. mabomba 6") })
             Spacer(Modifier.height(8.dp)); ReceiptPick(m, shots) { shots = it }
         }
@@ -252,7 +252,7 @@ fun TrackerMoneyBox(m: AppModel, s: Snapshot, p: Project, r: Repair, money: Trac
         Icon(Ic.get("coins"), null, tint = C.blue2, modifier = Modifier.size(18.dp)); Spacer(Modifier.width(8.dp))
         Text(t("Add what the repair cost (and a receipt)", "Ongeza gharama ya ukarabati (na risiti)"), style = MaterialTheme.typography.titleSmall, color = C.blue2)
     } else {
-        Field(money.fixCost, { money.fixCost = it.filter { c -> c.isDigit() } }, t("Actual cost when fixed (KES, optional)", "Gharama halisi ikirekebishwa (KES, si lazima)"), number = true, placeholder = t("what the repair cost", "gharama ya ukarabati"))
+        Field(money.fixCost, { money.fixCost = it.filter { c -> c.isDigit() } }, t("Actual cost when fixed (optional)", "Gharama halisi ikirekebishwa (si lazima)"), money = true, placeholder = t("what the repair cost", "gharama ya ukarabati"))
         Spacer(Modifier.height(8.dp)); ReceiptPick(m, money.fixShots) { money.fixShots = it }
     }
 }

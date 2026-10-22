@@ -218,6 +218,7 @@ class DonorsTest {
         rule.onNodeWithTag("nav_list").performClick(); rule.waitForIdle()
         waitFor("Kapsaret Borehole")
         rule.onAllNodesWithText("Kapsaret Borehole")[0].performClick(); rule.waitForIdle()
+        rule.onNodeWithTag("prj_more_toggle").performScrollTo().performClick(); rule.waitForIdle() // under More for this project
         rule.onNodeWithTag("dn_thanks").performScrollTo()
         rule.onNodeWithText("Thank-you for donors").performClick(); rule.waitForIdle()
         rule.onNodeWithText("Video").assertExists()

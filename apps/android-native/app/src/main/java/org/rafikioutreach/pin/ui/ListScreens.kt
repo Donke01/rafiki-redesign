@@ -205,7 +205,7 @@ fun ProjectsScreen(m: AppModel, open: (String) -> Unit, planRoute: () -> Unit = 
         "near" -> if (here != null) t("Closest pinned projects to you", "Miradi iliyo karibu nawe zaidi") else t("Finding where you are…", "Inatafuta mahali ulipo…")
         "missing" -> t("${rows.size} still need a location", "${rows.size} bado hazina mahali")
         "repairs" -> t("${rows.size} reported as needing repair or not working, most urgent first", "${rows.size} zimeripotiwa kuhitaji matengenezo au kutofanya kazi, za haraka kwanza")
-        "due" -> testCount(snap, rows).let { n -> if (n > 0) t("${rows.size} due a visit · $n need a water test", "${rows.size} zinasubiri ziara · $n zinahitaji kipimo cha maji")
+        "due" -> testCount(snap, rows).let { n -> if (n > 0) t("${rows.size} due a visit · $n ${if (n == 1) "needs" else "need"} a water test", "${rows.size} zinasubiri ziara · $n zinahitaji kipimo cha maji")
             else t("${rows.size} not visited in the last 6 months, longest first", "${rows.size} hazijatembelewa miezi 6 iliyopita, za muda mrefu kwanza") }
         else -> t("${rows.size} projects", "Miradi ${rows.size}")
     }

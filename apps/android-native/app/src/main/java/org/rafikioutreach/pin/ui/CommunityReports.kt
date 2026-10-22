@@ -134,7 +134,7 @@ internal fun smsAgo(iso: String, now: Instant = Instant.now()): String = runCatc
         m < 60 -> "$m min"
         m < 24 * 60 -> "${m / 60} h"
         m < 48 * 60 -> t("Yesterday", "Jana")
-        else -> DateTimeFormatter.ofPattern("d MMM", Locale.UK).withZone(ZoneId.systemDefault()).format(at)
+        else -> Dates.day(at.atZone(Dates.zone()).toLocalDate())
     }
 }.getOrDefault("")
 

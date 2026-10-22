@@ -335,7 +335,6 @@ fun ScanScreen(m: AppModel, opened: (String) -> Unit, back: () -> Unit) {
     val pick = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri -> if (uri != null) fromImage { ctx.contentResolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it) } } }
     ShowInBar(m, t("Scan QR", "Changanua QR"), true)
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 110.dp).testTag("scan_screen")) {
-        Text(t("Check in by QR", "Ingia kwa QR"), style = MaterialTheme.typography.headlineLarge, color = C.ink, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
         Text(t("Scan the RAFIKI sticker at the site. The project’s Site visit opens, checked in.", "Changanua kibandiko cha RAFIKI kilicho eneo la mradi. Ziara ya mradi inafunguka, ukiwa umeingia."), style = MaterialTheme.typography.bodyMedium, color = C.muted, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(top = 4.dp, bottom = 14.dp))
         val hu = C.hue("scan")
         Card {
@@ -360,7 +359,7 @@ fun ScanScreen(m: AppModel, opened: (String) -> Unit, back: () -> Unit) {
         }
         Card(Modifier.padding(top = 12.dp)) {
             Text(t("No sticker, or it won’t scan?", "Hakuna kibandiko, au hakichanganuliki?"), style = MaterialTheme.typography.titleSmall, color = C.ink)
-            Field(typed, { typed = it.filter { c -> c.isDigit() } }, t("Project number (on the sticker)", "Namba ya mradi (kwenye kibandiko)"), Modifier.testTag("scan_id"), placeholder = "e.g. 1234567890", number = true)
+            Field(typed, { typed = it.filter { c -> c.isDigit() } }, t("Project number (on the sticker)", "Namba ya mradi (kwenye kibandiko)"), Modifier.testTag("scan_id"), placeholder = t("e.g. 1234567890", "mf. 1234567890"), number = true)
             Btn(t("Open", "Fungua"), { handle(typed, byHand = true) }, Modifier.fillMaxWidth().padding(top = 12.dp).testTag("scan_open"), light = true, enabled = typed.isNotBlank())
             Text(t("Typing the number opens the visit too, but it isn’t marked as checked in by QR.", "Kuandika namba kunafungua ziara pia, lakini haiandikwi kuwa umeingia kwa QR."), style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 8.dp))
         }

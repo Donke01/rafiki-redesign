@@ -201,7 +201,7 @@ object Geo {
 }
 
 val COUNTRIES = linkedMapOf("ke" to "Kenya", "tz" to "Tanzania", "ug" to "Uganda", "mw" to "Malawi")
-fun statusName(s: String) = when (s) { "Completed" -> t("Completed", "Imekamilika"); "In Progress" -> t("In progress", "Inaendelea"); "Due Diligence" -> t("Due Diligence", "Inachunguzwa"); else -> s }
+fun statusName(s: String) = when (s) { "Completed" -> t("Completed", "Imekamilika"); "In Progress" -> t("In progress", "Inaendelea"); "Due Diligence" -> t("Being checked", "Inachunguzwa"); else -> s }
 val STATES = listOf("working", "repair", "notworking")
 fun stateName(k: String) = when (k) { "working" -> t("Working well", "Inafanya kazi vizuri"); "repair" -> t("Needs repair", "Inahitaji matengenezo"); "notworking" -> t("Not working", "Haifanyi kazi"); else -> k }
 val URGENCY = listOf("urgent", "month", "watch")

@@ -68,9 +68,8 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-fun whenText(iso: String): String = runCatching {
-    DateTimeFormatter.ofPattern("d MMM, HH:mm", Locale.UK).withZone(ZoneId.systemDefault()).format(Instant.parse(iso))
-}.getOrDefault(iso)
+/** "24 Oct, 18:34" in the app's language (see [Dates]). */
+fun whenText(iso: String): String = Dates.dateTime(iso)
 
 @Composable
 fun ProjectScreen(m: AppModel, id: String, startTab: String, back: () -> Unit) {
@@ -80,13 +79,15 @@ fun ProjectScreen(m: AppModel, id: String, startTab: String, back: () -> Unit) {
     val p = snap.projects.firstOrNull { it.id == id } ?: run { back(); return }
     val tabs = listOf("pin", "visit", "hist")
     // the three tabs: tap them, or swipe the page left and right
-    var tab by rememberSaveable(id) { mutableStateOf(startTab) }
-    val hp = rememberHaptics()
     val ctx = LocalContext.current
+    // a half-done visit kept on the phone: open on Site visit, where it offers to carry on
+    var tab by rememberSaveable(id) { mutableStateOf(if (startTab == "pin" && VisitDrafts.has(ctx, id)) "visit" else startTab) }
+    val hp = rememberHaptics()
     val here = fix?.ll
     // the project name moves into the top bar once its big title scrolls away
     var top by remember { mutableFloatStateOf(0f) }
     var titleBottom by remember { mutableFloatStateOf(Float.MAX_VALUE) }
+    var dirs by remember(id) { mutableStateOf(false) }
     ShowInBar(m, p.title, titleBottom < top)
 
     Column(Modifier.fillMaxSize().onGloballyPositioned { top = it.boundsInRoot().top }.verticalScroll(rememberScrollState()).padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 110.dp)) {
@@ -140,24 +141,24 @@ fun ProjectScreen(m: AppModel, id: String, startTab: String, back: () -> Unit) {
                     Text(t("Live · GPS ±${fix!!.acc} m", "Moja kwa moja · GPS ±${fix!!.acc} m"), color = okc, style = MaterialTheme.typography.labelSmall)
                 }
             }
-            if (p.gps != null) Row(Modifier.padding(top = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            // one Directions button (it asks which map app) and Share: full width, one line each
+            if (p.gps != null) Column(Modifier.padding(top = 14.dp).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 val ll = "${p.gps.lat},${p.gps.lng}"
-                MapTile(t("Directions", "Maelekezo"), "compass", Modifier.weight(1f), glass, GMAPS_ICON) {
-                    runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com/maps/dir/?api=1&destination=$ll"))) }
-                }
-                MapTile("Google Maps", "map", Modifier.weight(1f), glass, GMAPS_ICON) {
-                    runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("geo:$ll?q=$ll(${Uri.encode(p.title)})"))) }
-                }
-                MapTile(t("Share", "Shiriki"), "share", Modifier.weight(1f), glass, null) {
+                Btn(t("Directions", "Maelekezo"), { hp.tap(); dirs = true }, Modifier.fillMaxWidth().testTag("prj_dirs"), icon = "compass", light = true, outline = true)
+                Btn(t("Share location", "Shiriki mahali"), {
                     ctx.startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, p.title + "\nhttps://www.google.com/maps?q=$ll"), null))
-                }
+                }, Modifier.fillMaxWidth().testTag("prj_share"), icon = "share", light = true, small = true, outline = true)
             }
         }
+        if (dirs && p.gps != null) DirectionsSheet(p.title, p.gps) { dirs = false }
 
         snap.repairs[p.id]?.let { r -> RepairTracker(m, p, r, here) }
         ProjectCostLine(m, p)
-        ProjectExtrasBar(m, p) { if (tab != "hist") { hp.tap(); tab = "hist" } }
-        DonorThanks(m, p)
+        // the extras (photo timeline, the summary to share, a thank-you for donors) fold away under More
+        ProjectMore(id) {
+            ProjectExtrasBar(m, p) { if (tab != "hist") { hp.tap(); tab = "hist" } }
+            DonorThanks(m, p)
+        }
 
         // what to do
         Row(Modifier.padding(top = 14.dp).fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(C.card).border(1.dp, C.line, RoundedCornerShape(18.dp)).padding(5.dp)) {
@@ -192,20 +193,58 @@ fun ProjectScreen(m: AppModel, id: String, startTab: String, back: () -> Unit) {
     }
 }
 
+/** Directions: Google Maps, or any other map app on the phone. */
 @Composable
-private fun MapTile(label: String, icon: String, modifier: Modifier, glass: Boolean, brandIcon: String?, onClick: () -> Unit) {
-    Column(
-        modifier.clip(RoundedCornerShape(16.dp)).background(if (glass) C.card else Color(0x1FFFFFFF)).border(1.dp, if (glass) C.line else Color(0x29FFFFFF), RoundedCornerShape(16.dp))
-            .clickable(role = Role.Button, onClick = onClick).padding(vertical = 10.dp, horizontal = 4.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        // the app's own coloured icon (Google Maps), as on the web; a coloured line icon when there isn't one
-        Box(Modifier.size(38.dp).clip(RoundedCornerShape(12.dp)).background(if (glass) C.tint else Color.White), contentAlignment = Alignment.Center) {
-            val hu = C.hue("near")
-            if (brandIcon != null) NetImage(brandIcon, Modifier.size(24.dp)) { Icon(Ic.get(icon), null, tint = Color(0xFF0A78C2), modifier = Modifier.size(21.dp)) }
-            else Icon(Ic.get(icon), null, tint = if (glass) hu.fg else Color(0xFF1C8A50), modifier = Modifier.size(21.dp))
+private fun DirectionsSheet(title: String, at: LatLng, close: () -> Unit) {
+    val ctx = LocalContext.current
+    val ll = "${at.lat},${at.lng}"
+    DqmSheet("dir_sheet", close) { hide ->
+        DqmSheetHead(t("Directions", "Maelekezo"), listOf(title), null, "dir_close", { hide {} }) { val hu = C.hue("near"); IconTile("compass", hu.fg, hu.bg, 56.dp) }
+        Spacer(Modifier.height(14.dp))
+        DirRow(t("Google Maps", "Google Maps"), t("Turn-by-turn directions", "Maelekezo hatua kwa hatua"), "dir_gmaps", GMAPS_ICON, "map") {
+            hide { runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com/maps/dir/?api=1&destination=$ll"))) } }
         }
-        Text(label, color = if (glass) C.ink else Color.White, style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(top = 6.dp), textAlign = TextAlign.Center, maxLines = 1)
+        DirRow(t("Another map app", "Programu nyingine ya ramani"), t("Choose from the map apps on this phone", "Chagua kati ya programu za ramani kwenye simu hii"), "dir_other", null, "map") {
+            hide { runCatching { ctx.startActivity(Intent.createChooser(Intent(Intent.ACTION_VIEW, Uri.parse("geo:$ll?q=$ll(${Uri.encode(title)})")), t("Open with", "Fungua kwa"))) } }
+        }
+    }
+}
+
+@Composable
+private fun DirRow(title: String, sub: String, tag: String, brandIcon: String?, icon: String, onClick: () -> Unit) {
+    Row(Modifier.padding(top = 8.dp).fillMaxWidth().clip(RoundedCornerShape(18.dp)).border(1.dp, C.edge, RoundedCornerShape(18.dp)).clickable(role = Role.Button, onClick = onClick)
+        .heightIn(min = 64.dp).padding(horizontal = 14.dp, vertical = 10.dp).testTag(tag), verticalAlignment = Alignment.CenterVertically) {
+        Box(Modifier.size(40.dp).clip(RoundedCornerShape(12.dp)).background(C.tint), contentAlignment = Alignment.Center) {
+            if (brandIcon != null) NetImage(brandIcon, Modifier.size(24.dp)) { Icon(Ic.get(icon), null, tint = C.blue, modifier = Modifier.size(21.dp)) }
+            else Icon(Ic.get(icon), null, tint = C.blue, modifier = Modifier.size(21.dp))
+        }
+        Spacer(Modifier.width(12.dp))
+        Column(Modifier.weight(1f)) {
+            Text(title, style = MaterialTheme.typography.titleSmall, color = C.ink)
+            Text(sub, style = MaterialTheme.typography.bodySmall, color = C.muted)
+        }
+        Icon(Ic.get("chev"), null, tint = C.muted, modifier = Modifier.size(18.dp))
+    }
+}
+
+/** "More for this project": folded until tapped, so the project page starts short. */
+@Composable
+private fun ProjectMore(id: String, content: @Composable () -> Unit) {
+    var open by rememberSaveable(id) { mutableStateOf(false) }
+    val hp = rememberHaptics()
+    Card(Modifier.padding(top = 12.dp).testTag("prj_more"), pad = 0.dp) {
+        Row(Modifier.fillMaxWidth().clickable(role = Role.Button) { hp.tap(); open = !open }.heightIn(min = 60.dp).padding(horizontal = 14.dp, vertical = 8.dp).testTag("prj_more_toggle"),
+            verticalAlignment = Alignment.CenterVertically) {
+            val hu = C.hue("slate")
+            IconTile("more", hu.fg, hu.bg, 38.dp); Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                Text(t("More for this project", "Zaidi kuhusu mradi huu"), style = MaterialTheme.typography.titleSmall, color = C.ink)
+                Text(t("Photo timeline, summary to share, thank-you for donors", "Picha kwa wakati, muhtasari, shukrani kwa wafadhili"), style = MaterialTheme.typography.bodySmall, color = C.muted)
+            }
+            Spacer(Modifier.width(6.dp))
+            Icon(Ic.get(if (open) "up" else "down"), null, tint = C.muted, modifier = Modifier.size(20.dp))
+        }
+        if (open) Column(Modifier.fillMaxWidth().padding(start = 12.dp, end = 12.dp, bottom = 12.dp).testTag("prj_more_body")) { content() }
     }
 }
 
@@ -224,7 +263,7 @@ private fun RepairCard(m: AppModel, p: Project, r: org.rafikioutreach.pin.data.R
         }
         Text(t("By ", "Na ") + r.by + " · " + whenText(r.at) + (if (r.urgency.isNotBlank()) " · " + urgencyName(r.urgency) else "") + (if (r.note.isNotBlank()) ": “${r.note}”" else ""),
             style = MaterialTheme.typography.bodyMedium, color = C.text, modifier = Modifier.padding(top = 4.dp))
-        if (r.problems.isNotEmpty()) Text(r.problems.joinToString(", "), style = MaterialTheme.typography.bodySmall, color = C.muted)
+        if (r.problems.isNotEmpty()) Text(r.problems.joinToString(", ") { problemName(it) }, style = MaterialTheme.typography.bodySmall, color = C.muted)
         Btn(t("Mark fixed", "Weka imerekebishwa"), {
             busy = true
             scope.launch {

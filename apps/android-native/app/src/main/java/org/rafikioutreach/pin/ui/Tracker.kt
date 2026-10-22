@@ -75,7 +75,7 @@ fun RepairTracker(m: AppModel, p: Project, r: Repair, here: LatLng?) {
     if (!fixed && r.assignee.isNotBlank() && si < 1) si = 1
     val d = if (here != null && p.gps != null) Geo.metres(here, p.gps) else null
     val steps = listOf(
-        t("Reported", "Imeripotiwa") to ((if (bad) t("Not working", "Haifanyi kazi") else t("Needs repair", "Inahitaji matengenezo")) + " · " + r.by + ", " + whenText(r.at)),
+        t("Reported", "Imeripotiwa") to ((if (bad) t("Not working", "Haifanyi kazi") else t("Needs repair", "Inahitaji matengenezo")) + "\u00A0· " + r.by + ", " + whenText(r.at)),
         t("Assigned", "Imegawiwa") to (if (r.assignee.isNotBlank()) r.assignee + (r.stepAt["assigned"]?.let { ", " + whenText(it) } ?: "") else t("Waiting for the office", "Inasubiri ofisi")),
         t("Parts ordered", "Vipuri vimeagizwa") to (r.stepAt["parts"]?.let { whenText(it) } ?: if (r.approval?.status == "pending") t("Waiting for a second approval · asked by ", "Inasubiri idhini ya pili · imeombwa na ") + (r.approval?.by ?: "") else if (r.parts.isNotBlank()) t("Needs: ", "Inahitaji: ") + r.parts else "—"),
         t("Fixed", "Imerekebishwa") to (if (fixed) m.prefs.name else (if (isWater(p)) t("Mark it fixed when the water is running again", "Weka imerekebishwa maji yakitoka tena") else t("Mark it fixed when it’s working again", "Weka imerekebishwa ikifanya kazi tena"))),
@@ -85,7 +85,8 @@ fun RepairTracker(m: AppModel, p: Project, r: Repair, here: LatLng?) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(t("Repair job", "Kazi ya matengenezo"), style = MaterialTheme.typography.titleMedium, color = C.ink, modifier = Modifier.weight(1f))
             if (fixed) Tag(t("Fixed ✓", "Imerekebishwa ✓"), C.okBg, C.ok)
-            else Tag((if (r.urgency == "urgent" || r.urgency == "month") urgencyName(r.urgency) + " · " else "") + if (bad) t("Not working", "Haifanyi kazi") else t("Needs repair", "Inahitaji matengenezo"), C.badBg, C.bad)
+            // "Fix this month" says it in three words; urgent ones keep "Urgent · Not working"
+            else Tag(if (r.urgency == "month") t("Fix this month", "Rekebisha mwezi huu") else (if (r.urgency == "urgent") urgencyName(r.urgency) + " · " else "") + if (bad) t("Not working", "Haifanyi kazi") else t("Needs repair", "Inahitaji matengenezo"), C.badBg, C.bad)
         }
         if (p.gps != null && !fixed) Box(Modifier.padding(top = 10.dp).fillMaxWidth().height(150.dp).clip(RoundedCornerShape(18.dp)).background(Color(0xFFEAF1F6))) {
             StillMap(p.gps, if (bad) 0xFFB3261E.toInt() else 0xFFD98200.toInt(), Modifier.matchParentSize())
@@ -101,7 +102,7 @@ fun RepairTracker(m: AppModel, p: Project, r: Repair, here: LatLng?) {
                 Spacer(Modifier.width(10.dp))
                 Column {
                     Text(r.assignee.ifBlank { t("Not assigned yet", "Bado hajapewa mtu") }, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = Color(0xFF04263F))
-                    Text(if (r.due.isNotBlank()) t("Due ", "Mwisho ") + runCatching { LocalDate.parse(r.due).format(DateTimeFormatter.ofPattern("d MMM", Locale.UK)) }.getOrDefault(r.due)
+                    Text(if (r.due.isNotBlank()) t("Due ", "Mwisho ") + Dates.day(r.due)
                         else if (r.assignee.isNotBlank()) t("Repair job", "Kazi ya matengenezo") else t("The office assigns it", "Ofisi itamgawia mtu"), fontSize = 12.sp, color = Color(0xFF5A6066))
                 }
             }
@@ -135,7 +136,7 @@ fun RepairTracker(m: AppModel, p: Project, r: Repair, here: LatLng?) {
             // what was reported, in its own box
             if (r.note.isNotBlank() || r.problems.isNotEmpty() || r.cost != null) Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(if (C.dark) Color(0x14FFFFFF) else Color(0xFFF2F6F9)).padding(horizontal = 14.dp, vertical = 12.dp).testTag("repair_note")) {
                 if (r.note.isNotBlank()) Text("“${r.note}”", style = MaterialTheme.typography.bodyMedium.copy(fontStyle = androidx.compose.ui.text.font.FontStyle.Italic), color = C.text)
-                if (r.problems.isNotEmpty()) Text(t("Problems: ", "Matatizo: ") + r.problems.joinToString(", "), style = MaterialTheme.typography.bodySmall, color = C.muted)
+                if (r.problems.isNotEmpty()) Text(t("Problems: ", "Matatizo: ") + r.problems.joinToString(", ") { problemName(it) }, style = MaterialTheme.typography.bodySmall, color = C.muted)
                 r.cost?.let { Text(t("About KES ", "Takriban KES ") + "%,d".format(it), style = MaterialTheme.typography.bodySmall, color = C.muted) }
             }
             m.snap.collectAsState().value?.let { sn -> TrackerMoneyBox(m, sn, p, r, money) }
