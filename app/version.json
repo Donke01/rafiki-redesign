@@ -1,8 +1,8 @@
 {
   "ok": true,
-  "versionCode": 39,
-  "versionName": "2.16.3",
-  "notes": "Office \u203a Community redesigned: filters, chat-style message cards, tap a message for what happened and to call, WhatsApp or open the project; settings folded away.",
-  "sha256": "96635e5564618679f0c8194ebf76a4db2b597c20cdae841384f7ba4fb29cb450",
+  "versionCode": 40,
+  "versionName": "2.17.0",
+  "notes": "An interactive map (satellite first, coloured pins, filters, search, preview card, today's route, Follow me), calmer Office tabs with filters and sheets, choose areas and projects in Plan a week, and offline country maps (once the office sets them up).",
+  "sha256": "5a2eaf3c25b55c7d0aa0e98c91e8830fb74f21c42e1d6c48cc516a728495e928",
   "apk": "/app/rafiki-pin.apk"
 }
