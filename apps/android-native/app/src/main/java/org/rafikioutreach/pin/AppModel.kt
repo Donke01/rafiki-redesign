@@ -50,6 +50,8 @@ class AppModel(app: Application) : AndroidViewModel(app) {
     val prefs = Prefs(app)
     val api = Api(BuildConfig.SERVER, { prefs.pin }, { prefs.session })
     val outbox = Outbox(File(app.filesDir, "outbox.json"))
+    /** Donor mode (feat-donorapp): a donor's own projects, signed in with their link or code. */
+    val donor = org.rafikioutreach.pin.data.DonorState(app, BuildConfig.SERVER)
     val locator = Locator(app)
     private val sendLock = Mutex()
 

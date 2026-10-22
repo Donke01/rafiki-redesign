@@ -29,6 +29,9 @@ import java.util.concurrent.TimeUnit
 class AlertWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx, params) {
     override suspend fun doWork(): Result {
         val prefs = Prefs(applicationContext)
+        // a donor's phone (feat-donorapp): only their own projects' news, never the team's
+        val dp = DonorPrefs(applicationContext)
+        if (dp.token.isNotBlank()) { if (prefs.phoneAlerts) donorWork(applicationContext, prefs, dp); return Result.success() }
         if (!prefs.phoneAlerts || (prefs.pin.isBlank() && prefs.session.isBlank())) return Result.success()
         org.rafikioutreach.pin.Lang.sw = prefs.lang == "sw"
         val api = Api(BuildConfig.SERVER, { prefs.pin }, { prefs.session })
@@ -69,6 +72,8 @@ class AlertWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx,
 
         /** The phone's notification channels, so each kind can be turned off in Android's own settings. */
         internal const val CH_JOBS = "jobs"; internal const val CH_REPAIRS = "repairs"; internal const val CH_TEAM = "team"; internal const val CH_UPDATES = "updates"
+        /** Donor mode: one channel of its own (a donor's phone never gets the staff channels). */
+        internal const val CH_DONOR = "donor"
         /** Which channel an alert kind goes to: visits and repair jobs for me, repairs reported or fixed, the team's news, app updates. */
         internal fun channelOf(kind: String) = when (kind) { "assign", "job" -> CH_JOBS; "repair", "fixed" -> CH_REPAIRS; "update" -> CH_UPDATES; else -> CH_TEAM }
         /** A notification's title: the person who did it, or what it is when nobody did (a repair job, the review queue). */
@@ -92,6 +97,40 @@ class AlertWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx,
             ).forEach { (id, name, desc) -> nm.createNotificationChannel(NotificationChannel(id, name, NotificationManager.IMPORTANCE_DEFAULT).apply { description = desc }) }
             // the old single channel ("Team news") is replaced by these
             runCatching { nm.deleteNotificationChannel("alerts") }
+        }
+
+        private fun donorChannel(ctx: Context) {
+            if (Build.VERSION.SDK_INT < 26) return
+            ctx.getSystemService(NotificationManager::class.java).createNotificationChannel(NotificationChannel(CH_DONOR, t("New photos & updates from your projects", "Picha mpya na habari za miradi yako"), NotificationManager.IMPORTANCE_DEFAULT)
+                .apply { description = t("Visits, photos and thank-you messages from the projects you funded", "Ziara, picha na ujumbe wa shukrani kutoka kwa miradi uliyofadhili") })
+        }
+
+        /** A donor's check: their projects' news since the last one (the first check only remembers where things are).
+         *  A switched-off link signs the app out; it says so kindly when opened. Returns what was shown. */
+        suspend fun donorWork(ctx: Context, prefs: Prefs, dp: DonorPrefs, api: DonorApi = DonorApi(BuildConfig.SERVER) { dp.token }): List<Triple<String, String, String>> {
+            org.rafikioutreach.pin.Lang.sw = prefs.lang == "sw"
+            val r = api.view(bg = true)
+            if (!r.ok) { if (r.status == 404 && r.reason == "link") { dp.clear(); dp.gone = true }; return emptyList() }
+            dp.save(r.json)
+            val v = runCatching { DonorView.from(r.json) }.getOrNull() ?: return emptyList()
+            val since = dp.notifiedAt
+            if (since.isBlank()) { dp.notifiedAt = v.newest; return emptyList() }
+            val news = donorNews(v, maxOf(since, dp.seen))
+            if (v.newest > since) dp.notifiedAt = v.newest
+            if (news.isNotEmpty()) showDonor(ctx, news)
+            return news
+        }
+        fun showDonor(ctx: Context, items: List<Triple<String, String, String>>) {
+            if (!allowed(ctx)) return
+            donorChannel(ctx)
+            items.takeLast(5).forEach { (title, text, pid) ->
+                val open = Intent(ctx, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP).putExtra("donorOpen", pid)
+                val id = (title + text).hashCode()
+                val pi = PendingIntent.getActivity(ctx, id, open, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+                val n = NotificationCompat.Builder(ctx, CH_DONOR).setSmallIcon(R.drawable.ic_stat_pin).setContentTitle(title).setContentText(text)
+                    .setStyle(NotificationCompat.BigTextStyle().bigText(text)).setContentIntent(pi).setAutoCancel(true).setGroup("rafiki-donor").setColor(0xFF0A78C2.toInt()).build()
+                runCatching { NotificationManagerCompat.from(ctx).notify(id, n) }
+            }
         }
 
         fun schedule(ctx: Context) {

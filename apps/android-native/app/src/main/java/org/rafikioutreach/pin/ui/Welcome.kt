@@ -160,6 +160,10 @@ fun Welcome(m: AppModel, splash: Boolean, onSignIn: () -> Unit) {
             Box(Modifier.fillMaxWidth().padding(bottom = 14.dp), contentAlignment = Alignment.Center) { LangSwitch(m.prefs) }
             Go(t("Sign in", "Ingia"), tag = "onb_signin", onClick = onSignIn)
             Cap(if (first.isNotBlank()) back else t("New here? Ask your team for a PIN.", "Mgeni hapa? Omba PIN kwa timu yako."))
+            // feat-donorapp: donors sign in with their private link or code
+            androidx.compose.material3.TextButton({ m.donor.entry = true; onSignIn() }, Modifier.fillMaxWidth().testTag("onb_donor")) {
+                Text(t("I’m a donor", "Mimi ni mfadhili"), color = if (C.dark) Color(0xFF4AAAEE) else Color(0xFF076DB1), style = MaterialTheme.typography.labelLarge, maxLines = 1, softWrap = false)
+            }
         }
     }
 }

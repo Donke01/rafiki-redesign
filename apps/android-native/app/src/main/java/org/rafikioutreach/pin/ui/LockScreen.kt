@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -152,6 +153,12 @@ fun LockScreen(m: AppModel) {
                 if (!needName) TextButton({ needName = true }) { Text(t("Shared PIN? Add your name", "PIN ya timu? Ongeza jina lako"), color = C.blue2, style = MaterialTheme.typography.labelMedium) }
             }
             Text(t("Needs signal the first time. After that it opens without it.", "Inahitaji mtandao mara ya kwanza. Baada ya hapo inafunguka bila mtandao."), style = MaterialTheme.typography.bodySmall, color = C.muted, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 10.dp))
+            // feat-donorapp: "I'm a donor" opens the donor sign-in (link or short code)
+            Row(Modifier.padding(top = 14.dp).clip(RoundedCornerShape(99.dp)).border(1.dp, C.line, RoundedCornerShape(99.dp)).clickable(role = Role.Button) { m.donor.entry = true }
+                .heightIn(min = 48.dp).padding(horizontal = 22.dp).testTag("lock_donor"), verticalAlignment = Alignment.CenterVertically) {
+                Icon(DqmIc.get("heart"), null, tint = C.hue("coral").fg, modifier = Modifier.size(18.dp)); Spacer(Modifier.size(8.dp))
+                Text(t("I’m a donor", "Mimi ni mfadhili"), color = C.blue2, style = MaterialTheme.typography.labelLarge, maxLines = 1, softWrap = false)
+            }
             LangSwitch(m.prefs, Modifier.padding(top = 16.dp))
         }
     }

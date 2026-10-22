@@ -98,7 +98,17 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
         i?.getStringExtra("open")?.let { id -> i.removeExtra("open"); if (id.isNotBlank()) model.goProject = id else model.goTab = "me" }
         // the home-screen widget: Visit nearby / Pin a location open Projects on that list (like Home's quick actions)
         i?.getStringExtra("quick")?.let { q -> i.removeExtra("quick"); model.quick(q) }
+        // a tap on a donor notification: that project
+        i?.getStringExtra("donorOpen")?.let { id -> i.removeExtra("donorOpen"); if (id.isNotBlank()) model.donor.goProject = id }
         val u = i?.data ?: return
+        // a donor's private link (https://pin.rafikioutreach.org/pin#donor=<token>): donor mode (feat-donorapp)
+        if (u.scheme == "https") org.rafikioutreach.pin.data.DonorEntry.tokenFromLink(u.path, u.fragment)?.let { tok ->
+            i.data = null
+            if (model.donor.on.value && model.donor.prefs.token == tok) return
+            if (model.donor.on.value) model.donor.signOut()
+            model.donor.prefill = tok; model.donor.entry = true
+            return
+        }
         // a RAFIKI QR sticker scanned with the phone's own camera: https://pin.rafikioutreach.org/pin#p=<id>
         if (org.rafikioutreach.pin.ui.QrCheckin.fromLink(u)) { i.data = null; return }
         if (u.scheme != "org.rafikioutreach.pin" || u.host != "signin") return
@@ -111,6 +121,8 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
 @Composable
 fun App(m: AppModel) {
     val signedIn by m.signedIn.collectAsState()
+    val donorOn by m.donor.on.collectAsState()
+    val donorGone by m.donor.gone.collectAsState()
     val ask = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { if (it.values.any { ok -> ok }) m.locator.start() }
     LaunchedEffect(signedIn) { if (signedIn) ask.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)) }
     // GPS only while the app is open, and restarted when coming back to it
@@ -130,9 +142,17 @@ fun App(m: AppModel) {
         org.rafikioutreach.pin.ui.AppBackground(Modifier.matchParentSize())
         Box(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().imePadding()) {
             val bioLocked by m.bioLocked.collectAsState()
-            if (!signedIn) LockScreen(m) else if (bioLocked) org.rafikioutreach.pin.ui.BioLockScreen(m) else Shell(m)
+            when {
+                // donor mode: a donor-only app, never the staff screens (feat-donorapp)
+                donorOn -> org.rafikioutreach.pin.ui.DonorApp(m)
+                m.donor.entry -> org.rafikioutreach.pin.ui.DonorSignIn(m) { m.donor.entry = false }
+                donorGone && !signedIn -> org.rafikioutreach.pin.ui.DonorGone(m)
+                !signedIn -> LockScreen(m)
+                bioLocked -> org.rafikioutreach.pin.ui.BioLockScreen(m)
+                else -> Shell(m)
+            }
         }
-        when {
+        if (!donorOn && !m.donor.entry && !(donorGone && !signedIn)) when {
             !signedIn && !helloDone -> org.rafikioutreach.pin.ui.Welcome(m, false) { helloDone = true }
             signedIn && org.rafikioutreach.pin.ui.Onb.enabled && (!onbSeen || m.replayOnb) -> org.rafikioutreach.pin.ui.Onboarding(m) { role ->
                 onbSeen = true; helloDone = true; m.replayOnb = false
