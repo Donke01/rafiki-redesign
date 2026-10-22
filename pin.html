@@ -154,22 +154,70 @@ html[data-theme=dark] .kpi{background:#12324A}html[data-theme=dark] .kpi b,html[
 .oact{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px}
 .oact .msg{margin:0}
 .otab[data-o=sms] span{letter-spacing:-.02em}html[data-theme=sun] .otab[data-o=sms] span,html[data-size=l] .otab[data-o=sms] span,html[data-size=xl] .otab[data-o=sms] span{font-size:.9em}
-.vx-hd{display:flex;gap:14px;align-items:flex-start}.vx-hd h2{margin:0 0 4px}.vx-hd p{margin:0}
-.vx-big{flex:none;width:48px;height:48px;border-radius:16px;display:grid;place-items:center;background:var(--tint);color:var(--blue2)}.vx-big svg{width:26px;height:26px}
-.vx-nums{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:14px}.vx-nums div{background:var(--bg);border-radius:14px;padding:10px 12px;border:var(--bw) solid var(--line)}.vx-nums b{display:block;font-size:1.35rem;color:var(--ink)}.vx-nums small{font-size:.72rem;color:var(--muted);font-weight:600}
-.vx-h{margin:18px 0 8px}.vx-list,.vx-sts,.vx-ph{list-style:none;margin:0;padding:0}
-.vx-msg{display:flex;gap:12px;background:var(--card);border:var(--bw) solid var(--line);border-radius:18px;padding:12px 14px;margin-bottom:8px}.vx-b{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
-.vx-ic{flex:none;width:36px;height:36px;border-radius:12px;display:grid;place-items:center;background:var(--tint);color:var(--blue2)}.vx-ic svg{width:20px;height:20px}
-.vx-bad .vx-ic{background:var(--badbg);color:var(--bad)}.vx-warn .vx-ic{background:var(--warnbg);color:var(--warn)}.vx-ok .vx-ic{background:var(--okbg);color:var(--ok)}.vx-off{opacity:.78}.vx-off .vx-ic{background:var(--bg);color:var(--muted)}
-.vx-q{margin:0;font-size:.9rem;color:var(--text);overflow-wrap:anywhere}.vx-reply{color:var(--muted);font-size:.76rem;overflow-wrap:anywhere}.vx-reg{align-self:flex-start;min-height:32px;padding:4px 0;font-size:.82rem}
-.tag.vx-t-bad{background:var(--badbg);color:var(--bad)}.tag.vx-t-ok{background:var(--okbg);color:var(--ok)}.tag.vx-t-off{background:var(--bg);color:var(--muted)}.vx-msg .oh .tag{white-space:normal;text-align:right}
+:root{--vxb:#F1F5F9;--vxwa:#25A244;--vxwab:rgba(37,162,68,.14)}
+html[data-theme=dark]{--vxb:#222D36;--vxwa:#5FD08F;--vxwab:rgba(95,208,143,.14)}
+html[data-theme=sun]{--vxb:#F1F5F9;--vxwa:#00562A;--vxwab:#D8F5E3}
+.vx-hero{padding:16px}
+.vx-hd{display:flex;gap:12px;align-items:center}.vx-hd h2{margin:0 0 2px;font-size:1.1rem}.vx-hd p{margin:0;font-size:.88rem;line-height:1.4}
+.vx-big{flex:none;width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:var(--tint);color:var(--blue2)}.vx-big svg{width:24px;height:24px}
+.vx-nums{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}.vx-nums div{background:var(--bg);border-radius:14px;padding:8px 10px;border:var(--bw) solid var(--line)}
+.vx-nums b{display:block;font-size:1.3rem;line-height:1.25;color:var(--ink)}.vx-nums small{display:block;font-size:.72rem;line-height:1.3;color:var(--muted);font-weight:600}
+.vx-nums .bad b{color:var(--bad)}.vx-nums .off b{color:var(--muted)}
+.vx-chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:6px -16px 0;padding:8px 16px 14px}.vx-chips::-webkit-scrollbar{display:none}
+html[data-theme=dark] #oBody .vx-chips .chip[aria-pressed=true]{background:var(--blue2);border-color:transparent;color:#0B1116}html[data-theme=dark] #oBody .vx-chips .chip[aria-pressed=true] .n{background:rgba(11,17,22,.18);color:#0B1116}.vx-chips .chip .n{background:var(--hb-slate);color:var(--ink);margin-left:2px}
+.vx-sts,.vx-ph{list-style:none;margin:0;padding:0}
+.vx-list{display:grid;gap:8px}.vx-more{margin-top:10px}
+.vx-card{display:flex;flex-direction:column;gap:8px;width:100%;padding:14px;border:var(--bw) solid var(--line);border-radius:20px;background:var(--card);color:inherit;font:inherit;text-align:left;cursor:pointer;transition:border-color .2s,box-shadow .2s,transform .12s}
+.vx-card:hover{border-color:var(--blue);box-shadow:0 6px 18px rgba(4,38,63,.08)}.vx-card:active{transform:scale(.985)}.vx-card:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+html[data-theme=dark] .vx-card:hover{box-shadow:none}
+.vx-card.vx-off>*{opacity:.7}
+.vx-top{display:grid;grid-template-columns:40px minmax(0,1fr) auto;grid-template-areas:"av tt wh" "av pl pl";column-gap:12px;row-gap:4px;align-items:center}
+.vx-av{grid-area:av;align-self:start;width:40px;height:40px;border-radius:50%;display:grid;place-items:center}.vx-av svg{width:20px;height:20px}
+.vx-av.sms{background:var(--tint);color:var(--blue2)}.vx-av.wa{background:var(--vxwab);color:var(--vxwa)}
+.vx-tt{grid-area:tt;min-width:0;font-weight:800;color:var(--ink);font-size:.98rem;line-height:1.3;overflow-wrap:break-word;hyphens:none}
+.vx-when{grid-area:wh;align-self:start;display:flex;align-items:center;gap:2px;margin-top:1px;font-size:.78rem;font-weight:600;color:var(--muted);white-space:nowrap}.vx-when svg{width:16px;height:16px;margin-right:-4px;transition:transform .2s}
+.vx-card:hover .vx-when svg{transform:translateX(2px);color:var(--blue)}
+.vx-pill{grid-area:pl;justify-self:start;display:inline-flex;align-items:flex-start;gap:6px;max-width:100%;padding:3px 10px 3px 8px;border-radius:12px;font-size:.74rem;font-weight:800;line-height:1.35}
+.vx-pill i{flex:none;width:7px;height:7px;margin-top:.38em;border-radius:50%;background:currentColor}
+.vx-t-bad{background:var(--badbg);color:var(--bad)}.vx-t-warn{background:var(--warnbg);color:var(--warn)}.vx-t-ok{background:var(--okbg);color:var(--ok)}.vx-t-has{background:var(--tint);color:var(--blue2)}.vx-t-off{background:var(--hb-slate);color:var(--muted)}
+.vx-bub{display:block;margin-left:52px;padding:10px 14px;border:var(--bw) solid transparent;border-radius:4px 16px 16px 16px;background:var(--vxb);color:var(--text);font-size:15px;line-height:1.4;white-space:pre-line;overflow-wrap:break-word}
+.vx-bub i{color:var(--muted)}
+.vx-rep{margin-left:52px;font-size:.78rem;font-weight:600;color:var(--muted)}
+.vx-meta{margin-left:52px;font-size:12px;line-height:1.45;color:var(--muted)}.vx-cm{display:flex;align-items:flex-start;gap:5px;margin-top:2px}.vx-cm svg{flex:none;width:14px;height:14px;margin-top:2px}.vx-meta .nw,.vx-kv .nw,.vx-why .nw,.vx-how .nw{white-space:nowrap}
+html[data-theme=sun] .vx-bub{border-color:#000}html[data-theme=sun] .vx-pill,html[data-theme=sun] .vx-av{border:1.5px solid currentColor}
+.vx-sets{padding:4px 16px}
+.vx-sec+.vx-sec{border-top:var(--bw) solid var(--line)}
+.vx-row{display:flex;align-items:center;gap:12px;width:100%;min-height:64px;padding:10px 0;border:0;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.vx-row:focus-visible{outline:3px solid var(--blue);outline-offset:2px;border-radius:12px}
+.vx-ri{flex:none;width:38px;height:38px;border-radius:12px;display:grid;place-items:center}.vx-ri svg{width:20px;height:20px}
+.vx-ri.k-setup{background:var(--hb-blue);color:var(--hu-blue)}.vx-ri.k-phones{background:var(--hb-green);color:var(--hu-green)}.vx-ri.k-voice{background:var(--hb-purple);color:var(--hu-purple)}
+.vx-rl{flex:1 1 auto;min-width:0;font-weight:800;font-size:.95rem;line-height:1.3;color:var(--ink)}
+.vx-rs{flex:0 1 auto;display:flex;flex-wrap:wrap;justify-content:flex-end;column-gap:6px;font-size:.8rem;font-weight:600;line-height:1.4;color:var(--muted);text-align:right}.vx-rs span{white-space:nowrap}
+.vx-rs span+span::before{content:"·";margin-right:6px}.vx-rs.stack{flex-direction:column;flex-wrap:nowrap;align-items:flex-end;gap:0}.vx-rs.stack span+span::before{content:none}
+.vx-rc{flex:none;display:flex;color:var(--muted);transform:rotate(90deg);transition:transform .28s cubic-bezier(.2,.8,.2,1)}.vx-rc svg{width:18px;height:18px}
+.vx-sec.open .vx-rc{transform:rotate(-90deg)}
+.vx-drop{display:grid;grid-template-rows:0fr;transition:grid-template-rows .3s cubic-bezier(.2,.8,.2,1)}.vx-sec.open .vx-drop{grid-template-rows:1fr}
+.vx-in{min-height:0;overflow:hidden}.vx-pad{padding:0 0 16px}.vx-pad>.vx-sts:first-child{margin-top:-4px}.vx-pad>p.muted:first-child{margin-top:0}
+.vx-sh .vx-shd{display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;padding:4px 36px 6px}
+.vx-shi{width:64px;height:64px;border-radius:20px;display:grid;place-items:center;margin-bottom:6px;animation:tmPop .5s cubic-bezier(.34,1.56,.64,1) .08s both}.vx-shi svg{width:32px;height:32px}
+.vx-shd h3{margin:0;font-size:1.25rem;line-height:1.3;color:var(--ink)}.vx-shd small{font-size:.9rem;color:var(--muted)}
+.vx-lab{margin:16px 0 6px;font-size:.72rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}.vx-lab.r{text-align:right}
+.vx-sh .vx-bub{width:fit-content;max-width:calc(100% - 48px);margin:0}
+.vx-sh .vx-bub.me{margin:0 0 0 auto;border-radius:16px 4px 16px 16px;background:var(--blue);color:#FFFFFF}
+html[data-theme=dark] .vx-sh .vx-bub.me{background:#1F6FB2}
+.vx-why{display:flex;gap:10px;align-items:flex-start;margin-top:16px;padding:12px 14px;border-radius:16px;font-size:.9rem;font-weight:600;line-height:1.45}.vx-why svg{flex:none;width:20px;height:20px;margin-top:1px}.vx-why span{color:var(--ink)}
+html[data-theme=sun] .vx-why{border:2px solid #000}
+.vx-kv{margin:12px 0 0;font-size:.9rem}.vx-kv div{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:10px 0;border-bottom:1px solid var(--line)}
+.vx-kv dt{flex:none;color:var(--muted)}.vx-kv dd{margin:0;min-width:0;font-weight:700;color:var(--ink);text-align:right}.vx-kv dd small{display:block;margin-top:2px;font-size:.8rem;font-weight:500;color:var(--muted)}
+.vx-acts{display:grid;gap:8px;margin-top:16px}.vx-two{display:grid;grid-template-columns:1fr 1fr;gap:8px}.vx-acts .btn{width:100%;min-height:52px}.vx-acts .msg{margin:0}.vx-acts .msg:empty{display:none}
+@media (prefers-reduced-motion: reduce){.vx-drop,.vx-rc,.vx-card,.vx-when svg{transition:none !important}.vx-shi{animation:none !important}}
 .vx-setup h3,.vx-voice h3{margin:14px 0 4px;font-size:.9rem}.vx-sts li.vx-st{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:var(--bw) solid var(--line);font-size:.9rem}.vx-sts li.vx-st span:nth-child(2){flex:1}.vx-sts li:last-child{border-bottom:0}
 .vx-dot{width:24px;height:24px;border-radius:999px;display:grid;place-items:center;background:var(--bg);color:var(--muted)}.vx-dot svg{width:15px;height:15px}.vx-st.on .vx-dot{background:var(--okbg);color:var(--ok)}.vx-st b{font-size:.8rem;color:var(--muted)}.vx-st.on b{color:var(--ok)}
 .vx-vars{margin:4px 0;display:flex;flex-wrap:wrap;gap:6px}.vx-vars code,.vx-voice code{font-size:.74rem;padding:3px 8px;border-radius:8px;background:var(--bg);color:var(--muted);border:var(--bw) solid var(--line)}.vx-vars code.set{background:var(--okbg);color:var(--ok);border-color:transparent}
 .vx-url{display:flex;gap:8px;align-items:center;margin:6px 0 4px}.vx-url code{flex:1;min-width:0;font-size:.74rem;padding:8px 10px;border-radius:10px;background:var(--bg);border:var(--bw) solid var(--line);overflow-wrap:anywhere;color:var(--ink)}
 .vx-how{margin:6px 0 0;padding-left:18px;font-size:.86rem;line-height:1.5}.vx-how li{margin-bottom:6px}
 .vx-ph li{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:var(--bw) solid var(--line)}.vx-ph li div{flex:1;min-width:0;display:flex;flex-direction:column}.vx-ph small{color:var(--muted);font-size:.78rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.o-side .card+.card{margin-top:12px}.vx-voice h2 svg{width:20px;height:20px;vertical-align:-3px}
+.o-side .card+.card{margin-top:12px}
 .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin:6px 0}
 .steps button{min-height:40px;border-radius:10px;border:var(--bw) solid var(--edge);background:var(--card);font-size:.72rem;font-weight:700;color:var(--muted);cursor:pointer;padding:0 4px}
 .steps button.on{background:var(--tint);border-color:#9FD3F7;color:var(--deep)}
@@ -5394,8 +5442,15 @@ label.dnr-p small{display:block;color:var(--muted);font-size:.76rem;font-weight:
   $('oBody').addEventListener('click', function (e) { var r = e.target.closest('.row[data-id]'); if (r && !e.target.closest('[data-pick]') && S.view === 'vOffice' && O.tab === 'cleanup') openProj(r.getAttribute('data-id')); });
 
   // community reports: water committees text "BROKEN 104" / "IMEHARIBIKA 104" (functions/api/sms.js);
-  // the office sees the messages, what is switched on, and keeps the list of committee phones (/api/sms-admin)
-  var VX = { data: null, pre: null };
+  // the office sees the messages (filter chips, a card per message, a sheet with what happened and what to do next),
+  // and, folded away until tapped, the set-up, the committee phones (/api/sms-admin) and the voice-note typing
+  var VX = { data: null, f: 'all', more: false, open: {} };
+  Object.assign(OIC, {
+    vxcopy: '<rect x="8.5" y="8.5" width="11" height="12" rx="2.5"/><path d="M15.5 8.5V6a2 2 0 0 0-2-2h-7a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h2"/>',
+    vxwa: '<path d="M4 20l1.3-4.2A8 8 0 1 1 8.4 18.8z"/><path d="M9.3 8.4c-.4 2.2 2.9 5.9 5.9 6.1.7 0 1.3-.5 1.4-1.2l-1.8-1-.9.9c-1.1-.4-2.3-1.6-2.7-2.7l.9-.9-1-1.8c-.7.1-1.4.4-1.8.6z"/>',
+    vxtune: '<path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2.2"/><circle cx="9" cy="17" r="2.2"/>',
+    vxinfo: '<circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.7v.1"/>'
+  });
   var VXRES = {
     'reported-broken': ['Not working', 'Haifanyi kazi', 'bad'], 'reported-repair': ['Needs repair', 'Inahitaji ukarabati', 'warn'], 'already-open': ['Already reported', 'Imesharipotiwa', 'has'],
     'fixed': ['Working again', 'Inafanya kazi tena', 'ok'], 'fixed-unconfirmed': ['Says it works: check', 'Wanasema inafanya kazi: hakikisha', 'ok'], 'noted-working': ['Says it works', 'Wanasema inafanya kazi', 'ok'],
@@ -5403,6 +5458,26 @@ label.dnr-p small{display:block;color:var(--muted);font-size:.76rem;font-weight:
     'ignored-unregistered': ['Ignored: phone not on the list', 'Imepuuzwa: simu haipo kwenye orodha', 'off'], 'ignored-no-project': ['Ignored: no such project', 'Imepuuzwa: mradi haupo', 'off'],
     'rate-limited': ['Ignored: too many messages', 'Imepuuzwa: ujumbe mwingi mno', 'off'], 'daily-limit': ['Ignored: daily limit', 'Imepuuzwa: kikomo cha siku', 'off'], 'bad-number': ['Bad number', 'Namba mbaya', 'off'], 'error': ['monday.com didn’t answer', 'monday.com haikujibu', 'off']
   };
+  // what RAFIKI did with each message, one sentence (shown in the sheet)
+  var VXWHY = {
+    'reported-broken': ['A repair was opened and the admins were <span class="nw">e-mailed</span>.', 'Ukarabati ulifunguliwa na wasimamizi walitumiwa barua pepe.'],
+    'reported-repair': ['A repair was opened.', 'Ukarabati ulifunguliwa.'],
+    'already-open': ['A repair was already open, so a note was added.', 'Ukarabati ulikuwa tayari umefunguliwa, kwa hiyo maelezo yaliongezwa.'],
+    'fixed': ['The open repair was closed.', 'Ukarabati uliokuwa wazi ulifungwa.'],
+    'fixed-unconfirmed': ['Noted on monday.com; the repair stays open until the team checks.', 'Imeandikwa kwenye monday.com; ukarabati unabaki wazi hadi timu ihakikishe.'],
+    'noted-working': ['Noted on monday.com.', 'Imeandikwa kwenye monday.com.'],
+    'help': ['They were sent the instructions.', 'Walitumiwa maelekezo.'],
+    'unknown': ['The message wasn’t understood; they were sent the instructions.', 'Ujumbe haukueleweka; walitumiwa maelekezo.'],
+    'no-project': ['There is no project with that number; they were told.', 'Hakuna mradi wenye namba hiyo; waliambiwa.'],
+    'ignored-no-project': ['There is no project with that number and the phone isn’t registered, so nothing was done.', 'Hakuna mradi wenye namba hiyo na simu haijasajiliwa, kwa hiyo hakuna kilichofanyika.'],
+    'ignored-unregistered': ['No project number, and the phone isn’t on the committee list, so nothing was done.', 'Hakuna namba ya mradi, na simu haipo kwenye orodha ya kamati, kwa hiyo hakuna kilichofanyika.'],
+    'rate-limited': ['Too many messages from this phone today, so it was ignored.', 'Ujumbe mwingi mno kutoka simu hii leo, kwa hiyo ulipuuzwa.'],
+    'daily-limit': ['Too many messages from this phone today, so it was ignored.', 'Ujumbe mwingi mno kutoka simu hii leo, kwa hiyo ulipuuzwa.'],
+    'bad-number': ['The phone number couldn’t be read, so nothing was done.', 'Namba ya simu haikusomeka, kwa hiyo hakuna kilichofanyika.'],
+    'error': ['monday.com didn’t answer; try again later.', 'monday.com haikujibu; jaribu tena baadaye.']
+  };
+  var VXF = [['all', 'All', 'Zote'], ['broken', 'Broken', 'Zimeharibika'], ['working', 'Working', 'Zinafanya kazi'], ['other', 'Other', 'Nyingine'], ['ignored', 'Ignored', 'Zimepuuzwa']];
+  function vxGroup(r) { r = r || ''; return /^reported-|^already-open$/.test(r) ? 'broken' : /^fixed|^noted-working$/.test(r) ? 'working' : /^ignored-|^rate-limited$|^daily-limit$/.test(r) ? 'ignored' : 'other'; }
   function vxApi(method, body) {
     return fetch('/api/sms-admin', { method: method, headers: Object.assign({ Accept: 'application/json' }, S.pin ? { 'X-Pin': S.pin } : {}, body ? { 'Content-Type': 'application/json' } : {}), body: body ? JSON.stringify(body) : undefined })
       .then(function (r) { return r.json().catch(function () { return { ok: false, reason: 'down' }; }).then(function (j) { j.status = r.status; return j; }); })
@@ -5417,26 +5492,69 @@ label.dnr-p small{display:block;color:var(--muted);font-size:.76rem;font-weight:
     });
     if (VX.data) vxDraw(b);
   }
+  // a real phone number (SMS, or WhatsApp from a number), or '' for a WhatsApp id like wa:KE.1461…
+  function vxPhone(from) { var s = String(from || '').replace(/^(wa|whatsapp):(?=\+)/, ''); return /^\+\d{9,15}$/.test(s) ? s : ''; }
+  // who sent it, kept short: +254 712 ••• 678, or WhatsApp user ••• 436 (escaped)
+  function vxWho(from) {
+    var p = vxPhone(from), d = String(from || '').replace(/\D/g, '');
+    if (p) return esc(p.slice(0, 4) + ' ' + p.slice(4, 7) + ' ••• ' + p.slice(-3));
+    if (/^(wa|whatsapp):/.test(String(from || ''))) return tr('WhatsApp user', 'Mtumiaji wa WhatsApp') + ' ••• ' + esc(d.slice(-3));
+    return esc(from || tr('Unknown', 'Haijulikani'));
+  }
+  function vxNum(p) { return /^\+\d{12}$/.test(p) ? p.slice(0, 4) + ' ' + p.slice(4, 7) + ' ' + p.slice(7, 10) + ' ' + p.slice(10) : p; }
+  function vxTitle(x) { return x.t ? x.t : x.id ? tr('Project ', 'Mradi ') + x.id : tr('No project number', 'Hakuna namba ya mradi'); }
+  function vxLoc() { return S.lang === 'sw' ? 'sw' : 'en-GB'; }
+  // 8 h · Yesterday · 3 Oct
+  function vxAgo(iso) {
+    var t = Date.parse(iso); if (isNaN(t)) return '';
+    var m = Math.floor((Date.now() - t) / 6e4), d0 = new Date(); d0.setHours(0, 0, 0, 0);
+    if (m < 1) return tr('Now', 'Sasa');
+    if (m < 60) return tr(m + ' min', 'dak ' + m);
+    if (t >= d0.getTime()) return tr(Math.floor(m / 60) + ' h', 'saa ' + Math.floor(m / 60));
+    if (t >= d0.getTime() - 864e5) return tr('Yesterday', 'Jana');
+    var d = new Date(t);
+    return d.toLocaleDateString(vxLoc(), d.getFullYear() === d0.getFullYear() ? { day: 'numeric', month: 'short' } : { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+  function vxWhen(iso) { var d = new Date(iso); return isNaN(d) ? '' : d.toLocaleDateString(vxLoc(), { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }) + ', ' + d.toLocaleTimeString(vxLoc(), { hour: '2-digit', minute: '2-digit' }); }
   function vxOn(on, en, sw) { return '<li class="vx-st ' + (on ? 'on' : '') + '"><span class="vx-dot" aria-hidden="true">' + oic(on ? 'check' : 'stop') + '</span><span>' + tr(en, sw) + '</span><b>' + (on ? tr('On', 'Imewashwa') : tr('Off', 'Imezimwa')) + '</b></li>'; }
   function vxVars(vars) { return '<p class="vx-vars">' + Object.keys(vars).map(function (k) { return '<code class="' + (vars[k] ? 'set' : '') + '">' + (vars[k] ? '✓ ' : '') + esc(k) + '</code>'; }).join(' ') + '</p>'; }
+  function vxRegd() { var r = {}; ((VX.data || {}).phones || []).forEach(function (p) { r[p.phone] = p; }); return r; }
+  function vxCard(x, i, regd) {
+    var r = VXRES[x.result] || [x.result || '?', x.result || '?', 'off'], wa = x.ch === 'whatsapp', nm = (regd[x.from] || {}).name || x.name || '';
+    return '<button type="button" class="vx-card vx-' + r[2] + '" data-vxi="' + i + '" data-testid="sms_msg">' +
+      '<span class="vx-top"><span class="vx-av ' + (wa ? 'wa' : 'sms') + '" aria-hidden="true">' + oic(wa ? 'chat' : 'phone') + '</span>' +
+      '<span class="vx-tt">' + esc(vxTitle(x)) + '</span><span class="vx-when">' + esc(vxAgo(x.at)) + oic('chev') + '</span>' +
+      '<span class="vx-pill vx-t-' + r[2] + '"><i aria-hidden="true"></i><span>' + esc(tr(r[0], r[1])) + '</span></span></span>' +
+      '<span class="vx-bub">' + (x.text ? esc(x.text) : '<i>' + tr('(no text)', '(hakuna maandishi)') + '</i>') + '</span>' +
+      (x.reply ? '<span class="vx-rep">↩ ' + tr('Replied', 'Imejibiwa') + '</span>' : '') +
+      '<span class="vx-meta"><span class="nw">' + vxWho(x.from) + '</span> · <span class="nw">' + (wa ? 'WhatsApp' : 'SMS') + '</span>' + (nm ? '<span class="vx-cm">' + oic('people') + '<span>' + esc(nm) + '</span></span>' : '') + '</span></button>';
+  }
+  function vxSec(k, ic, title, sum, body) {
+    var on = !!VX.open[k];
+    return '<div class="vx-sec' + (on ? ' open' : '') + '"><button type="button" class="vx-row" data-vxsec="' + k + '" data-testid="sms_' + k + '_toggle" aria-expanded="' + on + '" aria-controls="vxSec_' + k + '">' +
+      '<span class="vx-ri k-' + k + '" aria-hidden="true">' + oic(ic) + '</span><span class="vx-rl">' + title + '</span><span class="vx-rs">' + sum + '</span><span class="vx-rc" aria-hidden="true">' + oic('chev') + '</span></button>' +
+      '<div class="vx-drop" id="vxSec_' + k + '"' + (on ? '' : ' inert') + '><div class="vx-in"><div class="vx-pad vx-' + k + '" data-testid="sms_' + k + '">' + body + '</div></div></div></div>';
+  }
   function vxDraw(b) {
     var j = VX.data, st = j.setup || {}, at = st.at || { vars: {} }, tw = st.twilio || { vars: {} }, v = j.voice || {};
-    var reps = j.reports || [], ph = j.phones || [], month = Date.now() - 30 * 864e5;
-    var acted = reps.filter(function (x) { return /^reported|^fixed$/.test(x.result) && Date.parse(x.at) > month; }).length;
-    var regd = {}; ph.forEach(function (p) { regd[p.phone] = p; });
-    var list = reps.length ? '<ul class="vx-list">' + reps.slice(0, 60).map(function (x) {
-      var r = VXRES[x.result] || [x.result || '?', x.result || '?', 'off'], p = x.id && byId(x.id);
-      return '<li class="vx-msg vx-' + r[2] + '"><span class="vx-ic" aria-hidden="true">' + oic(x.ch === 'whatsapp' ? 'chat' : 'phone') + '</span><div class="vx-b">' +
-        '<div class="oh">' + (x.id && (x.t || p) ? '<button class="lnk" type="button" data-vxopen="' + esc(x.id) + '">' + esc(x.t || p.title) + '</button>' : '<b>' + (x.id ? tr('Project ', 'Mradi ') + esc(x.id) : tr('No project', 'Hakuna mradi')) + '</b>') + '<span class="tag vx-t-' + r[2] + '">' + esc(tr(r[0], r[1])) + '</span></div>' +
-        '<p class="vx-q">“' + esc(x.text || '') + '”</p>' +
-        '<small class="muted">' + esc(x.from) + (regd[x.from] && regd[x.from].name ? ' · ' + esc(regd[x.from].name) : '') + ' · ' + (x.ch === 'whatsapp' ? 'WhatsApp' : 'SMS') + ' · ' + esc(when(x.at)) + '</small>' +
-        (x.reply ? '<small class="vx-reply">↩ ' + esc(x.reply) + '</small>' : '') +
-        (!regd[x.from] && /^\+\d{9,15}$/.test(x.from || '') ? '<button class="lnk vx-reg" type="button" data-vxreg="' + esc(x.from) + '" data-vxid="' + esc(x.id || '') + '">' + tr('Add this phone to the list', 'Ongeza simu hii kwenye orodha') + '</button>' : '') +
-        '</div></li>';
-    }).join('') + '</ul>' : emptyHtml(tr('No messages yet. When a water committee texts the RAFIKI number, it shows here.', 'Hakuna ujumbe bado. Kamati ya maji ikituma ujumbe kwa namba ya RAFIKI, utaonekana hapa.'));
-    var steps = tr('<ol class="vx-how"><li>Water committees text the RAFIKI number, e.g. <b>BROKEN 104</b> or <b>IMEHARIBIKA 104 pampu</b>. The number is the project number (open a project: it’s in the share link), or leave it out from a phone on the list below.</li><li><b>REPAIR</b> / <b>MATENGENEZO</b> = needs repair, <b>FIXED</b> / <b>IMEREKEBISHWA</b> = working again, <b>HELP</b> / <b>MSAADA</b> = how to use it.</li><li>A report opens a repair, notes it on monday.com, and tells the team (bell and e-mail).</li><li>Phones not on the list are ignored unless they give a real project number. “Working again” only closes a repair from a phone listed for that project.</li></ol>',
-      '<ol class="vx-how"><li>Kamati za maji zinatuma ujumbe kwa namba ya RAFIKI, mf. <b>BROKEN 104</b> au <b>IMEHARIBIKA 104 pampu</b>. Namba ni namba ya mradi, au iachwe kutoka simu iliyo kwenye orodha hapa chini.</li><li><b>MATENGENEZO</b> = inahitaji ukarabati, <b>IMEREKEBISHWA</b> = inafanya kazi tena, <b>MSAADA</b> = jinsi ya kutumia.</li><li>Ripoti inafungua ukarabati, inaandikwa monday.com, na timu inaarifiwa.</li><li>Simu zisizo kwenye orodha zinapuuzwa isipokuwa zitaje namba halisi ya mradi.</li></ol>');
-    var setup = '<div class="card vx-setup"><h2>' + tr('Set-up', 'Mipangilio') + '</h2><ul class="vx-sts">' +
+    var reps = j.reports || [], ph = j.phones || [], wk = Date.now() - 7 * 864e5, regd = vxRegd();
+    var w7 = reps.filter(function (x) { return Date.parse(x.at) > wk; });
+    var n7 = { all: w7.length, bad: w7.filter(function (x) { return /^reported-(broken|repair)$/.test(x.result); }).length, off: w7.filter(function (x) { return vxGroup(x.result) === 'ignored'; }).length };
+    var cnt = { all: reps.length, broken: 0, working: 0, other: 0, ignored: 0 }; reps.forEach(function (x) { cnt[vxGroup(x.result)]++; });
+    var shown = []; reps.forEach(function (x, i) { if (VX.f === 'all' || vxGroup(x.result) === VX.f) shown.push([x, i]); });
+    var head = '<div class="card vx-hero" data-testid="sms_head"><div class="vx-hd"><span class="vx-big" aria-hidden="true">' + oic('chat') + '</span><div><h2>' + tr('Community reports', 'Ripoti za jamii') + '</h2><p class="muted">' + tr('Water committees text or WhatsApp when a water point breaks.', 'Kamati za maji hutuma SMS au WhatsApp kituo cha maji kikiharibika.') + '</p></div></div>' +
+      '<div class="vx-nums"><div><b>' + n7.all + '</b><small>' + tr('Last 7 days', 'Siku 7 zilizopita') + '</small></div><div class="' + (n7.bad ? 'bad' : '') + '"><b>' + n7.bad + '</b><small>' + tr('Not working', 'Haifanyi kazi') + '</small></div><div class="off"><b>' + n7.off + '</b><small>' + tr('Ignored', 'Zimepuuzwa') + '</small></div></div></div>';
+    var chips = reps.length ? '<div class="vx-chips" role="group" aria-label="' + tr('Show', 'Onyesha') + '">' + VXF.map(function (f) {
+      return '<button type="button" class="chip" data-vxf="' + f[0] + '" data-testid="sms_filter_' + f[0] + '" aria-pressed="' + (VX.f === f[0]) + '">' + tr(f[1], f[2]) + ' <span class="n">' + cnt[f[0]] + '</span></button>';
+    }).join('') + '</div>' : '';
+    var list = !reps.length ? emptyHtml(tr('No messages yet. When a water committee texts the RAFIKI number, it shows here.', 'Hakuna ujumbe bado. Kamati ya maji ikituma ujumbe kwa namba ya RAFIKI, utaonekana hapa.'))
+      : !shown.length ? '<div class="vx-none">' + emptyHtml(tr('No messages here. Try another filter.', 'Hakuna ujumbe hapa. Jaribu kichujio kingine.')) + '</div>'
+      : '<div class="vx-list">' + shown.slice(0, VX.more ? shown.length : 40).map(function (p) { return vxCard(p[0], p[1], regd); }).join('') + '</div>' +
+        (shown.length > 40 && !VX.more ? '<button class="btn light block vx-more" type="button" data-vxmore="1">' + tr('Show ' + (shown.length - 40) + ' more', 'Onyesha ' + (shown.length - 40) + ' zaidi') + '</button>' : '');
+    var steps = tr('<ol class="vx-how"><li>Water committees text the RAFIKI number, e.g. <b>BROKEN 104</b> or <b>IMEHARIBIKA 104 pampu</b>. The number is the project number (open a project: it’s in the share link), or leave it out from a phone on the committee list.</li><li><b>REPAIR</b> / <b>MATENGENEZO</b> = needs repair, <b>FIXED</b> / <b>IMEREKEBISHWA</b> = working again, <b>HELP</b> / <b>MSAADA</b> = how to use it.</li><li>A report opens a repair, notes it on monday.com, and tells the team (bell and <span class="nw">e-mail</span>).</li><li>Phones not on the list are ignored unless they give a real project number. “Working again” only closes a repair from a phone listed for that project.</li></ol>',
+      '<ol class="vx-how"><li>Kamati za maji zinatuma ujumbe kwa namba ya RAFIKI, mf. <b>BROKEN 104</b> au <b>IMEHARIBIKA 104 pampu</b>. Namba ni namba ya mradi, au iachwe kutoka simu iliyo kwenye orodha ya kamati.</li><li><b>MATENGENEZO</b> = inahitaji ukarabati, <b>IMEREKEBISHWA</b> = inafanya kazi tena, <b>MSAADA</b> = jinsi ya kutumia.</li><li>Ripoti inafungua ukarabati, inaandikwa monday.com, na timu inaarifiwa.</li><li>Simu zisizo kwenye orodha zinapuuzwa isipokuwa zitaje namba halisi ya mradi.</li></ol>');
+    var onw = function (on) { return on ? tr('on', 'imewashwa') : tr('off', 'imezimwa'); };
+    var setup = '<ul class="vx-sts">' +
       vxOn(at.on, 'SMS (Africa’s Talking)', 'SMS (Africa’s Talking)') + vxOn(at.replies, 'Answers by SMS', 'Majibu kwa SMS') + vxOn(tw.on, 'WhatsApp / SMS (Twilio)', 'WhatsApp / SMS (Twilio)') + '</ul>' +
       (!st.monday || !st.storage ? '<p class="msg warn">' + tr('Needs MONDAY_API_TOKEN and the FEED storage, like the rest of the app.', 'Inahitaji MONDAY_API_TOKEN na hifadhi ya FEED, kama programu nzima.') + '</p>' : '') +
       '<h3>Africa’s Talking</h3>' + vxVars(at.vars || {}) +
@@ -5446,20 +5564,26 @@ label.dnr-p small{display:block;color:var(--muted);font-size:.76rem;font-weight:
       '<h3>Twilio (WhatsApp)</h3>' + vxVars(tw.vars || {}) +
       '<p class="muted">' + tr('Twilio → your WhatsApp sender or number → “A message comes in” → Webhook, HTTP POST:', 'Twilio → namba yako ya WhatsApp → “A message comes in” → Webhook, HTTP POST:') + '</p>' +
       '<div class="vx-url"><code>' + esc((j.urls || {}).twilio || '') + '</code><button class="btn small light" type="button" data-vxcopy="' + esc((j.urls || {}).twilio || '') + '">' + tr('Copy', 'Nakili') + '</button></div>' +
-      '<details class="more"><summary>' + tr('How it works', 'Jinsi inavyofanya kazi') + '</summary>' + steps + '</details></div>';
-    var phones = '<div class="card vx-phones"><h2>' + tr('Committee phones', 'Simu za kamati') + ' <span class="tag has">' + ph.length + '</span></h2><p class="muted">' + tr('Messages from these phones count for their project, even without a project number.', 'Ujumbe kutoka simu hizi unahesabiwa kwa mradi wao, hata bila namba ya mradi.') + '</p>' +
+      '<details class="more"><summary>' + tr('How it works', 'Jinsi inavyofanya kazi') + '</summary>' + steps + '</details>';
+    var phones = '<p class="muted">' + tr('Messages from these phones count for their project, even without a project number.', 'Ujumbe kutoka simu hizi unahesabiwa kwa mradi wao, hata bila namba ya mradi.') + '</p>' +
       (ph.length ? '<ul class="vx-ph">' + ph.map(function (p) { return '<li><div><b>' + esc(p.phone) + '</b><small>' + esc(p.name ? p.name + ' · ' : '') + esc(p.t || p.id) + '</small></div><button class="btn small light" type="button" data-vxdel="' + esc(p.phone) + '">' + tr('Remove', 'Ondoa') + '</button></li>'; }).join('') + '</ul>' : '') +
-      '<div class="ofields"><label>' + tr('Phone', 'Simu') + '<input type="tel" id="vxPhone" placeholder="+254 712 345 678" value="' + esc(VX.pre ? VX.pre.phone : '') + '"></label>' +
-      '<label>' + tr('Project number', 'Namba ya mradi') + '<input type="text" inputmode="numeric" id="vxProj" list="vxProjList" placeholder="e.g. 10084384191" value="' + esc(VX.pre ? VX.pre.id : '') + '"></label>' +
+      '<div class="ofields"><label>' + tr('Phone', 'Simu') + '<input type="tel" id="vxPhone" placeholder="+254 712 345 678"></label>' +
+      '<label>' + tr('Project number', 'Namba ya mradi') + '<input type="text" inputmode="numeric" id="vxProj" list="vxProjList" placeholder="e.g. 10084384191"></label>' +
       '<label>' + tr('Committee or contact (optional)', 'Kamati au mhusika (si lazima)') + '<input type="text" id="vxName" placeholder="' + tr('e.g. Kapsaret water committee, Mary', 'mf. Kamati ya maji Kapsaret, Mary') + '"></label></div>' +
       '<datalist id="vxProjList">' + S.projects.slice(0, 600).map(function (p) { return '<option value="' + esc(p.id) + '">' + esc(p.title) + '</option>'; }).join('') + '</datalist>' +
-      '<div class="oact"><button class="btn" type="button" id="vxAdd">' + tr('Add phone', 'Ongeza simu') + '</button><span class="msg" id="vxMsg" aria-live="polite"></span></div></div>';
-    var voice = '<div class="card vx-voice"><h2>' + oic('mic') + ' ' + tr('Voice notes typed out', 'Sauti kuandikwa') + '</h2><ul class="vx-sts">' + vxOn(v.on, 'Typed out on monday.com', 'Huandikwa kwenye monday.com') + '</ul>' +
-      '<p class="muted">' + (v.on ? tr('Voice notes from visits are typed out (Kiswahili or English) and added to the visit’s note, so History and monday.com search show them. ', 'Sauti za ziara zinaandikwa (Kiswahili au Kiingereza) na kuongezwa kwenye maelezo ya ziara. ') + (v.thisMonth != null ? tr(v.thisMonth + ' this month.', v.thisMonth + ' mwezi huu.') : '') : tr('Off. Add ', 'Imezimwa. Ongeza ') + '<code>' + esc((v.missing || ['OPENAI_API_KEY']).join(', ')) + '</code>' + tr(' in Cloudflare to switch it on.', ' kwenye Cloudflare kuiwasha.')) + '</p></div>';
-    b.innerHTML = '<div class="o-grid vx"><div><div class="card vx-hero"><div class="vx-hd"><span class="vx-big" aria-hidden="true">' + oic('chat') + '</span><div><h2>' + tr('Community reports', 'Ripoti za jamii') + '</h2><p class="muted">' + tr('Water committees report a broken water point by SMS or WhatsApp. Reports open a repair straight away.', 'Kamati za maji zinaripoti kituo kilichoharibika kwa SMS au WhatsApp. Ripoti zinafungua ukarabati mara moja.') + '</p></div></div>' +
-      '<div class="vx-nums"><div><b>' + acted + '</b><small>' + tr('reports in 30 days', 'ripoti siku 30') + '</small></div><div><b>' + reps.length + '</b><small>' + tr('messages kept', 'ujumbe uliohifadhiwa') + '</small></div><div><b>' + ph.length + '</b><small>' + tr('committee phones', 'simu za kamati') + '</small></div></div></div>' +
-      '<h2 class="vx-h">' + tr('Latest messages', 'Ujumbe wa karibuni') + '</h2>' + list + '</div><div class="o-side">' + setup + phones + voice + '</div></div>';
-    VX.pre = null;
+      '<div class="oact"><button class="btn" type="button" id="vxAdd">' + tr('Add phone', 'Ongeza simu') + '</button><span class="msg" id="vxMsg" aria-live="polite"></span></div>';
+    var voice = '<ul class="vx-sts">' + vxOn(v.on, 'Typed out on monday.com', 'Huandikwa kwenye monday.com') + '</ul>' +
+      '<p class="muted">' + (v.on ? tr('Voice notes from visits are typed out (Kiswahili or English) and added to the visit’s note, so History and monday.com search show them. ', 'Sauti za ziara zinaandikwa (Kiswahili au Kiingereza) na kuongezwa kwenye maelezo ya ziara. ') + (v.thisMonth != null ? tr(v.thisMonth + ' this month.', v.thisMonth + ' mwezi huu.') : '') : tr('Off. Add ', 'Imezimwa. Ongeza ') + '<code>' + esc((v.missing || ['OPENAI_API_KEY']).join(', ')) + '</code>' + tr(' in Cloudflare to switch it on.', ' kwenye Cloudflare kuiwasha.')) + '</p>';
+    var sets = '<div class="card vx-sets">' +
+      vxSec('setup', 'vxtune', tr('Set-up', 'Mipangilio'), '<span>WhatsApp ' + onw(tw.on) + '</span><span>SMS ' + onw(at.on) + '</span>', setup) +
+      vxSec('phones', 'people', tr('Committee phones', 'Simu za kamati'), '<span>' + (ph.length === 1 ? tr('1 phone', 'simu 1') : tr(ph.length + ' phones', 'simu ' + ph.length)) + '</span>', phones) +
+      vxSec('voice', 'mic', tr('Voice notes typed out', 'Sauti kuandikwa'), '<span>' + (v.on ? tr('On', 'Imewashwa') : tr('Off', 'Imezimwa')) + '</span>', voice) + '</div>';
+    var oc = b.querySelector('.vx-chips'), sl = oc ? oc.scrollLeft : 0;
+    b.innerHTML = '<div class="o-grid vx"><div>' + head + chips + list + '</div><div class="o-side">' + sets + '</div></div>';
+    var nc = b.querySelector('.vx-chips'), pc = nc && nc.querySelector('[aria-pressed=true]');   // the chip row keeps its place, and the chosen chip stays in sight
+    if (nc) { nc.scrollLeft = sl; var cr = nc.getBoundingClientRect(), r2 = pc.getBoundingClientRect(); if (r2.left < cr.left + 16 || r2.right > cr.right - 16) nc.scrollLeft += r2.left < cr.left + 16 ? r2.left - cr.left - 16 : r2.right - cr.right + 16; }
+    // a summary that doesn't fit on one line stacks, right-aligned, without a stray "·" at the start of the second line
+    qa('.vx-rs', b).forEach(function (r) { var c = r.children; if (c.length > 1 && c[1].offsetTop > c[0].offsetTop) r.classList.add('stack'); });
     $('vxAdd').addEventListener('click', vxAdd);
   }
   function vxAdd() {
@@ -5467,18 +5591,62 @@ label.dnr-p small{display:block;color:var(--muted);font-size:.76rem;font-weight:
     if (!phone) { $('vxPhone').focus(); return; } if (!id) { $('vxProj').focus(); return; }
     msg('vxMsg', '', tr('Saving…', 'Inahifadhi…'));
     vxApi('POST', { action: 'phone-add', phone: phone, id: id, name: $('vxName').value, cc: (byId(id) || {}).ck || homeCk() }).then(function (j) {
-      if (!j.ok) { msg('vxMsg', 'bad', j.reason === 'phone' ? tr('That phone number doesn’t look right.', 'Namba hiyo ya simu haionekani sahihi.') : j.reason === 'project' ? tr('No project with that number.', 'Hakuna mradi wenye namba hiyo.') : why(j)); return; }
+      if (!j.ok) { msg('vxMsg', 'bad', vxWhy(j)); return; }
       VX.data.phones = (VX.data.phones || []).filter(function (p) { return p.phone !== j.phone.phone; }).concat([j.phone]);
       vxDraw($('oBody')); msg('vxMsg', 'ok', tr('Added ✓', 'Imeongezwa ✓'));
     });
   }
+  function vxWhy(j) { return j.reason === 'phone' ? tr('That phone number doesn’t look right.', 'Namba hiyo ya simu haionekani sahihi.') : j.reason === 'project' ? tr('No project with that number.', 'Hakuna mradi wenye namba hiyo.') : why(j); }
+  // tap a message: what it said, what RAFIKI did, and what to do next (open, call, WhatsApp, copy, add the phone)
+  function vxSheet(x) {
+    var r = VXRES[x.result] || [x.result || '?', x.result || '?', 'off'], tone = r[2], p = vxPhone(x.from), regd = vxRegd(), wa = x.ch === 'whatsapp';
+    var nm = (regd[x.from] || regd[p] || {}).name || x.name || '', hasP = !!(x.t && x.id), wy = VXWHY[x.result];
+    var ic = { bad: 'alert', warn: 'wrench', ok: 'okc', has: 'chat', off: 'stop' }[tone] || 'chat';
+    var html = '<div class="vx-sh" data-testid="sms_sheet"><div class="vx-shd"><span class="vx-shi vx-t-' + tone + '" aria-hidden="true">' + oic(ic) + '</span><h3>' + esc(tr(r[0], r[1])) + '</h3><small>' + esc(vxTitle(x)) + '</small></div>' +
+      '<p class="vx-lab">' + tr('Their message', 'Ujumbe wao') + '</p><div class="vx-bub">' + (x.text ? esc(x.text) : '<i>' + tr('(no text)', '(hakuna maandishi)') + '</i>') + '</div>' +
+      (x.reply ? '<p class="vx-lab r">' + tr('RAFIKI replied', 'RAFIKI ilijibu') + '</p><div class="vx-bub me">' + esc(x.reply) + '</div>' : '') +
+      (wy ? '<div class="vx-why vx-t-' + tone + '">' + oic('vxinfo') + '<span>' + tr(wy[0], wy[1]) + '</span></div>' : '') +
+      '<dl class="vx-kv"><div><dt>' + tr('Project', 'Mradi') + '</dt><dd>' + esc(vxTitle(x)) + '</dd></div>' +
+      '<div><dt>' + tr('From', 'Kutoka') + '</dt><dd><span class="nw">' + (p ? esc(vxNum(p)) : vxWho(x.from)) + '</span>' + (nm ? '<small>' + esc(nm) + '</small>' : '') + '</dd></div>' +
+      '<div><dt>' + tr('Channel', 'Njia') + '</dt><dd>' + (wa ? 'WhatsApp' : 'SMS') + '</dd></div>' +
+      '<div><dt>' + tr('Received', 'Ilipokelewa') + '</dt><dd>' + esc(vxWhen(x.at)) + '</dd></div></dl>' +
+      '<div class="vx-acts">' + (hasP ? '<button class="btn" type="button" data-a="open" data-testid="sms_open">' + oic('arrow') + tr('Open project', 'Fungua mradi') + '</button>' : '') +
+      (p ? '<div class="vx-two"><a class="btn light" href="tel:' + p + '" data-testid="sms_call">' + oic('phone') + tr('Call', 'Piga simu') + '</a><a class="btn light" href="https://wa.me/' + p.slice(1) + '" target="_blank" rel="noopener" data-testid="sms_wa">' + oic('vxwa') + 'WhatsApp</a></div>' +
+        '<button class="btn light" type="button" data-a="copy">' + oic('vxcopy') + '<span>' + tr('Copy number', 'Nakili namba') + '</span></button>' : '') +
+      (p && hasP && !x.reg && !regd[p] && !regd[x.from] ? '<button class="btn light" type="button" data-a="add" data-testid="sms_add">' + oic('plus') + '<span>' + tr('Add as committee phone', 'Ongeza kama simu ya kamati') + '</span></button>' : '') +
+      '<span class="msg" aria-live="polite"></span></div></div>';
+    var w = tSheet(tr(r[0], r[1]), html), c = w.querySelector('.tsh-c'), m = c.querySelector('.vx-acts .msg');
+    c.addEventListener('click', function (e) {
+      var a = e.target.closest('[data-a]'); if (!a) return;
+      var k = a.getAttribute('data-a');
+      if (k === 'open') { w.close(); setTimeout(function () { openProj(x.id); }, 200); return; }
+      if (k === 'copy') { try { navigator.clipboard.writeText(p); a.querySelector('span').textContent = tr('Copied ✓', 'Imenakiliwa ✓'); } catch (er) {} return; }
+      if (k === 'add') {
+        a.disabled = true; m.className = 'msg'; m.textContent = tr('Saving…', 'Inahifadhi…');
+        vxApi('POST', { action: 'phone-add', phone: p, id: x.id, name: '', cc: (byId(x.id) || {}).ck || homeCk() }).then(function (j) {
+          a.disabled = false;
+          if (!j.ok) { m.className = 'msg bad'; m.textContent = vxWhy(j); return; }
+          VX.data.phones = (VX.data.phones || []).filter(function (q) { return q.phone !== j.phone.phone; }).concat([j.phone]);
+          a.removeAttribute('data-a'); a.className = 'btn ok'; a.innerHTML = '<span>' + tr('Added ✓', 'Imeongezwa ✓') + '</span>'; m.className = 'msg'; m.textContent = '';
+          var redraw = function () { if (O.tab === 'sms' && S.view === 'vOffice') vxDraw($('oBody')); };
+          redraw(); vxApi('GET').then(function (g) { if (g.ok) { VX.data = g; redraw(); } });
+        });
+      }
+    });
+  }
   $('oBody').addEventListener('click', function (e) {
     if (O.tab !== 'sms') return;
-    var o = e.target.closest('[data-vxopen]'); if (o) { openProj(o.getAttribute('data-vxopen')); return; }
+    var card = e.target.closest('[data-vxi]'); if (card) { var x = ((VX.data || {}).reports || [])[+card.getAttribute('data-vxi')]; if (x) { buzz(); vxSheet(x); } return; }
+    var f = e.target.closest('[data-vxf]'); if (f) { VX.f = f.getAttribute('data-vxf'); VX.more = false; buzz(); vxDraw($('oBody')); return; }
+    if (e.target.closest('[data-vxmore]')) { VX.more = true; vxDraw($('oBody')); return; }
+    var s = e.target.closest('[data-vxsec]');
+    if (s) {
+      var k = s.getAttribute('data-vxsec'), sec = s.parentNode, on = !sec.classList.contains('open'), dr = sec.querySelector('.vx-drop');
+      VX.open[k] = on; sec.classList.toggle('open', on); s.setAttribute('aria-expanded', String(on));
+      if (on) dr.removeAttribute('inert'); else dr.setAttribute('inert', ''); return;
+    }
     var c = e.target.closest('[data-vxcopy]');
     if (c) { try { navigator.clipboard.writeText(c.getAttribute('data-vxcopy')); c.textContent = tr('Copied ✓', 'Imenakiliwa ✓'); } catch (er) {} return; }
-    var r = e.target.closest('[data-vxreg]');
-    if (r) { VX.pre = { phone: r.getAttribute('data-vxreg'), id: r.getAttribute('data-vxid') }; vxDraw($('oBody')); var f = $('vxPhone'); f.scrollIntoView({ block: 'center' }); (VX.pre || f.value ? $('vxProj') : f).focus(); return; }
     var d = e.target.closest('[data-vxdel]');
     if (d) {
       var ph = d.getAttribute('data-vxdel');
