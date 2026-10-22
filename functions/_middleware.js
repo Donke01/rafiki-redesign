@@ -9,12 +9,14 @@ const PROD = 'https://www.rafikioutreach.org';
 const FIELD = 'pin.rafikioutreach.org';
 const HIDDEN = /^(pin|test)\.rafikioutreach\.org$/;
 
-// Google Analytics (GA4) for the public website. Off until GA_MEASUREMENT_ID (G-…) is set in Cloudflare.
+// Google Analytics (GA4) for the public website.
 // Never on the field app, the API, or private links (donor pages, project share links, the repair tracker).
 const GA_ID = /^G-[A-Z0-9]{4,20}$/;
+// RAFIKI's GA4 Measurement ID (public by design: it appears in every page's source). GA_MEASUREMENT_ID in Cloudflare overrides it.
+const GA_DEFAULT = 'G-QQQ2X6420B';
 const GA_SKIP = /^\/(pin|app|api|donor|p|project|tracker|vendor)(\/|$|\.|-)/;
 function gaTag(env, url) {
-  const id = String((env && env.GA_MEASUREMENT_ID) || '').trim().toUpperCase();
+  const id = String((env && env.GA_MEASUREMENT_ID) || GA_DEFAULT).trim().toUpperCase();
   if (!GA_ID.test(id) || url.hostname === FIELD || HIDDEN.test(url.hostname) || GA_SKIP.test(url.pathname)) return '';
   return '<script async src="https://www.googletagmanager.com/gtag/js?id=' + id + '"></script>' +
     '<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date());gtag("config","' + id + '");' +
