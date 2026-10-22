@@ -377,6 +377,9 @@ fun MapHome(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit, offlin
     }
     if (sel != null && pinned.none { it.id == sel }) { sel = null; anchor = null }
     val dots = remember(pinned) { pinned.map { Dot(it.id, it.gps!!, 0, false, it.title) } }
+    // the map's default view fits the home country's projects (as on the web); no home country: all of them
+    val home = snap.me.home.ifBlank { m.prefs.country }
+    val homeDots = remember(dots, home) { if (home.isBlank()) null else pinned.filter { it.ck == home }.map { p -> dots.first { it.id == p.id } } }
 
     fun pick(id: String, fly: Boolean) {
         HomeLayers.follow = false // looking at a project: following you stops, as when you drag the map
@@ -476,7 +479,7 @@ fun MapHome(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit, offlin
     val maxFull = (with(dens) { (boxH - maxOf(leftPx, sidePx)).toDp() } - 12.dp - creditDp - cardsDp - 12.dp).coerceAtLeast(120.dp)
     room.top = maxOf(leftPx, sidePx)
     Box(Modifier.fillMaxSize().onSizeChanged { boxH = it.height; room.h = it.height; room.w = it.width }.testTag("map_home")) {
-        ProjectsMap(dots, here, { pick(it, false) }, Modifier.fillMaxSize(), fitKey = snap.projects.size, badgeBottom = bottomDp + 12.dp, drawDots = false, onMap = { mv = it }, extras = extras, styleSheet = styleSheet)
+        ProjectsMap(dots, here, { pick(it, false) }, Modifier.fillMaxSize(), fitKey = snap.projects.size, badgeBottom = bottomDp + 12.dp, drawDots = false, onMap = { mv = it }, extras = extras, styleSheet = styleSheet, fitDots = homeDots)
         // 1. the bottom panel: the card, the long-pressed spot, or Nearest to you (under everything else)
         AnimatedContent(panel, Modifier.align(Alignment.BottomCenter).padding(12.dp).onSizeChanged { bottomH = it.height }.onGloballyPositioned { room.panelTop = it.boundsInParent().top.roundToInt() },
             contentAlignment = Alignment.BottomCenter, label = "mapcard",

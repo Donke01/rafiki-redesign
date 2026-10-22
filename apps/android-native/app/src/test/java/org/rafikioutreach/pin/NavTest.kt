@@ -13,6 +13,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
+import androidx.activity.compose.setContent
 import androidx.test.core.app.ApplicationProvider
 import org.json.JSONArray
 import org.json.JSONObject
@@ -36,6 +37,7 @@ import org.rafikioutreach.pin.ui.Nav
 import org.rafikioutreach.pin.ui.Onb
 import org.rafikioutreach.pin.ui.RafikiTheme
 import org.rafikioutreach.pin.ui.VisitDrafts
+import org.rafikioutreach.pin.ui.NewSiteDrafts
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
@@ -53,14 +55,19 @@ class NavTest {
     private val out = File(System.getProperty("user.dir"), "build/shots").apply { mkdirs() }
     private val app get() = ApplicationProvider.getApplicationContext<Application>()
 
-    @After fun reset() { Lang.sw = false; Motion.on = true; Nav.now = { System.currentTimeMillis() }; HomeLayers.reset(); MapClean.on = false; Onb.enabled = true }
+    @After fun reset() { home = ""; uganda = false; NewSiteDrafts.remove(app); Lang.sw = false; Motion.on = true; Nav.now = { System.currentTimeMillis() }; HomeLayers.reset(); MapClean.on = false; Onb.enabled = true }
 
     // 20 projects around Eldoret: enough to scroll; 10 of them need a repair
     private fun proj(i: Int) = JSONObject().put("id", "${100 + i}").put("title", "Site ${100 + i} Borehole").put("country", "Kenya").put("ck", "ke").put("area", "Eldoret")
         .put("type", "Borehole well").put("status", "Completed").put("pump", "manual").put("gps", JSONArray().put(0.40 + i * 0.012).put(35.10 + i * 0.011))
     private fun ago(d: Long) = Instant.now().minusSeconds(d * 86400).toString()
+    // home country and two pinned projects in Uganda, for the map's default view
+    private var home = ""; private var uganda = false
+    private fun ug(id: String, lat: Double, lng: Double) = JSONObject().put("id", id).put("title", "Uganda $id").put("country", "Uganda").put("ck", "ug").put("area", "Mbale")
+        .put("type", "Borehole well").put("status", "Completed").put("gps", JSONArray().put(lat).put(lng))
     private fun snapshot() = JSONObject().put("ok", true).put("who", "Reid Anderson").put("admin", true).put("reviewOpen", 0)
-        .put("projects", JSONArray().apply { (1..20).forEach { put(proj(it)) } })
+        .put("me", JSONObject().put("kind", "app").put("home", home))
+        .put("projects", JSONArray().apply { (1..20).forEach { put(proj(it)) }; if (uganda) { put(ug("301", 1.08, 34.17)); put(ug("302", 0.35, 32.58)) } })
         .put("repairs", JSONObject().apply { (11..20).forEach { put("${100 + it}", JSONObject().put("state", "repair").put("by", "Bertin").put("at", ago(3)).put("urgency", "month").put("t", "Site ${100 + it} Borehole")) } })
         .put("visits", JSONObject()).put("jobs", JSONArray()).put("assigned", JSONArray()).put("confirmed", JSONObject())
 
@@ -96,6 +103,7 @@ class NavTest {
     // --- helpers -------------------------------------------------------------------------------------------------
     private fun tagged(t: String) = rule.onAllNodesWithTag(t).fetchSemanticsNodes().isNotEmpty()
     private fun has(t: String) = rule.onAllNodesWithText(t, substring = true).fetchSemanticsNodes().isNotEmpty()
+    private fun exact(t: String) = rule.onAllNodesWithText(t).fetchSemanticsNodes().isNotEmpty()
     private fun waitTag(t: String) = rule.waitUntil(8000) { tagged(t) }
     private fun tap(t: String) { rule.onNodeWithTag(t).performScrollTo().performClick(); settle() }
     private fun nav(k: String) { rule.onNodeWithTag("nav_$k").performClick(); settle() }
@@ -238,6 +246,65 @@ class NavTest {
         nav("new"); drawMap(); val ns = view(map()); look(map(), 0.2, 35.5, ns.z + 3)
         nav("list"); nav("new"); drawMap()
         assertSameView("New site's map opens at its default", ns, view(map()))
+    }
+
+    // the default view fits the home country's projects (as on the web); with no home country, all of them
+    private fun defaultCentre(h: String): View {
+        home = h; uganda = true; start(); nav("map"); return homeView()
+    }
+    @Test fun map_default_fits_the_home_country() {
+        val v = defaultCentre("ke")
+        // Kenya's 20 sites span lat 0.41..0.64, lng 35.11..35.32; Uganda's are far west (lng 32.6..34.2)
+        assertTrue("centred on Kenya's projects: $v", v.lat in 0.40..0.66 && v.lng in 35.05..35.40)
+        // and it comes back to that after a pan, via the bottom bar
+        look(map(), 0.35, 32.58, 15.0); nav("list"); nav("map")
+        assertSameView("back to the home country's fit", v, homeView())
+        shot("nav-08-map-home-country")
+    }
+    @Test fun map_default_with_no_home_country_fits_everything() {
+        val v = defaultCentre("")
+        assertTrue("between Uganda and Kenya: $v", v.lng in 33.0..35.0)
+    }
+
+    // --- New site: a half-typed form is never lost ---------------------------------------------------------------
+    private fun fillNewSite() {
+        nav("new"); rule.waitUntil(5000) { has("Site name") }
+        rule.onAllNodes(hasSetTextAction())[0].performScrollTo().performTextInput("Kiptoo Primary")
+        rule.onAllNodes(hasSetTextAction())[1].performScrollTo().performTextInput("Kiptoo, Nandi")
+        rule.onNodeWithText("School").performScrollTo().performClick(); settle()
+        until("the draft on disk") { NewSiteDrafts.load(app)?.optString("village") == "Kiptoo, Nandi" }
+    }
+    @Test fun new_site_draft_survives_leaving_the_tab() {
+        Lang.sw = false; start()
+        fillNewSite()
+        nav("map"); nav("new")
+        waitTag("site_resume"); assertTrue(exact("Kiptoo Primary")); shot("nav-09-new-site-resume")
+        tap("site_resume_yes")
+        assertTrue(exact("Kiptoo Primary") && exact("Kiptoo, Nandi"))
+        assertEquals("school", NewSiteDrafts.load(app)!!.optString("type"))
+        // Start again clears it
+        nav("map"); nav("new"); waitTag("site_resume"); tap("site_resume_no")
+        assertFalse(exact("Kiptoo Primary")); until("the draft gone") { !NewSiteDrafts.has(app) }
+    }
+    @Test fun new_site_draft_survives_the_activity_being_recreated() {
+        Lang.sw = false; start()
+        fillNewSite()
+        // Android closes and recreates the activity: everything in memory goes, a new model reads the phone
+        rule.activityRule.scenario.recreate(); rule.waitForIdle()
+        val m2 = model()
+        rule.runOnUiThread { rule.activity.setContent { RafikiTheme(dark = false) { Box(Modifier.size(390.dp, 844.dp)) { App(m2) } } } }
+        waitTag("nav_new"); settle(); nav("new")
+        waitTag("site_resume"); tap("site_resume_yes")
+        assertTrue(exact("Kiptoo Primary") && exact("Kiptoo, Nandi"))
+    }
+    @Test fun new_site_draft_goes_once_saved_to_send() {
+        Lang.sw = false; val m = start()
+        m.api.transport = { _, _, _, _ -> 0 to "" } // no signal: saved to send later
+        fillNewSite()
+        rule.onNodeWithText("Add this site").performScrollTo().performClick()
+        until("saved to send") { has("Saved on this phone") }
+        until("the draft gone") { !NewSiteDrafts.has(app) }
+        nav("map"); nav("new"); assertFalse(tagged("site_resume"))
     }
 
     // --- 4. Me: Team, back = Me; Monthly report, back = Me ------------------------------------------------------
