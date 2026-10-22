@@ -34,6 +34,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -107,9 +109,11 @@ data class TeamMapData(val people: List<Sharer>, val visits: List<DayVisit>) {
 }
 
 /** Why a site is suggested, and how long since its last visit (days). */
-data class PlanInfo(val why: List<String>, val age: Int?)
+data class PlanInfo(val why: List<String>, val age: Int?, val chosen: Boolean = false)
 /** A week's plan for one person: days of project ids (in driving order), the dates, and sites to add. */
-data class WeekPlan(val to: String, val info: Map<String, PlanInfo>, val total: Int, val days: List<List<String>>, val spare: List<String>, val dates: List<LocalDate>, val assigned: Boolean = false)
+data class WeekPlan(val to: String, val info: Map<String, PlanInfo>, val total: Int, val days: List<List<String>>, val spare: List<String>, val dates: List<LocalDate>, val assigned: Boolean = false,
+                    /** projects chosen by hand that have no location, so the server couldn't place them (titles) */
+                    val nogps: List<String> = emptyList())
 
 /** Working days from [start] on: Sundays are skipped (the team works Monday to Saturday). */
 fun planDates(start: LocalDate, n: Int): List<LocalDate> {
@@ -126,15 +130,16 @@ fun planMetres(ids: List<String>, s: Snapshot): Double = ids.mapNotNull { id -> 
 
 fun parsePlan(j: JSONObject, to: String, start: LocalDate, s: Snapshot): WeekPlan {
     val info = mutableMapOf<String, PlanInfo>()
-    fun read(o: JSONObject): String { val id = o.optString("id"); info[id] = PlanInfo(o.optJSONArray("why")?.let { a -> (0 until a.length()).map { a.optString(it) } } ?: emptyList(), if (o.isNull("age") || !o.has("age")) null else o.optInt("age")); return id }
+    fun read(o: JSONObject): String { val id = o.optString("id"); info[id] = PlanInfo(o.optJSONArray("why")?.let { a -> (0 until a.length()).map { a.optString(it) } } ?: emptyList(), if (o.isNull("age") || !o.has("age")) null else o.optInt("age"), o.optBoolean("chosen")); return id }
     val ds = j.optJSONArray("days") ?: JSONArray(); val sp = j.optJSONArray("spare") ?: JSONArray()
     val days = (0 until ds.length()).map { i -> val st = ds.getJSONObject(i).optJSONArray("stops") ?: JSONArray(); planOrder((0 until st.length()).map { read(st.getJSONObject(it)) }, s) }
     val spare = (0 until sp.length()).map { read(sp.getJSONObject(it)) }.filter { id -> s.projects.any { it.id == id && it.gps != null } }
-    return WeekPlan(to, info, j.optInt("total"), days, spare, planDates(start, days.size))
+    val nogps = j.optJSONArray("nogps")?.let { a -> (0 until a.length()).map { a.getJSONObject(it).let { o -> s.projects.firstOrNull { p -> p.id == o.optString("id") }?.title ?: o.optString("t").ifBlank { o.optString("id") } } } } ?: emptyList()
+    return WeekPlan(to, info, j.optInt("total"), days, spare, planDates(start, days.size), nogps = nogps)
 }
 
 /** The reasons as short tags: (tone, text). */
-fun planWhy(info: PlanInfo?, repairState: String?): List<Pair<String, String>> = (info?.why ?: emptyList()).mapNotNull { w ->
+fun planWhy(info: PlanInfo?, repairState: String?): List<Pair<String, String>> = (if (info?.chosen == true) listOf("chosen" to t("Chosen", "Umechagua")) else emptyList()) + (info?.why ?: emptyList()).mapNotNull { w ->
     when (w) {
         "repair" -> "bad" to (if (repairState == "repair") t("Needs repair", "Inahitaji matengenezo") else t("Not working", "Haifanyi kazi"))
         "urgent" -> "bad" to t("Urgent", "Haraka")
@@ -445,7 +450,6 @@ fun PlanWeekSection(m: AppModel, s: Snapshot, open: (String) -> Unit) {
     LaunchedEffect(Unit) { val a = m.api.adminGet("team").json.optJSONArray("team") ?: JSONArray(); names = (0 until a.length()).map { a.getJSONObject(it).optString("name") }.filter { it.isNotBlank() }.sorted() }
     var to by rememberSaveable { mutableStateOf("") }
     var ck by rememberSaveable { mutableStateOf(m.prefs.country.ifBlank { s.me.home }.ifBlank { "ke" }) }
-    var area by rememberSaveable { mutableStateOf("") }
     var days by rememberSaveable { mutableStateOf("5") }
     var per by rememberSaveable { mutableStateOf("5") }
     var start by rememberSaveable { mutableStateOf(LocalDate.now().plusDays(1).let { if (it.dayOfWeek == DayOfWeek.SUNDAY) it.plusDays(1) else it }.toString()) }
@@ -457,6 +461,12 @@ fun PlanWeekSection(m: AppModel, s: Snapshot, open: (String) -> Unit) {
     var busy by remember { mutableStateOf(false) }
     var stop by remember { mutableStateOf<Pair<Int, String>?>(null) }
     val choicesOpen = remember { mutableStateOf(true) }
+    // areas ticked (none: the whole country) and projects chosen by hand: always planned; "only these" leaves out the other suggestions
+    val areas = remember { mutableStateListOf<String>() }
+    val pick = remember { mutableStateListOf<String>() }
+    var onlyPick by rememberSaveable { mutableStateOf(false) }
+    var pickAt by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(pick.size) { if (pick.isEmpty()) onlyPick = false }
     // a new suggestion scrolls into view (edits to it don't)
     var made by remember { mutableIntStateOf(0) }
     val bring = remember { androidx.compose.foundation.relocation.BringIntoViewRequester() }
@@ -467,23 +477,48 @@ fun PlanWeekSection(m: AppModel, s: Snapshot, open: (String) -> Unit) {
     DqmHead("plan_head", "compass", "blue", t("Plan a week", "Panga wiki"), t("Suggested visits for one person: close sites on the same day, in driving order.", "Ziara zilizopendekezwa kwa mtu mmoja: maeneo yaliyo karibu siku moja, kwa mpangilio wa safari."))
     Card(Modifier.padding(top = 12.dp), pad = 4.dp) {
         val dn = days.toIntOrNull() ?: 5
-        val sum = listOf(to.ifBlank { t("Choose a person", "Chagua mtu") }, COUNTRIES[ck] ?: ck, area.ifBlank { t("all areas", "maeneo yote") }, if (dn == 1) t("1 day", "siku 1") else t("$dn days", "siku $dn"), t("$per a day", "$per kwa siku")).joinToString(" · ")
+        val sum = listOf(to.ifBlank { t("Choose a person", "Chagua mtu") }, COUNTRIES[ck] ?: ck, if (areas.isEmpty()) t("all areas", "maeneo yote") else planAreasText(areas, ck), if (dn == 1) t("1 day", "siku 1") else t("$dn days", "siku $dn"), t("$per a day", "$per kwa siku"), if (pick.isEmpty()) "" else if (onlyPick) t("only the ${pick.size} chosen", "zilizochaguliwa ${pick.size} tu") else t("${pick.size} chosen", "${pick.size} zimechaguliwa")).filter { it.isNotBlank() }.joinToString(" · ")
         DqmFold("plan_choices", "cog", "blue", t("Choices", "Machaguo"), sum, "has", choicesOpen) {
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 Picker(t("Field officer", "Afisa wa uwanjani"), to, listOf("" to t("Choose", "Chagua")) + names.map { it to it }, { to = it }, Modifier.weight(1f).testTag("plan_to"))
-                Picker(t("Country", "Nchi"), ck, COUNTRIES.toList(), { ck = it; area = "" }, Modifier.weight(1f))
+                Picker(t("Country", "Nchi"), ck, COUNTRIES.toList(), { if (it != ck) { ck = it; areas.clear(); pick.clear() } }, Modifier.weight(1f))
             }
-            val areas = remember(ck, s) { s.projects.filter { it.ck == ck && it.gps != null }.map { it.area.split(",").first().trim() }.filter { it.isNotBlank() }.groupingBy { it }.eachCount().entries.sortedWith(compareBy({ -it.value }, { it.key })).take(60) }
-            Picker(t("Area", "Eneo"), area, listOf("" to t("All of ", "Yote ya ") + (COUNTRIES[ck] ?: ck)) + areas.map { it.key to "${it.key} (${it.value})" }, { area = it }, Modifier.testTag("plan_area"))
+            PlanAreaField(t("Area", "Eneo"), planAreasText(areas, ck), Modifier.testTag("plan_area")) { pickAt = "areas" }
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 Picker(t("Days", "Siku"), days, (1..6).map { "$it" to "$it" }, { days = it }, Modifier.weight(1f))
                 Picker(t("Stops a day", "Vituo kwa siku"), per, (3..8).map { "$it" to "$it" }, { per = it }, Modifier.weight(1f))
             }
             DateField(t("First day", "Siku ya kwanza"), start, { if (it.isNotBlank()) start = it })
+            // the areas and projects in one line; a tap opens the picker at the projects
+            val ph = C.hue("purple")
+            Row(Modifier.padding(top = 14.dp).fillMaxWidth().clip(RoundedCornerShape(16.dp)).border(1.dp, C.line, RoundedCornerShape(16.dp)).clickable(role = Role.Button) { pickAt = "projects" }.heightIn(min = 60.dp).padding(horizontal = 12.dp, vertical = 8.dp).testTag("plan_pick"),
+                verticalAlignment = Alignment.CenterVertically) {
+                IconTile("clip", ph.fg, ph.bg, 38.dp); Spacer(Modifier.width(12.dp))
+                Column(Modifier.weight(1f)) {
+                    Text(t("Areas and projects", "Maeneo na miradi"), style = MaterialTheme.typography.titleSmall, color = C.ink)
+                    Row(Modifier.padding(top = 2.dp), verticalAlignment = Alignment.Top) {
+                        val on = pick.isNotEmpty() || areas.isNotEmpty()
+                        Box(Modifier.padding(top = 6.dp).size(7.dp).clip(CircleShape).background(if (on) C.blue2 else C.muted)); Spacer(Modifier.width(6.dp))
+                        Text(planScopeText(s.projects, ck, areas, pick), style = MaterialTheme.typography.bodySmall, color = if (on) C.ink else C.muted, modifier = Modifier.testTag("plan_scope"))
+                    }
+                }
+                Spacer(Modifier.width(6.dp))
+                Icon(Ic.get("chev"), null, tint = C.muted, modifier = Modifier.size(18.dp))
+            }
+            if (pick.isNotEmpty()) Row(Modifier.padding(top = 8.dp).fillMaxWidth().clip(RoundedCornerShape(16.dp)).border(1.dp, C.line, RoundedCornerShape(16.dp)).clickable(role = Role.Switch) { onlyPick = !onlyPick }.padding(horizontal = 12.dp, vertical = 8.dp).testTag("plan_only_row"),
+                verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text(t("Only these projects", "Miradi hii tu"), style = MaterialTheme.typography.titleSmall, color = C.ink)
+                    Text(t("No other suggestions are added", "Hakuna mapendekezo mengine yanayoongezwa"), style = MaterialTheme.typography.bodySmall, color = C.muted)
+                }
+                Spacer(Modifier.width(8.dp))
+                androidx.compose.material3.Switch(onlyPick, { onlyPick = it }, Modifier.testTag("plan_only"), colors = androidx.compose.material3.SwitchDefaults.colors(checkedTrackColor = C.ok))
+            }
             Btn(t("Suggest visits", "Pendekeza ziara"), {
                 scope.launch {
                     busy = true; msg = "" to t("Working it out…", "Inapanga…")
-                    val r = m.api.adminGet("plan", mapOf("ck" to ck, "area" to area, "days" to days, "per" to per))
+                    val r = m.api.adminGet("plan", mapOf("ck" to ck, "days" to days, "per" to per) + (if (areas.isEmpty()) emptyMap() else mapOf("areas" to areas.joinToString(","))) +
+                        (if (pick.isEmpty()) emptyMap() else mapOf("ids" to pick.joinToString(",")) + (if (onlyPick) mapOf("only" to "1") else emptyMap())))
                     busy = false
                     if (!r.ok) { msg = "bad" to reasonText(r.reason); return@launch }
                     plan = parsePlan(r.json, to, runCatching { LocalDate.parse(start) }.getOrDefault(LocalDate.now().plusDays(1)), s); day = -1; amsg = null; made++
@@ -501,12 +536,18 @@ fun PlanWeekSection(m: AppModel, s: Snapshot, open: (String) -> Unit) {
         }
     }
 
+    pickAt?.let { at -> PlanPickSheet(s, ck, areas, pick, at) { pickAt = null } }
+
     val p = plan ?: return
     if (p.days.isEmpty()) return
     val n = p.days.sumOf { it.size }; val km = p.days.sumOf { planMetres(it, s) }
     Card(Modifier.padding(top = 12.dp).bringIntoViewRequester(bring), pad = 16.dp) {
         Text(t("$n visits over ${p.days.size} " + (if (p.days.size == 1) "day" else "days") + " · about ${Geo.dist(km, m.prefs.miles)}", "Ziara $n kwa siku ${p.days.size} · takriban ${Geo.dist(km, m.prefs.miles)}"), style = MaterialTheme.typography.titleMedium, color = C.ink, modifier = Modifier.testTag("plan_sum"))
         Text(t("For ${p.to}. Straight lines between sites; roads are longer.", "Kwa ${p.to}. Mistari iliyonyooka kati ya maeneo; barabara ni ndefu zaidi.") + if (p.total > n) " " + t("${p.total - n} more sites need a visit: add them below.", "Maeneo mengine ${p.total - n} yanahitaji ziara: yaongeze hapa chini.") else "", style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 2.dp))
+        if (p.nogps.isNotEmpty()) Row(Modifier.padding(top = 10.dp).fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(C.warnBg).padding(12.dp).testTag("plan_nogps"), verticalAlignment = Alignment.Top) {
+            Icon(Ic.get("alert"), null, tint = C.warn, modifier = Modifier.size(18.dp)); Spacer(Modifier.width(8.dp))
+            Text(t("No location, so not placed: ", "Hakuna mahali, kwa hiyo haikuwekwa: ") + p.nogps.joinToString(", "), style = MaterialTheme.typography.bodySmall, color = C.ink)
+        }
         val lines = p.days.mapIndexed { i, ids -> MapLine(ids.mapNotNull { proj(it)?.gps }, OFA_COLORS[i % 6], day >= 0 && day != i) }
         val pins = p.days.flatMapIndexed { i, ids -> ids.mapIndexedNotNull { k, id -> proj(id)?.let { pr -> pr.gps?.let { MapPin(it, OFA_COLORS[i % 6], "${k + 1}", pr.title, day >= 0 && day != i) } } } }
         OfaMap(emptyList(), pins, lines, Modifier.padding(top = 12.dp).fillMaxWidth().height(300.dp).clip(RoundedCornerShape(18.dp)).testTag("plan_map"), fitKey = Triple(p.days, day, p.dates))
@@ -538,7 +579,7 @@ fun PlanWeekSection(m: AppModel, s: Snapshot, open: (String) -> Unit) {
                         Text(pr.area.ifBlank { pr.country } + (if (k > 0) " · " + Geo.dist(Geo.metres(stops[k - 1].gps!!, pr.gps!!), m.prefs.miles) + t(" from the last stop", " kutoka kituo cha mwisho") else ""), style = MaterialTheme.typography.bodySmall, color = C.muted)
                         val why = planWhy(p.info[pr.id], s.repairs[pr.id]?.state)
                         if (why.isNotEmpty()) FlowRow(Modifier.padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy(4.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                            why.forEach { (tone, txt) -> when (tone) { "bad" -> Tag(txt, C.badBg, C.bad); "has" -> Tag(txt, C.tint, C.deep); else -> Tag(txt, C.warnBg, C.warn) } }
+                            why.forEach { (tone, txt) -> when (tone) { "bad" -> Tag(txt, C.badBg, C.bad); "has" -> Tag(txt, C.tint, C.deep); "chosen" -> C.hue("purple").let { Tag(txt, it.bg, it.fg) }; else -> Tag(txt, C.warnBg, C.warn) } }
                         }
                     }
                     Icon(Ic.get("chev"), null, tint = C.muted, modifier = Modifier.size(18.dp))
@@ -586,6 +627,170 @@ fun PlanWeekSection(m: AppModel, s: Snapshot, open: (String) -> Unit) {
     }
 }
 
+private const val PICK_MAX = 60
+private const val AREA_MAX = 20
+private const val PICK_SHOW = 60
+
+/** "Kapsaret, Eldoret" → "Kapsaret": the first part of the area, as the planner (and the server) groups them. */
+fun planArea(p: Project) = p.area.split(",").first().trim()
+/** A country's areas with how many projects each, biggest first; the ticked ones are always in. */
+fun planAreas(all: List<Project>, ck: String, ticked: List<String> = emptyList()): List<Pair<String, Int>> {
+    val n = all.filter { it.ck == ck }.map { planArea(it) }.filter { it.isNotBlank() }.groupingBy { it }.eachCount()
+    val top = n.entries.sortedWith(compareBy({ -it.value }, { it.key })).take(80).map { it.key to it.value }
+    return top + ticked.filter { a -> top.none { it.first == a } && n.containsKey(a) }.map { it to n.getValue(it) }
+}
+private fun projN(n: Int) = if (n == 1) t("1 project", "mradi 1") else t("$n projects", "miradi $n")
+/** The Area field: "All of Kenya", "Kapsaret, Kaigat" or "Kapsaret, Kaigat +2 more". */
+fun planAreasText(areas: List<String>, ck: String): String =
+    if (areas.isEmpty()) t("All of ", "Yote ya ") + (COUNTRIES[ck] ?: ck) else areas.take(2).joinToString(", ") + if (areas.size > 2) " " + t("+${areas.size - 2} more", "na ${areas.size - 2} zaidi") else ""
+/** The line under the form: "Kapsaret: 3 of 8 projects · Kaigat: all 3" (no project ticked in an area: all of it can be suggested). */
+fun planScopeText(all: List<Project>, ck: String, areas: List<String>, pick: List<String>): String {
+    val cn = COUNTRIES[ck] ?: ck
+    val ps = pick.mapNotNull { id -> all.firstOrNull { it.id == id } }
+    if (areas.isEmpty()) return t("All of ", "Yote ya ") + cn + " · " + if (ps.isNotEmpty()) t("${ps.size} chosen by hand", "zimechaguliwa ${ps.size} kwa mkono") else t("suggestions from every area", "mapendekezo kutoka maeneo yote")
+    val n = all.filter { it.ck == ck }.groupingBy { planArea(it) }.eachCount()
+    val parts = areas.map { a ->
+        val k = ps.count { planArea(it) == a }; val m = n[a] ?: 0
+        a + ": " + when { k > 0 -> t("$k of " + projN(m), (if (m == 1) "mradi " else "miradi ") + "$k kati ya $m"); m == 1 -> t("its 1 project", "mradi wake 1"); else -> t("all $m", "yote $m") }
+    }
+    val other = ps.count { planArea(it) !in areas }
+    return parts.take(4).joinToString(" · ") + (if (parts.size > 4) " · " + t("+${parts.size - 4} more areas", "na maeneo ${parts.size - 4} zaidi") else "") +
+        (if (other > 0) " · " + t("$other more chosen", "zingine $other zimechaguliwa") else "")
+}
+
+/** Looks like the other pickers in the form, opens the Areas and projects sheet. Long names wrap. */
+@Composable
+private fun PlanAreaField(label: String, value: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
+    Column(modifier) {
+        Text(label, style = MaterialTheme.typography.labelMedium.copy(fontSize = 13.sp), color = C.ink, modifier = Modifier.padding(bottom = 6.dp, top = 12.dp))
+        Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(C.card).border(1.dp, C.edge, RoundedCornerShape(16.dp)).clickable(role = Role.Button, onClick = onClick).heightIn(min = 52.dp).padding(horizontal = 14.dp),
+            verticalAlignment = Alignment.CenterVertically) {
+            Text(value, style = MaterialTheme.typography.bodyLarge, color = C.text, modifier = Modifier.weight(1f).padding(vertical = 10.dp).testTag("plan_area_v"))
+            Icon(Ic.get("down"), null, tint = C.muted)
+        }
+    }
+}
+
+/** A small pill button (Select all, Clear, Ticked only): 44dp tall, filled when on. */
+@Composable
+private fun PlanPill(text: String, on: Boolean, tag: String, enabled: Boolean = true, onClick: () -> Unit) {
+    val shape = RoundedCornerShape(999.dp)
+    Box(Modifier.clip(shape).background(if (on) C.blue else C.card).then(if (on) Modifier else Modifier.border(1.dp, if (enabled) C.edge else C.line, shape))
+        .clickable(enabled = enabled, role = Role.Button, onClick = onClick).heightIn(min = 44.dp).padding(horizontal = 14.dp).testTag(tag), contentAlignment = Alignment.Center) {
+        Text(text, style = MaterialTheme.typography.labelLarge.copy(fontSize = 14.sp), color = if (on) C.card else if (enabled) C.ink else C.muted.copy(alpha = 0.55f), maxLines = 1)
+    }
+}
+
+/**
+ * Plan a week › Areas and projects. Areas: tick several (none: the whole country). Projects in them, by area, with Select
+ * all / Clear, search and "Ticked only": the ones ticked are always planned; none ticked: all of the areas can be suggested.
+ */
+@OptIn(ExperimentalLayoutApi::class, androidx.compose.foundation.ExperimentalFoundationApi::class)
+@Composable
+private fun PlanPickSheet(s: Snapshot, ck: String, areas: MutableList<String>, pick: MutableList<String>, at: String, close: () -> Unit) {
+    var q by remember { mutableStateOf("") }
+    var only by remember { mutableStateOf(false) }
+    var msg by remember { mutableStateOf<String?>(null) }
+    val cn = COUNTRIES[ck] ?: ck
+    val byId = remember(s) { s.projects.associateBy { it.id } }
+    val bring = remember { androidx.compose.foundation.relocation.BringIntoViewRequester() }
+    LaunchedEffect(Unit) { if (at == "projects" && areas.isNotEmpty()) { delay(450); runCatching { bring.bringIntoView() } } }
+    fun tickArea(a: String, on: Boolean) {
+        msg = null
+        if (on && a !in areas) {
+            // the first area ticked: the areas of projects already chosen come too, so none of them is hidden
+            val add = mutableListOf(a)
+            if (areas.isEmpty()) pick.mapNotNull { byId[it]?.let(::planArea) }.filter { it.isNotBlank() && it !in add }.distinct().forEach { add += it }
+            if (areas.size + add.size > AREA_MAX) { msg = t("You can tick up to $AREA_MAX areas.", "Unaweza kuchagua hadi maeneo $AREA_MAX."); return }
+            areas += add
+        } else if (!on) { areas.remove(a); pick.removeAll { id -> byId[id]?.let(::planArea) == a } }   // its projects are no longer chosen
+    }
+    fun tickProject(id: String, on: Boolean): Boolean {
+        if (on && id !in pick) { if (pick.size >= PICK_MAX) { msg = t("You can choose up to $PICK_MAX projects.", "Unaweza kuchagua hadi miradi $PICK_MAX."); return false }; pick += id }
+        if (!on) pick.remove(id)
+        return true
+    }
+    DqmSheet("plan_pick_sheet", close) { hide ->
+        DqmSheetHead(t("Areas and projects", "Maeneo na miradi"), listOf(t("Tick the areas to plan in, then any projects that must be visited. Those are always in the plan, grouped by distance; the other stops are suggestions.",
+            "Chagua maeneo ya kupanga, kisha miradi inayolazimika kutembelewa. Hiyo iko kwenye mpango kila wakati, kwa umbali; vituo vingine ni mapendekezo.")), null, "plan_pick_close", { hide {} }) { val h = C.hue("blue"); IconTile("layers", h.fg, h.bg, 64.dp) }
+        // areas: checkboxes with their counts
+        Row(Modifier.padding(top = 18.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(t("Areas", "Maeneo"), style = MaterialTheme.typography.titleSmall, color = C.ink); Spacer(Modifier.width(8.dp))
+            Box(Modifier.testTag("plan_area_n")) { Tag(if (areas.isEmpty()) t("All of ", "Yote ya ") + cn else t("${areas.size} ticked", "${areas.size} zimechaguliwa"), C.tint, C.deep) }
+        }
+        val counts = planAreas(s.projects, ck, areas)
+        Column(Modifier.padding(top = 8.dp).fillMaxWidth().heightIn(max = 264.dp).clip(RoundedCornerShape(14.dp)).border(1.dp, C.line, RoundedCornerShape(14.dp)).verticalScroll(rememberScrollState()).testTag("plan_area_list")) {
+            counts.forEachIndexed { k, (a, n) ->
+                val on = a in areas
+                if (k > 0) HorizontalDivider(color = C.line)
+                Row(Modifier.fillMaxWidth().background(if (on) C.tint else Color.Transparent).clickable(role = Role.Checkbox) { tickArea(a, !on) }.heightIn(min = 48.dp).padding(start = 2.dp, end = 12.dp).testTag("plan_area_$a"),
+                    verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(on, { tickArea(a, it) }, colors = CheckboxDefaults.colors(checkedColor = C.blue, checkmarkColor = C.card))
+                    Text(a, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold), color = C.ink, modifier = Modifier.weight(1f).padding(vertical = 8.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text("$n", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold), color = if (on) C.card else C.ink, textAlign = TextAlign.Center,
+                        modifier = Modifier.clip(RoundedCornerShape(999.dp)).background(if (on) C.blue else C.hue("slate").bg).widthIn(min = 30.dp).padding(horizontal = 8.dp, vertical = 2.dp))
+                }
+            }
+            if (counts.isEmpty()) Text(t("No areas in $cn yet.", "Bado hakuna maeneo $cn."), color = C.muted, modifier = Modifier.padding(12.dp))
+        }
+        if (areas.isEmpty()) Text(t("None ticked: projects from all of $cn.", "Hakuna iliyochaguliwa: miradi kutoka $cn yote."), style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 6.dp))
+        // projects of the ticked areas (or the whole country), by area
+        Row(Modifier.padding(top = 18.dp).bringIntoViewRequester(bring), verticalAlignment = Alignment.CenterVertically) {
+            Text(if (areas.isEmpty()) t("Projects in $cn", "Miradi ya $cn") else t("Projects in these areas", "Miradi katika maeneo haya"), style = MaterialTheme.typography.titleSmall, color = C.ink, modifier = Modifier.weight(1f, fill = false)); Spacer(Modifier.width(8.dp))
+            Box(Modifier.testTag("plan_pick_n")) { Tag(t("${pick.size} chosen", "${pick.size} zimechaguliwa"), C.tint, C.deep) }
+        }
+        Row(verticalAlignment = Alignment.Bottom) {
+            Field(q, { q = it }, t("Search", "Tafuta"), Modifier.weight(1f).testTag("plan_pick_q"), placeholder = t("Name or place", "Jina au mahali"))
+            Spacer(Modifier.width(8.dp))
+            Box(Modifier.padding(bottom = 4.dp)) { PlanPill(t("Ticked only", "Zilizochaguliwa tu"), only, "plan_pick_only") { only = !only } }
+        }
+        val tick = pick.toSet(); val qq = q.trim().lowercase()
+        val shown = s.projects.filter { p -> p.ck == ck && (areas.isEmpty() || planArea(p) in areas || p.id in tick) && (!only || p.id in tick) && (qq.isBlank() || "${p.title} ${p.area}".lowercase().contains(qq)) }
+        val groups = shown.groupBy { planArea(it) }
+        val big = counts.toMap()
+        val order = groups.keys.sortedWith(compareBy<String>({ areas.indexOf(it).let { i -> if (i < 0) 99 else i } }, { if (it.isBlank()) 1 else 0 }, { -(big[it] ?: 0) }, { it }))
+        var left = PICK_SHOW
+        order.forEach { a ->
+            if (left <= 0) return@forEach
+            val all = groups.getValue(a).sortedBy { it.title }; val ps = all.take(left); left -= ps.size
+            val k = all.count { it.id in tick }
+            val name = a.ifBlank { t("No area", "Hakuna eneo") }
+            Column(Modifier.padding(top = 10.dp).fillMaxWidth().clip(RoundedCornerShape(16.dp)).border(1.dp, C.line, RoundedCornerShape(16.dp)).testTag("plan_group_$a")) {
+                // the name and count; Select all / Clear beside it when there's room, otherwise under it
+                FlowRow(Modifier.fillMaxWidth().background(C.tint).padding(horizontal = 12.dp, vertical = 8.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Column(Modifier.padding(end = 8.dp, top = 2.dp, bottom = 2.dp)) {
+                        Text(name, style = MaterialTheme.typography.titleSmall, color = C.ink)
+                        Text(if (k > 0) t("$k of ${all.size} chosen", "$k kati ya ${all.size} zimechaguliwa") else projN(all.size), style = MaterialTheme.typography.bodySmall, color = C.muted)
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        PlanPill(t("Select all", "Chagua zote"), false, "plan_all_$a", enabled = k < all.size) { msg = null; all.all { tickProject(it.id, true) } }
+                        PlanPill(t("Clear", "Futa"), false, "plan_none_$a", enabled = k > 0) { msg = null; all.forEach { tickProject(it.id, false) } }
+                    }
+                }
+                ps.forEach { p ->
+                    val on = p.id in tick
+                    HorizontalDivider(color = C.line)
+                    Row(Modifier.fillMaxWidth().clickable(role = Role.Checkbox) { msg = null; tickProject(p.id, !on) }.heightIn(min = 56.dp).padding(start = 2.dp, end = 12.dp, top = 4.dp, bottom = 4.dp).testTag("plan_pick_${p.id}"),
+                        verticalAlignment = Alignment.CenterVertically) {
+                        Checkbox(on, { msg = null; tickProject(p.id, it) }, colors = CheckboxDefaults.colors(checkedColor = C.blue, checkmarkColor = C.card))
+                        Column(Modifier.weight(1f)) {
+                            Text(p.title, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold), color = C.ink)
+                            Text(listOf(p.type, p.area).filter { it.isNotBlank() }.joinToString(" · "), style = MaterialTheme.typography.bodySmall, color = C.muted)
+                            if (p.gps == null) Text(t("No location", "Hakuna mahali"), style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold), color = C.warn)
+                        }
+                    }
+                }
+            }
+        }
+        if (shown.isEmpty()) Text(if (only) t("No projects ticked yet.", "Bado hakuna mradi uliochaguliwa.") else t("No projects match.", "Hakuna mradi unaolingana."), color = C.muted, modifier = Modifier.padding(top = 12.dp))
+        if (shown.size > PICK_SHOW) Text(t("…and ${shown.size - PICK_SHOW} more. Search or tick an area to narrow it down.", "…na ${shown.size - PICK_SHOW} zaidi. Tafuta au chagua eneo ili kupunguza."), color = C.muted, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(top = 10.dp))
+        Msg(msg, "warn")
+        Btn(t("Done", "Imekamilika"), { hide {} }, Modifier.padding(top = 14.dp).fillMaxWidth().testTag("plan_pick_done"), icon = "check")
+        DqmLineBtn(t("Clear all", "Ondoa zote"), "x", { areas.clear(); pick.clear(); only = false; msg = null }, Modifier.padding(top = 8.dp).fillMaxWidth().testTag("plan_pick_clear"))
+    }
+}
+
 /** A stop: why it's suggested, which day, how far from the last stop; open the project or take it off the day. */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -598,7 +803,7 @@ private fun StopSheet(m: AppModel, p: WeekPlan, di: Int, k: Int, pr: Project, s:
         }
         val why = planWhy(p.info[pr.id], s.repairs[pr.id]?.state)
         if (why.isNotEmpty()) FlowRow(Modifier.padding(top = 10.dp).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            why.forEach { (tone, txt) -> when (tone) { "bad" -> Tag(txt, C.badBg, C.bad); "has" -> Tag(txt, C.tint, C.deep); else -> Tag(txt, C.warnBg, C.warn) } }
+            why.forEach { (tone, txt) -> when (tone) { "bad" -> Tag(txt, C.badBg, C.bad); "has" -> Tag(txt, C.tint, C.deep); "chosen" -> C.hue("purple").let { Tag(txt, it.bg, it.fg) }; else -> Tag(txt, C.warnBg, C.warn) } }
         }
         Column(Modifier.padding(top = 12.dp)) {
             DqmFact(t("Day", "Siku"), t("Day ", "Siku ") + (di + 1) + " · " + ofaDayLabel(p.dates[di]), t("Stop ${k + 1} of ${d.size}", "Kituo ${k + 1} kati ya ${d.size}"))

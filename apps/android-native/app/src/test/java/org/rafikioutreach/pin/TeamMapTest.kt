@@ -17,6 +17,9 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performScrollToNode
+import androidx.compose.ui.test.performTextClearance
+import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.printToString
 import androidx.compose.ui.unit.dp
@@ -43,6 +46,9 @@ import org.rafikioutreach.pin.ui.planDates
 import org.rafikioutreach.pin.ui.planMetres
 import org.rafikioutreach.pin.ui.planWhy
 import org.rafikioutreach.pin.ui.PlanInfo
+import org.rafikioutreach.pin.ui.planAreas
+import org.rafikioutreach.pin.ui.planAreasText
+import org.rafikioutreach.pin.ui.planScopeText
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
@@ -68,7 +74,15 @@ class TeamMapTest {
     private fun snapshot(admin: Boolean = true) = JSONObject().put("ok", true).put("who", "Reid Anderson").put("admin", admin).put("reviewOpen", 0)
         .put("projects", JSONArray().put(proj("101", "Kapsaret Borehole", "Kapsaret, Eldoret", 0.47, 35.25)).put(proj("102", "Chepkongi Dispensary", "Kapsaret, Eldoret", 0.514, 35.27))
             .put(proj("104", "Sigowet Church Well", "Sigowet", -0.27, 35.15)).put(proj("105", "Kitale Primary Tank", "Kitale", 1.015, 35.0)).put(proj("106", "Kiminini Borehole", "Kitale", 0.9, 34.92))
-            .put(proj("107", "Bungoma Bridge School", "Bungoma", 0.563, 34.56, "School")).put(proj("108", "Webuye Well", "Bungoma", 0.61, 34.77)).put(proj("109", "Moi’s Bridge Kiosk", "Eldoret", 0.87, 35.12)))
+            .put(proj("107", "Bungoma Bridge School", "Bungoma", 0.563, 34.56, "School")).put(proj("108", "Webuye Well", "Bungoma", 0.61, 34.77)).put(proj("109", "Moi’s Bridge Kiosk", "Eldoret", 0.87, 35.12))
+            .put(proj("111", "Lessos Dispensary", "Lessos", 0.0, 0.0, "Health").apply { remove("gps") })
+            // for Areas and projects: Kapsaret (8, one with no location), Kaigat (3), Ndalat (2), and long area names
+            .put(proj("121", "Kapsaret Primary School", "Kapsaret, Eldoret", 0.48, 35.26, "School")).put(proj("122", "Simat Water Kiosk", "Kapsaret, Eldoret", 0.49, 35.24, "Water collection"))
+            .put(proj("123", "Kapsaret Girls Secondary", "Kapsaret, Eldoret", 0.46, 35.27, "School")).put(proj("124", "Lemook Spring", "Kapsaret, Eldoret", 0.45, 35.23, "Water collection"))
+            .put(proj("125", "Kapsaret Market Tank", "Kapsaret, Eldoret", 0.475, 35.255)).put(proj("127", "Kapsaret Health Centre", "Kapsaret, Eldoret", 0.0, 0.0, "Health").apply { remove("gps") })
+            .put(proj("131", "Kaigat Borehole", "Kaigat, Nandi", 0.31, 35.2)).put(proj("132", "Kaigat Primary School", "Kaigat, Nandi", 0.32, 35.21, "School")).put(proj("133", "Kaigat Dispensary", "Kaigat, Nandi", 0.3, 35.19, "Health"))
+            .put(proj("141", "Ndalat Well", "Ndalat", 0.2, 35.1)).put(proj("142", "Ndalat Church Tank", "Ndalat", 0.21, 35.11))
+            .put(proj("151", "Elgon Estate Primary Borehole", "Elgon Estate Primary", 0.9, 34.7)).put(proj("152", "Kapsabaot Comprehensive School Rainwater Harvesting Tank", "Kapsabaot Comprehensive School", 0.95, 35.08, "School")))
         .put("repairs", JSONObject().put("104", JSONObject().put("state", "notworking").put("by", "Bertin").put("at", ago(4000)).put("urgency", "urgent").put("t", "Sigowet Church Well"))
             .put("107", JSONObject().put("state", "repair").put("by", "Grace").put("at", ago(9000)).put("t", "Bungoma Bridge School")))
         .put("visits", JSONObject().put("101", JSONObject().put("at", ago(400 * 1440)).put("by", "Meril").put("state", "working")))
@@ -79,6 +93,15 @@ class TeamMapTest {
             .put(JSONObject().put("stops", JSONArray().put(stop("107", "repair")).put(stop("108", "never"))))
             .put(JSONObject().put("stops", JSONArray().put(stop("105", "never", "test")).put(stop("106", "never")))))
         .put("spare", JSONArray().put(stop("109", "never")).put(stop("102", "never")))
+    private fun chosen(id: String, vararg why: String) = stop(id, *why).put("chosen", true)
+    // projects chosen by hand in Kapsaret: only these, or with suggestions filling the days; one of them has no location
+    private val planOnly = JSONObject().put("ok", true).put("total", 2).put("chosen", 2).put("only", true)
+        .put("days", JSONArray().put(JSONObject().put("stops", JSONArray().put(stop("101", "overdue", age = 400).put("chosen", true)).put(chosen("102")))))
+        .put("spare", JSONArray()).put("nogps", JSONArray().put(JSONObject().put("id", "127").put("t", "Kapsaret Health Centre")))
+    private val planMix = JSONObject().put("ok", true).put("total", 9).put("chosen", 2).put("only", false)
+        .put("days", JSONArray().put(JSONObject().put("stops", JSONArray().put(stop("101", "overdue", age = 400).put("chosen", true)).put(stop("124", "never"))))
+            .put(JSONObject().put("stops", JSONArray().put(chosen("102")).put(stop("131", "never")))))
+        .put("spare", JSONArray().put(stop("132", "never"))).put("nogps", JSONArray().put(JSONObject().put("id", "127").put("t", "Kapsaret Health Centre")))
     private val teammap = JSONObject().put("ok", true)
         .put("people", JSONArray().put(JSONObject().put("name", "Bertin Mwangi").put("lat", 0.52).put("lng", 35.28).put("acc", 12).put("at", ago(12)).put("phone", "0722 111 222").put("home", "ke"))
             .put(JSONObject().put("name", "Grace Achieng").put("lat", 0.58).put("lng", 34.6).put("acc", 30).put("at", ago(95)).put("phone", "").put("home", "ke"))
@@ -98,6 +121,7 @@ class TeamMapTest {
             posts += "$method $url ${body?.let { String(it) } ?: ""}"
             when {
                 url.contains("view=teammap") -> 200 to teammap.toString()
+                url.contains("view=plan") && url.contains("ids=") -> 200 to (if (url.contains("only=1")) planOnly else planMix).toString()
                 url.contains("view=plan") -> 200 to plan.toString()
                 url.contains("view=team") -> 200 to JSONObject().put("ok", true).put("team", JSONArray().put(JSONObject().put("name", "Meril Kiprop")).put(JSONObject().put("name", "Bertin Mwangi"))).toString()
                 url.contains("activity=1") -> 200 to "{\"ok\":true,\"activity\":[]}"
@@ -118,7 +142,7 @@ class TeamMapTest {
         File(out, "$name.png").outputStream().use { b.compress(Bitmap.CompressFormat.PNG, 100, it) }
     }
     private fun waitFor(text: String) = try { rule.waitUntil(8000) { rule.onAllNodesWithText(text, substring = true).fetchSemanticsNodes().isNotEmpty() } } catch (e: Throwable) {
-        println("TREE for '$text':\n" + rule.onRoot().printToString(maxDepth = 60)); throw e
+        rule.onAllNodes(androidx.compose.ui.test.isRoot()).let { r -> r.fetchSemanticsNodes().indices.forEach { println("TREE $it for '$text':\n" + r[it].printToString(maxDepth = 60)) } }; throw e
     }
     /** A sheet lives in its own window: draw it over the screen, the way it looks on the phone. */
     private fun sheetShot(name: String) {
@@ -128,6 +152,11 @@ class TeamMapTest {
         val d = org.robolectric.shadows.ShadowDialog.getLatestDialog()?.window?.decorView
         if (d != null && d.width > 0) { c.save(); c.translate(0f, (v.height - d.height).toFloat().coerceAtLeast(0f)); d.draw(c); c.restore() }
         File(out, "$name.png").outputStream().use { b.compress(Bitmap.CompressFormat.PNG, 100, it) }
+    }
+    /** An area row lives in its own short scrolling list: bring it into that list's view first. */
+    private fun tickArea(name: String) {
+        rule.onNodeWithTag("plan_area_list").performScrollTo().performScrollToNode(androidx.compose.ui.test.hasTestTag("plan_area_$name"))
+        rule.onNodeWithTag("plan_area_$name").performClick(); rule.waitForIdle()
     }
     private fun waitTag(tag: String) = rule.waitUntil(8000) { rule.onAllNodesWithTag(tag).fetchSemanticsNodes().isNotEmpty() }
     /** Work hours around now, so the test doesn't depend on the time of day. */
@@ -312,5 +341,132 @@ class TeamMapTest {
         // the stop sheet of an assigned plan has no "take it off"
         rule.onNodeWithTag("plan_stop_104").performScrollTo().performClick()
         waitTag("plan_sheet"); rule.onAllNodesWithTag("plan_rm").assertCountEquals(0)
+    }
+
+    @Test fun plan_areas_and_scope_text() {
+        val ps = Snapshot.from(snapshot()).projects
+        val a = planAreas(ps, "ke")
+        assertEquals("Kapsaret" to 8, a[0]); assertEquals("Kaigat" to 3, a[1])
+        assertTrue(a.contains("Kapsabaot Comprehensive School" to 1))
+        assertEquals("All of Kenya", planAreasText(emptyList(), "ke"))
+        assertEquals("Kapsaret, Kaigat", planAreasText(listOf("Kapsaret", "Kaigat"), "ke"))
+        assertEquals("Kapsaret, Kaigat +1 more", planAreasText(listOf("Kapsaret", "Kaigat", "Ndalat"), "ke"))
+        assertEquals("All of Kenya · suggestions from every area", planScopeText(ps, "ke", emptyList(), emptyList()))
+        assertEquals("All of Kenya · 2 chosen by hand", planScopeText(ps, "ke", emptyList(), listOf("101", "141")))
+        assertEquals("Kapsaret: 3 of 8 projects · Kaigat: all 3", planScopeText(ps, "ke", listOf("Kapsaret", "Kaigat"), listOf("101", "102", "127")))
+        assertEquals("Ndalat: all 2 · Kapsabaot Comprehensive School: 1 of 1 project", planScopeText(ps, "ke", listOf("Ndalat", "Kapsabaot Comprehensive School"), listOf("152")))
+        assertEquals("Elgon Estate Primary: its 1 project", planScopeText(ps, "ke", listOf("Elgon Estate Primary"), emptyList()))
+        Lang.sw = true
+        assertEquals("Kapsaret: miradi 3 kati ya 8 · Kaigat: yote 3", planScopeText(ps, "ke", listOf("Kapsaret", "Kaigat"), listOf("101", "102", "127")))
+        assertEquals("Yote ya Kenya", planAreasText(emptyList(), "ke"))
+    }
+
+    @Test fun office_plan_areas_and_projects() {
+        val m = model(); show(m)
+        rule.onNodeWithTag("nav_office").performClick(); rule.waitForIdle()
+        rule.onNodeWithTag("o_plan").performClick()
+        waitFor("Plan a week"); waitFor("Bertin Mwangi")
+        waitFor("All of Kenya · suggestions from every area")
+        rule.onAllNodesWithTag("plan_only_row").assertCountEquals(0)
+        rule.onNodeWithTag("plan_area").performScrollTo().performClick(); waitTag("plan_pick_sheet")
+        waitFor("None ticked: projects from all of Kenya."); waitFor("Projects in Kenya")
+        rule.onNodeWithText("Name or place").performScrollTo().performTextInput("ziwa")
+        rule.waitForIdle(); waitFor("No projects match.")
+        rule.onNodeWithText("ziwa").performTextClearance(); rule.waitForIdle()
+        tickArea("Kapsaret")
+        tickArea("Kaigat"); rule.waitForIdle()
+        waitFor("2 ticked"); waitFor("Projects in these areas")
+        rule.onAllNodesWithTag("plan_group_Bungoma").assertCountEquals(0)
+        rule.onNodeWithTag("plan_group_Kapsaret").assertExists(); rule.onNodeWithTag("plan_group_Kaigat").assertExists()
+        listOf("101", "102", "127").forEach { rule.onNodeWithTag("plan_pick_$it").performScrollTo().performClick() }
+        waitFor("3 chosen"); waitFor("3 of 8 chosen")
+        rule.onAllNodesWithText("No location").onFirst().assertExists()
+        rule.onNodeWithTag("plan_all_Kaigat").performScrollTo().performClick(); waitFor("6 chosen")
+        rule.onNodeWithTag("plan_none_Kaigat").performScrollTo().performClick(); waitFor("3 chosen")
+        rule.onNodeWithTag("plan_pick_only").performScrollTo().performClick(); rule.waitForIdle()
+        rule.onAllNodesWithTag("plan_pick_121").assertCountEquals(0); rule.onAllNodesWithTag("plan_group_Kaigat").assertCountEquals(0)
+        rule.onNodeWithTag("plan_pick_only").performClick(); rule.waitForIdle()
+        rule.onNodeWithTag("plan_area_n").performScrollTo()
+        sheetShot("45-plan-areas")
+        rule.onNodeWithTag("plan_group_Kapsaret").performScrollTo()
+        sheetShot("45a-plan-projects")
+        rule.onNodeWithTag("plan_pick_done").performScrollTo().performClick(); rule.mainClock.advanceTimeBy(1500)
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("plan_pick_sheet").fetchSemanticsNodes().isEmpty() }
+        waitFor("Kapsaret: 3 of 8 projects · Kaigat: all 3")
+        rule.onAllNodesWithText("Kapsaret, Kaigat").onFirst().assertExists()
+        rule.onNodeWithTag("plan_only").performScrollTo().performClick(); rule.waitForIdle()
+        waitFor("only the 3 chosen")
+        rule.onNodeWithTag("plan_area").performScrollTo()
+        shot("45b-plan-form-chosen")
+        rule.onNodeWithTag("plan_go").performScrollTo().performClick()
+        waitTag("plan_nogps"); waitFor("Kapsaret Health Centre")
+        val q = posts.last { it.contains("view=plan") }
+        assertTrue(q, q.contains("areas=Kapsaret%2CKaigat") && q.contains("ids=101%2C102%2C127") && q.contains("only=1") && !q.contains("&area="))
+        waitFor("No location, so not placed")
+        assertEquals(2, rule.onAllNodesWithText("Chosen").fetchSemanticsNodes().size)
+        rule.onNodeWithTag("plan_nogps").performScrollTo()
+        shot("45c-plan-only-chosen")
+        // with suggestions: the chosen ones stand out
+        rule.onNodeWithTag("plan_choices_toggle").performScrollTo().performClick(); rule.mainClock.advanceTimeBy(500); rule.waitForIdle()
+        rule.onNodeWithTag("plan_only").performScrollTo().performClick()
+        rule.onNodeWithTag("plan_go").performScrollTo().performClick()
+        waitTag("plan_day_1"); waitFor("Lemook Spring")
+        val q2 = posts.last { it.contains("view=plan") }
+        assertTrue(q2, q2.contains("ids=101%2C102%2C127") && !q2.contains("only=1"))
+        assertEquals(2, rule.onAllNodesWithText("Chosen").fetchSemanticsNodes().size)
+        rule.onNodeWithTag("plan_day_0").performScrollTo()
+        shot("45d-plan-chosen-with-suggestions")
+        // the summary opens the picker; unticking an area lets go of its projects; a new country starts again
+        rule.onNodeWithTag("plan_choices_toggle").performScrollTo().performClick(); rule.mainClock.advanceTimeBy(500); rule.waitForIdle()
+        rule.onNodeWithTag("plan_pick").performScrollTo().performClick(); waitTag("plan_pick_sheet")
+        tickArea("Kapsaret"); rule.waitForIdle()
+        waitFor("0 chosen"); rule.onAllNodesWithTag("plan_group_Kapsaret").assertCountEquals(0)
+        tickArea("Kaigat"); rule.waitForIdle()
+        rule.onNodeWithTag("plan_pick_152").performScrollTo().performClick()
+        tickArea("Ndalat"); rule.waitForIdle()
+        waitFor("2 ticked")
+        rule.onNodeWithTag("plan_group_Kapsabaot Comprehensive School").performScrollTo()
+        sheetShot("45e-plan-long-area")
+        rule.onNodeWithTag("plan_pick_done").performScrollTo().performClick(); rule.mainClock.advanceTimeBy(1500)
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("plan_pick_sheet").fetchSemanticsNodes().isEmpty() }
+        waitFor("Ndalat: all 2 · Kapsabaot Comprehensive School: 1 of 1 project")
+        rule.onNodeWithTag("plan_pick").performScrollTo()
+        shot("45f-plan-form-long-area")
+    }
+
+    @Test fun office_plan_areas_kiswahili_dark() {
+        Lang.sw = true
+        val m = model(); show(m, dark = true)
+        rule.onNodeWithTag("nav_office").performClick(); rule.waitForIdle()
+        rule.onNodeWithTag("o_plan").performClick()
+        waitFor("Panga wiki"); waitFor("Yote ya Kenya · mapendekezo kutoka maeneo yote")
+        rule.onNodeWithTag("plan_area").performScrollTo().performClick(); waitTag("plan_pick_sheet")
+        tickArea("Kapsaret")
+        tickArea("Kapsabaot Comprehensive School"); rule.waitForIdle()
+        rule.onNodeWithTag("plan_pick_101").performScrollTo().performClick()
+        waitFor("1 zimechaguliwa"); waitFor("Maeneo na miradi"); waitFor("Chagua zote")
+        rule.onNodeWithTag("plan_area_n").performScrollTo()
+        sheetShot("46-plan-areas-sw-dark")
+        rule.onNodeWithTag("plan_group_Kapsaret").performScrollTo()
+        sheetShot("46a-plan-projects-sw-dark")
+        rule.onNodeWithTag("plan_pick_done").performScrollTo().performClick(); rule.mainClock.advanceTimeBy(1500)
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("plan_pick_sheet").fetchSemanticsNodes().isEmpty() }
+        waitFor("Kapsaret: miradi 1 kati ya 8 · Kapsabaot Comprehensive School: mradi wake 1")
+        waitFor("Miradi hii tu")
+        rule.onNodeWithTag("plan_area").performScrollTo()
+        shot("46b-plan-form-chosen-sw-dark")
+    }
+
+    @Test fun office_plan_areas_sun() {
+        org.rafikioutreach.pin.ui.Look.mode = "sun"
+        val m = model(); show(m)
+        rule.onNodeWithTag("nav_office").performClick(); rule.waitForIdle()
+        rule.onNodeWithTag("o_plan").performClick()
+        waitFor("Plan a week")
+        rule.onNodeWithTag("plan_area").performScrollTo().performClick(); waitTag("plan_pick_sheet")
+        tickArea("Kapsaret"); rule.waitForIdle()
+        rule.onNodeWithTag("plan_pick_102").performScrollTo().performClick()
+        rule.onNodeWithTag("plan_group_Kapsaret").performScrollTo()
+        sheetShot("47-plan-projects-sun")
     }
 }
