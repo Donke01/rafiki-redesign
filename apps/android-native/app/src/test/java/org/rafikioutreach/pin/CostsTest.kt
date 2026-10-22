@@ -150,16 +150,8 @@ class CostsTest {
     }
 
     /** The sheet is its own window: draw the app, then the sheet's window on top. */
-    private fun sheetShot(name: String) {
-        rule.mainClock.advanceTimeBy(800); rule.waitForIdle()
-        val v = rule.activity.window.decorView
-        val b = Bitmap.createBitmap(v.width, v.height, Bitmap.Config.ARGB_8888); val c = Canvas(b); v.draw(c)
-        val d = org.robolectric.shadows.ShadowDialog.getLatestDialog()?.window?.decorView
-        if (d != null) { c.save(); c.translate(0f, (v.height - d.height).toFloat()); d.draw(c); c.restore() }
-        File(out, "$name.png").outputStream().use { b.compress(Bitmap.CompressFormat.PNG, 100, it) }
-    }
     private fun sheet(tag: String) = rule.waitUntil(5000) { rule.onAllNodesWithTag(tag).fetchSemanticsNodes().isNotEmpty() }
-    private fun closeSheet(tag: String) { rule.onNodeWithTag("ocv_close").performClick(); rule.mainClock.advanceTimeBy(1000); rule.waitUntil(5000) { rule.onAllNodesWithTag(tag).fetchSemanticsNodes().isEmpty() } }
+    private fun closeOcvSheet(tag: String) { rule.onNodeWithTag("ocv_close").performClick(); rule.mainClock.advanceTimeBy(1000); rule.waitUntil(5000) { rule.onAllNodesWithTag(tag).fetchSemanticsNodes().isEmpty() } }
 
     @Test fun people_served_and_costs() {
         Lang.sw = false
@@ -173,7 +165,7 @@ class CostsTest {
         rule.onNodeWithTag("people_total").assertExists(); rule.onAllNodesWithText("48,250").onFirst().assertExists()
         rule.onNodeWithText("Water points").assertExists(); rule.onNodeWithText("26,400").assertExists()
         sheetShot("60-office-people-served")
-        closeSheet("ocv_people_sheet")
+        closeOcvSheet("ocv_people_sheet")
         rule.onNodeWithTag("o_costs").performScrollTo().performClick()
         waitFor("Spent each month")
         rule.mainClock.advanceTimeBy(1500)
@@ -189,7 +181,7 @@ class CostsTest {
         rule.onAllNodesWithTag("ocv_cost").onFirst().performClick(); sheet("ocv_cost_sheet")
         rule.onNodeWithText("Pump cylinder").assertExists(); rule.onNodeWithTag("ocv_cost_open").assertExists()
         sheetShot("61c-office-cost-sheet")
-        closeSheet("ocv_cost_sheet")
+        closeOcvSheet("ocv_cost_sheet")
         rule.onNodeWithTag("ocv_cf_top").performScrollTo().performClick(); rule.waitForIdle()
         rule.onNodeWithTag("costs_top").performScrollTo(); rule.onAllNodesWithTag("ocv_top").assertCountEquals(2); shot("62-office-costs-top")
         // the second approval: folded away until tapped
@@ -262,7 +254,7 @@ class CostsTest {
         waitFor("watu wanaohudumiwa")
         rule.onNodeWithTag("ocv_t_people").performScrollTo().performClick(); sheet("ocv_people_sheet"); rule.mainClock.advanceTimeBy(2000)
         rule.onNodeWithText("Watu wanaohudumiwa").assertExists()
-        sheetShot("68-people-served-dark-sw"); closeSheet("ocv_people_sheet")
+        sheetShot("68-people-served-dark-sw"); closeOcvSheet("ocv_people_sheet")
         rule.onNodeWithTag("o_costs").performScrollTo().performClick()
         waitFor("Idhini ya pili"); rule.mainClock.advanceTimeBy(1500)
         rule.onNodeWithTag("ocv_costs_head").performScrollTo(); shot("69-costs-dark-sw")
