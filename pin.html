@@ -1951,6 +1951,85 @@ html[data-theme=sun] .ocv-bar .col{border:1.5px solid #000}html[data-theme=sun] 
 @media (min-width:1000px){body.wide .ocv-vg .ocv-vs{order:2}}
 @media (prefers-reduced-motion: reduce){.ocv-tile,.ocv-card,.ocv-shi,.ocv-re.in{animation:none !important}.ocv-ring,.ocv-meter i,.ocv-bar .col i,.ocv-drop,.ocv-rc,.ocv-tile,.ocv-card,.ocv-chev{transition:none !important}.ocv-pulse{animation:none}}
 </style>
+<style id="mpb-css">
+/* home map extras (mpb…): today's route, follow me, heat, years, live team, motion */
+.mpb-ctl{display:flex;flex-direction:column;gap:10px;clear:both}
+.mpb-fol[aria-pressed=true]{background:#0A78C2;border-color:#0A78C2;color:#FFFFFF;box-shadow:0 0 0 4px rgba(10,120,194,.25)}
+.mpb-fol svg{transition:transform .25s}.mpb-fol[aria-pressed=true] svg{fill:currentColor}
+.mpb-cmp svg{width:26px;height:26px;transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+html[data-theme=sun] .mpb-fol,html[data-theme=sun] .mpb-cmp{border:2px solid #000}
+.mpb-rot{position:absolute;inset:0;transform-origin:50% 50%;transition:transform .55s cubic-bezier(.2,.8,.2,1)}
+.mpb-rotd .leaflet-marker-icon:not(.mpb-me)>*{rotate:var(--mpb-un,0deg);transition:rotate .55s cubic-bezier(.2,.8,.2,1)}
+.mpb-up{display:flex;align-items:center;justify-content:center;width:100%;height:100%;box-sizing:border-box}
+/* today's route */
+.mpb-n,.mpb-y,.mpb-tm,.mpb-pl,.mpb-me{background:none;border:0}
+.mpb-n .mpb-up{border-radius:50%;background:#0A78C2;color:#FFFFFF;font:800 13px/1 Montserrat,system-ui,sans-serif;border:2.5px solid #FFFFFF;box-shadow:0 2px 7px rgba(4,38,63,.4)}
+.mpb-n.next .mpb-up{background:#7A4FD0;font-size:15px;border-width:3px;box-shadow:0 0 0 5px rgba(122,79,208,.28),0 2px 8px rgba(4,38,63,.45)}
+.mpb-n.ok .mpb-up{background:#1C9C5A}.mpb-n.ok svg{width:15px;height:15px}
+.mpb-pop .mpb-k{display:block;font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#7A4FD0;margin-bottom:2px}
+.mpb-pop .mpb-st{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:.82rem;font-weight:700;color:#5A6066}.mpb-pop .mpb-st.ok{color:#1C7C4A}.mpb-pop .mpb-st svg{width:16px;height:16px;flex:none}
+.mpb-pop .mpb-pb{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.mpb-pop .mpb-pb .btn{flex:1 1 auto;min-height:44px;margin:0;display:inline-flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;white-space:nowrap}.mpb-pop .mpb-pb svg{width:16px;height:16px}
+.mpb-pop a.btn:not(.light){color:#FFFFFF}.mpb-pop a.btn.light{color:var(--ink)}
+.mpb-tp{min-width:220px}.mpb-tp .mpb-who{display:flex;align-items:center;gap:10px}.mpb-tp .mpb-who>span:not(.ofa-av){display:flex;flex-direction:column;min-width:0}.mpb-tp b{font-size:.95rem}.mpb-tp small{font-size:.8rem;color:#5A6066}
+/* a soft pulse on sites that are not working or urgent */
+.mpb-pl i{position:absolute;inset:0;border-radius:50%;border:2.5px solid #D98200;opacity:.35}
+.mpb-pl.bad i{border-color:#B3261E}
+.mpb-pl i{animation:mpbPulse 2.6s cubic-bezier(.2,.6,.3,1) infinite}.mpb-pl i+i{animation-delay:1.3s}
+@keyframes mpbPulse{0%{transform:scale(.55);opacity:.75}100%{transform:scale(2.1);opacity:0}}
+/* pins drop in */
+@keyframes mpbDrop{0%{transform:translateY(-28px) scale(.6);opacity:0}55%{opacity:1}100%{transform:none;opacity:1}}
+path.mpb-drop{transform-box:fill-box;transform-origin:50% 100%;animation:mpbDrop .6s cubic-bezier(.34,1.56,.64,1) both;animation-delay:var(--mpb-d,0s)}
+.leaflet-marker-icon.mpb-drop>*{animation:mpbDrop .6s cubic-bezier(.34,1.56,.64,1) both;animation-delay:var(--mpb-d,0s)}
+.mpb-y .mpb-up{border-radius:50%;background:#0A78C2;border:2.5px solid #FFFFFF;box-shadow:0 1px 5px rgba(4,38,63,.45);transition:box-shadow .6s}
+.mpb-y.new .mpb-up{background:#2FA8F5;box-shadow:0 0 0 6px rgba(47,168,245,.35),0 0 0 12px rgba(47,168,245,.15),0 1px 5px rgba(4,38,63,.45)}
+.mpb-y.mpb-drop .mpb-up{animation-delay:var(--mpb-d,0s)}
+/* heat */
+.mpb-heat{position:absolute;pointer-events:none;transition:opacity .2s}
+/* live team */
+.mpb-tm .mpb-up{position:relative}.mpb-tm .ofa-av{position:absolute;left:2px;top:2px}
+.mpb-tm em{position:absolute;left:50%;top:44px;transform:translateX(-50%);white-space:nowrap;font-style:normal;font-size:10px;font-weight:800;padding:1px 7px;border-radius:999px;background:#FFFFFF;color:#04263F;box-shadow:0 1px 4px rgba(0,0,0,.28)}
+.mpb-tm.old .ofa-av{filter:grayscale(.7);opacity:.75}
+/* you, while following */
+.mpb-me b{position:absolute;left:50%;top:50%;width:20px;height:20px;margin:-10px 0 0 -10px;border-radius:50%;background:#098BE1;border:3px solid #FFFFFF;box-shadow:0 0 0 6px rgba(9,139,225,.22),0 2px 6px rgba(0,0,0,.3)}
+.mpb-me .mpb-cone{position:absolute;inset:0;border-radius:50%;background:conic-gradient(from -34deg,rgba(9,139,225,0) 0deg,rgba(9,139,225,.6) 34deg,rgba(9,139,225,0) 68deg,transparent 68deg);-webkit-mask:radial-gradient(circle,#000 30%,transparent 72%);mask:radial-gradient(circle,#000 30%,transparent 72%);transition:transform .4s}
+/* over the bottom of the map */
+.mpb-bot{display:flex;flex-direction:column;gap:8px;margin-bottom:8px}
+.mpb-bot>*{pointer-events:auto}
+.mpb-card{background:var(--card);color:var(--ink);border-radius:20px;border:var(--bw,0px) solid var(--line);box-shadow:0 8px 24px rgba(4,38,63,.18);padding:10px 12px;box-sizing:border-box}
+html[data-theme=sun] .mpb-card{border:2px solid #000}
+.mpb-x{flex:none;width:44px;height:44px;border:0;border-radius:50%;background:var(--hb-slate,rgba(0,0,0,.06));color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}.mpb-x svg{width:22px;height:22px}
+.mpb-next{display:flex;align-items:center;gap:10px}
+.mpb-nic{flex:none;width:40px;height:40px;border-radius:12px;background:#7A4FD0;color:#FFFFFF;display:flex;align-items:center;justify-content:center}.mpb-nic svg{width:22px;height:22px;fill:currentColor}
+.mpb-tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;border:0;background:none;padding:4px 0;text-align:left;font:inherit;color:inherit;cursor:pointer;min-height:44px;justify-content:center}
+span.mpb-tx{cursor:default}
+.mpb-tx small{font-size:.68rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.mpb-tx b{font-size:1rem;line-height:1.2;color:var(--ink);overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2}
+.mpb-km{flex:none;font-size:1.15rem;color:var(--ink);white-space:nowrap}
+.mpb-leg{display:flex;align-items:center;gap:10px;padding:8px 8px 8px 14px}.mpb-lt{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}.mpb-lt b{font-size:.9rem}
+.mpb-lr{display:flex;align-items:center;gap:8px}.mpb-lr small{font-size:.72rem;font-weight:700;color:var(--muted);white-space:nowrap}
+.mpb-ramp{display:block;flex:1;height:10px;border-radius:99px}
+.mpb-ends{display:flex;justify-content:space-between;font-size:.72rem;font-weight:700;color:var(--muted);margin-top:3px}
+.mpb-ln{display:block;font-size:.76rem;color:var(--muted)}
+.mpb-tr{display:flex;align-items:center;gap:12px}
+.mpb-play{flex:none;width:48px;height:48px;border-radius:50%;border:0;background:#0A78C2;color:#FFFFFF;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 12px rgba(10,120,194,.35)}.mpb-play svg{width:24px;height:24px}
+.mpb-time .mpb-tx b{font-size:1.5rem;line-height:1.1;font-variant-numeric:tabular-nums}.mpb-time .mpb-tx small{text-transform:none;letter-spacing:0;font-size:.82rem;font-weight:600;white-space:normal}
+#mpbRange{display:block;width:100%;height:44px;margin:4px 0 -10px;accent-color:#0A78C2;cursor:pointer}
+html[data-theme=dark] .mpb-play,html[data-theme=dark] .mpb-fol[aria-pressed=true]{background:#2F9BE6;border-color:#2F9BE6}
+body.mpb-fol-on #nearSheet,body.mpb-yr-on #nearSheet{display:none}
+/* the layer switches in the map-style sheet */
+.mpb-sh{margin-top:10px;padding-top:6px;border-top:1px solid var(--line)}
+.mpb-sh h4{margin:10px 6px 4px;font-size:.72rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.mpb-r{display:flex;align-items:center;gap:12px;width:100%;min-height:58px;margin:3px 0;padding:6px 14px;border:0;border-radius:16px;background:transparent;color:var(--ink);font:inherit;text-align:left;cursor:pointer;box-sizing:border-box}
+button.mpb-r:active{background:var(--tint)}
+.mpb-r .ei{flex:none;width:38px;height:38px;border-radius:12px;background:var(--tint);display:flex;align-items:center;justify-content:center;color:var(--blue);margin:0}.mpb-r .ei svg{width:22px;height:22px}
+.mpb-rt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.mpb-rt b{font-size:1rem}.mpb-rt small{font-size:.8rem;font-weight:500;color:var(--muted)}
+.mpb-r .tgl{pointer-events:none}.mpb-r[aria-checked=true] .tgl{background:#1C9C5A}.mpb-r[aria-checked=true] .tgl i{left:23px}
+.mpb-hr{cursor:default;min-height:52px;padding-bottom:0}
+.mpb-seg{margin:2px 14px 8px 64px}.mpb-seg button{font-size:.82rem;padding:0 4px;line-height:1.15}
+@media (max-width:360px){.mpb-seg{margin-left:14px}}
+@media (min-width:900px){.mpb-bot{max-width:420px}}
+@media (prefers-reduced-motion: reduce){.mpb-rot,.mpb-cmp svg,.mpb-me .mpb-cone,.mpb-rotd .leaflet-marker-icon>*{transition:none !important}.mpb-pl i,.mpb-drop,.mpb-drop>*{animation:none !important}.mpb-pl i+i{display:none}}
+</style>
 </head>
 <body class="locked">
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
@@ -2642,10 +2721,10 @@ html[data-theme=sun] .ocv-bar .col{border:1.5px solid #000}html[data-theme=sun] 
       b.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4l9 5-9 5-9-5z"/><path d="M3 14l9 5 9-5"/></svg>';
       L.DomEvent.disableClickPropagation(b);
       b.addEventListener('click', function () {
-        bsheet('Map style', [['street', 'Street map', 'map'], ['sat', 'Satellite photos', 'layers']], map.hasLayer(sat) ? 'sat' : 'street', function (k) {
+        mpbSheet(map, bsheet('Map style', [['street', 'Street map', 'map'], ['sat', 'Satellite photos', 'layers']], map.hasLayer(sat) ? 'sat' : 'street', function (k) {
           var on = k === 'sat' ? sat : street, off = k === 'sat' ? street : sat;
           if (map.hasLayer(off)) map.removeLayer(off); if (!map.hasLayer(on)) on.addTo(map); store.set('rfPinLayer', k); map.fire('baselayerchange');
-        });
+        })); // + the home map's layers (mpbSheet)
       });
       return b;
     } });
@@ -3083,7 +3162,7 @@ html[data-theme=sun] .ocv-bar .col{border:1.5px solid #000}html[data-theme=sun] 
         hMap.zoomControl.setPosition('topright');
         var Me = L.Control.extend({ options: { position: 'topright' }, onAdd: function () {
           var d = L.DomUtil.create('div', 'leaflet-bar lc-me'); d.innerHTML = '<a href="#" role="button" title="Show where I am" aria-label="Show where I am">◎</a>';
-          L.DomEvent.on(d, 'click', function (e) { L.DomEvent.preventDefault(e); L.DomEvent.stopPropagation(e); locate(function (ll) { if (ll) hMap.setView(ll, 13); else msg('mList', 'warn', 'Couldn’t get your location.'); }); });
+          L.DomEvent.on(d, 'click', function (e) { L.DomEvent.preventDefault(e); L.DomEvent.stopPropagation(e); locate(function (ll) { if (ll) mpbFly(ll, 13); else msg('mList', 'warn', 'Couldn’t get your location.'); }); });
           return d; } });
         meCtl = new Me().addTo(hMap);
         fldMapCtl(hMap); // Save this area for offline (field tools)
@@ -3095,7 +3174,7 @@ html[data-theme=sun] .ocv-bar .col{border:1.5px solid #000}html[data-theme=sun] 
       hLayer = L.featureGroup();
       var you = null;
       S.projects.forEach(function (p) {
-        if (!p.gps) return;
+        if (!p.gps || !mpbKeep(p)) return; // the time slider draws its own dots (mpb…)
         var r = S.repairs[p.id];
         if (r) L.circleMarker(p.gps, { radius: 9, color: COLORS[r.state] || COLORS.repair, weight: 2, fill: false, interactive: false, className: 'dot-alert' }).addTo(hLayer);
         L.circleMarker(p.gps, dotStyle(p)).bindPopup(function () {
@@ -3110,6 +3189,7 @@ html[data-theme=sun] .ocv-bar .col{border:1.5px solid #000}html[data-theme=sun] 
       if (!fitted && mine.length > 1) { hMap.fitBounds(L.latLngBounds(mine.map(function (p) { return p.gps; })), { paddingTopLeft: [24, 170], paddingBottomRight: [70, 80], maxZoom: 13 }); fitted = true; }
       if (!fitted && hLayer.getLayers().length) { hMap.fitBounds(hLayer.getBounds(), { paddingTopLeft: [24, 170], paddingBottomRight: [70, 80], maxZoom: 13 }); fitted = true; }
       nearUi();
+      mpbDraw(); // today's route, follow me, heat, years, live team, motion
     }, 30);
   }
   function nearUi() {
@@ -3429,6 +3509,7 @@ html[data-theme=sun] .ocv-bar .col{border:1.5px solid #000}html[data-theme=sun] 
     p.addEventListener('touchstart', function (e) { y0 = e.touches[0].clientY; dy = 0; p.style.transition = 'none'; }, { passive: true });
     p.addEventListener('touchmove', function (e) { if (y0 == null) return; dy = Math.max(0, e.touches[0].clientY - y0); p.style.transform = 'translateY(' + dy + 'px)'; }, { passive: true });
     p.addEventListener('touchend', function () { p.style.transition = ''; p.style.transform = ''; if (dy > 80) close(); y0 = null; });
+    return w;
   }
   // a light tick under the finger on phones that support it
   function buzz() { try { if (navigator.vibrate && matchMedia('(pointer: coarse)').matches) navigator.vibrate(8); } catch (e) {} }
@@ -7677,6 +7758,436 @@ html[data-theme=sun] .ocv-bar .col{border:1.5px solid #000}html[data-theme=sun] 
     var st = document.createElement('style'); st.id = 'fldCss'; st.textContent = css; document.head.appendChild(st);
   })();
   // ===== end of field tools ========================================================================
+
+  // --- home map extras (mpb…): today's route, follow me, heat, years, live team, and motion ---------------
+  // They live beside the home map with small hooks: homeMap() calls mpbDraw() after drawing the dots and
+  // asks mpbKeep(p) for each one, the map-style sheet calls mpbSheet() to add the layer switches, and
+  // "Show where I am" flies there with mpbFly(). The heat, years and team layers are for admins only
+  // (the server refuses field users the team map as well).
+  var MPB = { map: null, route: store.get('rfPinMpbRoute') !== '0', heat: '', years: false, year: 0, play: null, yk: {}, team: false, tm: null, tmT: null,
+    follow: false, north: false, watch: null, gpsHd: null, cHd: null, hd: null, oh: null, rot: 0, wrap: null, fixed: false, dropped: false, heatC: null, L: {} };
+  Object.assign(OIC, {
+    mpbNav: '<path d="M3.5 11.2l16.5-7.2-7.2 16.5-1.9-7.4z"/>',
+    mpbHeat: '<circle cx="12" cy="12" r="2.2"/><circle cx="12" cy="12" r="5.6" opacity=".7"/><circle cx="12" cy="12" r="9" opacity=".4"/>',
+    mpbPlay: '<path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/>',
+    mpbPause: '<path d="M8 5.5v13M16 5.5v13" stroke-width="3.2"/>'
+  });
+  function mpbStill() { return !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches); }
+  function mpbYmd(d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+  // a visit was sent for this project today: the stop is ticked off
+  function mpbDone(id) { var v = S.visits[id], d = v && new Date(v.at); return !!(d && !isNaN(d) && mpbYmd(d) === mpbYmd(new Date())); }
+  // the dots homeMap() draws itself: none while the time slider shows its own
+  function mpbKeep(p) { return !(MPB.years && S.admin); }
+  // how much of the map the cards at the top or bottom cover (px)
+  function mpbCover(which) {
+    var m = hMap && hMap.getContainer().getBoundingClientRect(), el = document.querySelector('#vMap .ov.' + which); if (!m || !el) return 0;
+    var r = el.getBoundingClientRect(); if (!r.height) return 0;
+    return Math.max(0, Math.round(which === 'top' ? r.bottom - m.top : m.bottom - r.top));
+  }
+  // popups clear the cards over the map and the buttons on the right
+  function mpbPopOpt(w) { return { maxWidth: w || 270, autoPanPaddingTopLeft: L.point(16, 16 + mpbCover('top')), autoPanPaddingBottomRight: L.point(66, 16 + mpbCover('bot')) }; }
+  function mpbFly(ll, z) { if (!hMap) return; if (mpbStill()) hMap.setView(ll, z); else hMap.flyTo(ll, z, { duration: 0.9 }); }
+  function mpbFlyAll(lls, maxZ) {
+    if (!hMap || !lls.length) return;
+    if (lls.length === 1) return mpbFly(lls[0], Math.min(maxZ || 15, 15));
+    var b = L.latLngBounds(lls), o = { paddingTopLeft: [30, 30 + mpbCover('top')], paddingBottomRight: [70, 30 + mpbCover('bot')], maxZoom: maxZ || 14 };
+    if (mpbStill()) hMap.fitBounds(b, o); else hMap.flyToBounds(b, Object.assign({ duration: 0.9 }, o));
+  }
+
+  // Today's route: your visits assigned for today, in driving order (the route planner's order()). The order
+  // is kept for the day, so the numbers don't jump about as you drive; a stop ticks off once a visit is sent.
+  function mpbStops() {
+    var d = mpbYmd(new Date()), mine = [];
+    (S.assigned || []).forEach(function (a) { var id = String(a.id); if (a.date === d && mine.indexOf(id) < 0) mine.push(id); });
+    var c = jget('rfPinMpbDay', null); if (!c || c.d !== d || !Array.isArray(c.ids)) c = { d: d, ids: [] };
+    // the server drops an assignment once it is visited, so the day's list is kept here
+    var keep = c.ids.filter(function (id) { return mine.indexOf(id) >= 0 || mpbDone(id); });
+    var add = mine.filter(function (id) { return keep.indexOf(id) < 0; });
+    if (add.length || keep.length !== c.ids.length) {
+      var done = keep.filter(mpbDone), last = done.length && byId(done[done.length - 1]);
+      var rest = order(keep.filter(function (id) { return !mpbDone(id); }).concat(add), (last && last.gps) || S.here || null).map(function (p) { return p.id; });
+      c.ids = done.concat(rest).concat(keep.concat(add).filter(function (id) { return done.indexOf(id) < 0 && rest.indexOf(id) < 0; }));
+      store.set('rfPinMpbDay', JSON.stringify(c));
+    }
+    return c.ids.map(byId).filter(function (p) { return p && p.gps; });
+  }
+  function mpbNextIdx(st) { for (var i = 0; i < st.length; i++) if (!mpbDone(st[i].id)) return i; return -1; }
+  var MPB_TICK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+  function mpbRouteDraw() {
+    if (MPB.L.route) { hMap.removeLayer(MPB.L.route); MPB.L.route = null; }
+    if (!MPB.route || (MPB.years && S.admin)) return;
+    var st = mpbStops(); if (!st.length) return;
+    var g = MPB.L.route = L.layerGroup(), nx = mpbNextIdx(st), pts = st.map(function (p) { return p.gps; });
+    if (pts.length > 1) {
+      L.polyline(pts, { color: '#FFFFFF', weight: 10, opacity: 0.85, interactive: false, lineCap: 'round', lineJoin: 'round', className: 'mpb-line' }).addTo(g);
+      for (var i = 1; i < pts.length; i++) L.polyline([pts[i - 1], pts[i]], { color: mpbDone(st[i].id) ? '#1C9C5A' : '#0A78C2', weight: 5, interactive: false, lineCap: 'round', className: 'mpb-line' }).addTo(g);
+    }
+    MPB.youLine = S.here && nx >= 0 ? L.polyline([S.here, pts[nx]], { color: '#0A78C2', weight: 3, dashArray: '1 9', lineCap: 'round', interactive: false, className: 'mpb-line' }).addTo(g) : null;
+    MPB.youTo = nx >= 0 ? pts[nx] : null;
+    st.forEach(function (p, i) {
+      var ok = mpbDone(p.id), big = i === nx, s = big ? 36 : 28;
+      L.marker(p.gps, { icon: L.divIcon({ className: 'mpb-n' + (ok ? ' ok' : big ? ' next' : ''), html: '<span class="mpb-up">' + (ok ? MPB_TICK : (i + 1)) + '</span>', iconSize: [s, s] }),
+        zIndexOffset: big ? 1200 : 900, title: tr('Stop ' + (i + 1) + ': ', 'Kituo ' + (i + 1) + ': ') + p.title, alt: p.title })
+        .bindPopup(function () { return mpbStopPop(p, i, st.length); }, mpbPopOpt()).addTo(g);
+    });
+    g.addTo(hMap);
+  }
+  function mpbStopPop(p, i, n) {
+    var v = S.visits[p.id], ok = mpbDone(p.id), t = v && new Date(v.at);
+    return '<div class="pop mpb-pop"><small class="mpb-k">' + esc(tr('Today’s route · stop ' + (i + 1) + ' of ' + n, 'Njia ya leo · kituo ' + (i + 1) + ' kati ya ' + n)) + '</small><b>' + esc(p.title) + '</b><span>' + esc(sub(p)) +
+      (S.here ? '<br>' + dist(metres(S.here, p.gps)) + tr(' from you', ' kutoka ulipo') : '') + '</span>' +
+      '<span class="mpb-st' + (ok ? ' ok' : '') + '">' + (ok ? MPB_TICK + esc(tr('Visited today at ', 'Imetembelewa leo saa ') + t.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })) : esc(tr('Not visited yet', 'Bado haijatembelewa'))) + '</span>' +
+      '<span class="mpb-pb"><button class="btn" type="button" data-mpb-visit="' + esc(p.id) + '">' + esc(ok ? tr('Open', 'Fungua') : tr('Report the visit', 'Ripoti ziara')) + '</button>' +
+      '<a class="btn light" href="https://www.google.com/maps/dir/?api=1&destination=' + p.gps[0].toFixed(6) + ',' + p.gps[1].toFixed(6) + '&travelmode=driving" target="_blank" rel="noopener">' + esc(tr('Directions', 'Maelekezo')) + '</a></span></div>';
+  }
+
+  // a soft pulse on sites that are not working or need an urgent repair (under the dots)
+  function mpbPulseDraw() {
+    if (MPB.L.pulse) { hMap.removeLayer(MPB.L.pulse); MPB.L.pulse = null; }
+    if (MPB.years && S.admin) return;
+    var g = L.layerGroup();
+    S.projects.forEach(function (p) {
+      var r = S.repairs[p.id]; if (!p.gps || !r || !(r.state === 'notworking' || r.urgency === 'urgent')) return;
+      L.marker(p.gps, { pane: 'mpbPulse', interactive: false, keyboard: false, icon: L.divIcon({ className: 'mpb-pl' + (r.state === 'notworking' ? ' bad' : ''), html: '<i></i><i></i>', iconSize: [30, 30] }) }).addTo(g);
+    });
+    MPB.L.pulse = g.addTo(hMap);
+  }
+
+  // pins drop in, north to south, the first time the map shows them
+  function mpbDropIn() {
+    if (MPB.dropped) return;
+    var els = qa('.leaflet-overlay-pane path.leaflet-interactive, .leaflet-marker-pane .leaflet-marker-icon', hMap.getContainer());
+    if (!els.length) return; MPB.dropped = true;
+    if (mpbStill()) return;
+    els.slice(0, 400).map(function (e) { return { e: e, y: e.getBoundingClientRect().top }; }).sort(function (a, b) { return a.y - b.y; }).forEach(function (x, i) {
+      var d = Math.min(i * 14, 700); x.e.style.setProperty('--mpb-d', d + 'ms'); x.e.classList.add('mpb-drop');
+      setTimeout(function () { x.e.classList.remove('mpb-drop'); }, 900 + d);
+    });
+  }
+
+  // Heat (admins): open repairs or people served, drawn on one canvas after each move (no library needed)
+  var MPB_HEAT = { repairs: ['rgba(255,214,74,0)', '#FFD64A', '#F28C28', '#D7301F', '#8C0000'], people: ['rgba(154,216,245,0)', '#9AD8F5', '#3EA7EE', '#0A5FB0', '#3B1E8F'] };
+  function mpbHeatPts() {
+    var out = [];
+    S.projects.forEach(function (p) {
+      if (!p.gps || !mpbYearOk(p)) return;
+      if (MPB.heat === 'repairs') { var r = S.repairs[p.id]; if (r) out.push({ ll: p.gps, w: (r.state === 'notworking' ? 2 : 1) * (r.urgency === 'urgent' ? 1.5 : 1) }); }
+      else { var n = Number(p.people) || 0; if (n > 0) out.push({ ll: p.gps, w: n }); }
+    });
+    return out;
+  }
+  function mpbPalette(k) {
+    MPB.pal = MPB.pal || {}; if (MPB.pal[k]) return MPB.pal[k];
+    var c = document.createElement('canvas'); c.width = 256; c.height = 1; var x = c.getContext('2d'), g = x.createLinearGradient(0, 0, 256, 0);
+    MPB_HEAT[k].forEach(function (col, i, a) { g.addColorStop(i / (a.length - 1), col); }); x.fillStyle = g; x.fillRect(0, 0, 256, 1);
+    return (MPB.pal[k] = x.getImageData(0, 0, 256, 1).data);
+  }
+  function mpbHeatDraw() {
+    var m = hMap; if (!m || !MPB.map) return;
+    var c = MPB.heatC, on = !!(MPB.heat && S.admin);
+    if (!on) { if (c) c.style.display = 'none'; return; }
+    if (!c) c = MPB.heatC = L.DomUtil.create('canvas', 'mpb-heat', m.getPane('mpbHeat'));
+    var sz = m.getSize(), D = MPB.rot ? Math.ceil(Math.sqrt(sz.x * sz.x + sz.y * sz.y)) : 0, ox = D ? Math.ceil((D - sz.x) / 2) : 0, oy = D ? Math.ceil((D - sz.y) / 2) : 0;
+    var w = sz.x + 2 * ox, h = sz.y + 2 * oy, r = 42, cell = 14, grid = {}, max = MPB.heat === 'people' ? 1500 : 2;
+    c.width = w; c.height = h; c.style.width = w + 'px'; c.style.height = h + 'px'; c.style.display = ''; c.style.opacity = '';
+    L.DomUtil.setPosition(c, m.containerPointToLayerPoint([-ox, -oy]));
+    mpbHeatPts().forEach(function (q) {
+      var pt = m.latLngToContainerPoint(q.ll), x = pt.x + ox, y = pt.y + oy; if (x < -r || y < -r || x > w + r || y > h + r) return;
+      var k = Math.floor(x / cell) + ':' + Math.floor(y / cell), g = grid[k] || (grid[k] = { x: 0, y: 0, w: 0 });
+      g.x += x * q.w; g.y += y * q.w; g.w += q.w;
+    });
+    var ks = Object.keys(grid); ks.forEach(function (k) { if (grid[k].w > max) max = grid[k].w; });
+    var x = c.getContext('2d'); x.clearRect(0, 0, w, h); if (!ks.length) return;
+    if (!MPB.brush) { var b = MPB.brush = document.createElement('canvas'); b.width = b.height = r * 2; var bx = b.getContext('2d'), rg = bx.createRadialGradient(r, r, 0, r, r, r); rg.addColorStop(0, 'rgba(0,0,0,1)'); rg.addColorStop(0.45, 'rgba(0,0,0,.6)'); rg.addColorStop(1, 'rgba(0,0,0,0)'); bx.fillStyle = rg; bx.fillRect(0, 0, r * 2, r * 2); }
+    ks.forEach(function (k) { var g = grid[k]; x.globalAlpha = Math.max(0.18, Math.min(1, Math.sqrt(g.w / max))); x.drawImage(MPB.brush, g.x / g.w - r, g.y / g.w - r); });
+    x.globalAlpha = 1;
+    var img = x.getImageData(0, 0, w, h), d = img.data, pal = mpbPalette(MPB.heat);
+    for (var i = 3; i < d.length; i += 4) { var a = d[i]; if (!a) continue; var j = a * 4; d[i - 3] = pal[j]; d[i - 2] = pal[j + 1]; d[i - 1] = pal[j + 2]; d[i] = a < 6 ? 0 : Math.min(215, 40 + a * 0.75); }
+    x.putImageData(img, 0, 0);
+  }
+
+  // Time slider (admins): projects completed up to a year, with a play button for presentations
+  function mpbYearOk(p) { return !(MPB.years && S.admin) || (p.status === 'Completed' && p.year && p.year <= MPB.year); }
+  function mpbYearSpan() {
+    var lo = 0, hi = 0; S.projects.forEach(function (p) { if (p.gps && p.status === 'Completed' && p.year) { if (!lo || p.year < lo) lo = p.year; if (p.year > hi) hi = p.year; } });
+    return lo ? [lo, hi] : null;
+  }
+  function mpbYearsDraw(fresh) {
+    var g = MPB.L.years;
+    if (!(MPB.years && S.admin)) { if (g) { hMap.removeLayer(g); MPB.L.years = null; MPB.yk = {}; } return; }
+    if (!g) { g = MPB.L.years = L.layerGroup().addTo(hMap); MPB.yk = {}; }
+    var Y = MPB.year, still = mpbStill(), n = 0;
+    if (!fresh && !Object.keys(MPB.yk).length) fresh = true; // turned on: they all drop in
+    S.projects.forEach(function (p) {
+      var on = p.gps && p.status === 'Completed' && p.year && p.year <= Y, mk = MPB.yk[p.id];
+      if (on && !mk) {
+        var drop = fresh && !still, d = Math.min(n++ * 35, 900);
+        mk = MPB.yk[p.id] = L.marker(p.gps, { icon: L.divIcon({ className: 'mpb-y' + (drop ? ' mpb-drop' : '') + (fresh && p.year === Y ? ' new' : ''), html: '<span class="mpb-up" style="--mpb-d:' + d + 'ms"></span>', iconSize: [18, 18] }), title: p.title + ' · ' + p.year, alt: p.title })
+          .bindPopup('<div class="pop"><b>' + esc(p.title) + '</b><span>' + esc(sub(p)) + '<br>' + esc(tr('Completed ', 'Ilikamilika ') + p.year) + (p.people ? ' · ' + esc(tr(Number(p.people).toLocaleString('en-US') + ' people', 'watu ' + Number(p.people).toLocaleString('en-US'))) : '') + '</span><button class="btn" type="button" data-open="' + esc(p.id) + '">' + esc(tr('Open', 'Fungua')) + '</button></div>', mpbPopOpt(260)).addTo(g);
+        if (drop) (function (el) { setTimeout(function () { if (el) el.classList.remove('mpb-drop', 'new'); }, 1700 + d); })(mk.getElement());
+      } else if (!on && mk) { g.removeLayer(mk); delete MPB.yk[p.id]; }
+    });
+  }
+  function mpbYearSet(y) { MPB.year = y; mpbYearsDraw(true); mpbHeatDraw(); mpbTimeUi(); }
+  function mpbYears(on) {
+    var sp = mpbYearSpan();
+    if (on && !sp) { toast(tr('No completed projects with a year to show.', 'Hakuna miradi iliyokamilika yenye mwaka wa kuonyesha.')); return false; }
+    mpbPlay(false); MPB.years = on && S.admin; document.body.classList.toggle('mpb-yr-on', MPB.years);
+    if (MPB.years) MPB.year = sp[1];
+    homeMap(); // the usual dots step aside while the slider shows its own
+    if (MPB.years) { var all = S.projects.filter(function (p) { return p.gps && p.status === 'Completed' && p.year; }).map(function (p) { return p.gps; }); setTimeout(function () { mpbFlyAll(all, 9); }, 80); }
+    return true;
+  }
+  function mpbPlay(on) {
+    clearInterval(MPB.play); MPB.play = null;
+    var sp = mpbYearSpan();
+    if (on && sp && MPB.years) {
+      if (MPB.year >= sp[1]) mpbYearSet(sp[0]);
+      MPB.play = setInterval(function () {
+        var s2 = mpbYearSpan();
+        if (!MPB.years || !s2 || S.view !== 'vMap' || MPB.year >= s2[1]) return mpbPlay(false);
+        mpbYearSet(MPB.year + 1);
+      }, 1300);
+    }
+    mpbTimeUi();
+  }
+
+  // Live team (admins): people sharing their location, as on Office › Team map. Off by default.
+  function mpbTeam(on) {
+    MPB.team = !!(on && S.admin); clearInterval(MPB.tmT); MPB.tmT = null;
+    if (!MPB.team) { if (MPB.L.team) { hMap.removeLayer(MPB.L.team); MPB.L.team = null; } return; }
+    mpbTeamLoad(true);
+    MPB.tmT = setInterval(function () { if (S.view === 'vMap' && !document.hidden) mpbTeamLoad(false); }, 180000); // every 3 minutes while it shows
+  }
+  function mpbTeamLoad(fit) {
+    if (!MPB.team) return;
+    if (!navigator.onLine) { if (fit) toast(tr('No signal: the team’s places need a connection.', 'Hakuna mtandao: mahali pa timu panahitaji mtandao.')); if (MPB.tm) mpbTeamDraw(false); return; }
+    adminApi('GET', null, '?view=teammap').then(function (j) {
+      if (!MPB.team) return;
+      if (!j.ok) { toast(why(j)); return; }
+      MPB.tm = j; MPB.tmAt = Date.now(); mpbTeamDraw(fit);
+    });
+  }
+  function mpbTeamDraw(fit) {
+    if (MPB.L.team) hMap.removeLayer(MPB.L.team);
+    var g = MPB.L.team = L.layerGroup(), ppl = (MPB.tm && MPB.tm.people) || [];
+    ppl.forEach(function (p) {
+      var old = Date.now() - Date.parse(p.at) > 36e5;
+      L.marker([p.lat, p.lng], { icon: L.divIcon({ className: 'mpb-tm' + (old ? ' old' : ''), html: '<span class="mpb-up">' + ofaAvatar(p.name) + '<em>' + esc(since(p.at)) + '</em></span>', iconSize: [44, 44], iconAnchor: [22, 22], popupAnchor: [0, -20] }), title: p.name, alt: p.name, zIndexOffset: 1500 })
+        .bindPopup(function () { return mpbTeamPop(p); }, mpbPopOpt(280)).addTo(g);
+    });
+    g.addTo(hMap);
+    if (fit) { if (ppl.length) mpbFlyAll(ppl.map(function (p) { return [p.lat, p.lng]; }), 13); else toast(tr('Nobody is sharing their location right now.', 'Hakuna anayeshiriki mahali kwa sasa.')); }
+  }
+  function mpbTeamPop(p) {
+    var ph = String(p.phone || '').replace(/\s/g, '');
+    return '<div class="mpb-pop mpb-tp"><span class="mpb-who">' + ofaAvatar(p.name) + '<span><b>' + esc(p.name) + '</b><small>' + esc(tr('Last seen ', 'Alionekana ') + since(p.at)) + (p.acc ? ' · ±' + (p.acc < 1000 ? p.acc + ' m' : Math.round(p.acc / 1000) + ' km') : '') + '</small></span></span>' +
+      (ph ? '<span class="mpb-pb"><a class="btn" href="tel:' + esc(ph) + '">' + oic('phone') + esc(tr('Call', 'Piga simu')) + '</a><a class="btn light" href="https://wa.me/' + waNum(p.phone, p.home) + '" target="_blank" rel="noopener">' + oic('chat') + 'WhatsApp</a></span>'
+        : '<span class="mpb-st">' + esc(tr('No phone number saved for them.', 'Hakuna namba ya simu iliyohifadhiwa.')) + '</span>') + '</div>';
+  }
+
+  // Follow me: keeps you in the middle, turned to the way you are heading (when the phone knows it), with the
+  // next stop and how far it is. Dragging the map stops it; the compass turns the map back to north.
+  function mpbFollow(on) {
+    if (on && !navigator.geolocation) { toast(tr('This browser can’t share your location.', 'Kivinjari hiki hakiwezi kushiriki mahali ulipo.')); return; }
+    MPB.follow = !!on; MPB.north = false; MPB.fixed = false;
+    var b = $('mpbFol'); if (b) { b.setAttribute('aria-pressed', String(MPB.follow)); b.setAttribute('aria-label', MPB.follow ? tr('Stop following me', 'Acha kunifuata') : tr('Follow me while driving', 'Nifuate ninapoendesha')); }
+    document.body.classList.toggle('mpb-fol-on', MPB.follow);
+    if (MPB.follow) {
+      if (window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission === 'function') DeviceOrientationEvent.requestPermission().then(function (s) { if (s === 'granted' && MPB.follow) mpbOrient(true); }).catch(function () {});
+      else mpbOrient(true);
+      MPB.watch = navigator.geolocation.watchPosition(mpbFix, function (e) {
+        if (e.code !== 1) return; // no reading yet: keep listening
+        mpbFollow(false); toast(tr('Location is blocked for this site. Allow it in the browser’s site settings.', 'Mahali pamezuiwa kwa tovuti hii. Paruhusu kwenye mipangilio ya tovuti ya kivinjari.'));
+      }, { enableHighAccuracy: true, maximumAge: 3000, timeout: 30000 });
+      if (S.here && Date.now() - (S.hereAt || 0) < 120000) mpbFix({ coords: { latitude: S.here[0], longitude: S.here[1], accuracy: S.hereAcc || 0 } });
+    } else {
+      if (MPB.watch !== null && navigator.geolocation) navigator.geolocation.clearWatch(MPB.watch); MPB.watch = null;
+      mpbOrient(false); MPB.gpsHd = null; mpbTurn(0);
+      if (MPB.L.me) { hMap.removeLayer(MPB.L.me); MPB.L.me = null; }
+    }
+    mpbNextUi();
+  }
+  function mpbFix(pos) {
+    if (!MPB.follow || !hMap) return;
+    if (S.view !== 'vMap') return mpbFollow(false);
+    var c = pos.coords, ll = [c.latitude, c.longitude];
+    S.here = ll; S.hereAt = Date.now(); S.hereAcc = Math.round(c.accuracy || 0);
+    MPB.gpsHd = c.heading != null && !isNaN(c.heading) && (c.speed || 0) > 1.5 ? c.heading : null; // GPS knows the way only while moving
+    if (!MPB.L.me) MPB.L.me = L.marker(ll, { icon: L.divIcon({ className: 'mpb-me', html: '<span class="mpb-cone"></span><b></b>', iconSize: [64, 64] }), interactive: false, keyboard: false, zIndexOffset: 2000 }).addTo(hMap);
+    else MPB.L.me.setLatLng(ll);
+    if (!MPB.fixed) { MPB.fixed = true; MPB.flyTill = Date.now() + 1100; mpbFly(ll, Math.max(hMap.getZoom(), 16)); }
+    else if (Date.now() > (MPB.flyTill || 0)) hMap.panTo(ll, { animate: !mpbStill(), duration: 0.6 });
+    if (MPB.youLine && MPB.youTo) MPB.youLine.setLatLngs([ll, MPB.youTo]);
+    mpbHeading(); mpbNextUi();
+  }
+  function mpbOrient(on) {
+    var ev = 'ondeviceorientationabsolute' in window ? 'deviceorientationabsolute' : 'deviceorientation';
+    if (on && !MPB.oh) {
+      MPB.oh = function (e) {
+        var h = e.webkitCompassHeading != null ? e.webkitCompassHeading : (e.absolute || ev === 'deviceorientationabsolute') && e.alpha != null ? 360 - e.alpha : null;
+        if (h == null || isNaN(h)) return;
+        MPB.cHd = (h + ((screen.orientation && screen.orientation.angle) || 0) + 360) % 360; mpbHeading();
+      };
+      addEventListener(ev, MPB.oh);
+    }
+    if (!on && MPB.oh) { removeEventListener(ev, MPB.oh); MPB.oh = null; MPB.cHd = null; }
+  }
+  function mpbHeading() {
+    var h = MPB.gpsHd != null ? MPB.gpsHd : MPB.cHd; MPB.hd = h;
+    var el = MPB.L.me && MPB.L.me.getElement(), cone = el && el.querySelector('.mpb-cone');
+    if (cone) { cone.style.display = h == null ? 'none' : ''; if (h != null) cone.style.transform = 'rotate(' + Math.round(h) + 'deg)'; }
+    if (MPB.follow && !MPB.north && h != null) mpbTurn(-h); else if (MPB.north) mpbTurn(0);
+  }
+  // Turning the map: Leaflet can't, so its moving pane sits in a wrapper that turns, with the tiles and dots
+  // filled out to the corners. Labels on markers stay upright.
+  function mpbTurn(deg) {
+    var m = hMap; if (!m) return;
+    var cur = MPB.rot, d = (((deg - cur) % 360) + 540) % 360 - 180;
+    if (Math.abs(d) < 3 && Math.round(((deg % 360) + 360) % 360) !== 0) return;
+    var nx = cur + d, turned = Math.round(((nx % 360) + 360) % 360) % 360 !== 0, was = !!m._mpbPad;
+    if (!MPB.wrap) {
+      if (!turned) return;
+      var mp = m.getPane('mapPane'), w = MPB.wrap = document.createElement('div'); w.className = 'mpb-rot';
+      mp.parentNode.insertBefore(w, mp); w.appendChild(mp);
+      var o = L.GridLayer.prototype._getTiledPixelBounds;
+      if (!L.GridLayer.prototype._mpbPad) L.GridLayer.prototype._getTiledPixelBounds = function (c) {
+        var b = o.call(this, c); if (!this._map || !this._map._mpbPad) return b;
+        var mid = b.getCenter(), s = b.getSize(), r = Math.sqrt(s.x * s.x + s.y * s.y) / 2;
+        return L.bounds([mid.x - r, mid.y - r], [mid.x + r, mid.y + r]);
+      };
+      L.GridLayer.prototype._mpbPad = 1;
+    }
+    MPB.rot = turned ? nx : 0;
+    MPB.wrap.style.transform = turned ? 'rotate(' + nx + 'deg)' : '';
+    var c = m.getContainer(); c.classList.toggle('mpb-rotd', turned); c.style.setProperty('--mpb-un', (turned ? -nx : 0) + 'deg');
+    if (turned !== was) {
+      m._mpbPad = turned;
+      var rs = [];
+      m.eachLayer(function (l) { if (l instanceof L.GridLayer && l._map) l._update(); if (l._renderer && rs.indexOf(l._renderer) < 0) rs.push(l._renderer); });
+      rs.forEach(function (r) { r.options.padding = turned ? 0.65 : 0.1; if (r._reset) r._reset(); });
+      mpbHeatDraw();
+    }
+    var cb = $('mpbCmp'); if (cb) { cb.classList.toggle('hidden', !turned); var nd = cb.querySelector('svg'); if (nd) nd.style.transform = 'rotate(' + (turned ? nx : 0) + 'deg)'; }
+  }
+
+  // the bar over the bottom of the map: the heat legend, the time slider, the next stop while following
+  function mpbBot() {
+    var b = MPB.bot; if (b && b.isConnected) return b;
+    var ov = document.querySelector('#vMap .ov.bot') || document.querySelector('#vMap .mapwrap'); if (!ov) return null;
+    b = MPB.bot = document.createElement('div'); b.className = 'mpb-bot'; ov.insertBefore(b, ov.firstChild);
+    b.innerHTML = '<div class="mpb-card mpb-next hidden" id="mpbNext" role="status" aria-live="polite"></div>' +
+      '<div class="mpb-card mpb-leg hidden" id="mpbLeg"></div>' +
+      '<div class="mpb-card mpb-time hidden" id="mpbTime" role="group"><div class="mpb-tr"><button type="button" class="mpb-play" id="mpbPlay"></button><span class="mpb-tx"><b id="mpbYr"></b><small id="mpbYn"></small></span><button type="button" class="mpb-x" id="mpbTx"></button></div>' +
+      '<input type="range" id="mpbRange" step="1"><span class="mpb-ends"><small id="mpbLo"></small><small id="mpbHi"></small></span></div>';
+    $('mpbPlay').addEventListener('click', function () { buzz(); mpbPlay(!MPB.play); });
+    $('mpbTx').addEventListener('click', function () { buzz(); mpbYears(false); mpbBotUi(); });
+    $('mpbRange').addEventListener('input', function () { var y = Number(this.value); MPB.year = y; mpbPlay(false); mpbYearSet(y); });
+    $('mpbNext').addEventListener('click', function (e) {
+      if (e.target.closest('#mpbNx')) { buzz(); mpbFollow(false); return; }
+      var o = e.target.closest('[data-mpb-visit]'); if (o) { mpbFollow(false); openProj(o.getAttribute('data-mpb-visit'), 'visit'); }
+    });
+    return b;
+  }
+  function mpbBotUi() { if (!mpbBot()) return; mpbLegUi(); mpbTimeUi(); mpbNextUi(); }
+  function mpbLegUi() {
+    var el = $('mpbLeg'); if (!el) return;
+    var k = S.admin ? MPB.heat : ''; el.classList.toggle('hidden', !k); if (!k) return;
+    var pts = mpbHeatPts(), tot = pts.reduce(function (s, q) { return s + q.w; }, 0), n = pts.length;
+    var line = k === 'repairs' ? (n === 1 ? tr('1 open repair', 'Matengenezo 1 yaliyo wazi') : tr(n + ' open repairs', 'Matengenezo ' + n + ' yaliyo wazi')) + ' · ' + tr('not working counts double', 'isiyofanya kazi inahesabiwa mara mbili')
+      : n ? tr(Math.round(tot).toLocaleString('en-US') + ' people served at ' + n + ' sites', 'Watu ' + Math.round(tot).toLocaleString('en-US') + ' wanahudumiwa katika maeneo ' + n) : tr('No people counts yet. They come from the board and site visits.', 'Bado hakuna idadi ya watu. Zinatoka kwenye bodi na ziara.');
+    el.innerHTML = '<span class="mpb-lt"><b>' + esc(k === 'repairs' ? tr('Open repairs', 'Matengenezo yaliyo wazi') : tr('People served', 'Watu wanaohudumiwa')) + '</b>' +
+      '<span class="mpb-lr"><small>' + esc(tr('Fewer', 'Chache')) + '</small><i class="mpb-ramp" style="background:linear-gradient(90deg,' + MPB_HEAT[k].slice(1).join(',') + ')"></i><small>' + esc(tr('More', 'Zaidi')) + '</small></span>' +
+      '<small class="mpb-ln">' + esc(line) + '</small></span><button type="button" class="mpb-x" id="mpbLx" aria-label="' + esc(tr('Hide the heat map', 'Ficha ramani ya joto')) + '">' + oic('xc').replace(/<circle[^>]*\/>/, '') + '</button>';
+    $('mpbLx').addEventListener('click', function () { buzz(); MPB.heat = ''; mpbHeatDraw(); mpbLegUi(); });
+  }
+  function mpbTimeUi() {
+    var el = $('mpbTime'); if (!el) return;
+    var on = MPB.years && S.admin, sp = on && mpbYearSpan(); el.classList.toggle('hidden', !sp); if (!sp) return;
+    var Y = MPB.year, ps = S.projects.filter(function (p) { return p.gps && p.status === 'Completed' && p.year && p.year <= Y; }), ppl = ps.reduce(function (s, p) { return s + (Number(p.people) || 0); }, 0);
+    var r = $('mpbRange'); r.min = sp[0]; r.max = sp[1]; if (Number(r.value) !== Y) r.value = Y; r.setAttribute('aria-label', tr('Year', 'Mwaka')); r.setAttribute('aria-valuetext', String(Y));
+    $('mpbLo').textContent = sp[0]; $('mpbHi').textContent = sp[1];
+    $('mpbYr').textContent = tr('By ' + Y, 'Hadi ' + Y);
+    $('mpbYn').textContent = (ps.length === 1 ? tr('1 project completed', 'Mradi 1 umekamilika') : tr(ps.length + ' projects completed', 'Miradi ' + ps.length + ' imekamilika')) + (ppl ? ' · ' + tr(ppl.toLocaleString('en-US') + ' people', 'watu ' + ppl.toLocaleString('en-US')) : '');
+    var pb = $('mpbPlay'); pb.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">' + (MPB.play ? OIC.mpbPause : OIC.mpbPlay) + '</svg>';
+    pb.setAttribute('aria-label', MPB.play ? tr('Pause', 'Simamisha') : tr('Play through the years', 'Cheza kupitia miaka')); pb.setAttribute('aria-pressed', String(!!MPB.play));
+    var tx = $('mpbTx'); tx.innerHTML = oic('xc').replace(/<circle[^>]*\/>/, ''); tx.setAttribute('aria-label', tr('Close the time slider', 'Funga kitelezi cha miaka'));
+  }
+  function mpbNextUi() {
+    var el = $('mpbNext'); if (!el) return;
+    el.classList.toggle('hidden', !MPB.follow); if (!MPB.follow) { el.innerHTML = ''; return; }
+    var st = MPB.route ? mpbStops() : [], i = mpbNextIdx(st), p = i >= 0 ? st[i] : null, k, near = null;
+    if (p) k = tr('Next stop · ' + (i + 1) + ' of ' + st.length, 'Kituo kijacho · ' + (i + 1) + ' kati ya ' + st.length);
+    else if (st.length) k = tr('Today’s route is done', 'Njia ya leo imekamilika');
+    else if (S.here) { near = nearest(1)[0]; if (near) { p = near.p; k = tr('Closest site', 'Eneo la karibu zaidi'); } }
+    var d = p && S.here ? metres(S.here, p.gps) : null;
+    el.innerHTML = '<span class="mpb-nic">' + oic('mpbNav') + '</span>' +
+      (p ? '<button type="button" class="mpb-tx" data-mpb-visit="' + esc(p.id) + '"><small>' + esc(k) + '</small><b>' + esc(p.title) + '</b></button><b class="mpb-km">' + (d != null ? '≈ ' + esc(dist(d)) : '…') + '</b>'
+        : '<span class="mpb-tx"><small>' + esc(k || tr('Following you', 'Inakufuata')) + '</small><b>' + esc(st.length ? tr('All visits sent ✓', 'Ziara zote zimetumwa ✓') : tr('Finding where you are…', 'Inatafuta mahali ulipo…')) + '</b></span>') +
+      '<button type="button" class="mpb-x" id="mpbNx" aria-label="' + esc(tr('Stop following me', 'Acha kunifuata')) + '">' + oic('xc').replace(/<circle[^>]*\/>/, '') + '</button>';
+  }
+
+  // the layer switches in the map-style sheet (the home map only)
+  function mpbSheet(map, w) {
+    if (!w || !hMap || map !== hMap) return;
+    var p = w.querySelector('.bsh-p'); if (!p) return;
+    var box = document.createElement('div'); box.className = 'mpb-sh';
+    var sw = function (k, ic, t, s, on) { return '<button type="button" class="mpb-r" role="switch" data-mpb="' + k + '" aria-checked="' + !!on + '"><i class="ei">' + oic(ic) + '</i><span class="mpb-rt"><b>' + esc(t) + '</b><small>' + esc(s) + '</small></span><span class="tgl" aria-hidden="true"><i></i></span></button>'; };
+    var draw = function () {
+      var st = mpbStops(), dn = st.filter(function (x) { return mpbDone(x.id); }).length;
+      var rs = st.length ? tr(st.length + (st.length === 1 ? ' visit' : ' visits') + ' for you today · ' + dn + ' done', 'Ziara ' + st.length + ' zako leo · ' + dn + ' zimekamilika') : tr('No visits for you today', 'Huna ziara leo');
+      box.innerHTML = '<h4>' + esc(tr('On the map', 'Kwenye ramani')) + '</h4>' + sw('route', 'ofaRoute', tr('Today’s route', 'Njia ya leo'), rs, MPB.route) +
+        (S.admin ? '<h4>' + esc(tr('For the office', 'Kwa ofisi')) + '</h4>' +
+          '<div class="mpb-r mpb-hr"><i class="ei">' + oic('mpbHeat') + '</i><span class="mpb-rt"><b>' + esc(tr('Heat map', 'Ramani ya joto')) + '</b><small>' + esc(tr('Shade the areas by…', 'Paka rangi maeneo kwa…')) + '</small></span></div>' +
+          '<div class="seg mpb-seg" role="group" aria-label="' + esc(tr('Heat map', 'Ramani ya joto')) + '">' + [['', tr('Off', 'Zima')], ['repairs', tr('Open repairs', 'Matengenezo')], ['people', tr('People served', 'Watu')]].map(function (o) { return '<button type="button" data-mpb-heat="' + o[0] + '" aria-pressed="' + (MPB.heat === o[0]) + '">' + esc(o[1]) + '</button>'; }).join('') + '</div>' +
+          sw('years', 'clock', tr('Projects by year', 'Miradi kwa mwaka'), tr('A time slider with a play button, for presentations', 'Kitelezi cha miaka chenye kitufe cha kucheza, kwa mawasilisho'), MPB.years) +
+          sw('team', 'people', tr('Team live', 'Timu sasa hivi'), tr('People sharing their location · updates every 3 min', 'Wanaoshiriki mahali · inasasishwa kila dakika 3'), MPB.team) : '');
+    };
+    draw(); p.appendChild(box);
+    var focus = function (k) { var el = box.querySelector(k); if (el) el.focus(); };
+    box.addEventListener('click', function (e) {
+      var h = e.target.closest('[data-mpb-heat]'), s = e.target.closest('[data-mpb]');
+      if (h && S.admin) { buzz(); MPB.heat = h.getAttribute('data-mpb-heat'); mpbHeatDraw(); mpbLegUi(); draw(); focus('[data-mpb-heat="' + MPB.heat + '"]'); return; }
+      if (!s) return; buzz();
+      var k = s.getAttribute('data-mpb'), on = s.getAttribute('aria-checked') !== 'true';
+      if (k === 'route') { MPB.route = on; store.set('rfPinMpbRoute', on ? '1' : '0'); mpbRouteDraw(); mpbNextUi(); if (on) { var st = mpbStops(); if (st.length) mpbFlyAll(st.map(function (x) { return x.gps; }).concat(S.here ? [S.here] : []), 14); } }
+      if (k === 'years' && S.admin) { if (!mpbYears(on)) on = false; mpbBotUi(); }
+      if (k === 'team' && S.admin) mpbTeam(on);
+      draw(); focus('[data-mpb="' + k + '"]');
+    });
+  }
+
+  function mpbInit() {
+    var m = MPB.map = hMap;
+    m.createPane('mpbHeat').style.zIndex = 350; m.createPane('mpbPulse').style.zIndex = 390;
+    var Ctl = L.Control.extend({ options: { position: 'topright' }, onAdd: function () {
+      var d = L.DomUtil.create('div', 'mpb-ctl');
+      d.innerHTML = '<button type="button" class="mstyle mpb-cmp hidden" id="mpbCmp" aria-label="' + esc(tr('Turn the map back to north', 'Rudisha ramani kaskazini')) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l3.6 9.2H8.4z" fill="#D23C32"/><path d="M12 21.2L8.4 12h7.2z" fill="currentColor" opacity=".5"/></svg></button>' +
+        '<button type="button" class="mstyle mpb-fol" id="mpbFol" aria-pressed="false" aria-label="' + esc(tr('Follow me while driving', 'Nifuate ninapoendesha')) + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true">' + OIC.mpbNav + '</svg></button>';
+      L.DomEvent.disableClickPropagation(d); L.DomEvent.disableScrollPropagation(d);
+      d.querySelector('#mpbFol').addEventListener('click', function () { buzz(); mpbFollow(!MPB.follow); });
+      d.querySelector('#mpbCmp').addEventListener('click', function () { buzz(); MPB.north = true; mpbTurn(0); });
+      return d;
+    } });
+    new Ctl().addTo(m);
+    m.on('dragstart', function () { if (MPB.follow) mpbFollow(false); }); // you're looking around: stop following
+    m.on('popupopen', function (e) {
+      if (MPB.rot) { MPB.north = true; mpbTurn(0); } // read popups the right way up
+      var el = e.popup.getElement(), b = el && el.querySelector('[data-mpb-visit]');
+      if (b) b.addEventListener('click', function () { openProj(b.getAttribute('data-mpb-visit'), mpbDone(b.getAttribute('data-mpb-visit')) ? 'pin' : 'visit'); });
+    });
+    m.on('zoomstart', function () { if (MPB.heatC) MPB.heatC.style.opacity = '0'; });
+    m.on('moveend zoomend resize', mpbHeatDraw);
+    document.addEventListener('visibilitychange', function () { if (!document.hidden && MPB.team && S.view === 'vMap' && Date.now() - (MPB.tmAt || 0) > 180000) mpbTeamLoad(false); });
+    addEventListener('online', function () { if (MPB.team) mpbTeamLoad(false); });
+  }
+  function mpbDraw() {
+    if (!hMap) return;
+    if (!MPB.map) mpbInit();
+    if (!S.admin) { MPB.heat = ''; if (MPB.years) { MPB.years = false; mpbPlay(false); document.body.classList.remove('mpb-yr-on'); } if (MPB.team) mpbTeam(false); } // admin layers never show for field users
+    mpbRouteDraw(); mpbPulseDraw(); mpbYearsDraw(false); mpbHeatDraw(); mpbBotUi(); mpbDropIn();
+    if (MPB.L.me) MPB.L.me.addTo(hMap);
+  }
 
   // --- start ----------------------------------------------------------------------------------------
   netUi(); outboxUi(); progUi(); installUi();
