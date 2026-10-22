@@ -12,6 +12,8 @@ import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -136,21 +138,52 @@ class CostsTest {
         assertTrue(sum.contains("Repair spending,Average per repair (last 12 months),18350,")); assertTrue(sum.contains("Top 10 water points (last 12 months),1. Kapsaret Borehole (Kenya),28500,1")); assertTrue(sum.contains("People served,Total,48250,"))
     }
 
+    /** The sheet is its own window: draw the app, then the sheet's window on top. */
+    private fun sheetShot(name: String) {
+        rule.mainClock.advanceTimeBy(800); rule.waitForIdle()
+        val v = rule.activity.window.decorView
+        val b = Bitmap.createBitmap(v.width, v.height, Bitmap.Config.ARGB_8888); val c = Canvas(b); v.draw(c)
+        val d = org.robolectric.shadows.ShadowDialog.getLatestDialog()?.window?.decorView
+        if (d != null) { c.save(); c.translate(0f, (v.height - d.height).toFloat()); d.draw(c); c.restore() }
+        File(out, "$name.png").outputStream().use { b.compress(Bitmap.CompressFormat.PNG, 100, it) }
+    }
+    private fun sheet(tag: String) = rule.waitUntil(5000) { rule.onAllNodesWithTag(tag).fetchSemanticsNodes().isNotEmpty() }
+    private fun closeSheet(tag: String) { rule.onNodeWithTag("ocv_close").performClick(); rule.mainClock.advanceTimeBy(1000); rule.waitUntil(5000) { rule.onAllNodesWithTag(tag).fetchSemanticsNodes().isEmpty() } }
+
     @Test fun people_served_and_costs() {
         Lang.sw = false
         val m = model(); show(m)
         rule.onNodeWithTag("nav_office").performClick()
-        waitFor("People served")
-        rule.onNodeWithTag("people_served").performScrollTo(); rule.mainClock.advanceTimeBy(2000)
-        rule.onNodeWithText("48,250").assertExists(); rule.onNodeWithText("+5,950 in 12 months").assertExists()
+        waitFor("people served")
+        // people served: a tile on the overview, the details in a sheet
+        rule.onNodeWithTag("ocv_t_people").performScrollTo(); rule.mainClock.advanceTimeBy(1500)
+        rule.onAllNodesWithText("+5,950 in 12 months").onFirst().assertExists()
+        rule.onNodeWithTag("ocv_t_people").performClick(); sheet("ocv_people_sheet"); rule.mainClock.advanceTimeBy(2000)
+        rule.onNodeWithTag("people_total").assertExists(); rule.onAllNodesWithText("48,250").onFirst().assertExists()
         rule.onNodeWithText("Water points").assertExists(); rule.onNodeWithText("26,400").assertExists()
-        shot("60-office-people-served")
+        sheetShot("60-office-people-served")
+        closeSheet("ocv_people_sheet")
         rule.onNodeWithTag("o_costs").performScrollTo().performClick()
-        waitFor("Most expensive water points")
+        waitFor("Spent each month")
         rule.mainClock.advanceTimeBy(1500)
-        rule.onNodeWithText("KES 18,350").assertExists(); rule.onNodeWithText("2 repairs in the last 12 months").assertExists()
-        shot("61-office-costs")
-        rule.onNodeWithTag("costs_top").performScrollTo(); shot("62-office-costs-top")
+        rule.onNodeWithText("18,350").assertExists(); rule.onNodeWithText("average per repair").assertExists(); rule.onNodeWithText("2 repairs").assertExists()
+        rule.onNodeWithTag("ocv_costs_head").performScrollTo(); shot("61-office-costs")
+        // the chart: tap a month
+        val first = java.time.YearMonth.now().minusMonths(11)
+        rule.onNodeWithTag("ocv_bar_$first").performScrollTo().performClick(); rule.waitForIdle()
+        assertTrue(rule.onNodeWithTag("ocv_chart_sel").fetchSemanticsNode().config[androidx.compose.ui.semantics.SemanticsProperties.Text].joinToString().contains(first.year.toString()))
+        // a cost: its sheet with the project's cost history
+        rule.onAllNodesWithTag("ocv_cost").assertCountEquals(2)
+        rule.onAllNodesWithTag("ocv_cost").onFirst().performScrollTo(); shot("61b-office-costs-list")
+        rule.onAllNodesWithTag("ocv_cost").onFirst().performClick(); sheet("ocv_cost_sheet")
+        rule.onNodeWithText("Pump cylinder").assertExists(); rule.onNodeWithTag("ocv_cost_open").assertExists()
+        sheetShot("61c-office-cost-sheet")
+        closeSheet("ocv_cost_sheet")
+        rule.onNodeWithTag("ocv_cf_top").performScrollTo().performClick(); rule.waitForIdle()
+        rule.onNodeWithTag("costs_top").performScrollTo(); rule.onAllNodesWithTag("ocv_top").assertCountEquals(2); shot("62-office-costs-top")
+        // the second approval: folded away until tapped
+        rule.onAllNodesWithTag("approve_save").assertCountEquals(0)
+        rule.onNodeWithTag("approve_setting_toggle").performScrollTo().performClick(); rule.mainClock.advanceTimeBy(500)
         rule.onNodeWithTag("approve_save").performScrollTo().performClick()
         rule.waitUntil(5000) { posts.any { it.contains("\"action\":\"settings\"") && it.contains("\"approveAbove\":\"50000\"") } }
         rule.onNodeWithTag("approve_setting").performScrollTo(); shot("63-office-costs-setting")
@@ -201,12 +234,30 @@ class CostsTest {
         Lang.sw = true
         val m = model(); show(m, dark = true)
         rule.onNodeWithTag("nav_office").performClick()
-        waitFor("Watu wanaohudumiwa")
-        rule.onNodeWithTag("people_served").performScrollTo(); rule.mainClock.advanceTimeBy(2000)
-        shot("68-people-served-dark-sw")
+        waitFor("watu wanaohudumiwa")
+        rule.onNodeWithTag("ocv_t_people").performScrollTo().performClick(); sheet("ocv_people_sheet"); rule.mainClock.advanceTimeBy(2000)
+        rule.onNodeWithText("Watu wanaohudumiwa").assertExists()
+        sheetShot("68-people-served-dark-sw"); closeSheet("ocv_people_sheet")
         rule.onNodeWithTag("o_costs").performScrollTo().performClick()
-        waitFor("Idhini ya pili")
-        shot("69-costs-dark-sw")
+        waitFor("Idhini ya pili"); rule.mainClock.advanceTimeBy(1500)
+        rule.onNodeWithTag("ocv_costs_head").performScrollTo(); shot("69-costs-dark-sw")
+        rule.onNodeWithTag("approve_setting_toggle").performScrollTo().performClick(); rule.mainClock.advanceTimeBy(500)
+        rule.onNodeWithTag("approve_setting").performScrollTo(); shot("69b-costs-setting-dark-sw")
+        rule.onAllNodesWithTag("ocv_cost").onFirst().performScrollTo().performClick(); sheet("ocv_cost_sheet")
+        sheetShot("69c-cost-sheet-dark-sw")
         Lang.sw = false
+    }
+
+    @Test fun costs_sun() {
+        Lang.sw = false
+        org.rafikioutreach.pin.ui.Look.mode = "sun"
+        try {
+            val m = model(); show(m)
+            rule.onNodeWithTag("nav_office").performClick()
+            rule.onNodeWithTag("o_costs").performScrollTo().performClick()
+            waitFor("Spent each month"); rule.mainClock.advanceTimeBy(1500)
+            rule.onNodeWithTag("ocv_costs_head").performScrollTo(); shot("69d-costs-sun")
+            rule.onAllNodesWithTag("ocv_cost").onFirst().performScrollTo(); shot("69e-costs-list-sun")
+        } finally { org.rafikioutreach.pin.ui.Look.mode = "" }
     }
 }

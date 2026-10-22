@@ -1700,6 +1700,165 @@ label.dnr-p small{display:block;color:var(--muted);font-size:.76rem;font-weight:
 .dnr-thx input[type=file]{display:block;margin-top:6px;font-size:.9rem;width:100%}
 @media (max-width:420px){.dnr-f{grid-template-columns:1fr 1fr}.dnr-f .chip{grid-column:1/-1}}
 </style>
+<style id="ocv-css">
+/* Office › Overview, Costs and Visits (ocv): calm heads, tappable tiles and cards, sheets, folded settings */
+@property --ocvp{syntax:'<number>';inherits:true;initial-value:0}
+.ocv-main{display:flex;flex-direction:column;gap:14px;min-width:0}
+.ocv-hero{padding:16px}
+.ocv-hd{display:flex;gap:12px;align-items:center}.ocv-hd>div{min-width:0}.ocv-hd h2{margin:0 0 2px;font-size:1.1rem;color:var(--ink)}.ocv-hd p{margin:0;font-size:.88rem;line-height:1.4}
+.ocv-big{flex:none;width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:var(--hb);color:var(--hu)}.ocv-big svg{width:24px;height:24px}
+.ocv-nums{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}
+.ocv-nums.kes{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (min-width:700px){.ocv-nums.kes{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.ocv-n{display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:2px;min-width:0;padding:8px 10px;border-radius:14px;background:var(--bg);border:var(--bw) solid var(--line);font:inherit;color:inherit;text-align:left}
+button.ocv-n{min-height:60px;cursor:pointer;transition:border-color .2s,background-color .2s}
+button.ocv-n:hover{border-color:var(--blue)}button.ocv-n[aria-pressed=true]{border-color:var(--blue);background:var(--tint)}
+button.ocv-n:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.ocv-n b{display:block;font-size:1.3rem;line-height:1.25;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.ocv-nums.kes .ocv-n b{font-size:1.15rem}
+.ocv-n b .ocv-cur{font-size:.68em;font-weight:800;color:var(--muted);margin-right:1px;letter-spacing:.02em}
+.ocv-n small{display:block;font-size:.74rem;line-height:1.3;color:var(--muted);font-weight:600}.ocv-n small .nw{white-space:nowrap}.ocv-n small .ocv-l2{display:block}
+.ocv-n.bad b{color:var(--bad)}.ocv-n.warn b{color:var(--warn)}
+.ocv-addb{margin-top:12px;min-height:52px}
+.ocv-box{padding:16px}
+.ocv-h{margin:0;font-size:1rem;line-height:1.3;color:var(--ink)}
+.ocv-box>.ocv-h{margin-bottom:4px}
+.ocv-lhd{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:6px 2px -6px}
+/* the overview: on the map, tiles, countries, the field */
+.ocv-map{display:flex;align-items:center;gap:12px;width:100%;margin-top:12px;padding:10px 12px;min-height:68px;border:var(--bw) solid var(--line);border-radius:16px;background:var(--bg);color:inherit;font:inherit;text-align:left;cursor:pointer;transition:border-color .2s}
+.ocv-map:disabled{cursor:default;opacity:1}.ocv-map:not(:disabled):hover{border-color:var(--blue)}.ocv-map:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.ocv-ring{flex:none;position:relative;width:48px;height:48px;border-radius:50%;background:conic-gradient(var(--blue) calc(var(--ocvp) * 1%),var(--line) 0);transition:--ocvp 1.3s cubic-bezier(.2,.7,.2,1)}
+.ocv-ring::before{content:"";position:absolute;inset:5px;border-radius:50%;background:var(--bg)}
+.ocv-ring span{position:absolute;inset:0;display:grid;place-items:center;font-size:.76rem;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums}
+.ocv-map .tx{flex:1;min-width:0}.ocv-map .tx b{display:block;font-size:.93rem;line-height:1.3;color:var(--ink)}.ocv-map .tx small{display:block;margin-top:1px;font-size:.8rem;line-height:1.35;color:var(--muted)}
+.ocv-chev{flex:none;display:flex;color:var(--muted);transition:transform .2s}.ocv-chev svg{width:18px;height:18px}
+.ocv-tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media (min-width:560px){.ocv-tiles{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.ocv-tile{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;min-height:132px;padding:14px 14px 14px;border:var(--bw) solid var(--line);border-radius:20px;background:var(--card);color:inherit;font:inherit;text-align:left;cursor:pointer;
+  animation:rowIn .4s both;animation-delay:calc(var(--i,0) * 45ms);transition:transform .18s,box-shadow .18s,border-color .18s}
+.ocv-tile:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(4,38,63,.1);border-color:var(--blue)}
+.ocv-tile:active{transform:scale(.98)}.ocv-tile:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+html[data-theme=dark] .ocv-tile:hover{box-shadow:none}
+.ocv-tile .ic{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:var(--hb);color:var(--hu);margin-bottom:8px}.ocv-tile .ic svg{width:21px;height:21px}
+.ocv-tile b{font-size:1.6rem;font-weight:800;line-height:1.1;color:var(--ink);font-variant-numeric:tabular-nums}
+.ocv-tile .l{font-size:.82rem;font-weight:700;line-height:1.3;color:var(--muted);padding-right:18px}
+.ocv-tile small{font-size:.74rem;line-height:1.35;color:var(--muted);padding-right:18px}.ocv-tile small .nw{white-space:nowrap}.ocv-tile small.up{color:var(--ok);font-weight:700}
+.ocv-tile .go{position:absolute;right:10px;bottom:12px;display:flex;color:var(--muted);transition:transform .2s,color .2s}.ocv-tile .go svg{width:16px;height:16px}
+.ocv-tile:hover .go,.ocv-crow:hover .ocv-chev,.ocv-map:not(:disabled):hover .ocv-chev,.ocv-fi:hover .ocv-chev{transform:translateX(2px);color:var(--blue)}
+.ocv-tile.hot{border-color:var(--warn)}.ocv-tile.hot .ic{background:var(--warnbg);color:var(--warn)}
+.ocv-tile.red{border-color:var(--bad)}.ocv-tile.red .ic{background:var(--badbg);color:var(--bad)}
+.ocv-pulse{position:absolute;top:14px;right:14px;width:9px;height:9px;border-radius:50%;background:var(--bad);box-shadow:0 0 0 0 rgba(210,60,50,.5);animation:pulse 2s infinite}
+.ocv-crow{display:flex;align-items:center;gap:12px;width:100%;min-height:72px;padding:12px 0;border:0;border-top:var(--bw) solid var(--line);background:none;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.ocv-box>.ocv-h+.ocv-crow{border-top:0}
+.ocv-crow:focus-visible,.ocv-fi:focus-visible{outline:3px solid var(--blue);outline-offset:2px;border-radius:12px}
+.ocv-crow .fl{flex:none;width:42px;height:42px;border-radius:13px;background:var(--tint);display:grid;place-items:center;font-size:1.35rem}
+.ocv-crow .mid{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start}
+.ocv-crow .ocv-ct{display:flex;justify-content:space-between;align-items:baseline;gap:2px 10px;flex-wrap:wrap;width:100%}
+.ocv-crow .ocv-ct b{color:var(--ink);font-size:.95rem}.ocv-crow .ocv-ct span{font-size:.78rem;color:var(--muted);white-space:nowrap}
+.ocv-meter{display:block;width:100%;height:6px;border-radius:99px;background:var(--line);overflow:hidden;margin:6px 0 8px}
+.ocv-meter i{display:block;height:100%;width:0;border-radius:99px;background:var(--blue);transition:width 1.1s cubic-bezier(.2,.7,.2,1)}
+.ocv-meter.big{height:8px;margin:4px 0 6px}
+.ocv-feed{list-style:none;margin:6px 0 0;padding:0}
+.ocv-feed li+li{border-top:var(--bw) solid var(--line)}
+.ocv-fi{display:flex;gap:12px;align-items:center;width:100%;padding:10px 0;border:0;background:none;color:inherit;font:inherit;text-align:left}
+button.ocv-fi{cursor:pointer;min-height:56px}
+.ocv-fi .dt{flex:none;align-self:flex-start;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;color:var(--c);background:color-mix(in srgb,var(--c) 14%,transparent)}.ocv-fi .dt svg{width:16px;height:16px}
+.ocv-fi .tx{flex:1;min-width:0;font-size:.9rem;line-height:1.4;color:var(--text);overflow-wrap:break-word}.ocv-fi .tx b{color:var(--ink)}.ocv-fi .tx small{display:block;margin-top:1px;color:var(--muted);font-size:.78rem}
+html[data-theme=dark] .ocv-fi .dt{color:color-mix(in srgb,var(--c) 70%,#FFFFFF)}
+.ocv-more{margin-top:10px}
+/* pills, chips, list cards */
+.ocv-pill{display:inline-flex;align-items:flex-start;gap:6px;max-width:100%;padding:3px 10px 3px 8px;border-radius:12px;font-size:.74rem;font-weight:800;line-height:1.35;text-align:left}
+.ocv-pill i{flex:none;width:7px;height:7px;margin-top:.38em;border-radius:50%;background:currentColor}
+.ocv-t-bad{background:var(--badbg);color:var(--bad)}.ocv-t-warn{background:var(--warnbg);color:var(--warn)}.ocv-t-ok{background:var(--okbg);color:var(--ok)}.ocv-t-has{background:var(--tint);color:var(--blue2)}.ocv-t-off{background:var(--hb-slate);color:var(--muted)}
+html[data-theme=sun] .ocv-pill{border:1.5px solid currentColor}
+.ocv-chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:2px 16px 6px}.ocv-chips::-webkit-scrollbar{display:none}
+.ocv-chips+.ocv-chips{margin-top:-6px}
+.ocv-chips .chip .n{background:var(--hb-slate);color:var(--ink);margin-left:2px}
+.ocv-chips.ppl .chip{min-height:40px;font-size:.84rem;font-weight:700}
+html[data-theme=dark] #oBody .ocv-chips .chip[aria-pressed=true]{background:var(--blue2);border-color:transparent;color:#0B1116}html[data-theme=dark] #oBody .ocv-chips .chip[aria-pressed=true] .n{background:rgba(11,17,22,.18);color:#0B1116}
+.ocv-list{display:grid;gap:8px}
+.ocv-card{display:grid;grid-template-columns:40px minmax(0,1fr) auto;grid-template-areas:"av tt wh" "av pl tm" "av mt mt";column-gap:12px;row-gap:5px;align-items:center;width:100%;padding:14px;border:var(--bw) solid var(--line);border-radius:20px;background:var(--card);color:inherit;font:inherit;text-align:left;cursor:pointer;
+  transition:border-color .2s,box-shadow .2s,transform .12s;animation:rowIn .35s both;animation-delay:calc(min(var(--i,0),8) * 35ms)}
+.ocv-card:hover{border-color:var(--blue);box-shadow:0 6px 18px rgba(4,38,63,.08)}.ocv-card:active{transform:scale(.985)}.ocv-card:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+html[data-theme=dark] .ocv-card:hover{box-shadow:none}
+.ocv-card .av{grid-area:av;align-self:start}
+.ocv-card .av .tm-av{width:40px;height:40px;font-size:.84rem}
+.ocv-card .tt{grid-area:tt;min-width:0;font-weight:800;color:var(--ink);font-size:.98rem;line-height:1.3;overflow-wrap:break-word;hyphens:none}
+.ocv-card .wh{grid-area:wh;align-self:start;display:flex;align-items:center;gap:2px;margin-top:1px;font-size:.8rem;font-weight:700;color:var(--muted);white-space:nowrap}
+.ocv-card .wh b{font-size:.93rem;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums}
+.ocv-card .wh svg{width:16px;height:16px;margin-right:-4px;transition:transform .2s}.ocv-card:hover .wh svg{transform:translateX(2px);color:var(--blue)}
+.ocv-card .pl{grid-area:pl;justify-self:start;min-width:0;display:flex}
+.ocv-card .tm{grid-area:tm;justify-self:end;font-size:.76rem;font-weight:600;color:var(--muted);white-space:nowrap}
+.ocv-card .mt{grid-area:mt;min-width:0;font-size:.82rem;line-height:1.45;color:var(--muted)}
+.ocv-card .mt>span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ocv-card .mt>span.ocv-meter{margin:6px 0 0;height:5px}
+.ocv-card .mt .nt{font-style:italic}
+.ocv-card.ocv-top{grid-template-areas:"av tt wh" "av mt mt"}
+.ocv-ic{flex:none;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:var(--hb);color:var(--hu)}.ocv-ic svg{width:20px;height:20px}
+.ocv-rk{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:var(--hb-amber);color:var(--hu-amber);font-weight:800;font-size:.9rem}.ocv-rk.one{background:var(--hu-coral);color:#FFFFFF}
+.ocv-rc-ic{display:inline-flex;vertical-align:-3px;color:var(--ok)}.ocv-rc-ic svg{width:15px;height:15px}
+html[data-theme=sun] .ocv-card .av .tm-av,html[data-theme=sun] .ocv-ic,html[data-theme=sun] .ocv-rk{border:2px solid #000}
+.ocv-none .empty{padding-top:10px}
+/* the costs chart */
+.ocv-ch-hd{display:flex;justify-content:space-between;align-items:baseline;gap:2px 12px;flex-wrap:wrap}
+.ocv-ch-sel{margin:0;font-size:.82rem;line-height:1.4;color:var(--muted);font-weight:600}.ocv-ch-sel b{color:var(--ink)}
+.ocv-bars{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:4px;align-items:end;margin-top:14px}
+.ocv-bar{display:flex;flex-direction:column;align-items:stretch;gap:6px;min-width:0;min-height:44px;padding:0;border:0;background:none;font:inherit;color:inherit;cursor:pointer}
+.ocv-bar .col{display:flex;align-items:flex-end;height:112px;border-radius:8px;background:var(--bg)}
+.ocv-bar .col i{display:block;width:100%;height:0;min-height:3px;border-radius:8px;background:var(--hu-amber);opacity:.5;transition:height 1s cubic-bezier(.2,.7,.2,1),opacity .2s}
+.ocv-bar.on .col i,.ocv-bar:hover .col i{opacity:1}
+.ocv-bar small{font-size:.64rem;font-weight:700;line-height:1.2;color:var(--muted);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:clip}
+.ocv-bar.on small{color:var(--ink)}
+.ocv-bar:focus-visible{outline:3px solid var(--blue);outline-offset:2px;border-radius:8px}
+html[data-theme=sun] .ocv-bar .col{border:1.5px solid #000}html[data-theme=sun] .ocv-bar .col i{opacity:.55}html[data-theme=sun] .ocv-bar.on .col i{opacity:1}
+/* folded settings */
+.ocv-sets{padding:4px 16px}
+.ocv-side .ocv-sets{margin-top:12px}
+.ocv-sec+.ocv-sec{border-top:var(--bw) solid var(--line)}
+.ocv-row{display:flex;align-items:center;gap:12px;width:100%;min-height:64px;padding:10px 0;border:0;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.ocv-row:focus-visible{outline:3px solid var(--blue);outline-offset:2px;border-radius:12px}
+.ocv-ri{flex:none;width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:var(--hb);color:var(--hu)}.ocv-ri svg{width:20px;height:20px}
+.ocv-rl{flex:1;min-width:0}.ocv-rl b{display:block;font-size:.95rem;line-height:1.3;color:var(--ink)}.ocv-rl small{display:block;font-size:.8rem;font-weight:600;line-height:1.4;color:var(--muted)}
+.ocv-rc{flex:none;display:flex;color:var(--muted);transform:rotate(90deg);transition:transform .28s cubic-bezier(.2,.8,.2,1)}.ocv-rc svg{width:18px;height:18px}
+.ocv-sec.open .ocv-rc{transform:rotate(-90deg)}
+.ocv-drop{display:grid;grid-template-rows:0fr;transition:grid-template-rows .3s cubic-bezier(.2,.8,.2,1)}.ocv-sec.open .ocv-drop{grid-template-rows:1fr}
+.ocv-in{min-height:0;overflow:hidden}.ocv-pad{padding:0 0 16px}.ocv-pad>p.muted:first-child{margin-top:0;font-size:.86rem}
+.ocv-pad .btn{min-height:48px}
+/* sheets */
+.ocv-shd{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;padding:4px 36px 8px}
+.ocv-shi{width:64px;height:64px;border-radius:20px;display:grid;place-items:center;margin-bottom:4px;background:var(--hb);color:var(--hu);animation:tmPop .5s cubic-bezier(.34,1.56,.64,1) .08s both}.ocv-shi svg{width:32px;height:32px}.ocv-shi .fl{font-size:2rem;line-height:1}
+.ocv-shd h3{margin:0;font-size:1.25rem;line-height:1.3;color:var(--ink);overflow-wrap:break-word;hyphens:none}
+.ocv-shd small{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:6px;font-size:.9rem;color:var(--muted)}
+.ocv-rel{font-weight:600}
+.ocv-lab{margin:18px 0 6px;font-size:.72rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.ocv-kv{margin:12px 0 0;font-size:.9rem}.ocv-kv div{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:10px 0;border-bottom:1px solid var(--line)}
+.ocv-kv dt{flex:none;max-width:45%;color:var(--muted)}.ocv-kv dd{margin:0;min-width:0;font-weight:700;color:var(--ink);text-align:right;overflow-wrap:break-word}.ocv-kv dd small{display:block;margin-top:2px;font-size:.8rem;font-weight:500;color:var(--muted)}
+.ocv-v{font-variant-numeric:tabular-nums}.ocv-v.ok{color:var(--ok)}.ocv-v.warn{color:var(--warn)}.ocv-v.bad{color:var(--bad)}.ocv-v.has{color:var(--blue2)}
+.ocv-who{display:inline-flex;align-items:center;gap:8px}.ocv-who .tm-av{width:28px;height:28px;font-size:.66rem}
+.ocv-acts{display:grid;gap:8px;margin-top:16px}.ocv-two{display:grid;grid-template-columns:1fr 1fr;gap:8px}.ocv-acts .btn{width:100%;min-height:52px}.ocv-acts .msg{margin:0}.ocv-acts .msg:empty{display:none}
+.ocv-acts .btn.ocv-red{color:var(--bad)}
+.ocv-acts .tm-cf:empty{display:none}.ocv-acts .tm-ask{margin-top:0}
+.ocv-re{padding:12px 14px 14px;border-radius:16px;background:var(--hb-slate)}.ocv-re.in{animation:tmAsk .32s cubic-bezier(.34,1.3,.64,1) both}
+.ocv-re .btn{margin-top:12px}
+.ocv-f label{display:block;margin:12px 0 0}.ocv-f input,.ocv-f select{margin-top:6px;min-height:48px}
+.ocv-f .row2{display:grid;grid-template-columns:1fr;gap:0 10px}
+@media (min-width:420px){.ocv-f .row2{grid-template-columns:1fr 1fr}}
+.ocv-re .ocv-f label:first-child{margin-top:0}
+.ocv-f input[type=search]{margin-top:12px}
+.ocv-pick{display:grid;gap:6px;margin-top:10px}.ocv-pick .row{min-height:64px}.ocv-pick .row .t,.ocv-pick .row .s{white-space:normal;overflow-wrap:break-word;text-overflow:clip}
+.ocv-foot{position:sticky;bottom:calc(-18px - env(safe-area-inset-bottom));z-index:1;display:flex;flex-direction:column;gap:6px;margin:14px -18px calc(-18px - env(safe-area-inset-bottom));padding:12px 18px calc(14px + env(safe-area-inset-bottom));background:var(--card);border-top:1px solid var(--line)}
+.ocv-foot .btn{width:100%;min-height:52px}.ocv-foot .msg{margin:0}.ocv-foot .msg:empty{display:none}
+@media (min-width:700px){.ocv-foot{bottom:-22px;margin:14px -22px -22px;padding:12px 22px 18px}}
+.ocv-total{text-align:center;margin:8px 0 2px}.ocv-total b{display:block;font-size:2rem;font-weight:800;line-height:1.15;color:var(--ink);font-variant-numeric:tabular-nums}.ocv-total small{display:block;margin-top:4px;font-size:.85rem;color:var(--muted)}
+.ocv-hist{list-style:none;margin:0;padding:0}
+.ocv-hist li{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.ocv-hist .ocv-ic{width:36px;height:36px;border-radius:11px}.ocv-hist .ocv-ic svg{width:18px;height:18px}
+.ocv-hist .tx{flex:1;min-width:0}.ocv-hist .tx b{display:block;font-size:.92rem;line-height:1.35;color:var(--ink);overflow-wrap:break-word}.ocv-hist .tx small .nw{white-space:nowrap}.ocv-hist .tx small{display:block;font-size:.78rem;line-height:1.4;color:var(--muted)}
+.ocv-hist .v{flex:none;font-size:.92rem;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.ocv-sh .ofb-people{border:0;padding:0;animation:none;background:none}
+.ocv-sh .ofb-ph{padding-right:40px}
+@media (min-width:1000px){body.wide .ocv-vg .ocv-vs{order:2}}
+@media (prefers-reduced-motion: reduce){.ocv-tile,.ocv-card,.ocv-shi,.ocv-re.in{animation:none !important}.ocv-ring,.ocv-meter i,.ocv-bar .col i,.ocv-drop,.ocv-rc,.ocv-tile,.ocv-card,.ocv-chev{transition:none !important}.ocv-pulse{animation:none}}
+</style>
 </head>
 <body class="locked">
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
@@ -5094,65 +5253,7 @@ label.dnr-p small{display:block;color:var(--muted);font-size:.76rem;font-weight:
       (function step(t) { var k = Math.min(1, (t - t0) / d); put(to * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(step); })(t0);
     });
   }
-  function oOverview(b) {
-    var P = S.projects, pinned = P.filter(function (p) { return p.gps; }).length, rep = Object.keys(S.repairs).map(function (k) { return S.repairs[k]; });
-    var st = { working: 0, repair: 0, notworking: 0 }; Object.keys(S.visits).forEach(function (k) { var v = S.visits[k]; if (st[v.state] != null) st[v.state]++; });
-    var urgent = rep.filter(function (r) { return r.urgency === 'urgent'; }).length, cost = rep.reduce(function (s, r) { return s + (Number(r.cost) || 0); }, 0);
-    var due = P.filter(function (p) { return p.gps && ageDays(p) >= DUE_DAYS; }).length;
-    var mFrom = new Date(); mFrom = new Date(mFrom.getFullYear(), mFrom.getMonth(), 1).getTime();
-    var vmOf = function () { return (actCache || []).filter(function (e) { return e.a === 'visit' && Date.parse(e.at) >= mFrom; }).length; };
-    var pct = Math.round(pinned / Math.max(1, P.length) * 100), missing = P.length - pinned;
-    var seen = st.working + st.repair + st.notworking, unseen = Math.max(0, P.length - seen), tot = Math.max(1, P.length);
-    var n = function (v, pre) { return '<b data-n="' + v + '"' + (pre ? ' data-pre="' + pre + '"' : '') + '>' + (pre || '') + v.toLocaleString('en-US') + '</b>'; };
-    var ti = 0, act = function (o) {
-      return '<button type="button" class="kpi otile' + (o.hot ? ' hot' + (o.red ? ' red' : '') : '') + '" style="--i:' + (ti++) + '"' + (o.go ? ' data-go="' + o.go + '"' : '') + '>' + (o.red ? '<i class="pulse" aria-hidden="true"></i>' : '') +
-        '<span class="ic">' + oic(o.ic) + '</span>' + o.v + '<span>' + o.l + '</span>' + (o.sub ? '<small>' + o.sub + '</small>' : '') + '</button>';
-    };
-    b.innerHTML = '<div class="o-grid"><div class="oview">' +
-      '<button type="button" class="kpi tank" data-go="list-missing" aria-label="' + pct + '% of projects have a location. Show the ' + missing + ' without one.">' +
-        '<span class="orb" aria-hidden="true"><span class="lvl" id="oLvl"><svg viewBox="0 0 240 16" preserveAspectRatio="none"><path class="w2" d="M0 8 Q30 0 60 8 T120 8 T180 8 T240 8 V16 H0z"/><path class="w1" d="M0 8 Q30 16 60 8 T120 8 T180 8 T240 8 V16 H0z"/></svg><i></i></span><span class="pct" data-n="' + pct + '" data-suf="%">' + pct + '%</span></span>' +
-        '<span class="tx"><b>' + pinned.toLocaleString('en-US') + ' of ' + P.length.toLocaleString('en-US') + ' projects are on the map</b><p>' + (missing ? missing + ' still need a location pinned in the field.' : 'Every project has a location.') + '</p>' + (missing ? '<span class="go">Show them ' + oic('arrow') + '</span>' : '') + '</span></button>' +
-      '<div class="otiles">' +
-        act({ ic: 'wrench', v: n(rep.length), l: 'open repairs', sub: (urgent ? urgent + ' urgent' : '') + (urgent && cost ? ', ' : '') + (cost ? 'KES ' + cost.toLocaleString('en-US') + ' estimated' : (urgent ? '' : 'no cost estimate yet')), go: 'o-repairs', hot: rep.length > 0, red: urgent > 0 }) +
-        act({ ic: 'inbox', v: n(S.reviewOpen || 0), l: 'waiting for your review', go: 'o-review', hot: (S.reviewOpen || 0) > 0 }) +
-        act({ ic: 'cal', v: n(due), l: 'due a visit', sub: 'not seen for 6+ months', go: 'list-due' }) +
-        act({ ic: 'flask', v: n(prjTestCount(P)), l: tr('water tests due', 'vipimo vya maji vinahitajika'), sub: tr('water points not tested for 6+ months', 'vituo vya maji havijapimwa kwa miezi 6+'), go: 'list-due', hot: prjTestCount(P) > 0 }) +
-        act({ ic: 'clip', v: '<b id="oVm"' + (actCache ? ' data-n="' + vmOf() + '"' : '') + '>' + (actCache ? vmOf() : '…') + '</b>', l: 'visits this month', go: 'o-visits' }) +
-      '</div>' + ofbPeopleHtml() +
-      '<div class="ohealth"><div class="hd"><b>Condition at last visit</b><span>' + seen + ' of ' + P.length + ' visited in the app</span></div>' +
-        '<div class="hbar" role="img" aria-label="' + st.working + ' working, ' + st.repair + ' needed repair, ' + st.notworking + ' not working, ' + unseen + ' not visited yet">' +
-          '<i class="g" data-w="' + (st.working / tot * 100) + '"></i><i class="a" data-w="' + (st.repair / tot * 100) + '"></i><i class="r" data-w="' + (st.notworking / tot * 100) + '"></i><i class="n" data-w="' + (unseen / tot * 100) + '"></i></div>' +
-        '<ul class="hleg"><li><i style="background:#1C9C5A"></i><b>' + st.working + '</b>working</li><li><i style="background:#E39A1E"></i><b>' + st.repair + '</b>needed repair</li><li><i style="background:#D23C32"></i><b>' + st.notworking + '</b>not working</li><li><i style="background:var(--off)"></i><b>' + unseen + '</b>not visited yet</li></ul></div>' +
-      '<h2>By country</h2><div class="ctry">' +
-      ['ke', 'tz', 'ug', 'mw'].map(function (c) {
-        var l = P.filter(function (p) { return p.ck === c; }); if (!l.length) return '';
-        var k = function (s) { return l.filter(function (p) { return S.visits[p.id] && S.visits[p.id].state === s; }).length; };
-        var loc = l.filter(function (p) { return p.gps; }).length, rp = l.filter(function (p) { return S.repairs[p.id]; }).length, du = l.filter(function (p) { return p.gps && ageDays(p) >= DUE_DAYS; }).length;
-        var pill = function (v, txt, col) { return v ? '<em style="--c:' + col + '">' + v + ' ' + txt + '</em>' : ''; };
-        return '<div class="crow"><span class="fl" aria-hidden="true">' + (FLAG[c] || '') + '</span><div><div class="top2"><b>' + CNAME[c] + '</b><span>' + loc + ' of ' + l.length + ' mapped</span></div>' +
-          '<div class="bar" role="img" aria-label="' + loc + ' of ' + l.length + ' mapped"><i data-w="' + (loc / l.length * 100) + '"></i></div>' +
-          '<div class="pills">' + ((rp || du || k('working') || k('repair') || k('notworking')) ? '' : '<em style="--c:#1C9C5A">Nothing needs attention</em>') + pill(k('working'), 'working', '#1C9C5A') + pill(k('repair'), 'needed repair', '#E39A1E') + pill(k('notworking'), 'not working', '#D23C32') + pill(rp, 'open ' + (rp === 1 ? 'repair' : 'repairs'), '#E39A1E') + pill(du, 'due a visit', '#0A78C2') + '</div></div></div>';
-      }).join('') + '</div>' +
-      '<h2>Latest from the field</h2><ul class="otl" id="oFeed"><li class="muted">Loading…</li></ul></div>' +
-      '<div class="o-side"><div class="map o-map" id="oMap" role="application" aria-label="Map of projects: open repairs in orange and red"></div><p class="muted" style="margin-top:6px">Orange and red: open repairs. Green: other projects with a location.</p></div></div>';
-    countUp(b);
-    requestAnimationFrame(function () { requestAnimationFrame(function () {
-      var lv = $('oLvl'); if (lv) lv.style.setProperty('--lvl', Math.max(pct, 4) + '%');
-      qa('[data-w]', b).forEach(function (el) { el.style.width = el.getAttribute('data-w') + '%'; });
-    }); });
-    var feedDraw = function () {
-      $('oFeed').innerHTML = (actCache || []).slice(-12).reverse().map(function (e) { var f = FEEDIC[e.a] || ['drop', '#0A78C2']; return '<li><span class="dt" style="--c:' + f[1] + '">' + oic(f[0]) + '</span><div><b>' + esc(e.by) + '</b> ' + (VERB[e.a] || e.a) + ' ' + esc(e.t || '') + '<small>' + esc(when(e.at)) + '</small></div></li>'; }).join('') || '<li class="muted">Nothing yet.</li>';
-    };
-    if (actCache) feedDraw();
-    if (navigator.onLine) api('GET', null, '?activity=1').then(function (j) { if (j.ok) { actCache = j.activity || []; if (O.tab === 'overview' && S.view === 'vOffice') { feedDraw(); var k = $('oVm'); if (k) { k.setAttribute('data-n', vmOf()); countUp(k.parentNode); } } } });
-    setTimeout(function () {
-      if (oMap) { oMap.remove(); oMap = null; }
-      oMap = L.map('oMap', { zoomControl: true }); layers(oMap);
-      var g = L.featureGroup();
-      P.forEach(function (p) { if (p.gps) L.circleMarker(p.gps, dotStyle(p)).bindTooltip(esc(p.title)).on('click', function () { openProj(p.id); }).addTo(g); });
-      g.addTo(oMap); if (g.getLayers().length) oMap.fitBounds(g.getBounds().pad(0.1)); else oMap.setView([-3, 35], 5);
-    }, 40);
-  }
+  function oOverview(b) { ocvOverview(b); }
 
   // repairs: jobs with steps, a person, a due date and a budget
   function oRepairs(b) {
@@ -5194,49 +5295,8 @@ label.dnr-p small{display:block;color:var(--muted);font-size:.76rem;font-weight:
     }
   });
 
-  // visits: assign projects to a field officer for a date
-  function oVisits(b) {
-    var tomorrow = new Date(Date.now() + 864e5).toISOString().slice(0, 10);
-    b.innerHTML = '<div class="o-grid"><div class="card"><h2>Assign visits</h2>' +
-      '<div class="ofields"><label>Field officer<select id="aTo">' + names().map(function (n) { return '<option>' + esc(n) + '</option>'; }).join('') + '</select></label>' +
-      '<label>Date<input type="date" id="aDate" value="' + tomorrow + '"></label></div>' +
-      '<label>Note (optional)<input type="text" id="aNote" placeholder="e.g. check the pump and meet the committee"></label>' +
-      '<div class="ofields"><label>Show<select id="aF"><option value="due">Due a visit</option><option value="repairs">Open repairs</option><option value="all">All with a location</option></select></label>' +
-      '<label>Country<select id="aC"><option value="">All</option><option value="ke">Kenya</option><option value="tz">Tanzania</option><option value="ug">Uganda</option><option value="mw">Malawi</option></select></label></div>' +
-      '<input type="search" id="aQ" placeholder="Search projects" aria-label="Search projects" style="margin-top:10px">' +
-      '<div class="list" id="aList" style="margin-top:10px;max-height:420px;overflow:auto"></div>' +
-      '<div class="oact"><button class="btn" type="button" id="aGo" disabled>Assign</button><span class="msg" id="aMsg" aria-live="polite"></span></div></div>' +
-      '<div class="card"><h2>Planned visits</h2><div id="aPlan"><p class="muted">Loading…</p></div></div></div>';
-    if (!names().length) $('aTo').outerHTML = '<p class="msg warn">Add people in the Team tab first.</p>';
-    $('aC').value = homeCk() || '';
-    var draw = function () {
-      var f = $('aF').value, c = $('aC').value, q = $('aQ').value.trim().toLowerCase();
-      var rows = S.projects.filter(function (p) { return p.gps && (!c || p.ck === c) && (!q || (p.title + ' ' + p.area).toLowerCase().indexOf(q) >= 0) && (f === 'all' || (f === 'repairs' ? S.repairs[p.id] : ageDays(p) >= DUE_DAYS)); });
-      if (f === 'due') rows.sort(function (a, z) { return ageDays(z) - ageDays(a); });
-      $('aList').innerHTML = rows.slice(0, 150).map(function (p) { var on = O.pick.indexOf(p.id) >= 0; return '<button class="row" type="button" role="checkbox" aria-checked="' + on + '" data-pick="' + esc(p.id) + '"><span class="ck" aria-hidden="true">' + (on ? '✓' : '') + '</span><span class="tx"><span class="t">' + esc(p.title) + '</span><span class="s">' + esc(sub(p)) + '</span></span><span class="tag">' + (S.repairs[p.id] ? 'Repair' : ageText(p)) + '</span></button>'; }).join('') || '<p class="muted">No projects match.</p>';
-      $('aGo').disabled = !O.pick.length || !$('aTo').value; $('aGo').textContent = O.pick.length ? 'Assign ' + O.pick.length + ' visit' + (O.pick.length === 1 ? '' : 's') : 'Assign';
-    };
-    ['aF', 'aC'].forEach(function (x) { $(x).addEventListener('change', draw); }); $('aQ').addEventListener('input', draw);
-    $('aList').addEventListener('click', function (e) { var r = e.target.closest('[data-pick]'); if (!r) return; var id = r.getAttribute('data-pick'), i = O.pick.indexOf(id); if (i >= 0) O.pick.splice(i, 1); else O.pick.push(id); draw(); });
-    $('aGo').addEventListener('click', function () {
-      var btn = this; btn.disabled = true; msg('aMsg', '', 'Assigning…');
-      adminApi('POST', { action: 'assign', ids: O.pick, to: $('aTo').value, date: $('aDate').value, note: $('aNote').value }).then(function (j) {
-        if (!j.ok) { btn.disabled = false; msg('aMsg', 'bad', why(j)); return; }
-        msg('aMsg', 'ok', 'Assigned ✓ ' + $('aTo').value + ' will see ' + (j.items.length === 1 ? 'it' : 'them') + ' in their app.'); O.pick = []; O.assign = null; draw(); plan();
-      });
-    });
-    var plan = function () {
-      adminApi('GET', null, '?view=assign').then(function (j) {
-        if (!j.ok) { $('aPlan').innerHTML = '<p class="msg bad">' + esc(why(j)) + '</p>'; return; }
-        var open = j.items.filter(function (a) { return !a.done; }).sort(function (a, z) { return a.date.localeCompare(z.date); }), today = new Date().toISOString().slice(0, 10);
-        var done = j.items.filter(function (a) { return a.done; }).sort(function (a, z) { return z.done.localeCompare(a.done); }).slice(0, 10);
-        $('aPlan').innerHTML = (open.length ? open.map(function (a) { return '<div class="kv"><span><b>' + esc(a.date) + '</b>' + (a.date < today ? ' <span class="tag bad">overdue</span>' : '') + ' · ' + esc(a.to) + '<br><small>' + esc(a.t || pname(a.id)) + (a.note ? ' — ' + esc(a.note) : '') + '</small></span><button class="lnk" type="button" data-unassign="' + esc(a.aid) + '">Remove</button></div>'; }).join('') : '<p class="muted">No visits planned.</p>') +
-          (done.length ? '<h3 style="margin-top:14px">Recently done</h3>' + done.map(function (a) { return '<div class="kv"><span>✅ ' + esc(a.t || pname(a.id)) + '<br><small>' + esc(a.to) + ' · ' + esc(when(a.done)) + '</small></span></div>'; }).join('') : '');
-      });
-    };
-    $('aPlan').addEventListener('click', function (e) { var u = e.target.closest('[data-unassign]'); if (!u) return; adminApi('POST', { action: 'unassign', aid: u.getAttribute('data-unassign') }).then(function () { plan(); }); });
-    draw(); plan();
-  }
+  // visits: the assigned visits as cards; the assign form and each visit's actions in sheets (ocv…)
+  function oVisits(b) { ocvVisits(b); }
 
   // review queue
   var KIND = { new: '🆕 New site', move: '📍 Location moved over 500 m', request: '🔒 Change to a confirmed location', story: '✨ Story moment' };
@@ -6160,50 +6220,7 @@ label.dnr-p small{display:block;color:var(--muted);font-size:.76rem;font-weight:
   }
 
   // Office › Costs
-  function ofbCosts(b) {
-    b.innerHTML = '<p class="muted">' + tr('Loading…', 'Inapakia…') + '</p>';
-    adminApi('GET', null, '?view=costs').then(function (j) {
-      if (O.tab !== 'costs') return;
-      if (!j.ok) { b.innerHTML = '<p class="msg bad">' + esc(why(j)) + '</p>'; return; }
-      ofbTake(j); O.costs = j;
-      var s = j.stats || {}, ti = 0, rows = (j.rows || []).slice().sort(function (a, z) { return z.at.localeCompare(a.at); });
-      var tile = function (ic, hue, v, l, sub) { return '<div class="kpi otile" style="--i:' + (ti++) + '"><span class="ic" style="background:var(--hb-' + hue + ');color:var(--hu-' + hue + ')">' + oic(ic) + '</span><b data-n="' + v + '" data-pre="KES ">KES ' + v.toLocaleString('en-US') + '</b><span>' + l + '</span>' + (sub ? '<small>' + sub + '</small>' : '') + '</div>'; };
-      var mName = new Date().toLocaleDateString(S.lang === 'sw' ? 'sw' : 'en-GB', { month: 'long' });
-      var cks = ['ke', 'tz', 'ug', 'mw'], cmax = Math.max.apply(null, cks.map(function (c) { return (s.byCountry || {})[c] || 0; }).concat([1]));
-      var top = s.top || [], tmax = top.length ? top[0].sum : 1;
-      b.innerHTML = '<div class="ofb-costs"><div class="otiles">' +
-          tile('coins', 'amber', s.month || 0, tr('spent on repairs in ' + mName, 'zilizotumika kwa ukarabati ' + mName)) +
-          tile('cal', 'blue', s.year || 0, tr('spent this year (' + (s.yearKey || '') + ')', 'zilizotumika mwaka huu (' + (s.yearKey || '') + ')')) +
-          tile('wrench', 'teal', s.avg || 0, tr('average per repair', 'wastani kwa kila ukarabati'), tr((s.repairs || 0) + ' repairs in the last 12 months', 'matengenezo ' + (s.repairs || 0) + ' katika miezi 12')) +
-          tile('trend', 'purple', s.sum12 || 0, tr('spent in the last 12 months', 'zilizotumika katika miezi 12')) +
-        '</div><div class="o-grid" style="margin-top:14px"><div class="card"><h2>' + tr('Most expensive water points to keep running', 'Vituo vya maji vinavyogharimu zaidi kuendesha') + '</h2><p class="muted">' + tr('Top 10 by money actually spent on repairs, last 12 months.', '10 bora kwa pesa halisi zilizotumika kwa ukarabati, miezi 12 iliyopita.') + '</p>' +
-          (top.length ? '<ol class="ofb-top">' + top.map(function (t, i) {
-            return '<li style="--i:' + i + '"><span class="rk">' + (i + 1) + '</span><button type="button" data-open="' + esc(t.id) + '">' + esc(t.t || pname(t.id)) + '</button><span class="v">' + esc(ofbKes(t.sum)) + '</span>' +
-              '<small>' + esc((CNAME[t.ck] || '') + (t.ck ? ' · ' : '') + tr(t.n + (t.n === 1 ? ' repair' : ' repairs'), 'matengenezo ' + t.n)) + '</small><i><em style="--c:var(--hu-coral)" data-w="' + (t.sum / tmax * 100).toFixed(1) + '"></em></i></li>';
-          }).join('') + '</ol>' : emptyHtml(tr('No repair costs recorded yet. Enter the actual cost when parts are ordered or a repair is fixed.', 'Bado hakuna gharama za ukarabati. Andika gharama halisi vipuri vikiagizwa au ukarabati ukikamilika.'))) + '</div>' +
-          '<div><div class="card"><h2>' + tr('By country, this year', 'Kwa nchi, mwaka huu') + '</h2>' + cks.map(function (c) {
-            var v = (s.byCountry || {})[c] || 0;
-            return '<div class="ofb-bar"><span aria-hidden="true">' + FLAG[c] + '</span><span class="t">' + CNAME[c] + '</span><span class="v">' + esc(ofbKes(v)) + '</span><i><em style="--c:' + OFB_CC[c] + '" data-w="' + (v / cmax * 100).toFixed(1) + '"></em></i></div>';
-          }).join('') + '</div>' +
-          '<div class="card" style="margin-top:12px"><h2>' + tr('Second approval', 'Idhini ya pili') + '</h2><p class="muted">' + tr('Repairs estimated above this need a second admin to approve the cost before parts are ordered. The person who asks can’t approve their own.', 'Ukarabati unaokadiriwa zaidi ya kiasi hiki unahitaji msimamizi wa pili kuidhinisha kabla ya kuagiza vipuri. Aliyeomba hawezi kuidhinisha mwenyewe.') + '</p>' +
-            '<div class="ofb-set"><label>' + tr('Second approval above (KES)', 'Idhini ya pili zaidi ya (KES)') + '<input type="number" inputmode="numeric" min="0" id="ofbLim" value="' + S.approveAbove + '"></label><button class="btn small" type="button" id="ofbLimGo">' + tr('Save', 'Hifadhi') + '</button></div><p class="msg" id="ofbLimMsg" aria-live="polite"></p></div></div></div>' +
-        '<div class="card" style="margin-top:14px"><div class="ofb-hd"><h2 style="margin:0">' + tr('Latest spending', 'Matumizi ya karibuni') + '</h2><button class="btn small light" type="button" data-x="costs">⬇️ ' + tr('Download CSV', 'Pakua CSV') + '</button></div>' +
-          (rows.length ? '<ul class="ofb-log">' + rows.slice(0, 12).map(function (r) {
-            return '<li><span class="ofb-ic" style="--hb:var(--hb-' + (r.step === 'fixed' ? 'green' : 'amber') + ');--hu:var(--hu-' + (r.step === 'fixed' ? 'green' : 'amber') + ')">' + oic(r.step === 'fixed' ? 'check' : 'box') + '</span><span class="tx"><button type="button" data-open="' + esc(r.id) + '">' + esc(r.t || pname(r.id)) + '</button><small>' + esc([r.what, r.by, when(r.at)].filter(Boolean).join(' · ')) + (r.receipt ? ' · 🧾' : '') + '</small></span><b>' + esc(ofbKes(r.actual)) + '</b></li>';
-          }).join('') + '</ul>' : '<p class="muted">' + tr('Nothing yet.', 'Bado hakuna kitu.') + '</p>') + '</div></div>';
-      countUp(b);
-      requestAnimationFrame(function () { requestAnimationFrame(function () { qa('[data-w]', b).forEach(function (el) { el.style.width = el.getAttribute('data-w') + '%'; }); }); });
-      $('ofbLimGo').addEventListener('click', function () {
-        var v = $('ofbLim').value, bt = this; if (v === '' || Number(v) < 0) { $('ofbLim').focus(); return; }
-        bt.disabled = true; msg('ofbLimMsg', '', tr('Saving…', 'Inahifadhi…'));
-        adminApi('POST', { action: 'settings', approveAbove: v }).then(function (r) {
-          bt.disabled = false; if (!r.ok) { msg('ofbLimMsg', 'bad', why(r)); return; }
-          ofbTake(r); msg('ofbLimMsg', 'ok', tr('Saved ✓ Second approval above ', 'Imehifadhiwa ✓ Idhini ya pili zaidi ya ') + ofbKes(r.approveAbove)); savedBtn(bt, tr('Saved', 'Imehifadhiwa'));
-        });
-      });
-      qa('[data-x=costs]', b).forEach(function (x) { x.addEventListener('click', ofbExportCosts); });
-    });
-  }
+  function ofbCosts(b) { ocvCosts(b); }
 
   // Office › Export
   function ofbExportCosts() {
@@ -6303,6 +6320,432 @@ label.dnr-p small{display:block;color:var(--muted);font-size:.76rem;font-weight:
     return body;
   }
   function ofbFixFiles() { var p = S.cur, b = p && ofbRc['fix' + p.id]; if (b) delete ofbRc['fix' + p.id]; return b ? [{ blob: b, kind: 'photo', label: 'receipt' }] : []; }
+
+  // --- Office › Overview, Costs and Visits, calm and tappable (ocv…) ------------------------------------
+  // Overview: a head with how much is on the map, number tiles that open their list, tab or sheet, countries that
+  // open a sheet, and the latest from the field. Costs: the big numbers and a 12-month chart first, spending as
+  // cards that open the project's cost history, the second-approval limit folded away. Visits: the assigned
+  // visits as cards with filters (status, person); the assign form and each visit's actions live in sheets.
+  // Same server calls as before: ?view=costs, ?view=assign, settings, assign, unassign.
+  var OCV = { vf: 'open', vp: '', vmore: false, cf: 'latest', cmore: false, cm: '', open: {}, items: null, feedMore: false };
+  var OCVVS = { late: ['Overdue', 'Imechelewa', 'bad', 'alert'], today: ['Today', 'Leo', 'warn', 'cal'], soon: ['Planned', 'Imepangwa', 'has', 'cal'], done: ['Done', 'Imefanyika', 'ok', 'okc'] };
+  function ocvHero(k, ic, hue, title, line, nums, tail) {
+    return '<div class="card ocv-hero" data-testid="ocv_' + k + '_head"><div class="ocv-hd"><span class="ocv-big" style="--hb:var(--hb-' + hue + ');--hu:var(--hu-' + hue + ')" aria-hidden="true">' + oic(ic) + '</span>' +
+      '<div><h2>' + title + '</h2><p class="muted">' + line + '</p></div></div>' + (nums && nums.length ? '<div class="ocv-nums' + (nums.kes ? ' kes' : '') + '">' + nums.join('') + '</div>' : '') + (tail || '') + '</div>';
+  }
+  // a small number; with go it is a button that sets a filter
+  function ocvNum(v, label, tone, go, on) {
+    var inner = '<b>' + v + '</b><small>' + label + '</small>';
+    return go ? '<button type="button" class="ocv-n ' + (tone || '') + '" data-ocvgo="' + go + '" aria-pressed="' + !!on + '">' + inner + '</button>' : '<div class="ocv-n ' + (tone || '') + '">' + inner + '</div>';
+  }
+  function ocvKes(v) { v = Math.round(Number(v) || 0); return '<span class="ocv-cur">KES</span> <span data-n="' + v + '">' + v.toLocaleString('en-US') + '</span>'; }
+  function ocvPill(tone, text) { return '<span class="ocv-pill ocv-t-' + tone + '"><i aria-hidden="true"></i><span>' + text + '</span></span>'; }
+  function ocvFold(k, ic, hue, title, sum, body) {
+    var on = !!OCV.open[k];
+    return '<div class="ocv-sec' + (on ? ' open' : '') + '"><button type="button" class="ocv-row" data-ocvsec="' + k + '" data-testid="ocv_' + k + '_toggle" aria-expanded="' + on + '" aria-controls="ocvSec_' + k + '">' +
+      '<span class="ocv-ri" style="--hb:var(--hb-' + hue + ');--hu:var(--hu-' + hue + ')" aria-hidden="true">' + oic(ic) + '</span><span class="ocv-rl"><b>' + title + '</b><small data-ocvsum="' + k + '">' + sum + '</small></span><span class="ocv-rc" aria-hidden="true">' + oic('chev') + '</span></button>' +
+      '<div class="ocv-drop" id="ocvSec_' + k + '"' + (on ? '' : ' inert') + '><div class="ocv-in"><div class="ocv-pad" data-testid="ocv_' + k + '">' + body + '</div></div></div></div>';
+  }
+  function ocvChips(list, cls) {
+    return '<div class="ocv-chips' + (cls ? ' ' + cls : '') + '" role="group" aria-label="' + tr('Show', 'Onyesha') + '">' + list.map(function (c) {
+      return '<button type="button" class="chip" data-ocvgo="' + c.go + '"' + (c.who != null ? ' data-who="' + esc(c.who) + '"' : '') + ' data-testid="' + c.tid + '" aria-pressed="' + !!c.on + '">' + c.l + ' <span class="n">' + c.n + '</span></button>';
+    }).join('') + '</div>';
+  }
+  // the chip row keeps its place, and the chosen chip stays in sight
+  function ocvChipKeep(b, sl) {
+    qa('.ocv-chips', b).forEach(function (nc, i) {
+      nc.scrollLeft = sl[i] || 0; var pc = nc.querySelector('[aria-pressed=true]'); if (!pc) return;
+      var cr = nc.getBoundingClientRect(), r2 = pc.getBoundingClientRect();
+      if (r2.left < cr.left + 16 || r2.right > cr.right - 16) nc.scrollLeft += r2.left < cr.left + 16 ? r2.left - cr.left - 16 : r2.right - cr.right + 16;
+    });
+  }
+  function ocvChipPos(b) { return qa('.ocv-chips', b).map(function (c) { return c.scrollLeft; }); }
+  function ocvGrow(root) {
+    countUp(root);
+    requestAnimationFrame(function () { requestAnimationFrame(function () {
+      qa('[data-w]', root).forEach(function (el) { el.style.width = el.getAttribute('data-w') + '%'; });
+      qa('[data-h]', root).forEach(function (el) { el.style.height = el.getAttribute('data-h') + '%'; });
+      qa('[data-p]', root).forEach(function (el) { el.style.setProperty('--ocvp', el.getAttribute('data-p')); });
+    }); });
+  }
+  function ocvSheet(label, html) {
+    var w = tSheet(label, '<div class="ocv-sh">' + html + '</div>'); ocvGrow(w); return w;
+  }
+  function ocvShd(ic, hue, title, small, tid) {
+    return '<div class="ocv-shd"' + (tid ? ' data-testid="' + tid + '"' : '') + '><span class="ocv-shi" style="--hb:var(--hb-' + hue + ');--hu:var(--hu-' + hue + ')" aria-hidden="true">' + ic + '</span><h3>' + title + '</h3>' + (small ? '<small>' + small + '</small>' : '') + '</div>';
+  }
+  function ocvKv(rows) { return '<dl class="ocv-kv">' + rows.filter(function (r) { return r && r[1] !== '' && r[1] != null; }).map(function (r) { return '<div><dt>' + r[0] + '</dt><dd>' + r[1] + '</dd></div>'; }).join('') + '</dl>'; }
+  function ocvToList(f, ck) {
+    S.filter = f; store.set('rfPinFilter', f);
+    qa('.chips .chip').forEach(function (x) { x.setAttribute('aria-pressed', x.getAttribute('data-f') === f ? 'true' : 'false'); });
+    if (ck != null) { $('iCountry').value = ck; store.set('rfPinCountry', ck || 'all'); countryChipUi(); }
+    show('vList');
+  }
+  function ocvTab(t) { O.tab = t; store.set('rfPinOTab', t); renderOffice(); var ot = $('oTabs'); if (ot && ot.getBoundingClientRect().top < 0) ot.scrollIntoView({ block: 'start' }); }
+
+  // ---- Overview
+  function ocvOverview(b) {
+    var P = S.projects, pinned = P.filter(function (p) { return p.gps; }).length, rep = Object.keys(S.repairs).map(function (k) { return S.repairs[k]; });
+    var st = { working: 0, repair: 0, notworking: 0 }; Object.keys(S.visits).forEach(function (k) { var v = S.visits[k]; if (st[v.state] != null) st[v.state]++; });
+    var urgent = rep.filter(function (r) { return r.urgency === 'urgent'; }).length, cost = rep.reduce(function (s, r) { return s + (Number(r.cost) || 0); }, 0);
+    var due = P.filter(function (p) { return p.gps && ageDays(p) >= DUE_DAYS; }).length, tests = prjTestCount(P), pe = S.people;
+    var pct = Math.round(pinned / Math.max(1, P.length) * 100), missing = P.length - pinned;
+    var seen = st.working + st.repair + st.notworking, unseen = Math.max(0, P.length - seen), tot = Math.max(1, P.length);
+    var ti = 0, tile = function (o) {
+      return '<button type="button" class="ocv-tile' + (o.hot ? ' hot' : '') + (o.red ? ' red' : '') + '" style="--i:' + (ti++) + ';--hb:var(--hb-' + o.hue + ');--hu:var(--hu-' + o.hue + ')" data-ocvgo="' + o.go + '" data-testid="ocv_t_' + o.k + '">' + (o.red ? '<i class="ocv-pulse" aria-hidden="true"></i>' : '') +
+        '<span class="ic" aria-hidden="true">' + oic(o.ic) + '</span><b' + (o.id ? ' id="' + o.id + '"' : '') + (o.n != null ? ' data-n="' + o.n + '"' : '') + '>' + (o.n != null ? o.n.toLocaleString('en-US') : '…') + '</b><span class="l">' + o.l + '</span>' +
+        (o.sub ? '<small' + (o.up ? ' class="up"' : '') + '>' + o.sub + '</small>' : '') + '<span class="go" aria-hidden="true">' + oic('chev') + '</span></button>';
+    };
+    var nw = function (t) { return '<span class="nw">' + t + '</span>'; };
+    var first = pe && (pe.trend || []).filter(function (t) { return t.n != null; })[0], up = first ? pe.total - first.n : 0;
+    var tiles = tile({ k: 'repairs', ic: 'wrench', hue: 'amber', n: rep.length, l: tr('open repairs', 'matengenezo yaliyo wazi'), sub: [urgent ? nw(tr(urgent + ' urgent', urgent + ' ya haraka')) : '', cost ? nw((urgent ? '· ' : '') + 'KES ' + cost.toLocaleString('en-US')) : ''].filter(Boolean).join(' '), go: 'o-repairs', hot: rep.length > 0, red: urgent > 0 }) +
+      tile({ k: 'review', ic: 'inbox', hue: 'purple', n: S.reviewOpen || 0, l: tr('waiting for your review', 'zinasubiri uidhinishe'), go: 'o-review', hot: (S.reviewOpen || 0) > 0 }) +
+      tile({ k: 'due', ic: 'cal', hue: 'blue', n: due, l: tr('due a visit', 'zinasubiri ziara'), go: 'list-due' }) +
+      tile({ k: 'tests', ic: 'flask', hue: 'teal', n: tests, l: tr('water tests due', 'vipimo vya maji vinahitajika'), go: 'list-due', hot: tests > 0 }) +
+      tile({ k: 'visits', ic: 'clip', hue: 'green', id: 'oVm', n: actCache ? ocvVm() : null, l: tr('visits this month', 'ziara za mwezi huu'), go: 'o-visits' }) +
+      (pe && pe.total ? tile({ k: 'people', ic: 'people', hue: 'teal', n: pe.total, l: tr('people served', 'watu wanaohudumiwa'), sub: up > 0 ? '+' + up.toLocaleString('en-US') + ' ' + tr('in 12 months', 'kwa miezi 12') : '', up: true, go: 'people' }) : '');
+    var mapStrip = '<button type="button" class="ocv-map" data-ocvgo="list-missing" data-testid="ocv_mapped"' + (missing ? '' : ' disabled') + '>' +
+      '<span class="ocv-ring" data-p="' + pct + '" aria-hidden="true"><span>' + pct + '%</span></span><span class="tx"><b>' + tr(pinned + ' of ' + P.length + ' projects on the map', 'Miradi ' + pinned + ' kati ya ' + P.length + ' iko kwenye ramani') + '</b>' +
+      '<small>' + (missing ? (missing === 1 ? tr('1 still needs a location', '1 bado unahitaji mahali') : tr(missing + ' still need a location', missing + ' bado inahitaji mahali')) : tr('Every project has a location', 'Kila mradi una mahali')) + '</small></span>' +
+      (missing ? '<span class="ocv-chev" aria-hidden="true">' + oic('chev') + '</span>' : '') + '</button>';
+    var health = '<div class="card ocv-box ohealth" data-testid="ocv_health"><div class="hd"><b>' + tr('Condition at last visit', 'Hali katika ziara ya mwisho') + '</b><span>' + tr(seen + ' of ' + P.length + ' visited', seen + ' kati ya ' + P.length + ' zimetembelewa') + '</span></div>' +
+      '<div class="hbar" role="img" aria-label="' + esc(tr(st.working + ' working, ' + st.repair + ' needed repair, ' + st.notworking + ' not working, ' + unseen + ' not visited yet', st.working + ' zinafanya kazi, ' + st.repair + ' zilihitaji matengenezo, ' + st.notworking + ' hazifanyi kazi, ' + unseen + ' bado hazijatembelewa')) + '">' +
+      '<i class="g" data-w="' + (st.working / tot * 100) + '"></i><i class="a" data-w="' + (st.repair / tot * 100) + '"></i><i class="r" data-w="' + (st.notworking / tot * 100) + '"></i><i class="n" data-w="' + (unseen / tot * 100) + '"></i></div>' +
+      '<ul class="hleg"><li><i style="background:#1C9C5A"></i><b>' + st.working + '</b>' + tr('working', 'zinafanya kazi') + '</li><li><i style="background:#E39A1E"></i><b>' + st.repair + '</b>' + tr('needed repair', 'zilihitaji matengenezo') + '</li>' +
+      '<li><i style="background:#D23C32"></i><b>' + st.notworking + '</b>' + tr('not working', 'hazifanyi kazi') + '</li><li><i style="background:var(--off)"></i><b>' + unseen + '</b>' + tr('not visited yet', 'bado hazijatembelewa') + '</li></ul></div>';
+    var ctry = ['ke', 'tz', 'ug', 'mw'].map(function (c) {
+      var l = P.filter(function (p) { return p.ck === c; }); if (!l.length) return '';
+      var loc = l.filter(function (p) { return p.gps; }).length, rp = l.filter(function (p) { return S.repairs[p.id]; }).length, du = l.filter(function (p) { return p.gps && ageDays(p) >= DUE_DAYS; }).length;
+      var pill = rp ? ocvPill('warn', rp === 1 ? tr('1 open repair', 'matengenezo 1') : tr(rp + ' open repairs', 'matengenezo ' + rp)) : du ? ocvPill('has', tr(du + ' due a visit', du + ' zinasubiri ziara')) : ocvPill('ok', tr('Nothing needs attention', 'Hakuna kinachohitaji kushughulikiwa'));
+      return '<button type="button" class="ocv-crow" data-ocvgo="ck" data-ck="' + c + '" data-testid="ocv_c_' + c + '"><span class="fl" aria-hidden="true">' + (FLAG[c] || '') + '</span><span class="mid"><span class="ocv-ct"><b>' + CNAME[c] + '</b><span>' + tr(loc + ' of ' + l.length + ' mapped', loc + ' kati ya ' + l.length + ' zina mahali') + '</span></span>' +
+        '<span class="ocv-meter" aria-hidden="true"><i data-w="' + (loc / l.length * 100).toFixed(1) + '"></i></span>' + pill + '</span><span class="ocv-chev" aria-hidden="true">' + oic('chev') + '</span></button>';
+    }).join('');
+    b.innerHTML = '<div class="o-grid ocv"><div class="ocv-main">' +
+      ocvHero('overview', 'drop', 'blue', tr('Overview', 'Muhtasari'), tr('All projects today. Tap a number to see the list.', 'Miradi yote leo. Gusa namba kuona orodha.'), null, mapStrip) +
+      '<div class="ocv-tiles">' + tiles + '</div>' + health +
+      (ctry ? '<div class="card ocv-box"><h3 class="ocv-h">' + tr('By country', 'Kwa nchi') + '</h3>' + ctry + '</div>' : '') +
+      '<div class="card ocv-box" id="ocvFeedBox"><h3 class="ocv-h">' + tr('Latest from the field', 'Habari za karibuni kutoka uwanjani') + '</h3><div id="ocvFeed">' + ocvFeedHtml() + '</div></div></div>' +
+      '<div class="o-side"><div class="map o-map" id="oMap" role="application" aria-label="' + tr('Map of projects: open repairs in orange and red', 'Ramani ya miradi: matengenezo yaliyo wazi kwa rangi ya machungwa na nyekundu') + '"></div><p class="muted" style="margin-top:6px">' +
+      tr('Orange and red: open repairs. Green: other projects with a location.', 'Machungwa na nyekundu: matengenezo yaliyo wazi. Kijani: miradi mingine yenye mahali.') + '</p></div></div>';
+    ocvGrow(b);
+    if (navigator.onLine) api('GET', null, '?activity=1').then(function (j) {
+      if (!j.ok) return; actCache = j.activity || [];
+      if (O.tab !== 'overview' || S.view !== 'vOffice') return;
+      var f = $('ocvFeed'); if (f) f.innerHTML = ocvFeedHtml();
+      var k = $('oVm'); if (k) { k.setAttribute('data-n', ocvVm()); countUp(k.parentNode); }
+    });
+    setTimeout(function () {
+      if (!$('oMap')) return;
+      if (oMap) { oMap.remove(); oMap = null; }
+      oMap = L.map('oMap', { zoomControl: true }); layers(oMap);
+      var g = L.featureGroup();
+      P.forEach(function (p) { if (p.gps) L.circleMarker(p.gps, dotStyle(p)).bindTooltip(esc(p.title)).on('click', function () { openProj(p.id); }).addTo(g); });
+      g.addTo(oMap); if (g.getLayers().length) oMap.fitBounds(g.getBounds().pad(0.1)); else oMap.setView([-3, 35], 5);
+    }, 40);
+  }
+  function ocvVm() { var d = new Date(), f = new Date(d.getFullYear(), d.getMonth(), 1).getTime(); return (actCache || []).filter(function (e) { return e.a === 'visit' && Date.parse(e.at) >= f; }).length; }
+  function ocvFeedHtml() {
+    if (!actCache) return '<p class="muted">' + tr('Loading…', 'Inapakia…') + '</p>';
+    var all = actCache.slice(-12).reverse(), list = OCV.feedMore ? all : all.slice(0, 5);
+    if (!all.length) return '<p class="muted">' + tr('Nothing yet.', 'Bado hakuna kitu.') + '</p>';
+    return '<ul class="ocv-feed">' + list.map(function (e) {
+      var f = FEEDIC[e.a] || ['drop', '#0A78C2'], p = e.id && byId(e.id);
+      var inner = '<span class="dt" style="--c:' + f[1] + '" aria-hidden="true">' + oic(f[0]) + '</span><span class="tx"><b>' + esc(e.by) + '</b> ' + esc(VERB[e.a] || e.a) + ' ' + esc(e.t || '') + '<small>' + esc(vxAgo(e.at)) + '</small></span>';
+      return '<li>' + (p ? '<button type="button" class="ocv-fi" data-ocvopen="' + esc(e.id) + '">' + inner + '<span class="ocv-chev" aria-hidden="true">' + oic('chev') + '</span></button>' : '<div class="ocv-fi">' + inner + '</div>') + '</li>';
+    }).join('') + '</ul>' + (all.length > 5 && !OCV.feedMore ? '<button class="btn light small block ocv-more" type="button" data-ocvgo="feedmore">' + tr('Show ' + (all.length - 5) + ' more', 'Onyesha ' + (all.length - 5) + ' zaidi') + '</button>' : '');
+  }
+  function ocvPeople() {
+    var w = ocvSheet(tr('People served', 'Watu wanaohudumiwa'), ofbPeopleHtml() + '<div class="ocv-acts"><button class="btn light" type="button" data-a="close">' + tr('Close', 'Funga') + '</button></div>');
+    w.querySelector('[data-a=close]').addEventListener('click', w.close);
+  }
+  function ocvCountry(c) {
+    var P = S.projects, l = P.filter(function (p) { return p.ck === c; });
+    var k = function (s) { return l.filter(function (p) { return S.visits[p.id] && S.visits[p.id].state === s; }).length; };
+    var loc = l.filter(function (p) { return p.gps; }).length, rp = l.filter(function (p) { return S.repairs[p.id]; }).length, du = l.filter(function (p) { return p.gps && ageDays(p) >= DUE_DAYS; }).length;
+    var n = function (v, tone) { return '<span class="ocv-v' + (v && tone ? ' ' + tone : '') + '">' + v + '</span>'; };
+    var w = ocvSheet(CNAME[c], ocvShd('<span class="fl">' + (FLAG[c] || '') + '</span>', 'blue', esc(CNAME[c]), l.length === 1 ? tr('1 project', 'Mradi 1') : tr(l.length + ' projects', 'Miradi ' + l.length), 'ocv_country_sheet') +
+      '<span class="ocv-meter big" aria-hidden="true"><i data-w="' + (loc / Math.max(1, l.length) * 100).toFixed(1) + '"></i></span>' +
+      ocvKv([[tr('On the map', 'Kwenye ramani'), tr(loc + ' of ' + l.length, loc + ' kati ya ' + l.length)], [tr('Working at the last visit', 'Zinafanya kazi, ziara ya mwisho'), n(k('working'), 'ok')], [tr('Needed repair', 'Zilihitaji matengenezo'), n(k('repair'), 'warn')],
+        [tr('Not working', 'Hazifanyi kazi'), n(k('notworking'), 'bad')], [tr('Open repairs', 'Matengenezo yaliyo wazi'), n(rp, 'warn')], [tr('Due a visit', 'Zinasubiri ziara'), n(du, 'has')]]) +
+      '<div class="ocv-acts"><button class="btn" type="button" data-a="all" data-testid="ocv_country_all">' + oic('arrow') + tr('Show these projects', 'Onyesha miradi hii') + '</button>' +
+      (l.length - loc ? '<button class="btn light" type="button" data-a="missing">' + oic('pin') + tr('Need a location', 'Zinahitaji mahali') + ' (' + (l.length - loc) + ')</button>' : '') +
+      (du ? '<button class="btn light" type="button" data-a="due">' + oic('cal') + tr('Due a visit', 'Zinasubiri ziara') + ' (' + du + ')</button>' : '') +
+      (rp ? '<button class="btn light" type="button" data-a="repairs">' + oic('wrench') + tr('Open repairs', 'Matengenezo yaliyo wazi') + ' (' + rp + ')</button>' : '') + '</div>');
+    w.querySelector('.tsh-c').addEventListener('click', function (e) {
+      var a = e.target.closest('[data-a]'); if (!a) return;
+      w.close(); var f = a.getAttribute('data-a'); setTimeout(function () { ocvToList(f, c); }, 180);
+    });
+  }
+
+  // ---- Costs
+  function ocvCosts(b) {
+    b.innerHTML = '<p class="muted">' + tr('Loading…', 'Inapakia…') + '</p>';
+    adminApi('GET', null, '?view=costs').then(function (j) {
+      if (j.ok) { ofbTake(j); O.costs = j; }
+      if (O.tab !== 'costs' || S.view !== 'vOffice') return;
+      if (!j.ok) { b.innerHTML = '<p class="msg bad">' + esc(why(j)) + '</p>'; return; }
+      ocvCDraw(b);
+    });
+  }
+  function ocvMonths() { var d = new Date(), ms = []; for (var i = 11; i >= 0; i--) { var x = new Date(d.getFullYear(), d.getMonth() - i, 1); ms.push(x.getFullYear() + '-' + ('0' + (x.getMonth() + 1)).slice(-2)); } return ms; }
+  function ocvMon(k, long) { var d = new Date(+k.slice(0, 4), +k.slice(5, 7) - 1, 1); return d.toLocaleDateString(vxLoc(), long ? { month: 'long', year: 'numeric' } : { month: 'short' }); }
+  function ocvRows() { return ((O.costs || {}).rows || []).slice().sort(function (a, z) { return String(z.at).localeCompare(String(a.at)); }); }
+  function ocvChartSel(k) {
+    var rows = ocvRows().filter(function (r) { return String(r.at || '').slice(0, 7) === k; }), v = rows.reduce(function (s, r) { return s + (Number(r.actual) || 0); }, 0);
+    return '<b>' + esc(ocvMon(k, true)) + '</b> · ' + esc(ofbKes(v)) + (rows.length ? ' · ' + (rows.length === 1 ? tr('1 entry', 'kiingilio 1') : tr(rows.length + ' entries', 'viingilio ' + rows.length)) : '');
+  }
+  function ocvChart() {
+    var ms = ocvMonths(), sum = {};
+    ocvRows().forEach(function (r) { var k = String(r.at || '').slice(0, 7); sum[k] = (sum[k] || 0) + (Number(r.actual) || 0); });
+    var max = Math.max.apply(null, ms.map(function (k) { return sum[k] || 0; }).concat([1])), sel = ms.indexOf(OCV.cm) >= 0 ? OCV.cm : ms[11];
+    return '<div class="card ocv-box ocv-chart" data-testid="ocv_chart"><div class="ocv-ch-hd"><h3 class="ocv-h">' + tr('Spent each month', 'Matumizi kila mwezi') + '</h3><p class="ocv-ch-sel" aria-live="polite">' + ocvChartSel(sel) + '</p></div>' +
+      '<div class="ocv-bars" role="group" aria-label="' + tr('Repair spending, last 12 months', 'Matumizi ya ukarabati, miezi 12 iliyopita') + '">' + ms.map(function (k) {
+        var v = sum[k] || 0;
+        return '<button type="button" class="ocv-bar' + (k === sel ? ' on' : '') + '" data-ocvm="' + k + '" aria-pressed="' + (k === sel) + '" aria-label="' + esc(ocvMon(k, true) + ': ' + ofbKes(v)) + '"><span class="col"><i data-h="' + (v / max * 100).toFixed(1) + '"></i></span><small>' + esc(ocvMon(k)) + '</small></button>';
+      }).join('') + '</div></div>';
+  }
+  function ocvCDraw(b) {
+    var j = O.costs || {}, s = j.stats || {}, rows = ocvRows(), top = s.top || [], cks = ['ke', 'tz', 'ug', 'mw'];
+    var cmax = Math.max.apply(null, cks.map(function (c) { return (s.byCountry || {})[c] || 0; }).concat([1])), tmax = top.length ? top[0].sum || 1 : 1;
+    var nums = [ocvNum(ocvKes(s.month), tr('this month', 'mwezi huu')), ocvNum(ocvKes(s.year), tr('this year (' + (s.yearKey || '') + ')', 'mwaka huu (' + (s.yearKey || '') + ')')),
+      ocvNum(ocvKes(s.sum12), tr('last 12 months', 'miezi 12 iliyopita')), ocvNum(ocvKes(s.avg), tr('average per repair', 'wastani kwa kila ukarabati') + '<span class="ocv-l2">' + tr((s.repairs || 0) + ' repairs', 'matengenezo ' + (s.repairs || 0)) + '</span>')];
+    nums.kes = true;
+    var head = ocvHero('costs', 'coins', 'amber', tr('Repair costs', 'Gharama za ukarabati'), tr('What repairs actually cost, as the team enters it.', 'Gharama halisi za ukarabati, kama timu inavyoandika.'), nums);
+    var shown = OCV.cf === 'top' ? top : rows, lim = OCV.cmore ? shown.length : 30;
+    var chips = ocvChips([{ go: 'cf-latest', tid: 'ocv_cf_latest', l: tr('Latest', 'Karibuni'), n: rows.length, on: OCV.cf !== 'top' }, { go: 'cf-top', tid: 'ocv_cf_top', l: tr('Most spent', 'Gharama kubwa zaidi'), n: top.length, on: OCV.cf === 'top' }]);
+    var list = !shown.length ? emptyHtml(tr('No repair costs recorded yet. Enter the actual cost when parts are ordered or a repair is fixed.', 'Bado hakuna gharama za ukarabati. Andika gharama halisi vipuri vikiagizwa au ukarabati ukikamilika.'))
+      : '<div class="ocv-list">' + shown.slice(0, lim).map(function (r, i) {
+        if (OCV.cf === 'top') return '<button type="button" class="ocv-card ocv-top" style="--i:' + i + '" data-ocvp="' + esc(r.id) + '" data-testid="ocv_top"><span class="av ocv-rk' + (i ? '' : ' one') + '" aria-hidden="true">' + (i + 1) + '</span>' +
+          '<span class="tt">' + esc(r.t || pname(r.id)) + '</span><span class="wh"><b>' + esc(ofbKes(r.sum)) + '</b>' + oic('chev') + '</span>' +
+          '<span class="mt"><span>' + esc((CNAME[r.ck] ? CNAME[r.ck] + ' · ' : '') + (r.n === 1 ? tr('1 repair', 'matengenezo 1') : tr(r.n + ' repairs', 'matengenezo ' + r.n))) + '</span><span class="ocv-meter" aria-hidden="true"><i style="background:var(--hu-coral)" data-w="' + (r.sum / tmax * 100).toFixed(1) + '"></i></span></span></button>';
+        var fx = r.step === 'fixed', hu = fx ? 'green' : 'amber';
+        return '<button type="button" class="ocv-card" style="--i:' + i + '" data-ocvp="' + esc(r.id) + '" data-testid="ocv_cost"><span class="av ocv-ic" style="--hb:var(--hb-' + hu + ');--hu:var(--hu-' + hu + ')" aria-hidden="true">' + oic(fx ? 'check' : 'box') + '</span>' +
+          '<span class="tt">' + esc(r.t || pname(r.id)) + '</span><span class="wh"><b>' + esc(ofbKes(r.actual)) + '</b>' + oic('chev') + '</span>' +
+          '<span class="pl">' + ocvPill(fx ? 'ok' : 'warn', fx ? tr('Fixed', 'Imerekebishwa') : tr('Parts ordered', 'Vipuri vimeagizwa')) + '</span><span class="tm">' + esc(vxAgo(r.at)) + '</span>' +
+          '<span class="mt"><span>' + esc([r.what, r.by].filter(Boolean).join(' · ')) + (r.receipt ? ' <span class="ocv-rc-ic" title="' + esc(tr('Receipt', 'Risiti')) + '">' + oic('receipt') + '<span class="vh">' + tr('receipt', 'risiti') + '</span></span>' : '') + '</span></span></button>';
+      }).join('') + '</div>' + (shown.length > lim ? '<button class="btn light block ocv-more" type="button" data-ocvgo="cmore">' + tr('Show ' + (shown.length - lim) + ' more', 'Onyesha ' + (shown.length - lim) + ' zaidi') + '</button>' : '');
+    var ctry = '<div class="card ocv-box" data-testid="ocv_by_country"><h3 class="ocv-h">' + tr('By country, this year', 'Kwa nchi, mwaka huu') + '</h3>' + cks.map(function (c) {
+      var v = (s.byCountry || {})[c] || 0;
+      return '<div class="ofb-bar"><span aria-hidden="true">' + FLAG[c] + '</span><span class="t">' + CNAME[c] + '</span><span class="v">' + esc(ofbKes(v)) + '</span><i><em style="--c:' + OFB_CC[c] + '" data-w="' + (v / cmax * 100).toFixed(1) + '"></em></i></div>';
+    }).join('') + '</div>';
+    var limit = '<p class="muted">' + tr('Repairs estimated above this need a second admin to approve the cost before parts are ordered. The person who asks can’t approve their own.', 'Ukarabati unaokadiriwa zaidi ya kiasi hiki unahitaji msimamizi wa pili kuidhinisha kabla ya kuagiza vipuri. Aliyeomba hawezi kuidhinisha mwenyewe.') + '</p>' +
+      '<div class="ofb-set"><label>' + tr('Second approval above (KES)', 'Idhini ya pili zaidi ya (KES)') + '<input type="number" inputmode="numeric" min="0" id="ofbLim" value="' + S.approveAbove + '"></label><button class="btn small" type="button" id="ofbLimGo">' + tr('Save', 'Hifadhi') + '</button></div><p class="msg" id="ofbLimMsg" aria-live="polite"></p>';
+    var sets = '<div class="card ocv-sets">' + ocvFold('limit', 'shield', 'purple', tr('Second approval', 'Idhini ya pili'), ocvLimSum(), limit) +
+      ocvFold('csv', 'down', 'blue', tr('Download', 'Pakua'), tr('Every cost entry, as a spreadsheet', 'Kila gharama, kama jedwali'), '<p class="muted">' + tr('A CSV file that opens in Excel and Google Sheets: every cost entry from the last 2 years.', 'Faili ya CSV inayofunguka kwenye Excel na Google Sheets: kila gharama ya miaka 2 iliyopita.') + '</p><button class="btn light" type="button" data-x="costs">' + oic('down') + tr('Download CSV', 'Pakua CSV') + '</button>') + '</div>';
+    var sl = ocvChipPos(b);
+    b.innerHTML = '<div class="o-grid ocv"><div class="ocv-main">' + head + ocvChart() + '<div class="ocv-lhd"><h3 class="ocv-h">' + tr('Spending', 'Matumizi') + '</h3></div>' + chips + list + '</div><div class="o-side ocv-side">' + ctry + sets + '</div></div>';
+    ocvChipKeep(b, sl); ocvGrow(b);
+    $('ofbLimGo').addEventListener('click', function () {
+      var v = $('ofbLim').value, bt = this; if (v === '' || Number(v) < 0) { $('ofbLim').focus(); return; }
+      bt.disabled = true; msg('ofbLimMsg', '', tr('Saving…', 'Inahifadhi…'));
+      adminApi('POST', { action: 'settings', approveAbove: v }).then(function (r) {
+        bt.disabled = false; if (!r.ok) { msg('ofbLimMsg', 'bad', why(r)); return; }
+        ofbTake(r); msg('ofbLimMsg', 'ok', tr('Saved ✓ Second approval above ', 'Imehifadhiwa ✓ Idhini ya pili zaidi ya ') + ofbKes(r.approveAbove)); savedBtn(bt, tr('Saved', 'Imehifadhiwa'));
+        var su = b.querySelector('[data-ocvsum=limit]'); if (su) su.textContent = ocvLimSum();
+      });
+    });
+    qa('[data-x=costs]', b).forEach(function (x) { x.addEventListener('click', ofbExportCosts); });
+  }
+  function ocvLimSum() { return tr('Above ', 'Zaidi ya ') + ofbKes(S.approveAbove); }
+  // tap a cost: what this project's repairs cost, entry by entry
+  function ocvCostSheet(id) {
+    var all = ocvRows().filter(function (r) { return String(r.id) === String(id); }), p = byId(id), yr = Date.now() - 365 * 864e5;
+    var y = all.filter(function (r) { return Date.parse(r.at) >= yr; }), sum = y.reduce(function (s, r) { return s + (Number(r.actual) || 0); }, 0);
+    var tp = ((((O.costs || {}).stats || {}).top) || []).filter(function (t) { return String(t.id) === String(id); })[0];
+    var title = (p && p.title) || (all[0] && all[0].t) || (tp && tp.t) || pname(id), ck = (p && p.ck) || (tp && tp.ck);
+    if (tp && !y.length) sum = tp.sum;
+    var hist = all.length ? '<p class="ocv-lab">' + tr('Cost history', 'Historia ya gharama') + '</p><ul class="ocv-hist">' + all.map(function (r) {
+      var fx = r.step === 'fixed', hu = fx ? 'green' : 'amber';
+      return '<li><span class="ocv-ic" style="--hb:var(--hb-' + hu + ');--hu:var(--hu-' + hu + ')" aria-hidden="true">' + oic(fx ? 'check' : 'box') + '</span><span class="tx"><b>' + esc(r.what || (fx ? tr('Fixed', 'Imerekebishwa') : tr('Parts ordered', 'Vipuri vimeagizwa'))) + '</b>' +
+        '<small>' + [fx ? tr('Fixed', 'Imerekebishwa') : tr('Parts ordered', 'Vipuri vimeagizwa'), r.by, vxAgo(r.at), r.receipt ? tr('receipt', 'risiti') : ''].filter(Boolean).map(function (x) { return '<span class="nw">' + esc(x) + '</span>'; }).join(' · ') + '</small></span><b class="v">' + esc(ofbKes(r.actual)) + '</b></li>';
+    }).join('') + '</ul>' : '';
+    var n12 = y.length || (tp ? tp.n : 0);
+    var w = ocvSheet(title, ocvShd(oic('coins'), 'amber', esc(title), esc(CNAME[ck] || ''), 'ocv_cost_sheet') +
+      '<div class="ocv-total"><b>' + esc(ofbKes(sum)) + '</b><small>' + tr('spent in the last 12 months', 'zilizotumika katika miezi 12 iliyopita') + (n12 ? ' · ' + (n12 === 1 ? tr('1 entry', 'kiingilio 1') : tr(n12 + ' entries', 'viingilio ' + n12)) : '') + '</small></div>' + hist +
+      '<div class="ocv-acts">' + (p ? '<button class="btn" type="button" data-a="open" data-testid="ocv_cost_open">' + oic('arrow') + tr('Open project', 'Fungua mradi') + '</button>' : '') + '</div>');
+    w.querySelector('.tsh-c').addEventListener('click', function (e) { if (e.target.closest('[data-a=open]')) { w.close(); setTimeout(function () { openProj(id); }, 200); } });
+  }
+
+  // ---- Visits
+  function ocvVisits(b) {
+    if (OCV.items) ocvVDraw(b); else b.innerHTML = '<p class="muted">' + tr('Loading…', 'Inapakia…') + '</p>';
+    ocvVLoad();
+  }
+  function ocvVLoad() {
+    return adminApi('GET', null, '?view=assign').then(function (j) {
+      if (j.ok) OCV.items = j.items || [];
+      if (O.tab !== 'visits' || S.view !== 'vOffice') return j;
+      if (!j.ok) { if (!OCV.items) $('oBody').innerHTML = '<p class="msg bad">' + esc(why(j)) + '</p>'; return j; }
+      ocvVDraw($('oBody')); return j;
+    });
+  }
+  function ocvToday() { var d = new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+  function ocvVSt(a, today) { return a.done ? 'done' : a.date < today ? 'late' : a.date === today ? 'today' : 'soon'; }
+  function ocvDays(a, z) { var p = function (s) { s = String(s).split('-'); return Date.UTC(+s[0], +s[1] - 1, +s[2]); }; return Math.round((p(a) - p(z)) / 864e5); }
+  function ocvDay(d, today) {
+    var n = ocvDays(d, today); if (n === 0) return tr('Today', 'Leo'); if (n === 1) return tr('Tomorrow', 'Kesho'); if (n === -1) return tr('Yesterday', 'Jana');
+    var x = String(d).split('-'), dt = new Date(+x[0], +x[1] - 1, +x[2]);
+    return isNaN(dt) ? d : dt.toLocaleDateString(vxLoc(), dt.getFullYear() === new Date().getFullYear() ? { day: 'numeric', month: 'short' } : { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+  function ocvRel(a, today) {
+    var s = ocvVSt(a, today), n = ocvDays(a.date, today);
+    if (s === 'done') return tr('Done ', 'Imefanyika ') + vxAgo(a.done);
+    if (s === 'late') return n === -1 ? tr('1 day late', 'Imechelewa siku 1') : tr(-n + ' days late', 'Imechelewa siku ' + (-n));
+    if (s === 'today') return tr('Today', 'Leo');
+    return n === 1 ? tr('Tomorrow', 'Kesho') : tr('In ' + n + ' days', 'Baada ya siku ' + n);
+  }
+  function ocvVDraw(b) {
+    var all = OCV.items || [], today = ocvToday(), F = [['open', 'Planned', 'Zimepangwa'], ['today', 'Today', 'Leo'], ['late', 'Overdue', 'Zimechelewa'], ['done', 'Done', 'Zimefanyika']];
+    var inF = function (a, f) { var s = ocvVSt(a, today); return f === 'open' ? s !== 'done' : f === s; }, byP = function (a) { return !OCV.vp || a.to === OCV.vp; };
+    var cnt = {}; F.forEach(function (f) { cnt[f[0]] = all.filter(function (a) { return inF(a, f[0]) && byP(a); }).length; });
+    var shown = all.filter(function (a) { return inF(a, OCV.vf) && byP(a); }).sort(OCV.vf === 'done' ? function (a, z) { return String(z.done).localeCompare(String(a.done)); } : function (a, z) { return a.date.localeCompare(z.date) || String(a.at).localeCompare(String(z.at)); });
+    var ppl = {}; all.forEach(function (a) { if (inF(a, OCV.vf)) ppl[a.to] = (ppl[a.to] || 0) + 1; }); if (OCV.vp && ppl[OCV.vp] == null) ppl[OCV.vp] = 0;
+    var who = Object.keys(ppl).sort(function (a, z) { return ppl[z] - ppl[a] || a.localeCompare(z); });
+    var head = ocvHero('visits', 'cal', 'blue', tr('Visits', 'Ziara'), tr('Site visits given to the field team. Tap one to change it.', 'Ziara walizopewa timu ya uwanjani. Gusa moja kuibadilisha.'),
+      [ocvNum(cnt.open, tr('planned', 'zimepangwa'), '', 'vf-open', OCV.vf === 'open'), ocvNum(cnt.today, tr('today', 'leo'), cnt.today ? 'warn' : '', 'vf-today', OCV.vf === 'today'), ocvNum(cnt.late, tr('overdue', 'zimechelewa'), cnt.late ? 'bad' : '', 'vf-late', OCV.vf === 'late')],
+      '<button class="btn block ocv-addb" type="button" data-ocvgo="assign" data-testid="ocv_assign">' + oic('plus') + tr('Assign a visit', 'Gawa ziara') + '</button>');
+    var chips = all.length ? ocvChips(F.map(function (f) { return { go: 'vf-' + f[0], tid: 'ocv_vf_' + f[0], l: tr(f[1], f[2]), n: cnt[f[0]], on: OCV.vf === f[0] }; })) +
+      (who.length > 1 || OCV.vp ? ocvChips([{ go: 'vp', who: '', tid: 'ocv_vp_all', l: tr('Everyone', 'Wote'), n: all.filter(function (a) { return inF(a, OCV.vf); }).length, on: !OCV.vp }].concat(who.map(function (n) { return { go: 'vp', who: n, tid: 'ocv_vp', l: esc(n), n: ppl[n], on: OCV.vp === n }; })), 'ppl') : '') : '';
+    var none = { open: ['No visits planned. Tap “Assign a visit” to give one to the field team.', 'Hakuna ziara zilizopangwa. Gusa “Gawa ziara” kumpa mtu wa timu.'], today: ['Nothing planned for today.', 'Hakuna kilichopangwa leo.'], late: ['Nothing overdue. Well done!', 'Hakuna iliyochelewa. Hongera!'], done: ['No visits done in the last 4 months.', 'Hakuna ziara zilizofanyika katika miezi 4 iliyopita.'] }[OCV.vf];
+    var lim = OCV.vmore ? shown.length : 30;
+    var list = !all.length ? emptyHtml(tr('No visits assigned yet. Tap “Assign a visit” to give one to the field team.', 'Bado hakuna ziara zilizogawiwa. Gusa “Gawa ziara” kumpa mtu wa timu.'))
+      : !shown.length ? '<div class="ocv-none">' + emptyHtml(OCV.vp ? tr('Nothing here for ' + esc(OCV.vp) + '. Try another filter.', 'Hakuna kitu hapa kwa ' + esc(OCV.vp) + '. Jaribu kichujio kingine.') : tr(none[0], none[1])) + '</div>'
+      : '<div class="ocv-list">' + shown.slice(0, lim).map(function (a, i) {
+        var s = ocvVSt(a, today), t = OCVVS[s], rel = s === 'done' ? '' : ocvRel(a, today), when = s === 'done' ? vxAgo(a.done) : ocvDay(a.date, today);
+        return '<button type="button" class="ocv-card ocv-v-' + s + '" style="--i:' + i + '" data-ocvv="' + esc(a.aid) + '" data-testid="ocv_visit"><span class="av">' + tmAv({ name: a.to }) + '</span>' +
+          '<span class="tt">' + esc(a.t || pname(a.id)) + '</span><span class="wh">' + esc(when) + oic('chev') + '</span>' +
+          '<span class="pl">' + ocvPill(t[2], tr(t[0], t[1])) + '</span>' +
+          '<span class="mt"><span>' + esc(a.to) + (rel && rel !== when ? ' · ' + esc(rel) : '') + '</span>' + (a.note ? '<span class="nt">“' + esc(a.note) + '”</span>' : '') + '</span></button>';
+      }).join('') + '</div>' + (shown.length > lim ? '<button class="btn light block ocv-more" type="button" data-ocvgo="vmore">' + tr('Show ' + (shown.length - lim) + ' more', 'Onyesha ' + (shown.length - lim) + ' zaidi') + '</button>' : '');
+    var sl = ocvChipPos(b);
+    b.innerHTML = '<div class="o-grid ocv ocv-vg"><div class="o-side ocv-vs">' + head + '</div><div class="ocv-main">' + chips + list + '</div></div>';
+    ocvChipKeep(b, sl);
+  }
+  // tap a visit: the details, and reassign, cancel or open the project
+  function ocvVSheet(a) {
+    var today = ocvToday(), s = ocvVSt(a, today), t = OCVVS[s], open = s !== 'done', title = a.t || pname(a.id), p = byId(a.id);
+    var hue = { bad: 'coral', warn: 'amber', has: 'blue', ok: 'green' }[t[2]];
+    var x = String(a.date).split('-'), dt = new Date(+x[0], +x[1] - 1, +x[2]);
+    var long = isNaN(dt) ? a.date : dt.toLocaleDateString(vxLoc(), { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    var opts = names().map(function (n) { return '<option' + (n === a.to ? ' selected' : '') + '>' + esc(n) + '</option>'; }).join('');
+    if (opts && names().indexOf(a.to) < 0) opts = '<option selected>' + esc(a.to) + '</option>' + opts;
+    var html = ocvShd(oic(t[3]), hue, esc(title), ocvPill(t[2], tr(t[0], t[1])) + (s === 'done' || s === 'today' ? '' : ' <span class="ocv-rel">' + esc(ocvRel(a, today)) + '</span>'), 'ocv_visit_sheet') +
+      ocvKv([[tr('Field officer', 'Afisa wa uwanjani'), '<span class="ocv-who">' + tmAv({ name: a.to }) + '<span>' + esc(a.to) + '</span></span>'], [tr('Date', 'Tarehe'), esc(long)], [tr('Note', 'Maelezo'), a.note ? esc(a.note) : ''],
+        [tr('Assigned by', 'Aliyegawa'), esc(a.by || '') + (a.at ? '<small>' + esc(vxWhen(a.at)) + '</small>' : '')], [tr('Done', 'Imefanyika'), a.done ? esc(vxWhen(a.done)) : '']]) +
+      '<div class="ocv-acts">' + (p ? '<button class="btn" type="button" data-a="open" data-testid="ocv_v_open">' + oic('arrow') + tr('Open project', 'Fungua mradi') + '</button>' : '') +
+      (open ? '<div class="ocv-two"><button class="btn light" type="button" data-a="re" data-testid="ocv_v_re" aria-expanded="false">' + oic('people') + tr('Reassign', 'Mpe mwingine') + '</button>' +
+        '<button class="btn light ocv-red" type="button" data-a="rm" data-testid="ocv_v_rm">' + oic('trash') + tr('Cancel visit', 'Ghairi ziara') + '</button></div>' +
+        '<div class="ocv-re" hidden><div class="ocv-f"><label>' + tr('Field officer', 'Afisa wa uwanjani') + (opts ? '<select data-f="to">' + opts + '</select>' : '<span class="msg warn">' + tr('Add people in the Team tab first.', 'Ongeza watu kwenye Timu kwanza.') + '</span>') + '</label>' +
+        '<label>' + tr('Date', 'Tarehe') + '<input type="date" data-f="date" value="' + esc(a.date) + '"></label></div>' +
+        '<button class="btn" type="button" data-a="re-go" data-testid="ocv_v_re_go">' + oic('check') + tr('Save the change', 'Hifadhi badiliko') + '</button></div><div class="tm-cf" aria-live="polite"></div>' : '') +
+      '<span class="msg" aria-live="polite"></span></div>';
+    var w = ocvSheet(title, html), c = w.querySelector('.tsh-c'), m = c.querySelector('.ocv-acts > .msg'), cf = c.querySelector('.tm-cf');
+    var done = function (text, after) {
+      m.className = 'msg ok'; m.textContent = text; toast(text);
+      ocvVLoad().then(function () { if (after) after(); }); setTimeout(w.close, 900);
+    };
+    c.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-a]'); if (!b) return;
+      var k = b.getAttribute('data-a');
+      if (k === 'open') { w.close(); setTimeout(function () { openProj(a.id); }, 200); return; }
+      if (k === 're') { var re = c.querySelector('.ocv-re'), on = re.hidden; re.hidden = !on; b.setAttribute('aria-expanded', String(on)); if (cf) cf.innerHTML = ''; if (on) { re.classList.add('in'); re.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } return; }
+      if (k === 're-go') {
+        var to = (c.querySelector('[data-f=to]') || {}).value, dd = c.querySelector('[data-f=date]').value;
+        if (!to || !dd) { m.className = 'msg bad'; m.textContent = tr('Choose a person and a date.', 'Chagua mtu na tarehe.'); return; }
+        if (to === a.to && dd === a.date) { m.className = 'msg warn'; m.textContent = tr('Nothing changed yet: choose another person or date.', 'Hakuna kilichobadilika: chagua mtu au tarehe nyingine.'); return; }
+        b.disabled = true; m.className = 'msg'; m.textContent = tr('Saving…', 'Inahifadhi…');
+        adminApi('POST', { action: 'assign', ids: [a.id], to: to, date: dd, note: a.note || '' }).then(function (j) {
+          if (!j.ok) { b.disabled = false; m.className = 'msg bad'; m.textContent = why(j); return; }
+          adminApi('POST', { action: 'unassign', aid: a.aid }).then(function () { done(tr('Changed ✓ ' + to + ' will see it in their app.', 'Imebadilishwa ✓ ' + to + ' ataiona kwenye programu yake.')); });
+        });
+        return;
+      }
+      if (k === 'rm') {
+        var re2 = c.querySelector('.ocv-re'); if (re2) re2.hidden = true;
+        tmAsk(cf, tr('Cancel this visit? It comes off ' + a.to + '’s list.', 'Ghairi ziara hii? Itaondolewa kwenye orodha ya ' + a.to + '.'), tr('Cancel visit', 'Ghairi ziara'), true, function (am) {
+          adminApi('POST', { action: 'unassign', aid: a.aid }).then(function (j) {
+            if (!j.ok) { am.className = 'msg bad'; am.textContent = why(j); qa('button', cf).forEach(function (x) { x.disabled = false; }); return; }
+            am.className = 'msg ok'; am.textContent = tr('Cancelled ✓', 'Imeghairiwa ✓');
+            OCV.items = (OCV.items || []).filter(function (z) { return z.aid !== a.aid; }); if (O.tab === 'visits' && S.view === 'vOffice') ocvVDraw($('oBody'));
+            toast(tr('Visit cancelled ✓', 'Ziara imeghairiwa ✓')); setTimeout(w.close, 700);
+          });
+        });
+      }
+    });
+  }
+  // the assign form, in a sheet: who, when, a note, and which projects
+  function ocvAssignOpen() {
+    var tomorrow = new Date(Date.now() + 864e5), tm = tomorrow.getFullYear() + '-' + ('0' + (tomorrow.getMonth() + 1)).slice(-2) + '-' + ('0' + tomorrow.getDate()).slice(-2);
+    var ns = names();
+    var html = ocvShd(oic('cal'), 'blue', tr('Assign a visit', 'Gawa ziara'), tr('They see it in their app, and monday.com gets a note.', 'Ataiona kwenye programu yake, na monday.com inapata maelezo.'), 'ocv_assign_sheet') +
+      '<div class="ocv-f"><div class="row2"><label>' + tr('Field officer', 'Afisa wa uwanjani') + (ns.length ? '<select id="aTo">' + ns.map(function (n) { return '<option>' + esc(n) + '</option>'; }).join('') + '</select>' : '<span class="msg warn" id="aToNone">' + tr('Add people in the Team tab first.', 'Ongeza watu kwenye Timu kwanza.') + '</span>') + '</label>' +
+      '<label>' + tr('Date', 'Tarehe') + '<input type="date" id="aDate" value="' + tm + '"></label></div>' +
+      '<label>' + tr('Note (optional)', 'Maelezo (si lazima)') + '<input type="text" id="aNote" placeholder="' + tr('e.g. check the pump and meet the committee', 'mf. kagua pampu na ukutane na kamati') + '"></label>' +
+      '<p class="ocv-lab">' + tr('Which projects?', 'Miradi ipi?') + '</p>' +
+      '<div class="row2"><label>' + tr('Show', 'Onyesha') + '<select id="aF"><option value="due">' + tr('Due a visit', 'Zinasubiri ziara') + '</option><option value="repairs">' + tr('Open repairs', 'Matengenezo yaliyo wazi') + '</option><option value="all">' + tr('All with a location', 'Zote zenye mahali') + '</option></select></label>' +
+      '<label>' + tr('Country', 'Nchi') + '<select id="aC"><option value="">' + tr('All', 'Zote') + '</option>' + ['ke', 'tz', 'ug', 'mw'].map(function (c) { return '<option value="' + c + '">' + CNAME[c] + '</option>'; }).join('') + '</select></label></div>' +
+      '<input type="search" id="aQ" placeholder="' + tr('Search projects', 'Tafuta miradi') + '" aria-label="' + tr('Search projects', 'Tafuta miradi') + '" autocomplete="off">' +
+      '<div class="list ocv-pick" id="aList"></div></div>' +
+      '<div class="ocv-foot"><button class="btn" type="button" id="aGo" disabled data-testid="ocv_assign_go">' + tr('Assign', 'Gawa') + '</button><span class="msg" id="aMsg" aria-live="polite"></span></div>';
+    var w = ocvSheet(tr('Assign a visit', 'Gawa ziara'), html), c = w.querySelector('.tsh-c');
+    $('aC').value = homeCk() || '';
+    var draw = function () {
+      var f = $('aF').value, ck = $('aC').value, q = $('aQ').value.trim().toLowerCase();
+      var rows = S.projects.filter(function (p) { return p.gps && (!ck || p.ck === ck) && (!q || (p.title + ' ' + p.area).toLowerCase().indexOf(q) >= 0) && (f === 'all' || (f === 'repairs' ? S.repairs[p.id] : ageDays(p) >= DUE_DAYS)); });
+      if (f === 'due') rows.sort(function (a, z) { return ageDays(z) - ageDays(a); });
+      $('aList').innerHTML = rows.slice(0, 150).map(function (p) { var on = O.pick.indexOf(p.id) >= 0; return '<button class="row" type="button" role="checkbox" aria-checked="' + on + '" data-pick="' + esc(p.id) + '"><span class="ck" aria-hidden="true">' + (on ? '✓' : '') + '</span><span class="tx"><span class="t">' + esc(p.title) + '</span><span class="s">' + esc(sub(p)) + '</span></span><span class="tag">' + (S.repairs[p.id] ? tr('Repair', 'Ukarabati') : esc(ageText(p))) + '</span></button>'; }).join('') || '<p class="muted">' + tr('No projects match.', 'Hakuna mradi unaolingana.') + '</p>';
+      var n = O.pick.length;
+      $('aGo').disabled = !n || !$('aTo') || !$('aTo').value; $('aGo').textContent = n ? (n === 1 ? tr('Assign 1 visit', 'Gawa ziara 1') : tr('Assign ' + n + ' visits', 'Gawa ziara ' + n)) : tr('Assign', 'Gawa');
+    };
+    ['aF', 'aC'].forEach(function (x) { $(x).addEventListener('change', draw); }); $('aQ').addEventListener('input', draw);
+    $('aList').addEventListener('click', function (e) { var r = e.target.closest('[data-pick]'); if (!r) return; buzz(); var id = r.getAttribute('data-pick'), i = O.pick.indexOf(id); if (i >= 0) O.pick.splice(i, 1); else O.pick.push(id); draw(); });
+    $('aGo').addEventListener('click', function () {
+      var btn = this, to = $('aTo').value; btn.disabled = true; msg('aMsg', '', tr('Assigning…', 'Inagawa…'));
+      adminApi('POST', { action: 'assign', ids: O.pick, to: to, date: $('aDate').value, note: $('aNote').value }).then(function (j) {
+        if (!j.ok) { btn.disabled = false; msg('aMsg', 'bad', why(j)); return; }
+        var t = (j.items || []).length === 1 ? tr('Assigned ✓ ' + to + ' will see it in their app.', 'Imegawiwa ✓ ' + to + ' ataiona kwenye programu yake.') : tr('Assigned ✓ ' + to + ' will see them in their app.', 'Imegawiwa ✓ ' + to + ' ataziona kwenye programu yake.');
+        msg('aMsg', 'ok', t); O.pick = []; O.assign = null; OCV.vf = 'open'; OCV.vp = ''; draw(); ocvVLoad(); toast(t); setTimeout(w.close, 1100);
+      });
+    });
+    draw();
+    c.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target.id === 'aQ') e.preventDefault(); });
+  }
+
+  // ---- taps for all three tabs
+  $('oBody').addEventListener('click', function (e) {
+    var tab = O.tab; if (tab !== 'overview' && tab !== 'costs' && tab !== 'visits') return;
+    var b = $('oBody'), g = e.target.closest('[data-ocvgo]');
+    if (g) {
+      var k = g.getAttribute('data-ocvgo'); buzz();
+      if (k.indexOf('o-') === 0) return ocvTab(k.slice(2));
+      if (k.indexOf('list-') === 0) return ocvToList(k.slice(5));
+      if (k === 'people') return ocvPeople();
+      if (k === 'ck') return ocvCountry(g.getAttribute('data-ck'));
+      if (k === 'feedmore') { OCV.feedMore = true; $('ocvFeed').innerHTML = ocvFeedHtml(); return; }
+      if (k.indexOf('vf-') === 0) { OCV.vf = k.slice(3); OCV.vmore = false; return ocvVDraw(b); }
+      if (k === 'vp') { OCV.vp = g.getAttribute('data-who') || ''; OCV.vmore = false; return ocvVDraw(b); }
+      if (k === 'vmore') { OCV.vmore = true; return ocvVDraw(b); }
+      if (k === 'assign') return ocvAssignOpen();
+      if (k.indexOf('cf-') === 0) { OCV.cf = k.slice(3); OCV.cmore = false; return ocvCDraw(b); }
+      if (k === 'cmore') { OCV.cmore = true; return ocvCDraw(b); }
+      return;
+    }
+    var v = e.target.closest('[data-ocvv]'); if (v) { var a = (OCV.items || []).filter(function (x) { return x.aid === v.getAttribute('data-ocvv'); })[0]; if (a) { buzz(); ocvVSheet(a); } return; }
+    var cp = e.target.closest('[data-ocvp]'); if (cp) { buzz(); ocvCostSheet(cp.getAttribute('data-ocvp')); return; }
+    var op = e.target.closest('[data-ocvopen]'); if (op) { openProj(op.getAttribute('data-ocvopen')); return; }
+    var m = e.target.closest('[data-ocvm]');
+    if (m) {
+      OCV.cm = m.getAttribute('data-ocvm'); buzz();
+      qa('[data-ocvm]', b).forEach(function (x) { var on = x === m; x.classList.toggle('on', on); x.setAttribute('aria-pressed', String(on)); });
+      var sel = b.querySelector('.ocv-ch-sel'); if (sel) sel.innerHTML = ocvChartSel(OCV.cm); return;
+    }
+    var s = e.target.closest('[data-ocvsec]');
+    if (s) {
+      var key = s.getAttribute('data-ocvsec'), sec = s.parentNode, on = !sec.classList.contains('open'), dr = sec.querySelector('.ocv-drop');
+      OCV.open[key] = on; sec.classList.toggle('open', on); s.setAttribute('aria-expanded', String(on)); buzz();
+      if (on) dr.removeAttribute('inert'); else dr.setAttribute('inert', '');
+    }
+  });
 
   // --- 7. install on the home screen ----------------------------------------------------------------
   var deferred = null, standalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true || /^android-app:\/\//.test(document.referrer || '');
