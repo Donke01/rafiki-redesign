@@ -53,7 +53,8 @@ data class Project(
 }
 
 data class LatLng(val lat: Double, val lng: Double) {
-    fun text() = "%.6f, %.6f".format(java.util.Locale.US, lat, lng)
+    /** For people: at most 5 decimals (about 1 m), no trailing zeros, e.g. "0.47, 35.25". */
+    fun text() = listOf(lat, lng).joinToString(", ") { "%.5f".format(java.util.Locale.US, it).trimEnd('0').trimEnd('.') }
 }
 
 /** An open repair (needs repair / not working), from the last visit. */
