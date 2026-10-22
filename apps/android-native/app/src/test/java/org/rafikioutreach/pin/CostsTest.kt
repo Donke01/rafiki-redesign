@@ -242,7 +242,7 @@ class CostsTest {
         rule.waitUntil(5000) { posts.any { it.contains("\"action\":\"parts\"") && it.contains("\"id\":\"104\"") } }
         waitFor("Sent for a second approval")
         rule.onNodeWithTag("fix_cost_open").performScrollTo().performClick()
-        rule.onNodeWithText("Actual cost when fixed (KES, optional)").assertExists()
+        rule.onNodeWithText("Actual cost when fixed (optional)").assertExists()
         rule.onNodeWithTag("project_costs").performScrollTo()
         shot("67-tracker-sent-and-costs")
     }

@@ -221,7 +221,8 @@ class FieldToolsTest {
         val m = model(); show(m)
         rule.waitUntil(8000) { rule.onAllNodesWithTag("quick_scan").fetchSemanticsNodes().isNotEmpty() }
         rule.onNodeWithTag("quick_scan").performClick(); rule.waitForIdle()
-        assertTrue(has("Ingia kwa QR") && has("Changanua kwa kamera"))
+        // one title only: "Changanua QR" in the top bar, no second heading on the page
+        assertTrue(!has("Ingia kwa QR") && has("Changanua kwa kamera") && has("mf. 1234567890"))
         shot("field-04-scan-sw-sun")
         // typing the number opens the visit, but not "checked in by QR"
         rule.onNode(androidx.compose.ui.test.hasSetTextAction() and androidx.compose.ui.test.hasAnyAncestor(androidx.compose.ui.test.hasTestTag("scan_id"))).performScrollTo().performTextInput("105")

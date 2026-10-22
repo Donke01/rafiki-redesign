@@ -154,11 +154,12 @@ fun Welcome(m: AppModel, splash: Boolean, onSignIn: () -> Unit) {
             }
         }
         val first = m.prefs.name.substringBefore(' ')
-        if (splash) Cap(if (first.isNotBlank()) "Habari $first, karibu tena." else "Habari, karibu tena.")
+        val back = if (first.isNotBlank()) t("Welcome back, $first.", "Habari $first, karibu tena.") else t("Welcome back.", "Habari, karibu tena.")
+        if (splash) Cap(back)
         else {
             Box(Modifier.fillMaxWidth().padding(bottom = 14.dp), contentAlignment = Alignment.Center) { LangSwitch(m.prefs) }
             Go(t("Sign in", "Ingia"), tag = "onb_signin", onClick = onSignIn)
-            Cap(if (first.isNotBlank()) "Habari $first, karibu tena." else t("New here? Ask your team for a PIN.", "Mgeni hapa? Omba PIN kwa timu yako."))
+            Cap(if (first.isNotBlank()) back else t("New here? Ask your team for a PIN.", "Mgeni hapa? Omba PIN kwa timu yako."))
         }
     }
 }

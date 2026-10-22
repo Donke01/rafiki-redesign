@@ -60,7 +60,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 @Composable
-fun Btn(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, icon: String? = null, enabled: Boolean = true, light: Boolean = false, ok: Boolean = false, small: Boolean = false, saved: String? = null, color: Color? = null) {
+fun Btn(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, icon: String? = null, enabled: Boolean = true, light: Boolean = false, ok: Boolean = false, small: Boolean = false, saved: String? = null, color: Color? = null, outline: Boolean = false) {
     val src = remember { MutableInteractionSource() }
     val pressed by src.collectIsPressedAsState()
     if (saved != null) {
@@ -79,7 +79,7 @@ fun Btn(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, icon: 
             .scale(if (pressed) 0.97f else 1f)
             .clip(RoundedCornerShape(999.dp))
             .background(bg)
-            .then(if (light) Modifier.border(1.dp, if (C.glassy) C.glassEdge else C.edge, RoundedCornerShape(999.dp)) else Modifier)
+            .then(if (light) Modifier.border(1.dp, if (C.glassy && !outline) C.glassEdge else C.edge, RoundedCornerShape(999.dp)) else Modifier)
             .clickable(enabled = enabled, interactionSource = src, indication = androidx.compose.material3.ripple(), role = Role.Button, onClick = onClick)
             .heightIn(min = if (small) 44.dp else 52.dp)
             .padding(horizontal = if (small) 16.dp else 22.dp),
@@ -142,17 +142,33 @@ fun IconTile(icon: String, tint: Color, bg: Color, size: Dp = 42.dp) {
 }
 
 @Composable
-fun Field(value: String, onChange: (String) -> Unit, label: String, modifier: Modifier = Modifier, placeholder: String = "", number: Boolean = false, lines: Int = 1, secret: Boolean = false, readOnly: Boolean = false, phone: Boolean = false) {
+fun Field(value: String, onChange: (String) -> Unit, label: String, modifier: Modifier = Modifier, placeholder: String = "", number: Boolean = false, lines: Int = 1, secret: Boolean = false, readOnly: Boolean = false, phone: Boolean = false, money: Boolean = false) {
     Column(modifier.fillMaxWidth()) {
         Text(label, style = MaterialTheme.typography.labelMedium.copy(fontSize = 13.sp), color = C.ink, modifier = Modifier.padding(bottom = 6.dp, top = 12.dp))
         OutlinedTextField(
-            value, onChange, Modifier.fillMaxWidth().defaultMinSize(minHeight = 52.dp),
+            value, if (money) { s -> onChange(s.filter { it.isDigit() }.take(12)) } else onChange, Modifier.fillMaxWidth().defaultMinSize(minHeight = 52.dp),
             placeholder = { Text(placeholder, color = C.muted) }, singleLine = lines == 1, minLines = lines,
-            keyboardOptions = if (secret) KeyboardOptions(keyboardType = KeyboardType.NumberPassword) else if (phone) KeyboardOptions(keyboardType = KeyboardType.Phone) else if (number) KeyboardOptions(keyboardType = KeyboardType.Decimal) else KeyboardOptions.Default,
-            visualTransformation = if (secret) androidx.compose.ui.text.input.PasswordVisualTransformation() else androidx.compose.ui.text.input.VisualTransformation.None, readOnly = readOnly,
+            // money: "KES" in front and "4,500" while typing; the value itself stays plain digits ("4500")
+            prefix = if (money) { { Text("KES\u00A0", color = C.muted, style = MaterialTheme.typography.bodyLarge) } } else null,
+            keyboardOptions = if (secret) KeyboardOptions(keyboardType = KeyboardType.NumberPassword) else if (phone) KeyboardOptions(keyboardType = KeyboardType.Phone) else if (money) KeyboardOptions(keyboardType = KeyboardType.Number) else if (number) KeyboardOptions(keyboardType = KeyboardType.Decimal) else KeyboardOptions.Default,
+            visualTransformation = if (secret) androidx.compose.ui.text.input.PasswordVisualTransformation() else if (money) Thousands else androidx.compose.ui.text.input.VisualTransformation.None, readOnly = readOnly,
             shape = RoundedCornerShape(16.dp), textStyle = MaterialTheme.typography.bodyLarge,
             colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = C.blue, unfocusedBorderColor = C.edge, focusedContainerColor = C.card, unfocusedContainerColor = C.card),
         )
+    }
+}
+
+/** Shows "4500" as "4,500" in a money field; the cursor keeps its place among the digits. */
+object Thousands : androidx.compose.ui.text.input.VisualTransformation {
+    fun group(d: String): String = d.reversed().chunked(3).joinToString(",").reversed()
+    override fun filter(text: androidx.compose.ui.text.AnnotatedString): androidx.compose.ui.text.input.TransformedText {
+        val d = text.text; val out = group(d)
+        val map = object : androidx.compose.ui.text.input.OffsetMapping {
+            // the commas in front of digit o: all of them, less those still to its right
+            override fun originalToTransformed(offset: Int): Int { val o = offset.coerceIn(0, d.length); return o + maxOf(0, (d.length - 1).coerceAtLeast(0) / 3 - (d.length - o) / 3) }
+            override fun transformedToOriginal(offset: Int): Int = out.take(offset.coerceIn(0, out.length)).count { it != ',' }
+        }
+        return androidx.compose.ui.text.input.TransformedText(androidx.compose.ui.text.AnnotatedString(out), map)
     }
 }
 

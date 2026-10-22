@@ -128,7 +128,12 @@ class ProjectExtrasTest {
     }
     private fun has(t: String) = rule.onAllNodesWithText(t, substring = true).fetchSemanticsNodes().isNotEmpty()
     private fun open(t: String) { rule.waitForIdle(); rule.onNodeWithTag("projects").performScrollToNode(hasText(t)); rule.onNodeWithText(t).performClick(); rule.waitForIdle() }
+    /** The extras sit under "More for this project", folded until tapped. */
+    private fun more() {
+        if (rule.onAllNodesWithTag("prj_more_body").fetchSemanticsNodes().isEmpty()) { rule.onNodeWithTag("prj_more_toggle").performScrollTo().performClick(); rule.waitForIdle() }
+    }
     private fun timeline() {
+        more()
         rule.onNodeWithTag("photo_timeline_go").performScrollTo().performClick()
         rule.waitUntil(5000) { rule.onAllNodesWithTag("photo_timeline").fetchSemanticsNodes().isNotEmpty() }
         rule.onNodeWithTag("photo_timeline").performScrollTo(); rule.waitForIdle()
@@ -183,7 +188,8 @@ class ProjectExtrasTest {
         rule.waitForIdle(); rule.onNodeWithTag("projects").performScrollToNode(hasText("Kapsaret Borehole"))
         assertTrue("row tag", rule.onAllNodesWithTag("water_test_due", useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty())
         open("Kapsaret Borehole")
-        rule.onNodeWithTag("share_summary").performScrollTo(); shot("92-project-test-due")
+        assertTrue("extras folded away", rule.onAllNodesWithTag("share_summary").fetchSemanticsNodes().isEmpty())
+        more(); rule.onNodeWithTag("share_summary").performScrollTo(); shot("92-project-test-due")
         assertTrue(has("Water test due") && has("Share project summary") && has("Photo timeline"))
         timeline(); shot("93-photo-timeline")
         assertTrue(has("Pump or tank, close up") && has("Water flowing") && has("Grace Achieng") && has("Bertin Mwangi") && has("8 photos · 4 visits"))
@@ -197,7 +203,7 @@ class ProjectExtrasTest {
         assertTrue(rule.onAllNodesWithTag("photo_viewer").fetchSemanticsNodes().isEmpty())
         // share: the summary is gathered from the notes, the visits and the photos
         SummaryProbe.last = null
-        rule.onNodeWithTag("share_summary").performScrollTo().performClick()
+        more(); rule.onNodeWithTag("share_summary").performScrollTo().performClick()
         rule.waitUntil(8000) { SummaryProbe.last != null }
         val s = SummaryProbe.last!!
         assertEquals("Kapsaret Borehole", s.title); assertEquals(350L, s.people); assertEquals(3, s.photos.size); assertNotNull(s.quote)
@@ -216,7 +222,7 @@ class ProjectExtrasTest {
         val m = model(); show(m)
         rule.onNodeWithTag("projects").performScrollToNode(hasTestTag("chips")); rule.onNodeWithText("Due a visit").performClick(); rule.waitForIdle()
         // Kapsaret (visited 40 days ago, never tested) and Moiben (never visited, not finished so no test)
-        assertTrue("count line", has("2 due a visit · 1 need a water test"))
+        assertTrue("count line", has("2 due a visit · 1 needs a water test"))
         rule.onNodeWithTag("projects").performScrollToNode(hasText("Kapsaret Borehole")); assertTrue(has("Kapsaret Borehole"))
         shot("96-due-a-visit-water-test")
         rule.onNodeWithTag("nav_office").performClick(); rule.waitForIdle()

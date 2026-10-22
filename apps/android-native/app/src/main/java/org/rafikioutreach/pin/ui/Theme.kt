@@ -15,6 +15,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.Hyphens
+import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontVariation
@@ -74,18 +76,22 @@ private fun mont(w: Int) = Font(R.font.montserrat, FontWeight(w), variationSetti
 @OptIn(ExperimentalTextApi::class)
 val Montserrat = FontFamily(mont(400), mont(500), mont(600), mont(700), mont(800), mont(900))
 
+/** Words never split (no hyphens), and lines are balanced so a single word isn't left alone on the last line.
+ *  LineBreak.Paragraph's line breaking with the balanced strategy: Paragraph alone still left "programu." on a line of its own. */
+private val Wrap = LineBreak.Paragraph.copy(strategy = LineBreak.Strategy.Balanced)
+
 private val type = Typography(
-    headlineLarge = TextStyle(fontFamily = Montserrat, fontWeight = FontWeight.ExtraBold, fontSize = 28.sp, letterSpacing = (-0.5).sp),
-    headlineMedium = TextStyle(fontFamily = Montserrat, fontWeight = FontWeight.ExtraBold, fontSize = 24.sp, letterSpacing = (-0.4).sp),
-    titleLarge = TextStyle(fontFamily = Montserrat, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp),
-    titleMedium = TextStyle(fontFamily = Montserrat, fontWeight = FontWeight.Bold, fontSize = 16.sp),
-    titleSmall = TextStyle(fontFamily = Montserrat, fontWeight = FontWeight.Bold, fontSize = 14.sp),
-    bodyLarge = TextStyle(fontFamily = Montserrat, fontWeight = FontWeight.Medium, fontSize = 16.sp, lineHeight = 23.sp),
-    bodyMedium = TextStyle(fontFamily = Montserrat, fontWeight = FontWeight.Medium, fontSize = 14.sp, lineHeight = 20.sp),
-    bodySmall = TextStyle(fontFamily = Montserrat, fontWeight = FontWeight.Medium, fontSize = 12.sp, lineHeight = 17.sp),
-    labelLarge = TextStyle(fontFamily = Montserrat, fontWeight = FontWeight.Bold, fontSize = 15.sp),
-    labelMedium = TextStyle(fontFamily = Montserrat, fontWeight = FontWeight.Bold, fontSize = 12.sp),
-    labelSmall = TextStyle(fontFamily = Montserrat, fontWeight = FontWeight.Bold, fontSize = 11.sp),
+    headlineLarge = TextStyle(lineBreak = Wrap, hyphens = Hyphens.None, fontFamily = Montserrat, fontWeight = FontWeight.ExtraBold, fontSize = 28.sp, letterSpacing = (-0.5).sp),
+    headlineMedium = TextStyle(lineBreak = Wrap, hyphens = Hyphens.None, fontFamily = Montserrat, fontWeight = FontWeight.ExtraBold, fontSize = 24.sp, letterSpacing = (-0.4).sp),
+    titleLarge = TextStyle(lineBreak = Wrap, hyphens = Hyphens.None, fontFamily = Montserrat, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp),
+    titleMedium = TextStyle(lineBreak = Wrap, hyphens = Hyphens.None, fontFamily = Montserrat, fontWeight = FontWeight.Bold, fontSize = 16.sp),
+    titleSmall = TextStyle(lineBreak = Wrap, hyphens = Hyphens.None, fontFamily = Montserrat, fontWeight = FontWeight.Bold, fontSize = 14.sp),
+    bodyLarge = TextStyle(lineBreak = Wrap, hyphens = Hyphens.None, fontFamily = Montserrat, fontWeight = FontWeight.Medium, fontSize = 16.sp, lineHeight = 23.sp),
+    bodyMedium = TextStyle(lineBreak = Wrap, hyphens = Hyphens.None, fontFamily = Montserrat, fontWeight = FontWeight.Medium, fontSize = 14.sp, lineHeight = 20.sp),
+    bodySmall = TextStyle(lineBreak = Wrap, hyphens = Hyphens.None, fontFamily = Montserrat, fontWeight = FontWeight.Medium, fontSize = 12.sp, lineHeight = 17.sp),
+    labelLarge = TextStyle(lineBreak = Wrap, hyphens = Hyphens.None, fontFamily = Montserrat, fontWeight = FontWeight.Bold, fontSize = 15.sp),
+    labelMedium = TextStyle(lineBreak = Wrap, hyphens = Hyphens.None, fontFamily = Montserrat, fontWeight = FontWeight.Bold, fontSize = 12.sp),
+    labelSmall = TextStyle(lineBreak = Wrap, hyphens = Hyphens.None, fontFamily = Montserrat, fontWeight = FontWeight.Bold, fontSize = 11.sp),
 )
 
 @Composable

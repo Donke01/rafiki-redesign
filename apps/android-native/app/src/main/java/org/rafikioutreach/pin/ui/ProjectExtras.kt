@@ -194,7 +194,8 @@ fun photoGroups(notes: List<Note>, p: Project, mainUrl: String?): List<TlGroup> 
 }
 
 private fun loc(): Locale = if (Lang.sw) Locale("sw") else Locale.UK
-fun prjDay(iso: String): String = runCatching { DateTimeFormatter.ofPattern("d MMM yyyy", loc()).withZone(ZoneId.systemDefault()).format(Instant.parse(iso)) }.getOrDefault(iso.take(10))
+/** "12 Sep" (with the year when it isn't this year), in the app's language (see [Dates]). */
+fun prjDay(iso: String): String = Dates.parse(iso)?.let { Dates.day(it) } ?: iso.take(10)
 
 /** Pictures for the timeline and the PDF; tests can hand in their own. */
 object PrjPics {
@@ -220,15 +221,16 @@ fun ProjectExtrasBar(m: AppModel, p: Project, showTimeline: () -> Unit) {
     val ctx = LocalContext.current; val scope = rememberScope()
     var busy by remember(p.id) { mutableStateOf(false) }
     var msg by remember(p.id) { mutableStateOf<String?>(null) }
-    Row(Modifier.padding(top = 12.dp).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        Btn(t("Photo timeline", "Picha kwa wakati"), showTimeline, Modifier.weight(1f).testTag("photo_timeline_go"), icon = "camera", light = true, small = true)
+    // full-width buttons, one line each (under More on the project page)
+    Column(Modifier.padding(top = 2.dp).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Btn(t("Photo timeline", "Picha kwa wakati"), showTimeline, Modifier.fillMaxWidth().testTag("photo_timeline_go"), icon = "camera", light = true, small = true, outline = true)
         Btn(if (busy) t("Preparing…", "Inaandaa…") else t("Share project summary", "Shiriki muhtasari wa mradi"), {
             busy = true; msg = null
             scope.launch {
                 msg = shareSummary(ctx, m, p)
                 busy = false
             }
-        }, Modifier.weight(1f).testTag("share_summary"), icon = "share", light = true, small = true, enabled = !busy)
+        }, Modifier.fillMaxWidth().testTag("share_summary"), icon = "share", light = true, small = true, enabled = !busy, outline = true)
     }
     Msg(msg, "bad")
 }
@@ -266,7 +268,7 @@ fun PhotoTimeline(m: AppModel, p: Project, notes: List<Note>) {
                         .clickable(role = Role.Button) { open = gi to ii }.semantics { contentDescription = desc }.testTag("ph_${g.key}_$ii")) {
                         Box {
                             PrjImage(it.url, Modifier.fillMaxWidth().aspectRatio(4f / 3f).background(C.tint))
-                            if (ii == 0 && !it.main && g.items.size > 1) Text(t("Latest", "Karibuni"), color = Color.White, style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                            if (ii == 0 && !it.main && g.items.size > 1) Text(t("Latest", "Mpya zaidi"), color = Color.White, style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
                                 modifier = Modifier.padding(8.dp).clip(RoundedCornerShape(99.dp)).background(Green).padding(horizontal = 8.dp, vertical = 2.dp))
                         }
                         Column(Modifier.fillMaxWidth().background(C.bg).padding(horizontal = 10.dp, vertical = 7.dp)) {
@@ -364,15 +366,15 @@ fun buildSummary(p: Project, s: Snapshot, notes: List<Note>, visits: List<JSONOb
     }
     val story = notes.firstNotNullOfOrNull { STORY.find(it.text) }
     val facts = mutableListOf<SumFact>()
-    if (p.type.isNotBlank()) facts += SumFact(t("Type", "Aina"), p.type)
+    if (p.type.isNotBlank()) facts += SumFact(t("Type", "Aina"), typeName(p.type))
     val where = listOf(p.area, p.country).filter { it.isNotBlank() }.joinToString(", ")
     if (where.isNotBlank()) facts += SumFact(t("Location", "Mahali"), where)
     listOf(statusName(p.status), p.year?.toString().orEmpty()).filter { it.isNotBlank() }.joinToString(" · ").takeIf { it.isNotBlank() }?.let { facts += SumFact(t("Project", "Mradi"), it) }
     s.visits[p.id]?.let { v -> facts += SumFact(t("Last visit", "Ziara ya mwisho"), prjDay(v.at) + " · " + stateName(v.state), v.state.takeIf { it in setOf("working", "repair", "notworking") }) }
     s.tests[p.id]?.let { facts += SumFact(t("Water last tested", "Maji yalipimwa mwisho"), prjDay(it)) }
-    s.repairs[p.id]?.let { r -> facts += SumFact(t("Open repair", "Matengenezo yaliyo wazi"), stateName(r.state) + ", " + t("reported ", "iliripotiwa ") + prjDay(r.at) + if (r.problems.isNotEmpty()) ": " + r.problems.joinToString(", ") else "", if (r.state == "notworking") "notworking" else "repair") }
-    return ProjectSummary(p.title, listOf(p.type, where).filter { it.isNotBlank() }.joinToString(" · ") + " · RAFIKI Outreach", photos, people, pLabel, pAt,
-        story?.groupValues?.get(1)?.trim(), story?.groupValues?.get(2)?.trim().orEmpty(), facts, by, DateTimeFormatter.ofPattern("d MMMM yyyy", loc()).format(today))
+    s.repairs[p.id]?.let { r -> facts += SumFact(t("Open repair", "Matengenezo yaliyo wazi"), stateName(r.state) + ", " + t("reported ", "iliripotiwa ") + prjDay(r.at) + if (r.problems.isNotEmpty()) ": " + r.problems.joinToString(", ") { problemName(it) } else "", if (r.state == "notworking") "notworking" else "repair") }
+    return ProjectSummary(p.title, listOf(typeName(p.type), where).filter { it.isNotBlank() }.joinToString(" · ") + " · RAFIKI Outreach", photos, people, pLabel, pAt,
+        story?.groupValues?.get(1)?.trim(), story?.groupValues?.get(2)?.trim().orEmpty(), facts, by, Dates.day(today, year = true))
 }
 
 /** For tests: the last summary made, before it went into the PDF. */
