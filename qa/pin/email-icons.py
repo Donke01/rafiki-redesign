@@ -19,7 +19,7 @@ P = {
  'coins': '<ellipse cx="12" cy="7" rx="6.5" ry="2.8"/><path d="M5.5 7v5c0 1.5 2.9 2.8 6.5 2.8s6.5-1.3 6.5-2.8V7"/><path d="M5.5 12v5c0 1.5 2.9 2.8 6.5 2.8s6.5-1.3 6.5-2.8v-5"/>',
  'quote': '<path d="M5 17.5c0-4 1.5-7 5-9M14 17.5c0-4 1.5-7 5-9"/><circle cx="7.5" cy="16" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/>',
 }
-T = {'blue': ('#0A78C2', '#E3F0FA'), 'red': ('#C62828', '#FDE8E6'), 'amber': ('#B45F06', '#FFF1DC'), 'green': ('#18804F', '#E2F5EA'), 'coral': ('#D23C32', '#FDE9E6'), 'navy': ('#04263F', '#E6ECF2')}
+T = {'blue': ('#0A78C2', '#E3F0FA'), 'red': ('#C62828', '#FDE8E6'), 'amber': ('#B45F06', '#FFF1DC'), 'green': ('#18804F', '#E2F5EA'), 'coral': ('#D23C32', '#FDE9E6'), 'navy': ('#4A7AA8', '#E6ECF2')}
 BADGES = ['check-green', 'alert-red', 'chat-amber', 'cal-blue', 'heart-coral', 'bell-blue', 'wrench-amber', 'drop-blue']
 SMALL = ['drop-blue', 'alert-red', 'wrench-amber', 'check-green', 'cal-blue', 'people-blue', 'pin-blue', 'inbox-blue', 'coins-blue', 'heart-coral', 'camera-blue', 'chat-amber', 'spark-amber', 'quote-navy', 'bell-blue']
 def svg(icon, tone, badge):
