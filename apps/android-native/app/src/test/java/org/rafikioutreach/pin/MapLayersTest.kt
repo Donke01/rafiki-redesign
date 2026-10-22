@@ -121,6 +121,7 @@ class MapLayersTest {
     private fun show(m: AppModel, dark: Boolean = false) {
         rule.setContent { RafikiTheme(dark = dark) { Box(Modifier.size(390.dp, 844.dp)) { App(m) } } }
         rule.waitUntil(8000) { has("nav_map") }; rule.onNodeWithTag("nav_map").performClick(); rule.waitForIdle()
+        org.rafikioutreach.pin.ui.MapClean.revealed = true; rule.waitForIdle() // the tiles shown, as after a tap on the calm map
     }
     private fun bitmap(): Bitmap {
         rule.waitForIdle()

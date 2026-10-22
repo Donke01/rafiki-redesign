@@ -55,7 +55,7 @@ class NavTest {
     private val out = File(System.getProperty("user.dir"), "build/shots").apply { mkdirs() }
     private val app get() = ApplicationProvider.getApplicationContext<Application>()
 
-    @After fun reset() { home = ""; uganda = false; NewSiteDrafts.remove(app); Lang.sw = false; Motion.on = true; Nav.now = { System.currentTimeMillis() }; HomeLayers.reset(); MapClean.on = false; Onb.enabled = true }
+    @After fun reset() { home = ""; uganda = false; NewSiteDrafts.remove(app); Lang.sw = false; Motion.on = true; Nav.now = { System.currentTimeMillis() }; HomeLayers.reset(); MapClean.revealed = false; Onb.enabled = true }
 
     // 20 projects around Eldoret: enough to scroll; 10 of them need a repair
     private fun proj(i: Int) = JSONObject().put("id", "${100 + i}").put("title", "Site ${100 + i} Borehole").put("country", "Kenya").put("ck", "ke").put("area", "Eldoret")
@@ -209,11 +209,11 @@ class NavTest {
     @Test fun map_filter_and_layers_start_over() {
         Lang.sw = false; val m = start()
         nav("map"); waitTag("map_home")
-        app.getSharedPreferences("map_style", 0).edit().putString("mapf", "broken").apply(); MapClean.on = true; HomeLayers.heat = "repairs"
+        app.getSharedPreferences("map_style", 0).edit().putString("mapf", "broken").apply(); MapClean.revealed = true; HomeLayers.heat = "repairs"
         nav("list"); nav("map")
         assertEquals("", app.getSharedPreferences("map_style", 0).getString("mapf", "x"))
-        assertFalse(MapClean.on); assertEquals("", HomeLayers.heat)
-        assertTrue(tagged("map_chips") && !tagged("map_pill"))
+        assertFalse(MapClean.revealed); assertEquals("", HomeLayers.heat)
+        assertTrue("calm again: the search button, no chips or pill", tagged("map_search_btn") && !tagged("map_chips") && !tagged("map_pill"))
         assertTrue("saved choices stay", m.prefs.pin == "9999")
     }
 

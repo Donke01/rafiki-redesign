@@ -63,6 +63,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
@@ -77,6 +78,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -128,7 +130,10 @@ import kotlin.math.tan
  *
  * Kept clear: with a filter on, the chip row folds into one pill, the pinned bar steps aside, Nearest to you rests
  * as one slim line and the map fits the matching pins. The key is a small Key button, the buttons on the right are
- * one compact column (Offline areas and Follow me under More), and a tap on empty map shows the map alone. Drawn
+ * one compact column (Offline areas and Follow me under More). Calm by default (map3): the map opens with only the pins,
+ * a round search button and the column; a tap on empty map reveals the chips, the pinned bar, Nearest to you and the Key
+ * (another tap or back hides them). A filter's pill, the search box, a card and "You're at" show regardless. The pins
+ * (MapPins.kt) say what they are and how they are. Drawn
  * bottom to top: the bottom panel, the column on the right, the controls at the top; open, Nearest to you stops
  * under them, and the map's credit always stays in view above the bottom panel. The same as the web app (mcl…).
  */
@@ -166,120 +171,6 @@ fun mapStatusOk(s: Snapshot, p: Project, k: String): Boolean = when (k) {
     "due" -> ageDays(s, p) >= DUE_DAYS || testDue(s, p)
     "mine" -> s.assigned.any { it.id == p.id } || p.id in s.jobs
     else -> true
-}
-
-data class HomePin(val id: String, val ll: LatLng, val cond: String)
-
-/** Groups pins that would sit within [radiusPx] of each other at [zoom] (256-pixel tiles, as osmdroid draws them).
- *  Past street level every pin stands alone. The worst pins seed the groups, so a broken pump is never hidden. */
-fun clusterPins(pins: List<HomePin>, zoom: Double, radiusPx: Double): List<List<HomePin>> {
-    if (zoom >= 15.0 || pins.size < 2) return pins.map { listOf(it) }
-    val scale = 256.0 * 2.0.pow(zoom)
-    val xy = pins.map { p ->
-        val la = Math.toRadians(p.ll.lat.coerceIn(-85.0, 85.0))
-        ((p.ll.lng + 180) / 360 * scale) to ((1 - ln(tan(la) + 1 / cos(la)) / PI) / 2 * scale)
-    }
-    val order = pins.indices.sortedWith(compareByDescending<Int> { condRank(pins[it].cond) }.thenBy { pins[it].id })
-    val used = BooleanArray(pins.size)
-    val out = mutableListOf<List<HomePin>>()
-    val r2 = radiusPx * radiusPx
-    for (i in order) {
-        if (used[i]) continue
-        used[i] = true
-        val g = mutableListOf(pins[i])
-        for (j in order) if (!used[j]) {
-            val dx = xy[i].first - xy[j].first; val dy = xy[i].second - xy[j].second
-            if (dx * dx + dy * dy <= r2) { used[j] = true; g += pins[j] }
-        }
-        out += g
-    }
-    return out
-}
-
-/** The pins and number bubbles on the map. Rebuilt only when the pins, the chosen one or the zoom (in half steps) change. */
-class HomePins(private val mv: MapView, private val dens: Float) {
-    var onPin: (String) -> Unit = {}
-    var animate = true
-    private var pins: List<HomePin> = emptyList()
-    private var sel: String? = null
-    private val shown = mutableListOf<Marker>()
-    private var key: Any? = null
-    private val icons = HashMap<String, BitmapDrawable>()
-    private val listener = object : MapListener {
-        override fun onScroll(e: ScrollEvent?) = false
-        override fun onZoom(e: ZoomEvent?): Boolean { mv.post { refresh() }; return false }
-    }
-    init { mv.addMapListener(listener) }
-
-    fun set(p: List<HomePin>, selected: String?) { pins = p; sel = selected; refresh() }
-    fun detach() { mv.removeMapListener(listener); shown.forEach { mv.overlays.remove(it) }; shown.clear(); mv.invalidate() }
-
-    fun refresh() {
-        val z = floor(mv.zoomLevelDouble * 2) / 2
-        val k = Triple(pins, sel, z)
-        if (k == key) return
-        key = k
-        shown.forEach { mv.overlays.remove(it) }; shown.clear()
-        // the chosen pin always stands alone, on top
-        val groups = clusterPins(pins.filter { it.id != sel }, z, 30.0 * dens) + pins.filter { it.id == sel }.map { listOf(it) }
-        groups.forEach { g -> shown += if (g.size == 1) pinMarker(g[0]) else bubbleMarker(g) }
-        // above the map's tiles, the long-press catcher and what goes under the pins (heat, pulse, the route's line:
-        // MapLayers.kt), under your own dot and anything drawn later
-        val at = mv.overlays.indexOfLast { it is MapEventsOverlay || it is org.osmdroid.views.overlay.TilesOverlay || it is UnderPins } + 1
-        mv.overlays.addAll(at.coerceIn(0, mv.overlays.size), shown)
-        mv.invalidate()
-    }
-
-    private fun pinMarker(p: HomePin) = Marker(mv).apply {
-        id = "pin:" + p.id; title = p.id; snippet = p.cond
-        position = GeoPoint(p.ll.lat, p.ll.lng); icon = dot(p.cond, p.id == sel); setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER); setInfoWindow(null)
-        setOnMarkerClickListener { _, _ -> onPin(p.id); true }
-    }
-
-    private fun bubbleMarker(g: List<HomePin>) = Marker(mv).apply {
-        val worst = g.maxBy { condRank(it.cond) }.cond
-        id = "cluster:" + g.size; title = g.size.toString(); snippet = worst
-        position = GeoPoint(g.sumOf { it.ll.lat } / g.size, g.sumOf { it.ll.lng } / g.size)
-        icon = bubble(worst, g.size); setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER); setInfoWindow(null)
-        setOnMarkerClickListener { _, _ -> zoomInto(g); true }
-    }
-
-    /** A tap on a bubble zooms in until its pins come apart. */
-    fun zoomInto(g: List<HomePin>) {
-        val box = BoundingBox.fromGeoPointsSafe(g.map { GeoPoint(it.ll.lat, it.ll.lng) })
-        val z = mv.zoomLevelDouble
-        if (box.latitudeSpan < 1e-4 && box.longitudeSpanWithDateLine < 1e-4) { mapFly(mv, LatLng(box.centerLatitude, box.centerLongitude), (z + 3).coerceAtMost(18.0), animate); return }
-        mv.zoomToBoundingBox(box.increaseByScale(1.6f), animate)
-        // never leave it where it was: at least two steps closer
-        mv.post { if (mv.zoomLevelDouble < z + 1) mapFly(mv, LatLng(box.centerLatitude, box.centerLongitude), z + 2, animate) }
-    }
-
-    private fun paint() = Paint(Paint.ANTI_ALIAS_FLAG)
-
-    private fun dot(c: String, big: Boolean): BitmapDrawable = icons.getOrPut("d$c$big") {
-        val r = (if (big) 11f else 8f) * dens; val edge = (if (big) 3f else 2.5f) * dens; val halo = (if (big) 5f else 1.5f) * dens
-        val n = (2 * (r + edge + halo)).roundToInt() + 2; val m = n / 2f
-        val b = Bitmap.createBitmap(n, n, Bitmap.Config.ARGB_8888); val cv = Canvas(b); val p = paint()
-        p.color = if (big) 0x800A78C2.toInt() else 0x47000000; cv.drawCircle(m, m, r + edge + halo, p)
-        p.color = android.graphics.Color.WHITE; cv.drawCircle(m, m, r + edge, p)
-        p.color = condArgb(c); cv.drawCircle(m, m, r, p)
-        BitmapDrawable(mv.resources, b)
-    }
-
-    private fun bubble(c: String, count: Int): BitmapDrawable {
-        val label = if (count > 99) "99+" else count.toString()
-        return icons.getOrPut("b$c$label") {
-            val r = (if (count < 10) 15f else if (count < 100) 18f else 21f) * dens; val edge = 3f * dens; val halo = 2f * dens
-            val n = (2 * (r + edge + halo)).roundToInt() + 2; val m = n / 2f
-            val b = Bitmap.createBitmap(n, n, Bitmap.Config.ARGB_8888); val cv = Canvas(b); val p = paint()
-            p.color = 0x47000000; cv.drawCircle(m, m, r + edge + halo, p)
-            p.color = android.graphics.Color.WHITE; cv.drawCircle(m, m, r + edge, p)
-            p.color = condArgb(c); cv.drawCircle(m, m, r, p)
-            p.color = android.graphics.Color.WHITE; p.textAlign = Paint.Align.CENTER; p.typeface = Typeface.DEFAULT_BOLD; p.textSize = 14f * dens
-            cv.drawText(label, m, m - (p.descent() + p.ascent()) / 2, p)
-            BitmapDrawable(mv.resources, b)
-        }
-    }
 }
 
 fun mapFly(mv: MapView, ll: LatLng, zoom: Double, animate: Boolean) {
@@ -332,6 +223,7 @@ fun MapHome(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit, offlin
     val focus = LocalFocusManager.current
     val anim = rememberMapMotion()
     val hp = rememberHaptics()
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
     val prefs = remember { ctx.getSharedPreferences("map_style", Context.MODE_PRIVATE) }
     var status by remember { mutableStateOf(prefs.getString("mapf", "") ?: "") }
     var ty by remember { mutableStateOf(m.prefs.ftype) }
@@ -349,6 +241,11 @@ fun MapHome(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit, offlin
     var typing by remember { mutableStateOf(false) }
     var suggOpen by remember { mutableStateOf(false) } // the search's suggestions are showing: "You're at" steps aside
     var askSearch by remember { mutableStateOf(false) }
+    var searchOpen by remember { mutableStateOf(false) } // calm: the search box open from its round button
+    var quick by remember { mutableStateOf<Triple<String, Float, Float>?>(null) } // a long-pressed pin's quick actions (id, x, y px)
+    var easeFor by remember { mutableStateOf<Pair<String, Long>?>(null) } // a pin to bring above its card (id, after ms)
+    // "Tap the map for filters", once on this phone
+    var hint by remember { mutableStateOf(!prefs.getBoolean("calm_hint", false)) }
     val styleSheet = remember { mutableStateOf(false) }
     val offlineSheet = remember { mutableStateOf(false) }
     // where things over the map are (px, in this box): the open sheet stops under the lowest of the top controls and the column
@@ -358,7 +255,7 @@ fun MapHome(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit, offlin
     val room = remember { MapRoom() }
     // today's route, follow me, heat, the time slider and live team (MapLayers.kt)
     val extras = rememberMapExtras(m, snap, fix, open, visit)
-    val clean = MapClean.on
+    val clean = !MapClean.revealed // calm: the tiles over the map are tucked away
     val online by OfflineMaps.online.collectAsState()
     val offlineAreas by OfflineMaps.areas.collectAsState()
     val cmOn = countryMapOn(false)
@@ -373,7 +270,9 @@ fun MapHome(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit, offlin
     val filtered = status.isNotBlank() || tyOn.isNotBlank()
     // the time slider shows its own dots (extras.keep), so the pins and their bubbles step aside meanwhile
     val visible = pinned.filter { extras.keep(it) && mapStatusOk(snap, it, status) && (tyOn.isBlank() || tgroup(it) == tyOn) }
-    val pins = visible.map { HomePin(it.id, it.gps!!, conds[it.id] ?: PinCond.OLD) }
+    // each pin's icon (the kind), a visit or water test due, and its short name: worked out once per list
+    val looks = remember(snap) { pinned.associate { it.id to Triple(typeLook(it).first, mapStatusOk(snap, it, "due"), shortName(it.title)) } }
+    val pins = visible.map { p -> val l = looks[p.id]; HomePin(p.id, p.gps!!, conds[p.id] ?: PinCond.OLD, l?.first ?: "drop", l?.second == true, l?.third ?: "") }
     val order = remember(anchor, visible) {
         val a = anchor?.let { id -> pinned.firstOrNull { it.id == id } }
         if (a == null) emptyList() else (visible.filter { it.id != a.id }.sortedBy { Geo.metres(a.gps!!, it.gps!!) }.take(24).let { listOf(a) + it })
@@ -386,10 +285,12 @@ fun MapHome(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit, offlin
 
     fun pick(id: String, fly: Boolean) {
         HomeLayers.follow = false // looking at a project: following you stops, as when you drag the map
-        hp.tap(); spot = null; measuring = false; anchor = id; sel = id; focus.clearFocus(); tray = false; keyOpen = false
+        hp.tap(); spot = null; measuring = false; anchor = id; sel = id; focus.clearFocus(); tray = false; keyOpen = false; quick = null
         val p = pinned.firstOrNull { it.id == id } ?: return
         val v = mv ?: return
         if (fly) mapFly(v, p.gps!!, maxOf(v.zoomLevelDouble, 15.0), anim)
+        // the map eases so the pin sits above the card (once the card is up, or the flight is over)
+        easeFor = id to (if (!anim) 0L else if (fly) 700L else 300L)
     }
     fun step(d: Int) {
         val i = order.indexOfFirst { it.id == sel }.takeIf { it >= 0 } ?: return
@@ -397,7 +298,7 @@ fun MapHome(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit, offlin
         hp.tap(); sel = p.id
         mv?.let { v -> if (anim) v.controller.animateTo(GeoPoint(p.gps!!.lat, p.gps.lng), v.zoomLevelDouble, 450L) else v.controller.setCenter(GeoPoint(p.gps!!.lat, p.gps.lng)) }
     }
-    fun closeCards() { sel = null; anchor = null; spot = null; measuring = false }
+    fun closeCards() { sel = null; anchor = null; spot = null; measuring = false; quick = null; room.cardTop = 0 }
     fun clearFilters() { status = ""; ty = ""; prefs.edit().putString("mapf", "").apply(); m.prefs.ftype = ""; rowOpen = false }
     // back closes what is open over the map, the last opened first: the card, Nearest to you, the tray or key,
     // the chip row, a stop or teammate, the map alone; only then does back leave the map (Nav.kt)
@@ -406,23 +307,31 @@ fun MapHome(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit, offlin
     BackStep(tray || keyOpen) { tray = false; keyOpen = false }
     BackStep(rowOpen && (status.isNotBlank() || ty.isNotBlank())) { rowOpen = false }
     BackStep(HomeLayers.pick != null) { HomeLayers.pick = null }
-    BackStep(MapClean.on) { MapClean.on = false }
+    BackStep(MapClean.revealed) { MapClean.revealed = false }
+    BackStep(quick != null) { quick = null }
 
     val pickNow by rememberUpdatedState<(String) -> Unit> { pick(it, false) }
-    // a tap on empty map: put the card away, fold the open chip row, or else show the map alone (and back)
+    val layerRef = remember { mutableStateOf<HomePins?>(null) }
+    // a tap on empty map: put the quick actions or the card away, fold the open chip row, or else reveal the tiles (and hide them again)
     val onTapMap by rememberUpdatedState {
         val wasTyping = typing
         focus.clearFocus()
         when {
+            quick != null -> quick = null
             sel != null || spot != null -> closeCards()
             wasTyping -> {}
             rowOpen && filtered -> rowOpen = false
-            else -> { hp.tap(); MapClean.on = !MapClean.on; tray = false; keyOpen = false; if (MapClean.on) nearOpen = false }
+            else -> { hp.tap(); MapClean.revealed = !MapClean.revealed; tray = false; keyOpen = false; hint = false; if (!MapClean.revealed) nearOpen = false }
         }
+        layerRef.value?.clearSpider()
         true
     }
     val onLong by rememberUpdatedState<(LatLng) -> Unit> { ll ->
-        if (!extras.years) { HomeLayers.follow = false; hp.tap(); focus.clearFocus(); sel = null; anchor = null; measuring = false; spot = ll; tray = false; keyOpen = false }
+        if (!extras.years) { HomeLayers.follow = false; hp.tap(); focus.clearFocus(); sel = null; anchor = null; measuring = false; spot = ll; tray = false; keyOpen = false; quick = null }
+    }
+    // a long press on a pin: Report a visit, Directions, Open, in a small popover by the pin
+    val onLongPin by rememberUpdatedState<(String, Float, Float) -> Unit> { id, x, y ->
+        if (!extras.years) { hp.long(); focus.clearFocus(); spot = null; measuring = false; tray = false; keyOpen = false; quick = Triple(id, x, y) }
     }
     // following you or showing the years: the card and "Nearest to you" step aside
     LaunchedEffect(extras.quiet) { if (extras.quiet) closeCards() }
@@ -440,8 +349,18 @@ fun MapHome(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit, offlin
         onDispose { v.overlays.remove(o) }
     }
     val layer = remember(mv) { mv?.let { HomePins(it, dens.density) } }
+    layerRef.value = layer
     DisposableEffect(layer) { onDispose { layer?.detach() } }
-    SideEffect { layer?.let { it.onPin = pickNow; it.animate = anim; it.set(pins, sel) } }
+    SideEffect { layer?.let { it.onPin = pickNow; it.onLongPin = onLongPin; it.animate = anim; it.scope = scope; it.set(pins, sel) } }
+    // the chosen pin comes clear of the card: above it and under the controls at the top
+    LaunchedEffect(easeFor) {
+        val (id, wait) = easeFor ?: return@LaunchedEffect
+        kotlinx.coroutines.delay(wait)
+        // the card's top, once it is laid out
+        repeat(30) { if (room.cardTop > 0) return@repeat; androidx.compose.runtime.withFrameNanos { } }
+        val v = mv ?: return@LaunchedEffect
+        if (sel == id) pinned.firstOrNull { it.id == id }?.gps?.let { easeAbove(v, it, room, dens.density, anim) }
+    }
     // the long-pressed spot, and the line from you to it
     DisposableEffect(mv, spot, measuring, here) {
         val v = mv; val sp = spot
@@ -463,6 +382,8 @@ fun MapHome(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit, offlin
     val panel = when { extras.quiet || typing -> "none"; sel != null -> "card"; spot != null -> "spot"; clean -> "none"; else -> "near" }
     val sheetOpen = nearOpen && panel == "near"
     val keyShown = !clean && !typing && !compact && !extras.years && sel == null && spot == null && !sheetOpen
+    val hintShown = hint && clean && panel == "none" && !typing && !extras.quiet && !extras.years && quick == null
+    LaunchedEffect(hintShown) { if (hintShown) { prefs.edit().putBoolean("calm_hint", true).apply(); kotlinx.coroutines.delay(4500); hint = false } }
     // a new filter: the screen clears (pill, slim handle), then the map fits what the filter leaves, clear of what is over it
     val firstFit = remember { booleanArrayOf(true) }
     LaunchedEffect(status, tyOn, mv) {
@@ -482,7 +403,7 @@ fun MapHome(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit, offlin
     // open, Nearest to you stops under the lowest of the top controls and the column, with room for the credit and those cards
     val maxFull = (with(dens) { (boxH - maxOf(leftPx, sidePx)).toDp() } - 12.dp - creditDp - cardsDp - 12.dp).coerceAtLeast(120.dp)
     room.top = maxOf(leftPx, sidePx)
-    Box(Modifier.fillMaxSize().onSizeChanged { boxH = it.height; room.h = it.height; room.w = it.width; compact = with(dens) { it.height.toDp() } < 600.dp }.testTag("map_home")) {
+    Box(Modifier.fillMaxSize().onSizeChanged { boxH = it.height; room.h = it.height; room.w = it.width; compact = with(dens) { it.height.toDp() } < 600.dp }.onGloballyPositioned { room.rootY = it.positionInRoot().y.roundToInt() }.testTag("map_home")) {
         ProjectsMap(dots, here, { pick(it, false) }, Modifier.fillMaxSize(), fitKey = snap.projects.size, badgeBottom = bottomDp + 12.dp, drawDots = false, onMap = { mv = it }, extras = extras, styleSheet = styleSheet, fitDots = homeDots)
         // 1. the bottom panel: the card, the long-pressed spot, or Nearest to you (under everything else)
         AnimatedContent(panel, Modifier.align(Alignment.BottomCenter).padding(12.dp).onSizeChanged { bottomH = it.height }.onGloballyPositioned { room.panelTop = it.boundsInParent().top.roundToInt() },
@@ -492,7 +413,9 @@ fun MapHome(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit, offlin
                 else (slideInVertically(tween(280)) { it / 2 } + fadeIn(tween(200))) togetherWith (slideOutVertically(tween(200)) { it / 2 } + fadeOut(tween(150)))
             }) { k ->
             when (k) {
-                "card" -> PreviewCard(m, snap, order, sel, conds, here, anim, { step(it) }, { closeCards() }, visit, open)
+                "card" -> Box(Modifier.onGloballyPositioned { room.cardTop = it.positionInRoot().y.roundToInt() - room.rootY }) {
+                    PreviewCard(m, snap, order, sel, conds, here, anim, { step(it) }, { closeCards() }, visit, open)
+                }
                 "spot" -> spot?.let { sp ->
                     SpotCard(sp, here, measuring, m.prefs.miles, { closeCards() }, { newSite(sp) }) {
                         measuring = !measuring
@@ -506,59 +429,172 @@ fun MapHome(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit, offlin
         }
         // 2. the Key button, bottom left above the credit (and the layers' cards: MapLayers.kt)
         val keyBottom = bottomDp + 12.dp + creditDp + cardsDp
-        if (keyShown) MapKeyButton(keyOpen, Modifier.align(Alignment.BottomStart).padding(start = 12.dp, bottom = keyBottom).onGloballyPositioned { room.keyTop = it.boundsInParent().top.roundToInt() }) {
-            keyOpen = !keyOpen; if (keyOpen) tray = false
-        }
-        // 3. the controls at the top left: the chip row or its pill, the pinned bar, "You're at"
-        Column(Modifier.align(Alignment.TopStart).padding(12.dp).padding(end = 64.dp).onGloballyPositioned { leftPx = it.boundsInParent().bottom.roundToInt() }) {
-            Spacer(Modifier.height(if (clean) 48.dp else 56.dp)) // the search box or its button (drawn last, so its suggestions sit over everything)
-            if (!extras.years && !clean && !typing) {
-                if (filtered && !rowOpen) FilterPill(status, tyOn, visible.size, { hp.tap(); rowOpen = true }) { hp.tap(); clearFilters() }
-                else MapChips(snap, pinned, status, tyOn, {
-                    status = if (status == it) "" else it; prefs.edit().putString("mapf", status).apply()
-                    rowOpen = false; if (status.isNotBlank() || tyOn.isNotBlank()) nearOpen = false
-                }, {
-                    ty = if (tyOn == it) "" else it; m.prefs.ftype = ty
-                    rowOpen = false; if (status.isNotBlank() || ty.isNotBlank()) nearOpen = false
-                }) { clearFilters() }
+        Stagger(keyShown, 2, anim, Modifier.align(Alignment.BottomStart).padding(start = 12.dp, bottom = keyBottom), up = true) {
+            // (inside its animation's box: its top in the map's box from the room under it)
+            MapKeyButton(keyOpen, Modifier.onGloballyPositioned { room.keyTop = room.h - with(dens) { keyBottom.roundToPx() } - it.size.height }) {
+                keyOpen = !keyOpen; if (keyOpen) tray = false
             }
-            if (filtered && visible.isEmpty() && !extras.years && !clean && !typing)
-                Text(t("Nothing on the map matches these filters.", "Hakuna kwenye ramani kinacholingana na vichujio hivi."), style = MaterialTheme.typography.labelMedium, color = C.ink,
-                    modifier = Modifier.padding(top = 8.dp).clip(RoundedCornerShape(12.dp)).background(C.card).padding(horizontal = 12.dp, vertical = 8.dp).testTag("map_none"))
+        }
+        // the one-time hint: "Tap the map for filters"
+        Stagger(hintShown, 0, anim, Modifier.align(Alignment.BottomCenter).padding(start = 12.dp, end = 12.dp, bottom = keyBottom), up = true) { CalmHint { hint = false } }
+        // 3. the controls at the top left: the chip row or its pill, the pinned bar, "You're at"
+        Column(Modifier.align(Alignment.TopStart).padding(12.dp).padding(end = 60.dp).onGloballyPositioned { leftPx = it.boundsInParent().bottom.roundToInt() }) {
+            Spacer(Modifier.height(50.dp)) // the search box or its button (drawn last, so its suggestions sit over everything)
+            // calm, only an active filter's pill shows; revealed, the chips (staggered in)
+            Stagger(!extras.years && !typing && (!clean || filtered), 0, anim) {
+                Column {
+                    if (filtered && !rowOpen) FilterPill(status, tyOn, visible.size, { hp.tap(); rowOpen = true }) { hp.tap(); clearFilters() }
+                    else MapChips(snap, pinned, status, tyOn, {
+                        status = if (status == it) "" else it; prefs.edit().putString("mapf", status).apply()
+                        rowOpen = false; if (status.isNotBlank() || tyOn.isNotBlank()) nearOpen = false
+                    }, {
+                        ty = if (tyOn == it) "" else it; m.prefs.ftype = ty
+                        rowOpen = false; if (status.isNotBlank() || ty.isNotBlank()) nearOpen = false
+                    }) { clearFilters() }
+                    if (filtered && visible.isEmpty())
+                        Text(t("Nothing on the map matches these filters.", "Hakuna kwenye ramani kinacholingana na vichujio hivi."), style = MaterialTheme.typography.labelMedium, color = C.ink,
+                            modifier = Modifier.padding(top = 6.dp).clip(RoundedCornerShape(12.dp)).background(mapGlass()).padding(horizontal = 12.dp, vertical = 7.dp).testTag("map_none"))
+                }
+            }
             // the pinned bar: one slim line, only with no filter and Nearest to you resting
-            if (!filtered && !sheetOpen && !clean && !typing && !compact) PinnedBar(snap, pinned.size)
-            if (!clean && !suggOpen && !typing) HereSlot(m, snap, here, Modifier.padding(top = 10.dp), visit, open, chipAfter = narrow, chipNow = compact)
+            Stagger(!filtered && !sheetOpen && !clean && !typing && !compact, 1, anim) { PinnedBar(snap, pinned.size) }
+            // "You're at" shows either way (it matters), compact
+            if (!suggOpen && !typing) HereSlot(m, snap, here, Modifier.padding(top = 8.dp), visit, open, chipAfter = narrow, chipNow = compact, slim = true)
             // no signal and no map kept on this phone: say so, and where to save one
-            if (!clean && !typing && !online && !cmOn && !extras.years) NoSignalNote(offlineAreas.isNotEmpty(), Modifier.padding(top = 8.dp), offline)
+            if (!typing && !online && !cmOn && !extras.years) NoSignalNote(offlineAreas.isNotEmpty(), Modifier.padding(top = 8.dp), offline)
         }
         // 4. the column on the right: Map style, where I am, More; the compass and Follow me while they are on
-        MapSide(m, mv, here, tray, { tray = it; if (it) { keyOpen = false; nearOpen = false } }, { styleSheet.value = true },
+        MapSide(m, mv, here, anim, { ll -> layer?.pulseYou(ll) }, tray, { tray = it; if (it) { keyOpen = false; nearOpen = false; quick = null } }, { styleSheet.value = true },
             Modifier.align(Alignment.TopEnd).padding(top = 12.dp, end = 10.dp).onGloballyPositioned { val b = it.boundsInParent(); sidePx = b.bottom.roundToInt(); room.sideLeft = b.left.roundToInt() })
-        // 5. the search (its suggestions over everything); with the map alone, just its button
-        if (clean) Box(
-            Modifier.align(Alignment.TopStart).padding(12.dp).size(48.dp).shadow(4.dp, CircleShape).clip(CircleShape).background(C.card).border(1.dp, C.line, CircleShape)
-                .clickable(role = Role.Button) { hp.tap(); MapClean.on = false; askSearch = true }.semantics { contentDescription = t("Search a village or project", "Tafuta kijiji au mradi") }.testTag("map_search_btn"),
+        // 5. the search (its suggestions over everything); calm, just its round button, which opens the box ready to type
+        if (clean && !searchOpen) Box(
+            Modifier.align(Alignment.TopStart).padding(12.dp).size(44.dp).shadow(3.dp, CircleShape).clip(CircleShape).background(mapGlass(0.9f)).border(1.dp, C.line, CircleShape)
+                .clickable(role = Role.Button) { hp.tap(); hint = false; searchOpen = true; askSearch = true }.semantics { contentDescription = t("Search a village or project", "Tafuta kijiji au mradi") }.testTag("map_search_btn"),
             contentAlignment = Alignment.Center,
-        ) { Icon(Ic.get("search"), null, tint = C.ink, modifier = Modifier.size(20.dp)) }
-        else MapSearch(m, snap, here, Modifier.align(Alignment.TopStart).padding(12.dp).padding(end = 64.dp), askSearch, { askSearch = false }, { typing = it }, { suggOpen = it }, { pick(it, true) }, { pts -> HomeLayers.follow = false; mv?.let { mapFlyAll(it, pts, anim, 14.0) }; closeCards() }, maxList = (with(dens) { boxH.toDp() } - 12.dp - 56.dp - 6.dp - 12.dp).coerceAtLeast(120.dp)) { ll ->
+        ) { Icon(Ic.get("search"), null, tint = C.ink, modifier = Modifier.size(19.dp)) }
+        else MapSearch(m, snap, here, Modifier.align(Alignment.TopStart).padding(12.dp).padding(end = 60.dp), askSearch, { askSearch = false }, { f -> if (!f && typing && clean) searchOpen = false; typing = f }, { suggOpen = it }, { pick(it, true) }, { pts -> HomeLayers.follow = false; mv?.let { mapFlyAll(it, pts, anim, 14.0) }; closeCards() }, maxList = (with(dens) { boxH.toDp() } - 12.dp - 50.dp - 12.dp).coerceAtLeast(120.dp)) { ll ->
             HomeLayers.follow = false; mv?.let { mapFly(it, ll, 13.0, anim) }; closeCards()
         }
         // Save this area for offline: the sheet (opened from More) and the bar while an area fills (OfflineMaps.kt)
         OfflineMapControls(m, offline, offlineSheet)
         // 6. on top: the tray under More and the key's colours; a tap anywhere else closes them
-        if (tray || keyOpen) Box(Modifier.matchParentSize().pointerInput(Unit) { awaitPointerEventScope { awaitPointerEvent(); tray = false; keyOpen = false } }.testTag("map_tap_away"))
+        if (tray || keyOpen || quick != null) Box(Modifier.matchParentSize().pointerInput(Unit) { awaitPointerEventScope { awaitPointerEvent(); tray = false; keyOpen = false; quick = null } }.testTag("map_tap_away"))
         MapTray(m, here, anim, tray, Modifier.align(Alignment.TopEnd).padding(top = with(dens) { maxOf(sidePx, leftPx).toDp() } + 8.dp, end = 10.dp), { tray = false }) { offlineSheet.value = true }
-        MapKeyPop(keyOpen && keyShown, anim, Modifier.align(Alignment.BottomStart).padding(start = 12.dp, bottom = keyBottom + 56.dp),
+        MapKeyPop(keyOpen && keyShown, anim, Modifier.align(Alignment.BottomStart).padding(start = 12.dp, bottom = keyBottom + 50.dp),
             stops = HomeLayers.route && snap.assigned.any { it.date == java.time.LocalDate.now().toString() }, team = HomeLayers.team && snap.admin)
+        // a long-pressed pin's quick actions, by the pin
+        val qp = quick?.let { q -> pinned.firstOrNull { it.id == q.first }?.let { it to q } }
+        PinQuick(qp?.first, qp?.second?.second ?: 0f, qp?.second?.third ?: 0f, room, anim, dens.density, { quick = null }, visit, open)
     }
 }
 
-/** Map only: a tap on an empty part of the map leaves the map alone (with a search button, the column on the right and the
- *  credit) until the next tap. Kept while the app is open (this session), not saved. */
-object MapClean { var on by mutableStateOf(false) }
+/** Calm by default (map3): the map with its pins, a round search button, the column on the right and the credit. A tap on
+ *  empty map reveals the chips, the pinned bar, Nearest to you and the Key ([revealed]); another tap, back or starting the
+ *  map over (Nav.kt) tucks them away again. Kept while the app is open (this session), not saved. */
+object MapClean {
+    var revealed by mutableStateOf(false)
+    /** Calm: the tiles are tucked away. */
+    val on: Boolean get() = !revealed
+}
+
+/** Over the map: a little see-through (glass) so the map shows; text on it stays AA over any photo. Bright sun stays solid. */
+@Composable
+fun mapGlass(a: Float = 0.86f): Color = if (!C.glassy) C.card else C.card.copy(alpha = if (C.dark) maxOf(a, 0.9f) else a)
+
+/** A pill drawn [v] inside its 44 dp touch area: the tiles look smaller while staying easy to tap. */
+private fun Modifier.insetPill(fill: Color, edge: Color?, v: androidx.compose.ui.unit.Dp = 4.dp): Modifier = drawBehind {
+    val i = v.toPx(); val h = size.height - 2 * i; val r = androidx.compose.ui.geometry.CornerRadius(h / 2, h / 2)
+    drawRoundRect(Color(0x24000000), topLeft = androidx.compose.ui.geometry.Offset(0f, i + 1.2.dp.toPx()), size = androidx.compose.ui.geometry.Size(size.width, h), cornerRadius = r)
+    drawRoundRect(fill, topLeft = androidx.compose.ui.geometry.Offset(0f, i), size = androidx.compose.ui.geometry.Size(size.width, h), cornerRadius = r)
+    if (edge != null) drawRoundRect(edge, topLeft = androidx.compose.ui.geometry.Offset(0f, i), size = androidx.compose.ui.geometry.Size(size.width, h), cornerRadius = r, style = androidx.compose.ui.graphics.drawscope.Stroke(1.dp.toPx()))
+}
+
+/** The tiles come and go one after another ([i]: their place in the order), a short fade and slide; none with reduced motion. */
+@Composable
+private fun Stagger(show: Boolean, i: Int, anim: Boolean, modifier: Modifier = Modifier, up: Boolean = false, content: @Composable () -> Unit) {
+    androidx.compose.animation.AnimatedVisibility(show, modifier,
+        enter = if (anim) fadeIn(tween(200, i * 40)) + slideInVertically(tween(240, i * 40)) { if (up) it / 3 else -it / 3 } else EnterTransition.None,
+        exit = if (anim) fadeOut(tween(150, i * 25)) + slideOutVertically(tween(170, i * 25)) { if (up) it / 4 else -it / 4 } else ExitTransition.None) { content() }
+}
+
+/** Once on this phone: the map is calm, a tap shows the filters. */
+@Composable
+private fun CalmHint(close: () -> Unit) {
+    val shape = RoundedCornerShape(999.dp)
+    Row(Modifier.shadow(4.dp, shape).clip(shape).background(Color(0xE604263F)).clickable(role = Role.Button, onClick = close).heightIn(min = 44.dp).padding(start = 12.dp, end = 14.dp).testTag("map_hint"),
+        verticalAlignment = Alignment.CenterVertically) {
+        Icon(Ic.get("finger"), null, tint = Color.White, modifier = Modifier.size(17.dp)); Spacer(Modifier.width(8.dp))
+        Text(t("Tap the map for filters", "Gusa ramani kuona vichujio"), style = MaterialTheme.typography.labelLarge.copy(fontSize = 13.sp), color = Color.White, maxLines = 1, softWrap = false)
+    }
+}
+
+/** Brings a chosen pin clear of its card: if it sits under the card or the controls at the top, the map eases so the pin
+ *  is in the middle of the free part above the card. */
+private fun easeAbove(mv: MapView, ll: LatLng, room: MapRoom, d: Float, anim: Boolean) {
+    if (mv.width <= 0 || mv.height <= 0 || room.cardTop <= 0) return
+    val pt = mv.projection.toPixels(GeoPoint(ll.lat, ll.lng), null)
+    val top = room.top + 26 * d; val bottom = room.cardTop - 30 * d
+    if (bottom - top < 40 * d) return
+    val left = 26 * d; val right = minOf(room.sideLeft.toFloat().takeIf { it > 0 } ?: mv.width.toFloat(), mv.width.toFloat()) - 10 * d
+    val inX = pt.x in left.toInt()..right.toInt(); val inY = pt.y in top.toInt()..bottom.toInt()
+    if (inX && inY) return
+    val dy = if (inY) 0f else pt.y - (top + bottom) / 2
+    val dx = if (inX) 0f else pt.x - (left + right) / 2
+    val c = mv.projection.fromPixels((mv.width / 2f + dx).roundToInt(), (mv.height / 2f + dy).roundToInt())
+    val g = GeoPoint(c.latitude, c.longitude)
+    if (anim) mv.controller.animateTo(g, mv.zoomLevelDouble, 300L) else mv.controller.setCenter(g)
+}
+
+/** Google Maps directions to a point. */
+private fun directions(ctx: Context, g: LatLng) {
+    runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com/maps/dir/?api=1&destination=" + "%.6f,%.6f".format(Locale.US, g.lat, g.lng)))) }
+}
+
+/** A long-pressed pin's quick actions: Report a visit, Directions, Open; a small popover above the pin (below it near the top). */
+@Composable
+private fun PinQuick(p: Project?, x: Float, y: Float, room: MapRoom, anim: Boolean, d: Float, close: () -> Unit, visit: (String) -> Unit, open: (String) -> Unit) {
+    val ctx = LocalContext.current
+    val last = remember { mutableStateOf<Project?>(null) }
+    if (p != null) last.value = p
+    val pr = p ?: last.value ?: return
+    androidx.compose.ui.layout.Layout({
+        androidx.compose.animation.AnimatedVisibility(p != null,
+            enter = if (anim) fadeIn(tween(160)) + androidx.compose.animation.scaleIn(tween(200), initialScale = 0.9f) else EnterTransition.None,
+            exit = if (anim) fadeOut(tween(120)) else ExitTransition.None) {
+            val shape = RoundedCornerShape(16.dp)
+            Column(Modifier.width(androidx.compose.foundation.layout.IntrinsicSize.Max).widthIn(min = 196.dp, max = 260.dp).shadow(10.dp, shape).clip(shape).background(C.card).border(1.dp, C.line, shape).padding(6.dp).testTag("pin_quick")) {
+                Text(pr.title, style = MaterialTheme.typography.labelMedium, color = C.muted, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 2.dp))
+                QuickRow("clip", t("Report a visit", "Ripoti ziara"), "quick_visit") { close(); visit(pr.id) }
+                QuickRow("nav", t("Directions", "Maelekezo"), "quick_dir") { close(); pr.gps?.let { directions(ctx, it) } }
+                QuickRow("chev", t("Open", "Fungua"), "quick_open") { close(); open(pr.id) }
+            }
+        }
+    }, Modifier.fillMaxSize()) { ms, c ->
+        val pl = ms.firstOrNull()?.measure(c.copy(minWidth = 0, minHeight = 0))
+        layout(c.maxWidth, c.maxHeight) {
+            if (pl == null) return@layout
+            val g = (12 * d).roundToInt(); val gap = (22 * d).roundToInt()
+            val px = (x - pl.width / 2f).roundToInt().coerceIn(g, (c.maxWidth - pl.width - g).coerceAtLeast(g))
+            val above = y.roundToInt() - gap - pl.height
+            // below the pin, it leaves room for the pin's name
+            val py = if (above >= room.top + g) above else (y.roundToInt() + gap + (16 * d).roundToInt()).coerceAtMost((c.maxHeight - pl.height - g).coerceAtLeast(g))
+            pl.place(px, py)
+        }
+    }
+}
+
+@Composable
+private fun QuickRow(icon: String, label: String, tag: String, onClick: () -> Unit) {
+    val h = rememberHaptics()
+    Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).clickable(role = Role.Button) { h.tap(); onClick() }.heightIn(min = 44.dp).padding(start = 8.dp, end = 12.dp).testTag(tag),
+        verticalAlignment = Alignment.CenterVertically) {
+        Icon(Ic.get(icon), null, tint = C.blue, modifier = Modifier.size(18.dp)); Spacer(Modifier.width(10.dp))
+        Text(label, style = MaterialTheme.typography.titleSmall, color = C.ink, maxLines = 1, softWrap = false)
+    }
+}
 
 /** Where things over the map are, in px in the map's box, as last drawn: the map fits a filter clear of them. */
-private class MapRoom { var w = 0; var h = 0; var top = 0; var sideLeft = 0; var panelTop = 0; var keyTop = 0 }
+private class MapRoom { var w = 0; var h = 0; var top = 0; var sideLeft = 0; var panelTop = 0; var keyTop = 0; var rootY = 0; var cardTop = 0 }
 
 /** One pill for the active filter(s): "Water · 98" with its icon, or "Water + Broken · 12". Tap it for the whole
  *  row of chips again; × clears the filters (and the row comes back). */
@@ -574,22 +610,22 @@ private fun FilterPill(status: String, ty: String, n: Int, open: () -> Unit, cle
     val hu = if (items.size == 1) items[0].third else C.hue("blue")
     val label = items.joinToString(" + ") { it.first }
     val shape = RoundedCornerShape(999.dp)
-    Row(Modifier.padding(vertical = 3.dp).shadow(3.dp, shape).clip(shape).background(hu.fg).testTag("map_pill"), verticalAlignment = Alignment.CenterVertically) {
+    Row(Modifier.insetPill(hu.fg, null).testTag("map_pill"), verticalAlignment = Alignment.CenterVertically) {
         Row(
-            Modifier.weight(1f, fill = false).clickable(role = Role.Button, onClick = open).heightIn(min = 48.dp).padding(start = 14.dp, end = 4.dp)
+            Modifier.weight(1f, fill = false).clip(shape).clickable(role = Role.Button, onClick = open).heightIn(min = 44.dp).padding(start = 12.dp, end = 2.dp)
                 .semantics { contentDescription = t("Filter: ", "Kichujio: ") + items.joinToString(", ") { it.first } + ", $n. " + t("Show all the filters", "Onyesha vichujio vyote") }.testTag("map_pill_open"),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Icon(Ic.get(if (items.size == 1) items[0].second else "filter"), null, tint = Color.White, modifier = Modifier.size(17.dp)); Spacer(Modifier.width(7.dp))
+            Icon(Ic.get(if (items.size == 1) items[0].second else "filter"), null, tint = Color.White, modifier = Modifier.size(15.dp)); Spacer(Modifier.width(6.dp))
             // a long label ends with "…"; the count and × always show
-            Text(label, style = MaterialTheme.typography.labelLarge.copy(fontSize = 14.sp, fontWeight = FontWeight.ExtraBold), color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis,
+            Text(label, style = MaterialTheme.typography.labelLarge.copy(fontSize = 13.sp, fontWeight = FontWeight.ExtraBold), color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f, fill = false).testTag("map_pill_label"))
-            Text(" · $n", style = MaterialTheme.typography.labelLarge.copy(fontSize = 14.sp), color = Color.White, maxLines = 1, softWrap = false)
-            Spacer(Modifier.width(4.dp))
-            Icon(Ic.get("down"), null, tint = Color.White.copy(alpha = 0.85f), modifier = Modifier.size(15.dp))
+            Text(" · $n", style = MaterialTheme.typography.labelLarge.copy(fontSize = 13.sp), color = Color.White, maxLines = 1, softWrap = false)
+            Spacer(Modifier.width(3.dp))
+            Icon(Ic.get("down"), null, tint = Color.White.copy(alpha = 0.85f), modifier = Modifier.size(14.dp))
         }
-        Box(Modifier.size(48.dp).clip(CircleShape).clickable(role = Role.Button, onClick = clear).semantics { contentDescription = t("Clear filters", "Ondoa vichujio") }.testTag("map_pill_x"), contentAlignment = Alignment.Center) {
-            Box(Modifier.size(26.dp).clip(CircleShape).background(Color(0x38FFFFFF)), contentAlignment = Alignment.Center) { Icon(Ic.get("x"), null, tint = Color.White, modifier = Modifier.size(14.dp)) }
+        Box(Modifier.size(44.dp).clip(CircleShape).clickable(role = Role.Button, onClick = clear).semantics { contentDescription = t("Clear filters", "Ondoa vichujio") }.testTag("map_pill_x"), contentAlignment = Alignment.Center) {
+            Box(Modifier.size(22.dp).clip(CircleShape).background(Color(0x38FFFFFF)), contentAlignment = Alignment.Center) { Icon(Ic.get("x"), null, tint = Color.White, modifier = Modifier.size(12.dp)) }
         }
     }
 }
@@ -598,15 +634,15 @@ private fun FilterPill(status: String, ty: String, n: Int, open: () -> Unit, cle
 @Composable
 private fun PinnedBar(snap: Snapshot, pn: Int) {
     val all = snap.projects.size
-    Card(Modifier.padding(top = 8.dp).testTag("map_pinned"), pad = 9.dp) {
+    Card(Modifier.padding(top = 6.dp).testTag("map_pinned"), pad = 7.dp) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             // never "…": on a small phone the shorter wording
             FirstFitText(listOf(t("$pn of $all projects pinned", "Miradi $pn kati ya $all ina mahali"), t("$pn/$all pinned", "$pn/$all zina mahali")),
-                MaterialTheme.typography.labelLarge.copy(fontSize = 13.sp), C.ink, Modifier.weight(1f))
+                MaterialTheme.typography.labelLarge.copy(fontSize = 12.sp), C.ink, Modifier.weight(1f))
             Spacer(Modifier.width(8.dp)) // a gap, so "… ina mahali" and "0 imebaki" never run together in Kiswahili
-            Text(t("${all - pn} to go", "${all - pn} imebaki"), style = MaterialTheme.typography.bodySmall, color = C.muted, maxLines = 1, softWrap = false)
+            Text(t("${all - pn} to go", "${all - pn} imebaki"), style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp), color = C.muted, maxLines = 1, softWrap = false)
         }
-        Box(Modifier.padding(top = 6.dp).fillMaxWidth().height(4.dp).clip(RoundedCornerShape(99.dp)).background(C.line)) {
+        Box(Modifier.padding(top = 5.dp).fillMaxWidth().height(4.dp).clip(RoundedCornerShape(99.dp)).background(C.line)) {
             Box(Modifier.fillMaxWidth(pn.toFloat() / maxOf(1, all)).height(4.dp).clip(RoundedCornerShape(99.dp)).background(OkBrush))
         }
     }
@@ -618,12 +654,12 @@ private fun MapKeyButton(open: Boolean, modifier: Modifier, toggle: () -> Unit) 
     val h = rememberHaptics()
     val shape = RoundedCornerShape(999.dp)
     Row(
-        modifier.shadow(4.dp, shape).clip(shape).background(C.card).border(1.dp, C.line, shape).clickable(role = Role.Button) { h.tap(); toggle() }.heightIn(min = 48.dp).padding(start = 12.dp, end = 16.dp)
+        modifier.insetPill(mapGlass(0.9f), C.line).clip(shape).clickable(role = Role.Button) { h.tap(); toggle() }.heightIn(min = 44.dp).padding(start = 10.dp, end = 13.dp)
             .semantics { contentDescription = t("Map key: what the colours mean", "Maelezo ya rangi za ramani"); stateDescription = if (open) t("open", "imefunguliwa") else t("closed", "imefungwa") }.testTag("map_key"),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Icon(Ic.get("info"), null, tint = C.blue, modifier = Modifier.size(18.dp)); Spacer(Modifier.width(6.dp))
-        Text(t("Key", "Rangi"), style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold), color = C.ink, maxLines = 1, softWrap = false)
+        Icon(Ic.get("info"), null, tint = C.blue, modifier = Modifier.size(15.dp)); Spacer(Modifier.width(5.dp))
+        Text(t("Key", "Rangi"), style = MaterialTheme.typography.labelLarge.copy(fontSize = 13.sp, fontWeight = FontWeight.ExtraBold), color = C.ink, maxLines = 1, softWrap = false)
     }
 }
 
@@ -640,15 +676,22 @@ private fun MapKeyPop(show: Boolean, anim: Boolean, modifier: Modifier, stops: B
         ) {
             listOf(PinCond.OK, PinCond.REPAIR, PinCond.BAD, PinCond.OLD).forEach { c ->
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(Modifier.size(12.dp).shadow(1.dp, CircleShape).clip(CircleShape).background(Color.White).padding(2.dp).clip(CircleShape).background(Color(condArgb(c))))
+                    Box(Modifier.size(13.dp).shadow(1.dp, CircleShape).clip(CircleShape).background(Color.White).padding(1.dp).border(3.dp, Color(condArgb(c)), CircleShape))
                     Spacer(Modifier.width(8.dp))
                     Text(condName(c), style = MaterialTheme.typography.labelSmall.copy(fontSize = 12.sp), color = C.ink, maxLines = 1, softWrap = false)
                 }
             }
             // the other marks on the map: a group of pins, you, today's route stops and (office) teammates
+            KeyRow(t("Visit or water test due", "Ziara au kipimo cha maji kinasubiri"), "key_due") {
+                Box(Modifier.size(9.dp).clip(CircleShape).background(Color.White).padding(1.5.dp).clip(CircleShape).background(Color(PinArt.DUE_ARGB)))
+            }
             KeyRow(t("A group: tap to zoom in", "Kundi: gusa ili kukuza"), "key_cluster") {
-                Box(Modifier.size(16.dp).shadow(1.dp, CircleShape).clip(CircleShape).background(Color.White).padding(1.5.dp).clip(CircleShape).background(Color(condArgb(PinCond.OK))), contentAlignment = Alignment.Center) {
-                    Text("3", color = Color.White, style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp, lineHeight = 9.sp, fontWeight = FontWeight.ExtraBold), maxLines = 1, softWrap = false)
+                Box(Modifier.size(16.dp).shadow(1.dp, CircleShape).clip(CircleShape).background(Color.White).padding(1.dp)
+                    .drawBehind { val w = 2.6.dp.toPx(); val st = androidx.compose.ui.graphics.drawscope.Stroke(w)
+                        val tl = androidx.compose.ui.geometry.Offset(w / 2, w / 2); val sz = androidx.compose.ui.geometry.Size(size.width - w, size.height - w)
+                        drawArc(Color(condArgb(PinCond.BAD)), -90f, 120f, false, tl, sz, style = st); drawArc(Color(condArgb(PinCond.OK)), 30f, 240f, false, tl, sz, style = st) },
+                    contentAlignment = Alignment.Center) {
+                    Text("3", color = Color(0xFF04263F), style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp, lineHeight = 9.sp, fontWeight = FontWeight.ExtraBold), maxLines = 1, softWrap = false)
                 }
             }
             KeyRow(t("You", "Wewe"), "key_you") { Box(Modifier.size(14.dp).clip(CircleShape).background(Color(0x38098BE1)).padding(2.dp).clip(CircleShape).background(Color.White).padding(2.dp).clip(CircleShape).background(Color(0xFF098BE1))) }
@@ -707,24 +750,25 @@ fun nearNone(ty: String, status: String): String = if (status.isNotBlank()) t("N
 /** The column of buttons on the right: Map style, Go to where I am and More in one compact strip; under it the
  *  compass while the map is turned and Follow me while it is on (tap to stop). Every button is 48 dp. */
 @Composable
-private fun MapSide(m: AppModel, mv: MapView?, here: LatLng?, tray: Boolean, onTray: (Boolean) -> Unit, onStyles: () -> Unit, modifier: Modifier) {
+private fun MapSide(m: AppModel, mv: MapView?, here: LatLng?, anim: Boolean, onMe: (LatLng) -> Unit, tray: Boolean, onTray: (Boolean) -> Unit, onStyles: () -> Unit, modifier: Modifier) {
     val follow = HomeLayers.follow
     val turned = kotlin.math.abs(((HomeLayers.rot % 360f) + 360f) % 360f).let { kotlin.math.min(it, 360f - it) } > 1f
-    val shape = RoundedCornerShape(16.dp)
+    val shape = RoundedCornerShape(14.dp)
+    val face = if (C.glassy) Color(0xE6FFFFFF) else Color.White
     Column(modifier, horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Column(Modifier.width(48.dp).shadow(4.dp, shape).clip(shape).background(Color.White).border(1.dp, Color(0x29000000), shape).testTag("map_side")) {
+        Column(Modifier.width(44.dp).shadow(3.dp, shape).clip(shape).background(face).border(1.dp, Color(0x29000000), shape).testTag("map_side")) {
             SideBtn("layers", t("Map style", "Mtindo wa ramani"), "ml_layers") { onTray(false); onStyles() }
             Box(Modifier.fillMaxWidth().height(1.dp).background(Color(0x1F04263F)))
             SideBtn("target", t("Go to where I am", "Nenda nilipo"), "ml_me") {
                 onTray(false)
-                if (here != null) mv?.controller?.animateTo(GeoPoint(here.lat, here.lng), 15.0, 600L)
+                if (here != null) mv?.let { v -> mapFly(v, here, 15.0, anim); onMe(here) }
                 else m.showBanner(t("Finding where you are… Turn on location.", "Inatafuta mahali ulipo… Washa mahali."))
             }
             Box(Modifier.fillMaxWidth().height(1.dp).background(Color(0x1F04263F)))
             SideBtn("more", t("More map tools", "Zana zaidi za ramani"), "ml_more", state = if (tray) t("open", "imefunguliwa") else t("closed", "imefungwa"), on = tray) { onTray(!tray) }
         }
         if (turned) Box(
-            Modifier.size(48.dp).shadow(4.dp, shape).clip(shape).background(Color.White).border(1.dp, Color(0x29000000), shape)
+            Modifier.size(44.dp).shadow(3.dp, shape).clip(shape).background(face).border(1.dp, Color(0x29000000), shape)
                 .clickable(role = Role.Button) {
                     val v = mv ?: return@clickable
                     HomeLayers.north = true
@@ -737,7 +781,7 @@ private fun MapSide(m: AppModel, mv: MapView?, here: LatLng?, tray: Boolean, onT
         if (follow) {
             val h = rememberHaptics()
             Box(
-                Modifier.size(48.dp).shadow(4.dp, shape).clip(shape).background(Color(0xFF0A78C2)).clickable(role = Role.Button) { h.tap(); HomeLayers.follow = false; HomeLayers.north = false; HomeLayers.pick = null }
+                Modifier.size(44.dp).shadow(3.dp, shape).clip(shape).background(Color(0xFF0A78C2)).clickable(role = Role.Button) { h.tap(); HomeLayers.follow = false; HomeLayers.north = false; HomeLayers.pick = null }
                     .semantics { contentDescription = t("Stop following me", "Acha kunifuata"); stateDescription = "on" }.testTag("ml_follow"),
                 contentAlignment = Alignment.Center,
             ) { Icon(Ic.get("nav"), null, tint = Color.White, modifier = Modifier.size(24.dp)) }
@@ -749,10 +793,10 @@ private fun MapSide(m: AppModel, mv: MapView?, here: LatLng?, tray: Boolean, onT
 private fun SideBtn(icon: String, label: String, tag: String, state: String? = null, on: Boolean = false, onClick: () -> Unit) {
     val h = rememberHaptics()
     Box(
-        Modifier.size(48.dp).background(if (on) Color(0x1A0A78C2) else Color.Transparent).clickable(role = Role.Button) { h.tap(); onClick() }
+        Modifier.size(44.dp).background(if (on) Color(0x1A0A78C2) else Color.Transparent).clickable(role = Role.Button) { h.tap(); onClick() }
             .semantics { contentDescription = label; if (state != null) stateDescription = state }.testTag(tag),
         contentAlignment = Alignment.Center,
-    ) { Icon(Ic.get(icon), null, tint = Color(0xFF04263F), modifier = Modifier.size(22.dp)) }
+    ) { Icon(Ic.get(icon), null, tint = Color(0xFF04263F), modifier = Modifier.size(19.dp)) }
 }
 
 /** Under More: Offline areas and Follow me, with their names; it slides open below the column. */
@@ -806,7 +850,7 @@ private fun MapChips(s: Snapshot, pinned: List<Project>, status: String, ty: Str
             drawRect(Brush.horizontalGradient(0f to Color.Black, 1f - 28.dp.toPx() / size.width to Color.Black, 1f to Color.Transparent), blendMode = BlendMode.DstIn)
         }.horizontalScroll(rememberScrollState()).padding(end = 20.dp).testTag("map_chips"), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
         if (status.isNotBlank() || ty.isNotBlank()) Box(
-            Modifier.size(44.dp).shadow(3.dp, CircleShape).clip(CircleShape).background(C.card).border(1.dp, C.line, CircleShape)
+            Modifier.size(44.dp).insetPill(mapGlass(0.9f), C.line).clip(CircleShape)
                 .clickable(role = Role.Button, onClick = clear).semantics { contentDescription = t("Clear filters", "Ondoa vichujio") }.testTag("mchip_clear"),
             contentAlignment = Alignment.Center,
         ) { Icon(Ic.get("x"), null, tint = C.ink, modifier = Modifier.size(18.dp)) }
@@ -828,17 +872,16 @@ private fun MapChips(s: Snapshot, pinned: List<Project>, status: String, ty: Str
 private fun MapChip(label: String, icon: String, n: Int, on: Boolean, hu: Hue, tag: String, onClick: () -> Unit) {
     val h = rememberHaptics()
     Row(
-        Modifier.padding(vertical = 3.dp).shadow(3.dp, RoundedCornerShape(999.dp)).clip(RoundedCornerShape(999.dp)).background(if (on) hu.fg else C.card)
-            .border(1.dp, if (on) hu.fg else C.line, RoundedCornerShape(999.dp)).clickable(role = Role.Checkbox) { h.tap(); onClick() }
-            .heightIn(min = 44.dp).padding(start = 12.dp, end = 10.dp).testTag(tag)
+        Modifier.insetPill(if (on) hu.fg else mapGlass(), if (on) hu.fg else C.line).clip(RoundedCornerShape(999.dp)).clickable(role = Role.Checkbox) { h.tap(); onClick() }
+            .heightIn(min = 44.dp).padding(start = 10.dp, end = 8.dp).testTag(tag)
             .semantics { contentDescription = "$label, $n" + if (on) ", " + t("on", "imewashwa") else "" },
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Icon(Ic.get(icon), null, tint = if (on) Color.White else hu.fg, modifier = Modifier.size(17.dp)); Spacer(Modifier.width(6.dp))
-        Text(label, style = MaterialTheme.typography.labelLarge.copy(fontSize = 14.sp), color = if (on) Color.White else C.ink, maxLines = 1, softWrap = false)
-        Spacer(Modifier.width(7.dp))
-        Text("$n", style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp, fontWeight = FontWeight.Bold), color = if (on) hu.fg else C.muted, maxLines = 1,
-            modifier = Modifier.clip(RoundedCornerShape(999.dp)).background(if (on) Color.White else C.bg).padding(horizontal = 7.dp, vertical = 1.dp))
+        Icon(Ic.get(icon), null, tint = if (on) Color.White else hu.fg, modifier = Modifier.size(15.dp)); Spacer(Modifier.width(5.dp))
+        Text(label, style = MaterialTheme.typography.labelLarge.copy(fontSize = 13.sp), color = if (on) Color.White else C.ink, maxLines = 1, softWrap = false)
+        Spacer(Modifier.width(6.dp))
+        Text("$n", style = MaterialTheme.typography.labelMedium.copy(fontSize = 11.sp, fontWeight = FontWeight.Bold), color = if (on) hu.fg else C.muted, maxLines = 1,
+            modifier = Modifier.clip(RoundedCornerShape(999.dp)).background(if (on) Color.White else C.bg).padding(horizontal = 6.dp, vertical = 0.dp))
     }
 }
 
@@ -881,16 +924,16 @@ private fun MapSearch(m: AppModel, snap: Snapshot, here: LatLng?, modifier: Modi
     LaunchedEffect(suggShown) { onSugg(suggShown) }
     Column(modifier.fillMaxWidth()) {
         Row(
-            Modifier.fillMaxWidth().heightIn(min = 48.dp).shadow(4.dp, RoundedCornerShape(16.dp)).clip(RoundedCornerShape(16.dp)).background(C.card)
-                .border(if (focused) 1.5.dp else 1.dp, if (focused) C.blue else C.line, RoundedCornerShape(16.dp)).padding(start = 14.dp, end = 4.dp).testTag("map_search"),
+            Modifier.fillMaxWidth().heightIn(min = 44.dp).shadow(3.dp, RoundedCornerShape(14.dp)).clip(RoundedCornerShape(14.dp)).background(if (focused) C.card else mapGlass(0.9f))
+                .border(if (focused) 1.5.dp else 1.dp, if (focused) C.blue else C.line, RoundedCornerShape(14.dp)).padding(start = 12.dp, end = 2.dp).testTag("map_search"),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Icon(Ic.get("search"), null, tint = if (focused) C.blue else C.muted, modifier = Modifier.size(20.dp)); Spacer(Modifier.width(10.dp))
+            Icon(Ic.get("search"), null, tint = if (focused) C.blue else C.muted, modifier = Modifier.size(18.dp)); Spacer(Modifier.width(9.dp))
             Box(Modifier.weight(1f)) {
-                if (q.isEmpty()) Text(t("Search a village or project", "Tafuta kijiji au mradi"), style = MaterialTheme.typography.bodyLarge, color = C.muted, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                if (q.isEmpty()) Text(t("Search a village or project", "Tafuta kijiji au mradi"), style = MaterialTheme.typography.bodyMedium, color = C.muted, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 BasicTextField(q, { q = it }, Modifier.fillMaxWidth().focusRequester(fr).onFocusChanged { focused = it.isFocused; onFocus(it.isFocused) }.testTag("map_search_input")
                     .semantics { contentDescription = t("Search a village or project", "Tafuta kijiji au mradi") }, singleLine = true,
-                    textStyle = MaterialTheme.typography.bodyLarge.copy(color = C.text), cursorBrush = SolidColor(C.blue),
+                    textStyle = MaterialTheme.typography.bodyMedium.copy(color = C.text), cursorBrush = SolidColor(C.blue),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search), keyboardActions = KeyboardActions(onSearch = {
                         when { projs.isNotEmpty() -> { done(projs[0].title); onProject(projs[0].id) }; areas.isNotEmpty() -> { done(areas[0].first); onArea(areas[0].second.map { it.gps!! }) }; places.isNotEmpty() -> { done(places[0].first); onPlace(places[0].third) } }
                     }))
@@ -948,11 +991,11 @@ private fun PreviewCard(m: AppModel, snap: Snapshot, order: List<Project>, sel: 
     val swipe = with(LocalDensity.current) { 56.dp.toPx() }
     var dx by remember { mutableStateOf(0f) }
     Column(
-        Modifier.fillMaxWidth().shadow(12.dp, RoundedCornerShape(26.dp)).clip(RoundedCornerShape(26.dp)).background(C.card).border(1.dp, C.line, RoundedCornerShape(26.dp))
+        Modifier.fillMaxWidth().shadow(8.dp, RoundedCornerShape(22.dp)).clip(RoundedCornerShape(22.dp)).background(mapGlass(0.94f)).border(1.dp, C.line, RoundedCornerShape(22.dp))
             .pointerInput(order, sel) { detectHorizontalDragGestures(onDragStart = { dx = 0f }, onDragEnd = { if (dx < -swipe) step(1) else if (dx > swipe) step(-1); dx = 0f }) { _, d -> dx += d } }
-            .padding(start = 14.dp, end = 8.dp, top = 6.dp, bottom = 14.dp).testTag("map_card"),
+            .padding(start = 12.dp, end = 6.dp, top = 5.dp, bottom = 10.dp).testTag("map_card"),
     ) {
-        Box(Modifier.align(Alignment.CenterHorizontally).padding(bottom = 2.dp).size(40.dp, 5.dp).clip(RoundedCornerShape(99.dp)).background(C.edge))
+        Box(Modifier.align(Alignment.CenterHorizontally).padding(bottom = 1.dp).size(36.dp, 4.dp).clip(RoundedCornerShape(99.dp)).background(C.edge))
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
                 Text(if (order.size > 1 && i >= 0) t("${i + 1} of ${order.size} nearby", "${i + 1} kati ya ${order.size} karibu") else t("Project", "Mradi"),
@@ -968,7 +1011,7 @@ private fun PreviewCard(m: AppModel, snap: Snapshot, order: List<Project>, sel: 
             if (!anim || d == 0) EnterTransition.None togetherWith ExitTransition.None
             else (slideInHorizontally(tween(260)) { w -> if (d > 0) w / 3 else -w / 3 } + fadeIn(tween(200))) togetherWith (slideOutHorizontally(tween(200)) { w -> if (d > 0) -w / 3 else w / 3 } + fadeOut(tween(140)))
         }, contentKey = { it.second.id }) { (_, pr) -> CardBody(m, snap, pr, conds[pr.id] ?: mapCondition(snap, pr), here) }
-        Row(Modifier.padding(top = 12.dp, end = 6.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(Modifier.padding(top = 9.dp, end = 6.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             ActionTile(t("Report a visit", "Ripoti ziara"), "clip", true, Modifier.weight(1f), "card_visit") { visit(p.id) }
             ActionTile(t("Directions", "Maelekezo"), "nav", false, Modifier.weight(1f), "card_dir") {
                 val g = p.gps ?: return@ActionTile
@@ -984,12 +1027,12 @@ private fun CardBody(m: AppModel, snap: Snapshot, p: Project, c: String, here: L
     val (ic, _) = typeLook(p)
     val (bg, fg) = when (c) { PinCond.BAD -> C.badBg to C.bad; PinCond.REPAIR -> C.warnBg to C.warn; PinCond.OLD -> C.hue("slate").let { it.bg to it.fg }; else -> C.okBg to C.ok }
     Row(Modifier.fillMaxWidth().padding(top = 6.dp, end = 6.dp), verticalAlignment = Alignment.Top) {
-        NetImage(p.photo?.let { m.api.photoUrl(it) }, Modifier.size(78.dp).clip(RoundedCornerShape(18.dp)).background(bg)) {
-            Icon(Ic.get(ic), null, tint = fg, modifier = Modifier.size(30.dp))
+        NetImage(p.photo?.let { m.api.photoUrl(it) }, Modifier.size(62.dp).clip(RoundedCornerShape(15.dp)).background(bg)) {
+            Icon(Ic.get(ic), null, tint = fg, modifier = Modifier.size(25.dp))
         }
-        Spacer(Modifier.width(12.dp))
+        Spacer(Modifier.width(11.dp))
         Column(Modifier.weight(1f)) {
-            Text(p.title, style = MaterialTheme.typography.titleSmall.copy(fontSize = 16.sp), color = C.ink, maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.testTag("card_title"))
+            Text(p.title, style = MaterialTheme.typography.titleSmall.copy(fontSize = 15.sp), color = C.ink, maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.testTag("card_title"))
             Text(listOf(p.area, p.country).filter { it.isNotBlank() }.joinToString(" · "), style = MaterialTheme.typography.bodySmall, color = C.muted, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Row(Modifier.padding(top = 6.dp), verticalAlignment = Alignment.CenterVertically) {
                 Row(Modifier.clip(RoundedCornerShape(999.dp)).background(bg).padding(start = 8.dp, end = 10.dp, top = 4.dp, bottom = 4.dp).testTag("card_cond"), verticalAlignment = Alignment.CenterVertically) {
@@ -1009,7 +1052,7 @@ private fun CardBody(m: AppModel, snap: Snapshot, p: Project, c: String, here: L
 @Composable
 private fun CardIcon(icon: String, label: String, enabled: Boolean, tag: String, onClick: () -> Unit) {
     Box(Modifier.size(44.dp).clip(CircleShape).clickable(enabled = enabled, role = Role.Button, onClick = onClick).semantics { contentDescription = label }.testTag(tag), contentAlignment = Alignment.Center) {
-        Icon(Ic.get(icon), null, tint = if (enabled) C.ink else C.off, modifier = Modifier.size(19.dp))
+        Icon(Ic.get(icon), null, tint = if (enabled) C.ink else C.off, modifier = Modifier.size(17.dp))
     }
 }
 
@@ -1018,13 +1061,13 @@ private fun CardIcon(icon: String, label: String, enabled: Boolean, tag: String,
 private fun ActionTile(label: String, icon: String, primary: Boolean, modifier: Modifier, tag: String, onClick: () -> Unit) {
     val hu = C.hue("map")
     Column(
-        modifier.clip(RoundedCornerShape(16.dp)).background(if (primary) OkBrush else SolidColor(hu.bg)).clickable(role = Role.Button, onClick = onClick)
-            .heightIn(min = 58.dp).padding(horizontal = 4.dp, vertical = 8.dp).testTag(tag),
+        modifier.clip(RoundedCornerShape(14.dp)).background(if (primary) OkBrush else SolidColor(hu.bg)).clickable(role = Role.Button, onClick = onClick)
+            .heightIn(min = 48.dp).padding(horizontal = 4.dp, vertical = 6.dp).testTag(tag),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center,
     ) {
-        Icon(Ic.get(icon), null, tint = if (primary) Color.White else hu.fg, modifier = Modifier.size(20.dp))
-        Text(label, style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.5.sp, lineHeight = 15.sp, fontWeight = FontWeight.Bold), color = if (primary) Color.White else C.ink,
-            textAlign = TextAlign.Center, maxLines = 2, modifier = Modifier.padding(top = 4.dp))
+        Icon(Ic.get(icon), null, tint = if (primary) Color.White else hu.fg, modifier = Modifier.size(18.dp))
+        Text(label, style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp, lineHeight = 14.sp, fontWeight = FontWeight.Bold), color = if (primary) Color.White else C.ink,
+            textAlign = TextAlign.Center, maxLines = 2, modifier = Modifier.padding(top = 3.dp))
     }
 }
 

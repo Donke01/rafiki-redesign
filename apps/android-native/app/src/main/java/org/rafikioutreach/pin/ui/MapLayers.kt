@@ -132,7 +132,7 @@ object HomeLayers {
     internal var dropped = false
     /** For tests: a phone heading without a compass sensor. */
     var testHeading: Float? = null
-    fun reset() { route = true; heat = ""; years = false; year = 0; playing = false; team = false; follow = false; north = false; rot = 0f; pick = null; tm = null; tmErr = null; compass = null; cardsH = 0; loaded = false; dropped = false; testHeading = null; MapClean.on = false }
+    fun reset() { route = true; heat = ""; years = false; year = 0; playing = false; team = false; follow = false; north = false; rot = 0f; pick = null; tm = null; tmErr = null; compass = null; cardsH = 0; loaded = false; dropped = false; testHeading = null; MapClean.revealed = false }
     internal fun load(ctx: Context) { if (loaded) return; loaded = true; route = ctx.getSharedPreferences("map_layers", Context.MODE_PRIVATE).getBoolean("route", true) }
     internal fun saveRoute(ctx: Context, on: Boolean) { route = on; ctx.getSharedPreferences("map_layers", Context.MODE_PRIVATE).edit().putBoolean("route", on).apply() }
 }
@@ -311,10 +311,8 @@ private class PulseOverlay(private val density: Float) : Overlay(), UnderPins {
         pts.forEach { (g, col) ->
             pj.toPixels(g, pt)
             if (!animate) { p.color = col; p.alpha = 90; c.drawCircle(pt.x.toFloat(), pt.y.toFloat(), 15 * density, p); return@forEach }
-            for (k in 0..1) {
-                val f = ((now + k * 1300) % 2600) / 2600f
-                p.color = col; p.alpha = ((1 - f) * 190).toInt(); c.drawCircle(pt.x.toFloat(), pt.y.toFloat(), (8 + 24 * f) * density, p)
-            }
+            val f = (now % 2400) / 2400f
+            p.color = col; p.alpha = ((1 - f) * 130).toInt(); c.drawCircle(pt.x.toFloat(), pt.y.toFloat(), (10 + 18 * f) * density, p)
         }
     }
 }
@@ -460,12 +458,13 @@ private fun BoxScope.HomeLayersOverlay(m: AppModel, snap: Snapshot, fix: Fix?, m
         // the lines go over the tiles and under the pins; the numbered stops over the pins
         st.route = out; mv.overlays.addAll(underPinsAt(mv), out.filterIsInstance<RouteLine>()); mv.overlays.addAll(out.filter { it !is RouteLine }); mv.invalidate()
     }
-    // the pulse on urgent and not-working sites (not on the history view)
+    // only not-working sites pulse, gently (map3; not on the history view), and not with reduced motion
+    val moving = rememberMapMotion() && Motion.loops
     st.pulse?.let { pl ->
-        pl.pts = if (yearsOn) emptyList() else snap.projects.mapNotNull { p -> val r = snap.repairs[p.id]; val g = p.gps; if (g != null && r != null && (r.state == "notworking" || r.urgency == "urgent")) GeoPoint(g.lat, g.lng) to (if (r.state == "notworking") 0xFFB3261E.toInt() else 0xFFD98200.toInt()) else null }
-        pl.animate = Motion.on && Motion.loops
+        pl.pts = if (yearsOn) emptyList() else snap.projects.mapNotNull { p -> val r = snap.repairs[p.id]; val g = p.gps; if (g != null && r != null && r.state == "notworking") GeoPoint(g.lat, g.lng) to 0xFFB3261E.toInt() else null }
+        pl.animate = moving
     }
-    if (st.pulse?.pts?.isNotEmpty() == true && Motion.on && Motion.loops) LaunchedEffect(mv) { while (isActive) { mv.postInvalidate(); delay(50) } }
+    if (st.pulse?.pts?.isNotEmpty() == true && moving) LaunchedEffect(mv) { while (isActive) { mv.postInvalidate(); delay(50) } }
     // heat
     val heatKind = if (snap.admin) HomeLayers.heat else ""
     st.heat?.let { h ->
@@ -598,8 +597,8 @@ private fun BoxScope.HomeLayersOverlay(m: AppModel, snap: Snapshot, fix: Fix?, m
     if (!follow) LaunchedEffect(Unit) { HomeLayers.north = false }
     // the follow-me button and the compass are in the Map tab's column of buttons (MapHome.kt, MapSide)
 
-    // the cards over the bottom of the map, above the map's credit; with the map alone (MapClean) only a tapped stop or teammate
-    val clean = MapClean.on
+    // the cards over the bottom of the map, above the map's credit; a layer that is on keeps its card even on the calm map (map3)
+    val clean = false
     Column(Modifier.align(Alignment.BottomCenter).padding(start = 12.dp, end = 12.dp, bottom = bottom + 40.dp).widthIn(max = 520.dp).fillMaxWidth()
         .onSizeChanged { if (HomeLayers.cardsH != it.height) HomeLayers.cardsH = it.height }, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         val pick = HomeLayers.pick

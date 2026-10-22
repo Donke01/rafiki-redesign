@@ -93,6 +93,9 @@ object Ic {
         "grid" to listOf(rect(4f, 4f, 6.5f, 6.5f, 1.5f), rect(13.5f, 4f, 6.5f, 6.5f, 1.5f), rect(4f, 13.5f, 6.5f, 6.5f, 1.5f), rect(13.5f, 13.5f, 6.5f, 6.5f, 1.5f)),
     )
 
+    /** The drawing's paths (SVG path data, 24×24), for pictures drawn outside Compose (the map's pins). */
+    fun paths(name: String): List<String> = D[name] ?: D.getValue("drop")
+
     fun get(name: String): ImageVector = cache.getOrPut(name) {
         ImageVector.Builder(name, 24.dp, 24.dp, 24f, 24f).apply {
             (D[name] ?: D.getValue("drop")).forEach { d ->

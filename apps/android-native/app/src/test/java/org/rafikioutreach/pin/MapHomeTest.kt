@@ -22,6 +22,7 @@ import androidx.compose.ui.test.swipeLeft
 import androidx.compose.ui.test.swipeRight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.geometry.Rect
+import android.graphics.RectF
 import androidx.compose.ui.semantics.getOrNull
 import androidx.test.core.app.ApplicationProvider
 import org.json.JSONArray
@@ -74,12 +75,13 @@ class MapHomeTest {
     private val ago = { days: Long -> Instant.now().minusSeconds(days * 86400).toString() }
 
     @Before fun fresh() { MapSetup.init(app); OfflineMaps.setOnline(true) }
-    @After fun reset() { org.rafikioutreach.pin.ui.Motion.on = true; Lang.sw = false; Look.mode = ""; OfflineMaps.setOnline(true); org.rafikioutreach.pin.ui.HomeLayers.reset() }
+    @After fun reset() { org.rafikioutreach.pin.ui.Motion.on = true; Lang.sw = false; Look.mode = ""; OfflineMaps.setOnline(true); org.rafikioutreach.pin.ui.HomeLayers.reset(); twins = false; longName = false }
 
     private fun proj(id: String, t: String, area: String, lat: Double?, lng: Double?, type: String = "Borehole well", ck: String = "ke", country: String = "Kenya") =
         JSONObject().put("id", id).put("title", t).put("country", country).put("ck", ck).put("area", area).put("type", type).put("status", "Completed").put("pump", "")
             .apply { if (lat != null) put("gps", JSONArray().put(lat).put(lng)) }
     private var longName = false
+    private var twins = false // a second project on the very same spot as Turbo Spring
     private fun visit(days: Long, by: String = "Meril", state: String = "working") = JSONObject().put("at", ago(days)).put("by", by).put("state", state)
     private fun snapshot() = JSONObject().put("ok", true).put("who", "Meril Kiprop").put("admin", false).put("reviewOpen", 0)
         .put("projects", JSONArray()
@@ -92,7 +94,8 @@ class MapHomeTest {
             .put(proj("107", "Moi’s Bridge Borehole", "Eldoret", 0.87, 35.12))
             .put(proj("108", "Mto wa Mbu Borehole", "Arusha", -3.37, 35.85, ck = "tz", country = "Tanzania"))
             .put(proj("109", "Kapsaret Primary School", "Eldoret", 0.475, 35.255, "School"))
-            .put(proj("110", "Sosiot Well", "Kericho", null, null)))
+            .put(proj("110", "Sosiot Well", "Kericho", null, null))
+            .apply { if (twins) put(proj("111", "Turbo Spring Kiosk", "Turbo", 0.63, 35.05, "Farming")) })
         .put("repairs", JSONObject()
             .put("101", JSONObject().put("state", "notworking").put("by", "Bertin").put("at", ago(3)).put("urgency", "urgent").put("t", "Kapsaret Borehole"))
             .put("102", JSONObject().put("state", "repair").put("by", "Grace").put("at", ago(9)).put("urgency", "month").put("t", "Chepkongi Dispensary")))
@@ -121,11 +124,13 @@ class MapHomeTest {
         if (fix) m.locator.pretend(Fix(LatLng(0.5150, 35.2700), 8, System.currentTimeMillis()))
         return m
     }
-    private fun show(m: AppModel, dark: Boolean = false, w: Int = 390, h: Int = 844) {
+    /** The Map tab. It opens calm (map3); unless [calm], the tiles are then shown, as after a tap on the map. */
+    private fun show(m: AppModel, dark: Boolean = false, w: Int = 390, h: Int = 844, calm: Boolean = false) {
         rule.setContent { RafikiTheme(dark = dark) { Box(Modifier.size(w.dp, h.dp)) { App(m) } } }
         rule.waitUntil(8000) { rule.onAllNodesWithTag("nav_map").fetchSemanticsNodes().isNotEmpty() }
         rule.onNodeWithTag("nav_map").performClick(); rule.waitForIdle()
         rule.waitUntil(5000) { rule.onAllNodesWithTag("map_home").fetchSemanticsNodes().isNotEmpty() }
+        if (!calm) { org.rafikioutreach.pin.ui.MapClean.revealed = true; rule.waitForIdle() }
     }
     private fun bitmap(): Bitmap {
         rule.waitForIdle()
@@ -422,7 +427,7 @@ class MapHomeTest {
     private fun box(tag: String): Rect? = rule.onAllNodesWithTag(tag, useUnmergedTree = true).fetchSemanticsNodes().firstOrNull()?.boundsInRoot?.takeIf { it.width > 1f && it.height > 1f }
     private fun meet(a: Rect, b: Rect) = a.left < b.right - 0.5f && b.left < a.right - 0.5f && a.top < b.bottom - 0.5f && b.top < a.bottom - 0.5f
     /** Everything drawn over the map, by its tag. */
-    private val over = listOf("map_search", "map_search_btn", "map_chips", "map_pill", "map_none", "map_pinned", "here", "here_chip", "map_nosignal", "map_side", "ml_compass", "ml_tray", "map_key", "map_legend", "nearest", "map_card", "spot_card", "map_credit")
+    private val over = listOf("map_search", "map_search_btn", "map_chips", "map_pill", "map_none", "map_pinned", "here", "here_chip", "map_nosignal", "map_side", "ml_compass", "ml_tray", "map_key", "map_legend", "nearest", "map_card", "spot_card", "map_credit", "map_hint")
     /** Pairs of things over the map whose boxes overlap (none should). */
     private fun overlaps(): List<String> {
         val b = over.mapNotNull { t -> box(t)?.let { t to it } }
@@ -561,8 +566,9 @@ class MapHomeTest {
         val tray = box("ml_tray")!!
         assertTrue("the tray hangs under the column", tray.top >= box("map_side")!!.bottom)
         assertTrue("the tray covers none of the chips, search, pinned bar, You’re at, key or credit", listOf("map_chips", "map_search", "map_pinned", "here", "map_key", "map_credit").mapNotNull { box(it) }.none { meet(it, tray) })
-        listOf("offline_btn", "ml_follow", "ml_more", "ml_layers", "ml_me", "map_key").forEach { t -> val b = box(t)!!; assertTrue("$t is 48 dp", b.height / rule.density.density >= 47.5f && b.width / rule.density.density >= 47.5f || t == "offline_btn" || t == "ml_follow" || t == "map_key") }
-        assertTrue("tray rows and the Key button are 48 dp tall", listOf("offline_btn", "ml_follow", "map_key").all { box(it)!!.height / rule.density.density >= 47.5f })
+        // map3: smaller tiles, but every touch target stays at least 44 dp
+        listOf("offline_btn", "ml_follow", "ml_more", "ml_layers", "ml_me", "map_key").forEach { t -> val b = box(t)!!; assertTrue("$t is 44 dp", b.height / rule.density.density >= 43.5f && b.width / rule.density.density >= 43.5f || t == "offline_btn" || t == "ml_follow" || t == "map_key") }
+        assertTrue("tray rows and the Key button are at least 44 dp tall", listOf("offline_btn", "ml_follow", "map_key").all { box(it)!!.height / rule.density.density >= 43.5f })
         shot("map-26-more")
         tapAway(); rule.waitForIdle()
         assertFalse("a tap elsewhere closes it", tagged("ml_tray"))
@@ -574,21 +580,23 @@ class MapHomeTest {
         shot("map-27-following")
         rule.onNodeWithTag("ml_follow").performClick(); rule.waitForIdle()
         assertFalse(org.rafikioutreach.pin.ui.HomeLayers.follow); assertFalse("off: back under More", tagged("ml_follow"))
-        // a tap on empty map: the map alone, with a search button, the column and the credit
+        // a tap on empty map: calm again, with a search button, the column and the credit; "You're at" stays (it matters)
         tapMap(mv)
         assertTrue(org.rafikioutreach.pin.ui.MapClean.on)
-        assertTrue("map only", tagged("map_search_btn") && tagged("map_side") && !tagged("map_search") && !tagged("map_chips") && !tagged("map_pinned") && !tagged("nearest") && !tagged("map_key") && !tagged("here"))
+        assertTrue("calm", tagged("map_search_btn") && tagged("map_side") && !tagged("map_search") && !tagged("map_chips") && !tagged("map_pinned") && !tagged("nearest") && !tagged("map_key") && tagged("here"))
         assertTrue("the credit still shows", creditClear()); assertEquals(emptyList<String>(), overlaps())
         shot("map-29-map-only")
         tapMap(mv)
-        assertTrue("tap again: all back", !org.rafikioutreach.pin.ui.MapClean.on && tagged("map_search") && tagged("nearest") && tagged("map_key"))
+        assertTrue("tap again: all back", org.rafikioutreach.pin.ui.MapClean.revealed && tagged("map_search") && tagged("nearest") && tagged("map_key"))
         tapMap(mv); rule.onNodeWithTag("map_search_btn").performClick(); rule.waitForIdle()
-        assertTrue("the search button brings it all back, ready to type", !org.rafikioutreach.pin.ui.MapClean.on && rule.onNodeWithTag("map_search_input").fetchSemanticsNode().config.getOrNull(androidx.compose.ui.semantics.SemanticsProperties.Focused) == true)
+        assertTrue("the search button opens the box ready to type; the tiles stay tucked away", org.rafikioutreach.pin.ui.MapClean.on && !tagged("map_chips") &&
+            rule.onNodeWithTag("map_search_input").fetchSemanticsNode().config.getOrNull(androidx.compose.ui.semantics.SemanticsProperties.Focused) == true)
         // a pin still opens its card; a tap on the map then only puts the card away
         look(mv, 0.62, 35.05, 13.0); tapMarker(mv, "pin:103")
         assertEquals("Turbo Spring", text("card_title")); assertEquals("card: nothing overlaps", emptyList<String>(), overlaps())
+        assertTrue("searching is over: the round button is back", tagged("map_search_btn"))
         tapMap(mv)
-        assertTrue(!tagged("map_card") && !org.rafikioutreach.pin.ui.MapClean.on)
+        assertTrue(!tagged("map_card") && org.rafikioutreach.pin.ui.MapClean.on)
         // Offline areas (under More) opens Save this area for offline
         rule.onNodeWithTag("ml_more").performClick(); rule.waitForIdle(); rule.onNodeWithTag("offline_btn").performClick(); rule.waitForIdle()
         rule.waitUntil(4000) { tagged("offline_sheet") }
@@ -635,4 +643,263 @@ class MapHomeTest {
         assertTrue("the key shows groups and you as well", tagged("key_cluster") && tagged("key_you") && has("Wewe"))
         shot("map-33-sw-dark-360-key")
     }
+
+    // --- map3: calm by default, pins that talk, more animation ---------------------------------------------------------
+
+    private val Calm get() = org.rafikioutreach.pin.ui.MapClean
+    private fun back() { rule.runOnUiThread { rule.activity.onBackPressedDispatcher.onBackPressed() }; rule.waitForIdle() }
+    private fun labels(mv: MapView) = mv.overlays.filterIsInstance<org.rafikioutreach.pin.ui.PinLabels>().first()
+    private fun pinBitmap(mv: MapView, id: String) = (mv.overlays.filterIsInstance<Marker>().first { it.id == id }.icon as android.graphics.drawable.BitmapDrawable).bitmap
+    private fun near(c: Int, want: Int, tol: Int = 40) = listOf(16, 8, 0).all { sh -> kotlin.math.abs(((c shr sh) and 255) - ((want shr sh) and 255)) <= tol } && (c ushr 24) > 200
+    private fun longPressMarker(mv: MapView, id: String) {
+        bitmap()
+        rule.runOnUiThread {
+            val mk = mv.overlays.filterIsInstance<Marker>().first { it.id == id }
+            val pt = mv.projection.toPixels(mk.position, null)
+            assertTrue("the pin takes the long press", mk.onLongPress(MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, pt.x.toFloat(), pt.y.toFloat(), 0), mv))
+        }
+        rule.waitForIdle()
+    }
+    private fun calmTiles() = tagged("map_search_btn") && tagged("map_side") && !tagged("map_search") && !tagged("map_chips") && !tagged("map_pinned") && !tagged("nearest") && !tagged("map_key")
+    private fun revealedTiles() = tagged("map_search") && tagged("map_chips") && tagged("nearest") && !tagged("map_search_btn")
+
+    /** The map opens calm: pins, a round search button, the column; the one-time hint. A tap reveals the chips, the pinned
+     *  bar, Nearest to you and the Key; another tap hides them; back hides them too. Nothing overlaps either way. */
+    private fun calmRevealHide(h: Int, sw: Boolean) {
+        Lang.sw = sw
+        try {
+            val m = model(); show(m, h = h, calm = true)
+            val mv = map()
+            val sfx = (if (h < 600) "-short" else "") + (if (sw) "-sw" else "")
+            assertTrue("calm by default", Calm.on && calmTiles())
+            assertTrue("You’re at still shows (within 200 m)", tagged("here") || tagged("here_chip"))
+            assertTrue("the one-time hint", tagged("map_hint") && has(if (sw) "Gusa ramani kuona vichujio" else "Tap the map for filters"))
+            assertTrue("remembered", app.getSharedPreferences("map_style", 0).getBoolean("calm_hint", false))
+            assertEquals("calm: nothing overlaps", emptyList<String>(), overlaps()); assertTrue(creditClear())
+            shot("map-60-calm$sfx")
+            tapMap(mv)
+            assertTrue("a tap reveals the tiles", Calm.revealed && revealedTiles() && !tagged("map_hint"))
+            if (h >= 600) assertTrue("and the pinned bar and Key", tagged("map_pinned") && tagged("map_key"))
+            assertEquals("revealed: nothing overlaps", emptyList<String>(), overlaps()); assertTrue(creditClear())
+            shot("map-61-revealed$sfx")
+            tapMap(mv)
+            assertTrue("another tap hides them", Calm.on && calmTiles())
+            tapMap(mv); assertTrue(Calm.revealed)
+            back()
+            assertTrue("back hides the revealed tiles, still on the map", Calm.on && calmTiles() && tagged("map_home"))
+            assertFalse(rule.activity.isFinishing)
+        } finally { Lang.sw = false }
+    }
+    @Test fun calm_tap_reveals_tap_hides_844() = calmRevealHide(844, false)
+    @Test fun calm_tap_reveals_tap_hides_844_sw() = calmRevealHide(844, true)
+    @Test fun calm_tap_reveals_tap_hides_480() = calmRevealHide(480, false)
+    @Test fun calm_tap_reveals_tap_hides_480_sw() = calmRevealHide(480, true)
+
+    /** Calm keeps what is active: a filter's pill, the search box while searching, the card. The bottom bar starts it over. */
+    @Test fun calm_keeps_what_is_active_and_starts_over() {
+        Lang.sw = false
+        val m = model(); show(m, calm = true)
+        val mv = map()
+        tapMap(mv); rule.onNodeWithTag("mchip_water").performScrollTo().performClick(); rule.waitForIdle()
+        tapMap(mv)
+        assertTrue("calm with a filter: its pill, no chips, no Nearest", Calm.on && tagged("map_pill") && !tagged("map_chips") && !tagged("nearest") && !tagged("map_key"))
+        assertEquals(emptyList<String>(), overlaps())
+        shot("map-62-calm-filter")
+        rule.onNodeWithTag("map_search_btn").performClick(); rule.waitForIdle()
+        assertTrue("searching: the search box", tagged("map_search") && !tagged("map_search_btn") && Calm.on)
+        rule.onNodeWithTag("map_search_input").performTextInput("Turbo"); rule.waitUntil(3000) { tagged("sugg_p_103") }
+        rule.onNodeWithTag("sugg_p_103").performClick(); rule.waitForIdle()
+        assertTrue("a card: it shows, calm or not", tagged("map_card") && Calm.on && tagged("map_search_btn"))
+        assertEquals(emptyList<String>(), overlaps())
+        rule.onNodeWithTag("card_x").performClick(); rule.waitForIdle()
+        tapMap(mv); assertTrue(Calm.revealed)
+        rule.onNodeWithTag("nav_list").performClick(); rule.waitForIdle(); rule.onNodeWithTag("nav_map").performClick(); rule.waitForIdle()
+        rule.waitUntil(4000) { tagged("map_home") }
+        assertTrue("the bottom bar starts the map over: calm, no filter", Calm.on && calmTiles() && !tagged("map_pill"))
+    }
+
+    /** Each pin: the kind's icon inside, a ring for how it is, a dot when a visit or water test is due. Pictures are kept by look. */
+    @Test fun pin_icons_per_condition() {
+        Lang.sw = false
+        val m = model(); show(m)
+        val mv = map()
+        look(mv, 0.55, 35.1, 15.0)
+        look(mv, 0.47, 35.25, 15.0)
+        val d = rule.density.density
+        fun ring(id: String): Int { val b = pinBitmap(mv, id); return b.getPixel(b.width / 2 + (10f * d).toInt(), b.height / 2) }
+        fun dot(id: String): Int { val b = pinBitmap(mv, id); val o = (11.5f * 0.72f * d).toInt(); return b.getPixel(b.width / 2 + o, b.height / 2 - o) }
+        fun inked(id: String): Int { val b = pinBitmap(mv, id); val r = (6f * d).toInt(); var n = 0
+            for (x in -r..r) for (y in -r..r) { val c = b.getPixel(b.width / 2 + x, b.height / 2 + y); if (((c shr 16) and 255) < 90 && ((c shr 8) and 255) < 90) n++ }; return n }
+        assertTrue("not working: red ring", near(ring("pin:101"), org.rafikioutreach.pin.ui.condArgb(PinCond.BAD)))
+        assertTrue("its icon is drawn inside", inked("pin:101") > 10)
+        assertTrue("a water point is due a water test: the blue dot", near(dot("pin:101"), org.rafikioutreach.pin.ui.PinArt.DUE_ARGB))
+        look(mv, 0.5143, 35.2698, 15.0)
+        assertTrue("needs repair: amber ring", near(ring("pin:102"), org.rafikioutreach.pin.ui.condArgb(PinCond.REPAIR)))
+        look(mv, 0.63, 35.05, 15.0)
+        assertTrue("working: green ring", near(ring("pin:103"), org.rafikioutreach.pin.ui.condArgb(PinCond.OK)))
+        look(mv, 0.58, 34.62, 15.0)
+        assertTrue("not visited in 6 months: grey ring, due", near(ring("pin:104"), org.rafikioutreach.pin.ui.condArgb(PinCond.OLD)) && near(dot("pin:104"), org.rafikioutreach.pin.ui.PinArt.DUE_ARGB))
+        look(mv, 0.2, 35.1, 15.0)
+        assertFalse("a farm visited 10 days ago: nothing due", near(dot("pin:106"), org.rafikioutreach.pin.ui.PinArt.DUE_ARGB))
+        assertTrue("the leaf is drawn", inked("pin:106") > 10)
+        // kept by type, condition and due: two working, due water points share one picture
+        look(mv, 0.75, 35.1, 9.0); look(mv, 0.75, 35.1, 15.0)
+        look(mv, 0.63, 35.05, 15.0); val a = pinBitmap(mv, "pin:103")
+        look(mv, 0.87, 35.12, 15.0); val b = pinBitmap(mv, "pin:107")
+        assertTrue("one picture per look", a === b)
+        shot("map-63-pins-z15")
+    }
+
+    /** A group is a donut split by how its projects are, with the count in the middle. */
+    @Test fun cluster_donut() {
+        Lang.sw = false
+        val m = model(); show(m)
+        val mv = map()
+        look(mv, -1.2, 35.4, 6.0)
+        rule.waitUntil(5000) { markers(mv).any { it.id.startsWith("cluster:") } }
+        val g = markers(mv).first { it.id.startsWith("cluster:") && it.snippet == PinCond.BAD }
+        val parts = g.subDescription.split(",").map { it.toInt() }
+        assertEquals("the parts add up to the count", g.title.toInt(), parts.sum())
+        assertTrue("a mix: ${parts}", parts[3] >= 1 && parts[2] >= 1 && parts[0] >= 1)
+        val b = (g.icon as android.graphics.drawable.BitmapDrawable).bitmap
+        val d = rule.density.density; val r = (15f - 2.25f) * d
+        val seen = (0 until 72).map { k -> val a = Math.toRadians(k * 5.0); b.getPixel((b.width / 2 + r * kotlin.math.cos(a)).toInt(), (b.height / 2 + r * kotlin.math.sin(a)).toInt()) }
+        listOf(PinCond.BAD to parts[3], PinCond.REPAIR to parts[2], PinCond.OLD to parts[1], PinCond.OK to parts[0]).filter { it.second > 0 }.forEach { (c, _) ->
+            assertTrue("the donut shows $c", seen.any { near(it, org.rafikioutreach.pin.ui.condArgb(c), 30) })
+        }
+        assertTrue("not working starts at the top", near(b.getPixel(b.width / 2 + 1, (b.height / 2 - r).toInt()), org.rafikioutreach.pin.ui.condArgb(PinCond.BAD), 30))
+        shot("map-64-donuts")
+        // a tap zooms smoothly into the group
+        val z = mv.zoomLevelDouble
+        tapMarker(mv, g.id); rule.mainClock.advanceTimeBy(1000); rule.waitForIdle()
+        assertTrue(mv.zoomLevelDouble >= z + 1)
+    }
+
+    /** Pins on the very same spot: a tap on their group fans them out, each its own pin. */
+    @Test fun same_spot_fans_out() {
+        Lang.sw = false; twins = true
+        val m = model(); show(m)
+        val mv = map()
+        look(mv, 0.63, 35.05, 16.0)
+        val g = markers(mv).first { it.id.startsWith("cluster:2:") }
+        tapMarker(mv, g.id); bitmap()
+        assertTrue("both pins stand alone: ${markers(mv).map { it.id }}", markers(mv).count { it.id == "pin:103" || it.id == "pin:111" } == 2)
+        val a = markers(mv).first { it.id == "pin:103" }; val b = markers(mv).first { it.id == "pin:111" }
+        val pa = mv.projection.toPixels(a.position, null); val pb = mv.projection.toPixels(b.position, null)
+        assertTrue("fanned apart: ${pa} ${pb}", kotlin.math.hypot((pa.x - pb.x).toDouble(), (pa.y - pb.y).toDouble()) > 40 * rule.density.density)
+        assertTrue(markers(mv).none { it.id.startsWith("cluster:") })
+        shot("map-65-fanned")
+        tapMarker(mv, "pin:111")
+        assertEquals("Turbo Spring Kiosk", text("card_title"))
+    }
+
+    /** From zoom 13 short names sit under the pins, never over another name or pin; under 13, none. */
+    @Test fun labels_at_zoom_13_and_above() {
+        Lang.sw = false
+        val m = model(); show(m)
+        val mv = map()
+        look(mv, 0.49, 35.26, 12.0)
+        assertTrue("zoom 12: no names", labels(mv).shown.isEmpty())
+        look(mv, 0.49, 35.26, 13.0)
+        assertTrue("zoom 13: names: ${labels(mv).shown}", labels(mv).shown.contains("102"))
+        look(mv, 0.4725, 35.2525, 15.0)
+        assertTrue("zoom 15: the two Kapsaret pins are close, one name gives way: ${labels(mv).shown}", labels(mv).shown.contains("101") && !labels(mv).shown.contains("109"))
+        look(mv, 0.4725, 35.2525, 16.0)
+        val l = labels(mv); val bx = l.boxes()
+        assertTrue("zoom 16: both Kapsaret names: ${l.shown}", l.shown.containsAll(listOf("101", "109")))
+        for (i in bx.indices) for (j in i + 1 until bx.size) assertFalse("names never overlap", RectF.intersects(bx[i], bx[j]))
+        val pins = markers(mv).map { mv.projection.toPixels(it.position, null) }
+        val pr = 14f * rule.density.density
+        bx.forEach { r -> assertTrue("a name sits under its pin, clear of the others", pins.count { p -> RectF.intersects(r, RectF(p.x - pr, p.y - pr, p.x + pr, p.y + pr)) } == 0) }
+        shot("map-66-names-z16")
+        // the rule itself: crowded pins show what fits and hide the rest
+        val xs = floatArrayOf(100f, 120f, 300f); val ys = floatArrayOf(100f, 100f, 100f); val ws = floatArrayOf(120f, 120f, 80f)
+        val show = BooleanArray(3); val boxes = FloatArray(12)
+        val n = org.rafikioutreach.pin.ui.placeLabels(3, xs, ys, ws, 30f, 20f, 15f, 1000f, 1000f, show, boxes)
+        assertEquals(2, n); assertTrue(show[0] && !show[1] && show[2])
+        assertEquals("Chepkongi Dispensary and…", org.rafikioutreach.pin.ui.shortName("Chepkongi Dispensary and Maternity Wing, Kapsaret Ward", 26))
+        assertEquals("Kapsaret Borehole", org.rafikioutreach.pin.ui.shortName("Kapsaret Borehole"))
+    }
+
+    /** A tapped pin lifts and grows, the others dim, the map eases so it sits above the card; back puts it all back. */
+    @Test fun tap_pin_lifts_and_sits_above_the_card() {
+        Lang.sw = false
+        val m = model(); show(m, calm = true)
+        val mv = map()
+        look(mv, 0.62, 35.05, 13.0)
+        // put Turbo Spring low on the map, where the card will be
+        rule.runOnUiThread { val p = mv.projection.fromPixels(mv.width / 2, (mv.height * 0.15).toInt()); mv.controller.setCenter(GeoPoint(p.latitude, p.longitude)) }
+        rule.waitForIdle(); bitmap()
+        tapMarker(mv, "pin:103"); rule.waitUntil(3000) { tagged("map_card") }; rule.mainClock.advanceTimeBy(500); rule.waitForIdle(); bitmap()
+        val chosen = markers(mv).first { it.id == "pin:103" } as org.rafikioutreach.pin.ui.PinMarker
+        assertTrue("it lifts and is the big pin", chosen.big && chosen.lift > 0f && chosen.alpha == 1f)
+        assertTrue("the others dim", markers(mv).filter { it.id != "pin:103" }.all { it.alpha < 1f })
+        val home = box("map_home")!!; val card = box("map_card")!!
+        val y = rule.runOnUiThread<Float> { home.top + mv.projection.toPixels(chosen.position, null).y }
+        assertTrue("the pin sits above the card: $y < ${card.top}", y < card.top - 10)
+        shot("map-67-pin-open")
+        back()
+        assertFalse(tagged("map_card"))
+        bitmap()
+        assertTrue("closed: no pin dimmed", markers(mv).all { it.alpha == 1f } && markers(mv).none { (it as org.rafikioutreach.pin.ui.PinMarker).big })
+    }
+
+    /** A long press on a pin: Report a visit, Directions and Open in a small popover by the pin. Back closes it. */
+    @Test fun long_press_pin_quick_actions() {
+        Lang.sw = false
+        val m = model(); show(m)
+        val mv = map()
+        look(mv, 0.62, 35.05, 13.0)
+        longPressMarker(mv, "pin:103")
+        assertTrue("the quick actions", tagged("pin_quick") && has("Report a visit") && has("Directions") && tagged("quick_open"))
+        assertFalse("not the long press on the map", tagged("spot_card") || tagged("map_card"))
+        val q = box("pin_quick")!!; val home = box("map_home")!!
+        assertTrue("inside the map", q.left >= home.left && q.right <= home.right && q.top >= home.top && q.bottom <= home.bottom)
+        shot("map-68-quick")
+        back()
+        assertTrue("back closes only the popover", !tagged("pin_quick") && tagged("map_home") && Calm.revealed)
+        longPressMarker(mv, "pin:103"); rule.onNodeWithTag("quick_dir").performClick(); rule.waitForIdle()
+        assertTrue(shadowOf(rule.activity).nextStartedActivity.dataString!!.contains("destination=0.630000,35.050000"))
+        assertFalse(tagged("pin_quick"))
+        longPressMarker(mv, "pin:103"); rule.onNodeWithTag("quick_visit").performClick()
+        rule.waitUntil(4000) { has("I’ve arrived") }
+    }
+
+    /** Kiswahili: the popover and the hint. */
+    @Test fun long_press_kiswahili_dark() {
+        Lang.sw = true
+        val m = model(); show(m, dark = true)
+        val mv = map()
+        look(mv, 0.62, 35.05, 13.0)
+        longPressMarker(mv, "pin:103")
+        assertTrue(has("Ripoti ziara") && has("Maelekezo") && has("Fungua"))
+        shot("map-69-quick-sw-dark")
+        Lang.sw = false
+    }
+
+    /** The six key pictures at 360 dp, in English and Kiswahili, light and dark: calm, revealed, a pin open, a group,
+     *  names at zoom, and the quick actions; the sun theme once. Nothing overlaps; no word is cut. */
+    private fun tour360(sw: Boolean, dark: Boolean) {
+        Lang.sw = sw
+        try {
+            val m = model(); show(m, dark = dark, w = 360, h = 760, calm = true)
+            val mv = map()
+            val sfx = (if (sw) "-sw" else "-en") + (if (dark) "-dark" else "-light")
+            look(mv, 0.62, 35.1, 9.0)
+            assertEquals(emptyList<String>(), overlaps()); shot("map3-1-calm$sfx")
+            tapMap(mv); rule.waitForIdle()
+            assertEquals(emptyList<String>(), overlaps()); shot("map3-2-revealed$sfx")
+            tapMap(mv)
+            look(mv, 0.62, 35.05, 13.0); tapMarker(mv, "pin:103"); rule.waitUntil(3000) { tagged("map_card") }; rule.mainClock.advanceTimeBy(500); rule.waitForIdle()
+            assertEquals(emptyList<String>(), overlaps()); shot("map3-3-pin-open$sfx")
+            rule.onNodeWithTag("card_x").performClick(); rule.waitForIdle()
+            look(mv, -1.2, 35.4, 6.0); shot("map3-4-groups$sfx")
+            look(mv, 0.4725, 35.2525, 15.0); shot("map3-5-names$sfx")
+            if (!dark && !sw) { Look.mode = "sun"; rule.waitForIdle(); look(mv, 0.62, 35.1, 9.0); tapMap(mv); shot("map3-6-sun$sfx"); Look.mode = "" }
+        } finally { Lang.sw = false; Look.mode = "" }
+    }
+    @Config(qualifiers = "w360dp-h760dp-xxhdpi") @Test fun shots_360_en_light() = tour360(false, false)
+    @Config(qualifiers = "w360dp-h760dp-xxhdpi") @Test fun shots_360_en_dark() = tour360(false, true)
+    @Config(qualifiers = "w360dp-h760dp-xxhdpi") @Test fun shots_360_sw_light() = tour360(true, false)
+    @Config(qualifiers = "w360dp-h760dp-xxhdpi") @Test fun shots_360_sw_dark() = tour360(true, true)
 }

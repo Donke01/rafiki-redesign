@@ -57,6 +57,8 @@ import org.rafikioutreach.pin.t
 class Haptics(private val view: android.view.View) {
     fun tap() { view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY) }
     fun ok() { view.performHapticFeedback(if (android.os.Build.VERSION.SDK_INT >= 30) HapticFeedbackConstants.CONFIRM else HapticFeedbackConstants.LONG_PRESS) }
+    /** A firmer buzz for a long press (the map pin's quick actions). */
+    fun long() { view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS) }
 }
 
 @Composable

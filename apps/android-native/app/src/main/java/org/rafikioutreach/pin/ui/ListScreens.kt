@@ -136,7 +136,7 @@ private class HereKeep { var id: String? = null; var last: Pair<Project, Double>
 /** The "You’re at …" banner. It appears within 200 m and stays until you are 260 m away, so GPS wobble
  *  near the edge doesn’t make it blink; it slides in and out instead of popping. */
 @Composable
-fun HereSlot(m: AppModel, snap: Snapshot, here: LatLng?, modifier: Modifier, visit: (String) -> Unit, open: (String) -> Unit, chipAfter: Boolean = false, chipNow: Boolean = false) {
+fun HereSlot(m: AppModel, snap: Snapshot, here: LatLng?, modifier: Modifier, visit: (String) -> Unit, open: (String) -> Unit, chipAfter: Boolean = false, chipNow: Boolean = false, slim: Boolean = false) {
     val keep = remember { HereKeep() }
     val near = here?.let { h -> snap.projects.filter { it.gps != null }.map { it to Geo.metres(h, it.gps!!) }.minByOrNull { it.second } }
     val now = near?.takeIf { (it.second <= 200 || (it.first.id == keep.id && it.second <= 260)) && !m.dismissed.contains(it.first.id) }
@@ -148,7 +148,7 @@ fun HereSlot(m: AppModel, snap: Snapshot, here: LatLng?, modifier: Modifier, vis
         var folded by remember(p.id, chipNow) { mutableStateOf(chipNow) }
         if (chipAfter || chipNow) androidx.compose.runtime.LaunchedEffect(p.id, folded) { if (!folded) { kotlinx.coroutines.delay(5000); folded = true } }
         if ((chipAfter || chipNow) && folded) HereChip(p) { folded = false }
-        else HereBanner(p, d, m.prefs.miles, Modifier, { visit(p.id) }, { open(p.id) }) { m.dismissed.add(p.id) }
+        else HereBanner(p, d, m.prefs.miles, Modifier, { visit(p.id) }, { open(p.id) }, slim) { m.dismissed.add(p.id) }
     }
 }
 
@@ -158,11 +158,14 @@ fun nearHere(s: Snapshot, here: LatLng?): Pair<Project, Double>? {
 }
 
 @Composable
-fun HereBanner(p: Project, d: Double, miles: Boolean, modifier: Modifier, visit: () -> Unit, open: () -> Unit, dismiss: () -> Unit) {
+fun HereBanner(p: Project, d: Double, miles: Boolean, modifier: Modifier, visit: () -> Unit, open: () -> Unit, slim: Boolean = false, dismiss: () -> Unit) {
+    // [slim]: over the map (map3) the strip is compact: less padding, the same touch targets
+    val vPad = if (slim) 3.dp else 8.dp
     // one slim strip: where you are (tap to open it), Report, and ×. The whole name, never cut short: a name too long
     // for two lines beside Report gets the strip's full width, and Report moves under it
     val nameStyle = MaterialTheme.typography.titleSmall.copy(lineHeight = 18.sp)
-    val status: @Composable (Modifier) -> Unit = { mod -> Text(t("YOU’RE AT", "UKO") + " · " + Geo.dist(d, miles), color = Color(0xCCFFFFFF), style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, letterSpacing = 0.8.sp, fontWeight = FontWeight.ExtraBold), maxLines = 1, modifier = mod.testTag("here_status")) }
+    // one line, never cut: without the distance when there is no room for it
+    val status: @Composable (Modifier) -> Unit = { mod -> FirstFitText(listOf(t("YOU’RE AT", "UKO") + " · " + Geo.dist(d, miles), t("YOU’RE AT", "UKO")), MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, letterSpacing = 0.8.sp, fontWeight = FontWeight.ExtraBold), Color(0xCCFFFFFF), mod.testTag("here_status")) }
     val report: @Composable () -> Unit = {
         Text(t("Report", "Ripoti"), color = Color(0xFF0E4A2B), style = MaterialTheme.typography.labelLarge, maxLines = 1, softWrap = false,
             modifier = Modifier.clip(RoundedCornerShape(99.dp)).background(Color.White).clickable(role = Role.Button, onClick = visit).heightIn(min = 40.dp).padding(horizontal = 14.dp, vertical = 10.dp).testTag("here_visit"))
@@ -180,14 +183,14 @@ fun HereBanner(p: Project, d: Double, miles: Boolean, modifier: Modifier, visit:
         val fits = rememberWordFitSize(listOf(p.title), nameStyle, slimW, 2, minSp = nameStyle.fontSize.value) >= nameStyle.fontSize.value &&
             !measurer.measure(p.title, nameStyle, maxLines = 2, constraints = androidx.compose.ui.unit.Constraints(maxWidth = slimW.coerceAtLeast(1))).hasVisualOverflow
         val shape = RoundedCornerShape(22.dp)
-        if (fits) Row(Modifier.fillMaxWidth().clip(shape).background(OkBrush).padding(start = 14.dp, end = 8.dp, top = 8.dp, bottom = 8.dp).testTag("here"), verticalAlignment = Alignment.CenterVertically) {
+        if (fits) Row(Modifier.fillMaxWidth().clip(shape).background(OkBrush).padding(start = 14.dp, end = 8.dp, top = vPad, bottom = vPad).testTag("here"), verticalAlignment = Alignment.CenterVertically) {
             Row(Modifier.weight(1f).clip(RoundedCornerShape(14.dp)).clickable(role = Role.Button, onClick = open).heightIn(min = 44.dp).testTag("here_open"), verticalAlignment = Alignment.CenterVertically) {
                 Icon(Ic.get("pin"), null, tint = Color.White, modifier = Modifier.size(20.dp)); Spacer(Modifier.width(10.dp))
                 Column { status(Modifier); Text(p.title, color = Color.White, style = nameStyle, maxLines = 2, modifier = Modifier.testTag("here_name")) }
             }
             Spacer(Modifier.width(8.dp)); report(); Spacer(Modifier.width(6.dp)); x()
         }
-        else Column(Modifier.fillMaxWidth().clip(shape).background(OkBrush).padding(start = 14.dp, end = 8.dp, top = 8.dp, bottom = 8.dp).testTag("here")) {
+        else Column(Modifier.fillMaxWidth().clip(shape).background(OkBrush).padding(start = 14.dp, end = 8.dp, top = vPad, bottom = vPad).testTag("here")) {
             Row(verticalAlignment = Alignment.Top) {
                 Row(Modifier.weight(1f).clip(RoundedCornerShape(14.dp)).clickable(role = Role.Button, onClick = open).heightIn(min = 44.dp).testTag("here_open"), verticalAlignment = Alignment.CenterVertically) {
                     Icon(Ic.get("pin"), null, tint = Color.White, modifier = Modifier.size(20.dp)); Spacer(Modifier.width(10.dp))

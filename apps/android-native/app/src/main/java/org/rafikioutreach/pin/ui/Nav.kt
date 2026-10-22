@@ -45,7 +45,7 @@ object Nav {
             "map" -> {
                 ctx.getSharedPreferences("map_style", android.content.Context.MODE_PRIVATE).edit().putString("mapf", "").apply()
                 m.prefs.ftype = ""
-                MapClean.on = false
+                MapClean.revealed = false // calm again (map3)
                 HomeLayers.heat = ""; HomeLayers.years = false; HomeLayers.playing = false; HomeLayers.team = false
                 HomeLayers.follow = false; HomeLayers.north = false; HomeLayers.rot = 0f; HomeLayers.pick = null
             }

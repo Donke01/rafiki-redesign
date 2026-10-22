@@ -129,6 +129,7 @@ class AppFeelTest {
         m.locator.pretend(org.rafikioutreach.pin.data.Fix(org.rafikioutreach.pin.data.LatLng(0.5150, 35.2700), 8, System.currentTimeMillis()))
         show(m)
         rule.onNodeWithTag("nav_map").performClick()
+        org.rafikioutreach.pin.ui.MapClean.revealed = true; rule.waitForIdle() // the tiles shown, as after a tap on the calm map
         rule.onNodeWithTag("here").assertExists()
         rule.onNodeWithText("Nearest to you").performClick()
         rule.waitUntil(3000) { rule.onAllNodesWithText("Kapsaret Borehole").fetchSemanticsNodes().isNotEmpty() }
@@ -149,7 +150,7 @@ class AppFeelTest {
         rule.onNodeWithTag("nav_me").performClick(); rule.waitForIdle()
         rule.onNodeWithText("Kapsaret Borehole", substring = true).assertDoesNotExist()
         back()   // Me -> Map home (feat-nava: back from any tab goes to Map home)
-        rule.onNodeWithText("projects pinned", substring = true).assertExists()
+        rule.onNodeWithTag("map_home").assertExists(); rule.onNodeWithTag("map_search_btn").assertExists() // Map home, calm (map3)
         rule.onNodeWithTag("nav_list").performClick(); rule.waitForIdle()
         back()   // Projects -> Map home
         rule.onNodeWithTag("map_home").assertExists()
@@ -188,6 +189,7 @@ class AppFeelTest {
         assertTrue(headShown || rule.onAllNodesWithTag("bar_title").fetchSemanticsNodes().isNotEmpty()); shot("52-list-scrolled")
         // map: drag-up sheet and map style sheet
         rule.onNodeWithTag("nav_map").performClick(); rule.waitForIdle()
+        org.rafikioutreach.pin.ui.MapClean.revealed = true; rule.waitForIdle() // the tiles shown, as after a tap on the calm map
         rule.onNodeWithTag("sheet_handle").performClick(); rule.waitForIdle()
         rule.onAllNodesWithText("Turbo Spring").onFirst().assertExists(); shot("53-map-sheet")
         rule.onNodeWithContentDescription("Map style").performClick(); rule.waitForIdle()
