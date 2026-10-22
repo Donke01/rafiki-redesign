@@ -1,8 +1,8 @@
 {
   "ok": true,
-  "versionCode": 40,
-  "versionName": "2.17.0",
-  "notes": "An interactive map (satellite first, coloured pins, filters, search, preview card, today's route, Follow me), calmer Office tabs with filters and sheets, choose areas and projects in Plan a week, and offline country maps (once the office sets them up).",
-  "sha256": "5a2eaf3c25b55c7d0aa0e98c91e8830fb74f21c42e1d6c48cc516a728495e928",
+  "versionCode": 41,
+  "versionName": "2.17.1",
+  "notes": "A clearer map: a filter becomes one pill, Nearest to you folds away, a Key button, tap the map for a full-screen view, and tidier side buttons. Panels no longer overlap.",
+  "sha256": "7e5d4d8dc46b302ec9ccc8d201aad93bd4212484ff74663e2a94e1d65ad240ab",
   "apk": "/app/rafiki-pin.apk"
 }
