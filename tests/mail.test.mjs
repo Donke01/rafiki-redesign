@@ -225,3 +225,47 @@ test('photo upload: images only, served back for mail apps', async () => {
   assert.ok(m.html.includes('/api/mail?img=' + up.id));
   assert.equal(cleanDraft({ photo: { kind: 'upload', id: '../../x' } }).photo, null);
 });
+
+test('app invite: preview { ok, subject, html, text } for one person, by name or key; never a PIN', async () => {
+  const { env } = await setup();
+  const pre = await call(env, '/api/mail', '1111', { action: 'invite', to: 'Meril', preview: true });
+  assert.equal(pre.ok, true); assert.equal(pre.to, 'Meril'); assert.equal(pre.email, true);
+  assert.equal(pre.subject, 'You’re invited to RAFIKI Pin');
+  assert.ok(pre.html.includes('href="https://pin.rafikioutreach.org/pin"') && pre.html.includes('Open RAFIKI Pin'));
+  assert.ok(pre.html.includes('Hi Meril,') && pre.html.includes('Add to Home Screen') && pre.html.includes('just open the link') && pre.html.includes('Office tab'));
+  assert.ok(pre.html.includes('which I’m sending you separately') && pre.html.includes('Reid Anderson, RAFIKI Outreach'), 'signed by the sender');
+  assert.ok(pre.text.startsWith('You’re invited to RAFIKI Pin') && pre.text.includes('https://pin.rafikioutreach.org/pin') && pre.text.includes('Hi Meril,'), 'the same text to share on WhatsApp or SMS');
+  assert.equal(outbox.length, 0, 'a preview sends nothing');
+  // by key, as the overview lists people
+  const k = await call(env, '/api/mail', '1111', { action: 'invite', to: 't:meril', preview: true });
+  assert.equal(k.ok, true); assert.equal(k.to, 'Meril');
+  // admins are told about the Office tab as their own
+  const j = await call(env, '/api/mail', '1111', { action: 'invite', to: 'Jessica', preview: true });
+  assert.ok(j.html.includes('You’re an admin'));
+  for (const r of [pre, k, j]) assert.ok(!/\b(1111|2222|3333)\b/.test(r.html + r.text) && !/PIN[:\s]+\d{4}/.test(r.html + r.text), 'no PIN, ever');
+  assert.equal((await call(env, '/api/mail', '1111', { action: 'invite', to: 'Nobody Here', preview: true })).status, 404);
+  assert.equal((await call(env, '/api/mail', '1111', { action: 'invite', to: '' })).status, 400);
+});
+
+test('app invite: sent to that one person only, logged; no e-mail → refused; non-admins refused', async () => {
+  const { env, store } = await setup();
+  const r = await call(env, '/api/mail', '1111', { action: 'invite', to: 'Meril' });
+  assert.equal(r.ok, true); assert.equal(r.sent, 1);
+  assert.equal(outbox.length, 1); assert.deepEqual(outbox[0].to, ['meril@rafiki.example']); assert.ok(!outbox[0].cc && !outbox[0].bcc);
+  assert.equal(outbox[0].subject, 'You’re invited to RAFIKI Pin'); assert.equal(outbox[0].reply_to, 'reid@rafiki.example');
+  assert.ok(!/\b(1111|2222|3333)\b/.test(outbox[0].html + outbox[0].text), 'the invite never carries a PIN');
+  const log = JSON.parse(store.m.get('pinmaillog'));
+  assert.equal(log[log.length - 1].audience, 'invite'); assert.equal(log[log.length - 1].label, 'App invite to Meril'); assert.ok(!JSON.stringify(log).includes('meril@'));
+  // Bertin has no e-mail: the preview works, sending is refused
+  assert.equal((await call(env, '/api/mail', '1111', { action: 'invite', to: 'Bertin', preview: true })).email, false);
+  const nb = await call(env, '/api/mail', '1111', { action: 'invite', to: 'Bertin' });
+  assert.equal(nb.status, 409); assert.equal(nb.reason, 'no-email'); assert.equal(outbox.length, 1);
+  // field team: refused, preview and send, and nothing comes back
+  for (const body of [{ action: 'invite', to: 'Jessica', preview: true }, { action: 'invite', to: 'Jessica' }]) {
+    const x = await call(env, '/api/mail', '3333', body);
+    assert.equal(x.status, 403); assert.equal(x.reason, 'not-admin'); assert.ok(!x.html && !x.text);
+  }
+  assert.equal(outbox.length, 1);
+  const off = await setup({ RESEND_API_KEY: '' });
+  assert.equal((await call(off.env, '/api/mail', '1111', { action: 'invite', to: 'Meril' })).reason, 'no-mail');
+});
