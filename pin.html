@@ -8139,7 +8139,7 @@ button.mpb-r:active{background:var(--tint)}
       box.innerHTML = '<h4>' + esc(tr('On the map', 'Kwenye ramani')) + '</h4>' + sw('route', 'ofaRoute', tr('Today’s route', 'Njia ya leo'), rs, MPB.route) +
         (S.admin ? '<h4>' + esc(tr('For the office', 'Kwa ofisi')) + '</h4>' +
           '<div class="mpb-r mpb-hr"><i class="ei">' + oic('mpbHeat') + '</i><span class="mpb-rt"><b>' + esc(tr('Heat map', 'Ramani ya joto')) + '</b><small>' + esc(tr('Shade the areas by…', 'Paka rangi maeneo kwa…')) + '</small></span></div>' +
-          '<div class="seg mpb-seg" role="group" aria-label="' + esc(tr('Heat map', 'Ramani ya joto')) + '">' + [['', tr('Off', 'Zima')], ['repairs', tr('Open repairs', 'Matengenezo')], ['people', tr('People served', 'Watu')]].map(function (o) { return '<button type="button" data-mpb-heat="' + o[0] + '" aria-pressed="' + (MPB.heat === o[0]) + '">' + esc(o[1]) + '</button>'; }).join('') + '</div>' +
+          '<div class="seg mpb-seg" role="group" aria-label="' + esc(tr('Heat map', 'Ramani ya joto')) + '">' + [['', tr('Off', 'Zima')], ['repairs', tr('Open repairs', 'Ukarabati')], ['people', tr('People served', 'Watu')]].map(function (o) { return '<button type="button" data-mpb-heat="' + o[0] + '" aria-pressed="' + (MPB.heat === o[0]) + '">' + esc(o[1]) + '</button>'; }).join('') + '</div>' +
           sw('years', 'clock', tr('Projects by year', 'Miradi kwa mwaka'), tr('A time slider with a play button, for presentations', 'Kitelezi cha miaka chenye kitufe cha kucheza, kwa mawasilisho'), MPB.years) +
           sw('team', 'people', tr('Team live', 'Timu sasa hivi'), tr('People sharing their location · updates every 3 min', 'Wanaoshiriki mahali · inasasishwa kila dakika 3'), MPB.team) : '');
     };

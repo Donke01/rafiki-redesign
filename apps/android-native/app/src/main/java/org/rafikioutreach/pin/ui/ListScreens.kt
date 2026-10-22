@@ -94,10 +94,11 @@ fun MapScreen(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit = ope
     val pinned = snap.projects.count { it.gps != null }
     var sheetH by remember { mutableIntStateOf(0) }
     val dens = androidx.compose.ui.platform.LocalDensity.current
+    val extras = rememberMapExtras(m, snap, fix, open, visit) // today's route, follow me, heat, years, team (MapLayers.kt)
     Box(Modifier.fillMaxSize()) {
         ProjectsMap(
-            snap.projects.filter { it.gps != null }.map { Dot(it.id, it.gps!!, dotColor(snap, it), snap.repairs.containsKey(it.id), it.title) },
-            fix?.ll, open, Modifier.fillMaxSize(), fitKey = snap.projects.size, badgeBottom = with(dens) { sheetH.toDp() } + 12.dp,
+            snap.projects.filter { it.gps != null && extras.keep(it) }.map { Dot(it.id, it.gps!!, dotColor(snap, it), snap.repairs.containsKey(it.id), it.title) },
+            fix?.ll, open, Modifier.fillMaxSize(), fitKey = snap.projects.size, badgeBottom = if (extras.quiet) 12.dp else with(dens) { sheetH.toDp() } + 12.dp, extras = extras,
         )
         Column(Modifier.padding(12.dp).padding(end = 58.dp).align(Alignment.TopStart)) {
         Card(pad = 12.dp) {
@@ -112,7 +113,7 @@ fun MapScreen(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit = ope
         }
         HereSlot(m, snap, fix?.ll, Modifier.padding(top = 10.dp), visit, open)
         }
-        NearestSheet(m, snap, fix?.ll, Modifier.align(Alignment.BottomCenter).padding(12.dp).onSizeChanged { sheetH = it.height }, open)
+        if (!extras.quiet) NearestSheet(m, snap, fix?.ll, Modifier.align(Alignment.BottomCenter).padding(12.dp).onSizeChanged { sheetH = it.height }, open)
         // Save this area for offline (OfflineMaps.kt)
         OfflineMapControls(m, offline)
     }

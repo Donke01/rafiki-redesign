@@ -22,6 +22,8 @@ data class Project(
     val gps: LatLng?,
     val photo: String?,
     val pump: String,
+    /** People served (the board's number, or the latest visit count for admins): the map's heat layer. */
+    val people: Int? = null,
 ) {
     val sub: String get() = listOf(area, country, statusName(status)).filter { it.isNotBlank() }.joinToString(" · ")
 
@@ -29,7 +31,7 @@ data class Project(
         put("id", id); put("title", title); put("country", country); put("ck", ck); put("area", area)
         put("type", type); put("status", status); year?.let { put("year", it) }
         gps?.let { put("gps", JSONArray().put(it.lat).put(it.lng)) }
-        photo?.let { put("photo", it) }; put("pump", pump)
+        photo?.let { put("photo", it) }; put("pump", pump); people?.let { put("people", it) }
     }
 
     companion object {
@@ -45,6 +47,7 @@ data class Project(
             gps = o.optJSONArray("gps")?.let { if (it.length() == 2) LatLng(it.getDouble(0), it.getDouble(1)) else null },
             photo = o.optString("photo").takeIf { it.isNotBlank() && it != "null" },
             pump = o.optString("pump"),
+            people = if (o.has("people") && !o.isNull("people")) o.optInt("people").takeIf { it > 0 } else null,
         )
     }
 }

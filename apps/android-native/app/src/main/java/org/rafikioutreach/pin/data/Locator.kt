@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 /** Where the phone is: live, from GPS and the network, no Google services needed. */
-data class Fix(val ll: LatLng, val acc: Int, val at: Long)
+data class Fix(val ll: LatLng, val acc: Int, val at: Long, /** which way you are moving (degrees from north), only while moving */ val bearing: Float? = null)
 
 class Locator(context: Context) {
     private val lm = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
@@ -21,7 +21,7 @@ class Locator(context: Context) {
 
     private val listener = object : LocationListener {
         override fun onLocationChanged(l: Location) {
-            val f = Fix(LatLng(l.latitude, l.longitude), l.accuracy.toInt().coerceAtLeast(1), System.currentTimeMillis())
+            val f = Fix(LatLng(l.latitude, l.longitude), l.accuracy.toInt().coerceAtLeast(1), System.currentTimeMillis(), if (l.hasBearing() && l.hasSpeed() && l.speed > 1.5f) l.bearing else null)
             val cur = _fix.value
             // keep a better recent fix rather than jumping to a vague network one
             if (!(cur == null || l.provider == LocationManager.GPS_PROVIDER || f.acc <= cur.acc || f.at - cur.at > 20000)) return

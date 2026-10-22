@@ -75,7 +75,7 @@ private fun dotDrawable(color: Int, big: Boolean) = GradientDrawable().apply {
 /** A map of project dots. Tap a dot to open the project.
  *  Dots are only rebuilt when the projects change; your own dot just moves, so live updates never flash. */
 @Composable
-fun ProjectsMap(dots: List<Dot>, me: LatLng?, onDot: (String) -> Unit, modifier: Modifier = Modifier, fitKey: Any? = null, badgeBottom: androidx.compose.ui.unit.Dp = 0.dp) {
+fun ProjectsMap(dots: List<Dot>, me: LatLng?, onDot: (String) -> Unit, modifier: Modifier = Modifier, fitKey: Any? = null, badgeBottom: androidx.compose.ui.unit.Dp = 0.dp, extras: MapExtras? = null) {
     val ctx = LocalContext.current
     MapSetup.init(ctx)
     // satellite first; the street map once they choose it (remembered on this phone)
@@ -126,10 +126,11 @@ fun ProjectsMap(dots: List<Dot>, me: LatLng?, onDot: (String) -> Unit, modifier:
         var styles by remember { mutableStateOf(false) }
         MapButton("layers", t("Map style", "Mtindo wa ramani"), Modifier.align(Alignment.TopEnd).padding(10.dp)) { styles = true }
         if (styles) PickSheet(t("Map style", "Mtindo wa ramani"), listOf(Triple("street", t("Street map", "Ramani ya barabara"), "map"), Triple("sat", t("Satellite photos", "Picha za satelaiti"), "layers")),
-            if (sat) "sat" else "street", { sat = it == "sat" }) { styles = false }
+            if (sat) "sat" else "street", { sat = it == "sat" }, extras?.sheet) { styles = false }
         if (me != null) MapButton("target", t("Go to where I am", "Nenda nilipo"), Modifier.align(Alignment.TopEnd).padding(top = 66.dp, end = 10.dp)) {
             map.controller.animateTo(GeoPoint(me.lat, me.lng), 15.0, 600L)
         }
+        extras?.overlay?.invoke(this, map, badgeBottom) // the home map's layers, follow me and compass (MapLayers.kt)
     }
 }
 
