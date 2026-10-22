@@ -148,16 +148,29 @@ class OfficeTest {
         shot("20-office-overview")
         rule.onNodeWithTag("show_missing").assertExists(); rule.onNodeWithTag("office_map").assertExists()
         rule.onNodeWithTag("o_repairs").performClick()
+        // Repairs: a calm card per job; tap it for a sheet with the step, person, money and Save
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("rr_job_104").fetchSemanticsNodes().isNotEmpty() }
+        rule.mainClock.advanceTimeBy(1200)
+        shot("21-office-repairs")
+        rule.onNodeWithTag("rr_job_104").performScrollTo().performClick()
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("rr_job_sheet").fetchSemanticsNodes().isNotEmpty() }
         waitFor("Handle loose")
-        tap("Parts ordered"); tap("Save")
+        rule.onNodeWithTag("rr_step_parts").performScrollTo().performClick(); rule.onNodeWithTag("rr_save").performScrollTo().performClick()
         rule.waitUntil(5000) { posts.any { it.contains("\"action\":\"job\"") } }
         assertTrue(posts.first { it.contains("\"action\":\"job\"") }.let { it.contains("\"step\":\"parts\"") && it.contains("\"id\":\"104\"") })
-        shot("21-office-repairs")
+        sheetShot("21b-office-repair-sheet")
+        rule.onNodeWithTag("rr_close").performScrollTo().performClick(); rule.mainClock.advanceTimeBy(1200)
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("rr_job_sheet").fetchSemanticsNodes().isEmpty() }
         rule.onNodeWithTag("o_review").performScrollTo().performClick()
         waitFor("Now the nurses")
         shot("22-office-review")
-        tap("Approve for the website")
+        rule.onNodeWithTag("rr_rev_r1").performScrollTo().performClick()
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("rr_rev_sheet").fetchSemanticsNodes().isNotEmpty() }
+        sheetShot("22b-office-review-sheet")
+        rule.onNodeWithTag("rr_approve").performScrollTo().performClick()
         rule.waitUntil(5000) { posts.any { it.contains("\"action\":\"review\"") && it.contains("\"decision\":\"approve\"") } }
+        rule.mainClock.advanceTimeBy(2000)
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("rr_rev_sheet").fetchSemanticsNodes().isEmpty() }
         rule.onNodeWithTag("o_team").performScrollTo().performClick()
         waitFor("Meril Kiprop")
         // a short list grouped by role: Reid (admin, Cloudflare PIN) under Admins, Meril under Field team

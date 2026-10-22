@@ -11,6 +11,7 @@ import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithTag
@@ -111,6 +112,16 @@ class CostsTest {
         val b = Bitmap.createBitmap(v.width, v.height, Bitmap.Config.ARGB_8888); v.draw(Canvas(b))
         File(out, "$name.png").outputStream().use { b.compress(Bitmap.CompressFormat.PNG, 100, it) }
     }
+    /** The sheet is its own window: draw the app, then the sheet's window on top. */
+    private fun sheetShot(name: String) {
+        rule.mainClock.advanceTimeBy(800); rule.waitForIdle()
+        val v = rule.activity.window.decorView
+        val b = Bitmap.createBitmap(v.width, v.height, Bitmap.Config.ARGB_8888); val c = Canvas(b); v.draw(c)
+        val d = org.robolectric.shadows.ShadowDialog.getLatestDialog()?.window?.decorView
+        if (d != null) { c.save(); c.translate(0f, (v.height - d.height).toFloat()); d.draw(c); c.restore() }
+        File(out, "$name.png").outputStream().use { b.compress(Bitmap.CompressFormat.PNG, 100, it) }
+    }
+    private fun closeSheet(tag: String) { rule.onNodeWithTag("rr_close").performScrollTo().performClick(); rule.mainClock.advanceTimeBy(1200); rule.waitUntil(5000) { rule.onAllNodesWithTag(tag).fetchSemanticsNodes().isEmpty() } }
     private fun waitFor(text: String) = rule.waitUntil(5000) { rule.onAllNodesWithText(text, substring = true).fetchSemanticsNodes().isNotEmpty() }
 
     @Test fun approval_rules_match_the_server() {
@@ -161,21 +172,35 @@ class CostsTest {
         val m = model(); show(m)
         rule.onNodeWithTag("nav_office").performClick()
         rule.onNodeWithTag("o_repairs").performClick()
-        waitFor("Needs a second approval before parts are ordered")
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("rr_job_104").fetchSemanticsNodes().isNotEmpty() }
+        waitFor("waiting for approval")
+        rule.onNodeWithTag("rr_job_105").performScrollTo().performClick()
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("rr_job_sheet").fetchSemanticsNodes().isNotEmpty() }
         waitFor("Waiting for a second approval · asked by Jessica")
-        rule.onAllNodesWithText("Parts ordered").onFirst().performScrollTo().performClick()
-        rule.onAllNodesWithText("Save").onFirst().performScrollTo().performClick()
+        closeSheet("rr_job_sheet")
+        rule.onNodeWithTag("rr_job_104").performScrollTo().performClick()
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("rr_job_sheet").fetchSemanticsNodes().isNotEmpty() }
+        waitFor("Needs a second approval before parts are ordered")
+        rule.onNodeWithTag("rr_step_parts").performScrollTo().performClick()
+        rule.onNodeWithTag("rr_save").performScrollTo().performClick()
         rule.waitUntil(5000) { posts.any { it.contains("\"action\":\"job\"") && it.contains("\"id\":\"104\"") && it.contains("\"step\":\"parts\"") } }
         waitFor("Asked ✓")
-        rule.onNodeWithText("Asked ✓", substring = true).performScrollTo()
-        shot("64-repairs-held-for-approval")
+        rule.onNodeWithTag("rr_msg").performScrollTo()
+        sheetShot("64-repairs-held-for-approval")
+        closeSheet("rr_job_sheet")
         rule.onNodeWithTag("o_review").performScrollTo().performClick()
-        waitFor("Quote from Babati Hardware")
-        val approve = rule.onAllNodesWithText("Approve the cost")
-        approve[0].assertIsEnabled(); approve[1].assertIsNotEnabled()
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("rr_rev_c1").fetchSemanticsNodes().isNotEmpty() }
+        rule.onNodeWithTag("rr_rev_c2").performScrollTo().performClick()
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("rr_rev_sheet").fetchSemanticsNodes().isNotEmpty() }
+        rule.onNodeWithTag("rr_approve").assertIsNotEnabled()
         rule.onNodeWithText("You asked for this, so another admin approves it.").assertExists()
-        shot("65-review-cost")
-        approve[0].performScrollTo().performClick()
+        closeSheet("rr_rev_sheet")
+        rule.onNodeWithTag("rr_rev_c1").performScrollTo().performClick()
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("rr_rev_sheet").fetchSemanticsNodes().isNotEmpty() }
+        waitFor("Quote from Babati Hardware")
+        rule.onNodeWithTag("rr_approve").assertIsEnabled()
+        sheetShot("65-review-cost")
+        rule.onNodeWithTag("rr_approve").performScrollTo().performClick()
         rule.waitUntil(5000) { posts.any { it.contains("\"action\":\"review\"") && it.contains("\"rid\":\"c1\"") && it.contains("\"decision\":\"approve\"") } }
     }
 

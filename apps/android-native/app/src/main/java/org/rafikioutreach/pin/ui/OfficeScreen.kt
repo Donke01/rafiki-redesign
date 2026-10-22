@@ -106,12 +106,12 @@ fun OfficeScreen(m: AppModel, open: (String) -> Unit) {
         Spacer(Modifier.height(14.dp))
         when (sec) {
             "overview" -> Overview(m, snap, open) { sec = it }
-            "repairs" -> Repairs(m, snap, open)
+            "repairs" -> RepairsSection(m, snap, open)   // OfficeRepairs.kt
             "costs" -> CostsSection(m, snap, open)
             "visits" -> AssignVisits(m, snap)
             "teammap" -> TeamMapSection(m, snap, open)
             "plan" -> PlanWeekSection(m, snap, open)
-            "review" -> ReviewQueue(m, open)
+            "review" -> ReviewSection(m, open)   // OfficeRepairs.kt
             "team" -> TeamSection(m)
             "cleanup" -> Cleanup(snap, open)
             "sms" -> CommunityReports(m, open)

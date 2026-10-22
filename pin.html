@@ -1666,7 +1666,7 @@ html[data-theme=sun] .rr-steps button[aria-checked=true]{border:2px solid #000}
 html[data-theme=sun] .rr-dec{border:2px solid #000}
 .rr-two{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;margin-top:10px}
 .rr-acts{display:grid;gap:8px;margin-top:18px}.rr-acts .btn,.rr-two .btn{width:100%;min-height:52px}.rr-acts .msg{margin:0}.rr-acts .msg:empty{display:none}
-.rr-acts .tm-ask{margin-top:0}
+.rr-acts .tm-ask{margin-top:0}.rr-ask:empty{display:none}.rr-rt small .nw{white-space:nowrap}
 .rr-reason{display:grid;grid-template-rows:0fr;transition:grid-template-rows .3s cubic-bezier(.2,.8,.2,1)}.rr-reason.on{grid-template-rows:1fr}
 .rr-reason label{margin:14px 0 0}.rr-reason input{margin-top:6px;min-height:48px}
 .rr-sh.done .rr-acts .btn{opacity:.55}
@@ -5393,7 +5393,7 @@ label.dnr-p small{display:block;color:var(--muted);font-size:.76rem;font-weight:
     var opts = '<option value="">' + tr('Not assigned', 'Hajapewa mtu') + '</option>' + nm.map(function (n) { return '<option' + (n === r.assignee ? ' selected' : '') + '>' + esc(n) + '</option>'; }).join('');
     var si = STEP.findIndex(function (s) { return s[0] === step; });
     var kv = function (k, v, long) { return v ? '<div' + (long ? ' class="long"' : '') + '><dt>' + k + '</dt><dd>' + v + '</dd></div>' : ''; };
-    var msum = (r.budget != null ? tr('Budget ', 'Bajeti ') + '<span class="nw">' + esc(ofbKes(r.budget)) + '</span>' : tr('No budget yet', 'Bado hakuna bajeti')) + ' · ' + tr('add what was spent', 'ongeza kilichotumika');
+    var msum = r.budget != null ? tr('Budget ', 'Bajeti ') + '<span class="nw">' + esc(ofbKes(r.budget)) + '</span>' : tr('Add what was spent and a receipt', 'Ongeza kilichotumika na risiti');
     var money = '<label>' + tr('Approved budget (KES)', 'Bajeti iliyoidhinishwa (KES)') + '<input type="number" inputmode="numeric" min="0" data-f="budget" value="' + (r.budget == null ? '' : r.budget) + '" placeholder="' + (r.cost ? r.cost : '') + '"></label>' +
       '<label>' + tr('Actual cost at this step (KES)', 'Gharama halisi katika hatua hii (KES)') + '<input type="number" inputmode="numeric" min="0" data-f="actual" placeholder="' + esc(tr('what was spent', 'kilichotumika')) + '"></label>' +
       '<p class="rr-lab">' + tr('Receipt (optional)', 'Risiti (si lazima)') + '</p>' + ofbFilePick('job' + id);
@@ -5415,8 +5415,9 @@ label.dnr-p small{display:block;color:var(--muted);font-size:.76rem;font-weight:
       '<div class="rr-box">' + rrSec('money', 'coins', 'amber', tr('Budget, cost and receipt', 'Bajeti, gharama na risiti'), msum, '<div class="rr-f">' + money + '</div>') + '</div>' +
       '<div class="rr-acts"><button class="btn" type="button" data-a="save" data-testid="rr_save">' + oic('check') + '<span>' + tr('Save', 'Hifadhi') + '</span></button>' +
         '<button class="btn ok" type="button" data-a="fixed" data-testid="rr_fixed">' + oic('okc') + '<span>' + tr('Mark fixed', 'Weka imerekebishwa') + '</span></button>' +
+        '<div class="rr-ask"></div>' +
         '<button class="btn light" type="button" data-a="open" data-testid="rr_open">' + oic('arrow') + '<span>' + tr('Open project', 'Fungua mradi') + '</span></button>' +
-        '<div class="rr-ask"></div><span class="msg" aria-live="polite" data-testid="rr_msg"></span></div></div>';
+        '<span class="msg" aria-live="polite" data-testid="rr_msg"></span></div></div>';
     var w = tSheet(title, html), c = w.querySelector('.rr-sh'), m = c.querySelector('[data-testid=rr_msg]'), ask = c.querySelector('.rr-ask');
     var f = function (n) { return c.querySelector('[data-f=' + n + ']'); };
     var busy = function (on) { qa('[data-a]', c).forEach(function (x) { x.disabled = on; }); };
