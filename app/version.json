@@ -1,8 +1,8 @@
 {
   "ok": true,
-  "versionCode": 41,
-  "versionName": "2.17.1",
-  "notes": "A clearer map: a filter becomes one pill, Nearest to you folds away, a Key button, tap the map for a full-screen view, and tidier side buttons. Panels no longer overlap.",
-  "sha256": "7e5d4d8dc46b302ec9ccc8d201aad93bd4212484ff74663e2a94e1d65ad240ab",
+  "versionCode": 42,
+  "versionName": "2.18.0",
+  "notes": "Back now closes what you opened, one step at a time, and pages start fresh when you come back. Half-done visits and new sites are kept. Distances in km, a clearer Projects list and map, better Kiswahili. New: Office › Send an e-mail, and donor mode with app codes.",
+  "sha256": "708b482cfdc106b14c8e76a5e54d62d10108fd4597cc2f7aee77c8b8fee35b79",
   "apk": "/app/rafiki-pin.apk"
 }
