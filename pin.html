@@ -2421,7 +2421,7 @@ html[data-theme=sun] .mcl-tray{border:2px solid #000;box-shadow:none}
 .mcl-sb svg{width:20px;height:20px}
 html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
 #vMap.mcl-clean .mcl-sb{display:flex}
-#vMap.mcl-clean :is(#mpaS,#mpaChips,#mclPill,#mpaNone,#mHere,#fldBar,#nearSheet,#mpaKey,#mclKeyPop,.mpb-bot){display:none !important}
+#vMap.mcl-clean :is(#nearSheet,#mpaKey,#mclKeyPop){display:none !important} /* calm by default: what stays and goes is in m3w-css */
 @media (min-width:700px){#vMap .ov.top > .mcl-pill{align-self:center;max-width:560px}#vMap .ov.top > .mcl-sb{align-self:flex-start}}
 @media (prefers-reduced-motion: reduce){.mcl-kp.in,.mcl-tray.in{animation:none !important}}
 </style>
@@ -2559,6 +2559,155 @@ body.mq-on #vMap .ov.top > :not(#mpaS):not(#mpaSug),body.mq-on #vMap :is(.ov.bot
 body.mq-on #vMap #mpaSug{max-height:calc(100dvh - 190px);overflow-y:auto;overscroll-behavior:contain}
 /* short screen: the resting Nearest sheet is just its title row; tap it for the rest */
 @media (max-height:700px){#vMap #nearSheet.shut > .bd{display:none}}
+</style>
+<style id="m3w-css">
+/* Map home, round 3 (m3…): calm by default, smaller glass tiles, pins that talk, short animations (150–350 ms).
+   Every tile over the map keeps a 44 px touch target; where it looks smaller, an invisible ::after makes up the rest. */
+#vMap{--m3g:rgba(255,255,255,.86);--m3gs:rgba(255,255,255,.74);--m3gb:rgba(255,255,255,.55);--m3b:blur(14px) saturate(1.5);--m3e:cubic-bezier(.2,.8,.2,1);--m3due:#0F7C8A}
+html[data-theme=dark] #vMap{--m3g:rgba(22,30,37,.86);--m3gs:rgba(22,30,37,.76);--m3gb:rgba(255,255,255,.08);--m3due:#3FC1CF}
+/* 1. calm: the map, the pins, a round search button and the column. A filter keeps its pill, a search its box, a card
+   its card; "You're at" (within 200 m) stays, compact. A tap on empty map brings the rest in, another puts it away. */
+#vMap.mcl-clean:not(.m3-q) #mpaS,#vMap.mcl-clean:not(.mcl-row) #mpaChips{display:none !important}
+#vMap.mcl-clean.m3-q .mcl-sb{display:none}
+/* the one-time hint */
+.m3-hint{display:flex;align-items:center;gap:8px;width:max-content;max-width:100%;box-sizing:border-box;margin:0 auto 8px;padding:0 14px 0 10px;min-height:36px;border-radius:999px;background:var(--m3g);-webkit-backdrop-filter:var(--m3b);backdrop-filter:var(--m3b);border:1px solid var(--m3gb);color:var(--ink);font-size:.8rem;font-weight:700;white-space:nowrap;box-shadow:0 4px 14px rgba(4,38,63,.18);animation:m3InUp .26s var(--m3e) both}
+.m3-hint svg{flex:none;width:18px;height:18px;color:var(--blue)}
+.m3-hint.out{animation:m3OutDn .2s ease-in both}
+#vMap:not(.mcl-clean) .m3-hint,body.mq-on .m3-hint{display:none}
+html[data-theme=sun] .m3-hint{background:#FFFFFF;border:2px solid #000;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
+/* revealing and hiding: a staggered fade and slide */
+@keyframes m3In{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+@keyframes m3InUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes m3Out{from{opacity:1;transform:none}to{opacity:0;transform:translateY(-8px)}}
+@keyframes m3OutDn{from{opacity:1;transform:none}to{opacity:0;transform:translateY(10px)}}
+#vMap.m3-in .ov.top > [data-m3i]{animation:m3In .2s var(--m3e) both;animation-delay:calc(var(--m3i,0) * 35ms)}
+#vMap.m3-in :is(#mpaKey,#nearSheet)[data-m3i]{animation:m3InUp .2s var(--m3e) both;animation-delay:calc(var(--m3i,0) * 35ms)}
+#vMap.m3-out .ov.top > [data-m3o]{animation:m3Out .16s ease-in both}
+#vMap.m3-out :is(#mpaKey,#nearSheet)[data-m3o]{animation:m3OutDn .16s ease-in both}
+/* 2. smaller, lighter tiles: glass over the map (solid in the sun theme), AA text at .86 */
+html:not([data-theme=sun]) #vMap :is(.mpa-s,.mpa-chip:not([aria-pressed=true]),.mpa-clr,.mpa-key,.mcl-sb,.mcl-kp,.mpa-none,#nearSheet,.mpa-card,.m3-qa){background:var(--m3g);-webkit-backdrop-filter:var(--m3b);backdrop-filter:var(--m3b);border-color:var(--m3gb)}
+#vMap .mpa-s{min-height:44px;border-radius:14px;padding:0 2px 0 12px;gap:6px;box-shadow:0 3px 14px rgba(4,38,63,.16)}
+#vMap .mpa-s > svg{width:18px;height:18px}
+#vMap .mpa-s input{height:42px}
+#vMap .mcl-sb{position:relative;width:40px;height:40px;box-shadow:0 3px 12px rgba(4,38,63,.18)}
+#vMap .mcl-sb svg{width:18px;height:18px}
+#vMap .mcl-sb::after{content:'';position:absolute;inset:-3px}
+#vMap .mpa-chips{gap:6px;margin:0 -4px;padding:4px 26px 4px 4px}
+#vMap .mpa-chip,#vMap .mpa-clr{position:relative;min-height:36px;gap:5px;padding:0 8px 0 10px;font-size:.8rem;box-shadow:0 1px 6px rgba(4,38,63,.16)}
+#vMap .mpa-chip svg{width:15px;height:15px}
+#vMap .mpa-chip i{min-width:18px;padding:0 5px;font-size:.68rem;line-height:1.5}
+#vMap .mpa-clr{width:36px;padding:0}
+#vMap .mpa-clr svg{width:15px;height:15px}
+#vMap :is(.mpa-chip,.mpa-clr,.mcl-pb,.mcl-px,.mpa-key,.here.mat .btn)::after{content:'';position:absolute;inset:-4px 0}
+#vMap :is(.mpa-clr,.mcl-px,.here.mat .btn.x)::after{inset:-4px}
+#vMap .mcl-pb{position:relative;min-height:36px;padding:0 2px 0 12px;gap:6px;font-size:.8rem}
+#vMap .mcl-pb svg{width:15px;height:15px}
+#vMap .mcl-px{position:relative;width:36px;height:36px}
+#vMap .mcl-px svg{width:14px;height:14px;padding:3px}
+#vMap .ov.top > .pill{padding:5px 10px 6px;border-radius:12px}
+#vMap .ov.top > .pill .prog .row1{font-size:.74rem}
+#vMap .ov.top > .pill .meter{height:3px}
+#vMap .mpa-key{position:absolute;min-height:36px;padding:0 11px 0 9px;gap:5px;font-size:.76rem;box-shadow:0 2px 10px rgba(4,38,63,.16)}
+#vMap .mpa-key svg{width:16px;height:16px}
+.mcl-kp{bottom:calc(var(--mcl-kb,120px) + 44px)}
+.mcl-kp .m3-kd{position:relative;width:12px;height:12px;flex:none;display:flex;align-items:center;justify-content:center}
+.mcl-kp .m3-kd::before{content:'';width:9px;height:9px;border-radius:50%;background:var(--m3due);box-shadow:0 0 0 2px #FFFFFF,0 0 0 3px rgba(0,0,0,.25)}
+/* the column on the right: 38 px wide to see, 44 px to tap */
+#hMap .mcl-col{position:relative;isolation:isolate;width:44px;background:none;border:0;box-shadow:none;overflow:visible}
+#hMap .mcl-col::before{content:'';position:absolute;z-index:-1;inset:0 3px;border-radius:12px;background:var(--m3gs);-webkit-backdrop-filter:var(--m3b);backdrop-filter:var(--m3b);border:1px solid rgba(4,38,63,.12);box-shadow:0 2px 10px rgba(4,38,63,.16)}
+html[data-theme=dark] #hMap .mcl-col::before{border-color:#26323C}
+html[data-theme=sun] #hMap .mcl-col::before{background:#FFFFFF;border:2px solid #000;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
+#hMap .mcl-col > * + *{border-top:0;background-image:linear-gradient(rgba(4,38,63,.12),rgba(4,38,63,.12));background-size:30px 1px !important;background-position:top center !important;background-repeat:no-repeat !important}
+html[data-theme=dark] #hMap .mcl-col > * + *{background-image:linear-gradient(#26323C,#26323C)}
+html[data-theme=sun] #hMap .mcl-col > * + *{background-image:linear-gradient(#000,#000)}
+#hMap .mcl-col .leaflet-control-zoom a + a{border-top:0;background-image:linear-gradient(rgba(4,38,63,.12),rgba(4,38,63,.12));background-size:30px 1px !important;background-position:top center !important;background-repeat:no-repeat !important}
+#hMap .mcl-col :is(.mstyle,.mcl-more),#hMap .mcl-col .leaflet-bar a{font-size:19px}
+#hMap .mcl-col svg{width:18px;height:18px}
+#hMap .mcl-col :is(.mstyle,.mcl-more,a),#hMap .mcl-col :is(.mstyle,.mcl-more,a):is(:hover,:focus,:active){background-color:transparent !important;box-shadow:none !important}
+#hMap .mcl-col :is(.mstyle,.mcl-more,a):hover{color:var(--blue)}
+/* Nearest to you, resting */
+#vMap #nearSheet .hd{min-height:44px;font-size:.86rem}
+#vMap .mcl-peek{min-height:44px;font-size:.8rem}
+/* the card */
+#vMap .mpa-card{padding:8px 6px 10px 12px;border-radius:20px}
+#vMap .mpa-ch{margin-top:0}
+#vMap .mpa-ib{position:relative;width:36px;height:36px}
+#vMap .mpa-ib svg{width:17px;height:17px}
+#vMap .mpa-ib::after{content:'';position:absolute;inset:-4px}
+#vMap .mpa-card .grab{top:5px;width:34px;height:4px;margin-left:-17px}
+#vMap .mpa-pos{font-size:.74rem}#vMap .mpa-pos > small{font-size:.68rem}
+#vMap .mpa-cb{gap:10px}
+#vMap .mpa-ph{width:56px;height:56px;border-radius:14px}
+#vMap .mpa-ph svg{width:22px;height:22px}
+#vMap .mpa-tx > b{font-size:.94rem}
+#vMap .mpa-tx > small,#vMap .mpa-lv{font-size:.76rem}
+#vMap .mpa-tags{margin-top:3px}
+#vMap .mpa-lv{margin-top:3px}
+#vMap .mpa-acts{gap:6px;margin:8px 6px 0 0}
+#vMap .mpa-cb{padding-top:2px}
+#vMap .mpa-a{min-height:44px;gap:2px;padding:3px 4px;border-radius:13px;font-size:.76rem}
+#vMap .mpa-a svg{width:16px;height:16px}
+#vMap .mpa-card.m3-fall{animation:m3OutDn .19s ease-in both;pointer-events:none}
+#vMap.m3-tight #hMap .mcl-col .leaflet-control-zoom,#vMap.m3-tight .ov.top > .pill{display:none}
+#vMap.m3-tight2 .mpa-card :is(.mpa-ph,.mpa-lv,.mpa-pos > small){display:none}
+/* "You're at": compact */
+#vMap .here.mat{min-height:44px;padding:0 0 0 10px;gap:4px}
+#vMap .here.mat .hw{gap:6px}
+#vMap .here.mat .hw svg{width:16px;height:16px}
+#vMap .here.mat .mat-t{font-size:.8rem}
+#vMap .here.mat .btn{position:relative;min-height:36px;padding:0 12px;font-size:.8rem}
+#vMap .here.mat .btn.x{width:36px;padding:0;margin-right:4px}
+/* 3. pins that talk: the kind of project inside, a ring for how it is, a dot when a visit or water test is due */
+.mpa-pin .mpa-dot{position:relative;display:flex;align-items:center;justify-content:center;width:28px;height:28px;box-sizing:border-box;border:0;border-radius:50%;background:#FFFFFF;color:var(--c);box-shadow:inset 0 0 0 3.5px var(--c),0 0 0 1.5px #FFFFFF,0 1px 5px rgba(0,0,0,.45);animation:none;transition:transform .22s var(--m3e),opacity .2s,box-shadow .22s}
+.mpa-pin .mpa-dot svg{width:15px;height:15px;stroke-width:2.3}
+.mpa-pin .mpa-dot.c-old{background:#F4F6F8}
+.m3-due{position:absolute;right:-3px;top:-3px;width:10px;height:10px;border-radius:50%;background:var(--m3due);box-shadow:0 0 0 2px #FFFFFF,0 0 0 3px rgba(0,0,0,.25)}
+/* only "not working" pulses, gently */
+.mpa-pin .mpa-dot.c-bad::before{content:'';position:absolute;inset:0;border-radius:50%;box-shadow:0 0 0 3px var(--mc-bad);opacity:0;animation:m3Pulse 2.2s ease-out infinite;pointer-events:none}
+@keyframes m3Pulse{0%{transform:scale(1);opacity:.65}70%,100%{transform:scale(1.8);opacity:0}}
+/* tapped: it lifts and grows, the others step back */
+.mpa-pin.on .mpa-dot{transform:translateY(-6px) scale(1.3);box-shadow:inset 0 0 0 3.5px var(--c),0 0 0 2px #FFFFFF,0 0 0 5px rgba(10,120,194,.55),0 8px 14px rgba(0,0,0,.4)}
+#hMap.m3-dim .mpa-pin:not(.on) :is(.mpa-dot,.m3-lb),#hMap.m3-dim .mpa-cl .mpa-bub{opacity:.5}
+.mpa-pin.m3-lp .mpa-dot{transform:scale(1.2)}
+/* names under the pins (zoom 13 and closer); a name that would overlap is left out */
+.m3-lb{position:absolute;left:50%;top:37px;transform:translateX(-50%);max-width:none;white-space:nowrap;font-style:normal;font-size:11px;font-weight:700;line-height:14px;color:#0E1C26;text-shadow:0 0 2px #FFFFFF,0 0 2px #FFFFFF,0 0 3px #FFFFFF,0 0 4px #FFFFFF;pointer-events:none;transition:opacity .2s}
+html[data-theme=sun] .m3-lb{font-weight:800;color:#000000}
+/* clusters: a ring split by how the projects in it are, the number in the middle */
+.mpa-cl .mpa-bub{position:relative;border:0;background:var(--m3r,var(--c));box-shadow:0 0 0 2px #FFFFFF,0 2px 8px rgba(0,0,0,.4);text-shadow:none;color:#0E1C26;transition:transform .15s,opacity .2s}
+.mpa-cl .mpa-bub::before{content:'';position:absolute;inset:6px;border-radius:50%;background:#FFFFFF}
+.mpa-cl .mpa-bub span{position:relative;font-size:.8rem;font-weight:800}
+/* spread out: projects on one spot */
+.m3-spi{pointer-events:none !important}
+.m3-sp{position:absolute;left:0;top:0;width:44px;height:44px;display:flex;align-items:center;justify-content:center;pointer-events:auto;transform:translate(var(--dx),var(--dy));transition:transform .28s var(--m3e)}
+.m3-spi.m3-sp0 .m3-sp{transform:none}
+.m3-leg{position:absolute;left:22px;top:21px;width:var(--r);height:2px;border-radius:2px;background:rgba(255,255,255,.95);box-shadow:0 0 0 1px rgba(4,38,63,.35);transform-origin:0 50%;transform:rotate(var(--a)) scaleX(1);transition:transform .28s var(--m3e)}
+.m3-spi.m3-sp0 .m3-leg{transform:rotate(var(--a)) scaleX(0)}
+.m3-spc{display:block;width:10px;height:10px;border-radius:50%;background:#0E1C26;border:2px solid #FFFFFF}
+/* filters: pins that leave shrink out, pins that come grow in */
+@keyframes m3Grow{from{transform:scale(.3);opacity:0}to{transform:none;opacity:1}}
+.leaflet-marker-icon.m3-grow > :is(.mpa-dot,.mpa-bub,.m3-lb){animation:m3Grow .22s var(--m3e) both}
+.leaflet-marker-icon.m3-out > *{transform:scale(.3) !important;opacity:0 !important;transition:transform .17s ease-in,opacity .17s ease-in !important}
+.leaflet-marker-icon.mpb-drop > *{animation-duration:.32s}
+/* long press on a pin: Report a visit, Directions, Open */
+.m3-qa{position:absolute;z-index:820;display:flex;flex-direction:column;gap:6px;width:max-content;max-width:calc(100% - 20px);box-sizing:border-box;padding:8px;border-radius:18px;border:var(--bw) solid var(--line);background:var(--card);color:var(--ink);box-shadow:0 10px 30px rgba(4,38,63,.28);transform-origin:50% 100%;animation:m3Pop .18s var(--m3e) both}
+.m3-qa.below{transform-origin:50% 0}
+@keyframes m3Pop{from{opacity:0;transform:translateY(6px) scale(.94)}to{opacity:1;transform:none}}
+.m3-qa b{padding:0 6px;font-size:.8rem;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px}
+.m3-qr{display:flex;gap:6px}
+.m3-qa :is(button,a){display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:72px;min-height:48px;padding:4px 8px;border:0;border-radius:12px;background:var(--hb-green);color:var(--ink);font:inherit;font-size:.74rem;font-weight:700;line-height:1.15;text-align:center;text-decoration:none;white-space:nowrap;cursor:pointer}
+.m3-qa :is(button,a) svg{width:18px;height:18px;color:var(--hu-green)}
+.m3-qa .pri{background:var(--g-ok,#1C7C4A);color:#FFFFFF}.m3-qa .pri svg{color:#FFFFFF}
+html[data-theme=sun] .m3-qa{border:2px solid #000;box-shadow:none}html[data-theme=sun] .m3-qa :is(button,a){border:2px solid #000}
+/* locate me: the you-dot pulses once */
+.you.m3-ping{position:relative}
+.you.m3-ping::after{content:'';position:absolute;inset:-3px;border-radius:50%;border:3px solid #098BE1;animation:m3Ping .35s ease-out both}
+@keyframes m3Ping{from{transform:scale(1);opacity:.8}to{transform:scale(3);opacity:0}}
+html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shadow:none}
+@media (prefers-reduced-motion: reduce){
+  #vMap.m3-in *,#vMap.m3-out *,.m3-hint,.m3-qa,.you.m3-ping::after,.mpa-pin .mpa-dot.c-bad::before,.leaflet-marker-icon.m3-grow > *{animation:none !important}
+  .mpa-pin .mpa-dot,.mpa-cl .mpa-bub,.m3-sp,.m3-leg,.m3-lb,.leaflet-marker-icon.m3-out > *{transition:none !important}
+  .mpa-pin .mpa-dot.c-bad::before{opacity:0}
+}
 </style>
 </head>
 <body class="locked">
@@ -3144,7 +3293,7 @@ body.mq-on #vMap #mpaSug{max-height:calc(100dvh - 190px);overflow-y:auto;overscr
   // Map home's first view: every project in the country fitted, no filter, no card, the Nearest list resting
   function mapFresh() {
     MPA.f = ''; store.set('rfPinMapF', ''); S.ftype = ''; store.set('rfPinType', ''); MCL.row = false;
-    if (MCL.clean) { MCL.clean = false; try { sessionStorage.setItem('rfPinMapClean', '0'); } catch (e) {} }
+    m3Calm(); // calm again: the tiles, the search box, a spread-out spot and the quick actions put away (map3w)
     if (MPA.map) { if (MPA.sel || MPA.spot || MPA.measure) mpaClose(); if ($('mpaQ')) $('mpaQ').value = ''; mpaSugHide(); }
     if (MCL.init) { mclTray(false); mclKey(false); if (!$('nearSheet').classList.contains('shut')) mclNear(false); mclSync(); }
     fitted = false; MCL.touched = false;
@@ -3982,7 +4131,7 @@ body.mq-on #vMap #mpaSug{max-height:calc(100dvh - 190px);overflow-y:auto;overscr
         hMap.zoomControl.setPosition('topright');
         var Me = L.Control.extend({ options: { position: 'topright' }, onAdd: function () {
           var d = L.DomUtil.create('div', 'leaflet-bar lc-me'); d.innerHTML = '<a href="#" role="button" title="Show where I am" aria-label="Show where I am">◎</a>';
-          L.DomEvent.on(d, 'click', function (e) { L.DomEvent.preventDefault(e); L.DomEvent.stopPropagation(e); locate(function (ll) { if (ll) mpbFly(ll, 13); else msg('mList', 'warn', 'Couldn’t get your location.'); }); });
+          L.DomEvent.on(d, 'click', function (e) { L.DomEvent.preventDefault(e); L.DomEvent.stopPropagation(e); locate(function (ll) { if (ll) m3Locate(ll); else msg('mList', 'warn', 'Couldn’t get your location.'); }); }); // a short flight, then the you-dot pulses once (map3w)
           return d; } });
         meCtl = new Me().addTo(hMap);
         fldMapCtl(hMap); // Save this area for offline (field tools)
@@ -3996,12 +4145,14 @@ body.mq-on #vMap #mpaSug{max-height:calc(100dvh - 190px);overflow-y:auto;overscr
       var you = null;
       hLayer.addTo(hMap);
       if (S.here) { you = L.marker(S.here, { icon: L.divIcon({ className: '', html: '<div class="you"></div>', iconSize: [16, 16] }), interactive: false, zIndexOffset: 2000 }).addTo(hLayer); }
+      MPA.you = you;
       var hk = homeCk(), mine = hk ? S.projects.filter(function (p) { return p.gps && p.ck === hk; }) : [], all = S.projects.filter(function (p) { return p.gps; });
       // the project pins (by condition, in bubbles when zoomed out) are drawn by mpaDraw
       mpaRefresh(false);
       nearUi();
       mpbDraw(); // today's route, follow me, heat, years, live team, motion
       mclInit(hMap); mclSync(); // the pill, the peek, the Key button, map-only mode and the column on the right (mcl…)
+      m3Hint(); // once: "Tap the map for filters" (map3w)
       // the first view: every pin, clear of what is over the map (the top controls with "You're at", the column, the sheet)
       var fl = mine.length > 1 ? mine : all;
       if (!fitted && fl.length) { MCL.fitB = L.latLngBounds(fl.map(function (p) { return p.gps; })); MCL.touched = false; mclLayout(); hMap.fitBounds(MCL.fitB, Object.assign(mclPad(), { maxZoom: 13 })); fitted = true; }
@@ -4058,8 +4209,8 @@ body.mq-on #vMap #mpaSug{max-height:calc(100dvh - 190px);overflow-y:auto;overscr
   // no longer counts. The same rules as the Android app (MapHome.kt).
   var MPA = { f: store.get('rfPinMapF') || '', key: store.get('rfPinMapKey') !== 'off', map: null, layer: null, spotLayer: null, sel: null, order: [], spot: null, measure: false, lp: 0, places: [], pq: '', pt: 0, items: [], act: -1 };
   // the map, decluttered (mcl…, further down): chip row open, map-only mode (this session only), the tray, the key
-  var MCL = { row: false, clean: false, tray: false, key: false, keyT: 0, tapT: 0, shut: 0, top: 0, side: null, init: false };
-  try { MCL.clean = sessionStorage.getItem('rfPinMapClean') === '1'; } catch (e) {}
+  // calm by default (map3w): the map opens with just the pins, a round search button and the column; q: searching from calm
+  var MCL = { row: false, clean: true, tray: false, key: false, keyT: 0, tapT: 0, shut: 0, top: 0, side: null, init: false, q: false, bk: null, qbk: null, out: false, outT: 0 };
   var MPA_RANK = { bad: 3, repair: 2, old: 1, ok: 0 };
   var MPA_ST = [['broken', 'Broken', 'Zimeharibika', 'alert'], ['due', 'Due a visit', 'Inasubiri ziara', 'cal'], ['mine', 'My assigned visits', 'Ziara nilizopewa', 'mpaPerson']];
   var MPA_TY = [['water', 'drop', 'blue'], ['school', 'school', 'purple'], ['health', 'mpaCross', 'coral'], ['home', 'mpaHouse', 'teal'], ['farm', 'mpaLeaf', 'green']];
@@ -4088,56 +4239,77 @@ body.mq-on #vMap #mpaSug{max-height:calc(100dvh - 190px);overflow-y:auto;overscr
   function mpaVisible() { var mine = mpaMine(), ty = mpaTy(); return S.projects.filter(function (p) { return p.gps && mpbKeep(p) && mpaStOk(p, MPA.f, mine) && (!ty || tgroup(p) === ty); }); }
   function mpaTyIcon(p) { var g = tgroup(p), t = MPA_TY.filter(function (x) { return x[0] === g; })[0]; return t ? [t[1], t[2]] : ['pin', 'slate']; }
 
-  // pins within 30 px of each other at this zoom share a bubble; the worst one seeds it, so a broken pump is never hidden
+  // pins within 30 px of each other at this zoom share a bubble; the worst one seeds it, so a broken pump is never hidden.
+  // From zoom 15 only pins on (almost) the same spot share one, and a tap spreads them out (map3w).
   function mpaGroups(list, z) {
     var pts = list.map(function (p) { return { p: p, c: mpaCond(p), xy: MPA.map.project(p.gps, z) }; });
-    if (z >= 15 || pts.length < 2) return pts.map(function (x) { return [x]; });
+    if (pts.length < 2) return pts.map(function (x) { return [x]; });
+    var near = z >= 15 ? 144 : 900;
     pts.sort(function (a, b) { return MPA_RANK[b.c] - MPA_RANK[a.c] || (a.p.id < b.p.id ? -1 : 1); });
     var out = [], used = [];
     pts.forEach(function (a, i) {
       if (used[i]) return; used[i] = 1; var g = [a];
-      pts.forEach(function (b, j) { if (!used[j]) { var dx = a.xy.x - b.xy.x, dy = a.xy.y - b.xy.y; if (dx * dx + dy * dy <= 900) { used[j] = 1; g.push(b); } } });
+      pts.forEach(function (b, j) { if (!used[j]) { var dx = a.xy.x - b.xy.x, dy = a.xy.y - b.xy.y; if (dx * dx + dy * dy <= near) { used[j] = 1; g.push(b); } } });
       out.push(g);
     });
     return out;
   }
-  function mpaDraw() {
+  // a pin: the kind of project inside, a ring for how it is, a dot when a visit or water test is due (map3w)
+  function mpaPinHtml(x, mine) {
+    return '<i class="mpa-dot c-' + x.c + '">' + oic(mpaTyIcon(x.p)[0]) + (mpaStOk(x.p, 'due', mine) ? '<s class="m3-due"></s>' : '') + '</i>';
+  }
+  function mpaDraw(anim) {
     var map = MPA.map; if (!map) return;
     if (!MPA.layer) MPA.layer = L.layerGroup().addTo(map);
-    MPA.layer.clearLayers();
-    mpaGroups(mpaVisible(), map.getZoom()).forEach(function (g) {
+    MPA.layer.clearLayers(); MPA.mk = {};
+    // only what is on the screen and a margin round it (fast with hundreds of projects); a pan past it draws again
+    var z = map.getZoom(), was = MPA.shown || {}, now = {}, mine = mpaMine(), sp = MPA.spider, area = MPA.area = map.getBounds().pad(0.6);
+    var vis = mpaVisible().filter(function (p) { return area.contains(p.gps) || p.id === MPA.sel; });
+    if (sp && (sp.z !== z || !sp.ids.some(function (id) { return vis.some(function (p) { return p.id === id; }); }))) sp = MPA.spider = null;
+    var spIds = {}; if (sp) sp.ids.forEach(function (id) { spIds[id] = 1; });
+    var groups = mpaGroups(vis.filter(function (p) { return !spIds[p.id]; }), z), singles = [];
+    groups.forEach(function (g) {
       var mk, el;
       if (g.length === 1) {
         var x = g[0], on = x.p.id === MPA.sel;
-        mk = L.marker(x.p.gps, { icon: L.divIcon({ className: 'mpa-pin' + (on ? ' on' : ''), html: '<i class="mpa-dot c-' + x.c + '"></i>', iconSize: [44, 44] }), title: x.p.title, keyboard: true, zIndexOffset: on ? 1500 : MPA_RANK[x.c] * 10 })
-          .on('click', function () { mpaPick(x.p.id, false); }).addTo(MPA.layer);
+        mk = L.marker(x.p.gps, { icon: L.divIcon({ className: 'mpa-pin' + (on ? ' on' : '') + (anim && !was['p' + x.p.id] ? ' m3-grow' : ''), html: mpaPinHtml(x, mine), iconSize: [44, 44] }), title: x.p.title, keyboard: true, zIndexOffset: on ? 1500 : MPA_RANK[x.c] * 10 })
+          .on('click', function () { if (Date.now() - MPA.lp < 900) return; mpaPick(x.p.id, false); })
+          .on('contextmenu', function (e) { if (e.originalEvent) L.DomEvent.preventDefault(e.originalEvent); m3Quick(x.p.id); }).addTo(MPA.layer);
         el = mk.getElement(); if (el) { el.setAttribute('data-id', x.p.id); el.setAttribute('data-c', x.c); el.setAttribute('aria-label', x.p.title + ', ' + mpaCondName(x.c)); }
+        now['p' + x.p.id] = 1; MPA.mk[x.p.id] = mk; singles.push({ x: x, el: el });
       } else {
-        var n = g.length, c = g[0].c, la = 0, ln = 0, sz = n < 10 ? 36 : n < 100 ? 42 : 48;
+        var n = g.length, c = g[0].c, la = 0, ln = 0, sz = n < 10 ? 34 : n < 100 ? 40 : 46, k = 'c' + g[0].p.id + ':' + n;
         g.forEach(function (y) { la += y.p.gps[0]; ln += y.p.gps[1]; });
-        mk = L.marker([la / n, ln / n], { icon: L.divIcon({ className: 'mpa-cl', html: '<b class="mpa-bub c-' + c + '" style="width:' + sz + 'px;height:' + sz + 'px">' + (n > 99 ? '99+' : n) + '</b>', iconSize: [Math.max(44, sz), Math.max(44, sz)] }), keyboard: true, zIndexOffset: 500 + MPA_RANK[c] * 10 })
+        mk = L.marker([la / n, ln / n], { icon: L.divIcon({ className: 'mpa-cl' + (anim && !was[k] ? ' m3-grow' : ''), html: '<b class="mpa-bub c-' + c + '" style="width:' + sz + 'px;height:' + sz + 'px;--m3r:' + m3Ring(g) + '"><span>' + (n > 99 ? '99+' : n) + '</span></b>', iconSize: [Math.max(44, sz), Math.max(44, sz)] }), keyboard: true, zIndexOffset: 500 + MPA_RANK[c] * 10 })
           .on('click', function () { mpaZoomInto(g); }).addTo(MPA.layer);
-        el = mk.getElement(); if (el) { el.setAttribute('data-n', n); el.setAttribute('data-c', c); el.setAttribute('aria-label', tr(n + ' projects here, ' + mpaCondName(c).toLowerCase() + ' among them. Tap to zoom in.', 'Miradi ' + n + ' hapa. Gusa kukuza.')); }
+        el = mk.getElement(); if (el) { el._ids = g.map(function (y) { return y.p.id; }); el.setAttribute('data-n', n); el.setAttribute('data-c', c); el.setAttribute('aria-label', tr(n + ' projects here, ' + mpaCondName(c).toLowerCase() + ' among them. Tap to zoom in.', 'Miradi ' + n + ' hapa. Gusa kukuza.')); }
+        now[k] = 1;
       }
     });
+    if (sp) m3SpiderDraw(sp, vis, mine, now);
+    MPA.shown = now;
+    if (z >= 13) m3Labels(singles, groups, z);
+    map.getContainer().classList.toggle('m3-dim', !!MPA.sel);
   }
-  // a tap on a bubble zooms in until its pins come apart
+  // a tap on a bubble: a short flight into its pins; pins on one spot spread out instead (map3w)
   function mpaZoomInto(g) {
     var map = MPA.map, b = L.latLngBounds(g.map(function (x) { return x.p.gps; })), z = map.getZoom();
-    if (b.getNorthEast().distanceTo(b.getSouthWest()) < 30) { map.setView(b.getCenter(), Math.min(18, z + 3), { animate: !mpaStill() }); return; }
-    map.setView(b.getCenter(), Math.max(z + 1, Math.min(map.getBoundsZoom(b.pad(0.4)), 16)), { animate: !mpaStill() });
+    if (b.getNorthEast().distanceTo(b.getSouthWest()) < 30 || z >= 17) return m3Spider(g);
+    var o = Object.assign(mclPad(), { maxZoom: 18 }), zz = map.getBoundsZoom(b, false, L.point(o.paddingTopLeft).add(o.paddingBottomRight));
+    if (zz <= z) { map.setView(b.getCenter(), Math.min(18, z + 2), { animate: !mpaStill() }); return; } // little room (a short screen): in two steps all the same
+    if (mpaStill()) map.fitBounds(b, Object.assign(o, { animate: false })); else map.flyToBounds(b, Object.assign(o, { duration: 0.35 }));
   }
-  // fit the map to these pins, clear of what is over the map (mclPad): animated unless motion is reduced
+  // fit the map to these pins, clear of what is over the map (mclPad): a short flight unless motion is reduced
   function mpaFit(list) {
     var map = MPA.map; if (!map || !list.length) return;
     if (list.length === 1) { map.setView(list[0].gps, Math.max(map.getZoom(), 14), { animate: !mpaStill() }); return; }
     var b = L.latLngBounds(list.map(function (p) { return p.gps; })), o = Object.assign(mclPad(), { maxZoom: 14 });
-    if (mpaStill()) map.fitBounds(b, Object.assign(o, { animate: false })); else map.flyToBounds(b, Object.assign(o, { duration: 0.8 }));
+    if (mpaStill()) map.fitBounds(b, Object.assign(o, { animate: false })); else map.flyToBounds(b, Object.assign(o, { duration: 0.35 }));
   }
   // after the projects or a filter change: chips, pins and the card
-  function mpaRefresh(fit) {
+  function mpaRefresh(fit, anim) {
     if (!MPA.map) return;
-    mpaChipsUi(); mpaDraw();
+    mpaChipsUi(); mpaDraw(anim);
     if (MPA.sel && !byId(MPA.sel)) { MPA.sel = null; }
     mpaCardUi(0);
     if (fit && (MPA.f || mpaTy())) mpaFit(mpaVisible());
@@ -4171,19 +4343,22 @@ body.mq-on #vMap #mpaSug{max-height:calc(100dvh - 190px);overflow-y:auto;overscr
     MPA.spot = null; MPA.measure = false; mpaSpotDraw();
     var vis = mpaVisible().filter(function (x) { return x.id !== id; });
     MPA.order = [p].concat(vis.map(function (x) { return { p: x, d: metres(p.gps, x.gps) }; }).sort(function (a, b) { return a.d - b.d; }).slice(0, 24).map(function (x) { return x.p; }));
-    MPA.sel = id; buzz(); $('mpaQ').blur(); mpaSugHide();
-    if (fly) MPA.map.setView(p.gps, Math.max(MPA.map.getZoom(), 14), { animate: !mpaStill() });
-    mpaDraw(); mpaCardUi(0);
+    MPA.sel = id; buzz(); $('mpaQ').blur(); mpaSugHide(); m3QuickShut();
+    if (!m3SelUi()) mpaDraw(); mpaCardUi(0); // it lifts, the others step back, the card slides up (map3w)
+    m3Ease(p, fly ? Math.max(MPA.map.getZoom(), 14) : 0); // the map eases so the pin sits above the card
   }
   function mpaStep(d) {
     var i = MPA.order.map(function (x) { return x.id; }).indexOf(MPA.sel), p = MPA.order[i + d]; if (i < 0 || !p) return;
-    MPA.sel = p.id; MPA.fromQ = false; buzz(); MPA.map.panTo(p.gps, { animate: !mpaStill() }); mpaDraw(); mpaCardUi(d);
+    MPA.sel = p.id; MPA.fromQ = false; buzz(); if (!m3SelUi()) mpaDraw(); mpaCardUi(d); m3Ease(p, 0, true);
   }
-  function mpaClose() { MPA.sel = null; MPA.fromQ = false; MPA.spot = null; MPA.measure = false; mpaSpotDraw(); mpaDraw(); mpaCardUi(0); }
+  function mpaClose() { MPA.sel = null; MPA.fromQ = false; MPA.spot = null; MPA.measure = false; mpaSpotDraw(); if (!m3SelUi()) mpaDraw(); mpaCardUi(0); }
   function mpaVisitDay(iso) { return dDay(iso); }
   function mpaCardUi(dir) {
     var box = $('mpaCard'); if (!box) return;
     var p = MPA.sel && byId(MPA.sel), sp = MPA.spot, open = !!(p || sp), was = !box.classList.contains('hidden');
+    // closing: the card slides and fades down first (map3w)
+    clearTimeout(MPA.fallT); box.classList.remove('m3-fall');
+    if (!open && was && !MPA.fell && !mpaStill() && S.view === 'vMap') { box.classList.add('m3-fall'); MPA.fallT = setTimeout(function () { MPA.fell = true; box.classList.remove('m3-fall'); mpaCardUi(0); MPA.fell = false; }, 190); return; }
     $('nearSheet').classList.toggle('hidden', open); box.classList.toggle('hidden', !open); $('mpaKey').classList.toggle('hidden', open);
     mclSync(); // what else is over the map makes room (mcl…)
     if (!open) { box.innerHTML = ''; return; }
@@ -4313,7 +4488,8 @@ body.mq-on #vMap #mpaSug{max-height:calc(100dvh - 190px);overflow-y:auto;overscr
       k.setAttribute('aria-label', tr('Map key: what the colours mean', 'Maelezo ya rangi za ramani'));
       k.innerHTML = oic('mpaInfo') + '<span>' + tr('Key', 'Rangi') + '</span>';
       $('mclKeyPop').setAttribute('aria-label', tr('Map key', 'Maelezo ya rangi'));
-      $('mclKeyPop').innerHTML = ['ok', 'repair', 'bad', 'old'].map(function (c) { return '<span><i class="c-' + c + '"></i>' + mpaCondName(c) + '</span>'; }).join('');
+      $('mclKeyPop').innerHTML = ['ok', 'repair', 'bad', 'old'].map(function (c) { return '<span><i class="c-' + c + '"></i>' + mpaCondName(c) + '</span>'; }).join('') +
+        '<span><s class="m3-kd"></s>' + tr('Visit or water test due', 'Ziara au kipimo cha maji kinasubiri') + '</span>';
     };
     keyUi();
     $('mpaKey').addEventListener('click', function () { buzz(); mclKey(!MCL.key); });
@@ -4326,7 +4502,7 @@ body.mq-on #vMap #mpaSug{max-height:calc(100dvh - 190px);overflow-y:auto;overscr
       if (MPA.sel && !mpaVisible().some(function (p) { return p.id === MPA.sel; })) MPA.sel = null;
       // a filter clears the screen: the row folds into one pill and Nearest to you rests as a slim handle (mcl…)
       MCL.row = false; if (MPA.f || mpaTy()) mclNear(false);
-      mpaRefresh(true);
+      mpaChipsUi(); m3Swap(function () { mpaRefresh(true, true); }); // pins that leave shrink out, pins that come grow in (map3w)
     });
     $('mpaCard').addEventListener('click', function (e) {
       var b = e.target.closest('[data-mpa]'); if (!b || b.disabled) return;
@@ -4385,13 +4561,18 @@ body.mq-on #vMap #mpaSug{max-height:calc(100dvh - 190px);overflow-y:auto;overscr
     map.on('click', function () {
       if (Date.now() - MPA.lp < 800) return;
       var typing = document.activeElement === $('mpaQ'); $('mpaQ').blur();
+      if (m3QuickShut()) return; // the quick actions of a long-pressed pin (map3w)
       if (MPA.sel || MPA.spot) return mpaClose();
+      if (MPA.spider) { MPA.spider = null; return mpaDraw(); } // the spread-out pins come back together
       if (typing || Date.now() - MCL.shut < 600) return;
       if (MCL.row && (MPA.f || mpaTy())) { MCL.row = false; return mclSync(); }
       clearTimeout(MCL.tapT); MCL.tapT = setTimeout(function () { mclClean(!MCL.clean); }, 280); // not when it is a double-tap to zoom
     });
     map.on('dblclick', function () { clearTimeout(MCL.tapT); });
-    map.on('zoomend', mpaDraw);
+    map.on('zoomend', function () { mpaDraw(); });
+    map.on('moveend', function () { if (MPA.area && !MPA.area.contains(map.getBounds())) mpaDraw(); });
+    map.on('zoomstart movestart', function () { m3QuickShut(); });
+    m3LongPins(map); // a long press on a pin: Report a visit, Directions, Open (map3w)
     // a new language: the words drawn here change too
     qa('#segLang button').forEach(function (b) { b.addEventListener('click', function () { setTimeout(function () {
       $('mpaQ').placeholder = tr('Search a village or project', 'Tafuta kijiji au mradi'); $('mpaQ').setAttribute('aria-label', $('mpaQ').placeholder);
@@ -6078,6 +6259,8 @@ body.mq-on #vMap #mpaSug{max-height:calc(100dvh - 190px);overflow-y:auto;overscr
   // polish-navw
   Object.assign(SW, {"Updated": "Imesasishwa", "Leave this visit?": "Acha ziara hii?", "Leave the visit": "Ondoka kwenye ziara",
     "Your answers are kept as a draft on this phone, so you can carry on later.": "Majibu yako yamehifadhiwa kama rasimu kwenye simu hii, ili uendelee baadaye."});
+  // polish-map3w
+  Object.assign(SW, {"Tap the map for filters": "Gusa ramani kuona vichujio", "Visit or water test due": "Ziara au kipimo cha maji kinasubiri", "Quick actions": "Vitendo vya haraka", "Report a visit": "Ripoti ziara", "Open": "Fungua"});
   // dates in the app's own style ("Thu 24 Oct", "24 Oct, 18:34") and relative times, when the language changes after they're drawn
   [['Sun', 'Jpl'], ['Mon', 'Jtt'], ['Tue', 'Jnn'], ['Wed', 'Jtn'], ['Thu', 'Alh'], ['Fri', 'Iju'], ['Sat', 'Jmo']].forEach(function (w) { SWP.push([new RegExp('^' + w[0] + ' (\\d{1,2}) ([A-Z][a-z]{2})$'), w[1] + ' $1 $2']); });
   SWP.push([/^(\d{1,2}) ([A-Z][a-z]{2})((?: \d{4})?(?:, \d{2}:\d{2})?)$/, "$1 $2$3"], [/^(\d+) h ago$/, "saa $1 zilizopita"], [/^(\d+) d ago$/, "siku $1 zilizopita"], [/^(\d+) wk ago$/, "wiki $1 zilizopita"],
@@ -10462,15 +10645,9 @@ body.mq-on #vMap #mpaSug{max-height:calc(100dvh - 190px);overflow-y:auto;overscr
   }
 
   // a soft pulse on sites that are not working or need an urgent repair (under the dots)
+  // the pulse: only "not working" pins pulse now, and they do it themselves, so it follows the filters (map3w)
   function mpbPulseDraw() {
     if (MPB.L.pulse) { hMap.removeLayer(MPB.L.pulse); MPB.L.pulse = null; }
-    if (MPB.years && S.admin) return;
-    var g = L.layerGroup();
-    S.projects.forEach(function (p) {
-      var r = S.repairs[p.id]; if (!p.gps || !r || !(r.state === 'notworking' || r.urgency === 'urgent')) return;
-      L.marker(p.gps, { pane: 'mpbPulse', interactive: false, keyboard: false, icon: L.divIcon({ className: 'mpb-pl' + (r.state === 'notworking' ? ' bad' : ''), html: '<i></i><i></i>', iconSize: [30, 30] }) }).addTo(g);
-    });
-    MPB.L.pulse = g.addTo(hMap);
   }
 
   // pins drop in, north to south, the first time the map shows them
@@ -10480,8 +10657,8 @@ body.mq-on #vMap #mpaSug{max-height:calc(100dvh - 190px);overflow-y:auto;overscr
     if (!els.length) return; MPB.dropped = true;
     if (mpbStill()) return;
     els.slice(0, 400).map(function (e) { return { e: e, y: e.getBoundingClientRect().top }; }).sort(function (a, b) { return a.y - b.y; }).forEach(function (x, i) {
-      var d = Math.min(i * 14, 700); x.e.style.setProperty('--mpb-d', d + 'ms'); x.e.classList.add('mpb-drop');
-      setTimeout(function () { x.e.classList.remove('mpb-drop'); }, 900 + d);
+      var d = Math.min(i * 6, 240); x.e.style.setProperty('--mpb-d', d + 'ms'); x.e.classList.add('mpb-drop'); // short (map3w)
+      setTimeout(function () { x.e.classList.remove('mpb-drop'); }, 400 + d);
     });
   }
 
@@ -10860,7 +11037,7 @@ body.mq-on #vMap #mpaSug{max-height:calc(100dvh - 190px);overflow-y:auto;overscr
     });
     $('mclPillX').addEventListener('click', function () {
       buzz(); MPA.f = ''; S.ftype = ''; store.set('rfPinMapF', ''); store.set('rfPinType', ''); MCL.row = false;
-      mpaRefresh(false); var c = $('mpaChips').querySelector('.mpa-chip'); if (c) c.focus();
+      mpaChipsUi(); m3Swap(function () { mpaRefresh(false, true); }); var c = $('mpaChips').querySelector('.mpa-chip'); if (c && c.offsetParent) c.focus();
     });
     // the peek: tap it or swipe it up
     var pk = $('mclPeek'), y0 = null;
@@ -10875,8 +11052,10 @@ body.mq-on #vMap #mpaSug{max-height:calc(100dvh - 190px);overflow-y:auto;overscr
       if (MCL.key && !e.target.closest('#mclKeyPop, #mpaKey')) { mclKey(false); MCL.shut = Date.now(); }
     }, true);
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && (MCL.tray || MCL.key)) { var t = MCL.tray; mclTray(false); mclKey(false); if (t) $('mclMore').focus(); } });
-    // map only: the search button brings everything back and opens the search
-    $('mclSb').addEventListener('click', function () { buzz(); mclClean(false); $('mpaQ').focus(); });
+    // calm: the round button opens just the search box; Back (or an empty box left behind) puts it away again (map3w)
+    $('mclSb').addEventListener('click', function () { buzz(); m3Search(true); $('mpaQ').focus(); });
+    $('mpaQ').addEventListener('focus', function () { if (!MCL.q) m3Search(true); });
+    $('mpaQ').addEventListener('blur', function () { setTimeout(function () { if (document.activeElement !== $('mpaQ') && !$('mpaQ').value.trim()) m3Search(false); }, 170); });
     // keep the layout right as things over the map change size
     if (window.ResizeObserver) { var ro = new ResizeObserver(function () { mclLayout(); }); [top, bot, side].forEach(function (el) { if (el) ro.observe(el); }); }
     addEventListener('resize', mclLayout); map.on('moveend resize', mclLayout);
@@ -10944,18 +11123,20 @@ body.mq-on #vMap #mpaSug{max-height:calc(100dvh - 190px);overflow-y:auto;overscr
     mclTray(false); MCL.keyT = setTimeout(function () { mclKey(false); }, 5000);
     if (!mpaStill()) { p.classList.remove('in'); void p.offsetWidth; p.classList.add('in'); }
   }
-  // map only: everything but a search button, the column on the right and the credit steps aside (this session only)
+  // calm (map only): everything but a search button, the column on the right and the credit steps aside, except what
+  // is active (a filter's pill, a search, a card, "You're at"); a tap on empty map brings the tiles in (map3w)
   function mclClean(on) {
-    MCL.clean = !!on; try { sessionStorage.setItem('rfPinMapClean', on ? '1' : '0'); } catch (e) {}
-    if (on) { mclTray(false); mclKey(false); mpaSugHide(); }
-    buzz(); mclSync();
+    on = !!on; if (MCL.clean === on) return mclSync();
+    MCL.clean = on;
+    if (on) { mclTray(false); mclKey(false); mpaSugHide(); if (!$('nearSheet').classList.contains('shut')) mclNear(false); }
+    buzz(); m3Reveal(on);
   }
   function mclSync() {
     var v = $('vMap'); if (!MCL.init || !v) return;
     var f = !!(MPA.f || mpaTy()), s = $('nearSheet'), bc = document.body.classList;
     var open = !!s && !s.classList.contains('shut') && !s.classList.contains('hidden') && !bc.contains('mpb-fol-on') && !(bc.contains('mpb-yr-on'));
     v.classList.toggle('mcl-card', !!$('mpaCard') && !$('mpaCard').classList.contains('hidden')); // "You're at" steps aside for a filter or a card
-    v.classList.toggle('mcl-f', f); v.classList.toggle('mcl-row', f && MCL.row); v.classList.toggle('mcl-open', open && !MCL.clean); v.classList.toggle('mcl-clean', MCL.clean);
+    v.classList.toggle('mcl-f', f); v.classList.toggle('mcl-row', f && MCL.row); v.classList.toggle('mcl-open', open && !MCL.clean); v.classList.toggle('mcl-clean', MCL.clean && !MCL.out); v.classList.toggle('m3-q', MCL.q);
     $('mclPillB').setAttribute('aria-expanded', String(f && MCL.row));
     // Follow me: in the column while it is on (tap to stop), in the tray under More while it is off
     var fol = $('mpbFol'), tray = $('mclTray');
@@ -10970,10 +11151,21 @@ body.mq-on #vMap #mpaSug{max-height:calc(100dvh - 190px);overflow-y:auto;overscr
     [ovb, $('tabs')].forEach(function (el) {
       if (!el || !el.offsetParent) return; var b = el.getBoundingClientRect(); if (b.top < low && b.bottom > r.top + r.height / 2 && b.left < r.right && b.right > r.left) low = b.top;
     });
+    // a short screen with the card open: the zoom buttons step aside (pinch still zooms), then the card's photo (map3w)
+    var v = $('vMap'), card = $('mpaCard'); v.classList.remove('m3-tight', 'm3-tight2');
+    if (card && !card.classList.contains('hidden') && MCL.side && ovb) {
+      var hit = function () { // the card (and the credit just above it) would reach the column or the controls at the top
+        var t = ovb.getBoundingClientRect().top - 22, lo = MCL.side.getBoundingClientRect().bottom;
+        qa('#vMap .ov.top > *').forEach(function (el) { if (el.offsetParent) lo = Math.max(lo, el.getBoundingClientRect().bottom); });
+        return t < lo + 4;
+      };
+      if (hit()) { v.classList.add('m3-tight'); if (hit()) v.classList.add('m3-tight2'); }
+    }
     var gb = Math.max(0, Math.round(r.bottom - low)); c.style.setProperty('--gbot', gb + 'px');
     wrap.style.setProperty('--mcl-kb', Math.round(wrap.getBoundingClientRect().bottom - low + 38) + 'px');
     var tb = r.top;
     qa('#vMap .ov.top > *').forEach(function (el) { if (el.offsetParent) tb = Math.max(tb, el.getBoundingClientRect().bottom); });
+    MCL.topL = Math.round(tb - r.top); // the controls at the top left only: the column on the right has its own room (map3w)
     if (MCL.side) tb = Math.max(tb, MCL.side.getBoundingClientRect().bottom);
     MCL.top = Math.round(tb - r.top);
     var s = $('nearSheet');
@@ -10992,7 +11184,226 @@ body.mq-on #vMap #mpaSug{max-height:calc(100dvh - 190px);overflow-y:auto;overscr
     var map = MPA.map, r = map.getContainer().getBoundingClientRect(), gb = parseFloat(map.getContainer().style.getPropertyValue('--gbot')) || 0, k = $('mpaKey');
     var right = MCL.side ? Math.max(0, r.right - MCL.side.getBoundingClientRect().left) : 60, bottom = gb + 34;
     if (k && k.offsetParent) bottom = Math.max(bottom, r.bottom - k.getBoundingClientRect().top);
-    return { paddingTopLeft: [16, Math.max(24, MCL.top) + 14], paddingBottomRight: [right + 14, bottom + 14] };
+    return { paddingTopLeft: [16, Math.max(24, MCL.topL == null ? MCL.top : MCL.topL) + 14], paddingBottomRight: [right + 14, bottom + 14] };
+  }
+
+  // --- map home, round 3 (m3…, map3w): calm by default, pins that talk, short animations --------------------------
+  // The map opens calm: the pins, a round search button and the column. A tap on empty map brings the tiles in with a
+  // staggered fade and slide (Back puts them away again), another tap puts them away. A filter keeps its pill, a search
+  // its box, a card its card. Pins carry their kind, a ring for how they are and a dot when something is due; names
+  // show from zoom 13 where they fit. Every animation is 150–350 ms and none run with reduced motion. As MapHome.kt.
+  function m3Calm() {
+    MCL.clean = true; MCL.q = false; MCL.out = false; clearTimeout(MCL.outT);
+    [MCL.bk, MCL.qbk].forEach(function (l) { if (l) bkShut(l); }); MCL.bk = MCL.qbk = null;
+    MPA.spider = null; m3QuickShut(); m3HintDone(true);
+    var v = $('vMap'); if (v) v.classList.remove('m3-in', 'm3-out');
+  }
+  // the tiles over the map that come and go with a tap (in the order they stagger)
+  function m3Tiles() {
+    var top = qa('#vMap .ov.top > *').filter(function (el) { return el.offsetParent && !el.classList.contains('mcl-sb'); });
+    return top.concat([$('mpaKey'), $('nearSheet')].filter(function (el) { return el && el.offsetParent; }));
+  }
+  function m3Reveal(calm) {
+    var v = $('vMap'); if (!v) return;
+    clearTimeout(MCL.outT); v.classList.remove('m3-in', 'm3-out'); MCL.out = false;
+    qa('[data-m3i],[data-m3o]', v).forEach(function (el) { el.removeAttribute('data-m3i'); el.removeAttribute('data-m3o'); el.style.removeProperty('--m3i'); });
+    if (calm) {
+      if (MCL.bk) { var l = MCL.bk; MCL.bk = null; bkShut(l); }
+      var go = m3Tiles().filter(function (el) { return !(el.id === 'mpaS' && MCL.q) && el.id !== 'mHere' && el.id !== 'mclPill' && el.id !== 'mpaNone' && el.id !== 'fldBar'; });
+      if (!mpaStill() && go.length && S.view === 'vMap') {
+        go.forEach(function (el) { el.setAttribute('data-m3o', ''); });
+        MCL.out = true; v.classList.add('m3-out');
+        MCL.outT = setTimeout(function () { MCL.out = false; v.classList.remove('m3-out'); qa('[data-m3o]', v).forEach(function (el) { el.removeAttribute('data-m3o'); }); mclSync(); }, 170);
+      }
+      mclSync(); return;
+    }
+    m3HintDone();
+    // one step for Back: it puts the tiles away again
+    if (!MCL.bk && bkTapped()) MCL.bk = bkOpen('in', function () { MCL.bk = null; if (MCL.clean) return false; mclClean(true); return true; }, v, 'm3-rev');
+    var pre = m3Tiles(); mclSync();
+    if (mpaStill() || S.view !== 'vMap') return;
+    m3Tiles().filter(function (el) { return pre.indexOf(el) < 0; }).forEach(function (el, i) { el.setAttribute('data-m3i', ''); el.style.setProperty('--m3i', i); });
+    void v.offsetWidth; v.classList.add('m3-in');
+    MCL.outT = setTimeout(function () { v.classList.remove('m3-in'); }, 360);
+  }
+  // searching from calm: just the search box (the round button opens it; Back or an empty box left behind closes it)
+  function m3Search(on) {
+    on = !!on; if (MCL.q === on) return;
+    MCL.q = on;
+    if (on) {
+      m3HintDone();
+      if (MCL.clean && !MCL.qbk && bkTapped()) MCL.qbk = bkOpen('in', function () {
+        MCL.qbk = null; if (!MCL.q) return false;
+        var q = $('mpaQ'); q.value = ''; $('mpaX').classList.add('hidden'); mpaSugHide(); q.blur(); MCL.q = false; mclSync(); return true;
+      }, $('mpaS'), 'm3-q');
+    } else if (MCL.qbk) { var l = MCL.qbk; MCL.qbk = null; bkShut(l); }
+    mclSync();
+  }
+  // once, the first time the calm map shows: "Tap the map for filters"
+  function m3Hint() {
+    if (!MCL.init || !MCL.clean || S.view !== 'vMap' || $('m3Hint') || store.get('rfPinMapHint') === '1') return;
+    store.set('rfPinMapHint', '1');
+    var bot = document.querySelector('#vMap .ov.bot'); if (!bot) return;
+    bot.insertAdjacentHTML('afterbegin', '<p class="m3-hint" id="m3Hint" role="status">' + oic('mclFilter') + '<span>' + tr('Tap the map for filters', 'Gusa ramani kuona vichujio') + '</span></p>');
+    MCL.hintT = setTimeout(function () { m3HintDone(); }, 6000);
+  }
+  function m3HintDone(quiet) {
+    var h = $('m3Hint'); if (!h) return; clearTimeout(MCL.hintT);
+    if (quiet || mpaStill() || !h.offsetParent) { h.remove(); return; }
+    h.classList.add('out'); h.id = ''; setTimeout(function () { h.remove(); }, 200);
+  }
+  // a cluster's ring: split by how the projects in it are (not working, needs repair, not visited, working)
+  function m3Ring(g) {
+    var n = g.length, k = { bad: 0, repair: 0, old: 0, ok: 0 }, at = 0, parts = [];
+    g.forEach(function (x) { k[x.c]++; });
+    ['bad', 'repair', 'old', 'ok'].forEach(function (c) { if (!k[c]) return; var to = at + k[c] / n * 100; parts.push('var(--mc-' + c + ') ' + at.toFixed(1) + '% ' + to.toFixed(1) + '%'); at = to; });
+    return 'conic-gradient(' + parts.join(',') + ')';
+  }
+  // names under the pins: short, and left out where one would overlap a pin, a bubble or another name
+  var M3W = {};
+  function m3Short(t) {
+    t = String(t || '').split(/\s+[-–—|(·]\s*|,\s*/)[0].trim();
+    if (t.length <= 18) return t;
+    var w = t.split(/\s+/), out = w[0];
+    for (var i = 1; i < w.length && (out + ' ' + w[i]).length <= 16; i++) out += ' ' + w[i];
+    return out + '…';
+  }
+  function m3TextW(t) {
+    if (M3W[t]) return M3W[t];
+    var c = M3W._c || (M3W._c = document.createElement('canvas').getContext('2d'));
+    if (!M3W._f) M3W._f = '700 11px ' + getComputedStyle(MPA.map.getContainer()).fontFamily;
+    c.font = M3W._f; return (M3W[t] = Math.ceil(c.measureText(t).width));
+  }
+  function m3Labels(singles, groups, z) {
+    var obst = [], placed = [];
+    groups.forEach(function (g) {
+      if (g.length < 2) return; var n = g.length, r = (n < 10 ? 34 : n < 100 ? 40 : 46) / 2 + 2, x = 0, y = 0;
+      g.forEach(function (m) { x += m.xy.x; y += m.xy.y; }); x /= n; y /= n; obst.push([x - r, y - r, x + r, y + r, '']);
+    });
+    singles.forEach(function (s) { var q = s.x.xy; obst.push([q.x - 15, q.y - 15, q.x + 15, q.y + 15, s.x.p.id]); });
+    singles.slice().sort(function (a, b) { return (b.x.p.id === MPA.sel) - (a.x.p.id === MPA.sel) || MPA_RANK[b.x.c] - MPA_RANK[a.x.c] || (a.x.p.id < b.x.p.id ? -1 : 1); }).forEach(function (s) {
+      if (!s.el) return;
+      var t = m3Short(s.x.p.title), w = m3TextW(t) + 6, q = s.x.xy, r = [q.x - w / 2, q.y + 15, q.x + w / 2, q.y + 30];
+      var hit = function (o) { return r[0] < o[2] && r[2] > o[0] && r[1] < o[3] && r[3] > o[1]; };
+      if (placed.some(hit) || obst.some(function (o) { return o[4] !== s.x.p.id && hit(o); })) return;
+      placed.push(r); s.el.insertAdjacentHTML('beforeend', '<em class="m3-lb" aria-hidden="true">' + esc(t) + '</em>');
+    });
+  }
+  // the chosen pin lifts and grows, the others step back; false when it isn't drawn on its own (in a bubble)
+  function m3SelUi() {
+    var map = MPA.map; if (!map || !MPA.mk) return true;
+    if (MPA.sel && !MPA.mk[MPA.sel]) return false;
+    Object.keys(MPA.mk).forEach(function (id) {
+      var mk = MPA.mk[id], el = mk.getElement(), on = id === MPA.sel; if (!el) return;
+      el.classList.toggle('on', on); mk.setZIndexOffset(on ? 1500 : el.classList.contains('m3-spi') ? 1300 : MPA_RANK[el.getAttribute('data-c')] * 10);
+    });
+    map.getContainer().classList.toggle('m3-dim', !!MPA.sel);
+    return true;
+  }
+  // the map eases so the chosen pin sits above the card (and clear of the top controls and the column)
+  function m3Ease(p, z, always) {
+    var map = MPA.map; if (!map || !p || !p.gps) return;
+    if (document.activeElement !== $('mpaQ')) { document.body.classList.remove('mq-on'); mclLayout(); } // chosen in the search: the card is back already
+    var c = map.getContainer(), cr = c.getBoundingClientRect(), W = c.clientWidth, H = c.clientHeight, box = $('mpaCard'), ovb = document.querySelector('#vMap .ov.bot');
+    var bottom = box && !box.classList.contains('hidden') && ovb ? ovb.getBoundingClientRect().top - cr.top : H - 40;
+    var top = Math.max(0, MCL.topL || 0) + 10, right = MCL.side ? Math.max(0, cr.right - MCL.side.getBoundingClientRect().left) : 56;
+    if (bottom - top < 90) top = Math.max(0, bottom - 90);
+    var tx = (W - right) / 2, ty = top + (bottom - top) * 0.55;
+    if (z) {
+      var pt = map.project(p.gps, z).subtract([tx - W / 2, ty - H / 2]);
+      map.setView(map.unproject(pt, z), z, { animate: !mpaStill() }); return;
+    }
+    var q = map.latLngToContainerPoint(p.gps);
+    if (!always && q.x > 24 && q.x < W - right - 12 && q.y > top + 36 && q.y < bottom - 44) return;
+    map.panBy([q.x - tx, q.y - ty], { animate: !mpaStill(), duration: 0.3, easeLinearity: 0.4 });
+  }
+  // a filter changed: the pins that leave shrink out first, then the map is drawn again (the new ones grow in)
+  function m3Swap(after) {
+    clearTimeout(MPA.swT);
+    if (mpaStill() || !MPA.map || !MPA.mk) return after();
+    var keep = {}, out = 0; mpaVisible().forEach(function (p) { keep[p.id] = 1; });
+    Object.keys(MPA.mk).forEach(function (id) { var el = !keep[id] && MPA.mk[id].getElement(); if (el) { el.classList.add('m3-out'); out++; } });
+    qa('.mpa-cl', MPA.map.getContainer()).forEach(function (el) { if ((el._ids || []).some(function (id) { return !keep[id]; })) { el.classList.add('m3-out'); out++; } });
+    if (!out) return after();
+    MPA.swT = setTimeout(after, 170);
+  }
+  // projects on one spot: they fan out around it, each on a short leg
+  function m3Spider(g) {
+    var la = 0, ln = 0; g.forEach(function (x) { la += x.p.gps[0]; ln += x.p.gps[1]; });
+    MPA.spider = { ids: g.map(function (x) { return x.p.id; }), ll: [la / g.length, ln / g.length], z: MPA.map.getZoom(), fresh: true };
+    buzz(); m3QuickShut(); mpaDraw();
+  }
+  function m3SpiderDraw(sp, vis, mine, now) {
+    var by = {}; vis.forEach(function (p) { by[p.id] = p; });
+    var list = sp.ids.map(function (id) { return by[id]; }).filter(Boolean), n = list.length, R = Math.max(46, Math.round(n * 48 / (2 * Math.PI)));
+    L.marker(sp.ll, { icon: L.divIcon({ className: '', html: '<i class="m3-spc"></i>', iconSize: [14, 14] }), interactive: false, keyboard: false, zIndexOffset: 1200 }).addTo(MPA.layer);
+    list.forEach(function (p, i) {
+      var a = -90 + i * 360 / n, rad = a * Math.PI / 180, x = { p: p, c: mpaCond(p) }, on = p.id === MPA.sel;
+      var html = '<s class="m3-leg" style="--a:' + a.toFixed(1) + 'deg;--r:' + R + 'px"></s><span class="m3-sp" style="--dx:' + (R * Math.cos(rad)).toFixed(1) + 'px;--dy:' + (R * Math.sin(rad)).toFixed(1) + 'px">' + mpaPinHtml(x, mine) + '</span>';
+      var mk = L.marker(sp.ll, { icon: L.divIcon({ className: 'mpa-pin m3-spi' + (on ? ' on' : '') + (sp.fresh && !mpaStill() ? ' m3-sp0' : ''), html: html, iconSize: [44, 44] }), title: p.title, keyboard: true, zIndexOffset: on ? 1500 : 1300 })
+        .on('click', function () { if (Date.now() - MPA.lp < 900) return; mpaPick(p.id, false); })
+        .on('contextmenu', function (e) { if (e.originalEvent) L.DomEvent.preventDefault(e.originalEvent); m3Quick(p.id); }).addTo(MPA.layer);
+      var el = mk.getElement(); if (el) { el.setAttribute('data-id', p.id); el.setAttribute('data-c', x.c); el.setAttribute('aria-label', p.title + ', ' + mpaCondName(x.c)); }
+      now['p' + p.id] = 1; MPA.mk[p.id] = mk;
+    });
+    if (sp.fresh) { sp.fresh = false; requestAnimationFrame(function () { requestAnimationFrame(function () { qa('.m3-sp0', MPA.map.getContainer()).forEach(function (el) { el.classList.remove('m3-sp0'); }); }); }); }
+  }
+  // a long press on a pin (a right-click on a computer): Report a visit, Directions, Open, in a small popover
+  function m3LongPins(map) {
+    var c = map.getContainer(), t = null, p0 = null;
+    var stop = function () { if (t) clearTimeout(t); t = null; };
+    c.addEventListener('touchstart', function (e) {
+      stop(); var el = e.touches.length === 1 && e.target.closest && e.target.closest('.mpa-pin[data-id]'); if (!el) return;
+      p0 = [e.touches[0].clientX, e.touches[0].clientY]; var id = el.getAttribute('data-id');
+      t = setTimeout(function () { t = null; m3Quick(id); }, 500);
+    }, { passive: true });
+    c.addEventListener('touchmove', function (e) { if (t && (Math.abs(e.touches[0].clientX - p0[0]) > 10 || Math.abs(e.touches[0].clientY - p0[1]) > 10)) stop(); }, { passive: true });
+    c.addEventListener('touchend', stop, { passive: true }); c.addEventListener('touchcancel', stop, { passive: true });
+    document.addEventListener('pointerdown', function (e) { if (MPA.qa && Date.now() - MPA.qa.t > 300 && !e.target.closest('#m3Qa')) { m3QuickShut(); MCL.shut = Date.now(); } }, true);
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && MPA.qa) { var pin = MPA.qa.pin; m3QuickShut(); if (pin) pin.focus(); } });
+  }
+  function m3Quick(id) {
+    var p = byId(id), map = MPA.map, wrap = document.querySelector('#vMap .mapwrap'); if (!p || !p.gps || !map || !wrap) return;
+    if (MPA.qa && MPA.qa.id === id && Date.now() - MPA.qa.t < 1000) return;
+    m3QuickShut(); MPA.lp = Date.now(); buzz();
+    var mk = MPA.mk && MPA.mk[id], pin = mk && mk.getElement(), dot = pin && pin.querySelector('.mpa-dot'); if (!dot) return;
+    var box = document.createElement('div'); box.className = 'm3-qa'; box.id = 'm3Qa'; box.setAttribute('role', 'group'); box.setAttribute('aria-label', tr('Quick actions', 'Vitendo vya haraka'));
+    box.innerHTML = '<b>' + esc(p.title) + '</b><div class="m3-qr">' +
+      '<button type="button" class="pri" data-m3q="visit">' + oic('clip') + '<span>' + tr('Report a visit', 'Ripoti ziara') + '</span></button>' +
+      '<a data-m3q="dir" href="https://www.google.com/maps/dir/?api=1&amp;destination=' + p.gps[0].toFixed(6) + ',' + p.gps[1].toFixed(6) + '" target="_blank" rel="noopener">' + oic('mpaNav') + '<span>' + tr('Directions', 'Maelekezo') + '</span></a>' +
+      '<button type="button" data-m3q="open">' + oic('chev') + '<span>' + tr('Open', 'Fungua') + '</span></button></div>';
+    wrap.appendChild(box);
+    var wr = wrap.getBoundingClientRect(), dr = dot.getBoundingClientRect(), bw = box.offsetWidth, bh = box.offsetHeight;
+    var cx = dr.left + dr.width / 2 - wr.left, top = dr.top - wr.top - bh - 10, below = top < (MCL.top || 0) + 4;
+    if (below) top = dr.bottom - wr.top + 10;
+    box.style.left = Math.round(Math.max(8, Math.min(cx - bw / 2, wr.width - bw - 8))) + 'px'; box.style.top = Math.round(top) + 'px';
+    box.classList.toggle('below', below); pin.classList.add('m3-lp');
+    var q = MPA.qa = { id: id, t: Date.now(), el: box, pin: pin, bk: null };
+    q.bk = bkOpen('in', function () { q.bk = null; return m3QuickShut(); }, box);
+    box.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-m3q]'); if (!b) return; var a = b.getAttribute('data-m3q');
+      m3QuickShut(); if (a === 'visit') openProj(id, 'visit'); else if (a === 'open') openProj(id);
+    });
+    var f = box.querySelector('button'); if (f) f.focus({ preventScroll: true });
+  }
+  function m3QuickShut() {
+    var q = MPA.qa; if (!q) return false; MPA.qa = null;
+    q.el.remove(); if (q.pin) q.pin.classList.remove('m3-lp'); if (q.bk) { var l = q.bk; q.bk = null; bkShut(l); }
+    return true;
+  }
+  // Show where I am: a short flight there, and the you-dot pulses once
+  function m3Locate(ll) {
+    var map = hMap; if (!map) return;
+    if (!MPA.you || !hLayer || !hLayer.hasLayer(MPA.you)) { if (hLayer) MPA.you = L.marker(ll, { icon: L.divIcon({ className: '', html: '<div class="you"></div>', iconSize: [16, 16] }), interactive: false, zIndexOffset: 2000 }).addTo(hLayer); }
+    else MPA.you.setLatLng(ll);
+    if (mpaStill()) { map.setView(ll, 13); return; }
+    var done = false, ping = function () {
+      if (done) return; done = true;
+      var el = MPA.you && MPA.you.getElement(), d = el && el.querySelector('.you'); if (!d) return;
+      d.classList.remove('m3-ping'); void d.offsetWidth; d.classList.add('m3-ping'); setTimeout(function () { d.classList.remove('m3-ping'); }, 500);
+    };
+    map.once('moveend', ping); setTimeout(ping, 500);
+    map.flyTo(ll, 13, { duration: 0.35 });
   }
 
   // --- start ----------------------------------------------------------------------------------------
