@@ -148,12 +148,13 @@ class AppFeelTest {
         rule.onNodeWithTag("nav_map").performClick(); rule.waitForIdle()
         rule.onNodeWithTag("nav_me").performClick(); rule.waitForIdle()
         rule.onNodeWithText("Kapsaret Borehole", substring = true).assertDoesNotExist()
-        back()   // Me -> Map
+        back()   // Me -> Map home (feat-nava: back from any tab goes to Map home)
         rule.onNodeWithText("projects pinned", substring = true).assertExists()
-        back()   // Map -> Projects
-        rule.onNodeWithTag("projects").assertExists()
-        back(); back()   // on Projects, back never quits the app (it only goes to the background)
-        assertTrue("back on Projects must not close the app", !rule.activity.isFinishing)
+        rule.onNodeWithTag("nav_list").performClick(); rule.waitForIdle()
+        back()   // Projects -> Map home
+        rule.onNodeWithTag("map_home").assertExists()
+        back(); back()   // on Map home, back never quits the app (it only goes to the background)
+        assertTrue("back on Map home must not close the app", !rule.activity.isFinishing)
         Onb.enabled = true; org.rafikioutreach.pin.ui.Motion.on = true
     }
 
@@ -172,8 +173,8 @@ class AppFeelTest {
         // project tabs swipe
         rule.onNodeWithTag("tab_hist").performScrollTo(); rule.waitForIdle()
         rule.onNodeWithText("Pin location").performTouchInput { swipeLeft() }; rule.waitForIdle()
-        rule.onNodeWithTag("hback").performClick(); rule.waitForIdle()
-        rule.onNodeWithTag("hback").performClick(); rule.waitForIdle()
+        // ← steps back like the phone's back (feat-nava): Site visit -> Pin location, the project -> search -> Projects
+        repeat(3) { if (rule.onAllNodesWithTag("projects").fetchSemanticsNodes().isEmpty()) { rule.onNodeWithTag("hback").performClick(); rule.waitForIdle() } }
         // country chip opens a bottom sheet
         rule.onNodeWithTag("projects").performScrollToNode(androidx.compose.ui.test.hasTestTag("proj_filter")); rule.onNodeWithTag("proj_filter").performClick(); rule.waitForIdle()
         rule.onNodeWithTag("proj_filter_sheet").assertExists(); shot("51-country-sheet")

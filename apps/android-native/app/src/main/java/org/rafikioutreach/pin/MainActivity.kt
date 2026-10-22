@@ -72,8 +72,11 @@ import org.rafikioutreach.pin.ui.ProjectScreen
 import org.rafikioutreach.pin.ui.ProjectsScreen
 import org.rafikioutreach.pin.ui.RafikiTheme
 
-/** Where you are in the app: a tab, or a project on top of it. */
-data class Place(val tab: String, val project: String? = null, val projectTab: String = "pin", val sub: String? = null)
+/** Where you are in the app: a tab, or a project on top of it. [key] is this visit to it: back comes back to the same
+ *  key (and finds the screen as it was left); a tab opened again from the bottom bar is a new key (it starts over). */
+data class Place(val tab: String, val project: String? = null, val projectTab: String = "pin", val sub: String? = null, val key: Long = Place.next()) {
+    companion object { private val n = java.util.concurrent.atomic.AtomicLong(); fun next() = n.incrementAndGet() }
+}
 
 class MainActivity : androidx.fragment.app.FragmentActivity() {
     private val model: AppModel by viewModels()
@@ -146,8 +149,11 @@ fun App(m: AppModel) {
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
 fun Shell(m: AppModel) {
-    val stack = remember { mutableStateListOf(Place("list")) }
+    // a fresh open: every tab starts over (filters, Me | Team, the map's view)
+    val stack = remember { org.rafikioutreach.pin.ui.Nav.startOverAll(m); mutableStateListOf(Place("list")) }
     val here = stack.last()
+    // what each screen in the stack kept (scroll, folds, sub-tabs), so back finds it as it was left
+    val kept = androidx.compose.runtime.saveable.rememberSaveableStateHolder()
     val waiting by m.waiting.collectAsState()
     val upd by m.update.collectAsState()
     val updReady = (upd?.code ?: 0) > BuildConfig.VERSION_CODE
@@ -160,31 +166,49 @@ fun Shell(m: AppModel) {
         life.lifecycle.addObserver(o); onDispose { life.lifecycle.removeObserver(o) }
     }
     val busy by m.busy.collectAsState()
-    // tabs visited before this one, so the phone's back button steps back through them
-    val tabsBefore = remember { mutableStateListOf<String>() }
     fun go(p: Place) { stack.add(p) }
-    fun tab(t: String) {
-        val from = stack.first().tab
-        if (from != t) { tabsBefore.remove(t); tabsBefore.add(from) }
+    fun pop() { if (stack.size > 1) kept.removeState(stack.removeAt(stack.lastIndex).key) }
+    /** A tab from the bottom bar (or the app sending you there): it starts over. [keepFilter]: the app asked for a list. */
+    fun tab(t: String, keepFilter: Boolean = false) {
+        stack.forEach { kept.removeState(it.key) }
+        org.rafikioutreach.pin.ui.Nav.startOver(m, t, keepFilter)
         stack.clear(); stack.add(Place(t))
     }
-    // back: leave the open screen, then the previous tab, then Projects. On Projects it never quits:
-    // the first press says "Press back again to leave", the second puts the app in the background (still running).
+    // back: whatever is open on the screen closes first (BackStep, Nav.kt), then the open screen, then the tab goes
+    // to Map home. On Map home it never quits: the first press says "Press back again to leave", the second puts the
+    // app in the background (still running).
     val act = androidx.compose.ui.platform.LocalContext.current as? android.app.Activity
     var backAt by remember { androidx.compose.runtime.mutableLongStateOf(0L) }
     BackHandler(true) {
         when {
-            stack.size > 1 -> stack.removeAt(stack.lastIndex)
-            tabsBefore.isNotEmpty() -> { val t = tabsBefore.removeAt(tabsBefore.lastIndex); stack.clear(); stack.add(Place(t)) }
-            here.tab != "list" -> { stack.clear(); stack.add(Place("list")) }
+            stack.size > 1 -> pop()
+            here.tab != "map" -> tab("map")
             System.currentTimeMillis() - backAt < 2000 -> { backAt = 0L; act?.moveTaskToBack(true) }
             else -> { backAt = System.currentTimeMillis(); act?.let { android.widget.Toast.makeText(it, t("Press back again to leave", "Bonyeza rudi tena kuondoka"), android.widget.Toast.LENGTH_SHORT).show() } }
         }
     }
+    // more than a few minutes in the background: the map goes back to its default view
+    val lifeMap = androidx.compose.ui.platform.LocalLifecycleOwner.current
+    androidx.compose.runtime.DisposableEffect(lifeMap) {
+        var stoppedAt = 0L
+        val o = androidx.lifecycle.LifecycleEventObserver { _, e ->
+            when (e) {
+                androidx.lifecycle.Lifecycle.Event.ON_STOP -> stoppedAt = org.rafikioutreach.pin.ui.Nav.now()
+                androidx.lifecycle.Lifecycle.Event.ON_START -> {
+                    if (stoppedAt > 0 && org.rafikioutreach.pin.ui.Nav.now() - stoppedAt > org.rafikioutreach.pin.ui.Nav.MAP_RESET_MS && stack.first().tab == "map") {
+                        kept.removeState(stack.first().key); org.rafikioutreach.pin.ui.Nav.startOver(m, "map"); stack[0] = Place("map")
+                    }
+                    stoppedAt = 0L
+                }
+                else -> {}
+            }
+        }
+        lifeMap.lifecycle.addObserver(o); onDispose { lifeMap.lifecycle.removeObserver(o) }
+    }
     // notifications: the bell (top right) needs what the team did, so keep it fresh
     LaunchedEffect(Unit) { while (true) { runCatching { m.loadActivity() }; kotlinx.coroutines.delay(5 * 60_000L) } }
     val goTab = m.goTab
-    LaunchedEffect(goTab) { if (goTab != null) { tab(goTab); m.goTab = null } }
+    LaunchedEffect(goTab) { if (goTab != null) { tab(goTab, keepFilter = true); m.goTab = null } }
     val goProject = m.goProject
     LaunchedEffect(goProject) { if (goProject != null) { go(Place(here.tab, goProject)); m.goProject = null } }
     // a QR sticker opened from outside the app: that project's Site visit, checked in by QR
@@ -204,7 +228,9 @@ fun Shell(m: AppModel) {
         // app header: you (or back), the wordmark, refresh
         Row(Modifier.fillMaxWidth().heightIn(min = 56.dp).padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.size(42.dp), contentAlignment = Alignment.Center) {
-                if (sub) RoundBtn("back", t("Back", "Rudi"), "hback") { stack.removeAt(stack.lastIndex) }
+                // the same as the phone's back: an open sub-tab or fold closes first
+                val dispatcher = androidx.activity.compose.LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
+                if (sub) RoundBtn("back", t("Back", "Rudi"), "hback") { if (dispatcher != null) dispatcher.onBackPressed() else pop() }
                 else Box(Modifier.size(40.dp).clip(androidx.compose.foundation.shape.CircleShape).background(androidx.compose.ui.graphics.Brush.linearGradient(listOf(Color(0xFF47B4F5), Color(0xFF0A78C2))))
                     .clickable(role = Role.Button) { tab("me") }.semantics { contentDescription = t("Me", "Mimi") }.testTag("hav"), contentAlignment = Alignment.Center) {
                     Text(m.prefs.name.split(" ").mapNotNull { it.firstOrNull()?.uppercase() }.take(2).joinToString(""), color = Color.White, style = MaterialTheme.typography.labelMedium.copy(fontSize = 13.sp))
@@ -227,10 +253,13 @@ fun Shell(m: AppModel) {
         org.rafikioutreach.pin.ui.SharingBar(m)
         // pull down to refresh (on screens that scroll)
         var pulling by remember { androidx.compose.runtime.mutableStateOf(false) }
-        androidx.compose.material3.pulltorefresh.PullToRefreshBox(pulling, { pulling = true; m.refresh { pulling = false } }, Modifier.weight(1f).fillMaxWidth().testTag("pull")) {
+        // it reloads the data only: the same screen, sub-tab, folds and scroll; then "Updated" (or why not)
+        val ctx = androidx.compose.ui.platform.LocalContext.current
+        androidx.compose.material3.pulltorefresh.PullToRefreshBox(pulling, { pulling = true; m.refresh { ok -> pulling = false
+                android.widget.Toast.makeText(ctx, if (ok) t("Updated", "Imesasishwa") else t("Couldn’t update. Showing what’s on this phone.", "Imeshindwa kusasisha. Inaonyesha kilicho kwenye simu hii."), android.widget.Toast.LENGTH_SHORT).show() } },
+            Modifier.weight(1f).fillMaxWidth().testTag("pull")) {
             // screens slide in from the right when you go deeper and slide back out when you go back;
             // switching tabs fades through
-            val pop = { if (stack.size > 1) stack.removeAt(stack.lastIndex) }
             androidx.compose.animation.AnimatedContent(
                 here to stack.size, Modifier.fillMaxSize(), label = "screens",
                 contentKey = { it.first },
@@ -249,7 +278,7 @@ fun Shell(m: AppModel) {
                     }.using(androidx.compose.animation.SizeTransform(clip = false))
                 },
             ) { (pl, _) ->
-                Box(Modifier.fillMaxSize()) {
+                kept.SaveableStateProvider(pl.key) { Box(Modifier.fillMaxSize()) {
                     val pid = pl.project
                     when {
                         pid != null -> ProjectScreen(m, pid, pl.projectTab) { pop() }
@@ -263,12 +292,12 @@ fun Shell(m: AppModel) {
                         pl.sub == "scan" -> org.rafikioutreach.pin.ui.ScanScreen(m, { id -> pop(); go(Place(pl.tab, id, "visit")) }) { pop() }
                         pl.tab == "map" -> MapScreen(m, { go(Place("map", it)) }, { go(Place("map", it, "visit")) }, offline = { go(Place("map", sub = "offline")) },
                             newSite = { ll -> org.rafikioutreach.pin.ui.MapHome.newSiteAt = ll; tab("new") })
-                        pl.tab == "new" -> NewSiteScreen(m) { id -> if (id != null) { tab("list"); go(Place("list", id)) } }
+                        pl.tab == "new" -> NewSiteScreen(m) { id -> if (id != null) { tab("list", keepFilter = true); go(Place("list", id)) } }
                         pl.tab == "me" -> MeScreen(m, { go(Place("me", it)) }, { go(Place("me", sub = "report")) }, notes = { go(Place("me", sub = "notes")) }) { go(Place("me", sub = "set_$it")) }
                         pl.tab == "office" -> org.rafikioutreach.pin.ui.OfficeScreen(m) { go(Place("office", it)) }
                         else -> ProjectsScreen(m, { go(Place("list", it)) }, { go(Place("list", sub = "route")) }, { tab("new") }, { go(Place("list", it, "visit")) }, scan = { go(Place("list", sub = "scan")) }) { go(Place("list", sub = "search")) }
                     }
-                }
+                } }
             }
         }
         // bottom tabs, floating

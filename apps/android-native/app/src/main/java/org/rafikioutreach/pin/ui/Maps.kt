@@ -80,7 +80,8 @@ private fun dotDrawable(color: Int, big: Boolean) = GradientDrawable().apply {
  *  The Map tab also draws its own column of buttons, and opens the map-style sheet through [styleSheet]. */
 @Composable
 fun ProjectsMap(dots: List<Dot>, me: LatLng?, onDot: (String) -> Unit, modifier: Modifier = Modifier, fitKey: Any? = null, badgeBottom: androidx.compose.ui.unit.Dp = 0.dp,
-                drawDots: Boolean = true, onMap: ((MapView) -> Unit)? = null, extras: MapExtras? = null, styleSheet: androidx.compose.runtime.MutableState<Boolean>? = null) {
+                drawDots: Boolean = true, onMap: ((MapView) -> Unit)? = null, extras: MapExtras? = null, styleSheet: androidx.compose.runtime.MutableState<Boolean>? = null,
+                fitDots: List<Dot>? = null) {
     val ctx = LocalContext.current
     MapSetup.init(ctx)
     // satellite first; the street map once they choose it (remembered on this phone)
@@ -125,9 +126,14 @@ fun ProjectsMap(dots: List<Dot>, me: LatLng?, onDot: (String) -> Unit, modifier:
                 val m = holder.me ?: Marker(mv).apply { icon = dotDrawable(0xFF098BE1.toInt(), false); setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER); setInfoWindow(null) }.also { holder.me = it; mv.overlays.add(it) }
                 if (holder.meAt != me) { holder.meAt = me; m.position = GeoPoint(me.lat, me.lng); changed = true }
             } else holder.me?.let { mv.overlays.remove(it); holder.me = null; holder.meAt = null; changed = true }
-            if (!fitted && dots.size > 1) {
+            // the default view: the pins to fit ([fitDots], e.g. the home country's), else all of them
+            val fit = fitDots?.takeIf { it.isNotEmpty() } ?: dots
+            if (!fitted && dots.size > 1 && fit.size == 1) {
                 fitted = true
-                val box = BoundingBox.fromGeoPointsSafe(dots.map { GeoPoint(it.ll.lat, it.ll.lng) })
+                mv.post { mv.controller.setZoom(12.0); mv.controller.setCenter(GeoPoint(fit[0].ll.lat, fit[0].ll.lng)) }
+            } else if (!fitted && fit.size > 1) {
+                fitted = true
+                val box = BoundingBox.fromGeoPointsSafe(fit.map { GeoPoint(it.ll.lat, it.ll.lng) })
                 mv.post { runCatching { mv.zoomToBoundingBox(box.increaseByScale(1.25f), false) } }
             }
             if (changed) mv.invalidate()

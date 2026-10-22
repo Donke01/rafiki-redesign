@@ -306,6 +306,7 @@ fun TeamMonth(m: AppModel, act: List<JSONObject>?) {
 @Composable
 fun TeamFeed(act: List<JSONObject>?, snap: Snapshot?, open: (String) -> Unit) {
     var more by remember { mutableStateOf(false) }
+    BackStep(more) { more = false }
     Card(Modifier.padding(top = 14.dp).testTag("team_feed")) {
         H2(t("Team feed", "Habari za timu"))
         if (act == null) { Text(t("Loading…", "Inapakia…"), color = C.muted, style = MaterialTheme.typography.bodyMedium); return@Card }
