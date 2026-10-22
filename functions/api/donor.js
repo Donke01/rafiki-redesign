@@ -2,11 +2,17 @@
 //   GET  /api/donor                 header X-Donor-Token: <token>  → the donor's projects, updates and impact (whitelisted fields only)
 //   GET  /api/donor?photo=<asset>&w=960&t=<token>                   → one visit photo or thank-you photo/video of one of their projects
 //   GET  /api/donor?unsub=<code>    → "stop the monthly e-mail?" page;  POST the same → done (also one-click from mail apps)
+// The RAFIKI Pin app in donor mode (feat-donorapp) uses the same token:
+//   GET  /api/donor?bg=1            the app's background check for news: same answer, doesn't count as "opened"
+//   POST /api/donor { code }        a short donor code (K7QM4-XR9TB) → { token, name }; wrong codes limited per connection and overall
+//   POST /api/donor { action: 'mail', on }   header X-Donor-Token → e-mail updates on/off (off = the e-mail's unsubscribe)
 // Unknown, revoked and rotated links all get the same answer. Wrong links are limited per connection.
 import { getFeed } from '../../lib/feed-cache.js';
-import { findByToken, loadView, donorFile, assetInfo, unsubscribe, saveDonors, CONTACT } from '../../lib/donor.js';
+import { findByToken, loadView, donorFile, assetInfo, unsubscribe, saveDonors, redeemCode, mailState, setMail, CONTACT } from '../../lib/donor.js';
 
 const MAX_BAD = 20;          // wrong links per connection per hour
+const MAX_CODE = 10;         // wrong app codes per connection per hour
+const MAX_CODE_ALL = 300;    // wrong app codes from everywhere per hour (stops a spread-out guessing run)
 const BURST = 120;           // requests per connection per minute (this worker)
 const hits = new Map();
 
@@ -26,6 +32,8 @@ function burst(ip) {
 }
 async function bad(env, ip) { if (!env.FEED) return 0; return Number(await env.FEED.get('rl:donorbad:' + ip)) || 0; }
 async function bump(env, ip) { if (env.FEED) await env.FEED.put('rl:donorbad:' + ip, String((await bad(env, ip)) + 1), { expirationTtl: 3600 }); }
+async function cnt(env, k) { return Number(await env.FEED.get(k)) || 0; }
+async function inc(env, k) { await env.FEED.put(k, String((await cnt(env, k)) + 1), { expirationTtl: 3600 }); }
 
 async function lookup(request, env, token) {
   const ip = ipOf(request);
@@ -52,15 +60,15 @@ export async function onRequestGet({ request, env, waitUntil }) {
   let feed;
   try { feed = await getFeed(env, waitUntil); } catch (e) { return json({ ok: false, reason: 'down' }, 502); }
   if (photo) return file(request, env, donor, photo, feed, q.get('w'), waitUntil);
-  // when they last opened it (at most one write every 10 minutes)
+  // when they last opened it (at most one write every 10 minutes); the app's background check doesn't count
   const now = new Date();
-  if (!viewer.lastOpen || now - Date.parse(viewer.lastOpen) > 600000) {
+  if (q.get('bg') !== '1' && (!viewer.lastOpen || now - Date.parse(viewer.lastOpen) > 600000)) {
     viewer.lastOpen = now.toISOString(); viewer.opens = (viewer.opens || 0) + 1;
     const save = saveDonors(env, list).catch(() => {});
     if (waitUntil) waitUntil(save); else await save;
   }
   try {
-    return json(await loadView(env, donor, viewer, { feed, fresh: true, waitUntil }));
+    return json(Object.assign(await loadView(env, donor, viewer, { feed, fresh: true, waitUntil }), { me: mailState(donor, viewer) }));
   } catch (e) {
     console.error('donor view:', e && e.message);
     return json({ ok: false, reason: 'down' }, 502);
@@ -69,10 +77,33 @@ export async function onRequestGet({ request, env, waitUntil }) {
 
 export async function onRequestPost({ request, env }) {
   const code = new URL(request.url).searchParams.get('unsub');
-  if (!code) return json({ ok: false, reason: 'method' }, 405);
+  if (!code) return appPost(request, env);
   const r = await unsubscribe(env, code, false);
   if (!r.ok) return page('Link not recognised', '<h1>That link isn’t recognised</h1><p>To stop the e-mails, write to <a href="mailto:' + CONTACT + '">' + CONTACT + '</a>.</p>', 404);
   return page('Monthly e-mail', '<h1>Done</h1><p>You won’t get the monthly e-mail any more. Changed your mind? Write to <a href="mailto:' + CONTACT + '">' + CONTACT + '</a>.</p>');
+}
+
+// The app: a donor code swapped for the link token, or e-mail updates on/off.
+async function appPost(request, env) {
+  let b = null;
+  try { b = await request.json(); } catch (e) {}
+  if (!b || typeof b !== 'object') return json({ ok: false, reason: 'bad-request' }, 400);
+  const ip = ipOf(request);
+  if (burst(ip)) return json({ ok: false, reason: 'rate' }, 429);
+  if (!env.FEED) return json({ ok: false, reason: 'not-set-up' }, 503);
+  if ('code' in b) {
+    const k = 'rl:donorcode:' + ip, all = 'rl:donorcode:all';
+    if (await cnt(env, k) >= MAX_CODE || await cnt(env, all) >= MAX_CODE_ALL) return json({ ok: false, reason: 'rate' }, 429);
+    const r = await redeemCode(env, b.code);
+    if (!r) { await inc(env, k); await inc(env, all); return json({ ok: false, reason: 'code', contact: CONTACT }, 404); }
+    return json({ ok: true, token: r.token, name: r.name });
+  }
+  if (b.action === 'mail') {
+    const hit = await lookup(request, env, request.headers.get('X-Donor-Token') || '');
+    if (hit.res) return hit.res;
+    return json({ ok: true, me: await setMail(env, hit, !!b.on) });
+  }
+  return json({ ok: false, reason: 'bad-request' }, 400);
 }
 
 // A visit photo, or a thank-you photo or video, of one of the donor's projects (only where photos are allowed).

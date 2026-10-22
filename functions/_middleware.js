@@ -25,6 +25,10 @@ function gaTag(env, url) {
 
 export async function onRequest({ request, next, env }) {
   const url = new URL(request.url);
+  // a donor's private link on the field app's address opens the app in donor mode (the Android app claims
+  // https://pin.rafikioutreach.org/pin; the token rides in the #fragment, which is never sent to a server)
+  const dl = url.hostname === FIELD && /^\/donor\/([A-Za-z0-9_-]{43})\/?$/.exec(url.pathname);
+  if (dl) return new Response(null, { status: 302, headers: { Location: url.origin + '/pin#donor=' + dl[1], 'Cache-Control': 'private, no-store', 'Referrer-Policy': 'no-referrer' } });
   // on the field app's address, any website page goes to the app; the app's own files, the API and assets still load
   if (url.hostname === FIELD && !/^\/(pin|api|app|vendor|img|fonts|\.well-known)(\/|$|\.|-)/.test(url.pathname) && !/\.[a-z0-9]{2,12}$/i.test(url.pathname)) {
     return Response.redirect(url.origin + '/pin' + url.search, 302);
