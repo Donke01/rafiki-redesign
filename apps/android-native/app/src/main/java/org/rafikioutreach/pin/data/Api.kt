@@ -24,8 +24,9 @@ class Api(val server: String, private val pin: () -> String, private val session
     suspend fun history(id: String): Reply = call("GET", "/api/pin?history=" + enc(id), null)
     suspend fun last(id: String): Reply = call("GET", "/api/pin?id=" + enc(id), null)
     suspend fun post(body: JSONObject): Reply = call("POST", "/api/pin", body)
-    suspend fun place(q: String, near: LatLng?, ck: String): Reply =
-        call("GET", "/api/place?q=" + enc(q) + (if (ck.isNotBlank()) "&cc=$ck" else "") + (near?.let { "&near=${it.lat},${it.lng}" } ?: ""), null)
+    /** [free]: OpenStreetMap's search only (Google's places may only be shown over Google's own map). */
+    suspend fun place(q: String, near: LatLng?, ck: String, free: Boolean = false): Reply =
+        call("GET", "/api/place?q=" + enc(q) + (if (ck.isNotBlank()) "&cc=$ck" else "") + (near?.let { "&near=${it.lat},${it.lng}" } ?: "") + (if (free) "&free=1" else ""), null)
 
     suspend fun activity(): Reply = call("GET", "/api/pin?activity=1", null)
     suspend fun team(): Reply = call("GET", "/api/pin?team=1", null)

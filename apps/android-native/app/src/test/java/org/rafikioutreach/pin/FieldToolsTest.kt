@@ -239,6 +239,8 @@ class FieldToolsTest {
     @Test fun offline_area_save_fill_list_and_delete() {
         Lang.sw = false
         OfflineMaps.officeFrom(null)
+        // maps open on satellite photos; this checks the street map is kept, so choose it first (remembered on the phone)
+        app.getSharedPreferences("map_style", 0).edit().putString("style", "street").commit()
         val m = model(); show(m)
         rule.waitUntil(8000) { rule.onAllNodesWithTag("nav_map").fetchSemanticsNodes().isNotEmpty() }
         rule.onNodeWithTag("nav_map").performClick(); rule.waitForIdle()

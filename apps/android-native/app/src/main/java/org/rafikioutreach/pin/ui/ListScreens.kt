@@ -86,41 +86,14 @@ fun dotColor(s: Snapshot, p: Project): Int = when (s.repairs[p.id]?.state) {
     "notworking" -> 0xFFB3261E.toInt(); "repair" -> 0xFFD98200.toInt(); null -> 0xFF1C7C4A.toInt(); else -> 0xFFD98200.toInt()
 }
 
+/** The Map tab: pins by condition, filter chips, search, clusters, the preview card and long press (MapHome.kt). */
 @Composable
-fun MapScreen(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit = open, offline: () -> Unit = {}) {
-    val s by m.snap.collectAsState()
-    val fix by m.fix.collectAsState()
-    val snap = s ?: return
-    val pinned = snap.projects.count { it.gps != null }
-    var sheetH by remember { mutableIntStateOf(0) }
-    val dens = androidx.compose.ui.platform.LocalDensity.current
-    Box(Modifier.fillMaxSize()) {
-        ProjectsMap(
-            snap.projects.filter { it.gps != null }.map { Dot(it.id, it.gps!!, dotColor(snap, it), snap.repairs.containsKey(it.id), it.title) },
-            fix?.ll, open, Modifier.fillMaxSize(), fitKey = snap.projects.size, badgeBottom = with(dens) { sheetH.toDp() } + 12.dp,
-        )
-        Column(Modifier.padding(12.dp).padding(end = 58.dp).align(Alignment.TopStart)) {
-        Card(pad = 12.dp) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(t("$pinned of ${snap.projects.size} projects pinned", "Miradi $pinned kati ya ${snap.projects.size} ina mahali"), style = MaterialTheme.typography.titleSmall, color = C.ink, modifier = Modifier.weight(1f))
-                Text(t("${snap.projects.size - pinned} to go", "${snap.projects.size - pinned} zimebaki"), style = MaterialTheme.typography.bodySmall, color = C.muted)
-            }
-            Meter(pinned.toFloat() / maxOf(1, snap.projects.size), Modifier.padding(top = 8.dp))
-            Row(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Legend(Color(0xFF1C7C4A), t("Pinned", "Ina mahali")); Legend(Color(0xFFD98200), t("Needs repair", "Inahitaji matengenezo")); Legend(Color(0xFFB3261E), t("Not working", "Haifanyi kazi"))
-            }
-        }
-        HereSlot(m, snap, fix?.ll, Modifier.padding(top = 10.dp), visit, open)
-        }
-        NearestSheet(m, snap, fix?.ll, Modifier.align(Alignment.BottomCenter).padding(12.dp).onSizeChanged { sheetH = it.height }, open)
-        // Save this area for offline (OfflineMaps.kt)
-        OfflineMapControls(m, offline)
-    }
-}
+fun MapScreen(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit = open, offline: () -> Unit = {}, newSite: (LatLng) -> Unit = {}) =
+    MapHome(m, open, visit, offline, newSite)
 
 /** "Nearest to you": the three closest pinned projects, folded away until you open it. */
 @Composable
-private fun NearestSheet(m: AppModel, snap: Snapshot, here: LatLng?, modifier: Modifier, open: (String) -> Unit) {
+fun NearestSheet(m: AppModel, snap: Snapshot, here: LatLng?, modifier: Modifier, open: (String) -> Unit) {
     val list = here?.let { h -> snap.projects.filter { it.gps != null }.map { it to Geo.metres(h, it.gps!!) }.sortedBy { it.second }.take(5) } ?: emptyList()
     val none: @Composable ColumnScope.() -> Unit = { Text(t("Allow location to see the projects closest to you.", "Ruhusu mahali ili uone miradi iliyo karibu nawe."), style = MaterialTheme.typography.bodyMedium, color = C.muted, modifier = Modifier.padding(6.dp)) }
     // drag it up for the five closest; it rests showing the closest one
@@ -169,14 +142,6 @@ fun HereBanner(p: Project, d: Double, miles: Boolean, modifier: Modifier, visit:
         Box(Modifier.size(40.dp).clip(CircleShape).border(1.dp, Color(0x99FFFFFF), CircleShape).clickable(role = Role.Button, onClick = dismiss).semantics { contentDescription = t("Not now", "Si sasa") }.testTag("here_x"), contentAlignment = Alignment.Center) {
             Icon(Ic.get("x"), null, tint = Color.White, modifier = Modifier.size(16.dp))
         }
-    }
-}
-
-@Composable
-private fun Legend(c: Color, t: String) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Box(Modifier.size(10.dp).clip(RoundedCornerShape(5.dp)).background(c)); Spacer(Modifier.width(5.dp))
-        Text(t, style = MaterialTheme.typography.labelSmall, color = C.muted)
     }
 }
 

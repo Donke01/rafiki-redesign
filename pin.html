@@ -2111,6 +2111,110 @@ html[data-theme=sun] .dqm-pgh{background:#FFFFFF;border-bottom-width:2px}
 .dqm-nogps{display:flex;gap:8px;align-items:flex-start;margin:10px 0 0;padding:10px 12px;border-radius:14px;background:var(--warnbg);color:var(--ink);font-size:.86rem;line-height:1.45}.dqm-nogps svg{flex:none;width:18px;height:18px;color:var(--warn);margin-top:1px}
 @media (prefers-reduced-motion: reduce){.dqm-drop,.dqm-rc,.dqm-card,.dqm-end svg,.dqm-nums button,.dqm-stop{transition:none !important}.dqm-card,.dqm-shi,.dqm-shd .ofa-av.lg{animation:none !important}}
 </style>
+<style id="mpa-css">
+/* Map home: search, filter chips, pins by condition, bubbles, the card, long press and the key (mpa…) */
+#vMap{--mc-ok:#1C7C4A;--mc-repair:#B86E00;--mc-bad:#B3261E;--mc-old:#66727C}
+#hMap{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+.c-ok{--c:var(--mc-ok)}.c-repair{--c:var(--mc-repair)}.c-bad{--c:var(--mc-bad)}.c-old{--c:var(--mc-old)}
+#vMap .ov.top > :is(.mpa-s,.mpa-chips,.pill){align-self:stretch;width:auto;max-width:100%;min-width:0;box-sizing:border-box}
+.mpa-s{position:relative;display:flex;align-items:center;gap:8px;min-height:48px;padding:0 4px 0 14px;border-radius:16px;background:var(--card);border:var(--bw) solid var(--line);box-shadow:0 4px 18px rgba(4,38,63,.16);color:var(--muted)}
+.mpa-s:focus-within{border-color:var(--blue);box-shadow:0 0 0 3px rgba(10,120,194,.18),0 4px 18px rgba(4,38,63,.16);color:var(--blue)}
+.mpa-s > svg{width:20px;height:20px;flex:0 0 auto}
+#vMap .mpa-s input{flex:1 1 auto;min-width:0;width:auto;height:46px;min-height:0;border:0 !important;border-radius:0;background:none !important;box-shadow:none !important;font:inherit;font-size:1rem;color:var(--text);outline:none;padding:0}
+.mpa-s input::placeholder{color:var(--muted);opacity:1}
+.mpa-s input::-webkit-search-cancel-button{display:none}
+#mpaX{width:44px;height:44px;flex:0 0 auto;border:0;border-radius:50%;background:none;color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer}
+#mpaX svg{width:16px;height:16px}
+.mpa-sug{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:5;background:var(--card);border:var(--bw) solid var(--line);border-radius:18px;box-shadow:0 12px 32px rgba(4,38,63,.22);padding:6px 0;max-height:min(60vh,420px);overflow:auto}
+.mpa-sr{display:flex;align-items:center;gap:12px;width:100%;min-height:52px;padding:6px 12px;border:0;background:none;font:inherit;text-align:left;color:var(--ink);cursor:pointer}
+.mpa-sr:hover,.mpa-sr[aria-selected=true]{background:var(--tint)}
+.mpa-si{width:36px;height:36px;flex:0 0 auto;border-radius:12px;display:flex;align-items:center;justify-content:center;background:var(--hb);color:var(--hu)}
+.mpa-si svg{width:19px;height:19px}
+.mpa-st{display:flex;flex-direction:column;min-width:0}
+.mpa-st b{font-size:.92rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mpa-st small{font-size:.78rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mpa-sn{margin:0;padding:8px 16px;font-size:.82rem;color:var(--muted)}
+.mpa-sn.mpa-off{font-size:.74rem;font-weight:600}
+.mpa-sn.pby{display:flex;align-items:center;gap:6px;font-size:.72rem}
+.mpa-chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:3px 2px 6px;margin:0 -2px;overscroll-behavior-x:contain}
+.mpa-chips::-webkit-scrollbar{display:none}
+.mpa-chips{padding-right:26px;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent)}
+.mpa-chip,.mpa-clr{flex:0 0 auto;display:inline-flex;align-items:center;gap:7px;min-height:44px;padding:0 10px 0 12px;border-radius:999px;border:var(--bw) solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-size:.86rem;font-weight:700;white-space:nowrap;cursor:pointer;box-shadow:0 2px 8px rgba(4,38,63,.14);--hu:var(--hu-blue);--hb:var(--hb-blue)}
+.mpa-chip.k-broken{--hu:var(--bad);--hb:var(--badbg)}.mpa-chip.k-due{--hu:var(--hu-teal);--hb:var(--hb-teal)}
+.mpa-chip svg{width:17px;height:17px;color:var(--hu);flex:0 0 auto}
+.mpa-chip i{font-style:normal;font-size:.74rem;font-weight:800;min-width:22px;padding:1px 7px;border-radius:999px;background:var(--bg);color:var(--muted);text-align:center}
+.mpa-chip[aria-pressed=true]{background:var(--hu);border-color:var(--hu);color:#FFFFFF}
+.mpa-chip[aria-pressed=true] svg{color:#FFFFFF}.mpa-chip[aria-pressed=true] i{background:#FFFFFF;color:var(--hu)}
+html[data-theme=dark] .mpa-chip[aria-pressed=true]{color:#0D1318}html[data-theme=dark] .mpa-chip[aria-pressed=true] svg{color:#0D1318}html[data-theme=dark] .mpa-chip[aria-pressed=true] i{background:#0D1318}
+.mpa-clr{width:44px;padding:0;justify-content:center;border-radius:50%}
+.mpa-clr svg{width:17px;height:17px}
+.mpa-none{margin:0;align-self:flex-start;padding:8px 12px;border-radius:12px;background:var(--card);color:var(--ink);font-size:.82rem;font-weight:600;box-shadow:0 4px 14px rgba(4,38,63,.14)}
+/* pins: a coloured dot with a white edge (reads on satellite photos too), 44 px to tap */
+.mpa-pin,.mpa-cl{display:flex;align-items:center;justify-content:center;background:none;border:0;border-radius:50%;outline-offset:-4px}
+.mpa-dot{display:block;width:18px;height:18px;border-radius:50%;background:var(--c);border:3px solid #FFFFFF;box-shadow:0 0 0 1px rgba(0,0,0,.28),0 1px 5px rgba(0,0,0,.4);transition:transform .15s}
+.mpa-pin.on{z-index:1500 !important}
+.mpa-pin.on .mpa-dot{transform:scale(1.45);box-shadow:0 0 0 4px rgba(10,120,194,.55),0 2px 8px rgba(0,0,0,.45)}
+.mpa-dot.c-bad{animation:mpaPulse 1.8s ease-out infinite}
+@keyframes mpaPulse{0%{box-shadow:0 0 0 1px rgba(0,0,0,.28),0 1px 5px rgba(0,0,0,.4),0 0 0 0 rgba(179,38,30,.55)}100%{box-shadow:0 0 0 1px rgba(0,0,0,.28),0 1px 5px rgba(0,0,0,.4),0 0 0 14px rgba(179,38,30,0)}}
+.mpa-bub{display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--c);color:#FFFFFF;border:3px solid #FFFFFF;font-weight:800;font-size:.86rem;letter-spacing:-.01em;box-shadow:0 0 0 1px rgba(0,0,0,.25),0 2px 8px rgba(0,0,0,.4);text-shadow:0 1px 1px rgba(0,0,0,.25);transition:transform .15s}
+.mpa-cl:hover .mpa-bub,.mpa-cl:focus-visible .mpa-bub{transform:scale(1.08)}
+.mpa-spot{display:flex;align-items:center;justify-content:center}
+.mpa-spot i{display:block;width:22px;height:22px;border-radius:50%;background:#04263F;border:3px solid #FFFFFF;box-shadow:0 0 0 1px rgba(0,0,0,.3),0 2px 8px rgba(0,0,0,.45),inset 0 0 0 5px #04263F,inset 0 0 0 9px #FFFFFF}
+/* the key to the colours: bottom right, above the sheet; tap it away */
+.mpa-key{position:absolute;right:10px;bottom:calc(var(--mpab,120px) + 46px);z-index:800;display:flex;flex-direction:column;gap:5px;padding:9px 11px;border-radius:16px;border:var(--bw) solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-size:.72rem;font-weight:600;text-align:left;cursor:pointer;box-shadow:0 4px 14px rgba(4,38,63,.16)}
+.mpa-key span{display:flex;align-items:center;gap:7px;white-space:nowrap}
+.mpa-key span i{width:12px;height:12px;border-radius:50%;background:var(--c);border:2px solid #FFFFFF;box-shadow:0 0 0 1px rgba(0,0,0,.25);flex:0 0 auto}
+.mpa-key.off{width:44px;height:44px;padding:0;align-items:center;justify-content:center;border-radius:50%}
+.mpa-key.off svg{width:20px;height:20px}
+/* the card */
+.mpa-card{position:relative;background:var(--card);border-radius:24px;border:var(--bw) solid var(--line);box-shadow:0 -2px 26px rgba(4,38,63,.22);padding:14px 8px 14px 14px;outline:none}
+.mpa-card .grab{position:absolute;left:50%;top:6px;width:40px;height:5px;margin-left:-20px;border-radius:99px;background:var(--edge,#C9D1D8)}
+.mpa-card.rise{animation:mpaRise .28s cubic-bezier(.2,.7,.2,1) both}
+@keyframes mpaRise{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+.mpa-ch{display:flex;align-items:center;gap:2px;margin-top:2px}
+.mpa-pos{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;font-size:.78rem;font-weight:600;color:var(--muted);white-space:nowrap}
+.mpa-pos > b{font-weight:800;color:var(--ink)}.mpa-pos > small{font-size:.72rem}
+.mpa-pos.mpa-sp{display:flex;flex-direction:column;white-space:normal}
+.mpa-pos.mpa-sp b{font-size:1.02rem;font-weight:800;color:var(--ink)}
+.mpa-pos.mpa-sp small{font-size:.78rem}
+.mpa-ib{width:44px;height:44px;flex:0 0 auto;border:0;border-radius:50%;background:none;color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.mpa-ib svg{width:19px;height:19px}.mpa-ib[disabled]{color:var(--off);cursor:default}
+.mpa-ib:not([disabled]):hover{background:var(--tint)}
+.mpa-cb{display:flex;gap:12px;align-items:flex-start;padding:4px 6px 0 0}
+.mpa-cb.in-l{animation:mpaInL .26s ease-out both}.mpa-cb.in-r{animation:mpaInR .26s ease-out both}
+@keyframes mpaInL{from{transform:translateX(36px);opacity:0}to{transform:none;opacity:1}}
+@keyframes mpaInR{from{transform:translateX(-36px);opacity:0}to{transform:none;opacity:1}}
+.mpa-ph{position:relative;width:78px;height:78px;flex:0 0 auto;border-radius:18px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--c) 14%,var(--card));color:var(--c)}
+.mpa-ph svg{width:30px;height:30px}
+.mpa-ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.mpa-tx{display:flex;flex-direction:column;min-width:0;flex:1 1 auto}
+.mpa-tx > b{font-size:1rem;font-weight:800;color:var(--ink);line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:normal;word-break:normal;hyphens:none}
+.mpa-tx > small{font-size:.8rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mpa-tags{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;margin-top:6px}
+.mpa-cond{font-style:normal;display:inline-flex;align-items:center;gap:6px;padding:3px 10px 3px 8px;border-radius:999px;font-size:.75rem;font-weight:800;white-space:nowrap;background:color-mix(in srgb,var(--c) 14%,var(--card));color:color-mix(in srgb,var(--c) 82%,var(--ink))}
+.mpa-cond i{width:9px;height:9px;border-radius:50%;background:var(--c)}
+.mpa-dist{font-size:.78rem;font-weight:700;color:var(--deep);white-space:nowrap}
+.mpa-lv{margin-top:6px;font-size:.8rem;color:var(--text)}
+.mpa-acts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 6px 0 0}
+.mpa-acts.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.mpa-a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:58px;padding:8px 4px;border-radius:16px;border:0;background:var(--hb-green);color:var(--ink);font:inherit;font-size:.8rem;font-weight:700;line-height:1.15;text-align:center;text-decoration:none;cursor:pointer;overflow-wrap:normal;word-break:normal;hyphens:none}
+.mpa-a svg{width:20px;height:20px;color:var(--hu-green)}
+.mpa-a.pri{background:var(--g-ok,#1C7C4A);color:#FFFFFF}.mpa-a.pri svg{color:#FFFFFF}
+.mpa-a.new{background:linear-gradient(135deg,#9A78F0,#6E46C8);color:#FFFFFF}.mpa-a.new svg{color:#FFFFFF}
+.mpa-a[data-mpa=measure]{background:var(--tint)}.mpa-a[data-mpa=measure] svg{color:var(--blue)}
+.mpa-a[data-mpa=measure].on{background:var(--blue);color:#FFFFFF}.mpa-a[data-mpa=measure].on svg{color:#FFFFFF}
+.mpa-a:active{transform:scale(.97)}
+.mpa-meas{display:flex;align-items:center;gap:10px;margin:10px 6px 0 0;padding:10px 14px;border-radius:16px;background:var(--tint)}
+.mpa-meas svg{width:22px;height:22px;color:var(--blue);flex:0 0 auto}
+.mpa-meas span{display:flex;flex-direction:column}.mpa-meas b{font-size:1.25rem;font-weight:800;color:var(--ink)}.mpa-meas small{font-size:.78rem;color:var(--muted)}
+.mpa-warn{margin:10px 6px 0 0;font-size:.86rem;font-weight:600;color:var(--warn)}
+html:not([data-theme=sun]) :is(.mpa-card,.mpa-key){background:var(--gl2);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur)}
+html[data-theme=sun] :is(.mpa-s,.mpa-chip,.mpa-clr,.mpa-card,.mpa-key,.mpa-sug,.mpa-none){border-color:#000;box-shadow:none}
+html[data-theme=sun] .mpa-a{border:2px solid #000}
+html[data-theme=sun] #vMap{--mc-repair:#8F5200;--mc-old:#4E5A63}
+@media (min-width:700px){#vMap .ov.top > :is(.mpa-s,.mpa-chips,.mpa-none,.pill){width:100%;max-width:560px;align-self:center}#vMap .mpa-card{max-width:560px;margin:0 auto}}
+@media (prefers-reduced-motion: reduce){.mpa-dot.c-bad,.mpa-card.rise,.mpa-cb.in-l,.mpa-cb.in-r{animation:none !important}.mpa-dot,.mpa-bub{transition:none}}
+</style>
 </head>
 <body class="locked">
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
@@ -2168,9 +2272,7 @@ html[data-theme=sun] .dqm-pgh{background:#FFFFFF;border-bottom-width:2px}
       <div class="mapwrap">
         <div id="hMap" role="application" aria-label="Map of RAFIKI projects. Tap a dot to open a project."></div>
         <div class="ov top">
-          <div class="pill"><div class="prog" id="mProg"></div>
-            <div class="legend"><span><i style="background:#1C7C4A"></i>Pinned</span><span><i style="background:#D98200"></i>Needs repair</span><span><i style="background:#B3261E"></i>Not working</span></div>
-          </div>
+          <div class="pill"><div class="prog" id="mProg"></div></div>
           <div id="mHere"></div>
         </div>
         <div class="ov bot">
@@ -2947,6 +3049,7 @@ html[data-theme=sun] .dqm-pgh{background:#FFFFFF;border-bottom-width:2px}
     };
     P.saved = function (ll) { if (oldMk) map.removeLayer(oldMk); oldMk = ll ? L.circleMarker(ll, { radius: 9, color: '#1C7C4A', weight: 2, fillColor: '#7FD1A3', fillOpacity: .9 }).addTo(map).bindTooltip('Saved location') : null; if (newMk) { map.removeLayer(newMk); newMk = null; } [youMk, accC].forEach(function (m) { if (m) map.removeLayer(m); }); youMk = accC = null; P.pick = null; line('', ''); };
     P.stop = stop;
+    P.at = function (ll) { setTimeout(function () { ensure(); set(ll, 'map', 0); map.setView(P.pick || ll, 17); }, 45); };
     P.you = function (ll, acc) {
       if (!map || watch !== null) return;
       if (!youMk) youMk = L.marker(ll, { icon: L.divIcon({ className: '', html: '<div class="you"></div>', iconSize: [16, 16] }), interactive: false }).addTo(map); else youMk.setLatLng(ll);
@@ -3222,7 +3325,7 @@ html[data-theme=sun] .dqm-pgh{background:#FFFFFF;border-bottom-width:2px}
         '<button class="btn small ghost x" type="button" data-here="x" data-id="' + esc(top.p.id) + '" aria-label="Not now">×</button></div>';
     }
     $('mHere').innerHTML = html; $('lHere').innerHTML = html ? '<div style="margin-bottom:12px">' + html + '</div>' : '';
-    nearUi();
+    nearUi(); mpaHere();
     if (S.view === 'vList' && S.filter === 'near') renderList();
   }
   document.addEventListener('click', function (e) {
@@ -3250,6 +3353,7 @@ html[data-theme=sun] .dqm-pgh{background:#FFFFFF;border-bottom-width:2px}
           return d; } });
         meCtl = new Me().addTo(hMap);
         fldMapCtl(hMap); // Save this area for offline (field tools)
+        mpaInit(hMap); // pins by condition, filter chips, search, clusters, the card and long press (mpa…)
         hMap.setView([-3.5, 35.5], 5);
         hMap.on('popupopen', function (e) { var el = e.popup.getElement(); var b = el && el.querySelector('[data-open]'); if (b) b.addEventListener('click', function () { openProj(b.getAttribute('data-open')); }); });
       }
@@ -3257,21 +3361,13 @@ html[data-theme=sun] .dqm-pgh{background:#FFFFFF;border-bottom-width:2px}
       if (hLayer) hMap.removeLayer(hLayer);
       hLayer = L.featureGroup();
       var you = null;
-      S.projects.forEach(function (p) {
-        if (!p.gps) return;
-        var r = S.repairs[p.id];
-        if (r) L.circleMarker(p.gps, { radius: 9, color: COLORS[r.state] || COLORS.repair, weight: 2, fill: false, interactive: false, className: 'dot-alert' }).addTo(hLayer);
-        L.circleMarker(p.gps, dotStyle(p)).bindPopup(function () {
-          return '<div class="pop">' + (p.photo ? '<img src="' + photoUrl(p, 480) + '" alt="" onerror="this.remove()">' : '') + '<b>' + esc(p.title) + '</b><span>' + esc(sub(p)) +
-            (r ? '<br><strong style="color:#B3261E">' + (r.state === 'notworking' ? '❌ Not working' : '⚠️ Needs repair') + '</strong>' : '') +
-            (S.here ? '<br>' + dist(metres(S.here, p.gps)) + ' from you' : '') + '</span><button class="btn" type="button" data-open="' + esc(p.id) + '">Open</button></div>';
-        }, { maxWidth: 260 }).addTo(hLayer);
-      });
       hLayer.addTo(hMap);
-      if (S.here) { you = L.marker(S.here, { icon: L.divIcon({ className: '', html: '<div class="you"></div>', iconSize: [16, 16] }), interactive: false }).addTo(hLayer); }
-      var hk = homeCk(), mine = hk ? S.projects.filter(function (p) { return p.gps && p.ck === hk; }) : [];
-      if (!fitted && mine.length > 1) { hMap.fitBounds(L.latLngBounds(mine.map(function (p) { return p.gps; })), { paddingTopLeft: [24, 170], paddingBottomRight: [70, 80], maxZoom: 13 }); fitted = true; }
-      if (!fitted && hLayer.getLayers().length) { hMap.fitBounds(hLayer.getBounds(), { paddingTopLeft: [24, 170], paddingBottomRight: [70, 80], maxZoom: 13 }); fitted = true; }
+      if (S.here) { you = L.marker(S.here, { icon: L.divIcon({ className: '', html: '<div class="you"></div>', iconSize: [16, 16] }), interactive: false, zIndexOffset: 2000 }).addTo(hLayer); }
+      var hk = homeCk(), mine = hk ? S.projects.filter(function (p) { return p.gps && p.ck === hk; }) : [], all = S.projects.filter(function (p) { return p.gps; });
+      // the project pins (by condition, in bubbles when zoomed out) are drawn by mpaDraw
+      if (!fitted && mine.length > 1) { hMap.fitBounds(L.latLngBounds(mine.map(function (p) { return p.gps; })), { paddingTopLeft: [24, 230], paddingBottomRight: [70, 80], maxZoom: 13 }); fitted = true; }
+      if (!fitted && all.length) { hMap.fitBounds(L.latLngBounds(all.map(function (p) { return p.gps; })), { paddingTopLeft: [24, 230], paddingBottomRight: [70, 80], maxZoom: 13 }); fitted = true; }
+      mpaRefresh(false);
       nearUi();
     }, 30);
   }
@@ -3315,6 +3411,327 @@ html[data-theme=sun] .dqm-pgh{background:#FFFFFF;border-bottom-width:2px}
   }
   $('nearHd').addEventListener('click', function () { var s = $('nearSheet'), shut = !s.classList.contains('shut'); s.classList.toggle('shut', shut); this.setAttribute('aria-expanded', shut ? 'false' : 'true'); $('nearHint').textContent = shut ? 'Show' : 'Hide'; });
   $('nearList').addEventListener('click', function (e) { if (e.target.closest('#geoRetry')) return geoRetry(); if (e.target.closest('#spotSet')) return spotSheet(); var b = e.target.closest('.row'); if (b) openProj(b.getAttribute('data-id')); });
+
+  // --- map home: pins by condition, filter chips, search, clusters, the card and long press (mpa…) ---------------
+  // A pin's colour: an open repair says how it is (red: not working, amber: needs repair); otherwise a visit in the
+  // last 6 months is green and no visit for 6 months (or none in the app) is grey. A fixed repair is closed, so it
+  // no longer counts. The same rules as the Android app (MapHome.kt).
+  var MPA = { f: store.get('rfPinMapF') || '', key: store.get('rfPinMapKey') !== 'off', map: null, layer: null, spotLayer: null, sel: null, order: [], spot: null, measure: false, lp: 0, places: [], pq: '', pt: 0, items: [], act: -1 };
+  var MPA_RANK = { bad: 3, repair: 2, old: 1, ok: 0 };
+  var MPA_ST = [['broken', 'Broken', 'Zimeharibika', 'alert'], ['due', 'Due a visit', 'Inasubiri ziara', 'cal'], ['mine', 'My assigned visits', 'Ziara nilizopewa', 'mpaPerson']];
+  var MPA_TY = [['water', 'drop', 'blue'], ['school', 'school', 'purple'], ['health', 'mpaCross', 'coral'], ['home', 'mpaHouse', 'teal'], ['farm', 'mpaLeaf', 'green']];
+  Object.assign(OIC, {
+    mpaCross: '<path d="M10 4.5h4v5.5h5.5v4H14v5.5h-4V14H4.5v-4H10z"/>',
+    mpaHouse: '<path d="M4 11.5L12 5l8 6.5"/><path d="M6 10v9.5h12V10"/><path d="M10 19.5v-5h4v5"/>',
+    mpaLeaf: '<path d="M5 19.5c0-8.5 6-14.5 15-14.5 0 9-6 15-14.5 15"/><path d="M5 19.5l7.5-7.5"/>',
+    mpaPerson: '<circle cx="12" cy="8" r="3.6"/><path d="M5 20c.8-3.8 3.6-6 7-6s6.2 2.2 7 6"/>',
+    mpaNav: '<path d="M3 11l18-8-8 18-2-8z"/>',
+    mpaLeft: '<path d="M19 12H5M11 6l-6 6 6 6"/>',
+    mpaInfo: '<circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.8v.1"/>',
+    mpaGlobe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>'
+  });
+  function mpaStill() { return !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches); }
+  function mpaCond(p) {
+    var r = S.repairs[p.id]; if (r) return r.state === 'notworking' ? 'bad' : 'repair';
+    var v = S.visits[p.id], t = v && Date.parse(v.at);
+    return !t || (Date.now() - t) / 864e5 >= DUE_DAYS ? 'old' : 'ok';
+  }
+  function mpaCondName(c) { return c === 'bad' ? tr('Not working', 'Haifanyi kazi') : c === 'repair' ? tr('Needs repair', 'Inahitaji matengenezo') : c === 'old' ? tr('No visit in 6 months', 'Bila ziara miezi 6') : tr('Working', 'Inafanya kazi'); }
+  function mpaMine() { var m = {}; (S.assigned || []).forEach(function (a) { m[a.id] = 1; }); (S.jobs || []).forEach(function (id) { m[id] = 1; }); return m; }
+  function mpaStOk(p, k, mine) { return k === 'broken' ? !!S.repairs[p.id] : k === 'due' ? (ageDays(p) >= DUE_DAYS || prjTestDue(p)) : k === 'mine' ? !!mine[p.id] : true; }
+  // the type filter is the same one as in Projects
+  function mpaTy() { var t = S.ftype; return t && MPA_TY.some(function (x) { return x[0] === t; }) && S.projects.some(function (p) { return p.gps && tgroup(p) === t; }) ? t : ''; }
+  function mpaVisible() { var mine = mpaMine(), ty = mpaTy(); return S.projects.filter(function (p) { return p.gps && mpaStOk(p, MPA.f, mine) && (!ty || tgroup(p) === ty); }); }
+  function mpaTyIcon(p) { var g = tgroup(p), t = MPA_TY.filter(function (x) { return x[0] === g; })[0]; return t ? [t[1], t[2]] : ['pin', 'slate']; }
+
+  // pins within 30 px of each other at this zoom share a bubble; the worst one seeds it, so a broken pump is never hidden
+  function mpaGroups(list, z) {
+    var pts = list.map(function (p) { return { p: p, c: mpaCond(p), xy: MPA.map.project(p.gps, z) }; });
+    if (z >= 15 || pts.length < 2) return pts.map(function (x) { return [x]; });
+    pts.sort(function (a, b) { return MPA_RANK[b.c] - MPA_RANK[a.c] || (a.p.id < b.p.id ? -1 : 1); });
+    var out = [], used = [];
+    pts.forEach(function (a, i) {
+      if (used[i]) return; used[i] = 1; var g = [a];
+      pts.forEach(function (b, j) { if (!used[j]) { var dx = a.xy.x - b.xy.x, dy = a.xy.y - b.xy.y; if (dx * dx + dy * dy <= 900) { used[j] = 1; g.push(b); } } });
+      out.push(g);
+    });
+    return out;
+  }
+  function mpaDraw() {
+    var map = MPA.map; if (!map) return;
+    if (!MPA.layer) MPA.layer = L.layerGroup().addTo(map);
+    MPA.layer.clearLayers();
+    mpaGroups(mpaVisible(), map.getZoom()).forEach(function (g) {
+      var mk, el;
+      if (g.length === 1) {
+        var x = g[0], on = x.p.id === MPA.sel;
+        mk = L.marker(x.p.gps, { icon: L.divIcon({ className: 'mpa-pin' + (on ? ' on' : ''), html: '<i class="mpa-dot c-' + x.c + '"></i>', iconSize: [44, 44] }), title: x.p.title, keyboard: true, zIndexOffset: on ? 1500 : MPA_RANK[x.c] * 10 })
+          .on('click', function () { mpaPick(x.p.id, false); }).addTo(MPA.layer);
+        el = mk.getElement(); if (el) { el.setAttribute('data-id', x.p.id); el.setAttribute('data-c', x.c); el.setAttribute('aria-label', x.p.title + ', ' + mpaCondName(x.c)); }
+      } else {
+        var n = g.length, c = g[0].c, la = 0, ln = 0, sz = n < 10 ? 36 : n < 100 ? 42 : 48;
+        g.forEach(function (y) { la += y.p.gps[0]; ln += y.p.gps[1]; });
+        mk = L.marker([la / n, ln / n], { icon: L.divIcon({ className: 'mpa-cl', html: '<b class="mpa-bub c-' + c + '" style="width:' + sz + 'px;height:' + sz + 'px">' + (n > 99 ? '99+' : n) + '</b>', iconSize: [Math.max(44, sz), Math.max(44, sz)] }), keyboard: true, zIndexOffset: 500 + MPA_RANK[c] * 10 })
+          .on('click', function () { mpaZoomInto(g); }).addTo(MPA.layer);
+        el = mk.getElement(); if (el) { el.setAttribute('data-n', n); el.setAttribute('data-c', c); el.setAttribute('aria-label', tr(n + ' projects here, ' + mpaCondName(c).toLowerCase() + ' among them. Tap to zoom in.', 'Miradi ' + n + ' hapa. Gusa kukuza.')); }
+      }
+    });
+  }
+  // a tap on a bubble zooms in until its pins come apart
+  function mpaZoomInto(g) {
+    var map = MPA.map, b = L.latLngBounds(g.map(function (x) { return x.p.gps; })), z = map.getZoom();
+    if (b.getNorthEast().distanceTo(b.getSouthWest()) < 30) { map.setView(b.getCenter(), Math.min(18, z + 3), { animate: !mpaStill() }); return; }
+    map.setView(b.getCenter(), Math.max(z + 1, Math.min(map.getBoundsZoom(b.pad(0.4)), 16)), { animate: !mpaStill() });
+  }
+  function mpaFit(list) {
+    var map = MPA.map; if (!map || !list.length) return;
+    var o = { paddingTopLeft: [24, 230], paddingBottomRight: [70, 170], maxZoom: 14, animate: !mpaStill() };
+    if (list.length === 1) map.setView(list[0].gps, Math.max(map.getZoom(), 14), { animate: !mpaStill() }); else map.fitBounds(L.latLngBounds(list.map(function (p) { return p.gps; })), o);
+  }
+  // after the projects or a filter change: chips, pins and the card
+  function mpaRefresh(fit) {
+    if (!MPA.map) return;
+    mpaChipsUi(); mpaDraw();
+    if (MPA.sel && !byId(MPA.sel)) { MPA.sel = null; }
+    mpaCardUi(0);
+    if (fit && (MPA.f || mpaTy())) mpaFit(mpaVisible());
+  }
+
+  // Broken, Due a visit, My assigned visits, then the kinds of project; each with how many there are. Swipe sideways.
+  function mpaChipsUi() {
+    var box = $('mpaChips'); if (!box) return;
+    var mine = mpaMine(), ty = mpaTy(), pinned = S.projects.filter(function (p) { return p.gps; }), sx = box.scrollLeft;
+    var h = MPA.f || ty ? '<button type="button" class="mpa-clr" data-mclr="1" aria-label="' + tr('Clear filters', 'Ondoa vichujio') + '">' + oic('x') + '</button>' : '';
+    MPA_ST.forEach(function (s) {
+      var n = pinned.filter(function (p) { return mpaStOk(p, s[0], mine) && (!ty || tgroup(p) === ty); }).length;
+      h += '<button type="button" class="mpa-chip k-' + s[0] + '" data-mf="' + s[0] + '" aria-pressed="' + (MPA.f === s[0]) + '">' + oic(s[3]) + '<span>' + tr(s[1], s[2]) + '</span><i>' + n + '</i></button>';
+    });
+    MPA_TY.forEach(function (t) {
+      if (!pinned.some(function (p) { return tgroup(p) === t[0]; })) return;
+      var g = TGROUPS.filter(function (x) { return x[0] === t[0]; })[0], n = pinned.filter(function (p) { return tgroup(p) === t[0] && mpaStOk(p, MPA.f, mine); }).length;
+      h += '<button type="button" class="mpa-chip" data-mt="' + t[0] + '" style="--hu:var(--hu-' + t[2] + ');--hb:var(--hb-' + t[2] + ')" aria-pressed="' + (ty === t[0]) + '">' + oic(t[1]) + '<span>' + tr(g[1], g[2]) + '</span><i>' + n + '</i></button>';
+    });
+    box.innerHTML = h; box.scrollLeft = sx;
+    $('mpaNone').classList.toggle('hidden', !((MPA.f || ty) && !mpaVisible().length));
+  }
+
+  // the card: a tapped pin (swipe it through the projects nearest that pin) or a long-pressed spot
+  function mpaPick(id, fly) {
+    var p = byId(id); if (!p || !p.gps || !MPA.map) return;
+    MPA.spot = null; MPA.measure = false; mpaSpotDraw();
+    var vis = mpaVisible().filter(function (x) { return x.id !== id; });
+    MPA.order = [p].concat(vis.map(function (x) { return { p: x, d: metres(p.gps, x.gps) }; }).sort(function (a, b) { return a.d - b.d; }).slice(0, 24).map(function (x) { return x.p; }));
+    MPA.sel = id; buzz(); $('mpaQ').blur(); mpaSugHide();
+    if (fly) MPA.map.setView(p.gps, Math.max(MPA.map.getZoom(), 14), { animate: !mpaStill() });
+    mpaDraw(); mpaCardUi(0);
+  }
+  function mpaStep(d) {
+    var i = MPA.order.map(function (x) { return x.id; }).indexOf(MPA.sel), p = MPA.order[i + d]; if (i < 0 || !p) return;
+    MPA.sel = p.id; buzz(); MPA.map.panTo(p.gps, { animate: !mpaStill() }); mpaDraw(); mpaCardUi(d);
+  }
+  function mpaClose() { MPA.sel = null; MPA.spot = null; MPA.measure = false; mpaSpotDraw(); mpaDraw(); mpaCardUi(0); }
+  function mpaVisitDay(iso) { var d = new Date(iso); return isNaN(d) ? '' : d.toLocaleDateString(S.lang === 'sw' ? 'sw' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' }); }
+  function mpaCardUi(dir) {
+    var box = $('mpaCard'); if (!box) return;
+    var p = MPA.sel && byId(MPA.sel), sp = MPA.spot, open = !!(p || sp), was = !box.classList.contains('hidden');
+    $('nearSheet').classList.toggle('hidden', open); box.classList.toggle('hidden', !open); $('mpaKey').classList.toggle('hidden', open);
+    if (!open) { box.innerHTML = ''; return; }
+    var x = '<button type="button" class="mpa-ib" data-mpa="x" aria-label="' + tr('Close', 'Funga') + '">' + oic('x') + '</button>', h;
+    if (sp) {
+      h = '<i class="grab" aria-hidden="true"></i><div class="mpa-ch"><span class="mpa-pos mpa-sp"><b>' + tr('This spot', 'Mahali hapa') + '</b><small>' + fmt(sp) + '</small></span>' + x + '</div>';
+      if (MPA.measure) h += S.here ? '<div class="mpa-meas" id="mpaMeas">' + oic('compass') + '<span><b>' + dist(metres(S.here, sp)) + '</b><small>' + tr('from you, to the ' + heading(S.here, sp) + ' (straight line)', 'kutoka kwako, upande wa ' + (SW[heading(S.here, sp)] || heading(S.here, sp)) + ' (mstari mnyoofu)') + '</small></span></div>'
+        : '<p class="mpa-warn" id="mpaMeas">' + tr('Allow location to measure from where you are.', 'Ruhusu mahali ili upime kutoka ulipo.') + '</p>';
+      h += '<div class="mpa-acts two"><button type="button" class="mpa-a new" data-mpa="new">' + oic('plus') + '<span>' + tr('Add a new site here', 'Ongeza eneo jipya hapa') + '</span></button>' +
+        '<button type="button" class="mpa-a' + (MPA.measure ? ' on' : '') + '" data-mpa="measure" aria-pressed="' + MPA.measure + '">' + oic('compass') + '<span>' + tr('Measure distance from me', 'Pima umbali kutoka kwangu') + '</span></button></div>';
+    } else {
+      var ids = MPA.order.map(function (o) { return o.id; }), i = ids.indexOf(p.id), n = MPA.order.length, c = mpaCond(p), v = S.visits[p.id], ti = mpaTyIcon(p);
+      h = '<i class="grab" aria-hidden="true"></i><div class="mpa-ch"><span class="mpa-pos"><b id="mpaPos">' + (n > 1 && i >= 0 ? tr((i + 1) + ' of ' + n + ' nearby', (i + 1) + ' kati ya ' + n + ' karibu') : tr('Project', 'Mradi')) + '</b>' + (n > 1 ? '<small>' + tr('Swipe for more', 'Telezesha kuona zaidi') + '</small>' : '') + '</span>' +
+        '<button type="button" class="mpa-ib" data-mpa="prev" aria-label="' + tr('Previous project nearby', 'Mradi uliotangulia karibu') + '"' + (i > 0 ? '' : ' disabled') + '>' + oic('mpaLeft') + '</button>' +
+        '<button type="button" class="mpa-ib" data-mpa="next" aria-label="' + tr('Next project nearby', 'Mradi unaofuata karibu') + '"' + (i >= 0 && i < n - 1 ? '' : ' disabled') + '>' + oic('arrow') + '</button>' + x + '</div>' +
+        '<div class="mpa-cb' + (dir && !mpaStill() ? (dir > 0 ? ' in-l' : ' in-r') : '') + '">' +
+          '<span class="mpa-ph c-' + c + '" style="--hu:var(--hu-' + ti[1] + ')">' + oic(ti[0]) + (p.photo ? '<img src="' + photoUrl(p, 240) + '" alt="" onerror="this.remove()">' : '') + '</span>' +
+          '<span class="mpa-tx"><b id="mpaTitle">' + esc(p.title) + '</b><small>' + esc([p.area, p.country].filter(Boolean).join(' · ')) + '</small>' +
+            '<span class="mpa-tags"><em class="mpa-cond c-' + c + '"><i></i>' + mpaCondName(c) + '</em>' + (S.here ? '<span class="mpa-dist" id="mpaDist">' + tr(dist(metres(S.here, p.gps)) + ' from you', dist(metres(S.here, p.gps)) + ' kutoka kwako') + '</span>' : '') + '</span>' +
+            '<span class="mpa-lv">' + (v ? tr('Last visit ', 'Ziara ya mwisho ') + mpaVisitDay(v.at) + (v.by ? ' · ' + esc(v.by) : '') : tr('No visit in the app yet', 'Bado hakuna ziara kwenye programu')) + '</span></span></div>' +
+        '<div class="mpa-acts"><button type="button" class="mpa-a pri" data-mpa="visit">' + oic('clip') + '<span>' + tr('Visit now', 'Tembelea sasa') + '</span></button>' +
+          '<a class="mpa-a" data-mpa="dir" href="https://www.google.com/maps/dir/?api=1&amp;destination=' + p.gps[0].toFixed(6) + ',' + p.gps[1].toFixed(6) + '" target="_blank" rel="noopener">' + oic('mpaNav') + '<span>' + tr('Directions', 'Maelekezo') + '</span></a>' +
+          '<button type="button" class="mpa-a" data-mpa="open">' + oic('chev') + '<span>' + tr('Open project', 'Fungua mradi') + '</span></button></div>';
+    }
+    box.innerHTML = h;
+    if (!was && !mpaStill()) { box.classList.remove('rise'); void box.offsetWidth; box.classList.add('rise'); }
+  }
+  // GPS moved: distances on the card and the measuring line follow
+  function mpaHere() {
+    if (!MPA.map) return;
+    if (MPA.spot && MPA.measure) { mpaSpotDraw(); mpaCardUi(0); return; }
+    var p = MPA.sel && byId(MPA.sel), el = $('mpaDist');
+    if (p && S.here) { if (el) el.textContent = tr(dist(metres(S.here, p.gps)) + ' from you', dist(metres(S.here, p.gps)) + ' kutoka kwako'); else mpaCardUi(0); }
+  }
+
+  // a long press (or a right-click on a computer): "Add a new site here" or "Measure distance from me"
+  function mpaLong(ll) {
+    MPA.lp = Date.now(); MPA.sel = null; MPA.spot = [Math.round(ll.lat * 1e6) / 1e6, Math.round(ll.lng * 1e6) / 1e6]; MPA.measure = false;
+    buzz(); $('mpaQ').blur(); mpaSugHide(); mpaSpotDraw(); mpaDraw(); mpaCardUi(0);
+  }
+  function mpaSpotDraw() {
+    var map = MPA.map; if (!map) return;
+    if (MPA.spotLayer) { map.removeLayer(MPA.spotLayer); MPA.spotLayer = null; }
+    if (!MPA.spot) return;
+    MPA.spotLayer = L.layerGroup().addTo(map);
+    if (MPA.measure && S.here) {
+      L.polyline([S.here, MPA.spot], { color: '#FFFFFF', weight: 7, opacity: 0.95, lineCap: 'round', interactive: false, className: 'mpa-line-w' }).addTo(MPA.spotLayer);
+      L.polyline([S.here, MPA.spot], { color: '#0A78C2', weight: 3.5, dashArray: '10 7', lineCap: 'round', interactive: false, className: 'mpa-line' }).addTo(MPA.spotLayer);
+    }
+    L.marker(MPA.spot, { icon: L.divIcon({ className: 'mpa-spot', html: '<i></i>', iconSize: [28, 28] }), interactive: false, keyboard: false, zIndexOffset: 1800 }).addTo(MPA.spotLayer);
+  }
+  function mpaNewSite(ll) {
+    var near = S.projects.filter(function (p) { return p.gps; }).map(function (p) { return { p: p, d: metres(ll, p.gps) }; }).sort(function (a, b) { return a.d - b.d; })[0];
+    mpaClose(); show('vNew');
+    if (near && near.d < 300000 && near.p.ck && $('nCountry').querySelector('option[value="' + near.p.ck + '"]')) $('nCountry').value = near.p.ck;
+    nPick.at(ll); setTimeout(newUi, 80); // ll: [lat, lng]
+  }
+
+  // search on the map: projects and their villages or areas as you type (from the list on this device, so it works
+  // with no signal), and places by name when there is signal; choosing one flies the map there
+  function mpaWords() { return $('mpaQ').value.trim().toLowerCase().split(/\s+/).filter(Boolean); }
+  function mpaSugHide() { var s = $('mpaSug'); if (s) { s.classList.add('hidden'); $('mpaQ').setAttribute('aria-expanded', 'false'); $('mpaQ').removeAttribute('aria-activedescendant'); } MPA.act = -1; }
+  function mpaSugUi() {
+    var q = $('mpaQ').value.trim().toLowerCase(), w = mpaWords(), box = $('mpaSug');
+    $('mpaX').classList.toggle('hidden', !q);
+    if (!w.length) { mpaSugHide(); return; }
+    var pinned = S.projects.filter(function (p) { return p.gps; }), by = {}, items = [];
+    pinned.forEach(function (p) { var a = String(p.area || '').trim(); if (a) (by[a] = by[a] || []).push(p); });
+    Object.keys(by).filter(function (a) { var hay = (a + ' ' + (by[a][0].country || '')).toLowerCase(); return w.every(function (x) { return hay.indexOf(x) >= 0; }); })
+      .sort(function (a, b) { return (b.toLowerCase().indexOf(w[0]) === 0) - (a.toLowerCase().indexOf(w[0]) === 0) || by[b].length - by[a].length; }).slice(0, 2)
+      .forEach(function (a) { items.push({ k: 'a', t: a, s: (by[a][0].country || '') + ' · ' + (by[a].length === 1 ? tr('1 project', 'mradi 1') : tr(by[a].length + ' projects', 'miradi ' + by[a].length)), list: by[a], ic: 'pin', hu: 'green' }); });
+    pinned.filter(function (p) { var hay = (p.title + ' ' + (p.area || '') + ' ' + (p.country || '')).toLowerCase(); return w.every(function (x) { return hay.indexOf(x) >= 0; }); })
+      .sort(function (a, b) { return (b.title.toLowerCase().indexOf(w[0]) === 0) - (a.title.toLowerCase().indexOf(w[0]) === 0) || (S.here ? metres(S.here, a.gps) - metres(S.here, b.gps) : 0); }).slice(0, 4)
+      .forEach(function (p) { var ti = mpaTyIcon(p); items.push({ k: 'p', t: p.title, s: [p.area, S.here ? dist(metres(S.here, p.gps)) : ''].filter(Boolean).join(' · '), id: p.id, ic: ti[0], hu: ti[1] }); });
+    var pl = MPA.pq === q ? MPA.places : [];
+    pl.forEach(function (x) { items.push({ k: 'g', t: x.name, s: x.where || '', ll: [x.lat, x.lng], ic: 'mpaGlobe', hu: 'slate', src: x.src }); });
+    MPA.items = items; MPA.act = Math.min(MPA.act, items.length - 1);
+    var on = navigator.onLine;
+    box.innerHTML = items.map(function (it, i) {
+      return '<button type="button" role="option" class="mpa-sr" id="mpaO' + i + '" data-i="' + i + '" data-k="' + it.k + '" aria-selected="' + (i === MPA.act) + '"><span class="mpa-si" style="--hu:var(--hu-' + it.hu + ');--hb:var(--hb-' + it.hu + ')">' + oic(it.ic) + '</span><span class="mpa-st"><b>' + esc(it.t) + '</b>' + (it.s ? '<small>' + esc(it.s) + '</small>' : '') + '</span></button>';
+    }).join('') + (items.length ? '' : '<p class="mpa-sn">' + (on ? tr('Nothing found yet. Try a village, school or town.', 'Bado hakuna kilichopatikana. Jaribu kijiji, shule au mji.') : tr('No project or area matches.', 'Hakuna mradi wala eneo linalolingana.')) + '</p>') +
+      (on ? '' : '<p class="mpa-sn mpa-off" id="mpaOff">' + tr('No signal: searching the projects on this device.', 'Hakuna mtandao: inatafuta miradi iliyo kwenye kifaa hiki.') + '</p>') +
+      (pl.some(function (x) { return x.src === 'google'; }) ? '<p class="mpa-sn pby">Powered by <img src="/img/pin/google-logo.png" alt="Google" width="50" height="20"></p>' : pl.length ? '<p class="mpa-sn">' + tr('Places: © OpenStreetMap contributors', 'Maeneo: © OpenStreetMap contributors') + '</p>' : '');
+    box.classList.remove('hidden'); $('mpaQ').setAttribute('aria-expanded', 'true');
+    if (MPA.act >= 0) $('mpaQ').setAttribute('aria-activedescendant', 'mpaO' + MPA.act); else $('mpaQ').removeAttribute('aria-activedescendant');
+  }
+  function mpaPlaces() {
+    clearTimeout(MPA.pt);
+    var q = $('mpaQ').value.trim().toLowerCase();
+    if (!navigator.onLine || q.length < 3) return;
+    MPA.pt = setTimeout(function () {
+      // Google's places only over Google's own map; otherwise the free search
+      var free = !(gKey() && !FLD.free);
+      placeApi('?' + (free ? 'free=1&' : '') + 'q=' + encodeURIComponent(q) + (S.here ? '&near=' + S.here[0].toFixed(4) + ',' + S.here[1].toFixed(4) : '')).then(function (j) {
+        if ($('mpaQ').value.trim().toLowerCase() !== q) return;
+        MPA.places = j.ok ? (j.places || []).filter(function (x) { return x.lat != null && x.lng != null; }).slice(0, 3) : []; MPA.pq = q;
+        if (document.activeElement === $('mpaQ')) mpaSugUi();
+      });
+    }, 450);
+  }
+  function mpaChoose(i) {
+    var it = MPA.items[i]; if (!it) return;
+    $('mpaQ').value = it.t; $('mpaX').classList.remove('hidden'); mpaSugHide(); $('mpaQ').blur();
+    if (it.k === 'p') return mpaPick(it.id, true);
+    MPA.sel = null; MPA.spot = null; mpaSpotDraw(); mpaDraw(); mpaCardUi(0);
+    if (it.k === 'a') mpaFit(it.list); else MPA.map.setView(it.ll, 13, { animate: !mpaStill() });
+  }
+
+  function mpaInit(map) {
+    MPA.map = map;
+    var top = document.querySelector('#vMap .ov.top'), bot = document.querySelector('#vMap .ov.bot'), wrap = document.querySelector('#vMap .mapwrap');
+    top.insertAdjacentHTML('afterbegin',
+      '<div class="mpa-s" id="mpaS" role="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg>' +
+        '<input type="search" id="mpaQ" placeholder="' + tr('Search a village or project', 'Tafuta kijiji au mradi') + '" aria-label="' + tr('Search a village or project', 'Tafuta kijiji au mradi') + '" autocomplete="off" enterkeyhint="search" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="mpaSug">' +
+        '<button type="button" id="mpaX" class="hidden" aria-label="' + tr('Clear', 'Futa') + '">' + oic('x') + '</button><div class="mpa-sug hidden" id="mpaSug" role="listbox" aria-label="' + tr('Suggestions', 'Mapendekezo') + '"></div></div>' +
+      '<div class="mpa-chips" id="mpaChips" role="group" aria-label="' + tr('Filter the map', 'Chuja ramani') + '"></div>' +
+      '<p class="mpa-none hidden" id="mpaNone" role="status">' + tr('Nothing on the map matches these filters.', 'Hakuna kwenye ramani kinacholingana na vichujio hivi.') + '</p>');
+    bot.insertAdjacentHTML('beforeend', '<div class="mpa-card hidden" id="mpaCard" role="region" aria-label="' + tr('Project on the map', 'Mradi kwenye ramani') + '" tabindex="-1"></div>');
+    wrap.insertAdjacentHTML('beforeend', '<button type="button" class="mpa-key" id="mpaKey"></button>');
+    var keyUi = function () {
+      var k = $('mpaKey');
+      k.classList.toggle('off', !MPA.key); k.setAttribute('aria-expanded', MPA.key ? 'true' : 'false');
+      k.setAttribute('aria-label', MPA.key ? tr('Map key. Tap to hide it.', 'Maelezo ya rangi. Gusa kuficha.') : tr('Show the map key', 'Onyesha maelezo ya rangi'));
+      k.innerHTML = MPA.key ? ['ok', 'repair', 'bad', 'old'].map(function (c) { return '<span><i class="c-' + c + '"></i>' + mpaCondName(c) + '</span>'; }).join('') : oic('mpaInfo');
+    };
+    keyUi();
+    $('mpaKey').addEventListener('click', function () { MPA.key = !MPA.key; store.set('rfPinMapKey', MPA.key ? 'on' : 'off'); keyUi(); buzz(); });
+    // the key sits just above whatever covers the bottom of the map
+    var lift = function () { wrap.style.setProperty('--mpab', Math.round(bot.getBoundingClientRect().height) + 'px'); };
+    if (window.ResizeObserver) new ResizeObserver(lift).observe(bot); lift();
+    $('mpaChips').addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      if (b.hasAttribute('data-mclr')) { MPA.f = ''; S.ftype = ''; }
+      else if (b.hasAttribute('data-mf')) { var k = b.getAttribute('data-mf'); MPA.f = MPA.f === k ? '' : k; }
+      else if (b.hasAttribute('data-mt')) { var t = b.getAttribute('data-mt'); S.ftype = mpaTy() === t ? '' : t; }
+      store.set('rfPinMapF', MPA.f); store.set('rfPinType', S.ftype); buzz();
+      if (MPA.sel && !mpaVisible().some(function (p) { return p.id === MPA.sel; })) MPA.sel = null;
+      mpaRefresh(true);
+    });
+    $('mpaCard').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-mpa]'); if (!b || b.disabled) return;
+      var a = b.getAttribute('data-mpa'), id = MPA.sel;
+      if (a === 'x') mpaClose(); else if (a === 'prev') mpaStep(-1); else if (a === 'next') mpaStep(1);
+      else if (a === 'visit') { mpaClose(); openProj(id, 'visit'); } else if (a === 'open') { mpaClose(); openProj(id); }
+      else if (a === 'new') mpaNewSite(MPA.spot.slice());
+      else if (a === 'measure') {
+        MPA.measure = !MPA.measure; buzz();
+        if (MPA.measure && !S.here) locate(function () { mpaSpotDraw(); mpaCardUi(0); if (S.here) MPA.map.fitBounds(L.latLngBounds([S.here, MPA.spot]), { padding: [60, 60], maxZoom: 16, animate: !mpaStill() }); });
+        else if (MPA.measure) MPA.map.fitBounds(L.latLngBounds([S.here, MPA.spot]), { paddingTopLeft: [40, 230], paddingBottomRight: [70, 260], maxZoom: 16, animate: !mpaStill() });
+        mpaSpotDraw(); mpaCardUi(0);
+      }
+    });
+    $('mpaCard').addEventListener('keydown', function (e) { if (e.key === 'ArrowLeft') mpaStep(-1); else if (e.key === 'ArrowRight') mpaStep(1); else if (e.key === 'Escape') mpaClose(); });
+    // swipe the card sideways for the next or previous project nearby
+    (function () {
+      var c = $('mpaCard'), x0 = null, y0 = 0;
+      c.addEventListener('touchstart', function (e) { x0 = e.touches.length === 1 && MPA.sel ? e.touches[0].clientX : null; y0 = e.touches[0].clientY; }, { passive: true });
+      c.addEventListener('touchend', function (e) {
+        if (x0 == null) return; var t = e.changedTouches[0], dx = t.clientX - x0, dy = t.clientY - y0; x0 = null;
+        if (Math.abs(dx) >= 56 && Math.abs(dy) < 50) mpaStep(dx < 0 ? 1 : -1);
+        else if (dy > 70 && Math.abs(dx) < 40) mpaClose(); // pulled down: put it away
+      }, { passive: true });
+    })();
+    // search
+    $('mpaQ').addEventListener('input', function () { MPA.act = -1; mpaSugUi(); mpaPlaces(); });
+    $('mpaQ').addEventListener('focus', function () { if (mpaWords().length) mpaSugUi(); });
+    $('mpaQ').addEventListener('blur', function () { setTimeout(function () { if (document.activeElement !== $('mpaQ')) mpaSugHide(); }, 150); });
+    $('mpaQ').addEventListener('keydown', function (e) {
+      var n = MPA.items.length;
+      if (e.key === 'ArrowDown' && n) { e.preventDefault(); MPA.act = (MPA.act + 1) % n; mpaSugUi(); }
+      else if (e.key === 'ArrowUp' && n) { e.preventDefault(); MPA.act = (MPA.act - 1 + n) % n; mpaSugUi(); }
+      else if (e.key === 'Enter') { e.preventDefault(); if (n) mpaChoose(Math.max(0, MPA.act)); }
+      else if (e.key === 'Escape') { mpaSugHide(); this.blur(); }
+    });
+    $('mpaSug').addEventListener('mousedown', function (e) { e.preventDefault(); }); // keep the box focused until the click lands
+    $('mpaSug').addEventListener('click', function (e) { var b = e.target.closest('[data-i]'); if (b) mpaChoose(+b.getAttribute('data-i')); });
+    $('mpaX').addEventListener('click', function () { $('mpaQ').value = ''; MPA.places = []; MPA.pq = ''; mpaSugHide(); this.classList.add('hidden'); $('mpaQ').focus(); });
+    // long press on a phone, right-click on a computer
+    var c = map.getContainer(), lt = null, p0 = null;
+    var cancel = function () { if (lt) clearTimeout(lt); lt = null; };
+    c.addEventListener('touchstart', function (e) {
+      cancel(); if (e.touches.length !== 1 || e.target.closest('.leaflet-marker-icon, .leaflet-control')) return;
+      p0 = [e.touches[0].clientX, e.touches[0].clientY];
+      lt = setTimeout(function () { lt = null; var r = c.getBoundingClientRect(); mpaLong(map.containerPointToLatLng([p0[0] - r.left, p0[1] - r.top])); }, 550);
+    }, { passive: true });
+    c.addEventListener('touchmove', function (e) { if (lt && (Math.abs(e.touches[0].clientX - p0[0]) > 10 || Math.abs(e.touches[0].clientY - p0[1]) > 10)) cancel(); }, { passive: true });
+    c.addEventListener('touchend', cancel, { passive: true }); c.addEventListener('touchcancel', cancel, { passive: true });
+    map.on('movestart zoomstart', cancel);
+    map.on('contextmenu', function (e) { if (Date.now() - MPA.lp < 1200) return; mpaLong(e.latlng); });
+    map.on('click', function () { if (Date.now() - MPA.lp < 800) return; $('mpaQ').blur(); if (MPA.sel || MPA.spot) mpaClose(); });
+    map.on('zoomend', mpaDraw);
+    // a new language: the words drawn here change too
+    qa('#segLang button').forEach(function (b) { b.addEventListener('click', function () { setTimeout(function () {
+      $('mpaQ').placeholder = tr('Search a village or project', 'Tafuta kijiji au mradi'); $('mpaQ').setAttribute('aria-label', $('mpaQ').placeholder);
+      keyUi(); mpaChipsUi(); mpaDraw(); mpaCardUi(0); $('mpaNone').textContent = tr('Nothing on the map matches these filters.', 'Hakuna kwenye ramani kinacholingana na vichujio hivi.');
+    }, 0); }); });
+    addEventListener('online', function () { if (mpaWords().length && document.activeElement === $('mpaQ')) mpaSugUi(); });
+    addEventListener('offline', function () { if (mpaWords().length && document.activeElement === $('mpaQ')) mpaSugUi(); });
+  }
 
 
 

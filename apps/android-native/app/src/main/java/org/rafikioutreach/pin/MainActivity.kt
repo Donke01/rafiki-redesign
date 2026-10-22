@@ -260,7 +260,8 @@ fun Shell(m: AppModel) {
                         pl.sub == "route" -> org.rafikioutreach.pin.ui.RouteScreen(m, { go(Place(pl.tab, it)) }) { pop() }
                         pl.sub == "offline" -> org.rafikioutreach.pin.ui.OfflineScreen(m) { pop() }
                         pl.sub == "scan" -> org.rafikioutreach.pin.ui.ScanScreen(m, { id -> pop(); go(Place(pl.tab, id, "visit")) }) { pop() }
-                        pl.tab == "map" -> MapScreen(m, { go(Place("map", it)) }, { go(Place("map", it, "visit")) }) { go(Place("map", sub = "offline")) }
+                        pl.tab == "map" -> MapScreen(m, { go(Place("map", it)) }, { go(Place("map", it, "visit")) }, offline = { go(Place("map", sub = "offline")) },
+                            newSite = { ll -> org.rafikioutreach.pin.ui.MapHome.newSiteAt = ll; tab("new") })
                         pl.tab == "new" -> NewSiteScreen(m) { id -> if (id != null) { tab("list"); go(Place("list", id)) } }
                         pl.tab == "me" -> MeScreen(m, { go(Place("me", it)) }, { go(Place("me", sub = "report")) }, notes = { go(Place("me", sub = "notes")) }) { go(Place("me", sub = "set_$it")) }
                         pl.tab == "office" -> org.rafikioutreach.pin.ui.OfficeScreen(m) { go(Place("office", it)) }

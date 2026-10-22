@@ -74,9 +74,11 @@ private fun dotDrawable(color: Int, big: Boolean) = GradientDrawable().apply {
 }
 
 /** A map of project dots. Tap a dot to open the project.
- *  Dots are only rebuilt when the projects change; your own dot just moves, so live updates never flash. */
+ *  Dots are only rebuilt when the projects change; your own dot just moves, so live updates never flash.
+ *  The Map tab draws its own pins and clusters ([drawDots] false, MapHome.kt) and adds its overlays through [onMap]. */
 @Composable
-fun ProjectsMap(dots: List<Dot>, me: LatLng?, onDot: (String) -> Unit, modifier: Modifier = Modifier, fitKey: Any? = null, badgeBottom: androidx.compose.ui.unit.Dp = 0.dp) {
+fun ProjectsMap(dots: List<Dot>, me: LatLng?, onDot: (String) -> Unit, modifier: Modifier = Modifier, fitKey: Any? = null, badgeBottom: androidx.compose.ui.unit.Dp = 0.dp,
+                drawDots: Boolean = true, onMap: ((MapView) -> Unit)? = null) {
     val ctx = LocalContext.current
     MapSetup.init(ctx)
     // satellite first; the street map once they choose it (remembered on this phone)
@@ -99,13 +101,14 @@ fun ProjectsMap(dots: List<Dot>, me: LatLng?, onDot: (String) -> Unit, modifier:
     val holder = remember { MapState() }
     var fitted by remember(fitKey) { mutableStateOf(false) }
     DisposableEffect(Unit) { map.onResume(); onDispose { map.onPause(); map.onDetach() } }
+    LaunchedEffect(map) { onMap?.invoke(map) }
     Box(modifier.clipToBounds()) {
         AndroidView({ map }, Modifier.fillMaxSize().clipToBounds(), update = { mv ->
             val src = g?.let { if (sat) it.sat else it.road } ?: if (sat) Satellite else OfflineMaps.street()
             if (mv.tileProvider.tileSource != src) mv.setTileSource(src)
             org.rafikioutreach.pin.cmap.CountryMaps.apply(mv, cm)
             var changed = false
-            if (holder.dots != dots) {
+            if (holder.dots != dots && drawDots) {
                 holder.dots = dots; changed = true
                 holder.markers.forEach { mv.overlays.remove(it) }
                 holder.markers = dots.map { d ->
