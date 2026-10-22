@@ -78,7 +78,7 @@ private fun dotDrawable(color: Int, big: Boolean) = GradientDrawable().apply {
  *  The Map tab draws its own pins and clusters ([drawDots] false, MapHome.kt) and adds its overlays through [onMap]. */
 @Composable
 fun ProjectsMap(dots: List<Dot>, me: LatLng?, onDot: (String) -> Unit, modifier: Modifier = Modifier, fitKey: Any? = null, badgeBottom: androidx.compose.ui.unit.Dp = 0.dp,
-                drawDots: Boolean = true, onMap: ((MapView) -> Unit)? = null) {
+                drawDots: Boolean = true, onMap: ((MapView) -> Unit)? = null, extras: MapExtras? = null) {
     val ctx = LocalContext.current
     MapSetup.init(ctx)
     // satellite first; the street map once they choose it (remembered on this phone)
@@ -141,10 +141,11 @@ fun ProjectsMap(dots: List<Dot>, me: LatLng?, onDot: (String) -> Unit, modifier:
             if (cm && picked) "cmap" else if (sat) "sat" else "street", {
                 if (it == "cmap") { org.rafikioutreach.pin.cmap.CountryMaps.pick(true); skip = false }
                 else { sat = it == "sat"; org.rafikioutreach.pin.cmap.CountryMaps.pick(false); skip = !online }
-            }) { styles = false }
+            }, extras?.sheet) { styles = false }
         if (me != null) MapButton("target", t("Go to where I am", "Nenda nilipo"), Modifier.align(Alignment.TopEnd).padding(top = 66.dp, end = 10.dp)) {
             map.controller.animateTo(GeoPoint(me.lat, me.lng), 15.0, 600L)
         }
+        extras?.overlay?.invoke(this, map, badgeBottom) // the home map's layers, follow me and compass (MapLayers.kt)
     }
 }
 

@@ -338,6 +338,27 @@ class CountryMapsTest {
         assertFalse(CountryMaps.isOn(mv))
     }
 
+    /** The map style sheet in Kiswahili: the three map styles, then the home map's layer switches (MapLayers.kt). */
+    private fun styleSheetSw(dark: Boolean) {
+        downloadKenya(); Lang.sw = true
+        val m = model(); show(m, dark)
+        rule.waitUntil(8000) { rule.onAllNodesWithTag("nav_map").fetchSemanticsNodes().isNotEmpty() }
+        rule.onNodeWithTag("nav_map").performClick(); rule.waitForIdle(); rule.mainClock.advanceTimeBy(800); rule.waitForIdle()
+        rule.onAllNodesWithContentDescription("Mtindo wa ramani")[0].performClick(); rule.mainClock.advanceTimeBy(700); rule.waitForIdle()
+        rule.waitUntil(5000) { has("Ramani ya barabara bila mtandao") }
+        assertTrue("the layer switches under the styles", has("Njia ya leo") && rule.onAllNodesWithTag("ml_sw_route").fetchSemanticsNodes().isNotEmpty())
+        val b = bitmap(); val c = Canvas(b); c.drawColor(0x66000000)
+        val d = org.robolectric.shadows.ShadowDialog.getLatestDialog()?.window?.decorView
+        if (d != null && d.width > 0) { c.save(); c.translate(0f, (b.height - d.height).toFloat().coerceAtLeast(0f)); d.draw(c); c.restore() }
+        File(out, "cmap-map-style-layers-sw" + (if (dark) "-dark" else "") + ".png").outputStream().use { b.compress(Bitmap.CompressFormat.PNG, 100, it) }
+        rule.onAllNodesWithText("Ramani ya barabara bila mtandao")[0].performClick(); rule.mainClock.advanceTimeBy(700); rule.waitForIdle()
+        val mv = findMap(rule.activity.window.decorView)!!
+        assertTrue(CountryMaps.isOn(mv)); assertTrue("the OpenStreetMap credit shows", credit())
+        CountryMaps.pick(false); rule.waitForIdle()
+    }
+    @Test fun map_style_sheet_with_layers_kiswahili() = styleSheetSw(false)
+    @Test fun map_style_sheet_with_layers_kiswahili_dark() = styleSheetSw(true)
+
     private fun openOffline() {
         rule.waitUntil(8000) { rule.onAllNodesWithTag("nav_map").fetchSemanticsNodes().isNotEmpty() }
         rule.onNodeWithTag("nav_map").performClick(); rule.waitForIdle(); rule.mainClock.advanceTimeBy(800); rule.waitForIdle()

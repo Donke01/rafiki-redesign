@@ -64,7 +64,7 @@ fun rememberHaptics(): Haptics { val v = LocalView.current; return remember(v) {
 /** A choice that slides up from the bottom of the screen (country, map style…). */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PickSheet(title: String, options: List<Triple<String, String, String?>>, selected: String, onPick: (String) -> Unit, onDismiss: () -> Unit) {
+fun PickSheet(title: String, options: List<Triple<String, String, String?>>, selected: String, onPick: (String) -> Unit, extra: (@Composable ColumnScope.() -> Unit)? = null, onDismiss: () -> Unit) {
     val state = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val h = rememberHaptics()
     ModalBottomSheet(onDismiss, sheetState = state, containerColor = C.card, shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)) {
@@ -82,6 +82,7 @@ fun PickSheet(title: String, options: List<Triple<String, String, String?>>, sel
                     if (on) Icon(Ic.get("check"), null, tint = C.blue, modifier = Modifier.size(22.dp))
                 }
             }
+            extra?.invoke(this) // more switches under the choice (the home map's layers, MapLayers.kt)
         }
     }
 }

@@ -227,7 +227,9 @@ export async function onRequestGet({ request, env, waitUntil }) {
     const feed = await getFeed(env, waitUntil);
     const projects = (feed.projects || []).map(p => ({
       id: p.id, title: p.title, country: p.country, ck: p.ck, area: p.area || '', type: p.type, status: p.status, year: p.year || null,
-      gps: p.gps || null, photo: (p.photos && p.photos[0]) || null, pump: p.pump || ''
+      gps: p.gps || null, photo: (p.photos && p.photos[0]) || null, pump: p.pump || '',
+      // people served (the board's number; admins get the latest visit count below): the map's heat layer
+      people: p.people || null
     }));
     if (chk.who && waitUntil) waitUntil(seen(env, chk.who));
     const repairs = await getJson(env, 'pinrepairs', {});
@@ -246,6 +248,7 @@ export async function onRequestGet({ request, env, waitUntil }) {
     if (chk.admin) {
       const latest = await getJson(env, 'pinpeople', {}), hist = await getJson(env, 'pinpeoplehist', {});
       extra.people = peopleServed(feed.projects || [], latest, hist);
+      projects.forEach(p => { const l = latest[p.id]; if (l && Number(l.n) > 0) p.people = Number(l.n); });
       if (!hist[monthKey(Date.now())] && waitUntil) waitUntil(snapPeople(env, feed.projects || [], latest).catch(() => {}));
     }
     // this person's own details (Me › Settings): how they signed in, and what they've set

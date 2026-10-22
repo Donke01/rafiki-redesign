@@ -61,7 +61,7 @@ import java.io.File
 class FieldToolsTest {
     @get:Rule val rule = createAndroidComposeRule<ComponentActivity>()
     private val out = File(System.getProperty("user.dir"), "build/shots").apply { mkdirs() }
-    private val posts = mutableListOf<String>()
+    private val posts = java.util.concurrent.CopyOnWriteArrayList<String>() // the app asks from several threads at once
     private val app get() = ApplicationProvider.getApplicationContext<Application>()
 
     /** Each test has a fresh app: point the map store at it (MapSetup only runs once per test run). */

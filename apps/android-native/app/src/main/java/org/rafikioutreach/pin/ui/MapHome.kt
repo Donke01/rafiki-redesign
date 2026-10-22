@@ -210,8 +210,9 @@ class HomePins(private val mv: MapView, private val dens: Float) {
         // the chosen pin always stands alone, on top
         val groups = clusterPins(pins.filter { it.id != sel }, z, 30.0 * dens) + pins.filter { it.id == sel }.map { listOf(it) }
         groups.forEach { g -> shown += if (g.size == 1) pinMarker(g[0]) else bubbleMarker(g) }
-        // just above the long-press catcher, under your own dot and anything drawn later
-        val at = mv.overlays.indexOfFirst { it is MapEventsOverlay } + 1
+        // above the map's tiles, the long-press catcher and what goes under the pins (heat, pulse, the route's line:
+        // MapLayers.kt), under your own dot and anything drawn later
+        val at = mv.overlays.indexOfLast { it is MapEventsOverlay || it is org.osmdroid.views.overlay.TilesOverlay || it is UnderPins } + 1
         mv.overlays.addAll(at.coerceIn(0, mv.overlays.size), shown)
         mv.invalidate()
     }
@@ -313,11 +314,14 @@ fun MapHome(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit, offlin
     var spot by remember { mutableStateOf<LatLng?>(null) }    // a long press
     var measuring by remember { mutableStateOf(false) }
     var bottomH by remember { mutableIntStateOf(0) }
+    // today's route, follow me, heat, the time slider and live team (MapLayers.kt)
+    val extras = rememberMapExtras(m, snap, fix, open, visit)
 
     val pinned = remember(snap) { snap.projects.filter { it.gps != null } }
     val conds = remember(snap) { pinned.associate { it.id to mapCondition(snap, it) } }
     val tyOn = ty.takeIf { k -> k.isNotBlank() && MAP_TYPES.any { it.first == k } && pinned.any { tgroup(it) == k } } ?: ""
-    val visible = pinned.filter { mapStatusOk(snap, it, status) && (tyOn.isBlank() || tgroup(it) == tyOn) }
+    // the time slider shows its own dots (extras.keep), so the pins and their bubbles step aside meanwhile
+    val visible = pinned.filter { extras.keep(it) && mapStatusOk(snap, it, status) && (tyOn.isBlank() || tgroup(it) == tyOn) }
     val pins = visible.map { HomePin(it.id, it.gps!!, conds[it.id] ?: PinCond.OLD) }
     val order = remember(anchor, visible) {
         val a = anchor?.let { id -> pinned.firstOrNull { it.id == id } }
@@ -327,6 +331,7 @@ fun MapHome(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit, offlin
     val dots = remember(pinned) { pinned.map { Dot(it.id, it.gps!!, 0, false, it.title) } }
 
     fun pick(id: String, fly: Boolean) {
+        HomeLayers.follow = false // looking at a project: following you stops, as when you drag the map
         hp.tap(); spot = null; measuring = false; anchor = id; sel = id; focus.clearFocus()
         val p = pinned.firstOrNull { it.id == id } ?: return
         val v = mv ?: return
@@ -342,7 +347,11 @@ fun MapHome(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit, offlin
 
     val pickNow by rememberUpdatedState<(String) -> Unit> { pick(it, false) }
     val onTapMap by rememberUpdatedState { focus.clearFocus(); if (sel != null || spot != null) { closeCards(); true } else false }
-    val onLong by rememberUpdatedState<(LatLng) -> Unit> { ll -> hp.tap(); focus.clearFocus(); sel = null; anchor = null; measuring = false; spot = ll }
+    val onLong by rememberUpdatedState<(LatLng) -> Unit> { ll ->
+        if (!extras.years) { HomeLayers.follow = false; hp.tap(); focus.clearFocus(); sel = null; anchor = null; measuring = false; spot = ll }
+    }
+    // following you or showing the years: the card and "Nearest to you" step aside
+    LaunchedEffect(extras.quiet) { if (extras.quiet) closeCards() }
 
     // a long press anywhere on the map; a tap on empty map closes the card
     DisposableEffect(mv) {
@@ -384,32 +393,34 @@ fun MapHome(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit, offlin
 
     val bottomDp = with(dens) { bottomH.toDp() }
     Box(Modifier.fillMaxSize().testTag("map_home")) {
-        ProjectsMap(dots, here, { pick(it, false) }, Modifier.fillMaxSize(), fitKey = snap.projects.size, badgeBottom = bottomDp + 12.dp, drawDots = false, onMap = { mv = it })
+        ProjectsMap(dots, here, { pick(it, false) }, Modifier.fillMaxSize(), fitKey = snap.projects.size, badgeBottom = bottomDp + 12.dp, drawDots = false, onMap = { mv = it }, extras = extras)
         Column(Modifier.padding(12.dp).padding(end = 58.dp).align(Alignment.TopStart)) {
             Spacer(Modifier.height(56.dp)) // the search box (drawn last, so its suggestions sit over everything)
-            MapChips(snap, pinned, status, tyOn, {
+            if (!extras.years) MapChips(snap, pinned, status, tyOn, {
                 status = if (status == it) "" else it; prefs.edit().putString("mapf", status).apply()
             }, {
                 ty = if (tyOn == it) "" else it; m.prefs.ftype = ty
             }) { status = ""; ty = ""; prefs.edit().putString("mapf", "").apply(); m.prefs.ftype = "" }
-            if ((status.isNotBlank() || tyOn.isNotBlank()) && visible.isEmpty())
+            if ((status.isNotBlank() || tyOn.isNotBlank()) && visible.isEmpty() && !extras.years)
                 Text(t("Nothing on the map matches these filters.", "Hakuna kwenye ramani kinacholingana na vichujio hivi."), style = MaterialTheme.typography.labelMedium, color = C.ink,
                     modifier = Modifier.padding(top = 8.dp).clip(RoundedCornerShape(12.dp)).background(C.card).padding(horizontal = 12.dp, vertical = 8.dp).testTag("map_none"))
             val pn = pinned.size
             Card(Modifier.padding(top = 8.dp), pad = 12.dp) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(t("$pn of ${snap.projects.size} projects pinned", "Miradi $pn kati ya ${snap.projects.size} ina mahali"), style = MaterialTheme.typography.titleSmall, color = C.ink, modifier = Modifier.weight(1f))
-                    Text(t("${snap.projects.size - pn} to go", "${snap.projects.size - pn} zimebaki"), style = MaterialTheme.typography.bodySmall, color = C.muted)
+                    Spacer(Modifier.width(8.dp)) // a gap, so "… ina mahali" and "0 zimebaki" never run together in Kiswahili
+                    Text(t("${snap.projects.size - pn} to go", "${snap.projects.size - pn} zimebaki"), style = MaterialTheme.typography.bodySmall, color = C.muted, maxLines = 1, softWrap = false)
                 }
                 Meter(pn.toFloat() / maxOf(1, snap.projects.size), Modifier.padding(top = 8.dp))
             }
             HereSlot(m, snap, here, Modifier.padding(top = 10.dp), visit, open)
         }
-        // the key to the colours, above whatever is at the bottom; tap it away
-        if (sel == null && spot == null) MapLegend(legend, Modifier.align(Alignment.BottomEnd).padding(end = 12.dp, bottom = bottomDp + 12.dp + 36.dp)) {
+        // the key to the colours, above whatever is at the bottom (and the layers' cards: MapLayers.kt); tap it away
+        val cardsDp = with(dens) { HomeLayers.cardsH.toDp() }.let { if (it > 0.dp) it + 34.dp else 0.dp }
+        if (sel == null && spot == null && !extras.years) MapLegend(legend, Modifier.align(Alignment.BottomEnd).padding(end = 12.dp, bottom = bottomDp + 12.dp + 36.dp + cardsDp)) {
             legend = !legend; prefs.edit().putBoolean("legend_off", !legend).apply()
         }
-        val panel = when { sel != null -> "card"; spot != null -> "spot"; else -> "near" }
+        val panel = when { extras.quiet -> "none"; sel != null -> "card"; spot != null -> "spot"; else -> "near" }
         AnimatedContent(panel, Modifier.align(Alignment.BottomCenter).padding(12.dp).onSizeChanged { bottomH = it.height }, contentAlignment = Alignment.BottomCenter, label = "mapcard",
             transitionSpec = {
                 if (!anim) EnterTransition.None togetherWith ExitTransition.None
@@ -423,11 +434,12 @@ fun MapHome(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit, offlin
                         if (measuring && here != null) mv?.let { v -> mapFlyAll(v, listOf(here, sp), anim, 16.0) }
                     }
                 } ?: Box(Modifier)
+                "none" -> Box(Modifier)
                 else -> NearestSheet(m, snap, here, Modifier, open)
             }
         }
-        MapSearch(m, snap, here, Modifier.align(Alignment.TopStart).padding(12.dp).padding(end = 58.dp), { pick(it, true) }, { pts -> mv?.let { mapFlyAll(it, pts, anim, 14.0) }; closeCards() }) { ll ->
-            mv?.let { mapFly(it, ll, 13.0, anim) }; closeCards()
+        MapSearch(m, snap, here, Modifier.align(Alignment.TopStart).padding(12.dp).padding(end = 58.dp), { pick(it, true) }, { pts -> HomeLayers.follow = false; mv?.let { mapFlyAll(it, pts, anim, 14.0) }; closeCards() }) { ll ->
+            HomeLayers.follow = false; mv?.let { mapFly(it, ll, 13.0, anim) }; closeCards()
         }
         // Save this area for offline (OfflineMaps.kt)
         OfflineMapControls(m, offline)
