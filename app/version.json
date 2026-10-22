@@ -1,8 +1,8 @@
 {
   "ok": true,
-  "versionCode": 43,
-  "versionName": "2.18.1",
-  "notes": "The map stays tidy with the keyboard open: while you search, only the search and its results show. On small screens nothing on the map overlaps.",
-  "sha256": "555240130f3b0ed6fbe4f2d79e09d5a78bba32550521bda2ea9e3d55a00f29c3",
+  "versionCode": 44,
+  "versionName": "2.19.0",
+  "notes": "A calmer map: it opens with just the pins; tap the map for filters. Pins show the project type and its condition, groups show the mix, names appear as you zoom in, and a long press gives quick actions.",
+  "sha256": "1e03aab9eddd9cdb97342117f18eefd19d765d9ba181fab3b1553fb0757b2cfc",
   "apk": "/app/rafiki-pin.apk"
 }
