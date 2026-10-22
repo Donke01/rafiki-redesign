@@ -10,7 +10,14 @@ def proj(i, t, area, gps, typ='Borehole well'): return {'id': str(i), 'title': t
 P = [proj(101, 'Kapsaret Borehole', 'Kapsaret, Eldoret', [0.47, 35.25]), proj(102, 'Chepkongi Dispensary', 'Kapsaret, Eldoret', [0.514, 35.27]), proj(103, 'Turbo Spring', 'Turbo', [0.63, 35.05], 'Water collection'),
      proj(104, 'Sigowet Church Well', 'Sigowet', [-0.27, 35.15]), proj(105, 'Kitale Primary Tank', 'Kitale', [1.015, 35.0]), proj(106, 'Kiminini Borehole', 'Kitale', [0.9, 34.92]),
      proj(107, 'Bungoma Bridge School', 'Bungoma', [0.563, 34.56], 'School'), proj(108, 'Webuye Well', 'Bungoma', [0.61, 34.77]), proj(109, 'Moi’s Bridge Kiosk', 'Eldoret', [0.87, 35.12]),
-     proj(110, 'Ziwa Borehole', 'Eldoret', [0.75, 35.3])]
+     proj(110, 'Ziwa Borehole', 'Eldoret', [0.75, 35.3]), proj(111, 'Lessos Dispensary', 'Lessos', None, 'Health'),
+     # for Areas and projects: Kapsaret (8, one with no location), Kaigat (3), Ndalat (2), and long area names
+     proj(121, 'Kapsaret Primary School', 'Kapsaret, Eldoret', [0.48, 35.26], 'School'), proj(122, 'Simat Water Kiosk', 'Kapsaret, Eldoret', [0.49, 35.24], 'Water collection'),
+     proj(123, 'Kapsaret Girls Secondary', 'Kapsaret, Eldoret', [0.46, 35.27], 'School'), proj(124, 'Lemook Spring', 'Kapsaret, Eldoret', [0.45, 35.23], 'Water collection'),
+     proj(125, 'Kapsaret Market Tank', 'Kapsaret, Eldoret', [0.475, 35.255]), proj(127, 'Kapsaret Health Centre', 'Kapsaret, Eldoret', None, 'Health'),
+     proj(131, 'Kaigat Borehole', 'Kaigat, Nandi', [0.31, 35.2]), proj(132, 'Kaigat Primary School', 'Kaigat, Nandi', [0.32, 35.21], 'School'), proj(133, 'Kaigat Dispensary', 'Kaigat, Nandi', [0.3, 35.19], 'Health'),
+     proj(141, 'Ndalat Well', 'Ndalat', [0.2, 35.1]), proj(142, 'Ndalat Church Tank', 'Ndalat', [0.21, 35.11]),
+     proj(151, 'Elgon Estate Primary Borehole', 'Elgon Estate Primary', [0.9, 34.7]), proj(152, 'Kapsabaot Comprehensive School Rainwater Harvesting Tank', 'Kapsabaot Comprehensive School', [0.95, 35.08], 'School')]
 REP = {'104': {'state': 'notworking', 'by': 'Bertin', 'at': iso(3000), 'urgency': 'urgent', 't': 'Sigowet Church Well'}, '107': {'state': 'repair', 'by': 'Grace', 'at': iso(9000), 't': 'Bungoma Bridge School'}}
 VIS = {'101': {'at': iso(400 * 1440), 'by': 'Meril', 'state': 'working'}, '102': {'at': iso(20 * 1440), 'by': 'Meril', 'state': 'working'}}
 TEAM = [{'name': 'Meril Kiprop', 'home': 'ke', 'admin': False, 'source': 'app', 'phone': '+254 712 345 678'}, {'name': 'Bertin Mwangi', 'home': 'ke', 'admin': False, 'source': 'app'}, {'name': 'Grace Achieng', 'home': 'ke', 'admin': False, 'source': 'app'}, {'name': 'Reid Anderson', 'admin': True, 'source': 'cloudflare'}]
@@ -19,11 +26,14 @@ TM = {'ok': True, 'people': [{'name': 'Bertin Mwangi', 'lat': 0.52, 'lng': 35.28
                              {'name': 'Meril Kiprop', 'lat': 1.0, 'lng': 35.02, 'acc': 8, 'at': iso(3), 'phone': '+254 712 345 678', 'home': 'ke'}],
       'visits': [{'id': '102', 'by': 'Bertin Mwangi', 'at': iso(70), 's': 'working', 't': 'Chepkongi Dispensary'}, {'id': '101', 'by': 'Bertin Mwangi', 'at': iso(150), 's': 'repair', 't': 'Kapsaret Borehole'},
                  {'id': '107', 'by': 'Grace Achieng', 'at': iso(120), 's': 'notworking', 't': 'Bungoma Bridge School'}]}
-def stop(i, why, age=None): p = next(x for x in P if x['id'] == str(i)); return {'id': p['id'], 't': p['title'], 'area': p['area'], 'gps': p['gps'], 'why': why, 'score': 50, 'age': age}
+def stop(i, why, age=None, chosen=False): p = next(x for x in P if x['id'] == str(i)); return dict({'id': p['id'], 't': p['title'], 'area': p['area'], 'gps': p['gps'], 'why': why, 'score': 50, 'age': age}, **({'chosen': True} if chosen else {}))
 PLAN = {'ok': True, 'total': 9, 'days': [{'stops': [stop(104, ['repair', 'urgent'], 3), stop(101, ['overdue'], 400)], 'km': 82.1},
                                           {'stops': [stop(107, ['repair']), stop(108, ['never'])], 'km': 24.0},
                                           {'stops': [stop(105, ['never', 'test']), stop(106, ['never'])], 'km': 15.2}],
         'spare': [stop(109, ['never']), stop(110, ['never']), stop(103, ['never'])]}
+# projects chosen by hand (ids=…) in Kapsaret: only these, or with suggestions filling the days; one has no location
+PLAN_ONLY = {'ok': True, 'total': 2, 'chosen': 2, 'only': True, 'days': [{'stops': [stop(101, ['overdue'], 400, True), stop(102, [], 20, True)], 'km': 5.4}], 'spare': [], 'nogps': [{'id': '127', 't': 'Kapsaret Health Centre'}]}
+PLAN_MIX = {'ok': True, 'total': 9, 'chosen': 2, 'only': False, 'days': [{'stops': [stop(101, ['overdue'], 400, True), stop(124, ['never'])], 'km': 3.1}, {'stops': [stop(102, [], 20, True), stop(131, ['never'])], 'km': 22.6}], 'spare': [stop(132, ['never'])], 'nogps': [{'id': '127', 't': 'Kapsaret Health Centre'}]}
 posts, adm, problems = [], [], []
 def check(c, w): print(('ok   ' if c else 'FAIL ') + w); (None if c else problems.append(w))
 state = {'admin': True, 'who': 'Meril Kiprop'}
@@ -37,7 +47,7 @@ def admin(route, req):
     adm.append(req.method + ' ' + req.url + ' ' + (req.post_data or ''))
     if req.method == 'GET':
         if 'view=teammap' in req.url: return route.fulfill(json=TM)
-        if 'view=plan' in req.url: return route.fulfill(json=PLAN)
+        if 'view=plan' in req.url: return route.fulfill(json=(PLAN_ONLY if 'only=1' in req.url else PLAN_MIX) if 'ids=' in req.url else PLAN)
         if 'view=team' in req.url: return route.fulfill(json={'ok': True, 'team': TEAM, 'mail': {'ready': False}, 'cron': False})
         if 'view=assign' in req.url: return route.fulfill(json={'ok': True, 'items': []})
         return route.fulfill(json={'ok': True, 'items': []})
@@ -146,7 +156,7 @@ with sync_playwright() as p:
     check(not folded(pg, 'planf') and folded(pg, 'planhow'), 'before the first run the choices are open, how it chooses is folded')
     pg.select_option('#ofaTo', 'Meril Kiprop'); pg.select_option('#ofaDaysN', '3'); pg.select_option('#ofaPer', '4'); pg.fill('#ofaStart', '2026-10-24')   # a Saturday: the next day is Monday
     pg.dispatch_event('#ofaPer', 'change')
-    check('Kitale (2)' in pg.inner_text('#ofaArea'), 'areas with how many sites')
+    check(pg.inner_text('#ofaAreaV') == 'All of Kenya' and pg.inner_text('#ofaPickSum') == 'All of Kenya · suggestions from every area', 'no area ticked: all of Kenya')
     check(pg.inner_text('#dqmPlanSum') == 'Meril Kiprop · Kenya · all areas · 3 days · 4 a day', 'the choices in one line: ' + pg.inner_text('#dqmPlanSum'))
     shot(pg, '10-plan-form.png')
     pg.click('#ofaGo'); pg.wait_for_timeout(1400)
@@ -192,12 +202,102 @@ with sync_playwright() as p:
         pg.evaluate("t => document.documentElement.setAttribute('data-theme', t)", th); pg.evaluate("document.querySelector('#ofaRes').scrollIntoView()"); shot(pg, '14-plan-%s.png' % th)
     pg.evaluate("document.documentElement.removeAttribute('data-theme')")
 
+    # --- 5a. Plan a week › Areas and projects: several areas, projects ticked by hand, only these or with suggestions ---
+    def midword(pg, sel): return pg.evaluate("""(sel) => { const bad = []; document.querySelectorAll(sel).forEach(el => { const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT); let n; while ((n = w.nextNode())) { const re = /\\S+/g; let m; while ((m = re.exec(n.data))) { const r = document.createRange(); r.setStart(n, m.index); r.setEnd(n, m.index + m[0].length); const tops = new Set([...r.getClientRects()].filter(x => x.width > 0).map(x => Math.round(x.top))); if (tops.size > 1) bad.push(m[0]); } } }); return bad; }""", sel)
+    def narrow(pg, sel, mn): return pg.evaluate("([sel, mn]) => [...document.querySelectorAll(sel)].filter(el => el.getClientRects().length && el.getBoundingClientRect().width < mn).map(el => el.textContent.trim().slice(0, 40) + ' ' + Math.round(el.getBoundingClientRect().width))", [sel, mn])
+    def last_plan(): return [a for a in adm if 'view=plan' in a][-1].split('?', 1)[1].split(' ')[0]
+    pg.click('[data-testid=planf_toggle]'); pg.wait_for_timeout(450)
+    check(pg.locator('#ofaOnly').is_hidden(), 'nothing chosen: the Only switch is hidden')
+    pg.click('[data-testid=plan_area]'); sheet_open(pg)
+    check(pg.locator('.tsh [data-testid=plan_pick_sheet]').count() == 1, 'the Area field opens Areas and projects')
+    rows = pg.locator('#ofaArList label').all_inner_texts()
+    check(pg.locator('#ofaArList input[type=checkbox]').count() >= 10 and pg.locator('#ofaArList input[type=radio]').count() == 0, 'areas are checkboxes')
+    check(rows[0].split() == ['Kapsaret', '8'] and rows[1].split() == ['Kaigat', '3'] and any(r.startswith('Kapsabaot Comprehensive School') and r.endswith('1') for r in rows), 'areas keep their counts, biggest first: %s' % rows[:3])
+    check(pg.inner_text('#ofaArN') == 'All of Kenya' and 'None ticked' in pg.inner_text('#ofaArHint'), 'none ticked means all of Kenya')
+    check(pg.inner_text('#ofaPrL') == 'Projects in Kenya' and pg.locator('#ofaPkList .dqm-pg').count() >= 10, 'no area ticked: all of Kenya’s projects, by area')
+    pg.fill('#ofaPkQ', 'ziwa'); pg.wait_for_timeout(200)
+    check(pg.locator('#ofaPkList label.dnr-p').count() == 1, 'search narrows the projects'); pg.fill('#ofaPkQ', ''); pg.wait_for_timeout(150)
+    pg.check('#ofaArList input[value="Kapsaret"]'); pg.check('#ofaArList input[value="Kaigat"]'); pg.wait_for_timeout(200)
+    heads = pg.locator('#ofaPkList .dqm-pgt b').all_inner_texts()
+    check(heads == ['Kapsaret', 'Kaigat'] and pg.locator('#ofaPkList label.dnr-p').count() == 11, 'projects of the ticked areas, grouped by area: %s' % heads)
+    check(pg.inner_text('#ofaArN') == '2 ticked' and pg.inner_text('#ofaPrL') == 'Projects in these areas', 'two areas ticked')
+    for i in ['101', '102', '127']: pg.check('#ofaPkList input[value="%s"]' % i)
+    pg.wait_for_timeout(150)
+    check(pg.inner_text('#ofaPkN') == '3 chosen' and '3 of 8 chosen' in pg.locator('.dqm-pg').nth(0).inner_text(), 'three ticked: the count and the area heading')
+    check('No location' in pg.locator('#ofaPkList label:has(input[value="127"])').inner_text(), 'a project with no location says so')
+    kg = pg.locator('.dqm-pg').nth(1)
+    kg.locator('[data-pa=all]').click(); pg.wait_for_timeout(150)
+    check(pg.inner_text('#ofaPkN') == '6 chosen' and kg.locator('input:checked').count() == 3, 'Select all in Kaigat')
+    pg.locator('.dqm-pg').nth(1).locator('[data-pa=none]').click(); pg.wait_for_timeout(150)
+    check(pg.inner_text('#ofaPkN') == '3 chosen' and pg.locator('.dqm-pg').nth(1).locator('input:checked').count() == 0, 'Clear in Kaigat')
+    pg.click('#ofaPkOnly'); pg.wait_for_timeout(150)
+    check(pg.locator('#ofaPkList label.dnr-p').count() == 3, 'ticked only'); pg.click('#ofaPkOnly'); pg.wait_for_timeout(150)
+    check(not overflow(pg, '.tsh .dnr-p, .tsh .dqm-pgh, .tsh .dqm-pks > *') and not midword(pg, '.tsh .dqm-an, .tsh .dqm-pgt b, .tsh label.dnr-p b'), 'picker: nothing overflows or breaks mid-word')
+    pg.locator('#ofaArList label:has(input[value="Kapsabaot Comprehensive School"])').scroll_into_view_if_needed()
+    check(not narrow(pg, '.tsh .dqm-an, .tsh .dqm-pgt, .tsh label.dnr-p:not(.dqm-ac) > span', 150), 'long names are never squeezed: %s' % narrow(pg, '.tsh .dqm-an, .tsh .dqm-pgt, .tsh label.dnr-p:not(.dqm-ac) > span', 150))
+    shot(pg, '21-plan-areas.png')
+    pg.evaluate("document.querySelector('#ofaPrs').scrollIntoView()"); shot(pg, '21b-plan-choose-projects.png')
+    pg.click('.tsh [data-testid=plan_pick_done]'); pg.wait_for_timeout(450)
+    check(pg.inner_text('#ofaAreaV') == 'Kapsaret, Kaigat', 'the Area field: ' + pg.inner_text('#ofaAreaV'))
+    check(pg.inner_text('#ofaPickSum') == 'Kapsaret: 3 of 8 projects · Kaigat: all 3', 'the summary under the form: ' + pg.inner_text('#ofaPickSum'))
+    check(pg.locator('#ofaOnly').is_visible() and pg.get_attribute('#ofaOnly', 'aria-checked') == 'false', 'the Only switch appears, off')
+    pg.click('#ofaOnly'); pg.wait_for_timeout(200)
+    check(pg.get_attribute('#ofaOnly', 'aria-checked') == 'true' and 'only the 3 chosen' in pg.inner_text('#dqmPlanSum'), 'Only these projects: on, in the folded summary: ' + pg.inner_text('#dqmPlanSum'))
+    pg.locator('#ofaPick').scroll_into_view_if_needed(); pg.evaluate("window.scrollBy(0, -260)"); shot(pg, '22-plan-form-chosen.png')
+    # tapping the summary opens the picker at the projects
+    pg.click('[data-testid=plan_pick]'); sheet_open(pg)
+    check(pg.evaluate("(() => { const r = document.querySelector('#ofaPrs').getBoundingClientRect(); return r.top < innerHeight * 0.6 && r.top > 0; })()"), 'the summary opens the picker at the projects')
+    sheet_close(pg)
+    pg.click('#ofaGo'); pg.wait_for_timeout(1400)
+    q = last_plan()
+    check('areas=Kapsaret,Kaigat' in q and 'ids=101,102,127' in q and 'only=1' in q and 'area=' not in q.replace('areas=', ''), 'asks for the ticked areas and the chosen projects only: ' + q)
+    check(pg.locator('.ofa-day').count() == 1 and pg.locator('.ofa-day .tag.dqm-ch').count() == 2, 'only the chosen projects, each with a Chosen tag')
+    check('No location, so not placed' in pg.inner_text('[data-testid=plan_nogps]') and 'Kapsaret Health Centre' in pg.inner_text('[data-testid=plan_nogps]'), 'a chosen project with no location is listed, not dropped')
+    check(not overflow(pg, '#oBody .dqm-stop, #oBody .dqm-row, #oBody .dqm-nogps'), 'chosen plan: nothing overflows')
+    pg.evaluate("document.querySelector('[data-testid=plan_res]').scrollIntoView()"); shot(pg, '23-plan-only-chosen.png')
+    pg.click('[data-testid=planf_toggle]'); pg.wait_for_timeout(400); pg.click('#ofaOnly'); pg.click('#ofaGo'); pg.wait_for_timeout(1400)
+    q = last_plan()
+    check('ids=101,102,127' in q and 'only=1' not in q, 'with suggestions: no only=1')
+    tags = pg.locator('.ofa-day .dqm-stop').evaluate_all("e => e.map(x => !!x.querySelector('.tag.dqm-ch'))")
+    check(pg.locator('.ofa-day').count() == 2 and tags.count(True) == 2 and tags.count(False) == 2, 'chosen projects stand out from suggestions: %s' % tags)
+    pg.click('[data-ofa-st="0:101"]'); sheet_open(pg)
+    check('Chosen' in pg.inner_text('.tsh .ofa-why'), 'the stop sheet says Chosen'); shot(pg, '24-plan-chosen-stop-sheet.png'); sheet_close(pg)
+    pg.evaluate("document.querySelector('[data-testid=plan_res]').scrollIntoView()"); shot(pg, '25-plan-chosen-with-suggestions.png')
+    for th in ['dark', 'sun']:
+        pg.evaluate("t => document.documentElement.setAttribute('data-theme', t)", th); pg.evaluate("document.querySelectorAll('.ofa-day')[0].scrollIntoView()"); shot(pg, '26-plan-chosen-%s.png' % th)
+        pg.click('[data-testid=planf_toggle]'); pg.wait_for_timeout(400); pg.locator('#ofaPick').scroll_into_view_if_needed(); pg.evaluate("window.scrollBy(0, -260)"); shot(pg, '26b-plan-form-%s.png' % th)
+        pg.click('[data-testid=plan_area]'); sheet_open(pg); shot(pg, '27-plan-areas-%s.png' % th)
+        pg.evaluate("document.querySelector('#ofaPrs').scrollIntoView()"); shot(pg, '27b-plan-projects-%s.png' % th); sheet_close(pg); pg.click('[data-testid=planf_toggle]'); pg.wait_for_timeout(400)
+    pg.evaluate("document.documentElement.removeAttribute('data-theme')")
+    # unticking an area lets go of its projects; the first area ticked brings the areas of projects already chosen
+    pg.click('[data-testid=planf_toggle]'); pg.wait_for_timeout(400); pg.click('[data-testid=plan_area]'); sheet_open(pg)
+    pg.uncheck('#ofaArList input[value="Kapsaret"]'); pg.wait_for_timeout(150)
+    check(pg.inner_text('#ofaPkN') == '0 chosen' and pg.locator('#ofaPkList .dqm-pgt b').all_inner_texts() == ['Kaigat'], 'unticking Kapsaret lets go of its projects')
+    pg.uncheck('#ofaArList input[value="Kaigat"]'); pg.wait_for_timeout(150)
+    pg.check('#ofaPkList input[value="152"]'); pg.check('#ofaArList input[value="Ndalat"]'); pg.wait_for_timeout(150)
+    check(pg.locator('#ofaArList input:checked').evaluate_all('e => e.map(x => x.value)') == ['Kapsabaot Comprehensive School', 'Ndalat'] or sorted(pg.locator('#ofaArList input:checked').evaluate_all('e => e.map(x => x.value)')) == ['Kapsabaot Comprehensive School', 'Ndalat'], 'the chosen project’s area is ticked too, so it isn’t hidden')
+    pg.click('.tsh [data-testid=plan_pick_done]'); pg.wait_for_timeout(400)
+    check(pg.inner_text('#ofaPickSum') == 'Ndalat: all 2 · Kapsabaot Comprehensive School: 1 of 1 project', 'summary: ' + pg.inner_text('#ofaPickSum'))
+    check(not overflow(pg, '#oBody .dqm-row, #oBody .dqm-sel') and not midword(pg, '#ofaPickSum, #ofaAreaV'), 'long area names wrap cleanly in the form')
+    pg.click('#ofaGo'); pg.wait_for_timeout(1200)
+    check('areas=Ndalat,Kapsabaot%20Comprehensive%20School' in last_plan() and 'ids=152' in last_plan(), 'area names are sent encoded: ' + last_plan())
+    # a new country starts again
+    pg.click('[data-testid=planf_toggle]'); pg.wait_for_timeout(400)
+    pg.select_option('#ofaCk', 'tz'); pg.wait_for_timeout(200)
+    check(pg.inner_text('#ofaAreaV') == 'All of Tanzania' and pg.locator('#ofaOnly').is_hidden(), 'another country: areas and projects cleared')
+    pg.select_option('#ofaCk', 'ke'); pg.wait_for_timeout(200); pg.click('[data-testid=planf_toggle]'); pg.wait_for_timeout(400)
+
     # --- 5b. desktop (1280) ------------------------------------------------------------------------------
     pg.set_viewport_size({'width': 1280, 'height': 900}); pg.goto(BASE + '/pin#office'); pg.wait_for_timeout(1200)
     pg.click('.otab[data-o=teammap]'); pg.wait_for_timeout(1500); pg.evaluate("window.scrollTo(0,0)"); shot(pg, '16-teammap-desktop.png')
     pg.click('#ofaTmList [data-ofa-p="Bertin Mwangi"]'); sheet_open(pg); shot(pg, '17-teammap-sheet-desktop.png'); sheet_close(pg)
     pg.click('.otab[data-o=plan]'); pg.wait_for_timeout(1200); shot(pg, '18-plan-desktop.png', True)
     check(not overflow(pg, '#oBody .dqm-stop, #oBody .dqm-row, #oBody .dqm-card'), 'nothing overflows on the desktop')
+    pg.click('[data-testid=planf_toggle]'); pg.wait_for_timeout(450); pg.click('[data-testid=plan_area]'); sheet_open(pg)
+    pg.check('#ofaArList input[value="Kapsaret"]'); pg.check('#ofaArList input[value="Kapsabaot Comprehensive School"]'); pg.check('#ofaPkList input[value="121"]'); pg.wait_for_timeout(200)
+    check(not overflow(pg, '.tsh .dnr-p, .tsh .dqm-pgh') and not midword(pg, '.tsh .dqm-an, .tsh .dqm-pgt b, .tsh label.dnr-p b'), 'picker on the desktop: nothing overflows or breaks mid-word')
+    pg.evaluate("document.querySelector('#ofaPrs').scrollIntoView()"); shot(pg, '18b-plan-picker-desktop.png'); pg.click('.tsh [data-testid=plan_pick_done]'); pg.wait_for_timeout(400)
+    pg.locator('#ofaPick').scroll_into_view_if_needed(); shot(pg, '18c-plan-form-desktop.png')
     pg.set_viewport_size({'width': 390, 'height': 844})
 
     # --- 6. Kiswahili ----------------------------------------------------------------------------------
@@ -218,6 +318,20 @@ with sync_playwright() as p:
     check(not overflow(pg, '#oBody .dqm-stop, #oBody .dqm-row, #oBody .ofa-day .oh'), 'plan: nothing overflows in Kiswahili')
     shot(pg, '20-plan-sw.png', True)
     pg.click('[data-ofa-st="1:107"]'); sheet_open(pg); shot(pg, '20b-plan-stop-sheet-sw.png'); sheet_close(pg)
+    pg.click('[data-testid=planf_toggle]'); pg.wait_for_timeout(400)
+    check(pg.inner_text('#ofaAreaV') == 'Yote ya Kenya' and 'mapendekezo kutoka maeneo yote' in pg.inner_text('#ofaPickSum'), 'Kiswahili: hakuna eneo')
+    pg.click('[data-testid=plan_area]'); sheet_open(pg)
+    pg.check('#ofaArList input[value="Kapsaret"]'); pg.check('#ofaArList input[value="Kapsabaot Comprehensive School"]'); pg.check('#ofaPkList input[value="101"]'); pg.wait_for_timeout(150)
+    t = pg.inner_text('.tsh')
+    check('Maeneo na miradi' in t and 'Chagua zote' in t and 'Futa' in t and pg.inner_text('#ofaPkN') == '1 zimechaguliwa' and pg.inner_text('#ofaArN') == '2 zimechaguliwa', 'areas and projects in Kiswahili')
+    check(not overflow(pg, '.tsh .dnr-p, .tsh .dqm-pgh, .tsh .dqm-pks > *') and not midword(pg, '.tsh .dqm-an, .tsh .dqm-pgt b, .tsh label.dnr-p b, .tsh .dqm-pga'), 'Kiswahili picker: nothing overflows or breaks mid-word')
+    check(not narrow(pg, '.tsh .dqm-an, .tsh .dqm-pgt, .tsh label.dnr-p:not(.dqm-ac) > span', 150), 'Kiswahili: long names are never squeezed')
+    shot(pg, '28-plan-areas-sw.png'); pg.evaluate("document.querySelector('#ofaPrs').scrollIntoView()"); shot(pg, '28b-plan-projects-sw.png')
+    pg.click('.tsh [data-testid=plan_pick_done]'); pg.wait_for_timeout(400)
+    check(pg.inner_text('#ofaPickSum') == 'Kapsaret: miradi 1 kati ya 8 · Kapsabaot Comprehensive School: mradi wake 1', 'summary in Kiswahili: ' + pg.inner_text('#ofaPickSum'))
+    check('Miradi hii tu' in pg.inner_text('#ofaOnly') and '1 zimechaguliwa' in pg.inner_text('#dqmPlanSum'), 'the Only switch and folded summary in Kiswahili')
+    check(not overflow(pg, '#oBody .dqm-row, #oBody .dqm-sel, #oBody .tm-sw') and not midword(pg, '#ofaPickSum, #ofaAreaV, #ofaOnly'), 'Kiswahili form: nothing overflows or breaks mid-word')
+    pg.locator('#ofaPick').scroll_into_view_if_needed(); pg.evaluate("window.scrollBy(0, -260)"); shot(pg, '29-plan-form-chosen-sw.png')
     pg.evaluate("localStorage.setItem('rfPinLang','en')")
 
     # --- 7. a field officer never sees the team map ----------------------------------------------------

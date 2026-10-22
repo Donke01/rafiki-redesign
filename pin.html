@@ -1831,6 +1831,34 @@ html[data-theme=dark] .dnr-link code{background:rgba(0,0,0,.25)}
 .dqm-qr .fq-r b{white-space:normal;overflow:visible;overflow-wrap:break-word;line-height:1.3}.dqm-qr .fq-r small{display:block;font-size:.78rem;line-height:1.4}
 .fq-prev{display:flex;flex-direction:column;gap:10px;align-items:stretch;padding:16px}.fq-prev .fq-s{width:220px;max-width:100%;margin:0 auto}.fq-prev .btn svg{width:20px;height:20px}
 .dqm-qr .fq-side{gap:12px}.dqm-qr .fq-side .dqm-sets{padding:4px 16px}
+/* plan a week › areas and projects */
+.dqm-afld{margin-top:12px}.dqm-flab{display:block;font-size:.8rem;font-weight:700;color:var(--ink)}
+.dqm-sel{display:flex;align-items:center;gap:10px;width:100%;margin-top:6px;min-height:48px;padding:10px 12px 10px 16px;border-radius:16px;border:var(--bw) solid var(--edge);background:var(--field);color:var(--ink);font:inherit;font-size:1rem;font-weight:700;text-align:left;cursor:pointer;transition:border-color .15s}
+html:not([data-theme=sun]) .dqm-sel{background-color:var(--gl2);border-color:var(--glb);box-shadow:var(--glin),0 2px 8px rgba(20,60,100,.05)}
+.dqm-sel span{flex:1;min-width:0;line-height:1.35;overflow-wrap:break-word;hyphens:none}.dqm-sel svg{flex:none;width:16px;height:16px;color:var(--ink);transform:rotate(90deg)}
+@media (hover:hover){.dqm-sel:hover{border-color:var(--blue)}}.dqm-sel:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.dqm-pk{margin-top:14px;border-top:var(--bw) solid var(--line)}.dqm-prow{min-height:60px}.dqm-pc{flex:none;display:flex;color:var(--muted)}.dqm-pc svg{width:18px;height:18px}
+.dqm-prow .dqm-rt small span{overflow-wrap:break-word;hyphens:none}.dqm-prow .dqm-rt small.t-has{color:var(--ink)}
+.dqm-pk .tm-sw{margin-top:4px}.dqm-pk .tm-sw .ic{background:var(--hb-purple);color:var(--hu-purple)}.dqm-pk .tm-sw[hidden]{display:none}
+.dqm-apk .dnr-pick legend{flex-wrap:wrap}.dqm-apk .dnr-pick legend>span:first-child{font-size:.95rem}
+.dqm-apk .dqm-alist{max-height:min(236px,34vh)}
+label.dnr-p.dqm-ac{align-items:center;min-height:48px;padding:8px 12px}label.dnr-p.dqm-ac input{margin:0}
+.dqm-an{flex:1 1 auto;min-width:0;font-weight:700;color:var(--ink);line-height:1.35;overflow-wrap:break-word;hyphens:none}
+.dqm-cnt{flex:none;min-width:30px;padding:2px 8px;border-radius:99px;background:var(--hb-slate);color:var(--ink);font-size:.78rem;font-weight:800;text-align:center}
+.dqm-ac:has(input:checked){background:var(--tint)}.dqm-ac:has(input:checked) .dqm-cnt{background:var(--blue);color:#FFFFFF}
+html[data-theme=dark] .dqm-ac:has(input:checked) .dqm-cnt{color:#0B1116}html[data-theme=sun] .dqm-cnt{border:1.5px solid currentColor}
+.dqm-apk .dqm-note:empty{display:none}
+.dqm-pks{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.dqm-pks input[type=search]{flex:1 1 200px;width:auto;min-width:0;min-height:48px}.dqm-pks .chip{flex:0 0 auto}
+.dqm-pgs{margin-top:10px;display:grid;gap:10px}
+.dqm-pg{border:var(--bw) solid var(--line);border-radius:16px;background:var(--field);overflow:hidden}
+.dqm-pgh{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;padding:10px 12px;background:var(--tint);border-bottom:1px solid var(--line)}
+.dqm-pgt{flex:1 1 auto;min-width:0}.dqm-pgt b{display:block;color:var(--ink);font-size:.95rem;line-height:1.3;overflow-wrap:break-word;hyphens:none}.dqm-pgt small{display:block;color:var(--muted);font-size:.78rem;font-weight:600}
+.dqm-pga{display:flex;gap:6px;margin-left:auto}.dqm-pga .chip{min-height:44px;padding:0 13px;font-size:.84rem}.dqm-pga .chip[disabled]{opacity:.45;cursor:default}
+.dqm-pg label.dnr-p>span{flex:1 1 auto;min-width:0}.dqm-pg label.dnr-p b{overflow-wrap:break-word;hyphens:none;line-height:1.3}
+.dqm-nl{color:var(--warn);font-weight:800}
+html[data-theme=sun] .dqm-pgh{background:#FFFFFF;border-bottom-width:2px}
+.tag.dqm-ch{background:var(--hb-purple);color:var(--hu-purple)}html[data-theme=sun] .tag.dqm-ch{border:1.5px solid currentColor}
+.dqm-nogps{display:flex;gap:8px;align-items:flex-start;margin:10px 0 0;padding:10px 12px;border-radius:14px;background:var(--warnbg);color:var(--ink);font-size:.86rem;line-height:1.45}.dqm-nogps svg{flex:none;width:18px;height:18px;color:var(--warn);margin-top:1px}
 @media (prefers-reduced-motion: reduce){.dqm-drop,.dqm-rc,.dqm-card,.dqm-end svg,.dqm-nums button,.dqm-stop{transition:none !important}.dqm-card,.dqm-shi,.dqm-shd .ofa-av.lg{animation:none !important}}
 </style>
 </head>
@@ -6119,6 +6147,7 @@ html[data-theme=dark] .dnr-link code{background:rgba(0,0,0,.25)}
   function ofaKm(ids) { var s = 0; for (var i = 1; i < ids.length; i++) { var a = byId(ids[i - 1]), z = byId(ids[i]); if (a && z && a.gps && z.gps) s += metres(a.gps, z.gps); } return s; }
   function ofaWhy(id) {
     var info = (OFA.plan && OFA.plan.info[id]) || {}, r = S.repairs[id], out = [];
+    if (info.chosen) out.push(['dqm-ch', tr('Chosen', 'Umechagua')]);
     (info.why || []).forEach(function (w) {
       if (w === 'repair') out.push(['bad', r && r.state !== 'notworking' ? tr('Needs repair', 'Inahitaji matengenezo') : tr('Not working', 'Haifanyi kazi')]);
       if (w === 'urgent') out.push(['bad', tr('Urgent', 'Haraka')]);
@@ -6136,10 +6165,11 @@ html[data-theme=dark] .dnr-link code{background:rgba(0,0,0,.25)}
     var form = (nm.length ? '' : '<p class="msg warn">' + tr('Add people in the Team tab first.', 'Ongeza watu kwenye kichupo cha Timu kwanza.') + '</p>') +
       '<div class="dqm-f dqm-pform"><div class="dqm-f2"><label>' + tr('Field officer', 'Afisa wa uwanjani') + sel('ofaTo', nm.map(function (n) { return [n, n]; }), OFA.to || '') + '</label>' +
       '<label>' + tr('Country', 'Nchi') + sel('ofaCk', ['ke', 'tz', 'ug', 'mw'].map(function (c) { return [c, CNAME[c]]; }), ck) + '</label></div>' +
-      '<label>' + tr('Area', 'Eneo') + '<select id="ofaArea"></select></label>' +
+      '<div class="dqm-afld"><span class="dqm-flab" id="ofaAreaL">' + tr('Area', 'Eneo') + '</span><button type="button" class="dqm-sel" id="ofaArea" data-testid="plan_area" aria-haspopup="dialog" aria-labelledby="ofaAreaL ofaAreaV"><span id="ofaAreaV"></span>' + oic('chev') + '</button></div>' +
       '<div class="dqm-f3"><label>' + tr('Days', 'Siku') + sel('ofaDaysN', [1, 2, 3, 4, 5, 6].map(function (n) { return [n, n]; }), OFA.days || 5) + '</label>' +
       '<label>' + tr('Stops a day', 'Vituo kwa siku') + sel('ofaPer', [3, 4, 5, 6, 7, 8].map(function (n) { return [n, n]; }), OFA.per || 5) + '</label>' +
       '<label class="dqm-wide">' + tr('First day', 'Siku ya kwanza') + '<input type="date" id="ofaStart" value="' + (OFA.start || ofaYmd(tm)) + '"></label></div>' +
+      dqmPickRow() +
       '<div class="dqm-acts"><button class="btn" type="button" id="ofaGo"' + (nm.length ? '' : ' disabled') + '>' + oic('spark') + ' ' + tr('Suggest visits', 'Pendekeza ziara') + '</button><span class="msg" id="ofaMsg" aria-live="polite"></span></div></div>';
     b.innerHTML = '<div class="dqm-plan">' + dqmHead('plan', 'ofaRoute', 'blue', tr('Plan a week', 'Panga wiki'), tr('Suggested visits for one person: close sites on the same day, in driving order.', 'Ziara zilizopendekezwa kwa mtu mmoja: maeneo yaliyo karibu siku moja, kwa mpangilio wa safari.')) +
       '<div class="card dqm-sets dqm-gap" id="dqmPlanF">' + dqmFold('planf', 'dqmtune', 'blue', tr('Choices', 'Machaguo'), '<span id="dqmPlanSum"></span>', 'has', form) +
@@ -6147,30 +6177,168 @@ html[data-theme=dark] .dnr-link code{background:rgba(0,0,0,.25)}
         '<p class="muted">' + tr('Suggests visits for one person: open repairs first, then sites not visited for 6 months or more, and water tests that are due. Sites close together go on the same day, in driving order.', 'Inapendekeza ziara kwa mtu mmoja: matengenezo yaliyo wazi kwanza, kisha maeneo yasiyotembelewa kwa miezi 6 au zaidi, na vipimo vya maji vinavyohitajika. Maeneo yaliyo karibu yanawekwa siku moja, kwa mpangilio wa safari.') + '</p>' +
         '<p class="muted">' + tr('Tap a stop to open the project or take it off the day. Then assign the week: each day goes to their “My work” with its date.', 'Gusa kituo kufungua mradi au kukiondoa siku hiyo. Kisha gawa wiki: kila siku inaenda kwenye “Kazi yangu” yao na tarehe yake.') + '</p>') +
       '</div><div id="ofaRes"></div></div>';
-    var areas = function () {
-      var c = $('ofaCk').value, n = {}; S.projects.forEach(function (p) { var a = ofaArea(p); if (p.ck === c && p.gps && a) n[a] = (n[a] || 0) + 1; });
-      var ks = Object.keys(n).sort(function (a, z) { return n[z] - n[a] || a.localeCompare(z); }).slice(0, 80);
-      $('ofaArea').innerHTML = '<option value="">' + tr('All of ', 'Yote ya ') + CNAME[c] + '</option>' + ks.map(function (a) { return '<option value="' + esc(a) + '"' + (a === OFA.area ? ' selected' : '') + '>' + esc(a) + ' (' + n[a] + ')</option>'; }).join('');
-    };
-    areas(); $('ofaCk').addEventListener('change', function () { OFA.area = ''; areas(); });
-    $('dqmPlanF').addEventListener('change', dqmPlanSum); dqmPlanSum();
+    // chosen projects that are no longer in the list are let go
+    OFA.pick = (OFA.pick || []).filter(function (id) { var p = byId(id); return p && p.ck === ck; });
+    $('ofaCk').addEventListener('change', dqmPickReset);
+    $('dqmPlanF').addEventListener('change', dqmPlanSum); dqmPickUi();
+    $('ofaArea').addEventListener('click', function () { buzz(); dqmPlanPick('areas'); });
+    $('ofaPick').addEventListener('click', function () { buzz(); dqmPlanPick('projects'); });
+    $('ofaOnly').addEventListener('click', function () { OFA.only = !OFA.only; this.setAttribute('aria-checked', String(OFA.only)); buzz(); dqmPlanSum(); });
     $('ofaGo').addEventListener('click', ofaSuggest);
     if (OFA.plan) ofaPlanDraw();
   }
   // the choices in one line, for the folded row
   function dqmPlanSum() {
     var el = $('dqmPlanSum'); if (!el) return;
-    var v = function (id) { var x = $(id); return x ? x.value : ''; }, ar = $('ofaArea'), d = +v('ofaDaysN') || 5;
-    el.textContent = [v('ofaTo') || tr('Choose a person', 'Chagua mtu'), CNAME[v('ofaCk')] || '', ar && ar.value ? ar.value : tr('all areas', 'maeneo yote'), d === 1 ? tr('1 day', 'siku 1') : tr(d + ' days', 'siku ' + d), tr(v('ofaPer') + ' a day', v('ofaPer') + ' kwa siku')].filter(Boolean).join(' · ');
+    var v = function (id) { var x = $(id); return x ? x.value : ''; }, d = +v('ofaDaysN') || 5, n = (OFA.pick || []).length;
+    el.textContent = [v('ofaTo') || tr('Choose a person', 'Chagua mtu'), CNAME[v('ofaCk')] || '', (OFA.areas || []).length ? dqmAreasTx() : tr('all areas', 'maeneo yote'), d === 1 ? tr('1 day', 'siku 1') : tr(d + ' days', 'siku ' + d), tr(v('ofaPer') + ' a day', v('ofaPer') + ' kwa siku'),
+      n ? (OFA.only ? tr('only the ' + n + ' chosen', 'zilizochaguliwa ' + n + ' tu') : tr(n + ' chosen', n + ' zimechaguliwa')) : ''].filter(Boolean).join(' · ');
   }
+  // Plan a week › areas and projects, in one sheet. Areas: tick several (none ticked: the whole country). Projects in
+  // them: tick some by hand and they are always planned, grouped by distance; the other stops are filled with the usual
+  // suggestions unless "Only these projects". No project ticked: every project of the ticked areas can be suggested.
+  var DQM_PICK_MAX = 60, DQM_AREA_MAX = 20, DQM_PICK_SHOW = 150;
+  function dqmPlanCk() { var x = $('ofaCk'); return (x && x.value) || OFA.ck || homeCk() || 'ke'; }
+  function dqmAreaN(ck) { var n = {}; S.projects.forEach(function (p) { var a = ofaArea(p); if (p.ck === ck && a) n[a] = (n[a] || 0) + 1; }); return n; }
+  function dqmAreaKeys(n) { var ks = Object.keys(n).sort(function (a, z) { return n[z] - n[a] || a.localeCompare(z); }).slice(0, 80); (OFA.areas || []).forEach(function (a) { if (ks.indexOf(a) < 0 && n[a]) ks.push(a); }); return ks; }
+  function dqmProjN(n) { return n === 1 ? tr('1 project', 'mradi 1') : tr(n + ' projects', 'miradi ' + n); }
+  // the Area field: "All of Kenya", "Kapsaret, Kaigat" or "Kapsaret, Kaigat +2 more"
+  function dqmAreasTx() {
+    var a = OFA.areas || [];
+    if (!a.length) return tr('All of ', 'Yote ya ') + CNAME[dqmPlanCk()];
+    return a.slice(0, 2).join(', ') + (a.length > 2 ? ' ' + tr('+' + (a.length - 2) + ' more', 'na ' + (a.length - 2) + ' zaidi') : '');
+  }
+  // the summary under the form: "Kapsaret: 3 of 8 projects · Kaigat: all 3"
+  function dqmScopeTx() {
+    var ck = dqmPlanCk(), n = dqmAreaN(ck), a = OFA.areas || [], pick = (OFA.pick || []).map(byId).filter(Boolean);
+    if (!a.length) return tr('All of ', 'Yote ya ') + CNAME[ck] + ' · ' + (pick.length ? tr(pick.length + ' chosen by hand', 'zimechaguliwa ' + pick.length + ' kwa mkono') : tr('suggestions from every area', 'mapendekezo kutoka maeneo yote'));
+    var parts = a.map(function (ar) {
+      var k = pick.filter(function (p) { return ofaArea(p) === ar; }).length, all = n[ar] || 0;
+      return ar + ': ' + (k ? tr(k + ' of ' + dqmProjN(all), (all === 1 ? 'mradi ' : 'miradi ') + k + ' kati ya ' + all) : all === 1 ? tr('its 1 project', 'mradi wake 1') : tr('all ' + all, 'yote ' + all));
+    });
+    var out = parts.slice(0, 4).join(' · ') + (parts.length > 4 ? ' · ' + tr('+' + (parts.length - 4) + ' more areas', 'na maeneo ' + (parts.length - 4) + ' zaidi') : '');
+    var other = pick.filter(function (p) { return a.indexOf(ofaArea(p)) < 0; }).length;
+    return out + (other ? ' · ' + tr(other + ' more chosen', 'zingine ' + other + ' zimechaguliwa') : '');
+  }
+  function dqmPickRow() {
+    return '<div class="dqm-pk"><button type="button" class="dqm-row dqm-prow" id="ofaPick" data-testid="plan_pick" aria-haspopup="dialog">' + dqmIc('clip', 'purple', 'dqm-ri') + '<span class="dqm-rt"><b>' + tr('Areas and projects', 'Maeneo na miradi') + '</b><small id="ofaPickS"><i aria-hidden="true"></i><span id="ofaPickSum" data-testid="plan_scope"></span></small></span><span class="dqm-pc" aria-hidden="true">' + oic('chev') + '</span></button>' +
+      '<button type="button" class="tm-sw" role="switch" id="ofaOnly" data-testid="plan_only" aria-checked="' + !!OFA.only + '" hidden><span class="ic">' + oic('check') + '</span><span><b>' + tr('Only these projects', 'Miradi hii tu') + '</b><small>' + tr('No other suggestions are added', 'Hakuna mapendekezo mengine yanayoongezwa') + '</small></span><i aria-hidden="true"></i></button></div>';
+  }
+  // the Area field, the summary row and the Only switch follow the ticks straight away
+  function dqmPickUi() {
+    var n = (OFA.pick || []).length;
+    if ($('ofaAreaV')) $('ofaAreaV').textContent = dqmAreasTx();
+    if ($('ofaPickSum')) { $('ofaPickSum').textContent = dqmScopeTx(); $('ofaPickS').className = n || (OFA.areas || []).length ? 't-has' : 't-off'; }
+    if ($('ofaOnly')) { $('ofaOnly').hidden = !n; if (!n) OFA.only = false; $('ofaOnly').setAttribute('aria-checked', String(!!OFA.only)); }
+    dqmPlanSum();
+  }
+  // a new country starts again
+  function dqmPickReset() { OFA.areas = []; OFA.pick = []; OFA.only = false; OFA.pq = ''; OFA.pt = false; dqmPickUi(); }
+  function dqmPlanPick(at) {
+    OFA.areas = OFA.areas || []; OFA.pick = OFA.pick || []; OFA.pq = OFA.pq || '';
+    var ck = dqmPlanCk(), cn = CNAME[ck];
+    var w = tSheet(tr('Areas and projects', 'Maeneo na miradi'), '<div class="dqm-fsh dqm-apk" data-testid="plan_pick_sheet"><div class="dqm-shd"><span class="dqm-shi dqm-t-has" aria-hidden="true">' + oic('layers') + '</span><h3>' + tr('Areas and projects', 'Maeneo na miradi') + '</h3><small>' +
+      tr('Tick the areas to plan in, then any projects that must be visited. Those are always in the plan, grouped by distance; the other stops are suggestions.', 'Chagua maeneo ya kupanga, kisha miradi inayolazimika kutembelewa. Hiyo iko kwenye mpango kila wakati, kwa umbali; vituo vingine ni mapendekezo.') + '</small></div>' +
+      '<fieldset class="dnr-pick dqm-ars" id="ofaArs"><legend><span>' + tr('Areas', 'Maeneo') + '</span> <span class="tag has" id="ofaArN" data-testid="plan_area_n"></span></legend>' +
+      '<div class="dnr-plist dqm-alist" id="ofaArList" role="group" aria-label="' + tr('Areas', 'Maeneo') + '"></div><p class="muted dqm-note" id="ofaArHint"></p></fieldset>' +
+      '<fieldset class="dnr-pick" id="ofaPrs"><legend><span id="ofaPrL"></span> <span class="tag has" id="ofaPkN" data-testid="plan_pick_n"></span></legend>' +
+      '<div class="dqm-pks"><input type="search" id="ofaPkQ" placeholder="' + tr('Search projects', 'Tafuta miradi') + '" aria-label="' + tr('Search projects by name or place', 'Tafuta miradi kwa jina au mahali') + '" value="' + esc(OFA.pq) + '">' +
+      '<button type="button" class="chip" id="ofaPkOnly" data-testid="plan_pick_only" aria-pressed="' + !!OFA.pt + '">' + tr('Ticked only', 'Zilizochaguliwa tu') + '</button></div>' +
+      '<div class="dqm-pgs" id="ofaPkList"></div></fieldset><p class="msg" id="ofaPkMsg" aria-live="polite"></p>' +
+      '<div class="dqm-acts"><button class="btn" type="button" data-a="done" data-testid="plan_pick_done">' + oic('check') + tr('Done', 'Imekamilika') + '</button><button class="btn light" type="button" data-a="clear" data-testid="plan_pick_clear">' + tr('Clear all', 'Ondoa zote') + '</button></div></div>');
+    var c = w.querySelector('.tsh-c');
+    var say = function (t) { msg('ofaPkMsg', t ? 'warn' : '', t || ''); };
+    var drawAreas = function () {
+      var n = dqmAreaN(ck), ks = dqmAreaKeys(n), on = {}; OFA.areas.forEach(function (a) { on[a] = 1; });
+      $('ofaArList').innerHTML = ks.length ? ks.map(function (a) {
+        return '<label class="dnr-p dqm-ac"><input type="checkbox" value="' + esc(a) + '"' + (on[a] ? ' checked' : '') + '><span class="dqm-an">' + esc(a) + '</span><span class="dqm-cnt" aria-label="' + esc(dqmProjN(n[a])) + '">' + n[a] + '</span></label>';
+      }).join('') : '<p class="muted dqm-note">' + tr('No areas in ' + cn + ' yet.', 'Bado hakuna maeneo ' + cn + '.') + '</p>';
+      $('ofaArN').textContent = OFA.areas.length ? tr(OFA.areas.length + ' ticked', OFA.areas.length + ' zimechaguliwa') : tr('All of ', 'Yote ya ') + cn;
+      $('ofaArHint').textContent = OFA.areas.length ? '' : tr('None ticked: projects from all of ' + cn + '.', 'Hakuna iliyochaguliwa: miradi kutoka ' + cn + ' yote.');
+    };
+    var drawProjects = function () {
+      var q = OFA.pq.trim().toLowerCase(), tick = {}, ar = OFA.areas; OFA.pick.forEach(function (id) { tick[id] = 1; });
+      var inScope = function (p) { return p.ck === ck && (!ar.length || ar.indexOf(ofaArea(p)) >= 0 || tick[p.id]); };
+      var P = S.projects.filter(function (p) {
+        return inScope(p) && (!OFA.pt || tick[p.id]) && (!q || (p.title + ' ' + (p.area || '')).toLowerCase().indexOf(q) >= 0);
+      });
+      // grouped by area: the ticked areas in the order they were ticked, otherwise the biggest first
+      var n = dqmAreaN(ck), g = {}, order = [];
+      P.forEach(function (p) { var a = ofaArea(p); if (!g[a]) { g[a] = []; order.push(a); } g[a].push(p); });
+      order.sort(function (a, z) { var ia = ar.indexOf(a), iz = ar.indexOf(z); if (ia >= 0 || iz >= 0) return (ia < 0 ? 99 : ia) - (iz < 0 ? 99 : iz); if (!a || !z) return a ? -1 : 1; return (n[z] || 0) - (n[a] || 0) || a.localeCompare(z); });
+      var shown = 0;
+      $('ofaPrL').textContent = ar.length ? tr('Projects in these areas', 'Miradi katika maeneo haya') : tr('Projects in ', 'Miradi ya ') + cn;
+      $('ofaPkList').innerHTML = P.length ? order.map(function (a) {
+        if (shown >= DQM_PICK_SHOW) return '';
+        var ps = g[a].sort(function (x, z) { return x.title.localeCompare(z.title); }).slice(0, DQM_PICK_SHOW - shown); shown += ps.length;
+        var k = g[a].filter(function (p) { return tick[p.id]; }).length;
+        return '<section class="dqm-pg" role="group" aria-label="' + esc(a || tr('No area', 'Hakuna eneo')) + '"><div class="dqm-pgh"><span class="dqm-pgt"><b>' + esc(a || tr('No area', 'Hakuna eneo')) + '</b><small>' + (k ? tr(k + ' of ' + g[a].length + ' chosen', k + ' kati ya ' + g[a].length + ' zimechaguliwa') : dqmProjN(g[a].length)) + '</small></span>' +
+          '<span class="dqm-pga"><button type="button" class="chip" data-pa="all" data-ar="' + esc(a) + '"' + (k === g[a].length ? ' disabled' : '') + '>' + tr('Select all', 'Chagua zote') + '</button><button type="button" class="chip" data-pa="none" data-ar="' + esc(a) + '"' + (k ? '' : ' disabled') + '>' + tr('Clear', 'Futa') + '</button></span></div>' +
+          ps.map(function (p) {
+            return '<label class="dnr-p"><input type="checkbox" value="' + esc(p.id) + '"' + (tick[p.id] ? ' checked' : '') + '><span><b>' + esc(p.title) + '</b><small>' + esc([p.type, p.area].filter(Boolean).join(' · ')) + (p.gps ? '' : ' · <span class="dqm-nl">' + tr('No location', 'Hakuna mahali') + '</span>') + '</small></span></label>';
+          }).join('') + '</section>';
+      }).join('') + (P.length > DQM_PICK_SHOW ? '<p class="muted dqm-note">' + tr('…and ' + (P.length - DQM_PICK_SHOW) + ' more. Search or tick an area to narrow it down.', '…na ' + (P.length - DQM_PICK_SHOW) + ' zaidi. Tafuta au chagua eneo ili kupunguza.') + '</p>' : '')
+        : '<p class="muted dqm-note">' + (OFA.pt ? tr('No projects ticked yet.', 'Bado hakuna mradi uliochaguliwa.') : tr('No projects match.', 'Hakuna mradi unaolingana.')) + '</p>';
+      $('ofaPkN').textContent = tr(OFA.pick.length + ' chosen', OFA.pick.length + ' zimechaguliwa');
+      w._vis = g;
+    };
+    var draw = function () { drawAreas(); drawProjects(); dqmPickUi(); };
+    var tickArea = function (a, on) {
+      var i = OFA.areas.indexOf(a);
+      if (on && i < 0) {
+        // the first area ticked: the areas of projects already chosen come too, so none of them is hidden
+        var add = [a]; if (!OFA.areas.length) OFA.pick.forEach(function (id) { var p = byId(id), x = p && ofaArea(p); if (x && add.indexOf(x) < 0) add.push(x); });
+        if (OFA.areas.length + add.length > DQM_AREA_MAX) { say(tr('You can tick up to ' + DQM_AREA_MAX + ' areas.', 'Unaweza kuchagua hadi maeneo ' + DQM_AREA_MAX + '.')); return false; }
+        OFA.areas = OFA.areas.concat(add);
+      }
+      if (!on && i >= 0) {
+        OFA.areas.splice(i, 1);
+        // its projects are no longer chosen
+        OFA.pick = OFA.pick.filter(function (id) { var p = byId(id); return !p || ofaArea(p) !== a; });
+      }
+      return true;
+    };
+    var tickProject = function (id, on) {
+      var i = OFA.pick.indexOf(id);
+      if (on && i < 0) { if (OFA.pick.length >= DQM_PICK_MAX) { say(tr('You can choose up to ' + DQM_PICK_MAX + ' projects.', 'Unaweza kuchagua hadi miradi ' + DQM_PICK_MAX + '.')); return false; } OFA.pick.push(id); }
+      if (!on && i >= 0) OFA.pick.splice(i, 1);
+      return true;
+    };
+    draw();
+    if (at === 'projects' && OFA.areas.length) setTimeout(function () { var f = $('ofaPrs'); if (f) c.scrollTop = f.offsetTop - 8; }, 30);
+    $('ofaArList').addEventListener('touchstart', function (e) { e.stopPropagation(); }, { passive: true });
+    c.addEventListener('input', function (e) { if (e.target.id === 'ofaPkQ') { OFA.pq = e.target.value; drawProjects(); } });
+    c.addEventListener('change', function (e) {
+      var t = e.target; if (t.type !== 'checkbox') return;
+      say('');
+      if (t.closest('#ofaArList')) { if (!tickArea(t.value, t.checked)) t.checked = !t.checked; else draw(); }
+      else if (t.closest('#ofaPkList')) { if (!tickProject(t.value, t.checked)) t.checked = false; drawProjects(); dqmPickUi(); }
+    });
+    c.addEventListener('click', function (e) {
+      var x = e.target.closest('#ofaPkOnly, [data-a], [data-pa]'); if (!x) return;
+      if (x.id === 'ofaPkOnly') { OFA.pt = !OFA.pt; x.setAttribute('aria-pressed', String(OFA.pt)); drawProjects(); return; }
+      if (x.hasAttribute('data-pa')) {
+        say(''); var ps = (w._vis || {})[x.getAttribute('data-ar')] || [], on = x.getAttribute('data-pa') === 'all';
+        ps.every(function (p) { return tickProject(p.id, on); });
+        drawProjects(); dqmPickUi(); return;
+      }
+      if (x.getAttribute('data-a') === 'clear') { OFA.areas = []; OFA.pick = []; OFA.only = false; OFA.pt = false; $('ofaPkOnly').setAttribute('aria-pressed', 'false'); say(''); draw(); return; }
+      if (x.getAttribute('data-a') === 'done') w.close();
+    });
+    return w;
+  }
+
   function ofaSuggest() {
-    OFA.to = $('ofaTo').value; OFA.ck = $('ofaCk').value; OFA.area = $('ofaArea').value; OFA.days = +$('ofaDaysN').value; OFA.per = +$('ofaPer').value; OFA.start = $('ofaStart').value || ofaYmd(new Date(Date.now() + 864e5));
+    OFA.to = $('ofaTo').value; OFA.ck = $('ofaCk').value; OFA.days = +$('ofaDaysN').value; OFA.per = +$('ofaPer').value; OFA.start = $('ofaStart').value || ofaYmd(new Date(Date.now() + 864e5));
     var btn = $('ofaGo'); btn.disabled = true; msg('ofaMsg', '', tr('Working it out…', 'Inapanga…'));
-    adminApi('GET', null, '?view=plan&ck=' + encodeURIComponent(OFA.ck) + '&area=' + encodeURIComponent(OFA.area) + '&days=' + OFA.days + '&per=' + OFA.per).then(function (j) {
+    var ar = OFA.areas || [], ids = (OFA.pick || []).filter(function (id) { return /^\d+$/.test(id); });
+    adminApi('GET', null, '?view=plan&ck=' + encodeURIComponent(OFA.ck) + '&days=' + OFA.days + '&per=' + OFA.per + (ar.length ? '&areas=' + ar.map(encodeURIComponent).join(',') : '') +
+      (ids.length ? '&ids=' + ids.join(',') + (OFA.only ? '&only=1' : '') : '')).then(function (j) {
       btn.disabled = false;
       if (!j.ok) { msg('ofaMsg', 'bad', why(j)); return; }
       var info = {}; (j.days || []).forEach(function (d) { d.stops.forEach(function (s) { info[s.id] = s; }); }); (j.spare || []).forEach(function (s) { info[s.id] = s; });
       OFA.plan = { to: OFA.to, info: info, total: j.total || 0, days: (j.days || []).map(function (d) { return ofaOrder(d.stops.map(function (s) { return s.id; })); }), spare: (j.spare || []).map(function (s) { return s.id; }).filter(function (id) { return byId(id); }) };
+      OFA.plan.nogps = j.nogps || [];
       OFA.plan.dates = ofaDates(OFA.start, OFA.plan.days.length); OFA.day = -1; OFA.done = false;
       msg('ofaMsg', '', j.total ? '' : tr('Nothing needs a visit there right now.', 'Hakuna kinachohitaji ziara huko kwa sasa.'));
       if (j.total) dqmFoldSet($('dqmPlanF'), 'planf', false);
@@ -6184,6 +6352,7 @@ html[data-theme=dark] .dnr-link code{background:rgba(0,0,0,.25)}
     var n = P.days.reduce(function (s, d) { return s + d.length; }, 0), km = P.days.reduce(function (s, d) { return s + ofaKm(d); }, 0);
     if (!P.days.length) { box.innerHTML = ''; return; }
     box.innerHTML = '<div class="card dqm-hero dqm-gap" data-testid="plan_res"><div class="ofa-sum"><b>' + tr(n + ' visits over ' + P.days.length + (P.days.length === 1 ? ' day' : ' days') + ' · about ' + dist(km), 'Ziara ' + n + ' kwa siku ' + P.days.length + ' · takriban ' + dist(km)) + '</b><small>' + tr('For ' + P.to + '. Straight lines between sites; roads are longer.', 'Kwa ' + P.to + '. Mistari iliyonyooka kati ya maeneo; barabara ni ndefu zaidi.') + (P.total > n ? ' ' + tr((P.total - n) + ' more sites need a visit: add them below.', 'Maeneo mengine ' + (P.total - n) + ' yanahitaji ziara: yaongeze hapa chini.') : '') + '</small></div>' +
+      ((P.nogps || []).length ? '<p class="dqm-nogps" data-testid="plan_nogps">' + oic('alert') + '<span><b>' + tr('No location, so not placed:', 'Hakuna mahali, kwa hiyo haikuwekwa:') + '</b> ' + P.nogps.map(function (x) { return esc((byId(x.id) || {}).title || x.t || x.id); }).join(', ') + '</span></p>' : '') +
       '<div class="map ofa-pmap" id="ofaPMap" role="application" aria-label="' + tr('Map of the planned days', 'Ramani ya siku zilizopangwa') + '"></div>' +
       '<div class="ofa-chips" role="group" aria-label="' + tr('Show a day on the map', 'Onyesha siku kwenye ramani') + '"><button type="button" data-ofa-day="-1" aria-pressed="' + (OFA.day < 0) + '">' + tr('All days', 'Siku zote') + '</button>' + P.days.map(function (d, i) { return '<button type="button" data-ofa-day="' + i + '" aria-pressed="' + (OFA.day === i) + '" style="--c:' + OFA_COL[i % 6] + '"><i></i>' + tr('Day ', 'Siku ') + (i + 1) + '</button>'; }).join('') + '</div></div>' +
       P.days.map(function (d, i) {
