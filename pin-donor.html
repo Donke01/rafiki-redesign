@@ -1,0 +1,668 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="format-detection" content="telephone=no">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="strict-origin">
+<meta name="theme-color" content="#076DB1">
+<title>RAFIKI Pin · Donor</title>
+<link rel="manifest" href="/pin.webmanifest">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/img/pin/apple-touch-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="RAFIKI Pin">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/vendor/leaflet/leaflet.css">
+<script>
+// RAFIKI Pin in donor mode (feat-donorapp). Donors sign in with their private link or short donor code and see
+// only their own projects: the same /api/donor answer as their private page, never the staff app or its data.
+// Theme, text size and language are the same settings as the staff app (rfPinTheme, rfPinSize, rfPinLang).
+(function () { try { var t = localStorage.getItem('rfPinTheme'), z = localStorage.getItem('rfPinSize'); if (t) document.documentElement.setAttribute('data-theme', t); if (z) document.documentElement.setAttribute('data-size', z); } catch (e) {} })();
+</script>
+<style>
+:root{--blue:#0A78C2;--blue2:#076DB1;--deep:#054F81;--ink:#04263F;--tint:#E3F1FC;--bg:#F4F8FB;--card:#FFFFFF;--text:#141618;--muted:#5A6066;--line:#DCE1E5;--ok:#1C7C4A;--okbg:#E2F4EA;--warn:#8A5200;--warnbg:#FDF0DC;--bad:#B3261E;--badbg:#FBE7E5;--build:#6E46C8;--buildbg:#EFE8FB;--coral:#C2410C;--coralbg:#FDE9E1;
+  --gl:rgba(255,255,255,.66);--gl2:rgba(255,255,255,.82);--glb:rgba(255,255,255,.9);--gls:0 10px 30px rgba(20,60,100,.08),0 1px 2px rgba(20,60,100,.05);--blur:blur(20px) saturate(1.7);--bw:1px;color-scheme:light}
+html[data-theme=dark]{--blue:#2F9BE6;--blue2:#4AAAEE;--deep:#9FD3F7;--ink:#E6EEF4;--tint:#12324A;--bg:#0B1116;--card:#161E25;--text:#E8EDF1;--muted:#9CA8B2;--line:#26323C;--ok:#5FD08F;--okbg:#123222;--warn:#F2B35B;--warnbg:#3A2A10;--bad:#FF8A80;--badbg:#3D1715;--build:#B49BFF;--buildbg:#2A2145;--coral:#FF9A82;--coralbg:#3D1F18;
+  --gl:rgba(24,34,44,.62);--gl2:rgba(30,42,54,.78);--glb:rgba(255,255,255,.09);--gls:0 10px 30px rgba(0,0,0,.35);color-scheme:dark}
+html[data-theme=sun]{--blue:#0050A0;--blue2:#003E7E;--deep:#002A57;--ink:#000000;--tint:#DCEBFF;--bg:#FFFFFF;--card:#FFFFFF;--text:#000000;--muted:#1E1E1E;--line:#000000;--ok:#00562A;--okbg:#D8F5E3;--warn:#6B3A00;--warnbg:#FFE8C2;--bad:#8C0000;--badbg:#FFDCDC;--build:#4A1FA0;--buildbg:#ECE3FF;--coral:#8A2A00;--coralbg:#FFE2D6;--gl:#FFFFFF;--gl2:#FFFFFF;--glb:#000000;--gls:none;--blur:none;--bw:2px}
+html{font-size:16px;background:var(--bg);-webkit-text-size-adjust:100%}html[data-size=s]{font-size:14px}html[data-size=l]{font-size:18px}html[data-size=xl]{font-size:20px}
+*{box-sizing:border-box}
+body{margin:0;font-family:Montserrat,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--text);background:transparent;-webkit-font-smoothing:antialiased;min-height:100vh;min-height:100dvh;overflow-wrap:normal;word-break:normal;hyphens:none}
+html:not([data-theme=sun]) body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(55% 38% at 0% 0%,rgba(110,195,255,.38),transparent 70%),radial-gradient(45% 32% at 100% 12%,rgba(120,232,210,.30),transparent 70%),radial-gradient(60% 40% at 85% 95%,rgba(185,165,255,.20),transparent 70%),radial-gradient(50% 35% at 5% 90%,rgba(255,170,150,.16),transparent 70%)}
+html[data-theme=dark] body::before{background:radial-gradient(55% 38% at 0% 0%,rgba(30,120,200,.30),transparent 70%),radial-gradient(45% 32% at 100% 12%,rgba(20,140,120,.20),transparent 70%),radial-gradient(60% 40% at 85% 95%,rgba(110,80,200,.16),transparent 70%)}
+button,input{font:inherit;color:inherit}
+a{color:var(--blue2)}
+img{max-width:100%;display:block}
+.hidden{display:none!important}
+.vh{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.nw{white-space:nowrap}
+svg.i{width:20px;height:20px;flex:none}
+/* glass cards */
+.card{background:var(--gl);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);border:var(--bw) solid var(--glb);box-shadow:var(--gls);border-radius:24px;padding:18px}
+html[data-theme=sun] .card{background:var(--card)}
+/* top bar */
+.top{position:sticky;top:0;z-index:900;display:flex;align-items:center;gap:10px;min-height:60px;padding:calc(6px + env(safe-area-inset-top)) 14px 6px;background:var(--gl2);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);box-shadow:0 1px 0 rgba(20,60,100,.06)}
+.top .lg{height:24px;width:auto}.top .lg-l{display:none}
+html[data-theme=dark] .top .lg-d{display:none}html[data-theme=dark] .top .lg-l{display:block}
+.top .mode{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;background:var(--coralbg);color:var(--coral);font-weight:800;font-size:.72rem;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+.top .mode svg{width:13px;height:13px}
+.top .sp{flex:1}
+.rb{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;border:var(--bw) solid var(--glb);background:var(--gl);color:var(--ink);cursor:pointer;flex:none;padding:0}
+.give{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 14px;border-radius:999px;background:var(--blue);color:#FFFFFF;font-weight:700;font-size:.85rem;text-decoration:none;white-space:nowrap}
+html[data-theme=dark] .give{color:#04263F}
+.give svg{width:16px;height:16px}
+main{max-width:640px;margin:0 auto;padding:14px 16px calc(110px + env(safe-area-inset-bottom))}
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:0 22px;border-radius:999px;border:0;background:linear-gradient(180deg,#1F3242,#0C1924);color:#FFFFFF;font-weight:700;font-size:1rem;text-decoration:none;cursor:pointer;white-space:nowrap;box-shadow:0 12px 26px rgba(12,25,36,.22)}
+html[data-theme=dark] .btn{background:#FFFFFF;color:#0C1924}
+html[data-theme=sun] .btn{background:#000000;color:#FFFFFF;box-shadow:none}
+.btn.light{background:var(--gl2);color:var(--ink);border:var(--bw) solid var(--glb);box-shadow:var(--gls)}
+html[data-theme=sun] .btn.light{background:#FFFFFF;border-color:#000000}
+.btn.block{width:100%}
+.btn[disabled]{opacity:.45;cursor:default}
+.lnk{background:none;border:0;padding:8px 4px;min-height:44px;color:var(--blue2);font-weight:700;font-size:.92rem;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.msg{min-height:1.2em;margin:8px 0 0;font-size:.9rem;font-weight:600;color:var(--muted)}.msg.bad{color:var(--bad)}.msg.ok{color:var(--ok)}
+/* sign in */
+.in{max-width:440px;margin:0 auto;padding:calc(28px + env(safe-area-inset-top)) 20px 40px;text-align:center}
+.in .mascot{width:84px;height:94px;margin:0 auto;display:block;animation:bob 3.2s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-5px)}}
+@media (prefers-reduced-motion:reduce){.in .mascot{animation:none}}
+.in .wm{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:12px}
+.in .wm img{height:26px;width:auto}.in .wm .lg-l{display:none}
+html[data-theme=dark] .in .wm .lg-d{display:none}html[data-theme=dark] .in .wm .lg-l{display:block}
+.in .wm b{color:var(--blue);font-size:1.25rem;font-weight:800}
+.in h1{font-size:1.65rem;line-height:1.2;color:var(--ink);margin:18px 0 6px;font-weight:800}
+.in p.sub{margin:0 auto;color:var(--muted);line-height:1.5;max-width:360px}
+.in form{margin-top:22px;text-align:left}
+.in label{display:block;font-weight:700;color:var(--ink);font-size:.92rem;margin-bottom:6px}
+.in input{width:100%;min-height:56px;padding:0 16px;border-radius:16px;border:var(--bw) solid var(--line);background:var(--gl2);font-size:1.1rem;font-weight:600;letter-spacing:.06em;color:var(--ink)}
+.in input::placeholder{letter-spacing:.06em;color:var(--muted);opacity:.7;font-weight:500}
+.in .help{font-size:.84rem;color:var(--muted);margin:8px 0 0;line-height:1.45}
+.in .btn{margin-top:16px}
+.in .alt{display:flex;flex-direction:column;align-items:center;gap:2px;margin-top:18px}
+.lsw{display:inline-flex;margin-top:18px;padding:4px;border-radius:999px;background:var(--gl2);border:var(--bw) solid var(--glb)}
+.lsw button{min-height:44px;padding:0 18px;border-radius:999px;border:0;background:none;font-weight:700;cursor:pointer;color:var(--ink);white-space:nowrap}
+.lsw button[aria-pressed=true]{background:linear-gradient(180deg,#1F3242,#0C1924);color:#FFFFFF}
+html[data-theme=dark] .lsw button[aria-pressed=true]{background:#FFFFFF;color:#0C1924}
+/* gone */
+.gone{max-width:440px;margin:0 auto;padding:calc(48px + env(safe-area-inset-top)) 22px 40px;text-align:center}
+.gone .ic{width:84px;height:84px;margin:0 auto;border-radius:28px;display:grid;place-items:center;background:var(--coralbg);color:var(--coral)}
+.gone .ic svg{width:40px;height:40px}
+.gone h1{font-size:1.5rem;color:var(--ink);margin:20px 0 8px;line-height:1.25}
+.gone p{color:var(--text);line-height:1.55;margin:0 0 8px}
+.gone .acts{display:flex;flex-direction:column;gap:10px;margin-top:20px}
+/* home */
+.hero{position:relative;overflow:hidden;border-radius:28px;padding:22px 20px 20px;color:#FFFFFF;background:radial-gradient(120% 90% at 100% 0%,#5BC0F8 0%,transparent 55%),linear-gradient(150deg,#0A78C2 0%,#054F81 70%,#04345A 100%);box-shadow:0 18px 40px rgba(5,79,129,.25)}
+html[data-theme=sun] .hero{background:#003E7E;box-shadow:none}
+.hero .kick{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;background:rgba(255,255,255,.16);font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.hero .kick svg{width:14px;height:14px}
+.hero h1{margin:12px 0 2px;font-size:1.75rem;line-height:1.15;font-weight:800}
+.hero .org{margin:0;color:rgba(255,255,255,.82);font-weight:600;font-size:.95rem}
+.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:16px}
+.tile{border-radius:16px;padding:10px 10px 11px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);min-width:0}
+.tile b{display:block;font-size:1.45rem;line-height:1.2;font-weight:800;white-space:nowrap;overflow:hidden}
+.tile small{display:block;font-size:.74rem;line-height:1.3;font-weight:600;color:rgba(255,255,255,.88);overflow:hidden}
+.sh{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:24px 2px 10px}
+.sh h2{margin:0;font-size:1.2rem;color:var(--ink);font-weight:800}
+.sh small{color:var(--muted);font-weight:600;white-space:nowrap}
+.pj{display:block;width:100%;text-align:left;padding:0;overflow:hidden;cursor:pointer;color:inherit;margin-bottom:12px}
+.pj .ph{position:relative;aspect-ratio:16/9;background:var(--tint);display:grid;place-items:center;color:var(--blue)}
+.pj .ph img{width:100%;height:100%;object-fit:cover}
+.pj .ph svg{width:44px;height:44px;opacity:.7}
+.pj .ph .badge{position:absolute;left:12px;top:12px}
+.pj .bd{display:block;padding:14px 16px 16px}
+.pj .bd b{display:block;font-size:1.08rem;color:var(--ink);line-height:1.3}
+.pj .bd .pl{display:flex;align-items:center;gap:4px;color:var(--muted);font-size:.86rem;font-weight:600;margin-top:3px}
+.pj .bd .pl svg{width:15px;height:15px}
+.pj .facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}
+.fact{border-radius:14px;padding:8px 10px;background:var(--gl2);border:var(--bw) solid var(--line)}
+.fact b{display:block;color:var(--ink);font-size:1rem;white-space:nowrap;overflow:hidden}
+.fact small{display:block;color:var(--muted);font-size:.74rem;font-weight:600;line-height:1.3;overflow:hidden}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:999px;font-size:.78rem;font-weight:800;white-space:nowrap;background:var(--card);color:var(--ink);box-shadow:0 2px 8px rgba(0,0,0,.12)}
+.badge i{width:8px;height:8px;border-radius:50%;background:currentColor}
+.b-working{color:var(--ok)}.b-repairing{color:var(--warn)}.b-notworking{color:var(--bad)}.b-building{color:var(--build)}.b-planned{color:var(--muted)}.b-done{color:var(--blue2)}
+.empty{text-align:center;color:var(--muted);padding:26px 10px}
+/* project */
+.pback{display:inline-flex;align-items:center;gap:6px;margin:0 0 8px -4px}
+.pcov{border-radius:24px;overflow:hidden;aspect-ratio:16/10;background:var(--tint);display:grid;place-items:center;color:var(--blue)}
+.pcov img{width:100%;height:100%;object-fit:cover}.pcov svg{width:56px;height:56px;opacity:.7}
+.ptitle{font-size:1.5rem;line-height:1.2;color:var(--ink);margin:14px 2px 2px;font-weight:800}
+.ppl{color:var(--muted);font-weight:600;margin:0 2px}
+.stc{display:flex;gap:12px;align-items:flex-start;margin-top:14px}
+.stc .si{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;flex:none}
+.stc .si svg{width:22px;height:22px}
+.stc b{display:block;color:var(--ink);font-size:1.05rem}
+.stc p{margin:2px 0 0;color:var(--text);font-size:.92rem;line-height:1.45}
+.t-working{background:var(--okbg);color:var(--ok)}.t-repairing{background:var(--warnbg);color:var(--warn)}.t-notworking{background:var(--badbg);color:var(--bad)}.t-building{background:var(--buildbg);color:var(--build)}.t-planned,.t-done{background:var(--tint);color:var(--blue2)}
+.pfacts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}
+.strip{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 2px 8px;margin:0 -2px}
+.strip figure{margin:0;flex:0 0 72%;max-width:300px;scroll-snap-align:start}
+.strip img,.strip video{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:18px;background:var(--tint)}
+.strip figcaption{font-size:.8rem;color:var(--muted);font-weight:600;margin-top:5px;line-height:1.35}
+.tl{list-style:none;margin:0;padding:0}
+.tl li{display:flex;gap:12px;padding:12px 0;border-top:1px solid var(--line)}
+.tl li:first-child{border-top:0;padding-top:2px}
+.tl .di{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;flex:none}
+.tl .di svg{width:20px;height:20px}
+.tl b{display:block;color:var(--ink);font-size:.98rem;line-height:1.35}
+.tl small{display:block;color:var(--muted);font-weight:600;font-size:.8rem;margin-top:1px}
+.tl p{margin:3px 0 0;font-size:.92rem;line-height:1.45}
+.tl .thumbs{display:flex;gap:6px;margin-top:8px;overflow:hidden}
+.tl .thumbs img{width:72px;height:72px;object-fit:cover;border-radius:12px;flex:none;background:var(--tint)}
+.quote{margin:0;padding:14px 16px;border-radius:18px;background:var(--gl2);border:var(--bw) solid var(--line);font-size:1rem;line-height:1.5;color:var(--ink)}
+.quote+.quote{margin-top:10px}
+.quote small{display:block;margin-top:6px;color:var(--muted);font-weight:700;font-size:.82rem}
+.pmap{height:220px;border-radius:18px;overflow:hidden;z-index:0;background:var(--tint)}
+.dpin{display:block;width:30px;height:38px}
+.mapacts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.btn.sm{min-height:44px;padding:0 16px;font-size:.9rem}
+.fund .row{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid var(--line);font-size:.94rem}
+.fund .row:first-child{border-top:0}
+.fund .row span{color:var(--muted);font-weight:600}
+.fund .row b{color:var(--ink);text-align:right}
+.bar{height:10px;border-radius:99px;background:var(--line);overflow:hidden;margin:6px 0 4px}
+.bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#47B4F5,#0A78C2)}
+/* updates */
+.month{margin-bottom:14px}
+.month h3{margin:0;font-size:1.05rem;color:var(--ink)}
+.month .sum{margin:4px 0 10px;color:var(--muted);font-weight:600;font-size:.86rem;line-height:1.45}
+.new{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:999px;background:var(--coralbg);color:var(--coral);font-size:.68rem;font-weight:800;letter-spacing:.04em;vertical-align:2px;white-space:nowrap}
+/* settings */
+.set{padding:6px 0}
+.set .r{display:flex;align-items:center;gap:12px;padding:12px 16px;min-height:60px;border-top:1px solid var(--line);color:inherit;text-decoration:none;width:100%;background:none;border-left:0;border-right:0;border-bottom:0;text-align:left;cursor:pointer}
+.set .r:first-child{border-top:0}
+.set .r .ri{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;flex:none}
+.set .r .ri svg{width:20px;height:20px}
+.set .r .tx{flex:1;min-width:0}
+.set .r b{display:block;color:var(--ink);font-size:.98rem}
+.set .r small{display:block;color:var(--muted);font-size:.8rem;font-weight:600;line-height:1.35;margin-top:1px}
+.set .r .chev{width:18px;height:18px;color:var(--muted)}
+.set .blk{padding:12px 16px;border-top:1px solid var(--line)}
+.set .blk:first-child{border-top:0}
+.set .blk>b{display:block;color:var(--ink);font-size:.98rem;margin-bottom:8px}
+.seg{display:flex;gap:4px;padding:4px;border-radius:16px;background:var(--gl2);border:var(--bw) solid var(--line)}
+.seg button{flex:1 1 0;min-width:0;min-height:44px;padding:2px 4px;overflow:hidden;border-radius:12px;border:0;background:none;font-weight:700;font-size:.86rem;line-height:1.15;color:var(--ink);cursor:pointer;white-space:normal}
+.seg button[aria-pressed=true]{background:linear-gradient(180deg,#1F3242,#0C1924);color:#FFFFFF}
+html[data-theme=dark] .seg button[aria-pressed=true]{background:#FFFFFF;color:#0C1924}
+html[data-theme=sun] .seg button[aria-pressed=true]{background:#000000;color:#FFFFFF}
+.sw{position:relative;width:52px;height:32px;border-radius:99px;background:var(--line);border:0;cursor:pointer;flex:none;padding:0;transition:background .2s}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:26px;height:26px;border-radius:50%;background:#FFFFFF;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .2s}
+.sw[aria-checked=true]{background:var(--ok)}.sw[aria-checked=true]::after{transform:translateX(20px)}
+.sw[disabled]{opacity:.45}
+.ver{text-align:center;color:var(--muted);font-size:.78rem;margin-top:18px}
+/* tabs */
+.tabs{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));max-width:520px;margin:0 auto;display:flex;height:68px;border-radius:28px;background:var(--gl2);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);border:var(--bw) solid var(--glb);box-shadow:0 18px 40px rgba(20,60,100,.16);z-index:950}
+html[data-theme=sun] .tabs{background:#FFFFFF;box-shadow:none}
+.tabs button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:0;background:none;color:var(--muted);font-weight:700;font-size:.74rem;cursor:pointer;position:relative;white-space:nowrap;min-width:0}
+.tabs .tp{width:56px;height:30px;border-radius:99px;display:grid;place-items:center}
+.tabs .tp svg{width:23px;height:23px}
+.tabs button[aria-selected=true]{color:var(--blue2)}
+.tabs button[aria-selected=true] .tp{background:var(--tint)}
+.tabs .dot{position:absolute;top:6px;left:calc(50% + 10px);min-width:18px;height:18px;padding:0 5px;border-radius:99px;background:var(--coral);color:#FFFFFF;font-size:.66rem;font-weight:800;display:grid;place-items:center}
+html[data-theme=dark] .tabs .dot{color:#3D1F18}
+/* sheet */
+.scrim{position:fixed;inset:0;background:rgba(4,20,32,.45);z-index:1500;display:flex;align-items:flex-end;justify-content:center}
+.sheet{width:100%;max-width:520px;background:var(--card);border-radius:28px 28px 0 0;padding:22px 20px calc(22px + env(safe-area-inset-bottom));box-shadow:0 -10px 40px rgba(0,0,0,.2)}
+html[data-theme=sun] .sheet{border:2px solid #000000}
+.sheet h2{margin:0 0 8px;color:var(--ink);font-size:1.25rem;line-height:1.3}
+.sheet p{margin:0 0 6px;line-height:1.5}
+.sheet .acts{display:flex;flex-direction:column;gap:10px;margin-top:16px}
+.toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#0C1924;color:#FFFFFF;padding:12px 18px;border-radius:14px;font-weight:600;font-size:.9rem;z-index:2000;max-width:calc(100% - 32px);text-align:center}
+.spin{display:grid;place-items:center;min-height:50vh;color:var(--muted);font-weight:600}
+.leaflet-container{font-family:inherit}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<radialGradient id="mgA" cx="38%" cy="38%" r="78%"><stop offset="0" stop-color="#BFE8FF"/><stop offset=".45" stop-color="#3EA7EE"/><stop offset="1" stop-color="#0757A0"/></radialGradient>
+<linearGradient id="mgH" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF" stop-opacity=".95"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/></linearGradient>
+</defs></svg>
+<div id="app" aria-live="polite"><div class="spin">…</div></div>
+<script src="/vendor/leaflet/leaflet.js" defer></script>
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  var qa = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  var store = {
+    get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
+    del: function (k) { try { localStorage.removeItem(k); } catch (e) {} }
+  };
+  var CONTACT = 'info@rafikioutreach.org', GIVE = 'https://www.rafikioutreach.org/donate';
+  var CODE_ALPHA = '23456789ABCDEFGHJKMNPQRSTVWXYZ';
+  var S = { token: store.get('rfPinDonor') || '', lang: store.get('rfPinLang') || '', D: null, tab: 'home', pid: null, seen: store.get('rfPinDonorSeen') || '', map: null };
+  try { S.D = JSON.parse(store.get('rfPinDonorData') || 'null'); } catch (e) { S.D = null; }
+  function tr(en, sw) { return S.lang === 'sw' && sw ? sw : en; }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function n(v) { return Math.round(Number(v) || 0).toLocaleString('en-US'); }
+  function first(s) { return String(s || '').trim().split(/\s+/)[0] || ''; }
+  function toast(t) { var d = document.createElement('div'); d.className = 'toast'; d.setAttribute('role', 'status'); d.textContent = t; document.body.appendChild(d); setTimeout(function () { d.remove(); }, 2600); }
+
+  // ---- icons ----
+  var ICON = {
+    drop: '<path d="M12 3.5s6 6.6 6 11a6 6 0 0 1-12 0c0-4.4 6-11 6-11z"/>',
+    heart: '<path d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.3a4.3 4.3 0 0 1 7.5 2.5C19.5 15.4 12 20 12 20z"/>',
+    home: '<path d="M4 11.5L12 5l8 6.5"/><path d="M6 10v9.5h12V10"/><path d="M10 19.5v-5h4v5"/>',
+    bell: '<path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/>',
+    gear: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
+    pin: '<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.6"/>',
+    back: '<path d="M15 5l-7 7 7 7"/>',
+    chev: '<path d="M9 6l6 6-6 6"/>',
+    cal: '<rect x="4" y="5.5" width="16" height="14.5" rx="2.5"/><path d="M8 3.5v4M16 3.5v4M4 10h16"/>',
+    camera: '<path d="M4 8.5h3l1.6-2.5h6.8L17 8.5h3v10.5H4z"/><circle cx="12" cy="13.5" r="3.3"/>',
+    wrench: '<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/>',
+    quote: '<path d="M9.5 7.5H6a1.5 1.5 0 0 0-1.5 1.5v3A1.5 1.5 0 0 0 6 13.5h2.5V15A2.5 2.5 0 0 1 6 17.5M19.5 7.5H16a1.5 1.5 0 0 0-1.5 1.5v3a1.5 1.5 0 0 0 1.5 1.5h2.5V15a2.5 2.5 0 0 1-2.5 2.5"/>',
+    cake: '<path d="M4.5 20.5h15v-7a2 2 0 0 0-2-2h-11a2 2 0 0 0-2 2z"/><path d="M4.5 15.5c1.5 1 3 1 4.5 0s3-1 4.5 0 3 1 4.5 0M12 11.5V8"/>',
+    mail: '<rect x="3.5" y="5.5" width="17" height="13" rx="2"/><path d="M4 7l8 6 8-6"/>',
+    lang: '<circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.5 2.6 3.5 5.4 3.5 8.5s-1 5.9-3.5 8.5c-2.5-2.6-3.5-5.4-3.5-8.5s1-5.9 3.5-8.5z"/>',
+    out: '<path d="M14 4.5h4a1.5 1.5 0 0 1 1.5 1.5v12a1.5 1.5 0 0 1-1.5 1.5h-4"/><path d="M10 8l-4 4 4 4M6 12h10"/>',
+    lock: '<rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/>',
+    school: '<path d="M3 9.5L12 5l9 4.5"/><path d="M5 10.5V19h14v-8.5"/><path d="M10 19v-4.5h4V19M3 19h18"/>',
+    house: '<path d="M4 11.5L12 5l8 6.5"/><path d="M6 10v9.5h12V10"/><path d="M10 19.5v-5h4v5"/>',
+    spark: '<path d="M12 3.5l1.9 5.6 5.6 1.9-5.6 1.9L12 18.5l-1.9-5.6L4.5 11l5.6-1.9z"/>',
+    text: '<path d="M4 18L9 6l5 12M5.8 14h6.4M15 18l3-7 3 7M15.9 16h4.2"/>',
+    sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6 6 6M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/>',
+    map: '<path d="M3.5 6.5l5.5-2.5 6 2.5 5.5-2.5v13.5L15 20l-6-2.5-5.5 2.5z"/><path d="M9 4v13.5M15 6.5V20"/>',
+    play: '<path d="M8 5.5v13l10-6.5z"/>'
+  };
+  function ic(k) { return '<svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICON[k] || ICON.drop) + '</svg>'; }
+  function mascot() { var d = 'M12 2.5s7 7.4 7 12.6a7 7 0 0 1-14 0c0-5.2 7-12.6 7-12.6z'; return '<svg class="mascot" viewBox="0 0 24 27" aria-hidden="true"><ellipse cx="12" cy="25.4" rx="5.2" ry="1" fill="#0B3A5E" opacity=".25"/><path d="' + d + '" fill="url(#mgA)"/><path d="' + d + '" fill="none" stroke="#FFFFFF" stroke-opacity=".55" stroke-width=".5"/><path d="M8.2 11.4c.5-1.7 1.6-3.4 2.7-4.8" stroke="url(#mgH)" stroke-width="1.3" stroke-linecap="round" fill="none"/><ellipse cx="10" cy="15.2" rx="1.15" ry="1.5" fill="#FFFFFF"/><ellipse cx="14" cy="15.2" rx="1.15" ry="1.5" fill="#FFFFFF"/><circle cx="10.25" cy="15.5" r=".62" fill="#04263F"/><circle cx="14.25" cy="15.5" r=".62" fill="#04263F"/><path d="M10.4 18.3c.9.8 2.3.8 3.2 0" stroke="#04263F" stroke-width=".6" stroke-linecap="round" fill="none"/></svg>'; }
+
+  // ---- dates: "Thu 24 Oct", "24 Oct 2025" (year only when it isn't this one), "3 d ago" ----
+  var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], MON_SW = ['Jan', 'Feb', 'Mac', 'Apr', 'Mei', 'Jun', 'Jul', 'Ago', 'Sep', 'Okt', 'Nov', 'Des'];
+  var DAY = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'], DAY_SW = ['Jpl', 'Jtt', 'Jnn', 'Jtn', 'Alh', 'Iju', 'Jmo'];
+  var MONTH = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'], MONTH_SW = ['Januari', 'Februari', 'Machi', 'Aprili', 'Mei', 'Juni', 'Julai', 'Agosti', 'Septemba', 'Oktoba', 'Novemba', 'Desemba'];
+  function day(iso) {
+    var d = new Date(iso); if (isNaN(d)) return '';
+    var m = (S.lang === 'sw' ? MON_SW : MON)[d.getMonth()];
+    return d.getFullYear() === new Date().getFullYear() ? (S.lang === 'sw' ? DAY_SW : DAY)[d.getDay()] + ' ' + d.getDate() + ' ' + m : d.getDate() + ' ' + m + ' ' + d.getFullYear();
+  }
+  function monthName(key) { var y = +key.slice(0, 4), m = +key.slice(5, 7) - 1; return (S.lang === 'sw' ? MONTH_SW : MONTH)[m] + ' ' + y; }
+  function ago(iso) {
+    var s = (Date.now() - Date.parse(iso)) / 1000; if (!(s >= 0)) return day(iso);
+    if (s < 90) return tr('just now', 'sasa hivi');
+    var m = s / 60, h = m / 60, d = h / 24, w = d / 7, y = d / 365;
+    if (m < 60) return tr(Math.round(m) + ' min ago', 'dakika ' + Math.round(m) + ' zilizopita');
+    if (h < 24) return tr(Math.round(h) + ' h ago', 'saa ' + Math.round(h) + ' zilizopita');
+    if (d < 14) return tr(Math.round(d) + ' d ago', 'siku ' + Math.round(d) + ' zilizopita');
+    if (d < 365) return tr(Math.round(w) + ' wk ago', 'wiki ' + Math.round(w) + ' zilizopita');
+    return Math.round(y) === 1 ? tr('1 yr ago', 'mwaka 1 uliopita') : tr(Math.round(y) + ' yr ago', 'miaka ' + Math.round(y) + ' iliyopita');
+  }
+
+  // ---- what a donor reads: status in friendly words ----
+  function stKey(p) { return p.health ? p.health.state : p.status === 'Under construction' ? 'building' : p.status === 'Upcoming' ? 'planned' : 'done'; }
+  function stName(k) {
+    return { working: tr('Working well', 'Inafanya kazi vizuri'), repairing: tr('Being repaired', 'Inarekebishwa'), notworking: tr('Waiting for a repair', 'Inasubiri matengenezo'),
+      building: tr('Being built', 'Inajengwa'), planned: tr('Planned', 'Imepangwa'), done: tr('Completed', 'Imekamilika') }[k];
+  }
+  function stSay(p) {
+    var k = stKey(p), at = p.health ? day(p.health.at) : '';
+    if (k === 'working') return tr('Water is flowing and people are using it. Last checked ' + at + '.', 'Maji yanatoka na watu wanayatumia. Imekaguliwa mwisho ' + at + '.');
+    if (k === 'repairing') return tr('Our team found a problem and is fixing it now.', 'Timu yetu iligundua tatizo na inalirekebisha sasa.');
+    if (k === 'notworking') return tr('It stopped working at the last check (' + at + '). Our team knows and is arranging the repair.', 'Iliacha kufanya kazi katika ukaguzi wa mwisho (' + at + '). Timu yetu inajua na inapanga matengenezo.');
+    if (k === 'building') { var st = (p.visits || []).filter(function (v) { return v.stage; })[0]; return st ? tr('Building is under way: ' + st.stage.toLowerCase() + '.', 'Ujenzi unaendelea: ' + stage(st.stage).toLowerCase() + '.') : tr('Building is under way.', 'Ujenzi unaendelea.'); }
+    if (k === 'planned') return tr('This project is planned. We’ll share news as soon as work starts.', 'Mradi huu umepangwa. Tutakujulisha kazi ikianza.');
+    return p.done || p.year ? tr('Finished in ' + (p.done ? day(p.done) : p.year) + '.', 'Ilikamilika ' + (p.done ? day(p.done) : p.year) + '.') : tr('Finished.', 'Imekamilika.');
+  }
+  function stage(s) { return S.lang === 'sw' ? ({ Foundation: 'Msingi', 'Walls going up': 'Kuta zinajengwa', Roofing: 'Kuezeka paa', Finishing: 'Kumalizia', Finished: 'Imekamilika' }[s] || s) : s; }
+  function badge(p) { var k = stKey(p); return '<span class="badge b-' + k + '"><i></i>' + esc(stName(k)) + '</span>'; }
+  function kind(p) {
+    var K = { 'Borehole well': ['Borehole well', 'Kisima kirefu'], 'Water collection': ['Rainwater tank', 'Tangi la maji ya mvua'], School: ['School', 'Shule'], Health: ['Health centre', 'Kituo cha afya'], Orphanage: ['Children’s home', 'Makao ya watoto'], Farming: ['Farming', 'Kilimo'], Training: ['Training', 'Mafunzo'], Nutrition: ['Nutrition', 'Lishe'] }[p.type];
+    return K ? tr(K[0], K[1]) : p.type || '';
+  }
+  function typeIcon(p) { return p.water ? 'drop' : p.cat === 'school' ? 'school' : p.cat === 'children' ? 'house' : 'spark'; }
+  function place(p) { return [p.area, p.country].filter(Boolean).join(', '); }
+  function boardPhoto(id, w) { return '/api/photo/' + encodeURIComponent(id) + '?w=' + (w || 960); }
+  function visitPhoto(id, w) { return '/api/donor?photo=' + encodeURIComponent(id) + '&w=' + (w || 960) + '&t=' + encodeURIComponent(S.token); }
+  function cover(p) { return (p.photos || []).length ? boardPhoto(p.photos[0], 960) : (p.gallery || []).length ? visitPhoto(p.gallery[0].id, 960) : ''; }
+  function byId(id) { return (S.D.projects || []).filter(function (p) { return p.id === id; })[0]; }
+  // a visit in a sentence: what the team found (no names, notes or costs: the server never sends them)
+  function visitSay(v) {
+    var a = [];
+    if (v.build) a.push(v.stage ? tr('Building: ' + v.stage.toLowerCase(), 'Ujenzi: ' + stage(v.stage).toLowerCase()) : tr('Building checked', 'Ujenzi umekaguliwa'));
+    else if (v.state) a.push({ working: tr('Working well', 'Inafanya kazi vizuri'), repair: tr('Needs a repair', 'Inahitaji matengenezo'), notworking: tr('Not working', 'Haifanyi kazi') }[v.state] || '');
+    if (v.users) a.push(tr('about ' + n(v.users) + ' people using it', 'takriban watu ' + n(v.users) + ' wanaitumia'));
+    if (v.flow) a.push(tr(n(v.flow) + ' litres a minute', 'lita ' + n(v.flow) + ' kwa dakika'));
+    if (v.water === 'safe') a.push(tr('water tested safe', 'maji yamepimwa ni salama'));
+    if (v.clarity === 'clear') a.push(tr('clear water', 'maji safi'));
+    var nm = v.numbers || {};
+    if (nm.pupils) a.push(tr(n(nm.pupils) + ' pupils', 'wanafunzi ' + n(nm.pupils)));
+    if (nm.patients) a.push(tr(n(nm.patients) + ' patients a week', 'wagonjwa ' + n(nm.patients) + ' kwa wiki'));
+    if (nm.children) a.push(tr(n(nm.children) + ' children', 'watoto ' + n(nm.children)));
+    var s = a.filter(Boolean).join(', ');
+    return s ? s.charAt(0).toUpperCase() + s.slice(1) + '.' : '';
+  }
+  function team() { return tr('RAFIKI field team', 'Timu ya RAFIKI uwanjani'); }
+
+  // ---- talking to the server (the same /api/donor as the private page) ----
+  function api(method, q, body) {
+    var h = { Accept: 'application/json' }; if (S.token) h['X-Donor-Token'] = S.token; if (body) h['Content-Type'] = 'application/json';
+    return fetch('/api/donor' + (q || ''), { method: method, headers: h, body: body ? JSON.stringify(body) : undefined, credentials: 'omit', cache: 'no-store' })
+      .then(function (r) { return r.json().catch(function () { return { ok: false, reason: 'down' }; }).then(function (j) { j.status = r.status; return j; }); })
+      .catch(function () { return { ok: false, reason: 'offline', status: 0 }; });
+  }
+  // a pasted private link (either address), a code, or a bare token
+  function readEntry(s) {
+    s = String(s || '').trim();
+    var m = /(?:\/donor\/|#donor=)([A-Za-z0-9_-]{43})(?![A-Za-z0-9_-])/.exec(s); if (m) return { token: m[1] };
+    if (/^[A-Za-z0-9_-]{43}$/.test(s)) return { token: s };
+    var c = s.toUpperCase().replace(/[\s‐-―-]+/g, '');
+    if (c.length === 10 && c.split('').every(function (x) { return CODE_ALPHA.indexOf(x) >= 0; })) return { code: c };
+    return null;
+  }
+  function staffHere() { return !!(store.get('rfPinMode') || store.get('rfPin')); }
+  function staffOut() {
+    ['rfPin', 'rfPinMode', 'rfPinPhoto', 'rfPinBio', 'rfPinRole', 'rfPinName', 'rfPinWho', 'rfPinList', 'rfPinRepairs', 'rfPinVisits'].forEach(store.del);
+    return fetch('/api/pin-auth/logout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}', credentials: 'same-origin' }).catch(function () {});
+  }
+
+  // ---- screens ----
+  function signIn(msg, cls) {
+    S.D = null; document.title = 'RAFIKI Pin · ' + tr('Donor', 'Mfadhili');
+    $('app').innerHTML = '<section class="in" aria-labelledby="hIn">' + mascot() +
+      '<div class="wm"><img class="lg-d" src="/img/logo-dark-bold.webp" alt="RAFIKI" width="76" height="26"><img class="lg-l" src="/img/logo-light-bold.webp" alt="" width="76" height="26"><b>Pin</b></div>' +
+      '<h1 id="hIn">' + tr('I’m a donor', 'Mimi ni mfadhili') + '</h1>' +
+      '<p class="sub">' + tr('See the projects you funded: photos, visits and thank-you messages from the communities.', 'Ona miradi uliyofadhili: picha, ziara na ujumbe wa shukrani kutoka kwa jamii.') + '</p>' +
+      '<form id="fIn" novalidate><label for="iCode">' + tr('Your donor code or private link', 'Msimbo wako wa mfadhili au kiungo cha siri') + '</label>' +
+      '<input id="iCode" type="text" inputmode="text" autocomplete="one-time-code" autocapitalize="characters" spellcheck="false" placeholder="K7QM4-XR9TB" aria-describedby="mIn hIn2">' +
+      '<p class="help" id="hIn2">' + tr('It’s in the message RAFIKI sent you. Paste the whole link, or type the 10-letter code.', 'Iko kwenye ujumbe RAFIKI ilikutumia. Bandika kiungo kizima, au andika msimbo wa herufi 10.') + '</p>' +
+      '<p class="msg ' + (cls || '') + '" id="mIn" role="status">' + esc(msg || '') + '</p>' +
+      '<button class="btn block" type="submit" id="bIn">' + tr('Continue', 'Endelea') + '</button></form>' +
+      '<div class="alt"><a class="lnk" href="mailto:' + CONTACT + '?subject=' + encodeURIComponent('My RAFIKI donor code') + '">' + ic('mail') + tr('No code? Write to us', 'Huna msimbo? Tuandikie') + '</a>' +
+      '<a class="lnk" href="/pin" id="aStaff">' + tr('I’m RAFIKI staff', 'Mimi ni mfanyakazi wa RAFIKI') + '</a></div>' +
+      langSwitch() + '</section>';
+    $('fIn').addEventListener('submit', function (e) { e.preventDefault(); go($('iCode').value); });
+    bindLang(function () { signIn(); });
+  }
+  function langSwitch() { return '<div class="lsw" role="group" aria-label="' + tr('Language', 'Lugha') + '"><button type="button" data-lang="" aria-pressed="' + (S.lang !== 'sw') + '">English</button><button type="button" data-lang="sw" aria-pressed="' + (S.lang === 'sw') + '">Kiswahili</button></div>'; }
+  function bindLang(redraw) { qa('[data-lang]').forEach(function (b) { b.addEventListener('click', function () { setLang(b.getAttribute('data-lang')); redraw(); }); }); }
+  function setLang(v) { S.lang = v; if (v) store.set('rfPinLang', v); else store.del('rfPinLang'); document.documentElement.lang = v === 'sw' ? 'sw' : 'en'; }
+  function say(t, cls) { var m = $('mIn'); if (m) { m.className = 'msg ' + (cls || ''); m.textContent = t; } }
+
+  // sign in with what was typed or pasted; a phone signed in as staff asks to sign out first
+  function go(entry, sure) {
+    var e = readEntry(entry);
+    if (!e) return say(tr('That doesn’t look like a donor code or link. A code has 10 letters and numbers, like K7QM4-XR9TB.', 'Hiyo haionekani kama msimbo au kiungo cha mfadhili. Msimbo una herufi na namba 10, mf. K7QM4-XR9TB.'), 'bad');
+    if (staffHere() && !sure) return askStaff(function () { go(entry, true); });
+    var b = $('bIn'); if (b) b.disabled = true;
+    say(tr('Checking…', 'Inakagua…'));
+    var next = e.token ? Promise.resolve({ ok: true, token: e.token }) : api('POST', '', { code: e.code });
+    next.then(function (j) {
+      if (!j.ok) { if (b) b.disabled = false; return say(why(j, true), 'bad'); }
+      S.token = j.token;
+      return load(true).then(function (r) {
+        if (b) b.disabled = false;
+        if (!r.ok) { S.token = ''; say(why(r, !!e.code), 'bad'); return; }
+        store.set('rfPinDonor', S.token);
+        toast(tr('Welcome, ', 'Karibu, ') + first(S.D.donor.viewer || S.D.donor.name) + '!');
+      });
+    });
+  }
+  function why(j, code) {
+    if (j.reason === 'rate') return tr('Too many tries from this connection. Please try again in an hour.', 'Majaribio mengi kutoka mtandao huu. Tafadhali jaribu tena baada ya saa moja.');
+    if (j.reason === 'offline') return tr('No connection. Check your signal and try again.', 'Hakuna muunganisho. Angalia mtandao kisha ujaribu tena.');
+    if (j.reason === 'code' || j.reason === 'link') return code ? tr('That code isn’t working. Check it, or write to us for a new one.', 'Msimbo huo haufanyi kazi. Uhakikishe, au tuandikie upate mpya.') : tr('That link isn’t working. It may have been replaced with a new one.', 'Kiungo hicho hakifanyi kazi. Huenda kimebadilishwa na kipya.');
+    return tr('Something went wrong. Please try again in a moment.', 'Kuna hitilafu. Tafadhali jaribu tena baada ya muda mfupi.');
+  }
+  function sheet(html) {
+    var w = document.createElement('div'); w.className = 'scrim'; w.innerHTML = '<div class="sheet" role="dialog" aria-modal="true">' + html + '</div>';
+    document.body.appendChild(w); w.addEventListener('click', function (e) { if (e.target === w) w.remove(); });
+    var f = w.querySelector('button'); if (f) f.focus();
+    return w;
+  }
+  function askStaff(then) {
+    var w = sheet('<h2>' + tr('This phone is signed in as RAFIKI staff', 'Simu hii imeingia kama mfanyakazi wa RAFIKI') + '</h2>' +
+      '<p>' + tr('A phone can be used either by staff or by a donor. Sign out of the staff app to continue as a donor?', 'Simu inaweza kutumiwa na mfanyakazi au na mfadhili. Toka kwenye programu ya wafanyakazi ili uendelee kama mfadhili?') + '</p>' +
+      '<div class="acts"><button class="btn" type="button" data-y>' + tr('Sign out and continue', 'Toka na uendelee') + '</button><button class="btn light" type="button" data-n>' + tr('Keep the staff sign-in', 'Baki kama mfanyakazi') + '</button></div>');
+    w.querySelector('[data-y]').addEventListener('click', function () { w.remove(); staffOut().then(then); });
+    w.querySelector('[data-n]').addEventListener('click', function () { w.remove(); location.replace('/pin'); });
+  }
+  // revoked (or the link was replaced): signed out, with a kind word
+  function gone() {
+    S.token = ''; S.D = null; ['rfPinDonor', 'rfPinDonorData', 'rfPinDonorSeen'].forEach(store.del);
+    $('app').innerHTML = '<section class="gone" aria-labelledby="hGone"><span class="ic">' + ic('heart') + '</span>' +
+      '<h1 id="hGone">' + tr('Your donor access has been switched off', 'Ufikiaji wako wa mfadhili umezimwa') + '</h1>' +
+      '<p>' + tr('Thank you for everything you’ve given. This link or code isn’t active any more; it may have been replaced with a new one.', 'Asante kwa yote uliyotoa. Kiungo au msimbo huu haufanyi kazi tena; huenda umebadilishwa na mpya.') + '</p>' +
+      '<p>' + tr('Write to us and we’ll gladly send you a fresh one.', 'Tuandikie na tutafurahi kukutumia mpya.') + '</p>' +
+      '<div class="acts"><a class="btn" href="mailto:' + CONTACT + '?subject=' + encodeURIComponent('My RAFIKI donor access') + '">' + ic('mail') + tr('Write to RAFIKI', 'Iandikie RAFIKI') + '</a><button class="btn light" type="button" id="bAgain">' + tr('Sign in again', 'Ingia tena') + '</button></div></section>';
+    $('bAgain').addEventListener('click', function () { signIn(); });
+  }
+
+  // ---- loading ----
+  function load(first) {
+    return api('GET', first ? '' : '?bg=1').then(function (j) {
+      if (j.ok) {
+        // the background check only redraws when there's something new (so nothing jumps while reading)
+        var was = S.D && JSON.stringify([S.D.updates, S.D.me]);
+        S.D = j; store.set('rfPinDonorData', JSON.stringify(j));
+        if (!S.seen) { S.seen = newest(); store.set('rfPinDonorSeen', S.seen); }
+        if (first || was !== JSON.stringify([j.updates, j.me])) draw();
+        return j;
+      }
+      if (j.status === 404 && j.reason === 'link' && store.get('rfPinDonor')) { gone(); return j; }
+      return j;
+    });
+  }
+  function newest() { return ((S.D && S.D.updates) || []).map(function (u) { return u.at || ''; }).sort().pop() || new Date().toISOString(); }
+  function fresh() { return ((S.D && S.D.updates) || []).filter(function (u) { return S.seen && u.at > S.seen; }); }
+
+  // ---- the app: Home, Updates, Settings, and a project on top ----
+  function draw() {
+    if (!S.D) return;
+    var who = S.D.donor.viewer || S.D.donor.name, k = fresh().length;
+    document.title = 'RAFIKI Pin · ' + first(who);
+    var body = S.pid && byId(S.pid) ? project(byId(S.pid)) : S.tab === 'updates' ? updates() : S.tab === 'settings' ? settings() : home();
+    $('app').innerHTML = '<header class="top"><img class="lg lg-d" src="/img/logo-dark-bold.webp" alt="RAFIKI" width="70" height="24"><img class="lg lg-l" src="/img/logo-light-bold.webp" alt="" width="70" height="24">' +
+      '<span class="mode">' + ic('heart') + tr('Donor', 'Mfadhili') + '</span><span class="sp"></span><a class="give" href="' + GIVE + '" target="_blank" rel="noopener">' + ic('heart') + tr('Give again', 'Changia tena') + '</a></header>' +
+      '<main id="main">' + body + '</main>' +
+      '<nav class="tabs" role="tablist" aria-label="' + tr('Main', 'Kuu') + '">' + [['home', tr('Home', 'Nyumbani'), 'home'], ['updates', tr('Updates', 'Habari'), 'bell'], ['settings', tr('Settings', 'Mipangilio'), 'gear']].map(function (t) {
+        return '<button type="button" role="tab" data-tab="' + t[0] + '" aria-selected="' + (S.tab === t[0] && !S.pid) + '"><span class="tp">' + ic(t[2]) + '</span>' + t[1] + (t[0] === 'updates' && k ? '<span class="dot" aria-label="' + tr(k + ' new', 'mpya ' + k) + '">' + k + '</span>' : '') + '</button>';
+      }).join('') + '</nav>';
+    bind(); fit();
+    if (S.pid) drawMap(byId(S.pid));
+  }
+  // words never split: a label whose longest word is wider than its box gets a little smaller until it fits
+  function fit() {
+    qa('.tile small, .tile b, .fact small, .fact b, .seg button, .tabs button, .badge').forEach(function (el) {
+      el.style.fontSize = ''; var px = parseFloat(getComputedStyle(el).fontSize), k = 0;
+      while (el.scrollWidth > el.clientWidth + 1 && px > 9 && k++ < 30) { px -= 0.5; el.style.fontSize = px + 'px'; }
+    });
+  }
+  window.addEventListener('resize', function () { if (S.D) fit(); });
+  function home() {
+    var D = S.D, t = D.totals, who = D.donor.viewer || D.donor.name, P = D.projects;
+    var org = [D.donor.group || D.donor.viewer !== D.donor.name ? D.donor.name : '', D.donor.org && D.donor.org !== D.donor.name ? D.donor.org : ''].filter(Boolean).join(' · ');
+    var h = '<section class="hero" aria-labelledby="hHi"><span class="kick">' + ic('lock') + tr('Just for you', 'Kwa ajili yako tu') + '</span>' +
+      '<h1 id="hHi">' + tr('Hello, ', 'Habari, ') + esc(first(who)) + '</h1><p class="org">' + esc(org || tr('Thank you for giving with RAFIKI', 'Asante kwa kuchangia na RAFIKI')) + '</p>' +
+      '<div class="tiles">' +
+      tile(t.water && t.water === t.projects ? t.water : t.projects, t.water && t.water === t.projects ? (t.water === 1 ? tr('well', 'kisima') : tr('wells', 'visima')) : (t.projects === 1 ? tr('project', 'mradi') : tr('projects', 'miradi'))) +
+      tile(t.people, tr('people served', 'wanufaika')) +
+      tile(t.visitsYear || 0, tr('visits this year', 'ziara mwaka huu')) + '</div></section>';
+    h += '<div class="sh"><h2>' + (P.length === 1 ? tr('Your project', 'Mradi wako') : tr('Your projects', 'Miradi yako')) + '</h2><small>' + P.length + '</small></div>';
+    h += P.length ? P.map(card).join('') : '<p class="card empty">' + tr('Your projects will appear here soon.', 'Miradi yako itaonekana hapa hivi karibuni.') + '</p>';
+    return h;
+  }
+  function tile(v, label) { return '<div class="tile"><b>' + n(v) + '</b><small>' + esc(label) + '</small></div>'; }
+  function card(p) {
+    var img = cover(p), last = (p.visits || [])[0];
+    return '<button class="card pj" type="button" data-open="' + esc(p.id) + '"><span class="ph">' + (img ? '<img src="' + esc(img) + '" alt="" loading="lazy">' : ic(typeIcon(p))) + badge(p) + '</span>' +
+      '<span class="bd"><b>' + esc(p.title) + '</b><span class="pl">' + ic('pin') + esc(place(p)) + '</span>' +
+      '<span class="facts"><span class="fact"><b>' + (p.impact && p.impact.people ? n(p.impact.people) : '—') + '</b><small>' + tr('people served', 'watu wanaohudumiwa') + '</small></span>' +
+      '<span class="fact"><b>' + (last ? day(last.at) : '—') + '</b><small>' + tr('last visit', 'ziara ya mwisho') + '</small></span></span></span></button>';
+  }
+  function project(p) {
+    var img = cover(p), k = stKey(p), I = p.impact || {}, h = '';
+    h += '<button class="lnk pback" type="button" data-back>' + ic('back') + tr('Your projects', 'Miradi yako') + '</button>';
+    h += '<div class="pcov">' + (img ? '<img src="' + esc(img) + '" alt="' + esc(p.title) + '">' : ic(typeIcon(p))) + '</div>';
+    h += '<h1 class="ptitle">' + esc(p.title) + '</h1><p class="ppl">' + esc([kind(p), place(p)].filter(Boolean).join(' · ')) + '</p>';
+    h += '<div class="card stc" style="margin-top:14px"><span class="si t-' + k + '">' + ic(k === 'repairing' || k === 'notworking' ? 'wrench' : typeIcon(p)) + '</span><div><b>' + esc(stName(k)) + '</b><p>' + esc(stSay(p)) + '</p></div></div>';
+    var f = [];
+    if (I.people) f.push([n(I.people), tr('people served', 'watu wanaohudumiwa')]);
+    if (I.litresPerDay) f.push([n(I.litresPerDay), tr('litres a day', 'lita kwa siku')]);
+    if (I.years) f.push([String(I.years), I.years === 1 ? tr('year of water', 'mwaka wa maji') : tr('years of water', 'miaka ya maji')]);
+    if (I.pupils) f.push([n(I.pupils), tr('pupils', 'wanafunzi')]);
+    if (I.patients) f.push([n(I.patients), tr('patients a week', 'wagonjwa kwa wiki')]);
+    if (I.children) f.push([n(I.children), tr('children', 'watoto')]);
+    if (f.length) h += '<div class="pfacts">' + f.slice(0, 3).map(function (x) { return '<div class="fact"><b>' + esc(x[0]) + '</b><small>' + esc(x[1]) + '</small></div>'; }).join('') + '</div>';
+    // photo timeline, newest first
+    var ph = (p.gallery || []).map(function (g) { return { at: g.at, src: visitPhoto(g.id, 960), cap: g.label }; });
+    if (ph.length) h += '<div class="sh"><h2>' + tr('Photos', 'Picha') + '</h2><small>' + ph.length + '</small></div><div class="strip">' + ph.map(function (x) {
+      return '<figure><img src="' + esc(x.src) + '" alt="' + esc(x.cap || p.title) + '" loading="lazy"><figcaption>' + day(x.at) + (x.cap ? ' · ' + esc(x.cap) : '') + '</figcaption></figure>'; }).join('') + '</div>';
+    // thank-you messages and videos from the community
+    if ((p.thanks || []).length || (p.stories || []).length) {
+      h += '<div class="sh"><h2>' + tr('Thank you from the community', 'Asante kutoka kwa jamii') + '</h2></div>';
+      if ((p.thanks || []).length) h += '<div class="strip">' + p.thanks.map(function (x) {
+        return '<figure>' + (x.media === 'video' ? '<video controls preload="none" playsinline src="' + esc(visitPhoto(x.id)) + '"></video>' : '<img src="' + esc(visitPhoto(x.id, 960)) + '" alt="' + esc(x.caption || tr('Thank-you photo', 'Picha ya shukrani')) + '" loading="lazy">') +
+          '<figcaption>' + day(x.at) + (x.caption ? ' · “' + esc(x.caption) + '”' : '') + '</figcaption></figure>'; }).join('') + '</div>';
+      (p.stories || []).forEach(function (s) { h += '<blockquote class="quote">“' + esc(s.quote) + '”' + (s.who ? '<small>— ' + esc(s.who) + '</small>' : '') + '</blockquote>'; });
+    }
+    // progress and what was spent on it
+    var rep = p.repairs || [];
+    var rows = [];
+    if (p.year) rows.push([p.status === 'Completed' ? tr('Completed', 'Ilikamilika') : tr('Started', 'Ilianza'), p.done ? day(p.done) : String(p.year)]);
+    if (p.depth) rows.push([tr('Depth', 'Kina'), n(p.depth) + ' m']);
+    if (p.pump) rows.push([tr('Pump', 'Pampu'), p.pump]);
+    var spent = rep.filter(function (r) { return r.cost; }).reduce(function (s, r) { return s + r.cost; }, 0);
+    if (spent) rows.push([tr('Spent on repairs', 'Gharama za matengenezo'), 'KES ' + n(spent)]);
+    if (rows.length || k === 'building') {
+      var stg = ['Foundation', 'Walls going up', 'Roofing', 'Finishing', 'Finished'], cur = (p.visits || []).filter(function (v) { return v.stage; })[0], pct = cur ? Math.round((stg.indexOf(cur.stage) + 1) / stg.length * 100) : 0;
+      h += '<div class="sh"><h2>' + tr('Progress', 'Maendeleo') + '</h2></div><div class="card fund">' +
+        (k === 'building' && cur ? '<div style="margin-bottom:6px"><b style="color:var(--ink)">' + esc(stage(cur.stage)) + '</b><div class="bar" role="img" aria-label="' + pct + '%"><i style="width:' + pct + '%"></i></div></div>' : '') +
+        rows.map(function (r) { return '<div class="row"><span>' + esc(r[0]) + '</span><b>' + esc(r[1]) + '</b></div>'; }).join('') + '</div>';
+    }
+    // visits: date, who, what they found
+    var V = (p.visits || []).slice(0, 8), R = rep.slice(0, 4);
+    if (V.length || R.length) {
+      h += '<div class="sh"><h2>' + tr('Visits and repairs', 'Ziara na matengenezo') + '</h2></div><div class="card"><ul class="tl">' +
+        V.map(function (v) { return { at: v.at, html: '<li><span class="di t-' + (v.state === 'working' || !v.state ? 'done' : v.state === 'repair' ? 'repairing' : 'notworking') + '">' + ic('cal') + '</span><div><b>' + tr('Site visit', 'Ziara') + ' · ' + day(v.at) + '</b><small>' + esc(team()) + '</small>' + (visitSay(v) ? '<p>' + esc(visitSay(v)) + '</p>' : '') + '</div></li>' }; })
+          .concat(R.map(function (r) { return { at: r.fixedAt || r.at, html: '<li><span class="di t-' + (r.open ? 'repairing' : 'working') + '">' + ic('wrench') + '</span><div><b>' + (r.open ? tr('Repair under way', 'Matengenezo yanaendelea') : tr('Repaired', 'Imerekebishwa')) + ' · ' + day(r.fixedAt || r.at) + '</b><small>' + esc(team()) + '</small>' +
+            '<p>' + esc((r.problems.length ? r.problems.join(', ') : tr('A problem was found', 'Tatizo liligunduliwa')) + (r.cost ? ' · KES ' + n(r.cost) : '')) + '</p></div></li>' }; }))
+          .sort(function (a, b) { return a.at < b.at ? 1 : -1; }).map(function (x) { return x.html; }).join('') + '</ul></div>';
+    }
+    // where it is
+    if (p.gps) h += '<div class="sh"><h2>' + tr('Where it is', 'Mahali ilipo') + '</h2></div><div class="pmap" id="pmap" role="img" aria-label="' + esc(tr('Map of ', 'Ramani ya ') + p.title) + '"></div>' +
+      '<div class="mapacts"><a class="btn light sm" href="https://www.google.com/maps/search/?api=1&query=' + p.gps[0] + ',' + p.gps[1] + '" target="_blank" rel="noopener">' + ic('map') + tr('Open in Google Maps', 'Fungua kwenye Google Maps') + '</a></div>';
+    h += '<div class="mapacts" style="margin-top:22px"><a class="btn light sm" href="mailto:' + CONTACT + '?subject=' + encodeURIComponent('Question about ' + p.title) + '">' + ic('mail') + tr('Ask about this project', 'Uliza kuhusu mradi huu') + '</a></div>';
+    return h;
+  }
+  function drawMap(p) {
+    if (!p || !p.gps || !$('pmap') || !window.L) return;
+    if (S.map) { S.map.remove(); S.map = null; }
+    S.map = L.map('pmap', { zoomControl: false, attributionControl: true, scrollWheelZoom: false, dragging: !L.Browser.mobile, tap: false }).setView(p.gps, 14);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }).addTo(S.map);
+    var c = { working: '#1C7C4A', repairing: '#D98200', notworking: '#B3261E', building: '#6E46C8' }[stKey(p)] || '#0A78C2';
+    L.marker(p.gps, { icon: L.divIcon({ className: '', html: '<svg class="dpin" viewBox="0 0 24 30"><path d="M12 29s-10-9-10-16a10 10 0 0 1 20 0c0 7-10 16-10 16z" fill="' + c + '" stroke="#FFFFFF" stroke-width="2"/><circle cx="12" cy="12.5" r="3.6" fill="#FFFFFF"/></svg>', iconSize: [30, 38], iconAnchor: [15, 37] }), title: p.title, keyboard: false }).addTo(S.map);
+  }
+  function updates() {
+    var U = S.D.updates || [], by = {}, keys = [];
+    U.forEach(function (u) { var k = String(u.at).slice(0, 7); if (!by[k]) { by[k] = []; keys.push(k); } by[k].push(u); });
+    var h = '<div class="sh" style="margin-top:6px"><h2>' + tr('Updates', 'Habari') + '</h2><small>' + tr('newest first', 'mpya kwanza') + '</small></div>';
+    if (!U.length) return h + '<p class="card empty">' + tr('News from your projects will appear here: visits, photos and thank-you messages.', 'Habari za miradi yako zitaonekana hapa: ziara, picha na ujumbe wa shukrani.') + '</p>';
+    keys.slice(0, 12).forEach(function (k) {
+      var L = by[k], c = function (t) { return L.filter(function (u) { return u.type === t; }).length; }, photos = L.filter(function (u) { return u.type === 'photos'; }).reduce(function (s, u) { return s + (u.n || 0); }, 0), sum = [];
+      if (c('visit')) sum.push(c('visit') === 1 ? tr('1 visit', 'ziara 1') : tr(c('visit') + ' visits', 'ziara ' + c('visit')));
+      if (photos) sum.push(photos === 1 ? tr('1 new photo', 'picha 1 mpya') : tr(photos + ' new photos', 'picha ' + photos + ' mpya'));
+      if (c('thanks')) sum.push(c('thanks') === 1 ? tr('1 thank-you', 'shukrani 1') : tr(c('thanks') + ' thank-yous', 'shukrani ' + c('thanks')));
+      if (c('repair')) sum.push(c('repair') === 1 ? tr('1 repair', 'matengenezo 1') : tr(c('repair') + ' repairs', 'matengenezo ' + c('repair')));
+      if (c('story')) sum.push(c('story') === 1 ? tr('1 story', 'hadithi 1') : tr(c('story') + ' stories', 'hadithi ' + c('story')));
+      h += '<section class="card month"><h3>' + esc(monthName(k)) + '</h3><p class="sum">' + esc(sum.join(' · ')) + '</p><ul class="tl">' + L.slice(0, 12).map(item).join('') + '</ul></section>';
+    });
+    return h;
+  }
+  function item(u) {
+    var p = byId(u.pid); if (!p) return '';
+    var isNew = S.seen && u.at > S.seen ? '<span class="new">' + tr('NEW', 'MPYA') + '</span>' : '', t = '', ico = 'cal', tone = 'done', body = '';
+    if (u.type === 'visit') { t = tr('Site visit', 'Ziara'); body = visitSay(u); tone = u.state === 'notworking' ? 'notworking' : u.state === 'repair' ? 'repairing' : 'done'; }
+    else if (u.type === 'photos') { t = u.n === 1 ? tr('1 new photo', 'Picha 1 mpya') : tr(u.n + ' new photos', 'Picha ' + u.n + ' mpya'); ico = 'camera'; tone = 'planned'; }
+    else if (u.type === 'thanks') { t = u.media === 'video' ? tr('A thank-you video', 'Video ya shukrani') : tr('A thank-you photo', 'Picha ya shukrani'); ico = 'heart'; tone = 'repairing'; body = u.caption ? '“' + u.caption + '”' : ''; }
+    else if (u.type === 'repair') { t = u.fixedAt ? tr('Repaired', 'Imerekebishwa') : tr('A problem was found', 'Tatizo liligunduliwa'); ico = 'wrench'; tone = u.fixedAt ? 'working' : 'repairing'; body = (u.problems || []).join(', '); }
+    else if (u.type === 'story') { t = tr('A story from the community', 'Hadithi kutoka kwa jamii'); ico = 'quote'; tone = 'building'; body = '“' + u.quote + '”' + (u.who ? ' — ' + u.who : ''); }
+    else if (u.type === 'anniversary') { t = u.years === 1 ? tr('One year of clean water!', 'Mwaka mmoja wa maji safi!') : tr(u.years + ' years of clean water!', 'Miaka ' + u.years + ' ya maji safi!'); ico = 'cake'; tone = 'working'; }
+    else return '';
+    var thumbs = u.type === 'photos' ? '<div class="thumbs">' + (u.photos || []).slice(0, 4).map(function (id) { return '<img src="' + esc(visitPhoto(id, 480)) + '" alt="" loading="lazy">'; }).join('') + '</div>'
+      : u.type === 'thanks' && u.media !== 'video' ? '<div class="thumbs"><img src="' + esc(visitPhoto(u.id, 480)) + '" alt="" loading="lazy"></div>' : '';
+    return '<li><span class="di t-' + tone + '">' + ic(ico) + '</span><div><b>' + esc(t) + isNew + '</b><small>' + esc(p.title) + ' · ' + day(u.at) + '</small>' + (body ? '<p>' + esc(body) + '</p>' : '') + thumbs +
+      '<button class="lnk" type="button" data-open="' + esc(p.id) + '" style="min-height:40px;padding:4px 0 0">' + tr('See the project', 'Ona mradi') + ic('chev') + '</button></div></li>';
+  }
+  function settings() {
+    var me = S.D.me || {}, size = store.get('rfPinSize') || '', theme = store.get('rfPinTheme') || '';
+    var seg = function (id, cur, opts) { return '<div class="seg" role="group" id="' + id + '">' + opts.map(function (o) { return '<button type="button" data-v="' + o[0] + '" aria-pressed="' + (cur === o[0]) + '">' + o[1] + '</button>'; }).join('') + '</div>'; };
+    var mailSub = !me.email ? tr('We don’t have your e-mail yet. Write to us to get them.', 'Bado hatuna barua pepe yako. Tuandikie uzipate.') : !me.digest ? tr('Paused by RAFIKI for now.', 'Zimesimamishwa na RAFIKI kwa sasa.') : me.on ? tr('A short summary on the 1st of each month.', 'Muhtasari mfupi tarehe 1 kila mwezi.') : tr('Off. You won’t get the monthly e-mail.', 'Zimezimwa. Hutapata barua pepe ya mwezi.');
+    return '<div class="sh" style="margin-top:6px"><h2>' + tr('Settings', 'Mipangilio') + '</h2></div>' +
+      '<div class="card set" style="padding:0">' +
+      '<div class="blk"><b>' + tr('Language', 'Lugha') + '</b>' + seg('segLang', S.lang, [['', 'English'], ['sw', 'Kiswahili']]) + '</div>' +
+      '<div class="blk"><b>' + tr('Text size', 'Ukubwa wa maandishi') + '</b>' + seg('segSize', size, [['s', tr('Small', 'Ndogo')], ['', tr('Normal', 'Kawaida')], ['l', tr('Large', 'Kubwa')], ['xl', tr('Larger', 'Kubwa zaidi')]]) + '</div>' +
+      '<div class="blk"><b>' + tr('Colours', 'Rangi') + '</b>' + seg('segTheme', theme, [['', tr('Light', 'Mwanga')], ['dark', tr('Dark', 'Giza')], ['sun', tr('Bright sun', 'Jua kali')]]) + '</div></div>' +
+      '<div class="card set" style="padding:0;margin-top:12px">' +
+      '<div class="r"><span class="ri t-planned">' + ic('mail') + '</span><span class="tx"><b>' + tr('E-mail updates', 'Habari kwa barua pepe') + '</b><small id="mailSub">' + esc(mailSub) + '</small></span><button class="sw" type="button" role="switch" id="swMail" aria-label="' + tr('E-mail updates', 'Habari kwa barua pepe') + '" aria-checked="' + !!me.on + '"' + (me.email && me.digest ? '' : ' disabled') + '></button></div>' +
+      '<div class="r"><span class="ri t-repairing">' + ic('bell') + '</span><span class="tx"><b>' + tr('New photos & updates', 'Picha mpya na habari') + '</b><small>' + tr('Shown on Updates when you open the app. For phone notifications, use the Android app.', 'Zinaonyeshwa kwenye Habari unapofungua programu. Kwa arifa za simu, tumia programu ya Android.') + '</small></span></div></div>' +
+      '<div class="card set" style="padding:0;margin-top:12px">' +
+      '<a class="r" href="' + GIVE + '" target="_blank" rel="noopener"><span class="ri t-working">' + ic('heart') + '</span><span class="tx"><b>' + tr('Give again', 'Changia tena') + '</b><small>rafikioutreach.org/donate</small></span>' + ic('chev').replace('class="i"', 'class="i chev"') + '</a>' +
+      '<a class="r" href="mailto:' + CONTACT + '"><span class="ri t-done">' + ic('mail') + '</span><span class="tx"><b>' + tr('Contact RAFIKI', 'Wasiliana na RAFIKI') + '</b><small>' + CONTACT + '</small></span>' + ic('chev').replace('class="i"', 'class="i chev"') + '</a>' +
+      '<button class="r" type="button" id="bOut"><span class="ri t-notworking">' + ic('out') + '</span><span class="tx"><b>' + tr('Sign out', 'Toka') + '</b><small>' + tr('You can sign in again with your code or link.', 'Unaweza kuingia tena kwa msimbo au kiungo chako.') + '</small></span></button></div>' +
+      '<p class="ver">' + tr('Signed in as ', 'Umeingia kama ') + esc(S.D.donor.viewer || S.D.donor.name) + '</p>';
+  }
+  function bind() {
+    qa('[data-tab]').forEach(function (b) { b.addEventListener('click', function () { S.tab = b.getAttribute('data-tab'); S.pid = null; if (S.tab === 'updates') markSeenSoon(); route(); }); });
+    qa('[data-open]').forEach(function (b) { b.addEventListener('click', function () { S.pid = b.getAttribute('data-open'); route(); }); });
+    qa('[data-back]').forEach(function (b) { b.addEventListener('click', function () { history.length > 1 && /^#p\//.test(location.hash) ? history.back() : (S.pid = null, route()); }); });
+    var segs = { segLang: function (v) { setLang(v); }, segSize: function (v) { if (v) { store.set('rfPinSize', v); document.documentElement.setAttribute('data-size', v); } else { store.del('rfPinSize'); document.documentElement.removeAttribute('data-size'); } },
+      segTheme: function (v) { if (v) { store.set('rfPinTheme', v); document.documentElement.setAttribute('data-theme', v); } else { store.del('rfPinTheme'); document.documentElement.removeAttribute('data-theme'); } var tc = document.querySelector('meta[name=theme-color]'); if (tc) tc.content = v === 'dark' ? '#0D1318' : '#076DB1'; } };
+    Object.keys(segs).forEach(function (id) { qa('#' + id + ' button').forEach(function (b) { b.addEventListener('click', function () { segs[id](b.getAttribute('data-v')); draw(); }); }); });
+    var sw = $('swMail'); if (sw) sw.addEventListener('click', function () {
+      var on = sw.getAttribute('aria-checked') !== 'true'; sw.disabled = true;
+      api('POST', '', { action: 'mail', on: on }).then(function (j) {
+        sw.disabled = false;
+        if (!j.ok) { if (j.reason === 'link') return gone(); return toast(why(j)); }
+        S.D.me = j.me; store.set('rfPinDonorData', JSON.stringify(S.D)); draw();
+        toast(j.me.on ? tr('E-mail updates on ✓', 'Habari kwa barua pepe zimewashwa ✓') : tr('E-mail updates off', 'Habari kwa barua pepe zimezimwa'));
+      });
+    });
+    var out = $('bOut'); if (out) out.addEventListener('click', function () {
+      var w = sheet('<h2>' + tr('Sign out?', 'Utoke?') + '</h2><p>' + tr('Your projects stay safe. Sign in again any time with your donor code or private link.', 'Miradi yako iko salama. Ingia tena wakati wowote kwa msimbo wako wa mfadhili au kiungo cha siri.') + '</p>' +
+        '<div class="acts"><button class="btn" type="button" data-y>' + tr('Sign out', 'Toka') + '</button><button class="btn light" type="button" data-n>' + tr('Cancel', 'Ghairi') + '</button></div>');
+      w.querySelector('[data-y]').addEventListener('click', function () { w.remove(); S.token = ''; ['rfPinDonor', 'rfPinDonorData', 'rfPinDonorSeen'].forEach(store.del); S.seen = ''; signIn(); });
+      w.querySelector('[data-n]').addEventListener('click', function () { w.remove(); });
+    });
+  }
+  var seenT = 0;
+  function markSeenSoon() { clearTimeout(seenT); seenT = setTimeout(function () { S.seen = newest(); store.set('rfPinDonorSeen', S.seen); }, 1500); }
+  // the address keeps the open project (#p/<id>), so the phone's back button closes it
+  function route() {
+    var want = S.pid ? '#p/' + S.pid : S.tab !== 'home' ? '#' + S.tab : '';
+    if (location.hash !== want) history.pushState(null, '', location.pathname + want);
+    draw(); window.scrollTo(0, 0);
+  }
+  window.addEventListener('popstate', function () {
+    var h = location.hash, m = /^#p\/(\d+)$/.exec(h);
+    S.pid = m ? m[1] : null; if (!m) S.tab = h === '#updates' ? 'updates' : h === '#settings' ? 'settings' : 'home';
+    if (S.D) draw();
+  });
+
+  // ---- start ----
+  document.documentElement.lang = S.lang === 'sw' ? 'sw' : 'en';
+  var link = /^#donor=([A-Za-z0-9_-]{43})$/.exec(location.hash);
+  if (link) {
+    history.replaceState(null, '', location.pathname);
+    // the same donor again: just open; someone else's link (or the first time): sign in with it
+    if (link[1] !== S.token) { S.D = null; S.token = ''; ['rfPinDonor', 'rfPinDonorData', 'rfPinDonorSeen'].forEach(store.del); S.seen = ''; signIn(); go(link[1]); return; }
+  }
+  var h0 = /^#p\/(\d+)$/.exec(location.hash); if (h0) S.pid = h0[1]; else if (location.hash === '#updates' || location.hash === '#settings') S.tab = location.hash.slice(1);
+  if (!S.token) return signIn();
+  if (S.D) draw(); else $('app').innerHTML = '<div class="spin">' + tr('Loading…', 'Inapakia…') + '</div>';
+  window.addEventListener('load', function () { if (S.pid && S.D) drawMap(byId(S.pid)); });
+  load(true).then(function (j) { if (!j.ok && !S.D && j.reason !== 'link') { $('app').innerHTML = '<section class="gone"><span class="ic">' + ic('drop') + '</span><h1>' + tr('We couldn’t load your projects just now', 'Hatukuweza kupakia miradi yako sasa hivi') + '</h1><p>' + esc(why(j)) + '</p><div class="acts"><button class="btn" type="button" onclick="location.reload()">' + tr('Try again', 'Jaribu tena') + '</button></div></section>'; } });
+  // news while the app is open: checked again every 5 minutes (the Updates tab shows a number)
+  setInterval(function () { if (S.token && document.visibilityState === 'visible') load(false); }, 5 * 60000);
+  document.addEventListener('visibilitychange', function () { if (S.token && document.visibilityState === 'visible') load(false); });
+})();
+</script>
+</body>
+</html>

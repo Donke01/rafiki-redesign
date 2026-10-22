@@ -11,6 +11,10 @@
   Cache-Control: public, max-age=3600
 /pin
   X-Robots-Tag: noindex, nofollow
+/pin-donor
+  X-Robots-Tag: noindex, nofollow
+  Referrer-Policy: strict-origin
+  Cache-Control: no-cache
 /vendor/*
   Cache-Control: public, max-age=604800
 /pin-sw.js

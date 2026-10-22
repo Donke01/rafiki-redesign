@@ -31,6 +31,8 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="https" android:host="pin.rafikioutreach.org" android:path="/pin" />
+                <!-- a donor's private link on the app's address opens donor mode (feat-donorapp); /pin#donor=<token> also matches the line above -->
+                <data android:scheme="https" android:host="pin.rafikioutreach.org" android:pathPrefix="/donor/" />
             </intent-filter>
         </activity>
         <receiver android:name=".data.InstallResult" android:exported="false" />

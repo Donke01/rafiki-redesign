@@ -22,6 +22,8 @@
 <script>
 // theme and text size before first paint
 (function () { try { var t = localStorage.getItem('rfPinTheme'), z = localStorage.getItem('rfPinSize'); if (t) document.documentElement.setAttribute('data-theme', t); if (z) document.documentElement.setAttribute('data-size', z); } catch (e) {} })();
+// donor mode (feat-donorapp): a donor's private link (/pin#donor=…) or a phone signed in as a donor opens the donor app
+(function () { try { var h = /^#donor=[A-Za-z0-9_-]{43}$/.test(location.hash) ? location.hash : ''; if (h || localStorage.getItem('rfPinDonor')) location.replace('/pin-donor' + h); } catch (e) {} })();
 </script>
 <style>
 :root{--blue:#0A78C2;--blue2:#076DB1;--deep:#054F81;--ink:#04263F;--tint:#E3F1FC;--bg:#EEF0F2;--card:#FFFFFF;--field:#FFFFFF;--text:#141618;--muted:#5A6066;--line:#DCE1E5;--edge:#C9D1D8;--ok:#1C7C4A;--okbg:#E2F4EA;--warn:#8A5200;--warnbg:#FDF0DC;--bad:#B3261E;--badbg:#FBE7E5;--off:#AFC4D3;--bar:rgba(255,255,255,.97);--tabh:68px;--bw:1px;color-scheme:light}
@@ -883,6 +885,19 @@ html[data-theme=sun] .pk{border:2px solid #000;box-shadow:none}
 .pp-go{margin-top:16px}
 .pp-links{display:flex;justify-content:center;gap:18px;flex-wrap:wrap;margin-top:4px}
 .pp-links .lnk{font-size:.82rem}
+/* feat-donorapp: "I'm a donor" under the PIN pad and on the welcome screen */
+.dna-code{display:flex;align-items:center;gap:10px;padding:8px 8px 8px 14px;border-radius:16px;border:var(--bw) solid var(--line);background:var(--card)}
+.dna-code .dna-cv{flex:1;min-width:0;display:flex;flex-direction:column}
+.dna-code .dna-cl{color:var(--muted);font-weight:600;font-size:.78rem;white-space:nowrap}
+.dna-code b{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:1.02rem;letter-spacing:.04em;color:var(--ink);white-space:nowrap}
+.dna-code .btn{min-height:40px!important;width:auto!important;flex:none}
+.dna-vcode{display:block;margin-top:2px}.dna-vcode b{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.04em;color:var(--ink);white-space:nowrap}
+.dna-inv .dna-msg{margin:6px 0 4px;font-size:.84rem;line-height:1.45;color:var(--ink);background:rgba(255,255,255,.7);padding:10px;border-radius:10px;overflow-wrap:break-word;word-break:normal}
+html[data-theme=dark] .dna-inv .dna-msg{background:rgba(0,0,0,.25)}
+.pp-donor{display:flex;align-items:center;justify-content:center;gap:8px;width:max-content;max-width:100%;margin:12px auto 0;min-height:48px;padding:0 22px;border-radius:999px;border:var(--bw) solid var(--line);color:var(--blue2);font-weight:700;font-size:.92rem;text-decoration:none;white-space:nowrap}
+.pp-donor svg{width:18px;height:18px;color:#D9573F;flex:none}
+.onb .onb-donor{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;color:#076DB1;font-weight:700;font-size:.9rem;text-decoration:none;white-space:nowrap}
+html[data-theme=dark] .onb .onb-donor{color:#4AAAEE}
 #mSign{margin-top:6px}
 @media (prefers-reduced-motion: reduce){.pp-dots.shake{animation:none}.pk{transition:none}}
 
@@ -2586,6 +2601,7 @@ html[data-theme=sun] .btn[disabled]{color:#000000}
         <button class="btn block pp-go" type="submit">Unlock</button>
         <div class="pp-links"><button type="button" class="lnk" id="ppLong">My PIN is longer</button><button type="button" class="lnk" id="ppWho">Shared PIN? Add your name</button></div>
       </form>
+      <a class="pp-donor" id="ppDonor" href="/pin-donor"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.3a4.3 4.3 0 0 1 7.5 2.5C19.5 15.4 12 20 12 20z"/></svg><span>I’m a donor</span></a>
       <p class="msg" id="mSign" aria-live="polite"></p>
     </section>
 
@@ -4316,7 +4332,7 @@ html[data-theme=sun] .btn[disabled]{color:#000000}
         '<div class="note1 g" style="--r:5deg;left:3%;bottom:24%;animation-delay:.2s"><b>✅ WORKING</b>' + esc(names[2]) + '</div>' +
         '<div class="note1 r" style="--r:-6deg;right:3%;bottom:28%;animation-delay:.3s"><b>🔧 REPAIR</b>' + esc(names[3]) + '</div></div>' +
         '<div class="ob1"><p class="hero1" id="onbT">Every water point.<br>One map.<br><span>Right in your pocket.</span></p><div class="mbig" style="margin-top:22px">' + drop('b', 'smile') + '</div></div>' +
-        (ONB.mode === 'splash' ? '<div class="foot"><span class="cap">' + esc('Habari ' + String(S.name || '').split(' ')[0] + ', karibu tena.') + '</span></div>' : ONB.mode === 'hello' ? '<div class="foot"><div class="lsw" role="group" aria-label="Language"><button type="button" data-lsw="" aria-pressed="' + (S.lang !== 'sw') + '">English</button><button type="button" data-lsw="sw" aria-pressed="' + (S.lang === 'sw') + '">Kiswahili</button></div><button class="go1" type="button" data-o="signin">Sign in</button><span class="cap">' + (S.name ? 'Habari ' + esc(String(S.name).split(' ')[0]) + ', karibu tena.' : 'New here? Ask your team for a PIN.') + '</span></div>'
+        (ONB.mode === 'splash' ? '<div class="foot"><span class="cap">' + esc('Habari ' + String(S.name || '').split(' ')[0] + ', karibu tena.') + '</span></div>' : ONB.mode === 'hello' ? '<div class="foot"><div class="lsw" role="group" aria-label="Language"><button type="button" data-lsw="" aria-pressed="' + (S.lang !== 'sw') + '">English</button><button type="button" data-lsw="sw" aria-pressed="' + (S.lang === 'sw') + '">Kiswahili</button></div><button class="go1" type="button" data-o="signin">Sign in</button><span class="cap">' + (S.name ? 'Habari ' + esc(String(S.name).split(' ')[0]) + ', karibu tena.' : 'New here? Ask your team for a PIN.') + '</span><a class="onb-donor" href="/pin-donor">' + tr('I’m a donor', 'Mimi ni mfadhili') + '</a></div>'
           : '<div class="foot"><button class="go1" type="button" data-o="next">Get started</button><span class="cap">Takes 30 seconds</span></div>');
     } else if (i === 1) {
       var opts = [['pin', 'Pin locations', 'Put every project on the map', 'b'], ['visit', 'Site visits', 'Check water points and report', 'g'], ['repairs', 'Repairs', 'Follow what needs fixing', 'c']];
@@ -5814,6 +5830,8 @@ html[data-theme=sun] .btn[disabled]{color:#000000}
   SWP.unshift([/^Repairs, (\d+) open$/, "Matengenezo, $1 wazi"], [/^Review, (\d+) open$/, "Kagua, $1 wazi"], [/^(\d+) with no location$/, "$1 bila mahali"]);
   // polish-mail
   Object.assign(SW, {"Send an e-mail": "Tuma barua pepe", "E-mail donors": "Tuma barua pepe", "Send me a test": "Nitumie jaribio", "Include their private project link": "Weka kiungo cha siri cha miradi yao"});
+  // polish-donorapp
+  Object.assign(SW, {"I’m a donor": "Mimi ni mfadhili", "App code": "Msimbo wa programu", "Send app invite": "Tuma mwaliko wa programu", "App invite": "Mwaliko wa programu"});
   // dates in the app's own style ("Thu 24 Oct", "24 Oct, 18:34") and relative times, when the language changes after they're drawn
   [['Sun', 'Jpl'], ['Mon', 'Jtt'], ['Tue', 'Jnn'], ['Wed', 'Jtn'], ['Thu', 'Alh'], ['Fri', 'Iju'], ['Sat', 'Jmo']].forEach(function (w) { SWP.push([new RegExp('^' + w[0] + ' (\\d{1,2}) ([A-Z][a-z]{2})$'), w[1] + ' $1 $2']); });
   SWP.push([/^(\d{1,2}) ([A-Z][a-z]{2})((?: \d{4})?(?:, \d{2}:\d{2})?)$/, "$1 $2$3"], [/^(\d+) h ago$/, "saa $1 zilizopita"], [/^(\d+) d ago$/, "siku $1 zilizopita"], [/^(\d+) wk ago$/, "wiki $1 zilizopita"],
@@ -8816,6 +8834,8 @@ html[data-theme=sun] .btn[disabled]{color:#000000}
       var act = a.getAttribute('data-a'), m = c.querySelector('.dqm-acts .msg'), cf = c.querySelector('.tm-cf'), lb = c.querySelector('.dqm-dnlink');
       if (act === 'edit') { w.close(); setTimeout(function () { dqmDnForm(d); }, 200); return; }
       if (act === 'mail') { w.close(); mlGo({ aud: 'donors', sub: 'pick', picks: [d.id] }); return; }
+      if (act === 'dncode') { dnaCopy(a.getAttribute('data-code'), tr('Code copied', 'Msimbo umenakiliwa')); return; }
+      if (act === 'invite') { var pv = d.viewers.filter(function (v) { return v.primary; })[0] || d.viewers[0]; if (pv && pv.code) { dnaInviteBox(lb, pv.name || d.name, pv.email || d.email, pv.code); lb.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } return; }
       var go = function (am) {
         var say = am || m;
         dnrSay(say, '', act === 'revoke' ? tr('Revoking…', 'Inazima…') : act === 'del' ? tr('Deleting…', 'Inafuta…') : tr('Getting the link…', 'Inaleta kiungo…'));
@@ -8842,7 +8862,7 @@ html[data-theme=sun] .btn[disabled]{color:#000000}
     return '<div class="dqm-shd"><span class="dqm-shi dqm-t-' + tone + '" aria-hidden="true">' + oic('heart') + '</span><h3>' + esc(d.name) + '</h3>' +
       (d.org && d.org !== d.name ? '<small>' + esc(d.org) + '</small>' : '') + (d.email ? '<small class="dqm-mail">' + esc(d.email) + '</small>' : '') + dqmDnPill(d) + '</div>' +
       '<div class="dqm-dnlink" aria-live="polite"></div>' +
-      '<div class="dqm-acts">' + (on ? '<button class="btn" type="button" data-a="copy" data-testid="dn_copy">' + oic('link') + '<span>' + tr('Copy private link', 'Nakili kiungo cha siri') + '</span></button>' +
+      '<div class="dqm-acts">' + (on ? '<button class="btn" type="button" data-a="copy" data-testid="dn_copy">' + oic('link') + '<span>' + tr('Copy private link', 'Nakili kiungo cha siri') + '</span></button>' + dnaCodeRow(d) +
         '<div class="dqm-two"><button class="btn light" type="button" data-a="share" data-testid="dn_share">' + oic('dqmshare') + '<span>' + tr('Share link', 'Shiriki kiungo') + '</span></button><button class="btn light" type="button" data-a="edit" data-testid="dn_edit">' + oic('dqmedit') + '<span>' + tr('Edit', 'Hariri') + '</span></button></div>'
         : '<button class="btn" type="button" data-a="rotate" data-testid="dn_newlink">' + oic('link') + '<span>' + tr('Make a new link', 'Tengeneza kiungo kipya') + '</span></button><button class="btn light" type="button" data-a="edit" data-testid="dn_edit">' + oic('dqmedit') + '<span>' + tr('Edit', 'Hariri') + '</span></button>') +
       '<button class="btn light" type="button" data-a="mail" data-testid="dn_email">' + oic('mail') + '<span>' + tr('E-mail', 'Barua pepe') + '</span></button>' +
@@ -8861,7 +8881,8 @@ html[data-theme=sun] .btn[disabled]{color:#000000}
       d.viewers.map(function (v) {
         return '<div class="dqm-v" data-vid="' + esc(v.vid) + '"><div class="dqm-vh"><b>' + esc(v.name || d.name) + '</b>' + (v.primary ? '<span class="tag has">' + tr('main', 'mkuu') + '</span>' : '') + (v.active ? '' : '<span class="tag">' + tr('revoked', 'kimezimwa') + '</span>') + '</div>' +
           '<small>' + esc([v.email, v.lastOpen ? tr('opened ', 'kimefunguliwa ') + since(v.lastOpen) : tr('not opened yet', 'bado hakijafunguliwa'), v.unsub ? tr('no monthly e-mail', 'hapati barua ya mwezi') : ''].filter(Boolean).join(' · ')) + '</small>' +
-          '<div class="dqm-vb">' + (v.active ? '<button class="btn small light" type="button" data-dv="copy">' + oic('link') + '<span>' + tr('Copy link', 'Nakili kiungo') + '</span></button><button class="btn small light" type="button" data-dv="rotate">' + tr('Rotate', 'Badilisha') + '</button><button class="btn small light dqm-bad" type="button" data-dv="revoke">' + tr('Revoke', 'Zima') + '</button>'
+          (v.active && v.code ? '<small class="dna-vcode">' + tr('App code', 'Msimbo wa programu') + ' <b data-nosw>' + esc(v.code) + '</b></small>' : '') +
+          '<div class="dqm-vb">' + (v.active ? '<button class="btn small light" type="button" data-dv="copy">' + oic('link') + '<span>' + tr('Copy link', 'Nakili kiungo') + '</span></button>' + (v.code ? '<button class="btn small light" type="button" data-dv="invite">' + tr('App invite', 'Mwaliko wa programu') + '</button>' : '') + '<button class="btn small light" type="button" data-dv="rotate">' + tr('Rotate', 'Badilisha') + '</button><button class="btn small light dqm-bad" type="button" data-dv="revoke">' + tr('Revoke', 'Zima') + '</button>'
             : '<button class="btn small light" type="button" data-dv="rotate">' + tr('New link', 'Kiungo kipya') + '</button>') +
           (v.primary ? '' : '<button class="btn small light dqm-bad" type="button" data-dv="remove">' + tr('Remove', 'Ondoa') + '</button>') + '</div><div class="dnr-box"></div></div>';
       }).join('') +
@@ -8882,6 +8903,7 @@ html[data-theme=sun] .btn[disabled]{color:#000000}
   function dnrViewerAct(btn, d, draw, c) {
     var row = btn.closest('[data-vid]'), vid = row.getAttribute('data-vid'), act = btn.getAttribute('data-dv'), box = row.querySelector('.dnr-box');
     var v = d.viewers.filter(function (x) { return x.vid === vid; })[0]; if (!v) return;
+    if (act === 'invite') return dnaInviteBox(box, v.name || d.name, v.email, v.code);
     var go = function (am) {
       adminApi('POST', { action: act === 'copy' ? 'donor-link' : act === 'remove' ? 'donor-viewer-remove' : 'donor-' + act, id: d.id, vid: vid }).then(function (j) {
         if (!j.ok) { if (am) { dnrSay(am, 'bad', dnrWhy(j)); qa('button', box).forEach(function (x) { x.disabled = false; }); } else toast(dnrWhy(j)); return; }
@@ -9169,6 +9191,42 @@ html[data-theme=sun] .btn[disabled]{color:#000000}
     if (t.id === 'mlPhU') return mlUpload(t.files && t.files[0]);
     if (t.closest('#mlPick') && t.type === 'checkbox') { var i = ML.picks.indexOf(t.value); if (t.checked && i < 0) ML.picks.push(t.value); if (!t.checked && i >= 0) ML.picks.splice(i, 1); return mlUpdateCount(); }
   });
+
+  // --- feat-donorapp: the donor's app code next to "Copy private link", and "Send app invite" ---
+  var DNA_APK = 'https://pin.rafikioutreach.org/app/rafiki-pin.apk', DNA_WEB = 'https://pin.rafikioutreach.org/pin';
+  function dnaCodeRow(d) {
+    var v = d.viewers.filter(function (x) { return x.primary; })[0] || d.viewers[0];
+    if (!v || !v.code) return '';
+    return '<div class="dna-code"><span class="dna-cv"><span class="dna-cl">' + tr('App code', 'Msimbo wa programu') + '</span><b data-nosw data-testid="dn_code">' + esc(v.code) + '</b></span>' +
+      '<button class="btn small light" type="button" data-a="dncode" data-code="' + esc(v.code) + '" aria-label="' + esc(tr('Copy the app code', 'Nakili msimbo wa programu')) + '">' + oic('link') + '<span>' + tr('Copy', 'Nakili') + '</span></button></div>' +
+      '<button class="btn light" type="button" data-a="invite" data-testid="dn_invite">' + oic('heart') + '<span>' + tr('Send app invite', 'Tuma mwaliko wa programu') + '</span></button>';
+  }
+  function dnaCopy(text, done) {
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(function () { toast(done); }, function () { prompt(tr('Copy this:', 'Nakili hiki:'), text); });
+    else prompt(tr('Copy this:', 'Nakili hiki:'), text);
+  }
+  // in English: donors read it (most of them abroad)
+  function dnaInviteText(name, code) {
+    return 'Hello ' + (String(name || '').split(/\s+/)[0] || '') + ', you can now follow the projects you funded in the RAFIKI Pin app: photos, visits and thank-you messages from the communities.\n\n' +
+      'Android: download the app from ' + DNA_APK + ', open it and tap “I’m a donor”.\n' +
+      'iPhone: open ' + DNA_WEB + ', tap “I’m a donor”, then Share › Add to Home Screen.\n\n' +
+      'Your donor code: ' + code + '\nIt’s just for you, so please don’t share it.';
+  }
+  // the links in the invite break only after a "/", never at the hyphen in "rafiki-pin" (what's copied is unchanged)
+  function dnaShow(text) {
+    return esc(text).replace(/https:\/\/[^\s,]+/g, function (u) { return u.replace(/-/g, '&#8209;').replace(/\//g, '/<wbr>'); }).replace(/\n/g, '<br>');
+  }
+  function dnaInviteBox(el, name, email, code) {
+    if (!el) return;
+    var text = dnaInviteText(name, code), wa = 'https://wa.me/?text=' + encodeURIComponent(text);
+    var mail = 'mailto:' + encodeURIComponent(email || '') + '?subject=' + encodeURIComponent('Your projects in the RAFIKI Pin app') + '&body=' + encodeURIComponent(text + '\n\nWith thanks,\nRAFIKI Outreach');
+    el.innerHTML = '<div class="pinbox dnr-link dna-inv" role="status" data-testid="dn_invite_box"><span>' + tr('App invite for ', 'Mwaliko wa programu kwa ') + esc(name) + '</span><p class="dna-msg" data-nosw>' + dnaShow(text) + '</p>' +
+      '<div class="dqm-lb"><button class="btn small light" type="button" data-copy>' + oic('link') + '<span>' + tr('Copy', 'Nakili') + '</span></button>' +
+      '<a class="btn small light" href="' + esc(wa) + '" target="_blank" rel="noopener noreferrer">' + oic('vxwa') + 'WhatsApp</a><a class="btn small light" href="' + esc(mail) + '">' + oic('mail') + tr('E-mail', 'Barua pepe') + '</a>' +
+      (navigator.share ? '<button class="btn small light" type="button" data-native>' + oic('dqmshare') + tr('More…', 'Zaidi…') + '</button>' : '') + '</div></div>';
+    el.querySelector('[data-copy]').addEventListener('click', function () { dnaCopy(text, tr('Invite copied', 'Mwaliko umenakiliwa')); });
+    var nat = el.querySelector('[data-native]'); if (nat) nat.addEventListener('click', function () { navigator.share({ title: 'Your projects in the RAFIKI Pin app', text: text }).catch(function () {}); });
+  }
 
   // --- Project › Thank-you for donors: a photo or short video (≤ 60 s) from the community, for this project's donors ---
   var DNR_THX = { busy: false };

@@ -64,7 +64,7 @@ import org.rafikioutreach.pin.t
 // Each donor gets a private link to a page with their projects, an exact-location map and updates; group donors
 // (a church, a company) can have several viewers, each with their own link.
 
-data class DonorViewer(val vid: String, val name: String, val email: String, val primary: Boolean, val lastOpen: String, val active: Boolean)
+data class DonorViewer(val vid: String, val name: String, val email: String, val primary: Boolean, val lastOpen: String, val active: Boolean, val code: String = "")
 data class Donor(val id: String, val name: String, val email: String, val org: String, val projects: List<String>, val showPhotos: Boolean, val photos: Map<String, String>,
                  val digest: Boolean, val lastOpen: String, val opens: Int, val revoked: Boolean, val viewers: List<DonorViewer>)
 
@@ -78,7 +78,7 @@ fun parseDonors(j: JSONObject): List<Donor> {
         val vs = d.optJSONArray("viewers") ?: JSONArray()
         Donor(d.str("id"), d.str("name"), d.str("email"), d.str("org"), (0 until ps.length()).map { ps.getString(it) }, d.optBoolean("showPhotos", true),
             ph.keys().asSequence().associateWith { ph.getString(it) }, d.optBoolean("digest", true), d.str("lastOpen"), d.optInt("opens"), d.optBoolean("revoked"),
-            (0 until vs.length()).map { k -> vs.getJSONObject(k).let { v -> DonorViewer(v.str("vid"), v.str("name"), v.str("email"), v.optBoolean("primary"), v.str("lastOpen"), v.optBoolean("active", true)) } })
+            (0 until vs.length()).map { k -> vs.getJSONObject(k).let { v -> DonorViewer(v.str("vid"), v.str("name"), v.str("email"), v.optBoolean("primary"), v.str("lastOpen"), v.optBoolean("active", true), v.str("code")) } })
     }
 }
 
@@ -106,6 +106,32 @@ fun pickProjects(all: List<Project>, q: String, ck: String, cat: String, ticked:
 
 fun donorShareText(name: String, link: String) =
     "Hello " + name.trim().split(Regex("\\s+")).firstOrNull().orEmpty() + ", here is your private RAFIKI Outreach page with the projects you funded: photos, visit reports and a live map. It’s just for you, so please don’t forward it.\n" + link
+
+// feat-donorapp: the RAFIKI Pin app for donors. The invite is in English: donors read it (most of them abroad).
+const val DONOR_APK = "https://pin.rafikioutreach.org/app/rafiki-pin.apk"
+const val DONOR_WEB_APP = "https://pin.rafikioutreach.org/pin"
+fun donorInviteText(name: String, code: String) =
+    "Hello " + name.trim().split(Regex("\\s+")).firstOrNull().orEmpty() + ", you can now follow the projects you funded in the RAFIKI Pin app: photos, visits and thank-you messages from the communities.\n\n" +
+        "Android: download the app from $DONOR_APK, open it and tap “I’m a donor”.\n" +
+        "iPhone: open $DONOR_WEB_APP, tap “I’m a donor”, then Share › Add to Home Screen.\n\n" +
+        "Your donor code: $code\nIt’s just for you, so please don’t share it."
+private fun shareInvite(ctx: android.content.Context, name: String, code: String) {
+    runCatching { ctx.startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_SUBJECT, "Your projects in the RAFIKI Pin app").putExtra(Intent.EXTRA_TEXT, donorInviteText(name, code)), t("Send the app invite", "Tuma mwaliko wa programu")).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
+}
+/** The app code next to "Copy private link": the code, Copy, and Send app invite. */
+@Composable
+private fun DonorCodeRow(name: String, code: String, copy: (String) -> Unit, said: (String) -> Unit) {
+    if (code.isBlank()) return
+    val ctx = LocalContext.current
+    Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).border(1.dp, C.line, RoundedCornerShape(16.dp)).background(C.card).padding(start = 14.dp, end = 6.dp, top = 6.dp, bottom = 6.dp).testTag("dn_code"), verticalAlignment = Alignment.CenterVertically) {
+        Column(Modifier.weight(1f)) {
+            Text(t("App code", "Msimbo wa programu"), style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold), color = C.muted, maxLines = 1, softWrap = false)
+            Text(code, style = MaterialTheme.typography.titleSmall.copy(fontFamily = FontFamily.Monospace, fontSize = 16.sp, letterSpacing = 0.5.sp), color = C.ink, maxLines = 1, softWrap = false)
+        }
+        Btn(t("Copy", "Nakili"), { copy(code); said(t("Code copied ✓", "Msimbo umenakiliwa ✓")) }, Modifier.testTag("dn_code_copy"), small = true, light = true, icon = "copy")
+    }
+    DqmLineBtn(t("Send app invite", "Tuma mwaliko wa programu"), "heart", { shareInvite(ctx, name, code) }, Modifier.fillMaxWidth().testTag("dn_invite"))
+}
 
 /** all · opened · not (not opened yet) · revoked */
 fun donorState(d: Donor) = when { d.revoked -> "revoked"; d.lastOpen.isNotBlank() -> "opened"; else -> "not" }
@@ -305,6 +331,7 @@ fun DonorsSection(m: AppModel, snap: Snapshot) {
 @Composable
 private fun DonorSheet(m: AppModel, d: Donor, link: List<String>?, close: () -> Unit, setLink: (List<String>?) -> Unit, changed: () -> Unit, share: (List<String>) -> Unit, copy: (String) -> Unit, edit: () -> Unit) {
     val scope = rememberScope()
+    val ctx = LocalContext.current
     var msg by remember { mutableStateOf<Pair<String, String>?>(null) }
     var ask by remember { mutableStateOf<String?>(null) }
     var askMsg by remember { mutableStateOf<String?>(null) }
@@ -344,9 +371,11 @@ private fun DonorSheet(m: AppModel, d: Donor, link: List<String>?, close: () -> 
         Column(Modifier.padding(top = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             if (!d.revoked && link != null) {
                 // the link is shown above with its own Copy and Share, so only Edit here
+                (d.viewers.firstOrNull { it.primary } ?: d.viewers.firstOrNull())?.let { pv -> DonorCodeRow(pv.name.ifBlank { d.name }, pv.code, copy) { msg = "ok" to it } }
                 DqmLineBtn(t("Edit", "Hariri"), "edit", { hide { edit() } }, Modifier.fillMaxWidth().testTag("dn_edit"))
             } else if (!d.revoked) {
                 Btn(t("Copy private link", "Nakili kiungo cha siri"), { act("donor-link") { j -> copy(j.optString("link")); msg = "ok" to t("Link copied ✓", "Kiungo kimenakiliwa ✓") } }, Modifier.fillMaxWidth().testTag("dn_copy"), icon = "copy", enabled = !busy)
+                (d.viewers.firstOrNull { it.primary } ?: d.viewers.firstOrNull())?.let { pv -> DonorCodeRow(pv.name.ifBlank { d.name }, pv.code, copy) { msg = "ok" to it } }
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     DqmLineBtn(t("Share link", "Shiriki kiungo"), "share", { act("donor-link") { j -> val s = listOf(d.id, d.name, j.optString("link"), d.email); setLink(s); share(s) } }, Modifier.weight(1f).testTag("dn_share"))
                     DqmLineBtn(t("Edit", "Hariri"), "edit", { hide { edit() } }, Modifier.weight(1f).testTag("dn_edit"))
@@ -374,9 +403,11 @@ private fun DonorSheet(m: AppModel, d: Donor, link: List<String>?, close: () -> 
                     Column(Modifier.padding(top = 10.dp).fillMaxWidth().testTag("dn_v_${v.vid}")) {
                         Text(v.name.ifBlank { d.name } + (if (v.primary) t(" (main)", " (mkuu)") else "") + (if (!v.active) t(" · revoked", " · kimezimwa") else ""), style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold), color = C.ink)
                         Text(listOf(v.email, if (v.lastOpen.isNotBlank()) t("opened ", "kimefunguliwa ") + whenText(v.lastOpen) else t("not opened yet", "bado hakijafunguliwa")).filter { it.isNotBlank() }.joinToString(" · "), style = MaterialTheme.typography.bodySmall, color = C.muted)
+                        if (v.active && v.code.isNotBlank()) Text(t("App code ", "Msimbo wa programu ") + v.code, style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold), color = C.ink, modifier = Modifier.testTag("dn_v_code_${v.vid}"))
                         FlowRow(Modifier.padding(top = 6.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                             if (v.active) {
                                 DqmLineBtn(t("Copy link", "Nakili kiungo"), "copy", { act("donor-link", v.vid) { j -> copy(j.optString("link")); msg = "ok" to t("Link copied ✓", "Kiungo kimenakiliwa ✓") } })
+                                if (v.code.isNotBlank()) DqmLineBtn(t("App invite", "Mwaliko wa programu"), "heart", { shareInvite(ctx, v.name.ifBlank { d.name }, v.code) })
                                 DqmLineBtn(t("Rotate", "Badilisha"), "refresh", { act("donor-rotate", v.vid) { j -> setLink(listOf(d.id, v.name.ifBlank { d.name }, j.optString("link"), v.email)); changed() } })
                                 DqmLineBtn(t("Revoke", "Zima"), "x", { vAsk = v.vid to "donor-revoke" }, Modifier.testTag("dn_v_revoke_${v.vid}"), red = true)
                             } else DqmLineBtn(t("New link", "Kiungo kipya"), "link", { act("donor-rotate", v.vid) { j -> setLink(listOf(d.id, v.name.ifBlank { d.name }, j.optString("link"), v.email)); changed() } })
