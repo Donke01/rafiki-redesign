@@ -2709,6 +2709,9 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
   .mpa-pin .mpa-dot.c-bad::before{opacity:0}
 }
 </style>
+<style id="monlogo-css">/* monday.com's own logo in Settings, as on Android (its icon if the logo can't load) */
+.pi.pi-brand .bi{width:24px;height:24px;display:flex;align-items:center;justify-content:center;background:transparent;box-shadow:none}.pi.pi-brand .bi svg{width:20px;height:20px;color:#6161FF}.pi.pi-brand .bi img{width:24px;height:24px;border-radius:5px}
+</style>
 </head>
 <body class="locked">
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
@@ -6913,7 +6916,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
     c.classList.remove('hidden');
     // one row in Settings ("Connected as …  ›"); the set-up itself opens in a sheet
     var sub = S.linked ? tr('Connected as ', 'Imeunganishwa kama ') + esc(S.linked) + ' ✓' : !S.who ? tr('Changes go in under the shared account', 'Mabadiliko yanaingia kwa akaunti ya pamoja') : tr('Not connected yet · takes 20 seconds', 'Bado haijaunganishwa · sekunde 20');
-    c.innerHTML = '<button class="pr mrow" type="button" id="monRow" aria-haspopup="dialog"><span class="pi" style="--hu:var(--hu-purple);--hb:var(--hb-purple)">' + oic('clipf') + '</span><span class="prt"><b>' + tr('Your name on monday.com', 'Jina lako kwenye monday.com') + '</b><small' + (S.linked ? ' class="ok"' : '') + '>' + sub + '</small></span><span class="cv">' + oic('chev') + '</span></button>';
+    c.innerHTML = '<button class="pr mrow" type="button" id="monRow" aria-haspopup="dialog"><span class="pi pi-brand" style="--hu:#6161FF;--hb:rgba(97,97,255,.10)">' + brand('monday') + '</span><span class="prt"><b>' + tr('Your name on monday.com', 'Jina lako kwenye monday.com') + '</b><small' + (S.linked ? ' class="ok"' : '') + '>' + sub + '</small></span><span class="cv">' + oic('chev') + '</span></button>';
     var sh = $('monSheet'); if (sh) sh.innerHTML = monBody();
   }
   function monBody() {
