@@ -175,7 +175,7 @@ Notes:
 ## What the owner must set up
 
 1. **OpenRouteService key (needed for road details):**
-   - Create a free account at <https://openrouteservice.org/dev/#/signup>, then go to Dashboard › Tokens and make a "Standard" token.
+   - Create a free HeiGIT account (account.heigit.org); its Basic key works for openrouteservice. The API lives at api.heigit.org (api.openrouteservice.org shuts down in Nov 2026).
    - In Cloudflare, open Pages › rafiki-redesign › Settings › Variables and secrets and add a **secret** named `ORS_API_KEY`. Do this for Production, and for Preview if wanted.
    - Never put the key in the code; the repository is public.
    - The free plan allows about **2,000 routes a day** and 40 a minute. Routes are cached for 30 days, so real use is far below that. `ORS_DAILY_LIMIT` (default 1800) stops calls before the limit.

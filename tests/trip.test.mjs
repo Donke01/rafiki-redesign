@@ -80,7 +80,7 @@ let meteoToday = TODAY;
 globalThis.fetch = async (url, o = {}) => {
   const u = String(url);
   if (u.includes('open-meteo.com')) { calls.meteo.push(u); return new Response(JSON.stringify(meteo(meteoToday))); }
-  if (u.includes('openrouteservice.org')) { calls.ors.push({ url: u, o }); return orsReply(o); }
+  if (u.includes('api.heigit.org/openrouteservice')) { calls.ors.push({ url: u, o }); return orsReply(o); }
   // monday.com (the feed for project ids): nothing
   return new Response(JSON.stringify({ data: {} }));
 };
@@ -237,7 +237,7 @@ test('roads: routeLeg asks ORS correctly, caches 30 days, and switches off quiet
   assert.equal(a.ok, true); assert.equal(a.cached, false); assert.equal(a.km, 70);
   assert.equal(calls.ors.length, 1);
   const c = calls.ors[0], body = JSON.parse(c.o.body);
-  assert.equal(c.url, 'https://api.openrouteservice.org/v2/directions/driving-car/geojson'); assert.equal(c.o.method, 'POST');
+  assert.equal(c.url, 'https://api.heigit.org/openrouteservice/v2/directions/driving-car/geojson'); assert.equal(c.o.method, 'POST');
   assert.equal(c.o.headers.Authorization, 'test-key');
   assert.deepEqual(body.extra_info, ['surface', 'waytype']);
   assert.deepEqual(body.coordinates, [[35, 1.015], [SCHOOL[1], SCHOOL[0]]], 'ORS wants [lng, lat]');
