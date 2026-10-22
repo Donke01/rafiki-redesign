@@ -3,6 +3,7 @@
 # page /donor/<token> with /api/donor mocked (data built by the real lib/donor.js, qa/pin/donor_mock.mjs): hero
 # and count-up, map with exact pins and street/satellite, pin card with Google Maps, project detail with photos,
 # before/after slider, filters, share, impact report PDF, and the "link not working" page.
+# Office › Export (choice cards, folded options) is covered here too.
 # Screenshots at 390 (phone) and 1280 (desktop) to qa/pin/donor/. No page errors allowed.
 import io, json, os, re, subprocess
 from urllib.parse import urlparse, parse_qs
@@ -59,6 +60,12 @@ def admin(route, req):
              'lastOpen': None, 'opens': 0, 'revoked': False, 'viewers': [{'vid': 'vG', 'name': b['name'], 'email': b['email'], 'primary': True, 'lastOpen': None, 'opens': 0, 'revoked': None, 'active': True, 'unsub': None}]}
         STATE['donors'].append(d); return route.fulfill(json={'ok': True, 'donor': d, 'link': link(TOKEN)})
     if b['action'] == 'donor-link': return route.fulfill(json={'ok': True, 'link': link(TOKEN if b['id'] == 'dG1' else 'AndersonLinkAndersonLinkAndersonLinkAnderso')})
+    if b['action'] == 'donor-revoke' and not b.get('vid'):
+        for x in STATE['donors']:
+            if x['id'] == b['id']: x['revoked'] = True
+        return route.fulfill(json={'ok': True})
+    if b['action'] == 'donor-remove':
+        STATE['donors'] = [x for x in STATE['donors'] if x['id'] != b['id']]; return route.fulfill(json={'ok': True})
     if b['action'] == 'donor-viewer-add':
         d = [x for x in STATE['donors'] if x['id'] == b['id']][0]
         d['viewers'].append({'vid': 'vJ', 'name': b['name'], 'email': b.get('email', ''), 'primary': False, 'lastOpen': None, 'opens': 0, 'revoked': None, 'active': True, 'unsub': None})
@@ -83,16 +90,36 @@ with sync_playwright() as p:
         pg.route('**/api/pin-auth/me', lambda r, q: r.fulfill(json={'available': False})); pg.route(re.compile(r'/api/pin(\?.*)?$'), pin); pg.route(re.compile(r'/api/admin(\?.*)?$'), admin)
         return ctx, pg, errs
 
-    # ---- Office › Donors, phone ----
+    # ---- Office › Donors, phone: numbers, filters, calm cards; a sheet per donor with every action ----
+    def shot(pg, name, full=False): pg.wait_for_timeout(450); pg.screenshot(path=os.path.join(OUT, name), full_page=full)
+    def sheet_open(pg): pg.wait_for_selector('.tsh.in'); pg.wait_for_timeout(650)
+    def sheet_close(pg): pg.keyboard.press('Escape'); pg.wait_for_timeout(400)
+    def folded(pg, k): return pg.evaluate("k => document.getElementById('dqmSec_' + k).getBoundingClientRect().height < 2 && document.getElementById('dqmSec_' + k).hasAttribute('inert')", k)
+    def fits(pg, sel):   # nothing wider than its box, no word split into pieces (each text node on whole words)
+        return pg.evaluate("""(sel) => { const out = []; document.querySelectorAll(sel).forEach(el => { if (el.scrollWidth > el.clientWidth + 1 && getComputedStyle(el).overflowX !== 'auto' && getComputedStyle(el).textOverflow !== 'ellipsis') out.push(el.className + ': ' + el.textContent.slice(0, 40)); }); return out; }""", sel)
     ctx, pg, errs = page_for(390, 844, True)
     pg.goto(BASE + '/pin'); pg.wait_for_timeout(700)
     for d in '9999': pg.click('.pk[data-k="%s"]' % d)
     pg.wait_for_timeout(1000); pg.evaluate("localStorage.setItem('rfPinOnb','1')"); pg.goto(BASE + '/pin#office'); pg.wait_for_timeout(1200)
     check(pg.locator('#oTabs [data-o=donors]').count() == 1, 'Office has a Donors section')
-    pg.click('#oTabs [data-o=donors]'); pg.wait_for_timeout(800)
-    check('Anderson Family' in pg.inner_text('#oBody') and 'Opened' in pg.inner_text('.dnr[data-dn=dA1]'), 'donor list: name and last opened')
-    check('E-mail digest: off — add RESEND_API_KEY and ALERT_FROM in Cloudflare' in pg.inner_text('#oBody'), 'digest status shown (off)')
-    pg.screenshot(path=os.path.join(OUT, '01-office-donors-phone.png'))
+    pg.click('#oTabs [data-o=donors]'); pg.wait_for_timeout(900)
+    card = pg.locator('[data-testid=dn_card][data-dn=dA1]')
+    check(card.count() == 1 and 'Anderson Family' in card.inner_text() and 'Opened their page' in card.inner_text() and '1 project' in card.inner_text(), 'donor card: name, status pill, projects')
+    check(card.locator('button, input, a').count() == 0, 'no buttons or forms inside the card')
+    nums = pg.eval_on_selector_all('[data-testid=dn_head] .dqm-nums b', 'e => e.map(x => x.textContent)')
+    check(nums == ['1', '1', '0'], 'head numbers: donors, opened, not opened %s' % nums)
+    check(folded(pg, 'dnmail'), 'e-mail digest folded away')
+    pg.click('[data-testid=dnmail_toggle]'); pg.wait_for_timeout(450)
+    check('Off. Add RESEND_API_KEY and ALERT_FROM in Cloudflare' in pg.inner_text('[data-testid=dnmail]') and pg.get_attribute('[data-testid=dnmail_toggle]', 'aria-expanded') == 'true', 'digest row opens: status off and what to add')
+    shot(pg, '01-office-donors-phone.png')
+    check(not fits(pg, '#oBody .dqm-card, #oBody .dqm-nums > *, #oBody .dqm-row'), 'nothing overflows on the phone')
+    pg.click('[data-testid=dn_filter_not]'); pg.wait_for_timeout(300)
+    check(pg.locator('[data-testid=dn_card]').count() == 0 and 'Everyone has opened their page' in pg.inner_text('#oBody'), 'filter Not opened: friendly empty state')
+    pg.click('[data-testid=dn_n_all]'); pg.wait_for_timeout(300)
+    check(pg.locator('[data-testid=dn_card]').count() == 1 and pg.get_attribute('[data-testid=dn_filter_all]', 'aria-pressed') == 'true', 'the Donors number tile sets the filter back to All')
+    # add a donor: the form in a sheet
+    pg.click('[data-testid=dn_add]'); sheet_open(pg)
+    check(pg.locator('.tsh [data-testid=dn_form]').count() == 1, 'Add a donor opens the form in a sheet')
     pg.fill('#dnName', 'Grace Community Church'); pg.fill('#dnEmail', 'office@gracechurch.example'); pg.fill('#dnOrg', 'Grace Community Church')
     pg.fill('#dnQ', 'kap'); pg.wait_for_timeout(200)
     check(pg.locator('#dnList .dnr-p').count() == 1, 'search narrows the projects')
@@ -104,23 +131,73 @@ with sync_playwright() as p:
     pg.check('#dnList input[value="103"]'); pg.wait_for_timeout(150)
     check(pg.inner_text('#dnCount') == '4 ticked', 'four projects ticked')
     check(pg.locator('#dnSens [data-ph="102"]').count() == 1, 'school photos need a consent tick')
-    pg.locator('#dnSens').scroll_into_view_if_needed(); pg.screenshot(path=os.path.join(OUT, '02-office-add-donor-phone.png'))
-    pg.click('#dnSave'); pg.wait_for_timeout(900)
+    shot(pg, '02-office-add-donor-sheet-phone.png')
+    pg.locator('#dnSens').scroll_into_view_if_needed(); shot(pg, '02b-office-add-donor-consent-phone.png')
+    pg.click('#dnSave'); pg.wait_for_timeout(1400)
     add = [x for x in posts if x['action'] == 'donor-add']
     check(add and sorted(add[0]['projects']) == ['101', '102', '103', '104'] and add[0]['showPhotos'] is True and add[0]['photos'] == {}, 'donor-add sent with projects and photo rule')
-    check('/donor/' + TOKEN in pg.inner_text('#dnLinkNew'), 'the private link is shown')
-    pg.click('#dnLinkNew [data-copy]'); pg.wait_for_timeout(300)
+    check(pg.locator('.tsh [data-testid=dn_sheet]').count() == 1 and '/donor/' + TOKEN in pg.inner_text('.tsh .dqm-dnlink').replace('​', ''), 'the new donor’s sheet opens with the private link')
+    check('Added ✓' in pg.inner_text('.tsh .dqm-acts .msg') and pg.locator('[data-testid=dn_card]').count() == 2, 'Added ✓, and the list has two donors')
+    pg.click('.tsh .dqm-dnlink [data-copy]'); pg.wait_for_timeout(300)
     check(pg.evaluate('navigator.clipboard.readText()') == link(TOKEN), 'Copy puts the private link on the clipboard')
-    wa = pg.get_attribute('#dnLinkNew a[href^="https://wa.me"]', 'href'); check(wa and 'donor%2F' + TOKEN in wa, 'WhatsApp share carries the link')
-    pg.locator('#dnLinkNew').scroll_into_view_if_needed(); pg.screenshot(path=os.path.join(OUT, '03-office-link-made-phone.png'))
-    # copy from the list, then edit: group viewers
-    pg.click('.dnr[data-dn=dA1] [data-dn-act=copy]'); pg.wait_for_timeout(300)
-    check('AndersonLink' in pg.evaluate('navigator.clipboard.readText()'), 'Copy private link from the list')
-    pg.click('.dnr[data-dn=dG1] [data-dn-act=edit]'); pg.wait_for_timeout(400)
-    check('Edit Grace Community Church' in pg.inner_text('#dnrSide') and pg.locator('#dnList input:checked').count() == 4, 'edit form opens with the ticked projects')
-    pg.fill('#dnVName', 'Pastor John'); pg.click('#dnVAdd'); pg.wait_for_timeout(500)
-    check('PastorJohnLink' in pg.inner_text('#dnVLink') and 'Pastor John' in pg.inner_text('.dnr-viewers'), 'group page: a second viewer with their own link')
-    pg.locator('.dnr-viewers').scroll_into_view_if_needed(); pg.screenshot(path=os.path.join(OUT, '04-office-group-viewers-phone.png'))
+    wa = pg.get_attribute('.tsh .dqm-dnlink a[href^="https://wa.me"]', 'href'); check(wa and 'donor%2F' + TOKEN in wa, 'WhatsApp share carries the link')
+    lines = pg.evaluate("""() => { const c = document.querySelector('.tsh .dnr-link code'); const tn = [...c.childNodes].filter(n => n.nodeType === 3).pop(); const r = document.createRange(); r.selectNodeContents(tn); return new Set([...r.getClientRects()].map(x => Math.round(x.top))).size; }""")
+    check(lines == 1, 'the private token stays whole on one line (%d)' % lines)
+    shot(pg, '03-office-link-made-sheet-phone.png')
+    sheet_close(pg)
+    # an existing donor's sheet: copy, share, rotate (asks), revoke (asks), viewers, edit
+    pg.click('[data-testid=dn_card][data-dn=dA1]'); sheet_open(pg)
+    t = pg.inner_text('.tsh [data-testid=dn_sheet]')
+    check('Anderson Family' in t and 'anderson@example.org' in t and 'Last opened' in t and '4 times' in t, 'donor sheet: details')
+    pg.click('.tsh [data-testid=dn_copy]'); pg.wait_for_timeout(400)
+    check('AndersonLink' in pg.evaluate('navigator.clipboard.readText()') and 'Copied ✓' in pg.inner_text('.tsh [data-testid=dn_copy]'), 'Copy private link from the sheet')
+    shot(pg, '04-office-donor-sheet-phone.png')
+    n0 = len(posts); pg.click('.tsh [data-testid=dn_revoke]'); pg.wait_for_timeout(400)
+    check(pg.locator('.tsh .tm-ask.bad').count() == 1 and len(posts) == n0, 'Revoke asks first and sends nothing yet')
+    pg.locator('.tsh .tm-ask').scroll_into_view_if_needed(); shot(pg, '05-office-donor-revoke-ask-phone.png')
+    pg.click('.tsh .tm-ask [data-k=no]'); pg.wait_for_timeout(200); check(pg.locator('.tsh .tm-ask').count() == 0, 'Cancel closes the question')
+    pg.click('.tsh [data-testid=dn_share]'); pg.wait_for_timeout(500)
+    check('AndersonLink' in pg.inner_text('.tsh .dqm-dnlink').replace('​', ''), 'Share link shows the link with WhatsApp and e-mail')
+    pg.click('.tsh [data-testid=dnv_toggle]'); pg.wait_for_timeout(450)
+    check('Who can open this page' in pg.inner_text('.tsh') and pg.locator('.tsh .dqm-v').count() == 1, 'viewers folded in the sheet, one person')
+    sheet_close(pg)
+    pg.click('[data-testid=dn_card][data-dn=dG1]'); sheet_open(pg)
+    pg.fill('#dnVName', 'Pastor John'); pg.click('#dnVAdd'); pg.wait_for_timeout(600)
+    check('PastorJohnLink' in pg.inner_text('#dnVLink').replace('​', '') and pg.locator('.tsh .dqm-v').count() == 2, 'group page: a second viewer with their own link')
+    pg.locator('#dnVLink').scroll_into_view_if_needed(); shot(pg, '06-office-group-viewers-phone.png')
+    pg.click('.tsh [data-testid=dn_edit]'); sheet_open(pg); pg.wait_for_timeout(300)
+    check(pg.locator('.tsh [data-testid=dn_form]').count() == 1 and 'Grace Community Church' in pg.inner_text('.tsh .dqm-shd') and pg.locator('#dnList input:checked').count() == 4, 'Edit opens the form sheet with the ticked projects')
+    pg.click('#dnCancel'); pg.wait_for_timeout(400)
+    # revoke, then delete (both confirmed)
+    pg.click('[data-testid=dn_card][data-dn=dA1]'); sheet_open(pg)
+    pg.click('.tsh [data-testid=dn_revoke]'); pg.wait_for_timeout(300); pg.click('.tsh .tm-ask [data-k=yes]'); pg.wait_for_timeout(900)
+    check(any(x['action'] == 'donor-revoke' and x['id'] == 'dA1' for x in posts) and 'Link revoked' in pg.inner_text('.tsh .dqm-shd') and pg.locator('.tsh [data-testid=dn_newlink]').count() == 1, 'revoked: the sheet now offers a new link')
+    check('Link revoked' in pg.inner_text('[data-testid=dn_card][data-dn=dA1]'), 'the list refreshes')
+    shot(pg, '07-office-donor-revoked-phone.png')
+    sheet_close(pg)
+    pg.click('[data-testid=dn_filter_revoked]'); pg.wait_for_timeout(300)
+    check(pg.locator('[data-testid=dn_card]').count() == 1, 'filter Revoked')
+    pg.click('[data-testid=dn_filter_all]'); pg.wait_for_timeout(300)
+    pg.click('[data-testid=dn_card][data-dn=dG1]'); sheet_open(pg)
+    pg.click('.tsh [data-testid=dn_delete]'); pg.wait_for_timeout(300)
+    check('Delete Grace Community Church?' in pg.inner_text('.tsh .tm-ask'), 'Delete asks first')
+    pg.click('.tsh .tm-ask [data-k=yes]'); pg.wait_for_timeout(1000)
+    check(any(x['action'] == 'donor-remove' and x['id'] == 'dG1' for x in posts) and pg.locator('.tsh').count() == 0 and pg.locator('[data-testid=dn_card]').count() == 1, 'deleted: sheet closes, list refreshes')
+    # Kiswahili, dark and sun
+    pg.evaluate("localStorage.setItem('rfPinLang','sw')"); pg.reload(); pg.wait_for_timeout(1500)
+    if pg.locator('#oTabs [data-o=donors][aria-pressed=true]').count() == 0: pg.click('#oTabs [data-o=donors]'); pg.wait_for_timeout(800)
+    t = pg.inner_text('#oBody')
+    check('Wafadhili' in t and 'Ongeza mfadhili' in t and 'Kiungo kimezimwa' in t, 'Donors in Kiswahili')
+    check(not fits(pg, '#oBody .dqm-card, #oBody .dqm-nums > *, #oBody .dqm-row'), 'nothing overflows in Kiswahili')
+    shot(pg, '08-office-donors-sw-phone.png')
+    pg.click('[data-testid=dn_card][data-dn=dA1]'); sheet_open(pg); shot(pg, '09-office-donor-sheet-sw-phone.png'); sheet_close(pg)
+    pg.click('[data-testid=dn_add]'); sheet_open(pg); shot(pg, '09b-office-add-donor-sw-phone.png'); sheet_close(pg)
+    pg.evaluate("localStorage.setItem('rfPinLang','en')"); pg.reload(); pg.wait_for_timeout(1400)
+    for th in ['dark', 'sun']:
+        pg.evaluate("t => document.documentElement.setAttribute('data-theme', t)", th); pg.wait_for_timeout(200)
+        shot(pg, '10-office-donors-%s-phone.png' % th)
+        pg.click('[data-testid=dn_card][data-dn=dA1]'); sheet_open(pg); shot(pg, '11-office-donor-sheet-%s-phone.png' % th); sheet_close(pg)
+    pg.evaluate("document.documentElement.removeAttribute('data-theme')")
     # Project › Thank-you for donors (field app): a photo goes to /api/pin-thanks
     thx = []
     pg.route('**/api/pin-thanks', lambda r, q: (thx.append(q.post_data_buffer), r.fulfill(json={'ok': True, 'id': '101', 'asset': '700'})))
@@ -132,14 +209,41 @@ with sync_playwright() as p:
     check(thx and b'name="id"' in thx[0] and b'101' in thx[0] and b'Asante sana!' in thx[0] and 'Sent' in pg.inner_text('#dnThxMsg'), 'thank-you photo sent with project and caption')
     check(not errs, 'no page errors (office phone): %s' % errs); ctx.close()
 
-    # ---- Office › Donors, desktop ----
+    # ---- Office › Donors and Export, desktop ----
     ctx, pg, errs = page_for(1280, 900, False)
     pg.goto(BASE + '/pin'); pg.wait_for_timeout(700)
     for d in '9999': pg.click('.pk[data-k="%s"]' % d)
     pg.wait_for_timeout(1000); pg.evaluate("localStorage.setItem('rfPinOnb','1'); localStorage.setItem('rfPinOTab','donors')"); pg.goto(BASE + '/pin#office'); pg.reload(); pg.wait_for_timeout(1600)
-    check(pg.locator('#dnrForm').count() == 1, 'desktop: donors open from the saved tab')
-    pg.screenshot(path=os.path.join(OUT, '05-office-donors-desktop.png'))
+    check(pg.locator('[data-testid=dn_head]').count() == 1 and pg.locator('#oBody .o-side .dqm-sets').count() == 1, 'desktop: donors open from the saved tab, settings in the side column')
+    pg.click('[data-testid=dnhow_toggle]'); pg.wait_for_timeout(450)
+    shot(pg, '12-office-donors-desktop.png')
+    check(not fits(pg, '#oBody .dqm-card, #oBody .dqm-nums > *, #oBody .dqm-row'), 'nothing overflows on the desktop')
+    pg.click('[data-testid=dn_card][data-dn=dA1]'); sheet_open(pg); shot(pg, '13-office-donor-sheet-desktop.png'); sheet_close(pg)
+    pg.click('[data-testid=dn_add]'); sheet_open(pg); shot(pg, '14-office-add-donor-desktop.png'); sheet_close(pg)
+    pg.evaluate("document.documentElement.setAttribute('data-theme','dark')"); shot(pg, '15-office-donors-dark-desktop.png'); pg.evaluate("document.documentElement.removeAttribute('data-theme')")
+    # Export: a card per spreadsheet, the rest folded
+    pg.click('#oTabs [data-o=export]'); pg.wait_for_timeout(900)
+    check(pg.locator('#oBody .dqm-x').count() == 6 and pg.locator('[data-x=costs]').count() == 1 and pg.locator('[data-x=costsum]').count() == 1, 'export: six choice cards (with costs and the summary)')
+    check(folded(pg, 'xrep') and folded(pg, 'xmail'), 'export: monthly report and e-mail summary folded')
+    shot(pg, '20-export-desktop.png')
+    with pg.expect_download() as dl: pg.click('[data-x=projects]')
+    check(dl.value.suggested_filename.startswith('rafiki-projects-') and dl.value.suggested_filename.endswith('.csv'), 'export: projects CSV downloads')
+    pg.click('[data-testid=xmail_toggle]'); pg.click('[data-testid=xrep_toggle]'); pg.wait_for_timeout(500)
+    check('CRON_KEY' in pg.inner_text('[data-testid=xmail]') and pg.locator('#xRep').is_visible(), 'export: folds open')
+    shot(pg, '21-export-open-desktop.png')
+    for th in ['dark', 'sun']:
+        pg.evaluate("t => document.documentElement.setAttribute('data-theme', t)", th); shot(pg, '22-export-%s-desktop.png' % th)
+    pg.evaluate("document.documentElement.removeAttribute('data-theme')")
     check(not errs, 'no page errors (office desktop): %s' % errs); ctx.close()
+    ctx, pg, errs = page_for(390, 844, True)
+    pg.goto(BASE + '/pin'); pg.wait_for_timeout(700)
+    for d in '9999': pg.click('.pk[data-k="%s"]' % d)
+    pg.wait_for_timeout(1000); pg.evaluate("localStorage.setItem('rfPinOnb','1'); localStorage.setItem('rfPinOTab','export'); localStorage.setItem('rfPinLang','sw')"); pg.goto(BASE + '/pin#office'); pg.reload(); pg.wait_for_timeout(1600)
+    t = pg.inner_text('#oBody')
+    check('Pakua jedwali' in t and 'Ziara za maeneo' in t and 'Ripoti ya mwezi' in t, 'export in Kiswahili')
+    check(not fits(pg, '#oBody .dqm-card, #oBody .dqm-row'), 'export: nothing overflows in Kiswahili on the phone')
+    shot(pg, '23-export-sw-phone.png', True)
+    check(not errs, 'no page errors (export phone): %s' % errs); ctx.close()
 
     # ---- donor page ----
     for (w, h, mobile, tag) in [(390, 844, True, 'phone'), (1280, 900, False, 'desktop')]:

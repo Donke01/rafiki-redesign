@@ -9,7 +9,9 @@ import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -88,11 +90,20 @@ class DonorsTest {
         }
         return m
     }
-    private fun show(m: AppModel) = rule.setContent { RafikiTheme(dark = false) { Box(Modifier.size(390.dp, 844.dp)) { App(m) } } }
+    private fun show(m: AppModel, dark: Boolean = false) = rule.setContent { RafikiTheme(dark = dark) { Box(Modifier.size(390.dp, 844.dp)) { App(m) } } }
     private fun shot(name: String) {
         rule.waitForIdle()
         val v = rule.activity.window.decorView
         val b = Bitmap.createBitmap(v.width, v.height, Bitmap.Config.ARGB_8888); v.draw(Canvas(b))
+        File(out, "$name.png").outputStream().use { b.compress(Bitmap.CompressFormat.PNG, 100, it) }
+    }
+    /** A sheet lives in its own window: draw it over the screen, the way it looks on the phone. */
+    private fun sheetShot(name: String) {
+        rule.mainClock.advanceTimeBy(800); rule.waitForIdle()
+        val v = rule.activity.window.decorView
+        val b = Bitmap.createBitmap(v.width, v.height, Bitmap.Config.ARGB_8888); val c = Canvas(b); v.draw(c); c.drawColor(0x66000000)
+        val d = org.robolectric.shadows.ShadowDialog.getLatestDialog()?.window?.decorView
+        if (d != null && d.width > 0) { c.save(); c.translate(0f, (v.height - d.height).toFloat().coerceAtLeast(0f)); d.draw(c); c.restore() }
         File(out, "$name.png").outputStream().use { b.compress(Bitmap.CompressFormat.PNG, 100, it) }
     }
     private fun waitFor(text: String) = rule.waitUntil(5000) { rule.onAllNodesWithText(text, substring = true).fetchSemanticsNodes().isNotEmpty() }
@@ -122,28 +133,75 @@ class DonorsTest {
         rule.onNodeWithTag("nav_office").performClick(); rule.waitForIdle()
         rule.onNodeWithTag("o_donors").performScrollTo().performClick()
         waitFor("Anderson Family")
-        rule.onNodeWithText("E-mail digest: off — add RESEND_API_KEY and ALERT_FROM in Cloudflare").assertExists()
+        rule.onNodeWithText("Opened their page").assertExists()
+        rule.onNodeWithTag("dn_head").performScrollTo()
         shot("40-office-donors")
-        // copy an existing donor's link
-        rule.onNodeWithTag("dn_copy_dA1").performScrollTo().performClick()
+        // the e-mail digest is folded into a settings row
+        rule.onAllNodesWithTag("dn_mail").assertCountEquals(0)
+        rule.onNodeWithTag("dn_mail_fold_toggle").performScrollTo().performClick(); rule.mainClock.advanceTimeBy(500); rule.waitForIdle()
+        rule.onNodeWithText("Off. Add RESEND_API_KEY and ALERT_FROM in Cloudflare to switch it on.").assertExists()
+        rule.onNodeWithTag("dn_mail").performScrollTo(); shot("40b-office-donors-digest")
+        // filters: nobody left unopened; the Donors number brings everyone back
+        rule.onNodeWithTag("dn_filter_not").performScrollTo().performClick(); waitFor("Everyone has opened their page.")
+        rule.onAllNodesWithTag("dn_dA1").assertCountEquals(0)
+        rule.onNodeWithTag("n_all").performScrollTo().performClick(); rule.waitForIdle()
+        rule.onNodeWithTag("dn_dA1").assertExists()
+        // a donor's sheet: copy the link; revoke asks first
+        rule.onNodeWithTag("dn_dA1").performScrollTo().performClick()
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("dn_sheet").fetchSemanticsNodes().isNotEmpty() }
+        sheetShot("40c-office-donor-sheet")
+        rule.onNodeWithTag("dn_copy").performScrollTo().performClick()
         rule.waitUntil(5000) { clip()?.contains("AndersonLink") == true }
-        // add a donor
+        rule.onNodeWithTag("dn_revoke").performScrollTo().performClick(); rule.waitForIdle()
+        rule.onNodeWithText("Revoke the link for Anderson Family? Their page stops working straight away. You can make a new link later.").assertExists()
+        rule.onNodeWithTag("dn_ask").performScrollTo()
+        sheetShot("40d-office-donor-revoke-ask")
+        assertTrue(posts.none { it.contains("\"donor-revoke\"") })
+        rule.onNodeWithTag("dn_ask_no").performScrollTo().performClick(); rule.waitForIdle()
+        rule.onAllNodesWithTag("dn_ask").assertCountEquals(0)
+        rule.onNodeWithTag("dn_viewers_toggle").performScrollTo().performClick(); rule.mainClock.advanceTimeBy(500); rule.waitForIdle()
+        rule.onNodeWithTag("dn_vname").performScrollTo()
+        sheetShot("40e-office-donor-viewers")
+        rule.onNodeWithTag("dn_close").performScrollTo().performClick(); rule.mainClock.advanceTimeBy(1500)
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("dn_sheet").fetchSemanticsNodes().isEmpty() }
+        // add a donor: the form in its own sheet
+        rule.onNodeWithTag("dn_add").performScrollTo().performClick()
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("dn_form").fetchSemanticsNodes().isNotEmpty() }
+        sheetShot("41-office-donor-form")
         rule.onNodeWithText("e.g. Grace Community Church").performScrollTo().performTextInput("Grace Community Church")
         rule.onNodeWithText("Name or place").performScrollTo().performTextInput("kap")
         rule.onNodeWithTag("dn_p_101").performScrollTo().performClick()
         rule.waitForIdle()
         rule.onNodeWithTag("dn_p_102").assertDoesNotExist()
-        shot("41-office-donor-form")
+        rule.onNodeWithTag("dn_p_101").performScrollTo()
+        sheetShot("41b-office-donor-form-picked")
         rule.onNodeWithTag("dn_save").performScrollTo().performClick()
         rule.waitUntil(5000) { posts.any { it.contains("\"donor-add\"") } }
         val add = posts.first { it.contains("\"donor-add\"") }
         assertTrue(add, add.contains("\"projects\":[\"101\"]") && add.contains("Grace Community Church") && add.contains("\"showPhotos\":true"))
-        rule.waitUntil(5000) { rule.onAllNodesWithText(link).fetchSemanticsNodes().isNotEmpty() }
+        // the new donor's sheet opens with the private link
+        rule.mainClock.advanceTimeBy(1500)
+        rule.waitUntil(8000) { rule.onAllNodesWithTag("dn_link").fetchSemanticsNodes().isNotEmpty() }
+        rule.onNodeWithText("Q7mF2kLx9PzR4tYc8VbN1sWq6HjD3gUe5AoKi0ZlM_x", substring = true).assertExists()
+        sheetShot("42-office-donor-link")
         rule.onNodeWithTag("dn_link_copy").performScrollTo().performClick()
         rule.waitUntil(5000) { clip() == link }
-        rule.onNodeWithTag("dn_link").performScrollTo()
-        shot("42-office-donor-link")
-        waitFor("Grace Community Church")
+    }
+
+    @Test fun office_donors_kiswahili_dark() {
+        Lang.sw = true
+        try {
+            val m = model(); show(m, dark = true)
+            rule.onNodeWithTag("nav_office").performClick(); rule.waitForIdle()
+            rule.onNodeWithTag("o_donors").performScrollTo().performClick()
+            waitFor("Anderson Family"); waitFor("Wamefungua ukurasa")
+            rule.onNodeWithTag("dn_head").performScrollTo()
+            shot("44-office-donors-sw-dark")
+            rule.onNodeWithTag("dn_dA1").performScrollTo().performClick()
+            rule.waitUntil(5000) { rule.onAllNodesWithTag("dn_sheet").fetchSemanticsNodes().isNotEmpty() }
+            waitFor("Nakili kiungo cha siri")
+            sheetShot("45-office-donor-sheet-sw-dark")
+        } finally { Lang.sw = false }
     }
 
     @Test fun thank_you_upload_call() = runBlocking {

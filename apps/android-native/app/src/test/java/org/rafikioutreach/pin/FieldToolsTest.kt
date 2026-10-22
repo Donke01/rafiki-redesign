@@ -163,10 +163,22 @@ class FieldToolsTest {
         rule.onNodeWithTag("qr_ck_").performClick(); rule.onNodeWithTag("qr_none").performScrollTo().performClick(); rule.waitForIdle()
         assertTrue(has("0 of 5 chosen"))
         rule.onNodeWithTag("qr_p_204").performScrollTo().performClick(); rule.onNodeWithTag("qr_p_105").performScrollTo().performClick(); rule.waitForIdle()
-        assertTrue(has("2 of 5 chosen") && has("Share PDF to print (2 stickers, 1 A4)"))
+        assertTrue(has("2 of 5 chosen") && has("2 stickers on 1 A4 page") && has("Share the PDF to print"))
         rule.onNodeWithTag("qr_sticker").performScrollTo(); shot("field-12-office-qr-sticker")
+        // how it works is folded away until tapped
+        assertFalse(has("monday.com notes the visit was checked in by QR"))
+        rule.onNodeWithTag("qr_how_toggle").performScrollTo().performClick(); rule.mainClock.advanceTimeBy(500); rule.waitForIdle()
+        assertTrue(has("monday.com notes the visit was checked in by QR"))
+        rule.onNodeWithTag("qr_how_body").performScrollTo(); shot("field-12b-office-qr-how")
+        rule.onNodeWithTag("qr_none").performScrollTo().performClick(); rule.waitForIdle()
+        assertTrue(has("Choose at least one project to see a sticker."))
+        rule.onNodeWithTag("qr_all").performScrollTo().performClick(); rule.waitForIdle()
+        Look.mode = "sun"; rule.waitForIdle()
+        rule.onNodeWithTag("qr_head").performScrollTo(); shot("field-12c-office-qr-sun")
+        Look.mode = ""
         Lang.sw = true; rule.waitForIdle()
         assertTrue(has("Vibandiko vya QR vya kuingia") && has("Shiriki PDF ya kuchapisha"))
+        rule.onNodeWithTag("qr_head").performScrollTo(); shot("field-12d-office-qr-sw")
         Lang.sw = false
     }
 

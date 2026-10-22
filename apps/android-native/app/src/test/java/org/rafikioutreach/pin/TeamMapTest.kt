@@ -8,6 +8,7 @@ import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
@@ -119,6 +120,15 @@ class TeamMapTest {
     private fun waitFor(text: String) = try { rule.waitUntil(8000) { rule.onAllNodesWithText(text, substring = true).fetchSemanticsNodes().isNotEmpty() } } catch (e: Throwable) {
         println("TREE for '$text':\n" + rule.onRoot().printToString(maxDepth = 60)); throw e
     }
+    /** A sheet lives in its own window: draw it over the screen, the way it looks on the phone. */
+    private fun sheetShot(name: String) {
+        rule.mainClock.advanceTimeBy(800); rule.waitForIdle()
+        val v = rule.activity.window.decorView
+        val b = Bitmap.createBitmap(v.width, v.height, Bitmap.Config.ARGB_8888); val c = Canvas(b); v.draw(c); c.drawColor(0x66000000)
+        val d = org.robolectric.shadows.ShadowDialog.getLatestDialog()?.window?.decorView
+        if (d != null && d.width > 0) { c.save(); c.translate(0f, (v.height - d.height).toFloat().coerceAtLeast(0f)); d.draw(c); c.restore() }
+        File(out, "$name.png").outputStream().use { b.compress(Bitmap.CompressFormat.PNG, 100, it) }
+    }
     private fun waitTag(tag: String) = rule.waitUntil(8000) { rule.onAllNodesWithTag(tag).fetchSemanticsNodes().isNotEmpty() }
     /** Work hours around now, so the test doesn't depend on the time of day. */
     private fun hoursNow(on: Boolean) = LocalDateTime.now().let { n -> val m = n.hour * 60 + n.minute; ShareHere.Hours(on, (1..7).toSet(), (m - 60 + 1440) % 1440, (m + 60) % 1440) }
@@ -196,13 +206,26 @@ class TeamMapTest {
         waitFor("3 teammates sharing their location")
         waitFor("Last seen 12 min ago")
         rule.onNodeWithTag("tm_map").assertExists()
+        rule.onNodeWithText("Not seen for over an hour", substring = true).assertExists()
+        rule.onNodeWithTag("tm_head").performScrollTo()
         shot("37-office-teammap")
+        // who shows here: folded
+        rule.onAllNodesWithTag("tm_privacy_body").assertCountEquals(0)
+        rule.onNodeWithTag("tm_privacy_toggle").performScrollTo().performClick(); rule.mainClock.advanceTimeBy(500); rule.waitForIdle()
+        rule.onNodeWithText("Field officers never see this map", substring = true).assertExists()
         rule.onNodeWithTag("tm_person_Grace Achieng").performScrollTo()
-        rule.onNodeWithTag("tm_visits_Bertin Mwangi").performClick()
-        waitFor("Chepkongi Dispensary")
+        shot("37b-office-teammap-list")
+        // a person: a sheet with call, WhatsApp and today's visits
+        rule.onNodeWithTag("tm_person_Bertin Mwangi").performScrollTo().performClick()
+        waitTag("tm_sheet"); waitFor("Chepkongi Dispensary")
         rule.onNodeWithText("Kapsaret Borehole").assertExists()
-        rule.onNodeWithTag("tm_person_Grace Achieng").performScrollTo()
-        shot("38-office-teammap-visits")
+        rule.onNodeWithTag("tm_call").assertExists(); rule.onNodeWithTag("tm_wa").assertExists()
+        sheetShot("38-office-teammap-person")
+        rule.onNodeWithTag("tm_onmap").performScrollTo().performClick(); rule.mainClock.advanceTimeBy(1500)
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("tm_sheet").fetchSemanticsNodes().isEmpty() }
+        rule.onNodeWithTag("tm_person_Grace Achieng").performScrollTo().performClick()
+        waitTag("tm_sheet"); rule.onNodeWithTag("tm_nophone").assertExists()
+        rule.onNodeWithTag("tm_close").performClick(); rule.mainClock.advanceTimeBy(1500)
         assertTrue(posts.any { it.contains("view=teammap") })
     }
 
@@ -211,7 +234,30 @@ class TeamMapTest {
         rule.onNodeWithTag("nav_office").performClick(); rule.waitForIdle()
         rule.onNodeWithTag("o_teammap").performClick()
         waitFor("3 teammates sharing their location")
+        rule.onNodeWithTag("tm_head").performScrollTo()
         shot("39-office-teammap-dark")
+        rule.onNodeWithTag("tm_person_Meril Kiprop").performScrollTo().performClick()
+        waitTag("tm_sheet")
+        sheetShot("39b-office-teammap-person-dark")
+    }
+
+    @Test fun office_team_map_and_plan_kiswahili() {
+        Lang.sw = true
+        val m = model(); show(m)
+        rule.onNodeWithTag("nav_office").performClick(); rule.waitForIdle()
+        rule.onNodeWithTag("o_teammap").performClick()
+        waitFor("Wenzako 3 wanashiriki mahali"); waitFor("Wanashiriki sasa")
+        rule.onNodeWithTag("tm_head").performScrollTo()
+        shot("39c-office-teammap-sw")
+        rule.onNodeWithTag("o_plan").performScrollTo().performClick()
+        waitFor("Panga wiki"); waitFor("Bertin Mwangi")
+        rule.onNodeWithTag("plan_go").performScrollTo().performClick()
+        waitTag("plan_day_2")
+        rule.onNodeWithTag("plan_day_0").performScrollTo()
+        shot("44-plan-sw")
+        rule.onNodeWithTag("plan_stop_104").performScrollTo().performClick()
+        waitTag("plan_sheet"); waitFor("Fungua mradi")
+        sheetShot("44b-plan-stop-sw")
     }
 
     @Test fun office_plan_a_week() {
@@ -221,22 +267,37 @@ class TeamMapTest {
         waitFor("Plan a week"); waitFor("Bertin Mwangi")
         rule.onNodeWithTag("plan_to").performScrollTo().performClick(); rule.waitForIdle()
         rule.onAllNodesWithText("Meril Kiprop").onFirst().performClick(); rule.waitForIdle()
-        waitFor("Meril Kiprop")
+        waitFor("Meril Kiprop · Kenya · all areas · 5 days · 5 a day")
+        rule.onAllNodesWithTag("plan_how_body").assertCountEquals(0)
+        rule.onNodeWithTag("plan_head").performScrollTo()
         shot("40-plan-form")
         rule.onNodeWithTag("plan_go").performScrollTo().performClick()
         waitTag("plan_sum")
         assertTrue(posts.any { it.contains("view=plan&ck=ke") && it.contains("days=5") })
+        // after the first run the choices fold away
+        rule.mainClock.advanceTimeBy(800); rule.waitForIdle()
+        rule.onAllNodesWithTag("plan_choices_body").assertCountEquals(0)
         waitTag("plan_day_2")
         rule.onAllNodesWithText("Urgent").onFirst().assertExists()
         rule.onAllNodesWithText("Water test due").onFirst().assertExists()
         rule.mainClock.advanceTimeBy(1000)
+        rule.onNodeWithTag("plan_sum").performScrollTo()
         shot("41-plan-result")
-        // take one stop off day 1, add one to day 2
-        rule.onNodeWithTag("plan_rm_101").performScrollTo().performClick(); rule.waitForIdle()
+        rule.onNodeWithTag("plan_day_0").performScrollTo()
+        shot("41b-plan-days")
+        // a stop opens a sheet: take it off day 1
+        rule.onNodeWithTag("plan_stop_101").performScrollTo().performClick()
+        waitTag("plan_sheet"); waitFor("Stop 2 of 2")
+        assertEquals(2, rule.onAllNodesWithText("Not visited for 13 months").fetchSemanticsNodes().size)   // on the day card and in the sheet
+        sheetShot("42-plan-stop-sheet")
+        rule.onNodeWithTag("plan_rm").performScrollTo().performClick(); rule.mainClock.advanceTimeBy(1500)
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("plan_sheet").fetchSemanticsNodes().isEmpty() }
+        rule.onAllNodesWithTag("plan_stop_101").assertCountEquals(0)
+        waitFor("Taken off day 1")
         rule.onNodeWithTag("plan_add_1").performScrollTo().performClick(); rule.waitForIdle()
         rule.onAllNodesWithText("Moi’s Bridge Kiosk", substring = true).onFirst().performClick(); rule.waitForIdle()
         rule.onNodeWithTag("plan_day_1").performScrollTo()
-        shot("42-plan-edited")
+        shot("42b-plan-edited")
         rule.onNodeWithTag("plan_assign").performScrollTo().performClick()
         rule.waitUntil(8000) { rule.onAllNodesWithText("Assigned ✓", substring = true).fetchSemanticsNodes().isNotEmpty() }
         val asg = posts.filter { it.contains("\"action\":\"assign\"") }.map { JSONObject(it.substringAfter(" ").substringAfter(" ")) }
@@ -248,5 +309,8 @@ class TeamMapTest {
         assertTrue(asg[1].getString("note").contains("Week plan, day 2 of 3"))
         rule.onNodeWithTag("plan_assign").performScrollTo()
         shot("43-plan-assigned")
+        // the stop sheet of an assigned plan has no "take it off"
+        rule.onNodeWithTag("plan_stop_104").performScrollTo().performClick()
+        waitTag("plan_sheet"); rule.onAllNodesWithTag("plan_rm").assertCountEquals(0)
     }
 }

@@ -33,6 +33,7 @@ import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -341,85 +342,89 @@ fun ShareSettingsPage(m: AppModel, back: () -> Unit) {
 }
 
 // --- Office › Team map ------------------------------------------------------------------------------
+/** The map first, then who is sharing as a compact list; tap a person for a sheet (call, WhatsApp, today's visits). */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun TeamMapSection(m: AppModel, s: Snapshot, open: (String) -> Unit) {
-    val ctx = LocalContext.current
     var data by remember { mutableStateOf<TeamMapData?>(null) }
     var err by remember { mutableStateOf<String?>(null) }
     var tick by remember { mutableIntStateOf(0) }
     var who by remember { mutableStateOf("") }
+    var sheet by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(tick) { val r = m.api.adminGet("teammap"); if (r.ok) { data = TeamMapData.from(r.json); err = null } else err = reasonText(r.reason) }
     val d = data
-    Card {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(t("Team map", "Ramani ya timu"), style = MaterialTheme.typography.titleLarge, color = C.ink, modifier = Modifier.weight(1f))
-            Btn(t("Refresh", "Onyesha upya"), { tick++ }, small = true, light = true, icon = "refresh")
-        }
-        Text(when {
-            err != null -> err!!
-            d == null -> t("Loading…", "Inapakia…")
-            else -> (when (d.people.size) { 0 -> t("Nobody is sharing their location right now.", "Hakuna anayeshiriki mahali kwa sasa."); 1 -> t("1 teammate sharing their location", "Mwenzako 1 anashiriki mahali"); else -> t("${d.people.size} teammates sharing their location", "Wenzako ${d.people.size} wanashiriki mahali") }) +
-                " · " + if (d.visits.size == 1) t("1 visit today", "ziara 1 leo") else t("${d.visits.size} visits today", "ziara ${d.visits.size} leo")
-        }, style = MaterialTheme.typography.bodyMedium, color = if (err != null) C.bad else C.muted, modifier = Modifier.padding(top = 4.dp).testTag("tm_sum"))
-        if (d != null) {
-            val colors = d.people.mapIndexed { i, p -> p.name to OFA_COLORS[i % OFA_COLORS.size] }.toMap()
-            val avatars = d.people.map { p -> MapAvatar(p.name, p.ll, initialsOf(p.name), colors.getValue(p.name), ago(p.at), ofaOld(p.at)) }
-            val pins = d.visits.mapNotNull { v -> s.projects.firstOrNull { it.id == v.id }?.gps?.let { MapPin(it, ofaStateColor(v.state), null, v.title) } }
-            val focus = if (who.isBlank()) null else d.people.filter { it.name == who }.map { it.ll } + d.visits.filter { it.by.equals(who, true) }.mapNotNull { v -> s.projects.firstOrNull { it.id == v.id }?.gps }
-            OfaMap(avatars, pins, emptyList(), Modifier.padding(top = 12.dp).fillMaxWidth().height(320.dp).clip(RoundedCornerShape(18.dp)).testTag("tm_map"), fitKey = d to who, focus = focus) { who = it }
-            FlowRow(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                OfaLegend(Color(0xFF1C9C5A), t("Visit today: working", "Ziara ya leo: inafanya kazi")); OfaLegend(Color(0xFFD98200), t("needs repair", "inahitaji matengenezo")); OfaLegend(Color(0xFFB3261E), t("not working", "haifanyi kazi"))
+    DqmHead("tm_head", "pin", "green", t("Team map", "Ramani ya timu"), t("Where teammates who share their location are, and today’s visits.", "Wenzako wanaoshiriki mahali walipo, na ziara za leo."),
+        if (d == null) emptyList() else listOf(DqmNum(d.people.size, t("Sharing now", "Wanashiriki sasa"), if (d.people.isEmpty()) "off" else "ok"), DqmNum(d.visits.size, t("Visits today", "Ziara za leo")),
+            d.visits.count { it.state == "notworking" }.let { DqmNum(it, t("Not working", "Hazifanyi kazi"), if (it > 0) "bad" else "off") }),
+        trailing = {
+            Box(Modifier.size(44.dp).clip(CircleShape).border(1.dp, C.line, CircleShape).clickable(role = Role.Button) { tick++ }.testTag("tm_refresh"), contentAlignment = Alignment.Center) {
+                Icon(Ic.get("refresh"), t("Refresh", "Onyesha upya"), tint = C.ink, modifier = Modifier.size(20.dp))
             }
-            d.people.forEach { p ->
-                val vs = d.visits.filter { it.by.equals(p.name, true) }
-                val openNow = who == p.name
-                OfaRule()
-                Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).clickable(role = Role.Button) { who = if (openNow) "" else p.name }.padding(vertical = 6.dp).testTag("tm_person_${p.name}"), verticalAlignment = Alignment.CenterVertically) {
-                    Box(Modifier.size(40.dp).clip(CircleShape).background(Color.White).padding(3.dp).clip(CircleShape).background(Color(colors.getValue(p.name))), contentAlignment = Alignment.Center) {
-                        Text(initialsOf(p.name), color = Color.White, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold))
-                    }
-                    Spacer(Modifier.width(12.dp))
-                    Column(Modifier.weight(1f)) {
-                        Text(p.name, style = MaterialTheme.typography.titleSmall, color = C.ink)
-                        Text(t("Last seen ", "Alionekana ") + ago(p.at) + (if (p.acc > 0) " · ±" + (if (p.acc < 1000) "${p.acc} m" else "${p.acc / 1000} km") else ""), style = MaterialTheme.typography.bodySmall, color = C.muted)
-                    }
-                }
-                FlowRow(Modifier.padding(start = 52.dp, top = 2.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    if (p.phone.isNotBlank()) {
-                        Btn(t("Call", "Piga simu"), { runCatching { ctx.startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + p.phone.replace(" ", "")))) } }, small = true, light = true, icon = "phone")
-                        Btn("WhatsApp", { runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://wa.me/" + waNumber(p.phone, p.home)))) } }, small = true, light = true, icon = "chat")
-                    }
-                    Btn(t("Visits today", "Ziara za leo") + " · ${vs.size}", { who = if (openNow) "" else p.name }, Modifier.testTag("tm_visits_${p.name}"), small = true, light = !openNow, icon = "clip")
-                }
-                if (openNow) Column(Modifier.padding(start = 52.dp, top = 6.dp)) {
-                    if (vs.isEmpty()) Text(t("No visits reported yet today.", "Hakuna ziara zilizoripotiwa leo bado."), style = MaterialTheme.typography.bodySmall, color = C.muted)
-                    vs.forEach { v ->
-                        Row(Modifier.fillMaxWidth().clickable { open(v.id) }.padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Box(Modifier.size(9.dp).clip(CircleShape).background(Color(ofaStateColor(v.state))))
-                            Spacer(Modifier.width(8.dp))
-                            Text(s.projects.firstOrNull { it.id == v.id }?.title ?: v.title, style = MaterialTheme.typography.bodyMedium, color = C.text, modifier = Modifier.weight(1f))
-                            Text(ofaClock(v.at), style = MaterialTheme.typography.bodySmall, color = C.muted)
-                        }
-                    }
-                }
-            }
-            if (d.people.isEmpty()) Text(t("People turn it on in Me › Settings › Security and alerts. It’s off unless they choose it.", "Watu wanaiwasha kwenye Mimi › Mipangilio › Usalama na arifa. Imezimwa wasipochagua."), style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 10.dp))
+        })
+    if (d == null) { Text(err ?: t("Loading…", "Inapakia…"), style = MaterialTheme.typography.bodyMedium, color = if (err != null) C.bad else C.muted, modifier = Modifier.padding(top = 12.dp).testTag("tm_sum")); return }
+    val colors = d.people.mapIndexed { i, p -> p.name to OFA_COLORS[i % OFA_COLORS.size] }.toMap()
+    val avatars = d.people.map { p -> MapAvatar(p.name, p.ll, initialsOf(p.name), colors.getValue(p.name), ago(p.at), ofaOld(p.at)) }
+    val pins = d.visits.mapNotNull { v -> s.projects.firstOrNull { it.id == v.id }?.gps?.let { MapPin(it, ofaStateColor(v.state), null, v.title) } }
+    val focus = if (who.isBlank()) null else d.people.filter { it.name == who }.map { it.ll } + d.visits.filter { it.by.equals(who, true) }.mapNotNull { v -> s.projects.firstOrNull { it.id == v.id }?.gps }
+    OfaMap(avatars, pins, emptyList(), Modifier.padding(top = 12.dp).fillMaxWidth().height(340.dp).clip(RoundedCornerShape(20.dp)).border(1.dp, C.line, RoundedCornerShape(20.dp)).testTag("tm_map"), fitKey = d to who, focus = focus) { who = it; sheet = it }
+    FlowRow(Modifier.padding(top = 8.dp, start = 4.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        OfaLegend(Color(0xFF1C9C5A), t("Visit today: working", "Ziara ya leo: inafanya kazi")); OfaLegend(Color(0xFFD98200), t("needs repair", "inahitaji matengenezo")); OfaLegend(Color(0xFFB3261E), t("not working", "haifanyi kazi"))
+    }
+    Text((when (d.people.size) { 0 -> t("Nobody is sharing their location right now.", "Hakuna anayeshiriki mahali kwa sasa."); 1 -> t("1 teammate sharing their location", "Mwenzako 1 anashiriki mahali"); else -> t("${d.people.size} teammates sharing their location", "Wenzako ${d.people.size} wanashiriki mahali") }) +
+        " · " + (if (d.visits.size == 1) t("1 visit today", "ziara 1 leo") else t("${d.visits.size} visits today", "ziara ${d.visits.size} leo")),
+        style = MaterialTheme.typography.titleSmall, color = C.ink, modifier = Modifier.padding(top = 16.dp, start = 4.dp).testTag("tm_sum"))
+    d.people.forEachIndexed { i, p ->
+        val vs = d.visits.filter { it.by.equals(p.name, true) }
+        val old = ofaOld(p.at)
+        DqmCard("tm_person_${p.name}", Modifier.padding(top = 8.dp).rise(minOf(i, 6)), p.name, null,
+            listOf(t("Last seen ", "Alionekana ") + ago(p.at) + accText(p.acc),
+                (if (old) t("Not seen for over an hour · ", "Hajaonekana kwa zaidi ya saa moja · ") else "") + (if (vs.size == 1) t("1 visit today", "ziara 1 leo") else t("${vs.size} visits today", "ziara ${vs.size} leo"))),
+            leading = { DqmAvatar(p.name, Color(colors.getValue(p.name)), Color.White, 44.dp) }) { sheet = p.name }
+    }
+    if (d.people.isEmpty()) EmptyDrop(t("Nobody is sharing their location right now.", "Hakuna anayeshiriki mahali kwa sasa."))
+    Card(Modifier.padding(top = 14.dp), pad = 4.dp) {
+        DqmFold("tm_privacy", "lock", "slate", t("Who shows here", "Nani anaonekana hapa"), t("Only people who turn it on, in their work hours", "Walioiwasha tu, wakati wa saa zao za kazi"), "has") {
+            Text(t("Only people who turned on “Share my location” in their Settings show here, and only in their work hours. Only the latest position is kept, for 12 hours, never a history. Field officers never see this map.",
+                "Wanaoonekana hapa ni wale tu waliowasha “Shiriki mahali nilipo” kwenye Mipangilio yao, na wakati wa saa zao za kazi tu. Mahali pa mwisho tu panahifadhiwa, kwa saa 12, si historia. Maafisa wa uwanjani hawaoni ramani hii."), style = MaterialTheme.typography.bodyMedium, color = C.text)
+            Text(t("People turn it on in Me › Settings › Security and alerts. It’s off unless they choose it.", "Watu wanaiwasha kwenye Mimi › Mipangilio › Usalama na arifa. Imezimwa wasipochagua."), style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 8.dp))
         }
     }
-    Row(Modifier.padding(top = 10.dp, start = 4.dp, end = 4.dp)) {
-        Icon(Ic.get("lock"), null, tint = C.muted, modifier = Modifier.size(16.dp).padding(top = 2.dp)); Spacer(Modifier.width(8.dp))
-        Text(t("Only people who turned on “Share my location” in their Settings show here, and only in their work hours. Only the latest position is kept, for 12 hours. Field officers never see this map.",
-            "Wanaoonekana hapa ni wale tu waliowasha “Shiriki mahali nilipo” kwenye Mipangilio yao, na wakati wa saa zao za kazi tu. Mahali pa mwisho tu panahifadhiwa, kwa saa 12. Maafisa wa uwanjani hawaoni ramani hii."),
-            style = MaterialTheme.typography.bodySmall, color = C.muted)
+    sheet?.let { n -> d.people.firstOrNull { it.name == n }?.let { p -> PersonMapSheet(p, Color(colors.getValue(p.name)), d.visits.filter { it.by.equals(p.name, true) }, s, { sheet = null }, { who = p.name }, open) } }
+}
+
+private fun accText(acc: Int) = if (acc > 0) " · ±" + (if (acc < 1000) "$acc m" else "${acc / 1000} km") else ""
+
+/** A teammate on the map: call, WhatsApp, show them on the map, and today's visits (tap one to open the project). */
+@Composable
+private fun PersonMapSheet(p: Sharer, col: Color, vs: List<DayVisit>, s: Snapshot, close: () -> Unit, onMap: () -> Unit, open: (String) -> Unit) {
+    val ctx = LocalContext.current
+    DqmSheet("tm_sheet", close) { hide ->
+        DqmSheetHead(p.name, listOf(t("Last seen ", "Alionekana ") + ago(p.at) + accText(p.acc)), null, "tm_close", { hide {} }) { DqmAvatar(p.name, col, Color.White, 68.dp, ring = true) }
+        if (p.phone.isNotBlank()) Row(Modifier.padding(top = 18.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            DqmLineBtn(t("Call", "Piga simu"), "phone", { runCatching { ctx.startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + p.phone.replace(" ", "")))) } }, Modifier.weight(1f).testTag("tm_call"))
+            DqmLineBtn("WhatsApp", "chat", { runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://wa.me/" + waNumber(p.phone, p.home)))) } }, Modifier.weight(1f).testTag("tm_wa"))
+        } else Text(t("No phone number on the team list for them.", "Hakuna namba ya simu yake kwenye orodha ya timu."), style = MaterialTheme.typography.bodyMedium, color = C.muted, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(top = 16.dp).testTag("tm_nophone"))
+        Btn(t("Show on the map", "Onyesha kwenye ramani"), { hide { onMap() } }, Modifier.padding(top = 8.dp).fillMaxWidth().testTag("tm_onmap"), icon = "pin")
+        DqmLabel(t("Visits today", "Ziara za leo") + " · ${vs.size}")
+        if (vs.isEmpty()) Text(t("No visits reported yet today.", "Hakuna ziara zilizoripotiwa leo bado."), style = MaterialTheme.typography.bodyMedium, color = C.muted)
+        vs.forEachIndexed { i, v ->
+            if (i > 0) Box(Modifier.fillMaxWidth().height(1.dp).background(C.line))
+            Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).clickable(role = Role.Button) { hide { open(v.id) } }.heightIn(min = 56.dp).padding(vertical = 8.dp).testTag("tm_visit_${v.id}"), verticalAlignment = Alignment.CenterVertically) {
+                Box(Modifier.size(12.dp).clip(CircleShape).background(Color(ofaStateColor(v.state))))
+                Spacer(Modifier.width(12.dp))
+                Column(Modifier.weight(1f)) {
+                    Text(s.projects.firstOrNull { it.id == v.id }?.title ?: v.title, style = MaterialTheme.typography.titleSmall, color = C.ink)
+                    Text(when (v.state) { "notworking" -> t("Not working", "Haifanyi kazi"); "repair" -> t("Needs repair", "Inahitaji matengenezo"); else -> t("Working", "Inafanya kazi") }, style = MaterialTheme.typography.bodySmall, color = C.muted)
+                }
+                Text(ofaClock(v.at), style = MaterialTheme.typography.labelLarge, color = C.muted)
+                Icon(Ic.get("chev"), null, tint = C.muted, modifier = Modifier.size(18.dp))
+            }
+        }
     }
 }
 
 private fun ofaOld(iso: String) = runCatching { java.time.Duration.between(java.time.Instant.parse(iso), java.time.Instant.now()).toMinutes() > 60 }.getOrDefault(false)
 private fun ofaClock(iso: String) = runCatching { DateTimeFormatter.ofPattern("HH:mm").withZone(java.time.ZoneId.systemDefault()).format(java.time.Instant.parse(iso)) }.getOrDefault("")
-
-@Composable
-private fun OfaRule() = Box(Modifier.padding(top = 10.dp, bottom = 4.dp).fillMaxWidth().height(1.dp).background(C.line))
 
 @Composable
 private fun OfaLegend(c: Color, label: String) {
@@ -430,6 +435,7 @@ private fun OfaLegend(c: Color, label: String) {
 }
 
 // --- Office › Plan a week -------------------------------------------------------------------------------
+/** The choices fold away after the first suggestion; clean day cards; a stop opens a sheet (open the project, take it off the day). */
 @OptIn(ExperimentalLayoutApi::class, androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
 fun PlanWeekSection(m: AppModel, s: Snapshot, open: (String) -> Unit) {
@@ -449,6 +455,8 @@ fun PlanWeekSection(m: AppModel, s: Snapshot, open: (String) -> Unit) {
     var day by remember { mutableIntStateOf(-1) }
     var note by remember { mutableStateOf("") }
     var busy by remember { mutableStateOf(false) }
+    var stop by remember { mutableStateOf<Pair<Int, String>?>(null) }
+    val choicesOpen = remember { mutableStateOf(true) }
     // a new suggestion scrolls into view (edits to it don't)
     var made by remember { mutableIntStateOf(0) }
     val bring = remember { androidx.compose.foundation.relocation.BringIntoViewRequester() }
@@ -456,40 +464,49 @@ fun PlanWeekSection(m: AppModel, s: Snapshot, open: (String) -> Unit) {
     LaunchedEffect(names) { if (to.isBlank()) names.firstOrNull()?.let { to = it } }
     fun proj(id: String) = s.projects.firstOrNull { it.id == id }
 
-    Card {
-        H2(t("Plan a week", "Panga wiki"))
-        Text(t("Suggests visits for one person: open repairs first, then sites not visited for 6 months or more, and water tests that are due. Sites close together go on the same day, in driving order.",
-            "Inapendekeza ziara kwa mtu mmoja: matengenezo yaliyo wazi kwanza, kisha maeneo yasiyotembelewa kwa miezi 6 au zaidi, na vipimo vya maji vinavyohitajika. Maeneo yaliyo karibu yanawekwa siku moja, kwa mpangilio wa safari."), style = MaterialTheme.typography.bodyMedium, color = C.muted, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            Picker(t("Field officer", "Afisa wa uwanjani"), to, listOf("" to t("Choose", "Chagua")) + names.map { it to it }, { to = it }, Modifier.weight(1f).testTag("plan_to"))
-            Picker(t("Country", "Nchi"), ck, COUNTRIES.toList(), { ck = it; area = "" }, Modifier.weight(1f))
-        }
-        val areas = remember(ck, s) { s.projects.filter { it.ck == ck && it.gps != null }.map { it.area.split(",").first().trim() }.filter { it.isNotBlank() }.groupingBy { it }.eachCount().entries.sortedWith(compareBy({ -it.value }, { it.key })).take(60) }
-        Picker(t("Area", "Eneo"), area, listOf("" to t("All of ", "Yote ya ") + (COUNTRIES[ck] ?: ck)) + areas.map { it.key to "${it.key} (${it.value})" }, { area = it }, Modifier.testTag("plan_area"))
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            Picker(t("Days", "Siku"), days, (1..6).map { "$it" to "$it" }, { days = it }, Modifier.weight(1f))
-            Picker(t("Stops a day", "Vituo kwa siku"), per, (3..8).map { "$it" to "$it" }, { per = it }, Modifier.weight(1f))
-        }
-        DateField(t("First day", "Siku ya kwanza"), start, { if (it.isNotBlank()) start = it })
-        Btn(t("Suggest visits", "Pendekeza ziara"), {
-            scope.launch {
-                busy = true; msg = "" to t("Working it out…", "Inapanga…")
-                val r = m.api.adminGet("plan", mapOf("ck" to ck, "area" to area, "days" to days, "per" to per))
-                busy = false
-                if (!r.ok) { msg = "bad" to reasonText(r.reason); return@launch }
-                plan = parsePlan(r.json, to, runCatching { LocalDate.parse(start) }.getOrDefault(LocalDate.now().plusDays(1)), s); day = -1; amsg = null; made++
-                msg = if (plan!!.total == 0) "" to t("Nothing needs a visit there right now.", "Hakuna kinachohitaji ziara huko kwa sasa.") else null
+    DqmHead("plan_head", "compass", "blue", t("Plan a week", "Panga wiki"), t("Suggested visits for one person: close sites on the same day, in driving order.", "Ziara zilizopendekezwa kwa mtu mmoja: maeneo yaliyo karibu siku moja, kwa mpangilio wa safari."))
+    Card(Modifier.padding(top = 12.dp), pad = 4.dp) {
+        val dn = days.toIntOrNull() ?: 5
+        val sum = listOf(to.ifBlank { t("Choose a person", "Chagua mtu") }, COUNTRIES[ck] ?: ck, area.ifBlank { t("all areas", "maeneo yote") }, if (dn == 1) t("1 day", "siku 1") else t("$dn days", "siku $dn"), t("$per a day", "$per kwa siku")).joinToString(" · ")
+        DqmFold("plan_choices", "cog", "blue", t("Choices", "Machaguo"), sum, "has", choicesOpen) {
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                Picker(t("Field officer", "Afisa wa uwanjani"), to, listOf("" to t("Choose", "Chagua")) + names.map { it to it }, { to = it }, Modifier.weight(1f).testTag("plan_to"))
+                Picker(t("Country", "Nchi"), ck, COUNTRIES.toList(), { ck = it; area = "" }, Modifier.weight(1f))
             }
-        }, Modifier.fillMaxWidth().padding(top = 14.dp).testTag("plan_go"), icon = "spark", enabled = to.isNotBlank() && !busy)
-        msg?.let { (tone, text) -> Msg(text, tone) }
+            val areas = remember(ck, s) { s.projects.filter { it.ck == ck && it.gps != null }.map { it.area.split(",").first().trim() }.filter { it.isNotBlank() }.groupingBy { it }.eachCount().entries.sortedWith(compareBy({ -it.value }, { it.key })).take(60) }
+            Picker(t("Area", "Eneo"), area, listOf("" to t("All of ", "Yote ya ") + (COUNTRIES[ck] ?: ck)) + areas.map { it.key to "${it.key} (${it.value})" }, { area = it }, Modifier.testTag("plan_area"))
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                Picker(t("Days", "Siku"), days, (1..6).map { "$it" to "$it" }, { days = it }, Modifier.weight(1f))
+                Picker(t("Stops a day", "Vituo kwa siku"), per, (3..8).map { "$it" to "$it" }, { per = it }, Modifier.weight(1f))
+            }
+            DateField(t("First day", "Siku ya kwanza"), start, { if (it.isNotBlank()) start = it })
+            Btn(t("Suggest visits", "Pendekeza ziara"), {
+                scope.launch {
+                    busy = true; msg = "" to t("Working it out…", "Inapanga…")
+                    val r = m.api.adminGet("plan", mapOf("ck" to ck, "area" to area, "days" to days, "per" to per))
+                    busy = false
+                    if (!r.ok) { msg = "bad" to reasonText(r.reason); return@launch }
+                    plan = parsePlan(r.json, to, runCatching { LocalDate.parse(start) }.getOrDefault(LocalDate.now().plusDays(1)), s); day = -1; amsg = null; made++
+                    msg = if (plan!!.total == 0) "" to t("Nothing needs a visit there right now.", "Hakuna kinachohitaji ziara huko kwa sasa.") else null
+                    if (plan!!.total > 0) choicesOpen.value = false
+                }
+            }, Modifier.fillMaxWidth().padding(top = 14.dp).testTag("plan_go"), icon = "spark", enabled = to.isNotBlank() && !busy)
+            msg?.let { (tone, text) -> Msg(text, tone) }
+        }
+        HorizontalDivider(color = C.line, modifier = Modifier.padding(horizontal = 14.dp))
+        DqmFold("plan_how", "info", "slate", t("How it chooses", "Jinsi inavyochagua"), t("Repairs first, then visits that are due", "Matengenezo kwanza, kisha ziara zinazohitajika"), "off") {
+            Text(t("Suggests visits for one person: open repairs first, then sites not visited for 6 months or more, and water tests that are due. Sites close together go on the same day, in driving order.",
+                "Inapendekeza ziara kwa mtu mmoja: matengenezo yaliyo wazi kwanza, kisha maeneo yasiyotembelewa kwa miezi 6 au zaidi, na vipimo vya maji vinavyohitajika. Maeneo yaliyo karibu yanawekwa siku moja, kwa mpangilio wa safari."), style = MaterialTheme.typography.bodyMedium, color = C.text)
+            Text(t("Tap a stop to open the project or take it off the day. Then assign the week: each day goes to their “My work” with its date.", "Gusa kituo kufungua mradi au kukiondoa siku hiyo. Kisha gawa wiki: kila siku inaenda kwenye “Kazi yangu” yao na tarehe yake."), style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 8.dp))
+        }
     }
 
     val p = plan ?: return
     if (p.days.isEmpty()) return
     val n = p.days.sumOf { it.size }; val km = p.days.sumOf { planMetres(it, s) }
-    Card(Modifier.padding(top = 12.dp).bringIntoViewRequester(bring)) {
+    Card(Modifier.padding(top = 12.dp).bringIntoViewRequester(bring), pad = 16.dp) {
         Text(t("$n visits over ${p.days.size} " + (if (p.days.size == 1) "day" else "days") + " · about ${Geo.dist(km, m.prefs.miles)}", "Ziara $n kwa siku ${p.days.size} · takriban ${Geo.dist(km, m.prefs.miles)}"), style = MaterialTheme.typography.titleMedium, color = C.ink, modifier = Modifier.testTag("plan_sum"))
-        Text(t("For ${p.to}. Straight lines between sites; roads are longer.", "Kwa ${p.to}. Mistari iliyonyooka kati ya maeneo; barabara ni ndefu zaidi.") + if (p.total > n) " " + t("${p.total - n} more sites need a visit: add them below.", "Maeneo mengine ${p.total - n} yanahitaji ziara: yaongeze hapa chini.") else "", style = MaterialTheme.typography.bodySmall, color = C.muted)
+        Text(t("For ${p.to}. Straight lines between sites; roads are longer.", "Kwa ${p.to}. Mistari iliyonyooka kati ya maeneo; barabara ni ndefu zaidi.") + if (p.total > n) " " + t("${p.total - n} more sites need a visit: add them below.", "Maeneo mengine ${p.total - n} yanahitaji ziara: yaongeze hapa chini.") else "", style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 2.dp))
         val lines = p.days.mapIndexed { i, ids -> MapLine(ids.mapNotNull { proj(it)?.gps }, OFA_COLORS[i % 6], day >= 0 && day != i) }
         val pins = p.days.flatMapIndexed { i, ids -> ids.mapIndexedNotNull { k, id -> proj(id)?.let { pr -> pr.gps?.let { MapPin(it, OFA_COLORS[i % 6], "${k + 1}", pr.title, day >= 0 && day != i) } } } }
         OfaMap(emptyList(), pins, lines, Modifier.padding(top = 12.dp).fillMaxWidth().height(300.dp).clip(RoundedCornerShape(18.dp)).testTag("plan_map"), fitKey = Triple(p.days, day, p.dates))
@@ -502,30 +519,33 @@ fun PlanWeekSection(m: AppModel, s: Snapshot, open: (String) -> Unit) {
         val col = Color(OFA_COLORS[i % 6])
         val stops = ids.mapNotNull { proj(it) }
         val ctr = if (stops.isEmpty()) null else LatLng(stops.sumOf { it.gps!!.lat } / stops.size, stops.sumOf { it.gps!!.lng } / stops.size)
-        Card(Modifier.padding(top = 12.dp).testTag("plan_day_$i"), border = col) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(Modifier.size(12.dp).clip(CircleShape).background(col)); Spacer(Modifier.width(8.dp))
-                Text(t("Day ", "Siku ") + (i + 1) + " · " + ofaDayLabel(p.dates[i]), style = MaterialTheme.typography.titleMedium, color = C.ink, modifier = Modifier.weight(1f))
-                Tag((if (stops.size == 1) t("1 stop", "kituo 1") else t("${stops.size} stops", "vituo ${stops.size}")) + (if (stops.size > 1) " · ≈ " + Geo.dist(planMetres(ids, s), m.prefs.miles) else ""), C.tint, C.deep)
+        Card(Modifier.padding(top = 12.dp).testTag("plan_day_$i"), pad = 14.dp, border = col) {
+            Row(verticalAlignment = Alignment.Top) {
+                Box(Modifier.padding(top = 6.dp).size(12.dp).clip(CircleShape).background(col)); Spacer(Modifier.width(10.dp))
+                Column(Modifier.weight(1f)) {
+                    Text(t("Day ", "Siku ") + (i + 1) + " · " + ofaDayLabel(p.dates[i]), style = MaterialTheme.typography.titleMedium, color = C.ink)
+                    Text((if (stops.size == 1) t("1 stop", "kituo 1") else t("${stops.size} stops", "vituo ${stops.size}")) + (if (stops.size > 1) " · " + t("about ", "takriban ") + Geo.dist(planMetres(ids, s), m.prefs.miles) else ""), style = MaterialTheme.typography.bodySmall, color = C.muted)
+                }
             }
             stops.forEachIndexed { k, pr ->
                 if (k > 0) Box(Modifier.fillMaxWidth().height(1.dp).background(C.line))
-                Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                Row(Modifier.padding(top = if (k == 0) 8.dp else 0.dp).fillMaxWidth().clip(RoundedCornerShape(12.dp)).clickable(role = Role.Button) { stop = i to pr.id }.heightIn(min = 56.dp).padding(vertical = 8.dp, horizontal = 2.dp).testTag("plan_stop_${pr.id}"),
+                    verticalAlignment = Alignment.CenterVertically) {
                     Box(Modifier.size(28.dp).clip(CircleShape).background(col), contentAlignment = Alignment.Center) { Text("${k + 1}", color = Color.White, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold)) }
-                    Spacer(Modifier.width(10.dp))
-                    Column(Modifier.weight(1f).clickable { open(pr.id) }) {
-                        Text(pr.title, style = MaterialTheme.typography.titleSmall, color = C.text)
+                    Spacer(Modifier.width(12.dp))
+                    Column(Modifier.weight(1f)) {
+                        Text(pr.title, style = MaterialTheme.typography.titleSmall, color = C.ink)
                         Text(pr.area.ifBlank { pr.country } + (if (k > 0) " · " + Geo.dist(Geo.metres(stops[k - 1].gps!!, pr.gps!!), m.prefs.miles) + t(" from the last stop", " kutoka kituo cha mwisho") else ""), style = MaterialTheme.typography.bodySmall, color = C.muted)
-                        FlowRow(Modifier.padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy(4.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                            planWhy(p.info[pr.id], s.repairs[pr.id]?.state).forEach { (tone, txt) -> when (tone) { "bad" -> Tag(txt, C.badBg, C.bad); "has" -> Tag(txt, C.tint, C.deep); else -> Tag(txt, C.warnBg, C.warn) } }
+                        val why = planWhy(p.info[pr.id], s.repairs[pr.id]?.state)
+                        if (why.isNotEmpty()) FlowRow(Modifier.padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy(4.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            why.forEach { (tone, txt) -> when (tone) { "bad" -> Tag(txt, C.badBg, C.bad); "has" -> Tag(txt, C.tint, C.deep); else -> Tag(txt, C.warnBg, C.warn) } }
                         }
                     }
-                    if (!p.assigned) Box(Modifier.size(40.dp).clip(CircleShape).border(1.dp, C.line, CircleShape).clickable(role = Role.Button) {
-                        plan = p.copy(days = p.days.mapIndexed { j, d -> if (j == i) planOrder(d - pr.id, s) else d }, spare = listOf(pr.id) + p.spare)
-                    }.semantics { contentDescription = t("Remove ", "Ondoa ") + pr.title }.testTag("plan_rm_${pr.id}"), contentAlignment = Alignment.Center) { Icon(Ic.get("x"), null, tint = C.muted, modifier = Modifier.size(16.dp)) }
+                    Icon(Ic.get("chev"), null, tint = C.muted, modifier = Modifier.size(18.dp))
                 }
             }
-            if (stops.isEmpty()) Text(t("No stops on this day.", "Hakuna vituo siku hii."), color = C.muted, style = MaterialTheme.typography.bodySmall)
+            if (stops.isEmpty()) Text(t("No stops on this day.", "Hakuna vituo siku hii."), color = C.muted, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(top = 8.dp))
+            if (!p.assigned && p.spare.isNotEmpty() || stops.isNotEmpty()) Box(Modifier.padding(top = 8.dp).fillMaxWidth().height(1.dp).background(C.line))
             if (!p.assigned && p.spare.isNotEmpty()) {
                 val spare = p.spare.mapNotNull { proj(it) }.sortedBy { sp -> ctr?.let { Geo.metres(it, sp.gps!!) } ?: 0.0 }.take(30)
                 Picker(t("Add a stop", "Ongeza kituo"), "", listOf("" to "+ " + t("Choose a site…", "Chagua eneo…")) + spare.map { sp -> sp.id to sp.title + (ctr?.let { " · " + Geo.dist(Geo.metres(it, sp.gps!!), m.prefs.miles) } ?: "") }, { id ->
@@ -533,7 +553,7 @@ fun PlanWeekSection(m: AppModel, s: Snapshot, open: (String) -> Unit) {
                 }, Modifier.testTag("plan_add_$i"))
             }
             if (stops.isNotEmpty()) mapsLegs(stops, null).firstOrNull()?.let { (_, url) ->
-                Btn(t("Route in Google Maps", "Njia kwenye Google Maps"), { runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) } }, Modifier.padding(top = 10.dp), small = true, light = true, icon = "compass")
+                DqmLineBtn(t("Route in Google Maps", "Njia kwenye Google Maps"), "compass", { runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) } }, Modifier.padding(top = 10.dp).fillMaxWidth())
             }
         }
     }
@@ -556,6 +576,37 @@ fun PlanWeekSection(m: AppModel, s: Snapshot, open: (String) -> Unit) {
             }
         }, Modifier.fillMaxWidth().padding(top = 12.dp).testTag("plan_assign"), icon = if (p.assigned) "check" else "cal", enabled = n > 0 && !p.assigned && !busy)
         amsg?.let { (tone, text) -> Box(Modifier.testTag("plan_msg")) { Msg(text, tone) } }
+    }
+    stop?.let { (di, id) ->
+        val pr = proj(id); val d = p.days.getOrNull(di); val k = d?.indexOf(id) ?: -1
+        if (pr != null && d != null && k >= 0) StopSheet(m, p, di, k, pr, s, { stop = null }, open) {
+            plan = p.copy(days = p.days.mapIndexed { j, dd -> if (j == di) planOrder(dd - id, s) else dd }, spare = listOf(id) + p.spare)
+            amsg = "ok" to t("Taken off day ${di + 1}. It’s back in “Add a stop”.", "Imeondolewa siku ya ${di + 1}. Iko tena kwenye “Ongeza kituo”.")
+        }
+    }
+}
+
+/** A stop: why it's suggested, which day, how far from the last stop; open the project or take it off the day. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun StopSheet(m: AppModel, p: WeekPlan, di: Int, k: Int, pr: Project, s: Snapshot, close: () -> Unit, open: (String) -> Unit, remove: () -> Unit) {
+    val col = Color(OFA_COLORS[di % 6]); val d = p.days[di]
+    val prev = if (k > 0) s.projects.firstOrNull { it.id == d[k - 1] } else null
+    DqmSheet("plan_sheet", close) { hide ->
+        DqmSheetHead(pr.title, listOf(listOf(pr.area, pr.country).filter { it.isNotBlank() }.joinToString(", ")), null, "plan_close", { hide {} }) {
+            Box(Modifier.size(64.dp).clip(CircleShape).background(col), contentAlignment = Alignment.Center) { Text("${k + 1}", color = Color.White, style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold)) }
+        }
+        val why = planWhy(p.info[pr.id], s.repairs[pr.id]?.state)
+        if (why.isNotEmpty()) FlowRow(Modifier.padding(top = 10.dp).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            why.forEach { (tone, txt) -> when (tone) { "bad" -> Tag(txt, C.badBg, C.bad); "has" -> Tag(txt, C.tint, C.deep); else -> Tag(txt, C.warnBg, C.warn) } }
+        }
+        Column(Modifier.padding(top = 12.dp)) {
+            DqmFact(t("Day", "Siku"), t("Day ", "Siku ") + (di + 1) + " · " + ofaDayLabel(p.dates[di]), t("Stop ${k + 1} of ${d.size}", "Kituo ${k + 1} kati ya ${d.size}"))
+            if (prev != null && prev.gps != null && pr.gps != null) DqmFact(t("From the last stop", "Kutoka kituo cha mwisho"), Geo.dist(Geo.metres(prev.gps, pr.gps), m.prefs.miles), prev.title)
+            if (pr.type.isNotBlank()) DqmFact(t("Type", "Aina"), pr.type)
+        }
+        Btn(t("Open project", "Fungua mradi"), { hide { open(pr.id) } }, Modifier.padding(top = 16.dp).fillMaxWidth().testTag("plan_open"), icon = "arrow")
+        if (!p.assigned) DqmLineBtn(t("Take it off day ${di + 1}", "Iondoe siku ya ${di + 1}"), "trash", { hide { remove() } }, Modifier.padding(top = 8.dp).fillMaxWidth().testTag("plan_rm"), red = true)
     }
 }
 

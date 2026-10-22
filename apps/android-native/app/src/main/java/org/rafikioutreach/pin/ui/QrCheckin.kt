@@ -37,6 +37,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -236,7 +237,7 @@ fun QrStickerCard(p: Project, modifier: Modifier = Modifier) {
     }
 }
 
-/** Office › QR codes: choose projects, see a sticker, share the A4 sheet as a PDF to print. */
+/** Office › QR codes: pick projects (by country, all or none), see a sticker, share the A4 sheet as a PDF to print. How it works is folded away. */
 @Composable
 fun QrStickerSection(m: AppModel, snap: Snapshot) {
     val ctx = LocalContext.current
@@ -248,53 +249,62 @@ fun QrStickerSection(m: AppModel, snap: Snapshot) {
     var busy by remember { mutableStateOf(false) }
     var msg by remember { mutableStateOf<String?>(null) }
     val hu = C.hue("qr")
-    Card {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            IconTile("qr", hu.fg, hu.bg); Spacer(Modifier.width(12.dp))
-            Column(Modifier.weight(1f)) {
-                Text(t("QR check-in stickers", "Vibandiko vya QR vya kuingia"), style = MaterialTheme.typography.titleMedium, color = C.ink)
-                Text(t("Print one for each project and fix it at the site (pump house, sign or office door). Scanning it opens the project’s Site visit, and monday.com notes the visit was checked in by QR.",
-                    "Chapisha kimoja kwa kila mradi na ukibandike eneo la mradi (nyumba ya pampu, bango au mlango wa ofisi). Kukichanganua kunafungua Ziara ya mradi, na monday.com inaandika kuwa ziara iliingizwa kwa QR."),
-                    style = MaterialTheme.typography.bodySmall, color = C.muted)
-            }
+    val pages = (chosen.size + QrStickers.COLS * QrStickers.ROWS - 1) / (QrStickers.COLS * QrStickers.ROWS)
+    DqmHead("qr_head", "qr", "teal", t("QR check-in stickers", "Vibandiko vya QR vya kuingia"), t("Print one for each project and fix it at the site.", "Chapisha kimoja kwa kila mradi na ukibandike eneo la mradi."),
+        listOf(DqmNum(chosen.size, t("Chosen", "Vimechaguliwa"), if (chosen.isEmpty()) "off" else ""), DqmNum(pages, if (pages == 1) t("A4 page", "Ukurasa A4") else t("A4 pages", "Kurasa A4"), if (pages == 0) "off" else "")))
+    val counts = snap.projects.groupingBy { it.ck }.eachCount()
+    Row(Modifier.padding(top = 14.dp, bottom = 4.dp).fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        (listOf("" to t("All countries", "Nchi zote")) + COUNTRIES.map { it.key to it.value }).filter { (k, _) -> k.isBlank() || (counts[k] ?: 0) > 0 || k == ck }.forEach { (k, l) ->
+            Chip("$l · ${if (k.isBlank()) snap.projects.size else counts[k] ?: 0}", if (k.isBlank()) "globe" else null, ck == k, { ck = k }, tag = "qr_ck_$k", hue = "qr")
         }
     }
-    Row(Modifier.padding(top = 12.dp).fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        (listOf("" to t("All countries", "Nchi zote")) + COUNTRIES.map { it.key to it.value }).forEach { (k, l) -> Chip(l, if (k.isBlank()) "globe" else null, ck == k, { ck = k }, tag = "qr_ck_$k", hue = "qr") }
-    }
-    Card(Modifier.padding(top = 12.dp), pad = 12.dp) {
+    Card(Modifier.padding(top = 10.dp), pad = 12.dp) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(t("${chosen.size} of ${list.size} chosen", "${chosen.size} kati ya ${list.size} zimechaguliwa"), style = MaterialTheme.typography.titleSmall, color = C.ink, modifier = Modifier.weight(1f).testTag("qr_count"))
-            Text(t("All", "Zote"), color = C.blue, style = MaterialTheme.typography.labelLarge, modifier = Modifier.clip(RoundedCornerShape(8.dp)).clickable { list.forEach { picked[it.id] = true } }.padding(8.dp).testTag("qr_all"))
-            Text(t("None", "Hakuna"), color = C.blue, style = MaterialTheme.typography.labelLarge, modifier = Modifier.clip(RoundedCornerShape(8.dp)).clickable { list.forEach { picked[it.id] = false } }.padding(8.dp).testTag("qr_none"))
+            Text(t("${chosen.size} of ${list.size} chosen", "${chosen.size} kati ya ${list.size} zimechaguliwa"), style = MaterialTheme.typography.titleSmall, color = C.ink, modifier = Modifier.weight(1f).padding(start = 4.dp).testTag("qr_count"))
+            Chip(t("All", "Zote"), null, false, { list.forEach { picked[it.id] = true } }, tag = "qr_all", hue = "qr")
+            Spacer(Modifier.width(6.dp))
+            Chip(t("None", "Hakuna"), null, false, { list.forEach { picked[it.id] = false } }, tag = "qr_none", hue = "qr")
         }
-        list.take(200).forEach { p ->
+        HorizontalDivider(color = C.line, modifier = Modifier.padding(top = 10.dp))
+        if (list.isEmpty()) Text(t("No projects in this country yet.", "Bado hakuna miradi katika nchi hii."), style = MaterialTheme.typography.bodyMedium, color = C.muted, modifier = Modifier.padding(8.dp))
+        list.take(200).forEachIndexed { i, p ->
             val on = picked[p.id] != false
-            Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).clickable(role = Role.Checkbox) { picked[p.id] = !on }.heightIn(min = 48.dp).testTag("qr_p_${p.id}"), verticalAlignment = Alignment.CenterVertically) {
+            if (i > 0) HorizontalDivider(color = C.line)
+            Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).clickable(role = Role.Checkbox) { picked[p.id] = !on }.heightIn(min = 56.dp).padding(vertical = 4.dp).testTag("qr_p_${p.id}"), verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(on, { picked[p.id] = it }, colors = CheckboxDefaults.colors(checkedColor = hu.fg))
                 Column(Modifier.weight(1f)) {
-                    Text(p.title, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = C.ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(p.title, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = C.ink)
                     Text("ID ${p.id}" + if (p.area.isNotBlank()) " · ${p.area}" else "", style = MaterialTheme.typography.bodySmall, color = C.muted)
                 }
             }
         }
-        if (list.size > 200) Text(t("Showing the first 200. Choose a country to see the rest.", "Inaonyesha 200 za kwanza. Chagua nchi kuona zilizobaki."), style = MaterialTheme.typography.bodySmall, color = C.muted)
+        if (list.size > 200) Text(t("Showing the first 200. Choose a country to see the rest.", "Inaonyesha 200 za kwanza. Chagua nchi kuona zilizobaki."), style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(8.dp))
     }
-    chosen.firstOrNull()?.let { p ->
-        Text(t("How a sticker looks", "Jinsi kibandiko kinavyoonekana"), style = MaterialTheme.typography.titleSmall, color = C.ink, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(top = 16.dp, bottom = 8.dp))
-        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { QrStickerCard(p, Modifier.width(220.dp)) }
+    Card(Modifier.padding(top = 12.dp).testTag("qr_preview"), pad = 16.dp) {
+        val p = chosen.firstOrNull()
+        if (p != null) {
+            Text(t("How a sticker looks", "Jinsi kibandiko kinavyoonekana"), style = MaterialTheme.typography.titleSmall, color = C.ink, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp))
+            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { QrStickerCard(p, Modifier.width(220.dp)) }
+        } else Text(t("Choose at least one project to see a sticker.", "Chagua angalau mradi mmoja kuona kibandiko."), style = MaterialTheme.typography.bodyMedium, color = C.muted, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+        Text(t("${chosen.size} " + (if (chosen.size == 1) "sticker" else "stickers") + " on $pages A4 " + (if (pages == 1) "page" else "pages"), "Vibandiko ${chosen.size} kwenye kurasa $pages za A4"), style = MaterialTheme.typography.titleSmall, color = C.ink, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(top = 12.dp))
+        Btn(if (busy) t("Making the PDF…", "Inatengeneza PDF…") else t("Share the PDF to print", "Shiriki PDF ya kuchapisha"), {
+            busy = true; msg = null
+            scope.launch {
+                val f = runCatching { withContext(Dispatchers.IO) { QrStickers.pdf(ctx, chosen, File(ctx.cacheDir, "exports/RAFIKI-QR-stickers.pdf")) } }.getOrNull()
+                busy = false
+                if (f == null) msg = t("Couldn’t make the PDF. Please try again.", "Imeshindwa kutengeneza PDF. Tafadhali jaribu tena.")
+                else runCatching { QrStickers.share(ctx, f) }.onFailure { msg = t("No app to share the PDF with.", "Hakuna programu ya kushiriki PDF.") }
+            }
+        }, Modifier.fillMaxWidth().padding(top = 12.dp).testTag("qr_pdf"), icon = "share", enabled = chosen.isNotEmpty() && !busy)
+        msg?.let { Msg(it, "bad") }
     }
-    val pages = (chosen.size + QrStickers.COLS * QrStickers.ROWS - 1) / (QrStickers.COLS * QrStickers.ROWS)
-    Btn(if (busy) t("Making the PDF…", "Inatengeneza PDF…") else t("Share PDF to print (${chosen.size} stickers, $pages A4)", "Shiriki PDF ya kuchapisha (vibandiko ${chosen.size}, A4 $pages)"), {
-        busy = true; msg = null
-        scope.launch {
-            val f = runCatching { withContext(Dispatchers.IO) { QrStickers.pdf(ctx, chosen, File(ctx.cacheDir, "exports/RAFIKI-QR-stickers.pdf")) } }.getOrNull()
-            busy = false
-            if (f == null) msg = t("Couldn’t make the PDF. Please try again.", "Imeshindwa kutengeneza PDF. Tafadhali jaribu tena.")
-            else runCatching { QrStickers.share(ctx, f) }.onFailure { msg = t("No app to share the PDF with.", "Hakuna programu ya kushiriki PDF.") }
+    Card(Modifier.padding(top = 12.dp), pad = 4.dp) {
+        DqmFold("qr_how", "info", "blue", t("How it works", "Jinsi inavyofanya kazi"), t("Scan it to open the Site visit", "Kichanganue kufungua Ziara"), "has") {
+            Text(t("Print one for each project and fix it at the site (pump house, sign or office door). Scanning it opens the project’s Site visit, and monday.com notes the visit was checked in by QR.",
+                "Chapisha kimoja kwa kila mradi na ukibandike eneo la mradi (nyumba ya pampu, bango au mlango wa ofisi). Kukichanganua kunafungua Ziara ya mradi, na monday.com inaandika kuwa ziara iliingizwa kwa QR."), style = MaterialTheme.typography.bodyMedium, color = C.text)
+            Text(t("Share the PDF to a printer or a computer, print it on A4 at 100% and cut along the dotted lines.", "Shiriki PDF kwa printa au kompyuta, ichapishe kwenye A4 kwa ukubwa 100% na ukate kwenye mistari ya nukta."), style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 8.dp))
         }
-    }, Modifier.fillMaxWidth().padding(top = 16.dp).testTag("qr_pdf"), icon = "share", enabled = chosen.isNotEmpty() && !busy)
-    msg?.let { Msg(it, "bad") }
+    }
 }
 
 /** Scan QR: Google's camera scanner, a photo of the sticker, or the project number typed in. */
