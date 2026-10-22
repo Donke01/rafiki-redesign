@@ -433,7 +433,7 @@ test('trip advice: a range of days gives the driest one; beyond 16 days there is
   const r = await tripAdvice(env, { from: KITALE, stops: [{ lat: SCHOOL[0], lng: SCHOOL[1] }], date: '2026-10-23', until: '2026-10-29', now: NOW, geometry: false });
   assert.equal(r.days.length, 7);
   // road wetness: the 24th has 12 mm on top of the 25 mm the day before
-  assert.deepEqual(r.days.map(d => d.level), ['heavy', 'heavy', 'wet', 'light', 'dry', 'dry', 'light']);
+  assert.deepEqual(r.days.map(d => d.roadLevel), ['heavy', 'heavy', 'wet', 'light', 'dry', 'dry', 'light']);
   assert.equal(r.bestDay.date, '2026-10-27'); assert.equal(r.bestDay.riskLevel, 'ok'); assert.equal(r.bestDay.name.en, 'Tue 27 Oct'); assert.equal(r.bestDay.name.sw, 'Jumanne 27/10');
   assert.equal(r.legs[0].geometry, undefined);
   assert.equal(calls.ors.length, 1);
@@ -490,12 +490,12 @@ test('week: the driest day for a list of projects, and for each planned day', as
   await addReport(env, GRACE, { kind: 'impassable_when_wet', lat: SCHOOL[0] + 0.005, lng: 35 }, 'ip', NOW);
   const r = await weekAdvice(env, { projects: [{ id: '1', name: 'A', lat: SCHOOL[0], lng: SCHOOL[1] }, { id: '2', name: 'B', lat: 0.514, lng: 35.27 }], start: '2026-10-23', days: 5, groups: [['1'], ['2']], now: NOW });
   assert.equal(r.ok, true); assert.equal(r.days.length, 5);
-  assert.equal(r.bestDay.date, '2026-10-27'); assert.equal(r.bestDay.level, 'dry');
+  assert.equal(r.bestDay.date, '2026-10-27'); assert.equal(r.bestDay.roadLevel, 'dry');
   assert.equal(r.days[0].wetSites, 2);
   const a = r.projects[0];
   assert.equal(a.wetReports.length, 1); assert.equal(a.days[0].score, 3 * 2 + 25 / 20, 'a site that floods counts twice');
   assert.equal(r.groups.length, 2); assert.equal(r.groups[0].bestDay.date, '2026-10-27');
-  assert.deepEqual(r.days.map(d => d.level), ['heavy', 'heavy', 'wet', 'light', 'dry']);
+  assert.deepEqual(r.days.map(d => d.roadLevel), ['heavy', 'heavy', 'wet', 'light', 'dry']);
   assert.equal(calls.meteo.length, 2, 'one forecast per 5 km square');
   // days past the forecast: listed, not rated
   const late = await weekAdvice(env, { projects: [{ id: '1', lat: 1, lng: 35 }], start: '2026-11-05', days: 4, now: NOW });
