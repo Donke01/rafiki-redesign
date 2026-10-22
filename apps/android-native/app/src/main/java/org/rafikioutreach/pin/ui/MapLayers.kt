@@ -132,7 +132,7 @@ object HomeLayers {
     internal var dropped = false
     /** For tests: a phone heading without a compass sensor. */
     var testHeading: Float? = null
-    fun reset() { route = true; heat = ""; years = false; year = 0; playing = false; team = false; follow = false; north = false; rot = 0f; pick = null; tm = null; tmErr = null; compass = null; cardsH = 0; loaded = false; dropped = false; testHeading = null }
+    fun reset() { route = true; heat = ""; years = false; year = 0; playing = false; team = false; follow = false; north = false; rot = 0f; pick = null; tm = null; tmErr = null; compass = null; cardsH = 0; loaded = false; dropped = false; testHeading = null; MapClean.on = false }
     internal fun load(ctx: Context) { if (loaded) return; loaded = true; route = ctx.getSharedPreferences("map_layers", Context.MODE_PRIVATE).getBoolean("route", true) }
     internal fun saveRoute(ctx: Context, on: Boolean) { route = on; ctx.getSharedPreferences("map_layers", Context.MODE_PRIVATE).edit().putBoolean("route", on).apply() }
 }
@@ -381,7 +381,7 @@ private class LayerState {
     var me: Marker? = null; var meCone: Boolean? = null; var fixed = false
 }
 
-private fun shortest(from: Float, to: Float): Float { val d = (((to - from) % 360f) + 540f) % 360f - 180f; return from + d }
+internal fun shortest(from: Float, to: Float): Float { val d = (((to - from) % 360f) + 540f) % 360f - 180f; return from + d }
 
 /** Drops markers in from a little above, fading in, north to south. */
 private suspend fun dropIn(mv: MapView, ms: List<Marker>) {
@@ -580,58 +580,33 @@ private fun BoxScope.HomeLayersOverlay(m: AppModel, snap: Snapshot, fix: Fix?, m
         st.fixed = false
     }
     if (!follow) LaunchedEffect(Unit) { HomeLayers.north = false }
-    val turned = abs(((HomeLayers.rot % 360f) + 360f) % 360f).let { min(it, 360f - it) } > 1f
+    // the follow-me button and the compass are in the Map tab's column of buttons (MapHome.kt, MapSide)
 
-    // buttons: follow me, and the compass while the map is turned
-    MapLayerButton("nav", if (follow) t("Stop following me", "Acha kunifuata") else t("Follow me while driving", "Nifuate ninapoendesha"), follow,
-        Modifier.align(Alignment.TopEnd).padding(top = 178.dp, end = 10.dp).testTag("ml_follow")) {
-        if (!follow && here == null) m.showBanner(t("Finding where you are… Turn on location to follow.", "Inatafuta mahali ulipo… Washa mahali ili ikufuate."))
-        HomeLayers.follow = !follow; HomeLayers.north = false; HomeLayers.pick = null
-    }
-    if (turned) Box(
-        Modifier.align(Alignment.TopEnd).padding(top = 234.dp, end = 10.dp).size(46.dp).clip(RoundedCornerShape(14.dp)).background(Color.White).border(1.dp, Color(0x33000000), RoundedCornerShape(14.dp))
-            .clickable(role = Role.Button) {
-                HomeLayers.north = true
-                if (Motion.on) mv.controller.animateTo(mv.mapCenter, mv.zoomLevelDouble, 500L, shortest(mv.mapOrientation, 0f)) else mv.mapOrientation = 0f
-                HomeLayers.rot = 0f
-            }.semantics { contentDescription = t("Turn the map back to north", "Rudisha ramani kaskazini") }.testTag("ml_compass"),
-        contentAlignment = Alignment.Center,
-    ) { Needle(Modifier.size(28.dp).rotate(HomeLayers.rot)) }
-
-    // the cards over the bottom of the map
-    Column(Modifier.align(Alignment.BottomCenter).padding(start = 12.dp, end = 12.dp, bottom = bottom + 26.dp).widthIn(max = 520.dp).fillMaxWidth()
+    // the cards over the bottom of the map, above the map's credit; with the map alone (MapClean) only a tapped stop or teammate
+    val clean = MapClean.on
+    Column(Modifier.align(Alignment.BottomCenter).padding(start = 12.dp, end = 12.dp, bottom = bottom + 40.dp).widthIn(max = 520.dp).fillMaxWidth()
         .onSizeChanged { if (HomeLayers.cardsH != it.height) HomeLayers.cardsH = it.height }, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         val pick = HomeLayers.pick
         val pStop = pick?.takeIf { it.startsWith("s:") }?.let { k -> stops.indexOfFirst { it.id == k.drop(2) }.takeIf { it >= 0 } }
         if (pStop != null) StopCard(m, snap, stops, pStop, here, today, visit, open)
         val pMate = pick?.takeIf { it.startsWith("t:") }?.let { k -> tm?.people?.firstOrNull { it.name == k.drop(2) } }
         if (pMate != null) MateCard(pMate)
-        if (follow) NextCard(m, snap, stops, nextIdx, here)
-        if (heatKind.isNotEmpty()) HeatLegend(snap, heatKind, if (yearsOn) HomeLayers.year else null)
-        if (yearsOn && span != null) YearsCard(snap, span)
-        if (HomeLayers.team && snap.admin && (!online || HomeLayers.tmErr != null)) Note(HomeLayers.tmErr ?: t("No signal: the team’s places need a connection.", "Hakuna mtandao: mahali pa timu panahitaji mtandao."))
+        if (follow && !clean) NextCard(m, snap, stops, nextIdx, here)
+        if (heatKind.isNotEmpty() && !clean) HeatLegend(snap, heatKind, if (yearsOn) HomeLayers.year else null)
+        if (yearsOn && span != null && !clean) YearsCard(snap, span)
+        if (HomeLayers.team && snap.admin && (!online || HomeLayers.tmErr != null) && !clean) Note(HomeLayers.tmErr ?: t("No signal: the team’s places need a connection.", "Hakuna mtandao: mahali pa timu panahitaji mtandao."))
     }
 }
 
 private fun minutesSince(iso: String) = runCatching { java.time.Duration.between(Instant.parse(iso), Instant.now()).toMinutes() }.getOrDefault(0L)
 
 @Composable
-private fun Needle(modifier: Modifier) {
+internal fun Needle(modifier: Modifier) {
     androidx.compose.foundation.Canvas(modifier) {
         val w = size.width; val h = size.height
         drawPath(androidx.compose.ui.graphics.Path().apply { moveTo(w / 2, h * 0.08f); lineTo(w * 0.66f, h / 2); lineTo(w * 0.34f, h / 2); close() }, Color(0xFFD23C32))
         drawPath(androidx.compose.ui.graphics.Path().apply { moveTo(w / 2, h * 0.92f); lineTo(w * 0.34f, h / 2); lineTo(w * 0.66f, h / 2); close() }, Color(0x8004263F))
     }
-}
-
-@Composable
-private fun MapLayerButton(icon: String, label: String, on: Boolean, modifier: Modifier, onClick: () -> Unit) {
-    val h = rememberHaptics()
-    Box(
-        modifier.size(46.dp).clip(RoundedCornerShape(14.dp)).background(if (on) Color(0xFF0A78C2) else Color.White).border(1.dp, if (on) Color(0xFF0A78C2) else Color(0x33000000), RoundedCornerShape(14.dp))
-            .clickable(role = Role.Button) { h.tap(); onClick() }.semantics { contentDescription = label; stateDescription = if (on) "on" else "off" },
-        contentAlignment = Alignment.Center,
-    ) { Icon(Ic.get(icon), null, tint = if (on) Color.White else Color(0xFF04263F), modifier = Modifier.size(24.dp)) }
 }
 
 @Composable

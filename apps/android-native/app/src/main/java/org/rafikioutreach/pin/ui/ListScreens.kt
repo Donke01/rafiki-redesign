@@ -91,15 +91,30 @@ fun dotColor(s: Snapshot, p: Project): Int = when (s.repairs[p.id]?.state) {
 fun MapScreen(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit = open, offline: () -> Unit = {}, newSite: (LatLng) -> Unit = {}) =
     MapHome(m, open, visit, offline, newSite)
 
-/** "Nearest to you": the three closest pinned projects, folded away until you open it. */
+/** "Nearest to you": the closest pinned projects, folded away until you open it. On the Map tab it is told whether it
+ *  is open ([expanded], [onExpand]), rests as one slim line while a filter is on ([slim]: "Nearest: … · 21.3 km ⌃")
+ *  and, open, grows no taller than [maxFull], so it stays under the controls at the top (MapHome.kt). */
 @Composable
-fun NearestSheet(m: AppModel, snap: Snapshot, here: LatLng?, modifier: Modifier, open: (String) -> Unit) {
+fun NearestSheet(m: AppModel, snap: Snapshot, here: LatLng?, modifier: Modifier, open: (String) -> Unit,
+                 slim: Boolean = false, expanded: Boolean? = null, onExpand: ((Boolean) -> Unit)? = null, maxFull: androidx.compose.ui.unit.Dp = androidx.compose.ui.unit.Dp.Unspecified) {
     val list = here?.let { h -> snap.projects.filter { it.gps != null }.map { it to Geo.metres(h, it.gps!!) }.sortedBy { it.second }.take(5) } ?: emptyList()
     val none: @Composable ColumnScope.() -> Unit = { Text(t("Allow location to see the projects closest to you.", "Ruhusu mahali ili uone miradi iliyo karibu nawe."), style = MaterialTheme.typography.bodyMedium, color = C.muted, modifier = Modifier.padding(6.dp)) }
+    val line: @Composable androidx.compose.foundation.layout.RowScope.() -> Unit = {
+        val first = list.firstOrNull()
+        if (first == null) Text(t("Nearest to you", "Iliyo karibu nawe"), style = MaterialTheme.typography.titleSmall, color = C.ink, maxLines = 1, softWrap = false, modifier = Modifier.weight(1f))
+        else Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
+            Text(t("Nearest:", "Karibu zaidi:"), style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold), color = C.ink, maxLines = 1, softWrap = false)
+            Spacer(Modifier.width(6.dp))
+            // a long name ends with "…"; the distance always shows
+            Text(first.first.title, style = MaterialTheme.typography.titleSmall, color = C.ink, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false).testTag("nearest_name"))
+            Text(" · " + Geo.dist(first.second, m.prefs.miles), style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold), color = C.deep, maxLines = 1, softWrap = false)
+        }
+    }
     // drag it up for the five closest; it rests showing the closest one
     DragSheet(t("Nearest to you", "Iliyo karibu nawe"), modifier,
         peek = { if (list.isEmpty()) none() else list.first().let { (p, _) -> ProjectRow(m, snap, p, here) { open(p.id) } } },
-        full = { if (list.isEmpty()) none() else list.forEach { (p, _) -> ProjectRow(m, snap, p, here) { open(p.id) } } })
+        full = { if (list.isEmpty()) none() else list.forEach { (p, _) -> ProjectRow(m, snap, p, here) { open(p.id) } } },
+        open = expanded, onOpen = onExpand, slim = if (slim) line else null, maxFull = maxFull)
 }
 
 private class HereKeep { var id: String? = null; var last: Pair<Project, Double>? = null }

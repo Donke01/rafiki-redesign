@@ -7,6 +7,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -127,31 +128,53 @@ fun FilterTile(label: String, icon: String, on: Boolean, onClick: () -> Unit, mo
     }
 }
 
-/** A panel you drag up from the bottom of the map: a peek of the closest project, or the five closest. */
+/** A panel you drag up from the bottom of the map: a peek of the closest project, or the five closest.
+ *  The Map tab keeps whether it is open ([open], [onOpen]), gives it a [slim] one-line handle while a filter is on,
+ *  and a [maxFull] height, so open it stops under the controls at the top and its list scrolls inside (MapHome.kt). */
 @Composable
-fun DragSheet(title: String, modifier: Modifier, peek: @Composable ColumnScope.() -> Unit, full: @Composable ColumnScope.() -> Unit) {
-    var open by remember { mutableStateOf(false) }
+fun DragSheet(title: String, modifier: Modifier, peek: @Composable ColumnScope.() -> Unit, full: @Composable ColumnScope.() -> Unit,
+              open: Boolean? = null, onOpen: ((Boolean) -> Unit)? = null, slim: (@Composable RowScope.() -> Unit)? = null, maxFull: androidx.compose.ui.unit.Dp = androidx.compose.ui.unit.Dp.Unspecified) {
+    var own by remember { mutableStateOf(false) }
+    val isOpen = open ?: own
+    fun set(v: Boolean) { if (onOpen != null) onOpen(v) else own = v }
     var drag by remember { mutableFloatStateOf(0f) }
     val h = rememberHaptics()
+    val shape = RoundedCornerShape(if (slim != null && !isOpen) 20.dp else 26.dp)
+    val look = Modifier.clip(shape).background(if (C.glassy) C.glass2 else C.card).border(1.dp, if (C.glassy) C.glassEdge else C.line, shape)
+    val grab = Modifier.pointerInput(isOpen) {
+        detectVerticalDragGestures(onDragStart = { drag = 0f }, onDragEnd = { if (drag < -24 && !isOpen) { set(true); h.tap() } else if (drag > 24 && isOpen) { set(false); h.tap() } }) { _, d -> drag += d }
+    }
+    if (slim != null && !isOpen) {
+        // one line: "Nearest: … · 21.3 km ⌃"; tap it or swipe it up
+        Box(modifier.fillMaxWidth().then(look).testTag("nearest")) {
+            Row(Modifier.fillMaxWidth().then(grab).clickable(role = Role.Button) { set(true); h.tap() }.heightIn(min = 48.dp).padding(start = 16.dp, end = 14.dp)
+                .semantics { contentDescription = t("Show more", "Onyesha zaidi") }.testTag("nearest_peek"), verticalAlignment = Alignment.CenterVertically) {
+                slim()
+                Spacer(Modifier.width(6.dp))
+                Icon(Ic.get("up"), null, tint = C.muted, modifier = Modifier.size(20.dp))
+            }
+        }
+        return
+    }
     Column(
         modifier.fillMaxWidth().animateContentSize(spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessMediumLow))
-            .clip(RoundedCornerShape(26.dp)).background(if (C.glassy) C.glass2 else C.card).border(1.dp, if (C.glassy) C.glassEdge else C.line, RoundedCornerShape(26.dp))
+            .then(if (isOpen && maxFull != androidx.compose.ui.unit.Dp.Unspecified) Modifier.heightIn(max = maxFull) else Modifier).then(look)
             .testTag("nearest"),
     ) {
         // the handle: drag up or down, or tap
         Column(
-            Modifier.fillMaxWidth().pointerInput(Unit) {
-                detectVerticalDragGestures(onDragStart = { drag = 0f }, onDragEnd = { if (drag < -24 && !open) { open = true; h.tap() } else if (drag > 24 && open) { open = false; h.tap() } }) { _, d -> drag += d }
-            }.clickable(role = Role.Button) { open = !open; h.tap() }.semantics { contentDescription = if (open) t("Show less", "Onyesha kidogo") else t("Show more", "Onyesha zaidi") }.testTag("sheet_handle"),
+            Modifier.fillMaxWidth().then(grab).clickable(role = Role.Button) { set(!isOpen); h.tap() }.semantics { contentDescription = if (isOpen) t("Show less", "Onyesha kidogo") else t("Show more", "Onyesha zaidi") }.testTag("sheet_handle"),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Box(Modifier.padding(top = 8.dp).size(40.dp, 5.dp).clip(RoundedCornerShape(99.dp)).background(C.edge))
             Row(Modifier.fillMaxWidth().padding(start = 18.dp, end = 18.dp, top = 6.dp, bottom = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                 Text(title, style = MaterialTheme.typography.titleMedium, color = C.ink, modifier = Modifier.weight(1f))
-                Icon(Ic.get("down"), null, tint = C.muted, modifier = Modifier.size(20.dp).rotate(if (open) 0f else 180f))
+                Icon(Ic.get("down"), null, tint = C.muted, modifier = Modifier.size(20.dp).rotate(if (isOpen) 0f else 180f))
             }
         }
-        Column(Modifier.padding(start = 12.dp, end = 12.dp, bottom = 12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) { if (open) full() else peek() }
+        // open, the list scrolls inside the sheet
+        Column(Modifier.weight(1f, fill = false).then(if (isOpen) Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState()) else Modifier).testTag("nearest_list")
+            .padding(start = 12.dp, end = 12.dp, bottom = 12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) { if (isOpen) full() else peek() }
     }
 }
 

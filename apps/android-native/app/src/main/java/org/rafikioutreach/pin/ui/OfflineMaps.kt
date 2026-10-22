@@ -392,24 +392,15 @@ fun OfflineMapLayer(map: MapView) {
     }
 }
 
-/** The map's "Save this area for offline" button, the sheet it opens, and the bar shown while an area fills. */
+/** The "Save this area for offline" sheet (opened from More › Offline areas) and the bar shown while an area fills. */
 @Composable
-fun BoxScope.OfflineMapControls(m: AppModel, openList: () -> Unit) {
+fun BoxScope.OfflineMapControls(m: AppModel, openList: () -> Unit, sheetState: androidx.compose.runtime.MutableState<Boolean>) {
     val filling by OfflineMaps.filling.collectAsState()
     val dl by OfflineMaps.download.collectAsState()
     val online by OfflineMaps.online.collectAsState()
-    var sheet by remember { mutableStateOf(false) }
+    // the button that opens the sheet is "Offline areas" under More, in the Map tab's column (MapHome.kt, MapSide)
+    var sheet by sheetState
     val hu = C.hue("offline")
-    Box(
-        Modifier.align(Alignment.TopEnd).padding(top = 122.dp, end = 10.dp).size(46.dp).clip(RoundedCornerShape(14.dp)).background(Color.White)
-            .border(1.dp, Color(0x33000000), RoundedCornerShape(14.dp)).clickable(role = Role.Button) { sheet = true }
-            .semantics { contentDescription = t("Save this area for offline", "Hifadhi eneo hili kwa matumizi bila mtandao") }.testTag("offline_btn"),
-        contentAlignment = Alignment.Center,
-    ) {
-        Box(Modifier.size(34.dp).clip(RoundedCornerShape(10.dp)).background(Color(0xFFE2F4EA)), contentAlignment = Alignment.Center) {
-            Icon(Ic.get("offline"), null, tint = Color(0xFF1C8A50), modifier = Modifier.size(22.dp))
-        }
-    }
     val d = dl
     val f = filling
     if (f != null || (d != null && !d.finished)) {

@@ -2298,6 +2298,87 @@ button.mpb-r:active{background:var(--tint)}
 @media (min-width:900px){.mpb-bot{max-width:420px}}
 @media (prefers-reduced-motion: reduce){.mpb-rot,.mpb-cmp svg,.mpb-me .mpb-cone,.mpb-rotd .leaflet-marker-icon>*{transition:none !important}.mpb-pl i,.mpb-drop,.mpb-drop>*{animation:none !important}.mpb-pl i+i{display:none}}
 </style>
+<style id="mcl-css">
+/* Map home, decluttered (mcl…): one pill for the active filter, a slim pinned bar, a peek for Nearest to you, a Key
+   button, map-only mode and one compact column of buttons on the right. Stacking, top to bottom: the top controls,
+   the side buttons, then the bottom sheet, which never reaches them. The map credit always stays in view. */
+html #vMap .ov.top{right:62px;min-height:0;padding:0;background:none;-webkit-backdrop-filter:none;backdrop-filter:none;border:0;border-radius:0;box-shadow:none} /* none of the page header's .top look */
+/* the pinned bar: one line and a thin meter; it steps aside for a filter, the open sheet and map-only mode */
+#vMap .ov.top > .pill{padding:7px 12px 8px;border-radius:14px}
+#vMap .ov.top > .pill .prog{gap:5px}
+#vMap .ov.top > .pill .prog .row1{font-size:.78rem;gap:8px}
+#vMap .ov.top > .pill .prog .row1 > span:first-child{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#vMap .ov.top > .pill .meter{height:4px}
+#vMap:is(.mcl-f,.mcl-open,.mcl-clean) .ov.top > .pill{display:none}
+/* one pill for the active filter(s): tap it for the whole row again, × clears them */
+.mcl-pill{display:none;align-self:flex-start;max-width:100%;min-width:0;box-sizing:border-box;align-items:center;border-radius:999px;background:var(--hu,var(--hu-blue));color:#FFFFFF;box-shadow:0 2px 10px rgba(4,38,63,.22)}
+#vMap.mcl-f:not(.mcl-row) .mcl-pill{display:flex}
+#vMap.mcl-f:not(.mcl-row) #mpaChips{display:none}
+body.mpb-yr-on #vMap .mcl-pill{display:none} /* the time slider shows its own dots: no filters meanwhile */
+.mcl-pb{flex:0 1 auto;display:flex;align-items:center;gap:7px;min-width:0;min-height:44px;padding:0 4px 0 14px;border:0;border-radius:999px 0 0 999px;background:none;color:inherit;font:inherit;font-size:.86rem;font-weight:800;cursor:pointer;text-align:left}
+.mcl-pb svg{flex:none;width:17px;height:17px}
+.mcl-pb svg:last-child{width:15px;height:15px;opacity:.85}
+.mcl-pt{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mcl-pn{flex:none;white-space:nowrap;font-weight:700}
+.mcl-px{flex:none;width:44px;height:44px;margin-right:2px;border:0;border-radius:50%;background:none;color:inherit;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.mcl-px svg{width:17px;height:17px;padding:4px;border-radius:50%;background:rgba(255,255,255,.22);box-sizing:content-box}
+html[data-theme=dark] .mcl-pill{color:#0D1318}html[data-theme=dark] .mcl-px svg{background:rgba(13,19,24,.16)}
+html[data-theme=sun] .mcl-pill{border:2px solid #000;box-shadow:none}
+/* Nearest to you: a slim handle while a filter is on; open, it stays under the top controls and scrolls inside */
+.mcl-peek{display:none;align-items:center;gap:6px;width:100%;min-height:48px;padding:0 14px 0 16px;border:0;background:none;font:inherit;font-size:.86rem;color:var(--ink);text-align:left;cursor:pointer;touch-action:none}
+.mcl-peek b{flex:none;font-weight:800;white-space:nowrap}
+.mcl-peek .mcl-pk{flex:0 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:700}
+.mcl-peek i{flex:none;font-style:normal;white-space:nowrap;color:var(--deep);font-weight:800}
+.mcl-peek svg{flex:none;width:18px;height:18px;margin-left:auto;color:var(--muted)}
+#vMap.mcl-f #nearSheet.shut .mcl-peek{display:flex}
+#vMap.mcl-f #nearSheet.shut :is(.hd,.bd){display:none}
+#vMap.mcl-f #nearSheet.shut{border-radius:18px}
+#vMap #nearSheet:not(.shut) .bd{max-height:var(--mcl-max,42vh);overscroll-behavior:contain}
+/* the key: a small button at the bottom left, above the credit; its colours pop up over the map */
+#vMap .mpa-key{left:10px;right:auto;bottom:var(--mcl-kb,120px);flex-direction:row;align-items:center;gap:6px;min-height:44px;padding:0 14px 0 11px;border-radius:999px;font-size:.82rem;font-weight:800;white-space:nowrap}
+#vMap .mpa-key svg{width:18px;height:18px;color:var(--blue)}
+#vMap.mcl-open .mpa-key{display:none}
+.mcl-kp{position:absolute;left:10px;bottom:calc(var(--mcl-kb,120px) + 52px);z-index:810;display:flex;flex-direction:column;gap:6px;padding:10px 14px 10px 12px;border-radius:16px;border:var(--bw) solid var(--line);background:var(--card);color:var(--ink);font-size:.78rem;font-weight:600;box-shadow:0 8px 26px rgba(4,38,63,.22);transform-origin:bottom left}
+.mcl-kp[hidden]{display:none}
+.mcl-kp span{display:flex;align-items:center;gap:8px;white-space:nowrap}
+.mcl-kp span i{width:12px;height:12px;border-radius:50%;background:var(--c);border:2px solid #FFFFFF;box-shadow:0 0 0 1px rgba(0,0,0,.25);flex:0 0 auto}
+.mcl-kp.in{animation:mclPop .18s ease-out both}
+@keyframes mclPop{from{opacity:0;transform:translateY(6px) scale(.96)}to{opacity:1;transform:none}}
+html[data-theme=sun] .mcl-kp{border:2px solid #000;box-shadow:none}
+/* the buttons on the right: one compact column; Offline areas and Follow me in a tray under More */
+#hMap .mcl-side{position:relative;display:flex;flex-direction:column;align-items:flex-end;gap:8px;margin:12px 10px 0 0}
+.mcl-col{display:flex;flex-direction:column;width:44px;border-radius:14px;background:#FFFFFF;border:1px solid rgba(0,0,0,.16);box-shadow:0 2px 10px rgba(4,38,63,.16);overflow:hidden}
+#hMap .mcl-col > *{margin:0;float:none;clear:none;border:0;border-radius:0;box-shadow:none;background:transparent}
+#hMap .mcl-col > * + *{border-top:1px solid rgba(4,38,63,.12)}
+#hMap .mcl-col :is(.mstyle,.mcl-more),#hMap .mcl-col .leaflet-bar a{display:flex;align-items:center;justify-content:center;width:44px;height:44px;line-height:44px;padding:0;border:0;border-radius:0;background:transparent;color:#04263F;font-size:22px;cursor:pointer}
+#hMap .mcl-col .leaflet-control-zoom a + a{border-top:1px solid rgba(4,38,63,.12)}
+#hMap .mcl-col .leaflet-bar a.leaflet-disabled{color:#9AA7B1}
+#hMap .mcl-col svg{width:22px;height:22px}
+#hMap .mcl-col :is(.mstyle,.mcl-more,a):hover{background:rgba(10,120,194,.08)}
+#hMap .mcl-side > .mstyle{width:44px;height:44px;margin:0}
+html[data-theme=dark] .mcl-col{background:#161E25;border-color:#26323C}
+html[data-theme=dark] #hMap .mcl-col :is(.mstyle,.mcl-more),html[data-theme=dark] #hMap .mcl-col .leaflet-bar a{color:#E8EDF1}
+html[data-theme=dark] #hMap .mcl-col > * + *,html[data-theme=dark] #hMap .mcl-col .leaflet-control-zoom a + a{border-color:#26323C}
+html[data-theme=sun] .mcl-col{border:2px solid #000;box-shadow:none}html[data-theme=sun] #hMap .mcl-col > * + *{border-color:#000}
+.mcl-tray{position:absolute;right:0;top:calc(100% + 8px);display:flex;flex-direction:column;gap:2px;min-width:200px;padding:6px;border-radius:18px;border:var(--bw) solid var(--line);background:var(--card);box-shadow:0 10px 30px rgba(4,38,63,.24);transform-origin:top right}
+.mcl-tray[hidden]{display:none}
+.mcl-tray.in{animation:mclTray .2s cubic-bezier(.2,.8,.2,1) both}
+@keyframes mclTray{from{opacity:0;transform:translateY(-8px) scale(.95)}to{opacity:1;transform:none}}
+#hMap .mcl-tray .mstyle{width:100%;height:auto;min-height:48px;justify-content:flex-start;gap:12px;margin:0;padding:0 14px 0 6px;border:0;border-radius:12px;background:transparent;box-shadow:none;color:var(--ink);font:inherit;font-size:.9rem;font-weight:700;text-align:left;white-space:nowrap}
+#hMap .mcl-tray .mstyle:hover{background:var(--tint)}
+#hMap .mcl-tray #mpbFol svg{box-sizing:content-box;padding:5px;border-radius:10px;background:var(--tint);color:var(--blue)}
+.mcl-lb{display:none}
+.mcl-tray .mcl-lb{display:inline}
+html[data-theme=sun] .mcl-tray{border:2px solid #000;box-shadow:none}
+/* map only: a tap on an empty part of the map leaves just the map, a search button and the column on the right */
+.mcl-sb{display:none;align-self:flex-start;width:48px;height:48px;border-radius:50%;border:var(--bw) solid var(--line);background:var(--card);color:var(--ink);align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 18px rgba(4,38,63,.16)}
+.mcl-sb svg{width:20px;height:20px}
+html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
+#vMap.mcl-clean .mcl-sb{display:flex}
+#vMap.mcl-clean :is(#mpaS,#mpaChips,#mclPill,#mpaNone,#mHere,#fldBar,#nearSheet,#mpaKey,#mclKeyPop,.mpb-bot){display:none !important}
+@media (min-width:700px){#vMap .ov.top > .mcl-pill{align-self:center;max-width:560px}#vMap .ov.top > .mcl-sb{align-self:flex-start}}
+@media (prefers-reduced-motion: reduce){.mcl-kp.in,.mcl-tray.in{animation:none !important}}
+</style>
 </head>
 <body class="locked">
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
@@ -3453,9 +3534,11 @@ button.mpb-r:active{background:var(--tint)}
       mpaRefresh(false);
       nearUi();
       mpbDraw(); // today's route, follow me, heat, years, live team, motion
+      mclInit(hMap); mclSync(); // the pill, the peek, the Key button, map-only mode and the column on the right (mcl…)
     }, 30);
   }
   function nearUi() {
+    mclPeekUi(); // the slim handle shows the closest one too (mcl…)
     var list = nearest(5);
     if (!S.here) {
       var why = !navigator.geolocation ? tr('This browser can’t share your location.', 'Kivinjari hiki hakiwezi kushiriki mahali ulipo.')
@@ -3493,7 +3576,7 @@ button.mpb-r:active{background:var(--tint)}
     box.innerHTML = items.map(function (it) { return it.html; }).join('');
     qa(':scope > .row', box).forEach(function (el, i) { el._k = key(items[i]); });
   }
-  $('nearHd').addEventListener('click', function () { var s = $('nearSheet'), shut = !s.classList.contains('shut'); s.classList.toggle('shut', shut); this.setAttribute('aria-expanded', shut ? 'false' : 'true'); $('nearHint').textContent = shut ? 'Show' : 'Hide'; });
+  $('nearHd').addEventListener('click', function () { mclNear($('nearSheet').classList.contains('shut')); }); // open or rest; the max height keeps it under the top controls (mcl…)
   $('nearList').addEventListener('click', function (e) { if (e.target.closest('#geoRetry')) return geoRetry(); if (e.target.closest('#spotSet')) return spotSheet(); var b = e.target.closest('.row'); if (b) openProj(b.getAttribute('data-id')); });
 
   // --- map home: pins by condition, filter chips, search, clusters, the card and long press (mpa…) ---------------
@@ -3501,6 +3584,9 @@ button.mpb-r:active{background:var(--tint)}
   // last 6 months is green and no visit for 6 months (or none in the app) is grey. A fixed repair is closed, so it
   // no longer counts. The same rules as the Android app (MapHome.kt).
   var MPA = { f: store.get('rfPinMapF') || '', key: store.get('rfPinMapKey') !== 'off', map: null, layer: null, spotLayer: null, sel: null, order: [], spot: null, measure: false, lp: 0, places: [], pq: '', pt: 0, items: [], act: -1 };
+  // the map, decluttered (mcl…, further down): chip row open, map-only mode (this session only), the tray, the key
+  var MCL = { row: false, clean: false, tray: false, key: false, keyT: 0, tapT: 0, shut: 0, top: 0, side: null, init: false };
+  try { MCL.clean = sessionStorage.getItem('rfPinMapClean') === '1'; } catch (e) {}
   var MPA_RANK = { bad: 3, repair: 2, old: 1, ok: 0 };
   var MPA_ST = [['broken', 'Broken', 'Zimeharibika', 'alert'], ['due', 'Due a visit', 'Inasubiri ziara', 'cal'], ['mine', 'My assigned visits', 'Ziara nilizopewa', 'mpaPerson']];
   var MPA_TY = [['water', 'drop', 'blue'], ['school', 'school', 'purple'], ['health', 'mpaCross', 'coral'], ['home', 'mpaHouse', 'teal'], ['farm', 'mpaLeaf', 'green']];
@@ -3568,10 +3654,12 @@ button.mpb-r:active{background:var(--tint)}
     if (b.getNorthEast().distanceTo(b.getSouthWest()) < 30) { map.setView(b.getCenter(), Math.min(18, z + 3), { animate: !mpaStill() }); return; }
     map.setView(b.getCenter(), Math.max(z + 1, Math.min(map.getBoundsZoom(b.pad(0.4)), 16)), { animate: !mpaStill() });
   }
+  // fit the map to these pins, clear of what is over the map (mclPad): animated unless motion is reduced
   function mpaFit(list) {
     var map = MPA.map; if (!map || !list.length) return;
-    var o = { paddingTopLeft: [24, 230], paddingBottomRight: [70, 170], maxZoom: 14, animate: !mpaStill() };
-    if (list.length === 1) map.setView(list[0].gps, Math.max(map.getZoom(), 14), { animate: !mpaStill() }); else map.fitBounds(L.latLngBounds(list.map(function (p) { return p.gps; })), o);
+    if (list.length === 1) { map.setView(list[0].gps, Math.max(map.getZoom(), 14), { animate: !mpaStill() }); return; }
+    var b = L.latLngBounds(list.map(function (p) { return p.gps; })), o = Object.assign(mclPad(), { maxZoom: 14 });
+    if (mpaStill()) map.fitBounds(b, Object.assign(o, { animate: false })); else map.flyToBounds(b, Object.assign(o, { duration: 0.8 }));
   }
   // after the projects or a filter change: chips, pins and the card
   function mpaRefresh(fit) {
@@ -3598,6 +3686,7 @@ button.mpb-r:active{background:var(--tint)}
     });
     box.innerHTML = h; box.scrollLeft = sx;
     $('mpaNone').classList.toggle('hidden', !((MPA.f || ty) && !mpaVisible().length));
+    mclSync(); // the pill, the pinned bar and the peek follow the filters (mcl…)
   }
 
   // the card: a tapped pin (swipe it through the projects nearest that pin) or a long-pressed spot
@@ -3621,6 +3710,7 @@ button.mpb-r:active{background:var(--tint)}
     var box = $('mpaCard'); if (!box) return;
     var p = MPA.sel && byId(MPA.sel), sp = MPA.spot, open = !!(p || sp), was = !box.classList.contains('hidden');
     $('nearSheet').classList.toggle('hidden', open); box.classList.toggle('hidden', !open); $('mpaKey').classList.toggle('hidden', open);
+    mclSync(); // what else is over the map makes room (mcl…)
     if (!open) { box.innerHTML = ''; return; }
     var x = '<button type="button" class="mpa-ib" data-mpa="x" aria-label="' + tr('Close', 'Funga') + '">' + oic('x') + '</button>', h;
     if (sp) {
@@ -3740,18 +3830,17 @@ button.mpb-r:active{background:var(--tint)}
       '<div class="mpa-chips" id="mpaChips" role="group" aria-label="' + tr('Filter the map', 'Chuja ramani') + '"></div>' +
       '<p class="mpa-none hidden" id="mpaNone" role="status">' + tr('Nothing on the map matches these filters.', 'Hakuna kwenye ramani kinacholingana na vichujio hivi.') + '</p>');
     bot.insertAdjacentHTML('beforeend', '<div class="mpa-card hidden" id="mpaCard" role="region" aria-label="' + tr('Project on the map', 'Mradi kwenye ramani') + '" tabindex="-1"></div>');
-    wrap.insertAdjacentHTML('beforeend', '<button type="button" class="mpa-key" id="mpaKey"></button>');
+    // the key to the colours: a small "Key" button at the bottom left; its colours pop up over the map (mcl…)
+    wrap.insertAdjacentHTML('beforeend', '<button type="button" class="mpa-key" id="mpaKey" aria-expanded="false" aria-controls="mclKeyPop"></button><div class="mcl-kp" id="mclKeyPop" role="group" hidden></div>');
     var keyUi = function () {
       var k = $('mpaKey');
-      k.classList.toggle('off', !MPA.key); k.setAttribute('aria-expanded', MPA.key ? 'true' : 'false');
-      k.setAttribute('aria-label', MPA.key ? tr('Map key. Tap to hide it.', 'Maelezo ya rangi. Gusa kuficha.') : tr('Show the map key', 'Onyesha maelezo ya rangi'));
-      k.innerHTML = MPA.key ? ['ok', 'repair', 'bad', 'old'].map(function (c) { return '<span><i class="c-' + c + '"></i>' + mpaCondName(c) + '</span>'; }).join('') : oic('mpaInfo');
+      k.setAttribute('aria-label', tr('Map key: what the colours mean', 'Maelezo ya rangi za ramani'));
+      k.innerHTML = oic('mpaInfo') + '<span>' + tr('Key', 'Rangi') + '</span>';
+      $('mclKeyPop').setAttribute('aria-label', tr('Map key', 'Maelezo ya rangi'));
+      $('mclKeyPop').innerHTML = ['ok', 'repair', 'bad', 'old'].map(function (c) { return '<span><i class="c-' + c + '"></i>' + mpaCondName(c) + '</span>'; }).join('');
     };
     keyUi();
-    $('mpaKey').addEventListener('click', function () { MPA.key = !MPA.key; store.set('rfPinMapKey', MPA.key ? 'on' : 'off'); keyUi(); buzz(); });
-    // the key sits just above whatever covers the bottom of the map
-    var lift = function () { wrap.style.setProperty('--mpab', Math.round(bot.getBoundingClientRect().height) + 'px'); };
-    if (window.ResizeObserver) new ResizeObserver(lift).observe(bot); lift();
+    $('mpaKey').addEventListener('click', function () { buzz(); mclKey(!MCL.key); });
     $('mpaChips').addEventListener('click', function (e) {
       var b = e.target.closest('button'); if (!b) return;
       if (b.hasAttribute('data-mclr')) { MPA.f = ''; S.ftype = ''; }
@@ -3759,6 +3848,8 @@ button.mpb-r:active{background:var(--tint)}
       else if (b.hasAttribute('data-mt')) { var t = b.getAttribute('data-mt'); S.ftype = mpaTy() === t ? '' : t; }
       store.set('rfPinMapF', MPA.f); store.set('rfPinType', S.ftype); buzz();
       if (MPA.sel && !mpaVisible().some(function (p) { return p.id === MPA.sel; })) MPA.sel = null;
+      // a filter clears the screen: the row folds into one pill and Nearest to you rests as a slim handle (mcl…)
+      MCL.row = false; if (MPA.f || mpaTy()) mclNear(false);
       mpaRefresh(true);
     });
     $('mpaCard').addEventListener('click', function (e) {
@@ -3811,7 +3902,16 @@ button.mpb-r:active{background:var(--tint)}
     c.addEventListener('touchend', cancel, { passive: true }); c.addEventListener('touchcancel', cancel, { passive: true });
     map.on('movestart zoomstart', cancel);
     map.on('contextmenu', function (e) { if (Date.now() - MPA.lp < 1200) return; mpaLong(e.latlng); });
-    map.on('click', function () { if (Date.now() - MPA.lp < 800) return; $('mpaQ').blur(); if (MPA.sel || MPA.spot) mpaClose(); });
+    // a tap on empty map: put the card away, fold the open chip row, or else show the map alone (mcl…)
+    map.on('click', function () {
+      if (Date.now() - MPA.lp < 800) return;
+      var typing = document.activeElement === $('mpaQ'); $('mpaQ').blur();
+      if (MPA.sel || MPA.spot) return mpaClose();
+      if (typing || Date.now() - MCL.shut < 600) return;
+      if (MCL.row && (MPA.f || mpaTy())) { MCL.row = false; return mclSync(); }
+      clearTimeout(MCL.tapT); MCL.tapT = setTimeout(function () { mclClean(!MCL.clean); }, 280); // not when it is a double-tap to zoom
+    });
+    map.on('dblclick', function () { clearTimeout(MCL.tapT); });
     map.on('zoomend', mpaDraw);
     // a new language: the words drawn here change too
     qa('#segLang button').forEach(function (b) { b.addEventListener('click', function () { setTimeout(function () {
@@ -9449,7 +9549,7 @@ button.mpb-r:active{background:var(--tint)}
       mpbOrient(false); MPB.gpsHd = null; mpbTurn(0);
       if (MPB.L.me) { hMap.removeLayer(MPB.L.me); MPB.L.me = null; }
     }
-    mpbNextUi();
+    mpbNextUi(); mclSync(); // the follow button sits in the column while on, in the tray under More while off
   }
   function mpbFix(pos) {
     if (!MPB.follow || !hMap) return;
@@ -9642,6 +9742,169 @@ button.mpb-r:active{background:var(--tint)}
     if (!S.admin) { MPB.heat = ''; if (MPB.years) { MPB.years = false; mpbPlay(false); document.body.classList.remove('mpb-yr-on'); } if (MPB.team) mpbTeam(false); } // admin layers never show for field users
     mpbRouteDraw(); mpbPulseDraw(); mpbYearsDraw(false); mpbHeatDraw(); mpbBotUi(); mpbDropIn();
     if (MPB.L.me) MPB.L.me.addTo(hMap);
+  }
+
+  // --- the map, decluttered (mcl…) ---------------------------------------------------------------------------
+  // With a filter on, the screen clears: the chip row folds into one pill, the pinned bar steps aside, Nearest to you
+  // rests as a slim handle and the map fits the matching pins. The key is a small button, the buttons on the right are
+  // one compact column (Offline areas and Follow me in a tray under More), and a tap on an empty part of the map
+  // leaves the map alone. Top to bottom: the top controls, the side buttons, the bottom sheet, which stops under them;
+  // the credit (Google, Esri or OpenStreetMap) always stays in view. The same as the Android app (MapHome.kt).
+  Object.assign(OIC, {
+    mclMore: '<circle cx="5.5" cy="12" r="1.7" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.7" fill="currentColor" stroke="none"/><circle cx="18.5" cy="12" r="1.7" fill="currentColor" stroke="none"/>',
+    mclUp: '<path d="M6 15l6-6 6 6"/>', mclDown: '<path d="M7 10l5 5 5-5"/>', mclFilter: '<path d="M4 6.5h16M7 12h10M10 17.5h4"/>',
+    mclMe: '<circle cx="12" cy="12" r="6.5"/><circle cx="12" cy="12" r="2" fill="currentColor"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3"/>'
+  });
+  function mclInit(map) {
+    if (MCL.init || !map || !$('mpaChips')) return; MCL.init = true;
+    var corner = map.getContainer().querySelector('.leaflet-top.leaflet-right'), top = document.querySelector('#vMap .ov.top'), bot = document.querySelector('#vMap .ov.bot');
+    $('mpaChips').insertAdjacentHTML('afterend', '<div class="mcl-pill" id="mclPill"><button type="button" class="mcl-pb" id="mclPillB" aria-expanded="false" aria-controls="mpaChips"></button><button type="button" class="mcl-px" id="mclPillX"></button></div>');
+    top.insertAdjacentHTML('afterbegin', '<button type="button" class="mcl-sb" id="mclSb"></button>');
+    $('nearSheet').insertAdjacentHTML('afterbegin', '<button type="button" class="mcl-peek" id="mclPeek" aria-expanded="false" aria-controls="nearList"></button>');
+    // one column on the right: Map style, zoom, where I am, More; the compass (and Follow me while on) below it
+    var Side = L.Control.extend({ options: { position: 'topright' }, onAdd: function () { var d = L.DomUtil.create('div', 'mcl-side'); L.DomEvent.disableClickPropagation(d); L.DomEvent.disableScrollPropagation(d); return d; } });
+    var side = MCL.side = new Side().addTo(map).getContainer(), col = document.createElement('div');
+    col.className = 'mcl-col'; side.appendChild(col);
+    [corner.querySelector(':scope > .mstyle:not(.fld-ob)'), map.zoomControl && map.zoomControl.getContainer(), meCtl && meCtl.getContainer()].forEach(function (el) { if (el) col.appendChild(el); });
+    var me = col.querySelector('.lc-me a'); if (me) me.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true">' + OIC.mclMe + '</svg>';
+    col.insertAdjacentHTML('beforeend', '<button type="button" class="mcl-more" id="mclMore" aria-haspopup="true" aria-expanded="false" aria-controls="mclTray">' + oic('mclMore') + '</button>');
+    if ($('mpbCmp')) side.appendChild($('mpbCmp'));
+    side.insertAdjacentHTML('beforeend', '<div class="mcl-tray" id="mclTray" role="group" hidden></div>');
+    var tray = $('mclTray');
+    [['fldOb', 'mclLbO'], ['mpbFol', 'mclLbF']].forEach(function (x) { var b = $(x[0]); if (b) { b.insertAdjacentHTML('beforeend', '<span class="mcl-lb" id="' + x[1] + '"></span>'); tray.appendChild(b); } });
+    qa('.mpb-ctl', corner).forEach(function (el) { if (!el.children.length) el.remove(); });
+    mclText();
+    // the pill: tap it for the whole row again; × clears the filters and brings the row back
+    $('mclPillB').addEventListener('click', function () {
+      buzz(); MCL.row = true; mclSync();
+      var on = $('mpaChips').querySelector('[aria-pressed=true]'); if (on) { on.focus(); if (on.scrollIntoView) on.scrollIntoView({ block: 'nearest', inline: 'nearest' }); }
+    });
+    $('mclPillX').addEventListener('click', function () {
+      buzz(); MPA.f = ''; S.ftype = ''; store.set('rfPinMapF', ''); store.set('rfPinType', ''); MCL.row = false;
+      mpaRefresh(false); var c = $('mpaChips').querySelector('.mpa-chip'); if (c) c.focus();
+    });
+    // the peek: tap it or swipe it up
+    var pk = $('mclPeek'), y0 = null;
+    pk.addEventListener('click', function () { buzz(); mclNear(true); });
+    pk.addEventListener('touchstart', function (e) { y0 = e.touches[0].clientY; }, { passive: true });
+    pk.addEventListener('touchend', function (e) { if (y0 == null) return; var dy = e.changedTouches[0].clientY - y0; y0 = null; if (dy < -24) { e.preventDefault(); buzz(); mclNear(true); } });
+    // More: the tray opens below the column; a tap anywhere else (or Escape) closes it, as it does the key
+    $('mclMore').addEventListener('click', function () { buzz(); mclTray(!MCL.tray); });
+    tray.addEventListener('click', function (e) { if (e.target.closest('button')) setTimeout(function () { mclTray(false); }, 0); });
+    document.addEventListener('pointerdown', function (e) {
+      if (MCL.tray && !e.target.closest('.mcl-side')) { mclTray(false); MCL.shut = Date.now(); }
+      if (MCL.key && !e.target.closest('#mclKeyPop, #mpaKey')) { mclKey(false); MCL.shut = Date.now(); }
+    }, true);
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && (MCL.tray || MCL.key)) { var t = MCL.tray; mclTray(false); mclKey(false); if (t) $('mclMore').focus(); } });
+    // map only: the search button brings everything back and opens the search
+    $('mclSb').addEventListener('click', function () { buzz(); mclClean(false); $('mpaQ').focus(); });
+    // keep the layout right as things over the map change size
+    if (window.ResizeObserver) { var ro = new ResizeObserver(function () { mclLayout(); }); [top, bot, side].forEach(function (el) { if (el) ro.observe(el); }); }
+    addEventListener('resize', mclLayout); map.on('moveend resize', mclLayout);
+    qa('#segLang button').forEach(function (b) { b.addEventListener('click', function () { setTimeout(function () { mclText(); mclSync(); }, 0); }); });
+  }
+  function mclText() {
+    if (!MCL.init) return;
+    $('mclSb').innerHTML = oic('search'); $('mclSb').setAttribute('aria-label', tr('Search a village or project', 'Tafuta kijiji au mradi'));
+    $('mclPillX').innerHTML = oic('x'); $('mclPillX').setAttribute('aria-label', tr('Clear filters', 'Ondoa vichujio'));
+    $('mclMore').setAttribute('aria-label', tr('More map tools', 'Zana zaidi za ramani'));
+    if ($('mclLbO')) $('mclLbO').textContent = tr('Offline areas', 'Ramani bila mtandao');
+    if ($('mclLbF')) $('mclLbF').textContent = tr('Follow me', 'Nifuate');
+    mclPillUi(); mclPeekUi();
+  }
+  // the active filters: the kind of project first, then the status ("Water + Broken")
+  function mclActive() {
+    var out = [], ty = mpaTy();
+    MPA_TY.forEach(function (x) { if (ty === x[0]) { var g = TGROUPS.filter(function (y) { return y[0] === x[0]; })[0]; out.push({ t: tr(g[1], g[2]), ic: x[1], hu: 'var(--hu-' + x[2] + ')' }); } });
+    MPA_ST.forEach(function (x) { if (MPA.f === x[0]) out.push({ t: tr(x[1], x[2]), ic: x[3], hu: x[0] === 'broken' ? 'var(--bad)' : x[0] === 'due' ? 'var(--hu-teal)' : 'var(--hu-blue)' }); });
+    return out;
+  }
+  function mclPillUi() {
+    var b = $('mclPillB'); if (!b) return;
+    var a = mclActive(); if (!a.length) return;
+    var n = mpaVisible().length, names = a.map(function (x) { return x.t; });
+    $('mclPill').style.setProperty('--hu', a.length === 1 ? a[0].hu : 'var(--hu-blue)');
+    b.innerHTML = oic(a.length === 1 ? a[0].ic : 'mclFilter') + '<span class="mcl-pt">' + esc(names.join(' + ')) + '</span><span class="mcl-pn">· ' + n + '</span>' + oic('mclDown');
+    b.setAttribute('aria-label', tr('Filter: ', 'Kichujio: ') + names.join(', ') + ', ' + n + '. ' + tr('Show all the filters', 'Onyesha vichujio vyote'));
+  }
+  function mclPeekUi() {
+    var b = $('mclPeek'); if (!b) return;
+    var n = nearest(1)[0];
+    b.innerHTML = n ? '<b>' + esc(tr('Nearest:', 'Karibu zaidi:')) + '</b><span class="mcl-pk">' + esc(n.p.title) + '</span><i>· ' + esc(dist(n.d)) + '</i>' + oic('mclUp')
+      : '<b>' + esc(tr('Nearest to you', 'Iliyo karibu nawe')) + '</b>' + oic('mclUp');
+    b.setAttribute('aria-label', (n ? tr('Nearest: ', 'Karibu zaidi: ') + n.p.title + ', ' + dist(n.d) : tr('Nearest to you', 'Iliyo karibu nawe')) + '. ' + tr('Show more', 'Onyesha zaidi'));
+  }
+  // Nearest to you: open (up to just under the top controls) or resting
+  function mclNear(open) {
+    var s = $('nearSheet'); if (!s) return;
+    s.classList.toggle('shut', !open); $('nearHd').setAttribute('aria-expanded', open ? 'true' : 'false'); $('nearHint').textContent = open ? 'Hide' : 'Show';
+    if ($('mclPeek')) $('mclPeek').setAttribute('aria-expanded', open ? 'true' : 'false');
+    if (open) { mclTray(false); mclKey(false); }
+    mclSync();
+    if (open) $('nearHd').focus({ preventScroll: true });
+  }
+  function mclTray(on) {
+    var t = $('mclTray'); if (!t || MCL.tray === !!on) return;
+    MCL.tray = !!on; t.hidden = !on; $('mclMore').setAttribute('aria-expanded', String(!!on));
+    if (!on) return;
+    mclKey(false); if (!$('nearSheet').classList.contains('shut')) mclNear(false);
+    // it opens below the column, and below the cards on the left where it would reach them ("You're at", the pinned bar)
+    var sb = MCL.side.getBoundingClientRect().bottom, tl = t.getBoundingClientRect().left, low = sb;
+    qa('#vMap .ov.top > *').forEach(function (el) { if (!el.offsetParent) return; var r = el.getBoundingClientRect(); if (r.right > tl) low = Math.max(low, r.bottom); });
+    t.style.top = 'calc(100% + 8px + ' + Math.round(low - sb) + 'px)';
+    if (!mpaStill()) { t.classList.remove('in'); void t.offsetWidth; t.classList.add('in'); }
+  }
+  // the key's colours: they close on a tap anywhere else, or by themselves after a few seconds
+  function mclKey(on) {
+    var p = $('mclKeyPop'); if (!p) return;
+    clearTimeout(MCL.keyT); MCL.key = !!on; p.hidden = !on; $('mpaKey').setAttribute('aria-expanded', String(!!on));
+    if (!on) return;
+    mclTray(false); MCL.keyT = setTimeout(function () { mclKey(false); }, 5000);
+    if (!mpaStill()) { p.classList.remove('in'); void p.offsetWidth; p.classList.add('in'); }
+  }
+  // map only: everything but a search button, the column on the right and the credit steps aside (this session only)
+  function mclClean(on) {
+    MCL.clean = !!on; try { sessionStorage.setItem('rfPinMapClean', on ? '1' : '0'); } catch (e) {}
+    if (on) { mclTray(false); mclKey(false); mpaSugHide(); }
+    buzz(); mclSync();
+  }
+  function mclSync() {
+    var v = $('vMap'); if (!MCL.init || !v) return;
+    var f = !!(MPA.f || mpaTy()), s = $('nearSheet'), bc = document.body.classList;
+    var open = !!s && !s.classList.contains('shut') && !s.classList.contains('hidden') && !bc.contains('mpb-fol-on') && !(bc.contains('mpb-yr-on'));
+    v.classList.toggle('mcl-f', f); v.classList.toggle('mcl-row', f && MCL.row); v.classList.toggle('mcl-open', open && !MCL.clean); v.classList.toggle('mcl-clean', MCL.clean);
+    $('mclPillB').setAttribute('aria-expanded', String(f && MCL.row));
+    // Follow me: in the column while it is on (tap to stop), in the tray under More while it is off
+    var fol = $('mpbFol'), tray = $('mclTray');
+    if (fol && tray) { if (MPB.follow) { if (fol.parentNode !== MCL.side) MCL.side.insertBefore(fol, tray); } else if (fol.parentNode !== tray) tray.appendChild(fol); }
+    mclPillUi(); mclLayout();
+  }
+  // Measures what is over the map: lifts the credit (and the Key button) above the bottom panel, and lets the open
+  // sheet grow only up to just under the top controls and the column on the right, with room for the credit.
+  function mclLayout() {
+    var map = MPA.map, wrap = document.querySelector('#vMap .mapwrap'); if (!MCL.init || !map || !wrap || !wrap.offsetParent) return;
+    var c = map.getContainer(), r = c.getBoundingClientRect(), low = r.bottom, ovb = document.querySelector('#vMap .ov.bot');
+    [ovb, $('tabs')].forEach(function (el) {
+      if (!el || !el.offsetParent) return; var b = el.getBoundingClientRect(); if (b.top < low && b.bottom > r.top + r.height / 2 && b.left < r.right && b.right > r.left) low = b.top;
+    });
+    var gb = Math.max(0, Math.round(r.bottom - low)); c.style.setProperty('--gbot', gb + 'px');
+    wrap.style.setProperty('--mcl-kb', Math.round(wrap.getBoundingClientRect().bottom - low + 38) + 'px');
+    var tb = r.top;
+    qa('#vMap .ov.top > *').forEach(function (el) { if (el.offsetParent) tb = Math.max(tb, el.getBoundingClientRect().bottom); });
+    if (MCL.side) tb = Math.max(tb, MCL.side.getBoundingClientRect().bottom);
+    MCL.top = Math.round(tb - r.top);
+    var s = $('nearSheet');
+    if (s && !s.classList.contains('shut') && s.offsetParent) {
+      var sb = s.getBoundingClientRect().bottom, mb = MPB.bot && MPB.bot.offsetParent ? MPB.bot.getBoundingClientRect().height + 8 : 0;
+      s.style.setProperty('--mcl-max', Math.max(96, Math.floor(sb - tb - 44 - mb - $('nearHd').offsetHeight - 14)) + 'px');
+    }
+  }
+  // room to leave when fitting the map: under the top controls, left of the column, above the bottom panel and the key
+  function mclPad() {
+    var map = MPA.map, r = map.getContainer().getBoundingClientRect(), gb = parseFloat(map.getContainer().style.getPropertyValue('--gbot')) || 0, k = $('mpaKey');
+    var right = MCL.side ? Math.max(0, r.right - MCL.side.getBoundingClientRect().left) : 60, bottom = gb + 34;
+    if (k && k.offsetParent) bottom = Math.max(bottom, r.bottom - k.getBoundingClientRect().top);
+    return { paddingTopLeft: [16, Math.max(24, MCL.top) + 14], paddingBottomRight: [right + 14, bottom + 14] };
   }
 
   // --- start ----------------------------------------------------------------------------------------

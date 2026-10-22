@@ -62,6 +62,10 @@ def run(br, admin, vp=(390, 844), reduce=False, name='Meril Kiprop'):
     return ctx, pg, st, errs
 
 def sheet(pg): pg.click('#vMap .mstyle'); pg.wait_for_timeout(450)
+# Follow me: in the column while it is on, in the tray under More while it is off (mcl…)
+def fol(pg):
+    if not pg.locator('#mpbFol').is_visible(): pg.click('#mclMore'); pg.wait_for_timeout(300)
+    pg.click('#mpbFol')
 def close_sheet(pg): pg.keyboard.press('Escape'); pg.wait_for_timeout(350)
 def no_hscroll(pg, w): return pg.evaluate('document.documentElement.scrollWidth') <= w
 # the map tab's pins (mpa…): single pins plus the projects in the number bubbles
@@ -82,8 +86,10 @@ with sync_playwright() as p:
     check(order_ == ['102', '110', '109'], 'driving order from where you are (nearest first): %s' % order_)
     check(pg.locator('#hMap path.mpb-line').count() >= 3, 'the route is drawn as a line')
     check(pg.locator('.mpb-pl').count() == 2 and pg.locator('.mpb-pl.bad').count() == 1, 'a soft pulse on the urgent / not working sites only (%d)' % pg.locator('.mpb-pl').count())
-    check(pg.locator('#mpbFol').is_visible() and pg.locator('#mpbCmp').is_hidden(), 'follow-me button; the compass only shows when the map is turned')
+    pg.click('#mclMore'); pg.wait_for_timeout(300)
+    check(pg.locator('#mpbFol').is_visible() and pg.locator('#mpbCmp').is_hidden(), 'follow-me button (under More); the compass only shows when the map is turned')
     b = pg.locator('#mpbFol').bounding_box(); check(b and b['width'] >= 44 and b['height'] >= 44, 'follow button is 44 px')
+    pg.keyboard.press('Escape'); pg.wait_for_timeout(200)
     shot(pg, '01-route-field.png')
     sheet(pg)
     check(pg.locator('.mpb-sh [data-mpb=route][aria-checked=true]').count() == 1, 'layers sheet: Today’s route is on')
@@ -106,7 +112,7 @@ with sync_playwright() as p:
     shot(pg, '03-route-ticked-popup.png')
     pg.evaluate("document.querySelector('.leaflet-popup-close-button').click()"); pg.wait_for_timeout(300)
     # follow me
-    pg.click('#mpbFol'); pg.wait_for_timeout(1600)
+    fol(pg); pg.wait_for_timeout(1600)
     check(pg.locator('#mpbFol[aria-pressed=true]').count() == 1, 'follow me is on')
     check(pg.locator('#mpbNext').is_visible() and 'next stop · 2 of 3' in pg.inner_text('#mpbNext').lower() and 'Ziwa Borehole' in pg.inner_text('#mpbNext'), 'the next stop and how far: ' + pg.inner_text('#mpbNext').replace('\n', ' | '))
     check(re.search(r'≈ [\d.]+ km', pg.inner_text('#mpbNext')) is not None, 'with a distance')
@@ -140,14 +146,14 @@ with sync_playwright() as p:
     check('Njia ya leo' in t and 'kwenye ramani' in t.lower() and 'zimekamilika' in t, 'the sheet in Kiswahili: ' + t.replace('\n', ' | '))
     shot(pg, '06-sheet-sw.png')
     close_sheet(pg)
-    pg.click('#mpbFol'); pg.wait_for_timeout(1500)
+    fol(pg); pg.wait_for_timeout(1500)
     check('kituo kijacho' in pg.inner_text('#mpbNext').lower(), 'next stop in Kiswahili: ' + pg.inner_text('#mpbNext').replace('\n', ' | '))
     shot(pg, '07-follow-sw.png')
     pg.click('#mpbNx'); pg.wait_for_timeout(300)
     check(pg.locator('#mpbFol[aria-pressed=false]').count() == 1, '× stops following')
     # with the map tab's pins (mpa…): a long press (here a right-click) on the turned map marks the spot under the
     # finger, and following stops for its card
-    pg.click('#mpbFol'); pg.wait_for_timeout(1200)
+    fol(pg); pg.wait_for_timeout(1200)
     pg.evaluate("window.dispatchEvent(new DeviceOrientationEvent('ondeviceorientationabsolute' in window ? 'deviceorientationabsolute' : 'deviceorientation', {alpha: 300, absolute: true}))"); pg.wait_for_timeout(900)
     check(pg.evaluate("document.querySelector('.mpb-rot').style.transform") == 'rotate(-60deg)' and pg.locator('#mpaCard').is_hidden(), 'turned while following; no pin card meanwhile')
     hb = pg.locator('#hMap').bounding_box(); mx, my = hb['x'] + hb['width'] / 2, hb['y'] + hb['height'] / 2
@@ -257,7 +263,7 @@ with sync_playwright() as p:
     check(pg.evaluate('window.__drops') == 0, 'reduced motion: pins don’t drop')
     an = pg.evaluate("getComputedStyle(document.querySelector('.mpb-pl i')).animationName")
     check(an == 'none', 'reduced motion: no pulse (%s)' % an)
-    pg.click('#mpbFol'); pg.wait_for_timeout(500)
+    fol(pg); pg.wait_for_timeout(500)
     pg.evaluate("window.dispatchEvent(new DeviceOrientationEvent('ondeviceorientationabsolute' in window ? 'deviceorientationabsolute' : 'deviceorientation', {alpha: 300, absolute: true}))"); pg.wait_for_timeout(200)
     tr_ = pg.evaluate("getComputedStyle(document.querySelector('.mpb-rot')).transitionDuration")
     check(tr_ in ('0s', '0s, 0s'), 'reduced motion: the map turns without sliding (%s)' % tr_)

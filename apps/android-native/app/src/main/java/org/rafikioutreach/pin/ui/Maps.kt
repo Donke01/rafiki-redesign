@@ -27,6 +27,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -75,10 +76,11 @@ private fun dotDrawable(color: Int, big: Boolean) = GradientDrawable().apply {
 
 /** A map of project dots. Tap a dot to open the project.
  *  Dots are only rebuilt when the projects change; your own dot just moves, so live updates never flash.
- *  The Map tab draws its own pins and clusters ([drawDots] false, MapHome.kt) and adds its overlays through [onMap]. */
+ *  The Map tab draws its own pins and clusters ([drawDots] false, MapHome.kt) and adds its overlays through [onMap].
+ *  The Map tab also draws its own column of buttons, and opens the map-style sheet through [styleSheet]. */
 @Composable
 fun ProjectsMap(dots: List<Dot>, me: LatLng?, onDot: (String) -> Unit, modifier: Modifier = Modifier, fitKey: Any? = null, badgeBottom: androidx.compose.ui.unit.Dp = 0.dp,
-                drawDots: Boolean = true, onMap: ((MapView) -> Unit)? = null, extras: MapExtras? = null) {
+                drawDots: Boolean = true, onMap: ((MapView) -> Unit)? = null, extras: MapExtras? = null, styleSheet: androidx.compose.runtime.MutableState<Boolean>? = null) {
     val ctx = LocalContext.current
     MapSetup.init(ctx)
     // satellite first; the street map once they choose it (remembered on this phone)
@@ -132,9 +134,11 @@ fun ProjectsMap(dots: List<Dot>, me: LatLng?, onDot: (String) -> Unit, modifier:
         })
         OfflineMapLayer(map)
         GoogleBadge(map, g, sat, Modifier.align(Alignment.BottomStart).padding(bottom = badgeBottom))
-        if (cm) CountryCredit(Modifier.align(Alignment.BottomEnd).padding(bottom = badgeBottom))
-        var styles by remember { mutableStateOf(false) }
-        MapButton("layers", t("Map style", "Mtindo wa ramani"), Modifier.align(Alignment.TopEnd).padding(10.dp)) { styles = true }
+        if (cm) CountryCredit(Modifier.align(Alignment.BottomEnd).padding(bottom = badgeBottom).testTag("map_credit"))
+        else if (g == null) FreeCredit(sat, Modifier.align(Alignment.BottomEnd).padding(bottom = badgeBottom)) // Esri's photos or OpenStreetMap
+        val ownStyles = remember { mutableStateOf(false) }
+        var styles by (styleSheet ?: ownStyles)
+        if (styleSheet == null) MapButton("layers", t("Map style", "Mtindo wa ramani"), Modifier.align(Alignment.TopEnd).padding(10.dp)) { styles = true }
         val have by org.rafikioutreach.pin.cmap.CountryMaps.have.collectAsState()
         if (styles) PickSheet(t("Map style", "Mtindo wa ramani"), listOf(Triple("street", t("Street map", "Ramani ya barabara"), "map"), Triple("sat", t("Satellite photos", "Picha za satelaiti"), "layers"))
             + (if (have.isNotEmpty()) listOf(Triple("cmap", t("Offline street map", "Ramani ya barabara bila mtandao"), "offline")) else emptyList()),
@@ -142,10 +146,10 @@ fun ProjectsMap(dots: List<Dot>, me: LatLng?, onDot: (String) -> Unit, modifier:
                 if (it == "cmap") { org.rafikioutreach.pin.cmap.CountryMaps.pick(true); skip = false }
                 else { sat = it == "sat"; org.rafikioutreach.pin.cmap.CountryMaps.pick(false); skip = !online }
             }, extras?.sheet) { styles = false }
-        if (me != null) MapButton("target", t("Go to where I am", "Nenda nilipo"), Modifier.align(Alignment.TopEnd).padding(top = 66.dp, end = 10.dp)) {
+        if (me != null && styleSheet == null) MapButton("target", t("Go to where I am", "Nenda nilipo"), Modifier.align(Alignment.TopEnd).padding(top = 66.dp, end = 10.dp)) {
             map.controller.animateTo(GeoPoint(me.lat, me.lng), 15.0, 600L)
         }
-        extras?.overlay?.invoke(this, map, badgeBottom) // the home map's layers, follow me and compass (MapLayers.kt)
+        extras?.overlay?.invoke(this, map, badgeBottom) // the home map's layers and their cards (MapLayers.kt)
     }
 }
 
@@ -226,6 +230,15 @@ private fun MapButton(icon: String, label: String, modifier: Modifier, onClick: 
 }
 
 
+/** The credit for the free maps: Esri's satellite photos or OpenStreetMap's street map, kept in view like Google's. */
+@Composable
+private fun FreeCredit(sat: Boolean, modifier: Modifier) {
+    androidx.compose.material3.Text(if (sat) "Imagery © Esri, Maxar, Earthstar Geographics" else "© OpenStreetMap contributors",
+        fontSize = androidx.compose.ui.unit.TextUnit(9f, androidx.compose.ui.unit.TextUnitType.Sp), color = Color(0xFF222222), maxLines = 1,
+        modifier = modifier.padding(6.dp).clip(RoundedCornerShape(3.dp)).background(Color(0xD9FFFFFF)).padding(horizontal = 4.dp, vertical = 1.dp)
+            .semantics { contentDescription = "map_credit" }.testTag("map_credit"))
+}
+
 /** Google's logo and the copyright for what is on screen, shown on Google maps as its terms ask. */
 @Composable
 private fun GoogleBadge(map: MapView, g: GoogleMaps?, sat: Boolean, modifier: Modifier) {
@@ -248,9 +261,9 @@ private fun GoogleBadge(map: MapView, g: GoogleMaps?, sat: Boolean, modifier: Mo
     }
     androidx.compose.foundation.layout.Row(modifier.padding(6.dp).fillMaxWidth(), verticalAlignment = Alignment.Bottom) {
         androidx.compose.foundation.Image(androidx.compose.ui.res.painterResource(if (sat) org.rafikioutreach.pin.R.drawable.google_logo_white else org.rafikioutreach.pin.R.drawable.google_logo), "Google",
-            Modifier.size(width = 59.dp, height = 23.dp).semantics { contentDescription = "Google" })
+            Modifier.size(width = 59.dp, height = 23.dp).semantics { contentDescription = "Google" }.testTag("map_glogo"))
         androidx.compose.foundation.layout.Spacer(Modifier.weight(1f))
         androidx.compose.material3.Text(text, fontSize = androidx.compose.ui.unit.TextUnit(9f, androidx.compose.ui.unit.TextUnitType.Sp), color = Color(0xFF222222), maxLines = 1,
-            modifier = Modifier.clip(RoundedCornerShape(3.dp)).background(Color(0xBFFFFFFF)).padding(horizontal = 4.dp, vertical = 1.dp).semantics { contentDescription = "map_copyright" })
+            modifier = Modifier.clip(RoundedCornerShape(3.dp)).background(Color(0xBFFFFFFF)).padding(horizontal = 4.dp, vertical = 1.dp).semantics { contentDescription = "map_copyright" }.testTag("map_credit"))
     }
 }

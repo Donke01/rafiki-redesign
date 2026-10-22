@@ -62,7 +62,7 @@ def sign_in(pg, lang=None, chunk=PIECE):
 
 def open_list(pg):
     pg.goto(BASE + '/pin#map'); pg.wait_for_timeout(1300)
-    pg.click('#fldOb'); pg.wait_for_timeout(500); pg.click('#fldList'); pg.wait_for_timeout(1200)
+    pg.click('#mclMore'); pg.wait_for_timeout(250); pg.click('#fldOb'); pg.wait_for_timeout(500); pg.click('#fldList'); pg.wait_for_timeout(1200)
 
 def ctx_new(br, **kw):
     c = br.new_context(viewport={'width': kw.pop('w', 390), 'height': 844}, is_mobile=True, has_touch=True, service_workers='block', **kw)

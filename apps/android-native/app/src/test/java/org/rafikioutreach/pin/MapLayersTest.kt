@@ -146,6 +146,8 @@ class MapLayersTest {
     private fun closeSheet() { rule.onNodeWithTag("pick_sat").performClick(); rule.mainClock.advanceTimeBy(900); rule.waitForIdle() }
     private fun here(lat: Double, lng: Double, bearing: Float? = null) { rule.runOnIdle { lastModel!!.locator.pretend(Fix(LatLng(lat, lng), 12, System.currentTimeMillis(), bearing)) }; rule.mainClock.advanceTimeBy(900); rule.waitForIdle() }
     private var lastModel: AppModel? = null
+    /** Follow me is in the tray under More while it is off (MapHome.kt, MapSide); on, it shows in the column. */
+    private fun followOn() { rule.onNodeWithTag("ml_more").performClick(); rule.waitForIdle(); rule.onNodeWithTag("ml_follow").performClick() }
 
     @Test fun logic_route_order_ticks_years_and_heat() {
         val s = Snapshot.from(snapshot(false, "Meril Kiprop"))
@@ -177,7 +179,7 @@ class MapLayersTest {
 
     @Test fun field_route_follow_compass() {
         val m = model(admin = false); lastModel = m; show(m)
-        waitTag("ml_follow"); rule.mainClock.advanceTimeBy(1500); rule.waitForIdle()
+        waitTag("ml_more"); rule.mainClock.advanceTimeBy(1500); rule.waitForIdle()
         here(0.5205, 35.2699)
         assertEquals("three numbered stops", 3, markers("Stop ").size)
         assertTrue("urgent and not-working sites", map().overlays.any { it.javaClass.simpleName == "PulseOverlay" })
@@ -199,7 +201,7 @@ class MapLayersTest {
         shot("ml_03_stop_card")
         rule.onNodeWithTag("ml_stop").assertExists(); HomeLayers.pick = null; rule.waitForIdle()
         // follow me: centred on you, the next stop with its distance; Nearest to you steps aside
-        rule.onNodeWithTag("ml_follow").performClick(); rule.mainClock.advanceTimeBy(1500); rule.waitForIdle()
+        followOn(); rule.mainClock.advanceTimeBy(1500); rule.waitForIdle()
         here(0.5206, 35.2699)
         waitTag("ml_next")
         assertTrue(hasText("Next stop · 1 of 3") && hasText("Chepkongi Dispensary"))
@@ -240,7 +242,7 @@ class MapLayersTest {
 
     @Test fun admin_heat_years_team() {
         val m = model(admin = true); lastModel = m; show(m)
-        waitTag("ml_follow"); rule.mainClock.advanceTimeBy(1500); rule.waitForIdle()
+        waitTag("ml_more"); rule.mainClock.advanceTimeBy(1500); rule.waitForIdle()
         assertEquals("no route without visits today", 0, markers("Stop ").size)
         openSheet()
         assertTrue(has("ml_heat_off") && has("ml_heat_repairs") && has("ml_heat_people") && has("ml_sw_years") && has("ml_sw_team"))
@@ -294,7 +296,7 @@ class MapLayersTest {
     @Test fun dark_and_kiswahili() {
         Lang.sw = true
         val m = model(admin = true); lastModel = m; show(m, dark = true)
-        waitTag("ml_follow"); rule.mainClock.advanceTimeBy(1500); rule.waitForIdle()
+        waitTag("ml_more"); rule.mainClock.advanceTimeBy(1500); rule.waitForIdle()
         HomeLayers.heat = "repairs"; HomeLayers.team = true; rule.mainClock.advanceTimeBy(1500); rule.waitForIdle()
         waitTag("ml_legend"); assertTrue(hasText("Matengenezo yaliyo wazi"))
         shot("ml_20_dark_sw")
@@ -306,7 +308,7 @@ class MapLayersTest {
     @Test fun with_the_map_tab_pins_kiswahili() {
         Lang.sw = true
         val m = model(admin = false); lastModel = m; show(m)
-        waitTag("ml_follow"); rule.mainClock.advanceTimeBy(1500); rule.waitForIdle()
+        waitTag("ml_more"); rule.mainClock.advanceTimeBy(1500); rule.waitForIdle()
         here(0.5205, 35.2699)
         val ov = map().overlays
         val firstPin = ov.indexOfFirst { it is Marker && ((it.id ?: "").startsWith("pin:") || (it.id ?: "").startsWith("cluster:")) }
@@ -316,7 +318,7 @@ class MapLayersTest {
         assertTrue("the numbered stops are over the pins", ov.indexOfFirst { it is Marker && (it.title ?: "").startsWith("Kituo ") } > firstPin)
         shot("ml_40_route_pins_sw")
         // following: the next stop takes the place of the card and Nearest to you
-        rule.onNodeWithTag("ml_follow").performClick(); rule.mainClock.advanceTimeBy(1500); rule.waitForIdle()
+        followOn(); rule.mainClock.advanceTimeBy(1500); rule.waitForIdle()
         here(0.5215, 35.2709, 60f); waitTag("ml_next")
         assertFalse(has("nearest") || has("map_card"))
         shot("ml_41_follow_turned_sw")
@@ -326,7 +328,7 @@ class MapLayersTest {
     private fun heatYearsSw(dark: Boolean) {
         Lang.sw = true
         val m = model(admin = true); lastModel = m; show(m, dark)
-        waitTag("ml_follow"); rule.mainClock.advanceTimeBy(1500); rule.waitForIdle()
+        waitTag("ml_more"); rule.mainClock.advanceTimeBy(1500); rule.waitForIdle()
         assertTrue(map().overlays.any { isPin(it) })
         HomeLayers.heat = "people"; rule.mainClock.advanceTimeBy(800); rule.waitForIdle()
         val ov = map().overlays
@@ -346,9 +348,9 @@ class MapLayersTest {
     @Test fun field_user_kiswahili_follow_and_reduced_motion() {
         Lang.sw = true; Motion.on = false
         val m = model(admin = false); lastModel = m; show(m)
-        waitTag("ml_follow"); rule.waitForIdle()
+        waitTag("ml_more"); rule.waitForIdle()
         here(0.5205, 35.2699)
-        rule.onNodeWithTag("ml_follow").performClick(); rule.waitForIdle()
+        followOn(); rule.waitForIdle()
         here(0.5215, 35.2709, 300f)
         waitTag("ml_next"); assertTrue(hasText("Kituo kijacho · 1 kati ya 3"))
         assertEquals("no motion: turned straight away", 60f, map().mapOrientation, 1.5f)

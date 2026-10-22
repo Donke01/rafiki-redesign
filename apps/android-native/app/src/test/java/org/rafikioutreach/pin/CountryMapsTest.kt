@@ -362,7 +362,7 @@ class CountryMapsTest {
     private fun openOffline() {
         rule.waitUntil(8000) { rule.onAllNodesWithTag("nav_map").fetchSemanticsNodes().isNotEmpty() }
         rule.onNodeWithTag("nav_map").performClick(); rule.waitForIdle(); rule.mainClock.advanceTimeBy(800); rule.waitForIdle()
-        rule.onNodeWithTag("offline_btn").performClick(); rule.mainClock.advanceTimeBy(700); rule.waitForIdle()
+        rule.onNodeWithTag("ml_more").performClick(); rule.waitForIdle(); rule.onNodeWithTag("offline_btn").performClick(); rule.mainClock.advanceTimeBy(700); rule.waitForIdle()
         rule.onNodeWithTag("oa_list").performScrollTo().performClick(); rule.mainClock.advanceTimeBy(700); rule.waitForIdle()
         rule.waitUntil(8000) { rule.onAllNodesWithTag("cm_section").fetchSemanticsNodes().isNotEmpty() }
     }
@@ -417,7 +417,7 @@ class CountryMapsTest {
         show(m)
         rule.waitUntil(8000) { rule.onAllNodesWithTag("nav_map").fetchSemanticsNodes().isNotEmpty() }
         rule.onNodeWithTag("nav_map").performClick(); rule.waitForIdle(); rule.mainClock.advanceTimeBy(800); rule.waitForIdle()
-        rule.onNodeWithTag("offline_btn").performClick(); rule.mainClock.advanceTimeBy(700); rule.waitForIdle()
+        rule.onNodeWithTag("ml_more").performClick(); rule.waitForIdle(); rule.onNodeWithTag("offline_btn").performClick(); rule.mainClock.advanceTimeBy(700); rule.waitForIdle()
         rule.onNodeWithTag("oa_list").performScrollTo().performClick(); rule.mainClock.advanceTimeBy(700); rule.waitForIdle()
         rule.waitUntil(5000) { has("Saved areas") }
         assertTrue(rule.onAllNodesWithTag("cm_section").fetchSemanticsNodes().isEmpty())

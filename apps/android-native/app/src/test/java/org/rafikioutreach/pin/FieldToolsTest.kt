@@ -253,7 +253,7 @@ class FieldToolsTest {
         // as if the officer had already looked over part of it: tiles kept in the map store
         val w = SqlTileWriter()
         for (z in zs.first..zs.first + 2) { val r = TileMath.rect(b.latNorth, b.latSouth, b.lonEast, b.lonWest, z); for (x in r.left..r.right) for (y in r.top..r.bottom) w.saveFile(TileSourceFactory.MAPNIK, MapTileIndex.getTileIndex(z, x, y), ByteArrayInputStream(ByteArray(2000)), System.currentTimeMillis() + 86_400_000L) }
-        rule.onNodeWithTag("offline_btn").performClick(); rule.waitForIdle()
+        rule.onNodeWithTag("ml_more").performClick(); rule.waitForIdle(); rule.onNodeWithTag("offline_btn").performClick(); rule.waitForIdle()
         assertTrue(has("Save this area for offline") && has("map tiles") && has("Zoom ${zs.first}–${zs.last}"))
         rule.onNodeWithTag("oa_name").performScrollTo()
         sheetShot("offline_sheet", "field-05-offline-sheet")
@@ -268,7 +268,7 @@ class FieldToolsTest {
         rule.onNodeWithText("Done").performClick(); rule.waitForIdle()
         assertNull(OfflineMaps.filling.value)
         // the list of saved areas, settings
-        rule.onNodeWithTag("offline_btn").performClick(); rule.waitForIdle()
+        rule.onNodeWithTag("ml_more").performClick(); rule.waitForIdle(); rule.onNodeWithTag("offline_btn").performClick(); rule.waitForIdle()
         rule.onNodeWithTag("oa_list").performScrollTo().performClick(); rule.waitForIdle()
         waitFor("of the street map kept")
         assertTrue(has("Eldoret") && has("Saved areas") && has("Storage limit for maps"))
@@ -294,7 +294,7 @@ class FieldToolsTest {
         show(m, dark = true)
         rule.waitUntil(8000) { rule.onAllNodesWithTag("nav_map").fetchSemanticsNodes().isNotEmpty() }
         rule.onNodeWithTag("nav_map").performClick(); rule.waitForIdle()
-        rule.onNodeWithTag("offline_btn").performClick(); rule.waitForIdle()
+        rule.onNodeWithTag("ml_more").performClick(); rule.waitForIdle(); rule.onNodeWithTag("offline_btn").performClick(); rule.waitForIdle()
         rule.onNodeWithTag("oa_list").performScrollTo().performClick(); rule.waitForIdle()
         waitFor("Mto wa Mbu")
         shot("field-08-offline-list-dark")

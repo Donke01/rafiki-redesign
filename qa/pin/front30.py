@@ -90,7 +90,7 @@ with sync_playwright() as p:
     # --- 2. Map › Save this area for offline -----------------------------------------------------------
     pg.goto(BASE + '/pin#map'); pg.wait_for_timeout(1500)
     check(pg.locator('#fldOb').count() == 1, 'map has the Save for offline button')
-    pg.click('#fldOb'); pg.wait_for_timeout(600)
+    pg.click('#mclMore'); pg.wait_for_timeout(250); pg.click('#fldOb'); pg.wait_for_timeout(600)
     est = pg.inner_text('#fldEst')
     check('map tiles' in est and 'Zoom' in est, 'size estimate shown: ' + est.replace('\n', ' | '))
     pg.screenshot(path=os.path.join(OUT, '05-offline-sheet.png'))
@@ -119,7 +119,7 @@ with sync_playwright() as p:
     pg.screenshot(path=os.path.join(OUT, '06-offline-filling.png'))
     pg.click('#fldDone'); pg.wait_for_timeout(500)
     check(pg.locator('#fldBar').count() == 0, 'Done closes the bar')
-    pg.click('#fldOb'); pg.wait_for_timeout(500); pg.click('#fldList'); pg.wait_for_timeout(1200)
+    pg.click('#mclMore'); pg.wait_for_timeout(250); pg.click('#fldOb'); pg.wait_for_timeout(500); pg.click('#fldList'); pg.wait_for_timeout(1200)
     t = pg.inner_text('.fld-sh')
     check('Eldoret trip' in t and 'of the street map kept' in t and 'Storage limit for maps' in t and 'Why the app doesn’t download whole areas' in t, 'saved areas list')
     pg.screenshot(path=os.path.join(OUT, '07-offline-list.png'))
@@ -206,7 +206,7 @@ with sync_playwright() as p:
     pg.goto(BASE + '/pin#map'); pg.reload(); pg.wait_for_timeout(2500)
     ok = pg.evaluate("navigator.serviceWorker.ready.then(() => !!navigator.serviceWorker.controller)")
     if not ok: pg.reload(); pg.wait_for_timeout(2500)
-    pg.click('#fldOb'); pg.wait_for_timeout(600); pg.fill('#fldName', 'Kitale'); pg.click('#fldSave'); pg.wait_for_timeout(2500)
+    pg.click('#mclMore'); pg.wait_for_timeout(250); pg.click('#fldOb'); pg.wait_for_timeout(600); pg.fill('#fldName', 'Kitale'); pg.click('#fldSave'); pg.wait_for_timeout(2500)
     a = pg.evaluate("JSON.parse(localStorage.getItem('rfPinFldAreas'))")[0]
     # look over it: zoom in a step, then pan a little
     pg.evaluate("() => { const el = document.querySelector('#hMap'); el.dispatchEvent(new WheelEvent('wheel', { deltaY: -120, clientX: 195, clientY: 400, bubbles: true })); }"); pg.wait_for_timeout(2500)
