@@ -57,6 +57,8 @@ class GoogleMapsTest {
         rule.waitUntil(5000) { GoogleTiles.maps.value != null }
         assertTrue(calls.any { it.contains("createSession roadmap pkg=org.rafikioutreach.pin") })
         assertTrue(calls.any { it.contains("createSession satellite") })
+        // maps open on satellite photos; this checks Google's street map (Roadmap), so choose it first
+        app.getSharedPreferences("map_style", 0).edit().putString("style", "street").commit()
         rule.setContent { RafikiTheme(dark = false) { Box(Modifier.size(390.dp, 844.dp)) { App(m) } } }
         rule.waitUntil(8000) { rule.onAllNodesWithTag("nav_map").fetchSemanticsNodes().isNotEmpty() }
         rule.onNodeWithTag("nav_map").performClick()

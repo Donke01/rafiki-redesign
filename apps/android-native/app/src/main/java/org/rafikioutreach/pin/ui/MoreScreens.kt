@@ -62,7 +62,9 @@ fun NewSiteScreen(m: AppModel, done: (String?) -> Unit) {
     var village by remember { mutableStateOf("") }
     var note by remember { mutableStateOf("") }
     var shots by remember { mutableStateOf(listOf<Shot>()) }
-    val spot = remember { Spot() }
+    // a long press on the map ("Add a new site here") starts it at that point
+    val at = remember { MapHome.takeNewSite() }
+    val spot = remember { Spot().also { s -> if (at != null) s.ll = at } }
     var msg by remember { mutableStateOf<Pair<String, String>?>(null) }
     var busy by remember { mutableStateOf(false) }
     val fix by m.fix.collectAsState()
@@ -81,7 +83,7 @@ fun NewSiteScreen(m: AppModel, done: (String?) -> Unit) {
         }
         Card(Modifier.padding(top = 14.dp)) {
             H2(t("Where is it?", "Iko wapi?"))
-            SpotPicker(m, spot, fix?.ll, ck)
+            SpotPicker(m, spot, at ?: fix?.ll, ck)
         }
         Card(Modifier.padding(top = 14.dp)) {
             H2(t("Photos (optional)", "Picha (si lazima)"))
