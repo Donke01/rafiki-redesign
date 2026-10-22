@@ -2552,6 +2552,14 @@ html[data-theme=sun] .btn[disabled]{color:#000000}
 .vx-t-off{color:var(--ink)}.vx-card.vx-off>*{opacity:1}
 .ocv-pk .bsh-o .ei{color:var(--deep);flex:0 0 38px;width:38px;min-width:0;padding:0;border-radius:50%}.ocv-pk .bsh-o .ei svg{width:20px;height:20px}
 </style>
+<style id="kbfix-css">
+/* Map, short screens (keyboard open, small phones): nothing on the map may sit on top of anything else */
+/* searching: only the search box and its suggestions; the rest steps aside until the search closes */
+body.mq-on #vMap .ov.top > :not(#mpaS):not(#mpaSug),body.mq-on #vMap :is(.ov.bot,#mpaChips,#mpaKey,#mclKeyPop,#mpaNone,#mpaCard,.mcl-pill),body.mq-on #vMap .leaflet-control-attribution{display:none !important}
+body.mq-on #vMap #mpaSug{max-height:calc(100dvh - 190px);overflow-y:auto;overscroll-behavior:contain}
+/* short screen: the resting Nearest sheet is just its title row; tap it for the rest */
+@media (max-height:700px){#vMap #nearSheet.shut > .bd{display:none}}
+</style>
 </head>
 <body class="locked">
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
@@ -4347,6 +4355,9 @@ html[data-theme=sun] .btn[disabled]{color:#000000}
     // search
     $('mpaQ').addEventListener('input', function () { MPA.act = -1; mpaSugUi(); mpaPlaces(); });
     $('mpaQ').addEventListener('focus', function () { if (mpaWords().length) mpaSugUi(); });
+    // searching: the chips, Key, pinned bar and Nearest step aside so nothing overlaps (the keyboard leaves little room)
+    $('mpaQ').addEventListener('focus', function () { document.body.classList.add('mq-on'); });
+    $('mpaQ').addEventListener('blur', function () { setTimeout(function () { if (document.activeElement !== $('mpaQ')) document.body.classList.remove('mq-on'); }, 160); });
     $('mpaQ').addEventListener('blur', function () { setTimeout(function () { if (document.activeElement !== $('mpaQ')) mpaSugHide(); }, 150); });
     $('mpaQ').addEventListener('keydown', function (e) {
       var n = MPA.items.length;
