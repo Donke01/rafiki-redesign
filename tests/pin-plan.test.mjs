@@ -2,7 +2,7 @@
 // Run: node --test tests/*.test.mjs
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { candidates, cluster, orderDay, routeKm, planWeek, metres, DUE_DAYS } from '../lib/pin-plan.js';
+import { candidates, cluster, orderDay, routeKm, planWeek, planChosen, chosenStops, metres, DUE_DAYS } from '../lib/pin-plan.js';
 import { postHere, teamMap, planView, HERE_TTL } from '../lib/pin-here.js';
 
 const NOW = Date.parse('2026-10-21T09:00:00Z');
@@ -129,4 +129,78 @@ test('planView: needs a country; finds water tests due', async () => {
   const r = await planView(env, new URLSearchParams('ck=ke&days=2&per=3'), feed);
   assert.equal(r.status, 200); assert.equal(r.body.total, 1);
   assert.deepEqual(r.body.days[0].stops[0].why, ['test']);
+});
+
+test('planChosen: every chosen project is planned, grouped by distance, the rest filled with suggestions', () => {
+  const c = candidates({ projects: P, visits, repairs, now: NOW, ck: 'ke' });
+  // 1 (Eldoret, nothing due), 6 (Kitale) and 9 (Bungoma): far apart, so three days
+  const ch = chosenStops(P, ['1', '6', '9', '10', '999'], { visits, repairs, now: NOW });
+  assert.deepEqual(ch.map(x => x.id), ['1', '6', '9'], 'no location and unknown ones are not stops');
+  assert.ok(ch.every(x => x.chosen) && ch[0].why.length === 0);
+  const plan = planChosen(ch, c, { days: 3, per: 3 });
+  const where = id => plan.days.findIndex(d => d.stops.some(s => s.id === id));
+  ['1', '6', '9'].forEach(id => assert.ok(where(id) >= 0, 'chosen ' + id + ' is planned'));
+  assert.equal(new Set(['1', '6', '9'].map(where)).size, 3, 'far apart: one day each');
+  assert.ok(plan.days.flatMap(d => d.stops).some(s => !s.chosen), 'room left is filled with suggestions');
+  plan.days.forEach(d => assert.ok(d.stops.length <= 3));
+  assert.equal(new Set(plan.days.flatMap(d => d.stops.map(s => s.id))).size, plan.days.flatMap(d => d.stops).length, 'no stop twice');
+  // only these projects: no suggestions at all
+  const only = planChosen(ch, c, { days: 3, per: 3, only: true });
+  assert.deepEqual(only.days.flatMap(d => d.stops.map(s => s.id)).sort(), ['1', '6', '9']);
+  assert.equal(only.spare.length, 0);
+  // more chosen than fit: more days, then more stops a day, never dropped
+  const many = chosenStops(P, P.map(p => p.id), { now: NOW });
+  const big = planChosen(many, [], { days: 1, per: 2 });
+  assert.equal(big.days.flatMap(d => d.stops).length, many.length);
+  assert.ok(big.dayCount * big.perDay >= many.length);
+});
+
+test('candidates: several areas ticked (any case); none ticked means every area', () => {
+  const two = candidates({ projects: P, visits, repairs, now: NOW, ck: 'ke', areas: ['kapsaret', 'Bungoma'] });
+  assert.ok(two.length > 0 && two.every(x => /^(Kapsaret|Bungoma)/.test(x.area)), two.map(x => x.area).join('|'));
+  assert.ok(two.some(x => x.area === 'Bungoma') && two.some(x => x.area.startsWith('Kapsaret')));
+  assert.deepEqual(candidates({ projects: P, visits, repairs, now: NOW, ck: 'ke', areas: [] }).map(x => x.id), candidates({ projects: P, visits, repairs, now: NOW, ck: 'ke' }).map(x => x.id));
+  // "Eldoret" is the second part of "Kapsaret, Eldoret": not an area of its own
+  assert.equal(candidates({ projects: P, visits, repairs, now: NOW, ck: 'ke', areas: ['Eldoret'] }).length, 0);
+});
+
+test('planView: areas, chosen projects (ids=…) and only=1 are checked on the server', async () => {
+  const env = { FEED: kv({ pinlastvisit: { 7: { at: ago(30), state: 'working' }, 8: { at: ago(30), state: 'working' } }, pinrepairs: {}, pinassign: [], 'pinvisit:7': [{ at: ago(30), quality: { ecoli: 'neg' } }] }) };
+  const many = Array.from({ length: 70 }, (_, i) => site('bun', 0.001 * i, 0, { id: String(1000 + i), area: 'Bungoma' }));
+  const feed = { projects: [site('kit', 0, 0, { id: '7' }), site('kit', 0.01, 0.01, { id: '8' }), site('kit', 0.02, 0, { id: '9' }), site('kit', 0.03, 0, { id: '11', gps: null, title: 'Kitale Dispensary' })].concat(many) };
+  const st = async s => (await planView(env, new URLSearchParams('ck=ke&' + s), feed)).status;
+  // ids: digits only, at most 60, each one a project in the feed
+  assert.equal(await st('ids=7,abc'), 400);
+  assert.equal(await st('ids=7;8'), 400);
+  assert.equal(await st('ids=7,,8'), 400);
+  assert.equal(await st('ids=-7'), 400);
+  assert.equal(await st('ids=7,12345'), 400, 'not in the feed');
+  assert.equal(await st('ids=' + many.slice(0, 61).map(p => p.id).join(',')), 400, '61 ids');
+  assert.equal(await st('ids=' + many.slice(0, 60).map(p => p.id).join(',')), 200, '60 ids');
+  // areas: at most 20, each at most 80 characters
+  assert.equal(await st('areas=' + Array.from({ length: 21 }, (_, i) => 'A' + i).join(',')), 400, '21 areas');
+  assert.equal(await st('areas=' + Array.from({ length: 20 }, (_, i) => 'A' + i).join(',')), 200, '20 areas');
+  assert.equal(await st('areas=' + encodeURIComponent('x'.repeat(81))), 400, 'an area of 81 characters');
+  assert.equal(await st('areas=' + encodeURIComponent('x'.repeat(80))), 200);
+  assert.equal(await st('areas=' + encodeURIComponent('<b>')), 400);
+  // areas narrow the suggestions; none ticked means the whole country
+  const ar = await planView(env, new URLSearchParams('ck=ke&days=6&per=8&areas=Kitale'), feed);
+  assert.deepEqual(ar.body.days.flatMap(d => d.stops).concat(ar.body.spare).map(s => s.area).filter(a => a !== 'Kitale'), []);
+  assert.equal(ar.body.total, 2, 'in Kitale: 9 (never visited) and 8 (water test due)');
+  const whole = await planView(env, new URLSearchParams('ck=ke&days=6&per=8'), feed);
+  assert.equal(whole.body.total, 72);
+  // chosen: always planned, even with nothing due; the days filled with suggestions from the ticked areas
+  const r = await planView(env, new URLSearchParams('ck=ke&days=2&per=3&areas=Kitale&ids=7,11'), feed);
+  assert.equal(r.status, 200);
+  const stops = r.body.days.flatMap(d => d.stops);
+  assert.ok(stops.some(s => s.id === '7' && s.chosen), 'chosen 7 is planned even with nothing due');
+  assert.ok(stops.some(s => s.id === '9' && !s.chosen), 'suggestions fill the day (9 was never visited)');
+  assert.ok(stops.every(s => s.area === 'Kitale'), 'suggestions only from the ticked areas');
+  assert.deepEqual(r.body.nogps, [{ id: '11', t: 'Kitale Dispensary' }], 'no location: listed, not dropped');
+  assert.equal(r.body.chosen, 1);
+  const o = await planView(env, new URLSearchParams('ck=ke&days=2&per=3&ids=7,8&only=1'), feed);
+  assert.deepEqual(o.body.days.flatMap(d => d.stops.map(s => s.id)).sort(), ['7', '8']);
+  assert.equal(o.body.total, 2); assert.equal(o.body.only, true); assert.equal(o.body.spare.length, 0);
+  // only=1 without ids changes nothing
+  assert.equal((await planView(env, new URLSearchParams('ck=ke&days=6&per=8&only=1'), feed)).body.total, 72);
 });

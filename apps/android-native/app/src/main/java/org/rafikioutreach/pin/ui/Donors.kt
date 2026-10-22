@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
@@ -43,7 +44,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -104,7 +107,21 @@ fun pickProjects(all: List<Project>, q: String, ck: String, cat: String, ticked:
 fun donorShareText(name: String, link: String) =
     "Hello " + name.trim().split(Regex("\\s+")).firstOrNull().orEmpty() + ", here is your private RAFIKI Outreach page with the projects you funded: photos, visit reports and a live map. It’s just for you, so please don’t forward it.\n" + link
 
-@OptIn(ExperimentalLayoutApi::class)
+/** all · opened · not (not opened yet) · revoked */
+fun donorState(d: Donor) = when { d.revoked -> "revoked"; d.lastOpen.isNotBlank() -> "opened"; else -> "not" }
+
+@Composable
+private fun donorPill(d: Donor): Pair<String, String> = when (donorState(d)) {
+    "revoked" -> "off" to t("Link revoked", "Kiungo kimezimwa")
+    "opened" -> "ok" to t("Opened their page", "Wamefungua ukurasa")
+    else -> "has" to t("Not opened yet", "Bado hawajafungua")
+}
+private fun donorProjects(n: Int) = if (n == 1) t("1 project", "mradi 1") else t("$n projects", "miradi $n")
+
+/**
+ * Office › Donors: numbers and filters, a calm card per donor that opens a sheet with every action (copy, share,
+ * rotate, revoke, edit, who can open the page, delete), "Add a donor" as a sheet, and the e-mail digest folded away.
+ */
 @Composable
 fun DonorsSection(m: AppModel, snap: Snapshot) {
     val scope = rememberScope()
@@ -118,7 +135,16 @@ fun DonorsSection(m: AppModel, snap: Snapshot) {
         val r = m.api.adminGet("donors")
         if (r.ok) { list = parseDonors(r.json); mailReady = r.json.optJSONObject("mail")?.optBoolean("ready") == true; loadMsg = null } else loadMsg = reasonText(r.reason)
     }
-    // the form (add, or edit when editId is set)
+    var filter by remember { mutableStateOf("all") }
+    var more by remember { mutableStateOf(false) }
+    // the donor whose sheet is open (by id), and one to open once the list has it (by name, after adding)
+    var picked by remember { mutableStateOf<String?>(null) }
+    var openName by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(list) { openName?.let { n -> list?.lastOrNull { it.name == n }?.let { picked = it.id; openName = null } } }
+    // the link just made or asked for: (donor id or name, who, link, e-mail)
+    var shown by remember { mutableStateOf<List<String>?>(null) }
+    // the form (add, or edit when editId is set), in its own sheet
+    var formOpen by remember { mutableStateOf(false) }
     var editId by remember { mutableStateOf<String?>(null) }
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -131,143 +157,126 @@ fun DonorsSection(m: AppModel, snap: Snapshot) {
     var ck by remember { mutableStateOf("") }
     var cat by remember { mutableStateOf("") }
     var only by remember { mutableStateOf(false) }
+    var formMsg by remember { mutableStateOf<Pair<String, String>?>(null) }
     var msg by remember { mutableStateOf<Pair<String, String>?>(null) }
-    // the link just made or asked for: who, link, e-mail
-    var shown by remember { mutableStateOf<Triple<String, String, String>?>(null) }
-    var vName by remember { mutableStateOf("") }
-    var vEmail by remember { mutableStateOf("") }
 
     fun reset(d: Donor?) {
         editId = d?.id; name = d?.name ?: ""; email = d?.email ?: ""; org = d?.org ?: ""
         ticked.clear(); d?.projects?.let { ticked.addAll(it) }
         photosOk.clear(); d?.photos?.filterValues { it == "on" }?.keys?.let { photosOk.addAll(it) }
-        showPhotos = d?.showPhotos ?: true; digest = d?.digest ?: true; q = ""; only = d != null; msg = null
+        showPhotos = d?.showPhotos ?: true; digest = d?.digest ?: true; q = ""; only = d != null; formMsg = null
     }
-    fun copy(link: String) { clip.setText(AnnotatedString(link)); msg = "ok" to t("Link copied ✓", "Kiungo kimenakiliwa ✓") }
     fun share(who: String, link: String) {
         runCatching { ctx.startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_SUBJECT, "Your RAFIKI project page").putExtra(Intent.EXTRA_TEXT, donorShareText(who, link)), t("Send the private link", "Tuma kiungo cha siri")).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
     }
-    fun act(d: Donor, action: String, vid: String? = null, after: (JSONObject) -> Unit = {}) {
-        scope.launch {
-            val body = JSONObject().put("action", action).put("id", d.id).apply { if (vid != null) put("vid", vid) }
-            val r = m.api.admin(body)
-            if (!r.ok) { msg = "bad" to when (r.reason) { "revoked" -> t("This link was revoked. Make a new one.", "Kiungo hiki kimezimwa. Tengeneza kipya."); "rotate" -> t("Make a new link (Rotate) to copy it.", "Tengeneza kiungo kipya ili ukinakili."); else -> reasonText(r.reason) }; return@launch }
-            after(r.json)
-        }
-    }
 
-    // e-mail digest status
-    Card(Modifier.padding(bottom = 10.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(Ic.get("link"), null, tint = C.blue, modifier = Modifier.size(22.dp)); Spacer(Modifier.width(8.dp))
-            Text(t("Donors", "Wafadhili"), style = MaterialTheme.typography.titleLarge, color = C.ink)
-        }
-        Text(t("Each donor gets a private link to a page with their projects, an exact-location map, visit reports, repairs, story moments and photos. No password: anyone with the link can see it, so send it only to them.",
-            "Kila mfadhili anapata kiungo cha siri cha ukurasa wenye miradi yake, ramani ya mahali kamili, ripoti za ziara, matengenezo, hadithi na picha. Hakuna nenosiri: yeyote mwenye kiungo anaweza kuuona, kwa hiyo mtumie yeye tu."),
-            style = MaterialTheme.typography.bodyMedium, color = C.muted, modifier = Modifier.padding(top = 4.dp))
-        Text(if (mailReady) t("E-mail digest: on · a monthly update on the 1st", "Barua pepe ya mwezi: imewashwa") else t("E-mail digest: off — add RESEND_API_KEY and ALERT_FROM in Cloudflare", "Barua pepe ya mwezi: imezimwa — ongeza RESEND_API_KEY na ALERT_FROM kwenye Cloudflare"),
-            color = if (mailReady) C.ok else C.warn, style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold),
-            modifier = Modifier.padding(top = 10.dp).fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(if (mailReady) C.okBg else C.warnBg).padding(10.dp).testTag("dn_mail"))
+    val L = (list ?: emptyList()).sortedWith(compareBy<Donor>({ it.revoked }, { it.lastOpen.isBlank() }).thenByDescending { it.lastOpen }.thenBy { it.name })
+    val count = L.groupingBy { donorState(it) }.eachCount()
+    DqmHead("dn_head", "heart", "coral", t("Donors", "Wafadhili"), t("Each donor gets a private page with their projects, a map and updates.", "Kila mfadhili anapata ukurasa wa siri wenye miradi yake, ramani na taarifa."),
+        listOf(DqmNum(L.size, t("Donors", "Wafadhili"), "", "all"), DqmNum(count["opened"] ?: 0, t("Opened", "Wamefungua"), if ((count["opened"] ?: 0) > 0) "ok" else "off", "opened"),
+            DqmNum(count["not"] ?: 0, t("Not opened", "Hawajafungua"), if ((count["not"] ?: 0) > 0) "has" else "off", "not")), filter, { filter = it; more = false }) {
+        Btn(t("Add a donor", "Ongeza mfadhili"), { reset(null); formOpen = true }, Modifier.padding(top = 14.dp).fillMaxWidth().testTag("dn_add"), icon = "plus")
     }
     loadMsg?.let { Msg(it, "bad") }
-    shown?.let { (who, link, mail) ->
-        Card(brush = androidx.compose.ui.graphics.SolidColor(C.okBg), modifier = Modifier.padding(bottom = 10.dp).testTag("dn_link")) {
-            Text(t("Private link for ", "Kiungo cha siri cha ") + who, style = MaterialTheme.typography.titleSmall, color = C.ok)
-            Text(link, style = MaterialTheme.typography.bodySmall, color = C.ink, modifier = Modifier.padding(vertical = 6.dp).fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(C.card).padding(8.dp))
-            Text(t("Anyone with this link can see the page. Send it only to them.", "Yeyote mwenye kiungo hiki anaweza kuona ukurasa. Mtumie yeye tu."), style = MaterialTheme.typography.bodySmall, color = C.text)
-            FlowRow(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Btn(t("Copy", "Nakili"), { copy(link) }, Modifier.testTag("dn_link_copy"), small = true, light = true, icon = "copy")
-                Btn(t("Share (WhatsApp, e-mail…)", "Shiriki (WhatsApp, barua pepe…)"), { share(who, link) }, small = true, light = true, icon = "share")
-                Btn(t("Done", "Imekamilika"), { shown = null }, small = true, light = true)
-            }
-        }
-    }
     msg?.let { (tone, text) -> Msg(text, tone) }
+    if (list != null && L.isNotEmpty()) DqmChips(listOf(Triple("all", t("All", "Wote"), L.size), Triple("opened", t("Opened", "Wamefungua"), count["opened"] ?: 0),
+        Triple("not", t("Not opened", "Hawajafungua"), count["not"] ?: 0), Triple("revoked", t("Revoked", "Vimezimwa"), count["revoked"] ?: 0)), filter, "dn_filter_") { filter = it; more = false }
+    val shownL = L.filter { filter == "all" || donorState(it) == filter }
+    if (list != null && L.isEmpty()) EmptyDrop(t("No donors yet. Tap “Add a donor” to make the first private page.", "Bado hakuna wafadhili. Gusa “Ongeza mfadhili” kutengeneza ukurasa wa kwanza wa siri."))
+    else if (list != null && shownL.isEmpty()) EmptyDrop(when (filter) { "revoked" -> t("No revoked links.", "Hakuna viungo vilivyozimwa."); "not" -> t("Everyone has opened their page.", "Wote wamefungua ukurasa wao."); else -> t("Nobody has opened their page yet.", "Bado hakuna aliyefungua ukurasa wake.") })
+    shownL.take(if (more) shownL.size else 30).forEachIndexed { i, d ->
+        val hu = C.hue(listOf("blue", "green", "purple", "teal", "coral", "slate")[(d.name.lowercase().hashCode() and 0x7fffffff) % 6])
+        DqmCard("dn_${d.id}", Modifier.padding(top = 10.dp).rise(minOf(i, 6)), d.name, donorPill(d),
+            listOf((if (d.org.isNotBlank() && d.org != d.name) d.org else d.email).ifBlank { t("No e-mail", "Hakuna barua pepe") },
+                donorProjects(d.projects.size) + (if (d.viewers.size > 1) t(" · ${d.viewers.size} people", " · watu ${d.viewers.size}") else "") + (if (!d.showPhotos) t(" · photos off", " · picha zimezimwa") else "")),
+            if (d.lastOpen.isNotBlank()) smsAgo(d.lastOpen) else "", d.revoked, { DqmAvatar(d.name, hu.bg, hu.fg) }) { picked = d.id }
+    }
+    if (shownL.size > 30 && !more) Btn(t("Show more", "Onyesha zaidi") + " (" + (shownL.size - 30) + ")", { more = true }, Modifier.padding(top = 12.dp).fillMaxWidth(), light = true, small = true)
 
-    // the list
-    val L = (list ?: emptyList()).sortedWith(compareBy<Donor>({ it.revoked }, { it.lastOpen.isBlank() }).thenByDescending { it.lastOpen }.thenBy { it.name })
-    if (list != null && L.isEmpty()) Text(t("No donors yet. Add the first one below.", "Bado hakuna wafadhili. Ongeza wa kwanza hapa chini."), color = C.muted, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(4.dp))
-    L.forEach { d ->
-        Card(Modifier.padding(top = 10.dp).testTag("dn_${d.id}")) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(d.name, style = MaterialTheme.typography.titleMedium, color = C.ink, modifier = Modifier.weight(1f))
-                if (d.revoked) Tag(t("Link revoked", "Kiungo kimezimwa"), C.badBg, C.bad) else Tag("${d.projects.size} " + (if (d.projects.size == 1) t("project", "mradi") else t("projects", "miradi")), C.tint, C.deep)
-            }
-            listOf(d.org.takeIf { it != d.name } ?: "", d.email).filter { it.isNotBlank() }.joinToString(" · ").takeIf { it.isNotBlank() }?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = C.muted) }
-            Text((if (d.lastOpen.isNotBlank()) t("Opened ", "Kimefunguliwa ") + whenText(d.lastOpen) + (if (d.opens > 1) " · ${d.opens}×" else "") else t("Not opened yet", "Bado hakijafunguliwa")) +
-                (if (d.viewers.size > 1) t(" · group page, ${d.viewers.size} viewers", " · ukurasa wa kikundi, watu ${d.viewers.size}") else "") + (if (!d.showPhotos) t(" · photos off", " · picha zimezimwa") else ""),
-                style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 2.dp))
-            FlowRow(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                if (d.revoked) Btn(t("New link", "Kiungo kipya"), { act(d, "donor-rotate") { j -> shown = Triple(d.name, j.optString("link"), d.email); tick++ } }, small = true)
-                else {
-                    Btn(t("Copy private link", "Nakili kiungo cha siri"), { act(d, "donor-link") { j -> copy(j.optString("link")) } }, Modifier.testTag("dn_copy_${d.id}"), small = true, icon = "link")
-                    Btn(t("Share", "Shiriki"), { act(d, "donor-link") { j -> shown = Triple(d.name, j.optString("link"), d.email); share(d.name, j.optString("link")) } }, small = true, light = true, icon = "share")
-                }
-                Btn(t("Edit", "Hariri"), { reset(d) }, Modifier.testTag("dn_edit_${d.id}"), small = true, light = true)
-                if (!d.revoked) {
-                    Btn(t("Rotate link", "Badilisha kiungo"), { act(d, "donor-rotate") { j -> shown = Triple(d.name, j.optString("link"), d.email); tick++ } }, small = true, light = true)
-                    Btn(t("Revoke", "Zima"), { act(d, "donor-revoke") { msg = "ok" to t("Link revoked", "Kiungo kimezimwa"); tick++ } }, small = true, color = C.bad)
-                }
-            }
+    // settings, folded away
+    Text(t("Settings", "Mipangilio"), style = MaterialTheme.typography.titleMedium, color = C.ink, modifier = Modifier.padding(top = 22.dp, bottom = 8.dp))
+    Card(pad = 4.dp) {
+        DqmFold("dn_mail_fold", "mail", "teal", t("E-mail digest", "Barua pepe ya kila mwezi"), if (mailReady) t("On · each donor, on the 1st of the month", "Imewashwa · kila mfadhili, tarehe 1 ya mwezi") else t("Off", "Imezimwa"), if (mailReady) "ok" else "off") {
+            Text(if (mailReady) t("On: each donor with an e-mail gets a monthly update on the 1st.", "Imewashwa: kila mfadhili mwenye barua pepe anapata taarifa ya mwezi tarehe 1.")
+                 else t("Off. Add RESEND_API_KEY and ALERT_FROM in Cloudflare to switch it on.", "Imezimwa. Ongeza RESEND_API_KEY na ALERT_FROM kwenye Cloudflare kuiwasha."), style = MaterialTheme.typography.bodyMedium, color = C.text, modifier = Modifier.testTag("dn_mail"))
+            Text(t("To stop it for one donor, open them, tap Edit and untick “Monthly e-mail update”.", "Kuizima kwa mfadhili mmoja, mfungue, gusa Hariri na uondoe tiki “Taarifa ya mwezi kwa barua pepe”."), style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 8.dp))
+        }
+        HorizontalDivider(color = C.line, modifier = Modifier.padding(horizontal = 14.dp))
+        DqmFold("dn_how", "info", "blue", t("How donor pages work", "Jinsi kurasa za wafadhili zinavyofanya kazi"), t("A private link, no password", "Kiungo cha siri, bila nenosiri"), "has") {
+            Text(t("Each donor gets a private link to a page with their projects, an exact-location map, visit reports, repairs, story moments and photos. No password: anyone with the link can see it, so send it only to them.",
+                "Kila mfadhili anapata kiungo cha siri cha ukurasa wenye miradi yake, ramani ya mahali kamili, ripoti za ziara, matengenezo, hadithi na picha. Hakuna nenosiri: yeyote mwenye kiungo anaweza kuuona, kwa hiyo mtumie yeye tu."), style = MaterialTheme.typography.bodyMedium, color = C.text)
+            Text(t("A church or company can have several people, each with their own link, so you can switch one off without affecting the others.", "Kanisa au kampuni inaweza kuwa na watu kadhaa, kila mmoja na kiungo chake, ili uweze kuzima kimoja bila kuathiri wengine."), style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 8.dp))
+            Text(t("Visit photos of water points are shown. Schools, clinics and children’s homes stay hidden until you tick “photos OK” (children’s faces need consent).", "Picha za ziara za vituo vya maji zinaonyeshwa. Shule, zahanati na makao ya watoto zinafichwa hadi uchague “picha sawa” (nyuso za watoto zinahitaji ridhaa)."), style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 8.dp))
         }
     }
 
+    // a donor's sheet
+    list?.firstOrNull { it.id == picked }?.let { d ->
+        DonorSheet(m, d, shown?.takeIf { it[0] == d.id || it[0] == d.name }, { picked = null }, { s -> shown = s }, { tick++ }, { share(it[1], it[2]) },
+            { link -> clip.setText(AnnotatedString(link)) }, edit = { reset(d); formOpen = true })
+    }
     // add / edit
-    val editing = list?.firstOrNull { it.id == editId }
-    Card(Modifier.padding(top = 14.dp).testTag("dn_form")) {
-        H2(if (editing != null) t("Edit ", "Hariri ") + editing.name else t("Add a donor", "Ongeza mfadhili"))
-        Field(name, { name = it }, t("Name", "Jina"), Modifier.testTag("dn_name"), placeholder = t("e.g. Grace Community Church", "mf. Kanisa la Grace"))
-        Field(email, { email = it }, t("E-mail", "Barua pepe"), placeholder = t("for the monthly update", "kwa taarifa ya mwezi"))
-        Field(org, { org = it }, t("Organisation (optional)", "Shirika (si lazima)"), placeholder = t("e.g. a church or company", "mf. kanisa au kampuni"))
-        Row(Modifier.padding(top = 14.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text(t("Projects they funded", "Miradi waliyofadhili"), style = MaterialTheme.typography.titleSmall, color = C.ink, modifier = Modifier.weight(1f))
-            Tag("${ticked.size} " + t("ticked", "zimechaguliwa"), C.tint, C.deep)
-        }
-        Field(q, { q = it }, t("Search", "Tafuta"), Modifier.testTag("dn_q"), placeholder = t("Name or place", "Jina au mahali"))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Picker(t("Country", "Nchi"), ck, listOf("" to t("All countries", "Nchi zote")) + COUNTRIES.toList(), { ck = it }, Modifier.weight(1f))
-            Picker(t("Type", "Aina"), cat, listOf("" to t("All types", "Aina zote"), "water" to t("Water", "Maji"), "school" to t("Schools", "Shule"), "health" to t("Health", "Afya"), "children" to t("Children’s homes", "Makao ya watoto"), "other" to t("Other", "Nyingine")), { cat = it }, Modifier.weight(1f))
-        }
-        Row(Modifier.padding(top = 6.dp).clickable { only = !only }, verticalAlignment = Alignment.CenterVertically) {
-            Checkbox(only, { only = it }, colors = CheckboxDefaults.colors(checkedColor = C.blue)); Text(t("Ticked only", "Zilizochaguliwa tu"), style = MaterialTheme.typography.bodyMedium, color = C.text)
-        }
-        val shownP = pickProjects(snap.projects, q, ck, cat, ticked.toSet(), only)
-        Column(Modifier.padding(top = 4.dp).fillMaxWidth().clip(RoundedCornerShape(14.dp)).border(1.dp, C.line, RoundedCornerShape(14.dp))) {
-            shownP.take(40).forEach { p ->
-                val on = p.id in ticked
-                Row(Modifier.fillMaxWidth().clickable(role = Role.Checkbox) { if (on) ticked.remove(p.id) else ticked.add(p.id) }.heightIn(min = 52.dp).padding(horizontal = 8.dp, vertical = 4.dp).testTag("dn_p_${p.id}"), verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(on, { if (it) ticked.add(p.id) else ticked.remove(p.id) }, colors = CheckboxDefaults.colors(checkedColor = C.blue))
-                    Column(Modifier.weight(1f)) {
-                        Text(p.title, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold), color = C.ink)
-                        Text(listOf(p.type, p.area, p.country).filter { it.isNotBlank() }.joinToString(" · "), style = MaterialTheme.typography.bodySmall, color = C.muted)
+    if (formOpen) {
+        val editing = list?.firstOrNull { it.id == editId }
+        DqmSheet("dn_form", { formOpen = false }) { hide ->
+            DqmSheetHead(if (editing != null) editing.name else t("Add a donor", "Ongeza mfadhili"),
+                listOf(if (editing != null) t("Change their details, projects and photos.", "Badilisha maelezo yao, miradi na picha.") else t("They get a private link to their own page. You can copy it again, replace it or switch it off at any time.", "Wanapata kiungo cha siri cha ukurasa wao. Unaweza kukinakili tena, kukibadilisha au kukizima wakati wowote.")),
+                closeTag = "dn_form_close", onClose = { hide {} }) { val (fg, bg) = dqmTone("has"); DqmTile(if (editing != null) "edit" else "heart", fg, bg, 64.dp) }
+            Field(name, { name = it }, t("Name", "Jina"), Modifier.testTag("dn_name"), placeholder = t("e.g. Grace Community Church", "mf. Kanisa la Grace"))
+            Field(email, { email = it }, t("E-mail", "Barua pepe"), placeholder = t("for the monthly update", "kwa taarifa ya mwezi"))
+            Field(org, { org = it }, t("Organisation (optional)", "Shirika (si lazima)"), placeholder = t("e.g. a church or company", "mf. kanisa au kampuni"))
+            Row(Modifier.padding(top = 18.dp), verticalAlignment = Alignment.CenterVertically) {
+                Text(t("Projects they funded", "Miradi waliyofadhili"), style = MaterialTheme.typography.titleSmall, color = C.ink, modifier = Modifier.weight(1f))
+                Tag("${ticked.size} " + t("ticked", "zimechaguliwa"), C.tint, C.deep)
+            }
+            Field(q, { q = it }, t("Search", "Tafuta"), Modifier.testTag("dn_q"), placeholder = t("Name or place", "Jina au mahali"))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Picker(t("Country", "Nchi"), ck, listOf("" to t("All countries", "Nchi zote")) + COUNTRIES.toList(), { ck = it }, Modifier.weight(1f))
+                Picker(t("Type", "Aina"), cat, listOf("" to t("All types", "Aina zote"), "water" to t("Water", "Maji"), "school" to t("Schools", "Shule"), "health" to t("Health", "Afya"), "children" to t("Children’s homes", "Makao ya watoto"), "other" to t("Other", "Nyingine")), { cat = it }, Modifier.weight(1f))
+            }
+            Row(Modifier.padding(top = 6.dp).clip(RoundedCornerShape(12.dp)).clickable { only = !only }.padding(end = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+                Checkbox(only, { only = it }, colors = CheckboxDefaults.colors(checkedColor = C.blue)); Text(t("Ticked only", "Zilizochaguliwa tu"), style = MaterialTheme.typography.bodyMedium, color = C.text)
+            }
+            val shownP = pickProjects(snap.projects, q, ck, cat, ticked.toSet(), only)
+            Column(Modifier.padding(top = 4.dp).fillMaxWidth().clip(RoundedCornerShape(14.dp)).border(1.dp, C.line, RoundedCornerShape(14.dp))) {
+                shownP.take(40).forEachIndexed { k, p ->
+                    val on = p.id in ticked
+                    if (k > 0) HorizontalDivider(color = C.line)
+                    Row(Modifier.fillMaxWidth().clickable(role = Role.Checkbox) { if (on) ticked.remove(p.id) else ticked.add(p.id) }.heightIn(min = 56.dp).padding(horizontal = 6.dp, vertical = 4.dp).testTag("dn_p_${p.id}"), verticalAlignment = Alignment.CenterVertically) {
+                        Checkbox(on, { if (it) ticked.add(p.id) else ticked.remove(p.id) }, colors = CheckboxDefaults.colors(checkedColor = C.blue))
+                        Column(Modifier.weight(1f)) {
+                            Text(p.title, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold), color = C.ink)
+                            Text(listOf(p.type, p.area, p.country).filter { it.isNotBlank() }.joinToString(" · "), style = MaterialTheme.typography.bodySmall, color = C.muted)
+                        }
+                    }
+                }
+                if (shownP.isEmpty()) Text(t("No projects match.", "Hakuna mradi unaolingana."), color = C.muted, modifier = Modifier.padding(12.dp))
+                if (shownP.size > 40) Text(t("…and ${shownP.size - 40} more. Search to narrow it down.", "…na ${shownP.size - 40} zaidi. Tafuta ili kupunguza."), color = C.muted, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(12.dp))
+            }
+            Row(Modifier.padding(top = 14.dp).fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(C.tint).padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text(t("Show visit photos", "Onyesha picha za ziara"), style = MaterialTheme.typography.titleSmall, color = C.ink)
+                    Text(t("Water points: shown. Schools, clinics and children’s homes: hidden until you tick “photos OK” (children’s faces need consent).", "Vituo vya maji: zinaonyeshwa. Shule, zahanati na makao ya watoto: zimefichwa hadi uchague “picha sawa” (nyuso za watoto zinahitaji ridhaa)."), style = MaterialTheme.typography.bodySmall, color = C.muted)
+                }
+                Spacer(Modifier.width(8.dp))
+                Switch(showPhotos, { showPhotos = it }, Modifier.testTag("dn_photos"), colors = SwitchDefaults.colors(checkedTrackColor = C.ok))
+            }
+            val sens = ticked.mapNotNull { id -> snap.projects.firstOrNull { it.id == id } }.filter { donorSensitive(it.type) }
+            if (showPhotos && sens.isNotEmpty()) {
+                Text(t("Photos OK? (consent checked)", "Picha sawa? (ridhaa imethibitishwa)"), style = MaterialTheme.typography.labelLarge, color = C.ink, modifier = Modifier.padding(top = 10.dp))
+                sens.forEach { p ->
+                    val on = p.id in photosOk
+                    Row(Modifier.clickable { if (on) photosOk.remove(p.id) else photosOk.add(p.id) }.testTag("dn_ok_${p.id}"), verticalAlignment = Alignment.CenterVertically) {
+                        Checkbox(on, { if (it) photosOk.add(p.id) else photosOk.remove(p.id) }, colors = CheckboxDefaults.colors(checkedColor = C.blue)); Text(p.title, style = MaterialTheme.typography.bodyMedium, color = C.text)
                     }
                 }
             }
-            if (shownP.isEmpty()) Text(t("No projects match.", "Hakuna mradi unaolingana."), color = C.muted, modifier = Modifier.padding(12.dp))
-            if (shownP.size > 40) Text(t("…and ${shownP.size - 40} more. Search to narrow it down.", "…na ${shownP.size - 40} zaidi. Tafuta ili kupunguza."), color = C.muted, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(12.dp))
-        }
-        Row(Modifier.padding(top = 14.dp).fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(C.tint).padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            Column(Modifier.weight(1f)) {
-                Text(t("Show visit photos", "Onyesha picha za ziara"), style = MaterialTheme.typography.titleSmall, color = C.ink)
-                Text(t("Water points: shown. Schools, clinics and children’s homes: hidden until you tick “photos OK” (children’s faces need consent).", "Vituo vya maji: zinaonyeshwa. Shule, zahanati na makao ya watoto: zimefichwa hadi uchague “picha sawa” (nyuso za watoto zinahitaji ridhaa)."), style = MaterialTheme.typography.bodySmall, color = C.muted)
+            Row(Modifier.padding(top = 6.dp).clickable { digest = !digest }, verticalAlignment = Alignment.CenterVertically) {
+                Checkbox(digest, { digest = it }, colors = CheckboxDefaults.colors(checkedColor = C.blue)); Text(t("Monthly e-mail update", "Taarifa ya mwezi kwa barua pepe"), style = MaterialTheme.typography.bodyMedium, color = C.text)
             }
-            Switch(showPhotos, { showPhotos = it }, Modifier.testTag("dn_photos"), colors = SwitchDefaults.colors(checkedTrackColor = C.ok))
-        }
-        val sens = ticked.mapNotNull { id -> snap.projects.firstOrNull { it.id == id } }.filter { donorSensitive(it.type) }
-        if (showPhotos && sens.isNotEmpty()) {
-            Text(t("Photos OK? (consent checked)", "Picha sawa? (ridhaa imethibitishwa)"), style = MaterialTheme.typography.labelLarge, color = C.ink, modifier = Modifier.padding(top = 10.dp))
-            sens.forEach { p ->
-                val on = p.id in photosOk
-                Row(Modifier.clickable { if (on) photosOk.remove(p.id) else photosOk.add(p.id) }.testTag("dn_ok_${p.id}"), verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(on, { if (it) photosOk.add(p.id) else photosOk.remove(p.id) }, colors = CheckboxDefaults.colors(checkedColor = C.blue)); Text(p.title, style = MaterialTheme.typography.bodyMedium, color = C.text)
-                }
-            }
-        }
-        Row(Modifier.padding(top = 6.dp).clickable { digest = !digest }, verticalAlignment = Alignment.CenterVertically) {
-            Checkbox(digest, { digest = it }, colors = CheckboxDefaults.colors(checkedColor = C.blue)); Text(t("Monthly e-mail update", "Taarifa ya mwezi kwa barua pepe"), style = MaterialTheme.typography.bodyMedium, color = C.text)
-        }
-        FlowRow(Modifier.padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            var busy by remember { mutableStateOf(false) }
             Btn(if (editing != null) t("Save changes", "Hifadhi mabadiliko") else t("Add and make private link", "Ongeza na utengeneze kiungo cha siri"), {
+                busy = true; formMsg = "" to t("Saving…", "Inahifadhi…")
                 scope.launch {
                     val ph = JSONObject(); photosOk.filter { it in ticked }.forEach { ph.put(it, "on") }
                     editing?.photos?.filter { it.value == "off" && it.key in ticked }?.forEach { ph.put(it.key, "off") }
@@ -275,41 +284,138 @@ fun DonorsSection(m: AppModel, snap: Snapshot) {
                         .put("projects", JSONArray(ticked.toList())).put("showPhotos", showPhotos).put("photos", ph).put("digest", digest)
                     if (editing != null) body.put("id", editing.id)
                     val r = m.api.admin(body)
-                    if (!r.ok) { msg = "bad" to reasonText(r.reason); return@launch }
-                    if (editing == null) shown = Triple(name.trim(), r.json.optString("link"), email.trim())
-                    msg = "ok" to (if (editing != null) t("Saved ✓", "Imehifadhiwa ✓") else t("Added ✓", "Imeongezwa ✓"))
-                    reset(null); tick++
+                    busy = false
+                    if (!r.ok) { formMsg = "bad" to reasonText(r.reason); return@launch }
+                    val who = name.trim()
+                    if (editing == null) { shown = listOf(who, who, r.json.optString("link"), email.trim()); openName = who; msg = "ok" to t("Added ✓ Send them their private link.", "Imeongezwa ✓ Mtumie kiungo chake cha siri.") }
+                    else { msg = "ok" to t("Saved ✓", "Imehifadhiwa ✓"); picked = editing.id }
+                    hide { reset(null); tick++ }
                 }
-            }, Modifier.testTag("dn_save"), icon = if (editing != null) "check" else "plus", enabled = name.isNotBlank())
-            if (editing != null) Btn(t("Cancel", "Ghairi"), { reset(null) }, small = true, light = true)
+            }, Modifier.padding(top = 14.dp).fillMaxWidth().testTag("dn_save"), icon = if (editing != null) "check" else "plus", enabled = name.isNotBlank() && !busy)
+            DqmLineBtn(t("Cancel", "Ghairi"), "x", { hide { reset(null) } }, Modifier.padding(top = 8.dp).fillMaxWidth().testTag("dn_cancel"))
+            formMsg?.let { (tone, text) -> Msg(text, tone) }
         }
-        // group pages: everyone who can open this page, each with their own link
-        if (editing != null) {
-            Text(t("Who can open this page", "Nani anaweza kufungua ukurasa huu"), style = MaterialTheme.typography.titleSmall, color = C.ink, modifier = Modifier.padding(top = 18.dp))
-            Text(t("For a church or company: give each person their own link, so you can switch one off without affecting the others.", "Kwa kanisa au kampuni: mpe kila mtu kiungo chake, ili uweze kuzima kimoja bila kuathiri wengine."), style = MaterialTheme.typography.bodySmall, color = C.muted)
-            editing.viewers.forEach { v ->
-                Column(Modifier.padding(top = 8.dp).fillMaxWidth().clip(RoundedCornerShape(14.dp)).border(1.dp, C.line, RoundedCornerShape(14.dp)).padding(10.dp).testTag("dn_v_${v.vid}")) {
-                    Text(v.name.ifBlank { editing.name } + (if (v.primary) t(" (main)", " (mkuu)") else "") + (if (!v.active) t(" · revoked", " · kimezimwa") else ""), style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold), color = C.ink)
-                    Text(listOf(v.email, if (v.lastOpen.isNotBlank()) t("opened ", "kimefunguliwa ") + whenText(v.lastOpen) else t("not opened yet", "bado hakijafunguliwa")).filter { it.isNotBlank() }.joinToString(" · "), style = MaterialTheme.typography.bodySmall, color = C.muted)
-                    FlowRow(Modifier.padding(top = 6.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        if (v.active) {
-                            Btn(t("Copy link", "Nakili kiungo"), { act(editing, "donor-link", v.vid) { j -> copy(j.optString("link")) } }, small = true, light = true)
-                            Btn(t("Rotate", "Badilisha"), { act(editing, "donor-rotate", v.vid) { j -> shown = Triple(v.name.ifBlank { editing.name }, j.optString("link"), v.email); tick++ } }, small = true, light = true)
-                            Btn(t("Revoke", "Zima"), { act(editing, "donor-revoke", v.vid) { tick++ } }, small = true, color = C.bad)
-                        } else Btn(t("New link", "Kiungo kipya"), { act(editing, "donor-rotate", v.vid) { j -> shown = Triple(v.name.ifBlank { editing.name }, j.optString("link"), v.email); tick++ } }, small = true, light = true)
-                        if (!v.primary) Btn(t("Remove", "Ondoa"), { act(editing, "donor-viewer-remove", v.vid) { tick++ } }, small = true, light = true)
-                    }
+    }
+}
+
+/** One donor: the private link (copy, share, rotate, revoke), edit, who can open the page, delete. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun DonorSheet(m: AppModel, d: Donor, link: List<String>?, close: () -> Unit, setLink: (List<String>?) -> Unit, changed: () -> Unit, share: (List<String>) -> Unit, copy: (String) -> Unit, edit: () -> Unit) {
+    val scope = rememberScope()
+    var msg by remember { mutableStateOf<Pair<String, String>?>(null) }
+    var ask by remember { mutableStateOf<String?>(null) }
+    var askMsg by remember { mutableStateOf<String?>(null) }
+    var busy by remember { mutableStateOf(false) }
+    var vName by remember { mutableStateOf("") }
+    var vEmail by remember { mutableStateOf("") }
+    var vAsk by remember { mutableStateOf<Pair<String, String>?>(null) }
+    val viewersOpen = remember { mutableStateOf(false) }
+    fun act(action: String, vid: String? = null, after: (JSONObject) -> Unit = {}) {
+        busy = true
+        scope.launch {
+            val body = JSONObject().put("action", action).put("id", d.id).apply { if (vid != null) put("vid", vid) }
+            val r = m.api.admin(body)
+            busy = false
+            if (!r.ok) { val why = when (r.reason) { "revoked" -> t("This link was revoked. Make a new one.", "Kiungo hiki kimezimwa. Tengeneza kipya."); "rotate" -> t("Make a new link (Rotate) to copy it.", "Tengeneza kiungo kipya ili ukinakili."); else -> reasonText(r.reason) }; if (ask != null) askMsg = why else msg = "bad" to why; return@launch }
+            after(r.json)
+        }
+    }
+    val (fg, bg) = dqmTone(donorPill(d).first)
+    DqmSheet("dn_sheet", close) { hide ->
+        DqmSheetHead(d.name, listOf(if (d.org.isNotBlank() && d.org != d.name) d.org else "", d.email), donorPill(d), "dn_close", { hide {} }) { DqmTile("heart", fg, bg, 64.dp) }
+        // the link just made or asked for
+        link?.let { (_, who, url, _) ->
+            Column(Modifier.padding(top = 16.dp).fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(C.okBg).padding(14.dp).testTag("dn_link")) {
+                Text(t("Private link for ", "Kiungo cha siri cha ") + who, style = MaterialTheme.typography.titleSmall, color = C.ok)
+                // the long link breaks after "/donor/", never inside the private token
+                Text(url.replace("/donor/", "/donor/\n"), style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace, fontSize = 11.sp, lineHeight = 15.sp), color = C.ink,
+                    modifier = Modifier.padding(vertical = 8.dp).fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(C.card).padding(10.dp))
+                Text(t("Anyone with this link can see the page. Send it only to them.", "Yeyote mwenye kiungo hiki anaweza kuona ukurasa. Mtumie yeye tu."), style = MaterialTheme.typography.bodySmall, color = C.text)
+                Row(Modifier.padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Btn(t("Copy", "Nakili"), { copy(url); msg = "ok" to t("Link copied ✓", "Kiungo kimenakiliwa ✓") }, Modifier.weight(1f).testTag("dn_link_copy"), small = true, light = true, icon = "copy")
+                    Btn(t("Share", "Shiriki"), { share(link) }, Modifier.weight(1f), small = true, light = true, icon = "share")
                 }
             }
-            Field(vName, { vName = it }, t("Add a person: name", "Ongeza mtu: jina"), Modifier.testTag("dn_vname"), placeholder = t("e.g. Pastor John", "mf. Mchungaji John"))
-            Field(vEmail, { vEmail = it }, t("Their e-mail (optional)", "Barua pepe (si lazima)"))
-            Btn(t("Add and make their link", "Ongeza na utengeneze kiungo chake"), {
-                scope.launch {
-                    val r = m.api.admin(JSONObject().put("action", "donor-viewer-add").put("id", editing.id).put("name", vName.trim()).put("email", vEmail.trim()))
-                    if (r.ok) { shown = Triple(vName.trim(), r.json.optString("link"), vEmail.trim()); vName = ""; vEmail = ""; tick++ } else msg = "bad" to reasonText(r.reason)
+        }
+        // the main actions
+        Column(Modifier.padding(top = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (!d.revoked) {
+                Btn(t("Copy private link", "Nakili kiungo cha siri"), { act("donor-link") { j -> copy(j.optString("link")); msg = "ok" to t("Link copied ✓", "Kiungo kimenakiliwa ✓") } }, Modifier.fillMaxWidth().testTag("dn_copy"), icon = "copy", enabled = !busy)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    DqmLineBtn(t("Share link", "Shiriki kiungo"), "share", { act("donor-link") { j -> val s = listOf(d.id, d.name, j.optString("link"), d.email); setLink(s); share(s) } }, Modifier.weight(1f).testTag("dn_share"))
+                    DqmLineBtn(t("Edit", "Hariri"), "edit", { hide { edit() } }, Modifier.weight(1f).testTag("dn_edit"))
                 }
-            }, Modifier.padding(top = 10.dp).testTag("dn_vadd"), small = true, icon = "plus", enabled = vName.isNotBlank())
-            Btn(t("Delete this donor", "Futa mfadhili huyu"), { act(editing, "donor-remove") { reset(null); msg = "ok" to t("Deleted", "Imefutwa"); tick++ } }, Modifier.padding(top = 14.dp), small = true, color = C.bad)
+            } else {
+                Btn(t("Make a new link", "Tengeneza kiungo kipya"), { act("donor-rotate") { j -> setLink(listOf(d.id, d.name, j.optString("link"), d.email)); msg = "ok" to t("New link made ✓", "Kiungo kipya kimetengenezwa ✓"); changed() } }, Modifier.fillMaxWidth().testTag("dn_newlink"), icon = "link", enabled = !busy)
+                DqmLineBtn(t("Edit", "Hariri"), "edit", { hide { edit() } }, Modifier.fillMaxWidth().testTag("dn_edit"))
+            }
+        }
+        msg?.let { (tone, text) -> Box(Modifier.testTag("dn_msg")) { Msg(text, tone) } }
+        // facts
+        Column(Modifier.padding(top = 12.dp)) {
+            val ps = d.projects.map { id -> m.snap.value?.projects?.firstOrNull { it.id == id }?.title ?: id }
+            DqmFact(t("Projects", "Miradi"), donorProjects(ps.size), ps.take(3).joinToString(", ") + if (ps.size > 3) " …" else "")
+            DqmFact(t("Last opened", "Ilifunguliwa mwisho"), if (d.lastOpen.isNotBlank()) whenText(d.lastOpen) else t("Not yet", "Bado"), if (d.opens > 1) t("${d.opens} times", "mara ${d.opens}") else "")
+            DqmFact(t("Visit photos", "Picha za ziara"), if (d.showPhotos) t("Shown", "Zinaonyeshwa") else t("Hidden", "Zimefichwa"))
+            DqmFact(t("Monthly e-mail", "Barua pepe ya mwezi"), if (d.digest) t("On", "Imewashwa") else t("Off", "Imezimwa"))
+        }
+        // who can open this page, folded
+        Column(Modifier.padding(top = 14.dp).fillMaxWidth().clip(RoundedCornerShape(18.dp)).border(1.dp, C.line, RoundedCornerShape(18.dp)).padding(vertical = 2.dp)) {
+            DqmFold("dn_viewers", "people", "purple", t("Who can open this page", "Nani anaweza kufungua ukurasa huu"), if (d.viewers.size == 1) t("1 person", "mtu 1") else t("${d.viewers.size} people", "watu ${d.viewers.size}"), if (d.viewers.size > 1) "has" else "off", viewersOpen) {
+                Text(t("For a church or company: give each person their own link, so you can switch one off without affecting the others.", "Kwa kanisa au kampuni: mpe kila mtu kiungo chake, ili uweze kuzima kimoja bila kuathiri wengine."), style = MaterialTheme.typography.bodySmall, color = C.muted)
+                d.viewers.forEach { v ->
+                    Column(Modifier.padding(top = 10.dp).fillMaxWidth().testTag("dn_v_${v.vid}")) {
+                        Text(v.name.ifBlank { d.name } + (if (v.primary) t(" (main)", " (mkuu)") else "") + (if (!v.active) t(" · revoked", " · kimezimwa") else ""), style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold), color = C.ink)
+                        Text(listOf(v.email, if (v.lastOpen.isNotBlank()) t("opened ", "kimefunguliwa ") + whenText(v.lastOpen) else t("not opened yet", "bado hakijafunguliwa")).filter { it.isNotBlank() }.joinToString(" · "), style = MaterialTheme.typography.bodySmall, color = C.muted)
+                        FlowRow(Modifier.padding(top = 6.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            if (v.active) {
+                                DqmLineBtn(t("Copy link", "Nakili kiungo"), "copy", { act("donor-link", v.vid) { j -> copy(j.optString("link")); msg = "ok" to t("Link copied ✓", "Kiungo kimenakiliwa ✓") } })
+                                DqmLineBtn(t("Rotate", "Badilisha"), "refresh", { act("donor-rotate", v.vid) { j -> setLink(listOf(d.id, v.name.ifBlank { d.name }, j.optString("link"), v.email)); changed() } })
+                                DqmLineBtn(t("Revoke", "Zima"), "x", { vAsk = v.vid to "donor-revoke" }, Modifier.testTag("dn_v_revoke_${v.vid}"), red = true)
+                            } else DqmLineBtn(t("New link", "Kiungo kipya"), "link", { act("donor-rotate", v.vid) { j -> setLink(listOf(d.id, v.name.ifBlank { d.name }, j.optString("link"), v.email)); changed() } })
+                            if (!v.primary) DqmLineBtn(t("Remove", "Ondoa"), "trash", { vAsk = v.vid to "donor-viewer-remove" }, red = true)
+                        }
+                        vAsk?.takeIf { it.first == v.vid }?.let { (vid, a) ->
+                            DqmAsk((if (a == "donor-viewer-remove") t("Remove ", "Ondoa ") else t("Revoke the link for ", "Zima kiungo cha ")) + v.name.ifBlank { d.name } + "?",
+                                if (a == "donor-viewer-remove") t("Remove", "Ondoa") else t("Revoke", "Zima"), true, busy, null, { vAsk = null }, { act(a, vid) { vAsk = null; changed() } }, "dn_vask")
+                        }
+                    }
+                }
+                Field(vName, { vName = it }, t("Add a person: name", "Ongeza mtu: jina"), Modifier.testTag("dn_vname"), placeholder = t("e.g. Pastor John", "mf. Mchungaji John"))
+                Field(vEmail, { vEmail = it }, t("Their e-mail (optional)", "Barua pepe (si lazima)"))
+                Btn(t("Add and make their link", "Ongeza na utengeneze kiungo chake"), {
+                    busy = true
+                    scope.launch {
+                        val r = m.api.admin(JSONObject().put("action", "donor-viewer-add").put("id", d.id).put("name", vName.trim()).put("email", vEmail.trim()))
+                        busy = false
+                        if (r.ok) { setLink(listOf(d.id, vName.trim(), r.json.optString("link"), vEmail.trim())); vName = ""; vEmail = ""; changed() } else msg = "bad" to reasonText(r.reason)
+                    }
+                }, Modifier.padding(top = 10.dp).fillMaxWidth().testTag("dn_vadd"), small = true, icon = "plus", enabled = vName.isNotBlank() && !busy)
+            }
+        }
+        // the rest: rotate, revoke, delete (each asks first)
+        HorizontalDivider(color = C.line, modifier = Modifier.padding(top = 16.dp))
+        // one to a row, so a longer Kiswahili label is never squeezed
+        Column(Modifier.padding(top = 14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (!d.revoked) {
+                DqmLineBtn(t("Rotate link", "Badilisha kiungo"), "refresh", { ask = "rotate"; askMsg = null }, Modifier.fillMaxWidth().testTag("dn_rotate"))
+                DqmLineBtn(t("Revoke the link", "Zima kiungo"), "x", { ask = "revoke"; askMsg = null }, Modifier.fillMaxWidth().testTag("dn_revoke"), red = true)
+            }
+            DqmLineBtn(t("Delete donor", "Futa mfadhili"), "trash", { ask = "delete"; askMsg = null }, Modifier.fillMaxWidth().testTag("dn_delete"), red = true)
+        }
+        ask?.let { a ->
+            DqmAsk(when (a) {
+                "revoke" -> t("Revoke the link for ${d.name}? Their page stops working straight away. You can make a new link later.", "Zima kiungo cha ${d.name}? Ukurasa wao utaacha kufanya kazi mara moja. Unaweza kutengeneza kiungo kipya baadaye.")
+                "rotate" -> t("Make a new link for ${d.name}? The old link stops working, so send them the new one.", "Tengeneza kiungo kipya cha ${d.name}? Kiungo cha zamani kitaacha kufanya kazi, kwa hiyo watumie kipya.")
+                else -> t("Delete ${d.name}? Their links stop working straight away.", "Futa ${d.name}? Viungo vyao vitaacha kufanya kazi mara moja.")
+            }, when (a) { "revoke" -> t("Revoke", "Zima"); "rotate" -> t("Make a new link", "Tengeneza kiungo kipya"); else -> t("Delete", "Futa") }, a != "rotate", busy, askMsg, { ask = null }, {
+                when (a) {
+                    "revoke" -> act("donor-revoke") { ask = null; setLink(null); msg = "ok" to t("Link revoked", "Kiungo kimezimwa"); changed() }
+                    "rotate" -> act("donor-rotate") { j -> ask = null; setLink(listOf(d.id, d.name, j.optString("link"), d.email)); msg = "ok" to t("New link made ✓", "Kiungo kipya kimetengenezwa ✓"); changed() }
+                    else -> act("donor-remove") { hide { changed() } }
+                }
+            }, "dn_ask")
         }
     }
 }

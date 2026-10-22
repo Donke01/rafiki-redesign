@@ -5,7 +5,9 @@
 //   GET  /api/admin?view=export   → every visit record kept by the app (for the spreadsheet export)
 //   GET  /api/admin?view=costs    → repair spending (last 25 months) with this month / year / country / top 10, and the approval limit
 //   GET  /api/admin?view=teammap  → teammates sharing their location (latest point only) and today's visits
-//   GET  /api/admin?view=plan&ck=&area=&days=&per= → suggested visits for a week, grouped into days (lib/pin-plan.js)
+//   GET  /api/admin?view=plan&ck=&days=&per=[&areas=Kapsaret,Kaigat][&ids=104,105][&only=1] → suggested visits for a week,
+//        grouped into days. areas: the areas ticked (≤20, each ≤80 characters; none = the whole country); ids: projects
+//        chosen by hand (digits, ≤60, in the feed), always planned; only=1: no other suggestions (lib/pin-here.js planView)
 //   POST /api/admin { action: "review",  rid, decision: "approve"|"reject", reason }
 //                   { action: "job",     id, step, assignee, due, budget, note, actual, what, receipt }  repair jobs
 //                       (above the approval limit, "parts"/"fixed" wait for a second admin: answers { held, asked })

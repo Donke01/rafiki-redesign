@@ -1950,6 +1950,166 @@ html[data-theme=sun] .ocv-bar .col{border:1.5px solid #000}html[data-theme=sun] 
 .ocv-sh .ofb-ph{padding-right:40px}
 @media (min-width:1000px){body.wide .ocv-vg .ocv-vs{order:2}}
 @media (prefers-reduced-motion: reduce){.ocv-tile,.ocv-card,.ocv-shi,.ocv-re.in{animation:none !important}.ocv-ring,.ocv-meter i,.ocv-bar .col i,.ocv-drop,.ocv-rc,.ocv-tile,.ocv-card,.ocv-chev{transition:none !important}.ocv-pulse{animation:none}}
+<style id="dqm-css">
+/* Office › Donors, QR codes, Team map, Plan a week and Export (dqm): the calm look of Office › Community */
+.dqm-hero{padding:16px}
+.dqm-hd{display:flex;gap:12px;align-items:center}.dqm-hd>div{flex:1;min-width:0}
+.dqm-hd h2{margin:0 0 2px;font-size:1.1rem;line-height:1.3}.dqm-hd p{margin:0;font-size:.88rem;line-height:1.4}
+.dqm-ic{flex:none;width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:var(--hb,var(--tint));color:var(--hu,var(--blue2))}.dqm-ic svg{width:24px;height:24px}
+.dqm-rf{flex:none;width:44px;height:44px;border-radius:50%;border:var(--bw) solid var(--line);background:var(--card);color:var(--ink);display:grid;place-items:center;cursor:pointer}.dqm-rf svg{width:20px;height:20px}.dqm-rf:hover{background:var(--tint)}
+.dqm-nums{display:grid;grid-template-columns:repeat(var(--n,3),minmax(0,1fr));gap:8px;margin-top:12px}
+.dqm-nums>*{display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:0;min-height:44px;margin:0;padding:8px 10px;border-radius:14px;background:var(--bg);border:var(--bw) solid var(--line);color:inherit;font:inherit;text-align:left}
+.dqm-nums button{cursor:pointer;transition:border-color .2s,transform .12s}.dqm-nums button:hover{border-color:var(--blue)}.dqm-nums button:active{transform:scale(.97)}.dqm-nums button:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.dqm-nums button[aria-pressed=true]{border-color:var(--blue);box-shadow:inset 0 0 0 1px var(--blue)}
+.dqm-nums b{display:block;font-size:1.3rem;line-height:1.25;color:var(--ink);font-variant-numeric:tabular-nums}.dqm-nums small{display:block;font-size:.72rem;line-height:1.3;color:var(--muted);font-weight:600;hyphens:none;overflow-wrap:normal}
+.dqm-nums .bad b{color:var(--bad)}.dqm-nums .ok b{color:var(--ok)}.dqm-nums .has b{color:var(--blue2)}.dqm-nums .off b{color:var(--muted)}
+.dqm-hact{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.dqm-hact .btn{flex:1 1 auto}.dqm-hact .btn svg,.dqm-acts .btn svg,.dqm-lb .btn svg,.dqm-vb .btn svg{width:20px;height:20px;flex:none}
+.dqm-chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:6px -16px 0;padding:8px 16px 14px}.dqm-chips::-webkit-scrollbar{display:none}
+.dqm-chips .chip .n{background:var(--hb-slate);color:var(--ink);margin-left:2px}.dqm-chips .chip[aria-pressed=true] .n{background:rgba(255,255,255,.22);color:inherit}
+html[data-theme=dark] #oBody .dqm-chips .chip[aria-pressed=true]{background:var(--blue2);border-color:transparent;color:#0B1116}html[data-theme=dark] #oBody .dqm-chips .chip[aria-pressed=true] .n{background:rgba(11,17,22,.18);color:#0B1116}
+.dqm-list{display:grid;gap:8px}.dqm-more{margin-top:10px}.dqm-gap{margin-top:12px}
+.dqm-card{display:grid;grid-template-columns:auto minmax(0,1fr) auto;column-gap:12px;align-items:center;width:100%;min-height:68px;padding:12px 14px;border:var(--bw) solid var(--line);border-radius:20px;background:var(--card);color:inherit;font:inherit;text-align:left;cursor:pointer;
+  animation:tmIn .5s cubic-bezier(.34,1.4,.64,1) both;animation-delay:calc(var(--i,0) * 40ms);transition:border-color .2s,box-shadow .2s,transform .12s}
+@media (hover:hover){.dqm-card:hover{border-color:var(--blue);box-shadow:0 6px 18px rgba(4,38,63,.08)}}.dqm-card:active{transform:scale(.985)}.dqm-card:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+html[data-theme=dark] .dqm-card:hover{box-shadow:none}
+.dqm-card.dim>*{opacity:.72}
+.dqm-av{flex:none;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--hb,var(--tint));color:var(--hu,var(--blue2));font-weight:800;font-size:.9rem;letter-spacing:.02em}.dqm-av svg{width:22px;height:22px}
+.dqm-av.sq{border-radius:14px}
+.dqm-mid{min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:3px}
+.dqm-tt{max-width:100%;font-weight:800;color:var(--ink);font-size:.98rem;line-height:1.3;overflow-wrap:break-word;hyphens:none}
+.dqm-sub{max-width:100%;font-size:.8rem;line-height:1.4;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dqm-sub2{max-width:100%;font-size:.8rem;line-height:1.4;color:var(--muted)}
+.dqm-dim{color:var(--warn);font-weight:700}
+.dqm-end{align-self:start;display:flex;align-items:center;gap:2px;margin-top:2px;font-size:.78rem;font-weight:600;color:var(--muted);white-space:nowrap}.dqm-end svg{width:16px;height:16px;transition:transform .2s}
+.dqm-card:hover .dqm-end svg{transform:translateX(2px);color:var(--blue)}
+.dqm-p{grid-template-columns:auto minmax(0,1fr) auto}.dqm-p .ofa-av{width:42px;height:42px}.dqm-p .dqm-end{align-self:center;margin:0}
+.dqm-pill{display:inline-flex;align-items:flex-start;gap:6px;max-width:100%;padding:3px 10px 3px 8px;border-radius:12px;font-size:.74rem;font-weight:800;line-height:1.35}
+.dqm-pill i{flex:none;width:7px;height:7px;margin-top:.38em;border-radius:50%;background:currentColor}
+.dqm-t-bad{background:var(--badbg);color:var(--bad)}.dqm-t-warn{background:var(--warnbg);color:var(--warn)}.dqm-t-ok{background:var(--okbg);color:var(--ok)}.dqm-t-has{background:var(--tint);color:var(--blue2)}.dqm-t-off{background:var(--hb-slate);color:var(--muted)}
+html[data-theme=sun] .dqm-pill,html[data-theme=sun] .dqm-av,html[data-theme=sun] .dqm-ic,html[data-theme=sun] .dqm-ri{border:1.5px solid currentColor}
+.dqm-none .empty{padding-top:10px}
+.dqm-nw{white-space:nowrap}
+/* folded rows: a title, and under it what's inside */
+.dqm-sets{padding:4px 16px}
+.dqm-sec+.dqm-sec{border-top:var(--bw) solid var(--line)}
+.dqm-row{display:flex;align-items:center;gap:12px;width:100%;min-height:64px;padding:10px 0;border:0;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.dqm-row:focus-visible{outline:3px solid var(--blue);outline-offset:2px;border-radius:12px}
+.dqm-ri{flex:none;width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:var(--hb);color:var(--hu)}.dqm-ri svg{width:20px;height:20px}
+.dqm-rt{flex:1 1 auto;min-width:0}.dqm-rt b{display:block;font-weight:800;font-size:.95rem;line-height:1.3;color:var(--ink)}
+.dqm-rt small{display:flex;align-items:flex-start;gap:6px;margin-top:2px;font-size:.8rem;font-weight:600;line-height:1.4;color:var(--muted)}.dqm-rt small i{flex:none;width:7px;height:7px;margin-top:.45em;border-radius:50%;background:var(--muted)}
+.dqm-rt small.t-ok i{background:var(--ok)}.dqm-rt small.t-has i{background:var(--blue2)}.dqm-rt small.t-bad i{background:var(--bad)}.dqm-rt small.t-warn i{background:var(--warn)}
+.dqm-rc{flex:none;display:flex;color:var(--muted);transform:rotate(90deg);transition:transform .28s cubic-bezier(.2,.8,.2,1)}.dqm-rc svg{width:18px;height:18px}
+.dqm-sec.open .dqm-rc{transform:rotate(-90deg)}
+.dqm-drop{display:grid;grid-template-rows:0fr;transition:grid-template-rows .3s cubic-bezier(.2,.8,.2,1)}.dqm-sec.open .dqm-drop{grid-template-rows:1fr}
+.dqm-in{min-height:0;overflow:hidden}.dqm-pad{padding:0 0 16px}.dqm-pad>p:first-child{margin-top:0}.dqm-pad p{font-size:.88rem;line-height:1.5}.dqm-pad .btn svg{width:18px;height:18px}
+.dqm-in-sh{margin-top:14px;box-shadow:none;border:var(--bw) solid var(--line)}
+/* sheets */
+.dqm-shd{display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;padding:4px 36px 8px}
+.dqm-shi{width:64px;height:64px;border-radius:20px;display:grid;place-items:center;margin-bottom:6px;animation:tmPop .5s cubic-bezier(.34,1.56,.64,1) .08s both}.dqm-shi svg{width:32px;height:32px}
+.dqm-shi.dqm-num{border-radius:50%;background:var(--c);color:#FFFFFF;font-size:1.6rem;font-weight:800}
+.dqm-shd h3{margin:0;font-size:1.25rem;line-height:1.3;color:var(--ink);overflow-wrap:break-word;hyphens:none}.dqm-shd small{font-size:.9rem;line-height:1.4;color:var(--muted)}
+.dqm-shd .dqm-pill{margin-top:4px}.dqm-shd .ofa-av.lg{width:68px;height:68px;font-size:1.3rem;margin-bottom:6px;animation:tmPop .5s cubic-bezier(.34,1.56,.64,1) .08s both}
+.dqm-c{justify-content:center;margin-top:6px}
+.dqm-lab{margin:18px 0 6px;font-size:.72rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.dqm-tm .dqm-lab:first-child,#ofaTmSum{margin-top:0;letter-spacing:0;text-transform:none;font-size:.86rem;font-weight:700}
+.dqm-note{margin:6px 0 0;font-size:.88rem;line-height:1.5}
+.dqm-kv{margin:12px 0 0;font-size:.9rem}.dqm-kv div{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:10px 0;border-bottom:1px solid var(--line)}
+.dqm-kv dt{flex:none;color:var(--muted)}.dqm-kv dd{margin:0;min-width:0;font-weight:700;color:var(--ink);text-align:right}.dqm-kv dd small{display:block;margin-top:2px;font-size:.8rem;font-weight:500;color:var(--muted)}
+.dqm-acts{display:grid;gap:8px;margin-top:16px}.dqm-two{display:grid;grid-template-columns:1fr 1fr;gap:8px}.dqm-acts .btn{width:100%;min-height:52px}.dqm-acts .msg{margin:0}.dqm-acts .msg:empty{display:none}
+.dqm-bad,.btn.light.dqm-bad{color:var(--bad)}.btn.light.dqm-bad:hover{background:var(--badbg)}
+.dqm-ab{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:16px;padding-top:16px;border-top:1px solid var(--line)}
+.dqm-ab>:last-child:nth-child(odd):not(:first-child){grid-column:1/-1}
+.dqm-ab button{display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:6px 12px;border-radius:14px;border:var(--bw) solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-size:.9rem;font-weight:700;text-align:center;cursor:pointer}
+.dqm-ab button svg{flex:none;width:18px;height:18px}.dqm-ab button:hover{background:var(--tint)}.dqm-ab .bad{color:var(--bad)}.dqm-ab .bad:hover{background:var(--badbg)}
+.dqm-mail{white-space:nowrap}
+.dqm-dnlink:empty{display:none}.dqm-dnlink .pinbox{margin-top:14px}
+.tsh .pinbox.dnr-link{padding:14px 12px}.dqm-in-sh .pinbox.dnr-link{padding:12px 10px}.dqm-in-sh .dnr-link code{font-size:.64rem}.dnr-link code{font-size:.7rem;padding:8px;letter-spacing:-.01em;overflow-wrap:break-word;word-break:normal}
+html[data-theme=dark] .dnr-link code{background:rgba(0,0,0,.25)}
+.dqm-lb{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;width:100%}.dqm-lb .btn{flex:1 1 auto}
+.dqm-v{padding:12px 0;border-bottom:1px solid var(--line)}.dqm-v:last-of-type{border-bottom:0}
+.dqm-vh{display:flex;flex-wrap:wrap;align-items:center;gap:6px}.dqm-vh b{color:var(--ink);font-size:.95rem}.dqm-vh .tag{padding:2px 8px;font-size:.7rem}
+.dqm-v small{display:block;margin-top:2px;color:var(--muted);font-size:.8rem;line-height:1.4}
+.dqm-vb{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.dqm-vb .btn svg{width:16px;height:16px}
+.dqm-vadd{margin-top:8px;padding-top:4px;border-top:1px solid var(--line)}
+/* forms in sheets and folds */
+.dqm-f label:not(.dnr-p):not(.tick){display:block;margin:12px 0 0;font-size:.8rem;font-weight:700;color:var(--ink);text-transform:none;letter-spacing:0}
+.dqm-f input:not([type=checkbox]),.dqm-f select{display:block;width:100%;margin-top:6px;min-height:48px}
+.dqm-f2{display:grid;grid-template-columns:1fr;gap:0 10px}
+.dqm-f3{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}.dqm-f3 .dqm-wide{grid-column:1/-1}
+@media (min-width:480px){.dqm-f2{grid-template-columns:1fr 1fr}}
+@media (min-width:1000px){body.wide .dqm-f3{grid-template-columns:1fr 1fr 1.4fr}body.wide .dqm-f3 .dqm-wide{grid-column:auto}}
+.dqm-f label.tick{display:flex;align-items:center;gap:10px;font-size:.9rem;font-weight:600;margin-top:14px}.dqm-f label.tick input{width:22px;height:22px;margin:0;flex:none;accent-color:var(--blue)}
+.dqm-fsh .dnr-pick{margin-top:16px}.dqm-fsh .dnr-plist{max-height:260px}.dqm-fsh .dnr-f{grid-template-columns:1fr 1fr}.dqm-fsh .dnr-f .chip{grid-column:1/-1}
+.dqm-fsh .dnr-f select,.dqm-fsh #dnQ{min-height:48px}
+.dqm-fsh .dnr-sw .tgl{flex:none}
+.dqm-fsh .dnr-sens label.tick{margin-top:8px}
+/* export */
+.dqm-xs{display:grid;gap:8px;margin-top:12px}@media (min-width:640px){.dqm-xs{grid-template-columns:1fr 1fr}}
+.dqm-x .dqm-av{width:44px;height:44px}.dqm-x .dqm-dl{align-self:center;margin:0;width:36px;height:36px;border-radius:50%;justify-content:center;background:var(--tint);color:var(--blue2)}.dqm-x .dqm-dl svg{width:18px;height:18px}
+.dqm-x:hover .dqm-dl svg{transform:translateY(2px)}
+/* team map */
+.dqm-tmg{margin-top:12px}.dqm-tmmap{height:360px}@media (min-width:1000px){body.wide .dqm-tmmap{height:460px}}
+.dqm-tm .ofa-leg{margin-top:10px}
+.ofa-av.lg{border-width:4px}
+.dqm-vt{list-style:none;margin:0;padding:0}.dqm-vt li+li{border-top:1px solid var(--line)}
+.dqm-vt button{display:flex;align-items:center;gap:12px;width:100%;min-height:56px;padding:8px 0;border:0;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.dqm-vt button>i{flex:none;width:12px;height:12px;border-radius:50%;box-shadow:0 0 0 2px var(--card),0 0 0 3px var(--line)}
+.dqm-vt span{flex:1;min-width:0}.dqm-vt b{display:block;color:var(--ink);font-size:.92rem;line-height:1.3}.dqm-vt small{display:block;color:var(--muted);font-size:.78rem}
+.dqm-vt time{flex:none;font-size:.8rem;font-weight:700;color:var(--muted)}.dqm-vt svg{flex:none;width:16px;height:16px;color:var(--muted)}
+.dqm-vt button:hover b{color:var(--blue2)}
+/* plan a week */
+.dqm-pform .dqm-acts{margin-top:14px}
+.dqm-plan .ofa-sum b{display:block;color:var(--ink);font-size:1.05rem;line-height:1.35}.dqm-plan .ofa-sum small{display:block;margin-top:2px;color:var(--muted);font-size:.84rem;line-height:1.45}
+.dqm-day{padding:14px 16px}.dqm-day .oh{display:flex;align-items:flex-start;gap:10px;justify-content:flex-start}
+.dqm-day .oh>span{flex:1;min-width:0}.dqm-day .oh b{display:block;color:var(--ink);font-size:1rem;line-height:1.3}.dqm-day .oh small{display:block;margin-top:1px;color:var(--muted);font-size:.8rem}
+.dqm-dot{flex:none;width:12px;height:12px;margin-top:.35em;border-radius:50%;background:var(--c)}
+.dqm-stops{list-style:none;margin:8px 0 0;padding:0}.dqm-stops li+li{border-top:1px solid var(--line)}
+.dqm-stop{display:flex;align-items:center;gap:12px;width:100%;min-height:56px;padding:10px 4px;border:0;border-radius:12px;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer;transition:background-color .15s}
+@media (hover:hover){.dqm-stop:hover{background:var(--tint)}}.dqm-stop:focus-visible{outline:3px solid var(--blue);outline-offset:1px}
+.dqm-stop .n{flex:none;width:28px;height:28px;border-radius:50%;background:var(--c);color:#FFFFFF;font-size:.8rem;font-weight:800;display:grid;place-items:center}
+.dqm-stop .tx{flex:1;min-width:0}.dqm-stop .tx b{display:block;color:var(--ink);font-size:.93rem;line-height:1.3}.dqm-stop .tx small{display:block;color:var(--muted);font-size:.78rem;line-height:1.4}
+.dqm-stop .ofa-why{margin-top:5px}.dqm-chev{flex:none;display:flex;color:var(--muted)}.dqm-chev svg{width:16px;height:16px}
+.dqm-dayf{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}.dqm-dayf select{flex:1 1 200px;min-height:44px;width:auto}.dqm-dayf .btn{flex:1 1 auto}
+.dqm-plan .ofa-pmap{border-radius:16px;overflow:hidden}
+/* QR codes */
+.dqm-qr .fq-ck{margin:6px -16px 0;padding:8px 16px 14px}
+.dqm-qr .fq-grid{margin-top:0}
+.dqm-qr .fq-list{padding:6px 14px 10px;max-height:min(62vh,560px)}
+.dqm-qr .fq-lh{position:sticky;top:-6px;z-index:1;margin:0 -14px;padding:10px 14px 8px;background:var(--card);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.dqm-qr .fq-lh b{flex:1 1 auto;font-size:.95rem}.fq-an{display:flex;gap:6px}.fq-an .chip{min-height:40px;padding:0 14px;font-size:.84rem}
+.dqm-qr .fq-r{min-height:56px;padding:6px 2px;gap:12px}.dqm-qr .fq-r:first-of-type{border-top:0}.dqm-qr .fq-r input{width:22px;height:22px}
+.dqm-qr .fq-r b{white-space:normal;overflow:visible;overflow-wrap:break-word;line-height:1.3}.dqm-qr .fq-r small{display:block;font-size:.78rem;line-height:1.4}
+.fq-prev{display:flex;flex-direction:column;gap:10px;align-items:stretch;padding:16px}.fq-prev .fq-s{width:220px;max-width:100%;margin:0 auto}.fq-prev .btn svg{width:20px;height:20px}
+.dqm-qr .fq-side{gap:12px}.dqm-qr .fq-side .dqm-sets{padding:4px 16px}
+/* plan a week › areas and projects */
+.dqm-afld{margin-top:12px}.dqm-flab{display:block;font-size:.8rem;font-weight:700;color:var(--ink)}
+.dqm-sel{display:flex;align-items:center;gap:10px;width:100%;margin-top:6px;min-height:48px;padding:10px 12px 10px 16px;border-radius:16px;border:var(--bw) solid var(--edge);background:var(--field);color:var(--ink);font:inherit;font-size:1rem;font-weight:700;text-align:left;cursor:pointer;transition:border-color .15s}
+html:not([data-theme=sun]) .dqm-sel{background-color:var(--gl2);border-color:var(--glb);box-shadow:var(--glin),0 2px 8px rgba(20,60,100,.05)}
+.dqm-sel span{flex:1;min-width:0;line-height:1.35;overflow-wrap:break-word;hyphens:none}.dqm-sel svg{flex:none;width:16px;height:16px;color:var(--ink);transform:rotate(90deg)}
+@media (hover:hover){.dqm-sel:hover{border-color:var(--blue)}}.dqm-sel:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.dqm-pk{margin-top:14px;border-top:var(--bw) solid var(--line)}.dqm-prow{min-height:60px}.dqm-pc{flex:none;display:flex;color:var(--muted)}.dqm-pc svg{width:18px;height:18px}
+.dqm-prow .dqm-rt small span{overflow-wrap:break-word;hyphens:none}.dqm-prow .dqm-rt small.t-has{color:var(--ink)}
+.dqm-pk .tm-sw{margin-top:4px}.dqm-pk .tm-sw .ic{background:var(--hb-purple);color:var(--hu-purple)}.dqm-pk .tm-sw[hidden]{display:none}
+.dqm-apk .dnr-pick legend{flex-wrap:wrap}.dqm-apk .dnr-pick legend>span:first-child{font-size:.95rem}
+.dqm-apk .dqm-alist{max-height:min(236px,34vh)}
+label.dnr-p.dqm-ac{align-items:center;min-height:48px;padding:8px 12px}label.dnr-p.dqm-ac input{margin:0}
+.dqm-an{flex:1 1 auto;min-width:0;font-weight:700;color:var(--ink);line-height:1.35;overflow-wrap:break-word;hyphens:none}
+.dqm-cnt{flex:none;min-width:30px;padding:2px 8px;border-radius:99px;background:var(--hb-slate);color:var(--ink);font-size:.78rem;font-weight:800;text-align:center}
+.dqm-ac:has(input:checked){background:var(--tint)}.dqm-ac:has(input:checked) .dqm-cnt{background:var(--blue);color:#FFFFFF}
+html[data-theme=dark] .dqm-ac:has(input:checked) .dqm-cnt{color:#0B1116}html[data-theme=sun] .dqm-cnt{border:1.5px solid currentColor}
+.dqm-apk .dqm-note:empty{display:none}
+.dqm-pks{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.dqm-pks input[type=search]{flex:1 1 200px;width:auto;min-width:0;min-height:48px}.dqm-pks .chip{flex:0 0 auto}
+.dqm-pgs{margin-top:10px;display:grid;gap:10px}
+.dqm-pg{border:var(--bw) solid var(--line);border-radius:16px;background:var(--field);overflow:hidden}
+.dqm-pgh{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;padding:10px 12px;background:var(--tint);border-bottom:1px solid var(--line)}
+.dqm-pgt{flex:1 1 auto;min-width:0}.dqm-pgt b{display:block;color:var(--ink);font-size:.95rem;line-height:1.3;overflow-wrap:break-word;hyphens:none}.dqm-pgt small{display:block;color:var(--muted);font-size:.78rem;font-weight:600}
+.dqm-pga{display:flex;gap:6px;margin-left:auto}.dqm-pga .chip{min-height:44px;padding:0 13px;font-size:.84rem}.dqm-pga .chip[disabled]{opacity:.45;cursor:default}
+.dqm-pg label.dnr-p>span{flex:1 1 auto;min-width:0}.dqm-pg label.dnr-p b{overflow-wrap:break-word;hyphens:none;line-height:1.3}
+.dqm-nl{color:var(--warn);font-weight:800}
+html[data-theme=sun] .dqm-pgh{background:#FFFFFF;border-bottom-width:2px}
+.tag.dqm-ch{background:var(--hb-purple);color:var(--hu-purple)}html[data-theme=sun] .tag.dqm-ch{border:1.5px solid currentColor}
+.dqm-nogps{display:flex;gap:8px;align-items:flex-start;margin:10px 0 0;padding:10px 12px;border-radius:14px;background:var(--warnbg);color:var(--ink);font-size:.86rem;line-height:1.45}.dqm-nogps svg{flex:none;width:18px;height:18px;color:var(--warn);margin-top:1px}
+@media (prefers-reduced-motion: reduce){.dqm-drop,.dqm-rc,.dqm-card,.dqm-end svg,.dqm-nums button,.dqm-stop{transition:none !important}.dqm-card,.dqm-shi,.dqm-shd .ofa-av.lg{animation:none !important}}
 </style>
 </head>
 <body class="locked">
@@ -5278,7 +5438,7 @@ html[data-theme=sun] .ocv-bar .col{border:1.5px solid #000}html[data-theme=sun] 
   function oSeg() {
     var T = [['overview', 'Overview', 'drop'], ['repairs', 'Repairs', 'wrench'], ['costs', tr('Costs', 'Gharama'), 'coins'], ['visits', 'Visits', 'cal'], ['review', 'Review', 'inbox'], ['team', 'Team', 'people'], ['cleanup', 'Clean-up', 'spark'], ['export', 'Export', 'down'], ['sms', tr('Community', 'Jamii'), 'chat']];
     T.splice(3, 0, ['teammap', tr('Team map', 'Ramani ya timu'), 'pin'], ['plan', tr('Plan a week', 'Panga wiki'), 'ofaRoute']);
-    T.push(['donors', 'Donors', 'heart']);
+    T.push(['donors', tr('Donors', 'Wafadhili'), 'heart']);
     T.push(['qr', tr('QR codes', 'Misimbo ya QR'), 'qr']);
     $('oTabs').innerHTML = T.map(function (t) {
       var c = t[0] === 'review' ? (S.reviewOpen || 0) : t[0] === 'repairs' ? Object.keys(S.repairs).length : 0;
@@ -6004,16 +6164,85 @@ html[data-theme=sun] .ocv-bar .col{border:1.5px solid #000}html[data-theme=sun] 
   function csv(rows) { return '﻿' + rows.map(function (r) { return r.map(function (v) { v = v == null ? '' : String(v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }).join(','); }).join('\r\n'); }
   function download(name, text) { var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type: 'text/csv;charset=utf-8' })); a.download = name; document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500); }
   var stamp = function () { return new Date().toISOString().slice(0, 10); };
+  // --- Office › Donors, QR codes, Team map, Plan a week and Export (dqm) ----------------------------------------
+  // The calm look of Office › Community: a head with an icon, one line and a few numbers; filter chips with counts;
+  // tappable cards that open a sheet (tSheet) holding every action; set-up and "how it works" folded into rows.
+  var DQM = { open: {}, df: 'all', dmore: false };
+  Object.assign(OIC, {
+    dqmprint: '<path d="M7 9V4h10v5"/><rect x="3.5" y="9" width="17" height="8" rx="2"/><path d="M7 14h10v6H7z"/>',
+    dqmrot: '<path d="M20 12a8 8 0 1 1-2.3-5.7"/><path d="M20 4v4.5h-4.5"/>',
+    dqmedit: '<path d="M4 20h4l10.5-10.5a2.8 2.8 0 0 0-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>',
+    dqmshare: '<circle cx="18" cy="5.5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="18.5" r="2.5"/><path d="M8.2 10.8l7.6-4M8.2 13.2l7.6 4"/>',
+    dqmdl: '<path d="M12 4v11M7 10.5l5 5 5-5M5 20h14"/>',
+    dqmoff: '<circle cx="12" cy="12" r="8.5"/><path d="M6 6l12 12"/>',
+    dqminfo: '<circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.7v.1"/>',
+    dqmtune: '<path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2.2"/><circle cx="9" cy="17" r="2.2"/>',
+    dqmfile: '<path d="M7 3.5h7l4.5 4.5v12.5H7z"/><path d="M14 3.5V8h4.5M10 13h6M10 16.5h6"/>'
+  });
+  function dqmHue(n) { var h = 7; String(n || '').toLowerCase().split('').forEach(function (c) { h = (h * 31 + c.charCodeAt(0)) % 4294967296; }); return ['blue', 'green', 'purple', 'teal', 'coral', 'slate'][h % 6]; }
+  function dqmIc(ic, hue, cls) { return '<span class="' + (cls || 'dqm-ic') + '" style="--hu:var(--hu-' + hue + ');--hb:var(--hb-' + hue + ')" aria-hidden="true">' + oic(ic) + '</span>'; }
+  // the head of a tab: icon, title, one line; number tiles [n, label, tone, filter key] (with a key they set the filter); buttons
+  function dqmHead(k, ic, hue, title, line, nums, cur, acts) {
+    return '<div class="card dqm-hero" data-testid="' + k + '_head"><div class="dqm-hd">' + dqmIc(ic, hue) + '<div><h2>' + title + '</h2><p class="muted">' + line + '</p></div></div>' +
+      (nums && nums.length ? '<div class="dqm-nums" style="--n:' + nums.length + '">' + nums.map(function (x) {
+        var inner = '<b>' + x[0] + '</b><small>' + x[1] + '</small>';
+        return x[3] ? '<button type="button" class="' + (x[2] || '') + '" data-dqmf="' + k + ':' + x[3] + '" aria-pressed="' + (cur === x[3]) + '" data-testid="' + k + '_n_' + x[3] + '">' + inner + '</button>' : '<div class="' + (x[2] || '') + '">' + inner + '</div>';
+      }).join('') + '</div>' : '') + (acts ? '<div class="dqm-hact">' + acts + '</div>' : '') + '</div>';
+  }
+  function dqmChips(k, fs, cnt, cur) {
+    return '<div class="dqm-chips" role="group" aria-label="' + tr('Show', 'Onyesha') + '">' + fs.map(function (f) {
+      return '<button type="button" class="chip" data-dqmf="' + k + ':' + f[0] + '" data-testid="' + k + '_filter_' + f[0] + '" aria-pressed="' + (cur === f[0]) + '">' + tr(f[1], f[2]) + ' <span class="n">' + cnt[f[0]] + '</span></button>';
+    }).join('') + '</div>';
+  }
+  // the chip row keeps its place after a redraw, and the chosen chip stays in sight
+  function dqmChipKeep(b, sl) {
+    var nc = b.querySelector('.dqm-chips'), pc = nc && nc.querySelector('[aria-pressed=true]'); if (!nc) return;
+    nc.scrollLeft = sl || 0; if (!pc) return;
+    var cr = nc.getBoundingClientRect(), r2 = pc.getBoundingClientRect();
+    if (r2.left < cr.left + 16 || r2.right > cr.right - 16) nc.scrollLeft += r2.left < cr.left + 16 ? r2.left - cr.left - 16 : r2.right - cr.right + 16;
+  }
+  function dqmPill(tone, label) { return '<span class="dqm-pill dqm-t-' + tone + '"><i aria-hidden="true"></i><span>' + label + '</span></span>'; }
+  // a row that opens and closes with a tap: title, and under it what's inside (so neither is squeezed)
+  function dqmFold(k, ic, hue, title, sum, tone, body) {
+    var on = !!DQM.open[k];
+    return '<div class="dqm-sec' + (on ? ' open' : '') + '"><button type="button" class="dqm-row" data-dqmsec="' + k + '" data-testid="' + k + '_toggle" aria-expanded="' + on + '" aria-controls="dqmSec_' + k + '">' + dqmIc(ic, hue, 'dqm-ri') +
+      '<span class="dqm-rt"><b>' + title + '</b><small class="t-' + (tone || 'off') + '"><i aria-hidden="true"></i><span>' + sum + '</span></small></span><span class="dqm-rc" aria-hidden="true">' + oic('chev') + '</span></button>' +
+      '<div class="dqm-drop" id="dqmSec_' + k + '"' + (on ? '' : ' inert') + '><div class="dqm-in"><div class="dqm-pad" data-testid="' + k + '">' + body + '</div></div></div></div>';
+  }
+  function dqmFoldSet(root, k, on) {
+    var s = root && root.querySelector('[data-dqmsec="' + k + '"]'); DQM.open[k] = on; if (!s) return;
+    var sec = s.parentNode, dr = sec.querySelector('.dqm-drop');
+    sec.classList.toggle('open', on); s.setAttribute('aria-expanded', String(on)); if (on) dr.removeAttribute('inert'); else dr.setAttribute('inert', '');
+  }
+  document.addEventListener('click', function (e) {
+    var s = e.target.closest('[data-dqmsec]'); if (!s) return;
+    buzz(); dqmFoldSet(s.closest('.dqm-sec').parentNode, s.getAttribute('data-dqmsec'), !s.parentNode.classList.contains('open'));
+  });
+  function dqmKv(rows) { return '<dl class="dqm-kv">' + rows.filter(Boolean).map(function (r) { return '<div><dt>' + r[0] + '</dt><dd>' + r[1] + (r[2] ? '<small>' + r[2] + '</small>' : '') + '</dd></div>'; }).join('') + '</dl>'; }
+
+  // Export: a card per spreadsheet; the monthly report and the e-mail summary folded away
   function oExport(b) {
-    b.innerHTML = '<div class="o-grid"><div class="card"><h2>Download a spreadsheet</h2><p class="muted">CSV files open in Excel and Google Sheets.</p><div class="xbtns">' +
-      '<button class="btn light" type="button" data-x="projects">📋 Projects with locations and status</button>' +
-      '<button class="btn light" type="button" data-x="visits">🩺 Site visits with readings</button>' +
-      '<button class="btn light" type="button" data-x="repairs">🔧 Open repairs and jobs</button>' +
-      '<button class="btn light" type="button" data-x="activity">🕑 Everything the team did (last 13 months)</button>' + ofbExportBtns() + '</div><p class="msg" id="xMsg" aria-live="polite"></p></div>' +
-      '<div class="card"><h2>Reports</h2><p>The monthly report (to save as a PDF) is in <b>Me → Monthly report</b>.</p><button class="btn small light" type="button" id="xRep">Open the monthly report</button>' +
-      '<h3 style="margin-top:16px">Monthly e-mail summary</h3><p class="muted">' + (O.cron && O.mail && O.mail.ready ? 'On: a summary of last month goes to the admins on the 1st of each month.' : 'Not switched on yet: needs the e-mail keys and CRON_KEY in Cloudflare and GitHub (see the set-up notes).') + '</p></div></div>';
+    var X = [['projects', 'clip', 'blue', tr('Projects', 'Miradi'), tr('Every project with its location and status', 'Kila mradi na mahali na hali yake')],
+      ['visits', 'cal', 'green', tr('Site visits', 'Ziara za maeneo'), tr('Every visit with its readings', 'Kila ziara na vipimo vyake')],
+      ['repairs', 'wrench', 'amber', tr('Open repairs and jobs', 'Matengenezo na kazi zilizo wazi'), tr('What is broken, who is fixing it and by when', 'Kilichoharibika, nani anakitengeneza na lini')],
+      ['activity', 'clock', 'purple', tr('Everything the team did', 'Kila kitu timu ilifanya'), tr('The last 13 months, one row per action', 'Miezi 13 iliyopita, mstari mmoja kwa kila kitendo')],
+      ['costs', 'coins', 'coral', tr('Repair costs', 'Gharama za ukarabati'), tr('Every entry from the last 2 years', 'Kila kiingilio cha miaka 2 iliyopita')],
+      ['costsum', 'trend', 'teal', tr('Costs and people served', 'Gharama na watu wanaohudumiwa'), tr('A summary for each project', 'Muhtasari wa kila mradi')]];
+    var mon = O.cron && O.mail && O.mail.ready;
+    b.innerHTML = '<div class="o-grid dqm"><div>' + dqmHead('x', 'dqmdl', 'blue', tr('Export', 'Pakua'), tr('Download a spreadsheet (CSV). It opens in Excel and Google Sheets.', 'Pakua jedwali (CSV). Linafunguka kwenye Excel na Google Sheets.')) +
+      '<div class="dqm-xs">' + X.map(function (x) {
+        return '<button type="button" class="dqm-card dqm-x" data-x="' + x[0] + '" data-testid="x_' + x[0] + '">' + dqmIc(x[1], x[2], 'dqm-av sq') +
+          '<span class="dqm-mid"><span class="dqm-tt">' + x[3] + '</span><span class="dqm-sub2">' + x[4] + '</span></span><span class="dqm-end dqm-dl">' + oic('dqmdl') + '</span></button>';
+      }).join('') + '</div><p class="msg" id="xMsg" aria-live="polite"></p></div>' +
+      '<div class="o-side"><div class="card dqm-sets">' +
+      dqmFold('xrep', 'dqmfile', 'purple', tr('Monthly report', 'Ripoti ya mwezi'), tr('A PDF to save from Me', 'PDF ya kuhifadhi kutoka Mimi'), 'has',
+        '<p class="muted">' + tr('The monthly report, to save as a PDF, is in <b>Me → Monthly report</b>.', 'Ripoti ya mwezi, ya kuhifadhi kama PDF, iko kwenye <b>Mimi → Ripoti ya mwezi</b>.') + '</p><button class="btn small light" type="button" id="xRep">' + oic('dqmfile') + tr('Open the monthly report', 'Fungua ripoti ya mwezi') + '</button>') +
+      dqmFold('xmail', 'mail', 'teal', tr('Monthly e-mail summary', 'Muhtasari wa mwezi kwa barua pepe'), mon ? tr('On', 'Imewashwa') : tr('Off', 'Imezimwa'), mon ? 'ok' : 'off',
+        '<p class="muted">' + (mon ? tr('On: a summary of last month goes to the admins on the 1st of each month.', 'Imewashwa: muhtasari wa mwezi uliopita unaenda kwa wasimamizi tarehe 1 ya kila mwezi.')
+          : tr('Not switched on yet: needs the e-mail keys and <span class="dqm-nw">CRON_KEY</span> in Cloudflare and GitHub (see the set-up notes).', 'Bado haijawashwa: inahitaji funguo za barua pepe na <span class="dqm-nw">CRON_KEY</span> kwenye Cloudflare na GitHub (angalia maelezo ya kuweka).')) + '</p>') +
+      '</div></div></div>';
     $('xRep').addEventListener('click', function () { openReport(); });
-    qa('[data-x]', b).forEach(function (x) { x.addEventListener('click', function () { exportX(x.getAttribute('data-x')); }); });
+    qa('[data-x]', b).forEach(function (x) { x.addEventListener('click', function () { buzz(); exportX(x.getAttribute('data-x')); }); });
   }
   function exportX(k) {
     var P = S.projects;
@@ -6157,18 +6386,24 @@ html[data-theme=sun] .ocv-bar .col{border:1.5px solid #000}html[data-theme=sun] 
     return w;
   }
 
-  // Office › Team map: who is sharing, where they were last seen, and today's visits
+  // Office › Team map: the map first, then who is sharing as a compact list; tap a person for a sheet
+  // (call, WhatsApp, today's visits, show on the map). Who shows here, and why, is folded away.
   // each teammate on the map gets their own colour (in list order), others a colour from their name
   function ofaHue(n) { if (OFA.hue && OFA.hue[n]) return OFA.hue[n]; var h = 5381; String(n || '').split('').forEach(function (c) { h = (h * 33 + c.charCodeAt(0)) % 100003; }); return OFA_COL[h % OFA_COL.length]; }
   function ofaAvatar(n, cls) { return '<span class="ofa-av' + (cls ? ' ' + cls : '') + '" style="--c:' + ofaHue(n) + '" aria-hidden="true">' + mateInitials(n) + '</span>'; }
   function ofaStateCol(s) { return s === 'notworking' ? '#B3261E' : s === 'repair' ? '#D98200' : '#1C9C5A'; }
   function ofaClock(iso) { var d = new Date(iso); return isNaN(d) ? '' : d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }); }
   function ofaTeamMap(b) {
-    b.innerHTML = '<div class="o-grid"><div class="o-side"><div class="map o-map" id="ofaTmMap" role="application" aria-label="' + tr('Map of teammates sharing their location, and today’s visits', 'Ramani ya wenzako wanaoshiriki mahali, na ziara za leo') + '"></div>' +
+    b.innerHTML = '<div class="dqm-tm"><div class="card dqm-hero" data-testid="tm_head"><div class="dqm-hd">' + dqmIc('pin', 'green') + '<div><h2>' + tr('Team map', 'Ramani ya timu') + '</h2><p class="muted">' + tr('Where teammates who share their location are, and today’s visits.', 'Wenzako wanaoshiriki mahali walipo, na ziara za leo.') + '</p></div>' +
+      '<button class="dqm-rf" type="button" id="ofaTmR" aria-label="' + tr('Refresh', 'Onyesha upya') + '" title="' + tr('Refresh', 'Onyesha upya') + '">' + oic('dqmrot') + '</button></div><div class="dqm-nums" id="ofaTmNums" style="--n:3"></div></div>' +
+      '<div class="o-grid dqm-tmg"><div><div class="map o-map dqm-tmmap" id="ofaTmMap" role="application" aria-label="' + tr('Map of teammates sharing their location, and today’s visits', 'Ramani ya wenzako wanaoshiriki mahali, na ziara za leo') + '"></div>' +
       '<ul class="ofa-leg"><li>' + ofaAvatar('A B', 'sm') + tr('Teammate, when last seen', 'Mwenzako, alipoonekana mwisho') + '</li><li><i style="background:#1C9C5A"></i>' + tr('Visit today: working', 'Ziara ya leo: inafanya kazi') + '</li><li><i style="background:#D98200"></i>' + tr('needs repair', 'inahitaji matengenezo') + '</li><li><i style="background:#B3261E"></i>' + tr('not working', 'haifanyi kazi') + '</li></ul></div>' +
-      '<div><div class="card"><div class="ofa-hd"><h2>' + tr('Team map', 'Ramani ya timu') + '</h2><button class="btn small light" type="button" id="ofaTmR">' + tr('Refresh', 'Onyesha upya') + '</button></div><p class="muted" id="ofaTmSum" style="margin:8px 0 0">' + tr('Loading…', 'Inapakia…') + '</p><ul class="ofa-mates" id="ofaTmList"></ul></div>' +
-      '<p class="muted ofa-priv">' + oic('lock') + '<span>' + tr('Only people who turned on “Share my location” in their Settings show here, and only in their work hours. Only the latest position is kept, for 12 hours. Field officers never see this map.', 'Wanaoonekana hapa ni wale tu waliowasha “Shiriki mahali nilipo” kwenye Mipangilio yao, na wakati wa saa zao za kazi tu. Mahali pa mwisho tu panahifadhiwa, kwa saa 12. Maafisa wa uwanjani hawaoni ramani hii.') + '</span></p></div></div>';
-    $('ofaTmR').addEventListener('click', function () { ofaTmLoad(); });
+      '<div><p class="dqm-lab" id="ofaTmSum">' + tr('Loading…', 'Inapakia…') + '</p><div class="dqm-list" id="ofaTmList"></div>' +
+      '<div class="card dqm-sets dqm-gap">' + dqmFold('tmpriv', 'lock', 'slate', tr('Who shows here', 'Nani anaonekana hapa'), tr('Only people who turn it on, in their work hours', 'Walioiwasha tu, wakati wa saa zao za kazi'), 'has',
+        '<p class="muted">' + tr('Only people who turned on “Share my location” in their Settings show here, and only in their work hours. Only the latest position is kept, for 12 hours, never a history. Field officers never see this map.',
+          'Wanaoonekana hapa ni wale tu waliowasha “Shiriki mahali nilipo” kwenye Mipangilio yao, na wakati wa saa zao za kazi tu. Mahali pa mwisho tu panahifadhiwa, kwa saa 12, si historia. Maafisa wa uwanjani hawaoni ramani hii.') + '</p>' +
+        '<p class="muted">' + tr('People turn it on in Me › Settings › Security and alerts. It’s off unless they choose it.', 'Watu wanaiwasha kwenye Mimi › Mipangilio › Usalama na arifa. Imezimwa wasipochagua.') + '</p>') + '</div></div></div></div>';
+    $('ofaTmR').addEventListener('click', function () { buzz(); ofaTmLoad(); });
     ofaTmLoad();
   }
   function ofaTmLoad() {
@@ -6179,18 +6414,24 @@ html[data-theme=sun] .ocv-bar .col{border:1.5px solid #000}html[data-theme=sun] 
     });
   }
   function ofaTmVisits(n) { return ((OFA.tm && OFA.tm.visits) || []).filter(function (v) { return same(v.by, n); }); }
+  function dqmOld(iso) { return Date.now() - Date.parse(iso) > 36e5; }
+  function dqmAcc(a) { return a ? ' · ±' + (a < 1000 ? a + ' m' : Math.round(a / 1000) + ' km') : ''; }
+  function dqmVisitsN(n) { return n === 1 ? tr('1 visit today', 'ziara 1 leo') : tr(n + ' visits today', 'ziara ' + n + ' leo'); }
   function ofaTmDraw() {
     var t = OFA.tm, ppl = t.people || [], vis = t.visits || [];
     OFA.hue = {}; ppl.forEach(function (p, i) { OFA.hue[p.name] = OFA_COL[i % OFA_COL.length]; });
+    var bad = vis.filter(function (v) { return v.s === 'notworking'; }).length;
+    $('ofaTmNums').innerHTML = '<div class="' + (ppl.length ? 'ok' : 'off') + '"><b>' + ppl.length + '</b><small>' + tr('Sharing now', 'Wanashiriki sasa') + '</small></div><div><b>' + vis.length + '</b><small>' + tr('Visits today', 'Ziara za leo') + '</small></div>' +
+      '<div class="' + (bad ? 'bad' : 'off') + '"><b>' + bad + '</b><small>' + tr('Found not working', 'Hazifanyi kazi') + '</small></div>';
     $('ofaTmSum').textContent = (ppl.length ? (ppl.length === 1 ? tr('1 teammate sharing their location', 'Mwenzako 1 anashiriki mahali') : tr(ppl.length + ' teammates sharing their location', 'Wenzako ' + ppl.length + ' wanashiriki mahali')) : tr('Nobody is sharing their location right now.', 'Hakuna anayeshiriki mahali kwa sasa.')) +
-      ' · ' + (vis.length === 1 ? tr('1 visit today', 'ziara 1 leo') : tr(vis.length + ' visits today', 'ziara ' + vis.length + ' leo'));
-    $('ofaTmList').innerHTML = ppl.map(function (p) {
-      var v = ofaTmVisits(p.name), open = OFA.open === p.name;
-      return '<li data-ofa-p="' + esc(p.name) + '"><button type="button" class="ofa-who" data-ofa-go="' + esc(p.name) + '">' + ofaAvatar(p.name) + '<span><b>' + esc(p.name) + '</b><small>' + tr('Last seen ', 'Alionekana ') + since(p.at) + (p.acc ? ' · ±' + (p.acc < 1000 ? p.acc + ' m' : Math.round(p.acc / 1000) + ' km') : '') + '</small></span></button>' +
-        '<div class="ofa-act">' + (p.phone ? '<a href="tel:' + esc(p.phone.replace(/\s/g, '')) + '">' + oic('phone') + tr('Call', 'Piga simu') + '</a><a href="https://wa.me/' + waNum(p.phone, p.home) + '" target="_blank" rel="noopener">' + oic('chat') + 'WhatsApp</a>' : '') +
-        '<button type="button" data-ofa-vt="' + esc(p.name) + '" aria-expanded="' + open + '">' + oic('clip') + tr('Visits today', 'Ziara za leo') + ' · ' + v.length + '</button></div>' +
-        (open ? '<ul class="ofa-vt">' + (v.length ? v.map(function (x) { var pr = byId(x.id); return '<li><i style="background:' + ofaStateCol(x.s) + '"></i><span>' + esc(pr ? pr.title : x.t || x.id) + '</span><small>' + ofaClock(x.at) + '</small></li>'; }).join('') : '<li class="muted">' + tr('No visits reported yet today.', 'Hakuna ziara zilizoripotiwa leo bado.') + '</li>') + '</ul>' : '') + '</li>';
-    }).join('') || '<li class="muted" style="border:0">' + tr('People turn it on in Me › Settings › Security and alerts. It’s off unless they choose it.', 'Watu wanaiwasha kwenye Mimi › Mipangilio › Usalama na arifa. Imezimwa wasipochagua.') + '</li>';
+      ' · ' + dqmVisitsN(vis.length);
+    $('ofaTmList').innerHTML = ppl.map(function (p, i) {
+      var v = ofaTmVisits(p.name), old = dqmOld(p.at);
+      return '<button type="button" class="dqm-card dqm-p" data-ofa-p="' + esc(p.name) + '" data-testid="tm_person" style="--i:' + Math.min(i, 10) + '">' + ofaAvatar(p.name) +
+        '<span class="dqm-mid"><span class="dqm-tt">' + esc(p.name) + '</span><span class="dqm-sub">' + tr('Last seen ', 'Alionekana ') + since(p.at) + dqmAcc(p.acc) + '</span>' +
+        '<span class="dqm-sub2">' + (old ? '<span class="dqm-dim">' + tr('Not seen for over an hour', 'Hajaonekana kwa zaidi ya saa moja') + '</span> · ' : '') + dqmVisitsN(v.length) + '</span></span>' +
+        '<span class="dqm-end">' + oic('chev') + '</span></button>';
+    }).join('') || '<div class="dqm-none">' + emptyHtml(tr('Nobody is sharing their location right now. People turn it on in Me › Settings › Security and alerts.', 'Hakuna anayeshiriki mahali kwa sasa. Watu wanaiwasha kwenye Mimi › Mipangilio › Usalama na arifa.')) + '</div>';
     setTimeout(function () {
       if (!$('ofaTmMap')) return;
       if (OFA.map) { OFA.map.remove(); OFA.map = null; }
@@ -6202,20 +6443,42 @@ html[data-theme=sun] .ocv-bar .col{border:1.5px solid #000}html[data-theme=sun] 
         if (OFA.open && same(x.by, OFA.open)) focus.push(mk.getLatLng());
       });
       ppl.forEach(function (p) {
-        var old = Date.now() - Date.parse(p.at) > 36e5;
-        var mk = L.marker([p.lat, p.lng], { icon: L.divIcon({ className: 'ofa-mk' + (old ? ' old' : ''), html: ofaAvatar(p.name) + '<em>' + esc(since(p.at)) + '</em>', iconSize: [40, 56], iconAnchor: [20, 20], popupAnchor: [0, -18] }), title: p.name, zIndexOffset: 1000 }).addTo(g);
-        mk.bindPopup('<b>' + esc(p.name) + '</b><br><small>' + tr('Last seen ', 'Alionekana ') + since(p.at) + '</small><div class="ofa-act" style="margin:8px 0 0">' + (p.phone ? '<a href="tel:' + esc(p.phone.replace(/\s/g, '')) + '">' + oic('phone') + tr('Call', 'Piga simu') + '</a><a href="https://wa.me/' + waNum(p.phone, p.home) + '" target="_blank" rel="noopener">' + oic('chat') + 'WhatsApp</a>' : '') + '<button type="button" data-ofa-vt="' + esc(p.name) + '">' + oic('clip') + tr('Visits today', 'Ziara za leo') + ' · ' + ofaTmVisits(p.name).length + '</button></div>');
+        var mk = L.marker([p.lat, p.lng], { icon: L.divIcon({ className: 'ofa-mk' + (dqmOld(p.at) ? ' old' : ''), html: ofaAvatar(p.name) + '<em>' + esc(since(p.at)) + '</em>', iconSize: [40, 56], iconAnchor: [20, 20], popupAnchor: [0, -18] }), title: p.name, zIndexOffset: 1000 }).addTo(g);
+        mk.bindPopup('<b>' + esc(p.name) + '</b><br><small>' + tr('Last seen ', 'Alionekana ') + since(p.at) + '</small><div class="ofa-act" style="margin:8px 0 0"><button type="button" data-ofa-p="' + esc(p.name) + '">' + oic('clip') + tr('Visits today', 'Ziara za leo') + ' · ' + ofaTmVisits(p.name).length + '</button></div>');
         p._mk = mk; if (OFA.open && same(p.name, OFA.open)) focus.push(mk.getLatLng());
       });
       g.addTo(m);
       if (focus.length > 1) m.fitBounds(L.latLngBounds(focus).pad(0.3), { maxZoom: 14 }); else if (focus.length) m.setView(focus[0], 13);
       else if (g.getLayers().length) m.fitBounds(g.getBounds().pad(0.15), { maxZoom: 13 }); else { var c = CENTER[homeCk()] || [-3, 35, 5]; m.setView([c[0], c[1]], c[2]); }
+      if (OFA.pop) { var pp = (OFA.tm.people || []).filter(function (x) { return x.name === OFA.pop; })[0]; OFA.pop = ''; if (pp && pp._mk) pp._mk.openPopup(); }
     }, 40);
   }
+  // a teammate: call, WhatsApp, today's visits (tap one to open the project), and show them on the map
+  function dqmTmSheet(n) {
+    var p = ((OFA.tm && OFA.tm.people) || []).filter(function (x) { return x.name === n; })[0]; if (!p) return;
+    var v = ofaTmVisits(n), tel = p.phone ? p.phone.replace(/\s/g, '') : '';
+    var html = '<div class="dqm-sh" data-testid="tm_sheet"><div class="dqm-shd">' + ofaAvatar(n, 'lg') + '<h3>' + esc(n) + '</h3><small>' + tr('Last seen ', 'Alionekana ') + since(p.at) + dqmAcc(p.acc) + '</small></div>' +
+      '<div class="dqm-acts">' + (p.phone ? '<div class="dqm-two"><a class="btn light" href="tel:' + esc(tel) + '" data-testid="tm_call">' + oic('phone') + tr('Call', 'Piga simu') + '</a><a class="btn light" href="https://wa.me/' + waNum(p.phone, p.home) + '" target="_blank" rel="noopener" data-testid="tm_wa">' + oic('vxwa') + 'WhatsApp</a></div>'
+        : '<p class="muted dqm-note">' + tr('No phone number on the team list for them.', 'Hakuna namba ya simu yake kwenye orodha ya timu.') + '</p>') +
+      '<button class="btn" type="button" data-a="map" data-testid="tm_onmap">' + oic('pin') + tr('Show on the map', 'Onyesha kwenye ramani') + '</button></div>' +
+      '<p class="dqm-lab">' + tr('Visits today', 'Ziara za leo') + ' · ' + v.length + '</p>' +
+      (v.length ? '<ul class="dqm-vt">' + v.map(function (x) {
+        var pr = byId(x.id), st = x.s === 'notworking' ? tr('Not working', 'Haifanyi kazi') : x.s === 'repair' ? tr('Needs repair', 'Inahitaji matengenezo') : tr('Working', 'Inafanya kazi');
+        return '<li><button type="button" data-a="open" data-id="' + esc(x.id) + '"><i style="background:' + ofaStateCol(x.s) + '" aria-hidden="true"></i><span><b>' + esc(pr ? pr.title : x.t || x.id) + '</b><small>' + st + '</small></span><time>' + ofaClock(x.at) + '</time>' + oic('chev') + '</button></li>';
+      }).join('') + '</ul>' : '<p class="muted dqm-note">' + tr('No visits reported yet today.', 'Hakuna ziara zilizoripotiwa leo bado.') + '</p>') + '</div>';
+    var w = tSheet(n, html), c = w.querySelector('.tsh-c');
+    c.addEventListener('click', function (e) {
+      var a = e.target.closest('[data-a]'); if (!a) return;
+      if (a.getAttribute('data-a') === 'open') { var id = a.getAttribute('data-id'); w.close(); setTimeout(function () { openProj(id); }, 200); return; }
+      if (a.getAttribute('data-a') === 'map') {
+        w.close(); OFA.open = n; OFA.pop = n; ofaTmDraw();
+        var mp = $('ofaTmMap'); if (mp && mp.scrollIntoView) mp.scrollIntoView({ block: 'nearest', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+      }
+    });
+  }
   $('oBody').addEventListener('click', function (e) {
-    var go = e.target.closest('[data-ofa-go]'), vt = e.target.closest('[data-ofa-vt]');
-    if (go && OFA.tm) { var n = go.getAttribute('data-ofa-go'), p = (OFA.tm.people || []).filter(function (x) { return x.name === n; })[0]; if (p && p._mk && OFA.map) { OFA.map.setView(p._mk.getLatLng(), Math.max(OFA.map.getZoom(), 13)); p._mk.openPopup(); var mp = $('ofaTmMap'); if (mp && mp.scrollIntoView) mp.scrollIntoView({ block: 'nearest' }); } return; }
-    if (vt) { var k = vt.getAttribute('data-ofa-vt'); OFA.open = OFA.open === k ? '' : k; ofaTmDraw(); }
+    var pe = e.target.closest('[data-ofa-p]');
+    if (pe && OFA.tm && O.tab === 'teammap') { buzz(); if (OFA.map) OFA.map.closePopup(); dqmTmSheet(pe.getAttribute('data-ofa-p')); }
   });
 
   // Office › Plan a week
@@ -6227,6 +6490,7 @@ html[data-theme=sun] .ocv-bar .col{border:1.5px solid #000}html[data-theme=sun] 
   function ofaKm(ids) { var s = 0; for (var i = 1; i < ids.length; i++) { var a = byId(ids[i - 1]), z = byId(ids[i]); if (a && z && a.gps && z.gps) s += metres(a.gps, z.gps); } return s; }
   function ofaWhy(id) {
     var info = (OFA.plan && OFA.plan.info[id]) || {}, r = S.repairs[id], out = [];
+    if (info.chosen) out.push(['dqm-ch', tr('Chosen', 'Umechagua')]);
     (info.why || []).forEach(function (w) {
       if (w === 'repair') out.push(['bad', r && r.state !== 'notworking' ? tr('Needs repair', 'Inahitaji matengenezo') : tr('Not working', 'Haifanyi kazi')]);
       if (w === 'urgent') out.push(['bad', tr('Urgent', 'Haraka')]);
@@ -6236,37 +6500,191 @@ html[data-theme=sun] .ocv-bar .col{border:1.5px solid #000}html[data-theme=sun] 
     });
     return out;
   }
+  // the choices sit in a row that is open until the first suggestion, then folds away with a one-line summary
   function ofaPlanTab(b) {
     var ck = OFA.ck || homeCk() || 'ke', nm = names(), tm = new Date(Date.now() + 864e5); if (tm.getDay() === 0) tm = new Date(tm.getTime() + 864e5);
     var sel = function (id, opts, v) { return '<select id="' + id + '">' + opts.map(function (o) { return '<option value="' + esc(o[0]) + '"' + (String(o[0]) === String(v) ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') + '</select>'; };
-    b.innerHTML = '<div class="card"><h2>' + tr('Plan a week', 'Panga wiki') + '</h2><p class="muted" style="margin-top:0">' + tr('Suggests visits for one person: open repairs first, then sites not visited for 6 months or more, and water tests that are due. Sites close together go on the same day, in driving order.', 'Inapendekeza ziara kwa mtu mmoja: matengenezo yaliyo wazi kwanza, kisha maeneo yasiyotembelewa kwa miezi 6 au zaidi, na vipimo vya maji vinavyohitajika. Maeneo yaliyo karibu yanawekwa siku moja, kwa mpangilio wa safari.') + '</p>' +
-      (nm.length ? '' : '<p class="msg warn">' + tr('Add people in the Team tab first.', 'Ongeza watu kwenye kichupo cha Timu kwanza.') + '</p>') +
-      '<div class="ofields"><label>' + tr('Field officer', 'Afisa wa uwanjani') + sel('ofaTo', nm.map(function (n) { return [n, n]; }), OFA.to || '') + '</label>' +
+    if (DQM.open.planf == null || !OFA.plan) DQM.open.planf = !OFA.plan;
+    var form = (nm.length ? '' : '<p class="msg warn">' + tr('Add people in the Team tab first.', 'Ongeza watu kwenye kichupo cha Timu kwanza.') + '</p>') +
+      '<div class="dqm-f dqm-pform"><div class="dqm-f2"><label>' + tr('Field officer', 'Afisa wa uwanjani') + sel('ofaTo', nm.map(function (n) { return [n, n]; }), OFA.to || '') + '</label>' +
       '<label>' + tr('Country', 'Nchi') + sel('ofaCk', ['ke', 'tz', 'ug', 'mw'].map(function (c) { return [c, CNAME[c]]; }), ck) + '</label></div>' +
-      '<label>' + tr('Area', 'Eneo') + '<select id="ofaArea"></select></label>' +
-      '<div class="ofields"><label>' + tr('Days', 'Siku') + sel('ofaDaysN', [1, 2, 3, 4, 5, 6].map(function (n) { return [n, n]; }), OFA.days || 5) + '</label>' +
+      '<div class="dqm-afld"><span class="dqm-flab" id="ofaAreaL">' + tr('Area', 'Eneo') + '</span><button type="button" class="dqm-sel" id="ofaArea" data-testid="plan_area" aria-haspopup="dialog" aria-labelledby="ofaAreaL ofaAreaV"><span id="ofaAreaV"></span>' + oic('chev') + '</button></div>' +
+      '<div class="dqm-f3"><label>' + tr('Days', 'Siku') + sel('ofaDaysN', [1, 2, 3, 4, 5, 6].map(function (n) { return [n, n]; }), OFA.days || 5) + '</label>' +
       '<label>' + tr('Stops a day', 'Vituo kwa siku') + sel('ofaPer', [3, 4, 5, 6, 7, 8].map(function (n) { return [n, n]; }), OFA.per || 5) + '</label>' +
-      '<label>' + tr('First day', 'Siku ya kwanza') + '<input type="date" id="ofaStart" value="' + (OFA.start || ofaYmd(tm)) + '"></label></div>' +
-      '<div class="oact"><button class="btn" type="button" id="ofaGo"' + (nm.length ? '' : ' disabled') + '>' + oic('spark') + ' ' + tr('Suggest visits', 'Pendekeza ziara') + '</button><span class="msg" id="ofaMsg" aria-live="polite"></span></div></div><div id="ofaRes"></div>';
-    var areas = function () {
-      var c = $('ofaCk').value, n = {}; S.projects.forEach(function (p) { var a = ofaArea(p); if (p.ck === c && p.gps && a) n[a] = (n[a] || 0) + 1; });
-      var ks = Object.keys(n).sort(function (a, z) { return n[z] - n[a] || a.localeCompare(z); }).slice(0, 80);
-      $('ofaArea').innerHTML = '<option value="">' + tr('All of ', 'Yote ya ') + CNAME[c] + '</option>' + ks.map(function (a) { return '<option value="' + esc(a) + '"' + (a === OFA.area ? ' selected' : '') + '>' + esc(a) + ' (' + n[a] + ')</option>'; }).join('');
-    };
-    areas(); $('ofaCk').addEventListener('change', function () { OFA.area = ''; areas(); });
+      '<label class="dqm-wide">' + tr('First day', 'Siku ya kwanza') + '<input type="date" id="ofaStart" value="' + (OFA.start || ofaYmd(tm)) + '"></label></div>' +
+      dqmPickRow() +
+      '<div class="dqm-acts"><button class="btn" type="button" id="ofaGo"' + (nm.length ? '' : ' disabled') + '>' + oic('spark') + ' ' + tr('Suggest visits', 'Pendekeza ziara') + '</button><span class="msg" id="ofaMsg" aria-live="polite"></span></div></div>';
+    b.innerHTML = '<div class="dqm-plan">' + dqmHead('plan', 'ofaRoute', 'blue', tr('Plan a week', 'Panga wiki'), tr('Suggested visits for one person: close sites on the same day, in driving order.', 'Ziara zilizopendekezwa kwa mtu mmoja: maeneo yaliyo karibu siku moja, kwa mpangilio wa safari.')) +
+      '<div class="card dqm-sets dqm-gap" id="dqmPlanF">' + dqmFold('planf', 'dqmtune', 'blue', tr('Choices', 'Machaguo'), '<span id="dqmPlanSum"></span>', 'has', form) +
+      dqmFold('planhow', 'dqminfo', 'slate', tr('How it chooses', 'Jinsi inavyochagua'), tr('Repairs first, then visits that are due', 'Matengenezo kwanza, kisha ziara zinazohitajika'), 'off',
+        '<p class="muted">' + tr('Suggests visits for one person: open repairs first, then sites not visited for 6 months or more, and water tests that are due. Sites close together go on the same day, in driving order.', 'Inapendekeza ziara kwa mtu mmoja: matengenezo yaliyo wazi kwanza, kisha maeneo yasiyotembelewa kwa miezi 6 au zaidi, na vipimo vya maji vinavyohitajika. Maeneo yaliyo karibu yanawekwa siku moja, kwa mpangilio wa safari.') + '</p>' +
+        '<p class="muted">' + tr('Tap a stop to open the project or take it off the day. Then assign the week: each day goes to their “My work” with its date.', 'Gusa kituo kufungua mradi au kukiondoa siku hiyo. Kisha gawa wiki: kila siku inaenda kwenye “Kazi yangu” yao na tarehe yake.') + '</p>') +
+      '</div><div id="ofaRes"></div></div>';
+    // chosen projects that are no longer in the list are let go
+    OFA.pick = (OFA.pick || []).filter(function (id) { var p = byId(id); return p && p.ck === ck; });
+    $('ofaCk').addEventListener('change', dqmPickReset);
+    $('dqmPlanF').addEventListener('change', dqmPlanSum); dqmPickUi();
+    $('ofaArea').addEventListener('click', function () { buzz(); dqmPlanPick('areas'); });
+    $('ofaPick').addEventListener('click', function () { buzz(); dqmPlanPick('projects'); });
+    $('ofaOnly').addEventListener('click', function () { OFA.only = !OFA.only; this.setAttribute('aria-checked', String(OFA.only)); buzz(); dqmPlanSum(); });
     $('ofaGo').addEventListener('click', ofaSuggest);
     if (OFA.plan) ofaPlanDraw();
   }
+  // the choices in one line, for the folded row
+  function dqmPlanSum() {
+    var el = $('dqmPlanSum'); if (!el) return;
+    var v = function (id) { var x = $(id); return x ? x.value : ''; }, d = +v('ofaDaysN') || 5, n = (OFA.pick || []).length;
+    el.textContent = [v('ofaTo') || tr('Choose a person', 'Chagua mtu'), CNAME[v('ofaCk')] || '', (OFA.areas || []).length ? dqmAreasTx() : tr('all areas', 'maeneo yote'), d === 1 ? tr('1 day', 'siku 1') : tr(d + ' days', 'siku ' + d), tr(v('ofaPer') + ' a day', v('ofaPer') + ' kwa siku'),
+      n ? (OFA.only ? tr('only the ' + n + ' chosen', 'zilizochaguliwa ' + n + ' tu') : tr(n + ' chosen', n + ' zimechaguliwa')) : ''].filter(Boolean).join(' · ');
+  }
+  // Plan a week › areas and projects, in one sheet. Areas: tick several (none ticked: the whole country). Projects in
+  // them: tick some by hand and they are always planned, grouped by distance; the other stops are filled with the usual
+  // suggestions unless "Only these projects". No project ticked: every project of the ticked areas can be suggested.
+  var DQM_PICK_MAX = 60, DQM_AREA_MAX = 20, DQM_PICK_SHOW = 150;
+  function dqmPlanCk() { var x = $('ofaCk'); return (x && x.value) || OFA.ck || homeCk() || 'ke'; }
+  function dqmAreaN(ck) { var n = {}; S.projects.forEach(function (p) { var a = ofaArea(p); if (p.ck === ck && a) n[a] = (n[a] || 0) + 1; }); return n; }
+  function dqmAreaKeys(n) { var ks = Object.keys(n).sort(function (a, z) { return n[z] - n[a] || a.localeCompare(z); }).slice(0, 80); (OFA.areas || []).forEach(function (a) { if (ks.indexOf(a) < 0 && n[a]) ks.push(a); }); return ks; }
+  function dqmProjN(n) { return n === 1 ? tr('1 project', 'mradi 1') : tr(n + ' projects', 'miradi ' + n); }
+  // the Area field: "All of Kenya", "Kapsaret, Kaigat" or "Kapsaret, Kaigat +2 more"
+  function dqmAreasTx() {
+    var a = OFA.areas || [];
+    if (!a.length) return tr('All of ', 'Yote ya ') + CNAME[dqmPlanCk()];
+    return a.slice(0, 2).join(', ') + (a.length > 2 ? ' ' + tr('+' + (a.length - 2) + ' more', 'na ' + (a.length - 2) + ' zaidi') : '');
+  }
+  // the summary under the form: "Kapsaret: 3 of 8 projects · Kaigat: all 3"
+  function dqmScopeTx() {
+    var ck = dqmPlanCk(), n = dqmAreaN(ck), a = OFA.areas || [], pick = (OFA.pick || []).map(byId).filter(Boolean);
+    if (!a.length) return tr('All of ', 'Yote ya ') + CNAME[ck] + ' · ' + (pick.length ? tr(pick.length + ' chosen by hand', 'zimechaguliwa ' + pick.length + ' kwa mkono') : tr('suggestions from every area', 'mapendekezo kutoka maeneo yote'));
+    var parts = a.map(function (ar) {
+      var k = pick.filter(function (p) { return ofaArea(p) === ar; }).length, all = n[ar] || 0;
+      return ar + ': ' + (k ? tr(k + ' of ' + dqmProjN(all), (all === 1 ? 'mradi ' : 'miradi ') + k + ' kati ya ' + all) : all === 1 ? tr('its 1 project', 'mradi wake 1') : tr('all ' + all, 'yote ' + all));
+    });
+    var out = parts.slice(0, 4).join(' · ') + (parts.length > 4 ? ' · ' + tr('+' + (parts.length - 4) + ' more areas', 'na maeneo ' + (parts.length - 4) + ' zaidi') : '');
+    var other = pick.filter(function (p) { return a.indexOf(ofaArea(p)) < 0; }).length;
+    return out + (other ? ' · ' + tr(other + ' more chosen', 'zingine ' + other + ' zimechaguliwa') : '');
+  }
+  function dqmPickRow() {
+    return '<div class="dqm-pk"><button type="button" class="dqm-row dqm-prow" id="ofaPick" data-testid="plan_pick" aria-haspopup="dialog">' + dqmIc('clip', 'purple', 'dqm-ri') + '<span class="dqm-rt"><b>' + tr('Areas and projects', 'Maeneo na miradi') + '</b><small id="ofaPickS"><i aria-hidden="true"></i><span id="ofaPickSum" data-testid="plan_scope"></span></small></span><span class="dqm-pc" aria-hidden="true">' + oic('chev') + '</span></button>' +
+      '<button type="button" class="tm-sw" role="switch" id="ofaOnly" data-testid="plan_only" aria-checked="' + !!OFA.only + '" hidden><span class="ic">' + oic('check') + '</span><span><b>' + tr('Only these projects', 'Miradi hii tu') + '</b><small>' + tr('No other suggestions are added', 'Hakuna mapendekezo mengine yanayoongezwa') + '</small></span><i aria-hidden="true"></i></button></div>';
+  }
+  // the Area field, the summary row and the Only switch follow the ticks straight away
+  function dqmPickUi() {
+    var n = (OFA.pick || []).length;
+    if ($('ofaAreaV')) $('ofaAreaV').textContent = dqmAreasTx();
+    if ($('ofaPickSum')) { $('ofaPickSum').textContent = dqmScopeTx(); $('ofaPickS').className = n || (OFA.areas || []).length ? 't-has' : 't-off'; }
+    if ($('ofaOnly')) { $('ofaOnly').hidden = !n; if (!n) OFA.only = false; $('ofaOnly').setAttribute('aria-checked', String(!!OFA.only)); }
+    dqmPlanSum();
+  }
+  // a new country starts again
+  function dqmPickReset() { OFA.areas = []; OFA.pick = []; OFA.only = false; OFA.pq = ''; OFA.pt = false; dqmPickUi(); }
+  function dqmPlanPick(at) {
+    OFA.areas = OFA.areas || []; OFA.pick = OFA.pick || []; OFA.pq = OFA.pq || '';
+    var ck = dqmPlanCk(), cn = CNAME[ck];
+    var w = tSheet(tr('Areas and projects', 'Maeneo na miradi'), '<div class="dqm-fsh dqm-apk" data-testid="plan_pick_sheet"><div class="dqm-shd"><span class="dqm-shi dqm-t-has" aria-hidden="true">' + oic('layers') + '</span><h3>' + tr('Areas and projects', 'Maeneo na miradi') + '</h3><small>' +
+      tr('Tick the areas to plan in, then any projects that must be visited. Those are always in the plan, grouped by distance; the other stops are suggestions.', 'Chagua maeneo ya kupanga, kisha miradi inayolazimika kutembelewa. Hiyo iko kwenye mpango kila wakati, kwa umbali; vituo vingine ni mapendekezo.') + '</small></div>' +
+      '<fieldset class="dnr-pick dqm-ars" id="ofaArs"><legend><span>' + tr('Areas', 'Maeneo') + '</span> <span class="tag has" id="ofaArN" data-testid="plan_area_n"></span></legend>' +
+      '<div class="dnr-plist dqm-alist" id="ofaArList" role="group" aria-label="' + tr('Areas', 'Maeneo') + '"></div><p class="muted dqm-note" id="ofaArHint"></p></fieldset>' +
+      '<fieldset class="dnr-pick" id="ofaPrs"><legend><span id="ofaPrL"></span> <span class="tag has" id="ofaPkN" data-testid="plan_pick_n"></span></legend>' +
+      '<div class="dqm-pks"><input type="search" id="ofaPkQ" placeholder="' + tr('Search projects', 'Tafuta miradi') + '" aria-label="' + tr('Search projects by name or place', 'Tafuta miradi kwa jina au mahali') + '" value="' + esc(OFA.pq) + '">' +
+      '<button type="button" class="chip" id="ofaPkOnly" data-testid="plan_pick_only" aria-pressed="' + !!OFA.pt + '">' + tr('Ticked only', 'Zilizochaguliwa tu') + '</button></div>' +
+      '<div class="dqm-pgs" id="ofaPkList"></div></fieldset><p class="msg" id="ofaPkMsg" aria-live="polite"></p>' +
+      '<div class="dqm-acts"><button class="btn" type="button" data-a="done" data-testid="plan_pick_done">' + oic('check') + tr('Done', 'Imekamilika') + '</button><button class="btn light" type="button" data-a="clear" data-testid="plan_pick_clear">' + tr('Clear all', 'Ondoa zote') + '</button></div></div>');
+    var c = w.querySelector('.tsh-c');
+    var say = function (t) { msg('ofaPkMsg', t ? 'warn' : '', t || ''); };
+    var drawAreas = function () {
+      var n = dqmAreaN(ck), ks = dqmAreaKeys(n), on = {}; OFA.areas.forEach(function (a) { on[a] = 1; });
+      $('ofaArList').innerHTML = ks.length ? ks.map(function (a) {
+        return '<label class="dnr-p dqm-ac"><input type="checkbox" value="' + esc(a) + '"' + (on[a] ? ' checked' : '') + '><span class="dqm-an">' + esc(a) + '</span><span class="dqm-cnt" aria-label="' + esc(dqmProjN(n[a])) + '">' + n[a] + '</span></label>';
+      }).join('') : '<p class="muted dqm-note">' + tr('No areas in ' + cn + ' yet.', 'Bado hakuna maeneo ' + cn + '.') + '</p>';
+      $('ofaArN').textContent = OFA.areas.length ? tr(OFA.areas.length + ' ticked', OFA.areas.length + ' zimechaguliwa') : tr('All of ', 'Yote ya ') + cn;
+      $('ofaArHint').textContent = OFA.areas.length ? '' : tr('None ticked: projects from all of ' + cn + '.', 'Hakuna iliyochaguliwa: miradi kutoka ' + cn + ' yote.');
+    };
+    var drawProjects = function () {
+      var q = OFA.pq.trim().toLowerCase(), tick = {}, ar = OFA.areas; OFA.pick.forEach(function (id) { tick[id] = 1; });
+      var inScope = function (p) { return p.ck === ck && (!ar.length || ar.indexOf(ofaArea(p)) >= 0 || tick[p.id]); };
+      var P = S.projects.filter(function (p) {
+        return inScope(p) && (!OFA.pt || tick[p.id]) && (!q || (p.title + ' ' + (p.area || '')).toLowerCase().indexOf(q) >= 0);
+      });
+      // grouped by area: the ticked areas in the order they were ticked, otherwise the biggest first
+      var n = dqmAreaN(ck), g = {}, order = [];
+      P.forEach(function (p) { var a = ofaArea(p); if (!g[a]) { g[a] = []; order.push(a); } g[a].push(p); });
+      order.sort(function (a, z) { var ia = ar.indexOf(a), iz = ar.indexOf(z); if (ia >= 0 || iz >= 0) return (ia < 0 ? 99 : ia) - (iz < 0 ? 99 : iz); if (!a || !z) return a ? -1 : 1; return (n[z] || 0) - (n[a] || 0) || a.localeCompare(z); });
+      var shown = 0;
+      $('ofaPrL').textContent = ar.length ? tr('Projects in these areas', 'Miradi katika maeneo haya') : tr('Projects in ', 'Miradi ya ') + cn;
+      $('ofaPkList').innerHTML = P.length ? order.map(function (a) {
+        if (shown >= DQM_PICK_SHOW) return '';
+        var ps = g[a].sort(function (x, z) { return x.title.localeCompare(z.title); }).slice(0, DQM_PICK_SHOW - shown); shown += ps.length;
+        var k = g[a].filter(function (p) { return tick[p.id]; }).length;
+        return '<section class="dqm-pg" role="group" aria-label="' + esc(a || tr('No area', 'Hakuna eneo')) + '"><div class="dqm-pgh"><span class="dqm-pgt"><b>' + esc(a || tr('No area', 'Hakuna eneo')) + '</b><small>' + (k ? tr(k + ' of ' + g[a].length + ' chosen', k + ' kati ya ' + g[a].length + ' zimechaguliwa') : dqmProjN(g[a].length)) + '</small></span>' +
+          '<span class="dqm-pga"><button type="button" class="chip" data-pa="all" data-ar="' + esc(a) + '"' + (k === g[a].length ? ' disabled' : '') + '>' + tr('Select all', 'Chagua zote') + '</button><button type="button" class="chip" data-pa="none" data-ar="' + esc(a) + '"' + (k ? '' : ' disabled') + '>' + tr('Clear', 'Futa') + '</button></span></div>' +
+          ps.map(function (p) {
+            return '<label class="dnr-p"><input type="checkbox" value="' + esc(p.id) + '"' + (tick[p.id] ? ' checked' : '') + '><span><b>' + esc(p.title) + '</b><small>' + esc([p.type, p.area].filter(Boolean).join(' · ')) + (p.gps ? '' : ' · <span class="dqm-nl">' + tr('No location', 'Hakuna mahali') + '</span>') + '</small></span></label>';
+          }).join('') + '</section>';
+      }).join('') + (P.length > DQM_PICK_SHOW ? '<p class="muted dqm-note">' + tr('…and ' + (P.length - DQM_PICK_SHOW) + ' more. Search or tick an area to narrow it down.', '…na ' + (P.length - DQM_PICK_SHOW) + ' zaidi. Tafuta au chagua eneo ili kupunguza.') + '</p>' : '')
+        : '<p class="muted dqm-note">' + (OFA.pt ? tr('No projects ticked yet.', 'Bado hakuna mradi uliochaguliwa.') : tr('No projects match.', 'Hakuna mradi unaolingana.')) + '</p>';
+      $('ofaPkN').textContent = tr(OFA.pick.length + ' chosen', OFA.pick.length + ' zimechaguliwa');
+      w._vis = g;
+    };
+    var draw = function () { drawAreas(); drawProjects(); dqmPickUi(); };
+    var tickArea = function (a, on) {
+      var i = OFA.areas.indexOf(a);
+      if (on && i < 0) {
+        // the first area ticked: the areas of projects already chosen come too, so none of them is hidden
+        var add = [a]; if (!OFA.areas.length) OFA.pick.forEach(function (id) { var p = byId(id), x = p && ofaArea(p); if (x && add.indexOf(x) < 0) add.push(x); });
+        if (OFA.areas.length + add.length > DQM_AREA_MAX) { say(tr('You can tick up to ' + DQM_AREA_MAX + ' areas.', 'Unaweza kuchagua hadi maeneo ' + DQM_AREA_MAX + '.')); return false; }
+        OFA.areas = OFA.areas.concat(add);
+      }
+      if (!on && i >= 0) {
+        OFA.areas.splice(i, 1);
+        // its projects are no longer chosen
+        OFA.pick = OFA.pick.filter(function (id) { var p = byId(id); return !p || ofaArea(p) !== a; });
+      }
+      return true;
+    };
+    var tickProject = function (id, on) {
+      var i = OFA.pick.indexOf(id);
+      if (on && i < 0) { if (OFA.pick.length >= DQM_PICK_MAX) { say(tr('You can choose up to ' + DQM_PICK_MAX + ' projects.', 'Unaweza kuchagua hadi miradi ' + DQM_PICK_MAX + '.')); return false; } OFA.pick.push(id); }
+      if (!on && i >= 0) OFA.pick.splice(i, 1);
+      return true;
+    };
+    draw();
+    if (at === 'projects' && OFA.areas.length) setTimeout(function () { var f = $('ofaPrs'); if (f) c.scrollTop = f.offsetTop - 8; }, 30);
+    $('ofaArList').addEventListener('touchstart', function (e) { e.stopPropagation(); }, { passive: true });
+    c.addEventListener('input', function (e) { if (e.target.id === 'ofaPkQ') { OFA.pq = e.target.value; drawProjects(); } });
+    c.addEventListener('change', function (e) {
+      var t = e.target; if (t.type !== 'checkbox') return;
+      say('');
+      if (t.closest('#ofaArList')) { if (!tickArea(t.value, t.checked)) t.checked = !t.checked; else draw(); }
+      else if (t.closest('#ofaPkList')) { if (!tickProject(t.value, t.checked)) t.checked = false; drawProjects(); dqmPickUi(); }
+    });
+    c.addEventListener('click', function (e) {
+      var x = e.target.closest('#ofaPkOnly, [data-a], [data-pa]'); if (!x) return;
+      if (x.id === 'ofaPkOnly') { OFA.pt = !OFA.pt; x.setAttribute('aria-pressed', String(OFA.pt)); drawProjects(); return; }
+      if (x.hasAttribute('data-pa')) {
+        say(''); var ps = (w._vis || {})[x.getAttribute('data-ar')] || [], on = x.getAttribute('data-pa') === 'all';
+        ps.every(function (p) { return tickProject(p.id, on); });
+        drawProjects(); dqmPickUi(); return;
+      }
+      if (x.getAttribute('data-a') === 'clear') { OFA.areas = []; OFA.pick = []; OFA.only = false; OFA.pt = false; $('ofaPkOnly').setAttribute('aria-pressed', 'false'); say(''); draw(); return; }
+      if (x.getAttribute('data-a') === 'done') w.close();
+    });
+    return w;
+  }
+
   function ofaSuggest() {
-    OFA.to = $('ofaTo').value; OFA.ck = $('ofaCk').value; OFA.area = $('ofaArea').value; OFA.days = +$('ofaDaysN').value; OFA.per = +$('ofaPer').value; OFA.start = $('ofaStart').value || ofaYmd(new Date(Date.now() + 864e5));
+    OFA.to = $('ofaTo').value; OFA.ck = $('ofaCk').value; OFA.days = +$('ofaDaysN').value; OFA.per = +$('ofaPer').value; OFA.start = $('ofaStart').value || ofaYmd(new Date(Date.now() + 864e5));
     var btn = $('ofaGo'); btn.disabled = true; msg('ofaMsg', '', tr('Working it out…', 'Inapanga…'));
-    adminApi('GET', null, '?view=plan&ck=' + encodeURIComponent(OFA.ck) + '&area=' + encodeURIComponent(OFA.area) + '&days=' + OFA.days + '&per=' + OFA.per).then(function (j) {
+    var ar = OFA.areas || [], ids = (OFA.pick || []).filter(function (id) { return /^\d+$/.test(id); });
+    adminApi('GET', null, '?view=plan&ck=' + encodeURIComponent(OFA.ck) + '&days=' + OFA.days + '&per=' + OFA.per + (ar.length ? '&areas=' + ar.map(encodeURIComponent).join(',') : '') +
+      (ids.length ? '&ids=' + ids.join(',') + (OFA.only ? '&only=1' : '') : '')).then(function (j) {
       btn.disabled = false;
       if (!j.ok) { msg('ofaMsg', 'bad', why(j)); return; }
       var info = {}; (j.days || []).forEach(function (d) { d.stops.forEach(function (s) { info[s.id] = s; }); }); (j.spare || []).forEach(function (s) { info[s.id] = s; });
       OFA.plan = { to: OFA.to, info: info, total: j.total || 0, days: (j.days || []).map(function (d) { return ofaOrder(d.stops.map(function (s) { return s.id; })); }), spare: (j.spare || []).map(function (s) { return s.id; }).filter(function (id) { return byId(id); }) };
+      OFA.plan.nogps = j.nogps || [];
       OFA.plan.dates = ofaDates(OFA.start, OFA.plan.days.length); OFA.day = -1; OFA.done = false;
       msg('ofaMsg', '', j.total ? '' : tr('Nothing needs a visit there right now.', 'Hakuna kinachohitaji ziara huko kwa sasa.'));
+      if (j.total) dqmFoldSet($('dqmPlanF'), 'planf', false);
       ofaPlanDraw();
       var res = $('ofaRes'); if (res && res.firstChild && res.scrollIntoView) res.scrollIntoView({ block: 'start', behavior: window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
     });
@@ -6276,22 +6694,24 @@ html[data-theme=sun] .ocv-bar .col{border:1.5px solid #000}html[data-theme=sun] 
     var P = OFA.plan, box = $('ofaRes'); if (!P || !box) return;
     var n = P.days.reduce(function (s, d) { return s + d.length; }, 0), km = P.days.reduce(function (s, d) { return s + ofaKm(d); }, 0);
     if (!P.days.length) { box.innerHTML = ''; return; }
-    box.innerHTML = '<div class="card" style="margin-top:12px"><div class="ofa-sum"><b>' + tr(n + ' visits over ' + P.days.length + (P.days.length === 1 ? ' day' : ' days') + ' · about ' + dist(km), 'Ziara ' + n + ' kwa siku ' + P.days.length + ' · takriban ' + dist(km)) + '</b><small>' + tr('For ' + P.to + '. Straight lines between sites; roads are longer.', 'Kwa ' + P.to + '. Mistari iliyonyooka kati ya maeneo; barabara ni ndefu zaidi.') + (P.total > n ? ' ' + tr((P.total - n) + ' more sites need a visit: add them below.', 'Maeneo mengine ' + (P.total - n) + ' yanahitaji ziara: yaongeze hapa chini.') : '') + '</small></div>' +
+    box.innerHTML = '<div class="card dqm-hero dqm-gap" data-testid="plan_res"><div class="ofa-sum"><b>' + tr(n + ' visits over ' + P.days.length + (P.days.length === 1 ? ' day' : ' days') + ' · about ' + dist(km), 'Ziara ' + n + ' kwa siku ' + P.days.length + ' · takriban ' + dist(km)) + '</b><small>' + tr('For ' + P.to + '. Straight lines between sites; roads are longer.', 'Kwa ' + P.to + '. Mistari iliyonyooka kati ya maeneo; barabara ni ndefu zaidi.') + (P.total > n ? ' ' + tr((P.total - n) + ' more sites need a visit: add them below.', 'Maeneo mengine ' + (P.total - n) + ' yanahitaji ziara: yaongeze hapa chini.') : '') + '</small></div>' +
+      ((P.nogps || []).length ? '<p class="dqm-nogps" data-testid="plan_nogps">' + oic('alert') + '<span><b>' + tr('No location, so not placed:', 'Hakuna mahali, kwa hiyo haikuwekwa:') + '</b> ' + P.nogps.map(function (x) { return esc((byId(x.id) || {}).title || x.t || x.id); }).join(', ') + '</span></p>' : '') +
       '<div class="map ofa-pmap" id="ofaPMap" role="application" aria-label="' + tr('Map of the planned days', 'Ramani ya siku zilizopangwa') + '"></div>' +
       '<div class="ofa-chips" role="group" aria-label="' + tr('Show a day on the map', 'Onyesha siku kwenye ramani') + '"><button type="button" data-ofa-day="-1" aria-pressed="' + (OFA.day < 0) + '">' + tr('All days', 'Siku zote') + '</button>' + P.days.map(function (d, i) { return '<button type="button" data-ofa-day="' + i + '" aria-pressed="' + (OFA.day === i) + '" style="--c:' + OFA_COL[i % 6] + '"><i></i>' + tr('Day ', 'Siku ') + (i + 1) + '</button>'; }).join('') + '</div></div>' +
       P.days.map(function (d, i) {
         var c = OFA_COL[i % 6], ctr = d.length ? [d.reduce(function (s, id) { return s + byId(id).gps[0]; }, 0) / d.length, d.reduce(function (s, id) { return s + byId(id).gps[1]; }, 0) / d.length] : null;
         var spare = P.spare.slice().sort(function (a, z) { return ctr ? metres(ctr, byId(a).gps) - metres(ctr, byId(z).gps) : 0; });
         var stops = d.map(byId);
-        return '<article class="card ofa-day" style="--c:' + c + '"><div class="oh"><b>' + tr('Day ', 'Siku ') + (i + 1) + ' · ' + ofaDayName(P.dates[i]) + '</b><span class="tag has">' + (d.length === 1 ? tr('1 stop', 'kituo 1') : tr(d.length + ' stops', 'vituo ' + d.length)) + (d.length > 1 ? ' · ≈ ' + dist(ofaKm(d)) : '') + '</span></div>' +
-          '<ol class="ofa-stops">' + stops.map(function (p, k) {
-            return '<li><span class="n">' + (k + 1) + '</span><span class="tx"><b>' + esc(p.title) + '</b><small>' + esc(p.area || p.country) + (k ? ' · ' + dist(metres(stops[k - 1].gps, p.gps)) + tr(' from the last stop', ' kutoka kituo cha mwisho') : '') + '</small><span class="ofa-why">' + ofaWhy(p.id).map(function (w) { return '<span class="tag ' + w[0] + '">' + esc(w[1]) + '</span>'; }).join('') + '</span></span>' +
-              '<button type="button" class="ofa-x" data-ofa-rm="' + i + ':' + esc(p.id) + '" aria-label="' + esc(tr('Remove ', 'Ondoa ') + p.title) + '">×</button></li>';
-          }).join('') + '</ol>' + (d.length ? '' : '<p class="muted">' + tr('No stops on this day.', 'Hakuna vituo siku hii.') + '</p>') +
-          '<div class="ofa-dayf">' + (spare.length ? '<select data-ofa-add="' + i + '" aria-label="' + tr('Add a stop to day ', 'Ongeza kituo siku ya ') + (i + 1) + '"><option value="">+ ' + tr('Add a stop…', 'Ongeza kituo…') + '</option>' + spare.slice(0, 30).map(function (id) { var p = byId(id); return '<option value="' + esc(id) + '">' + esc(p.title) + (ctr ? ' · ' + dist(metres(ctr, p.gps)) : '') + '</option>'; }).join('') + '</select>' : '') +
+        return '<article class="card ofa-day dqm-day" style="--c:' + c + '" data-testid="plan_day"><div class="oh"><i class="dqm-dot" aria-hidden="true"></i><span><b>' + tr('Day ', 'Siku ') + (i + 1) + ' · ' + ofaDayName(P.dates[i]) + '</b><small>' + (d.length === 1 ? tr('1 stop', 'kituo 1') : tr(d.length + ' stops', 'vituo ' + d.length)) + (d.length > 1 ? ' · ' + tr('about ', 'takriban ') + dist(ofaKm(d)) : '') + '</small></span></div>' +
+          '<ol class="dqm-stops">' + stops.map(function (p, k) {
+            var w = ofaWhy(p.id);
+            return '<li><button type="button" class="dqm-stop" data-ofa-st="' + i + ':' + esc(p.id) + '" data-testid="plan_stop"><span class="n">' + (k + 1) + '</span><span class="tx"><b>' + esc(p.title) + '</b><small>' + esc(p.area || p.country) + (k ? ' · ' + dist(metres(stops[k - 1].gps, p.gps)) + tr(' from the last stop', ' kutoka kituo cha mwisho') : '') + '</small>' +
+              (w.length ? '<span class="ofa-why">' + w.map(function (x) { return '<span class="tag ' + x[0] + '">' + esc(x[1]) + '</span>'; }).join('') + '</span>' : '') + '</span><span class="dqm-chev" aria-hidden="true">' + oic('chev') + '</span></button></li>';
+          }).join('') + '</ol>' + (d.length ? '' : '<p class="muted dqm-note">' + tr('No stops on this day.', 'Hakuna vituo siku hii.') + '</p>') +
+          '<div class="dqm-dayf">' + (spare.length && !OFA.done ? '<select data-ofa-add="' + i + '" aria-label="' + tr('Add a stop to day ', 'Ongeza kituo siku ya ') + (i + 1) + '"><option value="">+ ' + tr('Add a stop…', 'Ongeza kituo…') + '</option>' + spare.slice(0, 30).map(function (id) { var p = byId(id); return '<option value="' + esc(id) + '">' + esc(p.title) + (ctr ? ' · ' + dist(metres(ctr, p.gps)) : '') + '</option>'; }).join('') + '</select>' : '') +
           (d.length ? '<a class="btn small light" href="' + gmaps(stops, null) + '" target="_blank" rel="noopener">' + brand('gmaps') + tr('Route in Google Maps', 'Njia kwenye Google Maps') + '</a>' : '') + '</div></article>';
       }).join('') +
-      '<div class="card" style="margin-top:12px"><label>' + tr('Note for ', 'Maelezo kwa ') + esc(P.to) + ' ' + tr('(optional)', '(si lazima)') + '<input type="text" id="ofaNote" placeholder="' + tr('e.g. take the water test kit', 'mf. beba vifaa vya kupima maji') + '"></label>' +
+      '<div class="card dqm-gap dqm-f"><label>' + tr('Note for ', 'Maelezo kwa ') + esc(P.to) + ' ' + tr('(optional)', '(si lazima)') + '<input type="text" id="ofaNote" placeholder="' + tr('e.g. take the water test kit', 'mf. beba vifaa vya kupima maji') + '"></label>' +
       '<button class="btn block" type="button" id="ofaAssign" style="margin-top:12px"' + (n && !OFA.done ? '' : ' disabled') + '>' + oic('cal') + ' ' + (OFA.done ? tr('Assigned', 'Imegawiwa') : tr('Assign ' + n + ' visits to ' + P.to, 'Mpe ' + P.to + ' ziara ' + n)) + '</button><p class="msg" id="ofaAMsg" aria-live="polite"></p></div>';
     $('ofaAssign').addEventListener('click', ofaAssign);
     setTimeout(ofaPlanMap, 40);
@@ -6315,10 +6735,31 @@ html[data-theme=sun] .ocv-bar .col{border:1.5px solid #000}html[data-theme=sun] 
     if (fit.getLayers().length) m.fitBounds(fit.getBounds().pad(0.15), { maxZoom: 13 }); else { var c = CENTER[OFA.ck] || [-3, 35, 5]; m.setView([c[0], c[1]], c[2]); }
   }
   $('oBody').addEventListener('click', function (e) {
-    var dy = e.target.closest('[data-ofa-day]'), rm = e.target.closest('[data-ofa-rm]');
+    var dy = e.target.closest('[data-ofa-day]'), st = e.target.closest('[data-ofa-st]');
     if (dy && OFA.plan) { OFA.day = +dy.getAttribute('data-ofa-day'); qa('[data-ofa-day]').forEach(function (x) { x.setAttribute('aria-pressed', x === dy); }); ofaPlanMap(); return; }
-    if (rm && OFA.plan && !OFA.done) { var a = rm.getAttribute('data-ofa-rm').split(':'), d = OFA.plan.days[+a[0]], i = d.indexOf(a[1]); if (i >= 0) { d.splice(i, 1); OFA.plan.spare.unshift(a[1]); } OFA.plan.days[+a[0]] = ofaOrder(d); ofaPlanDraw(); }
+    if (st && OFA.plan) { var a = st.getAttribute('data-ofa-st').split(':'); buzz(); dqmStopSheet(+a[0], a[1]); }
   });
+  // a stop: why it's suggested, where it is, and what to do with it (open the project, take it off the day)
+  function dqmStopSheet(di, id) {
+    var P = OFA.plan, d = P.days[di], k = d.indexOf(id), p = byId(id); if (!p || k < 0) return;
+    var prev = k ? byId(d[k - 1]) : null, w0 = ofaWhy(id), c = OFA_COL[di % 6];
+    var html = '<div class="dqm-sh" data-testid="plan_sheet"><div class="dqm-shd"><span class="dqm-shi dqm-num" style="--c:' + c + '" aria-hidden="true">' + (k + 1) + '</span><h3>' + esc(p.title) + '</h3><small>' + esc([p.area, p.country].filter(Boolean).join(', ')) + '</small>' +
+      (w0.length ? '<span class="ofa-why dqm-c">' + w0.map(function (x) { return '<span class="tag ' + x[0] + '">' + esc(x[1]) + '</span>'; }).join('') + '</span>' : '') + '</div>' +
+      dqmKv([[tr('Day', 'Siku'), esc(tr('Day ', 'Siku ') + (di + 1) + ' · ' + ofaDayName(P.dates[di])), tr('Stop ' + (k + 1) + ' of ' + d.length, 'Kituo ' + (k + 1) + ' kati ya ' + d.length)],
+        prev ? [tr('From the last stop', 'Kutoka kituo cha mwisho'), esc(dist(metres(prev.gps, p.gps))), esc(prev.title)] : null,
+        p.type ? [tr('Type', 'Aina'), esc(p.type)] : null]) +
+      '<div class="dqm-acts"><button class="btn" type="button" data-a="open" data-testid="plan_open">' + oic('arrow') + tr('Open project', 'Fungua mradi') + '</button>' +
+      (OFA.done ? '' : '<button class="btn light dqm-bad" type="button" data-a="rm" data-testid="plan_rm">' + oic('trash') + tr('Take it off day ' + (di + 1), 'Iondoe siku ya ' + (di + 1)) + '</button>') + '</div></div>';
+    var w = tSheet(p.title, html);
+    w.querySelector('.tsh-c').addEventListener('click', function (e) {
+      var a = e.target.closest('[data-a]'); if (!a) return;
+      if (a.getAttribute('data-a') === 'open') { w.close(); setTimeout(function () { openProj(id); }, 200); return; }
+      if (a.getAttribute('data-a') === 'rm' && !OFA.done) {
+        var i = d.indexOf(id); if (i >= 0) { d.splice(i, 1); P.spare.unshift(id); } P.days[di] = ofaOrder(d);
+        w.close(); ofaPlanDraw(); toast(tr('Taken off day ' + (di + 1) + '. It’s back in “Add a stop”.', 'Imeondolewa siku ya ' + (di + 1) + '. Iko tena kwenye “Ongeza kituo”.'));
+      }
+    });
+  }
   $('oBody').addEventListener('change', function (e) {
     var ad = e.target.closest('[data-ofa-add]'); if (!ad || !ad.value || !OFA.plan || OFA.done) return;
     var di = +ad.getAttribute('data-ofa-add'), id = ad.value, P = OFA.plan;
@@ -7062,7 +7503,7 @@ html[data-theme=sun] .ocv-bar .col{border:1.5px solid #000}html[data-theme=sun] 
   OIC.heart = '<path d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.3a4.3 4.3 0 0 1 7.5 2.5C19.5 15.4 12 20 12 20z"/>';
   OIC.link = '<path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/>';
   var DNR = { list: null, mail: null, cron: false, origin: '', edit: null, form: null, q: '', cat: '', ck: '', only: false };
-  var DNR_CAT = [['', 'All types'], ['water', 'Water'], ['school', 'Schools'], ['health', 'Health'], ['children', 'Children’s homes'], ['other', 'Other']];
+  var DNR_CAT = [['', 'All types', 'Aina zote'], ['water', 'Water', 'Maji'], ['school', 'Schools', 'Shule'], ['health', 'Health', 'Afya'], ['children', 'Children’s homes', 'Makao ya watoto'], ['other', 'Other', 'Nyingine']];
   var DNR_SENS = { school: 1, health: 1, children: 1 };
   function dnrCat(p) { var t = String(p.type || ''); return /borehole|collection/i.test(t) ? 'water' : /school/i.test(t) ? 'school' : /health/i.test(t) ? 'health' : /orphan/i.test(t) ? 'children' : 'other'; }
   function dnrLoad(cb) {
@@ -7071,30 +7512,44 @@ html[data-theme=sun] .ocv-bar .col{border:1.5px solid #000}html[data-theme=sun] 
       cb(j);
     });
   }
+  // the list: numbers, filters (all, opened, not opened, revoked) and a calm card per donor; tap one for its sheet
+  function dqmDnState(d) { return d.revoked ? 'revoked' : d.lastOpen ? 'opened' : 'not'; }
+  function dqmDnPill(d) { var s = dqmDnState(d); return s === 'revoked' ? dqmPill('off', tr('Link revoked', 'Kiungo kimezimwa')) : s === 'opened' ? dqmPill('ok', tr('Opened their page', 'Wamefungua ukurasa')) : dqmPill('has', tr('Not opened yet', 'Bado hawajafungua')); }
+  function dqmDnProj(n) { return n === 1 ? tr('1 project', 'mradi 1') : tr(n + ' projects', 'miradi ' + n); }
+  function dqmDn(id) { return (DNR.list || []).filter(function (x) { return x.id === id; })[0]; }
   function dnrOffice(b) {
-    if (!DNR.list) { b.innerHTML = '<p class="muted">Loading…</p>'; return dnrLoad(function (j) { if (!j.ok) { b.innerHTML = '<p class="msg bad">' + esc(why(j)) + '</p>'; return; } if (O.tab === 'donors') dnrOffice(b); }); }
-    if (!DNR.form) dnrFormReset(null);
+    if (!DNR.list) { b.innerHTML = '<p class="muted">' + tr('Loading…', 'Inapakia…') + '</p>'; return dnrLoad(function (j) { if (!j.ok) { b.innerHTML = '<p class="msg bad">' + esc(why(j)) + '</p>'; return; } if (O.tab === 'donors') dnrOffice(b); }); }
     var L = DNR.list.slice().sort(function (a, z) { return (a.revoked - z.revoked) || String(z.lastOpen || '').localeCompare(String(a.lastOpen || '')) || a.name.localeCompare(z.name); });
-    var mail = DNR.mail && DNR.mail.ready ? '<p class="dnr-mail on">' + oic('check') + '<span><b>E-mail digest: on</b> · each donor gets a monthly update on the 1st' + (DNR.cron ? '' : ' (once CRON_KEY is set)') + '.</span></p>'
-      : '<p class="dnr-mail">' + oic('alert') + '<span><b>E-mail digest: off</b> — add RESEND_API_KEY and ALERT_FROM in Cloudflare.</span></p>';
-    b.innerHTML = '<div class="o-grid dnr-grid"><div>' +
-      '<div class="dnr-intro card"><h2>' + oic('heart') + 'Donors</h2><p class="muted">Each donor gets a private link to a page with their projects, an exact-location map, visit reports, repairs, story moments and photos. No password: anyone with the link can see it, so send it only to them.</p>' + mail + '</div>' +
-      (L.length ? '<div class="ocards dnr-list">' + L.map(dnrCard).join('') + '</div>' : '<p class="muted" style="margin:14px 4px">No donors yet. Add the first one here.</p>') + '</div>' +
-      '<div class="o-side" id="dnrSide">' + dnrFormHtml() + '</div></div>';
-    dnrPickDraw();
+    var cnt = { all: L.length, opened: 0, not: 0, revoked: 0 }; L.forEach(function (d) { cnt[dqmDnState(d)]++; });
+    var shown = L.filter(function (d) { return DQM.df === 'all' || dqmDnState(d) === DQM.df; }), on = DNR.mail && DNR.mail.ready;
+    var head = dqmHead('dn', 'heart', 'coral', tr('Donors', 'Wafadhili'), tr('Each donor gets a private page with their projects, a map and updates.', 'Kila mfadhili anapata ukurasa wa siri wenye miradi yake, ramani na taarifa.'),
+      [[cnt.all, tr('Donors', 'Wafadhili'), '', 'all'], [cnt.opened, tr('Opened their page', 'Wamefungua ukurasa'), cnt.opened ? 'ok' : 'off', 'opened'], [cnt.not, tr('Not opened yet', 'Bado hawajafungua'), cnt.not ? 'has' : 'off', 'not']], DQM.df,
+      '<button class="btn" type="button" data-dqm="dnadd" data-testid="dn_add">' + oic('plus') + tr('Add a donor', 'Ongeza mfadhili') + '</button>');
+    var chips = L.length ? dqmChips('dn', [['all', 'All', 'Wote'], ['opened', 'Opened', 'Wamefungua'], ['not', 'Not opened', 'Hawajafungua'], ['revoked', 'Revoked', 'Vimezimwa']], cnt, DQM.df) : '';
+    var list = !L.length ? '<div class="dqm-none">' + emptyHtml(tr('No donors yet. Tap “Add a donor” to make the first private page.', 'Bado hakuna wafadhili. Gusa “Ongeza mfadhili” kutengeneza ukurasa wa kwanza wa siri.')) + '</div>'
+      : !shown.length ? '<div class="dqm-none">' + emptyHtml(DQM.df === 'revoked' ? tr('No revoked links. Good.', 'Hakuna viungo vilivyozimwa.') : DQM.df === 'not' ? tr('Everyone has opened their page.', 'Wote wamefungua ukurasa wao.') : tr('Nobody has opened their page yet.', 'Bado hakuna aliyefungua ukurasa wake.')) + '</div>'
+      : '<div class="dqm-list">' + shown.slice(0, DQM.dmore ? shown.length : 30).map(dqmDnCard).join('') + '</div>' +
+        (shown.length > 30 && !DQM.dmore ? '<button class="btn light block dqm-more" type="button" data-dqm="dnmore">' + tr('Show ' + (shown.length - 30) + ' more', 'Onyesha ' + (shown.length - 30) + ' zaidi') + '</button>' : '');
+    var sets = '<div class="card dqm-sets">' +
+      dqmFold('dnmail', 'mail', 'teal', tr('E-mail digest', 'Barua pepe ya kila mwezi'), on ? tr('On · each donor, on the 1st of the month', 'Imewashwa · kila mfadhili, tarehe 1 ya mwezi') : tr('Off', 'Imezimwa'), on ? 'ok' : 'off',
+        '<p class="muted" data-testid="dn_mail">' + (on ? tr('On: each donor with an e-mail gets a monthly update on the 1st', 'Imewashwa: kila mfadhili mwenye barua pepe anapata taarifa ya mwezi tarehe 1') + (DNR.cron ? '.' : tr(' (once CRON_KEY is set).', ' (CRON_KEY ikishawekwa).'))
+          : tr('Off. Add <span class="dqm-nw">RESEND_API_KEY</span> and <span class="dqm-nw">ALERT_FROM</span> in Cloudflare to switch it on.', 'Imezimwa. Ongeza <span class="dqm-nw">RESEND_API_KEY</span> na <span class="dqm-nw">ALERT_FROM</span> kwenye Cloudflare kuiwasha.')) + '</p>' +
+        '<p class="muted">' + tr('To stop it for one donor, open them, tap Edit and untick “Monthly e-mail update”.', 'Kuizima kwa mfadhili mmoja, mfungue, gusa Hariri na uondoe tiki “Taarifa ya mwezi kwa barua pepe”.') + '</p>') +
+      dqmFold('dnhow', 'dqminfo', 'blue', tr('How donor pages work', 'Jinsi kurasa za wafadhili zinavyofanya kazi'), tr('A private link, no password', 'Kiungo cha siri, bila nenosiri'), 'has',
+        '<p class="muted">' + tr('Each donor gets a private link to a page with their projects, an exact-location map, visit reports, repairs, story moments and photos. No password: anyone with the link can see it, so send it only to them.', 'Kila mfadhili anapata kiungo cha siri cha ukurasa wenye miradi yake, ramani ya mahali kamili, ripoti za ziara, matengenezo, hadithi na picha. Hakuna nenosiri: yeyote mwenye kiungo anaweza kuuona, kwa hiyo mtumie yeye tu.') + '</p>' +
+        '<p class="muted">' + tr('A church or company can have several people, each with their own link, so you can switch one off without affecting the others.', 'Kanisa au kampuni inaweza kuwa na watu kadhaa, kila mmoja na kiungo chake, ili uweze kuzima kimoja bila kuathiri wengine.') + '</p>' +
+        '<p class="muted">' + tr('Visit photos of water points are shown. Schools, clinics and children’s homes stay hidden until you tick “photos OK” (children’s faces need consent).', 'Picha za ziara za vituo vya maji zinaonyeshwa. Shule, zahanati na makao ya watoto zinafichwa hadi uchague “picha sawa” (nyuso za watoto zinahitaji ridhaa).') + '</p>') + '</div>';
+    var oc = b.querySelector('.dqm-chips'), sl = oc ? oc.scrollLeft : 0;
+    b.innerHTML = '<div class="o-grid dqm"><div>' + head + chips + list + '</div><div class="o-side">' + sets + '</div></div>';
+    dqmChipKeep(b, sl);
   }
-  function dnrCard(d) {
-    var seen = d.lastOpen ? 'Opened ' + since(d.lastOpen) + (d.opens > 1 ? ' · ' + d.opens + ' times' : '') : 'Not opened yet';
-    var vs = d.viewers.length;
-    return '<article class="card dnr' + (d.revoked ? ' off' : '') + '" data-dn="' + esc(d.id) + '"><div class="oh"><b>' + esc(d.name) + '</b>' +
-      '<span class="tag ' + (d.revoked ? '' : 'has') + '">' + (d.revoked ? 'Link revoked' : d.projects.length + ' project' + (d.projects.length === 1 ? '' : 's')) + '</span></div>' +
-      '<p class="muted">' + esc([d.org && d.org !== d.name ? d.org : '', d.email].filter(Boolean).join(' · ') || 'No e-mail') + '</p>' +
-      '<p class="muted dnr-seen">' + oic('clock') + esc(seen) + (vs > 1 ? ' · group page, ' + vs + ' viewers' : '') + (d.showPhotos ? '' : ' · photos off') + '</p>' +
-      '<div class="oact">' + (d.revoked ? '<button class="btn small" type="button" data-dn-act="rotate">New link</button>'
-        : '<button class="btn small" type="button" data-dn-act="copy">' + oic('link') + 'Copy private link</button><button class="btn small light" type="button" data-dn-act="share">Share link</button>') +
-      '<button class="btn small light" type="button" data-dn-act="edit">Edit</button>' +
-      (d.revoked ? '' : '<button class="lnk" type="button" data-dn-act="rotate">Rotate link</button><button class="lnk dnr-bad" type="button" data-dn-act="revoke">Revoke</button>') +
-      '<span class="msg" aria-live="polite"></span></div><div class="dnr-box"></div></article>';
+  function dqmDnCard(d, i) {
+    var sub = (d.org && d.org !== d.name ? d.org : d.email) || tr('No e-mail', 'Hakuna barua pepe');
+    var meta = dqmDnProj(d.projects.length) + (d.viewers.length > 1 ? ' · ' + tr(d.viewers.length + ' people', 'watu ' + d.viewers.length) : '') + (d.showPhotos ? '' : ' · ' + tr('photos off', 'picha zimezimwa'));
+    return '<button type="button" class="dqm-card' + (d.revoked ? ' dim' : '') + '" data-dqmdn="' + esc(d.id) + '" data-dn="' + esc(d.id) + '" data-testid="dn_card" style="--i:' + Math.min(i, 10) + '">' +
+      '<span class="dqm-av" style="--hu:var(--hu-' + dqmHue(d.name) + ');--hb:var(--hb-' + dqmHue(d.name) + ')" aria-hidden="true">' + mateInitials(d.name) + '</span>' +
+      '<span class="dqm-mid"><span class="dqm-tt">' + esc(d.name) + '</span>' + dqmDnPill(d) + '<span class="dqm-sub">' + esc(sub) + '</span><span class="dqm-sub">' + esc(meta) + '</span></span>' +
+      '<span class="dqm-end">' + (d.lastOpen ? esc(vxAgo(d.lastOpen)) : '') + oic('chev') + '</span></button>';
   }
   function dnrFormReset(d) {
     DNR.edit = d ? d.id : null;
@@ -7102,39 +7557,29 @@ html[data-theme=sun] .ocv-bar .col{border:1.5px solid #000}html[data-theme=sun] 
       : { name: '', email: '', org: '', projects: [], showPhotos: true, photos: {}, digest: true };
     DNR.q = ''; DNR.only = !!d;
   }
+  // the add / edit form, shown in a sheet
   function dnrFormHtml() {
-    var f = DNR.form, d = DNR.edit && DNR.list.filter(function (x) { return x.id === DNR.edit; })[0];
-    var h = '<div class="card dnr-form" id="dnrForm"><h2>' + (d ? 'Edit ' + esc(d.name) : 'Add a donor') + '</h2>' +
-      (d ? '' : '<p class="muted">They get a private link to their own page. You can copy it again, replace it or switch it off at any time.</p>') +
-      '<label>Name<input type="text" id="dnName" autocomplete="off" placeholder="e.g. Grace Community Church" value="' + esc(f.name) + '"></label>' +
-      '<div class="ofields"><label>E-mail<input type="email" id="dnEmail" placeholder="for the monthly update" value="' + esc(f.email) + '"></label>' +
-      '<label>Organisation (optional)<input type="text" id="dnOrg" placeholder="e.g. a church or company" value="' + esc(f.org) + '"></label></div>' +
-      '<fieldset class="dnr-pick"><legend>Projects they funded <span class="tag has" id="dnCount">' + f.projects.length + ' ticked</span></legend>' +
-      '<input type="search" id="dnQ" placeholder="Search by name or place" value="' + esc(DNR.q) + '" aria-label="Search projects">' +
-      '<div class="dnr-f"><select id="dnCk" aria-label="Country"><option value="">All countries</option>' + ['ke', 'tz', 'ug', 'mw'].map(function (c) { return '<option value="' + c + '"' + (DNR.ck === c ? ' selected' : '') + '>' + CNAME[c] + '</option>'; }).join('') + '</select>' +
-      '<select id="dnCat" aria-label="Type">' + DNR_CAT.map(function (c) { return '<option value="' + c[0] + '"' + (DNR.cat === c[0] ? ' selected' : '') + '>' + c[1] + '</option>'; }).join('') + '</select>' +
-      '<button type="button" class="chip" id="dnOnly" aria-pressed="' + DNR.only + '">Ticked only</button></div>' +
-      '<div class="dnr-plist" id="dnList" role="group" aria-label="Projects"></div></fieldset>' +
-      '<div class="dnr-sw"><div><b>Show visit photos</b><small>Water points: shown. Schools, clinics and children’s homes: hidden until you tick “photos OK” below (children’s faces need consent).</small></div>' +
-      '<button class="tgl" type="button" role="switch" id="dnPh" aria-checked="' + f.showPhotos + '" aria-label="Show visit photos to this donor"><i></i></button></div>' +
+    var f = DNR.form, d = DNR.edit && dqmDn(DNR.edit);
+    return '<div class="dqm-shd"><span class="dqm-shi dqm-t-has" aria-hidden="true">' + oic(d ? 'dqmedit' : 'heart') + '</span><h3>' + (d ? esc(d.name) : tr('Add a donor', 'Ongeza mfadhili')) + '</h3><small>' +
+      (d ? tr('Change their details, projects and photos.', 'Badilisha maelezo yao, miradi na picha.') : tr('They get a private link to their own page. You can copy it again, replace it or switch it off at any time.', 'Wanapata kiungo cha siri cha ukurasa wao. Unaweza kukinakili tena, kukibadilisha au kukizima wakati wowote.')) + '</small></div>' +
+      '<div class="dnr-form dqm-f" id="dnrForm">' +
+      '<label>' + tr('Name', 'Jina') + '<input type="text" id="dnName" autocomplete="off" placeholder="' + tr('e.g. Grace Community Church', 'mf. Kanisa la Grace') + '" value="' + esc(f.name) + '"></label>' +
+      '<div class="dqm-f2"><label>' + tr('E-mail', 'Barua pepe') + '<input type="email" id="dnEmail" placeholder="' + tr('for the monthly update', 'kwa taarifa ya mwezi') + '" value="' + esc(f.email) + '"></label>' +
+      '<label>' + tr('Organisation (optional)', 'Shirika (si lazima)') + '<input type="text" id="dnOrg" placeholder="' + tr('e.g. a church or company', 'mf. kanisa au kampuni') + '" value="' + esc(f.org) + '"></label></div>' +
+      '<fieldset class="dnr-pick"><legend>' + tr('Projects they funded', 'Miradi waliyofadhili') + ' <span class="tag has" id="dnCount">' + dqmTicked(f.projects.length) + '</span></legend>' +
+      '<input type="search" id="dnQ" placeholder="' + tr('Search by name or place', 'Tafuta kwa jina au mahali') + '" value="' + esc(DNR.q) + '" aria-label="' + tr('Search projects', 'Tafuta miradi') + '">' +
+      '<div class="dnr-f"><select id="dnCk" aria-label="' + tr('Country', 'Nchi') + '"><option value="">' + tr('All countries', 'Nchi zote') + '</option>' + ['ke', 'tz', 'ug', 'mw'].map(function (c) { return '<option value="' + c + '"' + (DNR.ck === c ? ' selected' : '') + '>' + CNAME[c] + '</option>'; }).join('') + '</select>' +
+      '<select id="dnCat" aria-label="' + tr('Type', 'Aina') + '">' + DNR_CAT.map(function (c) { return '<option value="' + c[0] + '"' + (DNR.cat === c[0] ? ' selected' : '') + '>' + tr(c[1], c[2]) + '</option>'; }).join('') + '</select>' +
+      '<button type="button" class="chip" id="dnOnly" aria-pressed="' + DNR.only + '">' + tr('Ticked only', 'Zilizochaguliwa tu') + '</button></div>' +
+      '<div class="dnr-plist" id="dnList" role="group" aria-label="' + tr('Projects', 'Miradi') + '"></div></fieldset>' +
+      '<div class="dnr-sw"><div><b>' + tr('Show visit photos', 'Onyesha picha za ziara') + '</b><small>' + tr('Water points: shown. Schools, clinics and children’s homes: hidden until you tick “photos OK” below (children’s faces need consent).', 'Vituo vya maji: zinaonyeshwa. Shule, zahanati na makao ya watoto: zimefichwa hadi uchague “picha sawa” hapa chini (nyuso za watoto zinahitaji ridhaa).') + '</small></div>' +
+      '<button class="tgl" type="button" role="switch" id="dnPh" aria-checked="' + f.showPhotos + '" aria-label="' + tr('Show visit photos to this donor', 'Onyesha picha za ziara kwa mfadhili huyu') + '"><i></i></button></div>' +
       '<div id="dnSens"></div>' +
-      '<label class="tick"><input type="checkbox" id="dnDigest"' + (f.digest ? ' checked' : '') + '> Monthly e-mail update' + (DNR.mail && DNR.mail.ready ? '' : ' (when e-mail is switched on)') + '</label>' +
-      '<div class="oact"><button class="btn" type="button" id="dnSave">' + (d ? 'Save changes' : 'Add and make private link') + '</button>' + (d ? '<button class="btn light" type="button" id="dnCancel">Cancel</button>' : '') + '<span class="msg" id="dnMsg" aria-live="polite"></span></div>' +
-      '<div id="dnLinkNew"></div>';
-    if (d) {
-      h += '<div class="dnr-viewers"><h3>Who can open this page</h3><p class="muted">For a church or company: give each person their own link, so you can switch one off without affecting the others.</p>' +
-        d.viewers.map(function (v) {
-          return '<div class="dnr-v" data-vid="' + esc(v.vid) + '"><div><b>' + esc(v.name || d.name) + (v.primary ? ' <span class="tag has">main</span>' : '') + (v.active ? '' : ' <span class="tag">revoked</span>') + '</b>' +
-            '<small>' + esc([v.email, v.lastOpen ? 'opened ' + since(v.lastOpen) : 'not opened yet', v.unsub ? 'no monthly e-mail' : ''].filter(Boolean).join(' · ')) + '</small></div>' +
-            '<div class="oact">' + (v.active ? '<button class="btn small light" type="button" data-dv="copy">Copy link</button><button class="lnk" type="button" data-dv="rotate">Rotate</button><button class="lnk dnr-bad" type="button" data-dv="revoke">Revoke</button>' : '<button class="btn small light" type="button" data-dv="rotate">New link</button>') +
-            (v.primary ? '' : '<button class="lnk dnr-bad" type="button" data-dv="remove">Remove</button>') + '</div><div class="dnr-box"></div></div>';
-        }).join('') +
-        '<div class="ofields"><label>Add a person: name<input type="text" id="dnVName" placeholder="e.g. Pastor John"></label><label>Their e-mail (optional)<input type="email" id="dnVEmail"></label></div>' +
-        '<div class="oact"><button class="btn small" type="button" id="dnVAdd">Add and make their link</button><span class="msg" id="dnVMsg" aria-live="polite"></span></div><div id="dnVLink"></div>' +
-        '<div class="oact dnr-danger"><button class="lnk dnr-bad" type="button" id="dnDel">Delete this donor</button></div></div>';
-    }
-    return h + '</div>';
+      '<label class="tick"><input type="checkbox" id="dnDigest"' + (f.digest ? ' checked' : '') + '> ' + tr('Monthly e-mail update', 'Taarifa ya mwezi kwa barua pepe') + (DNR.mail && DNR.mail.ready ? '' : tr(' (when e-mail is switched on)', ' (barua pepe ikiwashwa)')) + '</label>' +
+      '<div class="dqm-acts"><button class="btn" type="button" id="dnSave">' + oic(d ? 'check' : 'plus') + (d ? tr('Save changes', 'Hifadhi mabadiliko') : tr('Add and make private link', 'Ongeza na utengeneze kiungo cha siri')) + '</button>' +
+      '<button class="btn light" type="button" id="dnCancel">' + tr('Cancel', 'Ghairi') + '</button><span class="msg" id="dnMsg" aria-live="polite"></span></div></div>';
   }
+  function dqmTicked(n) { return tr(n + ' ticked', n + ' zimechaguliwa'); }
   function dnrPickDraw() {
     var f = DNR.form, el = $('dnList'); if (!el) return;
     var q = DNR.q.trim().toLowerCase(), tick = {}; f.projects.forEach(function (id) { tick[id] = 1; });
@@ -7146,15 +7591,15 @@ html[data-theme=sun] .ocv-bar .col{border:1.5px solid #000}html[data-theme=sun] 
     }).sort(function (a, z) { return (!!tick[z.id] - !!tick[a.id]) || a.title.localeCompare(z.title); });
     el.innerHTML = P.length ? P.slice(0, 150).map(function (p) {
       return '<label class="dnr-p"><input type="checkbox" value="' + esc(p.id) + '"' + (tick[p.id] ? ' checked' : '') + '><span><b>' + esc(p.title) + '</b><small>' + esc([p.type, p.area, p.country, p.status].filter(Boolean).join(' · ')) + '</small></span></label>';
-    }).join('') + (P.length > 150 ? '<p class="muted">…and ' + (P.length - 150) + ' more. Search to narrow it down.</p>' : '') : '<p class="muted">No projects match.</p>';
-    $('dnCount').textContent = f.projects.length + ' ticked';
+    }).join('') + (P.length > 150 ? '<p class="muted">' + tr('…and ' + (P.length - 150) + ' more. Search to narrow it down.', '…na ' + (P.length - 150) + ' zaidi. Tafuta ili kupunguza.') + '</p>' : '') : '<p class="muted dqm-note">' + tr('No projects match.', 'Hakuna mradi unaolingana.') + '</p>';
+    $('dnCount').textContent = dqmTicked(f.projects.length);
     dnrSensDraw();
   }
   // per-project photo consent for schools, clinics and children's homes
   function dnrSensDraw() {
     var f = DNR.form;
     var sens = f.projects.map(function (id) { return byId(id); }).filter(function (p) { return p && DNR_SENS[dnrCat(p)]; });
-    $('dnSens').innerHTML = sens.length && f.showPhotos ? '<div class="dnr-sens"><b>Photos OK? (consent checked)</b>' + sens.map(function (p) {
+    $('dnSens').innerHTML = sens.length && f.showPhotos ? '<div class="dnr-sens"><b>' + tr('Photos OK? (consent checked)', 'Picha sawa? (ridhaa imethibitishwa)') + '</b>' + sens.map(function (p) {
       return '<label class="tick"><input type="checkbox" data-ph="' + esc(p.id) + '"' + (f.photos[p.id] === 'on' ? ' checked' : '') + '> ' + esc(p.title) + '</label>';
     }).join('') + '</div>' : '';
   }
@@ -7170,107 +7615,177 @@ html[data-theme=sun] .ocv-bar .col{border:1.5px solid #000}html[data-theme=sun] 
   function dnrLinkBox(el, name, email, link, fresh) {
     var wa = 'https://wa.me/?text=' + encodeURIComponent(dnrMsgText(name, link));
     var mail = 'mailto:' + encodeURIComponent(email || '') + '?subject=' + encodeURIComponent('Your RAFIKI project page') + '&body=' + encodeURIComponent(dnrMsgText(name, link) + '\n\nWith thanks,\nRAFIKI Outreach');
-    el.innerHTML = '<div class="pinbox dnr-link" role="status"><span>' + (fresh ? 'New private link for ' : 'Private link for ') + esc(name) + '</span><code>' + esc(link) + '</code>' +
-      '<small>Anyone with this link can see the page. Send it only to them.</small><div class="oact"><button class="btn small light" type="button" data-copy>' + oic('link') + 'Copy</button>' +
-      '<a class="btn small light" href="' + esc(wa) + '" target="_blank" rel="noopener noreferrer">WhatsApp</a><a class="btn small light" href="' + esc(mail) + '">E-mail</a>' +
-      (navigator.share ? '<button class="btn small light" type="button" data-native>More…</button>' : '') + '</div></div>';
-    el.querySelector('[data-copy]').addEventListener('click', function () { dnrCopy(link, this); });
+    // the long link breaks only after "/donor/", never inside the private token
+    el.innerHTML = '<div class="pinbox dnr-link" role="status"><span>' + (fresh ? tr('New private link for ', 'Kiungo kipya cha siri cha ') : tr('Private link for ', 'Kiungo cha siri cha ')) + esc(name) + '</span><code>' + esc(link).replace('/donor/', '/donor/<wbr>') + '</code>' +
+      '<small>' + tr('Anyone with this link can see the page. Send it only to them.', 'Yeyote mwenye kiungo hiki anaweza kuona ukurasa. Mtumie yeye tu.') + '</small><div class="dqm-lb"><button class="btn small light" type="button" data-copy>' + oic('link') + '<span>' + tr('Copy', 'Nakili') + '</span></button>' +
+      '<a class="btn small light" href="' + esc(wa) + '" target="_blank" rel="noopener noreferrer">' + oic('vxwa') + 'WhatsApp</a><a class="btn small light" href="' + esc(mail) + '">' + oic('mail') + tr('E-mail', 'Barua pepe') + '</a>' +
+      (navigator.share ? '<button class="btn small light" type="button" data-native>' + oic('dqmshare') + tr('More…', 'Zaidi…') + '</button>' : '') + '</div></div>';
+    el.querySelector('[data-copy]').addEventListener('click', function () { dnrCopy(link, this.querySelector('span')); });
     var nat = el.querySelector('[data-native]'); if (nat) nat.addEventListener('click', function () { navigator.share({ title: 'Your RAFIKI project page', text: dnrMsgText(name, link) }).catch(function () {}); });
   }
   function dnrCopy(text, btn) {
-    var done = function () { if (btn) btn.textContent = 'Copied ✓'; toast('Link copied'); };
-    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, function () { prompt('Copy this link:', text); });
-    else prompt('Copy this link:', text);
+    var done = function () { if (btn) btn.textContent = tr('Copied ✓', 'Imenakiliwa ✓'); toast(tr('Link copied', 'Kiungo kimenakiliwa')); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, function () { prompt(tr('Copy this link:', 'Nakili kiungo hiki:'), text); });
+    else prompt(tr('Copy this link:', 'Nakili kiungo hiki:'), text);
   }
-  function dnrRefresh(keepForm) {
-    dnrLoad(function () { if (!keepForm) dnrFormReset(null); if (O.tab === 'donors' && S.view === 'vOffice') dnrOffice($('oBody')); });
+  // load the list again and redraw it (and then)
+  function dnrRefresh(then) {
+    dnrLoad(function () { if (O.tab === 'donors' && S.view === 'vOffice') dnrOffice($('oBody')); if (typeof then === 'function') then(); });
   }
   function dnrSay(el, cls, t) { if (el) { el.className = 'msg ' + (cls || ''); el.textContent = t || ''; } }
-  function dnrWhy(j) { return j.reason === 'revoked' ? 'This link was revoked. Make a new one.' : j.reason === 'rotate' ? 'Make a new link (Rotate) to copy it.' : j.reason === 'full' ? 'Too many already.' : why(j); }
-  $('oBody').addEventListener('input', function (e) {
-    if (O.tab !== 'donors') return;
-    if (e.target.id === 'dnQ') { DNR.q = e.target.value; dnrPickDraw(); }
-  });
-  $('oBody').addEventListener('change', function (e) {
-    if (O.tab !== 'donors') return;
-    var f = DNR.form, t = e.target;
-    if (t.id === 'dnCk') { DNR.ck = t.value; dnrPickDraw(); }
-    else if (t.id === 'dnCat') { DNR.cat = t.value; dnrPickDraw(); }
-    else if (t.closest('#dnList') && t.type === 'checkbox') {
-      var id = t.value, i = f.projects.indexOf(id);
-      if (t.checked && i < 0) f.projects.push(id); if (!t.checked && i >= 0) f.projects.splice(i, 1);
-      dnrRead(); $('dnCount').textContent = f.projects.length + ' ticked'; dnrSensDraw();
-    }
-  });
+  function dnrWhy(j) { return j.reason === 'revoked' ? tr('This link was revoked. Make a new one.', 'Kiungo hiki kimezimwa. Tengeneza kipya.') : j.reason === 'rotate' ? tr('Make a new link (Rotate) to copy it.', 'Tengeneza kiungo kipya (Badilisha) ili ukinakili.') : j.reason === 'full' ? tr('Too many already.', 'Tayari ni wengi mno.') : why(j); }
   $('oBody').addEventListener('click', function (e) {
     if (O.tab !== 'donors') return;
-    var t = e.target;
-    if (t.closest('#dnOnly')) { dnrRead(); DNR.only = !DNR.only; t.closest('#dnOnly').setAttribute('aria-pressed', DNR.only); return dnrPickDraw(); }
-    if (t.closest('#dnPh')) { dnrRead(); DNR.form.showPhotos = !DNR.form.showPhotos; t.closest('#dnPh').setAttribute('aria-checked', DNR.form.showPhotos); return dnrSensDraw(); }
-    if (t.closest('#dnCancel')) { dnrFormReset(null); return dnrOffice($('oBody')); }
-    if (t.closest('#dnSave')) return dnrSave();
-    if (t.closest('#dnVAdd')) return dnrViewerAdd();
-    if (t.closest('#dnDel')) {
-      var dd = DNR.list.filter(function (x) { return x.id === DNR.edit; })[0];
-      if (!dd || !confirm('Delete ' + dd.name + '? Their links stop working straight away.')) return;
-      return adminApi('POST', { action: 'donor-remove', id: dd.id }).then(function (j) { if (j.ok) { toast('Deleted'); dnrRefresh(false); } else dnrSay($('dnMsg'), 'bad', dnrWhy(j)); });
+    var t = e.target, x;
+    if ((x = t.closest('[data-dqmdn]'))) { buzz(); dqmDnOpen(x.getAttribute('data-dqmdn')); return; }
+    if ((x = t.closest('[data-dqm]'))) {
+      if (x.getAttribute('data-dqm') === 'dnadd') { buzz(); dqmDnForm(null); }
+      if (x.getAttribute('data-dqm') === 'dnmore') { DQM.dmore = true; dnrOffice($('oBody')); }
+      return;
     }
-    var dv = t.closest('[data-dv]'); if (dv) return dnrViewerAct(dv);
-    var a = t.closest('[data-dn-act]'); if (!a) return;
-    var c = a.closest('[data-dn]'), id = c.getAttribute('data-dn'), d = DNR.list.filter(function (x) { return x.id === id; })[0], act = a.getAttribute('data-dn-act'), m = c.querySelector('.msg'), box = c.querySelector('.dnr-box');
-    if (!d) return;
-    if (act === 'edit') { dnrFormReset(d); $('dnrSide').innerHTML = dnrFormHtml(); dnrPickDraw(); $('dnrSide').scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
-    if (act === 'revoke' && !confirm('Revoke the link for ' + d.name + '? Their page stops working straight away. You can make a new link later.')) return;
-    if (act === 'rotate' && !d.revoked && !confirm('Make a new link for ' + d.name + '? The old link stops working, so send them the new one.')) return;
-    dnrSay(m, '', act === 'revoke' ? 'Revoking…' : 'Getting the link…');
-    adminApi('POST', { action: act === 'copy' || act === 'share' ? 'donor-link' : 'donor-' + act, id: id }).then(function (j) {
-      if (!j.ok) return dnrSay(m, 'bad', dnrWhy(j));
-      dnrSay(m, '', '');
-      if (act === 'revoke') { toast('Link revoked'); return dnrRefresh(true); }
-      if (act === 'copy') { dnrCopy(j.link, a); return; }
-      dnrLinkBox(box, d.name, d.email, j.link, act === 'rotate');
-      if (act === 'rotate') { toast('New link made'); dnrLoad(function () {}); }
-    });
+    if ((x = t.closest('[data-dqmf^="dn:"]'))) { buzz(); DQM.df = x.getAttribute('data-dqmf').slice(3); DQM.dmore = false; dnrOffice($('oBody')); }
   });
+  // the add / edit sheet
+  function dqmDnForm(d) {
+    dnrFormReset(d || null);
+    var w = DNR.sheet = tSheet(d ? tr('Edit ', 'Hariri ') + d.name : tr('Add a donor', 'Ongeza mfadhili'), '<div class="dqm-fsh" data-testid="dn_form">' + dnrFormHtml() + '</div>'), c = w.querySelector('.tsh-c');
+    c.addEventListener('input', function (e) { if (e.target.id === 'dnQ') { DNR.q = e.target.value; dnrPickDraw(); } });
+    c.addEventListener('change', function (e) {
+      var f = DNR.form, t = e.target;
+      if (t.id === 'dnCk') { DNR.ck = t.value; dnrPickDraw(); }
+      else if (t.id === 'dnCat') { DNR.cat = t.value; dnrPickDraw(); }
+      else if (t.closest('#dnList') && t.type === 'checkbox') {
+        var id = t.value, i = f.projects.indexOf(id);
+        if (t.checked && i < 0) f.projects.push(id); if (!t.checked && i >= 0) f.projects.splice(i, 1);
+        dnrRead(); $('dnCount').textContent = dqmTicked(f.projects.length); dnrSensDraw();
+      }
+    });
+    c.addEventListener('click', function (e) {
+      var t = e.target;
+      if (t.closest('#dnOnly')) { dnrRead(); DNR.only = !DNR.only; t.closest('#dnOnly').setAttribute('aria-pressed', DNR.only); return dnrPickDraw(); }
+      if (t.closest('#dnPh')) { dnrRead(); DNR.form.showPhotos = !DNR.form.showPhotos; t.closest('#dnPh').setAttribute('aria-checked', DNR.form.showPhotos); return dnrSensDraw(); }
+      if (t.closest('#dnCancel')) { w.close(); return; }
+      if (t.closest('#dnSave')) return dnrSave();
+    });
+    // scrolling the project list never drags the sheet down
+    c.querySelector('.dnr-plist').addEventListener('touchstart', function (e) { e.stopPropagation(); }, { passive: true });
+    dnrPickDraw();
+    if (!d && matchMedia('(pointer: fine)').matches) setTimeout(function () { if ($('dnName')) $('dnName').focus(); }, 300);
+    return w;
+  }
   function dnrSave() {
     var f = dnrRead(), m = $('dnMsg');
-    if (!f.name.trim()) { $('dnName').focus(); return dnrSay(m, 'bad', 'Add their name.'); }
-    if (!f.projects.length && !confirm('No projects ticked yet. Save anyway?')) return;
-    dnrSay(m, '', 'Saving…');
+    if (!f.name.trim()) { $('dnName').focus(); return dnrSay(m, 'bad', tr('Add their name.', 'Ongeza jina lao.')); }
+    if (!f.projects.length && !confirm(tr('No projects ticked yet. Save anyway?', 'Bado hakuna mradi uliochaguliwa. Hifadhi hata hivyo?'))) return;
+    dnrSay(m, '', tr('Saving…', 'Inahifadhi…'));
     var body = { action: DNR.edit ? 'donor-update' : 'donor-add', id: DNR.edit || undefined, name: f.name, email: f.email, org: f.org, projects: f.projects, showPhotos: f.showPhotos, photos: f.photos, digest: f.digest };
+    var w = DNR.sheet, btn = $('dnSave'); if (btn) btn.disabled = true;
     adminApi('POST', body).then(function (j) {
+      if (btn) btn.disabled = false;
       if (!j.ok) return dnrSay(m, 'bad', dnrWhy(j));
-      if (DNR.edit) { toast('Saved ✓'); return dnrRefresh(false); }
+      if (DNR.edit) { var id = DNR.edit; toast(tr('Saved ✓', 'Imehifadhiwa ✓')); if (w) w.close(); return dnrRefresh(function () { setTimeout(function () { dqmDnOpen(id); }, 240); }); }
       var made = j.donor;
-      dnrLoad(function () {
-        dnrFormReset(null); dnrOffice($('oBody'));
-        dnrLinkBox($('dnLinkNew'), made.name, made.email, j.link, true);
-        dnrSay($('dnMsg'), 'ok', 'Added ✓');
+      dnrRefresh(function () {
+        if (w) w.close();
+        setTimeout(function () { var s = dqmDnOpen(made.id, { name: made.name, email: made.email, url: j.link, fresh: true }); if (s) dnrSay(s.querySelector('.dqm-acts .msg'), 'ok', tr('Added ✓ Send them their private link.', 'Imeongezwa ✓ Mtumie kiungo chake cha siri.')); }, 240);
       });
     });
   }
-  function dnrViewerAdd() {
+  // a donor's sheet: the link (copy, share, rotate, revoke), edit, who can open the page, delete
+  function dqmDnOpen(id, link) {
+    var d0 = dqmDn(id); if (!d0) return null;
+    var cur = { link: link || null }, w = tSheet(d0.name, '<div class="dqm-sh" data-testid="dn_sheet"></div>'), c = w.querySelector('.tsh-c'), box = c.firstChild;
+    var draw = function () {
+      var d = dqmDn(id); if (!d) { w.close(); return; }
+      box.innerHTML = dqmDnBody(d);
+      if (cur.link) dnrLinkBox(box.querySelector('.dqm-dnlink'), cur.link.name, cur.link.email, cur.link.url, cur.link.fresh);
+    };
+    var again = function () { dnrRefresh(draw); };
+    draw();
+    c.addEventListener('click', function (e) {
+      var d = dqmDn(id); if (!d) return;
+      var dv = e.target.closest('[data-dv]'); if (dv) return dnrViewerAct(dv, d, draw, c);
+      if (e.target.closest('#dnVAdd')) return dnrViewerAdd(d, draw);
+      var a = e.target.closest('[data-a]'); if (!a) return;
+      var act = a.getAttribute('data-a'), m = c.querySelector('.dqm-acts .msg'), cf = c.querySelector('.tm-cf'), lb = c.querySelector('.dqm-dnlink');
+      if (act === 'edit') { w.close(); setTimeout(function () { dqmDnForm(d); }, 200); return; }
+      var go = function (am) {
+        var say = am || m;
+        dnrSay(say, '', act === 'revoke' ? tr('Revoking…', 'Inazima…') : act === 'del' ? tr('Deleting…', 'Inafuta…') : tr('Getting the link…', 'Inaleta kiungo…'));
+        adminApi('POST', { action: act === 'del' ? 'donor-remove' : act === 'copy' || act === 'share' ? 'donor-link' : 'donor-' + act, id: id }).then(function (j) {
+          if (!j.ok) { dnrSay(say, 'bad', dnrWhy(j)); if (am) qa('button', cf).forEach(function (x) { x.disabled = false; }); return; }
+          dnrSay(say, '', '');
+          if (act === 'del') { toast(tr('Deleted', 'Imefutwa')); w.close(); dnrRefresh(); return; }
+          if (act === 'revoke') { toast(tr('Link revoked', 'Kiungo kimezimwa')); cur.link = null; return again(); }
+          if (act === 'copy') { dnrCopy(j.link, a.querySelector('span')); return; }
+          cur.link = { name: d.name, email: d.email, url: j.link, fresh: act === 'rotate' };
+          if (act === 'rotate') { toast(tr('New link made', 'Kiungo kipya kimetengenezwa')); return again(); }
+          dnrLinkBox(lb, d.name, d.email, j.link, false); lb.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        });
+      };
+      if (act === 'revoke') return tmAsk(cf, tr('Revoke the link for ' + d.name + '? Their page stops working straight away. You can make a new link later.', 'Zima kiungo cha ' + d.name + '? Ukurasa wao utaacha kufanya kazi mara moja. Unaweza kutengeneza kiungo kipya baadaye.'), tr('Revoke', 'Zima'), true, go);
+      if (act === 'rotate' && !d.revoked) return tmAsk(cf, tr('Make a new link for ' + d.name + '? The old link stops working, so send them the new one.', 'Tengeneza kiungo kipya cha ' + d.name + '? Kiungo cha zamani kitaacha kufanya kazi, kwa hiyo watumie kipya.'), tr('Make a new link', 'Tengeneza kiungo kipya'), false, go);
+      if (act === 'del') return tmAsk(cf, tr('Delete ' + d.name + '? Their links stop working straight away.', 'Futa ' + d.name + '? Viungo vyao vitaacha kufanya kazi mara moja.'), tr('Delete', 'Futa'), true, go);
+      go();
+    });
+    return w;
+  }
+  function dqmDnBody(d) {
+    var on = !d.revoked, vs = d.viewers, ps = d.projects.map(function (id) { var p = byId(id); return p ? p.title : id; }), tone = d.revoked ? 'off' : d.lastOpen ? 'ok' : 'has';
+    return '<div class="dqm-shd"><span class="dqm-shi dqm-t-' + tone + '" aria-hidden="true">' + oic('heart') + '</span><h3>' + esc(d.name) + '</h3>' +
+      (d.org && d.org !== d.name ? '<small>' + esc(d.org) + '</small>' : '') + (d.email ? '<small class="dqm-mail">' + esc(d.email) + '</small>' : '') + dqmDnPill(d) + '</div>' +
+      '<div class="dqm-dnlink" aria-live="polite"></div>' +
+      '<div class="dqm-acts">' + (on ? '<button class="btn" type="button" data-a="copy" data-testid="dn_copy">' + oic('link') + '<span>' + tr('Copy private link', 'Nakili kiungo cha siri') + '</span></button>' +
+        '<div class="dqm-two"><button class="btn light" type="button" data-a="share" data-testid="dn_share">' + oic('dqmshare') + '<span>' + tr('Share link', 'Shiriki kiungo') + '</span></button><button class="btn light" type="button" data-a="edit" data-testid="dn_edit">' + oic('dqmedit') + '<span>' + tr('Edit', 'Hariri') + '</span></button></div>'
+        : '<button class="btn" type="button" data-a="rotate" data-testid="dn_newlink">' + oic('link') + '<span>' + tr('Make a new link', 'Tengeneza kiungo kipya') + '</span></button><button class="btn light" type="button" data-a="edit" data-testid="dn_edit">' + oic('dqmedit') + '<span>' + tr('Edit', 'Hariri') + '</span></button>') +
+      '<span class="msg" aria-live="polite"></span></div>' +
+      dqmKv([[tr('Projects', 'Miradi'), esc(dqmDnProj(ps.length)), ps.length ? esc(ps.slice(0, 3).join(', ') + (ps.length > 3 ? ' …' : '')) : ''],
+        [tr('Last opened', 'Ilifunguliwa mwisho'), d.lastOpen ? esc(vxWhen(d.lastOpen)) : tr('Not yet', 'Bado'), d.opens > 1 ? tr(d.opens + ' times', 'mara ' + d.opens) : ''],
+        [tr('Visit photos', 'Picha za ziara'), d.showPhotos ? tr('Shown', 'Zinaonyeshwa') : tr('Hidden', 'Zimefichwa')],
+        [tr('Monthly e-mail', 'Barua pepe ya mwezi'), d.digest ? tr('On', 'Imewashwa') : tr('Off', 'Imezimwa')]]) +
+      '<div class="card dqm-sets dqm-in-sh">' + dqmFold('dnv', 'people', 'purple', tr('Who can open this page', 'Nani anaweza kufungua ukurasa huu'), vs.length === 1 ? tr('1 person', 'mtu 1') : tr(vs.length + ' people', 'watu ' + vs.length), vs.length > 1 ? 'has' : 'off', dqmDnViewers(d)) + '</div>' +
+      '<div class="dqm-ab">' + (on ? '<button type="button" data-a="rotate" data-testid="dn_rotate">' + oic('dqmrot') + '<span>' + tr('Rotate link', 'Badilisha kiungo') + '</span></button><button type="button" class="bad" data-a="revoke" data-testid="dn_revoke">' + oic('dqmoff') + '<span>' + tr('Revoke', 'Zima') + '</span></button>' : '') +
+      '<button type="button" class="bad" data-a="del" data-testid="dn_delete">' + oic('trash') + '<span>' + tr('Delete donor', 'Futa mfadhili') + '</span></button></div><div class="tm-cf" aria-live="polite"></div>';
+  }
+  // group pages: everyone who can open the page, each with their own link
+  function dqmDnViewers(d) {
+    return '<p class="muted dqm-note">' + tr('For a church or company: give each person their own link, so you can switch one off without affecting the others.', 'Kwa kanisa au kampuni: mpe kila mtu kiungo chake, ili uweze kuzima kimoja bila kuathiri wengine.') + '</p>' +
+      d.viewers.map(function (v) {
+        return '<div class="dqm-v" data-vid="' + esc(v.vid) + '"><div class="dqm-vh"><b>' + esc(v.name || d.name) + '</b>' + (v.primary ? '<span class="tag has">' + tr('main', 'mkuu') + '</span>' : '') + (v.active ? '' : '<span class="tag">' + tr('revoked', 'kimezimwa') + '</span>') + '</div>' +
+          '<small>' + esc([v.email, v.lastOpen ? tr('opened ', 'kimefunguliwa ') + since(v.lastOpen) : tr('not opened yet', 'bado hakijafunguliwa'), v.unsub ? tr('no monthly e-mail', 'hapati barua ya mwezi') : ''].filter(Boolean).join(' · ')) + '</small>' +
+          '<div class="dqm-vb">' + (v.active ? '<button class="btn small light" type="button" data-dv="copy">' + oic('link') + '<span>' + tr('Copy link', 'Nakili kiungo') + '</span></button><button class="btn small light" type="button" data-dv="rotate">' + tr('Rotate', 'Badilisha') + '</button><button class="btn small light dqm-bad" type="button" data-dv="revoke">' + tr('Revoke', 'Zima') + '</button>'
+            : '<button class="btn small light" type="button" data-dv="rotate">' + tr('New link', 'Kiungo kipya') + '</button>') +
+          (v.primary ? '' : '<button class="btn small light dqm-bad" type="button" data-dv="remove">' + tr('Remove', 'Ondoa') + '</button>') + '</div><div class="dnr-box"></div></div>';
+      }).join('') +
+      '<div class="dqm-f dqm-vadd"><label>' + tr('Add a person: name', 'Ongeza mtu: jina') + '<input type="text" id="dnVName" autocomplete="off" placeholder="' + tr('e.g. Pastor John', 'mf. Mchungaji John') + '"></label><label>' + tr('Their e-mail (optional)', 'Barua pepe yao (si lazima)') + '<input type="email" id="dnVEmail" autocomplete="off"></label>' +
+      '<div class="dqm-acts"><button class="btn light" type="button" id="dnVAdd">' + oic('plus') + tr('Add and make their link', 'Ongeza na utengeneze kiungo chake') + '</button><span class="msg" id="dnVMsg" aria-live="polite"></span></div><div id="dnVLink"></div></div>';
+  }
+  function dnrViewerAdd(d, draw) {
     var name = $('dnVName').value.trim(), m = $('dnVMsg'); if (!name) { $('dnVName').focus(); return; }
-    dnrSay(m, '', 'Adding…');
-    adminApi('POST', { action: 'donor-viewer-add', id: DNR.edit, name: name, email: $('dnVEmail').value }).then(function (j) {
+    dnrSay(m, '', tr('Adding…', 'Inaongeza…'));
+    adminApi('POST', { action: 'donor-viewer-add', id: d.id, name: name, email: $('dnVEmail').value }).then(function (j) {
       if (!j.ok) return dnrSay(m, 'bad', dnrWhy(j));
       var email = $('dnVEmail').value, link = j.link;
       DNR.list = DNR.list.map(function (x) { return x.id === j.donor.id ? j.donor : x; });
-      $('dnrSide').innerHTML = dnrFormHtml(); dnrPickDraw();
-      dnrLinkBox($('dnVLink'), name, email, link, true);
+      draw(); dnrLinkBox($('dnVLink'), name, email, link, true);
+      if (O.tab === 'donors' && S.view === 'vOffice') dnrOffice($('oBody'));
     });
   }
-  function dnrViewerAct(btn) {
-    var row = btn.closest('[data-vid]'), vid = row.getAttribute('data-vid'), act = btn.getAttribute('data-dv'), d = DNR.list.filter(function (x) { return x.id === DNR.edit; })[0];
-    var v = d && d.viewers.filter(function (x) { return x.vid === vid; })[0]; if (!v) return;
-    if ((act === 'revoke' || act === 'remove') && !confirm((act === 'remove' ? 'Remove ' : 'Revoke the link for ') + (v.name || d.name) + '?')) return;
-    adminApi('POST', { action: act === 'copy' ? 'donor-link' : act === 'remove' ? 'donor-viewer-remove' : 'donor-' + act, id: d.id, vid: vid }).then(function (j) {
-      if (!j.ok) return toast(dnrWhy(j));
-      if (act === 'copy') return dnrCopy(j.link, btn);
-      if (j.donor) DNR.list = DNR.list.map(function (x) { return x.id === j.donor.id ? j.donor : x; });
-      $('dnrSide').innerHTML = dnrFormHtml(); dnrPickDraw();
-      if (act === 'rotate') { var r = $('dnrSide').querySelector('[data-vid="' + vid + '"] .dnr-box'); if (r) dnrLinkBox(r, v.name || d.name, v.email, j.link, true); }
-    });
+  function dnrViewerAct(btn, d, draw, c) {
+    var row = btn.closest('[data-vid]'), vid = row.getAttribute('data-vid'), act = btn.getAttribute('data-dv'), box = row.querySelector('.dnr-box');
+    var v = d.viewers.filter(function (x) { return x.vid === vid; })[0]; if (!v) return;
+    var go = function (am) {
+      adminApi('POST', { action: act === 'copy' ? 'donor-link' : act === 'remove' ? 'donor-viewer-remove' : 'donor-' + act, id: d.id, vid: vid }).then(function (j) {
+        if (!j.ok) { if (am) { dnrSay(am, 'bad', dnrWhy(j)); qa('button', box).forEach(function (x) { x.disabled = false; }); } else toast(dnrWhy(j)); return; }
+        if (act === 'copy') return dnrCopy(j.link, btn.querySelector('span') || btn);
+        if (j.donor) DNR.list = DNR.list.map(function (x) { return x.id === j.donor.id ? j.donor : x; });
+        draw();
+        if (act === 'rotate') { var r = c.querySelector('[data-vid="' + vid + '"] .dnr-box'); if (r) dnrLinkBox(r, v.name || d.name, v.email, j.link, true); }
+        if (O.tab === 'donors' && S.view === 'vOffice') dnrOffice($('oBody'));
+      });
+    };
+    if (act === 'revoke' || act === 'remove') return tmAsk(box, (act === 'remove' ? tr('Remove ', 'Ondoa ') : tr('Revoke the link for ', 'Zima kiungo cha ')) + (v.name || d.name) + '?', act === 'remove' ? tr('Remove', 'Ondoa') : tr('Revoke', 'Zima'), true, go);
+    go();
   }
 
   // --- Project › Thank-you for donors: a photo or short video (≤ 60 s) from the community, for this project's donors ---
@@ -7603,21 +8118,30 @@ html[data-theme=sun] .ocv-bar .col{border:1.5px solid #000}html[data-theme=sun] 
   }
   function fldQrDraw(b) {
     var list = S.projects.filter(function (p) { return !FQ.ck || p.ck === FQ.ck; }).slice().sort(function (x, y) { return x.title.localeCompare(y.title); });
-    var on = list.filter(function (p) { return !FQ.off[p.id]; }), pages = Math.ceil(on.length / 12);
-    b.innerHTML = '<div class="card fq-intro"><i class="fq-ic">' + oic('qr') + '</i><div><h3>' + tr('QR check-in stickers', 'Vibandiko vya QR vya kuingia') + '</h3><p class="muted">' +
-      tr('Print one for each project and fix it at the site (pump house, sign or office door). Scanning it opens the project’s Site visit, and monday.com notes the visit was checked in by QR.',
-        'Chapisha kimoja kwa kila mradi na ukibandike eneo la mradi (nyumba ya pampu, bango au mlango wa ofisi). Kukichanganua kunafungua Ziara ya mradi, na monday.com inaandika kuwa ziara iliingizwa kwa QR.') + '</p></div></div>' +
-      '<div class="fq-ck">' + [['', tr('All countries', 'Nchi zote')]].concat(Object.keys(CNAME).map(function (k) { return [k, CNAME[k]]; })).map(function (c) { return '<button type="button" class="chip" data-fqck="' + c[0] + '" aria-pressed="' + (FQ.ck === c[0]) + '">' + esc(c[1]) + '</button>'; }).join('') + '</div>' +
-      '<div class="fq-grid"><div class="card fq-list"><div class="fq-lh"><b id="fqCount">' + tr(on.length + ' of ' + list.length + ' chosen', on.length + ' kati ya ' + list.length + ' zimechaguliwa') + '</b><button type="button" class="lnk" data-fq="all">' + tr('All', 'Zote') + '</button><button type="button" class="lnk" data-fq="none">' + tr('None', 'Hakuna') + '</button></div>' +
-      list.slice(0, 300).map(function (p) { return '<label class="fq-r"><input type="checkbox" data-fqid="' + esc(p.id) + '"' + (FQ.off[p.id] ? '' : ' checked') + '><span><b>' + esc(p.title) + '</b><small>ID ' + esc(p.id) + (p.area ? ' · ' + esc(p.area) : '') + '</small></span></label>'; }).join('') +
-      (list.length > 300 ? '<p class="muted">' + tr('Showing the first 300. Choose a country to see the rest.', 'Inaonyesha 300 za kwanza. Chagua nchi kuona zilizobaki.') + '</p>' : '') + '</div>' +
-      '<div class="fq-side">' + (on[0] ? '<p class="fq-cap">' + tr('How a sticker looks', 'Jinsi kibandiko kinavyoonekana') + '</p>' + fldSticker(on[0]) : '') +
-      '<p class="fq-n" id="fqN">' + tr(on.length + ' stickers on ' + pages + ' A4 ' + (pages === 1 ? 'page' : 'pages'), 'Vibandiko ' + on.length + ' kwenye kurasa ' + pages + ' za A4') + '</p>' +
-      '<button class="btn block" type="button" id="fqPrint"' + (on.length ? '' : ' disabled') + '>' + oic('file') + tr('Print or save as PDF', 'Chapisha au hifadhi kama PDF') + '</button>' +
-      '<p class="muted fq-tip">' + tr('In the print box choose A4, 100% scale, and “Save as PDF” to keep a file. Cut along the dotted lines.', 'Kwenye kisanduku cha kuchapisha chagua A4, ukubwa 100%, na “Save as PDF” ili kuhifadhi faili. Kata kwenye mistari ya nukta.') + '</p></div></div>';
+    var on = list.filter(function (p) { return !FQ.off[p.id]; }), pages = Math.ceil(on.length / 12), cnt = { '': S.projects.length };
+    Object.keys(CNAME).forEach(function (k) { cnt[k] = S.projects.filter(function (p) { return p.ck === k; }).length; });
+    var oc = b.querySelector('.dqm-chips'), sl = oc ? oc.scrollLeft : 0, ol = b.querySelector('.fq-list'), lt = ol ? ol.scrollTop : 0;
+    b.innerHTML = '<div class="dqm-qr">' + dqmHead('qr', 'qr', 'teal', tr('QR check-in stickers', 'Vibandiko vya QR vya kuingia'), tr('Print one for each project and fix it at the site.', 'Chapisha kimoja kwa kila mradi na ukibandike eneo la mradi.'),
+      [[on.length, tr('Chosen', 'Vimechaguliwa'), on.length ? '' : 'off'], [pages, pages === 1 ? tr('A4 page', 'Ukurasa A4') : tr('A4 pages', 'Kurasa A4'), pages ? '' : 'off']]) +
+      '<div class="dqm-chips fq-ck" role="group" aria-label="' + tr('Country', 'Nchi') + '">' + [['', tr('All countries', 'Nchi zote')]].concat(Object.keys(CNAME).map(function (k) { return [k, CNAME[k]]; })).filter(function (c) { return !c[0] || cnt[c[0]] || FQ.ck === c[0]; }).map(function (c) {
+        return '<button type="button" class="chip" data-fqck="' + c[0] + '" aria-pressed="' + (FQ.ck === c[0]) + '">' + esc(c[1]) + ' <span class="n">' + cnt[c[0]] + '</span></button>';
+      }).join('') + '</div>' +
+      '<div class="fq-grid"><div class="card fq-list"><div class="fq-lh"><b id="fqCount">' + tr(on.length + ' of ' + list.length + ' chosen', on.length + ' kati ya ' + list.length + ' zimechaguliwa') + '</b>' +
+      '<span class="fq-an"><button type="button" class="chip" data-fq="all">' + tr('All', 'Zote') + '</button><button type="button" class="chip" data-fq="none">' + tr('None', 'Hakuna') + '</button></span></div>' +
+      (list.length ? list.slice(0, 300).map(function (p) { return '<label class="fq-r"><input type="checkbox" data-fqid="' + esc(p.id) + '"' + (FQ.off[p.id] ? '' : ' checked') + '><span><b>' + esc(p.title) + '</b><small>ID ' + esc(p.id) + (p.area ? ' · ' + esc(p.area) : '') + '</small></span></label>'; }).join('')
+        : '<p class="muted dqm-note">' + tr('No projects in this country yet.', 'Bado hakuna miradi katika nchi hii.') + '</p>') +
+      (list.length > 300 ? '<p class="muted dqm-note">' + tr('Showing the first 300. Choose a country to see the rest.', 'Inaonyesha 300 za kwanza. Chagua nchi kuona zilizobaki.') + '</p>' : '') + '</div>' +
+      '<div class="fq-side"><div class="card fq-prev">' + (on[0] ? '<p class="fq-cap">' + tr('How a sticker looks', 'Jinsi kibandiko kinavyoonekana') + '</p>' + fldSticker(on[0]) : '<p class="muted fq-cap">' + tr('Choose at least one project to see a sticker.', 'Chagua angalau mradi mmoja kuona kibandiko.') + '</p>') +
+      '<p class="fq-n" id="fqN">' + tr(on.length + (on.length === 1 ? ' sticker on ' : ' stickers on ') + pages + ' A4 ' + (pages === 1 ? 'page' : 'pages'), 'Vibandiko ' + on.length + ' kwenye kurasa ' + pages + ' za A4') + '</p>' +
+      '<button class="btn block" type="button" id="fqPrint"' + (on.length ? '' : ' disabled') + '>' + oic('dqmprint') + tr('Print or save as PDF', 'Chapisha au hifadhi kama PDF') + '</button></div>' +
+      '<div class="card dqm-sets">' + dqmFold('qrhow', 'dqminfo', 'blue', tr('How it works', 'Jinsi inavyofanya kazi'), tr('Scan it to open the Site visit', 'Kichanganue kufungua Ziara'), 'has',
+        '<p class="muted">' + tr('Print one for each project and fix it at the site (pump house, sign or office door). Scanning it opens the project’s Site visit, and monday.com notes the visit was checked in by QR.',
+          'Chapisha kimoja kwa kila mradi na ukibandike eneo la mradi (nyumba ya pampu, bango au mlango wa ofisi). Kukichanganua kunafungua Ziara ya mradi, na monday.com inaandika kuwa ziara iliingizwa kwa QR.') + '</p>' +
+        '<p class="muted">' + tr('In the print box choose A4, 100% scale, and “Save as PDF” to keep a file. Cut along the dotted lines.', 'Kwenye kisanduku cha kuchapisha chagua A4, ukubwa 100%, na “Save as PDF” ili kuhifadhi faili. Kata kwenye mistari ya nukta.') + '</p>') + '</div></div></div></div>';
+    dqmChipKeep(b, sl); var nl = b.querySelector('.fq-list'); if (nl) nl.scrollTop = lt;
     b.onclick = function (e) {
       var t = e.target, x;
-      if ((x = t.closest('[data-fqck]'))) { FQ.ck = x.getAttribute('data-fqck'); return fldQrDraw(b); }
+      if ((x = t.closest('[data-fqck]'))) { buzz(); FQ.ck = x.getAttribute('data-fqck'); var l0 = b.querySelector('.fq-list'); if (l0) l0.scrollTop = 0; return fldQrDraw(b); }
       if ((x = t.closest('[data-fq]'))) { var none = x.getAttribute('data-fq') === 'none'; list.forEach(function (p) { if (none) FQ.off[p.id] = 1; else delete FQ.off[p.id]; }); return fldQrDraw(b); }
       if (t.closest('#fqPrint')) return fldQrPrint(on);
     };
