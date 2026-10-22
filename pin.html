@@ -2379,6 +2379,64 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
 @media (min-width:700px){#vMap .ov.top > .mcl-pill{align-self:center;max-width:560px}#vMap .ov.top > .mcl-sb{align-self:flex-start}}
 @media (prefers-reduced-motion: reduce){.mcl-kp.in,.mcl-tray.in{animation:none !important}}
 </style>
+<style id="pwoffice-css">
+/* polish-pwoffice: Me, Office, report, notifications, team */
+/* the app's own confirm sheet sits above any open sheet */
+.bsh.po-ask{z-index:2400}.bsh.po-ask .bsh-h h3{min-width:0;white-space:normal;padding:0 46px;text-wrap:balance}.bsh.po-ask .btn.po-red{background:#B3261E !important;color:#FFFFFF !important;box-shadow:none !important}
+/* set-up names folded under a plain sentence */
+.po-tech{margin:4px 0 8px;font-size:.8rem}.po-tech summary{cursor:pointer;color:var(--blue2);font-weight:700;font-size:.8rem}.po-tech p{margin:6px 0 0;color:var(--muted);overflow-wrap:anywhere}
+.tm-note .po-tech{margin:6px 0 0}
+/* What to tell me: the main switch, and the kinds greyed out while it's off */
+.bsh .pr.nk-all b small{display:block;font-size:.78rem;font-weight:600;color:var(--muted);margin-top:2px}
+.bsh .nk-h{display:block;margin:16px 0 4px;text-align:center;font-size:.72rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.nk-kids.off .pr{opacity:.45}.nk-kids.off .tgl{cursor:not-allowed}
+/* Me: stamps fold to one row */
+.stamps.fold .stp:nth-child(n+4){display:none}
+#meStampsMore{display:block;margin:2px auto 6px}
+/* monday.com set-up: one row that opens a sheet */
+.pr-mon .mrow .cv svg{transform:none !important}
+.mon-sh .msteps{margin-top:6px}
+/* the report: month and country on the report itself; tables become cards on a phone */
+.reppick{margin:0 0 12px}.reppick label{display:block;margin-bottom:4px}
+.rt .rl{display:none}
+@media screen and (max-width:600px){
+  .tw{overflow:visible;margin:0;padding:0}
+  .rt.cards{min-width:0;font-size:.84rem}.rt.cards thead{display:none}
+  .rt.cards,.rt.cards tbody,.rt.cards tr,.rt.cards td{display:block;width:auto}
+  .rt.cards tr{border:1px solid #DCE1E5;border-radius:12px;padding:4px 12px;margin:0 0 8px;background:#FFFFFF}
+  .rt.cards tr:nth-child(even) td{background:none}
+  .rt.cards td{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:6px 0;border-bottom:1px solid #EEF1F3;text-align:right;overflow-wrap:normal;word-break:normal;hyphens:none}
+  .rt.cards td:last-child{border-bottom:0}
+  .rt.cards td .rl{display:block;flex:none;max-width:48%;text-align:left;font-size:.76rem;font-weight:700;color:#4A5157;white-space:normal}
+  .rt.cards td:first-child{display:block;text-align:left;font-size:.9rem;font-weight:700;color:#04263F}.rt.cards td:first-child .rl{display:none}
+  .rt.cards td small{font-weight:400}
+  .rt.cards td .rv{min-width:0}.rt.cards td small{display:block;color:#5A6066}
+}
+/* Office › Visits: one chip row, whose visits first */
+.ocv-chips .ocv-pick{display:inline-flex;align-items:center;gap:6px;max-width:220px}.ocv-chips .ocv-pick span{overflow:hidden;text-overflow:ellipsis}
+.ocv-chips .ocv-pick svg{width:16px;height:16px;flex:none}.ocv-chips .ocv-pick svg.dn{width:14px;height:14px}
+.ocv-sep{flex:none;width:1px;align-self:stretch;margin:6px 2px;background:var(--line)}
+.ocv-pk .bsh-o .pk-n{flex:1;min-width:0}.ocv-pk .bsh-o .n{margin-left:auto;font-size:.84rem;color:var(--muted)}.ocv-pk .bsh-o .ei{font-size:.8rem;font-weight:800}
+/* date boxes: the app's own date style over the browser's */
+.dhw{position:relative;display:block}.dhw .dh{position:absolute;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--text);white-space:nowrap;display:none}
+.dhw.set input[type=date]:not(:focus){color:transparent}.dhw.set input[type=date]:not(:focus)+.dh{display:block}
+/* contrast: AA for initials, small labels, stamp numbers, pills and turned-off buttons */
+.hav,.mates .av{background:linear-gradient(135deg,#1576BD,#054F81)}
+html[data-theme=sun] .hav,html[data-theme=sun] .mates .av{background:#0050A0}
+html:not([data-theme=dark]) .np-av:not(.tile),html:not([data-theme=dark]) .tm-av,html:not([data-theme=dark]) .dqm-av{color:color-mix(in srgb,var(--hu) 70%,#000000)}
+.mehero{background:linear-gradient(140deg,#0868A8 0%,#054F81 55%,#04263F 100%)}
+html[data-theme=sun] .mehero{background:#002A57}
+.mh-lbl,.mh-stats span,.mh-who small{color:#FFFFFF}
+.mh-av{background:rgba(0,0,0,.18)}
+.here.slim .hw small{opacity:1}
+html:not([data-theme=sun]) .here.slim{background:linear-gradient(135deg,#1E8150,#155F39)}
+.stp:not(.got) .stin small{color:#5E6A73}
+.btn[disabled]{color:#263540}
+html[data-theme=dark] .btn[disabled]{color:#C9D5DE}
+html[data-theme=sun] .btn[disabled]{color:#000000}
+.vx-t-off{color:var(--ink)}.vx-card.vx-off>*{opacity:1}
+.ocv-pk .bsh-o .ei{color:var(--deep);flex:0 0 38px;width:38px;min-width:0;padding:0;border-radius:50%}.ocv-pk .bsh-o .ei svg{width:20px;height:20px}
+</style>
 </head>
 <body class="locked">
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
@@ -2402,7 +2460,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
     <button class="bell" id="meBell" type="button" aria-label="Notifications"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg><i class="bn hidden" id="meBellN">0</i></button>
   </header>
   <div class="onb hidden" id="onb" role="dialog" aria-modal="true" aria-labelledby="onbT"></div>
-  <div class="net" id="net" role="status">No signal. Keep working: changes are saved on this phone and sent when you're back online.</div>
+  <div class="net" id="net" role="status">No signal. Keep working: changes are saved on this phone and sent when you’re back online.</div>
   <main id="main">
 
     <!-- unlock -->
@@ -2468,7 +2526,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
         <input type="search" id="iSearch" class="hidden" placeholder="Search by project name or place" aria-label="Search by project name or place">
 
         <div class="chips otabs fgrid" role="group" aria-label="Show">
-          <button class="chip otab" type="button" data-f="missing" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><path d="M10.3 8.4a1.9 1.9 0 1 1 2.6 1.8c-.6.3-.9.7-.9 1.3M12 13.6v.1"/></svg><span>Needs a location</span></button>
+          <button class="chip otab" type="button" data-f="missing" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><path d="M10.3 8.4a1.9 1.9 0 1 1 2.6 1.8c-.6.3-.9.7-.9 1.3M12 13.6v.1"/></svg><span>No location</span></button>
           <button class="chip otab" type="button" data-f="near" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg><span>Nearby</span></button>
           <button class="chip otab" type="button" data-f="repairs" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></svg><span>Repairs</span><i class="n" id="repN">0</i></button>
           <button class="chip otab" type="button" data-f="due" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M12 13.2v2.6l1.8 1.1"/></svg><span>Due a visit</span></button>
@@ -2488,7 +2546,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
     <!-- route -->
     <section id="vRoute" class="hidden" aria-labelledby="h-route">
       <button class="back" id="routeBack" type="button">← Projects</button>
-      <h1 id="h-route" style="margin-top:4px">Today's route</h1>
+      <h1 id="h-route" style="margin-top:4px">Today’s route</h1>
       <p class="muted" id="routeSum"></p>
       <div class="legs" id="routeLegs"></div>
       <div class="stops" id="routeStops"></div>
@@ -2559,13 +2617,13 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
     <!-- new site -->
     <section id="vNew" class="hidden" aria-labelledby="h-new">
       <h1 id="h-new" style="margin:4px 2px 4px">Add a new site</h1>
-      <p class="muted" style="margin:0 2px 12px">It goes onto the monday.com board as “Due Diligence”, so it isn't on the website until you move it on.</p>
+      <p class="muted" style="margin:0 2px 12px">It goes onto the monday.com board as “Due Diligence”, so it isn’t on the website until you move it on.</p>
       <div class="card">
         <label for="nName" style="margin-top:0">Site name</label>
         <input type="text" id="nName" placeholder="e.g. Kiptoo Primary School" autocomplete="off">
         <div class="two">
           <div><label for="nCountry">Country</label><select id="nCountry"><option value="ke">Kenya</option><option value="tz">Tanzania</option><option value="ug">Uganda</option><option value="mw">Malawi</option></select></div>
-          <div><label for="nType">Type</label><select id="nType"><option value="borehole">Borehole well</option><option value="collection">Water collection</option><option value="school">School</option><option value="health">Health</option><option value="children">Children's home</option><option value="farming">Farming</option><option value="community">Community</option><option value="other">Other</option></select></div>
+          <div><label for="nType">Type</label><select id="nType"><option value="borehole">Borehole well</option><option value="collection">Water collection</option><option value="school">School</option><option value="health">Health</option><option value="children">Children’s home</option><option value="farming">Farming</option><option value="community">Community</option><option value="other">Other</option></select></div>
         </div>
         <label for="nVillage">Village / community</label>
         <input type="text" id="nVillage" placeholder="e.g. Kiptoo, Nandi" autocomplete="off">
@@ -2604,6 +2662,10 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
     <!-- monthly report -->
     <section id="vReport" class="hidden" aria-labelledby="repTitle">
       <div class="noprint repbar"><button class="back" id="repBack" type="button">← Me</button><button class="btn small" id="repPrint" type="button">⬇ Save as PDF</button></div>
+      <div class="noprint two reppick">
+        <div><label for="repMonth">Month</label><select id="repMonth"></select></div>
+        <div><label for="repCountry">Country</label><select id="repCountry"><option value="">All countries</option><option value="ke">Kenya</option><option value="tz">Tanzania</option><option value="ug">Uganda</option><option value="mw">Malawi</option></select></div>
+      </div>
       <div id="repBody" class="rep"></div>
     </section>
 
@@ -2639,16 +2701,8 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
             <select id="meHome"><option value="">Automatic</option><option value="ke">Kenya</option><option value="tz">Tanzania</option><option value="ug">Uganda</option><option value="mw">Malawi</option></select>
             <small class="muted kt" id="meHomeTx"></small></div>
         </div>
-        <div class="card">
-          <h2>Monthly report</h2>
-          <p class="muted">Visits, repairs and how projects are doing for one month, ready to save as a PDF.</p>
-          <div class="two">
-            <div><label for="repMonth">Month</label><select id="repMonth"></select></div>
-            <div><label for="repCountry">Country</label><select id="repCountry"><option value="">All countries</option><option value="ke">Kenya</option><option value="tz">Tanzania</option><option value="ug">Uganda</option><option value="mw">Malawi</option></select></div>
-          </div>
-          <button class="btn block" id="repOpen" type="button" style="margin-top:14px">Open report</button>
-        </div>
-        <div class="card stamps-card"><h2>Your stamps</h2><p class="muted" style="margin:0 0 4px">Every point you pin and every visit you report adds to your collection.</p><div class="stamps" id="meStamps"></div>
+        <div class="card stamps-card"><h2>Your stamps</h2><p class="muted" style="margin:0 0 4px">Every point you pin and every visit you report adds to your collection.</p><div class="stamps fold" id="meStamps"></div>
+          <button class="lnk" id="meStampsMore" type="button" aria-expanded="false" aria-controls="meStamps">Show all stamps</button>
           <button class="lnk" id="meWelcome" type="button">Show the welcome screens again</button></div>
         <div class="card settings" id="meSet"></div>
         <div class="card" id="meInstall"></div>
@@ -2746,7 +2800,55 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
   function acct(m) { return S.units === 'mi' ? '±' + Math.round(m * 3.28084) + ' ft' : '±' + m + ' m'; }
   function msg(id, cls, t) { $(id).className = 'msg ' + (cls || ''); $(id).textContent = t || ''; }
   function photoUrl(p, w) { return p && p.photo ? '/api/photo/' + encodeURIComponent(p.photo) + '?w=' + (w || 480) : ''; }
-  function when(iso) { var d = new Date(iso); return isNaN(d) ? '' : d.toLocaleDateString(undefined, { day: 'numeric', month: 'short' }) + ', ' + d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }); }
+  // --- dates and times: one absolute style and one relative style, the same as the Android app ---
+  // date "Thu 24 Oct" · date and time "24 Oct, 18:34" · "24 Oct 2025" only when it isn't this year · "5 min ago" · "In 2 days"
+  // Our own 3-letter months (the browser's en-GB gives "Sept"); ISO stays for storage and the server.
+  var MO3 = { en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], sw: ['Jan', 'Feb', 'Mac', 'Apr', 'Mei', 'Jun', 'Jul', 'Ago', 'Sep', 'Okt', 'Nov', 'Des'] };
+  var WD3 = { en: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'], sw: ['Jpl', 'Jtt', 'Jnn', 'Jtn', 'Alh', 'Iju', 'Jmo'] };
+  function dOf(x) { if (x instanceof Date) return x; if (typeof x === 'number') return new Date(x); x = String(x || ''); return new Date(/^\d{4}-\d{2}-\d{2}$/.test(x) ? x + 'T12:00:00' : /^\d{4}-\d{2}$/.test(x) ? x + '-01T12:00:00' : x); }
+  function dL() { return S.lang === 'sw' ? 'sw' : 'en'; }
+  function dYr(d) { return d.getFullYear() !== new Date().getFullYear(); }
+  // "Thu 24 Oct", or "24 Oct 2025" in another year; plain: no weekday ("24 Oct"), for tight columns
+  function dDay(x, plain) { var d = dOf(x); if (isNaN(d)) return ''; return dYr(d) ? d.getDate() + ' ' + MO3[dL()][d.getMonth()] + ' ' + d.getFullYear() : (plain ? '' : WD3[dL()][d.getDay()] + ' ') + d.getDate() + ' ' + MO3[dL()][d.getMonth()]; }
+  function dClock(x) { var d = dOf(x); return isNaN(d) ? '' : ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2); }
+  function dWhen(x) { var d = dOf(x); return isNaN(d) ? '' : d.getDate() + ' ' + MO3[dL()][d.getMonth()] + (dYr(d) ? ' ' + d.getFullYear() : '') + ', ' + dClock(d); }
+  // a month: "Oct", or "Oct 2025" in another year (yr: always with the year)
+  function dMonth(x, yr) { var d = dOf(x); return isNaN(d) ? '' : MO3[dL()][d.getMonth()] + (yr || dYr(d) ? ' ' + d.getFullYear() : ''); }
+  // "just now" · "5 min ago" · "3 h ago" · "2 d ago" · "6 wk ago" · "1 yr ago"
+  function dAgo(x) {
+    var t = dOf(x).getTime(); if (isNaN(t)) return '';
+    var m = Math.max(0, Math.floor((Date.now() - t) / 6e4)), h = Math.floor(m / 60), d = Math.floor(h / 24), w = Math.floor(d / 7), y = Math.floor(d / 365);
+    var sw = function (n, w1) { return w1 + ' ' + n + (n === 1 ? ' iliyopita' : ' zilizopita'); };
+    return m < 1 ? tr('just now', 'sasa hivi') : m < 60 ? tr(m + ' min ago', sw(m, 'dakika')) : h < 24 ? tr(h + ' h ago', sw(h, 'saa')) : d < 7 ? tr(d + ' d ago', sw(d, 'siku'))
+      : y < 1 ? tr(w + ' wk ago', sw(w, 'wiki')) : tr(y + ' yr ago', y === 1 ? 'mwaka 1 uliopita' : 'miaka ' + y + ' iliyopita');
+  }
+  // a due date (yyyy-mm-dd): "Today" · "Tomorrow" · "In 2 days" · "3 days late"
+  function dDueN(ymd) { var a = dOf(ymd), b = new Date(); if (isNaN(a)) return null; a.setHours(12, 0, 0, 0); b.setHours(12, 0, 0, 0); return Math.round((a - b) / 864e5); }
+  function dDue(ymd) {
+    var n = dDueN(ymd); if (n == null) return '';
+    return n === 0 ? tr('Today', 'Leo') : n === 1 ? tr('Tomorrow', 'Kesho') : n > 1 ? tr('In ' + n + ' days', 'Baada ya siku ' + n) : n === -1 ? tr('1 day late', 'Imechelewa siku 1') : tr(-n + ' days late', 'Imechelewa siku ' + -n);
+  }
+  function when(iso) { return dWhen(iso); }
+  // date boxes show the date the app's way ("Thu 24 Oct") over the browser's own "10/23/2026" until they're tapped
+  function dateBoxes() {
+    qa('input[type=date]:not([data-dh])').forEach(function (i) {
+      i.setAttribute('data-dh', '1'); var cs = getComputedStyle(i), w = document.createElement('span'), t = document.createElement('span');
+      w.className = 'dhw'; w.style.margin = cs.margin; i.style.margin = '0'; i.parentNode.insertBefore(w, i); w.appendChild(i);
+      t.className = 'dh'; t.setAttribute('aria-hidden', 'true'); t.style.fontSize = cs.fontSize; t.style.left = (parseFloat(cs.paddingLeft) + parseFloat(cs.borderLeftWidth) || 16) + 'px'; w.appendChild(t);
+      var up = function () { t.textContent = i.value ? dDay(i.value) : ''; w.classList.toggle('set', !!i.value); };
+      i.addEventListener('input', up); i.addEventListener('change', up); up();
+    });
+  }
+  // tile labels (Office tabs, the Projects filters) never break a word: a long one ("Matengenezo") shrinks to fit instead
+  function otabFit() {
+    qa('.otab span').forEach(function (sp) {
+      if (sp.closest('.hidden') || !sp.offsetWidth) return;
+      sp.style.fontSize = ''; sp.style.overflowWrap = 'normal';
+      for (var k = 0; k < 6 && sp.scrollWidth > sp.clientWidth + 0.5; k++) sp.style.fontSize = (0.94 - k * 0.06) + 'em';
+    });
+  }
+  var dbT = 0; if (window.MutationObserver) new MutationObserver(function () { if (!dbT) dbT = requestAnimationFrame(function () { dbT = 0; dateBoxes(); otabFit(); }); }).observe(document.documentElement, { childList: true, subtree: true, characterData: true });
+  window.addEventListener('resize', function () { otabFit(); });
   function sub(p) { return [p.area, p.country, p.status].filter(Boolean).join(' · '); }
   function saveList() { store.set('rfPinList', JSON.stringify(S.projects)); store.set('rfPinRepairs', JSON.stringify(S.repairs)); store.set('rfPinVisits', JSON.stringify(S.visits)); }
   function why(j) {
@@ -2762,7 +2864,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
       : j.reason === 'pin-cloudflare' ? tr('Your PIN was set by the office, so only they can change it.', 'PIN yako iliwekwa na ofisi, kwa hiyo wao pekee wanaweza kuibadilisha.')
       : j.reason === 'own-pin' ? tr('You need your own PIN for this. Ask the office for one.', 'Unahitaji PIN yako mwenyewe kwa hili. Omba ofisi ikupe.')
       : j.reason === 'locked' ? 'Too many wrong PINs from this connection. Please try again in an hour.'
-      : j.reason === 'not-set-up' ? 'The pin app isn’t switched on yet: PINs still need to be set in Cloudflare.'
+      : j.reason === 'not-set-up' ? tr('The pin app isn’t switched on yet. Ask whoever looks after the website to set up the PINs.', 'Programu bado haijawashwa. Muombe anayesimamia tovuti aweke PIN.')
       : j.reason === 'no-monday' ? 'The pin app can’t reach monday.com yet (the monday.com connection isn’t set up).'
       : j.reason === 'offline' ? 'No connection. Check your signal and try again.'
       : j.reason === 'place' ? 'That spot is outside East Africa. Please check the point.'
@@ -3705,7 +3807,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
     MPA.sel = p.id; buzz(); MPA.map.panTo(p.gps, { animate: !mpaStill() }); mpaDraw(); mpaCardUi(d);
   }
   function mpaClose() { MPA.sel = null; MPA.spot = null; MPA.measure = false; mpaSpotDraw(); mpaDraw(); mpaCardUi(0); }
-  function mpaVisitDay(iso) { var d = new Date(iso); return isNaN(d) ? '' : d.toLocaleDateString(S.lang === 'sw' ? 'sw' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' }); }
+  function mpaVisitDay(iso) { return dDay(iso); }
   function mpaCardUi(dir) {
     var box = $('mpaCard'); if (!box) return;
     var p = MPA.sel && byId(MPA.sel), sp = MPA.spot, open = !!(p || sp), was = !box.classList.contains('hidden');
@@ -4028,6 +4130,8 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
     setTimeout(function () { t.classList.add('out'); setTimeout(function () { t.remove(); }, 320); }, 5200);
   }
   $('meWelcome').addEventListener('click', function () { onbOpen(); });
+  // the stamps fold to one row; the rest open on a tap
+  $('meStampsMore').addEventListener('click', function () { var f = $('meStamps').classList.toggle('fold'); this.setAttribute('aria-expanded', !f); this.textContent = f ? tr('Show all stamps', 'Onyesha stempu zote') : tr('Show fewer stamps', 'Onyesha stempu chache'); buzz(); });
 
   // --- app header and the first run ---------------------------------------------------------------
   function headUi(v) {
@@ -4274,7 +4378,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
   }
   var DUE_DAYS = 180, URGO = { urgent: 0, month: 1, watch: 2 };
   function ageDays(p) { var v = S.visits[p.id]; return v ? (Date.now() - Date.parse(v.at)) / 864e5 : 1e6; }
-  function ageText(p) { var d = ageDays(p); if (d >= 1e6) return 'No visit yet'; var m = Math.floor(d / 30.4); return m >= 12 ? Math.floor(m / 12) + ' yr ago' : m + ' mo ago'; }
+  function ageText(p) { var d = ageDays(p); if (d >= 1e6) return 'No visit yet'; return dAgo(Date.parse(S.visits[p.id].at)); }
   // type of project: Water, Schools, Health, Children, Farming, Other (only the ones there are)
   var TGROUPS = [['water', 'Water', 'Maji'], ['school', 'Schools', 'Shule'], ['health', 'Health', 'Afya'], ['home', 'Children’s homes', 'Makao ya watoto'], ['farm', 'Farming', 'Kilimo'], ['other', 'Other', 'Nyingine']];
   function tgroup(p) { var t = String(p.type || '').toLowerCase(); return /borehole|collection/.test(t) ? 'water' : /school/.test(t) ? 'school' : /health/.test(t) ? 'health' : /orphan/.test(t) ? 'home' : /farm/.test(t) ? 'farm' : 'other'; }
@@ -4305,7 +4409,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
     if (f === 'repairs') rows.sort(function (a, b) { var ra = S.repairs[a.id], rb = S.repairs[b.id]; return (URGO[ra.urgency] || 3) - (URGO[rb.urgency] || 3) || (rb.at || '').localeCompare(ra.at || ''); });
     if (f === 'due') rows.sort(function (a, b) { return ageDays(b) - ageDays(a); });
     $('count').textContent = near ? (S.here ? 'Closest pinned projects to you' : from ? tr('Closest to ', 'Karibu zaidi na ') + spotName() : 'Finding where you are…')
-      : f === 'missing' ? rows.length + ' still need a location'
+      : f === 'missing' ? rows.length + ' with no location'
       : f === 'repairs' ? rows.length + (rows.length === 1 ? ' project reported' : ' projects reported') + ' as needing repair or not working, most urgent first'
       : f === 'due' ? rows.length + ' not visited in the last 6 months (or not yet in the app), longest first' + (prjTestCount(rows) ? tr(' · ' + prjTestCount(rows) + ' due a water test', ' · ' + prjTestCount(rows) + ' zinahitaji kipimo cha maji') : '')
       : rows.length + ' projects';
@@ -4561,7 +4665,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
     var map = p.gps ? '<div class="smap">' + staticMap(p.gps, 15, S.here) + '<span class="pt" style="--c:' + col + '"></span>' +
       (d != null ? '<span class="chipl">' + esc(dist(d)) + ' · Live</span>' : '') + '<span class="attr">© OpenStreetMap</span>' +
       '<div class="who3"><span class="av" aria-hidden="true">' + esc(r.assignee ? initials(r.assignee) : '?') + '</span><span><b>' + (r.assignee ? esc(r.assignee) : 'Not assigned yet') + '</b><small>' +
-      (r.due ? 'Due ' + esc(new Date(r.due + 'T12:00:00').toLocaleDateString(undefined, { day: 'numeric', month: 'short' })) : r.assignee ? 'Repair job' : 'The office assigns it') + '</small></span></div></div>' : '';
+      (r.due ? 'Due ' + esc(dDay(r.due)) : r.assignee ? 'Repair job' : 'The office assigns it') + '</small></span></div></div>' : '';
     var steps = [
       ['Reported', (bad ? 'Not working' : 'Needs repair') + ' · ' + esc(r.by) + ', ' + esc(when(r.at))],
       ['Assigned', r.assignee ? esc(r.assignee) + (at.assigned ? ', ' + esc(when(at.assigned)) : '') : 'Waiting for the office'],
@@ -4745,7 +4849,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
   function cmp(k) {
     var pv = prevVisits[S.cur.id] && prevVisits[S.cur.id].filter(function (x) { return x.readings; })[0];
     if (!pv || pv.readings[k] == null) return '';
-    var now = Number(V.r[k]), was = pv.readings[k], txt = tr('Last visit', 'Ziara iliyopita') + ' (' + new Date(pv.at).toLocaleDateString(undefined, { day: 'numeric', month: 'short' }) + '): ' + was;
+    var now = Number(V.r[k]), was = pv.readings[k], txt = tr('Last visit', 'Ziara iliyopita') + ' (' + dDay(pv.at) + '): ' + was;
     if (V.r[k] === '' || V.r[k] == null || isNaN(now) || now === was) return '<span class="cmp" id="cmp_' + k + '">' + txt + '</span>';
     var worse = k === 'strokes' ? now > was : k === 'flow' ? now < was : null;
     return '<span class="cmp ' + (worse === true ? 'worse' : worse === false ? 'better' : '') + '" id="cmp_' + k + '">' + txt + ' → ' + now + ' ' + (now > was ? '↑' : '↓') + (worse === true ? ' ' + tr('worse', 'mbaya zaidi') : worse === false ? ' ' + tr('better', 'bora zaidi') : '') + '</span>';
@@ -4754,7 +4858,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
   function cmpN(k) {
     var pv = prevVisits[S.cur.id] && prevVisits[S.cur.id].filter(function (x) { return x.numbers && x.numbers[k] != null; })[0];
     if (!pv || /born|died|sold|income/.test(k)) return '';
-    var now = Number((V.n || {})[k]), was = pv.numbers[k], txt = tr('Last visit', 'Ziara iliyopita') + ' (' + new Date(pv.at).toLocaleDateString(undefined, { day: 'numeric', month: 'short' }) + '): ' + was;
+    var now = Number((V.n || {})[k]), was = pv.numbers[k], txt = tr('Last visit', 'Ziara iliyopita') + ' (' + dDay(pv.at) + '): ' + was;
     if (!V.n || V.n[k] === '' || V.n[k] == null || isNaN(now) || now === was) return '<span class="cmp" id="cmpn_' + k + '">' + txt + '</span>';
     return '<span class="cmp" id="cmpn_' + k + '">' + txt + ' → ' + now + ' ' + (now > was ? '↑' : '↓') + '</span>';
   }
@@ -4771,7 +4875,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
       if (!V.arrive) h += '<p class="muted">' + tr('Records the time you arrived and where you are.', 'Inarekodi saa uliyofika na mahali ulipo.') + '</p><button class="btn block big" type="button" data-act="arrive">📍 ' + tr('I’ve arrived', 'Nimefika') + '</button>';
       else {
         var far = V.arrive.d != null && V.arrive.d > 500;
-        h += '<p class="ok-line">✓ ' + tr('Arrived', 'Umefika') + ' ' + new Date(V.arrive.at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }) + (V.arrive.d != null ? ' · ' + dist(V.arrive.d) + ' ' + tr('from the saved point', 'kutoka mahali palipohifadhiwa') : '') + '</p>' +
+        h += '<p class="ok-line">✓ ' + tr('Arrived', 'Umefika') + ' ' + dClock(V.arrive.at) + (V.arrive.d != null ? ' · ' + dist(V.arrive.d) + ' ' + tr('from the saved point', 'kutoka mahali palipohifadhiwa') : '') + '</p>' +
           (far ? '<p class="msg warn">' + tr('That’s more than 500 m from the saved point. If you’re at the site, pin the right location in the Pin location tab.', 'Ni zaidi ya mita 500 kutoka mahali palipohifadhiwa. Ikiwa uko eneo hili, weka mahali sahihi kwenye kichupo cha Pin location.') + '</p>' : '') +
           '<button class="lnk" type="button" data-act="arrive">' + tr('Check in again', 'Thibitisha tena') + '</button>';
       }
@@ -4846,7 +4950,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
       var rd = ['strokes', 'flow', 'queue', 'users'].filter(function (k) { return V.r[k] !== '' && V.r[k] != null; }); if (rd.length || V.r.clarity) rows.push([tr('Readings', 'Vipimo'), rd.length + (V.r.clarity ? 1 : 0)]);
       if (V.q.ecoli === 'pos') rows.push(['E. coli', '<span class="bad-t">' + tr('Found: not safe untreated', 'Imepatikana: si salama bila kutibiwa') + '</span>']);
       rows.push([tr('Photos', 'Picha'), V.files.length + (V.voice ? ' + ' + tr('voice note', 'sauti') : '')]);
-      if (V.arrive) rows.push([tr('On site since', 'Uko eneo tangu'), new Date(V.arrive.at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })]);
+      if (V.arrive) rows.push([tr('On site since', 'Uko eneo tangu'), dClock(V.arrive.at)]);
       h += '<h2>' + tr('Check and send', 'Hakiki na utume') + '</h2><div class="sum">' + rows.map(function (r) { return '<div class="kv"><span>' + r[0] + '</span><b>' + r[1] + '</b></div>'; }).join('') + '</div>' +
         inp('note', tr('Anything else? (optional)', 'Jambo jingine? (si lazima)'), { area: 1, ph: tr('What did you see or agree with the community?', 'Uliona nini au mlikubaliana nini na jamii?') }) +
         '<div class="voice" id="wVoice"></div>' +
@@ -5051,7 +5155,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
     left: '<path d="M15 6l-6 6 6 6"/>', right: '<path d="M9 6l6 6-6 6"/>', x: '<path d="M6 6l12 12M18 6L6 18"/>', print: '<path d="M12 4v11M7 10.5l5 5 5-5M5 20h14"/>'
   };
   function prjIc(n) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + PRJ_SVG[n] + '</svg>'; }
-  function prjDay(iso) { var d = new Date(iso); return isNaN(d) ? '' : d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }); }
+  function prjDay(iso) { return dDay(iso); }
 
   // water tests: the server keeps one small map {project id: when the water was last tested}
   function prjTests() { if (!S.tests) S.tests = jget('rfPinTests', {}); return S.tests; }
@@ -5123,7 +5227,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
         return '<div class="prj-g" style="--i:' + gi + '"><div class="prj-gh"><b>' + esc(tr(g.en, g.sw)) + '</b><span>' + (g.k === 'main' ? tr('On the website', 'Kwenye tovuti') : g.items.length + ' ' + (g.items.length === 1 ? tr('photo', 'picha') : tr('photos', 'picha'))) + '</span></div>' +
           '<div class="prj-strip" aria-label="' + esc(tr(g.en, g.sw)) + '">' + g.items.map(function (it, ii) {
             return '<button type="button" class="prj-ph' + (it.main ? ' main' : '') + '" data-g="' + gi + '" data-i="' + ii + '" aria-label="' + esc(tr(g.en, g.sw) + (it.at ? ', ' + prjDay(it.at) : '') + (it.by ? ', ' + it.by : '')) + '">' +
-              '<img loading="lazy" src="' + esc(it.url) + '" alt="" onerror="this.parentNode.classList.add(\'off\')">' + (ii === 0 && !it.main && g.items.length > 1 ? '<i class="prj-new">' + tr('Latest', 'Karibuni') + '</i>' : '') +
+              '<img loading="lazy" src="' + esc(it.url) + '" alt="" onerror="this.parentNode.classList.add(\'off\')">' + (ii === 0 && !it.main && g.items.length > 1 ? '<i class="prj-new">' + tr('Latest', 'Mpya zaidi') + '</i>' : '') +
               '<span class="cap"><b>' + (it.main ? tr('Main photo', 'Picha kuu') : esc(prjDay(it.at))) + '</b>' + (it.by ? '<small>' + esc(it.by) + '</small>' : '') + '</span></button>';
           }).join('') + '</div></div>';
       }).join('') +
@@ -5225,7 +5329,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
     if (ppl) h += '<div class="prj-big"><b>' + ppl.n.toLocaleString('en-US') + '</b><span>' + esc(tr(ppl.en, ppl.sw)) + (ppl.at ? '<small>' + tr('Counted at the visit on ', 'Ilihesabiwa kwenye ziara ya ') + esc(prjDay(ppl.at)) + '</small>' : '') + '</span></div>';
     if (story) h += '<blockquote class="prj-q"><p>“' + esc(story.q) + '”</p>' + (story.who ? '<cite>— ' + esc(story.who) + '</cite>' : '') + '</blockquote>';
     if (rows.length) h += '<h2>' + tr('About the project', 'Kuhusu mradi') + '</h2><dl class="prj-facts">' + rows.map(function (x) { return '<dt>' + esc(x[0]) + '</dt><dd>' + esc(x[1]) + '</dd>'; }).join('') + '</dl>';
-    h += '<p class="muted rep-f">' + tr('Prepared by ', 'Imeandaliwa na ') + esc(S.name || 'RAFIKI') + ', ' + esc(new Date().toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' })) + '. ' + tr('From RAFIKI’s own field visits (RAFIKI Pin app and monday.com).', 'Kutoka kwa ziara za RAFIKI zenyewe (programu ya RAFIKI Pin na monday.com).') + (story ? ' ' + tr('The person quoted agreed to be quoted and photographed.', 'Aliyenukuliwa alikubali kunukuliwa na kupigwa picha.') : '') + '</p>';
+    h += '<p class="muted rep-f">' + tr('Prepared by ', 'Imeandaliwa na ') + esc(S.name || 'RAFIKI') + ', ' + esc(dDay(new Date())) + '. ' + tr('From RAFIKI’s own field visits (RAFIKI Pin app and monday.com).', 'Kutoka kwa ziara za RAFIKI zenyewe (programu ya RAFIKI Pin na monday.com).') + (story ? ' ' + tr('The person quoted agreed to be quoted and photographed.', 'Aliyenukuliwa alikubali kunukuliwa na kupigwa picha.') : '') + '</p>';
     return withLetterhead(h);
   }
   function prjSumText(p, notes, visits) {
@@ -5356,6 +5460,20 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
   Object.assign(SW, {"My month": "Mwezi wangu", "My work": "Kazi yangu", "Team today": "Timu leo", "Team totals": "Jumla ya timu", "Team feed": "Habari za timu", "This month": "Mwezi huu", "Show more": "Onyesha zaidi", "Me": "Mimi", "Team": "Timu", "This phone": "Simu hii", "Colours": "Rangi", "Language": "Lugha", "Distances": "Umbali", "Text size": "Ukubwa wa maandishi", "My country": "Nchi yangu", "Monthly report": "Ripoti ya mwezi", "Lock the app": "Funga programu", "Pins": "Mahali", "Visits": "Ziara", "Light": "Mwanga", "Dark": "Giza", "Sun": "Jua", "Small": "Ndogo", "Normal": "Kawaida", "Large": "Kubwa", "Larger": "Kubwa zaidi"});
   Object.assign(SW, {"Your stamps": "Stempu zako", "Show the welcome screens again": "Onyesha skrini za kukaribisha tena", "Sign in": "Ingia", "New here? Ask your team for a PIN.": "Mgeni hapa? Omba PIN kwa timu yako.", "First drop": "Tone la kwanza", "Pin a location": "Weka mahali", "First visit": "Ziara ya kwanza", "Report a site visit": "Ripoti ziara", "Fixer": "Mrekebishaji", "Mark a repair fixed": "Weka matengenezo kuwa yamekamilika", "Explorer": "Mvumbuzi", "Add a new site": "Ongeza eneo jipya", "Mapper": "Mchora ramani", "Pin 10 locations": "Weka mahali 10", "Regular": "Mzoefu", "Report 10 visits": "Ripoti ziara 10", "Earned": "Umepata"}); SWP.push([/^Habari (.+), karibu tena\.$/,"Habari $1, karibu tena."]);
   Object.assign(SW, {"Kilometres (km)": "Kilomita (km)", "e.g. 2.4 km away": "mf. km 2.4 kutoka ulipo", "e.g. 1.5 miles away": "mf. maili 1.5 kutoka ulipo"});
+  // polish-pwoffice
+  Object.assign(SW, {"PINNED": "IMEWEKWA", "VISIT": "ZIARA", "WORKING": "INAFANYA KAZI", "REPAIR": "MATENGENEZO", "Show all stamps": "Onyesha stempu zote",
+    "Repairs": "Matengenezo", "Review": "Kagua", "Review, assign and report": "Kagua, gawa na ripoti", "Clean-up": "Safisha data", "Export": "Hamisha", "Latest": "Mpya zaidi",
+    "Latest from the field": "Habari mpya zaidi kutoka uwanjani", "Lock the app": "Funga kwa PIN", "Borehole well": "Kisima kirefu", "No location": "Hakuna mahali",
+    "waiting for your review": "zinasubiri ukague", "Nothing waiting for review.": "Hakuna kinachosubiri kukaguliwa.",
+    "Children’s home": "Makao ya watoto", "Today’s route": "Njia ya leo", "It goes onto the monday.com board as “Due Diligence”, so it isn’t on the website until you move it on.": "Inaingia kwenye monday.com kama “Due Diligence”, kwa hiyo haionekani kwenye tovuti hadi uisogeze.",
+    "No signal. Keep working: changes are saved on this phone and sent when you’re back online.": "Hakuna mtandao. Endelea kufanya kazi: mabadiliko yanahifadhiwa kwenye simu hii na kutumwa ukipata mtandao.",
+    "Today": "Leo", "Tomorrow": "Kesho", "1 day late": "Imechelewa siku 1", "Website PIN": "PIN ya tovuti", "Community report": "Ripoti ya jamii", "Community (SMS)": "Jamii (SMS)",
+    "Mar": "Mac", "May": "Mei", "Aug": "Ago", "Oct": "Okt", "Dec": "Des"});
+  SWP.unshift([/^Repairs, (\d+) open$/, "Matengenezo, $1 wazi"], [/^Review, (\d+) open$/, "Kagua, $1 wazi"], [/^(\d+) with no location$/, "$1 bila mahali"]);
+  // dates in the app's own style ("Thu 24 Oct", "24 Oct, 18:34") and relative times, when the language changes after they're drawn
+  [['Sun', 'Jpl'], ['Mon', 'Jtt'], ['Tue', 'Jnn'], ['Wed', 'Jtn'], ['Thu', 'Alh'], ['Fri', 'Iju'], ['Sat', 'Jmo']].forEach(function (w) { SWP.push([new RegExp('^' + w[0] + ' (\\d{1,2}) ([A-Z][a-z]{2})$'), w[1] + ' $1 $2']); });
+  SWP.push([/^(\d{1,2}) ([A-Z][a-z]{2})((?: \d{4})?(?:, \d{2}:\d{2})?)$/, "$1 $2$3"], [/^(\d+) h ago$/, "saa $1 zilizopita"], [/^(\d+) d ago$/, "siku $1 zilizopita"], [/^(\d+) wk ago$/, "wiki $1 zilizopita"],
+    [/^(\d+) yr ago$/, "miaka $1 iliyopita"], [/^In (\d+) days$/, "Baada ya siku $1"], [/^(\d+) days late$/, "Imechelewa siku $1"]);
   var MON = {Jan:'Jan',Feb:'Feb',Mar:'Mac',Apr:'Apr',May:'Mei',Jun:'Jun',Jul:'Jul',Aug:'Ago',Sep:'Sep',Oct:'Okt',Nov:'Nov',Dec:'Des',January:'Januari',February:'Februari',March:'Machi',April:'Aprili',June:'Juni',July:'Julai',August:'Agosti',September:'Septemba',October:'Oktoba',November:'Novemba',December:'Desemba'};
   function swOne(x) {
     if (!x) return null;
@@ -5411,17 +5529,31 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
   $('meHome').addEventListener('change', function () { if (this.value) store.set('rfPinHomeSet', this.value); else store.del('rfPinHomeSet'); store.del('rfPinCountry'); fitted = false; applyHome(); homeTx(); });
   function homeTx() { var h = homeCk(); $('meHomeTx').textContent = h ? 'Lists and the map start with ' + CNAME[h] + '. You can still pick any country in Projects.' + (store.get('rfPinHomeSet') ? '' : ' (Found from ' + (S.srvHome ? 'your sign-in' : 'where your phone is') + '.)') : 'Not known yet: choose one, or allow location.'; }
   // months for the report
-  (function () { var d = new Date(), o = ''; for (var i = 0; i < 12; i++) { var m = new Date(d.getFullYear(), d.getMonth() - i, 1); o += '<option value="' + m.getFullYear() + '-' + ('0' + (m.getMonth() + 1)).slice(-2) + '">' + m.toLocaleDateString(undefined, { month: 'short', year: 'numeric' }) + '</option>'; } $('repMonth').innerHTML = o; })();
-  $('repOpen').addEventListener('click', function () { openReport(); });
+  (function () { var d = new Date(), o = ''; for (var i = 0; i < 12; i++) { var m = new Date(d.getFullYear(), d.getMonth() - i, 1); o += '<option value="' + m.getFullYear() + '-' + ('0' + (m.getMonth() + 1)).slice(-2) + '">' + dMonth(m, true) + '</option>'; } $('repMonth').innerHTML = o; })();
+  // the report has one way in (Me › Monthly report); month and country are chosen on the report itself
+  ['repMonth', 'repCountry'].forEach(function (id) { $(id).addEventListener('change', function () { if (!actCache) return openReport('replace'); $('repBody').innerHTML = reportHtml($('repMonth').value, $('repCountry').value); repCards($('repBody')); }); });
   $('repBack').addEventListener('click', function () { goBack(function () { show('vMe', 'replace'); }); });
   $('repPrint').addEventListener('click', function () { window.print(); });
   function openReport(how) {
     if (!$('repCountry').dataset.set) { $('repCountry').value = homeCk() || ''; $('repCountry').dataset.set = '1'; }
     show('vReport', how);
     $('repBody').innerHTML = '<p class="muted">Loading…</p>';
-    var draw = function () { $('repBody').innerHTML = reportHtml($('repMonth').value, $('repCountry').value); };
+    var draw = function () { $('repBody').innerHTML = reportHtml($('repMonth').value, $('repCountry').value); repCards($('repBody')); };
     if (!navigator.onLine && actCache) return draw();
     api('GET', null, '?activity=1').then(function (j) { if (j.ok) actCache = j.activity || []; if (actCache) draw(); else $('repBody').innerHTML = '<p class="msg bad">' + esc(why(j)) + '</p>'; });
+  }
+  // on a phone each table row becomes a card: every cell gets its column name (hidden on wider screens and in print)
+  function repCards(root) {
+    qa('.rt', root).forEach(function (t) {
+      var hs = qa('thead th', t).map(function (th) { return th.textContent.trim(); }); t.classList.add('cards');
+      qa('tbody tr', t).forEach(function (r) {
+        qa('td', r).forEach(function (td, i) {
+          if (!hs[i]) return; var v = document.createElement('span'); v.className = 'rv';
+          while (td.firstChild) v.appendChild(td.firstChild);
+          td.innerHTML = '<span class="rl" aria-hidden="true">' + esc(hs[i]) + '</span>'; td.appendChild(v);
+        });
+      });
+    });
   }
   function reportHtml(month, ck) {
     var y = +month.slice(0, 4), m = +month.slice(5) - 1, from = new Date(y, m, 1).getTime(), to = new Date(y, m + 1, 1).getTime();
@@ -5437,8 +5569,8 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
     var n = function (a) { return ev.filter(function (e) { return e.a === a; }).length; };
     var pc = ids.length ? Math.round(cnt.working / ids.length * 100) + '%' : '–';
     var ti = 0, tile = function (v, l, cls) { return '<div class="kpi ' + (cls || '') + '" style="--i:' + (ti++) + '"><b>' + v + '</b><span>' + l + '</span></div>'; };
-    var title = new Date(y, m, 1).toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
-    var h = '<header class="rep-h"><h1 id="repTitle">Field report · ' + esc(title) + '</h1><p>' + (ck ? esc(CNAME[ck]) : 'All countries') + ' · RAFIKI Outreach · Prepared by ' + esc(S.name) + ', ' + new Date().toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' }) + '</p></header>';
+    var title = dMonth(new Date(y, m, 1), true);
+    var h = '<header class="rep-h"><h1 id="repTitle">Field report · ' + esc(title) + '</h1><p>' + (ck ? esc(CNAME[ck]) : 'All countries') + ' · RAFIKI Outreach · Prepared by ' + esc(S.name) + ', ' + dDay(new Date()) + '</p></header>';
     var pl = function (k, one, many) { return k === 1 ? one : many; };
     h += '<div class="kpis">' + tile(visits.length, pl(visits.length, 'site visit', 'site visits')) + tile(ids.length, pl(ids.length, 'project visited', 'projects visited')) + tile(pc, 'of visited projects working', ids.length && cnt.working / ids.length < .8 ? 'warn' : '') + tile(open.length, pl(open.length, 'open repair', 'open repairs') + (urgent ? ' (' + urgent + ' urgent)' : ''), urgent ? 'bad' : '') +
       tile(n('fixed'), pl(n('fixed'), 'repair fixed', 'repairs fixed')) + tile(n('new'), pl(n('new'), 'new site added', 'new sites added')) + tile(n('pin'), pl(n('pin'), 'location pinned', 'locations pinned')) + tile(due, 'due a visit (6+ months)') + '</div>';
@@ -5448,9 +5580,9 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
         return '<tr><td>' + CNAME[c] + '</td><td>' + S.projects.filter(function (p) { return p.ck === c; }).length + '</td><td>' + cid.length + '</td><td>' + k('working') + '</td><td>' + k('repair') + '</td><td>' + k('notworking') + '</td><td>' + open.filter(function (x) { return x.p && x.p.ck === c; }).length + '</td></tr>';
       }).join('') + '</tbody></table></div>';
     h += '<h2>Open repairs' + (cost ? ' · about KES ' + cost.toLocaleString() + ' estimated' : '') + '</h2>' + (open.length ? '<div class="tw"><table class="rt"><thead><tr><th>Project</th><th>Reported</th><th>Urgency</th><th>Problems</th><th>Parts</th><th>Est. KES</th></tr></thead><tbody>' +
-      open.map(function (x) { return '<tr><td><b>' + esc(x.p ? x.p.title : x.r.t || x.id) + '</b><br><small>' + esc(x.p ? x.p.country : '') + ' · ' + (x.r.state === 'notworking' ? '❌ not working' : '⚠️ needs repair') + '</small></td><td>' + esc(new Date(x.r.at).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })) + '<br><small>' + esc(x.r.by) + '</small></td><td>' + esc(x.r.urgency ? URG[x.r.urgency][0] : '–') + '</td><td>' + esc((x.r.problems || []).join(', ') || x.r.note || '–') + '</td><td>' + esc(x.r.parts || '–') + '</td><td>' + (x.r.cost ? Number(x.r.cost).toLocaleString() : '–') + '</td></tr>'; }).join('') + '</tbody></table></div>' : '<p class="muted">None. 🎉</p>');
+      open.map(function (x) { return '<tr><td><b>' + esc(x.p ? x.p.title : x.r.t || x.id) + '</b><br><small>' + esc(x.p ? x.p.country : '') + ' · ' + (x.r.state === 'notworking' ? '❌ not working' : '⚠️ needs repair') + '</small></td><td>' + esc(dDay(x.r.at, true)) + '<br><small>' + esc(isSms(x.r) ? tr('Community (SMS)', 'Jamii (SMS)') : x.r.by) + '</small></td><td>' + esc(x.r.urgency ? URG[x.r.urgency][0] : '–') + '</td><td>' + esc((x.r.problems || []).join(', ') || x.r.note || '–') + '</td><td>' + esc(x.r.parts || '–') + '</td><td>' + (x.r.cost ? Number(x.r.cost).toLocaleString() : '–') + '</td></tr>'; }).join('') + '</tbody></table></div>' : '<p class="muted">None. 🎉</p>');
     h += '<h2>Visits this month</h2>' + (visits.length ? '<div class="tw"><table class="rt"><thead><tr><th>Date</th><th>Project</th><th>By</th><th>Result</th></tr></thead><tbody>' +
-      visits.slice().sort(function (a, b) { return a.at.localeCompare(b.at); }).map(function (e) { var p = byId(e.id); return '<tr><td>' + esc(new Date(e.at).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })) + '</td><td>' + esc(p ? p.title : e.t) + '</td><td>' + esc(e.by) + '</td><td>' + (STATES[e.s] ? STATES[e.s][0] + ' ' + STATES[e.s][1] : '') + (e.u ? ' · ' + URG[e.u][0] : '') + '</td></tr>'; }).join('') + '</tbody></table></div>' : '<p class="muted">No visits recorded in the app this month.</p>');
+      visits.slice().sort(function (a, b) { return a.at.localeCompare(b.at); }).map(function (e) { var p = byId(e.id); return '<tr><td>' + esc(dDay(e.at)) + '</td><td>' + esc(p ? p.title : e.t) + '</td><td>' + esc(isSms(e) ? tr('Community (SMS)', 'Jamii (SMS)') : e.by) + '</td><td>' + (STATES[e.s] ? STATES[e.s][0] + ' ' + STATES[e.s][1] : '') + (e.u ? ' · ' + URG[e.u][0] : '') + '</td></tr>'; }).join('') + '</tbody></table></div>' : '<p class="muted">No visits recorded in the app this month.</p>');
     h += '<p class="muted rep-f">Only visits, repairs and pins made with the RAFIKI Pin app are counted.</p>';
     return withLetterhead(h);
   }
@@ -5473,11 +5605,12 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
   var VERB = { pin: 'pinned', visit: 'reported a visit to', fixed: 'marked fixed', new: 'added a new site:', undo: 'undid a pin on', request: 'asked to move the confirmed location of', approve: 'approved', reject: 'turned down', job: 'updated the repair job on', assign: 'assigned', team: 'team:' };
   var WORK = { pin: 1, visit: 1, fixed: 1, new: 1 };
   function same(a, b) { return String(a || '').trim().toLowerCase() === String(b || '').trim().toLowerCase(); }
+  // a report texted in by a water committee ("SMS from +254•••678"): a community report, never a teammate
+  function isSms(e) { return !!e && (e.src === 'sms' || /^SMS from /.test(String(e.by || ''))); }
   function dayKey(t) { var d = new Date(t); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); }
   function since(iso) {
     var t = Date.parse(iso); if (isNaN(t)) return tr('never', 'bado');
-    var m = Math.round((Date.now() - t) / 6e4);
-    return m < 2 ? tr('just now', 'sasa hivi') : m < 60 ? tr(m + ' min ago', 'dakika ' + m + ' zilizopita') : m < 1440 ? tr(Math.floor(m / 60) + ' h ago', 'saa ' + Math.floor(m / 60) + ' zilizopita') : m < 2880 ? tr('yesterday', 'jana') : tr(Math.floor(m / 1440) + ' days ago', 'siku ' + Math.floor(m / 1440) + ' zilizopita');
+    return dAgo(t);
   }
   function actKind(a) { return a === 'new' ? 'pin' : a; }
   function mateInitials(n) { return esc(String(n || '?').split(/\s+/).map(function (w) { return w.charAt(0); }).slice(0, 2).join('').toUpperCase()); }
@@ -5494,16 +5627,13 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
     var days = {}; mine.forEach(function (e) { days[dayKey(e.at)] = 1; });
     var d = new Date(); if (!days[dayKey(d)]) d = new Date(d.getTime() - 864e5); var streak = 0;
     while (days[dayKey(d)]) { streak++; d = new Date(d.getTime() - 864e5); }
-    var tile = function (k, hue, ic, l) { return '<div class="mmt" style="--hu:var(--hu-' + hue + ');--hb:var(--hb-' + hue + ')">' + oic(ic) + '<b data-n="' + n[k] + '">' + n[k] + '</b><span>' + l + '</span></div>'; };
     $('meStats').innerHTML = [['pin', tr('Pins', 'Mahali')], ['visit', tr('Visits', 'Ziara')], ['fixed', tr('Fixed', 'Zimerekebishwa')]].map(function (x) { return '<div><b data-n="' + n[x[0]] + '">' + n[x[0]] + '</b><span>' + x[1] + '</span></div>'; }).join('');
     $('meStreak').innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg><span>' + (streak === 0 ? tr('Pin or visit today to start a streak.', 'Weka mahali au tembelea leo kuanza mfululizo.') : streak === 1 ? tr('1 day in a row. Keep it going!', 'Siku 1 mfululizo. Endelea hivyo!') : tr(streak + ' days in a row. Keep it going!', 'Siku ' + streak + ' mfululizo. Endelea hivyo!')) + '</span>';
     countUp($('meStats'));
-    $('mmName').textContent = new Date().toLocaleDateString(S.lang === 'sw' ? 'sw' : 'en-GB', { month: 'long' });
-    $('mmBody').innerHTML = '<div class="mmtiles">' + tile('pin', 'blue', 'pin', tr('Pins', 'Mahali')) + tile('visit', 'green', 'clip', tr('Visits', 'Ziara')) + tile('fixed', 'amber', 'wrench', tr('Fixed', 'Zimerekebishwa')) + '</div>' +
-      '<span class="lbl">' + tr('Last 6 weeks', 'Wiki 6 zilizopita') + '</span><div class="wk" role="img" aria-label="' + esc(tr('Work each week: ', 'Kazi kila wiki: ') + weeks.join(', ')) + '">' +
+    $('mmName').textContent = dMonth(new Date());
+    $('mmBody').innerHTML = '<span class="lbl">' + tr('Last 6 weeks', 'Wiki 6 zilizopita') + '</span><div class="wk" role="img" aria-label="' + esc(tr('Work each week: ', 'Kazi kila wiki: ') + weeks.join(', ')) + '">' +
       weeks.map(function (v, i) { return '<div><small>' + (v || '') + '</small><i style="height:' + Math.max(6, Math.round(v / top * 80)) + '%"' + (i === 5 ? ' class="now"' : '') + '></i></div>'; }).join('') + '</div>' +
       '<div class="wkl"><span>' + tr('6 wk ago', 'Wiki 6') + '</span><span>' + tr('This week', 'Wiki hii') + '</span></div>';
-    qa('#mmBody .mmt').forEach(function (t) { if (typeof countUp === 'function') countUp(t); });
   }
   // Me | Team switch at the top of Me & team
   function mePane(p) {
@@ -5516,8 +5646,8 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
   // --- notifications: the bell in Me & team ----------------------------------------------------
   // Worked out on the phone from what the team did, jobs and visits for you, and the review queue.
   var NOTE_KINDS = [['assign', 'Visits assigned to me', 'Ziara nilizopewa', 'cal', 'teal'], ['job', 'Repair jobs for me', 'Kazi za matengenezo kwangu', 'wrench', 'amber'], ['repair', 'Repairs reported', 'Matengenezo yaliyoripotiwa', 'alert', 'coral'],
-    ['fixed', 'Repairs fixed', 'Matengenezo yaliyokamilika', 'okc', 'green'], ['new', 'New sites added', 'Maeneo mapya', 'plus', 'purple'], ['review', 'Waiting for review (admins)', 'Zinasubiri kuidhinishwa (wasimamizi)', 'inbox', 'blue']];
-  function noteOn(k) { var o = jget('rfPinNoteKinds', {}); return o[k] !== 0; }
+    ['fixed', 'Repairs fixed', 'Matengenezo yaliyokamilika', 'okc', 'green'], ['new', 'New sites added', 'Maeneo mapya', 'plus', 'purple'], ['review', 'Waiting for review (admins)', 'Zinasubiri kukaguliwa (wasimamizi)', 'inbox', 'blue']];
+  function noteOn(k) { var o = jget('rfPinNoteKinds', {}); return o.all !== 0 && o[k] !== 0; }
   function notes() {
     var me = S.name, out = [], cut = Date.now() - 30 * 864e5;
     (actCache || []).forEach(function (e) {
@@ -5525,14 +5655,14 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
       // each one: kind, when, project id, the whole sentence (t), who (by), the project's name (p) and the short message (m)
       var what = (e.t || 'visits').replace(/ for .*$/, '');
       if (e.a === 'assign' && same(e.to, me)) out.push({ k: 'assign', at: e.at, id: e.id && byId(e.id) ? e.id : undefined, by: e.by, p: e.id && byId(e.id) ? byId(e.id).title : '', m: tr('Asked you to make ' + what, 'Amekuomba ufanye ' + what.replace(/visits?/, 'ziara')), t: tr(e.by + ' asked you to make ' + what, e.by + ' amekuomba ufanye ' + what.replace(/visits?/, 'ziara')) });
-      else if (e.a === 'visit' && (e.s === 'repair' || e.s === 'notworking')) out.push({ k: 'repair', at: e.at, id: e.id, by: e.by, p: e.t || '', m: e.s === 'notworking' ? tr('Reported it’s not working', 'Ameripoti kuwa haifanyi kazi') : tr('Reported it needs repair', 'Ameripoti kuwa inahitaji matengenezo'), t: e.by + ': ' + (e.t || '') + ' · ' + (e.s === 'notworking' ? tr('not working', 'haifanyi kazi') : tr('needs repair', 'inahitaji matengenezo')) });
-      else if (e.a === 'fixed') out.push({ k: 'fixed', at: e.at, id: e.id, by: e.by, p: e.t || '', m: tr('Marked it fixed ✓', 'Ameiweka kuwa imerekebishwa ✓'), t: tr(e.by + ' fixed ' + (e.t || ''), e.by + ' amerekebisha ' + (e.t || '')) });
+      else if (e.a === 'visit' && (e.s === 'repair' || e.s === 'notworking')) out.push({ k: 'repair', at: e.at, id: e.id, by: isSms(e) ? '' : e.by, sms: isSms(e), name: isSms(e) ? tr('Community report', 'Ripoti ya jamii') : '', p: e.t || '', m: e.s === 'notworking' ? tr('Reported it’s not working', 'Ameripoti kuwa haifanyi kazi') : tr('Reported it needs repair', 'Ameripoti kuwa inahitaji matengenezo'), t: e.by + ': ' + (e.t || '') + ' · ' + (e.s === 'notworking' ? tr('not working', 'haifanyi kazi') : tr('needs repair', 'inahitaji matengenezo')) });
+      else if (e.a === 'fixed') out.push({ k: 'fixed', at: e.at, id: e.id, by: isSms(e) ? '' : e.by, sms: isSms(e), name: isSms(e) ? tr('Community report', 'Ripoti ya jamii') : '', p: e.t || '', m: tr('Marked it fixed ✓', 'Ameiweka kuwa imerekebishwa ✓'), t: tr(e.by + ' fixed ' + (e.t || ''), e.by + ' amerekebisha ' + (e.t || '')) });
       else if (e.a === 'new' && S.admin) out.push({ k: 'new', at: e.at, id: e.id, by: e.by, p: e.t || '', m: tr('Added a new site', 'Ameongeza eneo jipya'), t: tr(e.by + ' added a new site: ' + (e.t || ''), e.by + ' ameongeza eneo jipya: ' + (e.t || '')) });
     });
     (S.jobs || []).forEach(function (id) { var r = S.repairs[id]; if (r) { var pt = r.t || (byId(id) || {}).title || ''; out.push({ k: 'job', at: (r.stepAt && r.stepAt.assigned) || r.at, id: id, name: tr('Repair job', 'Kazi ya matengenezo'), p: pt, m: tr('This repair is yours to do', 'Matengenezo haya ni yako kufanya'), t: tr('Repair job for you: ', 'Kazi ya matengenezo kwako: ') + pt }); } });
     if (S.admin && S.reviewOpen) {
       var ra = store.get('rfPinReviewAt'); if (!ra) { ra = new Date().toISOString(); store.set('rfPinReviewAt', ra); }   // stays the same, so "mark as read" sticks
-      var rv = S.reviewOpen === 1 ? tr('1 change waiting for your review', 'Badiliko 1 linasubiri uidhinishe') : tr(S.reviewOpen + ' changes waiting for your review', 'Mabadiliko ' + S.reviewOpen + ' yanasubiri uidhinishe');
+      var rv = S.reviewOpen === 1 ? tr('1 change waiting for your review', 'Badiliko 1 linasubiri ukague') : tr(S.reviewOpen + ' changes waiting for your review', 'Mabadiliko ' + S.reviewOpen + ' yanasubiri ukague');
       out.push({ k: 'review', at: ra, name: tr('Office review', 'Ukaguzi wa ofisi'), p: '', m: rv, t: rv });
     }
     return out.filter(function (n) { return noteOn(n.k); }).sort(function (a, b) { return String(b.at).localeCompare(String(a.at)); }).slice(0, 40);
@@ -5558,6 +5688,18 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
     w.querySelector('.bsh-bg').addEventListener('click', w.close); w.querySelector('.bsh-x').addEventListener('click', w.close);
     return w;
   }
+  // set-up names (RESEND_API_KEY, CRON_KEY, …) only inside a fold, under a plain sentence
+  function poTech(tech) { return '<details class="po-tech"><summary>' + tr('Technical details', 'Maelezo ya kiufundi') + '</summary><p>' + tech + '</p></details>'; }
+  // the app's own "are you sure?" sheet, in place of the browser's confirm(); it sits above any open sheet
+  function poAsk(title, text, yes, red) {
+    return new Promise(function (res) {
+      var w = panel(esc(title), (text ? '<p class="muted">' + esc(text) + '</p>' : '') + '<button class="btn block' + (red ? ' po-red' : '') + '" type="button" data-k="yes">' + esc(yes) + '</button><button class="btn light block" type="button" data-k="no" style="margin-top:8px">' + tr('Cancel', 'Ghairi') + '</button>', 'po-ask');
+      var done = function (v) { if (w.dataset.done) return; w.dataset.done = '1'; w.close(); res(v); };
+      w.addEventListener('click', function (e) { if (e.target.closest('[data-k=yes]')) done(true); else if (e.target.closest('[data-k=no],.bsh-x,.bsh-bg')) done(false); });
+      w.addEventListener('keydown', function (e) { if (e.key === 'Escape') done(false); });
+      setTimeout(function () { var y = w.querySelector('[data-k=yes]'); if (y) y.focus({ preventScroll: true }); }, 60);
+    });
+  }
   // The bell opens a full page: All · Unread · For me · Repairs, grouped Today / This week / Earlier.
   // It's its own step in the phone's history, so Back (or Esc) closes it.
   var NP = { w: null, f: 'all', menu: false, pushed: false };
@@ -5567,18 +5709,14 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
   function nameHue(s) { var h = 0; String(s || '').trim().toLowerCase().split('').forEach(function (c) { h = (h * 31 + c.charCodeAt(0)) >>> 0; }); return NHUES[h % NHUES.length]; }
   function nAgo(iso) {
     var d = Date.parse(iso); if (isNaN(d)) return '';
-    var m = Math.max(0, Math.floor((Date.now() - d) / 60000)), h = Math.floor(m / 60), dd = Math.floor(h / 24);
-    if (m < 1) return tr('just now', 'sasa hivi');
-    if (m < 60) return tr(m + ' min ago', 'dakika ' + m + ' zilizopita');
-    if (h < 24) return tr(h + ' h ago', 'saa ' + h + ' zilizopita');
-    if (dd < 7) return dd === 1 ? tr('yesterday', 'jana') : tr(dd + ' days ago', 'siku ' + dd + ' zilizopita');
-    return new Date(d).toLocaleDateString(S.lang === 'sw' ? 'sw' : 'en-GB', { day: 'numeric', month: 'short' });
+    return Date.now() - d < 7 * 864e5 ? dAgo(d) : dDay(d);
   }
   function nGroup(iso) { var d = Date.parse(iso), t = new Date(); t.setHours(0, 0, 0, 0); return d >= t.getTime() ? 0 : d >= t.getTime() - 6 * 864e5 ? 1 : 2; }
   function nPass(n, f, seen, rd) { return f === 'unread' ? noteNew(n, seen, rd) : f === 'me' ? n.k === 'assign' || n.k === 'job' : f === 'repairs' ? n.k === 'repair' || n.k === 'fixed' : true; }
   function nRow(n, i, seen, rd, K) {
     var k = K[n.k], nw = noteNew(n, seen, rd), who = n.by, hu = nameHue(who);
-    var av = who ? '<span class="np-av" aria-hidden="true" style="--hu:var(--hu-' + hu + ');--hb:var(--hb-' + hu + ')">' + esc(initials(who)) + '<i class="bd" style="--ku:var(--hu-' + k[4] + ')">' + oic(k[3]) + '</i></span>'
+    var av = n.sms ? '<span class="np-av tile sms" aria-hidden="true" style="--hu:var(--hu-slate);--hb:var(--hb-slate)">' + oic('phone') + '<i class="bd" style="--ku:var(--hu-' + k[4] + ')">' + oic(k[3]) + '</i></span>'
+      : who ? '<span class="np-av" aria-hidden="true" style="--hu:var(--hu-' + hu + ');--hb:var(--hb-' + hu + ')">' + esc(initials(who)) + '<i class="bd" style="--ku:var(--hu-' + k[4] + ')">' + oic(k[3]) + '</i></span>'
       : '<span class="np-av tile" aria-hidden="true" style="--hu:var(--hu-' + k[4] + ');--hb:var(--hb-' + k[4] + ')">' + oic(k[3]) + '</span>';
     return '<li><button type="button" class="np-r' + (nw ? ' new' : '') + '" style="--i:' + Math.min(i, 12) + '" data-key="' + esc(nkey(n)) + '"' + (n.id ? ' data-id="' + esc(n.id) + '"' : n.k === 'review' ? ' data-go="review"' : '') + '>' + av +
       '<span class="np-t">' + (nw ? '<span class="vh">' + tr('Unread: ', 'Haijasomwa: ') + '</span>' : '') + '<b>' + esc(who || n.name || '') + '</b><small>' + esc([nAgo(n.at), n.p].filter(Boolean).join(' · ')) + '</small><span class="m">' + esc(n.m || n.t) + '</span></span>' +
@@ -5733,7 +5871,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
       setRow('profile', 'people', 'blue', tr('Personal details', 'Taarifa zangu'), esc(me.nick || S.name || '') + (me.phone ? ' · ' + esc(me.phone) : '')) +
       setRow('pin', 'lock', 'purple', kind === 'monday' ? tr('Sign-in', 'Kuingia') : tr('Change my PIN', 'Badilisha PIN yangu'), kind === 'monday' ? tr('Signed in with monday.com', 'Umeingia kwa monday.com') : kind === 'app' ? tr('Your own 4-digit PIN', 'PIN yako ya tarakimu 4') : kind === 'cloudflare' ? tr('Set by the office', 'Imewekwa na ofisi') : tr('Shared team PIN', 'PIN ya timu')) + '</div>' +
       '<div class="sgrp" id="setPhone"><span class="sgl">' + tr('Security and alerts', 'Usalama na arifa') + '</span><i data-slot="bio"></i>' +
-      setRow('notify', 'clock', 'amber', tr('Notifications', 'Arifa'), tr('What the bell tells you about', 'Kengele inakuarifu nini')) +
+      setRow('notify', 'clock', 'amber', tr('What to tell me', 'Niarifu kuhusu nini'), tr('What the bell tells you about', 'Kengele inakuarifu nini')) +
       ofaSetRow() +
       '<span class="sgl">' + tr('Display', 'Mwonekano') + '</span>' +
       setRow('look', 'sun', 'amber', tr('Appearance', 'Mwonekano'), lookTx()) +
@@ -5789,9 +5927,14 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
       });
     } else if (k === 'notify') {
       var o = jget('rfPinNoteKinds', {});
-      w = panel(tr('Notifications', 'Arifa'), '<p class="muted">' + tr('The bell in Me & team shows these. On Android the phone can also tell you when the app is closed (turn that on in the Android app).', 'Kengele kwenye Mimi na timu inaonyesha haya. Kwenye Android simu inaweza pia kukuarifu programu ikiwa imefungwa (washa kwenye programu ya Android).') + '</p>' +
-        NOTE_KINDS.filter(function (n) { return n[0] !== 'review' || S.admin; }).map(function (n) { return '<div class="pr"><span class="pi" style="--hu:var(--hu-' + n[4] + ');--hb:var(--hb-' + n[4] + ')">' + oic(n[3]) + '</span><b>' + tr(n[1], n[2]) + '</b><button type="button" class="tgl" role="switch" data-nk="' + n[0] + '" aria-checked="' + (o[n[0]] !== 0) + '" aria-label="' + tr(n[1], n[2]) + '"><i></i></button></div>'; }).join(''));
-      w.addEventListener('click', function (e) { var t = e.target.closest('[data-nk]'); if (!t) return; var kk = t.getAttribute('data-nk'), on = t.getAttribute('aria-checked') !== 'true'; t.setAttribute('aria-checked', on); o[kk] = on ? 1 : 0; store.set('rfPinNoteKinds', JSON.stringify(o)); bellUi(); buzz(); });
+      w = panel(tr('What to tell me', 'Niarifu kuhusu nini'), '<p class="muted">' + tr('The bell in Me & team shows these. On Android the phone can also tell you when the app is closed (turn that on in the Android app).', 'Kengele kwenye Mimi na timu inaonyesha haya. Kwenye Android simu inaweza pia kukuarifu programu ikiwa imefungwa (washa kwenye programu ya Android).') + '</p>' +
+        '<div class="pr nk-all"><span class="pi" style="--hu:var(--hu-amber);--hb:var(--hb-amber)">' + oic('bell') + '</span><b>' + tr('Alerts in the bell', 'Arifa kwenye kengele') + '<small>' + tr('Turn off to pause them all.', 'Zima kuzisimamisha zote.') + '</small></b><button type="button" class="tgl" role="switch" data-nk="all" aria-checked="' + (o.all !== 0) + '" aria-label="' + tr('Alerts in the bell', 'Arifa kwenye kengele') + '"><i></i></button></div>' +
+        '<span class="nk-h">' + tr('Tell me about', 'Niarifu kuhusu') + '</span><div class="nk-kids">' +
+        NOTE_KINDS.filter(function (n) { return n[0] !== 'review' || S.admin; }).map(function (n) { return '<div class="pr"><span class="pi" style="--hu:var(--hu-' + n[4] + ');--hb:var(--hb-' + n[4] + ')">' + oic(n[3]) + '</span><b>' + tr(n[1], n[2]) + '</b><button type="button" class="tgl" role="switch" data-nk="' + n[0] + '" aria-checked="' + (o[n[0]] !== 0) + '" aria-label="' + tr(n[1], n[2]) + '"><i></i></button></div>'; }).join('') + '</div>');
+      // the main switch off: the kinds below stay as they were, greyed out, until it's back on
+      var nkKids = function () { var off = o.all === 0, k = w.querySelector('.nk-kids'); k.classList.toggle('off', off); qa('.nk-kids .tgl', w).forEach(function (t) { t.disabled = off; t.setAttribute('aria-disabled', off); }); };
+      nkKids();
+      w.addEventListener('click', function (e) { var t = e.target.closest('[data-nk]'); if (!t || t.disabled) return; var kk = t.getAttribute('data-nk'), on = t.getAttribute('aria-checked') !== 'true'; t.setAttribute('aria-checked', on); o[kk] = on ? 1 : 0; store.set('rfPinNoteKinds', JSON.stringify(o)); nkKids(); bellUi(); buzz(); });
     } else if (k === 'help') {
       panel(tr('Help and FAQs', 'Msaada na maswali'), '<div class="faq">' + FAQ.map(function (f) { return '<details><summary>' + tr(f[0], f[1]) + '</summary><p>' + tr(f[2], f[3]) + '</p></details>'; }).join('') + '</div><a class="btn light block" href="/faq" target="_blank" rel="noopener" style="margin-top:12px">' + tr('More questions on the website', 'Maswali zaidi kwenye tovuti') + '</a>');
     } else if (k === 'look') {
@@ -5863,13 +6006,13 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
   // Team totals (in name order, no ranking) and the team feed
   function actDraw() {
     var a = actCache; if (!a) return;
-    var from = period === 'w' ? weekStart() : monthStart(), rows = a.filter(function (e) { return WORK[e.a] && Date.parse(e.at) >= from; }), by = {}, all = { pin: 0, visit: 0, fixed: 0 };
+    var from = period === 'w' ? weekStart() : monthStart(), rows = a.filter(function (e) { return WORK[e.a] && !isSms(e) && Date.parse(e.at) >= from; }), by = {}, all = { pin: 0, visit: 0, fixed: 0 };
     rows.forEach(function (e) { var k = String(e.by || '—').trim(), c = actKind(e.a); by[k] = by[k] || { pin: 0, visit: 0, fixed: 0 }; by[k][c]++; all[c]++; });
     var names = Object.keys(by).sort(function (x, y) { return x.toLowerCase().localeCompare(y.toLowerCase()); });
     var pill = function (n, hue, ic) { return '<span class="tp" style="--hu:var(--hu-' + hue + ');--hb:var(--hb-' + hue + ')">' + oic(ic) + n + '</span>'; };
     $('actTable').innerHTML = '<div class="together"><b>' + tr('Together', 'Pamoja') + '</b><span>' + tr(all.pin + ' pins · ' + all.visit + ' visits · ' + all.fixed + ' fixed', 'mahali ' + all.pin + ' · ziara ' + all.visit + ' · ' + all.fixed + ' zimerekebishwa') + '</span></div>' +
       (names.length ? '<ul class="tots">' + names.map(function (n) { var o = by[n]; return '<li><b>' + esc(n) + '</b>' + pill(o.pin, 'blue', 'pin') + pill(o.visit, 'green', 'clip') + pill(o.fixed, 'amber', 'wrench') + '</li>'; }).join('') + '</ul>' : '<p class="muted">' + tr('Nothing yet in this period.', 'Hakuna bado katika kipindi hiki.') + '</p>');
-    var list = a.filter(function (e) { return WORK[e.a] || e.a === 'job'; }).sort(function (x, y) { return x.at < y.at ? 1 : -1; });
+    var list = a.filter(function (e) { return (WORK[e.a] || e.a === 'job') && !isSms(e); }).sort(function (x, y) { return x.at < y.at ? 1 : -1; });
     var FI = { pin: ['pin', 'blue'], visit: ['clip', 'green'], fixed: ['check', 'green'], new: ['plus', 'purple'], job: ['wrench', 'amber'] };
     $('actFeed').innerHTML = list.slice(0, feedN).map(function (e) {
       var f = FI[e.a], p = byId(e.id), st = e.a === 'visit' && e.s && STATES[e.s] ? ' · ' + tr(STATES[e.s][1], STATES[e.s][2]) : '';
@@ -5908,7 +6051,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
     if (store.get('rfPinBio')) { store.del('rfPinBio'); bioUi(); $('lockBtn').textContent = S.mode === 'monday' ? 'Sign out' : 'Lock the app'; return; }
     navigator.credentials.create({ publicKey: { challenge: rnd(32), rp: { name: 'RAFIKI Pin', id: location.hostname }, user: { id: rnd(16), name: S.name || 'RAFIKI Pin', displayName: S.name || 'RAFIKI Pin' },
       pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }], authenticatorSelection: { authenticatorAttachment: 'platform', userVerification: 'required', residentKey: 'discouraged' }, timeout: 60000, attestation: 'none' } })
-      .then(function (c) { if (!c) throw 0; store.set('rfPinBio', b64u(c.rawId)); buzz(); bioUi(); $('lockBtn').textContent = tr('Lock the app', 'Funga programu'); toast(tr('Fingerprint unlock is on ✓', 'Kufungua kwa alama ya kidole kumewashwa ✓')); },
+      .then(function (c) { if (!c) throw 0; store.set('rfPinBio', b64u(c.rawId)); buzz(); bioUi(); $('lockBtn').textContent = tr('Lock the app', 'Funga kwa PIN'); toast(tr('Fingerprint unlock is on ✓', 'Kufungua kwa alama ya kidole kumewashwa ✓')); },
         function () { msg('bioMsg', 'bad', tr('Not turned on.', 'Haijawashwa.')); });
   });
   // the gate: covers everything until the device check (or the PIN) says it's you (design: Figma 06 / 07)
@@ -5978,17 +6121,20 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
     var c = $('meMonday'); if (!c) return;
     if (S.mode === 'monday') { c.classList.add('hidden'); return; }
     c.classList.remove('hidden');
-    var head = function (sub, ok) { return '<button class="pr mrow" type="button" id="monRow" aria-expanded="' + c.classList.contains('open') + '"><span class="pi" style="--hu:var(--hu-purple);--hb:var(--hb-purple)">' + oic('clipf') + '</span><span class="prt"><b>' + tr('Your name on monday.com', 'Jina lako kwenye monday.com') + '</b><small' + (ok ? ' class="ok"' : '') + '>' + sub + '</small></span><span class="cv">' + oic('chev') + '</span></button><div class="mbody">'; };
-    if (S.linked) { if (!c.dataset.seen) { c.dataset.seen = '1'; c.classList.remove('open'); } c.innerHTML = head(tr('Connected as ', 'Imeunganishwa kama ') + esc(S.linked) + ' ✓', 1) + '<p class="muted">' + tr('Everything you save goes to monday.com under your own name.', 'Kila unachohifadhi kinaenda monday.com kwa jina lako.') + '</p><button class="lnk" id="monOff" type="button">' + tr('Disconnect', 'Tenganisha') + '</button></div>'; return; }
-    if (!S.who) { c.innerHTML = head(tr('Changes go in under the shared account', 'Mabadiliko yanaingia kwa akaunti ya pamoja')) + '<p class="muted">' + tr('To use your own name, ask the office for your own PIN.', 'Kutumia jina lako, omba ofisi PIN yako mwenyewe.') + '</p></div>'; return; }
-    if (!c.dataset.seen) { c.dataset.seen = '1'; c.classList.add('open'); }
-    c.innerHTML = head(tr('Takes 20 seconds, once', 'Inachukua sekunde 20, mara moja')) + '<p class="muted">' + tr('Your changes then show on monday.com under your own name.', 'Mabadiliko yako yataonekana monday.com kwa jina lako.') + '</p>' +
+    // one row in Settings ("Connected as …  ›"); the set-up itself opens in a sheet
+    var sub = S.linked ? tr('Connected as ', 'Imeunganishwa kama ') + esc(S.linked) + ' ✓' : !S.who ? tr('Changes go in under the shared account', 'Mabadiliko yanaingia kwa akaunti ya pamoja') : tr('Not connected yet · takes 20 seconds', 'Bado haijaunganishwa · sekunde 20');
+    c.innerHTML = '<button class="pr mrow" type="button" id="monRow" aria-haspopup="dialog"><span class="pi" style="--hu:var(--hu-purple);--hb:var(--hb-purple)">' + oic('clipf') + '</span><span class="prt"><b>' + tr('Your name on monday.com', 'Jina lako kwenye monday.com') + '</b><small' + (S.linked ? ' class="ok"' : '') + '>' + sub + '</small></span><span class="cv">' + oic('chev') + '</span></button>';
+    var sh = $('monSheet'); if (sh) sh.innerHTML = monBody();
+  }
+  function monBody() {
+    if (S.linked) return '<p class="muted">' + tr('Connected as ', 'Imeunganishwa kama ') + '<b>' + esc(S.linked) + '</b> ✓ ' + tr('Everything you save goes to monday.com under your own name.', 'Kila unachohifadhi kinaenda monday.com kwa jina lako.') + '</p><button class="btn light block" id="monOff" type="button">' + tr('Disconnect', 'Tenganisha') + '</button>';
+    if (!S.who) return '<p class="muted">' + tr('To use your own name, ask the office for your own PIN.', 'Kutumia jina lako, omba ofisi PIN yako mwenyewe.') + '</p>';
+    return '<p class="muted">' + tr('Your changes then show on monday.com under your own name.', 'Mabadiliko yako yataonekana monday.com kwa jina lako.') + '</p>' +
       '<ol class="msteps"><li><a class="btn wide" id="monOpen" href="' + TOKURL + '" target="_blank" rel="noopener">1 · ' + tr('Open my monday.com token', 'Fungua tokeni yangu ya monday.com') + '</a><small>' + tr('Tap Copy on that page, then come back here.', 'Gusa Copy kwenye ukurasa huo, kisha rudi hapa.') + '</small></li>' +
       '<li><button class="btn wide light" id="monPaste" type="button">2 · ' + tr('Paste and connect', 'Bandika na uunganishe') + '</button></li></ol>' +
       '<details class="mman"><summary>' + tr('Or paste it yourself', 'Au ibandike mwenyewe') + '</summary><input type="password" id="monTok" autocomplete="off" spellcheck="false" placeholder="' + tr('monday.com token', 'tokeni ya monday.com') + '"><button class="btn small" id="monGo" type="button">' + tr('Connect', 'Unganisha') + '</button></details>' +
       '<span class="msg" id="monMsg" aria-live="polite"></span>' +
-      '<p class="muted mnote">' + tr('On a phone, monday.com may only open this page on a computer. You can do this step on any computer: sign in with your PIN there and connect. It then works on every phone that uses your PIN.', 'Kwenye simu, monday.com inaweza kufungua ukurasa huu kwenye kompyuta tu. Unaweza kufanya hatua hii kwenye kompyuta yoyote: ingia kwa PIN yako huko na uunganishe. Kisha itafanya kazi kwenye kila simu inayotumia PIN yako.') + '</p></div>';
-    var r = $('monRow'); if (r) r.setAttribute('aria-expanded', c.classList.contains('open'));
+      '<p class="muted mnote">' + tr('On a phone, monday.com may only open this page on a computer. You can do this step on any computer: sign in with your PIN there and connect. It then works on every phone that uses your PIN.', 'Kwenye simu, monday.com inaweza kufungua ukurasa huu kwenye kompyuta tu. Unaweza kufanya hatua hii kwenye kompyuta yoyote: ingia kwa PIN yako huko na uunganishe. Kisha itafanya kazi kwenye kila simu inayotumia PIN yako.') + '</p>';
   }
   function monSend(tok) {
     tok = String(tok || '').trim();
@@ -6001,16 +6147,17 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
     });
   }
   function monPaste() {
-    if (!navigator.clipboard || !navigator.clipboard.readText) { var d = $('meMonday').querySelector('details'); if (d) d.open = true; return msg('monMsg', 'warn', tr('Paste the token in the box below.', 'Bandika tokeni kwenye kisanduku hapa chini.')); }
-    navigator.clipboard.readText().then(monSend, function () { var d = $('meMonday').querySelector('details'); if (d) d.open = true; msg('monMsg', 'warn', tr('Couldn’t read the clipboard. Paste the token in the box below.', 'Haikuweza kusoma ubao wa kunakili. Bandika tokeni kwenye kisanduku hapa chini.')); });
+    if (!navigator.clipboard || !navigator.clipboard.readText) { var d = ($('monSheet') || $('meMonday')).querySelector('details'); if (d) d.open = true; return msg('monMsg', 'warn', tr('Paste the token in the box below.', 'Bandika tokeni kwenye kisanduku hapa chini.')); }
+    navigator.clipboard.readText().then(monSend, function () { var d = ($('monSheet') || $('meMonday')).querySelector('details'); if (d) d.open = true; msg('monMsg', 'warn', tr('Couldn’t read the clipboard. Paste the token in the box below.', 'Haikuweza kusoma ubao wa kunakili. Bandika tokeni kwenye kisanduku hapa chini.')); });
   }
-  $('meMonday').addEventListener('click', function (e) {
-    if (e.target.closest('#monRow')) { var c = $('meMonday'); c.classList.toggle('open'); e.target.closest('#monRow').setAttribute('aria-expanded', c.classList.contains('open')); buzz(); return; }
+  function monClick(e) {
+    if (e.target.closest('#monRow')) { buzz(); var w = panel(tr('Your name on monday.com', 'Jina lako kwenye monday.com'), '<div id="monSheet" class="mon-sh">' + monBody() + '</div>'); w.addEventListener('click', monClick); return; }
     if (e.target.closest('#monOpen')) { tokWait = true; return; }
     if (e.target.closest('#monPaste')) return monPaste();
     if (e.target.closest('#monGo')) return monSend($('monTok').value);
     if (e.target.closest('#monOff')) api('POST', { action: 'monday-unlink' }).then(function (j) { if (j.ok) { S.linked = ''; monUi(); } });
-  });
+  }
+  $('meMonday').addEventListener('click', monClick);
   // coming back from the token page: try the clipboard straight away (the browser may ask first)
   document.addEventListener('visibilitychange', function () {
     if (document.visibilityState !== 'visible' || !tokWait || S.view !== 'vMe' || !navigator.clipboard || !navigator.clipboard.readText) return;
@@ -6022,7 +6169,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
     homeTx();
     $('meAv').innerHTML = S.photo && S.mode === 'monday' ? '<img src="' + esc(S.photo) + '" alt="">' : '<i>' + esc((S.name || '?').split(/\s+/).map(function (w) { return w.charAt(0); }).slice(0, 2).join('').toUpperCase()) + '</i>';
     $('mePin').innerHTML = S.mode === 'monday' ? (S.photo ? '<img class="avatar" src="' + esc(S.photo) + '" alt="" onerror="this.remove()">' : '') + 'monday.com' : S.who ? 'Your own PIN' : 'Shared team PIN';
-    $('lockBtn').textContent = bioOn() ? tr('Lock the app', 'Funga programu') : S.mode === 'monday' ? 'Sign out' : 'Lock the app'; bioUi();
+    $('lockBtn').textContent = bioOn() ? tr('Lock the app', 'Funga kwa PIN') : S.mode === 'monday' ? 'Sign out' : 'Lock the app'; bioUi();
     outboxUi(); installUi(); stampsUi(); waitDraw(); meWorkDraw();
     if (actCache) actDraw(); if (teamCache) teamTodayDraw();
     if (!navigator.onLine) { var nos = '<p class="muted">' + tr('This needs a signal.', 'Hii inahitaji mtandao.') + '</p>'; if (!actCache) { $('actTable').innerHTML = nos; $('mmBody').innerHTML = nos; } if (!teamCache) $('ttBody').innerHTML = nos; return; }
@@ -6063,7 +6210,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
     if (!S.admin) { show('vMap'); return; }
     oSeg(); adminUi();
     var b = $('oBody'), t = O.tab;
-    if (!navigator.onLine && t !== 'overview' && t !== 'cleanup') { b.innerHTML = '<p class="msg warn">The Office needs a signal for this. Overview and Clean-up work offline.</p>'; return; }
+    if (!navigator.onLine && t !== 'overview' && t !== 'cleanup') { b.innerHTML = '<p class="msg warn">' + tr('The Office needs a signal for this. Overview and Clean-up work offline.', 'Ofisi inahitaji mtandao kwa hili. Muhtasari na Safisha data zinafanya kazi bila mtandao.') + '</p>'; return; }
     if (t === 'overview') return oOverview(b);
     if (t === 'repairs') return oNeedTeam(function () { oRepairs(b); });
     if (t === 'visits') return oNeedTeam(function () { oVisits(b); });
@@ -6139,7 +6286,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
   var RR = { f: 'all', more: false, rf: 'all', rmore: false, open: {} };
   var RRF = [['all', 'All', 'Zote'], ['urgent', 'Urgent', 'Za haraka'], ['notworking', 'Not working', 'Hazifanyi kazi'], ['unassigned', 'Not assigned', 'Hazijagawiwa'], ['approval', 'Needs approval', 'Zinahitaji idhini'], ['parts', 'Parts ordered', 'Vipuri vimeagizwa']];
   // kind: sheet title (en, sw), card label (en, sw), icon, hue
-  var RRK = { cost: ['Second approval: repair cost', 'Idhini ya pili: gharama ya ukarabati', 'Repair cost', 'Gharama ya ukarabati', 'shield', 'purple'],
+  var RRK = { cost: ['Second approval: repair cost', 'Idhini ya pili: gharama ya matengenezo', 'Repair cost', 'Gharama ya matengenezo', 'shield', 'purple'],
     new: ['New site', 'Eneo jipya', 'New site', 'Eneo jipya', 'plus', 'green'],
     move: ['Location moved over 500 m', 'Mahali pamehamishwa zaidi ya m 500', 'Location moved', 'Mahali pamehamishwa', 'pin', 'blue'],
     request: ['Change to a confirmed location', 'Badiliko la mahali palipothibitishwa', 'Confirmed location', 'Mahali palipothibitishwa', 'lock', 'amber'],
@@ -6151,10 +6298,10 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
   function rrUrg(r) { return r.urgency in URGO ? URGO[r.urgency] : 3; }
   function rrAppr(r) { var s = ofbState(r); return s === 'needed' || s === 'pending' || s === 'declined'; }
   function rrIs(f, r) { return f === 'all' || (f === 'urgent' ? r.urgency === 'urgent' : f === 'notworking' ? r.state === 'notworking' : f === 'unassigned' ? !r.assignee : f === 'approval' ? rrAppr(r) : f === 'parts' && r.step === 'parts'); }
-  function rrCond(r) { return (r.urgency === 'urgent' ? tr('Urgent', 'Haraka') + ' · ' : r.urgency === 'month' ? tr('This month', 'Mwezi huu') + ' · ' : '') + (r.state === 'notworking' ? tr('Not working', 'Haifanyi kazi') : tr('Needs repair', 'Inahitaji ukarabati')); }
+  function rrCond(r) { return (r.urgency === 'urgent' ? tr('Urgent', 'Haraka') + ' · ' : r.urgency === 'month' ? tr('This month', 'Mwezi huu') + ' · ' : '') + (r.state === 'notworking' ? tr('Not working', 'Haifanyi kazi') : tr('Needs repair', 'Inahitaji matengenezo')); }
   function rrTone(r) { return r.state === 'notworking' || r.urgency === 'urgent' ? 'bad' : 'warn'; }
   function rrApprWord(r) { var s = ofbState(r); return s === 'pending' ? tr('waiting for approval', 'inasubiri idhini') : s === 'needed' ? tr('needs approval', 'inahitaji idhini') : s === 'declined' ? tr('cost declined', 'gharama imekataliwa') : s === 'approved' ? tr('cost approved', 'gharama imeidhinishwa') : ''; }
-  function rrDay(s) { var d = new Date(s + 'T12:00:00'); return isNaN(d) ? s : d.toLocaleDateString(vxLoc(), { day: 'numeric', month: 'short' }); }
+  function rrDay(s) { return dDay(s) || s; }
   // pieces of a line that never split inside themselves, joined by "·"
   function rrNw(a) { return a.filter(Boolean).map(function (s) { return '<span class="nw">' + s + '</span>'; }).join(' · '); }
   function rrNum(n, label, cls, f, cur) {
@@ -6191,7 +6338,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
     var ids = Object.keys(S.repairs).sort(function (a, c) { var ra = S.repairs[a], rc = S.repairs[c]; return rrUrg(ra) - rrUrg(rc) || (ra.at || '').localeCompare(rc.at || ''); });
     var cnt = {}; RRF.forEach(function (f) { cnt[f[0]] = ids.filter(function (id) { return rrIs(f[0], S.repairs[id]); }).length; });
     var shown = ids.filter(function (id) { return rrIs(RR.f, S.repairs[id]); }), lim = RR.more ? shown.length : 30;
-    var head = '<div class="card rr-hero" data-testid="rr_head"><div class="rr-hd"><span class="rr-big" aria-hidden="true">' + oic('wrench') + '</span><div><h2>' + tr('Repair jobs', 'Kazi za ukarabati') + '</h2><p class="muted">' +
+    var head = '<div class="card rr-hero" data-testid="rr_head"><div class="rr-hd"><span class="rr-big" aria-hidden="true">' + oic('wrench') + '</span><div><h2>' + tr('Repair jobs', 'Kazi za matengenezo') + '</h2><p class="muted">' +
         tr('Most urgent first. Tap a job to move it on, assign it or mark it fixed.', 'Za haraka kwanza. Gusa kazi kuisogeza, kuigawa au kuiweka imerekebishwa.') + '</p></div></div>' +
       '<div class="rr-nums">' + rrNum(ids.length, tr('Open', 'Zilizo wazi'), '', 'all', RR.f) + rrNum(cnt.urgent, tr('Urgent', 'Za haraka'), cnt.urgent ? 'bad' : '', 'urgent', RR.f) +
         rrNum(cnt.approval, tr('Need approval', 'Zinahitaji idhini'), cnt.approval ? 'purple' : '', 'approval', RR.f) + '</div></div>';
@@ -6200,8 +6347,8 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
       : '<div class="rr-list' + (still ? ' still' : '') + '">' + shown.slice(0, lim).map(rrJobCard).join('') + '</div>' + (shown.length > lim ? rrMore(shown.length - lim) : '');
     var lk = '<span class="nw">' + esc(ofbKes(S.approveAbove)) + '</span>';
     var how = tr('<ol class="rr-how"><li>Changes leave a note on the project in monday.com, and the person assigned sees the job in their app.</li><li>Repairs estimated above ' + lk + ' need a second admin to approve the cost before parts are ordered. The person who asks can’t approve their own. The amount is set in Costs.</li><li>Add the actual cost and a receipt photo when parts are ordered or the repair is fixed: they add up in Costs.</li><li>“Mark fixed” closes the job and takes it off this list.</li></ol>',
-      '<ol class="rr-how"><li>Mabadiliko yanaacha maelezo kwenye mradi katika monday.com, na aliyepewa anaona kazi kwenye programu yake.</li><li>Ukarabati unaokadiriwa zaidi ya ' + lk + ' unahitaji msimamizi wa pili kuidhinisha gharama kabla ya kuagiza vipuri. Aliyeomba hawezi kuidhinisha mwenyewe. Kiasi kinawekwa kwenye Gharama.</li><li>Ongeza gharama halisi na picha ya risiti vipuri vikiagizwa au ukarabati ukikamilika: zinajumlishwa kwenye Gharama.</li><li>“Weka imerekebishwa” inafunga kazi na kuiondoa kwenye orodha hii.</li></ol>');
-    var side = '<div class="card rr-sets">' + rrSec('how', 'vxinfo', 'blue', tr('How repair jobs work', 'Jinsi kazi za ukarabati zinavyoenda'), tr('Second approval above ', 'Idhini ya pili zaidi ya ') + lk, how) + '</div>';
+      '<ol class="rr-how"><li>Mabadiliko yanaacha maelezo kwenye mradi katika monday.com, na aliyepewa anaona kazi kwenye programu yake.</li><li>Matengenezo yanayokadiriwa zaidi ya ' + lk + ' yanahitaji msimamizi wa pili kuidhinisha gharama kabla ya kuagiza vipuri. Aliyeomba hawezi kuidhinisha mwenyewe. Kiasi kinawekwa kwenye Gharama.</li><li>Ongeza gharama halisi na picha ya risiti vipuri vikiagizwa au matengenezo yakikamilika: zinajumlishwa kwenye Gharama.</li><li>“Weka imerekebishwa” inafunga kazi na kuiondoa kwenye orodha hii.</li></ol>');
+    var side = '<div class="card rr-sets">' + rrSec('how', 'vxinfo', 'blue', tr('How repair jobs work', 'Jinsi kazi za matengenezo zinavyoenda'), tr('Second approval above ', 'Idhini ya pili zaidi ya ') + lk, how) + '</div>';
     b.innerHTML = '<div class="o-grid rr" data-testid="rr_repairs"><div>' + head + (ids.length ? rrChips(RRF, RR.f, cnt, 'rrf') : '') + list + '</div><div class="o-side">' + side + '</div></div>';
     rrKeep(b, sl);
   }
@@ -6308,11 +6455,11 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
     var cnt = { all: open.length }; RRKF.forEach(function (f) { if (f[0] !== 'all') cnt[f[0]] = open.filter(function (x) { return rrKf(x) === f[0]; }).length; });
     var shown = open.filter(function (x) { return RR.rf === 'all' || rrKf(x) === RR.rf; }), lim = RR.rmore ? shown.length : 30;
     var t0 = open.reduce(function (m, x) { var t = Date.parse(x.at); return isNaN(t) ? m : Math.min(m, t); }, Infinity);
-    var head = '<div class="card rr-hero" data-testid="rr_head"><div class="rr-hd"><span class="rr-big k-review" aria-hidden="true">' + oic('inbox') + '</span><div><h2>' + tr('Waiting for review', 'Zinasubiri kuidhinishwa') + '</h2><p class="muted">' +
-        tr('New sites, moved locations, stories and big repair costs wait here for an admin.', 'Maeneo mapya, mahali palipohamishwa, hadithi na gharama kubwa za ukarabati zinasubiri msimamizi hapa.') + '</p></div></div>' +
-      '<div class="rr-nums">' + rrNum(open.length, tr('Waiting', 'Zinasubiri'), '', 'all', RR.rf) + rrNum(cnt.cost, tr('Repair costs', 'Gharama za ukarabati'), cnt.cost ? 'purple' : '', 'cost', RR.rf) +
+    var head = '<div class="card rr-hero" data-testid="rr_head"><div class="rr-hd"><span class="rr-big k-review" aria-hidden="true">' + oic('inbox') + '</span><div><h2>' + tr('Waiting for review', 'Zinasubiri kukaguliwa') + '</h2><p class="muted">' +
+        tr('New sites, moved locations, stories and big repair costs wait here for an admin.', 'Maeneo mapya, mahali palipohamishwa, hadithi na gharama kubwa za matengenezo zinasubiri msimamizi hapa.') + '</p></div></div>' +
+      '<div class="rr-nums">' + rrNum(open.length, tr('Waiting', 'Zinasubiri'), '', 'all', RR.rf) + rrNum(cnt.cost, tr('Repair costs', 'Gharama za matengenezo'), cnt.cost ? 'purple' : '', 'cost', RR.rf) +
         rrNum(isFinite(t0) ? esc(rrAge(Date.now() - t0)) : '—', tr('Oldest waiting', 'Iliyosubiri zaidi'), 'off') + '</div></div>';
-    var list = !open.length ? emptyHtml(tr('Nothing waiting for review.', 'Hakuna kinachosubiri kuidhinishwa.'))
+    var list = !open.length ? emptyHtml(tr('Nothing waiting for review.', 'Hakuna kinachosubiri kukaguliwa.'))
       : !shown.length ? '<div class="rr-none">' + emptyHtml(tr('Nothing here. Try another filter.', 'Hakuna kitu hapa. Jaribu kichujio kingine.')) + '</div>'
       : '<div class="rr-list' + (still ? ' still' : '') + '">' + shown.slice(0, lim).map(rrRevCard).join('') + '</div>' + (shown.length > lim ? rrMore(shown.length - lim) : '');
     var dl = done.length ? '<ul class="rr-done">' + done.map(function (x) {
@@ -6397,7 +6544,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
   });
   var CROWN = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3.4 8.9 8.1 12.4l3.9-6.6 3.9 6.6 4.7-3.5-1.6 9.1H5z"/><rect fill="currentColor" x="5" y="19.3" width="14" height="2.2" rx="1.1"/><circle fill="currentColor" cx="3.1" cy="7.7" r="1.6"/><circle fill="currentColor" cx="12" cy="4.3" r="1.7"/><circle fill="currentColor" cx="20.9" cy="7.7" r="1.6"/></svg>';
   var TM_HUES = ['blue', 'green', 'purple', 'teal', 'coral', 'slate'];
-  var TM_SRC = { app: ['PIN from app', 'key', 'PIN ya programu'], cloudflare: ['PIN in Cloudflare', 'cloud', 'PIN iko Cloudflare'], monday: ['monday.com', 'people'] };
+  var TM_SRC = { app: ['PIN from app', 'key', 'PIN ya programu'], cloudflare: ['Website PIN', 'cloud', 'PIN ya tovuti'], monday: ['monday.com', 'people'] };
   function tmHue(n) { var h = 7; String(n || '').toLowerCase().split('').forEach(function (c) { h = (h * 31 + c.charCodeAt(0)) >>> 0; }); return TM_HUES[h % TM_HUES.length]; }
   function tmAv(p) { var h = tmHue(p.name); return '<span class="tm-av" style="--hu:var(--hu-' + h + ');--hb:var(--hb-' + h + ')" aria-hidden="true">' + esc(initials(p.name)) + (p.admin ? '<i class="cr">' + CROWN + '</i>' : '') + '</span>'; }
   function tmTags(p, long) {
@@ -6424,7 +6571,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
       sec('adm', tr('Admins', 'Wasimamizi'), CROWN, adm) + sec('fld', tr('Field team', 'Timu ya uwanjani'), oic('people'), fld) + '</div>' +
       '<div class="o-side"><div class="card"><div class="tm-mail"><span class="ic">' + oic('mail') + '</span><div><h2>' + tr('E-mail alerts', 'Taarifa kwa barua pepe') + '</h2>' +
       (O.mail && O.mail.ready ? '<p class="muted">' + tr('Alerts go to: ', 'Taarifa zinaenda kwa: ') + '<b>' + esc((O.mail.to || []).join(', ') || tr('nobody yet: add an admin with an e-mail', 'bado hakuna: ongeza msimamizi mwenye barua pepe')) + '</b></p><button class="btn small light" type="button" id="tTest">' + tr('Send a test e-mail', 'Tuma barua pepe ya majaribio') + '</button> <span class="msg" id="tTestMsg" aria-live="polite"></span>'
-        : '<p class="muted">' + tr('Not switched on yet. Add RESEND_API_KEY and ALERT_FROM in Cloudflare (see the set-up notes).', 'Bado haijawashwa. Ongeza RESEND_API_KEY na ALERT_FROM kwenye Cloudflare (angalia maelezo ya kuweka).') + '</p>') + '</div></div></div></div></div>';
+        : '<p class="muted">' + tr('Not switched on yet. Whoever looks after the website can turn e-mail alerts on.', 'Bado haijawashwa. Anayesimamia tovuti anaweza kuwasha taarifa kwa barua pepe.') + '</p>' + poTech(tr('Add RESEND_API_KEY and ALERT_FROM in Cloudflare (see the set-up notes).', 'Ongeza RESEND_API_KEY na ALERT_FROM kwenye Cloudflare (angalia maelezo ya kuweka).'))) + '</div></div></div></div></div>';
     var g = b.querySelector('.o-grid');
     g.addEventListener('click', function (e) { var r = e.target.closest('.tm-row'); if (r) { buzz(); tmOpen(r.getAttribute('data-who')); } });
     $('tmAdd').addEventListener('click', function () { buzz(); tmAddOpen(); });
@@ -6435,7 +6582,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
         var h = g.querySelector('.tm-sec[data-sec=' + l.getAttribute('data-sec') + ']'); h.querySelector('.n').textContent = n; h.hidden = l.hidden = !!q && !n;
       });
     });
-    if ($('tTest')) $('tTest').addEventListener('click', function () { msg('tTestMsg', '', tr('Sending…', 'Inatuma…')); adminApi('POST', { action: 'test-mail' }).then(function (j) { msg('tTestMsg', j.ok ? 'ok' : 'bad', j.ok ? tr('Sent ✓ Check the inbox.', 'Imetumwa ✓ Angalia barua pepe.') : j.reason === 'no-recipients' ? tr('No e-mail addresses yet.', 'Bado hakuna anwani za barua pepe.') : j.reason === 'no-mail' ? tr('E-mail is off: add RESEND_API_KEY and ALERT_FROM in Cloudflare, then redeploy.', 'Barua pepe imezimwa: ongeza RESEND_API_KEY na ALERT_FROM kwenye Cloudflare.') : j.detail ? tr('Not sent. Resend said: ', 'Haijatumwa. Resend imesema: ') + j.detail : why(j)); }); });
+    if ($('tTest')) $('tTest').addEventListener('click', function () { msg('tTestMsg', '', tr('Sending…', 'Inatuma…')); adminApi('POST', { action: 'test-mail' }).then(function (j) { msg('tTestMsg', j.ok ? 'ok' : 'bad', j.ok ? tr('Sent ✓ Check the inbox.', 'Imetumwa ✓ Angalia barua pepe.') : j.reason === 'no-recipients' ? tr('No e-mail addresses yet.', 'Bado hakuna anwani za barua pepe.') : j.reason === 'no-mail' ? tr('E-mail isn’t switched on yet. Whoever looks after the website can turn it on.', 'Barua pepe bado haijawashwa. Anayesimamia tovuti anaweza kuiwasha.') : j.detail ? tr('Not sent. Resend said: ', 'Haijatumwa. Resend imesema: ') + j.detail : why(j)); }); });
   }
   function tmRedraw() { if (S.view === 'vOffice' && O.tab === 'team') oNeedTeam(function () { oTeam($('oBody'), true); }); }
   // a sheet that springs up from the bottom (a centred card on a wide screen). Tap outside, drag down or Esc closes it.
@@ -6474,7 +6621,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
         '<small class="muted">' + tr('The team sees the phone number, for calls and WhatsApp.', 'Timu inaona namba ya simu, kwa kupiga na WhatsApp.') + '</small>' + tmSwitch(p.admin) +
         '<div class="tm-go"><button class="btn" type="button" data-a="save">' + oic('check') + tr('Save', 'Hifadhi') + '</button><span class="msg" aria-live="polite"></span></div>' +
         '<div class="tm-ab"><button type="button" data-a="pin">' + oic('key') + tr('New PIN', 'PIN mpya') + '</button><button type="button" data-a="rm">' + oic('trash') + tr('Remove', 'Ondoa') + '</button></div><div class="tm-cf" aria-live="polite"></div></div>'
-      : '<div class="tm-note ' + esc(p.source) + '">' + oic(p.source === 'cloudflare' ? 'cloud' : 'people') + '<span>' + (p.source === 'cloudflare' ? tr('Set in Cloudflare — change it there, or re-add here with an app PIN.', 'Imewekwa Cloudflare — ibadilishe huko, au mwongeze hapa kwa PIN ya programu.') : tr('Signs in with monday.com. The Admin role comes from PIN_ADMINS in Cloudflare.', 'Anaingia kwa monday.com. Nafasi ya msimamizi inatoka PIN_ADMINS kwenye Cloudflare.')) + '</span></div>' +
+      : '<div class="tm-note ' + esc(p.source) + '">' + oic(p.source === 'cloudflare' ? 'cloud' : 'people') + '<span>' + (p.source === 'cloudflare' ? tr('This PIN is kept in the website’s settings, so it can’t be changed here. To manage it here, add them again with an app PIN.', 'PIN hii imehifadhiwa kwenye mipangilio ya tovuti, kwa hiyo haiwezi kubadilishwa hapa. Ili kuisimamia hapa, mwongeze tena kwa PIN ya programu.') + poTech(tr('It’s in PIN_USERS in Cloudflare.', 'Iko kwenye PIN_USERS ndani ya Cloudflare.')) : tr('Signs in with monday.com. Whoever looks after the website decides who is an admin.', 'Anaingia kwa monday.com. Anayesimamia tovuti ndiye anaamua nani ni msimamizi.') + poTech(tr('The admin role comes from PIN_ADMINS in Cloudflare.', 'Nafasi ya msimamizi inatoka PIN_ADMINS kwenye Cloudflare.'))) + '</span></div>' +
         (p.email || p.phone ? '<dl class="tm-kv">' + (p.email ? '<div><dt>' + tr('E-mail', 'Barua pepe') + '</dt><dd>' + esc(p.email) + '</dd></div>' : '') + (p.phone ? '<div><dt>' + tr('Phone', 'Simu') + '</dt><dd>' + esc(p.phone) + '</dd></div>' : '') + '</dl>' : '') +
         '<div class="tm-go"><button class="btn light" type="button" data-a="readd">' + oic('key') + (p.source === 'cloudflare' ? tr('Re-add with an app PIN', 'Mwongeze kwa PIN ya programu') : tr('Give them an app PIN', 'Mpe PIN ya programu')) + '</button></div>');
     var w = tSheet(p.name, html), c = w.querySelector('.tsh-c'), cf = c.querySelector('.tm-cf'), m = c.querySelector('.tm-go .msg');
@@ -6566,7 +6713,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
     vxinfo: '<circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.7v.1"/>'
   });
   var VXRES = {
-    'reported-broken': ['Not working', 'Haifanyi kazi', 'bad'], 'reported-repair': ['Needs repair', 'Inahitaji ukarabati', 'warn'], 'already-open': ['Already reported', 'Imesharipotiwa', 'has'],
+    'reported-broken': ['Not working', 'Haifanyi kazi', 'bad'], 'reported-repair': ['Needs repair', 'Inahitaji matengenezo', 'warn'], 'already-open': ['Already reported', 'Imesharipotiwa', 'has'],
     'fixed': ['Working again', 'Inafanya kazi tena', 'ok'], 'fixed-unconfirmed': ['Says it works: check', 'Wanasema inafanya kazi: hakikisha', 'ok'], 'noted-working': ['Says it works', 'Wanasema inafanya kazi', 'ok'],
     'help': ['Asked how to use it', 'Waliuliza jinsi ya kutumia', 'has'], 'unknown': ['Not understood', 'Haikueleweka', 'has'], 'no-project': ['Unknown project number', 'Namba ya mradi haijulikani', 'has'],
     'ignored-unregistered': ['Ignored: phone not on the list', 'Imepuuzwa: simu haipo kwenye orodha', 'off'], 'ignored-no-project': ['Ignored: no such project', 'Imepuuzwa: mradi haupo', 'off'],
@@ -6574,11 +6721,11 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
   };
   // what RAFIKI did with each message, one sentence (shown in the sheet)
   var VXWHY = {
-    'reported-broken': ['A repair was opened and the admins were <span class="nw">e-mailed</span>.', 'Ukarabati ulifunguliwa na wasimamizi walitumiwa barua pepe.'],
-    'reported-repair': ['A repair was opened.', 'Ukarabati ulifunguliwa.'],
-    'already-open': ['A repair was already open, so a note was added.', 'Ukarabati ulikuwa tayari umefunguliwa, kwa hiyo maelezo yaliongezwa.'],
-    'fixed': ['The open repair was closed.', 'Ukarabati uliokuwa wazi ulifungwa.'],
-    'fixed-unconfirmed': ['Noted on monday.com; the repair stays open until the team checks.', 'Imeandikwa kwenye monday.com; ukarabati unabaki wazi hadi timu ihakikishe.'],
+    'reported-broken': ['A repair was opened and the admins were <span class="nw">e-mailed</span>.', 'Matengenezo yalifunguliwa na wasimamizi walitumiwa barua pepe.'],
+    'reported-repair': ['A repair was opened.', 'Matengenezo yalifunguliwa.'],
+    'already-open': ['A repair was already open, so a note was added.', 'Matengenezo yalikuwa tayari yamefunguliwa, kwa hiyo maelezo yaliongezwa.'],
+    'fixed': ['The open repair was closed.', 'Matengenezo yaliyokuwa wazi yalifungwa.'],
+    'fixed-unconfirmed': ['Noted on monday.com; the repair stays open until the team checks.', 'Imeandikwa kwenye monday.com; matengenezo yanabaki wazi hadi timu ihakikishe.'],
     'noted-working': ['Noted on monday.com.', 'Imeandikwa kwenye monday.com.'],
     'help': ['They were sent the instructions.', 'Walitumiwa maelekezo.'],
     'unknown': ['The message wasn’t understood; they were sent the instructions.', 'Ujumbe haukueleweka; walitumiwa maelekezo.'],
@@ -6618,18 +6765,12 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
   function vxNum(p) { return /^\+\d{12}$/.test(p) ? p.slice(0, 4) + ' ' + p.slice(4, 7) + ' ' + p.slice(7, 10) + ' ' + p.slice(10) : p; }
   function vxTitle(x) { return x.t ? x.t : x.id ? tr('Project ', 'Mradi ') + x.id : tr('No project number', 'Hakuna namba ya mradi'); }
   function vxLoc() { return S.lang === 'sw' ? 'sw' : 'en-GB'; }
-  // 8 h · Yesterday · 3 Oct
+  // 8 h ago · 2 d ago · 3 Oct
   function vxAgo(iso) {
     var t = Date.parse(iso); if (isNaN(t)) return '';
-    var m = Math.floor((Date.now() - t) / 6e4), d0 = new Date(); d0.setHours(0, 0, 0, 0);
-    if (m < 1) return tr('Now', 'Sasa');
-    if (m < 60) return tr(m + ' min', 'dak ' + m);
-    if (t >= d0.getTime()) return tr(Math.floor(m / 60) + ' h', 'saa ' + Math.floor(m / 60));
-    if (t >= d0.getTime() - 864e5) return tr('Yesterday', 'Jana');
-    var d = new Date(t);
-    return d.toLocaleDateString(vxLoc(), d.getFullYear() === d0.getFullYear() ? { day: 'numeric', month: 'short' } : { day: 'numeric', month: 'short', year: 'numeric' });
+    return Date.now() - t < 7 * 864e5 ? dAgo(t) : dDay(t, true);
   }
-  function vxWhen(iso) { var d = new Date(iso); return isNaN(d) ? '' : d.toLocaleDateString(vxLoc(), { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }) + ', ' + d.toLocaleTimeString(vxLoc(), { hour: '2-digit', minute: '2-digit' }); }
+  function vxWhen(iso) { return dWhen(iso); }
   function vxOn(on, en, sw) { return '<li class="vx-st ' + (on ? 'on' : '') + '"><span class="vx-dot" aria-hidden="true">' + oic(on ? 'check' : 'stop') + '</span><span>' + tr(en, sw) + '</span><b>' + (on ? tr('On', 'Imewashwa') : tr('Off', 'Imezimwa')) + '</b></li>'; }
   function vxVars(vars) { return '<p class="vx-vars">' + Object.keys(vars).map(function (k) { return '<code class="' + (vars[k] ? 'set' : '') + '">' + (vars[k] ? '✓ ' : '') + esc(k) + '</code>'; }).join(' ') + '</p>'; }
   function vxRegd() { var r = {}; ((VX.data || {}).phones || []).forEach(function (p) { r[p.phone] = p; }); return r; }
@@ -6666,11 +6807,11 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
       : '<div class="vx-list">' + shown.slice(0, VX.more ? shown.length : 40).map(function (p) { return vxCard(p[0], p[1], regd); }).join('') + '</div>' +
         (shown.length > 40 && !VX.more ? '<button class="btn light block vx-more" type="button" data-vxmore="1">' + tr('Show ' + (shown.length - 40) + ' more', 'Onyesha ' + (shown.length - 40) + ' zaidi') + '</button>' : '');
     var steps = tr('<ol class="vx-how"><li>Water committees text the RAFIKI number, e.g. <b>BROKEN 104</b> or <b>IMEHARIBIKA 104 pampu</b>. The number is the project number (open a project: it’s in the share link), or leave it out from a phone on the committee list.</li><li><b>REPAIR</b> / <b>MATENGENEZO</b> = needs repair, <b>FIXED</b> / <b>IMEREKEBISHWA</b> = working again, <b>HELP</b> / <b>MSAADA</b> = how to use it.</li><li>A report opens a repair, notes it on monday.com, and tells the team (bell and <span class="nw">e-mail</span>).</li><li>Phones not on the list are ignored unless they give a real project number. “Working again” only closes a repair from a phone listed for that project.</li></ol>',
-      '<ol class="vx-how"><li>Kamati za maji zinatuma ujumbe kwa namba ya RAFIKI, mf. <b>BROKEN 104</b> au <b>IMEHARIBIKA 104 pampu</b>. Namba ni namba ya mradi, au iachwe kutoka simu iliyo kwenye orodha ya kamati.</li><li><b>MATENGENEZO</b> = inahitaji ukarabati, <b>IMEREKEBISHWA</b> = inafanya kazi tena, <b>MSAADA</b> = jinsi ya kutumia.</li><li>Ripoti inafungua ukarabati, inaandikwa monday.com, na timu inaarifiwa.</li><li>Simu zisizo kwenye orodha zinapuuzwa isipokuwa zitaje namba halisi ya mradi.</li></ol>');
+      '<ol class="vx-how"><li>Kamati za maji zinatuma ujumbe kwa namba ya RAFIKI, mf. <b>BROKEN 104</b> au <b>IMEHARIBIKA 104 pampu</b>. Namba ni namba ya mradi, au iachwe kutoka simu iliyo kwenye orodha ya kamati.</li><li><b>MATENGENEZO</b> = inahitaji matengenezo, <b>IMEREKEBISHWA</b> = inafanya kazi tena, <b>MSAADA</b> = jinsi ya kutumia.</li><li>Ripoti inafungua matengenezo, inaandikwa monday.com, na timu inaarifiwa.</li><li>Simu zisizo kwenye orodha zinapuuzwa isipokuwa zitaje namba halisi ya mradi.</li></ol>');
     var onw = function (on) { return on ? tr('on', 'imewashwa') : tr('off', 'imezimwa'); };
     var setup = '<ul class="vx-sts">' +
       vxOn(at.on, 'SMS (Africa’s Talking)', 'SMS (Africa’s Talking)') + vxOn(at.replies, 'Answers by SMS', 'Majibu kwa SMS') + vxOn(tw.on, 'WhatsApp / SMS (Twilio)', 'WhatsApp / SMS (Twilio)') + '</ul>' +
-      (!st.monday || !st.storage ? '<p class="msg warn">' + tr('Needs MONDAY_API_TOKEN and the FEED storage, like the rest of the app.', 'Inahitaji MONDAY_API_TOKEN na hifadhi ya FEED, kama programu nzima.') + '</p>' : '') +
+      (!st.monday || !st.storage ? '<p class="msg warn">' + tr('Not ready yet: the website’s monday.com link and storage need setting up first, as for the rest of the app.', 'Bado haiko tayari: kiungo cha monday.com na hifadhi ya tovuti vinahitaji kuwekwa kwanza, kama programu nzima.') + '</p>' + poTech(tr('Needs MONDAY_API_TOKEN and the FEED storage.', 'Inahitaji MONDAY_API_TOKEN na hifadhi ya FEED.')) : '') +
       '<h3>Africa’s Talking</h3>' + vxVars(at.vars || {}) +
       (at.tokenShort ? '<p class="msg warn">' + tr('SMS_WEBHOOK_TOKEN is too short: use 16 or more random characters.', 'SMS_WEBHOOK_TOKEN ni fupi mno: tumia herufi 16 au zaidi.') + '</p>' : '') +
       '<p class="muted">' + tr('Africa’s Talking → SMS → SMS Callback URLs → Incoming messages. Paste this, with your SMS_WEBHOOK_TOKEN in place of YOUR_SMS_WEBHOOK_TOKEN:', 'Africa’s Talking → SMS → SMS Callback URLs → Incoming messages. Bandika hii, ukiweka SMS_WEBHOOK_TOKEN yako badala ya YOUR_SMS_WEBHOOK_TOKEN:') + '</p>' +
@@ -6687,7 +6828,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
       '<datalist id="vxProjList">' + S.projects.slice(0, 600).map(function (p) { return '<option value="' + esc(p.id) + '">' + esc(p.title) + '</option>'; }).join('') + '</datalist>' +
       '<div class="oact"><button class="btn" type="button" id="vxAdd">' + tr('Add phone', 'Ongeza simu') + '</button><span class="msg" id="vxMsg" aria-live="polite"></span></div>';
     var voice = '<ul class="vx-sts">' + vxOn(v.on, 'Typed out on monday.com', 'Huandikwa kwenye monday.com') + '</ul>' +
-      '<p class="muted">' + (v.on ? tr('Voice notes from visits are typed out (Kiswahili or English) and added to the visit’s note, so History and monday.com search show them. ', 'Sauti za ziara zinaandikwa (Kiswahili au Kiingereza) na kuongezwa kwenye maelezo ya ziara. ') + (v.thisMonth != null ? tr(v.thisMonth + ' this month.', v.thisMonth + ' mwezi huu.') : '') : tr('Off. Add ', 'Imezimwa. Ongeza ') + '<code>' + esc((v.missing || ['OPENAI_API_KEY']).join(', ')) + '</code>' + tr(' in Cloudflare to switch it on.', ' kwenye Cloudflare kuiwasha.')) + '</p>';
+      '<p class="muted">' + (v.on ? tr('Voice notes from visits are typed out (Kiswahili or English) and added to the visit’s note, so History and monday.com search show them. ', 'Sauti za ziara zinaandikwa (Kiswahili au Kiingereza) na kuongezwa kwenye maelezo ya ziara. ') + (v.thisMonth != null ? tr(v.thisMonth + ' this month.', v.thisMonth + ' mwezi huu.') : '') + '</p>' : tr('Off. Whoever looks after the website can switch it on.', 'Imezimwa. Anayesimamia tovuti anaweza kuiwasha.') + '</p>' + poTech(tr('Add ', 'Ongeza ') + '<code>' + esc((v.missing || ['OPENAI_API_KEY']).join(', ')) + '</code>' + tr(' in Cloudflare.', ' kwenye Cloudflare.')));
     var sets = '<div class="card vx-sets">' +
       vxSec('setup', 'vxtune', tr('Set-up', 'Mipangilio'), '<span>WhatsApp ' + onw(tw.on) + '</span><span>SMS ' + onw(at.on) + '</span>', setup) +
       vxSec('phones', 'people', tr('Committee phones', 'Simu za kamati'), '<span>' + (ph.length === 1 ? tr('1 phone', 'simu 1') : tr(ph.length + ' phones', 'simu ' + ph.length)) + '</span>', phones) +
@@ -6764,9 +6905,10 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
     var d = e.target.closest('[data-vxdel]');
     if (d) {
       var ph = d.getAttribute('data-vxdel');
-      if (!confirm(tr('Remove ' + ph + ' from the list?', 'Ondoa ' + ph + ' kwenye orodha?'))) return;
-      d.disabled = true;
-      vxApi('POST', { action: 'phone-remove', phone: ph }).then(function (j) { if (!j.ok) { d.disabled = false; alert(why(j)); return; } VX.data.phones = j.phones || []; vxDraw($('oBody')); });
+      poAsk(tr('Remove this phone?', 'Ondoa simu hii?'), vxNum(ph) + ' · ' + tr('Texts from it will be ignored unless they give a project number.', 'Ujumbe kutoka simu hii utapuuzwa usipotaja namba ya mradi.'), tr('Remove', 'Ondoa'), true).then(function (ok) {
+        if (!ok) return; d.disabled = true;
+        vxApi('POST', { action: 'phone-remove', phone: ph }).then(function (j) { if (!j.ok) { d.disabled = false; alert(why(j)); return; } VX.data.phones = j.phones || []; vxDraw($('oBody')); });
+      });
     }
   });
 
@@ -6836,22 +6978,19 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
       ['visits', 'cal', 'green', tr('Site visits', 'Ziara za maeneo'), tr('Every visit with its readings', 'Kila ziara na vipimo vyake')],
       ['repairs', 'wrench', 'amber', tr('Open repairs and jobs', 'Matengenezo na kazi zilizo wazi'), tr('What is broken, who is fixing it and by when', 'Kilichoharibika, nani anakitengeneza na lini')],
       ['activity', 'clock', 'purple', tr('Everything the team did', 'Kila kitu timu ilifanya'), tr('The last 13 months, one row per action', 'Miezi 13 iliyopita, mstari mmoja kwa kila kitendo')],
-      ['costs', 'coins', 'coral', tr('Repair costs', 'Gharama za ukarabati'), tr('Every entry from the last 2 years', 'Kila kiingilio cha miaka 2 iliyopita')],
+      ['costs', 'coins', 'coral', tr('Repair costs', 'Gharama za matengenezo'), tr('Every entry from the last 2 years', 'Kila kiingilio cha miaka 2 iliyopita')],
       ['costsum', 'trend', 'teal', tr('Costs and people served', 'Gharama na watu wanaohudumiwa'), tr('A summary for each project', 'Muhtasari wa kila mradi')]];
     var mon = O.cron && O.mail && O.mail.ready;
-    b.innerHTML = '<div class="o-grid dqm"><div>' + dqmHead('x', 'dqmdl', 'blue', tr('Export', 'Pakua'), tr('Download a spreadsheet (CSV). It opens in Excel and Google Sheets.', 'Pakua jedwali (CSV). Linafunguka kwenye Excel na Google Sheets.')) +
+    b.innerHTML = '<div class="o-grid dqm"><div>' + dqmHead('x', 'dqmdl', 'blue', tr('Export', 'Hamisha'), tr('Download a spreadsheet (CSV). It opens in Excel and Google Sheets.', 'Pakua jedwali (CSV). Linafunguka kwenye Excel na Google Sheets.')) +
       '<div class="dqm-xs">' + X.map(function (x) {
         return '<button type="button" class="dqm-card dqm-x" data-x="' + x[0] + '" data-testid="x_' + x[0] + '">' + dqmIc(x[1], x[2], 'dqm-av sq') +
           '<span class="dqm-mid"><span class="dqm-tt">' + x[3] + '</span><span class="dqm-sub2">' + x[4] + '</span></span><span class="dqm-end dqm-dl">' + oic('dqmdl') + '</span></button>';
       }).join('') + '</div><p class="msg" id="xMsg" aria-live="polite"></p></div>' +
       '<div class="o-side"><div class="card dqm-sets">' +
-      dqmFold('xrep', 'dqmfile', 'purple', tr('Monthly report', 'Ripoti ya mwezi'), tr('A PDF to save from Me', 'PDF ya kuhifadhi kutoka Mimi'), 'has',
-        '<p class="muted">' + tr('The monthly report, to save as a PDF, is in <b>Me → Monthly report</b>.', 'Ripoti ya mwezi, ya kuhifadhi kama PDF, iko kwenye <b>Mimi → Ripoti ya mwezi</b>.') + '</p><button class="btn small light" type="button" id="xRep">' + oic('dqmfile') + tr('Open the monthly report', 'Fungua ripoti ya mwezi') + '</button>') +
       dqmFold('xmail', 'mail', 'teal', tr('Monthly e-mail summary', 'Muhtasari wa mwezi kwa barua pepe'), mon ? tr('On', 'Imewashwa') : tr('Off', 'Imezimwa'), mon ? 'ok' : 'off',
-        '<p class="muted">' + (mon ? tr('On: a summary of last month goes to the admins on the 1st of each month.', 'Imewashwa: muhtasari wa mwezi uliopita unaenda kwa wasimamizi tarehe 1 ya kila mwezi.')
-          : tr('Not switched on yet: needs the e-mail keys and <span class="dqm-nw">CRON_KEY</span> in Cloudflare and GitHub (see the set-up notes).', 'Bado haijawashwa: inahitaji funguo za barua pepe na <span class="dqm-nw">CRON_KEY</span> kwenye Cloudflare na GitHub (angalia maelezo ya kuweka).')) + '</p>') +
+        '<p class="muted">' + (mon ? tr('On: a summary of last month goes to the admins on the 1st of each month.', 'Imewashwa: muhtasari wa mwezi uliopita unaenda kwa wasimamizi tarehe 1 ya kila mwezi.') + '</p>'
+          : tr('Not switched on yet. Whoever looks after the website can turn it on.', 'Bado haijawashwa. Anayesimamia tovuti anaweza kuiwasha.') + '</p>' + poTech(tr('Needs the e-mail keys and <span class="dqm-nw">CRON_KEY</span> in Cloudflare and GitHub (see the set-up notes).', 'Inahitaji funguo za barua pepe na <span class="dqm-nw">CRON_KEY</span> kwenye Cloudflare na GitHub (angalia maelezo ya kuweka).')))) +
       '</div></div></div>';
-    $('xRep').addEventListener('click', function () { openReport(); });
     qa('[data-x]', b).forEach(function (x) { x.addEventListener('click', function () { buzz(); exportX(x.getAttribute('data-x')); }); });
   }
   function exportX(k) {
@@ -6888,7 +7027,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
   // says so, with Stop. Plan a week asks the server for suggested visits (lib/pin-plan.js), keeps each day in
   // driving order with the route planner's order(), and sends them with the Office's "assign" action.
   var OFA = { tm: null, map: null, open: '', plan: null, pmap: null, day: -1, done: false };
-  var OFA_WD = [['Sun', 'Jpl'], ['Mon', 'Jtt'], ['Tue', 'Jnn'], ['Wed', 'Jtn'], ['Thu', 'Alh'], ['Fri', 'Ijm'], ['Sat', 'Jms']];
+  var OFA_WD = [['Sun', 'Jpl'], ['Mon', 'Jtt'], ['Tue', 'Jnn'], ['Wed', 'Jtn'], ['Thu', 'Alh'], ['Fri', 'Iju'], ['Sat', 'Jmo']];
   var OFA_COL = ['#0A78C2', '#1C9C5A', '#D98200', '#7A4FD0', '#D23C32', '#0E8F96'];
   Object.assign(OIC, { ofaRoute: '<circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M8 19h7.5a3.5 3.5 0 0 0 0-7h-7a3.5 3.5 0 0 1 0-7H16"/>' });
   document.head.insertAdjacentHTML('beforeend', '<style id="ofaCss">' +
@@ -7002,7 +7141,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
   function ofaHue(n) { if (OFA.hue && OFA.hue[n]) return OFA.hue[n]; var h = 5381; String(n || '').split('').forEach(function (c) { h = (h * 33 + c.charCodeAt(0)) % 100003; }); return OFA_COL[h % OFA_COL.length]; }
   function ofaAvatar(n, cls) { return '<span class="ofa-av' + (cls ? ' ' + cls : '') + '" style="--c:' + ofaHue(n) + '" aria-hidden="true">' + mateInitials(n) + '</span>'; }
   function ofaStateCol(s) { return s === 'notworking' ? '#B3261E' : s === 'repair' ? '#D98200' : '#1C9C5A'; }
-  function ofaClock(iso) { var d = new Date(iso); return isNaN(d) ? '' : d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }); }
+  function ofaClock(iso) { return dClock(iso); }
   function ofaTeamMap(b) {
     b.innerHTML = '<div class="dqm-tm"><div class="card dqm-hero" data-testid="tm_head"><div class="dqm-hd">' + dqmIc('pin', 'green') + '<div><h2>' + tr('Team map', 'Ramani ya timu') + '</h2><p class="muted">' + tr('Where teammates who share their location are, and today’s visits.', 'Wenzako wanaoshiriki mahali walipo, na ziara za leo.') + '</p></div>' +
       '<button class="dqm-rf" type="button" id="ofaTmR" aria-label="' + tr('Refresh', 'Onyesha upya') + '" title="' + tr('Refresh', 'Onyesha upya') + '">' + oic('dqmrot') + '</button></div><div class="dqm-nums" id="ofaTmNums" style="--n:3"></div></div>' +
@@ -7025,7 +7164,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
   }
   function ofaTmVisits(n) { return ((OFA.tm && OFA.tm.visits) || []).filter(function (v) { return same(v.by, n); }); }
   function dqmOld(iso) { return Date.now() - Date.parse(iso) > 36e5; }
-  function dqmAcc(a) { return a ? ' · ±' + (a < 1000 ? a + ' m' : Math.round(a / 1000) + ' km') : ''; }
+  function dqmAcc(a) { return a ? ' · ±' + (a < 1000 ? Math.round(a) + ' m' : a < 10000 ? (a / 1000).toFixed(1) + ' km' : Math.round(a / 1000) + ' km') : ''; }
   function dqmVisitsN(n) { return n === 1 ? tr('1 visit today', 'ziara 1 leo') : tr(n + ' visits today', 'ziara ' + n + ' leo'); }
   function ofaTmDraw() {
     var t = OFA.tm, ppl = t.people || [], vis = t.visits || [];
@@ -7033,8 +7172,8 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
     var bad = vis.filter(function (v) { return v.s === 'notworking'; }).length;
     $('ofaTmNums').innerHTML = '<div class="' + (ppl.length ? 'ok' : 'off') + '"><b>' + ppl.length + '</b><small>' + tr('Sharing now', 'Wanashiriki sasa') + '</small></div><div><b>' + vis.length + '</b><small>' + tr('Visits today', 'Ziara za leo') + '</small></div>' +
       '<div class="' + (bad ? 'bad' : 'off') + '"><b>' + bad + '</b><small>' + tr('Found not working', 'Hazifanyi kazi') + '</small></div>';
-    $('ofaTmSum').textContent = (ppl.length ? (ppl.length === 1 ? tr('1 teammate sharing their location', 'Mwenzako 1 anashiriki mahali') : tr(ppl.length + ' teammates sharing their location', 'Wenzako ' + ppl.length + ' wanashiriki mahali')) : tr('Nobody is sharing their location right now.', 'Hakuna anayeshiriki mahali kwa sasa.')) +
-      ' · ' + dqmVisitsN(vis.length);
+    var vn = dqmVisitsN(vis.length);   // nobody sharing: the list below already says so, once
+    $('ofaTmSum').textContent = ppl.length ? (ppl.length === 1 ? tr('1 teammate sharing their location', 'Mwenzako 1 anashiriki mahali') : tr(ppl.length + ' teammates sharing their location', 'Wenzako ' + ppl.length + ' wanashiriki mahali')) + ' · ' + vn : vn.charAt(0).toUpperCase() + vn.slice(1);
     $('ofaTmList').innerHTML = ppl.map(function (p, i) {
       var v = ofaTmVisits(p.name), old = dqmOld(p.at);
       return '<button type="button" class="dqm-card dqm-p" data-ofa-p="' + esc(p.name) + '" data-testid="tm_person" style="--i:' + Math.min(i, 10) + '">' + ofaAvatar(p.name) +
@@ -7096,7 +7235,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
   function ofaYmd(d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
   // working days from the first day on, skipping Sundays
   function ofaDates(start, n) { var d = new Date(start + 'T12:00:00'), out = []; if (isNaN(d)) d = new Date(); while (out.length < n) { if (d.getDay() !== 0) out.push(ofaYmd(d)); d.setDate(d.getDate() + 1); } return out; }
-  function ofaDayName(ymd) { var d = new Date(ymd + 'T12:00:00'); return tr(OFA_WD[d.getDay()][0], OFA_WD[d.getDay()][1]) + ' ' + d.getDate() + ' ' + d.toLocaleDateString(S.lang === 'sw' ? 'sw' : 'en-GB', { month: 'short' }); }
+  function ofaDayName(ymd) { return dDay(ymd); }
   function ofaKm(ids) { var s = 0; for (var i = 1; i < ids.length; i++) { var a = byId(ids[i - 1]), z = byId(ids[i]); if (a && z && a.gps && z.gps) s += metres(a.gps, z.gps); } return s; }
   function ofaWhy(id) {
     var info = (OFA.plan && OFA.plan.info[id]) || {}, r = S.repairs[id], out = [];
@@ -7413,8 +7552,8 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
     var today = (function (d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); })(new Date()), as = (S.assigned || []).slice().sort(function (a, z) { return a.date.localeCompare(z.date); }), jobs = (S.jobs || []).filter(function (id) { return S.repairs[id]; });
     if (!as.length && !jobs.length) { $('myWork').innerHTML = ''; return; }
     $('myWork').innerHTML = '<div class="card mywork"><h2>Your work</h2>' +
-      as.map(function (a) { return '<button class="row" type="button" data-id="' + esc(a.id) + '" data-visit="1"><span class="th" aria-hidden="true">🗓</span><span class="tx"><span class="t">' + esc(a.t || pname(a.id)) + '</span><span class="s">Visit · ' + esc(a.date) + (a.note ? ' · ' + esc(a.note) : '') + ' · from ' + esc(a.by) + '</span></span><span class="tag ' + (a.date < today ? 'bad' : a.date === today ? 'has' : '') + '">' + (a.date < today ? 'Overdue' : a.date === today ? 'Today' : a.date.slice(5)) + '</span></button>'; }).join('') +
-      jobs.map(function (id) { var r = S.repairs[id]; return '<button class="row" type="button" data-id="' + esc(id) + '"><span class="th" aria-hidden="true">🔧</span><span class="tx"><span class="t">' + esc(pname(id)) + '</span><span class="s">Repair · ' + esc((STEP.filter(function (s) { return s[0] === (r.step || 'reported'); })[0] || [])[1]) + (r.due ? ' · due ' + esc(r.due) : '') + (r.budget != null ? ' · budget KES ' + Number(r.budget).toLocaleString() : '') + '</span></span><span class="tag bad">' + (r.due && r.due < today ? 'Overdue' : 'Job') + '</span></button>'; }).join('') + '</div>';
+      as.map(function (a) { return '<button class="row" type="button" data-id="' + esc(a.id) + '" data-visit="1"><span class="th" aria-hidden="true">🗓</span><span class="tx"><span class="t">' + esc(a.t || pname(a.id)) + '</span><span class="s">' + tr('Visit', 'Ziara') + ' · ' + esc(dDay(a.date)) + (a.note ? ' · ' + esc(a.note) : '') + ' · ' + tr('from ', 'kutoka kwa ') + esc(a.by) + '</span></span><span class="tag ' + (a.date < today ? 'bad' : a.date === today ? 'has' : '') + '">' + esc(dDue(a.date)) + '</span></button>'; }).join('') +
+      jobs.map(function (id) { var r = S.repairs[id]; return '<button class="row" type="button" data-id="' + esc(id) + '"><span class="th" aria-hidden="true">🔧</span><span class="tx"><span class="t">' + esc(pname(id)) + '</span><span class="s">' + tr('Repair', 'Matengenezo') + ' · ' + esc((STEP.filter(function (s) { return s[0] === (r.step || 'reported'); })[0] || [])[1]) + (r.due ? ' · ' + tr('due ', 'mwisho ') + esc(dDay(r.due)) : '') + (r.budget != null ? ' · ' + tr('budget', 'bajeti') + ' KES ' + Number(r.budget).toLocaleString('en-US') : '') + '</span></span><span class="tag ' + (r.due && r.due <= today ? 'bad' : r.due ? '' : 'bad') + '">' + (r.due ? esc(dDue(r.due)) : tr('Job', 'Kazi')) + '</span></button>'; }).join('') + '</div>';
   }
   $('myWork').addEventListener('click', function (e) { var b = e.target.closest('.row'); if (b) openProj(b.getAttribute('data-id'), b.hasAttribute('data-visit') ? 'visit' : 'pin'); });
 
@@ -7493,7 +7632,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
     var blob = ofbRc['job' + id];
     if (j.held) {
       m.className = 'msg warn';
-      m.textContent = j.asked ? tr('Saved. This repair is above ' + ofbKes(S.approveAbove) + ', so parts are ordered after a second admin approves the cost. Asked ✓', 'Imehifadhiwa. Ukarabati huu ni zaidi ya ' + ofbKes(S.approveAbove) + ', kwa hiyo vipuri vitaagizwa baada ya msimamizi wa pili kuidhinisha. Imeombwa ✓')
+      m.textContent = j.asked ? tr('Saved. This repair is above ' + ofbKes(S.approveAbove) + ', so parts are ordered after a second admin approves the cost. Asked ✓', 'Imehifadhiwa. Matengenezo haya ni zaidi ya ' + ofbKes(S.approveAbove) + ', kwa hiyo vipuri vitaagizwa baada ya msimamizi wa pili kuidhinisha. Imeombwa ✓')
         : tr('Still waiting for a second admin to approve the cost.', 'Bado inasubiri msimamizi wa pili kuidhinisha gharama.');
       if (j.asked) { S.reviewOpen = (S.reviewOpen || 0) + 1; adminUi(); oSeg(); }
       var stp = (j.job && j.job.step) || 'reported', i = STEP.findIndex(function (s) { return s[0] === stp; });
@@ -7531,7 +7670,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
     var x = function (i) { return (i * (W - 8) / (vals.length - 1) + 4).toFixed(1); }, y = function (v) { return (H - 8 - (v - lo) / span * (H - 20)).toFixed(1); };
     var pts = []; vals.forEach(function (v, i) { if (v != null) pts.push([x(i), y(v)]); });
     var line = 'M' + pts.map(function (p) { return p.join(' '); }).join(' L'), last = pts[pts.length - 1];
-    var mo = function (k) { var d = new Date(k + '-01T12:00:00Z'); return d.toLocaleDateString(S.lang === 'sw' ? 'sw' : 'en-GB', { month: 'short', year: '2-digit' }); };
+    var mo = function (k) { return dMonth(k); };
     return '<svg class="ofb-spark" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" role="img" aria-label="' + esc(tr('People served over the last 12 months', 'Watu waliohudumiwa katika miezi 12 iliyopita')) + '">' +
       '<path class="ar" d="' + line + ' L' + last[0] + ' ' + H + ' L' + pts[0][0] + ' ' + H + 'Z"/><path class="ln" pathLength="1" d="' + line + '"/><circle class="dt" cx="' + last[0] + '" cy="' + last[1] + '" r="4.5"/></svg>' +
       '<div class="ofb-sl"><span>' + esc(mo(tr12[0].m)) + '</span><span>' + esc(tr('12-month trend', 'Mwenendo wa miezi 12')) + '</span><span>' + esc(tr('now', 'sasa')) + '</span></div>';
@@ -7567,7 +7706,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
       if ($('xMsg')) msg('xMsg', 'ok', tr(rows.length + ' cost entries ✓', 'Gharama ' + rows.length + ' ✓'));
     };
     if (O.costs) return go(O.costs);
-    if ($('xMsg')) msg('xMsg', '', tr('Gathering repair costs…', 'Inakusanya gharama za ukarabati…'));
+    if ($('xMsg')) msg('xMsg', '', tr('Gathering repair costs…', 'Inakusanya gharama za matengenezo…'));
     adminApi('GET', null, '?view=costs').then(function (j) { if (!j.ok) { if ($('xMsg')) msg('xMsg', 'bad', why(j)); return; } O.costs = j; go(j); });
   }
   function ofbExportSummary() {
@@ -7587,11 +7726,11 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
       msg('xMsg', 'ok', tr('Summary ✓', 'Muhtasari ✓'));
     };
     if (O.costs) return go(O.costs);
-    msg('xMsg', '', tr('Gathering repair costs…', 'Inakusanya gharama za ukarabati…'));
+    msg('xMsg', '', tr('Gathering repair costs…', 'Inakusanya gharama za matengenezo…'));
     adminApi('GET', null, '?view=costs').then(function (j) { if (!j.ok) { msg('xMsg', 'bad', why(j)); return; } O.costs = j; go(j); });
   }
   function ofbExportBtns() {
-    return '<button class="btn light" type="button" data-x="costs">💰 ' + tr('Repair costs (every entry, last 2 years)', 'Gharama za ukarabati (kila kiingilio, miaka 2)') + '</button>' +
+    return '<button class="btn light" type="button" data-x="costs">💰 ' + tr('Repair costs (every entry, last 2 years)', 'Gharama za matengenezo (kila kiingilio, miaka 2)') + '</button>' +
       '<button class="btn light" type="button" data-x="costsum">💰 ' + tr('Costs and people served: summary', 'Gharama na watu wanaohudumiwa: muhtasari') + '</button>';
   }
 
@@ -7606,8 +7745,8 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
     if (!p || !S.cur || S.cur.id !== p.id || !j || !j.ok || !j.costs) return;
     var c = j.costs, el = ofbPcEl(p), last = (c.last || [])[0];
     el.innerHTML = '<div class="ofb-pc"><span class="ofb-ic" style="--hb:var(--hb-amber);--hu:var(--hu-amber)">' + oic('coins') + '</span><span><b>' +
-      (c.n ? esc(tr('Repairs: ' + ofbKes(c.sum) + ' in the last 12 months (' + c.n + (c.n === 1 ? ' repair)' : ' repairs)'), 'Ukarabati: ' + ofbKes(c.sum) + ' katika miezi 12 iliyopita (matengenezo ' + c.n + ')')) : esc(tr('Repairs: nothing spent in the last 12 months', 'Ukarabati: hakuna kilichotumika katika miezi 12 iliyopita'))) + '</b>' +
-      (last ? '<small>' + esc(tr('Latest: ', 'Karibuni: ') + [ofbKes(last.actual), last.what, last.by, when(last.at)].filter(Boolean).join(' · ')) + '</small>' : '') + '</span></div>';
+      (c.n ? esc(tr('Repairs: ' + ofbKes(c.sum) + ' in the last 12 months (' + c.n + (c.n === 1 ? ' repair)' : ' repairs)'), 'Matengenezo: ' + ofbKes(c.sum) + ' katika miezi 12 iliyopita (matengenezo ' + c.n + ')')) : esc(tr('Repairs: nothing spent in the last 12 months', 'Matengenezo: hakuna kilichotumika katika miezi 12 iliyopita'))) + '</b>' +
+      (last ? '<small>' + esc(tr('Latest: ', 'Mpya zaidi: ') + [ofbKes(last.actual), last.what, last.by, when(last.at)].filter(Boolean).join(' · ')) + '</small>' : '') + '</span></div>';
   }
   function ofbTracker(p, r) {
     ofbPcEl(p);
@@ -7626,7 +7765,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
     if (mine && !ofbPast(r.step, 'parts')) box.innerHTML += '<p class="msg" id="ofbPartsMsg" aria-live="polite"></p>';
     card.insertBefore(box, $('fixBox'));
     // the money spent, when it's marked fixed
-    $('fixBox').insertAdjacentHTML('beforeend', '<label for="ofbFixCost">' + tr('Actual cost (KES, optional)', 'Gharama halisi (KES, si lazima)') + '</label><input id="ofbFixCost" type="number" inputmode="numeric" min="0" placeholder="' + esc(tr('what the repair cost', 'gharama ya ukarabati')) + '"><div style="margin-top:8px">' + ofbFilePick('fix' + p.id) + '</div>');
+    $('fixBox').insertAdjacentHTML('beforeend', '<label for="ofbFixCost">' + tr('Actual cost (KES, optional)', 'Gharama halisi (KES, si lazima)') + '</label><input id="ofbFixCost" type="number" inputmode="numeric" min="0" placeholder="' + esc(tr('what the repair cost', 'gharama ya matengenezo')) + '"><div style="margin-top:8px">' + ofbFilePick('fix' + p.id) + '</div>');
     if ($('ofbParts')) $('ofbParts').addEventListener('click', function () {
       var bt = this, ask = st === 'needed' || st === 'declined';
       if (!ask && $('ofbPartsBox').classList.contains('hidden')) { $('ofbPartsBox').classList.remove('hidden'); bt.textContent = tr('Save: parts ordered', 'Hifadhi: vipuri vimeagizwa'); $('ofbPartsCost').focus(); return; }
@@ -7734,14 +7873,14 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
     var nw = function (t) { return '<span class="nw">' + t + '</span>'; };
     var first = pe && (pe.trend || []).filter(function (t) { return t.n != null; })[0], up = first ? pe.total - first.n : 0;
     var tiles = tile({ k: 'repairs', ic: 'wrench', hue: 'amber', n: rep.length, l: tr('open repairs', 'matengenezo yaliyo wazi'), sub: [urgent ? nw(tr(urgent + ' urgent', urgent + ' ya haraka')) : '', cost ? nw((urgent ? '· ' : '') + 'KES ' + cost.toLocaleString('en-US')) : ''].filter(Boolean).join(' '), go: 'o-repairs', hot: rep.length > 0, red: urgent > 0 }) +
-      tile({ k: 'review', ic: 'inbox', hue: 'purple', n: S.reviewOpen || 0, l: tr('waiting for your review', 'zinasubiri uidhinishe'), go: 'o-review', hot: (S.reviewOpen || 0) > 0 }) +
+      tile({ k: 'review', ic: 'inbox', hue: 'purple', n: S.reviewOpen || 0, l: tr('waiting for your review', 'zinasubiri ukague'), go: 'o-review', hot: (S.reviewOpen || 0) > 0 }) +
       tile({ k: 'due', ic: 'cal', hue: 'blue', n: due, l: tr('due a visit', 'zinasubiri ziara'), go: 'list-due' }) +
       tile({ k: 'tests', ic: 'flask', hue: 'teal', n: tests, l: tr('water tests due', 'vipimo vya maji vinahitajika'), go: 'list-due', hot: tests > 0 }) +
       tile({ k: 'visits', ic: 'clip', hue: 'green', id: 'oVm', n: actCache ? ocvVm() : null, l: tr('visits this month', 'ziara za mwezi huu'), go: 'o-visits' }) +
       (pe && pe.total ? tile({ k: 'people', ic: 'people', hue: 'teal', n: pe.total, l: tr('people served', 'watu wanaohudumiwa'), sub: up > 0 ? '+' + up.toLocaleString('en-US') + ' ' + tr('in 12 months', 'kwa miezi 12') : '', up: true, go: 'people' }) : '');
     var mapStrip = '<button type="button" class="ocv-map" data-ocvgo="list-missing" data-testid="ocv_mapped"' + (missing ? '' : ' disabled') + '>' +
       '<span class="ocv-ring" data-p="' + pct + '" aria-hidden="true"><span>' + pct + '%</span></span><span class="tx"><b>' + tr(pinned + ' of ' + P.length + ' projects on the map', 'Miradi ' + pinned + ' kati ya ' + P.length + ' iko kwenye ramani') + '</b>' +
-      '<small>' + (missing ? (missing === 1 ? tr('1 still needs a location', '1 bado unahitaji mahali') : tr(missing + ' still need a location', missing + ' bado inahitaji mahali')) : tr('Every project has a location', 'Kila mradi una mahali')) + '</small></span>' +
+      '<small>' + (missing ? (missing === 1 ? tr('1 has no location', '1 haina mahali') : tr(missing + ' have no location', missing + ' hazina mahali')) : tr('Every project has a location', 'Kila mradi una mahali')) + '</small></span>' +
       (missing ? '<span class="ocv-chev" aria-hidden="true">' + oic('chev') + '</span>' : '') + '</button>';
     var health = '<div class="card ocv-box ohealth" data-testid="ocv_health"><div class="hd"><b>' + tr('Condition at last visit', 'Hali katika ziara ya mwisho') + '</b><span>' + tr(seen + ' of ' + P.length + ' visited', seen + ' kati ya ' + P.length + ' zimetembelewa') + '</span></div>' +
       '<div class="hbar" role="img" aria-label="' + esc(tr(st.working + ' working, ' + st.repair + ' needed repair, ' + st.notworking + ' not working, ' + unseen + ' not visited yet', st.working + ' zinafanya kazi, ' + st.repair + ' zilihitaji matengenezo, ' + st.notworking + ' hazifanyi kazi, ' + unseen + ' bado hazijatembelewa')) + '">' +
@@ -7759,7 +7898,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
       ocvHero('overview', 'drop', 'blue', tr('Overview', 'Muhtasari'), tr('All projects today. Tap a number to see the list.', 'Miradi yote leo. Gusa namba kuona orodha.'), null, mapStrip) +
       '<div class="ocv-tiles">' + tiles + '</div>' + health +
       (ctry ? '<div class="card ocv-box"><h3 class="ocv-h">' + tr('By country', 'Kwa nchi') + '</h3>' + ctry + '</div>' : '') +
-      '<div class="card ocv-box" id="ocvFeedBox"><h3 class="ocv-h">' + tr('Latest from the field', 'Habari za karibuni kutoka uwanjani') + '</h3><div id="ocvFeed">' + ocvFeedHtml() + '</div></div></div>' +
+      '<div class="card ocv-box" id="ocvFeedBox"><h3 class="ocv-h">' + tr('Latest from the field', 'Habari mpya zaidi kutoka uwanjani') + '</h3><div id="ocvFeed">' + ocvFeedHtml() + '</div></div></div>' +
       '<div class="o-side"><div class="map o-map" id="oMap" role="application" aria-label="' + tr('Map of projects: open repairs in orange and red', 'Ramani ya miradi: matengenezo yaliyo wazi kwa rangi ya machungwa na nyekundu') + '"></div><p class="muted" style="margin-top:6px">' +
       tr('Orange and red: open repairs. Green: other projects with a location.', 'Machungwa na nyekundu: matengenezo yaliyo wazi. Kijani: miradi mingine yenye mahali.') + '</p></div></div>';
     ocvGrow(b);
@@ -7784,8 +7923,8 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
     var all = actCache.slice(-12).reverse(), list = OCV.feedMore ? all : all.slice(0, 5);
     if (!all.length) return '<p class="muted">' + tr('Nothing yet.', 'Bado hakuna kitu.') + '</p>';
     return '<ul class="ocv-feed">' + list.map(function (e) {
-      var f = FEEDIC[e.a] || ['drop', '#0A78C2'], p = e.id && byId(e.id);
-      var inner = '<span class="dt" style="--c:' + f[1] + '" aria-hidden="true">' + oic(f[0]) + '</span><span class="tx"><b>' + esc(e.by) + '</b> ' + esc(VERB[e.a] || e.a) + ' ' + esc(e.t || '') + '<small>' + esc(vxAgo(e.at)) + '</small></span>';
+      var sms = isSms(e), f = sms ? ['phone', '#5A6066'] : FEEDIC[e.a] || ['drop', '#0A78C2'], p = e.id && byId(e.id);
+      var inner = '<span class="dt" style="--c:' + f[1] + '" aria-hidden="true">' + oic(f[0]) + '</span><span class="tx"><b>' + esc(sms ? tr('Community report', 'Ripoti ya jamii') : e.by) + '</b> ' + (sms ? esc(e.t || '') + (e.s && STATES[e.s] ? ' · ' + esc(tr(STATES[e.s][1], STATES[e.s][2])) : '') : esc(VERB[e.a] || e.a) + ' ' + esc(e.t || '')) + '<small>' + esc(vxAgo(e.at)) + '</small></span>';
       return '<li>' + (p ? '<button type="button" class="ocv-fi" data-ocvopen="' + esc(e.id) + '">' + inner + '<span class="ocv-chev" aria-hidden="true">' + oic('chev') + '</span></button>' : '<div class="ocv-fi">' + inner + '</div>') + '</li>';
     }).join('') + '</ul>' + (all.length > 5 && !OCV.feedMore ? '<button class="btn light small block ocv-more" type="button" data-ocvgo="feedmore">' + tr('Show ' + (all.length - 5) + ' more', 'Onyesha ' + (all.length - 5) + ' zaidi') + '</button>' : '');
   }
@@ -7803,7 +7942,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
       ocvKv([[tr('On the map', 'Kwenye ramani'), tr(loc + ' of ' + l.length, loc + ' kati ya ' + l.length)], [tr('Working at the last visit', 'Zinafanya kazi, ziara ya mwisho'), n(k('working'), 'ok')], [tr('Needed repair', 'Zilihitaji matengenezo'), n(k('repair'), 'warn')],
         [tr('Not working', 'Hazifanyi kazi'), n(k('notworking'), 'bad')], [tr('Open repairs', 'Matengenezo yaliyo wazi'), n(rp, 'warn')], [tr('Due a visit', 'Zinasubiri ziara'), n(du, 'has')]]) +
       '<div class="ocv-acts"><button class="btn" type="button" data-a="all" data-testid="ocv_country_all">' + oic('arrow') + tr('Show these projects', 'Onyesha miradi hii') + '</button>' +
-      (l.length - loc ? '<button class="btn light" type="button" data-a="missing">' + oic('pin') + tr('Need a location', 'Zinahitaji mahali') + ' (' + (l.length - loc) + ')</button>' : '') +
+      (l.length - loc ? '<button class="btn light" type="button" data-a="missing">' + oic('pin') + tr('No location', 'Hakuna mahali') + ' (' + (l.length - loc) + ')</button>' : '') +
       (du ? '<button class="btn light" type="button" data-a="due">' + oic('cal') + tr('Due a visit', 'Zinasubiri ziara') + ' (' + du + ')</button>' : '') +
       (rp ? '<button class="btn light" type="button" data-a="repairs">' + oic('wrench') + tr('Open repairs', 'Matengenezo yaliyo wazi') + ' (' + rp + ')</button>' : '') + '</div>');
     w.querySelector('.tsh-c').addEventListener('click', function (e) {
@@ -7823,7 +7962,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
     });
   }
   function ocvMonths() { var d = new Date(), ms = []; for (var i = 11; i >= 0; i--) { var x = new Date(d.getFullYear(), d.getMonth() - i, 1); ms.push(x.getFullYear() + '-' + ('0' + (x.getMonth() + 1)).slice(-2)); } return ms; }
-  function ocvMon(k, long) { var d = new Date(+k.slice(0, 4), +k.slice(5, 7) - 1, 1); return d.toLocaleDateString(vxLoc(), long ? { month: 'long', year: 'numeric' } : { month: 'short' }); }
+  function ocvMon(k, long) { return dMonth(k.slice(0, 7), long); }
   function ocvRows() { return ((O.costs || {}).rows || []).slice().sort(function (a, z) { return String(z.at).localeCompare(String(a.at)); }); }
   function ocvChartSel(k) {
     var rows = ocvRows().filter(function (r) { return String(r.at || '').slice(0, 7) === k; }), v = rows.reduce(function (s, r) { return s + (Number(r.actual) || 0); }, 0);
@@ -7834,7 +7973,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
     ocvRows().forEach(function (r) { var k = String(r.at || '').slice(0, 7); sum[k] = (sum[k] || 0) + (Number(r.actual) || 0); });
     var max = Math.max.apply(null, ms.map(function (k) { return sum[k] || 0; }).concat([1])), sel = ms.indexOf(OCV.cm) >= 0 ? OCV.cm : ms[11];
     return '<div class="card ocv-box ocv-chart" data-testid="ocv_chart"><div class="ocv-ch-hd"><h3 class="ocv-h">' + tr('Spent each month', 'Matumizi kila mwezi') + '</h3><p class="ocv-ch-sel" aria-live="polite">' + ocvChartSel(sel) + '</p></div>' +
-      '<div class="ocv-bars" role="group" aria-label="' + tr('Repair spending, last 12 months', 'Matumizi ya ukarabati, miezi 12 iliyopita') + '">' + ms.map(function (k) {
+      '<div class="ocv-bars" role="group" aria-label="' + tr('Repair spending, last 12 months', 'Matumizi ya matengenezo, miezi 12 iliyopita') + '">' + ms.map(function (k) {
         var v = sum[k] || 0;
         return '<button type="button" class="ocv-bar' + (k === sel ? ' on' : '') + '" data-ocvm="' + k + '" aria-pressed="' + (k === sel) + '" aria-label="' + esc(ocvMon(k, true) + ': ' + ofbKes(v)) + '"><span class="col"><i data-h="' + (v / max * 100).toFixed(1) + '"></i></span><small>' + esc(ocvMon(k)) + '</small></button>';
       }).join('') + '</div></div>';
@@ -7843,12 +7982,12 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
     var j = O.costs || {}, s = j.stats || {}, rows = ocvRows(), top = s.top || [], cks = ['ke', 'tz', 'ug', 'mw'];
     var cmax = Math.max.apply(null, cks.map(function (c) { return (s.byCountry || {})[c] || 0; }).concat([1])), tmax = top.length ? top[0].sum || 1 : 1;
     var nums = [ocvNum(ocvKes(s.month), tr('this month', 'mwezi huu')), ocvNum(ocvKes(s.year), tr('this year (' + (s.yearKey || '') + ')', 'mwaka huu (' + (s.yearKey || '') + ')')),
-      ocvNum(ocvKes(s.sum12), tr('last 12 months', 'miezi 12 iliyopita')), ocvNum(ocvKes(s.avg), tr('average per repair', 'wastani kwa kila ukarabati') + '<span class="ocv-l2">' + tr((s.repairs || 0) + ' repairs', 'matengenezo ' + (s.repairs || 0)) + '</span>')];
+      ocvNum(ocvKes(s.sum12), tr('last 12 months', 'miezi 12 iliyopita')), ocvNum(ocvKes(s.avg), tr('average per repair', 'wastani kwa kila kazi ya matengenezo') + '<span class="ocv-l2">' + tr((s.repairs || 0) + ' repairs', 'matengenezo ' + (s.repairs || 0)) + '</span>')];
     nums.kes = true;
-    var head = ocvHero('costs', 'coins', 'amber', tr('Repair costs', 'Gharama za ukarabati'), tr('What repairs actually cost, as the team enters it.', 'Gharama halisi za ukarabati, kama timu inavyoandika.'), nums);
+    var head = ocvHero('costs', 'coins', 'amber', tr('Repair costs', 'Gharama za matengenezo'), tr('What repairs actually cost, as the team enters it.', 'Gharama halisi za matengenezo, kama timu inavyoandika.'), nums);
     var shown = OCV.cf === 'top' ? top : rows, lim = OCV.cmore ? shown.length : 30;
-    var chips = ocvChips([{ go: 'cf-latest', tid: 'ocv_cf_latest', l: tr('Latest', 'Karibuni'), n: rows.length, on: OCV.cf !== 'top' }, { go: 'cf-top', tid: 'ocv_cf_top', l: tr('Most spent', 'Gharama kubwa zaidi'), n: top.length, on: OCV.cf === 'top' }]);
-    var list = !shown.length ? emptyHtml(tr('No repair costs recorded yet. Enter the actual cost when parts are ordered or a repair is fixed.', 'Bado hakuna gharama za ukarabati. Andika gharama halisi vipuri vikiagizwa au ukarabati ukikamilika.'))
+    var chips = ocvChips([{ go: 'cf-latest', tid: 'ocv_cf_latest', l: tr('Latest', 'Mpya zaidi'), n: rows.length, on: OCV.cf !== 'top' }, { go: 'cf-top', tid: 'ocv_cf_top', l: tr('Most spent', 'Gharama kubwa zaidi'), n: top.length, on: OCV.cf === 'top' }]);
+    var list = !shown.length ? emptyHtml(tr('No repair costs recorded yet. Enter the actual cost when parts are ordered or a repair is fixed.', 'Bado hakuna gharama za matengenezo. Andika gharama halisi vipuri vikiagizwa au matengenezo yakikamilika.'))
       : '<div class="ocv-list">' + shown.slice(0, lim).map(function (r, i) {
         if (OCV.cf === 'top') return '<button type="button" class="ocv-card ocv-top" style="--i:' + i + '" data-ocvp="' + esc(r.id) + '" data-testid="ocv_top"><span class="av ocv-rk' + (i ? '' : ' one') + '" aria-hidden="true">' + (i + 1) + '</span>' +
           '<span class="tt">' + esc(r.t || pname(r.id)) + '</span><span class="wh"><b>' + esc(ofbKes(r.sum)) + '</b>' + oic('chev') + '</span>' +
@@ -7863,7 +8002,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
       var v = (s.byCountry || {})[c] || 0;
       return '<div class="ofb-bar"><span aria-hidden="true">' + FLAG[c] + '</span><span class="t">' + CNAME[c] + '</span><span class="v">' + esc(ofbKes(v)) + '</span><i><em style="--c:' + OFB_CC[c] + '" data-w="' + (v / cmax * 100).toFixed(1) + '"></em></i></div>';
     }).join('') + '</div>';
-    var limit = '<p class="muted">' + tr('Repairs estimated above this need a second admin to approve the cost before parts are ordered. The person who asks can’t approve their own.', 'Ukarabati unaokadiriwa zaidi ya kiasi hiki unahitaji msimamizi wa pili kuidhinisha kabla ya kuagiza vipuri. Aliyeomba hawezi kuidhinisha mwenyewe.') + '</p>' +
+    var limit = '<p class="muted">' + tr('Repairs estimated above this need a second admin to approve the cost before parts are ordered. The person who asks can’t approve their own.', 'Matengenezo yanayokadiriwa zaidi ya kiasi hiki yanahitaji msimamizi wa pili kuidhinisha kabla ya kuagiza vipuri. Aliyeomba hawezi kuidhinisha mwenyewe.') + '</p>' +
       '<div class="ofb-set"><label>' + tr('Second approval above (KES)', 'Idhini ya pili zaidi ya (KES)') + '<input type="number" inputmode="numeric" min="0" id="ofbLim" value="' + S.approveAbove + '"></label><button class="btn small" type="button" id="ofbLimGo">' + tr('Save', 'Hifadhi') + '</button></div><p class="msg" id="ofbLimMsg" aria-live="polite"></p>';
     var sets = '<div class="card ocv-sets">' + ocvFold('limit', 'shield', 'purple', tr('Second approval', 'Idhini ya pili'), ocvLimSum(), limit) +
       ocvFold('csv', 'down', 'blue', tr('Download', 'Pakua'), tr('Every cost entry, as a spreadsheet', 'Kila gharama, kama jedwali'), '<p class="muted">' + tr('A CSV file that opens in Excel and Google Sheets: every cost entry from the last 2 years.', 'Faili ya CSV inayofunguka kwenye Excel na Google Sheets: kila gharama ya miaka 2 iliyopita.') + '</p><button class="btn light" type="button" data-x="costs">' + oic('down') + tr('Download CSV', 'Pakua CSV') + '</button>') + '</div>';
@@ -7919,8 +8058,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
   function ocvDays(a, z) { var p = function (s) { s = String(s).split('-'); return Date.UTC(+s[0], +s[1] - 1, +s[2]); }; return Math.round((p(a) - p(z)) / 864e5); }
   function ocvDay(d, today) {
     var n = ocvDays(d, today); if (n === 0) return tr('Today', 'Leo'); if (n === 1) return tr('Tomorrow', 'Kesho'); if (n === -1) return tr('Yesterday', 'Jana');
-    var x = String(d).split('-'), dt = new Date(+x[0], +x[1] - 1, +x[2]);
-    return isNaN(dt) ? d : dt.toLocaleDateString(vxLoc(), dt.getFullYear() === new Date().getFullYear() ? { day: 'numeric', month: 'short' } : { day: 'numeric', month: 'short', year: 'numeric' });
+    return dDay(d) || d;
   }
   function ocvRel(a, today) {
     var s = ocvVSt(a, today), n = ocvDays(a.date, today);
@@ -7928,6 +8066,12 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
     if (s === 'late') return n === -1 ? tr('1 day late', 'Imechelewa siku 1') : tr(-n + ' days late', 'Imechelewa siku ' + (-n));
     if (s === 'today') return tr('Today', 'Leo');
     return n === 1 ? tr('Tomorrow', 'Kesho') : tr('In ' + n + ' days', 'Baada ya siku ' + n);
+  }
+  function ocvVPick(b) {
+    var w = panel(tr('Whose visits', 'Ziara za nani'), '<div class="ocv-pk">' + (OCV.vwho || []).map(function (o) {
+      return '<button type="button" class="bsh-o" data-who="' + esc(o.who) + '" aria-pressed="' + (OCV.vp === o.who) + '"><span class="ei">' + (o.who ? esc(initials(o.who)) : oic('people')) + '</span><span class="pk-n">' + (o.who ? esc(o.who) : tr('Everyone', 'Wote')) + '</span><span class="n">' + o.n + '</span></button>';
+    }).join('') + '</div>');
+    w.addEventListener('click', function (e) { var o = e.target.closest('[data-who]'); if (!o) return; buzz(); OCV.vp = o.getAttribute('data-who') || ''; OCV.vmore = false; w.close(); ocvVDraw(b); });
   }
   function ocvVDraw(b) {
     var all = OCV.items || [], today = ocvToday(), F = [['open', 'Planned', 'Zimepangwa'], ['today', 'Today', 'Leo'], ['late', 'Overdue', 'Zimechelewa'], ['done', 'Done', 'Zimefanyika']];
@@ -7939,8 +8083,10 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
     var head = ocvHero('visits', 'cal', 'blue', tr('Visits', 'Ziara'), tr('Site visits given to the field team. Tap one to change it.', 'Ziara walizopewa timu ya uwanjani. Gusa moja kuibadilisha.'),
       [ocvNum(cnt.open, tr('planned', 'zimepangwa'), '', 'vf-open', OCV.vf === 'open'), ocvNum(cnt.today, tr('today', 'leo'), cnt.today ? 'warn' : '', 'vf-today', OCV.vf === 'today'), ocvNum(cnt.late, tr('overdue', 'zimechelewa'), cnt.late ? 'bad' : '', 'vf-late', OCV.vf === 'late')],
       '<button class="btn block ocv-addb" type="button" data-ocvgo="assign" data-testid="ocv_assign">' + oic('plus') + tr('Assign a visit', 'Gawa ziara') + '</button>');
-    var chips = all.length ? ocvChips(F.map(function (f) { return { go: 'vf-' + f[0], tid: 'ocv_vf_' + f[0], l: tr(f[1], f[2]), n: cnt[f[0]], on: OCV.vf === f[0] }; })) +
-      (who.length > 1 || OCV.vp ? ocvChips([{ go: 'vp', who: '', tid: 'ocv_vp_all', l: tr('Everyone', 'Wote'), n: all.filter(function (a) { return inF(a, OCV.vf); }).length, on: !OCV.vp }].concat(who.map(function (n) { return { go: 'vp', who: n, tid: 'ocv_vp', l: esc(n), n: ppl[n], on: OCV.vp === n }; })), 'ppl') : '') : '';
+    // one chip row: whose visits (a chip that opens a picker), then planned / today / overdue / done
+    OCV.vwho = [{ who: '', n: all.filter(function (a) { return inF(a, OCV.vf); }).length }].concat(who.map(function (n) { return { who: n, n: ppl[n] }; }));
+    var pick = who.length > 1 || OCV.vp ? '<button type="button" class="chip ocv-pick" data-ocvgo="vpick" data-testid="ocv_vp_pick" aria-haspopup="dialog" aria-pressed="' + !!OCV.vp + '">' + oic('people') + '<span>' + (OCV.vp ? esc(OCV.vp) : tr('Everyone', 'Wote')) + '</span><svg class="dn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><i class="ocv-sep" aria-hidden="true"></i>' : '';
+    var chips = all.length ? ocvChips(F.map(function (f) { return { go: 'vf-' + f[0], tid: 'ocv_vf_' + f[0], l: tr(f[1], f[2]), n: cnt[f[0]], on: OCV.vf === f[0] }; })).replace('">', '">' + pick) : '';
     var none = { open: ['No visits planned. Tap “Assign a visit” to give one to the field team.', 'Hakuna ziara zilizopangwa. Gusa “Gawa ziara” kumpa mtu wa timu.'], today: ['Nothing planned for today.', 'Hakuna kilichopangwa leo.'], late: ['Nothing overdue. Well done!', 'Hakuna iliyochelewa. Hongera!'], done: ['No visits done in the last 4 months.', 'Hakuna ziara zilizofanyika katika miezi 4 iliyopita.'] }[OCV.vf];
     var lim = OCV.vmore ? shown.length : 30;
     var list = !all.length ? emptyHtml(tr('No visits assigned yet. Tap “Assign a visit” to give one to the field team.', 'Bado hakuna ziara zilizogawiwa. Gusa “Gawa ziara” kumpa mtu wa timu.'))
@@ -7961,7 +8107,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
     var today = ocvToday(), s = ocvVSt(a, today), t = OCVVS[s], open = s !== 'done', title = a.t || pname(a.id), p = byId(a.id);
     var hue = { bad: 'coral', warn: 'amber', has: 'blue', ok: 'green' }[t[2]];
     var x = String(a.date).split('-'), dt = new Date(+x[0], +x[1] - 1, +x[2]);
-    var long = isNaN(dt) ? a.date : dt.toLocaleDateString(vxLoc(), { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    var long = isNaN(dt) ? a.date : dDay(dt);
     var opts = names().map(function (n) { return '<option' + (n === a.to ? ' selected' : '') + '>' + esc(n) + '</option>'; }).join('');
     if (opts && names().indexOf(a.to) < 0) opts = '<option selected>' + esc(a.to) + '</option>' + opts;
     var html = ocvShd(oic(t[3]), hue, esc(title), ocvPill(t[2], tr(t[0], t[1])) + (s === 'done' || s === 'today' ? '' : ' <span class="ocv-rel">' + esc(ocvRel(a, today)) + '</span>'), 'ocv_visit_sheet') +
@@ -8028,7 +8174,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
       var f = $('aF').value, ck = $('aC').value, q = $('aQ').value.trim().toLowerCase();
       var rows = S.projects.filter(function (p) { return p.gps && (!ck || p.ck === ck) && (!q || (p.title + ' ' + p.area).toLowerCase().indexOf(q) >= 0) && (f === 'all' || (f === 'repairs' ? S.repairs[p.id] : ageDays(p) >= DUE_DAYS)); });
       if (f === 'due') rows.sort(function (a, z) { return ageDays(z) - ageDays(a); });
-      $('aList').innerHTML = rows.slice(0, 150).map(function (p) { var on = O.pick.indexOf(p.id) >= 0; return '<button class="row" type="button" role="checkbox" aria-checked="' + on + '" data-pick="' + esc(p.id) + '"><span class="ck" aria-hidden="true">' + (on ? '✓' : '') + '</span><span class="tx"><span class="t">' + esc(p.title) + '</span><span class="s">' + esc(sub(p)) + '</span></span><span class="tag">' + (S.repairs[p.id] ? tr('Repair', 'Ukarabati') : esc(ageText(p))) + '</span></button>'; }).join('') || '<p class="muted">' + tr('No projects match.', 'Hakuna mradi unaolingana.') + '</p>';
+      $('aList').innerHTML = rows.slice(0, 150).map(function (p) { var on = O.pick.indexOf(p.id) >= 0; return '<button class="row" type="button" role="checkbox" aria-checked="' + on + '" data-pick="' + esc(p.id) + '"><span class="ck" aria-hidden="true">' + (on ? '✓' : '') + '</span><span class="tx"><span class="t">' + esc(p.title) + '</span><span class="s">' + esc(sub(p)) + '</span></span><span class="tag">' + (S.repairs[p.id] ? tr('Repair', 'Matengenezo') : esc(ageText(p))) + '</span></button>'; }).join('') || '<p class="muted">' + tr('No projects match.', 'Hakuna mradi unaolingana.') + '</p>';
       var n = O.pick.length;
       $('aGo').disabled = !n || !$('aTo') || !$('aTo').value; $('aGo').textContent = n ? (n === 1 ? tr('Assign 1 visit', 'Gawa ziara 1') : tr('Assign ' + n + ' visits', 'Gawa ziara ' + n)) : tr('Assign', 'Gawa');
     };
@@ -8059,6 +8205,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
       if (k === 'feedmore') { OCV.feedMore = true; $('ocvFeed').innerHTML = ocvFeedHtml(); return; }
       if (k.indexOf('vf-') === 0) { OCV.vf = k.slice(3); OCV.vmore = false; return ocvVDraw(b); }
       if (k === 'vp') { OCV.vp = g.getAttribute('data-who') || ''; OCV.vmore = false; return ocvVDraw(b); }
+      if (k === 'vpick') return ocvVPick(b);
       if (k === 'vmore') { OCV.vmore = true; return ocvVDraw(b); }
       if (k === 'assign') return ocvAssignOpen();
       if (k.indexOf('cf-') === 0) { OCV.cf = k.slice(3); OCV.cmore = false; return ocvCDraw(b); }
@@ -8142,8 +8289,9 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
         (shown.length > 30 && !DQM.dmore ? '<button class="btn light block dqm-more" type="button" data-dqm="dnmore">' + tr('Show ' + (shown.length - 30) + ' more', 'Onyesha ' + (shown.length - 30) + ' zaidi') + '</button>' : '');
     var sets = '<div class="card dqm-sets">' +
       dqmFold('dnmail', 'mail', 'teal', tr('E-mail digest', 'Barua pepe ya kila mwezi'), on ? tr('On · each donor, on the 1st of the month', 'Imewashwa · kila mfadhili, tarehe 1 ya mwezi') : tr('Off', 'Imezimwa'), on ? 'ok' : 'off',
-        '<p class="muted" data-testid="dn_mail">' + (on ? tr('On: each donor with an e-mail gets a monthly update on the 1st', 'Imewashwa: kila mfadhili mwenye barua pepe anapata taarifa ya mwezi tarehe 1') + (DNR.cron ? '.' : tr(' (once CRON_KEY is set).', ' (CRON_KEY ikishawekwa).'))
-          : tr('Off. Add <span class="dqm-nw">RESEND_API_KEY</span> and <span class="dqm-nw">ALERT_FROM</span> in Cloudflare to switch it on.', 'Imezimwa. Ongeza <span class="dqm-nw">RESEND_API_KEY</span> na <span class="dqm-nw">ALERT_FROM</span> kwenye Cloudflare kuiwasha.')) + '</p>' +
+        '<p class="muted" data-testid="dn_mail">' + (on ? tr('On: each donor with an e-mail gets a monthly update on the 1st', 'Imewashwa: kila mfadhili mwenye barua pepe anapata taarifa ya mwezi tarehe 1') + (DNR.cron ? '.' : tr(', once the website’s monthly timer is set up.', ', kipima muda cha mwezi cha tovuti kikishawekwa.'))
+          : tr('Off. Whoever looks after the website can switch it on.', 'Imezimwa. Anayesimamia tovuti anaweza kuiwasha.')) + '</p>' +
+        (on && DNR.cron ? '' : poTech(on ? tr('Needs CRON_KEY.', 'Inahitaji CRON_KEY.') : tr('Add <span class="dqm-nw">RESEND_API_KEY</span> and <span class="dqm-nw">ALERT_FROM</span> in Cloudflare.', 'Ongeza <span class="dqm-nw">RESEND_API_KEY</span> na <span class="dqm-nw">ALERT_FROM</span> kwenye Cloudflare.'))) +
         '<p class="muted">' + tr('To stop it for one donor, open them, tap Edit and untick “Monthly e-mail update”.', 'Kuizima kwa mfadhili mmoja, mfungue, gusa Hariri na uondoe tiki “Taarifa ya mwezi kwa barua pepe”.') + '</p>') +
       dqmFold('dnhow', 'dqminfo', 'blue', tr('How donor pages work', 'Jinsi kurasa za wafadhili zinavyofanya kazi'), tr('A private link, no password', 'Kiungo cha siri, bila nenosiri'), 'has',
         '<p class="muted">' + tr('Each donor gets a private link to a page with their projects, an exact-location map, visit reports, repairs, story moments and photos. No password: anyone with the link can see it, so send it only to them.', 'Kila mfadhili anapata kiungo cha siri cha ukurasa wenye miradi yake, ramani ya mahali kamili, ripoti za ziara, matengenezo, hadithi na picha. Hakuna nenosiri: yeyote mwenye kiungo anaweza kuuona, kwa hiyo mtumie yeye tu.') + '</p>' +
@@ -8283,10 +8431,10 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
     if (!d && matchMedia('(pointer: fine)').matches) setTimeout(function () { if ($('dnName')) $('dnName').focus(); }, 300);
     return w;
   }
-  function dnrSave() {
+  function dnrSave(sure) {
     var f = dnrRead(), m = $('dnMsg');
     if (!f.name.trim()) { $('dnName').focus(); return dnrSay(m, 'bad', tr('Add their name.', 'Ongeza jina lao.')); }
-    if (!f.projects.length && !confirm(tr('No projects ticked yet. Save anyway?', 'Bado hakuna mradi uliochaguliwa. Hifadhi hata hivyo?'))) return;
+    if (!f.projects.length && !sure) return poAsk(tr('Save with no projects?', 'Hifadhi bila miradi?'), tr('No projects are ticked yet. You can tick them later.', 'Bado hakuna mradi uliochaguliwa. Unaweza kuichagua baadaye.'), tr('Save anyway', 'Hifadhi hata hivyo')).then(function (ok) { if (ok) dnrSave(true); });
     dnrSay(m, '', tr('Saving…', 'Inahifadhi…'));
     var body = { action: DNR.edit ? 'donor-update' : 'donor-add', id: DNR.edit || undefined, name: f.name, email: f.email, org: f.org, projects: f.projects, showPhotos: f.showPhotos, photos: f.photos, digest: f.digest };
     var w = DNR.sheet, btn = $('dnSave'); if (btn) btn.disabled = true;
@@ -8591,7 +8739,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
       return '<div class="fld-in"><div class="fld-use" id="fldUse">' + tr('Checking storage…', 'Inaangalia hifadhi…') + '</div>' + cmBoxHtml() +
         (FLD.areas.length ? FLD.areas.map(function (a, i) {
           var hu = ['green', 'blue', 'purple', 'teal', 'amber'][i % 5];
-          return '<div class="fld-a" data-id="' + esc(a.id) + '" style="--hu:var(--hu-' + hu + ');--hb:var(--hb-' + hu + ')"><div class="fld-ah"><i>' + oic('map') + '</i><div><b>' + esc(a.name) + '</b><span>' + tr('Saved', 'Imehifadhiwa') + ' ' + esc(new Date(a.at).toLocaleDateString(S.lang === 'sw' ? 'sw' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' })) + ' · ' + tr('zoom', 'ukuzaji') + ' ' + a.minZ + '–' + a.maxZ + '</span></div>' +
+          return '<div class="fld-a" data-id="' + esc(a.id) + '" style="--hu:var(--hu-' + hu + ');--hb:var(--hb-' + hu + ')"><div class="fld-ah"><i>' + oic('map') + '</i><div><b>' + esc(a.name) + '</b><span>' + tr('Saved', 'Imehifadhiwa') + ' ' + esc(dDay(a.at)) + ' · ' + tr('zoom', 'ukuzaji') + ' ' + a.minZ + '–' + a.maxZ + '</span></div>' +
             '<button type="button" class="fld-del" data-del="' + esc(a.id) + '" aria-label="' + esc(tr('Delete ' + a.name, 'Futa ' + a.name)) + '">' + oic('trash') + '</button></div>' +
             '<div class="meter"><i style="width:0%"></i></div><p class="fld-ap">…</p>' +
             '<div class="fld-ab"><button class="btn small light" type="button" data-show="' + esc(a.id) + '">' + oic('map') + tr('Show on map', 'Onyesha kwenye ramani') + '</button><button class="btn small" type="button" data-more="' + esc(a.id) + '">' + oic('offline') + tr('Keep more', 'Hifadhi zaidi') + '</button></div></div>';
@@ -8834,7 +8982,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
   function cmDone() { return Object.keys(CM.have).filter(function (k) { return CM.have[k].done; }).map(function (k) { return CM.have[k]; }); }
   function cmReady() { return !!window.caches && cmDone().length > 0; }
   function cmMb(b) { return b >= 1073741824 ? (b / 1073741824).toFixed(1) + ' GB' : b >= 10485760 ? Math.round(b / 1048576) + ' MB' : (b / 1048576).toFixed(1) + ' MB'; }
-  function cmDay(d) { var t = Date.parse(d); return isNaN(t) ? '' : new Date(t).toLocaleDateString(S.lang === 'sw' ? 'sw' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' }); }
+  function cmDay(d) { var t = Date.parse(d); return isNaN(t) ? '' : dDay(t); }
 
   // --- reading a PMTiles v3 archive (github.com/protomaps/PMTiles/blob/main/spec/v3/spec.md) -----------------
   function cmVar(b, p) { var v = 0, m = 1, x; do { x = b[p.i++]; v += (x & 0x7f) * m; m *= 128; } while (x & 0x80); return v; }
@@ -9377,7 +9525,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
     var v = S.visits[p.id], ok = mpbDone(p.id), t = v && new Date(v.at);
     return '<div class="pop mpb-pop"><small class="mpb-k">' + esc(tr('Today’s route · stop ' + (i + 1) + ' of ' + n, 'Njia ya leo · kituo ' + (i + 1) + ' kati ya ' + n)) + '</small><b>' + esc(p.title) + '</b><span>' + esc(sub(p)) +
       (S.here ? '<br>' + dist(metres(S.here, p.gps)) + tr(' from you', ' kutoka ulipo') : '') + '</span>' +
-      '<span class="mpb-st' + (ok ? ' ok' : '') + '">' + (ok ? MPB_TICK + esc(tr('Visited today at ', 'Imetembelewa leo saa ') + t.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })) : esc(tr('Not visited yet', 'Bado haijatembelewa'))) + '</span>' +
+      '<span class="mpb-st' + (ok ? ' ok' : '') + '">' + (ok ? MPB_TICK + esc(tr('Visited today at ', 'Imetembelewa leo saa ') + dClock(t)) : esc(tr('Not visited yet', 'Bado haijatembelewa'))) + '</span>' +
       '<span class="mpb-pb"><button class="btn" type="button" data-mpb-visit="' + esc(p.id) + '">' + esc(ok ? tr('Open', 'Fungua') : tr('Report the visit', 'Ripoti ziara')) + '</button>' +
       '<a class="btn light" href="https://www.google.com/maps/dir/?api=1&destination=' + p.gps[0].toFixed(6) + ',' + p.gps[1].toFixed(6) + '&travelmode=driving" target="_blank" rel="noopener">' + esc(tr('Directions', 'Maelekezo')) + '</a></span></div>';
   }
@@ -9683,7 +9831,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
       box.innerHTML = '<h4>' + esc(tr('On the map', 'Kwenye ramani')) + '</h4>' + sw('route', 'ofaRoute', tr('Today’s route', 'Njia ya leo'), rs, MPB.route) +
         (S.admin ? '<h4>' + esc(tr('For the office', 'Kwa ofisi')) + '</h4>' +
           '<div class="mpb-r mpb-hr"><i class="ei">' + oic('mpbHeat') + '</i><span class="mpb-rt"><b>' + esc(tr('Heat map', 'Ramani ya joto')) + '</b><small>' + esc(tr('Shade the areas by…', 'Paka rangi maeneo kwa…')) + '</small></span></div>' +
-          '<div class="seg mpb-seg" role="group" aria-label="' + esc(tr('Heat map', 'Ramani ya joto')) + '">' + [['', tr('Off', 'Zima')], ['repairs', tr('Open repairs', 'Ukarabati')], ['people', tr('People served', 'Watu')]].map(function (o) { return '<button type="button" data-mpb-heat="' + o[0] + '" aria-pressed="' + (MPB.heat === o[0]) + '">' + esc(o[1]) + '</button>'; }).join('') + '</div>' +
+          '<div class="seg mpb-seg" role="group" aria-label="' + esc(tr('Heat map', 'Ramani ya joto')) + '">' + [['', tr('Off', 'Zima')], ['repairs', tr('Open repairs', 'Matengenezo')], ['people', tr('People served', 'Watu')]].map(function (o) { return '<button type="button" data-mpb-heat="' + o[0] + '" aria-pressed="' + (MPB.heat === o[0]) + '">' + esc(o[1]) + '</button>'; }).join('') + '</div>' +
           sw('years', 'clock', tr('Projects by year', 'Miradi kwa mwaka'), tr('A time slider with a play button, for presentations', 'Kitelezi cha miaka chenye kitufe cha kucheza, kwa mawasilisho'), MPB.years) +
           sw('team', 'people', tr('Team live', 'Timu sasa hivi'), tr('People sharing their location · updates every 3 min', 'Wanaoshiriki mahali · inasasishwa kila dakika 3'), MPB.team) : '');
     };
