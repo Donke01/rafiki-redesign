@@ -63,8 +63,36 @@ class AlertWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx,
     }
 
     companion object {
-        private const val CHANNEL = "alerts"
         private const val WORK = "rafiki-alerts"
+        private const val GROUP = "rafiki"
+        private const val SUMMARY_ID = 7000
+
+        /** The phone's notification channels, so each kind can be turned off in Android's own settings. */
+        internal const val CH_JOBS = "jobs"; internal const val CH_REPAIRS = "repairs"; internal const val CH_TEAM = "team"; internal const val CH_UPDATES = "updates"
+        /** Which channel an alert kind goes to: visits and repair jobs for me, repairs reported or fixed, the team's news, app updates. */
+        internal fun channelOf(kind: String) = when (kind) { "assign", "job" -> CH_JOBS; "repair", "fixed" -> CH_REPAIRS; "update" -> CH_UPDATES; else -> CH_TEAM }
+        /** A notification's title: the person who did it, or what it is when nobody did (a repair job, the review queue). */
+        internal fun titleOf(a: Alert): String = when {
+            a.by.startsWith("SMS from") || a.by.startsWith("WhatsApp from") -> t("Community report", "Ripoti ya jamii")
+            a.by.isNotBlank() -> a.by
+            a.name.isNotBlank() -> a.name
+            else -> "RAFIKI Pin"
+        }
+        /** Its words: the project and what happened ("Kapsaret Borehole · Reported it needs repair"). */
+        internal fun textOf(a: Alert): String = listOf(a.title, a.msg).filter { it.isNotBlank() }.joinToString(" · ").ifBlank { a.text }
+
+        private fun channels(ctx: Context) {
+            if (Build.VERSION.SDK_INT < 26) return
+            val nm = ctx.getSystemService(NotificationManager::class.java)
+            listOf(
+                Triple(CH_JOBS, t("Jobs for me", "Kazi zangu"), t("Visits and repair jobs given to you", "Ziara na kazi za matengenezo ulizopewa")),
+                Triple(CH_REPAIRS, t("Repairs", "Matengenezo"), t("Water points reported broken or fixed", "Vituo vya maji vilivyoripotiwa kuharibika au kurekebishwa")),
+                Triple(CH_TEAM, t("Team", "Timu"), t("New sites and changes waiting for review", "Maeneo mapya na mabadiliko yanayosubiri kukaguliwa")),
+                Triple(CH_UPDATES, t("Updates", "Masasisho"), t("A newer RAFIKI Pin is ready", "RAFIKI Pin mpya iko tayari")),
+            ).forEach { (id, name, desc) -> nm.createNotificationChannel(NotificationChannel(id, name, NotificationManager.IMPORTANCE_DEFAULT).apply { description = desc }) }
+            // the old single channel ("Team news") is replaced by these
+            runCatching { nm.deleteNotificationChannel("alerts") }
+        }
 
         fun schedule(ctx: Context) {
             val req = PeriodicWorkRequestBuilder<AlertWorker>(15, TimeUnit.MINUTES)
@@ -79,29 +107,38 @@ class AlertWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx,
         /** "Update available · 2.15.1": opens the app, where the update pop-up is waiting. */
         fun showUpdate(ctx: Context, name: String, notes: String) {
             if (!allowed(ctx)) return
-            val nm = ctx.getSystemService(NotificationManager::class.java)
-            if (Build.VERSION.SDK_INT >= 26 && nm.getNotificationChannel(CHANNEL) == null)
-                nm.createNotificationChannel(NotificationChannel(CHANNEL, t("Team news", "Habari za timu"), NotificationManager.IMPORTANCE_DEFAULT))
+            channels(ctx)
             val open = Intent(ctx, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP).putExtra("open", "").putExtra("tab", "me")
             val pi = PendingIntent.getActivity(ctx, 7001, open, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
             val text = notes.ifBlank { t("Tap to update. It installs right in the app.", "Gusa kusasisha. Inasakinishwa ndani ya programu.") }
-            val n = NotificationCompat.Builder(ctx, CHANNEL).setSmallIcon(R.drawable.ic_stat_pin).setContentTitle(t("RAFIKI Pin update · $name", "Sasisho la RAFIKI Pin · $name")).setContentText(text)
+            val n = NotificationCompat.Builder(ctx, CH_UPDATES).setSmallIcon(R.drawable.ic_stat_pin).setContentTitle(t("RAFIKI Pin update · $name", "Sasisho la RAFIKI Pin · $name")).setContentText(text)
                 .setStyle(NotificationCompat.BigTextStyle().bigText(text)).setContentIntent(pi).setAutoCancel(true).setColor(0xFF0A78C2.toInt()).build()
             runCatching { NotificationManagerCompat.from(ctx).notify(7001, n) }
         }
 
+        /** Each new thing as its own notification, titled by the person (or the job), in its channel, all
+         *  grouped under one summary ("3 new · RAFIKI Pin") so a busy day doesn't fill the shade. */
         fun show(ctx: Context, items: List<Alert>) {
             if (!allowed(ctx)) return
-            val nm = ctx.getSystemService(NotificationManager::class.java)
-            if (Build.VERSION.SDK_INT >= 26 && nm.getNotificationChannel(CHANNEL) == null)
-                nm.createNotificationChannel(NotificationChannel(CHANNEL, t("Team news", "Habari za timu"), NotificationManager.IMPORTANCE_DEFAULT).apply { description = t("Repairs, visits and jobs for you", "Matengenezo, ziara na kazi zako") })
-            items.take(5).forEachIndexed { i, al ->
+            channels(ctx)
+            val shown = items.take(5)
+            shown.forEach { al ->
                 val open = Intent(ctx, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP).putExtra("open", al.id ?: "").putExtra("tab", "me")
                 val pi = PendingIntent.getActivity(ctx, (al.at + al.text).hashCode(), open, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-                val n = NotificationCompat.Builder(ctx, CHANNEL).setSmallIcon(R.drawable.ic_stat_pin).setContentTitle("RAFIKI Pin").setContentText(al.text)
-                    .setStyle(NotificationCompat.BigTextStyle().bigText(al.text)).setContentIntent(pi).setAutoCancel(true).setGroup("rafiki").setColor(0xFF0A78C2.toInt()).build()
+                val body = textOf(al)
+                val n = NotificationCompat.Builder(ctx, channelOf(al.kind)).setSmallIcon(R.drawable.ic_stat_pin).setContentTitle(titleOf(al)).setContentText(body)
+                    .setStyle(NotificationCompat.BigTextStyle().bigText(body)).setContentIntent(pi).setAutoCancel(true).setGroup(GROUP).setColor(0xFF0A78C2.toInt()).build()
                 runCatching { NotificationManagerCompat.from(ctx).notify((al.at + al.text).hashCode(), n) }
             }
+            if (shown.isEmpty()) return
+            val inbox = NotificationCompat.InboxStyle().setSummaryText("RAFIKI Pin")
+            shown.forEach { inbox.addLine(titleOf(it) + ": " + textOf(it)) }
+            val open = Intent(ctx, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP).putExtra("open", "").putExtra("tab", "me")
+            val pi = PendingIntent.getActivity(ctx, SUMMARY_ID, open, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+            val title = if (shown.size == 1) t("1 new notification", "Arifa 1 mpya") else t("${shown.size} new notifications", "Arifa ${shown.size} mpya")
+            val sum = NotificationCompat.Builder(ctx, channelOf(shown.first().kind)).setSmallIcon(R.drawable.ic_stat_pin).setContentTitle(title).setContentText(shown.joinToString(", ") { titleOf(it) })
+                .setStyle(inbox).setGroup(GROUP).setGroupSummary(true).setContentIntent(pi).setAutoCancel(true).setColor(0xFF0A78C2.toInt()).build()
+            runCatching { NotificationManagerCompat.from(ctx).notify(SUMMARY_ID, sum) }
         }
     }
 }

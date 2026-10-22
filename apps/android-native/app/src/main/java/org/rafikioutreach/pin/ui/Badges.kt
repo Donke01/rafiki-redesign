@@ -114,6 +114,12 @@ fun BadgeStamps(m: AppModel) {
             }
             Text(t("$earned of ${states.size}", "$earned kati ya ${states.size}"), style = MaterialTheme.typography.labelMedium, color = C.ink, modifier = Modifier.padding(start = 10.dp).testTag("stamps_count"))
         }
+        // a new stamp: the note opens in its own space under the bar (never over the words above), then folds away
+        androidx.compose.animation.AnimatedVisibility(toast && fresh.isNotEmpty(),
+            enter = if (moving) androidx.compose.animation.expandVertically(spring(dampingRatio = 0.8f, stiffness = 380f)) + androidx.compose.animation.fadeIn(tween(220)) else androidx.compose.animation.EnterTransition.None,
+            exit = if (moving) androidx.compose.animation.shrinkVertically(tween(260)) + androidx.compose.animation.fadeOut(tween(200)) else androidx.compose.animation.ExitTransition.None) {
+            BadgeBanner(fresh, moving, { toast = false }, Modifier.padding(top = 14.dp))
+        }
         states.chunked(3).forEachIndexed { r, row ->
             Row(Modifier.padding(top = 16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 row.forEachIndexed { c, st ->
@@ -134,10 +140,32 @@ fun BadgeStamps(m: AppModel) {
                 }
             }
         }
-        Text(t("Show the welcome screens again", "Onyesha skrini za kukaribisha tena"), style = MaterialTheme.typography.labelLarge, color = C.blue2,
-            modifier = Modifier.padding(top = 12.dp).clip(RoundedCornerShape(10.dp)).clickable { m.replayOnb = true }.padding(vertical = 10.dp).testTag("replay"))
     }
-    if (toast && fresh.isNotEmpty()) BadgeToast(fresh, moving, { toast = false }) { toast = false; scope.launch { here.bringIntoView() } }
+}
+
+/** "New stamp earned!" inside the stamps card, under the progress bar; it says so for a few seconds, then folds away. */
+@Composable
+private fun BadgeBanner(fresh: List<BadgeState>, moving: Boolean, gone: () -> Unit, modifier: Modifier = Modifier) {
+    val hp = rememberHaptics()
+    LaunchedEffect(Unit) { hp.ok(); delay(5200); gone() }
+    val first = fresh.first()
+    Row(modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp))
+        .background(Brush.linearGradient(listOf(Color(0xFF1A8BD6), Color(0xFF054F81), Color(0xFF04263F))))
+        .clickable(onClick = gone).padding(horizontal = 14.dp, vertical = 12.dp).testTag("badge_toast")
+        .semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite },
+        verticalAlignment = Alignment.CenterVertically) {
+        Box(Modifier.size(46.dp).clip(RoundedCornerShape(14.dp)).background(Color(0x26FFFFFF)), contentAlignment = Alignment.Center) {
+            Drop(28.dp, badgeDrop(first.def.color), Mood.Smile, still0 = !moving)
+        }
+        Spacer(Modifier.width(12.dp))
+        Column(Modifier.weight(1f)) {
+            Text(if (fresh.size == 1) t("New stamp earned!", "Umepata stempu mpya!") else t("${fresh.size} new stamps earned!", "Umepata stempu ${fresh.size} mpya!"),
+                color = Color(0xFFFFD66B), fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, letterSpacing = .4.sp)
+            // whole names only: each title keeps its words together and the list wraps between titles
+            Text(fresh.joinToString(" · ") { it.def.title.replace(' ', '\u00A0') }, color = Color.White, style = MaterialTheme.typography.titleSmall)
+            if (fresh.size == 1) Text(first.def.how, color = Color(0xFFCFE8FA), style = MaterialTheme.typography.bodySmall)
+        }
+    }
 }
 
 /** "New badge!" at the top of the screen, like a notification; goes away by itself. */

@@ -275,7 +275,7 @@ class TeamMapTest {
         val m = model(); show(m)
         rule.onNodeWithTag("nav_office").performClick(); rule.waitForIdle()
         rule.onNodeWithTag("o_teammap").performClick()
-        waitFor("Wenzako 3 wanashiriki mahali"); waitFor("Wanashiriki sasa")
+        waitFor("Wenzako 3 wanashiriki mahali"); waitFor("wanashiriki sasa")
         rule.onNodeWithTag("tm_head").performScrollTo()
         shot("39c-office-teammap-sw")
         rule.onNodeWithTag("o_plan").performScrollTo().performClick()

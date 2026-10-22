@@ -251,7 +251,7 @@ fun QrStickerSection(m: AppModel, snap: Snapshot) {
     val hu = C.hue("qr")
     val pages = (chosen.size + QrStickers.COLS * QrStickers.ROWS - 1) / (QrStickers.COLS * QrStickers.ROWS)
     DqmHead("qr_head", "qr", "teal", t("QR check-in stickers", "Vibandiko vya QR vya kuingia"), t("Print one for each project and fix it at the site.", "Chapisha kimoja kwa kila mradi na ukibandike eneo la mradi."),
-        listOf(DqmNum(chosen.size, t("Chosen", "Vimechaguliwa"), if (chosen.isEmpty()) "off" else ""), DqmNum(pages, if (pages == 1) t("A4 page", "Ukurasa A4") else t("A4 pages", "Kurasa A4"), if (pages == 0) "off" else "")))
+        listOf(DqmNum(chosen.size, t("chosen", "vimechaguliwa"), if (chosen.isEmpty()) "off" else ""), DqmNum(pages, if (pages == 1) t("A4 page", "ukurasa A4") else t("A4 pages", "kurasa A4"), if (pages == 0) "off" else "")))
     val counts = snap.projects.groupingBy { it.ck }.eachCount()
     Row(Modifier.padding(top = 14.dp, bottom = 4.dp).fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         (listOf("" to t("All countries", "Nchi zote")) + COUNTRIES.map { it.key to it.value }).filter { (k, _) -> k.isBlank() || (counts[k] ?: 0) > 0 || k == ck }.forEach { (k, l) ->

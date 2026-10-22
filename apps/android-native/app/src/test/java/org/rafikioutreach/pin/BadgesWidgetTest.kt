@@ -143,7 +143,7 @@ class BadgesWidgetTest {
         rule.onAllNodesWithTag("badge_toast").assertCountEquals(0)
         assertEquals(got, BadgeMemory(app).seen("Meril Kiprop")!!.size)
         shot("b1-me-badges")
-        rule.onNodeWithText("Show the welcome screens again").performScrollTo(); shot("b2-me-badges-lower")
+        rule.onAllNodesWithTag("stamp_no").onLast().performScrollTo(); shot("b2-me-badges-lower")
         // Kiswahili
         Lang.sw = true; rule.waitForIdle()
         rule.onNodeWithTag("badge_month10", useUnmergedTree = true).assertTextEquals("ziara 7/10")
@@ -195,7 +195,7 @@ class BadgesWidgetTest {
         rule.setContent { RafikiTheme(dark = false) { Box(Modifier.size(390.dp, 844.dp)) { Column(Modifier.padding(16.dp)) { BadgeStamps(m) } } } }
         rule.waitUntil(5000) { rule.onAllNodesWithTag("badge_toast").fetchSemanticsNodes().isNotEmpty() }
         rule.onNodeWithText("New stamp earned!").assertExists()
-        rule.onNode(hasTestTag("badge_toast") and hasText("Story collector", substring = true)).assertExists()
+        rule.onNode(hasTestTag("badge_toast") and hasText("Story\u00A0collector", substring = true)).assertExists()
         rule.onAllNodesWithTag("confetti").assertCountEquals(0)
         rule.onAllNodesWithTag("stamp_new").assertCountEquals(1)
     }
@@ -236,7 +236,7 @@ class BadgesWidgetTest {
         // Kiswahili
         Prefs(app).lang = "sw"
         val sw = render(PinWidget.views(app, PinWidget.load(app), false), 300, 150, "w3-widget-medium-sw")
-        assertEquals("Tembelea karibu", text(sw, R.id.w_go_near_t)); assertEquals("Ziara zinasubiri", text(sw, R.id.w_l_due))
+        assertEquals("Tembelea karibu", text(sw, R.id.w_go_near_t)); assertEquals("Kutembelea", text(sw, R.id.w_l_due)); assertEquals("La haraka", text(sw, R.id.w_l_urgent))
         Prefs(app).lang = "en"
         // signed out: asks to open the app
         Prefs(app).forget()

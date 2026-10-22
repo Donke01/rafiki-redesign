@@ -136,11 +136,6 @@ fun MeScreen(m: AppModel, open: (String) -> Unit = {}, report: () -> Unit = {}, 
             WaitingList(m, s)
             MyWork(s, open)
             MyMonth(m, act)
-            Card(Modifier.padding(top = 14.dp)) {
-                H2(t("Monthly report", "Ripoti ya mwezi"))
-                Text(t("Visits, repairs and how projects are doing for one month, ready to share as a PDF.", "Ziara, matengenezo na hali ya miradi kwa mwezi mmoja, tayari kushiriki kama PDF."), style = MaterialTheme.typography.bodyMedium, color = C.muted)
-                Btn(t("Open report", "Fungua ripoti"), report, Modifier.padding(top = 10.dp), icon = "clip", small = true)
-            }
             BadgeStamps(m)
             SettingsCard(m, settings)
             UpdateRow(m)

@@ -21,6 +21,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
@@ -86,7 +87,7 @@ fun SettingsCard(m: AppModel, go: (String) -> Unit) {
         Text(t("Settings", "Mipangilio"), style = MaterialTheme.typography.titleLarge, color = C.ink, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
         // most used first: who you are, then keeping the app safe and telling you things, then how it looks, then help
         Group(t("Account", "Akaunti"))
-        MondayRow(m, s)
+        MondayRow(m, s) { go("monday") }
         SetRow("person", "blue", t("Personal details", "Taarifa zangu"), listOf(me.nick.ifBlank { m.prefs.name }, me.phone).filter { it.isNotBlank() }.joinToString(" · "), "set_profile") { go("profile") }
         SetRow("lock", "purple", if (me.kind == "monday") t("Sign-in", "Kuingia") else t("Change my PIN", "Badilisha PIN yangu"), when (me.kind) {
             "monday" -> t("Signed in with monday.com", "Umeingia kwa monday.com"); "app" -> t("Your own PIN", "PIN yako mwenyewe")
@@ -128,7 +129,7 @@ private fun mail(ctx: android.content.Context, subject: String, body: String) {
 private fun web(ctx: android.content.Context, path: String) { runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.rafikioutreach.org$path"))) } }
 
 @Composable
-private fun Group(label: String) = Text(label.uppercase(), style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.4.sp), color = C.muted, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(top = 16.dp, bottom = 2.dp))
+private fun Group(label: String) = Text(label.uppercase(), style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.4.sp), color = C.muted, textAlign = TextAlign.Start, modifier = Modifier.fillMaxWidth().padding(start = 2.dp, top = 16.dp, bottom = 2.dp))
 
 @Composable
 private fun SetRow(icon: String, hue: String, title: String, sub: String, tag: String, onClick: () -> Unit) {
@@ -150,7 +151,7 @@ private fun lookMode(): String { val sys = androidx.compose.foundation.isSystemI
 /** "Light · normal text" under Appearance. */
 @Composable
 private fun lookText(): String {
-    val col = when (lookMode()) { "dark" -> t("Dark", "Giza"); "sun" -> t("Sun", "Jua"); else -> t("Light", "Mwanga") }
+    val col = if (Look.mode.isBlank()) t("Same as phone", "Kama simu") else when (lookMode()) { "dark" -> t("Dark", "Giza"); "sun" -> t("Sun", "Jua"); else -> t("Light", "Mwanga") }
     val size = when (TextSize.value) { "s" -> t("small text", "maandishi madogo"); "l" -> t("large text", "maandishi makubwa"); "xl" -> t("larger text", "maandishi makubwa zaidi"); else -> t("normal text", "maandishi ya kawaida") }
     return "$col · $size"
 }
@@ -167,9 +168,9 @@ private fun BioRow(m: AppModel) {
     Row(Modifier.fillMaxWidth().padding(vertical = 10.dp, horizontal = 2.dp).testTag("bio_card"), verticalAlignment = Alignment.CenterVertically) {
         IconTile("finger", hu.fg, hu.bg, 40.dp); Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
-            Text(t("Unlock with fingerprint or face", "Fungua kwa alama ya kidole au uso"), style = MaterialTheme.typography.titleSmall, color = C.ink)
-            Text(bioMsg ?: if (bio) t("On · asked when the app opens and after a minute away", "Imewashwa · inaulizwa programu inapofunguliwa na baada ya dakika moja nje") else t("Off · keeps the app private if someone else picks up your phone", "Imezimwa · inaweka programu faragha mtu mwingine akishika simu yako"),
-                style = MaterialTheme.typography.bodySmall, color = if (bioMsg != null) C.bad else C.muted, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            Text(t("Fingerprint or face unlock", "Fungua kwa kidole au uso"), style = MaterialTheme.typography.titleSmall, color = C.ink, maxLines = 2)
+            Text(bioMsg ?: if (bio) t("On · asked when the app opens and after a minute away", "Imewashwa · inaulizwa programu ikifunguliwa na baada ya dakika moja") else t("Off · keeps the app private if someone picks up your phone", "Imezimwa · inalinda programu mtu akishika simu yako"),
+                style = MaterialTheme.typography.bodySmall, color = if (bioMsg != null) C.bad else C.muted)
         }
         Spacer(Modifier.width(8.dp))
         Toggle(bio, if (bio) t("Turn off", "Zima") else t("Turn on", "Washa"), Modifier.testTag("bio_switch")) {
@@ -179,27 +180,21 @@ private fun BioRow(m: AppModel) {
     }
 }
 
-/** Settings › Account › Your name on monday.com: opens in place to connect (not when signed in with monday.com itself). */
+/** Settings › Account › Your name on monday.com: one row ("Connected as … ›"); the steps to connect are on their own page
+ *  (not shown when signed in with monday.com itself). */
 @Composable
-private fun MondayRow(m: AppModel, snap: org.rafikioutreach.pin.data.Snapshot?) {
+private fun MondayRow(m: AppModel, snap: org.rafikioutreach.pin.data.Snapshot?, onClick: () -> Unit) {
     if (snap == null || m.prefs.session.isNotBlank()) return
-    var open by remember { mutableStateOf(snap.linked.isBlank() && snap.who.isNotBlank()) }
-    val turn by chevTurn(if (open) 90f else 0f)
-    val h = rememberHaptics()
-    Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).clickable(role = Role.Button) { h.tap(); open = !open }.padding(vertical = 10.dp, horizontal = 2.dp).testTag("monday_row"), verticalAlignment = Alignment.CenterVertically) {
+    val linked = snap.linked.isNotBlank()
+    Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).clickable(role = Role.Button, onClick = onClick).padding(vertical = 10.dp, horizontal = 2.dp).testTag("monday_row"), verticalAlignment = Alignment.CenterVertically) {
         Box(Modifier.size(40.dp).clip(RoundedCornerShape(14.dp)).background(MondayBlue.copy(alpha = 0.10f)), contentAlignment = Alignment.Center) { Brand("monday.com", 24.dp, "link", MondayBlue) }
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
             Text(t("Your name on monday.com", "Jina lako kwenye monday.com"), style = MaterialTheme.typography.titleSmall, color = C.ink)
-            val linked = snap.linked.isNotBlank()
-            Text(when { linked -> t("Connected as ${snap.linked} ✓", "Imeunganishwa kama ${snap.linked} ✓"); snap.who.isBlank() -> t("Changes go in under the shared account", "Mabadiliko yanaingia kwa akaunti ya pamoja"); else -> t("Takes 20 seconds, once", "Inachukua sekunde 20, mara moja") },
-                style = MaterialTheme.typography.bodySmall, color = if (linked) C.ok else C.muted, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = if (linked) Modifier.testTag("monday_connected") else Modifier)
+            Text(when { linked -> t("Connected as ${snap.linked}", "Imeunganishwa kama ${snap.linked}"); snap.who.isBlank() -> t("Changes go in under the shared account", "Mabadiliko yanaingia kwa akaunti ya pamoja"); else -> t("Not connected · takes 20 seconds", "Haijaunganishwa · sekunde 20") },
+                style = MaterialTheme.typography.bodySmall, color = if (linked) C.ok else C.muted, modifier = if (linked) Modifier.testTag("monday_connected") else Modifier)
         }
-        Icon(Ic.get("chev"), null, tint = C.muted, modifier = Modifier.size(18.dp).rotate(turn))
-    }
-    androidx.compose.animation.AnimatedVisibility(open, enter = if (Motion.on) androidx.compose.animation.expandVertically() + androidx.compose.animation.fadeIn() else androidx.compose.animation.EnterTransition.None,
-        exit = if (Motion.on) androidx.compose.animation.shrinkVertically() + androidx.compose.animation.fadeOut() else androidx.compose.animation.ExitTransition.None) {
-        Column(Modifier.padding(start = 52.dp, bottom = 12.dp)) { ConnectMonday(m, snap, inline = true) }
+        Icon(Ic.get("chev"), null, tint = C.muted, modifier = Modifier.size(18.dp))
     }
 }
 
@@ -226,7 +221,7 @@ private fun SetChoice(title: String, sub: String, on: Boolean, tag: String, lead
 }
 
 @Composable
-private fun SetLabel(text: String) = Text(text.uppercase(), style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.4.sp), color = C.muted, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(top = 18.dp, bottom = 2.dp))
+private fun SetLabel(text: String) = Text(text.uppercase(), style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.4.sp), color = C.muted, textAlign = TextAlign.Start, modifier = Modifier.fillMaxWidth().padding(start = 2.dp, top = 18.dp, bottom = 2.dp))
 
 /** A small sample of the app in the colours: what Light, Dark and Sun look like before you pick one. */
 @Composable
@@ -237,6 +232,51 @@ private fun Swatch(p: Palette) {
             Box(Modifier.fillMaxWidth(0.55f).height(3.dp).clip(RoundedCornerShape(2.dp)).background(p.muted))
             Box(Modifier.fillMaxWidth(0.4f).height(5.dp).clip(RoundedCornerShape(3.dp)).background(p.blue))
         }
+    }
+}
+
+/** "Same as phone": half Light, half Dark. */
+@Composable
+private fun PhoneSwatch() {
+    Row(Modifier.size(46.dp, 38.dp).clip(RoundedCornerShape(10.dp)).border(1.dp, C.line, RoundedCornerShape(10.dp))) {
+        listOf(Light, Dark).forEach { p ->
+            Box(Modifier.weight(1f).fillMaxHeight().background(p.bg).padding(start = if (p === Light) 5.dp else 0.dp, end = if (p === Dark) 5.dp else 0.dp, top = 5.dp, bottom = 5.dp)) {
+                Column(Modifier.fillMaxSize().background(p.card).padding(3.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                    Box(Modifier.fillMaxWidth(0.8f).height(4.dp).clip(RoundedCornerShape(2.dp)).background(p.ink))
+                    Box(Modifier.fillMaxWidth(0.5f).height(5.dp).clip(RoundedCornerShape(3.dp)).background(p.blue))
+                }
+            }
+        }
+    }
+}
+
+/** About › Check for updates: asks the website now; a newer app opens Me, where it downloads and installs. */
+@Composable
+private fun CheckUpdatesRow(m: AppModel) {
+    val u by m.update.collectAsState()
+    var busy by remember { mutableStateOf(false) }
+    var failed by remember { mutableStateOf(false) }
+    var asked by remember { mutableStateOf(false) }
+    val scope = rememberScope()
+    val ready = (u?.code ?: 0) > BuildConfig.VERSION_CODE
+    Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).clickable(enabled = !busy, role = Role.Button) {
+        if (ready) { m.focusUpdate = true; m.goTab = "me"; return@clickable }
+        busy = true; failed = false; asked = true
+        scope.launch { failed = !m.checkUpdate(); busy = false; if (m.updateReady) { m.focusUpdate = true; m.goTab = "me" } }
+    }.padding(vertical = 10.dp, horizontal = 2.dp).testTag("about_update"), verticalAlignment = Alignment.CenterVertically) {
+        val hu = C.hue(if (ready) "pin" else "near"); IconTile(if (ready) "upload" else "refresh", hu.fg, hu.bg, 40.dp); Spacer(Modifier.width(12.dp))
+        Column(Modifier.weight(1f)) {
+            Text(if (ready) t("Update available · ${u!!.name}", "Toleo jipya · ${u!!.name}") else t("Check for updates", "Angalia masasisho"), style = MaterialTheme.typography.titleSmall, color = C.ink)
+            Text(when {
+                busy -> t("Checking…", "Inaangalia…")
+                failed -> t("Couldn’t check. Needs a signal.", "Haikuweza kuangalia. Inahitaji mtandao.")
+                ready -> t("Tap to update", "Gusa kusasisha")
+                asked -> t("You’re up to date ✓", "Uko na toleo jipya ✓")
+                else -> t("Version ", "Toleo ") + BuildConfig.VERSION_NAME
+            }, style = MaterialTheme.typography.bodySmall, color = if (failed) C.bad else if (asked && !busy && !ready) C.ok else C.muted, modifier = Modifier.testTag("about_update_status"))
+        }
+        if (busy) androidx.compose.material3.CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp, color = C.blue)
+        else Icon(Ic.get("chev"), null, tint = C.muted, modifier = Modifier.size(18.dp))
     }
 }
 
@@ -258,7 +298,8 @@ private fun LookPage(m: AppModel) {
         Text(t("Visited 3 days ago by Grace. The pump works and the water is clear.", "Ilitembelewa siku 3 zilizopita na Grace. Pampu inafanya kazi na maji ni safi."), style = MaterialTheme.typography.bodyMedium, color = C.text, modifier = Modifier.padding(top = 10.dp, start = 2.dp, end = 2.dp))
     }
     SetLabel(t("Colours", "Rangi"))
-    val sel = lookMode()
+    val sel = Look.mode.ifBlank { "system" }
+    SetChoice(t("Same as phone", "Kama simu"), t("Light or dark, as the phone is set", "Mwanga au giza, kama simu ilivyowekwa"), sel == "system", "theme_system", lead = { PhoneSwatch() }) { Look.mode = ""; m.prefs.theme = "" }
     listOf(Triple("light", t("Light", "Mwanga"), t("Bright and clear, for most days", "Angavu na wazi, kwa siku nyingi")) to Light,
         Triple("dark", t("Dark", "Giza"), t("Easy on the eyes at night", "Rahisi kwa macho usiku")) to Dark,
         Triple("sun", t("Sun", "Jua"), t("Black on white, for bright sunshine outdoors", "Nyeusi juu ya nyeupe, kwa jua kali nje")) to Sun).forEach { (o, p) ->
@@ -283,7 +324,7 @@ private fun LookPage(m: AppModel) {
 
 private val FAQ = listOf(
     listOf("How do I pin a project’s location?", "Ninawekaje mahali pa mradi?", "Stand at the site, open the project, then Pin location › Use my location. Check the point on the map and save. You can also tap the map, or paste a Google Maps link.", "Simama kwenye eneo, fungua mradi, kisha Weka mahali › Tumia mahali nilipo. Hakikisha kwenye ramani kisha hifadhi. Unaweza pia kugusa ramani, au kubandika kiungo cha Google Maps."),
-    listOf("How do I report a site visit?", "Ninaripotije ziara?", "Open the project › Site visit. Tap “I’ve arrived”, choose how it is, go through the checklist, add photos, then Send. Each kind of project has its own checklist.", "Fungua mradi › Ziara. Gusa “Nimefika”, chagua hali, pitia orodha ya ukaguzi, ongeza picha, kisha Tuma. Kila aina ya mradi ina orodha yake."),
+    listOf("How do I report a visit?", "Ninaripotije ziara?", "Open the project › Site visit. Tap “I’ve arrived”, choose how it is, go through the checklist, add photos, then Send. Each kind of project has its own checklist.", "Fungua mradi › Ziara. Gusa “Nimefika”, chagua hali, pitia orodha ya ukaguzi, ongeza picha, kisha Tuma. Kila aina ya mradi ina orodha yake."),
     listOf("What happens with no signal?", "Nini kinatokea bila mtandao?", "Keep working. Everything is saved on this phone and sent to monday.com by itself when there’s signal. Me shows what is still waiting.", "Endelea kufanya kazi. Kila kitu kinahifadhiwa kwenye simu na kutumwa monday.com chenyewe mtandao ukipatikana. Mimi inaonyesha kinachosubiri."),
     listOf("Why does my change need approval?", "Kwa nini badiliko langu linahitaji kuidhinishwa?", "If an admin confirmed a location, moving it by more than 500 m goes to the office for approval first. New sites and story moments are checked too.", "Ikiwa msimamizi amethibitisha mahali, kuhamisha zaidi ya mita 500 kunaenda ofisini kuidhinishwa kwanza. Maeneo mapya na hadithi pia hukaguliwa."),
     listOf("How do I update the app?", "Ninasasishaje programu?", "Me › App updates › Update now. It downloads and installs in the app. On Samsung phones, turn Auto Blocker off for a moment if the update is cancelled.", "Mimi › Masasisho › Sasisha sasa. Inapakuliwa na kusakinishwa ndani ya programu. Kwenye simu za Samsung, zima Auto Blocker kwa muda ikiwa sasisho limeghairiwa."),
@@ -302,7 +343,7 @@ fun SettingsPage(m: AppModel, which: String, back: () -> Unit) {
     var msg by remember { mutableStateOf<Pair<String, String>?>(null) }
     var busy by remember { mutableStateOf(false) }
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp).padding(bottom = 100.dp)) {
-        val title = when (which) { "profile" -> t("Personal details", "Taarifa zangu"); "pin" -> if (me.kind == "monday") t("Sign-in", "Kuingia") else t("Change my PIN", "Badilisha PIN yangu"); "notify" -> t("Notifications", "Arifa"); "help" -> t("Help and FAQs", "Msaada na maswali"); "signout" -> t("Sign out of this phone?", "Toka kwenye simu hii?"); "look" -> t("Appearance", "Mwonekano"); "lang" -> t("Language", "Lugha"); "units" -> t("Distances", "Umbali"); else -> t("About RAFIKI Pin", "Kuhusu RAFIKI Pin") }
+        val title = when (which) { "profile" -> t("Personal details", "Taarifa zangu"); "pin" -> if (me.kind == "monday") t("Sign-in", "Kuingia") else t("Change my PIN", "Badilisha PIN yangu"); "notify" -> t("Notification settings", "Mipangilio ya arifa"); "monday" -> t("Your name on monday.com", "Jina lako kwenye monday.com"); "help" -> t("Help and FAQs", "Msaada na maswali"); "signout" -> t("Sign out of this phone?", "Toka kwenye simu hii?"); "look" -> t("Appearance", "Mwonekano"); "lang" -> t("Language", "Lugha"); "units" -> t("Distances", "Umbali"); else -> t("About RAFIKI Pin", "Kuhusu RAFIKI Pin") }
         Text(title, style = MaterialTheme.typography.headlineLarge, color = C.ink, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(top = 4.dp, bottom = 8.dp).testTag("set_title"))
         Card(Modifier.padding(top = 8.dp)) {
             when (which) {
@@ -361,13 +402,15 @@ fun SettingsPage(m: AppModel, which: String, back: () -> Unit) {
                             else { phoneOn = true; m.prefs.phoneAlerts = true; AlertWorker.schedule(ctx.applicationContext) }
                         }
                     }
-                    Text(t("TELL ME ABOUT", "NIARIFU KUHUSU"), style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.4.sp), color = C.muted, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(top = 18.dp, bottom = 4.dp))
+                    Text(t("TELL ME ABOUT", "NIARIFU KUHUSU"), style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.4.sp), color = C.muted, textAlign = TextAlign.Start, modifier = Modifier.fillMaxWidth().padding(start = 2.dp, top = 18.dp, bottom = 4.dp))
+                    // with alerts on this phone off, the kinds are greyed out and can't be changed
+                    if (!phoneOn) Text(t("Turn on Alerts on this phone to choose what it tells you about.", "Washa Arifa kwenye simu hii ili uchague inachokuarifu."), style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(bottom = 6.dp).testTag("nk_off_note"))
                     ALERT_KINDS.filter { it[0] != "review" || s?.admin == true }.forEach { k ->
                         HorizontalDivider(color = C.line)
-                        Row(Modifier.padding(vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Row(Modifier.padding(vertical = 10.dp).alpha(if (phoneOn) 1f else 0.42f), verticalAlignment = Alignment.CenterVertically) {
                             val hu = C.hue(k[4]); IconTile(k[3], hu.fg, hu.bg, 38.dp); Spacer(Modifier.width(12.dp))
                             Text(t(k[1], k[2]), style = MaterialTheme.typography.titleSmall, color = C.ink, modifier = Modifier.weight(1f))
-                            Toggle(k[0] !in off, t(k[1], k[2]), Modifier.testTag("nk_" + k[0])) { off = if (k[0] in off) off - k[0] else off + k[0]; m.prefs.noteOff = off; m.noteChanged() }
+                            Toggle(phoneOn && k[0] !in off, t(k[1], k[2]), Modifier.testTag("nk_" + k[0]), enabled = phoneOn) { off = if (k[0] in off) off - k[0] else off + k[0]; m.prefs.noteOff = off; m.noteChanged() }
                         }
                     }
                 }
@@ -383,8 +426,15 @@ fun SettingsPage(m: AppModel, which: String, back: () -> Unit) {
                         }
                     }
                     Btn(t("More questions on the website", "Maswali zaidi kwenye tovuti"), { web(ctx, "/faq") }, Modifier.fillMaxWidth().padding(top = 14.dp), light = true)
+                    HorizontalDivider(color = C.line, modifier = Modifier.padding(top = 16.dp, bottom = 4.dp))
+                    SetRow("spark", "purple", t("Show the welcome screens again", "Onyesha skrini za kukaribisha tena"), t("The short tour from the first day", "Utangulizi mfupi wa siku ya kwanza"), "replay") { m.replayOnb = true }
                 }
                 "look" -> LookPage(m)
+                "monday" -> if (s?.linked.isNullOrBlank() && s?.who.isNullOrBlank()) Text(t("Your changes go in under the shared account. To use your own name, ask the office for your own PIN.", "Mabadiliko yako yanaingia kwa akaunti ya pamoja. Kutumia jina lako, omba ofisi PIN yako mwenyewe."), style = MaterialTheme.typography.bodyMedium, color = C.text)
+                    else {
+                        if (s?.linked?.isNotBlank() == true) Text(t("Connected as ${s?.linked} ✓", "Imeunganishwa kama ${s?.linked} ✓"), style = MaterialTheme.typography.titleSmall, color = C.ok, modifier = Modifier.padding(bottom = 6.dp).testTag("monday_connected"))
+                        ConnectMonday(m, s, inline = true)
+                    }
                 "lang" -> {
                     Text(t("The whole app, and the reports you make, in the language you choose.", "Programu nzima, na ripoti unazotengeneza, kwa lugha unayochagua."), style = MaterialTheme.typography.bodyMedium, color = C.muted, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
                     val sw = org.rafikioutreach.pin.Lang.sw
@@ -408,6 +458,8 @@ fun SettingsPage(m: AppModel, which: String, back: () -> Unit) {
                     Text(t("Version ", "Toleo ") + BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE + ")", style = MaterialTheme.typography.titleSmall, color = C.ink, modifier = Modifier.padding(top = 14.dp))
                     Text(t("The field app for RAFIKI Outreach: pin projects, report visits and repairs, and keep monday.com up to date, even with no signal.", "Programu ya uwanjani ya RAFIKI Outreach: weka mahali pa miradi, ripoti ziara na matengenezo, na usasishe monday.com, hata bila mtandao."), style = MaterialTheme.typography.bodyMedium, color = C.muted, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 8.dp))
                     Text("rafikioutreach.org", style = MaterialTheme.typography.labelLarge, color = C.blue2, modifier = Modifier.padding(top = 12.dp).clickable { web(ctx, "") })
+                    HorizontalDivider(color = C.line, modifier = Modifier.padding(top = 14.dp, bottom = 4.dp))
+                    CheckUpdatesRow(m)
                 }
             }
             msg?.let { (tone, text) -> Msg(text, tone) }

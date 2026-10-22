@@ -139,7 +139,10 @@ class DonorsTest {
         // the e-mail digest is folded into a settings row
         rule.onAllNodesWithTag("dn_mail").assertCountEquals(0)
         rule.onNodeWithTag("dn_mail_fold_toggle").performScrollTo().performClick(); rule.mainClock.advanceTimeBy(500); rule.waitForIdle()
-        rule.onNodeWithText("Off. Add RESEND_API_KEY and ALERT_FROM in Cloudflare to switch it on.").assertExists()
+        rule.onNodeWithText("Off. Sending e-mail isn’t set up yet; whoever looks after the website can switch it on.").assertExists()
+        rule.onAllNodesWithText("RESEND_API_KEY", substring = true).assertCountEquals(0)
+        rule.onNodeWithTag("dn_mail_tech_toggle").performScrollTo().performClick(); rule.waitForIdle()
+        rule.onNodeWithText("RESEND_API_KEY", substring = true).assertExists()
         rule.onNodeWithTag("dn_mail").performScrollTo(); shot("40b-office-donors-digest")
         // filters: nobody left unopened; the Donors number brings everyone back
         rule.onNodeWithTag("dn_filter_not").performScrollTo().performClick(); waitFor("Everyone has opened their page.")
@@ -184,6 +187,9 @@ class DonorsTest {
         rule.waitUntil(8000) { rule.onAllNodesWithTag("dn_link").fetchSemanticsNodes().isNotEmpty() }
         rule.onNodeWithText("Q7mF2kLx9PzR4tYc8VbN1sWq6HjD3gUe5AoKi0ZlM_x", substring = true).assertExists()
         sheetShot("42-office-donor-link")
+        // the link card has its own Copy and Share: no second pair under it
+        rule.onAllNodesWithTag("dn_copy").assertCountEquals(0); rule.onAllNodesWithTag("dn_share").assertCountEquals(0)
+        rule.onNodeWithTag("dn_link_share").assertExists()
         rule.onNodeWithTag("dn_link_copy").performScrollTo().performClick()
         rule.waitUntil(5000) { clip() == link }
     }

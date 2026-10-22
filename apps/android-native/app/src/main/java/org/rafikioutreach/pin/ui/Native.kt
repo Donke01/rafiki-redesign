@@ -99,10 +99,10 @@ fun Chip(label: String, icon: String?, on: Boolean, onClick: () -> Unit, badge: 
             .clickable(role = Role.Tab) { h.tap(); onClick() }.heightIn(min = 40.dp).padding(horizontal = 14.dp).then(if (tag.isNotEmpty()) Modifier.testTag(tag) else Modifier),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        if (icon != null) { Icon(Ic.get(icon), null, tint = if (on) Color.White else col.fg, modifier = Modifier.size(17.dp)); Spacer(Modifier.width(6.dp)) }
-        Text(label, style = MaterialTheme.typography.labelLarge.copy(fontSize = 14.sp), color = if (on) Color.White else C.ink, maxLines = 1)
+        if (icon != null) { Icon(Ic.get(icon), null, tint = if (on) C.onFill else col.fg, modifier = Modifier.size(17.dp)); Spacer(Modifier.width(6.dp)) }
+        Text(label, style = MaterialTheme.typography.labelLarge.copy(fontSize = 14.sp), color = if (on) C.onFill else C.ink, maxLines = 1)
         if (badge > 0) { Spacer(Modifier.width(6.dp)); Text("$badge", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold, modifier = Modifier.clip(CircleShape).background(Red).padding(horizontal = 6.dp, vertical = 1.dp)) }
-        if (trailing != null) { Spacer(Modifier.width(4.dp)); Icon(Ic.get(trailing), null, tint = if (on) Color.White else C.muted, modifier = Modifier.size(16.dp)) }
+        if (trailing != null) { Spacer(Modifier.width(4.dp)); Icon(Ic.get(trailing), null, tint = if (on) C.onFill else C.muted, modifier = Modifier.size(16.dp)) }
     }
 }
 
@@ -120,8 +120,8 @@ fun FilterTile(label: String, icon: String, on: Boolean, onClick: () -> Unit, mo
                 .padding(horizontal = 2.dp, vertical = 7.dp).then(if (tag.isNotEmpty()) Modifier.testTag(tag) else Modifier),
             horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center,
         ) {
-            Icon(Ic.get(icon), null, tint = if (on) Color.White else col.fg, modifier = Modifier.size(19.dp))
-            Text(label, style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp, lineHeight = 12.sp, fontWeight = FontWeight.Bold), color = if (on) Color.White else C.ink,
+            Icon(Ic.get(icon), null, tint = if (on) C.onFill else col.fg, modifier = Modifier.size(19.dp))
+            Text(label, style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp, lineHeight = 12.sp, fontWeight = FontWeight.Bold), color = if (on) C.onFill else C.ink,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center, maxLines = 2, modifier = Modifier.padding(top = 3.dp))
         }
         if (badge > 0) Text("$badge", color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold, modifier = Modifier.align(Alignment.TopEnd).padding(top = 3.dp, end = 4.dp).clip(CircleShape).background(Red).padding(horizontal = 5.dp, vertical = 1.dp))
@@ -140,7 +140,8 @@ fun DragSheet(title: String, modifier: Modifier, peek: @Composable ColumnScope.(
     var drag by remember { mutableFloatStateOf(0f) }
     val h = rememberHaptics()
     val shape = RoundedCornerShape(if (slim != null && !isOpen) 20.dp else 26.dp)
-    val look = Modifier.clip(shape).background(if (C.glassy) C.glass2 else C.card).border(1.dp, if (C.glassy) C.glassEdge else C.line, shape)
+    // Dark: nearly solid, so grey words stay readable over a bright map
+    val look = Modifier.clip(shape).background(if (C.glassy) (if (C.dark) Color(0xF51E2A36) else C.glass2) else C.card).border(1.dp, if (C.glassy) C.glassEdge else C.line, shape)
     val grab = Modifier.pointerInput(isOpen) {
         detectVerticalDragGestures(onDragStart = { drag = 0f }, onDragEnd = { if (drag < -24 && !isOpen) { set(true); h.tap() } else if (drag > 24 && isOpen) { set(false); h.tap() } }) { _, d -> drag += d }
     }

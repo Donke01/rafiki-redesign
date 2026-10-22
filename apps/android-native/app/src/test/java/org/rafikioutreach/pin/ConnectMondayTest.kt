@@ -56,6 +56,10 @@ class ConnectMondayTest {
         rule.waitUntil(8000) { rule.onAllNodesWithTag("hav").fetchSemanticsNodes().isNotEmpty() }
         rule.mainClock.advanceTimeBy(2000)
         rule.onNodeWithTag("hav").performClick()
+        // Settings shows one row; the steps are on its own page
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("monday_row").fetchSemanticsNodes().isNotEmpty() }
+        rule.onAllNodesWithTag("monday_paste").assertCountEquals(0)
+        rule.onNodeWithTag("monday_row").performScrollTo().performClick(); rule.mainClock.advanceTimeBy(800)
         rule.waitUntil(5000) { rule.onAllNodesWithTag("monday_paste").fetchSemanticsNodes().isNotEmpty() }
         val clip = app.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         clip.setPrimaryClip(ClipData.newPlainText("t", "hello"))
@@ -65,7 +69,7 @@ class ConnectMondayTest {
         clip.setPrimaryClip(ClipData.newPlainText("t", tok))
         rule.onNodeWithTag("monday_paste").performClick()
         rule.waitUntil(5000) { rule.onAllNodesWithTag("monday_connected", useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
-        rule.onNodeWithTag("monday_connected", useUnmergedTree = true).assertTextEquals("Connected as Meril Adoyo ✓")
+        rule.onNodeWithTag("monday_connected", useUnmergedTree = true).assertTextContains("Connected as Meril Adoyo", substring = true)
         assertTrue(sent.contains("monday-link:eyJhbG"))
         assertEquals("", clip.primaryClip?.getItemAt(0)?.text?.toString().orEmpty())
         rule.onNodeWithTag("monday_off").performScrollTo().performClick()

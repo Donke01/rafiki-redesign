@@ -87,7 +87,9 @@ class MeTeamTest {
         shot("60-me-top")
         rule.onNodeWithTag("my_work").performScrollTo(); rule.onNodeWithText("Overdue").assertExists(); rule.onNodeWithText("Today").assertExists()
         rule.onNodeWithTag("my_month").performScrollTo(); shot("61-me-month")
-        if (LocalDate.now().dayOfMonth > 2) { rule.onNodeWithTag("my_visit").assertTextEquals("2"); rule.onNodeWithTag("hero_visit").assertTextEquals("2") }
+        if (LocalDate.now().dayOfMonth > 2) rule.onNodeWithTag("hero_visit").assertTextEquals("2")
+        // the month's numbers show once (on the card at the top); My month is just the six-week chart
+        rule.onAllNodesWithTag("my_visit").assertCountEquals(0); rule.onAllNodesWithTag("my_week").assertCountEquals(6)
         rule.onNodeWithTag("my_streak").assertTextContains("in a row", substring = true)
         // the phone's own settings live in Settings › This phone, after the report and the stamps
         rule.onAllNodesWithText("Colours").assertCountEquals(0)
@@ -96,7 +98,9 @@ class MeTeamTest {
         rule.onNodeWithTag("set_look", useUnmergedTree = true).assertExists()
         rule.onNode(hasTestTag("set_lang") and hasText("English", substring = true)).assertExists()
         rule.onNode(hasTestTag("set_units") and hasText("Kilometres (km)", substring = true)).assertExists()
+        rule.onNodeWithTag("monday_row").performScrollTo().performClick(); rule.mainClock.advanceTimeBy(800); rule.waitForIdle()
         rule.onNodeWithTag("monday_open").performScrollTo(); shot("61c-monday")
+        rule.onNodeWithTag("hback").performClick(); rule.mainClock.advanceTimeBy(800); rule.waitForIdle()
         // Appearance: colours and text size, with a live preview
         rule.onNodeWithTag("set_look").performScrollTo().performClick(); rule.waitForIdle()
         rule.waitUntil(5000) { rule.onAllNodesWithTag("look_preview").fetchSemanticsNodes().isNotEmpty() }
@@ -340,6 +344,8 @@ class MeTeamTest {
         rule.onNodeWithTag("cp_save").performScrollTo().performClick()
         rule.waitUntil(5000) { m.prefs.pin == "4826" }
         rule.waitUntil(5000) { rule.onAllNodesWithTag("set_notify").fetchSemanticsNodes().isNotEmpty() }
+        // the kinds can only be changed with alerts on this phone switched on
+        org.robolectric.Shadows.shadowOf(ApplicationProvider.getApplicationContext<android.app.Application>()).grantPermissions(android.Manifest.permission.POST_NOTIFICATIONS); m.prefs.phoneAlerts = true
         rule.onNodeWithTag("set_notify").performScrollTo().performClick(); rule.waitForIdle(); shot("85-notify")
         rule.onNodeWithTag("nk_fixed").performScrollTo().performClick()
         org.junit.Assert.assertTrue("fixed" in m.prefs.noteOff)

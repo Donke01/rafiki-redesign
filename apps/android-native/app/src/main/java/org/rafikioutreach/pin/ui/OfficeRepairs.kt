@@ -83,14 +83,14 @@ internal fun rrMatches(f: String, r: Repair, limit: Long) = when (f) {
     "approval" -> rrNeedsApproval(r, limit); "parts" -> r.step == "parts"; else -> true
 }
 internal fun rrCondition(r: Repair) = (when (r.urgency) { "urgent" -> t("Urgent", "Haraka") + " · "; "month" -> t("This month", "Mwezi huu") + " · "; else -> "" }) +
-    (if (r.state == "notworking") t("Not working", "Haifanyi kazi") else t("Needs repair", "Inahitaji ukarabati"))
+    (if (r.state == "notworking") t("Not working", "Haifanyi kazi") else t("Needs repair", "Inahitaji matengenezo"))
 private fun approvalWord(r: Repair, limit: Long) = when (Money.state(r, limit)) {
     "pending" -> t("waiting for approval", "inasubiri idhini"); "needed" -> t("needs approval", "inahitaji idhini")
     "declined" -> t("cost declined", "gharama imekataliwa"); "approved" -> t("cost approved", "gharama imeidhinishwa"); else -> ""
 }
 /** A review item's kind: filter key, sheet title, card label, icon, hue. */
 internal fun rrKind(k: String): List<String> = when (k) {
-    "cost" -> listOf("cost", t("Second approval: repair cost", "Idhini ya pili: gharama ya ukarabati"), t("Repair cost", "Gharama ya ukarabati"), "shield", "purple")
+    "cost" -> listOf("cost", t("Second approval: repair cost", "Idhini ya pili: gharama ya matengenezo"), t("Repair cost", "Gharama ya matengenezo"), "shield", "purple")
     "new" -> listOf("new", t("New site", "Eneo jipya"), t("New site", "Eneo jipya"), "plus", "green")
     "move" -> listOf("loc", t("Location moved over 500 m", "Mahali pamehamishwa zaidi ya m 500"), t("Location moved", "Mahali pamehamishwa"), "pin", "blue")
     "request" -> listOf("loc", t("Change to a confirmed location", "Badiliko la mahali palipothibitishwa"), t("Confirmed location", "Mahali palipothibitishwa"), "lock", "amber")
@@ -141,7 +141,7 @@ fun RepairsSection(m: AppModel, s: Snapshot, open: (String) -> Unit) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             val am = C.hue("amber"); IconTile("wrench", am.fg, am.bg, 44.dp); Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
-                Text(t("Repair jobs", "Kazi za ukarabati"), style = MaterialTheme.typography.titleMedium, color = C.ink)
+                Text(t("Repair jobs", "Kazi za matengenezo"), style = MaterialTheme.typography.titleMedium, color = C.ink)
                 Text(t("Most urgent first. Tap a job to move it on, assign it or mark it fixed.", "Za haraka kwanza. Gusa kazi kuisogeza, kuigawa au kuiweka imerekebishwa."), style = MaterialTheme.typography.bodySmall, color = C.muted)
             }
         }
@@ -151,10 +151,11 @@ fun RepairsSection(m: AppModel, s: Snapshot, open: (String) -> Unit) {
             RrStat(Modifier.weight(1f).testTag("rr_n_approval"), "${n("approval")}", t("need approval", "zinahitaji idhini"), if (n("approval") > 0) C.hue("purple").fg else C.muted, filter == "approval") { filter = "approval"; shown = 30 }
         }
     }
-    if (ids.isNotEmpty()) Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(top = 16.dp, bottom = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    val (rrScroll, rrSpot) = rememberKeepInView(filter)
+    if (ids.isNotEmpty()) Row(Modifier.fillMaxWidth().horizontalScroll(rrScroll).padding(top = 16.dp, bottom = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         listOf("all" to t("All", "Zote"), "urgent" to t("Urgent", "Za haraka"), "notworking" to t("Not working", "Hazifanyi kazi"), "unassigned" to t("Not assigned", "Hazijagawiwa"),
             "approval" to t("Needs approval", "Zinahitaji idhini"), "parts" to t("Parts ordered", "Vipuri vimeagizwa"))
-            .forEach { (k, l) -> Chip("$l · ${n(k)}", null, filter == k, { filter = k; shown = 30 }, tag = "rr_filter_$k", hue = "blue") }
+            .forEach { (k, l) -> Box(rrSpot(k)) { Chip("$l · ${n(k)}", null, filter == k, { filter = k; shown = 30 }, tag = "rr_filter_$k", hue = "blue") } }
     }
     val list = ids.filter { rrMatches(filter, s.repairs.getValue(it), lim) }
     if (ids.isEmpty()) EmptyDrop(t("No open repairs.", "Hakuna matengenezo yaliyo wazi."))
@@ -163,11 +164,11 @@ fun RepairsSection(m: AppModel, s: Snapshot, open: (String) -> Unit) {
     if (list.size > shown) Btn(t("Show more", "Onyesha zaidi") + " (" + (list.size - shown) + ")", { shown += 30 }, Modifier.padding(top = 12.dp).fillMaxWidth().testTag("rr_more"), light = true, small = true)
 
     Card(Modifier.padding(top = 18.dp), pad = 4.dp) {
-        RrFold("rr_how", "info", "blue", t("How repair jobs work", "Jinsi kazi za ukarabati zinavyoenda"), t("Second approval above ", "Idhini ya pili zaidi ya ") + Money.kes(lim)) {
+        RrFold("rr_how", "info", "blue", t("How repair jobs work", "Jinsi kazi za matengenezo zinavyoenda"), t("Second approval above ", "Idhini ya pili zaidi ya ") + Money.kes(lim)) {
             listOf(
                 t("Changes leave a note on the project in monday.com, and the person assigned sees the job in their app.", "Mabadiliko yanaacha maelezo kwenye mradi katika monday.com, na aliyepewa anaona kazi kwenye programu yake."),
-                t("Repairs estimated above ${Money.kes(lim)} need a second admin to approve the cost before parts are ordered. The person who asks can’t approve their own. The amount is set in Costs.", "Ukarabati unaokadiriwa zaidi ya ${Money.kes(lim)} unahitaji msimamizi wa pili kuidhinisha gharama kabla ya kuagiza vipuri. Aliyeomba hawezi kuidhinisha mwenyewe. Kiasi kinawekwa kwenye Gharama."),
-                t("Add the actual cost and a receipt photo when parts are ordered or the repair is fixed: they add up in Costs.", "Ongeza gharama halisi na picha ya risiti vipuri vikiagizwa au ukarabati ukikamilika: zinajumlishwa kwenye Gharama."),
+                t("Repairs estimated above ${Money.kes(lim)} need a second admin to approve the cost before parts are ordered. The person who asks can’t approve their own. The amount is set in Costs.", "Matengenezo yanayokadiriwa zaidi ya ${Money.kes(lim)} yanahitaji msimamizi wa pili kuidhinisha gharama kabla ya kuagiza vipuri. Aliyeomba hawezi kuidhinisha mwenyewe. Kiasi kinawekwa kwenye Gharama."),
+                t("Add the actual cost and a receipt photo when parts are ordered or the repair is fixed: they add up in Costs.", "Ongeza gharama halisi na picha ya risiti vipuri vikiagizwa au matengenezo yakikamilika: zinajumlishwa kwenye Gharama."),
                 t("“Mark fixed” closes the job and takes it off this list.", "“Weka imerekebishwa” inafunga kazi na kuiondoa kwenye orodha hii."),
             ).forEachIndexed { i, line -> Row(Modifier.padding(top = 6.dp)) { Text("${i + 1}.", style = MaterialTheme.typography.bodyMedium, color = C.muted, modifier = Modifier.width(22.dp)); Text(line, style = MaterialTheme.typography.bodyMedium, color = C.text, modifier = Modifier.weight(1f)) } }
         }
@@ -448,18 +449,19 @@ fun ReviewSection(m: AppModel, open: (String) -> Unit) {
             IconTile("inbox", C.blue, C.tint, 44.dp); Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
                 Text(t("Waiting for review", "Zinasubiri kuidhinishwa"), style = MaterialTheme.typography.titleMedium, color = C.ink)
-                Text(t("New sites, moved locations, stories and big repair costs wait here for an admin.", "Maeneo mapya, mahali palipohamishwa, hadithi na gharama kubwa za ukarabati zinasubiri msimamizi hapa."), style = MaterialTheme.typography.bodySmall, color = C.muted)
+                Text(t("New sites, moved locations, stories and big repair costs wait here for an admin.", "Maeneo mapya, mahali palipohamishwa, hadithi na gharama kubwa za matengenezo zinasubiri msimamizi hapa."), style = MaterialTheme.typography.bodySmall, color = C.muted)
             }
         }
         Row(Modifier.padding(top = 14.dp).height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             RrStat(Modifier.weight(1f).testTag("rr_n_all"), "${openItems.size}", t("waiting", "zinasubiri"), C.ink, filter == "all") { filter = "all"; shown = 30 }
-            RrStat(Modifier.weight(1f).testTag("rr_n_cost"), "${n("cost")}", t("repair costs", "gharama za ukarabati"), if (n("cost") > 0) C.hue("purple").fg else C.muted, filter == "cost") { filter = "cost"; shown = 30 }
+            RrStat(Modifier.weight(1f).testTag("rr_n_cost"), "${n("cost")}", t("repair costs", "gharama za matengenezo"), if (n("cost") > 0) C.hue("purple").fg else C.muted, filter == "cost") { filter = "cost"; shown = 30 }
             RrStat(Modifier.weight(1f).testTag("rr_n_age"), oldest?.let { rrAge(it) } ?: "—", t("oldest waiting", "iliyosubiri zaidi"), C.muted, false, null)
         }
     }
-    if (openItems.isNotEmpty()) Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(top = 16.dp, bottom = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    val (rvScroll, rvSpot) = rememberKeepInView(filter)
+    if (openItems.isNotEmpty()) Row(Modifier.fillMaxWidth().horizontalScroll(rvScroll).padding(top = 16.dp, bottom = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         listOf("all" to t("All", "Zote"), "cost" to t("Costs", "Gharama"), "new" to t("New sites", "Maeneo mapya"), "loc" to t("Locations", "Mahali"), "story" to t("Stories", "Hadithi"))
-            .forEach { (k, l) -> Chip("$l · ${n(k)}", null, filter == k, { filter = k; shown = 30 }, tag = "rr_kind_$k", hue = "blue") }
+            .forEach { (k, l) -> Box(rvSpot(k)) { Chip("$l · ${n(k)}", null, filter == k, { filter = k; shown = 30 }, tag = "rr_kind_$k", hue = "blue") } }
     }
     val list = openItems.filter { filter == "all" || rrKind(it.optString("kind"))[0] == filter }
     if (openItems.isEmpty()) EmptyDrop(t("Nothing waiting for review.", "Hakuna kinachosubiri kuidhinishwa."))

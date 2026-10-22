@@ -33,7 +33,7 @@ data class BadgeState(val def: BadgeDef, val n: Int) {
 object Badges {
     val ALL = listOf(
         BadgeDef("pin1", "b", "First drop", "Tone la kwanza", "Pin a location", "Weka mahali", "pins", "pini", 1),
-        BadgeDef("visit1", "g", "First visit", "Ziara ya kwanza", "Report a site visit", "Ripoti ziara", "visits", "ziara", 1),
+        BadgeDef("visit1", "g", "First visit", "Ziara ya kwanza", "Report a visit", "Ripoti ziara", "visits", "ziara", 1),
         BadgeDef("fixed1", "c", "Fixer", "Mrekebishaji", "Mark a repair fixed", "Weka matengenezo kuwa yamekamilika", "repairs", "matengenezo", 1),
         BadgeDef("new1", "y", "Explorer", "Mvumbuzi", "Add a new site", "Ongeza eneo jipya", "sites", "maeneo", 1),
         BadgeDef("pin10", "p", "Mapper", "Mchora ramani", "Pin 10 locations", "Weka mahali 10", "pins", "pini", 10),

@@ -220,7 +220,7 @@ class ProjectExtrasTest {
         rule.onNodeWithTag("projects").performScrollToNode(hasText("Kapsaret Borehole")); assertTrue(has("Kapsaret Borehole"))
         shot("96-due-a-visit-water-test")
         rule.onNodeWithTag("nav_office").performClick(); rule.waitForIdle()
-        rule.onNodeWithTag("o_tests").performScrollTo(); assertTrue(has("water tests due")); shot("97-office-water-tests")
+        rule.onNodeWithTag("o_tests").performScrollTo(); assertTrue(has("water test due")); shot("97-office-water-tests")
         rule.onNodeWithTag("o_tests").performClick(); rule.waitForIdle()
         assertEquals("due", m.prefs.filter)
     }

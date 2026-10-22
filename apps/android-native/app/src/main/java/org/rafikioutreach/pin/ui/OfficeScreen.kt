@@ -10,6 +10,7 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.foundation.layout.*
 import androidx.compose.ui.text.withStyle
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -84,12 +85,13 @@ import java.time.ZoneOffset
 @Composable
 fun OfficeScreen(m: AppModel, open: (String) -> Unit) {
     var sec by rememberSaveable { mutableStateOf("overview") }
+    var strip by rememberSaveable { mutableStateOf(false) }
     val s by m.snap.collectAsState()
     val snap = s ?: return
     val secs = listOf(
-        Triple("overview", t("Overview", "Muhtasari"), "drop"), Triple("repairs", t("Repairs", "Ukarabati"), "wrench"), Triple("costs", t("Costs", "Gharama"), "coins"), Triple("visits", t("Visits", "Ziara"), "cal"),
+        Triple("overview", t("Overview", "Muhtasari"), "drop"), Triple("repairs", t("Repairs", "Matengenezo"), "wrench"), Triple("costs", t("Costs", "Gharama"), "coins"), Triple("visits", t("Visits", "Ziara"), "cal"),
         Triple("teammap", t("Team map", "Ramani ya timu"), "pin"), Triple("plan", t("Plan a week", "Panga wiki"), "compass"),
-        Triple("review", t("Review", "Idhinisha"), "inbox"), Triple("team", t("Team", "Timu"), "people"), Triple("cleanup", t("Clean-up", "Usafi"), "spark"), Triple("export", t("Export", "Pakua"), "upload"),
+        Triple("review", t("Review", "Kagua"), "inbox"), Triple("team", t("Team", "Timu"), "people"), Triple("cleanup", t("Clean-up", "Safisha data"), "spark"), Triple("export", t("Export", "Hamisha"), "upload"),
         Triple("sms", t("Community", "Jamii"), "chat"),
         Triple("donors", t("Donors", "Wafadhili"), "link"),
         Triple("qr", t("QR codes", "Misimbo ya QR"), "qr"), // QR check-in stickers (QrCheckin.kt)
@@ -97,15 +99,23 @@ fun OfficeScreen(m: AppModel, open: (String) -> Unit) {
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
         Text(t("Office", "Ofisi"), style = MaterialTheme.typography.headlineLarge, color = C.ink, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.fillMaxWidth())
         val per = if (secs.size % 3 == 0 && secs.size % 4 != 0) 3 else 4
-        secs.chunked(per).forEachIndexed { ri, row ->
+        val badgeOf = { k: String -> when (k) { "review" -> snap.reviewOpen; "repairs" -> snap.repairs.size; else -> 0 } }
+        // all the sections as tiles until one is picked; then a strip of chips, so the tab's content starts near the top
+        if (!strip) secs.chunked(per).forEachIndexed { ri, row ->
             Row(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                row.forEachIndexed { ci, (k, l, ic) -> Tile(l, ic, sec == k, { sec = k }, Modifier.weight(1f).rise(ri * per + ci, step = 35).testTag("o_$k"), badge = when (k) { "review" -> snap.reviewOpen; "repairs" -> snap.repairs.size; else -> 0 }) }
+                row.forEachIndexed { ci, (k, l, ic) -> Tile(l, ic, sec == k, { sec = k; strip = true }, Modifier.weight(1f).rise(ri * per + ci, step = 35).testTag("o_$k"), badge = badgeOf(k)) }
                 repeat(per - row.size) { Spacer(Modifier.weight(1f)) }
+            }
+        } else {
+            val (scroll, spot) = rememberKeepInView(sec)
+            Row(Modifier.padding(top = 10.dp).fillMaxWidth().horizontalScroll(scroll).testTag("office_strip"), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                Chip(t("All", "Zote"), "grid", false, { strip = false }, tag = "o_all", hue = "blue")
+                secs.forEach { (k, l, ic) -> Box(spot(k)) { Chip(l, ic, sec == k, { sec = k }, badge = badgeOf(k), tag = "o_$k", hue = "blue") } }
             }
         }
         Spacer(Modifier.height(14.dp))
         when (sec) {
-            "overview" -> OcvOverview(m, snap, open) { sec = it } // OfficeOverview.kt
+            "overview" -> OcvOverview(m, snap, open) { sec = it; strip = true } // OfficeOverview.kt
             "repairs" -> RepairsSection(m, snap, open)   // OfficeRepairs.kt
             "costs" -> CostsSection(m, snap, open)
             "visits" -> OcvVisits(m, snap, open) // OfficeOverview.kt
@@ -207,7 +217,7 @@ private fun RepairJob(m: AppModel, s: Snapshot, id: String, names: List<String>,
         Text((p?.country ?: "") + " · " + t("reported by ", "imeripotiwa na ") + r.by + ", " + whenText(r.at) + (if (r.urgency.isNotBlank()) " · " + urgencyName(r.urgency) else ""), style = MaterialTheme.typography.bodySmall, color = C.muted)
         if (r.note.isNotBlank()) Text("“${r.note}”", style = MaterialTheme.typography.bodyMedium, color = C.text, modifier = Modifier.padding(top = 4.dp))
         if (r.problems.isNotEmpty()) Text(t("Problems: ", "Matatizo: ") + r.problems.joinToString(", "), style = MaterialTheme.typography.bodySmall, color = C.muted)
-        if (r.parts.isNotBlank() || r.cost != null) Text(listOfNotNull(r.parts.takeIf { it.isNotBlank() }?.let { t("Parts: ", "Vipuri: ") + it }, r.cost?.let { t("About KES ", "Takriban KES ") + "%,d".format(it) }).joinToString(" · "), style = MaterialTheme.typography.bodySmall, color = C.muted)
+        if (r.parts.isNotBlank() || r.cost != null) Text(listOfNotNull(r.parts.takeIf { it.isNotBlank() }?.let { t("Parts: ", "Vipuri: ") + it }, r.cost?.let { t("About ", "Takriban ") + Money.kes(it) }).joinToString(" · "), style = MaterialTheme.typography.bodySmall, color = C.muted)
         listOf("reported" to t("Reported", "Imeripotiwa"), "assigned" to t("Assigned", "Imegawiwa"), "parts" to t("Parts ordered", "Vipuri vimeagizwa"), "fixed" to t("Fixed", "Imerekebishwa")).chunked(2).forEachIndexed { i, pair ->
             Row(Modifier.padding(top = if (i == 0) 10.dp else 6.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 pair.forEach { (k, l) -> Pill(l, step == k, Modifier.weight(1f), color = if (k == "fixed") C.ok else null) { step = k } }
@@ -252,7 +262,7 @@ private fun ReviewQueue(m: AppModel, open: (String) -> Unit) {
         Card(Modifier.padding(top = 10.dp)) {
             val (icon, kind) = when (it2.optString("kind")) {
                 "new" -> "plus" to t("New site", "Eneo jipya"); "move" -> "pin" to t("Big location change", "Mabadiliko makubwa ya mahali")
-                "request" -> "lock" to t("Change to a confirmed location", "Badiliko la mahali palipothibitishwa"); "cost" -> "shield" to t("Second approval: repair cost", "Idhini ya pili: gharama ya ukarabati"); else -> "spark" to t("Story moment", "Hadithi")
+                "request" -> "lock" to t("Change to a confirmed location", "Badiliko la mahali palipothibitishwa"); "cost" -> "shield" to t("Second approval: repair cost", "Idhini ya pili: gharama ya matengenezo"); else -> "spark" to t("Story moment", "Hadithi")
             }
             Row(verticalAlignment = Alignment.CenterVertically) { IconTile(icon, C.blue, C.tint, 36.dp); Spacer(Modifier.width(10.dp)); Text(kind, style = MaterialTheme.typography.titleSmall, color = C.ink, modifier = Modifier.weight(1f)); Text(whenText(it2.optString("at")), style = MaterialTheme.typography.bodySmall, color = C.muted) }
             Text(it2.optString("t") + " · " + t("by ", "na ") + it2.optString("by"), style = MaterialTheme.typography.titleSmall, color = C.blue2, modifier = Modifier.padding(top = 8.dp).clickable { open(it2.optString("id")) })
@@ -286,7 +296,7 @@ private fun TeamSection(m: AppModel) {
     var open by remember { mutableStateOf<JSONObject?>(null) }
     var adding by remember { mutableStateOf<JSONObject?>(null) }
     var q by remember { mutableStateOf("") }
-    Btn(t("Add a person", "Ongeza mtu"), { adding = JSONObject() }, Modifier.testTag("team_add"), icon = "plus")
+    Btn(t("Add a person", "Ongeza mtu"), { adding = JSONObject() }, Modifier.fillMaxWidth().testTag("team_add"), icon = "plus")
     if (people.size > 8) Field(q, { q = it }, t("Find a person", "Tafuta mtu"), placeholder = t("Name", "Jina"))
     val list = people.filter { q.isBlank() || it.optString("name").contains(q.trim(), ignoreCase = true) }.sortedBy { it.optString("name").lowercase() }
     val admins = list.filter { it.optBoolean("admin") }
@@ -363,7 +373,7 @@ private fun Chips(p: JSONObject, long: Boolean = false, center: Boolean = false)
     FlowRow(Modifier.padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy(4.dp, if (center) Alignment.CenterHorizontally else Alignment.Start), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         if (p.optBoolean("admin")) Chip(t("Admin", "Msimamizi"), C.hue("amber"), crown = true)
         when (p.optString("source")) {
-            "cloudflare" -> Chip(t("PIN in Cloudflare", "PIN iko Cloudflare"), C.hue("purple"), "cloud")
+            "cloudflare" -> Chip(t("PIN set by the office", "PIN ya ofisi"), C.hue("purple"), "key")
             "monday" -> Chip("monday.com", C.hue("blue"), "people")
             else -> Chip(t("PIN from app", "PIN ya programu"), C.hue("green"), "key")
         }
@@ -407,16 +417,44 @@ private fun AdminSwitch(on: Boolean, flip: () -> Unit) {
             Text(t("Sees the Office and can manage the team", "Anaona Ofisi na anaweza kusimamia timu"), style = MaterialTheme.typography.bodySmall, color = C.muted)
         }
         Spacer(Modifier.width(8.dp))
-        Toggle(on, t("Admin", "Msimamizi"), Modifier.testTag("tm_admin").minimumInteractiveComponentSize(), flip)
+        Toggle(on, t("Admin", "Msimamizi"), Modifier.testTag("tm_admin").minimumInteractiveComponentSize(), onClick = flip)
     }
 }
 
+/** How long a new PIN stays on screen before it is hidden. */
+internal const val PIN_SHOWN_SECONDS = 60
+
+/** The message that carries a new PIN to the person (sent by the admin, from their own phone). */
+internal fun pinMessage(who: String, pin: String) = t("Hi ${who.substringBefore(' ')}, your RAFIKI Pin PIN is $pin. Open the app (or pin.rafikioutreach.org) and sign in with it. Please keep it to yourself.",
+    "Habari ${who.substringBefore(' ')}, PIN yako ya RAFIKI Pin ni $pin. Fungua programu (au pin.rafikioutreach.org) uingie nayo. Tafadhali usimpe mtu mwingine.")
+
+/** A new PIN: shown for a minute with Copy, WhatsApp and SMS, then hidden for good. */
 @Composable
-private fun PinShown(who: String, pin: String) {
-    Card(Modifier.padding(top = 12.dp), brush = SolidColor(C.okBg)) {
-        Text(t("PIN for ", "PIN ya ") + who, style = MaterialTheme.typography.titleSmall, color = C.ok)
-        Text(pin, style = MaterialTheme.typography.headlineLarge.copy(letterSpacing = 8.sp), color = C.ink, modifier = Modifier.padding(vertical = 6.dp).testTag("tm_pin_shown"))
-        Text(t("Shown once. Send it privately; they can’t see it again.", "Inaonyeshwa mara moja. Mtumie kwa siri; hawezi kuiona tena."), style = MaterialTheme.typography.bodySmall, color = C.text)
+private fun PinShown(who: String, pin: String, phone: String = "", home: String = "") {
+    val ctx = LocalContext.current
+    val clip = androidx.compose.ui.platform.LocalClipboardManager.current
+    var left by remember(pin) { mutableStateOf(PIN_SHOWN_SECONDS) }
+    var copied by remember(pin) { mutableStateOf(false) }
+    LaunchedEffect(pin) { while (left > 0) { kotlinx.coroutines.delay(1000); left-- } }
+    val ph = phone.trim().takeIf { it.isNotBlank() && it != "null" }
+    Card(Modifier.padding(top = 12.dp).testTag("tm_pin_card"), brush = SolidColor(if (left > 0) C.okBg else C.hue("slate").bg)) {
+        Text(t("PIN for ", "PIN ya ") + who, style = MaterialTheme.typography.titleSmall, color = if (left > 0) C.ok else C.muted)
+        if (left <= 0) {
+            Text(t("Hidden now, to keep it safe. If they didn’t get it, make a new PIN.", "Imefichwa sasa, kwa usalama. Kama hawakuipata, tengeneza PIN mpya."), style = MaterialTheme.typography.bodyMedium, color = C.text, modifier = Modifier.padding(top = 6.dp).testTag("tm_pin_hidden"))
+            return@Card
+        }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(pin, style = MaterialTheme.typography.headlineLarge.copy(letterSpacing = 8.sp), color = C.ink, modifier = Modifier.weight(1f).padding(vertical = 6.dp).testTag("tm_pin_shown"))
+            Text(t("hides in ${left} s", "inajificha baada ya sekunde $left"), style = MaterialTheme.typography.labelMedium, color = C.muted, modifier = Modifier.testTag("tm_pin_left"))
+        }
+        Text(t("Send it privately; it can’t be shown again.", "Mtumie kwa siri; haiwezi kuonyeshwa tena."), style = MaterialTheme.typography.bodySmall, color = C.text)
+        Btn(if (copied) t("Copied ✓", "Imenakiliwa ✓") else t("Copy", "Nakili"), { clip.setText(androidx.compose.ui.text.AnnotatedString(pin)); copied = true }, Modifier.padding(top = 10.dp).fillMaxWidth().testTag("tm_pin_copy"), icon = "copy", light = true, small = true)
+        Row(Modifier.padding(top = 8.dp).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Btn("WhatsApp", { runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, android.net.Uri.parse("https://wa.me/" + (ph?.let { waNumber(it, home) } ?: "") + "?text=" + android.net.Uri.encode(pinMessage(who, pin))))) } },
+                Modifier.weight(1f).testTag("tm_pin_wa"), icon = "chat", light = true, small = true)
+            Btn("SMS", { runCatching { ctx.startActivity(Intent(Intent.ACTION_SENDTO, android.net.Uri.parse("smsto:" + (ph?.replace(" ", "") ?: ""))).putExtra("sms_body", pinMessage(who, pin))) } },
+                Modifier.weight(1f).testTag("tm_pin_sms"), icon = "phone", light = true, small = true)
+        }
     }
 }
 
@@ -492,15 +530,15 @@ private fun PersonSheet(m: AppModel, p: JSONObject, close: () -> Unit, changed: 
                         Msg(askMsg, "bad")
                     }
                 }
-                pin?.let { PinShown(name, it) }
+                pin?.let { PinShown(name, it, phone, home) }
             } else {
                 val cf = source == "cloudflare"
                 val hu = C.hue(if (cf) "purple" else "blue")
                 Row(Modifier.padding(top = 14.dp).fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(hu.bg).padding(14.dp), verticalAlignment = Alignment.Top) {
                     Icon(Ic.get(if (cf) "cloud" else "people"), null, tint = hu.fg, modifier = Modifier.size(20.dp))
                     Spacer(Modifier.width(10.dp))
-                    Text(if (cf) t("Set in Cloudflare — change it there, or re-add here with an app PIN.", "Imewekwa Cloudflare — ibadilishe huko, au mwongeze hapa kwa PIN ya programu.")
-                         else t("Signs in with monday.com. The Admin role comes from PIN_ADMINS in Cloudflare.", "Anaingia kwa monday.com. Nafasi ya msimamizi inatoka PIN_ADMINS kwenye Cloudflare."), style = MaterialTheme.typography.bodyMedium, color = C.ink)
+                    Text(if (cf) t("This PIN was set up on the server, so it can’t be changed here. Re-add them with an app PIN to manage it here.", "PIN hii iliwekwa kwenye seva, kwa hiyo haiwezi kubadilishwa hapa. Mwongeze tena kwa PIN ya programu ili uisimamie hapa.")
+                         else t("Signs in with monday.com. Whether they’re an admin is set on the server.", "Anaingia kwa monday.com. Kama ni msimamizi kunawekwa kwenye seva."), style = MaterialTheme.typography.bodyMedium, color = C.ink)
                 }
                 Btn(if (cf) t("Re-add with an app PIN", "Mwongeze kwa PIN ya programu") else t("Give them an app PIN", "Mpe PIN ya programu"), { hide { readd(p) } }, Modifier.padding(top = 14.dp).fillMaxWidth().testTag("tm_readd"), icon = "key", light = true)
             }
@@ -526,7 +564,7 @@ private fun AddSheet(m: AppModel, pre: JSONObject, close: () -> Unit, added: () 
             val d = done
             if (d != null) {
                 SheetHead(d.first, admin, d.first, t("Added to the team ✓", "Ameongezwa kwenye timu ✓"))
-                PinShown(d.first, d.second)
+                PinShown(d.first, d.second, phone, home)
                 Btn(t("Done", "Imekamilika"), { scope.launch { state.hide() }.invokeOnCompletion { close() } }, Modifier.padding(top = 12.dp).fillMaxWidth().testTag("tm_done"), light = true)
             } else {
                 SheetHead(name, admin, t("Add a person", "Ongeza mtu"), t("They get their own 4-digit PIN, shown once. Send it to them privately.", "Wanapata PIN yao ya tarakimu 4, inaonyeshwa mara moja. Wapelekee kwa siri."))
@@ -565,6 +603,14 @@ private fun Cleanup(s: Snapshot, open: (String) -> Unit) {
         Triple(t("No photo", "Hakuna picha"), t("Add a photo to the “Photos of the project” column in monday.com.", "Ongeza picha kwenye safu ya “Photos of the project” katika monday.com."), s.projects.filter { it.photo == null }),
         Triple(t("No visit for over a year", "Hakuna ziara kwa zaidi ya mwaka"), t("Only visits made with the app are known.", "Ziara zilizofanywa kwa programu tu ndizo zinajulikana."), s.projects.filter { it.gps != null && ageDays(s, it) > 365 }),
     )
+    // a calm head with the numbers, like the other Office tabs
+    val wrongPlace = (outside + dup).map { it.id }.toSet().size
+    val todo = lists.flatMap { it.third }.map { it.id }.toSet().size
+    DqmHead("clean_head", "spark", "teal", t("Clean-up", "Safisha data"),
+        if (todo == 0) t("Every project looks tidy.", "Kila mradi uko sawa.") else t("Fix these to keep the map and monday.com tidy. Tap a project to open it.", "Rekebisha haya ili ramani na monday.com viwe safi. Gusa mradi kuufungua."),
+        listOf(DqmNum(lists[0].third.size, t("no location", "bila mahali"), if (lists[0].third.isEmpty()) "ok" else "has"),
+            DqmNum(wrongPlace, t("location to check", "mahali pa kukagua"), if (wrongPlace == 0) "ok" else "bad"),
+            DqmNum(lists[3].third.size, t("no photo", "bila picha"), if (lists[3].third.isEmpty()) "ok" else "")))
     val looks = listOf("pinq" to "blue", "globe" to "coral", "copy" to "amber", "camera" to "purple", "clock" to "teal")
     val tags: List<(Project) -> String?> = listOf(
         { null },
@@ -696,7 +742,7 @@ internal fun mailResult(x: org.rafikioutreach.pin.data.Reply): String {
     return when {
         x.ok -> t("Sent ✓ Check the inbox.", "Imetumwa ✓ Angalia barua pepe.")
         x.reason == "no-recipients" -> t("No e-mail addresses yet.", "Bado hakuna anwani za barua pepe.")
-        x.reason == "no-mail" -> t("E-mail is off: add RESEND_API_KEY and ALERT_FROM in Cloudflare, then redeploy.", "Barua pepe imezimwa: ongeza RESEND_API_KEY na ALERT_FROM kwenye Cloudflare.")
+        x.reason == "no-mail" -> t("Sending e-mail isn’t set up yet. Whoever looks after the website can switch it on.", "Kutuma barua pepe bado hakujawekwa. Anayesimamia tovuti anaweza kuiwasha.")
         detail.isNotBlank() -> t("Not sent. Resend said: ", "Haijatumwa. Resend imesema: ") + detail
         x.status == 0 -> t("Not sent: no connection. Try again with signal.", "Haijatumwa: hakuna mtandao. Jaribu tena ukiwa na mtandao.")
         else -> t("Not sent. Please try again in a moment.", "Haijatumwa. Tafadhali jaribu tena baadaye.")

@@ -53,6 +53,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
@@ -279,9 +280,10 @@ fun Shell(m: AppModel) {
             val review = m.snap.collectAsState().value?.reviewOpen ?: 0
             (listOf(Triple("map", t("Map", "Ramani"), "map"), Triple("list", t("Projects", "Miradi"), "list"), Triple("new", t("New site", "Eneo jipya"), "plus"), Triple("me", t("Me", "Mimi"), "person")) +
                 (if (admin) listOf(Triple("office", t("Office", "Ofisi"), "inbox")) else emptyList())).forEach { (k, label, icon) ->
-                val on = here.tab == k && here.project == null
-                val hu = org.rafikioutreach.pin.ui.C.hue(k)
-                Column(Modifier.weight(1f).clickable(role = Role.Tab) { hp.tap(); tab(k) }.padding(vertical = 6.dp).testTag("nav_$k"), horizontalAlignment = Alignment.CenterHorizontally) {
+                // the tab you are in stays lit, also with a project or page open on top of it; one colour for every tab
+                val on = here.tab == k
+                val hu = org.rafikioutreach.pin.ui.Hue(C.blue2, C.tint)
+                Column(Modifier.weight(1f).clickable(role = Role.Tab) { hp.tap(); tab(k) }.semantics { selected = on }.padding(vertical = 6.dp).testTag("nav_$k"), horizontalAlignment = Alignment.CenterHorizontally) {
                     Box {
                         if (k == "new") Box(Modifier.size(48.dp, 30.dp).clip(RoundedCornerShape(14.dp)).background(androidx.compose.ui.graphics.Brush.linearGradient(listOf(Color(0xFF9A78F0), Color(0xFF6E46C8)))), contentAlignment = Alignment.Center) { Icon(Ic.get(icon), null, tint = Color.White, modifier = Modifier.size(20.dp)) }
                         else Box(Modifier.size(52.dp, 30.dp).clip(RoundedCornerShape(99.dp)).background(if (on) hu.bg else Color.Transparent), contentAlignment = Alignment.Center) { Icon(Ic.get(icon), null, tint = if (on) hu.fg else C.muted, modifier = Modifier.size(24.dp)) }
@@ -289,7 +291,7 @@ fun Shell(m: AppModel) {
                         if (k == "me" && waiting == 0 && updReady) Box(Modifier.align(Alignment.TopEnd).padding(top = 2.dp, end = 10.dp).size(10.dp).clip(CircleShape).background(Color.White).padding(2.dp).clip(CircleShape).background(C.blue).testTag("update_dot"))
                         if (k == "me" && waiting > 0) Text("$waiting", color = Color.White, fontSize = 10.sp, modifier = Modifier.align(Alignment.TopEnd).clip(RoundedCornerShape(99.dp)).background(C.warn).padding(horizontal = 5.dp))
                     }
-                    Text(label, style = MaterialTheme.typography.labelSmall, color = if (on) hu.fg else C.muted, modifier = Modifier.padding(top = 3.dp))
+                    Text(label, style = MaterialTheme.typography.labelSmall, color = if (on) hu.fg else C.muted, maxLines = 1, softWrap = false, modifier = Modifier.padding(top = 3.dp))
                 }
             }
         }
