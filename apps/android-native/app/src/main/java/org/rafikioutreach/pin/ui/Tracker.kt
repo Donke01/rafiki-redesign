@@ -137,7 +137,7 @@ fun RepairTracker(m: AppModel, p: Project, r: Repair, here: LatLng?) {
             if (r.note.isNotBlank() || r.problems.isNotEmpty() || r.cost != null) Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(if (C.dark) Color(0x14FFFFFF) else Color(0xFFF2F6F9)).padding(horizontal = 14.dp, vertical = 12.dp).testTag("repair_note")) {
                 if (r.note.isNotBlank()) Text("“${r.note}”", style = MaterialTheme.typography.bodyMedium.copy(fontStyle = androidx.compose.ui.text.font.FontStyle.Italic), color = C.text)
                 if (r.problems.isNotEmpty()) Text(t("Problems: ", "Matatizo: ") + r.problems.joinToString(", ") { problemName(it) }, style = MaterialTheme.typography.bodySmall, color = C.muted)
-                r.cost?.let { Text(t("About KES ", "Takriban KES ") + "%,d".format(it), style = MaterialTheme.typography.bodySmall, color = C.muted) }
+                r.cost?.let { Text(t("About ", "Takriban ") + org.rafikioutreach.pin.data.Money.kes(it), style = MaterialTheme.typography.bodySmall, color = C.muted) }
             }
             m.snap.collectAsState().value?.let { sn -> TrackerMoneyBox(m, sn, p, r, money) }
             Btn(t("Mark fixed", "Weka imerekebishwa"), {

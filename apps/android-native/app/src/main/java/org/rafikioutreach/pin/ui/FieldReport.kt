@@ -158,7 +158,7 @@ internal class RTable(val cols: List<Float>, val head: List<RCell>, val rows: Li
 
 internal fun reportTitle(r: ReportData) = t("Field report · ", "Ripoti ya uwanjani · ") + r.label
 internal fun reportSub(r: ReportData) = r.country + " · RAFIKI Outreach · " + t("Prepared by ", "Imeandaliwa na ") + r.by + ", " + r.date
-internal fun repairsHeading(r: ReportData) = t("Open repairs", "Matengenezo yaliyo wazi") + (if (r.cost > 0) t(" · about KES ${num(r.cost)} estimated", " · takriban KES ${num(r.cost)} kwa makadirio") else "")
+internal fun repairsHeading(r: ReportData) = t("Open repairs", "Matengenezo yaliyo wazi") + (if (r.cost > 0) t(" · about KES\u00A0${num(r.cost)} estimated", " · takriban KES\u00A0${num(r.cost)} kwa makadirio") else "")
 internal fun reportNote() = t("Only visits, repairs and pins made with the RAFIKI Pin app are counted.", "Ziara, matengenezo na mahali vilivyowekwa kwa programu ya RAFIKI Pin tu ndivyo vinahesabiwa.")
 
 internal fun countryTable(r: ReportData) = RTable(
@@ -475,34 +475,56 @@ private fun PaperHeading(text: String) = Text(text, style = MaterialTheme.typogr
 @Composable
 private fun StateIcon(state: String, size: Dp) = androidx.compose.foundation.Canvas(Modifier.size(size)) { drawIntoCanvas { drawStateIcon(it.nativeCanvas, state, 0f, 0f, this.size.width) } }
 
-/** A report table like the web one on screen: blue header row, light stripes, hairlines; wider than a phone, so it scrolls sideways. */
+/** A report table like the web one on screen: blue header row, light stripes, hairlines. It fits the phone when its
+ *  columns can (headers then wrap between words, never inside one); otherwise it scrolls sideways, with the edge
+ *  fading out and a line saying so, so a column at the edge never looks cut off. */
 @Composable
-private fun PaperTable(tb: RTable) {
+private fun PaperTable(tb: RTable) = androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxWidth()) {
+    val room = maxWidth
     val cell = MaterialTheme.typography.bodySmall.copy(fontSize = 11.5.sp, lineHeight = 15.sp, color = PText)
     val small = cell.copy(fontSize = 10.sp, lineHeight = 13.sp, color = PMuted)
     val head = small.copy(fontWeight = FontWeight.Bold, color = Color.White)
     // columns as wide as their header, and wide enough for most cells on one line (up to 1.6× the PDF column)
     val tm = rememberTextMeasurer(); val d = LocalDensity.current
-    val w = remember(tb) {
-        tb.cols.mapIndexed { i, pt ->
-            fun px(text: String, st: androidx.compose.ui.text.TextStyle) = tm.measure(text, st, maxLines = 1).size.width
-            val icon = with(d) { 16.dp.toPx() }
+    val (w0, wMin) = remember(tb) {
+        fun px(text: String, st: androidx.compose.ui.text.TextStyle) = tm.measure(text, st, maxLines = 1).size.width.toFloat()
+        fun word(text: String, st: androidx.compose.ui.text.TextStyle) = text.split(' ').maxOfOrNull { px(it, st) } ?: 0f
+        val icon = with(d) { 16.dp.toPx() }; val pad = with(d) { 12.dp.toPx() }
+        val pref = tb.cols.mapIndexed { i, pt ->
             val hw = px(tb.head[i].text, head) + (if (tb.head[i].icon != null) icon else 0f)
             val cw = tb.rows.maxOfOrNull { r ->
                 val c = r[i]
                 maxOf(px(c.text, cell.copy(fontWeight = if (c.bold) FontWeight.Bold else FontWeight.Medium)) + (if (c.icon != null) icon else 0f),
                     if (c.hasSub) px(c.sub + c.subTail, small) + (if (c.subIcon != null) icon else 0f) else 0f)
             } ?: 0f
-            with(d) { maxOf((pt * 0.96f).dp, (hw + 12.dp.toPx()).toDp(), minOf((cw + 12.dp.toPx()).toDp(), (pt * 1.6f).dp)) }
+            with(d) { maxOf((pt * 0.96f).dp, (hw + pad).toDp(), minOf((cw + pad).toDp(), (pt * 1.6f).dp)) }
         }
+        // the least each column needs so no word has to break: its longest word
+        val least = tb.cols.indices.map { i ->
+            val hw = word(tb.head[i].text, head) + (if (tb.head[i].icon != null) icon else 0f)
+            val cw = tb.rows.maxOfOrNull { r -> val c = r[i]; maxOf(word(c.text, cell.copy(fontWeight = if (c.bold) FontWeight.Bold else FontWeight.Medium)) + (if (c.icon != null) icon else 0f), if (c.hasSub) word(c.sub + c.subTail, small) else 0f) } ?: 0f
+            with(d) { (maxOf(hw, cw) + pad).toDp() }
+        }
+        pref to least
+    }
+    val sumPref = w0.fold(0.dp) { a, b -> a + b }; val sumMin = wMin.fold(0.dp) { a, b -> a + b }
+    val fits = sumMin <= room
+    val w = when {
+        sumPref <= room -> w0
+        fits -> w0.indices.map { i -> wMin[i] + (w0[i] - wMin[i]) * ((room - sumMin) / (sumPref - sumMin)) }
+        else -> w0
     }
     val total = w.fold(0.dp) { a, b -> a + b }
-    Column(Modifier.horizontalScroll(rememberScrollState())) {
-        Row(Modifier.width(total).clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)).background(PBlue), verticalAlignment = Alignment.CenterVertically) {
+    val scroll = rememberScrollState()
+    Column {
+    if (!fits) Text(t("Swipe the table sideways to see every column →", "Telezesha jedwali kando kuona safu zote →"), style = small, modifier = Modifier.padding(bottom = 6.dp).testTag("table_swipe"))
+    Box {
+    Column(Modifier.horizontalScroll(scroll)) {
+        Row(Modifier.width(total).clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)).background(PBlue).height(IntrinsicSize.Min), verticalAlignment = Alignment.CenterVertically) {
             tb.head.forEachIndexed { i, h ->
                 Row(Modifier.width(w[i]).padding(horizontal = 6.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                     if (h.icon != null) { StateIcon(h.icon, 11.dp); Spacer(Modifier.width(4.dp)) }
-                    Text(h.text, style = head, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(h.text, style = head, maxLines = 2)
                 }
             }
         }
@@ -512,7 +534,7 @@ private fun PaperTable(tb: RTable) {
                     Column(Modifier.width(w[i]).padding(horizontal = 6.dp, vertical = 7.dp)) {
                         Row(verticalAlignment = Alignment.Top) {
                             if (c.icon != null) { Box(Modifier.padding(top = 2.dp)) { StateIcon(c.icon, 12.dp) }; Spacer(Modifier.width(4.dp)) }
-                            Text(c.text, style = cell.copy(fontWeight = if (c.bold) FontWeight.Bold else FontWeight.Medium), maxLines = 3, overflow = TextOverflow.Ellipsis)
+                            Text(c.text, style = cell.copy(fontWeight = if (c.bold) FontWeight.Bold else FontWeight.Medium), maxLines = 6, overflow = TextOverflow.Ellipsis)
                         }
                         if (c.hasSub) Row(verticalAlignment = Alignment.CenterVertically) {
                             if (c.sub.isNotEmpty()) Text(c.sub, style = small, maxLines = 1)
@@ -524,5 +546,12 @@ private fun PaperTable(tb: RTable) {
             }
             Box(Modifier.width(total).height(0.75.dp).background(PLine))
         }
+    }
+    // more to the right (or left): the edge fades into the paper
+    if (scroll.canScrollForward) Box(Modifier.matchParentSize().padding(start = (room - 28.dp).coerceAtLeast(0.dp))
+        .background(androidx.compose.ui.graphics.Brush.horizontalGradient(listOf(Color.White.copy(alpha = 0f), Color.White))))
+    if (scroll.canScrollBackward) Box(Modifier.matchParentSize().padding(end = (room - 20.dp).coerceAtLeast(0.dp))
+        .background(androidx.compose.ui.graphics.Brush.horizontalGradient(listOf(Color.White, Color.White.copy(alpha = 0f)))))
+    }
     }
 }

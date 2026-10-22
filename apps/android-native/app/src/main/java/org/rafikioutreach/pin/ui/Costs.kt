@@ -190,7 +190,7 @@ fun JobMoneyFields(m: AppModel, r: Repair, limit: Long, st: JobMoney) {
 
 /** After an Office job save: the message to show (held for approval, or the receipt), and sends the receipt. */
 suspend fun jobMoneyDone(m: AppModel, x: org.rafikioutreach.pin.data.Reply, st: JobMoney, limit: Long): Pair<String, String>? {
-    if (x.json.optString("held").isNotBlank()) return "warn" to (if (x.json.optBoolean("asked")) t("Saved. This repair is above ${Money.kes(limit)}, so parts are ordered after a second admin approves the cost. Asked ✓", "Imehifadhiwa. Ukarabati huu ni zaidi ya ${Money.kes(limit)}, kwa hiyo vipuri vitaagizwa baada ya msimamizi wa pili kuidhinisha. Imeombwa ✓")
+    if (x.json.optString("held").isNotBlank()) return "warn" to (if (x.json.optBoolean("asked")) t("Saved. This repair is above ${Money.kes(limit)}, so parts are ordered after a second admin approves the cost. Asked ✓", "Imehifadhiwa. Matengenezo haya ni zaidi ya ${Money.kes(limit)}, kwa hiyo vipuri vitaagizwa baada ya msimamizi wa pili kuidhinisha. Imeombwa ✓")
         else t("Still waiting for a second admin to approve the cost.", "Bado inasubiri msimamizi wa pili kuidhinisha gharama."))
     val shot = st.shots.firstOrNull(); val uid = x.json.optString("updateId")
     st.actual = ""; st.shots = emptyList()
@@ -250,9 +250,9 @@ fun TrackerMoneyBox(m: AppModel, s: Snapshot, p: Project, r: Repair, money: Trac
     var showFix by remember(p.id) { mutableStateOf(false) }
     if (!showFix) Row(Modifier.padding(top = 10.dp).clip(RoundedCornerShape(12.dp)).clickable { showFix = true }.padding(vertical = 8.dp, horizontal = 2.dp).testTag("fix_cost_open"), verticalAlignment = Alignment.CenterVertically) {
         Icon(Ic.get("coins"), null, tint = C.blue2, modifier = Modifier.size(18.dp)); Spacer(Modifier.width(8.dp))
-        Text(t("Add what the repair cost (and a receipt)", "Ongeza gharama ya ukarabati (na risiti)"), style = MaterialTheme.typography.titleSmall, color = C.blue2)
+        Text(t("Add what the repair cost (and a receipt)", "Ongeza gharama ya matengenezo (na risiti)"), style = MaterialTheme.typography.titleSmall, color = C.blue2)
     } else {
-        Field(money.fixCost, { money.fixCost = it.filter { c -> c.isDigit() } }, t("Actual cost when fixed (optional)", "Gharama halisi ikirekebishwa (si lazima)"), money = true, placeholder = t("what the repair cost", "gharama ya ukarabati"))
+        Field(money.fixCost, { money.fixCost = it.filter { c -> c.isDigit() } }, t("Actual cost when fixed (optional)", "Gharama halisi ikirekebishwa (si lazima)"), money = true, placeholder = t("what the repair cost", "gharama ya matengenezo"))
         Spacer(Modifier.height(8.dp)); ReceiptPick(m, money.fixShots) { money.fixShots = it }
     }
 }
@@ -268,9 +268,9 @@ fun ProjectCostLine(m: AppModel, p: Project) {
     Row(Modifier.padding(top = 12.dp).fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(C.card).border(if (C.ink == Color.Black) 2.dp else 1.dp, C.line, RoundedCornerShape(18.dp)).padding(12.dp).testTag("project_costs"), verticalAlignment = Alignment.CenterVertically) {
         IconTile("coins", am.fg, am.bg, 40.dp); Spacer(Modifier.width(12.dp))
         Column {
-            Text(if (n > 0) t("Repairs: ${Money.kes(sum)} in the last 12 months ($n ${if (n == 1) "repair" else "repairs"})", "Ukarabati: ${Money.kes(sum)} katika miezi 12 iliyopita (matengenezo $n)")
-                else t("Repairs: nothing spent in the last 12 months", "Ukarabati: hakuna kilichotumika katika miezi 12 iliyopita"), style = MaterialTheme.typography.titleSmall, color = C.ink)
-            if (last != null) Text(t("Latest: ", "Karibuni: ") + listOf(Money.kes(last.optLong("actual")), last.optString("what"), last.optString("by"), whenText(last.optString("at"))).filter { it.isNotBlank() }.joinToString(" · "), style = MaterialTheme.typography.bodySmall, color = C.muted)
+            Text(if (n > 0) t("Repairs: ${Money.kes(sum)} in the last 12 months ($n ${if (n == 1) "repair" else "repairs"})", "Matengenezo: ${Money.kes(sum)} katika miezi 12 iliyopita (matengenezo $n)")
+                else t("Repairs: nothing spent in the last 12 months", "Matengenezo: hakuna kilichotumika katika miezi 12 iliyopita"), style = MaterialTheme.typography.titleSmall, color = C.ink)
+            if (last != null) Text(t("Latest: ", "Mpya zaidi: ") + listOf(Money.kes(last.optLong("actual")), last.optString("what"), last.optString("by"), whenText(last.optString("at"))).filter { it.isNotBlank() }.joinToString(" · "), style = MaterialTheme.typography.bodySmall, color = C.muted)
         }
     }
 }
@@ -329,10 +329,10 @@ fun CostExports(m: AppModel, s: Snapshot, onMsg: (String?) -> Unit) {
     val ctx = LocalContext.current
     val scope = rememberScope()
     fun withCosts(go: (CostView) -> Unit) = scope.launch {
-        onMsg(t("Gathering repair costs…", "Inakusanya gharama za ukarabati…"))
+        onMsg(t("Gathering repair costs…", "Inakusanya gharama za matengenezo…"))
         val x = m.api.adminGet("costs"); if (!x.ok) { onMsg(reasonText(x.reason)); return@launch }
         onMsg(null); go(CostView.from(x.json))
     }
-    Btn(t("Repair costs (every entry, last 2 years)", "Gharama za ukarabati (kila kiingilio, miaka 2)"), { withCosts { shareCsv(ctx, "rafiki-repair-costs-${LocalDate.now()}.csv", costsCsv(it, s.projects)) } }, Modifier.fillMaxWidth().testTag("x_costs"), light = true, icon = "coins")
+    Btn(t("Repair costs (every entry, last 2 years)", "Gharama za matengenezo (kila kiingilio, miaka 2)"), { withCosts { shareCsv(ctx, "rafiki-repair-costs-${LocalDate.now()}.csv", costsCsv(it, s.projects)) } }, Modifier.fillMaxWidth().testTag("x_costs"), light = true, icon = "coins")
     Btn(t("Costs and people served: summary", "Gharama na watu wanaohudumiwa: muhtasari"), { withCosts { shareCsv(ctx, "rafiki-costs-and-people-${LocalDate.now()}.csv", summaryCsv(it, s.people)) } }, Modifier.fillMaxWidth().testTag("x_costsum"), light = true, icon = "coins")
 }

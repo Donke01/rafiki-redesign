@@ -16,7 +16,8 @@ object Money {
     const val APPROVE_DEFAULT = 50000L
     private val ORDER = listOf("reported", "assigned", "parts", "fixed")
 
-    fun kes(n: Long?): String = "KES " + "%,d".format(java.util.Locale.US, n ?: 0L)
+    /** "KES 4,500", with a non-breaking space so KES never sits alone at the end of a line. */
+    fun kes(n: Long?): String = "KES\u00A0" + "%,d".format(java.util.Locale.US, n ?: 0L)
     /** The repair's estimate: the field estimate or the approved budget, whichever is higher. */
     fun estOf(r: Repair): Long = maxOf(r.cost ?: 0L, r.budget ?: 0L)
     fun past(step: String, ref: String) = ORDER.indexOf(step.ifBlank { "reported" }) >= ORDER.indexOf(ref)

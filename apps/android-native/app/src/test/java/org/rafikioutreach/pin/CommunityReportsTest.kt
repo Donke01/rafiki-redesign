@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onAllNodesWithText
@@ -166,6 +167,10 @@ class CommunityReportsTest {
         // settings open with a tap
         rule.onNodeWithTag("sms_setup_toggle").performScrollTo().performClick(); rule.mainClock.advanceTimeBy(600); rule.waitForIdle()
         rule.onNodeWithTag("sms_setup_body").assertExists()
+        // the setting names sit under "Technical details"
+        assertEquals(0, rule.onAllNodesWithText("✓ SMS_WEBHOOK_TOKEN").fetchSemanticsNodes().size)
+        rule.onNodeWithTag("sms_vars_line").assertExists()
+        rule.onNodeWithTag("sms_tech_toggle").performScrollTo().performClick(); rule.waitForIdle()
         rule.onNodeWithText("✓ SMS_WEBHOOK_TOKEN").assertExists(); rule.onNodeWithText("TWILIO_AUTH_TOKEN").assertExists()
         rule.onNodeWithText("?token=YOUR_SMS_WEBHOOK_TOKEN", substring = true).assertExists()
         shot("61-community-setup")
@@ -184,6 +189,10 @@ class CommunityReportsTest {
         waitFor("Ripoti za jamii")
         rule.onNodeWithText("Hakuna ujumbe bado", substring = true).assertExists()
         rule.onNodeWithTag("sms_voice_toggle").performScrollTo().performClick(); rule.mainClock.advanceTimeBy(600); rule.waitForIdle()
+        // plain words first; the setting's name only under "Technical details"
+        rule.onAllNodesWithText("OPENAI_API_KEY", substring = true).assertCountEquals(0)
+        rule.onNodeWithText("Imezimwa. Anayesimamia tovuti anaweza kuiwasha.").assertExists()
+        rule.onNodeWithTag("voice_tech_toggle").performScrollTo().performClick(); rule.waitForIdle()
         rule.onNodeWithText("OPENAI_API_KEY", substring = true).assertExists()
         assertEquals(0, rule.onAllNodesWithText("✓ SMS_WEBHOOK_TOKEN").fetchSemanticsNodes().size)
         shot("63-community-off-dark-sw")

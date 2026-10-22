@@ -163,7 +163,9 @@ fun HereBanner(p: Project, d: Double, miles: Boolean, modifier: Modifier, visit:
 @Composable
 fun Meter(f0: Float, modifier: Modifier = Modifier, light: Boolean = false, glass: Boolean = false) {
     val f = rememberFill(f0)
-    Box(modifier.fillMaxWidth().height(if (light || glass) 8.dp else 10.dp).clip(RoundedCornerShape(99.dp)).background(if (glass) Color(0x1F0A78C2) else if (light) Color(0x2EFFFFFF) else C.line)) {
+    // Sun: a white track with a black edge (a black track looked full)
+    Box(modifier.fillMaxWidth().height(if (light || glass) 8.dp else 10.dp).clip(RoundedCornerShape(99.dp)).background(if (glass) Color(0x1F0A78C2) else if (light) Color(0x2EFFFFFF) else if (!C.glassy) Color.White else C.line)
+        .then(if (!glass && !light && !C.glassy) Modifier.border(1.5.dp, Color.Black, RoundedCornerShape(99.dp)) else Modifier)) {
         Box(Modifier.fillMaxWidth(f.coerceIn(0f, 1f)).height(if (light || glass) 8.dp else 10.dp).clip(RoundedCornerShape(99.dp))
             .background(if (glass) androidx.compose.ui.graphics.Brush.horizontalGradient(listOf(Color(0xFF0A78C2), Color(0xFF47B4F5))) else if (light) androidx.compose.ui.graphics.Brush.horizontalGradient(listOf(Color(0xFF5DB8F2), Color(0xFFBFE3FB))) else OkBrush))
     }

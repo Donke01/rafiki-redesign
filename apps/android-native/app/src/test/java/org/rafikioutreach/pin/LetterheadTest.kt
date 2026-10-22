@@ -213,7 +213,7 @@ class LetterheadTest {
     @Test fun report_screen_full() {
         Lang.sw = false
         showReport("ke", "Meril Kiprop", 3000)
-        rule.onNodeWithText("Open repairs · about KES 35,700 estimated").assertExists()
+        rule.onNodeWithText("Open repairs · about KES\u00A035,700 estimated").assertExists()
         shot("report-screen-full")
     }
 }

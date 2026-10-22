@@ -364,8 +364,8 @@ fun TeamMapSection(m: AppModel, s: Snapshot, open: (String) -> Unit) {
     LaunchedEffect(tick) { val r = m.api.adminGet("teammap"); if (r.ok) { data = TeamMapData.from(r.json); err = null } else err = reasonText(r.reason) }
     val d = data
     DqmHead("tm_head", "pin", "green", t("Team map", "Ramani ya timu"), t("Where teammates who share their location are, and today’s visits.", "Wenzako wanaoshiriki mahali walipo, na ziara za leo."),
-        if (d == null) emptyList() else listOf(DqmNum(d.people.size, t("Sharing now", "Wanashiriki sasa"), if (d.people.isEmpty()) "off" else "ok"), DqmNum(d.visits.size, t("Visits today", "Ziara za leo")),
-            d.visits.count { it.state == "notworking" }.let { DqmNum(it, t("Not working", "Hazifanyi kazi"), if (it > 0) "bad" else "off") }),
+        if (d == null) emptyList() else listOf(DqmNum(d.people.size, t("sharing now", "wanashiriki sasa"), if (d.people.isEmpty()) "off" else "ok"), DqmNum(d.visits.size, if (d.visits.size == 1) t("visit today", "ziara ya leo") else t("visits today", "ziara za leo")),
+            d.visits.count { it.state == "notworking" }.let { DqmNum(it, t("not working", "hazifanyi kazi"), if (it > 0) "bad" else "off") }),
         trailing = {
             Box(Modifier.size(44.dp).clip(CircleShape).border(1.dp, C.line, CircleShape).clickable(role = Role.Button) { tick++ }.testTag("tm_refresh"), contentAlignment = Alignment.Center) {
                 Icon(Ic.get("refresh"), t("Refresh", "Onyesha upya"), tint = C.ink, modifier = Modifier.size(20.dp))

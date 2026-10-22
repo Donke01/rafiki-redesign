@@ -190,8 +190,8 @@ fun Onboarding(m: AppModel, done: (String) -> Unit) {
                 val opts = listOf(
                     Triple("pin", t("Pin locations", "Weka mahali") to t("Put every project on the map", "Weka kila mradi kwenye ramani"), DropC.Blue to Mood.Smile),
                     Triple("visit", t("Site visits", "Ziara") to t("Check water points and report", "Kagua vituo vya maji na uripoti"), DropC.Green to Mood.O),
-                    Triple("repairs", t("Repairs", "Ukarabati") to t("Follow what needs fixing", "Fuatilia kinachohitaji kurekebishwa"), DropC.Coral to Mood.Wink),
-                ) + if (admin) listOf(Triple("office", t("Office work", "Kazi za ofisi") to t("Review, assign and report", "Idhinisha, gawa na ripoti"), DropC.Purple to Mood.Smile)) else emptyList()
+                    Triple("repairs", t("Repairs", "Matengenezo") to t("Follow what needs fixing", "Fuatilia kinachohitaji kurekebishwa"), DropC.Coral to Mood.Wink),
+                ) + if (admin) listOf(Triple("office", t("Office work", "Kazi za ofisi") to t("Review, assign and report", "Kagua, gawa na ripoti"), DropC.Purple to Mood.Smile)) else emptyList()
                 Column(Modifier.padding(top = 12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     opts.forEach { (k, l, d) -> Opt(role == k, "onb_r_$k", { role = k }) { Column(Modifier.weight(1f)) { Text(l.first, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = if (role == k) Color.White else Color.Unspecified); Text(l.second, fontSize = 12.sp, color = (if (role == k) Color.White else Color.Unspecified).copy(alpha = .75f)) }; Drop(40.dp, d.first, d.second) } }
                 }

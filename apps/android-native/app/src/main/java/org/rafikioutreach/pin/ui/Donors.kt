@@ -173,8 +173,8 @@ fun DonorsSection(m: AppModel, snap: Snapshot) {
     val L = (list ?: emptyList()).sortedWith(compareBy<Donor>({ it.revoked }, { it.lastOpen.isBlank() }).thenByDescending { it.lastOpen }.thenBy { it.name })
     val count = L.groupingBy { donorState(it) }.eachCount()
     DqmHead("dn_head", "heart", "coral", t("Donors", "Wafadhili"), t("Each donor gets a private page with their projects, a map and updates.", "Kila mfadhili anapata ukurasa wa siri wenye miradi yake, ramani na taarifa."),
-        listOf(DqmNum(L.size, t("Donors", "Wafadhili"), "", "all"), DqmNum(count["opened"] ?: 0, t("Opened", "Wamefungua"), if ((count["opened"] ?: 0) > 0) "ok" else "off", "opened"),
-            DqmNum(count["not"] ?: 0, t("Not opened", "Hawajafungua"), if ((count["not"] ?: 0) > 0) "has" else "off", "not")), filter, { filter = it; more = false }) {
+        listOf(DqmNum(L.size, t("donors", "wafadhili"), "", "all"), DqmNum(count["opened"] ?: 0, t("opened", "wamefungua"), if ((count["opened"] ?: 0) > 0) "ok" else "off", "opened"),
+            DqmNum(count["not"] ?: 0, t("not opened", "hawajafungua"), if ((count["not"] ?: 0) > 0) "has" else "off", "not")), filter, { filter = it; more = false }) {
         Btn(t("Add a donor", "Ongeza mfadhili"), { reset(null); formOpen = true }, Modifier.padding(top = 14.dp).fillMaxWidth().testTag("dn_add"), icon = "plus")
     }
     loadMsg?.let { Msg(it, "bad") }
@@ -198,7 +198,8 @@ fun DonorsSection(m: AppModel, snap: Snapshot) {
     Card(pad = 4.dp) {
         DqmFold("dn_mail_fold", "mail", "teal", t("E-mail digest", "Barua pepe ya kila mwezi"), if (mailReady) t("On · each donor, on the 1st of the month", "Imewashwa · kila mfadhili, tarehe 1 ya mwezi") else t("Off", "Imezimwa"), if (mailReady) "ok" else "off") {
             Text(if (mailReady) t("On: each donor with an e-mail gets a monthly update on the 1st.", "Imewashwa: kila mfadhili mwenye barua pepe anapata taarifa ya mwezi tarehe 1.")
-                 else t("Off. Add RESEND_API_KEY and ALERT_FROM in Cloudflare to switch it on.", "Imezimwa. Ongeza RESEND_API_KEY na ALERT_FROM kwenye Cloudflare kuiwasha."), style = MaterialTheme.typography.bodyMedium, color = C.text, modifier = Modifier.testTag("dn_mail"))
+                 else t("Off. Sending e-mail isn’t set up yet; whoever looks after the website can switch it on.", "Imezimwa. Kutuma barua pepe bado hakujawekwa; anayesimamia tovuti anaweza kuiwasha."), style = MaterialTheme.typography.bodyMedium, color = C.text, modifier = Modifier.testTag("dn_mail"))
+            if (!mailReady) TechDetails(listOf("RESEND_API_KEY" to false, "ALERT_FROM" to false), "dn_mail_tech")
             Text(t("To stop it for one donor, open them, tap Edit and untick “Monthly e-mail update”.", "Kuizima kwa mfadhili mmoja, mfungue, gusa Hariri na uondoe tiki “Taarifa ya mwezi kwa barua pepe”."), style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 8.dp))
         }
         HorizontalDivider(color = C.line, modifier = Modifier.padding(horizontal = 14.dp))
@@ -334,13 +335,16 @@ private fun DonorSheet(m: AppModel, d: Donor, link: List<String>?, close: () -> 
                 Text(t("Anyone with this link can see the page. Send it only to them.", "Yeyote mwenye kiungo hiki anaweza kuona ukurasa. Mtumie yeye tu."), style = MaterialTheme.typography.bodySmall, color = C.text)
                 Row(Modifier.padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Btn(t("Copy", "Nakili"), { copy(url); msg = "ok" to t("Link copied ✓", "Kiungo kimenakiliwa ✓") }, Modifier.weight(1f).testTag("dn_link_copy"), small = true, light = true, icon = "copy")
-                    Btn(t("Share", "Shiriki"), { share(link) }, Modifier.weight(1f), small = true, light = true, icon = "share")
+                    Btn(t("Share", "Shiriki"), { share(link) }, Modifier.weight(1f).testTag("dn_link_share"), small = true, light = true, icon = "share")
                 }
             }
         }
         // the main actions
         Column(Modifier.padding(top = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            if (!d.revoked) {
+            if (!d.revoked && link != null) {
+                // the link is shown above with its own Copy and Share, so only Edit here
+                DqmLineBtn(t("Edit", "Hariri"), "edit", { hide { edit() } }, Modifier.fillMaxWidth().testTag("dn_edit"))
+            } else if (!d.revoked) {
                 Btn(t("Copy private link", "Nakili kiungo cha siri"), { act("donor-link") { j -> copy(j.optString("link")); msg = "ok" to t("Link copied ✓", "Kiungo kimenakiliwa ✓") } }, Modifier.fillMaxWidth().testTag("dn_copy"), icon = "copy", enabled = !busy)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     DqmLineBtn(t("Share link", "Shiriki kiungo"), "share", { act("donor-link") { j -> val s = listOf(d.id, d.name, j.optString("link"), d.email); setLink(s); share(s) } }, Modifier.weight(1f).testTag("dn_share"))
@@ -478,7 +482,7 @@ fun DonorThanks(m: AppModel, p: Project) {
                     if (r.ok) { msg = "ok" to t("Sent ✓ Thank you! The donors will see it on their page.", "Imetumwa ✓ Asante! Wafadhili wataiona kwenye ukurasa wao."); picked = null; caption = "" }
                     else msg = "bad" to (if (r.status == 0) t("This needs a signal. Try again when you’re online.", "Hii inahitaji mtandao. Jaribu tena ukiwa mtandaoni.") else reasonText(r.reason))
                 }
-            }, Modifier.padding(top = 10.dp).testTag("dn_thanks_send"), small = true, icon = "upload", enabled = picked != null && !busy)
+            }, Modifier.padding(top = 10.dp).fillMaxWidth().testTag("dn_thanks_send"), icon = "upload", enabled = picked != null && !busy)
             msg?.let { (tone, text) -> Msg(text, tone) }
         }
     }

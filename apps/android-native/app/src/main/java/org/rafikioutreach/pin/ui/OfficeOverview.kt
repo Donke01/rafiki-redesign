@@ -59,6 +59,8 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -138,7 +140,7 @@ private fun OcvNum(modifier: Modifier, value: String, label: String, color: Colo
             if (prefix.isNotEmpty()) Text(prefix, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold), color = C.muted, modifier = Modifier.padding(end = 4.dp, bottom = 3.dp))
             Text(value, style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold, fontSize = if (prefix.isNotEmpty()) 19.sp else 22.sp), color = color, maxLines = 1, softWrap = false)
         }
-        Text(label, style = MaterialTheme.typography.bodySmall, color = C.muted)
+        FitWords(label, MaterialTheme.typography.bodySmall, C.muted, Modifier.fillMaxWidth(), Alignment.CenterStart, 3)
         if (sub.isNotEmpty()) Text(sub, style = MaterialTheme.typography.bodySmall, color = C.muted)
     }
 }
@@ -188,12 +190,42 @@ private fun OcvCard(tag: String, i: Int, lead: @Composable () -> Unit, title: St
     }
 }
 
-/** A filter chip with its count. */
+/** A filter chip with its count; the chosen one is scrolled into view. */
 @Composable
 private fun OcvChips(items: List<Triple<String, String, Boolean>>, tags: List<String>, pick: (Int) -> Unit) {
-    Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(top = 12.dp, bottom = 2.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        items.forEachIndexed { i, (label, n, on) -> Chip("$label · $n", null, on, { pick(i) }, tag = tags[i], hue = "blue") }
+    val (scroll, spot) = rememberKeepInView(items.indexOfFirst { it.third })
+    Row(Modifier.fillMaxWidth().horizontalScroll(scroll).padding(top = 12.dp, bottom = 2.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        items.forEachIndexed { i, (label, n, on) -> Box(spot(i)) { Chip("$label · $n", null, on, { pick(i) }, tag = tags[i], hue = "blue") } }
     }
+}
+
+/** For a row that scrolls sideways: the scroll state, and a modifier for each item, so the item [sel] is
+ *  scrolled into view whenever it changes (only sideways; the page itself doesn't move). */
+@Composable
+internal fun rememberKeepInView(sel: Any?): Pair<androidx.compose.foundation.ScrollState, (Any) -> Modifier> {
+    val st = rememberScrollState()
+    val spots = remember { HashMap<Any, Pair<Int, Int>>() }
+    var laid by remember { mutableIntStateOf(0) }
+    LaunchedEffect(sel, laid > 0) {
+        val (x, w) = spots[sel ?: return@LaunchedEffect] ?: return@LaunchedEffect
+        val vp = st.viewportSize; if (vp <= 0) return@LaunchedEffect
+        val gap = (vp / 12)
+        when {
+            x - gap < st.value -> st.animateScrollTo((x - gap).coerceAtLeast(0))
+            x + w + gap > st.value + vp -> st.animateScrollTo((x + w + gap - vp).coerceAtMost(st.maxValue))
+        }
+    }
+    return st to { k -> Modifier.onGloballyPositioned { c -> spots[k] = c.positionInParent().x.toInt() to c.size.width; if (laid == 0) laid = 1 } }
+}
+
+/** The grey boxes shown while numbers load (the same in the Office and on Me), instead of dashes. */
+@Composable
+internal fun Skel(modifier: Modifier, dark: Boolean = false) {
+    val a = if (Motion.on && Motion.loops) {
+        val tr = androidx.compose.animation.core.rememberInfiniteTransition(label = "skel")
+        tr.animateFloat(0.45f, 0.9f, androidx.compose.animation.core.infiniteRepeatable(tween(900), androidx.compose.animation.core.RepeatMode.Reverse), label = "a").value
+    } else 0.7f
+    Box(modifier.clip(RoundedCornerShape(8.dp)).background((if (dark) Color.White.copy(alpha = 0.22f) else C.line).copy(alpha = if (dark) 0.22f * a else a)).testTag("skel"))
 }
 
 /** Initials in a coloured circle, as on the Team list. */
@@ -322,13 +354,13 @@ fun OcvOverview(m: AppModel, s: Snapshot, open: (String) -> Unit, go: (String) -
     // the tiles, two by two
     val pe = s.people?.takeIf { it.total > 0 }
     val tiles = listOfNotNull(
-        OcvT("ocv_t_repairs", "wrench", "amber", s.repairs.size.toLong(), t("open repairs", "matengenezo yaliyo wazi"),
-            listOfNotNull(if (urgent > 0) t("$urgent urgent", "$urgent ya haraka") else null, if (cost > 0) "KES " + ocvFmt(cost) else null).joinToString(" · "), hot = s.repairs.isNotEmpty(), red = urgent > 0) { go("repairs") },
-        OcvT("ocv_t_review", "inbox", "purple", s.reviewOpen.toLong(), t("waiting for your review", "zinasubiri uidhinishe"), hot = s.reviewOpen > 0) { go("review") },
-        OcvT("ocv_t_due", "cal", "blue", due.toLong(), t("due a visit", "zinasubiri ziara")) { toList("due") },
+        OcvT("ocv_t_repairs", "wrench", "amber", s.repairs.size.toLong(), if (s.repairs.size == 1) t("open repair", "tengenezo lililo wazi") else t("open repairs", "matengenezo yaliyo wazi"),
+            listOfNotNull(if (urgent > 0) t("$urgent urgent", "$urgent ya haraka") else null, if (cost > 0) "KES\u00A0" + ocvFmt(cost) else null).joinToString(" · "), hot = s.repairs.isNotEmpty(), red = urgent > 0) { go("repairs") },
+        OcvT("ocv_t_review", "inbox", "purple", s.reviewOpen.toLong(), if (s.reviewOpen == 1) t("waiting for your review", "inasubiri uidhinishe") else t("waiting for your review", "zinasubiri uidhinishe"), hot = s.reviewOpen > 0) { go("review") },
+        OcvT("ocv_t_due", "cal", "blue", due.toLong(), if (due == 1) t("due a visit", "unasubiri ziara") else t("due a visit", "zinasubiri ziara")) { toList("due") },
         // water points with no water test in 6 months: Projects › Due a visit, where they carry the tag
-        OcvT("o_tests", "drop", "teal", tests.toLong(), t("water tests due", "vipimo vya maji vinahitajika"), hot = tests > 0) { toList("due") },
-        OcvT("ocv_t_visits", "clip", "green", vm?.toLong(), t("visits this month", "ziara za mwezi huu")) { go("visits") },
+        OcvT("o_tests", "drop", "teal", tests.toLong(), if (tests == 1) t("water test due", "kipimo cha maji kinahitajika") else t("water tests due", "vipimo vya maji vinahitajika"), hot = tests > 0) { toList("due") },
+        OcvT("ocv_t_visits", "clip", "green", vm?.toLong(), if (vm == 1) t("visit this month", "ziara ya mwezi huu") else t("visits this month", "ziara za mwezi huu")) { go("visits") },
         pe?.let { OcvT("ocv_t_people", "people", "teal", it.total, t("people served", "watu wanaohudumiwa"), if (it.growth > 0) "+" + ocvFmt(it.growth) + " " + t("in 12 months", "kwa miezi 12") else "", up = true) { people = true } },
     )
     tiles.chunked(2).forEachIndexed { ri, row ->
@@ -392,14 +424,15 @@ fun OcvOverview(m: AppModel, s: Snapshot, open: (String) -> Unit, go: (String) -
             list.forEachIndexed { i, e ->
                 if (i > 0) HorizontalDivider(color = C.line)
                 val id = e.optString("id"); val known = id.isNotBlank() && s.projects.any { it.id == id }
-                val hu = C.hue(ocvFeedHue(e.optString("a")))
+                val sms = isCommunity(e)
+                val hu = C.hue(if (sms) "slate" else ocvFeedHue(e.optString("a")))
                 Row(Modifier.fillMaxWidth().then(if (known) Modifier.clip(RoundedCornerShape(12.dp)).clickable(role = Role.Button) { open(id) } else Modifier).heightIn(min = 56.dp).padding(vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Box(Modifier.size(32.dp).clip(CircleShape).background(hu.bg), contentAlignment = Alignment.Center) { Icon(Ic.get(ocvFeedIcon(e.optString("a"))), null, tint = hu.fg, modifier = Modifier.size(16.dp)) }
+                    Box(Modifier.size(32.dp).clip(CircleShape).background(hu.bg), contentAlignment = Alignment.Center) { Icon(Ic.get(if (sms) "phone" else ocvFeedIcon(e.optString("a"))), null, tint = hu.fg, modifier = Modifier.size(16.dp)) }
                     Spacer(Modifier.width(12.dp))
                     Column(Modifier.weight(1f)) {
                         Text(androidx.compose.ui.text.buildAnnotatedString {
-                            withStyle(androidx.compose.ui.text.SpanStyle(fontWeight = FontWeight.Bold, color = C.ink)) { append(e.optString("by")) }
-                            append(" " + verb(e.optString("a")) + " " + e.optString("t"))
+                            withStyle(androidx.compose.ui.text.SpanStyle(fontWeight = FontWeight.Bold, color = C.ink)) { append(if (sms) communityName() else e.optString("by")) }
+                            append(if (sms) ": " + e.optString("t") + (when (e.optString("a")) { "fixed" -> " · " + t("working again", "inafanya kazi tena"); "visit" -> e.optString("s").takeIf { it.isNotBlank() }?.let { " · " + org.rafikioutreach.pin.data.stateName(it) } ?: ""; else -> "" }) else " " + verb(e.optString("a")) + " " + e.optString("t"))
                         }, style = MaterialTheme.typography.bodyMedium, color = C.text)
                         Text(smsAgo(e.optString("at")), style = MaterialTheme.typography.bodySmall, color = C.muted)
                     }
@@ -459,7 +492,8 @@ private fun OcvTile(modifier: Modifier, i: Int, x: OcvT) {
         ) {
             IconTile(icon, if (red) C.bad else if (hot) C.warn else hu.fg, if (red) C.badBg else if (hot) C.warnBg else hu.bg, 38.dp)
             val shown = n?.let { kotlin.math.round(rememberFill(it.toFloat(), 900)).toLong() }
-            Text(shown?.let { ocvFmt(it) } ?: "…", style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold), color = C.ink, modifier = Modifier.padding(top = 8.dp))
+            if (shown == null) Skel(Modifier.padding(top = 12.dp, bottom = 4.dp).size(52.dp, 26.dp))
+            else Text(ocvFmt(shown), style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold), color = C.ink, modifier = Modifier.padding(top = 8.dp))
             Row(verticalAlignment = Alignment.Bottom) {
                 Column(Modifier.weight(1f)) {
                     Text(label, style = MaterialTheme.typography.labelMedium, color = C.muted)
@@ -527,14 +561,14 @@ fun OcvCosts(m: AppModel, s: Snapshot, open: (String) -> Unit) {
     if (cv == null) { Text(err ?: t("Loading…", "Inapakia…"), color = if (err != null) C.bad else C.muted); return }
     val title = { id: String, fallback: String -> s.projects.firstOrNull { it.id == id }?.title ?: fallback.ifBlank { id } }
 
-    OcvHead("ocv_costs_head", "coins", "amber", t("Repair costs", "Gharama za ukarabati"), t("What repairs actually cost, as the team enters it.", "Gharama halisi za ukarabati, kama timu inavyoandika.")) {
+    OcvHead("ocv_costs_head", "coins", "amber", t("Repair costs", "Gharama za matengenezo"), t("What repairs actually cost, as the team enters it.", "Gharama halisi za matengenezo, kama timu inavyoandika.")) {
         Row(Modifier.padding(top = 12.dp).height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OcvNum(Modifier.weight(1f), ocvCount(cv.month), t("this month", "mwezi huu"), prefix = "KES", tag = "ocv_c_month")
             OcvNum(Modifier.weight(1f), ocvCount(cv.year), t("this year (${cv.yearKey})", "mwaka huu (${cv.yearKey})"), prefix = "KES")
         }
         Row(Modifier.padding(top = 8.dp).height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OcvNum(Modifier.weight(1f), ocvCount(cv.sum12), t("last 12 months", "miezi 12 iliyopita"), prefix = "KES")
-            OcvNum(Modifier.weight(1f), ocvCount(cv.avg), t("average per repair", "wastani kwa kila ukarabati"), prefix = "KES", tag = "ocv_c_avg", sub = if (cv.repairs == 1) t("1 repair", "matengenezo 1") else t("${cv.repairs} repairs", "matengenezo ${cv.repairs}"))
+            OcvNum(Modifier.weight(1f), ocvCount(cv.avg), t("average per repair", "wastani kwa kila tengenezo"), prefix = "KES", tag = "ocv_c_avg", sub = if (cv.repairs == 1) t("1 repair", "matengenezo 1") else t("${cv.repairs} repairs", "matengenezo ${cv.repairs}"))
         }
     }
     // spent each month: tap a bar for that month
@@ -566,9 +600,9 @@ fun OcvCosts(m: AppModel, s: Snapshot, open: (String) -> Unit) {
     }
     // spending: the latest entries, or the projects that cost the most
     Text(t("Spending", "Matumizi"), style = MaterialTheme.typography.titleMedium, color = C.ink, modifier = Modifier.padding(top = 18.dp))
-    OcvChips(listOf(Triple(t("Latest", "Karibuni"), "${cv.rows.size}", cf == "latest"), Triple(t("Most spent", "Gharama kubwa zaidi"), "${cv.top.size}", cf == "top")), listOf("ocv_cf_latest", "ocv_cf_top")) { cf = if (it == 0) "latest" else "top"; shown = 30 }
+    OcvChips(listOf(Triple(t("Latest", "Mpya zaidi"), "${cv.rows.size}", cf == "latest"), Triple(t("Most spent", "Gharama kubwa zaidi"), "${cv.top.size}", cf == "top")), listOf("ocv_cf_latest", "ocv_cf_top")) { cf = if (it == 0) "latest" else "top"; shown = 30 }
     if (cf == "top") Column(Modifier.testTag("costs_top")) {
-        if (cv.top.isEmpty()) EmptyDrop(t("No repair costs recorded yet. Enter the actual cost when parts are ordered or a repair is fixed.", "Bado hakuna gharama za ukarabati. Andika gharama halisi vipuri vikiagizwa au ukarabati ukikamilika."))
+        if (cv.top.isEmpty()) EmptyDrop(t("No repair costs recorded yet. Enter the actual cost when parts are ordered or a repair is fixed.", "Bado hakuna gharama za matengenezo. Andika gharama halisi vipuri vikiagizwa au matengenezo yakikamilika."))
         val tmax = (cv.top.firstOrNull()?.sum ?: 1L).coerceAtLeast(1L); val coral = C.hue("coral"); val amber = C.hue("amber")
         cv.top.take(shown).forEachIndexed { i, tp ->
             OcvCard("ocv_top", i, { Box(Modifier.size(40.dp).clip(RoundedCornerShape(12.dp)).background(if (i == 0) coral.fg else amber.bg), contentAlignment = Alignment.Center) { Text("${i + 1}", color = if (i == 0) Color.White else amber.fg, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp) } },
@@ -576,7 +610,7 @@ fun OcvCosts(m: AppModel, s: Snapshot, open: (String) -> Unit) {
         }
         if (cv.top.size > shown) OcvMore(cv.top.size - shown, "ocv_cmore") { shown += 30 }
     } else {
-        if (cv.rows.isEmpty()) EmptyDrop(t("No repair costs recorded yet. Enter the actual cost when parts are ordered or a repair is fixed.", "Bado hakuna gharama za ukarabati. Andika gharama halisi vipuri vikiagizwa au ukarabati ukikamilika."))
+        if (cv.rows.isEmpty()) EmptyDrop(t("No repair costs recorded yet. Enter the actual cost when parts are ordered or a repair is fixed.", "Bado hakuna gharama za matengenezo. Andika gharama halisi vipuri vikiagizwa au matengenezo yakikamilika."))
         cv.rows.take(shown).forEachIndexed { i, r ->
             val fx = r.step == "fixed"; val hu = C.hue(if (fx) "green" else "amber")
             OcvCard("ocv_cost", i, { IconTile(if (fx) "check" else "box", hu.fg, hu.bg, 40.dp) }, title(r.id, r.title), Money.kes(r.actual), true,
@@ -604,7 +638,7 @@ fun OcvCosts(m: AppModel, s: Snapshot, open: (String) -> Unit) {
             var lm by remember { mutableStateOf<Pair<String, String>?>(null) }
             var saved by remember { mutableStateOf<String?>(null) }
             LaunchedEffect(saved) { if (saved != null) { kotlinx.coroutines.delay(2600); saved = null } }
-            Text(t("Repairs estimated above this need a second admin to approve the cost before parts are ordered. The person who asks can’t approve their own.", "Ukarabati unaokadiriwa zaidi ya kiasi hiki unahitaji msimamizi wa pili kuidhinisha kabla ya kuagiza vipuri. Aliyeomba hawezi kuidhinisha mwenyewe."), style = MaterialTheme.typography.bodySmall, color = C.muted)
+            Text(t("Repairs estimated above this need a second admin to approve the cost before parts are ordered. The person who asks can’t approve their own.", "Matengenezo yanayokadiriwa zaidi ya kiasi hiki yanahitaji msimamizi wa pili kuidhinisha kabla ya kuagiza vipuri. Aliyeomba hawezi kuidhinisha mwenyewe."), style = MaterialTheme.typography.bodySmall, color = C.muted)
             Field(lim, { lim = it.filter { c -> c.isDigit() } }, t("Second approval above (KES)", "Idhini ya pili zaidi ya (KES)"), number = true)
             Btn(t("Save", "Hifadhi"), {
                 scope.launch {
@@ -616,7 +650,7 @@ fun OcvCosts(m: AppModel, s: Snapshot, open: (String) -> Unit) {
             lm?.let { (tone, text) -> Msg(text, tone) }
         }
         HorizontalDivider(color = C.line, modifier = Modifier.padding(horizontal = 14.dp))
-        OcvFold("ocv_csv", "upload", "blue", t("Download", "Pakua"), t("Every cost entry, as a spreadsheet", "Kila gharama, kama jedwali")) {
+        OcvFold("ocv_csv", "upload", "blue", t("Download", "Hamisha"), t("Every cost entry, as a spreadsheet", "Kila gharama, kama jedwali")) {
             Text(t("A CSV file that opens in Excel and Google Sheets: every cost entry from the last 2 years.", "Faili ya CSV inayofunguka kwenye Excel na Google Sheets: kila gharama ya miaka 2 iliyopita."), style = MaterialTheme.typography.bodySmall, color = C.muted)
             Btn(t("Share CSV", "Shiriki CSV"), { shareCsv(ctx, "rafiki-repair-costs-${LocalDate.now()}.csv", costsCsv(cv, s.projects)) }, Modifier.padding(top = 10.dp).fillMaxWidth().testTag("ocv_csv_go"), light = true, icon = "upload")
         }
@@ -682,6 +716,12 @@ internal fun ocvRelText(date: String, today: String): String {
         n < -1 -> t("${-n} days late", "Imechelewa siku ${-n}"); n == -1 -> t("1 day late", "Imechelewa siku 1")
         n == 0 -> t("Today", "Leo"); n == 1 -> t("Tomorrow", "Kesho"); else -> t("In $n days", "Baada ya siku $n")
     }
+}
+
+/** After "Overdue": how long, without saying "late" twice ("Overdue · 3 days", "Imechelewa · siku 3"). */
+internal fun ocvLateShort(date: String, today: String): String {
+    val n = -ocvDays(date, today)
+    return if (n == 1) t("1 day", "siku 1") else t("$n days", "siku $n")
 }
 
 /** Office › Visits: the assigned visits as cards with filters (status and person); the assign form and each
@@ -757,7 +797,7 @@ private fun OcvVisitSheet(m: AppModel, s: Snapshot, a: JSONObject, team: List<St
     var msg by remember { mutableStateOf<Pair<String, String>?>(null) }
     var busy by remember { mutableStateOf(false) }
     OcvSheet("ocv_visit_sheet", close) { hide ->
-        OcvSheetHead({ IconTile(icon, fg, bg, 52.dp) }, label + if (st == "late" || st == "soon") " · " + ocvRelText(a.optString("date"), today) else "", fg, title) { hide {} }
+        OcvSheetHead({ IconTile(icon, fg, bg, 52.dp) }, label + when (st) { "late" -> " · " + ocvLateShort(a.optString("date"), today); "soon" -> " · " + ocvRelText(a.optString("date"), today); else -> "" }, fg, title) { hide {} }
         Column(Modifier.padding(top = 10.dp)) {
             OcvFact(t("Field officer", "Afisa wa uwanjani"), a.optString("to"))
             OcvFact(t("Date", "Tarehe"), runCatching { LocalDate.parse(a.optString("date")).format(DateTimeFormatter.ofPattern("EEEE d MMMM yyyy", ocvLoc())) }.getOrDefault(a.optString("date")))

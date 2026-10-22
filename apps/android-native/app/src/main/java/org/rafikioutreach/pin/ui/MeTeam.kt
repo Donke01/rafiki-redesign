@@ -44,6 +44,11 @@ private fun same(a: String, b: String) = a.trim().equals(b.trim(), ignoreCase = 
 private fun day(iso: String): LocalDate? = runCatching { Instant.parse(iso).atZone(ZoneId.systemDefault()).toLocalDate() }.getOrNull()
 private val WORK = setOf("pin", "visit", "fixed", "new")
 
+/** A water committee's SMS or WhatsApp report (lib/sms.js logs it "by: SMS from +254 7••", src "sms"): shown as
+ *  "Community report" with a phone, and never counted as someone on the team. */
+fun isCommunity(e: JSONObject) = e.optString("src") == "sms" || e.optString("by").startsWith("SMS from") || e.optString("by").startsWith("WhatsApp from")
+fun communityName() = t("Community report", "Ripoti ya jamii")
+
 /** "3 min ago", "2 h ago", "yesterday", "4 days ago". */
 fun ago(iso: String?): String {
     val at = iso?.let { runCatching { Instant.parse(it) }.getOrNull() } ?: return t("never", "bado")
@@ -57,40 +62,26 @@ fun ago(iso: String?): String {
     }
 }
 
-/** My month: pins, visits and fixes this month, the last six weeks, and how many days in a row. */
+/** My month: the last six weeks as a chart (this month's numbers are on the card at the top). */
 @Composable
 fun MyMonth(m: AppModel, act: List<JSONObject>?) {
     val mine = act?.filter { same(it.optString("by"), m.prefs.name) && it.optString("a") in WORK }
     Card(Modifier.padding(top = 14.dp).testTag("my_month")) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally), verticalAlignment = Alignment.CenterVertically) {
             H2(t("My month", "Mwezi wangu"), wide = false)
-            Text(LocalDate.now().month.getDisplayName(java.time.format.TextStyle.FULL, if (org.rafikioutreach.pin.Lang.sw) java.util.Locale("sw") else java.util.Locale.UK), style = MaterialTheme.typography.labelLarge, color = C.muted)
+            Text(t("last 6 weeks", "wiki 6 zilizopita"), style = MaterialTheme.typography.labelLarge, color = C.muted)
         }
-        if (mine == null) { Text(t("Loading…", "Inapakia…"), color = C.muted, style = MaterialTheme.typography.bodyMedium); return@Card }
-        val today = LocalDate.now(); val start = today.withDayOfMonth(1)
-        val month = mine.filter { day(it.optString("at"))?.let { d -> !d.isBefore(start) } == true }
-        Row(Modifier.padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            listOf(Triple("pin", t("Pins", "Mahali"), "pin"), Triple("visit", t("Visits", "Ziara"), "clip"), Triple("fixed", t("Fixed", "Zimerekebishwa"), "wrench")).forEachIndexed { i, (k, l, ic) ->
-                val n = month.count { it.optString("a") == k || (k == "pin" && it.optString("a") == "new") }
-                val hu = C.hue(if (k == "fixed") "repairs" else if (k == "visit") "near" else "pin")
-                val shown = kotlin.math.round(rememberFill(n.toFloat(), 900)).toInt()
-                Column(Modifier.weight(1f).rise(i + 1).clip(RoundedCornerShape(16.dp)).background(hu.bg).padding(vertical = 12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(Ic.get(ic), null, tint = hu.fg, modifier = Modifier.size(18.dp))
-                    Text("$shown", style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold), color = hu.fg, modifier = Modifier.testTag("my_$k"))
-                    Text(l, style = MaterialTheme.typography.labelSmall, color = C.ink)
-                }
-            }
-        }
+        val today = LocalDate.now()
         // the last six weeks, oldest first
-        val weeks = (5 downTo 0).map { w -> val from = today.minusDays((w * 7L) + 6); val to = today.minusDays(w * 7L); mine.count { day(it.optString("at"))?.let { d -> !d.isBefore(from) && !d.isAfter(to) } == true } }
-        val top = maxOf(1, weeks.max())
-        Text(t("Last 6 weeks", "Wiki 6 zilizopita"), style = MaterialTheme.typography.labelMedium, color = C.muted, modifier = Modifier.padding(top = 14.dp, bottom = 6.dp))
-        Row(Modifier.fillMaxWidth().height(64.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.Bottom) {
-            weeks.forEachIndexed { i, n ->
-                val f = rememberFill(n.toFloat() / top, 800 + i * 80)
+        val weeks = mine?.let { l -> (5 downTo 0).map { w -> val from = today.minusDays((w * 7L) + 6); val to = today.minusDays(w * 7L); l.count { day(it.optString("at"))?.let { d -> !d.isBefore(from) && !d.isAfter(to) } == true } } }
+        val top = maxOf(1, weeks?.max() ?: 1)
+        Row(Modifier.padding(top = 10.dp).fillMaxWidth().height(64.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.Bottom) {
+            (weeks ?: List(6) { -1 }).forEachIndexed { i, n ->
                 Column(Modifier.weight(1f).fillMaxHeight(), verticalArrangement = Arrangement.Bottom, horizontalAlignment = Alignment.CenterHorizontally) {
+                    if (n < 0) { Skel(Modifier.fillMaxWidth().fillMaxHeight(0.3f + 0.1f * (i % 3))); return@Column }
+                    val f = rememberFill(n.toFloat() / top, 800 + i * 80)
                     if (n > 0) Text("$n", style = MaterialTheme.typography.labelSmall, color = C.muted)
-                    Box(Modifier.fillMaxWidth().fillMaxHeight(maxOf(0.06f, f * 0.8f)).clip(RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp)).background(if (i == 5) C.blue else C.blue.copy(alpha = 0.35f)))
+                    Box(Modifier.fillMaxWidth().fillMaxHeight(maxOf(0.06f, f * 0.8f)).clip(RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp)).background(if (i == 5) C.blue else C.blue.copy(alpha = 0.35f)).testTag("my_week"))
                 }
             }
         }
@@ -99,6 +90,35 @@ fun MyMonth(m: AppModel, act: List<JSONObject>?) {
             Text(t("This week", "Wiki hii"), style = MaterialTheme.typography.labelSmall, color = C.muted)
         }
     }
+}
+
+// Due dates as the brief writes them. A small local helper for now; it can join the shared date helper later.
+private val DAYS_SW = listOf("Jtt", "Jnn", "Jtn", "Alh", "Iju", "Jmo", "Jpl")
+private val MONTHS_SW = listOf("Jan", "Feb", "Mac", "Apr", "Mei", "Jun", "Jul", "Ago", "Sep", "Okt", "Nov", "Des")
+/** "Thu 24 Oct" ("Alh 24 Okt"), or "24 Oct 2027" in another year. */
+internal fun dueDay(d: LocalDate, today: LocalDate = LocalDate.now()): String {
+    val sw = org.rafikioutreach.pin.Lang.sw
+    val mon = if (sw) MONTHS_SW[d.monthValue - 1] else d.month.getDisplayName(java.time.format.TextStyle.SHORT, java.util.Locale.UK).take(3)
+    if (d.year != today.year) return "${d.dayOfMonth}\u00A0$mon\u00A0${d.year}"
+    val wd = if (sw) DAYS_SW[d.dayOfWeek.value - 1] else d.dayOfWeek.getDisplayName(java.time.format.TextStyle.SHORT, java.util.Locale.UK).take(3)
+    return "$wd\u00A0${d.dayOfMonth}\u00A0$mon"
+}
+/** "due today", "due tomorrow", "due in 2 days", "due Thu 24 Oct", "3 days late". */
+internal fun dueText(iso: String, today: LocalDate = LocalDate.now()): String {
+    val d = runCatching { LocalDate.parse(iso.take(10)) }.getOrNull() ?: return iso
+    val n = ChronoUnit.DAYS.between(today, d).toInt()
+    return when {
+        n < -1 -> t("${-n} days late", "imechelewa siku ${-n}"); n == -1 -> t("1 day late", "imechelewa siku 1")
+        n == 0 -> t("due today", "mwisho leo"); n == 1 -> t("due tomorrow", "mwisho kesho")
+        n < 7 -> t("due in $n days", "mwisho baada ya siku $n")
+        else -> t("due ", "mwisho ") + dueDay(d, today)
+    }
+}
+/** The short tag on the right: "Today", "Tomorrow", "In 2 days", "Thu 24 Oct". */
+internal fun dueTag(iso: String, today: LocalDate = LocalDate.now()): String {
+    val d = runCatching { LocalDate.parse(iso.take(10)) }.getOrNull() ?: return iso
+    val n = ChronoUnit.DAYS.between(today, d).toInt()
+    return when { n == 0 -> t("Today", "Leo"); n == 1 -> t("Tomorrow", "Kesho"); n in 2..6 -> t("In $n days", "Baada ya siku $n"); else -> dueDay(d, today) }
 }
 
 /** Visits and repair jobs given to me, overdue first. */
@@ -113,11 +133,11 @@ fun MyWork(snap: Snapshot?, open: (String) -> Unit) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally), verticalAlignment = Alignment.CenterVertically) { H2(t("My work", "Kazi yangu"), wide = false); Tag("${visits.size + jobs.size}", C.tint, C.deep) }
         visits.sortedByDescending { it.third }.forEach { (a, date, late) ->
             WorkRow("cal", "due", a.title.ifBlank { snap.projects.firstOrNull { it.id == a.id }?.title ?: a.id },
-                t("Visit", "Ziara") + (if (a.note.isNotBlank()) " · " + a.note else "") + " · " + t("from ", "kutoka ") + a.by,
-                if (late) t("Overdue", "Imechelewa") else if (date == today) t("Today", "Leo") else date.drop(5), if (late) "bad" else if (date == today) "ok" else "") { open(a.id) }
+                t("Visit", "Ziara") + (if (a.note.isNotBlank()) " · " + a.note else "") + " · " + t("from\u00A0", "kutoka\u00A0") + a.by,
+                if (late) t("Overdue", "Imechelewa") else dueTag(date), if (late) "bad" else if (date == today) "ok" else "") { open(a.id) }
         }
         jobs.forEach { (p, r) ->
-            WorkRow("wrench", "repairs", p.title, t("Repair job", "Kazi ya matengenezo") + (r?.due?.takeIf { it.isNotBlank() }?.let { " · " + t("due ", "mwisho ") + it.drop(5) } ?: ""),
+            WorkRow("wrench", "repairs", p.title, t("Repair job", "Kazi ya matengenezo") + (r?.due?.takeIf { it.isNotBlank() }?.let { " · " + dueText(it) } ?: ""),
                 if (r?.due?.isNotBlank() == true && r.due < today) t("Overdue", "Imechelewa") else t("Job", "Kazi"), if (r?.due?.isNotBlank() == true && r.due < today) "bad" else "warn") { open(p.id) }
         }
     }
@@ -254,17 +274,21 @@ fun TeamMonth(m: AppModel, act: List<JSONObject>?) {
         SmallSeg(listOf("w" to t("This week", "Wiki hii"), "m" to t("This month", "Mwezi huu")), if (month) "m" else "w", Modifier.padding(top = 4.dp).fillMaxWidth(), tag = "tm_") { month = it == "m" }
         if (act == null) { Text(t("Loading…", "Inapakia…"), color = C.muted, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 8.dp)); return@Card }
         val today = LocalDate.now(); val from = if (month) today.withDayOfMonth(1) else today.minusDays((today.dayOfWeek.value - 1).toLong())
-        val rows = act.filter { it.optString("a") in WORK && day(it.optString("at"))?.let { d -> !d.isBefore(from) } == true }
+        val all = act.filter { it.optString("a") in WORK && day(it.optString("at"))?.let { d -> !d.isBefore(from) } == true }
+        val rows = all.filterNot { isCommunity(it) }
+        val community = all.filter { isCommunity(it) }
         val by = rows.groupBy { it.optString("by").trim() }.toSortedMap(String.CASE_INSENSITIVE_ORDER)
         val tot = { a: String -> rows.count { it.optString("a") == a || (a == "pin" && it.optString("a") == "new") } }
         Row(Modifier.padding(top = 12.dp).fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(C.tint).padding(horizontal = 14.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
             Text(t("Together", "Pamoja"), style = MaterialTheme.typography.titleSmall, color = C.deep, modifier = Modifier.weight(1f))
             Text(t("${tot("pin")} pins · ${tot("visit")} visits · ${tot("fixed")} fixed", "mahali ${tot("pin")} · ziara ${tot("visit")} · ${tot("fixed")} zimerekebishwa"), style = MaterialTheme.typography.labelMedium, color = C.deep, modifier = Modifier.testTag("tm_total"))
         }
-        if (by.isEmpty()) Text(t("Nothing yet in this period.", "Hakuna bado katika kipindi hiki."), style = MaterialTheme.typography.bodyMedium, color = C.muted, modifier = Modifier.padding(top = 10.dp))
-        by.forEach { (name, l) ->
-            Row(Modifier.padding(top = 10.dp).fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Text(name, style = MaterialTheme.typography.titleSmall, color = C.ink, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+        if (by.isEmpty() && community.isEmpty()) Text(t("Nothing yet in this period.", "Hakuna bado katika kipindi hiki."), style = MaterialTheme.typography.bodyMedium, color = C.muted, modifier = Modifier.padding(top = 10.dp))
+        // the team in name order, then water committees' reports on a line of their own
+        (by.entries.map { it.key to it.value } + (if (community.isNotEmpty()) listOf("" to community) else emptyList())).forEach { (name, l) ->
+            Row(Modifier.padding(top = 10.dp).fillMaxWidth().then(if (name.isEmpty()) Modifier.testTag("tm_community") else Modifier), verticalAlignment = Alignment.CenterVertically) {
+                if (name.isEmpty()) { Icon(Ic.get("phone"), null, tint = C.muted, modifier = Modifier.size(16.dp)); Spacer(Modifier.width(6.dp)) }
+                Text(name.ifEmpty { communityName() }, style = MaterialTheme.typography.titleSmall, color = if (name.isEmpty()) C.muted else C.ink, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
                 listOf("pin" to "pin", "visit" to "near", "fixed" to "repairs").forEach { (a, hue) ->
                     val n = l.count { it.optString("a") == a || (a == "pin" && it.optString("a") == "new") }
                     val hu = C.hue(hue)
@@ -288,17 +312,19 @@ fun TeamFeed(act: List<JSONObject>?, snap: Snapshot?, open: (String) -> Unit) {
         val list = act.filter { it.optString("a") in WORK || it.optString("a") == "job" }.sortedByDescending { it.optString("at") }
         if (list.isEmpty()) { EmptyDrop(t("Nothing yet. Pins, visits and fixes show here.", "Bado hakuna. Mahali, ziara na marekebisho yataonekana hapa.")); return@Card }
         list.take(if (more) 40 else 8).forEachIndexed { i, e ->
-            val (icon, hue) = when (e.optString("a")) { "pin" -> "pin" to "pin"; "visit" -> "clip" to "near"; "fixed" -> "check" to "near"; "new" -> "plus" to "new"; else -> "wrench" to "repairs" }
+            val sms = isCommunity(e)
+            val (icon, hue) = if (sms) "phone" to "slate" else when (e.optString("a")) { "pin" -> "pin" to "pin"; "visit" -> "clip" to "near"; "fixed" -> "check" to "near"; "new" -> "plus" to "new"; else -> "wrench" to "repairs" }
             val hu = C.hue(hue)
             val id = e.optString("id")
             val known = snap?.projects?.any { it.id == id } == true
-            Row(Modifier.padding(top = 8.dp).rise(i, step = 40).fillMaxWidth().clip(RoundedCornerShape(14.dp)).then(if (known) Modifier.clickable { open(id) } else Modifier).padding(6.dp).testTag("feed_row"), verticalAlignment = Alignment.CenterVertically) {
+            Row(Modifier.padding(top = 8.dp).rise(i, step = 40).fillMaxWidth().clip(RoundedCornerShape(14.dp)).then(if (known) Modifier.clickable { open(id) } else Modifier).padding(6.dp).testTag(if (sms) "feed_community" else "feed_row"), verticalAlignment = Alignment.CenterVertically) {
                 Box(Modifier.size(34.dp).clip(CircleShape).background(hu.bg), contentAlignment = Alignment.Center) { Icon(Ic.get(icon), null, tint = hu.fg, modifier = Modifier.size(17.dp)) }
                 Spacer(Modifier.width(10.dp))
                 Column(Modifier.weight(1f)) {
                     Text(androidx.compose.ui.text.buildAnnotatedString {
-                        withStyle(androidx.compose.ui.text.SpanStyle(fontWeight = FontWeight.Bold)) { append(e.optString("by").substringBefore(' ')) }
-                        append(" " + verb(e).lowercase() + " " + (snap?.projects?.firstOrNull { it.id == id }?.title ?: e.optString("t")))
+                        withStyle(androidx.compose.ui.text.SpanStyle(fontWeight = FontWeight.Bold)) { append(if (sms) communityName() else e.optString("by").substringBefore(' ')) }
+                        append((if (sms) ": " else " " + verb(e).lowercase() + " ") + (snap?.projects?.firstOrNull { it.id == id }?.title ?: e.optString("t")))
+                        if (sms && e.optString("a") == "fixed") append(" · " + t("working again", "inafanya kazi tena"))
                         if (e.optString("a") == "visit" && e.optString("s").isNotBlank()) append(" · " + stateName(e.optString("s")))
                     }, style = MaterialTheme.typography.bodyMedium, color = C.text, maxLines = 2, overflow = TextOverflow.Ellipsis)
                     Text(ago(e.optString("at")), style = MaterialTheme.typography.labelSmall, color = C.muted)

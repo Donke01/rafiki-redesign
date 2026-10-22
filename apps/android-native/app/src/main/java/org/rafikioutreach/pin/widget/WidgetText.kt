@@ -44,8 +44,9 @@ object WidgetText {
         return if (parts.isEmpty()) t("All caught up ✓", "Umemaliza yote ✓") else parts.joinToString(" · ")
     }
 
-    fun dueLabel(n: Int) = if (n == 1) t("Visit due", "Ziara inasubiri") else t("Visits due", "Ziara zinasubiri")
-    fun urgentLabel(n: Int) = if (n == 1) t("Urgent repair", "Tengenezo la haraka") else t("Urgent repairs", "Matengenezo ya haraka")
+    // short enough for a third of the widget, so nothing ends in "…"
+    fun dueLabel(n: Int) = if (n == 1) t("Visit due", "Kutembelea") else t("Visits due", "Kutembelea")
+    fun urgentLabel(n: Int) = if (n == 1) t("Urgent repair", "La haraka") else t("Urgent repairs", "Ya haraka")
     fun mineLabel() = t("For you", "Zako")
     fun nearLabel(small: Boolean) = if (small) t("Nearby", "Karibu") else t("Visit nearby", "Tembelea karibu")
     fun pinLabel(small: Boolean) = if (small) t("Pin", "Weka") else t("Pin a location", "Weka mahali")

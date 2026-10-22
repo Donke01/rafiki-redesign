@@ -179,7 +179,7 @@ class OfficeTest {
         waitFor("Meril Kiprop")
         // a short list grouped by role: Reid (admin, Cloudflare PIN) under Admins, Meril under Field team
         rule.onNodeWithTag("team_admins").assertExists(); rule.onNodeWithTag("team_field").assertExists()
-        rule.onNodeWithTag("tm_Reid Anderson").assertExists(); rule.onNodeWithText("PIN in Cloudflare").assertExists()
+        rule.onNodeWithTag("tm_Reid Anderson").assertExists(); rule.onNodeWithText("PIN set by the office").assertExists()
         assertTrue(rule.onNodeWithTag("team_admins").fetchSemanticsNode().boundsInRoot.top < rule.onNodeWithTag("tm_Reid Anderson").fetchSemanticsNode().boundsInRoot.top)
         assertTrue(rule.onNodeWithTag("tm_Reid Anderson").fetchSemanticsNode().boundsInRoot.top < rule.onNodeWithTag("team_field").fetchSemanticsNode().boundsInRoot.top)
         assertTrue(rule.onNodeWithTag("team_field").fetchSemanticsNode().boundsInRoot.top < rule.onNodeWithTag("tm_Meril Kiprop").fetchSemanticsNode().boundsInRoot.top)
@@ -224,7 +224,7 @@ class OfficeTest {
         // Cloudflare person: a short note and only the re-add action, which opens Add a person already filled in
         rule.onNodeWithTag("tm_Reid Anderson").performScrollTo().performClick()
         rule.waitUntil(5000) { rule.onAllNodesWithTag("team_sheet").fetchSemanticsNodes().isNotEmpty() }
-        rule.onNodeWithText("Set in Cloudflare — change it there, or re-add here with an app PIN.").assertExists()
+        rule.onNodeWithText("This PIN was set up on the server, so it can’t be changed here. Re-add them with an app PIN to manage it here.").assertExists()
         rule.onAllNodesWithTag("tm_save").assertCountEquals(0); rule.onAllNodesWithTag("tm_newpin").assertCountEquals(0)
         sheetShot("23e-team-cloudflare")
         rule.onNodeWithTag("tm_readd").performScrollTo().performClick()
@@ -245,7 +245,7 @@ class OfficeTest {
         rule.onNodeWithTag("nav_office").performClick()
         waitFor("Kapsaret Borehole"); rule.mainClock.advanceTimeBy(1500)
         rule.onNodeWithTag("ocv_overview_head").assertExists(); rule.onNodeWithText("3 of 4 projects on the map").assertExists(); rule.onNodeWithText("1 still needs a location").assertExists()
-        rule.onNodeWithText("1 urgent · KES 4,500").assertExists()
+        rule.onNodeWithText("1 urgent · KES\u00A04,500").assertExists()
         shot("ocv-01-overview")
         rule.onNodeWithTag("ocv_countries").performScrollTo(); shot("ocv-01b-overview-countries")
         rule.onNodeWithTag("ocv_c_ke").performScrollTo().performClick()
@@ -369,8 +369,8 @@ class OfficeTest {
         rule.onNodeWithTag("nav_office").performClick()
         waitFor("Muhtasari")
         shot("24-office-sw")
-        rule.onNodeWithTag("nav_me").performClick()
-        tap("Fungua ripoti")
+        rule.onNodeWithTag("nav_me").performClick(); rule.waitForIdle()
+        rule.onNodeWithTag("me_report").performScrollTo().performClick()
         waitFor("Ripoti ya uwanjani")
         waitFor("Kapsaret Borehole")
         shot("25-report-sw")

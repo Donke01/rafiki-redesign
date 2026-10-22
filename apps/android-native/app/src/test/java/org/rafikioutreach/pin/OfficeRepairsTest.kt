@@ -257,7 +257,8 @@ class OfficeRepairsTest {
             tag("rr_head").performScrollTo(); shot("80-repairs-dark")
             tag("rr_job_105").performScrollTo().performClick(); waitTag("rr_job_sheet"); sheetShot("80b-repairs-sheet-dark")
             close("rr_job_sheet")
-            tag("o_review").performScrollTo().performClick(); waitTag("rr_rev_c1"); rule.mainClock.advanceTimeBy(1200)
+            // the Office tabs are a sideways strip now: bring the strip on screen, then the chip
+            tag("office_strip").performScrollTo(); tag("o_review").performScrollTo(); rule.mainClock.advanceTimeBy(800); tag("o_review").performClick(); waitTag("rr_rev_c1"); rule.mainClock.advanceTimeBy(1200)
             tag("rr_head").performScrollTo(); shot("81-review-dark")
             tag("rr_rev_r1").performScrollTo().performClick(); waitTag("rr_rev_sheet"); sheetShot("81b-review-sheet-dark")
             org.rafikioutreach.pin.ui.Look.mode = "sun"; sheetShot("82-review-sheet-sun")
@@ -273,7 +274,7 @@ class OfficeRepairsTest {
         Lang.sw = true
         try {
             val m = model(); openRepairs(m)
-            rule.onNodeWithText("Kazi za ukarabati").assertExists(); rule.onNodeWithText("Hazijagawiwa · 2").assertExists()
+            rule.onNodeWithText("Kazi za matengenezo").assertExists(); rule.onNodeWithText("Hazijagawiwa · 2").assertExists()
             tag("rr_head").performScrollTo(); shot("83-repairs-sw")
             tag("rr_job_104").performScrollTo(); shot("83a-repairs-cards-sw")
             tag("rr_job_104").performClick(); waitTag("rr_job_sheet"); waitText("Weka imerekebishwa")

@@ -101,7 +101,8 @@ fun MeHero(m: AppModel, act: List<JSONObject>?, snap: Snapshot?, report: () -> U
                 val n = count(k)
                 val shown = n?.let { kotlin.math.round(rememberFill(it.toFloat(), 900)).toInt() }
                 Column(Modifier.weight(1f).clip(RoundedCornerShape(16.dp)).background(Color(0x1FFFFFFF)).padding(vertical = 12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(shown?.toString() ?: "–", color = Color.White, style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold), modifier = Modifier.testTag("hero_$k"))
+                    if (shown == null) Skel(Modifier.padding(vertical = 5.dp).size(34.dp, 22.dp), dark = true)
+                    else Text(shown.toString(), color = Color.White, style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold), modifier = Modifier.testTag("hero_$k"))
                     Text(l, color = Color(0xFFCFE8FA), style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold))
                 }
             }
@@ -112,7 +113,7 @@ fun MeHero(m: AppModel, act: List<JSONObject>?, snap: Snapshot?, report: () -> U
                 color = Color.White, style = MaterialTheme.typography.labelLarge, modifier = Modifier.testTag("my_streak"))
         }
         Row(Modifier.padding(top = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            HeroBtn(t("Lock the app", "Funga programu"), "lock", true, Modifier.weight(1f)) { m.lockOrSignOut() }
+            HeroBtn(t("Lock the app", "Funga kwa PIN"), "lock", true, Modifier.weight(1f)) { m.lockOrSignOut() }
             HeroBtn(t("Monthly report", "Ripoti ya mwezi"), "file", false, Modifier.weight(1f).testTag("me_report"), report)
         }
     }
@@ -133,10 +134,10 @@ private fun HeroBtn(text: String, icon: String, solid: Boolean, modifier: Modifi
 
 /** An on/off switch drawn like the design: green when on. */
 @Composable
-fun Toggle(on: Boolean, label: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
+fun Toggle(on: Boolean, label: String, modifier: Modifier = Modifier, enabled: Boolean = true, onClick: () -> Unit) {
     val x by animateDpAsState(if (on) 23.dp else 3.dp, label = "knob")
     Box(modifier.size(50.dp, 30.dp).clip(RoundedCornerShape(99.dp)).background(if (on) Green else Color(0xFFC9D1D8))
-        .clickable(role = Role.Switch, onClick = onClick).semantics { contentDescription = label; stateDescription = if (on) "on" else "off" }) {
+        .clickable(enabled = enabled, role = Role.Switch, onClick = onClick).semantics { contentDescription = label; stateDescription = if (on) "on" else "off" }) {
         Box(Modifier.offset(x = x, y = 3.dp).size(24.dp).shadow(1.dp, CircleShape).clip(CircleShape).background(Color.White))
     }
 }

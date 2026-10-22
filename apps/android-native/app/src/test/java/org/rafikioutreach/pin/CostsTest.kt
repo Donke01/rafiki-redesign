@@ -137,7 +137,7 @@ class CostsTest {
         assertEquals("", Money.blocked(big.copy(step = "parts"), "fixed", 50000))
         assertFalse(Money.canDecide("Reid Anderson", " reid anderson")); assertTrue(Money.canDecide("Reid Anderson", "Jessica")); assertFalse(Money.canDecide("", ""))
         assertEquals(12500L, Money.parse("12,500")); assertNull(Money.parse("")); assertNull(Money.parse("-3"))
-        assertEquals("KES 85,000", Money.kes(85000))
+        assertEquals("KES\u00A085,000", Money.kes(85000))
         val s = Snapshot.from(snapshot())
         assertEquals("pending", s.repairs["105"]!!.approval!!.status); assertEquals(50000, s.approveAbove)
         val p = s.people!!; assertEquals(48250, p.total); assertEquals(48250 - 42300, p.growth.toInt()); assertEquals(12, p.trend.size); assertNull(p.trend[0].second)
@@ -235,7 +235,7 @@ class CostsTest {
         rule.onNodeWithTag("nav_list").performClick(); rule.waitForIdle()
         rule.onNodeWithTag("projects").performScrollToNode(hasText("Kapsaret Borehole"))
         rule.onNodeWithText("Kapsaret Borehole").performClick()
-        rule.waitUntil(5000) { rule.onAllNodesWithText("Repairs: KES 36,500 in the last 12 months (3 repairs)").fetchSemanticsNodes().isNotEmpty() }
+        rule.waitUntil(5000) { rule.onAllNodesWithText("Repairs: KES\u00A036,500 in the last 12 months (3 repairs)").fetchSemanticsNodes().isNotEmpty() }
         rule.onNodeWithTag("approval_needed").performScrollTo()
         shot("66-tracker-needs-approval")
         rule.onNodeWithTag("parts_btn").performScrollTo().performClick()

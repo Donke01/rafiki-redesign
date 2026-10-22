@@ -75,7 +75,7 @@ import java.util.Locale
 /** What happened to a community SMS / WhatsApp message: label and tone ("bad", "warn", "ok", "has", "off"). */
 fun smsResult(result: String): Pair<String, String> = when (result) {
     "reported-broken" -> t("Not working", "Haifanyi kazi") to "bad"
-    "reported-repair" -> t("Needs repair", "Inahitaji ukarabati") to "warn"
+    "reported-repair" -> t("Needs repair", "Inahitaji matengenezo") to "warn"
     "already-open" -> t("Already reported", "Imesharipotiwa") to "has"
     "fixed" -> t("Working again", "Inafanya kazi tena") to "ok"
     "fixed-unconfirmed" -> t("Says it works: check", "Wanasema inafanya kazi: hakikisha") to "ok"
@@ -100,11 +100,11 @@ internal fun smsBucket(result: String): String = when (result) {
 
 /** One sentence on what the app did with the message. */
 internal fun smsExplain(result: String): String = when (result) {
-    "reported-broken" -> t("A repair was opened and the admins were e-mailed.", "Ukarabati ulifunguliwa na wasimamizi walitumiwa barua pepe.")
-    "reported-repair" -> t("A repair was opened.", "Ukarabati ulifunguliwa.")
-    "already-open" -> t("A repair was already open, so a note was added.", "Ukarabati ulikuwa wazi tayari, kwa hiyo maelezo yaliongezwa.")
-    "fixed" -> t("The open repair was closed.", "Ukarabati uliokuwa wazi ulifungwa.")
-    "fixed-unconfirmed" -> t("Noted on monday.com; the repair stays open until the team checks.", "Imeandikwa kwenye monday.com; ukarabati unabaki wazi hadi timu ihakikishe.")
+    "reported-broken" -> t("A repair was opened and the admins were e-mailed.", "Matengenezo yalifunguliwa na wasimamizi walitumiwa barua pepe.")
+    "reported-repair" -> t("A repair was opened.", "Matengenezo yalifunguliwa.")
+    "already-open" -> t("A repair was already open, so a note was added.", "Matengenezo yalikuwa wazi tayari, kwa hiyo maelezo yaliongezwa.")
+    "fixed" -> t("The open repair was closed.", "Matengenezo yaliyokuwa wazi yalifungwa.")
+    "fixed-unconfirmed" -> t("Noted on monday.com; the repair stays open until the team checks.", "Imeandikwa kwenye monday.com; matengenezo yanabaki wazi hadi timu ihakikishe.")
     "noted-working" -> t("Noted on monday.com.", "Imeandikwa kwenye monday.com.")
     "help" -> t("They were sent the instructions.", "Walitumiwa maelekezo.")
     "unknown" -> t("The message wasn’t understood; they were sent the instructions.", "Ujumbe haukueleweka; walitumiwa maelekezo.")
@@ -193,8 +193,9 @@ fun CommunityReports(m: AppModel, open: (String) -> Unit) {
         Triple("other", t("Other", "Nyingine"), reps.count { smsBucket(it.optString("result")) == "other" }),
         Triple("ignored", t("Ignored", "Zimepuuzwa"), reps.count { smsBucket(it.optString("result")) == "ignored" }),
     )
-    Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(top = 16.dp, bottom = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        filters.forEach { (k, label, n) -> Chip("$label · $n", null, filter == k, { filter = k; shown = 40 }, tag = "sms_filter_$k", hue = "blue") }
+    val (fScroll, fSpot) = rememberKeepInView(filter)
+    Row(Modifier.fillMaxWidth().horizontalScroll(fScroll).padding(top = 16.dp, bottom = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        filters.forEach { (k, label, n) -> Box(fSpot(k)) { Chip("$label · $n", null, filter == k, { filter = k; shown = 40 }, tag = "sms_filter_$k", hue = "blue") } }
     }
     val list = reps.filter { filter == "all" || smsBucket(it.optString("result")) == filter }
     if (list.isEmpty()) EmptyDrop(if (reps.isEmpty()) t("No messages yet. When a water committee texts the RAFIKI number, it shows here.", "Hakuna ujumbe bado. Kamati ya maji ikituma ujumbe kwa namba ya RAFIKI, utaonekana hapa.")
@@ -213,7 +214,16 @@ fun CommunityReports(m: AppModel, open: (String) -> Unit) {
             OnRow(at.optBoolean("on"), "SMS (Africa’s Talking)", "sms_at")
             OnRow(at.optBoolean("replies"), t("Answers by SMS", "Majibu kwa SMS"), "sms_replies")
             OnRow(tw.optBoolean("on"), "WhatsApp / SMS (Twilio)", "sms_twilio")
-            Vars(at.optJSONObject("vars")); Vars(tw.optJSONObject("vars"))
+            // in plain words; the setting names for whoever looks after the website are folded away
+            val vars = listOfNotNull(at.optJSONObject("vars"), tw.optJSONObject("vars")).flatMap { v -> v.keys().asSequence().map { it to v.optBoolean(it) }.toList() }
+            if (vars.isNotEmpty()) {
+                val missing = vars.count { !it.second }
+                Text(if (missing == 0) t("Everything it needs is set up.", "Kila kinachohitajika kimewekwa.")
+                     else if (missing == 1) t("1 setting still needs adding on the server by whoever looks after the website.", "Mpangilio 1 bado unahitaji kuongezwa kwenye seva na anayesimamia tovuti.")
+                     else t("$missing settings still need adding on the server by whoever looks after the website.", "Mipangilio $missing bado inahitaji kuongezwa kwenye seva na anayesimamia tovuti."),
+                    style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 12.dp).testTag("sms_vars_line"))
+                TechDetails(vars, "sms_tech")
+            }
             Text(t("Paste these addresses in Africa’s Talking or Twilio:", "Bandika anwani hizi kwenye Africa’s Talking au Twilio:"), style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 12.dp))
             (j.optJSONObject("urls") ?: JSONObject()).let { u -> listOf(u.optString("at"), u.optString("twilio")).filter { it.isNotBlank() }.forEach { CopyLine(it) } }
         }
@@ -235,8 +245,9 @@ fun CommunityReports(m: AppModel, open: (String) -> Unit) {
             OnRow(voice.optBoolean("on"), t("Typed out on monday.com", "Huandikwa kwenye monday.com"), "voice_on")
             val missing = voice.optJSONArray("missing")?.let { a -> (0 until a.length()).map { a.getString(it) } } ?: emptyList()
             Text(if (voice.optBoolean("on")) t("Voice notes from visits are typed out (Kiswahili or English) and added to the visit’s note, so History shows them.", "Sauti za ziara zinaandikwa (Kiswahili au Kiingereza) na kuongezwa kwenye maelezo ya ziara.")
-                else t("Off. Add ", "Imezimwa. Ongeza ") + missing.ifEmpty { listOf("OPENAI_API_KEY") }.joinToString(", ") + t(" in Cloudflare to switch it on.", " kwenye Cloudflare kuiwasha."),
+                else t("Off. Whoever looks after the website can switch it on.", "Imezimwa. Anayesimamia tovuti anaweza kuiwasha."),
                 style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 6.dp))
+            if (!voice.optBoolean("on")) TechDetails(missing.ifEmpty { listOf("OPENAI_API_KEY") }.map { it to false }, "voice_tech")
         }
     }
 
@@ -424,11 +435,21 @@ private fun OnRow(on: Boolean, label: String, tag: String) {
     }
 }
 
+/** "Technical details": the server's setting names (✓ when set), folded away for whoever looks after the website. */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun Vars(v: JSONObject?) {
-    if (v == null) return
-    FlowRow(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        v.keys().asSequence().toList().forEach { k -> val on = v.optBoolean(k); Tag((if (on) "✓ " else "") + k, if (on) C.okBg else C.bg, if (on) C.ok else C.muted) }
+internal fun TechDetails(names: List<Pair<String, Boolean>>, tag: String) {
+    var open by remember { mutableStateOf(false) }
+    Column(Modifier.padding(top = 8.dp).fillMaxWidth().testTag(tag)) {
+        Row(Modifier.clip(RoundedCornerShape(10.dp)).clickable(role = Role.Button) { open = !open }.heightIn(min = 40.dp).padding(end = 8.dp).testTag(tag + "_toggle"), verticalAlignment = Alignment.CenterVertically) {
+            Text(t("Technical details", "Maelezo ya kiufundi"), style = MaterialTheme.typography.labelLarge.copy(fontSize = 13.sp), color = C.blue2)
+            Spacer(Modifier.width(4.dp)); Icon(Ic.get("down"), null, tint = C.blue2, modifier = Modifier.size(16.dp).rotate(if (open) 180f else 0f))
+        }
+        if (open) {
+            Text(t("Setting names on the server (Cloudflare), for whoever looks after the website:", "Majina ya mipangilio kwenye seva (Cloudflare), kwa anayesimamia tovuti:"), style = MaterialTheme.typography.bodySmall, color = C.muted)
+            FlowRow(Modifier.padding(top = 6.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                names.forEach { (k, on) -> Tag((if (on) "✓ " else "") + k, if (on) C.okBg else C.bg, if (on) C.ok else C.muted) }
+            }
+        }
     }
 }

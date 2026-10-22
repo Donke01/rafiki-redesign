@@ -119,12 +119,26 @@ fun Tile(label: String, icon: String, selected: Boolean, onClick: () -> Unit, mo
         ) {
             Icon(Ic.get(icon), null, tint = if (selected) Color.White else C.blue, modifier = Modifier.size(22.dp))
             Spacer(Modifier.size(4.dp))
-            Text(label, color = if (selected) Color.White else C.ink, style = MaterialTheme.typography.labelSmall, textAlign = TextAlign.Center, lineHeight = 13.sp)
+            FitWords(label, MaterialTheme.typography.labelSmall.copy(lineHeight = 13.sp, textAlign = TextAlign.Center), if (selected) Color.White else C.ink)
         }
         if (badge > 0) Text(
             "$badge", color = if (selected) Red else Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold,
             modifier = Modifier.align(Alignment.TopCenter).padding(start = 30.dp, top = 5.dp).clip(CircleShape).background(if (selected) Color.White else Red).padding(horizontal = 6.dp, vertical = 1.dp),
         )
+    }
+}
+
+/** Up to two lines that wrap only between words: the text gets a little smaller until its longest word fits the width,
+ *  so a long Kiswahili word ("Matengenezo") never splits in the middle. */
+@Composable
+fun FitWords(text: String, style: androidx.compose.ui.text.TextStyle, color: Color, modifier: Modifier = Modifier, align: Alignment = Alignment.Center, lines: Int = 2) {
+    var size by remember(text, style) { mutableStateOf(style.fontSize.value) }
+    Box(modifier, contentAlignment = align) {
+        Text(text, color = color, style = style.copy(fontSize = size.sp, lineHeight = (size + 2).sp), maxLines = lines, onTextLayout = { r ->
+            // a line that ends inside a word, or text that doesn't fit: try a little smaller
+            val broken = (0 until r.lineCount - 1).any { l -> val e = r.getLineEnd(l); e in 1 until text.length && !text[e - 1].isWhitespace() && !text[e].isWhitespace() }
+            if ((broken || r.hasVisualOverflow) && size > 8f) size -= 0.5f
+        })
     }
 }
 

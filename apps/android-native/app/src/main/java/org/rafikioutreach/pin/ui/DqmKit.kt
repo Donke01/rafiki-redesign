@@ -129,15 +129,16 @@ private fun DqmStat(modifier: Modifier, x: DqmNum, on: Boolean, onNum: (String) 
             .heightIn(min = 44.dp).padding(horizontal = 10.dp, vertical = 9.dp),
     ) {
         Text("${x.n}", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold), color = col)
-        Text(x.label, style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp, lineHeight = 15.sp), color = C.muted)
+        FitWords(x.label, MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp, lineHeight = 15.sp), C.muted, Modifier.fillMaxWidth(), Alignment.CenterStart, 3)
     }
 }
 
 /** Filter chips with counts, in a row that scrolls sideways. */
 @Composable
 internal fun DqmChips(items: List<Triple<String, String, Int>>, picked: String, tagPrefix: String, hue: String = "blue", onPick: (String) -> Unit) {
-    Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(top = 14.dp, bottom = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        items.forEach { (k, label, n) -> Chip("$label · $n", null, picked == k, { onPick(k) }, tag = tagPrefix + k, hue = hue) }
+    val (scroll, spot) = rememberKeepInView(picked)
+    Row(Modifier.fillMaxWidth().horizontalScroll(scroll).padding(top = 14.dp, bottom = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        items.forEach { (k, label, n) -> Box(spot(k)) { Chip("$label · $n", null, picked == k, { onPick(k) }, tag = tagPrefix + k, hue = hue) } }
     }
 }
 

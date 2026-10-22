@@ -123,10 +123,14 @@ val Palette.glass2: Color get() = if (dark) Color(0xB81E2A36) else Color(0xC7FFF
 val Palette.glassEdge: Color get() = if (dark) Color(0x17FFFFFF) else Color(0xE6FFFFFF)
 val Ink = Color(0xFF0C1924)
 val InkBrush = Brush.verticalGradient(listOf(Color(0xFF1F3242), Color(0xFF0C1924)))
+/** Dark colours: a deeper blue, so white words on buttons stay easy to read (contrast 4.5:1 and up). */
+val DarkPrimaryBrush = Brush.linearGradient(listOf(Color(0xFF0A6DB3), Color(0xFF075E9C), Color(0xFF05528A)))
 /** The main button colour for the current colours. */
-val Palette.primary: Brush get() = when { this === Sun -> androidx.compose.ui.graphics.SolidColor(Color(0xFF0050A0)); inky -> InkBrush; else -> BlueBrush }
+val Palette.primary: Brush get() = when { this === Sun -> androidx.compose.ui.graphics.SolidColor(Color(0xFF0050A0)); inky -> InkBrush; dark -> DarkPrimaryBrush; else -> BlueBrush }
 /** A selected choice (pill, tab). */
-val Palette.selected: Color get() = when { this === Sun -> Color(0xFF0050A0); inky -> Ink; else -> blue }
+val Palette.selected: Color get() = when { this === Sun -> Color(0xFF0050A0); inky -> Ink; dark -> Color(0xFF075E9C); else -> blue }
+/** Words on a chosen chip or tile filled with a colour: in Dark the fills are light, so the words are dark. */
+val Palette.onFill: Color get() = if (dark) Color(0xFF07131C) else Color.White
 
 /** The app background: bright white with soft blue, mint and lilac light. */
 @Composable
