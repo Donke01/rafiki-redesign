@@ -259,6 +259,7 @@ class AppModel(app: Application) : AndroidViewModel(app) {
         val n = raw.optInt("reviewOpen"); if (n > (_snap.value?.reviewOpen ?: 0)) prefs.reviewAt = java.time.Instant.now().toString()
         prefs.saveSnapshot(raw); _snap.value = Snapshot.from(raw)
         org.rafikioutreach.pin.ui.GoogleTiles.configure(getApplication(), _snap.value?.gmapsAndroid)
+        org.rafikioutreach.pin.cmap.CountryMaps.baseFrom(raw.optJSONObject("countryMaps")) // whole-country maps (feat-cmap)
         // the home-screen widget counts from this list
         org.rafikioutreach.pin.widget.PinWidget.update(getApplication())
     }

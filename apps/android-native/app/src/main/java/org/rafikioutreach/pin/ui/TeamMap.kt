@@ -186,9 +186,12 @@ fun OfaMap(avatars: List<MapAvatar>, pins: List<MapPin>, lines: List<MapLine>, m
     val tap by rememberUpdatedState(onAvatar)
     val map = remember { MapView(ctx).apply { setTileSource(TileSourceFactory.MAPNIK); setMultiTouchControls(true); controller.setZoom(7.0); controller.setCenter(GeoPoint(0.5, 35.3)); minZoomLevel = 3.0 } }
     val st = remember { OfaMapState() }
+    val cm = countryMapOn(false) // the whole-country map with no signal, or when picked as the map style (feat-cmap)
     DisposableEffect(Unit) { map.onResume(); onDispose { map.onPause(); map.onDetach() } }
-    AndroidView({ map }, modifier.clipToBounds().semantics { contentDescription = t("Map", "Ramani") }, update = { mv ->
+    Box(modifier.clipToBounds()) {
+    AndroidView({ map }, Modifier.matchParentSize().semantics { contentDescription = t("Map", "Ramani") }, update = { mv ->
         g?.road?.let { if (mv.tileProvider.tileSource != it) mv.setTileSource(it) }
+        org.rafikioutreach.pin.cmap.CountryMaps.apply(mv, cm)
         val key = Triple(avatars, pins, lines)
         if (st.key != key) {
             st.key = key
@@ -216,6 +219,8 @@ fun OfaMap(avatars: List<MapAvatar>, pins: List<MapPin>, lines: List<MapLine>, m
             }
         }
     })
+    if (cm) CountryCredit(Modifier.align(Alignment.BottomEnd))
+    }
 }
 
 // --- the "Sharing location with the office · Stop" bar (under the app header, on every screen) ------

@@ -58,7 +58,8 @@ private fun StillMap(ll: LatLng, color: Int, modifier: Modifier) {
         }
     }
     DisposableEffect(Unit) { map.onResume(); onDispose { map.onPause(); map.onDetach() } }
-    AndroidView({ map }, modifier.clipToBounds())
+    val cm = countryMapOn(false) // the whole-country map with no signal (feat-cmap)
+    AndroidView({ map }, modifier.clipToBounds(), update = { org.rafikioutreach.pin.cmap.CountryMaps.apply(it, cm) })
 }
 
 /** An open repair: where it is, who has it, and how far the job has got. */
