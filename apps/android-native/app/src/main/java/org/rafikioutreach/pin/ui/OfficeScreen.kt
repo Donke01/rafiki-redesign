@@ -87,6 +87,9 @@ fun OfficeScreen(m: AppModel, open: (String) -> Unit) {
     var sec by rememberSaveable { mutableStateOf("overview") }
     var strip by rememberSaveable { mutableStateOf(false) }
     val s by m.snap.collectAsState()
+    // "E-mail" from Office › Donors or a project's donor area opens Send an e-mail with that audience
+    val mailGo = MailNav.preset
+    LaunchedEffect(mailGo) { if (mailGo != null) { sec = "mail"; strip = true } }
     val snap = s ?: return
     val secs = listOf(
         Triple("overview", t("Overview", "Muhtasari"), "drop"), Triple("repairs", t("Repairs", "Matengenezo"), "wrench"), Triple("costs", t("Costs", "Gharama"), "coins"), Triple("visits", t("Visits", "Ziara"), "cal"),
@@ -95,6 +98,7 @@ fun OfficeScreen(m: AppModel, open: (String) -> Unit) {
         Triple("sms", t("Community", "Jamii"), "chat"),
         Triple("donors", t("Donors", "Wafadhili"), "link"),
         Triple("qr", t("QR codes", "Misimbo ya QR"), "qr"), // QR check-in stickers (QrCheckin.kt)
+        Triple("mail", t("Send an e\u2011mail", "Tuma barua pepe"), "mail"), // Office › Send an e-mail (Mail.kt)
     )
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
         Text(t("Office", "Ofisi"), style = MaterialTheme.typography.headlineLarge, color = C.ink, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.fillMaxWidth())
@@ -127,6 +131,7 @@ fun OfficeScreen(m: AppModel, open: (String) -> Unit) {
             "sms" -> CommunityReports(m, open)
             "donors" -> DonorsSection(m, snap)
             "qr" -> QrStickerSection(m, snap)
+            "mail" -> MailSection(m, snap)
             else -> Export(m, snap)
         }
         Spacer(Modifier.height(24.dp))
