@@ -197,7 +197,7 @@ class MapLayersTest {
         closeSheet()
         // tap the first stop: its card, with Report the visit and Directions
         rule.runOnIdle { markers("Stop 1").first().let { HomeLayers.pick = "s:102" } }; rule.waitForIdle()
-        waitTag("ml_stop"); assertTrue(hasText("Report the visit") && hasText("Directions") && hasText("Chepkongi Dispensary"))
+        waitTag("ml_stop"); assertTrue(hasText("Report a visit") && hasText("Directions") && hasText("Chepkongi Dispensary"))
         shot("ml_03_stop_card")
         rule.onNodeWithTag("ml_stop").assertExists(); HomeLayers.pick = null; rule.waitForIdle()
         // follow me: centred on you, the next stop with its distance; Nearest to you steps aside

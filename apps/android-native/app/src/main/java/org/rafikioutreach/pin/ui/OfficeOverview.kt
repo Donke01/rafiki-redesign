@@ -99,7 +99,7 @@ private val OCV_FLAG = mapOf("ke" to "🇰🇪", "tz" to "🇹🇿", "ug" to "�
 private val OCV_CC = mapOf("ke" to Color(0xFF0A78C2), "tz" to Color(0xFF1C9C5A), "ug" to Color(0xFFE39A1E), "mw" to Color(0xFF7A4FD0))
 private fun JSONArray?.ocvObjs() = if (this == null) emptyList() else (0 until length()).map { getJSONObject(it) }
 private fun ocvFmt(n: Long) = "%,d".format(Locale.US, n)
-private fun ocvLoc(): Locale = if (org.rafikioutreach.pin.Lang.sw) Locale("sw") else Locale.UK
+private fun ocvLoc(): Locale = if (org.rafikioutreach.pin.Lang.sw) Locale("sw") else Locale.US
 private fun JSONObject.ocvS(k: String) = optString(k).takeIf { it.isNotBlank() && it != "null" } ?: ""
 
 @Composable

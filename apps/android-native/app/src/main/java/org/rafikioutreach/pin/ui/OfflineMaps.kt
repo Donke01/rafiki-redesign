@@ -367,7 +367,7 @@ object OfflineMaps {
 /** Storage: "under 1 MB", "4.2 MB", "250 MB", then "8.0 GB" from 1 GB (the same as the web app). */
 fun mbText(b: Long): String = if (b < 1024L * 1024) t("under 1 MB", "chini ya 1 MB") else org.rafikioutreach.pin.cmap.CountryMaps.mb(b)
 private fun limitText(mb: Int) = if (mb >= 1000) "${mb / 1000} GB" else "$mb MB"
-private fun dayText(ms: Long) = runCatching { Instant.ofEpochMilli(ms).atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("d MMM yyyy", if (org.rafikioutreach.pin.Lang.sw) java.util.Locale("sw") else java.util.Locale.UK)) }.getOrDefault("")
+private fun dayText(ms: Long) = runCatching { Instant.ofEpochMilli(ms).atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("d MMM yyyy", if (org.rafikioutreach.pin.Lang.sw) java.util.Locale("sw") else java.util.Locale.US)) }.getOrDefault("")
 
 /** Inside the map: knows the area on screen, draws the area being saved, and flies to an area when asked. */
 @Composable

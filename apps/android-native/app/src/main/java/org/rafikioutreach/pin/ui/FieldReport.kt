@@ -93,7 +93,7 @@ data class ReportData(
 }
 
 private val URGO = mapOf("urgent" to 0, "month" to 1, "watch" to 2)
-private fun loc(): Locale = if (org.rafikioutreach.pin.Lang.sw) Locale("sw") else Locale.UK
+private fun loc(): Locale = if (org.rafikioutreach.pin.Lang.sw) Locale("sw") else Locale.US
 fun reportMonth(ym: YearMonth): String = DateTimeFormatter.ofPattern("MMMM yyyy", loc()).format(ym)
 private fun dayMonth(iso: String, zone: ZoneId) = runCatching { DateTimeFormatter.ofPattern("d MMM", loc()).withZone(zone).format(Instant.parse(iso)) }.getOrDefault(iso.take(10))
 private fun num(n: Long) = "%,d".format(Locale.US, n)

@@ -109,7 +109,7 @@ private fun rrLine(parts: List<Pair<String, Color?>>) = androidx.compose.ui.text
         if (col != null) { pushStyle(androidx.compose.ui.text.SpanStyle(color = col, fontWeight = FontWeight.Bold)); append(txt); pop() } else append(txt)
     }
 }
-private fun rrLocale() = if (org.rafikioutreach.pin.Lang.sw) java.util.Locale("sw") else java.util.Locale.UK
+private fun rrLocale() = if (org.rafikioutreach.pin.Lang.sw) java.util.Locale("sw") else java.util.Locale.US
 private fun dayText(d: String) = runCatching { LocalDate.parse(d).format(java.time.format.DateTimeFormatter.ofPattern("d MMM", rrLocale())) }.getOrDefault(d)
 /** "8 min", "5 h", "Yesterday", "3 Oct" (in the app's language). */
 private fun rrAgo(iso: String): String = runCatching {

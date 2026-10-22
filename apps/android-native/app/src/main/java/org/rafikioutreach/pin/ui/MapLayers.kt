@@ -697,7 +697,7 @@ private fun StopCard(m: AppModel, snap: Snapshot, stops: List<Project>, i: Int, 
                 Text(if (done) t("Visited today", "Imetembelewa leo") else t("Not visited yet", "Bado haijatembelewa"), style = MaterialTheme.typography.labelMedium, color = if (done) Green else C.muted, modifier = Modifier.padding(start = if (done) 6.dp else 0.dp))
             }
             Row(Modifier.padding(top = 10.dp, end = 6.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Btn(if (done) t("Open", "Fungua") else t("Report the visit", "Ripoti ziara"), { HomeLayers.pick = null; if (done) open(p.id) else visit(p.id) }, Modifier.weight(1f).testTag("ml_stop_go"), small = true)
+                Btn(if (done) t("Open", "Fungua") else t("Report a visit", "Ripoti ziara"), { HomeLayers.pick = null; if (done) open(p.id) else visit(p.id) }, Modifier.weight(1f).testTag("ml_stop_go"), small = true)
                 Btn(t("Directions", "Maelekezo"), {
                     runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com/maps/dir/?api=1&destination=%.6f,%.6f&travelmode=driving".format(java.util.Locale.US, p.gps!!.lat, p.gps.lng)))) }
                 }, Modifier.weight(1f), small = true, light = true, icon = "nav")
@@ -812,7 +812,7 @@ private fun LayerSwitches(m: AppModel, snap: Snapshot, fix: Fix?) {
     }
     val h = rememberHaptics()
     Row(Modifier.padding(start = 64.dp, end = 14.dp, bottom = 6.dp).fillMaxWidth().clip(RoundedCornerShape(18.dp)).border(1.dp, C.line, RoundedCornerShape(18.dp)).padding(4.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        listOf("" to t("Off", "Zima"), "repairs" to t("Open repairs", "Ukarabati"), "people" to t("People served", "Watu")).forEach { (k, label) ->
+        listOf("" to t("Off", "Zima"), "repairs" to t("Repairs", "Matengenezo"), "people" to t("People served", "Watu")).forEach { (k, label) ->
             val on = HomeLayers.heat == k
             Box(Modifier.weight(1f).heightIn(min = 44.dp).clip(RoundedCornerShape(14.dp)).background(if (on) C.blue else Color.Transparent)
                 .clickable(role = Role.RadioButton) { h.tap(); HomeLayers.heat = k }.semantics { stateDescription = if (on) "on" else "off" }.testTag("ml_heat_" + k.ifEmpty { "off" }).padding(horizontal = 4.dp, vertical = 6.dp),

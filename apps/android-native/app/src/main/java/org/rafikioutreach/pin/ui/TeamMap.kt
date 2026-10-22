@@ -832,7 +832,7 @@ private fun StopSheet(m: AppModel, p: WeekPlan, di: Int, k: Int, pr: Project, s:
     }
 }
 
-private fun ofaDayLabel(d: LocalDate): String = ShareHere.dayName(d.dayOfWeek.value) + " " + d.dayOfMonth + " " + DateTimeFormatter.ofPattern("MMM", if (org.rafikioutreach.pin.Lang.sw) Locale("sw") else Locale.UK).format(d)
+private fun ofaDayLabel(d: LocalDate): String = ShareHere.dayName(d.dayOfWeek.value) + " " + d.dayOfMonth + " " + DateTimeFormatter.ofPattern("MMM", if (org.rafikioutreach.pin.Lang.sw) Locale("sw") else Locale.US).format(d)
 
 @Composable
 private fun OfaDayChip(label: String, dot: Color?, on: Boolean, onClick: () -> Unit) {

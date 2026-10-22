@@ -193,7 +193,7 @@ fun photoGroups(notes: List<Note>, p: Project, mainUrl: String?): List<TlGroup> 
     return (if (mainUrl != null) listOf(TlGroup("main", "main", "Main photo", "Picha kuu", listOf(TlItem(mainUrl, "", "", main = true)))) else emptyList()) + out
 }
 
-private fun loc(): Locale = if (Lang.sw) Locale("sw") else Locale.UK
+private fun loc(): Locale = if (Lang.sw) Locale("sw") else Locale.US
 /** "12 Sep" (with the year when it isn't this year), in the app's language (see [Dates]). */
 fun prjDay(iso: String): String = Dates.parse(iso)?.let { Dates.day(it) } ?: iso.take(10)
 

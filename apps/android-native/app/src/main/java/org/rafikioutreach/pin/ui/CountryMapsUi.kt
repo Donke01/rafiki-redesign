@@ -60,7 +60,7 @@ fun CountryCredit(modifier: Modifier) {
         modifier = modifier.padding(6.dp).clip(RoundedCornerShape(3.dp)).background(Color(0xD9FFFFFF)).padding(horizontal = 4.dp, vertical = 1.dp).semantics { contentDescription = "osm_credit" })
 }
 
-private fun dayText(d: String) = runCatching { LocalDate.parse(d).format(DateTimeFormatter.ofPattern("d MMM yyyy", if (org.rafikioutreach.pin.Lang.sw) java.util.Locale("sw") else java.util.Locale.UK)) }.getOrDefault(d)
+private fun dayText(d: String) = runCatching { LocalDate.parse(d).format(DateTimeFormatter.ofPattern("d MMM yyyy", if (org.rafikioutreach.pin.Lang.sw) java.util.Locale("sw") else java.util.Locale.US)) }.getOrDefault(d)
 
 /** Offline maps › Whole country maps: each country with its size, Download / Update / Resume / Stop / Delete,
  *  progress, Wi-Fi only (with a switch for mobile data) and the free space on the phone. Hidden until set up. */

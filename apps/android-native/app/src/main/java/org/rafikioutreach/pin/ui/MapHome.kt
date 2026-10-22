@@ -317,7 +317,7 @@ fun rememberMapMotion(): Boolean {
 }
 
 private fun visitDay(iso: String) = runCatching {
-    Instant.parse(iso).atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("d MMM yyyy", if (org.rafikioutreach.pin.Lang.sw) Locale("sw") else Locale.UK))
+    Instant.parse(iso).atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("d MMM yyyy", if (org.rafikioutreach.pin.Lang.sw) Locale("sw") else Locale.US))
 }.getOrDefault("")
 
 @Composable
@@ -951,7 +951,7 @@ private fun PreviewCard(m: AppModel, snap: Snapshot, order: List<Project>, sel: 
             else (slideInHorizontally(tween(260)) { w -> if (d > 0) w / 3 else -w / 3 } + fadeIn(tween(200))) togetherWith (slideOutHorizontally(tween(200)) { w -> if (d > 0) -w / 3 else w / 3 } + fadeOut(tween(140)))
         }, contentKey = { it.second.id }) { (_, pr) -> CardBody(m, snap, pr, conds[pr.id] ?: mapCondition(snap, pr), here) }
         Row(Modifier.padding(top = 12.dp, end = 6.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            ActionTile(t("Visit now", "Tembelea sasa"), "clip", true, Modifier.weight(1f), "card_visit") { visit(p.id) }
+            ActionTile(t("Report a visit", "Ripoti ziara"), "clip", true, Modifier.weight(1f), "card_visit") { visit(p.id) }
             ActionTile(t("Directions", "Maelekezo"), "nav", false, Modifier.weight(1f), "card_dir") {
                 val g = p.gps ?: return@ActionTile
                 runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com/maps/dir/?api=1&destination=" + "%.6f,%.6f".format(Locale.US, g.lat, g.lng)))) }
@@ -1042,7 +1042,7 @@ private fun SpotCard(sp: LatLng, here: LatLng?, measuring: Boolean, miles: Boole
                 horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center,
             ) {
                 Icon(Ic.get("plus"), null, tint = Color.White, modifier = Modifier.size(20.dp))
-                Text(t("Add a new site here", "Ongeza eneo jipya hapa"), style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.5.sp, lineHeight = 15.sp, fontWeight = FontWeight.Bold), color = Color.White,
+                Text(t("New site here", "Eneo jipya hapa"), style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.5.sp, lineHeight = 15.sp, fontWeight = FontWeight.Bold), color = Color.White,
                     textAlign = TextAlign.Center, maxLines = 2, modifier = Modifier.padding(top = 4.dp))
             }
             Column(
@@ -1051,7 +1051,7 @@ private fun SpotCard(sp: LatLng, here: LatLng?, measuring: Boolean, miles: Boole
                 horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center,
             ) {
                 Icon(Ic.get("compass"), null, tint = if (measuring) Color.White else C.blue, modifier = Modifier.size(20.dp))
-                Text(t("Measure distance from me", "Pima umbali kutoka kwangu"), style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.5.sp, lineHeight = 15.sp, fontWeight = FontWeight.Bold),
+                Text(t("Measure from me", "Pima kutoka kwangu"), style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.5.sp, lineHeight = 15.sp, fontWeight = FontWeight.Bold),
                     color = if (measuring) Color.White else C.ink, textAlign = TextAlign.Center, maxLines = 2, modifier = Modifier.padding(top = 4.dp))
             }
         }

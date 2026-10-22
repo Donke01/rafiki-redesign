@@ -151,7 +151,7 @@ class ScreensTest {
         rule.onNodeWithText("Haifanyi kazi").assertExists()
         shot("09-visit-sw")
         rule.onNodeWithTag("nav_new").performClick()
-        rule.onNodeWithText("Ongeza eneo jipya").assertExists()
+        assertTrue(rule.onAllNodesWithText("Eneo jipya").fetchSemanticsNodes().size >= 2)
         shot("10-new-site-sw")
         rule.onNodeWithTag("nav_me").performClick()
         rule.onNodeWithText("Mimi na timu").assertExists()

@@ -106,7 +106,7 @@ fun PeopleServedCard(p: PeopleServed, modifier: Modifier = Modifier) {
         }
         Spark(p.trend.map { it.second }, teal.fg, Modifier.padding(top = 8.dp).fillMaxWidth().height(70.dp))
         Row(Modifier.fillMaxWidth()) {
-            Text(p.trend.firstOrNull()?.first?.let { runCatching { java.time.YearMonth.parse(it).format(java.time.format.DateTimeFormatter.ofPattern("MMM yy", java.util.Locale.UK)) }.getOrDefault(it) } ?: "", style = MaterialTheme.typography.labelSmall, color = C.muted)
+            Text(p.trend.firstOrNull()?.first?.let { runCatching { java.time.YearMonth.parse(it).format(java.time.format.DateTimeFormatter.ofPattern("MMM yy", java.util.Locale.US)) }.getOrDefault(it) } ?: "", style = MaterialTheme.typography.labelSmall, color = C.muted)
             Text(t("12-month trend", "Mwenendo wa miezi 12"), style = MaterialTheme.typography.labelSmall, color = C.muted, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.weight(1f))
             Text(t("now", "sasa"), style = MaterialTheme.typography.labelSmall, color = C.muted)
         }

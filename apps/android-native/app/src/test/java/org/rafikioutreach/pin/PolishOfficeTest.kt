@@ -249,7 +249,7 @@ class PolishOfficeTest {
         // the team: a water committee's SMS is a "Community report", not a teammate
         tag("pane_team").performClick(); rule.mainClock.advanceTimeBy(1500); rule.waitForIdle()
         tag("tm_community").performScrollTo(); assertTrue(has("Community report"))
-        tag("tm_total").assertTextEquals("1 pins · 1 visits · 1 fixed")
+        tag("tm_total").assertTextEquals("1 pin · 1 visit · 1 fixed")
         shot("po-14-team-totals")
         tag("feed_community").performScrollTo(); assertTrue(!has("SMS ")); shot("po-15-team-feed")
     }

@@ -88,7 +88,7 @@ fun agoText(iso: String, now: Instant = Instant.now()): String {
         m < 60 -> t("$m min ago", "dakika $m zilizopita")
         h < 24 -> t("$h h ago", "saa $h zilizopita")
         d < 7 -> if (d == 1L) t("yesterday", "jana") else t("$d days ago", "siku $d zilizopita")
-        else -> DateTimeFormatter.ofPattern("d MMM", Locale.UK).withZone(ZoneId.systemDefault()).format(at)
+        else -> Dates.day(at.atZone(ZoneId.systemDefault()).toLocalDate())
     }
 }
 

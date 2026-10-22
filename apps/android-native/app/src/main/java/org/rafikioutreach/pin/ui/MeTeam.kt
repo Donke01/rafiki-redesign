@@ -98,9 +98,9 @@ private val MONTHS_SW = listOf("Jan", "Feb", "Mac", "Apr", "Mei", "Jun", "Jul", 
 /** "Thu 24 Oct" ("Alh 24 Okt"), or "24 Oct 2027" in another year. */
 internal fun dueDay(d: LocalDate, today: LocalDate = LocalDate.now()): String {
     val sw = org.rafikioutreach.pin.Lang.sw
-    val mon = if (sw) MONTHS_SW[d.monthValue - 1] else d.month.getDisplayName(java.time.format.TextStyle.SHORT, java.util.Locale.UK).take(3)
+    val mon = if (sw) MONTHS_SW[d.monthValue - 1] else d.month.getDisplayName(java.time.format.TextStyle.SHORT, java.util.Locale.US).take(3)
     if (d.year != today.year) return "${d.dayOfMonth}\u00A0$mon\u00A0${d.year}"
-    val wd = if (sw) DAYS_SW[d.dayOfWeek.value - 1] else d.dayOfWeek.getDisplayName(java.time.format.TextStyle.SHORT, java.util.Locale.UK).take(3)
+    val wd = if (sw) DAYS_SW[d.dayOfWeek.value - 1] else d.dayOfWeek.getDisplayName(java.time.format.TextStyle.SHORT, java.util.Locale.US).take(3)
     return "$wd\u00A0${d.dayOfMonth}\u00A0$mon"
 }
 /** "due today", "due tomorrow", "due in 2 days", "due Thu 24 Oct", "3 days late". */
@@ -281,7 +281,7 @@ fun TeamMonth(m: AppModel, act: List<JSONObject>?) {
         val tot = { a: String -> rows.count { it.optString("a") == a || (a == "pin" && it.optString("a") == "new") } }
         Row(Modifier.padding(top = 12.dp).fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(C.tint).padding(horizontal = 14.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
             Text(t("Together", "Pamoja"), style = MaterialTheme.typography.titleSmall, color = C.deep, modifier = Modifier.weight(1f))
-            Text(t("${tot("pin")} pins · ${tot("visit")} visits · ${tot("fixed")} fixed", "mahali ${tot("pin")} · ziara ${tot("visit")} · ${tot("fixed")} zimerekebishwa"), style = MaterialTheme.typography.labelMedium, color = C.deep, modifier = Modifier.testTag("tm_total"))
+            Text(t("${tot("pin")} ${if (tot("pin") == 1) "pin" else "pins"} · ${tot("visit")} ${if (tot("visit") == 1) "visit" else "visits"} · ${tot("fixed")} fixed", "mahali ${tot("pin")} · ziara ${tot("visit")} · ${tot("fixed")} zimerekebishwa"), style = MaterialTheme.typography.labelMedium, color = C.deep, modifier = Modifier.testTag("tm_total"))
         }
         if (by.isEmpty() && community.isEmpty()) Text(t("Nothing yet in this period.", "Hakuna bado katika kipindi hiki."), style = MaterialTheme.typography.bodyMedium, color = C.muted, modifier = Modifier.padding(top = 10.dp))
         // the team in name order, then water committees' reports on a line of their own
