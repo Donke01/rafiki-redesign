@@ -78,6 +78,12 @@ def tabbar(pg, v, t=1300): pg.click('#tabs button[data-v=%s]' % v); pg.wait_for_
 def y(pg): return pg.evaluate('Math.round(scrollY)')
 def vis(pg, sel): loc = pg.locator(sel); return loc.count() > 0 and loc.first.is_visible()
 def shot(pg, name, lang): pg.wait_for_timeout(300); fn = os.path.join(OUT, '%s-%s.png' % (lang, name)); pg.screenshot(path=fn); return fn
+# a point on the home map with nothing on it (no pin, bubble or control), for a tap on empty map
+def empty_spot(pg):
+    return pg.evaluate("""(() => { const r = document.getElementById('hMap').getBoundingClientRect();
+      for (let fy = .45; fy < .8; fy += .05) for (let fx = .1; fx < .7; fx += .06) { const x = r.left + r.width * fx, y = r.top + r.height * fy, e = document.elementFromPoint(x, y);
+        if (e && (e.id === 'hMap' || e.classList.contains('leaflet-tile') || e.classList.contains('leaflet-container')) && ![...document.querySelectorAll('#hMap .leaflet-marker-icon')].some(m => { const b = m.getBoundingClientRect(); return x > b.left - 24 && x < b.right + 24 && y > b.top - 24 && y < b.bottom + 24; })) return [x, y]; }
+      return [r.left + 30, r.top + r.height * .6]; })()""")
 HMAP = "(() => { const m = (window.__maps || []).filter(x => x.getContainer().id === 'hMap')[0]; const c = m.getCenter(); return [+c.lat.toFixed(4), +c.lng.toFixed(4), m.getZoom()]; })()"
 
 RESULTS = []
@@ -128,6 +134,12 @@ def s_map(pg, check, lang):
     back_to = pg.evaluate(HMAP)
     check(abs(back_to[0] - first[0]) < 0.02 and abs(back_to[1] - first[1]) < 0.02 and back_to[2] == first[2], 'the bottom bar brings Map back to its first view (%s, first %s)' % (back_to, first))
     shot(pg, 'map-default', lang)
+    # calm by default (map3w): a tap on empty map brings the filters in, Back puts them away (one step), still on Map
+    check(vis(pg, '#mclSb') and not vis(pg, '#mpaChips'), 'the map starts calm: a round search button, no chips')
+    ex, ey = empty_spot(pg); pg.mouse.click(ex, ey); pg.wait_for_timeout(900)
+    check(vis(pg, '#mpaChips') and vis(pg, '#mpaS'), 'a tap on empty map brings the filters in')
+    back(pg); check(vis(pg, '#mclSb') and not vis(pg, '#mpaChips') and view(pg) == 'vMap' and h(pg) == '#map', 'Back puts the filters away, still on Map (%s, %s)' % (view(pg), h(pg)))
+    if vis(pg, '#mclSb'): pg.click('#mclSb'); pg.wait_for_timeout(300)
     pg.fill('#mpaQ', 'Kaps'); pg.wait_for_timeout(600); pg.click('#mpaSug [data-k=p]'); pg.wait_for_timeout(1300)
     check(vis(pg, '#mpaCard'), 'a map card opens'); shot(pg, 'map-card', lang)
     back(pg); check(not vis(pg, '#mpaCard') and view(pg) == 'vMap' and h(pg) == '#map', 'Back closes the card only (%s, %s)' % (view(pg), h(pg)))
