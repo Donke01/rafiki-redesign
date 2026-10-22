@@ -2958,28 +2958,241 @@ html[data-theme=sun] .btn[disabled]{color:#000000}
   // --- views and tab bar -------------------------------------------------------------------
   var MAIN = ['vMap', 'vList', 'vNew', 'vMe', 'vOffice'];
   var DEEP = { vProj: 1, vRoute: 1, vReport: 1, vSearch: 1 };
-  // Each screen has its own address (#map, #list, #p/<id>…), so the phone's Back button and a
-  // page refresh keep you where you were.
-  function hashFor(v) { return v === 'vProj' && S.cur ? '#p/' + S.cur.id + (S.tab && S.tab !== 'pin' ? '/' + S.tab : '') : '#' + ({ vMap: 'map', vList: 'list', vRoute: 'route', vSearch: 'search', vNew: 'new', vMe: 'me', vReport: 'report', vOffice: 'office' }[v] || 'map'); }
+  // Each screen, and each sub-tab in it, has its own address (#map, #list, #p/<id>, #p/<id>/hist, #office/repairs,
+  // #me/team…), so Back and a page refresh keep you where you were.
+  function hashFor(v) {
+    if (v === 'vProj' && S.cur) return '#p/' + S.cur.id + (S.tab && S.tab !== 'pin' ? '/' + S.tab : '');
+    if (v === 'vMe') return '#me' + (store.get('rfPinMePane') === 'team' ? '/team' : '');
+    if (v === 'vOffice') return '#office' + (O.tab && O.tab !== 'overview' ? '/' + O.tab : '');
+    return '#' + ({ vMap: 'map', vList: 'list', vRoute: 'route', vSearch: 'search', vNew: 'new', vReport: 'report' }[v] || 'map');
+  }
+  // the address of a screen on its first sub-tab (Pin location, Overview, Me)
+  function baseHash(v) { return v === 'vProj' && S.cur ? '#p/' + S.cur.id : v === 'vMe' ? '#me' : v === 'vOffice' ? '#office' : hashFor(v); }
+  // how: (nothing) a new step · 'replace' · 'none' · 'sub': a sub-tab, where leaving the first one is a step and the
+  // next ones take its place, so Back from any sub-tab comes to the first one
   function nav(v, how) {
     if (v === 'vLock' || how === 'none') return;
-    var h = hashFor(v); if (location.hash === h) return;
-    try { if (how === 'replace') history.replaceState({ pin: 1 }, '', h); else { history.pushState({ pin: 1 }, '', h); S.depth++; } } catch (e) {}
+    var h = hashFor(v); if (bkNow() === h) return;
+    if (how === 'sub') how = bkNow() === baseHash(v) ? 'push' : 'replace';
+    bkGo(how === 'replace' ? 'replace' : 'push', h);
   }
-  S.depth = 0;
-  function goBack(fallback) { if (S.depth > 0) history.back(); else fallback(); }
-  function applyHash(first) {
+
+  // --- one back stack (navw) ----------------------------------------------------------------------
+  // Every step is a history entry, so the phone's Back, the browser's Back and the app's own ← all do the same thing.
+  // A screen or sub-tab is an entry with its own address. Anything opened on top of it (a sheet, a viewer, a fold,
+  // the map card, the Nearest list, a dropdown) is an entry with the same address, and Back closes the top-most
+  // one first. Entries carry their place in the stack (i); a layer entry also carries L.
+  var BK = { i: 0, st: [], q: [], skip: 0, skipT: 0, shown: '', y: {}, gest: 0, sum: null, opened: [], mode: '', home: null, leave: false, init: false, hid: 0 };
+  function bkNow() { return BK.shown || location.hash; }
+  function bkQ(fn) { if (BK.skip && Date.now() - BK.skipT > 1500) { BK.skip = 0; bkRun(); } if (BK.skip) BK.q.push(fn); else fn(); }
+  function bkRun() { var q = BK.q; BK.q = []; q.forEach(function (f) { f(); }); }
+  function bkPush(h, layer) {
+    BK.i++; BK.st = BK.st.filter(function (l) { return l.i == null || l.i < BK.i; }); // steps that were ahead are gone
+    try { history.pushState(layer ? { pin: 1, i: BK.i, L: 1 } : { pin: 1, i: BK.i }, '', h); } catch (e) {}
+    return BK.i;
+  }
+  function bkBack() { BK.skip++; BK.skipT = Date.now(); history.back(); }
+  // a new screen or sub-tab: what was open on top closes; folds stay as they were, for when Back comes here again
+  function bkGo(how, h) {
+    BK.y[bkNow()] = window.scrollY; bkSettle(); BK.shown = h;
+    bkQ(function () { if (how === 'replace') { try { history.replaceState({ pin: 1, i: BK.i }, '', h); } catch (e) {} } else bkPush(h); });
+  }
+  function bkSettle() { BK.st = BK.st.filter(function (l) { if (l.kind !== 'ov') return true; l.dead = true; l.close(); return false; }); }
+  function bkFind(el) { for (var k = BK.st.length - 1; k >= 0; k--) if (!BK.st[k].dead && BK.st[k].el === el) return BK.st[k]; return null; }
+  function bkFindKey(key) { if (!key) return null; for (var k = BK.st.length - 1; k >= 0; k--) if (!BK.st[k].dead && BK.st[k].key === key) return BK.st[k]; return null; }
+  // something opened: a step of its own
+  function bkOpen(kind, close, el, key) {
+    var l = { kind: kind, close: close, el: el, key: key || '', dead: false };
+    BK.st.push(l);
+    bkQ(function () { if (!l.dead) l.i = bkPush(bkNow(), true); });
+    return l;
+  }
+  // it closed by itself (its ×, a tap outside, Esc, a choice): its step goes too
+  function bkShut(l) {
+    if (!l || l.dead) return; l.dead = true;
+    var k = BK.st.indexOf(l); if (k >= 0) BK.st.splice(k, 1);
+    bkQ(function () { if (l.i != null && l.i === BK.i) bkBack(); });
+  }
+  // Back closes it; false when there was nothing left to close (already shut by hand, or gone with a redraw)
+  function bkClose(l) {
+    var did = false; try { did = l.close() !== false; } catch (e) {}
+    if (did && l.kind === 'ov') setTimeout(function () { var n = l.el; if (n.isConnected && !n.gone && !n.classList.contains('out') && !bkFind(n)) bkOpen('ov', l.close, n); }, 450); // it asked to stay open
+    return did;
+  }
+  function bkInit() {
+    if (BK.init) return; BK.init = true;
+    var st = history.state || {}, h = location.hash;
+    try { history.scrollRestoration = 'manual'; } catch (e) {} // a reload starts at the top; Back puts the scroll back itself (bkRestore)
+    try {
+      if (st.i != null) { BK.i = st.i; if (st.L) history.replaceState({ pin: 1, i: BK.i }, '', h); } // a reload: the steps before it stay
+      else { // a fresh open: Map home is the first step, so Back from any screen comes home before it leaves the app
+        history.replaceState({ pin: 1, i: 0 }, '', '#map'); BK.i = 0;
+        if (h && h !== '#map') { history.pushState({ pin: 1, i: 1 }, '', h); BK.i = 1; }
+      }
+    } catch (e) {}
+    BK.shown = location.hash;
+    S.filter = 'all'; store.set('rfPinFilter', 'all'); mapFresh(); // an open of the app starts with no filters (Projects on All, the map with none)
+  }
+  addEventListener('popstate', function (e) {
+    var st = e.state || {}, was = BK.i;
+    if (st.i == null) { BK.i = was + 1; try { history.replaceState({ pin: 1, i: BK.i }, '', location.hash); } catch (x) {} if (S.view !== 'vLock') { BK.y[bkNow()] = window.scrollY; bkSettle(); applyHash(false); } return; } // an address typed in
+    BK.i = st.i;
+    if (BK.skip) { BK.skip--; if (!BK.skip) bkRun(); return; } // our own step back, after something closed by itself
+    if (BK.home) { var hm = BK.home; BK.home = null; bkSettle(); BK.st = []; hm(); bkRun(); return; } // the bottom bar went home first
+    if (S.view === 'vLock') return;
+    if (BK.i > was) { if (location.hash !== bkNow()) { BK.y[bkNow()] = window.scrollY; bkSettle(); applyHash(false, 'back'); } return; } // Forward
+    // Back: close what is open above this step, top-most first
+    var closed = false;
+    while (BK.st.length && !(BK.st[BK.st.length - 1].i <= BK.i)) { var l = BK.st.pop(); if (!l.dead) { l.dead = true; if (bkClose(l)) closed = true; } }
+    if (location.hash !== bkNow()) { // another screen or sub-tab
+      if (bkVisitHold()) return;
+      BK.y[bkNow()] = window.scrollY; bkSettle(); applyHash(false, 'back'); return;
+    }
+    if (closed) return;
+    if (BK.i > 0) history.back(); // nothing to close here: a step already undone by hand (or from before a reload), so on to the one before
+  });
+  // the app's own ← buttons use the same steps; at the first one, fallback()
+  function goBack(fallback) { if (BK.i > 0) history.back(); else fallback(); }
+  // Back from a site visit with answers in it: one step back in the visit; on its first step it asks first. The draft is kept either way.
+  function bkVisitHold() {
+    if (BK.leave) { BK.leave = false; return false; }
+    if (S.view !== 'vProj' || S.tab !== 'visit' || !S.cur || !V || V.sent || V.id !== S.cur.id) return false;
+    var stay = '#p/' + S.cur.id + '/visit';
+    if (location.hash === stay || !(V.step > 0 || V.arrive || V.state || (V.files && V.files.length) || V.note || V.voice)) return false;
+    bkPush(stay); BK.shown = stay;
+    if (V.step > 0) { goStep(V.step - 1); return true; }
+    draftSave();
+    poAsk(tr('Leave this visit?', 'Acha ziara hii?'), tr('Your answers are kept as a draft on this phone, so you can carry on later.', 'Majibu yako yamehifadhiwa kama rasimu kwenye simu hii, ili uendelee baadaye.'), tr('Leave the visit', 'Ondoka kwenye ziara')).then(function (ok) {
+      if (ok) setTimeout(function () { bkQ(function () { BK.leave = true; history.back(); }); }, 300); // once the question's own step is gone
+    });
+    return true;
+  }
+  // the bottom bar: the screen starts over, and Back from it comes to Map home
+  function tabGo(v) {
+    var go = function () {
+      if (location.hash !== '#map' && BK.i === 0) { try { history.replaceState({ pin: 1, i: 0 }, '', '#map'); } catch (e) {} BK.shown = '#map'; }
+      BK.mode = 'fresh'; bkFresh(v); show(v, v === 'vMap' ? 'replace' : 'push');
+    };
+    if (BK.i > 0) bkQ(function () { BK.home = go; history.go(-BK.i); }); else { bkSettle(); BK.st = []; go(); }
+  }
+  // Start over: scroll at the top, folds shut, search boxes empty, filters back to their defaults. Saved settings and drafts stay.
+  function bkFresh(v) {
+    var sec = $(v);
+    BK.opened = BK.opened.filter(function (d) { if (d.isConnected && sec && sec.contains(d)) { d.open = false; return false; } return d.isConnected; });
+    if (v === 'vList') { S.filter = 'all'; store.set('rfPinFilter', 'all'); S.ftype = ''; store.set('rfPinType', ''); $('iSearch').value = ''; }
+    if (v === 'vSearch') $('sQ').value = '';
+    if (v === 'vMap') mapFresh();
+    if (v === 'vMe') { store.set('rfPinMePane', 'me'); var sb = $('meStampsMore'); if (sb && !$('meStamps').classList.contains('fold')) { $('meStamps').classList.add('fold'); sb.setAttribute('aria-expanded', 'false'); sb.textContent = tr('Show all stamps', 'Onyesha stempu zote'); } }
+    if (v === 'vOffice') { O.tab = 'overview'; store.set('rfPinOTab', 'overview'); try { OCV.open = {}; DQM.open = {}; } catch (e) {} }
+    if (v === 'vNew') newFresh();
+  }
+  // Map home's first view: every project in the country fitted, no filter, no card, the Nearest list resting
+  function mapFresh() {
+    MPA.f = ''; store.set('rfPinMapF', ''); S.ftype = ''; store.set('rfPinType', ''); MCL.row = false;
+    if (MCL.clean) { MCL.clean = false; try { sessionStorage.setItem('rfPinMapClean', '0'); } catch (e) {} }
+    if (MPA.map) { if (MPA.sel || MPA.spot || MPA.measure) mpaClose(); if ($('mpaQ')) $('mpaQ').value = ''; mpaSugHide(); }
+    if (MCL.init) { mclTray(false); mclKey(false); if (!$('nearSheet').classList.contains('shut')) mclNear(false); mclSync(); }
+    fitted = false; MCL.touched = false;
+  }
+  // back after a while in the background: the map starts over too
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) { BK.hid = Date.now(); return; }
+    if (BK.hid && Date.now() - BK.hid > 5 * 60000 && S.view !== 'vLock') { mapFresh(); if (S.view === 'vMap' && hMap) homeMap(); }
+    BK.hid = 0;
+  });
+  // coming back with Back: the screen where you left it
+  function bkRestore() {
+    var y = BK.y[bkNow()]; if (!y) return;
+    [0, 80, 300].forEach(function (t) { setTimeout(function () { if (window.scrollY < y - 2) window.scrollTo(0, y); }, t); });
+  }
+  // what counts as a tap (a fold or a card opened by the person, not by a redraw)
+  ['pointerdown', 'touchstart', 'keydown'].forEach(function (ev) { document.addEventListener(ev, function () { BK.gest = Date.now(); }, { capture: true, passive: true }); });
+  document.addEventListener('click', function (e) { BK.gest = Date.now(); var s = e.target.closest && e.target.closest('summary'); BK.sum = s ? s.parentNode : null; }, true);
+  function bkTapped() { return Date.now() - BK.gest < 900 && S.view !== 'vLock'; }
+  // sheets, dialogs and full-screen viewers: anything of these added to the page
+  var BK_OV = '.bsh, .tsh, .npg, .prj-lb, #prjSum, .fld-scan';
+  function bkOvShut(el) { // closes it the way its own × (or a tap outside) does
+    if (!el.isConnected || el.gone || el.classList.contains('out')) return false;
+    var x = el.querySelector(':scope > .bsh-p > .bsh-h > .bsh-x, :scope > .tsh-p > .tsh-x, .prj-x, :scope > .prj-sbar > .prj-bk, :scope > .np-h > [data-np=back], #fldScX') || el.querySelector(':scope > .bsh-bg, :scope > .tsh-bg');
+    if (x) x.click(); else if (el.close) el.close(); else el.remove();
+    return true;
+  }
+  new MutationObserver(function (ms) {
+    ms.forEach(function (m) { m.removedNodes.forEach(function (n) { var l = n.nodeType === 1 && bkFind(n); if (l) bkShut(l); }); });
+    ms.forEach(function (m) { m.addedNodes.forEach(function (n) { if (n.nodeType === 1 && n.matches(BK_OV) && !bkFind(n) && S.view !== 'vLock' && !n.classList.contains('out')) bkOpen('ov', function () { return bkOvShut(n); }, n); }); });
+  }).observe(document.body, { childList: true });
+  // folds (details) the person opens
+  function bkDKey(d) { var a = d.parentNode && d.parentNode.closest('[id]'); return a ? 'd:' + a.id + ':' + Array.prototype.indexOf.call(a.querySelectorAll('details'), d) : ''; }
+  function bkDEl(l) { if (l.el.isConnected) return l.el; var m = /^d:(.+):(\d+)$/.exec(l.key), a = m && document.getElementById(m[1]); return a ? a.querySelectorAll('details')[+m[2]] : null; }
+  document.addEventListener('toggle', function (e) {
+    var d = e.target; if (!d || d.tagName !== 'DETAILS') return;
+    if (d.open) {
+      if (BK.sum !== d || S.view === 'vLock') return; BK.sum = null;
+      if (BK.opened.indexOf(d) < 0) BK.opened.push(d);
+      var l = bkOpen('in', function () { var x = bkDEl(l); if (!x || !x.open) return false; x.open = false; return true; }, d, bkDKey(d));
+    } else { var k = bkFind(d); if (k) bkShut(k); }
+  }, true);
+  // buttons that open something (aria-expanded): the Nearest list, More, the key, the filter row, Show all stamps, Office folds…
+  var BK_SHUT = { nearList: function () { mclNear(false); }, mclTray: function () { mclTray(false); }, mclKeyPop: function () { mclKey(false); }, mpaChips: function () { MCL.row = false; mclSync(); } };
+  function bkAKey(b) { var c = b.getAttribute('aria-controls'); return c ? 'c:' + c : b.id ? '#' + b.id : ''; }
+  function bkAEl(l) { if (l.el.isConnected) return l.el; var m = /^(c:|#)(.+)$/.exec(l.key); if (!m) return null; return m[1] === '#' ? document.getElementById(m[2]) : document.querySelector('[aria-controls="' + m[2] + '"][aria-expanded="true"]') || document.querySelector('[aria-controls="' + m[2] + '"]'); }
+  new MutationObserver(function (ms) {
+    ms.forEach(function (m) {
+      var b = m.target; if (b.tagName !== 'BUTTON' && b.getAttribute('role') !== 'button') return; // a search box's list goes with the search
+      var on = b.getAttribute('aria-expanded') === 'true', key = bkAKey(b), l = bkFind(b) || bkFindKey(key);
+      if (on && m.oldValue !== 'true' && !l && bkTapped() && b.isConnected) {
+        var nl = bkOpen('in', function () { var x = bkAEl(nl), c = (x || b).getAttribute('aria-controls'); if (!x || x.getAttribute('aria-expanded') !== 'true') return false; if (BK_SHUT[c]) BK_SHUT[c](); else x.click(); return true; }, b, key);
+      } else if (!on && l) bkShut(l);
+    });
+  }).observe(document.body, { attributes: true, attributeFilter: ['aria-expanded'], attributeOldValue: true, subtree: true });
+  // the map card and the search suggestions
+  var BK_W = { mpaCard: function () { mpaClose(); }, mpaSug: function () { mpaSugHide(); var q = $('mpaQ'); if (q) q.blur(); } };
+  var bkWo = new MutationObserver(function (ms) {
+    ms.forEach(function (m) {
+      var el = m.target, was = /(^|\s)hidden(\s|$)/.test(m.oldValue || ''), now = el.classList.contains('hidden'); if (was === now) return;
+      var l = bkFind(el);
+      if (!now && !l && bkTapped()) bkOpen('in', function () { if (el.classList.contains('hidden')) return false; BK_W[el.id](); return true; }, el);
+      else if (now && l) bkShut(l);
+    });
+  });
+  function bkWatch() { Object.keys(BK_W).forEach(function (id) { var el = $(id); if (el && !el._bkw) { el._bkw = 1; bkWo.observe(el, { attributes: true, attributeFilter: ['class'], attributeOldValue: true }); } }); }
+  // the refresh button: the same screen, scrolled where it was, with the folds that were open still open
+  function bkKeep() {
+    var sec = $(S.view), k = { v: S.view, h: bkNow(), y: window.scrollY, d: [] };
+    if (sec) qa('details[open]', sec).forEach(function (d) { var x = bkDKey(d); if (x) k.d.push(x); });
+    return k;
+  }
+  function bkKeepPut(k) {
+    var put = function () {
+      if (S.view !== k.v || bkNow() !== k.h) return;
+      k.d.forEach(function (x) { var d = bkDEl({ el: {}, key: x }); if (d && !d.open) d.open = true; });
+      if (Math.abs(window.scrollY - k.y) > 2) window.scrollTo(0, k.y);
+    };
+    put(); setTimeout(put, 400); setTimeout(put, 1200);
+  }
+
+  function applyHash(first, mode) {
     if (S.view === 'vLock' && !first) return;
+    if (first) bkInit();
     if (fldQrHash()) return; // a QR sticker: #p=<id> (field tools)
-    var m = /^#p\/(\d+)(?:\/(visit|hist))?$/.exec(location.hash), v = { '#map': 'vMap', '#list': 'vList', '#route': 'vRoute', '#search': 'vSearch', '#new': 'vNew', '#me': 'vMe', '#report': 'vReport', '#office': 'vOffice' }[location.hash];
+    var h = location.hash, m = /^#p\/(\d+)(?:\/(visit|hist))?$/.exec(h), o = /^#office(?:\/([a-z]+))?$/.exec(h), me = /^#me(\/team)?$/.exec(h);
+    var v = { '#map': 'vMap', '#list': 'vList', '#route': 'vRoute', '#search': 'vSearch', '#new': 'vNew', '#report': 'vReport' }[h] || (o ? 'vOffice' : me ? 'vMe' : '');
+    BK.shown = h; BK.mode = first ? 'fresh' : mode || '';
+    if (first && v) bkFresh(v); // a fresh open starts the screen over; the sub-tab comes from the address
+    if (o) O.tab = o[1] || 'overview';
+    if (me) store.set('rfPinMePane', me[1] ? 'team' : 'me');
     if (v === 'vReport') { openReport('none'); return; }
-    if (m && byId(m[1])) { openProj(m[1], m[2] || 'pin', 'none'); return; }
+    if (m && byId(m[1])) {
+      if (!first && S.view === 'vProj' && S.cur && S.cur.id === m[1]) { BK.mode = ''; tab(m[2] || 'pin'); if (mode === 'back') bkRestore(); return; } // only the sub-tab changed
+      openProj(m[1], m[2] || 'pin', 'none'); return;
+    }
+    if (!first && v && v === S.view && (v === 'vOffice' || v === 'vMe')) { BK.mode = ''; if (v === 'vOffice') renderOffice(); else mePane(); if (mode === 'back') bkRestore(); else window.scrollTo(0, 0); return; } // only the sub-tab changed
     if (v === 'vRoute') renderRoute();
     show(v || 'vMap', 'none');
     if (!v) nav('vMap', 'replace');
   }
-  addEventListener('popstate', function () { if (S.depth > 0) S.depth--; if (npPop()) return; applyHash(false); });
   function show(v, how) {
+    var mode = BK.mode; BK.mode = '';
     if (S.view !== v && MAIN.indexOf(S.view) >= 0) S.prev = S.view;
     if (v !== 'vProj') { pick.stop(); liveStop(); } if (v !== 'vNew') nPick.stop();
     S.view = v;
@@ -3001,7 +3214,7 @@ html[data-theme=sun] .btn[disabled]{color:#000000}
     if (v === 'vSearch') searchOpen();
     setTimeout(titleUi, 0);
     if (v === 'vList') S.animList = true;
-    if (v === 'vMap') homeMap();
+    if (v === 'vMap') { homeMap(); setTimeout(bkWatch, 60); }
     if (v === 'vList') renderList();
     if (v === 'vMe') renderMe();
     if (v === 'vOffice') renderOffice();
@@ -3010,8 +3223,9 @@ html[data-theme=sun] .btn[disabled]{color:#000000}
     if (v === 'vNew') openNew();
     hereWatch(v === 'vMap' || v === 'vList');
     setTimeout(function () { crReset(v); }, 0); // chip rows start at the beginning again (pwmap)
+    if (mode === 'back') bkRestore();
   }
-  qa('#tabs button').forEach(function (b) { b.addEventListener('click', function () { show(b.getAttribute('data-v')); }); });
+  qa('#tabs button').forEach(function (b) { b.addEventListener('click', function () { tabGo(b.getAttribute('data-v')); }); });
 
   // --- talking to the server -------------------------------------------------------------
   function api(method, body, q) {
@@ -3400,6 +3614,7 @@ html[data-theme=sun] .btn[disabled]{color:#000000}
     P.saved = function (ll) { if (oldMk) map.removeLayer(oldMk); oldMk = ll ? L.circleMarker(ll, { radius: 9, color: '#1C7C4A', weight: 2, fillColor: '#7FD1A3', fillOpacity: .9 }).addTo(map).bindTooltip('Saved location') : null; if (newMk) { map.removeLayer(newMk); newMk = null; } [youMk, accC].forEach(function (m) { if (m) map.removeLayer(m); }); youMk = accC = null; P.pick = null; line('', ''); };
     P.stop = stop;
     P.at = function (ll) { setTimeout(function () { ensure(); set(ll, 'map', 0); map.setView(P.pick || ll, 17); }, 45); };
+    P.view = function (center, zoom) { setTimeout(function () { ensure(); map.setView(P.pick || center, P.pick ? 17 : zoom); }, 30); }; // its first view again (navw)
     P.you = function (ll, acc) {
       if (!map || watch !== null) return;
       if (!youMk) youMk = L.marker(ll, { icon: L.divIcon({ className: '', html: '<div class="you"></div>', iconSize: [16, 16] }), interactive: false }).addTo(map); else youMk.setLatLng(ll);
@@ -3504,6 +3719,7 @@ html[data-theme=sun] .btn[disabled]{color:#000000}
   function load(fromLock) {
     api('GET').then(function (j) {
       if (!j.ok) {
+        if (refreshing) { refreshing(false); refreshing = null; }
         if (j.status === 401 || j.status === 429 || j.status === 503) { lockOut(j); return; }
         if (j.reason === 'offline' && S.projects.length && (S.pin || S.mode === 'monday') && (S.name || S.who)) { // no signal: keep working from the saved list
           if (S.view === 'vLock') applyHash(true); else if (S.view === 'vList') renderList();
@@ -3530,7 +3746,7 @@ html[data-theme=sun] .btn[disabled]{color:#000000}
       S.srvHome = j.home || ''; store.set('rfPinSrvHome', S.srvHome); applyHome();
       msg('mList', '', '');
       if (S.view === 'vLock') applyHash(true); else { if (S.view === 'vList') renderList(); if (S.view === 'vMap') homeMap(); if (S.view === 'vProj' && S.cur && byId(S.cur.id)) { S.cur = byId(S.cur.id); curUi(); repairUi(); } if (S.view === 'vRoute') renderRoute(); }
-      if (refreshing) { refreshing(); refreshing = null; }
+      if (refreshing) { refreshing(true); refreshing = null; }
       $('who').textContent = S.name;
       flush();
     });
@@ -4243,7 +4459,7 @@ html[data-theme=sun] .btn[disabled]{color:#000000}
     $('hAv').textContent = initials(S.name);
   }
   $('hBack').addEventListener('click', function () { var b = S.view === 'vProj' ? 'back' : S.view === 'vRoute' ? 'routeBack' : S.view === 'vReport' ? 'repBack' : null; if (b) $(b).click(); else if (S.view === 'vSearch') goBack(function () { show('vList', 'replace'); }); });
-  $('hAv').addEventListener('click', function () { show('vMe'); });
+  $('hAv').addEventListener('click', function () { tabGo('vMe'); });
 
   var DROPC = { b: 'mgA', g: 'mgG', c: 'mgC', p: 'mgP', y: 'mgY' };
   function drop(c, mood) {
@@ -4708,7 +4924,7 @@ html[data-theme=sun] .btn[disabled]{color:#000000}
   }
   function tab(which, from) {
     var was = S.tab;
-    S.tab = which; if (S.view === 'vProj') nav('vProj', 'replace');
+    S.tab = which; if (S.view === 'vProj') nav('vProj', 'sub');
     if (S.view === 'vProj' && was && was !== which) { var pn = $({ pin: 'panePin', visit: 'paneVisit', hist: 'paneHist' }[which]); var fwd = from ? from === 'l' : ['pin', 'visit', 'hist'].indexOf(which) > ['pin', 'visit', 'hist'].indexOf(was); pn.classList.remove('pane-l', 'pane-r'); void pn.offsetWidth; pn.classList.add(fwd ? 'pane-l' : 'pane-r'); }
     [['pin', 'tabPin', 'panePin'], ['visit', 'tabVisit', 'paneVisit'], ['hist', 'tabHist', 'paneHist']].forEach(function (t) {
       $(t[1]).setAttribute('aria-selected', t[0] === which ? 'true' : 'false'); $(t[2]).classList.toggle('hidden', t[0] !== which);
@@ -5603,8 +5819,6 @@ html[data-theme=sun] .btn[disabled]{color:#000000}
     w.querySelector('[data-x]').focus();
   }
   function prjSumClose() { var w = $('prjSum'); if (!w) return; document.removeEventListener('keydown', w._key); w.remove(); document.body.classList.remove('prj-open'); }
-  window.addEventListener('popstate', function () { prjClose(); prjSumClose(); });
-  window.addEventListener('hashchange', function () { prjClose(); prjSumClose(); });
   if ($('prjTl')) $('prjTl').addEventListener('click', prjTlClick);
   if ($('prjBar')) $('prjBar').addEventListener('click', prjBarClick);
   (function () {
@@ -5701,6 +5915,7 @@ html[data-theme=sun] .btn[disabled]{color:#000000}
   function newUi() {
     var ok = $('nName').value.trim() && nPick.pick;
     $('bNewSave').disabled = !ok;
+    newDraftSave();
     $('nPt').textContent = !$('nName').value.trim() ? 'Add the name, then choose where it is.' : nPick.pick ? 'Location: ' + fmt(nPick.pick) + (nPick.how === 'gps' && nPick.acc ? ' (' + acct(nPick.acc) + ')' : '') : 'Now choose where it is: use your location or tap the map.';
   }
   $('nName').addEventListener('input', newUi);
@@ -5708,8 +5923,25 @@ html[data-theme=sun] .btn[disabled]{color:#000000}
     if (newOpen) { setTimeout(nPick.resize, 30); return; } // keep what was typed when switching tabs
     newOpen = true; msg('mNew', '', '');
     var ck = $('iCountry').value || homeCk() || 'ke'; $('nCountry').value = ck; var c = CENTER[ck];
-    nPick.open(S.here || [c[0], c[1]], S.here ? 15 : c[2], null); newUi();
+    nPick.open(S.here || [c[0], c[1]], S.here ? 15 : c[2], null);
+    var d = jget('rfPinNewDraft', null); // a half-done form from before (navw)
+    if (d) {
+      newRest = true; $('nName').value = d.name || ''; $('nVillage').value = d.village || ''; $('nNote').value = d.note || ''; if (d.type) $('nType').value = d.type; if (d.ck && CENTER[d.ck]) $('nCountry').value = d.ck;
+      if (d.ll) nPick.at(d.ll);
+      setTimeout(function () { if (d.ll && nPick.pick) { nPick.how = d.how || 'map'; nPick.acc = d.acc || 0; } newRest = false; newUi(); }, 120);
+    }
+    newUi();
   }
+  // the New site form is a draft on this phone, so a refresh doesn't lose it (navw)
+  var newRest = false;
+  function newDraftSave() {
+    if (!newOpen || newRest) return;
+    var d = { name: $('nName').value, village: $('nVillage').value, note: $('nNote').value, type: $('nType').value, ck: $('nCountry').value, ll: nPick.pick, how: nPick.how, acc: nPick.acc };
+    if (!d.name.trim() && !d.village.trim() && !d.note.trim() && !d.ll) store.del('rfPinNewDraft'); else store.set('rfPinNewDraft', JSON.stringify(d));
+  }
+  $('vNew').addEventListener('input', newDraftSave); $('vNew').addEventListener('change', newDraftSave);
+  // New site, started over: the map at its first view (what was typed stays)
+  function newFresh() { if (!newOpen) return; var c = CENTER[$('nCountry').value] || CENTER.ke; nPick.view(S.here || [c[0], c[1]], S.here ? 15 : c[2]); }
   $('nCountry').addEventListener('change', function () { if (!nPick.pick && !S.here) { var c = CENTER[$('nCountry').value]; nPick.open([c[0], c[1]], c[2], null); } });
   $('bNewSave').addEventListener('click', function () {
     var ll = nPick.pick, name = $('nName').value.trim(); if (!ll || !name) return;
@@ -5781,6 +6013,9 @@ html[data-theme=sun] .btn[disabled]{color:#000000}
     "Today": "Leo", "Tomorrow": "Kesho", "1 day late": "Imechelewa siku 1", "Website PIN": "PIN ya tovuti", "Community report": "Ripoti ya jamii", "Community (SMS)": "Jamii (SMS)",
     "Mar": "Mac", "May": "Mei", "Aug": "Ago", "Oct": "Okt", "Dec": "Des"});
   SWP.unshift([/^Repairs, (\d+) open$/, "Matengenezo, $1 wazi"], [/^Review, (\d+) open$/, "Kagua, $1 wazi"], [/^(\d+) with no location$/, "$1 bila mahali"]);
+  // polish-navw
+  Object.assign(SW, {"Updated": "Imesasishwa", "Leave this visit?": "Acha ziara hii?", "Leave the visit": "Ondoka kwenye ziara",
+    "Your answers are kept as a draft on this phone, so you can carry on later.": "Majibu yako yamehifadhiwa kama rasimu kwenye simu hii, ili uendelee baadaye."});
   // dates in the app's own style ("Thu 24 Oct", "24 Oct, 18:34") and relative times, when the language changes after they're drawn
   [['Sun', 'Jpl'], ['Mon', 'Jtt'], ['Tue', 'Jnn'], ['Wed', 'Jtn'], ['Thu', 'Alh'], ['Fri', 'Iju'], ['Sat', 'Jmo']].forEach(function (w) { SWP.push([new RegExp('^' + w[0] + ' (\\d{1,2}) ([A-Z][a-z]{2})$'), w[1] + ' $1 $2']); });
   SWP.push([/^(\d{1,2}) ([A-Z][a-z]{2})((?: \d{4})?(?:, \d{2}:\d{2})?)$/, "$1 $2$3"], [/^(\d+) h ago$/, "saa $1 zilizopita"], [/^(\d+) d ago$/, "siku $1 zilizopita"], [/^(\d+) wk ago$/, "wiki $1 zilizopita"],
@@ -5948,7 +6183,7 @@ html[data-theme=sun] .btn[disabled]{color:#000000}
   }
   // Me | Team switch at the top of Me & team
   function mePane(p) {
-    if (p) store.set('rfPinMePane', p); p = store.get('rfPinMePane') === 'team' ? 'team' : 'me';
+    if (p) store.set('rfPinMePane', p); if (p && S.view === 'vMe') nav('vMe', 'sub'); p = store.get('rfPinMePane') === 'team' ? 'team' : 'me';
     qa('#meSw button').forEach(function (b) { b.setAttribute('aria-selected', b.getAttribute('data-p') === p ? 'true' : 'false'); });
     $('paneMe').classList.toggle('hidden', p !== 'me'); $('paneTeam').classList.toggle('hidden', p !== 'team');
   }
@@ -6124,7 +6359,7 @@ html[data-theme=sun] .btn[disabled]{color:#000000}
       '<div class="np-f" role="group" aria-label="' + tr('Show', 'Onyesha') + '">' + NFILT.map(function (x) { return '<button type="button" data-f="' + x[0] + '" aria-pressed="false">' + tr(x[1], x[2]) + (x[0] === 'unread' ? '<i class="c hidden"></i>' : '') + '</button>'; }).join('') + '</div>' +
       '<div class="np-body"><div class="np-in"></div></div>';
     document.body.appendChild(w); document.body.classList.add('npg-on'); NP.w = w;
-    try { history.pushState({ pin: 1, np: 1 }, '', location.hash); S.depth++; NP.pushed = true; } catch (e) { NP.pushed = false; }
+    NP.pushed = false; // its step in history is the app's back stack (bkOpen)
     npDraw(true);
     w.addEventListener('click', npClick); document.addEventListener('keydown', npKey);
     setTimeout(function () { var b = w.querySelector('[data-np=back]'); if (b && NP.w === w) b.focus(); }, 40);
@@ -6139,7 +6374,6 @@ html[data-theme=sun] .btn[disabled]{color:#000000}
     var b = $('meBell'); if (b && S.view === 'vMe') b.focus();
     return true;
   }
-  function npPop() { if (S.npSkip) { S.npSkip = false; return true; } return npShut(true); }
   $('meBell').addEventListener('click', function () { buzz(); bellOpen(); });
   function bellLoad() { if (navigator.onLine) api('GET', null, '?activity=1').then(function (j) { if (j.ok) { actCache = j.activity || []; bellUi(); } }); else bellUi(); }
 
@@ -6519,6 +6753,7 @@ html[data-theme=sun] .btn[disabled]{color:#000000}
   function pname(id) { var p = byId(id); return p ? p.title : 'Project ' + id; }
   function renderOffice() {
     if (!S.admin) { show('vMap'); return; }
+    if (S.view === 'vOffice') nav('vOffice', 'sub'); // a section is a step: Back comes to Overview
     oSeg(); adminUi();
     var b = $('oBody'), t = O.tab;
     if (!navigator.onLine && t !== 'overview' && t !== 'cleanup') { b.innerHTML = '<p class="msg warn">' + tr('The Office needs a signal for this. Overview and Clean-up work offline.', 'Ofisi inahitaji mtandao kwa hili. Muhtasari na Safisha data zinafanya kazi bila mtandao.') + '</p>'; return; }
@@ -9100,7 +9335,7 @@ html[data-theme=sun] .btn[disabled]{color:#000000}
   // a sticker scanned with the phone's own camera opens /pin#p=<id>: that project's Site visit, checked in
   function fldQrHash() {
     var m = /^#p=(\d{1,15})/.exec(location.hash); if (!m) return false;
-    try { history.replaceState({ pin: 1 }, '', '#map'); } catch (e) {}
+    try { history.replaceState({ pin: 1, i: BK.i }, '', '#map'); } catch (e) {} BK.shown = '#map';
     if (!byId(m[1])) { show('vMap', 'none'); toast(tr('That QR code’s project isn’t in your list. Refresh, then scan again.', 'Mradi wa msimbo huo wa QR haupo kwenye orodha yako. Onyesha upya, kisha changanua tena.')); return true; }
     fldQrOpen(m[1], 'replace'); return true;
   }
@@ -10385,11 +10620,12 @@ html[data-theme=sun] .btn[disabled]{color:#000000}
   function toast(t) { var d = document.createElement('div'); d.className = 'toast'; d.setAttribute('role', 'status'); d.textContent = t; document.body.appendChild(d); setTimeout(function () { d.remove(); }, 2200); }
   $('bRefresh').addEventListener('click', function () {
     var b = this; if (b.classList.contains('spin')) return;
-    if (!navigator.onLine) { toast('No signal: showing what’s saved on this phone.'); return; }
+    if (!navigator.onLine) { toast(tr('No signal: showing what’s saved on this phone.', 'Hakuna mtandao: inaonyesha kilichohifadhiwa kwenye simu hii.')); return; }
     b.classList.add('spin');
-    refreshing = function () { b.classList.remove('spin'); toast('Up to date ✓'); };
+    var keep = bkKeep(); // it stays on this screen, scrolled where it was, folds as they were
+    refreshing = function (ok) { b.classList.remove('spin'); bkKeepPut(keep); toast(ok === false ? tr('Couldn’t refresh. Please try again.', 'Haikuweza kuonyesha upya. Tafadhali jaribu tena.') : tr('Updated', 'Imesasishwa')); };
     flush().then(function () { load(false); });
-    setTimeout(function () { if (refreshing) { refreshing = null; b.classList.remove('spin'); toast('Couldn’t refresh. Please try again.'); } }, 20000);
+    setTimeout(function () { if (refreshing) { refreshing = null; b.classList.remove('spin'); toast(tr('Couldn’t refresh. Please try again.', 'Haikuweza kuonyesha upya. Tafadhali jaribu tena.')); } }, 20000);
   });
   // startup: a monday.com sign-in first, then a saved PIN
   var back = signinReturn();
