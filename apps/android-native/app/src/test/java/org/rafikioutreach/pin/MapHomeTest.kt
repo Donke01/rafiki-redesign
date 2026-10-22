@@ -400,6 +400,25 @@ class MapHomeTest {
 
     // --- the map, decluttered: one pill, the slim handle, the Key button, More, map only; nothing overlaps -------------
 
+    /** The keyboard leaves a short map (about 480 dp): searching shows only the search box and its list, which stays
+     *  inside the map; nothing overlaps, in English and Kiswahili. */
+    private fun searchShort(sw: Boolean) {
+        Lang.sw = sw
+        try {
+            val m = model(); show(m, h = 480)
+            assertTrue("resting: ${overlaps()}", overlaps().isEmpty())
+            rule.onNodeWithTag("map_search_input").performClick(); rule.waitForIdle()
+            assertTrue("others step aside", !tagged("map_chips") && !tagged("map_pinned") && !tagged("map_key") && !tagged("nearest"))
+            rule.onNodeWithTag("map_search_input").performTextInput("Ka"); rule.waitForIdle()
+            rule.waitUntil(4000) { tagged("map_sugg") }
+            assertTrue("typing: ${overlaps()}", overlaps().isEmpty())
+            assertTrue("list inside the map", box("map_sugg")!!.bottom <= box("map_home")!!.bottom + 0.5f)
+            shot("map-50-search-short" + if (sw) "-sw" else "")
+        } finally { Lang.sw = false }
+    }
+    @Test fun search_short_screen_en() = searchShort(false)
+    @Test fun search_short_screen_sw() = searchShort(true)
+
     private fun box(tag: String): Rect? = rule.onAllNodesWithTag(tag, useUnmergedTree = true).fetchSemanticsNodes().firstOrNull()?.boundsInRoot?.takeIf { it.width > 1f && it.height > 1f }
     private fun meet(a: Rect, b: Rect) = a.left < b.right - 0.5f && b.left < a.right - 0.5f && a.top < b.bottom - 0.5f && b.top < a.bottom - 0.5f
     /** Everything drawn over the map, by its tag. */

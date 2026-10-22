@@ -38,6 +38,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -363,6 +364,8 @@ fun MapHome(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit, offlin
     val cmOn = countryMapOn(false)
     // a small phone (360 dp): "You're at" folds into a chip after 5 seconds
     val narrow = androidx.compose.ui.platform.LocalConfiguration.current.screenWidthDp < 380
+    // a short map (a small phone, a split screen): the extras step aside so nothing sits on anything else
+    var compact by remember { mutableStateOf(false) }
 
     val pinned = remember(snap) { snap.projects.filter { it.gps != null } }
     val conds = remember(snap) { pinned.associate { it.id to mapCondition(snap, it) } }
@@ -456,9 +459,10 @@ fun MapHome(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit, offlin
         v.overlays.addAll(added); v.invalidate()
         onDispose { added.forEach { v.overlays.remove(it) }; v.invalidate() }
     }
-    val panel = when { extras.quiet -> "none"; sel != null -> "card"; spot != null -> "spot"; clean -> "none"; else -> "near" }
+    // searching (keyboard up, little room): only the search box and its suggestions, nothing else over the map
+    val panel = when { extras.quiet || typing -> "none"; sel != null -> "card"; spot != null -> "spot"; clean -> "none"; else -> "near" }
     val sheetOpen = nearOpen && panel == "near"
-    val keyShown = !clean && !extras.years && sel == null && spot == null && !sheetOpen
+    val keyShown = !clean && !typing && !compact && !extras.years && sel == null && spot == null && !sheetOpen
     // a new filter: the screen clears (pill, slim handle), then the map fits what the filter leaves, clear of what is over it
     val firstFit = remember { booleanArrayOf(true) }
     LaunchedEffect(status, tyOn, mv) {
@@ -478,7 +482,7 @@ fun MapHome(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit, offlin
     // open, Nearest to you stops under the lowest of the top controls and the column, with room for the credit and those cards
     val maxFull = (with(dens) { (boxH - maxOf(leftPx, sidePx)).toDp() } - 12.dp - creditDp - cardsDp - 12.dp).coerceAtLeast(120.dp)
     room.top = maxOf(leftPx, sidePx)
-    Box(Modifier.fillMaxSize().onSizeChanged { boxH = it.height; room.h = it.height; room.w = it.width }.testTag("map_home")) {
+    Box(Modifier.fillMaxSize().onSizeChanged { boxH = it.height; room.h = it.height; room.w = it.width; compact = with(dens) { it.height.toDp() } < 600.dp }.testTag("map_home")) {
         ProjectsMap(dots, here, { pick(it, false) }, Modifier.fillMaxSize(), fitKey = snap.projects.size, badgeBottom = bottomDp + 12.dp, drawDots = false, onMap = { mv = it }, extras = extras, styleSheet = styleSheet, fitDots = homeDots)
         // 1. the bottom panel: the card, the long-pressed spot, or Nearest to you (under everything else)
         AnimatedContent(panel, Modifier.align(Alignment.BottomCenter).padding(12.dp).onSizeChanged { bottomH = it.height }.onGloballyPositioned { room.panelTop = it.boundsInParent().top.roundToInt() },
@@ -496,7 +500,7 @@ fun MapHome(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit, offlin
                     }
                 } ?: Box(Modifier)
                 "none" -> Box(Modifier)
-                else -> NearestSheet(m, snap, here, Modifier, open, slim = filtered, expanded = nearOpen, onExpand = { nearOpen = it; if (it) { tray = false; keyOpen = false } }, maxFull = maxFull,
+                else -> NearestSheet(m, snap, here, Modifier, open, slim = filtered || compact, expanded = nearOpen, onExpand = { nearOpen = it; if (it) { tray = false; keyOpen = false } }, maxFull = maxFull,
                     pool = if (filtered) visible else null, emptyText = nearNone(tyOn, status))
             }
         }
@@ -508,7 +512,7 @@ fun MapHome(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit, offlin
         // 3. the controls at the top left: the chip row or its pill, the pinned bar, "You're at"
         Column(Modifier.align(Alignment.TopStart).padding(12.dp).padding(end = 64.dp).onGloballyPositioned { leftPx = it.boundsInParent().bottom.roundToInt() }) {
             Spacer(Modifier.height(if (clean) 48.dp else 56.dp)) // the search box or its button (drawn last, so its suggestions sit over everything)
-            if (!extras.years && !clean) {
+            if (!extras.years && !clean && !typing) {
                 if (filtered && !rowOpen) FilterPill(status, tyOn, visible.size, { hp.tap(); rowOpen = true }) { hp.tap(); clearFilters() }
                 else MapChips(snap, pinned, status, tyOn, {
                     status = if (status == it) "" else it; prefs.edit().putString("mapf", status).apply()
@@ -518,14 +522,14 @@ fun MapHome(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit, offlin
                     rowOpen = false; if (status.isNotBlank() || ty.isNotBlank()) nearOpen = false
                 }) { clearFilters() }
             }
-            if (filtered && visible.isEmpty() && !extras.years && !clean)
+            if (filtered && visible.isEmpty() && !extras.years && !clean && !typing)
                 Text(t("Nothing on the map matches these filters.", "Hakuna kwenye ramani kinacholingana na vichujio hivi."), style = MaterialTheme.typography.labelMedium, color = C.ink,
                     modifier = Modifier.padding(top = 8.dp).clip(RoundedCornerShape(12.dp)).background(C.card).padding(horizontal = 12.dp, vertical = 8.dp).testTag("map_none"))
             // the pinned bar: one slim line, only with no filter and Nearest to you resting
-            if (!filtered && !sheetOpen && !clean) PinnedBar(snap, pinned.size)
-            if (!clean && !suggOpen) HereSlot(m, snap, here, Modifier.padding(top = 10.dp), visit, open, chipAfter = narrow)
+            if (!filtered && !sheetOpen && !clean && !typing && !compact) PinnedBar(snap, pinned.size)
+            if (!clean && !suggOpen && !typing) HereSlot(m, snap, here, Modifier.padding(top = 10.dp), visit, open, chipAfter = narrow, chipNow = compact)
             // no signal and no map kept on this phone: say so, and where to save one
-            if (!clean && !online && !cmOn && !extras.years) NoSignalNote(offlineAreas.isNotEmpty(), Modifier.padding(top = 8.dp), offline)
+            if (!clean && !typing && !online && !cmOn && !extras.years) NoSignalNote(offlineAreas.isNotEmpty(), Modifier.padding(top = 8.dp), offline)
         }
         // 4. the column on the right: Map style, where I am, More; the compass and Follow me while they are on
         MapSide(m, mv, here, tray, { tray = it; if (it) { keyOpen = false; nearOpen = false } }, { styleSheet.value = true },
@@ -536,7 +540,7 @@ fun MapHome(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit, offlin
                 .clickable(role = Role.Button) { hp.tap(); MapClean.on = false; askSearch = true }.semantics { contentDescription = t("Search a village or project", "Tafuta kijiji au mradi") }.testTag("map_search_btn"),
             contentAlignment = Alignment.Center,
         ) { Icon(Ic.get("search"), null, tint = C.ink, modifier = Modifier.size(20.dp)) }
-        else MapSearch(m, snap, here, Modifier.align(Alignment.TopStart).padding(12.dp).padding(end = 64.dp), askSearch, { askSearch = false }, { typing = it }, { suggOpen = it }, { pick(it, true) }, { pts -> HomeLayers.follow = false; mv?.let { mapFlyAll(it, pts, anim, 14.0) }; closeCards() }) { ll ->
+        else MapSearch(m, snap, here, Modifier.align(Alignment.TopStart).padding(12.dp).padding(end = 64.dp), askSearch, { askSearch = false }, { typing = it }, { suggOpen = it }, { pick(it, true) }, { pts -> HomeLayers.follow = false; mv?.let { mapFlyAll(it, pts, anim, 14.0) }; closeCards() }, maxList = (with(dens) { boxH.toDp() } - 12.dp - 56.dp - 6.dp - 12.dp).coerceAtLeast(120.dp)) { ll ->
             HomeLayers.follow = false; mv?.let { mapFly(it, ll, 13.0, anim) }; closeCards()
         }
         // Save this area for offline: the sheet (opened from More) and the bar while an area fills (OfflineMaps.kt)
@@ -842,7 +846,7 @@ private fun MapChip(label: String, icon: String, n: Int, on: Boolean, hu: Hue, t
  *  with no signal), and places by name when there is signal. Choosing one flies the map there. */
 @Composable
 private fun MapSearch(m: AppModel, snap: Snapshot, here: LatLng?, modifier: Modifier, ask: Boolean, asked: () -> Unit, onFocus: (Boolean) -> Unit, onSugg: (Boolean) -> Unit,
-                      onProject: (String) -> Unit, onArea: (List<LatLng>) -> Unit, onPlace: (LatLng) -> Unit) {
+                      onProject: (String) -> Unit, onArea: (List<LatLng>) -> Unit, maxList: androidx.compose.ui.unit.Dp = 520.dp, onPlace: (LatLng) -> Unit) {
     var q by remember { mutableStateOf("") }
     var focused by remember { mutableStateOf(false) }
     // the search button of the map alone (MapClean) opens the search ready to type
@@ -896,8 +900,9 @@ private fun MapSearch(m: AppModel, snap: Snapshot, here: LatLng?, modifier: Modi
             }
         }
         if (suggShown) Column(
-            Modifier.padding(top = 6.dp).fillMaxWidth().shadow(8.dp, RoundedCornerShape(18.dp)).clip(RoundedCornerShape(18.dp)).background(C.card).border(1.dp, C.line, RoundedCornerShape(18.dp))
-                .padding(vertical = 6.dp).testTag("map_sugg"),
+            // it scrolls in the room the keyboard leaves, never past the bottom of the map
+            Modifier.padding(top = 6.dp).fillMaxWidth().heightIn(max = maxList).shadow(8.dp, RoundedCornerShape(18.dp)).clip(RoundedCornerShape(18.dp)).background(C.card).border(1.dp, C.line, RoundedCornerShape(18.dp))
+                .verticalScroll(rememberScrollState()).padding(vertical = 6.dp).testTag("map_sugg"),
         ) {
             areas.forEach { (a, l) ->
                 SuggRow("pin", C.hue("green"), a, t("${l.first().country} · ${l.size} projects", "${l.first().country} · miradi ${l.size}").let { if (l.size == 1) t("${l.first().country} · 1 project", "${l.first().country} · mradi 1") else it }, "sugg_a_$a") {

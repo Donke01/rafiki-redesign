@@ -1,8 +1,8 @@
 {
   "ok": true,
-  "versionCode": 42,
-  "versionName": "2.18.0",
-  "notes": "Back now closes what you opened, one step at a time, and pages start fresh when you come back. Half-done visits and new sites are kept. Distances in km, a clearer Projects list and map, better Kiswahili. New: Office › Send an e-mail, and donor mode with app codes.",
-  "sha256": "708b482cfdc106b14c8e76a5e54d62d10108fd4597cc2f7aee77c8b8fee35b79",
+  "versionCode": 43,
+  "versionName": "2.18.1",
+  "notes": "The map stays tidy with the keyboard open: while you search, only the search and its results show. On small screens nothing on the map overlaps.",
+  "sha256": "555240130f3b0ed6fbe4f2d79e09d5a78bba32550521bda2ea9e3d55a00f29c3",
   "apk": "/app/rafiki-pin.apk"
 }

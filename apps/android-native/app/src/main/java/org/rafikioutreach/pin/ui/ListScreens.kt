@@ -136,7 +136,7 @@ private class HereKeep { var id: String? = null; var last: Pair<Project, Double>
 /** The "You’re at …" banner. It appears within 200 m and stays until you are 260 m away, so GPS wobble
  *  near the edge doesn’t make it blink; it slides in and out instead of popping. */
 @Composable
-fun HereSlot(m: AppModel, snap: Snapshot, here: LatLng?, modifier: Modifier, visit: (String) -> Unit, open: (String) -> Unit, chipAfter: Boolean = false) {
+fun HereSlot(m: AppModel, snap: Snapshot, here: LatLng?, modifier: Modifier, visit: (String) -> Unit, open: (String) -> Unit, chipAfter: Boolean = false, chipNow: Boolean = false) {
     val keep = remember { HereKeep() }
     val near = here?.let { h -> snap.projects.filter { it.gps != null }.map { it to Geo.metres(h, it.gps!!) }.minByOrNull { it.second } }
     val now = near?.takeIf { (it.second <= 200 || (it.first.id == keep.id && it.second <= 260)) && !m.dismissed.contains(it.first.id) }
@@ -145,9 +145,9 @@ fun HereSlot(m: AppModel, snap: Snapshot, here: LatLng?, modifier: Modifier, vis
     androidx.compose.animation.AnimatedVisibility(now != null, modifier, enter = androidx.compose.animation.fadeIn() + androidx.compose.animation.expandVertically(), exit = androidx.compose.animation.fadeOut() + androidx.compose.animation.shrinkVertically()) {
         val (p, d) = now ?: keep.last ?: return@AnimatedVisibility
         // on a small phone's map it folds into a chip after 5 seconds, leaving the map room; a tap opens it again
-        var folded by remember(p.id) { mutableStateOf(false) }
-        if (chipAfter) androidx.compose.runtime.LaunchedEffect(p.id, folded) { if (!folded) { kotlinx.coroutines.delay(5000); folded = true } }
-        if (chipAfter && folded) HereChip(p) { folded = false }
+        var folded by remember(p.id, chipNow) { mutableStateOf(chipNow) }
+        if (chipAfter || chipNow) androidx.compose.runtime.LaunchedEffect(p.id, folded) { if (!folded) { kotlinx.coroutines.delay(5000); folded = true } }
+        if ((chipAfter || chipNow) && folded) HereChip(p) { folded = false }
         else HereBanner(p, d, m.prefs.miles, Modifier, { visit(p.id) }, { open(p.id) }) { m.dismissed.add(p.id) }
     }
 }
