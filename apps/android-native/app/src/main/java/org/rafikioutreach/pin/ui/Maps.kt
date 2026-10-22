@@ -78,7 +78,10 @@ private fun dotDrawable(color: Int, big: Boolean) = GradientDrawable().apply {
 fun ProjectsMap(dots: List<Dot>, me: LatLng?, onDot: (String) -> Unit, modifier: Modifier = Modifier, fitKey: Any? = null, badgeBottom: androidx.compose.ui.unit.Dp = 0.dp) {
     val ctx = LocalContext.current
     MapSetup.init(ctx)
-    var sat by remember { mutableStateOf(false) }
+    // satellite first; the street map once they choose it (remembered on this phone)
+    val mapPrefs = remember { ctx.getSharedPreferences("map_style", android.content.Context.MODE_PRIVATE) }
+    var sat by remember { mutableStateOf(mapPrefs.getString("style", "sat") != "street") }
+    androidx.compose.runtime.LaunchedEffect(sat) { mapPrefs.edit().putString("style", if (sat) "sat" else "street").apply() }
     val g0 by GoogleTiles.maps.collectAsState()
     val g = OfflineMaps.google(g0) // the free maps while filling an offline area or with no signal
     val onDotNow by androidx.compose.runtime.rememberUpdatedState(onDot)

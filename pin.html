@@ -2606,11 +2606,11 @@ html[data-theme=sun] .ocv-bar .col{border:1.5px solid #000}html[data-theme=sun] 
   function layers(map) {
     var street = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' });
     var sat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, maxNativeZoom: 18, attribution: 'Imagery &copy; Esri, Maxar, Earthstar Geographics' });
-    var fallback = function () { if (!map.hasLayer(street) && !map.hasLayer(sat)) (store.get('rfPinLayer') === 'sat' ? sat : street).addTo(map); };
+    var fallback = function () { if (!map.hasLayer(street) && !map.hasLayer(sat)) (store.get('rfPinLayer') === 'street' ? street : sat).addTo(map); }; // satellite first, unless they chose the street map
     if (!gKey()) fallback(); else setTimeout(fallback, 5000); // Google not answering: show the free maps meanwhile
     if (gKey()) Promise.all([gSession('road'), gSession('sat')]).then(function (ss) {
       if (!ss[0] || !ss[1]) return fallback();
-      var gs = gLayer(ss[0], false), gt = gLayer(ss[1], true), wasSat = map.hasLayer(sat) || (!map.hasLayer(street) && store.get('rfPinLayer') === 'sat');
+      var gs = gLayer(ss[0], false), gt = gLayer(ss[1], true), wasSat = map.hasLayer(sat) || (!map.hasLayer(street) && store.get('rfPinLayer') !== 'street');
       [street, sat].forEach(function (l) { if (map.hasLayer(l)) map.removeLayer(l); });
       street = gs; sat = gt; (wasSat ? sat : street).addTo(map);
       // Google's logo and the copyright for what is on screen, as its terms ask
