@@ -2379,6 +2379,73 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
 @media (min-width:700px){#vMap .ov.top > .mcl-pill{align-self:center;max-width:560px}#vMap .ov.top > .mcl-sb{align-self:flex-start}}
 @media (prefers-reduced-motion: reduce){.mcl-kp.in,.mcl-tray.in{animation:none !important}}
 </style>
+<style id="pwmap-css">
+/* Polish (pwmap): the map home, the Projects list, Offline maps and the welcome screens */
+/* "You're at" on the map: a slim chip, at most two lines, never a word cut; it steps aside for a filter or a card */
+#vMap #mHere{align-self:flex-start;max-width:100%;min-width:0}
+#vMap #mHere:empty,#vMap:is(.mcl-f,.mcl-card) #mHere{display:none}
+.here.mat{flex-direction:row;align-items:center;gap:6px;max-width:100%;min-height:48px;padding:2px 2px 2px 12px;border-radius:24px;box-sizing:border-box}
+.here.mat .hw{flex:0 1 auto;min-width:0;display:flex;align-items:center;gap:8px;min-height:44px;padding:0;border:0;background:none;color:#FFFFFF;font:inherit;text-align:left;cursor:pointer}
+.here.mat .hw svg{flex:none;width:18px;height:18px}
+.here.mat .mat-t{min-width:0;font-size:.84rem;line-height:1.22;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow-wrap:normal;word-break:normal;hyphens:none}
+.here.mat .mat-t small{font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;opacity:.85}
+.here.mat .mat-t,.here.mat .mat-t :is(b,small){color:#FFFFFF}.here.mat .mat-t b{font-size:inherit;font-weight:800;line-height:inherit}
+.here.mat .btn{flex:none;min-height:44px;padding:0 14px}
+.here.mat .btn.x{width:44px;padding:0;margin:0}
+/* sun: the words on the green stay white */
+html[data-theme=sun] .here .hw,html[data-theme=sun] .here .hw :is(b,small,span){color:#FFFFFF}
+/* Map style: the heat map line says it all, the three choices on one line each */
+.mpb-seg{margin:2px 14px 8px}.mpb-seg button{white-space:nowrap}
+/* chip rows: a soft fade at an edge with more to see */
+.cr-l,.cr-r{-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 var(--crl,0px),#000 calc(100% - var(--crr,0px)),transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 var(--crl,0px),#000 calc(100% - var(--crr,0px)),transparent 100%)}
+.cr-l{--crl:44px}.cr-r{--crr:44px}
+.mpa-chips:not(.cr-l):not(.cr-r){-webkit-mask-image:none;mask-image:none}
+:is(.mpa-chips,.rr-chips,.tchips,.np-f,.lchips) > *{white-space:nowrap}
+/* Projects: one calm head, compact actions, one chip row, one Filter pill (as in the Office tabs) */
+#vList .lhead{margin:0 0 10px}
+#vList .lhead h1{margin:0 0 2px;font-size:1.3rem;line-height:1.2;text-align:left}
+#vList .lhead .rr-big{background:var(--hb-blue);color:var(--hu-blue)}
+#vList .lhead #lProg,#vList .lhead #cProg,#vList #typeChips{display:none !important}
+#homeTop.lacts{display:flex;flex-direction:column;gap:8px;margin:0 0 12px}
+#homeTop.lacts .sbox{margin:0;min-height:48px}
+.lrow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.lact{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-width:0;min-height:56px;padding:6px 4px;border-radius:14px;border:var(--bw) solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-size:.76rem;font-weight:700;line-height:1.15;text-align:center;white-space:nowrap;cursor:pointer;transition:transform .12s}
+.lact:active{transform:scale(.96)}
+#homeTop #bRouteMode[aria-pressed=false]{background:var(--card);border-color:var(--line);color:var(--ink);padding:6px 4px}
+html:not([data-theme=sun]) #homeTop #bRouteMode[aria-pressed=false]{background:var(--gl);border-color:var(--glb);box-shadow:var(--gls),var(--glin)}
+.lact svg{width:20px;height:20px;color:var(--blue)}
+html:not([data-theme=sun]) .lact{background:var(--gl);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);border-color:var(--glb);box-shadow:var(--gls),var(--glin)}
+.lact[aria-pressed=true]{background:var(--inkb,#0C1924) !important;border-color:transparent !important;color:#FFFFFF}.lact[aria-pressed=true] svg{color:#FFFFFF}
+html[data-theme=dark] .lact[aria-pressed=true]{background:var(--blue2) !important;color:#0B1116}html[data-theme=dark] .lact[aria-pressed=true] svg{color:#0B1116}
+html[data-theme=sun] .lact[aria-pressed=true]{background:#000 !important}
+#vList .lbar{position:sticky;top:var(--hh,62px);z-index:30;margin:0 -16px 2px;padding:2px 0 0;background:rgba(244,248,251,.9);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+html[data-theme=dark] #vList .lbar{background:rgba(11,17,22,.88)}html[data-theme=sun] #vList .lbar{background:#FFFFFF}
+#vList .lbar .rr-chips{margin:0;padding:6px 16px 8px}
+@media (min-width:700px){#vList .lbar{margin:0 0 2px}#vList .lbar .rr-chips{padding:6px 0 8px}}
+html[data-theme=dark] #vList .rr-chips .chip[aria-pressed=true]{background:var(--blue2);border-color:transparent;color:#0B1116}html[data-theme=dark] #vList .rr-chips .chip[aria-pressed=true] .n{background:rgba(11,17,22,.18);color:#0B1116}
+#vList .countrow{margin:4px 0 8px}
+#vList .countrow .count{font-size:.84rem;line-height:1.35}
+.lfilt h4.lfh{margin:12px 6px 4px;font-size:.72rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.lfilt .bsh-o{min-height:52px}
+.lfilt .lfn{flex:none;font-size:.82rem;font-weight:700;color:var(--muted)}
+.lfilt .bsh-o b{flex:none;width:22px;justify-content:center}
+.lfilt .lfdone{margin-top:14px}
+/* the welcome screens: the language card at the side shows only its colour, never half a word */
+.onb .lc > :is(.pl,p){transition:opacity .2s}
+.onb .lc:not(.on) > :is(.pl,p){opacity:0}
+/* a computer: the map uses the whole width, the top bar keeps one width on every screen, the photo stays low */
+@media (min-width:1000px){
+  .app,body.wide .app{max-width:none}
+  header.top{padding-left:max(12px,calc(50% - 578px));padding-right:max(12px,calc(50% - 578px))}
+  main > section{max-width:728px;margin-left:auto;margin-right:auto}
+  body.wide main > section{max-width:1148px}
+  main.bare > #vMap{max-width:none}
+  #vMap .ov.bot{left:max(10px,calc(50% - 370px));right:max(10px,calc(50% - 370px))}
+  #pHero{aspect-ratio:auto;height:min(320px,40vh)}
+}
+@media (min-width:700px){#vMap .ov.top > :is(.mcl-pill,#mHere){align-self:flex-start;max-width:560px;margin-left:max(0px,calc((100% - 560px) / 2))}}
+@media (prefers-reduced-motion: reduce){.onb .lc > :is(.pl,p){transition:none}}
+</style>
 </head>
 <body class="locked">
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
@@ -2457,29 +2524,29 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
 
     <!-- list -->
     <section id="vList" class="hidden" aria-labelledby="h-list">
-      <div id="homeTop"></div>
+      <!-- one calm head as in the Office tabs: the title, how many are pinned, three numbers that filter the list (pwmap) -->
+      <div class="card rr-hero lhead" id="lHead">
+        <div class="rr-hd"><span class="rr-big" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6.5h11M9 12h11M9 17.5h11"/><circle cx="4.8" cy="6.5" r="1.2"/><circle cx="4.8" cy="12" r="1.2"/><circle cx="4.8" cy="17.5" r="1.2"/></svg></span><div><h1 id="h-list">Projects</h1><p class="muted" id="lHi"></p></div></div>
+        <div class="prog hidden" id="lProg"></div><div class="cmeters hidden" id="cProg"></div>
+        <div class="rr-nums" id="lNums" role="group" aria-label="Show"></div>
+      </div>
+      <div id="homeTop" class="lacts">
+        <button class="sbox" type="button" data-q="search" aria-label="Search projects"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg><span>Search a project or place</span></button>
+        <div class="lrow" role="group" aria-label="Quick actions"><button type="button" class="lact" data-q="new" data-ic="plus"><span>New site</span></button><button type="button" class="lact" data-q="scan" data-ic="scan"><span>Scan QR</span></button><button type="button" class="lact" id="bRouteMode" data-ic="map" aria-pressed="false"><span>Plan a route</span></button></div>
+      </div>
       <div id="lHere"></div>
       <div id="myWork"></div>
       <div id="instBox"></div>
       <div class="outbox hidden" id="outbox" role="status"><span id="outboxTx"></span><button class="btn small light" id="bFlush" type="button">Send now</button></div>
-      <div class="listhead"><h1 id="h-list">Projects</h1><button class="btn small light" id="bRouteMode" type="button" aria-pressed="false">🗺 Plan a route</button></div>
-      <div class="card prog-card" style="padding:16px"><div class="prog" id="lProg"></div><div class="cmeters" id="cProg" style="margin-top:12px"></div></div>
-      <div class="tools">
-        <input type="search" id="iSearch" class="hidden" placeholder="Search by project name or place" aria-label="Search by project name or place">
-
-        <div class="chips otabs fgrid" role="group" aria-label="Show">
-          <button class="chip otab" type="button" data-f="missing" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><path d="M10.3 8.4a1.9 1.9 0 1 1 2.6 1.8c-.6.3-.9.7-.9 1.3M12 13.6v.1"/></svg><span>Needs a location</span></button>
-          <button class="chip otab" type="button" data-f="near" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg><span>Nearby</span></button>
-          <button class="chip otab" type="button" data-f="repairs" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></svg><span>Repairs</span><i class="n" id="repN">0</i></button>
-          <button class="chip otab" type="button" data-f="due" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M12 13.2v2.6l1.8 1.1"/></svg><span>Due a visit</span></button>
-          <button class="chip otab" type="button" data-f="all" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6.5h11M9 12h11M9 17.5h11"/><circle cx="4.8" cy="6.5" r="1.2"/><circle cx="4.8" cy="12" r="1.2"/><circle cx="4.8" cy="17.5" r="1.2"/></svg><span>All</span></button>
-        </div>
-        <select id="iCountry" class="vh" aria-label="Country" tabindex="-1">
-          <option value="">All countries</option><option value="ke">Kenya</option><option value="tz">Tanzania</option><option value="ug">Uganda</option><option value="mw">Malawi</option>
-        </select>
-      </div>
-      <div class="countrow"><button class="chip cchip" type="button" id="bCountry" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 6.5l5.5-2.5 6 2.5 5.5-2.5v13.5L15 20l-6-2.5-5.5 2.5z"/><path d="M9 4v13.5M15 6.5V20"/></svg><span id="bCountryTx">All countries</span><svg class="dn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><p class="count" id="count" aria-live="polite"></p></div>
-      <div class="tchips" id="typeChips" role="group" aria-label="Type of project"></div>
+      <!-- one row of filters with their numbers, as in the Office tabs; it stays at the top while the list scrolls -->
+      <div class="lbar"><div class="chips rr-chips lchips" id="lChips" role="group" aria-label="Show"></div></div>
+      <input type="search" id="iSearch" class="hidden" placeholder="Search by project name or place" aria-label="Search by project name or place">
+      <select id="iCountry" class="vh" aria-label="Country" tabindex="-1">
+        <option value="">All countries</option><option value="ke">Kenya</option><option value="tz">Tanzania</option><option value="ug">Uganda</option><option value="mw">Malawi</option>
+      </select>
+      <!-- the country and the kind of project: one Filter pill -->
+      <div class="countrow"><button class="chip cchip" type="button" id="bCountry" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6.5h16M7 12h10M10 17.5h4"/></svg><span id="bCountryTx">All countries</span><svg class="dn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><p class="count" id="count" aria-live="polite"></p></div>
+      <div class="tchips" id="typeChips" hidden></div>
       <div class="list" id="list"></div>
       <p class="msg" id="mList" aria-live="polite"></p>
       <div class="routebar hidden" id="routeBar"><div><span id="routeN">Choose pinned projects to visit</span><button class="btn small" id="bRouteGo" type="button" disabled>Plan route</button></div></div>
@@ -2737,13 +2804,14 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function inRange(ll) { return ll && ll[0] >= -18 && ll[0] <= 6 && ll[1] >= 28 && ll[1] <= 42; }
   function metres(a, b) { var R = 6371000, r = function (x) { return x * Math.PI / 180; }, dLa = r(b[0] - a[0]), dLo = r(b[1] - a[1]); var h = Math.pow(Math.sin(dLa / 2), 2) + Math.cos(r(a[0])) * Math.cos(r(b[0])) * Math.pow(Math.sin(dLo / 2), 2); return 2 * R * Math.asin(Math.sqrt(h)); }
-  // to the metre up to 10 km (e.g. 910 m, 9,312 m), then in km
-  // kilometres: to the metre up to 10 km; miles: to the foot up to 1 mile (switch in Me → Display)
+  // the same everywhere, as in the Android app: under 1 km whole metres ("850 m"), 1 to 10 km one decimal ("5.5 km"),
+  // 10 km and over whole km ("12 km"); in miles (switch in Me → Display) feet under 0.1 mi, then one decimal ("2.3 mi")
   function dist(m) {
-    if (S.units === 'mi') { var mi = m / 1609.344; return mi < 1 ? Math.round(m * 3.28084).toLocaleString('en-US') + ' ft' : mi < 10 ? mi.toFixed(2) + ' mi' : mi < 100 ? mi.toFixed(1) + ' mi' : Math.round(mi) + ' mi'; }
-    return m < 10000 ? Math.round(m).toLocaleString('en-US') + ' m' : m < 100000 ? (m / 1000).toFixed(1) + ' km' : Math.round(m / 1000) + ' km';
+    m = Math.max(0, +m || 0);
+    if (S.units === 'mi') { var mi = m / 1609.344; return mi < 0.1 ? Math.round(m * 3.28084) + ' ft' : mi.toFixed(1) + ' mi'; }
+    return Math.round(m) < 1000 ? Math.round(m) + ' m' : m < 9950 ? (m / 1000).toFixed(1) + ' km' : Math.round(m / 1000).toLocaleString('en-US') + ' km';
   }
-  function acct(m) { return S.units === 'mi' ? '±' + Math.round(m * 3.28084) + ' ft' : '±' + m + ' m'; }
+  function acct(m) { return '±' + dist(m); } // GPS accuracy: "±8 m", "±1.2 km"
   function msg(id, cls, t) { $(id).className = 'msg ' + (cls || ''); $(id).textContent = t || ''; }
   function photoUrl(p, w) { return p && p.photo ? '/api/photo/' + encodeURIComponent(p.photo) + '?w=' + (w || 480) : ''; }
   function when(iso) { var d = new Date(iso); return isNaN(d) ? '' : d.toLocaleDateString(undefined, { day: 'numeric', month: 'short' }) + ', ' + d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }); }
@@ -2828,6 +2896,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
     document.body.classList.toggle('wide', v === 'vOffice');
     if (v === 'vNew') openNew();
     hereWatch(v === 'vMap' || v === 'vList');
+    setTimeout(function () { crReset(v); }, 0); // chip rows start at the beginning again (pwmap)
   }
   qa('#tabs button').forEach(function (b) { b.addEventListener('click', function () { show(b.getAttribute('data-v')); }); });
 
@@ -3374,7 +3443,6 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
       return l.length ? '<div>' + CNAME[ck] + ' ' + h + '/' + l.length + '<div class="meter"><i data-w="' + Math.round(h / l.length * 100) + '" style="width:0"></i></div></div>' : '';
     }).join('');
     grow();
-    var nr = Object.keys(S.repairs).length; $('repN').textContent = nr; $('repN').classList.toggle('hidden', !nr);
   }
 
   // --- where am I: "I'm here" banner and nearest projects --------------------------------------
@@ -3477,18 +3545,31 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
     if (!S.here) return [];
     return S.projects.filter(function (p) { return p.gps; }).map(function (p) { return { p: p, d: metres(S.here, p.gps) }; }).sort(function (a, b) { return a.d - b.d; }).slice(0, n);
   }
+  // Nearest to you on the map follows the map's filter (Broken, Water…): only the projects the map shows, closest first
+  var NEAR_MAX = 100000; // further than this, a project isn't "near you"
+  function nearF(n, from) {
+    from = from || S.here; if (!from) return [];
+    var pool = MPA.map && (MPA.f || mpaTy()) ? mpaVisible() : S.projects.filter(function (p) { return p.gps; });
+    return pool.map(function (p) { return { p: p, d: metres(from, p.gps) }; }).sort(function (a, b) { return a.d - b.d; }).slice(0, n);
+  }
+  // a broken site keeps its distance: the distance first, then how it is
+  function nearSt(p) { var r = S.repairs[p.id]; return r ? '<span class="tag' + (r.state === 'notworking' ? ' bad' : '') + '">' + mpaCondName(r.state === 'notworking' ? 'bad' : 'repair') + '</span>' : ''; }
+  function nearNone() { if (!S.projects.some(function (p) { return p.gps; })) return ''; return '<p class="muted gw near-note" style="margin:0 6px 8px">' + (MPA.f || mpaTy() ? tr('Nothing near you matches this filter.', 'Hakuna kilicho karibu nawe kinacholingana na kichujio hiki.') : tr('None near you.', 'Hakuna karibu nawe.')) + '</p>'; }
   function hereUi() {
     if (!S.gpsHome && S.here) {
       var n = nearest(1)[0];
       if (n && n.d < 300000) { S.gpsHome = n.p.ck; var before = $('iCountry').value; applyHome(); if (S.view === 'vList' && before !== $('iCountry').value) renderList(); }
     }
-    var top = nearest(1)[0], html = '';
+    var top = nearest(1)[0], html = '', mh = '', had = !!$('mHere').innerHTML;
     if (top && top.d <= 200 && !S.dismissed[top.p.id]) {
-      html = '<div class="here slim" role="status"><button class="hw" type="button" data-here="open" data-id="' + esc(top.p.id) + '">' + oic('pin') + '<span><small>YOU’RE AT · ' + dist(top.d) + '</small><b>' + esc(top.p.title) + '</b></span></button>' +
-        '<button class="btn small" type="button" data-here="visit" data-id="' + esc(top.p.id) + '">Report</button>' +
+      var acts = '<button class="btn small" type="button" data-here="visit" data-id="' + esc(top.p.id) + '">Report</button>' +
         '<button class="btn small ghost x" type="button" data-here="x" data-id="' + esc(top.p.id) + '" aria-label="Not now">×</button></div>';
+      html = '<div class="here slim" role="status"><button class="hw" type="button" data-here="open" data-id="' + esc(top.p.id) + '">' + oic('pin') + '<span><small>YOU’RE AT · ' + dist(top.d) + '</small><b>' + esc(top.p.title) + '</b></span></button>' + acts;
+      // on the map, a slim chip: one line where the name fits, never more than two (pwmap)
+      mh = '<div class="here mat" role="status"><button class="hw" type="button" data-here="open" data-id="' + esc(top.p.id) + '" aria-label="' + esc(tr('You’re at ', 'Uko ') + top.p.title + ', ' + dist(top.d)) + '">' + oic('pin') + '<span class="mat-t"><small>' + tr('You’re at', 'Uko') + '</small> <b>' + esc(top.p.title) + '</b></span></button>' + acts;
     }
-    $('mHere').innerHTML = html; $('lHere').innerHTML = html ? '<div style="margin-bottom:12px">' + html + '</div>' : '';
+    $('mHere').innerHTML = mh; $('lHere').innerHTML = html ? '<div style="margin-bottom:12px">' + html + '</div>' : '';
+    if (had !== !!mh) mclRefit(); // the first view of the map keeps the pins clear of it
     nearUi(); mpaHere();
     if (S.view === 'vList' && S.filter === 'near') renderList();
   }
@@ -3529,17 +3610,19 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
       if (S.here) { you = L.marker(S.here, { icon: L.divIcon({ className: '', html: '<div class="you"></div>', iconSize: [16, 16] }), interactive: false, zIndexOffset: 2000 }).addTo(hLayer); }
       var hk = homeCk(), mine = hk ? S.projects.filter(function (p) { return p.gps && p.ck === hk; }) : [], all = S.projects.filter(function (p) { return p.gps; });
       // the project pins (by condition, in bubbles when zoomed out) are drawn by mpaDraw
-      if (!fitted && mine.length > 1) { hMap.fitBounds(L.latLngBounds(mine.map(function (p) { return p.gps; })), { paddingTopLeft: [24, 230], paddingBottomRight: [70, 80], maxZoom: 13 }); fitted = true; }
-      if (!fitted && all.length) { hMap.fitBounds(L.latLngBounds(all.map(function (p) { return p.gps; })), { paddingTopLeft: [24, 230], paddingBottomRight: [70, 80], maxZoom: 13 }); fitted = true; }
       mpaRefresh(false);
       nearUi();
       mpbDraw(); // today's route, follow me, heat, years, live team, motion
       mclInit(hMap); mclSync(); // the pill, the peek, the Key button, map-only mode and the column on the right (mcl…)
+      // the first view: every pin, clear of what is over the map (the top controls with "You're at", the column, the sheet)
+      var fl = mine.length > 1 ? mine : all;
+      if (!fitted && fl.length) { MCL.fitB = L.latLngBounds(fl.map(function (p) { return p.gps; })); MCL.touched = false; mclLayout(); hMap.fitBounds(MCL.fitB, Object.assign(mclPad(), { maxZoom: 13 })); fitted = true; }
     }, 30);
   }
   function nearUi() {
     mclPeekUi(); // the slim handle shows the closest one too (mcl…)
-    var list = nearest(5);
+    var list = nearF(5), box = $('nearList'), old = box.querySelector(':scope > .near-note');
+    if (old) old.remove();
     if (!S.here) {
       var why = !navigator.geolocation ? tr('This browser can’t share your location.', 'Kivinjari hiki hakiwezi kushiriki mahali ulipo.')
         : S.geoErr === 1 ? tr('Location is blocked for this site. Allow it in the browser’s site settings (the icon left of the address), then try again.', 'Mahali pamezuiwa kwa tovuti hii. Paruhusu kwenye mipangilio ya tovuti ya kivinjari (alama iliyo kushoto ya anwani), kisha jaribu tena.')
@@ -3550,16 +3633,18 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
       var btns = '<div class="gwb">' + (DESK || S.geoErr ? '<button class="btn small" id="spotSet" type="button">' + (S.spot ? tr('Change where I am', 'Badilisha nilipo') : tr('Set where I am', 'Weka nilipo')) + '</button>' : '') +
         (S.geoErr ? '<button class="btn small light" id="geoRetry" type="button">' + tr('Try again', 'Jaribu tena') + '</button>' : '') + '</div>';
       if (from) {
-        var al = S.projects.filter(function (p) { return p.gps; }).map(function (p) { return { p: p, d: metres(from, p.gps) }; }).sort(function (a, b) { return a.d - b.d; }).slice(0, 5);
+        var al = nearF(5, from);
         var head = S.spot ? tr('From ' + esc(S.spot.name) + ', the place you set.', 'Kutoka ' + esc(S.spot.name) + ', mahali ulipoweka.')
           : (S.approx.city ? tr('Roughly, from your internet connection near ' + esc(S.approx.city) + '.', 'Takriban, kutoka kwa mtandao wako karibu na ' + esc(S.approx.city) + '.') : tr('Roughly, from your internet connection.', 'Takriban, kutoka kwa mtandao wako.')) + ' ' + why;
-        $('nearList').innerHTML = '<p class="muted gw" style="margin:0 6px 8px">' + head + '</p>' + btns + al.map(function (x) { return rowHtml(x.p, '<span class="tag">≈ ' + dist(x.d) + '</span>'); }).join('');
+        $('nearList').innerHTML = '<p class="muted gw" style="margin:0 6px 8px">' + head + '</p>' + btns + (al.length ? al.map(function (x) { return rowHtml(x.p, '<span class="tag">≈ ' + dist(x.d) + '</span>' + nearSt(x.p)); }).join('') : nearNone());
         $('nearList').dataset.k = ''; return;
       }
       $('nearList').innerHTML = '<p class="muted gw" style="margin:0 6px 8px">' + why + '</p>' + btns;
       $('nearList').dataset.k = ''; return;
     }
-    paint($('nearList'), list.map(function (x) { var tag = '<span class="tag has">' + dist(x.d) + '</span>'; return { html: rowHtml(x.p, tag), tag: tag, id: x.p.id }; }), '');
+    paint(box, list.map(function (x) { var tag = '<span class="tag has">' + dist(x.d) + '</span>'; return { html: rowHtml(x.p, tag + nearSt(x.p)), tag: tag, id: x.p.id }; }), nearNone());
+    // none within reach: say so, and still show the closest ones
+    if (list.length && list[0].d > NEAR_MAX) box.insertAdjacentHTML('afterbegin', '<p class="muted gw near-note" style="margin:0 6px 8px">' + tr('None within ' + dist(NEAR_MAX) + '. The closest ones:', 'Hakuna ndani ya ' + dist(NEAR_MAX) + '. Zilizo karibu zaidi:') + '</p>');
   }
   // Redraws a list of project rows. When only the distances changed (e.g. as you walk), just those
   // labels are updated, so the photos stay put instead of reloading and blinking.
@@ -3668,6 +3753,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
     if (MPA.sel && !byId(MPA.sel)) { MPA.sel = null; }
     mpaCardUi(0);
     if (fit && (MPA.f || mpaTy())) mpaFit(mpaVisible());
+    nearUi(); // Nearest to you follows the filter
   }
 
   // Broken, Due a visit, My assigned visits, then the kinds of project; each with how many there are. Swipe sideways.
@@ -3684,14 +3770,15 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
       var g = TGROUPS.filter(function (x) { return x[0] === t[0]; })[0], n = pinned.filter(function (p) { return tgroup(p) === t[0] && mpaStOk(p, MPA.f, mine); }).length;
       h += '<button type="button" class="mpa-chip" data-mt="' + t[0] + '" style="--hu:var(--hu-' + t[2] + ');--hb:var(--hb-' + t[2] + ')" aria-pressed="' + (ty === t[0]) + '">' + oic(t[1]) + '<span>' + tr(g[1], g[2]) + '</span><i>' + n + '</i></button>';
     });
-    box.innerHTML = h; box.scrollLeft = sx;
+    box.innerHTML = h; box.scrollLeft = MPA.f || ty ? sx : 0; // no filter on: the row starts at the beginning again
     $('mpaNone').classList.toggle('hidden', !((MPA.f || ty) && !mpaVisible().length));
     mclSync(); // the pill, the pinned bar and the peek follow the filters (mcl…)
   }
 
   // the card: a tapped pin (swipe it through the projects nearest that pin) or a long-pressed spot
-  function mpaPick(id, fly) {
+  function mpaPick(id, fly, fromQ) {
     var p = byId(id); if (!p || !p.gps || !MPA.map) return;
+    MPA.fromQ = !!fromQ; // chosen in the search: the card doesn't count it among the projects nearby
     if (MPB.follow) mpbFollow(false); // looking at a project: following you stops, as when you drag the map
     MPA.spot = null; MPA.measure = false; mpaSpotDraw();
     var vis = mpaVisible().filter(function (x) { return x.id !== id; });
@@ -3702,9 +3789,9 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
   }
   function mpaStep(d) {
     var i = MPA.order.map(function (x) { return x.id; }).indexOf(MPA.sel), p = MPA.order[i + d]; if (i < 0 || !p) return;
-    MPA.sel = p.id; buzz(); MPA.map.panTo(p.gps, { animate: !mpaStill() }); mpaDraw(); mpaCardUi(d);
+    MPA.sel = p.id; MPA.fromQ = false; buzz(); MPA.map.panTo(p.gps, { animate: !mpaStill() }); mpaDraw(); mpaCardUi(d);
   }
-  function mpaClose() { MPA.sel = null; MPA.spot = null; MPA.measure = false; mpaSpotDraw(); mpaDraw(); mpaCardUi(0); }
+  function mpaClose() { MPA.sel = null; MPA.fromQ = false; MPA.spot = null; MPA.measure = false; mpaSpotDraw(); mpaDraw(); mpaCardUi(0); }
   function mpaVisitDay(iso) { var d = new Date(iso); return isNaN(d) ? '' : d.toLocaleDateString(S.lang === 'sw' ? 'sw' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' }); }
   function mpaCardUi(dir) {
     var box = $('mpaCard'); if (!box) return;
@@ -3715,13 +3802,14 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
     var x = '<button type="button" class="mpa-ib" data-mpa="x" aria-label="' + tr('Close', 'Funga') + '">' + oic('x') + '</button>', h;
     if (sp) {
       h = '<i class="grab" aria-hidden="true"></i><div class="mpa-ch"><span class="mpa-pos mpa-sp"><b>' + tr('This spot', 'Mahali hapa') + '</b><small>' + fmt(sp) + '</small></span>' + x + '</div>';
-      if (MPA.measure) h += S.here ? '<div class="mpa-meas" id="mpaMeas">' + oic('compass') + '<span><b>' + dist(metres(S.here, sp)) + '</b><small>' + tr('from you, to the ' + heading(S.here, sp) + ' (straight line)', 'kutoka kwako, upande wa ' + (SW[heading(S.here, sp)] || heading(S.here, sp)) + ' (mstari mnyoofu)') + '</small></span></div>'
+      if (MPA.measure) h += S.here ? '<div class="mpa-meas" id="mpaMeas">' + oic('compass') + '<span><b>' + dist(metres(S.here, sp)) + '</b><small>' + tr('from you, to the ' + heading(S.here, sp) + ' (straight line)', 'kutoka kwako, upande wa ' + String(SW[heading(S.here, sp)] || heading(S.here, sp)).replace(/-/g, '\u2011') + ' (mstari mnyoofu)') + '</small></span></div>'
         : '<p class="mpa-warn" id="mpaMeas">' + tr('Allow location to measure from where you are.', 'Ruhusu mahali ili upime kutoka ulipo.') + '</p>';
       h += '<div class="mpa-acts two"><button type="button" class="mpa-a new" data-mpa="new">' + oic('plus') + '<span>' + tr('Add a new site here', 'Ongeza eneo jipya hapa') + '</span></button>' +
-        '<button type="button" class="mpa-a' + (MPA.measure ? ' on' : '') + '" data-mpa="measure" aria-pressed="' + MPA.measure + '">' + oic('compass') + '<span>' + tr('Measure distance from me', 'Pima umbali kutoka kwangu') + '</span></button></div>';
+        '<button type="button" class="mpa-a' + (MPA.measure ? ' on' : '') + '" data-mpa="measure" aria-pressed="' + MPA.measure + '">' + oic('compass') + '<span>' + tr('Measure from me', 'Pima kutoka kwangu') + '</span></button></div>';
     } else {
       var ids = MPA.order.map(function (o) { return o.id; }), i = ids.indexOf(p.id), n = MPA.order.length, c = mpaCond(p), v = S.visits[p.id], ti = mpaTyIcon(p);
-      h = '<i class="grab" aria-hidden="true"></i><div class="mpa-ch"><span class="mpa-pos"><b id="mpaPos">' + (n > 1 && i >= 0 ? tr((i + 1) + ' of ' + n + ' nearby', (i + 1) + ' kati ya ' + n + ' karibu') : tr('Project', 'Mradi')) + '</b>' + (n > 1 ? '<small>' + tr('Swipe for more', 'Telezesha kuona zaidi') + '</small>' : '') + '</span>' +
+      var fq = MPA.fromQ && i === 0;
+      h = '<i class="grab" aria-hidden="true"></i><div class="mpa-ch"><span class="mpa-pos"><b id="mpaPos">' + (fq ? tr('From your search', 'Kutoka utafutaji wako') : n > 1 && i >= 0 ? tr((i + 1) + ' of ' + n + ' nearby', (i + 1) + ' kati ya ' + n + ' karibu') : tr('Project', 'Mradi')) + '</b>' + (n > 1 ? '<small>' + (fq ? tr('Swipe for projects near it', 'Telezesha kuona miradi iliyo karibu nao') : tr('Swipe for more', 'Telezesha kuona zaidi')) + '</small>' : '') + '</span>' +
         '<button type="button" class="mpa-ib" data-mpa="prev" aria-label="' + tr('Previous project nearby', 'Mradi uliotangulia karibu') + '"' + (i > 0 ? '' : ' disabled') + '>' + oic('mpaLeft') + '</button>' +
         '<button type="button" class="mpa-ib" data-mpa="next" aria-label="' + tr('Next project nearby', 'Mradi unaofuata karibu') + '"' + (i >= 0 && i < n - 1 ? '' : ' disabled') + '>' + oic('arrow') + '</button>' + x + '</div>' +
         '<div class="mpa-cb' + (dir && !mpaStill() ? (dir > 0 ? ' in-l' : ' in-r') : '') + '">' +
@@ -3814,7 +3902,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
   function mpaChoose(i) {
     var it = MPA.items[i]; if (!it) return;
     $('mpaQ').value = it.t; $('mpaX').classList.remove('hidden'); mpaSugHide(); $('mpaQ').blur();
-    if (it.k === 'p') return mpaPick(it.id, true);
+    if (it.k === 'p') return mpaPick(it.id, true, true);
     if (MPB.follow) mpbFollow(false); // going somewhere else on the map: following you stops
     MPA.sel = null; MPA.spot = null; mpaSpotDraw(); mpaDraw(); mpaCardUi(0);
     if (it.k === 'a') mpaFit(it.list); else MPA.map.setView(it.ll, 13, { animate: !mpaStill() });
@@ -4089,8 +4177,8 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
     } else if (i === 2) {
       h = bar + '<h1 class="ot" id="onbT">Which language?</h1>' +
         '<div class="ob1"><div class="car" id="onbCar">' +
-        '<div class="lc" data-l="en">' + drop('b', 'o') + '<span class="pl">ENGLISH</span><p>Hello! Let’s find today’s water points.</p></div>' +
-        '<div class="lc g" data-l="sw">' + drop('g', 'smile') + '<span class="pl">KISWAHILI</span><p>Habari! Tutafute vituo vya maji vya leo.</p></div></div>' +
+        '<div class="lc' + (ONB.lang !== 'sw' ? ' on' : '') + '" data-l="en">' + drop('b', 'o') + '<span class="pl">ENGLISH</span><p>Hello! Let’s find today’s water points.</p></div>' +
+        '<div class="lc g' + (ONB.lang === 'sw' ? ' on' : '') + '" data-l="sw">' + drop('g', 'smile') + '<span class="pl">KISWAHILI</span><p>Habari! Tutafute vituo vya maji vya leo.</p></div></div>' +
         '<div class="lname" id="onbLn">' + (ONB.lang === 'sw' ? 'Kiswahili' : 'English') + '</div><div class="dots"><i class="' + (ONB.lang !== 'sw' ? 'on' : '') + '"></i><i class="' + (ONB.lang === 'sw' ? 'on' : '') + '"></i></div></div>' +
         '<div class="foot"><button class="go1" type="button" data-o="lang">That’s my language</button><span class="cap">Swipe to see both. Switch anytime in Me.</span></div>';
     } else if (i === 3) {
@@ -4114,6 +4202,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
         var k = car.scrollLeft > (car.scrollWidth - car.clientWidth) / 2 ? 'sw' : 'en'; if (k === ONB.lang) return;
         ONB.lang = k; $('onbLn').textContent = k === 'sw' ? 'Kiswahili' : 'English';
         qa('.dots i', b).forEach(function (d, j) { d.classList.toggle('on', (j === 1) === (k === 'sw')); });
+        qa('.lc', car).forEach(function (c) { c.classList.toggle('on', c.getAttribute('data-l') === k); }); // the card at the side shows only its colour, never half a word
       });
     }
     if (typeof swApply === 'function') swApply();
@@ -4157,17 +4246,9 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
     var ck = homeCk(); return ck && CNAME[ck] ? CNAME[ck] : '';
   }
   function homeUi() {
-    var first = String(S.name || '').trim().split(/\s+/)[0], w = whereNow();
-    $('homeTop').innerHTML = '<div class="hello"><span class="av" aria-hidden="true">' + esc(initials(S.name)) + '</span><span class="who2"><small>Habari, ' + esc(first || 'karibu') + '</small>' +
-      '</span></div>' +
-      '<div class="bigq"><h2>Which project<b>today?</b></h2></div>' +
-      '<button class="sbox" type="button" data-q="search" aria-label="Search projects">' + oic('search') + '<span>Search a project or place</span></button>' +
-      '<div class="quick" role="group" aria-label="Quick actions">' +
-      '<button type="button" data-q="missing"><i>' + oic('pin') + '</i><span>Pin a location</span></button>' +
-      '<button type="button" data-q="near"><i>' + oic('clip') + '</i><span>Visit nearby</span></button>' +
-      '<button type="button" data-q="new"><i>' + oic('plus') + '</i><span>Add a site</span></button>' +
-      '<button type="button" data-q="repairs"><i>' + oic('wrench') + '</i><span>Repairs</span></button>' +
-      '<button type="button" data-q="scan"><i>' + oic('scan') + '</i><span>Scan QR</span></button></div>';
+    qa('#homeTop [data-ic]').forEach(function (b) { var ic = b === $('bRouteMode') && S.routeMode ? 'check' : b.getAttribute('data-ic'); if (b._ic !== ic) { var o = b.querySelector('svg'); if (o) o.remove(); b.insertAdjacentHTML('afterbegin', oic(ic)); b._ic = ic; } });
+    $('bRouteMode').setAttribute('aria-pressed', S.routeMode ? 'true' : 'false');
+    $('bRouteMode').querySelector('span').textContent = S.routeMode ? tr('Done', 'Imekamilika') : tr('Plan a route', 'Panga njia');
   }
   $('homeTop').addEventListener('click', function (e) {
     var b = e.target.closest('[data-q]'); if (!b) return;
@@ -4263,7 +4344,8 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
   })();
 
   // --- 2. list ---------------------------------------------------------------------------------
-  function thumb(p) { return '<span class="th" aria-hidden="true">' + (p.photo ? '<img loading="lazy" src="' + photoUrl(p, 480) + '" alt="" onerror="this.remove()">' : '💧') + '</span>'; }
+  // no photo: the icon for the kind of project (water drop, school, clinic, children's home, farm), as in the map search
+  function thumb(p) { return '<span class="th" aria-hidden="true">' + (p.photo ? '<img loading="lazy" src="' + photoUrl(p, 480) + '" alt="" onerror="this.remove()">' : '<span class="ei">' + oic(mpaTyIcon(p)[0]) + '</span>') + '</span>'; }
   var rowI = 0;
   function rowHtml(p, tag, check) {
     var dis = check && !p.gps, on = check && S.pickedRoute.indexOf(p.id) >= 0;
@@ -4282,21 +4364,25 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
     var n = {}; S.projects.forEach(function (p) { if (!ck || p.ck === ck) { var g = tgroup(p); n[g] = (n[g] || 0) + 1; } });
     var gs = TGROUPS.filter(function (g) { return n[g[0]]; });
     if (S.ftype && !n[S.ftype]) S.ftype = '';
-    $('typeChips').innerHTML = gs.length < 2 ? '' : '<button type="button" class="tchip" data-t="" aria-pressed="' + !S.ftype + '">' + tr('All types', 'Aina zote') + '</button>' +
-      gs.map(function (g) { return '<button type="button" class="tchip" data-t="' + g[0] + '" aria-pressed="' + (S.ftype === g[0]) + '">' + tr(g[1], g[2]) + ' <i>' + n[g[0]] + '</i></button>'; }).join('');
+    LTY = gs.length < 2 ? [] : gs.map(function (g) { return [g[0], tr(g[1], g[2]), n[g[0]]]; }); // shown in the Filter sheet (pwmap)
   }
   function renderList() {
     progUi(); myWorkUi(); meWorkDraw(); homeUi(); countryChipUi();
     var q = $('iSearch').value.trim().toLowerCase(), ck = $('iCountry').value, f = S.filter, near = f === 'near';
     typeChipsUi(ck);
-    var rows = S.projects.filter(function (p) {
+    // the numbers on the tiles and the chips count the same projects as the list: the country and kind chosen in Filter
+    var scope = S.projects.filter(function (p) {
       if (S.ftype && tgroup(p) !== S.ftype) return false;
+      if (ck && p.ck !== ck) return false;
+      if (q && (p.title + ' ' + p.area + ' ' + p.country).toLowerCase().indexOf(q) < 0) return false;
+      return true;
+    });
+    lHeadUi(scope);
+    var rows = scope.filter(function (p) {
       if (f === 'missing' && p.gps) return false;
       if (near && !p.gps) return false;
       if (f === 'repairs' && !S.repairs[p.id]) return false;
-      if (f === 'due' && (!p.gps || (ageDays(p) < DUE_DAYS && !prjTestDue(p)))) return false;
-      if (ck && p.ck !== ck) return false;
-      if (q && (p.title + ' ' + p.area + ' ' + p.country).toLowerCase().indexOf(q) < 0) return false;
+      if (f === 'due' && !lDue(p)) return false;
       return true;
     });
     var from = near ? spotLL() : S.here;
@@ -4306,8 +4392,8 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
     if (f === 'due') rows.sort(function (a, b) { return ageDays(b) - ageDays(a); });
     $('count').textContent = near ? (S.here ? 'Closest pinned projects to you' : from ? tr('Closest to ', 'Karibu zaidi na ') + spotName() : 'Finding where you are…')
       : f === 'missing' ? rows.length + ' still need a location'
-      : f === 'repairs' ? rows.length + (rows.length === 1 ? ' project reported' : ' projects reported') + ' as needing repair or not working, most urgent first'
-      : f === 'due' ? rows.length + ' not visited in the last 6 months (or not yet in the app), longest first' + (prjTestCount(rows) ? tr(' · ' + prjTestCount(rows) + ' due a water test', ' · ' + prjTestCount(rows) + ' zinahitaji kipimo cha maji') : '')
+      : f === 'repairs' ? tr(rows.length + ' to fix · most urgent first', rows.length + ' za kutengeneza · za haraka kwanza')
+      : f === 'due' ? tr(rows.length + ' not visited in 6 months · longest first', rows.length + ' bila ziara miezi 6 · za muda mrefu kwanza') + (prjTestCount(rows) ? tr(' · ' + prjTestCount(rows) + ' due a water test', ' · ' + prjTestCount(rows) + ' zinahitaji kipimo cha maji') : '')
       : rows.length + ' projects';
     // the country shows on its own button beside the count
     if (S.routeMode) $('count').textContent += ' · tick the pinned ones to visit';
@@ -4316,10 +4402,12 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
     rowI = 0; $('list').classList.toggle('stagger', !!S.animList); S.animList = false;
     var items = rows.map(function (p) {
       var r = S.repairs[p.id];
-      var tag = r ? '<span class="tag' + (r.state === 'notworking' ? ' bad' : '') + '">' + (r.urgency === 'urgent' ? 'Urgent · ' : '') + (r.state === 'notworking' ? 'Not working' : 'Needs repair') + '</span>'
+      var st = r ? '<span class="tag' + (r.state === 'notworking' ? ' bad' : '') + '">' + (r.urgency === 'urgent' ? 'Urgent · ' : '') + (r.state === 'notworking' ? 'Not working' : 'Needs repair') + '</span>' : '';
+      var tag = near ? '<span class="tag' + (S.here ? ' has' : '') + '">' + (S.here ? '' : '≈ ') + dist(p._d) + '</span>' // Nearby: the distance first, then how it is
+        : r ? st
         : f === 'due' ? '<span class="tag">' + ageText(p) + '</span>'
-        : near ? '<span class="tag' + (S.here ? ' has' : '') + '">' + (S.here ? '' : '≈ ') + dist(p._d) + '</span>' : p.gps ? '<span class="tag has">' + (p._d != null ? dist(p._d) : 'Pinned') + '</span>' : '<span class="tag">No location</span>';
-      return { html: rowHtml(p, tag + prjTestTag(p), S.routeMode), tag: tag, id: p.id };
+        : p.gps ? '<span class="tag has">' + (p._d != null ? dist(p._d) : 'Pinned') + '</span>' : '<span class="tag">No location</span>';
+      return { html: rowHtml(p, tag + (near ? st : '') + prjTestTag(p), S.routeMode), tag: tag, id: p.id };
     });
     paint($('list'), items, emptyHtml(f === 'missing' && !q && !ck ? 'Every project has a location.' : f === 'repairs' && !q && !ck ? 'No open repairs.' : f === 'due' && !q ? 'Everything has been visited in the last 6 months.' : 'No projects match.'));
     freshUi();
@@ -4327,11 +4415,14 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
   }
   $('iSearch').addEventListener('input', renderList);
   $('iCountry').addEventListener('change', function () { store.set('rfPinCountry', this.value || 'all'); renderList(); });
-  function countryChipUi() { var o = $('iCountry').selectedOptions[0]; $('bCountryTx').textContent = o ? o.textContent : 'All countries'; swApply(); }
-  $('bCountry').addEventListener('click', function () {
-    var sel = $('iCountry');
-    bsheet('Country', [].map.call(sel.options, function (o) { return [o.value, o.textContent, o.value ? 'pin' : 'map']; }), sel.value, function (v) { sel.value = v; sel.dispatchEvent(new Event('change')); });
-  });
+  // the Filter pill says what is chosen: "Kenya", "Kenya · Schools", "All countries"
+  function countryChipUi() {
+    var ck = $('iCountry').value, g = TGROUPS.filter(function (x) { return x[0] === S.ftype; })[0];
+    $('bCountryTx').textContent = (ck ? CNAME[ck] : tr('All countries', 'Nchi zote')) + (g ? ' · ' + tr(g[1], g[2]) : '');
+    $('bCountry').setAttribute('aria-label', tr('Filter: ', 'Kichujio: ') + $('bCountryTx').textContent);
+    swApply();
+  }
+  $('bCountry').addEventListener('click', lFilter);
   // home country: chosen in Me, or from the monday.com profile / personal PIN, or from where the phone is
   function homeCk() { return store.get('rfPinHomeSet') || S.srvHome || S.gpsHome || ''; }
   function applyHome() {
@@ -4339,15 +4430,91 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
     if (chosen == null && homeCk()) $('iCountry').value = homeCk(); else if (chosen != null) $('iCountry').value = chosen === 'all' ? '' : chosen;
   }
   applyHome();
-  qa('.chips .chip').forEach(function (c) {
-    c.addEventListener('click', function () {
-      S.filter = c.getAttribute('data-f'); store.set('rfPinFilter', S.filter); S.animList = true;
-      qa('.chips .chip').forEach(function (x) { x.setAttribute('aria-pressed', x === c ? 'true' : 'false'); });
+  function lPick(f) {
+    {
+      S.filter = f; store.set('rfPinFilter', S.filter); S.animList = true;
       renderList();
       if (S.filter === 'near') { if (DESK) approxFetch(); locate(function (ll) { if (!ll && !spotLL()) msg('mList', 'warn', DESK ? tr('This computer can’t find its location. Tap “Set where I am”.', 'Kompyuta hii haiwezi kupata mahali ilipo. Gusa “Weka nilipo”.') : 'Couldn’t get your location. Allow location for this site, then try again.'); renderList(); }); }
+    }
+  }
+  $('lChips').addEventListener('click', function (e) { var b = e.target.closest('[data-f]'); if (b) lPick(b.getAttribute('data-f')); });
+  // a tile filters the list; tapped again, it shows them all
+  $('lNums').addEventListener('click', function (e) { var b = e.target.closest('[data-f]'); if (b) { var f = b.getAttribute('data-f'); lPick(S.filter === f ? 'all' : f); } });
+
+  // --- Projects: the calm head, the chip row and the Filter sheet, in step with the Office tabs (pwmap) ---------
+  var LTY = []; // the kinds of project in the chosen country: [key, name, how many]
+  var LCH = [['all', 'All', 'Yote'], ['missing', 'No location', 'Hakuna mahali'], ['near', 'Nearby', 'Karibu nawe'], ['repairs', 'Repairs', 'Matengenezo'], ['due', 'Due a visit', 'Inasubiri ziara']];
+  function lDue(p) { return !!p.gps && (ageDays(p) >= DUE_DAYS || prjTestDue(p)); }
+  function lHeadUi(scope) {
+    var n = scope.length, miss = 0, rep = 0, due = 0;
+    scope.forEach(function (p) { if (!p.gps) miss++; if (S.repairs[p.id]) rep++; if (lDue(p)) due++; });
+    $('lHi').textContent = tr((n - miss) + ' of ' + n + ' projects pinned · ' + miss + '\u00a0to\u00a0go', 'Miradi ' + (n - miss) + ' kati ya ' + n + ' ina mahali · ' + miss + '\u00a0bado');
+    var tile = function (k, v, label, cls) { return '<button type="button" class="rr-num' + (cls ? ' ' + cls : '') + '" data-f="' + k + '" aria-pressed="' + (S.filter === k) + '"><b>' + v + '</b><small>' + label + '</small></button>'; };
+    $('lNums').innerHTML = tile('missing', miss, tr('No location', 'Hakuna mahali'), miss ? '' : 'off') + tile('repairs', rep, tr('Repairs', 'Matengenezo'), rep ? 'bad' : 'off') + tile('due', due, tr('Due a visit', 'Inasubiri ziara'), due ? '' : 'off');
+    lChipsUi({ all: n, missing: miss, repairs: rep, due: due });
+  }
+  function lChipsUi(cnt) {
+    var row = $('lChips');
+    if (row._lang !== S.lang) { row.innerHTML = LCH.map(function (c) { return '<button class="chip" type="button" data-f="' + c[0] + '" aria-pressed="false">' + tr(c[1], c[2]) + (c[0] === 'near' ? '' : ' <span class="n"></span>') + '</button>'; }).join(''); row._lang = S.lang; }
+    qa('.chip', row).forEach(function (b) { var k = b.getAttribute('data-f'), x = b.querySelector('.n'); if (x) x.textContent = cnt[k] || 0; b.setAttribute('aria-pressed', String(k === S.filter)); });
+    crShow(row);
+  }
+  // Filter: the country and the kind of project in one sheet; the list follows each choice, Done closes it
+  function lFilter() {
+    var sel = $('iCountry'), w = document.createElement('div'), p, key;
+    var cks = [''].concat(['ke', 'tz', 'ug', 'mw'].filter(function (k) { return S.projects.some(function (x) { return x.ck === k; }); }));
+    var opt = function (attr, k, label, n, on, ic) {
+      return '<button type="button" class="bsh-o" data-' + attr + '="' + k + '" aria-pressed="' + on + '"><i class="ei">' + oic(ic) + '</i><span>' + esc(label) + '</span>' + (n != null ? '<small class="lfn">' + n + '</small>' : '') + '<b aria-hidden="true">' + (on ? oic('check') : '') + '</b></button>';
+    };
+    var draw = function () {
+      var ck = sel.value;
+      p.innerHTML = '<i class="grab" aria-hidden="true"></i><h3>' + esc(tr('Filter', 'Chuja')) + '</h3>' +
+        '<h4 class="lfh">' + esc(tr('Country', 'Nchi')) + '</h4>' + cks.map(function (k) { return opt('lc', k, k ? CNAME[k] : tr('All countries', 'Nchi zote'), S.projects.filter(function (x) { return !k || x.ck === k; }).length, ck === k, k ? 'pin' : 'map'); }).join('') +
+        (LTY.length ? '<h4 class="lfh">' + esc(tr('Kind of project', 'Aina ya mradi')) + '</h4>' + opt('lt', '', tr('All kinds', 'Aina zote'), null, !S.ftype, 'mclFilter') +
+          LTY.map(function (t) { var ti = MPA_TY.filter(function (x) { return x[0] === t[0]; })[0]; return opt('lt', t[0], t[1], t[2], S.ftype === t[0], ti ? ti[1] : 'pin'); }).join('') : '') +
+        '<button type="button" class="btn block lfdone" data-lx="1">' + esc(tr('Done', 'Imekamilika')) + '</button>';
+    };
+    w.className = 'bsh'; w.setAttribute('role', 'dialog'); w.setAttribute('aria-modal', 'true'); w.setAttribute('aria-label', tr('Filter', 'Chuja'));
+    w.innerHTML = '<div class="bsh-bg"></div><div class="bsh-p lfilt"></div>'; p = w.querySelector('.bsh-p');
+    draw(); document.body.appendChild(w); swApply();
+    var close = function () { w.classList.add('out'); setTimeout(function () { w.remove(); }, 220); document.removeEventListener('keydown', key); $('bCountry').focus({ preventScroll: true }); };
+    key = function (e) { if (e.key === 'Escape') close(); };
+    document.addEventListener('keydown', key);
+    requestAnimationFrame(function () { w.classList.add('in'); var f = p.querySelector('[aria-pressed=true]'); if (f) f.focus(); });
+    w.querySelector('.bsh-bg').addEventListener('click', close);
+    p.addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return; buzz();
+      if (b.hasAttribute('data-lx')) return close();
+      var k;
+      if (b.hasAttribute('data-lc')) { k = '[data-lc="' + b.getAttribute('data-lc') + '"]'; sel.value = b.getAttribute('data-lc'); sel.dispatchEvent(new Event('change')); }
+      else if (b.hasAttribute('data-lt')) { k = '[data-lt="' + b.getAttribute('data-lt') + '"]'; S.ftype = b.getAttribute('data-lt'); store.set('rfPinType', S.ftype); S.animList = true; renderList(); }
+      else return;
+      draw(); swApply(); var f = p.querySelector(k); if (f) f.focus();
     });
-  });
-  qa('.chips .chip').forEach(function (x) { x.setAttribute('aria-pressed', x.getAttribute('data-f') === S.filter ? 'true' : 'false'); });
+  }
+
+  // --- chip rows everywhere: a soft fade at an edge with more to see, and they start at the beginning again (pwmap) ---
+  var CR_SEL = '.mpa-chips, .rr-chips, .tchips, .np-f, .chips';
+  function crFade(el) {
+    var max = el.scrollWidth - el.clientWidth, on = max > 2 && getComputedStyle(el).overflowX !== 'visible';
+    el.classList.toggle('cr-l', on && el.scrollLeft > 2); el.classList.toggle('cr-r', on && el.scrollLeft < max - 2);
+  }
+  // the chosen chip in view, the rest from the start
+  function crShow(row) {
+    if (!row) return;
+    var on = row.querySelector('[aria-pressed=true]');
+    if (!on || on === row.firstElementChild) { row.scrollLeft = 0; return crFade(row); }
+    var r = row.getBoundingClientRect(), c = on.getBoundingClientRect();
+    if (c.right > r.right - 28) row.scrollLeft += c.right - r.right + 28; else if (c.left < r.left + 28) row.scrollLeft -= r.left + 28 - c.left;
+    crFade(row);
+  }
+  // a screen shown again: its chip rows start at the beginning (or at the chosen chip)
+  function crReset(v) { var sec = $(v); if (sec) qa(CR_SEL, sec).forEach(function (row) { row.scrollLeft = 0; crShow(row); }); }
+  document.addEventListener('scroll', function (e) { var t = e.target; if (t && t.nodeType === 1 && t.matches(CR_SEL)) crFade(t); }, true);
+  var crT = 0;
+  function crSoon() { if (!crT) crT = requestAnimationFrame(function () { crT = 0; qa(CR_SEL).forEach(crFade); }); }
+  if (window.MutationObserver) new MutationObserver(crSoon).observe(document.body, { childList: true, subtree: true });
+  addEventListener('resize', crSoon);
   $('typeChips').addEventListener('click', function (e) { var b = e.target.closest('[data-t]'); if (!b) return; S.ftype = b.getAttribute('data-t'); store.set('rfPinType', S.ftype); S.animList = true; renderList(); });
   $('list').addEventListener('click', function (e) {
     if (e.target.closest('#spotSet2')) return spotSheet();
@@ -4362,7 +4529,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
   // --- 3. route planner ----------------------------------------------------------------------------
   function routeBarUi() { var n = S.pickedRoute.length; $('routeN').textContent = n ? n + (n === 1 ? ' stop chosen' : ' stops chosen') : 'Tick the projects to visit'; $('bRouteGo').disabled = n < 1; }
   $('bRouteMode').addEventListener('click', function () {
-    S.routeMode = !S.routeMode; this.setAttribute('aria-pressed', S.routeMode ? 'true' : 'false'); this.textContent = S.routeMode ? 'Done' : '🗺 Plan a route';
+    S.routeMode = !S.routeMode; homeUi();
     if (S.routeMode) { S.pickedRoute = S.route.slice(); if (S.filter === 'missing') qa('.chips .chip[data-f=all]')[0].click(); }
     $('routeBar').classList.toggle('hidden', !S.routeMode); document.body.classList.toggle('routing', S.routeMode); renderList();
   });
@@ -4383,7 +4550,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
   $('bRouteGo').addEventListener('click', function () {
     locate(function (here) {
       S.route = order(S.pickedRoute, here).map(function (p) { return p.id; }); store.set('rfPinRoute', JSON.stringify(S.route));
-      S.routeMode = false; $('bRouteMode').setAttribute('aria-pressed', 'false'); $('bRouteMode').textContent = '🗺 Plan a route';
+      S.routeMode = false; homeUi();
       renderRoute(); show('vRoute');
     });
   });
@@ -5356,6 +5523,8 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
   Object.assign(SW, {"My month": "Mwezi wangu", "My work": "Kazi yangu", "Team today": "Timu leo", "Team totals": "Jumla ya timu", "Team feed": "Habari za timu", "This month": "Mwezi huu", "Show more": "Onyesha zaidi", "Me": "Mimi", "Team": "Timu", "This phone": "Simu hii", "Colours": "Rangi", "Language": "Lugha", "Distances": "Umbali", "Text size": "Ukubwa wa maandishi", "My country": "Nchi yangu", "Monthly report": "Ripoti ya mwezi", "Lock the app": "Funga programu", "Pins": "Mahali", "Visits": "Ziara", "Light": "Mwanga", "Dark": "Giza", "Sun": "Jua", "Small": "Ndogo", "Normal": "Kawaida", "Large": "Kubwa", "Larger": "Kubwa zaidi"});
   Object.assign(SW, {"Your stamps": "Stempu zako", "Show the welcome screens again": "Onyesha skrini za kukaribisha tena", "Sign in": "Ingia", "New here? Ask your team for a PIN.": "Mgeni hapa? Omba PIN kwa timu yako.", "First drop": "Tone la kwanza", "Pin a location": "Weka mahali", "First visit": "Ziara ya kwanza", "Report a site visit": "Ripoti ziara", "Fixer": "Mrekebishaji", "Mark a repair fixed": "Weka matengenezo kuwa yamekamilika", "Explorer": "Mvumbuzi", "Add a new site": "Ongeza eneo jipya", "Mapper": "Mchora ramani", "Pin 10 locations": "Weka mahali 10", "Regular": "Mzoefu", "Report 10 visits": "Ripoti ziara 10", "Earned": "Umepata"}); SWP.push([/^Habari (.+), karibu tena\.$/,"Habari $1, karibu tena."]);
   Object.assign(SW, {"Kilometres (km)": "Kilomita (km)", "e.g. 2.4 km away": "mf. km 2.4 kutoka ulipo", "e.g. 1.5 miles away": "mf. maili 1.5 kutoka ulipo"});
+  // polish-pwmap
+  Object.assign(SW, {"Scan QR": "Changanua QR"});
   var MON = {Jan:'Jan',Feb:'Feb',Mar:'Mac',Apr:'Apr',May:'Mei',Jun:'Jun',Jul:'Jul',Aug:'Ago',Sep:'Sep',Oct:'Okt',Nov:'Nov',Dec:'Des',January:'Januari',February:'Februari',March:'Machi',April:'Aprili',June:'Juni',July:'Julai',August:'Agosti',September:'Septemba',October:'Oktoba',November:'Novemba',December:'Desemba'};
   function swOne(x) {
     if (!x) return null;
@@ -8595,7 +8764,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
             '<button type="button" class="fld-del" data-del="' + esc(a.id) + '" aria-label="' + esc(tr('Delete ' + a.name, 'Futa ' + a.name)) + '">' + oic('trash') + '</button></div>' +
             '<div class="meter"><i style="width:0%"></i></div><p class="fld-ap">…</p>' +
             '<div class="fld-ab"><button class="btn small light" type="button" data-show="' + esc(a.id) + '">' + oic('map') + tr('Show on map', 'Onyesha kwenye ramani') + '</button><button class="btn small" type="button" data-more="' + esc(a.id) + '">' + oic('offline') + tr('Keep more', 'Hifadhi zaidi') + '</button></div></div>';
-        }).join('') : '<p class="muted">' + tr('No areas saved yet. On the Map, tap the green download button to save an area before a trip.', 'Bado hakuna eneo lililohifadhiwa. Kwenye Ramani, gusa kitufe kijani cha kupakua ili uhifadhi eneo kabla ya safari.') + '</p>') +
+        }).join('') : '<p class="muted">' + tr('No areas saved yet. On the Map, tap More (•••), then Offline areas, to save an area before a trip.', 'Bado hakuna eneo lililohifadhiwa. Kwenye Ramani, gusa Zaidi (•••), kisha Ramani bila mtandao, ili uhifadhi eneo kabla ya safari.') + '</p>') +
         '<h4>' + tr('Storage limit for maps', 'Kikomo cha hifadhi ya ramani') + '</h4><div class="seg" id="fldLimit">' + [100, 250, 500, 1000].map(function (v) { return '<button type="button" data-v="' + v + '" aria-pressed="' + (FLD.set.limit === v) + '">' + fldLim(v) + '</button>'; }).join('') + '</div>' +
         '<h4>' + tr('Keep map tiles I’ve viewed for', 'Hifadhi vigae vya ramani nilivyoangalia kwa') + '</h4><div class="seg" id="fldKeep">' + [7, 30, 90].map(function (v) { return '<button type="button" data-v="' + v + '" aria-pressed="' + (FLD.set.keep === v) + '">' + tr(v + ' days', 'siku ' + v) + '</button>'; }).join('') + '</div>' +
         '<p class="muted">' + tr('Outside saved areas, map tiles you have looked at are cleared after this long. Saved areas stay until you delete them.', 'Nje ya maeneo yaliyohifadhiwa, vigae vya ramani ulivyoangalia vinafutwa baada ya muda huu. Maeneo yaliyohifadhiwa yanabaki hadi utakapoyafuta.') + '</p>' +
@@ -9682,8 +9851,8 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
       var rs = st.length ? tr(st.length + (st.length === 1 ? ' visit' : ' visits') + ' for you today · ' + dn + ' done', 'Ziara ' + st.length + ' zako leo · ' + dn + ' zimekamilika') : tr('No visits for you today', 'Huna ziara leo');
       box.innerHTML = '<h4>' + esc(tr('On the map', 'Kwenye ramani')) + '</h4>' + sw('route', 'ofaRoute', tr('Today’s route', 'Njia ya leo'), rs, MPB.route) +
         (S.admin ? '<h4>' + esc(tr('For the office', 'Kwa ofisi')) + '</h4>' +
-          '<div class="mpb-r mpb-hr"><i class="ei">' + oic('mpbHeat') + '</i><span class="mpb-rt"><b>' + esc(tr('Heat map', 'Ramani ya joto')) + '</b><small>' + esc(tr('Shade the areas by…', 'Paka rangi maeneo kwa…')) + '</small></span></div>' +
-          '<div class="seg mpb-seg" role="group" aria-label="' + esc(tr('Heat map', 'Ramani ya joto')) + '">' + [['', tr('Off', 'Zima')], ['repairs', tr('Open repairs', 'Ukarabati')], ['people', tr('People served', 'Watu')]].map(function (o) { return '<button type="button" data-mpb-heat="' + o[0] + '" aria-pressed="' + (MPB.heat === o[0]) + '">' + esc(o[1]) + '</button>'; }).join('') + '</div>' +
+          '<div class="mpb-r mpb-hr"><i class="ei">' + oic('mpbHeat') + '</i><span class="mpb-rt"><b>' + esc(tr('Heat map', 'Ramani ya joto')) + '</b><small>' + esc(tr('Shade the areas by open repairs or by people\u00a0served', 'Paka rangi maeneo kwa matengenezo yaliyo wazi au kwa watu\u00a0waliohudumiwa')) + '</small></span></div>' +
+          '<div class="seg mpb-seg" role="group" aria-label="' + esc(tr('Heat map', 'Ramani ya joto')) + '">' + [['', tr('Off', 'Zima')], ['repairs', tr('Repairs', 'Matengenezo')], ['people', tr('People', 'Watu')]].map(function (o) { return '<button type="button" data-mpb-heat="' + o[0] + '" aria-pressed="' + (MPB.heat === o[0]) + '">' + esc(o[1]) + '</button>'; }).join('') + '</div>' +
           sw('years', 'clock', tr('Projects by year', 'Miradi kwa mwaka'), tr('A time slider with a play button, for presentations', 'Kitelezi cha miaka chenye kitufe cha kucheza, kwa mawasilisho'), MPB.years) +
           sw('team', 'people', tr('Team live', 'Timu sasa hivi'), tr('People sharing their location · updates every 3 min', 'Wanaoshiriki mahali · inasasishwa kila dakika 3'), MPB.team) : '');
     };
@@ -9801,6 +9970,8 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
     // keep the layout right as things over the map change size
     if (window.ResizeObserver) { var ro = new ResizeObserver(function () { mclLayout(); }); [top, bot, side].forEach(function (el) { if (el) ro.observe(el); }); }
     addEventListener('resize', mclLayout); map.on('moveend resize', mclLayout);
+    // once the map has been moved by hand, the first view is never redone (mclRefit)
+    ['pointerdown', 'wheel', 'keydown'].forEach(function (ev) { map.getContainer().addEventListener(ev, function () { MCL.touched = true; }, { passive: true }); });
     qa('#segLang button').forEach(function (b) { b.addEventListener('click', function () { setTimeout(function () { mclText(); mclSync(); }, 0); }); });
   }
   function mclText() {
@@ -9829,10 +10000,11 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
   }
   function mclPeekUi() {
     var b = $('mclPeek'); if (!b) return;
-    var n = nearest(1)[0];
-    b.innerHTML = n ? '<b>' + esc(tr('Nearest:', 'Karibu zaidi:')) + '</b><span class="mcl-pk">' + esc(n.p.title) + '</span><i>· ' + esc(dist(n.d)) + '</i>' + oic('mclUp')
+    var n = nearF(1)[0], none = S.here && (!n || n.d > NEAR_MAX); // nothing that matches the filter within reach
+    b.innerHTML = none ? '<b>' + esc(tr('None near you', 'Hakuna karibu nawe')) + '</b>' + (n ? '<span class="mcl-pk">' + esc(tr('closest', 'iliyo karibu zaidi')) + '</span><i>· ' + esc(dist(n.d)) + '</i>' : '') + oic('mclUp')
+      : n ? '<b>' + esc(tr('Nearest:', 'Karibu zaidi:')) + '</b><span class="mcl-pk">' + esc(n.p.title) + '</span><i>· ' + esc(dist(n.d)) + '</i>' + oic('mclUp')
       : '<b>' + esc(tr('Nearest to you', 'Iliyo karibu nawe')) + '</b>' + oic('mclUp');
-    b.setAttribute('aria-label', (n ? tr('Nearest: ', 'Karibu zaidi: ') + n.p.title + ', ' + dist(n.d) : tr('Nearest to you', 'Iliyo karibu nawe')) + '. ' + tr('Show more', 'Onyesha zaidi'));
+    b.setAttribute('aria-label', (none ? tr('None near you', 'Hakuna karibu nawe') + (n ? ', ' + tr('closest', 'iliyo karibu zaidi') + ' ' + dist(n.d) : '') : n ? tr('Nearest: ', 'Karibu zaidi: ') + n.p.title + ', ' + dist(n.d) : tr('Nearest to you', 'Iliyo karibu nawe')) + '. ' + tr('Show more', 'Onyesha zaidi'));
   }
   // Nearest to you: open (up to just under the top controls) or resting
   function mclNear(open) {
@@ -9872,6 +10044,7 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
     var v = $('vMap'); if (!MCL.init || !v) return;
     var f = !!(MPA.f || mpaTy()), s = $('nearSheet'), bc = document.body.classList;
     var open = !!s && !s.classList.contains('shut') && !s.classList.contains('hidden') && !bc.contains('mpb-fol-on') && !(bc.contains('mpb-yr-on'));
+    v.classList.toggle('mcl-card', !!$('mpaCard') && !$('mpaCard').classList.contains('hidden')); // "You're at" steps aside for a filter or a card
     v.classList.toggle('mcl-f', f); v.classList.toggle('mcl-row', f && MCL.row); v.classList.toggle('mcl-open', open && !MCL.clean); v.classList.toggle('mcl-clean', MCL.clean);
     $('mclPillB').setAttribute('aria-expanded', String(f && MCL.row));
     // Follow me: in the column while it is on (tap to stop), in the tray under More while it is off
@@ -9898,6 +10071,11 @@ html[data-theme=sun] .mcl-sb{border:2px solid #000;box-shadow:none}
       var sb = s.getBoundingClientRect().bottom, mb = MPB.bot && MPB.bot.offsetParent ? MPB.bot.getBoundingClientRect().height + 8 : 0;
       s.style.setProperty('--mcl-max', Math.max(96, Math.floor(sb - tb - 44 - mb - $('nearHd').offsetHeight - 14)) + 'px');
     }
+  }
+  // "You're at" came or went after the first view: fit that view again, unless the map has been moved since
+  function mclRefit() {
+    if (!MCL.init || !MCL.fitB || MCL.touched || !hMap || S.view !== 'vMap' || MPA.sel || MPA.spot || MPA.f || mpaTy()) return;
+    mclLayout(); hMap.fitBounds(MCL.fitB, Object.assign(mclPad(), { maxZoom: 13, animate: false }));
   }
   // room to leave when fitting the map: under the top controls, left of the column, above the bottom panel and the key
   function mclPad() {
