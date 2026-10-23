@@ -364,6 +364,8 @@ fun TeamMapSection(m: AppModel, s: Snapshot, open: (String) -> Unit) {
     var tick by remember { mutableIntStateOf(0) }
     var who by remember { mutableStateOf("") }
     var sheet by remember { mutableStateOf<String?>(null) }
+    // "Show on team map" from a person's sheet in Office › Team: the map focuses on them (TeamPerson.kt)
+    LaunchedEffect(Unit) { TeamGo.map?.let { who = it; TeamGo.map = null } }
     LaunchedEffect(tick) { val r = m.api.adminGet("teammap"); if (r.ok) { data = TeamMapData.from(r.json); err = null } else err = reasonText(r.reason) }
     val d = data
     DqmHead("tm_head", "pin", "green", t("Team map", "Ramani ya timu"), t("Where teammates who share their location are, and today’s visits.", "Wenzako wanaoshiriki mahali walipo, na ziara za leo."),

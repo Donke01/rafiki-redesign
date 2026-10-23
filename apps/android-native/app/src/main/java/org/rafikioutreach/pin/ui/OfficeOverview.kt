@@ -740,6 +740,9 @@ fun OcvVisits(m: AppModel, s: Snapshot, open: (String) -> Unit) {
     var shown by remember { mutableIntStateOf(30) }
     var picked by remember { mutableStateOf<JSONObject?>(null) }
     var assigning by remember { mutableStateOf(false) }
+    // "Assign a visit" from a person's sheet in Office › Team: the sheet opens with them chosen (TeamPerson.kt)
+    var assignTo by remember { mutableStateOf(TeamGo.assign.orEmpty()) }
+    LaunchedEffect(Unit) { if (TeamGo.assign != null) { TeamGo.assign = null; assigning = true } }
     LaunchedEffect(tick) { val r = m.api.adminGet("assign"); if (r.ok) { items = r.json.optJSONArray("items").ocvObjs(); err = null } else err = reasonText(r.reason) }
     val all = items
     if (all == null) { Text(err ?: t("Loading…", "Inapakia…"), color = if (err != null) C.bad else C.muted); return }
@@ -782,7 +785,7 @@ fun OcvVisits(m: AppModel, s: Snapshot, open: (String) -> Unit) {
     if (list.size > shown) OcvMore(list.size - shown, "ocv_vmore") { shown += 30 }
 
     picked?.let { a -> OcvVisitSheet(m, s, a, team, today, { picked = null }, { id -> picked = null; open(id) }) { tick++ } }
-    if (assigning) OcvAssignSheet(m, s, team, { assigning = false }) { vf = "open"; vp = ""; tick++ }
+    if (assigning) OcvAssignSheet(m, s, team, { assigning = false; assignTo = "" }, assignTo) { vf = "open"; vp = ""; tick++ }
 }
 
 /** One assigned visit: the details, and reassign, cancel or open the project. */
@@ -853,7 +856,7 @@ private fun OcvVisitSheet(m: AppModel, s: Snapshot, a: JSONObject, team: List<St
 /** Assign a visit: who, when, a note, and which projects. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun OcvAssignSheet(m: AppModel, s: Snapshot, team: List<String>, close: () -> Unit, done: () -> Unit) {
+private fun OcvAssignSheet(m: AppModel, s: Snapshot, team: List<String>, close: () -> Unit, pre: String = "", done: () -> Unit) {
     val scope = rememberScope()
     val state = androidx.compose.material3.rememberModalBottomSheetState(skipPartiallyExpanded = true)
     fun hide(then: () -> Unit = {}) { scope.launch { state.hide() }.invokeOnCompletion { close(); then() } }
@@ -861,7 +864,7 @@ private fun OcvAssignSheet(m: AppModel, s: Snapshot, team: List<String>, close: 
     var ck by remember { mutableStateOf("") }
     var q by remember { mutableStateOf("") }
     val picked = remember { mutableStateListOf<String>() }
-    var to by remember { mutableStateOf("") }
+    var to by remember { mutableStateOf(pre) }
     var date by remember { mutableStateOf(LocalDate.now().plusDays(1).toString()) }
     var note by remember { mutableStateOf("") }
     var msg by remember { mutableStateOf<Pair<String, String>?>(null) }

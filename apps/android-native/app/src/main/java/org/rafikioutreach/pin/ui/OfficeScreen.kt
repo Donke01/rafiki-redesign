@@ -92,6 +92,9 @@ fun OfficeScreen(m: AppModel, open: (String) -> Unit) {
     // "E-mail" from Office › Donors or a project's donor area opens Send an e-mail with that audience
     val mailGo = MailNav.preset
     LaunchedEffect(mailGo) { if (mailGo != null) { sec = "mail"; strip = true } }
+    // a person's sheet in Office › Team can jump to the Team map or to Assign a visit (TeamPerson.kt)
+    val teamGo = TeamGo.section
+    LaunchedEffect(teamGo) { if (teamGo != null) { sec = teamGo; strip = true; TeamGo.section = null } }
     val snap = s ?: return
     val secs = listOf(
         Triple("overview", t("Overview", "Muhtasari"), "drop"), Triple("repairs", t("Repairs", "Matengenezo"), "wrench"), Triple("costs", t("Costs", "Gharama"), "coins"), Triple("visits", t("Visits", "Ziara"), "cal"),
@@ -128,7 +131,7 @@ fun OfficeScreen(m: AppModel, open: (String) -> Unit) {
             "teammap" -> TeamMapSection(m, snap, open)
             "plan" -> PlanWeekSection(m, snap, open)
             "review" -> ReviewSection(m, open)   // OfficeRepairs.kt
-            "team" -> TeamSection(m)
+            "team" -> TeamSection(m, open)
             "cleanup" -> Cleanup(snap, open)
             "sms" -> CommunityReports(m, open)
             "donors" -> DonorsSection(m, snap)
@@ -297,7 +300,7 @@ private fun ReviewQueue(m: AppModel, open: (String) -> Unit) {
 
 /** Office › Team: a short list grouped by role (admins wear a crown). Tap a person for a sheet with their details and actions. */
 @Composable
-private fun TeamSection(m: AppModel) {
+private fun TeamSection(m: AppModel, openProject: (String) -> Unit) {
     val scope = rememberScope()
     val (people, again) = rememberTeam(m)
     var open by remember { mutableStateOf<JSONObject?>(null) }
@@ -328,7 +331,7 @@ private fun TeamSection(m: AppModel) {
         Btn(t("Send a test e-mail", "Tuma barua pepe ya majaribio"), { scope.launch { tm = t("Sending…", "Inatuma…"); val x = m.api.admin(JSONObject().put("action", "test-mail")); tm = mailResult(x) } }, Modifier.padding(top = 10.dp), small = true, light = true, icon = "upload")
         Msg(tm)
     }
-    open?.let { p -> PersonSheet(m, p, close = { open = null }, changed = again, readd = { open = null; adding = it }) }
+    open?.let { p -> PersonSheet(m, p, close = { open = null }, changed = again, readd = { open = null; adding = it }, openProject = openProject) }
     adding?.let { pre -> AddSheet(m, pre, close = { adding = null }, added = again) }
 }
 
@@ -466,8 +469,8 @@ private fun PinShown(who: String, pin: String, phone: String = "", home: String 
 }
 
 @Composable
-private fun SheetHead(name: String, admin: Boolean, title: String, sub: String, chips: (@Composable () -> Unit)? = null) {
-    Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+private fun SheetHead(name: String, admin: Boolean, title: String, sub: String, xRoom: Boolean = false, chips: (@Composable () -> Unit)? = null) {
+    Column(Modifier.fillMaxWidth().padding(horizontal = if (xRoom) 44.dp else 0.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         Box(Modifier.rise(0)) { Avatar(name, admin, 64.dp) }
         Text(title, style = MaterialTheme.typography.titleLarge, color = C.ink, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 6.dp))
         chips?.invoke()
@@ -477,7 +480,7 @@ private fun SheetHead(name: String, admin: Boolean, title: String, sub: String, 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun PersonSheet(m: AppModel, p: JSONObject, close: () -> Unit, changed: () -> Unit, readd: (JSONObject) -> Unit) {
+private fun PersonSheet(m: AppModel, p: JSONObject, close: () -> Unit, changed: () -> Unit, readd: (JSONObject) -> Unit, openProject: (String) -> Unit = {}) {
     val scope = rememberScope()
     val state = androidx.compose.material3.rememberModalBottomSheetState(skipPartiallyExpanded = true)
     fun hide(then: () -> Unit = close) { scope.launch { state.hide() }.invokeOnCompletion { then() } }
@@ -492,13 +495,41 @@ private fun PersonSheet(m: AppModel, p: JSONObject, close: () -> Unit, changed: 
     var msg by remember { mutableStateOf<Pair<String, String>?>(null) }
     var askMsg by remember { mutableStateOf<String?>(null) }
     var busy by remember { mutableStateOf(false) }
+    // the quick actions (TeamPerson.kt): contact, app access, their work
+    val ctx = LocalContext.current
+    val snap by m.snap.collectAsState()
+    val act by m.activity.collectAsState()
+    val iAmAdmin = snap?.admin == true
+    var sharing by remember { mutableStateOf(false) }
+    var inviting by remember { mutableStateOf(false) }
+    var elevate by remember { mutableStateOf<Boolean?>(null) }
+    var copied by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(copied) { if (copied != null) { kotlinx.coroutines.delay(2000); copied = null } }
+    LaunchedEffect(name) { launch { m.loadActivity() }; if (iAmAdmin) { val r = m.api.adminGet("teammap"); if (r.ok) sharing = TeamMapData.from(r.json).people.any { it.name.equals(name, true) } } }
+    val savedEmail = p.optString("email").takeIf { it != "null" }.orEmpty().trim()
+    val app = source == "app"
+    val quick = buildList {
+        if (savedEmail.isNotBlank()) add(QuickAct("mail", "mail", t("E-mail", "Barua pepe"), "teal") { hide { close(); MailNav.preset = MailPreset("pick", picks = listOf("t:" + name.lowercase())) } })
+        addAll(phoneActs(ctx, name, phone, home))
+        if (iAmAdmin && app && savedEmail.isNotBlank()) add(QuickAct("invite", "share", t("Send app invite", "Tuma mwaliko"), "purple") { inviting = true })
+        if (iAmAdmin && app) add(if (admin) QuickAct("unadmin", "crown", t("Remove admin", "Ondoa usimamizi"), "amber") { elevate = false } else QuickAct("admin", "crown", t("Make admin", "Mfanye msimamizi"), "amber") { elevate = true })
+        if (sharing) add(QuickAct("map", "pin", t("Show on team map", "Ramani ya timu"), "green") { hide { close(); TeamGo.map = name; TeamGo.section = "teammap" } })
+        if (iAmAdmin) add(QuickAct("assign", "cal", t("Assign a visit", "Gawa ziara"), "blue") { hide { close(); TeamGo.assign = name; TeamGo.section = "visits" } })
+    }
     androidx.compose.material3.ModalBottomSheet(onDismissRequest = close, sheetState = state, containerColor = C.card, modifier = Modifier.testTag("team_sheet")) {
         Column(Modifier.verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, bottom = 28.dp)) {
-            SheetHead(name, if (source == "app") admin else p.optBoolean("admin"), name, seenText(p)) { Chips(p, long = true, center = true) }
+            Box(Modifier.fillMaxWidth()) {
+                SheetHead(name, if (source == "app") admin else p.optBoolean("admin"), name, seenText(p), xRoom = true) { Chips(p, long = true, center = true) }
+                Box(Modifier.align(Alignment.TopEnd)) { SheetCloseX("tm_x") { hide() } }
+            }
+            QuickActions(quick, Modifier.padding(top = 14.dp))
+            if (savedEmail.isBlank()) Text(t("Add an e-mail to send e-mails", "Ongeza barua pepe ili kutuma barua pepe"), style = MaterialTheme.typography.bodySmall, color = C.muted, textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp).testTag("tma_noemail"))
+            Msg(copied, "ok")
             if (source == "app") {
                 Picker(t("Home country", "Nchi ya nyumbani"), home, listOf("" to t("All countries", "Nchi zote")) + COUNTRIES.toList(), { home = it })
-                Field(email, { email = it }, t("E-mail (for alerts)", "Barua pepe (kwa taarifa)"), placeholder = "name@rafikioutreach.org")
-                Field(phone, { phone = it }, t("Phone", "Simu"), placeholder = "+254 712 345 678", phone = true)
+                CopyField(email, { email = it }, t("E-mail (for alerts)", "Barua pepe (kwa taarifa)"), "name@rafikioutreach.org", "tm_copy_email", t("Copy e-mail", "Nakili barua pepe")) { copied = t("E-mail copied ✓", "Barua pepe imenakiliwa ✓") }
+                CopyField(phone, { phone = it }, t("Phone", "Simu"), "+254 712 345 678", "tm_copy_phone", t("Copy phone", "Nakili simu"), phone = true) { copied = t("Phone copied ✓", "Simu imenakiliwa ✓") }
                 Text(t("The team sees the phone number, for calls and WhatsApp.", "Timu inaona namba ya simu, kwa kupiga na WhatsApp."), style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 4.dp))
                 AdminSwitch(admin) { admin = !admin }
                 Btn(t("Save", "Hifadhi"), {
@@ -538,6 +569,8 @@ private fun PersonSheet(m: AppModel, p: JSONObject, close: () -> Unit, changed: 
                     }
                 }
                 pin?.let { PinShown(name, it, phone, home) }
+                if (inviting) InviteSheet(m, p) { inviting = false }
+                elevate?.let { mk -> AdminConfirmSheet(m, p, mk, close = { elevate = null }) { admin = mk; p.put("admin", mk); changed(); msg = "ok" to (if (mk) t("$name is now an admin ✓", "$name sasa ni msimamizi ✓") else t("$name is no longer an admin ✓", "$name si msimamizi tena ✓")) } }
             } else {
                 val cf = source == "cloudflare"
                 val hu = C.hue(if (cf) "purple" else "blue")
@@ -549,6 +582,7 @@ private fun PersonSheet(m: AppModel, p: JSONObject, close: () -> Unit, changed: 
                 }
                 Btn(if (cf) t("Re-add with an app PIN", "Mwongeze kwa PIN ya programu") else t("Give them an app PIN", "Mpe PIN ya programu"), { hide { readd(p) } }, Modifier.padding(top = 14.dp).fillMaxWidth().testTag("tm_readd"), icon = "key", light = true)
             }
+            PersonActivity(name, act, snap) { id -> hide { close(); openProject(id) } }
         }
     }
 }

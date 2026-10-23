@@ -202,6 +202,9 @@ fun WaitingList(m: AppModel, snap: Snapshot?) {
 @Composable
 fun TeamToday(m: AppModel, mates: List<Mate>?, act: List<JSONObject>?, snap: Snapshot?, open: (String) -> Unit) {
     val ctx = LocalContext.current
+    // a teammate's picture opens their contact actions and activity (TeamPerson.kt)
+    var mate by remember { mutableStateOf<Mate?>(null) }
+    mate?.let { p -> MateSheet(p, act, snap, { mate = null }, open) }
     Card(Modifier.padding(top = 14.dp).testTag("team_today")) {
         val head = remember { mutableStateOf(0) }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally), verticalAlignment = Alignment.CenterVertically) { H2(t("Team today", "Timu leo"), wide = false); if (head.value > 0) Tag(t("${head.value} active", "${head.value} kazini"), C.okBg, C.ok) }
@@ -217,7 +220,7 @@ fun TeamToday(m: AppModel, mates: List<Mate>?, act: List<JSONObject>?, snap: Sna
             val e = last[p]
             val onToday = listOfNotNull(e?.optString("at"), p.lastSeen).any { day(it) == today }
             Row(Modifier.padding(top = 10.dp).rise(i, step = 50).fillMaxWidth().testTag("mate_row"), verticalAlignment = Alignment.CenterVertically) {
-                Box {
+                Box(Modifier.clip(CircleShape).clickable(role = Role.Button) { mate = p }.semantics { contentDescription = p.name }.testTag("mate_open")) {
                     Box(Modifier.size(42.dp).clip(CircleShape).background(androidx.compose.ui.graphics.Brush.linearGradient(listOf(Color(0xFF47B4F5), Color(0xFF0A78C2)))), contentAlignment = Alignment.Center) {
                         Text(p.name.split(" ").mapNotNull { it.firstOrNull()?.uppercase() }.take(2).joinToString(""), color = Color.White, style = MaterialTheme.typography.labelLarge)
                     }
