@@ -1,8 +1,8 @@
 {
   "ok": true,
-  "versionCode": 45,
-  "versionName": "2.20.0",
-  "notes": "Tap a team member for quick actions: e-mail, call, WhatsApp, send an app invite, make admin, assign a visit. Send an e-mail now lets you choose people one by one.",
-  "sha256": "16a2f620e219c9dfb31534cbb7f17dbf0073a2f8b3a8826b2c8073847b7c8dd8",
+  "versionCode": 46,
+  "versionName": "2.21.0",
+  "notes": "Tap any person for their contact card: e-mail, call, WhatsApp, change their details, set or reset a PIN, make admin, block or sign them out of every phone. Donors have the same card.",
+  "sha256": "c099b4a65242216daf0e9e2cd51cb2c005876f516cba4f4ac151509762bbba07",
   "apk": "/app/rafiki-pin.apk"
 }
