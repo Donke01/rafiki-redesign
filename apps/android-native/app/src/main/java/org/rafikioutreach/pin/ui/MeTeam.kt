@@ -202,9 +202,7 @@ fun WaitingList(m: AppModel, snap: Snapshot?) {
 @Composable
 fun TeamToday(m: AppModel, mates: List<Mate>?, act: List<JSONObject>?, snap: Snapshot?, open: (String) -> Unit) {
     val ctx = LocalContext.current
-    // a teammate's picture opens their contact actions and activity (TeamPerson.kt)
-    var mate by remember { mutableStateOf<Mate?>(null) }
-    mate?.let { p -> MateSheet(p, act, snap, { mate = null }, open) }
+    // a teammate's picture opens their contact sheet (Contact.kt)
     Card(Modifier.padding(top = 14.dp).testTag("team_today")) {
         val head = remember { mutableStateOf(0) }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally), verticalAlignment = Alignment.CenterVertically) { H2(t("Team today", "Timu leo"), wide = false); if (head.value > 0) Tag(t("${head.value} active", "${head.value} kazini"), C.okBg, C.ok) }
@@ -220,7 +218,7 @@ fun TeamToday(m: AppModel, mates: List<Mate>?, act: List<JSONObject>?, snap: Sna
             val e = last[p]
             val onToday = listOfNotNull(e?.optString("at"), p.lastSeen).any { day(it) == today }
             Row(Modifier.padding(top = 10.dp).rise(i, step = 50).fillMaxWidth().testTag("mate_row"), verticalAlignment = Alignment.CenterVertically) {
-                Box(Modifier.clip(CircleShape).clickable(role = Role.Button) { mate = p }.semantics { contentDescription = p.name }.testTag("mate_open")) {
+                Box(Modifier.clip(CircleShape).clickable(role = Role.Button) { Contact.show(p.name) }.semantics { contentDescription = p.name }.testTag("mate_open")) {
                     Box(Modifier.size(42.dp).clip(CircleShape).background(androidx.compose.ui.graphics.Brush.linearGradient(listOf(Color(0xFF47B4F5), Color(0xFF0A78C2)))), contentAlignment = Alignment.Center) {
                         Text(p.name.split(" ").mapNotNull { it.firstOrNull()?.uppercase() }.take(2).joinToString(""), color = Color.White, style = MaterialTheme.typography.labelLarge)
                     }
@@ -289,7 +287,8 @@ fun TeamMonth(m: AppModel, act: List<JSONObject>?) {
         if (by.isEmpty() && community.isEmpty()) Text(t("Nothing yet in this period.", "Hakuna bado katika kipindi hiki."), style = MaterialTheme.typography.bodyMedium, color = C.muted, modifier = Modifier.padding(top = 10.dp))
         // the team in name order, then water committees' reports on a line of their own
         (by.entries.map { it.key to it.value } + (if (community.isNotEmpty()) listOf("" to community) else emptyList())).forEach { (name, l) ->
-            Row(Modifier.padding(top = 10.dp).fillMaxWidth().then(if (name.isEmpty()) Modifier.testTag("tm_community") else Modifier), verticalAlignment = Alignment.CenterVertically) {
+            Row(Modifier.padding(top = 4.dp).fillMaxWidth().then(if (name.isEmpty()) Modifier.testTag("tm_community") else Modifier.clip(RoundedCornerShape(12.dp)).clickable(role = Role.Button) { Contact.show(name) }.testTag("tm_who_$name"))
+                .heightIn(min = 44.dp), verticalAlignment = Alignment.CenterVertically) {
                 if (name.isEmpty()) { Icon(Ic.get("phone"), null, tint = C.muted, modifier = Modifier.size(16.dp)); Spacer(Modifier.width(6.dp)) }
                 Text(name.ifEmpty { communityName() }, style = MaterialTheme.typography.titleSmall, color = if (name.isEmpty()) C.muted else C.ink, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
                 listOf("pin" to "pin", "visit" to "near", "fixed" to "repairs").forEach { (a, hue) ->
@@ -322,7 +321,9 @@ fun TeamFeed(act: List<JSONObject>?, snap: Snapshot?, open: (String) -> Unit) {
             val id = e.optString("id")
             val known = snap?.projects?.any { it.id == id } == true
             Row(Modifier.padding(top = 8.dp).rise(i, step = 40).fillMaxWidth().clip(RoundedCornerShape(14.dp)).then(if (known) Modifier.clickable { open(id) } else Modifier).padding(6.dp).testTag(if (sms) "feed_community" else "feed_row"), verticalAlignment = Alignment.CenterVertically) {
-                Box(Modifier.size(34.dp).clip(CircleShape).background(hu.bg), contentAlignment = Alignment.Center) { Icon(Ic.get(icon), null, tint = hu.fg, modifier = Modifier.size(17.dp)) }
+                // the person (tap: their contact sheet) with what they did as a badge; community reports keep the phone
+                if (sms || !Contact.isPerson(e.optString("by").trim())) Box(Modifier.size(34.dp).clip(CircleShape).background(hu.bg), contentAlignment = Alignment.Center) { Icon(Ic.get(icon), null, tint = hu.fg, modifier = Modifier.size(17.dp)) }
+                else PersonTap(e.optString("by"), tag = "feed_who") { PersonBadgeAvatar(e.optString("by"), icon, hu, C.card, 34.dp) }
                 Spacer(Modifier.width(10.dp))
                 Column(Modifier.weight(1f)) {
                     Text(androidx.compose.ui.text.buildAnnotatedString {

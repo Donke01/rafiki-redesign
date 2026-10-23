@@ -17,6 +17,10 @@ data class Reply(val ok: Boolean, val status: Int, val json: JSONObject, val rea
 /** Talks to the same endpoints as the web app: /api/pin, /api/pin-photo, /api/place. */
 class Api(val server: String, private val pin: () -> String, private val session: () -> String = { "" }) {
 
+    /** Told when the server ends this person's access: 401 with reason "blocked" (an admin blocked them) or
+     *  "signed-out" (an admin signed them out of all phones). The app then signs out with a kind message. */
+    var onAuthEnd: ((String) -> Unit)? = null
+
     /** Lets tests swap the network for a fake one. */
     var transport: (method: String, url: String, headers: Map<String, String>, body: ByteArray?) -> Pair<Int, String> = ::http
 
@@ -105,10 +109,14 @@ class Api(val server: String, private val pin: () -> String, private val session
     private fun toReply(status: Int, text: String): Reply {
         if (status == 0) return Reply(false, 0, JSONObject(), "offline")
         val j = try { JSONObject(text) } catch (e: Exception) { JSONObject().put("ok", false).put("reason", "down") }
-        return Reply(j.optBoolean("ok"), status, j, j.optString("reason").takeIf { it.isNotBlank() })
+        val reason = j.optString("reason").takeIf { it.isNotBlank() }
+        if (status == 401 && reason in AUTH_END) onAuthEnd?.invoke(reason!!)
+        return Reply(j.optBoolean("ok"), status, j, reason)
     }
 
     companion object {
+        /** 401 reasons that mean "you're no longer signed in here" (feat-conta). */
+        val AUTH_END = setOf("blocked", "signed-out")
         fun enc(s: String): String = URLEncoder.encode(s, "UTF-8")
 
         fun http(method: String, url: String, headers: Map<String, String>, body: ByteArray?): Pair<Int, String> = try {

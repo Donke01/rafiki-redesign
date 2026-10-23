@@ -41,11 +41,10 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 
-// Office › Team › a person (feat-teama): a row of quick actions under the name (contact, app access, their work),
-// an app invite by e-mail (preview, then send; never with the PIN), make or remove admin with a confirm sheet,
-// and their visits and activity. Me › Team › a teammate's picture opens the same contact actions and activity.
+// Parts of the contact sheet (Contact.kt, feat-conta): the app invite by e-mail (preview, then send; never with the PIN),
+// make or remove admin with a confirm sheet, and their visits and activity.
 
-/** Jumps from a person's sheet to another Office tab: Team map with them in focus, or Assign a visit for them. */
+/** Jumps from a contact sheet to another Office tab: Team map with them in focus, or Assign a visit for them. */
 object TeamGo {
     var section by mutableStateOf<String?>(null)
     var map by mutableStateOf<String?>(null)
@@ -72,80 +71,17 @@ internal fun inviteText(who: String, from: String, admin: Boolean): String {
     )
 }
 
-/** One round quick action: an icon in a circle over a short label. */
-data class QuickAct(val key: String, val icon: String, val label: String, val hue: String, val brand: String? = null, val onClick: () -> Unit)
-
-/** The quick actions in neat rows of four, so all of them fit on a 360-wide phone without scrolling. */
-@Composable
-internal fun QuickActions(acts: List<QuickAct>, modifier: Modifier = Modifier) {
-    if (acts.isEmpty()) return
-    val h = rememberHaptics()
-    Column(modifier.fillMaxWidth().testTag("tma_row"), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        acts.chunked(4).forEach { row ->
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                row.forEach { a ->
-                    val hu = if (a.hue == "wa") Hue(WhatsAppGreen, WhatsAppGreen.copy(alpha = 0.14f)) else C.hue(a.hue)
-                    Column(Modifier.weight(1f).clip(RoundedCornerShape(14.dp)).clickable(role = Role.Button) { h.tap(); a.onClick() }.semantics { contentDescription = a.label }
-                        .padding(vertical = 4.dp).testTag("tma_${a.key}"), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Box(Modifier.size(48.dp).clip(CircleShape).background(hu.bg).then(if (!C.glassy) Modifier.border(1.5.dp, hu.fg.copy(alpha = 0.5f), CircleShape) else Modifier), contentAlignment = Alignment.Center) {
-                            if (a.brand != null) Brand(a.brand, 24.dp, a.icon, hu.fg)
-                            else if (a.icon == "crown") Icon(Ic.crownFill, null, tint = hu.fg, modifier = Modifier.size(22.dp))
-                            else Icon(Ic.get(a.icon), null, tint = hu.fg, modifier = Modifier.size(22.dp))
-                        }
-                        FitLabel(a.label, Modifier.padding(top = 5.dp, start = 2.dp, end = 2.dp))
-                    }
-                }
-                repeat(4 - row.size) { Spacer(Modifier.weight(1f)) }
-            }
-        }
-    }
-}
-
-/** A label of at most two lines that shrinks a little rather than ever breaking a word in two. */
-@Composable
-private fun FitLabel(text: String, modifier: Modifier = Modifier) {
-    val measurer = rememberTextMeasurer()
-    val base = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
-    BoxWithConstraints(modifier.fillMaxWidth()) {
-        val w = constraints.maxWidth
-        val size = remember(text, w, base) {
-            listOf(12f, 11.5f, 11f, 10.5f, 10f, 9.5f, 9f).firstOrNull { s ->
-                val st = base.copy(fontSize = s.sp, lineHeight = (s + 3).sp)
-                text.split(' ').all { measurer.measure(it, st, maxLines = 1, softWrap = false).size.width <= w } &&
-                    measurer.measure(text, st, constraints = Constraints(maxWidth = w)).lineCount <= 2
-            } ?: 9f
-        }
-        Text(text, style = base.copy(fontSize = size.sp, lineHeight = (size + 3).sp), color = C.ink, maxLines = 2, modifier = Modifier.fillMaxWidth())
-    }
-}
-
-/** A field with a small copy button next to it (e-mail, phone). */
-@Composable
-internal fun CopyField(value: String, onChange: (String) -> Unit, label: String, placeholder: String, tag: String, copyLabel: String, phone: Boolean = false, onCopied: () -> Unit) {
-    val clip = androidx.compose.ui.platform.LocalClipboardManager.current
-    Row(verticalAlignment = Alignment.Bottom) {
-        Field(value, onChange, label, Modifier.weight(1f), placeholder = placeholder, phone = phone)
-        if (value.isNotBlank()) {
-            Spacer(Modifier.width(6.dp))
-            Box(Modifier.padding(bottom = 4.dp).size(48.dp).clip(CircleShape).clickable(role = Role.Button) { clip.setText(androidx.compose.ui.text.AnnotatedString(value.trim())); onCopied() }
-                .semantics { contentDescription = copyLabel }.testTag(tag), contentAlignment = Alignment.Center) {
-                Icon(Ic.get("copy"), null, tint = C.blue, modifier = Modifier.size(20.dp))
-            }
-        }
-    }
-}
-
 private val WORK_ACTS = setOf("pin", "visit", "fixed", "new")
 private fun sameName(a: String, b: String) = a.trim().equals(b.trim(), ignoreCase = true)
 private fun localDay(iso: String): LocalDate? = runCatching { Instant.parse(iso).atZone(ZoneId.systemDefault()).toLocalDate() }.getOrNull()
 
 /** Their pins, visits and fixes: today and this month from the team feed. Tap one to open the project. */
 @Composable
-internal fun PersonActivity(name: String, act: List<JSONObject>?, snap: Snapshot?, open: (String) -> Unit) {
-    DqmLabel(t("Their visits and activity", "Ziara na kazi zake"))
+internal fun PersonActivity(names: List<String>, act: List<JSONObject>?, snap: Snapshot?, label: Boolean = true, open: (String) -> Unit) {
+    if (label) DqmLabel(t("Their visits and activity", "Ziara na kazi zake")) else Spacer(Modifier.height(8.dp))
     if (act == null) { Text(t("Loading…", "Inapakia…"), style = MaterialTheme.typography.bodyMedium, color = C.muted); return }
     val today = LocalDate.now(); val first = today.withDayOfMonth(1)
-    val month = act.filter { sameName(it.optString("by"), name) && it.optString("a") in WORK_ACTS && localDay(it.optString("at"))?.let { d -> !d.isBefore(first) } == true }.sortedByDescending { it.optString("at") }
+    val month = act.filter { e -> names.any { n -> sameName(e.optString("by"), n) } && e.optString("a") in WORK_ACTS && localDay(e.optString("at"))?.let { d -> !d.isBefore(first) } == true }.sortedByDescending { it.optString("at") }
     val nToday = month.count { localDay(it.optString("at")) == today }
     Row(Modifier.fillMaxWidth().testTag("tma_counts"), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         listOf(nToday to t("today", "leo"), month.size to t("this month", "mwezi huu")).forEach { (n, l) ->
@@ -156,8 +92,8 @@ internal fun PersonActivity(name: String, act: List<JSONObject>?, snap: Snapshot
         }
     }
     if (month.isEmpty()) { Text(t("Nothing yet this month.", "Bado hakuna kitu mwezi huu."), style = MaterialTheme.typography.bodyMedium, color = C.muted, modifier = Modifier.padding(top = 10.dp)); return }
-    var more by remember(name) { mutableStateOf(false) }
-    month.take(if (more) 30 else 5).forEach { e ->
+    var more by remember(names) { mutableStateOf(false) }
+    month.take(if (more) 30 else 6).forEach { e ->
         val id = e.optString("id")
         val p = snap?.projects?.firstOrNull { it.id == id }
         val (icon, hue) = when (e.optString("a")) { "pin" -> "pin" to "pin"; "visit" -> "clip" to "near"; "fixed" -> "check" to "near"; else -> "plus" to "new" }
@@ -174,7 +110,7 @@ internal fun PersonActivity(name: String, act: List<JSONObject>?, snap: Snapshot
             if (p != null) Icon(Ic.get("chev"), null, tint = C.muted, modifier = Modifier.size(18.dp))
         }
     }
-    if (month.size > 5) Text(if (more) t("Show less", "Onyesha kidogo") else t("Show all ${month.size}", "Onyesha zote ${month.size}"), style = MaterialTheme.typography.labelLarge, color = C.blue,
+    if (month.size > 6) Text(if (more) t("Show less", "Onyesha kidogo") else t("Show all ${month.size}", "Onyesha zote ${month.size}"), style = MaterialTheme.typography.labelLarge, color = C.blue,
         modifier = Modifier.padding(top = 6.dp).clip(RoundedCornerShape(10.dp)).clickable { more = !more }.padding(8.dp).testTag("tma_act_more"))
 }
 
@@ -182,26 +118,16 @@ private fun actVerb(e: JSONObject) = when (e.optString("a")) {
     "pin" -> t("Pinned", "Aliweka mahali"); "visit" -> t("Visited", "Alitembelea"); "fixed" -> t("Fixed", "Alirekebisha"); else -> t("Added", "Aliongeza")
 }
 
-/** Call, WhatsApp and SMS: only when there is a phone number. */
-internal fun phoneActs(ctx: android.content.Context, name: String, phone: String, home: String): List<QuickAct> {
-    val ph = phone.trim().takeIf { it.isNotBlank() && it != "null" } ?: return emptyList()
-    return listOf(
-        QuickAct("call", "phone", t("Call", "Piga simu"), "near") { runCatching { ctx.startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + ph.replace(" ", "")))) } },
-        QuickAct("wa", "chat", "WhatsApp", "wa", brand = "business.whatsapp.com") { runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://wa.me/" + waNumber(ph, home)))) } },
-        QuickAct("sms", "text", "SMS", "blue") { runCatching { ctx.startActivity(Intent(Intent.ACTION_SENDTO, Uri.parse("smsto:" + ph.replace(" ", "")))) } },
-    )
-}
-
 /** A small sheet that slides up over the person's sheet, with an X; back closes only this one. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun TeamSubSheet(tag: String, close: () -> Unit, content: @Composable ColumnScope.(hide: (() -> Unit) -> Unit) -> Unit) {
+internal fun TeamSubSheet(tag: String, close: () -> Unit, x: Boolean = true, content: @Composable ColumnScope.(hide: (() -> Unit) -> Unit) -> Unit) {
     val scope = rememberScope()
     val state = androidx.compose.material3.rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val hide: (() -> Unit) -> Unit = { then -> sheetHide(scope, state) { close(); then() } }
     androidx.compose.material3.ModalBottomSheet(onDismissRequest = close, sheetState = state, containerColor = C.card, modifier = Modifier.testTag(tag)) {
         Column(Modifier.verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, bottom = 28.dp)) {
-            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.TopEnd) { SheetCloseX(tag + "_x") { hide {} } }
+            if (x) Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.TopEnd) { SheetCloseX(tag + "_x") { hide {} } }
             content(hide)
         }
     }
@@ -247,10 +173,10 @@ internal fun AdminConfirmSheet(m: AppModel, p: JSONObject, makeAdmin: Boolean, c
                 busy = true; msg = null
                 scope.launch {
                     val x = m.api.admin(JSONObject().put("action", "team-update").put("name", name).put("home", p.optString("home").takeIf { it != "null" } ?: "")
-                        .put("email", p.optString("email").takeIf { it != "null" } ?: "").put("phone", p.optString("phone").takeIf { it != "null" } ?: "").put("admin", makeAdmin))
+                        .put("email", p.optString("email").takeIf { it != "null" } ?: "").put("phone", p.optString("phone").takeIf { it != "null" } ?: "").put("role", p.optString("role").takeIf { it != "null" } ?: "").put("admin", makeAdmin))
                     busy = false
                     if (x.ok) hide { done() }
-                    else msg = if (x.reason == "self") t("You can’t remove your own admin role.", "Huwezi kuondoa nafasi yako mwenyewe ya msimamizi.") else org.rafikioutreach.pin.data.reasonText(x.reason)
+                    else msg = if (x.reason == "self") t("You can’t remove your own admin role.", "Huwezi kuondoa nafasi yako mwenyewe ya msimamizi.") else contactWhy(x.reason)
                 }
             }, Modifier.weight(1f).testTag("tma_admin_yes"), small = true, enabled = !busy, color = if (makeAdmin) null else C.bad)
         }
@@ -326,22 +252,5 @@ private fun InviteBody(html: String) {
                 Text(l, color = Color.White, style = MaterialTheme.typography.labelLarge)
             }
         else Text(l, style = MaterialTheme.typography.bodyMedium, color = C.text, modifier = Modifier.padding(vertical = 3.dp))
-    }
-}
-
-/** Me › Team › a teammate: contact actions and their activity (no admin actions here). */
-@Composable
-internal fun MateSheet(mate: Mate, act: List<JSONObject>?, snap: Snapshot?, close: () -> Unit, open: (String) -> Unit) {
-    val ctx = LocalContext.current
-    TeamSubSheet("mate_sheet", close) { hide ->
-        Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-            DqmAvatar(mate.name, Color(0xFF0A78C2), Color.White, 64.dp)
-            Text(mate.name, style = MaterialTheme.typography.titleLarge, color = C.ink, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 6.dp))
-            Text(t("Last seen ", "Alionekana ") + ago(mate.lastSeen), style = MaterialTheme.typography.bodySmall, color = C.muted, textAlign = TextAlign.Center)
-        }
-        val acts = phoneActs(ctx, mate.name, mate.phone, mate.home)
-        if (acts.isNotEmpty()) QuickActions(acts, Modifier.padding(top = 14.dp))
-        else Text(t("No phone number on the team list for them.", "Hakuna namba ya simu yake kwenye orodha ya timu."), style = MaterialTheme.typography.bodyMedium, color = C.muted, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(top = 14.dp))
-        PersonActivity(mate.name, act, snap) { id -> hide { open(id) } }
     }
 }

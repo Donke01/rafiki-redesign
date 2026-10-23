@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
@@ -244,17 +245,18 @@ class TeamMapTest {
         rule.onNodeWithText("Field officers never see this map", substring = true).assertExists()
         rule.onNodeWithTag("tm_person_Grace Achieng").performScrollTo()
         shot("37b-office-teammap-list")
-        // a person: a sheet with call, WhatsApp and today's visits
+        // a person: their contact sheet (feat-conta), the same as everywhere else, with "Show on team map"
         rule.onNodeWithTag("tm_person_Bertin Mwangi").performScrollTo().performClick()
-        waitTag("tm_sheet"); waitFor("Chepkongi Dispensary")
-        rule.onNodeWithText("Kapsaret Borehole").assertExists()
-        rule.onNodeWithTag("tm_call").assertExists(); rule.onNodeWithTag("tm_wa").assertExists()
+        waitTag("ct_sheet"); waitTag("ct_map")
+        rule.onNodeWithTag("ct_name").assertTextEquals("Bertin Mwangi")
         sheetShot("38-office-teammap-person")
-        rule.onNodeWithTag("tm_onmap").performScrollTo().performClick(); rule.mainClock.advanceTimeBy(1500)
-        rule.waitUntil(5000) { rule.onAllNodesWithTag("tm_sheet").fetchSemanticsNodes().isEmpty() }
+        rule.onNodeWithTag("ct_map").performScrollTo().performClick(); rule.mainClock.advanceTimeBy(1500)
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("ct_sheet").fetchSemanticsNodes().isEmpty() }
+        rule.onNodeWithTag("tm_map").assertExists()
         rule.onNodeWithTag("tm_person_Grace Achieng").performScrollTo().performClick()
-        waitTag("tm_sheet"); rule.onNodeWithTag("tm_nophone").assertExists()
-        rule.onNodeWithTag("tm_close").performClick(); rule.mainClock.advanceTimeBy(1500)
+        waitTag("ct_sheet"); rule.onNodeWithTag("ct_name").assertTextEquals("Grace Achieng")
+        rule.onNodeWithTag("ct_x").performClick(); rule.mainClock.advanceTimeBy(1500)
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("ct_sheet").fetchSemanticsNodes().isEmpty() }
         assertTrue(posts.any { it.contains("view=teammap") })
     }
 
@@ -266,7 +268,7 @@ class TeamMapTest {
         rule.onNodeWithTag("tm_head").performScrollTo()
         shot("39-office-teammap-dark")
         rule.onNodeWithTag("tm_person_Meril Kiprop").performScrollTo().performClick()
-        waitTag("tm_sheet")
+        waitTag("ct_sheet"); rule.mainClock.advanceTimeBy(1000)
         sheetShot("39b-office-teammap-person-dark")
     }
 

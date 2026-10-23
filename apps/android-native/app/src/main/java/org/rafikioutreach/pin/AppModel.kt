@@ -70,6 +70,18 @@ class AppModel(app: Application) : AndroidViewModel(app) {
 
     init {
         viewModelScope.launch { while (true) { delay(60000); if (_signedIn.value) sendWaiting() } }
+        // blocked, or signed out of all phones by an admin: sign this phone out with a kind word (feat-conta)
+        api.onAuthEnd = { why -> ended = why; viewModelScope.launch(Dispatchers.Main) { authEnded(why) } }
+    }
+
+    /** Why the server ended this sign-in ("blocked" or "signed-out"), until the next sign-in. */
+    @Volatile var ended: String? = null
+        private set
+    /** Signs this phone out (changes waiting to send stay) and says why, kindly, on the sign-in screen. */
+    fun authEnded(why: String) {
+        ended = why
+        if (_signedIn.value) lock()
+        _banner.value = reasonText(why)
     }
 
     // --- app updates: the newest Android app on the website ----------------------------------
@@ -124,6 +136,7 @@ class AppModel(app: Application) : AndroidViewModel(app) {
         }
         val who = r.json.optString("who")
         if (who.isBlank() && name.isBlank()) { prefs.pin = ""; return "NEED_NAME" }
+        ended = null
         prefs.name = who.ifBlank { name.trim() }
         accept(r.json)
         _signedIn.value = true
@@ -287,7 +300,7 @@ class AppModel(app: Application) : AndroidViewModel(app) {
     suspend fun sendWaiting(): Outbox.Result = sendLock.withLock {
         val res = outbox.flush(api)
         _waiting.value = outbox.count()
-        if (res.locked) { lock(); _banner.value = t("Your PIN stopped working. Please sign in again; nothing was lost.", "PIN yako imeacha kufanya kazi. Tafadhali ingia tena; hakuna kilichopotea.") }
+        if (res.locked) { lock(); _banner.value = ended?.let { reasonText(it) } ?: t("Your PIN stopped working. Please sign in again; nothing was lost.", "PIN yako imeacha kufanya kazi. Tafadhali ingia tena; hakuna kilichopotea.") }
         res
     }
 

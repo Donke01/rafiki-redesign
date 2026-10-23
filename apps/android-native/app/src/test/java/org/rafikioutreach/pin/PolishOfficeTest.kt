@@ -209,9 +209,9 @@ class PolishOfficeTest {
         val m = model(); office(m)
         tag("o_team").performScrollTo().performClick(); rule.mainClock.advanceTimeBy(1500); rule.waitForIdle()
         waitTag("tm_Meril Kiprop"); assertTrue(has("PIN set by the office")); assertTrue(!has("Cloudflare"))
-        tag("tm_Meril Kiprop").performScrollTo().performClick(); waitTag("team_sheet")
-        tag("tm_newpin").performScrollTo().performClick(); rule.waitForIdle()
-        tag("tm_yes").performScrollTo().performClick()
+        tag("tm_Meril Kiprop").performScrollTo().performClick(); waitTag("ct_sheet"); waitTag("ct_newpin")
+        tag("ct_newpin").performScrollTo().performClick(); waitTag("ct_newpin_sheet"); rule.waitForIdle()
+        tag("ct_yes").performScrollTo().performClick()
         waitTag("tm_pin_shown")
         tag("tm_pin_copy").assertExists(); tag("tm_pin_wa").assertExists(); tag("tm_pin_sms").assertExists()
         tag("tm_pin_card").performScrollTo()
@@ -229,8 +229,8 @@ class PolishOfficeTest {
         Lang.sw = true
         val m = model(); office(m, dark = true)
         tag("o_team").performScrollTo().performClick(); rule.mainClock.advanceTimeBy(1500); rule.waitForIdle()
-        waitTag("tm_Meril Kiprop"); tag("tm_Meril Kiprop").performScrollTo().performClick(); waitTag("team_sheet")
-        tag("tm_newpin").performScrollTo().performClick(); rule.waitForIdle(); tag("tm_yes").performScrollTo().performClick()
+        waitTag("tm_Meril Kiprop"); tag("tm_Meril Kiprop").performScrollTo().performClick(); waitTag("ct_sheet"); waitTag("ct_newpin")
+        tag("ct_newpin").performScrollTo().performClick(); waitTag("ct_newpin_sheet"); rule.waitForIdle(); tag("ct_yes").performScrollTo().performClick()
         waitTag("tm_pin_shown"); tag("tm_pin_card").performScrollTo()
         sheetShot("po-11-team-new-pin-sw-dark")
     }

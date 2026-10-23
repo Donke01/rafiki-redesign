@@ -19,6 +19,9 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.unit.dp
 import androidx.test.core.app.ApplicationProvider
@@ -185,29 +188,39 @@ class OfficeTest {
         assertTrue(rule.onNodeWithTag("team_field").fetchSemanticsNode().boundsInRoot.top < rule.onNodeWithTag("tm_Meril Kiprop").fetchSemanticsNode().boundsInRoot.top)
         rule.onNodeWithTag("tm_Meril Kiprop").performScrollTo()
         shot("23-office-team")
-        // tap a person: a sheet with their details and actions
+        // tap a person: their contact sheet (feat-conta), a menu of actions; each opens its own small sheet
         rule.onNodeWithTag("tm_Meril Kiprop").performClick()
-        rule.waitUntil(5000) { rule.onAllNodesWithTag("team_sheet").fetchSemanticsNodes().isNotEmpty() }
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("ct_sheet").fetchSemanticsNodes().isNotEmpty() }
+        rule.mainClock.advanceTimeBy(1000); rule.waitForIdle()
         sheetShot("23b-team-person")
-        rule.onNodeWithTag("tm_newpin").performScrollTo().performClick()
-        rule.onNodeWithText("Make a new PIN for Meril Kiprop? Their old PIN stops working.").assertExists()
+        rule.onNodeWithTag("ct_newpin").performScrollTo().performClick()
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("ct_newpin_sheet").fetchSemanticsNodes().isNotEmpty() }
+        rule.onNodeWithText("Their old PIN stops working.").assertExists()
         assertTrue(posts.none { it.contains("\"action\":\"team-pin\"") })
-        rule.onNodeWithTag("tm_yes").performScrollTo().performClick()
+        rule.onNodeWithTag("ct_yes").performScrollTo().performClick()
         waitFor("5307")
         sheetShot("23c-team-new-pin")
-        rule.onNodeWithTag("tm_remove").performScrollTo().performClick()
-        rule.onNodeWithText("Remove Meril Kiprop from the team? Their PIN stops working straight away.").assertExists()
+        rule.onNodeWithTag("ct_pin_done").performScrollTo().performClick(); rule.mainClock.advanceTimeBy(1200)
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("ct_newpin_sheet").fetchSemanticsNodes().isEmpty() }
+        rule.onNodeWithTag("ct_remove").performScrollTo().performClick()
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("ct_ask_sheet").fetchSemanticsNodes().isNotEmpty() }
+        rule.onNodeWithText("Remove Meril Kiprop from the team?").assertExists()
         sheetShot("23d-team-remove-ask")
-        rule.onNodeWithText("Cancel").performScrollTo().performClick()
-        rule.onAllNodesWithTag("tm_ask").assertCountEquals(0)
+        rule.onNodeWithTag("ct_no").performScrollTo().performClick(); rule.mainClock.advanceTimeBy(1200)
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("ct_ask_sheet").fetchSemanticsNodes().isEmpty() }
         assertTrue(posts.none { it.contains("\"action\":\"team-remove\"") })
-        rule.onNodeWithText("+254 712 345 678").performScrollTo().performTextInput("0712 000 111")
-        rule.onNodeWithTag("tm_admin").performScrollTo().performClick()
-        rule.onNodeWithTag("tm_save").performScrollTo().performClick()
+        // change the phone: one field and Save; the rest of their entry is kept
+        rule.onNodeWithTag("ct_phone_row").performScrollTo().performClick()
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("ct_field_sheet").fetchSemanticsNodes().isNotEmpty() }
+        rule.onNode(hasSetTextAction() and hasAnyAncestor(hasTestTag("ct_field"))).performTextClearance()
+        rule.onNode(hasSetTextAction() and hasAnyAncestor(hasTestTag("ct_field"))).performTextInput("0712 000 111")
+        rule.onNodeWithTag("ct_field_save").performScrollTo().performClick()
         rule.waitUntil(5000) { posts.any { it.contains("\"action\":\"team-update\"") } }
-        posts.first { it.contains("\"action\":\"team-update\"") }.let { assertTrue(it, it.contains("\"name\":\"Meril Kiprop\"") && it.contains("\"phone\":\"0712 000 111\"") && it.contains("\"admin\":true") && it.contains("\"home\":\"ke\"")) }
-        rule.mainClock.advanceTimeBy(2000)
-        rule.waitUntil(5000) { rule.onAllNodesWithTag("team_sheet").fetchSemanticsNodes().isEmpty() }
+        posts.first { it.contains("\"action\":\"team-update\"") }.let { assertTrue(it, it.contains("\"name\":\"Meril Kiprop\"") && it.contains("\"phone\":\"0712 000 111\"") && it.contains("\"admin\":false") && it.contains("\"home\":\"ke\"")) }
+        rule.mainClock.advanceTimeBy(1500)
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("ct_field_sheet").fetchSemanticsNodes().isEmpty() }
+        rule.onNodeWithTag("ct_x").performScrollTo().performClick(); rule.mainClock.advanceTimeBy(1500)
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("ct_sheet").fetchSemanticsNodes().isEmpty() }
         // Add a person: its own sheet, then the PIN shown once
         rule.onNodeWithTag("team_add").performScrollTo().performClick()
         rule.waitUntil(5000) { rule.onAllNodesWithTag("team_add_sheet").fetchSemanticsNodes().isNotEmpty() }
@@ -221,17 +234,18 @@ class OfficeTest {
         rule.onNodeWithTag("tm_done").performScrollTo().performClick()
         rule.mainClock.advanceTimeBy(1500)
         rule.waitUntil(5000) { rule.onAllNodesWithTag("team_add_sheet").fetchSemanticsNodes().isEmpty() }
-        // Cloudflare person: a short note and only the re-add action, which opens Add a person already filled in
+        // Cloudflare person: details read-only, and "Move to an app PIN" (asks first, technical names folded away)
         rule.onNodeWithTag("tm_Reid Anderson").performScrollTo().performClick()
-        rule.waitUntil(5000) { rule.onAllNodesWithTag("team_sheet").fetchSemanticsNodes().isNotEmpty() }
-        rule.onNodeWithText("This PIN was set up on the server, so it can’t be changed here. Re-add them with an app PIN to manage it here.").assertExists()
-        rule.onAllNodesWithTag("tm_save").assertCountEquals(0); rule.onAllNodesWithTag("tm_newpin").assertCountEquals(0)
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("ct_sheet").fetchSemanticsNodes().isNotEmpty() }
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("ct_move").fetchSemanticsNodes().isNotEmpty() }
+        rule.onNodeWithTag("ct_cf_note").assertExists(); rule.onNodeWithTag("ct_b_cf").assertExists()
+        rule.onAllNodesWithTag("ct_newpin").assertCountEquals(0); rule.onAllNodesWithTag("ct_email_row").assertCountEquals(0)
         sheetShot("23e-team-cloudflare")
-        rule.onNodeWithTag("tm_readd").performScrollTo().performClick()
-        rule.mainClock.advanceTimeBy(1000)
-        rule.waitUntil(5000) { rule.onAllNodesWithTag("team_add_sheet").fetchSemanticsNodes().isNotEmpty() }
-        rule.onNode(hasSetTextAction() and hasText("Reid Anderson")).assertExists()
-        rule.onNodeWithTag("tm_readd").assertDoesNotExist()
+        rule.onNodeWithTag("ct_move").performScrollTo().performClick()
+        rule.waitUntil(5000) { rule.onAllNodesWithTag("ct_ask_sheet").fetchSemanticsNodes().isNotEmpty() }
+        rule.onNodeWithTag("ct_tech").performScrollTo().performClick(); rule.onNodeWithText("PIN_USERS", substring = true).assertExists()
+        rule.onNodeWithTag("ct_yes").performScrollTo().performClick()
+        rule.waitUntil(5000) { posts.any { it.contains("\"action\":\"team-move\"") && it.contains("\"name\":\"Reid Anderson\"") } }
     }
 
     /** Overview tiles and the country sheet; Visits as cards with filters, a sheet to reassign or cancel, and the assign sheet. */
@@ -354,10 +368,11 @@ class OfficeTest {
             rule.onNodeWithTag("tm_Meril Kiprop").performScrollTo()
             shot("23h-team-dark")
             rule.onNodeWithTag("tm_Meril Kiprop").performClick()
-            rule.waitUntil(5000) { rule.onAllNodesWithTag("team_sheet").fetchSemanticsNodes().isNotEmpty() }
+            rule.waitUntil(5000) { rule.onAllNodesWithTag("ct_sheet").fetchSemanticsNodes().isNotEmpty() }
+            rule.mainClock.advanceTimeBy(1000)
             sheetShot("23i-team-person-dark")
-            // the whole admin row flips the switch, so the target is big enough
-            assertTrue(rule.onNodeWithTag("tm_admin_row").fetchSemanticsNode().size.height >= with(rule.density) { 44.dp.roundToPx() })
+            // every menu row is big enough to tap
+            assertTrue(rule.onNodeWithTag("ct_newpin").fetchSemanticsNode().size.height >= with(rule.density) { 44.dp.roundToPx() })
             org.rafikioutreach.pin.ui.Look.mode = "sun"
             sheetShot("23j-team-person-sun")
         } finally { org.rafikioutreach.pin.ui.Look.mode = "" }
