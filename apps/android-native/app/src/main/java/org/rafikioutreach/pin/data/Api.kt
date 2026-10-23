@@ -20,6 +20,10 @@ class Api(val server: String, private val pin: () -> String, private val session
     /** Told when the server ends this person's access: 401 with reason "blocked" (an admin blocked them) or
      *  "signed-out" (an admin signed them out of all phones). The app then signs out with a kind message. */
     var onAuthEnd: ((String) -> Unit)? = null
+    /** The PIN session's number (X-Pin-Gen): after "Sign out of all phones" the server refuses the old one. */
+    var gen: () -> String = { "" }
+    /** True while signing in with a PIN typed on the lock screen (X-Pin-New: 1 starts a new session). */
+    @Volatile var fresh = false
 
     /** Lets tests swap the network for a fake one. */
     var transport: (method: String, url: String, headers: Map<String, String>, body: ByteArray?) -> Pair<Int, String> = ::http
@@ -57,7 +61,10 @@ class Api(val server: String, private val pin: () -> String, private val session
 
     /** Who is asking: a PIN, or the monday.com session (sent the way a browser sends its cookie). */
     private fun auth(h: MutableMap<String, String>) {
-        pin().takeIf { it.isNotBlank() }?.let { h["X-Pin"] = it }
+        pin().takeIf { it.isNotBlank() }?.let {
+            h["X-Pin"] = it
+            if (fresh) h["X-Pin-New"] = "1" else gen().takeIf { g -> g.isNotBlank() }?.let { g -> h["X-Pin-Gen"] = g }
+        }
         session().takeIf { it.isNotBlank() }?.let { h["Cookie"] = "rfpin=$it"; h["Origin"] = server }
     }
 

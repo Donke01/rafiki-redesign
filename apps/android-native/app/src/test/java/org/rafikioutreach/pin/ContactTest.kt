@@ -54,8 +54,10 @@ class ContactTest {
     private val posts = java.util.concurrent.CopyOnWriteArrayList<String>()
     /** What GET /api/pin answers (a 401 reason, to test being blocked or signed out). */
     @Volatile private var listEnd: String? = null
+    /** How the signed-in admin (Reid) got their PIN. */
+    private var reidSrc = "app"
 
-    @After fun reset() { Lang.sw = false; Look.mode = ""; Motion.on = true; MailNav.preset = null; TeamGo.section = null; TeamGo.map = null; TeamGo.assign = null; Contact.who = null }
+    @After fun reset() { reidSrc = "app"; Lang.sw = false; Look.mode = ""; Motion.on = true; MailNav.preset = null; TeamGo.section = null; TeamGo.map = null; TeamGo.assign = null; Contact.who = null }
 
     private val now = Instant.now()
     private fun ago(min: Long) = now.minusSeconds(min * 60).toString()
@@ -73,8 +75,9 @@ class ContactTest {
 
     private fun team() = JSONArray()
         .put(JSONObject().put("name", "Meril Kiprop").put("home", "ke").put("admin", false).put("src", "app").put("phone", "0712 345 678").put("email", "meril@rafikioutreach.org")
-            .put("role", "Field officer, Kitale").put("lastSeen", ago(45)).put("aka", JSONArray().put("Meril K")).put("blocked", JSONObject.NULL))
-        .put(JSONObject().put("name", "Reid Anderson").put("home", "ke").put("admin", true).put("src", "app").put("email", "reid@rafikioutreach.org").put("phone", "0700 111 222").put("lastSeen", ago(1)))
+            .put("role", "Field officer, Kitale").put("lastSeen", ago(45)).put("aka", JSONArray().put("Meril K")).put("blocked", JSONObject.NULL).put("out", "2026-10-22T08:00:00Z"))
+        .put(JSONObject().put("name", "Peter Otieno").put("home", "ke").put("admin", true).put("adminCf", true).put("alsoCloudflare", true).put("src", "app").put("lastSeen", ago(600)))
+        .put(JSONObject().put("name", "Reid Anderson").put("home", "ke").put("admin", true).put("src", reidSrc).put("email", "reid@rafikioutreach.org").put("phone", "0700 111 222").put("lastSeen", ago(1)))
         .put(JSONObject().put("name", "Grace Wanjiru").put("home", "ke").put("admin", false).put("src", "app").put("phone", "0722 000 333")
             .put("blocked", JSONObject().put("at", "2026-10-23T08:00:00Z").put("by", "Morgan").put("reason", "Phone lost")))
         .put(JSONObject().put("name", "Jessica Anderson").put("admin", true).put("src", "cloudflare"))
@@ -206,7 +209,7 @@ class ContactTest {
         val m = model(); openContact(m)
         tag("ct_name").assertTextEquals("Meril Kiprop"); tag("ct_role").assertTextEquals("Field officer, Kitale")
         listOf("ct_b_field", "ct_b_app").forEach { assertTrue(it, tagged(it)) }; assertFalse(tagged("ct_b_blocked")); assertFalse(tagged("ct_b_admin"))
-        assertTrue(has("Active · last seen"))
+        assertTrue(has("Active · last seen")); assertTrue(tagged("ct_out")); assertTrue(has("Signed out of all phones on 22\u00A0Oct"))
         listOf("ct_copy_email", "ct_copy_phone", "ct_mail", "ct_call", "ct_wa", "ct_sms", "ct_share", "ct_name_row", "ct_email_row", "ct_phone_row", "ct_home_row", "ct_role_row",
             "ct_invite", "ct_newpin", "ct_setpin", "ct_resetpin", "ct_admin", "ct_block", "ct_signout", "ct_remove", "ct_assign", "ct_jobs").forEach { assertTrue(it, tagged(it)) }
         assertTrue(has("Change e-mail") && has("Change phone"))
@@ -426,6 +429,27 @@ class ContactTest {
         waitFor("Change my PIN"); assertTrue(tagged("hback"))
     }
 
+    @Test fun own_sheet_when_your_pin_is_set_in_cloudflare_edits_the_phone_through_profile() {
+        Lang.sw = false; reidSrc = "cloudflare"
+        val m = model(); openContact(m, "Reid Anderson")
+        listOf("ct_name_ro", "ct_email_ro", "ct_setby", "ct_phone_row", "ct_mypin").forEach { assertTrue(it, tagged(it)) }
+        listOf("ct_name_row", "ct_email_row", "ct_cf_note").forEach { assertFalse(it, tagged(it)) }
+        assertTrue(has("Set by the office"))
+        sheetShot("ct-27-own-sheet-cloudflare-en-light")
+        tag("ct_phone_row").performScrollTo().performClick(); waitTag("ct_field_sheet"); settle()
+        type("ct_field", "0711 222 333"); tag("ct_field_save").performClick(); settle(1500)
+        rule.waitUntil(5000) { post("profile")?.contains("\"phone\":\"0711 222 333\"") == true }
+        assertNull(post("team-update"))
+    }
+
+    @Test fun an_admin_set_in_cloudflare_cant_be_demoted_here() {
+        Lang.sw = false
+        val m = model(); openContact(m, "Peter Otieno")
+        assertTrue(tagged("ct_admincf") && tagged("ct_alsocf")); assertFalse(tagged("ct_unadmin")); assertFalse(tagged("ct_admin"))
+        tag("ct_alsocf").performScrollTo(); sheetShot("ct-28-admin-in-cloudflare-en-light")
+        Lang.sw = true; settle(); assertTrue(has("Msimamizi kupitia Cloudflare"))
+    }
+
     @Test fun own_sheet_kiswahili_dark() {
         Lang.sw = true
         val m = model(); openContact(m, "Reid Anderson", dark = true)
@@ -496,7 +520,9 @@ class ContactTest {
         tag("rr_reported_by").performScrollTo().performClick(); waitTag("ct_sheet"); back(); waitGone("ct_sheet"); back(); waitGone("rr_job_sheet")
         // Plan a week: the chosen field officer
         tag("o_plan").performScrollTo().performClick(); settle(1500)
-        waitTag("plan_choices_toggle"); if (!tagged("plan_who")) { tag("plan_choices_toggle").performScrollTo().performClick(); settle() }
+        // the chooser is open at first; the chosen person shows once the team has loaded
+        waitTag("plan_choices_toggle"); rule.waitUntil(20000) { tagged("plan_who") || !tagged("plan_choices_body") }
+        if (!tagged("plan_who")) { tag("plan_choices_toggle").performScrollTo().performClick(); settle() }
         waitTag("plan_who"); tag("plan_who").performScrollTo().performClick(); waitTag("ct_sheet"); back(); waitGone("ct_sheet")
         // Visits › Assign a visit: the chosen person
         tag("o_visits").performScrollTo().performClick(); settle(1500); waitTag("ocv_assign")

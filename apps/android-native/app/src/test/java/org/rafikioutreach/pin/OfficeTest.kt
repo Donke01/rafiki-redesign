@@ -238,7 +238,8 @@ class OfficeTest {
         rule.onNodeWithTag("tm_Reid Anderson").performScrollTo().performClick()
         rule.waitUntil(5000) { rule.onAllNodesWithTag("ct_sheet").fetchSemanticsNodes().isNotEmpty() }
         rule.waitUntil(5000) { rule.onAllNodesWithTag("ct_move").fetchSemanticsNodes().isNotEmpty() }
-        rule.onNodeWithTag("ct_cf_note").assertExists(); rule.onNodeWithTag("ct_b_cf").assertExists()
+        // their own entry: name and e-mail are set by the office
+        rule.onNodeWithTag("ct_setby").assertExists(); rule.onNodeWithTag("ct_b_cf").assertExists()
         rule.onAllNodesWithTag("ct_newpin").assertCountEquals(0); rule.onAllNodesWithTag("ct_email_row").assertCountEquals(0)
         sheetShot("23e-team-cloudflare")
         rule.onNodeWithTag("ct_move").performScrollTo().performClick()

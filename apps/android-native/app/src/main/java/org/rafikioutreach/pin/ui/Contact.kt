@@ -60,6 +60,8 @@ data class Blocked(val at: String, val by: String, val reason: String)
 data class Person(
     val name: String, val home: String = "", val email: String = "", val phone: String = "", val admin: Boolean = false, val src: String = "",
     val lastSeen: String? = null, val role: String = "", val aka: List<String> = emptyList(), val blocked: Blocked? = null, val known: Boolean = true,
+    /** Admin through PIN_ADMINS in Cloudflare (can't be made a field officer in the app); also has a Cloudflare entry; signed out of all phones at. */
+    val adminCf: Boolean = false, val alsoCloudflare: Boolean = false, val out: String? = null,
 ) {
     val app get() = src == "app"
     val cloudflare get() = src == "cloudflare"
@@ -73,8 +75,10 @@ data class Person(
         fun from(o: JSONObject): Person {
             val b = o.optJSONObject("blocked")
             val aka = o.optJSONArray("aka")?.let { a -> (0 until a.length()).map { a.optString(it) }.filter { it.isNotBlank() } }.orEmpty()
+            // the admin team view has blocked {at, by, reason} or null; Me › Team's list only true/false
+            val blocked = b?.let { Blocked(it.s("at"), it.s("by"), it.s("reason")) } ?: if (o.optBoolean("blocked")) Blocked("", "", "") else null
             return Person(o.s("name"), o.s("home"), o.s("email"), o.s("phone"), o.optBoolean("admin"), o.s("src").ifBlank { o.s("source") },
-                o.s("lastSeen").ifBlank { null }, o.s("role"), aka, b?.let { Blocked(it.s("at"), it.s("by"), it.s("reason")) })
+                o.s("lastSeen").ifBlank { null }, o.s("role"), aka, blocked, adminCf = o.optBoolean("adminCf"), alsoCloudflare = o.optBoolean("alsoCloudflare"), out = o.s("out").ifBlank { null })
         }
     }
 }
@@ -98,8 +102,6 @@ fun contactWhy(reason: String?): String = when (reason) {
     "digits" -> t("Use 4 to 8 digits.", "Tumia tarakimu 4 hadi 8.")
     "self" -> t("You can’t do that to yourself. Ask another admin.", "Huwezi kujifanyia hivyo. Mwombe msimamizi mwingine.")
     "last-admin" -> t("They’re the last admin, so this would leave nobody to run the Office. Make someone else an admin first.", "Ndiye msimamizi wa mwisho, kwa hiyo hakuna atakayebaki kusimamia Ofisi. Mfanye mtu mwingine msimamizi kwanza.")
-    "not-in-app" -> t("Their PIN wasn’t made in the app, so it can’t be changed here.", "PIN yake haikutengenezwa kwenye programu, kwa hiyo haiwezi kubadilishwa hapa.")
-    "admin" -> t("Only admins can do this.", "Wasimamizi pekee wanaweza kufanya hivi.")
     else -> reasonText(reason)
 }
 
@@ -256,7 +258,7 @@ private fun shareContact(ctx: android.content.Context, p: Person) {
 }
 
 /** The one-step sheets the menu opens. */
-private enum class CtSub { NAME, EMAIL, PHONE, HOME, ROLE, INVITE, NEWPIN, RESETPIN, SETPIN, ADMIN, UNADMIN, BLOCK, UNBLOCK, SIGNOUT, REMOVE, MOVE, GIVEPIN, JOBS }
+private enum class CtSub { NAME, EMAIL, PHONE, MYPHONE, HOME, ROLE, INVITE, NEWPIN, RESETPIN, SETPIN, ADMIN, UNADMIN, BLOCK, UNBLOCK, SIGNOUT, REMOVE, MOVE, GIVEPIN, JOBS }
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -277,8 +279,14 @@ private fun ContactSheet(m: AppModel, who: String, close: () -> Unit, go: (Strin
     LaunchedEffect(tick, name) {
         val list: List<Person>? = if (iAmAdmin) {
             val r = m.api.adminGet("team"); r.json.optJSONArray("team")?.let { a -> (0 until a.length()).map { Person.from(a.getJSONObject(it)) } }
-        } else { m.loadTeam(); m.team.value?.map { Person(it.name, it.home, "", it.phone, false, "", it.lastSeen) } }
-        person = list?.firstOrNull { it.isCalled(name) } ?: person?.takeIf { it.isCalled(name) } ?: Person(name, known = false)
+        } else {
+            val r = m.api.team(); r.json.optJSONArray("team")?.let { a -> (0 until a.length()).map { Person.from(a.getJSONObject(it)) } }
+        }
+        val found = list?.firstOrNull { it.isCalled(name) }
+        // your own: how you sign in comes with the list (Me › Settings) when the team list doesn't say
+        val mine = found != null && found.isCalled(m.prefs.name)
+        person = (if (mine && found!!.src.isBlank()) found.copy(src = snap?.me?.kind?.takeIf { it in setOf("app", "cloudflare", "monday") } ?: "app") else found)
+            ?: person?.takeIf { it.isCalled(name) } ?: Person(name, known = false)
         loaded = true
         if (iAmAdmin) { val r = m.api.adminGet("teammap"); if (r.ok) sharing = TeamMapData.from(r.json).people.any { person?.isCalled(it.name) == true } }
     }
@@ -310,6 +318,7 @@ private fun ContactSheet(m: AppModel, who: String, close: () -> Unit, go: (Strin
                 }
                 val status = when {
                     !loaded -> t("Loading…", "Inapakia…")
+                    p.blocked != null && p.blocked.at.isBlank() -> t("Blocked by the office", "Amezuiwa na ofisi")
                     p.blocked != null -> t("Blocked by ${p.blocked.by.ifBlank { "the office" }} on ${Dates.day(p.blocked.at)}", "Amezuiwa na ${p.blocked.by.ifBlank { "ofisi" }} tarehe ${Dates.day(p.blocked.at)}")
                     !p.known -> t("Not on the team list", "Hayupo kwenye orodha ya timu")
                     p.lastSeen != null -> t("Active · last seen ", "Anatumia · alionekana ") + Dates.dateTime(p.lastSeen)
@@ -317,6 +326,8 @@ private fun ContactSheet(m: AppModel, who: String, close: () -> Unit, go: (Strin
                     else -> t("Hasn’t signed in yet", "Bado hajaingia")
                 }
                 Text(status, style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold), color = if (p.blocked != null) C.bad else C.muted, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 8.dp).testTag("ct_status"))
+                if (p.blocked == null && p.out != null) Text(t("Signed out of all phones on ", "Ametolewa kwenye simu zote tarehe ") + Dates.day(p.out), style = MaterialTheme.typography.bodySmall, color = C.muted,
+                    textAlign = TextAlign.Center, modifier = Modifier.testTag("ct_out"))
                 p.blocked?.reason?.takeIf { it.isNotBlank() }?.let { why -> Text("“$why”", style = MaterialTheme.typography.bodySmall, color = C.muted, textAlign = TextAlign.Center) }
             }
             Box(Modifier.align(Alignment.TopEnd)) { SheetCloseX("ct_x") { hide {} } }
@@ -344,7 +355,9 @@ private fun ContactSheet(m: AppModel, who: String, close: () -> Unit, go: (Strin
         }
 
         // Details: admins (app people), or the person themselves; others see them read-only
-        val canEdit = p.known && !p.cloudflare && ((iAmAdmin && p.app) || me)
+        val canEdit = p.known && p.app && (iAmAdmin || me)
+        // your own entry when your PIN isn't from the app: name and e-mail are the office's; the phone is yours (profile)
+        val selfFixed = me && p.known && !p.app
         if (p.known) CtGroup(t("Details", "Maelezo"), "ct_g_details") {
             if (canEdit) {
                 CtRow("ct_name_row", "edit", "blue", t("Name", "Jina"), p.name) { sub = CtSub.NAME }
@@ -354,10 +367,15 @@ private fun ContactSheet(m: AppModel, who: String, close: () -> Unit, go: (Strin
                     CtRow("ct_home_row", "pin", "green", t("Home country", "Nchi ya nyumbani"), COUNTRIES[p.home] ?: t("All countries", "Nchi zote")) { sub = CtSub.HOME }
                     CtRow("ct_role_row", "people", "slate", t("Role or title", "Cheo au kazi"), p.role.ifBlank { t("Not set (optional)", "Haijawekwa (si lazima)") }) { sub = CtSub.ROLE }
                 }
+            } else if (selfFixed) {
+                CtRow("ct_name_ro", "edit", "blue", t("Name", "Jina"), p.name, onClick = null)
+                CtRow("ct_email_ro", "mail", "teal", t("E-mail", "Barua pepe"), p.email.ifBlank { t("None yet", "Bado hakuna") }, onClick = null)
+                Text(t("Set by the office", "Imewekwa na ofisi"), style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp).testTag("ct_setby"))
+                CtRow("ct_phone_row", "phone", "near", if (p.phone.isBlank()) t("Add phone", "Ongeza simu") else t("Change phone", "Badilisha simu"), p.phone.ifBlank { t("None yet", "Bado hakuna") }) { sub = CtSub.MYPHONE }
             } else {
                 CtRow("ct_home_ro", "pin", "green", t("Home country", "Nchi ya nyumbani"), COUNTRIES[p.home] ?: t("All countries", "Nchi zote"), onClick = null)
                 if (p.role.isNotBlank()) CtRow("ct_role_ro", "people", "slate", t("Role or title", "Cheo au kazi"), p.role, onClick = null)
-                if (iAmAdmin && p.cloudflare) Text(t("Their PIN is set in Cloudflare, so their details can’t be changed here. Move them to an app PIN below to manage them here.", "PIN yake imewekwa kwenye Cloudflare, kwa hiyo maelezo yake hayawezi kubadilishwa hapa. Mhamishe kwenye PIN ya programu hapa chini ili umsimamie hapa."),
+                if (iAmAdmin && p.cloudflare && !me) Text(t("Their PIN is set in Cloudflare, so their details can’t be changed here. Move them to an app PIN below to manage them here.", "PIN yake imewekwa kwenye Cloudflare, kwa hiyo maelezo yake hayawezi kubadilishwa hapa. Mhamishe kwenye PIN ya programu hapa chini ili umsimamie hapa."),
                     style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp).testTag("ct_cf_note"))
             }
             if (me) CtRow("ct_mypin", "key", "amber", t("Change my PIN", "Badilisha PIN yangu"), t("In Settings", "Kwenye Mipangilio")) { leave { go("settings", "pin") } }
@@ -370,8 +388,10 @@ private fun ContactSheet(m: AppModel, who: String, close: () -> Unit, go: (Strin
                     CtRow("ct_invite", "share", "purple", t("Send app invite", "Tuma mwaliko wa programu"), t("E-mail, WhatsApp or SMS. Never with the PIN.", "Barua pepe, WhatsApp au SMS. Kamwe pamoja na PIN.")) { sub = CtSub.INVITE }
                     CtRow("ct_newpin", "key", "green", t("New PIN", "PIN mpya"), t("Makes one and shows it once", "Inatengeneza moja na kuionyesha mara moja")) { sub = CtSub.NEWPIN }
                     CtRow("ct_setpin", "lock", "teal", t("Set a PIN", "Weka PIN"), t("You type 4 to 8 digits", "Unaandika tarakimu 4 hadi 8")) { sub = CtSub.SETPIN }
+                    if (p.alsoCloudflare) CtRow("ct_alsocf", "cloud", "purple", t("Also in Cloudflare", "Pia yuko kwenye Cloudflare"), t("Their old entry there can be removed", "Ingizo lake la zamani huko linaweza kuondolewa"), onClick = null)
                     CtRow("ct_resetpin", "refresh", "blue", t("Reset and send a new PIN", "Badilisha na utume PIN mpya"), t("If they forgot it: by WhatsApp or SMS", "Kama ameisahau: kwa WhatsApp au SMS")) { sub = CtSub.RESETPIN }
-                    if (!me) CtRow(if (p.admin) "ct_unadmin" else "ct_admin", "crown", "amber", if (p.admin) t("Remove admin", "Ondoa usimamizi") else t("Make admin", "Mfanye msimamizi"),
+                    if (!me && p.adminCf) CtRow("ct_admincf", "crown", "amber", t("Admin set in Cloudflare", "Msimamizi kupitia Cloudflare"), t("Can’t be made a field officer in the app", "Hawezi kufanywa afisa wa uwanjani kwenye programu"), onClick = null)
+                    else if (!me) CtRow(if (p.admin) "ct_unadmin" else "ct_admin", "crown", "amber", if (p.admin) t("Remove admin", "Ondoa usimamizi") else t("Make admin", "Mfanye msimamizi"),
                         if (p.admin) t("They keep their PIN", "Anabaki na PIN yake") else t("They’ll see the Office", "Ataona Ofisi")) { sub = if (p.admin) CtSub.UNADMIN else CtSub.ADMIN }
                 }
                 p.cloudflare -> {
@@ -380,11 +400,11 @@ private fun ContactSheet(m: AppModel, who: String, close: () -> Unit, go: (Strin
                 }
                 else -> CtRow("ct_givepin", "key", "green", t("Give them an app PIN", "Mpe PIN ya programu"), t("They sign in with monday.com now", "Kwa sasa anaingia kwa monday.com")) { sub = CtSub.GIVEPIN }
             }
-            if (!me && p.src != "monday") {
+            if (!me) {
                 if (p.blocked == null) CtRow("ct_block", "x", "coral", t("Block", "Zuia"), t("Stops their PIN and signs them out", "Inasimamisha PIN yake na kumtoa"), red = true) { sub = CtSub.BLOCK }
                 else CtRow("ct_unblock", "check", "green", t("Unblock", "Ondoa zuio"), t("The same PIN works again", "PIN ileile itafanya kazi tena")) { sub = CtSub.UNBLOCK }
             }
-            if (p.src != "monday") CtRow("ct_signout", "upload", "slate", t("Sign out of all phones", "Toa kwenye simu zote"), if (me) t("Including this one. Your PIN stays.", "Pamoja na hii. PIN yako inabaki.") else t("Keeps their PIN", "PIN yake inabaki")) { sub = CtSub.SIGNOUT }
+            CtRow("ct_signout", "upload", "slate", t("Sign out of all phones", "Toa kwenye simu zote"), if (me) t("Including this one. Your PIN stays.", "Pamoja na hii. PIN yako inabaki.") else t("Keeps their PIN", "PIN yake inabaki")) { sub = CtSub.SIGNOUT }
             if (!me && p.app) CtRow("ct_remove", "trash", "coral", t("Remove from the team", "Ondoa kwenye timu"), t("Their history is kept", "Historia yake inabaki"), red = true) { sub = CtSub.REMOVE }
         }
 
@@ -405,6 +425,7 @@ private fun ContactSheet(m: AppModel, who: String, close: () -> Unit, go: (Strin
             CtSub.NAME -> FieldSheet(m, p, "name", me, iAmAdmin, done) { to -> said = "ok" to t("Renamed ✓", "Jina limebadilishwa ✓"); if (me) m.prefs.name = to; name = to; changed() }
             CtSub.EMAIL -> FieldSheet(m, p, "email", me, iAmAdmin, done) { said = "ok" to t("Saved ✓", "Imehifadhiwa ✓"); changed() }
             CtSub.PHONE -> FieldSheet(m, p, "phone", me, iAmAdmin, done) { said = "ok" to t("Saved ✓", "Imehifadhiwa ✓"); changed() }
+            CtSub.MYPHONE -> FieldSheet(m, p, "phone", me, iAmAdmin, done, profile = true) { said = "ok" to t("Saved ✓", "Imehifadhiwa ✓"); changed() }
             CtSub.ROLE -> FieldSheet(m, p, "role", me, iAmAdmin, done) { said = "ok" to t("Saved ✓", "Imehifadhiwa ✓"); changed() }
             CtSub.HOME -> HomeSheet(m, p, done) { said = "ok" to t("Saved ✓", "Imehifadhiwa ✓"); changed() }
             CtSub.INVITE -> InviteSheet(m, p.json(), done)
@@ -446,7 +467,7 @@ private fun updateBody(p: Person, field: String, value: String, me: Boolean, adm
 
 /** One field, Save, and (for e-mail and phone) Remove: name, e-mail, phone, or role/title. */
 @Composable
-private fun FieldSheet(m: AppModel, p: Person, field: String, me: Boolean, admin: Boolean, close: () -> Unit, saved: (String) -> Unit) {
+private fun FieldSheet(m: AppModel, p: Person, field: String, me: Boolean, admin: Boolean, close: () -> Unit, profile: Boolean = false, saved: (String) -> Unit) {
     val scope = rememberScope()
     val start = when (field) { "name" -> p.name; "email" -> p.email; "phone" -> p.phone; else -> p.role }
     var v by remember { mutableStateOf(start) }
@@ -472,6 +493,14 @@ private fun FieldSheet(m: AppModel, p: Person, field: String, me: Boolean, admin
             if (x == start) { hide {}; return }
             busy = true; msg = null
             scope.launch {
+                // your own phone when your PIN isn't from the app: Me › Settings › Personal details (profile)
+                if (profile) {
+                    val me0 = m.snap.value?.me
+                    val err = m.saveProfile(me0?.nick.orEmpty(), x, me0?.home?.ifBlank { p.home } ?: p.home)
+                    busy = false
+                    if (err == null) hide { saved(x) } else msg = err
+                    return@launch
+                }
                 val r: Reply = if (field == "name") m.api.admin(JSONObject().put("action", "team-rename").put("name", p.name).put("to", x))
                     else m.api.admin(updateBody(p, field, x, me, admin))
                 busy = false

@@ -1,0 +1,323 @@
+{
+ "_about": "Recorded from the server (feat-contw aeeb78c..f8ae43a: functions/api/admin.js teamPost, functions/api/pin.js, lib/pin-auth.js) by running it in node with a test KV store: status and JSON body of each reply. Refresh it when the server's shapes change.",
+ "teamAdd": {
+  "status": 200,
+  "body": {
+   "ok": true,
+   "pin": "1757"
+  }
+ },
+ "setPinWeak": {
+  "status": 400,
+  "body": {
+   "ok": false,
+   "reason": "weak-pin"
+  }
+ },
+ "setPinTaken": {
+  "status": 409,
+  "body": {
+   "ok": false,
+   "reason": "pin-taken"
+  }
+ },
+ "setPinOk": {
+  "status": 200,
+  "body": {
+   "ok": true
+  }
+ },
+ "listFirst": {
+  "status": 200,
+  "body": {
+   "ok": true,
+   "who": "Grace Wanjiru",
+   "gen": 0,
+   "admin": false
+  }
+ },
+ "signout": {
+  "status": 200,
+  "body": {
+   "ok": true,
+   "gen": 1
+  }
+ },
+ "listOldGen": {
+  "status": 401,
+  "body": {
+   "ok": false,
+   "reason": "signed-out"
+  }
+ },
+ "listNewSignIn": {
+  "status": 200,
+  "body": {
+   "ok": true,
+   "who": "Grace Wanjiru",
+   "gen": 1,
+   "admin": false
+  }
+ },
+ "renameTaken": {
+  "status": 409,
+  "body": {
+   "ok": false,
+   "reason": "exists"
+  }
+ },
+ "rename": {
+  "status": 200,
+  "body": {
+   "ok": true,
+   "name": "Grace W. Wanjiru",
+   "aka": [
+    "Grace Wanjiru"
+   ],
+   "repairs": 0,
+   "visits": 0
+  }
+ },
+ "updateBadEmail": {
+  "status": 400,
+  "body": {
+   "ok": false,
+   "reason": "bad-email"
+  }
+ },
+ "selfUpdate": {
+  "status": 200,
+  "body": {
+   "ok": true
+  }
+ },
+ "notAdmin": {
+  "status": 403,
+  "body": {
+   "ok": false,
+   "reason": "not-admin"
+  }
+ },
+ "block": {
+  "status": 200,
+  "body": {
+   "ok": true,
+   "blocked": {
+    "at": "2026-10-23T11:04:37.379Z",
+    "by": "Morgan",
+    "reason": "Phone lost"
+   }
+  }
+ },
+ "listBlocked": {
+  "status": 401,
+  "body": {
+   "ok": false,
+   "reason": "blocked"
+  }
+ },
+ "blockSelf": {
+  "status": 409,
+  "body": {
+   "ok": false,
+   "reason": "self"
+  }
+ },
+ "updateCloudflare": {
+  "status": 404,
+  "body": {
+   "ok": false,
+   "reason": "cloudflare"
+  }
+ },
+ "moveNotCf": {
+  "status": 404,
+  "body": {
+   "ok": false,
+   "reason": "not-cloudflare"
+  }
+ },
+ "teamView": {
+  "status": 200,
+  "body": {
+   "ok": true,
+   "team": [
+    {
+     "name": "Grace W. Wanjiru",
+     "home": "ke",
+     "admin": false,
+     "adminCf": false,
+     "email": "grace.w@example.org",
+     "phone": "0712 000 111",
+     "role": "Field officer, Kitale",
+     "aka": [
+      "Grace Wanjiru"
+     ],
+     "source": "app",
+     "added": "2026-10-23T11:04:37.361Z",
+     "lastSeen": "2026-10-23T11:04:37.370Z",
+     "alsoCloudflare": false,
+     "src": "app",
+     "blocked": {
+      "at": "2026-10-23T11:04:37.379Z",
+      "by": "Morgan",
+      "reason": "Phone lost"
+     },
+     "out": "2026-10-23T11:04:37.379Z"
+    },
+    {
+     "name": "Morgan",
+     "home": "",
+     "admin": true,
+     "adminCf": true,
+     "email": "",
+     "phone": "",
+     "role": "",
+     "aka": [],
+     "source": "cloudflare",
+     "lastSeen": null,
+     "src": "cloudflare",
+     "blocked": null,
+     "out": null
+    },
+    {
+     "name": "Meril",
+     "home": "ke",
+     "admin": false,
+     "adminCf": false,
+     "email": "",
+     "phone": "",
+     "role": "",
+     "aka": [],
+     "source": "cloudflare",
+     "lastSeen": null,
+     "src": "cloudflare",
+     "blocked": null,
+     "out": null
+    }
+   ],
+   "mail": {
+    "ready": false,
+    "to": []
+   },
+   "cron": false
+  }
+ },
+ "move": {
+  "status": 200,
+  "body": {
+   "ok": true,
+   "pin": "8180"
+  }
+ },
+ "teamViewAfterMove": {
+  "status": 200,
+  "body": {
+   "ok": true,
+   "team": [
+    {
+     "name": "Grace W. Wanjiru",
+     "home": "ke",
+     "admin": false,
+     "adminCf": false,
+     "email": "grace.w@example.org",
+     "phone": "0712 000 111",
+     "role": "Field officer, Kitale",
+     "aka": [
+      "Grace Wanjiru"
+     ],
+     "source": "app",
+     "added": "2026-10-23T11:04:37.361Z",
+     "lastSeen": "2026-10-23T11:04:37.370Z",
+     "alsoCloudflare": false,
+     "src": "app",
+     "blocked": {
+      "at": "2026-10-23T11:04:37.379Z",
+      "by": "Morgan",
+      "reason": "Phone lost"
+     },
+     "out": "2026-10-23T11:04:37.379Z"
+    },
+    {
+     "name": "Meril",
+     "home": "ke",
+     "admin": false,
+     "adminCf": false,
+     "email": "",
+     "phone": "",
+     "role": "",
+     "aka": [],
+     "source": "app",
+     "added": "2026-10-23T11:04:37.386Z",
+     "lastSeen": null,
+     "alsoCloudflare": true,
+     "src": "app",
+     "blocked": null,
+     "out": null
+    },
+    {
+     "name": "Morgan",
+     "home": "",
+     "admin": true,
+     "adminCf": true,
+     "email": "",
+     "phone": "",
+     "role": "",
+     "aka": [],
+     "source": "cloudflare",
+     "lastSeen": null,
+     "src": "cloudflare",
+     "blocked": null,
+     "out": null
+    }
+   ],
+   "mail": {
+    "ready": false,
+    "to": []
+   },
+   "cron": false
+  }
+ },
+ "unblock": {
+  "status": 200,
+  "body": {
+   "ok": true
+  }
+ },
+ "teamList": {
+  "status": 200,
+  "body": {
+   "ok": true,
+   "team": [
+    {
+     "name": "Grace W. Wanjiru",
+     "home": "ke",
+     "phone": "0712 000 111",
+     "role": "Field officer, Kitale",
+     "aka": [
+      "Grace Wanjiru"
+     ],
+     "lastSeen": "2026-10-23T11:04:37.370Z",
+     "blocked": false,
+     "email": "grace.w@example.org"
+    },
+    {
+     "name": "Meril",
+     "home": "ke",
+     "phone": "",
+     "role": "",
+     "aka": [],
+     "lastSeen": null,
+     "blocked": false
+    },
+    {
+     "name": "Morgan",
+     "home": "",
+     "phone": "",
+     "lastSeen": null,
+     "blocked": false
+    }
+   ]
+  }
+ }
+}
