@@ -15,18 +15,29 @@
 //                   { action: "assign",  ids: [], to, date, note } / { action: "unassign", aid }
 //                   { action: "confirm", id, on }                                   lock a confirmed location
 //                   { action: "team-add", name, home, admin, email } → { pin } (shown once)
-//                   { action: "team-update", name, home, admin, email, phone } / "team-pin" (new PIN) / "team-remove"
+//                   { action: "team-update", name, home, admin, email, phone, role } (fields left out stay; "" clears e-mail, phone, role)
+//                   { action: "team-pin", name } → { pin } (a new one, shown once) / { action: "team-remove", name }
+//                   { action: "team-rename", name, to }      old names are kept in "aka", so history still counts for them;
+//                       open repair jobs and planned visits move to the new name
+//                   { action: "team-set-pin", name, pin }    4–8 digits, not easy to guess ("weak-pin"), not anyone else's ("pin-taken")
+//                   { action: "team-block", name, reason } / { action: "team-unblock", name }  blocked: PIN refused, every phone signed out
+//                   { action: "team-signout", name }         ends their sessions on every phone; the PIN stays
+//                   { action: "team-move", name } → { pin }  a Cloudflare PIN person gets an app PIN (their Cloudflare entry can then go)
+//                   Team actions are for admins, except team-rename and team-update (name, e-mail, phone) on yourself.
+//                   Refusals: exists, weak-pin, pin-taken, self, last-admin, not-in-app, not-cloudflare, bad-email
 //                   { action: "test-mail" }
 //   GET  /api/admin?view=donors   → donors with their projects and viewers (Office › Donors; see lib/donor.js)
-//   POST /api/admin { action: "donor-add" | "donor-update" | "donor-link" | "donor-rotate" | "donor-revoke" | "donor-viewer-add" | "donor-viewer-remove" | "donor-remove", id, vid, … }
+//   POST /api/admin { action: "donor-add" | "donor-update" | "donor-link" | "donor-rotate" | "donor-revoke" | "donor-viewer-add" | "donor-viewer-remove" | "donor-remove"
+//                    | "donor-viewer-update" (id, vid, name, email) | "donor-viewer-restore" (id, vid: the same link works again), id, vid, … }
 //   POST /api/admin?cron=monthly with header X-Cron-Key = CRON_KEY → e-mails last month's summary to admins
 //        (run on the 1st of each month by .github/workflows/monthly-report.yml), and the monthly e-mail to donors
 import { checkPin } from './pin.js';
 import { getFeed, dropFeed } from '../../lib/feed-cache.js';
 import { parseGps, readGps, writeGps, createUpdate, BOARD_ID } from '../../lib/monday.js';
-import { getJson, putJson, team, saveTeam, hashPin, newPin, freshPin, adminNames, sameName, sendMail, alertHtml, escHtml, recipients, addReview } from '../../lib/pin-store.js';
+import { getJson, putJson, team, saveTeam, hashPin, newPin, freshPin, adminNames, sameName, sendMail, alertHtml, escHtml, recipients, addReview, guards, saveGuards, guardKey, guardFor, weakPin, pinInUse } from '../../lib/pin-store.js';
+import { moveLink } from '../../lib/pin-auth.js';
 import { kes, money, estOf, stepBlocked, canDecide, approveLimit, setApproveLimit, askApproval, costRow, addCost, costStats, snapPeople } from '../../lib/pin-office.js';
-import { teamMap, planView } from '../../lib/pin-here.js';
+import { teamMap, planView, hereKey } from '../../lib/pin-here.js';
 import { donorAdminGet, donorAdminPost, runDigest } from '../../lib/donor.js';
 
 const STEPS = { reported: 'Reported', assigned: 'Assigned', parts: 'Parts ordered', fixed: 'Fixed' };
@@ -73,10 +84,13 @@ export async function onRequestGet({ request, env }) {
   if (view === 'teammap') return json(Object.assign({ ok: true }, await teamMap(env)));
   if (view === 'plan') { let feed = null; try { feed = await getFeed(env); } catch (e) {} const r = await planView(env, new URL(request.url).searchParams, feed); return json(r.body, r.status); }
   if (view === 'team') {
-    const t = await team(env), seenAt = await getJson(env, 'pinseen', {}), admins = adminNames(env);
-    const list = t.map(p => ({ name: p.name, home: p.home || '', admin: !!p.admin || admins.includes(p.name.toLowerCase()), email: p.email || '', phone: p.phone || '', source: 'app', added: p.added, lastSeen: seenAt[p.name] || null }));
-    people(env).forEach(p => { if (!list.some(x => sameName(x.name, p.name))) list.push({ name: p.name, home: p.home, admin: admins.includes(p.name.toLowerCase()), email: '', source: 'cloudflare', lastSeen: seenAt[p.name] || null }); });
-    Object.keys(seenAt).forEach(n => { if (!list.some(x => sameName(x.name, n))) list.push({ name: n, home: '', admin: admins.includes(n.toLowerCase()), email: '', source: 'monday', lastSeen: seenAt[n] }); });
+    const t = await team(env), seenAt = await getJson(env, 'pinseen', {}), admins = adminNames(env), gd = await guards(env), cf = people(env);
+    const list = t.map(p => ({ name: p.name, home: p.home || '', admin: !!p.admin || admins.includes(p.name.toLowerCase()), adminCf: admins.includes(p.name.toLowerCase()), email: p.email || '', phone: p.phone || '', role: p.role || '', aka: p.aka || [], source: 'app', added: p.added, lastSeen: seenAt[p.name] || null, alsoCloudflare: cf.some(x => sameName(x.name, p.name)) }));
+    cf.forEach(p => { if (!list.some(x => sameName(x.name, p.name))) list.push({ name: p.name, home: p.home, admin: admins.includes(p.name.toLowerCase()), adminCf: admins.includes(p.name.toLowerCase()), email: '', phone: '', role: '', aka: [], source: 'cloudflare', lastSeen: seenAt[p.name] || null }); });
+    // names someone used to have (renamed in the app) are not separate people
+    const old = new Set(t.flatMap(p => (p.aka || []).map(a => a.toLowerCase())));
+    Object.keys(seenAt).forEach(n => { if (!list.some(x => sameName(x.name, n)) && !old.has(n.toLowerCase())) list.push({ name: n, home: '', admin: admins.includes(n.toLowerCase()), adminCf: admins.includes(n.toLowerCase()), email: '', phone: '', role: '', aka: [], source: 'monday', lastSeen: seenAt[n] }); });
+    list.forEach(x => { const g = guardFor(gd, x.name); x.src = x.source; x.blocked = g && g.blocked ? g.blocked : null; x.out = (g && g.out) || null; });
     return json({ ok: true, team: list, mail: { ready: !!(env.RESEND_API_KEY && env.ALERT_FROM), to: await recipients(env) }, cron: !!env.CRON_KEY });
   }
   if (view === 'export') {
@@ -96,10 +110,15 @@ export async function onRequestPost({ request, env, waitUntil }) {
   if (url.searchParams.get('cron') === 'monthly') return monthly(request, env);
   const origin = request.headers.get('Origin');
   if (origin && new URL(origin).host !== url.host) return json({ ok: false, reason: 'origin' }, 403);
-  const chk = await admin(request, env);
+  const chk = await checkPin(request, env);
   if (chk.res) return chk.res;
   let b;
-  try { b = await request.json(); } catch (e) { return json({ ok: false, reason: 'bad-request' }, 400); }
+  try { b = await request.json(); } catch (e) { return json({ ok: false, reason: chk.admin ? 'bad-request' : 'not-admin' }, chk.admin ? 400 : 403); }
+  if (!b || typeof b !== 'object') return json({ ok: false, reason: 'bad-request' }, 400);
+  // anyone may change their own name, e-mail and phone; everything else here is for admins
+  const self = !chk.admin && !!chk.who && (b.action === 'team-rename' || b.action === 'team-update') && sameName(clean(b.name, 60), chk.who);
+  if (!chk.admin && !self) return json({ ok: false, reason: 'not-admin' }, 403);
+  if (!env.FEED) return json({ ok: false, reason: 'no-storage' }, 503);
   const by = chk.who || 'an admin', token = chk.token || env.MONDAY_API_TOKEN, api = env.MONDAY_API_URL, board = String(env.MONDAY_BOARD_ID || BOARD_ID);
   const id = String(b.id || '').replace(/\D/g, '');
   try {
@@ -221,25 +240,10 @@ export async function onRequestPost({ request, env, waitUntil }) {
         await putJson(env, 'pinconfirmed', c);
         return json({ ok: true, confirmed: c[id] || null });
       }
-      case 'team-add': case 'team-update': case 'team-pin': case 'team-remove': {
-        const t = await team(env), name = clean(b.name, 60);
-        if (!name) return json({ ok: false, reason: 'bad-request' }, 400);
-        let p = t.find(x => sameName(x.name, name));
-        if (b.action === 'team-add') {
-          if (p) return json({ ok: false, reason: 'exists' }, 409);
-          const { pin, h } = await freshPin(env, t);
-          p = { name, home: CC.includes(b.home) ? b.home : '', admin: !!b.admin, email: clean(b.email, 120), phone: phone(b.phone), h, added: new Date().toISOString(), by };
-          t.push(p); await saveTeam(env, t);
-          await log(env, { by, a: 'team', t: 'added ' + name });
-          return json({ ok: true, pin });
-        }
-        if (!p) return json({ ok: false, reason: 'not-in-app' }, 404);
-        if (b.action === 'team-remove') { await saveTeam(env, t.filter(x => x !== p)); await log(env, { by, a: 'team', t: 'removed ' + name }); return json({ ok: true }); }
-        if (b.action === 'team-pin') { const { pin, h } = await freshPin(env, t.filter(x => x !== p)); p.h = h; await saveTeam(env, t); await log(env, { by, a: 'team', t: 'new PIN for ' + name }); return json({ ok: true, pin }); }
-        if (sameName(name, by) && p.admin && !b.admin && !adminNames(env).includes(name.toLowerCase())) return json({ ok: false, reason: 'self' }, 409);
-        p.home = CC.includes(b.home) ? b.home : ''; p.admin = !!b.admin; p.email = clean(b.email, 120); if (b.phone !== undefined) p.phone = phone(b.phone);
-        await saveTeam(env, t);
-        return json({ ok: true });
+      case 'team-add': case 'team-update': case 'team-pin': case 'team-remove': case 'team-rename': case 'team-set-pin':
+      case 'team-block': case 'team-unblock': case 'team-signout': case 'team-move': {
+        const r = await teamPost(env, b, chk, by);
+        return json(r.body, r.status || 200);
       }
       case 'settings': {
         const n = money(b.approveAbove, 1000000000);
@@ -248,7 +252,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
         await log(env, { by, a: 'settings', t: 'second approval above ' + kes(n) });
         return json({ ok: true, approveAbove: n });
       }
-      case 'donor-add': case 'donor-update': case 'donor-link': case 'donor-rotate': case 'donor-revoke': case 'donor-viewer-add': case 'donor-viewer-remove': case 'donor-remove': {
+      case 'donor-add': case 'donor-update': case 'donor-link': case 'donor-rotate': case 'donor-revoke': case 'donor-viewer-add': case 'donor-viewer-remove': case 'donor-remove': case 'donor-viewer-update': case 'donor-viewer-restore': {
         const r = await donorAdminPost(env, b, by);
         return json(r.body, r.status || 200);
       }
@@ -262,6 +266,139 @@ export async function onRequestPost({ request, env, waitUntil }) {
     console.error('admin ' + b.action + ':', e && e.message);
     return json({ ok: false, reason: 'down' }, 502);
   }
+}
+
+// ---- Office › Team: one person's contact sheet ---------------------------------------------------------------
+const okMail = e => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e);
+const R = (status, body) => ({ status, body });
+// everyone who can be an admin right now (app admins and PIN_ADMINS), minus the blocked
+function activeAdmins(env, t, gd) {
+  const names = new Set(adminNames(env).concat(t.filter(p => p.admin).map(p => p.name.toLowerCase())));
+  return [...names].filter(n => !(guardFor(gd, n) || {}).blocked);
+}
+export async function teamPost(env, b, chk, by) {
+  const t = await team(env), name = clean(b.name, 60), a = b.action, me = chk.who || '';
+  if (!name) return R(400, { ok: false, reason: 'bad-request' });
+  let p = t.find(x => sameName(x.name, name));
+  const cf = people(env).find(x => sameName(x.name, name));
+  const seenAt = await getJson(env, 'pinseen', {});
+  const known = p || cf || Object.keys(seenAt).some(n => sameName(n, name)) || adminNames(env).includes(name.toLowerCase());
+  const isSelf = sameName(name, me);
+  const logT = async (text, who) => log(env, { by, a: 'team', t: text, who: who || (p && p.name) || name }); // "Morgan" + "blocked Grace"
+  if (a === 'team-add') {
+    if (p || cf) return R(409, { ok: false, reason: 'exists' });
+    const email = clean(b.email, 120).toLowerCase();
+    if (email && !okMail(email)) return R(400, { ok: false, reason: 'bad-email' });
+    const { pin, h } = await freshPin(env, t);
+    p = { name, home: CC.includes(b.home) ? b.home : '', admin: !!b.admin, email, phone: phone(b.phone), role: clean(b.role, 80), h, added: new Date().toISOString(), by };
+    t.push(p); await saveTeam(env, t);
+    await logT('added ' + name);
+    return R(200, { ok: true, pin });
+  }
+  if (a === 'team-move') {
+    if (p) return R(409, { ok: false, reason: 'exists' });
+    if (!cf) return R(404, { ok: false, reason: 'not-cloudflare' });
+    const { pin, h } = await freshPin(env, t);
+    t.push({ name: cf.name, home: cf.home || '', admin: adminNames(env).includes(cf.name.toLowerCase()), email: '', phone: '', role: '', h, added: new Date().toISOString(), by, moved: true });
+    await saveTeam(env, t);
+    await logT('moved ' + cf.name + ' to an app PIN');
+    return R(200, { ok: true, pin });
+  }
+  // blocking, unblocking and signing out work for everyone, whichever way they sign in
+  if (a === 'team-block' || a === 'team-unblock' || a === 'team-signout') {
+    if (!known) return R(404, { ok: false, reason: 'gone' });
+    const who = (p || cf || {}).name || name, gd = await guards(env), k = guardKey(who), g = Object.assign({ gen: 0, out: null, blocked: null }, gd[k]);
+    const now = new Date().toISOString();
+    if (a === 'team-block') {
+      if (isSelf) return R(409, { ok: false, reason: 'self' });
+      const adm = activeAdmins(env, t, gd);
+      if (adm.includes(k) && adm.length <= 1) return R(409, { ok: false, reason: 'last-admin' });
+      g.blocked = { at: now, by, reason: clean(b.reason, 200) };
+      g.gen = (Number(g.gen) || 0) + 1; g.out = now;           // every phone is signed out straight away
+      gd[k] = g; await saveGuards(env, gd);
+      await env.FEED.delete(hereKey(who));                        // off the team map
+      await logT('blocked ' + who + (g.blocked.reason ? ' (' + g.blocked.reason + ')' : ''));
+      return R(200, { ok: true, blocked: g.blocked });
+    }
+    if (a === 'team-unblock') {
+      g.blocked = null; gd[k] = g; await saveGuards(env, gd);
+      await logT('unblocked ' + who);
+      return R(200, { ok: true });
+    }
+    g.gen = (Number(g.gen) || 0) + 1; g.out = now; gd[k] = g; await saveGuards(env, gd);
+    await logT('signed ' + who + ' out of all phones');
+    return R(200, { ok: true, gen: g.gen });
+  }
+  if (!p) return R(404, { ok: false, reason: cf ? 'cloudflare' : 'not-in-app' });
+  if (a === 'team-remove') {
+    if (isSelf) return R(409, { ok: false, reason: 'self' });
+    const gd = await guards(env), adm = activeAdmins(env, t, gd);
+    if (p.admin && !adminNames(env).includes(p.name.toLowerCase()) && adm.includes(guardKey(p.name)) && adm.length <= 1) return R(409, { ok: false, reason: 'last-admin' });
+    await saveTeam(env, t.filter(x => x !== p));
+    await logT('removed ' + p.name);
+    return R(200, { ok: true });
+  }
+  if (a === 'team-pin') {
+    const { pin, h } = await freshPin(env, t.filter(x => x !== p)); p.h = h; await saveTeam(env, t);
+    await logT('new PIN for ' + p.name);
+    return R(200, { ok: true, pin });
+  }
+  if (a === 'team-set-pin') {
+    const pin = String(b.pin == null ? '' : b.pin).trim();
+    if (weakPin(pin)) return R(400, { ok: false, reason: 'weak-pin' });
+    if (await pinInUse(env, t, pin, p)) return R(409, { ok: false, reason: 'pin-taken' });
+    p.h = await hashPin(env, pin); await saveTeam(env, t);
+    await logT('set a PIN for ' + p.name);
+    return R(200, { ok: true });
+  }
+  if (a === 'team-rename') {
+    const to = clean(b.to, 60), from = p.name;
+    if (!to) return R(400, { ok: false, reason: 'bad-request' });
+    if (to === from) return R(200, { ok: true, name: to, aka: p.aka || [] });
+    const mine = n => sameName(n, from) || (p.aka || []).some(x => sameName(x, n));
+    const taken = t.some(x => x !== p && sameName(x.name, to)) || people(env).some(x => sameName(x.name, to)) ||
+      Object.keys(seenAt).some(n => sameName(n, to) && !mine(n)) || t.some(x => x !== p && (x.aka || []).some(n => sameName(n, to)));
+    if (taken) return R(409, { ok: false, reason: 'exists' });
+    // the old name is kept, so history, the team feed, totals and repair jobs under it still count for them
+    p.aka = [...new Set((p.aka || []).concat([from]))].filter(n => !sameName(n, to)).slice(-10);
+    p.name = to; await saveTeam(env, t);
+    const rep = await getJson(env, 'pinrepairs', {}); let nr = 0;
+    Object.values(rep).forEach(j => { if (j && sameName(j.assignee, from)) { j.assignee = to; nr++; } });
+    if (nr) await putJson(env, 'pinrepairs', rep);
+    const as = await getJson(env, 'pinassign', []); let na = 0;
+    as.forEach(x => { if (!x.done && sameName(x.to, from)) { x.to = to; na++; } });
+    if (na) await putJson(env, 'pinassign', as);
+    const move = async key => { const m = await getJson(env, key, {}), k = Object.keys(m).find(n => sameName(n, from)); if (k) { m[to] = m[k]; delete m[k]; await putJson(env, key, m); } };
+    await move('pinseen'); await move('pinprofiles');
+    const gd = await guards(env), gk = guardKey(from); if (gd[gk]) { gd[guardKey(to)] = gd[gk]; delete gd[gk]; await saveGuards(env, gd); }
+    await moveLink(env, from, to);
+    await env.FEED.delete(hereKey(from));
+    await logT('renamed ' + from + ' to ' + to);
+    return R(200, { ok: true, name: to, aka: p.aka, repairs: nr, visits: na });
+  }
+  // team-update: only the fields sent change. Your own: name (team-rename), e-mail and phone; admins: everything.
+  const admin = !!chk.admin;
+  if ('email' in b) { const e = clean(b.email, 120).toLowerCase(); if (e && !okMail(e)) return R(400, { ok: false, reason: 'bad-email' }); }
+  if (admin && 'admin' in b && !b.admin && p.admin) {
+    if (isSelf && !adminNames(env).includes(name.toLowerCase())) return R(409, { ok: false, reason: 'self' });
+    const adm = activeAdmins(env, t, await guards(env));
+    if (!adminNames(env).includes(name.toLowerCase()) && adm.includes(guardKey(p.name)) && adm.length <= 1) return R(409, { ok: false, reason: 'last-admin' });
+  }
+  const was = { admin: !!p.admin, email: p.email || '', phone: p.phone || '' };
+  if ('email' in b) p.email = clean(b.email, 120).toLowerCase();
+  if ('phone' in b) p.phone = phone(b.phone);
+  if (admin) {
+    if ('home' in b) p.home = CC.includes(b.home) ? b.home : '';
+    if ('admin' in b) p.admin = !!b.admin;
+    if ('role' in b) p.role = clean(b.role, 80);
+  }
+  await saveTeam(env, t);
+  const ch = [];
+  if (was.admin !== !!p.admin) ch.push(p.admin ? 'made ' + p.name + ' an admin' : 'removed ' + p.name + '’s admin role');
+  if (was.email !== (p.email || '')) ch.push(p.email ? 'changed ' + p.name + '’s e-mail' : 'removed ' + p.name + '’s e-mail');
+  if (was.phone !== (p.phone || '')) ch.push(p.phone ? 'changed ' + p.name + '’s phone' : 'removed ' + p.name + '’s phone');
+  if (ch.length) await logT('' + ch.join(', '));
+  return R(200, { ok: true });
 }
 
 // Monthly summary e-mail (last calendar month), triggered by the scheduled GitHub workflow.

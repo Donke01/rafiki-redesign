@@ -27,8 +27,8 @@
 // Admins (PIN_ADMINS, or made admin in the app) also get the Office tools in /api/admin.
 import { getFeed, dropFeed } from '../../lib/feed-cache.js';
 import { parseGps, readGps, writeGps, createUpdate, createSite, readUpdates, tidyTitle, BOARD_ID } from '../../lib/monday.js';
-import { session, configured, linkToken, linkedFor, unlink } from '../../lib/pin-auth.js';
-import { getJson as gj, putJson, team, saveTeam, hashPin, isAdminName, sameName, seen, addReview, sendMail, alertHtml } from '../../lib/pin-store.js';
+import { session, configured, linkToken, linkedFor, unlink, signOut } from '../../lib/pin-auth.js';
+import { getJson as gj, putJson, team, saveTeam, hashPin, isAdminName, sameName, seen, addReview, sendMail, alertHtml, guards, guardFor } from '../../lib/pin-store.js';
 import { kes, money, estOf, stepAtOrAfter, stepBlocked, approveLimit, askApproval, costRow, addCost, projectCosts, peopleServed, notePeople, snapPeople, monthKey } from '../../lib/pin-office.js';
 import { postHere } from '../../lib/pin-here.js';
 
@@ -142,6 +142,10 @@ export async function checkPin(request, env) {
   if (s) {
     // the cookie is sent automatically, so changes must come from the app's own pages
     if (request.method !== 'GET' && !request.headers.get('Origin') && request.headers.get('Sec-Fetch-Site') !== 'same-origin') return { res: json({ ok: false, reason: 'origin' }, 403) };
+    // blocked, or signed out of every phone after this session began (Office › Team)
+    const g = guardFor(await guards(env), s.name);
+    if (g && g.blocked) return { res: json({ ok: false, reason: 'blocked' }, 401) };
+    if (g && g.out && !(s.at && s.at > g.out)) { await signOut(request, env).catch(() => {}); return { res: json({ ok: false, reason: 'signed-out' }, 401) }; }
     const t = await team(env), mine = t.find(p => sameName(p.name, s.name));
     return { who: s.name, token: s.token, monday: true, kind: 'monday', home: s.home || (mine && mine.home) || '', admin: isAdminName(env, t, s.name) };
   }
@@ -162,11 +166,22 @@ export async function checkPin(request, env) {
     await bump(env, failKey);
     return { res: json({ ok: false, reason: 'pin' }, 401) };
   }
+  // blocked people can't sign in; after "Sign out of all phones" an app that still sends the old session number
+  // (X-Pin-Gen) is sent back to the lock screen. A PIN typed on the lock screen (X-Pin-New: 1) starts a new session.
+  // Apps that don't send a session number yet are let through.
+  let gen = 0;
+  if (who) {
+    const g = guardFor(await guards(env), who);
+    if (g && g.blocked) return { res: json({ ok: false, reason: 'blocked' }, 401) };
+    gen = (g && Number(g.gen)) || 0;
+    const sent = (request.headers.get('X-Pin-Gen') || '').trim();
+    if (gen && sent !== '' && request.headers.get('X-Pin-New') !== '1' && Number(sent) !== gen) return { res: json({ ok: false, reason: 'signed-out' }, 401) };
+  }
   const admin = !!who && isAdminName(env, t, who);
   // their own monday.com token, if they connected one: changes go in under their own name
   const ln = who ? await linkedFor(env, who).catch(() => null) : null;
-  if (ln) return { who, home: home || ln.home || '', admin, kind, token: ln.tok, linked: ln.name };
-  return { who, home, admin, kind };
+  if (ln) return { who, home: home || ln.home || '', admin, kind, gen, token: ln.tok, linked: ln.name };
+  return { who, home, admin, kind, gen };
 }
 
 // --- open repairs and the activity log (KV) ------------------------------------------------
@@ -213,7 +228,8 @@ export async function onRequestGet({ request, env, waitUntil }) {
     if (q.get('team')) {
       // the team list for Me & team: no PINs, no e-mails, no admin flags
       const t = await team(env), seenAt = await getJson(env, 'pinseen', {}), prof = await getJson(env, 'pinprofiles', {});
-      const list = t.map(p => ({ name: p.name, home: p.home || '', phone: p.phone || '', lastSeen: seenAt[p.name] || null }));
+      const gd = await guards(env);
+      const list = t.map(p => ({ name: p.name, home: p.home || '', phone: p.phone || '', role: p.role || '', aka: p.aka || [], lastSeen: seenAt[p.name] || null }));
       String(env.PIN_USERS || '').split(/[,;\n]/).forEach(s => {
         const a = s.split(':').map(x => x.trim()); if (a.length < 2) return;
         let home = ''; if (a.length > 2 && /^(ke|tz|ug|mw)$/i.test(a[a.length - 1])) home = a.pop().toLowerCase();
@@ -222,6 +238,7 @@ export async function onRequestGet({ request, env, waitUntil }) {
       Object.keys(seenAt).forEach(n => { if (!list.some(x => sameName(x.name, n))) list.push({ name: n, home: '', phone: '', lastSeen: seenAt[n] }); });
       // what people set for themselves in Me › Settings › Personal details
       list.forEach(x => { const k = Object.keys(prof).find(n => sameName(n, x.name)), pr = k && prof[k]; if (pr) { if (pr.phone) x.phone = pr.phone; if (pr.home) x.home = pr.home; if (pr.nick) x.nick = pr.nick; } });
+      list.forEach(x => { const g = guardFor(gd, x.name); x.blocked = !!(g && g.blocked); });
       return json({ ok: true, team: list.sort((a, b) => a.name.localeCompare(b.name)) }, 200);
     }
     const feed = await getFeed(env, waitUntil);
@@ -257,7 +274,7 @@ export async function onRequestGet({ request, env, waitUntil }) {
       const mine = (await team(env)).find(p => sameName(p.name, chk.who)) || {};
       extra.me = { kind: chk.kind || '', nick: pr.nick || '', phone: pr.phone || mine.phone || '', home: pr.home || chk.home || '' };
     } else extra.me = { kind: chk.kind || 'shared', nick: '', phone: '', home: '' };
-    return json(Object.assign({ ok: true, who: chk.who, monday: !!chk.monday, linked: chk.linked || '', gmaps: env.GOOGLE_TILES_WEB_KEY || env.GOOGLE_TILES_ANDROID_KEY ? { web: env.GOOGLE_TILES_WEB_KEY || '', android: env.GOOGLE_TILES_ANDROID_KEY || '' } : null, offlineTiles: offlineTiles(env), countryMaps: countryMaps(env), home: chk.home || '', projects, repairs, visits: await getJson(env, 'pinlastvisit', {}), tests: await getJson(env, 'pintests', {}) }, extra), 200);
+    return json(Object.assign({ ok: true, who: chk.who, gen: chk.gen || 0, monday: !!chk.monday, linked: chk.linked || '', gmaps: env.GOOGLE_TILES_WEB_KEY || env.GOOGLE_TILES_ANDROID_KEY ? { web: env.GOOGLE_TILES_WEB_KEY || '', android: env.GOOGLE_TILES_ANDROID_KEY || '' } : null, offlineTiles: offlineTiles(env), countryMaps: countryMaps(env), home: chk.home || '', projects, repairs, visits: await getJson(env, 'pinlastvisit', {}), tests: await getJson(env, 'pintests', {}) }, extra), 200);
   } catch (e) {
     console.error('pin get:', e && e.message);
     return json({ ok: false, reason: 'down' }, 502);
