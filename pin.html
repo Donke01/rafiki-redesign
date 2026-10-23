@@ -347,7 +347,7 @@ html[data-theme=sun] .tm-qi{border:2px solid #000}
 .ct-r:focus-visible{outline:3px solid var(--blue);outline-offset:-3px}
 .ct-ri{flex:none;width:36px;height:36px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:var(--hb);color:var(--hu)}.ct-ri svg{width:20px;height:20px}
 .ct-rl{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
-.ct-rl b{color:var(--ink);font-size:.95rem;line-height:1.3;overflow-wrap:normal;word-break:normal;hyphens:none}
+.ct-rl b{color:var(--ink);font-size:.95rem;line-height:1.3;overflow-wrap:normal;word-break:normal;hyphens:none;text-wrap:balance}
 .ct-rl small{color:var(--muted);font-size:.8rem;line-height:1.35;overflow-wrap:normal;word-break:normal;hyphens:none;overflow:hidden;text-overflow:ellipsis}
 .ct-r.red .ct-rl b{color:var(--bad)}
 .ct-rc{flex:none;display:flex;color:var(--muted)}.ct-rc svg{width:18px;height:18px}
@@ -7636,7 +7636,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
   function ctGroup(k, title, rows, note) { rows = rows.filter(Boolean); return rows.length ? '<section class="ct-g" data-g="' + k + '"><h4>' + title + '</h4><div class="ct-list">' + rows.join('') + '</div>' + (note || '') + '</section>' : ''; }
   function ctDraw() {
     var w = CT.w; if (!w) return;
-    var c = w.querySelector('.tsh-c'), y = c.scrollTop, p = ctP(), adm = S.admin && CT.full, me = ctMe(p), s = ctSrc(p), app = s === 'app', tel = tmTel(p), first = esc(String(p.name).split(/\s+/)[0]);
+    var c = w.querySelector('.tsh-c'), y = c.scrollTop, p = ctP(), adm = S.admin && CT.full, me = ctMe(p), s = ctSrc(p) || (me ? (S.me || {}).kind || '' : ''), app = s === 'app', tel = tmTel(p), first = esc(String(p.name).split(/\s+/)[0]);
     var mine = me && !adm ? (S.me || {}) : null;
     if (mine) { if (!tel && mine.phone) { p.phone = mine.phone; tel = tmTel(p); } }
     var editable = adm || me;                                      // details: admins, or yourself
@@ -7646,9 +7646,9 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
       (p.email || p.phone ? '<div class="ct-ids">' + (p.email ? ctId('email', p.email) : '') + (p.phone ? ctId('phone', p.phone) : '') + '</div>' : '');
     var contact = ctGroup('contact', tr('Contact', 'Mawasiliano'), [
       adm && p.email ? ctRow('mail', 'mail', 'blue', tr('Send an e-mail', 'Tuma barua pepe'), esc(p.email)) : '',
-      tel ? ctRow('call', 'phone', 'green', tr('Call', 'Piga simu'), esc(p.phone), { href: 'tel:' + tel }) : '',
-      tel ? ctRow('wa', 'vxwa', 'green', 'WhatsApp', esc(p.phone), { href: 'https://wa.me/' + waNum(p.phone, p.home), ext: true }) : '',
-      tel ? ctRow('sms', 'chat', 'teal', 'SMS', esc(p.phone), { href: 'sms:' + tel }) : '',
+      tel && !me ? ctRow('call', 'phone', 'green', tr('Call', 'Piga simu'), esc(p.phone), { href: 'tel:' + tel }) : '',
+      tel && !me ? ctRow('wa', 'vxwa', 'green', 'WhatsApp', esc(p.phone), { href: 'https://wa.me/' + waNum(p.phone, p.home), ext: true }) : '',
+      tel && !me ? ctRow('sms', 'chat', 'teal', 'SMS', esc(p.phone), { href: 'sms:' + tel }) : '',
       !me ? ctRow('share', 'ctShare', 'slate', tr('Share contact', 'Shiriki mawasiliano'), tr('Name, phone and e-mail', 'Jina, simu na barua pepe')) : ''
     ], !tel && !p.email && !me ? '<p class="ct-hint">' + tr('No phone or e-mail yet.', 'Bado hakuna simu wala barua pepe.') + (adm && app ? ' ' + tr('Add them under Details.', 'Viongeze chini ya Maelezo.') : '') + '</p>' : '');
     var ro = !editable;
@@ -7735,6 +7735,9 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
       (o.body || '') + '<div class="ct-go">' + (o.save ? '<button class="btn' + (o.red ? ' po-red' : '') + '" type="button" data-k="save" data-testid="ct_save">' + (o.saveIc ? oic(o.saveIc) : '') + '<span>' + o.save + '</span></button>' : '') +
       '<button class="btn light" type="button" data-k="back" data-testid="ct_back">' + tr('Back', 'Rudi') + '</button><span class="msg" aria-live="polite"></span></div>' + (o.after || '') + '<div class="ct-out"></div></div>'));
     var c = w.querySelector('.tsh-c'), m = c.querySelector('.ct-go .msg'), sv = c.querySelector('[data-k=save]'), inp = c.querySelector('input, select');
+    // a result sheet (a new PIN, a link): the result first, then Done
+    w.done = function () { var g = c.querySelector('.ct-go'), b = g.querySelector('[data-k=back]'); c.querySelector('.ct-fm').appendChild(g); b.textContent = tr('Done', 'Imekamilika'); };
+    if (!o.save) w.done();
     w.say = function (cls, t) { m.className = 'msg ' + (cls || ''); m.textContent = t || ''; mlHyph(m); };
     w.busy = function (on) { qa('.ct-go button, .ct-fm [data-k=clear]', c).forEach(function (x) { x.disabled = on; }); };
     c.addEventListener('click', function (e) {
@@ -7759,7 +7762,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
   function ctDone(w, text, newName) { buzz(); toast(text); ctReload(newName); setTimeout(function () { w.close(); }, 250); }
   // Name, E-mail, Phone, Home country, Role: one field each
   function ctEdit(k, p) {
-    var me = ctMe(p), adm = S.admin && CT.full, app = ctSrc(p) === 'app';
+    var me = ctMe(p), adm = S.admin && CT.full, app = (ctSrc(p) || (me ? (S.me || {}).kind : '')) === 'app';
     var send = function (body, w, ok, newName) {
       // your own phone and home country: the same save as Me › Personal details (it keeps the Team list in step)
       if (me && (k === 'phone' || k === 'home')) {
@@ -7802,7 +7805,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
           w2.busy(false); if (!j.ok) return w2.say('bad', ctWhy(j));
           buzz(); w2.say('ok', tr('PIN set ✓', 'PIN imewekwa ✓'));
           var c = w2.querySelector('.tsh-c'); c.querySelector('.ct-lb').remove(); var h = c.querySelector('.ct-fm > .ct-hint'); if (h) h.remove(); c.querySelector('[data-k=save]').remove();
-          pinBox(c.querySelector('.ct-out'), p.name, v, p.phone, p.home); mlHyph(c); ctReload();
+          pinBox(c.querySelector('.ct-out'), p.name, v, p.phone, p.home); w2.done(); mlHyph(c); ctReload();
         });
       } });
     var i = w.querySelector('input'); i.addEventListener('input', function () { i.value = i.value.replace(/\D/g, '').slice(0, 8); });
