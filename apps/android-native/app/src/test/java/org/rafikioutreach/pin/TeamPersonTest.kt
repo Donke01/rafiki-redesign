@@ -35,7 +35,7 @@ import org.robolectric.shadows.ShadowDialog
 import java.io.File
 import java.time.Instant
 
-/** Office › Team › a person: the quick actions, the app invite, make or remove admin, their activity; Me › Team › a teammate (screenshots "tp-…"). */
+/** The app invite text and Office › Send an e-mail › Choose people (screenshots "tp-…"). The contact sheet itself is in ContactTest. */
 @RunWith(RobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [34], qualifiers = "w390dp-h844dp-xxhdpi")
@@ -128,21 +128,6 @@ class TeamPersonTest {
         }
         settle()
     }
-    private fun openPerson(m: AppModel, who: String = "Meril Kiprop", dark: Boolean = false) {
-        show(m, dark); waitTag("hav"); rule.mainClock.advanceTimeBy(2000)
-        tag("nav_office").performClick(); rule.mainClock.advanceTimeBy(1500); rule.waitForIdle()
-        tag("o_team").performScrollTo().performClick(); rule.mainClock.advanceTimeBy(1500); rule.waitForIdle()
-        waitTag("tm_$who"); tag("tm_$who").performScrollTo().performClick(); waitTag("team_sheet")
-        waitTag("tma_map") // the Team map check (sharing) has come back
-        settle()
-    }
-    private fun openPersonNoMap(m: AppModel, who: String) {
-        show(m); waitTag("hav"); rule.mainClock.advanceTimeBy(2000)
-        tag("nav_office").performClick(); rule.mainClock.advanceTimeBy(1500); rule.waitForIdle()
-        tag("o_team").performScrollTo().performClick(); rule.mainClock.advanceTimeBy(1500); rule.waitForIdle()
-        waitTag("tm_$who"); tag("tm_$who").performScrollTo().performClick(); waitTag("team_sheet"); settle()
-    }
-
     // --- the invite text --------------------------------------------------------------------------------------------
 
     @Test fun invite_text_never_has_a_pin() {
@@ -155,149 +140,6 @@ class TeamPersonTest {
         Lang.sw = true
         val sw = inviteText("Meril Kiprop", "Reid Anderson", admin = false)
         assertTrue(sw.startsWith("Habari Meril,")); assertTrue(sw.contains("Ongeza kwenye Skrini ya Nyumbani")); assertFalse(Regex("\\b\\d{4,6}\\b").containsMatchIn(sw))
-    }
-
-    // --- Office › Team › a person -----------------------------------------------------------------------------------
-
-    @Test fun person_sheet_quick_actions_light_390() {
-        Lang.sw = false
-        val m = model(); openPerson(m)
-        listOf("tma_mail", "tma_call", "tma_wa", "tma_sms", "tma_invite", "tma_admin", "tma_map", "tma_assign", "tm_x", "tm_copy_email", "tm_copy_phone").forEach { assertTrue(it, tagged(it)) }
-        assertFalse(tagged("tma_unadmin")); assertFalse(tagged("tma_noemail"))
-        // the old edit fields and actions are all still here
-        listOf("tm_admin_row", "tm_save", "tm_newpin", "tm_remove").forEach { assertTrue(it, tagged(it)) }
-        sheetShot("tp-01-person-actions")
-        // their activity: today and this month, tap one to open the project
-        tag("tma_counts").performScrollTo(); assertTrue(tagged("tma_act_105") && tagged("tma_act_101"))
-        sheetShot("tp-02-person-activity")
-        // copy the phone
-        tag("tm_copy_phone").performScrollTo().performClick(); settle()
-        val clip = app.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
-        assertEquals("0712 345 678", clip.primaryClip?.getItemAt(0)?.text?.toString())
-        tag("tma_act_105").performScrollTo().performClick(); settle(); rule.mainClock.advanceTimeBy(1500); rule.waitForIdle()
-        assertFalse("the sheet closed", sheetOpen()); assertTrue("the project opened", has("Turbo Spring"))
-    }
-
-    @Test @Config(qualifiers = "w360dp-h800dp-xxhdpi") fun person_sheet_kiswahili_dark_360() {
-        Lang.sw = true; width = 360
-        val m = model(); openPerson(m, dark = true)
-        assertTrue(has("Mfanye msimamizi") && has("Gawa ziara") && has("Tuma mwaliko"))
-        sheetShot("tp-03-person-actions-sw-dark-360")
-    }
-
-    @Test @Config(qualifiers = "w360dp-h800dp-xxhdpi") fun person_sheet_english_dark_360_no_email() {
-        Lang.sw = false; width = 360
-        val m = model(noEmail = true); openPerson(m, dark = true)
-        assertFalse(tagged("tma_mail")); assertFalse(tagged("tma_invite")); assertTrue(tagged("tma_noemail")); assertTrue(has("Add an e-mail to send e-mails"))
-        sheetShot("tp-04-person-actions-noemail-dark-360")
-    }
-
-    @Test fun invite_preview_then_send_to_that_person_only() {
-        Lang.sw = false
-        val m = model(); openPerson(m)
-        tag("tma_invite").performClick(); waitTag("tma_invite_sheet"); waitTag("tma_invite_subject")
-        tag("tma_invite_subject").assertTextEquals("You're invited to RAFIKI Pin"); assertTrue(tagged("tma_invite_btn"))
-        assertTrue(posts.any { it.contains("/api/mail") && it.contains("\"action\":\"invite\"") && it.contains("\"to\":\"Meril Kiprop\"") && it.contains("\"preview\":true") })
-        sheetShot("tp-05-invite-preview")
-        posts.clear()
-        tag("tma_invite_send").performScrollTo().performClick(); settle(); waitTag("tma_invite_done")
-        val sends = posts.filter { it.contains("/api/mail") && it.contains("\"invite\"") }
-        assertEquals(1, sends.size); assertTrue(sends[0].contains("\"to\":\"Meril Kiprop\"")); assertFalse(sends[0].contains("preview")); assertFalse(sends[0].contains("pin\":"))
-        assertTrue(has("Invite sent to Meril Kiprop"))
-        tag("tma_invite_wa").assertExists(); tag("tma_invite_sms").assertExists()
-        sheetShot("tp-06-invite-sent")
-        // back closes only the invite; the person's sheet is still there
-        back(); assertFalse(tagged("tma_invite_sheet")); assertTrue(tagged("team_sheet"))
-    }
-
-    @Test fun invite_kiswahili_dark() {
-        Lang.sw = true
-        val m = model(); openPerson(m, dark = true)
-        tag("tma_invite").performClick(); waitTag("tma_invite_subject")
-        assertTrue(has("PIN haiwi kamwe kwenye barua pepe"))
-        sheetShot("tp-07-invite-sw-dark")
-    }
-
-    @Test fun make_admin_confirm_then_saved() {
-        Lang.sw = false
-        val m = model(); openPerson(m)
-        tag("tma_admin").performClick(); waitTag("tma_admin_sheet")
-        assertTrue(has("Make Meril Kiprop an admin?")); assertTrue(has("They’ll see the Office tab"))
-        sheetShot("tp-08-make-admin-confirm")
-        tag("tma_admin_yes").performScrollTo().performClick(); settle(); rule.mainClock.advanceTimeBy(1000); rule.waitForIdle()
-        assertTrue(posts.any { it.contains("\"team-update\"") && it.contains("\"Meril Kiprop\"") && it.contains("\"admin\":true") && it.contains("\"email\":\"meril@rafikioutreach.org\"") })
-        assertFalse(tagged("tma_admin_sheet")); waitTag("tma_unadmin"); assertTrue(has("Meril Kiprop is now an admin"))
-    }
-
-    @Test fun cant_remove_your_own_admin_role() {
-        Lang.sw = false
-        val m = model(reidApp = true); openPersonNoMap(m, "Reid Anderson")
-        tag("tma_unadmin").performClick(); waitTag("tma_admin_sheet")
-        assertTrue(tagged("tma_admin_self")); assertFalse(tagged("tma_admin_yes"))
-        sheetShot("tp-09-own-admin")
-        tag("tma_admin_no").performScrollTo().performClick(); settle(); assertFalse(tagged("tma_admin_sheet")); assertTrue(tagged("team_sheet"))
-    }
-
-    @Test fun email_opens_send_an_email_with_that_person() {
-        Lang.sw = false
-        val m = model(); openPerson(m)
-        tag("tma_mail").performClick(); settle(); rule.mainClock.advanceTimeBy(1500); rule.waitForIdle()
-        waitTag("ml_form"); assertFalse(sheetOpen()); assertEquals(null, MailNav.preset)
-        // Choose people, with that one person picked
-        waitTag("ml_chip_t:meril kiprop"); assertTrue(tagged("ml_g_admins") && tagged("ml_g_donors"))
-        tag("ml_count").assertTextEquals("Goes to 1 person")
-    }
-
-    @Test fun assign_a_visit_opens_with_them_chosen() {
-        Lang.sw = false
-        val m = model(); openPerson(m)
-        tag("tma_assign").performScrollTo().performClick(); settle(); rule.mainClock.advanceTimeBy(1500); rule.waitForIdle()
-        waitTag("ocv_assign_sheet"); assertTrue(has("Meril Kiprop"))
-        sheetShot("tp-10-assign-for-them")
-    }
-
-    @Test fun show_on_team_map_only_when_sharing() {
-        Lang.sw = false
-        val m = model(); openPerson(m)
-        tag("tma_map").performClick(); settle(); rule.mainClock.advanceTimeBy(1500); rule.waitForIdle()
-        waitTag("tm_map"); assertEquals(null, TeamGo.map)
-    }
-
-    @Test fun no_map_action_when_not_sharing_and_x_closes() {
-        Lang.sw = false
-        val m = model(sharing = false); openPersonNoMap(m, "Meril Kiprop")
-        rule.mainClock.advanceTimeBy(1500); rule.waitForIdle()
-        assertFalse(tagged("tma_map")); assertTrue(tagged("tma_assign"))
-        tag("tm_x").performClick(); settle(); assertFalse(tagged("team_sheet")); assertTrue(tagged("tm_Meril Kiprop"))
-        // back on the sheet closes only the sheet
-        tag("tm_Meril Kiprop").performScrollTo().performClick(); waitTag("team_sheet"); settle()
-        back(); assertFalse(tagged("team_sheet")); assertTrue(tagged("tm_Meril Kiprop"))
-    }
-
-    // --- Me › Team › a teammate (anyone, not only admins) -----------------------------------------------------------
-
-    @Test fun teammate_sheet_for_a_field_officer_has_contact_and_activity_only() {
-        Lang.sw = false
-        val m = model(admin = false)
-        show(m); waitTag("hav"); rule.mainClock.advanceTimeBy(2000)
-        tag("nav_me").performClick(); rule.mainClock.advanceTimeBy(1500); rule.waitForIdle()
-        tag("pane_team").performClick(); rule.mainClock.advanceTimeBy(1500); rule.waitForIdle()
-        waitTag("mate_open"); rule.onAllNodesWithTag("mate_open")[0].performClick(); waitTag("mate_sheet"); settle()
-        listOf("tma_call", "tma_wa", "tma_sms", "tma_counts").forEach { assertTrue(it, tagged(it)) }
-        listOf("tma_invite", "tma_admin", "tma_unadmin", "tma_assign", "tma_mail", "tm_newpin").forEach { assertFalse(it, tagged(it)) }
-        sheetShot("tp-11-teammate-sheet")
-        back(); assertFalse(tagged("mate_sheet")); assertTrue(tagged("team_today"))
-    }
-
-    @Test fun teammate_sheet_kiswahili_dark() {
-        Lang.sw = true
-        val m = model(admin = false)
-        show(m, dark = true); waitTag("hav"); rule.mainClock.advanceTimeBy(2000)
-        tag("nav_me").performClick(); rule.mainClock.advanceTimeBy(1500); rule.waitForIdle()
-        tag("pane_team").performClick(); rule.mainClock.advanceTimeBy(1500); rule.waitForIdle()
-        waitTag("mate_open"); rule.onAllNodesWithTag("mate_open")[0].performClick(); waitTag("mate_sheet"); settle()
-        assertTrue(has("Piga simu") && has("Ziara na kazi zake".uppercase()))
-        sheetShot("tp-12-teammate-sheet-sw-dark")
     }
 
     // --- Office › Send an e-mail › Choose people ---------------------------------------------------------------------

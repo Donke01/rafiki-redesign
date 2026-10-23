@@ -17,6 +17,8 @@ class Prefs(context: Context) {
     var filter: String get() = sp.getString("filter", "missing") ?: "missing"; set(v) = sp.edit().putString("filter", v).apply()
     var country: String get() = sp.getString("country", "") ?: ""; set(v) = sp.edit().putString("country", v).apply()
     var session: String get() = sp.getString("session", "") ?: ""; set(v) = sp.edit().putString("session", v).apply()
+    /** The PIN session's number from the server (GET /api/pin "gen"), sent back as X-Pin-Gen; "" until known. */
+    var pinGen: String get() = sp.getString("pinGen", "") ?: ""; set(v) = sp.edit().putString("pinGen", v).apply()
     var verifier: String get() = sp.getString("verifier", "") ?: ""; set(v) = sp.edit().putString("verifier", v).apply()
     var route: String get() = sp.getString("route", "") ?: ""; set(v) = sp.edit().putString("route", v).apply()
     var onb: Boolean get() = sp.getBoolean("onb", false); set(v) = sp.edit().putBoolean("onb", v).apply()
@@ -52,7 +54,7 @@ class Prefs(context: Context) {
     fun saveSnapshot(raw: JSONObject) = runCatching { listFile.writeText(raw.toString()) }
     fun loadSnapshot(): JSONObject? = runCatching { JSONObject(listFile.readText()) }.getOrNull()
     var bio: Boolean get() = sp.getBoolean("bio", false); set(v) = sp.edit().putBoolean("bio", v).apply()
-    fun forget() { pin = ""; session = ""; bio = false }
+    fun forget() { pin = ""; session = ""; pinGen = ""; bio = false }
 }
 
 /** One change waiting to be sent: the action, its photos, and how far it got. */

@@ -70,6 +70,19 @@ class AppModel(app: Application) : AndroidViewModel(app) {
 
     init {
         viewModelScope.launch { while (true) { delay(60000); if (_signedIn.value) sendWaiting() } }
+        // blocked, or signed out of all phones by an admin: sign this phone out with a kind word (feat-conta)
+        api.onAuthEnd = { why -> ended = why; viewModelScope.launch(Dispatchers.Main) { authEnded(why) } }
+        api.gen = { prefs.pinGen }
+    }
+
+    /** Why the server ended this sign-in ("blocked" or "signed-out"), until the next sign-in. */
+    @Volatile var ended: String? = null
+        private set
+    /** Signs this phone out (changes waiting to send stay) and says why, kindly, on the sign-in screen. */
+    fun authEnded(why: String) {
+        ended = why
+        if (_signedIn.value) lock()
+        _banner.value = reasonText(why)
     }
 
     // --- app updates: the newest Android app on the website ----------------------------------
@@ -117,13 +130,16 @@ class AppModel(app: Application) : AndroidViewModel(app) {
     /** Sign in with a PIN; shared team PINs need a name. Returns an error text, or null when in. */
     suspend fun signIn(pin: String, name: String): String? {
         prefs.pin = pin
-        val r = api.list()
+        // a PIN typed here starts a new session; the server's session number comes back with the list
+        prefs.pinGen = ""; api.fresh = true
+        val r = try { api.list() } finally { api.fresh = false }
         if (!r.ok) {
             prefs.pin = ""
             return if (r.status == 0) t("No signal. Connect to the internet to sign in the first time.", "Hakuna mtandao. Unganisha intaneti ili uingie mara ya kwanza.") else reasonText(r.reason)
         }
         val who = r.json.optString("who")
         if (who.isBlank() && name.isBlank()) { prefs.pin = ""; return "NEED_NAME" }
+        ended = null
         prefs.name = who.ifBlank { name.trim() }
         accept(r.json)
         _signedIn.value = true
@@ -259,6 +275,8 @@ class AppModel(app: Application) : AndroidViewModel(app) {
 
     private fun accept(raw: JSONObject) {
         val n = raw.optInt("reviewOpen"); if (n > (_snap.value?.reviewOpen ?: 0)) prefs.reviewAt = java.time.Instant.now().toString()
+        // the PIN session's number, sent back with every request (X-Pin-Gen)
+        if (prefs.pin.isNotBlank() && raw.has("gen")) prefs.pinGen = raw.optInt("gen").toString()
         prefs.saveSnapshot(raw); _snap.value = Snapshot.from(raw)
         org.rafikioutreach.pin.ui.GoogleTiles.configure(getApplication(), _snap.value?.gmapsAndroid)
         org.rafikioutreach.pin.cmap.CountryMaps.baseFrom(raw.optJSONObject("countryMaps")) // whole-country maps (feat-cmap)
@@ -287,7 +305,7 @@ class AppModel(app: Application) : AndroidViewModel(app) {
     suspend fun sendWaiting(): Outbox.Result = sendLock.withLock {
         val res = outbox.flush(api)
         _waiting.value = outbox.count()
-        if (res.locked) { lock(); _banner.value = t("Your PIN stopped working. Please sign in again; nothing was lost.", "PIN yako imeacha kufanya kazi. Tafadhali ingia tena; hakuna kilichopotea.") }
+        if (res.locked) { lock(); _banner.value = ended?.let { reasonText(it) } ?: t("Your PIN stopped working. Please sign in again; nothing was lost.", "PIN yako imeacha kufanya kazi. Tafadhali ingia tena; hakuna kilichopotea.") }
         res
     }
 

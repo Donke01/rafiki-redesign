@@ -112,8 +112,10 @@ fun LockScreen(m: AppModel) {
                     Box(Modifier.size(18.dp).clip(CircleShape).then(if (i < pin.length) Modifier.background(C.blue) else Modifier.border(2.dp, C.off, CircleShape)))
                 }
             }
-            Msg(msg, if (msg == t("Checking…", "Inakagua…")) "" else "bad")
-            if (msg == null && banner != null) Msg(banner, if (banner == t("Signing in…", "Inaingia…")) "" else "bad")
+            // blocked or signed out by the office: said kindly, not as an error (feat-conta)
+            val kind = org.rafikioutreach.pin.data.Api.AUTH_END.map { org.rafikioutreach.pin.data.reasonText(it) }
+            Box(Modifier.testTag("lock_msg")) { Msg(msg, if (msg == t("Checking…", "Inakagua…")) "" else if (msg in kind) "warn" else "bad") }
+            if (msg == null && banner != null) Msg(banner, if (banner == t("Signing in…", "Inaingia…")) "" else if (banner in kind) "warn" else "bad")
             if (needName) Field(name, { name = it }, t("Your name", "Jina lako"), placeholder = t("e.g. Meril", "mf. Meril"))
             Spacer(Modifier.height(14.dp))
 

@@ -363,9 +363,9 @@ fun TeamMapSection(m: AppModel, s: Snapshot, open: (String) -> Unit) {
     var err by remember { mutableStateOf<String?>(null) }
     var tick by remember { mutableIntStateOf(0) }
     var who by remember { mutableStateOf("") }
-    var sheet by remember { mutableStateOf<String?>(null) }
-    // "Show on team map" from a person's sheet in Office › Team: the map focuses on them (TeamPerson.kt)
-    LaunchedEffect(Unit) { TeamGo.map?.let { who = it; TeamGo.map = null } }
+    // "Show on team map" from a person's contact sheet: the map focuses on them (Contact.kt), also when already here
+    val goMap = TeamGo.map
+    LaunchedEffect(goMap) { goMap?.let { who = it; TeamGo.map = null } }
     LaunchedEffect(tick) { val r = m.api.adminGet("teammap"); if (r.ok) { data = TeamMapData.from(r.json); err = null } else err = reasonText(r.reason) }
     val d = data
     DqmHead("tm_head", "pin", "green", t("Team map", "Ramani ya timu"), t("Where teammates who share their location are, and today’s visits.", "Wenzako wanaoshiriki mahali walipo, na ziara za leo."),
@@ -381,7 +381,7 @@ fun TeamMapSection(m: AppModel, s: Snapshot, open: (String) -> Unit) {
     val avatars = d.people.map { p -> MapAvatar(p.name, p.ll, initialsOf(p.name), colors.getValue(p.name), ago(p.at), ofaOld(p.at)) }
     val pins = d.visits.mapNotNull { v -> s.projects.firstOrNull { it.id == v.id }?.gps?.let { MapPin(it, ofaStateColor(v.state), null, v.title) } }
     val focus = if (who.isBlank()) null else d.people.filter { it.name == who }.map { it.ll } + d.visits.filter { it.by.equals(who, true) }.mapNotNull { v -> s.projects.firstOrNull { it.id == v.id }?.gps }
-    OfaMap(avatars, pins, emptyList(), Modifier.padding(top = 12.dp).fillMaxWidth().height(340.dp).clip(RoundedCornerShape(20.dp)).border(1.dp, C.line, RoundedCornerShape(20.dp)).testTag("tm_map"), fitKey = d to who, focus = focus) { who = it; sheet = it }
+    OfaMap(avatars, pins, emptyList(), Modifier.padding(top = 12.dp).fillMaxWidth().height(340.dp).clip(RoundedCornerShape(20.dp)).border(1.dp, C.line, RoundedCornerShape(20.dp)).testTag("tm_map"), fitKey = d to who, focus = focus) { who = it; Contact.show(it) }
     FlowRow(Modifier.padding(top = 8.dp, start = 4.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         OfaLegend(Color(0xFF1C9C5A), t("Visit today: working", "Ziara ya leo: inafanya kazi")); OfaLegend(Color(0xFFD98200), t("needs repair", "inahitaji matengenezo")); OfaLegend(Color(0xFFB3261E), t("not working", "haifanyi kazi"))
     }
@@ -394,7 +394,7 @@ fun TeamMapSection(m: AppModel, s: Snapshot, open: (String) -> Unit) {
         DqmCard("tm_person_${p.name}", Modifier.padding(top = 8.dp).rise(minOf(i, 6)), p.name, null,
             listOf(t("Last seen ", "Alionekana ") + ago(p.at) + accText(p.acc),
                 (if (old) t("Not seen for over an hour · ", "Hajaonekana kwa zaidi ya saa moja · ") else "") + (if (vs.size == 1) t("1 visit today", "ziara 1 leo") else t("${vs.size} visits today", "ziara ${vs.size} leo"))),
-            leading = { DqmAvatar(p.name, Color(colors.getValue(p.name)), Color.White, 44.dp) }) { sheet = p.name }
+            leading = { DqmAvatar(p.name, Color(colors.getValue(p.name)), Color.White, 44.dp) }) { who = p.name; Contact.show(p.name) }
     }
     if (d.people.isEmpty()) EmptyDrop(t("Nobody is sharing their location right now.", "Hakuna anayeshiriki mahali kwa sasa."))
     Card(Modifier.padding(top = 14.dp), pad = 4.dp) {
@@ -404,39 +404,9 @@ fun TeamMapSection(m: AppModel, s: Snapshot, open: (String) -> Unit) {
             Text(t("People turn it on in Me › Settings › Security and alerts. It’s off unless they choose it.", "Watu wanaiwasha kwenye Mimi › Mipangilio › Usalama na arifa. Imezimwa wasipochagua."), style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 8.dp))
         }
     }
-    sheet?.let { n -> d.people.firstOrNull { it.name == n }?.let { p -> PersonMapSheet(p, Color(colors.getValue(p.name)), d.visits.filter { it.by.equals(p.name, true) }, s, { sheet = null }, { who = p.name }, open) } }
 }
 
 private fun accText(acc: Int) = if (acc > 0) " · " + Geo.acc(acc) else ""
-
-/** A teammate on the map: call, WhatsApp, show them on the map, and today's visits (tap one to open the project). */
-@Composable
-private fun PersonMapSheet(p: Sharer, col: Color, vs: List<DayVisit>, s: Snapshot, close: () -> Unit, onMap: () -> Unit, open: (String) -> Unit) {
-    val ctx = LocalContext.current
-    DqmSheet("tm_sheet", close) { hide ->
-        DqmSheetHead(p.name, listOf(t("Last seen ", "Alionekana ") + ago(p.at) + accText(p.acc)), null, "tm_close", { hide {} }) { DqmAvatar(p.name, col, Color.White, 68.dp, ring = true) }
-        if (p.phone.isNotBlank()) Row(Modifier.padding(top = 18.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            DqmLineBtn(t("Call", "Piga simu"), "phone", { runCatching { ctx.startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + p.phone.replace(" ", "")))) } }, Modifier.weight(1f).testTag("tm_call"))
-            DqmLineBtn("WhatsApp", "chat", { runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://wa.me/" + waNumber(p.phone, p.home)))) } }, Modifier.weight(1f).testTag("tm_wa"))
-        } else Text(t("No phone number on the team list for them.", "Hakuna namba ya simu yake kwenye orodha ya timu."), style = MaterialTheme.typography.bodyMedium, color = C.muted, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(top = 16.dp).testTag("tm_nophone"))
-        Btn(t("Show on the map", "Onyesha kwenye ramani"), { hide { onMap() } }, Modifier.padding(top = 8.dp).fillMaxWidth().testTag("tm_onmap"), icon = "pin")
-        DqmLabel(t("Visits today", "Ziara za leo") + " · ${vs.size}")
-        if (vs.isEmpty()) Text(t("No visits reported yet today.", "Hakuna ziara zilizoripotiwa leo bado."), style = MaterialTheme.typography.bodyMedium, color = C.muted)
-        vs.forEachIndexed { i, v ->
-            if (i > 0) Box(Modifier.fillMaxWidth().height(1.dp).background(C.line))
-            Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).clickable(role = Role.Button) { hide { open(v.id) } }.heightIn(min = 56.dp).padding(vertical = 8.dp).testTag("tm_visit_${v.id}"), verticalAlignment = Alignment.CenterVertically) {
-                Box(Modifier.size(12.dp).clip(CircleShape).background(Color(ofaStateColor(v.state))))
-                Spacer(Modifier.width(12.dp))
-                Column(Modifier.weight(1f)) {
-                    Text(s.projects.firstOrNull { it.id == v.id }?.title ?: v.title, style = MaterialTheme.typography.titleSmall, color = C.ink)
-                    Text(when (v.state) { "notworking" -> t("Not working", "Haifanyi kazi"); "repair" -> t("Needs repair", "Inahitaji matengenezo"); else -> t("Working", "Inafanya kazi") }, style = MaterialTheme.typography.bodySmall, color = C.muted)
-                }
-                Text(ofaClock(v.at), style = MaterialTheme.typography.labelLarge, color = C.muted)
-                Icon(Ic.get("chev"), null, tint = C.muted, modifier = Modifier.size(18.dp))
-            }
-        }
-    }
-}
 
 private fun ofaOld(iso: String) = runCatching { java.time.Duration.between(java.time.Instant.parse(iso), java.time.Instant.now()).toMinutes() > 60 }.getOrDefault(false)
 private fun ofaClock(iso: String) = runCatching { DateTimeFormatter.ofPattern("HH:mm").withZone(java.time.ZoneId.systemDefault()).format(java.time.Instant.parse(iso)) }.getOrDefault("")
@@ -493,6 +463,8 @@ fun PlanWeekSection(m: AppModel, s: Snapshot, open: (String) -> Unit) {
                 Picker(t("Field officer", "Afisa wa uwanjani"), to, listOf("" to t("Choose", "Chagua")) + names.map { it to it }, { to = it }, Modifier.weight(1f).testTag("plan_to"))
                 Picker(t("Country", "Nchi"), ck, COUNTRIES.toList(), { if (it != ck) { ck = it; areas.clear(); pick.clear() } }, Modifier.weight(1f))
             }
+            // the chosen person: a tap opens their contact sheet (Contact.kt)
+            if (to.isNotBlank()) PersonChip(to, Modifier.padding(top = 4.dp), tag = "plan_who")
             PlanAreaField(t("Area", "Eneo"), planAreasText(areas, ck), Modifier.testTag("plan_area")) { pickAt = "areas" }
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 Picker(t("Days", "Siku"), days, (1..6).map { "$it" to "$it" }, { days = it }, Modifier.weight(1f))
@@ -612,6 +584,7 @@ fun PlanWeekSection(m: AppModel, s: Snapshot, open: (String) -> Unit) {
     }
     Card(Modifier.padding(top = 12.dp)) {
         Field(note, { note = it.take(200) }, t("Note for ", "Maelezo kwa ") + p.to + " " + t("(optional)", "(si lazima)"), placeholder = t("e.g. take the water test kit", "mf. beba vifaa vya kupima maji"))
+        if (p.to.isNotBlank()) PersonChip(p.to, Modifier.padding(top = 10.dp), tag = "plan_to_who")
         Btn(if (p.assigned) t("Assigned", "Imegawiwa") else t("Assign $n visits to ${p.to}", "Mpe ${p.to} ziara $n"), {
             scope.launch {
                 busy = true; amsg = "" to t("Assigning…", "Inagawa…")

@@ -170,7 +170,7 @@ fun App(m: AppModel) {
 @Composable
 fun Shell(m: AppModel) {
     // a fresh open: every tab starts over (filters, Me | Team, the map's view)
-    val stack = remember { org.rafikioutreach.pin.ui.Nav.startOverAll(m); mutableStateListOf(Place("list")) }
+    val stack = remember { org.rafikioutreach.pin.ui.Nav.startOverAll(m); org.rafikioutreach.pin.ui.Contact.who = null; mutableStateListOf(Place("list")) }
     val here = stack.last()
     // what each screen in the stack kept (scroll, folds, sub-tabs), so back finds it as it was left
     val kept = androidx.compose.runtime.saveable.rememberSaveableStateHolder()
@@ -243,6 +243,14 @@ fun Shell(m: AppModel) {
     val sub = here.project != null || here.sub != null
     val hp = org.rafikioutreach.pin.ui.rememberHaptics()
     org.rafikioutreach.pin.ui.UpdatePrompt(m, updReady)
+    // a person tapped anywhere: their contact sheet, the same everywhere (Contact.kt)
+    org.rafikioutreach.pin.ui.ContactHost(m) { kind, arg ->
+        when (kind) {
+            "project" -> go(Place(here.tab, arg))
+            "settings" -> go(Place(here.tab, sub = "set_$arg"))
+            "office" -> { org.rafikioutreach.pin.ui.TeamGo.section = arg; if (here.tab != "office" || stack.size > 1) tab("office") }
+        }
+    }
 
     Column(Modifier.fillMaxSize()) {
         // app header: you (or back), the wordmark, refresh

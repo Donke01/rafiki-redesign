@@ -235,7 +235,9 @@ private fun NoteAvatar(a: Alert, k: List<String>, ring: Color) {
         return
     }
     val hu = C.hue(nameHue(a.by))
-    Box(Modifier.size(46.dp).testTag("note_avatar")) {
+    // a tap on the person opens their contact sheet (Contact.kt); the rest of the row opens the notification
+    val person = Contact.isPerson(a.by.trim())
+    Box(Modifier.size(46.dp).then(if (person) Modifier.clickable(role = Role.Button) { Contact.show(a.by) }.semantics { contentDescription = a.by } else Modifier).testTag("note_avatar")) {
         Box(Modifier.fillMaxSize().clip(CircleShape).background(hu.bg), contentAlignment = Alignment.Center) {
             Text(initialsOf(a.by), color = hu.fg, style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold, fontSize = 15.sp))
         }

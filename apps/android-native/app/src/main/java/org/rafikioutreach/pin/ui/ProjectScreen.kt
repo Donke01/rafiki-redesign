@@ -115,8 +115,10 @@ fun ProjectScreen(m: AppModel, id: String, startTab: String, back: () -> Unit) {
             }
             if (testDue(snap, p)) WaterTestTag(Modifier.padding(top = 6.dp))
             Text(p.gps?.let { it.text() + t(" · saved location", " · mahali palipohifadhiwa") } ?: t("No location saved yet.", "Bado hakuna mahali palipohifadhiwa."), style = MaterialTheme.typography.bodySmall, color = fg3, modifier = Modifier.padding(top = 8.dp))
-            Text(if (v != null) t("Last visit: ", "Ziara ya mwisho: ") + whenText(v.at) + " · " + v.by + " · " + stateName(v.state) else t("No visit recorded in the app yet.", "Bado hakuna ziara iliyorekodiwa kwenye programu."),
+            Text(if (v != null) t("Last visit: ", "Ziara ya mwisho: ") + whenText(v.at) + " · " + stateName(v.state) else t("No visit recorded in the app yet.", "Bado hakuna ziara iliyorekodiwa kwenye programu."),
                 style = MaterialTheme.typography.bodySmall, color = fg3)
+            // who visited: a tap opens their contact sheet (Contact.kt)
+            if (v != null && v.by.isNotBlank()) PersonChip(v.by, tag = "p_visit_by")
             if (snap.confirmed.contains(p.id)) Text(t("Location confirmed by the office", "Mahali pamethibitishwa na ofisi"), color = okc, style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(top = 4.dp))
             if (snap.admin && p.gps != null) {
                 val scope = rememberScope(); var cm by remember(p.id) { mutableStateOf<String?>(null) }
@@ -265,8 +267,9 @@ private fun RepairCard(m: AppModel, p: Project, r: org.rafikioutreach.pin.data.R
             Text(if (r.state == "notworking") t("Reported as not working", "Imeripotiwa haifanyi kazi") else t("Reported as needing repair", "Imeripotiwa inahitaji matengenezo"),
                 style = MaterialTheme.typography.titleSmall, color = if (r.state == "notworking") C.bad else C.warn)
         }
-        Text(t("By ", "Na ") + r.by + " · " + whenText(r.at) + (if (r.urgency.isNotBlank()) " · " + urgencyName(r.urgency) else "") + (if (r.note.isNotBlank()) ": “${r.note}”" else ""),
-            style = MaterialTheme.typography.bodyMedium, color = C.text, modifier = Modifier.padding(top = 4.dp))
+        if (r.by.isNotBlank()) PersonChip(r.by, Modifier.padding(top = 2.dp), tag = "p_repair_by")
+        Text(whenText(r.at) + (if (r.urgency.isNotBlank()) " · " + urgencyName(r.urgency) else "") + (if (r.note.isNotBlank()) ": “${r.note}”" else ""),
+            style = MaterialTheme.typography.bodyMedium, color = C.text, modifier = Modifier.padding(top = 2.dp))
         if (r.problems.isNotEmpty()) Text(r.problems.joinToString(", ") { problemName(it) }, style = MaterialTheme.typography.bodySmall, color = C.muted)
         Btn(t("Mark fixed", "Weka imerekebishwa"), {
             busy = true
@@ -296,7 +299,12 @@ fun HistoryTab(m: AppModel, p: Project) {
     if (n != null && n.isEmpty()) EmptyDrop(t("No notes on this project yet.", "Bado hakuna maelezo kwenye mradi huu."))
     n?.forEach { note ->
         Card(Modifier.padding(top = 10.dp), pad = 14.dp) {
-            Text(whenText(note.at) + " · " + note.by, style = MaterialTheme.typography.labelMedium, color = C.ink)
+            // when, and who (a tap opens their contact sheet)
+            val who = photoBy(note)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(whenText(note.at), style = MaterialTheme.typography.labelMedium, color = C.ink, modifier = Modifier.padding(end = 8.dp))
+                if (who.isNotBlank()) PersonChip(who, Modifier.weight(1f, fill = false), tag = "h_by")
+            }
             Text(note.text, style = MaterialTheme.typography.bodyMedium, color = C.text, modifier = Modifier.padding(top = 4.dp))
             note.files.filter { it.isImage }.take(4).forEach { f ->
                 NetImage(f.url, Modifier.padding(top = 8.dp).fillMaxWidth().aspectRatio(4f / 3f).clip(RoundedCornerShape(14.dp)).background(C.tint)) {}

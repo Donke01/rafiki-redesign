@@ -340,7 +340,7 @@ private fun RrJobSheet(m: AppModel, s: Snapshot, id: String, names: List<String>
                 }
             }
             Column(Modifier.padding(top = 10.dp)) {
-                RrFact(t("Reported by", "Imeripotiwa na"), r.by.ifBlank { "—" } + " · " + whenText(r.at))
+                PersonFact(t("Reported by", "Imeripotiwa na"), r.by.ifBlank { "—" }, sub = whenText(r.at), tag = "rr_reported_by")
                 RrFact(t("Country", "Nchi"), p?.country ?: "")
                 RrFact(t("Problems", "Matatizo"), r.problems.joinToString(", "), long = true)
                 RrFact(t("Their note", "Maelezo yao"), r.note.takeIf { it.isNotBlank() }?.let { "“$it”" } ?: "", long = true)
@@ -355,6 +355,8 @@ private fun RrJobSheet(m: AppModel, s: Snapshot, id: String, names: List<String>
                 }
             }
             Picker(t("Assigned to", "Amepewa"), who, listOf("" to t("Not assigned", "Hajapewa mtu")) + (if (r.assignee.isNotBlank() && r.assignee !in names) listOf(r.assignee) else emptyList<String>()).plus(names).map { it to it }, { who = it })
+            // the person it's assigned to: a tap opens their contact sheet (Contact.kt)
+            if (who.isNotBlank()) PersonChip(who, Modifier.padding(top = 4.dp), tag = "rr_assignee")
             DateField(t("Due", "Tarehe ya mwisho"), due, { due = it })
             Field(note, { note = it }, t("Note (optional)", "Maelezo (si lazima)"), placeholder = t("e.g. parts bought in Eldoret", "mf. vipuri vilinunuliwa Eldoret"))
             Column(Modifier.padding(top = 16.dp).fillMaxWidth().clip(RoundedCornerShape(16.dp)).border(if (C.glassy) 1.dp else 2.dp, if (C.glassy) C.line else Color.Black, RoundedCornerShape(16.dp))) {
@@ -546,14 +548,14 @@ private fun RrReviewSheet(m: AppModel, x: JSONObject, close: () -> Unit, open: (
     androidx.compose.material3.ModalBottomSheet(onDismissRequest = close, sheetState = state, containerColor = C.card, modifier = Modifier.testTag("rr_rev_sheet")) {
         Column(Modifier.verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, bottom = 28.dp)) {
             RrSheetHead(k[3], k[4], x.optString("t").ifBlank { x.optString("id") }, k[1]) { hide() }
-            val who = (if (cost) t("Asked by", "Imeombwa na") else t("Sent by", "Imetumwa na")) to x.optString("by").ifBlank { "—" } + " · " + whenText(x.optString("at"))
+            val who = (if (cost) t("Asked by", "Imeombwa na") else t("Sent by", "Imetumwa na")) to x.optString("by").ifBlank { "—" }
             when (kind) {
                 "cost" -> {
                     Row(Modifier.padding(top = 16.dp), verticalAlignment = Alignment.Bottom) {
                         Text(Money.kes(d.optLong("est")), style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold), color = C.ink); Spacer(Modifier.width(8.dp))
                         Text(t("estimate · above ", "makadirio · zaidi ya ") + Money.kes(limit), style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(bottom = 4.dp))
                     }
-                    Column(Modifier.padding(top = 6.dp)) { RrFact(t("Parts", "Vipuri"), d.optString("parts"), long = true); RrFact(t("Their note", "Maelezo yao"), d.optString("note").takeIf { it.isNotBlank() }?.let { "“$it”" } ?: "", long = true); RrFact(who.first, who.second) }
+                    Column(Modifier.padding(top = 6.dp)) { RrFact(t("Parts", "Vipuri"), d.optString("parts"), long = true); RrFact(t("Their note", "Maelezo yao"), d.optString("note").takeIf { it.isNotBlank() }?.let { "“$it”" } ?: "", long = true); PersonFact(who.first, who.second, sub = whenText(x.optString("at")), tag = "rr_by") }
                     Row(Modifier.padding(top = 14.dp).fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(C.hue("slate").bg).padding(12.dp), verticalAlignment = Alignment.Top) {
                         Icon(Ic.get("info"), null, tint = C.muted, modifier = Modifier.size(18.dp)); Spacer(Modifier.width(8.dp))
                         Text(t("Asked before ordering parts. The person who asked can’t approve it.", "Imeombwa kabla ya kuagiza vipuri. Aliyeomba hawezi kuidhinisha."), style = MaterialTheme.typography.bodyMedium, color = C.ink)
@@ -570,15 +572,15 @@ private fun RrReviewSheet(m: AppModel, x: JSONObject, close: () -> Unit, open: (
                             }
                         }
                     }
-                    Column(Modifier.padding(top = 6.dp)) { RrFact(who.first, who.second); RrFact(t("Consent", "Ridhaa"), t("Given, to quote and photograph", "Imetolewa, kunukuu na kupiga picha")) }
+                    Column(Modifier.padding(top = 6.dp)) { PersonFact(who.first, who.second, sub = whenText(x.optString("at")), tag = "rr_by"); RrFact(t("Consent", "Ridhaa"), t("Given, to quote and photograph", "Imetolewa, kunukuu na kupiga picha")) }
                 }
                 "new" -> Column(Modifier.padding(top = 10.dp)) {
                     RrFact(t("Type", "Aina"), d.optString("type")); RrFact(t("Village", "Kijiji"), d.optString("village")); RrFact(t("Country", "Nchi"), COUNTRIES[d.optString("ck")] ?: "")
-                    RrFact(t("Location", "Mahali"), d.optString("gps")); RrFact(t("Their note", "Maelezo yao"), d.optString("note").takeIf { it.isNotBlank() }?.let { "“$it”" } ?: "", long = true); RrFact(who.first, who.second)
+                    RrFact(t("Location", "Mahali"), d.optString("gps")); RrFact(t("Their note", "Maelezo yao"), d.optString("note").takeIf { it.isNotBlank() }?.let { "“$it”" } ?: "", long = true); PersonFact(who.first, who.second, sub = whenText(x.optString("at")), tag = "rr_by")
                 }
                 else -> Column(Modifier.padding(top = 10.dp)) {
                     RrFact(t("From", "Kutoka"), d.optString("from").ifBlank { t("none", "hakuna") }); RrFact(t("To", "Hadi"), d.optString("to"))
-                    RrFact(t("Distance", "Umbali"), if (d.has("dist")) Geo.dist(d.optDouble("dist"), m.prefs.miles) else ""); RrFact(t("How", "Jinsi"), d.optString("how"), long = true); RrFact(who.first, who.second)
+                    RrFact(t("Distance", "Umbali"), if (d.has("dist")) Geo.dist(d.optDouble("dist"), m.prefs.miles) else ""); RrFact(t("How", "Jinsi"), d.optString("how"), long = true); PersonFact(who.first, who.second, sub = whenText(x.optString("at")), tag = "rr_by")
                 }
             }
             if (own) Msg(t("You asked for this, so another admin approves it.", "Wewe uliomba hili, kwa hiyo msimamizi mwingine ataidhinisha."), "warn")

@@ -429,7 +429,9 @@ fun OcvOverview(m: AppModel, s: Snapshot, open: (String) -> Unit, go: (String) -
                 val sms = isCommunity(e)
                 val hu = C.hue(if (sms) "slate" else ocvFeedHue(e.optString("a")))
                 Row(Modifier.fillMaxWidth().then(if (known) Modifier.clip(RoundedCornerShape(12.dp)).clickable(role = Role.Button) { open(id) } else Modifier).heightIn(min = 56.dp).padding(vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Box(Modifier.size(32.dp).clip(CircleShape).background(hu.bg), contentAlignment = Alignment.Center) { Icon(Ic.get(if (sms) "phone" else ocvFeedIcon(e.optString("a"))), null, tint = hu.fg, modifier = Modifier.size(16.dp)) }
+                    // the person (tap: their contact sheet), with what they did as a badge; community reports keep the phone icon
+                    if (sms || !Contact.isPerson(e.optString("by").trim())) Box(Modifier.size(32.dp).clip(CircleShape).background(hu.bg), contentAlignment = Alignment.Center) { Icon(Ic.get(if (sms) "phone" else ocvFeedIcon(e.optString("a"))), null, tint = hu.fg, modifier = Modifier.size(16.dp)) }
+                    else PersonTap(e.optString("by"), tag = "ocv_feed_who") { PersonBadgeAvatar(e.optString("by"), ocvFeedIcon(e.optString("a")), hu, C.card, 34.dp) }
                     Spacer(Modifier.width(12.dp))
                     Column(Modifier.weight(1f)) {
                         Text(androidx.compose.ui.text.buildAnnotatedString {
@@ -742,7 +744,9 @@ fun OcvVisits(m: AppModel, s: Snapshot, open: (String) -> Unit) {
     var assigning by remember { mutableStateOf(false) }
     // "Assign a visit" from a person's sheet in Office › Team: the sheet opens with them chosen (TeamPerson.kt)
     var assignTo by remember { mutableStateOf(TeamGo.assign.orEmpty()) }
-    LaunchedEffect(Unit) { if (TeamGo.assign != null) { TeamGo.assign = null; assigning = true } }
+    // "Assign a visit" on a contact sheet, also when Visits is already open (Contact.kt)
+    val goAssign = TeamGo.assign
+    LaunchedEffect(goAssign) { if (goAssign != null) { assignTo = goAssign; TeamGo.assign = null; assigning = true } }
     LaunchedEffect(tick) { val r = m.api.adminGet("assign"); if (r.ok) { items = r.json.optJSONArray("items").ocvObjs(); err = null } else err = reasonText(r.reason) }
     val all = items
     if (all == null) { Text(err ?: t("Loading…", "Inapakia…"), color = if (err != null) C.bad else C.muted); return }
@@ -778,7 +782,7 @@ fun OcvVisits(m: AppModel, s: Snapshot, open: (String) -> Unit) {
         val to = a.optString("to"); val note = a.ocvS("note")
         val right = if (st == "done") smsAgo(a.optString("done")) else ocvDayText(a.optString("date"), today)
         val rel = if (st == "done") "" else ocvRelText(a.optString("date"), today)
-        OcvCard("ocv_visit", i, { OcvAvatar(to) }, a.ocvS("t").ifBlank { s.projects.firstOrNull { it.id == a.optString("id") }?.title ?: a.optString("id") },
+        OcvCard("ocv_visit", i, { PersonTap(to, tag = "ocv_visit_who") { OcvAvatar(to) } }, a.ocvS("t").ifBlank { s.projects.firstOrNull { it.id == a.optString("id") }?.title ?: a.optString("id") },
             right, false, { OcvPill(label, tone) }, "",
             listOf(to + if (rel.isNotEmpty() && rel != right) " · $rel" else "", if (note.isNotBlank()) "“$note”" else ""), italicLast = true) { picked = a }
     }
@@ -804,10 +808,10 @@ private fun OcvVisitSheet(m: AppModel, s: Snapshot, a: JSONObject, team: List<St
     OcvSheet("ocv_visit_sheet", close) { hide ->
         OcvSheetHead({ IconTile(icon, fg, bg, 52.dp) }, label + when (st) { "late" -> " · " + ocvLateShort(a.optString("date"), today); "soon" -> " · " + ocvRelText(a.optString("date"), today); else -> "" }, fg, title) { hide {} }
         Column(Modifier.padding(top = 10.dp)) {
-            OcvFact(t("Field officer", "Afisa wa uwanjani"), a.optString("to"))
+            PersonFact(t("Field officer", "Afisa wa uwanjani"), a.optString("to"), tag = "ocv_v_to")
             OcvFact(t("Date", "Tarehe"), runCatching { LocalDate.parse(a.optString("date")).format(DateTimeFormatter.ofPattern("EEEE d MMMM yyyy", ocvLoc())) }.getOrDefault(a.optString("date")))
             a.ocvS("note").takeIf { it.isNotBlank() }?.let { OcvFact(t("Note", "Maelezo"), it) }
-            if (a.ocvS("by").isNotBlank()) OcvFact(t("Assigned by", "Aliyegawa"), a.ocvS("by"), sub = a.ocvS("at").takeIf { it.isNotBlank() }?.let { whenText(it) } ?: "")
+            if (a.ocvS("by").isNotBlank()) PersonFact(t("Assigned by", "Aliyegawa"), a.ocvS("by"), sub = a.ocvS("at").takeIf { it.isNotBlank() }?.let { whenText(it) } ?: "", tag = "ocv_v_by")
             if (st == "done") OcvFact(t("Done", "Imefanyika"), whenText(a.optString("done")), C.ok)
         }
         if (p != null) Btn(t("Open project", "Fungua mradi"), { hide { openIt(id) } }, Modifier.padding(top = 16.dp).fillMaxWidth().testTag("ocv_v_open"), icon = "arrow")
@@ -877,6 +881,8 @@ private fun OcvAssignSheet(m: AppModel, s: Snapshot, team: List<String>, close: 
                 OcvSheetHead({ IconTile("cal", bl.fg, bl.bg, 52.dp) }, t("They see it in their app", "Ataiona kwenye programu yake"), C.muted, t("Assign a visit", "Gawa ziara")) { hide() }
                 if (team.isEmpty()) Msg(t("Add people in the Team tab first.", "Ongeza watu kwenye Timu kwanza."), "warn")
                 else Picker(t("Field officer", "Afisa wa uwanjani"), to, team.map { it to it }, { to = it })
+                // the chosen person: a tap opens their contact sheet
+                if (to.isNotBlank()) PersonChip(to, Modifier.padding(top = 4.dp), tag = "ocv_assign_who")
                 DateField(t("Date", "Tarehe"), date, { date = it })
                 Field(note, { note = it }, t("Note (optional)", "Maelezo (si lazima)"), placeholder = t("e.g. check the pump and meet the committee", "mf. kagua pampu na ukutane na kamati"))
                 Text(t("WHICH PROJECTS?", "MIRADI IPI?"), style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 0.8.sp, fontWeight = FontWeight.ExtraBold), color = C.muted, modifier = Modifier.padding(top = 18.dp))
