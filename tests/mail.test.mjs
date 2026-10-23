@@ -269,3 +269,30 @@ test('app invite: sent to that one person only, logged; no e-mail → refused; n
   const off = await setup({ RESEND_API_KEY: '' });
   assert.equal((await call(off.env, '/api/mail', '1111', { action: 'invite', to: 'Meril' })).reason, 'no-mail');
 });
+
+test('Choose people: team members and donors picked one by one, one e-mail each, donors keep their unsubscribe', async () => {
+  const { env, ids } = await setup();
+  const ppl = await teamPeople(env), key = n => ppl.find(p => p.name === n).key;
+  const dl = JSON.parse(env.FEED.m.get('pindonors')), viewer = (id, i) => id + '.' + dl.find(d => d.id === id).viewers[i || 0].vid;
+  // Meril and Bertin (no e-mail) from the team; Grace Church's second viewer, John, and the unsubscribed Ann from the donors
+  const body = { audience: 'pick', people: [key('Meril'), key('Bertin')], donors: [viewer(ids.grace, 1), ids.john, viewer(ids.unsub)] };
+  const r = await resolve(env, 'pick', { people: body.people, donors: body.donors });
+  assert.equal(r.kind, 'mixed');
+  assert.deepEqual(r.list.map(p => p.name + ':' + p.kind), ['Meril:team', 'Pastor bPaul/b:donor', 'John Mwangi:donor']);
+  assert.deepEqual(r.skipped, { unsub: 1, revoked: 0, 'no-email': 1, dup: 1 });   // John's second viewer has the same address
+  const pre = await call(env, '/api/mail', '1111', Object.assign({ action: 'preview' }, body, DRAFT));
+  assert.equal(pre.ok, true); assert.equal(pre.count, 3); assert.ok(!JSON.stringify(pre).includes('@donor.example'));
+  const s = await call(env, '/api/mail', '1111', Object.assign({ action: 'send', expect: 3, includeLink: true }, body, DRAFT));
+  assert.equal(s.ok, true); assert.equal(s.sent, 3); assert.equal(s.skipped, 3);
+  assert.equal(outbox.length, 3);
+  for (const e of outbox) assert.equal(e.to.length, 1);
+  const meril = outbox.find(e => e.to[0] === 'meril@rafiki.example'), john = outbox.find(e => e.to[0] === 'john@donor.example');
+  assert.ok(meril && !meril.headers && meril.html.includes('RAFIKI Pin&nbsp;team'), 'the teammate gets the team e-mail, no unsubscribe');
+  assert.ok(john && /api\/donor\?unsub=/.test(john.html) && john.headers['List-Unsubscribe'], 'donors keep their own unsubscribe');
+  assert.ok(!/\/donor\/[A-Za-z0-9_-]{43}/.test(outbox.map(e => e.html).join('')), 'no private link in a mixed send');
+  assert.ok(!outbox.some(e => /ann@/.test(e.to[0])), 'the unsubscribed donor is skipped');
+  const log = JSON.parse(env.FEED.m.get('pinmaillog')); assert.equal(log[log.length - 1].label, 'Chosen people');
+  // nothing picked: nobody
+  assert.equal((await call(env, '/api/mail', '1111', Object.assign({ action: 'send', audience: 'pick', people: [], donors: [], expect: 0 }, DRAFT))).reason, 'nobody');
+  assert.equal((await call(env, '/api/mail', '3333', Object.assign({ action: 'preview' }, body, DRAFT))).status, 403);
+});

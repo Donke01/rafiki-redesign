@@ -7,6 +7,7 @@
 //                  { action: "test", … }   → the same e-mail, sent only to the admin's own address
 //                  { action: "send", …, expect } → one e-mail per person (expect = the count the admin confirmed)
 //                  { action: "photo", type, data (base64) } → { id } a photo for the e-mail (≤ 1.5 MB)
+//                  audience "pick" (Choose people): people: [team keys], donors: [viewer keys]; each person gets their own kind of e-mail
 //                  { action: "invite", to, preview } → the ready-made app invite to ONE team member (to = their name or key).
 //                    preview: true → { subject, html, text } (text is the same invite for WhatsApp/SMS); otherwise it is sent.
 //                    The invite never carries a PIN.
@@ -106,13 +107,13 @@ export async function onRequestPost({ request, env }) {
     if (b.action === 'invite') return await invite(request, env, chk, b);
     if (!['preview', 'test', 'send'].includes(b.action)) return json({ ok: false, reason: 'bad-request' }, 400);
     const draft = cleanDraft(b), aud = String(b.audience || '');
-    const r = await resolve(env, aud, b.picks);
+    const r = await resolve(env, aud, aud === 'pick' ? { people: b.people, donors: b.donors } : b.picks);
     if (!r) return json({ ok: false, reason: 'bad-request' }, 400);
-    if (r.kind !== 'donor') draft.includeLink = false;
+    if (r.kind !== 'donor') draft.includeLink = false;   // the private link only goes in an e-mail to donors alone
     const skipped = { unsub: r.skipped.unsub, revoked: r.skipped.revoked, noEmail: r.skipped['no-email'], dup: r.skipped.dup };
     const S = site(request), mine = await ownEmail(env, by);
     // the e-mail as one person gets it; previews and tests use sample links, so nobody's private link or unsubscribe goes astray
-    const made = async (p, sample) => renderMail(Object.assign({ site: S, kind: r.kind, person: p, draft, by: chk.who || '' }, r.kind === 'donor' ? await donorLinks(env, S, p, draft.includeLink, sample) : {}));
+    const made = async (p, sample) => { const k = p.kind || r.kind; return renderMail(Object.assign({ site: S, kind: k, person: p, draft, by: chk.who || '' }, k === 'donor' && (sample || p.donor) ? await donorLinks(env, S, p, draft.includeLink, sample) : {})); };
     const sampleP = r.list[0] || { name: chk.who || 'Friend' };
     if (b.action === 'preview') {
       const m = await made(sampleP, true);
