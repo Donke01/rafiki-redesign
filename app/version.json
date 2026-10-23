@@ -1,8 +1,8 @@
 {
   "ok": true,
-  "versionCode": 44,
-  "versionName": "2.19.0",
-  "notes": "A calmer map: it opens with just the pins; tap the map for filters. Pins show the project type and its condition, groups show the mix, names appear as you zoom in, and a long press gives quick actions.",
-  "sha256": "1e03aab9eddd9cdb97342117f18eefd19d765d9ba181fab3b1553fb0757b2cfc",
+  "versionCode": 45,
+  "versionName": "2.20.0",
+  "notes": "Tap a team member for quick actions: e-mail, call, WhatsApp, send an app invite, make admin, assign a visit. Send an e-mail now lets you choose people one by one.",
+  "sha256": "16a2f620e219c9dfb31534cbb7f17dbf0073a2f8b3a8826b2c8073847b7c8dd8",
   "apk": "/app/rafiki-pin.apk"
 }
