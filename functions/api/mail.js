@@ -7,14 +7,18 @@
 //                  { action: "test", … }   → the same e-mail, sent only to the admin's own address
 //                  { action: "send", …, expect } → one e-mail per person (expect = the count the admin confirmed)
 //                  { action: "photo", type, data (base64) } → { id } a photo for the e-mail (≤ 1.5 MB)
+//                  audience "pick" (Choose people): people: [team keys], donors: [viewer keys]; each person gets their own kind of e-mail
+//                  { action: "invite", to, preview } → the ready-made app invite to ONE team member (to = their name or key).
+//                    preview: true → { subject, html, text } (text is the same invite for WhatsApp/SMS); otherwise it is sent.
+//                    The invite never carries a PIN.
 import { checkPin } from './pin.js';
 import { team, sameName } from '../../lib/pin-store.js';
 import { getFeed } from '../../lib/feed-cache.js';
 import { CONTACT } from '../../lib/donor.js';
-import { resolve, teamPeople, donorPeople, cleanDraft, renderMail, donorLinks, sendAll, readLog, addLog, usage, lastLog, overCap, caps, mailReady, audienceLabel } from '../../lib/mail.js';
+import { resolve, teamPeople, donorPeople, cleanDraft, renderMail, donorLinks, sendAll, readLog, addLog, usage, lastLog, overCap, caps, mailReady, audienceLabel, inviteDraft, inviteText } from '../../lib/mail.js';
 import { donors } from '../../lib/donor.js';
 
-const LIMIT = { send: 6, test: 12, photo: 20 };   // per admin per hour
+const LIMIT = { send: 6, test: 12, photo: 20, invite: 20 };   // per admin per hour
 const MAX_IMG = 1536 * 1024;
 const HEAD = { 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', 'X-Robots-Tag': 'noindex' };
 function json(body, status) { return new Response(JSON.stringify(body), { status: status || 200, headers: Object.assign({ 'Content-Type': 'application/json; charset=utf-8' }, HEAD) }); }
@@ -100,15 +104,16 @@ export async function onRequestPost({ request, env }) {
       await env.FEED.put('mailimg:' + id, JSON.stringify({ t: type, d: btoa(bin), by, at: new Date().toISOString() }), { expirationTtl: 60 * 60 * 24 * 400 });
       return json({ ok: true, id, url: site(request) + '/api/mail?img=' + id });
     }
+    if (b.action === 'invite') return await invite(request, env, chk, b);
     if (!['preview', 'test', 'send'].includes(b.action)) return json({ ok: false, reason: 'bad-request' }, 400);
     const draft = cleanDraft(b), aud = String(b.audience || '');
-    const r = await resolve(env, aud, b.picks);
+    const r = await resolve(env, aud, aud === 'pick' ? { people: b.people, donors: b.donors } : b.picks);
     if (!r) return json({ ok: false, reason: 'bad-request' }, 400);
-    if (r.kind !== 'donor') draft.includeLink = false;
+    if (r.kind !== 'donor') draft.includeLink = false;   // the private link only goes in an e-mail to donors alone
     const skipped = { unsub: r.skipped.unsub, revoked: r.skipped.revoked, noEmail: r.skipped['no-email'], dup: r.skipped.dup };
     const S = site(request), mine = await ownEmail(env, by);
     // the e-mail as one person gets it; previews and tests use sample links, so nobody's private link or unsubscribe goes astray
-    const made = async (p, sample) => renderMail(Object.assign({ site: S, kind: r.kind, person: p, draft, by: chk.who || '' }, r.kind === 'donor' ? await donorLinks(env, S, p, draft.includeLink, sample) : {}));
+    const made = async (p, sample) => { const k = p.kind || r.kind; return renderMail(Object.assign({ site: S, kind: k, person: p, draft, by: chk.who || '' }, k === 'donor' && (sample || p.donor) ? await donorLinks(env, S, p, draft.includeLink, sample) : {})); };
     const sampleP = r.list[0] || { name: chk.who || 'Friend' };
     if (b.action === 'preview') {
       const m = await made(sampleP, true);
@@ -143,6 +148,27 @@ export async function onRequestPost({ request, env }) {
     console.error('mail ' + b.action + ':', e && e.message);
     return json({ ok: false, reason: 'down' }, 502);
   }
+}
+
+// one team member, found by key ("t:<name>") or by name
+async function invite(request, env, chk, b) {
+  const to = String(b.to || '').trim().slice(0, 80), by = chk.who || 'An admin';
+  if (!to) return json({ ok: false, reason: 'bad-request' }, 400);
+  const p = (await teamPeople(env)).find(x => x.key === to || sameName(x.name, to));
+  if (!p) return json({ ok: false, reason: 'not-found' }, 404);
+  const m = renderMail({ site: site(request), kind: 'team', person: p, draft: inviteDraft(p, chk.who), by: chk.who || '' });
+  if (b.preview) return json({ ok: true, to: p.name, email: !!p.email, subject: m.subject, html: m.html, text: inviteText(p, chk.who) });
+  if (!p.email) return json({ ok: false, reason: 'no-email' }, 409);
+  if (!mailReady(env)) return json({ ok: false, reason: 'no-mail' }, 503);
+  const log = await readLog(env), over = overCap(env, 1, usage(log));
+  if (over) return json(Object.assign({ ok: false, count: 1 }, over), 409);
+  if (await limited(env, 'invite', by, LIMIT.invite)) return json({ ok: false, reason: 'rate' }, 429);
+  const mine = await ownEmail(env, by);
+  const res = await sendAll(env, [p], async () => m, { replyTo: mine || CONTACT });
+  const ok = res[0].ok;
+  await addLog(env, { id: crypto.randomUUID().slice(0, 12), at: new Date().toISOString(), by, audience: 'invite', label: 'App invite to ' + p.name, kind: 'team', subject: m.subject, link: false,
+    n: 1, sent: ok ? 1 : 0, failed: ok ? 0 : 1, skipped: 0, skippedBy: { unsub: 0, revoked: 0, noEmail: 0, dup: 0 }, rcpt: [{ name: p.name, s: ok ? 'sent' : 'failed', e: ok ? undefined : String(res[0].error || '').slice(0, 120) }] });
+  return ok ? json({ ok: true, sent: 1, to: p.name }) : json({ ok: false, reason: 'down', detail: res[0].error }, 502);
 }
 
 export function onRequest() { return json({ ok: false, reason: 'method' }, 405); }
