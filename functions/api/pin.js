@@ -226,7 +226,7 @@ export async function onRequestGet({ request, env, waitUntil }) {
     }
     if (q.get('activity')) return json({ ok: true, activity: (await getJson(env, 'pinact', [])).map(stripT) }, 200);
     if (q.get('team')) {
-      // the team list for Me & team: no PINs, no e-mails, no admin flags
+      // the team list for Me & team: no PINs, no e-mails (except your own), no admin flags; role, old names (aka), blocked
       const t = await team(env), seenAt = await getJson(env, 'pinseen', {}), prof = await getJson(env, 'pinprofiles', {});
       const gd = await guards(env);
       const list = t.map(p => ({ name: p.name, home: p.home || '', phone: p.phone || '', role: p.role || '', aka: p.aka || [], lastSeen: seenAt[p.name] || null }));
@@ -239,6 +239,8 @@ export async function onRequestGet({ request, env, waitUntil }) {
       // what people set for themselves in Me › Settings › Personal details
       list.forEach(x => { const k = Object.keys(prof).find(n => sameName(n, x.name)), pr = k && prof[k]; if (pr) { if (pr.phone) x.phone = pr.phone; if (pr.home) x.home = pr.home; if (pr.nick) x.nick = pr.nick; } });
       list.forEach(x => { const g = guardFor(gd, x.name); x.blocked = !!(g && g.blocked); });
+      // your own e-mail, for your own contact card (nobody else's)
+      if (chk.who) { const mine = t.find(p => sameName(p.name, chk.who)), x = list.find(y => sameName(y.name, chk.who)); if (mine && x) x.email = mine.email || ''; }
       return json({ ok: true, team: list.sort((a, b) => a.name.localeCompare(b.name)) }, 200);
     }
     const feed = await getFeed(env, waitUntil);

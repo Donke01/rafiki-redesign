@@ -327,6 +327,46 @@ html[data-theme=sun] .tm-qi{border:2px solid #000}
 .tm-in .tm-cp{position:absolute;right:4px;bottom:4px}
 .tm-kv dd{display:flex;align-items:center;gap:2px;min-width:0;overflow-wrap:anywhere}.tm-kv dd .tm-cp{margin:-10px -8px -10px 0}
 .tm-ab.tm-ab1{grid-template-columns:1fr}
+/* contw: one contact sheet for every person (a header, then a grouped menu; each row opens a small sheet) */
+.ct-hd{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;padding:4px 36px 6px}
+.ct-hd .tm-av{width:68px;height:68px;font-size:1.4rem;animation:tmPop .5s cubic-bezier(.34,1.56,.64,1) .08s both}.ct-hd .tm-av .cr{width:28px;height:28px;top:-9px;right:-7px;padding:4px}
+.ct-hd h3{margin:4px 0 0;font-size:1.3rem;line-height:1.25;color:var(--ink);overflow-wrap:normal;word-break:normal;hyphens:none}
+.ct-hd .tm-tags{justify-content:center}.tm-t.fld{--hu:var(--hu-blue);--hb:var(--hb-blue)}.tm-t.blk{--hu:var(--bad);--hb:var(--badbg)}.tm-t.adm svg{width:13px;height:13px}
+.ct-role{font-size:.86rem;font-weight:600;color:var(--text)}
+.ct-st{font-size:.8rem;color:var(--muted)}.ct-st.bad{color:var(--bad);font-weight:700}
+.ct-ids{margin:10px 0 0;border:var(--bw) solid var(--line);border-radius:16px;overflow:hidden}
+.ct-id{display:flex;align-items:center;gap:10px;min-height:48px;padding:2px 4px 2px 12px}.ct-id+.ct-id{border-top:1px solid var(--line)}
+.ct-idi{flex:none;display:flex;color:var(--muted)}.ct-idi svg{width:18px;height:18px}
+.ct-idv{flex:1;min-width:0;font-weight:700;color:var(--ink);font-size:.92rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ct-cp{flex:none;display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border:0;border-radius:12px;background:none;color:var(--muted);cursor:pointer}.ct-cp svg{width:18px;height:18px}.ct-cp:hover{background:var(--tint);color:var(--blue)}
+.ct-g{margin-top:18px}
+.ct-g h4{margin:0 2px 6px;font-size:.74rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.ct-list{border:var(--bw) solid var(--line);border-radius:18px;overflow:hidden;background:var(--card)}
+.ct-r{display:flex;align-items:center;gap:12px;width:100%;min-height:56px;padding:8px 10px 8px 12px;border:0;border-top:1px solid var(--line);background:none;color:var(--text);font:inherit;text-align:left;text-decoration:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.ct-list>.ct-r:first-child{border-top:0}.ct-r:hover{background:var(--tint)}.ct-r:active{background:var(--tint);transition:none}.ct-r.ro{cursor:default}.ct-r.ro:hover{background:none}
+.ct-r:focus-visible{outline:3px solid var(--blue);outline-offset:-3px}
+.ct-ri{flex:none;width:36px;height:36px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:var(--hb);color:var(--hu)}.ct-ri svg{width:20px;height:20px}
+.ct-rl{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.ct-rl b{color:var(--ink);font-size:.95rem;line-height:1.3;overflow-wrap:normal;word-break:normal;hyphens:none}
+.ct-rl small{color:var(--muted);font-size:.8rem;line-height:1.35;overflow-wrap:normal;word-break:normal;hyphens:none;overflow:hidden;text-overflow:ellipsis}
+.ct-r.red .ct-rl b{color:var(--bad)}
+.ct-rc{flex:none;display:flex;color:var(--muted)}.ct-rc svg{width:18px;height:18px}
+.ct-none{font-style:italic}.ct-idl{font-weight:600;color:var(--muted)}.ct-aka{display:block}
+.ct-hint{margin:8px 4px 0;font-size:.8rem;color:var(--muted)}
+.ct-cf{display:flex;gap:10px;align-items:flex-start;margin-top:8px;padding:12px 14px;border-radius:16px;background:var(--hb-purple);color:var(--ink);font-size:.86rem}.ct-cf>svg{flex:none;width:20px;height:20px;color:var(--hu-purple);margin-top:1px}
+.ct-cf .po-tech{margin-top:4px}
+.ct .tm-work{margin:0 0 10px;padding:0;border:0}
+.ct-who{font-weight:700;color:inherit;text-decoration:underline;text-decoration-color:color-mix(in srgb,currentColor 35%,transparent);text-underline-offset:3px;cursor:pointer;border-radius:4px}
+.ct-who:hover{color:var(--blue)}.ct-who:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.ct-fh{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;padding:4px 36px 4px}
+.ct-fh .ct-ri{width:52px;height:52px;border-radius:16px}.ct-fh .ct-ri svg{width:26px;height:26px}
+.ct-fh h3{margin:4px 0 0;font-size:1.15rem;color:var(--ink);overflow-wrap:normal;word-break:normal;hyphens:none}.ct-fh small{color:var(--muted);font-size:.86rem;line-height:1.45}
+.ct-lb{display:block;margin:16px 0 0;font-weight:700;font-size:.88rem;color:var(--ink)}.ct-lb input,.ct-lb select{display:block;width:100%;margin-top:6px;min-height:48px}
+.ct-pin{font-size:1.4rem;letter-spacing:.3em;text-align:center}
+.ct-go{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}.ct-go .btn{flex:1 1 140px;min-height:48px}.ct-go .msg{flex-basis:100%;margin:0}
+.ct-go .btn.po-red{background:var(--bad) !important;color:#FFFFFF !important;border-color:var(--bad) !important}
+.ct-clear{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:48px;margin-top:10px;border:0;border-radius:14px;background:none;color:var(--bad);font:inherit;font-weight:700;cursor:pointer}.ct-clear svg{width:18px;height:18px}.ct-clear:hover{background:var(--badbg)}
+html[data-theme=sun] .ct-list,html[data-theme=sun] .ct-ids{border:2px solid #000}html[data-theme=sun] .ct-ri{border:2px solid #000}
 .tm-work{margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}
 .tm-work h4{margin:0 0 10px;font-size:.76rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .tm-wn{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.tm-wn div{display:flex;flex-direction:column;align-items:center;padding:10px 2px;border-radius:14px;background:var(--hb-slate)}
@@ -3097,7 +3137,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
   var jget = function (k, d) { try { return JSON.parse(store.get(k) || 'null') || d; } catch (e) { return d; } };
   // the RAFIKI logo (dark and light versions) for headers
   var LOGO = '<img class="lg-d" src="/img/logo-dark-bold.webp" alt="RAFIKI" width="64" height="22"><img class="lg-l" src="/img/logo-light-bold.webp" alt="" width="64" height="22">';
-  var S = { gmaps: null, mode: store.get('rfPinMode') || '', photo: store.get('rfPinPhoto') || '', pin: store.get('rfPin') || '', name: store.get('rfPinName') || '', who: store.get('rfPinWho') || '', projects: jget('rfPinList', []), repairs: jget('rfPinRepairs', {}), visits: jget('rfPinVisits', {}), admin: jget('rfPinRole', {}).admin || false, jobs: jget('rfPinRole', {}).jobs || [], assigned: jget('rfPinRole', {}).assigned || [], confirmed: jget('rfPinRole', {}).confirmed || {}, reviewOpen: 0, lang: store.get('rfPinLang') || '', units: store.get('rfPinUnits') || 'km', srvHome: store.get('rfPinSrvHome') || '', gpsHome: '',
+  var S = { gmaps: null, mode: store.get('rfPinMode') || '', photo: store.get('rfPinPhoto') || '', pin: store.get('rfPin') || '', gen: Number(store.get('rfPinGen')) || 0, name: store.get('rfPinName') || '', who: store.get('rfPinWho') || '', projects: jget('rfPinList', []), repairs: jget('rfPinRepairs', {}), visits: jget('rfPinVisits', {}), admin: jget('rfPinRole', {}).admin || false, jobs: jget('rfPinRole', {}).jobs || [], assigned: jget('rfPinRole', {}).assigned || [], confirmed: jget('rfPinRole', {}).confirmed || {}, reviewOpen: 0, lang: store.get('rfPinLang') || '', units: store.get('rfPinUnits') || 'km', srvHome: store.get('rfPinSrvHome') || '', gpsHome: '',
     me: jget('rfPinMe', null), filter: store.get('rfPinFilter') || 'missing', ftype: store.get('rfPinType') || '', cur: null, here: null, hereAt: 0, view: 'vLock', prev: 'vMap', routeMode: false, pickedRoute: [], route: jget('rfPinRoute', []), dismissed: {} };
   var CENTER = { ke: [0.3, 37.9, 7], tz: [-6.3, 34.8, 6], ug: [1.4, 32.3, 7], mw: [-13.3, 34.3, 7] };
   var CNAME = { ke: 'Kenya', tz: 'Tanzania', ug: 'Uganda', mw: 'Malawi' };
@@ -3182,6 +3222,8 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
       : j.reason === 'pin-taken' ? tr('That PIN can’t be used. Choose another.', 'PIN hiyo haiwezi kutumika. Chagua nyingine.')
       : j.reason === 'pin-cloudflare' ? tr('Your PIN was set by the office, so only they can change it.', 'PIN yako iliwekwa na ofisi, kwa hiyo wao pekee wanaweza kuibadilisha.')
       : j.reason === 'own-pin' ? tr('You need your own PIN for this. Ask the office for one.', 'Unahitaji PIN yako mwenyewe kwa hili. Omba ofisi ikupe.')
+      : j.reason === 'blocked' ? tr('Your access to RAFIKI Pin has been paused by the office. Please talk to them if you think this is a mistake.', 'Ofisi imesimamisha ufikiaji wako wa RAFIKI Pin. Tafadhali zungumza nao kama unafikiri ni kosa.')
+      : j.reason === 'signed-out' ? tr('You were signed out on all phones by the office. Enter your PIN to carry on.', 'Ofisi imekutoa kwenye simu zote. Weka PIN yako kuendelea.')
       : j.reason === 'locked' ? 'Too many wrong PINs from this connection. Please try again in an hour.'
       : j.reason === 'not-set-up' ? tr('The pin app isn’t switched on yet. Ask whoever looks after the website to set up the PINs.', 'Programu bado haijawashwa. Muombe anayesimamia tovuti aweke PIN.')
       : j.reason === 'no-monday' ? 'The pin app can’t reach monday.com yet (the monday.com connection isn’t set up).'
@@ -3469,13 +3511,16 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
   qa('#tabs button').forEach(function (b) { b.addEventListener('click', function () { tabGo(b.getAttribute('data-v')); }); });
 
   // --- talking to the server -------------------------------------------------------------
+  // the PIN and this phone's session number (after "Sign out of all phones" an older number is refused, contw);
+  // a PIN typed on the lock screen starts a new session
+  function pinHdr() { if (!S.pin) return {}; var h = { 'X-Pin': S.pin, 'X-Pin-Gen': String(S.gen || 0) }; if (S.pinNew) h['X-Pin-New'] = '1'; return h; }
   function api(method, body, q) {
-    return fetch('/api/pin' + (q || ''), { method: method, headers: Object.assign({ Accept: 'application/json' }, S.pin ? { 'X-Pin': S.pin } : {}, body ? { 'Content-Type': 'application/json' } : {}), body: body ? JSON.stringify(body) : undefined })
+    return fetch('/api/pin' + (q || ''), { method: method, headers: Object.assign({ Accept: 'application/json' }, pinHdr(), body ? { 'Content-Type': 'application/json' } : {}), body: body ? JSON.stringify(body) : undefined })
       .then(function (r) { return r.json().catch(function () { return { ok: false, reason: 'down' }; }).then(function (j) { j.status = r.status; return j; }); })
       .catch(function () { return { ok: false, reason: 'offline', status: 0 }; });
   }
   function placeApi(q) {
-    return fetch('/api/place' + q, { headers: Object.assign({ Accept: 'application/json' }, S.pin ? { 'X-Pin': S.pin } : {}) })
+    return fetch('/api/place' + q, { headers: Object.assign({ Accept: 'application/json' }, pinHdr()) })
       .then(function (r) { return r.json().catch(function () { return { ok: false, reason: 'down' }; }).then(function (j) { j.status = r.status; return j; }); })
       .catch(function () { return { ok: false, reason: 'offline', status: 0 }; });
   }
@@ -3483,7 +3528,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
     var fd = new FormData(); fd.append('update', updateId); if (label) fd.append('label', label);
     var ext = kind === 'voice' ? (/mp4|m4a|aac/.test(blob.type) ? 'm4a' : /ogg/.test(blob.type) ? 'ogg' : 'webm') : 'jpg';
     fd.append('file', blob, (kind === 'voice' ? 'voice.' : 'photo.') + ext);
-    return fetch('/api/pin-photo', { method: 'POST', headers: S.pin ? { 'X-Pin': S.pin } : {}, body: fd })
+    return fetch('/api/pin-photo', { method: 'POST', headers: pinHdr(), body: fd })
       .then(function (r) { return r.json().catch(function () { return { ok: false, reason: 'down' }; }).then(function (j) { j.status = r.status; return j; }); })
       .catch(function () { return { ok: false, reason: 'offline', status: 0 }; });
   }
@@ -3871,7 +3916,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
     e.preventDefault();
     var name = $('iName').value.trim(), pin = $('iPin').value.trim();
     if (!pin) { msg('mLock', 'bad', 'Please enter your PIN.'); $('iPin').focus(); return; }
-    S.name = name; S.pin = pin; S.mode = 'pin'; msg('mLock', '', 'Checking…');
+    S.name = name; S.pin = pin; S.mode = 'pin'; S.pinNew = true; msg('mLock', '', 'Checking…');
     load(true);
   });
   // number pad: 4 digits unlock by themselves; "My PIN is longer" for older 6-digit PINs
@@ -3896,7 +3941,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
   function ppReset() { $('iPin').value = ''; ppDraw(); }
   ppDraw();
   if (S.name) $('ppHi').textContent = 'Habari ' + S.name.split(' ')[0] + ', karibu tena.';
-  function forget() { store.del('rfPinBio'); S.pin = ''; store.del('rfPin'); if (S.mode === 'monday') { S.mode = ''; store.del('rfPinMode'); store.del('rfPinPhoto'); } }
+  function forget() { store.del('rfPinBio'); S.pin = ''; store.del('rfPin'); S.gen = 0; store.del('rfPinGen'); if (S.mode === 'monday') { S.mode = ''; store.del('rfPinMode'); store.del('rfPinPhoto'); } }
   function lock() {
     pick.stop(); nPick.stop();
     var wasMonday = S.mode === 'monday'; forget(); ppReset(); msg('mLock', '', ''); msg('mSign', '', '');
@@ -3904,7 +3949,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
     show('vLock');
   }
   $('lockBtn').addEventListener('click', function () { if (bioOn()) bioGate(); else lock(); });
-  function lockOut(j) { var wasMonday = S.mode === 'monday'; forget(); show('vLock'); if (!wasMonday) { ppReset(); var dd = $('ppDots'); dd.classList.remove('shake'); void dd.offsetWidth; dd.classList.add('shake'); } msg(wasMonday || j.reason === 'signin' ? 'mSign' : 'mLock', 'bad', wasMonday ? 'Please sign in with monday.com again.' : why(j)); }
+  function lockOut(j) { var wasMonday = S.mode === 'monday', kind = j.reason === 'blocked' || j.reason === 'signed-out'; forget(); show('vLock'); if (kind) { ppReset(); msg(wasMonday ? 'mSign' : 'mLock', 'warn', why(j)); return; } if (!wasMonday) { ppReset(); var dd = $('ppDots'); dd.classList.remove('shake'); void dd.offsetWidth; dd.classList.add('shake'); } msg(wasMonday || j.reason === 'signin' ? 'mSign' : 'mLock', 'bad', wasMonday ? 'Please sign in with monday.com again.' : why(j)); }
   // sign in with monday.com: come back to the same screen afterwards
   // monday.com sign-in on the lock screen: with your own monday.com token (works before the app is installed for
   // the account), or monday.com's own approve page
@@ -3969,7 +4014,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
         if (fromLock) msg('mLock', 'bad', why(j)); else msg('mList', 'bad', why(j));
         return;
       }
-      S.who = j.who || ''; S.linked = j.linked || ''; S.gmaps = j.gmaps || null; store.set('rfPinGmaps', JSON.stringify(S.gmaps));
+      S.who = j.who || ''; S.linked = j.linked || ''; S.pinNew = false; S.gen = Number(j.gen) || 0; store.set('rfPinGen', String(S.gen)); S.gmaps = j.gmaps || null; store.set('rfPinGmaps', JSON.stringify(S.gmaps));
       S.cmaps = j.countryMaps || null; store.set('rfPinCmaps', JSON.stringify(S.cmaps)); // whole-country maps (feat-cmap)
       if (j.monday) { S.mode = 'monday'; S.pin = ''; store.del('rfPin'); store.set('rfPinMode', 'monday'); }
       if (S.who) S.name = S.who;
@@ -4416,7 +4461,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
           '<span class="mpa-ph c-' + c + '" style="--hu:var(--hu-' + ti[1] + ')">' + oic(ti[0]) + (p.photo ? '<img src="' + photoUrl(p, 240) + '" alt="" onerror="this.remove()">' : '') + '</span>' +
           '<span class="mpa-tx"><b id="mpaTitle">' + esc(p.title) + '</b><small>' + esc([p.area, p.country].filter(Boolean).join(' · ')) + '</small>' +
             '<span class="mpa-tags"><em class="mpa-cond c-' + c + '"><i></i>' + mpaCondName(c) + '</em>' + (S.here ? '<span class="mpa-dist" id="mpaDist">' + tr(dist(metres(S.here, p.gps)) + ' from you', dist(metres(S.here, p.gps)) + ' kutoka kwako') + '</span>' : '') + '</span>' +
-            '<span class="mpa-lv">' + (v ? tr('Last visit ', 'Ziara ya mwisho ') + mpaVisitDay(v.at) + (v.by ? ' · ' + esc(v.by) : '') : tr('No visit in the app yet', 'Bado hakuna ziara kwenye programu')) + '</span></span></div>' +
+            '<span class="mpa-lv">' + (v ? tr('Last visit ', 'Ziara ya mwisho ') + mpaVisitDay(v.at) + (v.by ? ' · ' + ctWho(v.by) : '') : tr('No visit in the app yet', 'Bado hakuna ziara kwenye programu')) + '</span></span></div>' +
         '<div class="mpa-acts"><button type="button" class="mpa-a pri" data-mpa="visit">' + oic('clip') + '<span>' + tr('Visit now', 'Tembelea sasa') + '</span></button>' +
           '<a class="mpa-a" data-mpa="dir" href="https://www.google.com/maps/dir/?api=1&amp;destination=' + p.gps[0].toFixed(6) + ',' + p.gps[1].toFixed(6) + '" target="_blank" rel="noopener">' + oic('mpaNav') + '<span>' + tr('Directions', 'Maelekezo') + '</span></a>' +
           '<button type="button" class="mpa-a" data-mpa="open">' + oic('chev') + '<span>' + tr('Open project', 'Fungua mradi') + '</span></button></div>';
@@ -5303,7 +5348,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
       ofbProjCost(p, j); if (S.cur && S.cur.id === p.id && j && j.ok) tilesUi(j.costs || null);
       if (S.cur && S.cur.id === p.id && j.ok && j.visits) { prevVisits[p.id] = j.visits; if (V && STEPS[V.step][0] === 'read') vRender(); }
       if (!S.cur || S.cur.id !== p.id || !j.ok || !j.last) { $('pLast').innerHTML = ''; return; }
-      $('pLast').innerHTML = '<span>' + esc(tr('Last pinned by ' + j.last.by, 'Mahali paliwekwa mwisho na ' + j.last.by)) + ' · ' + esc(when(j.last.at)) + '</span><button class="btn light small" id="bUndo" type="button">' + oic('undo') + '<span>' + tr('Undo', 'Tendua') + '</span></button>';
+      $('pLast').innerHTML = '<span>' + esc(tr('Last pinned by ', 'Mahali paliwekwa mwisho na ')) + ctWho(j.last.by) + ' · ' + esc(when(j.last.at)) + '</span><button class="btn light small" id="bUndo" type="button">' + oic('undo') + '<span>' + tr('Undo', 'Tendua') + '</span></button>';
       $('bUndo').addEventListener('click', function () {
         var pv = j.last.prev, pl = Array.isArray(pv) ? pv : /^\s*-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?\s*$/.test(String(pv || '')) ? String(pv).split(',').map(Number) : null, pt = pl ? fmt(pl) : pv ? String(pv) : '';
         pwAsk(tr('Undo the last pin?', 'Tendua mahali palipowekwa mwisho?'), pt ? tr('The location goes back to ' + pt + '.', 'Mahali panarudi kuwa ' + pt + '.') : tr('The location will be empty again.', 'Mahali patakuwa tupu tena.'), tr('Undo the pin', 'Tendua mahali'), tr('Keep it', 'Paache'), function () {
@@ -5377,11 +5422,11 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
     var d = S.here && p.gps ? metres(S.here, p.gps) : null;
     var map = p.gps ? '<div class="smap">' + staticMap(p.gps, 15, S.here) + '<span class="pt" style="--c:' + col + '"></span>' +
       (d != null ? '<span class="chipl">' + esc(dist(d)) + ' · Live</span>' : '') + '<span class="attr">© OpenStreetMap</span>' +
-      '<div class="who3"><span class="av" aria-hidden="true">' + esc(r.assignee ? initials(r.assignee) : '?') + '</span><span><b>' + (r.assignee ? esc(r.assignee) : 'Not assigned yet') + '</b><small>' +
+      '<div class="who3"><span class="av" aria-hidden="true">' + esc(r.assignee ? initials(r.assignee) : '?') + '</span><span><b>' + (r.assignee ? ctWho(r.assignee) : 'Not assigned yet') + '</b><small>' +
       (r.due ? 'Due ' + esc(dDay(r.due)) : r.assignee ? 'Repair job' : 'The office assigns it') + '</small></span></div></div>' : '';
     var steps = [
-      ['Reported', (bad ? 'Not working' : 'Needs repair') + ' · ' + esc(r.by) + ', ' + esc(when(r.at))],
-      ['Assigned', r.assignee ? esc(r.assignee) + (at.assigned ? ', ' + esc(when(at.assigned)) : '') : 'Waiting for the office'],
+      ['Reported', (bad ? 'Not working' : 'Needs repair') + ' · ' + ctWho(r.by) + ', ' + esc(when(r.at))],
+      ['Assigned', r.assignee ? ctWho(r.assignee) + (at.assigned ? ', ' + esc(when(at.assigned)) : '') : 'Waiting for the office'],
       ['Parts ordered', at.parts ? esc(when(at.parts)) : (r.parts ? 'Needs: ' + esc(r.parts) : '—')],
       ['Fixed', water(p) ? 'Mark it fixed when the water is running again' : 'Mark it fixed when it’s working again']
     ];
@@ -5830,7 +5875,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
   // "Last visit" line on the project, and the previous readings for comparing
   function visitLine() {
     var p = S.cur, v = p && S.visits[p.id];
-    $('pVisit').innerHTML = v ? esc(tr('Last visit', 'Ziara iliyopita') + ': ' + when(v.at) + ' · ' + v.by) + (STATES[v.state] ? ' · <span class="stn">' + stIc(v.state) + esc(tr(stOf(p)[v.state][1], stOf(p)[v.state][2])) + '</span>' : '') : esc(tr('No visit recorded in the app yet.', 'Hakuna ziara iliyorekodiwa bado.'));
+    $('pVisit').innerHTML = v ? esc(tr('Last visit', 'Ziara iliyopita') + ': ' + when(v.at) + ' · ') + ctWho(v.by) + (STATES[v.state] ? ' · <span class="stn">' + stIc(v.state) + esc(tr(stOf(p)[v.state][1], stOf(p)[v.state][2])) + '</span>' : '') : esc(tr('No visit recorded in the app yet.', 'Hakuna ziara iliyorekodiwa bado.'));
     stateUi();
   }
   // the state at a glance, under the project name
@@ -5853,7 +5898,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
         if (AUDIO.test(f.ext)) return '<audio controls preload="none" src="' + esc(f.url) + '"></audio>';
         return '<a class="btn light small" href="' + esc(f.url) + '" target="_blank" rel="noopener">📎 ' + esc(f.name) + '</a>';
       }).join('');
-      return '<article class="note" style="--i:' + (ni++) + '"><div class="meta">' + esc(when(n.at)) + (n.by ? ' · ' + esc(n.by) : '') + '</div><p>' + esc(n.text) + '</p>' + (files ? '<div class="files">' + files + '</div>' : '') + '</article>';
+      return '<article class="note" style="--i:' + (ni++) + '"><div class="meta">' + esc(when(n.at)) + (n.by ? ' · ' + esc(n.by) : '') + '</div><p>' + ctNoteText(n) + '</p>' + (files ? '<div class="files">' + files + '</div>' : '') + '</article>';
     }).join('') : emptyHtml('No notes on this project yet.');
     prjTlDraw(notes, stale);
   }
@@ -5917,6 +5962,8 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
     return { k: slug, key: slug, en: h, sw: h };
   }
   // who took it: the note says "Site visit by Grace (RAFIKI pin app)" or "… pinned with the RAFIKI pin app by Grace: …"
+  // a note's text with the person in "by Grace" tappable (their contact sheet)
+  function ctNoteText(n) { var t = esc(n.text), w = prjWho(n); if (!w || w === n.by || /RAFIKI/i.test(w)) return t; var k = t.indexOf('by ' + esc(w)); return k < 0 ? t : t.slice(0, k) + 'by ' + ctWho(w) + t.slice(k + 3 + esc(w).length); }
   function prjWho(n) { var m = /\bby ([^.:(\n<]{2,60}?)\s*(?:\(RAFIKI pin app\)|:|\.)/i.exec(String(n.text || '').split('\n')[0]); return m ? m[1].trim() : n.by || ''; }
   // [{k, key, en, sw, items: [{url, at, by}]}]: one group per view, newest first; the project's main photo on top
   function prjGroups(notes, p) {
@@ -5953,7 +6000,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
           '<div class="prj-strip" aria-label="' + esc(tr(g.en, g.sw)) + '">' + g.items.map(function (it, ii) {
             return '<button type="button" class="prj-ph' + (it.main ? ' main' : '') + '" data-g="' + gi + '" data-i="' + ii + '" aria-label="' + esc(tr(g.en, g.sw) + (it.at ? ', ' + prjDay(it.at) : '') + (it.by ? ', ' + it.by : '')) + '">' +
               '<img loading="lazy" src="' + esc(it.url) + '" alt="" onerror="this.parentNode.classList.add(\'off\')">' + (ii === 0 && !it.main && g.items.length > 1 ? '<i class="prj-new">' + tr('Latest', 'Mpya zaidi') + '</i>' : '') +
-              '<span class="cap"><b>' + (it.main ? tr('Main photo', 'Picha kuu') : esc(prjDay(it.at))) + '</b>' + (it.by ? '<small>' + esc(it.by) + '</small>' : '') + '</span></button>';
+              '<span class="cap"><b>' + (it.main ? tr('Main photo', 'Picha kuu') : esc(prjDay(it.at))) + '</b>' + (it.by ? '<small>' + ctWho(it.by) + '</small>' : '') + '</span></button>';
           }).join('') + '</div></div>';
       }).join('') +
       (n ? '' : '<p class="muted prj-none">' + (stale ? tr('Visit photos need a signal.', 'Picha za ziara zinahitaji mtandao.') : tr('No visit photos yet. Photos from each site visit show here, grouped by view, so you can compare them over time.', 'Bado hakuna picha za ziara. Picha za kila ziara zinaonekana hapa, kwa mwonekano, ili uzilinganishe kwa wakati.')) + '</p>') + '</div>';
@@ -6547,7 +6594,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
       : who ? '<span class="np-av" aria-hidden="true" style="--hu:var(--hu-' + hu + ');--hb:var(--hb-' + hu + ')">' + esc(initials(who)) + '<i class="bd" style="--ku:var(--hu-' + k[4] + ')">' + oic(k[3]) + '</i></span>'
       : '<span class="np-av tile" aria-hidden="true" style="--hu:var(--hu-' + k[4] + ');--hb:var(--hb-' + k[4] + ')">' + oic(k[3]) + '</span>';
     return '<li><button type="button" class="np-r' + (nw ? ' new' : '') + '" style="--i:' + Math.min(i, 12) + '" data-key="' + esc(nkey(n)) + '"' + (n.id ? ' data-id="' + esc(n.id) + '"' : n.k === 'review' ? ' data-go="review"' : '') + '>' + av +
-      '<span class="np-t">' + (nw ? '<span class="vh">' + tr('Unread: ', 'Haijasomwa: ') + '</span>' : '') + '<b>' + esc(who || n.name || '') + '</b><small>' + esc([nAgo(n.at), n.p].filter(Boolean).join(' · ')) + '</small><span class="m">' + esc(n.m || n.t) + '</span></span>' +
+      '<span class="np-t">' + (nw ? '<span class="vh">' + tr('Unread: ', 'Haijasomwa: ') + '</span>' : '') + '<b>' + (who && !n.sms ? ctWho(who) : esc(who || n.name || '')) + '</b><small>' + esc([nAgo(n.at), n.p].filter(Boolean).join(' · ')) + '</small><span class="m">' + esc(n.m || n.t) + '</span></span>' +
       (nw ? '<i class="np-d" aria-hidden="true"></i>' : '') + '</button></li>';
   }
   function npEmpty(f) {
@@ -6816,7 +6863,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
     var t = teamCache; if (!t) return;
     var today = dayKey(Date.now()), a = actCache || [];
     var rows = t.filter(function (p) { return !same(p.name, S.name); }).map(function (p) {
-      var last = a.filter(function (e) { return same(e.by, p.name) && WORK[e.a]; }).sort(function (x, y) { return x.at < y.at ? 1 : -1; })[0];
+      var last = a.filter(function (e) { return ctIs(p, e.by) && WORK[e.a]; }).sort(function (x, y) { return x.at < y.at ? 1 : -1; })[0];
       return { p: p, e: last, at: (last && last.at > (p.lastSeen || '') ? last.at : p.lastSeen) || '' };
     }).sort(function (x, y) { return x.at < y.at ? 1 : x.at > y.at ? -1 : 0; });
     var on = rows.filter(function (r) { return r.at && dayKey(r.at) === today; }).length;
@@ -6834,16 +6881,16 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
   function actDraw() {
     var a = actCache; if (!a) return;
     var from = period === 'w' ? weekStart() : monthStart(), rows = a.filter(function (e) { return WORK[e.a] && !isSms(e) && Date.parse(e.at) >= from; }), by = {}, all = { pin: 0, visit: 0, fixed: 0 };
-    rows.forEach(function (e) { var k = String(e.by || '—').trim(), c = actKind(e.a); by[k] = by[k] || { pin: 0, visit: 0, fixed: 0 }; by[k][c]++; all[c]++; });
+    rows.forEach(function (e) { var k = ctCanon(String(e.by || '—').trim()), c = actKind(e.a); by[k] = by[k] || { pin: 0, visit: 0, fixed: 0 }; by[k][c]++; all[c]++; });
     var names = Object.keys(by).sort(function (x, y) { return x.toLowerCase().localeCompare(y.toLowerCase()); });
     var pill = function (n, hue, ic) { return '<span class="tp" style="--hu:var(--hu-' + hue + ');--hb:var(--hb-' + hue + ')">' + oic(ic) + n + '</span>'; };
     $('actTable').innerHTML = '<div class="together"><b>' + tr('Together', 'Pamoja') + '</b><span>' + tr(all.pin + ' pins · ' + all.visit + ' visits · ' + all.fixed + ' fixed', 'mahali ' + all.pin + ' · ziara ' + all.visit + ' · ' + all.fixed + ' zimerekebishwa') + '</span></div>' +
-      (names.length ? '<ul class="tots">' + names.map(function (n) { var o = by[n]; return '<li><b>' + esc(n) + '</b>' + pill(o.pin, 'blue', 'pin') + pill(o.visit, 'green', 'clip') + pill(o.fixed, 'amber', 'wrench') + '</li>'; }).join('') + '</ul>' : '<p class="muted">' + tr('Nothing yet in this period.', 'Hakuna bado katika kipindi hiki.') + '</p>');
+      (names.length ? '<ul class="tots">' + names.map(function (n) { var o = by[n]; return '<li><b>' + ctWho(n) + '</b>' + pill(o.pin, 'blue', 'pin') + pill(o.visit, 'green', 'clip') + pill(o.fixed, 'amber', 'wrench') + '</li>'; }).join('') + '</ul>' : '<p class="muted">' + tr('Nothing yet in this period.', 'Hakuna bado katika kipindi hiki.') + '</p>');
     var list = a.filter(function (e) { return (WORK[e.a] || e.a === 'job') && !isSms(e); }).sort(function (x, y) { return x.at < y.at ? 1 : -1; });
     var FI = { pin: ['pin', 'blue'], visit: ['clip', 'green'], fixed: ['check', 'green'], new: ['plus', 'purple'], job: ['wrench', 'amber'] };
     $('actFeed').innerHTML = list.slice(0, feedN).map(function (e) {
       var f = FI[e.a], p = byId(e.id), st = e.a === 'visit' && e.s && STATES[e.s] ? ' · ' + tr(STATES[e.s][1], STATES[e.s][2]) : '';
-      return '<li' + (p ? ' class="go" data-id="' + esc(e.id) + '" role="button" tabindex="0"' : '') + '><span class="fi" style="--hu:var(--hu-' + f[1] + ');--hb:var(--hb-' + f[1] + ')">' + oic(f[0]) + '</span><div><b>' + esc(String(e.by || '').split(' ')[0]) + '</b> ' + vb(e).toLowerCase() + ' ' + esc(p ? p.title : e.t || '') + st + '<small>' + since(e.at) + '</small></div>' + (p ? '<span class="cv">' + oic('chev') + '</span>' : '') + '</li>';
+      return '<li' + (p ? ' class="go" data-id="' + esc(e.id) + '" role="button" tabindex="0"' : '') + '><span class="fi" style="--hu:var(--hu-' + f[1] + ');--hb:var(--hb-' + f[1] + ')">' + oic(f[0]) + '</span><div><b>' + ctWho(ctCanon(e.by), '', String(ctCanon(e.by) || '').split(' ')[0]) + '</b> ' + vb(e).toLowerCase() + ' ' + esc(p ? p.title : e.t || '') + st + '<small>' + since(e.at) + '</small></div>' + (p ? '<span class="cv">' + oic('chev') + '</span>' : '') + '</li>';
     }).join('') || '<li class="muted">' + tr('Nothing yet. Pins, visits and fixes show here.', 'Bado hakuna. Mahali, ziara na marekebisho yataonekana hapa.') + '</li>';
     $('feedMore').classList.toggle('hidden', list.length <= 8);
     $('feedMore').textContent = feedN > 8 ? tr('Show less', 'Onyesha kidogo') : tr('Show more', 'Onyesha zaidi');
@@ -7010,7 +7057,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
   var STEP = [['reported', 'Reported'], ['assigned', 'Assigned'], ['parts', 'Parts ordered'], ['fixed', 'Fixed']];
   var BOXES = { ke: [-4.8, 33.9, 5.1, 41.9], tz: [-11.8, 29.3, -0.9, 40.5], ug: [-1.5, 29.5, 4.3, 35.1], mw: [-17.2, 32.6, -9.3, 36] };
   function adminApi(method, body, q) {
-    return fetch('/api/admin' + (q || ''), { method: method, headers: Object.assign({ Accept: 'application/json' }, S.pin ? { 'X-Pin': S.pin } : {}, body ? { 'Content-Type': 'application/json' } : {}), body: body ? JSON.stringify(body) : undefined })
+    return fetch('/api/admin' + (q || ''), { method: method, headers: Object.assign({ Accept: 'application/json' }, pinHdr(), body ? { 'Content-Type': 'application/json' } : {}), body: body ? JSON.stringify(body) : undefined })
       .then(function (r) { return r.json().catch(function () { return { ok: false, reason: 'down' }; }).then(function (j) { j.status = r.status; return j; }); })
       .catch(function () { return { ok: false, reason: 'offline', status: 0 }; });
   }
@@ -7184,7 +7231,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
   }
   function rrJobCard(id, i) {
     var r = S.repairs[id], p = byId(id), tone = rrTone(r), est = ofbEst(r), aw = rrApprWord(r), late = r.due && r.due < new Date().toISOString().slice(0, 10);
-    var d1 = rrNw([esc(rrStep(r.step)), r.assignee ? esc(r.assignee) : tr('not assigned', 'hajapewa mtu'), r.due ? (late ? '<b class="late">' : '') + tr('due ', 'mwisho ') + esc(rrDay(r.due)) + (late ? '</b>' : '') : '']);
+    var d1 = rrNw([esc(rrStep(r.step)), r.assignee ? ctWho(r.assignee) : tr('not assigned', 'hajapewa mtu'), r.due ? (late ? '<b class="late">' : '') + tr('due ', 'mwisho ') + esc(rrDay(r.due)) + (late ? '</b>' : '') : '']);
     var d2 = rrNw([esc(p ? p.country : ''), est ? esc(ofbKes(est)) : '', aw ? '<b class="ap">' + esc(aw) + '</b>' : '']);
     return '<button type="button" class="rr-card" data-rrjob="' + esc(id) + '" data-testid="rr_job" style="--i:' + Math.min(i, 10) + '">' +
       '<span class="rr-ic rr-t-' + tone + '" aria-hidden="true">' + oic('wrench') + '</span><span class="rr-tt">' + esc(p ? p.title : r.t || id) + '</span>' +
@@ -7211,7 +7258,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
         : '<div class="rr-dec" data-testid="rr_cost_dec"><label>' + tr('Note (optional)', 'Maelezo (si lazima)') + '<input type="text" data-f="dnote" placeholder="' + esc(tr('e.g. quote checked with the driller', 'mf. bei imehakikishwa na mchimbaji')) + '"></label>' +
           '<div class="rr-two"><button class="btn ok" type="button" data-a="capp" data-testid="rr_cost_approve">' + oic('check') + '<span>' + tr('Approve the cost', 'Idhinisha gharama') + '</span></button>' +
           '<button class="btn light" type="button" data-a="cdec" data-testid="rr_cost_decline"><span>' + tr('Decline', 'Kataa') + '</span></button></div></div>') : '') +
-      '<dl class="rr-kv">' + kv(tr('Reported by', 'Imeripotiwa na'), esc(r.by || '—') + '<small>' + esc(vxWhen(r.at)) + '</small>') + kv(tr('Country', 'Nchi'), esc(p ? p.country : '')) +
+      '<dl class="rr-kv">' + kv(tr('Reported by', 'Imeripotiwa na'), (r.by ? ctWho(r.by) : '—') + '<small>' + esc(vxWhen(r.at)) + '</small>') + kv(tr('Country', 'Nchi'), esc(p ? p.country : '')) +
         kv(tr('Problems', 'Matatizo'), esc((r.problems || []).join(', ')), true) + kv(tr('Their note', 'Maelezo yao'), r.note ? '“' + esc(r.note) + '”' : '', true) +
         kv(tr('Parts', 'Vipuri'), esc(r.parts || ''), true) + kv(tr('Field estimate', 'Makadirio ya uwanjani'), r.cost ? '<span class="nw">' + esc(ofbKes(r.cost)) + '</span>' : '') + '</dl>' +
       '<p class="rr-lab">' + tr('Job step', 'Hatua ya kazi') + '</p><div class="rr-steps" role="radiogroup" aria-label="' + tr('Job step', 'Hatua ya kazi') + '">' + STEP.map(function (s, k) {
@@ -7311,7 +7358,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
       '<span class="rr-ic rr-h-' + k[5] + '" aria-hidden="true">' + oic(k[4]) + '</span><span class="rr-tt">' + esc(x.t || pname(x.id)) + '</span>' +
       '<span class="rr-when">' + esc(vxAgo(x.at)) + oic('chev') + '</span>' +
       '<span class="rr-pill rr-h-' + k[5] + '"><i aria-hidden="true"></i><span>' + tr(k[2], k[3]) + '</span></span>' +
-      '<span class="rr-d rr-d1">' + (own ? '<b class="ap">' + tr('You asked: another admin approves', 'Uliomba wewe: msimamizi mwingine aidhinishe') + '</b>' : tr('by ', 'na ') + esc(x.by || '—')) + '</span>' +
+      '<span class="rr-d rr-d1">' + (own ? '<b class="ap">' + tr('You asked: another admin approves', 'Uliomba wewe: msimamizi mwingine aidhinishe') + '</b>' : tr('by ', 'na ') + (x.by ? ctWho(x.by) : '—')) + '</span>' +
       (gist ? '<span class="rr-d rr-d2 q">' + gist + '</span>' : '') + '</button>';
   }
   // Review: one item's sheet. Same server call as before: { action: 'review', rid, decision, reason }
@@ -7319,7 +7366,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
     var k = rrK(x.kind), d = x.data || {}, cost = x.kind === 'cost', own = cost && ofbSame(x.by, S.name), title = x.t || pname(x.id);
     var ll = function (v) { var mm = /(-?\d+\.\d+),\s*(-?\d+\.\d+)/.exec(v || ''); return mm ? '<a href="https://www.google.com/maps?q=' + mm[1] + ',' + mm[2] + '&t=k" target="_blank" rel="noopener">' + esc(v) + '</a>' : esc(v || tr('none', 'hakuna')); };
     var kv = function (key, v, long) { return v ? '<div' + (long ? ' class="long"' : '') + '><dt>' + key + '</dt><dd>' + v + '</dd></div>' : ''; };
-    var who = kv(cost ? tr('Asked by', 'Imeombwa na') : tr('Sent by', 'Imetumwa na'), esc(x.by || '—') + '<small>' + esc(vxWhen(x.at)) + '</small>');
+    var who = kv(cost ? tr('Asked by', 'Imeombwa na') : tr('Sent by', 'Imetumwa na'), (x.by ? ctWho(x.by) : '—') + '<small>' + esc(vxWhen(x.at)) + '</small>');
     var det = cost ? '<div class="rr-amt"><b class="nw">' + esc(ofbKes(d.est)) + '</b><span>' + esc(tr('estimate · above ', 'makadirio · zaidi ya ')) + '<span class="nw">' + esc(ofbKes(S.approveAbove)) + '</span></span></div>' +
         '<dl class="rr-kv">' + kv(tr('Parts', 'Vipuri'), esc(d.parts || ''), true) + kv(tr('Their note', 'Maelezo yao'), d.note ? '“' + esc(d.note) + '”' : '', true) + who + '</dl>' +
         '<div class="rr-why">' + oic('vxinfo') + '<span>' + tr('Asked before ordering parts. The person who asked can’t approve it.', 'Imeombwa kabla ya kuagiza vipuri. Aliyeomba hawezi kuidhinisha.') + '</span></div>'
@@ -7441,38 +7488,12 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
     box.querySelector('[data-k=yes]').addEventListener('click', function () { qa('button', box).forEach(function (x) { x.disabled = true; }); m.className = 'msg'; m.textContent = tr('Working…', 'Inafanya kazi…'); go(m); });
     box.querySelector('[data-k=yes]').focus({ preventScroll: true }); box.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   }
-  // a person's quick actions: round buttons under the name. Contact for everyone; app access and planning for admins.
-  // An action whose data is missing (no phone, no e-mail) is left out, never shown greyed.
   Object.assign(OIC, { tmsend: '<path d="M4 11.5 20 4l-7.5 16-2.2-6.3z"/><path d="M10.3 13.7 20 4"/>' });
   function tmTel(p) { return String(p.phone || '').replace(/[^\d+]/g, ''); }
-  function tmQa(p, adm) {
-    var b = function (k, ic, label, href, ext) {
-      var inner = '<span class="tm-qi" aria-hidden="true">' + (ic === 'crown' ? CROWN : oic(ic)) + '</span><span class="tm-ql">' + label + '</span>';
-      return href ? '<a class="tm-q" data-q="' + k + '" data-testid="tm_q_' + k + '" href="' + esc(href) + '"' + (ext ? ' target="_blank" rel="noopener"' : '') + '>' + inner + '</a>'
-        : '<button class="tm-q" type="button" data-q="' + k + '" data-testid="tm_q_' + k + '">' + inner + '</button>';
-    };
-    var tel = tmTel(p), app = p.source === 'app', out = [];
-    if (adm && p.email) out.push(b('mail', 'mail', tr('E-mail', 'Barua pepe')));
-    if (tel) out.push(b('call', 'phone', tr('Call', 'Piga simu'), 'tel:' + tel), b('wa', 'vxwa', 'WhatsApp', 'https://wa.me/' + waNum(p.phone, p.home), true), b('sms', 'chat', 'SMS', 'sms:' + tel));
-    if (adm && p.email) out.push(b('invite', 'tmsend', tr('Invite', 'Mwalike')));
-    if (adm && app) out.push(b('pin', 'key', tr('New PIN', 'PIN mpya')), b('admin', 'crown', p.admin ? tr('Remove admin', 'Ondoa usimamizi') : tr('Make admin', 'Mfanye msimamizi')));
-    if (adm) out.push(b('plan', 'cal', tr('Assign a visit', 'Mpe ziara')));
-    return '<div class="tm-qa" role="group" aria-label="' + tr('Actions', 'Vitendo') + '">' + out.join('') + '</div>' +
-      (adm && !p.email && app ? '<p class="tm-hint">' + oic('mail') + '<span>' + tr('Add an e-mail to send e-mails', 'Ongeza barua pepe ili kutuma barua pepe') + '</span></p>' : '');
-  }
-  // the map button joins the row only when they are sharing their location (admins only: field officers never see the team map)
-  function tmMapBtn(c, name) {
-    var put = function () {
-      var on = ((OFA.tm && OFA.tm.people) || []).some(function (x) { return same(x.name, name); }), row = c.querySelector('.tm-qa');
-      if (!on || !row || row.querySelector('[data-q=map]')) return;
-      row.insertAdjacentHTML('beforeend', '<button class="tm-q" type="button" data-q="map" data-testid="tm_q_map"><span class="tm-qi" aria-hidden="true">' + oic('pin') + '</span><span class="tm-ql">' + tr('On the map', 'Kwenye ramani') + '</span></button>');
-    };
-    if (OFA.tm) put();
-    adminApi('GET', null, '?view=teammap').then(function (j) { if (j.ok) { OFA.tm = j; if (c.isConnected) put(); } });
-  }
   // their pins, visits and fixes: today and this month, from the team feed; tap one to open the project
-  function tmWork(name) {
-    var a = (actCache || []).filter(function (e) { return same(e.by, name) && WORK[e.a] && !isSms(e); }).sort(function (x, y) { return x.at < y.at ? 1 : -1; });
+  function tmWork(name, aka) {
+    var nm = [name].concat(aka || []);
+    var a = (actCache || []).filter(function (e) { return nm.some(function (n) { return same(e.by, n); }) && WORK[e.a] && !isSms(e); }).sort(function (x, y) { return x.at < y.at ? 1 : -1; });
     var t0 = new Date(); t0.setHours(0, 0, 0, 0);
     var today = a.filter(function (e) { return Date.parse(e.at) >= t0.getTime(); }), mon = a.filter(function (e) { return Date.parse(e.at) >= monthStart(); }), n = { pin: 0, visit: 0, fixed: 0 };
     mon.forEach(function (e) { n[actKind(e.a)]++; });
@@ -7482,44 +7503,19 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
       return '<li><button type="button"' + (pr ? ' data-q="open" data-id="' + esc(e.id) + '"' : ' disabled') + '><span class="fi" style="--hu:var(--hu-' + f[1] + ');--hb:var(--hb-' + f[1] + ')" aria-hidden="true">' + oic(f[0]) + '</span>' +
         '<span class="tm-wt"><b>' + vb(e) + ' ' + esc(pr ? pr.title : e.t || '') + '</b><small>' + since(e.at) + esc(st) + '</small></span>' + (pr ? oic('chev') : '') + '</button></li>';
     };
-    return '<div class="tm-work" data-testid="tm_work"><h4>' + tr('Their work', 'Kazi yake') + '</h4>' +
+    return '<div class="tm-work" data-testid="tm_work">' +
       '<div class="tm-wn"><div><b>' + today.length + '</b><small>' + tr('Today', 'Leo') + '</small></div><div><b>' + n.pin + '</b><small>' + tr('Pins', 'Mahali') + '</small></div><div><b>' + n.visit + '</b><small>' + tr('Visits', 'Ziara') + '</small></div><div><b>' + n.fixed + '</b><small>' + tr('Fixed', 'Zimerekebishwa') + '</small></div></div>' +
       '<p class="tm-wl">' + tr('Pins, visits and fixes: this month', 'Mahali, ziara na marekebisho: mwezi huu') + '</p>' +
       (mon.length ? '<ul class="tm-wli">' + mon.slice(0, 6).map(li).join('') + '</ul>' + (mon.length > 6 ? '<p class="tm-wl">' + tr('And ' + (mon.length - 6) + ' more this month', 'Na nyingine ' + (mon.length - 6) + ' mwezi huu') + '</p>' : '')
         : '<p class="muted tm-wl">' + (actCache ? tr('Nothing yet this month.', 'Bado hakuna mwezi huu.') : tr('Loading…', 'Inapakia…')) + '</p>') + '</div>';
   }
   function tmWorkLoad(c, name) {
-    var put = function () { var w = c.querySelector('.tm-work'); if (w) w.outerHTML = tmWork(name); };
+    var put = function () { if (CT.w && CT.w.querySelector('.tsh-c') === c) return ctDraw(); var w = c.querySelector('.tm-work'); if (w) w.outerHTML = tmWork(name); };
     if (actCache) return;
     api('GET', null, '?activity=1').then(function (j) { if (j.ok) { actCache = j.activity || []; if (c.isConnected) put(); } });
   }
-  // the shared clicks in a person's sheet: open a project from their work, copy a field
+  // copy a field
   function tmCopy(v) { if (!v) return; try { navigator.clipboard.writeText(v); toast(tr('Copied ✓', 'Imenakiliwa ✓')); buzz(); } catch (e) {} }
-  function tmIn(type, f, v, ph) { return '<span class="tm-in"><input type="' + type + '" data-f="' + f + '" value="' + esc(v || '') + '" placeholder="' + ph + '" autocomplete="off"><button type="button" class="tm-cp" data-cp="' + f + '" aria-label="' + (f === 'email' ? tr('Copy e-mail', 'Nakili barua pepe') : tr('Copy phone', 'Nakili simu')) + '">' + oic('vxcopy') + '</button></span>'; }
-  function tmKv(p) {
-    var cp = function (f, v) { return '<button type="button" class="tm-cp" data-cv="' + esc(v) + '" aria-label="' + (f === 'email' ? tr('Copy e-mail', 'Nakili barua pepe') : tr('Copy phone', 'Nakili simu')) + '">' + oic('vxcopy') + '</button>'; };
-    return p.email || p.phone ? '<dl class="tm-kv">' + (p.email ? '<div><dt>' + tr('E-mail', 'Barua pepe') + '</dt><dd>' + esc(p.email) + cp('email', p.email) + '</dd></div>' : '') + (p.phone ? '<div><dt>' + tr('Phone', 'Simu') + '</dt><dd>' + esc(p.phone) + cp('phone', p.phone) + '</dd></div>' : '') + '</dl>' : '';
-  }
-  function tmTap(e, w, c) {
-    var cv = e.target.closest('[data-cv]'); if (cv) { tmCopy(cv.getAttribute('data-cv')); return true; }
-    var cp = e.target.closest('[data-cp]'); if (cp) { var i = c.querySelector('[data-f=' + cp.getAttribute('data-cp') + ']'); tmCopy(i && i.value.trim()); return true; }
-    var o = e.target.closest('[data-q=open]'); if (o) { var id = o.getAttribute('data-id'); w.close(); setTimeout(function () { openProj(id, 'pin'); }, 220); return true; }
-    return false;
-  }
-  // a teammate seen from Me & team (anyone): contact actions and their work. Admins get the full sheet.
-  function mateOpen(name) {
-    if (S.admin && navigator.onLine) return oNeedTeam(function () { if ((O.team || []).some(function (x) { return x.name === name; })) tmOpen(name); else mateSheet(name); });
-    mateSheet(name);
-  }
-  function mateSheet(name) {
-    var p = (teamCache || []).filter(function (x) { return same(x.name, name); })[0] || { name: name };
-    var h = tmHue(p.name), html = '<div class="tm-hd"><span class="tm-av" style="--hu:var(--hu-' + h + ');--hb:var(--hb-' + h + ')" aria-hidden="true">' + esc(initials(p.name)) + '</span><h3>' + esc(p.name) + '</h3>' +
-      (CNAME[p.home] ? '<span class="tm-tags"><span class="tm-t">' + oic('pin') + CNAME[p.home] + '</span></span>' : '') + '<small class="tm-seen">' + tmSeen(p) + '</small></div>' +
-      (tmTel(p) ? tmQa(p, false) : '') + tmKv(p) + tmWork(p.name);
-    var w = mlHyph(tSheet(p.name, '<div data-testid="mate_sheet">' + html + '</div>')), c = w.querySelector('.tsh-c');
-    c.addEventListener('click', function (e) { if (tmTap(e, w, c)) return; if (e.target.closest('a.tm-q')) buzz(); });
-    tmWorkLoad(c, p.name);
-  }
   // Send app invite: the ready-made e-mail, previewed; then send it, or share the same words on WhatsApp or SMS
   function tmInvite(p) {
     mlApi('POST', { action: 'invite', to: p.name, preview: true }).then(function (j) {
@@ -7544,79 +7540,338 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
       });
     });
   }
-  // Make admin / Remove admin: a styled sheet that says what changes. Your own admin role can't be removed here.
-  function tmElevate(p, done) {
-    if (p.admin && same(p.name, S.name)) {
-      var w = panel(tr('You can’t remove your own admin role', 'Huwezi kuondoa nafasi yako mwenyewe ya msimamizi'), '<p class="muted">' + tr('Ask another admin to do it. That way the team always keeps someone who can manage it.', 'Mwombe msimamizi mwingine afanye hivyo. Hivyo timu inabaki na mtu anayeweza kuisimamia.') + '</p><button class="btn light block" type="button" data-k="ok">' + tr('OK', 'Sawa') + '</button>', 'po-ask');
-      w.addEventListener('click', function (e) { if (e.target.closest('[data-k=ok]')) w.close(); });
-      return;
-    }
+  // from a person's sheet to another Office tab is a step of its own, so Back comes to the Team list again
+  function tmPush(tab) { if (S.view !== 'vOffice') { O.tab = tab; return; } O.tab = tab; store.set('rfPinOTab', tab); bkGo('push', hashFor('vOffice')); }
+  // --- One contact sheet for every person (contw) --------------------------------------------------------------
+  // Tapping a teammate anywhere (Office › Team, Me › Team, the team map, notifications, project history, repair jobs,
+  // planned visits, Latest from the field, review sheets) opens this card: their header, then a menu grouped as
+  // Contact · Details · Access · Their work. Each row does one thing in its own small sheet (one field, Save, × and
+  // Back). Admins see everything; a field user sees Contact and Their work; your own card lets you edit your details.
+  Object.assign(OIC, {
+    ctShare: '<circle cx="18" cy="5.5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="18.5" r="2.5"/><path d="M8.2 10.8 15.8 6.7M8.2 13.2l7.6 4.1"/>',
+    ctBlock: '<circle cx="12" cy="12" r="8.5"/><path d="M6 6l12 12"/>',
+    ctOut: '<path d="M14 4.5h3.5a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H14"/><path d="M10 8l-4 4 4 4M6 12h9"/>',
+    ctUser: '<circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c.8-3.8 3.8-5.8 7.5-5.8s6.7 2 7.5 5.8"/>',
+    ctTag: '<path d="M3.5 12.2V4.5a1 1 0 0 1 1-1h7.7l8.3 8.3-8.7 8.7z"/><circle cx="8" cy="8" r="1.4"/>',
+    ctDial: '<rect x="6.5" y="3.5" width="11" height="17" rx="2.5"/><path d="M10.5 17h3"/>'
+  });
+  var CT = { w: null, name: '' };
+  function ctNames(p) { return [p.name].concat(p.aka || []); }
+  function ctIs(p, n) { return ctNames(p).some(function (x) { return same(x, n); }); }
+  function ctFind(list, n) { return (list || []).filter(function (x) { return ctIs(x, n); })[0] || null; }
+  // a name in a list or a sentence that opens their contact sheet ("by Grace")
+  function ctWho(n, cls, text) { return n && /^SMS from |^Community report$/.test(n) ? esc(text || n) : n ? '<span class="ct-who' + (cls ? ' ' + cls : '') + '" data-mate="' + esc(n) + '" role="button" tabindex="0">' + esc(text || n) + '</span>' : ''; }
+  // a name used before a rename → the person's name now (Office › Team or the team list)
+  function ctCanon(n) { var p = ctFind(O.team, n) || ctFind(teamCache, n); return p ? p.name : n; }
+  // one place for every tap on a person (capture, so the row underneath doesn't open too)
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest && e.target.closest('[data-mate]'); if (!t || S.view === 'vLock') return;
+    var n = t.getAttribute('data-mate'); if (!n || /^SMS from /.test(n)) return;
+    e.preventDefault(); e.stopPropagation(); buzz(); ctOpen(n);
+  }, true);
+  document.addEventListener('keydown', function (e) { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches && e.target.matches('[data-mate],[data-dvc]')) { e.preventDefault(); e.target.click(); } });
+  function mateOpen(name) { ctOpen(name); }
+  function tmOpen(name) { ctOpen(name); }
+  // admins read Office › Team (e-mails, roles, blocks); everyone else the team list (no e-mails, except your own)
+  function ctData(name, cb) {
+    if (S.admin && navigator.onLine !== false) return oNeedTeam(function () { var p = ctFind(O.team, name); if (p) return cb(p, true); ctField(name, cb); });
+    ctField(name, cb);
+  }
+  function ctField(name, cb) {
+    var got = function () { cb(ctFind(teamCache, name) || { name: name, aka: [], src: '' }, false); };
+    if (teamCache) return got();
+    api('GET', null, '?team=1').then(function (j) { if (j.ok) teamCache = (j.team || []).filter(function (p) { return p.name; }); got(); });
+  }
+  function ctOpen(name) {
+    ctData(name, function (p, full) {
+      if (CT.w && CT.w.isConnected && !CT.w.gone) { CT.name = p.name; CT.full = full; ctDraw(); return; }
+      CT.name = p.name; CT.full = full;
+      CT.w = mlHyph(tSheet(p.name, '<div class="ct" data-testid="ct_sheet"></div>'));
+      var c = CT.w.querySelector('.tsh-c');
+      ctDraw();
+      c.addEventListener('click', ctTap);
+      tmWorkLoad(c, p.name);
+      if (S.admin) ctMapCheck();
+    });
+  }
+  function ctP() { return (CT.full ? ctFind(O.team, CT.name) : ctFind(teamCache, CT.name)) || { name: CT.name, aka: [] }; }
+  function ctSrc(p) { return p.src || p.source || ''; }
+  function ctMe(p) { return ctIs(p, S.name) || (S.who && ctIs(p, S.who)); }
+  // after a change: read the team again, then draw the card (and the Team list) from it
+  function ctReload(newName) {
+    if (newName) CT.name = newName;
+    var done = function () { if (CT.w && CT.w.isConnected && !CT.w.gone) ctDraw(); tmRedraw(); };
+    if (CT.full) { O.team = null; oNeedTeam(done); } else { teamCache = null; ctField(CT.name, done); }
+  }
+  function ctStatus(p) {
+    var b = p.blocked;
+    if (b && typeof b === 'object') return '<span class="ct-st bad">' + esc(tr('Blocked by ' + (b.by || '') + ' on ' + dDay(b.at, true), 'Amezuiwa na ' + (b.by || '') + ' tarehe ' + dDay(b.at, true))) + '</span>';
+    if (b) return '<span class="ct-st bad">' + tr('Blocked', 'Amezuiwa') + '</span>';
+    if (p.lastSeen) return '<span class="ct-st"><span class="nw">' + tr('Active', 'Yuko hai') + '</span> · <span class="nw">' + esc(tr('last seen ', 'alionekana ') + dWhen(p.lastSeen)) + '</span></span>';
+    return '<span class="ct-st">' + (ctSrc(p) === 'app' ? tr('Invited · hasn’t signed in yet', 'Amealikwa · bado hajaingia') : tr('Hasn’t signed in yet', 'Bado hajaingia')) + '</span>';
+  }
+  function ctBadges(p) {
+    var s = ctSrc(p), t = function (cls, ic, label) { return '<span class="tm-t ' + cls + '">' + ic + label + '</span>'; }, out = [];
+    if (CT.full) out.push(p.admin ? t('adm', CROWN, tr('Admin', 'Msimamizi')) : t('fld', oic('people'), tr('Field', 'Uwanjani')));
+    if (s === 'app') out.push(t('s-app', oic('key'), tr('PIN from app', 'PIN ya programu')));
+    if (s === 'cloudflare') out.push(t('s-cloudflare', oic('cloud'), tr('PIN in Cloudflare', 'PIN iko Cloudflare')));
+    if (s === 'monday') out.push(t('s-monday', oic('people'), 'monday.com'));
+    if (p.blocked) out.push(t('blk', oic('ctBlock'), tr('Blocked', 'Amezuiwa')));
+    if (CNAME[p.home]) out.push(t('', oic('pin'), CNAME[p.home]));
+    return '<span class="tm-tags">' + out.join('') + '</span>';
+  }
+  function ctId(kind, v) {
+    return '<div class="ct-id"><span class="ct-idi" aria-hidden="true">' + oic(kind === 'email' ? 'mail' : 'phone') + '</span><span class="ct-idv" title="' + esc(v) + '">' + esc(v) + '</span>' +
+      '<button type="button" class="ct-cp" data-cv="' + esc(v) + '" data-testid="ct_copy_' + kind + '" aria-label="' + (kind === 'email' ? tr('Copy e-mail', 'Nakili barua pepe') : tr('Copy phone', 'Nakili simu')) + '">' + oic('vxcopy') + '</button></div>';
+  }
+  // a menu row: icon, label, the current value, and › (a link for Call, WhatsApp and SMS)
+  function ctRow(k, ic, hue, label, val, o) {
+    o = o || {};
+    var inner = '<span class="ct-ri" style="--hu:var(--hu-' + hue + ');--hb:var(--hb-' + hue + ')" aria-hidden="true">' + (ic === 'crown' ? CROWN : oic(ic)) + '</span><span class="ct-rl"><b>' + label + '</b>' + (val ? '<small>' + val + '</small>' : '') + '</span>' + (o.ro ? '' : '<span class="ct-rc" aria-hidden="true">' + oic('chev') + '</span>');
+    var cls = 'ct-r' + (o.red ? ' red' : '') + (o.ro ? ' ro' : '');
+    if (o.ro) return '<div class="' + cls + '" data-testid="ct_' + k + '">' + inner + '</div>';
+    if (o.href) return '<a class="' + cls + '" data-ct="' + k + '" data-testid="ct_' + k + '" href="' + esc(o.href) + '"' + (o.ext ? ' target="_blank" rel="noopener"' : '') + '>' + inner + '</a>';
+    return '<button type="button" class="' + cls + '" data-ct="' + k + '" data-testid="ct_' + k + '">' + inner + '</button>';
+  }
+  function ctGroup(k, title, rows, note) { rows = rows.filter(Boolean); return rows.length ? '<section class="ct-g" data-g="' + k + '"><h4>' + title + '</h4><div class="ct-list">' + rows.join('') + '</div>' + (note || '') + '</section>' : ''; }
+  function ctDraw() {
+    var w = CT.w; if (!w) return;
+    var c = w.querySelector('.tsh-c'), y = c.scrollTop, p = ctP(), adm = S.admin && CT.full, me = ctMe(p), s = ctSrc(p), app = s === 'app', tel = tmTel(p), first = esc(String(p.name).split(/\s+/)[0]);
+    var mine = me && !adm ? (S.me || {}) : null;
+    if (mine) { if (!tel && mine.phone) { p.phone = mine.phone; tel = tmTel(p); } }
+    var editable = adm || me;                                      // details: admins, or yourself
+    var canName = (adm && app) || (me && app), canMail = (adm && app) || (me && app), canPhone = (adm && app) || me;
+    var none = function (t) { return '<span class="ct-none">' + t + '</span>'; };
+    var hd = '<div class="ct-hd">' + tmAv(p) + '<h3>' + esc(p.name) + '</h3>' + (p.role ? '<span class="ct-role">' + esc(p.role) + '</span>' : '') + ctBadges(p) + ctStatus(p) + '</div>' +
+      (p.email || p.phone ? '<div class="ct-ids">' + (p.email ? ctId('email', p.email) : '') + (p.phone ? ctId('phone', p.phone) : '') + '</div>' : '');
+    var contact = ctGroup('contact', tr('Contact', 'Mawasiliano'), [
+      adm && p.email ? ctRow('mail', 'mail', 'blue', tr('Send an e-mail', 'Tuma barua pepe'), esc(p.email)) : '',
+      tel ? ctRow('call', 'phone', 'green', tr('Call', 'Piga simu'), esc(p.phone), { href: 'tel:' + tel }) : '',
+      tel ? ctRow('wa', 'vxwa', 'green', 'WhatsApp', esc(p.phone), { href: 'https://wa.me/' + waNum(p.phone, p.home), ext: true }) : '',
+      tel ? ctRow('sms', 'chat', 'teal', 'SMS', esc(p.phone), { href: 'sms:' + tel }) : '',
+      !me ? ctRow('share', 'ctShare', 'slate', tr('Share contact', 'Shiriki mawasiliano'), tr('Name, phone and e-mail', 'Jina, simu na barua pepe')) : ''
+    ], !tel && !p.email && !me ? '<p class="ct-hint">' + tr('No phone or e-mail yet.', 'Bado hakuna simu wala barua pepe.') + (adm && app ? ' ' + tr('Add them under Details.', 'Viongeze chini ya Maelezo.') : '') + '</p>' : '');
+    var ro = !editable;
+    var details = ctGroup('details', tr('Details', 'Maelezo'), [
+      ctRow('name', 'ctUser', 'blue', tr('Name', 'Jina'), esc(p.name) + ((p.aka || []).length ? '<span class="ct-aka">' + esc(tr('Before: ', 'Awali: ') + p.aka.join(', ')) + '</span>' : ''), { ro: ro || !canName }),
+      editable || p.email ? ctRow('email', 'mail', 'teal', canMail ? (p.email ? tr('Change e-mail', 'Badilisha barua pepe') : tr('Add e-mail', 'Ongeza barua pepe')) : tr('E-mail', 'Barua pepe'), p.email ? esc(p.email) : none(tr('None yet', 'Bado hakuna')), { ro: ro || !canMail }) : '',
+      editable || p.phone ? ctRow('phone', 'ctDial', 'green', canPhone ? (p.phone ? tr('Change phone', 'Badilisha simu') : tr('Add phone', 'Ongeza simu')) : tr('Phone', 'Simu'), p.phone ? esc(p.phone) : none(tr('None yet', 'Bado hakuna')), { ro: ro || !canPhone }) : '',
+      ctRow('home', 'pin', 'amber', tr('Home country', 'Nchi ya nyumbani'), CNAME[p.home] ? esc(CNAME[p.home]) : none(tr('Not set', 'Haijawekwa')), { ro: !((adm && app) || me) }),
+      editable || p.role ? ctRow('role', 'ctTag', 'purple', tr('Role / title', 'Kazi / cheo'), p.role ? esc(p.role) : none(tr('Optional, e.g. Field officer, Kitale', 'Si lazima, mf. Afisa wa uwanjani, Kitale')), { ro: !(adm && app) }) : ''
+    ], editable && !app && s ? '<p class="ct-hint">' + (s === 'cloudflare' ? tr('Name and e-mail come from the website’s settings.', 'Jina na barua pepe vinatoka kwenye mipangilio ya tovuti.') : tr('Name and e-mail come from monday.com.', 'Jina na barua pepe vinatoka monday.com.')) + '</p>' : '');
+    var access = '';
+    if (adm) {
+      var b = !!p.blocked, rows = [];
+      if (!me) rows.push(ctRow('invite', 'tmsend', 'blue', tr('Send app invite', 'Tuma mwaliko wa programu'), p.email ? tr('E-mail, WhatsApp or SMS', 'Barua pepe, WhatsApp au SMS') : tr('WhatsApp or SMS', 'WhatsApp au SMS')));
+      if (app && !me) rows.push(ctRow('newpin', 'key', 'purple', tr('New PIN', 'PIN mpya'), tr('Make one and show it once', 'Tengeneza na uonyeshe mara moja')),
+        ctRow('setpin', 'lock', 'purple', tr('Set a PIN', 'Weka PIN'), tr('Type 4 to 8 digits', 'Andika tarakimu 4 hadi 8')),
+        ctRow('resend', 'chat', 'teal', tr('Reset and send a new PIN', 'Weka upya na utume PIN mpya'), tr('PINs are stored locked, so the old one can’t be sent', 'PIN zinahifadhiwa zimefungwa, kwa hiyo ya zamani haiwezi kutumwa')));
+      if (me) rows.push(ctRow('mypin', 'lock', 'purple', tr('Change my PIN', 'Badilisha PIN yangu'), app ? tr('Your own PIN', 'PIN yako mwenyewe') : s === 'cloudflare' ? tr('Set by the office', 'Imewekwa na ofisi') : tr('Signed in with monday.com', 'Umeingia kwa monday.com')));
+      if (s === 'cloudflare') rows.push(ctRow('move', 'key', 'green', tr('Move to an app PIN', 'Hamia PIN ya programu'), tr('Then the app can manage their PIN', 'Kisha programu inaweza kusimamia PIN yake')));
+      if (!me) rows.push(app && !p.adminCf ? ctRow('admin', 'crown', 'amber', p.admin ? tr('Remove admin', 'Ondoa usimamizi') : tr('Make admin', 'Mfanye msimamizi'), p.admin ? tr('Sees the Office tab now', 'Anaona Ofisi sasa') : tr('Field user now', 'Mtumiaji wa uwanjani sasa'))
+        : ctRow('admin', 'crown', 'amber', tr('Admin role', 'Nafasi ya msimamizi'), (p.admin ? tr('Admin', 'Msimamizi') : tr('Field user', 'Mtumiaji wa uwanjani')) + ' · ' + (s === 'monday' || p.adminCf ? tr('set in Cloudflare', 'imewekwa Cloudflare') : tr('set in Cloudflare', 'imewekwa Cloudflare')), { ro: true }));
+      if (!me) rows.push(ctRow('block', 'ctBlock', b ? 'green' : 'coral', b ? tr('Unblock', 'Ondoa kizuizi') : tr('Block', 'Zuia'), b ? tr('Same PIN works again', 'PIN ileile itafanya kazi tena') : tr('Stops their PIN, signs them out', 'Inazima PIN yake, inamtoa'), { red: !b }));
+      rows.push(ctRow('signout', 'ctOut', 'slate', tr('Sign out of all phones', 'Toka kwenye simu zote'), me ? tr('Including this one; your PIN stays', 'Pamoja na hii; PIN yako inabaki') : tr('Their PIN stays', 'PIN yake inabaki')));
+      if (app && !me) rows.push(ctRow('remove', 'trash', 'coral', tr('Remove from the team', 'Ondoa kwenye timu'), tr('History is kept', 'Historia inabaki'), { red: true }));
+      access = ctGroup('access', tr('Access', 'Ufikiaji'), rows, s === 'cloudflare' ? '<div class="ct-cf">' + oic('cloud') + '<span>' + tr('PIN set in Cloudflare, so it can’t be changed here. Move them to an app PIN first; the Cloudflare entry can then be removed.', 'PIN imewekwa Cloudflare, kwa hiyo haiwezi kubadilishwa hapa. Mhamishie PIN ya programu kwanza; kisha ingizo la Cloudflare linaweza kuondolewa.') + poTech(tr('Their entry is in PIN_USERS (and PIN_ADMINS for admins) in Cloudflare.', 'Ingizo lake liko kwenye PIN_USERS (na PIN_ADMINS kwa wasimamizi) ndani ya Cloudflare.')) + '</span></div>'
+        : app && p.alsoCloudflare ? '<div class="ct-cf">' + oic('cloud') + '<span>' + tr('They have an app PIN now. Their old Cloudflare entry can be removed.', 'Sasa ana PIN ya programu. Ingizo lake la zamani la Cloudflare linaweza kuondolewa.') + poTech(tr('Remove their line from PIN_USERS in Cloudflare.', 'Ondoa mstari wake kwenye PIN_USERS ndani ya Cloudflare.')) + '</span></div>' : '');
+    } else if (me) access = ctGroup('access', tr('Access', 'Ufikiaji'), [ctRow('mypin', 'lock', 'purple', tr('Change my PIN', 'Badilisha PIN yangu'), (S.me || {}).kind === 'app' ? tr('Your own PIN', 'PIN yako mwenyewe') : (S.me || {}).kind === 'monday' ? tr('Signed in with monday.com', 'Umeingia kwa monday.com') : tr('Set by the office', 'Imewekwa na ofisi'))]);
+    var jobs = Object.keys(S.repairs || {}).filter(function (k) { var r = S.repairs[k]; return r && r.assignee && ctIs(p, r.assignee); });
+    var work = '<section class="ct-g" data-g="work"><h4>' + tr('Their work', 'Kazi yake') + '</h4>' + tmWork(p.name, p.aka) +
+      '<div class="ct-list">' + (adm ? ctRow('plan', 'cal', 'blue', tr('Assign a visit', 'Mpe ziara'), tr('Plan a week with ' + first, 'Panga wiki na ' + first)) : '') +
+      (jobs.length ? jobs.slice(0, 6).map(function (k) { var r = S.repairs[k], pr = byId(k); return ctRow('job', 'wrench', 'amber', esc(pr ? pr.title : r.t || k), esc(tr('Repair job · ', 'Kazi ya matengenezo · ') + rrStepTx(r.step))).replace('data-ct="job"', 'data-ct="job" data-id="' + esc(k) + '"'); }).join('')
+        : ctRow('nojobs', 'wrench', 'slate', tr('Repair jobs', 'Kazi za matengenezo'), tr('None assigned to them', 'Hakuna aliyopewa'), { ro: true })) +
+      '<span data-slot="map"></span></div></section>';
+    c.firstChild.innerHTML = hd + contact + details + access + work;
+    mlHyph(c); c.scrollTop = y;
+    if (OFA.tm && adm) ctMapPut();
+  }
+  function rrStepTx(k) { var m = { reported: ['Reported', 'Imeripotiwa'], assigned: ['Assigned', 'Amepewa'], parts: ['Parts ordered', 'Vipuri vimeagizwa'] }[k || 'reported'] || ['Reported', 'Imeripotiwa']; return tr(m[0], m[1]); }
+  // "Show on team map": only when they share their location (admins only)
+  function ctMapPut() {
+    var w = CT.w; if (!w) return; var p = ctP(), sl = w.querySelector('[data-slot=map]'); if (!sl) return;
+    var on = ((OFA.tm && OFA.tm.people) || []).some(function (x) { return ctIs(p, x.name); });
+    if (on) sl.outerHTML = ctRow('map', 'pin', 'teal', tr('Show on team map', 'Onyesha kwenye ramani ya timu'), tr('Sharing their location now', 'Anashiriki mahali alipo sasa'));
+  }
+  function ctMapCheck() { adminApi('GET', null, '?view=teammap').then(function (j) { if (j.ok) { OFA.tm = j; if (CT.w && CT.w.isConnected) ctMapPut(); } }); }
+  function ctTap(e) {
+    var w = CT.w, c = w.querySelector('.tsh-c');
+    var cv = e.target.closest('[data-cv]'); if (cv) { tmCopy(cv.getAttribute('data-cv')); return; }
+    var o = e.target.closest('[data-q=open]'); if (o) { var id = o.getAttribute('data-id'); w.close(); setTimeout(function () { openProj(id, 'pin'); }, 220); return; }
+    var r = e.target.closest('[data-ct]'); if (!r) return;
+    var k = r.getAttribute('data-ct'), p = ctP(); buzz();
+    if (k === 'call' || k === 'wa' || k === 'sms') return;   // links
+    if (k === 'job') { var jid = r.getAttribute('data-id'); w.close(); setTimeout(function () { openProj(jid, 'pin'); }, 220); return; }
+    if (k === 'mail') { w.close(); setTimeout(function () { tmPush('mail'); mlGo({ aud: 'pick', picks: ['t:' + p.name.toLowerCase()] }); }, 250); return; }
+    if (k === 'plan') { w.close(); setTimeout(function () { if (OFA.to !== p.name) OFA.plan = null; OFA.to = p.name; tmPush('plan'); ocvTab('plan'); }, 250); return; }
+    if (k === 'map') { w.close(); setTimeout(function () { OFA.open = p.name; OFA.pop = p.name; tmPush('teammap'); ocvTab('teammap'); }, 250); return; }
+    if (k === 'share') return ctShare(p);
+    if (k === 'invite') return tmInvite(p);
+    if (k === 'mypin') return setOpen('pin');
+    if (k === 'name' || k === 'email' || k === 'phone' || k === 'home' || k === 'role') return ctEdit(k, p);
+    if (k === 'setpin') return ctSetPin(p);
+    if (k === 'newpin' || k === 'resend') return ctNewPin(p, k === 'resend');
+    if (k === 'move') return ctMove(p);
+    if (k === 'admin') return ctAdmin(p);
+    if (k === 'block') return p.blocked ? ctUnblock(p) : ctBlock(p);
+    if (k === 'signout') return ctSignout(p);
+    if (k === 'remove') return ctRemove(p);
+  }
+  // a vCard file through the phone's share sheet, or the words, or a download
+  function ctShare(p) {
+    var v = ['BEGIN:VCARD', 'VERSION:3.0', 'FN:' + p.name, 'N:' + p.name.split(/\s+/).slice(1).join(' ') + ';' + p.name.split(/\s+/)[0] + ';;;', p.phone ? 'TEL;TYPE=CELL:' + p.phone : '', p.email ? 'EMAIL:' + p.email : '', 'ORG:RAFIKI Outreach', p.role ? 'TITLE:' + p.role : '', 'END:VCARD'].filter(Boolean).join('\r\n');
+    var txt = [p.name, p.phone, p.email].filter(Boolean).join('\n'), fn = p.name.replace(/[^\w ]+/g, '').trim().replace(/\s+/g, '-') + '.vcf';
+    try {
+      var f = new File([v], fn, { type: 'text/vcard' });
+      if (navigator.canShare && navigator.canShare({ files: [f] })) return navigator.share({ files: [f], title: p.name }).catch(function () {});
+    } catch (x) {}
+    if (navigator.share) return navigator.share({ title: p.name, text: txt }).catch(function () {});
+    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([v], { type: 'text/vcard' })); a.download = fn; document.body.appendChild(a); a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500); toast(tr('Contact card saved', 'Kadi ya mawasiliano imehifadhiwa'));
+  }
+  // the small focused sheet: icon, title, one field, Save; × and Back close it, nothing else changes
+  function ctForm(o) {
+    var w = mlHyph(tSheet(o.title, '<div class="ct-fm" data-testid="ct_form_' + o.k + '"><div class="ct-fh"><span class="ct-ri" style="--hu:var(--hu-' + o.hue + ');--hb:var(--hb-' + o.hue + ')" aria-hidden="true">' + (o.ic === 'crown' ? CROWN : oic(o.ic)) + '</span><h3>' + esc(o.title) + '</h3>' + (o.sub ? '<small>' + o.sub + '</small>' : '') + '</div>' +
+      (o.body || '') + '<div class="ct-go">' + (o.save ? '<button class="btn' + (o.red ? ' po-red' : '') + '" type="button" data-k="save" data-testid="ct_save">' + (o.saveIc ? oic(o.saveIc) : '') + '<span>' + o.save + '</span></button>' : '') +
+      '<button class="btn light" type="button" data-k="back" data-testid="ct_back">' + tr('Back', 'Rudi') + '</button><span class="msg" aria-live="polite"></span></div>' + (o.after || '') + '<div class="ct-out"></div></div>'));
+    var c = w.querySelector('.tsh-c'), m = c.querySelector('.ct-go .msg'), sv = c.querySelector('[data-k=save]'), inp = c.querySelector('input, select');
+    w.say = function (cls, t) { m.className = 'msg ' + (cls || ''); m.textContent = t || ''; mlHyph(m); };
+    w.busy = function (on) { qa('.ct-go button, .ct-fm [data-k=clear]', c).forEach(function (x) { x.disabled = on; }); };
+    c.addEventListener('click', function (e) {
+      if (e.target.closest('[data-k=back]')) { w.close(); return; }
+      var cv = e.target.closest('[data-cv]'); if (cv) { tmCopy(cv.getAttribute('data-cv')); return; }
+      if (e.target.closest('[data-k=save]') && o.go) { w.busy(true); w.say('', tr('Saving…', 'Inahifadhi…')); o.go(w, inp ? inp.value.trim() : ''); return; }
+      if (e.target.closest('[data-k=clear]') && o.clear) { w.busy(true); w.say('', tr('Saving…', 'Inahifadhi…')); o.clear(w); }
+    });
+    if (inp && inp.tagName === 'INPUT') { inp.addEventListener('keydown', function (e) { if (e.key === 'Enter' && sv) { e.preventDefault(); sv.click(); } }); if (matchMedia('(pointer: fine)').matches) setTimeout(function () { inp.focus(); }, 300); }
+    return w;
+  }
+  function ctWhy(j) {
+    return j.reason === 'exists' ? tr('Someone already has that name.', 'Tayari kuna mtu mwenye jina hilo.')
+      : j.reason === 'weak-pin' ? tr('Too easy to guess. Use 4 to 8 digits, not 1234, 0000 or 1212.', 'Ni rahisi mno kubahatisha. Tumia tarakimu 4 hadi 8, si 1234, 0000 wala 1212.')
+      : j.reason === 'pin-taken' ? tr('Someone else already uses that PIN. Choose another.', 'Mtu mwingine tayari anatumia PIN hiyo. Chagua nyingine.')
+      : j.reason === 'self' ? tr('You can’t do that to yourself. Ask another admin.', 'Huwezi kujifanyia hivyo. Mwombe msimamizi mwingine.')
+      : j.reason === 'last-admin' ? tr('They are the last admin. Make someone else an admin first.', 'Yeye ndiye msimamizi wa mwisho. Mfanye mtu mwingine msimamizi kwanza.')
+      : j.reason === 'bad-email' ? tr('That e-mail doesn’t look right.', 'Barua pepe hiyo haionekani sahihi.')
+      : j.reason === 'cloudflare' || j.reason === 'not-in-app' ? tr('Their PIN is set in Cloudflare. Move them to an app PIN first.', 'PIN yake imewekwa Cloudflare. Mhamishie PIN ya programu kwanza.')
+      : why(j);
+  }
+  function ctDone(w, text, newName) { buzz(); toast(text); ctReload(newName); setTimeout(function () { w.close(); }, 250); }
+  // Name, E-mail, Phone, Home country, Role: one field each
+  function ctEdit(k, p) {
+    var me = ctMe(p), adm = S.admin && CT.full, app = ctSrc(p) === 'app';
+    var send = function (body, w, ok, newName) {
+      // your own phone and home country: the same save as Me › Personal details (it keeps the Team list in step)
+      if (me && (k === 'phone' || k === 'home')) {
+        var cur = S.me || {}; return api('POST', { action: 'profile', nick: cur.nick || '', phone: k === 'phone' ? body.phone : cur.phone || '', home: k === 'home' ? body.home : cur.home || '' }).then(function (j) {
+          w.busy(false); if (!j.ok) return w.say('bad', ctWhy(j)); S.me = j.me; store.set('rfPinMe', JSON.stringify(j.me)); setUi(); ctDone(w, ok);
+        });
+      }
+      adminApi('POST', body).then(function (j) { w.busy(false); if (!j.ok) return w.say('bad', ctWhy(j)); if (newName && me) { S.name = newName; S.who = newName; store.set('rfPinName', newName); store.set('rfPinWho', newName); if ($('who')) $('who').textContent = newName; } ctDone(w, ok, newName); });
+    };
+    var upd = function (f, v) { var b = { action: 'team-update', name: p.name }; b[f] = v; return b; };
+    if (k === 'name') return ctForm({ k: k, ic: 'ctUser', hue: 'blue', title: tr('Name', 'Jina'), sub: tr('Their history stays with them under the new name.', 'Historia yake inabaki naye kwa jina jipya.'),
+      body: '<label class="ct-lb">' + tr('Full name', 'Jina kamili') + '<input type="text" data-testid="ct_in" autocomplete="off" maxlength="60" value="' + esc(p.name) + '"></label>', save: tr('Save', 'Hifadhi'), saveIc: 'check',
+      go: function (w, v) { if (!v) { w.busy(false); return w.say('bad', tr('Type a name.', 'Andika jina.')); } send({ action: 'team-rename', name: p.name, to: v }, w, tr('Name saved ✓', 'Jina limehifadhiwa ✓'), v); } });
+    if (k === 'email') return ctForm({ k: k, ic: 'mail', hue: 'teal', title: p.email ? tr('Change e-mail', 'Badilisha barua pepe') : tr('Add e-mail', 'Ongeza barua pepe'), sub: tr('For alerts, invites and e-mails from the office.', 'Kwa taarifa, mialiko na barua pepe kutoka ofisini.'),
+      body: '<label class="ct-lb">' + tr('E-mail', 'Barua pepe') + '<input type="email" inputmode="email" data-testid="ct_in" autocomplete="off" placeholder="name@rafikioutreach.org" value="' + esc(p.email || '') + '"></label>', save: tr('Save', 'Hifadhi'), saveIc: 'check',
+      after: p.email ? '<button type="button" class="ct-clear" data-k="clear" data-testid="ct_clear">' + oic('trash') + '<span>' + tr('Remove e-mail', 'Ondoa barua pepe') + '</span></button>' : '',
+      go: function (w, v) { if (!v || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)) { w.busy(false); return w.say('bad', tr('That e-mail doesn’t look right.', 'Barua pepe hiyo haionekani sahihi.')); } send(upd('email', v), w, tr('E-mail saved ✓', 'Barua pepe imehifadhiwa ✓')); },
+      clear: function (w) { send(upd('email', ''), w, tr('E-mail removed', 'Barua pepe imeondolewa')); } });
+    if (k === 'phone') return ctForm({ k: k, ic: 'ctDial', hue: 'green', title: p.phone ? tr('Change phone', 'Badilisha simu') : tr('Add phone', 'Ongeza simu'), sub: tr('The team sees it, for calls and WhatsApp.', 'Timu inaiona, kwa kupiga simu na WhatsApp.'),
+      body: '<label class="ct-lb">' + tr('Phone', 'Simu') + '<input type="tel" inputmode="tel" data-testid="ct_in" autocomplete="off" placeholder="+254 712 345 678" value="' + esc(p.phone || '') + '"></label>', save: tr('Save', 'Hifadhi'), saveIc: 'check',
+      after: p.phone ? '<button type="button" class="ct-clear" data-k="clear" data-testid="ct_clear">' + oic('trash') + '<span>' + tr('Remove phone', 'Ondoa simu') + '</span></button>' : '',
+      go: function (w, v) { if (String(v).replace(/\D/g, '').length < 7) { w.busy(false); return w.say('bad', tr('Type the whole number.', 'Andika namba nzima.')); } send(upd('phone', v), w, tr('Phone saved ✓', 'Simu imehifadhiwa ✓')); },
+      clear: function (w) { send(upd('phone', ''), w, tr('Phone removed', 'Simu imeondolewa')); } });
+    if (k === 'home') return ctForm({ k: k, ic: 'pin', hue: 'amber', title: tr('Home country', 'Nchi ya nyumbani'), sub: tr('Lists and the map start there.', 'Orodha na ramani zinaanzia hapo.'),
+      body: '<label class="ct-lb">' + tr('Country', 'Nchi') + '<select data-testid="ct_in"><option value="">' + tr('Not set', 'Haijawekwa') + '</option>' + ['ke', 'tz', 'ug', 'mw'].map(function (c) { return '<option value="' + c + '"' + (p.home === c ? ' selected' : '') + '>' + CNAME[c] + '</option>'; }).join('') + '</select></label>', save: tr('Save', 'Hifadhi'), saveIc: 'check',
+      go: function (w, v) { send(upd('home', v), w, tr('Saved ✓', 'Imehifadhiwa ✓')); } });
+    if (k === 'role') return ctForm({ k: k, ic: 'ctTag', hue: 'purple', title: tr('Role / title', 'Kazi / cheo'), sub: tr('Optional. Shown under their name.', 'Si lazima. Inaonyeshwa chini ya jina lake.'),
+      body: '<label class="ct-lb">' + tr('Role / title', 'Kazi / cheo') + '<input type="text" data-testid="ct_in" autocomplete="off" maxlength="80" placeholder="' + tr('e.g. Field officer, Kitale', 'mf. Afisa wa uwanjani, Kitale') + '" value="' + esc(p.role || '') + '"></label>', save: tr('Save', 'Hifadhi'), saveIc: 'check',
+      go: function (w, v) { send(upd('role', v), w, tr('Saved ✓', 'Imehifadhiwa ✓')); } });
+  }
+  // the same rules as the server: 4 to 8 digits, not 0000, 1234, 9876, 1212…
+  function ctWeak(s) { return !/^\d{4,8}$/.test(s) || /^(\d{1,4})\1+$/.test(s) || '01234567890'.indexOf(s) >= 0 || '09876543210'.indexOf(s) >= 0; }
+  function ctSetPin(p) {
+    var w = ctForm({ k: 'setpin', ic: 'lock', hue: 'purple', title: tr('Set a PIN', 'Weka PIN'), sub: esc(tr('For ' + p.name + '. Their old PIN stops working.', 'Kwa ' + p.name + '. PIN yake ya zamani itaacha kufanya kazi.')),
+      body: '<label class="ct-lb">' + tr('PIN (4 to 8 digits)', 'PIN (tarakimu 4 hadi 8)') + '<input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="8" data-testid="ct_in" autocomplete="off" class="ct-pin"></label><p class="ct-hint">' + tr('Not easy ones like 1234, 0000 or 1212, and not anyone else’s PIN.', 'Si rahisi kama 1234, 0000 au 1212, wala PIN ya mtu mwingine.') + '</p>',
+      save: tr('Set PIN', 'Weka PIN'), saveIc: 'check',
+      go: function (w2, v) {
+        if (ctWeak(v)) { w2.busy(false); return w2.say('bad', ctWhy({ reason: 'weak-pin' })); }
+        adminApi('POST', { action: 'team-set-pin', name: p.name, pin: v }).then(function (j) {
+          w2.busy(false); if (!j.ok) return w2.say('bad', ctWhy(j));
+          buzz(); w2.say('ok', tr('PIN set ✓', 'PIN imewekwa ✓'));
+          var c = w2.querySelector('.tsh-c'); c.querySelector('.ct-lb').remove(); var h = c.querySelector('.ct-fm > .ct-hint'); if (h) h.remove(); c.querySelector('[data-k=save]').remove();
+          pinBox(c.querySelector('.ct-out'), p.name, v, p.phone, p.home); mlHyph(c); ctReload();
+        });
+      } });
+    var i = w.querySelector('input'); i.addEventListener('input', function () { i.value = i.value.replace(/\D/g, '').slice(0, 8); });
+  }
+  function ctNewPin(p, resend) {
+    poAsk(resend ? tr('Reset and send a new PIN?', 'Weka upya na utume PIN mpya?') : tr('Make a new PIN for ' + p.name + '?', 'Tengeneza PIN mpya ya ' + p.name + '?'),
+      (resend ? tr('PINs are stored locked, so nobody can look up the old one. A new PIN is made; send it to them on WhatsApp or SMS. ', 'PIN zinahifadhiwa zimefungwa, kwa hiyo hakuna anayeweza kuona ya zamani. PIN mpya inatengenezwa; mtumie kwa WhatsApp au SMS. ') : '') + tr('Their old PIN stops working.', 'PIN yake ya zamani itaacha kufanya kazi.'),
+      resend ? tr('Reset and send', 'Weka upya na utume') : tr('Make a new PIN', 'Tengeneza PIN mpya')).then(function (ok) {
+      if (!ok) return;
+      adminApi('POST', { action: 'team-pin', name: p.name }).then(function (j) {
+        if (!j.ok) { toast(ctWhy(j)); return; }
+        buzz(); ctPinSheet(p, j.pin, resend ? tr('New PIN made: send it now', 'PIN mpya imetengenezwa: itume sasa') : tr('New PIN', 'PIN mpya'));
+      });
+    });
+  }
+  function ctPinSheet(p, pin, title, note) {
+    var w = ctForm({ k: 'pin', ic: 'key', hue: 'purple', title: title, sub: note || '' });
+    pinBox(w.querySelector('.ct-out'), p.name, pin, p.phone, p.home); mlHyph(w); ctReload();
+  }
+  function ctMove(p) {
+    poAsk(tr('Move ' + p.name + ' to an app PIN?', 'Mhamishie ' + p.name + ' PIN ya programu?'), tr('They get a new PIN that the app can manage. Their Cloudflare PIN keeps working until that entry is removed.', 'Anapata PIN mpya ambayo programu inaweza kusimamia. PIN yake ya Cloudflare inaendelea kufanya kazi hadi ingizo hilo liondolewe.'), tr('Move to an app PIN', 'Hamia PIN ya programu')).then(function (ok) {
+      if (!ok) return;
+      adminApi('POST', { action: 'team-move', name: p.name }).then(function (j) {
+        if (!j.ok) { toast(ctWhy(j)); return; }
+        buzz(); ctPinSheet(p, j.pin, tr('Moved to an app PIN ✓', 'Amehamishiwa PIN ya programu ✓'), tr('The Cloudflare entry can be removed now.', 'Ingizo la Cloudflare linaweza kuondolewa sasa.'));
+      });
+    });
+  }
+  function ctAdmin(p) {
     var up = !p.admin, first = String(p.name).split(/\s+/)[0];
     poAsk(up ? tr('Make ' + p.name + ' an admin?', 'Mfanye ' + p.name + ' msimamizi?') : tr('Remove ' + p.name + '’s admin role?', 'Ondoa usimamizi wa ' + p.name + '?'),
       up ? tr(first + ' will see the Office tab: repairs, review, the team, visit plans, donors and e-mails. They can add and remove people and make new PINs. You can change this back any time.', first + ' ataona Ofisi: matengenezo, ukaguzi, timu, mipango ya ziara, wafadhili na barua pepe. Ataweza kuongeza na kuondoa watu na kutengeneza PIN mpya. Unaweza kubadilisha hili wakati wowote.')
         : tr(first + ' will no longer see the Office tab or manage the team. They keep their PIN and can still pin, visit and report.', first + ' hataona Ofisi tena wala kusimamia timu. Anabaki na PIN yake na bado anaweza kuweka mahali, kutembelea na kuripoti.'),
       up ? tr('Make admin', 'Mfanye msimamizi') : tr('Remove admin', 'Ondoa usimamizi'), !up).then(function (ok) {
       if (!ok) return;
-      adminApi('POST', { action: 'team-update', name: p.name, home: p.home || '', email: p.email || '', phone: p.phone || '', admin: up }).then(function (j) {
-        if (!j.ok) { toast(j.reason === 'self' ? tr('You can’t remove your own admin role.', 'Huwezi kuondoa nafasi yako mwenyewe ya msimamizi.') : why(j)); return; }
-        p.admin = up; buzz(); toast(up ? tr(p.name + ' is now an admin ✓', p.name + ' sasa ni msimamizi ✓') : tr(p.name + ' is no longer an admin ✓', p.name + ' si msimamizi tena ✓'));
-        tmRedraw(); done();
+      adminApi('POST', { action: 'team-update', name: p.name, admin: up }).then(function (j) {
+        if (!j.ok) { toast(ctWhy(j)); return; }
+        buzz(); toast(up ? tr(p.name + ' is now an admin ✓', p.name + ' sasa ni msimamizi ✓') : tr(p.name + ' is no longer an admin ✓', p.name + ' si msimamizi tena ✓')); ctReload();
       });
     });
   }
-  // from a person's sheet to another Office tab is a step of its own, so Back comes to the Team list again
-  function tmPush(tab) { if (S.view !== 'vOffice') { O.tab = tab; return; } O.tab = tab; store.set('rfPinOTab', tab); bkGo('push', hashFor('vOffice')); }
-  function tmOpen(name) {
-    var p = (O.team || []).filter(function (x) { return x.name === name; })[0]; if (!p) return;
-    var app = p.source === 'app', hd = function () { return '<div class="tm-hd">' + tmAv(p) + '<h3>' + esc(p.name) + '</h3>' + tmTags(p, true) + '<small class="tm-seen">' + tmSeen(p) + '</small></div>'; };
-    var html = hd() + tmQa(p, true) + '<div class="tm-cf tm-cf0" aria-live="polite"></div>' + (app
-      ? '<div class="tm-f"><label>' + tr('Home country', 'Nchi ya nyumbani') + '<select data-f="home">' + tmHomes(p.home) + '</select></label>' +
-        '<div class="row2"><label>' + tr('E-mail (for alerts)', 'Barua pepe (kwa taarifa)') + tmIn('email', 'email', p.email, 'name@rafikioutreach.org') + '</label>' +
-        '<label>' + tr('Phone', 'Simu') + tmIn('tel', 'phone', p.phone, '+254 712 345 678') + '</label></div>' +
-        '<small class="muted">' + tr('The team sees the phone number, for calls and WhatsApp.', 'Timu inaona namba ya simu, kwa kupiga na WhatsApp.') + '</small>' + tmSwitch(p.admin) +
-        '<div class="tm-go"><button class="btn" type="button" data-a="save">' + oic('check') + tr('Save', 'Hifadhi') + '</button><span class="msg" aria-live="polite"></span></div>' +
-        '<div class="tm-ab tm-ab1"><button type="button" data-a="rm">' + oic('trash') + tr('Remove from the team', 'Ondoa kwenye timu') + '</button></div><div class="tm-cf" aria-live="polite"></div></div>'
-      : '<div class="tm-note ' + esc(p.source) + '">' + oic(p.source === 'cloudflare' ? 'cloud' : 'people') + '<span>' + (p.source === 'cloudflare' ? tr('This PIN is kept in the website’s settings, so it can’t be changed here. To manage it here, add them again with an app PIN.', 'PIN hii imehifadhiwa kwenye mipangilio ya tovuti, kwa hiyo haiwezi kubadilishwa hapa. Ili kuisimamia hapa, mwongeze tena kwa PIN ya programu.') + poTech(tr('It’s in PIN_USERS in Cloudflare.', 'Iko kwenye PIN_USERS ndani ya Cloudflare.')) : tr('Signs in with monday.com. Whoever looks after the website decides who is an admin.', 'Anaingia kwa monday.com. Anayesimamia tovuti ndiye anaamua nani ni msimamizi.') + poTech(tr('The admin role comes from PIN_ADMINS in Cloudflare.', 'Nafasi ya msimamizi inatoka PIN_ADMINS kwenye Cloudflare.'))) + '</span></div>' +
-        tmKv(p) +
-        '<div class="tm-go"><button class="btn light" type="button" data-a="readd">' + oic('key') + (p.source === 'cloudflare' ? tr('Re-add with an app PIN', 'Mwongeze kwa PIN ya programu') : tr('Give them an app PIN', 'Mpe PIN ya programu')) + '</button></div>') + tmWork(p.name);
-    var w = mlHyph(tSheet(p.name, '<div data-testid="tm_sheet">' + html + '</div>')), c = w.querySelector('.tsh-c'), cf = c.querySelector('.tm-f .tm-cf') || c.querySelector('.tm-cf0'), cf0 = c.querySelector('.tm-cf0'), m = c.querySelector('.tm-go .msg');
-    var redo = function () { c.querySelector('.tm-hd').outerHTML = hd(); var q = c.querySelector('.tm-qa'), h = c.querySelector('.tm-hint'); if (h) h.remove(); q.outerHTML = tmQa(p, true); mlHyph(c); tmMapBtn(c, p.name); var s = c.querySelector('.tm-sw'); if (s) s.setAttribute('aria-checked', String(!!p.admin)); };
-    tmMapBtn(c, p.name); tmWorkLoad(c, p.name);
-    c.addEventListener('click', function (e) {
-      if (tmTap(e, w, c)) return;
-      var sw = e.target.closest('.tm-sw'); if (sw) { sw.setAttribute('aria-checked', String(sw.getAttribute('aria-checked') !== 'true')); buzz(); return; }
-      var q = e.target.closest('[data-q]');
-      if (q) {
-        var qk = q.getAttribute('data-q'); buzz();
-        if (qk === 'mail') { w.close(); setTimeout(function () { tmPush('mail'); mlGo({ aud: 'pick', picks: ['t:' + p.name.toLowerCase()] }); }, 250); }
-        if (qk === 'invite') tmInvite(p);
-        if (qk === 'admin') tmElevate(p, redo);
-        if (qk === 'map') { w.close(); setTimeout(function () { OFA.open = p.name; OFA.pop = p.name; tmPush('teammap'); ocvTab('teammap'); }, 250); }
-        if (qk === 'plan') { w.close(); setTimeout(function () { if (OFA.to !== p.name) OFA.plan = null; OFA.to = p.name; tmPush('plan'); ocvTab('plan'); }, 250); }
-        if (qk === 'pin') tmAsk(cf0, tr('Make a new PIN for ' + p.name + '? Their old PIN stops working.', 'Tengeneza PIN mpya ya ' + p.name + '? PIN ya zamani itaacha kufanya kazi.'), tr('Make a new PIN', 'Tengeneza PIN mpya'), false, function (am) {
-          adminApi('POST', { action: 'team-pin', name: p.name }).then(function (j) { if (!j.ok) { am.className = 'msg bad'; am.textContent = why(j); qa('button', cf0).forEach(function (x) { x.disabled = false; }); return; } pinBox(cf0, p.name, j.pin, p.phone, p.home); cf0.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); });
-        });
-        return;
-      }
-      var a = e.target.closest('[data-a]'); if (!a) return;
-      var k = a.getAttribute('data-a'), f = function (n) { return c.querySelector('[data-f=' + n + ']'); };
-      if (k === 'readd') { w.close(); setTimeout(function () { tmAddOpen(p); }, 200); return; }
-      if (k === 'save') {
-        var body = { action: 'team-update', name: p.name, home: f('home').value, email: f('email').value.trim(), phone: f('phone').value.trim(), admin: f('admin').getAttribute('aria-checked') === 'true' };
-        a.disabled = true; m.className = 'msg'; m.textContent = tr('Saving…', 'Inahifadhi…');
-        adminApi('POST', body).then(function (j) {
-          a.disabled = false;
-          if (!j.ok) { m.className = 'msg bad'; m.textContent = j.reason === 'self' ? tr('You can’t remove your own admin role.', 'Huwezi kuondoa nafasi yako mwenyewe ya msimamizi.') : why(j); return; }
-          p.home = body.home; p.email = body.email; p.phone = body.phone; p.admin = body.admin;
-          redo(); m.className = 'msg ok'; m.textContent = tr('Saved ✓', 'Imehifadhiwa ✓');
-          tmRedraw(); setTimeout(w.close, 800);
-        });
-      }
-      if (k === 'rm') tmAsk(cf, tr('Remove ' + p.name + ' from the team? Their PIN stops working straight away.', 'Ondoa ' + p.name + ' kwenye timu? PIN yake itaacha kufanya kazi mara moja.'), tr('Remove', 'Ondoa'), true, function (am) {
-        adminApi('POST', { action: 'team-remove', name: p.name }).then(function (j) {
-          if (!j.ok) { am.className = 'msg bad'; am.textContent = why(j); qa('button', cf).forEach(function (x) { x.disabled = false; }); return; }
-          am.className = 'msg ok'; am.textContent = tr('Removed ✓', 'Imeondolewa ✓'); O.team = null; tmRedraw(); setTimeout(w.close, 700);
-        });
+  function ctBlock(p) {
+    ctForm({ k: 'block', ic: 'ctBlock', hue: 'coral', title: tr('Block ' + p.name + '?', 'Zuia ' + p.name + '?'),
+      sub: esc(tr('Their PIN stops working and every phone they use is signed out straight away. Their history is kept and they stay on the list, marked Blocked. You can unblock them later with the same PIN.', 'PIN yake itaacha kufanya kazi na simu zote anazotumia zitatolewa mara moja. Historia yake inabaki na anabaki kwenye orodha, akiwa amezuiwa. Unaweza kumwondolea kizuizi baadaye kwa PIN ileile.')),
+      body: '<label class="ct-lb">' + tr('Reason (optional)', 'Sababu (si lazima)') + '<input type="text" data-testid="ct_in" autocomplete="off" maxlength="200" placeholder="' + tr('e.g. lost their phone', 'mf. amepoteza simu yake') + '"></label>',
+      save: tr('Block', 'Zuia'), saveIc: 'ctBlock', red: true,
+      go: function (w, v) { adminApi('POST', { action: 'team-block', name: p.name, reason: v }).then(function (j) { w.busy(false); if (!j.ok) return w.say('bad', ctWhy(j)); ctDone(w, tr(p.name + ' is blocked', p.name + ' amezuiwa')); }); } });
+  }
+  function ctUnblock(p) {
+    poAsk(tr('Unblock ' + p.name + '?', 'Mwondolee ' + p.name + ' kizuizi?'), tr('They can sign in again with the same PIN.', 'Ataweza kuingia tena kwa PIN ileile.'), tr('Unblock', 'Ondoa kizuizi')).then(function (ok) {
+      if (!ok) return;
+      adminApi('POST', { action: 'team-unblock', name: p.name }).then(function (j) { if (!j.ok) { toast(ctWhy(j)); return; } buzz(); toast(tr(p.name + ' is unblocked ✓', p.name + ' ameondolewa kizuizi ✓')); ctReload(); });
+    });
+  }
+  function ctSignout(p) {
+    var me = ctMe(p);
+    poAsk(me ? tr('Sign out of all your phones?', 'Toka kwenye simu zako zote?') : tr('Sign ' + p.name + ' out of all phones?', 'Mtoe ' + p.name + ' kwenye simu zote?'),
+      me ? tr('Every phone, this one too, asks for your PIN again. Your PIN stays the same.', 'Kila simu, hii pia, itaomba PIN yako tena. PIN yako inabaki ileile.') : tr('Every phone they use asks for their PIN again. Their PIN stays the same.', 'Kila simu anayotumia itaomba PIN yake tena. PIN yake inabaki ileile.'),
+      tr('Sign out', 'Toa')).then(function (ok) {
+      if (!ok) return;
+      adminApi('POST', { action: 'team-signout', name: p.name }).then(function (j) { if (!j.ok) { toast(ctWhy(j)); return; } buzz(); toast(tr('Signed out of all phones ✓', 'Ametolewa kwenye simu zote ✓')); ctReload(); });
+    });
+  }
+  function ctRemove(p) {
+    poAsk(tr('Remove ' + p.name + ' from the team?', 'Ondoa ' + p.name + ' kwenye timu?'), tr('Their PIN stops working straight away. Their history is kept.', 'PIN yake itaacha kufanya kazi mara moja. Historia yake inabaki.'), tr('Remove', 'Ondoa'), true).then(function (ok) {
+      if (!ok) return;
+      adminApi('POST', { action: 'team-remove', name: p.name }).then(function (j) {
+        if (!j.ok) { toast(ctWhy(j)); return; }
+        buzz(); toast(tr(p.name + ' was removed', p.name + ' ameondolewa')); O.team = null; tmRedraw(); if (CT.w) CT.w.close();
       });
     });
   }
@@ -7712,7 +7967,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
   var VXF = [['all', 'All', 'Zote'], ['broken', 'Broken', 'Zimeharibika'], ['working', 'Working', 'Zinafanya kazi'], ['other', 'Other', 'Nyingine'], ['ignored', 'Ignored', 'Zimepuuzwa']];
   function vxGroup(r) { r = r || ''; return /^reported-|^already-open$/.test(r) ? 'broken' : /^fixed|^noted-working$/.test(r) ? 'working' : /^ignored-|^rate-limited$|^daily-limit$/.test(r) ? 'ignored' : 'other'; }
   function vxApi(method, body) {
-    return fetch('/api/sms-admin', { method: method, headers: Object.assign({ Accept: 'application/json' }, S.pin ? { 'X-Pin': S.pin } : {}, body ? { 'Content-Type': 'application/json' } : {}), body: body ? JSON.stringify(body) : undefined })
+    return fetch('/api/sms-admin', { method: method, headers: Object.assign({ Accept: 'application/json' }, pinHdr(), body ? { 'Content-Type': 'application/json' } : {}), body: body ? JSON.stringify(body) : undefined })
       .then(function (r) { return r.json().catch(function () { return { ok: false, reason: 'down' }; }).then(function (j) { j.status = r.status; return j; }); })
       .catch(function () { return { ok: false, reason: 'offline', status: 0 }; });
   }
@@ -8175,31 +8430,9 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
     }, 40);
   }
   // a teammate: call, WhatsApp, today's visits (tap one to open the project), and show them on the map
-  function dqmTmSheet(n) {
-    var p = ((OFA.tm && OFA.tm.people) || []).filter(function (x) { return x.name === n; })[0]; if (!p) return;
-    var v = ofaTmVisits(n), tel = p.phone ? p.phone.replace(/\s/g, '') : '';
-    var html = '<div class="dqm-sh" data-testid="tm_sheet"><div class="dqm-shd">' + ofaAvatar(n, 'lg') + '<h3>' + esc(n) + '</h3><small>' + tr('Last seen ', 'Alionekana ') + since(p.at) + dqmAcc(p.acc) + '</small></div>' +
-      '<div class="dqm-acts">' + (p.phone ? '<div class="dqm-two"><a class="btn light" href="tel:' + esc(tel) + '" data-testid="tm_call">' + oic('phone') + tr('Call', 'Piga simu') + '</a><a class="btn light" href="https://wa.me/' + waNum(p.phone, p.home) + '" target="_blank" rel="noopener" data-testid="tm_wa">' + oic('vxwa') + 'WhatsApp</a></div>'
-        : '<p class="muted dqm-note">' + tr('No phone number on the team list for them.', 'Hakuna namba ya simu yake kwenye orodha ya timu.') + '</p>') +
-      '<button class="btn" type="button" data-a="map" data-testid="tm_onmap">' + oic('pin') + tr('Show on the map', 'Onyesha kwenye ramani') + '</button></div>' +
-      '<p class="dqm-lab">' + tr('Visits today', 'Ziara za leo') + ' · ' + v.length + '</p>' +
-      (v.length ? '<ul class="dqm-vt">' + v.map(function (x) {
-        var pr = byId(x.id), st = x.s === 'notworking' ? tr('Not working', 'Haifanyi kazi') : x.s === 'repair' ? tr('Needs repair', 'Inahitaji matengenezo') : tr('Working', 'Inafanya kazi');
-        return '<li><button type="button" data-a="open" data-id="' + esc(x.id) + '"><i style="background:' + ofaStateCol(x.s) + '" aria-hidden="true"></i><span><b>' + esc(pr ? pr.title : x.t || x.id) + '</b><small>' + st + '</small></span><time>' + ofaClock(x.at) + '</time>' + oic('chev') + '</button></li>';
-      }).join('') + '</ul>' : '<p class="muted dqm-note">' + tr('No visits reported yet today.', 'Hakuna ziara zilizoripotiwa leo bado.') + '</p>') + '</div>';
-    var w = tSheet(n, html), c = w.querySelector('.tsh-c');
-    c.addEventListener('click', function (e) {
-      var a = e.target.closest('[data-a]'); if (!a) return;
-      if (a.getAttribute('data-a') === 'open') { var id = a.getAttribute('data-id'); w.close(); setTimeout(function () { openProj(id); }, 200); return; }
-      if (a.getAttribute('data-a') === 'map') {
-        w.close(); OFA.open = n; OFA.pop = n; ofaTmDraw();
-        var mp = $('ofaTmMap'); if (mp && mp.scrollIntoView) mp.scrollIntoView({ block: 'nearest', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
-      }
-    });
-  }
   $('oBody').addEventListener('click', function (e) {
     var pe = e.target.closest('[data-ofa-p]');
-    if (pe && OFA.tm && O.tab === 'teammap') { buzz(); if (OFA.map) OFA.map.closePopup(); dqmTmSheet(pe.getAttribute('data-ofa-p')); }
+    if (pe && OFA.tm && O.tab === 'teammap') { buzz(); if (OFA.map) OFA.map.closePopup(); ctOpen(pe.getAttribute('data-ofa-p')); }
   });
 
   // Office › Plan a week
@@ -8896,7 +9129,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
     if (!all.length) return '<p class="muted">' + tr('Nothing yet.', 'Bado hakuna kitu.') + '</p>';
     return '<ul class="ocv-feed">' + list.map(function (e) {
       var sms = isSms(e), f = sms ? ['phone', '#5A6066'] : FEEDIC[e.a] || ['drop', '#0A78C2'], p = e.id && byId(e.id);
-      var inner = '<span class="dt" style="--c:' + f[1] + '" aria-hidden="true">' + oic(f[0]) + '</span><span class="tx"><b>' + esc(sms ? tr('Community report', 'Ripoti ya jamii') : e.by) + '</b> ' + (sms ? esc(e.t || '') + (e.s && STATES[e.s] ? ' · ' + esc(tr(STATES[e.s][1], STATES[e.s][2])) : '') : esc(VERB[e.a] || e.a) + ' ' + esc(e.t || '')) + '<small>' + esc(vxAgo(e.at)) + '</small></span>';
+      var inner = '<span class="dt" style="--c:' + f[1] + '" aria-hidden="true">' + oic(f[0]) + '</span><span class="tx"><b>' + (sms ? esc(tr('Community report', 'Ripoti ya jamii')) : ctWho(e.by)) + '</b> ' + (sms ? esc(e.t || '') + (e.s && STATES[e.s] ? ' · ' + esc(tr(STATES[e.s][1], STATES[e.s][2])) : '') : esc(VERB[e.a] || e.a) + ' ' + esc(e.t || '')) + '<small>' + esc(vxAgo(e.at)) + '</small></span>';
       return '<li>' + (p ? '<button type="button" class="ocv-fi" data-ocvopen="' + esc(e.id) + '">' + inner + '<span class="ocv-chev" aria-hidden="true">' + oic('chev') + '</span></button>' : '<div class="ocv-fi">' + inner + '</div>') + '</li>';
     }).join('') + '</ul>' + (all.length > 5 && !OCV.feedMore ? '<button class="btn light small block ocv-more" type="button" data-ocvgo="feedmore">' + tr('Show ' + (all.length - 5) + ' more', 'Onyesha ' + (all.length - 5) + ' zaidi') + '</button>' : '');
   }
@@ -9068,7 +9301,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
         return '<button type="button" class="ocv-card ocv-v-' + s + '" style="--i:' + i + '" data-ocvv="' + esc(a.aid) + '" data-testid="ocv_visit"><span class="av">' + tmAv({ name: a.to }) + '</span>' +
           '<span class="tt">' + esc(a.t || pname(a.id)) + '</span><span class="wh">' + esc(when) + oic('chev') + '</span>' +
           '<span class="pl">' + ocvPill(t[2], tr(t[0], t[1])) + '</span>' +
-          '<span class="mt"><span>' + esc(a.to) + (rel && rel !== when ? ' · ' + esc(rel) : '') + '</span>' + (a.note ? '<span class="nt">“' + esc(a.note) + '”</span>' : '') + '</span></button>';
+          '<span class="mt"><span>' + ctWho(a.to) + (rel && rel !== when ? ' · ' + esc(rel) : '') + '</span>' + (a.note ? '<span class="nt">“' + esc(a.note) + '”</span>' : '') + '</span></button>';
       }).join('') + '</div>' + (shown.length > lim ? '<button class="btn light block ocv-more" type="button" data-ocvgo="vmore">' + tr('Show ' + (shown.length - lim) + ' more', 'Onyesha ' + (shown.length - lim) + ' zaidi') + '</button>' : '');
     var sl = ocvChipPos(b);
     b.innerHTML = '<div class="o-grid ocv ocv-vg"><div class="o-side ocv-vs">' + head + '</div><div class="ocv-main">' + chips + list + '</div></div>';
@@ -9083,8 +9316,8 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
     var opts = names().map(function (n) { return '<option' + (n === a.to ? ' selected' : '') + '>' + esc(n) + '</option>'; }).join('');
     if (opts && names().indexOf(a.to) < 0) opts = '<option selected>' + esc(a.to) + '</option>' + opts;
     var html = ocvShd(oic(t[3]), hue, esc(title), ocvPill(t[2], tr(t[0], t[1])) + (s === 'done' || s === 'today' ? '' : ' <span class="ocv-rel">' + esc(ocvRel(a, today)) + '</span>'), 'ocv_visit_sheet') +
-      ocvKv([[tr('Field officer', 'Afisa wa uwanjani'), '<span class="ocv-who">' + tmAv({ name: a.to }) + '<span>' + esc(a.to) + '</span></span>'], [tr('Date', 'Tarehe'), esc(long)], [tr('Note', 'Maelezo'), a.note ? esc(a.note) : ''],
-        [tr('Assigned by', 'Aliyegawa'), esc(a.by || '') + (a.at ? '<small>' + esc(vxWhen(a.at)) + '</small>' : '')], [tr('Done', 'Imefanyika'), a.done ? esc(vxWhen(a.done)) : '']]) +
+      ocvKv([[tr('Field officer', 'Afisa wa uwanjani'), '<span class="ocv-who">' + tmAv({ name: a.to }) + '<span>' + ctWho(a.to) + '</span></span>'], [tr('Date', 'Tarehe'), esc(long)], [tr('Note', 'Maelezo'), a.note ? esc(a.note) : ''],
+        [tr('Assigned by', 'Aliyegawa'), ctWho(a.by || '') + (a.at ? '<small>' + esc(vxWhen(a.at)) + '</small>' : '')], [tr('Done', 'Imefanyika'), a.done ? esc(vxWhen(a.done)) : '']]) +
       '<div class="ocv-acts">' + (p ? '<button class="btn" type="button" data-a="open" data-testid="ocv_v_open">' + oic('arrow') + tr('Open project', 'Fungua mradi') + '</button>' : '') +
       (open ? '<div class="ocv-two"><button class="btn light" type="button" data-a="re" data-testid="ocv_v_re" aria-expanded="false">' + oic('people') + tr('Reassign', 'Mpe mwingine') + '</button>' +
         '<button class="btn light ocv-red" type="button" data-a="rm" data-testid="ocv_v_rm">' + oic('trash') + tr('Cancel visit', 'Ghairi ziara') + '</button></div>' +
@@ -9436,6 +9669,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
     draw();
     c.addEventListener('click', function (e) {
       var d = dqmDn(id); if (!d) return;
+      var dvc = e.target.closest('[data-dvc]'); if (dvc) { buzz(); return dnContact(id, dvc.getAttribute('data-dvc'), draw); }
       var dv = e.target.closest('[data-dv]'); if (dv) return dnrViewerAct(dv, d, draw, c);
       if (e.target.closest('#dnVAdd')) return dnrViewerAdd(d, draw);
       var a = e.target.closest('[data-a]'); if (!a) return;
@@ -9483,11 +9717,81 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
       '<div class="dqm-ab">' + (on ? '<button type="button" data-a="rotate" data-testid="dn_rotate">' + oic('dqmrot') + '<span>' + tr('Rotate link', 'Badilisha kiungo') + '</span></button><button type="button" class="bad" data-a="revoke" data-testid="dn_revoke">' + oic('dqmoff') + '<span>' + tr('Revoke', 'Zima') + '</span></button>' : '') +
       '<button type="button" class="bad" data-a="del" data-testid="dn_delete">' + oic('trash') + '<span>' + tr('Delete donor', 'Futa mfadhili') + '</span></button></div><div class="tm-cf" aria-live="polite"></div>';
   }
+  // a donor contact (one viewer of a donor page): the same kind of card as a teammate's (contw)
+  function dnContact(id, vid, redraw) {
+    var D = { w: null };
+    var cur = function () { var d = dqmDn(id), v = d && d.viewers.filter(function (x) { return x.vid === vid; })[0]; return d && v ? { d: d, v: v } : null; };
+    var take = function (j) { if (j && j.donor) DNR.list = DNR.list.map(function (x) { return x.id === j.donor.id ? j.donor : x; }); if (redraw) redraw(); if (O.tab === 'donors' && S.view === 'vOffice') dnrOffice($('oBody')); draw(); };
+    var draw = function () {
+      var x = cur(); if (!x) { if (D.w) D.w.close(); return; }
+      var d = x.d, v = x.v, on = !!v.active, name = v.name || d.name, c = D.w.querySelector('.tsh-c'), y = c.scrollTop, h = dqmHue(name);
+      var tags = '<span class="tm-tags">' + (v.primary ? '<span class="tm-t s-app">' + oic('heart') + tr('Main contact', 'Mawasiliano makuu') + '</span>' : '<span class="tm-t fld">' + oic('people') + tr('Also sees the page', 'Pia anaona ukurasa') + '</span>') +
+        (on ? '' : '<span class="tm-t blk">' + oic('ctBlock') + tr('Access blocked', 'Ufikiaji umezuiwa') + '</span>') + '</span>';
+      var st = !on ? '<span class="ct-st bad">' + esc(tr('Link switched off ', 'Kiungo kimezimwa ') + (v.revoked ? dDay(v.revoked, true) : '')) + '</span>'
+        : v.lastOpen ? '<span class="ct-st"><span class="nw">' + tr('Opened their page', 'Wamefungua ukurasa') + '</span> · <span class="nw">' + esc(dWhen(v.lastOpen)) + '</span></span>' : '<span class="ct-st">' + tr('Hasn’t opened their page yet', 'Bado hajafungua ukurasa') + '</span>';
+      var hd = '<div class="ct-hd"><span class="tm-av" style="--hu:var(--hu-' + h + ');--hb:var(--hb-' + h + ')" aria-hidden="true">' + mateInitials(name) + '</span><h3>' + esc(name) + '</h3>' + (d.org && d.org !== name ? '<span class="ct-role">' + esc(d.org) + '</span>' : '') + tags + st + '</div>' +
+        (v.email || (on && v.code) ? '<div class="ct-ids">' + (v.email ? ctId('email', v.email) : '') + (on && v.code ? '<div class="ct-id"><span class="ct-idi" aria-hidden="true">' + oic('key') + '</span><span class="ct-idv"><span class="ct-idl">' + tr('App code', 'Msimbo wa programu') + '</span> <b data-nosw>' + esc(v.code) + '</b></span><button type="button" class="ct-cp" data-cv="' + esc(v.code) + '" data-testid="dc_copy_code" aria-label="' + tr('Copy app code', 'Nakili msimbo wa programu') + '">' + oic('vxcopy') + '</button></div>' : '') + '</div>' : '');
+      var contact = ctGroup('contact', tr('Contact', 'Mawasiliano'), [
+        v.email ? ctRow('mail', 'mail', 'blue', tr('Send an e-mail', 'Tuma barua pepe'), esc(v.email)) : '',
+        on ? ctRow('copy', 'link', 'teal', tr('Copy private link', 'Nakili kiungo cha siri'), tr('Their own page', 'Ukurasa wao wenyewe')) : '',
+        on ? ctRow('share', 'ctShare', 'green', tr('Share link', 'Shiriki kiungo'), 'WhatsApp, ' + tr('e-mail or more', 'barua pepe au zaidi')) : '',
+        on && v.code ? ctRow('invite', 'tmsend', 'purple', tr('Send app invite', 'Tuma mwaliko wa programu'), tr('With their app code', 'Pamoja na msimbo wao wa programu')) : ''
+      ]);
+      var details = ctGroup('details', tr('Details', 'Maelezo'), [
+        ctRow('name', 'ctUser', 'blue', tr('Name', 'Jina'), esc(name)),
+        ctRow('email', 'mail', 'teal', v.email ? tr('Change e-mail', 'Badilisha barua pepe') : tr('Add e-mail', 'Ongeza barua pepe'), v.email ? esc(v.email) : '<span class="ct-none">' + tr('None yet', 'Bado hakuna') + '</span>'),
+        ctRow('digest', 'cal', 'amber', d.digest ? tr('Stop monthly e-mails', 'Simamisha barua pepe za mwezi') : tr('Start monthly e-mails', 'Anzisha barua pepe za mwezi'), (d.digest ? tr('On', 'Imewashwa') : tr('Off', 'Imezimwa')) + (d.viewers.length > 1 ? ' · ' + tr('for everyone on this page', 'kwa wote wa ukurasa huu') : ''))
+      ]);
+      var access = ctGroup('access', tr('Access', 'Ufikiaji'), [
+        ctRow('rotate', 'dqmrot', 'purple', on ? tr('New link', 'Kiungo kipya') : tr('Make a new link', 'Tengeneza kiungo kipya'), on ? tr('The old link stops working', 'Kiungo cha zamani kitaacha kufanya kazi') : tr('A new link and app code', 'Kiungo kipya na msimbo mpya')),
+        on ? ctRow('revoke', 'ctBlock', 'coral', tr('Block access', 'Zuia ufikiaji'), tr('Their link and app code stop working', 'Kiungo na msimbo wao vitaacha kufanya kazi'), { red: true })
+          : ctRow('restore', 'ctBlock', 'green', tr('Restore access', 'Rudisha ufikiaji'), tr('The same link works again', 'Kiungo kilekile kitafanya kazi tena')),
+        ctRow('remove', 'trash', 'coral', v.primary ? tr('Remove donor', 'Ondoa mfadhili') : tr('Remove from this page', 'Ondoa kwenye ukurasa huu'), v.primary ? tr('Everyone’s links stop working', 'Viungo vya wote vitaacha kufanya kazi') : tr('Only their link stops', 'Kiungo chake tu kinazimwa'), { red: true })
+      ]);
+      c.firstChild.innerHTML = hd + contact + details + access;
+      mlHyph(c); c.scrollTop = y;
+    };
+    var x0 = cur(); if (!x0) return;
+    D.w = mlHyph(tSheet(x0.v.name || x0.d.name, '<div class="ct" data-testid="dn_contact"></div>'));
+    draw();
+    var link = function (then) { adminApi('POST', { action: 'donor-link', id: id, vid: vid }).then(function (j) { if (!j.ok) return toast(dnrWhy(j)); then(j); }); };
+    D.w.querySelector('.tsh-c').addEventListener('click', function (e) {
+      var cv = e.target.closest('[data-cv]'); if (cv) { tmCopy(cv.getAttribute('data-cv')); return; }
+      var r = e.target.closest('[data-ct]'); if (!r) return;
+      var k = r.getAttribute('data-ct'), x = cur(); if (!x) return; var d = x.d, v = x.v, name = v.name || d.name; buzz();
+      if (k === 'mail') { D.w.close(); mlGo({ aud: 'donors', sub: 'pick', picks: [d.id] }); return; }
+      if (k === 'copy') return link(function (j) { dnrCopy(j.link); });
+      if (k === 'share') return link(function (j) { var w = ctForm({ k: 'share', ic: 'ctShare', hue: 'green', title: tr('Share link', 'Shiriki kiungo') }); dnrLinkBox(w.querySelector('.ct-out'), name, v.email, j.link, false); mlHyph(w); });
+      if (k === 'invite') { var w = ctForm({ k: 'invite', ic: 'tmsend', hue: 'purple', title: tr('Send app invite', 'Tuma mwaliko wa programu') }); dnaInviteBox(w.querySelector('.ct-out'), name, v.email, v.code); mlHyph(w); return; }
+      var save = function (body, w, ok) { adminApi('POST', Object.assign({ id: id, vid: vid }, body)).then(function (j) { w.busy(false); if (!j.ok) return w.say('bad', j.reason === 'bad-email' ? ctWhy(j) : dnrWhy(j)); take(j); buzz(); toast(ok); setTimeout(function () { w.close(); }, 250); }); };
+      if (k === 'name') return ctForm({ k: 'dname', ic: 'ctUser', hue: 'blue', title: tr('Name', 'Jina'), body: '<label class="ct-lb">' + tr('Name', 'Jina') + '<input type="text" data-testid="ct_in" maxlength="80" autocomplete="off" value="' + esc(name) + '"></label>', save: tr('Save', 'Hifadhi'), saveIc: 'check',
+        go: function (w, val) { if (!val) { w.busy(false); return w.say('bad', tr('Type a name.', 'Andika jina.')); } save({ action: 'donor-viewer-update', name: val }, w, tr('Name saved ✓', 'Jina limehifadhiwa ✓')); } });
+      if (k === 'email') return ctForm({ k: 'demail', ic: 'mail', hue: 'teal', title: v.email ? tr('Change e-mail', 'Badilisha barua pepe') : tr('Add e-mail', 'Ongeza barua pepe'), sub: tr('For the monthly update and e-mails from the office.', 'Kwa taarifa ya mwezi na barua pepe kutoka ofisini.'),
+        body: '<label class="ct-lb">' + tr('E-mail', 'Barua pepe') + '<input type="email" inputmode="email" data-testid="ct_in" autocomplete="off" value="' + esc(v.email || '') + '"></label>', save: tr('Save', 'Hifadhi'), saveIc: 'check',
+        after: v.email ? '<button type="button" class="ct-clear" data-k="clear" data-testid="ct_clear">' + oic('trash') + '<span>' + tr('Remove e-mail', 'Ondoa barua pepe') + '</span></button>' : '',
+        go: function (w, val) { if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(val)) { w.busy(false); return w.say('bad', ctWhy({ reason: 'bad-email' })); } save({ action: 'donor-viewer-update', email: val }, w, tr('E-mail saved ✓', 'Barua pepe imehifadhiwa ✓')); },
+        clear: function (w) { save({ action: 'donor-viewer-update', email: '' }, w, tr('E-mail removed', 'Barua pepe imeondolewa')); } });
+      if (k === 'digest') return adminApi('POST', { action: 'donor-update', id: id, digest: !d.digest }).then(function (j) { if (!j.ok) return toast(dnrWhy(j)); take(j); toast(j.donor && j.donor.digest ? tr('Monthly e-mails on ✓', 'Barua pepe za mwezi zimewashwa ✓') : tr('Monthly e-mails stopped', 'Barua pepe za mwezi zimesimamishwa')); });
+      var act = function (body, ok, then) { adminApi('POST', Object.assign({ id: id, vid: vid }, body)).then(function (j) { if (!j.ok) return toast(dnrWhy(j)); take(j); buzz(); toast(ok); if (then) then(j); }); };
+      if (k === 'rotate') return poAsk(tr('Make a new link for ' + name + '?', 'Tengeneza kiungo kipya cha ' + name + '?'), tr('The old link and app code stop working, so send them the new ones.', 'Kiungo na msimbo wa zamani vitaacha kufanya kazi, kwa hiyo watumie vipya.'), tr('Make a new link', 'Tengeneza kiungo kipya')).then(function (ok) {
+        if (ok) act({ action: 'donor-rotate' }, tr('New link made', 'Kiungo kipya kimetengenezwa'), function (j) { var w = ctForm({ k: 'link', ic: 'link', hue: 'teal', title: tr('New link', 'Kiungo kipya') }); dnrLinkBox(w.querySelector('.ct-out'), name, v.email, j.link, true); mlHyph(w); }); });
+      if (k === 'revoke') return poAsk(tr('Block access for ' + name + '?', 'Zuia ufikiaji wa ' + name + '?'), tr('Their page and app code stop working straight away. You can restore the same link later.', 'Ukurasa na msimbo wao vitaacha kufanya kazi mara moja. Unaweza kurudisha kiungo kilekile baadaye.'), tr('Block access', 'Zuia ufikiaji'), true).then(function (ok) { if (ok) act({ action: 'donor-revoke' }, tr('Access blocked', 'Ufikiaji umezuiwa')); });
+      if (k === 'restore') return poAsk(tr('Restore access for ' + name + '?', 'Rudisha ufikiaji wa ' + name + '?'), tr('Their old link and app code work again.', 'Kiungo na msimbo wao wa zamani vitafanya kazi tena.'), tr('Restore', 'Rudisha')).then(function (ok) { if (ok) act({ action: 'donor-viewer-restore' }, tr('Access restored ✓', 'Ufikiaji umerudishwa ✓')); });
+      if (k === 'remove') return poAsk(v.primary ? tr('Remove ' + d.name + '?', 'Ondoa ' + d.name + '?') : tr('Remove ' + name + ' from this page?', 'Ondoa ' + name + ' kwenye ukurasa huu?'), v.primary ? tr('Everyone’s links stop working straight away.', 'Viungo vya wote vitaacha kufanya kazi mara moja.') : tr('Their link stops working straight away.', 'Kiungo chake kitaacha kufanya kazi mara moja.'), tr('Remove', 'Ondoa'), true).then(function (ok) {
+        if (!ok) return;
+        adminApi('POST', v.primary ? { action: 'donor-remove', id: id } : { action: 'donor-viewer-remove', id: id, vid: vid }).then(function (j) {
+          if (!j.ok) return toast(dnrWhy(j)); toast(tr('Removed', 'Imeondolewa')); D.w.close();
+          if (v.primary) { DNR.list = DNR.list.filter(function (q) { return q.id !== id; }); qa('.tsh [data-testid=dn_sheet]').forEach(function (n) { var t = n.closest('.tsh'); if (t && t.close) t.close(); }); dnrRefresh(); } else take(j);
+        });
+      });
+    });
+    return D.w;
+  }
   // group pages: everyone who can open the page, each with their own link
   function dqmDnViewers(d) {
     return '<p class="muted dqm-note">' + tr('For a church or company: give each person their own link, so you can switch one off without affecting the others.', 'Kwa kanisa au kampuni: mpe kila mtu kiungo chake, ili uweze kuzima kimoja bila kuathiri wengine.') + '</p>' +
       d.viewers.map(function (v) {
-        return '<div class="dqm-v" data-vid="' + esc(v.vid) + '"><div class="dqm-vh"><b>' + esc(v.name || d.name) + '</b>' + (v.primary ? '<span class="tag has">' + tr('main', 'mkuu') + '</span>' : '') + (v.active ? '' : '<span class="tag">' + tr('revoked', 'kimezimwa') + '</span>') + '</div>' +
+        return '<div class="dqm-v" data-vid="' + esc(v.vid) + '"><div class="dqm-vh"><b><span class="ct-who" data-dvc="' + esc(v.vid) + '" role="button" tabindex="0" data-testid="dn_viewer">' + esc(v.name || d.name) + '</span></b>' + (v.primary ? '<span class="tag has">' + tr('main', 'mkuu') + '</span>' : '') + (v.active ? '' : '<span class="tag">' + tr('revoked', 'kimezimwa') + '</span>') + '</div>' +
           '<small>' + esc([v.email, v.lastOpen ? tr('opened ', 'kimefunguliwa ') + since(v.lastOpen) : tr('not opened yet', 'bado hakijafunguliwa'), v.unsub ? tr('no monthly e-mail', 'hapati barua ya mwezi') : ''].filter(Boolean).join(' · ')) + '</small>' +
           (v.active && v.code ? '<small class="dna-vcode">' + tr('App code', 'Msimbo wa programu') + ' <b data-nosw>' + esc(v.code) + '</b></small>' : '') +
           '<div class="dqm-vb">' + (v.active ? '<button class="btn small light" type="button" data-dv="copy">' + oic('link') + '<span>' + tr('Copy link', 'Nakili kiungo') + '</span></button>' + (v.code ? '<button class="btn small light" type="button" data-dv="invite">' + tr('App invite', 'Mwaliko wa programu') + '</button>' : '') + '<button class="btn small light" type="button" data-dv="rotate">' + tr('Rotate', 'Badilisha') + '</button><button class="btn small light dqm-bad" type="button" data-dv="revoke">' + tr('Revoke', 'Zima') + '</button>'
@@ -9541,7 +9845,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
   }
   function mlKeep() { store.set('rfPinMailDraft', JSON.stringify({ aud: ML.aud, sub: ML.sub, project: ML.project, subject: ML.subject, body: ML.body, btnOn: ML.btnOn, btnLabel: ML.btnLabel, btnHref: ML.btnHref, link: ML.link })); }
   function mlApi(method, body, q) {
-    return fetch('/api/mail' + (q || ''), { method: method, headers: Object.assign({ Accept: 'application/json' }, S.pin ? { 'X-Pin': S.pin } : {}, body ? { 'Content-Type': 'application/json' } : {}), body: body ? JSON.stringify(body) : undefined })
+    return fetch('/api/mail' + (q || ''), { method: method, headers: Object.assign({ Accept: 'application/json' }, pinHdr(), body ? { 'Content-Type': 'application/json' } : {}), body: body ? JSON.stringify(body) : undefined })
       .then(function (r) { return r.json().catch(function () { return { ok: false, reason: 'down' }; }).then(function (j) { j.status = r.status; return j; }); })
       .catch(function () { return { ok: false, reason: 'offline', status: 0 }; });
   }
@@ -9806,7 +10110,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
     var e = (ML.ov.log || []).filter(function (x) { return x.id === id; })[0]; if (!e) return;
     var st = { sent: tr('Sent', 'Imetumwa'), failed: tr('Not delivered', 'Haikufika') };
     mlHyph(tSheet(e.subject || '', '<div class="ml-lg" data-testid="ml_log_sheet"><div class="dqm-shd"><span class="dqm-shi dqm-t-' + (e.failed ? 'has' : 'ok') + '" aria-hidden="true">' + oic('mail') + '</span><h3>' + esc(e.subject || '') + '</h3><small>' + esc(mlAudWord(e)) + '</small></div>' +
-      dqmKv([[tr('Sent by', 'Imetumwa na'), esc(e.by || '')], [tr('When', 'Lini'), esc(vxWhen(e.at))], [tr('Sent', 'Zimetumwa'), String(e.sent || 0), e.failed ? esc(tr(e.failed + ' not delivered', e.failed + ' hazikufika')) : ''],
+      dqmKv([[tr('Sent by', 'Imetumwa na'), ctWho(e.by || '')], [tr('When', 'Lini'), esc(vxWhen(e.at))], [tr('Sent', 'Zimetumwa'), String(e.sent || 0), e.failed ? esc(tr(e.failed + ' not delivered', e.failed + ' hazikufika')) : ''],
         e.skipped ? [tr('Skipped', 'Zimerukwa'), String(e.skipped), esc(mlSkipText(e.skippedBy || {}).join(' · '))] : null, e.link ? [tr('Private link', 'Kiungo cha siri'), tr('Included', 'Kimewekwa')] : null]) +
       '<h3 class="ml-h">' + tr('Each person', 'Kila mtu') + '</h3><ul class="ml-rc">' + (e.rcpt || []).map(function (r) { return '<li class="' + (r.s === 'sent' ? 'ok' : 'bad') + '"><i aria-hidden="true"></i><b>' + esc(r.name) + '</b><span>' + esc(st[r.s] || r.s) + '</span>' + (r.e ? '<small>' + esc(r.e) + '</small>' : '') + '</li>'; }).join('') + '</ul></div>'));
   }
@@ -9916,7 +10220,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
       if (secs > 61) return msg(m, 'bad', tr('Please keep it to 60 seconds or less (this one is ' + Math.round(secs) + ' s).', 'Tafadhali isizidi sekunde 60 (hii ni sekunde ' + Math.round(secs) + ').'));
       DNR_THX.busy = true; msg(m, '', tr('Sending…', 'Inatuma…'));
       var fd = new FormData(); fd.append('id', p.id); fd.append('file', f); fd.append('caption', $('dnThxCap').value); fd.append('seconds', String(Math.round(secs))); if (!S.who && S.name) fd.append('by', S.name);
-      fetch('/api/pin-thanks', { method: 'POST', headers: Object.assign({ Accept: 'application/json' }, S.pin ? { 'X-Pin': S.pin } : {}), body: fd })
+      fetch('/api/pin-thanks', { method: 'POST', headers: Object.assign({ Accept: 'application/json' }, pinHdr()), body: fd })
         .then(function (r) { return r.json().catch(function () { return { ok: false, reason: 'down' }; }); }, function () { return { ok: false, reason: 'offline' }; })
         .then(function (j) {
           DNR_THX.busy = false;
@@ -11003,7 +11307,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
   }
   function mpbTeamPop(p) {
     var ph = String(p.phone || '').replace(/\s/g, '');
-    return '<div class="mpb-pop mpb-tp"><span class="mpb-who">' + ofaAvatar(p.name) + '<span><b>' + esc(p.name) + '</b><small>' + esc(tr('Last seen ', 'Alionekana ') + since(p.at)) + (p.acc ? ' · ±' + (p.acc < 1000 ? p.acc + ' m' : Math.round(p.acc / 1000) + ' km') : '') + '</small></span></span>' +
+    return '<div class="mpb-pop mpb-tp"><span class="mpb-who">' + ofaAvatar(p.name) + '<span><b>' + ctWho(p.name) + '</b><small>' + esc(tr('Last seen ', 'Alionekana ') + since(p.at)) + (p.acc ? ' · ±' + (p.acc < 1000 ? p.acc + ' m' : Math.round(p.acc / 1000) + ' km') : '') + '</small></span></span>' +
       (ph ? '<span class="mpb-pb"><a class="btn" href="tel:' + esc(ph) + '">' + oic('phone') + esc(tr('Call', 'Piga simu')) + '</a><a class="btn light" href="https://wa.me/' + waNum(p.phone, p.home) + '" target="_blank" rel="noopener">' + oic('chat') + 'WhatsApp</a></span>'
         : '<span class="mpb-st">' + esc(tr('No phone number saved for them.', 'Hakuna namba ya simu iliyohifadhiwa.')) + '</span>') + '</div>';
   }
