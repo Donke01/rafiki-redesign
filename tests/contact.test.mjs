@@ -262,3 +262,55 @@ test('donors: rename a viewer, change their e-mail, block and restore the same l
   assert.equal(r.body.ok, true); assert.equal(r.body.link.split('/donor/')[1], tok, 'the same link works again');
   assert.ok(await findByToken(E, tok)); assert.ok(!r.body.donor.revoked);
 });
+
+// ---- the shapes the Android app uses (conta) -------------------------------------------------------------------
+test('android: admin team-update with every field; self team-update with name, e-mail, phone only', async () => {
+  const E = env(), M = as(E, '4821');
+  await M.adm({ action: 'team-add', name: 'Grace', home: 'ke', email: 'grace@example.org', phone: '0712 000 111' });
+  await M.adm({ action: 'team-set-pin', name: 'Grace', pin: '58204' });
+  // admin: everything, "" clears e-mail and phone
+  let r = await M.adm({ action: 'team-update', name: 'Grace', home: 'tz', admin: false, email: '', phone: '', role: 'Field officer, Kitale' });
+  assert.equal(r.ok, true);
+  let g = (await teamOf(E)).find(p => p.name === 'Grace');
+  assert.equal(g.email, ''); assert.equal(g.phone, ''); assert.equal(g.home, 'tz'); assert.equal(g.role, 'Field officer, Kitale'); assert.equal(g.admin, false); assert.equal(g.src, 'app'); assert.equal(g.source, 'app');
+  // self: name, e-mail, phone; admin and home are not sent and don't change
+  r = await run(E, admin, '/api/admin', { 'X-Pin': '58204' }, { action: 'team-update', name: 'Grace', email: 'grace@example.org', phone: '+254 712 000 111' });
+  assert.equal(r.ok, true);
+  g = (await teamOf(E)).find(p => p.name === 'Grace');
+  assert.equal(g.email, 'grace@example.org'); assert.equal(g.phone, '+254 712 000 111'); assert.equal(g.home, 'tz'); assert.equal(g.admin, false); assert.equal(g.role, 'Field officer, Kitale');
+  // self sending admin: true is ignored, and editing someone else is refused
+  await run(E, admin, '/api/admin', { 'X-Pin': '58204' }, { action: 'team-update', name: 'Grace', email: 'g@example.org', phone: '', admin: true, home: 'ke' });
+  g = (await teamOf(E)).find(p => p.name === 'Grace');
+  assert.equal(g.admin, false); assert.equal(g.home, 'tz'); assert.equal(g.phone, '');
+  assert.equal((await run(E, admin, '/api/admin', { 'X-Pin': '58204' }, { action: 'team-update', name: 'Morgan', email: 'x@example.org' })).status, 403);
+});
+
+test('android: team-add and team-move answer { ok, pin }', async () => {
+  const E = env(), M = as(E, '4821');
+  const a = await M.adm({ action: 'team-add', name: 'Brian', home: 'ke', admin: false, email: '', phone: '', role: '' });
+  assert.deepEqual(Object.keys(a).filter(k => k !== 'status').sort(), ['ok', 'pin']); assert.equal(a.ok, true); assert.match(a.pin, /^\d{4}$/);
+  const m = await M.adm({ action: 'team-move', name: 'Meril' });
+  assert.deepEqual(Object.keys(m).filter(k => k !== 'status').sort(), ['ok', 'pin']); assert.match(m.pin, /^\d{4}$/);
+  assert.equal((await as(E, a.pin).get()).who, 'Brian'); assert.equal((await as(E, m.pin).get()).who, 'Meril');
+  // the PIN is shown once: never in the team view
+  const t = JSON.stringify(await teamOf(E)); assert.ok(!t.includes(a.pin) && !t.includes(m.pin));
+});
+
+test('android: blocked and signed-out get 401 { ok:false, reason } on every signed-in endpoint', async () => {
+  const E = env(), M = as(E, '4821');
+  await M.adm({ action: 'team-add', name: 'Grace', admin: true });
+  await M.adm({ action: 'team-set-pin', name: 'Grace', pin: '58204' });
+  const mail = await import('../functions/api/mail.js'), sms = await import('../functions/api/sms-admin.js'), roads = await import('../functions/api/road-reports.js');
+  const all = async (h, why) => {
+    for (const [mod, path] of [[pin, '/api/pin'], [pin, '/api/pin?team=1'], [admin, '/api/admin?view=team'], [mail, '/api/mail'], [sms, '/api/sms-admin'], [roads, '/api/road-reports']]) {
+      const r = await run(E, mod, path, h); assert.equal(r.status, 401, path + ' ' + why); assert.equal(r.ok, false); assert.equal(r.reason, why, path);
+    }
+    const p = await run(E, admin, '/api/admin', h, { action: 'team-signout', name: 'Morgan' }); assert.equal(p.status, 401); assert.equal(p.reason, why);
+    const q = await run(E, pin, '/api/pin', h, { action: 'profile', phone: '0712' }); assert.equal(q.status, 401); assert.equal(q.reason, why);
+  };
+  await M.adm({ action: 'team-signout', name: 'Grace' });
+  await all({ 'X-Pin': '58204', 'X-Pin-Gen': '0' }, 'signed-out');
+  await M.adm({ action: 'team-block', name: 'Grace', reason: '' });
+  await all({ 'X-Pin': '58204', 'X-Pin-Gen': '2' }, 'blocked');
+  await all({ 'X-Pin': '58204', 'X-Pin-New': '1' }, 'blocked');
+});
