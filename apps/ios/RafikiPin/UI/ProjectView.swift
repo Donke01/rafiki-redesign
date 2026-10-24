@@ -8,6 +8,8 @@ struct ProjectView: View {
     let startTab: String
     @State private var tab = ""
     @State private var cm: String?
+    @State private var dirs = false
+    @State private var more = false
 
     var body: some View {
         if let snap = m.snap, let p = snap.projects.first(where: { $0.id == id }) {
@@ -20,7 +22,8 @@ struct ProjectView: View {
                             .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous)).padding(.vertical, 6)
                     }
                     hero(snap, p).padding(.top, 6)
-                    if let r = snap.repairs[p.id] { RepairCard(p: p, r: r).padding(.top, 12) }
+                    if let r = snap.repairs[p.id] { RepairTracker(p: p, r: r, here: loc.fix?.ll) }
+                    if snap.admin { ProjectCostLine(p: p) }
                     HStack(spacing: 0) {
                         ForEach([("pin", t("Pin location", "Weka mahali")), ("visit", t("Site visit", "Ziara")), ("hist", t("History", "Historia"))], id: \.0) { k, label in
                             Button { tab = k } label: {
@@ -38,9 +41,11 @@ struct ProjectView: View {
                         default: PinTab(p: p)
                         }
                     }.padding(.top, 14)
+                    moreFold(snap, p)
                     Spacer().frame(height: 24)
-                }.padding(16)
+                }.padding(16).frame(maxWidth: 640).frame(maxWidth: .infinity)
             }
+            .sheet(isPresented: $dirs) { if let g = p.gps { DirectionsSheet(title: p.title, at: g) } }
             .onAppear { if tab.isEmpty { tab = startTab } }
             .id(p.id)
         } else {
@@ -52,9 +57,14 @@ struct ProjectView: View {
         CardV(deep: true) {
             Text(p.title).font(.hMedium).foregroundColor(.white)
             Text(p.sub).font(.bMedium).foregroundColor(LightBlue)
+            if testDue(snap, p) { WaterTestTag().padding(.top, 8) }
             Text(p.gps.map { t("Saved location: ", "Mahali palipohifadhiwa: ") + $0.text() } ?? t("No location saved yet.", "Bado hakuna mahali palipohifadhiwa.")).font(.bMedium).foregroundColor(LightBlue)
-            let v = snap.visits[p.id]
-            Text(v.map { t("Last visit: ", "Ziara ya mwisho: ") + When.text($0.at) + " · " + $0.by + " · " + stateName($0.state) } ?? t("No visit recorded in the app yet.", "Bado hakuna ziara iliyorekodiwa kwenye programu.")).font(.bMedium).foregroundColor(LightBlue)
+            if let v = snap.visits[p.id] {
+                HStack(spacing: 6) {
+                    Text(t("Last visit: ", "Ziara ya mwisho: ") + Dates.dateTime(v.at) + " · " + stateName(v.state) + " · ").font(.bMedium).foregroundColor(LightBlue)
+                    PersonChip(name: v.by).colorScheme(.dark)
+                }
+            } else { Text(t("No visit recorded in the app yet.", "Bado hakuna ziara iliyorekodiwa kwenye programu.")).font(.bMedium).foregroundColor(LightBlue) }
             if snap.confirmed.contains(p.id) { Text(t("Location confirmed by the office", "Mahali pamethibitishwa na ofisi")).font(.lMedium).foregroundColor(Color(hex: 0x9BE7BC)).padding(.top, 4) }
             if snap.admin && p.gps != nil {
                 let on = snap.confirmed.contains(p.id)
@@ -82,10 +92,31 @@ struct ProjectView: View {
             if let g = p.gps {
                 let ll = "\(g.lat),\(g.lng)"
                 HStack(spacing: 8) {
-                    MapTile(label: t("Directions", "Maelekezo"), icon: "compass") { Share.open("https://www.google.com/maps/dir/?api=1&destination=\(ll)") }
+                    MapTile(label: t("Directions", "Maelekezo"), icon: "compass") { dirs = true }
                     MapTile(label: "Google Maps", icon: "map") { Share.open("https://www.google.com/maps/search/?api=1&query=\(ll)") }
                     MapTile(label: t("Share", "Shiriki"), icon: "share") { Share.items([p.title + "\nhttps://www.google.com/maps?q=\(ll)"]) }
                 }.padding(.top, 12)
+            }
+        }
+    }
+}
+
+extension ProjectView {
+    /// "More for this project": the photo timeline, a donor summary and a thank-you for donors.
+    func moreFold(_ snap: Snapshot, _ p: Project) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Button { withAnimation { more.toggle() } } label: {
+                HStack(spacing: 10) {
+                    Icon("more", size: 20, color: C.blue2)
+                    Text(t("More for this project", "Zaidi kwa mradi huu")).font(.tSmall).foregroundColor(C.ink)
+                    Spacer()
+                    Icon(more ? "down" : "chev", size: 20, color: C.muted)
+                }.padding(.horizontal, 16).frame(minHeight: 54).background(C.card).clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(C.line, lineWidth: 1)).contentShape(Rectangle())
+            }.buttonStyle(.plain).padding(.top, 18)
+            if more {
+                ProjectExtrasBar(p: p) { tab = "hist" }.padding(.top, 10)
+                DonorThanks(p: p)
             }
         }
     }
@@ -106,37 +137,6 @@ private struct MapTile: View {
     }
 }
 
-private struct RepairCard: View {
-    @EnvironmentObject var m: AppModel
-    let p: Project; let r: Repair
-    @State private var msg: String?
-    @State private var busy = false
-    var body: some View {
-        let nw = r.state == "notworking"
-        CardV(fill: nw ? C.badBg : C.warnBg) {
-            HStack(spacing: 8) {
-                Icon("alert", size: 20, color: nw ? C.bad : Amber)
-                Text(nw ? t("Reported as not working", "Imeripotiwa haifanyi kazi") : t("Reported as needing repair", "Imeripotiwa inahitaji matengenezo")).font(.tSmall).foregroundColor(nw ? C.bad : C.warn)
-            }
-            Text(t("By ", "Na ") + r.by + " · " + When.text(r.at) + (r.urgency.isEmpty ? "" : " · " + urgencyName(r.urgency)) + (r.note.isEmpty ? "" : ": “\(r.note)”")).font(.bMedium).foregroundColor(C.text).padding(.top, 4)
-            if !r.problems.isEmpty { Text(r.problems.joined(separator: ", ")).font(.bSmall).foregroundColor(C.muted) }
-            Btn(t("Mark fixed", "Weka imerekebishwa"), icon: "wrench", enabled: !busy, ok: true, small: true) {
-                busy = true
-                Task {
-                    switch await m.submit(["action": "fixed", "id": p.id, "note": ""], []) {
-                    case .sent: m.localFixed(p); msg = nil
-                    case .queued: m.localFixed(p); msg = t("Saved on this phone. It will be sent when you have signal.", "Imehifadhiwa kwenye simu. Itatumwa ukipata mtandao.")
-                    case .failed(let s): msg = s
-                    case .locked: break
-                    }
-                    busy = false
-                }
-            }.padding(.top, 10)
-            Msg(msg, "warn")
-        }
-    }
-}
-
 struct HistoryTab: View {
     @EnvironmentObject var m: AppModel
     let p: Project
@@ -144,13 +144,14 @@ struct HistoryTab: View {
     @State private var err: String?
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text(t("Notes on this project in monday.com, newest first.", "Maelezo ya mradi huu kwenye monday.com, ya karibuni kwanza.")).font(.bMedium).foregroundColor(C.muted)
+            if let n = notes { PhotoTimeline(p: p, notes: n) }
+            Text(t("Notes on this project in monday.com, newest first.", "Maelezo ya mradi huu kwenye monday.com, ya karibuni kwanza.")).font(.bMedium).foregroundColor(C.muted).padding(.top, 14)
             Msg(err, "bad")
             if notes == nil && err == nil { Text(t("Loading…", "Inapakia…")).foregroundColor(C.muted).padding(.top, 12) }
             if let n = notes, n.isEmpty { Text(t("No notes yet.", "Bado hakuna maelezo.")).foregroundColor(C.muted).padding(.top, 12) }
             ForEach(notes ?? []) { note in
                 CardV(pad: 14) {
-                    Text(When.text(note.at) + " · " + note.by).font(.lMedium).foregroundColor(C.ink)
+                    HStack(spacing: 6) { Text(Dates.dateTime(note.at) + " ·").font(.lMedium).foregroundColor(C.ink); PersonChip(name: photoBy(note)) }
                     Text(note.text).font(.bMedium).foregroundColor(C.text).padding(.top, 4)
                     ForEach(Array(note.files.filter(\.isImage).prefix(4).enumerated()), id: \.offset) { _, f in
                         NetImage(url: f.url) { C.tint }.frame(maxWidth: .infinity).aspectRatio(4 / 3, contentMode: .fit).clipped()

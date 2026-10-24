@@ -15,6 +15,18 @@ struct PillGrid: View {
     }
 }
 
+/// A half-typed New site kept on the phone (newsite.json), offered again (Resume / Start again) when the screen opens.
+enum NewSiteDrafts {
+    static var file: URL { Prefs.dataDir.appendingPathComponent("newsite.json") }
+    static func save(_ j: JSON) { var x = j; x["saved"] = Date().timeIntervalSince1970; if let d = try? JSONSerialization.data(withJSONObject: x) { try? d.write(to: file, options: .atomic) } }
+    static func load() -> JSON? { (try? Data(contentsOf: file)).flatMap { try? JSONSerialization.jsonObject(with: $0) as? JSON } }
+    static func remove() { try? FileManager.default.removeItem(at: file) }
+    /// Start again: the kept form and its photos go.
+    static func discard() { load()?.objs("shots").forEach { try? FileManager.default.removeItem(at: Outbox.resolve($0.str("path"))) }; remove() }
+}
+/// A long press on the map ("Add a new site here") starts New site at that point.
+enum NewSiteStart { static var at: LatLng? }
+
 struct NewSiteView: View {
     @EnvironmentObject var m: AppModel
     @ObservedObject var loc = Locator.shared
@@ -27,12 +39,49 @@ struct NewSiteView: View {
     @State private var shots: [Shot] = []
     @State private var msg: (String, String)?
     @State private var busy = false
+    @State private var offer: JSON? = NewSiteDrafts.load()
+    @State private var start: LatLng? = NewSiteStart.at
+
+    private var blank: Bool { name.isEmpty && village.isEmpty && note.isEmpty && shots.isEmpty }
+    private func keep() {
+        guard offer == nil else { return }
+        if blank { NewSiteDrafts.remove(); return }
+        var j: JSON = ["v": 1, "name": name, "ck": ck, "type": type, "village": village, "note": note, "shots": shots.map { ["path": $0.path, "label": $0.label] }]
+        if let ll = spot.ll { j["lat"] = ll.lat; j["lng"] = ll.lng }
+        NewSiteDrafts.save(j)
+    }
 
     var body: some View {
+        if let o = offer { resume(o) } else { form }
+    }
+
+    private func resume(_ o: JSON) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                Text(t("Add a new site", "Ongeza eneo jipya")).font(.hLarge).foregroundColor(C.ink)
-                Text(t("It goes onto the monday.com board as “Due Diligence”, so it isn’t on the website until the office moves it on.", "Inaingia kwenye monday.com kama “Due Diligence”, kwa hiyo haionekani kwenye tovuti hadi ofisi iisogeze.")).font(.bMedium).foregroundColor(C.muted)
+                Text(t("New site", "Eneo jipya")).font(.hLarge).foregroundColor(C.ink).wide(.center)
+                CardV {
+                    IconTile(icon: "clock", tint: C.blue, bg: C.tint, size: 56)
+                    let at0 = Dates.timeOrDateTime(Date(timeIntervalSince1970: o.num("saved") ?? Date().timeIntervalSince1970))
+                    Text(t("Carry on with the new site from \(at0)?", "Uendelee na eneo jipya ulilolianza \(at0)?")).font(.tLarge).foregroundColor(C.ink).padding(.top, 12)
+                    Text(o.str("name").isEmpty ? t("No name yet", "Bado halina jina") : o.str("name")).font(.bMedium).foregroundColor(C.muted).padding(.top, 4)
+                    Btn(t("Resume", "Endelea nalo"), icon: "arrow", wide: true) {
+                        name = o.str("name"); if !o.str("ck").isEmpty { ck = o.str("ck") }; if !o.str("type").isEmpty { type = o.str("type") }
+                        village = o.str("village"); note = o.str("note")
+                        shots = o.objs("shots").map { Shot(path: $0.str("path"), label: $0.str("label")) }.filter { FileManager.default.fileExists(atPath: Outbox.resolve($0.path).path) }
+                        if start == nil, let la = o.num("lat"), let ln = o.num("lng") { spot.ll = LatLng(lat: la, lng: ln); start = spot.ll }
+                        offer = nil
+                    }.padding(.top, 16)
+                    Btn(t("Start again", "Anza upya"), icon: "refresh", light: true, wide: true) { NewSiteDrafts.discard(); offer = nil }.padding(.top, 10)
+                }.padding(.top, 14)
+            }.padding(16)
+        }
+    }
+
+    private var form: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 0) {
+                Text(t("New site", "Eneo jipya")).font(.hLarge).foregroundColor(C.ink).wide(.center)
+                Text(t("The office checks every new site first. It isn’t on the website until they approve it.", "Ofisi hukagua kila eneo jipya kwanza. Halionekani kwenye tovuti hadi ofisi iliidhinishe.")).font(.bMedium).foregroundColor(C.muted)
                 CardV {
                     Field(t("Site name", "Jina la eneo"), $name, placeholder: t("e.g. Kiptoo Primary School", "mf. Shule ya Msingi Kiptoo"))
                     Text(t("Country", "Nchi")).font(.lMedium).foregroundColor(C.ink).padding(.top, 14).padding(.bottom, 6)
@@ -44,7 +93,7 @@ struct NewSiteView: View {
                 }.padding(.top, 14)
                 CardV {
                     H2(t("Where is it?", "Iko wapi?"))
-                    SpotPicker(spot: spot, start: loc.fix?.ll, ck: ck)
+                    SpotPicker(spot: spot, start: start ?? loc.fix?.ll, ck: ck)
                 }.padding(.top, 14)
                 CardV {
                     H2(t("Photos (optional)", "Picha (si lazima)"))
@@ -57,7 +106,12 @@ struct NewSiteView: View {
                 Spacer().frame(height: 24)
             }.padding(16)
         }
-        .onAppear { if ck.isEmpty { ck = m.prefs.country.isEmpty ? "ke" : m.prefs.country } }
+        .onAppear {
+            if ck.isEmpty { ck = m.prefs.country.isEmpty ? "ke" : m.prefs.country }
+            if let a = NewSiteStart.at { spot.ll = a; NewSiteStart.at = nil }
+        }
+        .onChange(of: name) { _ in keep() }.onChange(of: village) { _ in keep() }.onChange(of: note) { _ in keep() }
+        .onChange(of: ck) { _ in keep() }.onChange(of: type) { _ in keep() }.onChange(of: shots) { _ in keep() }.onChange(of: spot.ll) { _ in keep() }
     }
 
     func add() {
@@ -68,11 +122,11 @@ struct NewSiteView: View {
                               "note": note.trimmingCharacters(in: .whitespacesAndNewlines), "lat": ll.lat, "lng": ll.lng]
             switch await m.submit(body, shots.map { OutFile(path: $0.path, kind: "photo", label: "Site photo") }) {
             case .sent(let reply, _):
-                busy = false
+                busy = false; name = ""; village = ""; note = ""; shots = []; NewSiteDrafts.remove()
                 await m.refreshNow()
                 let id = reply.str("id")
                 m.tab("list"); if !id.isEmpty { m.go(Place(tab: "list", project: id)) }
-            case .queued: busy = false; msg = ("warn", t("Saved on this phone. It will be added when you have signal.", "Imehifadhiwa kwenye simu. Itaongezwa ukipata mtandao.")); name = ""; shots = []
+            case .queued: busy = false; msg = ("warn", t("Saved on this phone. It will be added when you have signal.", "Imehifadhiwa kwenye simu. Itaongezwa ukipata mtandao.")); name = ""; village = ""; note = ""; shots = []; NewSiteDrafts.remove()
             case .failed(let s): busy = false; msg = ("bad", s)
             case .locked: busy = false
             }
@@ -87,11 +141,10 @@ struct MeView: View {
         ScrollViewReader { sv in
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
-                    HStack {
-                        Text(t("Me & team", "Mimi na timu")).font(.hLarge).foregroundColor(C.ink).id("top")
-                        Spacer(minLength: 8)
-                        SmallSeg(items: [("me", t("Me", "Mimi")), ("team", t("Team", "Timu"))], sel: pane) { p in pane = p; m.prefs.mePane = p; sv.scrollTo("top", anchor: .top) }
-                    }
+                    // the title in the middle, Me | Team under it (the bell is in the app header, top right)
+                    Text(t("Me & team", "Mimi na timu")).font(.hLarge).foregroundColor(C.ink).wide(.center).id("top")
+                    SmallSeg(items: [("me", t("Me", "Mimi")), ("team", t("Team", "Timu"))], sel: pane) { p in pane = p; m.prefs.mePane = p; sv.scrollTo("top", anchor: .top) }
+                        .wide(.center).padding(.top, 10)
                     if pane == "team" {
                         TeamToday(mates: m.team, act: m.activity, snap: m.snap)
                         TeamMonth(act: m.activity)
@@ -101,20 +154,16 @@ struct MeView: View {
                         WaitingList(snap: m.snap)
                         if let snap = m.snap { MyWork(snap: snap) }
                         MyMonth(act: m.activity)
+                        BadgeStamps()
                         SettingsCard()
-                        CardV {
-                            H2(t("Monthly report", "Ripoti ya mwezi"))
-                            Text(t("Visits, repairs and how projects are doing for one month, ready to share as a PDF.", "Ziara, matengenezo na hali ya miradi kwa mwezi mmoja, tayari kushiriki kama PDF.")).font(.bMedium).foregroundColor(C.muted)
-                            Btn(t("Open report", "Fungua ripoti"), icon: "clip", small: true) { m.go(Place(tab: "me", sub: "report")) }.padding(.top, 10)
-                        }.padding(.top, 14)
-                        Text("RAFIKI Pin " + ((Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String) ?? "")).font(.bSmall).foregroundColor(C.muted).padding(.top, 18)
+                        Text("RAFIKI Pin " + AppInfo.version).font(.bSmall).foregroundColor(C.muted).wide(.center).padding(.top, 18)
                     }
-                }.padding(16)
+                }.padding(16).padding(.bottom, 90)
             }
         }
         .onAppear { pane = m.prefs.mePane }
         .task { await m.loadActivity(); await m.loadTeam() }
-        .refreshable { await m.refreshNow(); await m.loadActivity(); await m.loadTeam() }
+        .refreshable { await m.refreshNow(quiet: true); await m.loadActivity(); await m.loadTeam() }
     }
 }
 

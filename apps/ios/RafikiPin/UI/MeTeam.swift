@@ -215,9 +215,9 @@ struct TeamToday: View {
                     let place = e.flatMap { x in snap?.projects.first { $0.id == x.str("id") } }
                     HStack(spacing: 12) {
                         ZStack(alignment: .bottomTrailing) {
-                            Avatar(name: p.name, size: 42)
+                            PersonAvatar(name: p.name, size: 42)
                             if dayOf(at) == today { Circle().fill(GreenC).frame(width: 11, height: 11).overlay(Circle().stroke(Color.white, lineWidth: 2)) }
-                        }
+                        }.onTapGesture { Contact.show(p.name) }.accessibilityAddTraits(.isButton)
                         Button { if let id = e?.str("id"), place != nil { m.go(Place(tab: "me", project: id)) } } label: {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(p.name).font(.tSmall).foregroundColor(C.ink).lineLimit(1)
@@ -271,7 +271,8 @@ struct TeamMonth: View {
                 ForEach(names, id: \.self) { n in
                     let l = rows.filter { same($0.str("by"), n) }
                     HStack(spacing: 6) {
-                        Text(n).font(.tSmall).foregroundColor(C.ink).lineLimit(1)
+                        PersonAvatar(name: n, size: 28).onTapGesture { Contact.show(n) }
+                        Text(n).font(.tSmall).foregroundColor(C.ink).lineLimit(1).onTapGesture { Contact.show(n) }
                         Spacer(minLength: 4)
                         ForEach([("pin", "pin", "pin"), ("visit", "near", "clip"), ("fixed", "repairs", "wrench")], id: \.0) { k, hue, icon in
                             let hu = C.hue(hue)
@@ -300,7 +301,7 @@ struct TeamFeed: View {
                     let hu = C.hue(ic.1), id = e.str("id"), p = snap?.projects.first { $0.id == id }
                     Button { if p != nil { m.go(Place(tab: "me", project: id)) } } label: {
                         HStack(spacing: 10) {
-                            Icon(ic.0, size: 17, color: hu.fg).frame(width: 34, height: 34).background(hu.bg).clipShape(Circle())
+                            PersonBadgeAvatar(name: e.str("by"), icon: ic.0, hue: hu, ring: C.card, size: 34)
                             VStack(alignment: .leading, spacing: 2) {
                                 (Text(String(e.str("by").split(separator: " ").first ?? "")).bold() + Text(" " + verb(e.str("a")) + " " + (p?.title ?? e.str("t")) + (e.str("a") == "visit" && !e.str("s").isEmpty ? " · " + stateName(e.str("s")) : "")))
                                     .font(.bMedium).foregroundColor(C.text).lineLimit(2).multilineTextAlignment(.leading)
