@@ -98,7 +98,6 @@ struct Shell: View {
         .onChange(of: m.goProject) { id in if let id { m.go(Place(tab: m.here.tab, project: id)); m.goProject = nil } }
     }
 }
-private struct WhoBox: Identifiable { let name: String; var id: String { name } }
 
 struct TopBar: View {
     @EnvironmentObject var m: AppModel
