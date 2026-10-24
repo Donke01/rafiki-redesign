@@ -464,8 +464,7 @@ struct RepairTracker: View {
     var body: some View {
         let bad = r.state == "notworking"
         let order = ["reported", "assigned", "parts", "fixed"]
-        var si = fixed ? 3 : max(0, order.firstIndex(of: r.step) ?? 0)
-        if !fixed && !r.assignee.isEmpty && si < 1 { si = 1 }
+        let si = fixed ? 3 : max(r.assignee.isEmpty ? 0 : 1, order.firstIndex(of: r.step) ?? 0)
         let d = here.flatMap { h in p.gps.map { Geo.metres(h, $0) } }
         let steps: [(String, String)] = [
             (t("Reported", "Imeripotiwa"), (bad ? t("Not working", "Haifanyi kazi") : t("Needs repair", "Inahitaji matengenezo")) + "\u{00A0}· " + r.by + ", " + Dates.dateTime(r.at)),
