@@ -386,7 +386,7 @@ private struct TeamSection: View {
                 }.padding(.bottom, 10)
             }
             ForEach(team.people.indices, id: \.self) { i in
-                Person(p: team.people[i], shown: $shown, msg: $msg) { await team.load(m) }.id(team.people[i].str("name") + team.people[i].str("home") + team.people[i].str("email"))
+                TeamPersonRow(p: team.people[i], shown: $shown, msg: $msg) { await team.load(m) }.id(team.people[i].str("name") + team.people[i].str("home") + team.people[i].str("email"))
             }
             if case let (tone, text)? = msg { Msg(text, tone) }
             CardV {
@@ -424,7 +424,7 @@ private struct TeamSection: View {
     }
 }
 
-private struct Person: View {
+private struct TeamPersonRow: View {
     @EnvironmentObject var m: AppModel
     let p: JSON
     @Binding var shown: (String, String)?
