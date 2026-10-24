@@ -21,53 +21,6 @@ func nearHere(_ s: Snapshot, _ here: LatLng?) -> (Project, Double)? {
     return nil
 }
 
-struct MapTab: View {
-    @EnvironmentObject var m: AppModel
-    @ObservedObject var loc: Locator
-    @State private var sat = false
-    @State private var goMe = 0
-    init() { _loc = ObservedObject(wrappedValue: Locator.shared) }
-
-    var body: some View {
-        if let snap = m.snap {
-            let pinned = snap.projects.filter { $0.gps != nil }.count
-            ZStack {
-                ProjectsMap(dots: snap.projects.compactMap { p in p.gps.map { Dot(id: p.id, ll: $0, color: dotColor(snap, p), big: snap.repairs[p.id] != nil, title: p.title) } },
-                            satellite: sat, onDot: { m.go(Place(tab: "map", project: $0)) }, goMe: $goMe)
-                    .ignoresSafeArea(edges: [])
-                VStack(spacing: 0) {
-                    HStack(alignment: .top, spacing: 10) {
-                        CardV(pad: 12) {
-                            HStack {
-                                Text(t("\(pinned) of \(snap.projects.count) projects pinned", "Miradi \(pinned) kati ya \(snap.projects.count) ina mahali")).font(.tSmall).foregroundColor(C.ink)
-                                Spacer(minLength: 4)
-                                Text(t("\(snap.projects.count - pinned) to go", "\(snap.projects.count - pinned) zimebaki")).font(.bSmall).foregroundColor(C.muted)
-                            }
-                            Meter(f: Double(pinned) / Double(max(1, snap.projects.count))).padding(.top, 8)
-                            HStack(spacing: 10) {
-                                Legend(c: Color(hex: 0x1C7C4A), text: t("Pinned", "Ina mahali")); Legend(c: Color(hex: 0xD98200), text: t("Needs repair", "Inahitaji matengenezo")); Legend(c: Color(hex: 0xB3261E), text: t("Not working", "Haifanyi kazi"))
-                            }.padding(.top, 8)
-                        }
-                        VStack(spacing: 10) {
-                            MapButton(icon: sat ? "map" : "satellite", label: sat ? t("Show the street map", "Onyesha ramani ya barabara") : t("Show satellite photos", "Onyesha picha za satelaiti")) { sat.toggle() }
-                            if loc.fix != nil { MapButton(icon: "target", label: t("Go to where I am", "Nenda nilipo")) { goMe += 1 } }
-                        }
-                    }.padding(12)
-                    Spacer()
-                    if case let (p, d)? = nearHere(snap, loc.fix?.ll) {
-                        HereBanner(p: p, d: d, miles: m.miles) { m.go(Place(tab: "map", project: p.id)) }.padding(12)
-                    }
-                }
-            }
-        }
-    }
-}
-
-private struct Legend: View {
-    let c: Color; let text: String
-    var body: some View { HStack(spacing: 5) { RoundedRectangle(cornerRadius: 5).fill(c).frame(width: 10, height: 10); Text(text).font(.lSmall).foregroundColor(C.muted).lineLimit(1).minimumScaleFactor(0.7) } }
-}
-
 struct HereBanner: View {
     let p: Project; let d: Double; let miles: Bool; let open: () -> Void
     var body: some View {

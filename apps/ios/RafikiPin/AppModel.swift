@@ -48,6 +48,8 @@ final class AppModel: ObservableObject {
     @Published var noteTick = 0
     /// "You’re at …" banners closed with ×, until the app is closed.
     @Published var dismissed: Set<String> = []
+    /// A project to show on the Map tab (from elsewhere in the app).
+    var mapFocus: String?
     /// Open this project (a tap on a notification).
     @Published var goProject: String?
     /// Me → "Show the welcome screens again".
