@@ -42,6 +42,23 @@ final class AppModel: ObservableObject {
 
     private var sending = false
     private var timer: Timer?
+    /// Why the server ended this sign-in ("blocked" or "signed-out"), until the next sign-in.
+    var ended: String?
+    /// Bumped when notifications are read or switched, so the bell redraws.
+    @Published var noteTick = 0
+    /// "You’re at …" banners closed with ×, until the app is closed.
+    @Published var dismissed: Set<String> = []
+    /// Open this project (a tap on a notification).
+    @Published var goProject: String?
+    /// Me → "Show the welcome screens again".
+    @Published var replayOnb = false
+    /// A short message at the bottom of the screen, for a moment (ToastView).
+    @Published var toast: String?
+    private var toastTask: Task<Void, Never>?
+    func say(_ text: String) {
+        toast = text; toastTask?.cancel()
+        toastTask = Task { try? await Task.sleep(nanoseconds: 2_600_000_000); if !Task.isCancelled { toast = nil } }
+    }
 
     init(demo: Bool = ProcessInfo.processInfo.arguments.contains("-demo")) {
         self.demo = demo
@@ -62,6 +79,16 @@ final class AppModel: ObservableObject {
         timer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
             Task { @MainActor in if self?.signedIn == true { _ = await self?.sendWaiting() } }
         }
+        // blocked, or signed out of all phones by an admin: sign this phone out with a kind word
+        api.gen = { p.pinGen }
+        api.onAuthEnd = { [weak self] why in Task { @MainActor in self?.authEnded(why) } }
+    }
+
+    /// Signs this phone out (changes waiting to send stay) and says why, kindly, on the sign-in screen.
+    func authEnded(_ why: String) {
+        ended = why
+        if signedIn { lock() }
+        banner = reasonText(why)
     }
 
     var miles: Bool { prefs.miles }
@@ -81,18 +108,50 @@ final class AppModel: ObservableObject {
     /// Sign in with a PIN; shared team PINs need a name. Returns an error text, or nil when in.
     func signIn(pin: String, name: String) async -> String? {
         prefs.pin = pin
+        // a PIN typed here starts a new session; the server's session number comes back with the list
+        prefs.pinGen = ""; api.fresh = true
         let r = await api.list()
+        api.fresh = false
         if !r.ok {
             prefs.pin = ""
             return r.status == 0 ? t("No signal. Connect to the internet to sign in the first time.", "Hakuna mtandao. Unganisha intaneti ili uingie mara ya kwanza.") : reasonText(r.reason)
         }
         let who = r.json.str("who")
         if who.isEmpty && name.trimmingCharacters(in: .whitespaces).isEmpty { prefs.pin = ""; return "NEED_NAME" }
+        ended = nil
         prefs.name = who.isEmpty ? name.trimmingCharacters(in: .whitespaces) : who
         accept(r.json)
         signedIn = true
         return nil
     }
+
+    // --- Me › Settings ------------------------------------------------------------------------
+    /// Personal details: a display name, phone and home country. Returns an error text, or nil.
+    func saveProfile(nick: String, phone: String, home: String) async -> String? {
+        let r = await api.post(["action": "profile", "nick": nick.trimmingCharacters(in: .whitespaces), "phone": phone.trimmingCharacters(in: .whitespaces), "home": home])
+        if !r.ok { return reasonText(r.reason) }
+        if let me = r.json.obj("me") { edit { $0.me = Me.from(me) } }
+        return nil
+    }
+    /// Change my PIN (a PIN given out in the app). Returns an error text, or nil.
+    func changePin(current: String, new: String) async -> String? {
+        let r = await api.post(["action": "pin-change", "current": current.trimmingCharacters(in: .whitespaces), "pin": new.trimmingCharacters(in: .whitespaces)])
+        if !r.ok { return reasonText(r.reason) }
+        prefs.pin = new.trimmingCharacters(in: .whitespaces); return nil
+    }
+    /// Sign out of this phone: forgets the PIN and name (changes waiting to send stay).
+    func signOut() { lock(); prefs.name = "" }
+
+    // --- notifications: the bell in the header ----------------------------------------------------
+    func alerts() -> [Alert] { snap.map { alertsFor($0, activity ?? [], me: prefs.name, off: prefs.noteOff, reviewAt: prefs.reviewAt) } ?? [] }
+    /// Unread: newer than "Mark all as read" and not opened one by one. Opening the list doesn't read them.
+    func isNew(_ a: Alert) -> Bool { alertNew(a, seen: prefs.noteSeen, read: prefs.noteRead) }
+    func unread() -> Int { let seen = prefs.noteSeen, read = prefs.noteRead; return alerts().filter { alertNew($0, seen: seen, read: read) }.count }
+    /// Mark all as read.
+    func markRead() { prefs.noteSeen = When.now(); prefs.noteRead = []; noteTick += 1 }
+    /// One opened: read (only keys still in the list are kept).
+    func markRead(_ a: Alert) { let keys = Set(alerts().map(\.key)); prefs.noteRead = prefs.noteRead.union([a.key]).intersection(keys); noteTick += 1 }
+    func noteChanged() { noteTick += 1 }
 
     // --- Face ID / Touch ID lock ----------------------------------------------------------
     private var awayAt: Date?
@@ -209,13 +268,21 @@ final class AppModel: ObservableObject {
         activity = a.compactMap { $0 as? JSON }; return true
     }
 
-    private func accept(_ raw: JSON) { prefs.saveSnapshot(raw); snap = Snapshot.from(raw) }
+    private func accept(_ raw: JSON) {
+        if raw.int("reviewOpen") > (snap?.reviewOpen ?? 0) { prefs.reviewAt = When.now() }
+        // the PIN session's number, sent back with every request (X-Pin-Gen)
+        if !prefs.pin.isEmpty, raw["gen"] != nil { prefs.pinGen = raw.str("gen") }
+        prefs.saveSnapshot(raw); snap = Snapshot.from(raw)
+    }
+    /// When the list was last fetched, so coming back to the app doesn't reload every time.
+    private(set) var lastRefresh = Date.distantPast
 
     /// Sends anything waiting, then fetches the latest list.
     func refresh() { Task { _ = await refreshNow() } }
     func reload() { refresh() }
-    @discardableResult func refreshNow() async -> Bool {
-        busy = true
+    @discardableResult func refreshNow(quiet: Bool = false) async -> Bool {
+        lastRefresh = Date()
+        busy = !quiet
         _ = await sendWaiting()
         let r = await api.list()
         busy = false
@@ -234,7 +301,7 @@ final class AppModel: ObservableObject {
         sending = true; defer { sending = false }
         let res = await outbox.flush(api)
         waiting = outbox.count()
-        if res.locked { lock(); banner = t("Your PIN stopped working. Please sign in again; nothing was lost.", "PIN yako imeacha kufanya kazi. Tafadhali ingia tena; hakuna kilichopotea.") }
+        if res.locked { lock(); banner = ended.map { reasonText($0) } ?? t("Your PIN stopped working. Please sign in again; nothing was lost.", "PIN yako imeacha kufanya kazi. Tafadhali ingia tena; hakuna kilichopotea.") }
         return res
     }
 
@@ -261,6 +328,9 @@ final class AppModel: ObservableObject {
         }
     }
     func localFixed(_ p: Project) { edit { $0.repairs[p.id] = nil } }
+    func localTested(_ p: Project) { edit { $0.tests[p.id] = When.now() } }
+    /// The last pin on a project (for "Undo").
+    func lastPin(_ id: String) async -> JSON? { let r = await api.last(id); return r.ok ? r.json.obj("last") : nil }
     private func edit(_ f: (inout Snapshot) -> Void) { if var s = snap { f(&s); snap = s } }
 
     func history(_ id: String) async -> ([Note]?, String?) {

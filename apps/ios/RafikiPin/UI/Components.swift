@@ -11,6 +11,13 @@ enum Ic {
         "layers": "square.3.layers.3d", "del": "delete.left", "clock": "clock", "upload": "square.and.arrow.up", "inbox": "tray", "spark": "sparkle",
         "chev": "chevron.right", "finger": "touchid", "face": "faceid", "phone": "phone", "chat": "message", "down": "chevron.down", "share": "square.and.arrow.up", "satellite": "globe.europe.africa",
         "sun": "sun.max", "globe": "globe", "nav": "location", "file": "doc.text", "link": "link", "flame": "flame", "text": "textformat.size",
+        "bell": "bell", "cog": "gearshape", "info": "info.circle", "crown": "crown", "key": "key", "mail": "envelope", "cloud": "cloud", "qr": "qrcode",
+        "scan": "qrcode.viewfinder", "offline": "icloud.and.arrow.down", "trash": "trash", "up": "chevron.up", "more": "ellipsis", "filter": "line.3.horizontal.decrease",
+        "school": "building.columns", "cross": "cross", "house": "house", "leaf": "leaf", "brick": "square.stack.3d.up", "copy": "doc.on.doc", "coins": "dollarsign.circle",
+        "hourglass": "hourglass", "box": "shippingbox", "trend": "chart.line.uptrend.xyaxis", "shield": "checkmark.shield", "grid": "square.grid.2x2", "play": "play.fill",
+        "pause": "pause.fill", "eye": "eye", "eyeoff": "eye.slash", "route": "point.topleft.down.to.point.bottomright.curvepath", "heat": "flame", "star": "star",
+        "video": "video", "photo": "photo", "send": "paperplane", "edit": "pencil", "minus": "minus", "block": "nosign", "logout": "rectangle.portrait.and.arrow.right",
+        "whatsapp": "message.fill", "truck": "truck.box", "road": "road.lanes", "rain": "cloud.rain", "car": "car", "sparkles": "sparkles", "doc": "doc.richtext",
     ]
     static func name(_ k: String) -> String { map[k] ?? "drop" }
 }

@@ -101,7 +101,7 @@ struct MeView: View {
                         WaitingList(snap: m.snap)
                         if let snap = m.snap { MyWork(snap: snap) }
                         MyMonth(act: m.activity)
-                        ThisPhone(snap: m.snap)
+                        SettingsCard()
                         CardV {
                             H2(t("Monthly report", "Ripoti ya mwezi"))
                             Text(t("Visits, repairs and how projects are doing for one month, ready to share as a PDF.", "Ziara, matengenezo na hali ya miradi kwa mwezi mmoja, tayari kushiriki kama PDF.")).font(.bMedium).foregroundColor(C.muted)

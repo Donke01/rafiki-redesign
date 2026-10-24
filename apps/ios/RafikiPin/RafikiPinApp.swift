@@ -15,7 +15,7 @@ struct RafikiPinApp: App {
             Root().environmentObject(model)
                 .onChange(of: phase) { p in
                     // GPS only while the app is open; refresh when coming back to it
-                    if p == .active, model.signedIn { model.cameBack(); model.locator.start(); if !model.demo { model.refresh() } }
+                    if p == .active, model.signedIn { model.cameBack(); model.locator.start(); if !model.demo && Date().timeIntervalSince(model.lastRefresh) > 300 { Task { await model.refreshNow(quiet: true); await PhoneAlerts.post(model) } } }
                     if p == .background { model.wentAway(); model.locator.stop() }
                 }
         }
@@ -40,17 +40,22 @@ struct Root: View {
 
 struct Shell: View {
     @EnvironmentObject var m: AppModel
+    @ObservedObject private var contact = Contact.shared
     @State private var depth = 1
     var body: some View {
         let here = m.here
         VStack(spacing: 0) {
             TopBar()
+            SharingBar()
             ZStack {
                 Group {
                     if let pid = here.project { ProjectView(id: pid, startTab: here.projectTab) }
                     else if here.sub == "search" { SearchView() }
                     else if here.sub == "report" { ReportView() }
                     else if here.sub == "route" { RouteView() }
+                    else if here.sub == "notes" { NotificationsView() }
+                    else if here.sub == "set_share" { ShareSettingsPage() }
+                    else if let s = here.sub, s.hasPrefix("set_") { SettingsPage(which: String(s.dropFirst(4))) }
                     else if here.tab == "map" { MapTab() }
                     else if here.tab == "new" { NewSiteView() }
                     else if here.tab == "me" { MeView() }
@@ -67,30 +72,48 @@ struct Shell: View {
             .onChange(of: m.stack.count) { n in depth = n }
             BottomTabs()
         }
+        .overlay(ToastView())
         .gesture(DragGesture(minimumDistance: 30).onEnded { g in
             // swipe from the left edge to go back, like other iPhone apps
             if g.startLocation.x < 30 && g.translation.width > 80 { m.back() }
         })
+        // a person tapped anywhere: their contact sheet, the same everywhere (Contact.swift)
+        .sheet(item: Binding(get: { contact.who.map { WhoBox(name: $0) } }, set: { if $0 == nil { contact.who = nil } })) { w in
+            ContactSheet(who: w.name) { kind, arg in
+                switch kind {
+                case "project": m.go(Place(tab: m.here.tab, project: arg))
+                case "settings": m.go(Place(tab: m.here.tab, sub: "set_" + arg))
+                case "office": TeamGo.section = arg; m.tab("office")
+                default: break
+                }
+            }.environmentObject(m)
+        }
+        // notifications: the bell needs what the team did, so keep it fresh; phone alerts for anything new
+        .task {
+            while !Task.isCancelled {
+                await m.loadActivity(); await PhoneAlerts.post(m)
+                try? await Task.sleep(nanoseconds: 5 * 60 * 1_000_000_000)
+            }
+        }
+        .onChange(of: m.goProject) { id in if let id { m.go(Place(tab: m.here.tab, project: id)); m.goProject = nil } }
     }
 }
+private struct WhoBox: Identifiable { let name: String; var id: String { name } }
 
 struct TopBar: View {
     @EnvironmentObject var m: AppModel
     var body: some View {
         HStack(spacing: 0) {
             if m.stack.count > 1 {
-                Button { Haptic.tap(); m.back() } label: { Icon("back", size: 22, color: C.ink).frame(width: 44, height: 44).background(C.card.opacity(0.85)).clipShape(Circle()) }
-                    .accessibilityLabel(t("Back", "Rudi"))
+                Button { Haptic.tap(); m.back() } label: { Icon("back", size: 20, color: C.ink).frame(width: 40, height: 40).background(C.card.opacity(0.8)).clipShape(Circle()).overlay(Circle().stroke(C.line, lineWidth: 1)) }
+                    .buttonStyle(.plain).frame(width: 46, height: 46).accessibilityLabel(t("Back", "Rudi"))
             } else {
-                Button { m.tab("me") } label: { Avatar(name: m.prefs.name, size: 40) }.accessibilityLabel(t("Me", "Mimi")).accessibilityIdentifier("hav")
+                Button { m.tab("me") } label: { Avatar(name: m.prefs.name, size: 40) }.buttonStyle(.plain).frame(width: 46, height: 46).accessibilityLabel(t("Me", "Mimi")).accessibilityIdentifier("hav")
             }
             Spacer()
-            HStack(spacing: 0) { Text("RAFIKI").font(.tMedium).tracking(2.5).foregroundColor(C.ink); Text(" Pin").font(.tMedium).foregroundColor(C.blue) }
+            Wordmark()
             Spacer()
-            Button { Haptic.tap(); m.refresh() } label: {
-                Icon("refresh", size: 22, color: C.ink).rotationEffect(.degrees(m.busy ? 360 : 0)).animation(m.busy ? .linear(duration: 0.8).repeatForever(autoreverses: false) : .default, value: m.busy)
-                    .frame(width: 44, height: 44).background(C.card.opacity(0.85)).clipShape(Circle())
-            }.accessibilityLabel(t("Refresh", "Onyesha upya"))
+            Bell { m.go(Place(tab: m.here.tab, sub: "notes")) }
         }
         .padding(.horizontal, 12).frame(minHeight: 58)
         .background(.ultraThinMaterial)
@@ -106,8 +129,9 @@ struct BottomTabs: View {
         if admin { tabs.append(("office", t("Office", "Ofisi"), "inbox")) }
         return HStack(spacing: 0) {
             ForEach(tabs, id: \.0) { k, label, icon in
-                let on = m.here.tab == k && m.here.project == nil && m.here.sub == nil
-                let hu = C.hue(k)
+                // the tab you are in stays lit, also with a project or page open on top of it; one colour for every tab
+                let on = m.here.tab == k
+                let hu = Hue(fg: C.blue2, bg: C.tint)
                 Button { Haptic.tap(); m.tab(k) } label: {
                     VStack(spacing: 3) {
                         ZStack(alignment: .topTrailing) {

@@ -29,6 +29,25 @@ final class Prefs {
     var route: String { get { s("route") } set { d.set(newValue, forKey: "route") } }
     var theme: String { get { s("theme") } set { d.set(newValue, forKey: "theme") } }
     var lang: String { get { s("lang") } set { d.set(newValue, forKey: "lang") } }
+    /// The PIN session's number from the server (GET /api/pin "gen"), sent back as X-Pin-Gen; "" until known.
+    var pinGen: String { get { s("pinGen") } set { d.set(newValue, forKey: "pinGen") } }
+    /// The welcome screens have been seen.
+    var onb: Bool { get { d.bool(forKey: "onb") } set { d.set(newValue, forKey: "onb") } }
+    /// Notifications: when the list was marked read, kinds turned off, phone alerts on, and the newest one the phone was told about.
+    var noteSeen: String { get { s("noteSeen") } set { d.set(newValue, forKey: "noteSeen") } }
+    var noteOff: Set<String> { get { Set(s("noteOff").split(separator: ",").map(String.init).filter { !$0.isEmpty }) } set { d.set(newValue.sorted().joined(separator: ","), forKey: "noteOff") } }
+    /// Notifications opened one by one since "Mark all as read" (their keys).
+    var noteRead: Set<String> { get { Set((d.array(forKey: "noteRead") as? [String]) ?? []) } set { d.set(Array(newValue), forKey: "noteRead") } }
+    var phoneAlerts: Bool { get { d.object(forKey: "phoneAlerts") == nil ? true : d.bool(forKey: "phoneAlerts") } set { d.set(newValue, forKey: "phoneAlerts") } }
+    var notifiedAt: String { get { s("notifiedAt") } set { d.set(newValue, forKey: "notifiedAt") } }
+    var reviewAt: String { get { s("reviewAt") } set { d.set(newValue, forKey: "reviewAt") } }
+    /// Projects: the type of project shown ("" = all).
+    var ftype: String { get { s("ftype") } set { d.set(newValue, forKey: "ftype") } }
+    /// Text size: "s" small, "" normal, "l" large, "xl" larger.
+    var textSize: String { get { s("textSize") } set { d.set(newValue, forKey: "textSize") } }
+    /// Any small value a screen wants to remember (map style, layers, drafts).
+    func get(_ k: String, _ def: String = "") -> String { s("x." + k, def) }
+    func set(_ k: String, _ v: String) { d.set(v, forKey: "x." + k) }
 
     var pin: String { get { secret("pin") } set { setSecret("pin", newValue) } }
     var session: String { get { secret("session") } set { setSecret("session", newValue) } }
@@ -59,7 +78,7 @@ final class Prefs {
     var bio: Bool { get { d.bool(forKey: "bio") } set { d.set(newValue, forKey: "bio") } }
     /// Me & team: which half is showing, "me" or "team".
     var mePane: String { get { d.string(forKey: "mePane") ?? "me" } set { d.set(newValue, forKey: "mePane") } }
-    func forget() { pin = ""; session = ""; bio = false }
+    func forget() { pin = ""; session = ""; pinGen = ""; bio = false }
 }
 
 /// A photo or voice note waiting to go with a change.
