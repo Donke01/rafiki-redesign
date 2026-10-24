@@ -27,6 +27,7 @@ enum QrCheckin {
     static func mark(_ id: String) { marks[id] = Date() }
     static func isFor(_ id: String) -> Bool { (marks[id].map { Date().timeIntervalSince($0) } ?? .infinity) < 12 * 3600 }
     static func clear(_ id: String) { marks[id] = nil }
+    static func at(_ id: String) -> Date? { marks[id] }
 }
 
 /// QR codes: made with Core Image, read from a photo with Core Image.

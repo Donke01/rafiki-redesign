@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// Checklist items: English (what monday.com shows) and Kiswahili. Same as the web and Android apps.
 let ITEMS: [String: (String, String)] = [
@@ -121,7 +122,7 @@ final class VisitDraft: ObservableObject {
     @Published var other = ""; @Published var parts = ""; @Published var cost = ""
     @Published var strokes = ""; @Published var flow = ""; @Published var queue = ""; @Published var users = ""; @Published var clarity = ""
     @Published var ecoli = ""
-    @Published var active = ""; @Published var chair = ""; @Published var phone = ""; @Published var fund = ""
+    @Published var active = ""; @Published var chair = ""; @Published var phone = ""; @Published var fee = ""; @Published var fund = ""
     @Published var quote = ""; @Published var quoteBy = ""; @Published var consent = false
     @Published var note = ""
     @Published var stage = ""
@@ -132,11 +133,78 @@ final class VisitDraft: ObservableObject {
 
     static var drafts: [String: VisitDraft] = [:]
     static func of(_ id: String) -> VisitDraft { if let d = drafts[id] { return d }; let d = VisitDraft(); drafts[id] = d; return d }
+
+    private var texts: [String: String] {
+        ["state": state, "urgency": urgency, "other": other, "parts": parts, "cost": cost, "strokes": strokes, "flow": flow, "queue": queue, "users": users,
+         "clarity": clarity, "ecoli": ecoli, "active": active, "chair": chair, "phone": phone, "fee": fee, "fund": fund, "quote": quote, "quoteBy": quoteBy, "note": note, "stage": stage]
+    }
+    /// Nothing typed or chosen yet (so there's nothing to keep).
+    var blank: Bool {
+        step == 0 && arrived == nil && texts.values.allSatisfy { $0.trimmingCharacters(in: .whitespaces).isEmpty } && check.values.allSatisfy { $0.isEmpty }
+            && nums.values.allSatisfy { $0.trimmingCharacters(in: .whitespaces).isEmpty } && shots.isEmpty && voice == nil && !consent
+    }
+    /// Everything in the visit, with the paths of its photos and voice note, to keep on the phone.
+    func toJson() -> JSON {
+        var j: JSON = ["v": 1, "step": step, "consent": consent]
+        if let arrived { j["arrived"] = arrived }; if let a = arrivedAt { j["lat"] = a.lat; j["lng"] = a.lng }
+        for (k, s) in texts where !s.isEmpty { j[k] = s }
+        j["check"] = check.filter { !$0.value.isEmpty }; j["nums"] = nums.filter { !$0.value.isEmpty }
+        j["shots"] = shots.map { ["path": $0.path, "label": $0.label] }
+        if let voice { j["voice"] = voice }
+        return j
+    }
+    /// Puts a kept visit back; photos that are no longer on the phone are left out.
+    func fill(_ j: JSON) {
+        step = j.int("step"); consent = j.bool("consent")
+        arrived = j.str("arrived").isEmpty ? nil : j.str("arrived")
+        arrivedAt = (j["lat"] as? Double).flatMap { la in (j["lng"] as? Double).map { LatLng(lat: la, lng: $0) } }
+        state = j.str("state"); urgency = j.str("urgency"); other = j.str("other"); parts = j.str("parts"); cost = j.str("cost")
+        strokes = j.str("strokes"); flow = j.str("flow"); queue = j.str("queue"); users = j.str("users"); clarity = j.str("clarity"); ecoli = j.str("ecoli")
+        active = j.str("active"); chair = j.str("chair"); phone = j.str("phone"); fee = j.str("fee"); fund = j.str("fund")
+        quote = j.str("quote"); quoteBy = j.str("quoteBy"); note = j.str("note"); stage = j.str("stage")
+        check = (j.obj("check") ?? [:]).compactMapValues { $0 as? String }
+        nums = (j.obj("nums") ?? [:]).compactMapValues { $0 as? String }
+        let fm = FileManager.default
+        shots = j.objs("shots").map { Shot(path: $0.str("path"), label: $0.str("label")) }.filter { !$0.path.isEmpty && fm.fileExists(atPath: Outbox.resolve($0.path).path) }
+        voice = j.str("voice").isEmpty ? nil : j.str("voice"); if let v = voice, !fm.fileExists(atPath: Outbox.resolve(v).path) { voice = nil }
+        sent = nil
+    }
+}
+
+/// A half-done visit kept on the phone (Documents/visits/<project>.json), so it survives iOS closing the app.
+/// It's written on every change, removed once the visit is sent or saved to send, or when "Start again" is chosen.
+enum VisitDrafts {
+    struct Kept { let json: JSON; let saved: Date
+        var started: Date { When.parse(json.str("arrived")) ?? saved }
+        var photos: Int { json.objs("shots").count }
+    }
+    private static func file(_ id: String) -> URL {
+        let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("visits")
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        return dir.appendingPathComponent(String(id.map { $0.isLetter || $0.isNumber || $0 == "-" || $0 == "_" ? $0 : "_" }) + ".json")
+    }
+    static func save(_ id: String, _ j: JSON) {
+        var j = j; j["saved"] = Date().timeIntervalSince1970
+        if let d = try? JSONSerialization.data(withJSONObject: j) { try? d.write(to: file(id), options: .atomic) }
+    }
+    static func load(_ id: String) -> Kept? {
+        guard let d = try? Data(contentsOf: file(id)), let j = (try? JSONSerialization.jsonObject(with: d)) as? JSON else { return nil }
+        return Kept(json: j, saved: Date(timeIntervalSince1970: j.num("saved") ?? 0))
+    }
+    static func remove(_ id: String) { try? FileManager.default.removeItem(at: file(id)) }
+    /// Start again: the kept visit and its photos and voice note go.
+    static func discard(_ id: String) {
+        if let j = load(id)?.json {
+            for s in j.objs("shots") where !s.str("path").isEmpty { try? FileManager.default.removeItem(at: Outbox.resolve(s.str("path"))) }
+            if !j.str("voice").isEmpty { try? FileManager.default.removeItem(at: Outbox.resolve(j.str("voice"))) }
+        }
+        remove(id)
+    }
 }
 
 struct VisitTab: View {
     let p: Project
-    var body: some View { VStack(alignment: .leading, spacing: 0) { QrCheckedIn(id: p.id); VisitForm(p: p, v: VisitDraft.of(p.id)) } }
+    var body: some View { VisitForm(p: p, v: VisitDraft.of(p.id)) }
 }
 
 private struct VisitForm: View {
@@ -146,6 +214,8 @@ private struct VisitForm: View {
     @ObservedObject var v: VisitDraft
     @State private var msg: (String, String)?
     @State private var busy = false
+    @State private var offer: VisitDrafts.Kept?
+    @State private var looked = false
 
     var wet: Bool { isWater(p) }
     var k0: String { kind(p) }
@@ -153,25 +223,49 @@ private struct VisitForm: View {
     var items: [String] { LISTS[kind(p)] ?? [] }
 
     var body: some View {
-        if let sent = v.sent {
+        main
+            .onAppear {
+                guard !looked else { return }; looked = true
+                if v.blank && v.sent == nil { offer = VisitDrafts.load(p.id) }
+                // scanned the site's QR sticker (Scan QR): that counts as arriving
+                if offer == nil, QrCheckin.isFor(p.id), v.arrived == nil, let at = QrCheckin.at(p.id) { v.arrived = When.iso.string(from: at); v.arrivedAt = loc.fix?.ll }
+            }
+            .onReceive(v.objectWillChange.debounce(for: .milliseconds(400), scheduler: RunLoop.main)) { _ in
+                if offer == nil && v.sent == nil && !v.blank { VisitDrafts.save(p.id, v.toJson()) }
+            }
+    }
+
+    @ViewBuilder var main: some View {
+        if let o = offer {
+            CardV {
+                IconTile(icon: "clock", tint: C.blue, bg: C.tint, size: 56)
+                Text(t("Carry on with your visit from \(Dates.timeOrDateTime(o.started))?", "Uendelee na ziara uliyoanza \(Dates.timeOrDateTime(o.started))?")).font(.tLarge).foregroundColor(C.ink).padding(.top, 12)
+                let n = o.photos, stepNo = o.json.int("step") + 1
+                Text(t("It was kept on this phone: step \(stepNo) of \(steps.count)" + (n > 0 ? ", \(n) \(n == 1 ? "photo" : "photos")." : "."), "Ilihifadhiwa kwenye simu hii: hatua \(stepNo) kati ya \(steps.count)" + (n > 0 ? ", picha \(n)." : ".")))
+                    .font(.bMedium).foregroundColor(C.muted).padding(.top, 4)
+                Btn(t("Resume", "Endelea nayo"), icon: "arrow", wide: true) { v.fill(o.json); offer = nil }.padding(.top, 16).accessibilityIdentifier("resume_yes")
+                Btn(t("Start again", "Anza upya"), icon: "refresh", light: true, wide: true) { VisitDrafts.discard(p.id); offer = nil }.padding(.top, 10).accessibilityIdentifier("resume_no")
+            }
+        } else if let sent = v.sent {
             CardV {
                 IconTile(icon: "okc", tint: C.ok, bg: C.okBg, size: 64)
                 Text(sent == "sent" ? t("Visit report sent", "Ripoti ya ziara imetumwa") : t("Saved on this phone", "Imehifadhiwa kwenye simu")).font(.tLarge).foregroundColor(C.ink).padding(.top, 12)
                 Text(sent == "sent" ? t("It’s on the project in monday.com.", "Iko kwenye mradi katika monday.com.") : t("It will be sent to monday.com when you have signal.", "Itatumwa monday.com ukipata mtandao.")).font(.bMedium).foregroundColor(C.muted)
-                Btn(t("Start another visit here", "Anza ziara nyingine hapa"), light: true, small: true) { VisitDraft.drafts[p.id] = nil; v.sent = nil; v.step = 0; v.state = ""; v.shots = []; v.check = [:]; v.note = ""; v.voice = nil; v.arrived = nil }.padding(.top, 14)
+                Btn(t("Start another visit here", "Anza ziara nyingine hapa"), light: true, small: true) { VisitDraft.drafts[p.id] = nil; VisitDrafts.remove(p.id); v.sent = nil; v.step = 0; v.state = ""; v.shots = []; v.check = [:]; v.note = ""; v.voice = nil; v.arrived = nil }.padding(.top, 14)
             }
         } else {
             VStack(alignment: .leading, spacing: 0) {
+                // step bar: the segments, and only the current step named ("Step 2 of 7 · Condition")
                 HStack(spacing: 4) {
                     ForEach(Array(steps.enumerated()), id: \.offset) { i, s in
                         Button { v.step = i } label: {
-                            VStack(spacing: 4) {
-                                Capsule().fill(i < v.step ? AnyShapeStyle(C.ok) : i == v.step ? AnyShapeStyle(BlueBrush) : AnyShapeStyle(C.line)).frame(height: 5)
-                                Text(s).font(.mont(9, .bold)).foregroundColor(i == v.step ? C.blue : C.muted).lineLimit(1).minimumScaleFactor(0.7)
-                            }.padding(.vertical, 4).contentShape(Rectangle())
-                        }.buttonStyle(.plain)
+                            Capsule().fill(i < v.step ? AnyShapeStyle(C.ok) : i == v.step ? AnyShapeStyle(BlueBrush) : AnyShapeStyle(C.line)).frame(height: 5)
+                                .padding(.vertical, 8).contentShape(Rectangle())
+                        }.buttonStyle(.plain).accessibilityLabel(s)
                     }
                 }
+                Text(t("Step \(v.step + 1) of \(steps.count)", "Hatua \(v.step + 1) kati ya \(steps.count)") + " · " + steps[v.step]).font(.mont(13, .bold)).foregroundColor(C.blue2).lineLimit(1).padding(.top, 2)
+                    .accessibilityIdentifier("step_label")
                 CardV { stepBody }.padding(.top, 12)
                 HStack(spacing: 10) {
                     Btn(t("Back", "Rudi"), icon: "back", enabled: v.step > 0, light: true, wide: true) { if v.step > 0 { v.step -= 1 } }
@@ -186,6 +280,7 @@ private struct VisitForm: View {
         case 0:
             H2(t("Check in", "Ingia"))
             Text(t("Records the time you arrived and where you are.", "Inarekodi muda ulipofika na mahali ulipo.")).font(.bMedium).foregroundColor(C.muted)
+            QrCheckedIn(id: p.id)
             if let a = v.arrived {
                 Text(t("Arrived ", "Umefika ") + When.text(a) + (v.arrivedAt.map { " · " + $0.text() } ?? "")).font(.tSmall).foregroundColor(C.ok).padding(.top, 12)
             } else {
@@ -212,14 +307,14 @@ private struct VisitForm: View {
             Text(t("Tap OK or Problem for each. Skip anything you couldn’t check.", "Gusa Sawa au Tatizo kwa kila kimoja. Ruka usichoweza kukagua.")).font(.bMedium).foregroundColor(C.muted)
             ForEach(items, id: \.self) { k in
                 let cur = v.check[k] ?? ""
-                HStack(spacing: 6) {
-                    Text(t(ITEMS[k]!.0, ITEMS[k]!.1)).font(.bMedium).foregroundColor(C.text).frame(maxWidth: .infinity, alignment: .leading)
-                    Pill(t("OK", "Sawa"), on: cur == "ok", color: C.ok) { v.check[k] = cur == "ok" ? "" : "ok" }.frame(width: 64)
-                    Pill(t("Problem", "Tatizo"), on: cur == "bad", color: C.bad) { v.check[k] = cur == "bad" ? "" : "bad" }.frame(width: 84)
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(t(ITEMS[k]!.0, ITEMS[k]!.1)).font(.bMedium).foregroundColor(C.text).padding(.leading, 2)
+                    OkProblem(cur: cur) { x in v.check[k] = cur == x ? "" : x }
                 }
-                .padding(10).background(cur == "ok" ? C.okBg : cur == "bad" ? C.badBg : C.card)
+                .padding(10).frame(maxWidth: .infinity, alignment: .leading).background(cur == "ok" ? C.okBg : cur == "bad" ? C.badBg : C.card)
                 .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                 .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(cur == "ok" ? C.ok : cur == "bad" ? C.bad : C.line, lineWidth: 1)).padding(.top, 8)
+                .accessibilityIdentifier("ck_\(k)")
             }
             Field(t("Anything else wrong?", "Kuna kingine kibaya?"), $v.other, placeholder: wet ? t("e.g. tap drips", "mf. bomba linavuja") : k0 == "farm" ? t("e.g. feeder broken", "mf. chombo cha chakula kimevunjika") : t("e.g. window glass broken", "mf. kioo cha dirisha kimevunjika"))
             if v.state != "working" && !v.state.isEmpty {
@@ -333,13 +428,31 @@ private struct VisitForm: View {
             if let ll = v.arrivedAt ?? loc.fix?.ll { body["lat"] = ll.lat; body["lng"] = ll.lng }
             let files = v.shots.map { OutFile(path: $0.path, kind: "photo", label: $0.label) } + (v.voice.map { [OutFile(path: $0, kind: "voice", label: "Voice note")] } ?? [])
             switch await m.submit(body, files) {
-            case .sent(_, let note): m.localVisit(p, state: v.state, note: v.note, urgency: v.urgency, problems: bad); v.sent = "sent"; msg = note.map { ("warn", $0) }
-            case .queued: m.localVisit(p, state: v.state, note: v.note, urgency: v.urgency, problems: bad); v.sent = "queued"
+            case .sent(_, let note): m.localVisit(p, state: v.state, note: v.note, urgency: v.urgency, problems: bad); if !v.ecoli.isEmpty { m.localTested(p) }; v.sent = "sent"; msg = note.map { ("warn", $0) }
+            case .queued: m.localVisit(p, state: v.state, note: v.note, urgency: v.urgency, problems: bad); if !v.ecoli.isEmpty { m.localTested(p) }; v.sent = "queued"
             case .failed(let s): msg = ("bad", s)
             case .locked: break
             }
+            if v.sent != nil { QrCheckin.clear(p.id); VisitDrafts.remove(p.id) }
             busy = false
         }
+    }
+}
+
+/// A checklist row's answer: one 48 pt pill in two halves, OK (turns green) and Problem (turns red).
+private struct OkProblem: View {
+    let cur: String; let pick: (String) -> Void
+    var body: some View {
+        HStack(spacing: 0) {
+            ForEach(Array([("ok", t("OK", "Sawa"), C.ok), ("bad", t("Problem", "Tatizo"), C.bad)].enumerated()), id: \.offset) { i, x in
+                let on = cur == x.0, onText = C.dark ? Color(hex: 0x0D1318) : Color.white
+                if i == 1 { Rectangle().fill(cur.isEmpty ? C.line : Color.clear).frame(width: 1) }
+                Button { Haptic.tap(); pick(x.0) } label: {
+                    HStack(spacing: 6) { Icon(x.0 == "ok" ? "check" : "alert", size: 18, color: on ? onText : x.2); Text(x.1).font(.lLarge).foregroundColor(on ? onText : C.ink).lineLimit(1) }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity).background(on ? x.2 : Color.clear).contentShape(Rectangle())
+                }.buttonStyle(.plain)
+            }
+        }.frame(height: 48).background(C.card).clipShape(Capsule()).overlay(Capsule().stroke(C.line, lineWidth: 1))
     }
 }
 
