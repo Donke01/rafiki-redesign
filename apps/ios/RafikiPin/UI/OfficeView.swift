@@ -64,10 +64,14 @@ struct OfficeView: View {
             }
             .onAppear {
                 if m.demo, let s = Demo.arg("-section") { sec = s; strip = true }
-                if MailNav.preset != nil { sec = "mail"; strip = true }
-                if let s = TeamGo.section { sec = s; strip = true; TeamGo.section = nil }
+                follow()
             }
+            .onChange(of: m.officeTick) { _ in follow() }
         }
+    }
+    private func follow() {
+        if MailNav.preset != nil { sec = "mail"; strip = true }
+        if let s = TeamGo.section { sec = s; strip = true; TeamGo.section = nil }
     }
     private func pick(_ k: String) { withAnimation(Motion.on ? .easeOut(duration: 0.2) : nil) { sec = k; strip = true } }
 }

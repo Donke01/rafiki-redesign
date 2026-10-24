@@ -98,7 +98,7 @@ struct NotificationsView: View {
                                     ForEach(Array(items.enumerated()), id: \.element.key) { i, a in
                                         NoteRow(a: a, new: alertNew(a, seen: seen, read: read)) {
                                             Haptic.tap(); m.markRead(a)
-                                            if let pid = a.pid { m.go(Place(tab: m.here.tab, project: pid)) } else if a.kind == "review" { m.tab("office") }
+                                            if let pid = a.pid { m.go(Place(tab: m.here.tab, project: pid)) } else if a.kind == "review" { m.openOffice("review") }
                                         }.padding(.bottom, 8).rise(i, step: 0.05)
                                     }
                                 }

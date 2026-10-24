@@ -683,7 +683,7 @@ struct DonorThanks: View {
                 if let msg { Msg(msg.1, msg.0) }
                 if m.snap?.admin == true {
                     Btn(t("E-mail this project’s donors", "Tuma barua pepe kwa wafadhili wa mradi huu"), icon: "mail", light: true, small: true, wide: true) {
-                        MailNav.preset = MailPreset(aud: "donors", sub: "project", project: p.id); TeamGo.section = "mail"; m.tab("office")
+                        MailNav.preset = MailPreset(aud: "donors", sub: "project", project: p.id); m.openOffice("mail")
                     }.padding(.top, 10)
                 }
             }

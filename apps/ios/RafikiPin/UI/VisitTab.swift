@@ -136,7 +136,7 @@ final class VisitDraft: ObservableObject {
 
 struct VisitTab: View {
     let p: Project
-    var body: some View { VisitForm(p: p, v: VisitDraft.of(p.id)) }
+    var body: some View { VStack(alignment: .leading, spacing: 0) { QrCheckedIn(id: p.id); VisitForm(p: p, v: VisitDraft.of(p.id)) } }
 }
 
 private struct VisitForm: View {
@@ -329,6 +329,7 @@ private struct VisitForm: View {
                 body["numbers"] = ns; body["carer"] = ["name": trim(v.chair), "phone": trim(v.phone)] as JSON
             }
             if let a = v.arrived { body["arrive"] = a }
+            if QrCheckin.isFor(p.id) { body["qr"] = true }
             if let ll = v.arrivedAt ?? loc.fix?.ll { body["lat"] = ll.lat; body["lng"] = ll.lng }
             let files = v.shots.map { OutFile(path: $0.path, kind: "photo", label: $0.label) } + (v.voice.map { [OutFile(path: $0, kind: "voice", label: "Voice note")] } ?? [])
             switch await m.submit(body, files) {

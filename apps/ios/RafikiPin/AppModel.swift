@@ -50,6 +50,9 @@ final class AppModel: ObservableObject {
     @Published var dismissed: Set<String> = []
     /// A project to show on the Map tab (from elsewhere in the app).
     var mapFocus: String?
+    /// Bumped to make the Office open a section (TeamGo.section, MailNav.preset), also when it is already showing.
+    @Published var officeTick = 0
+    func openOffice(_ section: String) { TeamGo.section = section; tab("office"); officeTick += 1 }
     /// Open this project (a tap on a notification).
     @Published var goProject: String?
     /// Me → "Show the welcome screens again".

@@ -216,9 +216,9 @@ struct HomeTop: View {
             }.buttonStyle(.plain).accessibilityIdentifier("home_search").padding(.bottom, 10)
             HStack(spacing: 8) {
                 ForEach(Array([("missing", t("Pin a location", "Weka mahali"), "pin"), ("near", t("Visit nearby", "Tembelea karibu"), "clip"),
-                               ("new", t("Add a site", "Ongeza eneo"), "plus"), ("repairs", t("Repairs", "Ukarabati"), "wrench")].enumerated()), id: \.element.0) { i, q in
+                               ("new", t("New site", "Eneo jipya"), "plus"), ("repairs", t("Repairs", "Rekebisha"), "wrench"), ("scan", t("Scan QR", "Soma QR"), "scan")].enumerated()), id: \.element.0) { i, q in
                     let (k, label, icon) = q, hu = C.hue(k)
-                    Button { Haptic.tap(); if k == "new" { m.tab("new") } else { filter(k) } } label: {
+                    Button { Haptic.tap(); if k == "new" { m.tab("new") } else if k == "scan" { m.go(Place(tab: "list", sub: "scan")) } else { filter(k) } } label: {
                         VStack(spacing: 6) {
                             Icon(icon, size: 20, color: hu.fg).frame(width: 38, height: 38).background(hu.bg).clipShape(RoundedRectangle(cornerRadius: 13, style: .continuous))
                             Text(label).font(.mont(12, .bold)).foregroundColor(C.ink).multilineTextAlignment(.center).lineLimit(2).minimumScaleFactor(0.8)

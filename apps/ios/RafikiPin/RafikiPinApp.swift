@@ -51,6 +51,7 @@ struct Shell: View {
                 Group {
                     if let pid = here.project { ProjectView(id: pid, startTab: here.projectTab) }
                     else if here.sub == "search" { SearchView() }
+                    else if here.sub == "scan" { ScanView() }
                     else if here.sub == "report" { ReportView() }
                     else if here.sub == "route" { RouteView() }
                     else if here.sub == "notes" { NotificationsView() }
@@ -83,7 +84,7 @@ struct Shell: View {
                 switch kind {
                 case "project": m.go(Place(tab: m.here.tab, project: arg))
                 case "settings": m.go(Place(tab: m.here.tab, sub: "set_" + arg))
-                case "office": TeamGo.section = arg; m.tab("office")
+                case "office": m.openOffice(arg)
                 default: break
                 }
             }.environmentObject(m)
