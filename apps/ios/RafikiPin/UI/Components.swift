@@ -15,7 +15,7 @@ enum Ic {
         "scan": "qrcode.viewfinder", "offline": "icloud.and.arrow.down", "trash": "trash", "up": "chevron.up", "more": "ellipsis", "filter": "line.3.horizontal.decrease",
         "school": "building.columns", "cross": "cross", "house": "house", "leaf": "leaf", "brick": "square.stack.3d.up", "copy": "doc.on.doc", "coins": "dollarsign.circle",
         "hourglass": "hourglass", "box": "shippingbox", "trend": "chart.line.uptrend.xyaxis", "shield": "checkmark.shield", "grid": "square.grid.2x2", "play": "play.fill",
-        "pause": "pause.fill", "eye": "eye", "eyeoff": "eye.slash", "route": "point.topleft.down.to.point.bottomright.curvepath", "heat": "flame", "star": "star",
+        "pause": "pause.fill", "speak": "speaker.wave.2.fill", "fit": "arrow.up.left.and.arrow.down.right", "eye": "eye", "eyeoff": "eye.slash", "route": "point.topleft.down.to.point.bottomright.curvepath", "heat": "flame", "star": "star",
         "video": "video", "photo": "photo", "send": "paperplane", "edit": "pencil", "minus": "minus", "block": "nosign", "logout": "rectangle.portrait.and.arrow.right",
         "heart": "heart", "whatsapp": "message.fill", "truck": "truck.box", "road": "road.lanes", "rain": "cloud.rain", "car": "car", "sparkles": "sparkles", "doc": "doc.richtext",
     ]

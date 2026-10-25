@@ -157,6 +157,8 @@ struct DonorApp: View {
 }
 
 private struct DonorTop: View {
+    @EnvironmentObject var m: AppModel
+    @State private var said: String?
     var body: some View {
         HStack(spacing: 8) {
             Image(C.dark ? "RafikiLogoLight" : "RafikiLogoDark").resizable().scaledToFit().frame(height: 22).accessibilityLabel("RAFIKI")
@@ -164,6 +166,16 @@ private struct DonorTop: View {
             HStack(spacing: 4) { Icon("heart", size: 13, color: co.fg); Text(t("DONOR", "MFADHILI")).font(.mont(11, .heavy)).tracking(0.6).foregroundColor(co.fg).lineLimit(1) }
                 .padding(.horizontal, 9).padding(.vertical, 4).background(co.bg).clipShape(Capsule())
             Spacer()
+            // text size in one tap: Normal → Large → Larger
+            Button {
+                Haptic.tap()
+                let next = m.prefs.textSize == "" ? "l" : m.prefs.textSize == "l" ? "xl" : ""
+                m.prefs.textSize = next; m.look += 1
+                m.say(next == "l" ? t("Large text", "Maandishi makubwa") : next == "xl" ? t("Larger text", "Maandishi makubwa zaidi") : t("Normal text", "Maandishi ya kawaida"))
+            } label: {
+                Text("Aa").font(.mont(17, .heavy)).foregroundColor(C.ink).frame(width: 46, height: 46).background(C.card)
+                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous)).overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(C.line, lineWidth: 1))
+            }.buttonStyle(Press()).accessibilityLabel(t("Text size", "Ukubwa wa maandishi")).accessibilityIdentifier("donor_aa")
             Button { Share.open(DONOR_GIVE) } label: {
                 HStack(spacing: 6) { Icon("heart", size: 16, color: .white); Text(t("Give again", "Changia tena")).font(.mont(13, .bold)).foregroundColor(.white).lineLimit(1) }
                     .padding(.horizontal, 14).frame(minHeight: 40).background(BlueBrush).clipShape(Capsule())
@@ -224,6 +236,10 @@ private struct DonorHome: View {
                 HeroTile(value: donorNum(v.visitsYear), label: t("visits this year", "ziara mwaka huu"))
             }.fixedSize(horizontal: false, vertical: true).padding(.top, 16)
         }.accessibilityIdentifier("donor_hero")
+        if v.projects.contains(where: { $0.gps != nil }) {
+            SectionHead(text: t("Your projects on the map", "Miradi yako kwenye ramani"))
+            DonorMap(projects: v.projects, withCard: true, open: open)
+        }
         SectionHead(text: v.projects.count == 1 ? t("Your project", "Mradi wako") : t("Your projects", "Miradi yako"), extra: "\(v.projects.count)")
         if v.projects.isEmpty { EmptyDrop(text: t("Your projects will appear here soon.", "Miradi yako itaonekana hapa hivi karibuni.")) }
         ForEach(Array(v.projects.enumerated()), id: \.element.id) { i, p in
@@ -298,9 +314,11 @@ private struct DonorCard: View {
 private struct DonorProjectView: View {
     @ObservedObject var d = DonorState.shared
     let p: DProject; let back: () -> Void
+    @State private var viewer: ViewerPhotos?
+    var pics: [(String, String)] { p.gallery.map { (d.photo($0.id, w: 1600), Dates.weekday($0.at) + ($0.label.isEmpty ? "" : " · " + $0.label)) } }
     var body: some View {
-        Button(action: back) { HStack(spacing: 4) { Icon("back", size: 18, color: C.blue2); Text(t("Your projects", "Miradi yako")).font(.lLarge).foregroundColor(C.blue2) }.frame(minHeight: 44) }
-            .buttonStyle(.plain).accessibilityIdentifier("dproject_back")
+        Btn(t("Back", "Rudi"), icon: "back", light: true) { back() }.padding(.bottom, 6).accessibilityIdentifier("dproject_back")
+            .fullScreenCover(item: $viewer) { PhotoViewer(v: $0) }
         Color.clear.aspectRatio(16 / 10, contentMode: .fit)
             .overlay(NetImage(url: cover(d, p)) { Icon(iconOf(p), size: 56, color: C.blue) }.scaledToFill())
             .background(C.tint).clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
@@ -310,9 +328,10 @@ private struct DonorProjectView: View {
         CardV {
             HStack(alignment: .top, spacing: 12) {
                 IconTile(icon: p.state == "repairing" || p.state == "notworking" ? "wrench" : iconOf(p), tint: fg, bg: bg, size: 44)
-                VStack(alignment: .leading, spacing: 2) { Text(donorStateName(p.state)).font(.tMedium).foregroundColor(C.ink); Text(donorStateSay(p)).font(.bMedium).foregroundColor(C.text) }
+                VStack(alignment: .leading, spacing: 2) { Text(donorStateName(p.state)).font(.tMedium).foregroundColor(C.ink); Text(donorStateSay(p) + (donorPeopleSay(p).isEmpty ? "" : " " + donorPeopleSay(p))).font(.bLarge).foregroundColor(C.text) }
                 Spacer(minLength: 0)
             }
+            SpeakBtn(key: "p_" + p.id, text: p.title + ". " + donorStateName(p.state) + ". " + donorStateSay(p) + " " + donorPeopleSay(p)).padding(.top, 12)
         }.padding(.top, 14)
         let facts = facts()
         if !facts.isEmpty {
@@ -321,7 +340,10 @@ private struct DonorProjectView: View {
         if !p.gallery.isEmpty {
             SectionHead(text: t("Photos", "Picha"), extra: "\(p.gallery.count)")
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(alignment: .top, spacing: 10) { ForEach(Array(p.gallery.enumerated()), id: \.offset) { _, g in MediaTile(url: d.photo(g.id), caption: Dates.weekday(g.at) + (g.label.isEmpty ? "" : " · " + g.label), video: false) } }
+                HStack(alignment: .top, spacing: 10) { ForEach(Array(p.gallery.enumerated()), id: \.offset) { k, g in MediaTile(url: d.photo(g.id), caption: Dates.weekday(g.at) + (g.label.isEmpty ? "" : " · " + g.label), video: false, zoom: true) { viewer = ViewerPhotos(list: pics, at: k, play: false) } } }
+            }
+            if p.gallery.count > 1 {
+                Btn(t("Watch the \(p.gallery.count) photos as a slideshow", "Tazama picha \(p.gallery.count) kama onyesho"), icon: "play", wide: true) { viewer = ViewerPhotos(list: pics, at: 0, play: true) }.padding(.top, 10)
             }
         }
         if !p.thanks.isEmpty || !p.stories.isEmpty {
@@ -330,7 +352,9 @@ private struct DonorProjectView: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(alignment: .top, spacing: 10) {
                         ForEach(Array(p.thanks.enumerated()), id: \.offset) { _, x in
-                            MediaTile(url: d.photo(x.id), caption: Dates.weekday(x.at) + (x.label.isEmpty ? "" : " · “" + x.label + "”"), video: x.video) { Share.open(d.photo(x.id)) }
+                            MediaTile(url: d.photo(x.id), caption: Dates.weekday(x.at) + (x.label.isEmpty ? "" : " · “" + x.label + "”"), video: x.video, zoom: true) {
+                                if x.video { Share.open(d.photo(x.id)) } else { viewer = ViewerPhotos(list: [(d.photo(x.id, w: 1600), x.label.isEmpty ? "" : "“" + x.label + "”")], at: 0, play: false) }
+                            }
                         }
                     }
                 }
@@ -347,11 +371,11 @@ private struct DonorProjectView: View {
         visitsAndRepairs
         if let ll = p.gps {
             SectionHead(text: t("Where it is", "Mahali ilipo"))
-            StillMap(ll: ll, color: p.state == "working" ? UIColor(C.ok) : p.state == "notworking" ? UIColor(C.bad) : p.state == "repairing" ? UIColor(C.warn) : UIColor(C.blue))
-                .frame(height: 200).clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+            DonorMap(projects: [p], withCard: false) { _ in }
             Btn(t("Open in Google Maps", "Fungua kwenye Google Maps"), icon: "map", light: true, small: true) { Share.open("https://www.google.com/maps/search/?api=1&query=\(ll.lat),\(ll.lng)") }.padding(.top, 10)
         }
-        Btn(t("Ask about this project", "Uliza kuhusu mradi huu"), icon: "mail", light: true, small: true) { donorMail("Question about " + p.title) }.padding(.top, 18)
+        SectionHead(text: t("Questions about this project?", "Una swali kuhusu mradi huu?"))
+        DonorTalk(p: p)
     }
 
     func facts() -> [(String, String)] {
@@ -427,15 +451,15 @@ private struct DonorProjectView: View {
 }
 
 private struct MediaTile: View {
-    let url: String; let caption: String; let video: Bool; var tap: () -> Void = {}
+    let url: String; let caption: String; let video: Bool; var zoom = false; var tap: () -> Void = {}
     var body: some View {
         VStack(alignment: .leading, spacing: 5) {
-            Button { if video { tap() } } label: {
+            Button { if video || zoom { Haptic.tap(); tap() } } label: {
                 Color.clear.aspectRatio(4 / 3, contentMode: .fit)
                     .overlay(NetImage(url: url) { Icon("camera", size: 32, color: C.blue) }.scaledToFill())
                     .background(C.tint).clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
                     .overlay { if video { Image(systemName: "play.fill").font(.system(size: 20)).foregroundColor(.white).frame(width: 52, height: 52).background(Color.black.opacity(0.7)).clipShape(Circle()) } }
-            }.buttonStyle(.plain).disabled(!video).accessibilityLabel(video ? t("Play the video", "Cheza video") : caption)
+            }.buttonStyle(.plain).disabled(!video && !zoom).accessibilityLabel(video ? t("Play the video", "Cheza video") : caption)
             Text(caption).font(.mont(12, .semibold)).foregroundColor(C.muted).lineLimit(3)
         }.frame(width: 240)
     }
@@ -501,8 +525,10 @@ private func updateLook(_ u: DUpdate) -> (String, String, String, String)? {
 private struct UpdateRow: View {
     @ObservedObject var d = DonorState.shared
     let u: DUpdate; let p: DProject; let fresh: Bool; let open: () -> Void
+    @State private var viewer: ViewerPhotos?
     var body: some View {
-        if let (icon, tone, title, text) = updateLook(u) {
+        if let (icon, tone, title, text0) = updateLook(u) {
+            let text = donorStory(u).isEmpty ? text0 : donorStory(u)
             let (f, b) = stateTone(tone)
             HStack(alignment: .top, spacing: 12) {
                 IconTile(icon: icon, tint: f, bg: b, size: 40)
@@ -512,20 +538,25 @@ private struct UpdateRow: View {
                         if fresh { Tag(t("NEW", "MPYA"), bg: C.named("coral").bg, fg: C.named("coral").fg) }
                     }
                     Text(p.title + " · " + Dates.weekday(u.at)).font(.mont(11, .semibold)).foregroundColor(C.muted)
-                    if !text.isEmpty { Text(text).font(.bMedium).foregroundColor(C.text).padding(.top, 3) }
+                    if !text.isEmpty { Text(text).font(.bLarge).foregroundColor(C.text).padding(.top, 4).fixedSize(horizontal: false, vertical: true) }
                     let thumbs = u.type == "photos" ? Array(u.photos.prefix(4)) : (u.type == "thanks" && u.media != "video" && !u.id.isEmpty) ? [u.id] : []
                     if !thumbs.isEmpty {
                         HStack(spacing: 6) {
-                            ForEach(thumbs, id: \.self) { id in
-                                NetImage(url: d.photo(id, w: 480)) { Color.clear }.scaledToFill().frame(width: 64, height: 64).background(C.tint).clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                            ForEach(Array(thumbs.enumerated()), id: \.offset) { k, id in
+                                Button { viewer = ViewerPhotos(list: thumbs.map { (d.photo($0, w: 1600), p.title + " · " + Dates.weekday(u.at)) }, at: k, play: false) } label: {
+                                    NetImage(url: d.photo(id, w: 480)) { Color.clear }.scaledToFill().frame(width: 72, height: 72).background(C.tint).clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                                }.buttonStyle(Press()).accessibilityLabel(t("Open photo", "Fungua picha"))
                             }
                         }.padding(.top, 8)
                     }
-                    Button(action: open) { HStack(spacing: 2) { Text(t("See the project", "Ona mradi")).font(.lLarge).foregroundColor(C.blue2); Icon("chev", size: 16, color: C.blue2) }.frame(minHeight: 40) }
-                        .buttonStyle(.plain)
+                    HStack(spacing: 8) {
+                        Btn(t("See the project", "Ona mradi"), icon: "chev", light: true, small: true) { open() }
+                        SpeakBtn(key: "u_" + u.type + u.pid + u.at, text: p.title + ". " + title + ". " + Dates.weekday(u.at) + ". " + text, label: t("Listen", "Sikiliza"), small: true, wide: false)
+                    }.padding(.top, 8)
                 }
                 Spacer(minLength: 0)
             }.accessibilityIdentifier("dupd_\(u.type)_\(u.pid)")
+            .fullScreenCover(item: $viewer) { PhotoViewer(v: $0) }
         }
     }
 }
@@ -572,6 +603,8 @@ private struct DonorSettings: View {
             Button { askOut = true } label: { row("back", "coral", t("Sign out", "Toka"), t("You can sign in again with your code or link.", "Unaweza kuingia tena kwa msimbo au kiungo chako.")) { EmptyView() } }
                 .buttonStyle(.plain).accessibilityIdentifier("dset_out")
         }.padding(.top, 12)
+        SectionHead(text: t("Talk to RAFIKI", "Ongea na RAFIKI"))
+        DonorTalk(p: nil)
         Text(t("Signed in as ", "Umeingia kama ") + v.viewer).font(.bSmall).foregroundColor(C.muted).wide(.center).padding(.top, 16)
             .onAppear { alerts = m.prefs.phoneAlerts }
             .confirmationDialog(t("Sign out?", "Utoke?"), isPresented: $askOut, titleVisibility: .visible) {
