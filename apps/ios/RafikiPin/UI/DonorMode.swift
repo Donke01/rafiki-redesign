@@ -211,11 +211,10 @@ private struct DonorTabs: View {
 private struct SectionHead: View {
     let text: String; var extra = ""
     var body: some View {
-        HStack(alignment: .bottom) {
-            Text(text).font(.tLarge).foregroundColor(C.ink)
-            Spacer()
-            if !extra.isEmpty { Text(extra).font(.lMedium).foregroundColor(C.muted) }
-        }.padding(.top, 22).padding(.bottom, 10).padding(.horizontal, 2)
+        VStack(spacing: 2) {
+            Text(text).font(.mont(22, .heavy)).foregroundColor(C.ink).multilineTextAlignment(.center)
+            if !extra.isEmpty { Text(extra).font(.lMedium).foregroundColor(C.muted).multilineTextAlignment(.center) }
+        }.frame(maxWidth: .infinity).padding(.top, 24).padding(.bottom, 12).padding(.horizontal, 2)
     }
 }
 
@@ -225,17 +224,37 @@ private struct DonorHome: View {
     var body: some View {
         let org = [v.group || v.viewer != v.name ? v.name : "", !v.org.isEmpty && v.org != v.name ? v.org : ""].filter { !$0.isEmpty }.joined(separator: " · ")
         let allWater = v.nWater > 0 && v.nWater == v.nProjects
-        CardV(pad: 18, deep: true) {
-            HStack(spacing: 5) { Icon("lock", size: 13, color: .white); Text(t("JUST FOR YOU", "KWA AJILI YAKO TU")).font(.mont(11, .heavy)).tracking(0.8).foregroundColor(.white) }
-                .padding(.horizontal, 11).padding(.vertical, 5).background(Color.white.opacity(0.16)).clipShape(Capsule())
-            Text(t("Hello, ", "Habari, ") + (v.viewer.trimmingCharacters(in: .whitespaces).split(separator: " ").first.map(String.init) ?? "")).font(.hLarge).foregroundColor(.white).padding(.top, 12)
-            Text(org.isEmpty ? t("Thank you for giving with RAFIKI", "Asante kwa kuchangia na RAFIKI") : org).font(.mont(14, .semibold)).foregroundColor(.white.opacity(0.85))
+        let hp = v.projects.first { cover(d, $0) != nil }
+        VStack(spacing: 0) {
+            HStack(spacing: 6) { Icon("lock", size: 13, color: .white); Text(t("JUST FOR YOU", "KWA AJILI YAKO TU")).font(.mont(11, .heavy)).tracking(0.8).foregroundColor(.white).lineLimit(1) }
+                .padding(.horizontal, 12).padding(.vertical, 5).background(Color.white.opacity(0.16)).clipShape(Capsule())
+            Text(t("Hello, ", "Habari, ") + (v.viewer.trimmingCharacters(in: .whitespaces).split(separator: " ").first.map(String.init) ?? "")).font(.mont(32, .heavy)).foregroundColor(.white)
+                .multilineTextAlignment(.center).shadow(color: .black.opacity(0.25), radius: 9, y: 2).padding(.top, 14)
+            Text(org.isEmpty ? t("Thank you for giving with RAFIKI", "Asante kwa kuchangia na RAFIKI") : org).font(.mont(14, .semibold)).foregroundColor(.white.opacity(0.85)).multilineTextAlignment(.center).padding(.top, 2)
+            if v.people > 0 {
+                Text((v.nProjects == 1 ? t("Your project serves about ", "Mradi wako unahudumia takriban ") : t("Your \(v.nProjects)\u{00A0}projects serve about ", "Miradi yako \(v.nProjects) inahudumia takriban ")) + (donorNum(v.people) + t(" people.", " watu.")).nb)
+                    .font(.mont(19, .bold)).foregroundColor(.white).multilineTextAlignment(.center).frame(maxWidth: 420).padding(.top, 14)
+            }
             HStack(spacing: 8) {
-                HeroTile(value: donorNum(v.nProjects), label: allWater ? (v.nWater == 1 ? t("well", "kisima") : t("wells", "visima")) : (v.nProjects == 1 ? t("project", "mradi") : t("projects", "miradi")))
-                HeroTile(value: donorNum(v.people), label: t("people served", "wanufaika"))
-                HeroTile(value: donorNum(v.visitsYear), label: t("visits this year", "ziara mwaka huu"))
-            }.fixedSize(horizontal: false, vertical: true).padding(.top, 16)
-        }.accessibilityIdentifier("donor_hero")
+                HeroTile(value: v.nProjects, label: allWater ? (v.nWater == 1 ? t("well", "kisima") : t("wells", "visima")) : (v.nProjects == 1 ? t("project", "mradi") : t("projects", "miradi")))
+                HeroTile(value: v.people, label: t("people served", "wanufaika"))
+                HeroTile(value: v.visitsYear, label: t("visits this year", "ziara mwaka huu"))
+            }.fixedSize(horizontal: false, vertical: true).frame(maxWidth: 560).padding(.top, 18)
+        }
+        .padding(.horizontal, 18).padding(.vertical, 26).frame(maxWidth: .infinity)
+        .background {
+            ZStack(alignment: .bottom) {
+                DeepBrush
+                if let hp {
+                    NetImage(url: cover(d, hp)) { Color.clear }.modifier(Drift()).clipped()
+                    LinearGradient(colors: [Color(hex: 0x04263F).opacity(0.55), Color(hex: 0x054F81).opacity(0.72), Color(hex: 0x04263F).opacity(0.94)], startPoint: .top, endPoint: .bottom)
+                }
+                Waves(back: Color.white.opacity(0.08), front: Color(hex: 0x6BBDF2).opacity(0.12)).frame(height: 70)
+            }
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+        .shadow(color: Color(hex: 0x04263F).opacity(0.2), radius: 16, y: 10)
+        .accessibilityIdentifier("donor_hero")
         if v.projects.contains(where: { $0.gps != nil }) {
             SectionHead(text: t("Your projects on the map", "Miradi yako kwenye ramani"))
             DonorMap(projects: v.projects, withCard: true, open: open)
@@ -243,31 +262,31 @@ private struct DonorHome: View {
         SectionHead(text: v.projects.count == 1 ? t("Your project", "Mradi wako") : t("Your projects", "Miradi yako"), extra: "\(v.projects.count)")
         if v.projects.isEmpty { EmptyDrop(text: t("Your projects will appear here soon.", "Miradi yako itaonekana hapa hivi karibuni.")) }
         ForEach(Array(v.projects.enumerated()), id: \.element.id) { i, p in
-            DonorCard(p: p) { open(p.id) }.padding(.bottom, 12).rise(min(i, 5))
+            DonorCard(p: p, index: i) { open(p.id) }.padding(.bottom, 18).rise(min(i, 5))
         }
     }
 }
 
 private struct HeroTile: View {
-    let value: String; let label: String
+    let value: Int; let label: String
     var body: some View {
-        VStack(alignment: .leading, spacing: 1) {
-            Text(value).font(.mont(22, .heavy)).foregroundColor(.white).lineLimit(1).minimumScaleFactor(0.6)
-            Text(label).font(.mont(11, .semibold)).foregroundColor(.white.opacity(0.9)).lineLimit(2).minimumScaleFactor(0.8)
-            Spacer(minLength: 0)
+        VStack(spacing: 2) {
+            DonorCount(value: value, font: .mont(24, .heavy), color: .white)
+            Text(label).font(.mont(12, .semibold)).foregroundColor(.white.opacity(0.9)).multilineTextAlignment(.center).lineLimit(2).minimumScaleFactor(0.8)
         }
-        .padding(.horizontal, 10).padding(.vertical, 9).frame(maxWidth: .infinity, minHeight: 76, alignment: .topLeading)
-        .background(Color.white.opacity(0.14)).clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(Color.white.opacity(0.22), lineWidth: 1))
+        .padding(.horizontal, 8).padding(.vertical, 12).frame(maxWidth: .infinity, minHeight: 82)
+        .background(Color.white.opacity(0.12)).clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(Color.white.opacity(0.22), lineWidth: 1))
     }
 }
 
+/// The status on the photo: frosted white, with a dot that breathes while it's working or being fixed.
 private struct StateBadge: View {
     let p: DProject
     var body: some View {
         let (fg, _) = stateTone(p.state)
-        HStack(spacing: 6) { Circle().fill(fg).frame(width: 8, height: 8); Text(donorStateName(p.state)).font(.lMedium).foregroundColor(fg).lineLimit(1) }
-            .padding(.horizontal, 11).padding(.vertical, 5).background(C.card).clipShape(Capsule()).shadow(color: .black.opacity(0.12), radius: 3, y: 1)
+        HStack(spacing: 7) { BreathDot(color: fg, live: p.state == "working" || p.state == "repairing"); Text(donorStateName(p.state)).font(.mont(13, .bold)).foregroundColor(fg).lineLimit(1) }
+            .padding(.leading, 11).padding(.trailing, 13).padding(.vertical, 6).background(Color.white.opacity(0.93)).clipShape(Capsule()).shadow(color: .black.opacity(0.12), radius: 4, y: 2)
     }
 }
 
@@ -284,28 +303,101 @@ private struct Fact: View {
     }
 }
 
+/// No photo yet: a deep blue scene with the project's icon floating, rings spreading, bubbles and waves.
+private struct NoPhotoScene: View {
+    let p: DProject
+    var body: some View {
+        ZStack {
+            LinearGradient(colors: [Color(hex: 0x3EA6EC), Color(hex: 0x0A78C2), Color(hex: 0x04263F)], startPoint: .topLeading, endPoint: .bottomTrailing)
+            Bubbles()
+            VStack { Spacer(); Waves(back: Color.white.opacity(0.09), front: Color(hex: 0x6BBDF2).opacity(0.14)).frame(height: 90) }
+            VStack {
+                ZStack { Ripples(); Icon(iconOf(p), size: 60, color: Color.white.opacity(0.4)).modifier(Bob()) }.frame(width: 84, height: 84).padding(.top, 46)
+                Spacer()
+            }
+        }
+    }
+}
+
+private struct PStat { let n: Int; let suffix: String; let count: Bool; let label: String }
+
+/// A project, the same card as the web donor page (designed in Figma): the photo with the name on it, three numbers,
+/// the last check as a living line, and one round arrow to open it. Everything centred.
 private struct DonorCard: View {
     @ObservedObject var d = DonorState.shared
-    let p: DProject; let open: () -> Void
+    let p: DProject; var index = 0; let open: () -> Void
+    var stats: [PStat] {
+        var a: [PStat] = []
+        if p.people > 0 { a.append(PStat(n: p.people, suffix: "", count: true, label: t("people served", "wanaohudumiwa"))) }
+        if p.pupils > 0 { a.append(PStat(n: p.pupils, suffix: "", count: true, label: t("pupils", "wanafunzi"))) }
+        if p.patients > 0 { a.append(PStat(n: p.patients, suffix: "", count: true, label: t("patients a week", "wagonjwa kwa wiki"))) }
+        if p.children > 0 { a.append(PStat(n: p.children, suffix: "", count: true, label: t("children", "watoto"))) }
+        if p.litresPerDay > 0 { a.append(PStat(n: p.litresPerDay, suffix: "\u{00A0}L", count: true, label: t("water a day", "maji kwa siku"))) }
+        if p.year > 0 { a.append(PStat(n: p.year, suffix: "", count: false, label: p.status == "Completed" ? t("completed", "ilikamilika") : t("year", "mwaka"))) }
+        return Array(a.prefix(3))
+    }
     var body: some View {
+        let (fg, bg) = stateTone(p.state)
+        let nPics = p.photos.count + p.gallery.count
+        let st = stats
         Button(action: open) {
-            VStack(alignment: .leading, spacing: 0) {
-                Color.clear.aspectRatio(16 / 9, contentMode: .fit)
-                    .overlay(NetImage(url: cover(d, p)) { Icon(iconOf(p), size: 44, color: C.blue) }.scaledToFill())
-                    .background(C.tint).clipped()
-                    .overlay(alignment: .topLeading) { StateBadge(p: p).padding(12) }
-                VStack(alignment: .leading, spacing: 3) {
-                    Text(p.title).font(.mont(17, .bold)).foregroundColor(C.ink).multilineTextAlignment(.leading)
-                    HStack(spacing: 4) { Icon("pin", size: 15, color: C.muted); Text(p.place).font(.mont(12, .semibold)).foregroundColor(C.muted) }
-                    HStack(spacing: 8) {
-                        Fact(value: p.people > 0 ? donorNum(p.people) : "—", label: t("people served", "watu wanaohudumiwa"))
-                        Fact(value: p.visits.first.map { Dates.weekday($0.at) } ?? "—", label: t("last visit", "ziara ya mwisho"))
-                    }.fixedSize(horizontal: false, vertical: true).padding(.top, 9)
-                }.padding(.horizontal, 16).padding(.top, 14).padding(.bottom, 16)
+            VStack(spacing: 0) {
+                Color.clear.aspectRatio(358.0 / 250.0, contentMode: .fit)
+                    .overlay(NetImage(url: cover(d, p)) { NoPhotoScene(p: p) }.modifier(Drift()))
+                    .overlay(LinearGradient(stops: [.init(color: Color(hex: 0x04263F).opacity(0), location: 0.35), .init(color: Color(hex: 0x021727).opacity(0.88), location: 1)], startPoint: .top, endPoint: .bottom))
+                    .modifier(Sheen(delay: 0.5 + Double(min(index, 5)) * 0.09))
+                    .clipped()
+                    .overlay(alignment: .topLeading) { StateBadge(p: p).padding(16) }
+                    .overlay(alignment: .topTrailing) {
+                        if nPics > 1 {
+                            HStack(spacing: 6) { Icon("camera", size: 15, color: .white); Text("\(nPics)").font(.mont(13, .bold)).foregroundColor(.white) }
+                                .padding(.leading, 10).padding(.trailing, 12).padding(.vertical, 6).background(Color(hex: 0x021727).opacity(0.55)).clipShape(Capsule()).padding(16)
+                                .accessibilityElement(children: .ignore).accessibilityLabel(t("\(nPics) photos", "Picha \(nPics)"))
+                        }
+                    }
+                    .overlay(alignment: .bottom) {
+                        VStack(spacing: 4) {
+                            Text(kindOf(p).uppercased()).font(.mont(12, .bold)).tracking(1).foregroundColor(.white.opacity(0.85)).multilineTextAlignment(.center)
+                            Text(p.title).font(.mont(25, .heavy)).foregroundColor(.white).multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true).shadow(color: .black.opacity(0.25), radius: 6)
+                            if !p.place.isEmpty {
+                                HStack(spacing: 5) { Icon("pin", size: 15, color: .white.opacity(0.9)); Text(p.place.nb).font(.mont(14, .semibold)).foregroundColor(.white.opacity(0.9)).lineLimit(1).minimumScaleFactor(0.75) }
+                            }
+                        }.padding(.horizontal, 20).padding(.bottom, 18)
+                    }
+                VStack(spacing: 16) {
+                    if !st.isEmpty {
+                        HStack(spacing: 0) {
+                            ForEach(Array(st.enumerated()), id: \.offset) { k, s in
+                                if k > 0 { Rectangle().fill(C.line).frame(width: 1) }
+                                VStack(spacing: 2) {
+                                    DonorCount(value: s.n, suffix: s.suffix, count: s.count)
+                                    Text(s.label).font(.mont(13, .medium)).foregroundColor(C.muted).multilineTextAlignment(.center).lineLimit(2).minimumScaleFactor(0.85)
+                                }.frame(maxWidth: .infinity).padding(.horizontal, 4)
+                            }
+                        }.fixedSize(horizontal: false, vertical: true)
+                    }
+                    if !p.health.isEmpty && !p.healthAt.isEmpty {
+                        let live = p.state == "working" && p.water
+                        let what = live ? t("Water flowing", "Maji yanatoka") : donorStateName(p.state)
+                        HStack(spacing: 10) {
+                            StateMark(k: p.state, color: donorStateColor(p.state))
+                            Text(what.nb + " · " + (t("checked ", "imekaguliwa ") + Dates.day(p.healthAt)).nb).font(.mont(14, .semibold)).foregroundColor(fg).multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
+                        }
+                        .padding(.horizontal, 12).padding(.vertical, 10).frame(maxWidth: .infinity)
+                        .background(ZStack { bg; if live { Waves(back: C.ok.opacity(0.10), front: C.blue.opacity(0.08)) } })
+                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    }
+                }.padding(.horizontal, 20).padding(.top, 18).padding(.bottom, 16)
+                Rectangle().fill(C.line).frame(height: 1)
+                HStack(spacing: 12) {
+                    Text(t("Photos, visits and repairs", "Picha, ziara na matengenezo")).font(.mont(16, .bold)).foregroundColor(C.blue).multilineTextAlignment(.center)
+                    Image(systemName: "arrow.right").font(.system(size: 17, weight: .bold)).foregroundColor(.white).modifier(Nudge())
+                        .frame(width: 44, height: 44).background(Color(hex: 0x0A78C2)).clipShape(Circle()).shadow(color: Color(hex: 0x0A78C2).opacity(0.3), radius: 7, y: 5)
+                }.frame(maxWidth: .infinity).padding(.vertical, 12).padding(.horizontal, 16)
             }
-            .background(C.card).clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).stroke(C.line, lineWidth: 1))
-            .shadow(color: Color(hex: 0x144678).opacity(0.1), radius: 6, y: 2)
+            .background(C.card).clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 28, style: .continuous).stroke(C.ink.opacity(0.06), lineWidth: 1))
+            .shadow(color: Color(hex: 0x04263F).opacity(0.10), radius: 16, y: 10)
         }.buttonStyle(Press()).accessibilityIdentifier("dcard_\(p.id)")
     }
 }
@@ -322,8 +414,8 @@ private struct DonorProjectView: View {
         Color.clear.aspectRatio(16 / 10, contentMode: .fit)
             .overlay(NetImage(url: cover(d, p)) { Icon(iconOf(p), size: 56, color: C.blue) }.scaledToFill())
             .background(C.tint).clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-        Text(p.title).font(.hMedium).foregroundColor(C.ink).padding(.top, 14).accessibilityIdentifier("dproject_title")
-        Text([kindOf(p), p.place].filter { !$0.isEmpty }.joined(separator: " · ")).font(.mont(14, .semibold)).foregroundColor(C.muted)
+        Text(p.title).font(.mont(28, .heavy)).foregroundColor(C.ink).multilineTextAlignment(.center).frame(maxWidth: .infinity).padding(.top, 14).accessibilityIdentifier("dproject_title")
+        Text([kindOf(p).nb, p.place.nb].filter { !$0.isEmpty }.joined(separator: " · ")).font(.mont(14, .semibold)).foregroundColor(C.muted).multilineTextAlignment(.center).frame(maxWidth: .infinity)
         let (fg, bg) = stateTone(p.state)
         CardV {
             HStack(alignment: .top, spacing: 12) {
@@ -489,22 +581,21 @@ private struct DonorUpdates: View {
     @ObservedObject var d = DonorState.shared
     let v: DonorView; let open: (String) -> Void
     var body: some View {
-        SectionHead(text: t("Updates", "Habari"), extra: t("newest first", "mpya kwanza"))
+        SectionHead(text: t("Updates", "Habari"), extra: t("From the RAFIKI field team, newest first", "Kutoka kwa timu ya RAFIKI, mpya kwanza"))
         if v.updates.isEmpty {
             EmptyDrop(text: t("News from your projects will appear here: visits, photos and thank-you messages.", "Habari za miradi yako zitaonekana hapa: ziara, picha na ujumbe wa shukrani."))
         } else {
             let keys = v.updates.map { String($0.at.prefix(7)) }.reduce(into: [String]()) { if !$0.contains($1) { $0.append($1) } }.prefix(12)
             ForEach(Array(keys), id: \.self) { k in
                 let us = v.updates.filter { $0.at.hasPrefix(k) }
-                CardV {
-                    Text(donorMonth(k)).font(.mont(17, .bold)).foregroundColor(C.ink)
-                    Text(donorMonthSum(us)).font(.mont(12, .semibold)).foregroundColor(C.muted).padding(.top, 3).padding(.bottom, 8)
-                    let shown = Array(us.prefix(12)).filter { v.project($0.pid) != nil && updateLook($0) != nil }
-                    ForEach(Array(shown.enumerated()), id: \.offset) { j, u in
-                        if j > 0 { Rectangle().fill(C.line).frame(height: 1).padding(.vertical, 10) }
-                        UpdateRow(u: u, p: v.project(u.pid)!, fresh: !d.seen.isEmpty && u.at > d.seen) { open(u.pid) }
-                    }
-                }.padding(.bottom, 14).accessibilityIdentifier("dmonth_\(k)")
+                VStack(spacing: 2) {
+                    Text(donorMonth(k).nb).font(.mont(18, .heavy)).foregroundColor(C.ink)
+                    Text(donorMonthSum(us)).font(.mont(12, .semibold)).foregroundColor(C.muted).multilineTextAlignment(.center)
+                }.frame(maxWidth: .infinity).padding(.top, 8).padding(.bottom, 10).accessibilityIdentifier("dmonth_\(k)")
+                let shown = Array(us.prefix(12)).filter { v.project($0.pid) != nil && updateLook($0) != nil }
+                ForEach(Array(shown.enumerated()), id: \.offset) { j, u in
+                    UpdateRow(u: u, p: v.project(u.pid)!, fresh: !d.seen.isEmpty && u.at > d.seen) { open(u.pid) }.padding(.bottom, 14).rise(min(j, 6))
+                }
             }
         }
     }
@@ -522,6 +613,25 @@ private func updateLook(_ u: DUpdate) -> (String, String, String, String)? {
     }
 }
 
+/// The update's icon: it pops in, then lives a little (a heart that beats, a spanner at work, a camera that flashes).
+private struct UpdateIcon: View {
+    let icon: String; let f: Color; let b: Color
+    var body: some View {
+        let tile = IconTile(icon: icon, tint: f, bg: b, size: 46)
+        Group {
+            switch icon {
+            case "heart": tile.modifier(Beat())
+            case "wrench": tile.modifier(AtWork(period: 2.6))
+            case "camera": tile.modifier(Flash()).clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            case "spark": tile.modifier(Bob(px: 4, period: 2.4))
+            default: tile
+            }
+        }.pop()
+    }
+}
+
+/// An update as its own card, centred: the icon, the project, the date, a headline and the story; Listen and
+/// See the project along the bottom.
 private struct UpdateRow: View {
     @ObservedObject var d = DonorState.shared
     let u: DUpdate; let p: DProject; let fresh: Bool; let open: () -> Void
@@ -530,32 +640,42 @@ private struct UpdateRow: View {
         if let (icon, tone, title, text0) = updateLook(u) {
             let text = donorStory(u).isEmpty ? text0 : donorStory(u)
             let (f, b) = stateTone(tone)
-            HStack(alignment: .top, spacing: 12) {
-                IconTile(icon: icon, tint: f, bg: b, size: 40)
-                VStack(alignment: .leading, spacing: 1) {
-                    HStack(spacing: 6) {
-                        Text(title).font(.tSmall).foregroundColor(C.ink)
+            let anniv = u.type == "anniversary"
+            VStack(spacing: 0) {
+                VStack(spacing: 0) {
+                    UpdateIcon(icon: icon, f: f, b: b)
+                    Button { open() } label: { Text(p.title).font(.mont(14, .bold)).foregroundColor(C.blue2).multilineTextAlignment(.center).padding(.horizontal, 6).padding(.vertical, 2) }
+                        .buttonStyle(.plain).padding(.top, 10)
+                    HStack(spacing: 8) {
+                        Text(Dates.weekday(u.at).nb).font(.mont(13, .medium)).foregroundColor(C.muted)
                         if fresh { Tag(t("NEW", "MPYA"), bg: C.named("coral").bg, fg: C.named("coral").fg) }
                     }
-                    Text(p.title + " · " + Dates.weekday(u.at)).font(.mont(11, .semibold)).foregroundColor(C.muted)
-                    if !text.isEmpty { Text(text).font(.bLarge).foregroundColor(C.text).padding(.top, 4).fixedSize(horizontal: false, vertical: true) }
-                    let thumbs = u.type == "photos" ? Array(u.photos.prefix(4)) : (u.type == "thanks" && u.media != "video" && !u.id.isEmpty) ? [u.id] : []
+                    Text(title).font(.mont(20, .heavy)).foregroundColor(C.ink).multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true).padding(.top, 12)
+                    if !text.isEmpty { Text(text).font(.bLarge).foregroundColor(C.text).multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true).padding(.top, 6) }
+                    let thumbs = u.type == "photos" ? Array(u.photos.prefix(3)) : (u.type == "thanks" && u.media != "video" && !u.id.isEmpty) ? [u.id] : []
                     if !thumbs.isEmpty {
-                        HStack(spacing: 6) {
+                        HStack(spacing: 8) {
                             ForEach(Array(thumbs.enumerated()), id: \.offset) { k, id in
                                 Button { viewer = ViewerPhotos(list: thumbs.map { (d.photo($0, w: 1600), p.title + " · " + Dates.weekday(u.at)) }, at: k, play: false) } label: {
-                                    NetImage(url: d.photo(id, w: 480)) { Color.clear }.scaledToFill().frame(width: 72, height: 72).background(C.tint).clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                                }.buttonStyle(Press()).accessibilityLabel(t("Open photo", "Fungua picha"))
+                                    Color.clear.aspectRatio(100.0 / 84.0, contentMode: .fit).frame(maxWidth: 120)
+                                        .overlay(NetImage(url: d.photo(id, w: 480)) { Color.clear }.scaledToFill())
+                                        .background(C.tint).clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                                }.buttonStyle(Press()).accessibilityLabel(t("Open photo", "Fungua picha")).pop()
                             }
-                        }.padding(.top, 8)
+                        }.frame(maxWidth: .infinity).padding(.top, 14)
                     }
-                    HStack(spacing: 8) {
-                        Btn(t("See the project", "Ona mradi"), icon: "chev", light: true, small: true) { open() }
-                        SpeakBtn(key: "u_" + u.type + u.pid + u.at, text: p.title + ". " + title + ". " + Dates.weekday(u.at) + ". " + text, label: t("Listen", "Sikiliza"), small: true, wide: false)
-                    }.padding(.top, 8)
-                }
-                Spacer(minLength: 0)
-            }.accessibilityIdentifier("dupd_\(u.type)_\(u.pid)")
+                }.padding(.horizontal, 20).padding(.top, 20).padding(.bottom, 16).frame(maxWidth: .infinity)
+                Rectangle().fill(anniv ? Color(hex: 0x8A5200).opacity(0.15) : C.line).frame(height: 1)
+                HStack(spacing: 10) {
+                    SpeakBtn(key: "u_" + u.type + u.pid + u.at, text: p.title + ". " + title + ". " + Dates.weekday(u.at) + ". " + text, label: t("Listen", "Sikiliza"), small: true, wide: false)
+                    Btn(t("See the project", "Ona mradi"), icon: "chev", light: true, small: true) { open() }
+                }.frame(maxWidth: .infinity).padding(.horizontal, 16).padding(.vertical, 10)
+            }
+            .background(anniv ? AnyShapeStyle(LinearGradient(colors: [Color(hex: 0xFFF6E0), Color(hex: 0xFDE7C2)], startPoint: .topLeading, endPoint: .bottomTrailing)) : AnyShapeStyle(C.card))
+            .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 28, style: .continuous).stroke(C.ink.opacity(0.06), lineWidth: 1))
+            .shadow(color: Color(hex: 0x04263F).opacity(0.08), radius: 14, y: 8)
+            .accessibilityIdentifier("dupd_\(u.type)_\(u.pid)")
             .fullScreenCover(item: $viewer) { PhotoViewer(v: $0) }
         }
     }
