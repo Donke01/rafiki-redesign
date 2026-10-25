@@ -106,7 +106,6 @@ func donorStage(_ s: String) -> String {
 }
 
 /// Donor mode's state: who is signed in, their projects, and signing in and out.
-@MainActor
 final class DonorState: ObservableObject {
     static let shared = DonorState()
     private let d = UserDefaults(suiteName: "rafiki-donor") ?? .standard
@@ -134,8 +133,8 @@ final class DonorState: ObservableObject {
     }
 
     // ---- /api/donor ----
-    func photo(_ id: String, w: Int = 960) -> String { "\(server)/api/donor?photo=\(Api.enc(id))&w=\(w)&t=\(Api.enc(token))" }
-    func board(_ id: String, w: Int = 960) -> String { "\(server)/api/photo/\(Api.enc(id))?w=\(w)" }
+    func photo(_ id: String, w: Int = 960) -> String { "\(AppModel.server)/api/donor?photo=\(Api.enc(id))&w=\(w)&t=\(Api.enc(token))" }
+    func board(_ id: String, w: Int = 960) -> String { "\(AppModel.server)/api/photo/\(Api.enc(id))?w=\(w)" }
     private func call(_ method: String, _ path: String, _ body: JSON?) async -> Reply {
         var h = ["Accept": "application/json"]
         if !token.isEmpty { h["X-Donor-Token"] = token }
@@ -146,7 +145,7 @@ final class DonorState: ObservableObject {
     }
 
     /// Signs in with a link, token or code. Returns an error text, or nil when in.
-    func signIn(_ typed: String) async -> String? {
+    @MainActor func signIn(_ typed: String) async -> String? {
         guard let e = DonorEntry.read(typed) else {
             return t("That doesn’t look like a donor code or link. A code has 10 letters and numbers, like K7QM4-XR9TB.", "Hiyo haionekani kama msimbo au kiungo cha mfadhili. Msimbo una herufi na namba 10, mf. K7QM4-XR9TB.")
         }
@@ -166,25 +165,25 @@ final class DonorState: ObservableObject {
         return nil
     }
     /// Fresh data (bg: the quiet check that doesn't count as opening the page). A switched-off link signs out.
-    @discardableResult func refresh(bg: Bool = false) async -> Reply {
+    @MainActor @discardableResult func refresh(bg: Bool = false) async -> Reply {
         if token.isEmpty { return Reply(ok: false, status: 401, json: [:], reason: "link") }
         let r = await call("GET", "/api/donor" + (bg ? "?bg=1" : ""), nil)
         if r.ok { accept(r.json) } else if r.status == 404 && r.reason == "link" { switchedOff() }
         return r
     }
-    private func accept(_ j: JSON) {
+    @MainActor private func accept(_ j: JSON) {
         if let data = try? JSONSerialization.data(withJSONObject: j) { try? data.write(to: file, options: .atomic) }
         let v = DonorView.from(j); view = v
         if seen.isEmpty { seen = v.newest; d.set(seen, forKey: "seen") }
         if notifiedAt.isEmpty { notifiedAt = v.newest }
     }
     private func clear() { ["token", "seen", "notifiedAt"].forEach { d.removeObject(forKey: $0) }; try? FileManager.default.removeItem(at: file) }
-    func switchedOff() { clear(); d.set(true, forKey: "gone"); gone = true; view = nil; on = false; seen = "" }
-    func signOut() { clear(); d.set(false, forKey: "gone"); gone = false; view = nil; on = false; seen = "" }
-    func dismissGone() { d.set(false, forKey: "gone"); gone = false }
-    func markSeen() { if let n = view?.newest { seen = n; d.set(n, forKey: "seen") } }
+    @MainActor func switchedOff() { clear(); d.set(true, forKey: "gone"); gone = true; view = nil; on = false; seen = "" }
+    @MainActor func signOut() { clear(); d.set(false, forKey: "gone"); gone = false; view = nil; on = false; seen = "" }
+    @MainActor func dismissGone() { d.set(false, forKey: "gone"); gone = false }
+    @MainActor func markSeen() { if let n = view?.newest { seen = n; d.set(n, forKey: "seen") } }
     /// E-mail updates on/off. Returns an error text or nil.
-    func setMail(_ on: Bool) async -> String? {
+    @MainActor func setMail(_ on: Bool) async -> String? {
         let r = await call("POST", "/api/donor", ["action": "mail", "on": on])
         if !r.ok { if r.status == 404 && r.reason == "link" { switchedOff() }; return why(r, false) }
         guard let me = r.json.obj("me"), let data = try? Data(contentsOf: file), var j = (try? JSONSerialization.jsonObject(with: data)) as? JSON else { return nil }
