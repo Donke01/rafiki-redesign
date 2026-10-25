@@ -131,7 +131,7 @@ final class DonorMapCtl: ObservableObject {
         guard let mv else { return }
         let cs = pts.compactMap { $0.gps }.map { CLLocationCoordinate2D(latitude: $0.lat, longitude: $0.lng) }
         guard !cs.isEmpty else { return }
-        if cs.count == 1 { mv.setRegion(MKCoordinateRegion(center: cs[0], latitudinalMeters: 3000, longitudinalMeters: 3000), animated: anim); return }
+        if cs.count == 1 { mv.setRegion(MKCoordinateRegion(center: cs[0], latitudinalMeters: 500, longitudinalMeters: 500), animated: anim); return }
         var rect = MKMapRect.null
         for c in cs { let pnt = MKMapPoint(c); rect = rect.union(MKMapRect(x: pnt.x, y: pnt.y, width: 0, height: 0)) }
         mv.setVisibleMapRect(rect, edgePadding: UIEdgeInsets(top: 80, left: 70, bottom: 70, right: 80), animated: anim)
@@ -139,7 +139,8 @@ final class DonorMapCtl: ObservableObject {
     func fly(_ p: DProject) {
         guard let mv, let g = p.gps else { return }
         let c = CLLocationCoordinate2D(latitude: g.lat, longitude: g.lng)
-        let span = min(mv.region.span.latitudeDelta, 0.03)
+        // straight down to the exact spot: the building itself on the satellite photos
+        let span = mv.mapType == .standard ? 0.0025 : 0.0012
         if Motion.on { UIView.animate(withDuration: 1.2) { mv.setRegion(MKCoordinateRegion(center: c, span: MKCoordinateSpan(latitudeDelta: span, longitudeDelta: span)), animated: true) } }
         else { mv.setRegion(MKCoordinateRegion(center: c, span: MKCoordinateSpan(latitudeDelta: span, longitudeDelta: span)), animated: false) }
     }
