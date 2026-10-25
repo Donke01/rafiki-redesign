@@ -307,6 +307,85 @@ html.ts-xl{--fs:1.38}
 .dbar .backbtn{display:inline-flex;align-items:center;gap:8px;min-height:52px;padding:0 18px 0 12px;border-radius:16px;border:1px solid var(--edge);background:#FFFFFF;color:var(--ink);font-weight:800;font-size:calc(17px*var(--fs));cursor:pointer;flex:0 0 auto}
 .dbar .backbtn svg{width:22px;height:22px}
 @media (prefers-reduced-motion:reduce){.mpin.k-working .dot::after{display:none}}
+/* ---- polish: calm, roomy, one clear action per card ---- */
+html{--fs:1.04}html.ts-l{--fs:1.16}html.ts-xl{--fs:1.3}
+.aa{display:inline-flex;align-items:center;justify-content:center;gap:1px;width:46px;height:46px;border-radius:50%;border:1px solid var(--edge);background:#FFFFFF;color:var(--ink);font-weight:800;cursor:pointer;line-height:1;flex:0 0 auto}
+.aa small{font-size:13px}.aa span{font-size:19px}
+.aa:hover{background:var(--tint)}
+.hero .acts .listen{min-height:48px;padding:0 18px;font-size:calc(15px*var(--fs))}
+/* the map card: map on top, the chosen project under it, all one piece */
+.mapwrap{border-radius:var(--R);overflow:hidden;background:var(--card);border:1px solid var(--line);box-shadow:0 18px 40px -24px rgba(4,38,63,.35)}
+.mapwrap .mapbox{border:0;border-radius:0}
+.mtog{top:14px;left:14px;padding:4px;border-radius:999px;box-shadow:0 6px 18px rgba(4,38,63,.18)}
+.mtog button{min-height:42px;padding:0 16px;border-radius:999px;font-size:calc(14px*var(--fs))}
+.mzoom{top:14px;right:14px;gap:0;border-radius:18px;overflow:hidden;box-shadow:0 6px 18px rgba(4,38,63,.18);background:#FFFFFF}
+.mzoom button{width:54px;height:54px;border:0;border-radius:0;box-shadow:none;font-size:28px;font-weight:600}
+.mzoom button+button{border-top:1px solid var(--line)}
+.mtools{position:absolute;left:14px;bottom:14px;z-index:1000;display:flex;gap:8px;flex-wrap:wrap}
+.mtools button{display:inline-flex;align-items:center;gap:7px;min-height:44px;padding:0 15px;border-radius:999px;border:0;background:rgba(255,255,255,.95);color:var(--ink);font-weight:700;font-size:calc(14px*var(--fs));box-shadow:0 6px 18px rgba(4,38,63,.2);cursor:pointer}
+.mtools svg{width:17px;height:17px}
+.mapbox.full .mtools{bottom:calc(92px + env(safe-area-inset-bottom,0px))}
+.mbar{display:none}
+.legend{background:none;border:0;padding:12px 4px 0;gap:6px 16px;font-size:calc(13px*var(--fs));color:var(--muted)}
+.legend i{width:14px;height:14px;border-width:3.5px}
+.mcard{border:0;border-top:1px solid var(--line);border-radius:0;padding:20px 18px;gap:12px}
+.mcard .mtop{display:grid;grid-template-columns:88px 1fr;gap:14px;align-items:center}
+.mcard .mtop img,.mcard .mtop .noimg{width:88px;height:88px;border-radius:20px;object-fit:cover;background:var(--tint);display:flex;align-items:center;justify-content:center;color:var(--blue)}
+.mcard .mtop .noimg svg{width:36px;height:36px}
+.mcard h3{font-size:calc(21px*var(--fs));margin:6px 0 2px}
+.mcard .wh{font-size:calc(14px*var(--fs))}
+.mcard .say{font-size:calc(18px*var(--fs));line-height:1.55}
+.mcard .row{display:flex;gap:10px;align-items:center}
+.mcard .row .btn{flex:1;min-height:54px;border-radius:999px}
+.speak{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:54px;padding:0 18px;border-radius:999px;border:1px solid var(--edge);background:#FFFFFF;color:var(--ink);font-weight:700;font-size:calc(15px*var(--fs));cursor:pointer;white-space:nowrap}
+.speak svg{width:20px;height:20px;color:var(--blue2)}
+.speak.reading{background:var(--tint);border-color:var(--blue);color:var(--blue2)}
+.pager{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:4px}
+.pager button{width:52px;height:52px;border-radius:50%;border:1px solid var(--edge);background:#FFFFFF;color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .12s,background .2s}
+.pager button:hover{background:var(--tint)}
+.pager button:active{transform:scale(.94)}
+.pager button svg{width:22px;height:22px}
+.pager span{font-weight:700;color:var(--muted);font-size:calc(15px*var(--fs))}
+.pager .dots{display:flex;gap:6px;justify-content:center;margin-top:4px}
+.pager .dots i{width:7px;height:7px;border-radius:50%;background:var(--edge)}
+.pager .dots i.on{background:var(--blue);width:20px;border-radius:4px}
+.gm{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:calc(14px*var(--fs));color:var(--blue2);text-decoration:none;justify-self:center;min-height:40px}
+.gm svg{width:17px;height:17px}
+/* updates: a calm card, the project's name as the link, Listen as a quiet text button */
+.up{padding:16px;gap:14px;border-radius:22px}
+.up .pt{font-size:calc(17px*var(--fs));background:none;border:0;padding:0;cursor:pointer;color:var(--ink);text-align:left;font-weight:800}
+.up .pt:hover{color:var(--blue2);text-decoration:underline}
+.up>div>b{font-size:calc(14px*var(--fs));font-weight:700;color:var(--blue2);margin-top:3px}
+.up .story{font-size:calc(16.5px*var(--fs));margin-top:6px}
+.up .ua{gap:4px 18px;margin-top:8px}
+.up .ua button{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0;border:0;background:none;color:var(--blue2);font-weight:700;font-size:calc(15px*var(--fs));cursor:pointer}
+.up .ua button svg{width:18px;height:18px}
+.up .ua button.reading{color:var(--ink)}
+/* talk to RAFIKI: one tidy panel of three rows */
+.talk{display:grid;gap:0;border-radius:22px;overflow:hidden;background:#FFFFFF;border:1px solid var(--line)}
+.talk a{display:flex;align-items:center;gap:14px;padding:14px 16px;min-height:68px;text-decoration:none;color:var(--ink)}
+.talk a+a{border-top:1px solid var(--line)}
+.talk a:hover{background:var(--tint)}
+.talk .ti{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:0 0 auto;background:var(--tint);color:var(--blue2)}
+.talk .ti svg{width:21px;height:21px}
+.talk .wa .ti{background:#DDF4E7;color:#1F8F4E}
+.talk b{display:block;font-size:calc(16px*var(--fs))}
+.talk small{display:block;font-weight:600;color:var(--muted);font-size:calc(14px*var(--fs))}
+.talk .go{margin-left:auto;color:var(--muted)}
+.talk .go svg{width:18px;height:18px}
+.band .side{display:grid;gap:12px}
+.band .talk{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.16)}
+.band .talk a{color:#FFFFFF}.band .talk a+a{border-color:rgba(255,255,255,.14)}.band .talk a:hover{background:rgba(255,255,255,.08)}
+.band .talk small,.band .talk .go{color:#B9D6EC}
+.band .talk .ti{background:rgba(255,255,255,.12);color:#FFFFFF}.band .talk .wa .ti{background:#1F8F4E;color:#FFFFFF}
+.band .side>.btn{min-height:56px}
+/* project page */
+.dbar .backbtn{min-height:46px;border-radius:999px;padding:0 16px 0 10px;font-size:calc(15px*var(--fs))}
+.gwrap{position:relative}
+.gwrap .slideshow{position:absolute;right:28px;top:12px;margin:0;min-height:46px;padding:0 16px;font-size:calc(14px*var(--fs));background:rgba(4,38,63,.82);box-shadow:0 6px 16px rgba(0,0,0,.25)}
+.dt .st{gap:8px 12px}
+.dt .say2{font-size:calc(18.5px*var(--fs));line-height:1.55;margin:14px 0 0}
+.dt .st .speak{min-height:44px;padding:0 14px;font-size:calc(14px*var(--fs))}
 /* printed impact report (Download impact report → Save as PDF) */
 #report{display:none}
 .lh-wrap,.lh-wrap>tbody,.lh-wrap>tbody>tr,.lh-wrap>tbody>tr>td{display:block;padding:0}.lh-wrap>tfoot{display:none}
@@ -352,8 +431,7 @@ html.ts-xl{--fs:1.38}
     <a class="home" href="/" aria-label="RAFIKI Outreach home page"><img src="/img/logo-dark-bold.png" alt="RAFIKI Outreach" width="88" height="30"></a>
     <span class="sp"></span>
     <span class="priv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></svg>Private page, just for you</span>
-    <span class="tsz-l" aria-hidden="true">Text size</span>
-    <div class="tsz" role="group" aria-label="Text size"><button type="button" data-ts="" aria-label="Normal text">A</button><button type="button" data-ts="ts-l" aria-label="Large text">A</button><button type="button" data-ts="ts-xl" aria-label="Larger text">A</button></div>
+    <button class="aa" type="button" id="aa" aria-label="Text size: normal. Tap for bigger text"><small>A</small><span>A</span></button>
     <a class="btn sm" href="/donate" id="giveTop">Give again</a>
   </div>
 </header>
@@ -408,7 +486,8 @@ html.ts-xl{--fs:1.38}
     speak: '<path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/>',
     phone: '<path d="M6.5 3.5h3l1.5 4.5-2 1.5a11 11 0 0 0 5.5 5.5l1.5-2 4.5 1.5v3a2 2 0 0 1-2 2A16.5 16.5 0 0 1 4.5 5.5a2 2 0 0 1 2-2z"/>',
     chat: '<path d="M20 11.5a8 8 0 0 1-11.8 7L4 19.5l1.1-4A8 8 0 1 1 20 11.5z"/>',
-    play: '<path d="M7 4.5v15l12-7.5z"/>'
+    play: '<path d="M7 4.5v15l12-7.5z"/>',
+    expand: '<path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/>'
   };
   function ic(n) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICON[n] || ICON.drop) + '</svg>'; }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
@@ -473,7 +552,7 @@ html.ts-xl{--fs:1.38}
       '<p class="org">' + esc([D.donor.group || D.donor.viewer !== D.donor.name ? D.donor.name : '', D.donor.org && D.donor.org !== D.donor.name ? D.donor.org : ''].filter(Boolean).join(' · ') || 'Thank you for giving with RAFIKI Outreach') + '</p>' +
       '<p class="say">' + say + '</p></div>' +
       '<div class="stats">' + stats.slice(0, 4).join('') + '</div>' +
-      '<div class="acts"><a class="btn white" href="#mapsec">' + ic('map') + 'See them on the map</a><button class="btn ghost" type="button" data-say="' + esc('Welcome, ' + first(who) + '. ' + plain(say)) + '">' + ic('speak') + 'Read it to me</button><button class="btn ghost" type="button" id="pdf">' + ic('down') + 'Download impact report</button>' +
+      '<div class="acts"><a class="btn white" href="#mapsec">' + ic('map') + 'See them on the map</a><button class="btn ghost listen" type="button" data-say="' + esc('Welcome, ' + first(who) + '. ' + plain(say)) + '">' + ic('speak') + 'Listen</button><button class="btn ghost" type="button" id="pdf">' + ic('down') + 'Download impact report</button>' +
       // feat-donorapp: on a phone, the same private link opens the RAFIKI Pin app in donor mode (Android App Link; the web app on an iPhone)
       (window.matchMedia && matchMedia('(pointer: coarse)').matches ? '<a class="btn ghost" id="inApp" href="https://pin.rafikioutreach.org/pin#donor=' + encodeURIComponent(TOKEN) + '" rel="noreferrer">' + ic('drop') + 'Open in the RAFIKI app</a>' : '') + '</div></section>';
     anni.forEach(function (p) {
@@ -483,21 +562,21 @@ html.ts-xl{--fs:1.38}
         '<p>Since ' + esc(day(p.done)) + ', about ' + n(p.impact.people) + ' people have had clean water close to home' + (p.impact.litresPerDay ? ', some ' + n(p.impact.litresPerDay) + ' litres a day' : '') + '. Thank you!</p>' +
         '<button class="btn sm" type="button" data-open="' + esc(p.id) + '">See the project</button></div></section>';
     });
-    h += '<section class="blk" id="mapsec" aria-labelledby="hMap"><div class="sh"><div><h2 id="hMap">Your projects on the map</h2><p>Tap a pin, or use Previous and Next under the map.</p></div></div>' +
-      '<div class="mapbox" id="mapbox"><div id="map" role="region" aria-label="Map of your projects"></div>' +
+    h += '<section class="blk" id="mapsec" aria-labelledby="hMap"><div class="sh"><div><h2 id="hMap">Your projects on the map</h2><p>Tap a pin to go to it, or step through them below the map.</p></div></div>' +
+      '<div class="mapwrap"><div class="mapbox" id="mapbox"><div id="map" role="region" aria-label="Map of your projects"></div>' +
       '<div class="mtog" role="group" aria-label="Map style"><button type="button" data-l="street" aria-pressed="true">Map</button><button type="button" data-l="sat" aria-pressed="false">Satellite</button></div>' +
       '<div class="mzoom"><button type="button" id="zin" aria-label="Zoom in">+</button><button type="button" id="zout" aria-label="Zoom out">−</button></div>' +
+      '<div class="mtools"><button type="button" id="fit">' + ic('fit') + 'Show all</button><button type="button" id="bigmap">' + ic('expand') + 'Full screen</button></div>' +
       '<button class="btn mclose" type="button" id="mclose">' + ic('x') + 'Close map</button></div>' +
-      '<div class="mbar"><button class="btn light" type="button" id="fit">' + ic('fit') + 'Show all</button><button class="btn light" type="button" id="bigmap">' + ic('fit') + 'Bigger map</button></div>' +
-      '<div class="legend" aria-label="What the colours mean">' + ['working', 'repairing', 'notworking', 'building', 'planned', 'done'].filter(function (k) { return P.some(function (p) { return stKey(p) === k; }); }).map(function (k) { return '<span style="--c:' + ST[k][2] + '"><i' + (k === 'planned' ? ' class="dash"' : '') + '></i>' + (k === 'done' ? 'Completed, not checked yet' : ST[k][0]) + '</span>'; }).join('') + '</div>' +
-      '<div class="mcard" id="mcard" aria-live="polite"></div></section>';
+      '<div class="mcard" id="mcard" aria-live="polite"></div></div>' +
+      '<div class="legend" aria-label="What the colours mean">' + ['working', 'repairing', 'notworking', 'building', 'planned', 'done'].filter(function (k) { return P.some(function (p) { return stKey(p) === k; }); }).map(function (k) { return '<span style="--c:' + ST[k][2] + '"><i' + (k === 'planned' ? ' class="dash"' : '') + '></i>' + (k === 'done' ? 'Completed, not checked yet' : ST[k][0]) + '</span>'; }).join('') + '</div></section>';
     h += '<section class="blk" aria-labelledby="hPj"><div class="sh"><div><h2 id="hPj">' + (P.length === 1 ? 'Your project' : 'Your ' + P.length + ' projects') + '</h2><p>Tap one for photos, visits and repairs.</p></div></div><div class="grid">' + P.map(card).join('') + '</div></section>';
     var cnt = function (f) { return D.updates.filter(function (u) { return inF(u, f); }).length; };
     h += '<section class="blk" aria-labelledby="hUp"><div class="sh"><div><h2 id="hUp">Latest updates</h2><p>From the RAFIKI field team, newest first.</p></div></div>' +
       '<div class="chips" role="group" aria-label="Show">' + [['all', 'All'], ['visit', 'Visits'], ['repair', 'Repairs'], ['story', 'Stories']].map(function (f) { return '<button class="chip" type="button" data-f="' + f[0] + '" aria-pressed="' + (filter === f[0]) + '">' + f[1] + '<i>' + cnt(f[0]) + '</i></button>'; }).join('') + '</div>' +
       '<ul class="feed" id="feed"></ul><button class="btn light more hidden" type="button" id="more">Show more</button></section>';
     h += '<section class="band" aria-labelledby="hHelp"><div><h2 id="hHelp">Thank you, ' + esc(first(who)) + '.</h2><p>Every well and classroom here started with a gift like yours. Ready to bring water to the next community?</p></div>' +
-      '<div class="talk"><a class="btn white" href="/donate">' + ic('drop') + 'Fund the next well</a>' + talk(null) + '</div></section>';
+      '<div class="side"><a class="btn white" href="/donate">' + ic('drop') + 'Fund the next well</a>' + talk(null) + '</div></section>';
     $('main').innerHTML = h; $('main').setAttribute('aria-busy', 'false'); $('foot').hidden = false;
     countUp($('main'));
     drawFeed(); drawMap();
@@ -530,12 +609,10 @@ html.ts-xl{--fs:1.38}
       '<span class="go">Photos, visits and repairs ' + ic('arrow') + '</span></span></button>';
   }
   // call, WhatsApp or e-mail the office (the number shows too, for phones that can't place a call from a page)
-  function talk(p, light) {
-    var cls = light ? 'btn light' : 'btn ghost';
+  function talk(p) {
     var wa = 'https://wa.me/' + WHATSAPP.replace(/\D/g, '') + '?text=' + encodeURIComponent('Hello RAFIKI, this is ' + (D.donor.viewer || D.donor.name) + (p ? '. A question about ' + p.title + ': ' : '. '));
-    return '<a class="' + cls + '" href="tel:' + PHONE.replace(/[^+\d]/g, '') + '">' + ic('phone') + '<span>Call RAFIKI<small>' + esc(PHONE) + '</small></span></a>' +
-      '<a class="btn wa" href="' + esc(wa) + '" target="_blank" rel="noopener noreferrer">' + ic('chat') + '<span>WhatsApp us<small>' + esc(WHATSAPP) + '</small></span></a>' +
-      '<a class="' + cls + '" href="' + esc(mailto(p)) + '">' + ic('mail') + '<span>E-mail us<small>' + CONTACT + '</small></span></a>';
+    var row = function (href, cls, icon, title, sub, ext) { return '<a class="' + cls + '" href="' + esc(href) + '"' + (ext ? ' target="_blank" rel="noopener noreferrer"' : '') + '><span class="ti">' + ic(icon) + '</span><span><b>' + title + '</b><small>' + esc(sub) + '</small></span><span class="go">' + ic('arrow') + '</span></a>'; };
+    return '<div class="talk">' + row('tel:' + PHONE.replace(/[^+\d]/g, ''), '', 'phone', 'Call RAFIKI', PHONE) + row(wa, 'wa', 'chat', 'WhatsApp us', WHATSAPP, true) + row(mailto(p), '', 'mail', 'E-mail us', CONTACT) + '</div>';
   }
   function mailto(p) {
     var subj = 'Question about ' + (p ? p.title : 'my RAFIKI projects') + ' (' + D.donor.name + ')';
@@ -617,15 +694,13 @@ html.ts-xl{--fs:1.38}
     Object.keys(markers).forEach(function (x) { var el = markers[x].getElement(); if (el && el.firstChild) el.firstChild.classList.toggle('on', x === id); markers[x].setZIndexOffset(x === id ? 1000 : 0); });
     stopSpeaking();
     var say = stateSay(p);
-    $('mcard').innerHTML = '<div class="hd">' + (img ? '<img src="' + esc(img) + '" alt="">' : '<span class="noimg">' + ic(typeIcon(p)) + '</span>') +
-      '<div><h3>' + esc(p.title) + '</h3><div class="wh">' + esc((KIND[p.type] || p.type) + ' · ' + place(p)) + '</div></div></div>' +
-      '<div>' + badge(p) + '</div>' +
+    $('mcard').innerHTML = '<div class="mtop">' + (img ? '<img src="' + esc(img) + '" alt="">' : '<span class="noimg">' + ic(typeIcon(p)) + '</span>') +
+      '<div>' + badge(p) + '<h3>' + esc(p.title) + '</h3><div class="wh">' + esc((KIND[p.type] || p.type) + ' · ' + place(p)) + '</div></div></div>' +
       '<p class="say">' + say + '</p>' +
-      '<div class="acts">' + (MP.length > 1 ? '<button class="btn light" type="button" id="mprev">' + ic('back') + 'Previous</button><button class="btn light" type="button" id="mnext">Next' + ic('arrow') + '</button>' : '') +
-      '<button class="btn wide" type="button" data-open="' + esc(p.id) + '">See this project' + ic('arrow') + '</button>' +
-      '<button class="btn light wide" type="button" data-say="' + esc(p.title + '. ' + ST[k][0] + '. ' + plain(say)) + '">' + ic('speak') + 'Read it to me</button>' +
-      '<a class="btn light wide" href="' + esc(gmaps(p)) + '" target="_blank" rel="noopener noreferrer">' + ic('map') + 'Open in Google Maps</a></div>' +
-      (MP.length > 1 ? '<div class="cnt">Project ' + (i + 1) + ' of ' + MP.length + '</div>' : '');
+      '<div class="row"><button class="btn" type="button" data-open="' + esc(p.id) + '">See this project' + ic('arrow') + '</button>' +
+      '<button class="speak" type="button" data-say="' + esc(p.title + '. ' + ST[k][0] + '. ' + plain(say)) + '">' + ic('speak') + 'Listen</button></div>' +
+      (MP.length > 1 ? '<div class="pager"><button type="button" id="mprev" aria-label="Previous project">' + ic('back') + '</button><div><span>Project ' + (i + 1) + ' of ' + MP.length + '</span><div class="dots" aria-hidden="true">' + MP.map(function (_, j) { return '<i' + (j === i ? ' class="on"' : '') + '></i>'; }).join('') + '</div></div><button type="button" id="mnext" aria-label="Next project">' + ic('arrow') + '</button></div>' : '') +
+      '<a class="gm" href="' + esc(gmaps(p)) + '" target="_blank" rel="noopener noreferrer">' + ic('map') + 'Open in Google Maps</a>';
     if ($('mprev')) { $('mprev').addEventListener('click', function () { pick(MP[(cur - 1 + MP.length) % MP.length].id, true); }); $('mnext').addEventListener('click', function () { pick(MP[(cur + 1) % MP.length].id, true); }); }
     // straight down to the exact spot: the building itself on the satellite photos
     if (fly && map) map.flyTo(p.gps, map.hasLayer(layers.sat) ? 19 : 18, { duration: STILL ? 0 : 1.6 });
@@ -643,7 +718,7 @@ html.ts-xl{--fs:1.38}
     stopSpeaking();
     var u = new SpeechSynthesisUtterance(btn.getAttribute('data-say')); u.rate = 0.9; u.lang = 'en-GB';
     btn._label = btn.innerHTML; speakingBtn = btn;
-    btn.classList.add('reading'); btn.innerHTML = '<span class="waves" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Stop reading';
+    btn.classList.add('reading'); btn.innerHTML = '<span class="waves" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Stop';
     u.onend = u.onerror = function () { if (speakingBtn === btn) stopSpeaking(); };
     speechSynthesis.speak(u);
   }
@@ -734,9 +809,9 @@ html.ts-xl{--fs:1.38}
     else if (u.type === 'thanks') { title = 'A thank-you from the community'; story = u.media === 'video' ? 'The community recorded a thank-you video for you.' : 'The community sent you a thank-you photo.'; body = (u.caption ? '<blockquote>“' + esc(u.caption) + '”</blockquote>' : '') + media(u, 480); }
     else if (u.type === 'anniversary') { title = (u.years === 1 ? 'One year' : u.years + ' years') + ' of clean water!'; story = 'About ' + n(p.impact.people) + ' people have had water close to home for ' + (u.years === 1 ? 'a whole year' : u.years + ' years') + '. Thank you for making it happen.'; }
     var listen = p.title + '. ' + title + '. ' + day(u.at) + '. ' + story + (u.type === 'thanks' && u.caption ? ' They wrote: ' + u.caption : '');
-    return '<li class="up' + (u.type === 'anniversary' ? ' anniv' : '') + '"><span class="ic" style="--b:' + ui[1] + ';--c:' + ui[2] + '">' + ic(ui[0]) + '</span><div><div class="hd"><span class="pt">' + esc(p.title) + '</span><time datetime="' + esc(u.at) + '">' + esc(day(u.at)) + '</time></div>' +
+    return '<li class="up' + (u.type === 'anniversary' ? ' anniv' : '') + '"><span class="ic" style="--b:' + ui[1] + ';--c:' + ui[2] + '">' + ic(ui[0]) + '</span><div><div class="hd"><button class="pt" type="button" data-open="' + esc(p.id) + '">' + esc(p.title) + '</button><time datetime="' + esc(u.at) + '">' + esc(day(u.at)) + '</time></div>' +
       '<b>' + esc(title) + '</b>' + (u.type === 'story' ? '' : '<p class="story">' + esc(story) + '</p>') + body +
-      '<div class="ua"><button class="btn light" type="button" data-open="' + esc(p.id) + '">See the project' + ic('arrow') + '</button><button class="btn light" type="button" data-say="' + esc(listen) + '">' + ic('speak') + 'Listen</button></div></div></li>';
+      '<div class="ua"><button type="button" data-say="' + esc(listen) + '">' + ic('speak') + 'Listen</button><button type="button" data-open="' + esc(p.id) + '">See the project' + ic('arrow') + '</button></div></div></li>';
   }
   function media(x, w) {
     return x.media === 'video' ? '<video controls playsinline preload="metadata" src="' + esc(visitPhoto(x.id)) + '"></video>' : '<img class="thx" src="' + esc(visitPhoto(x.id, w)) + '" alt="Thank-you photo" loading="lazy" data-zoom="' + esc(visitPhoto(x.id, 1600)) + '"' + (x.caption ? ' data-cap="' + esc('“' + x.caption + '”') + '"' : '') + '>';
@@ -754,11 +829,10 @@ html.ts-xl{--fs:1.38}
     if (push !== false && location.hash !== '#p/' + id) history.pushState(null, '', '#p/' + id);
     var pics = p.photos.map(function (x) { return { src: boardPhoto(x, 1600), cap: '' }; }).concat(p.gallery.map(function (g) { return { src: visitPhoto(g.id, 1600), cap: (g.label ? g.label.charAt(0).toUpperCase() + g.label.slice(1) + ' · ' : '') + day(g.at) }; }));
     var h = '<div class="dbar"><button class="backbtn" type="button" data-close>' + ic('back') + 'Back</button><b>' + esc(p.title) + '</b><button class="iconbtn" type="button" data-share="' + esc(p.id) + '" aria-label="Share this project">' + ic('share') + '</button></div><div class="dbody dt">';
-    h += pics.length ? '<div class="gal' + (pics.length === 1 ? ' one' : '') + '" role="list" aria-label="Photos">' + pics.slice(0, 20).map(function (x, i) { return '<figure role="listitem"><img src="' + esc(x.src) + '" alt="Photo ' + (i + 1) + ' of ' + esc(p.title) + '"' + (i ? ' loading="lazy"' : '') + ' data-zoom="' + esc(x.src) + '">' + (x.cap ? '<figcaption>' + esc(x.cap) + '</figcaption>' : '') + '</figure>'; }).join('') + '</div>' + (pics.length > 1 ? '<button class="btn slideshow" type="button" data-slides>' + ic('play') + 'Watch the ' + Math.min(pics.length, 20) + ' photos as a slideshow</button>' : '') : '';
+    h += pics.length ? '<div class="gwrap"><div class="gal' + (pics.length === 1 ? ' one' : '') + '" role="list" aria-label="Photos">' + pics.slice(0, 20).map(function (x, i) { return '<figure role="listitem"><img src="' + esc(x.src) + '" alt="Photo ' + (i + 1) + ' of ' + esc(p.title) + '"' + (i ? ' loading="lazy"' : '') + ' data-zoom="' + esc(x.src) + '">' + (x.cap ? '<figcaption>' + esc(x.cap) + '</figcaption>' : '') + '</figure>'; }).join('') + '</div>' + (pics.length > 1 ? '<button class="btn slideshow" type="button" data-slides>' + ic('play') + 'Slideshow</button>' : '') + '</div>' : '';
     if (!p.photosShown && !p.photos.length) h += '<div class="nophoto">' + ic('camera') + '<span>Photos from visits here show children or patients, so we share them only once everyone has agreed. Ask us if you’d like to see some.</span></div>';
-    h += '<h1 id="dTitle">' + esc(p.title) + '</h1><p class="where">' + esc((KIND[p.type] || p.type) + ' · ' + place(p)) + '</p><div class="st">' + badge(p) + checked(p) + '</div>' +
-      '<p class="story" style="font-size:calc(19px*var(--fs));line-height:1.5;margin:14px 0 0">' + stateSay(p) + '</p>' +
-      '<button class="btn light" style="margin-top:12px;min-height:54px" type="button" data-say="' + esc(p.title + '. ' + ST[stKey(p)][0] + '. ' + plain(stateSay(p))) + '">' + ic('speak') + 'Read it to me</button>';
+    h += '<h1 id="dTitle">' + esc(p.title) + '</h1><p class="where">' + esc((KIND[p.type] || p.type) + ' · ' + place(p)) + '</p><div class="st">' + badge(p) + checked(p) + '<button class="speak" type="button" data-say="' + esc(p.title + '. ' + ST[stKey(p)][0] + '. ' + plain(stateSay(p))) + '">' + ic('speak') + 'Listen</button></div>' +
+      '<p class="say2">' + stateSay(p) + '</p>';
     if (p.anniversary) h += '<div class="anni" style="margin-top:16px"><span class="ph" aria-hidden="true">🎉</span><div><h2 style="margin:0">' + (p.anniversary.years === 1 ? 'One year' : p.anniversary.years + ' years') + ' of water!</h2><p>Finished on ' + esc(day(p.done)) + '. Thank you for every litre since.</p></div></div>';
     var F = [];
     if (p.impact.people) F.push(['People served', 'about ' + n(p.impact.people), 1]);
@@ -776,7 +850,7 @@ html.ts-xl{--fs:1.38}
     if (p.impact.litresPerDay) h += '<p class="coords">Water a day is worked out from the measured flow over 8 hours of pumping.</p>';
     h += '<div class="dacts">' + (p.gps ? '<button class="btn" type="button" data-onmap="' + esc(p.id) + '">' + ic('pin') + 'Show on the map</button><a class="btn light" href="' + esc(gmaps(p)) + '" target="_blank" rel="noopener noreferrer">' + ic('map') + 'Open in Google Maps</a>' : '') +
       '<button class="btn light" type="button" data-share="' + esc(p.id) + '">' + ic('share') + 'Share with family</button></div>' +
-      '<h2>Questions about this project?</h2><div class="talk">' + talk(p, true) + '</div>';
+      '<h2>Questions about this project?</h2>' + talk(p);
     if (p.gps) h += '<p class="coords">Exact location: ' + p.gps[0].toFixed(6) + ', ' + p.gps[1].toFixed(6) + '</p>';
     if (p.beforeAfter) {
       var ba = p.beforeAfter, bs = ba.before.board ? boardPhoto(ba.before.board, 1600) : visitPhoto(ba.before.photo, 1600), as = visitPhoto(ba.after.photo, 1600);
@@ -861,14 +935,14 @@ html.ts-xl{--fs:1.38}
     var s = e.target.closest('[data-share]'); if (s) return share(s.getAttribute('data-share'));
     var m = e.target.closest('[data-onmap]'); if (m) { var id = m.getAttribute('data-onmap'); closeProj(); setTimeout(function () { $('mapsec').scrollIntoView({ behavior: STILL ? 'auto' : 'smooth' }); pick(id, true); }, 250); return; }
     var sy = e.target.closest('[data-say]'); if (sy) return speak(sy);
-    var ts = e.target.closest('[data-ts]'); if (ts) return setSize(ts.getAttribute('data-ts'));
+    if (e.target.closest('#aa')) { var cur0 = document.documentElement.classList.contains('ts-xl') ? 'ts-xl' : document.documentElement.classList.contains('ts-l') ? 'ts-l' : ''; var nx = cur0 === '' ? 'ts-l' : cur0 === 'ts-l' ? 'ts-xl' : ''; setSize(nx); return toast(nx === 'ts-l' ? 'Large text' : nx === 'ts-xl' ? 'Larger text' : 'Normal text'); }
     if (e.target.closest('[data-slides]')) { var g = qa('.gal [data-zoom]', $('det')); if (g.length) openViewer(photosNear(g[0]), 0, true); return; }
     var z = e.target.closest('[data-zoom]'); if (z && !e.target.closest('.lbx')) { var L2 = photosNear(z), at = Math.max(0, L2.findIndex(function (x) { return x.el === z; })); return openViewer(L2, at, false); }
   });
   // text size: A / A / A, kept for next time
   function setSize(k) {
     document.documentElement.classList.remove('ts-l', 'ts-xl'); if (k) document.documentElement.classList.add(k);
-    qa('[data-ts]').forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-ts') === k ? 'true' : 'false'); });
+    var aa = $('aa'); if (aa) aa.setAttribute('aria-label', 'Text size: ' + (k === 'ts-xl' ? 'larger' : k === 'ts-l' ? 'large' : 'normal') + '. Tap to change');
     try { localStorage.setItem('dnrSize', k); } catch (e) {}
     if (map) setTimeout(function () { map.invalidateSize(); }, 50);
   }

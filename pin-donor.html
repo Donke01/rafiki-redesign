@@ -305,6 +305,56 @@ html{font-size:17px}html[data-size=s]{font-size:15px}html[data-size=l]{font-size
 .pback{min-height:52px;font-size:1.05rem;padding:0 18px 0 12px;border-radius:16px;border:var(--bw) solid var(--glb);background:var(--gl2);color:var(--ink);font-weight:800}
 .pback svg{width:22px;height:22px}
 @media (prefers-reduced-motion:reduce){.mpin.arrive,.mcard>*,.waves i{animation:none!important}.mpin.k-working .dot::after{display:none}}
+/* ---- polish: calm, roomy, one clear action per card ---- */
+.mapcard{box-shadow:0 18px 40px -24px rgba(4,38,63,.35)}
+.mtog{top:12px;left:12px;border-radius:999px;box-shadow:0 6px 18px rgba(4,38,63,.18)}
+.mtog button{min-height:42px;padding:0 15px;border-radius:999px;font-size:.88rem}
+.mzoom{top:12px;right:12px;gap:0;border-radius:18px;overflow:hidden;box-shadow:0 6px 18px rgba(4,38,63,.18);background:#FFFFFF}
+.mzoom button{width:52px;height:52px;border:0;border-radius:0;box-shadow:none;font-size:28px;font-weight:600}
+.mzoom button+button{border-top:1px solid #DCE1E5}
+.mtools{position:absolute;left:12px;bottom:12px;z-index:500;display:flex;gap:8px;flex-wrap:wrap}
+.mtools button{display:inline-flex;align-items:center;gap:7px;min-height:44px;padding:0 15px;border-radius:999px;border:0;background:rgba(255,255,255,.95);color:#04263F;font-weight:700;font-size:.88rem;box-shadow:0 6px 18px rgba(4,38,63,.2);cursor:pointer}
+.mtools svg{width:17px;height:17px}
+.mapbox.full .mtools{bottom:calc(92px + env(safe-area-inset-bottom))}
+.mbar{display:none}
+.legend{padding:12px 4px 0;gap:6px 16px;font-size:.8rem;color:var(--muted)}
+.legend i{width:14px;height:14px;border-width:3.5px}
+.mcard{padding:18px 16px;gap:12px}
+.mcard .mtop{display:grid;grid-template-columns:84px 1fr;gap:14px;align-items:center}
+.mcard .mtop img,.mcard .mtop .noimg{width:84px;height:84px;border-radius:20px;object-fit:cover;background:var(--tint);display:flex;align-items:center;justify-content:center;color:var(--blue)}
+.mcard .mtop .noimg svg{width:34px;height:34px}
+.mcard h3{margin:6px 0 2px}
+.mcard .row{display:flex;gap:10px;align-items:center}
+.mcard .row .btn{flex:1;min-height:52px}
+.speak{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:0 18px;border-radius:999px;border:var(--bw) solid var(--glb);background:var(--gl2);color:var(--ink);font-weight:700;font-size:.92rem;cursor:pointer;white-space:nowrap;box-shadow:var(--gls)}
+.speak svg{width:20px;height:20px;color:var(--blue2)}
+.speak.reading{outline:2px solid var(--blue)}
+.pager{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.pager button{width:52px;height:52px;border-radius:50%;border:var(--bw) solid var(--glb);background:var(--gl2);color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:var(--gls)}
+.pager button:active{transform:scale(.94)}
+.pager button svg{width:22px;height:22px}
+.pager .mid{text-align:center}
+.pager .mid span{font-weight:700;color:var(--muted);font-size:.9rem}
+.pager .dots{display:flex;gap:6px;justify-content:center;margin-top:5px}
+.pager .dots i{width:7px;height:7px;border-radius:50%;background:var(--line)}
+.pager .dots i.on{background:var(--blue);width:20px;border-radius:4px}
+.tl .pt{background:none;border:0;padding:0;font:inherit;font-weight:800;color:var(--ink);cursor:pointer;text-align:left;font-size:1rem}
+.tl .ua{gap:4px 18px;margin-top:6px}
+.tl .ua button{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0;border:0;background:none;color:var(--blue2);font-weight:700;font-size:.92rem;cursor:pointer;box-shadow:none}
+.tl .ua button svg{width:18px;height:18px}
+.talk{display:grid;gap:0;border-radius:22px;overflow:hidden;background:var(--gl2);border:var(--bw) solid var(--glb);box-shadow:var(--gls)}
+.talk a{display:flex;align-items:center;gap:14px;padding:12px 16px;min-height:66px;text-decoration:none;color:var(--ink)}
+.talk a+a{border-top:1px solid var(--line)}
+.talk .ti{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none;background:var(--tint);color:var(--blue2)}
+.talk .ti svg{width:21px;height:21px}
+.talk .wa .ti{background:#DDF4E7;color:#1F8F4E}
+.talk b{display:block;font-size:1rem}
+.talk small{display:block;font-weight:600;color:var(--muted);font-size:.84rem}
+.talk .go{margin-left:auto;color:var(--muted)}
+.talk .go svg{width:18px;height:18px}
+.sh .ssbtn{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 14px;border-radius:999px;border:0;background:var(--blue);color:#FFFFFF;font-weight:700;font-size:.85rem;cursor:pointer}
+.sh .ssbtn svg{width:15px;height:15px}
+.stc .speak{margin-top:10px;min-height:44px;padding:0 14px;font-size:.85rem}
 </style>
 </head>
 <body>
@@ -361,7 +411,7 @@ html{font-size:17px}html[data-size=s]{font-size:15px}html[data-size=l]{font-size
     map: '<path d="M3.5 6.5l5.5-2.5 6 2.5 5.5-2.5v13.5L15 20l-6-2.5-5.5 2.5z"/><path d="M9 4v13.5M15 6.5V20"/>',
     play: '<path d="M8 5.5v13l10-6.5z"/>',
     check: '<path d="M5 12.5l4.5 4.5L19 7"/>', bang: '<path d="M12 5v9M12 19v.5"/>', bricks: '<path d="M3 6h18v12H3zM3 12h18M9 6v6M15 12v6"/>',
-    clock: '<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>', x: '<path d="M6 6l12 12M18 6L6 18"/>', fit: '<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>',
+    clock: '<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>', expand: '<path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/>', x: '<path d="M6 6l12 12M18 6L6 18"/>', fit: '<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>',
     speak: '<path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/>',
     phone: '<path d="M6.5 3.5h3l1.5 4.5-2 1.5a11 11 0 0 0 5.5 5.5l1.5-2 4.5 1.5v3a2 2 0 0 1-2 2A16.5 16.5 0 0 1 4.5 5.5a2 2 0 0 1 2-2z"/>',
     chat: '<path d="M20 11.5a8 8 0 0 1-11.8 7L4 19.5l1.1-4A8 8 0 1 1 20 11.5z"/>'
@@ -562,9 +612,9 @@ html{font-size:17px}html[data-size=s]{font-size:15px}html[data-size=l]{font-size
     return '<div class="mapbox' + (small ? ' small' : '') + '" id="mbox"><div class="lmap" id="lmap" role="region" aria-label="' + tr('Map of your projects', 'Ramani ya miradi yako') + '"></div>' +
       '<div class="mtog" role="group" aria-label="' + tr('Map style', 'Aina ya ramani') + '"><button type="button" data-ml="street" aria-pressed="true">' + tr('Map', 'Ramani') + '</button><button type="button" data-ml="sat" aria-pressed="false">' + tr('Satellite', 'Satelaiti') + '</button></div>' +
       '<div class="mzoom"><button type="button" id="zin" aria-label="' + tr('Zoom in', 'Karibia') + '">+</button><button type="button" id="zout" aria-label="' + tr('Zoom out', 'Ondoka mbali') + '">−</button></div>' +
-      '<button class="btn mclose" type="button" id="mclose">' + ic('x') + tr('Close map', 'Funga ramani') + '</button></div>' +
-      '<div class="mbar">' + (small ? '' : '<button class="btn light" type="button" id="mfit">' + ic('fit') + tr('Show all', 'Onyesha yote') + '</button>') +
-      '<button class="btn light" type="button" id="mbig"' + (small ? ' style="grid-column:1/-1"' : '') + '>' + ic('fit') + tr('Bigger map', 'Ramani kubwa') + '</button></div>';
+      '<div class="mtools">' + (small ? '' : '<button type="button" id="mfit">' + ic('fit') + tr('Show all', 'Onyesha yote') + '</button>') +
+      '<button type="button" id="mbig">' + ic('expand') + tr('Full screen', 'Skrini nzima') + '</button></div>' +
+      '<button class="btn mclose" type="button" id="mclose">' + ic('x') + tr('Close map', 'Funga ramani') + '</button></div>';
   }
   function legendHtml(P) {
     return '<div class="legend" aria-label="' + tr('What the colours mean', 'Maana ya rangi') + '">' + ['working', 'repairing', 'notworking', 'building', 'planned', 'done'].filter(function (k) { return P.some(function (p) { return stKey(p) === k; }); })
@@ -626,13 +676,12 @@ html{font-size:17px}html[data-size=s]{font-size:15px}html[data-size=l]{font-size
     Object.keys(M.markers).forEach(function (x) { var el = M.markers[x].getElement(); if (el && el.firstChild) el.firstChild.classList.toggle('on', x === id); M.markers[x].setZIndexOffset(x === id ? 1000 : 0); });
     stopSpeaking();
     var say = esc(stSay(p)) + (peopleSay(p) ? ' ' + peopleSay(p) : '');
-    $('mcard').innerHTML = '<div class="hd">' + (img ? '<img src="' + esc(img) + '" alt="">' : '<span class="noimg">' + ic(typeIcon(p)) + '</span>') +
-      '<div><h3>' + esc(p.title) + '</h3><div class="wh">' + esc([kind(p), place(p)].filter(Boolean).join(' · ')) + '</div></div></div>' +
-      '<div>' + badge(p) + '</div><p class="say">' + say + '</p>' +
-      '<div class="acts">' + (M.list.length > 1 ? '<button class="btn light" type="button" id="mprev">' + ic('back') + tr('Previous', 'Iliyotangulia') + '</button><button class="btn light" type="button" id="mnext">' + tr('Next', 'Inayofuata') + ic('chev') + '</button>' : '') +
-      '<button class="btn wide" type="button" data-open="' + esc(p.id) + '">' + tr('See this project', 'Ona mradi huu') + ic('chev') + '</button>' +
-      '<button class="btn light wide" type="button" data-say="' + esc(p.title + '. ' + stName(k) + '. ' + plain(say)) + '">' + ic('speak') + tr('Read it to me', 'Nisomee') + '</button></div>' +
-      (M.list.length > 1 ? '<div class="cnt">' + tr('Project ' + (i + 1) + ' of ' + M.list.length, 'Mradi ' + (i + 1) + ' kati ya ' + M.list.length) + '</div>' : '');
+    $('mcard').innerHTML = '<div class="mtop">' + (img ? '<img src="' + esc(img) + '" alt="">' : '<span class="noimg">' + ic(typeIcon(p)) + '</span>') +
+      '<div>' + badge(p) + '<h3>' + esc(p.title) + '</h3><div class="wh">' + esc([kind(p), place(p)].filter(Boolean).join(' · ')) + '</div></div></div>' +
+      '<p class="say">' + say + '</p>' +
+      '<div class="row"><button class="btn" type="button" data-open="' + esc(p.id) + '">' + tr('See this project', 'Ona mradi huu') + ic('chev') + '</button>' +
+      '<button class="speak" type="button" data-say="' + esc(p.title + '. ' + stName(k) + '. ' + plain(say)) + '">' + ic('speak') + tr('Listen', 'Sikiliza') + '</button></div>' +
+      (M.list.length > 1 ? '<div class="pager"><button type="button" id="mprev" aria-label="' + tr('Previous project', 'Mradi uliotangulia') + '">' + ic('back') + '</button><div class="mid"><span>' + tr('Project ' + (i + 1) + ' of ' + M.list.length, 'Mradi ' + (i + 1) + ' kati ya ' + M.list.length) + '</span><div class="dots" aria-hidden="true">' + M.list.map(function (_, j) { return '<i' + (j === i ? ' class="on"' : '') + '></i>'; }).join('') + '</div></div><button type="button" id="mnext" aria-label="' + tr('Next project', 'Mradi unaofuata') + '">' + ic('chev') + '</button></div>' : '');
     qa('#mcard [data-open]').forEach(function (b) { b.addEventListener('click', function () { S.pid = b.getAttribute('data-open'); route(); }); });
     if ($('mprev')) { $('mprev').addEventListener('click', function () { mpick(M.list[(M.cur - 1 + M.list.length) % M.list.length].id, true); }); $('mnext').addEventListener('click', function () { mpick(M.list[(M.cur + 1) % M.list.length].id, true); }); }
     // straight down to the exact spot: the building itself on the satellite photos
@@ -651,7 +700,7 @@ html{font-size:17px}html[data-size=s]{font-size:15px}html[data-size=l]{font-size
     stopSpeaking();
     var u = new SpeechSynthesisUtterance(btn.getAttribute('data-say')); u.rate = 0.9; u.lang = S.lang === 'sw' ? 'sw-KE' : 'en-GB';
     btn._label = btn.innerHTML; speakingBtn = btn;
-    btn.classList.add('reading'); btn.innerHTML = '<span class="waves" aria-hidden="true"><i></i><i></i><i></i><i></i></span>' + tr('Stop reading', 'Acha kusoma');
+    btn.classList.add('reading'); btn.innerHTML = '<span class="waves" aria-hidden="true"><i></i><i></i><i></i><i></i></span>' + tr('Stop', 'Acha');
     u.onend = u.onerror = function () { if (speakingBtn === btn) stopSpeaking(); };
     speechSynthesis.speak(u);
   }
@@ -714,9 +763,9 @@ html{font-size:17px}html[data-size=s]{font-size:15px}html[data-size=l]{font-size
   function talk(p) {
     var who = (S.D && (S.D.donor.viewer || S.D.donor.name)) || '';
     var wa = 'https://wa.me/' + WHATSAPP.replace(/\D/g, '') + '?text=' + encodeURIComponent('Hello RAFIKI, this is ' + who + (p ? '. A question about ' + p.title + ': ' : '. '));
-    return '<div class="talk"><a class="btn light" href="tel:' + PHONE.replace(/[^+\d]/g, '') + '">' + ic('phone') + '<span>' + tr('Call RAFIKI', 'Piga simu RAFIKI') + '<small>' + esc(PHONE) + '</small></span></a>' +
-      '<a class="btn wa" href="' + esc(wa) + '" target="_blank" rel="noopener">' + ic('chat') + '<span>' + tr('WhatsApp us', 'Tuandikie WhatsApp') + '<small>' + esc(WHATSAPP) + '</small></span></a>' +
-      '<a class="btn light" href="mailto:' + CONTACT + '?subject=' + encodeURIComponent(p ? 'Question about ' + p.title : 'My RAFIKI projects') + '">' + ic('mail') + '<span>' + tr('E-mail us', 'Tutumie barua pepe') + '<small>' + CONTACT + '</small></span></a></div>';
+    var row = function (href, cls, icon, title, sub, ext) { return '<a class="' + cls + '" href="' + esc(href) + '"' + (ext ? ' target="_blank" rel="noopener"' : '') + '><span class="ti">' + ic(icon) + '</span><span><b>' + title + '</b><small>' + esc(sub) + '</small></span><span class="go">' + ic('chev') + '</span></a>'; };
+    return '<div class="talk">' + row('tel:' + PHONE.replace(/[^+\d]/g, ''), '', 'phone', tr('Call RAFIKI', 'Piga simu RAFIKI'), PHONE) + row(wa, 'wa', 'chat', tr('WhatsApp us', 'Tuandikie WhatsApp'), WHATSAPP, true) +
+      row('mailto:' + CONTACT + '?subject=' + encodeURIComponent(p ? 'Question about ' + p.title : 'My RAFIKI projects'), '', 'mail', tr('E-mail us', 'Tutumie barua pepe'), CONTACT) + '</div>';
   }
   // text size, one tap: Normal → Large → Larger
   var SIZES = ['', 'l', 'xl'];
@@ -759,7 +808,7 @@ html{font-size:17px}html[data-size=s]{font-size:15px}html[data-size=l]{font-size
       tile(t.water && t.water === t.projects ? t.water : t.projects, t.water && t.water === t.projects ? (t.water === 1 ? tr('well', 'kisima') : tr('wells', 'visima')) : (t.projects === 1 ? tr('project', 'mradi') : tr('projects', 'miradi'))) +
       tile(t.people, tr('people served', 'wanufaika')) +
       tile(t.visitsYear || 0, tr('visits this year', 'ziara mwaka huu')) + '</div></section>';
-    if (P.some(function (p) { return p.gps; })) h += '<div class="sh"><h2>' + tr('Your projects on the map', 'Miradi yako kwenye ramani') + '</h2></div><section class="card mapcard">' + mapHtml(false) + legendHtml(P) + '<div class="mcard" id="mcard" aria-live="polite"></div></section>';
+    if (P.some(function (p) { return p.gps; })) h += '<div class="sh"><h2>' + tr('Your projects on the map', 'Miradi yako kwenye ramani') + '</h2></div><section class="card mapcard">' + mapHtml(false) + '<div class="mcard" id="mcard" aria-live="polite"></div></section>' + legendHtml(P);
     h += '<div class="sh"><h2>' + (P.length === 1 ? tr('Your project', 'Mradi wako') : tr('Your projects', 'Miradi yako')) + '</h2><small>' + P.length + '</small></div>';
     h += P.length ? P.map(card).join('') : '<p class="card empty">' + tr('Your projects will appear here soon.', 'Miradi yako itaonekana hapa hivi karibuni.') + '</p>';
     return h;
@@ -777,8 +826,8 @@ html{font-size:17px}html[data-size=s]{font-size:15px}html[data-size=l]{font-size
     h += '<button class="lnk pback" type="button" data-back>' + ic('back') + tr('Back', 'Rudi') + '</button>';
     h += '<div class="pcov">' + (img ? '<img src="' + esc(img) + '" alt="' + esc(p.title) + '">' : ic(typeIcon(p))) + '</div>';
     h += '<h1 class="ptitle">' + esc(p.title) + '</h1><p class="ppl">' + esc([kind(p), place(p)].filter(Boolean).join(' · ')) + '</p>';
-    h += '<div class="card stc" style="margin-top:14px"><span class="si t-' + k + '">' + ic(k === 'repairing' || k === 'notworking' ? 'wrench' : typeIcon(p)) + '</span><div><b>' + esc(stName(k)) + '</b><p>' + esc(stSay(p)) + (peopleSay(p) ? ' ' + peopleSay(p) : '') + '</p></div></div>' +
-      '<button class="btn light block" style="margin-top:10px" type="button" data-say="' + esc(p.title + '. ' + stName(k) + '. ' + stSay(p) + ' ' + plain(peopleSay(p))) + '">' + ic('speak') + tr('Read it to me', 'Nisomee') + '</button>';
+    h += '<div class="card stc" style="margin-top:14px"><span class="si t-' + k + '">' + ic(k === 'repairing' || k === 'notworking' ? 'wrench' : typeIcon(p)) + '</span><div><b>' + esc(stName(k)) + '</b><p>' + esc(stSay(p)) + (peopleSay(p) ? ' ' + peopleSay(p) : '') + '</p><button class="speak" type="button" data-say="' + esc(p.title + '. ' + stName(k) + '. ' + stSay(p) + ' ' + plain(peopleSay(p))) + '">' + ic('speak') + tr('Listen', 'Sikiliza') + '</button></div></div>' +
+      '';
     var f = [];
     if (I.people) f.push([n(I.people), tr('people served', 'watu wanaohudumiwa')]);
     if (I.litresPerDay) f.push([n(I.litresPerDay), tr('litres a day', 'lita kwa siku')]);
@@ -789,10 +838,10 @@ html{font-size:17px}html[data-size=s]{font-size:15px}html[data-size=l]{font-size
     if (f.length) h += '<div class="pfacts">' + f.slice(0, 3).map(function (x) { return '<div class="fact"><b>' + esc(x[0]) + '</b><small>' + esc(x[1]) + '</small></div>'; }).join('') + '</div>';
     // photo timeline, newest first
     var ph = (p.gallery || []).map(function (g) { return { at: g.at, src: visitPhoto(g.id, 960), big: visitPhoto(g.id, 1600), cap: g.label }; });
-    if (ph.length) h += '<div class="sh"><h2>' + tr('Photos', 'Picha') + '</h2><small>' + ph.length + '</small></div><div class="strip pstrip">' + ph.map(function (x) {
+    if (ph.length) h += '<div class="sh"><h2>' + tr('Photos', 'Picha') + '</h2>' + (ph.length > 1 ? '<button class="ssbtn" type="button" data-slides>' + ic('play') + tr('Slideshow', 'Onyesho') + '</button>' : '<small>1</small>') + '</div><div class="strip pstrip">' + ph.map(function (x) {
       var cap = day(x.at) + (x.cap ? ' · ' + x.cap : '');
       return '<figure><button type="button" data-zoom="' + esc(x.big) + '" data-cap="' + esc(cap) + '" aria-label="' + tr('Open photo', 'Fungua picha') + '"><img src="' + esc(x.src) + '" alt="' + esc(x.cap || p.title) + '" loading="lazy"></button><figcaption>' + esc(cap) + '</figcaption></figure>'; }).join('') + '</div>' +
-      (ph.length > 1 ? '<button class="btn slideshow" type="button" data-slides>' + ic('play') + tr('Watch the ' + ph.length + ' photos as a slideshow', 'Tazama picha ' + ph.length + ' kama onyesho') + '</button>' : '');
+      '';
     // thank-you messages and videos from the community
     if ((p.thanks || []).length || (p.stories || []).length) {
       h += '<div class="sh"><h2>' + tr('Thank you from the community', 'Asante kutoka kwa jamii') + '</h2></div>';
@@ -874,8 +923,8 @@ html{font-size:17px}html[data-size=s]{font-size:15px}html[data-size=l]{font-size
     var cap = p.title + ' · ' + day(u.at);
     var thumbs = u.type === 'photos' ? '<div class="thumbs">' + (u.photos || []).slice(0, 4).map(function (id) { return '<button type="button" data-zoom="' + esc(visitPhoto(id, 1600)) + '" data-cap="' + esc(cap) + '" aria-label="' + tr('Open photo', 'Fungua picha') + '"><img src="' + esc(visitPhoto(id, 480)) + '" alt="" loading="lazy"></button>'; }).join('') + '</div>'
       : u.type === 'thanks' && u.media !== 'video' ? '<div class="thumbs"><button type="button" data-zoom="' + esc(visitPhoto(u.id, 1600)) + '" data-cap="' + esc(u.caption ? '“' + u.caption + '”' : cap) + '" aria-label="' + tr('Open photo', 'Fungua picha') + '"><img src="' + esc(visitPhoto(u.id, 480)) + '" alt="" loading="lazy"></button></div>' : '';
-    return '<li><span class="di t-' + tone + '">' + ic(ico) + '</span><div><b>' + esc(p.title) + isNew + '</b><small>' + esc(t) + ' · ' + day(u.at) + '</small><p class="story">' + esc(story) + '</p>' + thumbs +
-      '<div class="ua"><button class="btn light" type="button" data-open="' + esc(p.id) + '">' + tr('See the project', 'Ona mradi') + ic('chev') + '</button><button class="btn light" type="button" data-say="' + esc(p.title + '. ' + t + '. ' + day(u.at) + '. ' + story) + '">' + ic('speak') + tr('Listen', 'Sikiliza') + '</button></div></div></li>';
+    return '<li><span class="di t-' + tone + '">' + ic(ico) + '</span><div><b><button class="pt" type="button" data-open="' + esc(p.id) + '">' + esc(p.title) + '</button>' + isNew + '</b><small>' + esc(t) + ' · ' + day(u.at) + '</small><p class="story">' + esc(story) + '</p>' + thumbs +
+      '<div class="ua"><button type="button" data-open="' + esc(p.id) + '">' + tr('See the project', 'Ona mradi') + ic('chev') + '</button><button type="button" data-say="' + esc(p.title + '. ' + t + '. ' + day(u.at) + '. ' + story) + '">' + ic('speak') + tr('Listen', 'Sikiliza') + '</button></div></div></li>';
   }
   function settings() {
     var me = S.D.me || {}, size = store.get('rfPinSize') || '', theme = store.get('rfPinTheme') || '';
