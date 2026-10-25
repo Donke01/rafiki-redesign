@@ -3,7 +3,11 @@ package org.rafikioutreach.pin.ui
 import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -43,6 +47,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -57,6 +62,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 import org.rafikioutreach.pin.AppModel
 import org.rafikioutreach.pin.data.DProject
@@ -258,67 +264,151 @@ private fun DonorTabs(on: String, news: Int, pick: (String) -> Unit) {
 
 @Composable
 private fun SectionHead(text: String, extra: String = "") {
-    Row(Modifier.fillMaxWidth().padding(top = 22.dp, bottom = 10.dp, start = 2.dp, end = 2.dp), verticalAlignment = Alignment.Bottom) {
-        Text(text, style = MaterialTheme.typography.titleLarge, color = C.ink, modifier = Modifier.weight(1f))
-        if (extra.isNotBlank()) Text(extra, style = MaterialTheme.typography.labelMedium, color = C.muted)
+    Column(Modifier.fillMaxWidth().padding(top = 24.dp, bottom = 12.dp, start = 2.dp, end = 2.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(text, style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold).heading(), color = C.ink, textAlign = TextAlign.Center)
+        if (extra.isNotBlank()) Text(extra, style = MaterialTheme.typography.labelMedium.heading(), color = C.muted, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 2.dp))
     }
 }
 
 @Composable
 private fun DonorHome(m: AppModel, v: DonorView, open: (String) -> Unit) {
     val org = listOf(if (v.group || v.viewer != v.name) v.name else "", if (v.org.isNotBlank() && v.org != v.name) v.org else "").filter { it.isNotBlank() }.joinToString(" · ")
-    Card(brush = DeepBrush, pad = 18.dp, modifier = Modifier.testTag("donor_hero")) {
-        Row(Modifier.clip(RoundedCornerShape(99.dp)).background(Color(0x29FFFFFF)).padding(horizontal = 11.dp, vertical = 5.dp), verticalAlignment = Alignment.CenterVertically) {
-            DIcon("lock", Color.White, 13.dp); Spacer(Modifier.width(5.dp))
-            Text(t("JUST FOR YOU", "KWA AJILI YAKO TU"), color = Color.White, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold, letterSpacing = 0.8.sp), maxLines = 1, softWrap = false)
+    val hp = v.projects.firstOrNull { cover(m, it) != null }
+    val shape = RoundedCornerShape(28.dp)
+    Box(Modifier.fillMaxWidth().shadow(14.dp, shape, ambientColor = Color(0x2604263F), spotColor = Color(0x4004263F)).clip(shape).background(DeepBrush).testTag("donor_hero")) {
+        if (hp != null) {
+            NetImage(cover(m, hp), Modifier.matchParentSize().drift()) {}
+            Box(Modifier.matchParentSize().background(Brush.verticalGradient(listOf(Color(0x8C04263F), Color(0xB8054F81), Color(0xF004263F)))))
         }
-        Text(t("Hello, ", "Habari, ") + v.viewer.trim().substringBefore(' '), style = MaterialTheme.typography.headlineLarge, color = Color.White, modifier = Modifier.padding(top = 12.dp))
-        Text(org.ifBlank { t("Thank you for giving with RAFIKI", "Asante kwa kuchangia na RAFIKI") }, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = Color(0xD9FFFFFF))
-        val allWater = v.nWater > 0 && v.nWater == v.nProjects
-        Row(Modifier.padding(top = 16.dp).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            HeroTile(num(v.nProjects), if (allWater) (if (v.nWater == 1) t("well", "kisima") else t("wells", "visima")) else (if (v.nProjects == 1) t("project", "mradi") else t("projects", "miradi")), Modifier.weight(1f).testTag("dn_tile_projects"))
-            HeroTile(num(v.people), t("people served", "wanufaika"), Modifier.weight(1f).testTag("dn_tile_people"))
-            HeroTile(num(v.visitsYear), t("visits this year", "ziara mwaka huu"), Modifier.weight(1f).testTag("dn_tile_visits"))
+        Waves(Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(70.dp), Color(0x14FFFFFF), Color(0x1F6BBDF2))
+        Column(Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 26.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            Row(Modifier.clip(RoundedCornerShape(99.dp)).background(Color(0x29FFFFFF)).padding(horizontal = 12.dp, vertical = 5.dp), verticalAlignment = Alignment.CenterVertically) {
+                DIcon("lock", Color.White, 13.dp); Spacer(Modifier.width(6.dp))
+                Text(t("JUST FOR YOU", "KWA AJILI YAKO TU"), color = Color.White, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold, letterSpacing = 0.8.sp), maxLines = 1, softWrap = false)
+            }
+            Text(t("Hello, ", "Habari, ") + v.viewer.trim().substringBefore(' '), style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.ExtraBold).heading(), color = Color.White, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 14.dp))
+            Text(org.ifBlank { t("Thank you for giving with RAFIKI", "Asante kwa kuchangia na RAFIKI") }, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold).heading(), color = Color(0xD9FFFFFF), textAlign = TextAlign.Center, modifier = Modifier.padding(top = 2.dp))
+            if (v.people > 0) Text(
+                (if (v.nProjects == 1) t("Your project serves about ", "Mradi wako unahudumia takriban ") else t("Your ${v.nProjects}\u00A0projects serve about ", "Miradi yako ${v.nProjects} inahudumia takriban ")) + (num(v.people) + t(" people.", " watu.")).nb(),
+                style = MaterialTheme.typography.titleMedium.copy(fontSize = 19.sp, lineHeight = 25.sp, fontWeight = FontWeight.Bold).heading(), color = Color.White, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 14.dp).widthIn(max = 420.dp))
+            val allWater = v.nWater > 0 && v.nWater == v.nProjects
+            Row(Modifier.padding(top = 18.dp).fillMaxWidth().widthIn(max = 560.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                HeroTile(num(v.nProjects), if (allWater) (if (v.nWater == 1) t("well", "kisima") else t("wells", "visima")) else (if (v.nProjects == 1) t("project", "mradi") else t("projects", "miradi")), Modifier.weight(1f).testTag("dn_tile_projects"))
+                HeroTile(num(v.people), t("people served", "wanufaika"), Modifier.weight(1f).testTag("dn_tile_people"))
+                HeroTile(num(v.visitsYear), t("visits this year", "ziara mwaka huu"), Modifier.weight(1f).testTag("dn_tile_visits"))
+            }
         }
     }
     if (v.projects.any { it.gps != null }) { SectionHead(t("Your projects on the map", "Miradi yako kwenye ramani")); DonorMap(m, v.projects, true, open) }
     SectionHead(if (v.projects.size == 1) t("Your project", "Mradi wako") else t("Your projects", "Miradi yako"), "${v.projects.size}")
     if (v.projects.isEmpty()) EmptyDrop(t("Your projects will appear here soon.", "Miradi yako itaonekana hapa hivi karibuni."))
-    v.projects.forEachIndexed { i, p -> ProjectCard(m, p, Modifier.padding(bottom = 12.dp).rise(minOf(i, 5))) { open(p.id) } }
+    v.projects.forEachIndexed { i, p -> ProjectCard(m, p, i, Modifier.padding(bottom = 18.dp).rise(minOf(i, 5))) { open(p.id) } }
 }
 
 @Composable
 private fun HeroTile(value: String, label: String, modifier: Modifier) {
-    Column(modifier.clip(RoundedCornerShape(16.dp)).background(Color(0x24FFFFFF)).border(1.dp, Color(0x38FFFFFF), RoundedCornerShape(16.dp)).heightIn(min = 76.dp).padding(horizontal = 10.dp, vertical = 9.dp)) {
-        WordFitText(value, MaterialTheme.typography.titleLarge.copy(fontSize = 22.sp), Color.White, 1)
-        WordFitText(label, MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp, lineHeight = 14.sp, fontWeight = FontWeight.SemiBold), Color(0xE6FFFFFF), 2)
+    val n = value.filter { it.isDigit() }.toIntOrNull()
+    val shown = if (n != null && value.all { it.isDigit() || it == ',' }) num(rememberFill(n.toFloat(), 1200).roundToInt()) else value
+    Column(modifier.clip(RoundedCornerShape(18.dp)).background(Color(0x1FFFFFFF)).border(1.dp, Color(0x38FFFFFF), RoundedCornerShape(18.dp)).heightIn(min = 82.dp).padding(horizontal = 8.dp, vertical = 12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+        WordFitText(shown, MaterialTheme.typography.titleLarge.copy(fontSize = 24.sp, fontWeight = FontWeight.ExtraBold), Color.White, 1, textAlign = TextAlign.Center)
+        WordFitText(label, MaterialTheme.typography.labelSmall.copy(fontSize = 12.sp, lineHeight = 15.sp, fontWeight = FontWeight.SemiBold).heading(), Color(0xE6FFFFFF), 2, textAlign = TextAlign.Center)
     }
 }
 
+/** The status on the photo: frosted white, with a dot that breathes while it's working or being fixed. */
 @Composable
 private fun StateBadge(p: DProject, modifier: Modifier = Modifier) {
     val (fg, _) = stateTone(p.state)
-    Row(modifier.shadow(3.dp, RoundedCornerShape(99.dp)).clip(RoundedCornerShape(99.dp)).background(C.card).padding(horizontal = 11.dp, vertical = 5.dp), verticalAlignment = Alignment.CenterVertically) {
-        Box(Modifier.size(8.dp).clip(CircleShape).background(fg)); Spacer(Modifier.width(6.dp))
-        Text(donorStateName(p.state), color = fg, style = MaterialTheme.typography.labelMedium, maxLines = 1, softWrap = false)
+    val pill = RoundedCornerShape(99.dp)
+    Row(modifier.shadow(4.dp, pill).clip(pill).background(Color(0xEDFFFFFF)).padding(start = 11.dp, end = 13.dp, top = 6.dp, bottom = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+        BreathDot(fg, p.state == "working" || p.state == "repairing"); Spacer(Modifier.width(7.dp))
+        Text(donorStateName(p.state), color = fg, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), maxLines = 1, softWrap = false)
     }
 }
 
+/** No photo yet: a deep blue scene with the project's icon floating, rings spreading, bubbles and waves. */
 @Composable
-private fun ProjectCard(m: AppModel, p: DProject, modifier: Modifier, onClick: () -> Unit) {
-    val shape = RoundedCornerShape(24.dp)
-    Column(modifier.fillMaxWidth().shadow(6.dp, shape, ambientColor = Color(0x14144678), spotColor = Color(0x1A144678)).clip(shape).background(if (C.glassy) C.glass2 else C.card)
-        .border(1.dp, if (C.glassy) C.glassEdge else C.line, shape).clickable(role = Role.Button, onClick = onClick).testTag("dcard_${p.id}")) {
-        Box(Modifier.fillMaxWidth().aspectRatio(16f / 9f).background(C.tint)) {
-            NetImage(cover(m, p), Modifier.matchParentSize()) { Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { DIcon(iconOf(p), C.blue, 44.dp) } }
-            StateBadge(p, Modifier.padding(12.dp))
+private fun NoPhotoScene(p: DProject) {
+    Box(Modifier.fillMaxSize().background(Brush.linearGradient(listOf(Color(0xFF3EA6EC), Color(0xFF0A78C2), Color(0xFF04263F))))) {
+        Bubbles(Modifier.matchParentSize())
+        Waves(Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(90.dp), Color(0x17FFFFFF), Color(0x246BBDF2))
+        Box(Modifier.align(Alignment.TopCenter).padding(top = 46.dp).size(84.dp), contentAlignment = Alignment.Center) {
+            Ripples(Modifier.matchParentSize())
+            Box(Modifier.bob()) { DIcon(iconOf(p), Color(0x66FFFFFF), 60.dp) }
         }
-        Column(Modifier.padding(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 16.dp)) {
-            Text(p.title, style = MaterialTheme.typography.titleMedium.copy(fontSize = 17.sp), color = C.ink)
-            Row(Modifier.padding(top = 3.dp), verticalAlignment = Alignment.CenterVertically) { DIcon("pin", C.muted, 15.dp); Spacer(Modifier.width(4.dp)); Text(p.place, style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold), color = C.muted) }
-            Row(Modifier.padding(top = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Fact(if (p.people > 0) num(p.people) else "—", t("people served", "watu wanaohudumiwa"), Modifier.weight(1f))
-                Fact(p.visits.firstOrNull()?.let { Dates.weekday(it.at) } ?: "—", t("last visit", "ziara ya mwisho"), Modifier.weight(1f))
+    }
+}
+
+private data class St(val n: Int, val suffix: String, val count: Boolean, val label: String)
+
+/** A project, the same card as the web donor page (designed in Figma): the photo with the name on it, three numbers,
+ *  the last check as a living line, and one round arrow to open it. Everything centred. */
+@Composable
+private fun ProjectCard(m: AppModel, p: DProject, index: Int, modifier: Modifier, onClick: () -> Unit) {
+    val shape = RoundedCornerShape(28.dp)
+    val src = remember { MutableInteractionSource() }
+    val (fg, bg) = stateTone(p.state)
+    val nPics = p.photos.size + p.gallery.size
+    Column(modifier.press(src).fillMaxWidth().shadow(14.dp, shape, ambientColor = Color(0x1404263F), spotColor = Color(0x2E04263F)).clip(shape).background(C.card)
+        .border(1.dp, C.ink.copy(alpha = 0.06f), shape).clickable(interactionSource = src, indication = LocalIndication.current, role = Role.Button, onClick = onClick).testTag("dcard_${p.id}"),
+        horizontalAlignment = Alignment.CenterHorizontally) {
+        Box(Modifier.fillMaxWidth().aspectRatio(358f / 250f).clipToBounds()) {
+            NetImage(cover(m, p), Modifier.matchParentSize().drift()) { NoPhotoScene(p) }
+            Box(Modifier.matchParentSize().background(Brush.verticalGradient(0.35f to Color(0x0004263F), 1f to Color(0xE0021727))))
+            Box(Modifier.matchParentSize().sheen(500L + minOf(index, 5) * 90L))
+            StateBadge(p, Modifier.align(Alignment.TopStart).padding(16.dp))
+            if (nPics > 1) Row(Modifier.align(Alignment.TopEnd).padding(16.dp).clip(RoundedCornerShape(99.dp)).background(Color(0x8C021727)).padding(start = 10.dp, end = 12.dp, top = 6.dp, bottom = 6.dp)
+                .semantics { contentDescription = t("$nPics photos", "Picha $nPics") }, verticalAlignment = Alignment.CenterVertically) {
+                DIcon("camera", Color.White, 15.dp); Spacer(Modifier.width(6.dp))
+                Text("$nPics", color = Color.White, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold))
+            }
+            Column(Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(start = 20.dp, end = 20.dp, bottom = 18.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(kindOf(p).uppercase(), color = Color(0xD9FFFFFF), style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 1.sp).heading(), textAlign = TextAlign.Center)
+                Text(p.title, color = Color.White, style = MaterialTheme.typography.titleLarge.copy(fontSize = 25.sp, lineHeight = 29.sp, fontWeight = FontWeight.ExtraBold).heading(), textAlign = TextAlign.Center, modifier = Modifier.padding(top = 4.dp))
+                if (p.place.isNotBlank()) Row(Modifier.padding(top = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                    DIcon("pin", Color(0xE6FFFFFF), 15.dp); Spacer(Modifier.width(5.dp))
+                    Text(p.place.nb(), color = Color(0xE6FFFFFF), style = MaterialTheme.typography.bodySmall.copy(fontSize = 14.sp, fontWeight = FontWeight.SemiBold), maxLines = 1, softWrap = false)
+                }
+            }
+        }
+        Column(Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 18.dp, bottom = 16.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            val stats = buildList {
+                if (p.people > 0) add(St(p.people, "", true, t("people served", "wanaohudumiwa")))
+                if (p.pupils > 0) add(St(p.pupils, "", true, t("pupils", "wanafunzi")))
+                if (p.patients > 0) add(St(p.patients, "", true, t("patients a week", "wagonjwa kwa wiki")))
+                if (p.children > 0) add(St(p.children, "", true, t("children", "watoto")))
+                if (p.litresPerDay > 0) add(St(p.litresPerDay, "\u00A0L", true, t("water a day", "maji kwa siku")))
+                if (p.year > 0) add(St(p.year, "", false, if (p.status == "Completed") t("completed", "ilikamilika") else t("year", "mwaka")))
+            }.take(3)
+            if (stats.isNotEmpty()) Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
+                stats.forEachIndexed { k, st ->
+                    if (k > 0) Box(Modifier.width(1.dp).fillMaxHeight().background(C.line))
+                    Column(Modifier.weight(1f).padding(horizontal = 4.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                        val shown = if (st.count) num(rememberFill(st.n.toFloat(), 1200).roundToInt()) else st.n.toString()
+                        WordFitText(shown + st.suffix, MaterialTheme.typography.titleLarge.copy(fontSize = 22.sp, fontWeight = FontWeight.ExtraBold), C.ink, 1, textAlign = TextAlign.Center)
+                        Text(st.label, style = MaterialTheme.typography.labelSmall.copy(fontSize = 13.sp, lineHeight = 16.sp, fontWeight = FontWeight.Medium).heading(), color = C.muted, textAlign = TextAlign.Center)
+                    }
+                }
+            }
+            if (p.health.isNotBlank() && p.healthAt.isNotBlank()) {
+                val live = p.state == "working" && p.water
+                val what = if (live) t("Water flowing", "Maji yanatoka") else donorStateName(p.state)
+                Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(bg).testTag("dcard_check_${p.id}")) {
+                    if (live) Waves(Modifier.matchParentSize(), C.ok.copy(alpha = 0.10f), C.blue.copy(alpha = 0.08f))
+                    Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+                        StateMark(p.state, donorStateColor(p.state)); Spacer(Modifier.width(10.dp))
+                        Text(what.nb() + " · " + (t("checked ", "imekaguliwa ") + Dates.day(p.healthAt)).nb(), color = fg, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold).para(), textAlign = TextAlign.Center)
+                    }
+                }
+            }
+        }
+        Box(Modifier.fillMaxWidth().height(1.dp).background(C.line))
+        Row(Modifier.fillMaxWidth().padding(vertical = 12.dp, horizontal = 16.dp), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+            Text(t("Photos, visits and repairs", "Picha, ziara na matengenezo"), color = C.blue, style = MaterialTheme.typography.titleSmall.copy(fontSize = 16.sp, fontWeight = FontWeight.Bold).heading(), textAlign = TextAlign.Center, modifier = Modifier.weight(1f, fill = false))
+            Spacer(Modifier.width(12.dp))
+            Box(Modifier.size(44.dp).shadow(8.dp, CircleShape, spotColor = Color(0x4D0A78C2)).clip(CircleShape).background(Color(0xFF0A78C2)), contentAlignment = Alignment.Center) {
+                Box(Modifier.nudge()) { DIcon("arrow", Color.White, 20.dp) }
             }
         }
     }
@@ -342,8 +432,8 @@ private fun DonorProject(m: AppModel, p: DProject, back: () -> Unit) {
     Box(Modifier.fillMaxWidth().aspectRatio(16f / 10f).clip(RoundedCornerShape(24.dp)).background(C.tint)) {
         NetImage(cover(m, p), Modifier.matchParentSize()) { Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { DIcon(iconOf(p), C.blue, 56.dp) } }
     }
-    Text(p.title, style = MaterialTheme.typography.headlineMedium, color = C.ink, modifier = Modifier.padding(top = 14.dp).testTag("dproject_title"))
-    Text(listOf(kindOf(p), p.place).filter { it.isNotBlank() }.joinToString(" · "), style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = C.muted)
+    Text(p.title, style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold).heading(), color = C.ink, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(top = 14.dp).testTag("dproject_title"))
+    Text(listOf(kindOf(p).nb(), p.place.nb()).filter { it.isNotBlank() }.joinToString(" · "), style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold).heading(), color = C.muted, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
     val (fg, bg) = stateTone(p.state)
     Card(Modifier.padding(top = 14.dp).testTag("dproject_state")) {
         Row(verticalAlignment = Alignment.Top) {
@@ -479,20 +569,28 @@ fun donorMonthSum(us: List<DUpdate>): String {
 
 @Composable
 private fun DonorUpdates(m: AppModel, v: DonorView, open: (String) -> Unit) {
-    SectionHead(t("Updates", "Habari"), t("newest first", "mpya kwanza"))
+    SectionHead(t("Updates", "Habari"), t("From the RAFIKI field team, newest first", "Kutoka kwa timu ya RAFIKI, mpya kwanza"))
     if (v.updates.isEmpty()) { EmptyDrop(t("News from your projects will appear here: visits, photos and thank-you messages.", "Habari za miradi yako zitaonekana hapa: ziara, picha na ujumbe wa shukrani.")); return }
     val seen = m.donor.seen
-    v.updates.groupBy { it.at.take(7) }.entries.take(12).forEachIndexed { i, (k, us) ->
-        Card(Modifier.padding(bottom = 14.dp).testTag("dmonth_$k")) {
-            Text(donorMonth(k), style = MaterialTheme.typography.titleMedium.copy(fontSize = 17.sp), color = C.ink)
-            Text(donorMonthSum(us), style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold), color = C.muted, modifier = Modifier.padding(top = 3.dp, bottom = 8.dp))
-            us.take(12).forEachIndexed { j, u -> v.project(u.pid)?.let { p -> if (j > 0) Box(Modifier.padding(vertical = 10.dp).fillMaxWidth().height(1.dp).background(C.line)); UpdateRow(m, u, p, seen.isNotBlank() && u.at > seen) { open(p.id) } } }
+    var n = 0
+    v.updates.groupBy { it.at.take(7) }.entries.take(12).forEach { (k, us) ->
+        Column(Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 10.dp).testTag("dmonth_$k"), horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(donorMonth(k).nb(), style = MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp, fontWeight = FontWeight.ExtraBold), color = C.ink, textAlign = TextAlign.Center)
+            Text(donorMonthSum(us), style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold).heading(), color = C.muted, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 2.dp))
         }
+        us.take(12).forEach { u -> v.project(u.pid)?.let { p -> UpdateCard(m, u, p, seen.isNotBlank() && u.at > seen, Modifier.padding(bottom = 14.dp).rise(minOf(n++, 6))) { open(p.id) } } }
     }
 }
 
+/** The update's icon: it pops in, then lives a little (a heart that beats, a spanner at work, a camera that flashes). */
 @Composable
-private fun UpdateRow(m: AppModel, u: DUpdate, p: DProject, fresh: Boolean, open: () -> Unit) {
+private fun UpdateIcon(icon: String, f: Color, b: Color) {
+    val live = when (icon) { "heart" -> Modifier.beat(); "wrench" -> Modifier.atWork(2600); "camera" -> Modifier.flash(); "spark" -> Modifier.bob(4.dp, 2400); else -> Modifier }
+    Box(Modifier.pop(250).then(live)) { if (icon == "heart") DqmTile("heart", f, b, 46.dp) else IconTile(icon, f, b, 46.dp) }
+}
+
+@Composable
+private fun UpdateCard(m: AppModel, u: DUpdate, p: DProject, fresh: Boolean, modifier: Modifier, open: () -> Unit) {
     var viewer by remember { mutableStateOf<Int?>(null) }
     val (icon, tone, title, body) = when (u.type) {
         "visit" -> listOf("cal", if (u.visit?.state == "notworking") "notworking" else if (u.visit?.state == "repair") "repairing" else "done", t("Site visit", "Ziara"), u.visit?.let { donorVisitSay(it) } ?: "")
@@ -504,26 +602,33 @@ private fun UpdateRow(m: AppModel, u: DUpdate, p: DProject, fresh: Boolean, open
         else -> return
     }
     val (f, b) = stateTone(tone)
-    Row(Modifier.fillMaxWidth().testTag("dupd_${u.type}_${u.pid}"), verticalAlignment = Alignment.Top) {
-        if (icon == "heart") DqmTile("heart", f, b, 40.dp) else IconTile(icon, f, b, 40.dp)
-        Spacer(Modifier.width(12.dp))
-        Column(Modifier.weight(1f)) {
+    val shape = RoundedCornerShape(28.dp)
+    val story = donorStory(u).ifBlank { body }
+    Column(modifier.fillMaxWidth().shadow(12.dp, shape, ambientColor = Color(0x1404263F), spotColor = Color(0x2604263F)).clip(shape)
+        .background(if (u.type == "anniversary") Brush.linearGradient(listOf(Color(0xFFFFF6E0), Color(0xFFFDE7C2))) else SolidColor(C.card))
+        .border(1.dp, C.ink.copy(alpha = 0.06f), shape).testTag("dupd_${u.type}_${u.pid}"), horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 20.dp, bottom = 16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            UpdateIcon(icon, f, b)
+            Text(p.title, style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold).heading(), color = C.blue2, textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = 10.dp).clip(RoundedCornerShape(8.dp)).clickable(role = Role.Button, onClick = open).padding(horizontal = 6.dp, vertical = 2.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(title, style = MaterialTheme.typography.titleSmall, color = C.ink, modifier = Modifier.weight(1f, fill = false))
-                if (fresh) { Spacer(Modifier.width(6.dp)); Tag(t("NEW", "MPYA"), C.hue("coral").bg, C.hue("coral").fg) }
+                Text(Dates.weekday(u.at).nb(), style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium), color = C.muted)
+                if (fresh) { Spacer(Modifier.width(8.dp)); Tag(t("NEW", "MPYA"), C.hue("coral").bg, C.hue("coral").fg) }
             }
-            Text(p.title + " · " + Dates.weekday(u.at), style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold), color = C.muted)
-            val story = donorStory(u).ifBlank { body }
-            if (story.isNotBlank()) Text(story, style = MaterialTheme.typography.bodyLarge, color = C.text, modifier = Modifier.padding(top = 4.dp))
-            val thumbs = if (u.type == "photos") u.photos.take(4) else if (u.type == "thanks" && u.media != "video" && u.id.isNotBlank()) listOf(u.id) else emptyList()
-            if (thumbs.isNotEmpty()) Row(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                thumbs.forEachIndexed { k, id -> NetImage(m.donor.api.photo(id, 480), Modifier.size(72.dp).clip(RoundedCornerShape(12.dp)).background(C.tint).clickable(role = Role.Button) { viewer = k }) {} }
+            Text(title, style = MaterialTheme.typography.titleLarge.copy(fontSize = 20.sp, lineHeight = 25.sp, fontWeight = FontWeight.ExtraBold).heading(), color = C.ink, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 12.dp))
+            if (story.isNotBlank()) Text(story, style = MaterialTheme.typography.bodyLarge.para(), color = C.text, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 6.dp))
+            val thumbs = if (u.type == "photos") u.photos.take(3) else if (u.type == "thanks" && u.media != "video" && u.id.isNotBlank()) listOf(u.id) else emptyList()
+            if (thumbs.isNotEmpty()) Row(Modifier.fillMaxWidth().padding(top = 14.dp), horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)) {
+                thumbs.forEachIndexed { k, id ->
+                    NetImage(m.donor.api.photo(id, 480), Modifier.weight(1f, fill = false).widthIn(max = 120.dp).fillMaxWidth().aspectRatio(100f / 84f).pop(350L + k * 100L).clip(RoundedCornerShape(16.dp)).background(C.tint).clickable(role = Role.Button) { viewer = k }) {}
+                }
             }
             viewer?.let { k -> PhotoViewer(thumbs.map { id -> m.donor.api.photo(id, 1600) to (p.title + " · " + Dates.weekday(u.at)) }, k, false) { viewer = null } }
-            Row(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Btn(t("See the project", "Ona mradi"), open, small = true, light = true, icon = "chev")
-                SpeakBtn("u_" + u.type + u.pid + u.at, p.title + ". " + title + ". " + Dates.weekday(u.at) + ". " + story, label = t("Listen", "Sikiliza"), small = true)
-            }
+        }
+        Box(Modifier.fillMaxWidth().height(1.dp).background(if (u.type == "anniversary") Color(0x268A5200) else C.line))
+        Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp), horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally), verticalAlignment = Alignment.CenterVertically) {
+            SpeakBtn("u_" + u.type + u.pid + u.at, p.title + ". " + title + ". " + Dates.weekday(u.at) + ". " + story, label = t("Listen", "Sikiliza"), small = true)
+            Btn(t("See the project", "Ona mradi"), open, small = true, light = true, icon = "arrow")
         }
     }
 }

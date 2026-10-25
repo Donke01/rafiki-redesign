@@ -11,7 +11,16 @@ import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -51,6 +60,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.input.pointer.pointerInput
@@ -174,15 +184,20 @@ fun DonorTalk(m: AppModel, p: DProject?) {
 
 @Composable
 private fun TalkRow(icon: String, color: Color, title: String, sub: String, tag: String, onClick: () -> Unit) {
-    val shape = RoundedCornerShape(18.dp)
+    val shape = RoundedCornerShape(20.dp)
     val wa = icon == "chat"
-    Row(Modifier.fillMaxWidth().clip(shape).background(if (wa) color else C.card).border(1.dp, if (wa) color else C.line, shape)
-        .clickable(role = Role.Button, onClick = onClick).heightIn(min = 64.dp).padding(horizontal = 18.dp, vertical = 10.dp).testTag(tag), verticalAlignment = Alignment.CenterVertically) {
-        Icon(Ic.get(icon), null, tint = if (wa) Color.White else color, modifier = Modifier.size(24.dp)); Spacer(Modifier.width(14.dp))
-        Column {
-            Text(title, style = MaterialTheme.typography.titleMedium, color = if (wa) Color.White else C.ink)
-            Text(sub, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = if (wa) Color.White.copy(alpha = .9f) else C.muted)
+    Row(Modifier.fillMaxWidth().shadow(2.dp, shape, ambientColor = Color(0x0D04263F), spotColor = Color(0x1404263F)).clip(shape).background(C.card).border(1.dp, C.ink.copy(alpha = 0.08f), shape)
+        .clickable(role = Role.Button, onClick = onClick).heightIn(min = 70.dp).padding(start = 12.dp, end = 14.dp, top = 12.dp, bottom = 12.dp).testTag(tag), verticalAlignment = Alignment.CenterVertically) {
+        Box(Modifier.size(44.dp).clip(CircleShape).background(if (wa) Color(0xFF25D366) else color), contentAlignment = Alignment.Center) {
+            Icon(Ic.get(icon), null, tint = Color.White, modifier = Modifier.size(22.dp))
         }
+        Spacer(Modifier.width(14.dp))
+        Column(Modifier.weight(1f)) {
+            Text(title, style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), color = C.ink)
+            WordFitText(sub.nb(), MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), C.muted, 1)
+        }
+        Spacer(Modifier.width(8.dp))
+        Icon(Ic.get("chev"), null, tint = C.muted, modifier = Modifier.size(20.dp))
     }
 }
 
@@ -304,16 +319,18 @@ fun DonorMap(m: AppModel, projects: List<DProject>, withCard: Boolean, open: (St
     var chosen by remember { mutableStateOf(false) }
     var full by remember { mutableStateOf(false) }
     var fitTick by remember { mutableIntStateOf(0) }
+    var dir by remember { mutableIntStateOf(1) }
     val sp = LocalSpeaker.current
     val choose: (String) -> Unit = { id -> cur = id; chosen = true; sp?.stop() }
+    val tapPin: (String) -> Unit = { id -> dir = 1; choose(id) }
     Card(pad = 0.dp, modifier = Modifier.testTag("dmap")) {
-        DonorMapView(pts, sat, { sat = it }, cur, chosen, fitTick, { if (withCard) choose(it) }, Modifier.fillMaxWidth().height(if (withCard) 380.dp else 260.dp), withCard)
+        DonorMapView(pts, sat, { sat = it }, cur, chosen, fitTick, { if (withCard) tapPin(it) }, Modifier.fillMaxWidth().height(if (withCard) 380.dp else 260.dp), withCard)
         Row(Modifier.fillMaxWidth().padding(12.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             if (pts.size > 1) Btn(t("Show all", "Onyesha yote"), { chosen = false; fitTick++ }, Modifier.weight(1f).testTag("dmap_all"), icon = "fit", light = true)
             Btn(t("Bigger map", "Ramani kubwa"), { full = true }, Modifier.weight(1f).testTag("dmap_big"), icon = "fit", light = true)
         }
         if (withCard) {
-            FlowRow(Modifier.fillMaxWidth().padding(start = 14.dp, end = 14.dp, bottom = 14.dp), horizontalArrangement = Arrangement.spacedBy(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            FlowRow(Modifier.fillMaxWidth().padding(start = 14.dp, end = 14.dp, bottom = 14.dp), horizontalArrangement = Arrangement.spacedBy(14.dp, Alignment.CenterHorizontally), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 listOf("working", "repairing", "notworking", "building", "planned", "done").filter { k -> pts.any { it.state == k } }.forEach { k ->
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(Modifier.size(18.dp).clip(CircleShape).background(Color.White).border(4.dp, donorStateColor(k), CircleShape)); Spacer(Modifier.width(7.dp))
@@ -323,12 +340,18 @@ fun DonorMap(m: AppModel, projects: List<DProject>, withCard: Boolean, open: (St
             }
             val i = pts.indexOfFirst { it.id == cur }.coerceAtLeast(0); val p = pts[i]
             Box(Modifier.fillMaxWidth().height(1.dp).background(C.line))
-            Crossfade(p.id, label = "dcard") { _ -> DonorMapCard(m, p, i, pts.size, { choose(pts[(i - 1 + pts.size) % pts.size].id) }, { choose(pts[(i + 1) % pts.size].id) }, open) }
+            AnimatedContent(i, transitionSpec = {
+                if (!Motion.on) EnterTransition.None togetherWith ExitTransition.None
+                else (slideInHorizontally(tween(420)) { w -> dir * w / 3 } + fadeIn(tween(420))) togetherWith (slideOutHorizontally(tween(300)) { w -> -dir * w / 3 } + fadeOut(tween(250)))
+            }, label = "dcard") { k ->
+                val q = pts[k.coerceIn(0, pts.size - 1)]
+                DonorMapCard(m, q, k, pts.size, { dir = -1; choose(pts[(k - 1 + pts.size) % pts.size].id) }, { dir = 1; choose(pts[(k + 1) % pts.size].id) }, open)
+            }
         }
     }
     if (full) Dialog({ full = false }, DialogProperties(usePlatformDefaultWidth = false)) {
         Box(Modifier.fillMaxSize().background(Color.Black)) {
-            DonorMapView(pts, sat, { sat = it }, cur, chosen, fitTick, { if (withCard) choose(it) }, Modifier.fillMaxSize(), false)
+            DonorMapView(pts, sat, { sat = it }, cur, chosen, fitTick, { if (withCard) tapPin(it) }, Modifier.fillMaxSize(), false)
             Btn(t("Close map", "Funga ramani"), { full = false }, Modifier.align(Alignment.BottomCenter).padding(bottom = 28.dp).testTag("dmap_close"), icon = "x")
         }
     }
@@ -337,31 +360,42 @@ fun DonorMap(m: AppModel, projects: List<DProject>, withCard: Boolean, open: (St
 @Composable
 private fun DonorMapCard(m: AppModel, p: DProject, i: Int, n: Int, prev: () -> Unit, next: () -> Unit, open: (String) -> Unit) {
     val say = donorStateSay(p) + donorPeopleSay(p).let { if (it.isBlank()) "" else " $it" }
-    Column(Modifier.padding(16.dp).testTag("dmap_card"), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            NetImage(p.photos.firstOrNull()?.let { m.donor.api.board(it, 480) } ?: p.gallery.firstOrNull()?.let { m.donor.api.photo(it.id, 480) },
-                Modifier.size(84.dp).clip(RoundedCornerShape(18.dp)).background(C.tint)) { Icon(Ic.get(donorIcon(p)), null, tint = C.blue, modifier = Modifier.size(36.dp)) }
-            Spacer(Modifier.width(14.dp))
-            Column {
-                Text(p.title, style = MaterialTheme.typography.titleLarge, color = C.ink)
-                Text(listOf(p.area, p.country).filter { it.isNotBlank() }.joinToString(", "), style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = C.muted)
+    val col = donorStateColor(p.state)
+    val thumb = RoundedCornerShape(24.dp)
+    Column(Modifier.fillMaxWidth().padding(start = 18.dp, end = 18.dp, top = 12.dp, bottom = 18.dp).testTag("dmap_card"), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(14.dp)) {
+        Box(Modifier.size(40.dp, 5.dp).clip(RoundedCornerShape(3.dp)).background(C.line))
+        NetImage(p.photos.firstOrNull()?.let { m.donor.api.board(it, 480) } ?: p.gallery.firstOrNull()?.let { m.donor.api.photo(it.id, 480) },
+            Modifier.size(104.dp).shadow(10.dp, thumb, spotColor = Color(0x2904263F)).clip(thumb).background(C.tint)) { Icon(Ic.get(donorIcon(p)), null, tint = C.blue, modifier = Modifier.size(40.dp)) }
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Row(Modifier.clip(RoundedCornerShape(99.dp)).background(col.copy(alpha = .12f)).padding(horizontal = 12.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+                BreathDot(col, p.state == "working" || p.state == "repairing", 10.dp); Spacer(Modifier.width(8.dp))
+                Text(donorStateName(p.state), color = col, style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold), maxLines = 1, softWrap = false)
             }
+            Text(p.title, style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold).heading(), color = C.ink, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 10.dp))
+            Text(listOf(p.area, p.country).filter { it.isNotBlank() }.joinToString(", ").nb(), style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = C.muted, textAlign = TextAlign.Center)
         }
-        val col = donorStateColor(p.state)
-        Row(Modifier.clip(RoundedCornerShape(99.dp)).background(col.copy(alpha = .12f)).padding(horizontal = 12.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
-            Box(Modifier.size(10.dp).clip(CircleShape).background(col)); Spacer(Modifier.width(8.dp))
-            Text(donorStateName(p.state), color = col, style = MaterialTheme.typography.labelLarge)
+        Text(say, style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp, lineHeight = 27.sp).para(), color = C.text, textAlign = TextAlign.Center)
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+            Btn(t("See this project", "Ona mradi huu"), { open(p.id) }, Modifier.weight(1f).testTag("dmap_open"), icon = "arrow")
+            SpeakBtn("map_" + p.id, p.title + ". " + donorStateName(p.state) + ". " + say, label = t("Listen", "Sikiliza"))
         }
-        Text(say, style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp, lineHeight = 26.sp), color = C.text)
-        if (n > 1) Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            Btn(t("Previous", "Iliyotangulia"), prev, Modifier.weight(1f).testTag("dmap_prev"), icon = "back", light = true)
-            Btn(t("Next", "Inayofuata"), next, Modifier.weight(1f).testTag("dmap_next"), icon = "arrow", light = true)
+        if (n > 1) Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(99.dp)).background(if (C.dark) Color(0x14FFFFFF) else Color(0xFFF3F5F7)).padding(6.dp), verticalAlignment = Alignment.CenterVertically) {
+            PagerBtn("back", t("Previous project", "Mradi uliotangulia"), "dmap_prev", prev)
+            Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(t("Project ${i + 1} of $n", "Mradi ${i + 1} kati ya $n").nb(), style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold), color = C.ink, maxLines = 1, softWrap = false)
+                Row(Modifier.padding(top = 6.dp), horizontalArrangement = Arrangement.spacedBy(5.dp), verticalAlignment = Alignment.CenterVertically) {
+                    repeat(minOf(n, 8)) { k -> Box(Modifier.size(if (k == minOf(i, 7)) 22.dp else 7.dp, 7.dp).clip(RoundedCornerShape(4.dp)).background(if (k == minOf(i, 7)) C.blue else C.edge)) }
+                }
+            }
+            PagerBtn("arrow", t("Next project", "Mradi unaofuata"), "dmap_next", next)
         }
-        Btn(t("See this project", "Ona mradi huu"), { open(p.id) }, Modifier.fillMaxWidth().testTag("dmap_open"), icon = "chev")
-        SpeakBtn("map_" + p.id, p.title + ". " + donorStateName(p.state) + ". " + say, Modifier.fillMaxWidth())
-        if (n > 1) Text(t("Project ${i + 1} of $n", "Mradi ${i + 1} kati ya $n"), style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = C.muted,
-            textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
     }
+}
+
+@Composable
+private fun PagerBtn(icon: String, label: String, tag: String, onClick: () -> Unit) {
+    Box(Modifier.size(50.dp).clip(CircleShape).background(C.card).border(1.5.dp, C.line, CircleShape).clickable(role = Role.Button, onClick = onClick)
+        .semantics { contentDescription = label }.testTag(tag), contentAlignment = Alignment.Center) { Icon(Ic.get(icon), null, tint = C.ink, modifier = Modifier.size(22.dp)) }
 }
 
 // ---- photos: full screen, big arrows, swipe, slideshow ---------------------------------------------------------
