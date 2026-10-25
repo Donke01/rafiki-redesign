@@ -114,20 +114,117 @@ struct RouteView: View {
     }
 }
 
-// MARK: - monthly report
+// MARK: - monthly report (the same sums, sections and design as the web and Android reports)
 
+struct Kpi { var value: String; var label: String; var tone = "" }
+struct CountryRow { var name: String; var projects: Int; var visited: Int; var working: Int; var repair: Int; var notWorking: Int; var open: Int }
+struct RepairRow { var title: String; var country: String; var state: String; var date: String; var by: String; var urgency: String; var problems: String; var parts: String; var cost: Int? }
+struct VisitRow { var date: String; var title: String; var by: String; var state: String; var urgency: String }
 struct ReportData {
-    var label: String; var visits: [JSON]; var ids: Set<String>; var working: Int; var fixed: Int; var pins: Int; var newSites: Int; var openRepairs: Int; var due: Int; var byCountry: [[String]]
+    var label: String; var country: String; var by: String; var date: String
+    var kpis: [Kpi]; var byCountry: [CountryRow]; var repairs: [RepairRow]; var cost: Int; var visits: [VisitRow]
+    var fileName: String { "RAFIKI-field-report-" + label.replacingOccurrences(of: " ", with: "-") + ".pdf" }
 }
 
-private func monthStart(_ d: Date) -> Date {
-    var c = Calendar(identifier: .gregorian); c.timeZone = TimeZone(identifier: "UTC")!
-    return c.date(from: c.dateComponents([.year, .month], from: d))!
+private func monthStart(_ d: Date) -> Date { let c = Calendar.current; return c.date(from: c.dateComponents([.year, .month], from: d))! }
+private func addMonths(_ d: Date, _ n: Int) -> Date { Calendar.current.date(byAdding: .month, value: n, to: d)! }
+private func monthKey(_ d: Date) -> String { let f = DateFormatter(); f.locale = Locale(identifier: "en_US_POSIX"); f.dateFormat = "yyyy-MM"; return f.string(from: d) }
+private func monthName(_ d: Date) -> String { let f = DateFormatter(); f.locale = Locale(identifier: Lang.sw ? "sw" : "en_GB"); f.dateFormat = "LLLL yyyy"; return f.string(from: d) }
+private func dayMonth(_ iso: String) -> String { guard let d = When.parse(iso) else { return String(iso.prefix(10)) }; let f = DateFormatter(); f.locale = Locale(identifier: Lang.sw ? "sw" : "en_GB"); f.dateFormat = "d MMM"; return f.string(from: d) }
+private func rnum(_ n: Int) -> String { let f = NumberFormatter(); f.numberStyle = .decimal; f.locale = Locale(identifier: "en_US"); return f.string(from: NSNumber(value: n)) ?? "\(n)" }
+
+/// The month's report for ck ("" = all countries), counted exactly like the web app's report.
+func buildReport(_ snap: Snapshot, _ act: [JSON], _ ym: Date, _ ck: String, by: String) -> ReportData {
+    let byId = Dictionary(snap.projects.map { ($0.id, $0) }, uniquingKeysWith: { a, _ in a })
+    let inC: (String) -> Bool = { id in ck.isEmpty || byId[id]?.ck == ck }
+    let from = ym, to = addMonths(ym, 1)
+    let ev = act.filter { e in
+        guard let d = When.parse(e.str("at")), d >= from, d < to else { return false }
+        return e.str("a") == "new" || inC(e.str("id"))
+    }
+    let visits = ev.filter { $0.str("a") == "visit" }
+    var latest: [String: JSON] = [:]
+    for v in visits { let id = v.str("id"); if latest[id] == nil || latest[id]!.str("at") < v.str("at") { latest[id] = v } }
+    let ids = Array(latest.keys)
+    let working = ids.filter { latest[$0]!.str("s") == "working" }.count
+    let projs = snap.projects.filter { ck.isEmpty || $0.ck == ck }
+    let urgo = ["urgent": 0, "month": 1, "watch": 2]
+    let open = snap.repairs.filter { inC($0.key) }.sorted { (urgo[$0.value.urgency] ?? 3, $0.key) < (urgo[$1.value.urgency] ?? 3, $1.key) }
+    let urgent = open.filter { $0.value.urgency == "urgent" }.count
+    let cost = open.reduce(0) { $0 + ($1.value.cost ?? 0) }
+    let due = projs.filter { $0.gps != nil && ageDays(snap, $0) >= DUE_DAYS }.count
+    let n = { (a: String) in ev.filter { $0.str("a") == a }.count }
+    let pc = ids.isEmpty ? "–" : "\(Int((Double(working) * 100 / Double(ids.count)).rounded()))%"
+    func pl(_ k: Int, _ one: String, _ many: String) -> String { k == 1 ? one : many }
+    let kpis = [
+        Kpi(value: "\(visits.count)", label: pl(visits.count, t("site visit", "ziara"), t("site visits", "ziara"))),
+        Kpi(value: "\(ids.count)", label: pl(ids.count, t("project visited", "mradi uliotembelewa"), t("projects visited", "miradi iliyotembelewa"))),
+        Kpi(value: pc, label: t("of visited projects working", "ya miradi iliyotembelewa inafanya kazi"), tone: !ids.isEmpty && Double(working) / Double(ids.count) < 0.8 ? "warn" : ""),
+        Kpi(value: "\(open.count)", label: pl(open.count, t("open repair", "tengenezo lililo wazi"), t("open repairs", "matengenezo yaliyo wazi")) + (urgent > 0 ? t(" (\(urgent) urgent)", " (\(urgent) ya haraka)") : ""), tone: urgent > 0 ? "bad" : ""),
+        Kpi(value: "\(n("fixed"))", label: pl(n("fixed"), t("repair fixed", "tengenezo lililokamilika"), t("repairs fixed", "matengenezo yaliyokamilika"))),
+        Kpi(value: "\(n("new"))", label: pl(n("new"), t("new site added", "eneo jipya lililoongezwa"), t("new sites added", "maeneo mapya yaliyoongezwa"))),
+        Kpi(value: "\(n("pin"))", label: pl(n("pin"), t("location pinned", "mahali palipowekwa"), t("locations pinned", "mahali palipowekwa"))),
+        Kpi(value: "\(due)", label: t("due a visit (6+ months)", "zinasubiri ziara (miezi 6+)")),
+    ]
+    let byCountry = COUNTRIES.filter { ck.isEmpty || $0.0 == ck }.map { c, name -> CountryRow in
+        let cid = ids.filter { byId[$0]?.ck == c }
+        let k = { (s: String) in cid.filter { latest[$0]!.str("s") == s }.count }
+        return CountryRow(name: name, projects: snap.projects.filter { $0.ck == c }.count, visited: cid.count, working: k("working"), repair: k("repair"), notWorking: k("notworking"), open: open.filter { byId[$0.key]?.ck == c }.count)
+    }
+    let repairs = open.map { id, r -> RepairRow in
+        let p = byId[id]
+        let probs = r.problems.joined(separator: ", ")
+        return RepairRow(title: p?.title ?? (r.title.isEmpty ? id : r.title), country: p?.country ?? "", state: r.state == "notworking" ? "notworking" : "repair", date: dayMonth(r.at), by: r.by,
+                         urgency: r.urgency.isEmpty ? "–" : urgencyName(r.urgency), problems: !probs.isEmpty ? probs : (r.note.isEmpty ? "–" : r.note), parts: r.parts.isEmpty ? "–" : r.parts, cost: (r.cost ?? 0) > 0 ? r.cost : nil)
+    }
+    let rows = visits.sorted { $0.str("at") < $1.str("at") }.map { e in
+        VisitRow(date: dayMonth(e.str("at")), title: byId[e.str("id")]?.title ?? e.str("t"), by: e.str("by"), state: e.str("s"), urgency: e.str("u").isEmpty ? "" : urgencyName(e.str("u")))
+    }
+    let f = DateFormatter(); f.locale = Locale(identifier: Lang.sw ? "sw" : "en_GB"); f.dateFormat = "d MMMM yyyy"
+    return ReportData(label: monthName(ym), country: countryName(ck) ?? t("All countries", "Nchi zote"), by: by, date: f.string(from: Date()), kpis: kpis, byCountry: byCountry, repairs: repairs, cost: cost, visits: rows)
 }
-private func addMonths(_ d: Date, _ n: Int) -> Date { var c = Calendar(identifier: .gregorian); c.timeZone = TimeZone(identifier: "UTC")!; return c.date(byAdding: .month, value: n, to: d)! }
-private func monthKey(_ d: Date) -> String { let f = DateFormatter(); f.locale = Locale(identifier: "en_US_POSIX"); f.timeZone = TimeZone(identifier: "UTC"); f.dateFormat = "yyyy-MM"; return f.string(from: d) }
-private func monthName(_ d: Date) -> String {
-    let f = DateFormatter(); f.timeZone = TimeZone(identifier: "UTC"); f.locale = Locale(identifier: Lang.sw ? "sw" : "en_GB"); f.dateFormat = "LLLL yyyy"; return f.string(from: d)
+
+func reportTitle(_ r: ReportData) -> String { t("Field report · ", "Ripoti ya uwanjani · ") + r.label }
+func reportSub(_ r: ReportData) -> String { r.country + " · RAFIKI Outreach · " + t("Prepared by ", "Imeandaliwa na ") + r.by + ", " + r.date }
+func repairsHeading(_ r: ReportData) -> String { t("Open repairs", "Matengenezo yaliyo wazi") + (r.cost > 0 ? t(" · about KES\u{00A0}\(rnum(r.cost)) estimated", " · takriban KES\u{00A0}\(rnum(r.cost)) kwa makadirio") : "") }
+func reportNote() -> String { t("Only visits, repairs and pins made with the RAFIKI Pin app are counted.", "Ziara, matengenezo na mahali vilivyowekwa kwa programu ya RAFIKI Pin tu ndivyo vinahesabiwa.") }
+let LETTERHEAD_FOOT = "501(c)(3) Nonprofit Organization  |  Providing clean water and community development in East Africa"
+
+/// One table cell: text (bold or not, after a status mark), and an optional small grey line under it.
+struct RCell { var text: String; var bold = false; var icon: String? = nil; var sub = "" }
+struct RTable { var cols: [CGFloat]; var head: [RCell]; var rows: [[RCell]] }
+private let STATE_ICONS: Set<String> = ["working", "repair", "notworking"]
+
+func countryTable(_ r: ReportData) -> RTable {
+    RTable(cols: [92, 58, 58, 74, 66, 84, 76.6],
+           head: [RCell(text: t("Country", "Nchi")), RCell(text: t("Projects", "Miradi")), RCell(text: t("Visited", "Zimetembelewa")), RCell(text: t("Working", "Zinafanya kazi"), icon: "working"),
+                  RCell(text: t("Repair", "Matengenezo"), icon: "repair"), RCell(text: t("Not working", "Hazifanyi kazi"), icon: "notworking"), RCell(text: t("Open repairs", "Matengenezo wazi"))],
+           rows: r.byCountry.map { c in [RCell(text: c.name), RCell(text: "\(c.projects)"), RCell(text: "\(c.visited)"), RCell(text: "\(c.working)"), RCell(text: "\(c.repair)"), RCell(text: "\(c.notWorking)"), RCell(text: "\(c.open)")] })
+}
+func repairTable(_ r: ReportData) -> RTable {
+    RTable(cols: [128, 68, 62, 128, 70, 52.6],
+           head: [RCell(text: t("Project", "Mradi")), RCell(text: t("Reported", "Iliripotiwa")), RCell(text: t("Urgency", "Uharaka")), RCell(text: t("Problems", "Matatizo")), RCell(text: t("Parts", "Vipuri")), RCell(text: t("Est. KES", "Makadirio KES"))],
+           rows: r.repairs.map { x in [RCell(text: x.title, bold: true, icon: x.state, sub: (x.country.isEmpty ? "" : x.country + " · ") + stateName(x.state).lowercased()),
+                                       RCell(text: x.date, sub: x.by), RCell(text: x.urgency), RCell(text: x.problems), RCell(text: x.parts), RCell(text: x.cost.map(rnum) ?? "–")] })
+}
+func visitTable(_ r: ReportData) -> RTable {
+    RTable(cols: [62, 176, 118, 152.6],
+           head: [RCell(text: t("Date", "Tarehe")), RCell(text: t("Project", "Mradi")), RCell(text: t("By", "Na")), RCell(text: t("Result", "Matokeo"))],
+           rows: r.visits.map { v in [RCell(text: v.date), RCell(text: v.title), RCell(text: v.by), RCell(text: stateName(v.state) + (v.urgency.isEmpty ? "" : " · " + v.urgency), icon: STATE_ICONS.contains(v.state) ? v.state : nil)] })
+}
+
+private let PInk = Color(hex: 0x04263F), PBlue = Color(hex: 0x076DB1), PText = Color(hex: 0x141618), PMuted = Color(hex: 0x5A6066), PLine = Color(hex: 0xDCE1E5), PNavy = Color(hex: 0x1A365D)
+
+/// The web report's status marks (✅ ⚠️ ❌), drawn so they look the same everywhere.
+struct StateMark: View {
+    let state: String; var size: CGFloat = 12
+    var body: some View {
+        switch state {
+        case "working": Image(systemName: "checkmark.square.fill").resizable().foregroundColor(Color(hex: 0x2E9E5B)).frame(width: size, height: size)
+        case "repair": Image(systemName: "exclamationmark.triangle.fill").resizable().foregroundColor(Color(hex: 0xF2B13A)).frame(width: size, height: size)
+        default: Image(systemName: "xmark").resizable().font(.system(size: size, weight: .heavy)).foregroundColor(Color(hex: 0xD7301F)).frame(width: size * 0.8, height: size * 0.8)
+        }
+    }
 }
 
 struct ReportView: View {
@@ -136,29 +233,10 @@ struct ReportView: View {
     @State private var ck = ""
     @State private var err: String?
 
-    func build(_ snap: Snapshot) -> ReportData {
-        let inCountry: (String) -> Bool = { id in ck.isEmpty || snap.projects.first { $0.id == id }?.ck == ck }
-        let from = ym, to = addMonths(ym, 1)
-        let ev = (m.activity ?? []).filter { e in
-            guard let d = When.parse(e.str("at")), d >= from, d < to else { return false }
-            return e.str("id").isEmpty || inCountry(e.str("id"))
-        }
-        let visits = ev.filter { $0.str("a") == "visit" }
-        var latest: [String: JSON] = [:]
-        for v in visits { let id = v.str("id"); if latest[id] == nil || latest[id]!.str("at") < v.str("at") { latest[id] = v } }
-        let byCountry: [[String]] = COUNTRIES.filter { ck.isEmpty || $0.0 == ck }.compactMap { k, n in
-            let l = snap.projects.filter { $0.ck == k }; if l.isEmpty { return nil }
-            let ids = Set(l.map(\.id)); let v = latest.filter { ids.contains($0.key) }.values
-            return [n, "\(l.count)", "\(v.count)", "\(v.filter { $0.str("s") == "working" }.count)", "\(v.filter { $0.str("s") == "repair" }.count)", "\(v.filter { $0.str("s") == "notworking" }.count)", "\(l.filter { snap.repairs[$0.id] != nil }.count)"]
-        }
-        return ReportData(label: monthName(ym), visits: visits, ids: Set(latest.keys), working: latest.values.filter { $0.str("s") == "working" }.count,
-                          fixed: ev.filter { $0.str("a") == "fixed" }.count, pins: ev.filter { $0.str("a") == "pin" }.count, newSites: ev.filter { $0.str("a") == "new" }.count,
-                          openRepairs: snap.repairs.keys.filter(inCountry).count, due: snap.projects.filter { $0.gps != nil && inCountry($0.id) && ageDays(snap, $0) >= DUE_DAYS }.count, byCountry: byCountry)
-    }
-
     var body: some View {
         if let snap = m.snap {
-            let rep = build(snap)
+            let home = snap.me.home.isEmpty ? m.prefs.country : snap.me.home
+            let rep = buildReport(snap, m.activity ?? [], ym, ck, by: m.prefs.name)
             let months = (0..<13).map { addMonths(monthStart(Date()), -$0) }
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
@@ -167,47 +245,85 @@ struct ReportView: View {
                         Picker1(label: t("Month", "Mwezi"), value: monthKey(ym), options: months.map { (monthKey($0), monthName($0)) }) { k in if let d = months.first(where: { monthKey($0) == k }) { ym = d } }
                         Picker1(label: t("Country", "Nchi"), value: ck, options: [("", t("All countries", "Nchi zote"))] + COUNTRIES) { ck = $0 }
                     }
+                    Btn(t("Share PDF", "Shiriki PDF"), icon: "share", wide: true) { sharePdf(rep, home: home) }.padding(.top, 12).accessibilityIdentifier("sharePdf")
                     Msg(err, "warn")
-                    CardV {
-                        Text(t("Field report · ", "Ripoti ya uwanjani · ") + rep.label).font(.tLarge).foregroundColor(C.ink)
-                        Text((countryName(ck) ?? t("All countries", "Nchi zote")) + " · RAFIKI Outreach · " + t("Prepared by ", "Imeandaliwa na ") + m.prefs.name).font(.bSmall).foregroundColor(C.muted)
-                        let pctW = rep.ids.isEmpty ? "—" : "\(rep.working * 100 / rep.ids.count)%"
-                        let tiles = [("\(rep.visits.count)", t("site visits", "ziara")), ("\(rep.ids.count)", t("projects visited", "miradi iliyotembelewa")),
-                                     (pctW, t("of visited projects working", "ya miradi iliyotembelewa inafanya kazi")), ("\(rep.openRepairs)", t("open repairs", "matengenezo yaliyo wazi")),
-                                     ("\(rep.fixed)", t("repairs fixed", "matengenezo yaliyokamilika")), ("\(rep.newSites)", t("new sites added", "maeneo mapya yaliyoongezwa")),
-                                     ("\(rep.pins)", t("locations pinned", "mahali palipowekwa")), ("\(rep.due)", t("due a visit (6+ months)", "zinasubiri ziara (miezi 6+)"))]
-                        LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
-                            ForEach(Array(tiles.enumerated()), id: \.offset) { _, tl in
-                                VStack(alignment: .leading, spacing: 2) { Text(tl.0).font(.hMedium).foregroundColor(C.ink); Text(tl.1).font(.bSmall).foregroundColor(C.muted).fixedSize(horizontal: false, vertical: true) }
-                                    .frame(maxWidth: .infinity, minHeight: 80, alignment: .topLeading).padding(12).background(C.tint).clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-                            }
-                        }.padding(.top, 10)
-                        H2(t("By country", "Kwa nchi")).padding(.top, 16)
-                        let head = [t("Country", "Nchi"), t("Projects", "Miradi"), t("Visited", "Zimetembelewa"), t("Working", "Zinafanya kazi"), t("Repair", "Matengenezo"), t("Not working", "Hazifanyi kazi"), t("Open repairs", "Matengenezo wazi")]
-                        ScrollView(.horizontal, showsIndicators: true) {
-                            VStack(alignment: .leading, spacing: 0) {
-                                ForEach(Array(([head] + rep.byCountry).enumerated()), id: \.offset) { i, r in
-                                    HStack(spacing: 0) {
-                                        ForEach(Array(r.enumerated()), id: \.offset) { j, c in
-                                            Text(c).font(.mont(12, i == 0 || j == 0 ? .bold : .medium)).foregroundColor(i == 0 ? .white : C.text).lineLimit(2)
-                                                .frame(width: j == 0 ? 104 : 118, alignment: .leading).padding(.trailing, 6)
-                                        }
-                                    }.padding(.vertical, 6).padding(.horizontal, 4).background(i == 0 ? C.blue2 : i % 2 == 0 ? C.tint : .clear)
-                                }
-                            }
-                        }
-                        H2(t("Visits this month", "Ziara za mwezi huu")).padding(.top, 16)
-                        if rep.visits.isEmpty { Text(t("No visits recorded in the app this month.", "Hakuna ziara zilizorekodiwa kwenye programu mwezi huu.")).font(.bMedium).foregroundColor(C.muted) }
-                        ForEach(Array(rep.visits.sorted { $0.str("at") < $1.str("at") }.enumerated()), id: \.offset) { _, e in
-                            Text(When.text(e.str("at")) + " · " + e.str("t") + " · " + e.str("by") + " · " + stateName(e.str("s"))).font(.bSmall).foregroundColor(C.text).padding(.top, 4)
-                        }
-                        Text(t("Only visits, repairs and pins made with the RAFIKI Pin app are counted.", "Ziara, matengenezo na mahali vilivyowekwa kwa programu ya RAFIKI Pin tu ndivyo vinahesabiwa.")).font(.bSmall).foregroundColor(C.muted).padding(.top, 12)
-                    }.padding(.top, 14)
-                    Btn(t("Share as PDF", "Shiriki kama PDF"), icon: "upload", wide: true) { sharePdf(rep, country: countryName(ck) ?? t("All countries", "Nchi zote"), by: m.prefs.name, home: m.prefs.country) }.padding(.top, 14)
+                    ReportPaper(r: rep, home: home).padding(.top, 14)
                     Spacer().frame(height: 24)
                 }.padding(16)
             }
             .task { if !(await m.loadActivity()) { err = t("No signal: the report needs a connection the first time.", "Hakuna mtandao: ripoti inahitaji mtandao mara ya kwanza.") } }
+        }
+    }
+}
+
+/// The report as a white sheet, like the web report (the same sections and tables as the PDF).
+private struct ReportPaper: View {
+    let r: ReportData; let home: String
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(alignment: .bottom, spacing: 8) {
+                Image("LetterheadLogo").resizable().scaledToFit().frame(maxWidth: .infinity, alignment: .leading).padding(.bottom, 8).layoutPriority(0)
+                VStack(alignment: .trailing, spacing: 0) { ForEach(letterheadAddress(home), id: \.self) { Text($0).font(.system(size: 9)).foregroundColor(.black) } }.layoutPriority(1)
+            }
+            Rectangle().fill(PNavy).frame(height: 1.5).padding(.bottom, 16)
+            Text(reportTitle(r)).font(.mont(21, .heavy)).foregroundColor(PInk)
+            Text(reportSub(r)).font(.mont(12)).foregroundColor(PMuted).padding(.top, 2)
+            LazyVGrid(columns: [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)], spacing: 8) {
+                ForEach(Array(r.kpis.enumerated()), id: \.offset) { _, k in
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(k.value).font(.mont(21, .heavy)).foregroundColor(PInk)
+                        Text(k.label).font(.mont(11.5, .semibold)).foregroundColor(Color(hex: 0x3A3F44)).fixedSize(horizontal: false, vertical: true)
+                        Spacer(minLength: 0)
+                    }.padding(10).frame(maxWidth: .infinity, minHeight: 74, alignment: .topLeading)
+                    .background(k.tone == "warn" ? Color(hex: 0xFDF0DC) : k.tone == "bad" ? Color(hex: 0xFBE7E5) : Color(hex: 0xE3F1FC)).clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                }
+            }.padding(.top, 14)
+            heading(t("By country", "Kwa nchi")); PaperTable(tb: countryTable(r))
+            heading(repairsHeading(r))
+            if r.repairs.isEmpty { Text(t("None. 🎉", "Hakuna. 🎉")).font(.bMedium).foregroundColor(PMuted) } else { PaperTable(tb: repairTable(r)) }
+            heading(t("Visits this month", "Ziara za mwezi huu"))
+            if r.visits.isEmpty { Text(t("No visits recorded in the app this month.", "Hakuna ziara zilizorekodiwa kwenye programu mwezi huu.")).font(.bMedium).foregroundColor(PMuted) } else { PaperTable(tb: visitTable(r)) }
+            Text(reportNote()).font(.mont(11.5)).foregroundColor(PMuted).padding(.top, 16)
+            HStack(spacing: 12) {
+                VStack(alignment: .leading, spacing: 4) { Rectangle().fill(PNavy).frame(height: 1); Text(LETTERHEAD_FOOT).font(.system(size: 8)).foregroundColor(Color(white: 0.5)) }
+                Image("LetterheadLogo").resizable().scaledToFit().frame(width: 58)
+            }.padding(.top, 18)
+        }
+        .padding(.horizontal, 16).padding(.vertical, 18).background(Color.white)
+        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous)).shadow(color: .black.opacity(0.12), radius: 4, y: 2)
+        .environment(\.colorScheme, .light).accessibilityIdentifier("report")
+    }
+    func heading(_ s: String) -> some View { Text(s).font(.mont(16, .heavy)).foregroundColor(PBlue).padding(.top, 22).padding(.bottom, 6) }
+}
+
+/// A report table like the web one: blue header row, light stripes, hairlines; it scrolls sideways when it's wider than the phone.
+private struct PaperTable: View {
+    let tb: RTable
+    var body: some View {
+        let w = tb.cols.map { $0 * 1.15 }
+        ScrollView(.horizontal, showsIndicators: true) {
+            VStack(alignment: .leading, spacing: 0) {
+                HStack(alignment: .center, spacing: 0) {
+                    ForEach(Array(tb.head.enumerated()), id: \.offset) { i, h in
+                        HStack(spacing: 4) { if let ic = h.icon { StateMark(state: ic, size: 11) }; Text(h.text).font(.mont(10, .bold)).foregroundColor(.white).lineLimit(2) }
+                            .padding(.horizontal, 6).padding(.vertical, 8).frame(width: w[i], alignment: .leading)
+                    }
+                }.background(PBlue).clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous).inset(by: -0.5))
+                ForEach(Array(tb.rows.enumerated()), id: \.offset) { n, r in
+                    HStack(alignment: .top, spacing: 0) {
+                        ForEach(Array(r.enumerated()), id: \.offset) { i, c in
+                            VStack(alignment: .leading, spacing: 1) {
+                                HStack(alignment: .top, spacing: 4) {
+                                    if let ic = c.icon { StateMark(state: ic, size: 12).padding(.top, 2) }
+                                    Text(c.text).font(.mont(11.5, c.bold ? .bold : .medium)).foregroundColor(PText).lineLimit(6).fixedSize(horizontal: false, vertical: true)
+                                }
+                                if !c.sub.isEmpty { Text(c.sub).font(.mont(10)).foregroundColor(PMuted).lineLimit(1) }
+                            }.padding(.horizontal, 6).padding(.vertical, 7).frame(width: w[i], alignment: .leading)
+                        }
+                    }.background(n % 2 == 1 ? Color(hex: 0xF4F9FD) : Color.white)
+                    Rectangle().fill(PLine).frame(width: w.reduce(0, +), height: 0.75)
+                }
+            }
         }
     }
 }
@@ -246,40 +362,97 @@ func drawLetterheadFoot(pageW: CGFloat = 595, pageH: CGFloat = 842) {
         .draw(at: CGPoint(x: 43.2, y: pageH - 25.2 - font.ascender))
 }
 
-/// Draws the report onto A4 pages on the RAFIKI letterhead and opens the share sheet (WhatsApp, e-mail, Files…).
-func sharePdf(_ r: ReportData, country: String, by: String, home: String = "") {
+/// Draws the report onto A4 pages on the RAFIKI letterhead (numbers, the three tables) and opens the share sheet.
+func sharePdf(_ r: ReportData, home: String = "") {
     let page = CGRect(x: 0, y: 0, width: 595, height: 842)
-    let title: [NSAttributedString.Key: Any] = [.font: UIFont.boldSystemFont(ofSize: 20), .foregroundColor: UIColor(red: 0x04 / 255, green: 0x26 / 255, blue: 0x3F / 255, alpha: 1)]
-    let h2: [NSAttributedString.Key: Any] = [.font: UIFont.boldSystemFont(ofSize: 13), .foregroundColor: UIColor(red: 0x07 / 255, green: 0x6D / 255, blue: 0xB1 / 255, alpha: 1)]
-    let body: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 10), .foregroundColor: UIColor(red: 0x14 / 255, green: 0x16 / 255, blue: 0x18 / 255, alpha: 1)]
-    let muted: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 10), .foregroundColor: UIColor(red: 0x5A / 255, green: 0x60 / 255, blue: 0x66 / 255, alpha: 1)]
+    let ink = UIColor(red: 0x04 / 255, green: 0x26 / 255, blue: 0x3F / 255, alpha: 1), blue = UIColor(red: 0x07 / 255, green: 0x6D / 255, blue: 0xB1 / 255, alpha: 1)
+    let text = UIColor(red: 0x14 / 255, green: 0x16 / 255, blue: 0x18 / 255, alpha: 1), mutedC = UIColor(red: 0x5A / 255, green: 0x60 / 255, blue: 0x66 / 255, alpha: 1)
+    let title: [NSAttributedString.Key: Any] = [.font: UIFont.boldSystemFont(ofSize: 20), .foregroundColor: ink]
+    let h2: [NSAttributedString.Key: Any] = [.font: UIFont.boldSystemFont(ofSize: 13), .foregroundColor: blue]
+    let muted: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 10), .foregroundColor: mutedC]
+    let L: CGFloat = 43.2, W: CGFloat = 508.6, bottom: CGFloat = 770
     let data = UIGraphicsPDFRenderer(bounds: page).pdfData { ctx in
-        var y: CGFloat = 128
+        var y: CGFloat = 122
         ctx.beginPage(); drawLetterheadFoot(); drawLetterheadTop(home)
-        func line(_ text: String, _ a: [NSAttributedString.Key: Any], _ gap: CGFloat = 15) {
-            let s = NSAttributedString(string: text, attributes: a)
-            let h = s.boundingRect(with: CGSize(width: 499, height: 1000), options: [.usesLineFragmentOrigin], context: nil).height
-            if y + h > 712 { ctx.beginPage(); drawLetterheadFoot(); y = 48 }
-            s.draw(with: CGRect(x: 48, y: y, width: 499, height: h + 2), options: [.usesLineFragmentOrigin], context: nil)
-            y += max(gap, h + 4)
+        func newPage() { ctx.beginPage(); drawLetterheadFoot(); y = 48 }
+        func para(_ s: String, _ a: [NSAttributedString.Key: Any], after: CGFloat = 6) {
+            let str = NSAttributedString(string: s, attributes: a)
+            let h = ceil(str.boundingRect(with: CGSize(width: W, height: 1000), options: [.usesLineFragmentOrigin], context: nil).height)
+            if y + h > bottom { newPage() }
+            str.draw(with: CGRect(x: L, y: y, width: W, height: h + 2), options: [.usesLineFragmentOrigin], context: nil); y += h + after
         }
-        line(t("Field report · ", "Ripoti ya uwanjani · ") + r.label, title, 26)
-        line("\(country) · RAFIKI Outreach · " + t("Prepared by ", "Imeandaliwa na ") + by, muted, 26)
-        let pct = r.ids.isEmpty ? "—" : "\(r.working * 100 / r.ids.count)%"
-        ["\(r.visits.count) " + t("site visits", "ziara"), "\(r.ids.count) " + t("projects visited", "miradi iliyotembelewa"), "\(pct) " + t("of visited projects working", "ya miradi iliyotembelewa inafanya kazi"),
-         "\(r.openRepairs) " + t("open repairs", "matengenezo yaliyo wazi"), "\(r.fixed) " + t("repairs fixed", "matengenezo yaliyokamilika"), "\(r.newSites) " + t("new sites added", "maeneo mapya yaliyoongezwa"),
-         "\(r.pins) " + t("locations pinned", "mahali palipowekwa"), "\(r.due) " + t("due a visit (6+ months)", "zinasubiri ziara (miezi 6+)")].forEach { line("•  " + $0, body) }
-        y += 10; line(t("By country", "Kwa nchi"), h2, 18)
-        for row in r.byCountry {
-            line(row[0] + ": " + t("\(row[1]) projects, \(row[2]) visited, \(row[3]) working, \(row[4]) needed repair, \(row[5]) not working, \(row[6]) open repairs",
-                                    "miradi \(row[1]), \(row[2]) zimetembelewa, \(row[3]) zinafanya kazi, \(row[4]) zilihitaji matengenezo, \(row[5]) hazifanyi kazi, matengenezo \(row[6]) wazi"), body)
+        func mark(_ st: String, _ x: CGFloat, _ top: CGFloat, _ s: CGFloat) {
+            let c: UIColor = st == "working" ? UIColor(red: 0.18, green: 0.62, blue: 0.36, alpha: 1) : st == "repair" ? UIColor(red: 0.95, green: 0.69, blue: 0.23, alpha: 1) : UIColor(red: 0.84, green: 0.19, blue: 0.12, alpha: 1)
+            c.setFill(); UIBezierPath(roundedRect: CGRect(x: x, y: top, width: s, height: s), cornerRadius: s * 0.2).fill()
+            UIColor.white.setStroke(); let p = UIBezierPath(); p.lineWidth = s * 0.14; p.lineCapStyle = .round
+            if st == "working" { p.move(to: CGPoint(x: x + s * 0.25, y: top + s * 0.52)); p.addLine(to: CGPoint(x: x + s * 0.43, y: top + s * 0.7)); p.addLine(to: CGPoint(x: x + s * 0.76, y: top + s * 0.32)) }
+            else if st == "repair" { p.move(to: CGPoint(x: x + s * 0.5, y: top + s * 0.22)); p.addLine(to: CGPoint(x: x + s * 0.5, y: top + s * 0.58)); p.move(to: CGPoint(x: x + s * 0.5, y: top + s * 0.76)); p.addLine(to: CGPoint(x: x + s * 0.5, y: top + s * 0.78)) }
+            else { p.move(to: CGPoint(x: x + s * 0.28, y: top + s * 0.28)); p.addLine(to: CGPoint(x: x + s * 0.72, y: top + s * 0.72)); p.move(to: CGPoint(x: x + s * 0.72, y: top + s * 0.28)); p.addLine(to: CGPoint(x: x + s * 0.28, y: top + s * 0.72)) }
+            p.stroke()
         }
-        y += 10; line(t("Visits", "Ziara"), h2, 18)
-        if r.visits.isEmpty { line(t("No visits recorded in the app this month.", "Hakuna ziara zilizorekodiwa kwenye programu mwezi huu."), muted) }
-        for e in r.visits.sorted(by: { $0.str("at") < $1.str("at") }) { line(When.text(e.str("at")) + "  " + String(e.str("t").prefix(48)) + "  ·  " + e.str("by") + "  ·  " + stateName(e.str("s")), body) }
-        y += 14; line(t("Only visits, repairs and pins made with the RAFIKI Pin app are counted.", "Ziara, matengenezo na mahali vilivyowekwa kwa programu ya RAFIKI Pin tu ndivyo vinahesabiwa."), muted)
+        func table(_ tb: RTable) {
+            let cell: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 8.5), .foregroundColor: text]
+            let cellB: [NSAttributedString.Key: Any] = [.font: UIFont.boldSystemFont(ofSize: 8.5), .foregroundColor: text]
+            let sub: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 7.5), .foregroundColor: mutedC]
+            let head: [NSAttributedString.Key: Any] = [.font: UIFont.boldSystemFont(ofSize: 8), .foregroundColor: UIColor.white]
+            func height(_ s: String, _ a: [NSAttributedString.Key: Any], _ w: CGFloat) -> CGFloat { ceil(NSAttributedString(string: s, attributes: a).boundingRect(with: CGSize(width: w, height: 1000), options: [.usesLineFragmentOrigin], context: nil).height) }
+            func drawHead() {
+                let hh = (0..<tb.head.count).map { i in height(tb.head[i].text, head, tb.cols[i] - 10 - (tb.head[i].icon != nil ? 12 : 0)) }.max()! + 10
+                if y + hh > bottom { newPage() }
+                blue.setFill(); UIBezierPath(roundedRect: CGRect(x: L, y: y, width: W, height: hh), byRoundingCorners: [.topLeft, .topRight], cornerRadii: CGSize(width: 5, height: 5)).fill()
+                var x = L
+                for (i, h) in tb.head.enumerated() {
+                    var tx = x + 5
+                    if let ic = h.icon { mark(ic, tx, y + 6, 9); tx += 12 }
+                    NSAttributedString(string: h.text, attributes: head).draw(with: CGRect(x: tx, y: y + 5, width: tb.cols[i] - (tx - x) - 5, height: hh), options: [.usesLineFragmentOrigin], context: nil)
+                    x += tb.cols[i]
+                }
+                y += hh
+            }
+            drawHead()
+            for (n, r) in tb.rows.enumerated() {
+                let rh = (0..<r.count).map { i -> CGFloat in
+                    let c = r[i], w = tb.cols[i] - 10 - (c.icon != nil ? 12 : 0)
+                    return height(c.text, c.bold ? cellB : cell, w) + (c.sub.isEmpty ? 0 : height(c.sub, sub, tb.cols[i] - 10) + 1)
+                }.max()! + 10
+                if y + rh > bottom { newPage(); drawHead() }
+                if n % 2 == 1 { UIColor(red: 0xF4 / 255, green: 0xF9 / 255, blue: 0xFD / 255, alpha: 1).setFill(); UIRectFill(CGRect(x: L, y: y, width: W, height: rh)) }
+                var x = L
+                for (i, c) in r.enumerated() {
+                    var tx = x + 5
+                    if let ic = c.icon { mark(ic, tx, y + 6, 9); tx += 12 }
+                    let a = c.bold ? cellB : cell
+                    let th = height(c.text, a, tb.cols[i] - (tx - x) - 5)
+                    NSAttributedString(string: c.text, attributes: a).draw(with: CGRect(x: tx, y: y + 5, width: tb.cols[i] - (tx - x) - 5, height: th + 2), options: [.usesLineFragmentOrigin], context: nil)
+                    if !c.sub.isEmpty { NSAttributedString(string: c.sub, attributes: sub).draw(with: CGRect(x: x + 5, y: y + 6 + th, width: tb.cols[i] - 10, height: 40), options: [.usesLineFragmentOrigin], context: nil) }
+                    x += tb.cols[i]
+                }
+                y += rh
+                UIColor(red: 0xDC / 255, green: 0xE1 / 255, blue: 0xE5 / 255, alpha: 1).setFill(); UIRectFill(CGRect(x: L, y: y, width: W, height: 0.6))
+            }
+            y += 6
+        }
+        para(reportTitle(r), title, after: 2)
+        para(reportSub(r), muted, after: 12)
+        // the numbers: four tinted tiles to a row
+        let tw = (W - 3 * 8) / 4, th: CGFloat = 54
+        for (i, k) in r.kpis.enumerated() {
+            let col = CGFloat(i % 4), rowY = y + CGFloat(i / 4) * (th + 8)
+            let bg = k.tone == "warn" ? UIColor(red: 0xFD / 255, green: 0xF0 / 255, blue: 0xDC / 255, alpha: 1) : k.tone == "bad" ? UIColor(red: 0xFB / 255, green: 0xE7 / 255, blue: 0xE5 / 255, alpha: 1) : UIColor(red: 0xE3 / 255, green: 0xF1 / 255, blue: 0xFC / 255, alpha: 1)
+            bg.setFill(); UIBezierPath(roundedRect: CGRect(x: L + col * (tw + 8), y: rowY, width: tw, height: th), cornerRadius: 7).fill()
+            NSAttributedString(string: k.value, attributes: [.font: UIFont.boldSystemFont(ofSize: 16), .foregroundColor: ink]).draw(at: CGPoint(x: L + col * (tw + 8) + 8, y: rowY + 6))
+            NSAttributedString(string: k.label, attributes: [.font: UIFont.systemFont(ofSize: 7.5, weight: .semibold), .foregroundColor: UIColor(red: 0x3A / 255, green: 0x3F / 255, blue: 0x44 / 255, alpha: 1)])
+                .draw(with: CGRect(x: L + col * (tw + 8) + 8, y: rowY + 27, width: tw - 14, height: 26), options: [.usesLineFragmentOrigin], context: nil)
+        }
+        y += CGFloat((r.kpis.count + 3) / 4) * (th + 8) + 8
+        para(t("By country", "Kwa nchi"), h2); table(countryTable(r))
+        para(repairsHeading(r), h2)
+        if r.repairs.isEmpty { para(t("None.", "Hakuna."), muted) } else { table(repairTable(r)) }
+        para(t("Visits this month", "Ziara za mwezi huu"), h2)
+        if r.visits.isEmpty { para(t("No visits recorded in the app this month.", "Hakuna ziara zilizorekodiwa kwenye programu mwezi huu."), muted) } else { table(visitTable(r)) }
+        y += 6; para(reportNote(), muted)
     }
-    let url = FileManager.default.temporaryDirectory.appendingPathComponent("RAFIKI-field-report-" + r.label.replacingOccurrences(of: " ", with: "-") + ".pdf")
+    let url = FileManager.default.temporaryDirectory.appendingPathComponent(r.fileName)
     try? data.write(to: url)
     Share.items([url])
 }
