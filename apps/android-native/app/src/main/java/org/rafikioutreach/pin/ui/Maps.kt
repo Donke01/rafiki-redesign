@@ -238,7 +238,7 @@ private fun MapButton(icon: String, label: String, modifier: Modifier, onClick: 
 
 /** The credit for the free maps: Esri's satellite photos or OpenStreetMap's street map, kept in view like Google's. */
 @Composable
-private fun FreeCredit(sat: Boolean, modifier: Modifier) {
+internal fun FreeCredit(sat: Boolean, modifier: Modifier) {
     androidx.compose.material3.Text(if (sat) "Imagery © Esri, Maxar, Earthstar Geographics" else "© OpenStreetMap contributors",
         fontSize = androidx.compose.ui.unit.TextUnit(9f, androidx.compose.ui.unit.TextUnitType.Sp), color = Color(0xFF222222), maxLines = 1,
         modifier = modifier.padding(6.dp).clip(RoundedCornerShape(3.dp)).background(Color(0xD9FFFFFF)).padding(horizontal = 4.dp, vertical = 1.dp)

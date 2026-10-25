@@ -184,8 +184,9 @@ fun DonorApp(m: AppModel) {
     BackHandler(pid != null || tab != "home") { if (pid != null) pid = null else tab = "home" }
     val news = v?.updates?.count { m.donor.seen.isNotBlank() && it.at > m.donor.seen } ?: 0
     LaunchedEffect(tab) { if (tab == "updates") { kotlinx.coroutines.delay(1500); m.donor.markSeen() } }
+    ProvideSpeaker {
     Column(Modifier.fillMaxSize().testTag("donor_app")) {
-        DonorTop()
+        DonorTop(m)
         Box(Modifier.weight(1f).fillMaxWidth()) {
             if (v == null) Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text(t("Loading…", "Inapakia…"), color = C.muted) }
             else {
@@ -205,10 +206,11 @@ fun DonorApp(m: AppModel) {
         }
         DonorTabs(if (pid != null) "" else tab, news) { tab = it; pid = null }
     }
+    }
 }
 
 @Composable
-private fun DonorTop() {
+private fun DonorTop(m: AppModel) {
     val ctx = LocalContext.current
     Row(Modifier.fillMaxWidth().heightIn(min = 56.dp).padding(horizontal = 14.dp), verticalAlignment = Alignment.CenterVertically) {
         androidx.compose.foundation.Image(androidx.compose.ui.res.painterResource(if (C.dark) org.rafikioutreach.pin.R.drawable.rafiki_logo_light else org.rafikioutreach.pin.R.drawable.rafiki_logo_dark), "RAFIKI",
@@ -220,6 +222,15 @@ private fun DonorTop() {
             Text(t("DONOR", "MFADHILI"), color = co.fg, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold, letterSpacing = 0.6.sp), maxLines = 1, softWrap = false)
         }
         Spacer(Modifier.weight(1f))
+        // text size in one tap: Normal → Large → Larger
+        Box(Modifier.padding(end = 8.dp).size(46.dp).clip(RoundedCornerShape(14.dp)).background(C.card).border(1.dp, C.line, RoundedCornerShape(14.dp))
+            .clickable(role = Role.Button) {
+                val next = when (TextSize.value) { "" -> "l"; "l" -> "xl"; else -> "" }
+                TextSize.value = next; m.prefs.textSize = next
+                android.widget.Toast.makeText(ctx, when (next) { "l" -> t("Large text", "Maandishi makubwa"); "xl" -> t("Larger text", "Maandishi makubwa zaidi"); else -> t("Normal text", "Maandishi ya kawaida") }, android.widget.Toast.LENGTH_SHORT).show()
+            }.semantics { contentDescription = t("Text size", "Ukubwa wa maandishi") }.testTag("donor_aa"), contentAlignment = Alignment.Center) {
+            Text("Aa", color = C.ink, style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold))
+        }
         Row(Modifier.clip(RoundedCornerShape(99.dp)).background(C.primary).clickable(role = Role.Button) { open(ctx, DONOR_GIVE) }.heightIn(min = 40.dp).padding(horizontal = 14.dp).testTag("donor_give"), verticalAlignment = Alignment.CenterVertically) {
             DIcon("heart", Color.White, 16.dp); Spacer(Modifier.width(6.dp))
             Text(t("Give again", "Changia tena"), color = Color.White, style = MaterialTheme.typography.labelMedium.copy(fontSize = 13.sp), maxLines = 1, softWrap = false)
@@ -270,6 +281,7 @@ private fun DonorHome(m: AppModel, v: DonorView, open: (String) -> Unit) {
             HeroTile(num(v.visitsYear), t("visits this year", "ziara mwaka huu"), Modifier.weight(1f).testTag("dn_tile_visits"))
         }
     }
+    if (v.projects.any { it.gps != null }) { SectionHead(t("Your projects on the map", "Miradi yako kwenye ramani")); DonorMap(m, v.projects, true, open) }
     SectionHead(if (v.projects.size == 1) t("Your project", "Mradi wako") else t("Your projects", "Miradi yako"), "${v.projects.size}")
     if (v.projects.isEmpty()) EmptyDrop(t("Your projects will appear here soon.", "Miradi yako itaonekana hapa hivi karibuni."))
     v.projects.forEachIndexed { i, p -> ProjectCard(m, p, Modifier.padding(bottom = 12.dp).rise(minOf(i, 5))) { open(p.id) } }
@@ -324,7 +336,9 @@ private fun Fact(value: String, label: String, modifier: Modifier) {
 @Composable
 private fun DonorProject(m: AppModel, p: DProject, back: () -> Unit) {
     val ctx = LocalContext.current
-    TextButton(back, Modifier.testTag("dproject_back")) { DIcon("back", C.blue2, 18.dp); Spacer(Modifier.width(4.dp)); Text(t("Your projects", "Miradi yako"), color = C.blue2, style = MaterialTheme.typography.labelLarge) }
+    var viewer by remember { mutableStateOf<Triple<List<Pair<String, String>>, Int, Boolean>?>(null) }
+    viewer?.let { (list, at, play) -> PhotoViewer(list, at, play) { viewer = null } }
+    Btn(t("Back", "Rudi"), back, Modifier.padding(bottom = 6.dp).testTag("dproject_back"), icon = "back", light = true)
     Box(Modifier.fillMaxWidth().aspectRatio(16f / 10f).clip(RoundedCornerShape(24.dp)).background(C.tint)) {
         NetImage(cover(m, p), Modifier.matchParentSize()) { Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { DIcon(iconOf(p), C.blue, 56.dp) } }
     }
@@ -334,8 +348,9 @@ private fun DonorProject(m: AppModel, p: DProject, back: () -> Unit) {
     Card(Modifier.padding(top = 14.dp).testTag("dproject_state")) {
         Row(verticalAlignment = Alignment.Top) {
             IconTile(if (p.state == "repairing" || p.state == "notworking") "wrench" else iconOf(p), fg, bg, 44.dp); Spacer(Modifier.width(12.dp))
-            Column { Text(donorStateName(p.state), style = MaterialTheme.typography.titleMedium, color = C.ink); Text(donorStateSay(p), style = MaterialTheme.typography.bodyMedium, color = C.text, modifier = Modifier.padding(top = 2.dp)) }
+            Column { Text(donorStateName(p.state), style = MaterialTheme.typography.titleMedium, color = C.ink); Text(donorStateSay(p) + donorPeopleSay(p).let { if (it.isBlank()) "" else " $it" }, style = MaterialTheme.typography.bodyLarge, color = C.text, modifier = Modifier.padding(top = 2.dp)) }
         }
+        SpeakBtn("p_" + p.id, p.title + ". " + donorStateName(p.state) + ". " + donorStateSay(p) + " " + donorPeopleSay(p), Modifier.fillMaxWidth().padding(top = 12.dp))
     }
     val facts = buildList {
         if (p.people > 0) add(num(p.people) to t("people served", "watu wanaohudumiwa"))
@@ -350,14 +365,20 @@ private fun DonorProject(m: AppModel, p: DProject, back: () -> Unit) {
     if (p.gallery.isNotEmpty()) {
         SectionHead(t("Photos", "Picha"), "${p.gallery.size}")
         Row(Modifier.horizontalScroll(rememberScrollState()).testTag("dproject_photos"), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            p.gallery.forEach { g -> MediaTile(m.donor.api.photo(g.id), Dates.weekday(g.at) + if (g.label.isNotBlank()) " · " + g.label else "", false) {} }
+            val pics = p.gallery.map { g -> m.donor.api.photo(g.id, 1600) to (Dates.weekday(g.at) + if (g.label.isNotBlank()) " · " + g.label else "") }
+            p.gallery.forEachIndexed { k, g -> MediaTile(m.donor.api.photo(g.id), pics[k].second, false, true) { viewer = Triple(pics, k, false) } }
         }
+        if (p.gallery.size > 1) Btn(t("Watch the ${p.gallery.size} photos as a slideshow", "Tazama picha ${p.gallery.size} kama onyesho"), {
+            viewer = Triple(p.gallery.map { g -> m.donor.api.photo(g.id, 1600) to (Dates.weekday(g.at) + if (g.label.isNotBlank()) " · " + g.label else "") }, 0, true)
+        }, Modifier.fillMaxWidth().padding(top = 10.dp).testTag("dproject_slides"), icon = "play")
     }
     // thank-yous from the community: photos, videos and their words
     if (p.thanks.isNotEmpty() || p.stories.isNotEmpty()) {
         SectionHead(t("Thank you from the community", "Asante kutoka kwa jamii"))
         if (p.thanks.isNotEmpty()) Row(Modifier.horizontalScroll(rememberScrollState()).testTag("dproject_thanks"), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            p.thanks.forEach { x -> MediaTile(m.donor.api.photo(x.id), Dates.weekday(x.at) + if (x.label.isNotBlank()) " · “" + x.label + "”" else "", x.video) { if (x.video) open(ctx, m.donor.api.photo(x.id)) } }
+            p.thanks.forEach { x -> MediaTile(m.donor.api.photo(x.id), Dates.weekday(x.at) + if (x.label.isNotBlank()) " · “" + x.label + "”" else "", x.video, true) {
+                if (x.video) open(ctx, m.donor.api.photo(x.id)) else viewer = Triple(listOf(m.donor.api.photo(x.id, 1600) to (if (x.label.isNotBlank()) "“" + x.label + "”" else "")), 0, false)
+            } }
         }
         p.stories.forEach { s ->
             Column(Modifier.padding(top = 10.dp).fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(if (C.glassy) C.glass2 else C.card).border(1.dp, C.line, RoundedCornerShape(18.dp)).padding(14.dp)) {
@@ -419,19 +440,17 @@ private fun DonorProject(m: AppModel, p: DProject, back: () -> Unit) {
     // where it is
     p.gps?.let { ll ->
         SectionHead(t("Where it is", "Mahali ilipo"))
-        Box(Modifier.fillMaxWidth().height(200.dp).clip(RoundedCornerShape(18.dp)).background(C.tint).testTag("dproject_map")) {
-            ProjectsMap(listOf(Dot(p.id, ll, when (p.state) { "working" -> 0xFF1C7C4A.toInt(); "repairing" -> 0xFFD98200.toInt(); "notworking" -> 0xFFB3261E.toInt(); else -> 0xFF0A78C2.toInt() }, true, p.title)), null, {}, Modifier.matchParentSize(), fitKey = p.id,
-                onMap = { mv -> mv.controller.setZoom(14.0); mv.controller.setCenter(org.osmdroid.util.GeoPoint(ll.lat, ll.lng)) })
-        }
+        DonorMap(m, listOf(p), false) {}
         Btn(t("Open in Google Maps", "Fungua kwenye Google Maps"), { open(ctx, "https://www.google.com/maps/search/?api=1&query=${ll.lat},${ll.lng}") }, Modifier.padding(top = 10.dp), light = true, small = true, icon = "map")
     }
-    Btn(t("Ask about this project", "Uliza kuhusu mradi huu"), { mail(ctx, "Question about " + p.title) }, Modifier.padding(top = 18.dp), light = true, small = true, icon = "mail")
+    SectionHead(t("Questions about this project?", "Una swali kuhusu mradi huu?"))
+    DonorTalk(m, p)
 }
 
 @Composable
-private fun MediaTile(url: String, caption: String, video: Boolean, onClick: () -> Unit) {
+private fun MediaTile(url: String, caption: String, video: Boolean, tap: Boolean = video, onClick: () -> Unit) {
     Column(Modifier.width(240.dp)) {
-        Box(Modifier.fillMaxWidth().aspectRatio(4f / 3f).clip(RoundedCornerShape(18.dp)).background(C.tint).clickable(enabled = video, role = Role.Button, onClick = onClick)) {
+        Box(Modifier.fillMaxWidth().aspectRatio(4f / 3f).clip(RoundedCornerShape(18.dp)).background(C.tint).clickable(enabled = tap, role = Role.Button, onClick = onClick)) {
             NetImage(url, Modifier.matchParentSize()) { Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { DIcon(if (video) "camera" else "camera", C.blue, 32.dp) } }
             if (video) Box(Modifier.align(Alignment.Center).size(52.dp).clip(CircleShape).background(Color(0xB3000000)).semantics { contentDescription = t("Play the video", "Cheza video") }, contentAlignment = Alignment.Center) {
                 Text("▶", color = Color.White, fontSize = 20.sp)
@@ -474,6 +493,7 @@ private fun DonorUpdates(m: AppModel, v: DonorView, open: (String) -> Unit) {
 
 @Composable
 private fun UpdateRow(m: AppModel, u: DUpdate, p: DProject, fresh: Boolean, open: () -> Unit) {
+    var viewer by remember { mutableStateOf<Int?>(null) }
     val (icon, tone, title, body) = when (u.type) {
         "visit" -> listOf("cal", if (u.visit?.state == "notworking") "notworking" else if (u.visit?.state == "repair") "repairing" else "done", t("Site visit", "Ziara"), u.visit?.let { donorVisitSay(it) } ?: "")
         "photos" -> listOf("camera", "planned", if (u.n == 1) t("1 new photo", "Picha 1 mpya") else t("${u.n} new photos", "Picha ${u.n} mpya"), "")
@@ -493,12 +513,17 @@ private fun UpdateRow(m: AppModel, u: DUpdate, p: DProject, fresh: Boolean, open
                 if (fresh) { Spacer(Modifier.width(6.dp)); Tag(t("NEW", "MPYA"), C.hue("coral").bg, C.hue("coral").fg) }
             }
             Text(p.title + " · " + Dates.weekday(u.at), style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold), color = C.muted)
-            if (body.isNotBlank()) Text(body, style = MaterialTheme.typography.bodyMedium, color = C.text, modifier = Modifier.padding(top = 3.dp))
+            val story = donorStory(u).ifBlank { body }
+            if (story.isNotBlank()) Text(story, style = MaterialTheme.typography.bodyLarge, color = C.text, modifier = Modifier.padding(top = 4.dp))
             val thumbs = if (u.type == "photos") u.photos.take(4) else if (u.type == "thanks" && u.media != "video" && u.id.isNotBlank()) listOf(u.id) else emptyList()
             if (thumbs.isNotEmpty()) Row(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                thumbs.forEach { id -> NetImage(m.donor.api.photo(id, 480), Modifier.size(64.dp).clip(RoundedCornerShape(12.dp)).background(C.tint)) {} }
+                thumbs.forEachIndexed { k, id -> NetImage(m.donor.api.photo(id, 480), Modifier.size(72.dp).clip(RoundedCornerShape(12.dp)).background(C.tint).clickable(role = Role.Button) { viewer = k }) {} }
             }
-            TextButton(open, Modifier.padding(top = 2.dp)) { Text(t("See the project", "Ona mradi"), color = C.blue2, style = MaterialTheme.typography.labelLarge); DIcon("chev", C.blue2, 16.dp) }
+            viewer?.let { k -> PhotoViewer(thumbs.map { id -> m.donor.api.photo(id, 1600) to (p.title + " · " + Dates.weekday(u.at)) }, k, false) { viewer = null } }
+            Row(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Btn(t("See the project", "Ona mradi"), open, small = true, light = true, icon = "chev")
+                SpeakBtn("u_" + u.type + u.pid + u.at, p.title + ". " + title + ". " + Dates.weekday(u.at) + ". " + story, label = t("Listen", "Sikiliza"), small = true)
+            }
         }
     }
 }
@@ -541,6 +566,8 @@ private fun DonorSettings(m: AppModel, v: DonorView) {
         Line()
         SetRow("back", "coral", t("Sign out", "Toka"), t("You can sign in again with your code or link.", "Unaweza kuingia tena kwa msimbo au kiungo chako."), { askOut = true }, tag = "dset_out") {}
     }
+    SectionHead(t("Talk to RAFIKI", "Ongea na RAFIKI"))
+    DonorTalk(m, null)
     Text(t("Signed in as ", "Umeingia kama ") + v.viewer, style = MaterialTheme.typography.bodySmall, color = C.muted, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(top = 16.dp))
     if (askOut) DqmSheet("dset_out_ask", { askOut = false }) { hide ->
         DqmSheetHead(t("Sign out?", "Utoke?"), listOf(t("Your projects stay safe. Sign in again any time with your donor code or private link.", "Miradi yako iko salama. Ingia tena wakati wowote kwa msimbo wako wa mfadhili au kiungo cha siri.")), closeTag = "dset_out_close", onClose = { hide {} }) { DqmTile("heart", C.hue("coral").fg, C.hue("coral").bg, 64.dp) }
