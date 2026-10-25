@@ -79,6 +79,11 @@ struct LockView: View {
                 }.font(.lMedium).foregroundColor(C.blue2).padding(.top, 10).buttonStyle(.plain).multilineTextAlignment(.center)
                 Text(t("Needs signal the first time. After that it opens without it.", "Inahitaji mtandao mara ya kwanza. Baada ya hapo inafunguka bila mtandao."))
                     .font(.bSmall).foregroundColor(C.muted).multilineTextAlignment(.center).padding(.top, 12)
+                // "I'm a donor" opens the donor sign-in (link or short code)
+                Button { DonorState.shared.entry = true } label: {
+                    HStack(spacing: 6) { Icon("heart", size: 18, color: C.named("coral").fg); Text(t("I’m a donor", "Mimi ni mfadhili")).font(.lLarge).foregroundColor(C.blue2).lineLimit(1) }
+                        .padding(.horizontal, 22).frame(minHeight: 48).overlay(Capsule().stroke(C.line, lineWidth: 1)).contentShape(Capsule())
+                }.buttonStyle(.plain).padding(.top, 14).accessibilityIdentifier("lock_donor")
                 LangSwitch().padding(.top, 16)
             }
             .frame(maxWidth: 420)

@@ -17,7 +17,7 @@ enum Ic {
         "hourglass": "hourglass", "box": "shippingbox", "trend": "chart.line.uptrend.xyaxis", "shield": "checkmark.shield", "grid": "square.grid.2x2", "play": "play.fill",
         "pause": "pause.fill", "eye": "eye", "eyeoff": "eye.slash", "route": "point.topleft.down.to.point.bottomright.curvepath", "heat": "flame", "star": "star",
         "video": "video", "photo": "photo", "send": "paperplane", "edit": "pencil", "minus": "minus", "block": "nosign", "logout": "rectangle.portrait.and.arrow.right",
-        "whatsapp": "message.fill", "truck": "truck.box", "road": "road.lanes", "rain": "cloud.rain", "car": "car", "sparkles": "sparkles", "doc": "doc.richtext",
+        "heart": "heart", "whatsapp": "message.fill", "truck": "truck.box", "road": "road.lanes", "rain": "cloud.rain", "car": "car", "sparkles": "sparkles", "doc": "doc.richtext",
     ]
     static func name(_ k: String) -> String { map[k] ?? "drop" }
 }

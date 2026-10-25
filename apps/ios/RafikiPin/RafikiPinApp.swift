@@ -13,6 +13,14 @@ struct RafikiPinApp: App {
     var body: some Scene {
         WindowGroup {
             Root().environmentObject(model)
+                // a donor's private link (…/pin#donor=<token> or …/donor/<token>): donor mode
+                .onOpenURL { url in
+                    guard let tok = DonorEntry.token(from: url) else { return }
+                    let d = DonorState.shared
+                    if d.on && d.token == tok { return }
+                    if d.on { d.signOut() }
+                    d.prefill = tok; d.entry = true
+                }
                 .onChange(of: phase) { p in
                     // GPS only while the app is open; refresh when coming back to it
                     if p == .active, model.signedIn { model.cameBack(); model.locator.start(); if !model.demo && Date().timeIntervalSince(model.lastRefresh) > 300 { Task { await model.refreshNow(quiet: true); await PhoneAlerts.post(model) } } }
@@ -28,12 +36,17 @@ struct Root: View {
     // welcome: before signing in, and for a moment every time the app opens; the full tour the first time
     @State private var helloDone = Demo.on
     @State private var onbSeen = UserDefaults.standard.bool(forKey: "onb")
+    @ObservedObject private var donor = DonorState.shared
     var body: some View {
         let _ = (Look.systemDark = scheme == .dark)
         ZStack {
             AppBackground()
-            if !m.signedIn { LockView() } else if m.bioLocked { BioLockView() } else { Shell() }
-            Group {
+            // donor mode: a donor-only app, never the staff screens
+            if donor.on { DonorApp() }
+            else if donor.entry { DonorSignIn() }
+            else if donor.gone && !m.signedIn { DonorGone() }
+            else if !m.signedIn { LockView() } else if m.bioLocked { BioLockView() } else { Shell() }
+            if !donor.on && !donor.entry && !(donor.gone && !m.signedIn) { Group {
                 if !m.signedIn && !helloDone { WelcomeView(splash: false) { withAnimation(.easeOut(duration: 0.25)) { helloDone = true } } }
                 else if m.signedIn && !Demo.on && (!onbSeen || m.replayOnb) {
                     OnboardingView { role in
@@ -42,7 +55,7 @@ struct Root: View {
                     }
                 }
                 else if m.signedIn && !helloDone { WelcomeView(splash: true) { withAnimation(.easeOut(duration: 0.25)) { helloDone = true } } }
-            }.transition(.opacity)
+            }.transition(.opacity) }
         }
         .id("\(m.look)-\(scheme == .dark)")
         .preferredColorScheme(Look.mode == "dark" ? .dark : (Look.mode == "light" || Look.mode == "sun") ? .light : nil)

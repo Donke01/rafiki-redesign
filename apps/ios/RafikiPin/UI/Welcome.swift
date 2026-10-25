@@ -155,6 +155,10 @@ struct WelcomeView: View {
                 LangSwitch().frame(maxWidth: .infinity).padding(.bottom, 14)
                 Go(text: t("Sign in", "Ingia"), tag: "onb_signin", action: onSignIn)
                 Cap(text: first.isEmpty ? t("New here? Ask your team for a PIN.", "Mgeni hapa? Omba PIN kwa timu yako.") : back)
+                // donors sign in with their private link or code
+                Button { DonorState.shared.entry = true; onSignIn() } label: {
+                    Text(t("I’m a donor", "Mimi ni mfadhili")).font(.lLarge).foregroundColor(C.dark ? Color(hex: 0x4AAAEE) : Color(hex: 0x076DB1)).frame(maxWidth: .infinity, minHeight: 44)
+                }.buttonStyle(.plain).accessibilityIdentifier("onb_donor")
             }
         }
         .task { if splash { try? await Task.sleep(nanoseconds: 1_600_000_000); onSignIn() } }
