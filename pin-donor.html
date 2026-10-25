@@ -216,6 +216,95 @@ html[data-theme=sun] .sheet{border:2px solid #000000}
 .toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#0C1924;color:#FFFFFF;padding:12px 18px;border-radius:14px;font-weight:600;font-size:.9rem;z-index:2000;max-width:calc(100% - 32px);text-align:center}
 .spin{display:grid;place-items:center;min-height:50vh;color:var(--muted);font-weight:600}
 .leaflet-container{font-family:inherit}
+/* ---- easier for older eyes: bigger text by default, a quick text-size button ---- */
+html{font-size:17px}html[data-size=s]{font-size:15px}html[data-size=l]{font-size:19.5px}html[data-size=xl]{font-size:22px}
+.aa{display:inline-flex;align-items:center;justify-content:center;min-width:46px;min-height:46px;border-radius:14px;border:var(--bw) solid var(--glb);background:var(--gl2);color:var(--ink);font-weight:800;font-size:1.05rem;cursor:pointer;line-height:1}
+.aa small{font-size:.7em;margin-right:1px}
+/* ---- the map: big pins with a type icon and a state mark, big buttons, a card under it ---- */
+.mapcard{padding:0;overflow:hidden}
+.mapbox{position:relative;background:var(--tint)}
+.mapbox .lmap{height:23rem;z-index:0}
+.mapbox.small .lmap{height:15rem}
+.mtog{position:absolute;top:10px;left:10px;z-index:500;display:flex;background:var(--card);border-radius:16px;padding:4px;box-shadow:0 4px 14px rgba(4,38,63,.22)}
+.mtog button{border:0;background:transparent;border-radius:12px;min-height:46px;padding:0 16px;font-size:.95rem;font-weight:800;color:var(--ink);cursor:pointer}
+.mtog button[aria-pressed=true]{background:var(--blue);color:#FFFFFF}
+.mzoom{position:absolute;top:10px;right:10px;z-index:500;display:grid;gap:10px}
+.mzoom button{width:58px;height:58px;border-radius:18px;border:var(--bw) solid var(--line);background:var(--card);color:var(--ink);font-size:30px;font-weight:800;line-height:1;cursor:pointer;box-shadow:0 4px 14px rgba(4,38,63,.22)}
+.mzoom button:active,.mbar .btn:active,.mcard .btn:active{transform:scale(.95)}
+.mclose{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom));z-index:500;display:none!important}
+.mapbox.full{position:fixed;inset:0;z-index:1500;padding-top:env(safe-area-inset-top)}
+.mapbox.full .lmap{height:100%}
+.mapbox.full .mclose{display:inline-flex!important}
+.mbar{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px}
+.mbar .btn{min-height:54px;font-size:.95rem;padding:0 10px;white-space:normal;text-align:center;line-height:1.2}
+.mpin{position:absolute;left:0;top:0;transform:translate(-50%,-34px);display:flex;flex-direction:column;align-items:center;gap:4px;width:170px;transition:opacity .35s}
+.mpin .dot{position:relative;width:58px;height:58px;border-radius:50%;background:#FFFFFF;border:5px solid var(--c);display:flex;align-items:center;justify-content:center;color:var(--c);box-shadow:0 6px 16px rgba(4,38,63,.35);transition:transform .3s cubic-bezier(.3,1.4,.5,1),background .3s,color .3s}
+.mpin.k-planned .dot{border-style:dashed}
+.mpin .dot>svg{width:26px;height:26px}
+.mpin .bdg{position:absolute;right:-9px;bottom:-7px;width:27px;height:27px;border-radius:50%;background:var(--c);border:3px solid #FFFFFF;display:flex;align-items:center;justify-content:center;color:#FFFFFF}
+.mpin .bdg svg{width:14px;height:14px;stroke-width:3.2}
+.mpin .nm{display:none;font-weight:800;font-size:14px;line-height:1.2;text-align:center;color:#FFFFFF;background:#04263F;border-radius:9px;padding:4px 9px;max-width:170px;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.mpin.on .dot{transform:scale(1.2);background:var(--c);color:#FFFFFF}
+.mpin.on .nm{display:block}
+.lmap.chosen .mpin:not(.on){opacity:.6}
+.mpin.arrive{animation:pdrop .7s cubic-bezier(.3,1.5,.5,1) both;animation-delay:var(--d)}
+@keyframes pdrop{from{opacity:0;transform:translate(-50%,-100px)}to{opacity:1;transform:translate(-50%,-34px)}}
+.mpin.k-working .dot::after{content:"";position:absolute;inset:-5px;border-radius:50%;border:3px solid var(--c);opacity:0;animation:ripple 3s ease-out infinite;animation-delay:calc(var(--d) + 1s)}
+@keyframes ripple{0%{transform:scale(1);opacity:.6}70%,100%{transform:scale(2);opacity:0}}
+.legend{display:flex;flex-wrap:wrap;gap:8px 16px;padding:0 14px 14px;font-size:.88rem;font-weight:600;color:var(--text)}
+.legend span{display:inline-flex;align-items:center;gap:7px}
+.legend i{width:18px;height:18px;border-radius:50%;background:#FFFFFF;border:4px solid var(--c)}
+.legend i.dash{border-style:dashed}
+.mcard{border-top:1px solid var(--line);padding:16px 14px 16px;display:grid;gap:12px}
+.mcard>*{animation:fadeup .45s ease both}
+.mcard>*:nth-child(2){animation-delay:.05s}.mcard>*:nth-child(3){animation-delay:.1s}.mcard>*:nth-child(4){animation-delay:.15s}
+@keyframes fadeup{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.mcard .hd{display:flex;gap:12px;align-items:center}
+.mcard .hd img,.mcard .hd .noimg{width:84px;height:84px;border-radius:18px;object-fit:cover;flex:0 0 auto;background:var(--tint);display:flex;align-items:center;justify-content:center;color:var(--blue)}
+.mcard .hd .noimg svg{width:36px;height:36px}
+.mcard h3{margin:0;font-size:1.2rem;line-height:1.2;color:var(--ink);font-weight:800}
+.mcard .wh{color:var(--muted);font-weight:600;font-size:.88rem;margin-top:2px}
+.mcard .say{margin:0;font-size:1.05rem;line-height:1.5;color:var(--text)}
+.mcard .say b{color:var(--ink)}
+.mcard .acts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mcard .btn{min-height:56px;font-size:1rem;border-radius:16px;white-space:normal;text-align:center;line-height:1.2;padding:0 12px}
+.mcard .btn.wide{grid-column:1/-1}
+.mcard .cnt{text-align:center;color:var(--muted);font-weight:600;font-size:.85rem}
+.btn.reading{outline:3px solid var(--blue);outline-offset:-3px}
+.waves{display:inline-flex;gap:3px;align-items:center;height:20px}
+.waves i{width:4px;border-radius:2px;background:currentColor;animation:wave 1s ease-in-out infinite}
+.waves i:nth-child(2){animation-delay:.15s}.waves i:nth-child(3){animation-delay:.3s}.waves i:nth-child(4){animation-delay:.45s}
+@keyframes wave{0%,100%{height:6px}50%{height:18px}}
+/* ---- updates told as short stories, with Listen ---- */
+.tl p.story{font-size:1rem;line-height:1.55;color:var(--text)}
+.tl .ua{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.tl .ua .btn{min-height:46px;font-size:.92rem;padding:0 16px}
+.tl .thumbs button{border:0;padding:0;background:none;cursor:zoom-in;flex:none}
+/* ---- photos: full screen, big arrows, slideshow ---- */
+.strip figure button{border:0;padding:0;background:none;display:block;width:100%;cursor:zoom-in}
+.slideshow{margin:10px 0 0}
+.lbx{position:fixed;inset:0;z-index:1600;background:#0B0F13;display:grid;grid-template-rows:auto 1fr auto;padding:calc(10px + env(safe-area-inset-top)) 10px calc(12px + env(safe-area-inset-bottom));color:#FFFFFF}
+.lbx .lt{display:flex;align-items:center;gap:10px;justify-content:space-between}
+.lbx .lt b{font-size:1rem;font-weight:700}
+.lbx .stage{position:relative;display:flex;align-items:center;justify-content:center;min-height:0;overflow:hidden;touch-action:pan-y}
+.lbx .stage img{max-width:100%;max-height:100%;border-radius:12px;object-fit:contain;transition:opacity .45s}
+.lbx .stage img.fade{opacity:0}
+.lbx .cap{text-align:center;font-size:1rem;font-weight:600;color:#E6EEF4;min-height:1.4em;margin:8px 0 4px}
+.lbx .lb{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap}
+.lbx .nav{width:70px;height:70px;border-radius:50%;border:2px solid rgba(255,255,255,.5);background:rgba(255,255,255,.12);color:#FFFFFF;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.lbx .nav svg{width:32px;height:32px;stroke-width:2.6}
+.lbx .btn{min-height:56px;background:#0A78C2;color:#FFFFFF}
+.lbx .x{background:#FFFFFF;color:#04263F}
+/* ---- talk to RAFIKI: call, WhatsApp, e-mail ---- */
+.talk{display:grid;gap:10px}
+.talk .btn{min-height:58px;justify-content:flex-start;padding:0 18px}
+.talk .btn span{display:flex;flex-direction:column;align-items:flex-start;text-align:left;line-height:1.2}
+.talk small{display:block;font-weight:600;opacity:.85;font-size:.82rem}
+.btn.wa{background:#1F8F4E!important;color:#FFFFFF!important}
+.stc p b{display:inline;font-size:inherit}
+.pback{min-height:52px;font-size:1.05rem;padding:0 18px 0 12px;border-radius:16px;border:var(--bw) solid var(--glb);background:var(--gl2);color:var(--ink);font-weight:800}
+.pback svg{width:22px;height:22px}
+@media (prefers-reduced-motion:reduce){.mpin.arrive,.mcard>*,.waves i{animation:none!important}.mpin.k-working .dot::after{display:none}}
 </style>
 </head>
 <body>
@@ -270,7 +359,12 @@ html[data-theme=sun] .sheet{border:2px solid #000000}
     text: '<path d="M4 18L9 6l5 12M5.8 14h6.4M15 18l3-7 3 7M15.9 16h4.2"/>',
     sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6 6 6M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/>',
     map: '<path d="M3.5 6.5l5.5-2.5 6 2.5 5.5-2.5v13.5L15 20l-6-2.5-5.5 2.5z"/><path d="M9 4v13.5M15 6.5V20"/>',
-    play: '<path d="M8 5.5v13l10-6.5z"/>'
+    play: '<path d="M8 5.5v13l10-6.5z"/>',
+    check: '<path d="M5 12.5l4.5 4.5L19 7"/>', bang: '<path d="M12 5v9M12 19v.5"/>', bricks: '<path d="M3 6h18v12H3zM3 12h18M9 6v6M15 12v6"/>',
+    clock: '<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>', x: '<path d="M6 6l12 12M18 6L6 18"/>', fit: '<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>',
+    speak: '<path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/>',
+    phone: '<path d="M6.5 3.5h3l1.5 4.5-2 1.5a11 11 0 0 0 5.5 5.5l1.5-2 4.5 1.5v3a2 2 0 0 1-2 2A16.5 16.5 0 0 1 4.5 5.5a2 2 0 0 1 2-2z"/>',
+    chat: '<path d="M20 11.5a8 8 0 0 1-11.8 7L4 19.5l1.1-4A8 8 0 1 1 20 11.5z"/>'
   };
   function ic(k) { return '<svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICON[k] || ICON.drop) + '</svg>'; }
   function mascot() { var d = 'M12 2.5s7 7.4 7 12.6a7 7 0 0 1-14 0c0-5.2 7-12.6 7-12.6z'; return '<svg class="mascot" viewBox="0 0 24 27" aria-hidden="true"><ellipse cx="12" cy="25.4" rx="5.2" ry="1" fill="#0B3A5E" opacity=".25"/><path d="' + d + '" fill="url(#mgA)"/><path d="' + d + '" fill="none" stroke="#FFFFFF" stroke-opacity=".55" stroke-width=".5"/><path d="M8.2 11.4c.5-1.7 1.6-3.4 2.7-4.8" stroke="url(#mgH)" stroke-width="1.3" stroke-linecap="round" fill="none"/><ellipse cx="10" cy="15.2" rx="1.15" ry="1.5" fill="#FFFFFF"/><ellipse cx="14" cy="15.2" rx="1.15" ry="1.5" fill="#FFFFFF"/><circle cx="10.25" cy="15.5" r=".62" fill="#04263F"/><circle cx="14.25" cy="15.5" r=".62" fill="#04263F"/><path d="M10.4 18.3c.9.8 2.3.8 3.2 0" stroke="#04263F" stroke-width=".6" stroke-linecap="round" fill="none"/></svg>'; }
@@ -453,6 +547,185 @@ html[data-theme=sun] .sheet{border:2px solid #000000}
   function newest() { return ((S.D && S.D.updates) || []).map(function (u) { return u.at || ''; }).sort().pop() || new Date().toISOString(); }
   function fresh() { return ((S.D && S.D.updates) || []).filter(function (u) { return S.seen && u.at > S.seen; }); }
 
+  // ---- the map: big pins, big buttons, Map / Satellite, a bigger map, and a card that steps through the projects ----
+  var STILL = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var PHONE = '+1 801 547 7847', WHATSAPP = '+254 791 674 001';
+  var STC = { working: '#1C7C4A', repairing: '#C77700', notworking: '#B3261E', building: '#5B3CC4', planned: '#5E7A90', done: '#0A78C2' };
+  var BADGE = { working: 'check', repairing: 'wrench', notworking: 'bang', building: 'bricks', planned: 'clock', done: 'check' };
+  var FLOWN = (function () { try { var f = sessionStorage.getItem('rfDonorFlown'); sessionStorage.setItem('rfDonorFlown', '1'); return !!f; } catch (e) { return false; } })();
+  function pinHtml(p, i, drop) {
+    var k = stKey(p);
+    return '<div class="mpin k-' + k + (drop ? ' arrive' : '') + '" style="--c:' + STC[k] + ';--d:' + (drop ? (1.4 + i * 0.15).toFixed(2) : 0) + 's">' +
+      '<span class="dot">' + ic(typeIcon(p)) + '<span class="bdg">' + ic(BADGE[k]) + '</span></span><span class="nm">' + esc(p.title) + '</span></div>';
+  }
+  function mapHtml(small) {
+    return '<div class="mapbox' + (small ? ' small' : '') + '" id="mbox"><div class="lmap" id="lmap" role="region" aria-label="' + tr('Map of your projects', 'Ramani ya miradi yako') + '"></div>' +
+      '<div class="mtog" role="group" aria-label="' + tr('Map style', 'Aina ya ramani') + '"><button type="button" data-ml="street" aria-pressed="true">' + tr('Map', 'Ramani') + '</button><button type="button" data-ml="sat" aria-pressed="false">' + tr('Satellite', 'Satelaiti') + '</button></div>' +
+      '<div class="mzoom"><button type="button" id="zin" aria-label="' + tr('Zoom in', 'Karibia') + '">+</button><button type="button" id="zout" aria-label="' + tr('Zoom out', 'Ondoka mbali') + '">−</button></div>' +
+      '<button class="btn mclose" type="button" id="mclose">' + ic('x') + tr('Close map', 'Funga ramani') + '</button></div>' +
+      '<div class="mbar">' + (small ? '' : '<button class="btn light" type="button" id="mfit">' + ic('fit') + tr('Show all', 'Onyesha yote') + '</button>') +
+      '<button class="btn light" type="button" id="mbig"' + (small ? ' style="grid-column:1/-1"' : '') + '>' + ic('fit') + tr('Bigger map', 'Ramani kubwa') + '</button></div>';
+  }
+  function legendHtml(P) {
+    return '<div class="legend" aria-label="' + tr('What the colours mean', 'Maana ya rangi') + '">' + ['working', 'repairing', 'notworking', 'building', 'planned', 'done'].filter(function (k) { return P.some(function (p) { return stKey(p) === k; }); })
+      .map(function (k) { return '<span style="--c:' + STC[k] + '"><i' + (k === 'planned' ? ' class="dash"' : '') + '></i>' + esc(k === 'done' ? tr('Completed, not checked yet', 'Imekamilika, haijakaguliwa bado') : stName(k)) + '</span>'; }).join('') + '</div>';
+  }
+  var M = { map: null, layers: {}, markers: {}, list: [], cur: -1 };
+  function drawLMap(P, withCard) {
+    if (!$('lmap') || !window.L) return;
+    if (S.map) { S.map.remove(); S.map = null; }
+    var pts = P.filter(function (p) { return p.gps; }), drop = withCard && !FLOWN && !STILL;
+    M = { map: null, layers: {}, markers: {}, list: pts, cur: -1, card: withCard };
+    var m = S.map = M.map = L.map('lmap', { zoomControl: false, scrollWheelZoom: false, tap: true, zoomSnap: 0.5 });
+    M.layers.street = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }).addTo(m);
+    M.layers.sat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, maxNativeZoom: 18, attribution: 'Imagery &copy; Esri' });
+    pts.forEach(function (p, i) {
+      var mk = L.marker(p.gps, { icon: L.divIcon({ className: '', html: pinHtml(p, i, drop), iconSize: [0, 0], iconAnchor: [0, 0] }), title: p.title, keyboard: true, riseOnHover: true }).addTo(m);
+      mk.on('click', function () { if (withCard) mpick(p.id, true); });
+      M.markers[p.id] = mk;
+    });
+    if (drop && pts.length) { m.setView([0.6, 36.4], 6); setTimeout(function () { mfit(true); }, 700); } else mfit(false);
+    qa('[data-ml]').forEach(function (b) { b.addEventListener('click', function () {
+      var sat = b.getAttribute('data-ml') === 'sat';
+      if (sat) { m.removeLayer(M.layers.street); M.layers.sat.addTo(m); } else { m.removeLayer(M.layers.sat); M.layers.street.addTo(m); }
+      qa('[data-ml]').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+    }); });
+    $('zin').addEventListener('click', function () { m.zoomIn(1); });
+    $('zout').addEventListener('click', function () { m.zoomOut(1); });
+    if ($('mfit')) $('mfit').addEventListener('click', function () { $('lmap').classList.remove('chosen'); mfit(true); });
+    $('mbig').addEventListener('click', function () { mfull(true); });
+    $('mclose').addEventListener('click', function () { mfull(false); });
+    if (withCard && pts.length) mpick(pts[0].id, false);
+    else if (pts.length === 1) { var el = M.markers[pts[0].id].getElement(); if (el && el.firstChild) el.firstChild.classList.add('on'); }
+  }
+  function mfull(on) {
+    $('mbox').classList.toggle('full', on); document.body.style.overflow = on ? 'hidden' : '';
+    setTimeout(function () { if (M.map) M.map.invalidateSize(); }, 60);
+    (on ? $('mclose') : $('mbig')).focus();
+  }
+  function mfit(fly) {
+    var pts = M.list.map(function (p) { return p.gps; }), m = M.map;
+    if (!pts.length) return m.setView([0.3, 37.9], 6);
+    var o = { padding: [70, 70], maxZoom: 14, duration: fly && !STILL ? 1.5 : 0 };
+    if (pts.length === 1) return fly && !STILL ? m.flyTo(pts[0], 14, o) : m.setView(pts[0], 14);
+    if (fly && !STILL) m.flyToBounds(L.latLngBounds(pts), o); else m.fitBounds(L.latLngBounds(pts), o);
+  }
+  function peopleSay(p) {
+    var I = p.impact || {};
+    if (p.status !== 'Completed') return I.people ? tr('When it’s finished, about <b>' + n(I.people) + ' people</b> will be served.', 'Ukikamilika, takriban <b>watu ' + n(I.people) + '</b> watahudumiwa.') : '';
+    if (I.pupils) return tr('<b>' + n(I.pupils) + ' pupils</b> learn here.', '<b>Wanafunzi ' + n(I.pupils) + '</b> wanasoma hapa.');
+    if (I.patients) return tr('About <b>' + n(I.patients) + ' patients</b> are seen here every week.', 'Takriban <b>wagonjwa ' + n(I.patients) + '</b> wanahudumiwa hapa kila wiki.');
+    if (I.children) return tr('<b>' + n(I.children) + ' children</b> are cared for here.', '<b>Watoto ' + n(I.children) + '</b> wanatunzwa hapa.');
+    return I.people ? tr('About <b>' + n(I.people) + ' people</b> are served here.', 'Takriban <b>watu ' + n(I.people) + '</b> wanahudumiwa hapa.') : '';
+  }
+  function plain(h) { var d = document.createElement('div'); d.innerHTML = h; return d.textContent; }
+  function mpick(id, fly) {
+    var i = M.list.findIndex(function (p) { return p.id === id; }); if (i < 0) return;
+    M.cur = i; var p = M.list[i], k = stKey(p), img = cover(p);
+    if (fly) $('lmap').classList.add('chosen');
+    Object.keys(M.markers).forEach(function (x) { var el = M.markers[x].getElement(); if (el && el.firstChild) el.firstChild.classList.toggle('on', x === id); M.markers[x].setZIndexOffset(x === id ? 1000 : 0); });
+    stopSpeaking();
+    var say = esc(stSay(p)) + (peopleSay(p) ? ' ' + peopleSay(p) : '');
+    $('mcard').innerHTML = '<div class="hd">' + (img ? '<img src="' + esc(img) + '" alt="">' : '<span class="noimg">' + ic(typeIcon(p)) + '</span>') +
+      '<div><h3>' + esc(p.title) + '</h3><div class="wh">' + esc([kind(p), place(p)].filter(Boolean).join(' · ')) + '</div></div></div>' +
+      '<div>' + badge(p) + '</div><p class="say">' + say + '</p>' +
+      '<div class="acts">' + (M.list.length > 1 ? '<button class="btn light" type="button" id="mprev">' + ic('back') + tr('Previous', 'Iliyotangulia') + '</button><button class="btn light" type="button" id="mnext">' + tr('Next', 'Inayofuata') + ic('chev') + '</button>' : '') +
+      '<button class="btn wide" type="button" data-open="' + esc(p.id) + '">' + tr('See this project', 'Ona mradi huu') + ic('chev') + '</button>' +
+      '<button class="btn light wide" type="button" data-say="' + esc(p.title + '. ' + stName(k) + '. ' + plain(say)) + '">' + ic('speak') + tr('Read it to me', 'Nisomee') + '</button></div>' +
+      (M.list.length > 1 ? '<div class="cnt">' + tr('Project ' + (i + 1) + ' of ' + M.list.length, 'Mradi ' + (i + 1) + ' kati ya ' + M.list.length) + '</div>' : '');
+    qa('#mcard [data-open]').forEach(function (b) { b.addEventListener('click', function () { S.pid = b.getAttribute('data-open'); route(); }); });
+    if ($('mprev')) { $('mprev').addEventListener('click', function () { mpick(M.list[(M.cur - 1 + M.list.length) % M.list.length].id, true); }); $('mnext').addEventListener('click', function () { mpick(M.list[(M.cur + 1) % M.list.length].id, true); }); }
+    if (fly && M.map) M.map.flyTo(p.gps, Math.max(M.map.getZoom(), 14), { duration: STILL ? 0 : 1.2 });
+  }
+
+  // ---- read it to me ----
+  var speakingBtn = null;
+  function stopSpeaking() {
+    if (window.speechSynthesis) speechSynthesis.cancel();
+    if (speakingBtn) { speakingBtn.classList.remove('reading'); speakingBtn.innerHTML = speakingBtn._label; speakingBtn = null; }
+  }
+  function speak(btn) {
+    if (!('speechSynthesis' in window)) return toast(tr('Reading aloud isn’t available in this browser.', 'Kusoma kwa sauti hakupatikani kwenye kivinjari hiki.'));
+    if (speakingBtn === btn) return stopSpeaking();
+    stopSpeaking();
+    var u = new SpeechSynthesisUtterance(btn.getAttribute('data-say')); u.rate = 0.9; u.lang = S.lang === 'sw' ? 'sw-KE' : 'en-GB';
+    btn._label = btn.innerHTML; speakingBtn = btn;
+    btn.classList.add('reading'); btn.innerHTML = '<span class="waves" aria-hidden="true"><i></i><i></i><i></i><i></i></span>' + tr('Stop reading', 'Acha kusoma');
+    u.onend = u.onerror = function () { if (speakingBtn === btn) stopSpeaking(); };
+    speechSynthesis.speak(u);
+  }
+
+  // ---- photos: full screen, big arrows, swipe, slideshow ----
+  var viewer = null;
+  function openViewer(list, at, play) {
+    closeViewer();
+    var lb = document.createElement('div'); lb.className = 'lbx'; lb.setAttribute('role', 'dialog'); lb.setAttribute('aria-modal', 'true'); lb.setAttribute('aria-label', tr('Photos', 'Picha'));
+    lb.innerHTML = '<div class="lt"><b id="lbn" aria-live="polite"></b><button class="btn x" type="button" id="lbx">' + ic('x') + tr('Close', 'Funga') + '</button></div>' +
+      '<div class="stage" id="lbs"><img id="lbi" alt=""></div>' +
+      '<div><p class="cap" id="lbc"></p><div class="lb">' + (list.length > 1 ? '<button class="nav" type="button" id="lbp" aria-label="' + tr('Previous photo', 'Picha iliyotangulia') + '">' + ic('back') + '</button>' +
+      '<button class="btn" type="button" id="lbplay"></button><button class="nav" type="button" id="lbf" aria-label="' + tr('Next photo', 'Picha inayofuata') + '">' + ic('chev') + '</button>' : '') + '</div></div>';
+    document.body.appendChild(lb); document.body.style.overflow = 'hidden';
+    viewer = { el: lb, list: list, i: at, timer: null };
+    var show = function (i, soft) {
+      viewer.i = (i + list.length) % list.length; var x = list[viewer.i], im = $('lbi');
+      var put = function () { im.src = x.src; im.alt = x.cap || ''; $('lbc').textContent = x.cap || ''; $('lbn').textContent = list.length > 1 ? tr('Photo ' + (viewer.i + 1) + ' of ' + list.length, 'Picha ' + (viewer.i + 1) + ' kati ya ' + list.length) : ''; im.classList.remove('fade'); };
+      if (soft && !STILL) { im.classList.add('fade'); setTimeout(put, 300); } else put();
+    };
+    var setPlay = function (on) {
+      if (!$('lbplay')) return;
+      clearInterval(viewer.timer); viewer.timer = on ? setInterval(function () { show(viewer.i + 1, true); }, 4500) : null;
+      $('lbplay').innerHTML = on ? '<svg class="i" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>' + tr('Pause', 'Simamisha') : ic('play') + tr('Slideshow', 'Onyesho la picha');
+    };
+    viewer.show = show; viewer.setPlay = setPlay;
+    show(at, false); setPlay(!!play);
+    $('lbx').addEventListener('click', closeViewer);
+    if ($('lbp')) {
+      $('lbp').addEventListener('click', function () { setPlay(false); show(viewer.i - 1, true); });
+      $('lbf').addEventListener('click', function () { setPlay(false); show(viewer.i + 1, true); });
+      $('lbplay').addEventListener('click', function () { setPlay(!viewer.timer); });
+      var x0 = null;
+      $('lbs').addEventListener('touchstart', function (e) { x0 = e.touches[0].clientX; }, { passive: true });
+      $('lbs').addEventListener('touchend', function (e) { if (x0 == null) return; var dx = e.changedTouches[0].clientX - x0; x0 = null; if (Math.abs(dx) > 50) { setPlay(false); show(viewer.i + (dx < 0 ? 1 : -1), true); } });
+    }
+    $('lbx').focus();
+  }
+  function closeViewer() { if (!viewer) return; clearInterval(viewer.timer); viewer.el.remove(); viewer = null; document.body.style.overflow = ''; }
+  function photosNear(el) {
+    var box = el.closest('.strip,.thumbs,li') || document;
+    return qa('[data-zoom]', box).map(function (z) { return { src: z.getAttribute('data-zoom'), cap: z.getAttribute('data-cap') || '', el: z }; });
+  }
+  document.addEventListener('click', function (e) {
+    var sy = e.target.closest('[data-say]'); if (sy) return speak(sy);
+    if (e.target.closest('[data-slides]')) { var g = qa('.pstrip [data-zoom]'); if (g.length) openViewer(photosNear(g[0]), 0, true); return; }
+    var z = e.target.closest('[data-zoom]'); if (z && !e.target.closest('.lbx')) { var L2 = photosNear(z); return openViewer(L2, Math.max(0, L2.findIndex(function (x) { return x.el === z; })), false); }
+  });
+  document.addEventListener('keydown', function (e) {
+    if (viewer && (e.key === 'ArrowRight' || e.key === 'ArrowLeft')) { viewer.setPlay(false); return viewer.show(viewer.i + (e.key === 'ArrowRight' ? 1 : -1), true); }
+    if (e.key !== 'Escape') return;
+    if (viewer) return closeViewer();
+    if ($('mbox') && $('mbox').classList.contains('full')) return mfull(false);
+    stopSpeaking();
+  });
+  // a gentle buzz on phones when a button is pressed, so people know the tap worked
+  document.addEventListener('click', function (e) { if (e.target.closest('button') && navigator.vibrate) { try { navigator.vibrate(10); } catch (x) {} } });
+
+  // ---- call, WhatsApp or e-mail the office (the number shows too) ----
+  function talk(p) {
+    var who = (S.D && (S.D.donor.viewer || S.D.donor.name)) || '';
+    var wa = 'https://wa.me/' + WHATSAPP.replace(/\D/g, '') + '?text=' + encodeURIComponent('Hello RAFIKI, this is ' + who + (p ? '. A question about ' + p.title + ': ' : '. '));
+    return '<div class="talk"><a class="btn light" href="tel:' + PHONE.replace(/[^+\d]/g, '') + '">' + ic('phone') + '<span>' + tr('Call RAFIKI', 'Piga simu RAFIKI') + '<small>' + esc(PHONE) + '</small></span></a>' +
+      '<a class="btn wa" href="' + esc(wa) + '" target="_blank" rel="noopener">' + ic('chat') + '<span>' + tr('WhatsApp us', 'Tuandikie WhatsApp') + '<small>' + esc(WHATSAPP) + '</small></span></a>' +
+      '<a class="btn light" href="mailto:' + CONTACT + '?subject=' + encodeURIComponent(p ? 'Question about ' + p.title : 'My RAFIKI projects') + '">' + ic('mail') + '<span>' + tr('E-mail us', 'Tutumie barua pepe') + '<small>' + CONTACT + '</small></span></a></div>';
+  }
+  // text size, one tap: Normal → Large → Larger
+  var SIZES = ['', 'l', 'xl'];
+  function nextSize() {
+    var cur = store.get('rfPinSize') || '', i = SIZES.indexOf(cur), v = SIZES[(i + 1) % SIZES.length];
+    if (v) { store.set('rfPinSize', v); document.documentElement.setAttribute('data-size', v); } else { store.del('rfPinSize'); document.documentElement.removeAttribute('data-size'); }
+    toast(v === 'l' ? tr('Large text', 'Maandishi makubwa') : v === 'xl' ? tr('Larger text', 'Maandishi makubwa zaidi') : tr('Normal text', 'Maandishi ya kawaida'));
+    draw();
+  }
+
   // ---- the app: Home, Updates, Settings, and a project on top ----
   function draw() {
     if (!S.D) return;
@@ -460,13 +733,13 @@ html[data-theme=sun] .sheet{border:2px solid #000000}
     document.title = 'RAFIKI Pin · ' + first(who);
     var body = S.pid && byId(S.pid) ? project(byId(S.pid)) : S.tab === 'updates' ? updates() : S.tab === 'settings' ? settings() : home();
     $('app').innerHTML = '<header class="top"><img class="lg lg-d" src="/img/logo-dark-bold.webp" alt="RAFIKI" width="70" height="24"><img class="lg lg-l" src="/img/logo-light-bold.webp" alt="" width="70" height="24">' +
-      '<span class="mode">' + ic('heart') + tr('Donor', 'Mfadhili') + '</span><span class="sp"></span><a class="give" href="' + GIVE + '" target="_blank" rel="noopener">' + ic('heart') + tr('Give again', 'Changia tena') + '</a></header>' +
+      '<span class="mode">' + ic('heart') + tr('Donor', 'Mfadhili') + '</span><span class="sp"></span><button class="aa" type="button" id="bAa" aria-label="' + tr('Text size', 'Ukubwa wa maandishi') + '"><small>A</small>A</button><a class="give" href="' + GIVE + '" target="_blank" rel="noopener">' + ic('heart') + tr('Give again', 'Changia tena') + '</a></header>' +
       '<main id="main">' + body + '</main>' +
       '<nav class="tabs" role="tablist" aria-label="' + tr('Main', 'Kuu') + '">' + [['home', tr('Home', 'Nyumbani'), 'home'], ['updates', tr('Updates', 'Habari'), 'bell'], ['settings', tr('Settings', 'Mipangilio'), 'gear']].map(function (t) {
         return '<button type="button" role="tab" data-tab="' + t[0] + '" aria-selected="' + (S.tab === t[0] && !S.pid) + '"><span class="tp">' + ic(t[2]) + '</span>' + t[1] + (t[0] === 'updates' && k ? '<span class="dot" aria-label="' + tr(k + ' new', 'mpya ' + k) + '">' + k + '</span>' : '') + '</button>';
       }).join('') + '</nav>';
     bind(); fit();
-    if (S.pid) drawMap(byId(S.pid));
+    drawMaps();
   }
   // words never split: a label whose longest word is wider than its box gets a little smaller until it fits
   function fit() {
@@ -485,6 +758,7 @@ html[data-theme=sun] .sheet{border:2px solid #000000}
       tile(t.water && t.water === t.projects ? t.water : t.projects, t.water && t.water === t.projects ? (t.water === 1 ? tr('well', 'kisima') : tr('wells', 'visima')) : (t.projects === 1 ? tr('project', 'mradi') : tr('projects', 'miradi'))) +
       tile(t.people, tr('people served', 'wanufaika')) +
       tile(t.visitsYear || 0, tr('visits this year', 'ziara mwaka huu')) + '</div></section>';
+    if (P.some(function (p) { return p.gps; })) h += '<div class="sh"><h2>' + tr('Your projects on the map', 'Miradi yako kwenye ramani') + '</h2></div><section class="card mapcard">' + mapHtml(false) + legendHtml(P) + '<div class="mcard" id="mcard" aria-live="polite"></div></section>';
     h += '<div class="sh"><h2>' + (P.length === 1 ? tr('Your project', 'Mradi wako') : tr('Your projects', 'Miradi yako')) + '</h2><small>' + P.length + '</small></div>';
     h += P.length ? P.map(card).join('') : '<p class="card empty">' + tr('Your projects will appear here soon.', 'Miradi yako itaonekana hapa hivi karibuni.') + '</p>';
     return h;
@@ -499,10 +773,11 @@ html[data-theme=sun] .sheet{border:2px solid #000000}
   }
   function project(p) {
     var img = cover(p), k = stKey(p), I = p.impact || {}, h = '';
-    h += '<button class="lnk pback" type="button" data-back>' + ic('back') + tr('Your projects', 'Miradi yako') + '</button>';
+    h += '<button class="lnk pback" type="button" data-back>' + ic('back') + tr('Back', 'Rudi') + '</button>';
     h += '<div class="pcov">' + (img ? '<img src="' + esc(img) + '" alt="' + esc(p.title) + '">' : ic(typeIcon(p))) + '</div>';
     h += '<h1 class="ptitle">' + esc(p.title) + '</h1><p class="ppl">' + esc([kind(p), place(p)].filter(Boolean).join(' · ')) + '</p>';
-    h += '<div class="card stc" style="margin-top:14px"><span class="si t-' + k + '">' + ic(k === 'repairing' || k === 'notworking' ? 'wrench' : typeIcon(p)) + '</span><div><b>' + esc(stName(k)) + '</b><p>' + esc(stSay(p)) + '</p></div></div>';
+    h += '<div class="card stc" style="margin-top:14px"><span class="si t-' + k + '">' + ic(k === 'repairing' || k === 'notworking' ? 'wrench' : typeIcon(p)) + '</span><div><b>' + esc(stName(k)) + '</b><p>' + esc(stSay(p)) + (peopleSay(p) ? ' ' + peopleSay(p) : '') + '</p></div></div>' +
+      '<button class="btn light block" style="margin-top:10px" type="button" data-say="' + esc(p.title + '. ' + stName(k) + '. ' + stSay(p) + ' ' + plain(peopleSay(p))) + '">' + ic('speak') + tr('Read it to me', 'Nisomee') + '</button>';
     var f = [];
     if (I.people) f.push([n(I.people), tr('people served', 'watu wanaohudumiwa')]);
     if (I.litresPerDay) f.push([n(I.litresPerDay), tr('litres a day', 'lita kwa siku')]);
@@ -512,14 +787,16 @@ html[data-theme=sun] .sheet{border:2px solid #000000}
     if (I.children) f.push([n(I.children), tr('children', 'watoto')]);
     if (f.length) h += '<div class="pfacts">' + f.slice(0, 3).map(function (x) { return '<div class="fact"><b>' + esc(x[0]) + '</b><small>' + esc(x[1]) + '</small></div>'; }).join('') + '</div>';
     // photo timeline, newest first
-    var ph = (p.gallery || []).map(function (g) { return { at: g.at, src: visitPhoto(g.id, 960), cap: g.label }; });
-    if (ph.length) h += '<div class="sh"><h2>' + tr('Photos', 'Picha') + '</h2><small>' + ph.length + '</small></div><div class="strip">' + ph.map(function (x) {
-      return '<figure><img src="' + esc(x.src) + '" alt="' + esc(x.cap || p.title) + '" loading="lazy"><figcaption>' + day(x.at) + (x.cap ? ' · ' + esc(x.cap) : '') + '</figcaption></figure>'; }).join('') + '</div>';
+    var ph = (p.gallery || []).map(function (g) { return { at: g.at, src: visitPhoto(g.id, 960), big: visitPhoto(g.id, 1600), cap: g.label }; });
+    if (ph.length) h += '<div class="sh"><h2>' + tr('Photos', 'Picha') + '</h2><small>' + ph.length + '</small></div><div class="strip pstrip">' + ph.map(function (x) {
+      var cap = day(x.at) + (x.cap ? ' · ' + x.cap : '');
+      return '<figure><button type="button" data-zoom="' + esc(x.big) + '" data-cap="' + esc(cap) + '" aria-label="' + tr('Open photo', 'Fungua picha') + '"><img src="' + esc(x.src) + '" alt="' + esc(x.cap || p.title) + '" loading="lazy"></button><figcaption>' + esc(cap) + '</figcaption></figure>'; }).join('') + '</div>' +
+      (ph.length > 1 ? '<button class="btn slideshow" type="button" data-slides>' + ic('play') + tr('Watch the ' + ph.length + ' photos as a slideshow', 'Tazama picha ' + ph.length + ' kama onyesho') + '</button>' : '');
     // thank-you messages and videos from the community
     if ((p.thanks || []).length || (p.stories || []).length) {
       h += '<div class="sh"><h2>' + tr('Thank you from the community', 'Asante kutoka kwa jamii') + '</h2></div>';
       if ((p.thanks || []).length) h += '<div class="strip">' + p.thanks.map(function (x) {
-        return '<figure>' + (x.media === 'video' ? '<video controls preload="none" playsinline src="' + esc(visitPhoto(x.id)) + '"></video>' : '<img src="' + esc(visitPhoto(x.id, 960)) + '" alt="' + esc(x.caption || tr('Thank-you photo', 'Picha ya shukrani')) + '" loading="lazy">') +
+        return '<figure>' + (x.media === 'video' ? '<video controls preload="none" playsinline src="' + esc(visitPhoto(x.id)) + '"></video>' : '<button type="button" data-zoom="' + esc(visitPhoto(x.id, 1600)) + '" data-cap="' + esc(x.caption ? '“' + x.caption + '”' : '') + '" aria-label="' + tr('Open photo', 'Fungua picha') + '"><img src="' + esc(visitPhoto(x.id, 960)) + '" alt="' + esc(x.caption || tr('Thank-you photo', 'Picha ya shukrani')) + '" loading="lazy"></button>') +
           '<figcaption>' + day(x.at) + (x.caption ? ' · “' + esc(x.caption) + '”' : '') + '</figcaption></figure>'; }).join('') + '</div>';
       (p.stories || []).forEach(function (s) { h += '<blockquote class="quote">“' + esc(s.quote) + '”' + (s.who ? '<small>— ' + esc(s.who) + '</small>' : '') + '</blockquote>'; });
     }
@@ -547,11 +824,12 @@ html[data-theme=sun] .sheet{border:2px solid #000000}
           .sort(function (a, b) { return a.at < b.at ? 1 : -1; }).map(function (x) { return x.html; }).join('') + '</ul></div>';
     }
     // where it is
-    if (p.gps) h += '<div class="sh"><h2>' + tr('Where it is', 'Mahali ilipo') + '</h2></div><div class="pmap" id="pmap" role="img" aria-label="' + esc(tr('Map of ', 'Ramani ya ') + p.title) + '"></div>' +
+    if (p.gps) h += '<div class="sh"><h2>' + tr('Where it is', 'Mahali ilipo') + '</h2></div><section class="card mapcard">' + mapHtml(true) + '</section>' +
       '<div class="mapacts"><a class="btn light sm" href="https://www.google.com/maps/search/?api=1&query=' + p.gps[0] + ',' + p.gps[1] + '" target="_blank" rel="noopener">' + ic('map') + tr('Open in Google Maps', 'Fungua kwenye Google Maps') + '</a></div>';
-    h += '<div class="mapacts" style="margin-top:22px"><a class="btn light sm" href="mailto:' + CONTACT + '?subject=' + encodeURIComponent('Question about ' + p.title) + '">' + ic('mail') + tr('Ask about this project', 'Uliza kuhusu mradi huu') + '</a></div>';
+    h += '<div class="sh"><h2>' + tr('Questions about this project?', 'Una swali kuhusu mradi huu?') + '</h2></div>' + talk(p);
     return h;
   }
+  function drawMaps() { if (S.pid && byId(S.pid)) drawLMap([byId(S.pid)], false); else if (!S.pid && S.tab === 'home') drawLMap(S.D.projects || [], true); }
   function drawMap(p) {
     if (!p || !p.gps || !$('pmap') || !window.L) return;
     if (S.map) { S.map.remove(); S.map = null; }
@@ -578,18 +856,25 @@ html[data-theme=sun] .sheet{border:2px solid #000000}
   }
   function item(u) {
     var p = byId(u.pid); if (!p) return '';
-    var isNew = S.seen && u.at > S.seen ? '<span class="new">' + tr('NEW', 'MPYA') + '</span>' : '', t = '', ico = 'cal', tone = 'done', body = '';
-    if (u.type === 'visit') { t = tr('Site visit', 'Ziara'); body = visitSay(u); tone = u.state === 'notworking' ? 'notworking' : u.state === 'repair' ? 'repairing' : 'done'; }
-    else if (u.type === 'photos') { t = u.n === 1 ? tr('1 new photo', 'Picha 1 mpya') : tr(u.n + ' new photos', 'Picha ' + u.n + ' mpya'); ico = 'camera'; tone = 'planned'; }
-    else if (u.type === 'thanks') { t = u.media === 'video' ? tr('A thank-you video', 'Video ya shukrani') : tr('A thank-you photo', 'Picha ya shukrani'); ico = 'heart'; tone = 'repairing'; body = u.caption ? '“' + u.caption + '”' : ''; }
-    else if (u.type === 'repair') { t = u.fixedAt ? tr('Repaired', 'Imerekebishwa') : tr('A problem was found', 'Tatizo liligunduliwa'); ico = 'wrench'; tone = u.fixedAt ? 'working' : 'repairing'; body = (u.problems || []).join(', '); }
-    else if (u.type === 'story') { t = tr('A story from the community', 'Hadithi kutoka kwa jamii'); ico = 'quote'; tone = 'building'; body = '“' + u.quote + '”' + (u.who ? ' — ' + u.who : ''); }
-    else if (u.type === 'anniversary') { t = u.years === 1 ? tr('One year of clean water!', 'Mwaka mmoja wa maji safi!') : tr(u.years + ' years of clean water!', 'Miaka ' + u.years + ' ya maji safi!'); ico = 'cake'; tone = 'working'; }
+    var isNew = S.seen && u.at > S.seen ? '<span class="new">' + tr('NEW', 'MPYA') + '</span>' : '', t = '', ico = 'cal', tone = 'done', story = '';
+    if (u.type === 'visit') {
+      t = tr('Site visit', 'Ziara'); tone = u.state === 'notworking' ? 'notworking' : u.state === 'repair' ? 'repairing' : 'done';
+      story = u.build ? tr('Our team visited the building work.', 'Timu yetu ilitembelea ujenzi.') : u.state === 'working' ? tr('Our team visited and found it working well.', 'Timu yetu ilitembelea na ikakuta inafanya kazi vizuri.')
+        : u.state === 'repair' ? tr('Our team visited and found something that needs a repair. They are arranging it.', 'Timu yetu ilitembelea na ikakuta kitu kinachohitaji matengenezo. Wanalipanga.')
+        : u.state === 'notworking' ? tr('Our team visited and found it wasn’t working. They are arranging the repair.', 'Timu yetu ilitembelea na ikakuta haifanyi kazi. Wanapanga matengenezo.') : tr('Our team visited and checked it.', 'Timu yetu ilitembelea na kukagua.');
+      var vs = visitSay(u); if (vs) story += ' ' + vs;
+    }
+    else if (u.type === 'photos') { t = u.n === 1 ? tr('1 new photo', 'Picha 1 mpya') : tr(u.n + ' new photos', 'Picha ' + u.n + ' mpya'); ico = 'camera'; tone = 'planned'; story = u.n === 1 ? tr('Our team took a new photo. Tap it to see it big.', 'Timu yetu ilipiga picha mpya. Iguse uione kubwa.') : tr('Our team took ' + u.n + ' new photos. Tap one to see it big.', 'Timu yetu ilipiga picha ' + u.n + ' mpya. Gusa moja uione kubwa.'); }
+    else if (u.type === 'thanks') { t = u.media === 'video' ? tr('A thank-you video', 'Video ya shukrani') : tr('A thank-you photo', 'Picha ya shukrani'); ico = 'heart'; tone = 'repairing'; story = (u.media === 'video' ? tr('The community recorded a thank-you video for you.', 'Jamii ilirekodi video ya shukrani kwa ajili yako.') : tr('The community sent you a thank-you photo.', 'Jamii ilikutumia picha ya shukrani.')) + (u.caption ? ' “' + u.caption + '”' : ''); }
+    else if (u.type === 'repair') { t = u.fixedAt ? tr('Repaired', 'Imerekebishwa') : tr('A problem was found', 'Tatizo liligunduliwa'); ico = 'wrench'; tone = u.fixedAt ? 'working' : 'repairing'; var pr = (u.problems || []).join(', ').toLowerCase(); story = u.fixedAt ? tr('It was repaired and is working again.' + (pr ? ' What was fixed: ' + pr + '.' : ''), 'Imerekebishwa na inafanya kazi tena.' + (pr ? ' Kilichorekebishwa: ' + pr + '.' : '')) : tr('Our team found a problem and is fixing it.' + (pr ? ' What broke: ' + pr + '.' : ''), 'Timu yetu iligundua tatizo na inalirekebisha.' + (pr ? ' Kilichoharibika: ' + pr + '.' : '')); }
+    else if (u.type === 'story') { t = tr('A story from the community', 'Hadithi kutoka kwa jamii'); ico = 'quote'; tone = 'building'; story = '“' + u.quote + '”' + (u.who ? ' — ' + u.who : ''); }
+    else if (u.type === 'anniversary') { t = u.years === 1 ? tr('One year of clean water!', 'Mwaka mmoja wa maji safi!') : tr(u.years + ' years of clean water!', 'Miaka ' + u.years + ' ya maji safi!'); ico = 'cake'; tone = 'working'; story = tr('Thank you for every litre since.', 'Asante kwa kila lita tangu hapo.'); }
     else return '';
-    var thumbs = u.type === 'photos' ? '<div class="thumbs">' + (u.photos || []).slice(0, 4).map(function (id) { return '<img src="' + esc(visitPhoto(id, 480)) + '" alt="" loading="lazy">'; }).join('') + '</div>'
-      : u.type === 'thanks' && u.media !== 'video' ? '<div class="thumbs"><img src="' + esc(visitPhoto(u.id, 480)) + '" alt="" loading="lazy"></div>' : '';
-    return '<li><span class="di t-' + tone + '">' + ic(ico) + '</span><div><b>' + esc(t) + isNew + '</b><small>' + esc(p.title) + ' · ' + day(u.at) + '</small>' + (body ? '<p>' + esc(body) + '</p>' : '') + thumbs +
-      '<button class="lnk" type="button" data-open="' + esc(p.id) + '" style="min-height:40px;padding:4px 0 0">' + tr('See the project', 'Ona mradi') + ic('chev') + '</button></div></li>';
+    var cap = p.title + ' · ' + day(u.at);
+    var thumbs = u.type === 'photos' ? '<div class="thumbs">' + (u.photos || []).slice(0, 4).map(function (id) { return '<button type="button" data-zoom="' + esc(visitPhoto(id, 1600)) + '" data-cap="' + esc(cap) + '" aria-label="' + tr('Open photo', 'Fungua picha') + '"><img src="' + esc(visitPhoto(id, 480)) + '" alt="" loading="lazy"></button>'; }).join('') + '</div>'
+      : u.type === 'thanks' && u.media !== 'video' ? '<div class="thumbs"><button type="button" data-zoom="' + esc(visitPhoto(u.id, 1600)) + '" data-cap="' + esc(u.caption ? '“' + u.caption + '”' : cap) + '" aria-label="' + tr('Open photo', 'Fungua picha') + '"><img src="' + esc(visitPhoto(u.id, 480)) + '" alt="" loading="lazy"></button></div>' : '';
+    return '<li><span class="di t-' + tone + '">' + ic(ico) + '</span><div><b>' + esc(p.title) + isNew + '</b><small>' + esc(t) + ' · ' + day(u.at) + '</small><p class="story">' + esc(story) + '</p>' + thumbs +
+      '<div class="ua"><button class="btn light" type="button" data-open="' + esc(p.id) + '">' + tr('See the project', 'Ona mradi') + ic('chev') + '</button><button class="btn light" type="button" data-say="' + esc(p.title + '. ' + t + '. ' + day(u.at) + '. ' + story) + '">' + ic('speak') + tr('Listen', 'Sikiliza') + '</button></div></div></li>';
   }
   function settings() {
     var me = S.D.me || {}, size = store.get('rfPinSize') || '', theme = store.get('rfPinTheme') || '';
@@ -607,9 +892,11 @@ html[data-theme=sun] .sheet{border:2px solid #000000}
       '<a class="r" href="' + GIVE + '" target="_blank" rel="noopener"><span class="ri t-working">' + ic('heart') + '</span><span class="tx"><b>' + tr('Give again', 'Changia tena') + '</b><small>rafikioutreach.org/donate</small></span>' + ic('chev').replace('class="i"', 'class="i chev"') + '</a>' +
       '<a class="r" href="mailto:' + CONTACT + '"><span class="ri t-done">' + ic('mail') + '</span><span class="tx"><b>' + tr('Contact RAFIKI', 'Wasiliana na RAFIKI') + '</b><small>' + CONTACT + '</small></span>' + ic('chev').replace('class="i"', 'class="i chev"') + '</a>' +
       '<button class="r" type="button" id="bOut"><span class="ri t-notworking">' + ic('out') + '</span><span class="tx"><b>' + tr('Sign out', 'Toka') + '</b><small>' + tr('You can sign in again with your code or link.', 'Unaweza kuingia tena kwa msimbo au kiungo chako.') + '</small></span></button></div>' +
+      '<div class="sh"><h2>' + tr('Talk to RAFIKI', 'Ongea na RAFIKI') + '</h2></div>' + talk(null) +
       '<p class="ver">' + tr('Signed in as ', 'Umeingia kama ') + esc(S.D.donor.viewer || S.D.donor.name) + '</p>';
   }
   function bind() {
+    var aa = $('bAa'); if (aa) aa.addEventListener('click', nextSize);
     qa('[data-tab]').forEach(function (b) { b.addEventListener('click', function () { S.tab = b.getAttribute('data-tab'); S.pid = null; if (S.tab === 'updates') markSeenSoon(); route(); }); });
     qa('[data-open]').forEach(function (b) { b.addEventListener('click', function () { S.pid = b.getAttribute('data-open'); route(); }); });
     qa('[data-back]').forEach(function (b) { b.addEventListener('click', function () { history.length > 1 && /^#p\//.test(location.hash) ? history.back() : (S.pid = null, route()); }); });
@@ -657,7 +944,7 @@ html[data-theme=sun] .sheet{border:2px solid #000000}
   var h0 = /^#p\/(\d+)$/.exec(location.hash); if (h0) S.pid = h0[1]; else if (location.hash === '#updates' || location.hash === '#settings') S.tab = location.hash.slice(1);
   if (!S.token) return signIn();
   if (S.D) draw(); else $('app').innerHTML = '<div class="spin">' + tr('Loading…', 'Inapakia…') + '</div>';
-  window.addEventListener('load', function () { if (S.pid && S.D) drawMap(byId(S.pid)); });
+  window.addEventListener('load', function () { if (S.D) drawMaps(); });
   load(true).then(function (j) { if (!j.ok && !S.D && j.reason !== 'link') { $('app').innerHTML = '<section class="gone"><span class="ic">' + ic('drop') + '</span><h1>' + tr('We couldn’t load your projects just now', 'Hatukuweza kupakia miradi yako sasa hivi') + '</h1><p>' + esc(why(j)) + '</p><div class="acts"><button class="btn" type="button" onclick="location.reload()">' + tr('Try again', 'Jaribu tena') + '</button></div></section>'; } });
   // news while the app is open: checked again every 5 minutes (the Updates tab shows a number)
   setInterval(function () { if (S.token && document.visibilityState === 'visible') load(false); }, 5 * 60000);
