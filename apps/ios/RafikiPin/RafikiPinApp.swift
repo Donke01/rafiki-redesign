@@ -25,11 +25,24 @@ struct RafikiPinApp: App {
 struct Root: View {
     @EnvironmentObject var m: AppModel
     @Environment(\.colorScheme) var scheme
+    // welcome: before signing in, and for a moment every time the app opens; the full tour the first time
+    @State private var helloDone = Demo.on
+    @State private var onbSeen = UserDefaults.standard.bool(forKey: "onb")
     var body: some View {
         let _ = (Look.systemDark = scheme == .dark)
         ZStack {
             AppBackground()
             if !m.signedIn { LockView() } else if m.bioLocked { BioLockView() } else { Shell() }
+            Group {
+                if !m.signedIn && !helloDone { WelcomeView(splash: false) { withAnimation(.easeOut(duration: 0.25)) { helloDone = true } } }
+                else if m.signedIn && !Demo.on && (!onbSeen || m.replayOnb) {
+                    OnboardingView { role in
+                        withAnimation(.easeOut(duration: 0.25)) { onbSeen = true; helloDone = true; m.replayOnb = false }
+                        m.tab(role == "office" && m.snap?.admin == true ? "office" : "list")
+                    }
+                }
+                else if m.signedIn && !helloDone { WelcomeView(splash: true) { withAnimation(.easeOut(duration: 0.25)) { helloDone = true } } }
+            }.transition(.opacity)
         }
         .id("\(m.look)-\(scheme == .dark)")
         .preferredColorScheme(Look.mode == "dark" ? .dark : (Look.mode == "light" || Look.mode == "sun") ? .light : nil)

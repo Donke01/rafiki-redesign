@@ -3,6 +3,7 @@ import Foundation
 /// Demo mode (launch argument -demo): sample projects and a pretend server, used to check every
 /// screen on the simulator without touching the real monday.com board.
 enum Demo {
+    static var on: Bool { ProcessInfo.processInfo.arguments.contains("-demo") }
     static func arg(_ k: String) -> String? {
         let a = ProcessInfo.processInfo.arguments
         guard let i = a.firstIndex(of: k), i + 1 < a.count else { return nil }
