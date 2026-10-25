@@ -607,7 +607,7 @@ html{font-size:17px}html[data-size=s]{font-size:15px}html[data-size=l]{font-size
     var pts = M.list.map(function (p) { return p.gps; }), m = M.map;
     if (!pts.length) return m.setView([0.3, 37.9], 6);
     var o = { padding: [70, 70], maxZoom: 14, duration: fly && !STILL ? 1.5 : 0 };
-    if (pts.length === 1) return fly && !STILL ? m.flyTo(pts[0], 14, o) : m.setView(pts[0], 14);
+    if (pts.length === 1) return fly && !STILL ? m.flyTo(pts[0], 17, o) : m.setView(pts[0], 17);
     if (fly && !STILL) m.flyToBounds(L.latLngBounds(pts), o); else m.fitBounds(L.latLngBounds(pts), o);
   }
   function peopleSay(p) {
@@ -635,7 +635,8 @@ html{font-size:17px}html[data-size=s]{font-size:15px}html[data-size=l]{font-size
       (M.list.length > 1 ? '<div class="cnt">' + tr('Project ' + (i + 1) + ' of ' + M.list.length, 'Mradi ' + (i + 1) + ' kati ya ' + M.list.length) + '</div>' : '');
     qa('#mcard [data-open]').forEach(function (b) { b.addEventListener('click', function () { S.pid = b.getAttribute('data-open'); route(); }); });
     if ($('mprev')) { $('mprev').addEventListener('click', function () { mpick(M.list[(M.cur - 1 + M.list.length) % M.list.length].id, true); }); $('mnext').addEventListener('click', function () { mpick(M.list[(M.cur + 1) % M.list.length].id, true); }); }
-    if (fly && M.map) M.map.flyTo(p.gps, Math.max(M.map.getZoom(), 14), { duration: STILL ? 0 : 1.2 });
+    // straight down to the exact spot: the building itself on the satellite photos
+    if (fly && M.map) M.map.flyTo(p.gps, M.map.hasLayer(M.layers.sat) ? 19 : 18, { duration: STILL ? 0 : 1.6 });
   }
 
   // ---- read it to me ----

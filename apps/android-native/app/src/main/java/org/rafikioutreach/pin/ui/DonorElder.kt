@@ -239,7 +239,7 @@ private fun DonorMapView(pts: List<DProject>, sat: Boolean, onSat: (Boolean) -> 
         val gs = pts.mapNotNull { p -> p.gps?.let { GeoPoint(it.lat, it.lng) } }
         if (gs.isEmpty()) return
         map.post {
-            if (gs.size == 1) { if (anim) map.controller.animateTo(gs[0], 14.0, 1500L) else { map.controller.setZoom(14.0); map.controller.setCenter(gs[0]) } }
+            if (gs.size == 1) { if (anim) map.controller.animateTo(gs[0], 17.0, 1500L) else { map.controller.setZoom(17.0); map.controller.setCenter(gs[0]) } }
             else runCatching { map.zoomToBoundingBox(BoundingBox.fromGeoPointsSafe(gs).increaseByScale(1.4f), anim) }
         }
     }
@@ -248,7 +248,8 @@ private fun DonorMapView(pts: List<DProject>, sat: Boolean, onSat: (Boolean) -> 
     LaunchedEffect(fitTick) { if (fitTick > 0) fit(Motion.on) }
     LaunchedEffect(cur, chosen) {
         if (!chosen) return@LaunchedEffect
-        pts.firstOrNull { it.id == cur }?.gps?.let { map.controller.animateTo(GeoPoint(it.lat, it.lng), maxOf(map.zoomLevelDouble, 14.0), if (Motion.on) 1200L else 0L) }
+        // straight down to the exact spot: the building itself on the satellite photos
+        pts.firstOrNull { it.id == cur }?.gps?.let { map.controller.animateTo(GeoPoint(it.lat, it.lng), if (sat) 19.0 else 18.0, if (Motion.on) 1600L else 0L) }
     }
     Box(modifier.clipToBounds()) {
         AndroidView({ map }, Modifier.fillMaxSize(), update = { mv ->

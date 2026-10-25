@@ -586,7 +586,7 @@ html.ts-xl{--fs:1.38}
     var pts = MP.map(function (p) { return p.gps; });
     if (!pts.length) return map.setView([0.3, 37.9], 6);
     var o = { padding: [70, 70], maxZoom: 14, duration: fly && !STILL ? 1.5 : 0 };
-    if (pts.length === 1) return fly && !STILL ? map.flyTo(pts[0], 14, o) : map.setView(pts[0], 14);
+    if (pts.length === 1) return fly && !STILL ? map.flyTo(pts[0], 17, o) : map.setView(pts[0], 17);
     if (fly && !STILL) map.flyToBounds(L.latLngBounds(pts), o); else map.fitBounds(L.latLngBounds(pts), o);
   }
   // what the state means, in a sentence a donor reads (and hears)
@@ -627,7 +627,8 @@ html.ts-xl{--fs:1.38}
       '<a class="btn light wide" href="' + esc(gmaps(p)) + '" target="_blank" rel="noopener noreferrer">' + ic('map') + 'Open in Google Maps</a></div>' +
       (MP.length > 1 ? '<div class="cnt">Project ' + (i + 1) + ' of ' + MP.length + '</div>' : '');
     if ($('mprev')) { $('mprev').addEventListener('click', function () { pick(MP[(cur - 1 + MP.length) % MP.length].id, true); }); $('mnext').addEventListener('click', function () { pick(MP[(cur + 1) % MP.length].id, true); }); }
-    if (fly && map) map.flyTo(p.gps, Math.max(map.getZoom(), 14), { duration: STILL ? 0 : 1.2 });
+    // straight down to the exact spot: the building itself on the satellite photos
+    if (fly && map) map.flyTo(p.gps, map.hasLayer(layers.sat) ? 19 : 18, { duration: STILL ? 0 : 1.6 });
   }
 
   // ---- read it to me ----
