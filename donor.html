@@ -569,6 +569,68 @@ html{--fs:1.04}html.ts-l{--fs:1.16}html.ts-xl{--fs:1.3}
 .cft i:nth-child(3n){border-radius:50%;width:8px;height:8px}
 @keyframes cft{0%{transform:translate(0,0) rotate(0);opacity:1}70%{opacity:1}100%{transform:translate(var(--dx),calc(var(--dy) + 90px)) rotate(var(--r));opacity:0}}
 @media (prefers-reduced-motion:reduce){.hwv,.hw,.pw,.bub,.sheen,.rip,.cft{display:none!important}}
+/* centred, and no broken words or lines */
+h1,h2,h3,.ut,.pj .cap b,.mcard h3{text-wrap:balance}
+p,.story,.say,.say2,small,.hl{text-wrap:pretty}
+body{hyphens:manual;-webkit-hyphens:manual;overflow-wrap:normal;word-break:normal}
+.nw,.hero .say b,.talk small,.badge,time,.pager span{white-space:nowrap}
+.sh{justify-content:center;text-align:center}.sh p,.band p,.hero .org{text-wrap:balance}
+.legend{justify-content:center}
+.chips{justify-content:center;flex-wrap:wrap;overflow:visible}
+.mtools{left:0;right:0;justify-content:center;pointer-events:none}.mtools>*{pointer-events:auto}
+.pj .ph .cap .pl{display:inline-flex;align-items:center;justify-content:center;gap:5px;font-size:calc(14px*var(--fs));font-weight:600;opacity:.9;margin-top:2px}
+.pj .ph .cap .pl svg{width:15px;height:15px;flex:0 0 auto}
+/* hero */
+.hero{text-align:center;padding:34px 20px 26px;background:radial-gradient(120% 120% at 50% 0%,#3EA6EC 0%,#0A78C2 35%,#054F81 72%,#04263F 100%)}
+.hero.has-ph{display:block!important;background:#04263F}
+.hero-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-3;transform:scale(1.04);animation:kb 20s ease-in-out infinite alternate}
+.hero-sh{position:absolute;inset:0;z-index:-2;background:linear-gradient(180deg,rgba(4,38,63,.55) 0%,rgba(5,79,129,.72) 40%,rgba(4,38,63,.94) 100%)}
+.hero::before{left:50%;right:auto;margin-left:-180px;top:-140px;width:360px;height:360px}
+.hero-ph{display:none!important}
+.hero-tx{max-width:640px;margin:0 auto}
+.hero .kick{-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.hero h1{margin:16px 0 6px;text-shadow:0 2px 18px rgba(0,0,0,.25)}
+.hero .say{margin:16px auto 0;max-width:24ch;text-wrap:balance}
+.hero .say b{background:linear-gradient(transparent 60%,rgba(107,189,242,.5) 60%);padding:0 2px}
+.stats{max-width:760px;margin:24px auto 0}
+.stat{text-align:center;padding:16px 10px 14px;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);background:rgba(255,255,255,.12)}
+.stat span{text-wrap:balance}
+.hero .acts{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:460px;margin:22px auto 0}
+.hero .acts>*{width:100%;min-height:54px;margin:0;padding:0 14px}
+.hero .acts>.btn.white,.hero .acts>#inApp{grid-column:1/-1}
+.hero .acts .btn.ghost{-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+@media (min-width:760px){.hero{padding:52px 40px 42px}.hero .acts{grid-template-columns:auto auto auto;max-width:none;justify-content:center}.hero .acts>*{width:auto;padding:0 22px}.hero .acts>.btn.white,.hero .acts>#inApp{grid-column:auto}}
+/* project cards */
+.pj{text-align:center}
+.pj .ph .cap{align-items:center;text-align:center}
+.pj .nums div{display:flex;flex-direction:column;align-items:center}
+.pj .nums div+div{padding-left:0}
+.pj .hl{justify-content:center;text-align:center}
+.pj .go{justify-content:center;gap:12px}
+/* map card */
+.mcard{text-align:center}
+.mcard .mtop{grid-template-columns:1fr;justify-items:center;gap:10px}
+.mcard .mtop img,.mcard .mtop .noimg{width:104px;height:104px}
+.mcard h3{margin:8px 0 3px}
+.mcard .row{justify-content:center}
+.mcard .wh{text-wrap:balance}
+/* update cards */
+.up .ub{text-align:center}
+.up .uh{flex-direction:column;gap:8px}
+.up .uh>div{align-items:center}
+.up .uh .pt{text-align:center}
+.up .ua{justify-content:center;gap:10px 22px;flex-wrap:wrap}
+.up blockquote{text-align:center}
+/* thank-you panel */
+.band{text-align:center;justify-items:center}
+.band>div{max-width:560px}
+.band .side{width:100%;max-width:460px}
+.band .talk a{text-align:left}
+/* project page */
+.dt h1,.dt .where,.dt .say2{text-align:center}
+.dt .st{justify-content:center}
+.dt h2{text-align:center}
+.dt .dacts{justify-content:center}
 /* printed impact report (Download impact report → Save as PDF) */
 #report{display:none}
 .lh-wrap,.lh-wrap>tbody,.lh-wrap>tbody>tr,.lh-wrap>tbody>tr>td{display:block;padding:0}.lh-wrap>tfoot{display:none}
@@ -684,7 +746,7 @@ html{--fs:1.04}html.ts-l{--fs:1.16}html.ts-xl{--fs:1.3}
   }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function n(v) { return Math.round(Number(v) || 0).toLocaleString('en-US'); }
-  function day(iso, yr) { var d = new Date(iso); return isNaN(d) ? '' : d.toLocaleDateString('en-GB', yr === false ? { day: 'numeric', month: 'short' } : { day: 'numeric', month: 'short', year: 'numeric' }); }
+  function day(iso, yr) { var d = new Date(iso); return isNaN(d) ? '' : d.toLocaleDateString('en-GB', yr === false ? { day: 'numeric', month: 'short' } : { day: 'numeric', month: 'short', year: 'numeric' }).replace(/ /g, '\u00a0'); }
   function toast(t) { var d = document.createElement('div'); d.className = 'toast'; d.setAttribute('role', 'status'); d.textContent = t; document.body.appendChild(d); setTimeout(function () { d.remove(); }, 2600); }
   function first(name) { return String(name || '').trim().split(/\s+/)[0] || 'friend'; }
   function boardPhoto(id, w) { return '/api/photo/' + encodeURIComponent(id) + '?w=' + (w || 960); }
@@ -698,6 +760,7 @@ html{--fs:1.04}html.ts-l{--fs:1.16}html.ts-xl{--fs:1.3}
   function stKey(p) { return p.health ? p.health.state : p.status === 'Under construction' ? 'building' : p.status === 'Upcoming' ? 'planned' : 'done'; }
   function badge(p) { var s = ST[stKey(p)]; return '<span class="badge ' + s[1] + '">' + s[0] + '</span>'; }
   function checked(p) { return p.health ? '<span class="checked">Last checked ' + esc(day(p.health.at)) + '</span>' : ''; }
+  function kp(p) { return '<span class="nw">' + esc(KIND[p.type] || p.type) + '</span> · <span class="nw">' + esc(place(p)) + '</span>'; }
   function place(p) { return [p.area, p.country].filter(Boolean).join(', '); }
   function gmaps(p) { return 'https://www.google.com/maps/search/?api=1&query=' + p.gps[0] + ',' + p.gps[1]; }
   function typeIcon(p) { return p.water ? 'drop' : p.cat === 'school' ? 'school' : p.cat === 'children' ? 'house' : 'spark'; }
@@ -738,13 +801,13 @@ html{--fs:1.04}html.ts-l{--fs:1.16}html.ts-xl{--fs:1.3}
     if (stats.length < 4) stats.push(stat(t.projects, t.projects === 1 ? 'project you funded' : 'projects you funded'));
     var anni = P.filter(function (p) { return p.anniversary; });
     var hp = P.filter(function (p) { return cover(p); })[0];
-    var h = '<section class="hero' + (hp ? ' has-ph' : '') + '" aria-labelledby="hi">' + waves('hwv') + bubbles(9) + (hp ? '<figure class="hero-ph"><img src="' + esc(cover(hp)) + '" alt="' + esc(hp.title) + '"><figcaption>' + esc(hp.title) + '</figcaption></figure>' : '') +
+    var h = '<section class="hero' + (hp ? ' has-ph' : '') + '" aria-labelledby="hi">' + (hp ? '<img class="hero-bg" src="' + esc(cover(hp)) + '" alt=""><span class="hero-sh" aria-hidden="true"></span>' : '') + waves('hwv') +
       '<div class="hero-tx"><span class="kick">' + ic('lock') + 'Your private project page</span>' +
       '<h1 id="hi">Welcome, ' + esc(first(who)) + '</h1>' +
       '<p class="org">' + esc([D.donor.group || D.donor.viewer !== D.donor.name ? D.donor.name : '', D.donor.org && D.donor.org !== D.donor.name ? D.donor.org : ''].filter(Boolean).join(' · ') || 'Thank you for giving with RAFIKI Outreach') + '</p>' +
       '<p class="say">' + say + '</p></div>' +
       '<div class="stats">' + stats.slice(0, 4).join('') + '</div>' +
-      '<div class="acts"><a class="btn white" href="#mapsec">' + ic('map') + 'See them on the map</a><button class="btn ghost listen" type="button" data-say="' + esc('Welcome, ' + first(who) + '. ' + plain(say)) + '">' + ic('speak') + 'Listen</button><button class="btn ghost" type="button" id="pdf">' + ic('down') + 'Download impact report</button>' +
+      '<div class="acts"><a class="btn white" href="#mapsec">' + ic('map') + 'See them on the map</a><button class="btn ghost listen" type="button" data-say="' + esc('Welcome, ' + first(who) + '. ' + plain(say)) + '">' + ic('speak') + 'Listen</button><button class="btn ghost" type="button" id="pdf">' + ic('down') + 'Impact report</button>' +
       // feat-donorapp: on a phone, the same private link opens the RAFIKI Pin app in donor mode (Android App Link; the web app on an iPhone)
       (window.matchMedia && matchMedia('(pointer: coarse)').matches ? '<a class="btn ghost" id="inApp" href="https://pin.rafikioutreach.org/pin#donor=' + encodeURIComponent(TOKEN) + '" rel="noreferrer">' + ic('drop') + 'Open in the RAFIKI app</a>' : '') + '</div></section>';
     anni.forEach(function (p) {
@@ -794,12 +857,12 @@ html{--fs:1.04}html.ts-l{--fs:1.16}html.ts-xl{--fs:1.3}
     if (p.impact.pupils) nums.push([n(p.impact.pupils), 'pupils', p.impact.pupils]);
     if (p.impact.patients) nums.push([n(p.impact.patients), 'patients a week', p.impact.patients]);
     if (p.impact.children) nums.push([n(p.impact.children), 'children', p.impact.children]);
-    if (p.impact.litresPerDay) nums.push([n(p.impact.litresPerDay) + ' L', 'water a day', p.impact.litresPerDay, ' L']);
+    if (p.impact.litresPerDay) nums.push([n(p.impact.litresPerDay) + '\u00a0L', 'water a day', p.impact.litresPerDay, '\u00a0L']);
     if (p.year) nums.push([p.year, p.status === 'Completed' ? 'completed' : 'year']);
-    var hl = p.health ? '<span class="hl ' + ST[k][1] + (k === 'working' && p.water ? ' live' : '') + '">' + (k === 'working' && p.water ? waves('hw') : '') + '<i>' + mg(k) + '</i><span>' + esc((k === 'working' && p.water ? 'Water flowing' : ST[k][0]) + ' · checked ' + day(p.health.at)) + '</span></span>' : '';
+    var hl = p.health ? '<span class="hl ' + ST[k][1] + (k === 'working' && p.water ? ' live' : '') + '">' + (k === 'working' && p.water ? waves('hw') : '') + '<i>' + mg(k) + '</i><span><span class="nw">' + esc(k === 'working' && p.water ? 'Water flowing' : ST[k][0]) + '</span> · <span class="nw">checked ' + esc(day(p.health.at)) + '</span></span></span>' : '';
     return '<button class="pj" type="button" data-open="' + esc(p.id) + '"><span class="ph">' + (img ? '<img src="' + esc(img) + '" alt="" loading="lazy">' : '<span class="noimg"><span class="rip" aria-hidden="true"></span>' + ic(typeIcon(p)) + '</span>' + bubbles(7) + waves('pw')) + '<span class="scrim"></span><span class="sheen" aria-hidden="true"></span>' + badge(p) +
       (npics > 1 ? '<span class="pc">' + ic('camera') + npics + '<span class="vh"> photos</span></span>' : '') +
-      '<span class="cap"><small>' + esc((KIND[p.type] || p.type) + ' · ' + place(p)) + '</small><b>' + esc(p.title) + '</b></span></span>' +
+      '<span class="cap"><small>' + esc(KIND[p.type] || p.type) + '</small><b>' + esc(p.title) + '</b><span class="pl">' + ic('pin') + '<span class="nw">' + esc(place(p)) + '</span></span></span></span>' +
       '<span class="bd">' + (nums.length ? '<span class="nums">' + nums.slice(0, 3).map(function (x) { return '<div><strong' + (x[2] ? ' data-cn="' + (Number(x[2]) || 0) + '" data-s="' + (x[3] || '') + '"' : '') + '>' + esc(x[0]) + '</strong><span>' + esc(x[1]) + '</span></div>'; }).join('') + '</span>' : '') + hl +
       '<span class="go">Photos, visits and repairs<i>' + ic('arrow') + '</i></span></span></button>';
   }
@@ -891,7 +954,7 @@ html{--fs:1.04}html.ts-l{--fs:1.16}html.ts-xl{--fs:1.3}
     var say = stateSay(p);
     $('mcard').classList.remove('go-l', 'go-r'); void $('mcard').offsetWidth; if (dir) $('mcard').classList.add(dir < 0 ? 'go-l' : 'go-r');
     $('mcard').innerHTML = '<div class="mtop">' + (img ? '<img src="' + esc(img) + '" alt="">' : '<span class="noimg">' + ic(typeIcon(p)) + '</span>') +
-      '<div>' + badge(p) + '<h3>' + esc(p.title) + '</h3><div class="wh">' + esc((KIND[p.type] || p.type) + ' · ' + place(p)) + '</div></div></div>' +
+      '<div>' + badge(p) + '<h3>' + esc(p.title) + '</h3><div class="wh">' + kp(p) + '</div></div></div>' +
       '<p class="say">' + say + '</p>' +
       '<div class="row"><button class="btn" type="button" data-open="' + esc(p.id) + '">See this project' + ic('arrow') + '</button>' +
       '<button class="speak" type="button" data-say="' + esc(p.title + '. ' + ST[k][0] + '. ' + plain(say)) + '">' + ic('speak') + 'Listen</button></div>' +
@@ -1063,7 +1126,7 @@ html{--fs:1.04}html.ts-l{--fs:1.16}html.ts-xl{--fs:1.3}
     var h = '<div class="dbar"><button class="backbtn" type="button" data-close>' + ic('back') + 'Back</button><b>' + esc(p.title) + '</b><button class="iconbtn" type="button" data-share="' + esc(p.id) + '" aria-label="Share this project">' + ic('share') + '</button></div><div class="dbody dt">';
     h += pics.length ? '<div class="gwrap"><div class="gal' + (pics.length === 1 ? ' one' : '') + '" role="list" aria-label="Photos">' + pics.slice(0, 20).map(function (x, i) { return '<figure role="listitem"><img src="' + esc(x.src) + '" alt="Photo ' + (i + 1) + ' of ' + esc(p.title) + '"' + (i ? ' loading="lazy"' : '') + ' data-zoom="' + esc(x.src) + '">' + (x.cap ? '<figcaption>' + esc(x.cap) + '</figcaption>' : '') + '</figure>'; }).join('') + '</div>' + (pics.length > 1 ? '<button class="btn slideshow" type="button" data-slides>' + ic('play') + 'Slideshow</button>' : '') + '</div>' : '';
     if (!p.photosShown && !p.photos.length) h += '<div class="nophoto">' + ic('camera') + '<span>Photos from visits here show children or patients, so we share them only once everyone has agreed. Ask us if you’d like to see some.</span></div>';
-    h += '<h1 id="dTitle">' + esc(p.title) + '</h1><p class="where">' + esc((KIND[p.type] || p.type) + ' · ' + place(p)) + '</p><div class="st">' + badge(p) + checked(p) + '<button class="speak" type="button" data-say="' + esc(p.title + '. ' + ST[stKey(p)][0] + '. ' + plain(stateSay(p))) + '">' + ic('speak') + 'Listen</button></div>' +
+    h += '<h1 id="dTitle">' + esc(p.title) + '</h1><p class="where">' + kp(p) + '</p><div class="st">' + badge(p) + checked(p) + '<button class="speak" type="button" data-say="' + esc(p.title + '. ' + ST[stKey(p)][0] + '. ' + plain(stateSay(p))) + '">' + ic('speak') + 'Listen</button></div>' +
       '<p class="say2">' + stateSay(p) + '</p>';
     if (p.anniversary) h += '<div class="anni" style="margin-top:16px"><span class="ph" aria-hidden="true">🎉</span><div><h2 style="margin:0">' + (p.anniversary.years === 1 ? 'One year' : p.anniversary.years + ' years') + ' of water!</h2><p>Finished on ' + esc(day(p.done)) + '. Thank you for every litre since.</p></div></div>';
     var F = [];
