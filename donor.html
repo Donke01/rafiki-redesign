@@ -465,6 +465,45 @@ html{--fs:1.04}html.ts-l{--fs:1.16}html.ts-xl{--fs:1.3}
 .band .talk .ti{background:#FFFFFF;color:var(--deep)}
 .band .talk .wa .ti{background:#25D366;color:#FFFFFF}
 .band .talk small,.band .talk .go{color:#CFE8FA}.band .talk .go{color:#FFFFFF}
+/* motion: calm, slow, once */
+.rv{opacity:0;transform:translateY(28px) scale(.985);transition:opacity .75s cubic-bezier(.2,.7,.2,1) var(--rd,0s),transform .75s cubic-bezier(.2,.7,.2,1) var(--rd,0s),box-shadow .2s}
+.rv.in{opacity:1;transform:none}
+.rv.done{transition:transform .25s ease,box-shadow .25s ease}
+.pj.rv.in:hover{transform:translateY(-4px)}
+.pj:active{transform:scale(.985)!important}
+.pj .ph img{transform-origin:60% 40%}
+.pj.in .ph img{animation:kb 16s ease-in-out .8s infinite alternate}
+@keyframes kb{from{transform:scale(1)}to{transform:scale(1.09) translate(-1.5%,-1%)}}
+.pj.rv .cap,.pj.rv .ph .badge,.pj.rv .ph .pc{opacity:0;transform:translateY(14px);transition:opacity .6s ease,transform .7s cubic-bezier(.2,.7,.2,1)}
+.pj.rv .ph .badge,.pj.rv .ph .pc{transform:translateY(-10px)}
+.pj.rv.in .cap{opacity:1;transform:none;transition-delay:calc(var(--rd,0s) + .3s)}
+.pj.rv.in .ph .badge,.pj.rv.in .ph .pc{opacity:1;transform:none;transition-delay:calc(var(--rd,0s) + .45s)}
+.pj.rv .nums div{opacity:0;transform:translateY(8px);transition:opacity .5s ease,transform .5s ease}
+.pj.rv.in .nums div{opacity:1;transform:none}
+.pj.rv.in .nums div:nth-child(1){transition-delay:calc(var(--rd,0s) + .4s)}
+.pj.rv.in .nums div:nth-child(2){transition-delay:calc(var(--rd,0s) + .5s)}
+.pj.rv.in .nums div:nth-child(3){transition-delay:calc(var(--rd,0s) + .6s)}
+.pj.in .hl i{animation:pop .55s cubic-bezier(.3,1.6,.5,1) calc(var(--rd,0s) + .75s) both}
+@keyframes pop{0%{transform:scale(0) rotate(-30deg)}100%{transform:none}}
+.pj .badge.b-working::before,.pj .badge.b-repairing::before{animation:breathe 2.4s ease-out infinite}
+@keyframes breathe{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--c) 55%,transparent)}80%,100%{box-shadow:0 0 0 7px transparent}}
+.pj.in .go i{animation:nudge 3s ease-in-out 1.6s infinite}
+.pj:hover .go i{animation:none}
+@keyframes nudge{0%,70%,100%{transform:none}80%{transform:translateX(4px)}90%{transform:translateX(0)}}
+.up.rv .ic{transform:scale(.6) rotate(-12deg);opacity:0;transition:transform .55s cubic-bezier(.3,1.6,.5,1),opacity .4s}
+.up.rv.in .ic{transform:none;opacity:1;transition-delay:calc(var(--rd,0s) + .25s)}
+.up.rv .strip button{opacity:0;transform:scale(.92);transition:opacity .5s,transform .5s cubic-bezier(.2,.7,.2,1)}
+.up.rv.in .strip button{opacity:1;transform:none}
+.up.rv.in .strip button:nth-child(1){transition-delay:.35s}.up.rv.in .strip button:nth-child(2){transition-delay:.45s}.up.rv.in .strip button:nth-child(3){transition-delay:.55s}.up.rv.in .strip button:nth-child(n+4){transition-delay:.65s}
+.band.rv .talk a,.band.rv .side>.btn{opacity:0;transform:translateX(-18px);transition:opacity .5s ease,transform .6s cubic-bezier(.2,.7,.2,1),background .2s}
+.band.rv.in .talk a,.band.rv.in .side>.btn{opacity:1;transform:none}
+.band.rv.in .side>.btn{transition-delay:.3s}
+.band.rv.in .talk a:nth-child(1){transition-delay:.42s}.band.rv.in .talk a:nth-child(2){transition-delay:.54s}.band.rv.in .talk a:nth-child(3){transition-delay:.66s}
+.band.in .talk .wa .ti{animation:ring 1s ease .9s 2}
+@keyframes ring{0%,100%{transform:none}20%{transform:rotate(-12deg)}40%{transform:rotate(10deg)}60%{transform:rotate(-6deg)}80%{transform:rotate(4deg)}}
+.band.rv{transform:translateY(28px)}
+.talk a:hover .go{transform:translateX(3px)}.talk .go{transition:transform .2s}
+@media (prefers-reduced-motion:reduce){.rv{opacity:1!important;transform:none!important}}
 /* printed impact report (Download impact report → Save as PDF) */
 #report{display:none}
 .lh-wrap,.lh-wrap>tbody,.lh-wrap>tbody>tr,.lh-wrap>tbody>tr>td{display:block;padding:0}.lh-wrap>tfoot{display:none}
@@ -658,15 +697,16 @@ html{--fs:1.04}html.ts-l{--fs:1.16}html.ts-xl{--fs:1.3}
       '<div class="side"><a class="btn white" href="/donate">' + ic('drop') + 'Fund the next well</a>' + talk(null) + '</div></section>';
     $('main').innerHTML = h; $('main').setAttribute('aria-busy', 'false'); $('foot').hidden = false;
     countUp($('main'));
-    drawFeed(); drawMap();
+    drawFeed(); drawMap(); reveal();
     $('pdf').addEventListener('click', report);
     applyHash();
   }
   function yrs(v) { return v < 10 ? (Math.round(v * 10) / 10).toLocaleString('en-US') : n(v); }
   function stat(v, label, dec, suf) { return '<div class="stat"><b data-n="' + (Number(v) || 0) + '" data-d="' + (dec || 0) + '" data-s="' + (suf || '') + '">' + (dec ? (Number(v) || 0).toFixed(1) : n(v)) + (suf || '') + '</b><span>' + esc(label) + '</span></div>'; }
-  function countUp(root) {
-    qa('[data-n]', root).forEach(function (el) {
-      var to = +el.getAttribute('data-n'), d = +el.getAttribute('data-d'), s = el.getAttribute('data-s') || '';
+  function countUp(root, attr) {
+    attr = attr || 'data-n';
+    qa('[' + attr + ']', root).forEach(function (el) {
+      var to = +el.getAttribute(attr), d = +el.getAttribute('data-d'), s = el.getAttribute('data-s') || '';
       var put = function (v) { el.textContent = (d ? v.toFixed(d) : Math.round(v).toLocaleString('en-US')) + s; };
       if (STILL || !to) return put(to);
       var t0 = performance.now(), dur = 1200;
@@ -676,17 +716,17 @@ html{--fs:1.04}html.ts-l{--fs:1.16}html.ts-xl{--fs:1.3}
   }
   function card(p) {
     var img = cover(p), nums = [], k = stKey(p), npics = p.photos.length + p.gallery.length;
-    if (p.impact.people) nums.push([n(p.impact.people), 'people served']);
-    if (p.impact.pupils) nums.push([n(p.impact.pupils), 'pupils']);
-    if (p.impact.patients) nums.push([n(p.impact.patients), 'patients a week']);
-    if (p.impact.children) nums.push([n(p.impact.children), 'children']);
-    if (p.impact.litresPerDay) nums.push([n(p.impact.litresPerDay) + ' L', 'water a day']);
+    if (p.impact.people) nums.push([n(p.impact.people), 'people served', p.impact.people]);
+    if (p.impact.pupils) nums.push([n(p.impact.pupils), 'pupils', p.impact.pupils]);
+    if (p.impact.patients) nums.push([n(p.impact.patients), 'patients a week', p.impact.patients]);
+    if (p.impact.children) nums.push([n(p.impact.children), 'children', p.impact.children]);
+    if (p.impact.litresPerDay) nums.push([n(p.impact.litresPerDay) + ' L', 'water a day', p.impact.litresPerDay, ' L']);
     if (p.year) nums.push([p.year, p.status === 'Completed' ? 'completed' : 'year']);
     var hl = p.health ? '<span class="hl ' + ST[k][1] + '"><i>' + ic(BADGE[k] || 'check') + '</i>' + esc((k === 'working' && p.water ? 'Water flowing' : ST[k][0]) + ' · checked ' + day(p.health.at)) + '</span>' : '';
     return '<button class="pj" type="button" data-open="' + esc(p.id) + '"><span class="ph">' + (img ? '<img src="' + esc(img) + '" alt="" loading="lazy">' : '<span class="noimg">' + ic(typeIcon(p)) + '</span>') + '<span class="scrim"></span>' + badge(p) +
       (npics > 1 ? '<span class="pc">' + ic('camera') + npics + '<span class="vh"> photos</span></span>' : '') +
       '<span class="cap"><small>' + esc((KIND[p.type] || p.type) + ' · ' + place(p)) + '</small><b>' + esc(p.title) + '</b></span></span>' +
-      '<span class="bd">' + (nums.length ? '<span class="nums">' + nums.slice(0, 3).map(function (x) { return '<div><strong>' + esc(x[0]) + '</strong><span>' + esc(x[1]) + '</span></div>'; }).join('') + '</span>' : '') + hl +
+      '<span class="bd">' + (nums.length ? '<span class="nums">' + nums.slice(0, 3).map(function (x) { return '<div><strong' + (x[2] ? ' data-cn="' + (Number(x[2]) || 0) + '" data-s="' + (x[3] || '') + '"' : '') + '>' + esc(x[0]) + '</strong><span>' + esc(x[1]) + '</span></div>'; }).join('') + '</span>' : '') + hl +
       '<span class="go">Photos, visits and repairs<i>' + ic('arrow') + '</i></span></span></button>';
   }
   // call, WhatsApp or e-mail the office (the number shows too, for phones that can't place a call from a page)
@@ -901,6 +941,26 @@ html{--fs:1.04}html.ts-l{--fs:1.16}html.ts-xl{--fs:1.3}
     var list = D.updates.filter(function (u) { return inF(u, filter); });
     $('feed').innerHTML = list.length ? list.slice(0, shown).map(item).join('') : '<li class="empty">' + (filter === 'all' ? 'No updates yet. The field team visits every project at least once a year; their reports will appear here.' : 'Nothing here yet.') + '</li>';
     $('more').classList.toggle('hidden', list.length <= shown);
+    reveal();
+  }
+  // cards rise gently into place as they scroll into view; numbers count up; nothing moves if the phone asks for less motion
+  var seen = null;
+  function reveal() {
+    if (STILL || !('IntersectionObserver' in window)) return;
+    if (!seen) seen = new IntersectionObserver(function (es) {
+      es.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        var el = e.target; el.classList.add('in'); seen.unobserve(el);
+        setTimeout(function () { el.classList.add('done'); }, 1400);
+        countUp(el, 'data-cn');
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.12 });
+    qa('.pj,.up,.band,.anni').forEach(function (el) {
+      if (el.classList.contains('rv')) return;
+      var sib = el.parentNode ? Array.prototype.indexOf.call(el.parentNode.children, el) : 0;
+      el.style.setProperty('--rd', ((sib % 3) * 0.09).toFixed(2) + 's');
+      el.classList.add('rv'); seen.observe(el);
+    });
   }
 
   // ---- project detail ----
