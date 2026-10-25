@@ -386,6 +386,85 @@ html{--fs:1.04}html.ts-l{--fs:1.16}html.ts-xl{--fs:1.3}
 .dt .st{gap:8px 12px}
 .dt .say2{font-size:calc(18.5px*var(--fs));line-height:1.55;margin:14px 0 0}
 .dt .st .speak{min-height:44px;padding:0 14px;font-size:calc(14px*var(--fs))}
+/* premium cards (from the Figma design "Rafiki Donor Cards") */
+.grid{gap:20px}
+.pj{border:1px solid rgba(4,38,63,.06);border-radius:28px;box-shadow:0 1px 2px rgba(4,38,63,.05),0 12px 32px -4px rgba(4,38,63,.08)}
+.pj:hover{transform:translateY(-4px);box-shadow:0 1px 2px rgba(4,38,63,.05),0 22px 44px -6px rgba(4,38,63,.16)}
+.pj .ph{aspect-ratio:358/250;background:linear-gradient(150deg,#3EA6EC,#0A78C2 45%,#04263F)}
+.pj .ph img{transition:transform .6s ease}
+.pj:hover .ph img{transform:scale(1.04)}
+.pj .ph .scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(4,38,63,0) 35%,rgba(2,23,39,.88) 100%)}
+.pj .ph .noimg{color:#FFFFFF;align-items:flex-start;padding-top:56px}
+.pj .ph .noimg svg{opacity:.35;width:64px;height:64px}
+.pj .ph .badge{left:16px;top:16px;background:rgba(255,255,255,.93);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:0 2px 8px rgba(0,0,0,.12);padding:6px 13px 6px 11px;font-size:calc(13px*var(--fs));letter-spacing:.01em}
+.pj .ph .pc{position:absolute;right:16px;top:16px;display:inline-flex;align-items:center;gap:6px;padding:6px 12px 6px 10px;border-radius:999px;background:rgba(2,23,39,.55);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);color:#FFFFFF;font-weight:700;font-size:calc(13px*var(--fs))}
+.pj .ph .pc svg{width:15px;height:15px}
+.pj .ph .cap{position:absolute;left:20px;right:20px;bottom:18px;display:flex;flex-direction:column;gap:4px;color:#FFFFFF}
+.pj .ph .cap small{font-size:calc(12px*var(--fs));font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.85;line-height:1.3}
+.pj .ph .cap b{font-size:calc(25px*var(--fs));font-weight:800;letter-spacing:-.015em;line-height:1.16;text-shadow:0 1px 12px rgba(0,0,0,.25)}
+.pj .bd{padding:18px 20px 0;gap:16px}
+.pj .nums{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;margin:0}
+.pj .nums div+div{border-left:1px solid #E6EAEE;padding-left:14px}
+.pj .nums strong{font-size:calc(22px*var(--fs));font-weight:800;letter-spacing:-.02em;line-height:1.2}
+.pj .nums span{font-size:calc(13px*var(--fs));font-weight:500;color:#5B6670;display:block;line-height:1.3}
+.pj .hl{display:flex;align-items:center;gap:10px;padding:10px 14px 10px 12px;border-radius:16px;background:var(--bg2);color:var(--fg);font-weight:600;font-size:calc(14px*var(--fs));line-height:1.3}
+.pj .hl i{width:26px;height:26px;border-radius:50%;background:var(--c);color:#FFFFFF;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.pj .hl i svg{width:15px;height:15px}
+.pj .go{margin:auto -20px 0;padding:12px 14px 12px 20px;border-top:1px solid #E6EAEE;justify-content:space-between;font-size:calc(16px*var(--fs));color:var(--blue)}
+.pj .go i{width:44px;height:44px;border-radius:50%;background:var(--blue);color:#FFFFFF;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 14px -2px rgba(10,120,194,.3);transition:transform .2s}
+.pj:hover .go i{transform:translateX(3px)}
+.pj .go svg{width:20px;height:20px}
+/* map card */
+.mcard{position:relative;padding:26px 20px 20px;gap:18px}
+.mcard::before{content:"";position:absolute;left:50%;top:10px;width:40px;height:5px;margin-left:-20px;border-radius:3px;background:#E6EAEE}
+.mcard .mtop{grid-template-columns:92px 1fr}
+.mcard .mtop img,.mcard .mtop .noimg{width:92px;height:92px;border-radius:22px;box-shadow:0 6px 14px -4px rgba(4,38,63,.16)}
+.mcard h3{font-size:calc(20px*var(--fs));font-weight:800;line-height:1.2;letter-spacing:-.015em;margin:7px 0 3px}
+.mcard .wh{font-size:calc(13px*var(--fs));color:#5B6670}
+.mcard .say{font-size:calc(17px*var(--fs));line-height:1.55;color:var(--ink)}
+.mcard .row .btn{white-space:nowrap;padding:0 18px;min-height:54px;box-shadow:0 8px 18px -4px rgba(10,120,194,.32)}
+.mcard .row .speak{min-height:54px;border-radius:999px;border:0;background:#EEF6FC;color:var(--blue);padding:0 20px 0 18px;font-weight:700}
+.mcard .row .speak.reading{background:var(--ink);color:#FFFFFF}
+.pager{background:#F3F5F7;border-radius:999px;padding:6px}
+.pager button{width:46px;height:46px;border:1.5px solid #E6EAEE}
+.pager span{color:var(--ink);font-size:calc(14px*var(--fs))}
+.pager .dots i{background:#C4CDD5}.pager .dots i.on{background:var(--blue);width:22px}
+/* update card */
+.feed{gap:14px}
+.up{display:block;padding:0;border:1px solid rgba(4,38,63,.06);border-radius:28px;box-shadow:0 1px 2px rgba(4,38,63,.05),0 12px 32px -4px rgba(4,38,63,.08);overflow:hidden}
+.up .ub{padding:20px 20px 16px}
+.up .uh{display:flex;align-items:center;gap:12px}
+.up .ic{width:44px;height:44px;border-radius:14px;flex:0 0 auto}
+.up .uh>div{min-width:0;display:flex;flex-direction:column;gap:1px}
+.up .uh .pt{font-size:calc(14px*var(--fs));font-weight:700;color:var(--blue);min-height:0;line-height:1.3}
+.up .uh time{font-size:calc(13px*var(--fs));font-weight:500;color:#5B6670}
+.up .ut{display:block;margin:14px 0 0;font-size:calc(20px*var(--fs));font-weight:800;letter-spacing:-.015em;line-height:1.25;color:var(--ink)}
+.up .story{font-size:calc(16px*var(--fs));line-height:1.56;color:#2A3640;margin-top:8px}
+.up blockquote{font-size:calc(18px*var(--fs))}
+.up .strip{margin-top:14px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.up .strip button{border-radius:16px;overflow:hidden;aspect-ratio:100/84;width:auto;height:auto}
+.up .strip img{width:100%;height:100%;object-fit:cover;border-radius:16px}
+.up .ua{display:flex;justify-content:space-between;align-items:center;margin:0;padding:12px 20px;border-top:1px solid #E6EAEE}
+.up .ua button:first-child{background:#EEF6FC;color:var(--blue);border-radius:999px;padding:0 16px 0 14px}
+.up .ua button:first-child.reading{background:var(--ink);color:#FFFFFF}
+.up .ua button+button{color:var(--ink)}
+.up.anniv{background:linear-gradient(135deg,#FFF6E0,#FDE7C2);border-color:#F3D49A}
+.up.anniv .ua{border-color:rgba(138,82,0,.15)}
+/* contact card */
+.talk{gap:8px;background:none;border:0;border-radius:0;overflow:visible}
+.talk a{border-radius:20px;background:#FFFFFF;border:1px solid rgba(4,38,63,.08);box-shadow:0 1px 2px rgba(4,38,63,.05);padding:12px 14px 12px 12px;min-height:70px;transition:transform .15s,background .2s}
+.talk a+a{border-top:1px solid rgba(4,38,63,.08)}
+.talk a:active{transform:scale(.98)}
+.talk .ti{width:44px;height:44px;background:var(--blue);color:#FFFFFF}
+.talk b{font-size:calc(17px*var(--fs))}
+.talk .go{color:var(--ink)}
+.band{background:linear-gradient(135deg,#0A78C2 0%,#054F81 55%,#04263F 100%);border-radius:28px;box-shadow:0 12px 32px -4px rgba(4,38,63,.25)}
+.band .talk{background:none;border:0}
+.band .talk a{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.14);box-shadow:none}
+.band .talk a+a{border-color:rgba(255,255,255,.14)}
+.band .talk .ti{background:#FFFFFF;color:var(--deep)}
+.band .talk .wa .ti{background:#25D366;color:#FFFFFF}
+.band .talk small,.band .talk .go{color:#CFE8FA}.band .talk .go{color:#FFFFFF}
 /* printed impact report (Download impact report → Save as PDF) */
 #report{display:none}
 .lh-wrap,.lh-wrap>tbody,.lh-wrap>tbody>tr,.lh-wrap>tbody>tr>td{display:block;padding:0}.lh-wrap>tfoot{display:none}
@@ -596,17 +675,19 @@ html{--fs:1.04}html.ts-l{--fs:1.16}html.ts-xl{--fs:1.3}
     });
   }
   function card(p) {
-    var img = cover(p), nums = [];
+    var img = cover(p), nums = [], k = stKey(p), npics = p.photos.length + p.gallery.length;
     if (p.impact.people) nums.push([n(p.impact.people), 'people served']);
     if (p.impact.pupils) nums.push([n(p.impact.pupils), 'pupils']);
     if (p.impact.patients) nums.push([n(p.impact.patients), 'patients a week']);
     if (p.impact.children) nums.push([n(p.impact.children), 'children']);
-    if (p.impact.litresPerDay) nums.push([n(p.impact.litresPerDay), 'litres a day']);
+    if (p.impact.litresPerDay) nums.push([n(p.impact.litresPerDay) + ' L', 'water a day']);
     if (p.year) nums.push([p.year, p.status === 'Completed' ? 'completed' : 'year']);
-    return '<button class="pj" type="button" data-open="' + esc(p.id) + '"><span class="ph">' + (img ? '<img src="' + esc(img) + '" alt="" loading="lazy">' : '<span class="noimg">' + ic(typeIcon(p)) + '</span>') + badge(p) + '</span>' +
-      '<span class="bd"><b>' + esc(p.title) + '</b><small>' + esc((KIND[p.type] || p.type) + ' · ' + place(p)) + '</small>' + checked(p) +
-      '<span class="nums">' + nums.slice(0, 3).map(function (x) { return '<div><strong>' + esc(x[0]) + '</strong><span>' + esc(x[1]) + '</span></div>'; }).join('') + '</span>' +
-      '<span class="go">Photos, visits and repairs ' + ic('arrow') + '</span></span></button>';
+    var hl = p.health ? '<span class="hl ' + ST[k][1] + '"><i>' + ic(BADGE[k] || 'check') + '</i>' + esc((k === 'working' && p.water ? 'Water flowing' : ST[k][0]) + ' · checked ' + day(p.health.at)) + '</span>' : '';
+    return '<button class="pj" type="button" data-open="' + esc(p.id) + '"><span class="ph">' + (img ? '<img src="' + esc(img) + '" alt="" loading="lazy">' : '<span class="noimg">' + ic(typeIcon(p)) + '</span>') + '<span class="scrim"></span>' + badge(p) +
+      (npics > 1 ? '<span class="pc">' + ic('camera') + npics + '<span class="vh"> photos</span></span>' : '') +
+      '<span class="cap"><small>' + esc((KIND[p.type] || p.type) + ' · ' + place(p)) + '</small><b>' + esc(p.title) + '</b></span></span>' +
+      '<span class="bd">' + (nums.length ? '<span class="nums">' + nums.slice(0, 3).map(function (x) { return '<div><strong>' + esc(x[0]) + '</strong><span>' + esc(x[1]) + '</span></div>'; }).join('') + '</span>' : '') + hl +
+      '<span class="go">Photos, visits and repairs<i>' + ic('arrow') + '</i></span></span></button>';
   }
   // call, WhatsApp or e-mail the office (the number shows too, for phones that can't place a call from a page)
   function talk(p) {
@@ -809,9 +890,9 @@ html{--fs:1.04}html.ts-l{--fs:1.16}html.ts-xl{--fs:1.3}
     else if (u.type === 'thanks') { title = 'A thank-you from the community'; story = u.media === 'video' ? 'The community recorded a thank-you video for you.' : 'The community sent you a thank-you photo.'; body = (u.caption ? '<blockquote>“' + esc(u.caption) + '”</blockquote>' : '') + media(u, 480); }
     else if (u.type === 'anniversary') { title = (u.years === 1 ? 'One year' : u.years + ' years') + ' of clean water!'; story = 'About ' + n(p.impact.people) + ' people have had water close to home for ' + (u.years === 1 ? 'a whole year' : u.years + ' years') + '. Thank you for making it happen.'; }
     var listen = p.title + '. ' + title + '. ' + day(u.at) + '. ' + story + (u.type === 'thanks' && u.caption ? ' They wrote: ' + u.caption : '');
-    return '<li class="up' + (u.type === 'anniversary' ? ' anniv' : '') + '"><span class="ic" style="--b:' + ui[1] + ';--c:' + ui[2] + '">' + ic(ui[0]) + '</span><div><div class="hd"><button class="pt" type="button" data-open="' + esc(p.id) + '">' + esc(p.title) + '</button><time datetime="' + esc(u.at) + '">' + esc(day(u.at)) + '</time></div>' +
-      '<b>' + esc(title) + '</b>' + (u.type === 'story' ? '' : '<p class="story">' + esc(story) + '</p>') + body +
-      '<div class="ua"><button type="button" data-say="' + esc(listen) + '">' + ic('speak') + 'Listen</button><button type="button" data-open="' + esc(p.id) + '">See the project' + ic('arrow') + '</button></div></div></li>';
+    return '<li class="up' + (u.type === 'anniversary' ? ' anniv' : '') + '"><div class="ub"><div class="uh"><span class="ic" style="--b:' + ui[1] + ';--c:' + ui[2] + '">' + ic(ui[0]) + '</span><div><button class="pt" type="button" data-open="' + esc(p.id) + '">' + esc(p.title) + '</button><time datetime="' + esc(u.at) + '">' + esc(day(u.at)) + '</time></div></div>' +
+      '<b class="ut">' + esc(title) + '</b>' + (u.type === 'story' ? '' : '<p class="story">' + esc(story) + '</p>') + body + '</div>' +
+      '<div class="ua"><button type="button" data-say="' + esc(listen) + '">' + ic('speak') + 'Listen</button><button type="button" data-open="' + esc(p.id) + '">See the project' + ic('arrow') + '</button></div></li>';
   }
   function media(x, w) {
     return x.media === 'video' ? '<video controls playsinline preload="metadata" src="' + esc(visitPhoto(x.id)) + '"></video>' : '<img class="thx" src="' + esc(visitPhoto(x.id, w)) + '" alt="Thank-you photo" loading="lazy" data-zoom="' + esc(visitPhoto(x.id, 1600)) + '"' + (x.caption ? ' data-cap="' + esc('“' + x.caption + '”') + '"' : '') + '>';
