@@ -466,6 +466,10 @@ html[data-theme=sun] .tsh-p:has(.ct-ban){background:linear-gradient(#DCEBFF,#DCE
 .ct-qt{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:88px;padding:12px 4px 10px;border:var(--bw) solid var(--line);border-radius:20px;background:var(--hb-slate);color:var(--ink);font:inherit;text-decoration:none;cursor:pointer;transition:transform .22s cubic-bezier(.34,1.56,.64,1),box-shadow .2s}
 .ct-qt:hover{box-shadow:0 6px 16px rgba(4,38,63,.1)}.ct-qt:active{transform:scale(.94)}.ct-qt:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
 .ct-qt b{font-size:.8rem;font-weight:800;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+/* tile labels shrink to fit a narrow tile (WhatsApp at 360px) and wrap only between words, never inside one */
+.ct-qk .ct-qt{container-type:inline-size;padding-left:2px;padding-right:2px}
+.ct-qk .ct-qt b{font-size:.72rem;font-size:min(.8rem,17cqi);white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:normal;word-break:keep-all;hyphens:none;text-align:center;line-height:1.15;letter-spacing:-.02em}
+.ct-qk.n1 .ct-qt b{font-size:.8rem}
 .ct-qi{display:flex;align-items:center;justify-content:center;width:46px;height:46px;border-radius:50%;background:var(--card);color:var(--ink)}.ct-qi svg{width:22px;height:22px}
 .ct-qt.call .ct-qi{background:#1C7C4A;color:#FFFFFF}.ct-qt.wa .ct-qi{background:#25D366;color:#FFFFFF}.ct-qt.sms .ct-qi{background:var(--hb-teal);color:var(--hu-teal)}.ct-qt.mail .ct-qi{background:var(--hb-blue);color:var(--hu-blue)}
 .ct .ct-ids{margin-top:12px}

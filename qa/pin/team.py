@@ -86,7 +86,7 @@ def office(pg, tab):
 def sheet(pg): return pg.locator('.tsh .rr-sh')
 with sync_playwright() as p:
     b = p.chromium.launch()
-    for W, H, tag, th, sw in [(390, 844, 'phone', '', 0), (1280, 860, 'desktop', '', 0), (390, 844, 'dark', 'dark', 0), (390, 844, 'sun', 'sun', 0), (390, 844, 'sw', '', 1)]:
+    for W, H, tag, th, sw in [(360, 740, 'p360', '', 0), (360, 740, 'p360sw', '', 1), (320, 640, 'p320', '', 0), (390, 844, 'phone', '', 0), (1280, 860, 'desktop', '', 0), (390, 844, 'dark', 'dark', 0), (390, 844, 'sun', 'sun', 0), (390, 844, 'sw', '', 1)]:
         ctx = b.new_context(viewport={'width': W, 'height': H}, device_scale_factor=2 if W < 500 else 1)
         pg, errs = login(ctx)
         theme(pg, th)
