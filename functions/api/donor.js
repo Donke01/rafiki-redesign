@@ -4,10 +4,12 @@
 //   GET  /api/donor?unsub=<code>    → "stop the monthly e-mail?" page;  POST the same → done (also one-click from mail apps)
 // The RAFIKI Pin app in donor mode (feat-donorapp) uses the same token:
 //   GET  /api/donor?bg=1            the app's background check for news: same answer, doesn't count as "opened"
+// Both answers also carry groupTrips: the group trips (volunteer/donor expeditions) the Office linked to this donor.
 //   POST /api/donor { code }        a short donor code (K7QM4-XR9TB) → { token, name }; wrong codes limited per connection and overall
 //   POST /api/donor { action: 'mail', on }   header X-Donor-Token → e-mail updates on/off (off = the e-mail's unsubscribe)
 // Unknown, revoked and rotated links all get the same answer. Wrong links are limited per connection.
 import { getFeed } from '../../lib/feed-cache.js';
+import { forDonor } from '../../lib/group-trips.js';
 import { findByToken, loadView, donorFile, assetInfo, unsubscribe, saveDonors, redeemCode, mailState, setMail, CONTACT } from '../../lib/donor.js';
 
 const MAX_BAD = 20;          // wrong links per connection per hour
@@ -68,7 +70,9 @@ export async function onRequestGet({ request, env, waitUntil }) {
     if (waitUntil) waitUntil(save); else await save;
   }
   try {
-    return json(Object.assign(await loadView(env, donor, viewer, { feed, fresh: true, waitUntil }), { me: mailState(donor, viewer) }));
+    // group trips (lib/group-trips.js) the Office linked to this donor: the same read-only shape as the trip page
+    const groupTrips = await forDonor(env, donor.id, new URL(request.url).origin).catch(() => []);
+    return json(Object.assign(await loadView(env, donor, viewer, { feed, fresh: true, waitUntil }), { me: mailState(donor, viewer), groupTrips }));
   } catch (e) {
     console.error('donor view:', e && e.message);
     return json({ ok: false, reason: 'down' }, 502);

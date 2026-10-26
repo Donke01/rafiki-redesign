@@ -40,6 +40,7 @@ import { kes, money, estOf, stepBlocked, canDecide, approveLimit, setApproveLimi
 import { teamMap, planView, hereKey } from '../../lib/pin-here.js';
 import { donorAdminGet, donorAdminPost, runDigest } from '../../lib/donor.js';
 import { chatSys, chatSync } from '../../lib/chat.js';
+import { tripsMonth } from '../../lib/itin.js';
 
 const STEPS = { reported: 'Reported', assigned: 'Assigned', parts: 'Parts ordered', fixed: 'Fixed' };
 const CC = ['ke', 'tz', 'ug', 'mw'];
@@ -428,16 +429,19 @@ async function monthly(request, env) {
   const spent = (await getJson(env, 'pincostidx', [])).filter(e => { const t = Date.parse(e.at); return t >= from && t < to; }).reduce((s2, e) => s2 + (Number(e.actual) || 0), 0);
   // the people-served trend gets this month's total (also kept up to date as visits come in)
   try { const feed = await getFeed(env); await snapPeople(env, feed.projects || []); } catch (e) { console.error('people:', e && e.message); }
+  // field trips finished last month (lib/itin.js)
+  let trips = null; try { trips = await tripsMonth(env, from, to); } catch (e) { console.error('trips month:', e && e.message); }
   const lines = [
     visits.length + ' site visits to ' + ids.length + ' projects' + (ids.length ? ' (' + Math.round(working / ids.length * 100) + '% working)' : '') + '.',
     open.length + ' open repairs' + (urgent ? ', ' + urgent + ' urgent' : '') + (cost ? ', about KES ' + cost.toLocaleString('en-US') + ' estimated' : '') + '; ' + n('fixed') + ' fixed during the month.',
     n('pin') + ' locations pinned, ' + n('new') + ' new sites added.' + (spent ? ' ' + kes(spent) + ' spent on repairs.' : ''),
     review ? review + ' items waiting for review in the Office tab.' : 'Nothing waiting for review.'
   ];
+  if (trips && trips.trips) lines.push(trips.text);
   // donors: what changed on their projects last month (skipped cleanly when e-mail isn't set up)
   let donorsMail;
   try { donorsMail = await runDigest(env, from, to, new URL(request.url).origin); } catch (e) { console.error('donor digest:', e && e.message); donorsMail = { ok: false, reason: 'down' }; }
-  const r = await sendMail(env, 'RAFIKI Pin: ' + label + ' summary', alertHtml(label, lines.map((t, k) => ({ label: ['Visits', 'Repairs', 'Mapping', 'Waiting for review'][k], text: t, icon: ['cal-blue', 'wrench-amber', 'pin-blue', 'inbox-blue'][k] })), new URL('/pin#report', request.url).toString(), new URL(request.url).origin, { tone: 'blue', icon: 'cal-blue', eyebrow: 'Monthly field summary', intro: 'Here is what the field team did last month.', stats: [[visits.length, 'site visits'], [ids.length ? Math.round(working / ids.length * 100) + '%' : '–', 'working'], [open.length, 'open repairs'], [n('fixed'), 'fixed']], cta: { label: 'Open the full report', href: new URL('/pin#report', request.url).toString() }, preheader: visits.length + ' site visits, ' + open.length + ' open repairs in ' + label + '.' }), lines.join('\n'));
+  const r = await sendMail(env, 'RAFIKI Pin: ' + label + ' summary', alertHtml(label, lines.map((t, k) => ({ label: ['Visits', 'Repairs', 'Mapping', 'Waiting for review', 'Trips'][k], text: t, icon: ['cal-blue', 'wrench-amber', 'pin-blue', 'inbox-blue', 'cal-blue'][k] })), new URL('/pin#report', request.url).toString(), new URL(request.url).origin, { tone: 'blue', icon: 'cal-blue', eyebrow: 'Monthly field summary', intro: 'Here is what the field team did last month.', stats: [[visits.length, 'site visits'], [ids.length ? Math.round(working / ids.length * 100) + '%' : '–', 'working'], [open.length, 'open repairs'], [n('fixed'), 'fixed']], cta: { label: 'Open the full report', href: new URL('/pin#report', request.url).toString() }, preheader: visits.length + ' site visits, ' + open.length + ' open repairs in ' + label + '.' }), lines.join('\n'));
   return json(Object.assign({ month: label }, r, { donors: donorsMail }), r.ok ? 200 : 503);
 }
 
