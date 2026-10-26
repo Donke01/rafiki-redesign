@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-cur-pill="off">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -363,6 +363,7 @@ html{font-size:17px}html[data-size=s]{font-size:15px}html[data-size=l]{font-size
 <linearGradient id="mgH" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF" stop-opacity=".95"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/></linearGradient>
 </defs></svg>
 <div id="app" aria-live="polite"><div class="spin">…</div></div>
+<script src="/money.js"></script>
 <script src="/vendor/leaflet/leaflet.js" defer></script>
 <script>
 (function () {
@@ -698,7 +699,7 @@ html{font-size:17px}html[data-size=s]{font-size:15px}html[data-size=l]{font-size
     if (!('speechSynthesis' in window)) return toast(tr('Reading aloud isn’t available in this browser.', 'Kusoma kwa sauti hakupatikani kwenye kivinjari hiki.'));
     if (speakingBtn === btn) return stopSpeaking();
     stopSpeaking();
-    var u = new SpeechSynthesisUtterance(btn.getAttribute('data-say')); u.rate = 0.9; u.lang = S.lang === 'sw' ? 'sw-KE' : 'en-GB';
+    var u = new SpeechSynthesisUtterance(window.RFX ? RFX.say(btn.getAttribute('data-say')) : btn.getAttribute('data-say')); u.rate = 0.9; u.lang = S.lang === 'sw' ? 'sw-KE' : 'en-GB';
     btn._label = btn.innerHTML; speakingBtn = btn;
     btn.classList.add('reading'); btn.innerHTML = '<span class="waves" aria-hidden="true"><i></i><i></i><i></i><i></i></span>' + tr('Stop', 'Acha');
     u.onend = u.onerror = function () { if (speakingBtn === btn) stopSpeaking(); };
@@ -934,7 +935,8 @@ html{font-size:17px}html[data-size=s]{font-size:15px}html[data-size=l]{font-size
       '<div class="card set" style="padding:0">' +
       '<div class="blk"><b>' + tr('Language', 'Lugha') + '</b>' + seg('segLang', S.lang, [['', 'English'], ['sw', 'Kiswahili']]) + '</div>' +
       '<div class="blk"><b>' + tr('Text size', 'Ukubwa wa maandishi') + '</b>' + seg('segSize', size, [['s', tr('Small', 'Ndogo')], ['', tr('Normal', 'Kawaida')], ['l', tr('Large', 'Kubwa')], ['xl', tr('Larger', 'Kubwa zaidi')]]) + '</div>' +
-      '<div class="blk"><b>' + tr('Colours', 'Rangi') + '</b>' + seg('segTheme', theme, [['', tr('Light', 'Mwanga')], ['dark', tr('Dark', 'Giza')], ['sun', tr('Bright sun', 'Jua kali')]]) + '</div></div>' +
+      '<div class="blk"><b>' + tr('Colours', 'Rangi') + '</b>' + seg('segTheme', theme, [['', tr('Light', 'Mwanga')], ['dark', tr('Dark', 'Giza')], ['sun', tr('Bright sun', 'Jua kali')]]) + '</div>' +
+      (window.RFX ? '<button class="r" type="button" id="bCur"><span class="ri t-working"><img src="' + RFX.list().filter(function (x) { return x.code === RFX.cur(); })[0].flag + '" alt="" style="width:24px;height:16px;border-radius:3px"></span><span class="tx"><b>' + tr('Currency', 'Sarafu') + '</b><small>' + esc(RFX.list().filter(function (x) { return x.code === RFX.cur(); })[0].name) + ' (' + RFX.cur() + ')' + (RFX.picked() ? '' : ' · ' + tr('automatic', 'kiotomatiki')) + '</small></span>' + ic('chev').replace('class="i"', 'class="i chev"') + '</button>' : '') + '</div>' +
       '<div class="card set" style="padding:0;margin-top:12px">' +
       '<div class="r"><span class="ri t-planned">' + ic('mail') + '</span><span class="tx"><b>' + tr('E-mail updates', 'Habari kwa barua pepe') + '</b><small id="mailSub">' + esc(mailSub) + '</small></span><button class="sw" type="button" role="switch" id="swMail" aria-label="' + tr('E-mail updates', 'Habari kwa barua pepe') + '" aria-checked="' + !!me.on + '"' + (me.email && me.digest ? '' : ' disabled') + '></button></div>' +
       '<div class="r"><span class="ri t-repairing">' + ic('bell') + '</span><span class="tx"><b>' + tr('New photos & updates', 'Picha mpya na habari') + '</b><small>' + tr('Shown on Updates when you open the app. For phone notifications, use the Android app.', 'Zinaonyeshwa kwenye Habari unapofungua programu. Kwa arifa za simu, tumia programu ya Android.') + '</small></span></div></div>' +
@@ -962,6 +964,7 @@ html{font-size:17px}html[data-size=s]{font-size:15px}html[data-size=l]{font-size
         toast(j.me.on ? tr('E-mail updates on ✓', 'Habari kwa barua pepe zimewashwa ✓') : tr('E-mail updates off', 'Habari kwa barua pepe zimezimwa'));
       });
     });
+    var bc = $('bCur'); if (bc) bc.addEventListener('click', function () { RFX.open(bc); });
     var out = $('bOut'); if (out) out.addEventListener('click', function () {
       var w = sheet('<h2>' + tr('Sign out?', 'Utoke?') + '</h2><p>' + tr('Your projects stay safe. Sign in again any time with your donor code or private link.', 'Miradi yako iko salama. Ingia tena wakati wowote kwa msimbo wako wa mfadhili au kiungo cha siri.') + '</p>' +
         '<div class="acts"><button class="btn" type="button" data-y>' + tr('Sign out', 'Toka') + '</button><button class="btn light" type="button" data-n>' + tr('Cancel', 'Ghairi') + '</button></div>');
@@ -969,6 +972,8 @@ html{font-size:17px}html[data-size=s]{font-size:15px}html[data-size=l]{font-size
       w.querySelector('[data-n]').addEventListener('click', function () { w.remove(); });
     });
   }
+  // the money picked in Settings › Currency: the screen redraws in it
+  if (window.RFX) RFX.on(function () { try { if (S.D) draw(); } catch (e) {} });
   var seenT = 0;
   function markSeenSoon() { clearTimeout(seenT); seenT = setTimeout(function () { S.seen = newest(); store.set('rfPinDonorSeen', S.seen); }, 1500); }
   // the address keeps the open project (#p/<id>), so the phone's back button closes it
