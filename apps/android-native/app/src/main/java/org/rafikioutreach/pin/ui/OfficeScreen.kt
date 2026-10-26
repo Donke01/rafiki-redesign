@@ -299,39 +299,200 @@ private fun ReviewQueue(m: AppModel, open: (String) -> Unit) {
     }
 }
 
-/** Office › Team: a short list grouped by role (admins wear a crown). Tap a person for their contact sheet (Contact.kt). */
+/** Office › Team, from the Figma design (the same as the web app and the iPhone): a navy head with numbers (tap one to
+ *  filter) and Add a person, search by name, phone or country, filter chips, and a card per person with a status ring,
+ *  Call and WhatsApp right on it, and a red card for someone blocked. Tap a person for their sheet (Contact.kt). */
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
 private fun TeamSection(m: AppModel, openProject: (String) -> Unit) {
     val scope = rememberScope()
     val (people, again) = rememberTeam(m)
     var adding by remember { mutableStateOf<JSONObject?>(null) }
-    var q by remember { mutableStateOf("") }
-    Btn(t("Add a person", "Ongeza mtu"), { adding = JSONObject() }, Modifier.fillMaxWidth().testTag("team_add"), icon = "plus")
-    if (people.size > 8) Field(q, { q = it }, t("Find a person", "Tafuta mtu"), placeholder = t("Name", "Jina"))
-    val list = people.filter { q.isBlank() || it.optString("name").contains(q.trim(), ignoreCase = true) }.sortedBy { it.optString("name").lowercase() }
+    var q by rememberSaveable { mutableStateOf("") }
+    var f by rememberSaveable { mutableStateOf("all") }
+    val all = people.sortedBy { it.optString("name").lowercase() }
+    fun cnt(k: String) = all.count { teamIs(it, k) }
+    if (f != "all" && cnt(f) == 0) f = "all"
+    val pick: (String) -> Unit = { k -> f = if (f == k && k != "all") "all" else k }
+    TeamHero(all, cnt("adm"), cnt("today"), cnt("week"), cnt("inv"), cnt("blk"), f, pick) { adding = JSONObject() }
+    Field(q, { q = it }, t("Find a person", "Tafuta mtu"), Modifier.padding(top = 8.dp).testTag("team_q"), placeholder = t("Name, phone or country", "Jina, simu au nchi"))
+    FlowRow(Modifier.padding(top = 10.dp).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        listOf("all" to t("All", "Wote"), "today" to t("Active today", "Hai leo"), "adm" to t("Admins", "Wasimamizi"), "inv" to t("Invited", "Walioalikwa"), "blk" to t("Blocked", "Waliozuiwa")).forEach { (k, label) ->
+            val n = if (k == "all") all.size else cnt(k)
+            if (k == "all" || n > 0) FilterPill(label, n, f == k, "team_f_$k") { pick(k) }
+        }
+    }
+    val qq = q.trim().lowercase(); val qd = qq.filter { it.isDigit() }
+    val list = all.filter { p ->
+        teamIs(p, f) && (qq.isEmpty() || listOf("name", "phone", "role", "email").joinToString(" ") { p.optString(it) }.plus(" " + (COUNTRIES[p.optString("home")] ?: "")).lowercase().contains(qq) ||
+            (qd.length >= 3 && p.optString("phone").filter { it.isDigit() }.contains(qd)))
+    }
     val admins = list.filter { it.optBoolean("admin") }
     val field = list.filterNot { it.optBoolean("admin") }
     var i = 0
-    TeamHead("crown", t("Admins", "Wasimamizi"), admins.size, C.hue("amber"), "team_admins")
-    admins.forEach { p -> PersonRow(p, i++) { Contact.show(p.optString("name")) } }
-    TeamHead("people", t("Field team", "Timu ya uwanjani"), field.size, C.hue("slate"), "team_field")
-    field.forEach { p -> PersonRow(p, i++) { Contact.show(p.optString("name")) } }
-    if (people.isNotEmpty() && field.isEmpty()) Text(t("Nobody here yet. Add a person above.", "Hakuna mtu bado. Ongeza mtu hapo juu."), style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(4.dp))
-    Card(Modifier.padding(top = 16.dp), pad = 14.dp) {
+    val filtered = qq.isNotEmpty() || f != "all"
+    if (!filtered || admins.isNotEmpty()) TeamHead("crown", t("Admins", "Wasimamizi"), admins.size, C.hue("amber"), "team_admins")
+    admins.forEach { p -> PersonCard(p, i++) { Contact.show(p.optString("name")) } }
+    if (!filtered || field.isNotEmpty()) TeamHead("people", t("Field team", "Timu ya uwanjani"), field.size, C.hue("slate"), "team_field")
+    field.forEach { p -> PersonCard(p, i++) { Contact.show(p.optString("name")) } }
+    if (filtered && list.isEmpty()) Text(t("Nobody matches.", "Hakuna anayelingana."), style = MaterialTheme.typography.bodyMedium, color = C.muted, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(24.dp).testTag("team_none"))
+    else if (people.isNotEmpty() && field.isEmpty() && !filtered) Text(t("Nobody here yet. Add a person above.", "Hakuna mtu bado. Ongeza mtu hapo juu."), style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(4.dp))
+    Card(Modifier.padding(top = 18.dp), pad = 16.dp) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             val hu = C.hue("teal")
-            IconTile("mail", hu.fg, hu.bg, 40.dp)
+            IconTile("mail", hu.fg, hu.bg, 44.dp)
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
-                Text(t("E-mail alerts", "Taarifa kwa barua pepe"), style = MaterialTheme.typography.titleSmall, color = C.ink)
-                Text(t("Admins with an e-mail get an alert when a site stops working.", "Wasimamizi wenye barua pepe wanapata taarifa eneo likiacha kufanya kazi."), style = MaterialTheme.typography.bodySmall, color = C.muted)
+                Text(t("E-mail alerts", "Taarifa kwa barua pepe"), style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold), color = C.ink)
+                Text(t("Repairs and reviews go to admins with an e-mail", "Matengenezo na mapitio yanaenda kwa wasimamizi wenye barua pepe"), style = MaterialTheme.typography.bodySmall, color = C.muted)
             }
         }
+        val mails = all.filter { it.optBoolean("admin") && it.optString("email").let { e -> e.isNotBlank() && e != "null" } }.map { it.optString("email") }
+        if (mails.isNotEmpty()) Column(Modifier.padding(top = 10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            mails.forEach { e -> Row(Modifier.clip(RoundedCornerShape(99.dp)).background(C.hue("slate").bg).padding(horizontal = 10.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                Icon(Ic.get("mail"), null, tint = C.ink, modifier = Modifier.size(14.dp)); Spacer(Modifier.width(6.dp))
+                Text(e, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = C.ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            } }
+        }
         var tm by remember { mutableStateOf<String?>(null) }
-        Btn(t("Send a test e-mail", "Tuma barua pepe ya majaribio"), { scope.launch { tm = t("Sending…", "Inatuma…"); val x = m.api.admin(JSONObject().put("action", "test-mail")); tm = mailResult(x) } }, Modifier.padding(top = 10.dp), small = true, light = true, icon = "upload")
+        Btn(t("Send a test e-mail", "Tuma barua pepe ya majaribio"), { scope.launch { tm = t("Sending…", "Inatuma…"); val x = m.api.admin(JSONObject().put("action", "test-mail")); tm = mailResult(x) } }, Modifier.padding(top = 12.dp).testTag("team_test_mail"), small = true, light = true, icon = "upload")
         Msg(tm)
     }
     adding?.let { pre -> AddSheet(m, pre, close = { adding = null }, added = again) }
+}
+
+/** today (used the app today), week (in the last 7 days), old, inv (never signed in), blk (blocked). */
+private fun teamState(p: JSONObject): String {
+    if (p.optJSONObject("blocked") != null || p.optBoolean("blocked")) return "blk"
+    val s = p.optString("lastSeen"); if (s.isBlank() || s == "null") return "inv"
+    val at = runCatching { java.time.Instant.parse(s) }.getOrNull() ?: return "inv"
+    val z = java.time.ZoneId.systemDefault()
+    if (at.atZone(z).toLocalDate() == java.time.LocalDate.now(z)) return "today"
+    return if (java.time.Duration.between(at, java.time.Instant.now()).toDays() < 7) "week" else "old"
+}
+private fun teamIs(p: JSONObject, f: String): Boolean { val st = teamState(p); return when (f) { "all" -> true; "adm" -> p.optBoolean("admin"); "week" -> st == "today" || st == "week"; else -> st == f } }
+private val StToday = Color(0xFF22B566); private val StWeek = Color(0xFFF0A630); private val StNone = Color(0xFFAEB8C1); private val StBlk = Color(0xFFD93A2E)
+private fun stColor(st: String) = when (st) { "today" -> StToday; "week" -> StWeek; "blk" -> StBlk; else -> StNone }
+
+/** The navy head: how many people and admins, a few faces, four numbers that filter, and Add a person. */
+@Composable
+private fun TeamHero(all: List<JSONObject>, nAdm: Int, nT: Int, nW: Int, nI: Int, nB: Int, f: String, pick: (String) -> Unit, add: () -> Unit) {
+    val shape = RoundedCornerShape(28.dp)
+    val navy = if (C.glassy) androidx.compose.ui.graphics.Brush.linearGradient(listOf(Color(0xFF0B4F80), Color(0xFF063559), Color(0xFF04263F))) else androidx.compose.ui.graphics.SolidColor(Color(0xFF002A57))
+    Column(Modifier.fillMaxWidth().rise(0).clip(shape).background(navy).sheen(700).padding(20.dp).testTag("team_hero")) {
+        Row(verticalAlignment = Alignment.Top) {
+            Column(Modifier.weight(1f)) {
+                Text(t("OFFICE", "OFISI"), style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.8.sp, fontWeight = FontWeight.ExtraBold), color = Color(0xFF9FD3F7))
+                Text(t("Your team", "Timu yako"), style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold), color = Color.White)
+                Text((if (all.size == 1) t("1 person", "Mtu 1") else t("${all.size} people", "Watu ${all.size}")) + " · " + (if (nAdm == 1) t("1 admin", "Msimamizi 1") else t("$nAdm admins", "Wasimamizi $nAdm")),
+                    style = MaterialTheme.typography.bodyMedium, color = Color.White.copy(alpha = 0.82f))
+            }
+            val faces = (all.filter { teamState(it) == "today" } + all.filterNot { teamState(it) == "today" }).take(3)
+            Row(Modifier.padding(top = 6.dp)) {
+                faces.forEachIndexed { k, p -> val hu = C.hue(teamHue(p.optString("name")))
+                    Box(Modifier.offset(x = (-10 * k).dp).size(40.dp).clip(CircleShape).background(Color(0xFF063559)).padding(2.5.dp).clip(CircleShape).background(hu.bg), contentAlignment = Alignment.Center) {
+                        Text(inits(p.optString("name")), color = hu.fg, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp)
+                    }
+                }
+                if (all.size > 3) Box(Modifier.offset(x = (-30).dp).size(40.dp).clip(CircleShape).background(Color(0xFF063559)).padding(2.5.dp).clip(CircleShape).background(Color.White), contentAlignment = Alignment.Center) {
+                    Text("+${all.size - 3}", color = Color(0xFF04263F), fontWeight = FontWeight.ExtraBold, fontSize = 12.sp)
+                }
+            }
+        }
+        Row(Modifier.padding(top = 16.dp).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            HeroStat("today", nT, StToday, t("today", "leo"), f == "today", true, pick)
+            HeroStat("week", nW, Color(0xFF7CC4F5), t("this week", "wiki hii"), f == "week", false, pick)
+            HeroStat("inv", nI, StWeek, t("invited", "walioalikwa"), f == "inv", false, pick)
+            HeroStat("blk", nB, Color(0xFFFF6B5E), t("blocked", "waliozuiwa"), f == "blk", false, pick)
+        }
+        val src = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+        Row(Modifier.padding(top = 16.dp).fillMaxWidth().heightIn(min = 54.dp).press(src).clip(RoundedCornerShape(99.dp)).background(Color.White)
+            .clickable(interactionSource = src, indication = androidx.compose.material3.ripple(), role = Role.Button, onClick = add).testTag("team_add"),
+            horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+            Icon(Ic.get("plus"), null, tint = Color(0xFF0A78C2), modifier = Modifier.size(22.dp)); Spacer(Modifier.width(8.dp))
+            Text(t("Add a person", "Ongeza mtu"), color = Color(0xFF0A78C2), fontWeight = FontWeight.ExtraBold, fontSize = 17.sp)
+        }
+    }
+}
+
+@Composable
+private fun RowScope.HeroStat(k: String, n: Int, dot: Color, label: String, on: Boolean, live: Boolean, pick: (String) -> Unit) {
+    val shape = RoundedCornerShape(16.dp)
+    Column(Modifier.weight(1f).heightIn(min = 62.dp).clip(shape).background(if (on) Color.White else Color.White.copy(alpha = 0.1f)).border(1.dp, Color.White.copy(alpha = if (on) 1f else 0.18f), shape)
+        .clickable(role = Role.Button) { pick(k) }.padding(horizontal = 10.dp, vertical = 9.dp).testTag("team_s_$k")) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            BreathDot(dot, live && n > 0, 8.dp); Spacer(Modifier.width(6.dp))
+            Text("$n", color = if (on) Color(0xFF04263F) else Color.White, fontWeight = FontWeight.ExtraBold, fontSize = 22.sp)
+        }
+        Text(label, color = (if (on) Color(0xFF04263F) else Color.White).copy(alpha = 0.85f), style = MaterialTheme.typography.labelSmall, maxLines = 2)
+    }
+}
+
+@Composable
+private fun FilterPill(label: String, n: Int, on: Boolean, tag: String, onClick: () -> Unit) {
+    val shape = RoundedCornerShape(99.dp)
+    Row(Modifier.heightIn(min = 44.dp).clip(shape).background(if (on) C.ink else C.card).border(if (C.glassy) 1.dp else 2.dp, if (on) C.ink else C.line, shape)
+        .clickable(role = Role.Button, onClick = onClick).padding(start = 16.dp, end = 8.dp).testTag(tag), verticalAlignment = Alignment.CenterVertically) {
+        Text(label, color = if (on) C.card else C.ink, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+        Spacer(Modifier.width(8.dp))
+        Text("$n", color = if (on) C.ink else C.hue("slate").fg, fontWeight = FontWeight.ExtraBold, fontSize = 12.sp,
+            modifier = Modifier.clip(shape).background(if (on) C.card else C.hue("slate").bg).padding(horizontal = 8.dp, vertical = 2.dp))
+    }
+}
+
+/** One person: picture with a status ring and dot, name, role and when they last used the app, tags, then Call and
+ *  WhatsApp (or, when blocked, who blocked them). */
+@Composable
+private fun PersonCard(p: JSONObject, i: Int, onClick: () -> Unit) {
+    val ctx = LocalContext.current
+    val src = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+    val name = p.optString("name"); val st = teamState(p); val blk = st == "blk"
+    val phone = p.optString("phone").takeIf { it.isNotBlank() && it != "null" }.orEmpty()
+    val shape = RoundedCornerShape(24.dp)
+    val bg = if (blk) androidx.compose.ui.graphics.lerp(C.card, C.badBg, 0.55f) else if (C.glassy) C.glass2 else C.card
+    val edge = if (blk) androidx.compose.ui.graphics.lerp(C.line, C.bad, 0.4f) else if (C.glassy) C.glassEdge else C.line
+    Column(Modifier.padding(top = 12.dp).rise(i, step = 40).fillMaxWidth().clip(shape).background(bg).border(if (C.glassy) 1.dp else 2.dp, edge, shape).testTag("tm_card_$name")) {
+        Row(Modifier.fillMaxWidth().press(src).clickable(interactionSource = src, indication = androidx.compose.material3.ripple(), role = Role.Button, onClick = onClick)
+            .padding(start = 16.dp, end = 12.dp, top = 14.dp, bottom = 14.dp).testTag("tm_$name"), verticalAlignment = Alignment.CenterVertically) {
+            Avatar(name, p.optBoolean("admin"), 56.dp, st)
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                Text(name, style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold), color = C.ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                val role = p.optString("role").takeIf { it.isNotBlank() && it != "null" }
+                val seen = if (st == "inv") (if (p.optString("src").ifBlank { p.optString("source") } == "app") t("Invited · hasn’t signed in yet", "Amealikwa · bado hajaingia") else t("Not signed in yet", "Bado hajaingia")) else seenText(p)
+                Text((role?.let { "$it · " } ?: "") + seen, style = MaterialTheme.typography.bodySmall, color = if (blk) C.bad else C.muted, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Chips(p, long = true)
+            }
+            Icon(Ic.get("chev"), null, tint = C.muted, modifier = Modifier.size(18.dp))
+        }
+        if (blk) {
+            HorizontalDivider(color = androidx.compose.ui.graphics.lerp(C.line, C.bad, 0.3f))
+            val by = p.optJSONObject("blocked")?.optString("by")?.takeIf { it.isNotBlank() && it != "null" }
+            Row(Modifier.fillMaxWidth().heightIn(min = 44.dp).padding(horizontal = 16.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                Icon(Ic.get("x"), null, tint = C.bad, modifier = Modifier.size(18.dp)); Spacer(Modifier.width(8.dp))
+                Text((by?.let { t("Blocked by $it", "Amezuiwa na $it") } ?: t("Blocked", "Amezuiwa")) + " · " + t("can’t sign in", "hawezi kuingia"), style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold), color = C.bad)
+            }
+        } else if (phone.isNotBlank()) {
+            HorizontalDivider(color = C.line)
+            Row(Modifier.fillMaxWidth().padding(start = 14.dp, end = 14.dp, top = 10.dp, bottom = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+                QuickPill(t("Call", "Piga"), C.hue("green"), "tm_call_$name", icon = "phone") { runCatching { ctx.startActivity(Intent(Intent.ACTION_DIAL, android.net.Uri.parse("tel:" + phone.replace(" ", "")))) } }
+                Spacer(Modifier.width(8.dp))
+                QuickPill("WhatsApp", Hue(if (C.dark) Color(0xFF5FD08F) else Color(0xFF1C8A50), WhatsAppGreen.copy(alpha = 0.14f)), "tm_wa_$name", brand = "whatsapp") { runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, android.net.Uri.parse("https://wa.me/" + waNumber(phone, p.optString("home"))))) } }
+                Text(phone, style = MaterialTheme.typography.bodySmall, color = C.muted, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.End, modifier = Modifier.weight(1f).padding(start = 8.dp))
+            }
+        }
+    }
+}
+
+@Composable
+private fun QuickPill(label: String, hu: Hue, tag: String, icon: String? = null, brand: String? = null, onClick: () -> Unit) {
+    val src = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+    Row(Modifier.heightIn(min = 44.dp).press(src).clip(RoundedCornerShape(99.dp)).background(hu.bg).clickable(interactionSource = src, indication = androidx.compose.material3.ripple(), role = Role.Button, onClick = onClick)
+        .padding(horizontal = 16.dp).testTag(tag), verticalAlignment = Alignment.CenterVertically) {
+        if (brand != null) BrandIcon(brand, 18.dp) else if (icon != null) Icon(Ic.get(icon), null, tint = hu.fg, modifier = Modifier.size(18.dp))
+        Spacer(Modifier.width(7.dp))
+        Text(label, color = hu.fg, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp, maxLines = 1)
+    }
 }
 
 private val CrownGold = Color(0xFFE0A100)
@@ -354,13 +515,14 @@ private fun TeamHead(icon: String, title: String, n: Int, hu: Hue, tag: String) 
 
 /** A round picture with initials; admins get a little crown on top. */
 @Composable
-private fun Avatar(name: String, admin: Boolean, size: androidx.compose.ui.unit.Dp = 44.dp) {
+private fun Avatar(name: String, admin: Boolean, size: androidx.compose.ui.unit.Dp = 44.dp, st: String = "") {
     val hu = C.hue(teamHue(name))
     Box(Modifier.size(size + size * 0.18f)) {
-        Box(Modifier.align(Alignment.BottomStart).size(size).clip(CircleShape).background(hu.bg).then(if (!C.glassy) Modifier.border(2.dp, C.ink, CircleShape) else Modifier), contentAlignment = Alignment.Center) {
+        Box(Modifier.align(Alignment.BottomStart).size(size).clip(CircleShape).background(hu.bg).then(if (st == "today") Modifier.border(2.5.dp, StToday, CircleShape) else if (!C.glassy) Modifier.border(2.dp, C.ink, CircleShape) else Modifier), contentAlignment = Alignment.Center) {
             if (name.isBlank()) Icon(Ic.get("plus"), null, tint = hu.fg, modifier = Modifier.size(size * 0.45f))
             else Text(inits(name), color = hu.fg, fontWeight = FontWeight.ExtraBold, fontSize = (size.value * 0.34f).sp)
         }
+        if (st.isNotBlank()) Box(Modifier.align(Alignment.BottomStart).offset(x = size - size * 0.26f, y = -(size * 0.02f)).size(size * 0.26f).clip(CircleShape).background(C.card).padding(2.5.dp).clip(CircleShape).background(stColor(st)).testTag("tm_st_$st"))
         if (admin) Box(Modifier.align(Alignment.TopEnd).size(size * 0.5f).clip(CircleShape).background(C.card).border(1.dp, C.line, CircleShape).padding(size * 0.08f), contentAlignment = Alignment.Center) {
             Icon(Ic.crownFill, t("Admin", "Msimamizi"), tint = if (C.dark) CrownGoldDark else CrownGold, modifier = Modifier.fillMaxSize())
         }

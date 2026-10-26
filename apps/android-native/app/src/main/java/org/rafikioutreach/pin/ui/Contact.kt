@@ -195,8 +195,26 @@ private fun CtRow(tag: String, icon: String, hue: String, label: String, value: 
 /** A group of rows on a card, under a small label. */
 @Composable
 private fun CtGroup(label: String, tag: String, content: @Composable ColumnScope.() -> Unit) {
-    DqmLabel(label, Modifier.testTag(tag))
-    Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).border(1.dp, C.line, RoundedCornerShape(18.dp)).padding(vertical = 4.dp, horizontal = 2.dp), content = content)
+    Column(Modifier.padding(top = 14.dp).fillMaxWidth().clip(RoundedCornerShape(22.dp)).background(C.card).border(if (C.glassy) 1.dp else 2.dp, C.line, RoundedCornerShape(22.dp)).padding(start = 6.dp, end = 6.dp, top = 4.dp, bottom = 6.dp)) {
+        DqmLabel(label, Modifier.padding(start = 6.dp).testTag(tag))
+        content()
+    }
+}
+
+/** A big quick-action tile: a round coloured icon over its label. */
+@Composable
+private fun RowScope.CtTile(tag: String, label: String, circle: Color, fg: Color, icon: String, brand: String? = null, onClick: () -> Unit) {
+    val h = rememberHaptics()
+    val src = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+    val shape = RoundedCornerShape(20.dp)
+    Column(Modifier.weight(1f).heightIn(min = 88.dp).press(src).clip(shape).background(C.hue("slate").bg).border(if (C.glassy) 1.dp else 2.dp, C.line, shape)
+        .clickable(interactionSource = src, indication = androidx.compose.material3.ripple(), role = Role.Button) { h.tap(); onClick() }.padding(horizontal = 2.dp, vertical = 12.dp).testTag(tag),
+        horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+        Box(Modifier.size(46.dp).clip(CircleShape).background(circle), contentAlignment = Alignment.Center) {
+            if (brand != null) BrandIcon(brand, 24.dp) else Icon(DqmIc.get(icon), null, tint = fg, modifier = Modifier.size(22.dp))
+        }
+        Text(label, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold), color = C.ink, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 8.dp))
+    }
 }
 
 /** A role badge in the header. */
@@ -296,14 +314,21 @@ private fun ContactSheet(m: AppModel, who: String, close: () -> Unit, go: (Strin
     TeamSubSheet("ct_sheet", close, x = false) { hide ->
         fun leave(then: () -> Unit) = hide { then() }
         // the header: picture, name, role badges, status, e-mail and phone (each with copy)
+        // a soft banner behind the picture (the Figma design)
+        val live = p.blocked == null && p.lastSeen != null && runCatching { java.time.Instant.parse(p.lastSeen).atZone(java.time.ZoneId.systemDefault()).toLocalDate() == java.time.LocalDate.now() }.getOrDefault(false)
+        val dot = when { p.blocked != null -> Color(0xFFD93A2E); live -> Color(0xFF22B566); p.lastSeen != null -> Color(0xFFF0A630); else -> Color(0xFFAEB8C1) }
         Box(Modifier.fillMaxWidth()) {
-            Column(Modifier.fillMaxWidth().padding(horizontal = 8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                Box { PersonAvatar(p.name, 72.dp)
-                    if (p.admin) Box(Modifier.align(Alignment.TopEnd).offset(4.dp, (-4).dp).size(28.dp).clip(CircleShape).background(C.card).border(1.dp, C.line, CircleShape).padding(5.dp)) {
+            if (C.glassy) Box(Modifier.fillMaxWidth().height(92.dp).clip(RoundedCornerShape(22.dp))
+                .background(androidx.compose.ui.graphics.Brush.linearGradient(listOf(C.hue("green").bg, C.hue("teal").bg, C.hue("blue").bg))).testTag("ct_banner"))
+            Column(Modifier.fillMaxWidth().padding(horizontal = 8.dp).padding(top = 30.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                Box {
+                    Box(Modifier.size(104.dp).clip(CircleShape).background(C.card).padding(4.dp).then(if (live) Modifier.border(3.dp, Color(0xFF22B566), CircleShape).padding(3.dp) else Modifier), contentAlignment = Alignment.Center) { PersonAvatar(p.name, if (live) 90.dp else 96.dp) }
+                    if (p.known) Box(Modifier.align(Alignment.BottomEnd).offset((-4).dp, (-4).dp).size(22.dp).clip(CircleShape).background(C.card).padding(3.dp).clip(CircleShape).background(dot).testTag("ct_dot"))
+                    if (p.admin) Box(Modifier.align(Alignment.TopStart).size(30.dp).clip(CircleShape).background(C.card).border(1.dp, C.line, CircleShape).padding(6.dp)) {
                         Icon(Ic.crownFill, t("Admin", "Msimamizi"), tint = if (C.dark) Color(0xFFF2C14E) else Color(0xFFE0A100), modifier = Modifier.fillMaxSize())
                     }
                 }
-                Text(p.name, style = MaterialTheme.typography.titleLarge, color = C.ink, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 8.dp, start = 36.dp, end = 36.dp).testTag("ct_name"))
+                Text(p.name, style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold), color = C.ink, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 10.dp, start = 36.dp, end = 36.dp).testTag("ct_name"))
                 if (p.role.isNotBlank()) Text(p.role, style = MaterialTheme.typography.bodyMedium, color = C.text, textAlign = TextAlign.Center, modifier = Modifier.testTag("ct_role"))
                 FlowRow(Modifier.padding(top = 8.dp).testTag("ct_badges"), horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     if (p.known) {
@@ -325,7 +350,10 @@ private fun ContactSheet(m: AppModel, who: String, close: () -> Unit, go: (Strin
                     p.app -> t("Invited · hasn’t signed in yet", "Amealikwa · bado hajaingia")
                     else -> t("Hasn’t signed in yet", "Bado hajaingia")
                 }
-                Text(status, style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold), color = if (p.blocked != null) C.bad else C.muted, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 8.dp).testTag("ct_status"))
+                Row(Modifier.padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    if (p.blocked == null && p.lastSeen != null) { BreathDot(Color(0xFF22B566), live, 8.dp); Spacer(Modifier.width(6.dp)) }
+                    Text(status, style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold), color = if (p.blocked != null) C.bad else if (p.lastSeen != null) C.hue("green").fg else C.muted, textAlign = TextAlign.Center, modifier = Modifier.testTag("ct_status"))
+                }
                 if (p.blocked == null && p.out != null) Text(t("Signed out of all phones on ", "Ametolewa kwenye simu zote tarehe ") + Dates.day(p.out), style = MaterialTheme.typography.bodySmall, color = C.muted,
                     textAlign = TextAlign.Center, modifier = Modifier.testTag("ct_out"))
                 p.blocked?.reason?.takeIf { it.isNotBlank() }?.let { why -> Text("“$why”", style = MaterialTheme.typography.bodySmall, color = C.muted, textAlign = TextAlign.Center) }
@@ -338,18 +366,20 @@ private fun ContactSheet(m: AppModel, who: String, close: () -> Unit, go: (Strin
         }
         said?.let { (tone, text) -> Box(Modifier.testTag("ct_msg")) { Msg(text, tone) } }
 
-        // Contact
-        if (!me) CtGroup(t("Contact", "Mawasiliano"), "ct_g_contact") {
-            if (p.email.isNotBlank()) CtRow("ct_mail", "mail", "teal", t("Send an e-mail", "Tuma barua pepe"), p.email) {
-                if (iAmAdmin) leave { MailNav.preset = MailPreset("pick", picks = listOf("t:" + p.name.lowercase())); go("office", "mail") }
-                else runCatching { ctx.startActivity(Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:" + p.email))) }
+        // Contact: Call, WhatsApp, SMS, E-mail and Share as big tiles (the Figma design)
+        if (!me) {
+            Row(Modifier.padding(top = 16.dp).fillMaxWidth().testTag("ct_g_contact"), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                if (p.phone.isNotBlank()) {
+                    CtTile("ct_call", t("Call", "Piga"), Color(0xFF1C7C4A), Color.White, icon = "phone") { dial(ctx, p.phone) }
+                    CtTile("ct_wa", "WhatsApp", WhatsAppGreen, Color.White, icon = "chat", brand = "whatsapp") { whatsapp(ctx, p.phone, p.home) }
+                    CtTile("ct_sms", "SMS", C.hue("teal").bg, C.hue("teal").fg, icon = "text") { sms(ctx, p.phone) }
+                }
+                if (p.email.isNotBlank() && (iAmAdmin || p.phone.isBlank())) CtTile("ct_mail", t("E-mail", "Barua pepe"), C.hue("blue").bg, C.hue("blue").fg, icon = "mail") {
+                    if (iAmAdmin) leave { MailNav.preset = MailPreset("pick", picks = listOf("t:" + p.name.lowercase())); go("office", "mail") }
+                    else runCatching { ctx.startActivity(Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:" + p.email))) }
+                }
+                CtTile("ct_share", t("Share", "Shiriki"), C.card, C.ink, icon = "share") { shareContact(ctx, p) }
             }
-            if (p.phone.isNotBlank()) {
-                CtRow("ct_call", "phone", "near", t("Call", "Piga simu"), p.phone) { dial(ctx, p.phone) }
-                CtRow("ct_wa", "chat", "wa", "WhatsApp", p.phone, brand = "business.whatsapp.com") { whatsapp(ctx, p.phone, p.home) }
-                CtRow("ct_sms", "text", "blue", "SMS", p.phone) { sms(ctx, p.phone) }
-            }
-            CtRow("ct_share", "share", "purple", t("Share contact", "Shiriki mawasiliano"), t("A contact card with name, phone and e-mail", "Kadi ya mawasiliano yenye jina, simu na barua pepe")) { shareContact(ctx, p) }
             if (p.email.isBlank() && p.phone.isBlank()) Text(t("No e-mail or phone on the team list for them yet.", "Bado hakuna barua pepe wala simu yake kwenye orodha ya timu."), style = MaterialTheme.typography.bodySmall, color = C.muted,
                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp).testTag("ct_nocontact"))
         }
