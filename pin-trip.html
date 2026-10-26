@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#054F81">
+<title>Trip plan · RAFIKI</title>
+<link rel="icon" href="/favicon.svg">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="/vendor/leaflet/leaflet.css">
+<!-- A shared trip, read-only, by private link (/pin-trip?t=<token>): a field trip from RAFIKI Pin, or a volunteer or donor
+     group trip. No sign-in, no PINs, costs, phone numbers of the team or private notes: the server (/api/trip-share) only
+     sends what this page may show. It checks for changes every minute, so it updates when the plan changes. -->
+<style>
+:root{--blue:#0A78C2;--deep:#054F81;--ink:#04263F;--bg:#EEF0F2;--card:#FFFFFF;--text:#141618;--muted:#5A6066;--line:#DCE1E5;--tint:#E3F1FC;--ok:#1C7C4A;--warn:#8A5200;--warnbg:#FDF0DC;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--blue:#5BB4F2;--deep:#9FD3F7;--ink:#E6EEF4;--bg:#0D1318;--card:#161E25;--text:#E8EDF1;--muted:#9CA8B2;--line:#26323C;--tint:#12324A;--ok:#5FD08F;--warn:#F2B35B;--warnbg:#3A2A10;color-scheme:dark}}
+*{box-sizing:border-box}html,body{margin:0}
+body{font-family:Montserrat,system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;overflow-wrap:normal;word-break:normal;hyphens:manual}
+.nw{white-space:nowrap}
+.wrap{max-width:720px;margin:0 auto;padding:0 16px calc(32px + env(safe-area-inset-bottom))}
+header{background:linear-gradient(160deg,#054F81,#0A78C2);color:#fff;padding:calc(20px + env(safe-area-inset-top)) 0 22px}
+header .wrap{padding-bottom:0}
+header img{height:22px;width:auto;display:block;margin-bottom:14px}
+h1{margin:0;font-size:1.5rem;line-height:1.25}
+.sub{margin:6px 0 0;font-size:.95rem;opacity:.92;line-height:1.45}
+.upd{margin:8px 0 0;font-size:.78rem;opacity:.8}
+.card{background:var(--card);border-radius:20px;padding:16px;margin:14px 0;border:1px solid var(--line)}
+h2{font-size:1.05rem;margin:0 0 10px;color:var(--ink)}
+.day h2{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}.day h2 small{font-size:.8rem;color:var(--muted);font-weight:600}
+ol.tl{list-style:none;margin:0;padding:0}
+ol.tl li{display:flex;gap:12px;padding:8px 0;border-top:1px solid var(--line)}
+ol.tl li:first-child{border-top:0}
+.tm{flex:0 0 54px;font-variant-numeric:tabular-nums;font-weight:700;color:var(--ink);font-size:.9rem}.tm small{display:block;font-weight:500;color:var(--muted)}
+.tx{flex:1 1 auto;min-width:0}.tx b{display:block;color:var(--ink);font-size:.95rem;line-height:1.35}.tx span{display:block;font-size:.84rem;color:var(--muted);line-height:1.4;margin-top:2px}
+.tx a{color:var(--blue)}
+.k{display:inline-block;font-size:.72rem;font-weight:800;letter-spacing:.03em;text-transform:uppercase;color:var(--blue);margin-bottom:2px}
+#map{height:240px;border-radius:20px;overflow:hidden;margin:14px 0;background:var(--tint);z-index:0}
+.txt{white-space:pre-wrap;line-height:1.55;font-size:.92rem;margin:0}
+.sos li{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:8px 0;border-top:1px solid var(--line)}.sos li:first-child{border-top:0}.sos ul{list-style:none;margin:0;padding:0}
+.sos a{color:var(--blue);font-weight:700;text-decoration:none}
+.a2hs{display:flex;gap:12px;align-items:flex-start;background:var(--tint);border-radius:18px;padding:12px 14px;margin:14px 0;font-size:.88rem;line-height:1.45}
+.a2hs b{display:block;color:var(--ink)}.a2hs button{flex:0 0 auto;min-height:44px;padding:0 16px;border-radius:999px;border:0;background:var(--blue);color:#fff;font:inherit;font-weight:700;cursor:pointer}
+.a2hs .x{background:transparent;color:var(--muted);padding:0 8px}
+.msg{padding:40px 0;text-align:center;color:var(--muted)}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.btns button{min-height:44px;padding:0 18px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-weight:700;cursor:pointer}
+.mk{display:flex;align-items:center;justify-content:center;border-radius:50%;background:#fff;border:2px solid #0A78C2;color:#0A78C2;font:800 12px/1 system-ui,sans-serif}
+@media print{.a2hs,.btns,#map{display:none}header{background:none;color:#000}header img{filter:invert(1)}.card{border:0;padding:0}body{background:#fff}}
+</style>
+</head>
+<body>
+<header><div class="wrap"><img src="/img/logo-light-bold.webp" alt="RAFIKI Outreach" width="64" height="22"><h1 id="t">Trip plan</h1><p class="sub" id="s"></p><p class="upd" id="u"></p></div></header>
+<main class="wrap" id="m"><p class="msg">Loading the trip…</p></main>
+<script src="/vendor/leaflet/leaflet.js"></script>
+<script>
+(function () {
+  var tok = (/[?&#]t=([A-Za-z0-9_-]{20,80})/.exec(location.search + location.hash) || [])[1] || '', etag = '', data = null, map = null;
+  var $ = function (id) { return document.getElementById(id); };
+  var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  var MO = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], WD = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  // "Thu 24 Oct", or "24 Oct 2027" in another year
+  function dd(x) { var d = new Date(/^\d{4}-\d{2}-\d{2}$/.test(x) ? x + 'T12:00:00' : x); if (isNaN(d)) return ''; return d.getFullYear() !== new Date().getFullYear() ? d.getDate() + ' ' + MO[d.getMonth()] + ' ' + d.getFullYear() : WD[d.getDay()] + ' ' + d.getDate() + ' ' + MO[d.getMonth()]; }
+  function range(a, b) { return !b || a === b ? '<span class="nw">' + dd(a) + '</span>' : '<span class="nw">' + dd(a) + ' –</span> <span class="nw">' + dd(b) + '</span>'; }
+  function km(n) { n = +n || 0; return n < 10 ? n.toFixed(1) + ' km' : Math.round(n) + ' km'; }
+  var KIND = { flight: 'Flight', transfer: 'Pick\u2011up', lodging: 'Lodging', project: 'Project day', school: 'School visit', safari: 'Safari', free: 'Free time', meal: 'Meal', other: '' };
+  function field(t) {
+    $('t').textContent = t.title || 'Trip plan'; document.title = (t.title || 'Trip plan') + ' · RAFIKI';
+    $('s').innerHTML = range(t.from, t.to) + (t.people && t.people.length ? ' · ' + esc(t.people.join(', ')) : '');
+    return '<div id="map" role="img" aria-label="Map of the trip"></div>' + (t.days || []).map(function (d, i) {
+      var rows = (d.timeline || []).map(function (r) {
+        if (r.kind === 'leave') return '<li><span class="tm">' + esc(r.at) + '</span><span class="tx"><b>Leave</b><span>' + esc(r.place || '') + '</span></span></li>';
+        if (r.kind === 'stop') return '<li><span class="tm">' + esc(r.arrive) + '<small>' + esc(r.leave || '') + '</small></span><span class="tx"><b>' + esc(r.name || '') + '</b></span></li>';
+        if (r.kind === 'drive') return '<li><span class="tm"></span><span class="tx"><span>Drive' + (r.km ? ' · ' + km(r.km) : '') + (r.min ? ' · about ' + Math.floor(r.min / 60) + ' h ' + ('0' + r.min % 60).slice(-2) : '') + '</span></span></li>';
+        if (r.kind === 'lunch') return '<li><span class="tm">' + esc(r.from) + '</span><span class="tx"><b>Lunch</b></span></li>';
+        if (r.kind === 'overnight') return '<li><span class="tm">' + esc(r.at) + '</span><span class="tx"><b>Overnight in ' + esc(r.town) + '</b>' + (d.overnight && d.overnight.lodging && d.overnight.lodging.name ? '<span>' + esc(d.overnight.lodging.name) + '</span>' : '') + '</span></li>';
+        if (r.kind === 'return') return '<li><span class="tm">' + esc(r.at) + '</span><span class="tx"><b>Back</b><span>' + esc(r.place || '') + '</span></span></li>';
+        return '';
+      }).join('');
+      return '<section class="card day"><h2><span>Day ' + (i + 1) + '</span><small>' + dd(d.date) + '</small></h2><ol class="tl">' + rows + '</ol></section>';
+    }).join('');
+  }
+  function group(t) {
+    $('t').textContent = t.name || 'Trip'; document.title = (t.name || 'Trip') + ' · RAFIKI';
+    $('s').innerHTML = range(t.from, t.to) + (t.destination ? ' · ' + esc(t.destination) : '');
+    var h = (t.summary ? '<section class="card"><p class="txt">' + esc(t.summary) + '</p></section>' : '') + '<div id="map" role="img" aria-label="Map of the trip"></div>';
+    h += (t.days || []).map(function (d) {
+      return '<section class="card day"><h2><span>' + dd(d.date) + '</span></h2><ol class="tl">' + (d.items || []).map(function (i) {
+        var f = i.flight, l = i.lodging, sub = [];
+        if (f) sub.push([f.airline, f.number].filter(Boolean).join(' ') + (f.from && f.to ? ' · ' + f.from + ' → ' + f.to : ''));
+        if (l) sub.push([l.address, l.checkIn ? 'check\u2011in ' + dd(l.checkIn) : '', l.checkOut ? 'check\u2011out ' + dd(l.checkOut) : ''].filter(Boolean).join(' · '));
+        if (i.location && i.location.name) sub.push(i.location.name);
+        if (i.notes) sub.push(i.notes);
+        return '<li><span class="tm">' + esc(i.start || '') + (i.end ? '<small>' + esc(i.end) + '</small>' : '') + '</span><span class="tx">' + (KIND[i.kind] ? '<span class="k">' + KIND[i.kind] + '</span>' : '') + '<b>' + esc(i.title || '') + '</b>' +
+          sub.map(function (x) { return '<span>' + esc(x) + '</span>'; }).join('') + (i.projectUrl ? '<span><a href="' + esc(i.projectUrl) + '" target="_blank" rel="noopener">About the project</a></span>' : '') + '</span></li>';
+      }).join('') + '</ol></section>';
+    }).join('');
+    if (t.packing) h += '<section class="card"><h2>Packing list</h2><p class="txt">' + esc(t.packing) + '</p></section>';
+    if (t.expect) h += '<section class="card"><h2>What to expect</h2><p class="txt">' + esc(t.expect) + '</p></section>';
+    if ((t.emergency || []).length) h += '<section class="card sos"><h2>Emergency contacts</h2><ul>' + t.emergency.map(function (e) { return '<li><span><b>' + esc(e.name) + '</b>' + (e.role ? ' · ' + esc(e.role) : '') + '</span>' + (e.phone ? '<a class="nw" href="tel:' + esc(String(e.phone).replace(/\s/g, '')) + '">' + esc(e.phone) + '</a>' : '') + '</li>'; }).join('') + '</ul></section>';
+    return h;
+  }
+  function pins() {
+    var t = data.trip, p = data.kind === 'group' ? t.map || [] : t.stops || [];
+    return p.filter(function (x) { return x && x.lat != null && x.lng != null; });
+  }
+  function drawMap() {
+    var el = $('map'); if (!el || !window.L) return;
+    var p = pins(); if (!p.length) { el.remove(); return; }
+    if (map) { try { map.remove(); } catch (e) {} }
+    map = L.map(el, { scrollWheelZoom: false, zoomControl: true });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '© OpenStreetMap contributors' }).addTo(map);
+    (data.trip.legs || data.trip.geometry || []).forEach(function (g) { var line = g.geometry || g; if (line && line.length > 1) L.polyline(line, { color: '#0A78C2', weight: 4, opacity: .8 }).addTo(map); });
+    p.forEach(function (x, i) { L.marker([x.lat, x.lng], { icon: L.divIcon({ className: 'mk', html: String(i + 1), iconSize: [26, 26] }), title: x.name }).addTo(map).bindPopup(esc(x.name)); });
+    if (p.length > 1) map.fitBounds(p.map(function (x) { return [x.lat, x.lng]; }), { padding: [24, 24], maxZoom: 13 }); else map.setView([p[0].lat, p[0].lng], 12);
+  }
+  // add to home screen: the phone's own prompt where there is one, otherwise how to do it
+  var deferred = null;
+  addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); deferred = e; a2hs(); });
+  function a2hs() {
+    var box = $('a2'); if (!box) return; var off = false; try { off = localStorage.getItem('rfTripA2hs') === '1'; } catch (e) {}
+    var standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+    if (off || standalone || !/Android|iPhone|iPad|Mobile/i.test(navigator.userAgent)) { box.innerHTML = ''; return; }
+    var ios = /iPhone|iPad/i.test(navigator.userAgent);
+    box.innerHTML = '<div class="a2hs"><span style="flex:1 1 auto"><b>Add to home screen</b>' + (deferred ? 'Keep this trip one tap away.' : ios ? 'Tap the Share button, then “Add to Home Screen”.' : 'Open your browser’s menu, then “Add to Home screen”.') + '</span>' +
+      (deferred ? '<button type="button" id="a2go">Add</button>' : '') + '<button type="button" class="x" id="a2x" aria-label="Hide">✕</button></div>';
+    if ($('a2go')) $('a2go').onclick = function () { deferred.prompt(); deferred = null; a2hs(); };
+    $('a2x').onclick = function () { try { localStorage.setItem('rfTripA2hs', '1'); } catch (e) {} a2hs(); };
+  }
+  function render() {
+    var t = data.trip || {};
+    $('m').innerHTML = '<div id="a2"></div>' + (data.kind === 'group' ? group(t) : field(t)) + '<div class="btns"><button type="button" onclick="print()">Save as PDF</button></div>';
+    $('u').textContent = data.updated ? 'Last changed ' + dd(data.updated) + ', ' + new Date(data.updated).toTimeString().slice(0, 5) : '';
+    drawMap(); a2hs();
+  }
+  function load() {
+    if (!tok) { $('m').innerHTML = '<p class="msg">This link is missing its code. Ask the trip leader to send it again.</p>'; return; }
+    fetch('/api/trip-share?t=' + encodeURIComponent(tok), { headers: Object.assign({ Accept: 'application/json' }, etag ? { 'If-None-Match': etag } : {}), cache: 'no-cache' }).then(function (r) {
+      if (r.status === 304) return null;
+      etag = r.headers.get('ETag') || '';
+      return r.json().then(function (j) { j.status = r.status; return j; });
+    }).then(function (j) {
+      if (!j) return;
+      if (!j.ok) { if (!data) $('m').innerHTML = '<p class="msg">' + (j.reason === 'rate' ? 'Too many tries from this connection. Please wait a minute and try again.' : 'This link isn’t working any more. Ask the trip leader for a new one.') + '</p>'; return; }
+      data = j; render();
+    }, function () { if (!data) $('m').innerHTML = '<p class="msg">No connection. Check your signal and try again.</p>'; });
+  }
+  load();
+  setInterval(function () { if (document.visibilityState === 'visible') load(); }, 60000);
+  document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') load(); });
+})();
+</script>
+</body>
+</html>
