@@ -120,7 +120,8 @@ fun mailCount(ov: MlOverview, audience: String, picks: Collection<String>): Pair
     return n to skip
 }
 /** "e-mail" never splits at its hyphen. */
-fun mailNb(s: String) = s.replace("e-mail", "e‑mail").replace("E-mail", "E‑mail")
+// a plain hyphen glued to the next letter with a word joiner (Montserrat has no U+2011 non-breaking hyphen, so that one drew wrong)
+fun mailNb(s: String) = s.replace("e-mail", "e-⁠mail").replace("E-mail", "E-⁠mail")
 /** A phrase whose number keeps its word and whose last two words stay together. */
 private fun keep(s: String) = s.replaceFirst(Regex("^(\\S+) "), "$1 ").replace(Regex(" (\\S+)$"), " $1")
 fun mailSkipText(skip: Map<String, Int>): List<String> = buildList {
@@ -488,7 +489,7 @@ fun MailPreview(subject: String, body: String, donor: Boolean, by: String, butto
                 if (cta != null) Box(Modifier.padding(top = 16.dp).fillMaxWidth().clip(RoundedCornerShape(99.dp)).background(fg).padding(vertical = 13.dp), contentAlignment = Alignment.Center) {
                     Text("$cta  →", color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
                 }
-                if (donor) Text(if (button != null && link) "Your private project page: open it here. Please don’t forward it." else "Questions? Just reply to this e‑mail.", color = grey, fontSize = 12.sp, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 10.dp).fillMaxWidth())
+                if (donor) Text(if (button != null && link) "Your private project page: open it here. Please don’t forward it." else "Questions? Just reply to this e-⁠mail.", color = grey, fontSize = 12.sp, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 10.dp).fillMaxWidth())
             }
         }
         Text(if (donor) "You get this because you support RAFIKI Outreach projects. Unsubscribe" else "You get this because you are on the RAFIKI Pin team.", color = Color(0xFF6B7680), fontSize = 11.sp, textAlign = TextAlign.Center, modifier = Modifier.padding(vertical = 10.dp).fillMaxWidth())

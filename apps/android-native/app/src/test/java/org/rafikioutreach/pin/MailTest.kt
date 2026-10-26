@@ -131,7 +131,9 @@ class MailTest {
         assertEquals(2, mailCount(ov, "admins", emptyList()).first); assertEquals(3 to 1, mailCount(ov, "team", emptyList()).let { it.first to it.second["no-email"] })
         assertEquals("Hello Grace, Grace Wanjiru", mailPersonalise("Hello {first}, {NAME}", "Grace Wanjiru")); assertEquals("Hi friend", mailPersonalise("Hi {first}", ""))
         assertEquals(listOf("p" to listOf("Dear A,"), "p" to listOf("One"), "ul" to listOf("a", "b")), mailBlocks("Dear A,\n\nOne\n- a\n- b"))
-        assertEquals(listOf("1 unsubscribed is skipped", "2 without an e‑mail"), mailSkipText(mapOf("unsub" to 1, "no-email" to 2)))
+        assertEquals(listOf("1 unsubscribed is skipped", "2 without an e-⁠mail"), mailSkipText(mapOf("unsub" to 1, "no-email" to 2)))
+        // Montserrat has no U+2011, so e-mail must never use it (it drew as a faint dash: "e mail")
+        assertTrue(!mailNb("Send an e-mail").contains('\u2011') && mailNb("Send an e-mail").contains("e-\u2060mail"))
         assertTrue(mailWhy("day-cap", JSONObject().put("left", 12)).contains("12 left today"))
         assertEquals(2, ov.log.size); assertEquals(false, ov.log[0].rcpt[1].ok)
     }

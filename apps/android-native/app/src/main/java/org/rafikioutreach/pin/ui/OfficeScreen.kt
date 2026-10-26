@@ -103,7 +103,7 @@ fun OfficeScreen(m: AppModel, open: (String) -> Unit) {
         Triple("sms", t("Community", "Jamii"), "chat"),
         Triple("donors", t("Donors", "Wafadhili"), "link"),
         Triple("qr", t("QR codes", "Misimbo ya QR"), "qr"), // QR check-in stickers (QrCheckin.kt)
-        Triple("mail", t("Send an e\u2011mail", "Tuma barua pepe"), "mail"), // Office › Send an e-mail (Mail.kt)
+        Triple("mail", t("Send an e-\u2060mail", "Tuma barua pepe"), "mail"), // Office › Send an e-mail (Mail.kt)
     )
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
         Text(t("Office", "Ofisi"), style = MaterialTheme.typography.headlineLarge, color = C.ink, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.fillMaxWidth())
