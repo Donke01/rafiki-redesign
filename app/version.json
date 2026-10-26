@@ -1,8 +1,8 @@
 {
   "ok": true,
-  "versionCode": 46,
-  "versionName": "2.21.0",
-  "notes": "Tap any person for their contact card: e-mail, call, WhatsApp, change their details, set or reset a PIN, make admin, block or sign them out of every phone. Donors have the same card.",
-  "sha256": "c099b4a65242216daf0e9e2cd51cb2c005876f516cba4f4ac151509762bbba07",
+  "versionCode": 47,
+  "versionName": "2.22.0",
+  "notes": "Fixes: donor screens no longer crash; contact sheet buttons fit their labels; prices follow your home country.",
+  "sha256": "6f0b21be4dc62d73312d23049bfb3eaea468f56e29cfde9381c7c33276d35aeb",
   "apk": "/app/rafiki-pin.apk"
 }
