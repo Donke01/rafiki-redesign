@@ -378,6 +378,106 @@ html[data-theme=sun] .ct-list,html[data-theme=sun] .ct-ids{border:2px solid #000
 .tm-inv .tm-go{margin-top:12px}.tm-inv .dqm-shd h3{text-wrap:balance}.tm-nopin{background:var(--hb-amber)}.tm-nopin svg{color:#B07D00}
 .tm-sh2,.pin-sh{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.tm-sh2 .btn{flex:1 1 0;white-space:nowrap}.pin-sh .btn{white-space:nowrap}.tm-sh2 svg,.pin-sh svg{width:18px;height:18px}
 #ttBody .av[data-mate],#ttBody b[data-mate]{cursor:pointer}
+/* Office › Team, from the Figma design: a navy hero with numbers, search, filter chips, person cards with Call / WhatsApp */
+.tm-hero{position:relative;overflow:hidden;margin:0 0 14px;padding:22px 20px 20px;border-radius:28px;color:#FFFFFF;
+  background:radial-gradient(120% 90% at 100% 0%,rgba(47,155,230,.55) 0%,rgba(47,155,230,0) 60%),linear-gradient(160deg,#0B4F80 0%,#063559 55%,#04263F 100%);box-shadow:0 14px 34px rgba(4,38,63,.22);animation:tmIn .6s cubic-bezier(.34,1.3,.64,1) both}
+.tm-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.12) 50%,transparent 65%);transform:translateX(-100%);animation:tmSheen 5.5s ease-in-out 1s infinite;pointer-events:none}
+@keyframes tmSheen{0%,70%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.tm-ht{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.tm-eb{display:block;font-size:.72rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#9FD3F7}
+.tm-hero h2{margin:4px 0 2px;font-size:1.75rem;line-height:1.15;font-weight:800;color:#FFFFFF}
+.tm-hero p{margin:0;font-size:.92rem;color:rgba(255,255,255,.82)}
+.tm-faces{display:flex;flex:none;padding-top:6px}.tm-faces .tm-av{width:40px;height:40px;font-size:.8rem;border:2.5px solid #063559;margin-left:-12px;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+.tm-faces .tm-av:first-child{margin-left:0}.tm-faces .tm-av.more{background:#FFFFFF;color:#04263F}
+.tm-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:18px 0 16px}
+.tm-stat{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-height:62px;padding:10px 8px 9px 10px;border:1px solid rgba(255,255,255,.18);border-radius:16px;background:rgba(255,255,255,.1);color:#FFFFFF;font:inherit;text-align:left;cursor:pointer;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);transition:background-color .2s,transform .2s cubic-bezier(.34,1.56,.64,1)}
+.tm-stat:hover{background:rgba(255,255,255,.18)}.tm-stat:active{transform:scale(.95)}.tm-stat[aria-pressed=true]{background:#FFFFFF;color:#04263F}
+.tm-stat:focus-visible{outline:3px solid #9FD3F7;outline-offset:2px}
+.tm-stat b{display:flex;align-items:center;gap:6px;font-size:1.45rem;line-height:1.1;font-weight:800}
+.tm-stat small{font-size:.7rem;line-height:1.2;font-weight:600;opacity:.85;max-width:100%;overflow-wrap:normal;word-break:normal;hyphens:none}
+.tm-stat .d{width:8px;height:8px;border-radius:50%;flex:none}.d.g{background:#3DDC84}.d.b{background:#7CC4F5}.d.a{background:#F5B342}.d.r{background:#FF6B5E}
+.tm-stat .d.g{animation:tmBeat 2s ease-in-out infinite}
+@keyframes tmBeat{0%,100%{box-shadow:0 0 0 0 rgba(61,220,132,.6)}50%{box-shadow:0 0 0 5px rgba(61,220,132,0)}}
+.tm-add{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:54px;border:0;border-radius:99px;background:#FFFFFF;color:#0A78C2;font:inherit;font-size:1.02rem;font-weight:800;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.18);transition:transform .25s cubic-bezier(.34,1.56,.64,1)}
+.tm-add svg{width:22px;height:22px}.tm-add:hover{transform:translateY(-1px)}.tm-add:active{transform:scale(.97)}.tm-add:focus-visible{outline:3px solid #9FD3F7;outline-offset:3px}
+.tm-find{position:relative;display:block;margin:0}.tm-find svg{position:absolute;left:18px;top:50%;width:20px;height:20px;margin-top:-10px;color:var(--muted);pointer-events:none}
+.tm-find input{width:100%;min-height:54px;margin:0;padding-left:50px;border:var(--bw) solid var(--line);border-radius:99px;background:var(--card);font-size:1rem}
+.tm-find input:focus{border-color:var(--blue);box-shadow:0 0 0 4px var(--tint)}
+.tm-chips{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 2px}
+.tm-chip{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 8px 0 16px;border:var(--bw) solid var(--line);border-radius:99px;background:var(--card);color:var(--ink);font:inherit;font-size:.92rem;font-weight:700;cursor:pointer;transition:background-color .2s,color .2s,transform .2s cubic-bezier(.34,1.56,.64,1)}
+.tm-chip .n{min-width:24px;padding:2px 7px;border-radius:99px;background:var(--hb-slate);color:var(--hu-slate);font-size:.74rem;font-weight:800;text-align:center}
+.tm-chip:active{transform:scale(.95)}.tm-chip[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:var(--card)}.tm-chip[aria-pressed=true] .n{background:var(--card);color:var(--ink)}
+.tm-chip:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.tm2 .tm-list{grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:12px}
+.tm-card{display:flex;flex-direction:column;border:var(--bw) solid var(--line);border-radius:24px;background:var(--card);overflow:hidden;box-shadow:0 2px 10px rgba(4,38,63,.05);
+  animation:tmIn .52s cubic-bezier(.34,1.4,.64,1) both;animation-delay:calc(var(--i,0) * 45ms);transition:box-shadow .2s,border-color .2s,transform .25s cubic-bezier(.34,1.56,.64,1)}
+.tm-card:hover{border-color:var(--blue);box-shadow:0 10px 26px rgba(4,38,63,.1);transform:translateY(-2px)}
+.tm-card[hidden]{display:none}.tm-list.still .tm-card{animation:none}
+.tm-card .tm-row{min-height:88px;padding:14px 14px 14px 16px;border:0;border-radius:0;background:none;animation:none;gap:14px}
+.tm-card .tm-row:hover{box-shadow:none;border:0}
+.tm-card .tm-nm{font-size:1.06rem}
+.tm-card .tm-seen{margin:2px 0 0;font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tm-role{color:var(--text);font-weight:600}
+.tm-card .tm-tags{margin-top:7px}
+.tm-card.st-blk{border-color:color-mix(in srgb,var(--bad) 40%,var(--line));background:color-mix(in srgb,var(--badbg) 55%,var(--card))}
+.tm-card.st-blk .tm-seen{color:var(--bad)}
+.tm-blk{display:flex;align-items:center;gap:8px;min-height:44px;padding:8px 16px;border-top:1px solid color-mix(in srgb,var(--bad) 30%,var(--line));color:var(--bad);font-size:.86rem;font-weight:700}.tm-blk svg{width:18px;height:18px;flex:none}
+.tm-acts{display:flex;align-items:center;gap:8px;padding:10px 14px 12px;border-top:1px solid var(--line)}
+.tm-cq{display:inline-flex;align-items:center;gap:7px;min-height:44px;padding:0 16px;border-radius:99px;background:var(--hb-green);color:var(--hu-green);font-weight:800;font-size:.9rem;text-decoration:none;transition:transform .2s cubic-bezier(.34,1.56,.64,1),background-color .2s}
+.tm-cq svg{width:18px;height:18px}.tm-cq:active{transform:scale(.94)}.tm-cq:hover{filter:brightness(.97)}
+.tm-cq.wa{background:var(--vxwab);color:var(--vxwa)}
+.tm-cq:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.tm-tel{flex:1;min-width:0;text-align:right;font-size:.8rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tm2 .tm-av{width:56px;height:56px;font-size:1.05rem}
+.tm-av.st-today{box-shadow:0 0 0 2.5px var(--card),0 0 0 4.5px var(--hu-green)}
+.tm-av .dot{position:absolute;right:0;bottom:1px;width:14px;height:14px;border-radius:50%;border:2.5px solid var(--card);background:#AEB8C1}
+.tm-av.st-today .dot{background:#22B566}.tm-av.st-week .dot{background:#F0A630}.tm-av.st-blk .dot{background:#D93A2E}
+.tm-av .cr{right:auto;left:-6px;top:-7px}
+.tm2 .tm-faces .tm-av{width:40px;height:40px;font-size:.8rem}
+.tm-none{padding:24px 8px;text-align:center;color:var(--muted)}
+.tm-mcard{border-radius:24px}
+.tm-to{display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin:12px 0 4px}
+.tm-to span{display:inline-flex;align-items:center;gap:6px;max-width:100%;padding:4px 10px;border-radius:99px;background:var(--hb-slate);color:var(--ink);font-size:.8rem;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.tm-to svg{width:14px;height:14px;flex:none}
+.tm-test{display:inline-flex;align-items:center;gap:8px;min-height:46px;margin-top:10px;padding:0 18px;border:0;border-radius:99px;background:var(--tint);color:var(--blue);font:inherit;font-weight:800;cursor:pointer}.tm-test svg{width:18px;height:18px}
+.tm-test:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+html[data-theme=dark] .tm-hero{box-shadow:none;border:1px solid #1E4A6E}
+html[data-theme=dark] .tm-card{box-shadow:none}html[data-theme=dark] .tm-card:hover{box-shadow:none}
+html[data-theme=sun] .tm-hero{background:#002A57;border:2px solid #000;box-shadow:none}html[data-theme=sun] .tm-hero::after{display:none}
+html[data-theme=sun] .tm-stat{background:#00396F;border:2px solid #FFFFFF}html[data-theme=sun] .tm-stat[aria-pressed=true]{background:#FFFFFF;color:#000}
+html[data-theme=sun] .tm-card,html[data-theme=sun] .tm-chip,html[data-theme=sun] .tm-find input{border:2px solid #000;box-shadow:none}
+html[data-theme=sun] .tm-cq{border:2px solid currentColor}
+@media (max-width:370px){.tm-stat small{font-size:.66rem}.tm-stat b{font-size:1.25rem}.tm-hero h2{font-size:1.5rem}}
+@media (prefers-reduced-motion: reduce){.tm-hero,.tm-hero::after,.tm-card,.tm-stat .d.g{animation:none !important}.tm-card,.tm-stat,.tm-chip,.tm-cq,.tm-add{transition:none !important}}
+/* the person sheet, from the Figma design: a soft banner, a big face, quick Call / WhatsApp / SMS / Share tiles, cards */
+.ct{position:relative;--cx:18px;--cy:6px}
+@media (min-width:700px){.ct{--cx:22px;--cy:26px}}
+.ct-ban{height:118px;margin:calc(-1 * var(--cy) - 22px) calc(-1 * var(--cx)) -74px;background:linear-gradient(120deg,var(--hb-green) 0%,var(--hb-teal) 45%,var(--hb-blue) 100%);background-size:200% 100%;animation:ctBan 9s ease-in-out infinite alternate}
+@media (min-width:700px){.ct-ban{margin-top:calc(-1 * var(--cy))}}
+@keyframes ctBan{to{background-position:100% 0}}
+.tsh-p:has(.ct-ban){background:linear-gradient(120deg,var(--hb-green),var(--hb-teal) 45%,var(--hb-blue)) top/100% 40px no-repeat,var(--card)}
+html[data-theme=sun] .tsh-p:has(.ct-ban){background:linear-gradient(#DCEBFF,#DCEBFF) top/100% 40px no-repeat,#FFFFFF}
+.ct-hd{position:relative;padding-top:0}
+.ct-hd .tm-av{width:104px;height:104px;font-size:2rem;border:4px solid var(--card);box-sizing:border-box;box-shadow:0 8px 22px rgba(4,38,63,.14)}
+.ct-hd .tm-av.st-today{box-shadow:0 0 0 3px var(--hu-green),0 8px 22px rgba(4,38,63,.14)}
+.ct-hd .tm-av .dot{width:20px;height:20px;right:4px;bottom:4px;border-width:3px}
+.ct-hd .tm-av .cr{width:30px;height:30px;left:-2px;top:-2px}
+.ct-hd h3{font-size:1.6rem;font-weight:800;margin-top:8px}
+.ct-st.on{display:inline-flex;align-items:center;gap:6px;color:var(--hu-green);font-weight:700}.ct-st .d{width:8px;height:8px;border-radius:50%;background:#22B566;flex:none;animation:tmBeat 2s ease-in-out infinite}
+.ct-qk{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:16px 0 0}.ct-qk.n5{grid-template-columns:repeat(5,minmax(0,1fr))}.ct-qk.n1{grid-template-columns:1fr}.ct-qk.n1 .ct-qt{flex-direction:row;min-height:56px;padding:6px 14px}.ct-qk.n1 .ct-qi{width:36px;height:36px}.ct-qk.n2{grid-template-columns:repeat(2,1fr)}
+.ct-qt{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:88px;padding:12px 4px 10px;border:var(--bw) solid var(--line);border-radius:20px;background:var(--hb-slate);color:var(--ink);font:inherit;text-decoration:none;cursor:pointer;transition:transform .22s cubic-bezier(.34,1.56,.64,1),box-shadow .2s}
+.ct-qt:hover{box-shadow:0 6px 16px rgba(4,38,63,.1)}.ct-qt:active{transform:scale(.94)}.ct-qt:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.ct-qt b{font-size:.8rem;font-weight:800;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.ct-qi{display:flex;align-items:center;justify-content:center;width:46px;height:46px;border-radius:50%;background:var(--card);color:var(--ink)}.ct-qi svg{width:22px;height:22px}
+.ct-qt.call .ct-qi{background:#1C7C4A;color:#FFFFFF}.ct-qt.wa .ct-qi{background:#25D366;color:#FFFFFF}.ct-qt.sms .ct-qi{background:var(--hb-teal);color:var(--hu-teal)}.ct-qt.mail .ct-qi{background:var(--hb-blue);color:var(--hu-blue)}
+.ct .ct-ids{margin-top:12px}
+.ct .ct-g{margin-top:14px;padding:14px 12px 8px;border:var(--bw) solid var(--line);border-radius:22px;background:var(--card);box-shadow:0 2px 10px rgba(4,38,63,.04)}
+.ct .ct-g h4{margin:0 4px 8px}
+.ct .ct-g .ct-list{border:0;border-radius:0;background:none}
+.ct .ct-g .ct-r{border-top:0;border-radius:14px;padding-left:6px}
+.ct .ct-g .tm-work{margin:0 0 6px}
+html[data-theme=dark] .ct-qt:hover,html[data-theme=dark] .ct .ct-g{box-shadow:none}
+html[data-theme=sun] .ct-ban{background:#DCEBFF;animation:none}html[data-theme=sun] .ct-qt,html[data-theme=sun] .ct .ct-g{border:2px solid #000}
+html[data-theme=sun] .ct-qt.call .ct-qi{background:#00562A}html[data-theme=sun] .ct-qt.wa .ct-qi{background:#00562A}
+@media (prefers-reduced-motion: reduce){.ct-ban,.ct-st .d{animation:none !important}.ct-qt{transition:none !important}}
 @media (prefers-reduced-motion: reduce){.tm-row,.tm-hd .tm-av,.tm-ask,.tsh .pinbox{animation:none !important}.tsh-p,.tsh-bg,.tm-sw i,.tm-sw i::after,.tm-row{transition:none !important}}
 .xbtns{display:flex;flex-direction:column;gap:8px}
 .xbtns .btn{justify-content:flex-start}
@@ -7458,7 +7558,14 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
   var TM_HUES = ['blue', 'green', 'purple', 'teal', 'coral', 'slate'];
   var TM_SRC = { app: ['PIN from app', 'key', 'PIN ya programu'], cloudflare: ['Website PIN', 'cloud', 'PIN ya tovuti'], monday: ['monday.com', 'people'] };
   function tmHue(n) { var h = 7; String(n || '').toLowerCase().split('').forEach(function (c) { h = (h * 31 + c.charCodeAt(0)) >>> 0; }); return TM_HUES[h % TM_HUES.length]; }
-  function tmAv(p) { var h = tmHue(p.name); return '<span class="tm-av" style="--hu:var(--hu-' + h + ');--hb:var(--hb-' + h + ')" aria-hidden="true">' + esc(initials(p.name)) + (p.admin ? '<i class="cr">' + CROWN + '</i>' : '') + '</span>'; }
+  // status from the last time they used the app: today (green), this week (amber), invited / not yet (grey), blocked (red)
+  function tmState(p) {
+    if (p.blocked) return 'blk';
+    var t = Date.parse(p.lastSeen || ''); if (isNaN(t)) return 'inv';
+    if (dayKey(t) === dayKey(Date.now())) return 'today';
+    return Date.now() - t < 7 * 864e5 ? 'week' : 'old';
+  }
+  function tmAv(p, st) { var h = tmHue(p.name); st = st || ''; return '<span class="tm-av' + (st ? ' st-' + st : '') + '" style="--hu:var(--hu-' + h + ');--hb:var(--hb-' + h + ')" aria-hidden="true">' + esc(initials(p.name)) + (p.admin ? '<i class="cr">' + CROWN + '</i>' : '') + (st ? '<i class="dot"></i>' : '') + '</span>'; }
   function tmTags(p, long) {
     var s = TM_SRC[p.source] || TM_SRC.app;
     return '<span class="tm-tags">' + (p.admin ? '<span class="tm-t adm">' + CROWN + tr('Admin', 'Msimamizi') + '</span>' : '') + '<span class="tm-t s-' + esc(p.source || 'app') + '">' + oic(s[1]) + tr(s[0], s[2]) + '</span>' +
@@ -7467,35 +7574,68 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
   function tmSeen(p) { return p.lastSeen ? tr('Last active ', 'Alitumia mwisho ') + esc(since(p.lastSeen)) : tr('Not signed in yet', 'Bado hajaingia'); }
   function tmHomes(sel) { return '<option value="">' + tr('All countries', 'Nchi zote') + '</option>' + ['ke', 'tz', 'ug', 'mw'].map(function (c) { return '<option value="' + c + '"' + (sel === c ? ' selected' : '') + '>' + CNAME[c] + '</option>'; }).join(''); }
   function tmSwitch(on) { return '<button type="button" class="tm-sw" role="switch" aria-checked="' + !!on + '" data-f="admin"><span class="ic">' + CROWN + '</span><span><b>' + tr('Admin', 'Msimamizi') + '</b><small>' + tr('Sees the Office tab and can manage the team', 'Anaona Ofisi na anaweza kusimamia timu') + '</small></span><i aria-hidden="true"></i></button>'; }
+  var TMF = { f: 'all', q: '' };
   function oTeam(b, quiet) {
     var all = (O.team || []).slice().sort(function (a, z) { return a.name.localeCompare(z.name); }), i = 0;
+    all.forEach(function (p) { p._st = tmState(p); });
     var adm = all.filter(function (p) { return p.admin; }), fld = all.filter(function (p) { return !p.admin; });
-    var row = function (p) {
-      return '<button type="button" class="tm-row" data-who="' + esc(p.name) + '" style="--i:' + Math.min(i++, 12) + '" aria-label="' + esc(p.name) + (p.admin ? ', ' + tr('admin', 'msimamizi') : '') + '">' + tmAv(p) +
-        '<span class="tm-mid"><b class="tm-nm">' + esc(p.name) + '</b>' + tmTags(p) + '<small class="tm-seen">' + tmSeen(p) + '</small></span><span class="tm-chev" aria-hidden="true">' + oic('chev') + '</span></button>';
+    var cnt = function (f) { return all.filter(function (p) { return tmIs(p, f); }).length; };
+    var nT = cnt('today'), nW = all.filter(function (p) { return p._st === 'today' || p._st === 'week'; }).length, nI = cnt('inv'), nB = cnt('blk');
+    if (TMF.f !== 'all' && !cnt(TMF.f)) TMF.f = 'all';
+    var card = function (p) {
+      var tel = tmTel(p), st = p._st, bl = p.blocked && typeof p.blocked === 'object' ? p.blocked : null;
+      var seen = st === 'inv' ? (ctSrc(p) === 'app' ? tr('Invited · hasn’t signed in yet', 'Amealikwa · bado hajaingia') : tr('Not signed in yet', 'Bado hajaingia')) : tmSeen(p);
+      return '<div class="tm-card st-' + st + '" data-who="' + esc(p.name) + '" style="--i:' + Math.min(i++, 12) + '">' +
+        '<button type="button" class="tm-row" data-who="' + esc(p.name) + '" aria-label="' + esc(p.name) + (p.admin ? ', ' + tr('admin', 'msimamizi') : '') + '">' + tmAv(p, st) +
+        '<span class="tm-mid"><b class="tm-nm">' + esc(p.name) + '</b><small class="tm-seen">' + (p.role ? '<span class="tm-role">' + esc(p.role) + '</span> · ' : '') + seen + '</small>' + tmTags(p, true) + '</span><span class="tm-chev" aria-hidden="true">' + oic('chev') + '</span></button>' +
+        (p.blocked ? '<div class="tm-blk">' + oic('ctBlock') + '<span>' + (bl && bl.by ? esc(tr('Blocked by ' + bl.by, 'Amezuiwa na ' + bl.by)) : tr('Blocked', 'Amezuiwa')) + ' · ' + tr('can’t sign in', 'hawezi kuingia') + '</span></div>'
+          : tel ? '<div class="tm-acts"><a class="tm-cq call" href="tel:' + esc(tel) + '" aria-label="' + esc(tr('Call ', 'Mpigie ') + p.name) + '">' + oic('phone') + '<span>' + tr('Call', 'Piga') + '</span></a>' +
+            '<a class="tm-cq wa" href="https://wa.me/' + waNum(p.phone, p.home) + '" target="_blank" rel="noopener" aria-label="' + esc('WhatsApp ' + p.name) + '">' + oic('vxwa') + '<span>WhatsApp</span></a><span class="tm-tel">' + esc(p.phone) + '</span></div>' : '') + '</div>';
     };
     var sec = function (k, title, ic, list) {
       return '<h3 class="tm-sec ' + k + '" data-sec="' + k + '">' + ic + '<span>' + title + '</span><span class="n">' + list.length + '</span></h3><div class="tm-list' + (quiet ? ' still' : '') + '" data-sec="' + k + '">' +
-        (list.length ? list.map(row).join('') : '<p class="tm-empty">' + (k === 'adm' ? tr('No admins yet.', 'Bado hakuna wasimamizi.') : tr('Nobody here yet. Add a person above.', 'Hakuna mtu bado. Ongeza mtu hapo juu.')) + '</p>') + '</div>';
+        (list.length ? list.map(card).join('') : '<p class="tm-empty">' + (k === 'adm' ? tr('No admins yet.', 'Bado hakuna wasimamizi.') : tr('Nobody here yet. Add a person above.', 'Hakuna mtu bado. Ongeza mtu hapo juu.')) + '</p>') + '</div>';
     };
-    b.innerHTML = '<div class="o-grid tm"><div><div class="tm-top"><button class="btn" type="button" id="tmAdd">' + oic('plus') + tr('Add a person', 'Ongeza mtu') + '</button>' +
-      (all.length > 8 ? '<input type="search" id="tmQ" placeholder="' + tr('Find a person', 'Tafuta mtu') + '" aria-label="' + tr('Find a person', 'Tafuta mtu') + '" autocomplete="off">' : '') + '</div>' +
-      sec('adm', tr('Admins', 'Wasimamizi'), CROWN, adm) + sec('fld', tr('Field team', 'Timu ya uwanjani'), oic('people'), fld) + '</div>' +
-      '<div class="o-side"><div class="card"><div class="tm-mail"><span class="ic">' + oic('mail') + '</span><div><h2>' + tr('E-mail alerts', 'Taarifa kwa barua pepe') + '</h2>' +
-      (O.mail && O.mail.ready ? '<p class="muted">' + tr('Alerts go to: ', 'Taarifa zinaenda kwa: ') + '<b>' + esc((O.mail.to || []).join(', ') || tr('nobody yet: add an admin with an e-mail', 'bado hakuna: ongeza msimamizi mwenye barua pepe')) + '</b></p><button class="btn small light" type="button" id="tTest">' + tr('Send a test e-mail', 'Tuma barua pepe ya majaribio') + '</button> <span class="msg" id="tTestMsg" aria-live="polite"></span>'
-        : '<p class="muted">' + tr('Not switched on yet. Whoever looks after the website can turn e-mail alerts on.', 'Bado haijawashwa. Anayesimamia tovuti anaweza kuwasha taarifa kwa barua pepe.') + '</p>' + poTech(tr('Add RESEND_API_KEY and ALERT_FROM in Cloudflare (see the set-up notes).', 'Ongeza RESEND_API_KEY na ALERT_FROM kwenye Cloudflare (angalia maelezo ya kuweka).'))) + '</div></div></div></div></div>';
-    var g = b.querySelector('.o-grid');
-    g.addEventListener('click', function (e) { var r = e.target.closest('.tm-row'); if (r) { buzz(); tmOpen(r.getAttribute('data-who')); } });
-    $('tmAdd').addEventListener('click', function () { buzz(); tmAddOpen(); });
-    if ($('tmQ')) $('tmQ').addEventListener('input', function () {
-      var q = this.value.trim().toLowerCase();
+    var faces = all.filter(function (p) { return p._st === 'today'; }).concat(all.filter(function (p) { return p._st !== 'today'; })).slice(0, 3);
+    var stat = function (f, n, dot, label) { return '<button type="button" class="tm-stat" data-tf="' + f + '" aria-pressed="' + (TMF.f === f) + '"><b><i class="d ' + dot + '"></i>' + n + '</b><small>' + label + '</small></button>'; };
+    var chip = function (f, label, n) { return f !== 'all' && !n ? '' : '<button type="button" class="tm-chip" data-tf="' + f + '" aria-pressed="' + (TMF.f === f) + '">' + label + '<span class="n">' + n + '</span></button>'; };
+    var mail = O.mail && O.mail.ready;
+    b.innerHTML = '<div class="tm2"><section class="tm-hero" aria-label="' + tr('Your team', 'Timu yako') + '"><div class="tm-ht"><div><span class="tm-eb">' + tr('Office', 'Ofisi') + '</span><h2>' + tr('Your team', 'Timu yako') + '</h2>' +
+      '<p>' + (all.length === 1 ? tr('1 person', 'Mtu 1') : tr(all.length + ' people', 'Watu ' + all.length)) + ' · ' + (adm.length === 1 ? tr('1 admin', 'Msimamizi 1') : tr(adm.length + ' admins', 'Wasimamizi ' + adm.length)) + '</p></div>' +
+      '<span class="tm-faces" aria-hidden="true">' + faces.map(function (p) { return tmAv({ name: p.name }); }).join('') + (all.length > 3 ? '<span class="tm-av more">+' + (all.length - 3) + '</span>' : '') + '</span></div>' +
+      '<div class="tm-stats">' + stat('today', nT, 'g', tr('today', 'leo')) + stat('week', nW, 'b', tr('this week', 'wiki hii')) + stat('inv', nI, 'a', tr('invited', 'walioalikwa')) + stat('blk', nB, 'r', tr('blocked', 'waliozuiwa')) + '</div>' +
+      '<button class="tm-add" type="button" id="tmAdd">' + oic('plus') + tr('Add a person', 'Ongeza mtu') + '</button></section>' +
+      '<div class="o-grid tm"><div><label class="tm-find">' + oic('search') + '<input type="search" id="tmQ" value="' + esc(TMF.q) + '" placeholder="' + tr('Find a person, phone or country', 'Tafuta mtu, simu au nchi') + '" aria-label="' + tr('Find a person', 'Tafuta mtu') + '" autocomplete="off"></label>' +
+      '<div class="tm-chips" role="group" aria-label="' + tr('Show', 'Onyesha') + '">' + chip('all', tr('All', 'Wote'), all.length) + chip('today', tr('Active today', 'Hai leo'), nT) + chip('adm', tr('Admins', 'Wasimamizi'), adm.length) + chip('inv', tr('Invited', 'Walioalikwa'), nI) + chip('blk', tr('Blocked', 'Waliozuiwa'), nB) + '</div>' +
+      sec('adm', tr('Admins', 'Wasimamizi'), CROWN, adm) + sec('fld', tr('Field team', 'Timu ya uwanjani'), oic('people'), fld) + '<p class="tm-none" hidden>' + tr('Nobody matches.', 'Hakuna anayelingana.') + '</p></div>' +
+      '<div class="o-side"><div class="card tm-mcard"><div class="tm-mail"><span class="ic">' + oic('mail') + '</span><div><h2>' + tr('E-mail alerts', 'Taarifa kwa barua pepe') + '</h2>' +
+      (mail ? '<p class="muted">' + tr('Repairs and reviews go to these admins', 'Matengenezo na mapitio yanaenda kwa wasimamizi hawa') + '</p></div></div>' +
+          ((O.mail.to || []).length ? '<div class="tm-to">' + O.mail.to.map(function (m) { return '<span>' + oic('mail') + esc(m) + '</span>'; }).join('') + '</div>' : '<p class="muted">' + tr('Nobody yet: add an admin with an e-mail.', 'Bado hakuna: ongeza msimamizi mwenye barua pepe.') + '</p>') +
+          '<button class="tm-test" type="button" id="tTest">' + oic('tmsend') + tr('Send a test e-mail', 'Tuma barua pepe ya majaribio') + '</button> <span class="msg" id="tTestMsg" aria-live="polite"></span>'
+        : '<p class="muted">' + tr('Not switched on yet. Whoever looks after the website can turn e-mail alerts on.', 'Bado haijawashwa. Anayesimamia tovuti anaweza kuwasha taarifa kwa barua pepe.') + '</p>' + poTech(tr('Add RESEND_API_KEY and ALERT_FROM in Cloudflare (see the set-up notes).', 'Ongeza RESEND_API_KEY na ALERT_FROM kwenye Cloudflare (angalia maelezo ya kuweka).')) + '</div></div>') + '</div></div></div></div>';
+    var W = b.firstChild, g = W.querySelector('.o-grid');
+    var show = function () {
+      var q = TMF.q.trim().toLowerCase(), f = TMF.f, any = 0;
+      qa('[data-tf]', W).forEach(function (x) { x.setAttribute('aria-pressed', String(x.getAttribute('data-tf') === f)); });
       qa('.tm-list', g).forEach(function (l) {
-        var n = 0; qa('.tm-row', l).forEach(function (r) { var hit = !q || r.getAttribute('data-who').toLowerCase().indexOf(q) >= 0; r.hidden = !hit; if (hit) n++; });
-        var h = g.querySelector('.tm-sec[data-sec=' + l.getAttribute('data-sec') + ']'); h.querySelector('.n').textContent = n; h.hidden = l.hidden = !!q && !n;
+        var n = 0; qa('.tm-card', l).forEach(function (r) {
+          var p = ctFind(all, r.getAttribute('data-who')) || {}, hay = [p.name, p.phone, tmTel(p), CNAME[p.home], p.role, p.email].join(' ').toLowerCase();
+          var hit = (!q || hay.indexOf(q) >= 0) && tmIs(p, f); r.hidden = !hit; if (hit) n++;
+        });
+        var h = g.querySelector('.tm-sec[data-sec=' + l.getAttribute('data-sec') + ']'); h.querySelector('.n').textContent = n; h.hidden = l.hidden = (!!q || f !== 'all') && !n; any += n;
       });
+      g.querySelector('.tm-none').hidden = !!any || !all.length;
+    };
+    W.addEventListener('click', function (e) {
+      var t = e.target.closest('[data-tf]'); if (t) { buzz(); var f = t.getAttribute('data-tf'); TMF.f = TMF.f === f && f !== 'all' ? 'all' : f; show(); return; }
+      var r = e.target.closest('.tm-row'); if (r) { buzz(); tmOpen(r.getAttribute('data-who')); }
     });
+    $('tmAdd').addEventListener('click', function () { buzz(); tmAddOpen(); });
+    $('tmQ').addEventListener('input', function () { TMF.q = this.value; show(); });
+    if (TMF.q || TMF.f !== 'all') show();
     if ($('tTest')) $('tTest').addEventListener('click', function () { msg('tTestMsg', '', tr('Sending…', 'Inatuma…')); adminApi('POST', { action: 'test-mail' }).then(function (j) { msg('tTestMsg', j.ok ? 'ok' : 'bad', j.ok ? tr('Sent ✓ Check the inbox.', 'Imetumwa ✓ Angalia barua pepe.') : j.reason === 'no-recipients' ? tr('No e-mail addresses yet.', 'Bado hakuna anwani za barua pepe.') : j.reason === 'no-mail' ? tr('E-mail isn’t switched on yet. Whoever looks after the website can turn it on.', 'Barua pepe bado haijawashwa. Anayesimamia tovuti anaweza kuiwasha.') : j.detail ? tr('Not sent. Resend said: ', 'Haijatumwa. Resend imesema: ') + j.detail : why(j)); }); });
   }
+  function tmIs(p, f) { var st = p._st || tmState(p); return f === 'all' || (f === 'adm' ? !!p.admin : f === 'week' ? st === 'today' || st === 'week' : st === f); }
   function tmRedraw() { if (S.view === 'vOffice' && O.tab === 'team') oNeedTeam(function () { oTeam($('oBody'), true); }); }
   // a sheet that springs up from the bottom (a centred card on a wide screen). Tap outside, drag down or Esc closes it.
   function tSheet(label, html) {
@@ -7642,7 +7782,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
     var b = p.blocked;
     if (b && typeof b === 'object') return '<span class="ct-st bad">' + esc(tr('Blocked by ' + (b.by || '') + ' on ' + dDay(b.at, true), 'Amezuiwa na ' + (b.by || '') + ' tarehe ' + dDay(b.at, true))) + '</span>';
     if (b) return '<span class="ct-st bad">' + tr('Blocked', 'Amezuiwa') + '</span>';
-    if (p.lastSeen) return '<span class="ct-st"><span class="nw">' + tr('Active', 'Yuko hai') + '</span> · <span class="nw">' + esc(tr('last seen ', 'alionekana ') + dWhen(p.lastSeen)) + '</span></span>';
+    if (p.lastSeen) return '<span class="ct-st on"><i class="d"></i><span class="nw">' + tr('Active', 'Yuko hai') + '</span> · <span class="nw">' + esc(tr('last seen ', 'alionekana ') + dWhen(p.lastSeen)) + '</span></span>';
     return '<span class="ct-st">' + (ctSrc(p) === 'app' ? tr('Invited · hasn’t signed in yet', 'Amealikwa · bado hajaingia') : tr('Hasn’t signed in yet', 'Bado hajaingia')) + '</span>';
   }
   function ctBadges(p) {
@@ -7677,15 +7817,22 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
     var editable = adm || me;                                      // details: admins, or yourself
     var canName = (adm && app) || (me && app), canMail = (adm && app) || (me && app), canPhone = (adm && app) || me;
     var none = function (t) { return '<span class="ct-none">' + t + '</span>'; };
-    var hd = '<div class="ct-hd">' + tmAv(p) + '<h3>' + esc(p.name) + '</h3>' + (p.role ? '<span class="ct-role">' + esc(p.role) + '</span>' : '') + ctBadges(p) + ctStatus(p) + '</div>' +
-      (p.email || p.phone ? '<div class="ct-ids">' + (p.email ? ctId('email', p.email) : '') + (p.phone ? ctId('phone', p.phone) : '') + '</div>' : '');
-    var contact = ctGroup('contact', tr('Contact', 'Mawasiliano'), [
-      adm && p.email ? ctRow('mail', 'mail', 'blue', tr('Send an e-mail', 'Tuma barua pepe'), esc(p.email)) : '',
-      tel && !me ? ctRow('call', 'phone', 'green', tr('Call', 'Piga simu'), esc(p.phone), { href: 'tel:' + tel }) : '',
-      tel && !me ? ctRow('wa', 'vxwa', 'green', 'WhatsApp', esc(p.phone), { href: 'https://wa.me/' + waNum(p.phone, p.home), ext: true }) : '',
-      tel && !me ? ctRow('sms', 'chat', 'teal', 'SMS', esc(p.phone), { href: 'sms:' + tel }) : '',
-      !me ? ctRow('share', 'ctShare', 'slate', tr('Share contact', 'Shiriki mawasiliano'), tr('Name, phone and e-mail', 'Jina, simu na barua pepe')) : ''
-    ], !tel && !p.email && !me ? '<p class="ct-hint">' + tr('No phone or e-mail yet.', 'Bado hakuna simu wala barua pepe.') + (adm && app ? ' ' + tr('Add them under Details.', 'Viongeze chini ya Maelezo.') : '') + '</p>' : '');
+    var hd = '<div class="ct-ban" aria-hidden="true"></div><div class="ct-hd">' + tmAv(p, tmState(p)) + '<h3>' + esc(p.name) + '</h3>' + (p.role ? '<span class="ct-role">' + esc(p.role) + '</span>' : '') + ctBadges(p) + ctStatus(p) + '</div>';
+    var ids = (p.email || p.phone ? '<div class="ct-ids">' + (p.email ? ctId('email', p.email) : '') + (p.phone ? ctId('phone', p.phone) : '') + '</div>' : '');
+    var qk = function (k, ic, cls, label, href, ext) {
+      var inner = '<span class="ct-qi">' + oic(ic) + '</span><b>' + label + '</b>';
+      return href ? '<a class="ct-qt ' + cls + '" data-ct="' + k + '" data-testid="ct_' + k + '" href="' + esc(href) + '"' + (ext ? ' target="_blank" rel="noopener"' : '') + '>' + inner + '</a>'
+        : '<button type="button" class="ct-qt ' + cls + '" data-ct="' + k + '" data-testid="ct_' + k + '">' + inner + '</button>';
+    };
+    var tiles = [
+      tel && !me ? qk('call', 'phone', 'call', tr('Call', 'Piga'), 'tel:' + tel) : '',
+      tel && !me ? qk('wa', 'vxwa', 'wa', 'WhatsApp', 'https://wa.me/' + waNum(p.phone, p.home), true) : '',
+      tel && !me ? qk('sms', 'chat', 'sms', 'SMS', 'sms:' + tel) : '',
+      adm && p.email ? qk('mail', 'mail', 'mail', tr('E-mail', 'Barua pepe')) : '',
+      !me ? qk('share', 'ctShare', 'share', tr('Share', 'Shiriki')) : ''
+    ].filter(Boolean);
+    var contact = (tiles.length ? '<div class="ct-qk n' + tiles.length + '" data-g="contact">' + tiles.join('') + '</div>' : '') +
+      (!tel && !p.email && !me ? '<p class="ct-hint">' + tr('No phone or e-mail yet.', 'Bado hakuna simu wala barua pepe.') + (adm && app ? ' ' + tr('Add them under Details.', 'Viongeze chini ya Maelezo.') : '') + '</p>' : '');
     var ro = !editable;
     var details = ctGroup('details', tr('Details', 'Maelezo'), [
       ctRow('name', 'ctUser', 'blue', tr('Name', 'Jina'), esc(p.name) + ((p.aka || []).length ? '<span class="ct-aka">' + esc(tr('Before: ', 'Awali: ') + p.aka.join(', ')) + '</span>' : ''), { ro: ro || !canName }),
@@ -7717,7 +7864,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
       (jobs.length ? jobs.slice(0, 6).map(function (k) { var r = S.repairs[k], pr = byId(k); return ctRow('job', 'wrench', 'amber', esc(pr ? pr.title : r.t || k), esc(tr('Repair job · ', 'Kazi ya matengenezo · ') + rrStepTx(r.step))).replace('data-ct="job"', 'data-ct="job" data-id="' + esc(k) + '"'); }).join('')
         : ctRow('nojobs', 'wrench', 'slate', tr('Repair jobs', 'Kazi za matengenezo'), tr('None assigned to them', 'Hakuna aliyopewa'), { ro: true })) +
       '<span data-slot="map"></span></div></section>';
-    c.firstChild.innerHTML = hd + contact + details + access + work;
+    c.firstChild.innerHTML = hd + contact + ids + work + details + access;
     mlHyph(c); c.scrollTop = y;
     if (OFA.tm && adm) ctMapPut();
   }
