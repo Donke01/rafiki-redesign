@@ -31,6 +31,7 @@ import { session, configured, linkToken, linkedFor, unlink, signOut } from '../.
 import { getJson as gj, putJson, team, saveTeam, hashPin, isAdminName, sameName, seen, addReview, sendMail, alertHtml, guards, guardFor } from '../../lib/pin-store.js';
 import { kes, money, estOf, stepAtOrAfter, stepBlocked, approveLimit, askApproval, costRow, addCost, projectCosts, peopleServed, notePeople, snapPeople, monthKey } from '../../lib/pin-office.js';
 import { postHere } from '../../lib/pin-here.js';
+import { chatSys } from '../../lib/chat.js';
 
 const MAX_FAILS = 8; // wrong PINs per connection per hour
 const MAX_SAVES = 120; // changes per connection per hour
@@ -523,6 +524,9 @@ export async function onRequestPost({ request, env, waitUntil }) {
         as.forEach(a => { if (!a.done && a.id === id && sameName(a.to, by)) { a.done = at; ch = true; } });
         if (ch) await putJson(env, 'pinassign', as);
       }
+      // the project's chat thread: a visit that found it not working, or a repair reported
+      if (b.state === 'notworking') later(chatSys(env, id, { type: 'notworking', by }, 'Visit by ' + by + ': not working.', { title, add: [by] }));
+      else if (b.state === 'repair') later(chatSys(env, id, { type: 'repair', by }, 'Repair reported by ' + by + (urg === 'urgent' ? ' (urgent)' : '') + '.', { title, add: [by] }));
       // tell the admins straight away about serious problems
       const why = [];
       if (b.state === 'notworking') why.push('reported NOT WORKING');
@@ -544,6 +548,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
       await setRepair(env, id, null);
       await bump(env, 'rl:pinsave:' + ip);
       await log(env, { by, a: 'fixed', id, t: title });
+      later(chatSys(env, id, { type: 'fixed', by }, 'Marked as fixed by ' + by + '.', { title }));
       return json({ ok: true, id, updateId }, 200);
     }
 
@@ -571,6 +576,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
       if (actual) await addCost(env, id, costRow({ at, rid: job.at, what: clean(b.what, 120) || 'Parts ordered', est: estOf(job), actual, by, step: 'parts', receipt: !!b.receipt }), { t: title });
       await bump(env, 'rl:pinsave:' + ip);
       await log(env, { by, a: 'job', id, t: title, s: 'parts' });
+      later(chatSys(env, id, { type: 'step', step: 'parts', by }, 'Parts ordered, reported by ' + by + '.', { title }));
       return json({ ok: true, id, updateId, job }, 200);
     }
 

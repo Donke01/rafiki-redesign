@@ -36,6 +36,8 @@ export async function onRequest({ request, next, env }) {
     return Response.redirect(url.origin + '/pin' + url.search, 302);
   }
   let res = await next();
+  // a WebSocket (team chat) must go back untouched; copying the response would drop the socket
+  if (res.status === 101 || res.webSocket) return res;
   if (HIDDEN.test(url.hostname)) { res = new Response(res.body, res); res.headers.set('X-Robots-Tag', 'noindex, nofollow'); }
   if (!(res.headers.get('Content-Type') || '').includes('text/html')) return res;
   const rw = new HTMLRewriter();

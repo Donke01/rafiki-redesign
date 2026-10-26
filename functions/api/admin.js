@@ -39,6 +39,7 @@ import { moveLink } from '../../lib/pin-auth.js';
 import { kes, money, estOf, stepBlocked, canDecide, approveLimit, setApproveLimit, askApproval, costRow, addCost, costStats, snapPeople } from '../../lib/pin-office.js';
 import { teamMap, planView, hereKey } from '../../lib/pin-here.js';
 import { donorAdminGet, donorAdminPost, runDigest } from '../../lib/donor.js';
+import { chatSys, chatSync } from '../../lib/chat.js';
 
 const STEPS = { reported: 'Reported', assigned: 'Assigned', parts: 'Parts ordered', fixed: 'Fixed' };
 const CC = ['ke', 'tz', 'ug', 'mw'];
@@ -200,6 +201,11 @@ export async function onRequestPost({ request, env, waitUntil }) {
           Object.assign(job, { step, assignee, due, budget, stepAt: at }); r[id] = job; await log(env, { by, a: 'job', id, t: job.t, s: step });
         }
         await putJson(env, 'pinrepairs', r);
+        // the project's chat thread
+        const later = p => (waitUntil ? waitUntil(p) : p);
+        if (assignee && ch.includes('assigned to ' + assignee)) later(chatSys(env, id, { type: 'assigned', to: assignee, by }, 'Repair assigned to ' + assignee + ' by ' + by + '.', { title: job.t, add: [assignee] }));
+        if (ch.includes('step: ' + STEPS.fixed)) later(chatSys(env, id, { type: 'fixed', by }, 'Marked as fixed by ' + by + '.', { title: job.t }));
+        else if (ch.some(x => x.indexOf('step: ') === 0)) later(chatSys(env, id, { type: 'step', step, by }, 'Repair step: ' + STEPS[step] + ' (by ' + by + ').', { title: job.t }));
         return json({ ok: true, job: step === 'fixed' ? null : job, updateId, held, asked });
       }
       case 'assign': {
@@ -213,6 +219,8 @@ export async function onRequestPost({ request, env, waitUntil }) {
           const a = { aid: crypto.randomUUID().slice(0, 10), id: pid, t: p ? p.title : '', to, date, note, by, at: new Date().toISOString() };
           as.push(a); made.push(a);
           await createUpdate(token, pid, '🗓 Site visit assigned to ' + to + ' for ' + date + ' by ' + by + (note ? '. Notes: ' + said(note) : '.'), api);
+          const cs = chatSys(env, pid, { type: 'assigned', to, by }, 'Site visit assigned to ' + to + ' for ' + date + ' by ' + by + '.', { title: a.t, add: [to] });
+          if (waitUntil) waitUntil(cs);
         }
         const cut = Date.now() - 120 * 864e5;
         await putJson(env, 'pinassign', as.filter(a => !a.done || Date.parse(a.done) > cut).slice(-600));
@@ -243,6 +251,8 @@ export async function onRequestPost({ request, env, waitUntil }) {
       case 'team-add': case 'team-update': case 'team-pin': case 'team-remove': case 'team-rename': case 'team-set-pin':
       case 'team-block': case 'team-unblock': case 'team-signout': case 'team-move': {
         const r = await teamPost(env, b, chk, by);
+        // the Team chats follow the team; blocked, removed or signed-out phones are cut off from chat at once
+        if ((r.status || 200) < 300 && waitUntil) waitUntil(chatSync(env));
         return json(r.body, r.status || 200);
       }
       case 'settings': {
