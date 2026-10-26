@@ -207,13 +207,15 @@ private fun RowScope.CtTile(tag: String, label: String, circle: Color, fg: Color
     val h = rememberHaptics()
     val src = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
     val shape = RoundedCornerShape(20.dp)
-    Column(Modifier.weight(1f).heightIn(min = 88.dp).press(src).clip(shape).background(C.hue("slate").bg).border(if (C.glassy) 1.dp else 2.dp, C.line, shape)
+    Column(Modifier.weight(1f).heightIn(min = 96.dp).press(src).clip(shape).background(C.hue("slate").bg).border(if (C.glassy) 1.dp else 2.dp, C.line, shape)
         .clickable(interactionSource = src, indication = androidx.compose.material3.ripple(), role = Role.Button) { h.tap(); onClick() }.padding(horizontal = 2.dp, vertical = 12.dp).testTag(tag),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
         Box(Modifier.size(46.dp).clip(CircleShape).background(circle), contentAlignment = Alignment.Center) {
             if (brand != null) BrandIcon(brand, 24.dp) else Icon(DqmIc.get(icon), null, tint = fg, modifier = Modifier.size(22.dp))
         }
-        Text(label, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold), color = C.ink, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 8.dp))
+        // shrinks to fit on one line, never cut short with "…" ("WhatsApp", "Barua pepe" with five tiles); the tiles
+        // are tall enough for a full-size label, so a shrunk one doesn't make its tile shorter than the others
+        WordFitText(label, MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold), C.ink, 1, Modifier.padding(top = 8.dp), textAlign = TextAlign.Center)
     }
 }
 
