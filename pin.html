@@ -2367,7 +2367,7 @@ html[data-theme=sun] .dqm-pgh{background:#FFFFFF;border-bottom-width:2px}
 .itw-chip svg{width:14px;height:14px;flex:0 0 auto}.itw-chip.r-ok{background:var(--okbg);color:var(--ok)}.itw-chip.r-warn{background:var(--warnbg);color:var(--warn)}.itw-chip.r-bad{background:var(--badbg);color:var(--bad)}
 .itw-warns{list-style:none;margin:0 0 10px;padding:0;display:flex;flex-direction:column;gap:6px}
 .itw-w{display:flex;flex-wrap:wrap;align-items:flex-start;gap:6px 10px;padding:10px 12px;border-radius:14px;background:var(--warnbg);color:var(--warn);font-size:.84rem;font-weight:600;line-height:1.4}
-.itw-w>svg{width:18px;height:18px;flex:0 0 18px;margin-top:1px}.itw-w>span{flex:1 1 180px;min-width:0}.itw-w .btn{margin-left:28px;min-height:40px;font-size:.82rem}
+.itw-w>svg{width:18px;height:18px;flex:0 0 18px;margin-top:1px}.itw-w>span{flex:1 1 180px;min-width:0}.itw-w>span small{display:block;font-size:.78rem;font-weight:600;opacity:.85;margin-top:2px}.itw-w .btn{margin-left:28px;min-height:40px;font-size:.82rem}
 .itw-w.bad{background:var(--badbg);color:var(--bad)}.itw-w.info{background:var(--hb-slate);color:var(--hu-slate);font-weight:500}
 .itw-tl{list-style:none;margin:0;padding:0;position:relative}
 .itw-tl>li{position:relative;display:flex;gap:10px;padding:6px 0}
@@ -12635,10 +12635,13 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
         var el = $('itwPBest'), ids = P.stops.filter(function (id) { var p = byId(id); return p && p.gps; }); if (!el) return;
         if (!ids.length || !navigator.onLine) { el.innerHTML = ''; return; }
         var n = Math.max(5, Math.min(14, Math.round((dOf(P.to) - dOf(P.from)) / 864e5) + 3));
-        itwApi('GET', '/api/trip/week?ids=' + ids.join(',') + '&start=' + P.from + '&days=' + n).then(function (j) {
+        // the best day per area (each area is one group for the weather check)
+        var by = {}; ids.forEach(function (id) { var a = ofaArea(byId(id)) || '—'; (by[a] = by[a] || []).push(id); }); var ar = Object.keys(by);
+        itwApi('GET', '/api/trip/week?ids=' + ids.join(',') + '&start=' + P.from + '&days=' + n + (ar.length > 1 ? '&groups=' + ar.map(function (a) { return by[a].join(','); }).join('|') : '')).then(function (j) {
           if (!$('itwPBest') || !j.ok || !j.bestDay) return;
-          var bd = j.bestDay, wet = (j.days || []).filter(function (d) { return d.roadLevel === 'heavy' || d.roadLevel === 'wet'; });
+          var bd = j.bestDay, wet = (j.days || []).filter(function (d) { return d.roadLevel === 'heavy' || d.roadLevel === 'wet'; }), gs = ar.length > 1 ? j.groups || [] : [];
           el.innerHTML = oic('itwRain') + '<span>' + tr('Best day for these sites: ', 'Siku bora kwa maeneo haya: ') + '<b class="nw">' + dDay(bd.date) + '</b>' + (bd.roadLevel === 'dry' ? tr(' · dry roads', ' · barabara kavu') : '') +
+            (gs.length ? '<small>' + gs.map(function (g, i) { return g.bestDay ? esc(ar[i]) + ': <span class="nw">' + dDay(g.bestDay.date) + '</span>' : ''; }).filter(Boolean).join(' · ') + '</small>' : '') +
             (wet.length ? '<small>' + tr('Wet murram on ', 'Murram yenye maji ') + wet.slice(0, 3).map(function (d) { return '<span class="nw">' + dDay(d.date) + '</span>'; }).join(', ') + '</small>' : '') + '</span>';
         });
       }, 400);

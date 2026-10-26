@@ -44,7 +44,7 @@ IT = {
             'warnings': [W('ROAD_REPORT', 'caution', 'Potholes reported 3 km before the site by Grace, 12 days ago.', 'Ripoti: Mashimo barabarani, km 3 kabla ya kufika — Grace, siku 12 zilizopita', sid='s2')]},
            {'date': day(1), 'stops': ['s4', 's5'], 'riskLevel': 'difficult', 'weather': {'rainMm': 25, 'roadLevel': 'heavy'},
             'warnings': [W('SWAP_DAY', 'difficult', 'Heavy rain on ' + 'Tuesday on the murram road to Nzoia Bridge. Swap with today?', 'Mvua kubwa Jumanne kwenye barabara ya murram kwenda Nzoia Bridge. Badilisha na leo?', fix={'action': 'swap', 'day': 1, 'with': 0}),
-                         W('AFTER_CLOSE', 'caution', 'Arrives 15:50, after school closes (15:30)', 'Inafika 15:50, baada ya shule kufungwa (15:30)', sid='s5', fix={'action': 'move', 'sid': 's5', 'toDay': 0})]}],
+                         W('AFTER_CLOSE', 'caution', 'Arrives 15:50, after the school closes', 'Inafika 15:50, baada ya shule kufungwa', sid='s5', fix={'action': 'move', 'sid': 's5', 'toDay': 0})]}],
   'unplanned': [], 'warnings': [],
   'legs': {'S>s1': {'min': 25, 'km': 14, 'src': 'trip', 'chips': CH(('12 km tarmac · 2 km murram', 'km 12 lami · km 2 murram'), ('No rain', 'Hakuna mvua'), ('~25 min', '~dak 25')), 'riskLevel': 'ok', 'geometry': [[0.514, 35.27], [0.49, 35.26], [0.47, 35.25]]},
            's1>s2': {'min': 70, 'km': 48, 'src': 'trip', 'chips': CH(('40 km tarmac · 8 km murram', 'km 40 lami · km 8 murram'), ('Rain 6 mm', 'Mvua mm 6'), ('~1 h 10', '~saa 1 dak 10')), 'riskLevel': 'caution', 'roadLevel': 'light',
