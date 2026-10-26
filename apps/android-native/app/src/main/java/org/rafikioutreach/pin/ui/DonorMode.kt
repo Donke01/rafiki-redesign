@@ -483,7 +483,7 @@ private fun DonorProject(m: AppModel, p: DProject, back: () -> Unit) {
         if (p.year > 0) add((if (p.status == "Completed") t("Completed", "Ilikamilika") else t("Started", "Ilianza")) to if (p.done.isNotBlank()) Dates.day(p.done) else "${p.year}")
         if (p.depth > 0) add(t("Depth", "Kina") to "${p.depth} m")
         if (p.pump.isNotBlank()) add(t("Pump", "Pampu") to p.pump)
-        if (spent > 0) add(t("Spent on repairs", "Gharama za matengenezo") to "KES " + num(spent))
+        if (spent > 0) add(t("Spent on repairs", "Gharama za matengenezo") to org.rafikioutreach.pin.data.Currency.kes(spent.toLong()))
     }
     val stage = p.visits.firstOrNull { it.stage.isNotBlank() }?.stage
     if (rows.isNotEmpty() || (p.state == "building" && stage != null)) {
@@ -509,7 +509,7 @@ private fun DonorProject(m: AppModel, p: DProject, back: () -> Unit) {
     data class Line(val at: String, val icon: String, val tone: String, val title: String, val text: String)
     val lines = (p.visits.take(8).map { v -> Line(v.at, "cal", if (v.state == "repair") "repairing" else if (v.state == "notworking") "notworking" else "done", t("Site visit", "Ziara") + " · " + Dates.weekday(v.at), donorVisitSay(v)) } +
         p.repairs.take(4).map { r -> val at = r.fixedAt.ifBlank { r.at }; Line(at, "wrench", if (r.open) "repairing" else "working", (if (r.open) t("Repair under way", "Matengenezo yanaendelea") else t("Repaired", "Imerekebishwa")) + " · " + Dates.weekday(at),
-            (if (r.problems.isNotEmpty()) r.problems.joinToString(", ") else t("A problem was found", "Tatizo liligunduliwa")) + if (r.cost > 0) " · KES " + num(r.cost) else "") }).sortedByDescending { it.at }
+            (if (r.problems.isNotEmpty()) r.problems.joinToString(", ") else t("A problem was found", "Tatizo liligunduliwa")) + if (r.cost > 0) " · " + org.rafikioutreach.pin.data.Currency.kes(r.cost.toLong()) else "") }).sortedByDescending { it.at }
     if (lines.isNotEmpty()) {
         SectionHead(t("Visits and repairs", "Ziara na matengenezo"))
         Card(Modifier.testTag("dproject_visits")) {

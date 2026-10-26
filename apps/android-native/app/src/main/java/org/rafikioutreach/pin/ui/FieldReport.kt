@@ -158,7 +158,7 @@ internal class RTable(val cols: List<Float>, val head: List<RCell>, val rows: Li
 
 internal fun reportTitle(r: ReportData) = t("Field report · ", "Ripoti ya uwanjani · ") + r.label
 internal fun reportSub(r: ReportData) = r.country + " · RAFIKI Outreach · " + t("Prepared by ", "Imeandaliwa na ") + r.by + ", " + r.date
-internal fun repairsHeading(r: ReportData) = t("Open repairs", "Matengenezo yaliyo wazi") + (if (r.cost > 0) t(" · about KES\u00A0${num(r.cost)} estimated", " · takriban KES\u00A0${num(r.cost)} kwa makadirio") else "")
+internal fun repairsHeading(r: ReportData) = t("Open repairs", "Matengenezo yaliyo wazi") + (if (r.cost > 0) t(" · about ${org.rafikioutreach.pin.data.Currency.kes(r.cost)} estimated", " · takriban ${org.rafikioutreach.pin.data.Currency.kes(r.cost)} kwa makadirio") else "")
 internal fun reportNote() = t("Only visits, repairs and pins made with the RAFIKI Pin app are counted.", "Ziara, matengenezo na mahali vilivyowekwa kwa programu ya RAFIKI Pin tu ndivyo vinahesabiwa.")
 
 internal fun countryTable(r: ReportData) = RTable(

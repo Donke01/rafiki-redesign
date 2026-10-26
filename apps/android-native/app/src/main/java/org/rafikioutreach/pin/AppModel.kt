@@ -70,6 +70,9 @@ class AppModel(app: Application) : AndroidViewModel(app) {
 
     init {
         viewModelScope.launch { while (true) { delay(60000); if (_signedIn.value) sendWaiting() } }
+        // Settings › Currency: the saved choice now, fresh rates (and where the phone is) from the server
+        org.rafikioutreach.pin.data.Currency.init(app)
+        viewModelScope.launch { org.rafikioutreach.pin.data.Currency.refresh(BuildConfig.SERVER) }
         // blocked, or signed out of all phones by an admin: sign this phone out with a kind word (feat-conta)
         api.onAuthEnd = { why -> ended = why; viewModelScope.launch(Dispatchers.Main) { authEnded(why) } }
         api.gen = { prefs.pinGen }

@@ -1,5 +1,6 @@
 package org.rafikioutreach.pin.ui
 
+import org.rafikioutreach.pin.data.Currency
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
@@ -148,6 +149,10 @@ private fun OcvNum(modifier: Modifier, value: String, label: String, color: Colo
 /** A number that counts up (or just shows, with reduced motion). */
 @Composable
 private fun ocvCount(n: Long): String = ocvFmt(kotlin.math.round(rememberFill(n.toFloat(), 1000)).toLong())
+/** The small label in front of a money tile: "KES", or "≈ USD" when another currency is chosen (Settings › Currency). */
+private fun curTag(): String = Currency.code.value.let { if (it == "KES") "KES" else "≈\u00A0$it" }
+/** Under a converted money tile: the KES amount as entered. */
+private fun kesSub(n: Long): String = if (Currency.code.value == "KES") "" else "KES\u00A0" + ocvFmt(n)
 
 /** A status: a dot and a short label, in its tone. */
 @Composable
@@ -357,7 +362,7 @@ fun OcvOverview(m: AppModel, s: Snapshot, open: (String) -> Unit, go: (String) -
     val pe = s.people?.takeIf { it.total > 0 }
     val tiles = listOfNotNull(
         OcvT("ocv_t_repairs", "wrench", "amber", s.repairs.size.toLong(), if (s.repairs.size == 1) t("open repair", "tengenezo lililo wazi") else t("open repairs", "matengenezo yaliyo wazi"),
-            listOfNotNull(if (urgent > 0) t("$urgent urgent", "$urgent ya haraka") else null, if (cost > 0) "KES\u00A0" + ocvFmt(cost) else null).joinToString(" · "), hot = s.repairs.isNotEmpty(), red = urgent > 0) { go("repairs") },
+            listOfNotNull(if (urgent > 0) t("$urgent urgent", "$urgent ya haraka") else null, if (cost > 0) org.rafikioutreach.pin.data.Currency.kes(cost) else null).joinToString(" · "), hot = s.repairs.isNotEmpty(), red = urgent > 0) { go("repairs") },
         OcvT("ocv_t_review", "inbox", "purple", s.reviewOpen.toLong(), if (s.reviewOpen == 1) t("waiting for your review", "inasubiri uidhinishe") else t("waiting for your review", "zinasubiri uidhinishe"), hot = s.reviewOpen > 0) { go("review") },
         OcvT("ocv_t_due", "cal", "blue", due.toLong(), if (due == 1) t("due a visit", "unasubiri ziara") else t("due a visit", "zinasubiri ziara")) { toList("due") },
         // water points with no water test in 6 months: Projects › Due a visit, where they carry the tag
@@ -567,12 +572,12 @@ fun OcvCosts(m: AppModel, s: Snapshot, open: (String) -> Unit) {
 
     OcvHead("ocv_costs_head", "coins", "amber", t("Repair costs", "Gharama za matengenezo"), t("What repairs actually cost, as the team enters it.", "Gharama halisi za matengenezo, kama timu inavyoandika.")) {
         Row(Modifier.padding(top = 12.dp).height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OcvNum(Modifier.weight(1f), ocvCount(cv.month), t("this month", "mwezi huu"), prefix = "KES", tag = "ocv_c_month")
-            OcvNum(Modifier.weight(1f), ocvCount(cv.year), t("this year (${cv.yearKey})", "mwaka huu (${cv.yearKey})"), prefix = "KES")
+            OcvNum(Modifier.weight(1f), ocvCount(Currency.num(cv.month)), t("this month", "mwezi huu"), prefix = curTag(), tag = "ocv_c_month", sub = kesSub(cv.month))
+            OcvNum(Modifier.weight(1f), ocvCount(Currency.num(cv.year)), t("this year (${cv.yearKey})", "mwaka huu (${cv.yearKey})"), prefix = curTag(), sub = kesSub(cv.year))
         }
         Row(Modifier.padding(top = 8.dp).height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OcvNum(Modifier.weight(1f), ocvCount(cv.sum12), t("last 12 months", "miezi 12 iliyopita"), prefix = "KES")
-            OcvNum(Modifier.weight(1f), ocvCount(cv.avg), t("average per repair", "wastani kwa kila tengenezo"), prefix = "KES", tag = "ocv_c_avg", sub = if (cv.repairs == 1) t("1 repair", "matengenezo 1") else t("${cv.repairs} repairs", "matengenezo ${cv.repairs}"))
+            OcvNum(Modifier.weight(1f), ocvCount(Currency.num(cv.sum12)), t("last 12 months", "miezi 12 iliyopita"), prefix = curTag(), sub = kesSub(cv.sum12))
+            OcvNum(Modifier.weight(1f), ocvCount(Currency.num(cv.avg)), t("average per repair", "wastani kwa kila tengenezo"), prefix = curTag(), tag = "ocv_c_avg", sub = listOf(kesSub(cv.avg), if (cv.repairs == 1) t("1 repair", "matengenezo 1") else t("${cv.repairs} repairs", "matengenezo ${cv.repairs}")).filter { it.isNotBlank() }.joinToString(" · "))
         }
     }
     // spent each month: tap a bar for that month

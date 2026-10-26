@@ -102,6 +102,8 @@ fun SettingsCard(m: AppModel, go: (String) -> Unit) {
             SetRow("sun", "amber", t("Appearance", "Mwonekano"), lookText(), "set_look") { go("look") }
             SetRow("globe", "blue", t("Language", "Lugha"), if (org.rafikioutreach.pin.Lang.sw) "Kiswahili" else "English", "set_lang") { go("lang") }
             SetRow("nav", "green", t("Distances", "Umbali"), if (m.prefs.miles) t("Miles", "Maili") else t("Kilometres (km)", "Kilomita (km)"), "set_units") { go("units") }
+            val cur = org.rafikioutreach.pin.data.Currency
+            SetRow("coins", "green", t("Currency", "Sarafu"), cur.name(cur.code.value) + " (" + cur.code.value + ")" + if (cur.picked) "" else " · " + t("automatic", "kiotomatiki"), "set_cur") { go("cur") }
         }
         Group(t("Help and support", "Msaada"))
         SetRow("search", "teal", t("Help and FAQs", "Msaada na maswali"), t("Pinning, visits, no signal, updates", "Kuweka mahali, ziara, bila mtandao, masasisho"), "set_help") { go("help") }
@@ -343,7 +345,7 @@ fun SettingsPage(m: AppModel, which: String, back: () -> Unit) {
     var msg by remember { mutableStateOf<Pair<String, String>?>(null) }
     var busy by remember { mutableStateOf(false) }
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp).padding(bottom = 100.dp)) {
-        val title = when (which) { "profile" -> t("Personal details", "Taarifa zangu"); "pin" -> if (me.kind == "monday") t("Sign-in", "Kuingia") else t("Change my PIN", "Badilisha PIN yangu"); "notify" -> t("Notification settings", "Mipangilio ya arifa"); "monday" -> t("Your name on monday.com", "Jina lako kwenye monday.com"); "help" -> t("Help and FAQs", "Msaada na maswali"); "signout" -> t("Sign out of this phone?", "Toka kwenye simu hii?"); "look" -> t("Appearance", "Mwonekano"); "lang" -> t("Language", "Lugha"); "units" -> t("Distances", "Umbali"); else -> t("About RAFIKI Pin", "Kuhusu RAFIKI Pin") }
+        val title = when (which) { "profile" -> t("Personal details", "Taarifa zangu"); "pin" -> if (me.kind == "monday") t("Sign-in", "Kuingia") else t("Change my PIN", "Badilisha PIN yangu"); "notify" -> t("Notification settings", "Mipangilio ya arifa"); "monday" -> t("Your name on monday.com", "Jina lako kwenye monday.com"); "help" -> t("Help and FAQs", "Msaada na maswali"); "signout" -> t("Sign out of this phone?", "Toka kwenye simu hii?"); "look" -> t("Appearance", "Mwonekano"); "lang" -> t("Language", "Lugha"); "units" -> t("Distances", "Umbali"); "cur" -> t("Currency", "Sarafu"); else -> t("About RAFIKI Pin", "Kuhusu RAFIKI Pin") }
         Text(title, style = MaterialTheme.typography.headlineLarge, color = C.ink, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(top = 4.dp, bottom = 8.dp).testTag("set_title"))
         Card(Modifier.padding(top = 8.dp)) {
             when (which) {
@@ -447,6 +449,20 @@ fun SettingsPage(m: AppModel, which: String, back: () -> Unit) {
                     Text(t("How far projects are from you, on lists, the map and routes.", "Umbali wa miradi kutoka ulipo, kwenye orodha, ramani na njia."), style = MaterialTheme.typography.bodyMedium, color = C.muted, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
                     SetChoice(t("Kilometres (km)", "Kilomita (km)"), t("e.g. 2.4 km away", "mf. km 2.4 kutoka ulipo"), !miles, "units_km") { miles = false; m.prefs.miles = false }
                     SetChoice(t("Miles", "Maili"), t("e.g. 1.5 miles away", "mf. maili 1.5 kutoka ulipo"), miles, "units_mi") { miles = true; m.prefs.miles = true }
+                }
+                "cur" -> {
+                    // Settings › Currency: automatic (where the phone is) or any of these; costs are still typed in KES
+                    val cur = org.rafikioutreach.pin.data.Currency
+                    var on by remember { mutableStateOf(if (cur.picked) cur.code.value else "") }
+                    Text(t("Costs and budgets show in this money. Converted amounts show ≈ with the KES amount next to them; you still type costs in KES.", "Gharama na bajeti zinaonyeshwa kwa pesa hii. Kiasi kilichobadilishwa kinaonyesha ≈ pamoja na kiasi cha KES; bado unaandika gharama kwa KES."),
+                        style = MaterialTheme.typography.bodyMedium, color = C.muted, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+                    SetChoice(t("Automatic", "Kiotomatiki"), t("The money of the country you’re in", "Pesa ya nchi uliyopo"), on == "", "cur_auto") { on = ""; cur.set(null) }
+                    cur.LIST.forEach { c ->
+                        SetChoice(cur.name(c.code) + " (" + c.code + ")", if (c.code == "KES") t("As the costs are entered", "Kama gharama zinavyoingizwa") else "KES\u00A01,000 ≈ " + cur.fmt(1000.0, "KES", c.code), on == c.code, "cur_" + c.code,
+                            lead = { Text(c.flag, fontSize = 26.sp) }) { on = c.code; cur.set(c.code) }
+                    }
+                    Text(if (cur.at.isBlank()) t("Approximate rates until the app is online.", "Viwango vya makadirio hadi programu iwe mtandaoni.") else t("Rates from ${Dates.day(cur.at)}, updated daily.", "Viwango vya ${Dates.day(cur.at)}, husasishwa kila siku."),
+                        style = MaterialTheme.typography.bodySmall, color = C.muted, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(top = 12.dp))
                 }
                 "signout" -> {
                     Text(t("Changes waiting to send stay on this phone and go when you sign in again.", "Mabadiliko yanayosubiri yanabaki kwenye simu na kutumwa ukiingia tena."), style = MaterialTheme.typography.bodyMedium, color = C.text, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
