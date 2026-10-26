@@ -52,6 +52,7 @@ struct SettingsCard: View {
             SetRow(icon: "sun", hue: "amber", title: t("Appearance", "Mwonekano"), sub: lookText()) { go("look") }
             SetRow(icon: "globe", hue: "blue", title: t("Language", "Lugha"), sub: Lang.sw ? "Kiswahili" : "English") { go("lang") }
             SetRow(icon: "nav", hue: "green", title: t("Distances", "Umbali"), sub: m.prefs.miles ? t("Miles", "Maili") : t("Kilometres (km)", "Kilomita (km)")) { go("units") }
+            SetRow(icon: "coins", hue: "green", title: t("Currency", "Sarafu"), sub: Currency.name(Currency.code) + " (" + Currency.code + ")" + (Currency.picked ? "" : " · " + t("automatic", "kiotomatiki"))) { go("cur") }
             GroupLabel(t("Help and support", "Msaada"))
             SetRow(icon: "search", hue: "teal", title: t("Help and FAQs", "Msaada na maswali"), sub: t("Pinning, visits, no signal, updates", "Kuweka mahali, ziara, bila mtandao, masasisho")) { go("help") }
             SetRow(icon: "chat", hue: "green", title: t("Contact the office", "Wasiliana na ofisi"), sub: "info@rafikioutreach.org") { Links.mail("RAFIKI Pin: " + m.prefs.name) }
@@ -154,6 +155,7 @@ struct SettingsPage: View {
         case "look": return t("Appearance", "Mwonekano")
         case "lang": return t("Language", "Lugha")
         case "units": return t("Distances", "Umbali")
+        case "cur": return t("Currency", "Sarafu")
         default: return t("About RAFIKI Pin", "Kuhusu RAFIKI Pin")
         }
     }
@@ -180,6 +182,16 @@ struct SettingsPage: View {
             Text(t("How far projects are from you, on lists, the map and routes.", "Umbali wa miradi kutoka ulipo, kwenye orodha, ramani na njia.")).font(.bMedium).foregroundColor(C.muted).multilineTextAlignment(.center).wide(.center)
             SetChoice(title: t("Kilometres (km)", "Kilomita (km)"), sub: t("e.g. 2.4 km away", "mf. km 2.4 kutoka ulipo"), on: !miles) { miles = false; m.prefs.miles = false; m.look += 1 }
             SetChoice(title: t("Miles", "Maili"), sub: t("e.g. 1.5 miles away", "mf. maili 1.5 kutoka ulipo"), on: miles) { miles = true; m.prefs.miles = true; m.look += 1 }
+        case "cur":
+            // Settings › Currency: automatic (where the phone is) or any of these; costs are still typed in KES
+            Text(t("Costs and budgets show in this money. Converted amounts show ≈ with the KES amount next to them; you still type costs in KES.", "Gharama na bajeti zinaonyeshwa kwa pesa hii. Kiasi kilichobadilishwa kinaonyesha ≈ pamoja na kiasi cha KES; bado unaandika gharama kwa KES.")).font(.bMedium).foregroundColor(C.muted).multilineTextAlignment(.center).wide(.center)
+            SetChoice(title: t("Automatic", "Kiotomatiki"), sub: t("The money of the country you’re in", "Pesa ya nchi uliyopo"), on: !Currency.picked) { Currency.set(nil); m.look += 1 }
+            ForEach(Currency.list, id: \.code) { c in
+                SetChoice(title: Currency.name(c.code) + " (" + c.code + ")", sub: c.code == "KES" ? t("As the costs are entered", "Kama gharama zinavyoingizwa") : "KES\u{00A0}1,000 ≈ " + Currency.fmt(1000, from: "KES", to: c.code),
+                          on: Currency.picked && Currency.code == c.code, action: { Currency.set(c.code); m.look += 1 }, lead: { Text(c.flag).font(.system(size: 26)) })
+            }
+            Text(Currency.at.isEmpty ? t("Approximate rates until the app is online.", "Viwango vya makadirio hadi programu iwe mtandaoni.") : t("Rates from \(Dates.day(Currency.at)), updated daily.", "Viwango vya \(Dates.day(Currency.at)), husasishwa kila siku."))
+                .font(.bSmall).foregroundColor(C.muted).multilineTextAlignment(.center).wide(.center).padding(.top, 12)
         case "signout":
             Text(t("Changes waiting to send stay on this phone and go when you sign in again.", "Mabadiliko yanayosubiri yanabaki kwenye simu na kutumwa ukiingia tena.")).font(.bMedium).foregroundColor(C.text).multilineTextAlignment(.center).wide(.center)
             Btn(t("Sign out", "Toka"), wide: true) { m.signOut() }.padding(.top, 16)

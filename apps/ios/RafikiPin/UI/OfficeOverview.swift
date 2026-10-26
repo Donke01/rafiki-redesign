@@ -88,6 +88,11 @@ struct OcvHead<Content: View>: View {
 }
 
 /// A small number in a head. Tappable ones set the filter.
+/// The small label in front of a money tile: "KES", or "≈ USD" when another currency is chosen (Settings › Currency).
+func curTag() -> String { Currency.code == "KES" ? "KES" : "≈\u{00A0}" + Currency.code }
+/// Under a converted money tile: the KES amount as entered.
+func kesSub(_ n: Int) -> String { Currency.code == "KES" ? "" : "KES\u{00A0}" + Geo.grouped(n) }
+
 struct OcvNum: View {
     let value: String; let label: String; var color: Color = C.ink; var on = false; var prefix = ""; var sub = ""; var action: (() -> Void)? = nil
     var body: some View {
@@ -300,7 +305,7 @@ struct OcvOverview: View {
             }
             let tiles: [OcvT] = [
                 OcvT(icon: "wrench", hue: "amber", n: s.repairs.count, label: s.repairs.count == 1 ? t("open repair", "tengenezo lililo wazi") : t("open repairs", "matengenezo yaliyo wazi"),
-                     sub: [urgent > 0 ? t("\(urgent) urgent", "\(urgent) ya haraka") : nil, cost > 0 ? "KES\u{00A0}" + Geo.grouped(cost) : nil].compactMap { $0 }.joined(separator: " · "), hot: !s.repairs.isEmpty, red: urgent > 0) { go("repairs") },
+                     sub: [urgent > 0 ? t("\(urgent) urgent", "\(urgent) ya haraka") : nil, cost > 0 ? Currency.kes(cost) : nil].compactMap { $0 }.joined(separator: " · "), hot: !s.repairs.isEmpty, red: urgent > 0) { go("repairs") },
                 OcvT(icon: "inbox", hue: "purple", n: s.reviewOpen, label: s.reviewOpen == 1 ? t("waiting for your review", "inasubiri uidhinishe") : t("waiting for your review", "zinasubiri uidhinishe"), hot: s.reviewOpen > 0) { go("review") },
                 OcvT(icon: "cal", hue: "blue", n: due, label: due == 1 ? t("due a visit", "unasubiri ziara") : t("due a visit", "zinasubiri ziara")) { toList("due") },
                 OcvT(icon: "drop", hue: "teal", n: tests, label: tests == 1 ? t("water test due", "kipimo cha maji kinahitajika") : t("water tests due", "vipimo vya maji vinahitajika"), hot: tests > 0) { toList("due") },
@@ -586,12 +591,12 @@ struct OcvCosts: View {
     @ViewBuilder private func content(_ cv: CostView) -> some View {
         OcvHead(icon: "coins", hue: "amber", title: t("Repair costs", "Gharama za matengenezo"), line: t("What repairs actually cost, as the team enters it.", "Gharama halisi za matengenezo, kama timu inavyoandika.")) {
             HStack(spacing: 8) {
-                OcvNum(value: Geo.grouped(cv.month), label: t("this month", "mwezi huu"), prefix: "KES")
-                OcvNum(value: Geo.grouped(cv.year), label: t("this year (\(String(cv.yearKey)))", "mwaka huu (\(String(cv.yearKey)))"), prefix: "KES")
+                OcvNum(value: Geo.grouped(Currency.num(cv.month)), label: t("this month", "mwezi huu"), prefix: curTag(), sub: kesSub(cv.month))
+                OcvNum(value: Geo.grouped(Currency.num(cv.year)), label: t("this year (\(String(cv.yearKey)))", "mwaka huu (\(String(cv.yearKey)))"), prefix: curTag(), sub: kesSub(cv.year))
             }.fixedSize(horizontal: false, vertical: true).padding(.top, 12)
             HStack(spacing: 8) {
-                OcvNum(value: Geo.grouped(cv.sum12), label: t("last 12 months", "miezi 12 iliyopita"), prefix: "KES")
-                OcvNum(value: Geo.grouped(cv.avg), label: t("average per repair", "wastani kwa kila tengenezo"), prefix: "KES", sub: cv.repairs == 1 ? t("1 repair", "matengenezo 1") : t("\(cv.repairs) repairs", "matengenezo \(cv.repairs)"))
+                OcvNum(value: Geo.grouped(Currency.num(cv.sum12)), label: t("last 12 months", "miezi 12 iliyopita"), prefix: curTag(), sub: kesSub(cv.sum12))
+                OcvNum(value: Geo.grouped(Currency.num(cv.avg)), label: t("average per repair", "wastani kwa kila tengenezo"), prefix: curTag(), sub: [kesSub(cv.avg), cv.repairs == 1 ? t("1 repair", "matengenezo 1") : t("\(cv.repairs) repairs", "matengenezo \(cv.repairs)")].filter { !$0.isEmpty }.joined(separator: " · "))
             }.fixedSize(horizontal: false, vertical: true).padding(.top, 8)
         }
         let ms = months(), sums = Dictionary(grouping: cv.rows, by: { String($0.at.prefix(7)) })

@@ -487,7 +487,7 @@ private struct DonorProjectView: View {
             p.year > 0 ? (p.status == "Completed" ? t("Completed", "Ilikamilika") : t("Started", "Ilianza"), !p.done.isEmpty ? Dates.day(p.done) : "\(p.year)") : nil,
             p.depth > 0 ? (t("Depth", "Kina"), "\(p.depth) m") : nil,
             !p.pump.isEmpty ? (t("Pump", "Pampu"), p.pump) : nil,
-            spent > 0 ? (t("Spent on repairs", "Gharama za matengenezo"), "KES " + donorNum(spent)) : nil,
+            spent > 0 ? (t("Spent on repairs", "Gharama za matengenezo"), Currency.kes(spent)) : nil,
         ].compactMap { $0 }
         let stage = p.visits.first { !$0.stage.isEmpty }?.stage
         let building = p.state == "building" && stage != nil
@@ -519,7 +519,7 @@ private struct DonorProjectView: View {
         } + p.repairs.prefix(4).map { r in
             let at = r.fixedAt.isEmpty ? r.at : r.fixedAt
             return (at, "wrench", r.open ? "repairing" : "working", (r.open ? t("Repair under way", "Matengenezo yanaendelea") : t("Repaired", "Imerekebishwa")) + " · " + Dates.weekday(at),
-                    (r.problems.isEmpty ? t("A problem was found", "Tatizo liligunduliwa") : r.problems.joined(separator: ", ")) + (r.cost > 0 ? " · KES " + donorNum(r.cost) : ""))
+                    (r.problems.isEmpty ? t("A problem was found", "Tatizo liligunduliwa") : r.problems.joined(separator: ", ")) + (r.cost > 0 ? " · " + Currency.kes(r.cost) : ""))
         }).sorted { $0.0 > $1.0 }
         if !lines.isEmpty {
             SectionHead(text: t("Visits and repairs", "Ziara na matengenezo"))

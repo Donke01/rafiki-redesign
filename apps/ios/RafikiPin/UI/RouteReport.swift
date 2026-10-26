@@ -186,7 +186,7 @@ func buildReport(_ snap: Snapshot, _ act: [JSON], _ ym: Date, _ ck: String, by: 
 
 func reportTitle(_ r: ReportData) -> String { t("Field report · ", "Ripoti ya uwanjani · ") + r.label }
 func reportSub(_ r: ReportData) -> String { r.country + " · RAFIKI Outreach · " + t("Prepared by ", "Imeandaliwa na ") + r.by + ", " + r.date }
-func repairsHeading(_ r: ReportData) -> String { t("Open repairs", "Matengenezo yaliyo wazi") + (r.cost > 0 ? t(" · about KES\u{00A0}\(rnum(r.cost)) estimated", " · takriban KES\u{00A0}\(rnum(r.cost)) kwa makadirio") : "") }
+func repairsHeading(_ r: ReportData) -> String { t("Open repairs", "Matengenezo yaliyo wazi") + (r.cost > 0 ? t(" · about \(Currency.kes(r.cost)) estimated", " · takriban \(Currency.kes(r.cost)) kwa makadirio") : "") }
 func reportNote() -> String { t("Only visits, repairs and pins made with the RAFIKI Pin app are counted.", "Ziara, matengenezo na mahali vilivyowekwa kwa programu ya RAFIKI Pin tu ndivyo vinahesabiwa.") }
 let LETTERHEAD_FOOT = "501(c)(3) Nonprofit Organization  |  Providing clean water and community development in East Africa"
 

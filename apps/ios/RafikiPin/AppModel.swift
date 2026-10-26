@@ -87,6 +87,9 @@ final class AppModel: ObservableObject {
         // blocked, or signed out of all phones by an admin: sign this phone out with a kind word
         api.gen = { p.pinGen }
         api.onAuthEnd = { [weak self] why in Task { @MainActor in self?.authEnded(why) } }
+        // Settings › Currency: the saved choice now, fresh rates (and where the phone is) from the server
+        Currency.start()
+        Task { @MainActor [weak self] in await Currency.refresh(server: AppModel.server); self?.look += 1 }
     }
 
     /// Signs this phone out (changes waiting to send stay) and says why, kindly, on the sign-in screen.
