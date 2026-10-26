@@ -76,7 +76,10 @@ struct DonorTalk: View {
     func row(_ icon: String, _ col: Color, _ title: String, _ sub: String, wa: Bool, _ go: @escaping () -> Void) -> some View {
         Button { Haptic.tap(); go() } label: {
             HStack(spacing: 14) {
-                Icon(icon, size: 22, color: .white).frame(width: 44, height: 44).background(wa ? Color(hex: 0x25D366) : col).clipShape(Circle())
+                Group {
+                    if wa { Icon("b:whatsapp", size: 30).frame(width: 44, height: 44).background(Color.white).clipShape(Circle()).overlay(Circle().stroke(C.line, lineWidth: 1)) }
+                    else { Icon(icon, size: 22, color: .white).frame(width: 44, height: 44).background(col).clipShape(Circle()) }
+                }
                 VStack(alignment: .leading, spacing: 1) {
                     Text(title).font(.mont(17, .bold)).foregroundColor(C.ink)
                     Text(sub.nb).font(.mont(14, .semibold)).foregroundColor(C.muted).lineLimit(1).minimumScaleFactor(0.75)

@@ -888,7 +888,7 @@ private struct LayerCards: View {
                 if !p.phone.isEmpty {
                     HStack(spacing: 8) {
                         Btn(t("Call", "Piga simu"), icon: "phone", small: true, wide: true) { Links.call(p.phone) }
-                        Btn("WhatsApp", icon: "chat", light: true, small: true, wide: true) { Links.whatsapp(p.phone, p.home) }
+                        Btn("WhatsApp", icon: "b:whatsapp", light: true, small: true, wide: true) { Links.whatsapp(p.phone, p.home) }
                     }.padding(.top, 10).padding(.trailing, 6)
                 } else { Text(t("No phone number saved for them.", "Hakuna namba ya simu iliyohifadhiwa.")).font(.bSmall).foregroundColor(C.muted).padding(.top, 8) }
             }.padding(.leading, 14).padding(.trailing, 8).padding(.top, 8).padding(.bottom, 12)

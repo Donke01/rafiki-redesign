@@ -731,8 +731,8 @@ struct DirectionsSheet: View {
         SubSheet { close in
             SubHead(icon: "compass", hue: "near", title: t("Directions", "Maelekezo"), sub: title)
             let ll = "\(at.lat),\(at.lng)"
-            dirRow(t("Apple Maps", "Apple Maps"), t("Turn-by-turn directions", "Maelekezo hatua kwa hatua"), "map") { close(); Share.open("http://maps.apple.com/?daddr=\(ll)&dirflg=d") }
-            dirRow("Google Maps", t("Turn-by-turn directions", "Maelekezo hatua kwa hatua"), "map") { close(); Share.open("https://www.google.com/maps/dir/?api=1&destination=\(ll)") }
+            dirRow(t("Apple Maps", "Apple Maps"), t("Turn-by-turn directions", "Maelekezo hatua kwa hatua"), "b:amaps") { close(); Share.open("http://maps.apple.com/?daddr=\(ll)&dirflg=d") }
+            dirRow("Google Maps", t("Turn-by-turn directions", "Maelekezo hatua kwa hatua"), "b:gmaps") { close(); Share.open("https://www.google.com/maps/dir/?api=1&destination=\(ll)") }
         }.presentationDetents([.medium])
     }
     private func dirRow(_ title: String, _ sub: String, _ icon: String, _ action: @escaping () -> Void) -> some View {

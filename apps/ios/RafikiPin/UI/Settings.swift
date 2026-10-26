@@ -38,7 +38,7 @@ struct SettingsCard: View {
             Text(t("Settings", "Mipangilio")).font(.tLarge).foregroundColor(C.ink).wide(.center)
             GroupLabel(t("Account", "Akaunti"))
             if let s = m.snap, m.prefs.session.isEmpty {
-                SetRow(icon: "link", hue: "purple", title: t("Your name on monday.com", "Jina lako kwenye monday.com"),
+                SetRow(icon: "b:monday", hue: "purple", title: t("Your name on monday.com", "Jina lako kwenye monday.com"),
                        sub: !s.linked.isEmpty ? t("Connected as \(s.linked)", "Imeunganishwa kama \(s.linked)") : s.who.isEmpty ? t("Changes go in under the shared account", "Mabadiliko yanaingia kwa akaunti ya pamoja") : t("Not connected · takes 20 seconds", "Haijaunganishwa · sekunde 20")) { go("monday") }
             }
             SetRow(icon: "person", hue: "blue", title: t("Personal details", "Taarifa zangu"), sub: [me.nick.isEmpty ? m.prefs.name : me.nick, me.phone].filter { !$0.isEmpty }.joined(separator: " · ")) { go("profile") }

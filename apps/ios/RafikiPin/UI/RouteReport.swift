@@ -91,7 +91,7 @@ struct RouteView: View {
                "Vituo \(stops.count) · takriban \(Geo.dist(total, miles: m.miles)) kwa mstari ulionyooka" + (loc.fix != nil ? " kutoka ulipo" : "") + ". Barabara zitakuwa ndefu zaidi. Imehifadhiwa kwenye simu, kwa hiyo inafanya kazi bila mtandao."))
             .font(.bMedium).foregroundColor(C.muted)
         ForEach(Array(mapsLegs(stops, from: loc.fix?.ll).enumerated()), id: \.offset) { _, leg in
-            Btn(leg.0, icon: "compass", wide: true) { Share.open(leg.1) }.padding(.top, 10)
+            Btn(leg.0, icon: "b:gmaps", wide: true) { Share.open(leg.1) }.padding(.top, 10)
         }
         ForEach(Array(legs.enumerated()), id: \.offset) { i, leg in
             Button { m.go(Place(tab: m.here.tab, project: leg.0.id)) } label: {

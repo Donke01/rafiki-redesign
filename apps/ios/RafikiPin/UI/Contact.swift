@@ -287,7 +287,7 @@ struct ContactSheet: View {
                         }
                         if !p.phone.isEmpty {
                             CtRow(icon: "phone", hue: "near", label: t("Call", "Piga simu"), value: p.phone) { Links.call(p.phone) }
-                            CtRow(icon: "chat", hue: "wa", label: "WhatsApp", value: p.phone) { Links.whatsapp(p.phone, p.home) }
+                            CtRow(icon: "b:whatsapp", hue: "wa", label: "WhatsApp", value: p.phone) { Links.whatsapp(p.phone, p.home) }
                             CtRow(icon: "text", hue: "blue", label: "SMS", value: p.phone) { Talk.sms(p.phone) }
                         }
                         CtRow(icon: "share", hue: "purple", label: t("Share contact", "Shiriki mawasiliano"), value: t("A contact card with name, phone and e-mail", "Kadi ya mawasiliano yenye jina, simu na barua pepe")) { shareContact(p) }
@@ -680,7 +680,7 @@ struct PinShown: View {
                 Text(t("Send it privately; it can’t be shown again.", "Mtumie kwa siri; haiwezi kuonyeshwa tena.")).font(.bSmall).foregroundColor(C.text)
                 Btn(copied ? t("Copied ✓", "Imenakiliwa ✓") : t("Copy", "Nakili"), icon: "copy", light: true, small: true, wide: true) { UIPasteboard.general.string = pin; copied = true }.padding(.top, 10)
                 HStack(spacing: 8) {
-                    Btn("WhatsApp", icon: "chat", light: true, small: true, wide: true) { Links.whatsapp(phone, home, text: pinMessage(who, pin)) }
+                    Btn("WhatsApp", icon: "b:whatsapp", light: true, small: true, wide: true) { Links.whatsapp(phone, home, text: pinMessage(who, pin)) }
                     Btn("SMS", icon: "phone", light: true, small: true, wide: true) { Talk.sms(phone, pinMessage(who, pin)) }
                 }.padding(.top, 8)
             }
@@ -907,7 +907,7 @@ struct InviteSheet: View {
             if preview != nil { Msg(err, "bad") }
             GroupLabel(t("Or share the invite", "Au shiriki mwaliko"))
             HStack(spacing: 8) {
-                Btn("WhatsApp", icon: "chat", light: true, small: true, wide: true) { Links.whatsapp(phone, p.str("home"), text: share) }
+                Btn("WhatsApp", icon: "b:whatsapp", light: true, small: true, wide: true) { Links.whatsapp(phone, p.str("home"), text: share) }
                 Btn("SMS", icon: "text", light: true, small: true, wide: true) { Talk.sms(phone, share) }
             }
             if sent { Btn(t("Done", "Imekamilika"), light: true, wide: true) { close() }.padding(.top, 12) }

@@ -93,7 +93,7 @@ struct ProjectView: View {
                 let ll = "\(g.lat),\(g.lng)"
                 HStack(spacing: 8) {
                     MapTile(label: t("Directions", "Maelekezo"), icon: "compass") { dirs = true }
-                    MapTile(label: "Google Maps", icon: "map") { Share.open("https://www.google.com/maps/search/?api=1&query=\(ll)") }
+                    MapTile(label: "Google Maps", icon: "b:gmaps") { Share.open("https://www.google.com/maps/search/?api=1&query=\(ll)") }
                     MapTile(label: t("Share", "Shiriki"), icon: "share") { Share.items([p.title + "\nhttps://www.google.com/maps?q=\(ll)"]) }
                 }.padding(.top, 12)
             }

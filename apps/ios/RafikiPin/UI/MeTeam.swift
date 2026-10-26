@@ -339,7 +339,7 @@ struct ConnectMonday: View {
         if m.prefs.session.isEmpty {
             Wrap(inline: inline) {
                 if !inline { HStack(alignment: .top, spacing: 12) {
-                    IconTile(icon: "people", tint: C.hue("new").fg, bg: C.hue("new").bg, size: 40)
+                    IconTile(icon: "b:monday", tint: C.hue("new").fg, bg: C.hue("new").bg, size: 40)
                     VStack(alignment: .leading, spacing: 4) {
                         Text(t("Your name on monday.com", "Jina lako kwenye monday.com")).font(.tLarge).foregroundColor(C.ink)
                         if !snap.linked.isEmpty { Text(t("Connected as \(snap.linked) ✓", "Imeunganishwa kama \(snap.linked) ✓")).font(.tSmall).foregroundColor(C.ok) }

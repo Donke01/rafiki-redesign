@@ -409,7 +409,7 @@ struct PlanWeekSection: View {
                 }
             }
             if let leg = mapsLegs(stops, from: nil).first {
-                DqmLineBtn(text: t("Route in Google Maps", "Njia kwenye Google Maps"), icon: "compass") { Share.open(leg.1) }.padding(.top, 10)
+                DqmLineBtn(text: t("Route in Google Maps", "Njia kwenye Google Maps"), icon: "b:gmaps") { Share.open(leg.1) }.padding(.top, 10)
             }
         }.padding(.top, 12)
     }

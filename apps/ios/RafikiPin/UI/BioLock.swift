@@ -149,7 +149,7 @@ struct MondaySignInSheet: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                Text(t("Sign in with monday.com", "Ingia kwa monday.com")).font(.tLarge).foregroundColor(C.ink)
+                HStack(spacing: 10) { Icon("b:monday", size: 30); Text(t("Sign in with monday.com", "Ingia kwa monday.com")).font(.tLarge).foregroundColor(C.ink) }
                 Text(t("Use your own monday.com token. Your changes then go in under your own name.", "Tumia tokeni yako ya monday.com. Mabadiliko yako yataingia kwa jina lako.")).font(.bMedium).foregroundColor(C.muted).padding(.top, 4)
                 Btn("1 · " + t("Open my monday.com token", "Fungua tokeni yangu ya monday.com"), wide: true) { waiting = true; Share.open(TOKEN_PAGE) }.padding(.top, 16)
                 Text(t("Tap Copy on that page, then come back here.", "Gusa Copy kwenye ukurasa huo, kisha rudi hapa.")).font(.lSmall).foregroundColor(C.muted).frame(maxWidth: .infinity).padding(.top, 4)

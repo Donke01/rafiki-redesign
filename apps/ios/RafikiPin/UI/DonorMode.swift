@@ -464,7 +464,7 @@ private struct DonorProjectView: View {
         if let ll = p.gps {
             SectionHead(text: t("Where it is", "Mahali ilipo"))
             DonorMap(projects: [p], withCard: false) { _ in }
-            Btn(t("Open in Google Maps", "Fungua kwenye Google Maps"), icon: "map", light: true, small: true) { Share.open("https://www.google.com/maps/search/?api=1&query=\(ll.lat),\(ll.lng)") }.padding(.top, 10)
+            Btn(t("Open in Google Maps", "Fungua kwenye Google Maps"), icon: "b:gmaps", light: true, small: true) { Share.open("https://www.google.com/maps/search/?api=1&query=\(ll.lat),\(ll.lng)") }.padding(.top, 10)
         }
         SectionHead(text: t("Questions about this project?", "Una swali kuhusu mradi huu?"))
         DonorTalk(p: p)

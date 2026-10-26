@@ -25,7 +25,26 @@ enum Ic {
 struct Icon: View {
     let k: String; var size: CGFloat = 22; var color: Color = C.ink
     init(_ k: String, size: CGFloat = 22, color: Color = C.ink) { self.k = k; self.size = size; self.color = color }
-    var body: some View { Image(systemName: Ic.name(k)).font(.system(size: size * 0.82, weight: .medium)).foregroundColor(color).frame(width: size, height: size) }
+    var body: some View {
+        if k.hasPrefix("b:") { BrandLogo(k: String(k.dropFirst(2)), size: size) }
+        else { Image(systemName: Ic.name(k)).font(.system(size: size * 0.82, weight: .medium)).foregroundColor(color).frame(width: size, height: size) }
+    }
+}
+
+/// A company's own coloured logo (monday.com, WhatsApp, Google Maps, Apple Maps), the same as Android and the web app.
+/// Use it through Icon with "b:monday", "b:whatsapp", "b:gmaps" or "b:amaps"; a plain symbol shows while it loads.
+struct BrandLogo: View {
+    let k: String; var size: CGFloat = 24
+    static let brands: [String: (String, String)] = ["monday": ("monday.com", "person.2"), "whatsapp": ("whatsapp.com", "message"),
+                                                    "gmaps": ("maps.google.com", "map"), "amaps": ("maps.apple.com", "mappin.and.ellipse")]
+    var body: some View {
+        let b = BrandLogo.brands[k] ?? ("", "link")
+        NetImage(url: b.0.isEmpty ? nil : "https://www.google.com/s2/favicons?domain=\(b.0)&sz=128") {
+            Image(systemName: b.1).font(.system(size: size * 0.8, weight: .medium)).foregroundColor(C.muted)
+        }
+        .frame(width: size, height: size).clipShape(RoundedRectangle(cornerRadius: size * 0.22, style: .continuous))
+        .accessibilityHidden(true)
+    }
 }
 
 /// The main button: blue, light (outlined) or green.
@@ -111,7 +130,8 @@ struct Tag: View {
 struct IconTile: View {
     let icon: String; let tint: Color; let bg: Color; var size: CGFloat = 42
     var body: some View {
-        Icon(icon, size: size * 0.55, color: tint).frame(width: size, height: size).background(bg).clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        Icon(icon, size: size * (icon.hasPrefix("b:") ? 0.62 : 0.55), color: tint).frame(width: size, height: size).background(icon.hasPrefix("b:") ? C.card : bg).clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(icon.hasPrefix("b:") ? C.line : .clear, lineWidth: 1))
     }
 }
 

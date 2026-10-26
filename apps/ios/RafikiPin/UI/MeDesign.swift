@@ -148,7 +148,7 @@ struct ThisPhone: View {
             if let snap, m.prefs.session.isEmpty {
                 let isOpen = open ?? (snap.linked.isEmpty && !snap.who.isEmpty)
                 Button { withAnimation(.easeOut(duration: 0.2)) { open = !isOpen } } label: {
-                    PhoneRow(icon: "link", hue: "new", title: t("Your name on monday.com", "Jina lako kwenye monday.com"),
+                    PhoneRow(icon: "b:monday", hue: "new", title: t("Your name on monday.com", "Jina lako kwenye monday.com"),
                              sub: !snap.linked.isEmpty ? t("Connected as \(snap.linked) ✓", "Imeunganishwa kama \(snap.linked) ✓") : snap.who.isEmpty ? t("Changes go in under the shared account", "Mabadiliko yanaingia kwa akaunti ya pamoja") : t("Takes 20 seconds, once", "Inachukua sekunde 20, mara moja"),
                              subOk: !snap.linked.isEmpty) {
                         Icon("chev", size: 18, color: C.muted).rotationEffect(.degrees(isOpen ? 90 : 0))
