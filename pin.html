@@ -13026,7 +13026,7 @@ html[data-theme=dark] .cw-snk button{color:#0A78C2}.cw-snk.out{opacity:0;transit
           files.forEach(function (f) {
             up = up.then(function (st) {
               if (st || f.id) return st;
-              var pre = f.posterBlob && !f.poster ? cwUp(f.posterBlob, 'poster', 'poster.jpg').then(function (p) { if (p.ok) f.poster = p.id; }) : Promise.resolve();
+              var pre = f.posterBlob && !f.poster ? cwUp(f.posterBlob, 'photo', 'poster.jpg') /* a poster is a small photo */.then(function (p) { if (p.ok) f.poster = p.id; }) : Promise.resolve();
               return pre.then(function () { return cwUp(f.blob, f.type, f.name, f.dur); }).then(function (j) {
                 if (j.ok) { f.id = j.id; if (j.url) f.url = j.url; cwOutPut(it); return false; }
                 if (j.status === 0 || j.status >= 500 || j.status === 429 || j.status === 401) return true;

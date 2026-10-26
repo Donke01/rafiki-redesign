@@ -120,6 +120,7 @@ class ChatMock:
             mid = path.split('/', 1)[1]; t, b = self.media.get(mid, ('image/png', png((60, 70, 80))))
             return route.fulfill(status=200, content_type=t, body=b)
         if path == 'media':
+            if q.get('type') not in ('photo', 'video', 'voice', 'doc'): return self.fulfill(route, {'ok': False, 'reason': 'bad-request'}, 400)
             mid = 'up%d' % next(self.ids); self.media[mid] = (req.headers.get('content-type', 'application/octet-stream'), req.post_data_buffer or b'')
             self.posts.append(('media', {'type': q.get('type'), 'name': q.get('name'), 'size': len(req.post_data_buffer or b''), 'dur': q.get('dur')}))
             return self.fulfill(route, {'ok': True, 'id': mid, 'url': '/api/chat/media/%s?e=1&s=sig' % mid, 'type': q.get('type'), 'size': len(req.post_data_buffer or b''), 'name': q.get('name')})
