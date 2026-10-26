@@ -1,0 +1,40 @@
+# Tests the team chat worker (workers/chat) on every change to it, and deploys it to Cloudflare as "rafiki-chat".
+# Deploying from here is the ALTERNATIVE to Cloudflare's own Git integration (Workers Builds, see workers/chat/README.md).
+# It only deploys when both repository secrets are set (Settings → Secrets and variables → Actions):
+#   CLOUDFLARE_API_TOKEN   an API token with the "Edit Cloudflare Workers" template (Workers Scripts, R2 and Durable Objects edit)
+#   CLOUDFLARE_ACCOUNT_ID  the account ID (Workers & Pages overview, right-hand column)
+# Without them it still runs the tests and skips the deploy, so it never clashes with Workers Builds.
+name: Chat worker
+on:
+  push:
+    branches: [main]
+    paths: ['workers/chat/**', '.github/workflows/chat-worker.yml']
+  pull_request:
+    paths: ['workers/chat/**']
+  workflow_dispatch:
+jobs:
+  test-and-deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: workers/chat
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: workers/chat/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - name: Deploy to Cloudflare
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "No Cloudflare API token here; deploys come from Workers Builds instead. Skipping."
+            exit 0
+          fi
+          npx wrangler deploy
