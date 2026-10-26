@@ -12286,8 +12286,8 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
   }
 
   // itw-core:start — a trip day's timeline, re-timed on the phone straight after a drag or a lock, with the server's
-  // schedule rule (itin contract, "The schedule rule"): cached legs → matrix → a straight-line guess; waits for opening or
-  // a fixed time; lunch once; back after working hours. Pure functions: tests/itin-ui.test.mjs lifts this block out and runs it.
+  // schedule rule (itin contract v1.1, lib/itin-plan.js schedule()): cached legs → matrix → a straight-line guess; waits for
+  // opening or a fixed time; lunch once; the server's words for the warnings. Pure functions: tests/itin-ui.test.mjs lifts this block out and runs it.
   var ITC = (function () {
     var H = { start: '07:30', end: '17:30' }, LUNCH = { at: '12:30', min: 45 };
     function hm(s) { var m = /^(\d{1,2}):(\d{2})$/.exec(String(s == null ? '' : s).trim()); return m ? (+m[1]) * 60 + (+m[2]) : null; }
@@ -12296,69 +12296,85 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
     function metres(a, b) { var R = 6371000, dLa = rad(b[0] - a[0]), dLo = rad(b[1] - a[1]); var h = Math.pow(Math.sin(dLa / 2), 2) + Math.cos(rad(a[0])) * Math.cos(rad(b[0])) * Math.pow(Math.sin(dLo / 2), 2); return 2 * R * Math.asin(Math.sqrt(h)); }
     function byS(it) { var m = {}; (it.stops || []).forEach(function (s) { m[s.sid] = s; }); return m; }
     function town(d) { return d && d.overnight && d.overnight.town ? 'T:' + d.overnight.town : ''; }
-    // where day i starts and ends, as point keys: S start, E end, T:<town> an overnight town
+    // where day i starts and ends, as point keys: S start, E end, T:<town> / N:<day> an overnight place (the server's startAt/endAt.key when given)
+    function nightKey(d) { return d.endAt && /^(T|N):/.test(d.endAt.key || '') ? d.endAt.key : town(d); }
     function ends(it, i) {
-      var ds = it.days || [], prev = ds[i - 1], last = i === ds.length - 1;
-      return { a: i > 0 && town(prev) ? town(prev) : 'S', b: town(ds[i]) || (last ? 'E' : 'S') };
+      var ds = it.days || [], d = ds[i] || {}, prev = ds[i - 1], last = i === ds.length - 1;
+      var a = prev && prev.overnight ? nightKey(prev) : 'S';
+      var b = d.overnight ? nightKey(d) : d.endAt && d.endAt.kind === 'home' && d.endAt.key ? d.endAt.key : last ? 'E' : 'S';
+      return { a: a, b: b, night: /^(T|N):/.test(b) };
     }
-    // a point's coordinates
+    // a point's coordinates and name
     function pt(it, k, m) {
       if (k === 'S') return it.start || null;
       if (k === 'E') return it.end && it.end.kind !== 'same' && it.end.lat != null ? it.end : it.start || null;
-      if (k.indexOf('T:') === 0) { var t = k.slice(2), hit = null; (it.days || []).forEach(function (d) { if (d.overnight && d.overnight.town === t) hit = d.overnight; }); return hit; }
+      if (k.indexOf('T:') === 0) { var t = k.slice(2), hit = null; (it.days || []).forEach(function (d) { if (d.overnight && d.overnight.town === t) hit = { name: t, lat: d.overnight.lat, lng: d.overnight.lng }; }); return hit; }
+      if (k.indexOf('N:') === 0) { var d = (it.days || [])[+k.slice(2)]; return d && d.overnight ? { name: d.overnight.town || (d.endAt || {}).name || '', lat: d.overnight.lat, lng: d.overnight.lng } : null; }
       return (m || byS(it))[k] || null;
     }
-    // drive minutes and km from a to b: the leg → the matrix → straight line × 1.3 at 45 km/h (a guess)
+    // drive minutes and km from a to b: the leg (either way) → the matrix → straight line × 1.4 at 45 km/h (lib/trip.js fallback)
     function drive(it, a, b, m) {
-      var L = (it.legs || {})[a + '>' + b] || (it.legs || {})[b + '>' + a];
-      if (L && L.min != null) return { min: +L.min, km: +(L.km || 0), leg: L, key: (it.legs || {})[a + '>' + b] ? a + '>' + b : b + '>' + a, guess: L.src === 'estimate' };
+      var lg = it.legs || {}, L = lg[a + '>' + b] || lg[b + '>' + a];
+      if (!L && same(it) && (a === 'E' || b === 'E')) { var a2 = a === 'E' ? 'S' : a, b2 = b === 'E' ? 'S' : b; L = lg[a2 + '>' + b2] || lg[b2 + '>' + a2]; if (L) { a = a2; b = b2; } }
+      if (L && L.min != null) return { min: +L.min, km: +(L.km || 0), key: lg[a + '>' + b] ? a + '>' + b : b + '>' + a, src: L.src || 'trip', guess: L.src === 'estimate' };
       var X = it.matrix, ia = X && X.keys ? X.keys.indexOf(a) : -1, ib = X && X.keys ? X.keys.indexOf(b) : -1;
-      if (ia >= 0 && ib >= 0 && X.min && X.min[ia] && X.min[ia][ib] != null) return { min: +X.min[ia][ib], km: X.km && X.km[ia] ? +X.km[ia][ib] || 0 : 0, leg: null, key: a + '>' + b, guess: X.src === 'estimate' };
+      if (ia >= 0 && ib >= 0 && X.min && X.min[ia] && X.min[ia][ib] != null) return { min: +X.min[ia][ib], km: X.km && X.km[ia] ? +X.km[ia][ib] || 0 : 0, key: a + '>' + b, src: 'matrix', guess: X.src === 'estimate' };
       var A = pt(it, a, m), B = pt(it, b, m);
-      if (!A || !B || A.lat == null || B.lat == null) return { min: 0, km: 0, leg: null, key: a + '>' + b, guess: true };
-      var km = metres([+A.lat, +A.lng], [+B.lat, +B.lng]) / 1000 * 1.3;
-      return { min: Math.round(km / 45 * 60) + (km > 0.5 ? 5 : 0), km: Math.round(km), leg: null, key: a + '>' + b, guess: true };
+      if (!A || !B || A.lat == null || B.lat == null) return { min: 0, km: 0, key: a + '>' + b, src: 'estimate', guess: true };
+      var km = metres([+A.lat, +A.lng], [+B.lat, +B.lng]) / 1000 * 1.4;
+      return { min: Math.round(km / 45 * 60), km: Math.round(km * 10) / 10, key: a + '>' + b, src: 'estimate', guess: true };
     }
-    // day i as the contract's timeline: leave → drive → (wait) → stop → (lunch) → … → return | overnight; with warnings
+    function same(it) { return !it.end || it.end.kind === 'same'; }
+    var PLACE = { school: { en: 'the school', sw: 'shule' }, health: { en: 'the clinic', sw: 'kliniki' } };
+    function W(code, level, en, sw, x) { var w = { code: code, level: level, en: en, sw: sw, local: true }; for (var k in x) w[k] = x[k]; return w; }
+    // day i as the server's timeline (lib/itin-plan.js schedule(), the same steps and words)
     function day(it, i) {
       var d = (it.days || [])[i]; if (!d) return null;
       var m = byS(it), hrs = it.hours || H, lu = it.lunch || LUNCH, e = ends(it, i);
-      var t = hm(hrs.start) == null ? hm(H.start) : hm(hrs.start), endAt = hm(hrs.end) == null ? hm(H.end) : hm(hrs.end);
-      var L = hm(lu.at) == null ? hm(LUNCH.at) : hm(lu.at), lmin = lu.skip ? 0 : (+lu.min || 0);
-      var tl = [], warns = [], km = 0, dmin = 0, lunch = !lmin, guess = false, pos = e.a, A = pt(it, e.a, m);
-      var eat = function () { tl.push({ kind: 'lunch', from: clock(t), to: clock(t + lmin) }); t += lmin; lunch = true; };
+      var t = hm(hrs.start) == null ? hm(H.start) : hm(hrs.start), H1 = hm(hrs.end), L = hm(lu.at), LM = +lu.min || 0;
+      var tl = [], warns = [], km = 0, dmin = 0, lunch = !!lu.skip || L == null || !LM, guess = false, pos = e.a, A = pt(it, e.a, m);
+      var eat = function () { tl.push({ kind: 'lunch', from: clock(t), to: clock(t + LM) }); t += LM; lunch = true; };
       var go = function (to) {
+        if (to === pos || (same(it) && /^[SE]$/.test(to) && /^[SE]$/.test(pos))) return;
         var g = drive(it, pos, to, m);
-        if (!lunch && t + g.min > L + 60) eat(); // before driving on when the next arrival would pass lunch.at + 60
-        tl.push({ kind: 'drive', from: pos, to: to, dep: clock(t), arr: clock(t + g.min), min: g.min, km: g.km, leg: g.key, guess: g.guess });
-        t += g.min; km += g.km; dmin += g.min; if (g.guess) guess = true; pos = to;
+        if (!lunch && t < L && t + g.min > L + 60 && t >= L - 60) eat();
+        tl.push({ kind: 'drive', from: pos, to: to, dep: clock(t), arr: clock(t + g.min), min: g.min, km: g.km, leg: g.key, src: g.src, guess: g.guess });
+        t += g.min; km += g.km || 0; dmin += g.min; if (g.guess) guess = true; pos = to;
       };
       tl.push({ kind: 'leave', at: clock(t), place: A ? A.name || '' : '' });
       (d.stops || []).forEach(function (sid) {
         var s = m[sid]; if (!s) return;
         go(sid);
-        var arrive = t, fx = hm(s.fixed), w = s.window, op = w ? hm(w.open) : null, cl = w ? hm(w.close) : null, vm = +s.visitMin || 45;
-        if (fx != null) {
-          if (arrive < fx) { tl.push({ kind: 'wait', from: clock(arrive), to: clock(fx), min: fx - arrive, sid: sid, why: 'fixed' }); arrive = fx; }
-          else if (arrive > fx) warns.push({ code: 'FIXED_LATE', level: 'difficult', sid: sid, at: clock(arrive), fixed: clock(fx), name: s.name, local: true });
-        } else if (op != null && cl != null) {
-          if (arrive < op) { tl.push({ kind: 'wait', from: clock(arrive), to: clock(op), min: op - arrive, sid: sid, why: 'opens' }); if (op - arrive > 20) warns.push({ code: 'BEFORE_OPEN', level: 'info', sid: sid, at: clock(arrive), open: clock(op), name: s.name, local: true }); arrive = op; }
-          if (arrive + vm > cl) warns.push({ code: 'AFTER_CLOSE', level: 'caution', sid: sid, at: clock(arrive), close: clock(cl), type: s.type || '', name: s.name, local: true });
+        var arrive = t, visit = Math.max(5, +s.visitMin || 45), f = hm(s.fixed), w = s.window && hm(s.window.open) != null && hm(s.window.close) != null ? s.window : null;
+        if (!lunch && t >= L + 60 && !(f != null && t + LM > f) && !(w && Math.max(t + LM, hm(w.open)) + visit > hm(w.close))) eat();
+        var st = t;
+        if (f != null) {
+          if (t < f) { tl.push({ kind: 'wait', from: clock(t), to: clock(f), min: Math.round(f - t), sid: sid, why: 'fixed' }); st = f; }
+          else if (t > f + 5) { var lm = Math.round(t - f); warns.push(W('FIXED_LATE', 'difficult', 'Arrives ' + clock(t) + ', ' + lm + ' min after the meeting at ' + s.fixed, 'Inafika ' + clock(t) + ', dakika ' + lm + ' baada ya mkutano wa saa ' + s.fixed, { sid: sid, lateMin: lm })); }
+        } else if (w) {
+          var o = hm(w.open), c = hm(w.close), pl = PLACE[s.type] || { en: 'the site', sw: 'eneo' };
+          if (t < o) { tl.push({ kind: 'wait', from: clock(t), to: clock(o), min: Math.round(o - t), sid: sid, why: 'opens' }); if (o - t > 20) warns.push(W('BEFORE_OPEN', 'info', 'Arrives ' + clock(t) + ', ' + Math.round(o - t) + ' min before ' + pl.en + ' opens', 'Inafika ' + clock(t) + ', dakika ' + Math.round(o - t) + ' kabla ' + pl.sw + ' haijafunguliwa', { sid: sid })); st = o; }
+          if (st >= c) warns.push(W('AFTER_CLOSE', 'difficult', 'Arrives ' + clock(arrive) + ', after ' + pl.en + ' closes', 'Inafika ' + clock(arrive) + ', baada ya ' + pl.sw + ' kufungwa', { sid: sid, lateMin: Math.round(st + visit - c) }));
+          else if (st + visit > c) warns.push(W('AFTER_CLOSE', 'caution', 'Visit runs until ' + clock(st + visit) + ', after ' + pl.en + ' closes at ' + w.close, 'Ziara inaisha ' + clock(st + visit) + ', baada ya ' + pl.sw + ' kufungwa saa ' + w.close, { sid: sid, lateMin: Math.round(st + visit - c) }));
         }
-        tl.push({ kind: 'stop', sid: sid, arrive: clock(arrive), leave: clock(arrive + vm), visitMin: vm, fixed: s.fixed || null, late: fx != null && t > fx });
-        t = arrive + vm;
-        if (!lunch && t >= L) eat(); // after the stop during which lunch time falls
+        t = st;
+        tl.push({ kind: 'stop', sid: sid, arrive: clock(arrive), start: clock(st), leave: clock(t + visit), visitMin: visit, fixed: s.fixed || null, late: warns.some(function (x) { return x.sid === sid && (x.code === 'AFTER_CLOSE' || x.code === 'FIXED_LATE'); }) });
+        t += visit;
+        if (!lunch && t >= L) eat();
       });
-      if ((d.stops || []).length) go(e.b);
+      go(e.b);
       var B = pt(it, e.b, m);
-      tl.push(e.b.indexOf('T:') === 0 ? { kind: 'overnight', at: clock(t), town: e.b.slice(2) } : { kind: 'return', at: clock(t), place: B ? B.name || '' : '' });
-      if (t > endAt) warns.push({ code: 'OVER_HOURS', level: 'caution', at: clock(t), end: clock(endAt), sid: (d.stops || []).slice(-1)[0] || null, local: true });
-      return { timeline: tl, warnings: warns, km: km, driveMin: dmin, endsAt: clock(t), guess: guess };
+      tl.push(e.night ? { kind: 'overnight', at: clock(t), town: B ? B.name || '' : '' } : { kind: 'return', at: clock(t), place: B ? B.name || '' : '' });
+      var over = H1 != null && t > H1 ? Math.round(t - H1) : 0;
+      if (over) warns.push(W('OVER_HOURS', over > 60 ? 'difficult' : 'caution', 'Day ends ' + clock(t) + ', after ' + hrs.end, 'Siku inaisha ' + clock(t) + ', baada ya ' + hrs.end, { overMin: over }));
+      return { timeline: tl, warnings: warns, km: Math.round(km * 10) / 10, driveMin: Math.round(dmin), endsAt: clock(t), guess: guess };
     }
     // every day re-timed; the server's own words for leg and weather warnings are kept
     function retime(it) {
       (it.days || []).forEach(function (d, i) {
         var r = day(it, i), keep = (d.warnings || []).filter(function (w) { return !/^(AFTER_CLOSE|BEFORE_OPEN|FIXED_LATE|OVER_HOURS)$/.test(w.code); });
+        // the server's fix (move to a day it fits) stays on its warning
+        r.warnings.forEach(function (w) { (d.warnings || []).forEach(function (o) { if (o.code === w.code && o.sid === w.sid && o.fix) w.fix = o.fix; }); });
         d.timeline = r.timeline; d.km = r.km; d.driveMin = r.driveMin; d.endsAt = r.endsAt; d.warnings = r.warnings.concat(keep); d.local = true;
       });
       return it;
@@ -12386,7 +12402,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
         (d.timeline || []).forEach(function (r) {
           if (r.kind !== 'stop') return; var s = m[r.sid]; if (!s) return; n.all++;
           if (s.status === 'done' || s.checkin) n.done++; else if (s.status === 'skipped') n.skipped++;
-          else if (s.status === 'late' || (today && d.date < today) || (today && d.date === today && nowMin != null && nowMin > hm(r.arrive) + 15)) n.late++;
+          else if (s.status === 'late' || (today && d.date < today) || (today && d.date === today && nowMin != null && nowMin > hm(r.start || r.arrive) + 15)) n.late++;
           else n.left++;
         });
       });
@@ -12420,7 +12436,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
     itwSwap: '<path d="M7 4 3.5 7.5 7 11M3.5 7.5H16M17 13l3.5 3.5L17 20M20.5 16.5H8"/>',
     itwGroup: '<circle cx="8" cy="8.5" r="2.8"/><circle cx="16.5" cy="9.5" r="2.3"/><path d="M2.5 19c.8-3.2 3-5 5.5-5s4.7 1.8 5.5 5M13.5 15.2c.9-.8 1.9-1.2 3-1.2 2.2 0 4 1.6 4.5 4.5"/>'
   });
-  var ITW = { list: null, admin: false, alerts: null, seg: 'field', veh: null, fuel: null, set: null, groups: null, prog: {}, me: null, mates: null };
+  var ITW = { sugAreas: [], list: null, admin: false, alerts: null, seg: 'field', veh: null, fuel: null, set: null, groups: null, prog: {}, me: null, mates: null };
   function itwApi(method, path, body) {
     return fetch(path, { method: method, headers: Object.assign({ Accept: 'application/json' }, pinHdr(), body ? { 'Content-Type': 'application/json' } : {}), body: body ? JSON.stringify(body) : undefined, credentials: 'same-origin' })
       .then(function (r) { return r.json().catch(function () { return { ok: false, reason: 'down' }; }).then(function (j) { j.status = r.status; return j; }); })
@@ -12454,7 +12470,13 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
       'bad-odometer': ['The odometer is lower than the last fill.', 'Odometer iko chini kuliko ujazo uliopita.'], 'no-vehicle': ['Choose a vehicle first.', 'Chagua gari kwanza.'],
       'in-use': ['This vehicle is on a planned trip.', 'Gari hili liko kwenye safari iliyopangwa.'], 'bad-type': ['Choose a type.', 'Chagua aina.'], 'bad-cc': ['Check the engine size (cc).', 'Hakikisha ukubwa wa injini (cc).'], 'bad-fuel': ['Choose petrol or diesel.', 'Chagua petroli au dizeli.'],
       'passport-number': ['Passport numbers are never stored. Remove it and save again.', 'Namba za pasipoti hazihifadhiwi kamwe. Iondoe kisha uhifadhi tena.'],
-      'bad-email': ['Check the e‑mail address.', 'Hakikisha anwani ya barua pepe.'], 'bad-date': ['Check the date.', 'Hakikisha tarehe.'], 'bad-currency': ['Choose a currency.', 'Chagua sarafu.'], 'bad-item': ['Add a title and a date.', 'Weka kichwa na tarehe.']
+      'bad-email': ['Check the e‑mail address.', 'Hakikisha anwani ya barua pepe.'], 'bad-date': ['Check the date.', 'Hakikisha tarehe.'], 'bad-currency': ['Choose a currency.', 'Chagua sarafu.'], 'bad-item': ['Add a title and a date.', 'Weka kichwa na tarehe.'],
+      end: ['Choose where the trip ends.', 'Chagua safari inapoishia.'], lunch: ['Check the lunch time.', 'Hakikisha muda wa chakula.'], 'bad-name': ['Add a name.', 'Weka jina.'],
+      'bad-consumption': ['L/100 km must be between 1 and 60.', 'L/100 km lazima iwe kati ya 1 na 60.'], 'bad-amount': ['Check the amount.', 'Hakikisha kiasi.'], 'bad-time': ['Check the time.', 'Hakikisha muda.'],
+      'no-mail': ['E\u2011mail isn’t set up yet.', 'Barua pepe bado haijawekwa.'], 'no-recipients': ['Nobody in the group has an e\u2011mail address.', 'Hakuna mtu kwenye kikundi mwenye barua pepe.'],
+      cap: ['The e\u2011mail limit is reached. Try again later.', 'Kikomo cha barua pepe kimefikiwa. Jaribu tena baadaye.'], 'day-cap': ['Today’s e\u2011mail limit is reached.', 'Kikomo cha barua pepe cha leo kimefikiwa.'], 'month-cap': ['This month’s e\u2011mail limit is reached.', 'Kikomo cha barua pepe cha mwezi huu kimefikiwa.'],
+      'bad-country': ['Choose a country.', 'Chagua nchi.'], 'bad-town': ['Check the town.', 'Hakikisha mji.'], 'no-fx': ['No exchange rate yet. Enter the amount in KES.', 'Bado hakuna kiwango cha ubadilishaji. Weka kiasi kwa KES.'],
+      participant: ['That person isn’t in the group.', 'Mtu huyo hayupo kwenye kikundi.'], 'too-many': ['That’s too many.', 'Hivyo ni vingi mno.'], 'bad-request': ['Something is missing. Check the form.', 'Kuna kitu kinakosekana. Hakikisha fomu.']
     }[j && j.reason];
     return R ? tr(R[0], R[1]) : why(j || {});
   }
@@ -12637,7 +12659,8 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
     };
     var sugDraw = function (j) {
       var el = $('itwPSug'); if (!el) return;
-      var areas = j.areas || [], items = (j.items || []).filter(function (x) { return !P.areas.length || P.areas.indexOf(x.area) >= 0; });
+      (j.areas || []).forEach(function (a) { if (ITW.sugAreas.indexOf(a) < 0) ITW.sugAreas.push(a); }); // the server filters by the ticked areas; keep every area to choose from
+      var areas = ITW.sugAreas, items = (j.items || []).filter(function (x) { return !P.areas.length || P.areas.indexOf(x.area) >= 0; });
       el.innerHTML = '<div class="itw-sug" data-testid="plan_sug"><div class="itw-sh2"><b>' + tr('Suggested stops', 'Vituo vilivyopendekezwa') + '</b><small class="muted">' + tr('Most needed first', 'Vinavyohitajika zaidi kwanza') + '</small></div>' +
         (areas.length ? '<div class="itw-chips itw-ar" role="group" aria-label="' + tr('Area', 'Eneo') + '">' + areas.slice(0, 14).map(function (a) { return '<button type="button" class="chip" data-ar="' + esc(a) + '" aria-pressed="' + (P.areas.indexOf(a) >= 0) + '">' + esc(a) + '</button>'; }).join('') + '</div>' : '') +
         (items.length ? items.slice(0, 30).map(function (x) {
@@ -12650,7 +12673,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
     var suggest = function () {
       var el = $('itwPSug'); if (!el) return; save();
       el.innerHTML = '<p class="muted">' + tr('Finding what needs a visit…', 'Inatafuta kinachohitaji ziara…') + '</p>';
-      var body = { ck: P.ck, ids: P.stops, limit: 30 }; if (P.start.kind === 'here' && S.here) body.from = { lat: S.here[0], lng: S.here[1] };
+      var body = { ck: P.ck, areas: P.areas, ids: P.stops, limit: 30 }; if (P.start.kind === 'here' && S.here) body.from = { lat: S.here[0], lng: S.here[1] };
       itwApi('POST', '/api/itin/suggest', body).then(function (j) { if (!$('itwPSug')) return; if (!j.ok) { el.innerHTML = '<p class="msg bad">' + esc(itwWhy(j)) + '</p>'; return; } sugDraw(j); });
     };
     // vehicles for the picker
@@ -12663,7 +12686,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
     w.addEventListener('change', function (e) {
       if (e.target.id === 'itwPSame') { P.end = e.target.checked ? { kind: 'same' } : { kind: 'place' }; plDraw('end'); $('itwPEndPl').classList.toggle('hidden', e.target.checked); }
       save(); if (/itwPFrom|itwPTo/.test(e.target.id)) { if ($('itwPTo').value < $('itwPFrom').value) $('itwPTo').value = $('itwPFrom').value; bestDay(); }
-      if (e.target.id === 'itwPCk') { P.areas = []; if ($('itwPSug').innerHTML) suggest(); }
+      if (e.target.id === 'itwPCk') { P.areas = []; ITW.sugAreas = []; if ($('itwPSug').innerHTML) suggest(); }
     });
     w.addEventListener('input', function (e) { if (e.target.id === 'itwPT') save(); });
     w.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target.hasAttribute('data-q')) { e.preventDefault(); plFind(e.target.getAttribute('data-q')); } });
@@ -12671,7 +12694,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
       var x = e.target.closest('button'); if (!x || !w.contains(x)) return;
       if (x.hasAttribute('data-rm')) { P.stops = P.stops.filter(function (id) { return id !== x.getAttribute('data-rm'); }); itwDraftSave(P); stopsDraw(); var sj = $('itwPSug') && $('itwPSug')._j; if (sj) sugDraw(sj); return; }
       if (x.hasAttribute('data-sg')) { var id = x.getAttribute('data-sg'), k = P.stops.indexOf(id); if (k >= 0) P.stops.splice(k, 1); else P.stops.push(id); buzz(); itwDraftSave(P); stopsDraw(); sugDraw($('itwPSug')._j); return; }
-      if (x.hasAttribute('data-ar')) { var a = x.getAttribute('data-ar'), i = P.areas.indexOf(a); if (i >= 0) P.areas.splice(i, 1); else P.areas.push(a); itwDraftSave(P); sugDraw($('itwPSug')._j); return; }
+      if (x.hasAttribute('data-ar')) { var a = x.getAttribute('data-ar'), i = P.areas.indexOf(a); if (i >= 0) P.areas.splice(i, 1); else P.areas.push(a); itwDraftSave(P); sugDraw($('itwPSug')._j); suggest(); return; }
       if (x.hasAttribute('data-pp')) { var n = x.getAttribute('data-pp'), j = P.people.indexOf(n); if (j >= 0) P.people.splice(j, 1); else P.people.push(n); x.setAttribute('aria-pressed', String(j < 0)); itwDraftSave(P); return; }
       if (x.closest('#itwPStart')) { P.start = { kind: x.getAttribute('data-k') }; qa('#itwPStart button').forEach(function (y) { y.setAttribute('aria-pressed', String(y === x)); }); if (P.start.kind === 'here' && !S.here) locate(function () { plDraw('start'); }); plDraw('start'); itwDraftSave(P); return; }
       if (x.hasAttribute('data-qgo')) { plFind(x.getAttribute('data-qgo')); return; }
@@ -12780,16 +12803,8 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
   }
   function itwRisk(l) { var x = { ok: ['Roads OK', 'Barabara sawa', 'ok'], caution: ['Take care', 'Kuwa makini', 'warn'], difficult: ['Difficult', 'Ngumu', 'bad'] }[l]; return x ? '<span class="itw-chip r-' + x[2] + '">' + tr(x[0], x[1]) + '</span>' : ''; }
   // a warning's words: the server's, or (re‑timed on the phone) ours
-  function itwWarnTx(w) {
-    if (w.en && !w.local) return itwT(w);
-    var it = ITW.v ? ITW.v.it : {}, s = w.sid ? itwStop(it, w.sid) : null, nm = s ? s.name : w.name || '';
-    var KIND = { school: ['school closes', 'shule inafungwa'], health: ['the clinic closes', 'zahanati inafungwa'] }[s ? s.type : ''] || ['it closes', 'inafungwa'];
-    if (w.code === 'AFTER_CLOSE') return tr('Arrives ' + w.at + ', after ' + KIND[0] + ' (' + w.close + '): ' + nm, 'Inafika ' + w.at + ', baada ya ' + KIND[1] + ' (' + w.close + '): ' + nm);
-    if (w.code === 'BEFORE_OPEN') return tr('Arrives ' + w.at + ' and waits until it opens at ' + w.open + ': ' + nm, 'Inafika ' + w.at + ' na kusubiri hadi ifunguliwe saa ' + w.open + ': ' + nm);
-    if (w.code === 'FIXED_LATE') return tr('Arrives ' + w.at + ', after the ' + w.fixed + ' meeting: ' + nm, 'Inafika ' + w.at + ', baada ya mkutano wa saa ' + w.fixed + ': ' + nm);
-    if (w.code === 'OVER_HOURS') return tr('Back at ' + w.at + ', after the working day ends (' + w.end + ')', 'Kurudi saa ' + w.at + ', baada ya saa za kazi kuisha (' + w.end + ')');
-    return itwT(w) || w.code;
-  }
+  // a warning's words: always the server's (the phone's own re-timing uses the same words as lib/itin-plan.js)
+  function itwWarnTx(w) { return itwT(w) || w.code; }
   function itwFixTx(f) {
     if (!f) return '';
     if (f.action === 'swap') { var d = (ITW.v.it.days || [])[f['with']]; return tr('Swap with ', 'Badilisha na ') + (d ? dDay(d.date) : tr('Day ' + (f['with'] + 1), 'Siku ' + (f['with'] + 1))); }
@@ -12801,7 +12816,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
     ws = (ws || []).filter(function (w) { return w.code !== 'NO_VEHICLE' || !ITW.v || !ITW.v.it.vehicleId; }); if (!ws.length) return '';
     return '<ul class="itw-warns">' + ws.map(function (w, i) {
       var lv = w.level === 'difficult' ? 'bad' : w.level === 'info' ? 'info' : 'warn', fx = itwCan() ? itwFixTx(w.fix) : '';
-      return '<li class="itw-w ' + lv + '">' + oic(w.level === 'info' ? 'mpaInfo' : /RAIN|STORM|MURRAM|SWAP/.test(w.code) ? 'itwRain' : /REPORT/.test(w.code) ? 'itwRoad' : 'alert') + '<span>' + esc(itwWarnTx(w)) + '</span>' +
+      return '<li class="itw-w ' + lv + '">' + oic(w.level === 'info' ? 'mpaInfo' : /RAIN|STORM|MURRAM|SWAP/.test(w.code) ? 'itwRain' : /REPORT/.test(w.code) ? 'itwRoad' : 'alert') + '<span>' + esc(itwWarnTx(w)) + (w.sid && ITW.v && itwStop(ITW.v.it, w.sid) ? '<small>' + itwNm(itwStop(ITW.v.it, w.sid).name) + '</small>' : '') + '</span>' +
         (fx ? '<button class="btn small light" type="button" data-fix="' + day + ':' + i + '">' + esc(fx) + '</button>' : '') + '</li>';
     }).join('') + '</ul>';
   }
@@ -12834,12 +12849,12 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
       if (r.kind === 'drive') return '<li class="itw-tl-d"><span class="itw-tm"></span><div>' + itwChips(it, r) + '</div></li>';
       if (r.kind === 'wait') return '<li class="itw-tl-w"><span class="itw-tm"><small>' + r.from + '</small></span><div><small>' + (r.why === 'fixed' ? tr('Wait ' + itwMin(r.min) + ' for the meeting', 'Subiri ' + itwMin(r.min) + ' kwa mkutano') : tr('Wait ' + itwMin(r.min) + ' until it opens', 'Subiri ' + itwMin(r.min) + ' hadi ifunguliwe')) + '</small></div></li>';
       if (r.kind === 'lunch') return '<li class="itw-tl-l"><span class="itw-tm"><b>' + r.from + '</b></span><div><b>' + oic('itwFood') + tr('Lunch', 'Chakula cha mchana') + '</b><small>' + r.from + '–' + r.to + '</small></div></li>';
-      if (r.kind === 'overnight') return '<li class="itw-tl-e itw-tl-n"><span class="itw-tm"><b>' + r.at + '</b></span><div><b>' + oic('itwBed') + tr('Overnight in ', 'Kulala ') + esc(r.town) + '</b>' + itwLodgeTx(d) + (ed ? '<button class="lnk" type="button" data-lodge="' + V.day + '">' + tr('Lodging', 'Malazi') + '</button>' : '') + '</div></li>';
+      if (r.kind === 'overnight') return '<li class="itw-tl-e itw-tl-n"><span class="itw-tm"><b>' + r.at + '</b></span><div><b>' + oic('itwBed') + tr('Overnight in ', 'Kulala ') + esc(r.town || (d.overnight || {}).town || (d.endAt || {}).name || '') + '</b>' + itwLodgeTx(d) + (ed ? '<button class="lnk" type="button" data-lodge="' + V.day + '">' + tr('Lodging', 'Malazi') + '</button>' : '') + '</div></li>';
       if (r.kind === 'return') return '<li class="itw-tl-e"><span class="itw-tm"><b>' + r.at + '</b></span><div><b>' + tr('Back', 'Kurudi') + '</b><small>' + esc(r.place || '') + '</small></div></li>';
       if (r.kind !== 'stop') return '';
       var s = itwStop(it, r.sid) || {}, p = pg[r.sid], st = s.checkin ? 'done' : p ? p.state : s.status, ss = ITW_SS[st], k = (d.stops || []).indexOf(r.sid), wt = itwWinTx(s);
       var bad = (d.warnings || []).some(function (w) { return w.sid === r.sid && /AFTER_CLOSE|FIXED_LATE/.test(w.code); });
-      return '<li class="itw-st' + (bad ? ' bad' : '') + (st ? ' s-' + st : '') + '" data-sid="' + esc(r.sid) + '" data-i="' + k + '"><span class="itw-tm"><b>' + r.arrive + '</b><small>' + r.leave + '</small></span>' +
+      return '<li class="itw-st' + (bad ? ' bad' : '') + (st ? ' s-' + st : '') + '" data-sid="' + esc(r.sid) + '" data-i="' + k + '"><span class="itw-tm"><b>' + (r.start || r.arrive) + '</b><small>' + r.leave + '</small></span>' +
         '<div class="itw-sb"><b>' + itwNm(s.name || '') + '</b><small>' + esc([itwTy(s.type), itwMin(r.visitMin)].filter(Boolean).join(' · ')) + (wt ? ' · <span class="nw">' + esc(wt) + '</span>' : '') + '</small>' +
         ((s.why || []).length && V.o.preview ? '<span class="itw-why">' + s.why.slice(0, 2).map(function (y) { return '<i class="w-' + esc(y.code) + '">' + esc(itwT(y)) + '</i>'; }).join('') + '</span>' : '') +
         '<div class="itw-sf">' + (ss ? '<span class="itw-ss">' + dqmPill(ss[2], tr(ss[0], ss[1]) + (p && p.at ? ' ' + p.at : '') + (p && p.lateMin ? ' · ' + '+' + itwMin(p.lateMin) : '')) + '</span>' : '') +
@@ -12866,7 +12881,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
     if (!navigator.onLine) { toast(tr('No signal. This change needs a signal to save.', 'Hakuna mtandao. Badiliko hili linahitaji mtandao kuhifadhiwa.')); return Promise.resolve({ ok: false }); }
     return itwApi('POST', '/api/itin/' + encodeURIComponent(it.id), body).then(function (j) {
       if (!ITW.v || ITW.v.it.id !== it.id) return j;
-      if (j.ok && j.itin) { j.itin._can = ITW.v.o.can; ITW.v.it = j.itin; itwSave(j.itin); itwVDraw(); }
+      if (j.ok && j.itin) { j.itin._can = ITW.v.o.can; if ((j.itin.days || []).some(function (d) { return !d.timeline; })) { ITC.retime(j.itin); j.itin.days.forEach(function (d) { delete d.local; }); } ITW.v.it = j.itin; itwSave(j.itin); itwVDraw(); }
       else if (j.reason === 'conflict' && j.current) { ITW.v.it = j.current; itwSave(j.current); itwVDraw(); toast(itwWhy(j)); }
       else if (!j.ok) toast(itwWhy(j));
       if (then) then(j);
@@ -12879,7 +12894,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
     if (x.hasAttribute('data-lock')) {
       var sid = x.getAttribute('data-lock'), s = itwStop(it, sid), row = null; buzz();
       (it.days[V.day].timeline || []).forEach(function (r) { if (r.sid === sid && r.kind === 'stop') row = r; });
-      itwStops([s.locked ? { sid: sid, locked: false, fixed: null } : { sid: sid, locked: true, fixed: row ? row.arrive : s.fixed }]);
+      itwStops([s.locked ? { sid: sid, locked: false, fixed: null } : { sid: sid, locked: true, fixed: row ? row.start || row.arrive : s.fixed }]);
       toast(s.locked ? tr('Time locked: ', 'Muda umefungwa: ') + s.fixed : tr('Time unlocked', 'Muda umefunguliwa')); return;
     }
     if (x.hasAttribute('data-smore')) return itwStopMenu(x.getAttribute('data-smore'));
@@ -12893,7 +12908,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
   }
   function itwPreviewSave(b) {
     var V = ITW.v; b.disabled = true; msg('itwVMsg', '', tr('Saving…', 'Inahifadhi…'));
-    var body = Object.assign({}, V.o.body, { title: V.it.title, plan: V.it });
+    var body = Object.assign({}, V.o.body, { title: V.it.title, stops: V.it.stops, plan: { days: V.it.days.map(function (d) { return { stops: d.stops, overnight: d.overnight || null }; }) } });
     itwApi('POST', '/api/itin', body).then(function (j) {
       b.disabled = false; if (!$('itwVMsg')) return;
       if (!j.ok) { msg('itwVMsg', 'bad', itwWhy(j)); return; }
@@ -12942,13 +12957,13 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
   function itwLodge(i) {
     var V = ITW.v, d = V.it.days[i], o = d.overnight || {}, l = o.lodging || {};
     var w = itwPanel(tr('Lodging in ', 'Malazi ') + esc(o.town || ''), '<div class="itw-fm"><label class="itw-f">' + tr('Name', 'Jina') + '<input id="itwLn" type="text" value="' + esc(l.name || '') + '"></label><label class="itw-f">' + tr('Phone', 'Simu') + '<input id="itwLp" type="tel" value="' + esc(l.phone || '') + '"></label>' +
-      '<label class="itw-f">' + tr('Cost a night (KES)', 'Gharama kwa usiku (KES)') + '<input id="itwLk" type="number" inputmode="numeric" value="' + esc(l.kes || '') + '"></label><label class="itw-f">' + tr('Note (optional)', 'Maelezo (si lazima)') + '<input id="itwLo" type="text" value="' + esc(l.note || '') + '"></label>' +
+      '<label class="itw-f">' + tr('Cost a night (KES)', 'Gharama kwa usiku (KES)') + '<input id="itwLk" type="number" inputmode="numeric" value="' + esc(l.kes || '') + '"></label><label class="itw-f">' + tr('Note (optional)', 'Maelezo (si lazima)') + '<input id="itwLo" type="text" value="' + esc(l.note || '') + '"></label><label class="itw-ck"><input type="checkbox" id="itwLpd"' + (l.paid ? ' checked' : '') + '> <span>' + tr('Paid (counts in the actual cost)', 'Imelipwa (inahesabiwa kwenye gharama halisi)') + '</span></label>' +
       '<button class="btn block" type="button" id="itwLs">' + tr('Save', 'Hifadhi') + '</button><button class="btn block light" type="button" id="itwLh">' + tr('Go home this night instead', 'Rudi nyumbani usiku huu badala yake') + '</button></div>', 'itw-sh');
     var put = function (ov) {
       if (V.o.preview) { d.overnight = ov; ITC.retime(V.it); itwVDraw(); w.close(); return; }
       itwPost({ action: 'lodging', v: V.it.v, day: i, overnight: ov }).then(function (j) { if (j && j.ok) w.close(); });
     };
-    $('itwLs').addEventListener('click', function () { put(Object.assign({}, o, { lodging: { name: $('itwLn').value.trim(), phone: $('itwLp').value.trim(), kes: +$('itwLk').value || 0, note: $('itwLo').value.trim() } })); });
+    $('itwLs').addEventListener('click', function () { put(Object.assign({}, o, { lodging: { name: $('itwLn').value.trim(), phone: $('itwLp').value.trim(), kes: +$('itwLk').value || 0, note: $('itwLo').value.trim(), paid: $('itwLpd').checked } })); });
     $('itwLh').addEventListener('click', function () { put(null); });
   }
   function itwMore() {
@@ -13046,6 +13061,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
         line(tr('Fuel', 'Mafuta'), e.fuelMissing ? null : e.fuelKes, a.fuelKes) + line(tr('Lunch', 'Chakula'), e.lunchKes, null) + line(tr('Per diem', 'Posho'), e.perDiemKes, null) +
         line(tr('Lodging', 'Malazi'), e.lodgingKes, a.lodgingKes) + line(tr('Extras', 'Mengineyo'), e.extrasKes, a.extrasKes) +
         '<tr class="tot"><th scope="row">' + tr('Total', 'Jumla') + '</th><td>' + itwKes(e.totalKes) + '</td><td>' + (a.totalKes != null ? itwKes(a.totalKes) : '—') + '</td></tr></tbody></table>' +
+      ((c.missing || []).length ? '<p class="msg warn">' + tr('Not counted yet: ', 'Bado haijahesabiwa: ') + c.missing.map(function (k) { return { lunchKes: tr('lunch', 'chakula'), perDiemKes: tr('per diem', 'posho'), lodgingKes: tr('lodging', 'malazi') }[k] || k; }).join(', ') + '. ' + (S.admin ? tr('Set the amounts in Office › Trips.', 'Weka viwango kwenye Ofisi › Safari.') : tr('The office sets these amounts.', 'Ofisi inaweka viwango hivi.')) + '</p>' : '') +
       (e.fuelMissing ? '<p class="msg warn">' + tr('The total leaves out fuel until there is a fuel price.', 'Jumla haijumuishi mafuta hadi kuwe na bei ya mafuta.') + '</p>' : '') +
       ((c.days || []).length > 1 ? '<h4>' + tr('Each day', 'Kila siku') + '</h4><table class="itw-tb itw-tbd"><tbody>' + c.days.map(function (d) { return '<tr><th scope="row"><span class="nw">' + dDay(d.date) + '</span><small>' + itwKm(d.km) + '</small></th><td>' + itwKes(d.totalKes) + '</td></tr>'; }).join('') + '</tbody></table>' : '') +
       '<h4>' + tr('Extras', 'Mengineyo') + '</h4><div id="itwXl"></div>' +
@@ -13118,7 +13134,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
     };
     w.addEventListener('change', function (e) { var k = e.target.getAttribute('data-pk'); if (k) { buzz(); put({ items: [{ key: k, done: e.target.checked }] }); } });
     w.addEventListener('click', function (e) {
-      var r = e.target.closest('[data-pkrm]'); if (r) { put({ items: [{ key: r.getAttribute('data-pkrm'), removed: true }] }); return; }
+      var r = e.target.closest('[data-pkrm]'); if (r) { var key = r.getAttribute('data-pkrm'); put({ items: [/^u:/.test(key) ? { key: key, 'delete': true } : { key: key, removed: true }] }); return; }
       if (e.target.closest('#itwPkA')) { var v = $('itwPkN').value.trim(); if (!v) return; $('itwPkN').value = ''; put({ add: [{ en: v, sw: v }] }); }
     });
   }
@@ -13129,7 +13145,12 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
   function shareToChat(itineraryId) {
     return itwApi('GET', '/api/itin/' + encodeURIComponent(itineraryId) + '?card=1').then(function (j) {
       if (!j.ok) { toast(itwWhy(j)); return false; }
-      if (typeof window.rfChatShare === 'function') return window.rfChatShare(Object.assign({ kind: 'itin', id: itineraryId }, j.card));
+      var send = function (card) { return window.rfChatShare(Object.assign({ kind: 'itin', id: itineraryId }, card)); };
+      if (typeof window.rfChatShare === 'function') {
+        if (j.card.url) return send(j.card);
+        var c = itwLoad(itineraryId); // not shared yet: make the private link first
+        return itwApi('POST', '/api/itin/' + encodeURIComponent(itineraryId), { action: 'share', v: c ? c.v : 0 }).then(function (k) { if (!k.ok) { toast(itwWhy(k)); return false; } return send(Object.assign({}, j.card, { url: k.url })); });
+      }
       toast(tr('Team chat isn’t on this phone yet. Share the link instead.', 'Gumzo la timu bado halipo kwenye simu hii. Shiriki kiungo badala yake.')); return false;
     });
   }
@@ -13152,7 +13173,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
       var b = e.target.closest('[data-sh]'); if (!b) return; var k = b.getAttribute('data-sh');
       if (k === 'copy') { try { navigator.clipboard.writeText(url).then(function () { toast(tr('Copied ✓', 'Imenakiliwa ✓')); }); } catch (x) { $('itwShU').select(); } return; }
       if (k === 'chat') return shareToChat(it.id);
-      if (k === 'make' || k === 'rotate') return itwApi('POST', '/api/itin/' + encodeURIComponent(it.id), { action: 'share', v: it.v, rotate: k === 'rotate' }).then(function (j) { if (!j.ok) return msg('itwShM', 'bad', itwWhy(j)); it.share = { url: j.url, at: new Date().toISOString(), by: S.name }; if (j.itin) V.it = j.itin; it = V.it; it.share = it.share || { url: j.url }; itwSave(it); again(); });
+      if (k === 'make' || k === 'rotate') return itwApi('POST', '/api/itin/' + encodeURIComponent(it.id), { action: 'share', v: it.v, rotate: k === 'rotate' }).then(function (j) { if (!j.ok) return msg('itwShM', 'bad', itwWhy(j)); V.it.share = { url: j.url, at: new Date().toISOString(), by: S.name }; if (j.v) V.it.v = j.v; it = V.it; itwSave(it); again(); });
       if (k === 'stop') return poAsk(tr('Stop sharing?', 'Acha kushiriki?'), tr('The link stops working for everyone who has it.', 'Kiungo kitaacha kufanya kazi kwa kila mwenye nacho.'), tr('Stop sharing', 'Acha kushiriki'), true).then(function (ok) { if (ok) itwPost({ action: 'unshare', v: it.v }).then(function (j) { if (j && j.ok) { V.it.share = null; it = V.it; again(); } }); });
       if (k === 'team') { var names = qa('[data-mate2][aria-pressed=true]', w).map(function (x) { return x.getAttribute('data-mate2'); }); itwPost({ action: 'share-team', v: it.v, names: names }).then(function (j) { if (j && j.ok) msg('itwShM', 'ok', tr('Shared', 'Imeshirikiwa')); }); }
     });
@@ -13188,19 +13209,20 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
     var t = itwToday(), n = ITC.next(it, t), c = ITC.count(it, t, itwNow());
     if (!n) { el.innerHTML = '<div class="itw-next done" data-id="' + esc(it.id) + '"><b>' + tr('All stops done', 'Vituo vyote vimekamilika') + '</b><p class="muted">' + esc(it.title || '') + '</p>' + (it.status !== 'done' ? '<button class="btn small" type="button" data-nx="finish">' + oic('okc') + tr('Finish the trip', 'Maliza safari') + '</button>' : '') + '</div>'; return; }
     var d = it.days[n.a], row = null, drv = null; (d.timeline || []).forEach(function (r, k) { if (r.kind === 'stop' && r.sid === n.s.sid) { row = r; for (var q = k - 1; q >= 0; q--) if (d.timeline[q].kind === 'drive') { drv = d.timeline[q]; break; } } });
-    var late = row && d.date === t && itwNow() > ITC.hm(row.arrive) + 15;
+    var late = row && d.date === t && itwNow() > ITC.hm(row.start || row.arrive) + 15;
     el.innerHTML = '<div class="itw-next' + (late ? ' late' : '') + '" data-id="' + esc(it.id) + '" data-testid="next_stop">' +
       '<small class="itw-nl">' + tr('Next stop', 'Kituo kinachofuata') + ' · ' + tr((c.done + c.skipped + 1) + ' of ' + c.all, (c.done + c.skipped + 1) + ' kati ya ' + c.all) + (inView ? '' : ' · ' + esc(it.title || '')) + '</small>' +
       '<b class="itw-nn">' + itwNm(n.s.name) + '</b>' +
-      '<span class="itw-nt">' + (row ? '<span class="nw">' + tr('Planned ', 'Imepangwa ') + row.arrive + '</span>' : '') + (late ? ' · <span class="nw t-bad">' + tr('running late', 'umechelewa') + '</span>' : '') + (itwWinTx(n.s) ? ' · <span class="nw">' + esc(itwWinTx(n.s)) + '</span>' : '') + '</span>' +
+      '<span class="itw-nt">' + (row ? '<span class="nw">' + tr('Planned ', 'Imepangwa ') + (row.start || row.arrive) + '</span>' : '') + (late ? ' · <span class="nw t-bad">' + tr('running late', 'umechelewa') + '</span>' : '') + (itwWinTx(n.s) ? ' · <span class="nw">' + esc(itwWinTx(n.s)) + '</span>' : '') + '</span>' +
       (drv ? itwChips(it, drv) : '') +
-      '<div class="itw-nb">' + (n.s.lat != null ? '<a class="btn light" href="https://www.google.com/maps/dir/?api=1&amp;destination=' + (+n.s.lat).toFixed(6) + ',' + (+n.s.lng).toFixed(6) + '&amp;travelmode=driving" target="_blank" rel="noopener">' + brand('gmaps') + tr('Directions', 'Maelekezo') + '</a>' : '') +
+      '<div class="itw-nb">' + (n.s.lat != null ? '<a class="btn light" data-left="' + esc(it.id) + '" href="https://www.google.com/maps/dir/?api=1&amp;destination=' + (+n.s.lat).toFixed(6) + ',' + (+n.s.lng).toFixed(6) + '&amp;travelmode=driving" target="_blank" rel="noopener">' + brand('gmaps') + tr('Directions', 'Maelekezo') + '</a>' : '') +
         '<button class="btn" type="button" data-nx="checkin" data-sid="' + esc(n.s.sid) + '">' + oic('check') + tr('Check in', 'Ingia') + '</button></div>' +
       '<div class="itw-nb2"><button class="lnk" type="button" data-nx="skip" data-sid="' + esc(n.s.sid) + '">' + tr('Skip', 'Ruka') + '</button><button class="lnk" type="button" data-nx="late" data-day="' + n.a + '">' + tr('Running late?', 'Umechelewa?') + '</button><button class="lnk" type="button" data-nx="road">' + tr('Report the road', 'Ripoti barabara') + '</button>' + (inView ? '' : '<button class="lnk" type="button" data-itwopen="' + esc(it.id) + '">' + tr('The day plan', 'Mpango wa siku') + '</button>') + '</div>' +
       '<p class="itw-pn"><span class="nw">' + tr(c.done + ' done', c.done + ' zimekamilika') + '</span>' + (c.late ? ' · <span class="nw t-bad">' + tr(c.late + ' late', c.late + ' zimechelewa') + '</span>' : '') + (c.skipped ? ' · <span class="nw">' + tr(c.skipped + ' skipped', c.skipped + ' zimerukwa') + '</span>' : '') + ' · <span class="nw">' + tr(c.left + ' to go', c.left + ' zimebaki') + '</span></p></div>';
     itwTrack(it);
   }
   document.addEventListener('click', function (e) {
+    var lf = e.target.closest('[data-left]'); if (lf) store.set('rfPinItinLeft', JSON.stringify({ id: lf.getAttribute('data-left'), at: new Date().toISOString() })); // Directions: they're leaving now
     var b = e.target.closest('[data-nx]'); if (!b) return;
     var box = b.closest('[data-id]'), id = box && box.getAttribute('data-id'), it = ITW.v && ITW.v.it.id === id ? ITW.v.it : ITW.nx && ITW.nx.id === id ? ITW.nx : itwLoad(id); if (!it) return;
     buzz(); itwNextAct(b.getAttribute('data-nx'), b, it);
@@ -13211,6 +13233,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
     if (k === 'checkin') {
       locate(function (here) {
         var body = { action: 'checkin', v: it.v, sid: sid, at: new Date().toISOString() }; if (here) { body.lat = here[0]; body.lng = here[1]; }
+        var lf = jget('rfPinItinLeft', null); if (lf && lf.id === it.id && Date.now() - Date.parse(lf.at) < 8 * 36e5) body.left = lf.at; store.del('rfPinItinLeft'); // the real drive time, for the trip engine
         itwSend(it.id, body); s.checkin = { at: body.at, by: S.name }; s.status = 'done'; itwSave(it);
         qa('.bsh.itw-sh').forEach(function (x) { if (x.close) x.close(); });
         setTimeout(function () { openProj(s.id, 'visit'); }, 260); // the existing visit flow: Report a visit for this project
@@ -13258,7 +13281,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
     itwApi('POST', '/api/itin/' + encodeURIComponent(it.id), { action: 'replan', v: it.v, day: day, now: now, mode: 'preview' }).then(function (j) {
       if (!j.ok) { toast(itwWhy(j)); return; }
       var nm = function (sids) { return (sids || []).map(function (s) { var x = itwStop(j.plan || it, s) || itwStop(it, s); return '<li>' + esc(x ? x.name : s) + '</li>'; }).join(''); };
-      var mv = (j.moved || []).length, pd = j.plan && j.plan.days && j.plan.days[day], back = pd && pd.endsAt;
+      j.moved = j.move || j.moved || []; var mv = j.moved.length, back = j.endsAt;
       var w = itwPanel(tr('Move the rest?', 'Hamisha vilivyobaki?'), '<div class="itw-rp" data-testid="replan_sheet"><p>' + (mv ? tr('From now (' + now + ') these don’t fit today:', 'Kuanzia sasa (' + now + ') hivi havitoshi leo:') : tr('From now (' + now + ') everything still fits today.', 'Kuanzia sasa (' + now + ') kila kitu bado kinatosha leo.')) + '</p>' +
         (mv ? '<ul class="itw-xl">' + nm(j.moved) + '</ul>' : '') + (back ? '<p class="muted">' + tr('Back at ', 'Kurudi saa ') + back + '</p>' : '') +
         (mv ? '<button class="btn block" type="button" data-rp="push">' + oic('cal') + tr('Push them to tomorrow', 'Zihamishie kesho') + '</button><button class="btn block light" type="button" data-rp="drop">' + tr('Drop them', 'Ziache') + '</button>'
@@ -13269,7 +13292,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
         if (k === 'keep') { w.close(); return; }
         b.disabled = true;
         itwApi('POST', '/api/itin/' + encodeURIComponent(it.id), { action: 'replan', v: it.v, day: day, now: now, mode: k }).then(function (r) {
-          if (!r.ok) { b.disabled = false; toast(itwWhy(r)); return; } var n = r.itin || r.plan; if (n && n.id) { itwSave(n); ITW.nx = n; if (ITW.v && ITW.v.it.id === n.id) ITW.v.it = n; itwRefreshNext(n); }
+          if (!r.ok) { b.disabled = false; toast(itwWhy(r)); return; } var n = r.itin; if (n && n.id) { itwSave(n); ITW.nx = n; if (ITW.v && ITW.v.it.id === n.id) ITW.v.it = n; itwRefreshNext(n); }
           w.close(); toast(k === 'drop' ? tr('Dropped. The office has been told.', 'Zimeachwa. Ofisi imearifiwa.') : tr('Re-planned. The office has been told.', 'Imepangwa upya. Ofisi imearifiwa.'));
         });
       });
@@ -13325,11 +13348,12 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
     var w = itwPanel(nw ? (bike ? tr('Add my motorbike', 'Ongeza pikipiki yangu') : tr('Add a vehicle', 'Ongeza gari')) : esc(v.name || v.plate || ''), body, 'itw-sh');
     var fuel = v.fuel || 'petrol';
     w.querySelector('#itwVf').addEventListener('click', function (e) { var b = e.target.closest('[data-f]'); if (!b) return; fuel = b.getAttribute('data-f'); qa('#itwVf button').forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); }); });
-    var post = function (body, cb) { itwApi('POST', '/api/vehicles', body).then(function (j) { if (!j.ok) { msg('itwVm', 'bad', itwWhy(j)); return cb && cb(j); } ITW.veh = j.vehicles || ITW.veh; if (j.vehicle) { ITW.veh = (ITW.veh || []).filter(function (x) { return x.vid !== j.vehicle.vid; }).concat(body.action === 'remove' ? [] : [j.vehicle]); } w.close(); itwVehDraw(); if (done) done(j); toast(tr('Saved', 'Imehifadhiwa')); }); };
+    var post = function (body, cb) { itwApi('POST', '/api/vehicles', body).then(function (j) { if (!j.ok) { msg('itwVm', 'bad', itwWhy(j) + (j.trips && j.trips.length ? ' (' + j.trips.map(function (t) { return t.title || t.id || t; }).join(', ') + ')' : '')); return cb && cb(j); } ITW.veh = j.vehicles || ITW.veh; if (j.vehicle) { ITW.veh = (ITW.veh || []).filter(function (x) { return x.vid !== j.vehicle.vid; }).concat(body.action === 'remove' ? [] : [j.vehicle]); } w.close(); itwVehDraw(); if (done) done(j); toast(tr('Saved', 'Imehifadhiwa')); }); };
     $('itwVsv').addEventListener('click', function () {
       var n = $('itwVn').value.trim(); if (!n) { msg('itwVm', 'bad', tr('Add a name or plate.', 'Weka jina au namba ya gari.')); return; }
       var x = { name: n, plate: /\d/.test(n) ? n.replace(/^.*?\b([A-Z]{2,3}\s?\d{3}[A-Z]?)\b.*$/i, '$1') : '', type: bike ? 'motorbike' : $('itwVt').value, cc: +$('itwVc').value || null, fuel: fuel, lPer100: +$('itwVl2').value || null, seats: +$('itwVs').value || null };
-      post(nw ? { action: 'add', vehicle: x } : { action: 'update', vid: v.vid, vehicle: x });
+      if (bike) x.mine = true;
+      post(nw ? Object.assign({ action: 'add' }, x) : Object.assign({ action: 'update', vid: v.vid }, x));
     });
     if (!nw) {
       $('itwVrm').addEventListener('click', function () { poAsk(tr('Remove this vehicle?', 'Ondoa gari hili?'), tr('Its fuel logs stay in the trips they belong to.', 'Kumbukumbu zake za mafuta zinabaki kwenye safari zake.'), tr('Remove', 'Ondoa'), true).then(function (ok) { if (ok) post({ action: 'remove', vid: v.vid }, function (j) { if (j.reason === 'in-use') poAsk(itwWhy(j), tr('Remove it anyway?', 'Liondoe hata hivyo?'), tr('Remove', 'Ondoa'), true).then(function (k) { if (k) post({ action: 'remove', vid: v.vid, force: true }); }); }); }); });
@@ -13352,12 +13376,12 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
       var towns = Object.keys(c.towns || {}), ov = c.overrides || {}, st = c.status || {}, cur = c.currency || 'KES';
       var pr = function (v) { return v == null ? '—' : '<span class="nw" data-nofx>' + (+v).toFixed(cur === 'KES' ? 2 : 0) + '</span>'; };
       var src = c.kind === 'none' ? tr('No official price yet', 'Bado hakuna bei rasmi') : esc(c.source || '') + (c.from ? ' · <span class="nw">' + dDay(c.from, true) + '–' + dDay(c.to, true) + '</span>' : '');
-      return '<div class="card itw-fc" data-testid="fuel_' + ck + '"><div class="itw-fch"><span class="itw-fl">' + (FLAG[ck] || '') + '</span><div><b>' + CNAME[ck] + '</b><small>' + src + '</small>' + (c.fetchedAt ? '<small class="muted">' + tr('Checked ', 'Imeangaliwa ') + dAgo(c.fetchedAt) + (c.kind === 'cached' ? tr(' · last good prices', ' · bei nzuri za mwisho') : '') + '</small>' : '') + '</div>' + dqmPill(c.kind === 'official' ? 'ok' : c.kind === 'none' ? 'bad' : 'warn', c.kind === 'official' ? tr('Official', 'Rasmi') : c.kind === 'override' ? tr('Entered', 'Imewekwa') : c.kind === 'cached' ? tr('Saved', 'Iliyohifadhiwa') : tr('None', 'Hakuna')) + '</div>' +
+      return '<div class="card itw-fc" data-testid="fuel_' + ck + '"><div class="itw-fch"><span class="itw-fl">' + (FLAG[ck] || '') + '</span><div><b>' + CNAME[ck] + '</b><small>' + src + '</small>' + (c.fetchedAt ? '<small class="muted">' + tr('Checked ', 'Imeangaliwa ') + dAgo(c.fetchedAt) + (c.kind === 'cached' ? tr(' · last good prices', ' · bei nzuri za mwisho') : '') + (c.stale ? tr(' · may be out of date', ' · huenda imepitwa na wakati') : '') + '</small>' : '') + '</div>' + dqmPill(c.kind === 'official' ? 'ok' : c.kind === 'none' ? 'bad' : 'warn', c.kind === 'official' ? tr('Official', 'Rasmi') : c.kind === 'override' ? tr('Entered', 'Imewekwa') : c.kind === 'cached' ? tr('Saved', 'Iliyohifadhiwa') : tr('None', 'Hakuna')) + '</div>' +
         (st.ok === false ? '<p class="msg warn">' + esc(ITW_FR[st.reason] ? tr(ITW_FR[st.reason][0], ITW_FR[st.reason][1]) : st.reason || '') + (st.at ? ' · ' + dAgo(st.at) : '') + '</p>' : '') +
         (towns.length || Object.keys(ov).length ? '<table class="itw-tb itw-ftb"><thead><tr><th scope="col">' + tr('Town', 'Mji') + '</th><th scope="col">' + tr('Petrol', 'Petroli') + '</th><th scope="col">' + tr('Diesel', 'Dizeli') + '</th></tr></thead><tbody>' +
           Object.keys(ov).map(function (t) { var o = ov[t]; return '<tr class="itw-ov"><th scope="row">' + esc(t === '*' ? tr('Whole country', 'Nchi nzima') : t) + '<small>' + tr('entered by ', 'imewekwa na ') + esc(o.by || '') + '</small></th><td>' + pr(o.petrol) + '</td><td>' + pr(o.diesel) + '</td></tr>'; }).join('') +
           towns.slice(0, 12).map(function (t) { var o = c.towns[t]; return '<tr><th scope="row">' + esc(t) + '</th><td>' + pr(o.petrol) + '</td><td>' + pr(o.diesel) + '</td></tr>'; }).join('') + '</tbody></table>' +
-          '<p class="muted itw-cur">' + tr('Per litre, ' + cur, 'Kwa lita, ' + cur) + (towns.length > 12 ? ' · ' + tr(towns.length + ' towns', 'miji ' + towns.length) : '') + (c.url ? ' · <a href="' + esc(c.url) + '" target="_blank" rel="noopener">' + esc(c.sourceName || c.source || '') + '</a>' : '') + '</p>' : '') + '</div>';
+          '<p class="muted itw-cur">' + tr('Per litre, ' + cur, 'Kwa lita, ' + cur) + (towns.length > 12 ? ' · ' + tr(towns.length + ' towns', 'miji ' + towns.length) : '') + (c.docUrl || c.url ? ' · <a href="' + esc(c.docUrl || c.url) + '" target="_blank" rel="noopener">' + esc(c.sourceName || c.source || '') + '</a>' : '') + (c.fx && c.fx.rate && cur !== 'KES' ? ' · <span class="nw">' + cur + '\u00a01 = KES\u00a0' + (+c.fx.rate).toFixed(4).replace(/0+$/, '') + '</span>' : '') + '</p>' : '') + '</div>';
     }).join('') + (S.admin ? '<div class="itw-two"><button class="btn small light" type="button" data-itw="fprice" data-testid="fuel_set">' + oic('dqmedit') + tr('Enter a price', 'Weka bei') + '</button><button class="btn small light" type="button" data-itw="frefresh">' + oic('dqmrot') + tr('Check prices now', 'Angalia bei sasa') + '</button></div>' : '');
   }
   function itwPriceEdit() {
@@ -13381,7 +13405,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
   }
   // ---- group trips (volunteers and donors): details, the group, day by day, costs per person, packing, sharing, reminders
   var ITW_GK = { flight: ['Flight', 'Ndege', 'itwPlane'], transfer: ['Pick‑up / transfer', 'Kuchukuliwa / usafiri', 'itwCar'], lodging: ['Lodging', 'Malazi', 'itwBed'], project: ['Drilling or project day', 'Siku ya uchimbaji au mradi', 'drop'], school: ['School visit', 'Ziara ya shule', 'people'], safari: ['Safari', 'Safari ya wanyama', 'compass'], free: ['Free time', 'Muda huru', 'spark'], meal: ['Meal', 'Mlo', 'itwFood'], other: ['Other', 'Nyingine', 'pin'] };
-  var ITW_CUR = ['USD', 'KES', 'GBP', 'EUR', 'CAD', 'AUD'];
+  var ITW_CUR = ['USD', 'KES', 'GBP', 'EUR', 'CAD', 'AUD', 'TZS', 'UGX', 'MWK'];
   function itwGroups(el) {
     itwApi('GET', '/api/group-trips').then(function (j) {
       if (!$('itwBody') || ITW.seg !== 'group') return;
@@ -13427,7 +13451,12 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
     w.querySelector('.bsh-x').addEventListener('click', gone); w.querySelector('.bsh-bg').addEventListener('click', gone);
     w.addEventListener('click', itwGClick);
   }
-  function itwGMoney(o) { return o ? Object.keys(o).filter(function (c) { return c !== 'KES'; }).map(function (c) { return '<span class="nw" data-nofx>' + c + ' ' + Math.round(o[c]).toLocaleString('en-US') + '</span>'; }).concat(o.KES != null ? ['<span class="nw" data-nofx>KES ' + Math.round(o.KES).toLocaleString('en-US') + '</span>'] : []).join(' · ') : '—'; }
+  // a total: "USD 1,450 · KES 187,340", or each currency on its own when there are no exchange rates (totals.byCurrency)
+  function itwGMoney(o) {
+    if (!o) return '—'; var f = function (c, v) { return '<span class="nw" data-nofx>' + c + '\u00a0' + Math.round(v).toLocaleString('en-US') + '</span>'; };
+    if (o.USD != null || o.KES != null) return [o.USD != null ? f('USD', o.USD) : '', o.KES != null ? f('KES', o.KES) : ''].filter(Boolean).join(' · ');
+    var b = o.byCurrency || o; return Object.keys(b).filter(function (c) { return /^[A-Z]{3}$/.test(c) && b[c]; }).map(function (c) { return f(c, b[c]); }).join(' · ') || '—';
+  }
   function itwGDraw() {
     var G = ITW.g; if (!G) return; var t = G.t, el = G.w.querySelector('#itwG'); if (!el) return;
     var open = {}; qa('details[data-gs]', el).forEach(function (d) { if (d.open) open[d.getAttribute('data-gs')] = 1; });
@@ -13504,13 +13533,13 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
     var w = itwPanel(iid ? esc(i.title) : tr('Add to the itinerary', 'Ongeza kwenye ratiba'), '<div class="itw-fm" data-testid="group_item"><label class="itw-f">' + tr('What', 'Nini') + '<select id="itwIk">' + Object.keys(ITW_GK).map(function (k) { return '<option value="' + k + '"' + (k === i.kind ? ' selected' : '') + '>' + tr(ITW_GK[k][0], ITW_GK[k][1]) + '</option>'; }).join('') + '</select></label>' +
       '<label class="itw-f">' + tr('Title', 'Kichwa') + '<input id="itwIt" type="text" maxlength="80" value="' + esc(i.title || '') + '"></label>' +
       '<div class="itw-f3"><label class="itw-f">' + tr('Date', 'Tarehe') + '<input id="itwId" type="date" value="' + esc(i.date || '') + '"></label><label class="itw-f">' + tr('Starts', 'Inaanza') + '<input id="itwIs" type="time" value="' + esc(i.start || '') + '"></label><label class="itw-f">' + tr('Ends', 'Inaisha') + '<input id="itwIe" type="time" value="' + esc(i.end || '') + '"></label></div>' +
-      '<div data-ik="flight"><div class="itw-f2"><label class="itw-f">' + tr('Airline', 'Shirika la ndege') + '<input id="itwIfa" type="text" value="' + esc(f.airline || '') + '"></label><label class="itw-f">' + tr('Flight number', 'Namba ya ndege') + '<input id="itwIfn" type="text" value="' + esc(f.number || '') + '"></label></div><div class="itw-f2"><label class="itw-f">' + tr('From', 'Kutoka') + '<input id="itwIff" type="text" value="' + esc(f.from || '') + '"></label><label class="itw-f">' + tr('To', 'Kwenda') + '<input id="itwIft" type="text" value="' + esc(f.to || '') + '"></label></div></div>' +
+      '<div data-ik="flight"><div class="itw-f2"><label class="itw-f">' + tr('Airline', 'Shirika la ndege') + '<input id="itwIfa" type="text" value="' + esc(f.airline || '') + '"></label><label class="itw-f">' + tr('Flight number', 'Namba ya ndege') + '<input id="itwIfn" type="text" value="' + esc(f.number || '') + '"></label></div><div class="itw-f2"><label class="itw-f">' + tr('From', 'Kutoka') + '<input id="itwIff" type="text" value="' + esc(f.from || '') + '"></label><label class="itw-f">' + tr('To', 'Kwenda') + '<input id="itwIft" type="text" value="' + esc(f.to || '') + '"></label></div><label class="itw-f">' + tr('Online check\u2011in opens (optional)', 'Kuingia mtandaoni kunaanza (si lazima)') + '<input id="itwIfc" type="text" value="' + esc(f.checkIn || '') + '" placeholder="' + esc(tr('e.g. 24 hours before', 'mf. saa 24 kabla')) + '"></label></div>' +
       '<div data-ik="lodging"><label class="itw-f">' + tr('Address', 'Anwani') + '<input id="itwIla" type="text" value="' + esc(lg.address || '') + '"></label><div class="itw-f2"><label class="itw-f">' + tr('Check‑in', 'Kuingia') + '<input id="itwIli" type="date" value="' + esc(lg.checkIn || '') + '"></label><label class="itw-f">' + tr('Check‑out', 'Kutoka') + '<input id="itwIlo" type="date" value="' + esc(lg.checkOut || '') + '"></label></div><label class="itw-f">' + tr('Contact', 'Mawasiliano') + '<input id="itwIlc" type="text" value="' + esc(lg.contact || '') + '"></label></div>' +
       '<div data-ik="project"><label class="itw-f">' + tr('Project', 'Mradi') + '<select id="itwIp"><option value="">' + tr('Choose…', 'Chagua…') + '</option>' + pj.map(function (p) { return '<option value="' + esc(p.id) + '"' + (p.id === i.projectId ? ' selected' : '') + '>' + esc(p.title) + '</option>'; }).join('') + '</select></label></div>' +
       '<label class="itw-f">' + tr('Place', 'Mahali') + '<input id="itwIln" type="text" value="' + esc(loc.name || '') + '" placeholder="' + esc(tr('e.g. Eldoret airport', 'mf. Uwanja wa ndege Eldoret')) + '"></label><label class="itw-f">' + tr('Point (optional)', 'Mahali kamili (si lazima)') + '<input id="itwIll" type="text" inputmode="decimal" value="' + esc(loc.lat != null ? fmt([loc.lat, loc.lng]) : '') + '" placeholder="0.4045, 35.2389"></label>' +
       '<label class="itw-f">' + tr('Notes', 'Maelezo') + '<textarea id="itwIn" rows="3">' + esc(i.notes || '') + '</textarea></label>' +
       '<label class="itw-f">' + tr('Attachment link (optional)', 'Kiungo cha kiambatisho (si lazima)') + '<input id="itwIa" type="url" value="' + esc(((i.attachments || [])[0] || {}).url || '') + '" placeholder="https://"></label>' +
-      '<label class="itw-f">' + tr('Remind the group', 'Kumbusha kikundi') + '<select id="itwIr"><option value="">' + tr('No reminder', 'Hakuna kumbusho') + '</option><option value="24h"' + ((i.remind || {}).before === '24h' ? ' selected' : '') + '>' + tr('24 hours before', 'Saa 24 kabla') + '</option><option value="3h"' + ((i.remind || {}).before === '3h' ? ' selected' : '') + '>' + tr('3 hours before', 'Saa 3 kabla') + '</option></select></label>' +
+      '<label class="itw-f">' + tr('Remind the group', 'Kumbusha kikundi') + '<select id="itwIr"><option value="">' + tr('No reminder', 'Hakuna kumbusho') + '</option><option value="24h"' + ((i.remind || {}).before === '24h' ? ' selected' : '') + '>' + tr('24 hours before', 'Saa 24 kabla') + '</option><option value="3h"' + ((i.remind || {}).before === '3h' ? ' selected' : '') + '>' + tr('3 hours before', 'Saa 3 kabla') + '</option><option value="1h"' + ((i.remind || {}).before === '1h' ? ' selected' : '') + '>' + tr('1 hour before', 'Saa 1 kabla') + '</option></select></label>' +
       '<button class="btn block" type="button" id="itwIsv">' + tr('Save', 'Hifadhi') + '</button>' + (iid ? '<button class="lnk t-bad" type="button" id="itwIrm">' + tr('Remove', 'Ondoa') + '</button>' : '') + '<p class="msg" id="itwIm" aria-live="polite"></p></div>', 'itw-sh itw-full');
     var kind = function () { var k = $('itwIk').value; qa('[data-ik]', w).forEach(function (x) { x.classList.toggle('hidden', x.getAttribute('data-ik') !== k); }); };
     kind(); $('itwIk').addEventListener('change', kind);
@@ -13518,7 +13547,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
       var k = $('itwIk').value, ll = /(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)/.exec($('itwIll').value), a = $('itwIa').value.trim();
       var x = { date: $('itwId').value, start: $('itwIs').value || null, end: $('itwIe').value || null, kind: k, title: $('itwIt').value.trim() || tr(ITW_GK[k][0], ITW_GK[k][1]), notes: $('itwIn').value.trim(),
         location: $('itwIln').value.trim() || ll ? { name: $('itwIln').value.trim(), lat: ll ? +ll[1] : null, lng: ll ? +ll[2] : null, address: '' } : null,
-        flight: k === 'flight' ? { airline: $('itwIfa').value.trim(), number: $('itwIfn').value.trim(), from: $('itwIff').value.trim(), to: $('itwIft').value.trim(), depart: $('itwIs').value || null, arrive: $('itwIe').value || null } : null,
+        flight: k === 'flight' ? { airline: $('itwIfa').value.trim(), number: $('itwIfn').value.trim(), from: $('itwIff').value.trim(), to: $('itwIft').value.trim(), checkIn: $('itwIfc').value.trim() || null, depart: $('itwIs').value || null, arrive: $('itwIe').value || null } : null,
         lodging: k === 'lodging' ? { name: $('itwIt').value.trim(), address: $('itwIla').value.trim(), checkIn: $('itwIli').value || null, checkOut: $('itwIlo').value || null, contact: $('itwIlc').value.trim() } : null,
         projectId: k === 'project' ? $('itwIp').value || null : null, attachments: a ? [{ name: tr('Link', 'Kiungo'), url: a, photo: null }] : [], remind: { before: $('itwIr').value || null, sentAt: (i.remind || {}).sentAt || null } };
       if (!x.date) return msg('itwIm', 'bad', itwWhy({ reason: 'bad-item' }));
@@ -13530,11 +13559,11 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
     var G = ITW.g;
     itwApi('POST', '/api/group-trips/' + encodeURIComponent(G.t.id), { action: 'remind', v: G.t.v, iid: iid, send: false }).then(function (j) {
       if (!j.ok) return toast(itwWhy(j)); var p = j.preview || {};
-      var w = itwPanel(tr('Reminder', 'Kumbusho'), '<div class="itw-fm" data-testid="group_remind"><p><b>' + esc(p.subject || '') + '</b></p><pre class="itw-pre">' + esc(p.text || '') + '</pre><p class="muted">' + tr('To ' + (j.to || 0) + ' people', 'Kwa watu ' + (j.to || 0)) + (j.missing ? ' · ' + tr(j.missing + ' with no e‑mail', j.missing + ' bila barua pepe') : '') + '</p>' +
-        '<button class="btn block" type="button" id="itwRsend"' + (j.to ? '' : ' disabled') + '>' + oic('mail') + tr('Send', 'Tuma') + '</button><p class="msg" id="itwRsm" aria-live="polite"></p></div>', 'itw-sh');
+      var w = itwPanel(tr('Reminder', 'Kumbusho'), '<div class="itw-fm" data-testid="group_remind"><p><b>' + esc(p.subject || '') + '</b></p><pre class="itw-pre">' + esc(p.text || '') + '</pre><p class="muted">' + tr('To ' + (j.to || 0) + ' people', 'Kwa watu ' + (j.to || 0)) + (j.missing ? ' · ' + tr(j.missing + ' with no e‑mail', j.missing + ' bila barua pepe') : '') + '</p>' + (j.ready === false ? '<p class="msg warn">' + tr('E‑mail isn’t set up yet, so it can’t be sent.', 'Barua pepe bado haijawekwa, kwa hiyo haiwezi kutumwa.') + '</p>' : '') +
+        '<button class="btn block" type="button" id="itwRsend"' + (j.to && j.ready !== false ? '' : ' disabled') + '>' + oic('mail') + tr('Send', 'Tuma') + '</button><p class="msg" id="itwRsm" aria-live="polite"></p></div>', 'itw-sh');
       $('itwRsend').addEventListener('click', function () {
         this.disabled = true; msg('itwRsm', '', tr('Sending…', 'Inatuma…'));
-        itwApi('POST', '/api/group-trips/' + encodeURIComponent(G.t.id), { action: 'remind', v: G.t.v, iid: iid, send: true }).then(function (k) { if (!k.ok) { msg('itwRsm', 'bad', itwWhy(k)); return; } w.close(); toast(tr('Sent to ' + k.sent, 'Imetumwa kwa ' + k.sent) + (k.failed ? ' · ' + tr(k.failed + ' failed', k.failed + ' hazikufika') : '')); if (k.trip) { G.t = k.trip; itwGDraw(); } });
+        itwApi('POST', '/api/group-trips/' + encodeURIComponent(G.t.id), { action: 'remind', v: G.t.v, iid: iid, send: true }).then(function (k) { if (!k.ok) { msg('itwRsm', 'bad', itwWhy(k)); return; } w.close(); toast(tr('Sent to ' + k.sent, 'Imetumwa kwa ' + k.sent) + ((k.failed || []).length ? ' · ' + tr(k.failed.length + ' failed', k.failed.length + ' hazikufika') : '')); if (k.trip) { G.t = k.trip; itwGDraw(); } });
       });
     });
   }

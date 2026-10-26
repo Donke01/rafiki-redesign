@@ -1,7 +1,7 @@
 // node --test tests/itin-ui.test.mjs — the trip planner's day timeline in pin.html (itw-core). After a drag, a lock or a
 // "Move the rest?", the phone re-times the days at once with the server's schedule rule (itin contract): cached legs, then
-// the matrix, then a straight-line guess; waits for opening or a fixed time; lunch once; "Arrives 15:50, after school
-// closes"; back after working hours. The block is pure, so it is lifted out of pin.html and run here as it is.
+// the matrix, then a straight-line guess; waits for opening or a fixed time; lunch once; "Arrives 15:50, after the school
+// closes"; back after working hours. It must give the same times as lib/itin-plan.js schedule() on the server. The block is pure, so it is lifted out of pin.html and run here as it is.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -38,25 +38,32 @@ test('a day: leave 07:30, the cached legs, visit lengths, lunch before a long dr
   assert.equal(r.endsAt, '14:20'); assert.deepEqual(r.warnings, []);
 });
 
-test('the last day ends at E; a leg the other way round is the same leg', () => {
+test('the last day ends at E (the start again when the trip ends where it began); a leg the other way round is the same leg', () => {
   const it = trip(); delete it.legs['s3>E']; it.legs['E>s3'] = { min: 12, km: 3 };
   const r = ITC.day(it, 1); assert.equal(r.timeline.at(-1).kind, 'return'); assert.equal(r.driveMin, 22);
+  const s = trip(); s.legs = { 'S>s3': { min: 10, km: 3 }, 's3>S': { min: 14, km: 3 } };
+  assert.equal(ITC.day(s, 1).driveMin, 24, 'E falls back to the S legs');
 });
 
-test('"Arrives 15:50, after school closes"', () => {
-  const it = trip(); it.legs['s1>s2'] = { min: 380, km: 95 }; // lunch comes first, before the long drive;
+test('"Arrives 15:50, after the school closes" (the server’s words), and a visit running past closing', () => {
+  const it = trip(); it.legs['s1>s2'] = { min: 425, km: 95 };
   const r = ITC.day(it, 0), w = r.warnings.find(x => x.code === 'AFTER_CLOSE');
-  assert.ok(w); assert.equal(w.sid, 's2'); assert.equal(w.at, '15:50'); assert.equal(w.close, '15:30');
-  assert.ok(r.warnings.some(x => x.code === 'OVER_HOURS'));
+  assert.ok(w); assert.equal(w.sid, 's2'); assert.equal(w.level, 'difficult');
+  assert.equal(w.en, 'Arrives 15:50, after the school closes'); assert.equal(w.sw, 'Inafika 15:50, baada ya shule kufungwa');
+  assert.ok(r.warnings.some(x => x.code === 'OVER_HOURS' && /^Day ends \d\d:\d\d, after 17:30$/.test(x.en)));
+  // arriving in time but the visit runs past closing: a caution, with the time it ends
+  it.legs['s1>s2'] = { min: 380, km: 95 };
+  const c = ITC.day(it, 0).warnings.find(x => x.code === 'AFTER_CLOSE');
+  assert.equal(c.level, 'caution'); assert.equal(c.en, 'Visit runs until 16:05, after the school closes at 15:30');
 });
 
 test('early: wait for opening (and an info note after 20 min); a fixed meeting time waits, or is late', () => {
   const it = trip(); it.hours.start = '06:00'; it.days[0].stops = ['s2']; it.legs['S>s2'] = { min: 60, km: 80 };
   const r = ITC.day(it, 0);
   assert.deepEqual(kinds(r).slice(0, 4), ['leave', 'drive', 'wait', 'stop']);
-  assert.equal(r.timeline[3].arrive, '08:00'); assert.equal(r.warnings[0].code, 'BEFORE_OPEN');
+  assert.equal(r.timeline[3].arrive, '07:00'); assert.equal(r.timeline[3].start, '08:00'); assert.equal(r.warnings[0].code, 'BEFORE_OPEN');
   const f = trip(); f.stops[0].fixed = '09:30';
-  const r2 = ITC.day(f, 0); assert.equal(r2.timeline.find(x => x.kind === 'stop').arrive, '09:30');
+  const r2 = ITC.day(f, 0); assert.equal(r2.timeline.find(x => x.kind === 'stop').start, '09:30');
   f.stops[0].fixed = '07:40'; assert.equal(ITC.day(f, 0).warnings[0].code, 'FIXED_LATE');
 });
 
@@ -68,7 +75,7 @@ test('no cached leg: the matrix, then a straight-line guess', () => {
 
 test('overnight: day 1 sleeps in a town, day 2 starts there', () => {
   const it = trip(); it.days[0].overnight = { town: 'Iten', lat: 0.67, lng: 35.51 }; it.legs['s2>T:Iten'] = { min: 90, km: 70 }; it.legs['T:Iten>s3'] = { min: 50, km: 40 };
-  assert.deepEqual(ITC.ends(it, 0), { a: 'S', b: 'T:Iten' }); assert.deepEqual(ITC.ends(it, 1), { a: 'T:Iten', b: 'E' });
+  assert.deepEqual(ITC.ends(it, 0), { a: 'S', b: 'T:Iten', night: true }); assert.deepEqual(ITC.ends(it, 1), { a: 'T:Iten', b: 'E', night: false });
   assert.equal(ITC.day(it, 0).timeline.at(-1).kind, 'overnight'); assert.equal(ITC.day(it, 1).timeline[1].min, 50);
 });
 

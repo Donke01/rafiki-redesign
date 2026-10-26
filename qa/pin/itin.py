@@ -1,5 +1,6 @@
 # Trips (itinw): Office › Trips and Vehicles, a trip's day plan, Plan a trip with suggestions, costs, packing, share,
-# "Move the rest?", Me › Next stop and a group trip, against a mock of the itin API (the contract in the itin notes).
+# "Move the rest?", Me › Next stop, a group trip and donor mode, against a mock of the itin API (contract v1.1, docs/itinerary.md).
+# Also walks it once like a user: Back one sheet at a time, drag a stop, lock a time, a one-tap fix, Check in → Report a visit.
 # Screenshots at 360, 390 and 1280 wide, in light, dark and sun, in English and Kiswahili. Each one is checked for
 # words broken across lines, things on top of each other, sideways scrolling and console errors.
 #   BASE=http://localhost:8931 OUT=/tmp/shots python3 qa/pin/itin.py [en|sw|both] [360,390,1280] [light,dark,sun]
@@ -104,7 +105,8 @@ GT = {'id': 'gt_july', 'v': 2, 'name': 'Kenya water trip, July 2027', 'from': '2
       'costs': [{'cid': 'c1', 'label': 'Lodging', 'amount': 450, 'currency': 'USD', 'per': 'person'}, {'cid': 'c2', 'label': 'Bus hire', 'amount': 180000, 'currency': 'KES', 'per': 'group'}],
       'payments': [{'payid': 'y1', 'pid': 'p1', 'amount': 1200, 'currency': 'USD', 'at': '2027-03-01'}],
       'packing': 'Sun hat, closed shoes for drilling days, headlamp.', 'expect': 'Long days outside; warm evenings in Kitale.', 'emergency': [{'name': 'Jessica', 'phone': '+254 700 000000', 'role': 'Trip leader'}],
-      'totals': {'perPerson': {'USD': 1450, 'KES': 187340}, 'group': {'USD': 2900, 'KES': 374680}, 'paid': {'p1': {'USD': 1200, 'KES': 155040}}, 'due': {'p1': {'USD': 250}, 'p2': {'USD': 1450}}, 'fx': {'at': '2026-10-26', 'USDKES': 129.2}},
+      'totals': {'participants': 2, 'perPerson': {'byCurrency': {'USD': 450, 'KES': 90000}, 'USD': 1146.6, 'KES': 148140}, 'group': {'byCurrency': {'USD': 900, 'KES': 180000}, 'USD': 2293.2, 'KES': 296280},
+                 'paid': {'p1': {'byCurrency': {'USD': 1200}, 'USD': 1200, 'KES': 155040}}, 'due': {'p1': {'USD': 0, 'KES': 0}, 'p2': {'USD': 1146.6, 'KES': 148140}}, 'fx': {'at': '2026-10-26', 'USDKES': 129.2}},
       'share': {'url': 'https://pin.rafikioutreach.org/pin-trip?t=abc', 'at': iso(30), 'by': 'Reid Anderson'}}
 
 def snap():
@@ -136,7 +138,13 @@ def install(pg):
         if path == '/settings': return J(route, {'ok': True, 'settings': b})
         a = b.get('action')
         if a == 'share': return J(route, {'ok': True, 'url': 'https://pin.rafikioutreach.org/pin-trip?t=Xy3kP0aLm9QwErTyUiOp1aSdFgHjKlZxCvBnMqWeRtY', 'token': 'x'})
-        if a == 'replan': return J(route, {'ok': True, 'plan': IT, 'moved': ['s3'], 'dropped': []})
+        POSTS.append(b)
+        if a == 'stops':   # like the server: the new order and edits, re-timed (here by the app itself: no timeline in the answer)
+            n = json.loads(json.dumps(IT)); by = {x['sid']: x for x in n['stops']}
+            for d, nd in zip(n['days'], b.get('days', [])): d['stops'] = nd['stops']; d.pop('timeline', None)
+            for e in b.get('stops', []): by.get(e['sid'], {}).update(e)
+            n['v'] = IT['v'] + 1; return J(route, {'ok': True, 'itin': n, 'can': {'edit': True, 'admin': True}})
+        if a == 'replan': return J(route, {'ok': True, 'preview': True, 'day': 0, 'keep': ['s1', 's2'], 'move': ['s3'], 'endsAt': '17:10'} if b.get('mode') == 'preview' else {'ok': True, 'itin': IT, 'moved': ['s3'], 'dropped': []})
         if a == 'summary': return J(route, {'ok': True, 'itin': dict(IT, summary={'visited': [{'sid': 's1', 'id': '101', 'name': 'Kapsaret Borehole', 'at': iso(3)}], 'skipped': [], 'km': {'value': 312, 'src': 'gps', 'planned': 298}, 'cost': {'estKes': 18250, 'actualKes': 9680, 'fuelLitres': 29.0}, 'problems': [], 'repairsOpened': 1, 'waterTests': 2})})
         return J(route, {'ok': True, 'itin': IT})
     def fuel(route, req):
@@ -155,17 +163,6 @@ def install(pg):
     pg.route(re.compile(r'/api/pin(\?.*)?$'), pin_api); pg.route(re.compile(r'/api/admin(\?.*)?$'), admin_api)
     pg.route(re.compile(r'/api/itin(/.*)?(\?.*)?$'), itin); pg.route(re.compile(r'/api/vehicles(\?.*)?$'), lambda r, q: J(r, {'ok': True, 'vehicles': VEH, 'admin': True}))
     pg.route(re.compile(r'/api/fuel(\?.*)?$'), fuel); pg.route(re.compile(r'/api/group-trips(/.*)?(\?.*)?$'), groups)
-    def share(route, req):
-        if 'G' * 20 in req.url:
-            days = {}
-            for i in GT['items']: days.setdefault(i['date'], []).append({k: i.get(k) for k in ('start', 'end', 'kind', 'title', 'location', 'notes', 'flight', 'lodging')})
-            return J(route, {'ok': True, 'kind': 'group', 'updated': iso(2), 'trip': {'name': GT['name'], 'from': GT['from'], 'to': GT['to'], 'destination': GT['destination'], 'summary': GT['summary'],
-                'days': [{'date': d, 'items': v} for d, v in sorted(days.items())], 'packing': GT['packing'], 'expect': GT['expect'], 'emergency': GT['emergency'], 'map': [{'name': 'Eldoret International Airport', 'lat': 0.4045, 'lng': 35.2389, 'kind': 'transfer'}, {'name': 'Kapsaret Borehole', 'lat': 0.47, 'lng': 35.25, 'kind': 'project'}]}})
-        nm = {s['sid']: s['name'] for s in IT['stops']}
-        return J(route, {'ok': True, 'kind': 'itin', 'updated': iso(1), 'trip': {'title': IT['title'], 'from': IT['from'], 'to': IT['to'], 'people': ['Reid', 'Meril'],
-            'days': [{'date': d['date'], 'overnight': d.get('overnight'), 'timeline': [dict(r, name=nm.get(r.get('sid'), '')) for r in d['timeline']]} for d in IT['days']],
-            'stops': [{'name': s['name'], 'lat': s['lat'], 'lng': s['lng']} for s in IT['stops']], 'legs': [l['geometry'] for l in IT['legs'].values() if l.get('geometry')]}})
-    pg.route(re.compile(r'/api/trip-share'), share)
     pg.route(re.compile(r'/api/trip/week'), lambda r, q: J(r, {'ok': True, 'bestDay': {'date': day(2), 'roadLevel': 'dry'}, 'days': [{'date': day(1), 'roadLevel': 'heavy'}]}))
     pg.route(re.compile(r'/api/(place|sms-admin|road-reports|fx)(\?.*)?$'), lambda r, q: J(r, {'ok': True, 'places': [], 'rates': {}}))
     pg.route(re.compile(r'https://(www\.google\.com/s2|fonts\.googleapis\.com)/.*'), lambda r, q: r.abort())
@@ -195,7 +192,7 @@ CHECK = r"""(root) => {
   R.querySelectorAll('.bsh-p,.card,.itw-tl,.itw-tb').forEach(e => { if (vis(e) && e.scrollWidth > e.clientWidth + 2 && getComputedStyle(e).overflowX !== 'auto') out.wide.push((e.className || '').slice(0, 30) + ' ' + e.scrollWidth + '>' + e.clientWidth); });
   return out; }"""
 
-RES = []; ERRS = []
+RES = []; ERRS = []; POSTS = []
 def context(br, lang, width, theme):
     mob = width < 700
     ctx = br.new_context(viewport={'width': width, 'height': 844 if mob else 900}, is_mobile=mob, has_touch=mob, device_scale_factor=2 if mob else 1, color_scheme='dark' if theme == 'dark' else 'light', service_workers='block', locale='en-GB', timezone_id='Africa/Nairobi',
@@ -223,6 +220,36 @@ def close_sheets(pg):
     for _ in range(4):
         if not pg.locator('.bsh').count(): break
         pg.evaluate('history.back()'); pg.wait_for_timeout(500)
+
+def act(pg, tag):
+    notes = []; ck = lambda c, w: None if c else notes.append(w)
+    pg.evaluate("location.hash = '#office/trips'"); pg.wait_for_timeout(1500)
+    pg.click('[data-itwopen="it_moiben"]'); pg.wait_for_timeout(1300)
+    pg.click('.itw-acts [data-v=cost]'); pg.wait_for_timeout(800)
+    pg.evaluate('history.back()'); pg.wait_for_timeout(700)
+    ck(pg.locator('.bsh').count() == 1 and pg.locator('.bsh.itw-trip').count() == 1, 'Back closes Costs only, the trip stays')
+    # drag the first stop of day 1 below the second: the order and the times change at once
+    first = pg.evaluate("[...document.querySelectorAll('.itw-tl .itw-st')].map(e => e.dataset.sid)")
+    g = pg.locator('.itw-tl .itw-st').nth(0).locator('.itw-grip'); g.scroll_into_view_if_needed(); b1 = g.bounding_box(); b2 = pg.locator('.itw-tl .itw-st').nth(1).bounding_box()
+    pg.mouse.move(b1['x'] + b1['width'] / 2, b1['y'] + b1['height'] / 2); pg.mouse.down(); pg.mouse.move(b1['x'] + 10, b2['y'] + b2['height'] * 0.85, steps=12); pg.mouse.up(); pg.wait_for_timeout(600)
+    after = pg.evaluate("[...document.querySelectorAll('.itw-tl .itw-st')].map(e => e.dataset.sid)")
+    ck(after[:2] == [first[1], first[0]], 'drag reorders the day (%s → %s)' % (first, after))
+    ck(any(p.get('action') == 'stops' for p in POSTS), 'the new order is saved (stops)')
+    # lock a stop's time
+    pg.locator('.itw-tl [data-lock]').nth(1).click(); pg.wait_for_timeout(400)
+    ck(pg.locator('.itw-tl [data-lock]').nth(1).get_attribute('aria-pressed') == 'true', 'the lock holds the time')
+    ck(any(p.get('action') == 'stops' and any(x.get('locked') for x in p.get('stops', [])) for p in POSTS), 'the lock is saved')
+    # one-tap fix on day 2: swap the rainy day
+    pg.click('.itw-days [data-day="1"]'); pg.wait_for_timeout(400); pg.locator('[data-fix]').first.click(); pg.wait_for_timeout(600)
+    ck(any(p.get('action') == 'swap-days' for p in POSTS), 'Swap sends swap-days')
+    pg.evaluate('history.back()'); pg.wait_for_timeout(700)
+    ck(pg.locator('.bsh').count() == 0 and pg.evaluate('location.hash') == '#office/trips', 'Back closes the trip, still on Office › Trips (%s)' % pg.evaluate('location.hash'))
+    # check in from Me: the visit flow for that project
+    pg.evaluate("location.hash = '#me'"); pg.wait_for_timeout(1800)
+    nx = pg.locator('#itwNext [data-nx=checkin]'); ck(nx.count() == 1, 'Me shows the Next stop card')
+    if nx.count(): nx.scroll_into_view_if_needed(); nx.click(); pg.wait_for_timeout(1800); ck(pg.evaluate('location.hash') == '#p/108/visit', 'Check in opens Report a visit for the project (%s)' % pg.evaluate('location.hash'))
+    ck(any(p.get('action') == 'checkin' and p.get('sid') == 's2' for p in POSTS), 'the check-in is sent')
+    RES.append((tag, 'behaviour', {'fail': notes} if notes else {})); print(('OK   ' if not notes else 'BAD  ') + tag + ' behaviour' + ('' if not notes else ' :: ' + ' | '.join(notes)), flush=True)
 
 def run(pg, tag):
     want = lambda n: not ONLY or n in ONLY.split(',')
@@ -262,11 +289,11 @@ def run(pg, tag):
         pg.evaluate("document.querySelectorAll('.itw-gs').forEach(d => { if (['days','cost','ppl'].includes(d.dataset.gs)) d.open = true; })"); pg.wait_for_timeout(300)
         look(pg, 'group-trip', tag, '.bsh:last-of-type'); sheet_scroll(pg, '[data-gs=cost]'); look(pg, 'group-costs', tag, '.bsh:last-of-type')
         pg.click('[data-gp=p1]'); pg.wait_for_timeout(600); look(pg, 'group-person', tag, '.bsh:last-of-type'); close_sheets(pg)
-    if want('public'):
-        pg.goto(BASE + '/pin-trip?t=' + 'F' * 43); pg.wait_for_timeout(1500); look(pg, 'public-field', tag, 'body')
-        pg.goto(BASE + '/pin-trip?t=' + 'G' * 43); pg.wait_for_timeout(1500); look(pg, 'public-group', tag, 'body')
-        pg.evaluate("document.querySelectorAll('.day')[1].scrollIntoView()"); pg.wait_for_timeout(300); look(pg, 'public-group-days', tag, 'body')
-        pg.goto(BASE + '/pin#me'); pg.wait_for_timeout(2500)
+    if want('donor'):   # donor mode: the group trip they are on, with its page
+        pg.route(re.compile(r'/api/donor(\?.*)?$'), lambda r, q: r.fulfill(json={'ok': True, 'donor': {'name': 'Ann Moss', 'viewer': 'Ann Moss'}, 'totals': {'projects': 1, 'water': 1, 'people': 1200, 'visitsYear': 3}, 'projects': [], 'updates': [],
+            'groupTrips': [{'name': GT['name'], 'from': GT['from'], 'to': GT['to'], 'destination': GT['destination'], 'summary': GT['summary'], 'url': 'https://pin.rafikioutreach.org/pin-trip?t=abc'}]}))
+        pg.evaluate("localStorage.setItem('rfPinDonor', '" + 'D' * 43 + "'); localStorage.removeItem('rfPinDonorData')"); pg.goto(BASE + '/pin-donor'); pg.wait_for_timeout(2200)
+        look(pg, 'donor-group-trip', tag, 'main'); pg.evaluate("localStorage.removeItem('rfPinDonor'); localStorage.removeItem('rfPinDonorData')"); pg.goto(BASE + '/pin'); pg.wait_for_timeout(2500)
     if want('me'):
         pg.evaluate("location.hash = '#me'"); pg.wait_for_timeout(1800); pg.evaluate("document.getElementById('meTrips').scrollIntoView()"); pg.wait_for_timeout(800)
         look(pg, 'me-next-stop', tag, '#vMe')
@@ -278,7 +305,9 @@ with sync_playwright() as p:
             for th in THEMES:
                 tag = '%s-%d-%s' % (lang, wd, th); del ERRS[:]
                 ctx, pg = context(br, lang, wd, th)
-                try: run(pg, tag)
+                try:
+                    if wd == WIDTHS[0] and th == THEMES[0] and (not ONLY or 'behaviour' in ONLY): act(pg, tag); pg.goto(BASE + '/pin#office/trips'); pg.wait_for_timeout(1500)
+                    run(pg, tag)
                 except Exception as e: RES.append((tag, 'run', {'error': [str(e).split('\n')[0][:300]]})); print('ERR  ' + tag + ' ' + str(e).split('\n')[0][:300], flush=True)
                 if ERRS: RES.append((tag, 'console', {'errors': ERRS[:5]})); print('ERR  ' + tag + ' console ' + json.dumps(ERRS[:5]), flush=True)
                 ctx.close()

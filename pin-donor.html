@@ -809,10 +809,21 @@ html{font-size:17px}html[data-size=s]{font-size:15px}html[data-size=l]{font-size
       tile(t.water && t.water === t.projects ? t.water : t.projects, t.water && t.water === t.projects ? (t.water === 1 ? tr('well', 'kisima') : tr('wells', 'visima')) : (t.projects === 1 ? tr('project', 'mradi') : tr('projects', 'miradi'))) +
       tile(t.people, tr('people served', 'wanufaika')) +
       tile(t.visitsYear || 0, tr('visits this year', 'ziara mwaka huu')) + '</div></section>';
+    h += gtrips(D.groupTrips);
     if (P.some(function (p) { return p.gps; })) h += '<div class="sh"><h2>' + tr('Your projects on the map', 'Miradi yako kwenye ramani') + '</h2></div><section class="card mapcard">' + mapHtml(false) + '<div class="mcard" id="mcard" aria-live="polite"></div></section>' + legendHtml(P);
     h += '<div class="sh"><h2>' + (P.length === 1 ? tr('Your project', 'Mradi wako') : tr('Your projects', 'Miradi yako')) + '</h2><small>' + P.length + '</small></div>';
     h += P.length ? P.map(card).join('') : '<p class="card empty">' + tr('Your projects will appear here soon.', 'Miradi yako itaonekana hapa hivi karibuni.') + '</p>';
     return h;
+  }
+  // a volunteer or donor group trip they are on (itinw): name, dates, where, and its private trip page
+  function gtrips(G) {
+    G = (G || []).filter(function (g) { return g && g.name; }); if (!G.length) return '';
+    var dt = function (x) { return '<span class="nw" style="white-space:nowrap">' + esc(day(/^\d{4}-\d{2}-\d{2}$/.test(x) ? x + 'T12:00:00' : x)) + '</span>'; };
+    return '<div class="sh"><h2>' + (G.length === 1 ? tr('Your trip', 'Safari yako') : tr('Your trips', 'Safari zako')) + '</h2></div>' + G.map(function (g) {
+      return '<section class="card"><b style="display:block;font-size:1.05rem;color:var(--ink)">' + esc(g.name) + '</b><p style="margin:4px 0 0;color:var(--muted);font-size:.9rem">' + dt(g.from) + (g.to && g.to !== g.from ? ' – ' + dt(g.to) : '') + (g.destination ? ' · ' + esc(g.destination) : '') + '</p>' +
+        (g.summary ? '<p style="margin:8px 0 0;font-size:.92rem">' + esc(g.summary) + '</p>' : '') +
+        (g.url ? '<div class="acts" style="margin-top:12px"><a class="btn" href="' + esc(g.url) + '" target="_blank" rel="noopener">' + tr('Open the trip plan', 'Fungua mpango wa safari') + '</a></div>' : '') + '</section>';
+    }).join('');
   }
   function tile(v, label) { return '<div class="tile"><b>' + n(v) + '</b><small>' + esc(label) + '</small></div>'; }
   function card(p) {
