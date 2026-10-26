@@ -75,6 +75,8 @@ export async function onRequestPost({ request, env }) {
       case 'log': {
         const v = (await vehicles(env)).find(x => x.vid === b.vid);
         if (!v) return bad('no-vehicle');
+        // a receipt photo from /api/pin-photo (kind=receipt) must exist and belong to this trip
+        if (b.receipt) { const ph = /^rc_[A-Za-z0-9]{6,20}$/.test(String(b.receipt)) ? await env.FEED.get('itinphoto:' + b.receipt, 'json') : null; if (!ph || (b.itinId && ph.itin !== b.itinId)) return bad('receipt'); }
         if (b.itinId) { const rec = await load(env, b.itinId); if (!rec) return bad('not-found', 404); if (!canEdit(chk, rec)) return bad('forbidden', 403); }
         const litres = Number(b.litres);
         if (!(litres >= 0.5 && litres <= 400)) return bad('bad-litres');

@@ -13,7 +13,7 @@ import { checkPin } from '../pin.js';
 import { getFeed } from '../../../lib/feed-cache.js';
 import { getJson, putJson, team, sameName } from '../../../lib/pin-store.js';
 import {
-  STATUSES, MAX_TITLE, settings, saveSettings, windowsAll, saveWindow, load, save, remove, canSee, canEdit, listFor, resolveStop, placeOf, datesOf,
+  STATUSES, MAX_TITLE, officeFor, settings, saveSettings, windowsAll, saveWindow, load, save, remove, canSee, canEdit, listFor, resolveStop, placeOf, datesOf,
   build, costOf, packingFor, editPacking, suggest, progressOf, checkin, replan, notifyOffice, addTrack, summaryOf, newId, newToken, sha, vehicles
 } from '../../../lib/itin.js';
 import { makeGet, bestInsert, LIMITS, okHm, hm } from '../../../lib/itin-plan.js';
@@ -47,9 +47,14 @@ async function fromBody(env, chk, b, byId, prev) {
   const from = b.from || (prev && prev.from), to = b.to || (prev && prev.to) || from;
   const dates = datesOf(from, to);
   if (!dates) return { err: bad('dates', 400, { max: LIMITS.days }) };
-  const start = placeOf(b.start, prev && prev.start);
+  // { kind: "office" } alone: the office from Office settings, for the trip's country
+  const ck0 = ['ke', 'tz', 'ug', 'mw'].includes(b.ck) ? b.ck : (prev && prev.ck) || chk.home || 'ke';
+  const office = x => (x && x.kind === 'office' && (x.lat == null || x.lng == null) ? officeFor(st, ck0) : undefined);
+  const sOff = office(b.start), eOff = office(b.end);
+  if (sOff === null || eOff === null) return { err: bad('no-office', 400, { ck: ck0 }) };
+  const start = sOff || placeOf(b.start, prev && prev.start);
   if (!start) return { err: bad('start') };
-  const end = b.end && b.end.kind && b.end.kind !== 'same' ? placeOf(b.end) : { kind: 'same' };
+  const end = eOff || (b.end && b.end.kind && b.end.kind !== 'same' ? placeOf(b.end) : { kind: 'same' });
   if (!end) return { err: bad('end') };
   const hours = b.hours ? b.hours : (prev && prev.hours) || st.hours;
   if (!okHm(hours.start) || !okHm(hours.end) || hm(hours.start) >= hm(hours.end)) return { err: bad('hours') };
