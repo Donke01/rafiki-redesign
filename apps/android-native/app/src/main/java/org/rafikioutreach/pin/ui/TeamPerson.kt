@@ -231,7 +231,7 @@ internal fun InviteSheet(m: AppModel, p: JSONObject, close: () -> Unit) {
         val ph = phone.trim().takeIf { it.isNotBlank() }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Btn("WhatsApp", { runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://wa.me/" + (ph?.let { waNumber(it, p.optString("home")) } ?: "") + "?text=" + Uri.encode(share)))) } },
-                Modifier.weight(1f).testTag("tma_invite_wa"), icon = "chat", light = true, small = true)
+                Modifier.weight(1f).testTag("tma_invite_wa"), icon = "b:whatsapp", light = true, small = true)
             Btn("SMS", { runCatching { ctx.startActivity(Intent(Intent.ACTION_SENDTO, Uri.parse("smsto:" + (ph?.replace(" ", "") ?: ""))).putExtra("sms_body", share)) } },
                 Modifier.weight(1f).testTag("tma_invite_sms"), icon = "text", light = true, small = true)
         }

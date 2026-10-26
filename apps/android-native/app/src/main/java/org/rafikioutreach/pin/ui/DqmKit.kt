@@ -262,7 +262,7 @@ internal fun DqmLineBtn(text: String, icon: String, onClick: () -> Unit, modifie
     val fg = if (red) C.bad else C.ink
     Row(modifier.clip(shape).border(1.dp, C.line, shape).clickable(enabled = enabled, role = Role.Button, onClick = onClick).heightIn(min = 48.dp).padding(horizontal = 12.dp, vertical = 6.dp),
         horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
-        Icon(DqmIc.get(icon), null, tint = if (red) C.bad else C.blue, modifier = Modifier.size(18.dp)); Spacer(Modifier.width(8.dp))
+        if (icon.startsWith("b:")) BrandIcon(icon.drop(2), 20.dp) else Icon(DqmIc.get(icon), null, tint = if (red) C.bad else C.blue, modifier = Modifier.size(18.dp)); Spacer(Modifier.width(8.dp))
         Text(text, style = MaterialTheme.typography.labelLarge, color = fg, textAlign = TextAlign.Center)
     }
 }

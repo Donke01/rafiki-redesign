@@ -531,7 +531,7 @@ private fun DonorProject(m: AppModel, p: DProject, back: () -> Unit) {
     p.gps?.let { ll ->
         SectionHead(t("Where it is", "Mahali ilipo"))
         DonorMap(m, listOf(p), false) {}
-        Btn(t("Open in Google Maps", "Fungua kwenye Google Maps"), { open(ctx, "https://www.google.com/maps/search/?api=1&query=${ll.lat},${ll.lng}") }, Modifier.padding(top = 10.dp), light = true, small = true, icon = "map")
+        Btn(t("Open in Google Maps", "Fungua kwenye Google Maps"), { open(ctx, "https://www.google.com/maps/search/?api=1&query=${ll.lat},${ll.lng}") }, Modifier.padding(top = 10.dp), light = true, small = true, icon = "b:gmaps")
     }
     SectionHead(t("Questions about this project?", "Una swali kuhusu mradi huu?"))
     DonorTalk(m, p)

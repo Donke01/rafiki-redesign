@@ -462,7 +462,7 @@ internal fun PinShown(who: String, pin: String, phone: String = "", home: String
         Btn(if (copied) t("Copied ✓", "Imenakiliwa ✓") else t("Copy", "Nakili"), { clip.setText(androidx.compose.ui.text.AnnotatedString(pin)); copied = true }, Modifier.padding(top = 10.dp).fillMaxWidth().testTag("tm_pin_copy"), icon = "copy", light = true, small = true)
         Row(Modifier.padding(top = 8.dp).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Btn("WhatsApp", { runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, android.net.Uri.parse("https://wa.me/" + (ph?.let { waNumber(it, home) } ?: "") + "?text=" + android.net.Uri.encode(pinMessage(who, pin))))) } },
-                Modifier.weight(1f).testTag("tm_pin_wa"), icon = "chat", light = true, small = true)
+                Modifier.weight(1f).testTag("tm_pin_wa"), icon = "b:whatsapp", light = true, small = true)
             Btn("SMS", { runCatching { ctx.startActivity(Intent(Intent.ACTION_SENDTO, android.net.Uri.parse("smsto:" + (ph?.replace(" ", "") ?: ""))).putExtra("sms_body", pinMessage(who, pin))) } },
                 Modifier.weight(1f).testTag("tm_pin_sms"), icon = "phone", light = true, small = true)
         }

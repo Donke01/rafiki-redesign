@@ -85,7 +85,7 @@ fun Btn(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, icon: 
             .padding(horizontal = if (small) 16.dp else 22.dp),
         horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically,
     ) {
-        if (icon != null) { Icon(Ic.get(icon), null, tint = fg, modifier = Modifier.size(if (small) 18.dp else 20.dp)); Spacer(Modifier.width(8.dp)) }
+        if (icon != null) { if (icon.startsWith("b:")) BrandIcon(icon.drop(2), if (small) 20.dp else 22.dp) else Icon(Ic.get(icon), null, tint = fg, modifier = Modifier.size(if (small) 18.dp else 20.dp)); Spacer(Modifier.width(8.dp)) }
         Text(text, color = fg, style = if (small) MaterialTheme.typography.labelMedium.copy(fontSize = 14.sp) else MaterialTheme.typography.labelLarge, textAlign = TextAlign.Center)
     }
 }
@@ -214,6 +214,13 @@ fun NetImage(url: String?, modifier: Modifier, placeholder: @Composable () -> Un
         val b = bmp
         if (b != null) Image(b.asImageBitmap(), null, contentScale = ContentScale.Crop, modifier = Modifier.matchParentSize()) else placeholder()
     }
+}
+
+/** A brand by key, the same on iPhone and the web: "monday", "whatsapp", "gmaps", "amaps" (its real coloured logo). */
+@Composable
+fun BrandIcon(k: String, size: androidx.compose.ui.unit.Dp) {
+    val (domain, fallback) = when (k) { "monday" -> "monday.com" to "people"; "whatsapp" -> "whatsapp.com" to "chat"; "gmaps" -> "maps.google.com" to "map"; "amaps" -> "maps.apple.com" to "pin"; else -> "" to "link" }
+    if (domain.isBlank()) Icon(Ic.get(fallback), null, tint = C.muted, modifier = Modifier.size(size)) else Brand(domain, size, fallback, C.muted)
 }
 
 /** A company's own icon (monday.com, WhatsApp, Google Maps), as on the web; [fallback] is drawn while it loads or with no signal. */

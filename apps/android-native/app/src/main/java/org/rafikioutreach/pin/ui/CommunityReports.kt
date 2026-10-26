@@ -356,7 +356,7 @@ private fun SmsSheet(m: AppModel, x: JSONObject, phones: List<JSONObject>, close
                 if (title.isNotBlank() && id.isNotBlank()) Btn(t("Open project", "Fungua mradi"), { open(id) }, Modifier.fillMaxWidth().testTag("sms_open"), icon = "pin")
                 if (dial) {
                     Btn(t("Call", "Piga simu"), { runCatching { ctx.startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:$from"))) } }, Modifier.weight(1f).testTag("sms_call"), icon = "phone", light = true, small = true)
-                    Btn("WhatsApp", { runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://wa.me/" + from.filter { it.isDigit() }))) } }, Modifier.weight(1f).testTag("sms_wa"), icon = "chat", light = true, small = true)
+                    Btn("WhatsApp", { runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://wa.me/" + from.filter { it.isDigit() }))) } }, Modifier.weight(1f).testTag("sms_wa"), icon = "b:whatsapp", light = true, small = true)
                     Btn(t("Copy number", "Nakili namba"), { clip.setText(AnnotatedString(from)); msg = "ok" to t("Copied ✓", "Imenakiliwa ✓") }, Modifier.fillMaxWidth().testTag("sms_copy"), icon = "copy", light = true, small = true)
                 }
                 if (dial && title.isNotBlank() && id.isNotBlank() && !registered && !added) {

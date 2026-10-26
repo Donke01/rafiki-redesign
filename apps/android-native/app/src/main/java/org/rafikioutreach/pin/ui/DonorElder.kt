@@ -188,8 +188,8 @@ private fun TalkRow(icon: String, color: Color, title: String, sub: String, tag:
     val wa = icon == "chat"
     Row(Modifier.fillMaxWidth().shadow(2.dp, shape, ambientColor = Color(0x0D04263F), spotColor = Color(0x1404263F)).clip(shape).background(C.card).border(1.dp, C.ink.copy(alpha = 0.08f), shape)
         .clickable(role = Role.Button, onClick = onClick).heightIn(min = 70.dp).padding(start = 12.dp, end = 14.dp, top = 12.dp, bottom = 12.dp).testTag(tag), verticalAlignment = Alignment.CenterVertically) {
-        Box(Modifier.size(44.dp).clip(CircleShape).background(if (wa) Color(0xFF25D366) else color), contentAlignment = Alignment.Center) {
-            Icon(Ic.get(icon), null, tint = Color.White, modifier = Modifier.size(22.dp))
+        Box(Modifier.size(44.dp).clip(CircleShape).background(if (wa) Color.White else color).then(if (wa) Modifier.border(1.dp, C.line, CircleShape) else Modifier), contentAlignment = Alignment.Center) {
+            if (wa) BrandIcon("whatsapp", 30.dp) else Icon(Ic.get(icon), null, tint = Color.White, modifier = Modifier.size(22.dp))
         }
         Spacer(Modifier.width(14.dp))
         Column(Modifier.weight(1f)) {

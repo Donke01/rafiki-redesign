@@ -578,7 +578,7 @@ fun PlanWeekSection(m: AppModel, s: Snapshot, open: (String) -> Unit) {
                 }, Modifier.testTag("plan_add_$i"))
             }
             if (stops.isNotEmpty()) mapsLegs(stops, null).firstOrNull()?.let { (_, url) ->
-                DqmLineBtn(t("Route in Google Maps", "Njia kwenye Google Maps"), "compass", { runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) } }, Modifier.padding(top = 10.dp).fillMaxWidth())
+                DqmLineBtn(t("Route in Google Maps", "Njia kwenye Google Maps"), "b:gmaps", { runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) } }, Modifier.padding(top = 10.dp).fillMaxWidth())
             }
         }
     }

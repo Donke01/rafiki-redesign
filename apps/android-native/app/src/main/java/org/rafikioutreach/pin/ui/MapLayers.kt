@@ -721,7 +721,7 @@ private fun MateCard(p: Sharer) {
             }
             if (p.phone.isNotBlank()) Row(Modifier.padding(top = 10.dp, end = 6.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Btn(t("Call", "Piga simu"), { runCatching { ctx.startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + p.phone.replace(" ", "")))) } }, Modifier.weight(1f).testTag("ml_call"), small = true, icon = "phone")
-                Btn("WhatsApp", { runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://wa.me/" + waNumber(p.phone, p.home)))) } }, Modifier.weight(1f).testTag("ml_wa"), small = true, light = true, icon = "chat")
+                Btn("WhatsApp", { runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://wa.me/" + waNumber(p.phone, p.home)))) } }, Modifier.weight(1f).testTag("ml_wa"), small = true, light = true, icon = "b:whatsapp")
             } else Text(t("No phone number saved for them.", "Hakuna namba ya simu iliyohifadhiwa."), style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 8.dp))
         }
     }
