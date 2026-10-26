@@ -20,6 +20,14 @@ class CurrencyTest {
         assertEquals("", Currency.forCountry("JP"))
     }
 
+    @Test fun automaticFollowsWhereThePhoneIsThenTheHomeCountry() {
+        assertEquals("USD", Currency.autoFor("US", "ke", "KE")) // in the USA: dollars
+        assertEquals("KES", Currency.autoFor("", "ke", "US"))   // not known where: the home country, not the phone's language
+        assertEquals("UGX", Currency.autoFor("", "", "UG"))
+        assertEquals("USD", Currency.autoFor("", "", ""))
+        assertEquals("KES", Currency.autoFor("JP", "ke", ""))   // not one of ours: the next one known
+    }
+
     @Test fun kesStaysAsEntered() {
         Currency.code.value = "KES"
         assertEquals("KES 4,500", Money.kes(4500))

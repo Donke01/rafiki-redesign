@@ -69,6 +69,7 @@ class OfficeTest {
         org.rafikioutreach.pin.ui.Onb.enabled = false
         val app = ApplicationProvider.getApplicationContext<Application>()
         Prefs(app).apply { pin = "9999"; name = "Reid Anderson"; saveSnapshot(snapshot()); filter = "all" }
+        app.getSharedPreferences("rafiki-pin", 0).edit().putString("currency", "KES").commit() // Settings › Currency: these screens show KES
         val m = AppModel(app)
         m.api.transport = { method, url, h, body ->
             posts += "$method $url ${h["Cookie"] ?: ""} ${body?.let { String(it) } ?: ""}"
@@ -134,6 +135,7 @@ class OfficeTest {
         org.rafikioutreach.pin.ui.Onb.enabled = false
         val app = ApplicationProvider.getApplicationContext<Application>()
         Prefs(app).apply { pin = "9999"; name = "Reid Anderson"; saveSnapshot(snap); filter = "all" }
+        app.getSharedPreferences("rafiki-pin", 0).edit().putString("currency", "KES").commit() // Settings › Currency: these screens show KES
         val m = AppModel(app)
         m.api.transport = { method, url, _, _ -> when { url.contains("activity=1") -> 200 to "{\"ok\":true,\"activity\":[]}"; url.contains("pin-auth/me") -> 200 to "{\"ok\":true,\"available\":false}"; method == "GET" -> 200 to snap.toString(); else -> 200 to "{\"ok\":true}" } }
         show(m)
@@ -185,8 +187,9 @@ class OfficeTest {
         rule.onNodeWithTag("tm_Reid Anderson").assertExists(); rule.onNodeWithText("PIN set by the office").assertExists()
         assertTrue(rule.onNodeWithTag("team_admins").fetchSemanticsNode().boundsInRoot.top < rule.onNodeWithTag("tm_Reid Anderson").fetchSemanticsNode().boundsInRoot.top)
         assertTrue(rule.onNodeWithTag("tm_Reid Anderson").fetchSemanticsNode().boundsInRoot.top < rule.onNodeWithTag("team_field").fetchSemanticsNode().boundsInRoot.top)
+        // the new person cards are taller (Office › Team redesign), so Meril is below the fold: scroll to them first
+        rule.onNodeWithTag("tm_Meril Kiprop").performScrollTo(); rule.waitForIdle()
         assertTrue(rule.onNodeWithTag("team_field").fetchSemanticsNode().boundsInRoot.top < rule.onNodeWithTag("tm_Meril Kiprop").fetchSemanticsNode().boundsInRoot.top)
-        rule.onNodeWithTag("tm_Meril Kiprop").performScrollTo()
         shot("23-office-team")
         // tap a person: their contact sheet (feat-conta), a menu of actions; each opens its own small sheet
         rule.onNodeWithTag("tm_Meril Kiprop").performClick()
