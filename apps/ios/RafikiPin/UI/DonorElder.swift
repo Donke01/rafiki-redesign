@@ -334,7 +334,7 @@ private struct DonorMapCard: View {
 struct ViewerPhotos: Identifiable { let id = UUID(); let list: [(String, String)]; let at: Int; let play: Bool }
 
 /// The photos one at a time on black, with big ◀ ▶, a Slideshow button (a new photo every 4½ seconds) and a big Close.
-struct PhotoViewer: View {
+struct DonorPhotoViewer: View {
     let v: ViewerPhotos
     @Environment(\.dismiss) private var dismiss
     @State private var i = 0
@@ -596,7 +596,7 @@ private struct CheckShape: Shape {
 /// The project's state as a small round mark that moves: the tick draws itself and a ring pulses out (working), the
 /// wrench turns (being repaired), the "!" blinks (waiting for a repair), bricks stack up (being built), the clock's
 /// hands turn (planned).
-struct StateMark: View {
+struct DonorStateMark: View {
     let k: String; let color: Color; var size: CGFloat = 26
     @State private var drawn: CGFloat = Motion.on ? 0 : 1
     var body: some View {

@@ -380,7 +380,7 @@ private struct DonorCard: View {
                         let live = p.state == "working" && p.water
                         let what = live ? t("Water flowing", "Maji yanatoka") : donorStateName(p.state)
                         HStack(spacing: 10) {
-                            StateMark(k: p.state, color: donorStateColor(p.state))
+                            DonorStateMark(k: p.state, color: donorStateColor(p.state))
                             Text(what.nb + " · " + (t("checked ", "imekaguliwa ") + Dates.day(p.healthAt)).nb).font(.mont(14, .semibold)).foregroundColor(fg).multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
                         }
                         .padding(.horizontal, 12).padding(.vertical, 10).frame(maxWidth: .infinity)
@@ -410,7 +410,7 @@ private struct DonorProjectView: View {
     var pics: [(String, String)] { p.gallery.map { (d.photo($0.id, w: 1600), Dates.weekday($0.at) + ($0.label.isEmpty ? "" : " · " + $0.label)) } }
     var body: some View {
         Btn(t("Back", "Rudi"), icon: "back", light: true) { back() }.padding(.bottom, 6).accessibilityIdentifier("dproject_back")
-            .fullScreenCover(item: $viewer) { PhotoViewer(v: $0) }
+            .fullScreenCover(item: $viewer) { DonorPhotoViewer(v: $0) }
         Color.clear.aspectRatio(16 / 10, contentMode: .fit)
             .overlay(NetImage(url: cover(d, p)) { Icon(iconOf(p), size: 56, color: C.blue) }.scaledToFill())
             .background(C.tint).clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
@@ -676,7 +676,7 @@ private struct UpdateRow: View {
             .overlay(RoundedRectangle(cornerRadius: 28, style: .continuous).stroke(C.ink.opacity(0.06), lineWidth: 1))
             .shadow(color: Color(hex: 0x04263F).opacity(0.08), radius: 14, y: 8)
             .accessibilityIdentifier("dupd_\(u.type)_\(u.pid)")
-            .fullScreenCover(item: $viewer) { PhotoViewer(v: $0) }
+            .fullScreenCover(item: $viewer) { DonorPhotoViewer(v: $0) }
         }
     }
 }
