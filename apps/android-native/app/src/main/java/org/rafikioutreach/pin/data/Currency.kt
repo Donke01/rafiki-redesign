@@ -12,7 +12,9 @@ import kotlin.math.roundToLong
 /** Settings › Display › Currency, the same as the web app (money.js) and the iPhone app.
  *  Costs are kept and typed in KES. When another currency is chosen, amounts show converted with "≈" and the KES
  *  amount next to them: "≈ $35 (KES 4,500)". "Automatic" follows the country the phone is in: Kenya → KES,
- *  USA → USD, Uganda → UGX, Tanzania → TZS, Malawi → MWK … Rates come from /api/fx once a day; rough ones until then. */
+ *  USA → USD, Uganda → UGX, Tanzania → TZS, Malawi → MWK … When that isn't known (offline, no SIM), the user's home
+ *  country comes before the phone's language region, which is often "United States" on phones in Kenya.
+ *  Rates come from /api/fx once a day; rough ones until then. */
 object Currency {
     data class Cur(val code: String, val en: String, val sw: String, val sym: String, val step: Long, val flag: String)
 
@@ -38,7 +40,11 @@ object Currency {
     var rates: Map<String, Double> = ROUGH; private set
     /** The day the rates are from ("2026-10-26"), "" while only the rough ones are known. */
     var at = ""; private set
+    /** Where the phone is: the country the server sees, else the mobile network or SIM. */
     private var country = ""
+    /** The user's home country (the team list, or the one picked at the start), and the phone's language region. */
+    private var home = ""
+    private var region = ""
     private var got = 0L
     private var sp: android.content.SharedPreferences? = null
 
@@ -50,7 +56,8 @@ object Currency {
     fun flag(c: String) = BY[c]?.flag ?: ""
 
     /** Called once when the app starts. */
-    fun init(ctx: Context) {
+    fun init(ctx: Context, home: String = "") {
+        this.home = home
         val p = ctx.getSharedPreferences("rafiki-pin", Context.MODE_PRIVATE); sp = p
         runCatching {
             val j = JSONObject(p.getString("fx", "") ?: "")
@@ -58,16 +65,25 @@ object Currency {
             at = j.optString("at"); country = j.optString("country"); got = j.optLong("got")
         }
         if (country.isBlank()) country = phoneCountry(ctx)
+        region = java.util.Locale.getDefault().country
         val own = p.getString("currency", "") ?: ""
         picked = BY.containsKey(own)
         code.value = if (picked) own else auto()
     }
     private fun phoneCountry(ctx: Context): String {
         val tm = ctx.getSystemService(Context.TELEPHONY_SERVICE) as? android.telephony.TelephonyManager
-        return listOfNotNull(runCatching { tm?.networkCountryIso }.getOrNull(), runCatching { tm?.simCountryIso }.getOrNull(), java.util.Locale.getDefault().country)
+        return listOfNotNull(runCatching { tm?.networkCountryIso }.getOrNull(), runCatching { tm?.simCountryIso }.getOrNull())
             .firstOrNull { it.isNotBlank() && forCountry(it).isNotBlank() } ?: ""
     }
-    private fun auto() = forCountry(country).ifBlank { "USD" }
+    private fun auto() = autoFor(country, home, region)
+    /** Automatic: where the phone is, else the home country, else the language region, else US dollars. */
+    fun autoFor(where: String, home: String, region: String): String =
+        listOf(where, home, region).map { forCountry(it) }.firstOrNull { it.isNotBlank() } ?: "USD"
+    /** The user's home country is known (or changed): automatic follows it when the phone's country isn't known. */
+    fun home(cc: String) {
+        if (cc == home) return
+        home = cc; if (!picked) code.value = auto()
+    }
 
     /** Pick a currency, or null for automatic. */
     fun set(c: String?) {

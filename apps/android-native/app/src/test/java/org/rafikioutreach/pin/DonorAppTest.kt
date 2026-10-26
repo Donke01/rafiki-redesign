@@ -205,7 +205,7 @@ class DonorAppTest {
             shot("73-donor-project-$k")
             rule.onNodeWithTag("dproject_thanks").performScrollTo(); shot("73b-donor-project-thanks-$k")
             rule.onNodeWithTag("dproject_visits").performScrollTo(); shot("73c-donor-project-visits-$k")
-            rule.onNodeWithTag("dproject_map").performScrollTo(); shot("73d-donor-project-map-$k")
+            rule.onNodeWithTag("dmap").performScrollTo(); shot("73d-donor-project-map-$k") // the project map is the donor map now (c08e937)
             rule.onNodeWithTag("dtab_updates").performClick(); waitTag("dmonth_2026-10")
             shot("74-donor-updates-$k")
             rule.onNodeWithTag("dtab_settings").performClick(); waitTag("dset_look")

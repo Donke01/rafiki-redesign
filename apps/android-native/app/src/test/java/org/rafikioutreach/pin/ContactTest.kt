@@ -233,7 +233,9 @@ class ContactTest {
     @Test fun admin_contact_sheet_kiswahili_dark() {
         Lang.sw = true
         val m = model(); openContact(m, dark = true)
-        assertTrue(has("Tuma barua pepe") && has("Piga simu") && has("Badilisha barua pepe") && has("Mfanye msimamizi") && has("Zuia"))
+        // Call / E-mail are big tiles now (Office › Team redesign): "Piga" and "Barua pepe", the same as the web app
+        tag("ct_call").assertTextContains("Piga"); tag("ct_mail").assertTextContains("Barua pepe")
+        assertTrue(has("Badilisha barua pepe") && has("Mfanye msimamizi") && has("Zuia"))
         assertTrue(has("Anatumia · alionekana"))
         sheetShot("ct-04-contact-admin-sw-dark")
         tag("ct_remove").performScrollTo(); sheetShot("ct-05-contact-access-sw-dark")
@@ -479,7 +481,7 @@ class ContactTest {
         tag("nav_me").performClick(); settle(1500)
         tag("pane_team").performClick(); settle(1500)
         waitTag("mate_open"); rule.onAllNodesWithTag("mate_open")[0].performClick(); waitTag("ct_sheet"); waitLoaded(); settle(1500)
-        assertTrue(has("Piga simu") && has("KAZI YAKE"))
+        tag("ct_call").assertTextContains("Piga"); assertTrue(has("KAZI YAKE")) // the Call tile (Office › Team redesign)
         sheetShot("ct-20-field-officer-view-sw-dark")
     }
 

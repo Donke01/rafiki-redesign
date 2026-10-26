@@ -282,6 +282,7 @@ class MapLayersTest {
         // live team: initials with "min ago", tap for Call / WhatsApp, refreshed every 3 minutes
         openSheet(); rule.onNodeWithTag("ml_sw_team").performClick(); rule.waitForIdle(); closeSheet()
         rule.mainClock.advanceTimeBy(1500); rule.waitForIdle()
+        rule.waitUntil(8000) { rule.mainClock.advanceTimeByFrame(); calls.any { it.contains("view=teammap") } } // fetched off the main thread: slow when the machine is busy
         assertEquals(1, calls.count { it.contains("view=teammap") })
         rule.waitUntil(5000) { markers("Bertin").isNotEmpty() }
         assertEquals(setOf("Bertin Mwangi", "Grace Achieng", "Meril Kiprop"), map().overlays.filterIsInstance<Marker>().map { it.title }.filter { it in setOf("Bertin Mwangi", "Grace Achieng", "Meril Kiprop") }.toSet())

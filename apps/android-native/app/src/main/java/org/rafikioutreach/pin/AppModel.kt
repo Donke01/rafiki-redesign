@@ -71,7 +71,7 @@ class AppModel(app: Application) : AndroidViewModel(app) {
     init {
         viewModelScope.launch { while (true) { delay(60000); if (_signedIn.value) sendWaiting() } }
         // Settings › Currency: the saved choice now, fresh rates (and where the phone is) from the server
-        org.rafikioutreach.pin.data.Currency.init(app)
+        org.rafikioutreach.pin.data.Currency.init(app, myHome())
         viewModelScope.launch { org.rafikioutreach.pin.data.Currency.refresh(BuildConfig.SERVER) }
         // blocked, or signed out of all phones by an admin: sign this phone out with a kind word (feat-conta)
         api.onAuthEnd = { why -> ended = why; viewModelScope.launch(Dispatchers.Main) { authEnded(why) } }
@@ -276,11 +276,15 @@ class AppModel(app: Application) : AndroidViewModel(app) {
     /** Apply a fresh copy of the list (after an Office change). */
     fun reload() = refresh()
 
+    /** The user's home country ("ke"): from the team list, else the one picked at the start. */
+    private fun myHome() = _snap.value?.me?.home.orEmpty().takeIf { it.isNotBlank() && it != "null" } ?: prefs.country
+
     private fun accept(raw: JSONObject) {
         val n = raw.optInt("reviewOpen"); if (n > (_snap.value?.reviewOpen ?: 0)) prefs.reviewAt = java.time.Instant.now().toString()
         // the PIN session's number, sent back with every request (X-Pin-Gen)
         if (prefs.pin.isNotBlank() && raw.has("gen")) prefs.pinGen = raw.optInt("gen").toString()
         prefs.saveSnapshot(raw); _snap.value = Snapshot.from(raw)
+        org.rafikioutreach.pin.data.Currency.home(myHome())
         org.rafikioutreach.pin.ui.GoogleTiles.configure(getApplication(), _snap.value?.gmapsAndroid)
         org.rafikioutreach.pin.cmap.CountryMaps.baseFrom(raw.optJSONObject("countryMaps")) // whole-country maps (feat-cmap)
         // the home-screen widget counts from this list

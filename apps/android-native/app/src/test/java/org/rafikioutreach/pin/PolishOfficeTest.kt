@@ -67,9 +67,10 @@ class PolishOfficeTest {
             .put(e("SMS from +254 712 ••• 678", "visit", "104", "Kapsaret Borehole", 70, "notworking", "sms")).put(e("Bertin Mwangi", "fixed", "101", "Chepkongi Dispensary", 90))
     }
 
-    private fun model(lateDays: Long = 3, actOk: Boolean = true): AppModel {
+    private fun model(lateDays: Long = 3, actOk: Boolean = true, cur: String = "KES"): AppModel {
         Onb.enabled = false
         Prefs(app).apply { pin = "9999"; name = "Reid Anderson"; saveSnapshot(snapshot()); filter = "all"; onb = true; lang = if (Lang.sw) "sw" else "en"; mePane = "me"; phoneAlerts = false }
+        app.getSharedPreferences("rafiki-pin", 0).edit().putString("currency", cur).commit() // Settings › Currency
         val m = AppModel(app)
         val assign = JSONArray().put(JSONObject().put("aid", "a1").put("id", "105").put("t", "Turbo Spring").put("to", "Meril Kiprop").put("date", LocalDate.now().minusDays(lateDays).toString()).put("note", "").put("by", "Jessica").put("at", "2026-10-15T08:00:00Z"))
         m.api.transport = { method, url, _, body ->
@@ -117,6 +118,7 @@ class PolishOfficeTest {
 
     @Test fun money_and_dates_follow_the_brief() {
         Lang.sw = false
+        org.rafikioutreach.pin.data.Currency.code.value = "KES" // Settings › Currency: in KES, the amount alone
         assertEquals("KES 4,500", Money.kes(4500))
         val today = LocalDate.of(2026, 10, 22)
         assertEquals("due today", dueText("2026-10-22", today)); assertEquals("due tomorrow", dueText("2026-10-23", today)); assertEquals("due in 2 days", dueText("2026-10-24", today))
@@ -169,6 +171,16 @@ class PolishOfficeTest {
         shot("po-03-office-strip-end")
         tag("o_all").performScrollTo(); rule.mainClock.advanceTimeBy(800); tag("o_all").performClick(); rule.mainClock.advanceTimeBy(800); rule.waitForIdle()
         rule.onAllNodesWithTag("office_strip").assertCountEquals(0)
+    }
+
+    /** Settings › Currency in US dollars: the cost shows converted with ≈ and the KES amount next to it. */
+    @Test fun office_overview_in_us_dollars() {
+        Lang.sw = false
+        val m = model(cur = "USD"); office(m)
+        waitTag("ocv_t_repairs"); waitFor("open repair")
+        waitFor("1 urgent · ≈\u00A0\$35 (KES\u00A04,500)") // 4,500 / 129
+        assertTrue(!has("1 urgent · KES"))
+        shot("po-01b-office-overview-usd")
     }
 
     @Test @Config(qualifiers = "w360dp-h800dp-xxhdpi") fun office_kiswahili_dark_360() {

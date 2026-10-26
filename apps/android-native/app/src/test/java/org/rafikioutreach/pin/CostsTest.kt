@@ -86,6 +86,7 @@ class CostsTest {
         org.rafikioutreach.pin.ui.Onb.enabled = false
         val app = ApplicationProvider.getApplicationContext<Application>()
         Prefs(app).apply { pin = "9999"; name = who; saveSnapshot(snapshot(who, admin)); filter = "all" }
+        app.getSharedPreferences("rafiki-pin", 0).edit().putString("currency", "KES").commit() // Settings › Currency: these screens show KES
         val m = AppModel(app)
         m.api.transport = { method, url, _, body ->
             val b = body?.let { String(it) } ?: ""
@@ -137,6 +138,7 @@ class CostsTest {
         assertEquals("", Money.blocked(big.copy(step = "parts"), "fixed", 50000))
         assertFalse(Money.canDecide("Reid Anderson", " reid anderson")); assertTrue(Money.canDecide("Reid Anderson", "Jessica")); assertFalse(Money.canDecide("", ""))
         assertEquals(12500L, Money.parse("12,500")); assertNull(Money.parse("")); assertNull(Money.parse("-3"))
+        org.rafikioutreach.pin.data.Currency.code.value = "KES" // Settings › Currency: in KES, the amount alone
         assertEquals("KES\u00A085,000", Money.kes(85000))
         val s = Snapshot.from(snapshot())
         assertEquals("pending", s.repairs["105"]!!.approval!!.status); assertEquals(50000, s.approveAbove)

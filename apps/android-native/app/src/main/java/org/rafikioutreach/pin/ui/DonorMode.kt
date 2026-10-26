@@ -6,8 +6,6 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -47,6 +45,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
@@ -381,9 +380,15 @@ private fun ProjectCard(m: AppModel, p: DProject, index: Int, modifier: Modifier
                 if (p.litresPerDay > 0) add(St(p.litresPerDay, "\u00A0L", true, t("water a day", "maji kwa siku")))
                 if (p.year > 0) add(St(p.year, "", false, if (p.status == "Completed") t("completed", "ilikamilika") else t("year", "mwaka")))
             }.take(3)
-            if (stats.isNotEmpty()) Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
+            // the thin lines between the numbers are drawn, not measured: the numbers fit their width (WordFitText,
+            // a BoxWithConstraints), which can't be asked for an intrinsic height, so no IntrinsicSize here
+            val rule = C.line
+            if (stats.isNotEmpty()) Row(Modifier.fillMaxWidth().drawBehind {
+                val px = 1.dp.toPx(); val n = stats.size; val col = (size.width - (n - 1) * px) / n
+                for (k in 1 until n) drawRect(rule, topLeft = androidx.compose.ui.geometry.Offset(k * col + (k - 1) * px, 0f), size = androidx.compose.ui.geometry.Size(px, size.height))
+            }) {
                 stats.forEachIndexed { k, st ->
-                    if (k > 0) Box(Modifier.width(1.dp).fillMaxHeight().background(C.line))
+                    if (k > 0) Spacer(Modifier.width(1.dp))
                     Column(Modifier.weight(1f).padding(horizontal = 4.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                         val shown = if (st.count) num(rememberFill(st.n.toFloat(), 1200).roundToInt()) else st.n.toString()
                         WordFitText(shown + st.suffix, MaterialTheme.typography.titleLarge.copy(fontSize = 22.sp, fontWeight = FontWeight.ExtraBold), C.ink, 1, textAlign = TextAlign.Center)

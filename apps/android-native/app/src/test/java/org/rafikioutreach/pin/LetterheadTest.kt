@@ -166,6 +166,7 @@ class LetterheadTest {
         org.rafikioutreach.pin.ui.Onb.enabled = false
         val snap = snapJson(home, name)
         Prefs(app).apply { pin = "9999"; this.name = name; saveSnapshot(snap); filter = "all" }
+        app.getSharedPreferences("rafiki-pin", 0).edit().putString("currency", "KES").commit() // Settings › Currency: the report shows KES
         val m = AppModel(app)
         // this month's activity, so the default month shows the tables
         val now = YearMonth.now()
