@@ -1,0 +1,34 @@
+# rafiki-chat: the RAFIKI Pin team chat (Durable Objects + R2). See README.md in this folder.
+# Only the Pages project reaches it, through its Service binding CHAT → rafiki-chat:
+# no workers.dev address, no preview URLs and no routes, so nothing on the internet can call it directly.
+name = "rafiki-chat"
+main = "src/index.js"
+compatibility_date = "2026-08-01"
+workers_dev = false
+preview_urls = false
+
+# Directory: one instance; membership, chat lists, unread counts, presence and every open WebSocket.
+# Conversation: one instance per chat; the messages, reactions and receipts of that chat.
+[[durable_objects.bindings]]
+name = "DIR"
+class_name = "Directory"
+
+[[durable_objects.bindings]]
+name = "CONV"
+class_name = "Conversation"
+
+# SQLite-backed Durable Objects (the free plan allows these)
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["Directory", "Conversation"]
+
+# photos, videos, voice notes and documents sent in chat
+[[r2_buckets]]
+binding = "CHAT_MEDIA"
+bucket_name = "rafiki-chat-media"
+
+[observability]
+enabled = true
+
+# Optional: a secret CHAT_SECRET (set it on this worker AND on the Pages project) makes the worker
+# refuse any request that doesn't carry it. It isn't needed while the worker has no public address.
