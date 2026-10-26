@@ -405,3 +405,59 @@ test('helpers: project types, public view has no costs', () => {
   assert.deepEqual(v.people, ['Meril']); assert.equal(v.cost, undefined);
   assert.equal(editPacking([{ key: 'u:1', auto: false, en: 'x' }], { items: [{ key: 'u:1', delete: true }] }).length, 0);
 });
+
+// ---- follow-ups for the web app: receipt photos, start/end at the office ----------------------------------------
+import * as photoApi from '../functions/api/pin-photo.js';
+function upload(env, pin, fields) {
+  const fd = new FormData();
+  for (const [k, v] of Object.entries(fields)) fd.append(k, v);
+  return photoApi.onRequestPost({ request: new Request('https://pin.example/api/pin-photo', { method: 'POST', headers: { 'X-Pin': pin, Origin: 'https://pin.example', 'CF-Connecting-IP': '10.9.9.9' }, body: fd }), env, waitUntil: () => {} });
+}
+const JPEG = () => new Blob([new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 1, 2, 3, 0xff, 0xd9])], { type: 'image/jpeg' });
+test('receipts: kind=receipt uploads for a trip you can edit; served to people who can see it; fuel logs reference it', async () => {
+  const env = makeEnv();
+  const t = (await newTrip(env, '3333')).itin;
+  let r = await upload(env, '3333', { kind: 'receipt', itin: t.id, file: JPEG() });
+  assert.equal(r.status, 201);
+  const up = await r.json();
+  assert.match(up.id, /^rc_[A-Za-z0-9]+$/); assert.equal(up.url, '/api/pin-photo?receipt=' + up.id);
+  // read back: the trip's people and admins; not others
+  const get = pin => photoApi.onRequestGet({ request: new Request('https://pin.example' + up.url, { headers: { 'X-Pin': pin } }), env });
+  const img = await get('3333');
+  assert.equal(img.status, 200); assert.equal(img.headers.get('Content-Type'), 'image/jpeg');
+  assert.deepEqual([...new Uint8Array(await img.arrayBuffer())], [0xff, 0xd8, 0xff, 0xe0, 1, 2, 3, 0xff, 0xd9]);
+  assert.equal((await get('2222')).status, 200);
+  assert.equal((await get('4444')).status, 404);
+  // someone not on the trip, the shared PIN, a non-photo, a missing trip
+  assert.equal((await upload(env, '4444', { kind: 'receipt', itin: t.id, file: JPEG() })).status, 403);
+  assert.equal((await (await upload(env, '9999', { kind: 'receipt', itin: t.id, file: JPEG() })).json()).reason, 'named-only');
+  assert.equal((await upload(env, '3333', { kind: 'receipt', itin: t.id, file: new Blob(['x'], { type: 'text/plain' }) })).status, 415);
+  assert.equal((await upload(env, '3333', { kind: 'receipt', itin: 'it_nothere1', file: JPEG() })).status, 404);
+  // a fuel log keeps the receipt id; one from another trip is refused
+  const v = await call(vehApi, env, '/api/vehicles', '2222', { action: 'add', name: 'Hilux', type: 'pickup', cc: 2400, fuel: 'diesel' });
+  const log = await call(fuelApi, env, '/api/fuel', '3333', { action: 'log', vid: v.vehicle.vid, itinId: t.id, litres: 20, kesPerL: 227.96, receipt: up.id });
+  assert.equal(log.status, 201); assert.equal(log.log.receipt, up.id);
+  const other = (await newTrip(env, '3333', { title: 'Other' })).itin;
+  assert.equal((await call(fuelApi, env, '/api/fuel', '3333', { action: 'log', vid: v.vehicle.vid, itinId: other.id, litres: 20, kesPerL: 227.96, receipt: up.id })).reason, 'receipt');
+  assert.equal((await call(fuelApi, env, '/api/fuel', '3333', { action: 'log', vid: v.vehicle.vid, litres: 20, kesPerL: 227.96, receipt: 'rc_madeupid99' })).reason, 'receipt');
+});
+test('office: { kind: "office" } is filled from Office settings, per country; no office set → no-office', async () => {
+  const env = makeEnv();
+  const off = { stops: ['104'], start: { kind: 'office' }, end: { kind: 'office' } };
+  let r = await newTrip(env, '3333', off);
+  assert.equal(r.status, 400); assert.equal(r.reason, 'no-office'); assert.equal(r.ck, 'ke');
+  assert.equal((await call(itinApi, env, '/api/itin/settings', '2222', { offices: { ke: { name: 'Kitale office', lat: 'x', lng: 35 } } })).reason, 'office');
+  const s = await call(itinApi, env, '/api/itin/settings', '2222', { offices: { ke: { name: 'Kitale office', lat: 1.0153, lng: 35.0062 } } });
+  assert.deepEqual(s.settings.offices.ke, { name: 'Kitale office', lat: 1.0153, lng: 35.0062 });
+  r = await newTrip(env, '3333', off);
+  assert.equal(r.status, 201);
+  assert.deepEqual(r.itin.start, { kind: 'office', name: 'Kitale office', lat: 1.0153, lng: 35.0062 });
+  assert.equal(r.itin.end.name, 'Kitale office');
+  assert.equal(r.itin.days[0].timeline[0].place, 'Kitale office');
+  // an office position sent by the app is used as given
+  r = await newTrip(env, '3333', { stops: ['104'], start: { kind: 'office', name: 'Eldoret office', lat: 0.514, lng: 35.27 } });
+  assert.equal(r.itin.start.name, 'Eldoret office');
+  // with one office set, other countries use it; removing it brings no-office back
+  await call(itinApi, env, '/api/itin/settings', '2222', { offices: { ke: null } });
+  assert.equal((await newTrip(env, '3333', off)).reason, 'no-office');
+});

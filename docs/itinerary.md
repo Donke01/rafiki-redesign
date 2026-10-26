@@ -65,7 +65,7 @@ Rules (`lib/fuel-prices.js`):
 2. **GitHub:** the new workflow `.github/workflows/fuel-prices.yml` uses the same repository secret `CRON_KEY` (and
    variable `SITE_URL`) as the monthly report. Once merged it runs daily; run it once by hand ("Run workflow") to fill the
    prices straight away.
-3. **Office settings:** lunch, per diem and lodging amounts start at 0 (not set); set them in Office (`POST /api/itin/settings`).
+3. **Office settings:** set the office position for each country (`offices`, used when a trip starts "at the office"; until then the app gets `no-office`), and the lunch, per diem and lodging amounts, which start at 0 (not set) (`POST /api/itin/settings`).
 4. **Uganda (and Malawi while MERA's file is old):** enter fuel prices in Office › Vehicles › Fuel prices.
 5. **Optional:** `FUEL_EPRA_URL`, `FUEL_EWURA_URL`, `FUEL_MERA_URL` override the source addresses if a regulator moves its page.
 
@@ -81,6 +81,7 @@ Rules (`lib/fuel-prices.js`):
 | `itinidx` | index: `[{ id, title, owner, people, viewers, from, to, status, ck, projects: [ids], stops: n, updated }]` (newest 1000) |
 | `itinshare:<sha256>` | `{ kind: "itin" \| "group", id }` for private read-only links |
 | `itintrack:<id>` | GPS track `[[lat, lng, epochMs], …]` (≤ 3000, thinned; kept 400 days) |
+| `itinphoto:<id>` | trip receipt photos (400 days) |
 | `itinsettings` · `itinwindows` · `itinalerts` | Office settings · per-project time windows · re-plan/skip notices (newest 200) |
 | `itinmatrix:<hash>` | cached ORS matrix (30 days) |
 | `vehicles` · `fuellog:<vid>` | vehicles · fuel logs per vehicle (newest 300) |
@@ -173,7 +174,8 @@ Point keys (in `legs`, `matrix`, timeline `from`/`to`): `S` start, `E` end (same
   ```
   ≤ 40 stops, ≤ 14 days. Refusals: `stops` (+ `unknown`), `too-many` (+ `max`), `dates` (+ `max`), `start`, `end`, `hours`, `lunch`, `no-vehicle`. `weather: false` skips roads/weather (fast). `plan` keeps a previewed/edited day split instead of re-optimising.
 - `POST /api/itin` (create): same body → `201 { ok, itin, can }`. Optional `status`.
-- `POST /api/itin/settings` (admins) `{ lunchKes, perDiemKes, lodgingKes, hours, lunch, visitMin: { type: min }, windows: { type: { open, close } | null }, overnightAfterMin }` → `{ ok, settings }`. Refusals `bad-amount`, `hours`, `lunch`.
+- **Start or end at the office:** send `{ kind: "office" }` with no position and the server fills in `{ kind, name, lat, lng }` from `settings.offices[<trip ck>]` (or the only office set). None set → `400 no-office` (+ `ck`); ask an admin to set it, or let the user pick a place. An office with a position sent by the app is used as given.
+- `POST /api/itin/settings` (admins) `{ offices: { ke: { name, lat, lng } | null }, lunchKes, perDiemKes, lodgingKes, hours, lunch, visitMin: { type: min }, windows: { type: { open, close } | null }, overnightAfterMin }` → `{ ok, settings }`. Refusals `bad-amount`, `hours`, `lunch`, `office`, `bad-country`. `GET ?settings=1` includes `offices` (empty until set; there is no built-in default).
 - `POST /api/itin/windows` (admins) `{ id, window: { open, close } | null, fixed?, visitMin?, days?: [0-6] }` → `{ ok, windows }`.
 - `POST /api/itin/<id>` `{ action, v, … }` → `{ ok, itin, can }` unless noted:
 
@@ -247,9 +249,10 @@ Consumption model (`lib/fuel-model.js`, `CONSUMPTION`): L/100 km = base(type, cc
 - `GET ?logs=<vid>` → `{ ok, logs (newest first), real }` · `?itin=<id>` → `{ ok, logs }`.
 - `POST { action: "override", ck, town ("*" = whole country), petrol?, diesel?, until? }` (admins; local currency) · `{ action: "override-remove", ck, town }` · `{ action: "refresh", ck? }` (admins, ≤ 20/h) → `{ ok, results: { ke: { ok, from, to, towns } | { ok: false, reason } } }`.
 - `POST { action: "log", vid, itinId?, litres, kesPerL | totalKes, (or perL | total with currency: "TZS|UGX|MWK"), odometer?, full?: true, town?, lat?, lng?, receipt?, note?, at? }` → `201 { ok, log, real }`. `log.paid` keeps the local amount and rate when not KES.
+- **Receipt photos:** upload first with `POST /api/pin-photo` (multipart: `kind=receipt`, `itin=<itinerary id>`, `file` = JPEG/PNG/WebP/HEIC ≤ 5 MB; no `update`) → `201 { ok, id: "rc_…", url: "/api/pin-photo?receipt=rc_…" }`. Only people who can edit that trip (refusals `named-only`, `forbidden`, `read-only` 403, `not-found` 404, `type` 415, `too-large` 413, `rate` 429). Put `id` in the fuel log's (or an extra's) `receipt`; a fuel log refuses a receipt that doesn't exist or belongs to another trip (`receipt`). `GET /api/pin-photo?receipt=<id>` (signed in, can see the trip) → the image. Kept in KV `itinphoto:<id>` for 400 days.
 - `POST { action: "log-remove", vid, lid }` (who added it, or an admin).
 - `POST /api/fuel?cron=prices` + `X-Cron-Key` → the daily fetch.
-- Refusals: `bad-country`, `bad-town`, `bad-price` (+ `range`, `currency`), `bad-litres` (0.5–400), `bad-odometer`, `no-vehicle`, `no-fx`. Fetch status reasons: `fetch`, `blocked`, `parse`, `stale`, `no-source`.
+- Refusals: `bad-country`, `bad-town`, `bad-price` (+ `range`, `currency`), `bad-litres` (0.5–400), `bad-odometer`, `no-vehicle`, `no-fx`. `receipt`. Fetch status reasons: `fetch`, `blocked`, `parse`, `stale`, `no-source`.
 
 ## 4. Group trips: `/api/group-trips` (admins only)
 - `GET` → `{ ok, items: [{ id, name, from, to, country, participants: n, public, donors, updated }] }` · `GET /<id>` → `{ ok, trip }`.
@@ -298,3 +301,4 @@ The monthly admin e-mail (`/api/admin?cron=monthly`) gets a "Trips" row when tri
   - Vehicles: `in-use` is 409 with `trips`; new refusals `bad-name`, `bad-consumption`.
   - Group trips: `totals` shape (`byCurrency`, `USD`, `KES`), `flight.checkIn`, `participant.donorId`; reminder preview/send answers as above.
   - Public itinerary adds `status`, `lines`; group page adds `leaders`, `contact`, `attachments`.
+- 2026-10-26 **v1.2:** `{ kind: "office" }` start/end filled from new `settings.offices` (per country), else `400 no-office`; receipt photos via `/api/pin-photo` `kind=receipt` → `{ id, url }`, referenced by fuel logs/extras (`receipt` refusal when it isn't that trip's).
