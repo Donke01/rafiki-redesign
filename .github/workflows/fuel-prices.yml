@@ -1,0 +1,21 @@
+# Fetches the official fuel pump prices (EPRA Kenya, EWURA Tanzania, MERA Malawi) for trip costs, once a day at 07:10
+# Nairobi time. EPRA publishes on the 14th for the 15th and EWURA on the first Tuesday/Wednesday of the month, so a daily
+# fetch picks each new list up within a day; an unchanged list is simply kept. See docs/itinerary.md.
+# Uses the same repository secret CRON_KEY (Settings → Secrets and variables → Actions) as the monthly report, with the
+# same value as the Cloudflare secret CRON_KEY. Optional repository variable SITE_URL (default: the preview site).
+name: Fuel prices
+on:
+  schedule:
+    - cron: '10 4 * * *'
+  workflow_dispatch:
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ask the site to fetch the official prices
+        env:
+          CRON_KEY: ${{ secrets.CRON_KEY }}
+          SITE_URL: ${{ vars.SITE_URL || 'https://rafiki-redesign.pages.dev' }}
+        run: |
+          if [ -z "$CRON_KEY" ]; then echo "CRON_KEY is not set; skipping."; exit 0; fi
+          curl -sS -f -X POST -H "X-Cron-Key: $CRON_KEY" "$SITE_URL/api/fuel?cron=prices"
