@@ -179,7 +179,7 @@ export class Directory extends DurableObject {
     const url = new URL(request.url), path = url.pathname.replace(/^\/+/, ''), q = url.searchParams;
     try {
       if (path === 'sys' && request.method === 'POST') return await this.sys(await request.json());
-      if (path === 'sync' && request.method === 'POST') { await this.roster(request); return json({ ok: true }); }
+      if (path === 'sync' && request.method === 'POST') { await request.text(); await this.roster(request); return json({ ok: true }); }
       if (path === 'ws') return await this.ws(request, q.get('t'));
       const me = this.me(request);
       if (!me) return fail('no-name', 403);
