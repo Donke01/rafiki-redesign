@@ -126,14 +126,17 @@ private let CrownGoldDark = Color(hex: 0xF2C14E)
 
 /// A round picture with initials; admins get a little crown on top.
 struct TeamAvatar: View {
-    let name: String; let admin: Bool; var size: CGFloat = 44
+    let name: String; let admin: Bool; var size: CGFloat = 44; var st = ""
     var body: some View {
         let hu = C.named(nameHue(name))
         ZStack(alignment: .topTrailing) {
             Group {
                 if name.isEmpty { Icon("plus", size: size * 0.45, color: hu.fg) }
                 else { Text(initialsOf(name)).font(.mont(size * 0.34, .heavy)).foregroundColor(hu.fg) }
-            }.frame(width: size, height: size).background(Circle().fill(hu.bg)).overlay(Circle().stroke(C.sun ? C.ink : .clear, lineWidth: 2))
+            }.frame(width: size, height: size).background(Circle().fill(hu.bg)).overlay(Circle().stroke(st == "today" ? StToday : C.sun ? C.ink : .clear, lineWidth: st == "today" ? 2.5 : 2))
+                .overlay(alignment: .bottomTrailing) {
+                    if !st.isEmpty { Circle().fill(stColor(st)).frame(width: size * 0.26 - 5, height: size * 0.26 - 5).padding(2.5).background(Circle().fill(C.card)).offset(x: 1, y: 1) }
+                }
                 .padding(.top, size * 0.18).padding(.trailing, size * 0.18)
             if admin {
                 Image(systemName: "crown.fill").font(.system(size: size * 0.26)).foregroundColor(C.dark ? CrownGoldDark : CrownGold)
@@ -169,41 +172,149 @@ private struct TeamChips: View {
     }
 }
 
-/// Office › Team: a short list grouped by role (admins wear a crown). Tap a person for their contact sheet.
+let StToday = Color(hex: 0x22B566)
+private let StWeek = Color(hex: 0xF0A630), StNone = Color(hex: 0xAEB8C1), StBlk = Color(hex: 0xD93A2E)
+func stColor(_ st: String) -> Color { st == "today" ? StToday : st == "week" ? StWeek : st == "blk" ? StBlk : StNone }
+/// today (used the app today), week (in the last 7 days), old, inv (never signed in), blk (blocked).
+func teamState(_ p: JSON) -> String {
+    if p.obj("blocked") != nil || p.bool("blocked") { return "blk" }
+    let s = p.str("lastSeen"); if s.isEmpty || s == "null" { return "inv" }
+    let fm = ISO8601DateFormatter(); fm.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+    guard let at = fm.date(from: s) ?? ISO8601DateFormatter().date(from: s) else { return "inv" }
+    if Calendar.current.isDateInToday(at) { return "today" }
+    return Date().timeIntervalSince(at) < 7 * 86400 ? "week" : "old"
+}
+private func teamIs(_ p: JSON, _ f: String) -> Bool {
+    let st = teamState(p)
+    switch f { case "all": return true; case "adm": return p.bool("admin"); case "week": return st == "today" || st == "week"; default: return st == f }
+}
+
+/// Office › Team, from the Figma design (the same as the web app and Android): a navy head with numbers (tap one to
+/// filter) and Add a person, search by name, phone or country, filter chips, and a card per person with a status ring,
+/// Call and WhatsApp on it, and a red card for someone blocked. Tap a person for their contact sheet.
 private struct TeamSection: View {
     @EnvironmentObject var m: AppModel
     @ObservedObject private var contact = Contact.shared
     @StateObject private var team = Team()
     @State private var adding = false
     @State private var q = ""
+    @State private var f = "all"
     @State private var tm: String?
+    @Environment(\.openURL) private var openURL
     var body: some View {
-        let list = team.people.filter { q.isEmpty || $0.str("name").localizedCaseInsensitiveContains(q.trimmingCharacters(in: .whitespaces)) }.sorted { $0.str("name").lowercased() < $1.str("name").lowercased() }
+        let all = team.people.sorted { $0.str("name").lowercased() < $1.str("name").lowercased() }
+        let qq = q.trimmingCharacters(in: .whitespaces).lowercased(), qd = qq.filter { $0.isNumber }
+        let ff = f != "all" && !all.contains { teamIs($0, f) } ? "all" : f
+        let list = all.filter { p in
+            teamIs(p, ff) && (qq.isEmpty || ["name", "phone", "role", "email"].map { p.str($0) }.joined(separator: " ").appending(" " + (countryName(p.str("home")) ?? "")).lowercased().contains(qq)
+                || (qd.count >= 3 && p.str("phone").filter { $0.isNumber }.contains(qd)))
+        }
         let admins = list.filter { $0.bool("admin") }, field = list.filter { !$0.bool("admin") }
+        let filtered = !qq.isEmpty || ff != "all"
         VStack(alignment: .leading, spacing: 0) {
-            Btn(t("Add a person", "Ongeza mtu"), icon: "plus", wide: true) { adding = true }
-            if team.people.count > 8 { Field(t("Find a person", "Tafuta mtu"), $q, placeholder: t("Name", "Jina")) }
-            head("crown", t("Admins", "Wasimamizi"), admins.count, C.named("amber"))
-            ForEach(Array(admins.enumerated()), id: \.offset) { i, p in row(p, i) }
-            head("people", t("Field team", "Timu ya uwanjani"), field.count, C.named("slate"))
-            ForEach(Array(field.enumerated()), id: \.offset) { i, p in row(p, admins.count + i) }
-            if !team.people.isEmpty && field.isEmpty { Text(t("Nobody here yet. Add a person above.", "Hakuna mtu bado. Ongeza mtu hapo juu.")).font(.bSmall).foregroundColor(C.muted).padding(4) }
-            CardV(pad: 14) {
+            hero(all, ff)
+            Field(t("Find a person", "Tafuta mtu"), $q, placeholder: t("Name, phone or country", "Jina, simu au nchi")).padding(.top, 8)
+            TagFlow(h: 8, v: 8) {
+                ForEach([("all", t("All", "Wote")), ("today", t("Active today", "Hai leo")), ("adm", t("Admins", "Wasimamizi")), ("inv", t("Invited", "Walioalikwa")), ("blk", t("Blocked", "Waliozuiwa"))], id: \.0) { k, label in
+                    let n = k == "all" ? all.count : all.filter { teamIs($0, k) }.count
+                    if k == "all" || n > 0 { pill(k, label, n, ff == k) }
+                }
+            }.padding(.top, 10)
+            if !filtered || !admins.isEmpty { head("crown", t("Admins", "Wasimamizi"), admins.count, C.named("amber")) }
+            ForEach(Array(admins.enumerated()), id: \.offset) { i, p in card(p, i) }
+            if !filtered || !field.isEmpty { head("people", t("Field team", "Timu ya uwanjani"), field.count, C.named("slate")) }
+            ForEach(Array(field.enumerated()), id: \.offset) { i, p in card(p, admins.count + i) }
+            if filtered && list.isEmpty { Text(t("Nobody matches.", "Hakuna anayelingana.")).font(.bMedium).foregroundColor(C.muted).frame(maxWidth: .infinity).padding(24) }
+            else if !team.people.isEmpty && field.isEmpty && !filtered { Text(t("Nobody here yet. Add a person above.", "Hakuna mtu bado. Ongeza mtu hapo juu.")).font(.bSmall).foregroundColor(C.muted).padding(4) }
+            CardV(pad: 16) {
                 HStack(spacing: 12) {
-                    IconTile(icon: "mail", tint: C.named("teal").fg, bg: C.named("teal").bg, size: 40)
+                    IconTile(icon: "mail", tint: C.named("teal").fg, bg: C.named("teal").bg, size: 44)
                     VStack(alignment: .leading, spacing: 1) {
-                        Text(t("E-mail alerts", "Taarifa kwa barua pepe")).font(.tSmall).foregroundColor(C.ink)
-                        Text(t("Admins with an e-mail get an alert when a site stops working.", "Wasimamizi wenye barua pepe wanapata taarifa eneo likiacha kufanya kazi.")).font(.bSmall).foregroundColor(C.muted)
+                        Text(t("E-mail alerts", "Taarifa kwa barua pepe")).font(.mont(17, .heavy)).foregroundColor(C.ink)
+                        Text(t("Repairs and reviews go to admins with an e-mail", "Matengenezo na mapitio yanaenda kwa wasimamizi wenye barua pepe")).font(.bSmall).foregroundColor(C.muted)
                     }
+                }
+                let mails = all.filter { $0.bool("admin") && !$0.str("email").isEmpty && $0.str("email") != "null" }.map { $0.str("email") }
+                if !mails.isEmpty {
+                    VStack(alignment: .leading, spacing: 6) {
+                        ForEach(mails, id: \.self) { e in
+                            HStack(spacing: 6) { Icon("mail", size: 14, color: C.ink); Text(e).font(.mont(13, .bold)).foregroundColor(C.ink).lineLimit(1) }
+                                .padding(.horizontal, 10).padding(.vertical, 4).background(C.named("slate").bg).clipShape(Capsule())
+                        }
+                    }.padding(.top, 10)
                 }
                 Btn(t("Send a test e-mail", "Tuma barua pepe ya majaribio"), icon: "upload", light: true, small: true) {
                     Task { tm = t("Sending…", "Inatuma…"); tm = mailResult(await m.api.admin(["action": "test-mail"])) }
-                }.padding(.top, 10)
+                }.padding(.top, 12)
                 Msg(tm)
-            }.padding(.top, 16)
+            }.padding(.top, 18)
         }
         .task(id: contact.changed) { await team.load(m) }
         .sheet(isPresented: $adding) { AddSheet { Task { await team.load(m) } }.environmentObject(m) }
+    }
+    private func pick(_ k: String) { Haptic.tap(); withAnimation(.easeOut(duration: 0.2)) { f = f == k && k != "all" ? "all" : k } }
+    private func hero(_ all: [JSON], _ ff: String) -> some View {
+        let nAdm = all.filter { $0.bool("admin") }.count
+        let n = { (k: String) in all.filter { teamIs($0, k) }.count }
+        let faces = Array((all.filter { teamState($0) == "today" } + all.filter { teamState($0) != "today" }).prefix(3))
+        let navy = Color(hex: 0x063559)
+        return VStack(alignment: .leading, spacing: 0) {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(t("OFFICE", "OFISI")).font(.mont(12, .heavy)).tracking(1.8).foregroundColor(Color(hex: 0x9FD3F7))
+                    Text(t("Your team", "Timu yako")).font(.mont(28, .heavy)).foregroundColor(.white)
+                    Text((all.count == 1 ? t("1 person", "Mtu 1") : t("\(all.count) people", "Watu \(all.count)")) + " · " + (nAdm == 1 ? t("1 admin", "Msimamizi 1") : t("\(nAdm) admins", "Wasimamizi \(nAdm)")))
+                        .font(.bMedium).foregroundColor(.white.opacity(0.82))
+                }
+                Spacer(minLength: 8)
+                HStack(spacing: -10) {
+                    ForEach(Array(faces.enumerated()), id: \.offset) { _, p in
+                        let hu = C.named(nameHue(p.str("name")))
+                        Text(initialsOf(p.str("name"))).font(.mont(13, .heavy)).foregroundColor(hu.fg).frame(width: 35, height: 35).background(Circle().fill(hu.bg)).padding(2.5).background(Circle().fill(navy))
+                    }
+                    if all.count > 3 { Text("+\(all.count - 3)").font(.mont(12, .heavy)).foregroundColor(Color(hex: 0x04263F)).frame(width: 35, height: 35).background(Circle().fill(.white)).padding(2.5).background(Circle().fill(navy)) }
+                }.padding(.top, 6).accessibilityHidden(true)
+            }
+            HStack(spacing: 8) {
+                stat("today", n("today"), StToday, t("today", "leo"), ff, live: true)
+                stat("week", n("week"), Color(hex: 0x7CC4F5), t("this week", "wiki hii"), ff)
+                stat("inv", n("inv"), StWeek, t("invited", "walioalikwa"), ff)
+                stat("blk", n("blk"), Color(hex: 0xFF6B5E), t("blocked", "waliozuiwa"), ff)
+            }.padding(.top, 16)
+            Button { Haptic.tap(); adding = true } label: {
+                HStack(spacing: 8) { Icon("plus", size: 22, color: Color(hex: 0x0A78C2)); Text(t("Add a person", "Ongeza mtu")).font(.mont(17, .heavy)).foregroundColor(Color(hex: 0x0A78C2)) }
+                    .frame(maxWidth: .infinity, minHeight: 54).background(Capsule().fill(.white)).shadow(color: .black.opacity(0.18), radius: 9, y: 6)
+            }.buttonStyle(Press()).padding(.top, 16).accessibilityIdentifier("team_add")
+        }
+        .padding(20)
+        .background(C.sun ? AnyView(Color(hex: 0x002A57)) : AnyView(ZStack {
+            LinearGradient(colors: [Color(hex: 0x0B4F80), navy, Color(hex: 0x04263F)], startPoint: .topLeading, endPoint: .bottomTrailing)
+            RadialGradient(colors: [Color(hex: 0x2F9BE6).opacity(0.55), .clear], center: .topTrailing, startRadius: 0, endRadius: 260)
+        }))
+        .modifier(Sheen(delay: 0.7))
+        .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 28, style: .continuous).stroke(C.sun ? Color.black : C.dark ? Color(hex: 0x1E4A6E) : .clear, lineWidth: C.sun ? 2 : 1))
+        .shadow(color: C.dark || C.sun ? .clear : Color(hex: 0x04263F).opacity(0.22), radius: 17, y: 14)
+        .rise(0)
+    }
+    private func stat(_ k: String, _ n: Int, _ dot: Color, _ label: String, _ ff: String, live: Bool = false) -> some View {
+        let on = ff == k
+        return Button { pick(k) } label: {
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: 6) { BreathDot(color: dot, live: live && n > 0, size: 8); Text("\(n)").font(.mont(22, .heavy)) }
+                Text(label).font(.mont(11, .semibold)).opacity(0.85).lineLimit(2).minimumScaleFactor(0.8)
+            }.foregroundColor(on ? Color(hex: 0x04263F) : .white).frame(maxWidth: .infinity, minHeight: 62, alignment: .leading).padding(.horizontal, 10).padding(.vertical, 9)
+            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(on ? Color.white : Color.white.opacity(0.1)))
+            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(Color.white.opacity(on ? 1 : 0.18), lineWidth: 1))
+        }.buttonStyle(Press()).accessibilityAddTraits(on ? .isSelected : [])
+    }
+    private func pill(_ k: String, _ label: String, _ n: Int, _ on: Bool) -> some View {
+        Button { pick(k) } label: {
+            HStack(spacing: 8) {
+                Text(label).font(.mont(15, .bold)).foregroundColor(on ? C.card : C.ink)
+                Text("\(n)").font(.mont(12, .heavy)).foregroundColor(on ? C.ink : C.named("slate").fg).padding(.horizontal, 8).padding(.vertical, 2).background(Capsule().fill(on ? C.card : C.named("slate").bg))
+            }.padding(.leading, 16).padding(.trailing, 8).frame(minHeight: 44).background(Capsule().fill(on ? C.ink : C.card)).overlay(Capsule().stroke(on ? C.ink : C.line, lineWidth: C.sun ? 2 : 1))
+        }.buttonStyle(Press()).accessibilityAddTraits(on ? .isSelected : [])
     }
     private func head(_ icon: String, _ title: String, _ n: Int, _ hu: Hue) -> some View {
         HStack(spacing: 8) {
@@ -212,21 +323,57 @@ private struct TeamSection: View {
             Text("\(n)").font(.mont(11, .heavy)).foregroundColor(hu.fg).padding(.horizontal, 8).padding(.vertical, 2).background(hu.bg).clipShape(Capsule())
         }.padding(.top, 20).padding(.bottom, 2).padding(.leading, 4)
     }
-    private func row(_ p: JSON, _ i: Int) -> some View {
-        let name = p.str("name"), seen = p.str("lastSeen")
-        return Button { Haptic.tap(); Contact.show(name) } label: {
-            HStack(spacing: 10) {
-                TeamAvatar(name: name, admin: p.bool("admin"))
-                VStack(alignment: .leading, spacing: 0) {
-                    Text(name).font(.tSmall).foregroundColor(C.ink).lineLimit(1)
-                    TeamChips(p: p)
-                    Text(seen.isEmpty || seen == "null" ? t("Not signed in yet", "Bado hajaingia") : t("Last active ", "Alitumia mwisho ") + Dates.dateTime(seen)).font(.bSmall).foregroundColor(C.muted).padding(.top, 3)
-                }
-                Spacer(minLength: 0)
-                Icon("chev", size: 18, color: C.muted)
-            }.padding(.horizontal, 12).padding(.vertical, 10).background(C.card).clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(C.line, lineWidth: C.sun ? 2 : 1))
-        }.buttonStyle(Press()).padding(.top, 8).rise(i, step: 0.04)
+    private func card(_ p: JSON, _ i: Int) -> some View {
+        let name = p.str("name"), seen = p.str("lastSeen"), st = teamState(p), blk = st == "blk"
+        let phone = p.str("phone") == "null" ? "" : p.str("phone"), role = p.str("role") == "null" ? "" : p.str("role")
+        let src = p.str("src").isEmpty ? p.str("source") : p.str("src")
+        let when = st == "inv" ? (src == "app" ? t("Invited · hasn’t signed in yet", "Amealikwa · bado hajaingia") : t("Not signed in yet", "Bado hajaingia")) : t("Last active ", "Alitumia mwisho ") + Dates.dateTime(seen)
+        let shape = RoundedRectangle(cornerRadius: 24, style: .continuous)
+        return VStack(spacing: 0) {
+            Button { Haptic.tap(); Contact.show(name) } label: {
+                HStack(spacing: 12) {
+                    TeamAvatar(name: name, admin: p.bool("admin"), size: 56, st: st)
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text(name).font(.mont(17, .heavy)).foregroundColor(C.ink).lineLimit(1)
+                        Text((role.isEmpty ? "" : role + " · ") + when).font(.bSmall).foregroundColor(blk ? C.bad : C.muted).lineLimit(1)
+                        TeamChips(p: p)
+                    }
+                    Spacer(minLength: 0)
+                    Icon("chev", size: 18, color: C.muted)
+                }.padding(.leading, 16).padding(.trailing, 12).padding(.vertical, 14).contentShape(Rectangle())
+            }.buttonStyle(Press()).accessibilityIdentifier("tm_\(name)")
+            if blk {
+                Divider().overlay(C.bad.opacity(0.3))
+                let by = p.obj("blocked")?.str("by") ?? ""
+                HStack(spacing: 8) {
+                    Icon("x", size: 18, color: C.bad)
+                    Text((by.isEmpty || by == "null" ? t("Blocked", "Amezuiwa") : t("Blocked by \(by)", "Amezuiwa na \(by)")) + " · " + t("can’t sign in", "hawezi kuingia")).font(.mont(13, .bold)).foregroundColor(C.bad)
+                    Spacer(minLength: 0)
+                }.padding(.horizontal, 16).frame(minHeight: 44)
+            } else if !phone.isEmpty {
+                Divider().overlay(C.line)
+                HStack(spacing: 8) {
+                    quick(t("Call", "Piga"), C.named("green")) { Icon("phone", size: 18, color: C.named("green").fg) } go: {
+                        if let u = URL(string: "tel:" + phone.filter { $0.isNumber || $0 == "+" }) { openURL(u) }
+                    }
+                    quick("WhatsApp", Hue(fg: C.dark ? Color(hex: 0x5FD08F) : Color(hex: 0x1C8A50), bg: Color(hex: 0x25D366).opacity(0.14))) { BrandLogo(k: "whatsapp", size: 18) } go: {
+                        if let u = URL(string: "https://wa.me/" + waNumber(phone, p.str("home"))) { openURL(u) }
+                    }
+                    Text(phone).font(.bSmall).foregroundColor(C.muted).lineLimit(1).frame(maxWidth: .infinity, alignment: .trailing)
+                }.padding(.horizontal, 14).padding(.top, 10).padding(.bottom, 12)
+            }
+        }
+        .background(shape.fill(blk ? C.badBg.opacity(0.55) : C.card).background(shape.fill(C.card)))
+        .overlay(shape.stroke(blk ? C.bad.opacity(0.4) : C.line, lineWidth: C.sun ? 2 : 1))
+        .clipShape(shape)
+        .shadow(color: C.dark || C.sun ? .clear : Color(hex: 0x04263F).opacity(0.05), radius: 5, y: 2)
+        .padding(.top, 12).rise(i + 1, step: 0.04)
+    }
+    private func quick<I: View>(_ label: String, _ hu: Hue, @ViewBuilder icon: () -> I, go: @escaping () -> Void) -> some View {
+        Button { Haptic.tap(); go() } label: {
+            HStack(spacing: 7) { icon(); Text(label).font(.mont(14, .heavy)).foregroundColor(hu.fg).lineLimit(1) }
+                .padding(.horizontal, 16).frame(minHeight: 44).background(Capsule().fill(hu.bg))
+        }.buttonStyle(Press())
     }
 }
 

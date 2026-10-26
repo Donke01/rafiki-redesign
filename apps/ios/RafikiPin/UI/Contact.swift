@@ -279,21 +279,22 @@ struct ContactSheet: View {
                 if let said { Msg(said.1, said.0) }
 
                 if !me {
-                    CtGroup(t("Contact", "Mawasiliano")) {
-                        if !p.email.isEmpty {
-                            CtRow(icon: "mail", hue: "teal", label: t("Send an e-mail", "Tuma barua pepe"), value: p.email) {
+                    // Call, WhatsApp, SMS, E-mail and Share as big tiles (the Figma design)
+                    HStack(spacing: 8) {
+                        if !p.phone.isEmpty {
+                            CtTile(label: t("Call", "Piga"), circle: Color(hex: 0x1C7C4A)) { Icon("phone", size: 22, color: .white) } go: { Links.call(p.phone) }
+                            CtTile(label: "WhatsApp", circle: Color(hex: 0x25D366)) { BrandLogo(k: "whatsapp", size: 24) } go: { Links.whatsapp(p.phone, p.home) }
+                            CtTile(label: "SMS", circle: C.named("teal").bg) { Icon("text", size: 22, color: C.named("teal").fg) } go: { Talk.sms(p.phone) }
+                        }
+                        if !p.email.isEmpty && (iAmAdmin || p.phone.isEmpty) {
+                            CtTile(label: t("E-mail", "Barua pepe"), circle: C.named("blue").bg) { Icon("mail", size: 22, color: C.named("blue").fg) } go: {
                                 if iAmAdmin { MailNav.preset = MailPreset(aud: "pick", picks: ["t:" + p.name.lowercased()]); leave { go("office", "mail") } } else { Share.open("mailto:" + p.email) }
                             }
                         }
-                        if !p.phone.isEmpty {
-                            CtRow(icon: "phone", hue: "near", label: t("Call", "Piga simu"), value: p.phone) { Links.call(p.phone) }
-                            CtRow(icon: "b:whatsapp", hue: "wa", label: "WhatsApp", value: p.phone) { Links.whatsapp(p.phone, p.home) }
-                            CtRow(icon: "text", hue: "blue", label: "SMS", value: p.phone) { Talk.sms(p.phone) }
-                        }
-                        CtRow(icon: "share", hue: "purple", label: t("Share contact", "Shiriki mawasiliano"), value: t("A contact card with name, phone and e-mail", "Kadi ya mawasiliano yenye jina, simu na barua pepe")) { shareContact(p) }
-                        if p.email.isEmpty && p.phone.isEmpty {
-                            Text(t("No e-mail or phone on the team list for them yet.", "Bado hakuna barua pepe wala simu yake kwenye orodha ya timu.")).font(.bSmall).foregroundColor(C.muted).padding(.horizontal, 12).padding(.vertical, 8)
-                        }
+                        CtTile(label: t("Share", "Shiriki"), circle: C.card) { Icon("share", size: 22, color: C.ink) } go: { shareContact(p) }
+                    }.padding(.top, 16)
+                    if p.email.isEmpty && p.phone.isEmpty {
+                        Text(t("No e-mail or phone on the team list for them yet.", "Bado hakuna barua pepe wala simu yake kwenye orodha ya timu.")).font(.bSmall).foregroundColor(C.muted).padding(.horizontal, 12).padding(.vertical, 8)
                     }
                 }
 
@@ -401,15 +402,28 @@ struct ContactSheet: View {
     }
 
     @ViewBuilder private func header(_ p: Person) -> some View {
+        let live: Bool = { guard p.blocked == nil, let ls = p.lastSeen else { return false }; let fm = ISO8601DateFormatter(); fm.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            guard let d = fm.date(from: ls) ?? ISO8601DateFormatter().date(from: ls) else { return false }; return Calendar.current.isDateInToday(d) }()
+        let dot: Color = p.blocked != nil ? Color(hex: 0xD93A2E) : live ? Color(hex: 0x22B566) : p.lastSeen != nil ? Color(hex: 0xF0A630) : Color(hex: 0xAEB8C1)
         VStack(spacing: 0) {
-            ZStack(alignment: .topTrailing) {
-                PersonAvatar(name: p.name, size: 72)
-                if p.admin {
-                    Icon("crown", size: 18, color: C.dark ? Color(hex: 0xF2C14E) : Color(hex: 0xE0A100)).frame(width: 28, height: 28).background(C.card).clipShape(Circle())
-                        .overlay(Circle().stroke(C.line, lineWidth: 1)).offset(x: 4, y: -4).accessibilityLabel(t("Admin", "Msimamizi"))
+            // a soft banner behind the picture (the Figma design)
+            ZStack(alignment: .top) {
+                if !C.sun {
+                    LinearGradient(colors: [C.named("green").bg, C.named("teal").bg, C.named("blue").bg], startPoint: .leading, endPoint: .trailing)
+                        .frame(height: 92).clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
                 }
+                ZStack(alignment: .topLeading) {
+                    PersonAvatar(name: p.name, size: live ? 90 : 96).padding(live ? 3 : 0)
+                        .overlay(Circle().stroke(live ? Color(hex: 0x22B566) : .clear, lineWidth: 3))
+                        .padding(4).background(Circle().fill(C.card))
+                        .overlay(alignment: .bottomTrailing) { if p.known { Circle().fill(dot).frame(width: 16, height: 16).padding(3).background(Circle().fill(C.card)).offset(x: -4, y: -4) } }
+                    if p.admin {
+                        Icon("crown", size: 18, color: C.dark ? Color(hex: 0xF2C14E) : Color(hex: 0xE0A100)).frame(width: 30, height: 30).background(C.card).clipShape(Circle())
+                            .overlay(Circle().stroke(C.line, lineWidth: 1)).accessibilityLabel(t("Admin", "Msimamizi"))
+                    }
+                }.padding(.top, 30)
             }
-            Text(p.name).font(.tLarge).foregroundColor(C.ink).multilineTextAlignment(.center).padding(.top, 8).padding(.horizontal, 36)
+            Text(p.name).font(.mont(26, .heavy)).foregroundColor(C.ink).multilineTextAlignment(.center).padding(.top, 10).padding(.horizontal, 36)
             if !p.role.isEmpty { Text(p.role).font(.bMedium).foregroundColor(C.text).multilineTextAlignment(.center) }
             if p.known {
                 HStack(spacing: 6) {
@@ -427,7 +441,10 @@ struct ContactSheet: View {
                 if let ls = p.lastSeen { return t("Active · last seen ", "Anatumia · alionekana ") + Dates.dateTime(ls) }
                 return p.app ? t("Invited · hasn’t signed in yet", "Amealikwa · bado hajaingia") : t("Hasn’t signed in yet", "Bado hajaingia")
             }()
-            Text(status).font(.mont(12, .semibold)).foregroundColor(p.blocked != nil ? C.bad : C.muted).multilineTextAlignment(.center).padding(.top, 8)
+            HStack(spacing: 6) {
+                if p.blocked == nil && p.lastSeen != nil { BreathDot(color: Color(hex: 0x22B566), live: live, size: 8) }
+                Text(status).font(.mont(12, .semibold)).foregroundColor(p.blocked != nil ? C.bad : p.lastSeen != nil ? C.named("green").fg : C.muted).multilineTextAlignment(.center)
+            }.padding(.top, 8)
             if p.blocked == nil, let o = p.out { Text(t("Signed out of all phones on ", "Ametolewa kwenye simu zote tarehe ") + Dates.day(o)).font(.bSmall).foregroundColor(C.muted).multilineTextAlignment(.center) }
             if let why = p.blocked?.reason, !why.isEmpty { Text("“\(why)”").font(.bSmall).foregroundColor(C.muted).multilineTextAlignment(.center) }
         }.padding(.horizontal, 8)
@@ -499,9 +516,29 @@ private struct CtGroup<Content: View>: View {
     @ViewBuilder var content: () -> Content
     init(_ label: String, @ViewBuilder content: @escaping () -> Content) { self.label = label; self.content = content }
     var body: some View {
-        GroupLabel(label)
-        VStack(spacing: 0) { content() }.padding(.vertical, 4).padding(.horizontal, 2)
-            .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(C.line, lineWidth: 1))
+        VStack(alignment: .leading, spacing: 0) {
+            GroupLabel(label).padding(.leading, 6)
+            VStack(spacing: 0) { content() }
+        }.padding(.horizontal, 6).padding(.top, 4).padding(.bottom, 6)
+            .background(RoundedRectangle(cornerRadius: 22, style: .continuous).fill(C.card))
+            .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(C.line, lineWidth: C.sun ? 2 : 1)).padding(.top, 14)
+    }
+}
+
+/// A big quick-action tile: a round coloured icon over its label.
+private struct CtTile<I: View>: View {
+    let label: String; let circle: Color
+    @ViewBuilder var icon: () -> I
+    let go: () -> Void
+    var body: some View {
+        Button { Haptic.tap(); go() } label: {
+            VStack(spacing: 8) {
+                icon().frame(width: 46, height: 46).background(Circle().fill(circle))
+                Text(label).font(.mont(13, .heavy)).foregroundColor(C.ink).lineLimit(1).minimumScaleFactor(0.8)
+            }.frame(maxWidth: .infinity, minHeight: 88).padding(.horizontal, 2)
+            .background(RoundedRectangle(cornerRadius: 20, style: .continuous).fill(C.named("slate").bg))
+            .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(C.line, lineWidth: C.sun ? 2 : 1))
+        }.buttonStyle(Press()).accessibilityLabel(label)
     }
 }
 
