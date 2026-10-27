@@ -4088,6 +4088,7 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
       : j.reason === 'offline' ? 'No connection. Check your signal and try again.'
       : j.reason === 'place' ? 'That spot is outside East Africa. Please check the point.'
       : j.reason === 'project' ? 'That project wasn’t found on monday.com.'
+      : j.reason === 'rate' && j.what === 'connect' ? tr('Too many tries to connect. Wait 15 minutes, then copy your token again and paste it.', 'Majaribio mengi ya kuunganisha. Subiri dakika 15, kisha nakili tokeni yako tena na uibandike.')
       : j.reason === 'rate' ? 'Too many changes from this connection. Please try again in an hour.'
       : j.reason === 'nothing-to-undo' ? 'There’s nothing to undo for this project.'
       : j.reason === 'changed' ? 'The location was changed on monday.com since, so it can’t be undone from here.'

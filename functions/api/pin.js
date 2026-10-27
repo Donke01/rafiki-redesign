@@ -42,6 +42,7 @@ import { photoIndex, photoOf, photoMap } from '../../lib/team-photo.js';
 
 const MAX_FAILS = 8; // wrong PINs per connection per hour
 const MAX_SAVES = 120; // changes per connection per hour
+const LINK_TRIES = 10, LINK_WINDOW = 900; // wrong monday.com tokens per person, per 15 minutes
 const COUNTRIES = { ke: ['KE', 'Kenya'], tz: ['TZ', 'Tanzania'], ug: ['UG', 'Uganda'], mw: ['MW', 'Malawi'] };
 const TYPES = { borehole: 'Water (Drilling)', collection: 'Water (Collection)', school: 'Educational', health: 'Medical', children: 'Orphanage', farming: 'Agricultural', community: 'Community', other: 'Other' };
 const VISIT = { working: '✅ Working well', notworking: '❌ Not working', repair: '⚠️ Needs repair' };
@@ -74,9 +75,9 @@ function sameText(a, b) {
   return diff === 0;
 }
 async function count(env, key) { return env.FEED ? Number(await env.FEED.get(key)) || 0 : 0; }
-async function bump(env, key) {
+async function bump(env, key, ttl = 3600) {
   if (!env.FEED) return;
-  await env.FEED.put(key, String((Number(await env.FEED.get(key)) || 0) + 1), { expirationTtl: 3600 });
+  await env.FEED.put(key, String((Number(await env.FEED.get(key)) || 0) + 1), { expirationTtl: ttl });
 }
 // project names saved before names were tidied can start with monday.com's ** or ##
 const strip = s => String(s || '').replace(/^[\s*#_-]+|[\s*#_]+$/g, '');
@@ -314,22 +315,25 @@ export async function onRequestPost({ request, env, waitUntil }) {
   const chk = await checkPin(request, env);
   if (chk.res) return chk.res;
   const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
-  if (await count(env, 'rl:pinsave:' + ip) >= MAX_SAVES) return json({ ok: false, reason: 'rate' }, 429);
 
   let b;
   try { b = await request.json(); } catch (e) { return json({ ok: false, reason: 'bad-request' }, 400); }
   if (!b || typeof b !== 'object') return json({ ok: false, reason: 'bad-request' }, 400);
   const action = b.action || 'pin';
+  // connecting monday.com has its own limit (below), so a busy office network can't block it
+  const connecting = action === 'monday-link' || action === 'monday-unlink';
+  if (!connecting && await count(env, 'rl:pinsave:' + ip) >= MAX_SAVES) return json({ ok: false, reason: 'rate' }, 429);
   // Me › Connect monday.com: link (or unlink) this person's own monday.com token to their PIN
   if (action === 'monday-link' || action === 'monday-unlink') {
     if (chk.monday) return json({ ok: false, reason: 'already' }, 400);
     if (!chk.who) return json({ ok: false, reason: 'own-pin' }, 400);
     if (!env.FEED) return json({ ok: false, reason: 'not-set-up' }, 503);
     if (action === 'monday-unlink') { await unlink(env, chk.who); return json({ ok: true }, 200); }
-    const lk = 'rl:pinlink:' + ip;
-    if (await count(env, lk) >= 10) return json({ ok: false, reason: 'rate' }, 429);
+    // 10 wrong tokens per person in 15 minutes; a paste that isn't a token at all isn't counted
+    const lk = 'rl:pinlink:' + String(chk.who).toLowerCase();
+    if (await count(env, lk) >= LINK_TRIES) return json({ ok: false, reason: 'rate', what: 'connect' }, 429);
     const r = await linkToken(env, chk.who, b.token);
-    if (r.fail) { await bump(env, lk); return json({ ok: false, reason: r.fail }, 400); }
+    if (r.fail) { if (r.fail !== 'token-format') await bump(env, lk, LINK_WINDOW); return json({ ok: false, reason: r.fail }, 400); }
     return json({ ok: true, name: r.name, photo: r.photo }, 200);
   }
   // Me › Settings › Personal details: a display name, phone and home country, for your own name
