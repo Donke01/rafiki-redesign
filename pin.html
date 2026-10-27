@@ -3531,6 +3531,117 @@ html[data-theme=sun] .cw-vpv{border:2px solid #000;box-shadow:none}
   body.cw2 #cwList .cw-row.cur{background:var(--tint)}
 }
 @media (prefers-reduced-motion: reduce){.cw-m.nw,.cw-sys.nw,.cw-rc.pop,.cw-tk.rd.up,.cw-dots i,.cw-skel i,.cw-unl.gone,.cw-fe,.cw-go > span{animation:none !important;transition:none !important}.cw-unl.gone{opacity:0}}
+/* cw2-list: the chat list (chat 2, design/chat-2026-10/list.png): a compact header with the Me photo, search in place and ⋯,
+   filter chips, "In the field now", a one-line alert prompt, dense rows with thin dividers, the new-chat button.
+   Text sizes only from the --cw-fs-* scale above. Phones: the RAFIKI bar steps aside (bell and refresh are in ⋯). */
+:root{--cw2-g:16px;--cw2-chip:#EEF0F2;--cw2-chipt:#141618;--cw2-on:#DDF1E6;--cw2-ont:#11643A;--cw2-at:#E3F4EA;--cw2-fab:#1C8A50;--cw2-nt:#EAF4FB}
+html[data-theme=dark]{--cw2-chip:#1E2830;--cw2-chipt:#E6EEF5;--cw2-on:rgba(60,192,122,.2);--cw2-ont:#8BE3B2;--cw2-at:rgba(60,192,122,.2);--cw2-fab:#1C8A50;--cw2-nt:rgba(91,192,255,.12)}
+html[data-theme=sun]{--cw2-chip:#FFFFFF;--cw2-chipt:#000000;--cw2-on:#00562A;--cw2-ont:#FFFFFF;--cw2-at:#FFFFFF;--cw2-fab:#00562A;--cw2-nt:#FFFFFF}
+@media (max-width:999px){
+  body.cwl header.top{display:none}
+  body.cwl,html:not([data-theme=sun]) body.cwl{background:var(--card)}
+  html:not([data-theme=sun]) body.cwl::before{display:none}
+}
+.cw2-top{position:sticky;top:0;z-index:30;margin:-16px calc(var(--cw2-g) * -1) 0;padding:calc(6px + env(safe-area-inset-top)) var(--cw2-g) 0;background:var(--card)}
+.cw2-hd{position:relative;display:flex;align-items:center;gap:6px;min-height:56px}
+.cw2-me{flex:none;width:42px;height:42px;margin-right:6px;padding:0;border:0;border-radius:50%;background:none;cursor:pointer;box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--blue)}
+.cw2-mea{display:flex;align-items:center;justify-content:center;width:100%;height:100%;border-radius:50%;overflow:hidden;background:linear-gradient(135deg,#1576BD,#054F81);color:#FFFFFF;font-size:var(--cw-fs-meta);font-weight:800}
+.cw2-mea img.avph{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:50%}
+.cw2-hd h1{flex:1;min-width:0;margin:0;font-size:var(--cw-fs-title);font-weight:var(--cw-fw-title);letter-spacing:-.015em;line-height:1.15;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cw2-ib{position:relative;flex:none;width:44px;height:44px;padding:0;border:0;border-radius:50%;background:none;color:var(--ink);display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.cw2-ib svg{width:23px;height:23px}.cw2-ib[aria-expanded=true]{background:var(--tint)}
+@media (hover:hover){.cw2-ib:hover,.cw2-p:hover,.cw2-arch:hover{background:var(--tint)}#cwList .cw-row:hover{background:var(--tint)}}
+.cw2-dot{position:absolute;top:9px;right:10px;width:9px;height:9px;border-radius:50%;background:var(--bad);border:2px solid var(--card)}
+.cw2-hd.srch > :not(.cw-sbox):not(.cw2-pop){display:none}
+.cw2-hd .cw-sbox{flex:1;min-width:0;min-height:44px;padding:0 4px}
+.cw2-hd .cw-sbox[hidden]{display:none}
+.cw2-hd .cw-sbox input{font-size:var(--cw-fs-name)}
+/* the ⋯ menu */
+.cw2-pop{position:absolute;top:52px;right:0;z-index:40;min-width:224px;max-width:calc(100vw - 32px);padding:6px;border-radius:16px;background:var(--card);border:var(--bw) solid var(--line);box-shadow:0 12px 32px rgba(4,38,63,.2)}
+.cw2-pop.hidden{display:none}
+.cw2-pop button{display:flex;align-items:center;gap:12px;width:100%;min-height:48px;padding:6px 12px;border:0;border-radius:11px;background:none;color:var(--text);font:inherit;font-size:var(--cw-fs-name);font-weight:600;text-align:left;cursor:pointer;white-space:nowrap}
+.cw2-pop button:hover,.cw2-pop button:focus-visible{background:var(--tint)}.cw2-pop button svg{flex:none;width:21px;height:21px;color:var(--muted)}
+.cw2-pop button span{flex:1}.cw2-pop button i{flex:none;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--bad);color:#FFFFFF;font-style:normal;font-size:var(--cw-fs-small);font-weight:800;line-height:22px;text-align:center}
+html[data-theme=sun] .cw2-pop{border:2px solid #000;box-shadow:none}
+/* the chips */
+.cw2-chips{display:flex;gap:8px;margin:0 calc(var(--cw2-g) * -1);padding:4px var(--cw2-g) 10px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.cw2-chips::-webkit-scrollbar{display:none}
+.cw2-chips button{flex:none;min-height:36px;padding:0 14px;border:0;border-radius:999px;background:var(--cw2-chip);color:var(--cw2-chipt);font:inherit;font-size:var(--cw-fs-meta);font-weight:700;white-space:nowrap;cursor:pointer}
+.cw2-chips button b{margin-left:1px;font-weight:800}
+.cw2-chips button[aria-pressed=true]{background:var(--cw2-on);color:var(--cw2-ont)}
+html[data-theme=sun] .cw2-chips button{border:2px solid #000}
+#cwTools.srch .cw2-chips,#cwTools.arch .cw2-chips{display:none}
+#cwTools .cw-archhd{margin:0 0 8px}
+/* In the field now */
+.cw2-fd{margin:0 calc(var(--cw2-g) * -1);padding:2px 0 10px var(--cw2-g);border-bottom:1px solid var(--line)}
+html[data-theme=sun] .cw2-fd{border-bottom:2px solid #000}
+.cw2-fd h2{display:flex;align-items:center;gap:7px;margin:0 0 8px;font-size:var(--cw-fs-small);font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.cw2-fd h2 i{width:8px;height:8px;border-radius:50%;background:var(--cw-un)}
+.cw2-ppl{display:flex;align-items:flex-start;gap:6px;padding-right:var(--cw2-g);overflow-x:auto;scrollbar-width:none}.cw2-ppl::-webkit-scrollbar{display:none}
+.cw2-p{flex:none;width:max(76px,5rem);padding:2px 0;border:0;border-radius:14px;background:none;color:var(--text);font:inherit;text-align:center;cursor:pointer}
+.cw2-rg{position:relative;display:block;width:58px;height:58px;margin:0 auto 4px;padding:2.5px;border-radius:50%;background:var(--line)}
+.cw2-rg.on{background:var(--cw-un)}.cw2-rg.site{background:conic-gradient(from 200deg,#1C9C5A,#0A78C2,#1C9C5A)}
+.cw2-rg .cw-av{width:100%;height:100%;border:2.5px solid var(--card);font-size:var(--cw-fs-name)}
+html[data-theme=sun] .cw2-rg .cw-av{border:2.5px solid #FFFFFF}
+.cw2-tag{position:absolute;right:-2px;bottom:-1px;width:22px;height:22px;border-radius:50%;background:var(--card);color:var(--cw-un);display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.cw2-tag svg{width:14px;height:14px}
+.cw2-p small,.cw2-p em{display:block;padding:0 2px;font-style:normal;line-height:1.25}
+.cw2-p small{font-size:var(--cw-fs-meta);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cw2-p em{font-size:var(--cw-fs-small);font-weight:700;color:var(--cw-un);display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;overflow-wrap:normal;word-break:normal;hyphens:none}
+.cw2-p em.old{color:var(--muted);font-weight:600}
+/* the alert prompt: one line */
+.cw2-nt{display:flex;align-items:center;gap:8px;margin:10px 0 2px;padding:4px 4px 4px 12px;min-height:44px;border-radius:12px;background:var(--cw2-nt);color:var(--text);font-size:var(--cw-fs-meta)}
+.cw2-nt > svg{flex:none;width:18px;height:18px;color:var(--blue)}
+.cw2-nt span{flex:1;min-width:0;line-height:1.3}
+.cw2-nt button{flex:none;min-height:36px;padding:0 8px;border:0;border-radius:10px;background:none;color:var(--blue);font:inherit;font-size:var(--cw-fs-meta);font-weight:800;white-space:nowrap;cursor:pointer}
+.cw2-nt button.x{width:36px;padding:0;color:var(--muted);display:flex;align-items:center;justify-content:center}.cw2-nt button.x svg{width:16px;height:16px}
+.cw2-nt button:hover{background:rgba(10,120,194,.1)}
+html[data-theme=sun] .cw2-nt{border:2px solid #000}html[data-theme=sun] .cw2-nt button{color:#0050A0}
+html[data-theme=dark] .cw2-nt button:not(.x){color:#5BC0FF}
+/* the rows: 74 px, a 52 px picture, a thin divider under the words */
+#cwList{margin-top:2px;padding-bottom:76px}
+#cwList .cw-rw{margin:0 calc(var(--cw2-g) * -1);border-radius:0}
+#cwList > .cw-row{width:calc(100% + var(--cw2-g) * 2);margin:0 calc(var(--cw2-g) * -1)}
+#cwList .cw-row{min-height:var(--cw-row);padding:0 var(--cw2-g);gap:13px;border-radius:0;background:transparent}
+#cwList .cw-rw.sw .cw-row,#cwList .cw-rw.swp .cw-row{background:var(--card) !important}
+#cwList .cw-rt{align-self:stretch;justify-content:center;gap:2px;min-height:var(--cw-row);padding:8px 0;border-bottom:1px solid var(--line)}
+html[data-theme=sun] #cwList .cw-row{border-bottom:0;background:#FFFFFF}html[data-theme=sun] #cwList .cw-rt{border-bottom:2px solid #000}
+#cwList .cw-r1 b{font-size:var(--cw-fs-name);font-weight:var(--cw-fw-name);line-height:1.3}
+#cwList .cw-row.un .cw-r1 b{font-weight:800}
+#cwList .cw-r1 time{font-size:var(--cw-fs-meta);font-weight:var(--cw-fw-meta)}
+#cwList .cw-row.un .cw-r1 time{color:var(--cw-un);font-weight:700}
+#cwList .cw-pv,#cwList .cw-typ{font-size:var(--cw-fs-msg);line-height:1.35}
+#cwList .cw-pv{font-weight:var(--cw-fw-msg)}#cwList .cw-row.un .cw-pv{color:var(--text);font-weight:500}
+#cwList .cw-typ{font-weight:600}
+#cwList .cw-un{min-width:22px;height:22px;font-size:var(--cw-fs-small);line-height:22px}
+#cwList .cw-at{width:auto;min-width:30px;padding:0 7px;background:var(--cw2-at);color:var(--cw-un);font-size:var(--cw-fs-meta)}
+html[data-theme=sun] #cwList .cw-at{border:2px solid #000;line-height:18px}
+#cwList .cw-bi svg{width:15px;height:15px}
+/* a chat's picture (cwChatAvatar): any size; a project's photo with a small blue water drop, or its type on a coloured tile */
+.cw-av.cav{font-size:var(--cw-fs-name)}.cw-av.cav.sm{font-size:var(--cw-fs-meta)}
+#cwList .cw-ra button{font-size:var(--cw-fs-small)}
+.cw-av.cav.ic svg{width:48%;height:48%}
+.cw-av.tile{border-radius:30%;background:var(--hb);color:var(--hu)}.cw-av.tile svg{width:50%;height:50%}
+html[data-theme=sun] .cw-av.tile{border-radius:30%}
+.cw-pdr{position:absolute;right:-3px;bottom:-3px;width:42%;height:42%;min-width:16px;min-height:16px;max-width:22px;max-height:22px;border-radius:30%;background:#0A78C2;border:2px solid var(--card);color:#FFFFFF;display:flex;align-items:center;justify-content:center}
+.cw-pdr svg{width:58%;height:58%}
+html[data-theme=sun] .cw-pdr{background:#0050A0;border-color:#000}
+/* Archived: a small grey row at the end */
+.cw2-arch{display:flex;align-items:center;gap:13px;width:calc(100% + var(--cw2-g) * 2);min-height:52px;margin:0 calc(var(--cw2-g) * -1);padding:0 var(--cw2-g);border:0;background:none;color:var(--muted);font:inherit;font-size:var(--cw-fs-meta);font-weight:600;text-align:left;cursor:pointer}
+.cw2-arch > svg{flex:none;width:var(--cw-av);height:20px}.cw2-arch span{flex:1;min-width:0}.cw2-arch i{font-style:normal;font-weight:700}
+/* the new-chat button: a green rounded square above the bottom bar */
+.cw2-fab{display:none;position:fixed;right:max(16px,calc(50% - 364px));bottom:calc(var(--tabh) + 30px + env(safe-area-inset-bottom));z-index:1150;width:56px;height:56px;padding:0;border:0;border-radius:18px;background:var(--cw2-fab);color:#FFFFFF;box-shadow:0 6px 16px rgba(28,138,80,.35);align-items:center;justify-content:center;cursor:pointer}
+.cw2-fab svg{width:25px;height:25px}.cw2-fab:active{transform:scale(.96)}
+body.cwl .cw2-fab{display:flex}#vChat.cw2-s + .cw2-fab{display:none !important}body.locked .cw2-fab{display:none !important}
+html[data-theme=sun] .cw2-fab{border:2px solid #000;box-shadow:none}
+@media (min-width:1000px){
+  body.cw2{--cw2-g:12px}
+  body.cw2 main > #vChat{background:var(--card);border-radius:18px 0 0 18px}
+  body.cw2 .cw2-top{top:-10px;margin-top:-10px;padding-top:4px;border-radius:18px 0 0 0}
+  body.cw2 .cw2-me{display:none}
+  body.cw2 .cw2-fab{display:flex;right:auto;left:calc(max(12px,calc(50% - 620px)) + 360px - 72px);bottom:calc(var(--tabh) + 42px)}
+}
+@media (prefers-reduced-motion: reduce){.cw2-fab:active{transform:none}}
 </style>
 <style id="mew-css">
 /* polish-mew: the Me pill at top left (avatar, person icon, "Me"), its one-time hint, profile photos, centred wide screens */
@@ -3643,6 +3754,169 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
   #oTabs.otabs.grp{display:grid !important;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 16px}
 }
 </style>
+<style id="cw2-room-css">/* cw2-room: one chat, redesigned (design/chat-2026-10/room.png, delete.png). Text sizes come only from the shared chat
+   scale (--cw-fs-*); --cw-fs-sheet is the sheet-title step, the same size Office and Stories sheets use (B17). */
+:root{--cw-fs-sheet:1.25rem;--cw-bg:#ECE7DF;--cw-time:#66737D;--cw-psbg:#F7FAFC;--cw-sel:#1C9C5A;--cw-selbar:#0B1F2E}
+html[data-theme=dark]{--cw-time:#9AA8B3;--cw-psbg:#121A21;--cw-sel:#3CC07A;--cw-selbar:#04101A}
+html[data-theme=sun]{--cw-time:#1E1E1E;--cw-psbg:#FFFFFF;--cw-sel:#00562A;--cw-selbar:#000000}
+/* the wall: warm, with faint dots (light theme, when no wallpaper is chosen) */
+html:not([data-theme]) #cwMsgs.cw-msgs:not([class*="cw-wp-"]){background-color:#ECE7DF;background-image:radial-gradient(circle at 10px 10px,rgba(10,120,194,.05) 2px,transparent 2.5px),radial-gradient(circle at 30px 30px,rgba(28,156,90,.045) 2px,transparent 2.5px);background-size:40px 40px}
+/* B1 the header: ←, the picture, name and typing / online / members, search and ⋯ */
+body.room .top{grid-template-columns:44px minmax(0,1fr) auto}
+body.room .cw-hd{grid-column:2/3;margin-left:2px;padding:0 4px;gap:10px}
+body.room #hBack{border:0;background:none;box-shadow:none}body.room #hBack svg{width:24px;height:24px}
+.cw-hda{display:none}
+body.room .cw-hda:not([hidden]){grid-column:3;grid-row:1;display:flex;align-items:center;margin-left:2px}
+body.cw2.room .cw-hda{display:none !important}
+@media (max-width:359px){body.room #cwHs{display:none}} /* the smallest phones: the chat's name gets the room; search is in ⋯ too */
+.cw-hd .cw-av,.cw-rh .cw-av{width:40px;height:40px}
+.cw-hdt{gap:1px}
+.cw-hdt b{font-size:var(--cw-fs-name);font-weight:800;color:var(--ink);line-height:1.25}
+.cw-hdt small{font-size:var(--cw-fs-meta);font-weight:var(--cw-fw-meta);color:var(--muted);line-height:1.3}
+.cw-hdt small.cw-typ{color:var(--cw-un);font-weight:600}
+.cw-hdb{flex:none;width:40px;height:40px;padding:0;border:0;border-radius:50%;background:none;color:var(--ink);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.cw-hdb svg{width:22px;height:22px}
+.cw-hdb:hover,.cw-hdb:active{background:var(--tint)}
+.cw-hdb:disabled{opacity:.35;cursor:default;background:none}
+.cw-hdb:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
+.cw-rhb{flex:1;min-width:0;display:flex;align-items:center;gap:10px;padding:4px 6px;border:0;border-radius:12px;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.cw-rhb:hover{background:var(--tint)}
+.cw-rha{flex:none;display:flex;gap:2px}
+body.cw2 .cw-rh{cursor:default}
+/* B2 the project strip */
+.cw-ps{flex:none;position:relative;z-index:2;display:flex;align-items:center;gap:10px;width:100%;min-height:42px;padding:6px 14px;border:0;border-bottom:var(--bw) solid var(--line);background:var(--cw-psbg);color:var(--text);font:inherit;text-align:left;cursor:pointer}
+.cw-ps.hidden{display:none}.cw-ps:active{background:var(--tint)}
+.cw-pst{flex:none;display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:var(--cw-fs-meta);font-weight:700;line-height:1.3;white-space:nowrap}
+.cw-pst i{width:7px;height:7px;border-radius:50%;background:currentColor}
+.cw-pst.ok{background:#E3F4EA;color:#11643A}.cw-pst.ok i{background:#1C9C5A}
+.cw-pst.warn{background:var(--warnbg);color:var(--warn)}.cw-pst.bad{background:var(--badbg);color:var(--bad)}.cw-pst.build{background:var(--tint);color:var(--blue)}
+html[data-theme=dark] .cw-pst.ok{background:var(--okbg);color:var(--ok)}html[data-theme=dark] .cw-pst.ok i{background:var(--ok)}
+html[data-theme=sun] .cw-pst{border:2px solid #000}html[data-theme=sun] .cw-pst.ok{background:#D8F5E3;color:#00562A}html[data-theme=sun] .cw-ps{border-bottom:2px solid #000}
+.cw-psx{flex:1;min-width:0;font-size:var(--cw-fs-meta);color:var(--muted);white-space:nowrap;overflow:hidden}
+.cw-pso{flex:none;margin-left:auto;font-size:var(--cw-fs-meta);font-weight:800;color:var(--blue);white-space:nowrap}
+.cw-ps.np .cw-psx .pl{display:none}.cw-ps.nx .cw-psx{visibility:hidden}
+/* search in this chat */
+.cw-find{flex:none;position:relative;z-index:3;display:flex;align-items:center;gap:2px;width:100%;min-height:52px;padding:5px 6px;border-bottom:var(--bw) solid var(--line);background:var(--card)}
+.cw-find.hidden{display:none}
+#cwFind input[type=search]{flex:1;min-width:0;width:auto;height:40px;min-height:40px;margin:0 2px;padding:0 10px 0 36px;border-radius:20px;background-position:11px 50%;background-size:17px;font-size:var(--cw-fs-msg)}
+.cw-fn{flex:none;min-width:2.4em;font-size:var(--cw-fs-meta);font-weight:700;color:var(--muted);text-align:center;font-variant-numeric:tabular-nums;white-space:nowrap}
+.cw-find .cw-hdb{width:38px;height:38px}.cw-find .cw-hdb svg{width:20px;height:20px}
+mark.cw-fm{background:rgba(255,200,0,.42);color:inherit;border-radius:3px;padding:0 1px}mark.cw-fm.cur{background:#FFB300;color:#000}
+/* B10 selecting: a dark bar over the header, a green ring on what's chosen */
+.cw-selh{position:fixed;left:0;right:0;top:var(--cwvt,0px);z-index:1200;display:flex;align-items:center;gap:2px;max-width:760px;height:var(--hh,56px);margin:0 auto;padding:env(safe-area-inset-top) 6px 0;background:var(--cw-selbar);color:#FFFFFF}
+.cw-selh.hidden{display:none}
+.cw-selh b{flex:1;min-width:0;margin-left:6px;font-size:var(--cw-fs-name);font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cw-selh .cw-hdb{color:#FFFFFF}.cw-selh .cw-hdb:hover,.cw-selh .cw-hdb:active{background:rgba(255,255,255,.14)}.cw-selh .cw-hdb:focus-visible{outline-color:#FFFFFF}
+body.cw2 .cw-selh{position:absolute;top:0;height:62px;max-width:none;padding-top:0;border-radius:0 18px 0 0}
+body.cwsel #vRoom{z-index:1150} /* the room's own layer goes above the app header while the bar covers it */
+#vRoom > .cw-selh,#vRoom > .cw-find{animation:none !important} /* modes, not a screen: no entrance */
+#vRoom.selmode .cw-m[data-id]{cursor:pointer}#vRoom.selmode .cw-m .cw-b *{pointer-events:none}
+.cw-m.sel .cw-b{box-shadow:0 0 0 3px var(--cw-sel) !important}
+/* B3 bubbles: theirs white with the sender's colour, mine light blue, a square-ish corner where a run starts, the time inside */
+.cw-m.them.first,.cw-m.me.first,.cw-m.them:not(.first),.cw-m.me:not(.first){padding-left:0;padding-right:0}
+.cw-b{max-width:80%;padding:6px 10px 5px;border-radius:14px;box-shadow:0 1px 1px rgba(4,20,34,.09)}
+@media (min-width:761px){.cw-b{max-width:min(80%,560px)}}
+.cw-m.them:not(.first) .cw-b{border-top-left-radius:6px}.cw-m.them:not(.last) .cw-b{border-bottom-left-radius:6px}
+.cw-m.me:not(.first) .cw-b{border-top-right-radius:6px}.cw-m.me:not(.last) .cw-b{border-bottom-right-radius:6px}
+.cw-m.them.first .cw-b{border-top-left-radius:4px}.cw-m.me.first .cw-b{border-top-right-radius:4px}
+.cw-m.first .cw-b::before{display:none}
+html[data-theme=sun] .cw-m.them.first .cw-b{border-top-left-radius:4px}html[data-theme=sun] .cw-m.me.first .cw-b{border-top-right-radius:4px}
+.cw-tx{font-size:var(--cw-fs-msg);font-weight:var(--cw-fw-msg);line-height:1.4}
+.cw-sn{font-size:var(--cw-fs-meta);font-weight:800;margin-bottom:1px}.cw-sn .cw-sav{display:none}
+.cw-mt{margin:7px 0 -3px 10px;font-size:var(--cw-fs-small);font-weight:var(--cw-fw-meta);color:var(--cw-time)}
+.cw-m.me .cw-mt{cursor:pointer}
+.cw-fw{font-size:var(--cw-fs-small)}.cw-q b{font-size:var(--cw-fs-meta)}.cw-q span{font-size:var(--cw-fs-meta)}.cw-vd{font-size:var(--cw-fs-small)}
+.cw-day span{padding:4px 11px;border-radius:9px;font-size:var(--cw-fs-meta);font-weight:700;color:var(--cw-time);box-shadow:0 1px 1px rgba(4,20,34,.06)}
+.cw-sys span{font-size:var(--cw-fs-meta)}
+.cw-unl span{width:auto;max-width:86%;padding:4px 12px;border-radius:9px;font-size:var(--cw-fs-small);font-weight:700;color:var(--cw-time);box-shadow:0 1px 1px rgba(4,20,34,.06)}
+.cw-seen{font-size:var(--cw-fs-small);cursor:pointer}
+html[data-theme=sun] .cw-day span,html[data-theme=sun] .cw-unl span{color:#000}
+/* B4 quick replies: small chips, only while the box is empty */
+.cw-qr{gap:7px}
+.cw-qr button{min-height:32px;padding:0 12px;border:0;border-radius:16px;background:rgba(255,255,255,.95);font-size:var(--cw-fs-meta);font-weight:700;box-shadow:0 1px 2px rgba(4,20,34,.1)}
+html[data-theme=dark] .cw-qr button{background:var(--card)}
+/* B7 Translate · Tafsiri and B8 Show text: a small blue link under the words; the translation in muted italics */
+.cw-tlk{display:inline-flex;align-items:center;min-height:30px;margin:1px 0 0;padding:0;border:0;background:none;color:var(--blue);font:inherit;font-size:var(--cw-fs-small);font-weight:800;text-decoration:none;cursor:pointer;white-space:nowrap}
+.cw-tlk.wait{color:var(--cw-time);font-weight:600;cursor:default}
+.cw-tlx{margin:4px 0 0;padding:1px 0 1px 9px;border-left:3px solid var(--line);font-size:var(--cw-fs-msg);font-style:italic;line-height:1.4;color:var(--muted)}
+.cw-vtx{margin:4px 0 0;font-size:var(--cw-fs-msg);line-height:1.4;color:var(--text)}
+/* B5 Add to project photos, under a photo in a project chat */
+.cw-addp{clear:both;display:flex;align-items:center;gap:7px;width:calc(100% + 6px);margin:7px -3px 2px;padding:7px 10px;border:0;border-radius:9px;background:var(--tint);color:var(--blue);font:inherit;font-size:var(--cw-fs-meta);font-weight:800;line-height:1.3;text-align:left;cursor:pointer}
+.cw-addp svg{width:16px;height:16px;flex:none}.cw-addp span{min-width:0}
+.cw-addp.ok{background:var(--okbg);color:var(--ok);cursor:default}.cw-addp.wait{color:var(--cw-time);cursor:default}
+html[data-theme=sun] .cw-addp{border:2px solid #000}
+/* B14 sending: Waiting for signal… (with Retry); Not sent · Tap to retry */
+.cw-snt{clear:both;display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:4px 8px;padding:4px 0 1px;font-size:var(--cw-fs-small);font-weight:600;line-height:1.3;color:var(--cw-time);text-align:right}
+.cw-snt svg{width:14px;height:14px;flex:none}.cw-snt.bad{color:var(--bad);font-weight:700}
+.cw-snt button{min-height:32px;padding:0 12px;border:0;border-radius:16px;background:rgba(4,38,63,.09);color:var(--ink);font:inherit;font-size:var(--cw-fs-small);font-weight:800;cursor:pointer;white-space:nowrap}
+html[data-theme=dark] .cw-snt button{background:rgba(255,255,255,.12)}html[data-theme=sun] .cw-snt button{border:2px solid #000;background:#FFFFFF}
+.cw-m.failed .cw-b{cursor:pointer}
+/* B10 the delete sheet (delete.png) */
+.cw-dsh{display:flex;flex-direction:column;gap:8px}
+.cw-dsn{margin:-4px 6px 8px;text-align:center;font-size:var(--cw-fs-meta);line-height:1.45;color:var(--muted);text-wrap:balance}
+.cw-dop{display:flex;align-items:center;gap:12px;width:100%;min-height:64px;padding:12px 14px;border:0;border-radius:14px;background:var(--bg);color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+.cw-dop:active{background:var(--tint)}
+.cw-dop .ic{flex:none;width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:var(--hb-slate);color:var(--hu-slate)}.cw-dop .ic svg{width:20px;height:20px}
+.cw-dop.red .ic{background:var(--badbg);color:var(--bad)}.cw-dop.red b{color:var(--bad)}
+.cw-dop .tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.cw-dop b{font-size:var(--cw-fs-name);font-weight:800;line-height:1.3}
+.cw-dop small{font-size:var(--cw-fs-meta);line-height:1.4;color:var(--muted)}
+.cw-dcan{display:block;width:100%;min-height:48px;margin-top:2px;border:0;border-radius:12px;background:none;color:var(--ink);font:inherit;font-size:var(--cw-fs-name);font-weight:800;cursor:pointer}
+.cw-dcan:active{background:var(--tint)}
+html[data-theme=sun] .cw-dop{border:2px solid #000;background:#FFFFFF}
+/* B17 chat sheets: one title style (the size Office and Stories sheets use), rows of the same height */
+.cw-shh{margin:0 0 10px;padding:0 40px;font-size:var(--cw-fs-sheet);font-weight:800;line-height:1.3;color:var(--ink);text-align:center;text-wrap:balance;overflow-wrap:normal;word-break:normal;hyphens:none}
+.bsh.cw-sheet .bsh-h h3{font-size:var(--cw-fs-sheet);font-weight:800;line-height:1.3;text-wrap:balance}
+.cw-ihd h3{font-size:var(--cw-fs-sheet);line-height:1.3}
+.cw-mn button{min-height:56px;font-size:var(--cw-fs-name)}
+.cw-pr{min-height:56px}.cw-pr > b,.cw-prt b{font-size:var(--cw-fs-name)}.cw-prt small{font-size:var(--cw-fs-meta)}
+/* B12 media, files and links */
+.cw-mtabs{display:flex;gap:4px;margin:2px 0 12px;padding:4px;border-radius:999px;background:var(--bg)}
+.cw-mtabs button{flex:1 1 0;min-width:0;min-height:40px;padding:0 6px;border:0;border-radius:999px;background:none;color:var(--muted);font:inherit;font-size:var(--cw-fs-meta);font-weight:800;white-space:nowrap;cursor:pointer}
+.cw-mtabs button[aria-selected=true]{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(4,38,63,.14)}
+.cw-mtabs i{font-style:normal;font-weight:700;color:var(--muted)}
+html[data-theme=sun] .cw-mtabs{border:2px solid #000}html[data-theme=sun] .cw-mtabs button[aria-selected=true]{background:#000;color:#FFFFFF}html[data-theme=sun] .cw-mtabs button[aria-selected=true] i{color:#FFFFFF}
+.cw-mfg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px}
+.cw-mfi{position:relative;display:block;aspect-ratio:1;padding:0;border:0;border-radius:6px;overflow:hidden;background:var(--tint);cursor:pointer}
+.cw-mfi img,.cw-mfi video{width:100%;height:100%;object-fit:cover;display:block}
+.cw-mfi .cw-play{width:34px;height:34px;margin:-17px 0 0 -17px}.cw-mfi .cw-play svg{width:18px;height:18px}
+.cw-mfr{display:flex;align-items:center;gap:12px;width:100%;min-height:60px;padding:8px 4px;border:0;border-bottom:1px solid var(--line);background:none;color:var(--text);font:inherit;text-align:left;text-decoration:none;cursor:pointer}
+.cw-mfr .cw-dx{width:36px;height:42px}
+.cw-mfli{flex:none;width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:var(--tint);color:var(--blue)}.cw-mfli svg{width:20px;height:20px}
+.cw-mfe{margin:28px 8px;text-align:center;color:var(--muted)}
+.cw-mfm{display:flex;margin:14px auto 4px;white-space:nowrap}
+/* B13 jump to a date */
+.cw-jd{display:flex;flex-direction:column;gap:10px}.cw-jd label{margin:0;font-weight:700}.cw-jd input{width:100%;margin:0}
+/* B5 also into the story */
+.cw-sto{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 0 6px}
+.cw-sto .btn{min-width:0;padding-left:6px;padding-right:6px;white-space:normal;line-height:1.25;text-wrap:balance}
+.cw-stk{display:flex;align-items:center;gap:10px;min-height:44px;margin:2px 0;font-weight:600;cursor:pointer}.cw-stk input{width:22px;height:22px;min-height:0;margin:0}
+.card.cw2-pre{box-shadow:0 0 0 3px var(--blue)}
+/* B16 add people */
+.cw-apn{margin:0 0 10px;padding:10px 12px;border-radius:12px;background:var(--warnbg);color:var(--warn);font-size:var(--cw-fs-meta);line-height:1.45}
+html[data-theme=sun] .cw-apn{border:2px solid #000}
+.cw-ap input[type=search]{width:100%;margin:2px 0 8px}
+.cw-apc{display:flex;flex-wrap:wrap;gap:6px}.cw-apc:not(:empty){margin:0 0 8px}
+.cw-apchip{display:inline-flex;align-items:center;gap:6px;max-width:100%;min-height:36px;padding:2px 10px 2px 3px;border:0;border-radius:18px;background:var(--tint);color:var(--ink);font:inherit;font-size:var(--cw-fs-meta);font-weight:700;cursor:pointer}
+.cw-apchip .cw-av{width:30px;height:30px;font-size:.62rem}.cw-apchip svg{width:14px;height:14px;flex:none;color:var(--muted)}
+.cw-apx .cw-pr{border-bottom:0}
+.cw-aph{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;margin:14px 2px 4px;min-height:32px}
+.cw-aph b{flex:1 0 auto;font-size:var(--cw-fs-meta);font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.cw-apf{flex:none;display:flex;width:22px;height:22px;border-radius:50%;overflow:hidden;color:var(--muted)}.cw-apf svg{width:100%;height:100%}
+.cw-apall{flex:none;min-height:32px;padding:0 12px;border:0;border-radius:16px;background:var(--tint);color:var(--blue);font:inherit;font-size:var(--cw-fs-small);font-weight:800;white-space:nowrap;cursor:pointer}
+.cw-apall[aria-pressed=true]{color:var(--muted)}
+html[data-theme=sun] .cw-apall,html[data-theme=sun] .cw-apchip{border:2px solid #000}
+.cw-apr.in{opacity:.55;cursor:default}
+.cw-apfl{display:inline-block;width:14px;height:14px;margin:0 5px -2px 0;border-radius:50%;overflow:hidden;vertical-align:baseline}.cw-apfl svg{display:block;width:14px;height:14px}
+/* B9 Message info: the small icons by the headings (the Sent calendar was drawn full width) */
+.cw-ih svg{width:16px;height:16px;flex:none}.cw-ih .cw-tk{width:18px;height:12px}
+.cw-xtm{margin:0 2px 6px;font-size:var(--cw-fs-name)}
+/* narrow phones: the voice note's bars give way so the length never sits on them */
+@media (max-width:400px){.cw-vo .cw-wv{gap:1px}.cw-vo .cw-wv i{min-width:1.5px}}
+/* the sheet's button bar reaches the bottom edge (nothing shows under it) */
+.cw-ap .cw-foot{bottom:calc(-18px - env(safe-area-inset-bottom));margin:0 -18px calc(-18px - env(safe-area-inset-bottom));padding:10px 18px calc(18px + env(safe-area-inset-bottom))}
+@media (prefers-reduced-motion: reduce){.cw-m.sel .cw-b{transition:none}}
+</style>
 </head>
 <body class="locked">
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
@@ -3659,6 +3933,7 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
     <button class="hav" id="hAv" type="button" aria-label="Me"></button>
     <span class="ht" aria-hidden="true"><img class="lg-d" src="/img/logo-dark-bold.webp" alt="RAFIKI" width="64" height="22"><img class="lg-l" src="/img/logo-light-bold.webp" alt="" width="64" height="22"><i>Pin</i></span><span class="htt" id="hTitle" aria-hidden="true"></span>
     <button class="cw-hd" id="cwHd" type="button" hidden></button>
+    <span class="cw-hda" id="cwHda" hidden><button class="cw-hdb" id="cwHs" type="button" aria-label="Search in this chat" data-hd="search" data-testid="cw_room_search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></button><button class="cw-hdb" id="cwHm" type="button" aria-label="More" aria-haspopup="dialog" data-hd="menu" data-testid="cw_room_menu"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg></button></span>
     <a class="home" href="/" aria-label="RAFIKI Outreach home page"><img class="lg-d" src="/img/logo-dark-bold.webp" alt=""><img class="lg-l" src="/img/logo-light-bold.webp" alt=""></a>
     <b>Pin</b>
     <span class="sp"></span>
@@ -3959,22 +4234,32 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
     <!-- chatw:begin -->
     <!-- chat: every conversation, newest first (chatw) -->
     <section id="vChat" class="hidden" aria-labelledby="h-chat">
-      <div class="cw-head">
-        <span class="cw-hb"><button class="cw-ib" id="cwSet" type="button" aria-label="Chat settings" data-testid="cw_settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 13.5a7.6 7.6 0 0 0 0-3l2-1.5-2-3.4-2.3 1a7.5 7.5 0 0 0-2.6-1.5L14 2.6h-4l-.5 2.5A7.5 7.5 0 0 0 6.9 6.6l-2.3-1-2 3.4 2 1.5a7.6 7.6 0 0 0 0 3l-2 1.5 2 3.4 2.3-1a7.5 7.5 0 0 0 2.6 1.5l.5 2.5h4l.5-2.5a7.5 7.5 0 0 0 2.6-1.5l2.3 1 2-3.4z"/></svg></button><button class="cw-ib" id="cwStar" type="button" aria-label="Starred messages"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4l2.5 5.2 5.6.8-4.1 3.9 1 5.6L12 16.8l-5 2.7 1-5.6-4.1-3.9 5.6-.8z"/></svg></button></span>
-        <h1 id="h-chat">Chat</h1>
-        <span class="cw-hb r"><button class="cw-ib pri" id="cwNew" type="button" aria-label="New chat" data-testid="cw_new"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button></span>
+      <div class="cw2-top" id="cwTop">
+        <div class="cw2-hd" id="cwHead">
+          <button class="cw2-me" id="cwMe" type="button" aria-label="Me"><span class="cw2-mea" aria-hidden="true"></span></button>
+          <h1 id="h-chat">Chats</h1>
+          <button class="cw2-ib" id="cwSrch" type="button" aria-label="Search chats and messages" data-testid="cw_search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg></button>
+          <button class="cw2-ib" id="cwMore" type="button" aria-label="More" aria-haspopup="menu" aria-expanded="false" data-testid="cw_more"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5.5" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="12" cy="18.5" r="1.9"/></svg><i class="cw2-dot hidden" id="cwMoreDot" aria-hidden="true"></i></button>
+          <div class="cw-sbox" id="cwSb" hidden><button type="button" id="cwQb" aria-label="Close the search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><input type="search" id="cwQ" placeholder="Search chats and messages" aria-label="Search chats and messages" autocomplete="off" enterkeyhint="search"><button type="button" id="cwQx" class="hidden" aria-label="Clear the search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+          <div class="cw2-pop hidden" id="cwMenu" role="menu" aria-label="More"></div>
+        </div>
+        <div id="cwTools">
+          <div class="cw-archhd hidden" id="cwArchHd"><button type="button" class="cw-ib sm" id="cwArchBk" aria-label="Back to all chats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><b>Archived</b></div>
+          <div class="cw2-chips" id="cwChips" role="group" aria-label="Show"></div>
+        </div>
       </div>
-      <div id="cwTools">
-        <div class="cw-sbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg><input type="search" id="cwQ" placeholder="Search chats and messages" aria-label="Search chats and messages" autocomplete="off" enterkeyhint="search"><button type="button" id="cwQx" class="hidden" aria-label="Clear the search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
-        <div class="cw-archhd hidden" id="cwArchHd"><button type="button" class="cw-ib sm" id="cwArchBk" aria-label="Back to all chats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><b>Archived</b></div>
-      </div>
+      <div id="cwField"></div>
       <div id="cwNote"></div>
       <div class="cw-list" id="cwList"></div>
     </section>
+    <button class="cw2-fab" id="cwNew" type="button" aria-label="New chat" data-testid="cw_new"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 19.5l1.2-3.6A7.8 7.8 0 1 1 8.6 18.6z"/><path d="M12 8.6v6M9 11.6h6"/></svg></button>
 
     <!-- one chat: the messages and the box to write in (chatw) -->
     <section id="vRoom" class="hidden" aria-label="Chat">
-      <button class="cw-rh" id="cwRh" type="button"></button>
+      <div class="cw-selh hidden" id="cwSel" role="toolbar" data-testid="cw_select_bar"></div>
+      <div class="cw-rh" id="cwRh"><button class="cw-rhb" id="cwRhb" type="button"></button><span class="cw-rha"><button class="cw-hdb" type="button" aria-label="Search in this chat" data-hd="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></button><button class="cw-hdb" type="button" aria-label="More" aria-haspopup="dialog" data-hd="menu"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg></button></span></div>
+      <button class="cw-ps hidden" id="cwPs" type="button" data-testid="cw_project_strip"></button>
+      <div class="cw-find hidden" id="cwFind" role="search" data-testid="cw_find"></div>
       <button class="cw-pinb hidden" id="cwPinB" type="button" data-testid="cw_pinbar"></button>
       <div class="cw-msgs" id="cwMsgs" role="log" aria-label="Messages" tabindex="-1"></div>
       <button class="cw-jat hidden" id="cwJat" type="button" aria-label="Jump to @mention" data-testid="cw_jump_mention">@</button>
@@ -6111,6 +6396,7 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
       ((s.status === 'draft') || (adm && (s.status === 'approved' || s.status === 'published')) ? '<button type="button" class="btn light" data-sty="collecting">' + tr('Back to Collecting', 'Rudi kukusanya') + '</button>' : '') + '</div>' +
       (!adm && (s.status === 'not-started' || s.status === 'collecting') ? '<p class="muted sty-send" data-testid="sty_send">' + tr('“Draft the story” sends it to an admin for review. Nothing goes on the website before it is approved.', '“Andaa hadithi” inaituma kwa msimamizi akague. Hakuna kinachoenda kwenye tovuti kabla ya kuidhinishwa.') + '</p>' : '') + '<p class="msg" id="styMsg" aria-live="polite"></p></div>';
     box.innerHTML = h; cnThumbs(box);
+    if (typeof cw2StoryPre === 'function') cw2StoryPre(s); // chat2: "Use in a story" from a project chat fills the quote
   }
   function ROWSKID(s) { return ['before', 'progress', 'after'].some(function (r) { return (s.photos[r] || []).some(function (x) { return x.children; }); }); }
   function wc(t) { return String(t || '').trim().split(/\s+/).filter(Boolean).length; }
@@ -14978,6 +15264,8 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
     loading: {}, title0: '', tySent: 0, tyT: 0, pollT: 0, readAt: {}, rate: +(store.get('rfChatRate') || 1) || 1,
     // chatpw: synced settings, what each chat showed last time (for the entrance animations), scroll per chat, pins, mentions
     prefs: jget('rfChatPrefs', { quick: null, dnd: CW_DND0, doubleTap: '❤️' }), drawn: {}, stWas: {}, rxWas: {}, scr: jget('rfChatScr', {}), unlGone: {}, pinAt: {}, mentQ: [], full: {}, trips: {}, push: false };
+  // chat2 (one chat): selection, find in chat, the tools the server offers, translations and voice-note text shown, photos added to a project
+  var CW2 = { sel: null, find: null, tools: jget('rfChatTools', { translate: false, transcribe: false }), tr: {}, trShow: {}, tx: {}, txShow: {}, busy: {}, added: jget('rfChatAdded', {}), mfl: {} };
 
   // ---- talking to the server
   // prefs, group-update and members answer with the chat's row as it is now
@@ -15059,6 +15347,22 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
     if (c.kind === 'project') { var pr = byId(c.project), pu = c.pphoto || (pr && pr.photo ? photoUrl(pr, 160) : ''); if (pu) return '<span class="' + cls + ' ph" style="background-image:url(&quot;' + esc(pu) + '&quot;)" aria-hidden="true"></span>'; }
     var t = cwTitle(c);
     return '<span class="' + cls + '" style="' + cwHueVar(t) + '" aria-hidden="true">' + esc(initials(t)) + '</span>';
+  }
+  // a chat's picture at any size (cw2-list): a project's photo with a small blue water drop, else its kind of project on a
+  // coloured tile; every other chat as cwAv. Shared: the one chat's header uses it too, as cwChatAvatar(c, 38).
+  var CW_DROPF = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.5S5.5 10 5.5 14.5a6.5 6.5 0 0 0 13 0C18.5 10 12 2.5 12 2.5z"/></svg>';
+  function cwChatAvatar(c, size) {
+    size = Math.round(+size || 52); var st = 'width:' + size + 'px;height:' + size + 'px;--cav:' + size + 'px';
+    if (!c) return '<span class="cw-av cav" style="' + st + '" aria-hidden="true"></span>';
+    if (c.kind === 'project' && !c.photo && !cwIsNews(c)) {
+      var pr = byId(c.project), pu = c.pphoto || (pr && pr.photo ? photoUrl(pr, 160) : '');
+      if (pu) return '<span class="cw-av cav ph pj" style="' + st + ';background-image:url(&quot;' + esc(pu) + '&quot;)" aria-hidden="true"><i class="cw-pdr">' + CW_DROPF + '</i></span>';
+      var ti = pr ? mpaTyIcon(pr) : ['drop', 'blue'];
+      return '<span class="cw-av cav tile pj" style="' + st + ';--hu:var(--hu-' + ti[1] + ');--hb:var(--hb-' + ti[1] + ')" aria-hidden="true">' + oic(ti[0]) + '</span>';
+    }
+    var h = cwAv(c), i = h.indexOf('>'), tag = h.slice(0, i).replace('class="cw-av', 'class="cw-av cav' + (size < 44 ? ' sm' : ''));
+    tag = /\sstyle="/.test(tag) ? tag.replace(' style="', ' style="' + st + ';') : tag + ' style="' + st + '"';
+    return tag + h.slice(i);
   }
   function cwKindTx(c) { return cwIsNews(c) ? '' : c.kind === 'team' ? tr('Team', 'Timu') : c.kind === 'project' ? tr('Project', 'Mradi') : c.kind === 'group' ? tr('Group', 'Kikundi') : ''; }
   // "You: …", "🎤 Voice message 0:12", "📷 Photo"
@@ -15180,6 +15484,7 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
     return cwApi('GET', 'list' + q).then(function (j) {
       if (!j.ok) { if (j.reason !== 'chat-off' && S.view === 'vChat') cwListDraw(); return j; }
       CH.on = true; CH.me = j.me || CH.me; CH.since = j.now || t0; if (j.prefs) cwPrefsGot(j.prefs); if (j.push != null) CH.push = !!j.push;
+      if (j.tools && typeof j.tools === 'object') { CW2.tools = { translate: !!j.tools.translate, transcribe: !!j.tools.transcribe }; store.set('rfChatTools', JSON.stringify(CW2.tools)); }
       if (j.presence) Object.keys(j.presence).forEach(function (k) { CH.pres[k] = j.presence[k]; if (j.presence[k] && j.presence[k].photo) phSet(k, j.presence[k].photo); });
       if (q) { (j.chats || []).forEach(cwUpsert); if (j.gone && j.gone.length) CH.chats = CH.chats.filter(function (x) { return j.gone.map(String).indexOf(String(x.id)) < 0; }); } else CH.chats = (j.chats || []).slice();
       cwSave(); cwBadge(); cwDelivered();
@@ -15208,8 +15513,8 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
   }
 
   // the list screen
-  function cwListOpen() { var was = CH.started; cwStart(); cwListDraw(); if (was) cwLoad(false); }
-  function cwFresh() { CH.q = ''; CH.hits = null; CH.arch = false; if ($('cwQ')) $('cwQ').value = ''; if ($('cwQx')) $('cwQx').classList.add('hidden'); if (CH.ql) { var l = CH.ql; CH.ql = null; bkShut(l); } if (CH.al) { var a = CH.al; CH.al = null; bkShut(a); } }
+  function cwListOpen() { var was = CH.started; cwStart(); cwListDraw(); if (was) cwLoad(false); cwTmLoad(); }
+  function cwFresh() { CH.q = ''; CH.hits = null; CH.arch = false; if ($('cwQ')) $('cwQ').value = ''; if ($('cwQx')) $('cwQx').classList.add('hidden'); if (CH.ql) { var l = CH.ql; CH.ql = null; bkShut(l); } if (CH.al) { var a = CH.al; CH.al = null; bkShut(a); } CH.so = false; cwMenuShut(); }
   function cwSorted() {
     return CH.chats.slice().sort(function (a, z) { return (cwIsNews(z) - cwIsNews(a)) || cwMs((z.last || {}).at) - cwMs((a.last || {}).at); });
   }
@@ -15220,50 +15525,151 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
     var pv = typ ? '<span class="cw-typ">' + typ + '</span>' : dr ? '<span class="cw-pv" data-nosw><b class="cw-dr">' + tr('Draft:', 'Rasimu:') + '</b> ' + esc(dr.replace(/\s+/g, ' ')) + '</span>'
       : '<span class="cw-pv" data-nosw>' + st + esc(cwPrev(last, c) || (c.kind === 'project' ? tr('Project thread', 'Mazungumzo ya mradi') : cwIsNews(c) ? tr('News from the office', 'Habari kutoka ofisini') : tr('No messages yet', 'Bado hakuna jumbe'))) + '</span>';
     var badges = (c.mention ? '<i class="cw-at" aria-label="' + tr('You were mentioned', 'Umetajwa') + '">@</i>' : '') + (mu ? '<span class="cw-bi" aria-label="' + tr('Muted', 'Imenyamazishwa') + '">' + cwIc('mute') + '</span>' : '') +
-      (c.pinned && !CH.arch ? '<span class="cw-bi" aria-label="' + tr('Pinned', 'Imebandikwa') + '">' + cwIc('pinned') + '</span>' : '') + (un ? '<i class="cw-un' + (mu ? ' mu' : '') + '">' + (un > 99 ? '99+' : un) + '</i>' : '');
-    var kind = cwKindTx(c);
+      ((c.pinned && !CH.arch) || cwIsNews(c) ? '<span class="cw-bi" aria-label="' + tr('Pinned', 'Imebandikwa') + '">' + cwIc('pinned') + '</span>' : '') + (un ? '<i class="cw-un' + (mu ? ' mu' : '') + '">' + (un > 99 ? '99+' : un) + '</i>' : '');
     return '<div class="cw-rw" data-c="' + esc(c.id) + '"><div class="cw-ra" aria-hidden="true"><button type="button" tabindex="-1" data-ra="mute" class="mu">' + cwIc(mu ? 'sound' : 'mute') + '<span>' + (mu ? tr('Unmute', 'Washa sauti') : tr('Mute', 'Nyamazisha')) + '</span></button>' +
       '<button type="button" tabindex="-1" data-ra="arch" class="ar">' + cwIc('box') + '<span>' + (c.archived ? tr('Unarchive', 'Rudisha') : tr('Archive', 'Hifadhi')) + '</span></button></div>' +
-      '<button type="button" class="cw-row' + (un ? ' un' : '') + (CH.cur === c.id && S.view === 'vRoom' ? ' cur' : '') + '" data-open="' + esc(c.id) + '" data-testid="cw_row"' + (CH.cur === c.id && S.view === 'vRoom' ? ' aria-current="true"' : '') + '>' + cwAv(c) +
-      '<span class="cw-rt"><span class="cw-r1"><b data-nosw>' + esc(cwTitle(c)) + '</b>' + (kind ? '<small class="cw-k">' + kind + '</small>' : '') + '<time>' + esc(cwListTime((last || {}).at)) + '</time></span>' +
+      '<button type="button" class="cw-row' + (un ? ' un' : '') + (CH.cur === c.id && S.view === 'vRoom' ? ' cur' : '') + '" data-open="' + esc(c.id) + '" data-testid="cw_row"' + (CH.cur === c.id && S.view === 'vRoom' ? ' aria-current="true"' : '') + '>' + cwChatAvatar(c, 52) +
+      '<span class="cw-rt"><span class="cw-r1"><b data-nosw>' + esc(cwTitle(c)) + '</b><time>' + esc(cwListTime((last || {}).at)) + '</time></span>' +
       '<span class="cw-r2">' + pv + '<span class="cw-bs">' + badges + '</span></span></span></button></div>';
   }
   function cwListDraw() {
     var box = $('cwList'); if (!box) return;
-    $('cwNote').innerHTML = cwNoteHtml();
-    if (CH.on === false) { box.innerHTML = cwOffHtml(); $('cwTools').classList.add('hidden'); return; }
+    var put = function (el, h) { if (el.__h === h) return false; el.__h = h; el.innerHTML = h; return true; }; // the same list again: nothing redrawn, nothing blinks
+    var list = function (h) { if (put(box, h)) cwFill(box); };
+    cwTopDraw(); put($('cwNote'), cwNoteHtml()); put($('cwField'), cwFieldHtml());
+    if (CH.on === false) { list(cwOffHtml()); $('cwTools').classList.add('hidden'); return; }
     $('cwTools').classList.remove('hidden');
     var all = cwSorted(), q = CH.q.trim().toLowerCase(), h = '';
     $('cwArchHd').classList.toggle('hidden', !CH.arch);
     if (q) {
       var hit = all.filter(function (c) { return (cwTitle(c) + ' ' + (c.members || []).join(' ')).toLowerCase().indexOf(q) >= 0; });
-      if (!hit.length && CH.hits && !CH.hits.length) { box.innerHTML = cwEmpty('search', tr('Nothing found', 'Hakuna kilichopatikana'), esc(tr('No chats or messages with “' + CH.q.trim() + '”.', 'Hakuna gumzo wala jumbe zenye “' + CH.q.trim() + '”.')), 'clearq', tr('Clear the search', 'Futa utafutaji'), 'cw_empty_search'); return; }
+      if (!hit.length && CH.hits && !CH.hits.length) { list(cwEmpty('search', tr('Nothing found', 'Hakuna kilichopatikana'), esc(tr('No chats or messages with “' + CH.q.trim() + '”.', 'Hakuna gumzo wala jumbe zenye “' + CH.q.trim() + '”.')), 'clearq', tr('Clear the search', 'Futa utafutaji'), 'cw_empty_search')); return; }
       h += '<h2 class="cw-sec">' + tr('Chats', 'Gumzo') + '</h2>' + (hit.length ? hit.map(cwRow).join('') : '<p class="cw-none">' + tr('No chats with that name', 'Hakuna gumzo lenye jina hilo') + '</p>');
       h += '<h2 class="cw-sec">' + tr('Messages', 'Jumbe') + '</h2>' + (CH.hits == null ? '<p class="cw-none">' + tr('Searching…', 'Inatafuta…') + '</p>' : CH.hits.length ? CH.hits.map(cwHitRow).join('') : '<p class="cw-none">' + tr('No messages found', 'Hakuna jumbe zilizopatikana') + '</p>');
-      box.innerHTML = h; cwFill(box); return;
+      list(h); return;
     }
     if (CH.arch) {
       var ar = all.filter(function (c) { return c.archived; });
-      box.innerHTML = ar.length ? ar.map(cwRow).join('') : cwEmpty('box', tr('No archived chats', 'Hakuna gumzo zilizohifadhiwa'), tr('Swipe a chat left and tap Archive to keep it here.', 'Telezesha gumzo kushoto na uguse Hifadhi ili kuliweka hapa.'), 'unarch', tr('Back to all chats', 'Rudi kwenye gumzo zote'), 'cw_empty_arch'); cwFill(box); return;
+      list(ar.length ? ar.map(cwRow).join('') : cwEmpty('box', tr('No archived chats', 'Hakuna gumzo zilizohifadhiwa'), tr('Swipe a chat left and tap Archive to keep it here.', 'Telezesha gumzo kushoto na uguse Hifadhi ili kuliweka hapa.'), 'unarch', tr('Back to all chats', 'Rudi kwenye gumzo zote'), 'cw_empty_arch')); return;
     }
-    var live = all.filter(function (c) { return !c.archived || cwIsNews(c); }), news = live.filter(cwIsNews), pin = live.filter(function (c) { return c.pinned && !cwIsNews(c); }), rest = live.filter(function (c) { return !c.pinned && !cwIsNews(c); }), nArch = all.length - live.length;
-    if (nArch) h += '<button type="button" class="cw-arow" id="cwArch" data-testid="cw_archived">' + cwIc('box') + '<span>' + tr('Archived', 'Zilizohifadhiwa') + '</span><i>' + nArch + '</i></button>';
-    h += news.map(cwRow).join('');
-    if (pin.length) h += '<h2 class="cw-sec">' + tr('Pinned', 'Zilizobandikwa') + '</h2>' + pin.map(cwRow).join('') + (rest.length ? '<h2 class="cw-sec">' + tr('Chats', 'Gumzo') + '</h2>' : '');
-    else if (news.length && rest.length) h += '<h2 class="cw-sec">' + tr('Chats', 'Gumzo') + '</h2>';
-    h += rest.map(cwRow).join('');
+    // Announcements first, then pinned chats, then the rest newest first; the chip picks which; Archived is a small row at the end
+    var f = cwChip(), live = all.filter(function (c) { return !c.archived || cwIsNews(c); }), nArch = all.length - live.length, sh = live.filter(function (c) { return cwChipOk(c, f); });
+    h += sh.filter(cwIsNews).concat(sh.filter(function (c) { return c.pinned && !cwIsNews(c); }), sh.filter(function (c) { return !c.pinned && !cwIsNews(c); })).map(cwRow).join('');
     if (!live.length) h += '<div class="cw-empty"><span class="cw-offi" aria-hidden="true">' + cwIc('chat') + '</span><h2>' + (CH.on ? tr('No chats yet', 'Bado hakuna gumzo') : tr('Loading…', 'Inapakia…')) + '</h2>' + (CH.on ? '<p>' + tr('Tap + to message a teammate or start a group.', 'Gusa + kumtumia mwenzako ujumbe au kuanzisha kikundi.') + '</p>' : '') + '</div>';
-    box.innerHTML = h; cwFill(box);
+    else if (!sh.length) { var ce = CW_CHIPE[f] || CW_CHIPE.all; h += cwEmpty('hello', tr(ce[0], ce[1]), '', 'allchip', tr('Show all chats', 'Onyesha gumzo zote'), 'cw_empty_chip'); }
+    if (nArch && f === 'all') h += '<button type="button" class="cw2-arch" id="cwArch" data-testid="cw_archived">' + cwIc('box') + '<span>' + tr('Archived', 'Zilizohifadhiwa') + '</span><i>' + nArch + '</i></button>';
+    list(h);
+  }
+  // ---- cw2-list: the header, the chips, "In the field now", search in place, the ⋯ menu
+  var CW_CHIPS = [['all', 'All', 'Zote'], ['unread', 'Unread', 'Hazijasomwa'], ['project', 'Projects', 'Miradi'], ['group', 'Groups', 'Vikundi'], ['team', 'Teams', 'Timu'], ['dm', 'People', 'Watu']];
+  var CW_CHIPE = { all: ['No chats here', 'Hakuna gumzo hapa'], unread: ['No unread chats', 'Hakuna gumzo ambazo hazijasomwa'], project: ['No project chats yet', 'Bado hakuna gumzo za miradi'], group: ['No groups yet', 'Bado hakuna vikundi'], team: ['No team chats', 'Hakuna gumzo za timu'], dm: ['No chats with people yet', 'Bado hakuna gumzo na watu'] };
+  // the chip is kept for this visit (a reload keeps it too); changing it is not a step for Back
+  function cwChip() { var v = ''; try { v = sessionStorage.getItem('rfChatChip') || ''; } catch (e) {} return CW_CHIPS.some(function (x) { return x[0] === v; }) ? v : 'all'; }
+  function cwChipSet(v) { try { sessionStorage.setItem('rfChatChip', v); } catch (e) {} }
+  function cwChipOk(c, f) { return f === 'all' ? true : f === 'unread' ? !!(c.unread || c.mention) : f === 'dm' ? c.kind === 'dm' : !cwIsNews(c) && c.kind === f; }
+  function cwBellN() { var bn = $('meBellN'); return bn && !bn.classList.contains('hidden') ? +bn.textContent || 0 : 0; }
+  function cwTopDraw() {
+    var hd = $('cwHead'); if (!hd) return;
+    var t = tr('Chats', 'Gumzo'); if ($('h-chat').textContent !== t) $('h-chat').textContent = t;
+    var me = $('cwMe'), av = me.firstChild; me.setAttribute('aria-label', tr('Me', 'Mimi'));
+    if (!av.querySelector('b')) av.innerHTML = '<b></b>';
+    if (av.getAttribute('data-ph') !== (S.name || '')) av.setAttribute('data-ph', S.name || '');
+    av.querySelector('b').textContent = initials(S.name);
+    $('cwSrch').setAttribute('aria-label', tr('Search chats and messages', 'Tafuta gumzo na jumbe')); $('cwMore').setAttribute('aria-label', tr('More', 'Zaidi'));
+    $('cwQ').setAttribute('placeholder', tr('Search chats and messages', 'Tafuta gumzo na jumbe')); $('cwQ').setAttribute('aria-label', tr('Search chats and messages', 'Tafuta gumzo na jumbe'));
+    $('cwQb').setAttribute('aria-label', tr('Close the search', 'Funga utafutaji')); $('cwNew').setAttribute('aria-label', tr('New chat', 'Gumzo jipya'));
+    $('cwChips').setAttribute('aria-label', tr('Show', 'Onyesha'));
+    $('cwMoreDot').classList.toggle('hidden', !cwBellN() || cwWide());
+    hd.classList.toggle('srch', !!CH.so); $('cwSb').hidden = !CH.so; $('vChat').classList.toggle('cw2-s', !!CH.so);
+    $('cwTools').classList.toggle('srch', !!CH.so); $('cwTools').classList.toggle('arch', !!CH.arch);
+    var f = cwChip(), nUn = CH.chats.filter(function (c) { return (!c.archived || cwIsNews(c)) && (c.unread || c.mention); }).length, ch = $('cwChips');
+    var h = CW_CHIPS.map(function (x) { return '<button type="button" data-chip="' + x[0] + '" aria-pressed="' + (x[0] === f) + '" data-testid="cw_chip">' + tr(x[1], x[2]) + (x[0] === 'unread' && nUn ? ' <b>' + nUn + '</b>' : '') + '</button>'; }).join('');
+    if (ch.__h !== h) { ch.__h = h; ch.innerHTML = h; }
+  }
+  // In the field now: who is online or was on in the last 3 hours. Admins also see who shares their location (Office › Team map):
+  // "At <project>" near a project or after a visit there, else "On the road". Field users never see anyone's position.
+  var CW_PINF = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>';
+  function cwTmLoad(force) {
+    if (!S.admin || CH.tmBusy || (!force && CH.tmAt && Date.now() - CH.tmAt < 12e4)) return;
+    CH.tmBusy = true;
+    adminApi('GET', null, '?view=teammap').then(function (j) { CH.tmBusy = false; CH.tmAt = Date.now(); if (j && j.ok) { CH.tm = j; phAdd(j.people); if (S.view === 'vChat') cwListDraw(); } });
+  }
+  function cwFieldAt(p, tm) {
+    var now = Date.now(), v = (tm.visits || []).filter(function (x) { return same(x.by, p.name) && now - Date.parse(x.at) < 3 * 36e5 && byId(x.id); }).sort(function (a, z) { return Date.parse(z.at) - Date.parse(a.at); })[0], pr = v ? byId(v.id) : null;
+    if (!pr && isFinite(p.lat) && isFinite(p.lng)) { var best = 500; (S.projects || []).forEach(function (x) { if (!x.gps) return; var d = metres([+p.lat, +p.lng], x.gps); if (d < best) { best = d; pr = x; } }); }
+    return pr ? tr('At ' + pr.title, 'Yuko ' + pr.title) : tr('On the road', 'Njiani');
+  }
+  function cwFieldPeople() {
+    var now = Date.now(), out = [], got = {}, tm = S.admin && CH.tm ? CH.tm : null;
+    if (tm) (tm.people || []).forEach(function (p) {
+      var t = Date.parse(p.at); if (!p.name || cwIsMe(p.name) || !(now - t < 36e5)) return;
+      got[phKey(p.name)] = 1; out.push({ name: p.name, k: 'site', label: cwFieldAt(p, tm), t: t, o: 0 });
+    });
+    Object.keys(CH.pres || {}).forEach(function (n) {
+      var p = CH.pres[n]; if (!p || cwIsMe(n) || got[phKey(n)]) return;
+      if (p.online) out.push({ name: n, k: 'on', label: tr('Online', 'Mtandaoni'), t: now, o: 1 });
+      else { var s0 = cwMs(p.seen); if (s0 && now - s0 < 3 * 36e5) out.push({ name: n, k: '', label: dAgo(s0), t: s0, o: 2 }); }
+    });
+    return out.sort(function (a, z) { return a.o - z.o || z.t - a.t || a.name.localeCompare(z.name); }).slice(0, 24);
+  }
+  function cwFieldHtml() {
+    if (CH.on !== true || CH.so || CH.arch || CH.q) return '';
+    var ppl = cwFieldPeople(); if (!ppl.length) return '';
+    return '<section class="cw2-fd" aria-labelledby="cwFdH" data-testid="cw_field"><h2 id="cwFdH"><i aria-hidden="true"></i>' + tr('In the field now', 'Uwanjani sasa') + '</h2><div class="cw2-ppl">' + ppl.map(function (p) {
+      return '<button type="button" class="cw2-p" data-dmw="' + esc(p.name) + '" data-k="' + p.k + '" data-testid="cw_field_p" aria-label="' + esc(p.name + ', ' + p.label) + '" title="' + esc(p.name + ' · ' + p.label) + '"><span class="cw2-rg' + (p.k ? ' ' + p.k : '') + '"><span class="cw-av" style="' + cwHueVar(p.name) + '" data-ph="' + esc(p.name) + '" aria-hidden="true">' + esc(initials(p.name)) + '</span>' +
+        (p.k === 'site' ? '<i class="cw2-tag" aria-hidden="true">' + CW_PINF + '</i>' : '') + '</span><small data-nosw aria-hidden="true">' + esc(cwFirst(p.name)) + '</small><em' + (p.k ? '' : ' class="old"') + ' data-nosw aria-hidden="true">' + esc(p.label) + '</em></button>';
+    }).join('') + '</div></section>';
+  }
+  // search opens in place of the title; Back (or ←) closes it
+  function cwSearchOpen(focus) {
+    if (!CH.so) {
+      cwMenuShut(); CH.so = true;
+      CH.ql = bkOpen('in', function () { CH.ql = null; if (!CH.so) return false; cwSearchShut(); return true; }, $('cwSb'));
+      cwListDraw();
+    }
+    if (focus !== false) { try { $('cwQ').focus({ preventScroll: true }); } catch (e) {} }
+  }
+  function cwSearchShut() { CH.so = false; CH.q = ''; CH.hits = null; $('cwQ').value = ''; $('cwQx').classList.add('hidden'); cwListDraw(); }
+  // the ⋯ menu: settings, starred, archived, a new group, mark all read; on a phone also the bell and refresh from the top bar
+  function cwMenuOut(e) {
+    if (e.target.closest('#cwMenu, #cwMore')) return;
+    cwMenuShut(); // a tap outside only closes the menu: the tap itself goes nowhere
+    var eat = function (x) { x.preventDefault(); x.stopPropagation(); }; document.addEventListener('click', eat, true); setTimeout(function () { document.removeEventListener('click', eat, true); }, 450);
+  }
+  function cwMenuKey(e) { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); cwMenuShut(); $('cwMore').focus(); } }
+  function cwMenuShut(fromBack) {
+    var m = $('cwMenu'); if (!m || m.classList.contains('hidden')) return false;
+    m.classList.add('hidden'); $('cwMore').setAttribute('aria-expanded', 'false');
+    document.removeEventListener('pointerdown', cwMenuOut, true); document.removeEventListener('keydown', cwMenuKey, true);
+    if (!fromBack && CH.ml) { var l = CH.ml; CH.ml = null; bkShut(l); }
+    return true;
+  }
+  function cwMenuOpen() {
+    var m = $('cwMenu'); if (!m.classList.contains('hidden')) { cwMenuShut(); return; }
+    var nb = cwBellN(), wide = cwWide(), un = CH.chats.some(function (c) { return (c.unread || c.mention) && !c.archived; });
+    var it = function (k, ic, en, sw, extra) { return '<button type="button" role="menuitem" data-mn="' + k + '"' + (k === 'set' ? ' id="cwSet" data-testid="cw_settings"' : k === 'star' ? ' id="cwStar"' : '') + '>' + ic + '<span>' + tr(en, sw) + '</span>' + (extra || '') + '</button>'; };
+    m.innerHTML = it('set', cwIc('gear'), 'Chat settings', 'Mipangilio ya gumzo') + it('star', cwIc('star'), 'Starred messages', 'Jumbe zenye nyota') + it('arch', cwIc('box'), 'Archived', 'Zilizohifadhiwa') + it('group', cwIc('people'), 'New group', 'Kikundi kipya') +
+      (un ? it('read', cwIc('check'), 'Mark all as read', 'Weka zote kama zimesomwa') : '') +
+      (wide ? '' : it('bell', cwIc('bell'), 'Notifications', 'Arifa', nb ? '<i aria-label="' + nb + '">' + (nb > 99 ? '99+' : nb) + '</i>' : '') + it('rf', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>', 'Refresh', 'Onyesha upya'));
+    m.setAttribute('aria-label', tr('More', 'Zaidi')); m.classList.remove('hidden'); $('cwMore').setAttribute('aria-expanded', 'true');
+    CH.ml = bkOpen('in', function () { CH.ml = null; return cwMenuShut(true); }, m);
+    setTimeout(function () { if (m.classList.contains('hidden')) return; document.addEventListener('pointerdown', cwMenuOut, true); document.addEventListener('keydown', cwMenuKey, true); }, 0);
+    try { m.querySelector('button').focus({ preventScroll: true }); } catch (e) {}
+  }
+  function cwArchOpen() { if (CH.arch) return; CH.arch = true; CH.al = bkOpen('in', function () { CH.al = null; if (!CH.arch) return false; CH.arch = false; cwListDraw(); return true; }, $('cwArchHd')); cwListDraw(); window.scrollTo(0, 0); }
+  function cwAllRead() {
+    CH.chats.forEach(function (c) { if ((c.unread || c.mention) && !c.archived) { c.unread = 0; c.mention = false; if (c.last && c.last.id) cwApi('POST', 'read', { c: c.id, upTo: c.last.id }); } });
+    cwSave(); cwBadge(); cwListDraw(); toast(tr('All chats marked as read', 'Gumzo zote zimewekwa kama zimesomwa'));
   }
   function cwHitRow(x) {
     var c = cwChat(x.c) || { id: x.c, title: x.c, kind: 'group' };
-    return '<button type="button" class="cw-row cw-hit" data-open="' + esc(x.c) + '" data-jump="' + esc(x.id) + '">' + cwAv(c) + '<span class="cw-rt"><span class="cw-r1"><b data-nosw>' + esc(cwTitle(c)) + '</b><time>' + esc(cwListTime(x.at)) + '</time></span>' +
+    return '<button type="button" class="cw-row cw-hit" data-open="' + esc(x.c) + '" data-jump="' + esc(x.id) + '">' + cwChatAvatar(c, 52) + '<span class="cw-rt"><span class="cw-r1"><b data-nosw>' + esc(cwTitle(c)) + '</b><time>' + esc(cwListTime(x.at)) + '</time></span>' +
       '<span class="cw-r2"><span class="cw-pv" data-nosw>' + (x.from ? esc(cwIsMe(x.from) ? tr('You', 'Wewe') : cwFirst(x.from)) + ': ' : '') + cwMark(x.snippet || '', CH.q) + '</span></span></span></button>';
   }
   function cwMark(t, q) { var s = esc(t); q = q.trim(); if (!q) return s; var i = s.toLowerCase().indexOf(esc(q).toLowerCase()); return i < 0 ? s : s.slice(0, i) + '<mark>' + s.slice(i, i + esc(q).length) + '</mark>' + s.slice(i + esc(q).length); }
   function cwNoteHtml() {
-    if (CH.on !== true || !('Notification' in window) || Notification.permission !== 'default' || store.get('rfChatNoteAsk')) return '';
-    return '<div class="cw-nt" role="status">' + cwIc('bell') + '<span>' + tr('Get a notification when a message comes while RAFIKI Pin is open.', 'Pata arifa ujumbe ukifika wakati RAFIKI Pin iko wazi.') + '</span><button type="button" class="btn small" id="cwNtOn">' + tr('Turn on', 'Washa') + '</button><button type="button" class="cw-ib sm" id="cwNtX" aria-label="' + tr('Not now', 'Si sasa') + '">' + cwIc('x') + '</button></div>';
+    if (CH.on !== true || CH.so || CH.arch || !('Notification' in window) || Notification.permission !== 'default' || store.get('rfChatNoteAsk')) return '';
+    return '<div class="cw2-nt" role="status" data-testid="cw_alerts">' + cwIc('bell') + '<span>' + tr('Get message alerts', 'Pata arifa za jumbe') + '</span><button type="button" id="cwNtOn">' + tr('Turn on', 'Washa') + '</button><button type="button" class="x" id="cwNtX" aria-label="' + tr('Not now', 'Si sasa') + '">' + cwIc('x') + '</button></div>';
   }
 
   // ---- one chat
@@ -15272,7 +15678,7 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
     var same0 = S.view === 'vRoom' && CH.cur === id;
     if (!same0 && S.view === 'vRoom') { cwScrSave(); cwDraftSave(); if (cwWide() && !how) how = 'replace'; } // two panes: one chat to the next, Back still goes to the list
     CH.cur = id; CH.unseen = 0; CH.stick = true;
-    if (!same0) { CH.reply = null; CH.edit = null; CH.ment = []; CH.drawn[id] = null; CH.opened = id; CH.mentQ = []; cwVpvDrop(); }
+    if (!same0) { CH.reply = null; CH.edit = null; CH.ment = []; CH.drawn[id] = null; CH.opened = id; CH.mentQ = []; cwVpvDrop(); cw2SelEnd(); cw2FindEnd(); }
     if (!CH.msgs[id]) { var cached = jget('rfChatM:' + id, null); if (cached) CH.msgs[id] = cached; }
     if (!same0) show('vRoom', how);
     cwRoomDraw(true);
@@ -15299,7 +15705,8 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
       var old = CH.msgs[id] || [], byIdM = {};
       (j.msgs || []).forEach(function (m) { byIdM[m.id] = 1; });
       // keep older pages already loaded; the fresh page wins for what it covers
-      var first = (j.msgs || [])[0], keep = first ? old.filter(function (m) { return !byIdM[m.id] && cwMs(m.at) < cwMs(first.at); }) : [];
+      var cl = +((cwChat(id) || {}).cleared) || 0; // chat2: nothing from before a Clear chat comes back from this phone's copy
+      var first = (j.msgs || [])[0], keep = first ? old.filter(function (m) { return !byIdM[m.id] && cwMs(m.at) < cwMs(first.at) && !(cl && +m.id <= cl); }) : [];
       CH.msgs[id] = keep.concat(j.msgs || []);
       if (CH.more[id] == null || !keep.length) CH.more[id] = !!j.more;
       (j.msgs || []).forEach(cwDropPend);
@@ -15340,14 +15747,16 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
   }
   function cwHead() {
     var c = cwChat(CH.cur) || { id: CH.cur, title: '', kind: 'group' }, b = $('cwHd'); if (!b) return;
+    // chat2: typing… in green; a person: online / last seen; a group or project: who's in it (the project strip shows the place)
+    var mem = (c.members || []).map(function (n) { return cwIsMe(n) ? tr('You', 'Wewe') : cwFirst(n); }).slice(0, 8).join(', ');
     var sub = cwTypTx(c) ? '<small class="cw-typ">' + cwTypHtml(c) + '</small>'
       : c.kind === 'dm' ? '<small>' + esc(cwSeenTx(CH.pres[cwOther(c)])) + '</small>'
-      : '<small data-nosw>' + esc(c.kind === 'project' && byId(c.project) ? [byId(c.project).area, byId(c.project).country].filter(Boolean).join(' · ') : (c.members || []).map(function (n) { return cwIsMe(n) ? tr('You', 'Wewe') : cwFirst(n); }).slice(0, 8).join(', ')) + '</small>';
-    b.innerHTML = cwAv(c) + '<span class="cw-hdt"><b data-nosw>' + esc(cwTitle(c) || tr('Chat', 'Gumzo')) + '</b>' + sub + '</span>';
+      : '<small data-nosw>' + esc(mem || (c.kind === 'project' && byId(c.project) ? [byId(c.project).area, byId(c.project).country].filter(Boolean).join(' · ') : '')) + '</small>';
+    b.innerHTML = cw2Av(c, 40) + '<span class="cw-hdt"><b data-nosw>' + esc(cwTitle(c) || tr('Chat', 'Gumzo')) + '</b>' + sub + '</span>';
     b.setAttribute('aria-label', tr('Chat info: ', 'Maelezo ya gumzo: ') + cwTitle(c));
     cwFill(b);
-    var rh = $('cwRh'); if (rh) { rh.innerHTML = b.innerHTML; rh.setAttribute('aria-label', b.getAttribute('aria-label')); }
-    cwPinUi();
+    var rh = $('cwRhb'); if (rh) { rh.innerHTML = b.innerHTML; rh.setAttribute('aria-label', b.getAttribute('aria-label')); }
+    cwPinUi(); cw2HeadUi(c);
   }
   function cwRoomDraw(first) {
     cwHead();
@@ -15406,10 +15815,11 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
       h += cwBubble(m, c, firstRun, lastRun, nw); prev = m;
       if (m === lastReal) h += cwSeenHtml(c, m);
     });
+    h += cw2AddCard(c);
     CH.drawn[id] = now;
     if (!all.length) h += CH.loading[id] ? '<div class="cw-empty sm"><p>' + tr('Loading…', 'Inapakia…') + '</p></div>'
       : cwEmpty('hello', esc(cwHelloTx(c)), cwIsNews(c) ? tr('News for the whole team appears here.', 'Habari kwa timu nzima zinaonekana hapa.') : tr('Messages stay inside RAFIKI. Phone numbers are never shared.', 'Jumbe zinabaki ndani ya RAFIKI. Namba za simu hazishirikiwi.'), cwCanSend(cwChat(id)) ? 'hello' : '', tr('Wave 👋', 'Punga mkono 👋'), 'cw_empty_hello');
-    var y = box.scrollTop; box.innerHTML = h; cwFill(box); cwVoiceSync();
+    var y = box.scrollTop; box.innerHTML = h; cwFill(box); cwVoiceSync(); cw2AfterDraw(box);
     if (CH.place === id) { cwPlace(); return; }
     if (keep) return;
     if (CH.stick || near) cwBottom(); else box.scrollTop = y;
@@ -15419,7 +15829,7 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
   function cwSeenHtml(c, m) {
     if (c.kind === 'dm' || !(c.seen || []).length || !c.last || !cwSame(c.last.id, m.id)) return '';
     var a = c.seen.filter(function (n) { return !cwIsMe(n) && !same(n, m.from); }); if (!a.length) return '';
-    return '<div class="cw-seen" data-testid="cw_seen" role="note" aria-label="' + esc(tr('Seen by ', 'Imeonwa na ') + a.join(', ')) + '"><span aria-hidden="true">' + tr('Seen', 'Imeonwa') + '</span>' + a.slice(0, 5).map(function (n) { return '<span class="cw-av" style="' + cwHueVar(n) + '" data-ph="' + esc(n) + '" aria-hidden="true">' + esc(initials(n)) + '</span>'; }).join('') + (a.length > 5 ? '<b aria-hidden="true">+' + (a.length - 5) + '</b>' : '') + '</div>';
+    return '<div class="cw-seen" data-testid="cw_seen" data-seen="' + esc(m.id) + '" role="note" aria-label="' + esc(tr('Seen by ', 'Imeonwa na ') + a.join(', ')) + '"><span aria-hidden="true">' + tr('Seen', 'Imeonwa') + '</span>' + a.slice(0, 5).map(function (n) { return '<span class="cw-av" style="' + cwHueVar(n) + '" data-ph="' + esc(n) + '" aria-hidden="true">' + esc(initials(n)) + '</span>'; }).join('') + (a.length > 5 ? '<b aria-hidden="true">+' + (a.length - 5) + '</b>' : '') + '</div>';
   }
   function cwLinkify(t, m) {
     var s = esc(t).replace(/(https?:\/\/[^\s<]+[^\s<.,;:!?)\]'"])/g, function (u) { return '<a class="cw-a" href="' + u + '" target="_blank" rel="noopener">' + u.replace(/^https?:\/\/(www\.)?/, '') + '</a>'; });
@@ -15434,7 +15844,7 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
   }
   function cwBubble(m, c, firstRun, lastRun, nw) {
     var me = cwIsMe(m.from), k = cwKey(m), emo = !m.deleted && m.kind === 'text' && !m.reply && !m.fwd ? cwEmo(m.text) : 0;
-    var cls = 'cw-m ' + (me ? 'me' : 'them') + (firstRun ? ' first' : '') + (lastRun ? ' last' : '') + (m.pend ? ' pend' : '') + (m.deleted ? ' del' : '') + (emo ? ' emo e' + emo : '') + (nw ? ' nw' : '');
+    var cls = 'cw-m ' + (me ? 'me' : 'them') + (firstRun ? ' first' : '') + (lastRun ? ' last' : '') + (m.pend ? ' pend' : '') + (m.deleted ? ' del' : '') + (emo ? ' emo e' + emo : '') + (nw ? ' nw' : '') + (m.failed ? ' failed' : '') + (CW2.sel && m.id && CW2.sel.ids.indexOf(String(m.id)) >= 0 ? ' sel' : '');
     var h = '<div class="' + cls + '" data-id="' + esc(m.id || '') + '"' + (m.pend ? ' data-cid="' + esc(m.pend) + '"' : '') + ' id="' + (m.id ? 'cwm-' + esc(m.id) : 'cwp-' + esc(m.pend)) + '" role="article" tabindex="-1" aria-label="' + esc(cwSay(m, me)) + '"><div class="cw-b" data-at="' + esc(cwExact(m.at)) + '">';
     if (!me && firstRun && c.kind !== 'dm') h += '<span class="cw-sn" style="' + cwHueVar(m.from) + '" data-nosw><span class="cw-sav" data-ph="' + esc(m.from) + '" aria-hidden="true">' + esc(initials(m.from)) + '</span>' + esc(m.from) + '</span>';
     if (m.deleted) return h + '<span class="cw-tx cw-dl">' + cwIc('x') + tr('This message was deleted', 'Ujumbe huu ulifutwa') + '</span>' + cwMeta(m, me) + '</div></div>';
@@ -15442,16 +15852,19 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
     if (m.reply && (m.reply.id || m.reply.text)) h += '<button type="button" class="cw-q" data-jump="' + esc(m.reply.id || '') + '" style="' + cwHueVar(m.reply.from) + '"><b data-nosw>' + esc(cwIsMe(m.reply.from) ? tr('You', 'Wewe') : m.reply.from || '') + '</b><span data-nosw>' + esc(cwPrev({ kind: m.reply.kind, text: m.reply.text, media: [] }, null) || '') + '</span></button>';
     var md = m.media || [];
     if (m.kind === 'media' && md.length) h += cwGrid(m, md);
-    else if (m.kind === 'voice') h += cwVoice(m, md[0] || {});
+    else if (m.kind === 'voice') h += cwVoice(m, md[0] || {}) + cw2VoiceText(m);
     else if (m.kind === 'doc') h += cwDocHtml(m, md[0] || {});
     else if (m.kind === 'location' || m.kind === 'live') h += cwLocHtml(m, me);
     else if (m.kind === 'contact') h += cwContactHtml(m);
     else if (m.kind === 'trip') h += cwTripHtml(m);
-    if (m.text) h += '<div class="cw-tx" data-nosw>' + cwLinkify(m.text, m) + '</div>';
     var u = m.kind === 'text' && m.text && /(https?:\/\/[^\s<]+)/.exec(m.text);
-    if (u) h += cwPreviewHtml(u[1].replace(/[.,;:!?)\]'"]+$/, ''));
     var st = m.status || '', sw = CH.stWas[k]; CH.stWas[k] = st;
-    h += cwMeta(m, me, me && st === 'read' && sw && sw !== 'read') + '</div>';
+    var meta = cwMeta(m, me, me && st === 'read' && sw && sw !== 'read');
+    // chat2: the time sits at the end of the words' last line when it fits (room.png), else on a line of its own
+    var inl = !!m.text && !u && !emo;
+    if (m.text) h += '<div class="cw-tx" data-nosw>' + cwLinkify(m.text, m) + (inl ? meta : '') + '</div>' + cw2TrHtml(m, me);
+    if (u) h += cwPreviewHtml(u[1].replace(/[.,;:!?)\]'"]+$/, ''));
+    h += (inl ? '' : meta) + cw2PhotoAdd(m, c) + cw2SendState(m) + '</div>';
     var rx = m.reacts || {}, ks = Object.keys(rx).filter(function (x) { return (rx[x] || []).length; }), rw = CH.rxWas[k] || {}, rn = {};
     if (ks.length) h += '<div class="cw-rx">' + ks.map(function (x) { var mine = rx[x].some(cwIsMe), n = rx[x].length; rn[x] = n; return '<button type="button" class="cw-rc' + (mine ? ' on' : '') + (CH.rxWas[k] && n > (rw[x] || 0) ? ' pop' : '') + '" data-rx="' + esc(x) + '" aria-label="' + esc(x + ' ' + n) + '">' + x + (n > 1 ? '<i>' + n + '</i>' : '') + '</button>'; }).join('') + '</div>';
     CH.rxWas[k] = rn;
@@ -15702,6 +16115,8 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
     var c = cwChat(it.c); if (c) { c.last = { id: '', from: cwMe(), kind: it.kind, text: it.kind === 'trip' && it.trip ? it.trip.title : it.text || '', trip: it.trip, at: it.at, status: 'sent', media: (it.files || []).map(function (f) { return { type: f.type, dur: f.dur, name: f.name }; }) }; c.archived = false; cwSave(); }
     CH.stick = true; if (S.view === 'vRoom' && CH.cur === it.c) cwMsgsDraw();
     cwWhoosh(); cwFlush();
+    // chat2: still here after a few seconds: "Waiting for signal…" under it
+    setTimeout(function () { if (S.view === 'vRoom' && CH.cur === it.c && (CH.pend[it.c] || []).some(function (x) { return x.cid === it.cid; })) cwMsgsDraw(true); }, 8200);
   }
   var cwFlushing = null;
   function cwFlush() {
@@ -15810,7 +16225,12 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
     if (d.t === 'presence') { CH.pres[d.who] = { online: !!d.online, seen: d.seen }; if (d.photo) phSet(d.who, d.photo); if (S.view === 'vRoom') cwHead(); if (S.view === 'vChat') cwListDraw(); return; }
     if (d.t === 'chat' && d.chat) {
       if (d.chat.removed || d.chat.gone) { CH.chats = CH.chats.filter(function (x) { return x.id !== d.chat.id; }); if (CH.cur === d.chat.id && S.view === 'vRoom') { toast(tr('You’re no longer in this chat.', 'Hauko tena kwenye gumzo hili.')); goBack(function () { show('vChat', 'replace'); }); } }
-      else cwUpsert(d.chat);
+      else {
+        var was = cwChat(d.chat.id), isNew = !was;
+        // chat2: cleared on another phone: those messages leave this one too
+        if (was && +d.chat.cleared > (+was.cleared || 0)) { CH.msgs[d.chat.id] = (CH.msgs[d.chat.id] || []).filter(function (m) { return !(+m.id <= +d.chat.cleared); }); cwSaveM(d.chat.id); if (S.view === 'vRoom' && CH.cur === d.chat.id) setTimeout(function () { cwMsgsDraw(); }, 0); }
+        cwUpsert(d.chat); if (isNew && d.chat.kind === 'group') cw2AddedNote(d.chat);
+      }
       cwSave(); cwBadge(); if (S.view === 'vChat') cwListDraw(); if (S.view === 'vRoom' && CH.cur === d.chat.id) { cwHead(); cwCompDraw(); } return;
     }
     if (d.t === 'live') {
@@ -15988,11 +16408,12 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
     return new Promise(function (ok) {
       var url = URL.createObjectURL(file), img = new Image();
       img.onload = function () {
-        var w = img.naturalWidth, h = img.naturalHeight, max = 1600, q = 0.82, c = document.createElement('canvas');
+        // chat2: 1600 px on Wi-Fi; 1280 px on mobile data; 960 px with the data saver on (both at 0.7)
+        var lite = cwSaver(), mob = cwOnMobile(), w = img.naturalWidth, h = img.naturalHeight, max = lite ? 960 : mob ? 1280 : 1600, q = lite || mob ? 0.7 : 0.82, c = document.createElement('canvas');
         var go = function () {
           var k = Math.min(1, max / Math.max(w, h)); c.width = Math.round(w * k); c.height = Math.round(h * k); c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
           c.toBlob(function (b) {
-            if (b && b.size > 2 * 1048576 && max > 640) { max = Math.round(max * 0.8); q = Math.max(0.6, q - 0.06); return go(); }
+            if (b && b.size > (lite ? 0.5 : 2) * 1048576 && max > 640) { max = Math.round(max * 0.8); q = Math.max(0.6, q - 0.06); return go(); }
             var info = { blob: b || file, type: 'photo', w: c.width, h: c.height, name: 'photo.jpg', size: (b || file).size };
             // and a small preview (320 px) for people with the data saver on
             var t = document.createElement('canvas'), k2 = Math.min(1, 320 / Math.max(w, h)); t.width = Math.round(w * k2); t.height = Math.round(h * k2); t.getContext('2d').drawImage(img, 0, 0, t.width, t.height);
@@ -16097,15 +16518,15 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
       }, 230);
     });
   }
-  function cwDocOpen(key) {
-    var m = cwFind(key) || {}, x = (m.media || [])[0] || {};
+  function cwDocOpen(key, m0) {
+    var m = m0 || cwFind(key) || {}, x = (m.media || [])[0] || {};
     (x.lurl || x.url ? Promise.resolve(x.lurl || x.url) : cwMedia(x.id)).then(function (u) { var a = document.createElement('a'); a.href = u; a.download = x.name || 'document'; a.target = '_blank'; a.rel = 'noopener'; document.body.appendChild(a); a.click(); a.remove(); }, function () { toast(tr('Couldn’t open that document.', 'Haikuweza kufungua hati hiyo.')); });
   }
   // the full-screen viewer: every photo and video in the chat; swipe between them, pinch or double-tap to zoom, drag to pan,
   // swipe down to close (a computer: the wheel zooms, a double-click too, the arrows move, Esc closes)
-  function cwViewer(key, idx) {
+  function cwViewer(key, idx, list) {
     var all = [], at = 0;
-    cwAll(CH.cur).forEach(function (m) { if (m.kind === 'media' && !m.deleted) (m.media || []).forEach(function (x, i) { if (String(m.id || m.pend) === String(key) && i === idx) at = all.length; all.push({ m: m, x: x }); }); });
+    (list || cwAll(CH.cur)).forEach(function (m) { if (m.kind === 'media' && !m.deleted) (m.media || []).forEach(function (x, i) { if (String(m.id || m.pend) === String(key) && i === idx) at = all.length; all.push({ m: m, x: x }); }); });
     if (!all.length) return;
     var w = document.createElement('div'); w.className = 'cw-lb'; w.setAttribute('role', 'dialog'); w.setAttribute('aria-modal', 'true'); w.setAttribute('aria-label', tr('Photos and videos', 'Picha na video'));
     w.innerHTML = '<div class="cw-lbh"><button type="button" class="cw-ib" data-lb="x" aria-label="' + tr('Close', 'Funga') + '">' + cwIc('x') + '</button><span class="cw-lbt"></span><span class="cw-lbn"></span></div><div class="cw-lbs"></div>' +
@@ -16189,10 +16610,15 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
     var photos = (m.media || []).filter(function (x) { return x.type === 'photo'; });
     var A = [['reply', 'reply', tr('Reply', 'Jibu')], ['fwd', 'fwd', tr('Forward', 'Sambaza')]];
     if (m.text) A.push(['copy', 'copy', tr('Copy', 'Nakili')]);
+    if (m.text && (m.kind === 'text' || m.kind === 'media')) A.push(['tr', 'globe', 'Translate · Tafsiri']); // chat2: the same words in both languages
+    if (m.kind === 'voice' && CW2.tools.transcribe && m.id) A.push(['tx', 'doc', CW2.txShow[cw2K(m)] ? tr('Hide text', 'Ficha maandishi') : tr('Show text', 'Onyesha maandishi')]);
     A.push(['star', 'star', m.starred ? tr('Unstar', 'Ondoa nyota') : tr('Star', 'Weka nyota')]);
     if (cwCanPin(c) && m.id) A.push(['pin', 'pinned', cwPinned(m) ? tr('Unpin', 'Bandua') : tr('Pin', 'Bandika')]);
+    if (m.id) A.push(['select', 'check', tr('Select', 'Chagua')]);
     A.push(['info', 'info', tr('Info', 'Maelezo')]);
     if (canEdit) A.push(['edit', 'edit', tr('Edit', 'Hariri')]);
+    if (c.kind === 'project' && byId(c.project) && photos.length && m.id) A.push(['addph', 'image', cw2Added(m) ? tr('Added to project ✓', 'Imeongezwa kwenye mradi ✓') : tr('Add to project photos', 'Ongeza kwenye picha za mradi')]);
+    if (c.kind === 'project' && byId(c.project) && m.kind === 'text' && m.text) A.push(['story', 'book', tr('Use in a story', 'Tumia kwenye hadithi')]);
     if (m.text || photos.length) A.push(['repair', 'wrench', tr('Report a repair', 'Ripoti matengenezo')]);
     if (S.admin) A.push(['assign', 'cal', tr('Assign a visit', 'Gawa ziara')]);
     A.push(['del', 'trash', tr('Delete', 'Futa'), 'red']);
@@ -16213,6 +16639,11 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
         if (k === 'repair') cwRepair(m);
         if (k === 'assign') cwAssign(m);
         if (k === 'del') cwDelete(m);
+        if (k === 'select') cw2SelStart(m);
+        if (k === 'tr') cw2Translate(m);
+        if (k === 'tx') cw2VoiceTx(m);
+        if (k === 'addph') { if (!cw2Added(m)) cw2AddPhotos(m); }
+        if (k === 'story') cw2Story(m);
       }, 200);
     });
   }
@@ -16228,18 +16659,7 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
     var w = panel(tr('Reactions', 'Hisia'), '<div class="cw-pl">' + ks.map(function (k) { return rx[k].map(function (n) { var me = cwIsMe(n); return '<' + (me ? 'button type="button" data-unreact="' + esc(k) + '"' : 'div') + ' class="cw-pr' + (k === e ? ' hl' : '') + '"><span class="cw-av" style="' + cwHueVar(n) + '" data-ph="' + esc(n) + '" aria-hidden="true">' + esc(initials(n)) + '</span><span class="cw-prt"><b data-nosw>' + esc(me ? tr('You', 'Wewe') : n) + '</b>' + (me ? '<small>' + tr('Tap to remove', 'Gusa kuondoa') + '</small>' : '') + '</span><span class="cw-pe">' + k + '</span></' + (me ? 'button' : 'div') + '>'; }).join(''); }).join('') + '</div>', 'cw-sheet');
     w.addEventListener('click', function (ev) { var b = ev.target.closest('[data-unreact]'); if (!b) return; w.close(); cwReact(m, b.getAttribute('data-unreact')); });
   }
-  function cwDelete(m) {
-    var c = cwChat(CH.cur) || {}, me = cwIsMe(m.from), all = me || (c.kind !== 'dm' && cwAdmin(c));
-    var w = panel(tr('Delete message?', 'Futa ujumbe?'), '<div class="cw-mn">' + (all ? '<button type="button" data-del="all" class="red" data-testid="cw_del_all">' + cwIc('trash') + tr('Delete for everyone', 'Futa kwa wote') + '</button>' : '') +
-      '<button type="button" data-del="me" class="red" data-testid="cw_del_me">' + cwIc('trash') + tr('Delete for me', 'Futa kwangu') + '</button><button type="button" data-del="no">' + cwIc('x') + tr('Cancel', 'Ghairi') + '</button></div>', 'cw-sheet');
-    w.addEventListener('click', function (e) {
-      var b = e.target.closest('[data-del]'); if (!b) return; var k = b.getAttribute('data-del'); w.close(); if (k === 'no') return;
-      var c0 = m.c || CH.cur;
-      if (k === 'all') { m.deleted = true; m.text = ''; m.media = []; } else CH.msgs[c0] = (CH.msgs[c0] || []).filter(function (x) { return !cwSame(x.id, m.id); });
-      cwSaveM(c0); cwMsgsDraw(true);
-      cwApi('POST', 'delete', { c: c0, id: m.id, forAll: k === 'all' }).then(function (j) { if (!j.ok) { toast(cwWhy(j)); cwMsgsLoad(c0, true); } });
-    });
-  }
+  function cwDelete(m) { cw2DelSheet([m]); } // chat2: one sheet for one message or many (delete.png)
   function cwInfoMsg(m) {
     var sent = '<h4 class="cw-ih">' + cwIc('cal') + tr('Sent', 'Ilitumwa') + '</h4><p class="cw-xtm" data-testid="cw_exact">' + esc(cwExact(m.at)) + (m.edited ? ' · ' + tr('edited ', 'ilihaririwa ') + esc(dClock(dOf(m.edited))) : '') + '</p>';
     if (!cwIsMe(m.from)) { panel(tr('Message info', 'Maelezo ya ujumbe'), '<div class="cw-inf"><div class="cw-pr"><span class="cw-av" style="' + cwHueVar(m.from) + '" data-ph="' + esc(m.from) + '" aria-hidden="true">' + esc(initials(m.from)) + '</span><span class="cw-prt"><b data-nosw>' + esc(m.from) + '</b></span></div>' + sent + '</div>', 'cw-sheet'); return; }
@@ -16252,8 +16672,8 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
         '<h4 class="cw-ih">' + CW_TK.delivered + tr('Delivered to', 'Imemfikia') + '</h4>' + (dl.length ? dl.map(row).join('') : '<p class="muted">' + tr('No one else', 'Hakuna mwingine') + '</p>');
     });
   }
-  function cwForward(m) {
-    var list = cwSorted().filter(function (c) { return cwCanSend(c); }), pick = [];
+  function cwForward(m, done) {
+    var ms = [].concat(m), list = cwSorted().filter(function (c) { return cwCanSend(c); }), pick = []; // chat2: one message or several (select)
     var w = tSheet(tr('Forward to', 'Sambaza kwa'), '<h3 class="cw-shh">' + tr('Forward to', 'Sambaza kwa') + '</h3><div class="cw-pl">' + list.map(function (c) { return '<button type="button" class="cw-pr" role="checkbox" aria-checked="false" data-fw="' + esc(c.id) + '">' + cwAv(c) + '<span class="cw-prt"><b data-nosw>' + esc(cwTitle(c)) + '</b></span><span class="cw-ck" aria-hidden="true">' + cwIc('check') + '</span></button>'; }).join('') + '</div>' +
       '<div class="cw-foot"><button type="button" class="btn block" id="cwFwGo" disabled>' + tr('Forward', 'Sambaza') + '</button></div>');
     cwFill(w);
@@ -16262,8 +16682,9 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
       if (b) { var id = b.getAttribute('data-fw'), i = pick.indexOf(id); if (i >= 0) pick.splice(i, 1); else pick.push(id); b.setAttribute('aria-checked', i < 0); $('cwFwGo').disabled = !pick.length; $('cwFwGo').textContent = pick.length > 1 ? tr('Forward to ' + pick.length, 'Sambaza kwa ' + pick.length) : tr('Forward', 'Sambaza'); return; }
       if (e.target.closest('#cwFwGo')) {
         w.close();
-        pick.forEach(function (c) { cwQueue({ c: c, kind: m.kind, text: m.text || undefined, fwd: true, loc: m.loc, contact: m.contact, live: undefined, media: (m.media || []).filter(function (x) { return x.id; }).map(function (x) { var o = {}; Object.keys(x).forEach(function (k) { if (k !== 'lurl') o[k] = x[k]; }); return o; }) }); });
+        pick.forEach(function (c) { ms.forEach(function (m) { cwQueue({ c: c, kind: m.kind, text: m.text || undefined, fwd: true, loc: m.loc, contact: m.contact, live: undefined, media: (m.media || []).filter(function (x) { return x.id; }).map(function (x) { var o = {}; Object.keys(x).forEach(function (k) { if (k !== 'lurl') o[k] = x[k]; }); return o; }) }); }); });
         toast(pick.length > 1 ? tr('Forwarded to ' + pick.length + ' chats', 'Imesambazwa kwa gumzo ' + pick.length) : tr('Forwarded', 'Imesambazwa'));
+        if (done) done();
       }
     });
   }
@@ -16451,6 +16872,7 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
       rows.push(row('sound', 'sound', 'amber', tr('Sound', 'Sauti'), snd ? tr('On for this chat', 'Imewashwa kwa gumzo hili') : tr('Off for this chat', 'Imezimwa kwa gumzo hili')));
       var wl = CW_WALL.filter(function (x) { return x[0] === wp; })[0] || CW_WALL[0], bl = CW_BUB.filter(function (x) { return x[0] === (c.bubble || ''); })[0] || CW_BUB[0];
       rows.push(row('wall', 'wall', 'purple', tr('Wallpaper and colour', 'Mandhari na rangi'), tr(wl[1], wl[2]) + ' · ' + tr(bl[2], bl[3])));
+      rows.push(row('mfl', 'image', 'teal', tr('Media, files and links', 'Picha, faili na viungo'), esc(cw2MflCount(c)))); // chat2
       if (grp && adm) {
         rows.push(row('link', 'link', 'blue', tr('Invite link', 'Kiungo cha mwaliko'), tr('Anyone in the team with the link can join', 'Yeyote kwenye timu mwenye kiungo anaweza kujiunga')));
         rows.push('<div class="ct-r sw"><span class="ct-ri" style="--hu:var(--hu-amber);--hb:var(--hb-amber)" aria-hidden="true">' + cwIc('lock') + '</span><span class="ct-rl"><b>' + tr('Only admins can send messages', 'Wasimamizi pekee wanaweza kutuma jumbe') + '</b></span><button type="button" class="cw-sw" role="switch" aria-checked="' + !!c.onlyAdmins + '" data-i="only" aria-label="' + tr('Only admins can send messages', 'Wasimamizi pekee wanaweza kutuma jumbe') + '"><span class="kn"></span></button></div>');
@@ -16459,10 +16881,10 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
       if (c.kind !== 'dm') {
         var mem = (c.members || []).slice().sort(function (a, z) { return (cwIsMe(z) - cwIsMe(a)) || ((c.admins || []).indexOf(z) >= 0) - ((c.admins || []).indexOf(a) >= 0) || a.localeCompare(z); });
         h += '<section class="ct-g"><h4>' + mem.length + ' ' + tr('members', 'wanachama') + (c.kind === 'team' ? ' · ' + tr('kept in step with the team list', 'inafuata orodha ya timu') : '') + '</h4><div class="ct-list">' +
-          (grp && adm ? '<button type="button" class="ct-r" data-i="add"><span class="ct-ri" style="--hu:var(--hu-green);--hb:var(--hb-green)" aria-hidden="true">' + cwIc('plus') + '</span><span class="ct-rl"><b>' + tr('Add members', 'Ongeza wanachama') + '</b></span></button>' : '') +
+          (cw2CanAdd(c) ? '<button type="button" class="ct-r" data-i="add" data-testid="cw_info_add"><span class="ct-ri" style="--hu:var(--hu-green);--hb:var(--hb-green)" aria-hidden="true">' + cwIc('plus') + '</span><span class="ct-rl"><b>' + tr('Add people', 'Ongeza watu') + '</b>' + (adm || S.admin ? '' : '<small>' + tr('Ask an admin to add someone', 'Mwombe msimamizi aongeze mtu') + '</small>') + '</span></button>' : '') +
           mem.map(function (n) { var a = (c.admins || []).some(function (x) { return same(x, n); }), p = CH.pres[n]; return '<button type="button" class="ct-r cw-mem" data-mem="' + esc(n) + '"><span class="cw-av" style="' + cwHueVar(n) + '" data-ph="' + esc(n) + '" aria-hidden="true">' + esc(initials(n)) + (p && p.online ? '<i class="cw-on"></i>' : '') + '</span><span class="ct-rl"><b data-nosw>' + esc(cwIsMe(n) ? tr('You', 'Wewe') : n) + '</b>' + (p && !cwIsMe(n) ? '<small>' + esc(cwSeenTx(p)) + '</small>' : '') + '</span>' + (a ? '<span class="tag">' + tr('Admin', 'Msimamizi') + '</span>' : '') + '</button>'; }).join('') + '</div></section>';
       }
-      if (grp) h += '<section class="ct-g"><div class="ct-list">' + row('leave', 'leave', 'coral', tr('Leave the group', 'Ondoka kwenye kikundi'), '', true) + '</div></section>';
+      h += '<section class="ct-g"><div class="ct-list">' + row('clear', 'trash', 'coral', tr('Clear chat', 'Futa jumbe za gumzo'), tr('Only from your view', 'Kwako tu'), true) + (c.kind === 'dm' ? row('delchat', 'trash', 'coral', tr('Delete chat', 'Futa gumzo'), '', true) : '') + (grp ? row('leave', 'leave', 'coral', tr('Leave the group', 'Ondoka kwenye kikundi'), '', true) : '') + '</div></section>';
       box.innerHTML = h; cwFill(box);
     };
     draw();
@@ -16479,7 +16901,9 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
       if (k === 'only') { var v = !c0.onlyAdmins; c0.onlyAdmins = v; draw(); cwCompDraw(); cwApi('POST', 'group-update', { c: c0.id, onlyAdmins: v }).then(function (j) { if (!j.ok) { c0.onlyAdmins = !v; draw(); cwCompDraw(); toast(cwWhy(j)); } }); return; }
       if (k === 'edit') return cwGroupEdit(c0, draw);
       if (k === 'photo') return cwPick('image/*', false, false, function (fs) { cwPhoto(fs[0]).then(function (x) { if (!x) return; toast(tr('Uploading…', 'Inapakia…')); cwUp(x.blob, 'photo', 'group.jpg').then(function (j) { if (!j.ok) return toast(cwWhy(j)); c0.photo = j.url || j.id; draw(); cwHead(); cwApi('POST', 'group-update', { c: c0.id, photo: j.id }); }); }); });
-      if (k === 'add') return cwAddMembers(c0, draw);
+      if (k === 'add') return cw2AddPeople(c0, draw);
+      if (k === 'mfl') return cw2Mfl(c0);
+      if (k === 'clear' || k === 'delchat') return cw2Clear(c0, k === 'delchat', w);
       if (k === 'leave') return poAsk(tr('Leave this group?', 'Ondoka kwenye kikundi hiki?'), tr('You won’t get its messages any more.', 'Hutapata tena jumbe zake.'), tr('Leave', 'Ondoka'), true).then(function (ok) {
         if (!ok) return; cwApi('POST', 'leave', { c: c0.id }).then(function (j) { if (!j.ok) return toast(cwWhy(j)); CH.chats = CH.chats.filter(function (x) { return x.id !== c0.id; }); cwSave(); cwBadge(); w.close(); setTimeout(function () { goBack(function () { show('vChat', 'replace'); }); }, 260); });
       });
@@ -16654,8 +17078,10 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
   }
   function cwShown(v) {
     if (v !== 'vRoom' && document.body.classList.contains('room')) cwDraftSave();
-    document.body.classList.toggle('room', v === 'vRoom');
+    document.body.classList.toggle('room', v === 'vRoom'); document.body.classList.toggle('cwl', v === 'vChat');
     var hd = $('cwHd'); if (hd) hd.hidden = v !== 'vRoom';
+    var hda = $('cwHda'); if (hda) hda.hidden = v !== 'vRoom';
+    if (v !== 'vRoom') { cw2SelEnd(); cw2FindEnd(); }
     if (v === 'vLock') { cwStop(); return; }
     if (S.name || S.who) cwStart();
     if (v !== 'vRoom') { if (CH.rec) cwRecEnd(false); cwVpvDrop(); cwTyping(null); Object.keys(CH.aud).forEach(function (k) { if (CH.aud[k] && !CH.aud[k].paused) CH.aud[k].pause(); }); cwMentUi(); var pb = $('cwPinB'); if (pb) pb.classList.add('hidden'); }
@@ -16671,22 +17097,36 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
   if (window.visualViewport) { visualViewport.addEventListener('resize', cwVv); visualViewport.addEventListener('scroll', cwVv); }
   addEventListener('resize', cwVv);
   document.addEventListener('visibilitychange', function () { if (!document.hidden && S.view === 'vRoom' && CH.cur) { cwRead(CH.cur); if (!CH.ws) cwMsgsLoad(CH.cur, true); } });
-  $('bRefresh').addEventListener('click', function () { if (CH.started && navigator.onLine !== false) { cwLoad(false); if (S.view === 'vRoom' && CH.cur) cwMsgsLoad(CH.cur, true); } });
+  $('bRefresh').addEventListener('click', function () { if (CH.started && navigator.onLine !== false) { cwLoad(false); if (S.view === 'vChat') cwTmLoad(true); if (S.view === 'vRoom' && CH.cur) cwMsgsLoad(CH.cur, true); } });
 
   // ---- taps
   $('cwHd').addEventListener('click', function () { buzz(); cwInfo(); });
   $('cwNew').addEventListener('click', function () { buzz(); cwNew(); });
-  $('cwStar').addEventListener('click', function () { buzz(); cwStarred(); });
   $('cwArchBk').addEventListener('click', function () { if (CH.al) { var l = CH.al; CH.al = null; CH.arch = false; bkShut(l); } else CH.arch = false; cwListDraw(); });
   $('cwQ').addEventListener('input', function () {
     var v = this.value; CH.q = v; $('cwQx').classList.toggle('hidden', !v);
-    if (v && !CH.ql) CH.ql = bkOpen('in', function () { CH.ql = null; if (!CH.q) return false; CH.q = ''; CH.hits = null; $('cwQ').value = ''; $('cwQx').classList.add('hidden'); cwListDraw(); return true; }, $('cwQ'));
-    if (!v && CH.ql) { var l = CH.ql; CH.ql = null; bkShut(l); }
+    if (!CH.so) cwSearchOpen(false);
     CH.hits = null; clearTimeout(CH.qT); cwListDraw();
     if (v.trim().length >= 2) CH.qT = setTimeout(function () { var q = v; cwApi('GET', 'search?q=' + encodeURIComponent(q.trim())).then(function (j) { if (CH.q !== q) return; CH.hits = j.hits || []; cwListDraw(); }); }, 300);
     else if (v) { CH.hits = []; }
   });
   $('cwQx').addEventListener('click', function () { $('cwQ').value = ''; $('cwQ').dispatchEvent(new Event('input')); $('cwQ').focus(); });
+  $('cwQb').addEventListener('click', function () { buzz(); if (CH.ql) { var l = CH.ql; CH.ql = null; bkShut(l); } cwSearchShut(); });
+  $('cwSrch').addEventListener('click', function () { buzz(); cwSearchOpen(); });
+  // an empty search left behind (focus went elsewhere) closes by itself, so it leaves no step for Back
+  $('cwQ').addEventListener('blur', function () { setTimeout(function () { if (CH.so && !CH.q && document.activeElement !== $('cwQ') && !$('cwSb').contains(document.activeElement)) { if (CH.ql) { var l = CH.ql; CH.ql = null; bkShut(l); } cwSearchShut(); } }, 250); });
+  $('cwMore').addEventListener('click', function () { buzz(); cwMenuOpen(); });
+  $('cwMe').addEventListener('click', function () { tabGo('vMe'); });
+  $('cwMenu').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-mn]'); if (!b) return; buzz(); var k = b.getAttribute('data-mn'); cwMenuShut();
+    setTimeout(function () {
+      if (k === 'set') cwSettings(); else if (k === 'star') cwStarred(); else if (k === 'arch') cwArchOpen(); else if (k === 'group') cwGroupNew();
+      else if (k === 'read') cwAllRead(); else if (k === 'bell') $('meBell').click(); else if (k === 'rf') $('bRefresh').click();
+    }, 200);
+  });
+  if (window.MutationObserver && $('meBellN')) new MutationObserver(function () { if (S.view === 'vChat') cwTopDraw(); }).observe($('meBellN'), { childList: true, characterData: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+  $('cwChips').addEventListener('click', function (e) { var b = e.target.closest('[data-chip]'); if (!b) return; buzz(); cwChipSet(b.getAttribute('data-chip')); cwListDraw(); });
+  $('cwField').addEventListener('click', function (e) { var b = e.target.closest('[data-dmw]'); if (!b) return; buzz(); cwDm(b.getAttribute('data-dmw')); });
   $('cwNote').addEventListener('click', function (e) {
     if (e.target.closest('#cwNtOn')) { try { Notification.requestPermission().then(function () { store.set('rfChatNoteAsk', '1'); cwListDraw(); }); } catch (x) { store.set('rfChatNoteAsk', '1'); cwListDraw(); } }
     if (e.target.closest('#cwNtX')) { store.set('rfChatNoteAsk', '1'); cwListDraw(); }
@@ -16697,10 +17137,10 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
     box.addEventListener('click', function (e) {
       if (skipClick) { skipClick = false; e.preventDefault(); return; }
       var es = e.target.closest('[data-es]');
-      if (es) { var k0 = es.getAttribute('data-es'); if (k0 === 'clearq') $('cwQx').click(); if (k0 === 'unarch') $('cwArchBk').click(); return; }
+      if (es) { var k0 = es.getAttribute('data-es'); if (k0 === 'clearq') $('cwQx').click(); if (k0 === 'unarch') $('cwArchBk').click(); if (k0 === 'allchip') { cwChipSet('all'); cwListDraw(); } return; }
       var ra = e.target.closest('[data-ra]');
       if (ra) { var c = cwChat(ra.closest('[data-c]').getAttribute('data-c')); if (!c) return; buzz(); if (ra.getAttribute('data-ra') === 'mute') cwMute(c); else cwArchive(c); return; }
-      if (e.target.closest('#cwArch')) { CH.arch = true; CH.al = bkOpen('in', function () { CH.al = null; if (!CH.arch) return false; CH.arch = false; cwListDraw(); return true; }, $('cwArch')); cwListDraw(); window.scrollTo(0, 0); return; }
+      if (e.target.closest('#cwArch')) { cwArchOpen(); return; }
       var o = e.target.closest('[data-open]'); if (!o) return;
       if (o.closest('.cw-rw.sw')) { o.closest('.cw-rw').classList.remove('sw'); o.style.transform = ''; return; }
       buzz(); var id = o.getAttribute('data-open'), j = o.getAttribute('data-jump');
@@ -16742,7 +17182,10 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
     box.addEventListener('click', function (e) {
       if (skip) { skip = false; return; }
       var t = e.target, el;
-      if ((el = t.closest('[data-es]'))) { if (el.getAttribute('data-es') === 'hello') { buzz(); cwQueue({ c: CH.cur, kind: 'text', text: '👋' }); } return; }
+      // chat2: while selecting, a tap adds or takes away a message, and nothing inside it opens
+      if (CW2.sel) { e.preventDefault(); if ((el = t.closest('.cw-m[data-id]')) && el.dataset.id) cw2SelToggle(el.dataset.id); return; }
+      if (cw2Tap(e, t)) return;
+      if ((el = t.closest('[data-es]'))) { if (el.getAttribute('data-es') === 'hello') { buzz(); cwQueue({ c: CH.cur, kind: 'text', text: '👋' }); } if (el.getAttribute('data-es') === 'addpeople') { buzz(); cw2AddPeople(cwChat(CH.cur)); } return; }
       if ((el = t.closest('[data-full]'))) { CH.full[el.getAttribute('data-full')] = 1; cwMsgsDraw(true); return; }
       if ((el = t.closest('[data-vact]'))) { var vo = el.closest('[data-vo]'), key = vo.getAttribute('data-vo'), k = el.getAttribute('data-vact'); buzz();
         if (k === 'play') cwVoicePlay(key);
@@ -16758,7 +17201,7 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
       if ((el = t.closest('[data-ctmsg]'))) { cwDm(el.getAttribute('data-ctmsg')); return; }
       if ((el = t.closest('[data-livestop]'))) { cwLiveStop(el.getAttribute('data-livestop')); return; }
       if ((el = t.closest('[data-rx]'))) { var mm = cwFind(el.closest('.cw-m').getAttribute('data-id')); if (mm) cwReacts(mm, el.getAttribute('data-rx')); return; }
-      if ((el = t.closest('.cw-m.pend'))) { var pm = cwFind(el.getAttribute('data-cid')); if (pm && pm.failed) cwMenu(pm); return; }
+      if ((el = t.closest('.cw-m.pend'))) { var pm = cwFind(el.getAttribute('data-cid')); if (pm && pm.failed) cw2Retry(pm.pend); return; } // chat2: Not sent · Tap to retry
       // a double-tap on a bubble: the reaction chosen in Chat settings (❤️ unless you picked 👍)
       if ((el = t.closest('.cw-m[data-id]')) && !t.closest('a, button, video, .cw-vo') && el.dataset.id) {
         var now = Date.now();
@@ -16767,8 +17210,9 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
       }
     });
     var msgOf = function (el) { var m = el.closest('.cw-m'); if (!m) return null; return cwFind(m.getAttribute('data-id') || m.getAttribute('data-cid')); };
-    box.addEventListener('contextmenu', function (e) { if (e.target.closest('a')) return; var m = msgOf(e.target); if (!m) return; e.preventDefault(); cwMenu(m); });
+    box.addEventListener('contextmenu', function (e) { if (CW2.sel) { e.preventDefault(); var sm = e.target.closest('.cw-m[data-id]'); if (sm && sm.dataset.id) cw2SelToggle(sm.dataset.id); return; } if (e.target.closest('a')) return; var m = msgOf(e.target); if (!m) return; e.preventDefault(); cwMenu(m); });
     box.addEventListener('pointerdown', function (e) {
+      if (CW2.sel) return; // selecting: taps only
       var b = e.target.closest('.cw-m'); if (!b || e.target.closest('.cw-vo, .cw-rx, a, video, .cw-pc, .cw-trip')) return;
       st = { b: b, x: e.clientX, y: e.clientY, dx: 0, h: false, l: false, tick: false };
       clearTimeout(lp); lp = setTimeout(function () { if (st && !st.h && !st.l) { var m = msgOf(b); st = null; skip = true; setTimeout(function () { skip = false; }, 500); if (m) { buzz(); cwMenu(m); } } }, 480);
@@ -16807,8 +17251,8 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
     var c = cwChat(CH.cur), ps = (c && c.pins) || []; if (!ps.length) return; buzz();
     var i = (CH.pinAt[c.id] || 0) % ps.length; cwJump(ps[i].id); CH.pinAt[c.id] = (i + 1) % ps.length; cwPinUi();
   });
-  $('cwRh').addEventListener('click', function () { buzz(); cwInfo(); });
-  $('cwSet').addEventListener('click', function () { buzz(); cwSettings(); });
+  $('cwRh').addEventListener('click', function (e) { var a = e.target.closest('[data-hd]'); buzz(); if (a) cw2HdAct(a.getAttribute('data-hd')); else cwInfo(); });
+  $('cwHda').addEventListener('click', function (e) { var a = e.target.closest('[data-hd]'); if (!a) return; buzz(); cw2HdAct(a.getAttribute('data-hd')); });
   // a photo pasted into the box, or dropped on the chat (a computer)
   (function () {
     var room = $('vRoom'), n = 0, drop = $('cwDrop');
@@ -16890,7 +17334,7 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
     if (S.view !== 'vChat' && S.view !== 'vRoom') return;
     if (e.key === 'Escape') { var sh = qa('.bsh.cw-sheet:not(.out)').pop(); if (sh && sh.close) { e.preventDefault(); sh.close(); } return; }
     if ((e.ctrlKey || e.metaKey) && !e.altKey && (e.key === 'k' || e.key === 'K')) {
-      e.preventDefault(); if (S.view === 'vRoom' && !cwWide()) { goBack(function () { show('vChat', 'replace'); }); setTimeout(function () { $('cwQ').focus(); }, 350); } else { $('cwQ').focus(); $('cwQ').select(); }
+      e.preventDefault(); if (S.view === 'vRoom' && !cwWide()) { goBack(function () { show('vChat', 'replace'); }); setTimeout(function () { cwSearchOpen(); }, 350); } else { cwSearchOpen(); $('cwQ').select(); }
       return;
     }
     if (e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
@@ -16903,6 +17347,556 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
   document.addEventListener('click', function (e) { var b = e.target.closest && e.target.closest('#pChat'); if (!b || !S.cur) return; buzz(); cwProject(S.cur.id); });
   cwBadge();
   // chatw:end
+
+  // cw2-room:begin ------------------------------------------------------------------------------------------------
+  // Chat 2, one chat (design/chat-2026-10/room.png, delete.png): the header's search and ⋯, the project strip, select +
+  // delete, Translate · Tafsiri, Show text under voice notes, Add to project photos, Use in a story, Seen by from the
+  // ticks, Clear / Delete chat, Media, files and links, Jump to a date, sending states and Add people.
+  CWI.globe = '<circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.4 2.6 3.6 5.4 3.6 8.5s-1.2 5.9-3.6 8.5c-2.4-2.6-3.6-5.4-3.6-8.5s1.2-5.9 3.6-8.5z"/>';
+  CWI.book = '<path d="M4.5 5.5A1.5 1.5 0 0 1 6 4h5.5v15H6a1.5 1.5 0 0 0-1.5 1.5z"/><path d="M19.5 5.5A1.5 1.5 0 0 0 18 4h-5.5v15H18a1.5 1.5 0 0 1 1.5 1.5z"/>';
+  CWI.dots = '<circle cx="12" cy="5" r="1.4" fill="currentColor"/><circle cx="12" cy="12" r="1.4" fill="currentColor"/><circle cx="12" cy="19" r="1.4" fill="currentColor"/>';
+  // the chat's picture: the list builder's cwChatAvatar (project photo with its water-drop badge) when it is there
+  function cw2Av(c, size) { return typeof cwChatAvatar === 'function' ? cwChatAvatar(c, size) : cwAv(c); }
+  function cw2K(m) { return String(m.c || CH.cur) + ':' + (m.id || m.pend); }
+  function cw2MsgOf(el) { var b = el.closest('.cw-m'); return b ? cwFind(b.getAttribute('data-id') || b.getAttribute('data-cid')) : null; }
+  // what was just opened under a message (a translation, a voice note's words): scrolled into sight if it went below
+  function cw2Reveal(m) { var el = document.getElementById('cwm-' + m.id), box = $('cwMsgs'); if (!el || !box) return; var r = el.getBoundingClientRect(), b = box.getBoundingClientRect(); if (r.bottom > b.bottom - 4) box.scrollTop += Math.min(r.bottom - b.bottom + 12, r.top - b.top - 8); }
+  function cw2Admin(c) { return !!c && c.kind !== 'dm' && (cwAdmin(c) || !!S.admin); }
+  function cw2CanAdd(c) { return !!c && (c.kind === 'group' || (c.kind === 'project' && cw2Admin(c))); }
+  function cw2Names(list) { var a = []; list.forEach(function (n) { if (n && !a.some(function (x) { return same(x, n); })) a.push(n); }); return a; }
+
+  // ---- the header: search and ⋯ (phones: in the app bar; a computer: on the room's own header) ----
+  function cw2HeadUi(c) {
+    var ls = tr('Search in this chat', 'Tafuta kwenye gumzo hili'), lm = tr('More', 'Zaidi');
+    qa('[data-hd=search]').forEach(function (b) { b.setAttribute('aria-label', ls); b.title = ls; });
+    qa('[data-hd=menu]').forEach(function (b) { b.setAttribute('aria-label', lm); b.title = lm; });
+    cw2Strip(c);
+  }
+  function cw2HdAct(k) { if (k === 'search') cw2FindStart(); if (k === 'menu') cw2RoomMenu(); }
+  // the project strip under the header: how it is, the last visit and where, "Open project ›" (the whole strip is the button)
+  function cw2Strip(c) {
+    var b = $('cwPs'); if (!b) return;
+    var p = c && c.kind === 'project' && byId(c.project);
+    if (!p || S.view !== 'vRoom') { b.className = 'cw-ps hidden'; b.innerHTML = ''; return; }
+    var r = S.repairs[p.id], st = r ? (r.state === 'notworking' ? ['bad', tr('Not working', 'Haifanyi kazi')] : ['warn', tr('Needs repair', 'Inahitaji matengenezo')])
+      : /construct|build|progress/i.test(p.status || '') ? ['build', tr('Under construction', 'Inajengwa')] : ['ok', tr('Working', 'Inafanya kazi')];
+    var v = S.visits[p.id], vd = v && dOf(v.at), vt = vd && !isNaN(vd) ? tr('Visited ' + dDay(vd, true), 'Ziara ' + dDay(vd, true)) : tr('No visit yet', 'Bado hakuna ziara');
+    var place = [p.area, p.country].filter(Boolean).join(', ');
+    var op = tr('Open project', 'Fungua mradi');
+    b.className = 'cw-ps';
+    b.innerHTML = '<span class="cw-pst ' + st[0] + '"><i aria-hidden="true"></i>' + esc(st[1]) + '</span><span class="cw-psx" data-nosw>' + esc(vt) + (place ? '<span class="pl"> · ' + esc(place) + '</span>' : '') + '</span><span class="cw-pso">' + op + ' ›</span>';
+    b.setAttribute('aria-label', tr('Open the project: ', 'Fungua mradi: ') + p.title + '. ' + st[1] + '. ' + vt + (place ? ', ' + place : ''));
+    cw2StripFit();
+  }
+  // no word cut in the strip: the place goes first, then the visit, when the screen (or the text size) leaves no room
+  function cw2StripFit() {
+    var b = $('cwPs'), x = b && b.querySelector('.cw-psx'); if (!x || b.classList.contains('hidden')) return;
+    b.classList.remove('np', 'nx'); if (x.scrollWidth <= x.clientWidth + 1) return;
+    b.classList.add('np'); if (x.scrollWidth > x.clientWidth + 1) b.classList.add('nx');
+  }
+  addEventListener('resize', function () { if (S.view === 'vRoom') cw2StripFit(); });
+  // the ⋯ menu
+  function cw2RoomMenu() {
+    var c = cwChat(CH.cur); if (!c) return;
+    var mu = cwMuted(c), A = [['find', 'search', tr('Search in this chat', 'Tafuta kwenye gumzo hili')], ['info', 'info', tr('Chat info', 'Maelezo ya gumzo')]];
+    if (c.kind === 'project' && byId(c.project)) A.push(['proj', 'drop', tr('Open project', 'Fungua mradi')]);
+    if (cw2CanAdd(c)) A.push(['add', 'plus', tr('Add people', 'Ongeza watu')]);
+    A.push(['mfl', 'image', tr('Media, files and links', 'Picha, faili na viungo')], ['date', 'cal', tr('Jump to a date', 'Nenda kwenye tarehe')], ['select', 'check', tr('Select messages', 'Chagua jumbe')],
+      ['mute', mu ? 'sound' : 'mute', mu ? tr('Unmute', 'Washa sauti') : tr('Mute', 'Nyamazisha')], ['wall', 'wall', tr('Wallpaper and colour', 'Mandhari na rangi')], ['clear', 'trash', tr('Clear chat', 'Futa jumbe za gumzo'), 'red']);
+    if (c.kind === 'dm') A.push(['delchat', 'trash', tr('Delete chat', 'Futa gumzo'), 'red']);
+    if (c.kind === 'group') A.push(['leave', 'leave', tr('Leave the group', 'Ondoka kwenye kikundi'), 'red']);
+    var w = panel(esc(cwTitle(c)), '<div class="cw-mn" data-testid="cw_room_menu_sheet">' + A.map(function (a) { return '<button type="button" data-rmk="' + a[0] + '"' + (a[3] ? ' class="red"' : '') + ' data-testid="cw_rm_' + a[0] + '">' + cwIc(a[1]) + '<span>' + a[2] + '</span></button>'; }).join('') + '</div>', 'cw-sheet');
+    w.querySelector('.bsh-h h3').setAttribute('data-nosw', '');
+    w.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-rmk]'); if (!b) return; var k = b.getAttribute('data-rmk'); w.close(); buzz();
+      setTimeout(function () {
+        var c0 = cwChat(CH.cur); if (!c0) return;
+        if (k === 'find') cw2FindStart();
+        if (k === 'info') cwInfo();
+        if (k === 'proj') openProj(String(c0.project), 'pin');
+        if (k === 'add') cw2AddPeople(c0);
+        if (k === 'mfl') cw2Mfl(c0);
+        if (k === 'date') cw2DatePick();
+        if (k === 'select') cw2SelStart(null);
+        if (k === 'mute') cwMute(c0, cwHead);
+        if (k === 'wall') cwWallPick(c0);
+        if (k === 'clear' || k === 'delchat') cw2Clear(c0, k === 'delchat');
+        if (k === 'leave') cw2Leave(c0);
+      }, 230);
+    });
+  }
+  function cw2Leave(c0, sheet) {
+    poAsk(tr('Leave this group?', 'Ondoka kwenye kikundi hiki?'), tr('You won’t get its messages any more.', 'Hutapata tena jumbe zake.'), tr('Leave', 'Ondoka'), true).then(function (ok) {
+      if (!ok) return; cwApi('POST', 'leave', { c: c0.id }).then(function (j) { if (!j.ok) return toast(cwWhy(j)); CH.chats = CH.chats.filter(function (x) { return x.id !== c0.id; }); cwSave(); cwBadge(); if (sheet) sheet.close(); setTimeout(function () { goBack(function () { show('vChat', 'replace'); }); }, sheet ? 520 : 260); });
+    });
+  }
+
+  // ---- select + delete (delete.png): long-press › Select, or ⋯ › Select messages. Back leaves the mode. ----
+  function cw2SelStart(m) {
+    if (S.view !== 'vRoom') return;
+    if (CW2.sel) { if (m && m.id) cw2SelToggle(String(m.id), true); return; }
+    CW2.sel = { ids: m && m.id && !m.pend ? [String(m.id)] : [] };
+    CW2.sel.l = bkOpen('in', function () { if (!CW2.sel) return false; cw2SelEnd(true); return true; }, $('cwSel'));
+    document.body.classList.add('cwsel'); $('vRoom').classList.add('selmode');
+    cw2SelUi(); cwMsgsDraw(true);
+  }
+  function cw2SelEnd(fromBack) {
+    var s0 = CW2.sel; if (!s0) return; CW2.sel = null;
+    document.body.classList.remove('cwsel'); $('vRoom').classList.remove('selmode');
+    var bar = $('cwSel'); bar.className = 'cw-selh hidden'; bar.innerHTML = '';
+    if (!fromBack && s0.l) bkShut(s0.l);
+    if (S.view === 'vRoom') cwMsgsDraw(true);
+  }
+  function cw2SelMsgs() { return CW2.sel ? CW2.sel.ids.map(function (id) { return cwFind(id); }).filter(Boolean).sort(function (a, b) { return cwMs(a.at) - cwMs(b.at); }) : []; }
+  function cw2SelToggle(id, on) {
+    var S0 = CW2.sel; if (!S0) return; var m = cwFind(id); if (!m || !m.id || m.pend || m.sys || m.kind === 'sys') return;
+    var a = S0.ids, i = a.indexOf(String(id));
+    if (i >= 0 && on !== true) a.splice(i, 1); else if (i < 0) a.push(String(id));
+    buzz(); var el = document.getElementById('cwm-' + id); if (el) el.classList.toggle('sel', a.indexOf(String(id)) >= 0);
+    if (!a.length && on !== true) { cw2SelEnd(); return; } // the last one taken away: done selecting
+    cw2SelUi();
+  }
+  function cw2SelUi() {
+    var bar = $('cwSel'), ms = cw2SelMsgs(), n = ms.length, live = ms.filter(function (m) { return !m.deleted; }), ok = n > 0 && live.length === n, stars = ok && live.every(function (m) { return m.starred; });
+    var btn = function (k, ic, label, on, tid) { return '<button type="button" class="cw-hdb" data-sl="' + k + '" aria-label="' + esc(label) + '" title="' + esc(label) + '"' + (on ? '' : ' disabled') + (tid ? ' data-testid="' + tid + '"' : '') + '>' + cwIc(ic) + '</button>'; };
+    bar.className = 'cw-selh';
+    var rh = $('cwRh'), wide = document.body.classList.contains('cw2') && rh; bar.style.top = wide ? rh.offsetTop + 'px' : ''; bar.style.height = wide ? rh.offsetHeight + 'px' : ''; // a computer: exactly over the room's header
+    bar.innerHTML = btn('x', 'x', tr('Stop selecting', 'Acha kuchagua'), true, 'cw_sel_x') + '<b aria-live="polite" data-testid="cw_sel_n">' + (n === 1 ? tr('1 selected', '1 imechaguliwa') : tr(n + ' selected', n + ' zimechaguliwa')) + '</b>' +
+      btn('fwd', 'fwd', tr('Forward', 'Sambaza'), ok, 'cw_sel_fwd') + btn('star', 'star', stars ? tr('Unstar', 'Ondoa nyota') : tr('Star', 'Weka nyota'), ok, 'cw_sel_star') + btn('del', 'trash', tr('Delete', 'Futa'), n > 0, 'cw_sel_del');
+  }
+  $('cwSel').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-sl]'); if (!b || b.disabled) return; var k = b.getAttribute('data-sl'), ms = cw2SelMsgs(); buzz();
+    if (k === 'x') return cw2SelEnd();
+    if (k === 'fwd') return cwForward(ms, function () { cw2SelEnd(); });
+    if (k === 'del') return cw2DelSheet(ms);
+    if (k === 'star') {
+      var on = !ms.every(function (m) { return m.starred; });
+      ms.forEach(function (m) { if (!!m.starred !== on) { m.starred = on; cwApi('POST', 'star', { c: m.c || CH.cur, id: m.id, on: on }); } });
+      toast(on ? (ms.length === 1 ? tr('Starred', 'Imewekwa nyota') : tr(ms.length + ' starred', 'Zimewekwa nyota ' + ms.length)) : tr('Star removed', 'Nyota imeondolewa'));
+      cw2SelEnd();
+    }
+  });
+  // the sheet (one message or many): for everyone (mine, or I'm an admin of this chat: it says so), for me, Cancel
+  function cw2DelSheet(ms) {
+    ms = (ms || []).filter(Boolean); if (!ms.length) return;
+    var c = cwChat(CH.cur) || {}, n = ms.length, mine = ms.every(function (m) { return cwIsMe(m.from); }), live = ms.filter(function (m) { return !m.deleted; });
+    var all = live.length > 0 && (mine || cw2Admin(c)), via = all && !mine, others = ms.filter(function (m) { return !cwIsMe(m.from); }), names = cw2Names(others.map(function (m) { return cwFirst(m.from); }));
+    var why2 = tr('so “Delete for everyone” is only there because you’re an admin of this chat.', 'kwa hiyo “Futa kwa wote” ipo kwa sababu wewe ni msimamizi wa gumzo hili.');
+    var note = !via ? '' : n === 1 ? tr('It’s ' + names[0] + '’s message, ', 'Ni ujumbe wa ' + names[0] + ', ') + why2
+      : others.length === 1 ? tr('One of them is ' + names[0] + '’s, ', 'Mmoja wao ni wa ' + names[0] + ', ') + why2
+      : names.length === 1 && others.length === n ? tr('They are ' + names[0] + '’s, ', 'Ni za ' + names[0] + ', ') + why2 : tr(others.length + ' of them are other people’s, ', 'Jumbe ' + others.length + ' ni za watu wengine, ') + why2;
+    var mem = (c.members || []).length, one = n === 1;
+    var everyone = c.kind === 'dm' ? tr('Gone for both of you. They see “This message was deleted”.', (one ? 'Unaondoka' : 'Zinaondoka') + ' kwa nyote wawili. Wataona “Ujumbe huu ulifutwa”.')
+      : tr('Gone for all ' + mem + ' people. They see “This message was deleted”.', (one ? 'Unaondoka' : 'Zinaondoka') + ' kwa watu wote ' + mem + '. Wataona “Ujumbe huu ulifutwa”.');
+    var forMe = one ? tr('Only gone from your phone. Others still see it.', 'Unaondoka kwenye simu yako tu. Wengine bado wanauona.') : tr('Only gone from your phone. Others still see them.', 'Zinaondoka kwenye simu yako tu. Wengine bado wanaziona.');
+    var w = panel(one ? tr('Delete message?', 'Futa ujumbe?') : tr('Delete ' + n + ' messages?', 'Futa jumbe ' + n + '?'), '<div class="cw-dsh" data-testid="cw_del_sheet">' + (note ? '<p class="cw-dsn" data-nosw>' + esc(note) + '</p>' : '') +
+      (all ? '<button type="button" class="cw-dop red" data-del="all" data-testid="cw_del_all"><span class="ic">' + cwIc('trash') + '</span><span class="tx"><b>' + tr('Delete for everyone', 'Futa kwa wote') + '</b><small>' + esc(everyone) + '</small></span></button>' : '') +
+      '<button type="button" class="cw-dop" data-del="me" data-testid="cw_del_me"><span class="ic">' + cwIc('user') + '</span><span class="tx"><b>' + tr('Delete for me', 'Futa kwangu') + '</b><small>' + esc(forMe) + '</small></span></button>' +
+      '<button type="button" class="cw-dcan" data-del="no">' + tr('Cancel', 'Ghairi') + '</button></div>', 'cw-sheet cw-delsh');
+    w.addEventListener('click', function (e) { var b = e.target.closest('[data-del]'); if (!b) return; var k = b.getAttribute('data-del'); w.close(); if (k !== 'no') cw2DoDel(ms, k === 'all'); });
+  }
+  function cw2DoDel(ms, forAll) {
+    var c0 = CH.cur, ids = ms.map(function (m) { return m.id; }).filter(Boolean), c = cwChat(c0);
+    if (forAll) ms.forEach(function (m) { m.deleted = true; m.text = ''; m.media = []; if (c && c.last && cwSame(c.last.id, m.id)) c.last.deleted = true; });
+    else CH.msgs[c0] = (CH.msgs[c0] || []).filter(function (x) { return !ids.some(function (id) { return cwSame(id, x.id); }); });
+    cw2SelEnd(); cwSaveM(c0); cwSave(); cwMsgsDraw(true);
+    var p = ids.length === 1 ? cwApi('POST', 'delete', { c: c0, id: ids[0], forAll: forAll }) : cwApi('POST', 'delete-many', { c: c0, ids: ids.map(cwNum), forAll: forAll });
+    p.then(function (j) { if (!j.ok) { toast(cwWhy(j)); cwMsgsLoad(c0, true); } else if (ids.length > 1) toast(tr(ids.length + ' messages deleted', 'Jumbe ' + ids.length + ' zimefutwa')); });
+  }
+
+  // ---- taps inside the messages that chat2 adds (called first by the message list's click handler) ----
+  function cw2Tap(e, t) {
+    var el, m;
+    if ((el = t.closest('[data-retry]'))) { cw2Retry(el.getAttribute('data-retry')); return true; }
+    if ((el = t.closest('[data-tr]'))) { buzz(); if ((m = cw2MsgOf(el))) cw2Translate(m); return true; }
+    if ((el = t.closest('[data-trorig]'))) { buzz(); CW2.trShow[el.getAttribute('data-trorig')] = false; cwMsgsDraw(true); return true; }
+    if (t.closest('[data-trg]')) return true; // Google Translate opens in a new tab by itself
+    if ((el = t.closest('[data-tx]'))) { buzz(); if ((m = cw2MsgOf(el))) cw2VoiceTx(m); return true; }
+    if ((el = t.closest('[data-addp]'))) { buzz(); if ((m = cw2MsgOf(el)) && !cw2Added(m)) cw2AddPhotos(m); return true; }
+    // ✓✓ on my message, or the "Seen" faces: Message info (read by, delivered to)
+    if ((el = t.closest('[data-seen]')) || (el = t.closest('.cw-m.me .cw-mt'))) {
+      m = el.hasAttribute('data-seen') ? cwFind(el.getAttribute('data-seen')) : cw2MsgOf(el);
+      if (m && m.id && !m.pend && !m.deleted) { buzz(); cwInfoMsg(m); return true; }
+    }
+    return false;
+  }
+
+  // ---- sending: "Waiting for signal…" with a small Retry; "Not sent · Tap to retry" ----
+  function cw2SendState(m) {
+    if (!m.pend) return '';
+    if (m.failed) return '<span class="cw-snt bad" data-testid="cw_not_sent">' + cwIc('alert') + '<span>' + tr('Not sent · Tap to retry', 'Haijatumwa · Gusa kujaribu tena') + '</span></span>';
+    if (navigator.onLine !== false && Date.now() - cwMs(m.at) < 8000) return '';
+    return '<span class="cw-snt" data-testid="cw_waiting"><span>' + tr('Waiting for signal…', 'Inasubiri mtandao…') + '</span><button type="button" data-retry="' + esc(m.pend) + '">' + tr('Retry', 'Jaribu tena') + '</button></span>';
+  }
+  function cw2Retry(cid) { var it = cwMem[cid]; if (!it) return; buzz(); it.failed = null; cwOutPut(it); if (S.view === 'vRoom') cwMsgsDraw(true); cwFlush(); }
+  ['online', 'offline'].forEach(function (ev) { addEventListener(ev, function () { if (S.view === 'vRoom' && CH.cur && (CH.pend[CH.cur] || []).length) cwMsgsDraw(true); }); });
+
+  // ---- Translate · Tafsiri: under messages in the other language, and in the long-press menu ----
+  var CW2_SW = /^(na|ya|wa|za|la|cha|vya|kwa|ni|si|hii|huu|hiyo|hapa|pale|kama|pia|sasa|kila|leo|jana|kesho|bado|sana|asante|habari|ndiyo|hapana|hakuna|kuna|iko|yuko|nini|lini|wapi|maji|kisima|pampu|kazi|watu|watoto|safi|siku|mzuri|nzuri|tafadhali|karibu|pole|sawa|mimi|wewe|yeye|sisi|nyinyi|wao|lakini|au|tu|tena|mwenyekiti|kamati)$/;
+  function cw2IsSw(t) { // the same test as lib/translate.js isSw
+    var w = String(t || '').toLowerCase().replace(/[^a-z'\s]/g, ' ').split(/\s+/).filter(function (x) { return x.length > 1; }); if (!w.length) return false;
+    var hits = w.filter(function (x) { return CW2_SW.test(x); }).length, vow = w.filter(function (x) { return /[aeiou]$/.test(x); }).length;
+    return hits / w.length >= 0.15 || (w.length >= 3 && vow / w.length >= 0.85);
+  }
+  function cw2Google(t) { return 'https://translate.google.com/?sl=auto&tl=' + (cw2IsSw(t) ? 'en' : 'sw') + '&text=' + encodeURIComponent(String(t || '').slice(0, 2000)) + '&op=translate'; }
+  function cw2TrWant(m, me) {
+    if (me || m.deleted || !m.text || (m.kind !== 'text' && m.kind !== 'media')) return false;
+    // under the message only when it is in the other language (and long enough to need it); always in the long-press menu
+    var t = m.text.replace(/https?:\/\/\S+/g, ' '), n = (t.match(/[A-Za-z']{2,}/g) || []).length; if (n < 3) return false;
+    return S.lang === 'sw' ? n >= 5 && !cw2IsSw(t) : cw2IsSw(t);
+  }
+  function cw2TrHtml(m, me) {
+    if (!m.id) return '';
+    var k = cw2K(m), got = CW2.tr[k];
+    if (got && CW2.trShow[k]) return '<div class="cw-tlx" data-nosw data-testid="cw_translation">' + esc(got.text) + '</div><button type="button" class="cw-tlk" data-trorig="' + esc(k) + '">' + tr('Show original', 'Onyesha ya asili') + '</button>';
+    if (!cw2TrWant(m, me) && !got) return '';
+    if (CW2.busy['tr' + k]) return '<span class="cw-tlk wait" role="status">' + tr('Translating…', 'Inatafsiri…') + '</span>';
+    if (!CW2.tools.translate && !got) return '<a class="cw-tlk" href="' + esc(cw2Google(m.text)) + '" target="_blank" rel="noopener" data-trg data-testid="cw_translate">Translate · Tafsiri</a>';
+    return '<button type="button" class="cw-tlk" data-tr="' + esc(k) + '" data-testid="cw_translate">Translate · Tafsiri</button>';
+  }
+  function cw2Translate(m) {
+    var k = cw2K(m);
+    if (CW2.tr[k]) { CW2.trShow[k] = true; cwMsgsDraw(true); cw2Reveal(m); return; }
+    if (!CW2.tools.translate) { window.open(cw2Google(m.text), '_blank', 'noopener'); return; }
+    CW2.busy['tr' + k] = 1; cwMsgsDraw(true);
+    fetch('/api/translate', { method: 'POST', headers: Object.assign({ Accept: 'application/json', 'Content-Type': 'application/json' }, pinHdr()), body: JSON.stringify({ text: m.text }) })
+      .then(function (r) { return r.json().catch(function () { return { ok: false, reason: 'down' }; }); }, function () { return { ok: false, reason: 'offline' }; })
+      .then(function (j) {
+        delete CW2.busy['tr' + k];
+        if (j.ok) { CW2.tr[k] = { text: j.text, to: j.to }; CW2.trShow[k] = true; if (S.view === 'vRoom') { cwMsgsDraw(true); cw2Reveal(m); return; } }
+        else if (j.google) { if (j.reason === 'off') { CW2.tools.translate = false; store.set('rfChatTools', JSON.stringify(CW2.tools)); } cwOpenSnack(tr('Couldn’t translate it here. Open Google Translate?', 'Haikuweza kutafsiri hapa. Fungua Google Translate?'), function () { window.open(j.google, '_blank', 'noopener'); }); }
+        else toast(cwWhy(j));
+        if (S.view === 'vRoom') cwMsgsDraw(true);
+      });
+  }
+
+  // ---- Show text under a voice note (only when typing out is switched on) ----
+  function cw2VoiceText(m) {
+    if (!CW2.tools.transcribe || !m.id || m.deleted) return '';
+    var k = cw2K(m), got = CW2.tx[k];
+    if (got && CW2.txShow[k]) return '<p class="cw-vtx" data-nosw data-testid="cw_voice_words">' + (got.text ? esc(got.text) : '<i>' + tr('No words were heard.', 'Hakuna maneno yaliyosikika.') + '</i>') + '</p><button type="button" class="cw-tlk" data-tx="' + esc(k) + '">' + tr('Hide text', 'Ficha maandishi') + '</button>';
+    if (CW2.busy['tx' + k]) return '<span class="cw-tlk wait" role="status">' + tr('Typing it out…', 'Inaandika maneno…') + '</span>';
+    return '<button type="button" class="cw-tlk" data-tx="' + esc(k) + '" data-testid="cw_voice_text">' + tr('Show text', 'Onyesha maandishi') + '</button>';
+  }
+  function cw2VoiceTx(m) {
+    var k = cw2K(m);
+    if (CW2.txShow[k]) { CW2.txShow[k] = false; cwMsgsDraw(true); return; }
+    if (CW2.tx[k]) { CW2.txShow[k] = true; cwMsgsDraw(true); cw2Reveal(m); return; }
+    CW2.busy['tx' + k] = 1; cwMsgsDraw(true);
+    cwApi('POST', 'transcribe', { c: m.c || CH.cur, id: cwNum(m.id) }).then(function (j) {
+      delete CW2.busy['tx' + k];
+      if (j.ok) { CW2.tx[k] = { text: j.text || '', lang: j.lang || '' }; CW2.txShow[k] = true; if (S.view === 'vRoom') { cwMsgsDraw(true); cw2Reveal(m); return; } }
+      else { if (j.reason === 'off') { CW2.tools.transcribe = false; store.set('rfChatTools', JSON.stringify(CW2.tools)); } toast(j.reason === 'off' ? tr('Typing out voice notes isn’t switched on.', 'Kuandika jumbe za sauti hakujawashwa.') : j.reason === 'rate' ? tr('That’s a lot for one hour. Try again later.', 'Ni nyingi kwa saa moja. Jaribu tena baadaye.') : cwWhy(j)); }
+      if (S.view === 'vRoom') cwMsgsDraw(true);
+    });
+  }
+
+  // ---- Add to project photos (project chats): a note on the project with the photos; then, if wanted, the story too ----
+  function cw2Added(m) { return !!CW2.added[cw2K(m)]; }
+  function cw2PhotoAdd(m, c) {
+    if (!c || c.kind !== 'project' || !byId(c.project) || m.kind !== 'media' || m.deleted || !m.id || !(m.media || []).some(function (x) { return x.type === 'photo'; })) return '';
+    var k = cw2K(m);
+    if (CW2.added[k]) return '<span class="cw-addp ok" data-testid="cw_added">' + cwIc('check') + '<span>' + tr('Added to project', 'Imeongezwa kwenye mradi') + '</span></span>';
+    if (CW2.busy['ph' + k]) return '<span class="cw-addp wait" role="status"><span>' + tr('Adding to the project…', 'Inaongeza kwenye mradi…') + '</span></span>';
+    return '<button type="button" class="cw-addp" data-addp="' + esc(m.id) + '" data-testid="cw_add_photos">' + cwIc('plus') + '<span>' + tr('Add to project photos', 'Ongeza kwenye picha za mradi') + '</span></button>';
+  }
+  function cw2Blob(x) {
+    var u = x.lurl || x.url;
+    return (u ? Promise.resolve(u) : cwMedia(x.id)).then(function (u2) { return fetch(u2, /^blob:/.test(u2) ? {} : { headers: pinHdr() }); }).then(function (r) { if (!r.ok) throw new Error('photo ' + r.status); return r.blob(); });
+  }
+  function cw2AddPhotos(m) {
+    var c = cwChat(m.c || CH.cur), p = c && byId(c.project); if (!p) return;
+    if (navigator.onLine === false) return toast(tr('Adding photos needs a signal.', 'Kuongeza picha kunahitaji mtandao.'));
+    var k = cw2K(m), photos = (m.media || []).filter(function (x) { return x.type === 'photo'; }), blobs = [];
+    var fail = function (j) { delete CW2.busy['ph' + k]; if (S.view === 'vRoom') cwMsgsDraw(true); toast(j && j.reason ? why(j) : tr('Couldn’t add the photos. Please try again.', 'Haikuweza kuongeza picha. Tafadhali jaribu tena.')); };
+    CW2.busy['ph' + k] = 1; cwMsgsDraw(true);
+    api('POST', { action: 'chat-photo', id: String(p.id), from: m.from || '' }).then(function (j) {
+      if (!j.ok || !j.updateId) return fail(j);
+      var chain = Promise.resolve();
+      photos.forEach(function (x) { chain = chain.then(function () { return cw2Blob(x).then(function (b) { blobs.push(b); return sendFile(j.updateId, b, 'photo', 'chat'); }).then(function (r) { if (!r.ok) throw r; }); }); });
+      chain.then(function () {
+        delete CW2.busy['ph' + k]; CW2.added[k] = Date.now();
+        var ks = Object.keys(CW2.added); if (ks.length > 400) ks.sort(function (a, b) { return CW2.added[a] - CW2.added[b]; }).slice(0, ks.length - 400).forEach(function (x) { delete CW2.added[x]; });
+        store.set('rfChatAdded', JSON.stringify(CW2.added));
+        if (S.view === 'vRoom') cwMsgsDraw(true);
+        toast(tr('Added to the project ✓', 'Imeongezwa kwenye mradi ✓'));
+        setTimeout(function () { cw2StoryAsk(p, blobs); }, 700);
+      }, function (r) { fail(r && r.reason ? r : null); });
+    });
+  }
+  // "Also add to the story?": Before / During / After, and whether children can be seen (consent then matters)
+  function cw2StoryAsk(p, blobs) {
+    if (!blobs.length) return;
+    var w = panel(tr('Also add to the story?', 'Ongeza pia kwenye hadithi?'), '<div class="cw-sta" data-testid="cw_story_ask"><p class="muted">' + esc(tr('The project’s story collects photos from before, during and after the work.', 'Hadithi ya mradi inakusanya picha za kabla, wakati na baada ya kazi.')) + '</p>' +
+      '<div class="cw-sto">' + [['before', tr('Before', 'Kabla')], ['progress', tr('During', 'Wakati wa kazi')], ['after', tr('After', 'Baada')]].map(function (r) { return '<button type="button" class="btn light" data-row="' + r[0] + '">' + r[1] + '</button>'; }).join('') + '</div>' +
+      '<label class="cw-stk"><input type="checkbox" id="cwStKid"> <span>' + tr('Children can be seen', 'Watoto wanaonekana') + '</span></label>' +
+      '<button type="button" class="cw-dcan" data-row="">' + tr('Not now', 'Si sasa') + '</button></div>', 'cw-sheet');
+    w.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-row]'); if (!b) return; var row = b.getAttribute('data-row'), kid = $('cwStKid').checked; w.close(); if (!row) return;
+      toast(tr('Adding to the story…', 'Inaongeza kwenye hadithi…'));
+      var chain = Promise.resolve(true);
+      blobs.forEach(function (bl) { chain = chain.then(function (ok) { if (!ok) return false; var fd = new FormData(); fd.append('action', 'photo'); fd.append('id', String(p.id)); fd.append('row', row); fd.append('children', kid ? 'true' : 'false'); fd.append('file', bl, 'chat.' + (/png/.test(bl.type) ? 'png' : 'jpg')); return styApi('POST', null, '', fd).then(function (j) { if (!j.ok) { toast(styWhy(j)); return false; } return true; }); }); });
+      chain.then(function (ok) { if (ok) toast(tr('Added to the story ✓', 'Imeongezwa kwenye hadithi ✓')); });
+    });
+  }
+  // ---- Use in a story: a text message becomes the story's quote (who said it: the sender); nothing is saved until Save quote ----
+  function cw2Story(m) {
+    var c = cwChat(m.c || CH.cur), p = c && byId(c.project); if (!p) return;
+    STY.pre = { id: String(p.id), quote: String(m.text || '').trim().slice(0, 600), by: m.from || '' };
+    openProj(String(p.id), 'story');
+  }
+  function cw2StoryPre(s) {
+    var P = STY.pre; if (!P || String(P.id) !== String(s.id)) return; STY.pre = null;
+    var q = $('styQ'), qb = $('styQB'); if (!q || !qb) return;
+    q.value = P.quote; qb.value = P.by;
+    var card = q.closest('.card'); if (card) { card.classList.add('cw2-pre'); card.setAttribute('data-testid', 'sty_quote_from_chat'); setTimeout(function () { card.scrollIntoView({ block: 'center', behavior: 'smooth' }); }, 150); }
+    toast(tr('Quote filled in from the chat. Tap Save quote to keep it.', 'Nukuu imejazwa kutoka gumzo. Gusa Hifadhi nukuu kuiweka.'));
+  }
+
+  // ---- Clear chat (for me) and a DM's Delete chat (cleared and archived) ----
+  function cw2Clear(c, del, sheet) {
+    var who = cwFirst(cwTitle(c));
+    poAsk(del ? tr('Delete this chat?', 'Futa gumzo hili?') : tr('Clear this chat?', 'Futa jumbe za gumzo hili?'),
+      del ? tr('Its messages leave your view and it moves to Archived. ' + who + ' still has them.', 'Jumbe zake zinaondoka kwako na gumzo linahamia Zilizohifadhiwa. ' + who + ' bado anazo.') : tr('All its messages leave your view. Everyone else still sees them.', 'Jumbe zake zote zinaondoka kwako. Wengine bado wanaziona.'),
+      del ? tr('Delete chat', 'Futa gumzo') : tr('Clear chat', 'Futa jumbe'), true).then(function (ok) {
+      if (!ok) return;
+      cwApi('POST', 'clear', del ? { c: c.id, archive: true } : { c: c.id }).then(function (j) {
+        if (!j.ok) return toast(cwWhy(j));
+        CH.msgs[c.id] = []; CH.more[c.id] = false; CW2.mfl[c.id] = []; CW2.mflMore = CW2.mflMore || {}; CW2.mflMore[c.id] = false; cwSaveM(c.id);
+        if (j.chat) cwUpsert(j.chat); else { c.last = null; c.unread = 0; if (del) c.archived = true; }
+        cwSave(); cwBadge();
+        if (sheet && sheet.close) sheet.close();
+        if (del) { toast(tr('Chat deleted', 'Gumzo limefutwa')); setTimeout(function () { if (S.view === 'vRoom' && CH.cur === c.id) goBack(function () { show('vChat', 'replace'); }); }, sheet ? 520 : 260); }
+        else { if (S.view === 'vRoom' && CH.cur === c.id) { cwHead(); cwMsgsDraw(); } toast(tr('Chat cleared', 'Jumbe zimefutwa')); }
+      });
+    });
+  }
+
+  // ---- Media, files and links (from chat info or ⋯): three tabs; tap opens the viewer, the file or the link ----
+  CW2.mflMore = {};
+  function cw2MflMsgs(c) {
+    var seen = {}, out = [];
+    cwAll(c.id).concat(CW2.mfl[c.id] || []).forEach(function (m) { var k = m.id ? 'i' + m.id : 'p' + m.pend; if (!seen[k] && !m.deleted) { seen[k] = 1; out.push(m); } });
+    return out.sort(function (a, b) { return cwMs(b.at) - cwMs(a.at); });
+  }
+  function cw2MflSplit(a) {
+    var S0 = { media: [], files: [], links: [] };
+    a.forEach(function (m) {
+      if (m.kind === 'media') (m.media || []).forEach(function (x, i) { S0.media.push({ m: m, x: x, i: i }); });
+      if (m.kind === 'doc' && (m.media || [])[0]) S0.files.push({ m: m, x: m.media[0] });
+      (String(m.text || '').match(/https?:\/\/[^\s<]+[^\s<.,;:!?)\]'"]/g) || []).forEach(function (u) { S0.links.push({ m: m, u: u }); });
+    });
+    return S0;
+  }
+  function cw2MflCount(c) { var s = cw2MflSplit(cw2MflMsgs(c)); return '📷 ' + s.media.length + ' · 📄 ' + s.files.length + ' · 🔗 ' + s.links.length + (CH.more[c.id] || CW2.mflMore[c.id] ? ' …' : ''); }
+  function cw2MflMore(c, pages) {
+    var id = c.id, all = (CH.msgs[id] || []).concat(CW2.mfl[id] || []).filter(function (m) { return typeof cwNum(m.id) === 'number'; }), low = all.reduce(function (a, m) { return Math.min(a, +m.id); }, 9e15);
+    var more = CW2.mflMore[id] != null ? CW2.mflMore[id] : !!CH.more[id];
+    if (!more || !pages || low >= 9e15) return Promise.resolve(false);
+    return cwApi('GET', 'msgs?c=' + encodeURIComponent(id) + '&before=' + low + '&limit=100').then(function (j) {
+      if (!j.ok) return false; CW2.mfl[id] = (j.msgs || []).concat(CW2.mfl[id] || []); CW2.mflMore[id] = !!j.more;
+      return pages > 1 ? cw2MflMore(c, pages - 1).then(function () { return true; }) : true;
+    });
+  }
+  function cw2Mfl(c) {
+    if (!c) return; var tab = 'media', ttl = tr('Media, files and links', 'Picha, faili na viungo');
+    var w = tSheet(ttl, '<div class="cw-mfl" data-testid="cw_mfl"><h3 class="cw-shh">' + ttl + '</h3><div class="cw-mtabs" role="tablist" aria-label="' + esc(ttl) + '"></div><div class="cw-mfb" id="cwMfb" role="tabpanel"></div></div>'), box = w.querySelector('.cw-mfl');
+    var draw = function () {
+      var s = cw2MflSplit(cw2MflMsgs(c)), more = CW2.mflMore[c.id] != null ? CW2.mflMore[c.id] : !!CH.more[c.id];
+      box.querySelector('.cw-mtabs').innerHTML = [['media', tr('Media', 'Picha'), s.media.length], ['files', tr('Files', 'Faili'), s.files.length], ['links', tr('Links', 'Viungo'), s.links.length]].map(function (t) { return '<button type="button" role="tab" data-mt="' + t[0] + '" aria-selected="' + (t[0] === tab) + '" data-testid="cw_mfl_' + t[0] + '">' + t[1] + ' <i>' + t[2] + '</i></button>'; }).join('');
+      var list = s[tab], h = '', dt = function (m) { return (cwIsMe(m.from) ? tr('You', 'Wewe') : cwFirst(m.from)) + ' · ' + dDay(dOf(m.at), true); };
+      if (!list.length) h = '<p class="cw-mfe">' + (tab === 'media' ? tr('No photos or videos yet', 'Bado hakuna picha wala video') : tab === 'files' ? tr('No files yet', 'Bado hakuna faili') : tr('No links yet', 'Bado hakuna viungo')) + '</p>';
+      else if (tab === 'media') h = '<div class="cw-mfg">' + list.map(function (o, i) { var x = o.x, src = x.thumbUrl || x.posterUrl || x.lurl || x.url, data = src ? ' src="' + esc(src) + '"' : ' data-mid="' + esc(x.thumb || x.poster || x.id || '') + '"'; return '<button type="button" class="cw-mfi" data-mfv="' + i + '" aria-label="' + esc((x.type === 'video' ? tr('Video', 'Video') : tr('Photo', 'Picha')) + ', ' + dt(o.m)) + '">' + (x.type === 'video' && !x.poster ? '<video muted playsinline preload="metadata"' + data + '></video>' : '<img alt="" loading="lazy"' + data + '>') + (x.type === 'video' ? '<i class="cw-play">' + cwIc('play') + '</i>' : '') + '</button>'; }).join('') + '</div>';
+      else if (tab === 'files') h = list.map(function (o, i) { var ext = (String(o.x.name || '').split('.').pop() || 'doc').slice(0, 4).toUpperCase(); return '<button type="button" class="cw-mfr" data-mff="' + i + '"><span class="cw-dx">' + esc(ext) + '</span><span class="cw-prt"><b data-nosw>' + esc(o.x.name || tr('Document', 'Hati')) + '</b><small data-nosw>' + esc(cwSize(o.x.size) + ' · ' + dt(o.m)) + '</small></span></button>'; }).join('');
+      else h = list.map(function (o) { var d = o.u.replace(/^https?:\/\/(www\.)?/, '').split('/')[0]; return '<a class="cw-mfr" href="' + esc(o.u) + '" target="_blank" rel="noopener"><span class="cw-mfli">' + cwIc('link') + '</span><span class="cw-prt"><b data-nosw>' + esc(d) + '</b><small data-nosw>' + esc(o.u.replace(/^https?:\/\//, '')) + '</small><small data-nosw>' + esc(dt(o.m)) + '</small></span></a>'; }).join('');
+      if (more) h += '<button type="button" class="btn light small cw-mfm" data-mfm="1">' + tr('Look further back', 'Tafuta za zamani zaidi') + '</button>';
+      $('cwMfb').innerHTML = h; cwFill($('cwMfb')); w._s = s;
+    };
+    draw();
+    if (CH.more[c.id] && CW2.mflMore[c.id] == null) cw2MflMore(c, 2).then(function (ok) { if (ok && w.isConnected) draw(); });
+    box.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-mt]'); if (b) { buzz(); tab = b.getAttribute('data-mt'); draw(); return; }
+      if ((b = e.target.closest('[data-mfm]'))) { b.disabled = true; b.textContent = tr('Loading…', 'Inapakia…'); cw2MflMore(c, 3).then(function () { if (w.isConnected) draw(); }); return; }
+      var s = w._s;
+      if ((b = e.target.closest('[data-mfv]'))) { var o = s.media[+b.getAttribute('data-mfv')], list = cw2MflMsgs(c).filter(function (m) { return m.kind === 'media'; }).reverse(); cwViewer(o.m.id || o.m.pend, o.i, list); return; }
+      if ((b = e.target.closest('[data-mff]'))) { var f = s.files[+b.getAttribute('data-mff')]; cwDocOpen(f.m.id || f.m.pend, f.m); }
+    });
+  }
+
+  // ---- Jump to a date (⋯, or the calendar in the search bar): older pages load until that day is there ----
+  function cw2Day(d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+  function cw2DatePick() {
+    var w = panel(tr('Jump to a date', 'Nenda kwenye tarehe'), '<div class="cw-jd" data-testid="cw_jump_date"><label for="cwJd">' + tr('Day', 'Siku') + '</label><input type="date" id="cwJd" max="' + cw2Day(new Date()) + '" value="' + cw2Day(new Date(Date.now() - 864e5)) + '"><button type="button" class="btn block" id="cwJdGo" data-testid="cw_jump_go">' + tr('Go to that day', 'Nenda siku hiyo') + '</button></div>', 'cw-sheet');
+    $('cwJdGo').addEventListener('click', function () { var v = $('cwJd').value; if (!/^\d{4}-\d{2}-\d{2}$/.test(v)) return; w.close(); setTimeout(function () { cw2JumpDate(v, 0); }, 240); });
+  }
+  function cw2JumpDate(v, n) {
+    var t0 = new Date(v + 'T00:00:00').getTime(), all = cwAll(CH.cur), id = CH.cur;
+    if (all.length && cwMs(all[0].at) > t0 && CH.more[id] && n < 40) {
+      if (!n) toast(tr('Loading older messages…', 'Inapakia jumbe za zamani…'));
+      return cwOlder().then(function (ok) { if (CH.cur !== id) return; if (ok) cw2JumpDate(v, n + 1); else cw2JumpTo(t0); });
+    }
+    cw2JumpTo(t0);
+  }
+  function cw2JumpTo(t0) {
+    var hit = cwAll(CH.cur).filter(function (m) { return cwMs(m.at) >= t0; })[0], box = $('cwMsgs');
+    if (!hit) return toast(tr('No messages on or after that day.', 'Hakuna jumbe siku hiyo wala baadaye.'));
+    var el = box.querySelector(hit.id ? '[data-id="' + hit.id + '"]' : '#cwp-' + hit.pend); if (!el) return;
+    var day = el.previousElementSibling; while (day && !day.classList.contains('cw-day') && !day.classList.contains('cw-m')) day = day.previousElementSibling;
+    CH.stick = false; box.scrollTop = Math.max(0, cwTopIn(day && day.classList.contains('cw-day') ? day : el, box) - 8);
+    if (el.classList.contains('cw-m')) { el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); }
+    if (cwDayKey(hit.at) !== cwDayKey(t0)) toast(tr('Nothing that day. Here is ' + cwDayTx(hit.at) + '.', 'Hakuna siku hiyo. Hii ni ' + cwDayTx(hit.at) + '.'));
+  }
+
+  // ---- Search in this chat: a bar at the top; ↑ older, ↓ newer; the words are marked; Back closes it ----
+  function cw2FindStart() {
+    if (S.view !== 'vRoom') return;
+    if (CW2.find) { var i0 = $('cwFq'); if (i0) i0.focus(); return; }
+    var bar = $('cwFind'), b = function (k, ic, l, tid) { return '<button type="button" class="cw-hdb" data-fd="' + k + '" aria-label="' + esc(l) + '" title="' + esc(l) + '"' + (tid ? ' data-testid="' + tid + '"' : '') + '>' + cwIc(ic) + '</button>'; };
+    CW2.find = { q: '', hits: [], i: -1, T: 0 };
+    CW2.find.l = bkOpen('in', function () { if (!CW2.find) return false; cw2FindEnd(true); return true; }, bar);
+    bar.innerHTML = b('x', 'back', tr('Close the search', 'Funga utafutaji'), 'cw_find_x') + '<input type="search" id="cwFq" placeholder="' + tr('Search in this chat', 'Tafuta kwenye gumzo hili') + '" aria-label="' + tr('Search in this chat', 'Tafuta kwenye gumzo hili') + '" autocomplete="off" enterkeyhint="search">' +
+      '<span class="cw-fn" id="cwFn" aria-live="polite" data-testid="cw_find_n"></span>' + b('up', 'up', tr('Older', 'Za zamani'), 'cw_find_up') + b('down', 'down', tr('Newer', 'Mpya zaidi'), 'cw_find_down') + b('date', 'cal', tr('Jump to a date', 'Nenda kwenye tarehe'), 'cw_find_date');
+    bar.className = 'cw-find'; cw2FindUi();
+    setTimeout(function () { var q = $('cwFq'); if (q) q.focus(); }, 60);
+  }
+  function cw2FindEnd(fromBack) {
+    var F = CW2.find; if (!F) return; CW2.find = null; clearTimeout(F.T);
+    var bar = $('cwFind'); bar.className = 'cw-find hidden'; bar.innerHTML = '';
+    if (!fromBack && F.l) bkShut(F.l);
+    if (S.view === 'vRoom') cwMsgsDraw(true);
+  }
+  function cw2FindRun(q) {
+    var F = CW2.find; if (!F) return; F.q = q.trim(); F.hits = []; F.i = -1;
+    if (F.q.length < 2) { cw2FindUi(); cwMsgsDraw(true); return; }
+    var lo = F.q.toLowerCase(), c0 = CH.cur, q0 = F.q;
+    F.hits = cwAll(c0).filter(function (m) { return m.id && !m.deleted && m.text && m.text.toLowerCase().indexOf(lo) >= 0; }).map(function (m) { return +m.id; }).sort(function (a, b) { return b - a; });
+    F.i = F.hits.length ? 0 : -1; cw2FindUi(); cwMsgsDraw(true); if (F.hits.length) cw2FindGo();
+    cwApi('GET', 'search?q=' + encodeURIComponent(q0)).then(function (j) {
+      var F2 = CW2.find; if (!F2 || F2.q !== q0 || CH.cur !== c0 || !j.ok) return;
+      var cur = F2.hits[F2.i]; (j.hits || []).forEach(function (x) { if (x.c === c0 && F2.hits.indexOf(+x.id) < 0) F2.hits.push(+x.id); });
+      F2.hits.sort(function (a, b) { return b - a; }); F2.i = cur != null ? F2.hits.indexOf(cur) : F2.hits.length ? 0 : -1; cw2FindUi(); if (cur == null && F2.hits.length) cw2FindGo();
+    });
+  }
+  function cw2FindGo() { var F = CW2.find; if (!F || F.i < 0) return; cwJump(String(F.hits[F.i])); cwMsgsDraw(true); var el = document.getElementById('cwm-' + F.hits[F.i]); if (el) el.scrollIntoView({ block: 'center' }); }
+  function cw2FindUi() {
+    var F = CW2.find, n = $('cwFn'); if (!F || !n) return; var k = F.hits.length;
+    n.textContent = F.q.length < 2 ? '' : k ? (F.i + 1) + '/' + k : tr('None', 'Hakuna');
+    n.setAttribute('aria-label', F.q.length < 2 ? '' : k ? tr((F.i + 1) + ' of ' + k, (F.i + 1) + ' kati ya ' + k) : tr('No messages found', 'Hakuna jumbe zilizopatikana'));
+    var up = $('cwFind').querySelector('[data-fd=up]'), dn = $('cwFind').querySelector('[data-fd=down]'); if (up) up.disabled = !(k && F.i < k - 1); if (dn) dn.disabled = !(k && F.i > 0);
+  }
+  // the words marked in the bubbles (after every redraw while searching); the current hit stronger
+  function cw2AfterDraw(box) {
+    var F = CW2.find; if (!F || F.q.length < 2) return;
+    var lo = F.q.toLowerCase(), cur = F.hits[F.i];
+    qa('.cw-m .cw-tx', box).forEach(function (tx) {
+      var m = tx.closest('.cw-m'), on = cur != null && m && String(m.getAttribute('data-id')) === String(cur);
+      var w = document.createTreeWalker(tx, NodeFilter.SHOW_TEXT), ns = [], n; while ((n = w.nextNode())) ns.push(n);
+      ns.forEach(function (nd) {
+        var s = nd.data, i = s.toLowerCase().indexOf(lo); if (i < 0) return;
+        var f = document.createDocumentFragment(), at = 0;
+        while (i >= 0) { f.appendChild(document.createTextNode(s.slice(at, i))); var mk = document.createElement('mark'); mk.className = 'cw-fm' + (on ? ' cur' : ''); mk.textContent = s.slice(i, i + lo.length); f.appendChild(mk); at = i + lo.length; i = s.toLowerCase().indexOf(lo, at); }
+        f.appendChild(document.createTextNode(s.slice(at))); nd.parentNode.replaceChild(f, nd);
+      });
+    });
+  }
+  $('cwFind').addEventListener('input', function (e) { if (e.target.id !== 'cwFq' || !CW2.find) return; var v = e.target.value; clearTimeout(CW2.find.T); CW2.find.T = setTimeout(function () { cw2FindRun(v); }, 250); });
+  $('cwFind').addEventListener('keydown', function (e) {
+    if (e.target.id !== 'cwFq' || !CW2.find) return;
+    if (e.key === 'Enter') { e.preventDefault(); var F = CW2.find; if (F.q !== e.target.value.trim()) { clearTimeout(F.T); cw2FindRun(e.target.value); } else if (F.i < F.hits.length - 1) { F.i++; cw2FindUi(); cw2FindGo(); } }
+    if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); cw2FindEnd(); }
+  });
+  $('cwFind').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-fd]'); if (!b || b.disabled) return; var k = b.getAttribute('data-fd'), F = CW2.find; buzz();
+    if (k === 'x') return cw2FindEnd();
+    if (k === 'date') return cw2DatePick();
+    if (!F) return;
+    if (k === 'up' && F.i < F.hits.length - 1) { F.i++; cw2FindUi(); cw2FindGo(); }
+    if (k === 'down' && F.i > 0) { F.i--; cw2FindUi(); cw2FindGo(); }
+  });
+  $('cwPs').addEventListener('click', function () { var c = cwChat(CH.cur); if (!c || !byId(c.project)) return; buzz(); openProj(String(c.project), 'pin'); });
+
+  // ---- Add people: search, photo, flag, role, online; by country with "Add all <country> team"; chips; already-in greyed;
+  // admins: "Invite a new person"; everyone: "Share invite link"; not an admin: "Ask an admin" (a message to the admins) ----
+  var CW2_CC = { ke: ['Kenya', 'Kenya'], tz: ['Tanzania', 'Tanzania'], ug: ['Uganda', 'Uganda'], mw: ['Malawi', 'Malawi'] };
+  function cw2AddCard(c) {
+    if (!c || c.kind !== 'group' || (c.members || []).length > 1 || !cwChat(c.id)) return '';
+    return cwEmpty('hello', tr('Only you are here so far', 'Ni wewe tu hapa kwa sasa'), tr('Add people to start talking.', 'Ongeza watu ili mzungumze.'), 'addpeople', tr('Add people', 'Ongeza watu'), 'cw_add_card');
+  }
+  function cw2AddPeople(c, after) {
+    if (!cw2CanAdd(c)) return;
+    var adm = cw2Admin(c), pick = [], ttl = tr('Add people', 'Ongeza watu');
+    cwTeam(function (team) {
+      var inG = function (n) { return (c.members || []).some(function (x) { return same(x, n); }); };
+      var ppl = team.filter(function (p) { return !cwIsMe(p.name); }).sort(function (a, z) { return a.name.localeCompare(z.name); });
+      var mine = (team.filter(function (p) { return cwIsMe(p.name); })[0] || {}).home || '';
+      var order = ['ke', 'tz', 'ug', 'mw'].sort(function (a, b) { return (b === mine) - (a === mine); }).concat(['']);
+      var w = tSheet(ttl, '<div class="cw-ap" data-testid="cw_add_people"><h3 class="cw-shh">' + ttl + '</h3>' +
+        (adm ? '' : '<p class="cw-apn">' + tr('Only the group’s admins can add people. Choose who you’d like, and the admins get a message asking them.', 'Wasimamizi wa kikundi pekee wanaweza kuongeza watu. Chagua unaowataka, na wasimamizi watapata ujumbe wa kuwaomba.') + '</p>') +
+        '<input type="search" id="cwApq" placeholder="' + tr('Search the team', 'Tafuta kwenye timu') + '" aria-label="' + tr('Search the team', 'Tafuta kwenye timu') + '" autocomplete="off">' +
+        '<div class="cw-apc" id="cwApc" aria-live="polite"></div>' +
+        '<div class="cw-apx">' + (S.admin ? '<button type="button" class="cw-pr cw-apa" data-ap="invite" data-testid="cw_ap_invite"><span class="cw-av ic" style="--hu:var(--hu-green);--hb:var(--hb-green)" aria-hidden="true">' + cwIc('plus') + '</span><span class="cw-prt"><b>' + tr('Invite a new person', 'Alika mtu mpya') + '</b><small>' + tr('Add them to the team in Office', 'Mwongeze kwenye timu kupitia Ofisi') + '</small></span></button>' : '') +
+        (c.kind === 'group' ? '<button type="button" class="cw-pr cw-apa" data-ap="link" data-testid="cw_ap_link"><span class="cw-av ic" style="--hu:var(--hu-blue);--hb:var(--hb-blue)" aria-hidden="true">' + cwIc('link') + '</span><span class="cw-prt"><b>' + tr('Share invite link', 'Shiriki kiungo cha mwaliko') + '</b><small>' + tr('Teammates can join with it', 'Wenzako wanaweza kujiunga nacho') + '</small></span></button>' : '') + '</div>' +
+        '<div class="cw-apl" id="cwApl"></div><div class="cw-foot"><button type="button" class="btn block" id="cwApGo" disabled data-testid="cw_ap_go"></button></div></div>');
+      var draw = function () {
+        var q = $('cwApq').value.trim().toLowerCase(), h = '';
+        order.forEach(function (ck) {
+          var grp = ppl.filter(function (p) { return (CW2_CC[p.home] ? p.home : '') === ck && (!q || p.name.toLowerCase().indexOf(q) >= 0); }); if (!grp.length) return;
+          var free = grp.filter(function (p) { return !inG(p.name); }), allOn = free.length && free.every(function (p) { return pick.indexOf(p.name) >= 0; }), cn = CW2_CC[ck];
+          h += '<div class="cw-aph"><span class="cw-apf" aria-hidden="true">' + (ck ? cwFlagSvg(ck) : cwIc('people')) + '</span><b>' + (cn ? tr(cn[0], cn[1]) : tr('Other', 'Wengine')) + '</b>' +
+            (ck && free.length > 1 ? '<button type="button" class="cw-apall" data-apall="' + ck + '" aria-pressed="' + !!allOn + '" data-testid="cw_ap_all_' + ck + '">' + (allOn ? tr('Clear', 'Ondoa') : tr('Add all ' + cn[0] + ' team', 'Ongeza timu yote ya ' + cn[1])) + '</button>' : '') + '</div>';
+          h += grp.map(function (p) {
+            var inn = inG(p.name), on = pick.indexOf(p.name) >= 0, pr = CH.pres[p.name], role = p.role || p.nick || '', st = pr && pr.online ? tr('online', 'yupo mtandaoni') : pr ? cwSeenTx(pr) : '';
+            var line = inn ? tr('Already in the group', 'Tayari yuko kwenye kikundi') : [role || (cn ? tr(cn[0], cn[1]) : ''), st].filter(Boolean).join(' · ');
+            return '<button type="button" class="cw-pr cw-apr' + (inn ? ' in' : '') + '" role="checkbox" aria-checked="' + (inn || on) + '"' + (inn ? ' aria-disabled="true"' : '') + ' data-app="' + esc(p.name) + '"><span class="cw-av" style="' + cwHueVar(p.name) + '" data-ph="' + esc(p.name) + '" aria-hidden="true">' + esc(initials(p.name)) + (pr && pr.online ? '<i class="cw-on"></i>' : '') + '</span>' +
+              '<span class="cw-prt"><b data-nosw>' + esc(p.name) + '</b><small data-nosw>' + (ck && !inn ? '<span class="cw-apfl" aria-hidden="true">' + cwFlagSvg(ck) + '</span>' : '') + esc(line) + '</small></span>' + (inn ? '' : '<span class="cw-ck" aria-hidden="true">' + cwIc('check') + '</span>') + '</button>';
+          }).join('');
+        });
+        $('cwApl').innerHTML = h || '<p class="muted">' + tr('No one found', 'Hakuna aliyepatikana') + '</p>';
+        $('cwApc').innerHTML = pick.map(function (n) { return '<button type="button" class="cw-apchip" data-apx="' + esc(n) + '" aria-label="' + esc(tr('Remove ', 'Ondoa ') + n) + '"><span class="cw-av" style="' + cwHueVar(n) + '" data-ph="' + esc(n) + '" aria-hidden="true">' + esc(initials(n)) + '</span><span data-nosw>' + esc(cwFirst(n)) + '</span>' + cwIc('x') + '</button>'; }).join('');
+        var k = pick.length, go = $('cwApGo'); go.disabled = !k;
+        go.textContent = adm ? (k === 1 ? tr('Add 1 person', 'Ongeza mtu 1') : k ? tr('Add ' + k + ' people', 'Ongeza watu ' + k) : tr('Add people', 'Ongeza watu'))
+          : (k === 1 ? tr('Ask an admin to add 1 person', 'Mwombe msimamizi aongeze mtu 1') : k ? tr('Ask an admin to add ' + k + ' people', 'Mwombe msimamizi aongeze watu ' + k) : tr('Ask an admin to add someone', 'Mwombe msimamizi aongeze mtu'));
+        if (typeof phScan === 'function') phScan();
+      };
+      $('cwApq').addEventListener('input', draw); draw();
+      w.addEventListener('click', function (e) {
+        var b = e.target.closest('[data-app]');
+        if (b) { var n = b.getAttribute('data-app'); if (inG(n)) return; var i = pick.indexOf(n); if (i >= 0) pick.splice(i, 1); else pick.push(n); buzz(); draw(); return; }
+        if ((b = e.target.closest('[data-apx]'))) { var j = pick.indexOf(b.getAttribute('data-apx')); if (j >= 0) pick.splice(j, 1); buzz(); draw(); return; }
+        if ((b = e.target.closest('[data-apall]'))) {
+          var ck = b.getAttribute('data-apall'), free = ppl.filter(function (p) { return (CW2_CC[p.home] ? p.home : '') === ck && !inG(p.name); }), allOn = free.every(function (p) { return pick.indexOf(p.name) >= 0; });
+          free.forEach(function (p) { var x = pick.indexOf(p.name); if (allOn && x >= 0) pick.splice(x, 1); if (!allOn && x < 0) pick.push(p.name); }); buzz(); draw(); return;
+        }
+        if ((b = e.target.closest('[data-ap]'))) { var k2 = b.getAttribute('data-ap'); buzz(); if (k2 === 'link') cwLink(c); if (k2 === 'invite') { w.close(); teamCache = null; setTimeout(function () { if (typeof tmAddOpen === 'function') tmAddOpen(); }, 260); } return; }
+        if (e.target.closest('#cwApGo') && pick.length) {
+          var go = $('cwApGo'); go.disabled = true;
+          if (adm) {
+            cwApi('POST', 'members', { c: c.id, add: pick.slice() }).then(function (j) {
+              if (!j.ok) { go.disabled = false; return toast(cwWhy(j)); }
+              if (!j.chat) { c.members = (c.members || []).concat(pick); cwSave(); }
+              w.close(); if (after) after(); cwHead(); toast(pick.length === 1 ? tr(cwFirst(pick[0]) + ' added ✓', cwFirst(pick[0]) + ' ameongezwa ✓') : tr(pick.length + ' people added ✓', 'Watu ' + pick.length + ' wameongezwa ✓'));
+              if (S.view === 'vRoom' && CH.cur === c.id) cwMsgsDraw(true);
+            });
+          } else {
+            var ad = (c.admins || []).filter(function (n) { return !cwIsMe(n); });
+            if (!ad.length) { go.disabled = false; return toast(tr('This group has no other admin to ask.', 'Kikundi hiki hakina msimamizi mwingine wa kumwomba.')); }
+            var names = pick.join(', ');
+            cwQueue({ c: c.id, kind: 'text', text: ad.map(function (n) { return '@' + n; }).join(' ') + ' ' + tr('could you add ' + names + ' to this group, please?', 'tafadhali mnaweza kuwaongeza ' + names + ' kwenye kikundi hiki?'), mentions: ad });
+            w.close(); toast(tr('Asked the admins ✓', 'Wasimamizi wameombwa ✓'));
+          }
+        }
+      });
+    });
+  }
+  // added to a group by someone else: a notification (in the background) or a note with Open
+  function cw2AddedNote(ch) {
+    if (cwAdmin(ch) || (S.view === 'vRoom' && CH.cur === ch.id)) return; // I made it (or I'm already looking at it)
+    var t = cwTitle(ch), txt = tr('You were added to ' + t, 'Umeongezwa kwenye ' + t), go = function () { cwOpen(ch.id); };
+    if ('Notification' in window && Notification.permission === 'granted' && document.hidden) { try { var n = new Notification(t, { body: txt, tag: 'rafiki-chat-' + ch.id, icon: '/apple-touch-icon.png' }); n.onclick = function () { try { window.focus(); } catch (e) {} go(); n.close(); }; return; } catch (e) {} }
+    cwOpenSnack(txt, go);
+  }
+  // cw2-room:end --------------------------------------------------------------------------------------------------
+
 
   // --- start ----------------------------------------------------------------------------------------
   netUi(); outboxUi(); progUi(); installUi();

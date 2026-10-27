@@ -1,2 +1,4 @@
 dist
 .wrangler
+qa/pin/__pycache__/
+__pycache__/

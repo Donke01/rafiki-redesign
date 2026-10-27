@@ -76,6 +76,15 @@ def longpress(pg, sel):
     b = pg.locator(sel).first; b.scroll_into_view_if_needed(); box = b.bounding_box()
     pg.mouse.move(box['x'] + box['width'] / 2, box['y'] + box['height'] / 2); pg.mouse.down(); pg.wait_for_timeout(750); pg.mouse.up(); pg.wait_for_timeout(500)
 def T(lang, en, sw): return sw if lang == 'sw' else en
+# chat 2 list (cw2-list): search opens in place from the header, Settings / Starred / Refresh live in the ⋯ menu on a phone
+def search(pg, t):
+    if not vis(pg, '#cwQ'): pg.click('#cwSrch'); pg.wait_for_timeout(250)
+    pg.fill('#cwQ', t)
+def menu(pg, k, t=700): pg.click('#cwMore'); pg.wait_for_timeout(250); pg.click('#cwMenu [data-mn=%s]' % k); pg.wait_for_timeout(t)
+def refresh(pg, t=1600):
+    if vis(pg, '#bRefresh'): pg.click('#bRefresh')
+    else: menu(pg, 'rf', 0)
+    pg.wait_for_timeout(t)
 # nothing wider than the screen, and no label cut inside the bottom bar
 NOOVER = "(() => document.scrollingElement.scrollWidth <= innerWidth + 1)()"
 BAR = """(() => { const out = []; document.querySelectorAll('#tabs nav button').forEach(b => { if (b.classList.contains('hidden')) return; const r = b.getBoundingClientRect();
@@ -140,7 +149,7 @@ def s_list(pg, check, lang, cm):
     check(pg.evaluate("[...document.querySelectorAll('#cwList .cw-row[data-open]')].map(r => r.dataset.open)") == ['d:grace'], 'Archived shows the archived chat')
     back(pg); check(h(pg) == '#chat' and vis(pg, '#cwArch') and not vis(pg, '#cwArchHd'), 'Back closes Archived, still on Chat (%s)' % h(pg))
     # search: titles here, message text from the server
-    pg.fill('#cwQ', 'cylinder'); pg.wait_for_timeout(900)
+    search(pg, 'cylinder'); pg.wait_for_timeout(900)
     check(pg.locator('#cwList .cw-hit').count() >= 2, 'search finds messages by their words (%d)' % pg.locator('#cwList .cw-hit').count())
     shot(pg, 'search', lang)
     pg.locator('#cwList .cw-hit[data-jump="7"]').click(); pg.wait_for_timeout(1800)
@@ -163,7 +172,7 @@ def s_list(pg, check, lang, cm):
     check(vis(pg, '.cw-row[data-open="d:meril"] .cw-bi'), 'muted for 8 hours: a muted mark')
     check(any(b.get('c') == 'd:meril' and isinstance(b.get('muted'), int) and b['muted'] > 0 for b in posts(cm, 'prefs')), 'the mute goes to the server with its end time')
     # starred messages
-    pg.click('#cwStar'); pg.wait_for_timeout(900); check(pg.locator('.tsh [data-sopen]').count() == 1, 'Starred messages lists the starred one')
+    menu(pg, 'star', 900); check(pg.locator('.tsh [data-sopen]').count() == 1, 'Starred messages lists the starred one')
     pg.click('.tsh [data-sopen]'); pg.wait_for_timeout(1800)
     check(h(pg) == '#chat/d:meril' and pg.evaluate("document.getElementById('cwm-4').classList.contains('flash')"), 'tapping it opens the chat at the message (%s)' % h(pg))
 
@@ -420,8 +429,8 @@ def s_entry(pg, check, lang, cm):
 
 def s_nav(pg, check, lang, cm):
     tabbar(pg, 'vChat', 1400); pg.evaluate('scrollTo(0, 0)')
-    pg.click('#bRefresh'); pg.wait_for_timeout(1600)
-    check(h(pg) == '#chat' and view(pg) == 'vChat', 'the refresh button stays on Chat')
+    refresh(pg)
+    check(h(pg) == '#chat' and view(pg) == 'vChat', 'the refresh button (⋯ › Refresh on a phone) stays on Chat')
     check(pg.evaluate("[...document.querySelectorAll('.toast')].some(t => /Updated|Imesasishwa/.test(t.textContent))"), 'an “Updated” toast')
     open_room(pg, 'd:meril', 1300)
     n = len(ERRS); pg.reload(); pg.wait_for_timeout(2500)
@@ -429,8 +438,8 @@ def s_nav(pg, check, lang, cm):
     check(len([e for e in ERRS[n:] if 'WebSocket' not in e]) == 0, 'no console errors after the reload (%s)' % ERRS[n:])
     back(pg, 1200); check(view(pg) == 'vChat', 'Back after the reload comes to the list (%s)' % view(pg))
     # start over: from another tab and back by the bar, the search is cleared
-    pg.fill('#cwQ', 'tea'); pg.wait_for_timeout(500); tabbar(pg, 'vList', 1200); tabbar(pg, 'vChat', 1300)
-    check(pg.input_value('#cwQ') == '' and h(pg) == '#chat', 'the bottom bar starts Chat over (search cleared)')
+    search(pg, 'tea'); pg.wait_for_timeout(500); tabbar(pg, 'vList', 1200); tabbar(pg, 'vChat', 1300)
+    check(pg.input_value('#cwQ') == '' and not vis(pg, '#cwQ') and h(pg) == '#chat', 'the bottom bar starts Chat over (search cleared and closed)')
     # the WebSocket drops: it comes back and catches up with only what's newer; closed with 4401 (blocked, removed, signed out) it stays shut
     open_room(pg, 'd:meril', 1300); t0 = len(posts(cm, 'ticket'))
     for w in cm.ws: w.close(code=1011, reason='restart')
@@ -490,7 +499,7 @@ def s_look(pg, check, lang, cm):
     open_room(pg, 't:all', 1500)
     check(pg.locator('#cwMsgs .cw-m.emo.e2').count() == 1, 'two emoji on their own show large, with no bubble')
     check(pg.evaluate("getComputedStyle(document.querySelector('#cwMsgs .cw-m.emo .cw-b')).backgroundColor") in ('rgba(0, 0, 0, 0)', 'transparent'), 'the emoji have no bubble behind them')
-    check(pg.evaluate("getComputedStyle(document.querySelector('#cwMsgs .cw-m.them.first:not(.emo) .cw-b'), '::before').content") == '""', 'the first bubble of a run has a tail')
+    check(pg.evaluate("getComputedStyle(document.querySelector('#cwMsgs .cw-m.them.first:not(.emo) .cw-b')).borderTopLeftRadius") == '4px', 'the first bubble of a run has its tail corner (chat2, room.png: a 4 px corner, no drawn tail)')
     check(pg.evaluate("(() => { const m = [...document.querySelectorAll('#cwMsgs .cw-m.them:not(.first) .cw-b')][0]; return !m || parseFloat(getComputedStyle(m).borderTopLeftRadius) <= 6; })()"), 'a joined bubble has a small corner where it meets the one above')
     check(pg.locator('#cwMsgs .cw-trip').count() == 1 and T(lang, 'Kapsaret Borehole', 'Kapsaret Borehole') in txt(pg, '#cwMsgs .cw-trip') and pg.locator('#cwMsgs .cw-trip .cw-trb i').count() == 1, 'a trip card: title, dates, next stop and progress')
     check(pg.locator('#cwMsgs .cw-lp.big .cw-lpi').count() == 1, 'an ordinary link with a picture shows it large')
@@ -564,7 +573,7 @@ def s_feel(pg, check, lang, cm):
     check(not ov, 'the chip floats clear of the box and the quick replies')
     shot(pg, 'new-chip', lang)
     # the unread line fades once it has scrolled past
-    back(pg, 900); cm.chats['g:kitale']['unread'] = 1; pg.click('#bRefresh'); pg.wait_for_timeout(1200)
+    back(pg, 900); cm.chats['g:kitale']['unread'] = 1; refresh(pg, 1200)
     open_room(pg, 'g:kitale', 1500)
     check(vis(pg, '#cwUnl') and not pg.evaluate("document.getElementById('cwUnl').classList.contains('gone')"), 'the unread line is there on opening')
 
@@ -609,7 +618,7 @@ def s_composer(pg, check, lang, cm):
     # double-tap a message: ❤️ by default; 👍 when chosen in Chat settings
     pg.locator('#cwm-1 .cw-tx').scroll_into_view_if_needed(); pg.wait_for_timeout(200); b = pg.locator('#cwm-1 .cw-tx').bounding_box(); pg.mouse.dblclick(b['x'] + 20, b['y'] + 8); pg.wait_for_timeout(700)
     check(any(r.get('id') == 1 and r.get('emoji') == '❤️' for r in posts(cm, 'react')), 'a double-tap reacts ❤️')
-    back(pg, 900); pg.click('#cwSet'); pg.wait_for_timeout(700)
+    back(pg, 900); menu(pg, 'set')
     check(vis(pg, '[data-testid=cw_settings_sheet]'), 'Chat settings opens')
     pg.click('[data-cs=dt][data-v="👍"]'); pg.wait_for_timeout(400)
     check(any(b.get('doubleTap') == '👍' and 'c' not in b for b in posts(cm, 'prefs')), 'the double-tap reaction is saved (synced prefs)')
@@ -618,7 +627,7 @@ def s_composer(pg, check, lang, cm):
     check(any(r.get('id') == 2 and r.get('emoji') == '👍' for r in posts(cm, 'react')), 'then a double-tap reacts 👍')
 
 def s_settings(pg, check, lang, cm):
-    tabbar(pg, 'vChat', 1400); pg.click('#cwSet'); pg.wait_for_timeout(700)
+    tabbar(pg, 'vChat', 1400); menu(pg, 'set')
     bad = pg.evaluate(BROKEN, '.tsh .cw-cs'); check(bad == [], 'no word breaks in Chat settings: %s' % bad)
     bad = pg.evaluate(OVER, '.tsh .cw-cs .row2, .tsh .cw-cs .seg, .tsh .cw-cs .cw-qe'); check(bad == [], 'nothing covers anything: %s' % bad)
     bad = pg.evaluate(CLIP, '.tsh .cw-cs button'); check(bad == [], 'no button cut off: %s' % bad)
@@ -673,12 +682,12 @@ def s_small(pg, check, lang, cm):
     longpress(pg, '#cwm-2 .cw-tx'); pg.click('.bsh [data-mk=info]'); pg.wait_for_timeout(600)
     check(vis(pg, '[data-testid=cw_exact]'), 'Info on someone else’s message shows when it was sent'); back(pg)
     # empty states: no search results, no starred, no archived, a new chat
-    back(pg, 900); pg.fill('#cwQ', 'zzqq'); pg.wait_for_timeout(1000)
+    back(pg, 900); search(pg, 'zzqq'); pg.wait_for_timeout(1000)
     check(vis(pg, '[data-testid=cw_empty_search]'), 'no search results: a picture and “Clear the search”')
     shot(pg, 'empty-search', lang)
     pg.click('[data-testid=cw_empty_search] [data-es]'); pg.wait_for_timeout(400); check(pg.input_value('#cwQ') == '', 'its one action clears the search')
-    cm.chats['d:grace']['archived'] = False; pg.click('#bRefresh'); pg.wait_for_timeout(1400)
-    cm.starred = []; pg.click('#cwStar'); pg.wait_for_timeout(900)
+    cm.chats['d:grace']['archived'] = False; back(pg, 700); refresh(pg, 1400)
+    cm.starred = []; menu(pg, 'star', 900)
     check(vis(pg, '[data-testid=cw_empty_star]'), 'no starred messages: a picture and one action'); shot(pg, 'empty-starred', lang); back(pg)
     pg.click('#cwNew'); pg.wait_for_timeout(800); pg.fill('#cwNq', 'Jessica'); pg.wait_for_timeout(200); pg.click('.tsh [data-dm="Jessica Anderson"]'); pg.wait_for_timeout(1500)
     check(vis(pg, '[data-testid=cw_empty_hello]') and T(lang, 'Say hello to Jessica', 'Msalimie Jessica') in txt(pg, '[data-testid=cw_empty_hello]'), 'a new chat: “Say hello to Jessica 👋”')

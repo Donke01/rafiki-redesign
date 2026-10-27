@@ -49,12 +49,14 @@ export class Conversation extends DurableObject {
     return { msg: this.one(id), dup: false };
   }
 
-  // newest page before `before` (or after `after`), oldest first; hidden-for-me messages left out
-  async page(k, before, after, limit) {
+  // newest page before `before` (or after `after`), oldest first; hidden-for-me messages left out, and (chat2) nothing at or
+  // below `floor`: the person cleared the chat up to there
+  async page(k, before, after, limit, floor) {
     limit = Math.min(Math.max(Number(limit) || 50, 1), 100);
+    const fl = Math.max(0, Number(floor) || 0);
     let rows;
-    if (after != null && after !== '') rows = [...this.sql.exec('SELECT * FROM msgs WHERE id > ? AND id NOT IN (SELECT id FROM hidden WHERE k = ?) ORDER BY id ASC LIMIT ?', Number(after), k, limit + 1)];
-    else rows = [...this.sql.exec('SELECT * FROM msgs WHERE id < ? AND id NOT IN (SELECT id FROM hidden WHERE k = ?) ORDER BY id DESC LIMIT ?', Number(before) || 9e15, k, limit + 1)].reverse();
+    if (after != null && after !== '') rows = [...this.sql.exec('SELECT * FROM msgs WHERE id > ? AND id > ? AND id NOT IN (SELECT id FROM hidden WHERE k = ?) ORDER BY id ASC LIMIT ?', Number(after), fl, k, limit + 1)];
+    else rows = [...this.sql.exec('SELECT * FROM msgs WHERE id < ? AND id > ? AND id NOT IN (SELECT id FROM hidden WHERE k = ?) ORDER BY id DESC LIMIT ?', Number(before) || 9e15, fl, k, limit + 1)].reverse();
     const more = rows.length > limit;
     if (more) rows = after != null && after !== '' ? rows.slice(0, limit) : rows.slice(1);
     return { msgs: rows.map(r => this.row(r)), more };
@@ -80,6 +82,8 @@ export class Conversation extends DurableObject {
     return { msg: this.one(id) };
   }
   async hide(k, id) { this.sql.exec('INSERT OR IGNORE INTO hidden (k, id) VALUES (?, ?)', k, Number(id)); return true; }
+  // chat2: many at once (select + delete); only ids that exist
+  async hideMany(k, ids) { let n = 0; for (const id of ids) if (this.one(id)) { this.sql.exec('INSERT OR IGNORE INTO hidden (k, id) VALUES (?, ?)', k, Number(id)); n++; } return n; }
 
   async react(k, name, id, emoji, now) {
     const m = this.one(id);

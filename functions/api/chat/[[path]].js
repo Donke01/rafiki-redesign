@@ -7,10 +7,42 @@ import { checkPin } from '../pin.js';
 import { guards, guardFor } from '../../../lib/pin-store.js';
 import { getFeed } from '../../../lib/feed-cache.js';
 import { chatOn, NEED, roster, chatHeaders, preview, tripFor, freshTrips, projectPhotos } from '../../../lib/chat.js';
+import { transcribe, transcribeSetup } from '../../../lib/transcribe.js';
+import { translateOn } from '../../../lib/translate.js';
 
 const HEAD = { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', 'X-Robots-Tag': 'noindex' };
 const json = (body, status) => new Response(JSON.stringify(body), { status: status || 200, headers: HEAD });
 const MAX_UPLOAD = 16 * 1024 * 1024 + 64 * 1024;
+const TX_PER_HOUR = 30, TX_KEEP = 365 * 86400;
+
+// chat2: "Show text" under a voice note. The message is read through the worker as this person (so only members
+// get it), its audio typed out with lib/transcribe.js, and the words kept in KV against the message (chattx:<c>:<id>).
+async function voiceText(env, chk, h, b) {
+  const c = String((b && b.c) || '').slice(0, 80), id = Number(b && b.id);
+  if (!/^[a-z]:[A-Za-z0-9_-]{1,64}$/.test(c) || !(id > 0)) return json({ ok: false, reason: 'bad-request' }, 400);
+  if (!transcribeSetup(env).on) return json({ ok: false, reason: 'off' });
+  const key = 'chattx:' + c + ':' + id, had = env.FEED ? await env.FEED.get(key, 'json') : null;
+  const r = await env.CHAT.fetch(new Request('https://rafiki-chat/msgs?c=' + encodeURIComponent(c) + '&after=' + (id - 1) + '&limit=1', { headers: h }));
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok || !j.ok) return json({ ok: false, reason: j.reason || 'not-found' }, r.status === 200 ? 404 : r.status);
+  const m = (j.msgs || []).find(x => Number(x.id) === id), md = m && m.kind === 'voice' && !m.deleted && Array.isArray(m.media) && m.media[0];
+  if (!md || !md.id) return json({ ok: false, reason: 'not-found' }, 404);
+  if (had && had.text != null) return json({ ok: true, text: had.text, lang: had.lang || '', cached: true });
+  if (env.FEED) {
+    const rk = 'rl:tx:' + String(chk.who).toLowerCase() + ':' + Math.floor(Date.now() / 3600e3), n = Number(await env.FEED.get(rk)) || 0;
+    if (n >= TX_PER_HOUR) return json({ ok: false, reason: 'rate' }, 429);
+    await env.FEED.put(rk, String(n + 1), { expirationTtl: 3700 });
+  }
+  const a = await env.CHAT.fetch(new Request('https://rafiki-chat/media/' + md.id, { headers: h }));
+  if (!a.ok) return json({ ok: false, reason: 'not-found' }, 404);
+  const bytes = new Uint8Array(await a.arrayBuffer());
+  let out;
+  try { out = await transcribe(env, bytes, a.headers.get('Content-Type') || 'audio/webm'); }
+  catch (e) { console.error('chat voice text:', e && e.message); return json({ ok: false, reason: e && e.code === 'rate' ? 'rate' : e && e.code === 'format' ? 'format' : 'down' }, 502); }
+  const v = { text: out.text || '', lang: out.lang || '' };
+  if (env.FEED) await env.FEED.put(key, JSON.stringify(v), { expirationTtl: TX_KEEP });
+  return json(Object.assign({ ok: true, cached: false }, v));
+}
 
 function peek(t) {
   try {
@@ -67,6 +99,11 @@ export async function onRequest({ request, env, params }) {
       return t ? json({ ok: true, trip: t.card }) : json({ ok: false, reason: 'not-found' }, 404);
     }
     const list = await roster(env), h = chatHeaders(env, who, list);
+    if (path === 'transcribe') {
+      if (request.method !== 'POST') return json({ ok: false, reason: 'method' }, 405);
+      let b; try { b = await request.json(); } catch (e) { return json({ ok: false, reason: 'bad-request' }, 400); }
+      return voiceText(env, chk, h, b);
+    }
     if (media) {
       const range = request.headers.get('Range'); if (range) h.Range = range;
       return env.CHAT.fetch(new Request(target(path, url), { method: request.method === 'HEAD' ? 'HEAD' : 'GET', headers: h }));
@@ -106,7 +143,11 @@ export async function onRequest({ request, env, params }) {
     if (r.ok && (path === 'msgs' || path === 'starred' || path === 'list')) {
       try {
         const j = JSON.parse(text);
-        if (path === 'list') { if ((j.chats || []).some(c => c.kind === 'project')) { let f = null; try { f = await getFeed(env); } catch (e) {} projectPhotos(j.chats, f); } }
+        if (path === 'list') {
+          if ((j.chats || []).some(c => c.kind === 'project')) { let f = null; try { f = await getFeed(env); } catch (e) {} projectPhotos(j.chats, f); }
+          // chat2: what the app can offer under messages (Translate · Tafsiri, "Show text" under voice notes)
+          j.tools = { translate: translateOn(env), transcribe: transcribeSetup(env).on };
+        }
         else await freshTrips(env, chk, j.msgs);
         text = JSON.stringify(j);
       } catch (e) {}

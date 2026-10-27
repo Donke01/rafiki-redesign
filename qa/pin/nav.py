@@ -208,7 +208,10 @@ def s_refresh(pg, check, lang):
     for v in ['vMap', 'vList', 'vNew', 'vMe', 'vOffice', 'vChat']:
         tabbar(pg, v, 1600); h0 = h(pg)
         if v != 'vMap': pg.evaluate('scrollTo(0, 260)'); pg.wait_for_timeout(300)
-        y0 = y(pg); pg.click('#bRefresh'); pg.wait_for_timeout(1600)
+        y0 = y(pg)
+        if v == 'vChat': pg.click('#cwMore'); pg.wait_for_timeout(250); pg.click('#cwMenu [data-mn=rf]')   # chat 2: on a phone Refresh is in the list's ⋯ menu (the app bar steps aside)
+        else: pg.click('#bRefresh')
+        pg.wait_for_timeout(1600)
         check(h(pg) == h0 and view(pg) == v, '%s: refresh stays on the screen (%s)' % (v, h(pg)))
         check(abs(y(pg) - y0) <= 4, '%s: refresh keeps the scroll (%d, was %d)' % (v, y(pg), y0))
         check(pg.evaluate("[...document.querySelectorAll('.toast')].some(t => /Updated|Imesasishwa/.test(t.textContent))"), '%s: an “Updated” toast' % v)

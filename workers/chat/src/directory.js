@@ -70,6 +70,8 @@ export class Directory extends DurableObject {
     add('chats', 'pins', 'TEXT');
     add('users', 'prefs', 'TEXT');
     add('users', 'photo', "TEXT DEFAULT ''");
+    // chat2: "Clear chat" keeps, per person, the newest message id they cleared away (it never comes back on reload)
+    add('members', 'cleared', 'INTEGER DEFAULT 0');
   }
 
   // ---- small reads ----------------------------------------------------------------------------
@@ -186,15 +188,15 @@ export class Directory extends DurableObject {
     const mem = this.q('SELECT m.k, m.admin, u.name FROM members m LEFT JOIN users u ON u.k = m.k WHERE m.c = ? ORDER BY m.joined, m.k', ch.id);
     let title = ch.title;
     if (ch.kind === 'dm') { const o = mem.find(x => x.k !== k); title = o ? o.name || o.k : ch.title; }
-    const last = P(ch.last), lk = last ? keyOf(last.from) : '';
+    const cl = (m && Number(m.cleared)) || 0, last0 = P(ch.last), last = last0 && cl && last0.id <= cl ? null : last0, lk = last ? keyOf(last.from) : '';
     // "Seen by": members whose read receipt covers the last message (not me, not its sender), most recent first
-    const seen = ch.seq ? this.q('SELECT u.name, m.k FROM members m LEFT JOIN users u ON u.k = m.k WHERE m.c = ? AND m.read_up >= ? AND m.read_at > 0 AND m.k != ? AND m.k != ? ORDER BY m.read_at DESC', ch.id, ch.seq, k, lk).map(x => x.name || x.k) : [];
+    const seen = ch.seq && last ? this.q('SELECT u.name, m.k FROM members m LEFT JOIN users u ON u.k = m.k WHERE m.c = ? AND m.read_up >= ? AND m.read_at > 0 AND m.k != ? AND m.k != ? ORDER BY m.read_at DESC', ch.id, ch.seq, k, lk).map(x => x.name || x.k) : [];
     const out = {
       id: ch.id, kind: ch.kind, title, photo: isMediaId(ch.photo) ? await mediaUrl(key, ch.photo, now) : '', project: ch.project || '', description: ch.description || '',
       members: mem.map(x => x.name || x.k), admins: mem.filter(x => x.admin).map(x => x.name || x.k), last,
       unread: m ? m.unread : 0, mention: !!(m && m.mention), pinned: !!(m && m.pinned),
       muted: m ? (m.muted === -1 ? 'always' : m.muted > now ? m.muted : 0) : 0, archived: !!(m && m.archived), onlyAdmins: !!ch.only_admins, wallpaper: (m && m.wallpaper) || '',
-      bubble: (m && m.bubble) || '', pins: P(ch.pins) || [], seen, mentionId: (m && m.mention) || 0,
+      bubble: (m && m.bubble) || '', pins: (P(ch.pins) || []).filter(x => x.id > cl), seen, mentionId: (m && m.mention) || 0, cleared: cl,
       country: ch.kind === 'team' && COUNTRIES[ch.id.slice(2)] ? ch.id.slice(2) : ''
     };
     if (ch.id === NEWS) out.announce = true;
@@ -266,6 +268,8 @@ export class Directory extends DurableObject {
         case 'send': return await this.send(me, b);
         case 'edit': return await this.edit(me, b);
         case 'delete': return await this.del(me, b);
+        case 'delete-many': return await this.delMany(me, b);
+        case 'clear': return await this.clear(me, b);
         case 'react': return await this.react(me, b);
         case 'star': return this.star(me, b);
         case 'read': return await this.receipt(me, b, 'read');
@@ -304,7 +308,7 @@ export class Directory extends DurableObject {
   async msgs(me, c, before, after, limit) {
     const { ch, res } = this.inChat(me, c);
     if (res) return res;
-    const key = await this.key(), r = await this.conv(ch.id).page(me.k, num(before), num(after), num(limit));
+    const mm = this.member(ch.id, me.k), key = await this.key(), r = await this.conv(ch.id).page(me.k, num(before), num(after), num(limit), mm ? mm.cleared : 0);
     return json({ ok: true, msgs: await Promise.all(r.msgs.map(m => this.deco(m, ch, key))), more: r.more });
   }
 
@@ -582,6 +586,48 @@ export class Directory extends DurableObject {
     await this.afterChange(ch, r.msg, { t: 'delete', c: ch.id, id, forAll: true, by: own ? undefined : me.name });
     return json({ ok: true });
   }
+  // chat2: select + delete. Up to 100 ids at once. For everyone: every one must be mine, or I'm an admin of this
+  // group, team or project chat; otherwise nothing is deleted. For me: hidden from my view only.
+  async delMany(me, b) {
+    const { ch, res } = this.inChat(me, b.c);
+    if (res) return res;
+    const ids = [...new Set((Array.isArray(b.ids) ? b.ids : []).map(num).filter(x => x != null && x > 0))];
+    if (!ids.length || ids.length > 100) return fail('bad-request');
+    const conv = this.conv(ch.id), list = await conv.byIds(ids);
+    if (list.length !== ids.length) return fail('not-found', 404);
+    if (list.some(m => m.kind === 'sys')) return fail('bad-request');
+    const now = Date.now();
+    if (!b.forAll) {
+      await conv.hideMany(me.k, ids);
+      const mm = this.member(ch.id, me.k), drop = list.filter(m => m.id > mm.read_up && m.fk !== me.k && !m.deleted).length;
+      if (drop) this.sql.exec('UPDATE members SET unread = MAX(unread - ?, 0), upd = ? WHERE c = ? AND k = ?', drop, now, ch.id, me.k);
+      for (const id of ids) this.sendTo(me.k, { t: 'delete', c: ch.id, id, forAll: false });
+      return json({ ok: true, n: ids.length });
+    }
+    const admin = this.groupish(ch) && this.isAdmin(ch.id, me);
+    if (!admin && list.some(m => m.fk !== me.k)) return fail('not-yours', 403);
+    let n = 0;
+    for (const m of list) {
+      if (m.deleted) continue;
+      const r = await conv.remove(m.id);
+      this.sql.exec('DELETE FROM texts WHERE c = ? AND id = ?', ch.id, m.id);
+      await this.afterChange(this.chat(ch.id), r.msg, { t: 'delete', c: ch.id, id: m.id, forAll: true, by: m.fk === me.k ? undefined : me.name });
+      n++;
+    }
+    return json({ ok: true, n });
+  }
+  // chat2: "Clear chat" (for me): everything up to now leaves my view for good; { archive: true } also archives it
+  // (a DM's "Delete chat")
+  async clear(me, b) {
+    const { ch, res } = this.inChat(me, b.c);
+    if (res) return res;
+    const now = Date.now(), up = ch.seq || 0;
+    this.sql.exec('UPDATE members SET cleared = ?, unread = 0, mention = 0, read_up = MAX(read_up, ?), deliv_up = MAX(deliv_up, ?), upd = ?' + (b.archive ? ', archived = 1' : '') + ' WHERE c = ? AND k = ?', up, up, up, now, ch.id, me.k);
+    await this.recalc(this.chat(ch.id));
+    const row = await this.row(this.chat(ch.id), me.k, await this.key());
+    this.sendTo(me.k, { t: 'chat', chat: row });
+    return json({ ok: true, cleared: up, chat: row });
+  }
   async react(me, b) {
     const { ch, res } = this.inChat(me, b.c);
     if (res) return res;
@@ -681,7 +727,7 @@ export class Directory extends DurableObject {
     const q = clean(qs, 100);
     if (q.length < 2) return json({ ok: true, hits: [] });
     const like = '%' + q.replace(/[\\%_]/g, c => '\\' + c) + '%';
-    const rows = this.q("SELECT t.c, t.id, t.frm, t.at, t.text FROM texts t JOIN members m ON m.c = t.c AND m.k = ? WHERE t.text LIKE ? ESCAPE '\\' ORDER BY t.at DESC LIMIT 50", me.k, like);
+    const rows = this.q("SELECT t.c, t.id, t.frm, t.at, t.text FROM texts t JOIN members m ON m.c = t.c AND m.k = ? WHERE t.id > m.cleared AND t.text LIKE ? ESCAPE '\\' ORDER BY t.at DESC LIMIT 50", me.k, like);
     const lo = q.toLowerCase();
     return json({
       ok: true, hits: rows.map(r => {
@@ -770,13 +816,16 @@ export class Directory extends DurableObject {
   // who gets a push for this message, and what it says: [{ token, platform, k, data }]
   pushPlan(ch, msg, mentionKeys, now) {
     const t = now || Date.now();
-    if (msg.kind === 'sys' && !(msg.sys && PUSH_SYS.includes(msg.sys.type))) return [];
+    // chat2: "<name> added <names>" goes to the people added (it opens the group), no one else
+    const added = msg.kind === 'sys' && msg.sys && msg.sys.type === 'added' ? new Set([].concat(msg.sys.who || []).map(keyOf)) : null;
+    if (msg.kind === 'sys' && !added && !(msg.sys && PUSH_SYS.includes(msg.sys.type))) return [];
     const ment = new Set(mentionKeys || []), out = [];
     const media = Array.isArray(msg.media) && msg.media[0] ? msg.media[0].type : '';
     const what = { photo: '📷 Photo', video: '🎥 Video', voice: '🎤 Voice message', doc: '📄 Document' }[media] || { location: '📍 Location', live: '📍 Live location', contact: '👤 Contact', trip: '🧭 Trip' }[msg.kind] || '';
     const line = [what, msg.text || (msg.trip && msg.trip.title) || ''].filter(Boolean).join(' ');
     for (const m of this.q('SELECT m.k, m.muted, m.unread, u.gen, u.blocked, u.removed, u.prefs, u.home FROM members m JOIN users u ON u.k = m.k WHERE m.c = ?', ch.id)) {
       if (m.k === msg.fk || m.blocked || m.removed) continue;
+      if (added && !added.has(m.k)) continue;
       if (this.sockets(m.k).length) continue;
       const mentioned = ment.has(m.k);
       const muted = m.muted === -1 || m.muted > t;
@@ -790,7 +839,7 @@ export class Directory extends DurableObject {
       const data = {
         t: 'msg', c: ch.id, id: msg.id, from: msg.from, title, kind: msg.kind, text: String(msg.text || (msg.trip && msg.trip.title) || '').slice(0, 200), media,
         mention: mentioned ? '1' : '0', unread: m.unread, badge, at: msg.at, sys: msg.sys ? msg.sys.type : '',
-        body: (msg.kind === 'sys' || ch.kind === 'dm' ? '' : msg.from + ': ') + line.slice(0, 200)
+        body: (added ? (msg.sys.by ? msg.sys.by + ' added you to ' + ch.title : 'You were added to ' + ch.title) : (msg.kind === 'sys' || ch.kind === 'dm' ? '' : msg.from + ': ') + line).slice(0, 200)
       };
       for (const d of devs) out.push({ token: d.token, platform: d.platform, k: m.k, data });
     }
