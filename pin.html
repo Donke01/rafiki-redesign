@@ -1005,6 +1005,10 @@ html[data-theme=sun] .phead{background:#002A57}
 
 /* Office sections: every section visible at once on a phone */
 .otabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.otabs.grp{display:flex;flex-direction:column;gap:12px}
+.ogh{margin:0 2px 6px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.ogt{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+@media (min-width:700px){.otabs.grp{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 16px}}
 .otab{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-height:64px;padding:8px 4px;border-radius:16px;border:var(--bw) solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-size:.74rem;font-weight:700;cursor:pointer;transition:background .15s,transform .12s}
 .otab svg{width:22px;height:22px;color:var(--blue)}
 .otab span{white-space:normal;overflow-wrap:break-word;text-align:center;line-height:1.15;max-width:100%}
@@ -2014,6 +2018,22 @@ button.ocv-n:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
 .ocv-map .tx{flex:1;min-width:0}.ocv-map .tx b{display:block;font-size:.93rem;line-height:1.3;color:var(--ink)}.ocv-map .tx small{display:block;margin-top:1px;font-size:.8rem;line-height:1.35;color:var(--muted)}
 .ocv-chev{flex:none;display:flex;color:var(--muted);transition:transform .2s}.ocv-chev svg{width:18px;height:18px}
 .ocv-tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.ost-hd{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.ost-hd .muted{margin:2px 0 0;font-size:.84rem}
+.ost-off{flex:none;border:0;background:none;color:var(--blue);font:inherit;font-size:.84rem;font-weight:700;padding:4px 2px;cursor:pointer}
+.ost-bar{display:block;height:6px;margin:12px 0 6px;border-radius:3px;background:var(--line);overflow:hidden}
+.ost-bar i{display:block;height:100%;border-radius:3px;background:var(--ok)}
+.ost-row{display:flex;align-items:center;gap:12px;width:100%;min-height:58px;padding:8px 2px;border:0;border-top:1px solid var(--line);background:none;color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+.ocv-h+.ost-row{margin-top:8px;border-top:0}
+.ost-row .tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.ost-row .tx b{font-size:.92rem;line-height:1.3}
+.ost-row .tx small{font-size:.8rem;line-height:1.35;color:var(--muted)}
+.ost-ck{flex:none;display:grid;place-items:center;width:36px;height:36px;border-radius:12px;background:var(--hb,var(--hb-blue));color:var(--hu,var(--hu-blue))}
+.ost-ck svg{width:20px;height:20px}
+.ost-row.ok .ost-ck{background:var(--okbg);color:var(--ok)}
+.ost-row.ok .tx b{color:var(--muted)}
+.otodo-ok{display:flex;align-items:center;gap:10px;margin:10px 0 2px;color:var(--ok);font-weight:700}
+.otodo-ok svg{width:22px;height:22px;flex:none}
 @media (min-width:560px){.ocv-tiles{grid-template-columns:repeat(3,minmax(0,1fr))}}
 .ocv-tile{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;min-height:132px;padding:14px 14px 14px;border:var(--bw) solid var(--line);border-radius:20px;background:var(--card);color:inherit;font:inherit;text-align:left;cursor:pointer;
   animation:rowIn .4s both;animation-delay:calc(var(--i,0) * 45ms);transition:transform .18s,box-shadow .18s,border-color .18s}
@@ -3598,6 +3618,7 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
 @media (min-width:700px){
   #oTabs.otabs{display:flex !important;flex-wrap:wrap;justify-content:center}
   #oTabs.otabs > .otab{flex:0 0 calc((100% - 8 * 8px) / 9);min-width:74px;max-width:110px}
+  #oTabs.otabs.grp{display:grid !important;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 16px}
 }
 </style>
 </head>
@@ -3834,7 +3855,7 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
     <!-- office (admins) -->
     <section id="vOffice" class="hidden" aria-labelledby="h-off">
       <h1 id="h-off" style="margin:4px 2px 10px">Office</h1>
-      <div class="otabs" id="oTabs" role="group" aria-label="Office sections"></div>
+      <div class="otabs grp" id="oTabs" role="group" aria-label="Office sections"></div>
       <div id="oBody" style="margin-top:12px"></div>
     </section>
 
@@ -8513,9 +8534,19 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
     T.push(['donors', tr('Donors', 'Wafadhili'), 'heart']);
     T.push(['qr', tr('QR codes', 'Misimbo ya QR'), 'qr']);
     T.push(['mail', tr('Send an <span class="ml-nw">e-mail</span>', 'Tuma barua pepe'), 'mail']);
-    $('oTabs').innerHTML = T.map(function (t) {
+    var tile = function (t) {
       var c = t[0] === 'review' ? (S.reviewOpen || 0) : t[0] === 'repairs' ? Object.keys(S.repairs).length : 0;
       return '<button class="otab" type="button" data-o="' + t[0] + '" aria-pressed="' + (O.tab === t[0]) + '"' + (c ? ' aria-label="' + t[1] + ', ' + c + ' open"' : '') + '>' + oic(t[2]) + '<span>' + t[1] + '</span>' + (c ? '<i class="n" aria-hidden="true">' + c + '</i>' : '') + '</button>';
+    };
+    // four groups in the order an admin uses them, so a new person sees where to start
+    var G = [[tr('Needs you', 'Inakuhitaji'), ['overview', 'review', 'repairs', 'visits']], [tr('Field work', 'Kazi ya uwanjani'), ['plan', 'trips', 'teammap', 'vehicles']],
+      [tr('People', 'Watu'), ['team', 'donors', 'mail', 'sms']], [tr('Records', 'Kumbukumbu'), ['costs', 'export', 'qr', 'cleanup']]];
+    var byK = {}; T.forEach(function (t) { byK[t[0]] = t; });
+    var used = {}; G.forEach(function (g) { g[1].forEach(function (k) { used[k] = 1; }); });
+    T.forEach(function (t) { if (!used[t[0]]) G[G.length - 1][1].push(t[0]); });
+    $('oTabs').innerHTML = G.map(function (g) {
+      var l = g[1].filter(function (k) { return byK[k]; });
+      return '<div class="ogrp" role="group" aria-label="' + esc(g[0].replace(/<[^>]+>/g, '')) + '"><p class="ogh">' + g[0] + '</p><div class="ogt">' + l.map(function (k) { return tile(byK[k]); }).join('') + '</div></div>';
     }).join('');
   }
   $('oTabs').addEventListener('click', function (e) { var b = e.target.closest('[data-o]'); if (!b) return; O.tab = b.getAttribute('data-o'); store.set('rfPinOTab', O.tab); renderOffice(); });
@@ -8527,6 +8558,7 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
     if (S.view === 'vOffice') nav('vOffice', 'sub'); // a section is a step: Back comes to Overview
     oSeg(); adminUi();
     var b = $('oBody'), t = O.tab;
+    stMark(START_TAB[t]);
     if (!navigator.onLine && t !== 'overview' && t !== 'cleanup') { b.innerHTML = '<p class="msg warn">' + tr('The Office needs a signal for this. Overview and Clean-up work offline.', 'Ofisi inahitaji mtandao kwa hili. Muhtasari na Safisha data zinafanya kazi bila mtandao.') + '</p>'; return; }
     if (t === 'overview') return oOverview(b);
     if (t === 'repairs') return oNeedTeam(function () { oRepairs(b); });
@@ -10569,6 +10601,66 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
   }
   function ocvTab(t) { O.tab = t; store.set('rfPinOTab', t); renderOffice(); var ot = $('oTabs'); if (ot && ot.getBoundingClientRect().top < 0) ot.scrollIntoView({ block: 'start' }); }
 
+  // ---- Overview › Start here: the first things a new admin sets up; each opens the right place and ticks itself off
+  var START = [['team', 'people', ['Add your field team', 'Ongeza timu yako ya uwanjani'], ['Give each person a PIN so they can sign in.', 'Mpe kila mtu PIN ili aweze kuingia.'], 'team', ''],
+    ['alerts', 'mail', ['Check who gets alert e-mails', 'Angalia nani anapata barua pepe za arifa'], ['Repairs and reviews are e-mailed to these admins.', 'Matengenezo na ukaguzi hutumwa kwa wasimamizi hawa.'], 'team', '.tm-mcard'],
+    ['approve', 'shield', ['Set when a repair needs a second approval', 'Weka lini matengenezo yanahitaji idhini ya pili'], ['Big repair costs wait for another admin.', 'Gharama kubwa za matengenezo zinasubiri msimamizi mwingine.'], 'costs', '#ofbLim'],
+    ['plan', 'cal', ['Plan a week of visits', 'Panga wiki ya ziara'], ['Pick a person; the app suggests the sites, in driving order.', 'Chagua mtu; programu inapendekeza maeneo kwa mpangilio wa safari.'], 'plan', ''],
+    ['qr', 'qr', ['Print QR check-in stickers', 'Chapisha stika za QR za kuingia'], ['One for each site: scanning it opens the Site visit.', 'Moja kwa kila eneo: ukiichanganua inafungua Ziara ya eneo.'], 'qr', '']];
+  var START_TAB = { team: 'alerts', costs: 'approve', plan: 'plan', qr: 'qr' };
+  function stSeen() { return jget('rfPinStart', {}); }
+  function stMark(k) { var d = stSeen(); if (!k || d[k]) return; d[k] = 1; store.set('rfPinStart', JSON.stringify(d)); }
+  function stDone(k) {
+    if (stSeen()[k]) return true;
+    if (k === 'team') return !!(O.team && O.team.some(function (p) { return !p.admin; }));
+    return false;
+  }
+  function ocvStartHtml() {
+    if (store.get('rfPinStartOff')) return '';
+    if (!O.team && !O.teamAsked) { O.teamAsked = true; oNeedTeam(function () { var el = $('ocvStart'); if (el) el.outerHTML = ocvStartHtml(); }); }
+    var n = START.filter(function (x) { return stDone(x[0]); }).length;
+    if (n === START.length) return '';
+    return '<div class="card ocv-box ost" id="ocvStart" data-testid="ocv_start"><div class="ost-hd"><div><h3 class="ocv-h">' + tr('Start here', 'Anza hapa') + '</h3>' +
+      '<p class="muted">' + tr(n + ' of ' + START.length + ' done. Each step opens the right place.', n + ' kati ya ' + START.length + ' zimekamilika. Kila hatua inafungua mahali sahihi.') + '</p></div>' +
+      '<button type="button" class="ost-off" data-start="off">' + tr('Hide', 'Ficha') + '</button></div>' +
+      '<span class="ost-bar" aria-hidden="true"><i style="width:' + Math.round(n / START.length * 100) + '%"></i></span>' +
+      START.map(function (x) {
+        var ok = stDone(x[0]);
+        return '<button type="button" class="ost-row' + (ok ? ' ok' : '') + '" data-start="' + x[0] + '" data-testid="ocv_start_' + x[0] + '"><span class="ost-ck" aria-hidden="true">' + (ok ? oic('check') : oic(x[1])) + '</span>' +
+          '<span class="tx"><b>' + tr(x[2][0], x[2][1]) + '</b><small>' + (ok ? tr('Done', 'Imekamilika') : tr(x[3][0], x[3][1])) + '</small></span><span class="ocv-chev" aria-hidden="true">' + oic('chev') + '</span></button>';
+      }).join('') + '</div>';
+  }
+  // ---- Overview › Needs you: only what is waiting for an admin, each opens the list to act on
+  function ocvTodoHtml(rep, due) {
+    var rows = [], rv = S.reviewOpen || 0, ua = rep.filter(function (r) { return r.urgency === 'urgent' && !r.assignee; }).length, bh = cnBehind();
+    if (rv) rows.push(['o-review', 'inbox', 'purple', rv === 1 ? tr('1 thing is waiting for your review', 'Jambo 1 linasubiri ukague') : tr(rv + ' things are waiting for your review', 'Mambo ' + rv + ' yanasubiri ukague'), tr('New sites, locations, stories and big costs', 'Maeneo mapya, mahali, hadithi na gharama kubwa')]);
+    if (ua) rows.push(['rr-unassigned', 'wrench', 'coral', ua === 1 ? tr('1 urgent repair has nobody on it', 'Matengenezo 1 ya haraka hayana mtu') : tr(ua + ' urgent repairs have nobody on them', 'Matengenezo ' + ua + ' ya haraka hayana mtu'), tr('Give each one to a person', 'Mpe mtu kila moja')]);
+    if (due) rows.push(['o-plan', 'cal', 'blue', due === 1 ? tr('1 site is due a visit', 'Eneo 1 linasubiri ziara') : tr(due + ' sites are due a visit', 'Maeneo ' + due + ' yanasubiri ziara'), tr('Plan a week of visits for someone', 'Mpangie mtu wiki ya ziara')]);
+    if (bh) rows.push(['list-build', 'wrench', 'amber', bh === 1 ? tr('1 building project is behind schedule', 'Mradi 1 wa ujenzi umechelewa') : tr(bh + ' building projects are behind schedule', 'Miradi ' + bh + ' ya ujenzi imechelewa'), tr('See what is holding them up', 'Angalia kinachozichelewesha')]);
+    return '<div class="card ocv-box otodo" data-testid="ocv_todo"><h3 class="ocv-h">' + tr('Needs you', 'Inakuhitaji') + '</h3>' +
+      (rows.length ? rows.map(function (r) {
+        return '<button type="button" class="ost-row" data-todo="' + r[0] + '" data-testid="ocv_todo_' + r[0] + '"><span class="ost-ck" style="--hb:var(--hb-' + r[2] + ');--hu:var(--hu-' + r[2] + ')" aria-hidden="true">' + oic(r[1]) + '</span>' +
+          '<span class="tx"><b>' + r[3] + '</b><small>' + r[4] + '</small></span><span class="ocv-chev" aria-hidden="true">' + oic('chev') + '</span></button>';
+      }).join('') : '<p class="otodo-ok">' + oic('check') + '<span>' + tr('Nothing needs you right now.', 'Hakuna kinachokuhitaji sasa hivi.') + '</span></p>') + '</div>';
+  }
+  $('oBody').addEventListener('click', function (e) {
+    var st = e.target.closest('[data-start]'), td = e.target.closest('[data-todo]');
+    if (st) {
+      var k = st.getAttribute('data-start'); buzz();
+      if (k === 'off') { store.set('rfPinStartOff', '1'); var el = $('ocvStart'); if (el) el.remove(); return; }
+      var x = START.filter(function (y) { return y[0] === k; })[0]; if (!x) return;
+      stMark(k); ocvTab(x[4]);
+      if (x[5]) setTimeout(function () { var t = document.querySelector(x[5]); if (t) t.scrollIntoView({ block: 'center', behavior: 'smooth' }); }, 900);
+      return;
+    }
+    if (td) {
+      var g = td.getAttribute('data-todo'); buzz();
+      if (g === 'rr-unassigned') { RR.f = 'unassigned'; return ocvTab('repairs'); }
+      if (g.indexOf('o-') === 0) return ocvTab(g.slice(2));
+      if (g.indexOf('list-') === 0) return ocvToList(g.slice(5));
+    }
+  });
+
   // ---- Overview
   function ocvOverview(b) {
     var P = S.projects, pinned = P.filter(function (p) { return p.gps; }).length, rep = Object.keys(S.repairs).map(function (k) { return S.repairs[k]; });
@@ -10609,7 +10701,7 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
     }).join('');
     b.innerHTML = '<div class="o-grid ocv"><div class="ocv-main">' +
       ocvHero('overview', 'drop', 'blue', tr('Overview', 'Muhtasari'), tr('All projects today. Tap a number to see the list.', 'Miradi yote leo. Gusa namba kuona orodha.'), null, mapStrip) +
-      '<div class="ocv-tiles">' + tiles + '</div>' + health +
+      ocvStartHtml() + ocvTodoHtml(rep, due) + '<div class="ocv-tiles">' + tiles + '</div>' + health +
       (ctry ? '<div class="card ocv-box"><h3 class="ocv-h">' + tr('By country', 'Kwa nchi') + '</h3>' + ctry + '</div>' : '') +
       '<div class="card ocv-box" id="ocvFeedBox"><h3 class="ocv-h">' + tr('Latest from the field', 'Habari mpya zaidi kutoka uwanjani') + '</h3><div id="ocvFeed">' + ocvFeedHtml() + '</div></div></div>' +
       '<div class="o-side"><div class="map o-map" id="oMap" role="application" aria-label="' + tr('Map of projects: open repairs in orange and red', 'Ramani ya miradi: matengenezo yaliyo wazi kwa rangi ya machungwa na nyekundu') + '"></div><p class="muted" style="margin-top:6px">' +
