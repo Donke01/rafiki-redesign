@@ -267,7 +267,7 @@ fun ProjectsScreen(m: AppModel, open: (String) -> Unit, planRoute: () -> Unit = 
             else t("${rows.size} not visited in the last 6 months, longest first", "${rows.size} hazijatembelewa miezi 6 iliyopita, za muda mrefu kwanza") }
         else -> t("${rows.size} projects", "Miradi ${rows.size}")
     }
-    val mine = snap.assigned.mapNotNull { a -> snap.projects.firstOrNull { it.id == a.id }?.let { it to t("Visit by ${a.date}", "Tembelea kabla ya ${a.date}") + if (a.note.isNotBlank()) " · ${a.note}" else "" } } +
+    val mine = snap.assigned.mapNotNull { a -> snap.projects.firstOrNull { it.id == a.id }?.let { it to t("Visit by " + Dates.weekday(a.date), "Tembelea kabla ya " + Dates.weekday(a.date)) + if (a.note.isNotBlank()) " · ${a.note}" else "" } } +
         snap.jobs.mapNotNull { id -> snap.projects.firstOrNull { it.id == id }?.let { it to t("Repair job", "Kazi ya matengenezo") } }
 
     val list = androidx.compose.foundation.lazy.rememberLazyListState()
