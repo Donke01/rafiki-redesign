@@ -156,8 +156,10 @@ def seq(name, lang, fn, br, admin=True, **kw):
     ctx.close()
     RESULTS.append((lang, name, not notes, notes))
     print(('PASS ' if not notes else 'FAIL ') + '[%s] %s' % (lang, name) + ('' if not notes else ' :: ' + ' | '.join(notes)), flush=True)
+STRIP = "(() => { const x = document.querySelector('#cwPs .cw-psx'); return !x || !x.getClientRects().length || getComputedStyle(x).visibility === 'hidden' || x.scrollWidth <= x.clientWidth + 1; })()"
 def tidy(pg, check, where, sel=ROOM):
     check(pg.evaluate(NOOVER), '%s: nothing wider than the screen' % where)
+    check(pg.evaluate(STRIP), '%s: the project strip cuts no word' % where)
     b = pg.evaluate(OFF, sel); check(b == [], '%s: nothing off the screen: %s' % (where, b))
     b = pg.evaluate(BROKEN, sel); check(b == [], '%s: no word breaks: %s' % (where, b))
     b = pg.evaluate(OVER, sel); check(b == [], '%s: nothing on top of anything: %s' % (where, b))
@@ -167,6 +169,9 @@ def s_look(pg, check, lang, cm, W):
     room(pg, 'p:101')
     check(h(pg) == '#chat/p:101' and view(pg) == 'vRoom', 'the project chat opens (%s)' % h(pg))
     check(vis(pg, '#cwHs') and vis(pg, '#cwHm') and vis(pg, '#hBack'), 'header: back, search and ⋯')
+    pg.set_viewport_size({'width': 320, 'height': 844}); pg.wait_for_timeout(300)
+    check(not vis(pg, '#cwHs') and pg.evaluate("(() => { const b = document.querySelector('#cwHd .cw-hdt b'); return b.scrollWidth <= b.clientWidth + 1; })()"), '320 px: search moves into ⋯ so the name fits')
+    pg.set_viewport_size({'width': 390, 'height': 844}); pg.wait_for_timeout(300)
     check(pg.locator('.top [aria-label*="all" i], .top [data-hd=call]').count() == 0, 'no call button')
     check(T(lang, 'Kapsaret Borehole', 'Kapsaret Borehole') in txt(pg, '#cwHd') and 'Meril' in txt(pg, '#cwHd .cw-hdt small'), 'name and the members under it (%s)' % txt(pg, '#cwHd'))
     cm.push({'t': 'typing', 'c': 'p:101', 'who': 'Meril Kiprop', 'what': 'typing'}); pg.wait_for_timeout(400)
@@ -432,7 +437,7 @@ def s_shots(pg, check, lang, cm, W):
 def s_size(pg, check, lang, cm, W):
     room(pg, 'p:101')
     for z, px in (('l', 18), ('xl', 20)):
-        pg.evaluate("z => document.documentElement.setAttribute('data-size', z)", z); pg.wait_for_timeout(300)
+        pg.evaluate("z => { document.documentElement.setAttribute('data-size', z); dispatchEvent(new Event('resize')); }", z); pg.wait_for_timeout(300)
         fs = pg.evaluate("['.cw-tx','.cw-sn','.cw-mt'].map(s => parseFloat(getComputedStyle(document.querySelector('#cwMsgs ' + s)).fontSize))")
         check(abs(fs[0] - .97 * px) < .3 and abs(fs[1] - .78 * px) < .3 and abs(fs[2] - .72 * px) < .3, 'Text size %s: words, names and times grow together (%s)' % (z.upper(), fs))
         tidy(pg, check, 'text size %s' % z); shot(pg, 'text-%s' % z, lang)

@@ -3657,6 +3657,7 @@ body.room #hBack{border:0;background:none;box-shadow:none}body.room #hBack svg{w
 .cw-hda{display:none}
 body.room .cw-hda:not([hidden]){grid-column:3;grid-row:1;display:flex;align-items:center;margin-left:2px}
 body.cw2.room .cw-hda{display:none !important}
+@media (max-width:359px){body.room #cwHs{display:none}} /* the smallest phones: the chat's name gets the room; search is in ⋯ too */
 .cw-hd .cw-av,.cw-rh .cw-av{width:40px;height:40px}
 .cw-hdt{gap:1px}
 .cw-hdt b{font-size:var(--cw-fs-name);font-weight:800;color:var(--ink);line-height:1.25}
@@ -3680,9 +3681,9 @@ body.cw2 .cw-rh{cursor:default}
 .cw-pst.warn{background:var(--warnbg);color:var(--warn)}.cw-pst.bad{background:var(--badbg);color:var(--bad)}.cw-pst.build{background:var(--tint);color:var(--blue)}
 html[data-theme=dark] .cw-pst.ok{background:var(--okbg);color:var(--ok)}html[data-theme=dark] .cw-pst.ok i{background:var(--ok)}
 html[data-theme=sun] .cw-pst{border:2px solid #000}html[data-theme=sun] .cw-pst.ok{background:#D8F5E3;color:#00562A}html[data-theme=sun] .cw-ps{border-bottom:2px solid #000}
-.cw-psx{flex:1;min-width:0;font-size:var(--cw-fs-meta);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cw-psx{flex:1;min-width:0;font-size:var(--cw-fs-meta);color:var(--muted);white-space:nowrap;overflow:hidden}
 .cw-pso{flex:none;margin-left:auto;font-size:var(--cw-fs-meta);font-weight:800;color:var(--blue);white-space:nowrap}
-@media (max-width:374px){.cw-ps.long .cw-psx{display:none}.cw-psx .pl{display:none}}
+.cw-ps.np .cw-psx .pl{display:none}.cw-ps.nx .cw-psx{visibility:hidden}
 /* search in this chat */
 .cw-find{flex:none;position:relative;z-index:3;display:flex;align-items:center;gap:2px;width:100%;min-height:52px;padding:5px 6px;border-bottom:var(--bw) solid var(--line);background:var(--card)}
 .cw-find.hidden{display:none}
@@ -15469,7 +15470,8 @@ html[data-theme=sun] .cw-apall,html[data-theme=sun] .cw-apchip{border:2px solid 
       var old = CH.msgs[id] || [], byIdM = {};
       (j.msgs || []).forEach(function (m) { byIdM[m.id] = 1; });
       // keep older pages already loaded; the fresh page wins for what it covers
-      var first = (j.msgs || [])[0], keep = first ? old.filter(function (m) { return !byIdM[m.id] && cwMs(m.at) < cwMs(first.at); }) : [];
+      var cl = +((cwChat(id) || {}).cleared) || 0; // chat2: nothing from before a Clear chat comes back from this phone's copy
+      var first = (j.msgs || [])[0], keep = first ? old.filter(function (m) { return !byIdM[m.id] && cwMs(m.at) < cwMs(first.at) && !(cl && +m.id <= cl); }) : [];
       CH.msgs[id] = keep.concat(j.msgs || []);
       if (CH.more[id] == null || !keep.length) CH.more[id] = !!j.more;
       (j.msgs || []).forEach(cwDropPend);
@@ -15988,7 +15990,12 @@ html[data-theme=sun] .cw-apall,html[data-theme=sun] .cw-apchip{border:2px solid 
     if (d.t === 'presence') { CH.pres[d.who] = { online: !!d.online, seen: d.seen }; if (d.photo) phSet(d.who, d.photo); if (S.view === 'vRoom') cwHead(); if (S.view === 'vChat') cwListDraw(); return; }
     if (d.t === 'chat' && d.chat) {
       if (d.chat.removed || d.chat.gone) { CH.chats = CH.chats.filter(function (x) { return x.id !== d.chat.id; }); if (CH.cur === d.chat.id && S.view === 'vRoom') { toast(tr('You’re no longer in this chat.', 'Hauko tena kwenye gumzo hili.')); goBack(function () { show('vChat', 'replace'); }); } }
-      else { var isNew = !cwChat(d.chat.id); cwUpsert(d.chat); if (isNew && d.chat.kind === 'group') cw2AddedNote(d.chat); }
+      else {
+        var was = cwChat(d.chat.id), isNew = !was;
+        // chat2: cleared on another phone: those messages leave this one too
+        if (was && +d.chat.cleared > (+was.cleared || 0)) { CH.msgs[d.chat.id] = (CH.msgs[d.chat.id] || []).filter(function (m) { return !(+m.id <= +d.chat.cleared); }); cwSaveM(d.chat.id); if (S.view === 'vRoom' && CH.cur === d.chat.id) setTimeout(function () { cwMsgsDraw(); }, 0); }
+        cwUpsert(d.chat); if (isNew && d.chat.kind === 'group') cw2AddedNote(d.chat);
+      }
       cwSave(); cwBadge(); if (S.view === 'vChat') cwListDraw(); if (S.view === 'vRoom' && CH.cur === d.chat.id) { cwHead(); cwCompDraw(); } return;
     }
     if (d.t === 'live') {
@@ -17128,14 +17135,22 @@ html[data-theme=sun] .cw-apall,html[data-theme=sun] .cw-apchip{border:2px solid 
     var v = S.visits[p.id], vd = v && dOf(v.at), vt = vd && !isNaN(vd) ? tr('Visited ' + dDay(vd, true), 'Ziara ' + dDay(vd, true)) : tr('No visit yet', 'Bado hakuna ziara');
     var place = [p.area, p.country].filter(Boolean).join(', ');
     var op = tr('Open project', 'Fungua mradi');
-    b.className = 'cw-ps' + (st[1].length + op.length > 22 ? ' long' : ''); // narrow phones: a long status and button leave no room for the visit
+    b.className = 'cw-ps';
     b.innerHTML = '<span class="cw-pst ' + st[0] + '"><i aria-hidden="true"></i>' + esc(st[1]) + '</span><span class="cw-psx" data-nosw>' + esc(vt) + (place ? '<span class="pl"> · ' + esc(place) + '</span>' : '') + '</span><span class="cw-pso">' + op + ' ›</span>';
     b.setAttribute('aria-label', tr('Open the project: ', 'Fungua mradi: ') + p.title + '. ' + st[1] + '. ' + vt + (place ? ', ' + place : ''));
+    cw2StripFit();
   }
+  // no word cut in the strip: the place goes first, then the visit, when the screen (or the text size) leaves no room
+  function cw2StripFit() {
+    var b = $('cwPs'), x = b && b.querySelector('.cw-psx'); if (!x || b.classList.contains('hidden')) return;
+    b.classList.remove('np', 'nx'); if (x.scrollWidth <= x.clientWidth + 1) return;
+    b.classList.add('np'); if (x.scrollWidth > x.clientWidth + 1) b.classList.add('nx');
+  }
+  addEventListener('resize', function () { if (S.view === 'vRoom') cw2StripFit(); });
   // the ⋯ menu
   function cw2RoomMenu() {
     var c = cwChat(CH.cur); if (!c) return;
-    var mu = cwMuted(c), A = [['info', 'info', tr('Chat info', 'Maelezo ya gumzo')]];
+    var mu = cwMuted(c), A = [['find', 'search', tr('Search in this chat', 'Tafuta kwenye gumzo hili')], ['info', 'info', tr('Chat info', 'Maelezo ya gumzo')]];
     if (c.kind === 'project' && byId(c.project)) A.push(['proj', 'drop', tr('Open project', 'Fungua mradi')]);
     if (cw2CanAdd(c)) A.push(['add', 'plus', tr('Add people', 'Ongeza watu')]);
     A.push(['mfl', 'image', tr('Media, files and links', 'Picha, faili na viungo')], ['date', 'cal', tr('Jump to a date', 'Nenda kwenye tarehe')], ['select', 'check', tr('Select messages', 'Chagua jumbe')],
@@ -17148,6 +17163,7 @@ html[data-theme=sun] .cw-apall,html[data-theme=sun] .cw-apchip{border:2px solid 
       var b = e.target.closest('[data-rmk]'); if (!b) return; var k = b.getAttribute('data-rmk'); w.close(); buzz();
       setTimeout(function () {
         var c0 = cwChat(CH.cur); if (!c0) return;
+        if (k === 'find') cw2FindStart();
         if (k === 'info') cwInfo();
         if (k === 'proj') openProj(String(c0.project), 'pin');
         if (k === 'add') cw2AddPeople(c0);
