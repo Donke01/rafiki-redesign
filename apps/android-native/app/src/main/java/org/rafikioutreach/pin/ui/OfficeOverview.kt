@@ -873,6 +873,8 @@ private fun OcvAssignSheet(m: AppModel, s: Snapshot, team: List<String>, close: 
     var ck by remember { mutableStateOf("") }
     var q by remember { mutableStateOf("") }
     val picked = remember { mutableStateListOf<String>() }
+    // "Assign a visit" from a chat message: its project comes ticked (feat-chata)
+    LaunchedEffect(Unit) { TeamGo.project?.let { if (it !in picked) picked.add(it); TeamGo.project = null } }
     var to by remember { mutableStateOf(pre) }
     var date by remember { mutableStateOf(LocalDate.now().plusDays(1).toString()) }
     var note by remember { mutableStateOf("") }

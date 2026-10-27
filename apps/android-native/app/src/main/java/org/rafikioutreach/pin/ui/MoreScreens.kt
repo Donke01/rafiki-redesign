@@ -203,6 +203,7 @@ fun MeScreen(m: AppModel, open: (String) -> Unit = {}, report: () -> Unit = {}, 
             UpdateCard(m)
             WaitingList(m, s)
             MyWork(s, open)
+            MyTrips(m) // field trips: next stop today, Plan a trip (TripsUi.kt)
             MyMonth(m, act)
             BadgeStamps(m)
             SettingsCard(m, settings)

@@ -154,6 +154,8 @@ fun ProjectScreen(m: AppModel, id: String, startTab: String, back: () -> Unit) {
                     ctx.startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, p.title + "\nhttps://www.google.com/maps?q=$ll"), null))
                 }, Modifier.fillMaxWidth().testTag("prj_share"), icon = "share", light = true, small = true, outline = true)
             }
+            // the project's own chat thread (feat-chata)
+            Btn(t("Chat", "Gumzo"), { hp.tap(); ChatNav.project(p.id) }, Modifier.padding(top = 8.dp).fillMaxWidth().testTag("prj_chat"), icon = "chat", light = true, small = true, outline = true)
         }
         if (dirs && p.gps != null) DirectionsSheet(p.title, p.gps) { dirs = false }
 

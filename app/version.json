@@ -1,8 +1,8 @@
 {
   "ok": true,
-  "versionCode": 47,
-  "versionName": "2.22.0",
-  "notes": "Fixes: donor screens no longer crash; contact sheet buttons fit their labels; prices follow your home country.",
-  "sha256": "6f0b21be4dc62d73312d23049bfb3eaea468f56e29cfde9381c7c33276d35aeb",
+  "versionCode": 48,
+  "versionName": "2.23.0",
+  "notes": "New: team Chat (groups, project chats, voice notes, photos) and Trips (plan a trip with weather, roads and fuel costs). Chat replaces Me in the bottom bar: Me is now your picture at the top left.",
+  "sha256": "e086be7c16464e83efd6f495929627ec520da999898472bb2cff661abc69aa5b",
   "apk": "/app/rafiki-pin.apk"
 }

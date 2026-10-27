@@ -36,6 +36,8 @@
             </intent-filter>
         </activity>
         <receiver android:name=".data.InstallResult" android:exported="false" />
+        <!-- chat notifications: Reply and Mark as read (feat-chata) -->
+        <receiver android:name=".data.ChatReplyReceiver" android:exported="false" />
         <!-- the RAFIKI Pin home-screen widget: medium (4×2) and small (2×1) -->
         <receiver android:name=".widget.PinWidget" android:exported="true" android:label="@string/w_name">
             <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>

@@ -10,6 +10,8 @@ for f in os.listdir(OUT):
     if f.endswith('.png'): os.remove(os.path.join(OUT, f))
 now = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
 iso = lambda h: (now - datetime.timedelta(hours=h)).strftime('%Y-%m-%dT%H:%M:%SZ')
+# 'earlier today' at any hour of the day (the browser runs in UTC): never before today's midnight
+today = lambda h: iso(min(h, (now.hour * 60 + now.minute) / 60 * 0.8))
 day = lambda d: (now + datetime.timedelta(days=d)).strftime('%Y-%m-%d')
 P = [{'id': '104', 'title': 'Kapsaret Borehole', 'country': 'Kenya', 'ck': 'ke', 'area': 'Eldoret', 'type': 'Borehole well', 'status': 'Completed', 'gps': [0.47, 35.25]},
      {'id': '105', 'title': 'Magara Well', 'country': 'Tanzania', 'ck': 'tz', 'area': 'Babati', 'type': 'Borehole well', 'status': 'Completed', 'gps': [-4.2, 35.7]},
@@ -32,14 +34,14 @@ REVIEW = [{'rid': 'c1', 'kind': 'cost', 'id': '105', 't': 'Magara Well', 'by': '
           {'rid': 'r4', 'kind': 'request', 'id': '107', 't': 'Mzuzu Water Kiosk', 'by': 'Grace Achieng', 'at': iso(150), 'status': 'open', 'data': {'from': '-11.45000, 34.02000', 'to': '-11.45310, 34.02240', 'dist': 430}},
           {'rid': 'd1', 'kind': 'new', 'id': '110', 't': 'Kaptebee Pigsty', 'by': 'Meril Kiprop', 'at': iso(400), 'status': 'approved', 'done': iso(20), 'doneBy': 'Jessica'},
           {'rid': 'd2', 'kind': 'move', 'id': '105', 't': 'Magara Well', 'by': 'Amina', 'at': iso(500), 'status': 'rejected', 'done': iso(40), 'doneBy': 'Reid Anderson', 'reason': 'Point was 2 km off'}]
-TEAM = [{'name': 'Reid Anderson', 'admin': True, 'source': 'cloudflare', 'src': 'cloudflare', 'home': '', 'email': 'reid@rafikioutreach.org', 'phone': '+1 801 555 0101', 'lastSeen': iso(1), 'aka': []},
+TEAM = [{'name': 'Reid Anderson', 'admin': True, 'source': 'cloudflare', 'src': 'cloudflare', 'home': '', 'email': 'reid@rafikioutreach.org', 'phone': '+1 801 555 0101', 'lastSeen': today(1), 'aka': []},
  {'name': 'Jessica Anderson', 'admin': True, 'source': 'app', 'src': 'app', 'home': '', 'email': 'jessica@rafikioutreach.org', 'phone': '', 'lastSeen': iso(30), 'aka': []},
- {'name': 'Meril Kiprop', 'source': 'app', 'src': 'app', 'home': 'ke', 'phone': '+254 712 345 678', 'role': 'Field officer', 'lastSeen': iso(2), 'aka': []},
+ {'name': 'Meril Kiprop', 'source': 'app', 'src': 'app', 'home': 'ke', 'phone': '+254 712 345 678', 'role': 'Field officer', 'lastSeen': today(2), 'aka': []},
  {'name': 'Bertin Mwangi', 'source': 'app', 'src': 'app', 'home': 'ke', 'phone': '+254 722 111 222', 'lastSeen': iso(26), 'aka': []},
  {'name': 'Grace Achieng', 'source': 'monday', 'src': 'monday', 'home': 'ug', 'phone': '', 'lastSeen': iso(200), 'aka': []},
  {'name': 'Amina Juma', 'source': 'app', 'src': 'app', 'home': 'tz', 'phone': '+255 754 000 111', 'lastSeen': None, 'aka': []},
  {'name': 'Okello Peter', 'source': 'app', 'src': 'app', 'home': 'ug', 'phone': '', 'lastSeen': iso(800), 'blocked': {'by': 'Reid Anderson', 'at': iso(100)}, 'aka': []},
- {'name': 'Chisomo Banda', 'source': 'app', 'src': 'app', 'home': 'mw', 'phone': '+265 99 123 4567', 'lastSeen': iso(5), 'aka': []}]
+ {'name': 'Chisomo Banda', 'source': 'app', 'src': 'app', 'home': 'mw', 'phone': '+265 99 123 4567', 'lastSeen': today(5), 'aka': []}]
 MODE = {'empty': False}
 posts, photos, problems = [], [], []
 def check(c, w): print(('ok   ' if c else 'FAIL ') + w); (None if c else problems.append(w))

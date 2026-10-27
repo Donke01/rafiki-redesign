@@ -12,8 +12,8 @@ android {
         applicationId = "org.rafikioutreach.pin"
         minSdk = 24
         targetSdk = 36
-        versionCode = 47
-        versionName = "2.22.0"
+        versionCode = 48
+        versionName = "2.23.0"
         buildConfigField("String", "SERVER", "\"https://rafiki-redesign.pages.dev\"")
     }
     signingConfigs {
@@ -61,6 +61,11 @@ dependencies {
     implementation("com.google.android.gms:play-services-code-scanner:16.1.0")
     // play flavor only: Google Play's in-app updates (flexible: downloads in the background, then a restart)
     "playImplementation"("com.google.android.play:app-update-ktx:2.1.0")
+    // Chat (feat-chata): a WebSocket for live messages, typing and presence; Media3 Transformer shrinks videos to 720p before upload
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("androidx.media3:media3-transformer:1.4.1")
+    implementation("androidx.media3:media3-effect:1.4.1")
+    implementation("androidx.media3:media3-common:1.4.1")
     testImplementation(bom)
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.robolectric:robolectric:4.14.1")

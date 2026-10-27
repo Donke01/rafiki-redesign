@@ -220,7 +220,8 @@ class AppFeelTest {
         repeat(34) { rule.mainClock.advanceTimeBy(50); frame() }
         rule.mainClock.autoAdvance = true; rule.onNodeWithTag("tracker").performScrollTo(); rule.mainClock.autoAdvance = false
         repeat(30) { rule.mainClock.advanceTimeBy(50); frame() }
-        rule.mainClock.autoAdvance = true; rule.onNodeWithTag("nav_me").performClick(); rule.mainClock.autoAdvance = false
+        // Me is the picture at the top left (Chat took its place in the bar, feat-chata): back off the project first
+        rule.mainClock.autoAdvance = true; rule.onNodeWithTag("hback").performClick(); rule.waitForIdle(); rule.onNodeWithTag("nav_me").performClick(); rule.mainClock.autoAdvance = false
         repeat(16) { rule.mainClock.advanceTimeBy(50); frame() }
         rule.mainClock.autoAdvance = true; rule.onNodeWithText("Your stamps").performScrollTo(); rule.mainClock.autoAdvance = false
         repeat(34) { rule.mainClock.advanceTimeBy(50); frame() }

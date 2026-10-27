@@ -3044,6 +3044,274 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
 <style id="monlogo-css">/* monday.com's own logo in Settings, as on Android (its icon if the logo can't load) */
 .pi.pi-brand .bi{width:24px;height:24px;display:flex;align-items:center;justify-content:center;background:transparent;box-shadow:none}.pi.pi-brand .bi svg{width:20px;height:20px;color:#6161FF}.pi.pi-brand .bi img{width:24px;height:24px;border-radius:5px}
 </style>
+<style id="chatw-css">/* chatw: Chat (list, one chat, sheets); Chat sits in the bottom bar, Me on the avatar */
+:root{--cw-bg:#E9EFF3;--cw-me:#D6EDFF;--cw-meb:#BFE0FA;--cw-them:#FFFFFF;--cw-tick:#7C8A95;--cw-read:#1D8FE0;--cw-sys:rgba(255,255,255,.86);--cw-un:#1C8A50}
+html[data-theme=dark]{--cw-bg:#0B1116;--cw-me:#123C5C;--cw-meb:#1B4C73;--cw-them:#1A232B;--cw-tick:#8FA0AD;--cw-read:#5BC0FF;--cw-sys:rgba(26,35,43,.92);--cw-un:#3CC07A}
+html[data-theme=sun]{--cw-bg:#FFFFFF;--cw-me:#DCEBFF;--cw-meb:#000000;--cw-them:#FFFFFF;--cw-tick:#1E1E1E;--cw-read:#0050A0;--cw-sys:#FFFFFF;--cw-un:#00562A}
+.hav[aria-current=page]{box-shadow:0 0 0 3px var(--card),0 0 0 5px var(--blue)}
+.tabs .dot.cw{background:var(--cw-un)}
+.cw-ib{flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--glb,var(--line));background:var(--gl2,var(--card));color:var(--ink);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0;box-shadow:var(--gls,none)}
+.cw-ib svg{width:20px;height:20px}.cw-ib.sm{width:36px;height:36px;box-shadow:none}.cw-ib.sm svg{width:18px;height:18px}
+.cw-ib.pri{background:var(--blue);border-color:var(--blue);color:#FFFFFF;box-shadow:0 6px 14px rgba(10,120,194,.28)}
+html[data-theme=sun] .cw-ib{border:2px solid #000;box-shadow:none}
+/* the list */
+.cw-head{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;align-items:center;gap:8px;margin:4px 0 12px}
+.cw-head h1{margin:0;text-align:center;font-size:2rem;letter-spacing:-.035em;line-height:1.08}
+.cw-sbox{display:flex;align-items:center;gap:8px;min-height:48px;padding:0 6px 0 14px;border:var(--bw) solid var(--line);border-radius:999px;background:var(--card);color:var(--muted)}
+.cw-sbox > svg{width:20px;height:20px;flex:none}
+.cw-sbox input{flex:1;min-width:0;min-height:0;margin:0;border:0 !important;border-radius:0;background:none !important;box-shadow:none !important;font:inherit;font-size:1rem;color:var(--text);padding:10px 0;outline:none;-webkit-appearance:none;appearance:none}
+.cw-sbox input::-webkit-search-cancel-button{display:none}
+.cw-sbox:focus-within{border-color:var(--blue);box-shadow:0 0 0 3px rgba(10,120,194,.15)}
+.cw-sbox button{flex:none;width:36px;height:36px;border:0;border-radius:50%;background:none;color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer}.cw-sbox button svg{width:18px;height:18px}
+.cw-archhd{display:flex;align-items:center;gap:10px;margin:12px 0 0}.cw-archhd b{font-size:1.05rem;color:var(--ink)}
+.cw-nt{display:flex;align-items:center;gap:10px;margin:12px 0 0;padding:10px 8px 10px 12px;border-radius:16px;background:var(--tint);color:var(--ink);font-size:.86rem;line-height:1.35}
+.cw-nt > svg{width:20px;height:20px;flex:none;color:var(--blue)}.cw-nt span{flex:1;min-width:0}.cw-nt .btn{flex:none;white-space:nowrap}
+html[data-theme=sun] .cw-nt{border:2px solid #000}
+.cw-list{margin-top:10px}
+.cw-sec{margin:16px 4px 6px;font-size:.74rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.cw-rw{position:relative;border-radius:18px;overflow:hidden;margin:2px 0}
+.cw-ra{position:absolute;top:0;right:0;bottom:0;display:flex;visibility:hidden}.cw-rw.sw .cw-ra,.cw-rw.swp .cw-ra{visibility:visible}
+.cw-ra button{width:84px;border:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font:inherit;font-size:.74rem;font-weight:800;color:#FFFFFF;cursor:pointer;white-space:nowrap}
+.cw-ra button svg{width:20px;height:20px}.cw-ra .mu{background:#5A6B78}.cw-ra .ar{background:#0A78C2}
+html[data-theme=sun] .cw-ra .mu{background:#1E1E1E}html[data-theme=sun] .cw-ra .ar{background:#0050A0}
+.cw-row{position:relative;z-index:1;display:flex;align-items:center;gap:12px;width:100%;min-height:72px;padding:10px 12px;border:0;border-radius:18px;background:var(--bg);color:var(--text);font:inherit;text-align:left;cursor:pointer;touch-action:pan-y;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;transition:transform .22s cubic-bezier(.2,.8,.2,1),background .15s}
+.cw-row:hover{background:var(--card)}.cw-row:active{background:var(--tint)}
+:root:not([data-theme]) .cw-row{background:transparent}.cw-rw.sw .cw-row,.cw-rw.swp .cw-row{background:var(--card) !important}
+html[data-theme=sun] .cw-row{background:#FFFFFF;border-bottom:2px solid #000;border-radius:0}html[data-theme=sun] .cw-rw{border-radius:0}
+.cw-av{flex:none;position:relative;width:50px;height:50px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:var(--hb,var(--tint));color:var(--hu,var(--blue));font-weight:800;font-size:1.02rem;letter-spacing:.02em;background-size:cover;background-position:center}
+.cw-av.ic svg{width:26px;height:26px}.cw-av.ph{background-color:var(--tint)}.cw-av.big{width:84px;height:84px;font-size:1.6rem}.cw-av.big.ic svg{width:40px;height:40px}
+html[data-theme=sun] .cw-av{border:2px solid #000}
+.cw-on{position:absolute;right:1px;bottom:1px;width:13px;height:13px;border-radius:50%;background:#25B562;border:2.5px solid var(--bg)}
+.cw-rt{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.cw-r1,.cw-r2{display:flex;align-items:center;gap:8px;min-width:0}
+.cw-r1 b{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:1rem;color:var(--ink)}
+.cw-k{flex:none;padding:1px 7px;border-radius:999px;background:var(--hb-slate);color:var(--hu-slate);font-size:.66rem;font-weight:800;letter-spacing:.02em;white-space:nowrap}
+.cw-r1 time{margin-left:auto;flex:none;font-size:.74rem;color:var(--muted);white-space:nowrap}
+.cw-row.un .cw-r1 time{color:var(--cw-un);font-weight:800}
+.cw-pv,.cw-typ{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.88rem;color:var(--muted)}
+.cw-pv .cw-tk{width:16px;height:11px;vertical-align:-1px;margin-right:3px;color:var(--cw-tick)}.cw-pv .cw-tk.rd{color:var(--cw-read)}
+.cw-typ{color:var(--cw-un);font-weight:700}
+.cw-row.un .cw-pv{color:var(--text)}
+.cw-bs{flex:none;display:flex;align-items:center;gap:5px;margin-left:auto}
+.cw-un,.cw-at{min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--cw-un);color:#FFFFFF;font-style:normal;font-size:.74rem;font-weight:800;line-height:22px;text-align:center}
+.cw-un.mu{background:var(--muted)}.cw-at{padding:0;width:22px}
+html[data-theme=dark] .cw-un,html[data-theme=dark] .cw-at{color:#04140B}
+.cw-bi{display:flex;color:var(--muted)}.cw-bi svg{width:16px;height:16px}
+.cw-arow{display:flex;align-items:center;gap:14px;width:100%;min-height:52px;padding:8px 14px 8px 25px;border:0;border-radius:16px;background:none;color:var(--ink);font:inherit;font-weight:700;cursor:pointer;text-align:left}
+.cw-arow svg{width:20px;height:20px;color:var(--muted)}.cw-arow span{flex:1}.cw-arow i{font-style:normal;font-size:.8rem;color:var(--muted);font-weight:800}
+.cw-arow:hover{background:var(--card)}
+.cw-none{margin:8px 6px;color:var(--muted);font-size:.9rem}
+.cw-row mark{background:rgba(255,200,0,.35);color:inherit;border-radius:3px}
+.cw-off,.cw-empty{text-align:center;padding:34px 18px;color:var(--muted)}
+.cw-off h2,.cw-empty h2{margin:12px 0 6px;font-size:1.15rem;color:var(--ink);text-wrap:balance}.cw-off p,.cw-empty p{margin:0 auto;max-width:32ch;line-height:1.45;text-wrap:balance}
+.cw-off .po-tech{margin:16px auto 0;max-width:40ch;text-align:left}
+.cw-offi{display:inline-flex;width:64px;height:64px;border-radius:22px;align-items:center;justify-content:center;background:var(--tint);color:var(--blue)}.cw-offi svg{width:32px;height:32px}
+.cw-empty.sm{padding:40px 12px}
+/* one chat: the header in the app bar, the messages, the box */
+.cw-hd{display:none}
+body.room .top .ht,body.room .top .htt,body.room .top .rf,body.room .top .bell{display:none !important}
+body.room .cw-hd{grid-column:2/4;grid-row:1;display:flex;align-items:center;gap:10px;min-width:0;width:100%;height:46px;margin-left:6px;padding:0 6px;border:0;border-radius:14px;background:none;color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+body.room .cw-hd:active{background:var(--tint)}
+.cw-hd .cw-av{width:38px;height:38px;font-size:.84rem}.cw-hd .cw-av.ic svg{width:21px;height:21px}.cw-hd .cw-on{width:11px;height:11px;border-width:2px;border-color:var(--card)}
+.cw-hdt{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.2}
+.cw-hdt b{font-size:1rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cw-hdt small{font-size:.76rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.cw-hdt small.cw-typ{color:var(--cw-un);font-weight:700}
+body.room .tabs{display:none}
+body.room{overflow:hidden}
+body.room main{padding-bottom:0}
+#vRoom{position:fixed;left:0;right:0;top:calc(var(--hh,56px) + var(--cwvt,0px));height:calc(var(--cwvh,100vh) - var(--hh,56px));z-index:5;display:flex;flex-direction:column;max-width:760px;margin:0 auto;background:var(--cw-bg)}
+#vRoom.hidden{display:none}
+@media (min-width:761px){#vRoom{border-left:var(--bw) solid var(--line);border-right:var(--bw) solid var(--line)}}
+.cw-msgs{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:8px 10px 10px;background-color:var(--cw-bg);-webkit-overflow-scrolling:touch}
+.cw-wp-sky{background:linear-gradient(180deg,#DDEFFC 0%,#F2F8FC 100%)}
+.cw-wp-dots{background-color:var(--cw-bg);background-image:radial-gradient(rgba(10,120,194,.16) 1.2px,transparent 1.3px);background-size:18px 18px}
+.cw-wp-leaf{background-color:#E7F3EA;background-image:radial-gradient(60% 40% at 15% 20%,rgba(28,138,80,.12),transparent 70%),radial-gradient(50% 35% at 85% 70%,rgba(28,138,80,.12),transparent 70%)}
+.cw-wp-waves{background-color:var(--cw-bg);background-image:repeating-radial-gradient(circle at 0 100%,transparent 0,transparent 14px,rgba(10,120,194,.08) 15px,transparent 17px)}
+.cw-wp-sand{background-color:#F5EEDF}
+html[data-theme=dark] .cw-wp-sky{background:linear-gradient(180deg,#0E2233 0%,#0B1116 100%)}html[data-theme=dark] .cw-wp-leaf{background-color:#0D1A12}html[data-theme=dark] .cw-wp-sand{background-color:#1C1810}
+html[data-theme=sun] .cw-msgs{background:#FFFFFF !important}
+.cw-day,.cw-sys,.cw-unl,.cw-older{display:flex;justify-content:center;margin:10px 0 8px}
+.cw-day span,.cw-sys span{padding:4px 12px;border-radius:10px;background:var(--cw-sys);color:var(--muted);font-size:.76rem;font-weight:700;box-shadow:0 1px 2px rgba(4,38,63,.08);text-align:center;max-width:86%;line-height:1.35}
+.cw-sys span{color:var(--ink);font-weight:600}.cw-sys.cw-e2e span{display:inline-flex;align-items:center;gap:6px;background:var(--warnbg);color:var(--warn);font-weight:600}.cw-e2e svg{width:14px;height:14px;flex:none}
+.cw-unl span{width:100%;padding:4px 0;background:var(--cw-sys);color:var(--muted);font-size:.78rem;font-weight:800;text-align:center;border-radius:8px}
+.cw-older span{font-size:.74rem;color:var(--muted)}.cw-msgs.older .cw-older span::after{content:" …"}
+html[data-theme=sun] .cw-day span,html[data-theme=sun] .cw-sys span,html[data-theme=sun] .cw-unl span{border:2px solid #000;box-shadow:none;color:#000}
+.cw-m{display:flex;flex-direction:column;align-items:flex-start;margin-top:2px;touch-action:pan-y;transition:transform .18s ease}
+.cw-m.first{margin-top:8px}.cw-m.me{align-items:flex-end}
+.cw-b{position:relative;max-width:min(82%,440px);min-width:84px;padding:6px 9px 4px;border-radius:16px;background:var(--cw-them);color:var(--text);box-shadow:0 1px 1.5px rgba(4,38,63,.13);overflow-wrap:anywhere}
+.cw-m.me .cw-b{background:var(--cw-me)}
+.cw-m.them.first .cw-b{border-top-left-radius:5px}.cw-m.me.first .cw-b{border-top-right-radius:5px}
+html[data-theme=sun] .cw-b{border:2px solid #000;box-shadow:none}
+@media (pointer:coarse){.cw-m{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}}
+.cw-m.rp .cw-b{box-shadow:0 0 0 2px var(--blue)}
+.cw-m.flash .cw-b{animation:cwFlash 1.4s ease}
+@keyframes cwFlash{0%,60%{box-shadow:0 0 0 3px var(--blue)}100%{box-shadow:0 1px 1.5px rgba(4,38,63,.13)}}
+.cw-sn{display:block;font-size:.8rem;font-weight:800;color:var(--hu);margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cw-tx{font-size:.96rem;line-height:1.4;white-space:normal}
+.cw-tx a{color:var(--blue);text-decoration:underline}.cw-tx a.cw-a{display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:bottom}
+.cw-men{color:var(--blue);font-weight:700}.cw-men[data-me]{background:rgba(10,120,194,.12);border-radius:4px;padding:0 2px}
+.cw-dl{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-style:italic}.cw-dl svg{width:14px;height:14px}
+.cw-fw{display:flex;align-items:center;gap:4px;font-size:.76rem;color:var(--muted);font-style:italic;margin-bottom:2px}.cw-fw svg{width:14px;height:14px}
+.cw-mt{float:right;display:inline-flex;align-items:center;gap:3px;margin:6px 0 -2px 10px;font-size:.7rem;color:var(--muted);white-space:nowrap;line-height:1}
+.cw-mt i{font-style:italic}.cw-st svg{width:12px;height:12px;fill:currentColor}
+.cw-tk{width:17px;height:12px;color:var(--cw-tick)}.cw-tk.q{width:13px;height:13px}.cw-tk.rd{color:var(--cw-read)}.cw-tk.bad{width:14px;height:14px;color:var(--bad)}
+.cw-q{display:flex;flex-direction:column;align-items:flex-start;width:100%;min-width:140px;margin:0 0 4px;padding:5px 9px;border:0;border-left:4px solid var(--hu);border-radius:8px;background:rgba(4,38,63,.06);color:var(--text);font:inherit;text-align:left;cursor:pointer}
+html[data-theme=dark] .cw-q{background:rgba(255,255,255,.07)}
+.cw-q b{font-size:.78rem;color:var(--hu)}.cw-q span{font-size:.84rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+.cw-rx{display:flex;flex-wrap:wrap;gap:4px;margin:-6px 8px 2px;position:relative;z-index:1}
+.cw-rc{display:inline-flex;align-items:center;gap:3px;min-height:28px;padding:2px 8px;border:1px solid var(--line);border-radius:999px;background:var(--card);font:inherit;font-size:.9rem;cursor:pointer;box-shadow:0 1px 2px rgba(4,38,63,.1)}
+.cw-rc i{font-style:normal;font-size:.74rem;font-weight:800;color:var(--muted)}.cw-rc.on{border-color:var(--blue);background:var(--tint)}
+html[data-theme=sun] .cw-rc{border:2px solid #000}
+/* media */
+.cw-g1{width:min(64vw,260px);margin:2px -5px 4px}
+.cw-g1 .cw-gi{display:block;width:100%;aspect-ratio:1/var(--r,.75);max-height:340px}
+.cw-g{display:grid;grid-template-columns:1fr 1fr;gap:3px;width:min(64vw,260px);margin:2px -5px 4px}
+.cw-g.n3 .cw-gi:first-child{grid-column:1/-1;aspect-ratio:2/1}
+.cw-gi{position:relative;display:block;aspect-ratio:1;overflow:hidden;border-radius:12px;background:var(--tint);cursor:pointer}
+.cw-gi img,.cw-gi video{width:100%;height:100%;object-fit:cover;display:block}
+.cw-gi.cw-broken::after,.cw-gi img.cw-broken{content:"";opacity:.4}
+.cw-play{position:absolute;left:50%;top:50%;width:48px;height:48px;margin:-24px 0 0 -24px;border-radius:50%;background:rgba(0,0,0,.5);color:#FFFFFF;display:flex;align-items:center;justify-content:center}.cw-play svg{width:24px;height:24px;margin-left:3px}
+.cw-gi small{position:absolute;left:8px;bottom:6px;color:#FFFFFF;font-size:.72rem;font-weight:800;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.cw-more{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.5);color:#FFFFFF;font-size:1.5rem}
+.cw-vo{display:flex;align-items:center;gap:8px;min-width:min(62vw,250px);padding:4px 0 2px}
+.cw-vp{flex:none;width:40px;height:40px;border-radius:50%;border:0;background:var(--blue);color:#FFFFFF;display:flex;align-items:center;justify-content:center;cursor:pointer}.cw-vp svg{width:20px;height:20px}
+.cw-wv{flex:1;min-width:0;height:30px;display:flex;align-items:center;gap:2px;cursor:pointer}
+.cw-wv i{flex:1;min-width:2px;border-radius:2px;background:var(--cw-tick);opacity:.45}.cw-wv i.on{background:var(--blue);opacity:1}
+.cw-vd{flex:none;font-size:.74rem;color:var(--muted);min-width:32px;font-variant-numeric:tabular-nums}
+.cw-vs{flex:none;min-width:38px;height:26px;padding:0 6px;border:0;border-radius:13px;background:rgba(4,38,63,.1);color:var(--ink);font:inherit;font-size:.74rem;font-weight:800;cursor:pointer}
+html[data-theme=dark] .cw-vs{background:rgba(255,255,255,.12)}html[data-theme=sun] .cw-vs{border:2px solid #000;background:#FFFFFF}
+.cw-doc{display:flex;align-items:center;gap:10px;width:min(66vw,270px);margin:2px -3px 4px;padding:8px 10px;border:0;border-radius:12px;background:rgba(4,38,63,.06);color:var(--text);font:inherit;text-align:left;cursor:pointer}
+html[data-theme=dark] .cw-doc{background:rgba(255,255,255,.07)}
+.cw-dx{flex:none;width:38px;height:44px;border-radius:6px;background:#D2553A;color:#FFFFFF;font-size:.66rem;font-weight:800;display:flex;align-items:flex-end;justify-content:center;padding-bottom:6px}
+.cw-dn{flex:1;min-width:0;display:flex;flex-direction:column}.cw-dn b{font-size:.88rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.cw-dn small{font-size:.74rem;color:var(--muted)}
+.cw-doc > svg{width:20px;height:20px;color:var(--muted);flex:none}
+.cw-loc{width:min(66vw,260px);margin:2px -5px 4px}
+.cw-map{position:relative;display:block;height:130px;overflow:hidden;border-radius:12px;background:#DDE6EA}
+.cw-tiles{position:absolute;display:grid;grid-template-columns:256px 256px;width:512px;height:512px}.cw-tiles img{width:256px;height:256px;max-width:none;display:block}
+html[data-theme=dark] .cw-tiles{filter:brightness(.8) contrast(1.1)}
+.cw-mpin{position:absolute;left:50%;top:50%;width:34px;height:34px;margin:-32px 0 0 -17px;color:#D2553A;filter:drop-shadow(0 2px 2px rgba(0,0,0,.35))}.cw-mpin svg{width:34px;height:34px;fill:#FFFFFF}
+.cw-lt{display:flex;flex-direction:column;gap:1px;padding:6px 4px 0}.cw-lt b{font-size:.88rem}.cw-lt small{font-size:.74rem;color:var(--muted)}
+.cw-la{display:flex;flex-wrap:wrap;gap:6px;padding:6px 2px 0}.cw-la .btn{min-height:36px;white-space:nowrap}.cw-la .btn svg{width:16px;height:16px}
+.cw-ct{display:flex;flex-wrap:wrap;align-items:center;gap:10px;min-width:min(62vw,240px);padding:4px 0}
+.cw-ct .cw-av{width:44px;height:44px;font-size:.9rem}.cw-ct b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cw-ca{display:flex;gap:6px;width:100%}.cw-ca .btn{flex:1;min-height:36px;white-space:nowrap}
+.cw-lp{display:flex;gap:10px;width:min(66vw,280px);margin:6px -3px 2px;padding:8px;border:0;border-radius:12px;background:rgba(4,38,63,.06);color:var(--text);font:inherit;text-align:left;text-decoration:none;cursor:pointer}
+html[data-theme=dark] .cw-lp{background:rgba(255,255,255,.07)}html[data-theme=sun] .cw-lp,html[data-theme=sun] .cw-doc,html[data-theme=sun] .cw-q{border:2px solid #000}
+.cw-lpi{flex:none;width:64px;height:64px;border-radius:10px;background:var(--tint) center/cover;display:flex;align-items:center;justify-content:center;color:var(--blue)}.cw-lpi svg{width:28px;height:28px}
+.cw-lpt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.cw-lpt b{font-size:.88rem;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.cw-lpt small{font-size:.76rem;color:var(--muted);line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.cw-lpt i{font-style:normal;font-size:.7rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.cw-lpt .tag{align-self:flex-start;margin-top:2px}
+.cw-jump{position:absolute;right:14px;bottom:calc(var(--cwch,64px) + 14px);width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--ink);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(4,38,63,.2);cursor:pointer;z-index:3}
+.cw-jump svg{width:22px;height:22px}.cw-jump.hidden{display:none}
+.cw-jump i{position:absolute;top:-6px;right:-4px;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:var(--cw-un);color:#FFFFFF;font-style:normal;font-size:.7rem;font-weight:800;line-height:20px;text-align:center}
+.cw-jump i.hidden{display:none}
+/* the box to write in */
+.cw-comp{position:relative;flex:none;padding:6px 8px calc(8px + env(safe-area-inset-bottom));background:var(--cw-bg)}
+html[data-theme=sun] .cw-comp{border-top:2px solid #000;background:#FFFFFF}
+.cw-cr{display:flex;align-items:flex-end;gap:6px}
+.cw-cb,.cw-go,.cw-cam{flex:none;width:48px;height:48px;border-radius:50%;border:0;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+.cw-cb{background:var(--card);color:var(--muted);box-shadow:0 1px 2px rgba(4,38,63,.12)}.cw-cb svg{width:24px;height:24px}
+.cw-go{background:var(--blue);color:#FFFFFF;box-shadow:0 4px 10px rgba(10,120,194,.3);touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}.cw-go svg{width:22px;height:22px}
+html[data-theme=sun] .cw-cb,html[data-theme=sun] .cw-go{border:2px solid #000;box-shadow:none}
+.cw-in{flex:1;min-width:0;display:flex;align-items:flex-end;min-height:48px;border-radius:24px;background:var(--card);box-shadow:0 1px 2px rgba(4,38,63,.12)}
+html[data-theme=sun] .cw-in{border:2px solid #000;box-shadow:none}
+.cw-in textarea{flex:1;min-width:0;min-height:48px;max-height:132px;margin:0;padding:13px 4px 12px 16px;border:0;border-radius:24px;background:none;color:var(--text);font:inherit;font-size:1rem;line-height:1.4;resize:none;outline:none;box-shadow:none}
+.cw-cam{width:44px;height:48px;background:none;color:var(--muted)}.cw-cam svg{width:22px;height:22px}.cw-cam.hidden{display:none}
+.cw-rb{display:flex;align-items:center;gap:8px;margin:0 0 6px;padding:6px 6px 6px 10px;border-left:4px solid var(--hu,var(--blue));border-radius:12px;background:var(--card)}
+.cw-rb > span{flex:1;min-width:0;display:flex;flex-direction:column}.cw-rb b{display:flex;align-items:center;gap:5px;font-size:.8rem;color:var(--hu,var(--blue))}.cw-rb b svg{width:14px;height:14px}
+.cw-rb small{font-size:.84rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cw-rb.ed{border-left-color:var(--blue)}
+.cw-men-pop{position:absolute;left:8px;right:8px;bottom:calc(100% - 2px);max-height:240px;overflow:auto;padding:6px;border-radius:16px;background:var(--card);box-shadow:0 -6px 24px rgba(4,38,63,.18);z-index:4}
+.cw-men-pop.hidden{display:none}
+.cw-men-pop button{display:flex;align-items:center;gap:10px;width:100%;min-height:48px;padding:4px 8px;border:0;border-radius:12px;background:none;color:var(--text);font:inherit;text-align:left;cursor:pointer}
+.cw-men-pop button:hover{background:var(--tint)}.cw-men-pop .cw-av{width:34px;height:34px;font-size:.78rem}
+.cw-only{display:flex;align-items:center;justify-content:center;gap:8px;margin:4px 0;padding:12px;border-radius:14px;background:var(--card);color:var(--muted);font-size:.88rem;text-align:center}.cw-only svg{width:16px;height:16px;flex:none}
+/* recording */
+.cw-rec{position:absolute;left:8px;right:62px;bottom:calc(8px + env(safe-area-inset-bottom));z-index:2;display:flex;align-items:center;gap:10px;min-height:48px;padding:0 6px 0 14px;border-radius:24px;background:var(--card);box-shadow:0 1px 2px rgba(4,38,63,.12);overflow:hidden}
+.cw-comp.locked .cw-rec{right:8px}.cw-comp.locked #cwGo{visibility:hidden}
+html[data-theme=sun] .cw-rec{border:2px solid #000;box-shadow:none}
+.cw-rec.hidden{display:none}
+.cw-cr.recording .cw-in,.cw-cr.recording .cw-cb{visibility:hidden}
+.cw-rd{flex:none;width:11px;height:11px;border-radius:50%;background:#E0362C;animation:cwBlink 1s infinite}
+@keyframes cwBlink{50%{opacity:.25}}
+.cw-rtm{flex:none;font-variant-numeric:tabular-nums;font-size:.95rem;color:var(--ink)}
+.cw-rs{flex:1;min-width:0;display:flex;align-items:center;justify-content:center;gap:4px;color:var(--muted);font-size:.86rem;white-space:nowrap;overflow:hidden}.cw-rs svg{width:16px;height:16px;flex:none}
+.cw-lk{flex:none;display:flex;flex-direction:column;align-items:center;color:var(--muted)}.cw-lk svg{width:16px;height:16px}
+.cw-rl{flex:1;min-width:0;font-size:.84rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cw-rec .cw-go{width:40px;height:40px}.cw-rec .cw-go svg{width:19px;height:19px}
+@media (prefers-reduced-motion: reduce){.cw-rd{animation:none}.cw-m,.cw-row{transition:none}.cw-m.flash .cw-b{animation:none;box-shadow:0 0 0 3px var(--blue)}}
+/* sheets */
+.cw-shh{margin:0 0 6px;font-size:1.2rem;color:var(--ink)}
+.bsh.cw-sheet{z-index:2400}
+.cw-sheet .cw-mn{display:flex;flex-direction:column}
+.cw-mn button{display:flex;align-items:center;gap:14px;width:100%;min-height:52px;padding:8px 6px;border:0;border-top:1px solid var(--line);background:none;color:var(--text);font:inherit;font-size:1rem;text-align:left;cursor:pointer}
+.cw-mn button:first-child{border-top:0}.cw-mn button svg{width:22px;height:22px;color:var(--muted);flex:none}.cw-mn button.red,.cw-mn button.red svg{color:var(--bad)}
+.cw-mn button:hover{background:var(--tint)}
+.cw-rxp{display:flex;justify-content:space-between;gap:4px;margin:0 0 10px;padding:6px;border-radius:999px;background:var(--bg)}
+.cw-rxp button{flex:1;max-width:52px;aspect-ratio:1;border:0;border-radius:50%;background:none;font-size:1.6rem;line-height:1;cursor:pointer;transition:transform .15s}
+.cw-rxp button:active{transform:scale(1.25)}.cw-rxp button.on{background:var(--tint);box-shadow:inset 0 0 0 2px var(--blue)}
+.cw-att{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 6px;padding:4px 0 6px}
+.cw-att button{display:flex;flex-direction:column;align-items:center;gap:8px;padding:10px 2px;border:0;border-radius:16px;background:none;color:var(--ink);font:inherit;cursor:pointer}
+.cw-att button:hover{background:var(--tint)}
+.cw-att span{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--hb);color:var(--hu)}.cw-att span svg{width:26px;height:26px}
+.cw-att b{font-size:.8rem;font-weight:700;text-align:center;line-height:1.25;text-wrap:balance;overflow-wrap:normal;word-break:normal;hyphens:none}
+html[data-theme=sun] .cw-att span{border:2px solid #000}
+.cw-opts{display:flex;flex-direction:column;gap:8px;margin-top:10px}.cw-opts .btn svg{width:18px;height:18px}
+.cw-pl{display:flex;flex-direction:column;margin:6px 0}
+.cw-pr{display:flex;align-items:center;gap:12px;width:100%;min-height:58px;padding:6px 4px;border:0;border-bottom:1px solid var(--line);background:none;color:var(--text);font:inherit;text-align:left;cursor:pointer}
+.cw-pr:hover{background:var(--tint)}.cw-pr .cw-av{width:42px;height:42px;font-size:.86rem}.cw-pr.big .cw-av{width:46px;height:46px}.cw-pr.hl{background:var(--tint)}
+.cw-pr > b,.cw-prt b{font-size:.98rem;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cw-prt{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}.cw-prt small{font-size:.8rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cw-pr time{flex:none;font-size:.74rem;color:var(--muted)}.cw-pe{font-size:1.3rem}
+.cw-ck{flex:none;width:26px;height:26px;border-radius:50%;border:2px solid var(--edge);display:flex;align-items:center;justify-content:center;color:transparent}.cw-ck svg{width:16px;height:16px}
+.cw-pr[aria-checked=true] .cw-ck{background:var(--blue);border-color:var(--blue);color:#FFFFFF}
+.cw-foot{position:sticky;bottom:0;padding:10px 0 2px;background:var(--card)}
+.tsh-c input[type=search]#cwPq,.tsh-c input[type=search]#cwPpq,.tsh-c input[type=search]#cwNq{width:100%;margin:6px 0 4px}
+.cw-ih{display:flex;align-items:center;gap:6px;margin:14px 2px 4px;font-size:.74rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.cw-ih .cw-tk{width:18px;height:12px}
+.cw-ms h3{margin:0 0 10px;font-size:1.15rem}
+.cw-msg{display:grid;gap:6px;margin-bottom:12px}.cw-msg.many{grid-template-columns:repeat(3,minmax(0,1fr))}
+.cw-msg img,.cw-msg video{width:100%;border-radius:12px;background:var(--tint);object-fit:cover;max-height:46vh}.cw-msg.many img,.cw-msg.many video{aspect-ratio:1}
+.cw-capr{display:flex;align-items:center;gap:8px}.cw-capr input{flex:1;min-width:0}
+.cw-walls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.cw-walls button{display:flex;flex-direction:column;align-items:center;gap:6px;padding:0;border:0;background:none;color:var(--ink);font:inherit;cursor:pointer}
+.cw-walls .cw-msgs{display:block;width:100%;height:84px;border-radius:14px;border:2px solid var(--line);flex:none;overflow:hidden;padding:0}
+.cw-walls button[aria-pressed=true] .cw-msgs{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue)}.cw-walls b{font-size:.84rem}
+.cw-url{padding:10px 12px;border-radius:12px;background:var(--bg);font-size:.86rem;overflow-wrap:anywhere;color:var(--ink)}
+/* chat info */
+.cw-ihd{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 0 4px;text-align:center}
+.cw-ihd h3{margin:6px 0 0;font-size:1.3rem;color:var(--ink);overflow-wrap:anywhere}.cw-ihd small{color:var(--muted)}.cw-ihd p{margin:6px 0 0;color:var(--text);line-height:1.4;max-width:36ch}
+.cw-iph{position:absolute;top:62px;left:calc(50% + 22px);width:34px;height:34px;border-radius:50%;border:2px solid var(--card);background:var(--blue);color:#FFFFFF;display:flex;align-items:center;justify-content:center;cursor:pointer}.cw-iph svg{width:17px;height:17px}
+.cw-info .ct-r .ct-ri svg{width:20px;height:20px}.cw-info .ct-rc svg{width:18px;height:18px;color:var(--muted)}
+.cw-info .ct-r.sw{cursor:default}
+.cw-mem .cw-av{width:40px;height:40px;font-size:.84rem}.cw-mem .tag{flex:none;white-space:nowrap}
+.cw-sw{flex:none;position:relative;width:52px;height:32px;border-radius:16px;border:0;background:var(--edge);cursor:pointer;padding:0;transition:background .2s}
+.cw-sw .kn{position:absolute;top:3px;left:3px;width:26px;height:26px;border-radius:50%;background:#FFFFFF;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .2s}
+.cw-sw[aria-checked=true]{background:var(--ok)}.cw-sw[aria-checked=true] .kn{transform:translateX(20px)}
+html[data-theme=sun] .cw-sw{border:2px solid #000}
+/* the photo viewer */
+.cw-lb{position:fixed;inset:0;z-index:2600;display:flex;flex-direction:column;background:#000000;color:#FFFFFF;opacity:0;transition:opacity .18s}
+.cw-lb.in{opacity:1}.cw-lb.out{opacity:0}
+.cw-lbh{display:flex;align-items:center;gap:10px;padding:calc(8px + env(safe-area-inset-top)) 10px 8px}
+.cw-lbh .cw-ib{background:rgba(255,255,255,.14);border:0;color:#FFFFFF;box-shadow:none}
+.cw-lbt{flex:1;min-width:0;font-size:.88rem;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.cw-lbn{font-size:.82rem;opacity:.8}
+.cw-lbs{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;touch-action:pan-y}
+.cw-lbs img,.cw-lbs video{max-width:100%;max-height:100%;object-fit:contain}
+.cw-lbp{position:absolute;top:50%;left:8px;width:44px;height:44px;margin-top:-22px;border-radius:50%;border:0;background:rgba(255,255,255,.16);color:#FFFFFF;display:flex;align-items:center;justify-content:center;cursor:pointer}.cw-lbp svg{width:24px;height:24px}
+.cw-lbp.nx{left:auto;right:8px}.cw-lbp.hidden{display:none}
+.cw-lbc{padding:10px 16px calc(14px + env(safe-area-inset-bottom));font-size:.95rem;text-align:center;min-height:20px}
+/* the undo snackbar */
+.cw-snk{position:fixed;left:50%;bottom:calc(var(--tabh) + 24px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:1300;display:flex;align-items:center;gap:14px;max-width:calc(100vw - 32px);padding:8px 8px 8px 16px;border-radius:14px;background:var(--ink);color:var(--card);font-size:.9rem;font-weight:700;box-shadow:0 6px 20px rgba(0,0,0,.25);animation:drop .3s both}
+.cw-snk span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cw-snk button{flex:none;min-height:40px;padding:0 12px;border:0;border-radius:10px;background:none;color:#7CC4FF;font:inherit;font-weight:800;cursor:pointer;white-space:nowrap}
+html[data-theme=dark] .cw-snk button{color:#0A78C2}.cw-snk.out{opacity:0;transition:opacity .3s}
+/* the project page's Chat button and the contact sheet's Message tile */
+.phead .links .cw-pbtn{grid-column:1/-1;flex-direction:row;justify-content:flex-start;gap:12px;padding:10px 12px;text-align:left;border:0;font:inherit;cursor:pointer}
+.cw-pbtn .mi{flex:none}.cw-pbt{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}.cw-pbt b{font-size:.95rem}.cw-pbt small{font-size:.76rem;font-weight:600;opacity:.85;line-height:1.3}
+.cw-pbtn .cw-pch{width:18px;height:18px;flex:none;opacity:.8}
+.ct-msg{display:flex;align-items:center;justify-content:center;gap:8px;margin:16px 0 0;min-height:52px}.ct-msg svg{width:20px;height:20px;flex:none}.ct-msg span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ct-msg + .ct-qk{margin-top:10px}
+</style>
 </head>
 <body class="locked">
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
@@ -3059,6 +3327,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
     <button class="hb" id="hBack" type="button" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
     <button class="hav" id="hAv" type="button" aria-label="Me"></button>
     <span class="ht" aria-hidden="true"><img class="lg-d" src="/img/logo-dark-bold.webp" alt="RAFIKI" width="64" height="22"><img class="lg-l" src="/img/logo-light-bold.webp" alt="" width="64" height="22"><i>Pin</i></span><span class="htt" id="hTitle" aria-hidden="true"></span>
+    <button class="cw-hd" id="cwHd" type="button" hidden></button>
     <a class="home" href="/" aria-label="RAFIKI Outreach home page"><img class="lg-d" src="/img/logo-dark-bold.webp" alt=""><img class="lg-l" src="/img/logo-light-bold.webp" alt=""></a>
     <b>Pin</b>
     <span class="sp"></span>
@@ -3343,13 +3612,38 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
       </div>
     </section>
 
+
+    <!-- chatw:begin -->
+    <!-- chat: every conversation, newest first (chatw) -->
+    <section id="vChat" class="hidden" aria-labelledby="h-chat">
+      <div class="cw-head">
+        <button class="cw-ib" id="cwStar" type="button" aria-label="Starred messages"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4l2.5 5.2 5.6.8-4.1 3.9 1 5.6L12 16.8l-5 2.7 1-5.6-4.1-3.9 5.6-.8z"/></svg></button>
+        <h1 id="h-chat">Chat</h1>
+        <button class="cw-ib pri" id="cwNew" type="button" aria-label="New chat" data-testid="cw_new"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+      </div>
+      <div id="cwTools">
+        <div class="cw-sbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg><input type="search" id="cwQ" placeholder="Search chats and messages" aria-label="Search chats and messages" autocomplete="off" enterkeyhint="search"><button type="button" id="cwQx" class="hidden" aria-label="Clear the search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+        <div class="cw-archhd hidden" id="cwArchHd"><button type="button" class="cw-ib sm" id="cwArchBk" aria-label="Back to all chats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><b>Archived</b></div>
+      </div>
+      <div id="cwNote"></div>
+      <div class="cw-list" id="cwList"></div>
+    </section>
+
+    <!-- one chat: the messages and the box to write in (chatw) -->
+    <section id="vRoom" class="hidden" aria-label="Chat">
+      <div class="cw-msgs" id="cwMsgs" role="log" aria-label="Messages"></div>
+      <button class="cw-jump hidden" id="cwJump" type="button" aria-label="Jump to the newest message"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9.5l6 6 6-6"/></svg><i id="cwJumpN" class="hidden"></i></button>
+      <div class="cw-comp" id="cwComp"></div>
+    </section>
+    <!-- chatw:end -->
   </main>
   <div class="tabs" id="tabs">
     <nav aria-label="Main">
       <button type="button" data-v="vMap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg>Map</button>
       <button type="button" data-v="vList"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="3.5" cy="6" r="1"/><circle cx="3.5" cy="12" r="1"/><circle cx="3.5" cy="18" r="1"/></svg>Projects<span class="dot hidden" id="tabDot"></span></button>
       <button type="button" data-v="vNew" class="plus"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span>New site</button>
-      <button type="button" data-v="vMe"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>Me</button>
+      <!-- Chat takes Me's place in the bar; Me is the avatar at top left (chatw, S/chat-tabbar-decision.md) -->
+      <button type="button" data-v="vChat" id="tabChat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 19.5l1.2-3.6A7.8 7.8 0 1 1 8.6 18.6z"/><path d="M9 10.5h6M9 13.5h4"/></svg>Chat<span class="dot cw hidden" id="chatDot"></span></button>
       <button type="button" data-v="vOffice" id="tabOffice" class="hidden"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Office<span class="dot hidden" id="offDot"></span></button>
     </nav>
   </div>
@@ -3501,15 +3795,16 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
   }
 
   // --- views and tab bar -------------------------------------------------------------------
-  var MAIN = ['vMap', 'vList', 'vNew', 'vMe', 'vOffice'];
-  var DEEP = { vProj: 1, vRoute: 1, vReport: 1, vSearch: 1 };
+  var MAIN = ['vMap', 'vList', 'vNew', 'vMe', 'vOffice', 'vChat'];
+  var DEEP = { vProj: 1, vRoute: 1, vReport: 1, vSearch: 1, vRoom: 1 };
   // Each screen, and each sub-tab in it, has its own address (#map, #list, #p/<id>, #p/<id>/hist, #office/repairs,
   // #me/team…), so Back and a page refresh keep you where you were.
   function hashFor(v) {
     if (v === 'vProj' && S.cur) return '#p/' + S.cur.id + (S.tab && S.tab !== 'pin' ? '/' + S.tab : '');
     if (v === 'vMe') return '#me' + (store.get('rfPinMePane') === 'team' ? '/team' : '');
     if (v === 'vOffice') return '#office' + (O.tab && O.tab !== 'overview' ? '/' + O.tab : '');
-    return '#' + ({ vMap: 'map', vList: 'list', vRoute: 'route', vSearch: 'search', vNew: 'new', vReport: 'report' }[v] || 'map');
+    if (v === 'vRoom') return '#chat/' + encodeURIComponent(CH.cur || '').replace(/%3A/gi, ':'); // chat ids like t:all, p:101
+    return '#' + ({ vMap: 'map', vList: 'list', vRoute: 'route', vSearch: 'search', vNew: 'new', vReport: 'report', vChat: 'chat' }[v] || 'map');
   }
   // the address of a screen on its first sub-tab (Pin location, Overview, Me)
   function baseHash(v) { return v === 'vProj' && S.cur ? '#p/' + S.cur.id : v === 'vMe' ? '#me' : v === 'vOffice' ? '#office' : hashFor(v); }
@@ -3630,6 +3925,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
     if (v === 'vMe') { store.set('rfPinMePane', 'me'); var sb = $('meStampsMore'); if (sb && !$('meStamps').classList.contains('fold')) { $('meStamps').classList.add('fold'); sb.setAttribute('aria-expanded', 'false'); sb.textContent = tr('Show all stamps', 'Onyesha stempu zote'); } }
     if (v === 'vOffice') { O.tab = 'overview'; store.set('rfPinOTab', 'overview'); try { OCV.open = {}; DQM.open = {}; ITW.seg = 'field'; } catch (e) {} }
     if (v === 'vNew') newFresh();
+    if (v === 'vChat') cwFresh();
   }
   // Map home's first view: every project in the country fitted, no filter, no card, the Nearest list resting
   function mapFresh() {
@@ -3655,7 +3951,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
   document.addEventListener('click', function (e) { BK.gest = Date.now(); var s = e.target.closest && e.target.closest('summary'); BK.sum = s ? s.parentNode : null; }, true);
   function bkTapped() { return Date.now() - BK.gest < 900 && S.view !== 'vLock'; }
   // sheets, dialogs and full-screen viewers: anything of these added to the page
-  var BK_OV = '.bsh, .tsh, .npg, .prj-lb, #prjSum, .fld-scan';
+  var BK_OV = '.bsh, .tsh, .npg, .prj-lb, #prjSum, .fld-scan, .cw-lb';
   function bkOvShut(el) { // closes it the way its own × (or a tap outside) does
     if (!el.isConnected || el.gone || el.classList.contains('out')) return false;
     var x = el.querySelector(':scope > .bsh-p > .bsh-h > .bsh-x, :scope > .tsh-p > .tsh-x, .prj-x, :scope > .prj-sbar > .prj-bk, :scope > .np-h > [data-np=back], #fldScX') || el.querySelector(':scope > .bsh-bg, :scope > .tsh-bg');
@@ -3720,8 +4016,9 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
     if (S.view === 'vLock' && !first) return;
     if (first) bkInit();
     if (fldQrHash()) return; // a QR sticker: #p=<id> (field tools)
+    if (cwHash(location.hash, first, mode)) return; // #chat/<id>, #chat/join/<token> (chatw)
     var h = location.hash, m = /^#p\/(\d+)(?:\/(visit|hist))?$/.exec(h), o = /^#office(?:\/([a-z]+))?$/.exec(h), me = /^#me(\/team)?$/.exec(h);
-    var v = { '#map': 'vMap', '#list': 'vList', '#route': 'vRoute', '#search': 'vSearch', '#new': 'vNew', '#report': 'vReport' }[h] || (o ? 'vOffice' : me ? 'vMe' : '');
+    var v = { '#map': 'vMap', '#list': 'vList', '#route': 'vRoute', '#search': 'vSearch', '#new': 'vNew', '#report': 'vReport', '#chat': 'vChat' }[h] || (o ? 'vOffice' : me ? 'vMe' : '');
     BK.shown = h; BK.mode = first ? 'fresh' : mode || '';
     if (first && v) bkFresh(v); // a fresh open starts the screen over; the sub-tab comes from the address
     if (o) O.tab = o[1] || 'overview';
@@ -3742,11 +4039,13 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
     if (v !== 'vProj') { pick.stop(); liveStop(); } if (v !== 'vNew') nPick.stop();
     S.view = v;
     nav(v, how);
-    ['vLock', 'vMap', 'vList', 'vSearch', 'vRoute', 'vProj', 'vNew', 'vMe', 'vReport', 'vOffice'].forEach(function (x) { $(x).classList.toggle('hidden', x !== v); });
+    ['vLock', 'vMap', 'vList', 'vSearch', 'vRoute', 'vProj', 'vNew', 'vMe', 'vReport', 'vOffice', 'vChat', 'vRoom'].forEach(function (x) { $(x).classList.toggle('hidden', x !== v); });
+    cwShown(v);
     document.body.classList.toggle('locked', v === 'vLock');
     $('main').classList.toggle('bare', v === 'vMap');
-    var tabFor = v === 'vReport' ? 'vMe' : v === 'vSearch' ? 'vList' : v === 'vRoute' || v === 'vProj' ? (S.prev === 'vMap' ? 'vMap' : 'vList') : v;
+    var tabFor = v === 'vReport' ? 'vMe' : v === 'vSearch' ? 'vList' : v === 'vRoom' ? 'vChat' : v === 'vRoute' || v === 'vProj' ? (S.prev === 'vMap' ? 'vMap' : 'vList') : v;
     qa('#tabs button').forEach(function (b) { if (b.getAttribute('data-v') === tabFor) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
+    if (tabFor === 'vMe') $('hAv').setAttribute('aria-current', 'page'); else $('hAv').removeAttribute('aria-current'); // Me lives on the avatar (chatw)
     $('who').textContent = v === 'vLock' ? '' : S.name; headUi(v);
     if (v !== 'vLock' && S.name && onbWanted() && $('onb').classList.contains('hidden')) setTimeout(onbOpen, 50);
     if (ONB.mode === 'hello' && v !== 'vLock' && !$('onb').classList.contains('hidden')) { $('onb').classList.add('hidden'); ONB.mode = ''; }
@@ -3763,6 +4062,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
     if (v === 'vList') renderList();
     if (v === 'vMe') renderMe();
     if (v === 'vOffice') renderOffice();
+    if (v === 'vChat') cwListOpen();
     document.body.classList.toggle('wide', v === 'vOffice');
     visitBarUi();
     if (v === 'vNew') openNew();
@@ -5037,11 +5337,11 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
 
   // --- app header and the first run ---------------------------------------------------------------
   function headUi(v) {
-    var sub = v === 'vProj' || v === 'vRoute' || v === 'vReport' || v === 'vSearch';
+    var sub = v === 'vProj' || v === 'vRoute' || v === 'vReport' || v === 'vSearch' || v === 'vRoom';
     document.body.classList.toggle('sub', sub);
     $('hAv').textContent = initials(S.name);
   }
-  $('hBack').addEventListener('click', function () { var b = S.view === 'vProj' ? 'back' : S.view === 'vRoute' ? 'routeBack' : S.view === 'vReport' ? 'repBack' : null; if (b) $(b).click(); else if (S.view === 'vSearch') goBack(function () { show('vList', 'replace'); }); });
+  $('hBack').addEventListener('click', function () { var b = S.view === 'vProj' ? 'back' : S.view === 'vRoute' ? 'routeBack' : S.view === 'vReport' ? 'repBack' : null; if (b) $(b).click(); else if (S.view === 'vSearch') goBack(function () { show('vList', 'replace'); }); else if (S.view === 'vRoom') goBack(function () { show('vChat', 'replace'); }); });
   $('hAv').addEventListener('click', function () { tabGo('vMe'); });
 
   var DROPC = { b: 'mgA', g: 'mgG', c: 'mgC', p: 'mgP', y: 'mgY' };
@@ -5551,6 +5851,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
         '<a class="mtile" href="https://www.google.com/maps?q=' + ll + '" target="_blank" rel="noopener" aria-label="Open in Google Maps"><span class="mi">' + brand('gmaps') + '</span>Google Maps</a>' +
         '<a class="mtile" href="https://maps.apple.com/?daddr=' + ll + '&dirflg=d" target="_blank" rel="noopener" aria-label="Open in Apple Maps"><span class="mi">' + brand('amaps') + '</span>Apple Maps</a>'
       : '';
+    $('pLinks').insertAdjacentHTML('beforeend', cwProjBtn()); // the project's own chat (chatw)
     distUi(); confirmUi();
   }
   // the calm head: three numbers, each one opens the tab it belongs to
@@ -6609,6 +6910,9 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
   Object.assign(SW, {"Tap the map for filters": "Gusa ramani kuona vichujio", "Visit or water test due": "Ziara au kipimo cha maji kinasubiri", "Quick actions": "Vitendo vya haraka", "Report a visit": "Ripoti ziara", "Open": "Fungua"});
   // polish-itinw
   Object.assign(SW, {"Trips": "Safari", "Vehicles": "Magari", "Plan a trip": "Panga safari", "My trips": "Safari zangu", "Next stop": "Kituo kinachofuata", "Report the road": "Ripoti barabara"});
+  // polish-chatw
+  Object.assign(SW, {"Chat": "Gumzo", "Starred messages": "Jumbe zenye nyota", "New chat": "Gumzo jipya", "Search chats and messages": "Tafuta gumzo na jumbe", "Clear the search": "Futa utafutaji",
+    "Back to all chats": "Rudi kwenye gumzo zote", "Archived": "Zilizohifadhiwa", "Messages": "Jumbe", "Jump to the newest message": "Nenda kwenye ujumbe mpya zaidi", "Message": "Ujumbe"});
   // dates in the app's own style ("Thu 24 Oct", "24 Oct, 18:34") and relative times, when the language changes after they're drawn
   [['Sun', 'Jpl'], ['Mon', 'Jtt'], ['Tue', 'Jnn'], ['Wed', 'Jtn'], ['Thu', 'Alh'], ['Fri', 'Iju'], ['Sat', 'Jmo']].forEach(function (w) { SWP.push([new RegExp('^' + w[0] + ' (\\d{1,2}) ([A-Z][a-z]{2})$'), w[1] + ' $1 $2']); });
   SWP.push([/^(\d{1,2}) ([A-Z][a-z]{2})((?: \d{4})?(?:, \d{2}:\d{2})?)$/, "$1 $2$3"], [/^(\d+) h ago$/, "saa $1 zilizopita"], [/^(\d+) d ago$/, "siku $1 zilizopita"], [/^(\d+) wk ago$/, "wiki $1 zilizopita"],
@@ -7995,7 +8299,8 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
       adm && p.email ? qk('mail', 'mail', 'mail', tr('E-mail', 'Barua pepe')) : '',
       !me ? qk('share', 'ctShare', 'share', tr('Share', 'Shiriki')) : ''
     ].filter(Boolean);
-    var contact = (tiles.length ? '<div class="ct-qk n' + tiles.length + '" data-g="contact">' + tiles.join('') + '</div>' : '') +
+    var contact = (!me ? '<button type="button" class="btn block ct-msg" data-ct="msg" data-testid="ct_msg">' + oic('chat') + '<span>' + tr('Message ' + first, 'Mtumie ' + first + ' ujumbe') + '</span></button>' : '') + // in-app chat (chatw)
+      (tiles.length ? '<div class="ct-qk n' + tiles.length + '" data-g="contact">' + tiles.join('') + '</div>' : '') +
       (!tel && !p.email && !me ? '<p class="ct-hint">' + tr('No phone or e-mail yet.', 'Bado hakuna simu wala barua pepe.') + (adm && app ? ' ' + tr('Add them under Details.', 'Viongeze chini ya Maelezo.') : '') + '</p>' : '');
     var ro = !editable;
     var details = ctGroup('details', tr('Details', 'Maelezo'), [
@@ -8052,6 +8357,7 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
     if (k === 'plan') { w.close(); setTimeout(function () { if (OFA.to !== p.name) OFA.plan = null; OFA.to = p.name; tmPush('plan'); ocvTab('plan'); }, 250); return; }
     if (k === 'map') { w.close(); setTimeout(function () { OFA.open = p.name; OFA.pop = p.name; tmPush('teammap'); ocvTab('teammap'); }, 250); return; }
     if (k === 'share') return ctShare(p);
+    if (k === 'msg') { w.close(); setTimeout(function () { cwDm(p.name); }, 220); return; }
     if (k === 'invite') return tmInvite(p);
     if (k === 'mypin') return setOpen('pin');
     if (k === 'name' || k === 'email' || k === 'phone' || k === 'home' || k === 'role') return ctEdit(k, p);
@@ -13575,6 +13881,1453 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
       });
     });
   }
+
+  // chatw:begin
+  // --- Chat (chatw): a WhatsApp-like team chat over /api/chat/* -------------------------------------------------
+  // One list of conversations (team, direct, groups, project threads), one screen per chat, real time over a
+  // WebSocket with catch-up after a reconnect, and an outbox on this phone so a message waits with a clock until it
+  // sends (it survives the app being closed). Donors never reach this file's screens; the server refuses their tokens.
+  var CWI = {
+    chat: '<path d="M4.5 19.5l1.2-3.6A7.8 7.8 0 1 1 8.6 18.6z"/><path d="M9 10.5h6M9 13.5h4"/>',
+    plus: '<path d="M12 5v14M5 12h14"/>', x: '<path d="M6 6l12 12M18 6L6 18"/>', search: '<circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/>',
+    send: '<path d="M4.5 11.6 19.5 4.5l-5.6 15-2.6-6.2z"/><path d="M11.3 13.3 19.5 4.5"/>', mic: '<rect x="9" y="3.5" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"/>',
+    clip: '<path d="M16.5 7.5l-7.6 7.6a2 2 0 0 0 2.8 2.8l7.9-7.9a4 4 0 0 0-5.7-5.7l-7.9 7.9a6 6 0 0 0 8.5 8.5l6-6"/>',
+    camera: '<path d="M4 8.5h3l1.6-2.5h6.8L17 8.5h3v10.5H4z"/><circle cx="12" cy="13.5" r="3.3"/>', photo: '<rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><circle cx="9" cy="10" r="1.7"/><path d="M20.5 16l-5-5-8.5 8.5"/>',
+    doc: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/>', pin: '<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.6"/>',
+    live: '<circle cx="12" cy="12" r="2.5"/><path d="M7.8 7.8a6 6 0 0 0 0 8.4M16.2 7.8a6 6 0 0 1 0 8.4M5 5a10 10 0 0 0 0 14M19 5a10 10 0 0 1 0 14"/>',
+    user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/>', people: '<circle cx="9" cy="8.5" r="3.2"/><path d="M3.5 19.5c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5"/><circle cx="17" cy="9.5" r="2.4"/><path d="M15.8 14.6c2.4.2 4 1.8 4.6 4.4"/>',
+    drop: '<path d="M12 3.5s6 6.6 6 11a6 6 0 0 1-12 0c0-4.4 6-11 6-11z"/>', reply: '<path d="M9.5 7L4.5 12l5 5"/><path d="M4.5 12H14a5.5 5.5 0 0 1 5.5 5.5V19"/>',
+    fwd: '<path d="M14.5 7l5 5-5 5"/><path d="M19.5 12H10a5.5 5.5 0 0 0-5.5 5.5V19"/>', copy: '<rect x="8.5" y="8.5" width="11" height="11" rx="2.5"/><path d="M15.5 8.5V6a1.5 1.5 0 0 0-1.5-1.5H6A1.5 1.5 0 0 0 4.5 6v8A1.5 1.5 0 0 0 6 15.5h2.5"/>',
+    star: '<path d="M12 4l2.5 5.2 5.6.8-4.1 3.9 1 5.6L12 16.8l-5 2.7 1-5.6-4.1-3.9 5.6-.8z"/>', info: '<circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.8v.1"/>',
+    trash: '<path d="M4.5 7h15M10 11v6M14 11v6"/><path d="M6 7l1 12.5a1.5 1.5 0 0 0 1.5 1.5h7a1.5 1.5 0 0 0 1.5-1.5L18 7M9.5 7V4.5h5V7"/>', edit: '<path d="M4.5 19.5h4l10-10-4-4-10 10z"/><path d="M13 7l4 4"/>',
+    wrench: '<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/>', cal: '<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
+    mute: '<path d="M4.5 9.5h3l4.5-4v13l-4.5-4h-3z"/><path d="M16 9.5l5 5M21 9.5l-5 5"/>', bell: '<path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/>',
+    box: '<path d="M3.5 7.5h17v3h-17z"/><path d="M5 10.5v8.5h14v-8.5M10 14h4"/>', pinned: '<path d="M9 4h6l-1 5 3.5 3.5h-11L10 9z"/><path d="M12 12.5V20"/>',
+    down: '<path d="M6 9.5l6 6 6-6"/>', back: '<path d="M15 5l-7 7 7 7"/>', check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>', chev: '<path d="M9 6l6 6-6 6"/>',
+    link: '<path d="M10 14a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1 1"/><path d="M14 10a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1-1"/>',
+    leave: '<path d="M14 4.5h4a1.5 1.5 0 0 1 1.5 1.5v12a1.5 1.5 0 0 1-1.5 1.5h-4"/><path d="M10 8l-4 4 4 4M6 12h9"/>', image: '<rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M3.5 15l4.5-4 4 3.5 3-2.5 5.5 4.5"/>',
+    lock: '<rect x="5.5" y="10.5" width="13" height="10" rx="2.5"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/>', up: '<path d="M6 14.5l6-6 6 6"/>',
+    play: '<path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/>', pause: '<path d="M8 5.5v13M16 5.5v13" stroke-width="3.2"/>', ext: '<path d="M14 4.5h5.5V10M19.5 4.5L11 13"/><path d="M18 14v4.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6H10"/>',
+    left: '<path d="M15 6l-6 6 6 6"/>', right: '<path d="M9 6l6 6-6 6"/>', share: '<circle cx="18" cy="5.5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="18.5" r="2.5"/><path d="M8.2 10.8l7.6-4M8.2 13.2l7.6 4"/>',
+    wall: '<rect x="3.5" y="3.5" width="17" height="17" rx="3"/><path d="M3.5 14l5-4 5 4 3-2.5 4 3.5"/><circle cx="15.5" cy="8.5" r="1.5"/>', sound: '<path d="M4.5 9.5h3l4.5-4v13l-4.5-4h-3z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11"/>'
+  };
+  function cwIc(n, cls) { return '<svg class="' + (cls || '') + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (CWI[n] || '') + '</svg>'; }
+  // the ticks: clock (waiting on this phone), one grey (sent), two grey (delivered), two blue (read)
+  var CW_TK = {
+    queued: '<svg class="cw-tk q" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="5.6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 5v3.2l2 1.3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>',
+    sent: '<svg class="cw-tk" viewBox="0 0 18 12" aria-hidden="true"><path d="M2.5 6.5l3 3L12 2.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    delivered: '<svg class="cw-tk" viewBox="0 0 18 12" aria-hidden="true"><path d="M1.5 6.5l3 3L11 2.5M7.3 9.2l.3.3L16 2.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    read: '<svg class="cw-tk rd" viewBox="0 0 18 12" aria-hidden="true"><path d="M1.5 6.5l3 3L11 2.5M7.3 9.2l.3.3L16 2.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    failed: '<svg class="cw-tk bad" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.2" fill="currentColor"/><path d="M8 4.6v4.2M8 11v.2" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round"/></svg>'
+  };
+  var CW_RX = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
+  var CW_WALL = [['', 'None', 'Hakuna'], ['sky', 'Sky', 'Anga'], ['dots', 'Dots', 'Nukta'], ['leaf', 'Leaves', 'Majani'], ['waves', 'Waves', 'Mawimbi'], ['sand', 'Sand', 'Mchanga']];
+  var CH = { on: null, started: false, me: '', chats: jget('rfChatList', []), pres: {}, cur: '', msgs: {}, more: {}, pend: {}, typ: {}, ws: null, wsN: 0, wsT: 0, pingT: 0, since: 0,
+    q: '', hits: null, qT: 0, ql: null, arch: false, al: null, prev: {}, med: {}, aud: {}, edit: null, reply: null, ment: [], unseen: 0, stick: true, rec: null, live: jget('rfChatLive', {}),
+    loading: {}, title0: '', tySent: 0, tyT: 0, pollT: 0, readAt: {}, rate: +(store.get('rfChatRate') || 1) || 1 };
+
+  // ---- talking to the server
+  // prefs, group-update and members answer with the chat's row as it is now
+  function cwRowBack(j) { if (j && j.ok && j.chat && j.chat.id) { cwUpsert(j.chat); cwSave(); cwBadge(); if (S.view === 'vChat') cwListDraw(); if (S.view === 'vRoom' && CH.cur === j.chat.id) { cwHead(); cwCompDraw(); } } return j; }
+  function cwApi(method, path, body) {
+    var h = Object.assign({ Accept: 'application/json' }, pinHdr()); if (body) h['Content-Type'] = 'application/json';
+    return fetch('/api/chat/' + path, { method: method, headers: h, body: body ? JSON.stringify(body) : undefined })
+      .then(function (r) { return r.json().catch(function () { return { ok: false, reason: r.status === 404 ? 'chat-off' : 'down' }; }).then(function (j) { j.status = r.status; if (j.reason === 'chat-off') { CH.on = false; if (j.need) CH.need = j.need; cwOffAll(); } return j; }); })
+      .catch(function () { return { ok: false, reason: 'offline', status: 0 }; })
+      .then(function (j) { return /^(prefs|group-update|members)$/.test(path) ? cwRowBack(j) : j; });
+  }
+  function cwWhy(j) { return j.reason === 'chat-off' ? cwOffTx() : j.reason === 'no-name' ? tr('Chat needs your own PIN or name. Ask the office.', 'Gumzo linahitaji PIN au jina lako mwenyewe. Uliza ofisi.') : j.reason === 'not-admin' ? tr('Only the group’s admins can do that.', 'Wasimamizi wa kikundi pekee wanaweza kufanya hivyo.') : j.reason === 'not-yours' ? tr('That isn’t your message.', 'Huo si ujumbe wako.') : j.reason === 'too-long' ? tr('Too long: videos up to 60 seconds, voice up to 5 minutes.', 'Ndefu mno: video hadi sekunde 60, sauti hadi dakika 5.') : j.reason === 'team' ? tr('Team chats follow the team list, so that can’t be changed here.', 'Gumzo za timu zinafuata orodha ya timu, kwa hiyo hilo haliwezi kubadilishwa hapa.') : j.reason === 'not-found' ? tr('That isn’t there any more.', 'Hicho hakipo tena.') : j.reason === 'not-member' ? tr('You’re no longer in this chat.', 'Hauko tena kwenye gumzo hili.') : j.reason === 'only-admins' ? tr('Only admins can send messages here.', 'Wasimamizi pekee wanaweza kutuma jumbe hapa.') : j.reason === 'edit-window' ? tr('Messages can only be edited for 15 minutes.', 'Jumbe zinaweza kuhaririwa kwa dakika 15 tu.') : j.reason === 'too-large' ? tr('That file is too large.', 'Faili hiyo ni kubwa mno.') : why(j); }
+  function cwOffTx() { return tr('Chat isn’t switched on yet. The office can turn it on.', 'Gumzo bado halijawashwa. Ofisi inaweza kuliwasha.'); }
+  function cwUp(blob, kind, name, dur) {
+    return fetch('/api/chat/media?type=' + encodeURIComponent(kind) + '&name=' + encodeURIComponent(name || kind) + (dur ? '&dur=' + Math.round(dur) : ''), { method: 'POST', headers: Object.assign({ 'Content-Type': blob.type || 'application/octet-stream' }, pinHdr()), body: blob })
+      .then(function (r) { return r.json().catch(function () { return { ok: false, reason: 'down' }; }).then(function (j) { j.status = r.status; return j; }); })
+      .catch(function () { return { ok: false, reason: 'offline', status: 0 }; });
+  }
+  // media is behind the PIN, so it comes as a blob and shows from a local address
+  function cwMedia(id) {
+    if (!id) return Promise.reject(new Error('no id'));
+    if (CH.med[id]) return CH.med[id];
+    var p = CH.med[id] = fetch('/api/chat/media/' + encodeURIComponent(id), { headers: pinHdr() }).then(function (r) { if (!r.ok) throw new Error('media ' + r.status); return r.blob(); }).then(function (b) { return URL.createObjectURL(b); });
+    p.catch(function () { delete CH.med[id]; });
+    return p;
+  }
+  function cwFill(root) {
+    qa('[data-mid]', root).forEach(function (el) {
+      if (el.dataset.got) return; el.dataset.got = '1';
+      cwMedia(el.getAttribute('data-mid')).then(function (u) { if (el.tagName === 'IMG' || el.tagName === 'VIDEO') el.src = u; else el.style.backgroundImage = 'url("' + u + '")'; }, function () { el.classList.add('cw-broken'); });
+    });
+  }
+
+  // ---- small helpers
+  function cwMe() { return CH.me || S.name || S.who || ''; }
+  function cwIsMe(n) { return !!n && same(n, cwMe()); }
+  function cwSame(a, b) { return a != null && b != null && a !== '' && String(a) === String(b); } // message ids are numbers; the page hands them back as text
+  function cwNum(x) { return /^\d+$/.test(String(x)) ? +x : x; }
+  function cwChat(id) { for (var i = 0; i < CH.chats.length; i++) if (CH.chats[i].id === id) return CH.chats[i]; return null; }
+  function cwMs(t) { return typeof t === 'number' ? t : Date.parse(t || '') || 0; }
+  function cwDayKey(t) { var d = dOf(t); return d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate(); }
+  function cwDayTx(t) { var k = cwDayKey(t); return k === cwDayKey(Date.now()) ? tr('Today', 'Leo') : k === cwDayKey(Date.now() - 864e5) ? tr('Yesterday', 'Jana') : dDay(dOf(t)); }
+  function cwListTime(t) {
+    if (!t) return ''; var d = dOf(t); if (isNaN(d)) return ''; var k = cwDayKey(d);
+    if (k === cwDayKey(Date.now())) return dClock(d);
+    if (k === cwDayKey(Date.now() - 864e5)) return tr('Yesterday', 'Jana');
+    return Date.now() - d.getTime() < 6 * 864e5 ? WD3[dL()][d.getDay()] : dDay(d, true);
+  }
+  function cwDur(s) { s = Math.max(0, Math.round(+s || 0)); return Math.floor(s / 60) + ':' + ('0' + s % 60).slice(-2); }
+  function cwSize(b) { b = +b || 0; return b < 1024 * 1024 ? Math.max(1, Math.round(b / 1024)) + ' KB' : (b / 1048576).toFixed(1) + ' MB'; }
+  function cwCoord(x) { return String(+(+x).toFixed(5)); }
+  function cwFirst(n) { return String(n || '').trim().split(/\s+/)[0]; }
+  function cwHueVar(n) { var h = nameHue(n); return '--hu:var(--hu-' + h + ');--hb:var(--hb-' + h + ')'; }
+  function cwMuted(c) { if (!c || !c.muted) return false; if (c.muted === 'always') return true; return cwMs(c.muted) > Date.now(); }
+  function cwOther(c) { var o = (c.members || []).filter(function (n) { return !cwIsMe(n); }); return o[0] || c.title || ''; }
+  function cwTitle(c) { if (!c) return ''; return c.kind === 'dm' ? (c.title && !cwIsMe(c.title) ? c.title : cwOther(c)) : c.title || (c.kind === 'project' && byId(c.project) ? byId(c.project).title : ''); }
+  function cwAdmin(c) { return !!c && (c.admins || []).some(cwIsMe); }
+  function cwUid() { return 'w' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+  function cwSave() { store.set('rfChatList', JSON.stringify(CH.chats.slice(0, 200))); }
+  function cwSaveM(c) { var a = (CH.msgs[c] || []).slice(-60); try { store.set('rfChatM:' + c, JSON.stringify(a)); } catch (e) {} }
+  function cwSeenTx(p) {
+    if (!p) return ''; if (p.online) return tr('online', 'yupo mtandaoni'); if (!p.seen) return '';
+    var d = dOf(p.seen); if (isNaN(d)) return ''; var k = cwDayKey(d);
+    return k === cwDayKey(Date.now()) ? tr('last seen ' + dClock(d), 'alionekana mwisho ' + dClock(d)) : k === cwDayKey(Date.now() - 864e5) ? tr('last seen yesterday ' + dClock(d), 'alionekana mwisho jana ' + dClock(d)) : tr('last seen ' + dWhen(d), 'alionekana mwisho ' + dWhen(d));
+  }
+  function cwTypTx(c, short) {
+    var t = CH.typ[c.id]; if (!t || !t.what || Date.now() - t.at > 7000) return '';
+    var rec = t.what === 'recording', who = cwFirst(t.who);
+    if (c.kind === 'dm' || short) return c.kind === 'dm' ? (rec ? tr('recording…', 'anarekodi…') : tr('typing…', 'anaandika…')) : (rec ? tr(who + ' is recording…', who + ' anarekodi…') : tr(who + ' is typing…', who + ' anaandika…'));
+    return rec ? tr(who + ' is recording…', who + ' anarekodi…') : tr(who + ' is typing…', who + ' anaandika…');
+  }
+  // a chat's picture: a person's initials (with a green dot when online), a group's photo, a project's photo, the team
+  function cwAv(c, big) {
+    var cls = 'cw-av' + (big ? ' big' : ''), dot = '';
+    if (c.kind === 'dm') { var o = cwOther(c), p = CH.pres[o]; dot = p && p.online ? '<i class="cw-on" aria-hidden="true"></i>' : ''; return '<span class="' + cls + '" style="' + cwHueVar(o) + '" aria-hidden="true">' + esc(initials(o)) + dot + '</span>'; }
+    if (c.photo) return '<span class="' + cls + ' ph"' + (/^(https?:|\/)/.test(c.photo) ? ' style="background-image:url(&quot;' + esc(c.photo) + '&quot;)"' : ' data-mid="' + esc(c.photo) + '"') + ' aria-hidden="true"></span>';
+    if (c.kind === 'project') { var pr = byId(c.project); return pr && pr.photo ? '<span class="' + cls + ' ph" style="background-image:url(&quot;' + esc(photoUrl(pr, 160)) + '&quot;)" aria-hidden="true"></span>' : '<span class="' + cls + ' ic" style="--hu:var(--hu-teal);--hb:var(--hb-teal)" aria-hidden="true">' + cwIc('drop') + '</span>'; }
+    if (c.kind === 'team') return '<span class="' + cls + ' ic" style="--hu:var(--hu-blue);--hb:var(--hb-blue)" aria-hidden="true">' + cwIc('people') + '</span>';
+    return '<span class="' + cls + '" style="' + cwHueVar(c.title) + '" aria-hidden="true">' + esc(initials(c.title)) + '</span>';
+  }
+  function cwKindTx(c) { return c.kind === 'team' ? tr('Team', 'Timu') : c.kind === 'project' ? tr('Project', 'Mradi') : c.kind === 'group' ? tr('Group', 'Kikundi') : ''; }
+  // "You: …", "🎤 Voice message 0:12", "📷 Photo"
+  function cwPrev(m, c) {
+    if (!m) return '';
+    if (m.deleted) return tr('This message was deleted', 'Ujumbe huu ulifutwa');
+    if (m.sys || m.kind === 'sys') return cwSysTx(m);
+    var md = (m.media || [])[0] || {}, t = m.text || '';
+    var body = m.kind === 'voice' ? '🎤 ' + tr('Voice message', 'Ujumbe wa sauti') + ((m.dur || md.dur) ? ' ' + cwDur(m.dur || md.dur) : '')
+      : m.kind === 'media' ? (md.type === 'video' ? '🎥 ' + (t || tr('Video', 'Video')) : '📷 ' + (t || tr('Photo', 'Picha')))
+      : m.kind === 'location' ? '📍 ' + tr('Location', 'Mahali') : m.kind === 'live' ? '📍 ' + tr('Live location', 'Mahali papo hapo')
+      : m.kind === 'contact' ? '👤 ' + ((m.contact && m.contact.name) || t || tr('Contact', 'Mwasiliani')) : m.kind === 'doc' ? '📄 ' + (md.name || t || tr('Document', 'Hati')) : t;
+    var who = cwIsMe(m.from) ? tr('You', 'Wewe') + ': ' : c && c.kind !== 'dm' && m.from ? cwFirst(m.from) + ': ' : '';
+    return who + body;
+  }
+  function cwSysTx(m) {
+    var s = typeof m.sys === 'string' ? { type: m.sys } : m.sys || {}, by = s.by ? cwFirst(s.by) : '', who = [].concat(s.who || []).join(', ');
+    if (S.lang !== 'sw' && m.text) return m.text;
+    var T = {
+      repair: [by ? by + ' reported a repair' : 'A repair was reported', by ? by + ' ameripoti matengenezo' : 'Matengenezo yameripotiwa'],
+      assigned: [s.to ? 'Assigned to ' + s.to : 'The repair was assigned', s.to ? 'Amepewa ' + s.to : 'Matengenezo yamegawiwa'],
+      step: ['Repair step: ' + rrStepTx(s.step), 'Hatua ya matengenezo: ' + rrStepTx(s.step)],
+      fixed: [by ? by + ' marked it fixed ✓' : 'Marked fixed ✓', by ? by + ' amesema imerekebishwa ✓' : 'Imerekebishwa ✓'],
+      sms: ['A community report arrived (SMS)', 'Ripoti ya jamii imefika (SMS)'],
+      notworking: [by ? by + '’s visit: not working' : 'A visit reported “Not working”', by ? 'Ziara ya ' + by + ': haifanyi kazi' : 'Ziara imeripoti “Haifanyi kazi”'],
+      created: [by ? by + ' made the group' : 'Group made', by ? by + ' ameunda kikundi' : 'Kikundi kimeundwa'], joined: [(who || by) + ' joined', (who || by) + ' amejiunga'], left: [(who || by) + ' left', (who || by) + ' ameondoka'],
+      added: [by + ' added ' + who, by + ' amemwongeza ' + who], removed: [by + ' removed ' + who, by + ' amemwondoa ' + who]
+    }[s.type];
+    return T ? tr(T[0], T[1]) : (m.text || '');
+  }
+
+  // ---- the bottom-bar badge and the tab title
+  function cwBadge() {
+    var n = 0; CH.chats.forEach(function (c) { if (!c.archived && c.unread && (!cwMuted(c) || c.mention)) n += c.unread; });
+    var d = $('chatDot'); if (d) { d.textContent = n > 99 ? '99+' : n; d.classList.toggle('hidden', !n || CH.on === false); }
+    var tb = $('tabChat'); if (tb) tb.setAttribute('aria-label', tr('Chat', 'Gumzo') + (n ? ', ' + n + ' ' + tr('unread', 'hazijasomwa') : ''));
+    if (!CH.title0) CH.title0 = document.title.replace(/^\(\d+\+?\)\s*/, '');
+    document.title = (n ? '(' + (n > 99 ? '99+' : n) + ') ' : '') + CH.title0;
+  }
+
+  // ---- start, the list, catch-up
+  function cwStart() {
+    if (CH.started) return; CH.started = true;
+    cwOutLoad(); cwLoad(false);
+  }
+  function cwStop() { CH.started = false; CH.wsNo = false; if (CH.ws) { try { CH.ws.onclose = null; CH.ws.close(); } catch (e) {} CH.ws = null; } clearTimeout(CH.wsT); clearInterval(CH.pingT); }
+  function cwLoad(since) {
+    var q = since && CH.since ? '?since=' + encodeURIComponent(CH.since) : '';
+    var t0 = Date.now();
+    return cwApi('GET', 'list' + q).then(function (j) {
+      if (!j.ok) { if (j.reason !== 'chat-off' && S.view === 'vChat') cwListDraw(); return j; }
+      CH.on = true; CH.me = j.me || CH.me; CH.since = j.now || t0;
+      if (j.presence) Object.keys(j.presence).forEach(function (k) { CH.pres[k] = j.presence[k]; });
+      if (q) { (j.chats || []).forEach(cwUpsert); if (j.gone && j.gone.length) CH.chats = CH.chats.filter(function (x) { return j.gone.map(String).indexOf(String(x.id)) < 0; }); } else CH.chats = (j.chats || []).slice();
+      cwSave(); cwBadge(); cwDelivered();
+      if (S.view === 'vChat') cwListDraw();
+      if (S.view === 'vRoom') cwHead();
+      cwWs(); cwPoll();
+      return j;
+    });
+  }
+  function cwUpsert(c) { var i = CH.chats.findIndex(function (x) { return x.id === c.id; }); if (i >= 0) CH.chats[i] = Object.assign({}, CH.chats[i], c); else CH.chats.push(c); }
+  function cwDelivered() {
+    CH.chats.forEach(function (c) { if (c.unread && c.last && c.last.id && !cwIsMe(c.last.from) && CH.readAt['d' + c.id] !== c.last.id) { CH.readAt['d' + c.id] = c.last.id; cwApi('POST', 'delivered', { c: c.id, upTo: c.last.id }); } });
+  }
+  // no WebSocket (or it dropped): ask now and then while a chat screen is open
+  function cwPoll() {
+    clearInterval(CH.pollT);
+    CH.pollT = setInterval(function () {
+      if (CH.ws || document.hidden || CH.on !== true || (S.view !== 'vChat' && S.view !== 'vRoom')) return;
+      cwLoad(true); if (S.view === 'vRoom' && CH.cur) cwAfter(CH.cur);
+    }, 15000);
+  }
+  function cwOffAll() { cwBadge(); if (S.view === 'vChat') cwListDraw(); if (S.view === 'vRoom') cwRoomDraw(); }
+  function cwOffHtml() {
+    return '<div class="cw-off" data-testid="cw_off"><span class="cw-offi" aria-hidden="true">' + cwIc('chat') + '</span><h2>' + tr('Chat isn’t switched on yet.', 'Gumzo bado halijawashwa.') + '</h2><p>' + tr('The office can turn it on.', 'Ofisi inaweza kuliwasha.') + '</p>' +
+      poTech((CH.need && CH.need.length ? esc(CH.need.join(' · ')) + '<br>' : '') + tr('Cloudflare Pages needs the CHAT binding to the rafiki-chat worker (workers/chat) and the same CHAT_SECRET in both. Media uses the R2 bucket rafiki-chat-media (CHAT_MEDIA).', 'Cloudflare Pages inahitaji muunganisho wa CHAT kwa worker ya rafiki-chat (workers/chat) na CHAT_SECRET ileile kwa zote mbili. Picha na faili zinatumia R2 bucket rafiki-chat-media (CHAT_MEDIA).')) + '</div>';
+  }
+
+  // the list screen
+  function cwListOpen() { var was = CH.started; cwStart(); cwListDraw(); if (was) cwLoad(false); }
+  function cwFresh() { CH.q = ''; CH.hits = null; CH.arch = false; if ($('cwQ')) $('cwQ').value = ''; if ($('cwQx')) $('cwQx').classList.add('hidden'); if (CH.ql) { var l = CH.ql; CH.ql = null; bkShut(l); } if (CH.al) { var a = CH.al; CH.al = null; bkShut(a); } }
+  function cwSorted() {
+    return CH.chats.slice().sort(function (a, z) { return cwMs((z.last || {}).at) - cwMs((a.last || {}).at); });
+  }
+  function cwRow(c) {
+    var last = c.last, mine = last && cwIsMe(last.from), typ = cwTypTx(c, true), mu = cwMuted(c), un = c.unread || 0;
+    var st = mine && !last.deleted ? (CW_TK[last.status || 'sent'] || '') : '';
+    var pv = typ ? '<span class="cw-typ">' + esc(typ) + '</span>' : '<span class="cw-pv" data-nosw>' + st + esc(cwPrev(last, c) || (c.kind === 'project' ? tr('Project thread', 'Mazungumzo ya mradi') : tr('No messages yet', 'Bado hakuna jumbe'))) + '</span>';
+    var badges = (c.mention ? '<i class="cw-at" aria-label="' + tr('You were mentioned', 'Umetajwa') + '">@</i>' : '') + (mu ? '<span class="cw-bi" aria-label="' + tr('Muted', 'Imenyamazishwa') + '">' + cwIc('mute') + '</span>' : '') +
+      (c.pinned && !CH.arch ? '<span class="cw-bi" aria-label="' + tr('Pinned', 'Imebandikwa') + '">' + cwIc('pinned') + '</span>' : '') + (un ? '<i class="cw-un' + (mu ? ' mu' : '') + '">' + (un > 99 ? '99+' : un) + '</i>' : '');
+    var kind = cwKindTx(c);
+    return '<div class="cw-rw" data-c="' + esc(c.id) + '"><div class="cw-ra" aria-hidden="true"><button type="button" tabindex="-1" data-ra="mute" class="mu">' + cwIc(mu ? 'sound' : 'mute') + '<span>' + (mu ? tr('Unmute', 'Washa sauti') : tr('Mute', 'Nyamazisha')) + '</span></button>' +
+      '<button type="button" tabindex="-1" data-ra="arch" class="ar">' + cwIc('box') + '<span>' + (c.archived ? tr('Unarchive', 'Rudisha') : tr('Archive', 'Hifadhi')) + '</span></button></div>' +
+      '<button type="button" class="cw-row' + (un ? ' un' : '') + '" data-open="' + esc(c.id) + '" data-testid="cw_row">' + cwAv(c) +
+      '<span class="cw-rt"><span class="cw-r1"><b data-nosw>' + esc(cwTitle(c)) + '</b>' + (kind ? '<small class="cw-k">' + kind + '</small>' : '') + '<time>' + esc(cwListTime((last || {}).at)) + '</time></span>' +
+      '<span class="cw-r2">' + pv + '<span class="cw-bs">' + badges + '</span></span></span></button></div>';
+  }
+  function cwListDraw() {
+    var box = $('cwList'); if (!box) return;
+    $('cwNote').innerHTML = cwNoteHtml();
+    if (CH.on === false) { box.innerHTML = cwOffHtml(); $('cwTools').classList.add('hidden'); return; }
+    $('cwTools').classList.remove('hidden');
+    var all = cwSorted(), q = CH.q.trim().toLowerCase(), h = '';
+    $('cwArchHd').classList.toggle('hidden', !CH.arch);
+    if (q) {
+      var hit = all.filter(function (c) { return (cwTitle(c) + ' ' + (c.members || []).join(' ')).toLowerCase().indexOf(q) >= 0; });
+      h += '<h2 class="cw-sec">' + tr('Chats', 'Gumzo') + '</h2>' + (hit.length ? hit.map(cwRow).join('') : '<p class="cw-none">' + tr('No chats with that name', 'Hakuna gumzo lenye jina hilo') + '</p>');
+      h += '<h2 class="cw-sec">' + tr('Messages', 'Jumbe') + '</h2>' + (CH.hits == null ? '<p class="cw-none">' + tr('Searching…', 'Inatafuta…') + '</p>' : CH.hits.length ? CH.hits.map(cwHitRow).join('') : '<p class="cw-none">' + tr('No messages found', 'Hakuna jumbe zilizopatikana') + '</p>');
+      box.innerHTML = h; return;
+    }
+    if (CH.arch) {
+      var ar = all.filter(function (c) { return c.archived; });
+      box.innerHTML = ar.length ? ar.map(cwRow).join('') : '<p class="cw-none">' + tr('No archived chats', 'Hakuna gumzo zilizohifadhiwa') + '</p>'; cwFill(box); return;
+    }
+    var live = all.filter(function (c) { return !c.archived; }), pin = live.filter(function (c) { return c.pinned; }), rest = live.filter(function (c) { return !c.pinned; }), nArch = all.length - live.length;
+    if (nArch) h += '<button type="button" class="cw-arow" id="cwArch" data-testid="cw_archived">' + cwIc('box') + '<span>' + tr('Archived', 'Zilizohifadhiwa') + '</span><i>' + nArch + '</i></button>';
+    if (pin.length) h += '<h2 class="cw-sec">' + tr('Pinned', 'Zilizobandikwa') + '</h2>' + pin.map(cwRow).join('') + (rest.length ? '<h2 class="cw-sec">' + tr('Chats', 'Gumzo') + '</h2>' : '');
+    h += rest.map(cwRow).join('');
+    if (!live.length) h += '<div class="cw-empty"><span class="cw-offi" aria-hidden="true">' + cwIc('chat') + '</span><h2>' + (CH.on ? tr('No chats yet', 'Bado hakuna gumzo') : tr('Loading…', 'Inapakia…')) + '</h2>' + (CH.on ? '<p>' + tr('Tap + to message a teammate or start a group.', 'Gusa + kumtumia mwenzako ujumbe au kuanzisha kikundi.') + '</p>' : '') + '</div>';
+    box.innerHTML = h; cwFill(box);
+  }
+  function cwHitRow(x) {
+    var c = cwChat(x.c) || { id: x.c, title: x.c, kind: 'group' };
+    return '<button type="button" class="cw-row cw-hit" data-open="' + esc(x.c) + '" data-jump="' + esc(x.id) + '">' + cwAv(c) + '<span class="cw-rt"><span class="cw-r1"><b data-nosw>' + esc(cwTitle(c)) + '</b><time>' + esc(cwListTime(x.at)) + '</time></span>' +
+      '<span class="cw-r2"><span class="cw-pv" data-nosw>' + (x.from ? esc(cwIsMe(x.from) ? tr('You', 'Wewe') : cwFirst(x.from)) + ': ' : '') + cwMark(x.snippet || '', CH.q) + '</span></span></span></button>';
+  }
+  function cwMark(t, q) { var s = esc(t); q = q.trim(); if (!q) return s; var i = s.toLowerCase().indexOf(esc(q).toLowerCase()); return i < 0 ? s : s.slice(0, i) + '<mark>' + s.slice(i, i + esc(q).length) + '</mark>' + s.slice(i + esc(q).length); }
+  function cwNoteHtml() {
+    if (CH.on !== true || !('Notification' in window) || Notification.permission !== 'default' || store.get('rfChatNoteAsk')) return '';
+    return '<div class="cw-nt" role="status">' + cwIc('bell') + '<span>' + tr('Get a notification when a message comes while RAFIKI Pin is open.', 'Pata arifa ujumbe ukifika wakati RAFIKI Pin iko wazi.') + '</span><button type="button" class="btn small" id="cwNtOn">' + tr('Turn on', 'Washa') + '</button><button type="button" class="cw-ib sm" id="cwNtX" aria-label="' + tr('Not now', 'Si sasa') + '">' + cwIc('x') + '</button></div>';
+  }
+
+  // ---- one chat
+  function cwOpen(id, how, mode) {
+    if (!id) return;
+    var same0 = S.view === 'vRoom' && CH.cur === id;
+    CH.cur = id; CH.unseen = 0; CH.stick = true;
+    if (!same0) { CH.reply = null; CH.edit = null; CH.ment = []; }
+    if (!CH.msgs[id]) { var cached = jget('rfChatM:' + id, null); if (cached) CH.msgs[id] = cached; }
+    if (!same0) show('vRoom', how);
+    cwRoomDraw(true);
+    cwMsgsLoad(id).then(function () { cwRead(id); });
+  }
+  function cwDm(name) {
+    cwStart();
+    var known = CH.chats.filter(function (c) { return c.kind === 'dm' && (c.members || []).some(function (n) { return same(n, name); }); })[0];
+    if (known) return cwOpen(known.id);
+    cwApi('POST', 'open', { kind: 'dm', with: name }).then(function (j) { if (!j.ok) return toast(cwWhy(j)); if (j.chat) cwUpsert(j.chat); cwOpen(j.id); if (!j.chat) cwLoad(true); });
+  }
+  function cwProject(pid) {
+    cwStart();
+    var known = CH.chats.filter(function (c) { return c.kind === 'project' && String(c.project) === String(pid); })[0];
+    if (known) return cwOpen(known.id);
+    cwApi('POST', 'open', { kind: 'project', project: pid }).then(function (j) { if (!j.ok) return toast(cwWhy(j)); if (j.chat) cwUpsert(j.chat); cwOpen(j.id); if (!j.chat) cwLoad(true); });
+  }
+  function cwProjBtn() { return '<button type="button" class="mtile cw-pbtn" id="pChat" data-testid="p_chat"><span class="mi">' + cwIc('chat') + '</span><span class="cw-pbt"><b>' + tr('Chat', 'Gumzo') + '</b><small>' + tr('Talk about this project with the team', 'Zungumza na timu kuhusu mradi huu') + '</small></span>' + cwIc('chev', 'cw-pch') + '</button>'; }
+  function cwMsgsLoad(id, quiet) {
+    if (CH.loading[id]) return CH.loading[id];
+    var p = CH.loading[id] = cwApi('GET', 'msgs?c=' + encodeURIComponent(id) + '&limit=50').then(function (j) {
+      delete CH.loading[id];
+      if (!j.ok) { if (S.view === 'vRoom' && CH.cur === id && !quiet && j.reason !== 'chat-off' && j.reason !== 'offline') toast(cwWhy(j)); return; }
+      var old = CH.msgs[id] || [], byIdM = {};
+      (j.msgs || []).forEach(function (m) { byIdM[m.id] = 1; });
+      // keep older pages already loaded; the fresh page wins for what it covers
+      var first = (j.msgs || [])[0], keep = first ? old.filter(function (m) { return !byIdM[m.id] && cwMs(m.at) < cwMs(first.at); }) : [];
+      CH.msgs[id] = keep.concat(j.msgs || []);
+      if (CH.more[id] == null || !keep.length) CH.more[id] = !!j.more;
+      (j.msgs || []).forEach(cwDropPend);
+      cwSaveM(id);
+      if (S.view === 'vRoom' && CH.cur === id) cwMsgsDraw();
+    });
+    return p;
+  }
+  // catch-up: the messages after the newest one here (msgs?after=); a full page again if there were many
+  function cwAfter(id) {
+    var a = (CH.msgs[id] || []).filter(function (m) { return typeof cwNum(m.id) === 'number'; }), last = a[a.length - 1];
+    if (!last) return cwMsgsLoad(id, true);
+    return cwApi('GET', 'msgs?c=' + encodeURIComponent(id) + '&after=' + encodeURIComponent(last.id) + '&limit=50').then(function (j) {
+      if (!j.ok) return; if (j.more) return cwMsgsLoad(id, true);
+      (j.msgs || []).forEach(function (m) { m.c = m.c || id; cwPut(m); });
+    });
+  }
+  function cwOlder() {
+    var id = CH.cur, a = (CH.msgs[id] || []).filter(function (m) { return m.id; }); if (!CH.more[id] || CH.loading['o' + id] || !a.length) return Promise.resolve(false);
+    var box = $('cwMsgs'), h0 = box.scrollHeight, y0 = box.scrollTop;
+    $('cwMsgs').classList.add('older');
+    return CH.loading['o' + id] = cwApi('GET', 'msgs?c=' + encodeURIComponent(id) + '&before=' + encodeURIComponent(a[0].id) + '&limit=50').then(function (j) {
+      delete CH.loading['o' + id]; box.classList.remove('older');
+      if (!j.ok || CH.cur !== id) return false;
+      var have = {}; (CH.msgs[id] || []).forEach(function (m) { have[m.id] = 1; });
+      CH.msgs[id] = (j.msgs || []).filter(function (m) { return !have[m.id]; }).concat(CH.msgs[id] || []); CH.more[id] = !!j.more;
+      cwMsgsDraw(true); box.scrollTop = y0 + (box.scrollHeight - h0); return true;
+    });
+  }
+  function cwRead(id) {
+    if (S.view !== 'vRoom' || CH.cur !== id || document.hidden) return;
+    var a = (CH.msgs[id] || []).filter(function (m) { return m.id && !cwIsMe(m.from); }), last = a[a.length - 1], c = cwChat(id);
+    if (c && (c.unread || c.mention)) { c.unread = 0; c.mention = false; cwSave(); cwBadge(); }
+    if (!last || CH.readAt[id] === last.id) return; CH.readAt[id] = last.id;
+    cwApi('POST', 'read', { c: id, upTo: last.id });
+  }
+  function cwHead() {
+    var c = cwChat(CH.cur) || { id: CH.cur, title: '', kind: 'group' }, b = $('cwHd'); if (!b) return;
+    var sub = cwTypTx(c) ? '<small class="cw-typ">' + esc(cwTypTx(c)) + '</small>'
+      : c.kind === 'dm' ? '<small>' + esc(cwSeenTx(CH.pres[cwOther(c)])) + '</small>'
+      : '<small data-nosw>' + esc(c.kind === 'project' && byId(c.project) ? [byId(c.project).area, byId(c.project).country].filter(Boolean).join(' · ') : (c.members || []).map(function (n) { return cwIsMe(n) ? tr('You', 'Wewe') : cwFirst(n); }).slice(0, 8).join(', ')) + '</small>';
+    b.innerHTML = cwAv(c) + '<span class="cw-hdt"><b data-nosw>' + esc(cwTitle(c) || tr('Chat', 'Gumzo')) + '</b>' + sub + '</span>';
+    b.setAttribute('aria-label', tr('Chat info: ', 'Maelezo ya gumzo: ') + cwTitle(c));
+    cwFill(b);
+  }
+  function cwRoomDraw(first) {
+    cwHead();
+    var m = $('cwMsgs'), c = cwChat(CH.cur);
+    var wp = store.get('rfChatWall:' + CH.cur); if (wp == null) wp = (c && c.wallpaper) || '';
+    m.className = 'cw-msgs' + (wp ? ' cw-wp-' + wp : '');
+    if (CH.on === false) { m.innerHTML = cwOffHtml(); $('cwComp').innerHTML = ''; return; }
+    cwCompDraw(); cwMsgsDraw(); if (first) cwBottom(true);
+  }
+  // messages in order, with the ones still on this phone at the end
+  function cwAll(id) {
+    var a = (CH.msgs[id] || []).slice(), p = (CH.pend[id] || []).map(function (it) { return cwPendMsg(it); });
+    return a.concat(p);
+  }
+  function cwPendMsg(it) {
+    return { id: '', pend: it.cid, cid: it.cid, c: it.c, from: cwMe(), at: it.at, kind: it.kind, text: it.text, reply: it.reply, fwd: it.fwd, mentions: it.mentions, loc: it.loc, live: it.live, contact: it.contact,
+      media: (it.files || []).map(function (f) { return { type: f.type, w: f.w, h: f.h, dur: f.dur, wave: f.wave, name: f.name, size: f.size, id: f.id, lurl: f.lurl || (f.blob ? (f.lurl = URL.createObjectURL(f.blob)) : '') }; }).concat(it.media || []),
+      status: it.failed ? 'failed' : 'queued', failed: it.failed };
+  }
+  function cwMsgsDraw(keep) {
+    var box = $('cwMsgs'); if (!box || S.view !== 'vRoom') return;
+    var id = CH.cur, c = cwChat(id) || { kind: 'group' }, all = cwAll(id), h = '', prev = null, near = box.scrollHeight - box.scrollTop - box.clientHeight < 80;
+    if (CH.more[id]) h += '<div class="cw-older"><span>' + tr('Scroll up for older messages', 'Sogeza juu kwa jumbe za zamani') + '</span></div>';
+    else if (all.length) h += '<div class="cw-sys cw-e2e"><span>' + cwIc('lock') + tr('Messages stay inside RAFIKI. Phone numbers are never shared.', 'Jumbe zinabaki ndani ya RAFIKI. Namba za simu hazishirikiwi.') + '</span></div>';
+    var unAt = c.unread && !cwIsMe((c.last || {}).from) ? all.length - c.unread : -1;
+    all.forEach(function (m, i) {
+      if (!prev || cwDayKey(prev.at) !== cwDayKey(m.at)) { h += '<div class="cw-day"><span>' + esc(cwDayTx(m.at)) + '</span></div>'; prev = null; }
+      if (i === unAt && unAt > 0) h += '<div class="cw-unl" id="cwUnl"><span>' + (c.unread === 1 ? tr('1 unread message', 'Ujumbe 1 haujasomwa') : tr(c.unread + ' unread messages', 'Jumbe ' + c.unread + ' hazijasomwa')) + '</span></div>';
+      if (m.sys || m.kind === 'sys') { h += '<div class="cw-sys" data-id="' + esc(m.id) + '"><span>' + esc(cwSysTx(m)) + '</span></div>'; prev = null; return; }
+      var nx = all[i + 1], firstRun = !prev || prev.sys || prev.kind === 'sys' || !same(prev.from, m.from) || cwMs(m.at) - cwMs(prev.at) > 5 * 60000;
+      var lastRun = !nx || nx.sys || nx.kind === 'sys' || !same(nx.from, m.from) || cwDayKey(nx.at) !== cwDayKey(m.at) || cwMs(nx.at) - cwMs(m.at) > 5 * 60000;
+      h += cwBubble(m, c, firstRun, lastRun); prev = m;
+    });
+    if (!all.length) h += '<div class="cw-empty sm"><p>' + (CH.loading[id] ? tr('Loading…', 'Inapakia…') : tr('No messages yet. Say hello!', 'Bado hakuna jumbe. Sema habari!')) + '</p></div>';
+    var y = box.scrollTop; box.innerHTML = h; cwFill(box); cwVoiceSync();
+    if (keep) return;
+    if (CH.stick || near) cwBottom(); else box.scrollTop = y;
+  }
+  function cwBottom(now) { var b = $('cwMsgs'); if (!b) return; var go = function () { b.scrollTop = b.scrollHeight; }; go(); if (now) { requestAnimationFrame(go); setTimeout(go, 120); } CH.unseen = 0; cwJumpUi(); }
+  function cwLinkify(t, m) {
+    var s = esc(t).replace(/(https?:\/\/[^\s<]+[^\s<.,;:!?)\]'"])/g, function (u) { return '<a class="cw-a" href="' + u + '" target="_blank" rel="noopener">' + u.replace(/^https?:\/\/(www\.)?/, '') + '</a>'; });
+    (m.mentions || []).forEach(function (n) { var e = esc('@' + n); s = s.split(e).join('<b class="cw-men"' + (cwIsMe(n) ? ' data-me="1"' : '') + '>' + e + '</b>'); });
+    return s.replace(/\n/g, '<br>');
+  }
+  function cwBubble(m, c, firstRun, lastRun) {
+    var me = cwIsMe(m.from), cls = 'cw-m ' + (me ? 'me' : 'them') + (firstRun ? ' first' : '') + (lastRun ? ' last' : '') + (m.pend ? ' pend' : '') + (m.deleted ? ' del' : '');
+    var h = '<div class="' + cls + '" data-id="' + esc(m.id || '') + '"' + (m.pend ? ' data-cid="' + esc(m.pend) + '"' : '') + ' id="' + (m.id ? 'cwm-' + esc(m.id) : 'cwp-' + esc(m.pend)) + '"><div class="cw-b">';
+    if (!me && firstRun && c.kind !== 'dm') h += '<span class="cw-sn" style="' + cwHueVar(m.from) + '" data-nosw>' + esc(m.from) + '</span>';
+    if (m.deleted) return h + '<span class="cw-tx cw-dl">' + cwIc('x') + tr('This message was deleted', 'Ujumbe huu ulifutwa') + '</span>' + cwMeta(m, me) + '</div></div>';
+    if (m.fwd) h += '<span class="cw-fw">' + cwIc('fwd') + tr('Forwarded', 'Imesambazwa') + '</span>';
+    if (m.reply && (m.reply.id || m.reply.text)) h += '<button type="button" class="cw-q" data-jump="' + esc(m.reply.id || '') + '" style="' + cwHueVar(m.reply.from) + '"><b data-nosw>' + esc(cwIsMe(m.reply.from) ? tr('You', 'Wewe') : m.reply.from || '') + '</b><span data-nosw>' + esc(cwPrev({ kind: m.reply.kind, text: m.reply.text, media: [] }, null) || '') + '</span></button>';
+    var md = m.media || [];
+    if (m.kind === 'media' && md.length) h += cwGrid(m, md);
+    else if (m.kind === 'voice') h += cwVoice(m, md[0] || {});
+    else if (m.kind === 'doc') h += cwDocHtml(m, md[0] || {});
+    else if (m.kind === 'location' || m.kind === 'live') h += cwLocHtml(m, me);
+    else if (m.kind === 'contact') h += cwContactHtml(m);
+    if (m.text) h += '<div class="cw-tx" data-nosw>' + cwLinkify(m.text, m) + '</div>';
+    var u = m.kind === 'text' && m.text && /(https?:\/\/[^\s<]+)/.exec(m.text);
+    if (u) h += cwPreviewHtml(u[1].replace(/[.,;:!?)\]'"]+$/, ''));
+    h += cwMeta(m, me) + '</div>';
+    var rx = m.reacts || {}, ks = Object.keys(rx).filter(function (k) { return (rx[k] || []).length; });
+    if (ks.length) h += '<div class="cw-rx">' + ks.map(function (k) { var mine = rx[k].some(cwIsMe); return '<button type="button" class="cw-rc' + (mine ? ' on' : '') + '" data-rx="' + esc(k) + '" aria-label="' + esc(k + ' ' + rx[k].length) + '">' + k + (rx[k].length > 1 ? '<i>' + rx[k].length + '</i>' : '') + '</button>'; }).join('') + '</div>';
+    return h + '</div>';
+  }
+  function cwMeta(m, me) {
+    var st = me ? (m.pend ? (m.failed ? CW_TK.failed : CW_TK.queued) : CW_TK[m.status || 'sent'] || CW_TK.sent) : '';
+    return '<span class="cw-mt">' + (m.edited && !m.deleted ? '<i>' + tr('edited', 'imehaririwa') + '</i>' : '') + (m.starred ? '<span class="cw-st" aria-label="' + tr('Starred', 'Ina nyota') + '">' + cwIc('star') + '</span>' : '') + '<time>' + esc(dClock(dOf(m.at))) + '</time>' + st +
+      (m.pend ? '<span class="vh">' + (m.failed ? tr('Not sent', 'Haijatumwa') : tr('Waiting to send', 'Inasubiri kutumwa')) + '</span>' : me && m.status ? '<span class="vh">' + ({ sent: tr('Sent', 'Imetumwa'), delivered: tr('Delivered', 'Imefika'), read: tr('Read', 'Imesomwa') }[m.status] || '') + '</span>' : '') + '</span>';
+  }
+  function cwMediaEl(x, cls, mi, mid) {
+    var u0 = x.lurl || x.url, src = u0 ? ' src="' + esc(u0) + '"' : '', data = u0 ? '' : ' data-mid="' + esc(x.id || '') + '"';
+    if (x.type === 'video') return '<span class="' + cls + ' vid" data-view="' + esc(mid) + ':' + mi + '">' + (x.poster && !x.lurl ? '<img alt=""' + (x.posterUrl ? ' src="' + esc(x.posterUrl) + '"' : ' data-mid="' + esc(x.poster) + '"') + '>' : '<video muted playsinline preload="metadata"' + src + data + '></video>') + '<i class="cw-play">' + cwIc('play') + '</i>' + (x.dur ? '<small>' + cwDur(x.dur) + '</small>' : '') + '</span>';
+    return '<span class="' + cls + '" data-view="' + esc(mid) + ':' + mi + '"><img alt="' + tr('Photo', 'Picha') + '"' + src + data + '></span>';
+  }
+  function cwGrid(m, md) {
+    var mid = m.id || m.pend, n = md.length;
+    if (n === 1) { var x = md[0], r = x.w && x.h ? Math.max(.6, Math.min(1.6, x.h / x.w)) : .75; return '<div class="cw-g1" style="--r:' + r + '">' + cwMediaEl(x, 'cw-gi', 0, mid) + '</div>'; }
+    return '<div class="cw-g n' + Math.min(n, 4) + '">' + md.slice(0, 4).map(function (x, i) { return cwMediaEl(x, 'cw-gi', i, mid).replace('</span>', (i === 3 && n > 4 ? '<b class="cw-more">+' + (n - 4) + '</b>' : '') + '</span>'); }).join('') + '</div>';
+  }
+  function cwWave(wv, n) {
+    var a = (wv || []).length ? wv : [], out = [];
+    for (var i = 0; i < n; i++) { var v = a.length ? a[Math.floor(i * a.length / n)] : 30 + 25 * Math.sin(i * 1.7) * Math.sin(i * .37); out.push(Math.max(12, Math.min(100, +v || 12))); }
+    return out;
+  }
+  function cwVoice(m, x) {
+    var key = m.id || m.pend, bars = cwWave(x.wave, 32);
+    return '<div class="cw-vo" data-vo="' + esc(key) + '" data-dur="' + (+x.dur || 0) + '"><button type="button" class="cw-vp" data-vact="play" aria-label="' + tr('Play voice message', 'Cheza ujumbe wa sauti') + '">' + cwIc('play') + '</button>' +
+      '<span class="cw-wv" data-vact="seek" aria-hidden="true">' + bars.map(function (b) { return '<i style="height:' + b + '%"></i>'; }).join('') + '</span>' +
+      '<span class="cw-vd">' + cwDur(x.dur) + '</span><button type="button" class="cw-vs" data-vact="rate" aria-label="' + tr('Playback speed', 'Kasi ya kucheza') + '">' + String(CH.rate).replace('.', '.') + '×</button></div>';
+  }
+  function cwDocHtml(m, x) {
+    var ext = (String(x.name || '').split('.').pop() || 'doc').slice(0, 4).toUpperCase();
+    return '<button type="button" class="cw-doc" data-doc="' + esc(m.id || m.pend) + '"><span class="cw-dx">' + esc(ext) + '</span><span class="cw-dn"><b data-nosw>' + esc(x.name || tr('Document', 'Hati')) + '</b><small>' + esc(cwSize(x.size)) + ' · ' + esc(ext) + '</small></span>' + cwIc('down') + '</button>';
+  }
+  // a map tile under the pin (one OpenStreetMap tile, no library)
+  function cwTile(lat, lng) {
+    var z = 15, n = Math.pow(2, z), x = (lng + 180) / 360 * n, r = lat * Math.PI / 180, y = (1 - Math.log(Math.tan(r) + 1 / Math.cos(r)) / Math.PI) / 2 * n;
+    var x0 = Math.floor(x - 0.5), y0 = Math.floor(y - 0.5), px = Math.round((x - x0) * 256), py = Math.round((y - y0) * 256), t = '';
+    for (var j = 0; j < 2; j++) for (var i = 0; i < 2; i++) t += '<img alt="" loading="lazy" src="https://tile.openstreetmap.org/' + z + '/' + (x0 + i) + '/' + (y0 + j) + '.png">';
+    return '<span class="cw-map"><span class="cw-tiles" style="left:calc(50% - ' + px + 'px);top:calc(50% - ' + py + 'px)">' + t + '</span><i class="cw-mpin" aria-hidden="true">' + cwIc('pin') + '</i></span>';
+  }
+  function cwLocHtml(m, me) {
+    var lv = m.live || {}, loc = m.kind === 'live' && lv.lat != null ? { lat: lv.lat, lng: lv.lng } : m.loc || {}, on = m.kind === 'live' && cwMs(lv.until) > Date.now() && !lv.stopped;
+    if (loc.lat == null) return '';
+    var ll = cwCoord(loc.lat) + ', ' + cwCoord(loc.lng);
+    return '<div class="cw-loc">' + cwTile(+loc.lat, +loc.lng) +
+      '<span class="cw-lt">' + (m.kind === 'live' ? '<b>' + (on ? tr('Live location', 'Mahali papo hapo') + ' · ' + tr('until ' + dClock(dOf(cwMs(lv.until))), 'hadi ' + dClock(dOf(cwMs(lv.until)))) : tr('Live location ended', 'Mahali papo hapo pameisha')) + '</b>' + (lv.at ? '<small>' + tr('Updated ', 'Imesasishwa ') + esc(dClock(dOf(lv.at))) + '</small>' : '') : '<b>' + tr('Location', 'Mahali') + '</b>') +
+      '<small>' + esc(ll) + '</small></span>' +
+      '<span class="cw-la"><a class="btn small light" href="https://www.google.com/maps?q=' + cwCoord(loc.lat) + ',' + cwCoord(loc.lng) + '" target="_blank" rel="noopener">' + cwIc('ext') + tr('Open in Google Maps', 'Fungua kwenye Google Maps') + '</a>' +
+      (on && me && m.id ? '<button type="button" class="btn small po-red" data-livestop="' + esc(m.id) + '">' + tr('Stop sharing', 'Acha kushiriki') + '</button>' : '') + '</span></div>';
+  }
+  function cwContactHtml(m) {
+    var n = (m.contact && m.contact.name) || '';
+    return '<div class="cw-ct"><span class="cw-av" style="' + cwHueVar(n) + '" aria-hidden="true">' + esc(initials(n)) + '</span><b data-nosw>' + esc(n) + '</b>' +
+      '<span class="cw-ca">' + (cwIsMe(n) ? '' : '<button type="button" class="btn small" data-ctmsg="' + esc(n) + '">' + tr('Message', 'Ujumbe') + '</button>') + '<button type="button" class="btn small light" data-mate="' + esc(n) + '">' + tr('View', 'Angalia') + '</button></span></div>';
+  }
+  // a link: a project link shows the project's own card; any other site shows its title and picture
+  function cwProjLink(u) { var m = /(?:pin\.rafikioutreach\.org|rafikioutreach\.org|localhost(?::\d+)?|^)\/?pin\/?#p\/(\d+)/.exec(u) || /\/pin#p\/(\d+)/.exec(u); return m ? m[1] : ''; }
+  function cwPreviewHtml(u) {
+    var pid = cwProjLink(u);
+    if (pid) {
+      var p = byId(pid), r = p && S.repairs[pid];
+      if (!p) return '';
+      return '<button type="button" class="cw-lp proj" data-proj="' + esc(pid) + '"><span class="cw-lpi"' + (p.photo ? ' style="background-image:url(&quot;' + esc(photoUrl(p, 240)) + '&quot;)"' : '') + '>' + (p.photo ? '' : cwIc('drop')) + '</span><span class="cw-lpt"><b data-nosw>' + esc(p.title) + '</b><small data-nosw>' + esc(sub(p)) + '</small>' +
+        (r ? '<span class="tag' + (r.state === 'notworking' ? ' bad' : '') + '">' + (r.state === 'notworking' ? tr('Not working', 'Haifanyi kazi') : tr('Needs repair', 'Inahitaji matengenezo')) + '</span>' : '') + '</span></button>';
+    }
+    var pv = CH.prev[u];
+    if (pv === undefined) { CH.prev[u] = null; cwApi('GET', 'preview?url=' + encodeURIComponent(u)).then(function (j) { CH.prev[u] = j && (j.title || j.description) ? j : false; if (CH.prev[u] && S.view === 'vRoom') cwMsgsDraw(); }); return ''; }
+    if (!pv) return '';
+    return '<a class="cw-lp" href="' + esc(u) + '" target="_blank" rel="noopener">' + (pv.image ? '<span class="cw-lpi" style="background-image:url(&quot;' + esc(pv.image) + '&quot;)"></span>' : '') + '<span class="cw-lpt"><b data-nosw>' + esc(pv.title || u) + '</b>' + (pv.description ? '<small data-nosw>' + esc(pv.description) + '</small>' : '') + '<i data-nosw>' + esc(pv.site || u.replace(/^https?:\/\/(www\.)?/, '').split('/')[0]) + '</i></span></a>';
+  }
+  function cwFind(id) { var a = cwAll(CH.cur); for (var i = 0; i < a.length; i++) if (cwSame(a[i].id, id) || (a[i].pend && a[i].pend === id)) return a[i]; return null; }
+  function cwFlash(id) {
+    var el = document.getElementById('cwm-' + id); if (!el) return false;
+    el.scrollIntoView({ block: 'center' }); el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); CH.stick = false; return true;
+  }
+  // a quoted message or a search hit: older pages load until it's there
+  function cwJump(id, n) {
+    if (!id || cwFlash(id)) return;
+    n = n || 0;
+    if (CH.more[CH.cur] && n < 12) return cwOlder().then(function (ok) { if (ok) cwJump(id, n + 1); else toast(tr('That message isn’t available', 'Ujumbe huo haupatikani')); });
+    toast(tr('That message isn’t available', 'Ujumbe huo haupatikani'));
+  }
+  function cwJumpUi() {
+    var b = $('cwJump'), box = $('cwMsgs'); if (!b || !box) return;
+    var far = box.scrollHeight - box.scrollTop - box.clientHeight > 300;
+    b.classList.toggle('hidden', !far); $('cwJumpN').textContent = CH.unseen > 99 ? '99+' : CH.unseen || ''; $('cwJumpN').classList.toggle('hidden', !CH.unseen);
+  }
+
+  // ---- the composer
+  function cwCanSend(c) { return !c || !c.onlyAdmins || cwAdmin(c); }
+  function cwCompDraw() {
+    var box = $('cwComp'), c = cwChat(CH.cur); if (!box) return;
+    if (c && !cwCanSend(c)) { box.innerHTML = '<p class="cw-only">' + cwIc('lock') + tr('Only admins can send messages', 'Wasimamizi pekee wanaweza kutuma jumbe') + '</p>'; cwGrow(); return; }
+    var r = CH.reply, e = CH.edit, txt = $('cwTx') ? $('cwTx').value : '';
+    var bar = r ? '<div class="cw-rb" style="' + cwHueVar(r.from) + '"><span><b data-nosw>' + esc(cwIsMe(r.from) ? tr('You', 'Wewe') : r.from) + '</b><small data-nosw>' + esc(cwPrev({ kind: r.kind, text: r.text, media: r.media || [] }, null)) + '</small></span><button type="button" class="cw-ib sm" id="cwRbX" aria-label="' + tr('Cancel reply', 'Ghairi jibu') + '">' + cwIc('x') + '</button></div>'
+      : e ? '<div class="cw-rb ed"><span><b>' + cwIc('edit') + tr('Edit message', 'Hariri ujumbe') + '</b><small data-nosw>' + esc(e.text) + '</small></span><button type="button" class="cw-ib sm" id="cwRbX" aria-label="' + tr('Cancel editing', 'Ghairi kuhariri') + '">' + cwIc('x') + '</button></div>' : '';
+    box.innerHTML = bar + '<div class="cw-men-pop hidden" id="cwMen" role="listbox" aria-label="' + tr('Mention someone', 'Mtaje mtu') + '"></div>' +
+      '<div class="cw-rec hidden" id="cwRec" aria-live="polite"></div>' +
+      '<div class="cw-cr" id="cwCr"><button type="button" class="cw-cb" id="cwAtt" aria-label="' + tr('Attach', 'Ambatisha') + '" data-testid="cw_attach">' + cwIc('plus') + '</button>' +
+      '<div class="cw-in"><textarea id="cwTx" rows="1" placeholder="' + tr('Message', 'Ujumbe') + '" aria-label="' + tr('Message', 'Ujumbe') + '" enterkeyhint="send" data-testid="cw_text"></textarea>' +
+      '<button type="button" class="cw-cam" id="cwCam" aria-label="' + tr('Camera', 'Kamera') + '">' + cwIc('camera') + '</button></div>' +
+      '<button type="button" class="cw-go" id="cwGo" data-testid="cw_send"></button></div>';
+    var t = $('cwTx'); t.value = e && !txt ? e.text : txt; cwGoUi(); cwGrow();
+  }
+  function cwGoUi() {
+    var b = $('cwGo'), t = $('cwTx'); if (!b || !t) return;
+    var has = !!t.value.trim() || !!CH.edit;
+    b.innerHTML = has ? cwIc('send') : cwIc('mic'); b.classList.toggle('mic', !has);
+    b.setAttribute('aria-label', has ? tr('Send', 'Tuma') : tr('Hold to record a voice message', 'Shikilia kurekodi ujumbe wa sauti'));
+    $('cwCam').classList.toggle('hidden', has);
+  }
+  function cwGrow() { var t = $('cwTx'); if (t) { t.style.height = 'auto'; t.style.height = Math.min(t.scrollHeight, 132) + 'px'; } var c = $('cwComp'); if (c && c.offsetHeight) $('vRoom').style.setProperty('--cwch', c.offsetHeight + 'px'); }
+  function cwTyping(what) {
+    if (!CH.ws || !CH.cur) return;
+    if (what && Date.now() - CH.tySent < 3000 && CH.tyWhat === what) return;
+    CH.tySent = what ? Date.now() : 0; CH.tyWhat = what;
+    try { CH.ws.send(JSON.stringify({ t: 'typing', c: CH.cur, what: what || null })); } catch (e) {}
+  }
+  function cwSendText() {
+    var t = $('cwTx'), v = t.value.replace(/\s+$/, '').replace(/^\s+/, ''); if (!v) return;
+    var c = CH.cur;
+    if (CH.edit) {
+      var m = CH.edit; CH.edit = null; t.value = ''; cwCompDraw();
+      if (v === m.text) return;
+      var was = m.text; m.text = v; m.edited = Date.now(); cwMsgsDraw();
+      cwApi('POST', 'edit', { c: c, id: m.id, text: v }).then(function (j) { if (!j.ok) { m.text = was; m.edited = null; cwMsgsDraw(); toast(cwWhy(j)); } else if (j.msg) cwPut(j.msg); });
+      return;
+    }
+    var ment = CH.ment.filter(function (n) { return v.indexOf('@' + n) >= 0; });
+    cwQueue({ c: c, kind: 'text', text: v, reply: cwReplyRef(), mentions: ment.length ? ment : undefined });
+    t.value = ''; CH.reply = null; CH.ment = []; cwTyping(null); cwCompDraw(); t = $('cwTx'); if (t) t.focus({ preventScroll: true });
+  }
+  function cwReplyRef() { var r = CH.reply; return r ? { id: r.id, from: r.from, kind: r.kind, text: r.kind === 'text' ? r.text : r.text || '' } : undefined; }
+  // the send sound: a short whoosh (and a tap on phones)
+  var cwAC = null;
+  function cwAudio() { try { if (!cwAC) cwAC = new (window.AudioContext || window.webkitAudioContext)(); if (cwAC.state === 'suspended') cwAC.resume(); } catch (e) { cwAC = null; } return cwAC; }
+  function cwWhoosh() {
+    buzz(); var a = cwAudio(); if (!a) return;
+    try {
+      var n = a.sampleRate * 0.22, b = a.createBuffer(1, n, a.sampleRate), d = b.getChannelData(0);
+      for (var i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 2);
+      var s = a.createBufferSource(), f = a.createBiquadFilter(), g = a.createGain(), t = a.currentTime;
+      f.type = 'bandpass'; f.Q.value = 1.2; f.frequency.setValueAtTime(600, t); f.frequency.exponentialRampToValueAtTime(3200, t + 0.2);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.18, t + 0.04); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.22);
+      s.buffer = b; s.connect(f); f.connect(g); g.connect(a.destination); s.start(t);
+    } catch (e) {}
+  }
+  function cwDing() {
+    var a = cwAudio(); if (!a) return;
+    try { var t = a.currentTime; [[880, 0], [1320, 0.09]].forEach(function (x) { var o = a.createOscillator(), g = a.createGain(); o.frequency.value = x[0]; g.gain.setValueAtTime(0.0001, t + x[1]); g.gain.exponentialRampToValueAtTime(0.12, t + x[1] + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + x[1] + 0.16); o.connect(g); g.connect(a.destination); o.start(t + x[1]); o.stop(t + x[1] + 0.18); }); } catch (e) {}
+  }
+
+  // ---- the outbox: a message is kept on this phone (IndexedDB, with its photos) until the server has it
+  var cwDB = null, cwMem = {};
+  function cwDb() {
+    if (cwDB) return cwDB;
+    cwDB = new Promise(function (ok, no) { if (!window.indexedDB) return no(new Error('no indexedDB')); var r = indexedDB.open('rafiki-chat', 1); r.onupgradeneeded = function () { if (!r.result.objectStoreNames.contains('out')) r.result.createObjectStore('out', { keyPath: 'cid' }); }; r.onsuccess = function () { ok(r.result); }; r.onerror = function () { no(r.error); }; });
+    return cwDB;
+  }
+  function cwOut(mode, fn) { return cwDb().then(function (d) { return new Promise(function (ok, no) { var t = d.transaction('out', mode), s = t.objectStore('out'), res = fn(s); t.oncomplete = function () { ok(res && res.result); }; t.onerror = function () { no(t.error); }; }); }); }
+  function cwStrip(it) { var o = {}; Object.keys(it).forEach(function (k) { if (k !== 'files') o[k] = it[k]; }); o.files = (it.files || []).map(function (f) { var g = {}; Object.keys(f).forEach(function (k) { if (k !== 'lurl') g[k] = f[k]; }); return g; }); return o; }
+  function cwOutPut(it) { cwMem[it.cid] = it; return cwOut('readwrite', function (s) { return s.put(cwStrip(it)); }).catch(function () {}); }
+  function cwOutDel(cid) { delete cwMem[cid]; return cwOut('readwrite', function (s) { return s.delete(cid); }).catch(function () {}); }
+  function cwOutAll() {
+    return cwOut('readonly', function (s) { return s.getAll(); }).then(function (a) { return a || []; }, function () { return []; }).then(function (a) {
+      var m = {}; a.forEach(function (x) { m[x.cid] = x; }); Object.keys(cwMem).forEach(function (k) { m[k] = cwMem[k]; });
+      return Object.keys(m).map(function (k) { return m[k]; }).sort(function (x, y) { return cwMs(x.at) - cwMs(y.at); });
+    });
+  }
+  function cwOutLoad() {
+    cwOutAll().then(function (a) {
+      a.forEach(function (it) { var l = CH.pend[it.c] = CH.pend[it.c] || []; if (!l.some(function (x) { return x.cid === it.cid; })) { l.push(it); cwMem[it.cid] = it; } });
+      if (a.length) { if (S.view === 'vRoom') cwMsgsDraw(); cwFlush(); }
+    });
+  }
+  function cwDropPend(m) {
+    if (!m || !m.cid) return; var l = CH.pend[m.c]; if (!l) return;
+    var i = l.findIndex(function (x) { return x.cid === m.cid; }); if (i < 0) return;
+    (l[i].files || []).forEach(function (f) { if (f.lurl) { try { URL.revokeObjectURL(f.lurl); } catch (e) {} } });
+    l.splice(i, 1); cwOutDel(m.cid);
+  }
+  function cwQueue(it) {
+    it.cid = it.cid || cwUid(); it.at = new Date().toISOString(); it.from = cwMe();
+    (CH.pend[it.c] = CH.pend[it.c] || []).push(it); cwOutPut(it);
+    var c = cwChat(it.c); if (c) { c.last = { id: '', from: cwMe(), kind: it.kind, text: it.text || '', at: it.at, status: 'sent', media: (it.files || []).map(function (f) { return { type: f.type, dur: f.dur, name: f.name }; }) }; c.archived = false; cwSave(); }
+    CH.stick = true; if (S.view === 'vRoom' && CH.cur === it.c) cwMsgsDraw();
+    cwWhoosh(); cwFlush();
+  }
+  var cwFlushing = null;
+  function cwFlush() {
+    if (cwFlushing) return cwFlushing;
+    cwFlushing = cwOutAll().then(function (items) {
+      var chain = Promise.resolve(false);
+      items.forEach(function (it0) {
+        chain = chain.then(function (stop) {
+          var it = cwMem[it0.cid] || it0; if (stop || it.failed) return stop;
+          var files = it.files || [], up = Promise.resolve(false);
+          files.forEach(function (f) {
+            up = up.then(function (st) {
+              if (st || f.id) return st;
+              var pre = f.posterBlob && !f.poster ? cwUp(f.posterBlob, 'photo', 'poster.jpg') /* a poster is a small photo */.then(function (p) { if (p.ok) f.poster = p.id; }) : Promise.resolve();
+              return pre.then(function () { return cwUp(f.blob, f.type, f.name, f.dur); }).then(function (j) {
+                if (j.ok) { f.id = j.id; if (j.url) f.url = j.url; cwOutPut(it); return false; }
+                if (j.status === 0 || j.status >= 500 || j.status === 429 || j.status === 401) return true;
+                it.failed = cwWhy(j); cwOutPut(it); return true;
+              });
+            });
+          });
+          return up.then(function (st) {
+            if (st) return !it.failed;
+            var body = { c: it.c, cid: it.cid, kind: it.kind };
+            ['text', 'reply', 'mentions', 'loc', 'live', 'contact', 'fwd'].forEach(function (k) { if (it[k] != null) body[k] = it[k]; });
+            var med = files.map(function (f) { var o = { id: f.id, type: f.type }; ['w', 'h', 'dur', 'wave', 'name', 'size', 'poster'].forEach(function (k) { if (f[k] != null) o[k] = f[k]; }); return o; }).concat(it.media || []);
+            if (med.length) body.media = med;
+            return cwApi('POST', 'send', body).then(function (j) {
+              if (j.ok && j.msg) { cwDropPend(j.msg.cid ? j.msg : Object.assign({ cid: it.cid, c: it.c }, j.msg)); cwPut(j.msg, true); if (it.kind === 'live' && it.live) cwLiveStart(j.msg); return false; }
+              if (j.status === 0 || j.status >= 500 || j.status === 429 || j.status === 401 || j.reason === 'chat-off') return true;
+              it.failed = cwWhy(j); cwOutPut(it); if (S.view === 'vRoom') cwMsgsDraw(); return false;
+            });
+          });
+        });
+      });
+      return chain;
+    }).then(function () { cwFlushing = null; }, function () { cwFlushing = null; });
+    return cwFlushing;
+  }
+  addEventListener('online', function () { if (CH.started) { cwFlush(); cwLoad(true); } });
+  setInterval(function () { if (CH.started && Object.keys(cwMem).length && navigator.onLine !== false) cwFlush(); }, 20000);
+
+  // a message from the server (sent, or arrived): into its chat, the list row, the badge
+  function cwPut(m, mine) {
+    if (!m || !m.c) return;
+    var a = CH.msgs[m.c], had = false;
+    if (a) { for (var i = 0; i < a.length; i++) if (cwSame(a[i].id, m.id)) { a[i] = Object.assign({}, a[i], m); had = true; break; } if (!had) { a.push(m); a.sort(function (x, y) { return cwMs(x.at) - cwMs(y.at); }); } cwSaveM(m.c); }
+    if (m.cid) cwDropPend(m);
+    var c = cwChat(m.c), open = S.view === 'vRoom' && CH.cur === m.c && !document.hidden;
+    if (!had && CH.typ[m.c] && same(CH.typ[m.c].who, m.from)) CH.typ[m.c] = null; // the message they were typing is here
+    if (c && !had) {
+      if (!c.last || cwMs(m.at) >= cwMs(c.last.at)) c.last = { id: m.id, from: m.from, kind: m.kind, text: m.text, at: m.at, status: m.status, deleted: m.deleted, sys: m.sys, media: m.media };
+      if (!cwIsMe(m.from) && !open) { c.unread = (c.unread || 0) + 1; if ((m.mentions || []).some(cwIsMe)) c.mention = true; }
+      if (c.archived && !cwIsMe(m.from) && !cwMuted(c)) c.archived = false;
+      cwSave(); cwBadge();
+    }
+    if (S.view === 'vRoom' && CH.cur === m.c) {
+      var box = $('cwMsgs'), near = box && box.scrollHeight - box.scrollTop - box.clientHeight < 120;
+      if (!had && !cwIsMe(m.from) && !near) CH.unseen++;
+      cwMsgsDraw(); cwJumpUi(); if (!had && !cwIsMe(m.from)) cwRead(m.c);
+    }
+    if (S.view === 'vChat') cwListDraw();
+    return had;
+  }
+
+  // ---- real time
+  function cwWs() {
+    if (CH.ws || CH.wsNo || CH.on !== true || !CH.started || !window.WebSocket || S.view === 'vLock') return;
+    CH.ws = 'opening';
+    cwApi('POST', 'ticket', {}).then(function (j) {
+      var t = j.ticket || j.t;
+      if (!j.ok || !t) { CH.ws = null; return cwWsLater(); }
+      var ws; try { ws = new WebSocket((location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/api/chat/ws?t=' + encodeURIComponent(t)); } catch (e) { CH.ws = null; return cwWsLater(); }
+      CH.ws = ws;
+      ws.onopen = function () { var again = CH.wsN > 0 || CH.wsUp; CH.wsN = 0; CH.wsUp = true; clearInterval(CH.pingT); CH.pingT = setInterval(function () { try { ws.send('{"t":"ping"}'); } catch (e) {} }, 25000); if (again) { cwLoad(true); if (S.view === 'vRoom' && CH.cur) cwAfter(CH.cur); } cwFlush(); };
+      ws.onmessage = function (e) { var d; try { d = JSON.parse(e.data); } catch (x) { return; } cwOn(d); };
+      ws.onclose = function (e) { if (CH.ws === ws) CH.ws = null; clearInterval(CH.pingT); if (e && e.code === 4401) { CH.wsNo = true; cwLoad(false); return; } if (CH.started) cwWsLater(); }; // 4401: blocked, removed or signed out
+      ws.onerror = function () { try { ws.close(); } catch (x) {} };
+    });
+  }
+  function cwWsLater() { clearTimeout(CH.wsT); var d = Math.min(30000, 1000 * Math.pow(2, CH.wsN++)); CH.wsT = setTimeout(cwWs, d); }
+  function cwOn(d) {
+    if (!d || !d.t || d.t === 'pong') return;
+    if (d.t === 'hello') { if (d.me) CH.me = d.me; return; }
+    if (d.t === 'msg' && d.msg) { var had = cwPut(d.msg); if (!had && !cwIsMe(d.msg.from)) { cwArrived(d.msg); cwApi('POST', 'delivered', { c: d.msg.c, upTo: d.msg.id }); } return; }
+    if (d.t === 'edit' || d.t === 'delete' || d.t === 'react') {
+      if (d.msg) { cwPut(d.msg); return; }
+      var m = (CH.msgs[d.c] || []).filter(function (x) { return cwSame(x.id, d.id); })[0]; if (!m) return;
+      if (d.t === 'edit') { m.text = d.text; m.edited = d.edited || d.at || Date.now(); }
+      if (d.t === 'delete') { m.deleted = true; m.text = ''; m.media = []; }
+      if (d.t === 'react') { if (d.reacts) m.reacts = d.reacts; else if (d.who) { m.reacts = m.reacts || {}; Object.keys(m.reacts).forEach(function (k) { m.reacts[k] = m.reacts[k].filter(function (n) { return !same(n, d.who); }); }); if (d.emoji) (m.reacts[d.emoji] = m.reacts[d.emoji] || []).push(d.who); } }
+      cwSaveM(d.c); if (S.view === 'vRoom' && CH.cur === d.c) cwMsgsDraw();
+      var c = cwChat(d.c); if (c && c.last && cwSame(c.last.id, d.id)) { if (d.t === 'delete') c.last.deleted = true; if (d.t === 'edit') c.last.text = d.text; if (S.view === 'vChat') cwListDraw(); }
+      return;
+    }
+    if (d.t === 'status') { cwStatus(d.c, d.upTo, d.status); return; }
+    if (d.t === 'typing') {
+      if (cwIsMe(d.who)) return;
+      CH.typ[d.c] = d.what ? { who: d.who, what: d.what, at: Date.now() } : null;
+      cwTypUi(); clearTimeout(CH.typT); CH.typT = setTimeout(cwTypUi, 7200); return;
+    }
+    if (d.t === 'presence') { CH.pres[d.who] = { online: !!d.online, seen: d.seen }; if (S.view === 'vRoom') cwHead(); if (S.view === 'vChat') cwListDraw(); return; }
+    if (d.t === 'chat' && d.chat) {
+      if (d.chat.removed || d.chat.gone) { CH.chats = CH.chats.filter(function (x) { return x.id !== d.chat.id; }); if (CH.cur === d.chat.id && S.view === 'vRoom') { toast(tr('You’re no longer in this chat.', 'Hauko tena kwenye gumzo hili.')); goBack(function () { show('vChat', 'replace'); }); } }
+      else cwUpsert(d.chat);
+      cwSave(); cwBadge(); if (S.view === 'vChat') cwListDraw(); if (S.view === 'vRoom' && CH.cur === d.chat.id) { cwHead(); cwCompDraw(); } return;
+    }
+    if (d.t === 'live') {
+      var lm = (CH.msgs[d.c] || []).filter(function (x) { return cwSame(x.id, d.id); })[0]; if (!lm) return;
+      lm.live = Object.assign({}, lm.live, { lat: d.lat, lng: d.lng, at: d.at }, d.until != null ? { until: d.until } : {}); if (d.until != null && cwMs(d.until) <= Date.now()) lm.live.stopped = true; if (S.view === 'vRoom' && CH.cur === d.c) cwMsgsDraw(true);
+    }
+  }
+  function cwTypUi() { if (S.view === 'vRoom') cwHead(); if (S.view === 'vChat' && !CH.q) cwListDraw(); }
+  var CW_RANK = { sent: 1, delivered: 2, read: 3 };
+  function cwStatus(c, upTo, st) {
+    var a = CH.msgs[c] || [], num = typeof cwNum(upTo) === 'number', k = -1;
+    for (var i = 0; i < a.length; i++) if (cwSame(a[i].id, upTo)) k = i;
+    var upto = function (m, j) { return num && typeof cwNum(m.id) === 'number' ? +m.id <= +upTo : j <= k; };
+    a.forEach(function (m, j) { if (cwIsMe(m.from) && upto(m, j) && (CW_RANK[st] || 0) > (CW_RANK[m.status] || 0)) m.status = st; });
+    var ch = cwChat(c); if (ch && ch.last && ch.last.id !== '' && cwIsMe(ch.last.from) && (CW_RANK[st] || 0) > (CW_RANK[ch.last.status] || 0) && (num ? +ch.last.id <= +upTo : cwSame(ch.last.id, upTo))) ch.last.status = st;
+    cwSaveM(c); if (S.view === 'vRoom' && CH.cur === c) cwMsgsDraw(true); if (S.view === 'vChat') cwListDraw();
+  }
+  // a message while you're elsewhere: a notification (this tab, grouped per chat) and a sound, unless the chat is muted
+  function cwArrived(m) {
+    var c = cwChat(m.c); if (!c || cwMuted(c)) return;
+    var here = S.view === 'vRoom' && CH.cur === m.c && !document.hidden;
+    if (here) return;
+    if (store.get('rfChatSnd:' + m.c) !== '0') cwDing();
+    if ('Notification' in window && Notification.permission === 'granted' && (document.hidden || S.view !== 'vRoom' || CH.cur !== m.c)) {
+      try {
+        var n = new Notification(cwTitle(c), { body: (c.kind !== 'dm' ? cwFirst(m.from) + ': ' : '') + cwPrev(Object.assign({}, m, { from: '' }), null), tag: 'rafiki-chat-' + m.c, renotify: true, icon: '/apple-touch-icon.png' });
+        n.onclick = function () { try { window.focus(); } catch (e) {} cwOpen(m.c); n.close(); };
+      } catch (e) {}
+    }
+  }
+
+  // ---- voice notes: hold the mic to record; slide left to cancel; slide up to lock hands-free
+  var cwCanRec = !!(window.MediaRecorder && navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+  function cwRecStart(x0, y0) {
+    if (!cwCanRec) { toast(tr('This browser can’t record sound.', 'Kivinjari hiki hakiwezi kurekodi sauti.')); return; }
+    if (CH.rec) return;
+    var R = CH.rec = { x0: x0, y0: y0, t0: 0, lock: false, gone: false, wave: [], chunks: [] };
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
+      if (R.gone) { stream.getTracks().forEach(function (t) { t.stop(); }); return; }
+      R.stream = stream;
+      var type = ['audio/webm;codecs=opus', 'audio/mp4', 'audio/webm', 'audio/ogg'].filter(function (t) { return MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t); })[0];
+      R.mr = type ? new MediaRecorder(stream, { mimeType: type }) : new MediaRecorder(stream);
+      R.mr.ondataavailable = function (e) { if (e.data && e.data.size) R.chunks.push(e.data); };
+      R.mr.start(250); R.t0 = Date.now(); buzz();
+      try { var a = cwAudio(), src = a.createMediaStreamSource(stream), an = a.createAnalyser(); an.fftSize = 512; src.connect(an); R.an = an; R.buf = new Uint8Array(an.fftSize); } catch (e) {}
+      R.tick = setInterval(function () {
+        if (R.an) { R.an.getByteTimeDomainData(R.buf); var s = 0; for (var i = 0; i < R.buf.length; i++) { var v = (R.buf[i] - 128) / 128; s += v * v; } R.wave.push(Math.min(100, Math.round(Math.sqrt(s / R.buf.length) * 320))); }
+        if (Date.now() - R.t0 >= 300000) { cwRecEnd(true); return; } // 5 minutes at most
+        cwRecUi();
+      }, 100);
+      cwTyping('recording'); cwRecUi();
+    }, function () { CH.rec = null; toast(tr('Allow the microphone to record a voice message.', 'Ruhusu maikrofoni kurekodi ujumbe wa sauti.')); cwRecUi(); });
+    cwRecUi();
+  }
+  function cwRecMove(x, y) {
+    var R = CH.rec; if (!R || R.lock) return;
+    R.dx = Math.min(0, x - R.x0); R.dy = Math.min(0, y - R.y0);
+    if (R.dx < -110) { cwRecEnd(false); return; }
+    if (R.dy < -80) { R.lock = true; buzz(); }
+    cwRecUi();
+  }
+  function cwRecEnd(send) {
+    var R = CH.rec; if (!R) return; CH.rec = null; R.gone = true; clearInterval(R.tick); cwTyping(null);
+    var dur = R.t0 ? (Date.now() - R.t0) / 1000 : 0, c = CH.cur;
+    var fin = function () {
+      if (R.stream) R.stream.getTracks().forEach(function (t) { t.stop(); });
+      cwRecUi();
+      if (!send) { toast(tr('Voice message cancelled', 'Ujumbe wa sauti umeghairiwa')); return; }
+      if (dur < 0.8 || !R.chunks.length) { toast(tr('Hold the mic to record, let go to send', 'Shikilia maikrofoni kurekodi, achilia kutuma')); return; }
+      var blob = new Blob(R.chunks, { type: (R.mr && R.mr.mimeType) || 'audio/webm' }), wv = cwWave(R.wave.length ? R.wave : null, 48).map(Math.round);
+      var ext = /mp4|m4a|aac/.test(blob.type) ? 'm4a' : /ogg/.test(blob.type) ? 'ogg' : 'webm';
+      cwQueue({ c: c, kind: 'voice', reply: cwReplyRef(), files: [{ blob: blob, type: 'voice', name: 'voice.' + ext, size: blob.size, dur: Math.round(dur), wave: R.wave.length ? wv : undefined }] });
+      CH.reply = null; cwCompDraw();
+    };
+    if (R.mr && R.mr.state !== 'inactive') { R.mr.onstop = fin; try { R.mr.stop(); } catch (e) { fin(); } } else fin();
+  }
+  function cwRecUi() {
+    var R = CH.rec, box = $('cwRec'), cr = $('cwCr'); if (!box || !cr) return;
+    box.classList.toggle('hidden', !R); cr.classList.toggle('recording', !!R); $('cwComp').classList.toggle('locked', !!(R && R.lock));
+    if (!R) { box.innerHTML = ''; return; }
+    var s = R.t0 ? (Date.now() - R.t0) / 1000 : 0, slid = R.dx ? Math.max(-110, R.dx) : 0;
+    box.innerHTML = '<span class="cw-rd" aria-hidden="true"></span><b class="cw-rtm">' + cwDur(s) + '</b>' +
+      (R.lock ? '<button type="button" class="cw-ib" id="cwRecX" aria-label="' + tr('Delete recording', 'Futa rekodi') + '">' + cwIc('trash') + '</button><span class="cw-rl">' + tr('Recording hands-free', 'Inarekodi bila kushika') + '</span><button type="button" class="cw-go" id="cwRecGo" aria-label="' + tr('Send', 'Tuma') + '">' + cwIc('send') + '</button>'
+        : '<span class="cw-rs" style="transform:translateX(' + slid + 'px)">' + cwIc('left') + tr('Slide to cancel', 'Telezesha kughairi') + '</span><span class="cw-lk" aria-hidden="true">' + cwIc('lock') + cwIc('up') + '</span>');
+  }
+  // playing: one player at a time, at 1×, 1.5× or 2×, the waveform fills as it plays
+  function cwVoiceUrl(key) {
+    var m = cwFind(key) || {}, x = (m.media || [])[0] || {};
+    return x.lurl || x.url ? Promise.resolve(x.lurl || x.url) : cwMedia(x.id);
+  }
+  function cwVoicePlay(key) {
+    var cur = CH.aud[key];
+    Object.keys(CH.aud).forEach(function (k) { if (k !== key && CH.aud[k] && !CH.aud[k].paused) CH.aud[k].pause(); });
+    if (cur) { if (cur.paused) cur.play().catch(function () {}); else cur.pause(); cwVoiceSync(); return; }
+    cwVoiceUrl(key).then(function (u) {
+      var a = CH.aud[key] = new Audio(u); a.playbackRate = CH.rate;
+      ['timeupdate', 'play', 'pause', 'ended', 'loadedmetadata'].forEach(function (ev) { a.addEventListener(ev, cwVoiceSync); });
+      a.addEventListener('ended', function () { a.currentTime = 0; cwVoiceSync(); });
+      a.play().catch(function () {}); cwVoiceSync();
+    }, function () { toast(tr('Couldn’t load that voice message.', 'Haikuweza kupakia ujumbe huo wa sauti.')); });
+  }
+  function cwVoiceSync() {
+    qa('#cwMsgs [data-vo]').forEach(function (el) {
+      var a = CH.aud[el.getAttribute('data-vo')], dur = (a && isFinite(a.duration) && a.duration) || +el.getAttribute('data-dur') || 0, t = a ? a.currentTime : 0, on = a && !a.paused, k = dur ? t / dur : 0;
+      var b = el.querySelector('.cw-vp'); b.innerHTML = cwIc(on ? 'pause' : 'play'); b.setAttribute('aria-label', on ? tr('Pause', 'Simamisha') : tr('Play voice message', 'Cheza ujumbe wa sauti'));
+      var bars = el.querySelectorAll('.cw-wv i'); for (var i = 0; i < bars.length; i++) bars[i].classList.toggle('on', i / bars.length < k);
+      el.querySelector('.cw-vd').textContent = cwDur(on || t ? t : dur); el.querySelector('.cw-vs').textContent = CH.rate + '×';
+    });
+  }
+
+  // ---- photos, videos, documents, places and people
+  function cwPick(accept, multi, capture, cb) {
+    var i = document.createElement('input'); i.type = 'file'; i.accept = accept; if (multi) i.multiple = true; if (capture) i.setAttribute('capture', 'environment');
+    i.style.display = 'none'; document.body.appendChild(i);
+    i.addEventListener('change', function () { var f = Array.prototype.slice.call(i.files || []); i.remove(); if (f.length) cb(f); });
+    i.click(); setTimeout(function () { if (i.isConnected && !i.files.length) i.remove(); }, 60000);
+  }
+  // photos: 1600 px JPEG, smaller again until it is 2 MB or less
+  function cwPhoto(file) {
+    return new Promise(function (ok) {
+      var url = URL.createObjectURL(file), img = new Image();
+      img.onload = function () {
+        var w = img.naturalWidth, h = img.naturalHeight, max = 1600, q = 0.82, c = document.createElement('canvas');
+        var go = function () {
+          var k = Math.min(1, max / Math.max(w, h)); c.width = Math.round(w * k); c.height = Math.round(h * k); c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+          c.toBlob(function (b) { if (b && b.size > 2 * 1048576 && max > 640) { max = Math.round(max * 0.8); q = Math.max(0.6, q - 0.06); return go(); } URL.revokeObjectURL(url); ok({ blob: b || file, type: 'photo', w: c.width, h: c.height, name: 'photo.jpg', size: (b || file).size }); }, 'image/jpeg', q);
+        };
+        go();
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); ok(null); };
+      img.src = url;
+    });
+  }
+  // videos: 16 MB and 60 seconds at most; a small JPEG poster from the first frame
+  function cwVideo(file) {
+    return new Promise(function (ok) {
+      if (file.size > 16 * 1048576) { toast(tr('Videos can be up to 16 MB.', 'Video zinaweza kuwa hadi MB 16.')); return ok(null); }
+      var url = URL.createObjectURL(file), v = document.createElement('video'), done = false; v.muted = true; v.preload = 'metadata'; v.playsInline = true;
+      var fin = function (r) { if (done) return; done = true; URL.revokeObjectURL(url); ok(r); };
+      v.onloadedmetadata = function () {
+        if (v.duration > 61) { toast(tr('Videos can be up to 60 seconds.', 'Video zinaweza kuwa hadi sekunde 60.')); return fin(null); }
+        var info = { blob: file, type: 'video', w: v.videoWidth, h: v.videoHeight, dur: Math.round(v.duration || 0), name: file.name || 'video.mp4', size: file.size };
+        v.onseeked = function () { try { var c = document.createElement('canvas'), k = Math.min(1, 640 / Math.max(v.videoWidth, v.videoHeight || 1)); c.width = Math.round(v.videoWidth * k); c.height = Math.round(v.videoHeight * k); c.getContext('2d').drawImage(v, 0, 0, c.width, c.height); c.toBlob(function (b) { if (b) info.posterBlob = b; fin(info); }, 'image/jpeg', 0.7); } catch (e) { fin(info); } };
+        try { v.currentTime = Math.min(0.1, (v.duration || 1) / 2); } catch (e) { fin(info); }
+        setTimeout(function () { fin(info); }, 2500);
+      };
+      v.onerror = function () { fin({ blob: file, type: 'video', name: file.name || 'video.mp4', size: file.size }); };
+      v.src = url;
+    });
+  }
+  function cwMediaSheet(files) {
+    var c = CH.cur;
+    Promise.all(files.slice(0, 10).map(function (f) { return /^video\//.test(f.type) ? cwVideo(f) : /^image\//.test(f.type) ? cwPhoto(f) : Promise.resolve(null); })).then(function (list) {
+      list = list.filter(Boolean); if (!list.length) return;
+      list.forEach(function (x) { x.lurl = URL.createObjectURL(x.blob); });
+      var w = tSheet(tr('Send photos', 'Tuma picha'), '<div class="cw-ms"><h3>' + (list.length === 1 ? (list[0].type === 'video' ? tr('Send a video', 'Tuma video') : tr('Send a photo', 'Tuma picha')) : tr('Send ' + list.length, 'Tuma ' + list.length)) + '</h3>' +
+        '<div class="cw-msg' + (list.length > 1 ? ' many' : '') + '">' + list.map(function (x) { return x.type === 'video' ? '<video src="' + x.lurl + '" muted playsinline controls></video>' : '<img src="' + x.lurl + '" alt="">'; }).join('') + '</div>' +
+        '<div class="cw-capr"><input type="text" id="cwCap" placeholder="' + tr('Add a caption', 'Ongeza maelezo') + '" aria-label="' + tr('Add a caption', 'Ongeza maelezo') + '" autocomplete="off"><button type="button" class="cw-go" id="cwCapGo" aria-label="' + tr('Send', 'Tuma') + '" data-testid="cw_media_send">' + cwIc('send') + '</button></div></div>');
+      var send = function () { var cap = $('cwCap').value.trim(); w.close(); cwQueue({ c: c, kind: 'media', text: cap || undefined, reply: cwReplyRef(), files: list }); CH.reply = null; cwCompDraw(); };
+      $('cwCapGo').addEventListener('click', send); $('cwCap').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); send(); } });
+    });
+  }
+  function cwDocPick() {
+    cwPick('.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,application/pdf', false, false, function (fs) {
+      var f = fs[0]; if (f.size > 10 * 1048576) { toast(tr('Documents can be up to 10 MB.', 'Hati zinaweza kuwa hadi MB 10.')); return; }
+      cwQueue({ c: CH.cur, kind: 'doc', reply: cwReplyRef(), files: [{ blob: f, type: 'doc', name: f.name, size: f.size }] }); CH.reply = null; cwCompDraw();
+    });
+  }
+  function cwHere(cb) {
+    if (!navigator.geolocation) return toast(tr('This phone can’t share its location.', 'Simu hii haiwezi kushiriki mahali ilipo.'));
+    toast(tr('Finding where you are…', 'Inatafuta ulipo…'));
+    navigator.geolocation.getCurrentPosition(function (p) { cb(p.coords.latitude, p.coords.longitude); }, function () { toast(tr('Allow location to share where you are.', 'Ruhusu mahali ili kushiriki ulipo.')); }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 30000 });
+  }
+  function cwLivePick() {
+    var w = panel(tr('Share live location', 'Shiriki mahali papo hapo'), '<p class="muted">' + tr('The chat sees where you are as you move. Stop any time.', 'Gumzo linaona ulipo unapotembea. Acha wakati wowote.') + '</p><div class="cw-opts">' +
+      [[15, tr('15 minutes', 'Dakika 15')], [60, tr('1 hour', 'Saa 1')], [480, tr('8 hours', 'Saa 8')]].map(function (o) { return '<button type="button" class="btn light block" data-live="' + o[0] + '">' + o[1] + '</button>'; }).join('') + '</div>', 'cw-sheet');
+    w.addEventListener('click', function (e) { var b = e.target.closest('[data-live]'); if (!b) return; var mins = +b.getAttribute('data-live'), c = CH.cur; w.close(); cwHere(function (lat, lng) { cwQueue({ c: c, kind: 'live', loc: { lat: lat, lng: lng }, live: { until: Date.now() + mins * 60000 } }); }); });
+  }
+  function cwLiveStart(m) {
+    var lv = m.live || {}; if (!m.id || cwMs(lv.until) <= Date.now()) return;
+    CH.live[m.id] = { c: m.c, until: cwMs(lv.until) }; store.set('rfChatLive', JSON.stringify(CH.live)); cwLiveWatch();
+  }
+  function cwLiveWatch() {
+    var ids = Object.keys(CH.live).filter(function (k) { return CH.live[k].until > Date.now(); });
+    Object.keys(CH.live).forEach(function (k) { if (ids.indexOf(k) < 0) delete CH.live[k]; });
+    store.set('rfChatLive', JSON.stringify(CH.live));
+    if (!ids.length) { if (CH.liveW != null && navigator.geolocation) navigator.geolocation.clearWatch(CH.liveW); CH.liveW = null; return; }
+    if (CH.liveW != null || !navigator.geolocation) return;
+    CH.liveW = navigator.geolocation.watchPosition(function (p) {
+      if (Date.now() - (CH.liveAt || 0) < 20000) return; CH.liveAt = Date.now();
+      Object.keys(CH.live).forEach(function (id) { var l = CH.live[id]; if (l.until > Date.now()) cwApi('POST', 'live', { c: l.c, id: id, lat: p.coords.latitude, lng: p.coords.longitude }); });
+      cwLiveWatch();
+    }, function () {}, { enableHighAccuracy: true, maximumAge: 20000 });
+  }
+  function cwLiveStop(id) {
+    var l = CH.live[id], m = cwFind(id), c = (l && l.c) || (m && m.c) || CH.cur; delete CH.live[id]; cwLiveWatch();
+    if (m) { m.live = Object.assign({}, m.live, { until: Date.now(), stopped: true }); cwMsgsDraw(true); }
+    cwApi('POST', 'live-stop', { c: c, id: cwNum(id) }).then(function (j) { if (!j.ok) toast(cwWhy(j)); else toast(tr('Stopped sharing your location', 'Umeacha kushiriki mahali ulipo')); });
+  }
+  function cwTeam(cb) { if (teamCache) return cb(teamCache); api('GET', null, '?team=1').then(function (j) { if (j.ok) teamCache = (j.team || []).filter(function (p) { return p.name; }); cb(teamCache || []); }); }
+  function cwContactPick() {
+    var c = CH.cur;
+    cwTeam(function (team) {
+      var ppl = team.filter(function (p) { return !cwIsMe(p.name); }).sort(function (a, z) { return a.name.localeCompare(z.name); });
+      var w = tSheet(tr('Share a contact', 'Shiriki mwasiliani'), '<h3 class="cw-shh">' + tr('Share a teammate', 'Shiriki mwenzako') + '</h3><p class="muted">' + tr('They can message them in the app. No phone numbers are shared.', 'Wanaweza kumtumia ujumbe kwenye programu. Namba za simu hazishirikiwi.') + '</p><div class="cw-pl">' +
+        ppl.map(function (p) { return '<button type="button" class="cw-pr" data-ct="' + esc(p.name) + '"><span class="cw-av" style="' + cwHueVar(p.name) + '" aria-hidden="true">' + esc(initials(p.name)) + '</span><b data-nosw>' + esc(p.name) + '</b></button>'; }).join('') + '</div>');
+      w.addEventListener('click', function (e) { var b = e.target.closest('[data-ct]'); if (!b) return; w.close(); cwQueue({ c: c, kind: 'contact', contact: { name: b.getAttribute('data-ct') } }); });
+    });
+  }
+  function cwAttach() {
+    var T = [['photo', 'image', 'blue', tr('Photos and videos', 'Picha na video')], ['camera', 'camera', 'coral', tr('Camera', 'Kamera')], ['doc', 'doc', 'purple', tr('Document', 'Hati')],
+      ['loc', 'pin', 'green', tr('Location', 'Mahali')], ['live', 'live', 'teal', tr('Live location', 'Mahali papo hapo')], ['contact', 'user', 'amber', tr('Contact', 'Mwasiliani')]];
+    var w = panel(tr('Send', 'Tuma'), '<div class="cw-att">' + T.map(function (t) { return '<button type="button" data-att="' + t[0] + '" data-testid="cw_att_' + t[0] + '"><span style="--hu:var(--hu-' + t[2] + ');--hb:var(--hb-' + t[2] + ')">' + cwIc(t[1]) + '</span><b>' + t[3] + '</b></button>'; }).join('') + '</div>', 'cw-sheet');
+    w.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-att]'); if (!b) return; var k = b.getAttribute('data-att'), c = CH.cur; w.close(); buzz();
+      setTimeout(function () {
+        if (k === 'photo') cwPick('image/*,video/*', true, false, cwMediaSheet);
+        if (k === 'camera') cwPick('image/*', false, true, cwMediaSheet);
+        if (k === 'doc') cwDocPick();
+        if (k === 'loc') cwHere(function (lat, lng) { cwQueue({ c: c, kind: 'location', loc: { lat: lat, lng: lng } }); });
+        if (k === 'live') cwLivePick();
+        if (k === 'contact') cwContactPick();
+      }, 230);
+    });
+  }
+  function cwDocOpen(key) {
+    var m = cwFind(key) || {}, x = (m.media || [])[0] || {};
+    (x.lurl || x.url ? Promise.resolve(x.lurl || x.url) : cwMedia(x.id)).then(function (u) { var a = document.createElement('a'); a.href = u; a.download = x.name || 'document'; a.target = '_blank'; a.rel = 'noopener'; document.body.appendChild(a); a.click(); a.remove(); }, function () { toast(tr('Couldn’t open that document.', 'Haikuweza kufungua hati hiyo.')); });
+  }
+  // the full-screen viewer: every photo and video in the chat, swipe between them
+  function cwViewer(key, idx) {
+    var all = [], at = 0;
+    cwAll(CH.cur).forEach(function (m) { if (m.kind === 'media' && !m.deleted) (m.media || []).forEach(function (x, i) { if (String(m.id || m.pend) === String(key) && i === idx) at = all.length; all.push({ m: m, x: x }); }); });
+    if (!all.length) return;
+    var w = document.createElement('div'); w.className = 'cw-lb'; w.setAttribute('role', 'dialog'); w.setAttribute('aria-modal', 'true'); w.setAttribute('aria-label', tr('Photos and videos', 'Picha na video'));
+    w.innerHTML = '<div class="cw-lbh"><button type="button" class="cw-ib" data-lb="x" aria-label="' + tr('Close', 'Funga') + '">' + cwIc('x') + '</button><span class="cw-lbt"></span><span class="cw-lbn"></span></div><div class="cw-lbs"></div>' +
+      '<button type="button" class="cw-lbp" data-lb="p" aria-label="' + tr('Previous', 'Iliyotangulia') + '">' + cwIc('left') + '</button><button type="button" class="cw-lbp nx" data-lb="n" aria-label="' + tr('Next', 'Inayofuata') + '">' + cwIc('right') + '</button><div class="cw-lbc" data-nosw></div>';
+    document.body.appendChild(w);
+    var stage = w.querySelector('.cw-lbs');
+    var draw = function () {
+      var it = all[at], x = it.x, src = x.lurl || x.url ? ' src="' + esc(x.lurl || x.url) + '"' : ' data-mid="' + esc(x.id) + '"';
+      stage.innerHTML = x.type === 'video' ? '<video controls playsinline autoplay' + src + '></video>' : '<img alt=""' + src + '>'; cwFill(stage);
+      w.querySelector('.cw-lbt').textContent = (cwIsMe(it.m.from) ? tr('You', 'Wewe') : it.m.from) + ' · ' + dWhen(dOf(it.m.at)); w.querySelector('.cw-lbt').setAttribute('data-nosw', '');
+      w.querySelector('.cw-lbn').textContent = (at + 1) + ' / ' + all.length; w.querySelector('.cw-lbc').textContent = it.m.text || '';
+      w.querySelector('[data-lb=p]').classList.toggle('hidden', at === 0); w.querySelector('[data-lb=n]').classList.toggle('hidden', at === all.length - 1);
+    };
+    var key0 = function (e) { if (e.key === 'ArrowLeft' && at > 0) { at--; draw(); } else if (e.key === 'ArrowRight' && at < all.length - 1) { at++; draw(); } else if (e.key === 'Escape') w.close(); };
+    w.close = function () { if (w.gone) return; w.gone = true; document.removeEventListener('keydown', key0); w.classList.add('out'); setTimeout(function () { w.remove(); }, 180); };
+    w.addEventListener('click', function (e) { var b = e.target.closest('[data-lb]'); if (!b) return; var k = b.getAttribute('data-lb'); if (k === 'x') w.close(); if (k === 'p' && at > 0) { at--; draw(); } if (k === 'n' && at < all.length - 1) { at++; draw(); } });
+    var sx = null; stage.addEventListener('touchstart', function (e) { sx = e.touches[0].clientX; }, { passive: true });
+    stage.addEventListener('touchend', function (e) { if (sx == null) return; var dx = e.changedTouches[0].clientX - sx; sx = null; if (dx < -50 && at < all.length - 1) { at++; draw(); } else if (dx > 50 && at > 0) { at--; draw(); } });
+    document.addEventListener('keydown', key0);
+    draw(); requestAnimationFrame(function () { w.classList.add('in'); });
+  }
+
+  // ---- long-press: reactions and what to do with a message
+  function cwMenuOk() { if (Date.now() - (CH.menuAt || 0) < 900) return false; CH.menuAt = Date.now(); return true; }
+  function cwMenu(m) {
+    if (!m || m.sys || !cwMenuOk()) return;
+    var me = cwIsMe(m.from), c = cwChat(CH.cur) || {}, mine = (m.reacts || {});
+    if (m.pend) {
+      var wp = panel(tr('Message', 'Ujumbe'), '<p class="muted">' + esc(m.failed || tr('Waiting to send. It goes as soon as there is signal.', 'Inasubiri kutumwa. Itaenda mtandao ukipatikana.')) + '</p><div class="cw-mn">' +
+        (m.failed ? '<button type="button" data-mk="retry">' + cwIc('send') + tr('Try again', 'Jaribu tena') + '</button>' : '') + '<button type="button" data-mk="drop" class="red">' + cwIc('trash') + tr('Delete', 'Futa') + '</button></div>', 'cw-sheet');
+      wp.addEventListener('click', function (e) { var b = e.target.closest('[data-mk]'); if (!b) return; var k = b.getAttribute('data-mk'), it = cwMem[m.pend]; wp.close(); if (!it) return; if (k === 'retry') { it.failed = null; cwOutPut(it); cwMsgsDraw(); cwFlush(); } else { cwDropPend({ c: it.c, cid: it.cid }); cwMsgsDraw(); } });
+      return;
+    }
+    if (m.deleted) return;
+    var canEdit = me && m.kind === 'text' && Date.now() - cwMs(m.at) < 15 * 60000, adm = cwAdmin(c);
+    var photos = (m.media || []).filter(function (x) { return x.type === 'photo'; });
+    var A = [['reply', 'reply', tr('Reply', 'Jibu')], ['fwd', 'fwd', tr('Forward', 'Sambaza')]];
+    if (m.text) A.push(['copy', 'copy', tr('Copy', 'Nakili')]);
+    A.push(['star', 'star', m.starred ? tr('Unstar', 'Ondoa nyota') : tr('Star', 'Weka nyota')]);
+    if (me) A.push(['info', 'info', tr('Info', 'Maelezo')]);
+    if (canEdit) A.push(['edit', 'edit', tr('Edit', 'Hariri')]);
+    if (m.text || photos.length) A.push(['repair', 'wrench', tr('Report a repair', 'Ripoti matengenezo')]);
+    if (S.admin) A.push(['assign', 'cal', tr('Assign a visit', 'Gawa ziara')]);
+    A.push(['del', 'trash', tr('Delete', 'Futa'), 'red']);
+    var w = panel(tr('Message', 'Ujumbe'), '<div class="cw-rxp" role="group" aria-label="' + tr('React', 'Toa hisia') + '">' + CW_RX.map(function (e) { var on = (mine[e] || []).some(cwIsMe); return '<button type="button" data-react="' + e + '" class="' + (on ? 'on' : '') + '" aria-pressed="' + on + '">' + e + '</button>'; }).join('') + '</div>' +
+      '<div class="cw-mn">' + A.map(function (a) { return '<button type="button" data-mk="' + a[0] + '"' + (a[3] ? ' class="red"' : '') + ' data-testid="cw_mk_' + a[0] + '">' + cwIc(a[1]) + '<span>' + a[2] + '</span></button>'; }).join('') + '</div>', 'cw-sheet cw-menu');
+    w.addEventListener('click', function (e) {
+      var r = e.target.closest('[data-react]');
+      if (r) { w.close(); cwReact(m, r.getAttribute('data-react')); return; }
+      var b = e.target.closest('[data-mk]'); if (!b) return; var k = b.getAttribute('data-mk'); w.close(); buzz();
+      setTimeout(function () {
+        if (k === 'reply') { CH.reply = m; CH.edit = null; cwCompDraw(); var t = $('cwTx'); if (t) t.focus(); }
+        if (k === 'fwd') cwForward(m);
+        if (k === 'copy') tmCopy(m.text);
+        if (k === 'star') { m.starred = !m.starred; cwMsgsDraw(true); cwApi('POST', 'star', { c: m.c || CH.cur, id: m.id, on: m.starred }); toast(m.starred ? tr('Starred', 'Imewekwa nyota') : tr('Star removed', 'Nyota imeondolewa')); }
+        if (k === 'info') cwInfoMsg(m);
+        if (k === 'edit') { CH.edit = m; CH.reply = null; var tx = $('cwTx'); if (tx) tx.value = ''; cwCompDraw(); tx = $('cwTx'); if (tx) { tx.value = m.text; cwGoUi(); cwGrow(); tx.focus(); } }
+        if (k === 'repair') cwRepair(m);
+        if (k === 'assign') cwAssign(m);
+        if (k === 'del') cwDelete(m);
+      }, 200);
+    });
+  }
+  function cwReact(m, e) {
+    var rx = m.reacts = m.reacts || {}, had = (rx[e] || []).some(cwIsMe);
+    Object.keys(rx).forEach(function (k) { rx[k] = rx[k].filter(function (n) { return !cwIsMe(n); }); });
+    if (!had) (rx[e] = rx[e] || []).push(cwMe());
+    cwMsgsDraw(true); buzz();
+    cwApi('POST', 'react', { c: m.c || CH.cur, id: m.id, emoji: had ? null : e }).then(function (j) { if (!j.ok) toast(cwWhy(j)); else if (j.reacts) { m.reacts = j.reacts; cwMsgsDraw(true); } else if (j.msg) cwPut(j.msg); });
+  }
+  function cwReacts(m, e) {
+    var rx = m.reacts || {}, ks = Object.keys(rx).filter(function (k) { return (rx[k] || []).length; });
+    var w = panel(tr('Reactions', 'Hisia'), '<div class="cw-pl">' + ks.map(function (k) { return rx[k].map(function (n) { var me = cwIsMe(n); return '<' + (me ? 'button type="button" data-unreact="' + esc(k) + '"' : 'div') + ' class="cw-pr' + (k === e ? ' hl' : '') + '"><span class="cw-av" style="' + cwHueVar(n) + '" aria-hidden="true">' + esc(initials(n)) + '</span><span class="cw-prt"><b data-nosw>' + esc(me ? tr('You', 'Wewe') : n) + '</b>' + (me ? '<small>' + tr('Tap to remove', 'Gusa kuondoa') + '</small>' : '') + '</span><span class="cw-pe">' + k + '</span></' + (me ? 'button' : 'div') + '>'; }).join(''); }).join('') + '</div>', 'cw-sheet');
+    w.addEventListener('click', function (ev) { var b = ev.target.closest('[data-unreact]'); if (!b) return; w.close(); cwReact(m, b.getAttribute('data-unreact')); });
+  }
+  function cwDelete(m) {
+    var c = cwChat(CH.cur) || {}, me = cwIsMe(m.from), all = me || (c.kind !== 'dm' && cwAdmin(c));
+    var w = panel(tr('Delete message?', 'Futa ujumbe?'), '<div class="cw-mn">' + (all ? '<button type="button" data-del="all" class="red" data-testid="cw_del_all">' + cwIc('trash') + tr('Delete for everyone', 'Futa kwa wote') + '</button>' : '') +
+      '<button type="button" data-del="me" class="red" data-testid="cw_del_me">' + cwIc('trash') + tr('Delete for me', 'Futa kwangu') + '</button><button type="button" data-del="no">' + cwIc('x') + tr('Cancel', 'Ghairi') + '</button></div>', 'cw-sheet');
+    w.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-del]'); if (!b) return; var k = b.getAttribute('data-del'); w.close(); if (k === 'no') return;
+      var c0 = m.c || CH.cur;
+      if (k === 'all') { m.deleted = true; m.text = ''; m.media = []; } else CH.msgs[c0] = (CH.msgs[c0] || []).filter(function (x) { return !cwSame(x.id, m.id); });
+      cwSaveM(c0); cwMsgsDraw(true);
+      cwApi('POST', 'delete', { c: c0, id: m.id, forAll: k === 'all' }).then(function (j) { if (!j.ok) { toast(cwWhy(j)); cwMsgsLoad(c0, true); } });
+    });
+  }
+  function cwInfoMsg(m) {
+    var w = panel(tr('Message info', 'Maelezo ya ujumbe'), '<div class="cw-inf"><p class="muted">' + tr('Loading…', 'Inapakia…') + '</p></div>', 'cw-sheet'), box = w.querySelector('.cw-inf');
+    cwApi('GET', 'info?c=' + encodeURIComponent(m.c || CH.cur) + '&id=' + encodeURIComponent(m.id)).then(function (j) {
+      if (!j.ok && !j.read) { box.innerHTML = '<p class="msg bad">' + esc(cwWhy(j)) + '</p>'; return; }
+      var row = function (x) { return '<div class="cw-pr"><span class="cw-av" style="' + cwHueVar(x.name) + '" aria-hidden="true">' + esc(initials(x.name)) + '</span><span class="cw-prt"><b data-nosw>' + esc(x.name) + '</b><small>' + esc(dWhen(dOf(x.at))) + '</small></span></div>'; };
+      var rd = j.read || [], dl = (j.delivered || []).filter(function (x) { return !rd.some(function (r) { return same(r.name, x.name); }); });
+      box.innerHTML = '<h4 class="cw-ih">' + CW_TK.read + tr('Read by', 'Imesomwa na') + '</h4>' + (rd.length ? rd.map(row).join('') : '<p class="muted">' + tr('No one yet', 'Bado hakuna') + '</p>') +
+        '<h4 class="cw-ih">' + CW_TK.delivered + tr('Delivered to', 'Imemfikia') + '</h4>' + (dl.length ? dl.map(row).join('') : '<p class="muted">' + tr('No one else', 'Hakuna mwingine') + '</p>');
+    });
+  }
+  function cwForward(m) {
+    var list = cwSorted().filter(function (c) { return cwCanSend(c); }), pick = [];
+    var w = tSheet(tr('Forward to', 'Sambaza kwa'), '<h3 class="cw-shh">' + tr('Forward to', 'Sambaza kwa') + '</h3><div class="cw-pl">' + list.map(function (c) { return '<button type="button" class="cw-pr" role="checkbox" aria-checked="false" data-fw="' + esc(c.id) + '">' + cwAv(c) + '<span class="cw-prt"><b data-nosw>' + esc(cwTitle(c)) + '</b></span><span class="cw-ck" aria-hidden="true">' + cwIc('check') + '</span></button>'; }).join('') + '</div>' +
+      '<div class="cw-foot"><button type="button" class="btn block" id="cwFwGo" disabled>' + tr('Forward', 'Sambaza') + '</button></div>');
+    cwFill(w);
+    w.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-fw]');
+      if (b) { var id = b.getAttribute('data-fw'), i = pick.indexOf(id); if (i >= 0) pick.splice(i, 1); else pick.push(id); b.setAttribute('aria-checked', i < 0); $('cwFwGo').disabled = !pick.length; $('cwFwGo').textContent = pick.length > 1 ? tr('Forward to ' + pick.length, 'Sambaza kwa ' + pick.length) : tr('Forward', 'Sambaza'); return; }
+      if (e.target.closest('#cwFwGo')) {
+        w.close();
+        pick.forEach(function (c) { cwQueue({ c: c, kind: m.kind, text: m.text || undefined, fwd: true, loc: m.loc, contact: m.contact, live: undefined, media: (m.media || []).filter(function (x) { return x.id; }).map(function (x) { var o = {}; Object.keys(x).forEach(function (k) { if (k !== 'lurl') o[k] = x[k]; }); return o; }) }); });
+        toast(pick.length > 1 ? tr('Forwarded to ' + pick.length + ' chats', 'Imesambazwa kwa gumzo ' + pick.length) : tr('Forwarded', 'Imesambazwa'));
+      }
+    });
+  }
+  // "Turn into a job": the repair report (a site visit with "Needs repair", the words and photos filled in) or the assign sheet
+  function cwPickProject(title, cb) {
+    var w = tSheet(title, '<h3 class="cw-shh">' + esc(title) + '</h3><p class="muted">' + tr('Which project is it about?', 'Inahusu mradi gani?') + '</p><input type="search" id="cwPq" placeholder="' + tr('Search projects', 'Tafuta miradi') + '" aria-label="' + tr('Search projects', 'Tafuta miradi') + '" autocomplete="off"><div class="cw-pl" id="cwPl"></div>');
+    var draw = function () { var q = $('cwPq').value.trim().toLowerCase(); $('cwPl').innerHTML = S.projects.filter(function (p) { return !q || (p.title + ' ' + (p.area || '')).toLowerCase().indexOf(q) >= 0; }).slice(0, 60).map(function (p) { return '<button type="button" class="cw-pr" data-pp="' + esc(p.id) + '"><span class="cw-prt"><b data-nosw>' + esc(p.title) + '</b><small data-nosw>' + esc(sub(p)) + '</small></span></button>'; }).join(''); };
+    $('cwPq').addEventListener('input', draw); draw();
+    w.addEventListener('click', function (e) { var b = e.target.closest('[data-pp]'); if (!b) return; w.close(); setTimeout(function () { cb(b.getAttribute('data-pp')); }, 240); });
+  }
+  function cwJobProject(m, title, cb) { var c = cwChat(m.c || CH.cur); if (c && c.kind === 'project' && byId(c.project)) return cb(String(c.project)); var pl = cwProjLink(m.text || ''); if (pl && byId(pl)) return cb(pl); cwPickProject(title, cb); }
+  function cwRepair(m) {
+    cwJobProject(m, tr('Report a repair', 'Ripoti matengenezo'), function (pid) {
+      var p = byId(pid); if (!p) return;
+      var photos = (m.media || []).filter(function (x) { return x.type === 'photo'; }).slice(0, 3), slotsN = ['damage', 'extra1', 'extra2'];
+      var go = function () {
+        Promise.all(photos.map(function (x) { return (x.lurl || x.url ? Promise.resolve(x.lurl || x.url) : cwMedia(x.id)).then(function (u) { return fetch(u).then(function (r) { return r.blob(); }); }).catch(function () { return null; }); })).then(function (blobs) {
+          var d = blank(p); d.state = 'repair'; d.note = (m.text || '') + (m.from ? ' (' + tr('from the chat, ', 'kutoka gumzo, ') + m.from + ')' : '');
+          var copy = {}; Object.keys(d).forEach(function (k) { if (k !== 'files' && k !== 'voice') copy[k] = d[k]; });
+          store.set('rfPinDraft:' + pid, JSON.stringify(copy));
+          var files = blobs.map(function (b, i) { return b ? { slot: slotsN[i], blob: b } : null; }).filter(Boolean);
+          dstore('readwrite', function (s) { return s.put({ id: pid, files: files, voice: null }); }).catch(function () {}).then(function () {
+            openProj(pid, 'visit');
+            var n = 0, t = setInterval(function () { if (V && V.id === pid) { clearInterval(t); V.resumed = false; vRender(); toast(tr('Filled in from the chat. Check it and send.', 'Imejazwa kutoka gumzo. Kagua na utume.')); } else if (++n > 40) clearInterval(t); }, 100);
+          });
+        });
+      };
+      if (store.get('rfPinDraft:' + pid)) poAsk(tr('Replace the unfinished visit?', 'Badilisha ziara ambayo haijakamilika?'), tr('This project already has a visit draft on this phone.', 'Mradi huu tayari una rasimu ya ziara kwenye simu hii.'), tr('Replace it', 'Ibadilishe')).then(function (ok) { if (ok) go(); });
+      else go();
+    });
+  }
+  function cwAssign(m) {
+    cwJobProject(m, tr('Assign a visit', 'Gawa ziara'), function (pid) {
+      oNeedTeam(function () {
+        O.pick = [pid]; ocvAssignOpen();
+        setTimeout(function () {
+          var to = $('aTo'), p = byId(pid);
+          if (to && m.from && !cwIsMe(m.from)) qa('option', to).forEach(function (o) { if (same(o.value || o.textContent, m.from)) to.value = o.value || o.textContent; });
+          if ($('aF')) { $('aF').value = 'all'; $('aF').dispatchEvent(new Event('change')); }
+          if ($('aQ') && p) { $('aQ').value = p.title; $('aQ').dispatchEvent(new Event('input')); }
+          if ($('aNote') && m.text) $('aNote').value = m.text.slice(0, 200);
+        }, 60);
+      });
+    });
+  }
+
+  // ---- chat info: members, admins, description, photo; mute, sound, wallpaper; the join link; leave
+  function cwInfo() {
+    var c = cwChat(CH.cur); if (!c) return;
+    var w = tSheet(tr('Chat info', 'Maelezo ya gumzo'), '<div class="cw-info" data-testid="cw_info"></div>'), box = w.querySelector('.cw-info');
+    var draw = function () {
+      c = cwChat(CH.cur) || c; var adm = cwAdmin(c), grp = c.kind === 'group', mu = cwMuted(c), snd = store.get('rfChatSnd:' + c.id) !== '0';
+      var wp = store.get('rfChatWall:' + c.id); if (wp == null) wp = c.wallpaper || '';
+      var sub0 = c.kind === 'dm' ? cwSeenTx(CH.pres[cwOther(c)]) : c.kind === 'project' ? tr('Project thread', 'Mazungumzo ya mradi') : (c.members || []).length + ' ' + tr('members', 'wanachama');
+      var h = '<div class="cw-ihd">' + cwAv(c, true) + (grp && adm ? '<button type="button" class="cw-iph" data-i="photo" aria-label="' + tr('Change photo', 'Badilisha picha') + '">' + cwIc('camera') + '</button>' : '') +
+        '<h3 data-nosw>' + esc(cwTitle(c)) + '</h3><small>' + esc(sub0) + '</small>' + (c.description ? '<p data-nosw>' + esc(c.description) + '</p>' : '') +
+        (grp && adm ? '<button type="button" class="lnk" data-i="edit">' + tr('Edit name and description', 'Hariri jina na maelezo') + '</button>' : '') + '</div>';
+      var row = function (k, ic, hue, label, val, red) { return '<button type="button" class="ct-r' + (red ? ' red' : '') + '" data-i="' + k + '"><span class="ct-ri" style="--hu:var(--hu-' + hue + ');--hb:var(--hb-' + hue + ')" aria-hidden="true">' + cwIc(ic) + '</span><span class="ct-rl"><b>' + label + '</b>' + (val ? '<small>' + val + '</small>' : '') + '</span><span class="ct-rc" aria-hidden="true">' + cwIc('chev') + '</span></button>'; };
+      var rows = [];
+      if (c.kind === 'project' && byId(c.project)) rows.push(row('proj', 'drop', 'teal', tr('Open the project', 'Fungua mradi'), esc(byId(c.project).title)));
+      if (c.kind === 'dm') rows.push(row('contact', 'user', 'blue', tr('View contact', 'Angalia mwasiliani'), esc(cwOther(c))));
+      rows.push(row('mute', mu ? 'sound' : 'mute', 'slate', mu ? tr('Unmute', 'Washa sauti') : tr('Mute', 'Nyamazisha'), mu ? (c.muted === 'always' ? tr('Muted always', 'Imenyamazishwa daima') : tr('Muted until ', 'Imenyamazishwa hadi ') + esc(dWhen(dOf(cwMs(c.muted))))) : tr('Notifications on', 'Arifa zimewashwa')));
+      rows.push(row('sound', 'sound', 'amber', tr('Sound', 'Sauti'), snd ? tr('On for this chat', 'Imewashwa kwa gumzo hili') : tr('Off for this chat', 'Imezimwa kwa gumzo hili')));
+      var wl = CW_WALL.filter(function (x) { return x[0] === wp; })[0] || CW_WALL[0];
+      rows.push(row('wall', 'wall', 'purple', tr('Wallpaper', 'Mandhari'), tr(wl[1], wl[2])));
+      if (grp && adm) {
+        rows.push(row('link', 'link', 'blue', tr('Invite link', 'Kiungo cha mwaliko'), tr('Anyone in the team with the link can join', 'Yeyote kwenye timu mwenye kiungo anaweza kujiunga')));
+        rows.push('<div class="ct-r sw"><span class="ct-ri" style="--hu:var(--hu-amber);--hb:var(--hb-amber)" aria-hidden="true">' + cwIc('lock') + '</span><span class="ct-rl"><b>' + tr('Only admins can send messages', 'Wasimamizi pekee wanaweza kutuma jumbe') + '</b></span><button type="button" class="cw-sw" role="switch" aria-checked="' + !!c.onlyAdmins + '" data-i="only" aria-label="' + tr('Only admins can send messages', 'Wasimamizi pekee wanaweza kutuma jumbe') + '"><span class="kn"></span></button></div>');
+      }
+      h += '<section class="ct-g"><div class="ct-list">' + rows.join('') + '</div></section>';
+      if (c.kind !== 'dm') {
+        var mem = (c.members || []).slice().sort(function (a, z) { return (cwIsMe(z) - cwIsMe(a)) || ((c.admins || []).indexOf(z) >= 0) - ((c.admins || []).indexOf(a) >= 0) || a.localeCompare(z); });
+        h += '<section class="ct-g"><h4>' + mem.length + ' ' + tr('members', 'wanachama') + (c.kind === 'team' ? ' · ' + tr('kept in step with the team list', 'inafuata orodha ya timu') : '') + '</h4><div class="ct-list">' +
+          (grp && adm ? '<button type="button" class="ct-r" data-i="add"><span class="ct-ri" style="--hu:var(--hu-green);--hb:var(--hb-green)" aria-hidden="true">' + cwIc('plus') + '</span><span class="ct-rl"><b>' + tr('Add members', 'Ongeza wanachama') + '</b></span></button>' : '') +
+          mem.map(function (n) { var a = (c.admins || []).some(function (x) { return same(x, n); }), p = CH.pres[n]; return '<button type="button" class="ct-r cw-mem" data-mem="' + esc(n) + '"><span class="cw-av" style="' + cwHueVar(n) + '" aria-hidden="true">' + esc(initials(n)) + (p && p.online ? '<i class="cw-on"></i>' : '') + '</span><span class="ct-rl"><b data-nosw>' + esc(cwIsMe(n) ? tr('You', 'Wewe') : n) + '</b>' + (p && !cwIsMe(n) ? '<small>' + esc(cwSeenTx(p)) + '</small>' : '') + '</span>' + (a ? '<span class="tag">' + tr('Admin', 'Msimamizi') + '</span>' : '') + '</button>'; }).join('') + '</div></section>';
+      }
+      if (grp) h += '<section class="ct-g"><div class="ct-list">' + row('leave', 'leave', 'coral', tr('Leave the group', 'Ondoka kwenye kikundi'), '', true) + '</div></section>';
+      box.innerHTML = h; cwFill(box);
+    };
+    draw();
+    box.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-i],[data-mem]'); if (!b) return; buzz();
+      var k = b.getAttribute('data-i'), c0 = cwChat(CH.cur);
+      if (b.hasAttribute('data-mem')) return cwMember(c0, b.getAttribute('data-mem'), draw);
+      if (k === 'proj') { w.close(); setTimeout(function () { openProj(String(c0.project), 'pin'); }, 230); return; }
+      if (k === 'contact') { ctOpen(cwOther(c0)); return; }
+      if (k === 'mute') return cwMute(c0, draw);
+      if (k === 'sound') { var on = store.get('rfChatSnd:' + c0.id) !== '0'; store.set('rfChatSnd:' + c0.id, on ? '0' : '1'); draw(); return; }
+      if (k === 'wall') return cwWallPick(c0, draw);
+      if (k === 'link') return cwLink(c0);
+      if (k === 'only') { var v = !c0.onlyAdmins; c0.onlyAdmins = v; draw(); cwCompDraw(); cwApi('POST', 'group-update', { c: c0.id, onlyAdmins: v }).then(function (j) { if (!j.ok) { c0.onlyAdmins = !v; draw(); cwCompDraw(); toast(cwWhy(j)); } }); return; }
+      if (k === 'edit') return cwGroupEdit(c0, draw);
+      if (k === 'photo') return cwPick('image/*', false, false, function (fs) { cwPhoto(fs[0]).then(function (x) { if (!x) return; toast(tr('Uploading…', 'Inapakia…')); cwUp(x.blob, 'photo', 'group.jpg').then(function (j) { if (!j.ok) return toast(cwWhy(j)); c0.photo = j.url || j.id; draw(); cwHead(); cwApi('POST', 'group-update', { c: c0.id, photo: j.id }); }); }); });
+      if (k === 'add') return cwAddMembers(c0, draw);
+      if (k === 'leave') return poAsk(tr('Leave this group?', 'Ondoka kwenye kikundi hiki?'), tr('You won’t get its messages any more.', 'Hutapata tena jumbe zake.'), tr('Leave', 'Ondoka'), true).then(function (ok) {
+        if (!ok) return; cwApi('POST', 'leave', { c: c0.id }).then(function (j) { if (!j.ok) return toast(cwWhy(j)); CH.chats = CH.chats.filter(function (x) { return x.id !== c0.id; }); cwSave(); cwBadge(); w.close(); setTimeout(function () { goBack(function () { show('vChat', 'replace'); }); }, 260); });
+      });
+    });
+  }
+  function cwMute(c, after) {
+    if (cwMuted(c)) { c.muted = 0; cwApi('POST', 'prefs', { c: c.id, muted: 0 }); cwSave(); cwBadge(); if (after) after(); if (S.view === 'vChat') cwListDraw(); toast(tr('Unmuted', 'Sauti imewashwa')); return; }
+    var w = panel(tr('Mute notifications', 'Nyamazisha arifa'), '<div class="cw-opts">' + [['8h', tr('8 hours', 'Saa 8')], ['1w', tr('1 week', 'Wiki 1')], ['always', tr('Always', 'Daima')]].map(function (o) { return '<button type="button" class="btn light block" data-mu="' + o[0] + '">' + o[1] + '</button>'; }).join('') + '</div>', 'cw-sheet');
+    w.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-mu]'); if (!b) return; var k = b.getAttribute('data-mu'); w.close();
+      c.muted = k === 'always' ? 'always' : Date.now() + (k === '8h' ? 8 * 3600000 : 7 * 864e5);
+      cwApi('POST', 'prefs', { c: c.id, muted: c.muted }); cwSave(); cwBadge(); if (after) after(); if (S.view === 'vChat') cwListDraw();
+      cwUndo(tr('Chat muted', 'Gumzo limenyamazishwa'), function () { c.muted = 0; cwApi('POST', 'prefs', { c: c.id, muted: 0 }); cwSave(); cwBadge(); if (after) after(); if (S.view === 'vChat') cwListDraw(); });
+    });
+  }
+  function cwArchive(c) {
+    var v = !c.archived; c.archived = v; if (v) c.pinned = c.pinned && false; cwSave(); cwBadge(); cwListDraw();
+    cwApi('POST', 'prefs', { c: c.id, archived: v });
+    cwUndo(v ? tr('Chat archived', 'Gumzo limehifadhiwa') : tr('Chat back in the list', 'Gumzo limerudishwa'), function () { c.archived = !v; cwApi('POST', 'prefs', { c: c.id, archived: !v }); cwSave(); cwBadge(); cwListDraw(); });
+  }
+  function cwPinChat(c) {
+    var v = !c.pinned; if (v && CH.chats.filter(function (x) { return x.pinned; }).length >= 5) { toast(tr('You can pin up to 5 chats.', 'Unaweza kubandika gumzo hadi 5.')); return; }
+    c.pinned = v; cwSave(); cwListDraw(); cwApi('POST', 'prefs', { c: c.id, pinned: v });
+  }
+  // a short snackbar with Undo, for the things that can be put back
+  function cwUndo(text, undo) {
+    qa('.cw-snk').forEach(function (x) { x.remove(); });
+    var d = document.createElement('div'); d.className = 'cw-snk'; d.setAttribute('role', 'status');
+    d.innerHTML = '<span>' + esc(text) + '</span><button type="button">' + tr('Undo', 'Tendua') + '</button>';
+    document.body.appendChild(d);
+    d.querySelector('button').addEventListener('click', function () { d.remove(); buzz(); undo(); });
+    setTimeout(function () { d.classList.add('out'); setTimeout(function () { d.remove(); }, 300); }, 5000);
+  }
+  function cwRowMenu(c) {
+    if (!cwMenuOk()) return;
+    var mu = cwMuted(c);
+    var w = panel(esc(cwTitle(c)), '<div class="cw-mn">' + (!c.archived ? '<button type="button" data-rm="pin">' + cwIc('pinned') + (c.pinned ? tr('Unpin', 'Bandua') : tr('Pin to the top', 'Bandika juu')) + '</button>' : '') +
+      '<button type="button" data-rm="mute">' + cwIc(mu ? 'sound' : 'mute') + (mu ? tr('Unmute', 'Washa sauti') : tr('Mute', 'Nyamazisha')) + '</button>' +
+      '<button type="button" data-rm="arch">' + cwIc('box') + (c.archived ? tr('Unarchive', 'Rudisha') : tr('Archive', 'Hifadhi')) + '</button>' +
+      (c.unread ? '<button type="button" data-rm="read">' + cwIc('check') + tr('Mark as read', 'Weka kama imesomwa') + '</button>' : '') + '</div>', 'cw-sheet');
+    w.querySelector('.bsh-h h3').setAttribute('data-nosw', '');
+    w.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-rm]'); if (!b) return; var k = b.getAttribute('data-rm'); w.close();
+      setTimeout(function () {
+        if (k === 'pin') cwPinChat(c); if (k === 'mute') cwMute(c); if (k === 'arch') cwArchive(c);
+        if (k === 'read') { c.unread = 0; c.mention = false; cwSave(); cwBadge(); cwListDraw(); if (c.last && c.last.id) cwApi('POST', 'read', { c: c.id, upTo: c.last.id }); }
+      }, 220);
+    });
+  }
+  function cwWallPick(c, after) {
+    var cur = store.get('rfChatWall:' + c.id); if (cur == null) cur = c.wallpaper || '';
+    var w = panel(tr('Wallpaper', 'Mandhari'), '<div class="cw-walls">' + CW_WALL.map(function (x) { return '<button type="button" data-wp="' + x[0] + '" aria-pressed="' + (cur === x[0]) + '"><span class="cw-msgs cw-wp-' + (x[0] || 'none') + '"></span><b>' + tr(x[1], x[2]) + '</b></button>'; }).join('') + '</div>', 'cw-sheet');
+    w.addEventListener('click', function (e) { var b = e.target.closest('[data-wp]'); if (!b) return; var v = b.getAttribute('data-wp'); w.close(); store.set('rfChatWall:' + c.id, v); c.wallpaper = v; cwApi('POST', 'prefs', { c: c.id, wallpaper: v }); if (S.view === 'vRoom') cwRoomDraw(); if (after) after(); });
+  }
+  function cwLink(c) {
+    var w = panel(tr('Invite link', 'Kiungo cha mwaliko'), '<div class="cw-lk"><p class="muted">' + tr('Teammates signed in to RAFIKI Pin can join with this link. Donors can’t.', 'Wenzako walioingia RAFIKI Pin wanaweza kujiunga kwa kiungo hiki. Wafadhili hawawezi.') + '</p><p class="cw-url" id="cwUrl" data-nosw>' + tr('Loading…', 'Inapakia…') + '</p>' +
+      '<div class="cw-opts"><button type="button" class="btn block" data-lk="copy" disabled>' + cwIc('copy') + tr('Copy link', 'Nakili kiungo') + '</button>' + (navigator.share ? '<button type="button" class="btn light block" data-lk="share" disabled>' + cwIc('share') + tr('Share link', 'Shiriki kiungo') + '</button>' : '') +
+      '<button type="button" class="btn light block po-red" data-lk="reset" disabled>' + tr('Reset link', 'Weka kiungo kipya') + '</button></div></div>', 'cw-sheet');
+    var url = '';
+    var get = function (reset) { cwApi('POST', 'link', reset ? { c: c.id, reset: true } : { c: c.id }).then(function (j) { if (!j.ok) { $('cwUrl').textContent = cwWhy(j); return; } url = j.url; $('cwUrl').textContent = url; qa('[data-lk]', w).forEach(function (b) { b.disabled = false; }); if (reset) toast(tr('New link made. The old one no longer works.', 'Kiungo kipya kimetengenezwa. Cha zamani hakifanyi kazi tena.')); }); };
+    get(false);
+    w.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-lk]'); if (!b || !url) return; var k = b.getAttribute('data-lk');
+      if (k === 'copy') tmCopy(url);
+      if (k === 'share') navigator.share({ title: cwTitle(c), url: url }).catch(function () {});
+      if (k === 'reset') poAsk(tr('Reset the invite link?', 'Weka kiungo kipya cha mwaliko?'), tr('The old link stops working.', 'Kiungo cha zamani kitaacha kufanya kazi.'), tr('Reset link', 'Weka kiungo kipya'), true).then(function (ok) { if (ok) get(true); });
+    });
+  }
+  function cwGroupEdit(c, after) {
+    var w = tSheet(tr('Edit group', 'Hariri kikundi'), '<h3 class="cw-shh">' + tr('Edit group', 'Hariri kikundi') + '</h3><label for="cwGt">' + tr('Name', 'Jina') + '</label><input type="text" id="cwGt" maxlength="60" value="' + esc(c.title || '') + '">' +
+      '<label for="cwGd">' + tr('Description (optional)', 'Maelezo (si lazima)') + '</label><textarea id="cwGd" maxlength="300">' + esc(c.description || '') + '</textarea><div class="cw-foot"><button type="button" class="btn block" id="cwGgo">' + tr('Save', 'Hifadhi') + '</button><p class="msg" id="cwGm"></p></div>');
+    $('cwGgo').addEventListener('click', function () {
+      var t = $('cwGt').value.trim(), d = $('cwGd').value.trim(); if (!t) { msg('cwGm', 'bad', tr('Give the group a name.', 'Kipe kikundi jina.')); return; }
+      this.disabled = true; cwApi('POST', 'group-update', { c: c.id, title: t, description: d }).then(function (j) { if (!j.ok) { $('cwGgo').disabled = false; msg('cwGm', 'bad', cwWhy(j)); return; } c.title = t; c.description = d; cwSave(); cwHead(); if (after) after(); w.close(); toast(tr('Saved ✓', 'Imehifadhiwa ✓')); });
+    });
+  }
+  function cwPeoplePick(title, go, skip, cb) {
+    cwTeam(function (team) {
+      var ppl = team.filter(function (p) { return !cwIsMe(p.name) && !(skip || []).some(function (n) { return same(n, p.name); }); }).sort(function (a, z) { return a.name.localeCompare(z.name); }), pick = [];
+      var w = tSheet(title, '<h3 class="cw-shh">' + esc(title) + '</h3><input type="search" id="cwPpq" placeholder="' + tr('Search the team', 'Tafuta kwenye timu') + '" aria-label="' + tr('Search the team', 'Tafuta kwenye timu') + '" autocomplete="off"><div class="cw-pl" id="cwPpl"></div><div class="cw-foot"><button type="button" class="btn block" id="cwPpGo" disabled>' + esc(go) + '</button></div>');
+      var draw = function () { var q = $('cwPpq').value.trim().toLowerCase(); $('cwPpl').innerHTML = ppl.filter(function (p) { return !q || p.name.toLowerCase().indexOf(q) >= 0; }).map(function (p) { var on = pick.indexOf(p.name) >= 0; return '<button type="button" class="cw-pr" role="checkbox" aria-checked="' + on + '" data-pk="' + esc(p.name) + '"><span class="cw-av" style="' + cwHueVar(p.name) + '" aria-hidden="true">' + esc(initials(p.name)) + '</span><span class="cw-prt"><b data-nosw>' + esc(p.name) + '</b></span><span class="cw-ck" aria-hidden="true">' + cwIc('check') + '</span></button>'; }).join(''); };
+      $('cwPpq').addEventListener('input', draw); draw();
+      w.addEventListener('click', function (e) {
+        var b = e.target.closest('[data-pk]'); if (b) { var n = b.getAttribute('data-pk'), i = pick.indexOf(n); if (i >= 0) pick.splice(i, 1); else pick.push(n); b.setAttribute('aria-checked', i < 0); $('cwPpGo').disabled = !pick.length; return; }
+        if (e.target.closest('#cwPpGo')) cb(pick, w);
+      });
+    });
+  }
+  function cwAddMembers(c, after) {
+    cwPeoplePick(tr('Add members', 'Ongeza wanachama'), tr('Add', 'Ongeza'), c.members, function (pick, w) {
+      cwApi('POST', 'members', { c: c.id, add: pick }).then(function (j) { if (!j.ok) return toast(cwWhy(j)); c.members = (c.members || []).concat(pick); cwSave(); w.close(); if (after) after(); cwHead(); toast(tr('Added ✓', 'Wameongezwa ✓')); });
+    });
+  }
+  function cwMember(c, n, after) {
+    if (cwIsMe(n)) return;
+    var adm = cwAdmin(c), grp = c.kind === 'group', isA = (c.admins || []).some(function (x) { return same(x, n); });
+    var w = panel(esc(n), '<div class="cw-mn"><button type="button" data-mm="msg">' + cwIc('chat') + tr('Message ' + cwFirst(n), 'Mtumie ' + cwFirst(n) + ' ujumbe') + '</button><button type="button" data-mm="view">' + cwIc('user') + tr('View contact', 'Angalia mwasiliani') + '</button>' +
+      (grp && adm ? '<button type="button" data-mm="admin">' + cwIc('lock') + (isA ? tr('Remove admin', 'Ondoa usimamizi') : tr('Make admin', 'Mfanye msimamizi')) + '</button><button type="button" data-mm="remove" class="red">' + cwIc('trash') + tr('Remove from the group', 'Ondoa kwenye kikundi') + '</button>' : '') + '</div>', 'cw-sheet');
+    w.querySelector('.bsh-h h3').setAttribute('data-nosw', '');
+    w.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-mm]'); if (!b) return; var k = b.getAttribute('data-mm'); w.close();
+      setTimeout(function () {
+        if (k === 'msg') { qa('.tsh').forEach(function (s) { if (s.close) s.close(); }); setTimeout(function () { cwDm(n); }, 260); }
+        if (k === 'view') ctOpen(n);
+        if (k === 'admin') cwApi('POST', 'members', isA ? { c: c.id, unadmin: [n] } : { c: c.id, admin: [n] }).then(function (j) { if (!j.ok) return toast(cwWhy(j)); c.admins = isA ? (c.admins || []).filter(function (x) { return !same(x, n); }) : (c.admins || []).concat([n]); cwSave(); if (after) after(); });
+        if (k === 'remove') poAsk(tr('Remove ' + n + '?', 'Mwondoe ' + n + '?'), tr('They lose access to this group straight away.', 'Atapoteza ufikiaji wa kikundi hiki mara moja.'), tr('Remove', 'Ondoa'), true).then(function (ok) {
+          if (ok) cwApi('POST', 'members', { c: c.id, remove: [n] }).then(function (j) { if (!j.ok) return toast(cwWhy(j)); c.members = (c.members || []).filter(function (x) { return !same(x, n); }); c.admins = (c.admins || []).filter(function (x) { return !same(x, n); }); cwSave(); if (after) after(); cwHead(); });
+        });
+      }, 220);
+    });
+  }
+  // a new chat: a teammate, a new group, or a project's thread
+  function cwNew() {
+    cwTeam(function (team) {
+      var ppl = team.filter(function (p) { return !cwIsMe(p.name); }).sort(function (a, z) { return a.name.localeCompare(z.name); });
+      var w = tSheet(tr('New chat', 'Gumzo jipya'), '<h3 class="cw-shh">' + tr('New chat', 'Gumzo jipya') + '</h3><div class="cw-pl"><button type="button" class="cw-pr big" data-nw="group"><span class="cw-av ic" style="--hu:var(--hu-green);--hb:var(--hb-green)" aria-hidden="true">' + cwIc('people') + '</span><span class="cw-prt"><b>' + tr('New group', 'Kikundi kipya') + '</b></span></button>' +
+        '<button type="button" class="cw-pr big" data-nw="proj"><span class="cw-av ic" style="--hu:var(--hu-teal);--hb:var(--hb-teal)" aria-hidden="true">' + cwIc('drop') + '</span><span class="cw-prt"><b>' + tr('A project’s chat', 'Gumzo la mradi') + '</b></span></button></div>' +
+        '<input type="search" id="cwNq" placeholder="' + tr('Search the team', 'Tafuta kwenye timu') + '" aria-label="' + tr('Search the team', 'Tafuta kwenye timu') + '" autocomplete="off"><h4 class="cw-ih">' + tr('Teammates', 'Wenzako') + '</h4><div class="cw-pl" id="cwNl"></div>');
+      var draw = function () { var q = $('cwNq').value.trim().toLowerCase(); $('cwNl').innerHTML = ppl.filter(function (p) { return !q || p.name.toLowerCase().indexOf(q) >= 0; }).map(function (p) { var pr = CH.pres[p.name]; return '<button type="button" class="cw-pr" data-dm="' + esc(p.name) + '"><span class="cw-av" style="' + cwHueVar(p.name) + '" aria-hidden="true">' + esc(initials(p.name)) + (pr && pr.online ? '<i class="cw-on"></i>' : '') + '</span><span class="cw-prt"><b data-nosw>' + esc(p.name) + '</b>' + (p.role ? '<small data-nosw>' + esc(p.role) + '</small>' : '') + '</span></button>'; }).join('') || '<p class="muted">' + tr('No one found', 'Hakuna aliyepatikana') + '</p>'; };
+      $('cwNq').addEventListener('input', draw); draw();
+      w.addEventListener('click', function (e) {
+        var b = e.target.closest('[data-dm],[data-nw]'); if (!b) return; buzz();
+        var n = b.getAttribute('data-dm'), k = b.getAttribute('data-nw'); w.close();
+        setTimeout(function () { if (n) cwDm(n); else if (k === 'group') cwGroupNew(); else cwPickProject(tr('A project’s chat', 'Gumzo la mradi'), cwProject); }, 240);
+      });
+    });
+  }
+  function cwGroupNew() {
+    cwPeoplePick(tr('New group: who’s in it?', 'Kikundi kipya: nani yumo?'), tr('Next', 'Endelea'), [], function (pick, w0) {
+      w0.close();
+      setTimeout(function () {
+        var w = tSheet(tr('New group', 'Kikundi kipya'), '<h3 class="cw-shh">' + tr('New group', 'Kikundi kipya') + '</h3><p class="muted" data-nosw>' + esc(pick.join(', ')) + '</p><label for="cwNg">' + tr('Group name', 'Jina la kikundi') + '</label><input type="text" id="cwNg" maxlength="60" placeholder="' + tr('e.g. Kitale repairs', 'mf. Matengenezo Kitale') + '">' +
+          '<label for="cwNd">' + tr('Description (optional)', 'Maelezo (si lazima)') + '</label><textarea id="cwNd" maxlength="300"></textarea><div class="cw-foot"><button type="button" class="btn block" id="cwNgo" data-testid="cw_group_go">' + tr('Create group', 'Unda kikundi') + '</button><p class="msg" id="cwNm"></p></div>');
+        $('cwNgo').addEventListener('click', function () {
+          var t = $('cwNg').value.trim(); if (!t) { msg('cwNm', 'bad', tr('Give the group a name.', 'Kipe kikundi jina.')); return; }
+          this.disabled = true;
+          cwApi('POST', 'group', { title: t, members: pick, description: $('cwNd').value.trim() }).then(function (j) { if (!j.ok) { $('cwNgo').disabled = false; msg('cwNm', 'bad', cwWhy(j)); return; } if (j.chat) cwUpsert(j.chat); w.close(); setTimeout(function () { cwOpen(j.id); if (!j.chat) cwLoad(true); }, 240); });
+        });
+      }, 240);
+    });
+  }
+  function cwStarred() {
+    var w = tSheet(tr('Starred messages', 'Jumbe zenye nyota'), '<h3 class="cw-shh">' + tr('Starred messages', 'Jumbe zenye nyota') + '</h3><div class="cw-pl" id="cwSl"><p class="muted">' + tr('Loading…', 'Inapakia…') + '</p></div>');
+    cwApi('GET', 'starred').then(function (j) {
+      var a = j.msgs || j.starred || [];
+      $('cwSl').innerHTML = !j.ok ? '<p class="msg bad">' + esc(cwWhy(j)) + '</p>' : a.length ? a.map(function (m) { var c = cwChat(m.c) || { title: typeof m.chat === 'string' ? m.chat : (m.chat && m.chat.title) || '', kind: 'group' }; return '<button type="button" class="cw-pr" data-sopen="' + esc(m.c) + '" data-sid="' + esc(m.id) + '"><span class="cw-prt"><b data-nosw>' + esc((cwIsMe(m.from) ? tr('You', 'Wewe') : m.from) + ' · ' + (cwTitle(c) || c.title)) + '</b><small data-nosw>' + esc(cwPrev(Object.assign({}, m, { from: '' }), null)) + '</small></span><time>' + esc(cwListTime(m.at)) + '</time></button>'; }).join('') : '<p class="muted">' + tr('Long-press a message and tap Star to keep it here.', 'Bonyeza ujumbe kwa muda na uguse Weka nyota ili uuweke hapa.') + '</p>';
+    });
+    w.addEventListener('click', function (e) { var b = e.target.closest('[data-sopen]'); if (!b) return; w.close(); var c = b.getAttribute('data-sopen'), id = b.getAttribute('data-sid'); setTimeout(function () { cwOpen(c); setTimeout(function () { cwJump(id); }, 500); }, 240); });
+  }
+
+  // ---- the screens: addresses, start-over, the header
+  function cwHash(h, first, mode) {
+    var m = /^#chat\/(.+)$/.exec(h || ''); if (!m) return false;
+    var j = /^join\/(.+)$/.exec(m[1]);
+    if (j) {
+      cwStart(); show('vChat', 'replace');
+      cwApi('POST', 'join', { token: decodeURIComponent(j[1]) }).then(function (r) { if (!r.ok) { toast(cwWhy(r)); return; } toast(tr('You joined the group ✓', 'Umejiunga na kikundi ✓')); cwLoad(false); cwOpen(r.id); });
+      return true;
+    }
+    var id = decodeURIComponent(m[1]);
+    BK.shown = h; BK.mode = first ? 'fresh' : mode || '';
+    if (!first && S.view === 'vRoom' && CH.cur === id) { BK.mode = ''; return true; }
+    cwStart(); cwOpen(id, 'none', mode);
+    return true;
+  }
+  function cwShown(v) {
+    document.body.classList.toggle('room', v === 'vRoom');
+    var hd = $('cwHd'); if (hd) hd.hidden = v !== 'vRoom';
+    if (v === 'vLock') { cwStop(); return; }
+    if (S.name || S.who) cwStart();
+    if (v !== 'vRoom') { if (CH.rec) cwRecEnd(false); cwTyping(null); Object.keys(CH.aud).forEach(function (k) { if (CH.aud[k] && !CH.aud[k].paused) CH.aud[k].pause(); }); }
+    if (v === 'vRoom') cwVv();
+  }
+  // the keyboard: the chat screen is as tall as what's visible, so the box stays above the keyboard and nothing jumps
+  function cwVv() {
+    var vv = window.visualViewport, h = vv ? vv.height : innerHeight;
+    document.documentElement.style.setProperty('--cwvh', Math.round(h) + 'px'); document.documentElement.style.setProperty('--cwvt', Math.round(vv ? vv.offsetTop : 0) + 'px');
+    if (S.view === 'vRoom' && CH.stick) { var b = $('cwMsgs'); if (b) b.scrollTop = b.scrollHeight; }
+  }
+  if (window.visualViewport) { visualViewport.addEventListener('resize', cwVv); visualViewport.addEventListener('scroll', cwVv); }
+  addEventListener('resize', cwVv);
+  document.addEventListener('visibilitychange', function () { if (!document.hidden && S.view === 'vRoom' && CH.cur) { cwRead(CH.cur); if (!CH.ws) cwMsgsLoad(CH.cur, true); } });
+  $('bRefresh').addEventListener('click', function () { if (CH.started && navigator.onLine !== false) { cwLoad(false); if (S.view === 'vRoom' && CH.cur) cwMsgsLoad(CH.cur, true); } });
+
+  // ---- taps
+  $('cwHd').addEventListener('click', function () { buzz(); cwInfo(); });
+  $('cwNew').addEventListener('click', function () { buzz(); cwNew(); });
+  $('cwStar').addEventListener('click', function () { buzz(); cwStarred(); });
+  $('cwArchBk').addEventListener('click', function () { if (CH.al) { var l = CH.al; CH.al = null; CH.arch = false; bkShut(l); } else CH.arch = false; cwListDraw(); });
+  $('cwQ').addEventListener('input', function () {
+    var v = this.value; CH.q = v; $('cwQx').classList.toggle('hidden', !v);
+    if (v && !CH.ql) CH.ql = bkOpen('in', function () { CH.ql = null; if (!CH.q) return false; CH.q = ''; CH.hits = null; $('cwQ').value = ''; $('cwQx').classList.add('hidden'); cwListDraw(); return true; }, $('cwQ'));
+    if (!v && CH.ql) { var l = CH.ql; CH.ql = null; bkShut(l); }
+    CH.hits = null; clearTimeout(CH.qT); cwListDraw();
+    if (v.trim().length >= 2) CH.qT = setTimeout(function () { var q = v; cwApi('GET', 'search?q=' + encodeURIComponent(q.trim())).then(function (j) { if (CH.q !== q) return; CH.hits = j.hits || []; cwListDraw(); }); }, 300);
+    else if (v) { CH.hits = []; }
+  });
+  $('cwQx').addEventListener('click', function () { $('cwQ').value = ''; $('cwQ').dispatchEvent(new Event('input')); $('cwQ').focus(); });
+  $('cwNote').addEventListener('click', function (e) {
+    if (e.target.closest('#cwNtOn')) { try { Notification.requestPermission().then(function () { store.set('rfChatNoteAsk', '1'); cwListDraw(); }); } catch (x) { store.set('rfChatNoteAsk', '1'); cwListDraw(); } }
+    if (e.target.closest('#cwNtX')) { store.set('rfChatNoteAsk', '1'); cwListDraw(); }
+  });
+  // the list: tap a row, long-press (or right-click) for its menu, swipe it left for Mute and Archive
+  (function () {
+    var box = $('cwList'), sw = null, lp = 0, skipClick = false;
+    box.addEventListener('click', function (e) {
+      if (skipClick) { skipClick = false; e.preventDefault(); return; }
+      var ra = e.target.closest('[data-ra]');
+      if (ra) { var c = cwChat(ra.closest('[data-c]').getAttribute('data-c')); if (!c) return; buzz(); if (ra.getAttribute('data-ra') === 'mute') cwMute(c); else cwArchive(c); return; }
+      if (e.target.closest('#cwArch')) { CH.arch = true; CH.al = bkOpen('in', function () { CH.al = null; if (!CH.arch) return false; CH.arch = false; cwListDraw(); return true; }, $('cwArch')); cwListDraw(); window.scrollTo(0, 0); return; }
+      var o = e.target.closest('[data-open]'); if (!o) return;
+      if (o.closest('.cw-rw.sw')) { o.closest('.cw-rw').classList.remove('sw'); o.style.transform = ''; return; }
+      buzz(); var id = o.getAttribute('data-open'), j = o.getAttribute('data-jump');
+      cwOpen(id); if (j) setTimeout(function () { cwJump(j); }, 600);
+    });
+    box.addEventListener('contextmenu', function (e) { var o = e.target.closest('[data-open]'); if (!o || o.hasAttribute('data-jump')) return; e.preventDefault(); var c = cwChat(o.getAttribute('data-open')); if (c) cwRowMenu(c); });
+    box.addEventListener('pointerdown', function (e) {
+      var o = e.target.closest('.cw-row[data-open]'); if (!o || o.hasAttribute('data-jump')) return;
+      qa('.cw-rw.sw', box).forEach(function (r) { if (r !== o.parentNode) { r.classList.remove('sw'); r.querySelector('.cw-row').style.transform = ''; } });
+      sw = { o: o, x: e.clientX, y: e.clientY, dx: 0, open: o.parentNode.classList.contains('sw'), id: e.pointerId, h: false };
+      clearTimeout(lp); lp = setTimeout(function () { if (sw && !sw.h && Math.abs(sw.dx) < 8) { var c = cwChat(o.getAttribute('data-open')); skipClick = true; sw = null; if (c) { buzz(); cwRowMenu(c); } } }, 520);
+    });
+    box.addEventListener('pointermove', function (e) {
+      if (!sw) return; var dx = e.clientX - sw.x, dy = e.clientY - sw.y;
+      if (!sw.h && Math.abs(dy) > 10 && Math.abs(dy) > Math.abs(dx)) { clearTimeout(lp); sw = null; return; }
+      if (!sw.h && Math.abs(dx) > 10) { sw.h = true; clearTimeout(lp); sw.o.style.transition = 'none'; sw.o.parentNode.classList.add('swp'); }
+      if (!sw.h) return; sw.dx = dx;
+      var x = Math.max(-176, Math.min(0, (sw.open ? -168 : 0) + dx)); sw.o.style.transform = 'translateX(' + x + 'px)';
+    });
+    var end = function () {
+      clearTimeout(lp); if (!sw) return; var s = sw; sw = null; if (!s.h) return;
+      s.o.style.transition = ''; s.o.parentNode.classList.remove('swp'); skipClick = true; setTimeout(function () { skipClick = false; }, 350);
+      var open = (s.open ? -168 : 0) + s.dx < -70; s.o.parentNode.classList.toggle('sw', open); s.o.style.transform = open ? 'translateX(-168px)' : '';
+      if (open) buzz();
+    };
+    box.addEventListener('pointerup', end); box.addEventListener('pointercancel', end);
+  })();
+  // one chat: long-press a message, swipe it right to reply, tap a quote, a photo, a voice note, a reaction
+  (function () {
+    var box = $('cwMsgs'), st = null, lp = 0, skip = false;
+    box.addEventListener('scroll', function () {
+      var near = box.scrollHeight - box.scrollTop - box.clientHeight < 80; CH.stick = near; if (near) CH.unseen = 0; cwJumpUi();
+      if (box.scrollTop < 240 && CH.more[CH.cur]) cwOlder();
+    }, { passive: true });
+    box.addEventListener('click', function (e) {
+      if (skip) { skip = false; return; }
+      var t = e.target, el;
+      if ((el = t.closest('[data-vact]'))) { var vo = el.closest('[data-vo]'), key = vo.getAttribute('data-vo'), k = el.getAttribute('data-vact'); buzz();
+        if (k === 'play') cwVoicePlay(key);
+        if (k === 'rate') { CH.rate = CH.rate === 1 ? 1.5 : CH.rate === 1.5 ? 2 : 1; store.set('rfChatRate', CH.rate); Object.keys(CH.aud).forEach(function (x) { if (CH.aud[x]) CH.aud[x].playbackRate = CH.rate; }); cwVoiceSync(); }
+        if (k === 'seek') { var a = CH.aud[key], r = el.getBoundingClientRect(); if (a && isFinite(a.duration)) { a.currentTime = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * a.duration; cwVoiceSync(); } else cwVoicePlay(key); }
+        return; }
+      if ((el = t.closest('[data-view]'))) { var p = el.getAttribute('data-view').split(':'); cwViewer(p[0], +p[1]); return; }
+      if ((el = t.closest('[data-jump]'))) { cwJump(el.getAttribute('data-jump')); return; }
+      if ((el = t.closest('[data-doc]'))) { cwDocOpen(el.getAttribute('data-doc')); return; }
+      if ((el = t.closest('[data-proj]'))) { openProj(el.getAttribute('data-proj'), 'pin'); return; }
+      if ((el = t.closest('[data-ctmsg]'))) { cwDm(el.getAttribute('data-ctmsg')); return; }
+      if ((el = t.closest('[data-livestop]'))) { cwLiveStop(el.getAttribute('data-livestop')); return; }
+      if ((el = t.closest('[data-rx]'))) { var mm = cwFind(el.closest('.cw-m').getAttribute('data-id')); if (mm) cwReacts(mm, el.getAttribute('data-rx')); return; }
+      if ((el = t.closest('.cw-m.pend'))) { var pm = cwFind(el.getAttribute('data-cid')); if (pm && pm.failed) cwMenu(pm); }
+    });
+    var msgOf = function (el) { var m = el.closest('.cw-m'); if (!m) return null; return cwFind(m.getAttribute('data-id') || m.getAttribute('data-cid')); };
+    box.addEventListener('contextmenu', function (e) { if (e.target.closest('a')) return; var m = msgOf(e.target); if (!m) return; e.preventDefault(); cwMenu(m); });
+    box.addEventListener('pointerdown', function (e) {
+      var b = e.target.closest('.cw-m'); if (!b || e.target.closest('.cw-vo, .cw-rx, a, video')) return;
+      st = { b: b, x: e.clientX, y: e.clientY, dx: 0, h: false };
+      clearTimeout(lp); lp = setTimeout(function () { if (st && !st.h) { var m = msgOf(b); st = null; skip = true; setTimeout(function () { skip = false; }, 500); if (m) { buzz(); cwMenu(m); } } }, 480);
+    });
+    box.addEventListener('pointermove', function (e) {
+      if (!st) return; var dx = e.clientX - st.x, dy = e.clientY - st.y;
+      if (!st.h && (Math.abs(dy) > 10 || dx < -10)) { clearTimeout(lp); st = null; return; }
+      if (!st.h && dx > 10) { st.h = true; clearTimeout(lp); }
+      if (!st.h) return; st.dx = dx; st.b.style.transform = 'translateX(' + Math.min(80, dx * 0.7) + 'px)'; st.b.classList.toggle('rp', dx > 56);
+    });
+    var end = function () {
+      clearTimeout(lp); if (!st) return; var s = st; st = null; if (!s.h) return;
+      s.b.style.transform = ''; s.b.classList.remove('rp'); skip = true; setTimeout(function () { skip = false; }, 300);
+      if (s.dx > 56) { var m = msgOf(s.b); if (m && !m.deleted && !m.pend) { buzz(); CH.reply = m; CH.edit = null; cwCompDraw(); var t = $('cwTx'); if (t) t.focus({ preventScroll: true }); } }
+    };
+    box.addEventListener('pointerup', end); box.addEventListener('pointercancel', end);
+  })();
+  $('cwJump').addEventListener('click', function () { buzz(); CH.stick = true; var b = $('cwMsgs'); b.scrollTo({ top: b.scrollHeight, behavior: 'smooth' }); CH.unseen = 0; cwJumpUi(); });
+  // the composer: send, the mic (hold), the camera, attach, @mentions, typing…
+  (function () {
+    var box = $('cwComp');
+    box.addEventListener('click', function (e) {
+      if (e.target.closest('#cwRbX')) { var wasEdit = !!CH.edit; CH.reply = null; CH.edit = null; if (wasEdit && $('cwTx')) $('cwTx').value = ''; cwCompDraw(); return; }
+      if (e.target.closest('#cwAtt')) { buzz(); cwAttach(); return; }
+      if (e.target.closest('#cwCam')) { buzz(); cwPick('image/*', false, true, cwMediaSheet); return; }
+      if (e.target.closest('#cwRecX')) { cwRecEnd(false); return; }
+      if (e.target.closest('#cwRecGo')) { cwRecEnd(true); return; }
+      var mn = e.target.closest('[data-men]');
+      if (mn) { var t = $('cwTx'), n = mn.getAttribute('data-men'), v = t.value, at = v.slice(0, t.selectionStart).lastIndexOf('@'); t.value = v.slice(0, at) + '@' + n + ' ' + v.slice(t.selectionStart); if (CH.ment.indexOf(n) < 0) CH.ment.push(n); $('cwMen').classList.add('hidden'); t.focus(); cwGoUi(); return; }
+      if (e.target.closest('#cwGo') && !$('cwGo').classList.contains('mic')) { cwSendText(); }
+    });
+    box.addEventListener('input', function (e) {
+      if (e.target.id !== 'cwTx') return; cwGoUi(); cwGrow(); cwTyping(e.target.value ? 'typing' : null);
+      clearTimeout(CH.tyT); CH.tyT = setTimeout(function () { cwTyping(null); }, 4000);
+      var t = e.target, before = t.value.slice(0, t.selectionStart), m = /(?:^|\s)@([^\s@]{0,20})$/.exec(before), c = cwChat(CH.cur), pop = $('cwMen');
+      if (!m || !c || c.kind === 'dm') { pop.classList.add('hidden'); return; }
+      var q = m[1].toLowerCase(), list = (c.members || []).filter(function (n) { return !cwIsMe(n) && n.toLowerCase().indexOf(q) >= 0; }).slice(0, 6);
+      pop.innerHTML = list.map(function (n) { return '<button type="button" role="option" data-men="' + esc(n) + '"><span class="cw-av" style="' + cwHueVar(n) + '" aria-hidden="true">' + esc(initials(n)) + '</span><b data-nosw>' + esc(n) + '</b></button>'; }).join('');
+      pop.classList.toggle('hidden', !list.length);
+    });
+    box.addEventListener('keydown', function (e) {
+      if (e.target.id !== 'cwTx') return;
+      if (e.key === 'Enter' && !e.shiftKey && !matchMedia('(pointer: coarse)').matches) { e.preventDefault(); cwSendText(); }
+      if (e.key === 'Escape' && (CH.reply || CH.edit)) { CH.reply = null; CH.edit = null; cwCompDraw(); }
+    });
+    // hold the mic: slide left to cancel, slide up to lock
+    var held = false;
+    box.addEventListener('pointerdown', function (e) {
+      var g = e.target.closest('#cwGo'); if (!g || !g.classList.contains('mic')) return;
+      e.preventDefault(); held = true; try { g.setPointerCapture(e.pointerId); } catch (x) {} cwRecStart(e.clientX, e.clientY);
+    });
+    box.addEventListener('pointermove', function (e) { if (held) cwRecMove(e.clientX, e.clientY); });
+    var up = function () { if (!held) return; held = false; if (CH.rec && !CH.rec.lock) cwRecEnd(true); };
+    box.addEventListener('pointerup', up); box.addEventListener('pointercancel', function () { if (held) { held = false; if (CH.rec && !CH.rec.lock) cwRecEnd(false); } });
+    box.addEventListener('contextmenu', function (e) { if (e.target.closest('#cwGo')) e.preventDefault(); });
+  })();
+  // a tap on the project page's Chat button
+  document.addEventListener('click', function (e) { var b = e.target.closest && e.target.closest('#pChat'); if (!b || !S.cur) return; buzz(); cwProject(S.cur.id); });
+  cwBadge();
+  // chatw:end
 
   // --- start ----------------------------------------------------------------------------------------
   netUi(); outboxUi(); progUi(); installUi();

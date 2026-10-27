@@ -54,6 +54,11 @@ class AppModel(app: Application) : AndroidViewModel(app) {
     val donor = org.rafikioutreach.pin.data.DonorState(app, BuildConfig.SERVER)
     val locator = Locator(app)
     private val sendLock = Mutex()
+    /** Team chat (feat-chata): the list, messages, the live connection and the offline outbox. */
+    val chat by lazy { org.rafikioutreach.pin.data.ChatHub(app, api, { prefs.name }, viewModelScope).also { h ->
+        // my live locations move with the phone while the app is open
+        viewModelScope.launch { locator.fix.collect { f -> if (f != null) h.onFix(f) } }
+    } }
 
     private val _snap = MutableStateFlow<Snapshot?>(prefs.loadSnapshot()?.let { runCatching { Snapshot.from(it) }.getOrNull() })
     init { org.rafikioutreach.pin.ui.GoogleTiles.configure(app, _snap.value?.gmapsAndroid) }
@@ -175,6 +180,7 @@ class AppModel(app: Application) : AndroidViewModel(app) {
         bioLocked.value = false
         val s = prefs.session
         prefs.forget(); _signedIn.value = false
+        runCatching { chat.forget() }
         org.rafikioutreach.pin.widget.PinWidget.update(getApplication())
         if (s.isNotBlank()) viewModelScope.launch { Api(BuildConfig.SERVER, { "" }, { s }).also { it.transport = api.transport }.logout() }
     }
@@ -311,6 +317,8 @@ class AppModel(app: Application) : AndroidViewModel(app) {
         lastRefresh = System.currentTimeMillis()
         if (!quiet) _busy.value = true
         sendWaiting()
+        // the chat list too (pull to refresh on Chat)
+        if (_signedIn.value) launch { runCatching { chat.refreshList(full = false); chat.flush() } }
         val r = api.list()
         if (!quiet) _busy.value = false
         when {

@@ -57,7 +57,56 @@ class Api(val server: String, private val pin: () -> String, private val session
     /** The newest Android app on the website: {versionCode, versionName, apk}. */
     suspend fun appVersion(): Reply = call("GET", "/app/version.json", null)
 
+    /** Trips (feat-itina): any JSON endpoint with the same sign-in, e.g. req("GET", "/api/itin?id=…"). */
+    suspend fun req(method: String, path: String, body: JSONObject? = null): Reply = call(method, path, body)
+
+    /** A trip receipt photo (fuel log or extra): /api/pin-photo with kind=receipt → { id, url } (contract v1.2). */
+    suspend fun receipt(itinId: String, file: File): Reply = withContext(Dispatchers.IO) {
+        val boundary = "----rafiki" + System.nanoTime()
+        val out = ByteArrayOutputStream()
+        fun field(name: String, value: String) { out.write("--$boundary\r\nContent-Disposition: form-data; name=\"$name\"\r\n\r\n$value\r\n".toByteArray()) }
+        field("kind", "receipt"); field("itin", itinId)
+        out.write("--$boundary\r\nContent-Disposition: form-data; name=\"file\"; filename=\"receipt.jpg\"\r\nContent-Type: image/jpeg\r\n\r\n".toByteArray())
+        out.write(file.readBytes())
+        out.write("\r\n--$boundary--\r\n".toByteArray())
+        val h = mutableMapOf("Accept" to "application/json", "Content-Type" to "multipart/form-data; boundary=$boundary", "Origin" to server)
+        auth(h)
+        val (status, text) = transport("POST", "$server/api/pin-photo", h, out.toByteArray())
+        toReply(status, text)
+    }
+
     fun photoUrl(photo: String, w: Int = 480) = "$server/api/photo/${enc(photo)}?w=$w"
+
+    // --- Chat (feat-chata): /api/chat/* with the same PIN headers ---------------------------------------------------
+    suspend fun get(path: String): Reply = call("GET", path, null)
+    suspend fun postTo(path: String, body: JSONObject): Reply = call("POST", path, body)
+    /** A file as the raw request body (POST /api/chat/media?type=&name=). */
+    suspend fun postRaw(path: String, bytes: ByteArray, mime: String): Reply = withContext(Dispatchers.IO) {
+        val h = mutableMapOf("Accept" to "application/json", "Content-Type" to mime, "Origin" to server)
+        auth(h)
+        val (status, text) = transport("POST", server + path, h, bytes)
+        toReply(status, text)
+    }
+    /** A file as multipart/form-data ("file" plus text fields), POST /api/chat/media. */
+    suspend fun postMultipart(path: String, bytes: ByteArray, mime: String, filename: String, fields: Map<String, String>): Reply = withContext(Dispatchers.IO) {
+        val boundary = "----rafiki" + System.nanoTime()
+        val out = ByteArrayOutputStream()
+        fields.forEach { (k, v) -> out.write("--$boundary\r\nContent-Disposition: form-data; name=\"$k\"\r\n\r\n$v\r\n".toByteArray()) }
+        out.write("--$boundary\r\nContent-Disposition: form-data; name=\"file\"; filename=\"${filename.replace("\"", "")}\"\r\nContent-Type: $mime\r\n\r\n".toByteArray())
+        out.write(bytes); out.write("\r\n--$boundary--\r\n".toByteArray())
+        val h = mutableMapOf("Accept" to "application/json", "Content-Type" to "multipart/form-data; boundary=$boundary", "Origin" to server)
+        auth(h)
+        val (status, text) = transport("POST", server + path, h, out.toByteArray())
+        toReply(status, text)
+    }
+    /** Lets tests swap file downloads for fake ones. */
+    var fetch: (url: String, headers: Map<String, String>) -> Pair<Int, ByteArray?> = ::httpBytes
+    /** A file the server only gives to signed-in people (GET /api/chat/media/:id). */
+    suspend fun download(path: String): Pair<Int, ByteArray?> = withContext(Dispatchers.IO) {
+        val h = mutableMapOf<String, String>(); auth(h); fetch(server + path, h)
+    }
+    /** The sign-in headers, for a connection made elsewhere. */
+    fun authHeaders(): Map<String, String> = mutableMapOf<String, String>().also { auth(it) }
 
     /** Who is asking: a PIN, or the monday.com session (sent the way a browser sends its cookie). */
     private fun auth(h: MutableMap<String, String>) {
@@ -136,5 +185,15 @@ class Api(val server: String, private val pin: () -> String, private val session
             c.disconnect()
             code to text
         } catch (e: Exception) { 0 to "" }
+
+        fun httpBytes(url: String, headers: Map<String, String>): Pair<Int, ByteArray?> = try {
+            val c = URL(url).openConnection() as HttpURLConnection
+            c.connectTimeout = 15000; c.readTimeout = 60000
+            headers.forEach { (k, v) -> c.setRequestProperty(k, v) }
+            val code = c.responseCode
+            val b = if (code in 200..299) c.inputStream.use { it.readBytes() } else null
+            c.disconnect()
+            code to b
+        } catch (e: Exception) { 0 to null }
     }
 }

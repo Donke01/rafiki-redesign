@@ -49,6 +49,8 @@ object TeamGo {
     var section by mutableStateOf<String?>(null)
     var map by mutableStateOf<String?>(null)
     var assign by mutableStateOf<String?>(null)
+    /** The project to tick in the assign sheet ("Assign a visit" from a chat message, feat-chata). */
+    var project by mutableStateOf<String?>(null)
 }
 
 const val PIN_APP_URL = "https://pin.rafikioutreach.org/pin"
