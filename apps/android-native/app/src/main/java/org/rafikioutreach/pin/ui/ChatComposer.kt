@@ -10,7 +10,27 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.RepeatMode
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.content.MediaType
+import androidx.compose.foundation.content.ReceiveContentListener
+import androidx.compose.foundation.content.TransferableContent
+import androidx.compose.foundation.content.consume
+import androidx.compose.foundation.content.contentReceiver
+import androidx.compose.foundation.content.hasMediaType
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.clearText
+import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
@@ -85,7 +105,12 @@ internal object MicTest { var pretend = false }
  * Writing: text with @mentions (a list pops up in groups), a reply or edit above it, the paperclip (photos and videos,
  * camera, document, location, live location, a teammate's contact), the camera, and the microphone: hold to record,
  * slide left to cancel, slide up to lock and talk hands-free.
+ *
+ * chatpa: quick replies above an empty box; the box grows to 6 lines and then scrolls, with a full-screen editor;
+ * pasted pictures and keyboard images/GIFs; a voice note is heard, trimmed, deleted or sent before it goes; the send
+ * button turns into the microphone when the box is empty.
  */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun Composer(m: AppModel, c: String, row: ChatRow?, reply: Msg?, editing: Msg?, clearReply: () -> Unit, clearEdit: () -> Unit, sent: () -> Unit) {
     val hub = m.chat
@@ -93,7 +118,10 @@ internal fun Composer(m: AppModel, c: String, row: ChatRow?, reply: Msg?, editin
     val scope = rememberScope()
     val hp = rememberHaptics()
     val density = LocalDensity.current
-    var value by rememberSaveable(c, stateSaver = TextFieldValue.Saver) { mutableStateOf(TextFieldValue(ChatDrafts.get(ctx, c))) }
+    val motion = chatMotion()
+    hub.settingsTick.collectAsState().value
+    val box = rememberSaveable(c, saver = TextFieldState.Saver) { TextFieldState(ChatDrafts.get(ctx, c)) }
+    val text = box.text.toString()
     val mentions = remember(c) { mutableStateListOf<String>() }
     var attach by remember { mutableStateOf(false) }
     var liveAsk by remember { mutableStateOf(false) }
@@ -101,22 +129,25 @@ internal fun Composer(m: AppModel, c: String, row: ChatRow?, reply: Msg?, editin
     var picked by remember { mutableStateOf<List<ChatMedia>?>(null) }
     var preparing by remember { mutableStateOf(false) }
     var msg by remember { mutableStateOf<String?>(null) }
+    var full by rememberSaveable { mutableStateOf(false) }
+    var lines by remember { mutableIntStateOf(1) }
     LaunchedEffect(msg) { if (msg != null) { delay(4000); msg = null } }
     BackStep(attach) { attach = false }
     // the draft is kept per chat (also if the app is closed)
-    LaunchedEffect(value.text) { delay(400); ChatDrafts.put(ctx, c, if (editing == null) value.text else "") }
-    LaunchedEffect(editing) { editing?.let { value = TextFieldValue(it.text, TextRange(it.text.length)) } }
+    LaunchedEffect(text) { delay(400); ChatDrafts.put(ctx, c, if (editing == null) text else "") }
+    LaunchedEffect(editing) { editing?.let { box.setTextAndPlaceCursorAtEnd(it.text) } }
     // "typing…" for the others, stopped 5 seconds after the last key
-    LaunchedEffect(value.text) { if (value.text.isNotBlank()) { hub.typing(c, "typing"); delay(5000); hub.typing(c, null) } }
+    LaunchedEffect(text) { if (text.isNotBlank()) { hub.typing(c, "typing"); delay(5000); hub.typing(c, null) } }
 
     fun quietChat() = hub.quiet(c)
-    fun after() { hp.tap(); if (!quietChat()) Whoosh.play(ctx); hub.typing(c, null); sent() }
-    fun sendText() {
-        val txt = value.text.trim(); if (txt.isBlank()) return
+    // the soft send sound: not when the chat or the setting is quiet, nor in Do-Not-Disturb hours
+    fun after() { hp.tap(); if (!quietChat() && hub.settings.sendSound && !hub.settings.dnd.active()) Whoosh.play(ctx); hub.typing(c, null); sent() }
+    fun sendText(t0: String = box.text.toString()) {
+        val txt = t0.trim(); if (txt.isBlank()) return
         val ed = editing
         if (ed != null) { scope.launch { hub.editMsg(ed, txt)?.let { msg = it } }; clearEdit() }
         else { hub.send(c, "text", txt, reply = reply, mentions = mentions.filter { txt.contains("@$it", true) }.distinct()); clearReply() }
-        value = TextFieldValue(""); mentions.clear(); ChatDrafts.put(ctx, c, ""); after()
+        box.clearText(); mentions.clear(); ChatDrafts.put(ctx, c, ""); full = false; after()
     }
 
     // --- picking photos, videos and documents ---------------------------------------------------------------------
@@ -135,6 +166,19 @@ internal fun Composer(m: AppModel, c: String, row: ChatRow?, reply: Msg?, editin
             preparing = false
             msg = why
             if (out.isNotEmpty()) picked = (picked.orEmpty() + out).take(10)
+        }
+    }
+    // pasted or keyboard pictures (screenshots, GIFs) go the same way as picked ones; tests paste files through ChatPaste
+    DisposableEffect(c) { ChatPaste.paste = { files -> prepare(files.map { null to it }) }; onDispose { ChatPaste.paste = null } }
+    val receiver = remember(c) {
+        object : ReceiveContentListener {
+            override fun onReceive(transferableContent: TransferableContent): TransferableContent? {
+                if (!transferableContent.hasMediaType(MediaType.Image)) return transferableContent
+                val uris = mutableListOf<Uri>()
+                val rest = transferableContent.consume { item -> item.uri?.let { uris += it; true } ?: false }
+                if (uris.isNotEmpty()) prepare(uris.map { it to null })
+                return rest
+            }
         }
     }
     val gallery = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(10)) { uris -> prepare(uris.map { it to null }) }
@@ -169,12 +213,24 @@ internal fun Composer(m: AppModel, c: String, row: ChatRow?, reply: Msg?, editin
     var dragX by remember { mutableFloatStateOf(0f) }
     var dragY by remember { mutableFloatStateOf(0f) }
     var secs by remember { mutableDoubleStateOf(0.0) }
+    // the note just recorded, to hear, trim, delete or send
+    var note by remember(c) { mutableStateOf<ChatMedia?>(null) }
+    var trimTo by remember(c) { mutableFloatStateOf(1f) }
     val micAsk = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { ok -> if (!ok) msg = t("Allow the microphone to record voice messages.", "Ruhusu kipaza sauti ili kurekodi ujumbe wa sauti.") else msg = t("Now hold the microphone to record.", "Sasa shikilia kipaza sauti kurekodi.") }
+    fun stopRec() {
+        val md = if (MicTest.pretend) {
+            val f = File(outDir(ctx), "a${System.nanoTime()}.m4a").apply { writeBytes(ByteArray(64)) }
+            ChatMedia("", "voice", dur = secs.coerceAtLeast(1.0), wave = VoiceRec.bars(rec.levels, 40), name = f.name, size = f.length(), local = f.path, mime = "audio/mp4")
+        } else rec.stop()
+        recording = false; locked = false; dragX = 0f; dragY = 0f; hub.typing(c, null)
+        if (md == null) { msg = t("Too short. Hold the microphone a little longer.", "Fupi mno. Shikilia kipaza sauti kidogo zaidi."); return }
+        trimTo = 1f; note = md; hp.tap()
+    }
     LaunchedEffect(recording) {
         while (recording) {
             if (!MicTest.pretend) rec.sample() else rec.levels += (10..90).random()
             secs = if (MicTest.pretend) secs + 0.1 else rec.seconds()
-            if (secs >= ChatCaps.VOICE_SECONDS) { finishRec(rec, hub, c, reply, { recording = false; locked = false }, ::after, clearReply) { msg = it } }
+            if (secs >= ChatCaps.VOICE_SECONDS) stopRec()
             delay(100)
         }
     }
@@ -187,55 +243,66 @@ internal fun Composer(m: AppModel, c: String, row: ChatRow?, reply: Msg?, editin
         return true
     }
     fun cancelRec() { if (!MicTest.pretend) rec.cancel(); recording = false; locked = false; dragX = 0f; dragY = 0f; hp.tap(); hub.typing(c, null) }
-    fun stopRec() {
-        if (MicTest.pretend) {
-            val f = File(outDir(ctx), "a${System.nanoTime()}.m4a").apply { writeBytes(ByteArray(64)) }
-            val md = ChatMedia("", "voice", dur = secs.coerceAtLeast(1.0), wave = VoiceRec.bars(rec.levels, 40), name = f.name, size = f.length(), local = f.path, mime = "audio/mp4")
-            hub.send(c, "voice", "", listOf(md), reply = reply); clearReply(); recording = false; locked = false; after(); return
+    fun dropNote() { VoicePlayer.stop(); note?.local?.let { runCatching { File(it).delete() } }; note = null; hp.tap() }
+    fun sendNote() {
+        val md = note ?: return
+        VoicePlayer.stop(); note = null
+        val end = md.dur * trimTo
+        scope.launch {
+            // trimmed: the end is cut off on the phone before it goes
+            val out = if (trimTo < 0.98f && end >= 1.0) withContext(Dispatchers.IO) { VoiceTrim.cut(md, end) } else md
+            hub.send(c, "voice", "", listOf(out), reply = reply); clearReply(); after()
         }
-        finishRec(rec, hub, c, reply, { recording = false; locked = false }, ::after, clearReply) { msg = it }
     }
     val cancelPx = with(density) { 110.dp.toPx() }; val lockPx = with(density) { 80.dp.toPx() }
 
     val members = row?.members.orEmpty().filter { !it.equals(hub.me, true) }
     // "@gr" being typed: the names that match
-    val token = Regex("(?:^|\\s)@([\\p{L}]*)$").find(value.text.substring(0, value.selection.end.coerceIn(0, value.text.length)))?.groupValues?.get(1)
+    val token = Regex("(?:^|\\s)@([\\p{L}]*)$").find(text.substring(0, box.selection.end.coerceIn(0, text.length)))?.groupValues?.get(1)
     val suggest = if (row?.isGroup == true && token != null) members.filter { it.startsWith(token, true) || it.split(' ').any { p -> p.startsWith(token, true) } }.take(5) else emptyList()
+    fun pickMention(n: String) {
+        val end = box.selection.end.coerceIn(0, text.length); val start = end - token!!.length - 1
+        box.edit { replace(start, end, "@$n "); selection = TextRange(start + n.length + 2) }; mentions += n
+    }
 
     Column(Modifier.fillMaxWidth().padding(start = 6.dp, end = 6.dp, top = 4.dp, bottom = 6.dp).testTag("composer")) {
         msg?.let { Text(it, style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold), color = C.warn, modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp).testTag("composer_msg")) }
         if (preparing) Text(t("Getting it ready…", "Inaandaliwa…"), style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp))
         if (suggest.isNotEmpty()) Column(Modifier.padding(bottom = 6.dp).fillMaxWidth().shadow(6.dp, RoundedCornerShape(16.dp)).clip(RoundedCornerShape(16.dp)).background(C.card).testTag("mentions")) {
             suggest.forEach { n ->
-                Row(Modifier.fillMaxWidth().clickable(role = Role.Button) {
-                    val end = value.selection.end.coerceIn(0, value.text.length); val start = end - token!!.length - 1
-                    val nt = value.text.substring(0, start) + "@$n " + value.text.substring(end)
-                    value = TextFieldValue(nt, TextRange(start + n.length + 2)); mentions += n
-                }.padding(horizontal = 14.dp, vertical = 8.dp).testTag("mention_$n"), verticalAlignment = Alignment.CenterVertically) {
+                Row(Modifier.fillMaxWidth().clickable(role = Role.Button) { pickMention(n) }.padding(horizontal = 14.dp, vertical = 8.dp).testTag("mention_$n"), verticalAlignment = Alignment.CenterVertically) {
                     PersonAvatar(n, 30.dp); Spacer(Modifier.width(10.dp)); Text(n, style = MaterialTheme.typography.titleSmall, color = C.ink)
                 }
             }
         }
+        // quick replies while the box is empty: one tap sends
+        if (text.isEmpty() && editing == null && !recording && note == null && suggest.isEmpty()) QuickChips(hub.settings.quick) { q -> sendText(q) }
         Row(verticalAlignment = Alignment.Bottom) {
             Column(Modifier.weight(1f).shadow(if (C.dark) 0.dp else 1.dp, RoundedCornerShape(24.dp)).clip(RoundedCornerShape(24.dp)).background(C.card).border(1.dp, if (C.glassy) C.glassEdge else C.line, RoundedCornerShape(24.dp))) {
                 // replying to / editing
-                if (reply != null || editing != null) Row(Modifier.padding(start = 8.dp, end = 4.dp, top = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+                if ((reply != null || editing != null) && note == null) Row(Modifier.padding(start = 8.dp, end = 4.dp, top = 6.dp), verticalAlignment = Alignment.CenterVertically) {
                     Box(Modifier.weight(1f)) {
                         if (editing != null) org.rafikioutreach.pin.ui.QuoteBox(org.rafikioutreach.pin.data.Quote(editing.id, t("Edit message", "Hariri ujumbe"), editing.kind, editing.text), "", Modifier.testTag("editing_bar"))
                         else reply?.let { QuoteBox(org.rafikioutreach.pin.data.Quote(it.id, it.from, it.kind, it.preview()), hub.me, Modifier.testTag("reply_bar")) }
                     }
-                    Box(Modifier.size(36.dp).clip(CircleShape).clickable(role = Role.Button) { if (editing != null) { clearEdit(); value = TextFieldValue("") } else clearReply() }.semantics { contentDescription = t("Cancel", "Ghairi") }.testTag("reply_x"), contentAlignment = Alignment.Center) {
+                    Box(Modifier.size(36.dp).clip(CircleShape).clickable(role = Role.Button) { if (editing != null) { clearEdit(); box.clearText() } else clearReply() }.semantics { contentDescription = t("Cancel", "Ghairi") }.testTag("reply_x"), contentAlignment = Alignment.Center) {
                         Icon(Ic.get("x"), null, tint = C.muted, modifier = Modifier.size(16.dp))
                     }
                 }
                 Row(Modifier.heightIn(min = 48.dp).padding(start = 14.dp, end = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                    val n = note
                     when {
+                        n != null -> VoiceNotePreview(n, trimTo, { trimTo = it }, { dropNote() })
                         recording && locked -> {
                             Box(Modifier.size(40.dp).clip(CircleShape).clickable(role = Role.Button) { cancelRec() }.semantics { contentDescription = t("Delete recording", "Futa rekodi") }.testTag("rec_trash"), contentAlignment = Alignment.Center) {
                                 Icon(Ic.get("trash"), null, tint = C.bad, modifier = Modifier.size(20.dp))
                             }
                             Text(clock(secs), style = MaterialTheme.typography.labelLarge, color = C.ink, modifier = Modifier.padding(horizontal = 6.dp).testTag("rec_time"))
-                            Waveform(VoiceRec.bars(rec.levels.takeLast(60), 30), 1f, C.bad, C.line, Modifier.weight(1f).height(28.dp).padding(end = 8.dp))
+                            Waveform(VoiceRec.bars(rec.levels.takeLast(60), 30), 1f, C.bad, C.line, Modifier.weight(1f).height(28.dp).padding(end = 4.dp))
+                            // stop: hear it before it goes
+                            Box(Modifier.size(40.dp).clip(CircleShape).clickable(role = Role.Button) { stopRec() }.semantics { contentDescription = t("Stop and listen", "Simamisha usikilize") }.testTag("rec_stop"), contentAlignment = Alignment.Center) {
+                                Icon(ChatIc.get("stop"), null, tint = C.bad, modifier = Modifier.size(20.dp))
+                            }
                         }
                         recording -> {
                             val blink by rememberInfiniteTransition(label = "rec").animateFloat(1f, 0.2f, infiniteRepeatable(tween(600), RepeatMode.Reverse), label = "dot")
@@ -246,20 +313,25 @@ internal fun Composer(m: AppModel, c: String, row: ChatRow?, reply: Msg?, editin
                         }
                         else -> {
                             Box(Modifier.weight(1f).padding(vertical = 12.dp)) {
-                                if (value.text.isEmpty()) Text(t("Message", "Ujumbe"), style = MaterialTheme.typography.bodyLarge, color = C.muted, maxLines = 1)
-                                BasicTextField(value, { value = it }, Modifier.fillMaxWidth().testTag("composer_input"), maxLines = 5,
+                                if (text.isEmpty()) Text(t("Message", "Ujumbe"), style = MaterialTheme.typography.bodyLarge, color = C.muted, maxLines = 1)
+                                // grows to 6 lines, then scrolls
+                                BasicTextField(box, Modifier.fillMaxWidth().contentReceiver(receiver).testTag("composer_input"),
+                                    lineLimits = TextFieldLineLimits.MultiLine(1, 6),
                                     textStyle = MaterialTheme.typography.bodyLarge.copy(color = C.text), cursorBrush = SolidColor(C.blue),
-                                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences))
+                                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+                                    onTextLayout = { r -> r()?.let { lines = it.lineCount } })
                             }
+                            // a long message: write it full screen
+                            if (lines >= 3) ComposerIcon("expand", t("Full screen", "Skrini nzima"), "expand") { full = true }
                             ComposerIcon("clip", t("Attach", "Ambatisha"), "attach") { hp.tap(); attach = true }
-                            if (value.text.isBlank()) ComposerIcon("camera", t("Camera", "Kamera"), "camera") { hp.tap(); shoot(false) }
+                            if (text.isBlank()) ComposerIcon("camera", t("Camera", "Kamera"), "camera") { hp.tap(); shoot(false) }
                         }
                     }
                 }
             }
             Spacer(Modifier.width(6.dp))
-            // send, or the microphone (hold)
-            val canSend = value.text.isNotBlank() || (recording && locked)
+            // send, or the microphone (hold): one morphs into the other
+            val canSend = text.isNotBlank() || (recording && locked) || note != null
             Box {
                 if (recording && !locked) {
                     // the lock: slide up to here
@@ -268,9 +340,10 @@ internal fun Composer(m: AppModel, c: String, row: ChatRow?, reply: Msg?, editin
                         Icon(Ic.get("lock"), null, tint = C.muted, modifier = Modifier.size(18.dp)); Icon(Ic.get("up"), null, tint = C.muted, modifier = Modifier.size(16.dp))
                     }
                 }
-                Box(Modifier.size(if (recording && !locked) 58.dp else 48.dp).offset { IntOffset(if (recording && !locked) dragX.roundToInt().coerceAtMost(0) / 3 else 0, 0) }
+                val sz by animateDpAsState(if (recording && !locked) 58.dp else 48.dp, tween(if (motion) 180 else 0), label = "mic")
+                Box(Modifier.size(sz).offset { IntOffset(if (recording && !locked) dragX.roundToInt().coerceAtMost(0) / 3 else 0, 0) }
                     .clip(CircleShape).background(if (recording && !locked) C.bad else ChatLook.online)
-                    .then(if (canSend) Modifier.clickable(role = Role.Button) { if (recording) stopRec() else sendText() } else Modifier.pointerInput(c) {
+                    .then(if (canSend) Modifier.clickable(role = Role.Button) { when { note != null -> sendNote(); recording -> stopRec(); else -> sendText() } } else Modifier.pointerInput(c) {
                         awaitEachGesture {
                             val down = awaitFirstDown(requireUnconsumed = false)
                             if (!startRec()) return@awaitEachGesture
@@ -284,16 +357,20 @@ internal fun Composer(m: AppModel, c: String, row: ChatRow?, reply: Msg?, editin
                                 if (!locked && !gone && total.x < -cancelPx) { gone = true; cancelRec() }
                                 if (!locked && !gone && total.y < -lockPx) { locked = true; dragX = 0f; dragY = 0f; hp.tap() }
                             }
+                            // let go: the note waits to be heard, trimmed or sent
                             if (!gone && !locked && recording) stopRec()
                         }
                     }).semantics { contentDescription = if (canSend) t("Send", "Tuma") else t("Hold to record a voice message", "Shikilia kurekodi ujumbe wa sauti") }
                     .testTag(if (canSend) "send" else "mic"), contentAlignment = Alignment.Center) {
-                    Icon(ChatIc.get(if (canSend) "send" else "mic"), null, tint = Color.White, modifier = Modifier.size(22.dp))
+                    AnimatedContent(canSend, transitionSpec = { if (motion) (scaleIn(tween(200), 0.4f) + fadeIn(tween(200))) togetherWith (scaleOut(tween(150), 0.4f) + fadeOut(tween(150))) else EnterTransition.None togetherWith ExitTransition.None }, label = "sendmic") { s ->
+                        Icon(ChatIc.get(if (s) "send" else "mic"), null, tint = Color.White, modifier = Modifier.size(22.dp))
+                    }
                 }
             }
         }
     }
 
+    if (full) FullEditor(box, { full = false }) { sendText() }
     if (attach) AttachSheet({ attach = false }) { k ->
         attach = false
         when (k) {
@@ -313,11 +390,52 @@ internal fun Composer(m: AppModel, c: String, row: ChatRow?, reply: Msg?, editin
     } }
 }
 
-private fun finishRec(rec: VoiceRec, hub: org.rafikioutreach.pin.data.ChatHub, c: String, reply: Msg?, reset: () -> Unit, after: () -> Unit, clearReply: () -> Unit, say: (String) -> Unit) {
-    val md = rec.stop(); reset()
-    if (md == null) { say(t("Too short. Hold the microphone a little longer.", "Fupi mno. Shikilia kipaza sauti kidogo zaidi.")); hub.typing(c, null); return }
-    hub.send(c, "voice", "", listOf(md), reply = reply); clearReply(); after()
+/** Tests paste pictures through here (what the keyboard or the clipboard would give the box). */
+internal object ChatPaste { var paste: ((List<File>) -> Unit)? = null }
+
+/** The voice note before it goes: delete, play, the waveform with the end to trim (drag), its length. */
+@Composable
+private fun RowScope.VoiceNotePreview(md: ChatMedia, trimTo: Float, setTrim: (Float) -> Unit, delete: () -> Unit) {
+    val st by VoicePlayer.state.collectAsState()
+    val playing = st.key == "preview" && st.playing
+    LaunchedEffect(playing) { while (playing) { VoicePlayer.tick(); if (st.dur > 0 && st.pos >= md.dur * trimTo) VoicePlayer.stop(); delay(80) } }
+    Box(Modifier.size(40.dp).clip(CircleShape).clickable(role = Role.Button) { delete() }.semantics { contentDescription = t("Delete voice message", "Futa ujumbe wa sauti") }.testTag("vp_delete"), contentAlignment = Alignment.Center) {
+        Icon(Ic.get("trash"), null, tint = C.bad, modifier = Modifier.size(20.dp))
+    }
+    Box(Modifier.size(36.dp).clip(CircleShape).background(ChatLook.online).clickable(role = Role.Button) { md.local.takeIf { it.isNotBlank() }?.let { VoicePlayer.toggle("preview", File(it), md.dur) } }
+        .semantics { contentDescription = if (playing) t("Pause", "Simamisha") else t("Listen", "Sikiliza") }.testTag("vp_play"), contentAlignment = Alignment.Center) {
+        Icon(Ic.get(if (playing) "pause" else "play"), null, tint = Color.White, modifier = Modifier.size(18.dp))
+    }
+    val prog = if (st.key == "preview" && md.dur > 0) (st.pos / md.dur).toFloat().coerceIn(0f, 1f) else 0f
+    Box(Modifier.weight(1f).height(32.dp).padding(horizontal = 8.dp).testTag("vp_trim")) {
+        Waveform(md.wave, prog, ChatLook.online, if (C.dark) Color(0x55FFFFFF) else Color(0x40000000), Modifier.matchParentSize()) { f -> setTrim(f.coerceIn(0.1f, 1f)) }
+        // what's cut off is dimmed, with a handle at the new end
+        BoxWithConstraints(Modifier.matchParentSize()) {
+            Box(Modifier.align(Alignment.CenterEnd).fillMaxHeight().width(maxWidth * (1f - trimTo)).background(C.card.copy(alpha = 0.7f)))
+            Box(Modifier.offset(x = maxWidth * trimTo - 2.dp).fillMaxHeight().width(4.dp).clip(RoundedCornerShape(2.dp)).background(C.blue).testTag("vp_handle"))
+        }
+    }
+    Text(clock(md.dur * trimTo), style = MaterialTheme.typography.labelLarge, color = C.ink, maxLines = 1, softWrap = false, modifier = Modifier.padding(end = 6.dp).testTag("vp_time"))
 }
+
+/** The message full screen, for something long: the same box, with Send. */
+@Composable
+private fun FullEditor(box: TextFieldState, close: () -> Unit, send: () -> Unit) {
+    androidx.compose.ui.window.Dialog(close, androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)) {
+        Column(Modifier.fillMaxSize().background(C.bg).statusBarsPadding().imePadding().padding(16.dp).testTag("full_editor")) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(Modifier.size(44.dp).clip(CircleShape).clickable(role = Role.Button) { close() }.semantics { contentDescription = t("Close", "Funga") }.testTag("full_close"), contentAlignment = Alignment.Center) { Icon(Ic.get("x"), null, tint = C.ink, modifier = Modifier.size(22.dp)) }
+                Text(t("Message", "Ujumbe"), style = MaterialTheme.typography.titleLarge, color = C.ink, modifier = Modifier.weight(1f).padding(start = 6.dp))
+                Btn(t("Send", "Tuma"), send, Modifier.testTag("full_send"), small = true, icon = "arrow", enabled = box.text.isNotBlank())
+            }
+            BasicTextField(box, Modifier.padding(top = 12.dp).fillMaxWidth().weight(1f).clip(RoundedCornerShape(16.dp)).background(C.card).padding(14.dp).testTag("full_input"),
+                textStyle = MaterialTheme.typography.bodyLarge.copy(color = C.text), cursorBrush = SolidColor(C.blue),
+                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences))
+        }
+    }
+}
+
+
 
 @Composable
 private fun ComposerIcon(icon: String, label: String, tag: String, onClick: () -> Unit) {
@@ -328,9 +446,19 @@ private fun ComposerIcon(icon: String, label: String, tag: String, onClick: () -
 
 /** A chat's half-typed message, kept on the phone. */
 internal object ChatDrafts {
-    private fun sp(ctx: Context) = ctx.getSharedPreferences("chat_drafts", Context.MODE_PRIVATE)
+    private var app: Context? = null
+    private fun sp(ctx: Context) = ctx.applicationContext.also { app = it }.getSharedPreferences("chat_drafts", Context.MODE_PRIVATE)
+    /** Bumped on every change, so the chat list shows "Draft: …" (chatpa). */
+    var version by mutableIntStateOf(0)
     fun get(ctx: Context, c: String) = sp(ctx).getString(c, "") ?: ""
-    fun put(ctx: Context, c: String, text: String) { if (text.isBlank()) sp(ctx).edit().remove(c).apply() else sp(ctx).edit().putString(c, text).apply() }
+    fun put(ctx: Context, c: String, text: String) {
+        val before = get(ctx, c)
+        if (text.isBlank()) sp(ctx).edit().remove(c).apply() else sp(ctx).edit().putString(c, text).apply()
+        if (before != text.ifBlank { "" }) version++
+    }
+    /** The draft for the list (no context to hand there). */
+    fun peek(c: String) = app?.let { get(it, c) }.orEmpty()
+    fun init(ctx: Context) { sp(ctx) }
 }
 
 /** The paperclip: what to send. */

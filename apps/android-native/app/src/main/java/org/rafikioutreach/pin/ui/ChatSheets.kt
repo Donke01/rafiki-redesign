@@ -65,6 +65,9 @@ internal fun MsgSheet(m: AppModel, msg: Msg, row: ChatRow?, close: () -> Unit, o
                 }
             }
         }
+        // when exactly it was sent (chatpa: also for other people's messages)
+        Text(t("Sent ", "Ilitumwa ") + Dates.dateTime(Instant.ofEpochMilli(msg.at)) + ":" + "%02d".format(Instant.ofEpochMilli(msg.at).atZone(Dates.zone()).second) + if (!mine && msg.from.isNotBlank()) " · " + msg.from else "",
+            style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(start = 6.dp, bottom = 6.dp).testTag("act_time"))
         if (msg.queued || msg.status == "failed") {
             if (msg.status == "failed") SheetRow("act_retry", "undo", t("Try again", "Jaribu tena")) { hide { hub.retry(msg) } }
             SheetRow("act_unsend", "trash", t("Don’t send", "Usitume"), red = true) { hide { hub.unsend(msg) } }
@@ -74,6 +77,12 @@ internal fun MsgSheet(m: AppModel, msg: Msg, row: ChatRow?, close: () -> Unit, o
             SheetRow("act_reply", "reply", t("Reply", "Jibu")) { hide { onReply() } }
             SheetRow("act_fwd", "fwd", t("Forward", "Sambaza")) { sub = "fwd" }
             if (msg.text.isNotBlank()) SheetRow("act_copy", "copy", t("Copy", "Nakili")) { clip.setText(AnnotatedString(msg.text)); hide { } }
+            // pin it to the top of the chat (DMs: anyone; elsewhere admins); a 4th pin replaces the oldest
+            val pinned = row?.pins?.any { it.id == msg.id } == true
+            if (hub.canPin(row, admin)) SheetRow("act_pin", "pin", if (pinned) t("Unpin", "Ondoa kibandiko") else t("Pin", "Bandika"),
+                value = if (!pinned && (row?.pins?.size ?: 0) >= 3) t("Replaces the oldest of the 3 pins", "Inachukua nafasi ya kibandiko cha zamani zaidi kati ya 3") else "") {
+                hide { hub.pinLater(msg, !pinned) }
+            }
             SheetRow("act_star", "star", if (msg.starred) t("Unstar", "Ondoa nyota") else t("Star", "Weka nyota")) { hide { scope.launch { hub.star(msg, !msg.starred) } } }
             if (mine) SheetRow("act_info", "info", t("Message info", "Maelezo ya ujumbe")) { sub = "info" }
             if (canEdit) SheetRow("act_edit", "edit", t("Edit", "Hariri")) { hide { onEdit() } }

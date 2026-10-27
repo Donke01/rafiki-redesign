@@ -19,6 +19,11 @@ class FakeChat(val me: String = "Reid Anderson") {
     val presence = JSONObject()
     @Volatile var off = false
     @Volatile var online = true
+    // chatpa (S/chatpolish-contract.md): my synced settings, push tokens, trips the proxy can resolve
+    val userPrefs = JSONObject().put("quick", JSONObject.NULL).put("dnd", JSONObject().put("on", false).put("from", "21:00").put("to", "06:30").put("mentions", false).put("tz", 180)).put("doubleTap", "❤️")
+    val devices = mutableListOf<String>()
+    val trips = mutableMapOf<String, JSONObject>()
+    @Volatile var push = false
     private var n = 1000
     private fun id() = "m${n++}"
     val now: Long get() = System.currentTimeMillis()
@@ -55,7 +60,24 @@ class FakeChat(val me: String = "Reid Anderson") {
         val path = url.substringAfter("/api/chat/").substringBefore('?')
         synchronized(this) {
             return when (path) {
-                "list" -> ok(JSONObject().put("now", now).put("me", me).put("chats", JSONArray(chats.values.toList())).put("presence", presence))
+                "list" -> ok(JSONObject().put("now", now).put("me", me).put("chats", JSONArray(chats.values.toList())).put("presence", presence).put("prefs", userPrefs).put("push", push))
+                "pin" -> {
+                    val c = chats[b.optString("c")] ?: return bad("not-member", 403)
+                    val m = find(b) ?: return bad("not-found", 404)
+                    if (c.optString("kind") != "dm" && !c.getJSONArray("admins").toString().contains(me)) return bad("not-admin", 403)
+                    val pins = (0 until (c.optJSONArray("pins")?.length() ?: 0)).map { c.getJSONArray("pins").getJSONObject(it) }.filter { it.optString("id") != m.optString("id") }.toMutableList()
+                    var replaced: String? = null
+                    if (b.optBoolean("on")) {
+                        val wasPinned = (c.optJSONArray("pins")?.toString() ?: "").contains("\"id\":\"${m.optString("id")}\"")
+                        pins.add(0, JSONObject().put("id", m.optString("id")).put("from", m.optString("from")).put("kind", m.optString("kind")).put("text", m.optString("text").take(160)).put("at", m.optString("at")).put("by", me).put("pinnedAt", now))
+                        if (pins.size > 3) replaced = pins.removeAt(pins.lastIndex).optString("id")
+                        if (!wasPinned) msg(c.optString("id"), "", "$me pinned a message", 0, kind = "sys") { put("sys", JSONObject().put("type", "pinned").put("by", me).put("id", m.optString("id"))) }
+                    }
+                    c.put("pins", JSONArray(pins))
+                    ok(JSONObject().put("pins", JSONArray(pins)).put("chat", c).apply { replaced?.let { put("replaced", it) } })
+                }
+                "device" -> { val tk = b.optString("token"); if (b.optBoolean("remove")) devices.remove(tk) else devices += tk; ok(JSONObject().put("push", push)) }
+                "trip" -> trips[q(url, "id")]?.let { ok(JSONObject().put("trip", it)) } ?: bad("not-found", 404)
                 "ticket" -> ok(JSONObject().put("t", "T123").put("exp", now + 60_000))
                 "open" -> {
                     if (b.optString("kind") == "dm") {
@@ -99,8 +121,10 @@ class FakeChat(val me: String = "Reid Anderson") {
                     val o = JSONObject(b.toString()).put("id", id()).put("from", me).put("at", Instant.now().toString()).put("status", "sent").put("reacts", JSONObject()).put("deleted", false)
                         .put("reply", replyQ ?: JSONObject.NULL).put("edited", JSONObject.NULL).put("sys", JSONObject.NULL)
                     if (!o.has("media")) o.put("media", JSONArray())
+                    // a trip card: the proxy fills it from the trip itself; unknown trips are refused
+                    if (o.optString("kind") == "trip") { val tid = b.optJSONObject("trip")?.optString("id").orEmpty(); o.put("trip", trips[tid] ?: return bad("not-found", 404)) }
                     list += o
-                    chat.put("last", JSONObject().put("id", o.optString("id")).put("from", me).put("kind", o.optString("kind")).put("text", o.optString("text")).put("at", o.optString("at")))
+                    chat.put("last", JSONObject().put("id", o.optString("id")).put("from", me).put("kind", o.optString("kind")).put("text", if (o.optString("kind") == "trip") o.getJSONObject("trip").optString("title") else o.optString("text")).put("at", o.optString("at"))).put("seen", JSONArray())
                     ok(JSONObject().put("msg", o))
                 }
                 "edit" -> { val m = find(b) ?: return bad("not-found", 404); m.put("text", b.optString("text")).put("edited", Instant.now().toString()); ok() }
@@ -110,8 +134,9 @@ class FakeChat(val me: String = "Reid Anderson") {
                     b.optString("emoji").takeIf { it.isNotBlank() && it != "null" }?.let { e -> r.put(e, (r.optJSONArray(e) ?: JSONArray()).put(me)) }; ok() }
                 "star" -> { find(b)?.put("starred", b.optBoolean("on")); ok() }
                 "starred" -> ok(JSONObject().put("msgs", JSONArray(msgs.values.flatten().filter { it.optBoolean("starred") })))
-                "read", "delivered", "prefs", "live", "live-stop" -> {
-                    if (path == "prefs") chats[b.optString("c")]?.let { c -> listOf("pinned", "muted", "archived", "wallpaper").forEach { k -> if (b.has(k)) c.put(k, b.get(k)) } }
+                "prefs" -> if (method == "GET" || !b.has("c")) { listOf("quick", "dnd", "doubleTap").forEach { k -> if (b.has(k)) userPrefs.put(k, b.get(k)) }; ok(JSONObject().put("prefs", userPrefs)) }
+                    else { chats[b.optString("c")]?.let { c -> listOf("pinned", "muted", "archived", "wallpaper", "bubble").forEach { k -> if (b.has(k)) c.put(k, b.get(k)) } }; ok(JSONObject().put("chat", chats[b.optString("c")])) }
+                "read", "delivered", "live", "live-stop" -> {
                     if (path == "read") chats[b.optString("c")]?.put("unread", 0)?.put("mention", false)
                     ok()
                 }

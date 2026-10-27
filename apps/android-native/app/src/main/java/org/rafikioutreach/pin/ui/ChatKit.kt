@@ -71,6 +71,13 @@ internal object ChatIc {
         "exit" to listOf("M14 4.5h4.5v15H14", "M10 8l-4 4 4 4M6 12h9.5"),
         "speed" to listOf("M4.5 15.5a7.5 7.5 0 1 1 15 0", "M12 15.5l3.5-4.5"),
         "video" to listOf("M3.5 6.5h12v11h-12z", "M15.5 10.5l5-3v9l-5-3z"),
+        // chatpa
+        "expand" to listOf("M14 4.5h5.5V10", "M10 19.5H4.5V14", "M19.5 4.5l-6.5 6.5", "M4.5 19.5l6.5-6.5"),
+        "stop" to listOf("M7 7h10v10H7z"),
+        "megaphone" to listOf("M4 10v4h3l7 4V6l-7 4z", "M17.5 9.5a3.5 3.5 0 0 1 0 5", "M7 14l1.5 5h2.5l-1.3-5"),
+        "bubble" to listOf("M5 5.5h14v10H10l-4 3.5v-3.5H5z"),
+        "data" to listOf("M7 4v16M7 20l-3-3M7 20l3-3", "M17 20V4M17 4l-3 3M17 4l3 3"),
+        "moon" to listOf("M19 14.5A7.5 7.5 0 0 1 9.5 5a7.5 7.5 0 1 0 9.5 9.5z"),
     )
     private val cache = HashMap<String, ImageVector>()
     fun get(name: String): ImageVector = D[name]?.let { paths ->
@@ -96,7 +103,9 @@ internal object ChatLook {
 /** The ticks on my messages: a clock while waiting, one grey tick sent, two grey delivered, two blue read; a red ! if refused. */
 @Composable
 internal fun Ticks(status: String, modifier: Modifier = Modifier, tint: Color = ChatLook.tick()) {
-    val col = if (status == "read") ChatLook.readBlue else if (status == "failed") C.bad else tint
+    // grey to blue: a soft fade when the message is read (chatpa)
+    val col by androidx.compose.animation.animateColorAsState(if (status == "read") ChatLook.readBlue else if (status == "failed") C.bad else tint,
+        androidx.compose.animation.core.tween(if (chatMotion()) 300 else 0), label = "tick")
     Canvas(modifier.size(if (status == "delivered" || status == "read") 18.dp else 14.dp, 12.dp).testTag("tick_$status")) {
         val sw = 1.6.dp.toPx()
         val h = size.height; val w = size.width
@@ -122,22 +131,26 @@ internal fun Ticks(status: String, modifier: Modifier = Modifier, tint: Color = 
 internal fun ChatAvatar(row: ChatRow?, me: String, size: Dp = 50.dp, online: Boolean = false, name: String? = null, m: org.rafikioutreach.pin.AppModel? = null) {
     Box(Modifier.size(size)) {
         val kind = row?.kind ?: "dm"
-        val title = name ?: if (kind == "dm") row?.other(me).orEmpty() else row?.title.orEmpty()
+        val title = name ?: if (kind == "dm") row?.other(me).orEmpty() else row?.let { chatTitle(it, me) }.orEmpty()
         val photo = row?.photo.orEmpty()
+        // the automatic picture (chatpa, contract §1): its own photo → a country team's flag → the project's photo → initials
+        val cc = row?.country.orEmpty()
+        val pphoto = row?.pphoto.orEmpty()
         when {
-            // a group's own photo
             m != null && photo.isNotBlank() && kind != "dm" -> ChatImage(m, org.rafikioutreach.pin.data.ChatMedia(photo, "photo"), Modifier.size(size).clip(CircleShape), max = 256)
-            else -> when (kind) {
-            "dm" -> PersonAvatar(title, size)
+            kind == "dm" -> PersonAvatar(title, size)
+            cc.isNotBlank() -> FlagAvatar(cc, size)
+            m != null && pphoto.isNotBlank() -> NetImage(if (pphoto.startsWith("http")) pphoto else m.api.server + pphoto, Modifier.size(size).clip(CircleShape).background(C.hue("blue").bg).testTag("pphoto")) {
+                Icon(Ic.get("drop"), null, tint = C.hue("blue").fg, modifier = Modifier.size(size * 0.48f))
+            }
             else -> {
-                val (icon, hue) = when (kind) { "team" -> "globe" to "teal"; "project" -> "drop" to "blue"; else -> "people" to nameHue(title) }
-                val hu = C.hue(hue)
+                val hu = C.hue(if (row?.announce == true) "amber" else if (kind == "project") "blue" else if (kind == "team") "teal" else nameHue(title))
                 Box(Modifier.size(size).clip(CircleShape).background(hu.bg), contentAlignment = Alignment.Center) {
-                    if (kind == "group" && title.isNotBlank()) Text(initialsOf(title), color = hu.fg, fontWeight = FontWeight.ExtraBold, fontSize = (size.value * 0.32f).sp)
-                    else Icon(Ic.get(icon), null, tint = hu.fg, modifier = Modifier.size(size * 0.48f))
+                    if (title.isNotBlank()) Text(initialsOf(title), color = hu.fg, fontWeight = FontWeight.ExtraBold, fontSize = (size.value * 0.32f).sp)
+                    else Icon(Ic.get("people"), null, tint = hu.fg, modifier = Modifier.size(size * 0.48f))
                 }
             }
-        } }
+        }
         if (online) Box(Modifier.align(Alignment.BottomEnd).size(size * 0.3f).clip(CircleShape).background(C.card).padding(2.dp).clip(CircleShape).background(ChatLook.online).testTag("online_dot"))
     }
 }

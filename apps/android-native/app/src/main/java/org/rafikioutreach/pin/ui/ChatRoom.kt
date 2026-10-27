@@ -2,12 +2,8 @@ package org.rafikioutreach.pin.ui
 
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -33,6 +29,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -63,6 +60,7 @@ import org.rafikioutreach.pin.data.ChatMedia
 import org.rafikioutreach.pin.data.ChatRow
 import org.rafikioutreach.pin.data.Geo
 import org.rafikioutreach.pin.data.Msg
+import org.rafikioutreach.pin.data.emojiOnly
 import org.rafikioutreach.pin.data.preview
 import org.rafikioutreach.pin.t
 import java.io.File
@@ -84,18 +82,21 @@ private fun lines(msgs: List<Msg>, unreadFrom: String?, unreadN: Int): List<Line
         if (d != day) { day = d; out += Line.Day(chatDay(m.at), "d_$d") }
         if (unreadFrom != null && m.id == unreadFrom && unreadN > 0) out += Line.Unread(unreadN)
         val prev = msgs.getOrNull(i - 1); val next = msgs.getOrNull(i + 1)
-        fun same(a: Msg?, b: Msg) = a != null && a.sys == null && b.sys == null && a.from == b.from && kotlin.math.abs(a.at - b.at) < 5 * 60_000 &&
+        fun same(a: Msg?, b: Msg) = a != null && a.sys == null && b.sys == null && a.kind != "sys" && b.kind != "sys" && a.from == b.from && kotlin.math.abs(a.at - b.at) < 5 * 60_000 &&
             Instant.ofEpochMilli(a.at).atZone(Dates.zone()).toLocalDate() == Instant.ofEpochMilli(b.at).atZone(Dates.zone()).toLocalDate()
         out += Line.B(m, !same(prev, m), !same(next, m))
     }
     return out.asReversed()
 }
 
+/** Is [me] @mentioned in this message? */
+private fun mentionsMe(m: Msg, me: String) = m.mentions.any { it.equals(me, true) }
+
 /**
- * One conversation (feat-chata). Bubbles left and right, grouped by sender, with the sender's name and colour in groups;
- * the time and ticks; "typing…" and "recording…"; swipe a message right to reply; hold it for reactions and actions;
- * link and project previews; date separators; a jump-to-bottom button with the count of new messages; older messages
- * load while scrolling up. The list grows from the composer upwards, so the keyboard opening never makes it jump.
+ * One conversation (feat-chata, polished in chatpa). Bubbles left and right with a tail on the first of a run, in my
+ * chosen colour; the time and ticks; typing dots; swipe right to reply, left to see the exact time; double-tap to react;
+ * hold for reactions and actions; link, project and trip cards; date separators; the pinned messages' bar; "↓ 3 new"
+ * and "Jump to @mention"; "Seen by" in groups; older messages load while scrolling up; the place is remembered per chat.
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -107,18 +108,22 @@ fun ChatRoom(m: AppModel, c: String, openInfo: () -> Unit, openChat: (String) ->
     val presence by hub.presence.collectAsState()
     val typingMap by hub.typing.collectAsState()
     val off by hub.off.collectAsState()
+    hub.settingsTick.collectAsState().value
     val me = hub.me
     val scope = rememberScope()
     val hp = rememberHaptics()
-    val ctx = LocalContext.current
+    val motion = chatMotion()
     DisposableEffect(c) { hub.openChat = c; onDispose { if (hub.openChat == c) hub.openChat = null; VoicePlayer.stop(); hub.typing(c, null) } }
-    LaunchedEffect(c) { hub.markSeen(c); hub.loadMsgs(c) }
+    var loaded by remember(c) { mutableStateOf(false) }
+    LaunchedEffect(c) { hub.markSeen(c); hub.loadMsgs(c); loaded = true }
     LaunchedEffect(msgs.size) { hub.markSeen(c) }
     // "3 unread messages", as the chat was opened
     val unreadAtOpen = remember(c) { row?.unread ?: 0 }
     val unreadFrom = remember(c, msgs.isNotEmpty()) { if (unreadAtOpen > 0) msgs.filter { !it.from.equals(me, true) }.takeLast(unreadAtOpen).firstOrNull()?.id else null }
     val list = remember(msgs, unreadFrom) { lines(msgs, unreadFrom, unreadAtOpen) }
-    val state = rememberLazyListState()
+    // where this chat was left (kept while the app runs)
+    val state = remember(c) { hub.scrollAt[c] }.let { s -> rememberLazyListState(s?.first ?: 0, s?.second ?: 0) }
+    DisposableEffect(c) { onDispose { hub.scrollAt[c] = state.firstVisibleItemIndex to state.firstVisibleItemScrollOffset } }
     val group = row?.isGroup == true
     var reply by remember(c) { mutableStateOf<Msg?>(null) }
     var editing by remember(c) { mutableStateOf<Msg?>(null) }
@@ -127,74 +132,113 @@ fun ChatRoom(m: AppModel, c: String, openInfo: () -> Unit, openChat: (String) ->
     var flash by remember { mutableStateOf<String?>(null) }
     var reactsOf by remember { mutableStateOf<Msg?>(null) }
     val mediaAll = remember(msgs) { msgs.filter { !it.deleted }.flatMap { msg -> msg.media.filter { it.type == "photo" || it.type == "video" }.map { msg to it } } }
+    // messages that arrive while the chat is open slide in; the ones already there don't move
+    val openedAt = remember(c) { System.currentTimeMillis() }
+    val known = remember(c) { msgs.map { it.key }.toHashSet() }
 
-    // scroll to a message (a tapped quote, a search hit, a starred message), loading older pages if needed
+    // scroll to a message (a tapped quote, a search hit, a starred or pinned message), loading older pages if needed
     fun jump(id: String) = scope.launch {
         var i = list.indexOfFirst { it is Line.B && it.msg.id == id }
         var tries = 0
         while (i < 0 && hub.hasMore(c) && tries < 10) { hub.loadOlder(c); tries++; delay(50); i = lines(hub.msgs(c).value, unreadFrom, unreadAtOpen).indexOfFirst { it is Line.B && it.msg.id == id } }
-        if (i >= 0) { state.animateScrollToItem(i); flash = id; delay(1600); flash = null }
+        if (i >= 0) { if (motion) state.animateScrollToItem(i) else state.scrollToItem(i); flash = id; delay(1600); flash = null }
     }
     val focus = ChatNav.focus
     LaunchedEffect(focus, msgs.isNotEmpty()) { if (focus != null && msgs.isNotEmpty()) { ChatNav.focus = null; jump(focus) } }
 
-    // new messages: follow them when at the bottom; otherwise count them on the jump button
+    // new messages: follow them when at the bottom; otherwise count them on the "↓ 3 new" chip
     val atBottom by remember { derivedStateOf { state.firstVisibleItemIndex <= 1 } }
     var awayAt by remember { mutableStateOf<Long?>(null) }
     LaunchedEffect(atBottom) { awayAt = if (atBottom) null else msgs.lastOrNull()?.at ?: 0L }
     val newer = awayAt?.let { a -> msgs.count { it.at > a && !it.from.equals(me, true) } } ?: 0
     val newest = list.firstOrNull()?.key
-    LaunchedEffect(newest) { if (atBottom || msgs.lastOrNull()?.from?.equals(me, true) == true) state.animateScrollToItem(0) }
+    LaunchedEffect(newest) { if (atBottom || msgs.lastOrNull()?.from?.equals(me, true) == true) { if (motion) state.animateScrollToItem(0) else state.scrollToItem(0) } }
     // older messages while scrolling up
     val nearTop by remember { derivedStateOf { (state.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0) >= state.layoutInfo.totalItemsCount - 3 } }
     var loadingOlder by remember { mutableStateOf(false) }
     LaunchedEffect(nearTop, msgs.size) { if (nearTop && !loadingOlder && hub.hasMore(c) && msgs.isNotEmpty()) { loadingOlder = true; hub.loadOlder(c); loadingOlder = false } }
 
+    // the unread divider fades once it has scrolled past (out of sight above, after it was seen)
+    val unreadIdx = list.indexOfFirst { it is Line.Unread }
+    var dividerSeen by remember(c) { mutableStateOf(false) }
+    var dividerGone by remember(c) { mutableStateOf(false) }
+    val dividerVisible by remember { derivedStateOf { state.layoutInfo.visibleItemsInfo.any { it.key == "unread" } } }
+    val lastVisible by remember { derivedStateOf { state.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0 } }
+    LaunchedEffect(dividerVisible, lastVisible, unreadIdx) {
+        if (dividerVisible) dividerSeen = true
+        else if (dividerSeen && unreadIdx > lastVisible) dividerGone = true
+    }
+
+    // @mentions of me I haven't seen yet: the unread ones, and the server's oldest unseen one
+    val mentionLeft = remember(c) { mutableStateListOf<String>() }
+    LaunchedEffect(c, msgs.isNotEmpty()) {
+        if (msgs.isEmpty() || mentionLeft.isNotEmpty()) return@LaunchedEffect
+        val from = unreadFrom?.let { u -> msgs.indexOfFirst { it.id == u } } ?: -1
+        val ids = (if (from >= 0) msgs.drop(from) else emptyList()).filter { mentionsMe(it, me) }.map { it.id } + listOfNotNull(row?.mentionId?.takeIf { it.isNotBlank() })
+        mentionLeft.addAll(ids.distinct())
+    }
+    val visibleKeys by remember { derivedStateOf { state.layoutInfo.visibleItemsInfo.map { it.key.toString() }.toSet() } }
+    LaunchedEffect(visibleKeys, msgs) { if (mentionLeft.isNotEmpty()) mentionLeft.removeAll { id -> msgs.firstOrNull { it.id == id }?.key?.let { it in visibleKeys } == true } }
+
     val wall = row?.wallpaper.orEmpty()
+    val dbl = hub.settings.doubleTap
     Column(Modifier.fillMaxSize().testTag("chat_room")) {
         ChatHead(m, row, c, me, presence, typingMap, openInfo)
+        if (row != null) PinBar(row, msgs) { jump(it) }
         Box(Modifier.weight(1f).fillMaxWidth()) {
-            Wallpaper(wall, Modifier.matchParentSize())
+            ChatWall(wall, Modifier.matchParentSize())
             BoxWithConstraints(Modifier.fillMaxSize()) {
                 val maxW = maxWidth * 0.8f
-                LazyColumn(Modifier.fillMaxSize().testTag("chat_msgs"), state, reverseLayout = true, contentPadding = PaddingValues(start = 10.dp, end = 10.dp, top = 10.dp, bottom = 8.dp)) {
+                LazyColumn(Modifier.fillMaxSize().testTag("chat_msgs"), state, reverseLayout = true, contentPadding = PaddingValues(start = 8.dp, end = 8.dp, top = 10.dp, bottom = 8.dp)) {
                     items(list, key = { it.key }, contentType = { it::class.simpleName }) { line ->
                         when (line) {
                             is Line.Day -> DayChip(line.label)
-                            is Line.Unread -> Text(if (line.n == 1) t("1 unread message", "Ujumbe 1 haujasomwa") else t("${line.n} unread messages", "Ujumbe ${line.n} haujasomwa"),
-                                style = MaterialTheme.typography.labelMedium, color = C.ink, textAlign = TextAlign.Center,
-                                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp).background(if (C.dark) Color(0x22FFFFFF) else Color(0x14000000)).padding(vertical = 6.dp).testTag("unread_line"))
-                            is Line.B -> MsgLine(m, line.msg, row, me, group, line.first, line.last, maxW, flash == line.msg.id,
-                                onReply = { hp.long(); reply = line.msg; editing = null },
-                                onLong = { hp.long(); held = line.msg },
-                                openMedia = { md -> viewer = mediaAll.indexOfFirst { it.second == md && it.first.key == line.msg.key }.coerceAtLeast(0) },
-                                jump = { jump(it) }, openProject = openProject, reacts = { reactsOf = line.msg })
+                            is Line.Unread -> {
+                                val a by animateFloatAsState(if (dividerGone) 0f else 1f, tween(if (motion) 320 else 0), label = "unread")
+                                Text(if (line.n == 1) t("1 unread message", "Ujumbe 1 haujasomwa") else t("${line.n} unread messages", "Ujumbe ${line.n} haujasomwa"),
+                                    style = MaterialTheme.typography.labelMedium, color = C.ink, textAlign = TextAlign.Center,
+                                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp).graphicsLayer { alpha = a }.background(if (C.dark) Color(0x22FFFFFF) else Color(0x14000000)).padding(vertical = 6.dp)
+                                        .testTag(if (dividerGone) "unread_line_faded" else "unread_line"))
+                            }
+                            is Line.B -> {
+                                val newestLine = list.firstOrNull { it is Line.B } === line
+                                val fresh = line.msg.key !in known && line.msg.at > openedAt - 5_000
+                                MsgLine(m, line.msg, row, me, group, line.first, line.last, maxW, flash == line.msg.id, fresh, motion,
+                                    seen = if (newestLine && group) row?.seen.orEmpty().filter { !it.equals(me, true) && !it.equals(line.msg.from, true) } else emptyList(),
+                                    onReply = { hp.long(); reply = line.msg; editing = null },
+                                    onLong = { hp.long(); held = line.msg },
+                                    onDouble = { if (!line.msg.queued && !line.msg.deleted && line.msg.sys == null) { hp.tap(); scope.launch { hub.react(line.msg, dbl) } } },
+                                    openMedia = { md -> viewer = mediaAll.indexOfFirst { it.second == md && it.first.key == line.msg.key }.coerceAtLeast(0) },
+                                    jump = { jump(it) }, openProject = openProject, reacts = { reactsOf = line.msg })
+                            }
                         }
                     }
-                    if (loadingOlder || (hub.hasMore(c) && msgs.size >= 50)) item(key = "older") {
-                        Box(Modifier.fillMaxWidth().padding(10.dp), contentAlignment = Alignment.Center) { androidx.compose.material3.CircularProgressIndicator(Modifier.size(22.dp), strokeWidth = 2.dp, color = C.blue) }
-                    }
-                    if (msgs.isEmpty()) item(key = "empty") {
-                        Text(t("No messages yet. Say hello!", "Bado hakuna ujumbe. Salimia!"), style = MaterialTheme.typography.bodyMedium, color = C.muted, textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth().padding(vertical = 40.dp, horizontal = 24.dp).testTag("chat_empty"))
-                    }
+                    if (loadingOlder || (hub.hasMore(c) && msgs.size >= 50)) item(key = "older") { OlderSkeleton() }
+                    if (msgs.isEmpty() && (loaded || !hub.hasMore(c))) item(key = "empty") { RoomEmpty(m, row, c, me) }
                 }
             }
-            // jump to the newest, with how many came in meanwhile
-            if (!atBottom) Box(Modifier.align(Alignment.BottomEnd).padding(end = 14.dp, bottom = 12.dp)) {
-                Box {
-                    Box(Modifier.size(44.dp).shadow(6.dp, CircleShape).clip(CircleShape).background(C.card).clickable(role = Role.Button) { scope.launch { state.animateScrollToItem(0) } }
-                        .semantics { contentDescription = t("Jump to the newest", "Nenda kwa mpya zaidi") }.testTag("jump_bottom"), contentAlignment = Alignment.Center) {
-                        Icon(Ic.get("down"), null, tint = C.ink, modifier = Modifier.size(22.dp))
-                    }
-                    if (newer > 0) Text("$newer", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.align(Alignment.TopEnd).offset(4.dp, (-4).dp)
-                        .clip(RoundedCornerShape(99.dp)).background(ChatLook.online).padding(horizontal = 6.dp, vertical = 1.dp).testTag("jump_count"))
+            // "Jump to @mention", above the "new" chip
+            if (mentionLeft.isNotEmpty()) Box(Modifier.align(Alignment.BottomEnd).padding(end = 14.dp, bottom = if (!atBottom) 66.dp else 12.dp)) {
+                Box(Modifier.size(44.dp).shadow(6.dp, CircleShape).clip(CircleShape).background(ChatLook.online).clickable(role = Role.Button) { mentionLeft.firstOrNull()?.let { id -> jump(id); mentionLeft.remove(id) } }
+                    .semantics { contentDescription = t("Jump to @mention", "Nenda kwenye @kutajwa") }.testTag("jump_mention"), contentAlignment = Alignment.Center) {
+                    Text("@", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
+                }
+            }
+            // back to the newest: "↓ 3 new" when messages came in meanwhile, otherwise a round arrow
+            if (!atBottom) {
+                if (newer > 0) Row(Modifier.align(Alignment.BottomCenter).padding(bottom = 12.dp).shadow(6.dp, RoundedCornerShape(99.dp)).clip(RoundedCornerShape(99.dp)).background(ChatLook.online)
+                    .clickable(role = Role.Button) { scope.launch { if (motion) state.animateScrollToItem(0) else state.scrollToItem(0) } }.padding(horizontal = 14.dp, vertical = 8.dp).testTag("new_chip"), verticalAlignment = Alignment.CenterVertically) {
+                    Text("↓ " + if (newer == 1) t("1 new", "1 mpya") else t("$newer new", "$newer mpya"), color = Color.White, style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold), maxLines = 1, softWrap = false, modifier = Modifier.testTag("jump_count"))
+                }
+                else Box(Modifier.align(Alignment.BottomEnd).padding(end = 14.dp, bottom = 12.dp).size(44.dp).shadow(6.dp, CircleShape).clip(CircleShape).background(C.card).clickable(role = Role.Button) { scope.launch { if (motion) state.animateScrollToItem(0) else state.scrollToItem(0) } }
+                    .semantics { contentDescription = t("Jump to the newest", "Nenda kwa mpya zaidi") }.testTag("jump_bottom"), contentAlignment = Alignment.Center) {
+                    Icon(Ic.get("down"), null, tint = C.ink, modifier = Modifier.size(22.dp))
                 }
             }
         }
         when {
             off -> ChatOff(Modifier.padding(12.dp), m.chat.offNeed)
-            row != null && row.onlyAdmins && !row.admin(me) -> Text(t("Only admins can send messages", "Wasimamizi pekee wanaweza kutuma ujumbe"), style = MaterialTheme.typography.bodyMedium, color = C.muted, textAlign = TextAlign.Center,
+            row != null && row.onlyAdmins && !row.admin(me) -> Text(if (row.announce) t("Only admins post announcements", "Wasimamizi pekee ndio hutuma matangazo") else t("Only admins can send messages", "Wasimamizi pekee wanaweza kutuma ujumbe"), style = MaterialTheme.typography.bodyMedium, color = C.muted, textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth().background(C.card).padding(18.dp).testTag("only_admins"))
             else -> Composer(m, c, row, reply, editing, { reply = null }, { editing = null }) { scope.launch { state.scrollToItem(0) } }
         }
@@ -204,7 +248,22 @@ fun ChatRoom(m: AppModel, c: String, openInfo: () -> Unit, openChat: (String) ->
     viewer?.let { i -> if (mediaAll.isNotEmpty()) MediaViewer(m, mediaAll, i) { viewer = null } else viewer = null }
 }
 
-/** The chat's head: its picture, name and what's happening (online, last seen, typing, members). A tap opens the info page. */
+/** A chat with no messages yet: the drop and "Say hello to the Kenya team 👋", with a button that does. */
+@Composable
+private fun RoomEmpty(m: AppModel, row: ChatRow?, c: String, me: String) {
+    val canPost = row == null || !row.onlyAdmins || row.admin(me)
+    val name = row?.let { chatTitle(it, me) }.orEmpty()
+    val text = when {
+        row?.announce == true -> if (canPost) t("No announcements yet. Write the first one for the whole team.", "Bado hakuna matangazo. Andika la kwanza kwa timu nzima.") else t("No announcements yet. The office posts news here.", "Bado hakuna matangazo. Ofisi huweka habari hapa.")
+        row?.kind == "dm" -> t("Say hello to ${name.substringBefore(' ')} 👋", "Msalimie ${name.substringBefore(' ')} 👋")
+        row?.kind == "team" -> t("Say hello to the $name 👋", "Isalimie $name 👋")
+        name.isNotBlank() -> t("Say hello to $name 👋", "Salimia $name 👋")
+        else -> t("No messages yet. Say hello!", "Bado hakuna ujumbe. Salimia!")
+    }
+    ChatEmpty(text, "chat_empty", if (canPost && row?.announce != true) t("Say hello 👋", "Salimia 👋") else null) { m.chat.send(c, "text", "👋") }
+}
+
+/** The chat's head: its picture, name and what's happening (online, last seen, typing dots, members). A tap opens the info page. */
 @Composable
 private fun ChatHead(m: AppModel, row: ChatRow?, c: String, me: String, presence: Map<String, org.rafikioutreach.pin.data.Presence>, typing: Map<String, Map<String, Pair<String, Long>>>, openInfo: () -> Unit) {
     val other = row?.other(me).orEmpty()
@@ -215,15 +274,19 @@ private fun ChatHead(m: AppModel, row: ChatRow?, c: String, me: String, presence
         row == null -> ""
         row.kind == "dm" -> if (p?.online == true) t("online", "yupo mtandaoni") else lastSeen(p?.seen ?: 0)
         row.kind == "project" -> t("Project thread", "Mazungumzo ya mradi") + " · " + t("${row.members.size} people", "watu ${row.members.size}")
+        row.announce -> t("Everyone on the team · admins post", "Timu nzima · wasimamizi wanatuma")
         else -> row.members.sortedBy { !it.equals(me, true) }.joinToString(", ") { if (it.equals(me, true)) t("You", "Wewe") else it.substringBefore(' ') }
     }
     Row(Modifier.fillMaxWidth().background(if (C.glassy) C.glass2 else C.card).clickable(role = Role.Button) { openInfo() }.padding(horizontal = 14.dp, vertical = 8.dp).testTag("chat_head"),
         verticalAlignment = Alignment.CenterVertically) {
         ChatAvatar(row, me, 40.dp, row?.kind == "dm" && p?.online == true, m = m)
         Column(Modifier.weight(1f).padding(start = 10.dp)) {
-            Text(row?.title?.ifBlank { other } ?: "", style = MaterialTheme.typography.titleSmall.copy(fontSize = 15.sp), color = C.ink, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.testTag("head_title"))
-            if (status.isNotBlank()) Text(status, style = MaterialTheme.typography.bodySmall.copy(fontWeight = if (typed != null) FontWeight.SemiBold else FontWeight.Medium),
-                color = if (typed != null || p?.online == true && row?.kind == "dm") ChatLook.online else C.muted, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.testTag("head_status"))
+            Text(row?.let { chatTitle(it, me) } ?: "", style = MaterialTheme.typography.titleSmall.copy(fontSize = 15.sp), color = C.ink, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.testTag("head_title"))
+            if (status.isNotBlank()) Row(verticalAlignment = Alignment.CenterVertically) {
+                if (typed != null && !(typed.contains("record") || typed.contains("rekodi"))) { TypingDots(ChatLook.online, Modifier.padding(end = 6.dp), 4.dp) }
+                Text(status, style = MaterialTheme.typography.bodySmall.copy(fontWeight = if (typed != null) FontWeight.SemiBold else FontWeight.Medium),
+                    color = if (typed != null || p?.online == true && row?.kind == "dm") ChatLook.online else C.muted, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.testTag("head_status"))
+            }
         }
         if (row?.muted() == true) Icon(ChatIc.get("mute"), t("Muted", "Imenyamazishwa"), tint = C.muted, modifier = Modifier.size(18.dp))
         Box(Modifier.size(40.dp), contentAlignment = Alignment.Center) { Icon(Ic.get("info"), t("Chat info", "Maelezo ya gumzo"), tint = C.muted, modifier = Modifier.size(20.dp)) }
@@ -238,37 +301,67 @@ private fun DayChip(label: String) {
     }
 }
 
-/** One message: a system note in the middle, or a bubble (left: theirs, right: mine). */
+/** What a screen reader says for a bubble: "Grace, 10:42, Pump fixed, read". */
+internal fun bubbleSays(msg: Msg, mine: Boolean): String {
+    val who = if (mine) t("You", "Wewe") else msg.from
+    val what = if (msg.deleted) t("This message was deleted", "Ujumbe huu ulifutwa") else msg.preview().ifBlank { msg.text }
+    val st = if (!mine || msg.deleted) "" else when (msg.status) {
+        "read" -> t("read", "imesomwa"); "delivered" -> t("delivered", "imefika"); "queued" -> t("waiting to send", "inasubiri kutumwa"); "failed" -> t("not sent", "haijatumwa"); else -> t("sent", "imetumwa")
+    }
+    return listOf(who, Dates.time(Instant.ofEpochMilli(msg.at)), what, st).filter { it.isNotBlank() }.joinToString(", ")
+}
+
+/** One message: a system line in the middle, or a bubble (left: theirs, right: mine). */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun MsgLine(m: AppModel, msg: Msg, row: ChatRow?, me: String, group: Boolean, first: Boolean, last: Boolean, maxW: androidx.compose.ui.unit.Dp, flash: Boolean,
-                    onReply: () -> Unit, onLong: () -> Unit, openMedia: (ChatMedia) -> Unit, jump: (String) -> Unit, openProject: (String, String) -> Unit, reacts: () -> Unit) {
-    if (msg.sys != null || msg.kind == "sys") { SysLine(m, msg, openProject); return }
+private fun MsgLine(m: AppModel, msg: Msg, row: ChatRow?, me: String, group: Boolean, first: Boolean, last: Boolean, maxW: androidx.compose.ui.unit.Dp, flash: Boolean, fresh: Boolean, motion: Boolean,
+                    seen: List<String>, onReply: () -> Unit, onLong: () -> Unit, onDouble: () -> Unit, openMedia: (ChatMedia) -> Unit, jump: (String) -> Unit, openProject: (String, String) -> Unit, reacts: () -> Unit) {
+    if (msg.sys != null || msg.kind == "sys") { SysLine(m, msg, fresh, motion, openProject); return }
     val mine = msg.from.equals(me, true)
     val density = LocalDensity.current
     val trigger = with(density) { 64.dp.toPx() }
     var dx by remember { mutableFloatStateOf(0f) }
     var buzzed by remember { mutableStateOf(false) }
     val hp = rememberHaptics()
-    val bg = if (mine) ChatLook.mine() else ChatLook.theirs()
+    val bg = if (mine) bubbleColor(row?.bubble.orEmpty()) else ChatLook.theirs()
     val flashA by animateFloatAsState(if (flash) 1f else 0f, label = "flash")
-    val tail = 5.dp; val r = 18.dp
-    val shape = if (mine) RoundedCornerShape(r, if (first) tail else r, r, r) else RoundedCornerShape(if (first) tail else r, r, r, r)
-    Box(Modifier.fillMaxWidth().padding(top = if (first) 6.dp else 2.dp).background(C.blue.copy(alpha = 0.18f * flashA))
+    val shape = remember(mine, first, last) { BubbleShape(mine, first, last) }
+    val big = if (msg.kind == "text" && !msg.deleted && msg.reply == null && !msg.fwd) emojiOnly(msg.text) else 0
+    Box(Modifier.fillMaxWidth().settleIn(fresh, motion, mine).padding(top = if (first) 6.dp else 2.dp).background(C.blue.copy(alpha = 0.18f * flashA))
         .pointerInput(msg.key) {
+            // right: reply (a haptic tick at the threshold); left: the exact time shows
             detectHorizontalDragGestures(onDragEnd = { if (dx > trigger) onReply(); dx = 0f; buzzed = false }, onDragCancel = { dx = 0f; buzzed = false }) { ch, d ->
-                val n = (dx + d).coerceIn(0f, trigger * 1.4f)
+                val n = (dx + d).coerceIn(-trigger * 1.3f, trigger * 1.4f)
                 if (n != dx) { dx = n; ch.consume() }
                 if (dx > trigger && !buzzed) { buzzed = true; hp.tap() }
             }
         }.testTag("msg_${msg.key}")) {
-        // the reply arrow that appears while swiping
-        if (dx > 4f) Box(Modifier.align(Alignment.CenterStart).padding(start = 6.dp).size(32.dp).alpha((dx / trigger).coerceIn(0f, 1f)).clip(CircleShape).background(C.card), contentAlignment = Alignment.Center) {
-            Icon(ChatIc.get("reply"), null, tint = C.blue, modifier = Modifier.size(18.dp))
+        // the reply arrow grows while swiping
+        if (dx > 4f) {
+            val k = (dx / trigger).coerceIn(0f, 1.2f)
+            Box(Modifier.align(Alignment.CenterStart).padding(start = 6.dp).size(32.dp).graphicsLayer { alpha = k.coerceAtMost(1f); scaleX = 0.4f + 0.6f * k; scaleY = 0.4f + 0.6f * k }
+                .clip(CircleShape).background(if (k >= 1f) C.blue else C.card).testTag("reply_arrow"), contentAlignment = Alignment.Center) {
+                Icon(ChatIc.get("reply"), null, tint = if (k >= 1f) Color.White else C.blue, modifier = Modifier.size(18.dp))
+            }
         }
+        // the exact time, revealed by swiping left
+        if (dx < -4f) Text(Dates.dateTime(Instant.ofEpochMilli(msg.at)) + ":" + "%02d".format(Instant.ofEpochMilli(msg.at).atZone(Dates.zone()).second), style = MaterialTheme.typography.labelSmall, color = C.muted, maxLines = 1, softWrap = false,
+            modifier = Modifier.align(Alignment.CenterEnd).padding(end = 6.dp).alpha((-dx / trigger).coerceIn(0f, 1f)).testTag("swipe_time"))
         Column(Modifier.offset { IntOffset(dx.roundToInt(), 0) }.align(if (mine) Alignment.CenterEnd else Alignment.CenterStart), horizontalAlignment = if (mine) Alignment.End else Alignment.Start) {
-            Column(Modifier.widthIn(max = maxW).shadow(if (C.dark) 0.dp else 0.5.dp, shape).clip(shape).background(bg)
-                .combinedClickable(onClick = {}, onLongClick = onLong, role = Role.Button).padding(start = 10.dp, end = 10.dp, top = 6.dp, bottom = 5.dp).testTag(if (mine) "bubble_mine" else "bubble_theirs")) {
+            val says = bubbleSays(msg, mine)
+            if (big > 0) {
+                // 1–3 emoji: large, without a bubble
+                Column(Modifier.combinedClickable(onClick = {}, onLongClick = onLong, onDoubleClick = onDouble, role = Role.Button).semantics { contentDescription = says }.padding(horizontal = 6.dp).testTag("emoji_big"), horizontalAlignment = if (mine) Alignment.End else Alignment.Start) {
+                    if (group && !mine && first) Text(msg.from, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold), color = ChatLook.nameColor(msg.from), maxLines = 1, modifier = Modifier.testTag("sender"))
+                    Text(msg.text.trim(), fontSize = when (big) { 1 -> 48.sp; 2 -> 40.sp; else -> 34.sp }, lineHeight = when (big) { 1 -> 56.sp; 2 -> 48.sp; else -> 42.sp })
+                    Row(Modifier.clip(RoundedCornerShape(8.dp)).background(if (C.dark) Color(0x66000000) else Color(0xCCFFFFFF)).padding(horizontal = 6.dp, vertical = 1.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Text(Dates.time(Instant.ofEpochMilli(msg.at)), style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp), color = C.muted, maxLines = 1, softWrap = false)
+                        if (mine) { Spacer(Modifier.width(3.dp)); Ticks(msg.status) }
+                    }
+                }
+            } else Column(Modifier.widthIn(max = maxW + TAIL).shadow(if (C.dark) 0.dp else 0.5.dp, shape).clip(shape).background(bg)
+                .combinedClickable(onClick = {}, onLongClick = onLong, onDoubleClick = onDouble, role = Role.Button).semantics { contentDescription = says }
+                .padding(start = if (mine) 10.dp else 10.dp + TAIL, end = if (mine) 10.dp + TAIL else 10.dp, top = 6.dp, bottom = 5.dp).testTag(if (mine) "bubble_mine" else "bubble_theirs")) {
                 if (group && !mine && first) Text(msg.from, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold), color = ChatLook.nameColor(msg.from), maxLines = 1, overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.padding(bottom = 2.dp).testTag("sender"))
                 if (msg.fwd && !msg.deleted) Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 2.dp)) {
@@ -283,6 +376,7 @@ private fun MsgLine(m: AppModel, msg: Msg, row: ChatRow?, me: String, group: Boo
                 }
                 // time, edited, star and ticks, bottom right
                 Row(Modifier.align(Alignment.End).padding(top = 1.dp), verticalAlignment = Alignment.CenterVertically) {
+                    if (row?.pins?.any { it.id == msg.id } == true) { Icon(Ic.get("pin"), t("Pinned", "Imebandikwa"), tint = C.muted, modifier = Modifier.size(11.dp).testTag("pinned_mark")); Spacer(Modifier.width(3.dp)) }
                     if (msg.starred) { Icon(ChatIc.get("star"), t("Starred", "Ina nyota"), tint = C.muted, modifier = Modifier.size(11.dp)); Spacer(Modifier.width(3.dp)) }
                     if (msg.edited > 0 && !msg.deleted) Text(t("edited ", "imehaririwa "), style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, fontStyle = FontStyle.Italic), color = C.muted, modifier = Modifier.testTag("edited"))
                     Text(Dates.time(Instant.ofEpochMilli(msg.at)), style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, fontWeight = FontWeight.Medium), color = C.muted, maxLines = 1, softWrap = false)
@@ -290,46 +384,52 @@ private fun MsgLine(m: AppModel, msg: Msg, row: ChatRow?, me: String, group: Boo
                 }
                 if (msg.failed != null) Text(msg.failed, style = MaterialTheme.typography.labelSmall, color = C.bad, modifier = Modifier.padding(top = 2.dp))
             }
-            if (msg.reacts.isNotEmpty()) Row(Modifier.padding(top = 1.dp, start = 6.dp, end = 6.dp).offset(y = (-4).dp).clip(RoundedCornerShape(99.dp)).background(C.card).border(1.dp, C.line, RoundedCornerShape(99.dp))
+            if (msg.reacts.isNotEmpty()) Row(Modifier.padding(top = 1.dp, start = 6.dp + if (mine) 0.dp else TAIL, end = 6.dp + if (mine) TAIL else 0.dp).offset(y = (-4).dp).pop(msg.reacts.hashCode(), motion).clip(RoundedCornerShape(99.dp)).background(C.card).border(1.dp, C.line, RoundedCornerShape(99.dp))
                 .clickable(role = Role.Button) { reacts() }.padding(horizontal = 7.dp, vertical = 2.dp).testTag("reacts_${msg.key}"), verticalAlignment = Alignment.CenterVertically) {
-                msg.reacts.entries.sortedByDescending { it.value.size }.take(4).forEach { (e, n) -> Text(e, fontSize = 13.sp) }
+                msg.reacts.entries.sortedByDescending { it.value.size }.take(4).forEach { (e, _) -> Text(e, fontSize = 13.sp) }
                 val total = msg.reacts.values.sumOf { it.size }
                 if (total > 1) Text(" $total", style = MaterialTheme.typography.labelSmall, color = C.muted)
             }
+            if (seen.isNotEmpty()) SeenBy(seen, Modifier.padding(top = 3.dp, end = if (mine) TAIL else 0.dp, start = if (mine) 0.dp else TAIL + 4.dp))
         }
     }
 }
 
-/** A message the app wrote (repair reported, assigned, step changed, fixed; an SMS report; a visit "Not working"). */
+/** A line the app wrote: an icon per kind and a short sentence with the time ("Meril fixed the pump · 10:42"). */
 @Composable
-private fun SysLine(m: AppModel, msg: Msg, openProject: (String, String) -> Unit) {
+private fun SysLine(m: AppModel, msg: Msg, fresh: Boolean, motion: Boolean, openProject: (String, String) -> Unit) {
     val s = msg.sys
-    val (icon, hue) = when (s?.type) { "repair", "notworking" -> "wrench" to "amber"; "fixed" -> "okc" to "green"; "assigned" -> "cal" to "blue"; "sms" -> "phone" to "teal"; "step" -> "clip" to "slate"; else -> "info" to "slate" }
-    // the server's line is English: in Kiswahili (or when it has none) the app builds its own from sys
-    val text = if (org.rafikioutreach.pin.Lang.sw || msg.text.isBlank()) sysText(s) else msg.text
+    val (icon, hue) = when (s?.type) {
+        "repair" -> "wrench" to "amber"; "notworking" -> "alert" to "coral"; "fixed" -> "okc" to "green"; "assigned" -> "cal" to "blue"; "sms" -> "phone" to "teal"; "step" -> "clip" to "slate"
+        "pinned" -> "pin" to "blue"; "created", "added", "joined" -> "people" to "green"; "removed", "left" -> "people" to "slate"; else -> "info" to "slate"
+    }
+    // the server's line is English: in Kiswahili (or when it has none) the app builds its own short one from sys
+    val text = if (org.rafikioutreach.pin.Lang.sw || msg.text.isBlank() || s?.type in setOf("fixed", "repair", "pinned", "notworking", "sms", "assigned")) sysText(s) else msg.text
     val hu = C.hue(hue)
-    Box(Modifier.fillMaxWidth().padding(vertical = 6.dp), contentAlignment = Alignment.Center) {
-        Row(Modifier.widthIn(max = 320.dp).clip(RoundedCornerShape(14.dp)).background(if (C.dark) Color(0xFF1E2A36) else Color(0xF5FFFFFF)).border(1.dp, hu.bg, RoundedCornerShape(14.dp))
-            .then(if (!s?.project.isNullOrBlank()) Modifier.clickable(role = Role.Button) { openProject(s!!.project, "pin") } else Modifier).padding(horizontal = 12.dp, vertical = 8.dp).testTag("sys_${msg.key}"),
+    Box(Modifier.fillMaxWidth().settleIn(fresh, motion).padding(vertical = 6.dp), contentAlignment = Alignment.Center) {
+        Row(Modifier.widthIn(max = 330.dp).clip(RoundedCornerShape(14.dp)).background(if (C.dark) Color(0xFF1E2A36) else Color(0xF5FFFFFF)).border(1.dp, hu.bg, RoundedCornerShape(14.dp))
+            .then(if (!s?.project.isNullOrBlank()) Modifier.clickable(role = Role.Button) { openProject(s!!.project, "pin") } else if (s?.type == "pinned" && s.repair.isNotBlank()) Modifier else Modifier)
+            .semantics(mergeDescendants = true) {}.padding(horizontal = 10.dp, vertical = 6.dp).testTag("sys_${msg.key}"),
             verticalAlignment = Alignment.CenterVertically) {
-            Icon(Ic.get(icon), null, tint = hu.fg, modifier = Modifier.size(16.dp)); Spacer(Modifier.width(8.dp))
-            Column {
-                Text(text, style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold), color = C.ink)
-                Text(Dates.time(Instant.ofEpochMilli(msg.at)), style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp), color = C.muted)
-            }
+            Box(Modifier.size(22.dp).clip(CircleShape).background(hu.bg), contentAlignment = Alignment.Center) { Icon(Ic.get(icon), null, tint = hu.fg, modifier = Modifier.size(13.dp)) }
+            Spacer(Modifier.width(8.dp))
+            Text(text + " · " + Dates.time(Instant.ofEpochMilli(msg.at)), style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold), color = C.ink, modifier = Modifier.testTag("sys_text"))
         }
     }
 }
 
+/** A system line's short words: "Meril fixed the pump", "Morgan pinned a message". */
 internal fun sysText(s: org.rafikioutreach.pin.data.SysNote?): String {
     val by = s?.by.orEmpty()
+    val who = by.substringBefore(' ')
     return when (s?.type) {
-        "repair" -> t("Repair reported", "Matengenezo yameripotiwa") + if (by.isNotBlank()) t(" by $by", " na $by") else ""
-        "notworking" -> t("A visit reported “Not working”", "Ziara iliripoti “Haifanyi kazi”") + if (by.isNotBlank()) " · $by" else ""
-        "assigned" -> t("Repair assigned", "Matengenezo yamegawiwa") + (s.to.ifBlank { by }).let { if (it.isNotBlank()) t(" to $it", " kwa $it") else "" }
+        "repair" -> if (who.isNotBlank()) t("$who reported a repair", "$who ameripoti matengenezo") else t("Repair reported", "Matengenezo yameripotiwa")
+        "notworking" -> t("A visit found it not working", "Ziara imekuta haifanyi kazi") + if (who.isNotBlank()) " · $who" else ""
+        "assigned" -> (s.to.ifBlank { by }).substringBefore(' ').let { to -> if (to.isNotBlank()) t("Repair assigned to $to", "Matengenezo amepewa $to") else t("Repair assigned", "Matengenezo yamegawiwa") }
         "step" -> t("Repair step: ", "Hatua ya matengenezo: ") + s.step
-        "fixed" -> t("Fixed ✓", "Imerekebishwa ✓") + if (by.isNotBlank()) " · $by" else ""
-        "sms" -> t("Community report arrived", "Ripoti ya jamii imefika")
+        "fixed" -> if (who.isNotBlank()) t("$who fixed the pump", "$who ametengeneza pampu") else t("Pump fixed", "Pampu imetengenezwa")
+        "sms" -> t("Community report", "Ripoti ya jamii")
+        "pinned" -> t("${who.ifBlank { by }} pinned a message", "${who.ifBlank { by }} amebandika ujumbe")
         "created" -> t("$by created the group", "$by ameunda kikundi")
         "added" -> t("$by added ${s.who.joinToString(", ")}", "$by amemwongeza ${s.who.joinToString(", ")}")
         "removed" -> t("$by removed ${s.who.joinToString(", ")}", "$by amemwondoa ${s.who.joinToString(", ")}")
@@ -355,11 +455,11 @@ internal fun QuoteBox(q: org.rafikioutreach.pin.data.Quote, me: String, modifier
 private val URL_RE = Regex("https?://[^\\s<>\"]+")
 private val PROJECT_RE = Regex("pin\\.rafikioutreach\\.org/pin#p[/=]([A-Za-z0-9_-]+)")
 
-/** The text with links (tappable) and @mentions (bold, coloured). */
+/** The text with links (tappable) and @mentions (bold, coloured; mine also marked behind). */
 @Composable
-private fun richText(text: String, names: List<String>, onProject: (String) -> Unit): AnnotatedString {
-    val link = C.blue; val mention = C.blue
-    return remember(text, names, link) {
+private fun richText(text: String, names: List<String>, me: String, onProject: (String) -> Unit): AnnotatedString {
+    val link = C.blue; val mention = C.blue; val mark = C.blue.copy(alpha = 0.16f)
+    return remember(text, names, link, me) {
         data class Span(val s: Int, val e: Int, val kind: String, val v: String)
         val spans = mutableListOf<Span>()
         URL_RE.findAll(text).forEach { spans += Span(it.range.first, it.range.last + 1, "url", it.value.trimEnd('.', ',', ')', '!', '?')) }
@@ -380,7 +480,7 @@ private fun richText(text: String, names: List<String>, onProject: (String) -> U
                         if (pid != null) withLink(LinkAnnotation.Clickable("p:$pid", style) { onProject(pid) }) { append(shown) }
                         else withLink(LinkAnnotation.Url(sp.v, style)) { append(shown) }
                     }
-                    else -> withStyle(SpanStyle(color = mention, fontWeight = FontWeight.Bold)) { append(shown) }
+                    else -> withStyle(SpanStyle(color = mention, fontWeight = FontWeight.Bold, background = if (sp.v.equals(me, true)) mark else Color.Unspecified)) { append(shown) }
                 }
                 at = sp.e
             }
@@ -389,23 +489,25 @@ private fun richText(text: String, names: List<String>, onProject: (String) -> U
     }
 }
 
-/** What's in a bubble: photos, a voice note, a location, a contact, a document, then the text and a link preview. */
+/** What's in a bubble: photos, a voice note, a location, a contact, a document, a trip, then the text and a link preview. */
 @Composable
 private fun MsgBody(m: AppModel, msg: Msg, mine: Boolean, row: ChatRow?, maxW: androidx.compose.ui.unit.Dp, openMedia: (ChatMedia) -> Unit, openProject: (String, String) -> Unit) {
-    val ctx = LocalContext.current
     val visual = msg.media.filter { it.type == "photo" || it.type == "video" }
     if (visual.isNotEmpty()) Box(Modifier.padding(bottom = if (msg.text.isNotBlank()) 4.dp else 0.dp)) { PhotoGrid(m, visual, maxW - 20.dp) { i -> openMedia(visual[i]) } }
     msg.media.firstOrNull { it.type == "voice" }?.let { VoiceBubble(m, msg, it, mine) }
     msg.media.filter { it.type == "doc" }.forEach { DocCard(m, it) }
     if (msg.kind == "location" || msg.kind == "live") msg.loc?.let { LocationCard(m, msg, mine) } ?: msg.live?.let { LocationCard(m, msg, mine) }
     msg.contact?.let { ContactCard(m, it) }
+    if (msg.kind == "trip") msg.trip?.let { TripCardView(it, minOf(maxW - 20.dp, 260.dp)) }
     if (msg.text.isNotBlank() && msg.kind != "contact") {
-        Text(richText(msg.text, row?.members.orEmpty()) { openProject(it, "pin") }, style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.5.sp, lineHeight = 21.sp), color = C.text, modifier = Modifier.testTag("msg_text"))
+        // @Name is highlighted when the name is in the message's mentions (older messages: any member)
+        val names = msg.mentions.ifEmpty { row?.members.orEmpty() }
+        Text(richText(msg.text, names, m.chat.me) { openProject(it, "pin") }, style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.5.sp, lineHeight = 21.sp), color = C.text, modifier = Modifier.testTag("msg_text"))
         URL_RE.find(msg.text)?.value?.trimEnd('.', ',', ')', '!', '?')?.let { LinkCard(m, it, openProject) }
     }
 }
 
-/** A website's preview, or a project link as a small project card. */
+/** A website's preview (a large picture when it has one), or a project link as a rich card: photo, status, "Report a visit". */
 @Composable
 private fun LinkCard(m: AppModel, url: String, openProject: (String, String) -> Unit) {
     val ctx = LocalContext.current
@@ -413,16 +515,26 @@ private fun LinkCard(m: AppModel, url: String, openProject: (String, String) -> 
     val shape = RoundedCornerShape(12.dp)
     val box = Modifier.padding(top = 6.dp).fillMaxWidth().clip(shape).background(if (C.dark) Color(0x22FFFFFF) else Color(0x0F000000))
     if (pid != null) {
-        val p = m.snap.collectAsState().value?.projects?.firstOrNull { it.id == pid }
-        Row(box.clickable(role = Role.Button) { openProject(pid, "pin") }.padding(10.dp).testTag("project_card"), verticalAlignment = Alignment.CenterVertically) {
-            IconTile("drop", C.hue("blue").fg, C.hue("blue").bg, 40.dp); Spacer(Modifier.width(10.dp))
-            Column(Modifier.weight(1f)) {
-                Text(p?.title ?: t("Project $pid", "Mradi $pid"), style = MaterialTheme.typography.titleSmall, color = C.ink, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                Text(p?.let { listOf(it.area, it.country).filter { s -> s.isNotBlank() }.joinToString(", ") }.orEmpty().ifBlank { t("Open the project", "Fungua mradi") }, style = MaterialTheme.typography.bodySmall, color = C.muted, maxLines = 1)
-                val rep = p?.let { m.snap.collectAsState().value?.repairs?.get(it.id) }
-                if (rep != null) Text(if (rep.state == "notworking") t("Not working", "Haifanyi kazi") else t("Needs repair", "Inahitaji matengenezo"), style = MaterialTheme.typography.labelSmall, color = if (rep.state == "notworking") C.bad else C.warn)
+        val snap = m.snap.collectAsState().value
+        val p = snap?.projects?.firstOrNull { it.id == pid }
+        val rep = p?.let { snap.repairs[it.id] }
+        Column(box.clickable(role = Role.Button) { openProject(pid, "pin") }.testTag("project_card")) {
+            p?.photo?.let { ph -> NetImage(m.api.photoUrl(ph, 480), Modifier.fillMaxWidth().aspectRatio(16f / 9f).background(C.hue("blue").bg).testTag("project_photo")) { Icon(Ic.get("drop"), null, tint = C.hue("blue").fg, modifier = Modifier.size(30.dp)) } }
+            Column(Modifier.padding(10.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (p?.photo == null) { IconTile("drop", C.hue("blue").fg, C.hue("blue").bg, 36.dp); Spacer(Modifier.width(10.dp)) }
+                    Column(Modifier.weight(1f)) {
+                        Text(p?.title ?: t("Project $pid", "Mradi $pid"), style = MaterialTheme.typography.titleSmall, color = C.ink, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                        Text(p?.let { listOf(it.area, it.country).filter { s -> s.isNotBlank() }.joinToString(", ") }.orEmpty().ifBlank { t("Open the project", "Fungua mradi") }, style = MaterialTheme.typography.bodySmall, color = C.muted, maxLines = 1)
+                    }
+                }
+                // the status: needs repair, not working, or working
+                val (st, hue) = when { rep?.state == "notworking" -> t("Not working", "Haifanyi kazi") to "coral"; rep != null -> t("Needs repair", "Inahitaji matengenezo") to "amber"; p != null -> t("Working", "Inafanya kazi") to "green"; else -> "" to "slate" }
+                if (st.isNotBlank()) Text(st, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold), color = C.hue(hue).fg, maxLines = 1, softWrap = false,
+                    modifier = Modifier.padding(top = 6.dp).clip(RoundedCornerShape(99.dp)).background(C.hue(hue).bg).padding(horizontal = 8.dp, vertical = 3.dp).testTag("project_status"))
+                Text(t("Report a visit", "Ripoti ziara"), style = MaterialTheme.typography.labelLarge, color = Color.White, textAlign = TextAlign.Center, maxLines = 1, softWrap = false,
+                    modifier = Modifier.padding(top = 8.dp).fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(C.blue).clickable(role = Role.Button) { openProject(pid, "visit") }.padding(vertical = 9.dp).testTag("project_visit"))
             }
-            Icon(Ic.get("chev"), null, tint = C.muted, modifier = Modifier.size(18.dp))
         }
         return
     }
@@ -430,11 +542,13 @@ private fun LinkCard(m: AppModel, url: String, openProject: (String, String) -> 
     LaunchedEffect(url) { data = m.chat.preview(url) }
     val d = data ?: return
     val title = d.optString("title").takeIf { it.isNotBlank() && it != "null" } ?: return
-    Column(box.clickable(role = Role.Button) { runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) } }.padding(10.dp).testTag("link_card")) {
-        d.optString("image").takeIf { it.startsWith("http") }?.let { NetImage(it, Modifier.fillMaxWidth().height(120.dp).clip(RoundedCornerShape(8.dp)).padding(bottom = 6.dp)) {} }
-        Text(d.optString("site").takeIf { it.isNotBlank() && it != "null" } ?: Uri.parse(url).host.orEmpty(), style = MaterialTheme.typography.labelSmall, color = C.muted, maxLines = 1)
-        Text(title, style = MaterialTheme.typography.titleSmall, color = C.ink, maxLines = 2, overflow = TextOverflow.Ellipsis)
-        d.optString("description").takeIf { it.isNotBlank() && it != "null" }?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = C.muted, maxLines = 3, overflow = TextOverflow.Ellipsis) }
+    Column(box.clickable(role = Role.Button) { runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) } }.testTag("link_card")) {
+        d.optString("image").takeIf { it.startsWith("http") }?.let { NetImage(it, Modifier.fillMaxWidth().aspectRatio(1.91f).background(C.tint).testTag("link_image")) {} }
+        Column(Modifier.padding(10.dp)) {
+            Text(d.optString("site").takeIf { it.isNotBlank() && it != "null" } ?: Uri.parse(url).host.orEmpty(), style = MaterialTheme.typography.labelSmall, color = C.muted, maxLines = 1)
+            Text(title, style = MaterialTheme.typography.titleSmall, color = C.ink, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            d.optString("description").takeIf { it.isNotBlank() && it != "null" }?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = C.muted, maxLines = 3, overflow = TextOverflow.Ellipsis) }
+        }
     }
 }
 

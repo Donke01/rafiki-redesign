@@ -37,6 +37,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -55,8 +56,9 @@ import org.rafikioutreach.pin.t
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun ChatListScreen(m: AppModel, open: (String) -> Unit, newChat: () -> Unit, archived: Boolean = false, openArchived: () -> Unit = {}, openStarred: () -> Unit = {}) {
+fun ChatListScreen(m: AppModel, open: (String) -> Unit, newChat: () -> Unit, archived: Boolean = false, openArchived: () -> Unit = {}, openStarred: () -> Unit = {}, openSettings: () -> Unit = {}, back: () -> Unit = {}) {
     val hub = m.chat
+    ChatDrafts.init(androidx.compose.ui.platform.LocalContext.current)
     LaunchedEffect(Unit) { hub.start() }
     val rows by hub.rows.collectAsState()
     val presence by hub.presence.collectAsState()
@@ -89,13 +91,14 @@ fun ChatListScreen(m: AppModel, open: (String) -> Unit, newChat: () -> Unit, arc
                             DropdownMenuItem({ Text(t("New group", "Kikundi kipya")) }, { menu = false; newChat() }, leadingIcon = { Icon(ChatIc.get("group"), null, tint = C.blue) }, modifier = Modifier.testTag("menu_newgroup"))
                             DropdownMenuItem({ Text(t("Starred messages", "Ujumbe wenye nyota")) }, { menu = false; openStarred() }, leadingIcon = { Icon(ChatIc.get("star"), null, tint = C.blue) }, modifier = Modifier.testTag("menu_starred"))
                             DropdownMenuItem({ Text(t("Archived", "Zilizohifadhiwa")) }, { menu = false; openArchived() }, leadingIcon = { Icon(ChatIc.get("archive"), null, tint = C.blue) }, modifier = Modifier.testTag("menu_archived"))
+                            DropdownMenuItem({ Text(t("Chat settings", "Mipangilio ya gumzo")) }, { menu = false; openSettings() }, leadingIcon = { Icon(Ic.get("cog"), null, tint = C.blue) }, modifier = Modifier.testTag("menu_settings"))
                         }
                     }
                 }
             }
             item(key = "search") { ChatSearchField(q, { q = it; searching = true }) }
             if (off) { item(key = "off") { ChatOff(Modifier.padding(horizontal = 16.dp, vertical = 8.dp), m.chat.offNeed) }; return@LazyColumn }
-            if (q.isNotBlank()) { chatSearch(this, m, q, rows, open); return@LazyColumn }
+            if (q.isNotBlank()) { chatSearch(this, m, q, rows, open) { q = ""; searching = false }; return@LazyColumn }
             if (!archived && nArchived > 0) item(key = "arch") {
                 Row(Modifier.fillMaxWidth().clickable(role = Role.Button) { openArchived() }.heightIn(min = 52.dp).padding(horizontal = 20.dp).testTag("chat_archived_row"), verticalAlignment = Alignment.CenterVertically) {
                     Box(Modifier.width(52.dp), contentAlignment = Alignment.Center) { Icon(ChatIc.get("archive"), null, tint = C.muted, modifier = Modifier.size(22.dp)) }
@@ -109,7 +112,8 @@ fun ChatListScreen(m: AppModel, open: (String) -> Unit, newChat: () -> Unit, arc
             if (pinned.isNotEmpty() && list.size > pinned.size) item(key = "la") { ChatLabel(t("ALL CHATS", "MAGUMZO YOTE"), "chat_all_label") }
             items(list.filter { !it.pinned }, key = { it.id }) { r -> ChatRowSwipe(m, r, me, presence, typing, undo, { open(r.id) }) { hp.long(); held = r } }
             if (list.isEmpty() && ready) item(key = "empty") {
-                EmptyDrop(if (archived) t("No archived chats.", "Hakuna magumzo yaliyohifadhiwa.") else t("No chats yet. Start one with the button below, or from anyone’s contact.", "Bado hakuna magumzo. Anzisha moja kwa kitufe kilicho chini, au kutoka kwa mawasiliano ya mtu yeyote."), Modifier.padding(horizontal = 24.dp))
+                if (archived) ChatEmpty(t("No archived chats. Swipe a chat left to tidy it away here.", "Hakuna magumzo yaliyohifadhiwa. Telezesha gumzo kushoto kuliweka hapa."), "chat_none_archived", t("Back to chats", "Rudi kwenye magumzo"), onAction = back)
+                else ChatEmpty(t("No chats yet. Say hello to the team 👋", "Bado hakuna magumzo. Isalimie timu 👋"), "chat_none", t("New chat", "Gumzo jipya"), onAction = newChat)
             }
             if (!ready) item(key = "loading") { Text(t("Loading…", "Inapakia…"), color = C.muted, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(20.dp)) }
         }
@@ -143,16 +147,16 @@ internal fun ChatSearchField(q: String, set: (String) -> Unit, hint: String = t(
 }
 
 /** Search: chats by title or member, and messages (the server's search; what's on the phone without signal). */
-private fun chatSearch(scope: androidx.compose.foundation.lazy.LazyListScope, m: AppModel, q: String, rows: List<ChatRow>, open: (String) -> Unit) {
+private fun chatSearch(scope: androidx.compose.foundation.lazy.LazyListScope, m: AppModel, q: String, rows: List<ChatRow>, open: (String) -> Unit, clear: () -> Unit) {
     val words = q.trim().lowercase()
     val chats = rows.filter { r -> r.title.lowercase().contains(words) || r.members.any { it.lowercase().contains(words) } }
     scope.item(key = "s_chats") { if (chats.isNotEmpty()) ChatLabel(t("CHATS", "MAGUMZO"), "search_chats_label") }
     scope.items(chats, key = { "s" + it.id }) { r -> ChatRowPlain(m, r, m.chat.me, m.chat.presence.collectAsState().value, emptyMap(), { open(r.id) }, null) }
-    scope.item(key = "s_msgs") { SearchHits(m, q, rows, open) }
+    scope.item(key = "s_msgs") { SearchHits(m, q, rows, open, chats.isEmpty(), clear) }
 }
 
 @Composable
-private fun SearchHits(m: AppModel, q: String, rows: List<ChatRow>, open: (String) -> Unit) {
+private fun SearchHits(m: AppModel, q: String, rows: List<ChatRow>, open: (String) -> Unit, noChats: Boolean = false, clear: () -> Unit = {}) {
     var hits by remember { mutableStateOf<List<ChatHub.Hit>?>(null) }
     LaunchedEffect(q) {
         delay(300)
@@ -174,7 +178,8 @@ private fun SearchHits(m: AppModel, q: String, rows: List<ChatRow>, open: (Strin
                 }
             }
         }
-        if (h.isEmpty()) Text(t("No messages match “$q”.", "Hakuna ujumbe unaolingana na “$q”."), style = MaterialTheme.typography.bodyMedium, color = C.muted, modifier = Modifier.padding(20.dp).testTag("search_none"))
+        if (h.isEmpty() && noChats) ChatEmpty(t("Nothing matches “$q”. Try another word.", "Hakuna kinacholingana na “$q”. Jaribu neno lingine."), "search_none", t("Clear search", "Futa utafutaji"), onAction = clear)
+        else if (h.isEmpty()) Text(t("No messages match “$q”.", "Hakuna ujumbe unaolingana na “$q”."), style = MaterialTheme.typography.bodyMedium, color = C.muted, modifier = Modifier.padding(20.dp).testTag("search_none_msgs"))
     }
 }
 
@@ -220,14 +225,23 @@ internal fun ChatRowPlain(m: AppModel, r: ChatRow, me: String, presence: Map<Str
         Column(Modifier.weight(1f).padding(start = 12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Row(Modifier.weight(1f).padding(end = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Text(r.title.ifBlank { other }, style = MaterialTheme.typography.titleSmall.copy(fontSize = 15.sp), color = C.ink, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
+                    Text(chatTitle(r, me), style = MaterialTheme.typography.titleSmall.copy(fontSize = 15.sp), color = C.ink, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
                     if (r.kind == "project") { Spacer(Modifier.width(6.dp)); Icon(Ic.get("drop"), null, tint = C.hue("blue").fg, modifier = Modifier.size(14.dp)) }
                 }
                 Text(chatWhen(r.last?.at ?: 0), style = MaterialTheme.typography.labelSmall.copy(fontWeight = if (r.unread > 0) FontWeight.ExtraBold else FontWeight.SemiBold),
                     color = if (r.unread > 0 && !muted) ChatLook.online else C.muted, maxLines = 1, softWrap = false, modifier = Modifier.testTag("rowtime"))
             }
             Row(Modifier.padding(top = 3.dp), verticalAlignment = Alignment.CenterVertically) {
-                if (typed != null) Text(typed, style = MaterialTheme.typography.bodySmall.copy(fontStyle = FontStyle.Italic, fontWeight = FontWeight.SemiBold), color = ChatLook.online, maxLines = 1, modifier = Modifier.weight(1f).testTag("row_typing"))
+                // the half-written message, while it waits in the box (not for the chat that's open)
+                val draft = remember(ChatDrafts.version, r.id) { ChatDrafts.peek(r.id) }
+                if (typed != null) Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
+                    if (!(typed.contains("record") || typed.contains("rekodi"))) TypingDots(ChatLook.online, Modifier.padding(end = 6.dp), 4.dp)
+                    Text(typed, style = MaterialTheme.typography.bodySmall.copy(fontStyle = FontStyle.Italic, fontWeight = FontWeight.SemiBold), color = ChatLook.online, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.testTag("row_typing"))
+                }
+                else if (draft.isNotBlank() && m.chat.openChat != r.id) Text(androidx.compose.ui.text.buildAnnotatedString {
+                    withStyle(androidx.compose.ui.text.SpanStyle(color = ChatLook.online, fontWeight = FontWeight.Bold)) { append(t("Draft: ", "Rasimu: ")) }
+                    append(draft.replace('\n', ' '))
+                }, style = MaterialTheme.typography.bodySmall, color = C.muted, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f).testTag("row_draft"))
                 else {
                     val l = r.last
                     val who = when { l == null -> ""; l.from.equals(me, true) -> t("You: ", "Wewe: "); r.isGroup && l.from.isNotBlank() && l.kind != "sys" -> l.from.substringBefore(' ') + ": "; else -> "" }
@@ -252,7 +266,7 @@ private fun ChatRowSheet(m: AppModel, r: ChatRow, close: () -> Unit, undo: UndoS
     TeamSubSheet("chatrow_sheet", close) { hide ->
         Row(verticalAlignment = Alignment.CenterVertically) {
             ChatAvatar(r, m.chat.me, 44.dp, m = m); Spacer(Modifier.width(12.dp))
-            Text(r.title.ifBlank { r.other(m.chat.me) }, style = MaterialTheme.typography.titleLarge, color = C.ink, maxLines = 2)
+            Text(chatTitle(r, m.chat.me), style = MaterialTheme.typography.titleLarge, color = C.ink, maxLines = 2)
         }
         Spacer(Modifier.height(10.dp))
         SheetRow("cr_pin", "pin", if (r.pinned) t("Unpin", "Ondoa kibandiko") else t("Pin to the top", "Bandika juu")) { hide { m.chat.pin(r.id, !r.pinned) } }
@@ -295,7 +309,7 @@ internal fun SheetRow(tag: String, icon: String, label: String, red: Boolean = f
 
 /** Messages starred in any chat; a tap opens the chat at that message. */
 @Composable
-fun StarredScreen(m: AppModel, open: (String) -> Unit) {
+fun StarredScreen(m: AppModel, back: () -> Unit = {}, open: (String) -> Unit) {
     var list by remember { mutableStateOf<List<org.rafikioutreach.pin.data.Msg>?>(null) }
     val tick by m.chat.tick.collectAsState()
     LaunchedEffect(tick) { list = m.chat.starred() ?: emptyList() }
@@ -305,7 +319,7 @@ fun StarredScreen(m: AppModel, open: (String) -> Unit) {
         val l = list
         when {
             l == null -> item { Text(t("Loading…", "Inapakia…"), color = C.muted) }
-            l.isEmpty() -> item { EmptyDrop(t("No starred messages. Hold a message and tap Star to keep it here.", "Hakuna ujumbe wenye nyota. Shikilia ujumbe na uguse Nyota kuuweka hapa.")) }
+            l.isEmpty() -> item { ChatEmpty(t("No starred messages. Hold a message and tap Star to keep it here.", "Hakuna ujumbe wenye nyota. Shikilia ujumbe na uguse Nyota kuuweka hapa."), "starred_none", t("Back to chats", "Rudi kwenye magumzo"), onAction = back) }
             else -> items(l, key = { it.id }) { msg ->
                 Card(Modifier.clickable(role = Role.Button) { ChatNav.focus = msg.id; open(msg.c) }.testTag("starred_${msg.id}"), pad = 14.dp) {
                     Row { Text((if (msg.from.equals(m.chat.me, true)) t("You", "Wewe") else msg.from) + " · " + (rows.firstOrNull { it.id == msg.c }?.title ?: ""), style = MaterialTheme.typography.labelMedium, color = C.muted, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))

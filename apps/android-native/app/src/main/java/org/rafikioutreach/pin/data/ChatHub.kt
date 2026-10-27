@@ -62,6 +62,16 @@ class ChatHub(private val ctx: Context, val api: Api, private val myName: () -> 
     /** Bumped when something outside a chat's message list changed (stars, a message removed). */
     val tick = MutableStateFlow(0)
 
+    // --- chatpa: my chat settings (synced), push, scroll memory -----------------------------------------------------
+    /** My chat settings: quick replies, Do-Not-Disturb, the double-tap reaction (synced); data saver, sounds (this phone). */
+    val settings = ChatSettings(ctx)
+    /** Bumped when [settings] change (here or from the server), so screens redraw. */
+    val settingsTick = MutableStateFlow(0)
+    /** The server can send push (list answer `push`). */
+    @Volatile var pushReady = false
+    /** Where each chat was scrolled to (index, offset), kept while the app runs. */
+    val scrollAt = mutableMapOf<String, Pair<Int, Int>>()
+
     private val threads = mutableMapOf<String, MutableStateFlow<List<Msg>>>()
     private val more = mutableMapOf<String, Boolean>()
     /** The chat on screen right now (its messages are read as they arrive). */
@@ -89,11 +99,11 @@ class ChatHub(private val ctx: Context, val api: Api, private val myName: () -> 
         resume()
     }
     /** The app came to the front: connect. */
-    fun resume() { front = true; closing?.cancel(); closing = null; connect(); openChat?.let { markSeen(it) } }
+    fun resume() { front = true; ChatPush.inFront = true; closing?.cancel(); closing = null; connect(); openChat?.let { markSeen(it) } }
     private var closing: Job? = null
     /** The app went to the background: the socket stays a minute (a message then is a notification at once), then
      *  closes and the background check takes over. */
-    fun pause() { front = false; closing?.cancel(); closing = scope.launch { delay(60_000); if (!front) close() } }
+    fun pause() { front = false; ChatPush.inFront = false; closing?.cancel(); closing = scope.launch { delay(60_000); if (!front) close() } }
     private fun close() { connJob?.cancel(); connJob = null; runCatching { conn?.close() }; conn = null; _online.value = false }
 
     /** Signed out: forget the chats kept on this phone (messages waiting to send stay, like the visits outbox). */
@@ -113,6 +123,8 @@ class ChatHub(private val ctx: Context, val api: Api, private val myName: () -> 
         // a server that answered something else (no "chats"): nothing to show yet
         val fresh = if (a == null) emptyList() else (0 until a.length()).mapNotNull { runCatching { ChatRow.from(a.getJSONObject(it)) }.getOrNull() }.filter { it.id.isNotBlank() }
         r.json.optString("me").takeIf { it.isNotBlank() && it != "null" }?.let { _me = it }
+        r.json.optJSONObject("prefs")?.let { settings.fromServer(it); settingsTick.value++ }
+        if (r.json.has("push")) pushReady = r.json.optBoolean("push")
         val gone = r.json.optJSONArray("gone")?.let { g -> (0 until g.length()).map { g.optString(it) } }.orEmpty().toSet()
         _rows.value = (if (full) fresh else merge(_rows.value, fresh)).filter { it.id !in gone }
         val p = ChatCache.presenceFrom(r.json.optJSONObject("presence"))
@@ -128,7 +140,8 @@ class ChatHub(private val ctx: Context, val api: Api, private val myName: () -> 
 
     private fun merge(old: List<ChatRow>, fresh: List<ChatRow>): List<ChatRow> {
         val byId = fresh.associateBy { it.id }
-        return old.map { byId[it.id] ?: it } + fresh.filter { f -> old.none { it.id == f.id } }
+        // a project's photo only comes with the full list (contract §1): keep the one we had
+        return old.map { o -> byId[o.id]?.let { n -> if (n.pphoto.isBlank() && o.pphoto.isNotBlank()) n.copy(pphoto = o.pphoto) else n } ?: o } + fresh.filter { f -> old.none { it.id == f.id } }
     }
     private fun save() = cache.saveList(_rows.value, _me, _presence.value)
     private fun recount() { _unread.value = _rows.value.filter { !it.muted(now()) }.sumOf { it.unread } }
@@ -136,7 +149,7 @@ class ChatHub(private val ctx: Context, val api: Api, private val myName: () -> 
     fun row(c: String): ChatRow? = _rows.value.firstOrNull { it.id == c }
 
     /** The list order: pinned first, then the newest message. */
-    fun sorted(rows: List<ChatRow>): List<ChatRow> = rows.sortedWith(compareByDescending<ChatRow> { it.pinned }.thenByDescending { it.last?.at ?: 0L })
+    fun sorted(rows: List<ChatRow>): List<ChatRow> = rows.sortedWith(compareByDescending<ChatRow> { it.announce }.thenByDescending { it.pinned }.thenByDescending { it.last?.at ?: 0L })
 
     // --- opening a chat -------------------------------------------------------------------------------------------
     /** A direct message with [with]: the one on the phone, or a new one from the server. */
@@ -165,7 +178,15 @@ class ChatHub(private val ctx: Context, val api: Api, private val myName: () -> 
         val waiting = outbox.forChat(c).map { it.asMsg(me) }.filter { w -> server.none { it.cid == w.cid && it.cid.isNotBlank() } }
         return (server + waiting).sortedWith(compareBy<Msg> { it.queued }.thenBy { it.at })
     }
-    private fun setThread(c: String, list: List<Msg>) { flowOf(c).value = list; cache.saveMsgs(c, list) }
+    private fun setThread(c: String, list: List<Msg>) { val l = unique(list); flowOf(c).value = l; cache.saveMsgs(c, l) }
+    /** One bubble per message: a waiting copy and the server's copy of the same message (same client id) never both
+     *  show, whatever order the outbox, the socket and a refresh arrive in (the server's copy wins). */
+    private fun unique(list: List<Msg>): List<Msg> {
+        if (list.map { it.key }.toSet().size == list.size) return list
+        val best = list.groupBy { it.key }.mapValues { (_, l) -> l.lastOrNull { !it.queued } ?: l.last() }
+        val done = HashSet<String>()
+        return list.mapNotNull { m -> if (done.add(m.key)) best[m.key] else null }
+    }
 
     /** The newest page from the server (on opening a chat, and after a reconnect). */
     suspend fun loadMsgs(c: String): Boolean {
@@ -221,7 +242,7 @@ class ChatHub(private val ctx: Context, val api: Api, private val myName: () -> 
     // --- sending ------------------------------------------------------------------------------------------------------
     /** Puts a message in the outbox (a clock in the chat), then sends it. Survives the app being closed. */
     fun send(c: String, kind: String, text: String = "", files: List<ChatMedia> = emptyList(), reply: Msg? = null, mentions: List<String> = emptyList(),
-             loc: LatLng? = null, liveMinutes: Int = 0, contact: String? = null, fwd: Boolean = false): String {
+             loc: LatLng? = null, liveMinutes: Int = 0, contact: String? = null, fwd: Boolean = false, trip: TripCard? = null): String {
         val cid = "a" + UUID.randomUUID().toString().replace("-", "").take(20)
         val body = JSONObject().put("kind", kind)
         if (text.isNotBlank()) body.put("text", text.trim())
@@ -231,11 +252,13 @@ class ChatHub(private val ctx: Context, val api: Api, private val myName: () -> 
         if (liveMinutes > 0) body.put("live", JSONObject().put("until", now() + liveMinutes * 60_000L))
         contact?.let { body.put("contact", JSONObject().put("name", it)) }
         if (fwd) body.put("fwd", true)
+        // a trip card: the server fills it from the trip itself (only the id counts); the rest draws the waiting bubble
+        trip?.let { body.put("trip", it.json()) }
         val item = ChatOutbox.Item(cid, c, body, files, now())
         outbox.add(item)
         val m = item.asMsg(me)
-        flowOf(c).value = flowOf(c).value + m
-        edit(c) { it.copy(last = ChatLast(cid, me, kind, if (kind == "contact") contact.orEmpty() else if (kind == "doc") files.firstOrNull()?.name.orEmpty() else text, m.at, files.firstOrNull()?.dur ?: 0.0), archived = false) }
+        flowOf(c).value = unique(flowOf(c).value + m)
+        edit(c) { it.copy(last = ChatLast(cid, me, kind, if (kind == "contact") contact.orEmpty() else if (kind == "doc") files.firstOrNull()?.name.orEmpty() else if (kind == "trip") trip?.title.orEmpty() else text, m.at, files.firstOrNull()?.dur ?: 0.0), archived = false, seen = emptyList()) }
         if (kind == "live" && loc != null) liveMine(cid, c, now() + liveMinutes * 60_000L)
         ChatSendWorker.enqueue(ctx)
         scope.launch { flush() }
@@ -246,6 +269,7 @@ class ChatHub(private val ctx: Context, val api: Api, private val myName: () -> 
     suspend fun flush() {
         if (outbox.count() == 0) return
         val res = outbox.flush(chat)
+        settings.count(res.uploaded)
         if (res.off) _off.value = true
         res.sent.forEach { (cid, m) ->
             val list = flowOf(m.c).value
@@ -311,7 +335,7 @@ class ChatHub(private val ctx: Context, val api: Api, private val myName: () -> 
             pinned = if (f.has("pinned")) f.optBoolean("pinned") else r.pinned,
             mutedUntil = if (f.has("muted")) ChatRow.mutedFrom(f.opt("muted")) else r.mutedUntil,
             archived = if (f.has("archived")) f.optBoolean("archived") else r.archived,
-            wallpaper = if (f.has("wallpaper")) f.optString("wallpaper") else r.wallpaper) }
+            wallpaper = if (f.has("wallpaper")) f.optString("wallpaper") else r.wallpaper, bubble = if (f.has("bubble")) f.optString("bubble") else r.bubble) }
         val r = chat.prefs(c, JSONObject(f.toString()))
         if (!r.ok) { _rows.value = _rows.value.map { if (it.id == c) before else it }; recount(); save(); return chatReason(r.reason) }
         return null
@@ -324,6 +348,42 @@ class ChatHub(private val ctx: Context, val api: Api, private val myName: () -> 
     /** The chat's sound for new messages (this phone only). */
     fun quiet(c: String) = sp.getBoolean("quiet_$c", false)
     fun setQuiet(c: String, on: Boolean) { sp.edit().putBoolean("quiet_$c", on).apply(); tick.value++ }
+
+    // --- chatpa: settings, pins, bubble colour, trips -------------------------------------------------------------------
+    /** Saves my synced settings ([keys]: "quick", "dnd", "doubleTap") on the server; they're already kept on the phone. */
+    fun saveSettings(vararg keys: String) {
+        settingsTick.value++
+        val all = settings.serverJson(); val body = JSONObject(); keys.forEach { k -> body.put(k, all.opt(k)) }
+        scope.launch { chat.myPrefs(body).takeIf { it.ok }?.json?.optJSONObject("prefs")?.let { settings.fromServer(it); settingsTick.value++ } }
+    }
+    /** May I pin in this chat? DMs: anyone; elsewhere chat admins (and Office admins). */
+    fun canPin(row: ChatRow?, officeAdmin: Boolean): Boolean = row != null && (row.kind == "dm" || row.admin(me) || officeAdmin)
+    /** Pin or unpin a message (a 4th pin replaces the oldest on the server). */
+    suspend fun pinMsg(m: Msg, on: Boolean): String? {
+        val r = chat.pin(m.c, m.id, on)
+        if (!r.ok) return chatReason(r.reason)
+        r.json.optJSONObject("chat")?.let { o -> val nr = ChatRow.from(o); if (nr.id.isNotBlank()) { _rows.value = merge(_rows.value, listOf(nr)); recount(); save() } }
+            ?: r.json.optJSONArray("pins")?.let { a -> edit(m.c) { it.copy(pins = PinNote.list(a)) } }
+            ?: edit(m.c) { row -> row.copy(pins = if (on) (listOf(PinNote(m.id, m.from, m.kind, m.preview().take(160), me, m.at, now())) + row.pins.filter { it.id != m.id }).take(3) else row.pins.filter { it.id != m.id }) }
+        return null
+    }
+    /** Pin from a sheet that closes at once: the work outlives it; a refusal shows as the chat's note. */
+    fun pinLater(m: Msg, on: Boolean) = scope.launch { pinMsg(m, on)?.let { note.value = it } }
+    fun bubble(c: String, token: String) = scope.launch { prefs(c, JSONObject().put("bubble", token)) }
+    /** A trip's card fresh from the server (contract §7), or null. */
+    suspend fun tripFresh(id: String): TripCard? = chat.trip(id).takeIf { it.ok }?.json?.optJSONObject("trip")?.let { TripCard.from(it) }
+    /** Shares a trip into a chat: its card from the trips code first (so the bubble shows it at once), then sent. */
+    suspend fun shareTrip(c: String, id: String): String? {
+        val r = chat.tripCard(id)
+        if (!r.ok && r.status != 0) return if (r.reason == "forbidden") t("This isn’t one of your trips.", "Hii si mojawapo ya safari zako.") else chatReason(r.reason)
+        val card = (r.json.optJSONObject("card") ?: r.json.optJSONObject("trip") ?: r.json).let { TripCard.from(it) }?.copy(id = id) ?: TripCard(id, "")
+        send(c, "trip", trip = card); return null
+    }
+    /** Every trip card in an open chat, re-read (it may have moved on since it was shared). */
+    suspend fun refreshTrips(c: String) {
+        val ids = flowOf(c).value.mapNotNull { it.trip?.id }.filter { it.isNotBlank() }.distinct().take(10)
+        ids.forEach { id -> tripFresh(id)?.let { card -> val l = flowOf(c).value; if (l.any { it.trip?.id == id }) flowOf(c).value = l.map { if (it.trip?.id == id) it.copy(trip = card) else it } } }
+    }
 
     // --- groups --------------------------------------------------------------------------------------------------------
     suspend fun newGroup(title: String, members: List<String>, description: String): Pair<String?, String?> {
@@ -359,7 +419,22 @@ class ChatHub(private val ctx: Context, val api: Api, private val myName: () -> 
 
     // --- files ---------------------------------------------------------------------------------------------------------
     /** A message's file on this phone: the one it was sent from, the one downloaded before, or downloaded now. */
-    suspend fun file(md: ChatMedia, posterOnly: Boolean = false): File? {
+    suspend fun file(md: ChatMedia, posterOnly: Boolean = false, thumbOnly: Boolean = false): File? {
+        if (thumbOnly) {
+            if (md.thumb.startsWith("/") && File(md.thumb).exists()) return File(md.thumb)
+            val tid = md.thumb.ifBlank { md.thumbUrl.substringAfter("/media/", "").substringBefore('?') }
+            if (tid.isBlank() && md.thumbUrl.isBlank()) return null
+            val tf = File(File(ctx.cacheDir, "chat-media").apply { mkdirs() }, "t_" + (tid.ifBlank { md.id }).replace(Regex("[^A-Za-z0-9_-]"), "_") + ".jpg")
+            if (tf.exists() && tf.length() > 0) return tf
+            val (st, b) = when {
+                md.thumbUrl.startsWith("http") -> withContext(kotlinx.coroutines.Dispatchers.IO) { api.fetch(md.thumbUrl, api.authHeaders()) }
+                md.thumbUrl.startsWith("/") -> api.download(md.thumbUrl)
+                else -> api.download(chat.mediaPath(tid))
+            }
+            if (st !in 200..299 || b == null) return null
+            settings.count(b.size.toLong())
+            return runCatching { tf.writeBytes(b); tf }.getOrNull()
+        }
         val id = if (posterOnly) md.poster else md.id
         if (!posterOnly && md.local.isNotBlank() && File(md.local).exists()) return File(md.local)
         if (id.isBlank()) return null
@@ -376,7 +451,16 @@ class ChatHub(private val ctx: Context, val api: Api, private val myName: () -> 
             else -> api.download(chat.mediaPath(id))
         }
         if (status !in 200..299 || bytes == null) return null
+        settings.count(bytes.size.toLong())
         return runCatching { f.writeBytes(bytes); f }.getOrNull()
+    }
+
+    /** A message's file if it's already on this phone (sent from here, or downloaded before); never downloads. */
+    fun cachedFile(md: ChatMedia): File? {
+        if (md.local.isNotBlank() && File(md.local).exists()) return File(md.local)
+        if (md.id.isBlank()) return null
+        val ext = when { md.type == "voice" -> "m4a"; md.type == "photo" -> "jpg"; md.type == "video" -> "mp4"; else -> md.name.substringAfterLast('.', "bin").take(5) }
+        return File(File(ctx.cacheDir, "chat-media"), md.id.replace(Regex("[^A-Za-z0-9_-]"), "_") + "." + ext).takeIf { it.exists() && it.length() > 0 }
     }
 
     // --- live location ---------------------------------------------------------------------------------------------------
@@ -476,10 +560,14 @@ class ChatHub(private val ctx: Context, val api: Api, private val myName: () -> 
                 if (i >= 0 && list[i].queued) outbox.remove(m.cid, deleteFiles = false)
                 val mine = m.from.equals(me, true)
                 val known = row(m.c) != null
-                if (known) edit(m.c) { r -> r.copy(last = ChatLast(m.id, m.from, m.kind, m.preview().let { if (m.kind == "text") m.text else it }, m.at, m.media.firstOrNull()?.dur ?: 0.0),
+                if (known) edit(m.c) { r -> r.copy(last = ChatLast(m.id, m.from, m.kind, m.preview().let { if (m.kind == "text") m.text else if (m.kind == "trip") m.trip?.title ?: m.text else it }, m.at, m.media.firstOrNull()?.dur ?: 0.0), seen = emptyList(),
                     unread = if (mine || (openChat == m.c && front)) r.unread else r.unread + 1, mention = r.mention || (!mine && m.mentions.any { it.equals(me, true) }), archived = if (mine) false else r.archived) }
                 else scope.launch { refreshList(full = false) }
+                // a trip card over the socket is the sender's snapshot: read it fresh for me (contract §7)
+                if (m.trip != null && m.trip.id.isNotBlank()) scope.launch { tripFresh(m.trip.id)?.let { card -> patch(m.c, m.id) { it.copy(trip = card) } } }
                 if (!mine) { scope.launch { chat.delivered(m.c, m.id) }; markSeen(m.c); _typing.value = _typing.value + (m.c to (_typing.value[m.c].orEmpty() - m.from)) }
+                // a soft chime when I'm @mentioned (not in Do-Not-Disturb hours, unless mentions may ring then)
+                if (!mine && front && m.mentions.any { it.equals(me, true) } && settings.mentionSound && row(m.c)?.muted(now()) != true && !(settings.dnd.active(now()) && !settings.dnd.mentions)) Chime.mention(ctx)
                 // the app just went to the background: a notification straight away
                 if (!mine && !front) row(m.c)?.let { r -> ChatNotify.show(ctx, r, listOf(m), me, r.unread, quiet(m.c)) }
             }
@@ -504,6 +592,13 @@ class ChatHub(private val ctx: Context, val api: Api, private val myName: () -> 
             "chat" -> e.optJSONObject("chat")?.let { o -> val r = ChatRow.from(o)
                 if (o.optBoolean("gone")) { _rows.value = _rows.value.filter { it.id != r.id }; recount(); save() }
                 else if (r.id.isNotBlank()) { _rows.value = merge(_rows.value, listOf(r)); recount(); save() } }
+            // chatpa: someone read up to the last message ("Seen by"), and my settings changed on another device
+            "seen" -> { val who = e.optString("who"); val upS = e.optString("upTo")
+                row(c)?.let { r -> val lastS = r.last?.id.orEmpty()
+                    val up = upS.toLongOrNull(); val last = lastS.toLongOrNull()
+                    val covers = if (up != null && last != null) up >= last else upS.isNotBlank() && (upS == lastS || lastS.isBlank())
+                    if (who.isNotBlank() && !who.equals(me, true) && covers && !who.equals(r.last?.from, true)) edit(c) { it.copy(seen = listOf(who) + it.seen.filter { n -> !n.equals(who, true) }) } } }
+            "prefs" -> { settings.fromServer(e.optJSONObject("prefs")); settingsTick.value++ }
             "removed", "gone" -> { _rows.value = _rows.value.filter { it.id != c }; recount(); save() }
             "live" -> { val id = e.optString("id"); patch(c, id) { it.copy(live = (it.live ?: LiveLoc(0, null, null, 0)).let { l -> l.copy(lat = e.optDouble("lat").takeIf { v -> !v.isNaN() } ?: l.lat, lng = e.optDouble("lng").takeIf { v -> !v.isNaN() } ?: l.lng,
                 at = chatMs(e.opt("at")).takeIf { a -> a > 0 } ?: now(), until = chatMs(e.opt("until")).takeIf { u -> u > 0 } ?: l.until) }) } }

@@ -46,6 +46,8 @@ import java.util.concurrent.TimeUnit
 object ChatNotify {
     const val CH_CHAT = "chat"
     const val CH_QUIET = "chat_quiet"
+    /** @mentions: their own channel (chatpa), so they can have a sound of their own in the phone's settings. */
+    const val CH_MENTION = "chat_mention"
     private const val GROUP = "rafiki-chat"
     private const val SUMMARY = 7600
     const val KEY_REPLY = "reply"
@@ -60,6 +62,9 @@ object ChatNotify {
         })
         nm.createNotificationChannel(NotificationChannel(CH_QUIET, t("Chat messages (no sound)", "Ujumbe wa gumzo (bila sauti)"), NotificationManager.IMPORTANCE_LOW).apply {
             description = t("Chats with their sound turned off", "Magumzo yaliyozimwa sauti"); setShowBadge(true); setSound(null, null)
+        })
+        nm.createNotificationChannel(NotificationChannel(CH_MENTION, t("Chat: you were mentioned", "Gumzo: umetajwa"), NotificationManager.IMPORTANCE_HIGH).apply {
+            description = t("When someone @mentions you", "Mtu anapokutaja kwa @"); setShowBadge(true); enableVibration(true); vibrationPattern = longArrayOf(0, 120, 90, 120)
         })
     }
 
@@ -82,15 +87,22 @@ object ChatNotify {
 
     /** New messages in one chat (from someone else). [unread] is the chat's count for the badge. */
     fun show(ctx: Context, row: ChatRow, msgs: List<Msg>, me: String, unread: Int, quiet: Boolean) {
-        if (msgs.isEmpty() || row.muted()) return
+        val mentioned = msgs.any { m -> m.mentions.any { it.equals(me, true) } }
+        // a muted chat stays quiet, except when I'm @mentioned (as the server's push does, chatpa)
+        if (msgs.isEmpty() || (row.muted() && !mentioned)) return
+        // Do-Not-Disturb hours (Chat settings): silent, unless @mentions may ring then
+        val dnd = ChatSettings(ctx).dnd
+        val hush = quiet || (dnd.active() && !(mentioned && dnd.mentions))
         val h = history(ctx, row.id).toMutableList()
         msgs.forEach { m -> if (h.none { it.optString("id") == m.id }) h += JSONObject().put("id", m.id).put("from", m.from).put("text", m.preview()).put("at", m.at) }
         keep(ctx, row.id, h)
-        post(ctx, row.id, row.title, row.isGroup, me, unread, quiet, alert = true)
+        post(ctx, row.id, row.title, row.isGroup, me, unread, hush, alert = true, mention = mentioned && !hush)
     }
+    /** The channel a chat notification goes to (tests read it). */
+    fun channelFor(quiet: Boolean, mention: Boolean) = if (quiet) CH_QUIET else if (mention) CH_MENTION else CH_CHAT
 
     /** Draws (or redraws) a chat's notification from what it keeps. */
-    fun post(ctx: Context, c: String, title: String, group: Boolean, me: String, unread: Int, quiet: Boolean, alert: Boolean) {
+    fun post(ctx: Context, c: String, title: String, group: Boolean, me: String, unread: Int, quiet: Boolean, alert: Boolean, mention: Boolean = false) {
         if (!AlertWorker.allowed(ctx)) return
         channels(ctx)
         val h = history(ctx, c); if (h.isEmpty()) return
@@ -114,7 +126,7 @@ object ChatNotify {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         val read = NotificationCompat.Action.Builder(R.drawable.ic_stat_pin, t("Mark as read", "Weka kama imesomwa"), readPi)
             .setSemanticAction(NotificationCompat.Action.SEMANTIC_ACTION_MARK_AS_READ).setShowsUserInterface(false).build()
-        val n = NotificationCompat.Builder(ctx, if (quiet) CH_QUIET else CH_CHAT).setSmallIcon(R.drawable.ic_stat_pin).setStyle(style)
+        val n = NotificationCompat.Builder(ctx, channelFor(quiet, mention)).setSmallIcon(R.drawable.ic_stat_pin).setStyle(style)
             .setContentIntent(pi).setAutoCancel(true).setCategory(NotificationCompat.CATEGORY_MESSAGE).setGroup(GROUP).setColor(0xFF0A78C2.toInt())
             .setNumber(unread.coerceAtLeast(0)).setBadgeIconType(NotificationCompat.BADGE_ICON_SMALL).setOnlyAlertOnce(!alert)
             .setSilent(quiet || !alert).addAction(reply).addAction(read).build()
@@ -253,7 +265,7 @@ class ChatWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx, 
                 sp.edit().putLong("bg_at_${row.id}", last.at).apply()
                 chat.delivered(row.id, last.id)
                 // the first check only remembers where things are, so nobody gets a flood of old news
-                if (first || row.muted()) continue
+                if (first || (row.muted() && !row.mention)) continue
                 val mr = chat.msgs(row.id, limit = row.unread.coerceIn(1, 6))
                 val msgs = mr.json.optJSONArray("msgs")?.let { m -> (0 until m.length()).mapNotNull { runCatching { Msg.from(m.getJSONObject(it), row.id) }.getOrNull() } }.orEmpty()
                     .filter { !it.from.equals(me, true) && it.at > seen && !it.deleted }

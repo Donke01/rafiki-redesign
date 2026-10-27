@@ -258,7 +258,8 @@ class ChatTest {
         // names on the first bubble of a run, quotes, reactions, ticks (read = blue, delivered = grey), the voice note, the mention and the project card
         val seen = seenScrolling(listOf("quote", "tick_read", "tick_delivered", "voice_play", "project_card", "sender"))
         assertEquals(setOf("quote", "tick_read", "tick_delivered", "voice_play", "project_card", "sender"), seen)
-        assertTrue(has(if (sw) "Leo" else "Today"))
+        // the quick replies row (chatpa) leaves less room: the "Today" chip may sit a little higher
+        assertTrue(seenText(if (sw) "Leo" else "Today"))
         assertTrue("yesterday's separator further up", seenText(if (sw) "Jana" else "Yesterday"))
         // read as it opened: the server is told up to the newest
         until("read") { fake.calls.any { it.startsWith("POST read") && it.contains("\"c\":\"g1\"") } }
@@ -341,6 +342,8 @@ class ChatTest {
         rule.onNodeWithTag("send").performTouchInput { up() }
         settle(1000)
         shot("chat-06-recording-locked")
+        // stop: the note waits to be heard, trimmed or sent (chatpa)
+        tap("send"); waitTag("vp_play"); assertTrue(tagged("vp_delete") && tagged("vp_trim"))
         tap("send")
         until("voice sent") { fake.calls.any { it.startsWith("POST send") && it.contains("\"kind\":\"voice\"") } }
         val body = JSONObject(fake.calls.last { it.startsWith("POST send") }.substringAfter("send "))

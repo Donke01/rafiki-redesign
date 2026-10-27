@@ -56,6 +56,8 @@ dependencies {
     implementation("androidx.media3:media3-transformer:1.4.1")
     implementation("androidx.media3:media3-effect:1.4.1")
     implementation("androidx.media3:media3-common:1.4.1")
+    // Chat push (chatpa): Firebase Cloud Messaging. Optional: without app/google-services.json the app works as before
+    implementation("com.google.firebase:firebase-messaging:24.1.0")
     testImplementation(bom)
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.robolectric:robolectric:4.14.1")
@@ -63,4 +65,21 @@ dependencies {
     testImplementation("androidx.test:core:1.6.1")
     testImplementation("org.json:json:20240303")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+}
+
+// Chat push (chatpa): app/google-services.json is optional and gitignored (the repo is public). When it is there, its
+// values become string resources (fcm_*) that the app reads at start to switch on Firebase Cloud Messaging; when it
+// isn't, the build, the tests and the app work exactly as without push. No Google Services plugin needed.
+file("google-services.json").takeIf { it.exists() }?.let { f ->
+    @Suppress("UNCHECKED_CAST")
+    val j = groovy.json.JsonSlurper().parse(f) as Map<String, Any?>
+    val info = j["project_info"] as? Map<String, Any?> ?: emptyMap()
+    val client = (j["client"] as? List<Map<String, Any?>>).orEmpty().firstOrNull { c ->
+        ((c["client_info"] as? Map<String, Any?>)?.get("android_client_info") as? Map<String, Any?>)?.get("package_name") == "org.rafikioutreach.pin" }
+    val appId = (client?.get("client_info") as? Map<String, Any?>)?.get("mobilesdk_app_id")?.toString().orEmpty()
+    val key = ((client?.get("api_key") as? List<Map<String, Any?>>)?.firstOrNull()?.get("current_key"))?.toString().orEmpty()
+    if (appId.isNotBlank() && key.isNotBlank()) android.defaultConfig {
+        resValue("string", "fcm_app_id", appId); resValue("string", "fcm_api_key", key)
+        resValue("string", "fcm_project_id", info["project_id"]?.toString().orEmpty()); resValue("string", "fcm_sender_id", info["project_number"]?.toString().orEmpty())
+    }
 }
