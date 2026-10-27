@@ -14,7 +14,7 @@ import { getFeed } from '../../../lib/feed-cache.js';
 import { getJson, putJson, team, sameName } from '../../../lib/pin-store.js';
 import {
   STATUSES, MAX_TITLE, officeFor, settings, saveSettings, windowsAll, saveWindow, load, save, remove, canSee, canEdit, listFor, resolveStop, placeOf, datesOf,
-  build, costOf, packingFor, editPacking, suggest, progressOf, checkin, replan, notifyOffice, addTrack, summaryOf, newId, newToken, sha, vehicles
+  build, cardOf, costOf, packingFor, editPacking, suggest, progressOf, checkin, replan, notifyOffice, addTrack, summaryOf, newId, newToken, sha, vehicles
 } from '../../../lib/itin.js';
 import { makeGet, bestInsert, LIMITS, okHm, hm } from '../../../lib/itin-plan.js';
 import { countryOf } from '../../../lib/towns.js';
@@ -107,7 +107,7 @@ export async function onRequestGet({ request, env, waitUntil, params }) {
     const rec = await load(env, path[0]);
     if (!rec) return bad('not-found', 404);
     if (!canSee(chk, rec)) return bad('forbidden', 403);
-    if (q.get('card')) return json({ ok: true, card: { id: rec.id, title: rec.title, from: rec.from, to: rec.to, stops: rec.stops.length, people: rec.people, url: rec.share ? rec.share.url : null } });
+    if (q.get('card')) return json({ ok: true, card: Object.assign(cardOf(rec), { stops: rec.stops.length, people: rec.people, url: rec.share ? rec.share.url : null }) });
     const out = view(rec, chk);
     if (q.get('progress')) out.progress = await progressOf(env, rec);
     return json(out);

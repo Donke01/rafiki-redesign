@@ -3,7 +3,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { onRequest } from '../functions/api/chat/[[path]].js';
-import { roster, chatSys, chatSync, preview, readHead } from '../lib/chat.js';
+import { roster, chatSys, chatSync, preview, readHead, freshTrips, projectPhotos } from '../lib/chat.js';
+import { cardOf } from '../lib/itin.js';
 
 function kv() {
   const m = new Map();
@@ -149,7 +150,7 @@ test('link previews: project links become a project card; other pages are read f
   const { getFeed } = await import('../lib/feed-cache.js');
   const p = await preview(env, 'https://pin.rafikioutreach.org/pin#p/101', getFeed);
   assert.equal(p.title, 'Kapsaret Borehole');
-  assert.deepEqual(p.project, { id: '101', title: 'Kapsaret Borehole', country: 'ke', status: 'Completed', type: 'Borehole well', area: 'Kapsaret' });
+  assert.deepEqual(p.project, { id: '101', title: 'Kapsaret Borehole', country: 'ke', ck: 'ke', status: 'Completed', type: 'Borehole well', area: 'Kapsaret', photo: '/api/photo/900?w=480' });
   assert.equal(p.image, '/api/photo/900?w=480');
   assert.equal((await preview(env, 'http://127.0.0.1/admin', getFeed)).reason, 'bad-request');
   assert.equal((await preview(env, 'file:///etc/passwd', getFeed)).reason, 'bad-request');
@@ -191,4 +192,72 @@ test('roster: team list, Cloudflare PINs and PIN_ADMINS, once each, with blocked
   assert.deepEqual(r.map(x => x.n), ['Bertin', 'Grace', 'Jessica', 'Meril', 'Reid Anderson']);
   assert.deepEqual(r.find(x => x.n === 'Bertin'), { n: 'Bertin', h: 'mw', a: 0, g: 4, b: 1 });
   assert.equal(r.find(x => x.n === 'Reid Anderson').a, 1);
+});
+
+// ---- chat polish: trip cards, project chat photos ----------------------------------------------------------
+const TRIP = {
+  id: 'it_trip0001', title: 'Kapsaret loop', status: 'active', owner: 'Meril', people: ['Meril'], viewers: [], ck: 'ke', from: '2026-10-27', to: '2026-10-28',
+  stops: [{ sid: 's1', name: 'Kapsaret', status: 'done', checkin: { at: 'x' } }, { sid: 's2', name: 'Chepkongi', status: 'planned' }, { sid: 's3', name: 'Ziwa', status: 'skipped' }, { sid: 's4', name: 'Moi\'s Bridge', status: 'planned' }],
+  days: [{ date: '2026-10-27', stops: ['s1', 's2'], timeline: [{ kind: 'stop', sid: 's1', start: '08:30' }, { kind: 'stop', sid: 's2', start: '10:30' }] },
+    { date: '2026-10-28', stops: ['s3', 's4'], timeline: [{ kind: 'stop', sid: 's4', start: '09:00' }] }]
+};
+test('trip card: next stop, done and total from the trip', () => {
+  const now = Date.UTC(2026, 9, 27, 6);
+  assert.deepEqual(cardOf(TRIP, now), { id: 'it_trip0001', title: 'Kapsaret loop', from: '2026-10-27', to: '2026-10-28', status: 'active', next: { name: 'Chepkongi', date: '2026-10-27', at: '10:30' }, done: 2, total: 4 });
+  // the next day: today's leftovers are past, so the next stop is tomorrow's
+  assert.deepEqual(cardOf(TRIP, Date.UTC(2026, 9, 28, 6)).next, { name: 'Moi\'s Bridge', date: '2026-10-28', at: '09:00' });
+});
+
+test('trip cards in chat: resolved by the proxy when sent, fresh for each viewer, title only without access', async () => {
+  const chat = fakeChat((req, body) => {
+    const u = new URL(req.url);
+    if (u.pathname === '/send') return Response.json({ ok: true, msg: Object.assign({ id: 7, kind: 'trip' }, JSON.parse(body)) });
+    if (u.pathname === '/msgs') return Response.json({ ok: true, msgs: [{ id: 7, kind: 'trip', trip: { id: 'it_trip0001', title: 'Old title', done: 0, total: 4, access: true } }, { id: 8, kind: 'trip', trip: { id: 'it_gone0001', title: 'Deleted trip' } }, { id: 9, kind: 'text', text: 'hi' }], more: false });
+    return Response.json({ ok: true });
+  });
+  const { env, store } = setup({ CHAT: chat });
+  store.m.set('itin:it_trip0001', JSON.stringify(TRIP));
+  // Meril is on the trip: the card is filled here, whatever the client sent
+  let r = await run(env, 'send', '3333', { body: { c: 'g:x', cid: 'a', kind: 'trip', trip: { id: 'it_trip0001', title: 'Hacked', done: 99 } } });
+  assert.equal(r.status, 200);
+  const sent = JSON.parse(chat.calls[0].body).trip;
+  assert.equal(sent.title, 'Kapsaret loop');
+  assert.equal(sent.done, 2);
+  assert.equal(sent.access, true);
+  // Grace is not on it: can't share it; unknown trips are 404
+  r = await run(env, 'send', '4444', { body: { c: 'g:x', kind: 'trip', trip: { id: 'it_trip0001' } } });
+  assert.equal(r.status, 403); assert.equal((await r.json()).reason, 'forbidden');
+  r = await run(env, 'send', '3333', { body: { c: 'g:x', kind: 'trip', trip: { id: 'it_none0001' } } });
+  assert.equal(r.status, 404);
+  // a trip field on other kinds is dropped
+  await run(env, 'send', '3333', { body: { c: 'g:x', kind: 'text', text: 'x', trip: { id: 'it_trip0001' } } });
+  assert.equal(JSON.parse(chat.calls[chat.calls.length - 1].body).trip, undefined);
+  // reading: fresh for Meril, title only for Grace, gone trips keep their title
+  let j = await (await run(env, 'msgs?c=g:x', '3333')).json();
+  assert.equal(j.msgs[0].trip.title, 'Kapsaret loop');
+  assert.equal(j.msgs[0].trip.next.name, 'Chepkongi');
+  assert.deepEqual(j.msgs[1].trip, { id: 'it_gone0001', title: 'Deleted trip', access: false, gone: true });
+  assert.equal(j.msgs[2].text, 'hi');
+  j = await (await run(env, 'msgs?c=g:x', '4444')).json();
+  assert.deepEqual(j.msgs[0].trip, { id: 'it_trip0001', title: 'Kapsaret loop', access: false });
+  // the admin (Jessica) sees every trip
+  j = await (await run(env, 'trip?id=it_trip0001', '2222')).json();
+  assert.equal(j.trip.access, true);
+  assert.equal((await run(env, 'trip?id=it_nope0001', '2222')).status, 404);
+  // the itin card endpoint carries the same fields
+  const { onRequestGet } = await import('../functions/api/itin/[[path]].js');
+  const c = await (await onRequestGet({ request: new Request('https://pin.example/api/itin/it_trip0001?card=1', { headers: { 'X-Pin': '3333', 'CF-Connecting-IP': '1.2.3.4' } }), env, params: { path: ['it_trip0001'] }, waitUntil() {} })).json();
+  assert.equal(c.card.total, 4);
+  assert.equal(c.card.stops, 4);
+  assert.deepEqual(c.card.people, ['Meril']);
+});
+
+test('project chats get the project photo in the list', async () => {
+  const chat = fakeChat(() => Response.json({ ok: true, chats: [{ id: 'p:101', kind: 'project', project: '101' }, { id: 't:ke', kind: 'team' }] }));
+  const { env } = setup({ CHAT: chat });
+  const j = await (await run(env, 'list', '3333')).json();
+  assert.equal(j.chats[0].pphoto, '/api/photo/900?w=160');
+  assert.equal(j.chats[1].pphoto, undefined);
+  assert.deepEqual(projectPhotos([{ kind: 'project', project: '5' }], null), [{ kind: 'project', project: '5', pphoto: '' }]);
+  assert.deepEqual(await freshTrips({}, {}, null), null);
 });

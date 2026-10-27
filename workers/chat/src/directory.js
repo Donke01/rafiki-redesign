@@ -10,9 +10,18 @@
 import { DurableObject } from 'cloudflare:workers';
 import { json, fail, rand, keyOf, clean, sha, mediaUrl, makeTicket, readTicket } from './util.js';
 import { EDIT_MS } from './conversation.js';
+import { fcmOn, inDnd, message as fcmMessage, sendOne } from './fcm.js';
 
 const COUNTRIES = { ke: 'Kenya', tz: 'Tanzania', ug: 'Uganda', mw: 'Malawi' };
-const KINDS = ['text', 'media', 'voice', 'location', 'live', 'contact', 'doc'];
+const KINDS = ['text', 'media', 'voice', 'location', 'live', 'contact', 'doc', 'trip'];
+export const NEWS = 't:news';
+const MAX_PINS = 3, MAX_QUICK = 8, MAX_DEVICES = 10;
+// project system lines that are worth a push (group housekeeping lines are not)
+const PUSH_SYS = ['repair', 'assigned', 'step', 'fixed', 'sms', 'notworking'];
+const TOKEN = /^[a-z0-9-]{0,20}$/;
+const HM = /^([01]\d|2[0-3]):[0-5]\d$/;
+const ITIN = /^it_[A-Za-z0-9]{6,20}$/, DAY = /^\d{4}-\d{2}-\d{2}$/;
+const TRIP_STATUS = ['draft', 'planned', 'active', 'done', 'cancelled'];
 const EMOJI = /^(?:\p{Extended_Pictographic}|\p{Emoji_Presentation})(?:️|‍|\p{Extended_Pictographic}|\p{Emoji_Modifier}|\p{Emoji_Presentation})*$/u;
 const MAX_TEXT = 4000;
 const LIVE_MAX = 8 * 3600e3 + 60e3;
@@ -20,6 +29,17 @@ const LIMITS = { send: [60, 60e3], media: [120, 3600e3], group: [20, 3600e3], pr
 const P = s => { if (s == null || s === '') return null; try { return JSON.parse(s); } catch (e) { return null; } };
 const num = v => (v === '' || v == null || !isFinite(Number(v)) ? null : Number(v));
 const isMediaId = s => /^[A-Za-z0-9_-]{16,40}$/.test(String(s || ''));
+
+// a trip card as stored in a message (filled by the Pages proxy from the itin code)
+export function tripCard(t) {
+  const n = v => Math.max(0, Math.min(999, Math.round(Number(v) || 0)));
+  const out = { id: String(t.id), title: clean(t.title, 120) || 'Trip', from: DAY.test(t.from) ? t.from : '', to: DAY.test(t.to) ? t.to : '',
+    status: TRIP_STATUS.includes(t.status) ? t.status : 'planned', next: null, done: n(t.done), total: n(t.total), access: true };
+  if (t.next && typeof t.next === 'object' && t.next.name) out.next = { name: clean(t.next.name, 80), date: DAY.test(t.next.date) ? t.next.date : '', at: HM.test(t.next.at || '') ? t.next.at : null };
+  if (out.done > out.total) out.done = out.total;
+  return out;
+}
+const DEF_PREFS = home => ({ quick: null, dnd: { on: false, from: '21:00', to: '06:30', mentions: false, tz: home === 'mw' ? 120 : 180 }, doubleTap: '❤️' });
 
 export class Directory extends DurableObject {
   constructor(ctx, env) {
@@ -37,6 +57,15 @@ export class Directory extends DurableObject {
     x('CREATE TABLE IF NOT EXISTS gone (c TEXT, k TEXT, at INTEGER, PRIMARY KEY (c, k))');
     x('CREATE TABLE IF NOT EXISTS texts (c TEXT, id INTEGER, frm TEXT, at INTEGER, text TEXT, PRIMARY KEY (c, id))');
     x('CREATE TABLE IF NOT EXISTS stars (k TEXT, c TEXT, id INTEGER, at INTEGER, PRIMARY KEY (k, c, id))');
+    // chat polish: push devices, per-user settings, bubble colour, pins, when someone last read
+    x('CREATE TABLE IF NOT EXISTS devices (token TEXT PRIMARY KEY, k TEXT, platform TEXT, gen INTEGER DEFAULT 0, at INTEGER)');
+    x('CREATE INDEX IF NOT EXISTS devices_k ON devices (k)');
+    const cols = t => new Set(this.q('PRAGMA table_info(' + t + ')').map(r => r.name));
+    const add = (t, col, def) => { if (!cols(t).has(col)) x('ALTER TABLE ' + t + ' ADD COLUMN ' + col + ' ' + def); };
+    add('members', 'bubble', "TEXT DEFAULT ''");
+    add('members', 'read_at', 'INTEGER DEFAULT 0');
+    add('chats', 'pins', 'TEXT');
+    add('users', 'prefs', 'TEXT');
   }
 
   // ---- small reads ----------------------------------------------------------------------------
@@ -106,18 +135,20 @@ export class Directory extends DurableObject {
     const u = this.user(me.k), now = Date.now();
     if (!u) this.sql.exec('INSERT INTO users (k, name, home, admin, gen, seen) VALUES (?,?,?,?,?,?)', me.k, me.name, me.home, me.admin ? 1 : 0, me.gen, now);
     else this.sql.exec('UPDATE users SET name = ?, home = CASE WHEN ? != \'\' THEN ? ELSE home END, admin = ?, removed = 0, blocked = 0, seen = ? WHERE k = ?', me.name, me.home, me.home, me.admin ? 1 : 0, now, me.k);
-    if (!u || u.removed || u.blocked || (me.home && u.home !== me.home) || !!u.admin !== me.admin) this.syncTeams(now);
+    if (!u || u.removed || u.blocked || (me.home && u.home !== me.home) || !!u.admin !== me.admin || !this.chat(NEWS)) this.syncTeams(now);
   }
   // Team chats: "All RAFIKI" and one per country, members kept in step with the team; Office admins are their admins
   syncTeams(now) {
     const people = this.q('SELECT * FROM users WHERE blocked = 0 AND removed = 0');
-    const want = { 't:all': people };
+    // Announcements: everyone, only admins post (the Office admins are its admins)
+    const want = { 't:all': people, [NEWS]: people };
     for (const cc of Object.keys(COUNTRIES)) want['t:' + cc] = people.filter(u => u.home === cc);
     for (const [c, list] of Object.entries(want)) {
       let ch = this.chat(c);
       if (!ch && !list.length) continue;
       if (!ch) {
-        this.sql.exec("INSERT INTO chats (id, kind, title, photo, project, description, created, by, last_at) VALUES (?, 'team', ?, '', '', '', ?, '', ?)", c, c === 't:all' ? 'All RAFIKI' : COUNTRIES[c.slice(2)], now, now);
+        this.sql.exec("INSERT INTO chats (id, kind, title, photo, project, description, created, by, last_at, only_admins) VALUES (?, 'team', ?, '', '', '', ?, '', ?, ?)",
+          c, c === 't:all' ? 'All RAFIKI' : c === NEWS ? 'Announcements' : COUNTRIES[c.slice(2)], now, now, c === NEWS ? 1 : 0);
         ch = this.chat(c);
       }
       const keys = new Set(list.map(u => u.k));
@@ -147,12 +178,19 @@ export class Directory extends DurableObject {
     const mem = this.q('SELECT m.k, m.admin, u.name FROM members m LEFT JOIN users u ON u.k = m.k WHERE m.c = ? ORDER BY m.joined, m.k', ch.id);
     let title = ch.title;
     if (ch.kind === 'dm') { const o = mem.find(x => x.k !== k); title = o ? o.name || o.k : ch.title; }
-    return {
+    const last = P(ch.last), lk = last ? keyOf(last.from) : '';
+    // "Seen by": members whose read receipt covers the last message (not me, not its sender), most recent first
+    const seen = ch.seq ? this.q('SELECT u.name, m.k FROM members m LEFT JOIN users u ON u.k = m.k WHERE m.c = ? AND m.read_up >= ? AND m.read_at > 0 AND m.k != ? AND m.k != ? ORDER BY m.read_at DESC', ch.id, ch.seq, k, lk).map(x => x.name || x.k) : [];
+    const out = {
       id: ch.id, kind: ch.kind, title, photo: isMediaId(ch.photo) ? await mediaUrl(key, ch.photo, now) : '', project: ch.project || '', description: ch.description || '',
-      members: mem.map(x => x.name || x.k), admins: mem.filter(x => x.admin).map(x => x.name || x.k), last: P(ch.last),
+      members: mem.map(x => x.name || x.k), admins: mem.filter(x => x.admin).map(x => x.name || x.k), last,
       unread: m ? m.unread : 0, mention: !!(m && m.mention), pinned: !!(m && m.pinned),
-      muted: m ? (m.muted === -1 ? 'always' : m.muted > now ? m.muted : 0) : 0, archived: !!(m && m.archived), onlyAdmins: !!ch.only_admins, wallpaper: (m && m.wallpaper) || ''
+      muted: m ? (m.muted === -1 ? 'always' : m.muted > now ? m.muted : 0) : 0, archived: !!(m && m.archived), onlyAdmins: !!ch.only_admins, wallpaper: (m && m.wallpaper) || '',
+      bubble: (m && m.bubble) || '', pins: P(ch.pins) || [], seen, mentionId: (m && m.mention) || 0,
+      country: ch.kind === 'team' && COUNTRIES[ch.id.slice(2)] ? ch.id.slice(2) : ''
     };
+    if (ch.id === NEWS) out.announce = true;
+    return out;
   }
   async pushRows(c, only) {
     const ch = this.chat(c), key = await this.key();
@@ -165,7 +203,8 @@ export class Directory extends DurableObject {
     delete out.fk;
     const n = this.q('SELECT COUNT(*) AS n FROM members WHERE c = ?', ch.id)[0].n;
     out.status = n < 2 ? 'sent' : msg.id <= ch.read_all ? 'read' : msg.id <= ch.deliv_all ? 'delivered' : 'sent';
-    if (Array.isArray(out.media)) out.media = await Promise.all(out.media.map(async x => Object.assign({}, x, { url: await mediaUrl(key, x.id) })));
+    if (Array.isArray(out.media)) out.media = await Promise.all(out.media.map(async x => Object.assign({}, x, { url: await mediaUrl(key, x.id) }, x.thumb ? { thumbUrl: await mediaUrl(key, x.thumb) } : {})));
+    if (!out.trip) delete out.trip;
     return out;
   }
   presence() {
@@ -195,6 +234,7 @@ export class Directory extends DurableObject {
           case 'starred': return await this.starred(me);
           case 'search': return this.search(me, q.get('q'));
           case 'key': return json({ ok: true, key: await this.key() });
+          case 'prefs': return json({ ok: true, prefs: this.userPrefs(me.k) });
         }
         return fail('not-found', 404);
       }
@@ -221,7 +261,9 @@ export class Directory extends DurableObject {
         case 'delivered': return await this.receipt(me, b, 'delivered');
         case 'live': return await this.live(me, b, false);
         case 'live-stop': return await this.live(me, b, true);
-        case 'prefs': return await this.prefs(me, b);
+        case 'prefs': return b.c == null ? this.setPrefs(me, b) : await this.prefs(me, b);
+        case 'pin': return await this.pin(me, b);
+        case 'device': return this.device(me, b);
       }
       return fail('not-found', 404);
     } catch (e) {
@@ -244,7 +286,7 @@ export class Directory extends DurableObject {
     const rows = this.q('SELECT c.* FROM chats c JOIN members m ON m.c = c.id WHERE m.k = ?' + (since ? ' AND m.upd > ?' : '') + ' ORDER BY c.last_at DESC', ...(since ? [me.k, since] : [me.k]));
     const chats = [];
     for (const ch of rows) if (!(ch.kind === 'dm' && !ch.seq && ch.by !== me.k)) chats.push(await this.row(ch, me.k, key));
-    const out = { ok: true, me: me.name, now, chats, presence: this.presence() };
+    const out = { ok: true, me: me.name, now, chats, presence: this.presence(), prefs: this.userPrefs(me.k), push: fcmOn(this.env) };
     if (since) out.gone = this.q('SELECT c FROM gone WHERE k = ? AND at > ?', me.k, since).map(r => r.c);
     return json(out);
   }
@@ -313,7 +355,7 @@ export class Directory extends DurableObject {
     if ('title' in b && ch.kind === 'group') { const t = clean(b.title, 60); if (!t) return fail('bad-request'); set.push(['title', t]); }
     if ('description' in b) set.push(['description', clean(b.description, 500)]);
     if ('photo' in b) { if (b.photo && !isMediaId(b.photo)) return fail('bad-request'); set.push(['photo', b.photo || '']); }
-    if ('onlyAdmins' in b) set.push(['only_admins', b.onlyAdmins ? 1 : 0]);
+    if ('onlyAdmins' in b && ch.id !== NEWS) set.push(['only_admins', b.onlyAdmins ? 1 : 0]);
     for (const [col, v] of set) this.sql.exec('UPDATE chats SET ' + col + ' = ? WHERE id = ?', v, ch.id);
     this.sql.exec('UPDATE members SET upd = ? WHERE c = ?', now, ch.id);
     await this.pushRows(ch.id);
@@ -386,7 +428,7 @@ export class Directory extends DurableObject {
     const r = await this.conv(ch.id).send(m);
     if (r.dup) return r;
     const msg = r.msg;
-    const last = { id: msg.id, from: msg.from, kind: msg.kind, text: String(msg.text || '').slice(0, 160), at: msg.at };
+    const last = { id: msg.id, from: msg.from, kind: msg.kind, text: String(msg.text || (msg.trip && msg.trip.title) || '').slice(0, 160), at: msg.at };
     if (m.sys) last.sys = m.sys.type;
     this.sql.exec('UPDATE chats SET seq = ?, last = ?, last_at = ? WHERE id = ?', msg.id, JSON.stringify(last), now, ch.id);
     if (msg.text && msg.kind !== 'sys') this.sql.exec('INSERT OR REPLACE INTO texts (c, id, frm, at, text) VALUES (?,?,?,?,?)', ch.id, msg.id, msg.from, now, msg.text);
@@ -396,6 +438,10 @@ export class Directory extends DurableObject {
     const fresh = this.chat(ch.id), key = await this.key();
     this.fan(ch.id, { t: 'msg', msg: await this.deco(msg, fresh, key) });
     await this.pushRows(ch.id);
+    if (fcmOn(this.env)) {
+      const p = this.push(fresh, msg, mentionKeys || []).catch(e => console.error('chat push:', e && e.message));
+      if (this.ctx.waitUntil) this.ctx.waitUntil(p);
+    }
     return r;
   }
   async send(me, b) {
@@ -423,6 +469,7 @@ export class Directory extends DurableObject {
       if (Array.isArray(x.wave)) it.wave = x.wave.slice(0, 128).map(v => Math.max(0, Math.min(100, Math.round(Number(v) || 0))));
       if (x.name) it.name = clean(x.name, 120);
       if (x.poster && isMediaId(x.poster)) it.poster = x.poster;
+      if (x.thumb && isMediaId(x.thumb)) it.thumb = x.thumb;
       items.push(it);
     }
     if (kind === 'text' && !text) return fail('bad-request');
@@ -448,6 +495,12 @@ export class Directory extends DurableObject {
       if (!u || u.blocked || u.removed) return fail('bad-request');
       m.contact = { name: u.name };
     }
+    if (kind === 'trip') {
+      // the Pages proxy has already loaded the trip with the itin code and filled this card (the client's copy is replaced)
+      const t = b.trip && typeof b.trip === 'object' ? b.trip : null;
+      if (!t || !ITIN.test(String(t.id || ''))) return fail('bad-request');
+      m.trip = tripCard(t);
+    }
     if (b.reply != null && num(b.reply) != null) m.reply = num(b.reply);
     const mem = new Set(this.memberKeys(ch.id));
     const mk = (Array.isArray(b.mentions) ? b.mentions : []).slice(0, 50).map(keyOf).filter(k => mem.has(k) && k !== me.k);
@@ -469,6 +522,13 @@ export class Directory extends DurableObject {
 
   // ---- changing messages --------------------------------------------------------------------------
   async afterChange(ch, msg, payload) {
+    const pins = P(ch.pins) || [], pi = pins.findIndex(x => x.id === msg.id);
+    if (pi >= 0) {
+      if (msg.deleted) pins.splice(pi, 1); else pins[pi] = Object.assign({}, pins[pi], { text: String(msg.text || '').slice(0, 160) });
+      this.sql.exec('UPDATE chats SET pins = ? WHERE id = ?', JSON.stringify(pins), ch.id);
+      this.sql.exec('UPDATE members SET upd = ? WHERE c = ?', Date.now(), ch.id);
+      if (!(P(ch.last) && P(ch.last).id === msg.id)) await this.pushRows(ch.id);
+    }
     const last = P(ch.last);
     if (last && last.id === msg.id) {
       const l = Object.assign({}, last, { text: String(msg.text || '').slice(0, 160), deleted: msg.deleted || undefined, edited: msg.edited || undefined });
@@ -547,7 +607,8 @@ export class Directory extends DurableObject {
     const up = Math.min(Math.max(num(b.upTo) || 0, 0), ch.seq), m = this.member(ch.id, me.k), now = Date.now(), conv = this.conv(ch.id);
     if (kind === 'read' && up > m.read_up) {
       const unread = await conv.unreadAfter(me.k, up);
-      this.sql.exec('UPDATE members SET read_up = ?, deliv_up = MAX(deliv_up, ?), unread = ?, mention = CASE WHEN mention > ? THEN mention ELSE 0 END, upd = ? WHERE c = ? AND k = ?', up, up, unread, up, now, ch.id, me.k);
+      this.sql.exec('UPDATE members SET read_up = ?, read_at = ?, deliv_up = MAX(deliv_up, ?), unread = ?, mention = CASE WHEN mention > ? THEN mention ELSE 0 END, upd = ? WHERE c = ? AND k = ?', up, now, up, unread, up, now, ch.id, me.k);
+      this.fan(ch.id, { t: 'seen', c: ch.id, who: me.name, upTo: up }, me.k);
       await conv.receipt(me.k, me.name, 'read', up, now);
       if (up > m.deliv_up) await conv.receipt(me.k, me.name, 'delivered', up, now);
       await this.pushRows(ch.id, me.k);
@@ -597,6 +658,7 @@ export class Directory extends DurableObject {
     if ('pinned' in b) set.push(['pinned', b.pinned ? 1 : 0]);
     if ('archived' in b) set.push(['archived', b.archived ? 1 : 0]);
     if ('wallpaper' in b) set.push(['wallpaper', clean(b.wallpaper, 40)]);
+    if ('bubble' in b) { const v = String(b.bubble == null ? '' : b.bubble); if (!TOKEN.test(v)) return fail('bad-request'); set.push(['bubble', v]); }
     if ('muted' in b) set.push(['muted', b.muted === 'always' ? -1 : Math.max(0, Math.round(num(b.muted) || 0))]);
     for (const [col, v] of set) this.sql.exec('UPDATE members SET ' + col + ' = ? WHERE c = ? AND k = ?', v, ch.id, me.k);
     this.sql.exec('UPDATE members SET upd = ? WHERE c = ? AND k = ?', Date.now(), ch.id, me.k);
@@ -616,6 +678,121 @@ export class Directory extends DurableObject {
         return { c: r.c, id: r.id, from: r.frm, at: r.at, snippet: (s ? '…' : '') + r.text.slice(s, s + 100) + (r.text.length > s + 100 ? '…' : '') };
       })
     });
+  }
+
+  // ---- per-person settings (quick replies, Do-Not-Disturb, double-tap reaction) ----------------------
+  userPrefs(k) {
+    const u = this.user(k), d = DEF_PREFS(u && u.home), p = (u && P(u.prefs)) || {};
+    return { quick: Array.isArray(p.quick) ? p.quick : null, dnd: Object.assign({}, d.dnd, p.dnd || {}), doubleTap: p.doubleTap || d.doubleTap };
+  }
+  setPrefs(me, b) {
+    const u = this.user(me.k), p = (u && P(u.prefs)) || {};
+    if ('quick' in b) {
+      if (b.quick === null) delete p.quick;
+      else {
+        if (!Array.isArray(b.quick) || b.quick.length > MAX_QUICK) return fail('bad-request');
+        const list = b.quick.map(x => clean(x, 61)).filter(Boolean);
+        if (list.some(x => x.length > 60)) return fail('bad-request');
+        p.quick = list;
+      }
+    }
+    if ('dnd' in b) {
+      const d = b.dnd && typeof b.dnd === 'object' ? b.dnd : null, cur = Object.assign({}, DEF_PREFS(u && u.home).dnd, p.dnd || {});
+      if (!d) return fail('bad-request');
+      if ('from' in d && !HM.test(String(d.from))) return fail('bad-request');
+      if ('to' in d && !HM.test(String(d.to))) return fail('bad-request');
+      if ('tz' in d && (num(d.tz) == null || Math.abs(num(d.tz)) > 14 * 60)) return fail('bad-request');
+      for (const f of ['on', 'mentions']) if (f in d) cur[f] = !!d[f];
+      for (const f of ['from', 'to']) if (f in d) cur[f] = String(d[f]);
+      if ('tz' in d) cur.tz = Math.round(num(d.tz));
+      p.dnd = cur;
+    }
+    if ('doubleTap' in b) {
+      const e = String(b.doubleTap || '');
+      if (!e || e.length > 16 || !EMOJI.test(e)) return fail('bad-request');
+      p.doubleTap = e;
+    }
+    this.sql.exec('UPDATE users SET prefs = ? WHERE k = ?', JSON.stringify(p), me.k);
+    const prefs = this.userPrefs(me.k);
+    this.sendTo(me.k, { t: 'prefs', prefs });
+    return json({ ok: true, prefs });
+  }
+
+  // ---- pinned messages (up to 3 per chat) ---------------------------------------------------------------
+  async pin(me, b) {
+    const { ch, res } = this.inChat(me, b.c);
+    if (res) return res;
+    if (ch.kind !== 'dm' && !this.isAdmin(ch.id, me)) return fail('not-admin', 403);
+    const id = num(b.id);
+    if (id == null) return fail('bad-request');
+    let pins = P(ch.pins) || [], replaced;
+    const now = Date.now(), had = pins.some(x => x.id === id);
+    if (b.on) {
+      const m = await this.conv(ch.id).get(id);
+      if (!m || m.deleted) return fail('not-found', 404);
+      if (m.kind === 'sys') return fail('bad-request');
+      const pin = { id, from: m.from, kind: m.kind, text: String(m.text || (m.trip && m.trip.title) || '').slice(0, 160), at: m.at, by: me.name, pinnedAt: now };
+      pins = [pin].concat(pins.filter(x => x.id !== id));
+      if (pins.length > MAX_PINS) { replaced = pins[pins.length - 1].id; pins = pins.slice(0, MAX_PINS); }
+    } else pins = pins.filter(x => x.id !== id);
+    this.sql.exec('UPDATE chats SET pins = ? WHERE id = ?', JSON.stringify(pins), ch.id);
+    this.sql.exec('UPDATE members SET upd = ? WHERE c = ?', now, ch.id);
+    if (b.on && !had) await this.post(this.chat(ch.id), { fk: '', from: '', kind: 'sys', text: me.name + ' pinned a message', sys: { type: 'pinned', by: me.name, id } });
+    else await this.pushRows(ch.id);
+    const out = { ok: true, pins, chat: await this.row(this.chat(ch.id), me.k, await this.key()) };
+    if (replaced != null) out.replaced = replaced;
+    return json(out);
+  }
+
+  // ---- push devices and FCM ---------------------------------------------------------------------------
+  device(me, b) {
+    const token = String(b.token || '');
+    if (!/^[A-Za-z0-9:_\-.]{20,4096}$/.test(token)) return fail('bad-request');
+    if (b.remove) { this.sql.exec('DELETE FROM devices WHERE token = ?', token); return json({ ok: true }); }
+    const platform = b.platform === 'web' ? 'web' : b.platform === 'android' ? 'android' : '';
+    if (!platform) return fail('bad-request');
+    this.sql.exec('INSERT OR REPLACE INTO devices (token, k, platform, gen, at) VALUES (?,?,?,?,?)', token, me.k, platform, me.gen || 0, Date.now());
+    const old = this.q('SELECT token FROM devices WHERE k = ? ORDER BY at DESC LIMIT -1 OFFSET ?', me.k, MAX_DEVICES);
+    for (const r of old) this.sql.exec('DELETE FROM devices WHERE token = ?', r.token);
+    return json({ ok: true, push: fcmOn(this.env) });
+  }
+  // who gets a push for this message, and what it says: [{ token, platform, k, data }]
+  pushPlan(ch, msg, mentionKeys, now) {
+    const t = now || Date.now();
+    if (msg.kind === 'sys' && !(msg.sys && PUSH_SYS.includes(msg.sys.type))) return [];
+    const ment = new Set(mentionKeys || []), out = [];
+    const media = Array.isArray(msg.media) && msg.media[0] ? msg.media[0].type : '';
+    const what = { photo: '📷 Photo', video: '🎥 Video', voice: '🎤 Voice message', doc: '📄 Document' }[media] || { location: '📍 Location', live: '📍 Live location', contact: '👤 Contact', trip: '🧭 Trip' }[msg.kind] || '';
+    const line = [what, msg.text || (msg.trip && msg.trip.title) || ''].filter(Boolean).join(' ');
+    for (const m of this.q('SELECT m.k, m.muted, m.unread, u.gen, u.blocked, u.removed, u.prefs, u.home FROM members m JOIN users u ON u.k = m.k WHERE m.c = ?', ch.id)) {
+      if (m.k === msg.fk || m.blocked || m.removed) continue;
+      if (this.sockets(m.k).length) continue;
+      const mentioned = ment.has(m.k);
+      const muted = m.muted === -1 || m.muted > t;
+      if (muted && !mentioned) continue;
+      const dnd = Object.assign({}, DEF_PREFS(m.home).dnd, ((P(m.prefs) || {}).dnd) || {});
+      if (inDnd(dnd, t) && !(mentioned && dnd.mentions)) continue;
+      const devs = this.q('SELECT token, platform, gen FROM devices WHERE k = ?', m.k).filter(d => (Number(d.gen) || 0) >= (Number(m.gen) || 0));
+      if (!devs.length) continue;
+      const badge = Number(this.one('SELECT SUM(unread) AS n FROM members WHERE k = ? AND muted != -1 AND muted <= ?', m.k, t).n) || 0;
+      const title = ch.kind === 'dm' ? msg.from : ch.title;
+      const data = {
+        t: 'msg', c: ch.id, id: msg.id, from: msg.from, title, kind: msg.kind, text: String(msg.text || (msg.trip && msg.trip.title) || '').slice(0, 200), media,
+        mention: mentioned ? '1' : '0', unread: m.unread, badge, at: msg.at, sys: msg.sys ? msg.sys.type : '',
+        body: (msg.kind === 'sys' || ch.kind === 'dm' ? '' : msg.from + ': ') + line.slice(0, 200)
+      };
+      for (const d of devs) out.push({ token: d.token, platform: d.platform, k: m.k, data });
+    }
+    return out;
+  }
+  async push(ch, msg, mentionKeys) {
+    const plan = this.pushPlan(ch, msg, mentionKeys, Date.now()).slice(0, 500);
+    const f = this.fcmFetch || fetch;
+    await Promise.all(plan.map(async p => {
+      const r = await sendOne(this.env, fcmMessage(p, p.data), f).catch(e => { console.error('fcm:', e && e.message); return { ok: false }; });
+      if (r.gone) this.sql.exec('DELETE FROM devices WHERE token = ?', p.token);
+    }));
+    return plan.length;
   }
 
   // ---- WebSockets (hibernation API) -----------------------------------------------------------------

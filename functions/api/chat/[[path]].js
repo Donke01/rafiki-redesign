@@ -6,7 +6,7 @@
 import { checkPin } from '../pin.js';
 import { guards, guardFor } from '../../../lib/pin-store.js';
 import { getFeed } from '../../../lib/feed-cache.js';
-import { chatOn, NEED, roster, chatHeaders, preview } from '../../../lib/chat.js';
+import { chatOn, NEED, roster, chatHeaders, preview, tripFor, freshTrips, projectPhotos } from '../../../lib/chat.js';
 
 const HEAD = { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', 'X-Robots-Tag': 'noindex' };
 const json = (body, status) => new Response(JSON.stringify(body), { status: status || 200, headers: HEAD });
@@ -60,6 +60,12 @@ export async function onRequest({ request, env, params }) {
       if (request.method !== 'GET') return json({ ok: false, reason: 'method' }, 405);
       return json(await preview(env, url.searchParams.get('url'), getFeed));
     }
+    // a trip card, fresh, for this viewer (title only for people not on the trip)
+    if (path === 'trip') {
+      if (request.method !== 'GET') return json({ ok: false, reason: 'method' }, 405);
+      const t = await tripFor(env, chk, url.searchParams.get('id'));
+      return t ? json({ ok: true, trip: t.card }) : json({ ok: false, reason: 'not-found' }, 404);
+    }
     const list = await roster(env), h = chatHeaders(env, who, list);
     if (media) {
       const range = request.headers.get('Range'); if (range) h.Range = range;
@@ -83,12 +89,28 @@ export async function onRequest({ request, env, params }) {
         if (!p) return json({ ok: false, reason: 'not-found' }, 404);
         b = { kind: 'project', project: id, ptitle: String(p.title || '') };
       } else delete b.ptitle;
+      // a trip card: loaded here with the itin code; the sender must be able to see the trip
+      if (path === 'send' && b.kind === 'trip') {
+        const t = await tripFor(env, chk, b.trip && b.trip.id);
+        if (!t) return json({ ok: false, reason: 'not-found' }, 404);
+        if (!t.card.access) return json({ ok: false, reason: 'forbidden' }, 403);
+        b.trip = t.card;
+      } else delete b.trip;
       body = JSON.stringify(b);
       h['Content-Type'] = 'application/json';
     } else if (request.method !== 'GET') return json({ ok: false, reason: 'method' }, 405);
     const r = await env.CHAT.fetch(new Request(target(path, url), { method: request.method, headers: h, body }));
     let text = await r.text();
     // the join link with this site's address
+    // trip cards re-resolved for this viewer; project chats get their project's photo
+    if (r.ok && (path === 'msgs' || path === 'starred' || path === 'list')) {
+      try {
+        const j = JSON.parse(text);
+        if (path === 'list') { if ((j.chats || []).some(c => c.kind === 'project')) { let f = null; try { f = await getFeed(env); } catch (e) {} projectPhotos(j.chats, f); } }
+        else await freshTrips(env, chk, j.msgs);
+        text = JSON.stringify(j);
+      } catch (e) {}
+    }
     if (path === 'link' && r.ok) { try { const j = JSON.parse(text); if (j.url) { j.url = url.origin + j.url; text = JSON.stringify(j); } } catch (e) {} }
     return new Response(text, { status: r.status, headers: HEAD });
   } catch (e) {
