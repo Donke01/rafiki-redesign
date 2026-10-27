@@ -51,6 +51,11 @@ dependencies {
     // camera through Google Play services, so the app needs no camera permission and stays small
     implementation("com.google.zxing:core:3.5.3")
     implementation("com.google.android.gms:play-services-code-scanner:16.1.0")
+    // Chat (feat-chata): a WebSocket for live messages, typing and presence; Media3 Transformer shrinks videos to 720p before upload
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("androidx.media3:media3-transformer:1.4.1")
+    implementation("androidx.media3:media3-effect:1.4.1")
+    implementation("androidx.media3:media3-common:1.4.1")
     testImplementation(bom)
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.robolectric:robolectric:4.14.1")
