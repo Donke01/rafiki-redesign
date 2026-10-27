@@ -1,8 +1,8 @@
 {
   "ok": true,
-  "versionCode": 48,
-  "versionName": "2.23.0",
-  "notes": "New: team Chat (groups, project chats, voice notes, photos) and Trips (plan a trip with weather, roads and fuel costs). Chat replaces Me in the bottom bar: Me is now your picture at the top left.",
-  "sha256": "e086be7c16464e83efd6f495929627ec520da999898472bb2cff661abc69aa5b",
+  "versionCode": 49,
+  "versionName": "2.24.0",
+  "notes": "Chat gets better: instant notifications, quick replies, pinned messages, Announcements, trip cards, data saver, voice note preview, seen-by faces and much more polish. Built for Android 16.",
+  "sha256": "446d482bf44723fcb6f61c7b9002b9e9793a064afb90219d4dd01357b4fa3416",
   "apk": "/app/rafiki-pin.apk"
 }
