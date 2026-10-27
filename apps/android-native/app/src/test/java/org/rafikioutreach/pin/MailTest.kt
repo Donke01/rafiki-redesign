@@ -26,6 +26,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.rafikioutreach.pin.data.Prefs
+import org.rafikioutreach.pin.ui.mailNb
 import org.rafikioutreach.pin.ui.RafikiTheme
 import org.rafikioutreach.pin.ui.mailAudience
 import org.rafikioutreach.pin.ui.mailBlocks

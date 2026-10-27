@@ -186,10 +186,14 @@ fun Shell(m: AppModel) {
         life.lifecycle.addObserver(o); onDispose { life.lifecycle.removeObserver(o) }
     }
     val busy by m.busy.collectAsState()
-    fun go(p: Place) { stack.add(p) }
-    fun pop() { if (stack.size > 1) kept.removeState(stack.removeAt(stack.lastIndex).key) }
+    // tapping the tab you are already on (its first screen): it still starts over, but in place, with no fade
+    // through, so nothing blinks; a deeper screen in that tab slides back to the first one as back does
+    var quiet by remember { androidx.compose.runtime.mutableStateOf(false) }
+    fun go(p: Place) { quiet = false; stack.add(p) }
+    fun pop() { quiet = false; if (stack.size > 1) kept.removeState(stack.removeAt(stack.lastIndex).key) }
     /** A tab from the bottom bar (or the app sending you there): it starts over. [keepFilter]: the app asked for a list. */
     fun tab(t: String, keepFilter: Boolean = false) {
+        quiet = stack.size == 1 && stack.first().tab == t && stack.first().project == null && stack.first().sub == null
         stack.forEach { kept.removeState(it.key) }
         org.rafikioutreach.pin.ui.Nav.startOver(m, t, keepFilter)
         stack.clear(); stack.add(Place(t))
@@ -296,7 +300,7 @@ fun Shell(m: AppModel) {
                     val ms = if (org.rafikioutreach.pin.ui.Motion.on) 300 else 0
                     val ease = androidx.compose.animation.core.FastOutSlowInEasing
                     when {
-                        ms == 0 -> androidx.compose.animation.EnterTransition.None togetherWith androidx.compose.animation.ExitTransition.None
+                        ms == 0 || quiet -> androidx.compose.animation.EnterTransition.None togetherWith androidx.compose.animation.ExitTransition.None
                         to > from -> (androidx.compose.animation.slideInHorizontally(androidx.compose.animation.core.tween(ms, easing = ease)) { it } + androidx.compose.animation.fadeIn(androidx.compose.animation.core.tween(ms / 2))) togetherWith
                             (androidx.compose.animation.slideOutHorizontally(androidx.compose.animation.core.tween(ms, easing = ease)) { -it / 4 } + androidx.compose.animation.fadeOut(androidx.compose.animation.core.tween(ms)))
                         to < from -> (androidx.compose.animation.slideInHorizontally(androidx.compose.animation.core.tween(ms, easing = ease)) { -it / 4 } + androidx.compose.animation.fadeIn(androidx.compose.animation.core.tween(ms))) togetherWith

@@ -159,6 +159,25 @@ class NavTest {
         // the grid is the Office's own first state: back again leaves the Office for Map home
         back(); waitTag("map_home")
     }
+    // --- tapping the tab you are already on: it starts over in place, with no fade through (no blink) ---------------
+    @Test fun same_tab_again_does_not_blink() {
+        start()
+        for ((k, root) in listOf("me" to "me_hero", "list" to "projects", "office" to "o_repairs")) {
+            nav(k); waitTag(root)
+            rule.mainClock.autoAdvance = false
+            rule.onNodeWithTag("nav_$k").performClick()
+            rule.mainClock.advanceTimeByFrame(); rule.mainClock.advanceTimeByFrame()
+            // a fade through would show the old and the new screen together (or neither) for a few frames
+            assertEquals("$k: one screen, straight away", 1, rule.onAllNodesWithTag(root).fetchSemanticsNodes().size)
+            rule.mainClock.autoAdvance = true; settle()
+            assertEquals("$k: still one screen", 1, rule.onAllNodesWithTag(root).fetchSemanticsNodes().size)
+            rule.onNodeWithTag("nav_$k").assertIsSelected()
+        }
+        // from a deeper screen the same tab still goes back to its first screen
+        nav("office"); tap("o_repairs"); waitTag("office_strip")
+        nav("office"); waitTag("o_repairs"); assertFalse(tagged("office_strip"))
+    }
+
     @Test fun office_tile_then_back_is_the_grid() = officeTileBack(false)
     @Test fun office_tile_then_back_is_the_grid_kiswahili() = officeTileBack(true)
 
