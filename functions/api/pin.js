@@ -5,7 +5,8 @@
 //   GET  /api/pin?id=<item>     → the last pin made with the app on that project (for undo)
 //   GET  /api/pin?history=<item>→ the latest notes on that project in monday.com, with their files
 //   GET  /api/pin?activity=1    → what the team did with the app in the last 30 days
-//   GET  /api/pin?team=1        → who is on the team: name, home country, phone (if the office added one), last seen
+//   GET  /api/pin?team=1        → who is on the team: name, home country, phone (if the office added one), last seen, photo
+//   (the main answer also has photos: { Name: url } and me.photo, from /api/team-photo)
 //   POST /api/pin  { action: "pin",   id, lat, lng, acc, how, by }   saves "lat, lng" into "GPS Coordinates"
 //                  { action: "undo",  id, by }                       puts back the value from before the last pin
 //                  { action: "visit", id, state, note, lat, lng, readings, by } leaves a site-visit note
@@ -32,6 +33,7 @@ import { getJson as gj, putJson, team, saveTeam, hashPin, isAdminName, sameName,
 import { kes, money, estOf, stepAtOrAfter, stepBlocked, approveLimit, askApproval, costRow, addCost, projectCosts, peopleServed, notePeople, snapPeople, monthKey } from '../../lib/pin-office.js';
 import { postHere } from '../../lib/pin-here.js';
 import { chatSys } from '../../lib/chat.js';
+import { photoIndex, photoOf, photoMap } from '../../lib/team-photo.js';
 
 const MAX_FAILS = 8; // wrong PINs per connection per hour
 const MAX_SAVES = 120; // changes per connection per hour
@@ -240,6 +242,8 @@ export async function onRequestGet({ request, env, waitUntil }) {
       // what people set for themselves in Me › Settings › Personal details
       list.forEach(x => { const k = Object.keys(prof).find(n => sameName(n, x.name)), pr = k && prof[k]; if (pr) { if (pr.phone) x.phone = pr.phone; if (pr.home) x.home = pr.home; if (pr.nick) x.nick = pr.nick; } });
       list.forEach(x => { const g = guardFor(gd, x.name); x.blocked = !!(g && g.blocked); });
+      // profile photos (/api/team-photo): a URL with a version, or ""
+      const ph = await photoIndex(env); list.forEach(x => { x.photo = photoOf(ph, x.name); });
       // your own e-mail, for your own contact card (nobody else's)
       if (chk.who) { const mine = t.find(p => sameName(p.name, chk.who)), x = list.find(y => sameName(y.name, chk.who)); if (mine && x) x.email = mine.email || ''; }
       return json({ ok: true, team: list.sort((a, b) => a.name.localeCompare(b.name)) }, 200);
@@ -275,8 +279,12 @@ export async function onRequestGet({ request, env, waitUntil }) {
     if (chk.who) {
       const prof = await getJson(env, 'pinprofiles', {}), k = Object.keys(prof).find(n => sameName(n, chk.who)), pr = (k && prof[k]) || {};
       const mine = (await team(env)).find(p => sameName(p.name, chk.who)) || {};
-      extra.me = { kind: chk.kind || '', nick: pr.nick || '', phone: pr.phone || mine.phone || '', home: pr.home || chk.home || '' };
-    } else extra.me = { kind: chk.kind || 'shared', nick: '', phone: '', home: '' };
+      extra.me = { kind: chk.kind || '', nick: pr.nick || '', phone: pr.phone || mine.phone || '', home: pr.home || chk.home || '', photo: '' };
+    } else extra.me = { kind: chk.kind || 'shared', nick: '', phone: '', home: '', photo: '' };
+    // profile photos (/api/team-photo): { Name: url } for everyone who has one, and your own
+    const phIdx = await photoIndex(env);
+    extra.photos = photoMap(phIdx);
+    if (chk.who) extra.me.photo = photoOf(phIdx, chk.who);
     return json(Object.assign({ ok: true, who: chk.who, gen: chk.gen || 0, monday: !!chk.monday, linked: chk.linked || '', gmaps: env.GOOGLE_TILES_WEB_KEY || env.GOOGLE_TILES_ANDROID_KEY ? { web: env.GOOGLE_TILES_WEB_KEY || '', android: env.GOOGLE_TILES_ANDROID_KEY || '' } : null, offlineTiles: offlineTiles(env), countryMaps: countryMaps(env), home: chk.home || '', projects, repairs, visits: await getJson(env, 'pinlastvisit', {}), tests: await getJson(env, 'pintests', {}) }, extra), 200);
   } catch (e) {
     console.error('pin get:', e && e.message);
@@ -321,7 +329,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
     const t = await team(env), mine = t.find(p => sameName(p.name, chk.who));
     if (mine) { mine.phone = phone; if (home) mine.home = home; await saveTeam(env, t); }
     await bump(env, 'rl:pinsave:' + ip);
-    return json({ ok: true, me: { kind: chk.kind || '', nick, phone, home } }, 200);
+    return json({ ok: true, me: { kind: chk.kind || '', nick, phone, home, photo: photoOf(await photoIndex(env), chk.who) } }, 200);
   }
   // Me › Settings › Change my PIN: only for a PIN given out in the app (stored hashed here)
   if (action === 'pin-change') {

@@ -38,6 +38,7 @@ import { getJson, putJson, team, saveTeam, hashPin, newPin, freshPin, adminNames
 import { moveLink } from '../../lib/pin-auth.js';
 import { kes, money, estOf, stepBlocked, canDecide, approveLimit, setApproveLimit, askApproval, costRow, addCost, costStats, snapPeople } from '../../lib/pin-office.js';
 import { teamMap, planView, hereKey } from '../../lib/pin-here.js';
+import { photoIndex, photoOf, movePhoto, dropPhoto } from '../../lib/team-photo.js';
 import { donorAdminGet, donorAdminPost, runDigest } from '../../lib/donor.js';
 import { chatSys, chatSync } from '../../lib/chat.js';
 import { tripsMonth } from '../../lib/itin.js';
@@ -83,7 +84,7 @@ export async function onRequestGet({ request, env }) {
     const rows = await getJson(env, 'pincostidx', []);
     return json({ ok: true, rows, stats: costStats(rows, feed ? feed.projects : []), approveAbove: await approveLimit(env) });
   }
-  if (view === 'teammap') return json(Object.assign({ ok: true }, await teamMap(env)));
+  if (view === 'teammap') { const tm = await teamMap(env), ph = await photoIndex(env); (tm.people || []).forEach(p => { p.photo = photoOf(ph, p.name); }); return json(Object.assign({ ok: true }, tm)); }
   if (view === 'plan') { let feed = null; try { feed = await getFeed(env); } catch (e) {} const r = await planView(env, new URL(request.url).searchParams, feed); return json(r.body, r.status); }
   if (view === 'team') {
     const t = await team(env), seenAt = await getJson(env, 'pinseen', {}), admins = adminNames(env), gd = await guards(env), cf = people(env);
@@ -92,7 +93,8 @@ export async function onRequestGet({ request, env }) {
     // names someone used to have (renamed in the app) are not separate people
     const old = new Set(t.flatMap(p => (p.aka || []).map(a => a.toLowerCase())));
     Object.keys(seenAt).forEach(n => { if (!list.some(x => sameName(x.name, n)) && !old.has(n.toLowerCase())) list.push({ name: n, home: '', admin: admins.includes(n.toLowerCase()), adminCf: admins.includes(n.toLowerCase()), email: '', phone: '', role: '', aka: [], source: 'monday', lastSeen: seenAt[n] }); });
-    list.forEach(x => { const g = guardFor(gd, x.name); x.src = x.source; x.blocked = g && g.blocked ? g.blocked : null; x.out = (g && g.out) || null; });
+    const ph = await photoIndex(env);
+    list.forEach(x => { const g = guardFor(gd, x.name); x.src = x.source; x.blocked = g && g.blocked ? g.blocked : null; x.out = (g && g.out) || null; x.photo = photoOf(ph, x.name); });
     return json({ ok: true, team: list, mail: { ready: !!(env.RESEND_API_KEY && env.ALERT_FROM), to: await recipients(env) }, cron: !!env.CRON_KEY });
   }
   if (view === 'export') {
@@ -346,6 +348,7 @@ export async function teamPost(env, b, chk, by) {
     const gd = await guards(env), adm = activeAdmins(env, t, gd);
     if (p.admin && !adminNames(env).includes(p.name.toLowerCase()) && adm.includes(guardKey(p.name)) && adm.length <= 1) return R(409, { ok: false, reason: 'last-admin' });
     await saveTeam(env, t.filter(x => x !== p));
+    await dropPhoto(env, p.name);
     await logT('removed ' + p.name);
     return R(200, { ok: true });
   }
@@ -383,6 +386,7 @@ export async function teamPost(env, b, chk, by) {
     await move('pinseen'); await move('pinprofiles');
     const gd = await guards(env), gk = guardKey(from); if (gd[gk]) { gd[guardKey(to)] = gd[gk]; delete gd[gk]; await saveGuards(env, gd); }
     await moveLink(env, from, to);
+    await movePhoto(env, from, to);
     await env.FEED.delete(hereKey(from));
     await logT('renamed ' + from + ' to ' + to);
     return R(200, { ok: true, name: to, aka: p.aka, repairs: nr, visits: na });

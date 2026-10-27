@@ -6,7 +6,7 @@
 // Every request comes from the Pages Functions (functions/api/chat), which already checked the PIN or
 // monday.com session, the blocked and signed-out guards, and refused donors. They pass the person in
 // X-Chat-User (URI-encoded name), X-Chat-Admin (1 = Office admin), X-Chat-Home (ke/tz/ug/mw), X-Chat-Gen
-// (session number) and the team roster in X-Chat-Roster (base64url JSON [{n, h, a, g, b}]).
+// (session number) and the team roster in X-Chat-Roster (base64url JSON [{n, h, a, g, b, p}]; p: profile photo version).
 import { DurableObject } from 'cloudflare:workers';
 import { json, fail, rand, keyOf, clean, sha, mediaUrl, makeTicket, readTicket } from './util.js';
 import { EDIT_MS } from './conversation.js';
@@ -29,6 +29,9 @@ const LIMITS = { send: [60, 60e3], media: [120, 3600e3], group: [20, 3600e3], pr
 const P = s => { if (s == null || s === '') return null; try { return JSON.parse(s); } catch (e) { return null; } };
 const num = v => (v === '' || v == null || !isFinite(Number(v)) ? null : Number(v));
 const isMediaId = s => /^[A-Za-z0-9_-]{16,40}$/.test(String(s || ''));
+// profile photos are served by the Pages side (/api/team-photo); the roster carries only the version
+const PV = /^[a-z0-9]{1,16}$/;
+export const photoUrl = (name, v) => (v && PV.test(v) ? '/api/team-photo?name=' + encodeURIComponent(name) + '&v=' + v : '');
 
 // a trip card as stored in a message (filled by the Pages proxy from the itin code)
 export function tripCard(t) {
@@ -66,6 +69,7 @@ export class Directory extends DurableObject {
     add('members', 'read_at', 'INTEGER DEFAULT 0');
     add('chats', 'pins', 'TEXT');
     add('users', 'prefs', 'TEXT');
+    add('users', 'photo', "TEXT DEFAULT ''");
   }
 
   // ---- small reads ----------------------------------------------------------------------------
@@ -113,22 +117,26 @@ export class Directory extends DurableObject {
     this.meta('roster', hash);
     this.syncRoster(list);
   }
-  // list: [{ n: name, h: home, a: admin, g: session number, b: blocked }]
+  // list: [{ n: name, h: home, a: admin, g: session number, b: blocked, p: photo version }]
   syncRoster(list) {
-    const now = Date.now(), seen = new Set(), kick = [];
+    const now = Date.now(), seen = new Set(), kick = [], pics = [];
     for (const p of list.slice(0, 2000)) {
       const name = clean(p && p.n, 80), k = keyOf(name);
       if (!k || seen.has(k)) continue;
       seen.add(k);
       const u = this.user(k), home = /^(ke|tz|ug|mw)$/.test(p.h || '') ? p.h : (u ? u.home : ''), gen = Number(p.g) || 0, blocked = p.b ? 1 : 0;
-      if (u) this.sql.exec('UPDATE users SET name = ?, home = ?, admin = ?, gen = ?, blocked = ?, removed = 0, roster = 1 WHERE k = ?', u.name || name, home, p.a ? 1 : 0, gen, blocked, k);
-      else this.sql.exec('INSERT INTO users (k, name, home, admin, gen, blocked, roster) VALUES (?,?,?,?,?,?,1)', k, name, home, p.a ? 1 : 0, gen, blocked);
+      const pv = PV.test(String(p.p || '')) ? String(p.p) : '';
+      if (u) this.sql.exec('UPDATE users SET name = ?, home = ?, admin = ?, gen = ?, blocked = ?, removed = 0, roster = 1, photo = ? WHERE k = ?', u.name || name, home, p.a ? 1 : 0, gen, blocked, pv, k);
+      else this.sql.exec('INSERT INTO users (k, name, home, admin, gen, blocked, roster, photo) VALUES (?,?,?,?,?,?,1,?)', k, name, home, p.a ? 1 : 0, gen, blocked, pv);
+      if (u && (u.photo || '') !== pv && !blocked) pics.push({ k, name: u.name || name, pv, seen: u.seen || null });
       if (blocked) kick.push(k);
       for (const ws of this.sockets(k)) { const a = ws.deserializeAttachment() || {}; if (gen > (Number(a.gen) || 0)) kick.push(k); }
     }
     // taken off the team list: out of the Team chats and their phones disconnected
     for (const u of this.q('SELECT k FROM users WHERE roster = 1')) if (!seen.has(u.k)) { this.sql.exec('UPDATE users SET roster = 0, removed = 1 WHERE k = ?', u.k); kick.push(u.k); }
     for (const k of new Set(kick)) for (const ws of this.sockets(k)) { try { ws.close(4401, 'signed-out'); } catch (e) {} }
+    // a new or removed profile photo: open chats swap the face straight away
+    for (const x of pics) this.everyone({ t: 'presence', who: x.name, online: this.sockets(x.k).length > 0, seen: x.seen, photo: photoUrl(x.name, x.pv) });
     this.syncTeams(now);
   }
   ensureUser(me) {
@@ -209,7 +217,10 @@ export class Directory extends DurableObject {
   }
   presence() {
     const p = {};
-    for (const u of this.q('SELECT k, name, seen FROM users WHERE blocked = 0 AND removed = 0')) p[u.name] = { online: this.sockets(u.k).length > 0, seen: u.seen || null };
+    for (const u of this.q('SELECT k, name, seen, photo FROM users WHERE blocked = 0 AND removed = 0')) {
+      p[u.name] = { online: this.sockets(u.k).length > 0, seen: u.seen || null };
+      if (u.photo) p[u.name].photo = photoUrl(u.name, u.photo);
+    }
     return p;
   }
 
@@ -808,7 +819,8 @@ export class Directory extends DurableObject {
     this.ctx.acceptWebSocket(server, [k]);
     server.serializeAttachment({ k, name: v.n, gen: Number(v.g) || 0 });
     server.send(JSON.stringify({ t: 'hello', me: v.n, now: Date.now() }));
-    if (first) this.everyone({ t: 'presence', who: v.n, online: true, seen: Date.now() }, k);
+    const pic = photoUrl(v.n, (this.user(k) || {}).photo);
+    if (first) this.everyone(Object.assign({ t: 'presence', who: v.n, online: true, seen: Date.now() }, pic ? { photo: pic } : {}), k);
     return new Response(null, { status: 101, webSocket: client });
   }
   everyone(payload, except) { const s = JSON.stringify(payload); for (const ws of this.ctx.getWebSockets()) { const a = ws.deserializeAttachment() || {}; if (a.k !== except) { try { ws.send(s); } catch (e) {} } } }
@@ -831,7 +843,8 @@ export class Directory extends DurableObject {
     if (left.length) return;
     const now = Date.now();
     this.sql.exec('UPDATE users SET seen = ? WHERE k = ?', now, a.k);
-    this.everyone({ t: 'presence', who: a.name, online: false, seen: now }, a.k);
+    const pic = photoUrl(a.name, (this.user(a.k) || {}).photo);
+    this.everyone(Object.assign({ t: 'presence', who: a.name, online: false, seen: now }, pic ? { photo: pic } : {}), a.k);
   }
   async webSocketClose(ws, code) { try { ws.close(code === 1005 || code === 1006 ? 1000 : code, 'bye'); } catch (e) {} await this.gone(ws); }
   async webSocketError(ws) { await this.gone(ws); }
