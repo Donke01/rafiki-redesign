@@ -47,7 +47,7 @@ ACT = [{'by': 'Meril Kiprop', 'a': 'visit', 's': 'notworking', 'id': '101', 't':
        {'by': 'Grace Achieng', 'a': 'pin', 'id': '103', 't': 'Turbo Spring', 'at': iso(26)}, {'by': ME, 'a': 'visit', 's': 'working', 'id': '102', 't': 'Chepkongi Dispensary', 'at': iso(40)}]
 def snap(admin=True, who=ME):
     return {'ok': True, 'who': who, 'admin': admin, 'reviewOpen': 0, 'projects': P, 'repairs': REP, 'visits': {}, 'tests': {}, 'jobs': ['101'] if who == ME else [],
-            'assigned': [{'id': '103', 't': 'Turbo Spring', 'to': who, 'by': 'Jessica Anderson', 'at': iso(5), 'due': day(2)}], 'confirmed': {},
+            'assigned': [{'id': '103', 't': 'Turbo Spring', 'to': who, 'by': 'Jessica Anderson', 'at': iso(5), 'date': day(2)}], 'confirmed': {},
             'me': {'kind': 'app', 'nick': '', 'phone': '', 'home': 'ke', 'photo': url(who.lower())}, 'photos': photos(), 'approveAbove': 50000,
             'stages': {'101': {'s': CS['stage'], 'at': DAYS(6), 'by': 'Meril Kiprop', 'pct': 45, 'due': day(-3), 'parent': None, 't': 'Kapsaret Borehole', 'n': 3, 'behind': CS['stage'] != 'handed'}, '105': {'s': 'planned', 'at': DAYS(2), 'by': ME, 'pct': None, 'due': None, 'parent': '101', 't': 'Tamiha Dormitory', 'n': 0, 'behind': False}},
             'stories': {k: {'st': v['status'], 'n': len([a for a in v['answers'].values() if a]), 'b': len(v['photos']['before']), 'i': 0, 'a': len(v['photos']['after']), 'c': v['consent'], 'at': DAYS(1)} for k, v in STORY.items()}}
@@ -412,6 +412,9 @@ def s_build(check):
                 go(pg, '#office', 1800); check(vis(pg, '[data-testid=ocv_t_build]'), '[%s] the Office overview counts it' % t)
                 go(pg, '#report', 2200); check('Construction' in pg.inner_text('#repBody'), '[%s] the monthly report has a Construction section' % t)
                 pg.wait_for_timeout(800); check(pg.locator('.rep-cnph img.in').count() >= 1, '[%s] with this month’s photos' % t)
+                go(pg, '#me/team', 1800); fs = pg.locator('#actFeed [data-testid=feed_stage]')
+                check(fs.count() >= 1 and ('Walls' if lang == 'en' else 'Kuta') in fs.first.inner_text(), '[%s] the team feed shows the stage change' % t)
+                if fs.count(): fs.first.scroll_into_view_if_needed(); shot(pg, 'build-feed-%s' % t)
                 # New site: what's happening here + part of
                 go(pg, '#new', 1600); pg.fill('#nName', 'Kapsaret Dormitory'); pg.click('#nBuild [data-v=building]'); pg.fill('#nPartQ', 'Kapsa'); pg.wait_for_timeout(400)
                 pg.locator('#nPartL [data-id="101"]').click(); pg.wait_for_timeout(300)

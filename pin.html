@@ -5713,7 +5713,9 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
     var shut = function (fromBack) {
       if (gone) return; gone = true; d.classList.add('out'); setTimeout(function () { d.remove(); }, 220);
       document.removeEventListener('pointerdown', any, true); document.removeEventListener('keydown', key, true); removeEventListener('resize', place);
-      if (!fromBack && l) bkShut(l);
+      // closed by a tap: drop its step without going back now (a tap on a tab must not race a history.back); the empty
+      // step left behind is skipped by the next Back, as for any step already undone by hand
+      if (!fromBack && l && !l.dead) { l.dead = true; var k = BK.st.indexOf(l); if (k >= 0) BK.st.splice(k, 1); }
     };
     var any = function () { shut(false); };   // the tap is never stopped: the map or button under it still gets it
     var key = function (e) { if (e.key === 'Escape') shut(false); };
@@ -5757,7 +5759,7 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
     }).catch(function () { return null; }).then(function (s) { delete PH.wait[u]; if (!s) PH.bad[u] = Date.now(); return s; });
     return PH.wait[u];
   }
-  function phScan() { if (PH.q) return; PH.q = requestAnimationFrame(function () { PH.q = 0; qa('[data-ph]').forEach(phPaint); }); }
+  function phScan() { if (PH.q) return; PH.q = requestAnimationFrame(function () { PH.q = 0; qa('[data-ph]:not(input)').forEach(phPaint); }); } // not the donor photo ticks, whose data-ph is a project id
   function phPaint(el) {
     var u = phUrl(el.getAttribute('data-ph')), img = el.querySelector(':scope > img.avph');
     if (!u || (PH.bad[u] && Date.now() - PH.bad[u] < 60000)) { if (img) img.remove(); el.classList.remove('ph-on'); return; }
@@ -8290,7 +8292,7 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
   function meWorkDraw() { var h = $('myWork').innerHTML, n = (h.match(/class="row"/g) || []).length; $('meWork').innerHTML = h.replace('<h2>Your work</h2>', '<div class="mmh"><h2>' + tr('My work', 'Kazi yangu') + '</h2><span class="tag cnt">' + n + '</span></div>'); }
   $('meWork').addEventListener('click', function (e) { var b = e.target.closest('.row'); if (b) openProj(b.getAttribute('data-id'), b.hasAttribute('data-visit') ? 'visit' : 'pin'); });
   function waNum(p, home) { var d = String(p).replace(/\D/g, ''), cc = { ke: '254', tz: '255', ug: '256', mw: '265' }[home] || '254'; return /^\s*\+/.test(p) ? d : d.charAt(0) === '0' ? cc + d.slice(1) : d; }
-  function vb(e) { return { pin: tr('Pinned', 'Aliweka mahali'), visit: tr('Visited', 'Alitembelea'), fixed: tr('Fixed', 'Alirekebisha'), new: tr('Added', 'Aliongeza') }[e.a] || e.a; }
+  function vb(e) { return { pin: tr('Pinned', 'Aliweka mahali'), visit: tr('Visited', 'Alitembelea'), fixed: tr('Fixed', 'Alirekebisha'), new: tr('Added', 'Aliongeza'), stage: tr('Moved the build on at', 'Alisogeza ujenzi wa') }[e.a] || e.a; }
   // Team today: who's working, where, and a call / WhatsApp button
   function teamTodayDraw() {
     var t = teamCache; if (!t) return;
@@ -8319,11 +8321,11 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
     var pill = function (n, hue, ic) { return '<span class="tp" style="--hu:var(--hu-' + hue + ');--hb:var(--hb-' + hue + ')">' + oic(ic) + n + '</span>'; };
     $('actTable').innerHTML = '<div class="together"><b>' + tr('Together', 'Pamoja') + '</b><span>' + tr(all.pin + ' pins · ' + all.visit + ' visits · ' + all.fixed + ' fixed', 'mahali ' + all.pin + ' · ziara ' + all.visit + ' · ' + all.fixed + ' zimerekebishwa') + '</span></div>' +
       (names.length ? '<ul class="tots">' + names.map(function (n) { var o = by[n]; return '<li><b>' + ctWho(n) + '</b>' + pill(o.pin, 'blue', 'pin') + pill(o.visit, 'green', 'clip') + pill(o.fixed, 'amber', 'wrench') + '</li>'; }).join('') + '</ul>' : '<p class="muted">' + tr('Nothing yet in this period.', 'Hakuna bado katika kipindi hiki.') + '</p>');
-    var list = a.filter(function (e) { return (WORK[e.a] || e.a === 'job') && !isSms(e); }).sort(function (x, y) { return x.at < y.at ? 1 : -1; });
-    var FI = { pin: ['pin', 'blue'], visit: ['clip', 'green'], fixed: ['check', 'green'], new: ['plus', 'purple'], job: ['wrench', 'amber'] };
+    var list = a.filter(function (e) { return (WORK[e.a] || e.a === 'job' || e.a === 'stage') && !isSms(e); }).sort(function (x, y) { return x.at < y.at ? 1 : -1; }); // a construction stage change shows in the feed too, not in the totals
+    var FI = { pin: ['pin', 'blue'], visit: ['clip', 'green'], fixed: ['check', 'green'], new: ['plus', 'purple'], job: ['wrench', 'amber'], stage: ['', 'amber'] };
     $('actFeed').innerHTML = list.slice(0, feedN).map(function (e) {
-      var f = FI[e.a], p = byId(e.id), st = e.a === 'visit' && e.s && STATES[e.s] ? ' · ' + tr(STATES[e.s][1], STATES[e.s][2]) : '';
-      return '<li' + (p ? ' class="go" data-id="' + esc(e.id) + '" role="button" tabindex="0"' : '') + '><span class="fi" style="--hu:var(--hu-' + f[1] + ');--hb:var(--hb-' + f[1] + ')">' + oic(f[0]) + '</span><div><b>' + ctWho(ctCanon(e.by), '', String(ctCanon(e.by) || '').split(' ')[0]) + '</b> ' + vb(e).toLowerCase() + ' ' + esc(p ? p.title : e.t || '') + st + '<small>' + since(e.at) + '</small></div>' + (p ? '<span class="cv">' + oic('chev') + '</span>' : '') + '</li>';
+      var f = FI[e.a], p = byId(e.id), st = e.a === 'visit' && e.s && STATES[e.s] ? ' · ' + tr(STATES[e.s][1], STATES[e.s][2]) : e.a === 'stage' && e.s ? ' · ' + esc(cnName(e.s)) : '';
+      return '<li' + (p ? ' class="go" data-id="' + esc(e.id) + '" role="button" tabindex="0"' : '') + (e.a === 'stage' ? ' data-testid="feed_stage"' : '') + '><span class="fi" style="--hu:var(--hu-' + f[1] + ');--hb:var(--hb-' + f[1] + ')">' + (e.a === 'stage' ? cnIc() : oic(f[0])) + '</span><div><b>' + ctWho(ctCanon(e.by), '', String(ctCanon(e.by) || '').split(' ')[0]) + '</b> ' + vb(e).toLowerCase() + ' ' + esc(p ? p.title : e.t || '') + st + '<small>' + since(e.at) + '</small></div>' + (p ? '<span class="cv">' + oic('chev') + '</span>' : '') + '</li>';
     }).join('') || '<li class="muted">' + tr('Nothing yet. Pins, visits and fixes show here.', 'Bado hakuna. Mahali, ziara na marekebisho yataonekana hapa.') + '</li>';
     $('feedMore').classList.toggle('hidden', list.length <= 8);
     $('feedMore').textContent = feedN > 8 ? tr('Show less', 'Onyesha kidogo') : tr('Show more', 'Onyesha zaidi');
