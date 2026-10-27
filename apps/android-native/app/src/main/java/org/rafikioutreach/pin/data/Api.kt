@@ -77,6 +77,13 @@ class Api(val server: String, private val pin: () -> String, private val session
         toReply(status, text)
     }
 
+    /** A construction progress photo (feat-mea): attached to the stage's monday.com note and kept in its gallery. */
+    suspend fun stagePhoto(updateId: String, file: File, label: String, stage: String, project: String): Reply = withContext(Dispatchers.IO) {
+        postMultipart("/api/pin-photo", file.readBytes(), "image/jpeg", "construction.jpg", linkedMapOf("update" to updateId, "label" to label, "stage" to stage, "project" to project))
+    }
+    /** A stage photo, for signed-in team members only. */
+    fun stagePhotoPath(project: String, asset: String, w: Int = 480) = "/api/pin-photo?stage=${enc(project)}&asset=${enc(asset)}&w=$w"
+
     fun photoUrl(photo: String, w: Int = 480) = "$server/api/photo/${enc(photo)}?w=$w"
 
     // --- Chat (feat-chata): /api/chat/* with the same PIN headers ---------------------------------------------------

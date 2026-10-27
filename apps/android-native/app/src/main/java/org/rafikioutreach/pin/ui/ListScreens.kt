@@ -229,6 +229,7 @@ fun Meter(f0: Float, modifier: Modifier = Modifier, light: Boolean = false, glas
 private val FILTERS = listOf(
     Triple("all", "All|Yote", "list"), Triple("missing", "Needs a location|Hakuna mahali", "pinq"), Triple("near", "Nearby|Karibu nawe", "compass"),
     Triple("repairs", "Repairs|Matengenezo", "wrench"), Triple("due", "Due a visit|Inasubiri ziara", "cal"),
+    Triple("build", "Under construction|Inajengwa", "build"),
 )
 
 @OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
@@ -251,6 +252,7 @@ fun ProjectsScreen(m: AppModel, open: (String) -> Unit, planRoute: () -> Unit = 
         "near" -> p.gps != null
         "repairs" -> snap.repairs.containsKey(p.id)
         "due" -> p.gps != null && (ageDays(snap, p) >= DUE_DAYS || testDue(snap, p))
+        "build" -> snap.building(p)
         else -> true
     }
     // what the Filter pill (country, type) leaves; the chips count within it
@@ -265,6 +267,7 @@ fun ProjectsScreen(m: AppModel, open: (String) -> Unit, planRoute: () -> Unit = 
         "repairs" -> t("${rows.size} reported as needing repair or not working, most urgent first", "${rows.size} zimeripotiwa kuhitaji matengenezo au kutofanya kazi, za haraka kwanza")
         "due" -> testCount(snap, rows).let { n -> if (n > 0) t("${rows.size} due a visit · $n ${if (n == 1) "needs" else "need"} a water test", "${rows.size} zinasubiri ziara · $n zinahitaji kipimo cha maji")
             else t("${rows.size} not visited in the last 6 months, longest first", "${rows.size} hazijatembelewa miezi 6 iliyopita, za muda mrefu kwanza") }
+        "build" -> t("${rows.size} being built", "${rows.size} inajengwa")
         else -> t("${rows.size} projects", "Miradi ${rows.size}")
     }
     val mine = snap.assigned.mapNotNull { a -> snap.projects.firstOrNull { it.id == a.id }?.let { it to t("Visit by " + Dates.weekday(a.date), "Tembelea kabla ya " + Dates.weekday(a.date)) + if (a.note.isNotBlank()) " · ${a.note}" else "" } } +
@@ -334,7 +337,8 @@ fun ProjectsScreen(m: AppModel, open: (String) -> Unit, planRoute: () -> Unit = 
                         if (rowScroll.value < rowScroll.maxValue) drawRect(androidx.compose.ui.graphics.Brush.horizontalGradient(0f to Color.Black, 1f - 28.dp.toPx() / size.width to Color.Black, 1f to Color.Transparent), blendMode = androidx.compose.ui.graphics.BlendMode.DstIn)
                     }.horizontalScroll(rowScroll).padding(end = 20.dp).testTag("chips"), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                     ProjFilterPill(listOfNotNull(COUNTRIES[ck], TGROUPS.firstOrNull { it.first == ty }?.let { t(it.second, it.third) })) { filterSheet = true }
-                    FILTERS.forEach { (k, label, icon) ->
+                    // Under construction shows when something is being built (or it's the chosen list)
+                    FILTERS.filter { (k, _, _) -> k != "build" || f == k || scoped.any { snap.building(it) } }.forEach { (k, label, icon) ->
                         Box(Modifier.onGloballyPositioned { chipX[k] = it.positionInParent().x.toInt() }) {
                             ProjChip(label.split("|").let { t(it[0], it[1]) }, icon, scoped.count { inFilter(it, k) }, f == k, "chip_$k") { f = k; m.prefs.filter = k }
                         }
@@ -353,6 +357,7 @@ fun ProjectsScreen(m: AppModel, open: (String) -> Unit, planRoute: () -> Unit = 
                 f == "missing" && ck.isBlank() -> t("Every project has a location.", "Kila mradi una mahali.")
                 f == "repairs" && ck.isBlank() -> t("No open repairs.", "Hakuna matengenezo yaliyo wazi.")
                 f == "due" -> t("Everything has been visited in the last 6 months.", "Kila kitu kimetembelewa katika miezi 6 iliyopita.")
+                f == "build" -> t("Nothing is being built right now.", "Hakuna kinachojengwa kwa sasa.")
                 else -> t("No projects match.", "Hakuna mradi unaolingana.")
             })
         }

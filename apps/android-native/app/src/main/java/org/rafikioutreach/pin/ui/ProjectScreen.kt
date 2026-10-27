@@ -160,6 +160,8 @@ fun ProjectScreen(m: AppModel, id: String, startTab: String, back: () -> Unit) {
         if (dirs && p.gps != null) DirectionsSheet(p.title, p.gps) { dirs = false }
 
         snap.repairs[p.id]?.let { r -> RepairTracker(m, p, r, here) }
+        // being built: the stages, photos, % and date, linked projects (feat-mea, construction)
+        ConstructionCard(m, p, snap)
         ProjectCostLine(m, p)
         // the extras (photo timeline, the summary to share, a thank-you for donors) fold away under More
         ProjectMore(id) {

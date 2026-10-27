@@ -86,7 +86,7 @@ fun PhotoSlots(m: AppModel, slots: List<Slot>, shots: List<Shot>, onChange: (Lis
         pending = f to label
         runCatching { cam.launch(FileProvider.getUriForFile(ctx, "org.rafikioutreach.pin.files", f)) }
     }
-    fun pickGallery(label: String) { gallFor = label; runCatching { gallery.launch("image/*") } }
+    fun pickGallery(label: String) { PhotoPick.fakeFile?.let { add(it(), label); return }; gallFor = label; runCatching { gallery.launch("image/*") } }
 
     @Composable
     fun Chooser(key: String, label: String) {

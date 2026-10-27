@@ -262,6 +262,7 @@ private fun verb(e: JSONObject) = when (e.optString("a")) {
     "pin" -> t("Pinned", "Aliweka mahali")
     "visit" -> t("Visited", "Alitembelea")
     "fixed" -> t("Fixed", "Alirekebisha")
+    "stage" -> t("Building: ", "Ujenzi: ") + Stages.label(e.optString("s"))
     "new" -> t("Added", "Aliongeza")
     else -> e.optString("a")
 }

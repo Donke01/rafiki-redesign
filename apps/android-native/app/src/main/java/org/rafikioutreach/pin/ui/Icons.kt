@@ -55,6 +55,9 @@ object Ic {
         "alert" to listOf("M12 4l9 16H3z", "M12 10v4.5M12 17.6v.1"),
         "back" to listOf("M19 12H5M11 6l-6 6 6 6"),
         "arrow" to listOf("M5 12h14M13 6l6 6-6 6"),
+        // construction (feat-mea): a crane, and a hard hat for the map badge
+        "build" to listOf("M6 21V4", "M6 4h13l-3 3", "M6 4l4 3", "M16 4v6", "M14.5 10h3v3h-3z", "M3 21h7"),
+        "hat" to listOf("M4 16a8 8 0 0 1 16 0", "M3 16h18", "M12 8v3"),
         "lock" to listOf(rect(5f, 10.5f, 14f, 10f, 2.5f), "M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"),
         "refresh" to listOf("M20 12a8 8 0 1 1-2.3-5.7", "M20 4v4.5h-4.5"),
         "target" to listOf(circle(12f, 12f, 7f), circle(12f, 12f, 1.5f), "M12 2v3M12 19v3M2 12h3M19 12h3"),

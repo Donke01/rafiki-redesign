@@ -81,6 +81,8 @@ data class DProject(
     val gps: LatLng?, val depth: Int, val pump: String, val photos: List<String>, val health: String, val healthAt: String,
     val people: Int, val litresPerDay: Int, val years: Double, val pupils: Int, val patients: Int, val children: Int,
     val visits: List<DVisit>, val repairs: List<DRepair>, val stories: List<DStory>, val gallery: List<DMedia>, val thanks: List<DMedia>,
+    /** Being built: the stages and their photos, read-only (feat-mea, construction). */
+    val build: org.rafikioutreach.pin.ui.DonorBuild? = null,
 ) {
     val place get() = listOf(area, country).filter { it.isNotBlank() }.joinToString(", ")
     /** working · repairing · notworking (from the last check), else building · planned · done */
@@ -111,7 +113,8 @@ data class DonorView(val name: String, val viewer: String, val org: String, val 
                     p.optJSONArray("repairs").objs().map { r -> DRepair(r.s("at"), r.optJSONArray("problems").strs(), r.optInt("cost"), r.s("fixedAt"), r.optBoolean("open")) },
                     p.optJSONArray("stories").objs().map { s -> DStory(s.s("at"), s.s("quote"), s.s("who")) },
                     p.optJSONArray("gallery").objs().map { m -> DMedia(m.s("id"), m.s("at"), m.s("label")) },
-                    p.optJSONArray("thanks").objs().map { m -> DMedia(m.s("id"), m.s("at"), m.s("caption"), m.s("media") == "video") })
+                    p.optJSONArray("thanks").objs().map { m -> DMedia(m.s("id"), m.s("at"), m.s("caption"), m.s("media") == "video") },
+                    org.rafikioutreach.pin.ui.DonorBuild.from(p.optJSONObject("construction")))
             }
             val us = j.optJSONArray("updates").objs().map { u ->
                 DUpdate(u.s("type"), u.s("pid"), u.s("at"), u.optInt("n"), u.optJSONArray("photos").strs(), u.s("quote").ifBlank { u.s("caption") }, u.s("who"), u.s("media"), u.s("id"),

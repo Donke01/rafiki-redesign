@@ -91,7 +91,7 @@ internal fun PhotoOr(name: String, size: Dp, initials: @Composable () -> Unit) {
 }
 
 /** Tests choose a picture without a camera or gallery. */
-internal object PhotoPick { var fake: (() -> Bitmap?)? = null }
+internal object PhotoPick { var fake: (() -> Bitmap?)? = null; var fakeFile: (() -> File)? = null }
 
 /**
  * Add, change or remove a profile photo: [name]'s ([self]: it's mine). Take a photo or choose one, fit it in the circle,

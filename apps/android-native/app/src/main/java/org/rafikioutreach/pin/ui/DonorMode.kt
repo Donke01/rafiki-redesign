@@ -450,6 +450,8 @@ private fun DonorProject(m: AppModel, p: DProject, back: () -> Unit) {
         }
         SpeakBtn("p_" + p.id, p.title + ". " + donorStateName(p.state) + ". " + donorStateSay(p) + " " + donorPeopleSay(p), Modifier.fillMaxWidth().padding(top = 12.dp))
     }
+    // being built: the stages and photos, read-only (feat-mea, construction)
+    p.build?.let { b -> DonorBuildCard(b, { id, w -> m.donor.api.photo(id, w) }) { list, at -> viewer = Triple(list, at, false) } }
     val facts = buildList {
         if (p.people > 0) add(num(p.people) to t("people served", "watu wanaohudumiwa"))
         if (p.litresPerDay > 0) add(num(p.litresPerDay) to t("litres a day", "lita kwa siku"))

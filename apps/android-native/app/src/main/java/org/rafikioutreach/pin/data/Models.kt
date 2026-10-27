@@ -105,7 +105,11 @@ data class Snapshot(
     val people: PeopleServed? = null,
     /** When the water was last tested, by project id (ISO time): "Water test due" after 6 months. */
     val tests: Map<String, String> = emptyMap(),
+    /** Building projects (feat-mea, construction): where each tracked project's build is, by project id. */
+    val stages: Map<String, StageBrief> = emptyMap(),
 ) {
+    /** Being built now: a tracked build not yet handed over, or monday.com's "Under Construction" status. */
+    fun building(p: Project) = stages[p.id]?.let { it.s != "handed" } ?: p.status.equals("Under Construction", true)
     companion object {
         fun from(o: JSONObject): Snapshot {
             val ps = o.optJSONArray("projects") ?: JSONArray()
@@ -130,8 +134,19 @@ data class Snapshot(
                 approveAbove = if (o.has("approveAbove")) o.optLong("approveAbove") else Money.APPROVE_DEFAULT,
                 people = PeopleServed.from(o.optJSONObject("people")),
                 tests = o.optJSONObject("tests")?.let { j -> j.keys().asSequence().associateWith { j.optString(it) } } ?: emptyMap(),
+                stages = o.optJSONObject("stages")?.let { j -> j.keys().asSequence().mapNotNull { k -> j.optJSONObject(k)?.let { k to StageBrief.from(it) } }.toMap() } ?: emptyMap(),
             )
         }
+    }
+}
+
+/** A build's stage, as the app's list carries it (me-contract §construction): stage key, when, by whom, % done,
+ *  expected finish, the project it's part of, its title, how many photos, and whether it's behind schedule. */
+data class StageBrief(val s: String, val at: String = "", val by: String = "", val pct: Int? = null, val due: String = "", val parent: String = "", val t: String = "", val n: Int = 0, val behind: Boolean = false) {
+    companion object {
+        private fun JSONObject.str(k: String) = optString(k).takeIf { it != "null" }.orEmpty()
+        fun from(o: JSONObject) = StageBrief(o.str("s").ifBlank { o.str("stage") }, o.str("at"), o.str("by"), if (o.has("pct") && !o.isNull("pct")) o.optInt("pct") else null,
+            o.str("due"), o.str("parent"), o.str("t"), o.optInt("n"), o.optBoolean("behind"))
     }
 }
 

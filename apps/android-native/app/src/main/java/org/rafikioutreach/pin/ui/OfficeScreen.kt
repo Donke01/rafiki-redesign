@@ -163,7 +163,7 @@ fun verb(a: String) = when (a) {
     "pin" -> t("pinned", "aliweka mahali pa"); "visit" -> t("reported a visit to", "aliripoti ziara ya"); "fixed" -> t("marked fixed", "aliweka imerekebishwa")
     "new" -> t("added a new site:", "aliongeza eneo jipya:"); "undo" -> t("undid a pin on", "alitendua mahali pa"); "request" -> t("asked to move the confirmed location of", "aliomba kuhamisha mahali palipothibitishwa pa")
     "approve" -> t("approved", "aliidhinisha"); "reject" -> t("turned down", "alikataa"); "job" -> t("updated the repair job on", "alisasisha kazi ya matengenezo ya")
-    "assign" -> t("assigned", "aligawa"); "team" -> t("team:", "timu:"); "ask" -> t("asked for a second approval on", "aliomba idhini ya pili ya"); "settings" -> t("changed a setting:", "alibadilisha mpangilio:"); else -> a
+    "stage" -> t("moved the build stage of", "alisogeza hatua ya ujenzi ya"); "assign" -> t("assigned", "aligawa"); "team" -> t("team:", "timu:"); "ask" -> t("asked for a second approval on", "aliomba idhini ya pili ya"); "settings" -> t("changed a setting:", "alibadilisha mpangilio:"); else -> a
 }
 
 /** A date chosen with a calendar. Empty = none. */

@@ -369,6 +369,9 @@ fun OcvOverview(m: AppModel, s: Snapshot, open: (String) -> Unit, go: (String) -
         // water points with no water test in 6 months: Projects › Due a visit, where they carry the tag
         OcvT("o_tests", "drop", "teal", tests.toLong(), if (tests == 1) t("water test due", "kipimo cha maji kinahitajika") else t("water tests due", "vipimo vya maji vinahitajika"), hot = tests > 0) { toList("due") },
         OcvT("ocv_t_visits", "clip", "green", vm?.toLong(), if (vm == 1) t("visit this month", "ziara ya mwezi huu") else t("visits this month", "ziara za mwezi huu")) { go("visits") },
+        // being built (feat-mea, construction): tracked builds not yet handed over, and how many are behind
+        s.projects.count { s.building(it) }.takeIf { it > 0 }?.let { nb -> val late = s.stages.values.count { it.s != "handed" && it.behind }
+            OcvT("ocv_t_build", "build", "amber", nb.toLong(), t("under construction", "inajengwa"), if (late > 0) t("$late behind schedule", "$late imechelewa") else "", red = late > 0) { toList("build") } },
         pe?.let { OcvT("ocv_t_people", "people", "teal", it.total, t("people served", "watu wanaohudumiwa"), if (it.growth > 0) "+" + ocvFmt(it.growth) + " " + t("in 12 months", "kwa miezi 12") else "", up = true) { people = true } },
     )
     tiles.chunked(2).forEachIndexed { ri, row ->
@@ -468,7 +471,7 @@ fun OcvOverview(m: AppModel, s: Snapshot, open: (String) -> Unit, go: (String) -
 }
 
 private fun ocvFeedHue(a: String) = when (a) { "pin", "approve", "assign" -> "pin"; "visit", "fixed" -> "near"; "new" -> "new"; "job", "request" -> "repairs"; "reject" -> "me"; else -> "slate" }
-private fun ocvFeedIcon(a: String) = when (a) { "pin" -> "pin"; "visit" -> "clip"; "fixed" -> "check"; "new" -> "plus"; "undo" -> "undo"; "job" -> "wrench"; "assign" -> "cal"; "team" -> "people"; "ask" -> "hourglass"; "settings" -> "shield"; "approve" -> "check"; else -> "drop" }
+private fun ocvFeedIcon(a: String) = when (a) { "stage" -> "build"; "pin" -> "pin"; "visit" -> "clip"; "fixed" -> "check"; "new" -> "plus"; "undo" -> "undo"; "job" -> "wrench"; "assign" -> "cal"; "team" -> "people"; "ask" -> "hourglass"; "settings" -> "shield"; "approve" -> "check"; else -> "drop" }
 
 /** The share of projects on the map, as a ring that fills. */
 @Composable

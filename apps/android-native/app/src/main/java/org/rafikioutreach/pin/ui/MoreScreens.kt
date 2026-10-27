@@ -8,6 +8,7 @@ import android.content.Intent
 import androidx.compose.ui.platform.testTag
 import android.net.Uri
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -93,6 +94,10 @@ fun NewSiteScreen(m: AppModel, done: (String?) -> Unit) {
     var village by remember { mutableStateOf("") }
     var note by remember { mutableStateOf("") }
     var shots by remember { mutableStateOf(listOf<Shot>()) }
+    // what's happening here (feat-mea, construction): already built, being built now, or planned; and what it's part of
+    var build by remember { mutableStateOf("built") }
+    var parent by remember { mutableStateOf("") }
+    var partOf by remember { mutableStateOf(false) }
     // a long press on the map ("Add a new site here") starts it at that point
     val at = remember { MapHome.takeNewSite() }
     val spot = remember { Spot().also { s -> if (at != null) s.ll = at } }
@@ -106,7 +111,7 @@ fun NewSiteScreen(m: AppModel, done: (String?) -> Unit) {
     androidx.compose.runtime.LaunchedEffect(offer == null) {
         if (offer != null) return@LaunchedEffect
         androidx.compose.runtime.snapshotFlow {
-            if (blank()) null else JSONObject().put("v", 1).put("name", name).put("ck", ck).put("type", type).put("village", village).put("note", note)
+            if (blank()) null else JSONObject().put("v", 1).put("name", name).put("ck", ck).put("type", type).put("village", village).put("note", note).put("build", build).put("parent", parent)
                 .apply { spot.ll?.let { put("lat", it.lat).put("lng", it.lng) } }
                 .put("shots", org.json.JSONArray().apply { shots.forEach { put(JSONObject().put("path", it.file.path).put("label", it.label)) } })
         }.collect { j ->
@@ -123,7 +128,7 @@ fun NewSiteScreen(m: AppModel, done: (String?) -> Unit) {
                 Text(o.optString("name").ifBlank { t("No name yet", "Bado halina jina") }, style = MaterialTheme.typography.bodyMedium, color = C.muted, modifier = Modifier.padding(top = 4.dp))
                 Btn(t("Resume", "Endelea nalo"), {
                     name = o.optString("name"); ck = o.optString("ck").ifBlank { ck }; type = o.optString("type").ifBlank { type }
-                    village = o.optString("village"); note = o.optString("note")
+                    village = o.optString("village"); note = o.optString("note"); build = o.optString("build").ifBlank { "built" }; parent = o.optString("parent")
                     shots = o.optJSONArray("shots")?.let { a -> (0 until a.length()).mapNotNull { i -> a.optJSONObject(i)?.let { Shot(java.io.File(it.optString("path")), it.optString("label")) } } }.orEmpty().filter { it.file.exists() }
                     if (at == null && o.has("lat") && o.has("lng")) org.rafikioutreach.pin.data.LatLng(o.optDouble("lat"), o.optDouble("lng")).let { spot.ll = it; kept = it }
                     offer = null
@@ -143,6 +148,22 @@ fun NewSiteScreen(m: AppModel, done: (String?) -> Unit) {
             COUNTRIES.entries.chunked(2).forEach { row -> Row(Modifier.padding(bottom = 6.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) { row.forEach { (k, n) -> Pill(n, ck == k, Modifier.weight(1f)) { ck = k } } } }
             Text(t("Type", "Aina"), style = MaterialTheme.typography.labelMedium, color = C.ink, modifier = Modifier.padding(top = 14.dp, bottom = 6.dp))
             TYPES.chunked(2).forEach { row -> Row(Modifier.padding(bottom = 6.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) { row.forEach { (k, l) -> Pill(t(l.first, l.second), type == k, Modifier.weight(1f)) { type = k } } } }
+            Text(t("What’s happening here?", "Nini kinaendelea hapa?"), style = MaterialTheme.typography.labelMedium, color = C.ink, modifier = Modifier.padding(top = 14.dp, bottom = 6.dp))
+            // one per line, so no word is ever split (Kiswahili's are long)
+            Column(Modifier.padding(bottom = 6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                listOf("built" to t("Already built", "Imeshajengwa"), "building" to t("Being built now", "Inajengwa sasa"), "planned" to t("Planned", "Imepangwa")).forEach { (k, l) ->
+                    Box(Modifier.fillMaxWidth().testTag("site_build_$k")) { Pill(l, build == k, Modifier.fillMaxWidth()) { build = k } }
+                }
+            }
+            if (build == "building") Text(t("The app tracks the build stage by stage: foundation, walls, roof…", "Programu itafuatilia ujenzi hatua kwa hatua: msingi, kuta, paa…"), style = MaterialTheme.typography.bodySmall, color = C.muted)
+            // part of an existing project (e.g. a dormitory at a school), optional
+            val pp = m.snap.collectAsState().value?.projects?.firstOrNull { it.id == parent }
+            Text(t("Part of (optional)", "Sehemu ya (si lazima)"), style = MaterialTheme.typography.labelMedium, color = C.ink, modifier = Modifier.padding(top = 14.dp, bottom = 6.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Btn(pp?.title ?: t("Choose a project", "Chagua mradi"), { partOf = true }, Modifier.weight(1f).testTag("site_partof"), icon = "link", light = true, small = true)
+                if (pp != null) Btn(t("Remove", "Ondoa"), { parent = "" }, Modifier.padding(start = 8.dp).testTag("site_partof_clear"), light = true, small = true, outline = true)
+            }
+            if (partOf) PartOfSheet(m, { partOf = false }) { parent = it }
             Field(village, { village = it }, t("Village / community", "Kijiji / jamii"), placeholder = t("e.g. Kiptoo, Nandi", "mf. Kiptoo, Nandi"))
             Field(note, { note = it }, t("Notes (optional)", "Maelezo (si lazima)"), placeholder = t("Who asked, how many people, current water source…", "Nani aliomba, watu wangapi, chanzo cha maji sasa…"), lines = 3)
         }
@@ -159,10 +180,11 @@ fun NewSiteScreen(m: AppModel, done: (String?) -> Unit) {
             busy = true
             scope.launch {
                 val body = JSONObject().put("action", "new").put("name", name.trim()).put("ck", ck).put("village", village.trim()).put("type", type).put("note", note.trim()).put("lat", ll.lat).put("lng", ll.lng)
+                    .put("build", build).apply { if (parent.isNotBlank()) put("parent", parent) }
                 when (val o = m.submit(body, shots.map { OutFile(it.file.path, "photo", "Site photo") })) {
                     // sent or saved to send: the kept form goes (and the form empties, so it isn't kept again)
-                    is Outcome.Sent -> { busy = false; name = ""; village = ""; note = ""; shots = emptyList(); NewSiteDrafts.remove(ctx); m.refresh(); done(o.reply.optString("id").takeIf { it.isNotBlank() }) }
-                    Outcome.Queued -> { busy = false; msg = "warn" to t("Saved on this phone. It will be added when you have signal.", "Imehifadhiwa kwenye simu. Itaongezwa ukipata mtandao."); name = ""; village = ""; note = ""; shots = emptyList(); NewSiteDrafts.remove(ctx) }
+                    is Outcome.Sent -> { busy = false; name = ""; village = ""; note = ""; shots = emptyList(); build = "built"; parent = ""; NewSiteDrafts.remove(ctx); m.refresh(); done(o.reply.optString("id").takeIf { it.isNotBlank() }) }
+                    Outcome.Queued -> { busy = false; msg = "warn" to t("Saved on this phone. It will be added when you have signal.", "Imehifadhiwa kwenye simu. Itaongezwa ukipata mtandao."); name = ""; village = ""; note = ""; shots = emptyList(); build = "built"; parent = ""; NewSiteDrafts.remove(ctx) }
                     is Outcome.Failed -> { busy = false; msg = "bad" to o.text }
                     Outcome.Locked -> busy = false
                 }
@@ -220,5 +242,25 @@ private fun MeRow(k: String, v: String) {
             Text(v, color = Color.White, style = MaterialTheme.typography.titleSmall)
         }
         HorizontalDivider(color = Color(0x26FFFFFF))
+    }
+}
+
+
+/** "Part of": search the projects and pick the one this new site belongs to (feat-mea, construction). */
+@Composable
+private fun PartOfSheet(m: AppModel, close: () -> Unit, pick: (String) -> Unit) {
+    var q by remember { mutableStateOf("") }
+    val all = m.snap.collectAsState().value?.projects.orEmpty()
+    TeamSubSheet("partof_sheet", close) { hide ->
+        Text(t("Part of which project?", "Sehemu ya mradi gani?"), style = MaterialTheme.typography.titleLarge, color = C.ink, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.fillMaxWidth())
+        Box(Modifier.testTag("partof_q")) { Field(q, { q = it }, t("Search", "Tafuta"), placeholder = t("e.g. Ndalat", "mf. Ndalat")) }
+        val hits = all.filter { q.isBlank() || it.title.contains(q.trim(), true) || it.area.contains(q.trim(), true) }.take(30)
+        hits.forEach { p ->
+            Row(Modifier.padding(top = 6.dp).fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(C.tint).clickable(role = androidx.compose.ui.semantics.Role.Button) { pick(p.id); hide {} }
+                .heightIn(min = 48.dp).padding(horizontal = 12.dp, vertical = 8.dp).testTag("partof_${p.id}"), verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) { Text(p.title, style = MaterialTheme.typography.titleSmall, color = C.ink); Text(p.sub, style = MaterialTheme.typography.bodySmall, color = C.muted) }
+            }
+        }
+        if (hits.isEmpty()) Text(t("No project matches.", "Hakuna mradi unaolingana."), style = MaterialTheme.typography.bodyMedium, color = C.muted, modifier = Modifier.padding(top = 10.dp))
     }
 }

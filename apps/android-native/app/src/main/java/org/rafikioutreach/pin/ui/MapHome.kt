@@ -272,7 +272,7 @@ fun MapHome(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit, offlin
     val visible = pinned.filter { extras.keep(it) && mapStatusOk(snap, it, status) && (tyOn.isBlank() || tgroup(it) == tyOn) }
     // each pin's icon (the kind), a visit or water test due, and its short name: worked out once per list
     val looks = remember(snap) { pinned.associate { it.id to Triple(typeLook(it).first, mapStatusOk(snap, it, "due"), shortName(it.title)) } }
-    val pins = visible.map { p -> val l = looks[p.id]; HomePin(p.id, p.gps!!, conds[p.id] ?: PinCond.OLD, l?.first ?: "drop", l?.second == true, l?.third ?: "") }
+    val pins = visible.map { p -> val l = looks[p.id]; HomePin(p.id, p.gps!!, conds[p.id] ?: PinCond.OLD, l?.first ?: "drop", l?.second == true, l?.third ?: "", snap.building(p)) }
     val order = remember(anchor, visible) {
         val a = anchor?.let { id -> pinned.firstOrNull { it.id == id } }
         if (a == null) emptyList() else (visible.filter { it.id != a.id }.sortedBy { Geo.metres(a.gps!!, it.gps!!) }.take(24).let { listOf(a) + it })
@@ -524,7 +524,7 @@ fun MapHome(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit, offlin
         if (tray || keyOpen || quick != null) Box(Modifier.matchParentSize().pointerInput(Unit) { awaitPointerEventScope { awaitPointerEvent(); tray = false; keyOpen = false; quick = null } }.testTag("map_tap_away"))
         MapTray(m, here, anim, tray, Modifier.align(Alignment.TopEnd).padding(top = with(dens) { maxOf(sidePx, leftPx).toDp() } + 8.dp, end = 10.dp), { tray = false }) { offlineSheet.value = true }
         MapKeyPop(keyOpen && keyShown, anim, Modifier.align(Alignment.BottomStart).padding(start = 12.dp, bottom = keyBottom + 50.dp),
-            stops = HomeLayers.route && snap.assigned.any { it.date == java.time.LocalDate.now().toString() }, team = HomeLayers.team && snap.admin)
+            stops = HomeLayers.route && snap.assigned.any { it.date == java.time.LocalDate.now().toString() }, team = HomeLayers.team && snap.admin, build = pinned.any { snap.building(it) })
         // a long-pressed pin's quick actions, by the pin
         val qp = quick?.let { q -> pinned.firstOrNull { it.id == q.first }?.let { it to q } }
         PinQuick(qp?.first, qp?.second?.second ?: 0f, qp?.second?.third ?: 0f, room, anim, dens.density, { quick = null }, visit, open)
@@ -716,7 +716,7 @@ private fun MapKeyButton(open: Boolean, modifier: Modifier, toggle: () -> Unit) 
 
 /** The colours of the pins, over the map above the Key button; closes on a tap anywhere else or by itself. */
 @Composable
-private fun MapKeyPop(show: Boolean, anim: Boolean, modifier: Modifier, stops: Boolean = false, team: Boolean = false) {
+private fun MapKeyPop(show: Boolean, anim: Boolean, modifier: Modifier, stops: Boolean = false, team: Boolean = false, build: Boolean = false) {
     androidx.compose.animation.AnimatedVisibility(show, modifier,
         enter = if (anim) fadeIn(tween(150)) + androidx.compose.animation.scaleIn(tween(180), initialScale = 0.94f, transformOrigin = androidx.compose.ui.graphics.TransformOrigin(0f, 1f)) else EnterTransition.None,
         exit = if (anim) fadeOut(tween(120)) else ExitTransition.None) {
@@ -736,6 +736,8 @@ private fun MapKeyPop(show: Boolean, anim: Boolean, modifier: Modifier, stops: B
             KeyRow(t("Visit or water test due", "Ziara au kipimo cha maji kinasubiri"), "key_due") {
                 Box(Modifier.size(9.dp).clip(CircleShape).background(Color.White).padding(1.5.dp).clip(CircleShape).background(Color(PinArt.DUE_ARGB)))
             }
+            // being built (feat-mea, construction)
+            if (build) KeyRow(t("Being built", "Inajengwa"), "key_build") { BuildBadge(15.dp) }
             KeyRow(t("A group: tap to zoom in", "Kundi: gusa ili kukuza"), "key_cluster") {
                 Box(Modifier.size(16.dp).shadow(1.dp, CircleShape).clip(CircleShape).background(Color.White).padding(1.dp)
                     .drawBehind { val w = 2.6.dp.toPx(); val st = androidx.compose.ui.graphics.drawscope.Stroke(w)
