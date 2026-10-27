@@ -10,7 +10,8 @@
 //   (lib/construction.js) → { ok, asset }. GET /api/pin-photo?stage=<project>&asset=<id>[&w=] → that photo, signed-in team only.
 import { checkPin } from './pin.js';
 import { load as loadItin, canEdit, canSee, newId } from '../../lib/itin.js';
-import { addFileToUpdate, assetInfo, addFileToColumn, STORY_COL } from '../../lib/monday.js';
+import { addFileToUpdate, assetInfo, addFileToColumn, STORY_COL, COL } from '../../lib/monday.js';
+import { dropFeed } from '../../lib/feed-cache.js';
 import { loadRec, saveRec } from '../../lib/story.js';
 import { STAGES, loadStage, addStagePhoto, hasPhoto } from '../../lib/construction.js';
 // voice notes are typed out in the background (Kiswahili or English) and added to the same note: lib/voice-note.js
@@ -44,6 +45,12 @@ export async function onRequestPost({ request, env, waitUntil }) {
   try {
     const voice = type.indexOf('audio/') === 0, bytes = voice ? await file.arrayBuffer() : null;
     const asset = await addFileToUpdate(chk.token || env.MONDAY_API_TOKEN, update, file, name, env.MONDAY_API_URL);
+    // a new site an admin added (no review needed): its photos also go to "Photos of the project" for the website
+    const pub = !voice && env.FEED ? await env.FEED.get('pinpub:' + update) : null;
+    if (pub) {
+      try { await addFileToColumn(chk.token || env.MONDAY_API_TOKEN, pub, COL.photos, file, name, env.MONDAY_API_URL); await dropFeed(env); }
+      catch (e) { console.error('site photo to column:', e && e.message); }
+    }
     const stage = String(form.get('stage') || ''), project = String(form.get('project') || '').replace(/\D/g, '');
     if (!voice && STAGES.includes(stage) && project && typeof asset === 'string' && env.FEED) {
       await addStagePhoto(env, project, stage, update, asset);

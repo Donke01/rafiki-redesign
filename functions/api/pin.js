@@ -407,6 +407,8 @@ export async function onRequestPost({ request, env, waitUntil }) {
       await bump(env, 'rl:pinsave:' + ip);
       await log(env, { by, a: 'new', id: newId, t: name });
       if (!chk.admin) await addReview(env, { kind: 'new', id: newId, t: name, by, data: { ck: b.ck, village, gps: fmt(g), type: typeLabel, note: clean(b.note, 300) } });
+      // added by an admin, so already approved: the photos sent to this note also go to "Photos of the project" (/api/pin-photo)
+      else if (updateId && env.FEED) await env.FEED.put('pinpub:' + updateId, newId, { expirationTtl: 86400 });
       return json(Object.assign({ ok: true, id: newId, updateId }, stage ? { stage: withBehind(stage) } : {}), 200);
     }
 

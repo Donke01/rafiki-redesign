@@ -33,7 +33,7 @@
 //        (run on the 1st of each month by .github/workflows/monthly-report.yml), and the monthly e-mail to donors
 import { checkPin } from './pin.js';
 import { getFeed, dropFeed } from '../../lib/feed-cache.js';
-import { parseGps, readGps, writeGps, createUpdate, BOARD_ID } from '../../lib/monday.js';
+import { parseGps, readGps, writeGps, createUpdate, publishSitePhotos, BOARD_ID } from '../../lib/monday.js';
 import { getJson, putJson, team, saveTeam, hashPin, newPin, freshPin, adminNames, sameName, sendMail, alertHtml, escHtml, recipients, addReview, guards, saveGuards, guardKey, guardFor, weakPin, pinInUse } from '../../lib/pin-store.js';
 import { moveLink } from '../../lib/pin-auth.js';
 import { kes, money, estOf, stepBlocked, canDecide, approveLimit, setApproveLimit, askApproval, costRow, addCost, costStats, snapPeople } from '../../lib/pin-office.js';
@@ -72,11 +72,14 @@ function people(env) {
   return String(env.PIN_USERS || '').split(/[,;\n]/).map(s => { const a = s.split(':').map(x => x.trim()); let home = ''; if (a.length > 2 && /^(ke|tz|ug|mw)$/i.test(a[a.length - 1])) home = a.pop().toLowerCase(); return a.length >= 2 ? { name: a.slice(0, -1).join(':'), home } : null; }).filter(Boolean);
 }
 
-export async function onRequestGet({ request, env }) {
+export async function onRequestGet({ request, env, waitUntil }) {
   const chk = await admin(request, env);
   if (chk.res) return chk.res;
   const view = new URL(request.url).searchParams.get('view');
   if (view === 'review') {
+    // approved new sites and story moments from before photos were copied on approval: copy them now, in the background
+    const later = p => (waitUntil ? waitUntil(p) : p);
+    later(sitePhotosCatchUp(env, chk.token || env.MONDAY_API_TOKEN).catch(e => console.error('site photos:', e && e.message)));
     const items = (await getJson(env, 'pinreview', [])).slice().reverse().map(x => (x.t ? Object.assign({}, x, { t: String(x.t).replace(/^[\s*#_-]+|[\s*#_]+$/g, '') }) : x));
     // stories waiting for approval (Stories tab, "Draft ready"); they leave the list once approved or sent back
     const si = await getJson(env, 'pinstoryidx', {});
@@ -149,6 +152,11 @@ export async function onRequestPost({ request, env, waitUntil }) {
           note = ok ? '✅ Repair cost of ' + kes(d.est) + ' approved by ' + by + ' (second approval; asked by ' + it.by + '). Parts can be ordered.' + (reason ? ' Note: ' + said(reason) : '')
             : '⛔ Repair cost of ' + kes(d.est) + ' declined by ' + by + (reason ? ': ' + said(reason) : '.') + ' Parts are not ordered yet.';
         }
+        if (it.kind === 'new' && ok) {
+          // approved: its photos go to "Photos of the project", so the website shows them
+          let n = 0; try { n = await publishSitePhotos(token, it.id, api); it.pub = new Date().toISOString(); await dropFeed(env); } catch (e) { console.error('site photos:', e && e.message); }
+          it.photos = n;
+        }
         if (it.kind === 'new') note = ok ? '✅ New site reviewed and approved by ' + by + ' (RAFIKI pin app).' : '⛔ New site rejected by ' + by + (reason ? ': ' + said(reason) : '.') + ' Please archive it on the board if it should not be followed up.';
         if (it.kind === 'move') {
           if (ok) note = '✅ Location change to ' + d.to + ' approved by ' + by + '.';
@@ -157,6 +165,11 @@ export async function onRequestPost({ request, env, waitUntil }) {
         if (it.kind === 'request') {
           if (ok) { await writeGps(token, board, it.id, d.to, null, api); await dropFeed(env); const c = await getJson(env, 'pinconfirmed', {}); c[it.id] = { by, at: new Date().toISOString(), value: d.to }; await putJson(env, 'pinconfirmed', c); note = '✅ Requested location ' + d.to + ' approved by ' + by + ' and confirmed.'; }
           else note = '⛔ Requested location ' + d.to + ' rejected by ' + by + (reason ? ': ' + said(reason) : '.') + ' The confirmed location stays ' + (d.from || 'as it was') + '.';
+        }
+        if (it.kind === 'story' && ok && d.update) {
+          // told with consent to quote and photograph: the visit's photos go to the website with the story
+          let n = 0; try { n = await publishSitePhotos(token, it.id, api, d.update); it.pub = new Date().toISOString(); await dropFeed(env); } catch (e) { console.error('story photos:', e && e.message); }
+          it.photos = n;
         }
         if (it.kind === 'story') {
           if (ok) { const st = await getJson(env, 'pinstories', []); st.push({ id: it.id, t: it.t, quote: d.quote, who: d.who, by: it.by, at: it.at, approvedBy: by }); await putJson(env, 'pinstories', st.slice(-500)); }
@@ -456,3 +469,19 @@ async function monthly(request, env) {
 }
 
 export function onRequest() { return json({ ok: false, reason: 'method' }, 405); }
+
+// Approved new sites and story moments whose photos were never copied to "Photos of the project" (approved before this was done):
+// a few at a time, each marked once copied so it is not tried again.
+async function sitePhotosCatchUp(env, token) {
+  if (!env.FEED || !token) return;
+  const all = await getJson(env, 'pinreview', []);
+  const todo = all.filter(x => x.status === 'approved' && !x.pub && (x.kind === 'new' || (x.kind === 'story' && x.data && x.data.update))).slice(0, 5);
+  if (!todo.length) return;
+  for (const it of todo) {
+    try { it.photos = await publishSitePhotos(token, it.id, env.MONDAY_API_URL, it.kind === 'story' ? it.data.update : undefined); it.pub = new Date().toISOString(); } catch (e) { console.error('site photos', it.id, e && e.message); }
+  }
+  const now = await getJson(env, 'pinreview', []);
+  for (const it of todo) { const x = now.find(y => y.rid === it.rid); if (x && it.pub) { x.pub = it.pub; x.photos = it.photos; } }
+  await putJson(env, 'pinreview', now);
+  await dropFeed(env);
+}
