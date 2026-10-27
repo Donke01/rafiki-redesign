@@ -108,7 +108,7 @@ def seq(name, lang, fn, br, cm=None, **kw):
 
 def s_bar(pg, check, lang, cm):
     n = pg.locator('#tabs nav button:not(.hidden)').count()
-    check(n == 5, 'admins see five items in the bar (%d)' % n)
+    check(n == 6, 'admins see six items in the bar, Stories joined (%d)' % n)
     check(pg.locator('#tabs button[data-v=vChat]').count() == 1 and pg.locator('#tabs button[data-v=vMe]:not(.hidden)').count() == 0, 'Chat is in the bar and Me is not (admins: Me is the pill; field users get a Me tab, me-brief §5)')
     check(pg.evaluate(BAR) == [], 'every bar label fits at 360 px: %s' % pg.evaluate(BAR))
     check(pg.evaluate(BROKEN, '#tabs nav') == [], 'no word in the bar breaks: %s' % pg.evaluate(BROKEN, '#tabs nav'))

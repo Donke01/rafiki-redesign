@@ -2019,6 +2019,25 @@ button.ocv-n:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
 .ocv-chev{flex:none;display:flex;color:var(--muted);transition:transform .2s}.ocv-chev svg{width:18px;height:18px}
 .ocv-tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .ost-hd{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.sh-go{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:14px;min-height:50px;font-size:1rem}
+.sh-go svg{width:20px;height:20px}
+.sh-nums{grid-template-columns:repeat(4,minmax(0,1fr));margin:12px 0}
+.sh-nums .rr-num small{line-height:1.25}
+.sh-nums .rr-num.hot{border-color:var(--warn)}
+.sh-row .tx .ocv-pill{align-self:flex-start;margin:4px 0 2px}
+.sh-note{margin:6px 0 4px;font-size:.84rem}
+.sh-how summary{cursor:pointer;font-weight:800;color:var(--ink)}
+.sh-how ol{margin:10px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:8px;font-size:.9rem;line-height:1.45}
+.sh-q{width:100%;min-height:46px;margin:2px 0 8px}
+.sh-pick{max-height:60vh;overflow:auto}
+.sty-send{margin:8px 0 0;font-size:.84rem}
+/* six tabs (Stories joined the bar): columns may shrink, the icon pill narrows on small phones */
+.tabs nav{grid-template-columns:repeat(var(--tc,4),minmax(0,1fr))}
+.tabs button{min-width:0}
+@media (max-width:420px){.tabs button > svg{width:min(48px,100%);padding:3px 10px}.tabs .plus span.ic{width:40px}}
+@media (max-width:380px){.tabs .dot{left:auto;right:6px}.tabs button{font-size:.62rem}.tabs button > svg{width:min(42px,100%);padding:3px 8px}.tabs .plus span.ic{width:34px}}
+.sh-nums .rr-num small{overflow-wrap:normal;word-break:normal;hyphens:none}
+@media (max-width:420px){.sh-nums{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .ost-hd .muted{margin:2px 0 0;font-size:.84rem}
 .ost-off{flex:none;border:0;background:none;color:var(--blue);font:inherit;font-size:.84rem;font-weight:700;padding:4px 2px;cursor:pointer}
 .ost-bar{display:block;height:6px;margin:12px 0 6px;border-radius:3px;background:var(--line);overflow:hidden}
@@ -3853,6 +3872,11 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
     </section>
 
     <!-- office (admins) -->
+    <!-- Stories: every project's story in one place, for everyone (sty-hub) -->
+    <section id="vStories" class="hidden" aria-labelledby="h-sty">
+      <h1 id="h-sty" style="margin:4px 2px 10px">Stories</h1>
+      <div id="shBody"></div>
+    </section>
     <section id="vOffice" class="hidden" aria-labelledby="h-off">
       <h1 id="h-off" style="margin:4px 2px 10px">Office</h1>
       <div class="otabs grp" id="oTabs" role="group" aria-label="Office sections"></div>
@@ -3965,6 +3989,7 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
       <button type="button" data-v="vNew" class="plus"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span>New site</button>
       <!-- Chat takes Me's place in the bar; Me is the avatar at top left (chatw, S/chat-tabbar-decision.md) -->
       <button type="button" data-v="vChat" id="tabChat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 19.5l1.2-3.6A7.8 7.8 0 1 1 8.6 18.6z"/><path d="M9 10.5h6M9 13.5h4"/></svg>Chat<span class="dot cw hidden" id="chatDot"></span></button>
+      <button type="button" data-v="vStories" id="tabStories"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v15H5.5A1.5 1.5 0 0 0 4 20.5z"/><path d="M20 5.5A1.5 1.5 0 0 0 18.5 4H13v15h5.5a1.5 1.5 0 0 1 1.5 1.5z"/></svg>Stories<span class="dot hidden" id="shDot"></span></button>
       <!-- field users (no Office tab) get Me back as the 5th tab; admins open Me from the pill (mew, me-brief §5) -->
       <button type="button" data-v="vMe" id="tabMe" class="hidden"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8.2" r="3.7"/><path d="M4.8 20c.9-3.6 3.7-5.6 7.2-5.6s6.3 2 7.2 5.6"/></svg>Me<span class="dot hidden" id="tabMeDot"></span></button>
       <button type="button" data-v="vOffice" id="tabOffice" class="hidden"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Office<span class="dot hidden" id="offDot"></span></button>
@@ -4119,7 +4144,7 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
   }
 
   // --- views and tab bar -------------------------------------------------------------------
-  var MAIN = ['vMap', 'vList', 'vNew', 'vMe', 'vOffice', 'vChat'];
+  var MAIN = ['vMap', 'vList', 'vNew', 'vMe', 'vOffice', 'vChat', 'vStories'];
   var DEEP = { vProj: 1, vRoute: 1, vReport: 1, vSearch: 1, vRoom: 1 };
   // Each screen, and each sub-tab in it, has its own address (#map, #list, #p/<id>, #p/<id>/hist, #office/repairs,
   // #me/team…), so Back and a page refresh keep you where you were.
@@ -4128,7 +4153,7 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
     if (v === 'vMe') return '#me' + (store.get('rfPinMePane') === 'team' ? '/team' : '');
     if (v === 'vOffice') return '#office' + (O.tab && O.tab !== 'overview' ? '/' + O.tab : '');
     if (v === 'vRoom') return '#chat/' + encodeURIComponent(CH.cur || '').replace(/%3A/gi, ':'); // chat ids like t:all, p:101
-    return '#' + ({ vMap: 'map', vList: 'list', vRoute: 'route', vSearch: 'search', vNew: 'new', vReport: 'report', vChat: 'chat' }[v] || 'map');
+    return '#' + ({ vMap: 'map', vList: 'list', vRoute: 'route', vSearch: 'search', vNew: 'new', vReport: 'report', vChat: 'chat', vStories: 'stories' }[v] || 'map');
   }
   // the address of a screen on its first sub-tab (Pin location, Overview, Me)
   function baseHash(v) { return v === 'vProj' && S.cur ? '#p/' + S.cur.id : v === 'vMe' ? '#me' : v === 'vOffice' ? '#office' : hashFor(v); }
@@ -4245,6 +4270,7 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
     BK.opened = BK.opened.filter(function (d) { if (d.isConnected && sec && sec.contains(d)) { d.open = false; return false; } return d.isConnected; });
     if (v === 'vList') { S.filter = 'all'; store.set('rfPinFilter', 'all'); S.ftype = ''; store.set('rfPinType', ''); $('iSearch').value = ''; }
     if (v === 'vSearch') $('sQ').value = '';
+    if (v === 'vStories') SH.f = '';
     if (v === 'vMap') mapFresh();
     if (v === 'vMe') { store.set('rfPinMePane', 'me'); var sb = $('meStampsMore'); if (sb && !$('meStamps').classList.contains('fold')) { $('meStamps').classList.add('fold'); sb.setAttribute('aria-expanded', 'false'); sb.textContent = tr('Show all stamps', 'Onyesha stempu zote'); } }
     if (v === 'vOffice') { O.tab = 'overview'; store.set('rfPinOTab', 'overview'); try { OCV.open = {}; DQM.open = {}; ITW.seg = 'field'; } catch (e) {} }
@@ -4342,7 +4368,7 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
     if (fldQrHash()) return; // a QR sticker: #p=<id> (field tools)
     if (cwHash(location.hash, first, mode)) return; // #chat/<id>, #chat/join/<token> (chatw)
     var h = location.hash, m = /^#p\/(\d+)(?:\/(visit|hist|story))?$/.exec(h), o = /^#office(?:\/([a-z]+))?$/.exec(h), me = /^#me(\/team)?$/.exec(h);
-    var v = { '#map': 'vMap', '#list': 'vList', '#route': 'vRoute', '#search': 'vSearch', '#new': 'vNew', '#report': 'vReport', '#chat': 'vChat' }[h] || (o ? 'vOffice' : me ? 'vMe' : '');
+    var v = { '#map': 'vMap', '#list': 'vList', '#route': 'vRoute', '#search': 'vSearch', '#new': 'vNew', '#report': 'vReport', '#chat': 'vChat', '#stories': 'vStories' }[h] || (o ? 'vOffice' : me ? 'vMe' : '');
     BK.shown = h; BK.mode = first ? 'fresh' : mode || '';
     if (first && v) bkFresh(v); // a fresh open starts the screen over; the sub-tab comes from the address
     if (o) O.tab = o[1] || 'overview';
@@ -4365,11 +4391,11 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
     if (v !== 'vProj') { pick.stop(); liveStop(); } if (v !== 'vNew') nPick.stop();
     S.view = v;
     nav(v, how);
-    ['vLock', 'vMap', 'vList', 'vSearch', 'vRoute', 'vProj', 'vNew', 'vMe', 'vReport', 'vOffice', 'vChat', 'vRoom'].forEach(function (x) { $(x).classList.toggle('hidden', x !== v); });
+    ['vLock', 'vMap', 'vList', 'vSearch', 'vRoute', 'vProj', 'vNew', 'vMe', 'vReport', 'vOffice', 'vChat', 'vRoom', 'vStories'].forEach(function (x) { $(x).classList.toggle('hidden', x !== v); });
     cwShown(v);
     document.body.classList.toggle('locked', v === 'vLock');
     $('main').classList.toggle('bare', v === 'vMap');
-    var tabFor = v === 'vReport' ? 'vMe' : v === 'vSearch' ? 'vList' : v === 'vRoom' ? 'vChat' : v === 'vRoute' || v === 'vProj' ? (S.prev === 'vMap' ? 'vMap' : 'vList') : v;
+    var tabFor = v === 'vReport' ? 'vMe' : v === 'vSearch' ? 'vList' : v === 'vRoom' ? 'vChat' : v === 'vRoute' || v === 'vProj' ? (S.prev === 'vMap' ? 'vMap' : S.prev === 'vStories' && v === 'vProj' ? 'vStories' : 'vList') : v;
     qa('#tabs button').forEach(function (b) { if (b.getAttribute('data-v') === tabFor) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
     if (tabFor === 'vMe') $('hAv').setAttribute('aria-current', 'page'); else $('hAv').removeAttribute('aria-current'); // Me lives on the avatar (chatw)
     $('who').textContent = v === 'vLock' ? '' : S.name; headUi(v);
@@ -4390,6 +4416,7 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
     if (v === 'vMe') renderMe();
     if (v === 'vOffice') renderOffice();
     if (v === 'vChat') cwListOpen();
+    if (v === 'vStories') shRender();
     document.body.classList.toggle('wide', v === 'vOffice');
     visitBarUi();
     if (v === 'vNew') openNew();
@@ -6078,7 +6105,8 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
       (adm && s.text ? '<button type="button" class="btn light" data-sty="text">' + tr('Save text', 'Hifadhi maandishi') + '</button>' : '') +
       (adm && (s.status === 'draft' || s.status === 'collecting') ? '<button type="button" class="btn" data-sty="approve" data-testid="sty_approve"' + (s.text ? '' : ' disabled') + '>' + tr('Approve', 'Idhinisha') + '</button>' : '') +
       (adm && s.status === 'approved' ? '<button type="button" class="btn" data-sty="publish">' + tr('Mark published', 'Weka imechapishwa') + '</button>' : '') +
-      ((s.status === 'draft') || (adm && (s.status === 'approved' || s.status === 'published')) ? '<button type="button" class="btn light" data-sty="collecting">' + tr('Back to Collecting', 'Rudi kukusanya') + '</button>' : '') + '</div><p class="msg" id="styMsg" aria-live="polite"></p></div>';
+      ((s.status === 'draft') || (adm && (s.status === 'approved' || s.status === 'published')) ? '<button type="button" class="btn light" data-sty="collecting">' + tr('Back to Collecting', 'Rudi kukusanya') + '</button>' : '') + '</div>' +
+      (!adm && (s.status === 'not-started' || s.status === 'collecting') ? '<p class="muted sty-send" data-testid="sty_send">' + tr('“Draft the story” sends it to an admin for review. Nothing goes on the website before it is approved.', '“Andaa hadithi” inaituma kwa msimamizi akague. Hakuna kinachoenda kwenye tovuti kabla ya kuidhinishwa.') + '</p>' : '') + '<p class="msg" id="styMsg" aria-live="polite"></p></div>';
     box.innerHTML = h; cnThumbs(box);
   }
   function ROWSKID(s) { return ['before', 'progress', 'after'].some(function (r) { return (s.photos[r] || []).some(function (x) { return x.children; }); }); }
@@ -6463,6 +6491,79 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
   // a tile filters the list; tapped again, it shows them all
   $('lNums').addEventListener('click', function (e) { var b = e.target.closest('[data-f]'); if (b) { var f = b.getAttribute('data-f'); lPick(S.filter === f ? 'all' : f); } });
 
+  // --- Stories: every project's story in one place (bottom bar). Write a story, see where each one is, send it for
+  // review; admins approve and publish. The writer itself is the project's Stories tab (styDraw), saved to monday.com.
+  var SH = { f: '' };
+  var SHF = [['need', 'Needs a story', 'Inahitaji hadithi'], ['draft', 'Waiting for review', 'Inasubiri ukaguzi'], ['approved', 'Approved', 'Imeidhinishwa'], ['published', 'On the website', 'Kwenye tovuti']];
+  function shGroup(p) { var st = styOf(p); return st === 'draft' ? 'draft' : st === 'approved' ? 'approved' : st === 'published' ? 'published' : 'need'; }
+  function shCount() { var c = { need: 0, draft: 0, approved: 0, published: 0 }; S.projects.forEach(function (p) { c[shGroup(p)]++; }); return c; }
+  function shDot() { var d = $('shDot'); if (!d) return; var n = S.admin ? shCount().draft : 0; d.textContent = n; d.classList.toggle('hidden', !n); }
+  function shLine(p) {
+    var x = S.stories[p.id], st = styOf(p);
+    if (!x || st === 'not-started') return '';
+    var ph = (x.b || 0) + (x.i || 0) + (x.a || 0);
+    return [tr((x.n || 0) + ' of 6 answers', 'Majibu ' + (x.n || 0) + ' kati ya 6'), ph === 1 ? tr('1 photo', 'Picha 1') : tr(ph + ' photos', 'Picha ' + ph), x.c === 'received' ? tr('consent received', 'ruhusa imepatikana') : tr('consent not yet', 'ruhusa bado')].map(function (t) { return t.replace(/ /g, '\u00a0'); }).join(' · ');
+  }
+  function shPill(p) {
+    var st = styOf(p), m = { 'not-started': ['off', 'Not started', 'Haijaanza'], collecting: ['has', 'Collecting', 'Inakusanywa'], draft: ['warn', 'Waiting for review', 'Inasubiri ukaguzi'], approved: ['ok', 'Approved', 'Imeidhinishwa'], published: ['ok', 'On the website', 'Kwenye tovuti'] }[st] || ['off', st, st];
+    return ocvPill(m[0], tr(m[1], m[2]));
+  }
+  function shSort(a, b) {
+    var w = function (p) { var st = styOf(p); return st === 'collecting' ? 0 : st === 'draft' ? 1 : p.status === 'Completed' ? 2 : 3; };
+    var x = S.stories[a.id], y = S.stories[b.id];
+    return w(a) - w(b) || String((y && y.at) || '').localeCompare(String((x && x.at) || '')) || a.title.localeCompare(b.title);
+  }
+  function shRow(p) {
+    return '<button type="button" class="ost-row sh-row" data-shopen="' + esc(p.id) + '" data-testid="sh_p_' + esc(p.id) + '"><span class="ost-ck" style="--hb:var(--hb-coral);--hu:var(--hu-coral)" aria-hidden="true">' + oic('spark') + '</span>' +
+      '<span class="tx"><b>' + esc(p.title) + '</b><small>' + esc([p.area, p.country].filter(Boolean).join(' · ')) + '</small>' + shPill(p) + (shLine(p) ? '<small>' + shLine(p) + '</small>' : '') + '</span><span class="ocv-chev" aria-hidden="true">' + oic('chev') + '</span></button>';
+  }
+  function shRender() {
+    var b = $('shBody'); if (!b) return;
+    var c = shCount();
+    if (!SH.f) SH.f = S.admin && c.draft ? 'draft' : 'need';
+    var list = S.projects.filter(function (p) { return shGroup(p) === SH.f; }).sort(shSort);
+    var MAXN = 60, more = list.length > MAXN;
+    b.innerHTML = '<div class="o-grid ocv"><div class="ocv-main">' +
+      ocvHero('stories', 'spark', 'coral', tr('Every project has a story', 'Kila mradi una hadithi'), tr('How a project changed lives, in the words of the people it serves. Everything is saved to monday.com.', 'Jinsi mradi ulivyobadilisha maisha, kwa maneno ya watu unaowahudumia. Kila kitu kinahifadhiwa monday.com.'), null,
+        '<button type="button" class="btn sh-go" data-sh="write" data-testid="sh_write">' + oic('plus') + '<span>' + tr('Write a story', 'Andika hadithi') + '</span></button>') +
+      '<div class="rr-nums sh-nums" role="group" aria-label="' + esc(tr('Show', 'Onyesha')) + '">' + SHF.map(function (f) {
+        return '<button type="button" class="rr-num' + (f[0] === 'draft' && c.draft && S.admin ? ' hot' : '') + '" data-shf="' + f[0] + '" aria-pressed="' + (SH.f === f[0]) + '" data-testid="sh_f_' + f[0] + '"><b>' + c[f[0]] + '</b><small>' + tr(f[1], f[2]) + '</small></button>';
+      }).join('') + '</div>' +
+      '<div class="card ocv-box" data-testid="sh_list"><h3 class="ocv-h">' + tr(SHF.filter(function (f) { return f[0] === SH.f; })[0][1], SHF.filter(function (f) { return f[0] === SH.f; })[0][2]) + '</h3>' +
+      (SH.f === 'draft' ? '<p class="muted sh-note">' + (S.admin ? tr('Open one to read it, edit the words, then Approve.', 'Fungua moja uisome, hariri maneno, kisha Idhinisha.') : tr('An admin reads these and approves them for the website.', 'Msimamizi anazisoma na kuziidhinisha kwa ajili ya tovuti.')) + '</p>' : '') +
+      (list.length ? list.slice(0, MAXN).map(shRow).join('') + (more ? '<p class="muted sh-note">' + tr('Showing ' + MAXN + ' of ' + list.length + '. Use “Write a story” to find any project.', 'Inaonyesha ' + MAXN + ' kati ya ' + list.length + '. Tumia “Andika hadithi” kupata mradi wowote.') + '</p>' : '')
+        : '<p class="otodo-ok">' + oic('check') + '<span>' + tr('Nothing here right now.', 'Hakuna kitu hapa sasa hivi.') + '</span></p>') + '</div>' +
+      '<details class="card ocv-box sh-how"><summary>' + tr('How a story gets to the website', 'Jinsi hadithi inavyofika kwenye tovuti') + '</summary><ol>' +
+        '<li><b>' + tr('Collect', 'Kusanya') + '</b> ' + tr('Answer the 6 questions (typing or a voice note), add before, during and after photos, a quote, and photo consent.', 'Jibu maswali 6 (kwa kuandika au sauti), ongeza picha za kabla, wakati na baada, nukuu, na ruhusa ya picha.') + '</li>' +
+        '<li><b>' + tr('Send for review', 'Tuma kwa ukaguzi') + '</b> ' + tr('“Draft the story” writes it from your answers and sends it to an admin.', '“Andaa hadithi” inaiandika kutoka kwa majibu yako na kuituma kwa msimamizi.') + '</li>' +
+        '<li><b>' + tr('Approve', 'Idhinisha') + '</b> ' + tr('An admin reads it, fixes the words and approves it.', 'Msimamizi anaisoma, anarekebisha maneno na kuiidhinisha.') + '</li>' +
+        '<li><b>' + tr('Publish', 'Chapisha') + '</b> ' + tr('Approved stories show on the website. Nothing goes public before that.', 'Hadithi zilizoidhinishwa zinaonekana kwenye tovuti. Hakuna kinachotoka kabla ya hapo.') + '</li></ol></details>' +
+      '</div></div>';
+    shDot();
+  }
+  function shPick() {
+    var all = S.projects.slice().sort(shSort);
+    var draw = function (q) {
+      q = (q || '').trim().toLowerCase();
+      var l = all.filter(function (p) { return !q || (p.title + ' ' + (p.area || '') + ' ' + (p.country || '')).toLowerCase().indexOf(q) >= 0; }).slice(0, 40);
+      return l.length ? l.map(shRow).join('') : '<p class="muted">' + tr('No project matches.', 'Hakuna mradi unaolingana.') + '</p>';
+    };
+    var w = panel(tr('Which project is the story about?', 'Hadithi inahusu mradi gani?'), '<input type="search" class="sh-q" id="shQ" placeholder="' + esc(tr('Search a project or village', 'Tafuta mradi au kijiji')) + '" aria-label="' + esc(tr('Search a project or village', 'Tafuta mradi au kijiji')) + '" autocomplete="off"><div id="shPickL" class="sh-pick">' + draw('') + '</div>');
+    var q = w.querySelector('#shQ'), L = w.querySelector('#shPickL');
+    q.addEventListener('input', function () { L.innerHTML = draw(q.value); });
+    L.addEventListener('click', function (e) { var r = e.target.closest('[data-shopen]'); if (!r) return; buzz(); w.close(); shOpen(r.getAttribute('data-shopen')); });
+  }
+  function shOpen(id) {
+    if (!byId(id)) return; openProj(id, 'story');
+    // straight to the writer: the project's tabs at the top of the screen, under the header
+    setTimeout(function () { var t = $('tabStory'), l = t && t.closest('[role=tablist]'); if (!l || S.view !== 'vProj') return; var hd = document.querySelector('header.top'); window.scrollTo({ top: Math.max(0, l.getBoundingClientRect().top + window.scrollY - (hd ? hd.offsetHeight : 0) - 8), behavior: 'smooth' }); }, 350);
+  }
+  $('shBody').addEventListener('click', function (e) {
+    var f = e.target.closest('[data-shf]'), o = e.target.closest('[data-shopen]'), g = e.target.closest('[data-sh]');
+    if (f) { buzz(); SH.f = f.getAttribute('data-shf'); shRender(); return; }
+    if (o) { buzz(); shOpen(o.getAttribute('data-shopen')); return; }
+    if (g && g.getAttribute('data-sh') === 'write') { buzz(); shPick(); }
+  });
   // --- Projects: the calm head, the chip row and the Filter sheet, in step with the Office tabs (pwmap) ---------
   var LTY = []; // the kinds of project in the chosen country: [key, name, how many]
   var LCH = [['all', 'All', 'Yote'], ['missing', 'No location', 'Hakuna mahali'], ['near', 'Nearby', 'Karibu nawe'], ['repairs', 'Repairs', 'Matengenezo'], ['due', 'Due a visit', 'Inasubiri ziara'],
@@ -8524,7 +8625,7 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
   }
   function adminUi() {
     $('tabOffice').classList.toggle('hidden', !S.admin); $('tabMe').classList.toggle('hidden', !!S.admin);
-    $('tabs').style.setProperty('--tc', 5);
+    $('tabs').style.setProperty('--tc', 6); shDot();
     var n = S.reviewOpen || 0; $('offDot').textContent = n; $('offDot').classList.toggle('hidden', !n);
   }
   function oSeg() {

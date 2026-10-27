@@ -246,7 +246,7 @@ def s_pill(check):
                         check(g['person'], '[%s] the person icon shows' % t)
                         if w >= 360: check(g['word'] and g['text'] == ('Mimi' if lang == 'sw' else 'Me'), '[%s] the word shows (%s)' % (t, g['text']))
                         tabs = pg.evaluate("[...document.querySelectorAll('#tabs button')].filter(b => b.offsetParent).map(b => [b.textContent.trim(), b.scrollWidth <= b.clientWidth + 1, b.getClientRects().length])")
-                        check(len(tabs) == 5 and all(x[1] for x in tabs), '[%s] five tabs, nothing cut (%s)' % (t, tabs))
+                        check(len(tabs) == 6 and all(x[1] for x in tabs), '[%s] six tabs, nothing cut (%s)' % (t, tabs))
                         if not admin: check(any(x[0].startswith('Mimi' if lang == 'sw' else 'Me') for x in tabs), '[%s] a field user has the Me tab' % t)
                         pg.click('#hAv'); pg.wait_for_timeout(1200)
                         g2 = pg.evaluate(HEAD); check(view(pg) == 'vMe' and g2['ring'] == 'page', '[%s] the pill opens Me and shows it is open' % t)

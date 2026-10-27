@@ -74,7 +74,7 @@ def context(br, lang, admin=True):
     return ctx, pg
 
 def h(pg): return pg.evaluate('location.hash')
-def view(pg): return pg.evaluate("['vMap','vList','vSearch','vRoute','vProj','vNew','vMe','vReport','vOffice','vChat','vRoom'].filter(v => !document.getElementById(v).classList.contains('hidden'))[0]")
+def view(pg): return pg.evaluate("['vMap','vList','vSearch','vRoute','vProj','vNew','vMe','vReport','vOffice','vChat','vRoom','vStories'].filter(v => !document.getElementById(v).classList.contains('hidden'))[0]")
 def back(pg, t=800): pg.evaluate('history.back()'); pg.wait_for_timeout(t)
 # Me left the bottom bar for the avatar at top left when Chat came in (chatw, S/chat-tabbar-decision.md); it starts over the same way
 def tabbar(pg, v, t=1300): pg.click('#hAv' if v == 'vMe' else '#tabs button[data-v=%s]' % v); pg.wait_for_timeout(t)
@@ -257,7 +257,7 @@ def s_new(pg, check, lang):
 # field users: Me is a bottom-bar tab as well as the pill; both open the same Me, and the Me tab is lit
 def s_field_me(pg, check, lang):
     check(vis(pg, '#tabs button[data-v=vMe]') and not vis(pg, '#tabs button[data-v=vOffice]'), 'a field user has Me in the bar, not Office')
-    check(pg.locator('#tabs button:visible').count() == 5, 'five tabs (%d)' % pg.locator('#tabs button:visible').count())
+    check(pg.locator('#tabs button:visible').count() == 6, 'six tabs, Stories joined (%d)' % pg.locator('#tabs button:visible').count())
     tabbar(pg, 'vList', 1300); pg.click('#tabs button[data-v=vMe]'); pg.wait_for_timeout(1500)
     check(view(pg) == 'vMe' and h(pg) == '#me', 'the Me tab opens Me (%s)' % h(pg))
     check(pg.get_attribute('#tabs button[data-v=vMe]', 'aria-current') == 'page' and pg.get_attribute('#hAv', 'aria-current') == 'page', 'the Me tab and the pill are lit')
@@ -291,7 +291,7 @@ SEQ = [('Office: a tile, then Back → Office grid', s_office), ('Project: Histo
        ('Reload on #p/101/hist, #office/repairs, #me', s_reload), ('Refresh button on each top-level screen stays put', s_refresh),
        ('Projects: Repairs + scrolled; bottom bar → All, top; Back → kept', s_filter),
        ('Links, the bottom bar and notifications: Back comes home or to where you were', s_home), ('New site: the form survives a reload; the bottom bar keeps it', s_new),
-       ('Field user: Me is the 5th tab, lit with the pill; it starts over', s_field_me), ('Admin: re-tap every tab, no blink', s_retap), ('Field user: re-tap every tab, no blink', s_retap)]
+       ('Field user: Me is in the bar, lit with the pill; it starts over', s_field_me), ('Admin: re-tap every tab, no blink', s_retap), ('Field user: re-tap every tab, no blink', s_retap)]
 FIELD = {s_field_me}
 with sync_playwright() as p:
     br = p.chromium.launch()
