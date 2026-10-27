@@ -30,8 +30,9 @@ VIS = {'103': {'at': iso(24 * 20), 'by': 'Meril Kiprop', 'state': 'working'}, '1
 TEAM = [{'name': 'Reid Anderson', 'admin': True, 'source': 'cloudflare'}, {'name': 'Meril Kiprop', 'source': 'app', 'home': 'ke'}]
 ACT = [{'by': 'Meril Kiprop', 'a': 'visit', 's': 'notworking', 'id': '101', 't': 'Kapsaret Borehole', 'at': iso(3)},
        {'by': 'Grace Achieng', 'a': 'pin', 'id': '103', 't': 'Turbo Spring', 'at': iso(26)}]
+ROLE = {'admin': True}   # field users (not admins) have Me as the 5th tab instead of Office (mew, me-brief §5)
 def snap():
-    return {'ok': True, 'who': 'Reid Anderson', 'admin': True, 'reviewOpen': 0, 'projects': P, 'repairs': REP, 'visits': VIS, 'tests': {}, 'jobs': [], 'assigned': [],
+    return {'ok': True, 'who': 'Reid Anderson' if ROLE['admin'] else 'Meril Kiprop', 'admin': ROLE['admin'], 'reviewOpen': 0, 'projects': P, 'repairs': REP, 'visits': VIS, 'tests': {}, 'jobs': [], 'assigned': [],
             'confirmed': {}, 'me': {'kind': 'app', 'nick': '', 'phone': '', 'home': 'ke'}, 'approveAbove': 50000}
 def install(pg):
     def pin_api(route, req):
@@ -55,7 +56,8 @@ def install(pg):
     pg.route(re.compile(r'https://(www\.google\.com/s2|fonts\.googleapis\.com)/.*'), lambda r, q: r.abort())
 
 ERRS = []
-def context(br, lang):
+def context(br, lang, admin=True):
+    ROLE['admin'] = admin
     ctx = br.new_context(viewport={'width': 390, 'height': 844}, is_mobile=True, has_touch=True, service_workers='block', locale='en-GB', timezone_id='Africa/Nairobi',
                          geolocation={'latitude': 0.515, 'longitude': 35.27, 'accuracy': 8}, permissions=['geolocation'])
     ctx.route(re.compile(r'https://(tile\.openstreetmap\.org|server\.arcgisonline\.com)/.*'), lambda r, q: r.fulfill(status=200, body=TILE, headers={'Content-Type': 'image/png', 'Access-Control-Allow-Origin': '*'}))
@@ -65,7 +67,7 @@ def context(br, lang):
     pg.on('pageerror', lambda e: ERRS.append('pageerror: ' + str(e)[:200]))
     pg.on('console', lambda m: ERRS.append('console: ' + m.text[:200]) if m.type == 'error' and 'Failed to load resource' not in m.text else None)
     pg.goto(BASE + '/pin'); pg.wait_for_timeout(700)
-    pg.evaluate("l => { localStorage.setItem('rfPinOnb', '1'); if (l === 'sw') localStorage.setItem('rfPinLang', 'sw'); }", lang)
+    pg.evaluate("l => { localStorage.setItem('rfPinOnb', '1'); localStorage.setItem('rfPinMeHint', '1'); if (l === 'sw') localStorage.setItem('rfPinLang', 'sw'); }", lang)
     pg.reload(); pg.wait_for_timeout(700)
     for d in '9999': pg.click('.pk[data-k="%s"]' % d)
     pg.wait_for_timeout(1500)
@@ -252,17 +254,50 @@ def s_new(pg, check, lang):
     shot(pg, 'new-site-after-reload', lang)
     tabbar(pg, 'vMap', 1500); tabbar(pg, 'vNew', 1500); check(pg.input_value('#nName') == 'Kipkaren Spring', 'the bottom bar starts New site over but keeps the draft')
 
+# field users: Me is a bottom-bar tab as well as the pill; both open the same Me, and the Me tab is lit
+def s_field_me(pg, check, lang):
+    check(vis(pg, '#tabs button[data-v=vMe]') and not vis(pg, '#tabs button[data-v=vOffice]'), 'a field user has Me in the bar, not Office')
+    check(pg.locator('#tabs button:visible').count() == 5, 'five tabs (%d)' % pg.locator('#tabs button:visible').count())
+    tabbar(pg, 'vList', 1300); pg.click('#tabs button[data-v=vMe]'); pg.wait_for_timeout(1500)
+    check(view(pg) == 'vMe' and h(pg) == '#me', 'the Me tab opens Me (%s)' % h(pg))
+    check(pg.get_attribute('#tabs button[data-v=vMe]', 'aria-current') == 'page' and pg.get_attribute('#hAv', 'aria-current') == 'page', 'the Me tab and the pill are lit')
+    shot(pg, 'field-me-tab', lang)
+    pg.locator('#meSw button[data-p=team]').click(); pg.wait_for_timeout(800); check(h(pg) == '#me/team', 'Team (%s)' % h(pg))
+    tabbar(pg, 'vMap', 1500); pg.click('#tabs button[data-v=vMe]'); pg.wait_for_timeout(1300)
+    check(h(pg) == '#me' and pg.get_attribute('#meSw button[data-p=me]', 'aria-selected') == 'true', 'the Me tab starts over on Me (%s)' % h(pg))
+    back(pg, 1300); check(view(pg) == 'vMap', 'Back from the Me tab comes to Map home (%s)' % view(pg))
+    pg.click('#hAv'); pg.wait_for_timeout(1300); check(view(pg) == 'vMe' and pg.get_attribute('#tabs button[data-v=vMe]', 'aria-current') == 'page', 'the pill opens the same Me, with the Me tab lit')
+
+# re-tapping the tab you are on: starts over in place, no fade, no new map (me-brief §6)
+WATCH = """() => { window.__blink = []; const mo = new MutationObserver(ms => ms.forEach(m => { const c = m.target.className || ''; if (m.target.tagName === 'SECTION' && /view-(in|fwd|back)/.test(c)) window.__blink.push(m.target.id + ':' + c); }));
+  document.querySelectorAll('main > section').forEach(s => mo.observe(s, { attributes: true, attributeFilter: ['class'] })); window.__mo = mo;
+  const m = document.querySelector('#hMap'); window.__map = m && m._leaflet_id; }"""
+def s_retap(pg, check, lang):
+    for b in pg.locator('#tabs button:visible').all():
+        v = b.get_attribute('data-v'); b.click(); pg.wait_for_timeout(1500)
+        if v == 'vList': pg.evaluate('scrollTo(0, 300)')
+        pg.evaluate(WATCH); b.click(); pg.wait_for_timeout(60)
+        anim = pg.evaluate("[...document.querySelectorAll('main > section')].filter(s => !s.classList.contains('hidden')).flatMap(s => s.getAnimations()).filter(a => a.playState === 'running').length")
+        pg.wait_for_timeout(900)
+        got = pg.evaluate("[window.__blink, window.__map === (document.querySelector('#hMap') || {})._leaflet_id]")
+        check(view(pg) == v, '%s: still on it (%s)' % (v, view(pg)))
+        check(not got[0] and not anim, '%s: no fade or slide when tapped again (%s, %d running)' % (v, got[0], anim))
+        check(got[1], '%s: the map is not made again' % v)
+        check(y(pg) == 0, '%s: back at the top (%d)' % (v, y(pg)))
+
 SEQ = [('Office: a tile, then Back → Office grid', s_office), ('Project: History, Back → Pin location, Back → Projects where you were', s_project),
        ('Map: moved, away and back by the bottom bar → first view; card, Back → card only', s_map), ('Me: stamps, Back → collapsed; Monthly report, Back; Team, Back', s_me),
        ('Visit: step 4, Back → step 3; step 1, Back asks and keeps the draft', s_visit), ('A sheet open, Back closes only the sheet', s_sheet),
        ('Reload on #p/101/hist, #office/repairs, #me', s_reload), ('Refresh button on each top-level screen stays put', s_refresh),
        ('Projects: Repairs + scrolled; bottom bar → All, top; Back → kept', s_filter),
-       ('Links, the bottom bar and notifications: Back comes home or to where you were', s_home), ('New site: the form survives a reload; the bottom bar keeps it', s_new)]
+       ('Links, the bottom bar and notifications: Back comes home or to where you were', s_home), ('New site: the form survives a reload; the bottom bar keeps it', s_new),
+       ('Field user: Me is the 5th tab, lit with the pill; it starts over', s_field_me), ('Admin: re-tap every tab, no blink', s_retap), ('Field user: re-tap every tab, no blink', s_retap)]
+FIELD = {s_field_me}
 with sync_playwright() as p:
     br = p.chromium.launch()
     for lang in LANGS:
         for name, fn in SEQ:
-            ctx, pg = context(br, lang); del ERRS[:]
+            ctx, pg = context(br, lang, admin=not (fn in FIELD or name.startswith('Field'))); del ERRS[:]
             seq(name, lang, fn, pg)
             ctx.close()
     br.close()

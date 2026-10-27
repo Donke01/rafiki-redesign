@@ -29,7 +29,7 @@ def context(br, lang, w=390, h=844, theme='', reduce=False):
     pg = ctx.new_page(); g['install'](pg)
     pg.on('pageerror', lambda e: ERRS.append('pageerror: ' + str(e)[:200]))
     pg.goto(BASE + '/pin'); pg.wait_for_timeout(700)
-    pg.evaluate("([l, t]) => { localStorage.setItem('rfPinOnb', '1'); if (l === 'sw') localStorage.setItem('rfPinLang', 'sw'); if (t) localStorage.setItem('rfPinTheme', t); }", [lang, theme])
+    pg.evaluate("([l, t]) => { localStorage.setItem('rfPinOnb', '1'); localStorage.setItem('rfPinMeHint', '1'); if (l === 'sw') localStorage.setItem('rfPinLang', 'sw'); if (t) localStorage.setItem('rfPinTheme', t); }", [lang, theme])
     pg.reload(); pg.wait_for_timeout(700)
     for d in '9999': pg.click('.pk[data-k="%s"]' % d)
     pg.wait_for_timeout(2200)
@@ -63,8 +63,10 @@ def full(br, lang, w=390, h=844, theme='', tag=''):
     view(pg, [0.52, 35.27], 14); pin(pg, '102'); check(pg.evaluate("!!document.getElementById('mpaCard').offsetParent"), '[%s] a pin opens its card' % t)
     check(pg.evaluate("document.getElementById('hMap').classList.contains('m3-dim') && document.querySelector('.mpa-pin.on[data-id=\"102\"]') != null"), '[%s] the pin lifts, the others step back' % t)
     shot(pg, t + '-3-card')
-    pg.evaluate('history.back()'); pg.wait_for_timeout(700); check(not pg.evaluate("!!document.getElementById('mpaCard').offsetParent") and not calm(pg), '[%s] Back closes the card only' % t)
-    pg.evaluate('history.back()'); pg.wait_for_timeout(700); check(calm(pg) and pg.evaluate('location.hash') == '#map', '[%s] Back again puts the tiles away, still on Map' % t)
+    check(calm(pg), '[%s] a pin tap puts the tiles away (the card stays)' % t)   # me-brief §7
+    pg.evaluate('history.back()'); pg.wait_for_timeout(700); check(not pg.evaluate("!!document.getElementById('mpaCard').offsetParent") and calm(pg) and pg.evaluate('location.hash') == '#map', '[%s] Back closes the card only, still on Map' % t)
+    tap_empty(pg); check(not calm(pg), '[%s] a tap on empty map reveals the tiles again' % t)
+    pg.evaluate('history.back()'); pg.wait_for_timeout(700); check(calm(pg) and pg.evaluate('location.hash') == '#map', '[%s] Back puts the tiles away, still on Map' % t)
     # names at zoom 13
     view(pg, [0.515, 35.272], 13); n = pg.evaluate("document.querySelectorAll('#hMap .m3-lb').length")
     check(n > 0, '[%s] names show at zoom 13 (%d)' % (t, n))
@@ -106,6 +108,24 @@ with sync_playwright() as p:
         pg.click('#hMap .lc-me a'); pg.wait_for_timeout(250)
         pinged = pg.evaluate("new Promise(r => { const t0 = Date.now(), f = () => document.querySelector('#hMap .you.m3-ping') ? r(true) : Date.now() - t0 > 900 ? r(false) : setTimeout(f, 20); f(); })")
         check(pinged, '[%s] Show where I am: the you-dot pulses once' % lang)
+        # exploring while the tiles are out puts them away (me-brief §7); the app's own moves don't
+        if not calm(pg): tap_empty(pg)
+        view(pg, [0.55, 35.27], 12)
+        def reveal():
+            if calm(pg): tap_empty(pg)
+            return not calm(pg)
+        box = pg.locator('#hMap').bounding_box(); cx, cy = box['x'] + box['width'] * 0.4, box['y'] + box['height'] * 0.5
+        check(reveal(), '[%s] revealed before dragging' % lang)
+        pg.mouse.move(cx, cy); pg.mouse.down(); pg.mouse.move(cx + 80, cy + 40, steps=6); pg.mouse.up(); pg.wait_for_timeout(500)
+        check(calm(pg), '[%s] dragging the map puts the tiles away' % lang)
+        check(reveal(), '[%s] an empty tap brings them back' % lang); pg.click('#hMap .leaflet-control-zoom-in'); pg.wait_for_timeout(600)
+        check(calm(pg), '[%s] the + button puts the tiles away' % lang)
+        reveal(); pg.mouse.move(cx, cy); pg.mouse.wheel(0, -300); pg.wait_for_timeout(700); check(calm(pg), '[%s] a wheel / pinch zoom puts the tiles away' % lang)
+        reveal(); x, y = g['empty_spot'](pg); pg.mouse.dblclick(x, y); pg.wait_for_timeout(800); check(calm(pg), '[%s] a double-tap zoom puts the tiles away (and does not bring them back)' % lang)
+        view(pg, [0.6, 35.2], 9); reveal(); pg.evaluate("document.querySelector('#hMap .mpa-cl').click()"); pg.wait_for_timeout(900); check(calm(pg), '[%s] a cluster tap puts the tiles away' % lang)
+        reveal(); pg.click('#hMap .lc-me a'); pg.wait_for_timeout(600); check(calm(pg), '[%s] Show where I am puts the tiles away' % lang)
+        reveal(); view(pg, [0.5, 35.3], 11); check(not calm(pg), '[%s] a camera move the app makes itself leaves the tiles out' % lang)
+        shot(pg, lang + '-390-9-explore-revealed'); pg.evaluate('history.back()'); pg.wait_for_timeout(600)
         # the bottom bar: back to calm, no filter
         pg.click('#tabs button[data-v=vList]'); pg.wait_for_timeout(900); pg.click('#tabs button[data-v=vMap]'); pg.wait_for_timeout(1500)
         check(calm(pg) and not pg.evaluate("!!document.getElementById('mclPill').offsetParent"), '[%s] the bottom bar brings the map back calm, no filter' % lang)
@@ -118,6 +138,8 @@ with sync_playwright() as p:
     # reduced motion: nothing animates
     ctx, pg = context(br, 'en', reduce=True); tap_empty(pg)
     check(pg.evaluate("!document.getElementById('vMap').classList.contains('m3-in') && getComputedStyle(document.querySelector('#hMap .mpa-dot.c-bad'), '::before').animationName === 'none'"), 'reduced motion: no reveal animation, no pulse')
+    b = pg.locator('#hMap').bounding_box(); pg.mouse.move(b['x'] + 120, b['y'] + 300); pg.mouse.down(); pg.mouse.move(b['x'] + 200, b['y'] + 340, steps=5); pg.mouse.up(); pg.wait_for_timeout(30)
+    check(calm(pg) and not pg.evaluate("document.getElementById('vMap').classList.contains('m3-out')"), 'reduced motion: a drag hides the tiles at once')
     ctx.close()
     # 250 projects on a 4× slower CPU
     base = list(P); P[:] = [pj(str(1000 + i), 'Site %d Borehole' % i, 'Area %d' % (i % 40), [0.1 + (i % 25) * 0.04, 34.7 + (i // 25) * 0.09], ['Borehole well', 'School', 'Health', 'Orphanage', 'Farming'][i % 5]) for i in range(250)]

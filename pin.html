@@ -3490,6 +3490,63 @@ html[data-theme=sun] .cw-vpv{border:2px solid #000;box-shadow:none}
 }
 @media (prefers-reduced-motion: reduce){.cw-m.nw,.cw-sys.nw,.cw-rc.pop,.cw-tk.rd.up,.cw-dots i,.cw-skel i,.cw-unl.gone,.cw-fe,.cw-go > span{animation:none !important;transition:none !important}.cw-unl.gone{opacity:0}}
 </style>
+<style id="mew-css">
+/* polish-mew: the Me pill at top left (avatar, person icon, "Me"), its one-time hint, profile photos, centred wide screens */
+html .top #hAv{grid-column:1;grid-row:1;justify-self:start;display:flex;align-items:center;gap:5px;width:auto;min-width:44px;height:44px;padding:0 10px 0 5px;border-radius:999px;background:var(--gl2,var(--card));color:var(--ink);border:1px solid var(--glb,var(--line));box-shadow:var(--gls,none);font:inherit;white-space:nowrap;position:relative;z-index:1}
+html[data-theme=sun] .top #hAv{background:#FFFFFF;border:2px solid #000;box-shadow:none}
+body.sub #hAv{display:none}body.locked #hAv{visibility:hidden}
+#hAv .hav-a{position:relative;flex:none;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1576BD,#054F81);color:#FFFFFF;font-size:.76rem;font-weight:800;letter-spacing:.02em;overflow:hidden}
+html[data-theme=sun] #hAv .hav-a{background:#0050A0}
+#hAv .hav-i{font-weight:inherit}
+#hAv .hav-l{display:flex;align-items:center;gap:2px;font-size:.92rem;font-weight:800;color:var(--ink)}
+#hAv .hav-p{width:15px;height:15px;flex:none;color:var(--blue)}
+#hAv.tight{padding-right:8px}#hAv.tight .hav-t{display:none}
+html .top #hAv[aria-current=page]{background:var(--tint);border-color:var(--blue);box-shadow:0 0 0 1.5px var(--blue)}
+html[data-theme=sun] .top #hAv[aria-current=page]{background:#DCEBFF;border-color:#000;box-shadow:0 0 0 2px #000}
+html .top #hAv[aria-current=page] .hav-l{color:var(--blue)}
+#hAv .hav-n{position:absolute;top:-4px;left:25px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--warn);color:#FFFFFF;font-style:normal;font-size:.66rem;font-weight:800;line-height:18px;text-align:center;border:2px solid var(--card);box-sizing:content-box}
+#hAv .hav-n.hidden{display:none}
+html .top #hTitle{max-width:min(calc(100% - 100px),var(--htw,100%))}
+/* the hint */
+.mehint{position:fixed;z-index:1200;padding:12px 14px 10px;border-radius:16px;background:#04263F;color:#FFFFFF;box-shadow:0 14px 34px rgba(4,38,63,.32);font-size:.92rem;line-height:1.4;opacity:0;transform:translateY(-6px)}
+.mehint.in{opacity:1;transform:none;transition:opacity .2s,transform .25s cubic-bezier(.3,1.4,.5,1)}.mehint.out{opacity:0;transition:opacity .18s}
+.mehint p{margin:0 0 8px;overflow-wrap:normal;word-break:normal;hyphens:none}
+.mehint-ar{position:absolute;top:-7px;width:16px;height:16px;background:inherit;transform:rotate(45deg);border-radius:3px}
+.mehint-ok{display:block;margin-left:auto;min-height:40px;padding:0 16px;border:0;border-radius:999px;background:#FFFFFF;color:#04263F;font:inherit;font-weight:800;cursor:pointer}
+html[data-theme=dark] .mehint{background:#E6EEF4;color:#04263F}html[data-theme=dark] .mehint-ok{background:#04263F;color:#FFFFFF}
+html[data-theme=sun] .mehint{background:#000;color:#FFF;box-shadow:none;border:2px solid #000}
+@media (prefers-reduced-motion: reduce){.mehint,.mehint.in,.mehint.out{transition:none;transform:none}}
+/* a photo laid over an avatar's initials */
+img.avph{position:absolute;inset:0;width:100%;height:100%;border-radius:50%;object-fit:cover;pointer-events:none;display:block}
+/* the photo is the first child and positioned, so the initials (in flow) sit under it and badges (positioned, later) over it */
+.cw-sav{position:relative;display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;margin:0 6px -5px 0;border-radius:50%;background:var(--hb,var(--tint));color:var(--hu,var(--blue));font-size:.56rem;font-weight:800;vertical-align:baseline;overflow:hidden}
+#meAv{position:relative;overflow:visible}#meAv > img:not(.avph){border-radius:50%}
+#meAv.can{cursor:pointer}
+#meAv .mh-cam{position:absolute;right:-4px;bottom:-4px;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#FFFFFF;color:#0A78C2;box-shadow:0 2px 6px rgba(0,0,0,.25);z-index:2}
+#meAv .mh-cam svg{width:14px;height:14px}
+html[data-theme=sun] #meAv .mh-cam{border:2px solid #000;color:#000}
+.ct-phav{cursor:pointer}
+/* the photo sheet */
+.bsh.ph-sh{z-index:2300} /* above a contact sheet, under the app's own confirm */
+.ph-sh .phs{display:flex;flex-direction:column;align-items:stretch;gap:10px;padding-bottom:8px}
+.ph-sh .phs-av{position:relative;align-self:center;width:120px;height:120px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1576BD,#054F81);color:#FFFFFF;font-size:2.2rem;font-weight:800;margin:4px 0 2px;overflow:hidden}
+html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
+.ph-sh .phs-tx{text-align:center;margin:0 0 4px}
+.ph-sh .btn{display:flex;align-items:center;justify-content:center;gap:8px}.ph-sh .btn svg{width:20px;height:20px;flex:none}
+.ph-sh .phc{position:relative;align-self:center;width:min(260px,70vw);aspect-ratio:1;border-radius:14px;overflow:hidden;touch-action:none;background:#000}
+.ph-sh .phc-c{display:block;width:100%;height:100%;cursor:grab}
+.ph-sh .phc-o{position:absolute;inset:0;border-radius:50%;box-shadow:0 0 0 999px rgba(0,0,0,.45);pointer-events:none;outline:2px solid rgba(255,255,255,.9);outline-offset:-2px}
+.ph-sh .phc-z{display:flex;align-items:center;gap:10px;font-weight:700}.ph-sh .phc-z input{flex:1;min-height:44px}
+.ph-sh .phc-tip{text-align:center;margin:0}
+/* wide screens: the header follows the page's centred column (the pill sits over the content), and a row of Office tiles that wraps stays centred */
+@media (min-width:1000px){
+  body:not(.wide):not(.cw2) header.top{padding-left:max(12px,calc(50% - 376px));padding-right:max(12px,calc(50% - 376px))}
+}
+@media (min-width:700px){
+  #oTabs.otabs{display:flex !important;flex-wrap:wrap;justify-content:center}
+  #oTabs.otabs > .otab{flex:0 0 calc((100% - 8 * 8px) / 9);min-width:74px;max-width:110px}
+}
+</style>
 </head>
 <body class="locked">
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
@@ -3827,6 +3884,8 @@ html[data-theme=sun] .cw-vpv{border:2px solid #000;box-shadow:none}
       <button type="button" data-v="vNew" class="plus"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span>New site</button>
       <!-- Chat takes Me's place in the bar; Me is the avatar at top left (chatw, S/chat-tabbar-decision.md) -->
       <button type="button" data-v="vChat" id="tabChat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 19.5l1.2-3.6A7.8 7.8 0 1 1 8.6 18.6z"/><path d="M9 10.5h6M9 13.5h4"/></svg>Chat<span class="dot cw hidden" id="chatDot"></span></button>
+      <!-- field users (no Office tab) get Me back as the 5th tab; admins open Me from the pill (mew, me-brief §5) -->
+      <button type="button" data-v="vMe" id="tabMe" class="hidden"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8.2" r="3.7"/><path d="M4.8 20c.9-3.6 3.7-5.6 7.2-5.6s6.3 2 7.2 5.6"/></svg>Me<span class="dot hidden" id="tabMeDot"></span></button>
       <button type="button" data-v="vOffice" id="tabOffice" class="hidden"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Office<span class="dot hidden" id="offDot"></span></button>
     </nav>
   </div>
@@ -4218,6 +4277,8 @@ html[data-theme=sun] .cw-vpv{border:2px solid #000;box-shadow:none}
   }
   function show(v, how) {
     var mode = BK.mode; BK.mode = '';
+    // the bottom-bar tab you're already on, tapped again: it starts over in place, with no fade and no new map (mew, me-brief §6)
+    var again = S.view === v && mode === 'fresh' && MAIN.indexOf(v) >= 0;
     if (S.view !== v && MAIN.indexOf(S.view) >= 0) S.prev = S.view;
     if (v !== 'vProj') { pick.stop(); liveStop(); } if (v !== 'vNew') nPick.stop();
     S.view = v;
@@ -4237,10 +4298,11 @@ html[data-theme=sun] .cw-vpv{border:2px solid #000;box-shadow:none}
     window.scrollTo(0, 0);
     // deeper screens slide in from the right, going back slides them away; tabs fade through
     var dir = (DEEP[v] || 0) - (DEEP[S.lastShown] || 0); S.lastShown = v;
-    var sec = $(v); if (sec) { sec.classList.remove('view-in', 'view-fwd', 'view-back'); void sec.offsetWidth; sec.classList.add(dir > 0 ? 'view-fwd' : dir < 0 ? 'view-back' : v === 'vMap' ? 'x' : 'view-in'); }
+    var sec = $(v); if (sec && again) sec.classList.remove('view-in', 'view-fwd', 'view-back');
+    else if (sec) { sec.classList.remove('view-in', 'view-fwd', 'view-back'); void sec.offsetWidth; sec.classList.add(dir > 0 ? 'view-fwd' : dir < 0 ? 'view-back' : v === 'vMap' ? 'x' : 'view-in'); }
     if (v === 'vSearch') searchOpen();
     setTimeout(titleUi, 0);
-    if (v === 'vList') S.animList = true;
+    if (v === 'vList' && !again) S.animList = true;
     if (v === 'vMap') { homeMap(); setTimeout(bkWatch, 60); }
     if (v === 'vList') renderList();
     if (v === 'vMe') renderMe();
@@ -4348,6 +4410,7 @@ html[data-theme=sun] .cw-vpv{border:2px solid #000;box-shadow:none}
       var n = a.length, t = n === 1 ? '1 change waiting to send' : n + ' changes waiting to send';
       $('outbox').classList.toggle('hidden', !n); $('outboxTx').textContent = t;
       $('tabDot').classList.toggle('hidden', !n); $('tabDot').textContent = n;
+      $('tabMeDot').classList.toggle('hidden', !n); $('tabMeDot').textContent = n > 99 ? '99+' : n; havN(n);
       $('meOut').textContent = n ? t : 'Nothing';
     });
   }
@@ -4768,6 +4831,8 @@ html[data-theme=sun] .cw-vpv{border:2px solid #000;box-shadow:none}
       store.set('rfPinName', S.name); store.set('rfPinWho', S.who);
       S.projects = j.projects || []; S.repairs = j.repairs || {}; S.visits = j.visits || {}; prjTestsSet(j.tests); saveList();
       if (j.me) { S.me = j.me; store.set('rfPinMe', JSON.stringify(j.me)); }
+      if (j.photos) { phAll(j.photos); if (j.me && j.me.photo) phSet(S.name, j.me.photo); } // profile photos (mew)
+      setTimeout(meHint, 1400);
       setTimeout(bellLoad, 0);   // the bell in the header counts what's new
       if ((j.reviewOpen || 0) > (S.reviewOpen || 0)) store.set('rfPinReviewAt', new Date().toISOString());
       S.admin = !!j.admin; S.jobs = j.jobs || []; S.assigned = j.assigned || []; S.confirmed = j.confirmed || {}; S.reviewOpen = j.reviewOpen || 0;
@@ -5396,6 +5461,13 @@ html[data-theme=sun] .cw-vpv{border:2px solid #000;box-shadow:none}
       clearTimeout(MCL.tapT); MCL.tapT = setTimeout(function () { mclClean(!MCL.clean); }, 280); // not when it is a double-tap to zoom
     });
     map.on('dblclick', function () { clearTimeout(MCL.tapT); });
+    // exploring while the tiles are out (a drag, a pinch, the zoom buttons, a double-tap, a pin or a cluster) puts them
+    // away again, the same way a tap does; the app's own camera moves (on open, start-over) don't count (mew, me-brief §7)
+    var explore = function () { if (!MCL.clean && S.view === 'vMap') { clearTimeout(MCL.tapT); mclClean(true); } };
+    ['pointerdown', 'touchstart', 'wheel', 'keydown'].forEach(function (ev) { c.addEventListener(ev, function () { MCL.user = Date.now(); if (ev === 'pointerdown' || ev === 'touchstart') MCL.down = true; }, { capture: true, passive: true }); });
+    ['pointerup', 'pointercancel', 'touchend', 'touchcancel'].forEach(function (ev) { addEventListener(ev, function () { if (MCL.down) { MCL.down = false; MCL.user = Date.now(); } }, { capture: true, passive: true }); });
+    map.on('movestart zoomstart', function () { if (MCL.down || Date.now() - (MCL.user || 0) < 500) explore(); });
+    c.addEventListener('click', function (e) { if (e.target.closest && e.target.closest('.leaflet-marker-icon')) explore(); }, true);
     map.on('zoomend', function () { mpaDraw(); });
     map.on('moveend', function () { if (MPA.area && !MPA.area.contains(map.getBounds())) mpaDraw(); });
     map.on('zoomstart movestart', function () { m3QuickShut(); });
@@ -5515,6 +5587,8 @@ html[data-theme=sun] .cw-vpv{border:2px solid #000;box-shadow:none}
     setTimeout(function () { t.classList.add('out'); setTimeout(function () { t.remove(); }, 320); }, 5200);
   }
   $('meWelcome').addEventListener('click', function () { onbOpen(); });
+  $('meAv').addEventListener('click', function () { if (this.classList.contains('can')) { buzz(); phSheet(S.name); } });
+  $('meAv').addEventListener('keydown', function (e) { if ((e.key === 'Enter' || e.key === ' ') && this.classList.contains('can')) { e.preventDefault(); phSheet(S.name); } });
   // the stamps fold to one row; the rest open on a tap
   $('meStampsMore').addEventListener('click', function () { var f = $('meStamps').classList.toggle('fold'); this.setAttribute('aria-expanded', !f); this.textContent = f ? tr('Show all stamps', 'Onyesha stempu zote') : tr('Show fewer stamps', 'Onyesha stempu chache'); buzz(); });
 
@@ -5522,10 +5596,210 @@ html[data-theme=sun] .cw-vpv{border:2px solid #000;box-shadow:none}
   function headUi(v) {
     var sub = v === 'vProj' || v === 'vRoute' || v === 'vReport' || v === 'vSearch' || v === 'vRoom';
     document.body.classList.toggle('sub', sub);
-    $('hAv').textContent = initials(S.name);
+    havDraw();
   }
   $('hBack').addEventListener('click', function () { var b = S.view === 'vProj' ? 'back' : S.view === 'vRoute' ? 'routeBack' : S.view === 'vReport' ? 'repBack' : null; if (b) $(b).click(); else if (S.view === 'vSearch') goBack(function () { show('vList', 'replace'); }); else if (S.view === 'vRoom') goBack(function () { show('vChat', 'replace'); }); });
   $('hAv').addEventListener('click', function () { tabGo('vMe'); });
+
+  // --- polish-mew: Me at top left is a labelled pill, a one-time hint for it, and profile photos ---------------
+  // The pill: the avatar (profile photo, else initials), a person icon and "Me". On a narrow header it drops the word.
+  var HAV_P = '<svg class="hav-p" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8.2" r="3.7"/><path d="M4.8 20c.9-3.6 3.7-5.6 7.2-5.6s6.3 2 7.2 5.6"/></svg>';
+  function havDraw() {
+    var a = $('hAv'); if (!a) return;
+    if (!a.querySelector('.hav-a')) a.innerHTML = '<span class="hav-a" aria-hidden="true"><b class="hav-i"></b></span><span class="hav-l" aria-hidden="true">' + HAV_P + '<span class="hav-t" data-nosw></span></span><i class="hav-n hidden" id="hAvN" aria-hidden="true"></i>';
+    var av = a.querySelector('.hav-a');
+    if (av.getAttribute('data-ph') !== (S.name || '')) av.setAttribute('data-ph', S.name || '');
+    a.querySelector('.hav-i').textContent = initials(S.name);
+    a.querySelector('.hav-t').textContent = tr('Me', 'Mimi');
+    var n = Number($('hAvN').textContent) || 0;
+    a.setAttribute('aria-label', tr('Me', 'Mimi') + (n ? ' · ' + (n === 1 ? tr('1 change waiting to send', 'Badiliko 1 linasubiri kutumwa') : tr(n + ' changes waiting to send', 'Mabadiliko ' + n + ' yanasubiri kutumwa')) : ''));
+    phScan(); havFit();
+  }
+  function havN(n) { var b = $('hAvN'); if (!b) return; b.textContent = n > 99 ? '99+' : String(n || 0); b.classList.toggle('hidden', !n); havDraw(); }
+  // never over the wordmark, the refresh button or the bell; the scrolled-page title keeps clear of it too
+  function havFit() {
+    var a = $('hAv'), top = a && a.closest('.top'); if (!top || !a.offsetParent) return;
+    a.classList.remove('tight');
+    var ht = top.querySelector('.ht'), r = a.getBoundingClientRect(), w = ht ? ht.getBoundingClientRect() : null;
+    if (w && w.width && r.right > w.left - 6) a.classList.add('tight');
+    r = a.getBoundingClientRect();
+    var tb = top.getBoundingClientRect(), cs = getComputedStyle(top), mid = (tb.left + parseFloat(cs.paddingLeft) + tb.right - parseFloat(cs.paddingRight)) / 2;
+    var rf = $('bRefresh').getBoundingClientRect(), right = rf.width ? rf.left : tb.right;
+    top.style.setProperty('--htw', Math.max(80, Math.floor(2 * (Math.min(mid - r.right, right - mid) - 10))) + 'px');
+  }
+  addEventListener('resize', function () { havFit(); });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(havFit);
+  qa('#segLang button, #segSize button').forEach(function (b) { b.addEventListener('click', function () { setTimeout(havDraw, 0); }); });
+
+  // The one-time hint: a speech bubble under the pill, the first time someone signed in opens this version.
+  // Any tap (it still reaches what was tapped, e.g. the map), "Got it", Esc or Back closes it; never shown again.
+  function meHint() {
+    if (!S.admin || store.get('rfPinMeHint') || S.view === 'vLock' || !S.name || document.body.classList.contains('sub') || document.querySelector('.mehint')) return;
+    var a = $('hAv'), onb = $('onb'); if (!a || !a.offsetParent || (onb && !onb.classList.contains('hidden')) || document.querySelector('.bsh, .tsh, .npg')) return;
+    store.set('rfPinMeHint', '1');
+    var d = document.createElement('div'); d.className = 'mehint'; d.setAttribute('role', 'status'); d.setAttribute('data-testid', 'me_hint');
+    d.innerHTML = '<i class="mehint-ar" aria-hidden="true"></i><p>' + esc(tr('Me is here now: your work, settings and team', 'Mimi iko hapa sasa: kazi yako, mipangilio na timu')) + '</p><button type="button" class="mehint-ok">' + esc(tr('Got it', 'Sawa')) + '</button>';
+    document.body.appendChild(d);
+    var place = function () {
+      var r = a.getBoundingClientRect(), W = document.documentElement.clientWidth, dw = Math.min(300, W - 24), left = Math.max(12, Math.min(r.left, W - 12 - dw));
+      d.style.width = dw + 'px'; d.style.left = left + 'px'; d.style.top = Math.round(r.bottom + 12) + 'px';
+      d.querySelector('.mehint-ar').style.left = Math.round(r.left + Math.min(r.height, r.width) / 2 - left - 8) + 'px';
+    };
+    place(); requestAnimationFrame(function () { d.classList.add('in'); });
+    var l = null, gone = false;
+    var shut = function (fromBack) {
+      if (gone) return; gone = true; d.classList.add('out'); setTimeout(function () { d.remove(); }, 220);
+      document.removeEventListener('pointerdown', any, true); document.removeEventListener('keydown', key, true); removeEventListener('resize', place);
+      if (!fromBack && l) bkShut(l);
+    };
+    var any = function () { shut(false); };   // the tap is never stopped: the map or button under it still gets it
+    var key = function (e) { if (e.key === 'Escape') shut(false); };
+    l = bkOpen('in', function () { if (gone) return false; shut(true); return true; }, d, 'mehint');
+    setTimeout(function () { if (!gone) { document.addEventListener('pointerdown', any, true); document.addEventListener('keydown', key, true); } }, 0);
+    addEventListener('resize', place);
+    d.querySelector('.mehint-ok').addEventListener('click', function () { shut(false); });
+  }
+
+  // Profile photos (/api/team-photo, contract in workers/chat/README + functions/api/team-photo.js). Every avatar
+  // that stands for a person carries data-ph="<name>"; the photo is laid over its initials once it has loaded, so the
+  // initials stay when there is none or it fails. Photos load with the app's own sign-in headers and are kept in the
+  // Cache API by their URL (a new photo is a new URL), so the last one still shows offline.
+  var PH = { map: {}, src: {}, wait: {}, bad: {}, q: 0 }, PH_C = 'rf-team-photos';
+  try { PH.map = JSON.parse(store.get('rfPinPhotos') || '{}') || {}; } catch (e) { PH.map = {}; }
+  function phKey(n) { return String(n || '').trim().toLowerCase(); }
+  function phUrl(n) { return PH.map[phKey(n)] || ''; }
+  function phSave() { store.set('rfPinPhotos', JSON.stringify(PH.map)); }
+  function phSet(n, u) { var k = phKey(n); if (!k || (PH.map[k] || '') === (u || '')) return; if (u) PH.map[k] = u; else delete PH.map[k]; phSave(); phScan(); }
+  function phAll(m) { var n = {}; Object.keys(m || {}).forEach(function (k) { if (m[k]) n[phKey(k)] = String(m[k]); }); PH.map = n; phSave(); phScan(); }
+  function phAdd(list) { var ch = false; (list || []).forEach(function (p) { if (p && p.name && typeof p.photo === 'string') { var k = phKey(p.name); if ((PH.map[k] || '') !== p.photo) { if (p.photo) PH.map[k] = p.photo; else delete PH.map[k]; ch = true; } } }); if (ch) { phSave(); phScan(); } }
+  function phNameOf(u) { var m = /[?&]name=([^&]*)/.exec(String(u || '')); try { return m ? decodeURIComponent(m[1]).trim().toLowerCase() : ''; } catch (e) { return ''; } }
+  function phCache() { try { return window.caches && window.isSecureContext ? caches.open(PH_C).catch(function () { return null; }) : Promise.resolve(null); } catch (e) { return Promise.resolve(null); } }
+  function phGot(u, b) { if (!b || !b.size) return null; var s = URL.createObjectURL(b); PH.src[u] = s; return s; }
+  function phKeep(u, b) { return phCache().then(function (c) { if (!c) return; var full = new URL(u, location.href).href, nm = phNameOf(u); return c.put(full, new Response(b, { headers: { 'Content-Type': b.type || 'image/jpeg' } })).then(function () { return c.keys(); }).then(function (ks) { ks.forEach(function (q) { if (q.url !== full && phNameOf(q.url) === nm) c.delete(q); }); }); }).catch(function () {}); }
+  function phBlob(u) {
+    if (PH.src[u]) return Promise.resolve(PH.src[u]);
+    if (PH.wait[u]) return PH.wait[u];
+    var nm = phNameOf(u);
+    PH.wait[u] = phCache().then(function (c) {
+      return (c ? c.match(new URL(u, location.href).href).catch(function () { return null; }) : Promise.resolve(null)).then(function (hit) {
+        if (hit) return hit.blob().then(function (b) { return phGot(u, b); });
+        return fetch(u, { headers: Object.assign({ Accept: 'image/*' }, pinHdr()), credentials: 'same-origin' }).then(function (r) {
+          if (r.status === 404) return null;   // no photo any more: initials
+          if (!r.ok) throw new Error('photo ' + r.status);
+          return r.blob().then(function (b) { if (!/^image\//.test(b.type || '')) return null; phKeep(u, b); return phGot(u, b); });
+        }).catch(function () {   // no signal: the last copy of this person kept on the phone
+          return !c ? null : c.keys().then(function (ks) { var q = ks.filter(function (x) { return phNameOf(x.url) === nm; })[0]; return q ? c.match(q).then(function (r) { return r ? r.blob() : null; }).then(function (b) { return b ? phGot(u, b) : null; }) : null; });
+        });
+      });
+    }).catch(function () { return null; }).then(function (s) { delete PH.wait[u]; if (!s) PH.bad[u] = Date.now(); return s; });
+    return PH.wait[u];
+  }
+  function phScan() { if (PH.q) return; PH.q = requestAnimationFrame(function () { PH.q = 0; qa('[data-ph]').forEach(phPaint); }); }
+  function phPaint(el) {
+    var u = phUrl(el.getAttribute('data-ph')), img = el.querySelector(':scope > img.avph');
+    if (!u || (PH.bad[u] && Date.now() - PH.bad[u] < 60000)) { if (img) img.remove(); el.classList.remove('ph-on'); return; }
+    if ((img && img.getAttribute('data-u') === u) || el.getAttribute('data-phw') === u) return;
+    el.setAttribute('data-phw', u);
+    phBlob(u).then(function (s) {
+      el.removeAttribute('data-phw');
+      if (!el.isConnected) return;
+      if (phUrl(el.getAttribute('data-ph')) !== u) return phScan();
+      var cur = el.querySelector(':scope > img.avph');
+      if (!s) { if (cur) cur.remove(); el.classList.remove('ph-on'); return; }
+      if (getComputedStyle(el).position === 'static') el.style.position = 'relative';
+      if (!cur) { cur = document.createElement('img'); cur.className = 'avph'; cur.alt = ''; cur.setAttribute('aria-hidden', 'true'); cur.draggable = false; el.insertBefore(cur, el.firstChild); }
+      cur.onerror = function () { cur.remove(); el.classList.remove('ph-on'); };
+      cur.setAttribute('data-u', u); cur.src = s; el.classList.add('ph-on');
+    });
+  }
+  new MutationObserver(function (ms) { for (var i = 0; i < ms.length; i++) if (ms[i].addedNodes.length) { phScan(); return; } }).observe(document.body, { childList: true, subtree: true });
+  function phForget() { PH.map = {}; store.del('rfPinPhotos'); Object.keys(PH.src).forEach(function (u) { try { URL.revokeObjectURL(PH.src[u]); } catch (e) {} }); PH.src = {}; try { if (window.caches) caches.delete(PH_C).catch(function () {}); } catch (e) {} phScan(); }
+  // who may change whose photo: yourself (with your own PIN or monday.com), or an admin for anyone
+  function phCan(name) { return same(name, S.name) ? !!(S.who || S.mode === 'monday') : !!S.admin; }
+  function phSend(name, blob) {
+    var mine = same(name, S.name);
+    return fetch('/api/team-photo' + (mine ? '' : '?name=' + encodeURIComponent(name)), { method: blob ? 'POST' : 'DELETE', headers: Object.assign({ Accept: 'application/json' }, pinHdr(), blob ? { 'Content-Type': 'image/jpeg' } : {}), body: blob || undefined, credentials: 'same-origin' })
+      .then(function (r) { return r.json().catch(function () { return { ok: false, reason: 'down' }; }).then(function (j) { j.status = r.status; return j; }); })
+      .catch(function () { return { ok: false, reason: 'offline', status: 0 }; });
+  }
+  function phWhy(j) {
+    return j.reason === 'offline' ? tr('Photos need a signal. Please try again when you’re online.', 'Picha zinahitaji mtandao. Tafadhali jaribu tena ukiwa mtandaoni.')
+      : j.reason === 'too-large' ? tr('That photo is too large.', 'Picha hiyo ni kubwa mno.') : j.reason === 'type' ? tr('That kind of file can’t be used.', 'Aina hiyo ya faili haiwezi kutumika.')
+      : j.reason === 'forbidden' || j.reason === 'named-only' ? tr('Only they, or an admin, can change this photo.', 'Ni yeye tu, au msimamizi, anayeweza kubadilisha picha hii.') : why(j);
+  }
+  // after a change: everywhere at once (lists drawn later read the same map)
+  function phDone(name, url, blob) {
+    if (url && blob) { PH.src[url] = URL.createObjectURL(blob); phKeep(url, blob); }
+    phSet(name, url);
+    if (same(name, S.name) && S.me) { S.me.photo = url; store.set('rfPinMe', JSON.stringify(S.me)); }
+    [teamCache, O.team].forEach(function (l) { (l || []).forEach(function (p) { if (same(p.name, name)) p.photo = url; }); });
+    if (CT.w && CT.w.isConnected) ctDraw();
+  }
+  // the sheet: take a photo or choose one, crop it to a square (a circle shows what people will see), or remove it
+  function phSheet(name) {
+    if (!name || !phCan(name)) return;
+    var mine = same(name, S.name), has = !!phUrl(name);
+    var w = panel(esc(mine ? tr('Your photo', 'Picha yako') : tr('Photo: ', 'Picha: ') + name), '<div class="phs" data-testid="ph_sheet"></div>', 'ph-sh');
+    var box = w.querySelector('.phs');
+    var start = function () {
+      has = !!phUrl(name);
+      box.innerHTML = '<span class="phs-av" data-ph="' + esc(name) + '" aria-hidden="true">' + esc(initials(name)) + '</span>' +
+        '<p class="muted phs-tx">' + esc(mine ? tr('Your teammates see it in chat, Team and on the team map.', 'Wenzako wanaiona kwenye gumzo, Timu na ramani ya timu.') : tr('The team sees it in chat, Team and on the team map.', 'Timu inaiona kwenye gumzo, Timu na ramani ya timu.')) + '</p>' +
+        '<button class="btn block" type="button" data-k="cam" data-testid="ph_cam">' + oic('camera') + '<span>' + tr('Take a photo', 'Piga picha') + '</span></button>' +
+        '<button class="btn light block" type="button" data-k="pick" data-testid="ph_pick">' + oic('image') + '<span>' + tr('Choose from gallery', 'Chagua kutoka kwenye picha') + '</span></button>' +
+        (has ? '<button class="btn light block po-red" type="button" data-k="rm" data-testid="ph_rm">' + oic('trash') + '<span>' + tr('Remove photo', 'Ondoa picha') + '</span></button>' : '') +
+        '<input type="file" accept="image/*" capture="user" class="vh" data-k="fcam" tabindex="-1" aria-hidden="true"><input type="file" accept="image/*" class="vh" data-k="fpick" tabindex="-1" aria-hidden="true">';
+    };
+    start();
+    box.addEventListener('click', function (e) {
+      var b = e.target.closest('button[data-k]'); if (!b) return; var k = b.getAttribute('data-k'); buzz();
+      if (k === 'cam') box.querySelector('[data-k=fcam]').click();
+      else if (k === 'pick') box.querySelector('[data-k=fpick]').click();
+      else if (k === 'rm') poAsk(mine ? tr('Remove your photo?', 'Ondoa picha yako?') : tr('Remove this photo?', 'Ondoa picha hii?'), tr('Your initials show instead.', 'Herufi za kwanza za jina zitaonekana badala yake.').replace(/^Your/, mine ? 'Your' : 'The'), tr('Remove photo', 'Ondoa picha'), true).then(function (ok) {
+        if (!ok) return; b.disabled = true;
+        phSend(name, null).then(function (j) { b.disabled = false; if (!j.ok) return toast(phWhy(j)); phDone(j.name || name, '', null); toast(tr('Photo removed', 'Picha imeondolewa')); w.close(); });
+      });
+    });
+    box.addEventListener('change', function (e) { var f = e.target.files && e.target.files[0]; e.target.value = ''; if (f) phCrop(w, box, f, name, start); });
+  }
+  function phCrop(w, box, file, name, back) {
+    if (!/^image\//.test(file.type || 'image/')) return toast(tr('That kind of file can’t be used.', 'Aina hiyo ya faili haiwezi kutumika.'));
+    var url = URL.createObjectURL(file), img = new Image();
+    img.onerror = function () { URL.revokeObjectURL(url); toast(tr('That photo couldn’t be opened.', 'Picha hiyo haikuweza kufunguliwa.')); };
+    img.onload = function () {
+      var iw = img.naturalWidth, ih = img.naturalHeight, base = Math.min(iw, ih), z = 1, cx = iw / 2, cy = ih / 2;
+      box.innerHTML = '<div class="phc" data-testid="ph_crop"><canvas class="phc-c" width="560" height="560" aria-label="' + esc(tr('Photo, cropped to a square', 'Picha, imekatwa mraba')) + '" role="img"></canvas><i class="phc-o" aria-hidden="true"></i></div>' +
+        '<label class="phc-z"><span>' + tr('Zoom', 'Kuza') + '</span><input type="range" min="1" max="3" step="0.01" value="1" data-testid="ph_zoom"></label>' +
+        '<p class="muted phc-tip">' + tr('Drag to move it inside the circle.', 'Iburute kuisogeza ndani ya duara.') + '</p>' +
+        '<button class="btn block" type="button" data-c="use" data-testid="ph_use">' + tr('Use this photo', 'Tumia picha hii') + '</button><button class="btn light block" type="button" data-c="again">' + tr('Choose another', 'Chagua nyingine') + '</button>';
+      var cv = box.querySelector('canvas'), ctx = cv.getContext('2d');
+      var clamp = function () { var s = base / z; cx = Math.min(Math.max(cx, s / 2), iw - s / 2); cy = Math.min(Math.max(cy, s / 2), ih - s / 2); return s; };
+      var paint = function (c, size) { var s = clamp(), g = c.getContext('2d'); g.fillStyle = '#FFFFFF'; g.fillRect(0, 0, size, size); g.imageSmoothingQuality = 'high'; g.drawImage(img, cx - s / 2, cy - s / 2, s, s, 0, 0, size, size); };
+      var draw = function () { paint(cv, 560); };
+      draw();
+      box.querySelector('input[type=range]').addEventListener('input', function () { z = Number(this.value) || 1; draw(); });
+      var drag = null;
+      cv.addEventListener('pointerdown', function (e) { drag = { x: e.clientX, y: e.clientY }; try { cv.setPointerCapture(e.pointerId); } catch (x) {} });
+      cv.addEventListener('pointermove', function (e) { if (!drag) return; var k = (base / z) / (cv.getBoundingClientRect().width || 1); cx -= (e.clientX - drag.x) * k; cy -= (e.clientY - drag.y) * k; drag = { x: e.clientX, y: e.clientY }; draw(); });
+      ['pointerup', 'pointercancel'].forEach(function (ev) { cv.addEventListener(ev, function () { drag = null; }); });
+      box.querySelector('[data-c=again]').addEventListener('click', function () { URL.revokeObjectURL(url); back(); });
+      box.querySelector('[data-c=use]').addEventListener('click', function () {
+        var b = this; b.disabled = true; b.textContent = tr('Saving…', 'Inahifadhi…');
+        var out = document.createElement('canvas'); out.width = out.height = 512; paint(out, 512);
+        // about 512 px and 200 KB or less, made on this phone
+        var q = 0.86, go = function () { out.toBlob(function (bl) { if (bl && bl.size > 200 * 1024 && q > 0.45) { q -= 0.08; return go(); } send(bl); }, 'image/jpeg', q); };
+        var send = function (bl) {
+          if (!bl) { b.disabled = false; b.textContent = tr('Use this photo', 'Tumia picha hii'); return toast(tr('That photo couldn’t be opened.', 'Picha hiyo haikuweza kufunguliwa.')); }
+          phSend(name, bl).then(function (j) {
+            if (!j.ok) { b.disabled = false; b.textContent = tr('Use this photo', 'Tumia picha hii'); return toast(phWhy(j)); }
+            URL.revokeObjectURL(url); phDone(j.name || name, j.photo || '', bl); buzz(); toast(tr('Photo saved ✓', 'Picha imehifadhiwa ✓')); w.close();
+          });
+        };
+        go();
+      });
+    };
+    img.src = url;
+  }
 
   var DROPC = { b: 'mgA', g: 'mgG', c: 'mgC', p: 'mgP', y: 'mgY' };
   function drop(c, mood) {
@@ -6168,7 +6442,7 @@ html[data-theme=sun] .cw-vpv{border:2px solid #000;box-shadow:none}
     var d = S.here && p.gps ? metres(S.here, p.gps) : null;
     var map = p.gps ? '<div class="smap">' + staticMap(p.gps, 15, S.here) + '<span class="pt" style="--c:' + col + '"></span>' +
       (d != null ? '<span class="chipl">' + esc(dist(d)) + ' · Live</span>' : '') + '<span class="attr">© OpenStreetMap</span>' +
-      '<div class="who3"><span class="av" aria-hidden="true">' + esc(r.assignee ? initials(r.assignee) : '?') + '</span><span><b>' + (r.assignee ? ctWho(r.assignee) : 'Not assigned yet') + '</b><small>' +
+      '<div class="who3"><span class="av"' + (r.assignee ? ' data-ph="' + esc(r.assignee) + '"' : '') + ' aria-hidden="true">' + esc(r.assignee ? initials(r.assignee) : '?') + '</span><span><b>' + (r.assignee ? ctWho(r.assignee) : 'Not assigned yet') + '</b><small>' +
       (r.due ? 'Due ' + esc(dDay(r.due)) : r.assignee ? 'Repair job' : 'The office assigns it') + '</small></span></div></div>' : '';
     var steps = [
       ['Reported', (bad ? 'Not working' : 'Needs repair') + ' · ' + ctWho(r.by) + ', ' + esc(when(r.at))],
@@ -7344,7 +7618,7 @@ html[data-theme=sun] .cw-vpv{border:2px solid #000;box-shadow:none}
   function nRow(n, i, seen, rd, K) {
     var k = K[n.k], nw = noteNew(n, seen, rd), who = n.by, hu = nameHue(who);
     var av = n.sms ? '<span class="np-av tile sms" aria-hidden="true" style="--hu:var(--hu-slate);--hb:var(--hb-slate)">' + oic('phone') + '<i class="bd" style="--ku:var(--hu-' + k[4] + ')">' + oic(k[3]) + '</i></span>'
-      : who ? '<span class="np-av" aria-hidden="true" style="--hu:var(--hu-' + hu + ');--hb:var(--hb-' + hu + ')">' + esc(initials(who)) + '<i class="bd" style="--ku:var(--hu-' + k[4] + ')">' + oic(k[3]) + '</i></span>'
+      : who ? '<span class="np-av" data-ph="' + esc(who) + '" aria-hidden="true" style="--hu:var(--hu-' + hu + ');--hb:var(--hb-' + hu + ')">' + esc(initials(who)) + '<i class="bd" style="--ku:var(--hu-' + k[4] + ')">' + oic(k[3]) + '</i></span>'
       : '<span class="np-av tile" aria-hidden="true" style="--hu:var(--hu-' + k[4] + ');--hb:var(--hb-' + k[4] + ')">' + oic(k[3]) + '</span>';
     return '<li><button type="button" class="np-r' + (nw ? ' new' : '') + '" style="--i:' + Math.min(i, 12) + '" data-key="' + esc(nkey(n)) + '"' + (n.id ? ' data-id="' + esc(n.id) + '"' : n.k === 'review' ? ' data-go="review"' : '') + '>' + av +
       '<span class="np-t">' + (nw ? '<span class="vh">' + tr('Unread: ', 'Haijasomwa: ') + '</span>' : '') + '<b>' + (who && !n.sms ? ctWho(who) : esc(who || n.name || '')) + '</b><small>' + esc([nAgo(n.at), n.p].filter(Boolean).join(' · ')) + '</small><span class="m">' + esc(n.m || n.t) + '</span></span>' +
@@ -7622,7 +7896,7 @@ html[data-theme=sun] .cw-vpv{border:2px solid #000;box-shadow:none}
       $('soGo').addEventListener('click', function () { w.close(); signOutAll(); });
     }
   }
-  function signOutAll() { forget(); store.del('rfPinName'); store.del('rfPinWho'); store.del('rfPinMe'); S.name = ''; S.who = ''; S.me = null; if (window.fetch) fetch('/api/pin-auth/logout', { method: 'POST' }).catch(function () {}); show('vLock'); }
+  function signOutAll() { forget(); store.del('rfPinName'); store.del('rfPinWho'); store.del('rfPinMe'); S.name = ''; S.who = ''; S.me = null; phForget(); if (window.fetch) fetch('/api/pin-auth/logout', { method: 'POST' }).catch(function () {}); show('vLock'); }
   $('meSet').addEventListener('click', function (e) { var b = e.target.closest('[data-set]'); if (!b) return; buzz(); setOpen(b.getAttribute('data-set')); });
 
   // Waiting to send: each change still on this phone
@@ -7657,7 +7931,7 @@ html[data-theme=sun] .cw-vpv{border:2px solid #000;box-shadow:none}
       rows.map(function (r) {
         var p = r.p, e = r.e, pr = e && byId(e.id), live = r.at && dayKey(r.at) === today;
         var sub = e ? vb(e) + ' ' + esc(pr ? pr.title : e.t || '') + (pr && pr.area ? ' · ' + esc(pr.area) : '') + ' · ' + since(e.at) : tr('Last seen ', 'Alionekana ') + since(p.lastSeen);
-        return '<li><span class="av' + (live ? ' live' : '') + '" data-mate="' + esc(p.name) + '" role="button" tabindex="0" aria-label="' + esc(p.name) + '">' + mateInitials(p.name) + '</span><div' + (e && pr ? ' class="go" data-id="' + esc(e.id) + '" role="button" tabindex="0"' : '') + '><b data-mate="' + esc(p.name) + '">' + esc(p.name) + '</b><small>' + sub + '</small></div>' +
+        return '<li><span class="av' + (live ? ' live' : '') + '" data-mate="' + esc(p.name) + '" data-ph="' + esc(p.name) + '" role="button" tabindex="0" aria-label="' + esc(p.name) + '">' + mateInitials(p.name) + '</span><div' + (e && pr ? ' class="go" data-id="' + esc(e.id) + '" role="button" tabindex="0"' : '') + '><b data-mate="' + esc(p.name) + '">' + esc(p.name) + '</b><small>' + sub + '</small></div>' +
           (p.phone ? '<a class="ca" href="tel:' + esc(p.phone.replace(/\s/g, '')) + '" aria-label="' + esc(tr('Call ', 'Mpigie ') + p.name) + '">' + oic('phone') + '</a><a class="ca" href="https://wa.me/' + waNum(p.phone, p.home) + '" target="_blank" rel="noopener" aria-label="' + esc('WhatsApp ' + p.name) + '">' + oic('chat') + '</a>' : '') + '</li>';
       }).join('') + '</ul>' + (S.admin && !rows.some(function (r) { return r.p.phone; }) ? '<p class="muted" style="margin:8px 0 0">' + tr('Add phone numbers in Office › Team to call or WhatsApp from here.', 'Ongeza namba za simu kwenye Ofisi › Timu ili kupiga au kutuma WhatsApp kutoka hapa.') + '</p>' : '');
   }
@@ -7827,12 +8101,16 @@ html[data-theme=sun] .cw-vpv{border:2px solid #000;box-shadow:none}
     var hk = homeCk(); $('meRole').textContent = (S.admin ? tr('Admin', 'Msimamizi') : tr('Field team', 'Timu ya uwanjani')) + (CNAME[hk] ? ' · ' + CNAME[hk] : '');
     homeTx();
     $('meAv').innerHTML = S.photo && S.mode === 'monday' ? '<img src="' + esc(S.photo) + '" alt="">' : '<i>' + esc((S.name || '?').split(/\s+/).map(function (w) { return w.charAt(0); }).slice(0, 2).join('').toUpperCase()) + '</i>';
+    // tap your avatar to add, change or remove your profile photo (mew)
+    var mav = $('meAv'), mcan = phCan(S.name); mav.setAttribute('data-ph', S.name || ''); mav.classList.toggle('can', mcan);
+    if (mcan) { mav.setAttribute('role', 'button'); mav.setAttribute('tabindex', '0'); mav.setAttribute('aria-label', phUrl(S.name) ? tr('Change your photo', 'Badilisha picha yako') : tr('Add your photo', 'Ongeza picha yako')); mav.insertAdjacentHTML('beforeend', '<b class="mh-cam" aria-hidden="true">' + oic('camera') + '</b>'); }
+    else { mav.removeAttribute('role'); mav.removeAttribute('tabindex'); mav.removeAttribute('aria-label'); }
     $('mePin').innerHTML = S.mode === 'monday' ? (S.photo ? '<img class="avatar" src="' + esc(S.photo) + '" alt="" onerror="this.remove()">' : '') + 'monday.com' : S.who ? 'Your own PIN' : 'Shared team PIN';
     $('lockBtn').textContent = bioOn() ? tr('Lock the app', 'Funga kwa PIN') : S.mode === 'monday' ? 'Sign out' : 'Lock the app'; bioUi();
     outboxUi(); installUi(); stampsUi(); waitDraw(); meWorkDraw(); itwMe();
     if (actCache) actDraw(); if (teamCache) teamTodayDraw();
     if (!navigator.onLine) { var nos = '<p class="muted">' + tr('This needs a signal.', 'Hii inahitaji mtandao.') + '</p>'; if (!actCache) { $('actTable').innerHTML = nos; $('mmBody').innerHTML = nos; } if (!teamCache) $('ttBody').innerHTML = nos; return; }
-    api('GET', null, '?team=1').then(function (j) { if (j.ok) { teamCache = (j.team || []).filter(function (p) { return p.name; }); teamTodayDraw(); } else if (!teamCache) $('ttBody').innerHTML = '<p class="msg bad">' + esc(why(j)) + '</p>'; });
+    api('GET', null, '?team=1').then(function (j) { if (j.ok) { teamCache = (j.team || []).filter(function (p) { return p.name; }); phAdd(teamCache); teamTodayDraw(); } else if (!teamCache) $('ttBody').innerHTML = '<p class="msg bad">' + esc(why(j)) + '</p>'; });
     api('GET', null, '?activity=1').then(function (j) { if (j.ok) { actCache = j.activity || []; actDraw(); } else if (!actCache) $('actTable').innerHTML = '<p class="msg bad">' + esc(why(j)) + '</p>'; });
   }
 
@@ -7847,8 +8125,8 @@ html[data-theme=sun] .cw-vpv{border:2px solid #000;box-shadow:none}
       .catch(function () { return { ok: false, reason: 'offline', status: 0 }; });
   }
   function adminUi() {
-    $('tabOffice').classList.toggle('hidden', !S.admin);
-    $('tabs').style.setProperty('--tc', S.admin ? 5 : 4);
+    $('tabOffice').classList.toggle('hidden', !S.admin); $('tabMe').classList.toggle('hidden', !!S.admin);
+    $('tabs').style.setProperty('--tc', 5);
     var n = S.reviewOpen || 0; $('offDot').textContent = n; $('offDot').classList.toggle('hidden', !n);
   }
   function oSeg() {
@@ -7864,7 +8142,7 @@ html[data-theme=sun] .cw-vpv{border:2px solid #000;box-shadow:none}
     }).join('');
   }
   $('oTabs').addEventListener('click', function (e) { var b = e.target.closest('[data-o]'); if (!b) return; O.tab = b.getAttribute('data-o'); store.set('rfPinOTab', O.tab); renderOffice(); });
-  function oNeedTeam(cb) { if (O.team) return cb(); adminApi('GET', null, '?view=team').then(function (j) { if (j.ok) { O.team = j.team; O.mail = j.mail; O.cron = j.cron; } cb(); }); }
+  function oNeedTeam(cb) { if (O.team) return cb(); adminApi('GET', null, '?view=team').then(function (j) { if (j.ok) { O.team = j.team; O.mail = j.mail; O.cron = j.cron; phAdd(O.team); } cb(); }); }
   function names() { return (O.team || []).map(function (p) { return p.name; }).sort(); }
   function pname(id) { var p = byId(id); return p ? p.title : 'Project ' + id; }
   function renderOffice() {
@@ -8218,7 +8496,7 @@ html[data-theme=sun] .cw-vpv{border:2px solid #000;box-shadow:none}
     if (dayKey(t) === dayKey(Date.now())) return 'today';
     return Date.now() - t < 7 * 864e5 ? 'week' : 'old';
   }
-  function tmAv(p, st) { var h = tmHue(p.name); st = st || ''; return '<span class="tm-av' + (st ? ' st-' + st : '') + '" style="--hu:var(--hu-' + h + ');--hb:var(--hb-' + h + ')" aria-hidden="true">' + esc(initials(p.name)) + (p.admin ? '<i class="cr">' + CROWN + '</i>' : '') + (st ? '<i class="dot"></i>' : '') + '</span>'; }
+  function tmAv(p, st) { var h = tmHue(p.name); st = st || ''; return '<span class="tm-av' + (st ? ' st-' + st : '') + '" style="--hu:var(--hu-' + h + ');--hb:var(--hb-' + h + ')" data-ph="' + esc(p.name) + '" aria-hidden="true">' + esc(initials(p.name)) + (p.admin ? '<i class="cr">' + CROWN + '</i>' : '') + (st ? '<i class="dot"></i>' : '') + '</span>'; }
   function tmTags(p, long) {
     var s = TM_SRC[p.source] || TM_SRC.app;
     return '<span class="tm-tags">' + (p.admin ? '<span class="tm-t adm">' + CROWN + tr('Admin', 'Msimamizi') + '</span>' : '') + '<span class="tm-t s-' + esc(p.source || 'app') + '">' + oic(s[1]) + tr(s[0], s[2]) + '</span>' +
@@ -8408,7 +8686,7 @@ html[data-theme=sun] .cw-vpv{border:2px solid #000;box-shadow:none}
   function ctField(name, cb) {
     var got = function () { cb(ctFind(teamCache, name) || { name: name, aka: [], src: '' }, false); };
     if (teamCache) return got();
-    api('GET', null, '?team=1').then(function (j) { if (j.ok) teamCache = (j.team || []).filter(function (p) { return p.name; }); got(); });
+    api('GET', null, '?team=1').then(function (j) { if (j.ok) teamCache = (j.team || []).filter(function (p) { return p.name; }); phAdd(teamCache); got(); });
   }
   function ctOpen(name) {
     ctData(name, function (p, full) {
@@ -8470,7 +8748,8 @@ html[data-theme=sun] .cw-vpv{border:2px solid #000;box-shadow:none}
     var editable = adm || me;                                      // details: admins, or yourself
     var canName = (adm && app) || (me && app), canMail = (adm && app) || (me && app), canPhone = (adm && app) || me;
     var none = function (t) { return '<span class="ct-none">' + t + '</span>'; };
-    var hd = '<div class="ct-ban" aria-hidden="true"></div><div class="ct-hd">' + tmAv(p, tmState(p)) + '<h3>' + esc(p.name) + '</h3>' + (p.role ? '<span class="ct-role">' + esc(p.role) + '</span>' : '') + ctBadges(p) + ctStatus(p) + '</div>';
+    var phOk = phCan(p.name), phHas = !!phUrl(p.name);
+    var hd = '<div class="ct-ban" aria-hidden="true"></div><div class="ct-hd">' + (phOk ? tmAv(p, tmState(p)).replace('<span class="tm-av', '<span data-ct="photo" role="button" tabindex="0" aria-label="' + esc(phHas ? tr('Change photo', 'Badilisha picha') : tr('Add photo', 'Ongeza picha')) + '" class="ct-phav tm-av').replace(' aria-hidden="true">', '>') : tmAv(p, tmState(p))) + '<h3>' + esc(p.name) + '</h3>' + (p.role ? '<span class="ct-role">' + esc(p.role) + '</span>' : '') + ctBadges(p) + ctStatus(p) + '</div>';
     var ids = (p.email || p.phone ? '<div class="ct-ids">' + (p.email ? ctId('email', p.email) : '') + (p.phone ? ctId('phone', p.phone) : '') + '</div>' : '');
     var qk = function (k, ic, cls, label, href, ext) {
       var inner = '<span class="ct-qi">' + oic(ic) + '</span><b>' + label + '</b>';
@@ -8489,6 +8768,7 @@ html[data-theme=sun] .cw-vpv{border:2px solid #000;box-shadow:none}
       (!tel && !p.email && !me ? '<p class="ct-hint">' + tr('No phone or e-mail yet.', 'Bado hakuna simu wala barua pepe.') + (adm && app ? ' ' + tr('Add them under Details.', 'Viongeze chini ya Maelezo.') : '') + '</p>' : '');
     var ro = !editable;
     var details = ctGroup('details', tr('Details', 'Maelezo'), [
+      phOk ? ctRow('photo', 'camera', 'coral', phHas ? tr('Change photo', 'Badilisha picha') : tr('Add photo', 'Ongeza picha'), phHas ? tr('Shown in chat, Team and on the team map', 'Inaonekana kwenye gumzo, Timu na ramani ya timu') : '<span class="ct-none">' + tr('Initials for now', 'Herufi za jina kwa sasa') + '</span>') : '',
       ctRow('name', 'ctUser', 'blue', tr('Name', 'Jina'), esc(p.name) + ((p.aka || []).length ? '<span class="ct-aka">' + esc(tr('Before: ', 'Awali: ') + p.aka.join(', ')) + '</span>' : ''), { ro: ro || !canName }),
       editable || p.email ? ctRow('email', 'mail', 'teal', canMail ? (p.email ? tr('Change e-mail', 'Badilisha barua pepe') : tr('Add e-mail', 'Ongeza barua pepe')) : tr('E-mail', 'Barua pepe'), p.email ? esc(p.email) : none(tr('None yet', 'Bado hakuna')), { ro: ro || !canMail }) : '',
       editable || p.phone ? ctRow('phone', 'ctDial', 'green', canPhone ? (p.phone ? tr('Change phone', 'Badilisha simu') : tr('Add phone', 'Ongeza simu')) : tr('Phone', 'Simu'), p.phone ? esc(p.phone) : none(tr('None yet', 'Bado hakuna')), { ro: ro || !canPhone }) : '',
@@ -8529,7 +8809,7 @@ html[data-theme=sun] .cw-vpv{border:2px solid #000;box-shadow:none}
     var on = ((OFA.tm && OFA.tm.people) || []).some(function (x) { return ctIs(p, x.name); });
     if (on) sl.outerHTML = ctRow('map', 'pin', 'teal', tr('Show on team map', 'Onyesha kwenye ramani ya timu'), tr('Sharing their location now', 'Anashiriki mahali alipo sasa'));
   }
-  function ctMapCheck() { adminApi('GET', null, '?view=teammap').then(function (j) { if (j.ok) { OFA.tm = j; if (CT.w && CT.w.isConnected) ctMapPut(); } }); }
+  function ctMapCheck() { adminApi('GET', null, '?view=teammap').then(function (j) { if (j.ok) { OFA.tm = j; phAdd(j.people); if (CT.w && CT.w.isConnected) ctMapPut(); } }); }
   function ctTap(e) {
     var w = CT.w, c = w.querySelector('.tsh-c');
     var cv = e.target.closest('[data-cv]'); if (cv) { tmCopy(cv.getAttribute('data-cv')); return; }
@@ -8544,6 +8824,7 @@ html[data-theme=sun] .cw-vpv{border:2px solid #000;box-shadow:none}
     if (k === 'share') return ctShare(p);
     if (k === 'msg') { w.close(); setTimeout(function () { cwDm(p.name); }, 220); return; }
     if (k === 'invite') return tmInvite(p);
+    if (k === 'photo') return phSheet(p.name);
     if (k === 'mypin') return setOpen('pin');
     if (k === 'name' || k === 'email' || k === 'phone' || k === 'home' || k === 'role') return ctEdit(k, p);
     if (k === 'setpin') return ctSetPin(p);
@@ -8717,7 +8998,7 @@ html[data-theme=sun] .cw-vpv{border:2px solid #000;box-shadow:none}
   }
   function tmAddOpen(pre) {
     pre = pre || {};
-    var av = function (n, adm) { var h = tmHue(n); return '<span class="tm-av" style="--hu:var(--hu-' + h + ');--hb:var(--hb-' + h + ')" aria-hidden="true">' + (n.trim() ? esc(initials(n)) : oic('plus')) + (adm ? '<i class="cr">' + CROWN + '</i>' : '') + '</span>'; };
+    var av = function (n, adm) { var h = tmHue(n); return '<span class="tm-av" style="--hu:var(--hu-' + h + ');--hb:var(--hb-' + h + ')" aria-hidden="true"' + (n.trim() ? ' data-ph="' + esc(n) + '"' : '') + '>' + (n.trim() ? esc(initials(n)) : oic('plus')) + (adm ? '<i class="cr">' + CROWN + '</i>' : '') + '</span>'; };
     var w = tSheet(tr('Add a person', 'Ongeza mtu'), '<div class="tm-hd">' + av(pre.name || '', pre.admin) + '<h3>' + tr('Add a person', 'Ongeza mtu') + '</h3><small class="tm-seen">' + tr('They get their own 4-digit PIN, shown once. Send it to them privately.', 'Wanapata PIN yao ya tarakimu 4, inaonyeshwa mara moja. Wapelekee kwa siri.') + '</small></div>' +
       '<div class="tm-f"><label>' + tr('Name', 'Jina') + '<input type="text" data-f="name" autocomplete="off" placeholder="' + tr('e.g. Jessica Anderson', 'mf. Jessica Anderson') + '" value="' + esc(pre.name || '') + '"></label>' +
       '<label>' + tr('Home country', 'Nchi ya nyumbani') + '<select data-f="home">' + tmHomes(pre.home || '') + '</select></label>' +
@@ -9206,7 +9487,7 @@ html[data-theme=sun] .cw-vpv{border:2px solid #000;box-shadow:none}
   // (call, WhatsApp, today's visits, show on the map). Who shows here, and why, is folded away.
   // each teammate on the map gets their own colour (in list order), others a colour from their name
   function ofaHue(n) { if (OFA.hue && OFA.hue[n]) return OFA.hue[n]; var h = 5381; String(n || '').split('').forEach(function (c) { h = (h * 33 + c.charCodeAt(0)) % 100003; }); return OFA_COL[h % OFA_COL.length]; }
-  function ofaAvatar(n, cls) { return '<span class="ofa-av' + (cls ? ' ' + cls : '') + '" style="--c:' + ofaHue(n) + '" aria-hidden="true">' + mateInitials(n) + '</span>'; }
+  function ofaAvatar(n, cls) { return '<span class="ofa-av' + (cls ? ' ' + cls : '') + '" style="--c:' + ofaHue(n) + '" data-ph="' + esc(n) + '" aria-hidden="true">' + mateInitials(n) + '</span>'; }
   function ofaStateCol(s) { return s === 'notworking' ? '#B3261E' : s === 'repair' ? '#D98200' : '#1C9C5A'; }
   function ofaClock(iso) { return dClock(iso); }
   function ofaTeamMap(b) {
@@ -9226,6 +9507,7 @@ html[data-theme=sun] .cw-vpv{border:2px solid #000;box-shadow:none}
     adminApi('GET', null, '?view=teammap').then(function (j) {
       if (S.view !== 'vOffice' || O.tab !== 'teammap' || !$('ofaTmList')) return;
       if (!j.ok) { $('ofaTmSum').innerHTML = '<span class="msg bad">' + esc(why(j)) + '</span>'; return; }
+      phAdd(j.people);
       OFA.tm = j; ofaTmDraw();
     });
   }
@@ -10121,7 +10403,7 @@ html[data-theme=sun] .cw-vpv{border:2px solid #000;box-shadow:none}
   }
   function ocvVPick(b) {
     var w = panel(tr('Whose visits', 'Ziara za nani'), '<div class="ocv-pk">' + (OCV.vwho || []).map(function (o) {
-      return '<button type="button" class="bsh-o" data-who="' + esc(o.who) + '" aria-pressed="' + (OCV.vp === o.who) + '"><span class="ei">' + (o.who ? esc(initials(o.who)) : oic('people')) + '</span><span class="pk-n">' + (o.who ? esc(o.who) : tr('Everyone', 'Wote')) + '</span><span class="n">' + o.n + '</span></button>';
+      return '<button type="button" class="bsh-o" data-who="' + esc(o.who) + '" aria-pressed="' + (OCV.vp === o.who) + '"><span class="ei"' + (o.who ? ' data-ph="' + esc(o.who) + '"' : '') + '>' + (o.who ? esc(initials(o.who)) : oic('people')) + '</span><span class="pk-n">' + (o.who ? esc(o.who) : tr('Everyone', 'Wote')) + '</span><span class="n">' + o.n + '</span></button>';
     }).join('') + '</div>');
     w.addEventListener('click', function (e) { var o = e.target.closest('[data-who]'); if (!o) return; buzz(); OCV.vp = o.getAttribute('data-who') || ''; OCV.vmore = false; w.close(); ocvVDraw(b); });
   }
@@ -10358,7 +10640,7 @@ html[data-theme=sun] .cw-vpv{border:2px solid #000;box-shadow:none}
     var sub = (d.org && d.org !== d.name ? d.org : d.email) || tr('No e-mail', 'Hakuna barua pepe');
     var meta = dqmDnProj(d.projects.length) + (d.viewers.length > 1 ? ' · ' + tr(d.viewers.length + ' people', 'watu ' + d.viewers.length) : '') + (d.showPhotos ? '' : ' · ' + tr('photos off', 'picha zimezimwa'));
     return '<button type="button" class="dqm-card' + (d.revoked ? ' dim' : '') + '" data-dqmdn="' + esc(d.id) + '" data-dn="' + esc(d.id) + '" data-testid="dn_card" style="--i:' + Math.min(i, 10) + '">' +
-      '<span class="dqm-av" style="--hu:var(--hu-' + dqmHue(d.name) + ');--hb:var(--hb-' + dqmHue(d.name) + ')" aria-hidden="true">' + mateInitials(d.name) + '</span>' +
+      '<span class="dqm-av" style="--hu:var(--hu-' + dqmHue(d.name) + ');--hb:var(--hb-' + dqmHue(d.name) + ')" data-ph="' + esc(d.name) + '" aria-hidden="true">' + mateInitials(d.name) + '</span>' +
       '<span class="dqm-mid"><span class="dqm-tt">' + esc(d.name) + '</span>' + dqmDnPill(d) + '<span class="dqm-sub">' + esc(sub) + '</span><span class="dqm-sub">' + esc(meta) + '</span></span>' +
       '<span class="dqm-end">' + (d.lastOpen ? esc(vxAgo(d.lastOpen)) : '') + oic('chev') + '</span></button>';
   }
@@ -12138,6 +12420,7 @@ html[data-theme=sun] .cw-vpv{border:2px solid #000;box-shadow:none}
     adminApi('GET', null, '?view=teammap').then(function (j) {
       if (!MPB.team) return;
       if (!j.ok) { toast(why(j)); return; }
+      phAdd(j.people);
       MPB.tm = j; MPB.tmAt = Date.now(); mpbTeamDraw(fit);
     });
   }
@@ -12769,6 +13052,7 @@ html[data-theme=sun] .cw-vpv{border:2px solid #000;box-shadow:none}
   // Show where I am: a short flight there, and the you-dot pulses once
   function m3Locate(ll) {
     var map = hMap; if (!map) return;
+    if (!MCL.clean && S.view === 'vMap') mclClean(true); // "Where I am" is exploring too: the tiles step aside (mew)
     if (!MPA.you || !hLayer || !hLayer.hasLayer(MPA.you)) { if (hLayer) MPA.you = L.marker(ll, { icon: L.divIcon({ className: '', html: '<div class="you"></div>', iconSize: [16, 16] }), interactive: false, zIndexOffset: 2000 }).addTo(hLayer); }
     else MPA.you.setLatLng(ll);
     if (mpaStill()) { map.setView(ll, 13); return; }
@@ -14193,7 +14477,7 @@ html[data-theme=sun] .cw-vpv{border:2px solid #000;box-shadow:none}
   // a chat's picture: a person's initials (with a green dot when online), a group's photo, a project's photo, the team
   function cwAv(c, big) {
     var cls = 'cw-av' + (big ? ' big' : ''), dot = '';
-    if (c.kind === 'dm') { var o = cwOther(c), p = CH.pres[o]; dot = p && p.online ? '<i class="cw-on" aria-hidden="true"></i>' : ''; return '<span class="' + cls + '" style="' + cwHueVar(o) + '" aria-hidden="true">' + esc(initials(o)) + dot + '</span>'; }
+    if (c.kind === 'dm') { var o = cwOther(c), p = CH.pres[o]; dot = p && p.online ? '<i class="cw-on" aria-hidden="true"></i>' : ''; return '<span class="' + cls + '" style="' + cwHueVar(o) + '" data-ph="' + esc(o) + '" aria-hidden="true">' + esc(initials(o)) + dot + '</span>'; }
     if (c.photo) return '<span class="' + cls + ' ph"' + (/^(https?:|\/)/.test(c.photo) ? ' style="background-image:url(&quot;' + esc(c.photo) + '&quot;)"' : ' data-mid="' + esc(c.photo) + '"') + ' aria-hidden="true"></span>';
     if (cwIsNews(c)) return '<span class="' + cls + ' ic an" aria-hidden="true">' + cwIc('news') + '</span>';
     var ck = cwCountry(c); if (ck && CW_FLAG[ck]) return '<span class="' + cls + ' fl" aria-hidden="true">' + cwFlagSvg(ck) + '</span>';
@@ -14321,7 +14605,7 @@ html[data-theme=sun] .cw-vpv{border:2px solid #000;box-shadow:none}
     return cwApi('GET', 'list' + q).then(function (j) {
       if (!j.ok) { if (j.reason !== 'chat-off' && S.view === 'vChat') cwListDraw(); return j; }
       CH.on = true; CH.me = j.me || CH.me; CH.since = j.now || t0; if (j.prefs) cwPrefsGot(j.prefs); if (j.push != null) CH.push = !!j.push;
-      if (j.presence) Object.keys(j.presence).forEach(function (k) { CH.pres[k] = j.presence[k]; });
+      if (j.presence) Object.keys(j.presence).forEach(function (k) { CH.pres[k] = j.presence[k]; if (j.presence[k] && j.presence[k].photo) phSet(k, j.presence[k].photo); });
       if (q) { (j.chats || []).forEach(cwUpsert); if (j.gone && j.gone.length) CH.chats = CH.chats.filter(function (x) { return j.gone.map(String).indexOf(String(x.id)) < 0; }); } else CH.chats = (j.chats || []).slice();
       cwSave(); cwBadge(); cwDelivered();
       if (S.view === 'vChat') cwListDraw();
@@ -14560,7 +14844,7 @@ html[data-theme=sun] .cw-vpv{border:2px solid #000;box-shadow:none}
   function cwSeenHtml(c, m) {
     if (c.kind === 'dm' || !(c.seen || []).length || !c.last || !cwSame(c.last.id, m.id)) return '';
     var a = c.seen.filter(function (n) { return !cwIsMe(n) && !same(n, m.from); }); if (!a.length) return '';
-    return '<div class="cw-seen" data-testid="cw_seen" role="note" aria-label="' + esc(tr('Seen by ', 'Imeonwa na ') + a.join(', ')) + '"><span aria-hidden="true">' + tr('Seen', 'Imeonwa') + '</span>' + a.slice(0, 5).map(function (n) { return '<span class="cw-av" style="' + cwHueVar(n) + '" aria-hidden="true">' + esc(initials(n)) + '</span>'; }).join('') + (a.length > 5 ? '<b aria-hidden="true">+' + (a.length - 5) + '</b>' : '') + '</div>';
+    return '<div class="cw-seen" data-testid="cw_seen" role="note" aria-label="' + esc(tr('Seen by ', 'Imeonwa na ') + a.join(', ')) + '"><span aria-hidden="true">' + tr('Seen', 'Imeonwa') + '</span>' + a.slice(0, 5).map(function (n) { return '<span class="cw-av" style="' + cwHueVar(n) + '" data-ph="' + esc(n) + '" aria-hidden="true">' + esc(initials(n)) + '</span>'; }).join('') + (a.length > 5 ? '<b aria-hidden="true">+' + (a.length - 5) + '</b>' : '') + '</div>';
   }
   function cwLinkify(t, m) {
     var s = esc(t).replace(/(https?:\/\/[^\s<]+[^\s<.,;:!?)\]'"])/g, function (u) { return '<a class="cw-a" href="' + u + '" target="_blank" rel="noopener">' + u.replace(/^https?:\/\/(www\.)?/, '') + '</a>'; });
@@ -14577,7 +14861,7 @@ html[data-theme=sun] .cw-vpv{border:2px solid #000;box-shadow:none}
     var me = cwIsMe(m.from), k = cwKey(m), emo = !m.deleted && m.kind === 'text' && !m.reply && !m.fwd ? cwEmo(m.text) : 0;
     var cls = 'cw-m ' + (me ? 'me' : 'them') + (firstRun ? ' first' : '') + (lastRun ? ' last' : '') + (m.pend ? ' pend' : '') + (m.deleted ? ' del' : '') + (emo ? ' emo e' + emo : '') + (nw ? ' nw' : '');
     var h = '<div class="' + cls + '" data-id="' + esc(m.id || '') + '"' + (m.pend ? ' data-cid="' + esc(m.pend) + '"' : '') + ' id="' + (m.id ? 'cwm-' + esc(m.id) : 'cwp-' + esc(m.pend)) + '" role="article" tabindex="-1" aria-label="' + esc(cwSay(m, me)) + '"><div class="cw-b" data-at="' + esc(cwExact(m.at)) + '">';
-    if (!me && firstRun && c.kind !== 'dm') h += '<span class="cw-sn" style="' + cwHueVar(m.from) + '" data-nosw>' + esc(m.from) + '</span>';
+    if (!me && firstRun && c.kind !== 'dm') h += '<span class="cw-sn" style="' + cwHueVar(m.from) + '" data-nosw><span class="cw-sav" data-ph="' + esc(m.from) + '" aria-hidden="true">' + esc(initials(m.from)) + '</span>' + esc(m.from) + '</span>';
     if (m.deleted) return h + '<span class="cw-tx cw-dl">' + cwIc('x') + tr('This message was deleted', 'Ujumbe huu ulifutwa') + '</span>' + cwMeta(m, me) + '</div></div>';
     if (m.fwd) h += '<span class="cw-fw">' + cwIc('fwd') + tr('Forwarded', 'Imesambazwa') + '</span>';
     if (m.reply && (m.reply.id || m.reply.text)) h += '<button type="button" class="cw-q" data-jump="' + esc(m.reply.id || '') + '" style="' + cwHueVar(m.reply.from) + '"><b data-nosw>' + esc(cwIsMe(m.reply.from) ? tr('You', 'Wewe') : m.reply.from || '') + '</b><span data-nosw>' + esc(cwPrev({ kind: m.reply.kind, text: m.reply.text, media: [] }, null) || '') + '</span></button>';
@@ -14649,7 +14933,7 @@ html[data-theme=sun] .cw-vpv{border:2px solid #000;box-shadow:none}
   }
   function cwContactHtml(m) {
     var n = (m.contact && m.contact.name) || '';
-    return '<div class="cw-ct"><span class="cw-av" style="' + cwHueVar(n) + '" aria-hidden="true">' + esc(initials(n)) + '</span><b data-nosw>' + esc(n) + '</b>' +
+    return '<div class="cw-ct"><span class="cw-av" style="' + cwHueVar(n) + '" data-ph="' + esc(n) + '" aria-hidden="true">' + esc(initials(n)) + '</span><b data-nosw>' + esc(n) + '</b>' +
       '<span class="cw-ca">' + (cwIsMe(n) ? '' : '<button type="button" class="btn small" data-ctmsg="' + esc(n) + '">' + tr('Message', 'Ujumbe') + '</button>') + '<button type="button" class="btn small light" data-mate="' + esc(n) + '">' + tr('View', 'Angalia') + '</button></span></div>';
   }
   // a link: a project link shows the project's own card; any other site shows its title and picture
@@ -14948,7 +15232,7 @@ html[data-theme=sun] .cw-vpv{border:2px solid #000;box-shadow:none}
       CH.typ[d.c] = d.what ? { who: d.who, what: d.what, at: Date.now() } : null;
       cwTypUi(); clearTimeout(CH.typT); CH.typT = setTimeout(cwTypUi, 7200); return;
     }
-    if (d.t === 'presence') { CH.pres[d.who] = { online: !!d.online, seen: d.seen }; if (S.view === 'vRoom') cwHead(); if (S.view === 'vChat') cwListDraw(); return; }
+    if (d.t === 'presence') { CH.pres[d.who] = { online: !!d.online, seen: d.seen }; if (d.photo) phSet(d.who, d.photo); if (S.view === 'vRoom') cwHead(); if (S.view === 'vChat') cwListDraw(); return; }
     if (d.t === 'chat' && d.chat) {
       if (d.chat.removed || d.chat.gone) { CH.chats = CH.chats.filter(function (x) { return x.id !== d.chat.id; }); if (CH.cur === d.chat.id && S.view === 'vRoom') { toast(tr('You’re no longer in this chat.', 'Hauko tena kwenye gumzo hili.')); goBack(function () { show('vChat', 'replace'); }); } }
       else cwUpsert(d.chat);
@@ -15212,13 +15496,13 @@ html[data-theme=sun] .cw-vpv{border:2px solid #000;box-shadow:none}
     if (m) { m.live = Object.assign({}, m.live, { until: Date.now(), stopped: true }); cwMsgsDraw(true); }
     cwApi('POST', 'live-stop', { c: c, id: cwNum(id) }).then(function (j) { if (!j.ok) toast(cwWhy(j)); else toast(tr('Stopped sharing your location', 'Umeacha kushiriki mahali ulipo')); });
   }
-  function cwTeam(cb) { if (teamCache) return cb(teamCache); api('GET', null, '?team=1').then(function (j) { if (j.ok) teamCache = (j.team || []).filter(function (p) { return p.name; }); cb(teamCache || []); }); }
+  function cwTeam(cb) { if (teamCache) return cb(teamCache); api('GET', null, '?team=1').then(function (j) { if (j.ok) teamCache = (j.team || []).filter(function (p) { return p.name; }); phAdd(teamCache); cb(teamCache || []); }); }
   function cwContactPick() {
     var c = CH.cur;
     cwTeam(function (team) {
       var ppl = team.filter(function (p) { return !cwIsMe(p.name); }).sort(function (a, z) { return a.name.localeCompare(z.name); });
       var w = tSheet(tr('Share a contact', 'Shiriki mwasiliani'), '<h3 class="cw-shh">' + tr('Share a teammate', 'Shiriki mwenzako') + '</h3><p class="muted">' + tr('They can message them in the app. No phone numbers are shared.', 'Wanaweza kumtumia ujumbe kwenye programu. Namba za simu hazishirikiwi.') + '</p><div class="cw-pl">' +
-        ppl.map(function (p) { return '<button type="button" class="cw-pr" data-ct="' + esc(p.name) + '"><span class="cw-av" style="' + cwHueVar(p.name) + '" aria-hidden="true">' + esc(initials(p.name)) + '</span><b data-nosw>' + esc(p.name) + '</b></button>'; }).join('') + '</div>');
+        ppl.map(function (p) { return '<button type="button" class="cw-pr" data-ct="' + esc(p.name) + '"><span class="cw-av" style="' + cwHueVar(p.name) + '" data-ph="' + esc(p.name) + '" aria-hidden="true">' + esc(initials(p.name)) + '</span><b data-nosw>' + esc(p.name) + '</b></button>'; }).join('') + '</div>');
       w.addEventListener('click', function (e) { var b = e.target.closest('[data-ct]'); if (!b) return; w.close(); cwQueue({ c: c, kind: 'contact', contact: { name: b.getAttribute('data-ct') } }); });
     });
   }
@@ -15366,7 +15650,7 @@ html[data-theme=sun] .cw-vpv{border:2px solid #000;box-shadow:none}
   }
   function cwReacts(m, e) {
     var rx = m.reacts || {}, ks = Object.keys(rx).filter(function (k) { return (rx[k] || []).length; });
-    var w = panel(tr('Reactions', 'Hisia'), '<div class="cw-pl">' + ks.map(function (k) { return rx[k].map(function (n) { var me = cwIsMe(n); return '<' + (me ? 'button type="button" data-unreact="' + esc(k) + '"' : 'div') + ' class="cw-pr' + (k === e ? ' hl' : '') + '"><span class="cw-av" style="' + cwHueVar(n) + '" aria-hidden="true">' + esc(initials(n)) + '</span><span class="cw-prt"><b data-nosw>' + esc(me ? tr('You', 'Wewe') : n) + '</b>' + (me ? '<small>' + tr('Tap to remove', 'Gusa kuondoa') + '</small>' : '') + '</span><span class="cw-pe">' + k + '</span></' + (me ? 'button' : 'div') + '>'; }).join(''); }).join('') + '</div>', 'cw-sheet');
+    var w = panel(tr('Reactions', 'Hisia'), '<div class="cw-pl">' + ks.map(function (k) { return rx[k].map(function (n) { var me = cwIsMe(n); return '<' + (me ? 'button type="button" data-unreact="' + esc(k) + '"' : 'div') + ' class="cw-pr' + (k === e ? ' hl' : '') + '"><span class="cw-av" style="' + cwHueVar(n) + '" data-ph="' + esc(n) + '" aria-hidden="true">' + esc(initials(n)) + '</span><span class="cw-prt"><b data-nosw>' + esc(me ? tr('You', 'Wewe') : n) + '</b>' + (me ? '<small>' + tr('Tap to remove', 'Gusa kuondoa') + '</small>' : '') + '</span><span class="cw-pe">' + k + '</span></' + (me ? 'button' : 'div') + '>'; }).join(''); }).join('') + '</div>', 'cw-sheet');
     w.addEventListener('click', function (ev) { var b = ev.target.closest('[data-unreact]'); if (!b) return; w.close(); cwReact(m, b.getAttribute('data-unreact')); });
   }
   function cwDelete(m) {
@@ -15383,11 +15667,11 @@ html[data-theme=sun] .cw-vpv{border:2px solid #000;box-shadow:none}
   }
   function cwInfoMsg(m) {
     var sent = '<h4 class="cw-ih">' + cwIc('cal') + tr('Sent', 'Ilitumwa') + '</h4><p class="cw-xtm" data-testid="cw_exact">' + esc(cwExact(m.at)) + (m.edited ? ' · ' + tr('edited ', 'ilihaririwa ') + esc(dClock(dOf(m.edited))) : '') + '</p>';
-    if (!cwIsMe(m.from)) { panel(tr('Message info', 'Maelezo ya ujumbe'), '<div class="cw-inf"><div class="cw-pr"><span class="cw-av" style="' + cwHueVar(m.from) + '" aria-hidden="true">' + esc(initials(m.from)) + '</span><span class="cw-prt"><b data-nosw>' + esc(m.from) + '</b></span></div>' + sent + '</div>', 'cw-sheet'); return; }
+    if (!cwIsMe(m.from)) { panel(tr('Message info', 'Maelezo ya ujumbe'), '<div class="cw-inf"><div class="cw-pr"><span class="cw-av" style="' + cwHueVar(m.from) + '" data-ph="' + esc(m.from) + '" aria-hidden="true">' + esc(initials(m.from)) + '</span><span class="cw-prt"><b data-nosw>' + esc(m.from) + '</b></span></div>' + sent + '</div>', 'cw-sheet'); return; }
     var w = panel(tr('Message info', 'Maelezo ya ujumbe'), '<div class="cw-inf">' + sent + '<p class="muted">' + tr('Loading…', 'Inapakia…') + '</p></div>', 'cw-sheet'), box = w.querySelector('.cw-inf');
     cwApi('GET', 'info?c=' + encodeURIComponent(m.c || CH.cur) + '&id=' + encodeURIComponent(m.id)).then(function (j) {
       if (!j.ok && !j.read) { box.innerHTML = '<p class="msg bad">' + esc(cwWhy(j)) + '</p>'; return; }
-      var row = function (x) { return '<div class="cw-pr"><span class="cw-av" style="' + cwHueVar(x.name) + '" aria-hidden="true">' + esc(initials(x.name)) + '</span><span class="cw-prt"><b data-nosw>' + esc(x.name) + '</b><small>' + esc(dWhen(dOf(x.at))) + '</small></span></div>'; };
+      var row = function (x) { return '<div class="cw-pr"><span class="cw-av" style="' + cwHueVar(x.name) + '" data-ph="' + esc(x.name) + '" aria-hidden="true">' + esc(initials(x.name)) + '</span><span class="cw-prt"><b data-nosw>' + esc(x.name) + '</b><small>' + esc(dWhen(dOf(x.at))) + '</small></span></div>'; };
       var rd = j.read || [], dl = (j.delivered || []).filter(function (x) { return !rd.some(function (r) { return same(r.name, x.name); }); });
       box.innerHTML = sent + '<h4 class="cw-ih">' + CW_TK.read + tr('Read by', 'Imesomwa na') + '</h4>' + (rd.length ? rd.map(row).join('') : '<p class="muted">' + tr('No one yet', 'Bado hakuna') + '</p>') +
         '<h4 class="cw-ih">' + CW_TK.delivered + tr('Delivered to', 'Imemfikia') + '</h4>' + (dl.length ? dl.map(row).join('') : '<p class="muted">' + tr('No one else', 'Hakuna mwingine') + '</p>');
@@ -15601,7 +15885,7 @@ html[data-theme=sun] .cw-vpv{border:2px solid #000;box-shadow:none}
         var mem = (c.members || []).slice().sort(function (a, z) { return (cwIsMe(z) - cwIsMe(a)) || ((c.admins || []).indexOf(z) >= 0) - ((c.admins || []).indexOf(a) >= 0) || a.localeCompare(z); });
         h += '<section class="ct-g"><h4>' + mem.length + ' ' + tr('members', 'wanachama') + (c.kind === 'team' ? ' · ' + tr('kept in step with the team list', 'inafuata orodha ya timu') : '') + '</h4><div class="ct-list">' +
           (grp && adm ? '<button type="button" class="ct-r" data-i="add"><span class="ct-ri" style="--hu:var(--hu-green);--hb:var(--hb-green)" aria-hidden="true">' + cwIc('plus') + '</span><span class="ct-rl"><b>' + tr('Add members', 'Ongeza wanachama') + '</b></span></button>' : '') +
-          mem.map(function (n) { var a = (c.admins || []).some(function (x) { return same(x, n); }), p = CH.pres[n]; return '<button type="button" class="ct-r cw-mem" data-mem="' + esc(n) + '"><span class="cw-av" style="' + cwHueVar(n) + '" aria-hidden="true">' + esc(initials(n)) + (p && p.online ? '<i class="cw-on"></i>' : '') + '</span><span class="ct-rl"><b data-nosw>' + esc(cwIsMe(n) ? tr('You', 'Wewe') : n) + '</b>' + (p && !cwIsMe(n) ? '<small>' + esc(cwSeenTx(p)) + '</small>' : '') + '</span>' + (a ? '<span class="tag">' + tr('Admin', 'Msimamizi') + '</span>' : '') + '</button>'; }).join('') + '</div></section>';
+          mem.map(function (n) { var a = (c.admins || []).some(function (x) { return same(x, n); }), p = CH.pres[n]; return '<button type="button" class="ct-r cw-mem" data-mem="' + esc(n) + '"><span class="cw-av" style="' + cwHueVar(n) + '" data-ph="' + esc(n) + '" aria-hidden="true">' + esc(initials(n)) + (p && p.online ? '<i class="cw-on"></i>' : '') + '</span><span class="ct-rl"><b data-nosw>' + esc(cwIsMe(n) ? tr('You', 'Wewe') : n) + '</b>' + (p && !cwIsMe(n) ? '<small>' + esc(cwSeenTx(p)) + '</small>' : '') + '</span>' + (a ? '<span class="tag">' + tr('Admin', 'Msimamizi') + '</span>' : '') + '</button>'; }).join('') + '</div></section>';
       }
       if (grp) h += '<section class="ct-g"><div class="ct-list">' + row('leave', 'leave', 'coral', tr('Leave the group', 'Ondoka kwenye kikundi'), '', true) + '</div></section>';
       box.innerHTML = h; cwFill(box);
@@ -15708,7 +15992,7 @@ html[data-theme=sun] .cw-vpv{border:2px solid #000;box-shadow:none}
     cwTeam(function (team) {
       var ppl = team.filter(function (p) { return !cwIsMe(p.name) && !(skip || []).some(function (n) { return same(n, p.name); }); }).sort(function (a, z) { return a.name.localeCompare(z.name); }), pick = [];
       var w = tSheet(title, '<h3 class="cw-shh">' + esc(title) + '</h3><input type="search" id="cwPpq" placeholder="' + tr('Search the team', 'Tafuta kwenye timu') + '" aria-label="' + tr('Search the team', 'Tafuta kwenye timu') + '" autocomplete="off"><div class="cw-pl" id="cwPpl"></div><div class="cw-foot"><button type="button" class="btn block" id="cwPpGo" disabled>' + esc(go) + '</button></div>');
-      var draw = function () { var q = $('cwPpq').value.trim().toLowerCase(); $('cwPpl').innerHTML = ppl.filter(function (p) { return !q || p.name.toLowerCase().indexOf(q) >= 0; }).map(function (p) { var on = pick.indexOf(p.name) >= 0; return '<button type="button" class="cw-pr" role="checkbox" aria-checked="' + on + '" data-pk="' + esc(p.name) + '"><span class="cw-av" style="' + cwHueVar(p.name) + '" aria-hidden="true">' + esc(initials(p.name)) + '</span><span class="cw-prt"><b data-nosw>' + esc(p.name) + '</b></span><span class="cw-ck" aria-hidden="true">' + cwIc('check') + '</span></button>'; }).join(''); };
+      var draw = function () { var q = $('cwPpq').value.trim().toLowerCase(); $('cwPpl').innerHTML = ppl.filter(function (p) { return !q || p.name.toLowerCase().indexOf(q) >= 0; }).map(function (p) { var on = pick.indexOf(p.name) >= 0; return '<button type="button" class="cw-pr" role="checkbox" aria-checked="' + on + '" data-pk="' + esc(p.name) + '"><span class="cw-av" style="' + cwHueVar(p.name) + '" data-ph="' + esc(p.name) + '" aria-hidden="true">' + esc(initials(p.name)) + '</span><span class="cw-prt"><b data-nosw>' + esc(p.name) + '</b></span><span class="cw-ck" aria-hidden="true">' + cwIc('check') + '</span></button>'; }).join(''); };
       $('cwPpq').addEventListener('input', draw); draw();
       w.addEventListener('click', function (e) {
         var b = e.target.closest('[data-pk]'); if (b) { var n = b.getAttribute('data-pk'), i = pick.indexOf(n); if (i >= 0) pick.splice(i, 1); else pick.push(n); b.setAttribute('aria-checked', i < 0); $('cwPpGo').disabled = !pick.length; return; }
@@ -15746,7 +16030,7 @@ html[data-theme=sun] .cw-vpv{border:2px solid #000;box-shadow:none}
       var w = tSheet(tr('New chat', 'Gumzo jipya'), '<h3 class="cw-shh">' + tr('New chat', 'Gumzo jipya') + '</h3><div class="cw-pl"><button type="button" class="cw-pr big" data-nw="group"><span class="cw-av ic" style="--hu:var(--hu-green);--hb:var(--hb-green)" aria-hidden="true">' + cwIc('people') + '</span><span class="cw-prt"><b>' + tr('New group', 'Kikundi kipya') + '</b></span></button>' +
         '<button type="button" class="cw-pr big" data-nw="proj"><span class="cw-av ic" style="--hu:var(--hu-teal);--hb:var(--hb-teal)" aria-hidden="true">' + cwIc('drop') + '</span><span class="cw-prt"><b>' + tr('A project’s chat', 'Gumzo la mradi') + '</b></span></button></div>' +
         '<input type="search" id="cwNq" placeholder="' + tr('Search the team', 'Tafuta kwenye timu') + '" aria-label="' + tr('Search the team', 'Tafuta kwenye timu') + '" autocomplete="off"><h4 class="cw-ih">' + tr('Teammates', 'Wenzako') + '</h4><div class="cw-pl" id="cwNl"></div>');
-      var draw = function () { var q = $('cwNq').value.trim().toLowerCase(); $('cwNl').innerHTML = ppl.filter(function (p) { return !q || p.name.toLowerCase().indexOf(q) >= 0; }).map(function (p) { var pr = CH.pres[p.name]; return '<button type="button" class="cw-pr" data-dm="' + esc(p.name) + '"><span class="cw-av" style="' + cwHueVar(p.name) + '" aria-hidden="true">' + esc(initials(p.name)) + (pr && pr.online ? '<i class="cw-on"></i>' : '') + '</span><span class="cw-prt"><b data-nosw>' + esc(p.name) + '</b>' + (p.role ? '<small data-nosw>' + esc(p.role) + '</small>' : '') + '</span></button>'; }).join('') || '<p class="muted">' + tr('No one found', 'Hakuna aliyepatikana') + '</p>'; };
+      var draw = function () { var q = $('cwNq').value.trim().toLowerCase(); $('cwNl').innerHTML = ppl.filter(function (p) { return !q || p.name.toLowerCase().indexOf(q) >= 0; }).map(function (p) { var pr = CH.pres[p.name]; return '<button type="button" class="cw-pr" data-dm="' + esc(p.name) + '"><span class="cw-av" style="' + cwHueVar(p.name) + '" data-ph="' + esc(p.name) + '" aria-hidden="true">' + esc(initials(p.name)) + (pr && pr.online ? '<i class="cw-on"></i>' : '') + '</span><span class="cw-prt"><b data-nosw>' + esc(p.name) + '</b>' + (p.role ? '<small data-nosw>' + esc(p.role) + '</small>' : '') + '</span></button>'; }).join('') || '<p class="muted">' + tr('No one found', 'Hakuna aliyepatikana') + '</p>'; };
       $('cwNq').addEventListener('input', draw); draw();
       w.addEventListener('click', function (e) {
         var b = e.target.closest('[data-dm],[data-nw]'); if (!b) return; buzz();
@@ -16001,7 +16285,7 @@ html[data-theme=sun] .cw-vpv{border:2px solid #000;box-shadow:none}
       var t = e.target, before = t.value.slice(0, t.selectionStart), m = /(?:^|\s)@([^\s@]{0,20})$/.exec(before), c = cwChat(CH.cur), pop = $('cwMen');
       if (!m || !c || c.kind === 'dm') { pop.classList.add('hidden'); return; }
       var q = m[1].toLowerCase(), list = (c.members || []).filter(function (n) { return !cwIsMe(n) && n.toLowerCase().indexOf(q) >= 0; }).slice(0, 6);
-      pop.innerHTML = list.map(function (n) { return '<button type="button" role="option" data-men="' + esc(n) + '"><span class="cw-av" style="' + cwHueVar(n) + '" aria-hidden="true">' + esc(initials(n)) + '</span><b data-nosw>' + esc(n) + '</b></button>'; }).join('');
+      pop.innerHTML = list.map(function (n) { return '<button type="button" role="option" data-men="' + esc(n) + '"><span class="cw-av" style="' + cwHueVar(n) + '" data-ph="' + esc(n) + '" aria-hidden="true">' + esc(initials(n)) + '</span><b data-nosw>' + esc(n) + '</b></button>'; }).join('');
       pop.classList.toggle('hidden', !list.length);
     });
     box.addEventListener('keydown', function (e) {
