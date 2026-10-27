@@ -15,6 +15,9 @@
 //                                                                     above the approval limit it asks for a second approval first
 //                  { action: "new",   name, ck, village, type, lat, lng, note, by }  adds a new site as "Due Diligence"
 //                  { action: "here",  lat, lng, acc } / { action: "here", off: true }  your latest position for the office's team map (opt-in)
+//                  { action: "new", …, build: "built"|"building"|"planned", parent }  "Being built now" / "Planned" start the stage tracker
+//                  { action: "stage", id, stage, note, pct, due } / { action: "stage-meta", id, pct, due }  construction stages
+//                  (lib/construction.js; photos then go to /api/pin-photo with stage=<key>&project=<id>)
 // Every change also leaves a note on the monday.com item (who, what, the old value). The answer
 // carries that note's id, so photos and voice notes can be attached to it with /api/pin-photo.
 //
@@ -27,7 +30,8 @@
 // Open repairs and the activity log are kept in Workers KV (FEED), not on the board.
 // Admins (PIN_ADMINS, or made admin in the app) also get the Office tools in /api/admin.
 import { getFeed, dropFeed } from '../../lib/feed-cache.js';
-import { parseGps, readGps, writeGps, createUpdate, createSite, readUpdates, tidyTitle, BOARD_ID } from '../../lib/monday.js';
+import { parseGps, readGps, writeGps, createUpdate, createSite, readUpdates, tidyTitle, setStatus, BOARD_ID } from '../../lib/monday.js';
+import { STAGES, STAGE_EN, BUILD_STATUS, DONE_STATUS, loadStage, saveStage, stageIndex, startRecord, applyStage, stageAllowed, stageNote, cleanPct, cleanDue, withBehind, behind, linked } from '../../lib/construction.js';
 import { session, configured, linkToken, linkedFor, unlink, signOut } from '../../lib/pin-auth.js';
 import { getJson as gj, putJson, team, saveTeam, hashPin, isAdminName, sameName, seen, addReview, sendMail, alertHtml, guards, guardFor } from '../../lib/pin-store.js';
 import { kes, money, estOf, stepAtOrAfter, stepBlocked, approveLimit, askApproval, costRow, addCost, projectCosts, peopleServed, notePeople, snapPeople, monthKey } from '../../lib/pin-office.js';
@@ -218,7 +222,11 @@ export async function onRequestGet({ request, env, waitUntil }) {
     const visits = env.FEED ? ((await env.FEED.get('pinvisit:' + id, 'json')) || []).slice(0, 3) : [];
     // what repairs here cost in the last 12 months, and the latest few entries
     const spend = env.FEED ? (await env.FEED.get('pincost:' + id, 'json')) || [] : [];
-    return json({ ok: true, last: last ? { value: last.value, prev: last.prev, by: last.by, at: last.at } : null, canUndo: !!env.FEED, visits, costs: Object.assign(projectCosts(spend), { last: spend.slice(-5).reverse() }) }, 200);
+    // construction stages, and the projects linked to this one ("Part of" / "Also here")
+    const stage = env.FEED ? withBehind(await loadStage(env, id)) : null;
+    let link = { parent: null, children: [] };
+    if (env.FEED) { const idx = await stageIndex(env); let feed = null; try { feed = await getFeed(env, waitUntil); } catch (e) {} const tOf = x => { const p = feed && (feed.projects || []).find(q => String(q.id) === String(x)); return p ? strip(p.title) : ''; }; link = linked(idx, id, tOf); }
+    return json({ ok: true, last: last ? { value: last.value, prev: last.prev, by: last.by, at: last.at } : null, canUndo: !!env.FEED, visits, costs: Object.assign(projectCosts(spend), { last: spend.slice(-5).reverse() }), stage, linked: link }, 200);
   }
   try {
     const hist = (q.get('history') || '').replace(/\D/g, '');
@@ -266,6 +274,9 @@ export async function onRequestGet({ request, env, waitUntil }) {
       confirmed: await getJson(env, 'pinconfirmed', {})
     };
     if (chk.admin) extra.reviewOpen = (await getJson(env, 'pinreview', [])).filter(x => x.status === 'open').length;
+    // construction stages for the list filter, the map badge, Office and the report
+    const sIdx = await stageIndex(env), now = Date.now();
+    extra.stages = {}; Object.keys(sIdx).forEach(k => { const x = sIdx[k]; extra.stages[k] = Object.assign({}, x, { behind: behind({ stage: x.s, due: x.due }, now) }); });
     // big repairs need a second approval above this (everyone sees it on the repair tracker)
     extra.approveAbove = await approveLimit(env);
     // Office overview: people served, from the latest visit counts and the board (two small KV reads)
@@ -364,22 +375,66 @@ export async function onRequestPost({ request, env, waitUntil }) {
       const g = parseGps(Number(b.lat) + ', ' + Number(b.lng));
       if (!g) return json({ ok: false, reason: 'place' }, 400);
       const village = clean(b.village, 120), typeLabel = TYPES[b.type] || '';
-      const newId = await createSite(token, board, { name, cc: c[0], countryName: c[1], village, typeLabel, gps: fmt(g) }, api);
+      // "What's happening here?": already built (as before), being built now, or planned; and "Part of" another project
+      const build = BUILD_STATUS[b.build] ? b.build : '';
+      let parent = String(b.parent || '').replace(/\D/g, ''), ptitle = '';
+      if (parent) {
+        let feed = null; try { feed = await getFeed(env); } catch (e) {}
+        const pp = feed && (feed.projects || []).find(x => String(x.id) === parent), ps = pp ? null : await loadStage(env, parent);
+        if (!pp && !ps) return json({ ok: false, reason: 'parent' }, 400);
+        ptitle = pp ? strip(pp.title) : ((await stageIndex(env))[parent] || {}).t || '';
+      }
+      const newId = await createSite(token, board, { name, cc: c[0], countryName: c[1], village, typeLabel, gps: fmt(g), status: BUILD_STATUS[build] }, api);
       if (!newId) return json({ ok: false, reason: 'down' }, 502);
       const note = '🆕 New site added from the field with the RAFIKI pin app by ' + by + '. Location: ' + fmt(g) + '.' +
         (village ? ' Village/community: ' + village + '.' : '') + (clean(b.note, 1000) ? ' Notes: ' + said(clean(b.note, 1000)) : '') +
-        ' It starts as "Due Diligence", so it is not on the website yet.';
+        (build === 'building' ? ' 🏗️ Being built now: the status is "Under Construction" and the stage tracker starts at Planned.' : build === 'planned' ? ' Planned: the status is "Planned and/or Permitted".' : ' It starts as "Due Diligence", so it is not on the website yet.') +
+        (parent ? ' Part of: ' + (ptitle || 'project ' + parent) + '.' : '');
       const updateId = await createUpdate(token, newId, note, api);
+      let stage = null;
+      if ((build || parent) && env.FEED) {
+        stage = await saveStage(env, startRecord(newId, by, parent || null, ptitle, build ? (build === 'building' ? 'Being built now' : 'Planned') : '', updateId || ''), name);
+        if (parent) later(createUpdate(token, parent, '🔗 Also here: ' + name + (build === 'building' ? ' (new, being built)' : build === 'planned' ? ' (new, planned)' : ' (new)') + ', added with the RAFIKI Pin app by ' + by + '.', api));
+      }
       await bump(env, 'rl:pinsave:' + ip);
       await log(env, { by, a: 'new', id: newId, t: name });
       if (!chk.admin) await addReview(env, { kind: 'new', id: newId, t: name, by, data: { ck: b.ck, village, gps: fmt(g), type: typeLabel, note: clean(b.note, 300) } });
-      return json({ ok: true, id: newId, updateId }, 200);
+      return json(Object.assign({ ok: true, id: newId, updateId }, stage ? { stage: withBehind(stage) } : {}), 200);
     }
 
     if (!id) return json({ ok: false, reason: 'bad-request' }, 400);
     const cur = await readGps(token, id, api);
     if (!cur || (cur.board && cur.board !== board)) return json({ ok: false, reason: 'project' }, 404);
     const title = clean(tidyTitle(cur.name), 120);
+
+    // construction: a stage change (with a monday note; photos follow to /api/pin-photo), or % done / expected finish
+    if (action === 'stage' || action === 'stage-meta') {
+      if (!env.FEED) return json({ ok: false, reason: 'not-set-up' }, 503);
+      const was = await loadStage(env, id), pct = cleanPct(b.pct), due = cleanDue(b.due);
+      if (pct === undefined || due === undefined) return json({ ok: false, reason: 'bad-request' }, 400);
+      if (action === 'stage-meta') {
+        const r = was || startRecord(id, by, null, '', '', '');
+        const dueChanged = 'due' in b && (r.due || null) !== due;
+        if ('pct' in b) r.pct = pct; if ('due' in b) r.due = due;
+        if (dueChanged) later(createUpdate(token, id, '🏗️ Expected finish ' + (due ? 'set to ' + due : 'cleared') + ' by ' + by + ' (RAFIKI Pin app).', api));
+        await saveStage(env, r, title); await bump(env, 'rl:pinsave:' + ip);
+        return json({ ok: true, id, stage: withBehind(r) }, 200);
+      }
+      const stage = String(b.stage || ''), bad = stageAllowed(was ? was.stage : 'planned', stage, chk.admin);
+      if (bad) return json({ ok: false, reason: bad }, bad === 'stage' ? 400 : bad === 'admin-only' ? 403 : 409);
+      const note = clean(b.note, 600);
+      const updateId = await createUpdate(token, id, stageNote({ stage, was: was ? was.stage : '', by, note, pct: 'pct' in b ? pct : was && was.pct, due: 'due' in b ? due : was && was.due }), api);
+      if (!updateId) return json({ ok: false, reason: 'down' }, 502);
+      if (stage === 'handed') await setStatus(token, board, id, DONE_STATUS, api);
+      else if (stage !== 'planned' && (!was || was.stage === 'planned')) later(setStatus(token, board, id, BUILD_STATUS.building, api).catch(e => console.error('status:', e && e.message)));
+      const o = { id, stage, by, note, update: updateId };
+      if ('pct' in b) o.pct = pct; if ('due' in b) o.due = due;
+      const r = await saveStage(env, applyStage(was, o), title);
+      if (stage === 'handed') await dropFeed(env);
+      await bump(env, 'rl:pinsave:' + ip);
+      await log(env, { by, a: 'stage', s: stage, id, t: title });
+      return json({ ok: true, id, updateId, stage: withBehind(r) }, 200);
+    }
 
     if (action === 'pin') {
       const g = parseGps(Number(b.lat) + ', ' + Number(b.lng));

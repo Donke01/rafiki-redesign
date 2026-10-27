@@ -6,9 +6,12 @@
 //   The caller must be able to edit that trip. Kept in KV (itinphoto:<id>, 400 days), not on monday.com.
 //   → { ok, id: "rc_…", url: "/api/pin-photo?receipt=rc_…" }; the id goes in a fuel log's or an extra's `receipt`.
 // GET /api/pin-photo?receipt=<id> → the image, for people who can see that trip.
+// Construction stages: the same upload with stage=<key> and project=<id> also keeps the asset id in that stage's gallery
+//   (lib/construction.js) → { ok, asset }. GET /api/pin-photo?stage=<project>&asset=<id>[&w=] → that photo, signed-in team only.
 import { checkPin } from './pin.js';
 import { load as loadItin, canEdit, canSee, newId } from '../../lib/itin.js';
-import { addFileToUpdate } from '../../lib/monday.js';
+import { addFileToUpdate, assetInfo } from '../../lib/monday.js';
+import { STAGES, loadStage, addStagePhoto, hasPhoto } from '../../lib/construction.js';
 // voice notes are typed out in the background (Kiswahili or English) and added to the same note: lib/voice-note.js
 import { typeOutVoiceNote } from '../../lib/voice-note.js';
 
@@ -39,7 +42,12 @@ export async function onRequestPost({ request, env, waitUntil }) {
   const name = (type.indexOf('audio/') === 0 ? 'voice-note-' : 'site-photo-' + (label ? label + '-' : '')) + new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-') + '.' + ext;
   try {
     const voice = type.indexOf('audio/') === 0, bytes = voice ? await file.arrayBuffer() : null;
-    await addFileToUpdate(chk.token || env.MONDAY_API_TOKEN, update, file, name, env.MONDAY_API_URL);
+    const asset = await addFileToUpdate(chk.token || env.MONDAY_API_TOKEN, update, file, name, env.MONDAY_API_URL);
+    const stage = String(form.get('stage') || ''), project = String(form.get('project') || '').replace(/\D/g, '');
+    if (!voice && STAGES.includes(stage) && project && typeof asset === 'string' && env.FEED) {
+      await addStagePhoto(env, project, stage, update, asset);
+      return json({ ok: true, asset }, 200);
+    }
     if (voice && waitUntil) waitUntil(typeOutVoiceNote(env, { token: chk.token || env.MONDAY_API_TOKEN, update, bytes, mime: type, ip: request.headers.get('CF-Connecting-IP') || 'unknown', by: chk.who || '', apiUrl: env.MONDAY_API_URL, secs: Number(form.get('secs')) || 0 }).catch(e => console.error('voice note typing:', e && e.message)));
     return json({ ok: true }, 200);
   } catch (e) {
@@ -74,6 +82,8 @@ async function receipt(request, env, chk, form) {
 export async function onRequestGet({ request, env }) {
   const chk = await checkPin(request, env);
   if (chk.res) return chk.res;
+  const sq = new URL(request.url).searchParams;
+  if (sq.get('stage')) return stagePhoto(env, sq.get('stage'), sq.get('asset'), chk);
   const id = new URL(request.url).searchParams.get('receipt') || '';
   if (!/^rc_[A-Za-z0-9]{6,20}$/.test(id) || !env.FEED) return json({ ok: false, reason: 'not-found' }, 404);
   const ph = await env.FEED.get('itinphoto:' + id, 'json');
@@ -81,6 +91,20 @@ export async function onRequestGet({ request, env }) {
   if (!ph || !rec || !canSee(chk, rec)) return json({ ok: false, reason: 'not-found' }, 404);
   const bin = atob(ph.d), out = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
   return new Response(out, { headers: { 'Content-Type': ph.t, 'Cache-Control': 'private, max-age=86400', 'X-Content-Type-Options': 'nosniff' } });
+}
+
+// a construction photo from monday.com: only assets kept in that project's stage record
+async function stagePhoto(env, project, asset, chk) {
+  project = String(project || '').replace(/\D/g, ''); asset = String(asset || '').replace(/\D/g, '');
+  if (!project || !asset || !env.FEED) return json({ ok: false, reason: 'not-found' }, 404);
+  if (!hasPhoto(await loadStage(env, project), asset)) return json({ ok: false, reason: 'not-found' }, 404);
+  let info = null; try { info = await assetInfo(chk.token || env.MONDAY_API_TOKEN, asset, env.MONDAY_API_URL); } catch (e) {}
+  if (!info) return json({ ok: false, reason: 'down' }, 502);
+  let r; try { r = await fetch(info.public_url); } catch (e) { r = null; }
+  if (!r || !r.ok) return json({ ok: false, reason: 'down' }, 502);
+  const type = r.headers.get('Content-Type') || 'image/jpeg';
+  if (!/^image\//i.test(type)) return json({ ok: false, reason: 'not-found' }, 404);
+  return new Response(r.body, { headers: { 'Content-Type': type, 'Cache-Control': 'private, max-age=86400', 'X-Content-Type-Options': 'nosniff' } });
 }
 
 export function onRequest() { return json({ ok: false, reason: 'method' }, 405); }
