@@ -499,7 +499,7 @@ def s_look(pg, check, lang, cm):
     open_room(pg, 't:all', 1500)
     check(pg.locator('#cwMsgs .cw-m.emo.e2').count() == 1, 'two emoji on their own show large, with no bubble')
     check(pg.evaluate("getComputedStyle(document.querySelector('#cwMsgs .cw-m.emo .cw-b')).backgroundColor") in ('rgba(0, 0, 0, 0)', 'transparent'), 'the emoji have no bubble behind them')
-    check(pg.evaluate("getComputedStyle(document.querySelector('#cwMsgs .cw-m.them.first:not(.emo) .cw-b'), '::before').content") == '""', 'the first bubble of a run has a tail')
+    check(pg.evaluate("getComputedStyle(document.querySelector('#cwMsgs .cw-m.them.first:not(.emo) .cw-b')).borderTopLeftRadius") == '4px', 'the first bubble of a run has its tail corner (chat2, room.png: a 4 px corner, no drawn tail)')
     check(pg.evaluate("(() => { const m = [...document.querySelectorAll('#cwMsgs .cw-m.them:not(.first) .cw-b')][0]; return !m || parseFloat(getComputedStyle(m).borderTopLeftRadius) <= 6; })()"), 'a joined bubble has a small corner where it meets the one above')
     check(pg.locator('#cwMsgs .cw-trip').count() == 1 and T(lang, 'Kapsaret Borehole', 'Kapsaret Borehole') in txt(pg, '#cwMsgs .cw-trip') and pg.locator('#cwMsgs .cw-trip .cw-trb i').count() == 1, 'a trip card: title, dates, next stop and progress')
     check(pg.locator('#cwMsgs .cw-lp.big .cw-lpi').count() == 1, 'an ordinary link with a picture shows it large')

@@ -18,6 +18,8 @@
 //                  { action: "new", …, build: "built"|"building"|"planned", parent }  "Being built now" / "Planned" start the stage tracker
 //                  { action: "stage", id, stage, note, pct, due } / { action: "stage-meta", id, pct, due }  construction stages
 //                  (lib/construction.js; photos then go to /api/pin-photo with stage=<key>&project=<id>)
+//                  { action: "chat-photo", id, from }  a note "📷 Photo from the <project> chat by <from>" for photos added
+//                                                     from the project's chat (chat2); the photos then go to /api/pin-photo
 // Every change also leaves a note on the monday.com item (who, what, the old value). The answer
 // carries that note's id, so photos and voice notes can be attached to it with /api/pin-photo.
 //
@@ -416,6 +418,16 @@ export async function onRequestPost({ request, env, waitUntil }) {
     const cur = await readGps(token, id, api);
     if (!cur || (cur.board && cur.board !== board)) return json({ ok: false, reason: 'project' }, 404);
     const title = clean(tidyTitle(cur.name), 120);
+
+    // chat2: "Add to project photos" from a project's chat: a note on the project, the photos follow to /api/pin-photo
+    if (action === 'chat-photo') {
+      const from = clean(b.from, 80);
+      const note = '📷 Photo from the ' + title + ' chat' + (from ? ' by ' + from : '') + (from && !sameName(from, by) ? ' (added by ' + by + ')' : '') + ' (RAFIKI pin app).';
+      const updateId = await createUpdate(token, id, note, api);
+      if (!updateId) return json({ ok: false, reason: 'down' }, 502);
+      await bump(env, 'rl:pinsave:' + ip);
+      return json({ ok: true, id, updateId }, 200);
+    }
 
     // construction: a stage change (with a monday note; photos follow to /api/pin-photo), or % done / expected finish
     if (action === 'stage' || action === 'stage-meta') {

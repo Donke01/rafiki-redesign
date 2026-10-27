@@ -34,7 +34,7 @@ def wav(sec=2.0, rate=8000):
 
 class ChatMock:
     def __init__(self, off=False):
-        self.off = off; self.down = False; self.posts = []; self.gets = []; self.ws = []; self.ids = itertools.count(500)
+        self.off = off; self.down = False; self.tools = {'translate': True, 'transcribe': True}; self.tr = []; self.posts = []; self.gets = []; self.ws = []; self.ids = itertools.count(500)
         now = datetime.datetime.now(datetime.timezone.utc)
         self.now = now
         at = lambda mins: (now - datetime.timedelta(minutes=mins)).strftime('%Y-%m-%dT%H:%M:%S.000Z')
@@ -141,7 +141,25 @@ class ChatMock:
             self.posts.append(('media', {'type': q.get('type'), 'name': q.get('name'), 'size': len(req.post_data_buffer or b''), 'dur': q.get('dur')}))
             return self.fulfill(route, {'ok': True, 'id': mid, 'url': '/api/chat/media/%s?e=1&s=sig' % mid, 'type': q.get('type'), 'size': len(req.post_data_buffer or b''), 'name': q.get('name')})
         if path == 'list':
-            return self.fulfill(route, {'ok': True, 'me': ME, 'now': now_ms(), 'chats': list(self.chats.values()), 'presence': self.presence, 'gone': [] if q.get('since') else None, 'prefs': self.prefs, 'push': False})
+            return self.fulfill(route, {'ok': True, 'me': ME, 'now': now_ms(), 'chats': list(self.chats.values()), 'presence': self.presence, 'gone': [] if q.get('since') else None, 'prefs': self.prefs, 'push': False, 'tools': self.tools})
+        # chat2 (one chat): delete many, clear for me, voice-note text
+        if path == 'delete-many':
+            c = body['c']; xs = [self.msg_by(c, i) for i in body.get('ids', [])]
+            if not xs or None in xs: return self.fulfill(route, {'ok': False, 'reason': 'not-found'}, 404)
+            for x in xs:
+                if body.get('forAll'): x.update(deleted=True, text='', media=[])
+                else: self.msgs[c].remove(x)
+            return self.fulfill(route, {'ok': True, 'n': len(xs)})
+        if path == 'clear':
+            c = body['c']; ch = self.chats[c]; ch['cleared'] = max([m['id'] for m in self.msgs.get(c, [])] or [0]); self.msgs[c] = []
+            ch.update(last=None, unread=0, mention=False)
+            if body.get('archive'): ch['archived'] = True
+            return self.fulfill(route, {'ok': True, 'cleared': ch['cleared'], 'chat': ch})
+        if path == 'transcribe':
+            x = self.msg_by(body.get('c'), body.get('id'))
+            if not self.tools.get('transcribe'): return self.fulfill(route, {'ok': False, 'reason': 'off'})
+            if not x or x['kind'] != 'voice': return self.fulfill(route, {'ok': False, 'reason': 'not-found'}, 404)
+            return self.fulfill(route, {'ok': True, 'text': 'Nimefika kisimani, pampu inahitaji silinda mpya.', 'lang': 'sw', 'cached': False})
         if path == 'prefs' and (req.method == 'GET' or 'c' not in body):
             for k in ('quick', 'dnd', 'doubleTap'):
                 if k in body: self.prefs[k] = body[k]
@@ -163,6 +181,7 @@ class ChatMock:
             if q.get('after'): a = [x for x in a if x['id'] > int(q['after'])]; return self.fulfill(route, {'ok': True, 'msgs': a[:lim], 'more': len(a) > lim})
             return self.fulfill(route, {'ok': True, 'msgs': a[-lim:], 'more': len(a) > lim})
         if path == 'send':
+            if getattr(self, 'refuse', False): return self.fulfill(route, {'ok': False, 'reason': 'not-member'}, 403)  # chat2: a send the server turns down
             c = body['c']; old = next((x for x in self.msgs.get(c, []) if x.get('cid') == body.get('cid')), None)
             if old: return self.fulfill(route, {'ok': True, 'msg': old})
             x = {'id': max([m['id'] for m in self.msgs.get(c, [])] or [0]) + 1, 'c': c, 'cid': body.get('cid'), 'from': ME, 'at': now_ms(), 'kind': body.get('kind'),
@@ -239,6 +258,12 @@ class ChatMock:
         for w in self.ws:
             try: w.send(json.dumps(ev))
             except Exception: pass
+    def translate(self, route, req):
+        if req.method == 'GET': return self.fulfill(route, {'ok': True, 'on': self.tools.get('translate')})
+        body = json.loads(req.post_data or '{}'); self.tr.append(body)
+        if not self.tools.get('translate'): return self.fulfill(route, {'ok': False, 'reason': 'off', 'to': 'en', 'google': 'https://translate.google.com/?sl=auto&tl=en&text=x'})
+        return self.fulfill(route, {'ok': True, 'text': 'The chairman says the children now drink clean water every day.', 'to': 'en', 'cached': False})
     def install(self, pg):
+        pg.route(re.compile(r'/api/translate$'), self.translate)
         pg.route(re.compile(r'/api/chat/(?!ws)'), self.handle)
         pg.route_web_socket(re.compile(r'/api/chat/ws'), self.on_ws)
