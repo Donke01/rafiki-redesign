@@ -73,7 +73,7 @@ object StoryKit {
         "collecting" -> t("Collecting", "Inakusanywa"); "draft" -> t("Draft ready", "Rasimu iko tayari"); "approved" -> t("Approved", "Imeidhinishwa")
         "published" -> t("Published", "Imechapishwa"); else -> t("Not started", "Haijaanza")
     }
-    fun row(k: String) = when (k) { "before" -> t("Before", "Kabla"); "progress" -> t("In progress", "Inaendelea"); else -> t("After", "Baada") }
+    fun row(k: String) = when (k) { "before" -> t("Before", "Kabla"); "progress" -> t("In progress", "Wakati wa kazi"); else -> t("After", "Baada") }
     /** The six questions, if the server doesn't send its own wording. */
     fun prompt(s: Story?, q: String): String = s?.prompts?.get(q)?.let { (en, sw) -> t(en.ifBlank { null } ?: builtIn(q).first, sw.ifBlank { null } ?: builtIn(q).second) } ?: builtIn(q).let { t(it.first, it.second) }
     private fun builtIn(q: String) = when (q) {
