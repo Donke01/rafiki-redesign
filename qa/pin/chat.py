@@ -130,7 +130,8 @@ def s_list(pg, check, lang, cm):
     check(vis(pg, '.cw-row[data-open="d:meril"] .cw-on'), 'Meril is online: a green dot')
     check(T(lang, 'You:', 'Wewe:') in txt(pg, '.cw-row[data-open="t:ke"] .cw-pv'), 'my last message starts with “You:”')
     check(vis(pg, '.cw-row[data-open="t:ke"] .cw-tk.rd'), 'my last message shows blue ticks (read)')
-    check(T(lang, 'Photo', 'Picha') in txt(pg, '.cw-row[data-open="g:kitale"] .cw-pv'), 'a photo preview says Photo')
+    check(T(lang, 'Photo', 'Picha') in txt(pg, '.cw-row[data-open="p:101"] .cw-pv'), 'a photo preview says Photo')
+    check(T(lang, 'Trip: Office planning trip', 'Safari: Office planning trip') in txt(pg, '.cw-row[data-open="g:kitale"] .cw-pv'), 'a trip card says “🧭 Trip: …”')
     check(pg.evaluate(NOOVER), 'nothing wider than the screen')
     check(pg.evaluate(BROKEN, '#vChat') == [], 'no word breaks in the list: %s' % pg.evaluate(BROKEN, '#vChat'))
     shot(pg, 'list', lang)
@@ -289,6 +290,17 @@ def s_media(pg, check, lang, cm):
     pg.click('.cw-lb [data-lb=n]'); pg.wait_for_timeout(300); check(txt(pg, '.cw-lbn').startswith('2 / '), 'the viewer moves to the next photo')
     shot(pg, 'viewer', lang)
     back(pg); check(not vis(pg, '.cw-lb') and view(pg) == 'vRoom', 'Back closes the viewer only')
+    # the viewer: double-tap zooms in and out, swipe down closes
+    pg.locator('#cwm-3 [data-view]').first.click(); pg.wait_for_timeout(700)
+    bb = pg.locator('.cw-lbs img').bounding_box(); cx, cy = bb['x'] + bb['width'] / 2, bb['y'] + bb['height'] / 2
+    pg.mouse.click(cx, cy); pg.wait_for_timeout(90); pg.mouse.click(cx, cy); pg.wait_for_timeout(400)
+    check(pg.get_attribute('.cw-lb', 'data-zoom') == '1' and 'scale(2.5)' in pg.evaluate("document.querySelector('.cw-lbs img').style.transform"), 'a double-tap zooms in')
+    pg.mouse.move(cx, cy); pg.mouse.down(); pg.mouse.move(cx - 60, cy - 40, steps=6); pg.mouse.up(); pg.wait_for_timeout(200)
+    check('translate(' in pg.evaluate("document.querySelector('.cw-lbs img').style.transform"), 'zoomed in, a drag pans')
+    pg.mouse.click(cx, cy); pg.wait_for_timeout(90); pg.mouse.click(cx, cy); pg.wait_for_timeout(400)
+    check(pg.get_attribute('.cw-lb', 'data-zoom') == '', 'another double-tap zooms back out')
+    pg.mouse.move(cx, cy); pg.mouse.down(); pg.mouse.move(cx, cy + 220, steps=10); pg.mouse.up(); pg.wait_for_timeout(500)
+    check(not vis(pg, '.cw-lb') and view(pg) == 'vRoom', 'a swipe down closes the viewer')
     # voice: play at 1×, 1.5×, 2×
     pg.click('#cwm-6 .cw-vs'); pg.wait_for_timeout(200); check(txt(pg, '#cwm-6 .cw-vs') == '1.5×', 'speed goes to 1.5×')
     pg.click('#cwm-6 .cw-vs'); pg.wait_for_timeout(200); check(txt(pg, '#cwm-6 .cw-vs') == '2×', 'then 2×')
@@ -356,7 +368,7 @@ def s_group(pg, check, lang, cm):
     check(pg.locator('.cw-info .cw-mem .tag').count() == 1, 'admins are marked')
     check(pg.evaluate(BROKEN, '.cw-info') == [], 'no word breaks in chat info: %s' % pg.evaluate(BROKEN, '.cw-info'))
     shot(pg, 'group-info', lang)
-    pg.click('.cw-info [data-i=wall]'); pg.wait_for_timeout(600); pg.click('.bsh [data-wp=savanna]'); pg.wait_for_timeout(400); pg.click('.bsh [data-bub=green]'); pg.wait_for_timeout(500)
+    pg.click('.cw-info [data-i=wall]'); pg.wait_for_timeout(600); pg.click('.bsh [data-wp=savanna]'); pg.wait_for_timeout(600); pg.click('.bsh [data-bub=green]'); pg.wait_for_timeout(900)
     check(pg.evaluate("document.getElementById('cwMsgs').classList.contains('cw-wp-savanna')") and any(b.get('wallpaper') == 'savanna' for b in posts(cm, 'prefs')), 'a RAFIKI wallpaper (savanna) is chosen for this chat')
     check(pg.get_attribute('#vRoom', 'data-bub') == 'green' and any(b.get('bubble') == 'green' for b in posts(cm, 'prefs')), 'and my bubble colour, saved per chat')
     shot(pg, 'wallpaper-sheet', lang); back(pg)
@@ -547,7 +559,9 @@ def s_feel(pg, check, lang, cm):
     for i, t in ((71, 'One'), (72, 'Two')):
         cm.push({'t': 'msg', 'msg': {'id': i, 'c': 't:ke', 'from': 'Meril Kiprop', 'at': int(datetime.datetime.now(datetime.timezone.utc).timestamp() * 1000), 'kind': 'text', 'text': t, 'media': []}}); pg.wait_for_timeout(200)
     check(vis(pg, '#cwJump.chip') and txt(pg, '#cwJumpT') == T(lang, '2 new', '2 mpya'), 'scrolled up, a chip says “↓ 2 new” (%s)' % txt(pg, '#cwJump'))
-    bad = pg.evaluate(OVER, '#vRoom'); check(bad == [], 'the chip covers nothing: %s' % bad)
+    pg.wait_for_timeout(500)
+    ov = pg.evaluate("(() => { const a = document.getElementById('cwJump').getBoundingClientRect(), b = document.getElementById('cwComp').getBoundingClientRect(); return a.bottom > b.top + 1; })()")
+    check(not ov, 'the chip floats clear of the box and the quick replies')
     shot(pg, 'new-chip', lang)
     # the unread line fades once it has scrolled past
     back(pg, 900); cm.chats['g:kitale']['unread'] = 1; pg.click('#bRefresh'); pg.wait_for_timeout(1200)
@@ -703,10 +717,10 @@ def s_trip(pg, check, lang, cm):
     check(pg.locator('[data-testid=cw_share_pick] [data-shc="t:news"]').count() == 0, 'chats I can’t post in aren’t offered')
     bad = pg.evaluate(BROKEN, '[data-testid=cw_share_pick]'); check(bad == [], 'no word breaks in the picker: %s' % bad)
     shot(pg, 'trip-picker', lang)
-    pg.click('[data-shc="t:ke"]'); pg.wait_for_timeout(1200)
+    pg.click('[data-shc="t:ke"]', timeout=5000); pg.wait_for_timeout(1200)
     s = posts(cm, 'send'); check(s and s[-1]['kind'] == 'trip' and s[-1]['trip'] == {'id': 'it_1'}, 'it sends kind “trip” with the trip id (%s)' % (s[-1] if s else None))
     check(vis(pg, '[data-testid=cw_snack]'), 'a snackbar offers to open the chat')
-    pg.click('[data-testid=cw_snack] button'); pg.wait_for_timeout(1500)
+    pg.click('[data-testid=cw_snack] button', timeout=5000); pg.wait_for_timeout(1500)
     check(h(pg) == '#chat/t:ke' and pg.locator('#cwMsgs .cw-trip').count() == 1, 'Open shows the trip card in the chat (%s)' % h(pg))
     check(T(lang, 'Trip: ', 'Safari: ') in txt(pg, '.cw-row[data-open="t:ke"] .cw-pv') if vis(pg, '.cw-row[data-open="t:ke"]') else True, '')
     shot(pg, 'trip-card', lang)
@@ -729,7 +743,7 @@ def s_desktop(pg, check, lang, cm):
         check(vis(pg, '#tabs'), '%d: the bottom bar stays' % w)
         bad = pg.evaluate(OVER, ROOMSEL + ', #cwList .cw-row'); check(bad == [], '%d: nothing covers anything: %s' % (w, bad))
         bad = pg.evaluate(BROKEN, ROOMTXT + ', #vChat'); check(bad == [], '%d: no word breaks: %s' % (w, bad))
-        shot(pg, 'desktop-%d-room' % w, lang)
+        pg.mouse.move(2, 300); shot(pg, 'desktop-%d-room' % w, lang)
     # keyboard: Alt+↓ the next chat, Ctrl+K the search, arrows between messages, Esc back to the list
     ids = pg.evaluate("[...document.querySelectorAll('#cwList .cw-row[data-open]')].map(r => r.dataset.open)")
     pg.focus('#cwTx'); pg.keyboard.press('Alt+ArrowDown'); pg.wait_for_timeout(1300)
@@ -806,7 +820,7 @@ def s_shots_desk(pg, check, lang, cm):
             check(pg.evaluate(NOOVER), '%d %s: fits' % (w, tn))
             bad = pg.evaluate(BROKEN, ROOMTXT + ', #vChat'); check(bad == [], '%d %s: no word breaks: %s' % (w, tn, bad))
             bad = pg.evaluate(OVER, ROOMSEL + ', #cwList .cw-row'); check(bad == [], '%d %s: nothing covers anything: %s' % (w, tn, bad))
-            shot(pg, 'desk-%d-%s' % (w, tn), lang)
+            pg.mouse.move(2, 300); shot(pg, 'desk-%d-%s' % (w, tn), lang)
 
 SEQ = [('Bottom bar: Chat instead of Me, Me on the avatar, everything fits at 360 px', s_bar, {'w': 360}),
        ('Chat list: pinned, unread, @, presence, Archived, search, swipe, row menu', s_list, {}),

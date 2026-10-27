@@ -3302,8 +3302,8 @@ html[data-theme=sun] .cw-sw{border:2px solid #000}
 .cw-lbp.nx{left:auto;right:8px}.cw-lbp.hidden{display:none}
 .cw-lbc{padding:10px 16px calc(14px + env(safe-area-inset-bottom));font-size:.95rem;text-align:center;min-height:20px}
 /* the undo snackbar */
-.cw-snk{position:fixed;left:50%;bottom:calc(var(--tabh) + 24px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:1300;display:flex;align-items:center;gap:14px;max-width:calc(100vw - 32px);padding:8px 8px 8px 16px;border-radius:14px;background:var(--ink);color:var(--card);font-size:.9rem;font-weight:700;box-shadow:0 6px 20px rgba(0,0,0,.25);animation:drop .3s both}
-.cw-snk span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cw-snk button{flex:none;min-height:40px;padding:0 12px;border:0;border-radius:10px;background:none;color:#7CC4FF;font:inherit;font-weight:800;cursor:pointer;white-space:nowrap}
+.cw-snk{position:fixed;left:0;right:0;margin:0 auto;width:max-content;bottom:calc(var(--tabh) + 24px + env(safe-area-inset-bottom));z-index:1300;display:flex;align-items:center;gap:14px;max-width:calc(100vw - 32px);padding:8px 8px 8px 16px;border-radius:14px;background:var(--ink);color:var(--card);font-size:.9rem;font-weight:700;box-shadow:0 6px 20px rgba(0,0,0,.25);animation:drop .3s both}
+.cw-snk span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cw-snk button{flex:none;min-height:40px;padding:0 12px;border:0;border-radius:10px;background:none;color:#7CC4FF;font:inherit;font-weight:800;cursor:pointer;white-space:nowrap}
 html[data-theme=dark] .cw-snk button{color:#0A78C2}.cw-snk.out{opacity:0;transition:opacity .3s}
 /* the project page's Chat button and the contact sheet's Message tile */
 .phead .links .cw-pbtn{grid-column:1/-1;flex-direction:row;justify-content:flex-start;gap:12px;padding:10px 12px;text-align:left;border:0;font:inherit;cursor:pointer}
@@ -3361,7 +3361,7 @@ html[data-theme=dark] .cw-pc{background:rgba(255,255,255,.07)}html[data-theme=su
 html[data-theme=dark] .cw-trip{background:rgba(255,255,255,.07)}html[data-theme=sun] .cw-trip{border:2px solid #000}
 .cw-trh{display:flex;align-items:center;gap:10px}.cw-tri{flex:none;width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:var(--hb-purple);color:var(--hu-purple)}.cw-tri svg{width:20px;height:20px}
 .cw-trt{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}.cw-trt b{font-size:.94rem;line-height:1.3;color:var(--ink)}.cw-trt small{font-size:.76rem;color:var(--muted);line-height:1.35}
-.cw-trn{display:flex;gap:6px;align-items:baseline;margin:8px 0 6px;font-size:.84rem;line-height:1.35}.cw-trn i{flex:none;font-style:normal;font-weight:800;color:var(--muted);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase}
+.cw-trn{display:flex;flex-direction:column;gap:1px;margin:8px 0 6px;font-size:.84rem;line-height:1.35}.cw-trn i{flex:none;font-style:normal;font-weight:800;color:var(--muted);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase}
 .cw-trb{display:block;height:8px;border-radius:4px;background:rgba(4,38,63,.12);overflow:hidden}.cw-trb i{display:block;height:100%;border-radius:4px;background:var(--ok);transition:width .3s}
 html[data-theme=dark] .cw-trb{background:rgba(255,255,255,.14)}
 .cw-trp{display:flex;justify-content:space-between;gap:8px;margin-top:4px;font-size:.74rem;color:var(--muted);white-space:nowrap}
@@ -3415,6 +3415,8 @@ html[data-theme=sun] .cw-pinb{border-bottom:2px solid #000}html[data-theme=dark]
 /* "↓ 3 new" and "Jump to @mention" */
 .cw-jump.chip{width:auto;padding:0 14px 0 10px;gap:4px;border-radius:22px;font:inherit;font-size:.86rem;font-weight:800;white-space:nowrap;background:var(--blue);border-color:var(--blue);color:#FFFFFF}
 .cw-jump.chip i{display:none}
+#vRoom .cw-jump.chip{background:var(--blue) !important;border-color:var(--blue) !important;color:#FFFFFF !important;animation:none !important;opacity:1 !important}
+.cw-qr{-webkit-mask-image:linear-gradient(to right,#000 calc(100% - 28px),transparent);mask-image:linear-gradient(to right,#000 calc(100% - 28px),transparent);padding-right:24px}
 .cw-jat{position:absolute;right:14px;bottom:calc(var(--cwch,64px) + 68px);width:44px;height:44px;border-radius:50%;border:0;background:var(--cw-un);color:#FFFFFF;font:inherit;font-size:1.2rem;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(4,38,63,.2);cursor:pointer;z-index:3}
 .cw-jat.hidden{display:none}html[data-theme=dark] .cw-jat{color:#04140B}
 /* drafts in the list */
@@ -14119,7 +14121,7 @@ html[data-theme=sun] .cw-vpv{border:2px solid #000;box-shadow:none}
 
   // ---- talking to the server
   // prefs, group-update and members answer with the chat's row as it is now
-  function cwRowBack(j) { if (j && j.ok && j.chat && j.chat.id) { cwUpsert(j.chat); cwSave(); cwBadge(); if (S.view === 'vChat') cwListDraw(); if (S.view === 'vRoom' && CH.cur === j.chat.id) { cwHead(); cwCompDraw(); } } return j; }
+  function cwRowBack(j) { if (j && j.ok && j.chat && j.chat.id) { cwUpsert(j.chat); cwSave(); cwBadge(); if (S.view === 'vChat') cwListDraw(); if (S.view === 'vRoom' && CH.cur === j.chat.id) { cwHead(); cwCompDraw(); $('vRoom').setAttribute('data-bub', j.chat.bubble || ''); } } return j; }
   function cwApi(method, path, body) {
     var h = Object.assign({ Accept: 'application/json' }, pinHdr()); if (body) h['Content-Type'] = 'application/json';
     return fetch('/api/chat/' + path, { method: method, headers: h, body: body ? JSON.stringify(body) : undefined })
@@ -14675,7 +14677,7 @@ html[data-theme=sun] .cw-vpv{border:2px solid #000;box-shadow:none}
     var st = { draft: tr('Draft', 'Rasimu'), planned: tr('Planned', 'Imepangwa'), active: tr('On the road', 'Safarini'), done: tr('Finished', 'Imekamilika'), cancelled: tr('Cancelled', 'Imeghairiwa') }[t.status] || '';
     var h = '<div class="cw-trip" data-testid="cw_trip"><span class="cw-trh"><span class="cw-tri" aria-hidden="true">' + cwIc('trip') + '</span><span class="cw-trt"><b data-nosw>' + esc(t.title || tr('Trip', 'Safari')) + '</b>' +
       (ok ? '<small data-nosw>' + [cwTripRange(t), st].filter(Boolean).map(function (x) { return '<span style="white-space:nowrap">' + esc(x) + '</span>'; }).join(' · ') + '</small>' : '') + '</span></span>';
-    if (!ok) return h + '<p class="cw-trx">' + tr('Only people on this trip can open it', 'Ni watu wa safari hii tu wanaoweza kuifungua') + '</p></div>';
+    if (!ok) return h + '<p class="cw-trx">' + (t.gone ? tr('This trip was deleted', 'Safari hii imefutwa') : tr('Only people on this trip can open it', 'Ni watu wa safari hii tu wanaoweza kuifungua')) + '</p></div>';
     var tot = +t.total || 0, dn = Math.min(tot, +t.done || 0), nx = t.next;
     if (nx && nx.name) h += '<p class="cw-trn"><i>' + tr('Next', 'Kinachofuata') + '</i><span data-nosw>' + esc(nx.name) + (nx.date ? ' · <span style="white-space:nowrap">' + esc(dDay(nx.date)) + (nx.at ? ', ' + esc(nx.at) : '') + '</span>' : '') + '</span></p>';
     if (tot) h += '<span class="cw-trb" role="progressbar" aria-valuemin="0" aria-valuemax="' + tot + '" aria-valuenow="' + dn + '" aria-label="' + esc(tr(dn + ' of ' + tot + ' stops done', 'Vituo ' + dn + ' kati ya ' + tot + ' vimekamilika')) + '"><i style="width:' + Math.round(dn / tot * 100) + '%"></i></span><span class="cw-trp" aria-hidden="true"><span>' + tr(dn + ' of ' + tot + ' stops', 'Vituo ' + dn + ' kati ya ' + tot) + '</span><span>' + Math.round(dn / tot * 100) + '%</span></span>';
@@ -14756,10 +14758,10 @@ html[data-theme=sun] .cw-vpv{border:2px solid #000;box-shadow:none}
     if (t) { t.style.height = 'auto'; var max = parseFloat(getComputedStyle(t).maxHeight) || 160; t.style.height = Math.min(t.scrollHeight, max) + 'px'; var x = $('cwEx'); if (x) x.classList.toggle('hidden', !(t.scrollHeight > parseFloat(getComputedStyle(t).lineHeight) * 2.6 + 25)); }
     var c = $('cwComp'); if (c && c.offsetHeight) { $('vRoom').style.setProperty('--cwch', c.offsetHeight + 'px'); if (CH.stick && S.view === 'vRoom') { var mb = $('cwMsgs'); if (mb) mb.scrollTop = mb.scrollHeight; } }
   }
-  // quick replies: a row of chips while the box is empty and in use; a tap sends one
+  // quick replies: a row of chips while the box is empty; a tap sends one
   function cwQrDraw() {
     var q = $('cwQr'), t = $('cwTx'); if (!q || !t) return;
-    var show = !t.value.trim() && !CH.edit && !CH.rec && !CH.vpv && document.activeElement === t;
+    var show = !t.value.trim() && !CH.edit && !CH.rec && !CH.vpv && $('cwMen').classList.contains('hidden'); // as on Android: whenever the box is empty
     if (show) q.innerHTML = cwQuick().map(function (x) { return '<button type="button" data-qr="' + esc(x) + '" data-nosw>' + esc(x) + '</button>'; }).join('');
     var was = !q.classList.contains('hidden'); q.classList.toggle('hidden', !show); if (was !== show) cwGrow();
   }
