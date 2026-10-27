@@ -209,6 +209,9 @@ test('trip card: next stop, done and total from the trip', () => {
 });
 
 test('trip cards in chat: resolved by the proxy when sent, fresh for each viewer, title only without access', async () => {
+  // the trip runs 27–28 Oct 2026: read it as on the morning of the 27th, whatever day the tests run
+  const realNow = Date.now; Date.now = () => Date.UTC(2026, 9, 27, 6);
+  try {
   const chat = fakeChat((req, body) => {
     const u = new URL(req.url);
     if (u.pathname === '/send') return Response.json({ ok: true, msg: Object.assign({ id: 7, kind: 'trip' }, JSON.parse(body)) });
@@ -250,6 +253,7 @@ test('trip cards in chat: resolved by the proxy when sent, fresh for each viewer
   assert.equal(c.card.total, 4);
   assert.equal(c.card.stops, 4);
   assert.deepEqual(c.card.people, ['Meril']);
+  } finally { Date.now = realNow; }
 });
 
 test('project chats get the project photo in the list', async () => {
