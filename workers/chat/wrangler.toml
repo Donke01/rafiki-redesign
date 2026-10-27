@@ -6,6 +6,8 @@ main = "src/index.js"
 compatibility_date = "2026-08-01"
 workers_dev = false
 preview_urls = false
+# keep values set in the Cloudflare dashboard (secrets always stay) when a new version deploys
+keep_vars = true
 
 # Directory: one instance; membership, chat lists, unread counts, presence and every open WebSocket.
 # Conversation: one instance per chat; the messages, reactions and receipts of that chat.
@@ -32,3 +34,7 @@ enabled = true
 
 # Optional: a secret CHAT_SECRET (set it on this worker AND on the Pages project) makes the worker
 # refuse any request that doesn't carry it. It isn't needed while the worker has no public address.
+
+# not secret: the Firebase project for push notifications (FCM_SERVICE_ACCOUNT is a dashboard secret)
+[vars]
+FCM_PROJECT_ID = "rafiki-pin"
