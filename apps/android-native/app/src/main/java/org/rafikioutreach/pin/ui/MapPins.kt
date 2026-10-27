@@ -282,6 +282,8 @@ private class PinsUnder(private val d: Float) : Overlay(), UnderPins {
 /** The pins and groups on the map. Rebuilt only when the pins, the chosen one or the zoom (in half steps) change. */
 class HomePins(private val mv: MapView, private val dens: Float) {
     var onPin: (String) -> Unit = {}
+    /** A tap on a group (it zooms in): the revealed tiles step aside (feat-mea). */
+    var onExplore: () -> Unit = {}
     /** A long press on a pin: its id and where it is on the map (px). */
     var onLongPin: (String, Float, Float) -> Unit = { _, _, _ -> }
     var animate = true
@@ -433,7 +435,7 @@ class HomePins(private val mv: MapView, private val dens: Float) {
         id = "cluster:" + g.size + ":" + g[0].id; title = g.size.toString(); snippet = worst; subDescription = parts.joinToString(",")
         position = GeoPoint(g.sumOf { it.ll.lat } / g.size, g.sumOf { it.ll.lng } / g.size)
         icon = art.donut(parts, g.size); setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER); setInfoWindow(null)
-        setOnMarkerClickListener { _, _ -> zoomInto(g); true }
+        setOnMarkerClickListener { _, _ -> onExplore(); zoomInto(g); true }
     }
 
     /** A tap on a group zooms smoothly into its bounds; pins on the same spot fan out where they are instead. */

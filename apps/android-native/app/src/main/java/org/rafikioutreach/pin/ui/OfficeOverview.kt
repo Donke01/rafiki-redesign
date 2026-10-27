@@ -239,8 +239,9 @@ private fun OcvAvatar(name: String, size: Dp = 40.dp) {
     var hh = 7L; name.lowercase().forEach { hh = (hh * 31 + it.code) % 4294967296L }
     val hu = C.hue(listOf("blue", "green", "purple", "teal", "coral", "slate")[(hh % 6).toInt()])
     val ini = name.trim().split(Regex("\\s+")).filter { it.isNotBlank() }.take(2).joinToString("") { it.take(1).uppercase() }.ifBlank { "·" }
-    Box(Modifier.size(size).clip(CircleShape).background(hu.bg).then(if (ocvSun) Modifier.border(2.dp, Color.Black, CircleShape) else Modifier), contentAlignment = Alignment.Center) {
-        Text(ini, color = hu.fg, fontWeight = FontWeight.ExtraBold, fontSize = (size.value * 0.34f).sp)
+    Box(Modifier.size(size).clip(CircleShape).background(hu.bg), contentAlignment = Alignment.Center) {
+        PhotoOr(name, size) { Text(ini, color = hu.fg, fontWeight = FontWeight.ExtraBold, fontSize = (size.value * 0.34f).sp) }
+        if (ocvSun) Box(Modifier.matchParentSize().border(2.dp, Color.Black, CircleShape))
     }
 }
 

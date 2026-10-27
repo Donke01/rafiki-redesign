@@ -17,6 +17,9 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.doubleClick
+import androidx.compose.ui.test.swipe
+import androidx.compose.ui.test.pinch
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.swipeLeft
 import androidx.compose.ui.test.swipeRight
@@ -690,6 +693,58 @@ class MapHomeTest {
             assertFalse(rule.activity.isFinishing)
         } finally { Lang.sw = false }
     }
+    // --- exploring the map clears the screen (feat-mea, item 7) ---------------------------------------------------------
+    private fun revealedMap(): Pair<AppModel, MapView> {
+        val m = model(); show(m, calm = true); val mv = map()
+        tapMap(mv); assertTrue("an empty-map tap still reveals the tiles", Calm.revealed && revealedTiles()); return m to mv
+    }
+    private fun settleMap() { rule.mainClock.advanceTimeBy(900); rule.waitForIdle() }
+    @Test fun explore_drag_clears_the_screen() {
+        val (_, mv) = revealedMap(); val c0 = mv.mapCenter.longitude
+        rule.onNodeWithTag("map_home").performTouchInput { swipe(androidx.compose.ui.geometry.Offset(width * 0.35f, height * 0.42f), androidx.compose.ui.geometry.Offset(width * 0.75f, height * 0.42f), 300) }
+        settleMap()
+        assertTrue("the map moved", kotlin.math.abs(mv.mapCenter.longitude - c0) > 1e-4)
+        assertTrue("a drag puts the tiles away", Calm.on && calmTiles())
+        shot("map-70-drag-calm")
+        tapMap(mv); assertTrue("an empty tap reveals them again", Calm.revealed)
+    }
+    @Test fun explore_pinch_clears_the_screen() {
+        val (_, mv) = revealedMap(); val z = mv.zoomLevelDouble
+        rule.onNodeWithTag("map_home").performTouchInput {
+            val c = androidx.compose.ui.geometry.Offset(width * 0.5f, height * 0.42f); val d = androidx.compose.ui.geometry.Offset(30f, 0f); val e = androidx.compose.ui.geometry.Offset(160f, 0f)
+            pinch(c - d, c - e, c + d, c + e, 400)
+        }
+        settleMap()
+        assertTrue("zoomed: ${mv.zoomLevelDouble} vs $z", kotlin.math.abs(mv.zoomLevelDouble - z) > 0.01)
+        assertTrue("a pinch puts the tiles away", Calm.on && calmTiles())
+    }
+    @Test fun explore_double_tap_zoom_clears_the_screen() {
+        val (_, mv) = revealedMap(); val z = mv.zoomLevelDouble
+        rule.onNodeWithTag("map_home").performTouchInput { doubleClick(androidx.compose.ui.geometry.Offset(width * 0.5f, height * 0.42f)) }
+        settleMap()
+        assertTrue("zoomed in: ${mv.zoomLevelDouble} vs $z", mv.zoomLevelDouble > z + 0.01)
+        assertFalse("a double tap's zoom puts the tiles away", Calm.revealed)
+    }
+    @Test fun explore_pin_and_group_taps_clear_the_screen() {
+        val (_, mv) = revealedMap()
+        val pin = markers(mv).first { it.id.startsWith("pin:") }.id
+        tapMarker(mv, pin); settleMap()
+        assertTrue("a pin tap puts the tiles away", Calm.on && !tagged("map_chips") && !tagged("nearest"))
+        assertTrue("and its card opens", tagged("map_card"))
+        shot("map-71-pin-calm-card")
+        back(); tapMap(mv); assertTrue(Calm.revealed)
+        look(mv, -1.2, 35.4, 6.0)
+        assertTrue("the app's own camera move doesn't count", Calm.revealed)
+        rule.waitUntil(5000) { markers(mv).any { it.id.startsWith("cluster:") } }
+        tapMarker(mv, markers(mv).first { it.id.startsWith("cluster:") }.id); settleMap()
+        assertTrue("a group tap puts the tiles away", Calm.on)
+    }
+    @Test fun explore_where_i_am_clears_the_screen() {
+        revealedMap()
+        rule.onNodeWithTag("ml_me").performClick(); settleMap()
+        assertTrue("Where I am puts the tiles away", Calm.on && calmTiles())
+    }
+
     @Test fun calm_tap_reveals_tap_hides_844() = calmRevealHide(844, false)
     @Test fun calm_tap_reveals_tap_hides_844_sw() = calmRevealHide(844, true)
     @Test fun calm_tap_reveals_tap_hides_480() = calmRevealHide(480, false)

@@ -85,9 +85,16 @@ fun MeHero(m: AppModel, act: List<JSONObject>?, snap: Snapshot?, report: () -> U
         Modifier.padding(top = 12.dp).rise().fillMaxWidth().shadow(12.dp, shape, ambientColor = Color(0x47054F81), spotColor = Color(0x47054F81)).clip(shape)
             .background(Brush.linearGradient(listOf(Color(0xFF0A78C2), Color(0xFF054F81), Color(0xFF04263F)))).padding(20.dp).testTag("me_hero"),
     ) {
+        // a tap on my picture: add or change my profile photo (feat-mea)
+        var photo by remember { mutableStateOf(false) }
+        val ctx = androidx.compose.ui.platform.LocalContext.current
+        if (photo) PhotoSheet(m, m.prefs.name, self = true, close = { photo = false }) { said -> android.os.Handler(android.os.Looper.getMainLooper()).post { android.widget.Toast.makeText(ctx, said, android.widget.Toast.LENGTH_SHORT).show() } }
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(Modifier.size(56.dp).clip(CircleShape).background(Color(0x29FFFFFF)).border(1.5.dp, Color(0x59FFFFFF), CircleShape), contentAlignment = Alignment.Center) {
-                Text(m.prefs.name.split(" ").mapNotNull { it.firstOrNull()?.uppercase() }.take(2).joinToString(""), color = Color.White, style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold))
+            Box(Modifier.clip(CircleShape).clickable(role = Role.Button) { photo = true }.semantics { contentDescription = if (org.rafikioutreach.pin.data.TeamPhotos.url(m.prefs.name) != null) t("Change your photo", "Badilisha picha yako") else t("Add your photo", "Weka picha yako") }.testTag("me_photo")) {
+                Box(Modifier.size(56.dp).clip(CircleShape).background(Color(0x29FFFFFF)).border(1.5.dp, Color(0x59FFFFFF), CircleShape), contentAlignment = Alignment.Center) {
+                    PhotoOr(m.prefs.name, 56.dp) { Text(m.prefs.name.split(" ").mapNotNull { it.firstOrNull()?.uppercase() }.take(2).joinToString(""), color = Color.White, style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold)) }
+                }
+                Box(Modifier.align(Alignment.BottomEnd).offset(4.dp, 4.dp).size(24.dp).clip(CircleShape).background(Color.White).padding(4.dp)) { Icon(Ic.get("camera"), null, tint = Color(0xFF054F81), modifier = Modifier.fillMaxSize()) }
             }
             Spacer(Modifier.width(14.dp))
             Column(Modifier.weight(1f)) {

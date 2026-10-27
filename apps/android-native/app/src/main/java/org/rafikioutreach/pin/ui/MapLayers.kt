@@ -274,9 +274,13 @@ private fun mateIcon(ctx: Context, name: String, color: Int, label: String, fade
     val cx = w / 2f; val cy = r + 2 * d
     p.color = 0x55000000; c.drawCircle(cx, cy + 1.5f * d, r, p)
     p.color = android.graphics.Color.WHITE; c.drawCircle(cx, cy, r, p)
-    p.color = color; p.alpha = if (faded) 150 else 255; c.drawCircle(cx, cy, r - 3 * d, p); p.alpha = 255
-    p.color = android.graphics.Color.WHITE; p.textSize = 13 * d; p.typeface = Typeface.DEFAULT_BOLD; p.textAlign = Paint.Align.CENTER
-    c.drawText(initialsOf(name), cx, cy + 4.5f * d, p)
+    // their profile photo when it's loaded (feat-mea), else their initials
+    if (!org.rafikioutreach.pin.data.TeamPhotos.drawFace(c, name, cx, cy, r - 3 * d, faded)) {
+        p.color = color; p.alpha = if (faded) 150 else 255; c.drawCircle(cx, cy, r - 3 * d, p); p.alpha = 255
+        p.color = android.graphics.Color.WHITE; p.textSize = 13 * d; p.typeface = Typeface.DEFAULT_BOLD; p.textAlign = Paint.Align.CENTER
+        c.drawText(initialsOf(name), cx, cy + 4.5f * d, p)
+    }
+    p.textAlign = Paint.Align.CENTER
     p.textSize = 10 * d; val tw = p.measureText(label) + 12 * d; val top = cy + r + 3 * d
     p.color = 0x33000000; c.drawRoundRect(RectF(cx - tw / 2, top + 1 * d, cx + tw / 2, top + 17 * d), 9 * d, 9 * d, p)
     p.color = android.graphics.Color.WHITE; c.drawRoundRect(RectF(cx - tw / 2, top, cx + tw / 2, top + 16 * d), 8 * d, 8 * d, p)
@@ -532,7 +536,9 @@ private fun BoxScope.HomeLayersOverlay(m: AppModel, snap: Snapshot, fix: Fix?, m
         }
         mv.addMapListener(l); onDispose { mv.removeMapListener(l) }
     }
-    val teamKey = Triple(tm, System.currentTimeMillis() / 60000, teamZoom to (mv.width > 0))
+    // profile photos (feat-mea): fetched once, then the markers are drawn again with the faces
+    LaunchedEffect(tm) { tm?.people?.forEach { p -> org.rafikioutreach.pin.data.TeamPhotos.url(p.name)?.let { u -> org.rafikioutreach.pin.data.TeamPhotos.load(p.name, u) } } }
+    val teamKey = Triple(tm, System.currentTimeMillis() / 60000, listOf(teamZoom, mv.width > 0, org.rafikioutreach.pin.data.TeamPhotos.tick))
     if (st.teamKey != teamKey) {
         st.teamKey = teamKey
         mv.overlays.removeAll(st.team)
@@ -711,7 +717,7 @@ private fun MateCard(p: Sharer) {
     MapCard("ml_mate") {
         Column(Modifier.padding(start = 14.dp, end = 8.dp, top = 8.dp, bottom = 12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(Modifier.size(40.dp).clip(CircleShape).background(Color(0xFF0A78C2)), contentAlignment = Alignment.Center) { Text(initialsOf(p.name), color = Color.White, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold)) }
+                PhotoOr(p.name, 40.dp) { Box(Modifier.size(40.dp).clip(CircleShape).background(Color(0xFF0A78C2)), contentAlignment = Alignment.Center) { Text(initialsOf(p.name), color = Color.White, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold)) } }
                 Spacer(Modifier.width(10.dp))
                 Column(Modifier.weight(1f)) {
                     Text(p.name, style = MaterialTheme.typography.titleSmall, color = C.ink)

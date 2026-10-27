@@ -134,7 +134,7 @@ fun NewSiteScreen(m: AppModel, done: (String?) -> Unit) {
         return
     }
 
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp).testTag("new_site")) {
         Text(t("New site", "Eneo jipya"), style = MaterialTheme.typography.headlineLarge, color = C.ink, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.fillMaxWidth())
         Text(t("The office checks every new site first. It isn’t on the website until they approve it.", "Ofisi hukagua kila eneo jipya kwanza. Halionekani kwenye tovuti hadi ofisi iliidhinishe."), style = MaterialTheme.typography.bodyMedium, color = C.muted)
         Card(Modifier.padding(top = 14.dp)) {

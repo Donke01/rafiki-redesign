@@ -362,8 +362,12 @@ private fun MsgLine(m: AppModel, msg: Msg, row: ChatRow?, me: String, group: Boo
             } else Column(Modifier.widthIn(max = maxW + TAIL).shadow(if (C.dark) 0.dp else 0.5.dp, shape).clip(shape).background(bg)
                 .combinedClickable(onClick = {}, onLongClick = onLong, onDoubleClick = onDouble, role = Role.Button).semantics { contentDescription = says }
                 .padding(start = if (mine) 10.dp else 10.dp + TAIL, end = if (mine) 10.dp + TAIL else 10.dp, top = 6.dp, bottom = 5.dp).testTag(if (mine) "bubble_mine" else "bubble_theirs")) {
-                if (group && !mine && first) Text(msg.from, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold), color = ChatLook.nameColor(msg.from), maxLines = 1, overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(bottom = 2.dp).testTag("sender"))
+                if (group && !mine && first) Row(verticalAlignment = Alignment.CenterVertically) {
+                    // their face next to their name, when they have a photo (feat-mea)
+                    if (org.rafikioutreach.pin.data.TeamPhotos.url(msg.from) != null) { Box(Modifier.padding(bottom = 2.dp)) { PhotoOr(msg.from, 18.dp) {} }; Spacer(Modifier.width(5.dp)) }
+                    Text(msg.from, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold), color = ChatLook.nameColor(msg.from), maxLines = 1, overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(bottom = 2.dp).testTag("sender"))
+                }
                 if (msg.fwd && !msg.deleted) Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 2.dp)) {
                     Icon(ChatIc.get("fwd"), null, tint = C.muted, modifier = Modifier.size(13.dp)); Spacer(Modifier.width(4.dp))
                     Text(t("Forwarded", "Imesambazwa"), style = MaterialTheme.typography.labelSmall.copy(fontStyle = FontStyle.Italic), color = C.muted)

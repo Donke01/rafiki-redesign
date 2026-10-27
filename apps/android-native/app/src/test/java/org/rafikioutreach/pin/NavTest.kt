@@ -55,7 +55,9 @@ class NavTest {
     private val out = File(System.getProperty("user.dir"), "build/shots").apply { mkdirs() }
     private val app get() = ApplicationProvider.getApplicationContext<Application>()
 
-    @After fun reset() { home = ""; uganda = false; NewSiteDrafts.remove(app); Lang.sw = false; Motion.on = true; Nav.now = { System.currentTimeMillis() }; HomeLayers.reset(); MapClean.revealed = false; Onb.enabled = true }
+    /** false: a field user (no Office; Me is the 5th tab, feat-mea). */
+    private var admin = true
+    @After fun reset() { admin = true; home = ""; uganda = false; NewSiteDrafts.remove(app); Lang.sw = false; Motion.on = true; Nav.now = { System.currentTimeMillis() }; HomeLayers.reset(); MapClean.revealed = false; Onb.enabled = true }
 
     // 20 projects around Eldoret: enough to scroll; 10 of them need a repair
     private fun proj(i: Int) = JSONObject().put("id", "${100 + i}").put("title", "Site ${100 + i} Borehole").put("country", "Kenya").put("ck", "ke").put("area", "Eldoret")
@@ -65,7 +67,7 @@ class NavTest {
     private var home = ""; private var uganda = false
     private fun ug(id: String, lat: Double, lng: Double) = JSONObject().put("id", id).put("title", "Uganda $id").put("country", "Uganda").put("ck", "ug").put("area", "Mbale")
         .put("type", "Borehole well").put("status", "Completed").put("gps", JSONArray().put(lat).put(lng))
-    private fun snapshot() = JSONObject().put("ok", true).put("who", "Reid Anderson").put("admin", true).put("reviewOpen", 0)
+    private fun snapshot() = JSONObject().put("ok", true).put("who", "Reid Anderson").put("admin", admin).put("reviewOpen", 0)
         .put("me", JSONObject().put("kind", "app").put("home", home))
         .put("projects", JSONArray().apply { (1..20).forEach { put(proj(it)) }; if (uganda) { put(ug("301", 1.08, 34.17)); put(ug("302", 0.35, 32.58)) } })
         .put("repairs", JSONObject().apply { (11..20).forEach { put("${100 + it}", JSONObject().put("state", "repair").put("by", "Bertin").put("at", ago(3)).put("urgency", "month").put("t", "Site ${100 + it} Borehole")) } })
@@ -160,10 +162,19 @@ class NavTest {
         back(); waitTag("map_home")
     }
     // --- tapping the tab you are already on: it starts over in place, with no fade through (no blink) ---------------
-    @Test fun same_tab_again_does_not_blink() {
-        start()
-        for ((k, root) in listOf("me" to "me_hero", "list" to "projects", "office" to "o_repairs")) {
+    /** Re-tapping the tab you're on (feat-mea, item 6): every tab, both roles. It starts over in place: one screen
+     *  straight away (no fade through), Map keeps the same map and eases back to its default view, New site keeps its
+     *  form, Chat shows its list at once. */
+    private fun sameTabAgain(isAdmin: Boolean) {
+        admin = isAdmin; start()
+        val tabs = listOf("map" to "map_home", "list" to "projects", "new" to "new_site", "chat" to "chat_list", (if (isAdmin) "me" else "me_tab") to "me_hero") +
+            (if (isAdmin) listOf("office" to "o_repairs") else emptyList())
+        for ((k, root) in tabs) {
             nav(k); waitTag(root)
+            val mv = if (k == "map") map() else null
+            val home = if (k == "map") view(mv!!) else null
+            if (k == "map") look(mv!!, 3.2, 31.0, 13.0)
+            if (k == "new") { rule.onAllNodes(hasSetTextAction())[0].performScrollTo().performTextInput("Kiptoo Primary"); settle() }
             rule.mainClock.autoAdvance = false
             rule.onNodeWithTag("nav_$k").performClick()
             rule.mainClock.advanceTimeByFrame(); rule.mainClock.advanceTimeByFrame()
@@ -172,11 +183,17 @@ class NavTest {
             rule.mainClock.autoAdvance = true; settle()
             assertEquals("$k: still one screen", 1, rule.onAllNodesWithTag(root).fetchSemanticsNodes().size)
             rule.onNodeWithTag("nav_$k").assertIsSelected()
+            when (k) {
+                "map" -> { rule.mainClock.advanceTimeBy(1500); settle(); assertTrue("the same map (no tiles reloading)", map() === mv); assertSameView("back to the default view", home!!, view(map())) }
+                "new" -> { assertTrue("the form is kept", exact("Kiptoo Primary")); rule.onAllNodes(hasSetTextAction())[0].performTextClearance(); settle() }
+            }
         }
         // from a deeper screen the same tab still goes back to its first screen
-        nav("office"); tap("o_repairs"); waitTag("office_strip")
-        nav("office"); waitTag("o_repairs"); assertFalse(tagged("office_strip"))
+        if (isAdmin) { nav("office"); tap("o_repairs"); waitTag("office_strip"); nav("office"); waitTag("o_repairs"); assertFalse(tagged("office_strip")) }
+        else { nav("me_tab"); tap("me_report"); waitTag("hback"); nav("me_tab"); waitTag("me_hero") }
     }
+    @Test fun same_tab_again_does_not_blink() = sameTabAgain(true)
+    @Test fun same_tab_again_does_not_blink_field_user() = sameTabAgain(false)
 
     @Test fun office_tile_then_back_is_the_grid() = officeTileBack(false)
     @Test fun office_tile_then_back_is_the_grid_kiswahili() = officeTileBack(true)
@@ -452,6 +469,40 @@ class NavTest {
         // back from Projects: Map home
         back(); waitTag("map_home")
     }
+    // --- Me for both roles (feat-mea): admins have Office as the 5th tab and Me on the pill; field users have both ------
+    @Test fun admin_bar_has_office_and_the_me_pill() {
+        start()
+        assertTrue(tagged("nav_office")); assertFalse(tagged("nav_me_tab")); assertTrue(tagged("nav_me"))
+        rule.onNodeWithTag("nav_me").performClick(); settle(); waitTag("me_hero"); rule.onNodeWithTag("nav_me").assertIsSelected()
+    }
+    private fun fieldUserMe(sw: Boolean) {
+        admin = false; Lang.sw = sw; start()
+        // Map · Projects · New site · Chat · Me, and the pill too
+        assertFalse(tagged("nav_office")); assertTrue(tagged("nav_me_tab")); assertTrue(tagged("nav_me"))
+        rule.onNodeWithTag("nav_me_tab").assertTextEquals(if (sw) "Mimi" else "Me")
+        // the tab opens Me and is lit; so is the pill
+        rule.onNodeWithTag("nav_me_tab").performClick(); settle(); waitTag("me_hero")
+        rule.onNodeWithTag("nav_me_tab").assertIsSelected(); rule.onNodeWithTag("nav_me").assertIsSelected()
+        shot(if (sw) "nav-me-tab-field-sw" else "nav-me-tab-field")
+        // it starts over: Team, then the tab again → Me (in place, no blink)
+        tap("pane_team"); assertFalse(tagged("me_hero"))
+        rule.mainClock.autoAdvance = false
+        rule.onNodeWithTag("nav_me_tab").performClick()
+        rule.mainClock.advanceTimeByFrame(); rule.mainClock.advanceTimeByFrame()
+        assertEquals("one Me screen, straight away", 1, rule.onAllNodesWithTag("me_hero").fetchSemanticsNodes().size)
+        rule.mainClock.autoAdvance = true; settle()
+        rule.mainClock.autoAdvance = false
+        rule.onNodeWithTag("nav_me_tab").performClick()
+        rule.mainClock.advanceTimeByFrame(); rule.mainClock.advanceTimeByFrame()
+        assertEquals("re-tap: still one screen", 1, rule.onAllNodesWithTag("me_hero").fetchSemanticsNodes().size)
+        rule.mainClock.autoAdvance = true; settle()
+        // the pill opens the same Me; back goes to Map home
+        nav("list"); rule.onNodeWithTag("nav_me").performClick(); settle(); waitTag("me_hero"); rule.onNodeWithTag("nav_me_tab").assertIsSelected()
+        back(); waitTag("map_home"); rule.onNodeWithTag("nav_map").assertIsSelected()
+    }
+    @Test fun field_user_has_me_in_the_bar() = fieldUserMe(false)
+    @Test fun field_user_has_me_in_the_bar_kiswahili() = fieldUserMe(true)
+
     @Test fun projects_start_over_from_bar_kept_with_back() = projectsStartOver(false)
     @Test fun projects_start_over_from_bar_kept_with_back_kiswahili() = projectsStartOver(true)
 

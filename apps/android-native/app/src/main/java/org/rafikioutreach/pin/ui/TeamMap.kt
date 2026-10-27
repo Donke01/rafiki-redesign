@@ -151,7 +151,7 @@ fun planWhy(info: PlanInfo?, repairState: String?): List<Pair<String, String>> =
 }
 
 // --- the map --------------------------------------------------------------------------------------------
-data class MapAvatar(val key: String, val ll: LatLng, val initials: String, val color: Int, val label: String, val faded: Boolean)
+data class MapAvatar(val key: String, val ll: LatLng, val initials: String, val color: Int, val label: String, val faded: Boolean, val faces: Int = 0)
 data class MapPin(val ll: LatLng, val color: Int, val number: String?, val title: String, val dim: Boolean = false)
 data class MapLine(val pts: List<LatLng>, val color: Int, val dim: Boolean)
 
@@ -164,9 +164,13 @@ private fun avatarIcon(ctx: android.content.Context, a: MapAvatar): BitmapDrawab
     val cx = w / 2f; val cy = r + 2 * d
     p.color = 0x55000000; c.drawCircle(cx, cy + 1.5f * d, r, p)
     p.color = android.graphics.Color.WHITE; c.drawCircle(cx, cy, r, p)
-    p.color = a.color; p.alpha = if (a.faded) 150 else 255; c.drawCircle(cx, cy, r - 3 * d, p); p.alpha = 255
-    p.color = android.graphics.Color.WHITE; p.textSize = 13 * d; p.typeface = Typeface.DEFAULT_BOLD; p.textAlign = Paint.Align.CENTER
-    c.drawText(a.initials, cx, cy + 4.5f * d, p)
+    // their profile photo when it's loaded (feat-mea), else their initials
+    if (!org.rafikioutreach.pin.data.TeamPhotos.drawFace(c, a.key, cx, cy, r - 3 * d, a.faded)) {
+        p.color = a.color; p.alpha = if (a.faded) 150 else 255; c.drawCircle(cx, cy, r - 3 * d, p); p.alpha = 255
+        p.color = android.graphics.Color.WHITE; p.textSize = 13 * d; p.typeface = Typeface.DEFAULT_BOLD; p.textAlign = Paint.Align.CENTER
+        c.drawText(a.initials, cx, cy + 4.5f * d, p)
+    }
+    p.color = android.graphics.Color.WHITE; p.typeface = Typeface.DEFAULT_BOLD; p.textAlign = Paint.Align.CENTER
     p.textSize = 10 * d; val tw = p.measureText(a.label) + 12 * d; val top = cy + r + 2 * d
     p.color = 0x33000000; c.drawRoundRect(RectF(cx - tw / 2, top + 1 * d, cx + tw / 2, top + 17 * d), 9 * d, 9 * d, p)
     p.color = android.graphics.Color.WHITE; c.drawRoundRect(RectF(cx - tw / 2, top, cx + tw / 2, top + 16 * d), 8 * d, 8 * d, p)
@@ -378,7 +382,9 @@ fun TeamMapSection(m: AppModel, s: Snapshot, open: (String) -> Unit) {
         })
     if (d == null) { Text(err ?: t("Loading…", "Inapakia…"), style = MaterialTheme.typography.bodyMedium, color = if (err != null) C.bad else C.muted, modifier = Modifier.padding(top = 12.dp).testTag("tm_sum")); return }
     val colors = d.people.mapIndexed { i, p -> p.name to OFA_COLORS[i % OFA_COLORS.size] }.toMap()
-    val avatars = d.people.map { p -> MapAvatar(p.name, p.ll, initialsOf(p.name), colors.getValue(p.name), ago(p.at), ofaOld(p.at)) }
+    LaunchedEffect(d) { d.people.forEach { p -> org.rafikioutreach.pin.data.TeamPhotos.url(p.name)?.let { u -> org.rafikioutreach.pin.data.TeamPhotos.load(p.name, u) } } }
+    val faces = org.rafikioutreach.pin.data.TeamPhotos.tick
+    val avatars = d.people.map { p -> MapAvatar(p.name, p.ll, initialsOf(p.name), colors.getValue(p.name), ago(p.at), ofaOld(p.at), faces) }
     val pins = d.visits.mapNotNull { v -> s.projects.firstOrNull { it.id == v.id }?.gps?.let { MapPin(it, ofaStateColor(v.state), null, v.title) } }
     val focus = if (who.isBlank()) null else d.people.filter { it.name == who }.map { it.ll } + d.visits.filter { it.by.equals(who, true) }.mapNotNull { v -> s.projects.firstOrNull { it.id == v.id }?.gps }
     OfaMap(avatars, pins, emptyList(), Modifier.padding(top = 12.dp).fillMaxWidth().height(340.dp).clip(RoundedCornerShape(20.dp)).border(1.dp, C.line, RoundedCornerShape(20.dp)).testTag("tm_map"), fitKey = d to who, focus = focus) { who = it; Contact.show(it) }
@@ -394,7 +400,7 @@ fun TeamMapSection(m: AppModel, s: Snapshot, open: (String) -> Unit) {
         DqmCard("tm_person_${p.name}", Modifier.padding(top = 8.dp).rise(minOf(i, 6)), p.name, null,
             listOf(t("Last seen ", "Alionekana ") + ago(p.at) + accText(p.acc),
                 (if (old) t("Not seen for over an hour · ", "Hajaonekana kwa zaidi ya saa moja · ") else "") + (if (vs.size == 1) t("1 visit today", "ziara 1 leo") else t("${vs.size} visits today", "ziara ${vs.size} leo"))),
-            leading = { DqmAvatar(p.name, Color(colors.getValue(p.name)), Color.White, 44.dp) }) { who = p.name; Contact.show(p.name) }
+            leading = { PhotoOr(p.name, 44.dp) { DqmAvatar(p.name, Color(colors.getValue(p.name)), Color.White, 44.dp) } }) { who = p.name; Contact.show(p.name) }
     }
     if (d.people.isEmpty()) EmptyDrop(t("Nobody is sharing their location right now.", "Hakuna anayeshiriki mahali kwa sasa."))
     Card(Modifier.padding(top = 14.dp), pad = 4.dp) {

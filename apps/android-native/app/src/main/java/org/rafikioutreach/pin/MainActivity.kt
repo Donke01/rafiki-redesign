@@ -73,6 +73,7 @@ import org.rafikioutreach.pin.ui.NewSiteScreen
 import org.rafikioutreach.pin.ui.ProjectScreen
 import org.rafikioutreach.pin.ui.ProjectsScreen
 import org.rafikioutreach.pin.ui.RafikiTheme
+import org.rafikioutreach.pin.ui.closeOnAnyTap
 
 /** Where you are in the app: a tab, or a project on top of it. [key] is this visit to it: back comes back to the same
  *  key (and finds the screen as it was left); a tab opened again from the bottom bar is a new key (it starts over). */
@@ -150,7 +151,11 @@ fun App(m: AppModel) {
     // welcome: before signing in, and for a moment every time the app opens; the full one the first time
     var helloDone by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(!org.rafikioutreach.pin.ui.Onb.enabled) }
     var onbSeen by remember { androidx.compose.runtime.mutableStateOf(m.prefs.onb) }
-    Box(Modifier.fillMaxSize()) {
+    // team photos are never asked for in donor mode
+    LaunchedEffect(donorOn) { org.rafikioutreach.pin.data.TeamPhotos.off = donorOn }
+    var hintOn by remember { androidx.compose.runtime.mutableStateOf(org.rafikioutreach.pin.ui.Onb.enabled && !m.prefs.meHint) }
+    fun closeHint() { hintOn = false; m.prefs.meHint = true }
+    Box(Modifier.fillMaxSize().closeOnAnyTap({ hintOn && m.snap.value?.admin == true && org.rafikioutreach.pin.ui.MeHint.anchor != null && helloDone && onbSeen }) { closeHint() }) {
         org.rafikioutreach.pin.ui.AppBackground(Modifier.matchParentSize())
         // edge to edge (always on from Android 15, no opt-out from 16): nothing under the status bar, the navigation
         // bar, a camera cutout (phones turned sideways) or the keyboard
@@ -166,6 +171,10 @@ fun App(m: AppModel) {
                 else -> Shell(m)
             }
         }
+        // "Me is here now" (feat-mea): once, the first time this version opens signed in, after any welcome; not donors
+        val bioLockedNow by m.bioLocked.collectAsState()
+        val adminNow = m.snap.collectAsState().value?.admin == true
+        if (hintOn && adminNow && signedIn && !donorOn && !m.donor.entry && !bioLockedNow && helloDone && onbSeen && !m.replayOnb) org.rafikioutreach.pin.ui.MeHintBubble { closeHint() }
         if (!donorOn && !m.donor.entry && !(donorGone && !signedIn)) when {
             !signedIn && !helloDone -> org.rafikioutreach.pin.ui.Welcome(m, false) { helloDone = true }
             signedIn && org.rafikioutreach.pin.ui.Onb.enabled && (!onbSeen || m.replayOnb) -> org.rafikioutreach.pin.ui.Onboarding(m) { role ->
@@ -205,6 +214,10 @@ fun Shell(m: AppModel) {
     /** A tab from the bottom bar (or the app sending you there): it starts over. [keepFilter]: the app asked for a list. */
     fun tab(t: String, keepFilter: Boolean = false) {
         quiet = stack.size == 1 && stack.first().tab == t && stack.first().project == null && stack.first().sub == null
+        // no blink (feat-mea): Map home keeps its map and eases back to the default view; New site keeps its form
+        // (the draft is what's on screen); every other tab swaps to a fresh copy of its first screen in the same frame
+        if (quiet && t == "map") { org.rafikioutreach.pin.ui.Nav.startOver(m, t); org.rafikioutreach.pin.ui.Nav.mapAgain++; return }
+        if (quiet && t == "new") return
         stack.forEach { kept.removeState(it.key) }
         org.rafikioutreach.pin.ui.Nav.startOver(m, t, keepFilter)
         stack.clear(); stack.add(Place(t))
@@ -299,38 +312,27 @@ fun Shell(m: AppModel) {
     }
 
     Column(Modifier.fillMaxSize()) {
-        // app header: you (or back), the wordmark, refresh
-        Row(Modifier.fillMaxWidth().heightIn(min = 56.dp).padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically) {
-            Box(Modifier.size(42.dp), contentAlignment = Alignment.Center) {
-                // the same as the phone's back: an open sub-tab or fold closes first
-                val dispatcher = androidx.activity.compose.LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
-                if (sub) RoundBtn("back", t("Back", "Rudi"), "hback") { if (dispatcher != null) dispatcher.onBackPressed() else pop() }
-                // Me: the picture at the top left (Chat took Me's place in the bottom bar, feat-chata), lit while on Me,
-                // with what's waiting to send and the app-update dot that the Me tab had
-                else Box(Modifier.size(42.dp).testTag("hav")) {
-                    val meOn = here.tab == "me"
-                    Box(Modifier.size(42.dp).clip(androidx.compose.foundation.shape.CircleShape).then(if (meOn) Modifier.border(2.dp, C.blue2, CircleShape).padding(3.dp) else Modifier.padding(1.dp))
-                        .clip(CircleShape).background(androidx.compose.ui.graphics.Brush.linearGradient(listOf(Color(0xFF47B4F5), Color(0xFF0A78C2))))
-                        .clickable(role = Role.Tab) { hp.tap(); tab("me") }.semantics { contentDescription = t("Me", "Mimi"); selected = meOn }.testTag("nav_me"), contentAlignment = Alignment.Center) {
-                        Text(m.prefs.name.split(" ").mapNotNull { it.firstOrNull()?.uppercase() }.take(2).joinToString(""), color = Color.White, style = MaterialTheme.typography.labelMedium.copy(fontSize = 13.sp))
-                    }
-                    if (waiting == 0 && updReady) Box(Modifier.align(Alignment.TopEnd).size(12.dp).clip(CircleShape).background(Color.White).padding(2.dp).clip(CircleShape).background(C.blue).testTag("update_dot"))
-                    if (waiting > 0) Text("$waiting", color = Color.White, fontSize = 10.sp, maxLines = 1, softWrap = false, modifier = Modifier.align(Alignment.TopEnd).offset(4.dp, (-2).dp).clip(RoundedCornerShape(99.dp)).background(C.warn).padding(horizontal = 5.dp))
-                }
-            }
+        // app header: Me (or back), the wordmark, the bell
+        val dispatcher = androidx.activity.compose.LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
+        org.rafikioutreach.pin.ui.HeaderRow(left = { word ->
+            // the same as the phone's back: an open sub-tab or fold closes first
+            if (sub) Box(Modifier.size(44.dp), contentAlignment = Alignment.Center) { RoundBtn("back", t("Back", "Rudi"), "hback") { if (dispatcher != null) dispatcher.onBackPressed() else pop() } }
+            // Me: a labelled pill at the top left (feat-mea; Chat took Me's place in the bottom bar, feat-chata), lit while
+            // on Me, with what's waiting to send and the app-update dot that the Me tab had
+            else org.rafikioutreach.pin.ui.MePill(m, here.tab == "me", waiting, updReady, word) { hp.tap(); tab("me") }
+        }, middle = {
             // the wordmark, or the screen's title once its big title has scrolled away
-            Box(Modifier.weight(1f).padding(horizontal = 8.dp), contentAlignment = Alignment.Center) {
-                androidx.compose.animation.AnimatedContent(m.bar.text, transitionSpec = {
-                    (androidx.compose.animation.fadeIn(androidx.compose.animation.core.tween(220)) + androidx.compose.animation.slideInVertically { it / 2 }) togetherWith
-                        (androidx.compose.animation.fadeOut(androidx.compose.animation.core.tween(150)) + androidx.compose.animation.slideOutVertically { -it / 2 })
-                }, label = "bar") { title ->
-                    if (title == null) org.rafikioutreach.pin.ui.Wordmark()
-                    else Text(title, style = MaterialTheme.typography.titleMedium, color = C.ink, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis, modifier = Modifier.testTag("bar_title"))
-                }
+            androidx.compose.animation.AnimatedContent(m.bar.text, transitionSpec = {
+                (androidx.compose.animation.fadeIn(androidx.compose.animation.core.tween(220)) + androidx.compose.animation.slideInVertically { it / 2 }) togetherWith
+                    (androidx.compose.animation.fadeOut(androidx.compose.animation.core.tween(150)) + androidx.compose.animation.slideOutVertically { -it / 2 })
+            }, label = "bar") { title ->
+                if (title == null) org.rafikioutreach.pin.ui.Wordmark()
+                else Text(title, style = MaterialTheme.typography.titleMedium, color = C.ink, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis, modifier = Modifier.testTag("bar_title"))
             }
+        }, right = {
             // notifications, top right (pull a screen down to refresh it)
             org.rafikioutreach.pin.ui.Bell(m) { go(Place(here.tab, sub = "notes")) }
-        }
+        })
         // "Sharing location with the office · Stop", on every screen while sharing (Me › Settings › Share my location)
         org.rafikioutreach.pin.ui.SharingBar(m)
         // pull down to refresh (on screens that scroll)
@@ -360,7 +362,8 @@ fun Shell(m: AppModel) {
                     }.using(androidx.compose.animation.SizeTransform(clip = false))
                 },
             ) { (pl, _) ->
-                kept.SaveableStateProvider(pl.key) { Box(Modifier.fillMaxSize()) {
+                // wide screens (tablets, a phone on its side): every page in a centred column; Map home stays full-bleed (feat-mea)
+                kept.SaveableStateProvider(pl.key) { org.rafikioutreach.pin.ui.Centred(full = pl.tab == "map" && pl.project == null && pl.sub == null) {
                     val pid = pl.project
                     when {
                         pid != null -> ProjectScreen(m, pid, pl.projectTab) { pop() }
@@ -395,35 +398,41 @@ fun Shell(m: AppModel) {
             }
         }
         // bottom tabs, floating; not inside a conversation, where the composer sits at the bottom (feat-chata)
-        if (here.sub?.startsWith("chat:") != true) BottomBar(m, here.tab, review = m.snap.collectAsState().value?.reviewOpen ?: 0, chat = chatUnread) { tab(it) }
+        if (here.sub?.startsWith("chat:") != true) BottomBar(m, here.tab, review = m.snap.collectAsState().value?.reviewOpen ?: 0, chat = chatUnread, waiting = waiting, updReady = updReady) { tab(it) }
     }
 }
 
-/** The tabs at the bottom: Map, Projects, New site, Chat and (for admins) Office. Me is the picture at the top left.
- *  [chat]: unread chat messages (the green badge). */
+/** The tabs at the bottom: Map, Projects, New site, Chat, then Office for admins or Me for field users (feat-mea).
+ *  Everyone also has the Me pill at the top left. [chat]: unread chat messages (the green badge); [waiting] and
+ *  [updReady]: the Me tab carries the same badges as the pill. */
 @Composable
-fun BottomBar(m: AppModel, current: String, review: Int, chat: Int, items: List<Triple<String, String, String>>? = null, go: (String) -> Unit) {
+fun BottomBar(m: AppModel, current: String, review: Int, chat: Int, items: List<Triple<String, String, String>>? = null, waiting: Int = 0, updReady: Boolean = false, go: (String) -> Unit) {
         val hp = org.rafikioutreach.pin.ui.rememberHaptics()
         val glassy = with(org.rafikioutreach.pin.ui.C) { this === org.rafikioutreach.pin.ui.Light || this === org.rafikioutreach.pin.ui.Dark }
         val barShape = RoundedCornerShape(28.dp)
-        Row(Modifier.padding(start = 12.dp, end = 12.dp, bottom = 10.dp, top = 6.dp).fillMaxWidth().shadow(16.dp, barShape, spotColor = Color(0x33144678)).clip(barShape)
+        // on a wide screen the bar stays a comfortable size, in the middle (feat-mea)
+        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        Row(Modifier.then(if (org.rafikioutreach.pin.ui.CentreLayout.on) Modifier.widthIn(max = 600.dp) else Modifier).padding(start = 12.dp, end = 12.dp, bottom = 10.dp, top = 6.dp).fillMaxWidth().shadow(16.dp, barShape, spotColor = Color(0x33144678)).clip(barShape)
             .background(if (glassy) (if (C.dark) Color(0xEB1E2A36) else Color(0xF2FFFFFF)) else C.card).border(1.dp, if (glassy) (if (C.dark) Color(0x17FFFFFF) else Color.White) else C.line, barShape).height(68.dp), verticalAlignment = Alignment.CenterVertically) {
             val admin = m.snap.collectAsState().value?.admin == true
             (items ?: (listOf(Triple("map", t("Map", "Ramani"), "map"), Triple("list", t("Projects", "Miradi"), "list"), Triple("new", t("New site", "Eneo jipya"), "plus"), Triple("chat", t("Chat", "Gumzo"), "chat")) +
-                (if (admin) listOf(Triple("office", t("Office", "Ofisi"), "inbox")) else emptyList()))).forEach { (k, label, icon) ->
+                (if (admin) listOf(Triple("office", t("Office", "Ofisi"), "inbox")) else listOf(Triple("me", t("Me", "Mimi"), "person"))))).forEach { (k, label, icon) ->
                 // the tab you are in stays lit, also with a project or page open on top of it; one colour for every tab
                 val on = current == k
                 val hu = org.rafikioutreach.pin.ui.Hue(C.blue2, C.tint)
-                Column(Modifier.weight(1f).clickable(role = Role.Tab) { hp.tap(); go(k) }.semantics { selected = on }.padding(vertical = 6.dp).testTag("nav_$k"), horizontalAlignment = Alignment.CenterHorizontally) {
+                Column(Modifier.weight(1f).clickable(role = Role.Tab) { hp.tap(); go(k) }.semantics { selected = on }.padding(vertical = 6.dp).testTag(if (k == "me") "nav_me_tab" else "nav_$k"), horizontalAlignment = Alignment.CenterHorizontally) {
                     Box {
                         if (k == "new") Box(Modifier.size(48.dp, 30.dp).clip(RoundedCornerShape(14.dp)).background(androidx.compose.ui.graphics.Brush.linearGradient(listOf(Color(0xFF9A78F0), Color(0xFF6E46C8)))), contentAlignment = Alignment.Center) { Icon(Ic.get(icon), null, tint = Color.White, modifier = Modifier.size(20.dp)) }
                         else Box(Modifier.size(52.dp, 30.dp).clip(RoundedCornerShape(99.dp)).background(if (on) hu.bg else Color.Transparent), contentAlignment = Alignment.Center) { Icon(Ic.get(icon), null, tint = if (on) hu.fg else C.muted, modifier = Modifier.size(24.dp)) }
                         if (k == "office" && review > 0) Text("$review", color = Color.White, fontSize = 10.sp, modifier = Modifier.align(Alignment.TopEnd).clip(RoundedCornerShape(99.dp)).background(C.warn).padding(horizontal = 5.dp))
+                        if (k == "me" && waiting > 0) Text("$waiting", color = Color.White, fontSize = 10.sp, maxLines = 1, softWrap = false, modifier = Modifier.align(Alignment.TopEnd).clip(RoundedCornerShape(99.dp)).background(C.warn).padding(horizontal = 5.dp).testTag("me_tab_waiting"))
+                        if (k == "me" && waiting == 0 && updReady) Box(Modifier.align(Alignment.TopEnd).padding(top = 2.dp, end = 8.dp).size(12.dp).clip(CircleShape).background(C.card).padding(2.dp).clip(CircleShape).background(C.blue).testTag("me_tab_update"))
                         if (k == "chat" && chat > 0) Text(if (chat > 99) "99+" else "$chat", color = Color.White, fontSize = 10.sp, maxLines = 1, softWrap = false, modifier = Modifier.align(Alignment.TopEnd).clip(RoundedCornerShape(99.dp)).background(org.rafikioutreach.pin.ui.ChatLook.online).padding(horizontal = 5.dp).testTag("chat_badge"))
                     }
                     Text(label, style = MaterialTheme.typography.labelSmall, color = if (on) hu.fg else C.muted, maxLines = 1, softWrap = false, modifier = Modifier.padding(top = 3.dp))
                 }
             }
+        }
         }
 }
 

@@ -521,9 +521,11 @@ private fun TeamHead(icon: String, title: String, n: Int, hu: Hue, tag: String) 
 private fun Avatar(name: String, admin: Boolean, size: androidx.compose.ui.unit.Dp = 44.dp, st: String = "") {
     val hu = C.hue(teamHue(name))
     Box(Modifier.size(size + size * 0.18f)) {
-        Box(Modifier.align(Alignment.BottomStart).size(size).clip(CircleShape).background(hu.bg).then(if (st == "today") Modifier.border(2.5.dp, StToday, CircleShape) else if (!C.glassy) Modifier.border(2.dp, C.ink, CircleShape) else Modifier), contentAlignment = Alignment.Center) {
+        Box(Modifier.align(Alignment.BottomStart).size(size).clip(CircleShape).background(hu.bg), contentAlignment = Alignment.Center) {
             if (name.isBlank()) Icon(Ic.get("plus"), null, tint = hu.fg, modifier = Modifier.size(size * 0.45f))
-            else Text(inits(name), color = hu.fg, fontWeight = FontWeight.ExtraBold, fontSize = (size.value * 0.34f).sp)
+            else PhotoOr(name, size) { Text(inits(name), color = hu.fg, fontWeight = FontWeight.ExtraBold, fontSize = (size.value * 0.34f).sp) }
+            // the ring goes on top, so it shows round a photo too
+            if (st == "today") Box(Modifier.matchParentSize().border(2.5.dp, StToday, CircleShape)) else if (!C.glassy) Box(Modifier.matchParentSize().border(2.dp, C.ink, CircleShape))
         }
         if (st.isNotBlank()) Box(Modifier.align(Alignment.BottomStart).offset(x = size - size * 0.26f, y = -(size * 0.02f)).size(size * 0.26f).clip(CircleShape).background(C.card).padding(2.5.dp).clip(CircleShape).background(stColor(st)).testTag("tm_st_$st"))
         if (admin) Box(Modifier.align(Alignment.TopEnd).size(size * 0.5f).clip(CircleShape).background(C.card).border(1.dp, C.line, CircleShape).padding(size * 0.08f), contentAlignment = Alignment.Center) {

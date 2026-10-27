@@ -296,7 +296,7 @@ internal fun SeenBy(names: List<String>, modifier: Modifier = Modifier) {
             val hu = C.hue(nameHue(n))
             Box(Modifier.offset(x = (-4 * i).dp).size(20.dp).clip(CircleShape).background(C.card).padding(1.5.dp).clip(CircleShape).background(hu.bg), contentAlignment = Alignment.Center) {
                 // a fixed size: the picture doesn't grow with large text, so its letter mustn't either
-                Text(n.trim().take(1).uppercase(), color = hu.fg, fontSize = with(androidx.compose.ui.platform.LocalDensity.current) { 10.dp.toSp() }, lineHeight = with(androidx.compose.ui.platform.LocalDensity.current) { 12.dp.toSp() }, fontWeight = FontWeight.ExtraBold, maxLines = 1, softWrap = false)
+                PhotoOr(n, 17.dp) { Text(n.trim().take(1).uppercase(), color = hu.fg, fontSize = with(androidx.compose.ui.platform.LocalDensity.current) { 10.dp.toSp() }, lineHeight = with(androidx.compose.ui.platform.LocalDensity.current) { 12.dp.toSp() }, fontWeight = FontWeight.ExtraBold, maxLines = 1, softWrap = false) }
             }
         }
         if (names.size > 5) Text("+${names.size - 5}", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = C.muted, modifier = Modifier.offset(x = (-4 * shown.size + 6).dp).testTag("seen_more"))

@@ -239,7 +239,7 @@ private fun NoteAvatar(a: Alert, k: List<String>, ring: Color) {
     val person = Contact.isPerson(a.by.trim())
     Box(Modifier.size(46.dp).then(if (person) Modifier.clickable(role = Role.Button) { Contact.show(a.by) }.semantics { contentDescription = a.by } else Modifier).testTag("note_avatar")) {
         Box(Modifier.fillMaxSize().clip(CircleShape).background(hu.bg), contentAlignment = Alignment.Center) {
-            Text(initialsOf(a.by), color = hu.fg, style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold, fontSize = 15.sp))
+            PhotoOr(a.by, 46.dp) { Text(initialsOf(a.by), color = hu.fg, style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold, fontSize = 15.sp)) }
         }
         Box(Modifier.align(Alignment.BottomEnd).offset(5.dp, 5.dp).size(24.dp).clip(CircleShape).background(ring).padding(2.5.dp).clip(CircleShape).background(kh.fg), contentAlignment = Alignment.Center) {
             Icon(Ic.get(k[3]), null, tint = C.card, modifier = Modifier.size(12.dp))

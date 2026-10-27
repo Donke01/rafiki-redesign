@@ -24,6 +24,8 @@ class Api(val server: String, private val pin: () -> String, private val session
     var gen: () -> String = { "" }
     /** True while signing in with a PIN typed on the lock screen (X-Pin-New: 1 starts a new session). */
     @Volatile var fresh = false
+    /** Every good JSON reply with the path it came from (profile photo URLs are picked out of them, feat-mea). */
+    var onJson: ((path: String, json: JSONObject) -> Unit)? = null
 
     /** Lets tests swap the network for a fake one. */
     var transport: (method: String, url: String, headers: Map<String, String>, body: ByteArray?) -> Pair<Int, String> = ::http
@@ -123,7 +125,7 @@ class Api(val server: String, private val pin: () -> String, private val session
         if (body != null) h["Content-Type"] = "application/json"
         if (method == "POST") h["Origin"] = server
         val (status, text) = transport(method, server + path, h, body?.toString()?.toByteArray())
-        toReply(status, text)
+        toReply(status, text).also { r -> if (r.ok && method == "GET") runCatching { onJson?.invoke(path, r.json) } }
     }
 
     /** Adds one photo or voice note to a monday.com note (after the change itself was saved). */
