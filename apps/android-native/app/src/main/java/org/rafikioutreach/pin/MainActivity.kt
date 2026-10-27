@@ -48,6 +48,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.draw.rotate
+import androidx.compose.foundation.layout.offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
@@ -91,6 +92,9 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
         handle(intent)
         // phone alerts while the app is closed (Me › Settings › Notifications)
         if (model.prefs.phoneAlerts) org.rafikioutreach.pin.data.AlertWorker.schedule(applicationContext)
+        // chat messages while the app is closed (feat-chata), and anything written offline still waiting to go
+        if (model.prefs.phoneAlerts) org.rafikioutreach.pin.data.ChatWorker.schedule(applicationContext)
+        if (model.chat.outbox.count() > 0) org.rafikioutreach.pin.data.ChatSendWorker.enqueue(applicationContext)
     }
 
     override fun onNewIntent(intent: android.content.Intent) { super.onNewIntent(intent); handle(intent) }
@@ -101,6 +105,8 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
         i?.getStringExtra("open")?.let { id -> i.removeExtra("open"); if (id.isNotBlank()) model.goProject = id else model.goTab = "me" }
         // the home-screen widget: Visit nearby / Pin a location open Projects on that list (like Home's quick actions)
         i?.getStringExtra("quick")?.let { q -> i.removeExtra("quick"); model.quick(q) }
+        // a tap on a chat notification: that chat (or Chat)
+        i?.getStringExtra("chat")?.let { c -> i.removeExtra("chat"); org.rafikioutreach.pin.ui.ChatNav.req = if (c.isBlank()) "" else "n:$c" }
         // a tap on a donor notification: that project
         i?.getStringExtra("donorOpen")?.let { id -> i.removeExtra("donorOpen"); if (id.isNotBlank()) model.donor.goProject = id }
         val u = i?.data ?: return
@@ -112,6 +118,8 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
             model.donor.prefill = tok; model.donor.entry = true
             return
         }
+        // a chat group's invite link: https://pin.rafikioutreach.org/pin#join=<token> (feat-chata)
+        if (u.scheme == "https" && !model.donor.on.value) org.rafikioutreach.pin.ui.joinToken(u.fragment.orEmpty() + "?" + u.query.orEmpty())?.let { tok -> i.data = null; org.rafikioutreach.pin.ui.ChatNav.req = "join:$tok"; return }
         // a RAFIKI QR sticker scanned with the phone's own camera: https://pin.rafikioutreach.org/pin#p=<id>
         if (org.rafikioutreach.pin.ui.QrCheckin.fromLink(u)) { i.data = null; return }
         if (u.scheme != "org.rafikioutreach.pin" || u.host != "signin") return
@@ -229,6 +237,31 @@ fun Shell(m: AppModel) {
         }
         lifeMap.lifecycle.addObserver(o); onDispose { lifeMap.lifecycle.removeObserver(o) }
     }
+    // Chat (feat-chata): the list and the live connection while the app is in front
+    LaunchedEffect(Unit) { m.chat.start() }
+    val lifeChat = androidx.compose.ui.platform.LocalLifecycleOwner.current
+    androidx.compose.runtime.DisposableEffect(lifeChat) {
+        val o = androidx.lifecycle.LifecycleEventObserver { _, e -> when (e) { androidx.lifecycle.Lifecycle.Event.ON_START -> m.chat.resume(); androidx.lifecycle.Lifecycle.Event.ON_STOP -> m.chat.pause(); else -> {} } }
+        lifeChat.lifecycle.addObserver(o); onDispose { lifeChat.lifecycle.removeObserver(o) }
+    }
+    val chatUnread by m.chat.unread.collectAsState()
+    val ctxChat = androidx.compose.ui.platform.LocalContext.current
+    fun openChat(id: String) { val cur = stack.last(); if (cur.sub == "chat:$id") return; go(Place(cur.tab, sub = "chat:$id")) }
+    // a chat asked for from anywhere: a contact's Message, a project's Chat, a notification, an invite link
+    // one at a time, from a collector (clearing the request must not cancel the work it started)
+    LaunchedEffect(Unit) { androidx.compose.runtime.snapshotFlow { org.rafikioutreach.pin.ui.ChatNav.req }.collect { r0 ->
+        val r = r0 ?: return@collect
+        org.rafikioutreach.pin.ui.ChatNav.req = null
+        fun say(e: String?) { if (e != null) android.widget.Toast.makeText(ctxChat, e, android.widget.Toast.LENGTH_LONG).show() }
+        when {
+            r.isEmpty() -> tab("chat")
+            r.startsWith("n:") -> { tab("chat"); openChat(r.drop(2)) }
+            r.startsWith("c:") -> openChat(r.drop(2))
+            r.startsWith("dm:") -> { val (id, e) = m.chat.openDm(r.drop(3)); if (id != null) openChat(id) else say(e) }
+            r.startsWith("p:") -> { val (id, e) = m.chat.openProject(r.drop(2)); if (id != null) openChat(id) else say(e) }
+            r.startsWith("join:") -> { val (id, e) = m.chat.join(r.drop(5)); if (id != null) { tab("chat"); openChat(id) } else say(e) }
+        }
+    } }
     // notifications: the bell (top right) needs what the team did, so keep it fresh
     LaunchedEffect(Unit) { while (true) { runCatching { m.loadActivity() }; kotlinx.coroutines.delay(5 * 60_000L) } }
     val goTab = m.goTab
@@ -263,9 +296,17 @@ fun Shell(m: AppModel) {
                 // the same as the phone's back: an open sub-tab or fold closes first
                 val dispatcher = androidx.activity.compose.LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
                 if (sub) RoundBtn("back", t("Back", "Rudi"), "hback") { if (dispatcher != null) dispatcher.onBackPressed() else pop() }
-                else Box(Modifier.size(40.dp).clip(androidx.compose.foundation.shape.CircleShape).background(androidx.compose.ui.graphics.Brush.linearGradient(listOf(Color(0xFF47B4F5), Color(0xFF0A78C2))))
-                    .clickable(role = Role.Button) { tab("me") }.semantics { contentDescription = t("Me", "Mimi") }.testTag("hav"), contentAlignment = Alignment.Center) {
-                    Text(m.prefs.name.split(" ").mapNotNull { it.firstOrNull()?.uppercase() }.take(2).joinToString(""), color = Color.White, style = MaterialTheme.typography.labelMedium.copy(fontSize = 13.sp))
+                // Me: the picture at the top left (Chat took Me's place in the bottom bar, feat-chata), lit while on Me,
+                // with what's waiting to send and the app-update dot that the Me tab had
+                else Box(Modifier.size(42.dp).testTag("hav")) {
+                    val meOn = here.tab == "me"
+                    Box(Modifier.size(42.dp).clip(androidx.compose.foundation.shape.CircleShape).then(if (meOn) Modifier.border(2.dp, C.blue2, CircleShape).padding(3.dp) else Modifier.padding(1.dp))
+                        .clip(CircleShape).background(androidx.compose.ui.graphics.Brush.linearGradient(listOf(Color(0xFF47B4F5), Color(0xFF0A78C2))))
+                        .clickable(role = Role.Tab) { hp.tap(); tab("me") }.semantics { contentDescription = t("Me", "Mimi"); selected = meOn }.testTag("nav_me"), contentAlignment = Alignment.Center) {
+                        Text(m.prefs.name.split(" ").mapNotNull { it.firstOrNull()?.uppercase() }.take(2).joinToString(""), color = Color.White, style = MaterialTheme.typography.labelMedium.copy(fontSize = 13.sp))
+                    }
+                    if (waiting == 0 && updReady) Box(Modifier.align(Alignment.TopEnd).size(12.dp).clip(CircleShape).background(Color.White).padding(2.dp).clip(CircleShape).background(C.blue).testTag("update_dot"))
+                    if (waiting > 0) Text("$waiting", color = Color.White, fontSize = 10.sp, maxLines = 1, softWrap = false, modifier = Modifier.align(Alignment.TopEnd).offset(4.dp, (-2).dp).clip(RoundedCornerShape(99.dp)).background(C.warn).padding(horizontal = 5.dp))
                 }
             }
             // the wordmark, or the screen's title once its big title has scrolled away
@@ -314,6 +355,14 @@ fun Shell(m: AppModel) {
                     val pid = pl.project
                     when {
                         pid != null -> ProjectScreen(m, pid, pl.projectTab) { pop() }
+                        // Chat (feat-chata): a conversation, its info page, a new chat, archived and starred
+                        pl.sub?.startsWith("chat:") == true -> org.rafikioutreach.pin.ui.ChatRoom(m, pl.sub.removePrefix("chat:"), openInfo = { go(Place(pl.tab, sub = "chatinfo:" + pl.sub.removePrefix("chat:"))) },
+                            openChat = { openChat(it) }, openProject = { id, t -> go(Place(pl.tab, id, t)) }, office = { s -> org.rafikioutreach.pin.ui.TeamGo.section = s; tab("office") })
+                        pl.sub?.startsWith("chatinfo:") == true -> org.rafikioutreach.pin.ui.ChatInfoScreen(m, pl.sub.removePrefix("chatinfo:"), back = { pop(); pop() }, openChat = { openChat(it) }, openProject = { go(Place(pl.tab, it)) })
+                        pl.sub == "chatnew" -> org.rafikioutreach.pin.ui.NewChatScreen(m) { id -> pop(); openChat(id) }
+                        pl.sub == "chatarch" -> org.rafikioutreach.pin.ui.ChatListScreen(m, { openChat(it) }, {}, archived = true)
+                        pl.sub == "chatstar" -> org.rafikioutreach.pin.ui.StarredScreen(m) { openChat(it) }
+                        pl.tab == "chat" -> org.rafikioutreach.pin.ui.ChatListScreen(m, { openChat(it) }, { go(Place("chat", sub = "chatnew")) }, openArchived = { go(Place("chat", sub = "chatarch")) }, openStarred = { go(Place("chat", sub = "chatstar")) })
                         pl.sub == "search" -> { val snap = m.snap.collectAsState().value; val fx = m.fix.collectAsState().value; if (snap != null) org.rafikioutreach.pin.ui.SearchScreen(m, snap, fx?.ll, { go(Place(pl.tab, it)) }) { pop() } }
                         pl.sub == "report" -> org.rafikioutreach.pin.ui.ReportScreen(m) { pop() }
                         pl.sub == "notes" -> org.rafikioutreach.pin.ui.NotificationsScreen(m, { go(Place(pl.tab, it)) }, { go(Place(pl.tab, sub = "set_notify")) }) { pop() }
@@ -332,31 +381,37 @@ fun Shell(m: AppModel) {
                 } }
             }
         }
-        // bottom tabs, floating
+        // bottom tabs, floating; not inside a conversation, where the composer sits at the bottom (feat-chata)
+        if (here.sub?.startsWith("chat:") != true) BottomBar(m, here.tab, review = m.snap.collectAsState().value?.reviewOpen ?: 0, chat = chatUnread) { tab(it) }
+    }
+}
+
+/** The tabs at the bottom: Map, Projects, New site, Chat and (for admins) Office. Me is the picture at the top left.
+ *  [chat]: unread chat messages (the green badge). */
+@Composable
+fun BottomBar(m: AppModel, current: String, review: Int, chat: Int, items: List<Triple<String, String, String>>? = null, go: (String) -> Unit) {
+        val hp = org.rafikioutreach.pin.ui.rememberHaptics()
         val glassy = with(org.rafikioutreach.pin.ui.C) { this === org.rafikioutreach.pin.ui.Light || this === org.rafikioutreach.pin.ui.Dark }
         val barShape = RoundedCornerShape(28.dp)
         Row(Modifier.padding(start = 12.dp, end = 12.dp, bottom = 10.dp, top = 6.dp).fillMaxWidth().shadow(16.dp, barShape, spotColor = Color(0x33144678)).clip(barShape)
             .background(if (glassy) (if (C.dark) Color(0xEB1E2A36) else Color(0xF2FFFFFF)) else C.card).border(1.dp, if (glassy) (if (C.dark) Color(0x17FFFFFF) else Color.White) else C.line, barShape).height(68.dp), verticalAlignment = Alignment.CenterVertically) {
             val admin = m.snap.collectAsState().value?.admin == true
-            val review = m.snap.collectAsState().value?.reviewOpen ?: 0
-            (listOf(Triple("map", t("Map", "Ramani"), "map"), Triple("list", t("Projects", "Miradi"), "list"), Triple("new", t("New site", "Eneo jipya"), "plus"), Triple("me", t("Me", "Mimi"), "person")) +
-                (if (admin) listOf(Triple("office", t("Office", "Ofisi"), "inbox")) else emptyList())).forEach { (k, label, icon) ->
+            (items ?: (listOf(Triple("map", t("Map", "Ramani"), "map"), Triple("list", t("Projects", "Miradi"), "list"), Triple("new", t("New site", "Eneo jipya"), "plus"), Triple("chat", t("Chat", "Gumzo"), "chat")) +
+                (if (admin) listOf(Triple("office", t("Office", "Ofisi"), "inbox")) else emptyList()))).forEach { (k, label, icon) ->
                 // the tab you are in stays lit, also with a project or page open on top of it; one colour for every tab
-                val on = here.tab == k
+                val on = current == k
                 val hu = org.rafikioutreach.pin.ui.Hue(C.blue2, C.tint)
-                Column(Modifier.weight(1f).clickable(role = Role.Tab) { hp.tap(); tab(k) }.semantics { selected = on }.padding(vertical = 6.dp).testTag("nav_$k"), horizontalAlignment = Alignment.CenterHorizontally) {
+                Column(Modifier.weight(1f).clickable(role = Role.Tab) { hp.tap(); go(k) }.semantics { selected = on }.padding(vertical = 6.dp).testTag("nav_$k"), horizontalAlignment = Alignment.CenterHorizontally) {
                     Box {
                         if (k == "new") Box(Modifier.size(48.dp, 30.dp).clip(RoundedCornerShape(14.dp)).background(androidx.compose.ui.graphics.Brush.linearGradient(listOf(Color(0xFF9A78F0), Color(0xFF6E46C8)))), contentAlignment = Alignment.Center) { Icon(Ic.get(icon), null, tint = Color.White, modifier = Modifier.size(20.dp)) }
                         else Box(Modifier.size(52.dp, 30.dp).clip(RoundedCornerShape(99.dp)).background(if (on) hu.bg else Color.Transparent), contentAlignment = Alignment.Center) { Icon(Ic.get(icon), null, tint = if (on) hu.fg else C.muted, modifier = Modifier.size(24.dp)) }
                         if (k == "office" && review > 0) Text("$review", color = Color.White, fontSize = 10.sp, modifier = Modifier.align(Alignment.TopEnd).clip(RoundedCornerShape(99.dp)).background(C.warn).padding(horizontal = 5.dp))
-                        if (k == "me" && waiting == 0 && updReady) Box(Modifier.align(Alignment.TopEnd).padding(top = 2.dp, end = 10.dp).size(10.dp).clip(CircleShape).background(Color.White).padding(2.dp).clip(CircleShape).background(C.blue).testTag("update_dot"))
-                        if (k == "me" && waiting > 0) Text("$waiting", color = Color.White, fontSize = 10.sp, modifier = Modifier.align(Alignment.TopEnd).clip(RoundedCornerShape(99.dp)).background(C.warn).padding(horizontal = 5.dp))
+                        if (k == "chat" && chat > 0) Text(if (chat > 99) "99+" else "$chat", color = Color.White, fontSize = 10.sp, maxLines = 1, softWrap = false, modifier = Modifier.align(Alignment.TopEnd).clip(RoundedCornerShape(99.dp)).background(org.rafikioutreach.pin.ui.ChatLook.online).padding(horizontal = 5.dp).testTag("chat_badge"))
                     }
                     Text(label, style = MaterialTheme.typography.labelSmall, color = if (on) hu.fg else C.muted, maxLines = 1, softWrap = false, modifier = Modifier.padding(top = 3.dp))
                 }
             }
         }
-    }
 }
 
 @Composable

@@ -215,7 +215,7 @@ private fun RowScope.CtTile(tag: String, label: String, circle: Color, fg: Color
         }
         // shrinks to fit on one line, never cut short with "…" ("WhatsApp", "Barua pepe" with five tiles); the tiles
         // are tall enough for a full-size label, so a shrunk one doesn't make its tile shorter than the others
-        WordFitText(label, MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold), C.ink, 1, Modifier.padding(top = 8.dp), textAlign = TextAlign.Center)
+        WordFitText(label, MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold), C.ink, 1, Modifier.padding(top = 8.dp).testTag(tag + "_label"), textAlign = TextAlign.Center)
     }
 }
 
@@ -368,6 +368,8 @@ private fun ContactSheet(m: AppModel, who: String, close: () -> Unit, go: (Strin
         }
         said?.let { (tone, text) -> Box(Modifier.testTag("ct_msg")) { Msg(text, tone) } }
 
+        // Message: a chat with them in the app (feat-chata); no phone numbers are shared
+        if (!me && p.known && p.blocked == null) Btn(t("Message", "Tuma ujumbe"), { leave { ChatNav.dm(p.name) } }, Modifier.padding(top = 14.dp).fillMaxWidth().testTag("ct_message"), icon = "chat")
         // Contact: Call, WhatsApp, SMS, E-mail and Share as big tiles (the Figma design)
         if (!me) {
             Row(Modifier.padding(top = 16.dp).fillMaxWidth().testTag("ct_g_contact"), horizontalArrangement = Arrangement.spacedBy(8.dp)) {

@@ -345,9 +345,10 @@ class PolishOfficeTest {
         val m = model(); start(m)
         tag("nav_list").assertIsSelected()
         m.goProject = "104"; rule.mainClock.advanceTimeBy(1500); rule.waitForIdle()
-        tag("nav_list").assertIsSelected(); tag("nav_me").assertIsNotSelected()
-        tag("nav_me").performClick(); rule.mainClock.advanceTimeBy(1500); rule.waitForIdle()
-        tag("nav_me").assertIsSelected(); tag("nav_list").assertIsNotSelected()
+        // Chat took Me's place in the bar (feat-chata)
+        tag("nav_list").assertIsSelected(); tag("nav_chat").assertIsNotSelected()
+        tag("nav_chat").performClick(); rule.mainClock.advanceTimeBy(1500); rule.waitForIdle()
+        tag("nav_chat").assertIsSelected(); tag("nav_list").assertIsNotSelected()
         shot("po-27-nav-me")
     }
 }
