@@ -104,6 +104,7 @@ fun OfficeScreen(m: AppModel, open: (String) -> Unit) {
         Triple("donors", t("Donors", "Wafadhili"), "link"),
         Triple("qr", t("QR codes", "Misimbo ya QR"), "qr"), // QR check-in stickers (QrCheckin.kt)
         Triple("mail", t("Send an e-\u2060mail", "Tuma barua pepe"), "mail"), // Office › Send an e-mail (Mail.kt)
+        Triple("trips", t("Trips", "Safari"), "route"), Triple("vehicles", t("Vehicles", "Magari"), "car"), // field and group trips, vehicles and fuel (feat-itina)
     )
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
         Text(t("Office", "Ofisi"), style = MaterialTheme.typography.headlineLarge, color = C.ink, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.fillMaxWidth())
@@ -137,6 +138,8 @@ fun OfficeScreen(m: AppModel, open: (String) -> Unit) {
             "donors" -> DonorsSection(m, snap)
             "qr" -> QrStickerSection(m, snap)
             "mail" -> MailSection(m, snap)
+            "trips" -> TripsSection(m)       // TripsUi.kt
+            "vehicles" -> VehiclesSection(m) // Vehicles.kt
             else -> Export(m, snap)
         }
         Spacer(Modifier.height(24.dp))

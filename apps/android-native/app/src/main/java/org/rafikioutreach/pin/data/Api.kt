@@ -57,6 +57,24 @@ class Api(val server: String, private val pin: () -> String, private val session
     /** The newest Android app on the website: {versionCode, versionName, apk}. */
     suspend fun appVersion(): Reply = call("GET", "/app/version.json", null)
 
+    /** Trips (feat-itina): any JSON endpoint with the same sign-in, e.g. req("GET", "/api/itin?id=…"). */
+    suspend fun req(method: String, path: String, body: JSONObject? = null): Reply = call(method, path, body)
+
+    /** A trip receipt photo (fuel log or extra): /api/pin-photo with kind=receipt → { id, url } (contract v1.2). */
+    suspend fun receipt(itinId: String, file: File): Reply = withContext(Dispatchers.IO) {
+        val boundary = "----rafiki" + System.nanoTime()
+        val out = ByteArrayOutputStream()
+        fun field(name: String, value: String) { out.write("--$boundary\r\nContent-Disposition: form-data; name=\"$name\"\r\n\r\n$value\r\n".toByteArray()) }
+        field("kind", "receipt"); field("itin", itinId)
+        out.write("--$boundary\r\nContent-Disposition: form-data; name=\"file\"; filename=\"receipt.jpg\"\r\nContent-Type: image/jpeg\r\n\r\n".toByteArray())
+        out.write(file.readBytes())
+        out.write("\r\n--$boundary--\r\n".toByteArray())
+        val h = mutableMapOf("Accept" to "application/json", "Content-Type" to "multipart/form-data; boundary=$boundary", "Origin" to server)
+        auth(h)
+        val (status, text) = transport("POST", "$server/api/pin-photo", h, out.toByteArray())
+        toReply(status, text)
+    }
+
     fun photoUrl(photo: String, w: Int = 480) = "$server/api/photo/${enc(photo)}?w=$w"
 
     // --- Chat (feat-chata): /api/chat/* with the same PIN headers ---------------------------------------------------

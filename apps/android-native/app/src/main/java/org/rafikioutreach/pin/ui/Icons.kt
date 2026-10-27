@@ -95,6 +95,9 @@ object Ic {
         "text" to listOf("M4 18 9 6l5 12M5.6 14h6.8M15 18l3-7 3 7M15.9 16h4.2"),
         // Office: back to all the sections as tiles
         "grid" to listOf(rect(4f, 4f, 6.5f, 6.5f, 1.5f), rect(13.5f, 4f, 6.5f, 6.5f, 1.5f), rect(4f, 13.5f, 6.5f, 6.5f, 1.5f), rect(13.5f, 13.5f, 6.5f, 6.5f, 1.5f)),
+        // trips and vehicles (feat-itina)
+        "car" to listOf("M4.5 16.5V12.5l1.9-4.6A2 2 0 0 1 8.3 6.5h7.4a2 2 0 0 1 1.9 1.4l1.9 4.6v4", "M4.5 12.5h15", circle(8f, 16.5f, 1.8f), circle(16f, 16.5f, 1.8f)),
+        "route" to listOf(circle(6f, 18f, 2.2f), circle(18f, 6f, 2.2f), "M8.2 18H15a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h6.8"),
     )
 
     /** The drawing's paths (SVG path data, 24×24), for pictures drawn outside Compose (the map's pins). */

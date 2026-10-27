@@ -268,6 +268,9 @@ fun Shell(m: AppModel) {
     LaunchedEffect(goTab) { if (goTab != null) { tab(goTab, keepFilter = true); m.goTab = null } }
     val goProject = m.goProject
     LaunchedEffect(goProject) { if (goProject != null) { go(Place(here.tab, goProject)); m.goProject = null } }
+    // a trip page asked for (Office › Trips, Me › My trips): on top of the tab you're in (feat-itina)
+    val tripOpen = org.rafikioutreach.pin.ui.TripNav.open
+    LaunchedEffect(tripOpen) { if (tripOpen != null) { go(Place(here.tab, sub = tripOpen)); org.rafikioutreach.pin.ui.TripNav.open = null } }
     // a QR sticker opened from outside the app: that project's Site visit, checked in by QR
     val qrOpen = org.rafikioutreach.pin.ui.QrCheckin.openReq
     LaunchedEffect(qrOpen) {
@@ -370,6 +373,8 @@ fun Shell(m: AppModel) {
                         pl.sub?.startsWith("set_") == true -> org.rafikioutreach.pin.ui.SettingsPage(m, pl.sub.removePrefix("set_")) { pop() }
                         pl.sub == "route" -> org.rafikioutreach.pin.ui.RouteScreen(m, { go(Place(pl.tab, it)) }) { pop() }
                         pl.sub == "offline" -> org.rafikioutreach.pin.ui.OfflineScreen(m) { pop() }
+                        pl.sub?.startsWith("trip") == true || pl.sub?.startsWith("gtrip") == true || pl.sub?.startsWith("gview:") == true ->
+                            org.rafikioutreach.pin.ui.TripPage(m, pl.sub, { go(Place(pl.tab, sub = it)) }, { pop(); go(Place(pl.tab, sub = it)) }, { id, visit -> go(Place(pl.tab, id, if (visit) "visit" else "pin")) }) { pop() }
                         pl.sub == "scan" -> org.rafikioutreach.pin.ui.ScanScreen(m, { id -> pop(); go(Place(pl.tab, id, "visit")) }) { pop() }
                         pl.tab == "map" -> MapScreen(m, { go(Place("map", it)) }, { go(Place("map", it, "visit")) }, offline = { go(Place("map", sub = "offline")) },
                             newSite = { ll -> org.rafikioutreach.pin.ui.MapHome.newSiteAt = ll; tab("new") })
