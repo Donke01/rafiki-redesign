@@ -82,7 +82,7 @@ fun ChatInfoScreen(m: AppModel, c: String, back: () -> Unit, openChat: (String) 
                     Icon(Ic.get("camera"), t("Change photo", "Badilisha picha"), tint = C.blue, modifier = Modifier.size(16.dp))
                 }
             }
-            Text(row.title.ifBlank { other }, style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold), color = C.ink, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 10.dp).testTag("info_title"))
+            Text(chatTitle(row, me), style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold), color = C.ink, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 10.dp).testTag("info_title"))
             Text(when (row.kind) {
                 "dm" -> presence[other]?.let { if (it.online) t("online", "yupo mtandaoni") else lastSeen(it.seen) }.orEmpty()
                 "team" -> t("Team group", "Kikundi cha timu") + " · " + t("${row.members.size} members", "wanachama ${row.members.size}")
@@ -104,7 +104,8 @@ fun ChatInfoScreen(m: AppModel, c: String, back: () -> Unit, openChat: (String) 
             SwitchRow("info_sound", t("Sound for new messages", "Sauti kwa ujumbe mpya"), !hub.quiet(c).also { tick }) { hub.setQuiet(c, !it) }
         }
         InfoCard(t("CHAT", "GUMZO")) {
-            SheetRow("info_wall", "wall", t("Wallpaper", "Mandhari"), value = wallName(row.wallpaper)) { sheet = "wall" }
+            SheetRow("info_bubble", "bubble", t("My bubble colour", "Rangi ya viputo vyangu"), value = bubbleName(row.bubble)) { sheet = "bubble" }
+            SheetRow("info_wall", "wall", t("Wallpaper", "Mandhari"), value = wallLabel(row.wallpaper)) { sheet = "wall" }
             SheetRow("info_pin", "pin", if (row.pinned) t("Unpin chat", "Ondoa kibandiko") else t("Pin chat", "Bandika gumzo")) { hub.pin(c, !row.pinned) }
             if (row.isGroup) {
                 if (iAdmin) SwitchRow("info_only", t("Only admins can send messages", "Wasimamizi pekee wanaweza kutuma ujumbe"), row.onlyAdmins) { on -> scope.launch { hub.updateGroup(c, JSONObject().put("onlyAdmins", on))?.let { said = "bad" to it } } }
@@ -138,14 +139,37 @@ fun ChatInfoScreen(m: AppModel, c: String, back: () -> Unit, openChat: (String) 
         "mute" -> MuteSheet(m, c) { sheet = null }
         "wall" -> TeamSubSheet("wall_sheet", { sheet = null }) { hide ->
             Text(t("Wallpaper", "Mandhari"), style = MaterialTheme.typography.titleLarge, color = C.ink, modifier = Modifier.padding(bottom = 10.dp))
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                WALLPAPERS.forEach { k ->
-                    Column(Modifier.weight(1f).clip(RoundedCornerShape(14.dp)).clickable(role = Role.RadioButton) { hide { scope.launch { hub.prefs(c, JSONObject().put("wallpaper", k)) } } }.testTag("wall_${k.ifBlank { "none" }}"),
-                        horizontalAlignment = Alignment.CenterHorizontally) {
-                        Box(Modifier.fillMaxWidth().aspectRatio(0.6f).clip(RoundedCornerShape(12.dp)).background(C.bg).border(if (row.wallpaper == k) 3.dp else 1.dp, if (row.wallpaper == k) C.blue else C.line, RoundedCornerShape(12.dp))) {
-                            Wallpaper(k, Modifier.matchParentSize())
+            // RAFIKI's own first (water, savanna, night), then the simple patterns; two rows of four
+            WALLS.chunked(4).forEach { r ->
+                Row(Modifier.fillMaxWidth().padding(bottom = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    r.forEach { k ->
+                        val on = row.wallpaper == k || (k.isBlank() && row.wallpaper == "none")
+                        Column(Modifier.weight(1f).clip(RoundedCornerShape(14.dp)).clickable(role = Role.RadioButton) { hide { scope.launch { hub.prefs(c, JSONObject().put("wallpaper", k)) } } }.testTag("wall_${k.ifBlank { "none" }}"),
+                            horizontalAlignment = Alignment.CenterHorizontally) {
+                            Box(Modifier.fillMaxWidth().aspectRatio(0.62f).clip(RoundedCornerShape(12.dp)).background(C.bg).border(if (on) 3.dp else 1.dp, if (on) C.blue else C.line, RoundedCornerShape(12.dp))) {
+                                ChatWall(k, Modifier.matchParentSize())
+                                // a bubble in my colour, to see how it reads
+                                Box(Modifier.align(Alignment.BottomEnd).padding(6.dp).size(28.dp, 12.dp).clip(RoundedCornerShape(6.dp)).background(bubbleColor(row.bubble)))
+                            }
+                            FitWords(wallLabel(k), MaterialTheme.typography.labelSmall, C.ink, Modifier.padding(top = 4.dp), lines = 1)
                         }
-                        FitWords(wallName(k), MaterialTheme.typography.labelSmall, C.ink, Modifier.padding(top = 4.dp), lines = 1)
+                    }
+                }
+            }
+        }
+        "bubble" -> TeamSubSheet("bubble_sheet", { sheet = null }) { hide ->
+            Text(t("My bubble colour", "Rangi ya viputo vyangu"), style = MaterialTheme.typography.titleLarge, color = C.ink)
+            Text(t("Only you see it, in this chat.", "Unaiona wewe tu, kwenye gumzo hili."), style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 4.dp, bottom = 10.dp))
+            BUBBLES.chunked(4).forEach { r ->
+                Row(Modifier.fillMaxWidth().padding(bottom = 10.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    r.forEach { k ->
+                        val on = row.bubble == k
+                        Column(Modifier.weight(1f).clip(RoundedCornerShape(14.dp)).clickable(role = Role.RadioButton) { hide { hub.bubble(c, k) } }.padding(vertical = 4.dp).testTag("bubble_${k.ifBlank { "usual" }}"), horizontalAlignment = Alignment.CenterHorizontally) {
+                            Box(Modifier.size(46.dp).clip(CircleShape).background(bubbleColor(k)).border(if (on) 3.dp else 1.dp, if (on) C.blue else C.line, CircleShape), contentAlignment = Alignment.Center) {
+                                if (on) Icon(Ic.get("check"), null, tint = C.blue, modifier = Modifier.size(20.dp))
+                            }
+                            FitWords(bubbleName(k), MaterialTheme.typography.labelSmall, C.ink, Modifier.padding(top = 4.dp), lines = 1)
+                        }
                     }
                 }
             }

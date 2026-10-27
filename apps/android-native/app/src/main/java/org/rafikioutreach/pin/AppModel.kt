@@ -167,11 +167,15 @@ class AppModel(app: Application) : AndroidViewModel(app) {
 
     fun lock() {
         bioLocked.value = false
-        val s = prefs.session
+        val s = prefs.session; val oldPin = prefs.pin; val oldGen = prefs.pinGen
         prefs.forget(); _signedIn.value = false
         runCatching { chat.forget() }
         org.rafikioutreach.pin.widget.PinWidget.update(getApplication())
-        if (s.isNotBlank()) viewModelScope.launch { Api(BuildConfig.SERVER, { "" }, { s }).also { it.transport = api.transport }.logout() }
+        // chat push (chatpa): the server forgets this phone's token first, with the old sign-in, then the session ends
+        viewModelScope.launch {
+            runCatching { org.rafikioutreach.pin.data.ChatPush.signOut(getApplication(), Api(BuildConfig.SERVER, { oldPin }, { s }).also { it.transport = api.transport; it.gen = { oldGen } }) }
+            if (s.isNotBlank()) Api(BuildConfig.SERVER, { "" }, { s }).also { it.transport = api.transport }.logout()
+        }
     }
 
     /** Is "Sign in with monday.com" switched on for this server? */

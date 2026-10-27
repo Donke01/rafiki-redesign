@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
@@ -38,6 +38,12 @@
         <receiver android:name=".data.InstallResult" android:exported="false" />
         <!-- chat notifications: Reply and Mark as read (feat-chata) -->
         <receiver android:name=".data.ChatReplyReceiver" android:exported="false" />
+        <!-- chat push (chatpa): Firebase Cloud Messaging, started by the app itself only when app/google-services.json
+             was in the build (ChatPush.init); Firebase's own start-up provider is taken out -->
+        <service android:name=".data.ChatPushService" android:exported="false">
+            <intent-filter><action android:name="com.google.firebase.MESSAGING_EVENT" /></intent-filter>
+        </service>
+        <provider android:name="com.google.firebase.provider.FirebaseInitProvider" android:authorities="${applicationId}.firebaseinitprovider" tools:node="remove" />
         <!-- the RAFIKI Pin home-screen widget: medium (4×2) and small (2×1) -->
         <receiver android:name=".widget.PinWidget" android:exported="true" android:label="@string/w_name">
             <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>

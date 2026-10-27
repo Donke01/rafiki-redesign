@@ -238,7 +238,10 @@ fun Shell(m: AppModel) {
         lifeMap.lifecycle.addObserver(o); onDispose { lifeMap.lifecycle.removeObserver(o) }
     }
     // Chat (feat-chata): the list and the live connection while the app is in front
-    LaunchedEffect(Unit) { m.chat.start() }
+    val ctxPush = androidx.compose.ui.platform.LocalContext.current.applicationContext
+    LaunchedEffect(Unit) { m.chat.start(); org.rafikioutreach.pin.data.ChatPush.register(ctxPush, m.api) }
+    // "Share to chat" from a trip (chatpa): the chat picker
+    org.rafikioutreach.pin.ui.TripShareHost(m)
     val lifeChat = androidx.compose.ui.platform.LocalLifecycleOwner.current
     androidx.compose.runtime.DisposableEffect(lifeChat) {
         val o = androidx.lifecycle.LifecycleEventObserver { _, e -> when (e) { androidx.lifecycle.Lifecycle.Event.ON_START -> m.chat.resume(); androidx.lifecycle.Lifecycle.Event.ON_STOP -> m.chat.pause(); else -> {} } }
@@ -363,9 +366,11 @@ fun Shell(m: AppModel) {
                             openChat = { openChat(it) }, openProject = { id, t -> go(Place(pl.tab, id, t)) }, office = { s -> org.rafikioutreach.pin.ui.TeamGo.section = s; tab("office") })
                         pl.sub?.startsWith("chatinfo:") == true -> org.rafikioutreach.pin.ui.ChatInfoScreen(m, pl.sub.removePrefix("chatinfo:"), back = { pop(); pop() }, openChat = { openChat(it) }, openProject = { go(Place(pl.tab, it)) })
                         pl.sub == "chatnew" -> org.rafikioutreach.pin.ui.NewChatScreen(m) { id -> pop(); openChat(id) }
-                        pl.sub == "chatarch" -> org.rafikioutreach.pin.ui.ChatListScreen(m, { openChat(it) }, {}, archived = true)
-                        pl.sub == "chatstar" -> org.rafikioutreach.pin.ui.StarredScreen(m) { openChat(it) }
-                        pl.tab == "chat" -> org.rafikioutreach.pin.ui.ChatListScreen(m, { openChat(it) }, { go(Place("chat", sub = "chatnew")) }, openArchived = { go(Place("chat", sub = "chatarch")) }, openStarred = { go(Place("chat", sub = "chatstar")) })
+                        pl.sub == "chatarch" -> org.rafikioutreach.pin.ui.ChatListScreen(m, { openChat(it) }, {}, archived = true, back = { pop() })
+                        pl.sub == "chatstar" -> org.rafikioutreach.pin.ui.StarredScreen(m, back = { pop() }) { openChat(it) }
+                        pl.sub == "chatsettings" -> org.rafikioutreach.pin.ui.ChatSettingsScreen(m)
+                        pl.tab == "chat" -> org.rafikioutreach.pin.ui.ChatListScreen(m, { openChat(it) }, { go(Place("chat", sub = "chatnew")) }, openArchived = { go(Place("chat", sub = "chatarch")) }, openStarred = { go(Place("chat", sub = "chatstar")) },
+                            openSettings = { go(Place("chat", sub = "chatsettings")) })
                         pl.sub == "search" -> { val snap = m.snap.collectAsState().value; val fx = m.fix.collectAsState().value; if (snap != null) org.rafikioutreach.pin.ui.SearchScreen(m, snap, fx?.ll, { go(Place(pl.tab, it)) }) { pop() } }
                         pl.sub == "report" -> org.rafikioutreach.pin.ui.ReportScreen(m) { pop() }
                         pl.sub == "notes" -> org.rafikioutreach.pin.ui.NotificationsScreen(m, { go(Place(pl.tab, it)) }, { go(Place(pl.tab, sub = "set_notify")) }) { pop() }

@@ -6,3 +6,7 @@ build/
 app/build/
 local.properties
 .kotlin/
+# Firebase config for chat push (chatpa): optional, never committed
+google-services.json
+app/google-services.json
+firebase.properties

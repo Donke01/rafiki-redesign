@@ -43,16 +43,27 @@ data class ChatRow(
     /** 0 = not muted, [ALWAYS] = always, otherwise muted until this moment (ms). */
     val mutedUntil: Long = 0L, val archived: Boolean = false, val onlyAdmins: Boolean = false,
     val description: String = "", val wallpaper: String = "",
+    /** chatpa (S/chatpolish-contract.md §1): my bubble colour here ('' = the usual), the pinned messages (newest pin
+     *  first, 3 at most), who has read the last message ("Seen by", latest reader first), my oldest unseen @mention,
+     *  the Announcements chat, a team chat's country (its flag) and a project chat's photo. */
+    val bubble: String = "", val pins: List<PinNote> = emptyList(), val seen: List<String> = emptyList(), val mentionId: String = "",
+    val announceFlag: Boolean = false, val countryCode: String = "", val pphoto: String = "",
 ) {
     fun muted(now: Long = System.currentTimeMillis()) = mutedUntil == ALWAYS || mutedUntil > now
     val isGroup get() = kind != "dm"
+    /** The auto-created Announcements chat (everyone in the team; only admins post). */
+    val announce get() = announceFlag || id == "t:news"
+    /** The country of a team chat ("ke"; from the server, or its id "t:ke"), '' for All RAFIKI, Announcements and others. */
+    val country get() = countryCode.ifBlank { if (kind == "team") id.substringAfterLast(':').substringAfterLast('_').lowercase().takeIf { it.length == 2 }.orEmpty() else "" }
     /** The other person in a direct message. */
     fun other(me: String) = members.firstOrNull { !it.equals(me, true) } ?: title
     fun admin(name: String) = admins.any { it.equals(name, true) }
     fun json(): JSONObject = JSONObject().put("id", id).put("kind", kind).put("title", title).put("photo", photo).put("project", project)
         .put("members", JSONArray(members)).put("admins", JSONArray(admins)).put("last", last?.json() ?: JSONObject.NULL).put("unread", unread).put("mention", mention)
         .put("pinned", pinned).put("muted", if (mutedUntil == ALWAYS) "always" else mutedUntil).put("archived", archived).put("onlyAdmins", onlyAdmins)
-        .put("description", description).put("wallpaper", wallpaper)
+        .put("description", description).put("wallpaper", wallpaper).put("bubble", bubble)
+        .put("pins", JSONArray().apply { pins.forEach { put(it.json()) } }).put("seen", JSONArray(seen)).put("mentionId", mentionId)
+        .put("announce", announceFlag).put("country", countryCode).put("pphoto", pphoto)
 
     companion object {
         const val ALWAYS = Long.MAX_VALUE
@@ -65,7 +76,8 @@ data class ChatRow(
             o.s("id"), o.s("kind").ifBlank { "group" }, o.s("title"), o.s("photo"), o.s("project"),
             o.optJSONArray("members").strings(), o.optJSONArray("admins").strings(), ChatLast.from(o.optJSONObject("last")),
             o.optInt("unread"), o.optBoolean("mention"), o.optBoolean("pinned"), mutedFrom(o.opt("muted")), o.optBoolean("archived"), o.optBoolean("onlyAdmins"),
-            o.s("description"), o.s("wallpaper"),
+            o.s("description"), o.s("wallpaper"), o.s("bubble"), PinNote.list(o.opt("pins")), o.optJSONArray("seen").strings(),
+            o.s("mentionId").takeIf { it != "0" }.orEmpty(), o.optBoolean("announce"), o.s("country").lowercase(), o.s("pphoto"),
         )
     }
 }
@@ -76,9 +88,12 @@ data class ChatMedia(
     val name: String = "", val size: Long = 0L, val local: String = "", val poster: String = "", val mime: String = "",
     /** The server's signed address (relative, works for about a day without headers). */
     val url: String = "",
+    /** chatpa (contract §8): a small preview for the data saver: a local file before upload, then its media id; and its signed address. */
+    val thumb: String = "", val thumbUrl: String = "",
 ) {
     fun json(withLocal: Boolean = false): JSONObject = JSONObject().put("id", id).put("type", type).put("w", w).put("h", h).put("dur", dur).put("wave", JSONArray(wave))
-        .put("name", name).put("size", size).apply { if (poster.isNotBlank()) put("poster", poster); if (mime.isNotBlank()) put("mime", mime); if (withLocal && local.isNotBlank()) put("local", local) }
+        .put("name", name).put("size", size).apply { if (poster.isNotBlank()) put("poster", poster); if (mime.isNotBlank()) put("mime", mime); if (withLocal && local.isNotBlank()) put("local", local)
+            if (thumb.isNotBlank() && (withLocal || !thumb.startsWith("/"))) put("thumb", thumb); if (withLocal && thumbUrl.isNotBlank()) put("thumbUrl", thumbUrl); if (withLocal && url.isNotBlank()) put("url", url) }
     companion object {
         /** The waveform: 0–100 per bar. Read from a list, or from "1,5,9" text. */
         fun waveFrom(v: Any?): List<Int> = when (v) {
@@ -87,7 +102,7 @@ data class ChatMedia(
             else -> emptyList()
         }
         fun from(o: JSONObject) = ChatMedia(o.s("id"), o.s("type").ifBlank { "photo" }, o.optInt("w"), o.optInt("h"), o.optDouble("dur", 0.0).takeIf { !it.isNaN() } ?: 0.0,
-            waveFrom(o.opt("wave")), o.s("name"), o.optLong("size"), o.s("local"), o.s("poster"), o.s("mime"), o.s("url"))
+            waveFrom(o.opt("wave")), o.s("name"), o.optLong("size"), o.s("local"), o.s("poster"), o.s("mime"), o.s("url"), o.s("thumb"), o.s("thumbUrl"))
     }
 }
 
@@ -117,6 +132,8 @@ data class Msg(
     val media: List<ChatMedia> = emptyList(), val reply: Quote? = null, val fwd: Boolean = false, val mentions: List<String> = emptyList(),
     val loc: LatLng? = null, val live: LiveLoc? = null, val contact: String? = null, val reacts: Map<String, List<String>> = emptyMap(),
     val edited: Long = 0L, val deleted: Boolean = false, val sys: SysNote? = null, val status: String = "sent", val failed: String? = null, val starred: Boolean = false,
+    /** chatpa: a trip card (kind 'trip'). */
+    val trip: TripCard? = null,
 ) {
     val queued get() = status == "queued"
     /** The key the list uses: the client id while waiting, so the bubble doesn't jump when the server's id arrives. */
@@ -127,7 +144,7 @@ data class Msg(
         .put("mentions", JSONArray(mentions)).put("loc", loc?.let { JSONObject().put("lat", it.lat).put("lng", it.lng) } ?: JSONObject.NULL)
         .put("live", live?.json() ?: JSONObject.NULL).put("contact", contact?.let { JSONObject().put("name", it) } ?: JSONObject.NULL)
         .put("reacts", JSONObject().apply { reacts.forEach { (e, n) -> put(e, JSONArray(n)) } }).put("edited", if (edited > 0) chatIso(edited) else JSONObject.NULL)
-        .put("deleted", deleted).put("sys", sys?.json() ?: JSONObject.NULL).put("status", status).put("starred", starred).apply { failed?.let { put("failed", it) } }
+        .put("deleted", deleted).put("sys", sys?.json() ?: JSONObject.NULL).put("status", status).put("starred", starred).apply { failed?.let { put("failed", it) }; trip?.let { put("trip", it.json()) } }
 
     companion object {
         fun from(o: JSONObject, chat: String = ""): Msg {
@@ -140,7 +157,7 @@ data class Msg(
                 Quote.from(o.optJSONObject("reply")), fwd, o.optJSONArray("mentions").strings(), loc, LiveLoc.from(o.optJSONObject("live")),
                 o.optJSONObject("contact")?.s("name")?.takeIf { it.isNotBlank() } ?: o.optString("contact").takeIf { it.isNotBlank() && !it.startsWith("{") && it != "null" },
                 reacts, chatMs(o.opt("edited")), o.optBoolean("deleted"), SysNote.from(o.optJSONObject("sys")), o.s("status").ifBlank { "sent" },
-                o.s("failed").takeIf { it.isNotBlank() }, o.optBoolean("starred"),
+                o.s("failed").takeIf { it.isNotBlank() }, o.optBoolean("starred"), TripCard.from(o.optJSONObject("trip")),
             )
         }
     }
@@ -158,9 +175,10 @@ fun chatPreview(kind: String, text: String, dur: Double = 0.0, deleted: Boolean 
     kind == "live" -> "📍 " + t("Live location", "Mahali moja kwa moja")
     kind == "contact" -> "👤 " + text.ifBlank { t("Contact", "Mawasiliano") }
     kind == "doc" -> "📄 " + text.ifBlank { t("Document", "Hati") }
+    kind == "trip" -> "🧭 " + t("Trip", "Safari") + if (text.isNotBlank()) ": $text" else ""
     else -> text
 }
-fun Msg.preview(): String = chatPreview(kind, if (kind == "contact") contact.orEmpty() else if (kind == "doc") media.firstOrNull()?.name ?: text else text,
+fun Msg.preview(): String = chatPreview(kind, if (kind == "contact") contact.orEmpty() else if (kind == "doc") media.firstOrNull()?.name ?: text else if (kind == "trip") trip?.title ?: text else text,
     media.firstOrNull()?.dur ?: 0.0, deleted, media.size, media.firstOrNull()?.type.orEmpty())
 
 /** Why a chat call didn't work, in plain words. */
@@ -206,6 +224,13 @@ class ChatApi(val api: Api) {
     suspend fun search(q: String) = api.get("/api/chat/search?q=" + enc(q))
     suspend fun preview(url: String) = api.get("/api/chat/preview?url=" + enc(url))
     suspend fun ticket() = api.postTo("/api/chat/ticket", JSONObject())
+    // chatpa (S/chatpolish-contract.md)
+    suspend fun myPrefs(f: JSONObject) = api.postTo("/api/chat/prefs", f)
+    suspend fun pin(c: String, id: String, on: Boolean) = api.postTo("/api/chat/pin", JSONObject().put("c", c).put("id", id).put("on", on))
+    suspend fun device(token: String) = api.postTo("/api/chat/device", JSONObject().put("token", token).put("platform", "android"))
+    suspend fun deviceRemove(token: String) = api.postTo("/api/chat/device", JSONObject().put("token", token).put("remove", true))
+    suspend fun trip(id: String) = api.get("/api/chat/trip?id=" + enc(id))
+    suspend fun tripCard(id: String) = api.get("/api/itin/" + enc(id) + "?card=1")
     fun mediaPath(id: String) = "/api/chat/media/" + enc(id)
 }
 
@@ -247,7 +272,7 @@ class ChatOutbox(private val file: File) {
     fun count() = all().size
     fun forChat(c: String) = all().filter { it.c == c }
 
-    data class Result(val sent: Map<String, Msg>, val failed: Map<String, String>, val waiting: Int, val off: Boolean, val locked: Boolean)
+    data class Result(val sent: Map<String, Msg>, val failed: Map<String, String>, val waiting: Int, val off: Boolean, val locked: Boolean, val uploaded: Long = 0L)
 
     /** Sends everything waiting, oldest first. A message that can't go yet stays (and the ones after it in the same chat,
      *  so the order is kept). */
@@ -255,7 +280,7 @@ class ChatOutbox(private val file: File) {
 
     private suspend fun flushNow(chat: ChatApi): Result {
         val sent = mutableMapOf<String, Msg>(); val failed = mutableMapOf<String, String>(); val stuck = mutableSetOf<String>()
-        var waiting = 0; var off = false; var locked = false
+        var waiting = 0; var off = false; var locked = false; var uploaded = 0L
         for (it0 in all().sortedBy { it.at }) {
             var it = it0
             if (it.c in stuck || off || locked) { waiting++; continue }
@@ -276,6 +301,7 @@ class ChatOutbox(private val file: File) {
                     }
                     ok = false; break
                 }
+                uploaded += bytes.size
                 files[i] = f.copy(id = r.json.optString("id"))
                 it = it.copy(files = files.toList()); put(it)
             }
@@ -286,6 +312,15 @@ class ChatOutbox(private val file: File) {
                 val r = chat.media(bytes, "photo", "poster.jpg", "image/jpeg")
                 if (!r.ok) { if (!r.retryLater && r.status != 401) files[i] = f.copy(poster = "") else { ok = false; break } }
                 else files[i] = f.copy(poster = r.json.optString("id"))
+                it = it.copy(files = files.toList()); put(it)
+            }
+            // a photo's small preview (the data saver, contract §8): best effort, never holds the message up for long
+            if (ok) for ((i, f) in files.withIndex()) {
+                if (f.thumb.isBlank() || !f.thumb.startsWith("/")) continue
+                val bytes = runCatching { File(f.thumb).readBytes() }.getOrNull() ?: run { files[i] = f.copy(thumb = ""); null } ?: continue
+                val r = chat.media(bytes, "photo", "thumb.jpg", "image/jpeg")
+                if (!r.ok) { if (!r.retryLater && r.status != 401) files[i] = f.copy(thumb = "") else { ok = false; break } }
+                else { uploaded += bytes.size; files[i] = f.copy(thumb = r.json.optString("id")) }
                 it = it.copy(files = files.toList()); put(it)
             }
             if (failed.containsKey(it.cid)) { remove(it.cid); continue }
@@ -303,7 +338,7 @@ class ChatOutbox(private val file: File) {
                 else -> { failed[it.cid] = chatReason(r.reason); remove(it.cid) }
             }
         }
-        return Result(sent, failed, waiting, off, locked)
+        return Result(sent, failed, waiting, off, locked, uploaded)
     }
 
     companion object {

@@ -36,6 +36,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.calculatePan
+import androidx.compose.foundation.gestures.calculateZoom
+import androidx.compose.ui.input.pointer.positionChanged
+import androidx.compose.ui.graphics.graphicsLayer
+import org.rafikioutreach.pin.data.saverOn
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -86,7 +93,13 @@ internal object ChatPrep {
         val out = File(outDir(ctx), "p${System.nanoTime()}.jpg")
         var q = 82
         do { FileOutputStream(out).use { bmp.compress(Bitmap.CompressFormat.JPEG, q, it) }; q -= 12 } while (out.length() > ChatCaps.PHOTO && q > 30)
-        ChatMedia("", "photo", bmp.width, bmp.height, size = out.length(), local = out.path, name = out.name, mime = "image/jpeg")
+        // a small preview (longest side 320 px) for people with the data saver on (chatpa, contract §8)
+        val thumb = if (maxSide > 320) runCatching {
+            val k2 = 320f / maxOf(bmp.width, bmp.height)
+            val tb = if (k2 < 1f) Bitmap.createScaledBitmap(bmp, (bmp.width * k2).toInt().coerceAtLeast(1), (bmp.height * k2).toInt().coerceAtLeast(1), true) else bmp
+            File(outDir(ctx), "t${System.nanoTime()}.jpg").also { f -> FileOutputStream(f).use { tb.compress(Bitmap.CompressFormat.JPEG, 60, it) } }.path
+        }.getOrDefault("") else ""
+        ChatMedia("", "photo", bmp.width, bmp.height, size = out.length(), local = out.path, name = out.name, mime = "image/jpeg", thumb = thumb)
     }.getOrNull()
 
     /** A content:// picked from the gallery, copied to a file first. */
@@ -169,17 +182,27 @@ internal object ChatPics {
 
 /** A photo (or a video's poster) from a message: from the phone, or downloaded once. */
 @Composable
-internal fun ChatImage(m: AppModel, md: ChatMedia, modifier: Modifier, max: Int = 720, crop: Boolean = true) {
+internal fun ChatImage(m: AppModel, md: ChatMedia, modifier: Modifier, max: Int = 720, crop: Boolean = true, full: Boolean = false) {
+    val ctx = LocalContext.current
+    val tick by m.chat.settingsTick.collectAsState()
     val local = if (md.type == "video") md.poster.takeIf { it.startsWith("/") } else md.local.takeIf { it.isNotBlank() }
-    var bmp by remember(md.id, md.local, md.poster) { mutableStateOf(local?.let { ChatPics.cached(it, max) }?.asImageBitmap()) }
-    LaunchedEffect(md.id, md.local, md.poster) {
+    // the data saver (chatpa): a photo not on the phone yet shows its small preview, or its size and "Tap to load";
+    // the full photo comes when it's opened
+    val saving = remember(md.id, tick) { md.type == "photo" && !full && local == null && saverOn(ctx, m.chat.settings.saver) && m.chat.cachedFile(md) == null }
+    val hasThumb = md.thumb.isNotBlank() || md.thumbUrl.isNotBlank()
+    var bmp by remember(md.id, md.local, md.poster, saving) { mutableStateOf(local?.let { ChatPics.cached(it, max) }?.asImageBitmap()) }
+    LaunchedEffect(md.id, md.local, md.poster, saving) {
         if (bmp != null) return@LaunchedEffect
-        val f = withContext(Dispatchers.IO) { local?.let { File(it) }?.takeIf { it.exists() } ?: if (md.type == "video") m.chat.file(md, posterOnly = true) else m.chat.file(md) }
+        if (saving && !hasThumb) return@LaunchedEffect
+        val f = withContext(Dispatchers.IO) { local?.let { File(it) }?.takeIf { it.exists() } ?: if (saving) m.chat.file(md, thumbOnly = true) else if (md.type == "video") m.chat.file(md, posterOnly = true) else m.chat.file(md) }
         bmp = f?.let { withContext(Dispatchers.IO) { ChatPics.load(it.path, max) } }?.asImageBitmap()
     }
     Box(modifier.background(if (C.dark) Color(0xFF26323C) else Color(0xFFDCE6EE)), contentAlignment = Alignment.Center) {
-        bmp?.let { Image(it, null, contentScale = if (crop) ContentScale.Crop else ContentScale.Fit, modifier = Modifier.matchParentSize()) }
-            ?: Icon(Ic.get(if (md.type == "video") "play" else "camera"), null, tint = C.muted, modifier = Modifier.size(26.dp))
+        bmp?.let { Image(it, null, contentScale = if (crop) ContentScale.Crop else ContentScale.Fit, modifier = Modifier.matchParentSize().then(if (saving) Modifier.testTag("thumb_shown") else Modifier)) }
+            ?: if (saving && !hasThumb) Column(Modifier.testTag("tap_load"), horizontalAlignment = Alignment.CenterHorizontally) {
+                Icon(Ic.get("down"), null, tint = C.muted, modifier = Modifier.size(24.dp))
+                Text(listOf(org.rafikioutreach.pin.data.dataText(md.size).takeIf { md.size > 0 }, t("Tap to load", "Gusa kupakia")).filterNotNull().joinToString(" · "), style = MaterialTheme.typography.labelSmall, color = C.muted, maxLines = 1, softWrap = false)
+            } else Icon(Ic.get(if (md.type == "video") "play" else "camera"), null, tint = C.muted, modifier = Modifier.size(26.dp))
         if (md.type == "video") {
             Box(Modifier.size(46.dp).clip(CircleShape).background(Color(0x99000000)), contentAlignment = Alignment.Center) { Icon(Ic.get("play"), null, tint = Color.White, modifier = Modifier.size(24.dp)) }
             Text(clock(md.dur), color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold, modifier = Modifier.align(Alignment.BottomStart).padding(6.dp).clip(RoundedCornerShape(6.dp)).background(Color(0x88000000)).padding(horizontal = 5.dp, vertical = 1.dp))
@@ -221,11 +244,12 @@ internal fun PhotoGrid(m: AppModel, media: List<ChatMedia>, width: androidx.comp
 internal fun MediaViewer(m: AppModel, items: List<Pair<Msg, ChatMedia>>, start: Int, close: () -> Unit) {
     BackStep(true) { close() }
     val pager = rememberPagerState(initialPage = start.coerceIn(0, (items.size - 1).coerceAtLeast(0))) { items.size }
+    var zoomed by remember { mutableStateOf(false) }
     Box(Modifier.fillMaxSize().background(Color.Black).pointerInput(Unit) { detectTapGestures { } }.testTag("media_viewer")) {
-        HorizontalPager(pager, Modifier.fillMaxSize()) { i ->
+        HorizontalPager(pager, Modifier.fillMaxSize(), userScrollEnabled = !zoomed) { i ->
             val (msg, md) = items[i]
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                if (md.type == "video") VideoPage(m, md, pager.currentPage == i) else ChatImage(m, md, Modifier.fillMaxSize(), max = 1600, crop = false)
+                if (md.type == "video") VideoPage(m, md, pager.currentPage == i) else ZoomBox({ zoomed = it }, close) { ChatImage(m, md, Modifier.fillMaxSize(), max = 1600, crop = false, full = true) }
                 if (msg.text.isNotBlank() && msg.media.firstOrNull() == md) Text(msg.text, color = Color.White, style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth().background(Color(0x88000000)).padding(16.dp))
             }
@@ -241,6 +265,73 @@ internal fun MediaViewer(m: AppModel, items: List<Pair<Msg, ChatMedia>>, start: 
             }
             Text("${pager.currentPage + 1} / ${items.size}", color = Color.White, style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(end = 8.dp).testTag("viewer_count"))
         }
+    }
+}
+
+/**
+ * A photo in the viewer (chatpa): pinch or double-tap to zoom, drag to pan while zoomed, swipe down to close.
+ * Sideways swipes go to the pager while it isn't zoomed.
+ */
+@Composable
+private fun ZoomBox(zoomed: (Boolean) -> Unit, close: () -> Unit, content: @Composable () -> Unit) {
+    var scale by remember { mutableFloatStateOf(1f) }
+    var off by remember { mutableStateOf(Offset.Zero) }
+    var drop by remember { mutableFloatStateOf(0f) }
+    val motion = chatMotion()
+    val shownScale by androidx.compose.animation.core.animateFloatAsState(scale, androidx.compose.animation.core.tween(if (motion) 220 else 0), label = "zoom")
+    LaunchedEffect(scale > 1f) { zoomed(scale > 1f) }
+    BoxWithConstraints(Modifier.fillMaxSize().testTag(if (scale > 1f) "zoomed" else "zoom_box")
+        .pointerInput(Unit) { detectTapGestures(onDoubleTap = { p -> if (scale > 1f) { scale = 1f; off = Offset.Zero } else { scale = 2.5f; off = (Offset(size.width / 2f, size.height / 2f) - p) * 1.5f } }) }
+        .pointerInput(Unit) {
+            awaitEachGesture {
+                awaitFirstDown(requireUnconsumed = false)
+                var vertical: Boolean? = null
+                do {
+                    val ev = awaitPointerEvent()
+                    val zoom = ev.calculateZoom(); val pan = ev.calculatePan()
+                    val fingers = ev.changes.count { it.pressed }
+                    if (fingers > 1 || scale > 1f) {
+                        scale = (scale * zoom).coerceIn(1f, 4f)
+                        val mx = size.width * (scale - 1f) / 2f; val my = size.height * (scale - 1f) / 2f
+                        off = if (scale > 1f) Offset((off.x + pan.x).coerceIn(-mx, mx), (off.y + pan.y).coerceIn(-my, my)) else Offset.Zero
+                        ev.changes.forEach { if (it.positionChanged()) it.consume() }
+                    } else {
+                        if (vertical == null && (kotlin.math.abs(pan.x) > 2f || kotlin.math.abs(pan.y) > 2f)) vertical = kotlin.math.abs(pan.y) > kotlin.math.abs(pan.x) && pan.y > 0
+                        if (vertical == true) { drop = (drop + pan.y).coerceAtLeast(0f); ev.changes.forEach { it.consume() } }
+                    }
+                } while (ev.changes.any { it.pressed })
+                if (drop > 110.dp.toPx()) { drop = 0f; close() } else drop = 0f
+            }
+        }
+        .graphicsLayer { scaleX = shownScale; scaleY = shownScale; translationX = off.x; translationY = off.y + drop; alpha = 1f - (drop / size.height.coerceAtLeast(1f)).coerceIn(0f, 0.6f) }) {
+        content()
+    }
+}
+
+/** Cuts a voice note's end on the phone (chatpa): the audio up to [end] seconds, copied without re-encoding. */
+internal object VoiceTrim {
+    fun cut(md: ChatMedia, end: Double): ChatMedia {
+        val n = if (md.dur > 0) (md.wave.size * end / md.dur).toInt().coerceIn(1, md.wave.size.coerceAtLeast(1)) else md.wave.size
+        val wave = if (md.wave.isEmpty()) md.wave else VoiceRec.bars(md.wave.take(n), 40)
+        val src = File(md.local)
+        val out = File(src.parentFile, "t${System.nanoTime()}.m4a")
+        val ok = runCatching {
+            val ex = android.media.MediaExtractor(); ex.setDataSource(src.path)
+            val track = (0 until ex.trackCount).first { ex.getTrackFormat(it).getString(android.media.MediaFormat.KEY_MIME)?.startsWith("audio/") == true }
+            ex.selectTrack(track)
+            val mux = android.media.MediaMuxer(out.path, android.media.MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4)
+            val ti = mux.addTrack(ex.getTrackFormat(track)); mux.start()
+            val buf = java.nio.ByteBuffer.allocate(256 * 1024); val info = android.media.MediaCodec.BufferInfo()
+            val endUs = (end * 1_000_000).toLong()
+            while (true) {
+                val size = ex.readSampleData(buf, 0); if (size < 0) break
+                if (ex.sampleTime > endUs) break
+                info.set(0, size, ex.sampleTime, if (ex.sampleFlags and android.media.MediaExtractor.SAMPLE_FLAG_SYNC != 0) android.media.MediaCodec.BUFFER_FLAG_KEY_FRAME else 0)
+                mux.writeSampleData(ti, buf, info); ex.advance()
+            }
+            mux.stop(); mux.release(); ex.release(); out.length() > 0
+        }.getOrDefault(false)
+        return if (ok) { src.delete(); md.copy(local = out.path, name = out.name, size = out.length(), dur = end, wave = wave) } else { out.delete(); md.copy(dur = end, wave = wave) }
     }
 }
 
@@ -352,6 +443,8 @@ internal fun VoiceBubble(m: AppModel, msg: Msg, md: ChatMedia, mine: Boolean) {
     val scope = rememberScope()
     val hp = rememberHaptics()
     LaunchedEffect(me && st.playing) { while (me && st.playing) { VoicePlayer.tick(); delay(80) } }
+    // voice notes load by themselves, also with the data saver on (they are small)
+    LaunchedEffect(md.id) { if (file == null && md.id.isNotBlank() && !md.id.startsWith("/")) m.chat.file(md)?.let { file = it } }
     val accent = if (mine) C.blue else ChatLook.online
     Row(Modifier.widthIn(min = 220.dp, max = 260.dp).padding(top = 2.dp).testTag("voice_${msg.key}"), verticalAlignment = Alignment.CenterVertically) {
         Box(Modifier.size(44.dp).clip(CircleShape).background(accent).clickable(role = Role.Button) {
