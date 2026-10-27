@@ -3682,7 +3682,7 @@ html[data-theme=dark] .cw-pst.ok{background:var(--okbg);color:var(--ok)}html[dat
 html[data-theme=sun] .cw-pst{border:2px solid #000}html[data-theme=sun] .cw-pst.ok{background:#D8F5E3;color:#00562A}html[data-theme=sun] .cw-ps{border-bottom:2px solid #000}
 .cw-psx{flex:1;min-width:0;font-size:var(--cw-fs-meta);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cw-pso{flex:none;margin-left:auto;font-size:var(--cw-fs-meta);font-weight:800;color:var(--blue);white-space:nowrap}
-@media (max-width:374px){.cw-ps.long .cw-psx{display:none}}
+@media (max-width:374px){.cw-ps.long .cw-psx{display:none}.cw-psx .pl{display:none}}
 /* search in this chat */
 .cw-find{flex:none;position:relative;z-index:3;display:flex;align-items:center;gap:2px;width:100%;min-height:52px;padding:5px 6px;border-bottom:var(--bw) solid var(--line);background:var(--card)}
 .cw-find.hidden{display:none}
@@ -3802,7 +3802,7 @@ html[data-theme=sun] .cw-apall,html[data-theme=sun] .cw-apchip{border:2px solid 
 /* narrow phones: the voice note's bars give way so the length never sits on them */
 @media (max-width:400px){.cw-vo .cw-wv{gap:1px}.cw-vo .cw-wv i{min-width:1.5px}}
 /* the sheet's button bar reaches the bottom edge (nothing shows under it) */
-.cw-ap .cw-foot{margin:0 -18px calc(-18px - env(safe-area-inset-bottom));padding:10px 18px calc(18px + env(safe-area-inset-bottom))}
+.cw-ap .cw-foot{bottom:calc(-18px - env(safe-area-inset-bottom));margin:0 -18px calc(-18px - env(safe-area-inset-bottom));padding:10px 18px calc(18px + env(safe-area-inset-bottom))}
 @media (prefers-reduced-motion: reduce){.cw-m.sel .cw-b{transition:none}}
 </style>
 </head>
@@ -17127,8 +17127,9 @@ html[data-theme=sun] .cw-apall,html[data-theme=sun] .cw-apchip{border:2px solid 
       : /construct|build|progress/i.test(p.status || '') ? ['build', tr('Under construction', 'Inajengwa')] : ['ok', tr('Working', 'Inafanya kazi')];
     var v = S.visits[p.id], vd = v && dOf(v.at), vt = vd && !isNaN(vd) ? tr('Visited ' + dDay(vd, true), 'Ziara ' + dDay(vd, true)) : tr('No visit yet', 'Bado hakuna ziara');
     var place = [p.area, p.country].filter(Boolean).join(', ');
-    b.className = 'cw-ps' + (st[1].length > 14 ? ' long' : '');
-    b.innerHTML = '<span class="cw-pst ' + st[0] + '"><i aria-hidden="true"></i>' + esc(st[1]) + '</span><span class="cw-psx" data-nosw>' + esc(vt + (place ? ' · ' + place : '')) + '</span><span class="cw-pso">' + tr('Open project', 'Fungua mradi') + ' ›</span>';
+    var op = tr('Open project', 'Fungua mradi');
+    b.className = 'cw-ps' + (st[1].length + op.length > 22 ? ' long' : ''); // narrow phones: a long status and button leave no room for the visit
+    b.innerHTML = '<span class="cw-pst ' + st[0] + '"><i aria-hidden="true"></i>' + esc(st[1]) + '</span><span class="cw-psx" data-nosw>' + esc(vt) + (place ? '<span class="pl"> · ' + esc(place) + '</span>' : '') + '</span><span class="cw-pso">' + op + ' ›</span>';
     b.setAttribute('aria-label', tr('Open the project: ', 'Fungua mradi: ') + p.title + '. ' + st[1] + '. ' + vt + (place ? ', ' + place : ''));
   }
   // the ⋯ menu
@@ -17276,8 +17277,9 @@ html[data-theme=sun] .cw-apall,html[data-theme=sun] .cw-apchip{border:2px solid 
   function cw2Google(t) { return 'https://translate.google.com/?sl=auto&tl=' + (cw2IsSw(t) ? 'en' : 'sw') + '&text=' + encodeURIComponent(String(t || '').slice(0, 2000)) + '&op=translate'; }
   function cw2TrWant(m, me) {
     if (me || m.deleted || !m.text || (m.kind !== 'text' && m.kind !== 'media')) return false;
-    var t = m.text.replace(/https?:\/\/\S+/g, ' '); if ((t.match(/[A-Za-z']{2,}/g) || []).length < 2) return false;
-    return S.lang === 'sw' ? !cw2IsSw(t) : cw2IsSw(t);
+    // under the message only when it is in the other language (and long enough to need it); always in the long-press menu
+    var t = m.text.replace(/https?:\/\/\S+/g, ' '), n = (t.match(/[A-Za-z']{2,}/g) || []).length; if (n < 3) return false;
+    return S.lang === 'sw' ? n >= 5 && !cw2IsSw(t) : cw2IsSw(t);
   }
   function cw2TrHtml(m, me) {
     if (!m.id) return '';
