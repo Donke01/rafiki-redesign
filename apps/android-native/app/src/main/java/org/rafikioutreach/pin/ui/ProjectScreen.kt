@@ -77,7 +77,7 @@ fun ProjectScreen(m: AppModel, id: String, startTab: String, back: () -> Unit) {
     val fix by m.fix.collectAsState()
     val snap = s ?: return
     val p = snap.projects.firstOrNull { it.id == id } ?: run { back(); return }
-    val tabs = listOf("pin", "visit", "hist")
+    val tabs = listOf("pin", "visit", "hist", "story")
     // the three tabs: tap them, or swipe the page left and right
     val ctx = LocalContext.current
     // a half-done visit kept on the phone: open on Site visit, where it offers to carry on
@@ -85,6 +85,9 @@ fun ProjectScreen(m: AppModel, id: String, startTab: String, back: () -> Unit) {
     // back from a tab chosen here: the tab the project opened on (Pin location), then the screen before
     val opened = rememberSaveable(id) { tab }
     BackStep(tab != opened) { tab = opened }
+    // a visit sent with "Add to this project's story": its Stories tab (feat-mea, me-brief §9)
+    val storyReq = StoryNav.open
+    LaunchedEffect(storyReq) { if (storyReq == id) { tab = "story"; StoryNav.open = null } }
     val hp = rememberHaptics()
     val here = fix?.ll
     // the project name moves into the top bar once its big title scrolls away
@@ -160,6 +163,8 @@ fun ProjectScreen(m: AppModel, id: String, startTab: String, back: () -> Unit) {
         if (dirs && p.gps != null) DirectionsSheet(p.title, p.gps) { dirs = false }
 
         snap.repairs[p.id]?.let { r -> RepairTracker(m, p, r, here) }
+        // being built: the stages, photos, % and date, linked projects (feat-mea, construction)
+        ConstructionCard(m, p, snap)
         ProjectCostLine(m, p)
         // the extras (photo timeline, the summary to share, a thank-you for donors) fold away under More
         ProjectMore(id) {
@@ -169,7 +174,7 @@ fun ProjectScreen(m: AppModel, id: String, startTab: String, back: () -> Unit) {
 
         // what to do
         Row(Modifier.padding(top = 14.dp).fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(C.card).border(1.dp, C.line, RoundedCornerShape(18.dp)).padding(5.dp)) {
-            listOf("pin" to t("Pin location", "Weka mahali"), "visit" to t("Site visit", "Ziara"), "hist" to t("History", "Historia")).forEachIndexed { i, (k, label) ->
+            listOf("pin" to t("Pin location", "Weka mahali"), "visit" to t("Site visit", "Ziara"), "hist" to t("History", "Historia"), "story" to t("Stories", "Hadithi")).forEachIndexed { i, (k, label) ->
                 val on = tab == k
                 Text(label, color = if (on) Color.White else C.ink, style = MaterialTheme.typography.titleSmall, textAlign = TextAlign.Center,
                     modifier = Modifier.weight(1f).clip(RoundedCornerShape(14.dp)).background(if (on) C.primary else SolidColor(Color.Transparent))
@@ -193,6 +198,7 @@ fun ProjectScreen(m: AppModel, id: String, startTab: String, back: () -> Unit) {
                 when (k) {
                     "pin" -> PinTab(m, p)
                     "visit" -> VisitTab(m, p)
+                    "story" -> StoryTab(m, p)
                     else -> HistoryTab(m, p)
                 }
             }

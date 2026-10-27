@@ -588,7 +588,7 @@ class ChatHub(private val ctx: Context, val api: Api, private val myName: () -> 
             "typing" -> { val who = e.optString("who"); val what = e.optString("what").takeIf { it.isNotBlank() && it != "null" }
                 val cur = _typing.value[c].orEmpty()
                 _typing.value = _typing.value + (c to if (what == null) cur - who else cur + (who to (what to now() + 6_000))) }
-            "presence" -> { val who = e.optString("who"); _presence.value = _presence.value + (who to Presence(e.optBoolean("online"), chatMs(e.opt("seen")).takeIf { it > 0 } ?: now())) }
+            "presence" -> { val who = e.optString("who"); if (e.has("photo")) TeamPhotos.set(who, e.optString("photo")); _presence.value = _presence.value + (who to Presence(e.optBoolean("online"), chatMs(e.opt("seen")).takeIf { it > 0 } ?: now())) }
             "chat" -> e.optJSONObject("chat")?.let { o -> val r = ChatRow.from(o)
                 if (o.optBoolean("gone")) { _rows.value = _rows.value.filter { it.id != r.id }; recount(); save() }
                 else if (r.id.isNotBlank()) { _rows.value = merge(_rows.value, listOf(r)); recount(); save() } }

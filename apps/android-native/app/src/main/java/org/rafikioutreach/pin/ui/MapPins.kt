@@ -45,7 +45,7 @@ import kotlin.math.tan
 
 /** A project's pin: where it is, how it is ([PinCond]), its kind's icon (typeLook: drop, school, cross, house, leaf,
  *  brick), whether a visit or water test is due, and its short name. */
-data class HomePin(val id: String, val ll: LatLng, val cond: String, val type: String = "drop", val due: Boolean = false, val name: String = "")
+data class HomePin(val id: String, val ll: LatLng, val cond: String, val type: String = "drop", val due: Boolean = false, val name: String = "", val build: Boolean = false)
 
 /** Groups pins that would sit within [radiusPx] of each other at [zoom] (256-pixel tiles, as osmdroid draws them).
  *  Past street level only pins on (nearly) the same spot group, so they can fan out. The worst pins seed the groups,
@@ -133,7 +133,7 @@ class PinArt(private val res: Resources, private val d: Float) {
     private fun paths(type: String) = icons.getOrPut(type) { Ic.paths(type).mapNotNull { runCatching { androidx.core.graphics.PathParser.createPathFromPathData(it) }.getOrNull() } }
 
     /** A project's pin: the kind's icon on white, a ring in the colour of how it is, a blue dot when something is due. */
-    fun pin(type: String, cond: String, due: Boolean, big: Boolean): BitmapDrawable = cache.getOrPut("p$type|$cond|$due|$big") {
+    fun pin(type: String, cond: String, due: Boolean, big: Boolean, build: Boolean = false): BitmapDrawable = cache.getOrPut("p$type|$cond|$due|$big|$build") {
         val r = (if (big) 11.5f else 8.5f) * d; val ring = (if (big) 3.5f else 3f) * d; val edge = 1.5f * d; val halo = (if (big) 4.5f else 1.5f) * d
         val n = ceil(2 * (r + ring + edge + halo)).toInt() + 2; val m = n / 2f
         val b = Bitmap.createBitmap(n, n, Bitmap.Config.ARGB_8888); val c = Canvas(b)
@@ -152,6 +152,15 @@ class PinArt(private val res: Resources, private val d: Float) {
             val o = (r + ring) * 0.72f
             p.color = android.graphics.Color.WHITE; c.drawCircle(m + o, m - o, 4.4f * d, p)
             p.color = DUE_ARGB; c.drawCircle(m + o, m - o, 3.1f * d, p)
+        }
+        // being built (feat-mea): a small hard hat at the lower left
+        if (build) {
+            val o = (r + ring) * 0.72f; val cx = m - o; val cy = m + o; val br = 5.6f * d
+            p.color = android.graphics.Color.WHITE; c.drawCircle(cx, cy, br, p)
+            p.color = BUILD_ARGB; c.drawCircle(cx, cy, br - 1.3f * d, p)
+            p.color = android.graphics.Color.WHITE
+            c.drawArc(android.graphics.RectF(cx - 2.8f * d, cy - 2.6f * d, cx + 2.8f * d, cy + 2.9f * d), 180f, 180f, true, p)
+            c.drawRect(cx - 3.6f * d, cy + 0.2f * d, cx + 3.6f * d, cy + 1.3f * d, p)
         }
         BitmapDrawable(res, b)
     }
@@ -191,6 +200,8 @@ class PinArt(private val res: Resources, private val d: Float) {
         /** The colours by [condRank]: working, not visited, needs repair, not working. */
         val RANKED = arrayOf(PinCond.OK, PinCond.OLD, PinCond.REPAIR, PinCond.BAD)
         const val DUE_ARGB = 0xFF0A78C2.toInt()
+        /** Being built: the hard-hat badge (amber). */
+        const val BUILD_ARGB = 0xFFD98200.toInt()
     }
 }
 
@@ -282,6 +293,8 @@ private class PinsUnder(private val d: Float) : Overlay(), UnderPins {
 /** The pins and groups on the map. Rebuilt only when the pins, the chosen one or the zoom (in half steps) change. */
 class HomePins(private val mv: MapView, private val dens: Float) {
     var onPin: (String) -> Unit = {}
+    /** A tap on a group (it zooms in): the revealed tiles step aside (feat-mea). */
+    var onExplore: () -> Unit = {}
     /** A long press on a pin: its id and where it is on the map (px). */
     var onLongPin: (String, Float, Float) -> Unit = { _, _, _ -> }
     var animate = true
@@ -422,7 +435,7 @@ class HomePins(private val mv: MapView, private val dens: Float) {
 
     private fun pinMarker(p: HomePin, big: Boolean) = PinMarker(mv, p, null, big).apply {
         id = "pin:" + p.id; title = p.id; snippet = p.cond
-        position = GeoPoint(p.ll.lat, p.ll.lng); icon = art.pin(p.type, p.cond, p.due, big); setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER); setInfoWindow(null)
+        position = GeoPoint(p.ll.lat, p.ll.lng); icon = art.pin(p.type, p.cond, p.due, big, p.build); setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER); setInfoWindow(null)
         setOnMarkerClickListener { _, _ -> onPin(p.id); true }
         onLong = { m -> val pt = mv.projection.toPixels(m.position, null); onLongPin(p.id, pt.x.toFloat(), pt.y.toFloat()); true }
     }
@@ -433,7 +446,7 @@ class HomePins(private val mv: MapView, private val dens: Float) {
         id = "cluster:" + g.size + ":" + g[0].id; title = g.size.toString(); snippet = worst; subDescription = parts.joinToString(",")
         position = GeoPoint(g.sumOf { it.ll.lat } / g.size, g.sumOf { it.ll.lng } / g.size)
         icon = art.donut(parts, g.size); setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER); setInfoWindow(null)
-        setOnMarkerClickListener { _, _ -> zoomInto(g); true }
+        setOnMarkerClickListener { _, _ -> onExplore(); zoomInto(g); true }
     }
 
     /** A tap on a group zooms smoothly into its bounds; pins on the same spot fan out where they are instead. */

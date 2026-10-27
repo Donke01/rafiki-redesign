@@ -49,6 +49,8 @@ class Prefs(context: Context) {
     var textSize: String get() = sp.getString("textSize", "") ?: ""; set(v) = sp.edit().putString("textSize", v).apply()
     /** Me & team: which half is showing, "me" or "team". */
     var mePane: String get() = sp.getString("mePane", "me") ?: "me"; set(v) = sp.edit().putString("mePane", v).apply()
+    /** "Me is here now" was closed (feat-mea): never shown again. */
+    var meHint: Boolean get() = sp.getBoolean("meHint", false); set(v) = sp.edit().putBoolean("meHint", v).apply()
     var lang: String get() = sp.getString("lang", "") ?: ""; set(v) = sp.edit().putString("lang", v).apply()
 
     fun saveSnapshot(raw: JSONObject) = runCatching { listFile.writeText(raw.toString()) }

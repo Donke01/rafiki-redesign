@@ -81,6 +81,11 @@ class AppModel(app: Application) : AndroidViewModel(app) {
         // blocked, or signed out of all phones by an admin: sign this phone out with a kind word (feat-conta)
         api.onAuthEnd = { why -> ended = why; viewModelScope.launch(Dispatchers.Main) { authEnded(why) } }
         api.gen = { prefs.pinGen }
+        // profile photos (feat-mea): the URLs come with the lists; the last ones known are kept for a start without signal
+        org.rafikioutreach.pin.data.TeamPhotos.init(app, api)
+        org.rafikioutreach.pin.data.TeamPhotos.off = donor.on.value
+        prefs.loadSnapshot()?.let { org.rafikioutreach.pin.data.TeamPhotos.absorb("/api/pin", it) }
+        api.onJson = { path, j -> org.rafikioutreach.pin.data.TeamPhotos.absorb(path, j) }
     }
 
     /** Why the server ended this sign-in ("blocked" or "signed-out"), until the next sign-in. */

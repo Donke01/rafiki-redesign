@@ -219,9 +219,9 @@ fun TeamToday(m: AppModel, mates: List<Mate>?, act: List<JSONObject>?, snap: Sna
             val onToday = listOfNotNull(e?.optString("at"), p.lastSeen).any { day(it) == today }
             Row(Modifier.padding(top = 10.dp).rise(i, step = 50).fillMaxWidth().testTag("mate_row"), verticalAlignment = Alignment.CenterVertically) {
                 Box(Modifier.clip(CircleShape).clickable(role = Role.Button) { Contact.show(p.name) }.semantics { contentDescription = p.name }.testTag("mate_open")) {
-                    Box(Modifier.size(42.dp).clip(CircleShape).background(androidx.compose.ui.graphics.Brush.linearGradient(listOf(Color(0xFF47B4F5), Color(0xFF0A78C2)))), contentAlignment = Alignment.Center) {
+                    PhotoOr(p.name, 42.dp) { Box(Modifier.size(42.dp).clip(CircleShape).background(androidx.compose.ui.graphics.Brush.linearGradient(listOf(Color(0xFF47B4F5), Color(0xFF0A78C2)))), contentAlignment = Alignment.Center) {
                         Text(p.name.split(" ").mapNotNull { it.firstOrNull()?.uppercase() }.take(2).joinToString(""), color = Color.White, style = MaterialTheme.typography.labelLarge)
-                    }
+                    } }
                     if (onToday) Box(Modifier.align(Alignment.BottomEnd).size(13.dp).clip(CircleShape).background(Color.White).padding(2.dp).clip(CircleShape).background(Color(0xFF1C9C5A)))
                 }
                 Spacer(Modifier.width(12.dp))
@@ -262,6 +262,7 @@ private fun verb(e: JSONObject) = when (e.optString("a")) {
     "pin" -> t("Pinned", "Aliweka mahali")
     "visit" -> t("Visited", "Alitembelea")
     "fixed" -> t("Fixed", "Alirekebisha")
+    "stage" -> t("Building: ", "Ujenzi: ") + Stages.label(e.optString("s"))
     "new" -> t("Added", "Aliongeza")
     else -> e.optString("a")
 }

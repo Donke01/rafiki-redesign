@@ -34,6 +34,10 @@ object Nav {
     const val MAP_RESET_MS = 5 * 60_000L
     /** The clock (tests move it on). */
     var now: () -> Long = { System.currentTimeMillis() }
+    /** Map home tapped again while open (feat-mea): the map starts over in place (same map, no tiles reloading) and
+     *  eases back to its default view. */
+    private val again = androidx.compose.runtime.mutableIntStateOf(0)
+    var mapAgain: Int get() = again.intValue; set(v) { again.intValue = v }
 
     /** Clears what a tab keeps outside its screen: temporary filters and chips, the Me | Team switch, the map's
      *  filter, card-free view and layers. Saved settings (country, map style, Today's route), drafts and sign-in stay.

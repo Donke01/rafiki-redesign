@@ -163,7 +163,7 @@ fun verb(a: String) = when (a) {
     "pin" -> t("pinned", "aliweka mahali pa"); "visit" -> t("reported a visit to", "aliripoti ziara ya"); "fixed" -> t("marked fixed", "aliweka imerekebishwa")
     "new" -> t("added a new site:", "aliongeza eneo jipya:"); "undo" -> t("undid a pin on", "alitendua mahali pa"); "request" -> t("asked to move the confirmed location of", "aliomba kuhamisha mahali palipothibitishwa pa")
     "approve" -> t("approved", "aliidhinisha"); "reject" -> t("turned down", "alikataa"); "job" -> t("updated the repair job on", "alisasisha kazi ya matengenezo ya")
-    "assign" -> t("assigned", "aligawa"); "team" -> t("team:", "timu:"); "ask" -> t("asked for a second approval on", "aliomba idhini ya pili ya"); "settings" -> t("changed a setting:", "alibadilisha mpangilio:"); else -> a
+    "stage" -> t("moved the build stage of", "alisogeza hatua ya ujenzi ya"); "assign" -> t("assigned", "aligawa"); "team" -> t("team:", "timu:"); "ask" -> t("asked for a second approval on", "aliomba idhini ya pili ya"); "settings" -> t("changed a setting:", "alibadilisha mpangilio:"); else -> a
 }
 
 /** A date chosen with a calendar. Empty = none. */
@@ -521,9 +521,11 @@ private fun TeamHead(icon: String, title: String, n: Int, hu: Hue, tag: String) 
 private fun Avatar(name: String, admin: Boolean, size: androidx.compose.ui.unit.Dp = 44.dp, st: String = "") {
     val hu = C.hue(teamHue(name))
     Box(Modifier.size(size + size * 0.18f)) {
-        Box(Modifier.align(Alignment.BottomStart).size(size).clip(CircleShape).background(hu.bg).then(if (st == "today") Modifier.border(2.5.dp, StToday, CircleShape) else if (!C.glassy) Modifier.border(2.dp, C.ink, CircleShape) else Modifier), contentAlignment = Alignment.Center) {
+        Box(Modifier.align(Alignment.BottomStart).size(size).clip(CircleShape).background(hu.bg), contentAlignment = Alignment.Center) {
             if (name.isBlank()) Icon(Ic.get("plus"), null, tint = hu.fg, modifier = Modifier.size(size * 0.45f))
-            else Text(inits(name), color = hu.fg, fontWeight = FontWeight.ExtraBold, fontSize = (size.value * 0.34f).sp)
+            else PhotoOr(name, size) { Text(inits(name), color = hu.fg, fontWeight = FontWeight.ExtraBold, fontSize = (size.value * 0.34f).sp) }
+            // the ring goes on top, so it shows round a photo too
+            if (st == "today") Box(Modifier.matchParentSize().border(2.5.dp, StToday, CircleShape)) else if (!C.glassy) Box(Modifier.matchParentSize().border(2.dp, C.ink, CircleShape))
         }
         if (st.isNotBlank()) Box(Modifier.align(Alignment.BottomStart).offset(x = size - size * 0.26f, y = -(size * 0.02f)).size(size * 0.26f).clip(CircleShape).background(C.card).padding(2.5.dp).clip(CircleShape).background(stColor(st)).testTag("tm_st_$st"))
         if (admin) Box(Modifier.align(Alignment.TopEnd).size(size * 0.5f).clip(CircleShape).background(C.card).border(1.dp, C.line, CircleShape).padding(size * 0.08f), contentAlignment = Alignment.Center) {
@@ -844,5 +846,22 @@ internal fun mailResult(x: org.rafikioutreach.pin.data.Reply): String {
         detail.isNotBlank() -> t("Not sent. Resend said: ", "Haijatumwa. Resend imesema: ") + detail
         x.status == 0 -> t("Not sent: no connection. Try again with signal.", "Haijatumwa: hakuna mtandao. Jaribu tena ukiwa na mtandao.")
         else -> t("Not sent. Please try again in a moment.", "Haijatumwa. Tafadhali jaribu tena baadaye.")
+    }
+}
+
+
+/** Office › Review: a story whose draft is ready to approve; it opens the project's Stories tab. */
+@Composable
+internal fun StoryDraftItem(it2: JSONObject, open: (String) -> Unit) {
+    val id = it2.optString("id")
+    Card(Modifier.padding(top = 10.dp).testTag("rv_story_$id")) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            IconTile("chat", C.hue("purple").fg, C.hue("purple").bg, 36.dp); Spacer(Modifier.width(10.dp))
+            Text(t("Story draft ready", "Rasimu ya hadithi iko tayari"), style = MaterialTheme.typography.titleSmall, color = C.ink, modifier = Modifier.weight(1f))
+            Text(whenText(it2.optString("at")), style = MaterialTheme.typography.bodySmall, color = C.muted)
+        }
+        Text(it2.optString("t").ifBlank { id }, style = MaterialTheme.typography.titleMedium, color = C.ink, modifier = Modifier.padding(top = 6.dp))
+        if (it2.optString("by").isNotBlank()) Text(t("Drafted by ", "Imeandikwa na ") + it2.optString("by"), style = MaterialTheme.typography.bodySmall, color = C.muted)
+        Btn(t("Open the Stories tab", "Fungua kichupo cha Hadithi"), { open(id) }, Modifier.padding(top = 10.dp).fillMaxWidth().testTag("rv_story_open_$id"), icon = "arrow", small = true)
     }
 }

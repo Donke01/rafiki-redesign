@@ -95,6 +95,7 @@ internal fun rrKind(k: String): List<String> = when (k) {
     "move" -> listOf("loc", t("Location moved over 500 m", "Mahali pamehamishwa zaidi ya m 500"), t("Location moved", "Mahali pamehamishwa"), "pin", "blue")
     "request" -> listOf("loc", t("Change to a confirmed location", "Badiliko la mahali palipothibitishwa"), t("Confirmed location", "Mahali palipothibitishwa"), "lock", "amber")
     "story" -> listOf("story", t("Story moment", "Hadithi"), t("Story", "Hadithi"), "spark", "coral")
+    "story-draft" -> listOf("story", t("Story draft ready", "Rasimu ya hadithi iko tayari"), t("Story draft", "Rasimu ya hadithi"), "chat", "purple")
     else -> listOf(k, k, k, "inbox", "slate")
 }
 /** "5 h", "6 d" (how long the oldest item has waited). */
@@ -469,7 +470,11 @@ fun ReviewSection(m: AppModel, open: (String) -> Unit) {
     val list = openItems.filter { filter == "all" || rrKind(it.optString("kind"))[0] == filter }
     if (openItems.isEmpty()) EmptyDrop(t("Nothing waiting for review.", "Hakuna kinachosubiri kuidhinishwa."))
     else if (list.isEmpty()) EmptyDrop(t("Nothing here. Try another filter.", "Hakuna kitu hapa. Jaribu kichujio kingine."))
-    list.take(shown).forEachIndexed { i, x -> RrReviewCard(m, x, Modifier.padding(top = 10.dp).rise(minOf(i, 6))) { picked = x } }
+    list.take(shown).forEachIndexed { i, x ->
+        // a story with its draft ready (feat-mea, me-brief §9): it's approved on the Stories tab, so it opens there
+        if (x.optString("kind") == "story-draft") StoryDraftItem(x) { id -> StoryNav.open = id; open(id) }
+        else RrReviewCard(m, x, Modifier.padding(top = 10.dp).rise(minOf(i, 6))) { picked = x }
+    }
     if (list.size > shown) Btn(t("Show more", "Onyesha zaidi") + " (" + (list.size - shown) + ")", { shown += 30 }, Modifier.padding(top = 12.dp).fillMaxWidth().testTag("rr_more"), light = true, small = true)
 
     Card(Modifier.padding(top = 18.dp), pad = 4.dp) {

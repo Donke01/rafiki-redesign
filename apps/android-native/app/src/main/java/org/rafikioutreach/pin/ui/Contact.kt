@@ -109,7 +109,8 @@ fun contactWhy(reason: String?): String = when (reason) {
 @Composable
 internal fun PersonAvatar(name: String, size: Dp = 44.dp) {
     val hu = C.hue(nameHue(name))
-    DqmAvatar(name, hu.bg, hu.fg, size)
+    // their profile photo when they have one (feat-mea)
+    PhotoOr(name, size) { DqmAvatar(name, hu.bg, hu.fg, size) }
 }
 
 /** A label and a team member's name with their picture and a chevron: a tap opens their contact sheet. */
@@ -278,7 +279,7 @@ private fun shareContact(ctx: android.content.Context, p: Person) {
 }
 
 /** The one-step sheets the menu opens. */
-private enum class CtSub { NAME, EMAIL, PHONE, MYPHONE, HOME, ROLE, INVITE, NEWPIN, RESETPIN, SETPIN, ADMIN, UNADMIN, BLOCK, UNBLOCK, SIGNOUT, REMOVE, MOVE, GIVEPIN, JOBS }
+private enum class CtSub { PHOTO, NAME, EMAIL, PHONE, MYPHONE, HOME, ROLE, INVITE, NEWPIN, RESETPIN, SETPIN, ADMIN, UNADMIN, BLOCK, UNBLOCK, SIGNOUT, REMOVE, MOVE, GIVEPIN, JOBS }
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -313,6 +314,9 @@ private fun ContactSheet(m: AppModel, who: String, close: () -> Unit, go: (Strin
     val me = name.trim().equals(m.prefs.name.trim(), ignoreCase = true) || person?.isCalled(m.prefs.name) == true
     val p = person ?: Person(name, known = false)
     val changed = { tick++; Contact.changed++ }
+    // profile photo (feat-mea): your own, or anyone's for admins
+    val canPhoto = p.known && (me || iAmAdmin)
+    val hasPhoto = org.rafikioutreach.pin.data.TeamPhotos.url(p.name) != null
     TeamSubSheet("ct_sheet", close, x = false) { hide ->
         fun leave(then: () -> Unit) = hide { then() }
         // the header: picture, name, role badges, status, e-mail and phone (each with copy)
@@ -324,7 +328,10 @@ private fun ContactSheet(m: AppModel, who: String, close: () -> Unit, go: (Strin
                 .background(androidx.compose.ui.graphics.Brush.linearGradient(listOf(C.hue("green").bg, C.hue("teal").bg, C.hue("blue").bg))).testTag("ct_banner"))
             Column(Modifier.fillMaxWidth().padding(horizontal = 8.dp).padding(top = 30.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                 Box {
-                    Box(Modifier.size(104.dp).clip(CircleShape).background(C.card).padding(4.dp).then(if (live) Modifier.border(3.dp, Color(0xFF22B566), CircleShape).padding(3.dp) else Modifier), contentAlignment = Alignment.Center) { PersonAvatar(p.name, if (live) 90.dp else 96.dp) }
+                    Box(Modifier.size(104.dp).clip(CircleShape).background(C.card).then(if (canPhoto) Modifier.clickable(role = Role.Button) { sub = CtSub.PHOTO }
+                        .semantics { contentDescription = if (hasPhoto) t("Change photo", "Badilisha picha") else t("Add photo", "Weka picha") }.testTag("ct_photo") else Modifier)
+                        .padding(4.dp).then(if (live) Modifier.border(3.dp, Color(0xFF22B566), CircleShape).padding(3.dp) else Modifier), contentAlignment = Alignment.Center) { PersonAvatar(p.name, if (live) 90.dp else 96.dp) }
+                    if (canPhoto) Box(Modifier.align(Alignment.BottomStart).offset(4.dp, (-4).dp).size(28.dp).clip(CircleShape).background(C.card).border(1.dp, C.line, CircleShape).padding(6.dp)) { Icon(Ic.get("camera"), null, tint = C.blue2, modifier = Modifier.fillMaxSize()) }
                     if (p.known) Box(Modifier.align(Alignment.BottomEnd).offset((-4).dp, (-4).dp).size(22.dp).clip(CircleShape).background(C.card).padding(3.dp).clip(CircleShape).background(dot).testTag("ct_dot"))
                     if (p.admin) Box(Modifier.align(Alignment.TopStart).size(30.dp).clip(CircleShape).background(C.card).border(1.dp, C.line, CircleShape).padding(6.dp)) {
                         Icon(Ic.crownFill, t("Admin", "Msimamizi"), tint = if (C.dark) Color(0xFFF2C14E) else Color(0xFFE0A100), modifier = Modifier.fillMaxSize())
@@ -393,6 +400,8 @@ private fun ContactSheet(m: AppModel, who: String, close: () -> Unit, go: (Strin
         // your own entry when your PIN isn't from the app: name and e-mail are the office's; the phone is yours (profile)
         val selfFixed = me && p.known && !p.app
         if (p.known) CtGroup(t("Details", "Maelezo"), "ct_g_details") {
+            if (canPhoto) CtRow("ct_photo_row", "camera", "purple", if (hasPhoto) t("Change photo", "Badilisha picha") else t("Add photo", "Weka picha"),
+                if (hasPhoto) t("Or remove it", "Au iondoe") else t("Shown next to " + (if (me) "your" else "their") + " name", "Inaonyeshwa karibu na jina " + (if (me) "lako" else "lake"))) { sub = CtSub.PHOTO }
             if (canEdit) {
                 CtRow("ct_name_row", "edit", "blue", t("Name", "Jina"), p.name) { sub = CtSub.NAME }
                 CtRow("ct_email_row", "mail", "teal", if (p.email.isBlank()) t("Add e-mail", "Ongeza barua pepe") else t("Change e-mail", "Badilisha barua pepe"), p.email.ifBlank { t("None yet", "Bado hakuna") }) { sub = CtSub.EMAIL }
@@ -456,6 +465,7 @@ private fun ContactSheet(m: AppModel, who: String, close: () -> Unit, go: (Strin
         val s = sub
         val done = { sub = null }
         when (s) {
+            CtSub.PHOTO -> PhotoSheet(m, p.name, self = me, close = done) { said = "ok" to it }
             CtSub.NAME -> FieldSheet(m, p, "name", me, iAmAdmin, done) { to -> said = "ok" to t("Renamed ✓", "Jina limebadilishwa ✓"); if (me) m.prefs.name = to; name = to; changed() }
             CtSub.EMAIL -> FieldSheet(m, p, "email", me, iAmAdmin, done) { said = "ok" to t("Saved ✓", "Imehifadhiwa ✓"); changed() }
             CtSub.PHONE -> FieldSheet(m, p, "phone", me, iAmAdmin, done) { said = "ok" to t("Saved ✓", "Imehifadhiwa ✓"); changed() }

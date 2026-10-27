@@ -51,6 +51,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -85,9 +86,15 @@ data class Kpi(val value: String, val label: String, val tone: String = "")
 data class CountryRow(val name: String, val projects: Int, val visited: Int, val working: Int, val repair: Int, val notWorking: Int, val open: Int)
 data class RepairRow(val title: String, val country: String, val state: String, val date: String, val by: String, val urgency: String, val problems: String, val parts: String, val cost: Long?)
 data class VisitRow(val date: String, val title: String, val by: String, val state: String, val urgency: String)
+/** A build's stage change in the month (feat-mea, construction). */
+data class StageRow(val id: String, val date: String, val title: String, val stage: String, val by: String)
 data class ReportData(
     val label: String, val country: String, val by: String, val date: String,
     val kpis: List<Kpi>, val byCountry: List<CountryRow>, val repairs: List<RepairRow>, val cost: Long, val visits: List<VisitRow>,
+    /** Construction: the month's stage changes, and some of their photos (loaded by the screen). */
+    val stages: List<StageRow> = emptyList(), val buildPhotos: List<android.graphics.Bitmap> = emptyList(),
+    /** Stories changed this month: collected (started), draft ready, approved (or published). */
+    val storiesCollected: Int = 0, val storiesDraft: Int = 0, val storiesApproved: Int = 0,
 ) {
     val fileName: String get() = "RAFIKI-field-report-" + label.replace(' ', '-') + ".pdf"
 }
@@ -144,8 +151,14 @@ fun buildReport(snap: Snapshot, act: List<JSONObject>, ym: YearMonth, ck: String
         VisitRow(dayMonth(e.optString("at"), zone), byId[e.optString("id")]?.title ?: e.optString("t"), e.optString("by"), e.optString("s"),
             e.optString("u").takeIf { it.isNotBlank() }?.let { urgencyName(it) }.orEmpty())
     }
+    // construction stages and stories this month (as on the web report)
+    val stages = ev.filter { it.optString("a") == "stage" }.sortedBy { it.optString("at") }.map { e ->
+        StageRow(e.optString("id"), dayMonth(e.optString("at"), zone), byId[e.optString("id")]?.title ?: e.optString("t").ifBlank { e.optString("id") }, Stages.label(e.optString("s")), e.optString("by"))
+    }
+    val sts = snap.stories.filter { (id, b) -> inC(id) && runCatching { Instant.parse(b.at).toEpochMilli() }.getOrNull()?.let { it >= from && it < to } == true }.values
     return ReportData(reportMonth(ym), COUNTRIES[ck] ?: t("All countries", "Nchi zote"), by, DateTimeFormatter.ofPattern("d MMMM yyyy", loc()).format(today),
-        kpis, byCountry, repairs, cost, rows)
+        kpis, byCountry, repairs, cost, rows, stages, emptyList(),
+        sts.count { it.st != "not-started" }, sts.count { it.st == "draft" }, sts.count { it.st == "approved" || it.st == "published" })
 }
 
 // --- the three tables, defined once for the screen and the PDF (column widths in PDF points, 508.6pt across) ---
@@ -181,6 +194,17 @@ internal fun visitTable(r: ReportData) = RTable(
     listOf(62f, 176f, 118f, 152.6f),
     listOf(RCell(t("Date", "Tarehe")), RCell(t("Project", "Mradi")), RCell(t("By", "Na")), RCell(t("Result", "Matokeo"))),
     r.visits.map { v -> listOf(RCell(v.date), RCell(v.title), RCell(v.by), RCell(stateName(v.state) + (if (v.urgency.isNotBlank()) " · " + v.urgency else ""), icon = v.state.takeIf { it in STATE_ICONS })) },
+)
+
+internal fun stageTable(r: ReportData) = RTable(
+    listOf(62f, 196f, 110f, 140.6f),
+    listOf(RCell(t("Date", "Tarehe")), RCell(t("Project", "Mradi")), RCell(t("Stage", "Hatua")), RCell(t("By", "Na"))),
+    r.stages.map { s -> listOf(RCell(s.date), RCell(s.title, bold = true), RCell(s.stage), RCell(s.by)) },
+)
+internal fun storyKpis(r: ReportData) = listOf(
+    Kpi("${r.storiesCollected}", if (r.storiesCollected == 1) t("story collected", "imekusanywa") else t("stories collected", "zimekusanywa")),
+    Kpi("${r.storiesDraft}", if (r.storiesDraft == 1) t("draft ready", "rasimu iko tayari") else t("drafts ready", "rasimu ziko tayari")),
+    Kpi("${r.storiesApproved}", if (r.storiesApproved == 1) t("story approved", "imeidhinishwa") else t("stories approved", "zimeidhinishwa")),
 )
 
 private val STATE_ICONS = setOf("working", "repair", "notworking")
@@ -347,6 +371,39 @@ internal fun drawReportPages(ctx: Context, r: ReportData, home: String, startPag
     pg.heading(f, t("By country", "Kwa nchi"), 45f); pg.table(f, countryTable(r))
     pg.heading(f, repairsHeading(r), 45f); if (r.repairs.isEmpty()) none(t("None.", "Hakuna.")) else pg.table(f, repairTable(r))
     pg.heading(f, t("Visits this month", "Ziara za mwezi huu"), 45f); if (r.visits.isEmpty()) none(t("No visits recorded in the app this month.", "Hakuna ziara zilizorekodiwa kwenye programu mwezi huu.")) else pg.table(f, visitTable(r))
+    // construction: the month's stage changes and a row of their photos
+    if (r.stages.isNotEmpty()) {
+        pg.heading(f, t("Construction", "Ujenzi"), 45f); pg.table(f, stageTable(r))
+        if (r.buildPhotos.isNotEmpty()) {
+            val s = 78f; val g = 8f
+            if (!pg.fits(s + 12f)) pg.next()
+            val y0 = pg.y + 8f
+            pg.op { c ->
+                r.buildPhotos.take(6).forEachIndexed { i, b ->
+                    val side = minOf(b.width, b.height); val src = android.graphics.Rect((b.width - side) / 2, (b.height - side) / 2, (b.width + side) / 2, (b.height + side) / 2)
+                    c.drawBitmap(b, src, RectF(PM + i * (s + g), y0, PM + i * (s + g) + s, y0 + s), Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG))
+                }
+            }
+            pg.y += s + 12f
+        }
+    }
+    // stories: collected, drafts ready, approved (tiles like the numbers at the top)
+    pg.heading(f, t("Stories", "Hadithi"), 50f)
+    run {
+        val row = storyKpis(r); val labs = row.map { wrap(it.label, lp, tw - 18f, 2) }
+        val h = 10f + 19f + 4f + labs.maxOf { it.size } * 9.6f + 7f
+        if (!pg.fits(h)) pg.next()
+        val y0 = pg.y
+        pg.op { c ->
+            row.forEachIndexed { i, k ->
+                val x = PM + i * (tw + gap)
+                c.drawRoundRect(RectF(x, y0, x + tw, y0 + h), 8f, 8f, Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFF0E9FB.toInt() })
+                c.drawText(k.value, x + 9f, y0 + 10f + 16f, vp)
+                labs[i].forEachIndexed { j, s -> c.drawText(s, x + 9f, y0 + 10f + 19f + 4f + 6.5f + j * 9.6f, lp) }
+            }
+        }
+        pg.y += h + gap
+    }
     pg.y += 10f; none(reportNote())
     // now draw: letterhead on page 1, footer and page numbers on every page
     pg.list.forEachIndexed { i, ops ->
@@ -394,7 +451,22 @@ fun ReportScreen(m: AppModel, back: () -> Unit) {
     LaunchedEffect(Unit) { if (!m.loadActivity()) err = t("No signal: the report needs a connection the first time.", "Hakuna mtandao: ripoti inahitaji mtandao mara ya kwanza.") }
     val months = (0 until 13).map { YearMonth.now().minusMonths(it.toLong()) }
     val home = snap.me.home.ifBlank { m.prefs.country }
-    val rep = remember(snap, act, ym, ck, org.rafikioutreach.pin.Lang.sw) { buildReport(snap, act.orEmpty(), ym, ck, m.prefs.name) }
+    val rep0 = remember(snap, act, ym, ck, org.rafikioutreach.pin.Lang.sw) { buildReport(snap, act.orEmpty(), ym, ck, m.prefs.name) }
+    // the month's construction photos: from each building project's stage record (up to 6 projects, 6 photos)
+    var photos by remember { mutableStateOf<List<android.graphics.Bitmap>>(emptyList()) }
+    LaunchedEffect(rep0.stages.map { it.id }, ym) {
+        val zone = java.time.ZoneId.systemDefault()
+        val from = ym.atDay(1).atStartOfDay(zone).toInstant(); val to = ym.plusMonths(1).atDay(1).atStartOfDay(zone).toInstant()
+        val out = mutableListOf<android.graphics.Bitmap>()
+        for (id in rep0.stages.map { it.id }.distinct().take(6)) {
+            val rec = StageRecord.from(m.api.last(id).json.optJSONObject("stage")) ?: continue
+            rec.hist.filter { h -> runCatching { Instant.parse(h.at) }.getOrNull()?.let { !it.isBefore(from) && it.isBefore(to) } == true }.flatMap { it.photos }.forEach { a ->
+                if (out.size < 6) StagePics.load(m.api, m.api.stagePhotoPath(id, a, 480))?.let { out += it }
+            }
+        }
+        photos = out
+    }
+    val rep = rep0.copy(buildPhotos = photos)
     val save = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/pdf")) { uri ->
         if (uri != null) runCatching {
             val f = reportPdf(ctx, rep, home)
@@ -457,6 +529,23 @@ private fun ReportPaper(r: ReportData, home: String) {
         if (r.repairs.isEmpty()) Text(t("None. 🎉", "Hakuna. 🎉"), style = MaterialTheme.typography.bodyMedium, color = PMuted) else PaperTable(repairTable(r))
         PaperHeading(t("Visits this month", "Ziara za mwezi huu"))
         if (r.visits.isEmpty()) Text(t("No visits recorded in the app this month.", "Hakuna ziara zilizorekodiwa kwenye programu mwezi huu."), style = MaterialTheme.typography.bodyMedium, color = PMuted) else PaperTable(visitTable(r))
+        // construction and stories this month (feat-mea), as on the web report
+        if (r.stages.isNotEmpty()) {
+            PaperHeading(t("Construction", "Ujenzi")); Box(Modifier.testTag("rep_build")) { PaperTable(stageTable(r)) }
+            if (r.buildPhotos.isNotEmpty()) Row(Modifier.padding(top = 8.dp).horizontalScroll(rememberScrollState()).testTag("rep_build_photos"), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                r.buildPhotos.take(6).forEach { b -> Image(b.asImageBitmap(), null, Modifier.size(72.dp).clip(RoundedCornerShape(10.dp)), contentScale = ContentScale.Crop) }
+            }
+        }
+        PaperHeading(t("Stories", "Hadithi"))
+        // one per line on a phone, so no word is split
+        Column(Modifier.testTag("rep_stories")) {
+            storyKpis(r).forEachIndexed { i, k ->
+                Row(Modifier.padding(top = if (i == 0) 0.dp else 8.dp).fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(Color(0xFFF0E9FB)).padding(horizontal = 12.dp, vertical = 8.dp).testTag("rep_story_$i"), verticalAlignment = Alignment.CenterVertically) {
+                    Text(k.value, style = MaterialTheme.typography.titleLarge.copy(fontSize = 21.sp, lineHeight = 24.sp), color = PInk, modifier = Modifier.width(44.dp))
+                    Text(k.label, style = body.copy(fontSize = 12.5.sp, lineHeight = 16.sp, fontWeight = FontWeight.SemiBold), color = Color(0xFF3A3F44))
+                }
+            }
+        }
         Text(reportNote(), style = body.copy(fontSize = 11.5.sp), color = PMuted, modifier = Modifier.padding(top = 16.dp))
         // the letterhead foot: navy rule, the nonprofit line and the RAFIKI logo
         Row(Modifier.padding(top = 18.dp).fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {

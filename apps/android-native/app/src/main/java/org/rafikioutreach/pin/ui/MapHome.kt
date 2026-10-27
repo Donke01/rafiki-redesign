@@ -272,7 +272,7 @@ fun MapHome(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit, offlin
     val visible = pinned.filter { extras.keep(it) && mapStatusOk(snap, it, status) && (tyOn.isBlank() || tgroup(it) == tyOn) }
     // each pin's icon (the kind), a visit or water test due, and its short name: worked out once per list
     val looks = remember(snap) { pinned.associate { it.id to Triple(typeLook(it).first, mapStatusOk(snap, it, "due"), shortName(it.title)) } }
-    val pins = visible.map { p -> val l = looks[p.id]; HomePin(p.id, p.gps!!, conds[p.id] ?: PinCond.OLD, l?.first ?: "drop", l?.second == true, l?.third ?: "") }
+    val pins = visible.map { p -> val l = looks[p.id]; HomePin(p.id, p.gps!!, conds[p.id] ?: PinCond.OLD, l?.first ?: "drop", l?.second == true, l?.third ?: "", snap.building(p)) }
     val order = remember(anchor, visible) {
         val a = anchor?.let { id -> pinned.firstOrNull { it.id == id } }
         if (a == null) emptyList() else (visible.filter { it.id != a.id }.sortedBy { Geo.metres(a.gps!!, it.gps!!) }.take(24).let { listOf(a) + it })
@@ -310,7 +310,28 @@ fun MapHome(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit, offlin
     BackStep(MapClean.revealed) { MapClean.revealed = false }
     BackStep(quick != null) { quick = null }
 
-    val pickNow by rememberUpdatedState<(String) -> Unit> { pick(it, false) }
+    // exploring the map clears the screen (feat-mea, item 7): a pin or group tapped, a pinch, the zoom buttons, a
+    // double tap, a drag or "Where I am" put the revealed tiles away (the card still opens). The app's own camera
+    // moves (opening, starting over, the reset after time away) don't: only a move while or just after a touch counts.
+    fun calmDown() { if (MapClean.revealed) { MapClean.revealed = false; tray = false; keyOpen = false; nearOpen = false } }
+    val touch = remember { MapTouch() }
+    DisposableEffect(mv) {
+        val v = mv
+        val l = v?.let { mvv -> object : MapListener {
+            fun moved() {
+                if (!MapClean.revealed || !touch.recent()) return
+                val c = touch.center ?: return
+                val p0 = mvv.projection.toPixels(c, null); val p1 = mvv.projection.toPixels(mvv.mapCenter, null)
+                val far = kotlin.math.hypot((p1.x - p0.x).toDouble(), (p1.y - p0.y).toDouble()) > 10 * dens.density
+                if (far || kotlin.math.abs(mvv.zoomLevelDouble - touch.zoom) > 0.01) calmDown()
+            }
+            override fun onScroll(e: org.osmdroid.events.ScrollEvent?): Boolean { moved(); return false }
+            override fun onZoom(e: org.osmdroid.events.ZoomEvent?): Boolean { moved(); return false }
+        } }
+        l?.let { v.addMapListener(it) }
+        onDispose { l?.let { v.removeMapListener(it) } }
+    }
+    val pickNow by rememberUpdatedState<(String) -> Unit> { calmDown(); pick(it, false) }
     val layerRef = remember { mutableStateOf<HomePins?>(null) }
     // a tap on empty map: put the quick actions or the card away, fold the open chip row, or else reveal the tiles (and hide them again)
     val onTapMap by rememberUpdatedState {
@@ -351,7 +372,7 @@ fun MapHome(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit, offlin
     val layer = remember(mv) { mv?.let { HomePins(it, dens.density) } }
     layerRef.value = layer
     DisposableEffect(layer) { onDispose { layer?.detach() } }
-    SideEffect { layer?.let { it.onPin = pickNow; it.onLongPin = onLongPin; it.animate = anim; it.scope = scope; it.set(pins, sel) } }
+    SideEffect { layer?.let { it.onExplore = { calmDown() }; it.onPin = pickNow; it.onLongPin = onLongPin; it.animate = anim; it.scope = scope; it.set(pins, sel) } }
     // the chosen pin comes clear of the card: above it and under the controls at the top
     LaunchedEffect(easeFor) {
         val (id, wait) = easeFor ?: return@LaunchedEffect
@@ -385,6 +406,21 @@ fun MapHome(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit, offlin
     val hintShown = hint && clean && panel == "none" && !typing && !extras.quiet && !extras.years && quick == null
     LaunchedEffect(hintShown) { if (hintShown) { prefs.edit().putBoolean("calm_hint", true).apply(); kotlinx.coroutines.delay(4500); hint = false } }
     // a new filter: the screen clears (pill, slim handle), then the map fits what the filter leaves, clear of what is over it
+    // Map tapped again while on it (feat-mea): start over in place: filters, card, sheets and search close, and the
+    // same map eases back to the default view (no new map, so no tiles reloading and no blink)
+    val again = Nav.mapAgain
+    val seenAgain = remember { intArrayOf(again) }
+    LaunchedEffect(again) {
+        if (seenAgain[0] == again) return@LaunchedEffect
+        seenAgain[0] = again
+        status = ""; ty = ""; sel = null; anchor = null; spot = null; measuring = false; quick = null; easeFor = null
+        rowOpen = false; nearOpen = false; keyOpen = false; tray = false; searchOpen = false; askSearch = false; typing = false; suggOpen = false
+        focus.clearFocus()
+        val v = mv ?: return@LaunchedEffect
+        val fit = (homeDots?.takeIf { it.isNotEmpty() } ?: dots).map { it.ll }
+        if (fit.size == 1) mapFly(v, fit[0], 12.0, anim)
+        else if (fit.size > 1) runCatching { v.zoomToBoundingBox(BoundingBox.fromGeoPointsSafe(fit.map { GeoPoint(it.lat, it.lng) }).increaseByScale(1.25f), anim) }
+    }
     val firstFit = remember { booleanArrayOf(true) }
     LaunchedEffect(status, tyOn, mv) {
         val v = mv ?: return@LaunchedEffect
@@ -404,7 +440,14 @@ fun MapHome(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit, offlin
     val maxFull = (with(dens) { (boxH - maxOf(leftPx, sidePx)).toDp() } - 12.dp - creditDp - cardsDp - 12.dp).coerceAtLeast(120.dp)
     room.top = maxOf(leftPx, sidePx)
     Box(Modifier.fillMaxSize().onSizeChanged { boxH = it.height; room.h = it.height; room.w = it.width; compact = with(dens) { it.height.toDp() } < 600.dp }.onGloballyPositioned { room.rootY = it.positionInRoot().y.roundToInt() }.testTag("map_home")) {
-        ProjectsMap(dots, here, { pick(it, false) }, Modifier.fillMaxSize(), fitKey = snap.projects.size, badgeBottom = bottomDp + 12.dp, drawDots = false, onMap = { mv = it }, extras = extras, styleSheet = styleSheet, fitDots = homeDots)
+        ProjectsMap(dots, here, { calmDown(); pick(it, false) }, Modifier.fillMaxSize().pointerInput(mv) {
+            // every touch on the map itself (not on what's over it) notes where the camera was when it began
+            awaitPointerEventScope { while (true) {
+                val e = awaitPointerEvent(androidx.compose.ui.input.pointer.PointerEventPass.Initial)
+                if (e.type == androidx.compose.ui.input.pointer.PointerEventType.Press && e.changes.count { it.pressed } == 1) mv?.let { touch.begin(GeoPoint(it.mapCenter.latitude, it.mapCenter.longitude), it.zoomLevelDouble) }
+                touch.at = System.nanoTime()
+            } }
+        }, fitKey = snap.projects.size, badgeBottom = bottomDp + 12.dp, drawDots = false, onMap = { mv = it }, extras = extras, styleSheet = styleSheet, fitDots = homeDots)
         // 1. the bottom panel: the card, the long-pressed spot, or Nearest to you (under everything else)
         AnimatedContent(panel, Modifier.align(Alignment.BottomCenter).padding(12.dp).onSizeChanged { bottomH = it.height }.onGloballyPositioned { room.panelTop = it.boundsInParent().top.roundToInt() },
             contentAlignment = Alignment.BottomCenter, label = "mapcard",
@@ -464,7 +507,7 @@ fun MapHome(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit, offlin
             if (!typing && !online && !cmOn && !extras.years) NoSignalNote(offlineAreas.isNotEmpty(), Modifier.padding(top = 8.dp), offline)
         }
         // 4. the column on the right: Map style, where I am, More; the compass and Follow me while they are on
-        MapSide(m, mv, here, anim, { ll -> layer?.pulseYou(ll) }, tray, { tray = it; if (it) { keyOpen = false; nearOpen = false; quick = null } }, { styleSheet.value = true },
+        MapSide(m, mv, here, anim, { ll -> calmDown(); layer?.pulseYou(ll) }, tray, { tray = it; if (it) { keyOpen = false; nearOpen = false; quick = null } }, { styleSheet.value = true },
             Modifier.align(Alignment.TopEnd).padding(top = 12.dp, end = 10.dp).onGloballyPositioned { val b = it.boundsInParent(); sidePx = b.bottom.roundToInt(); room.sideLeft = b.left.roundToInt() })
         // 5. the search (its suggestions over everything); calm, just its round button, which opens the box ready to type
         if (clean && !searchOpen) Box(
@@ -481,7 +524,7 @@ fun MapHome(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit, offlin
         if (tray || keyOpen || quick != null) Box(Modifier.matchParentSize().pointerInput(Unit) { awaitPointerEventScope { awaitPointerEvent(); tray = false; keyOpen = false; quick = null } }.testTag("map_tap_away"))
         MapTray(m, here, anim, tray, Modifier.align(Alignment.TopEnd).padding(top = with(dens) { maxOf(sidePx, leftPx).toDp() } + 8.dp, end = 10.dp), { tray = false }) { offlineSheet.value = true }
         MapKeyPop(keyOpen && keyShown, anim, Modifier.align(Alignment.BottomStart).padding(start = 12.dp, bottom = keyBottom + 50.dp),
-            stops = HomeLayers.route && snap.assigned.any { it.date == java.time.LocalDate.now().toString() }, team = HomeLayers.team && snap.admin)
+            stops = HomeLayers.route && snap.assigned.any { it.date == java.time.LocalDate.now().toString() }, team = HomeLayers.team && snap.admin, build = pinned.any { snap.building(it) })
         // a long-pressed pin's quick actions, by the pin
         val qp = quick?.let { q -> pinned.firstOrNull { it.id == q.first }?.let { it to q } }
         PinQuick(qp?.first, qp?.second?.second ?: 0f, qp?.second?.third ?: 0f, room, anim, dens.density, { quick = null }, visit, open)
@@ -491,6 +534,14 @@ fun MapHome(m: AppModel, open: (String) -> Unit, visit: (String) -> Unit, offlin
 /** Calm by default (map3): the map with its pins, a round search button, the column on the right and the credit. A tap on
  *  empty map reveals the chips, the pinned bar, Nearest to you and the Key ([revealed]); another tap, back or starting the
  *  map over (Nav.kt) tucks them away again. Kept while the app is open (this session), not saved. */
+/** When the person last touched the map and where the camera was then (feat-mea): their moves, not the app's. */
+internal class MapTouch {
+    var at = 0L; var center: GeoPoint? = null; var zoom = 0.0
+    fun begin(c: GeoPoint, z: Double) { center = c; zoom = z; at = System.nanoTime() }
+    /** A finger is on the map, or was in the last moment (a fling, a double tap's zoom, a zoom button's animation). */
+    fun recent() = center != null && System.nanoTime() - at < 1_500_000_000L
+}
+
 object MapClean {
     var revealed by mutableStateOf(false)
     /** Calm: the tiles are tucked away. */
@@ -665,7 +716,7 @@ private fun MapKeyButton(open: Boolean, modifier: Modifier, toggle: () -> Unit) 
 
 /** The colours of the pins, over the map above the Key button; closes on a tap anywhere else or by itself. */
 @Composable
-private fun MapKeyPop(show: Boolean, anim: Boolean, modifier: Modifier, stops: Boolean = false, team: Boolean = false) {
+private fun MapKeyPop(show: Boolean, anim: Boolean, modifier: Modifier, stops: Boolean = false, team: Boolean = false, build: Boolean = false) {
     androidx.compose.animation.AnimatedVisibility(show, modifier,
         enter = if (anim) fadeIn(tween(150)) + androidx.compose.animation.scaleIn(tween(180), initialScale = 0.94f, transformOrigin = androidx.compose.ui.graphics.TransformOrigin(0f, 1f)) else EnterTransition.None,
         exit = if (anim) fadeOut(tween(120)) else ExitTransition.None) {
@@ -685,6 +736,8 @@ private fun MapKeyPop(show: Boolean, anim: Boolean, modifier: Modifier, stops: B
             KeyRow(t("Visit or water test due", "Ziara au kipimo cha maji kinasubiri"), "key_due") {
                 Box(Modifier.size(9.dp).clip(CircleShape).background(Color.White).padding(1.5.dp).clip(CircleShape).background(Color(PinArt.DUE_ARGB)))
             }
+            // being built (feat-mea, construction)
+            if (build) KeyRow(t("Being built", "Inajengwa"), "key_build") { BuildBadge(15.dp) }
             KeyRow(t("A group: tap to zoom in", "Kundi: gusa ili kukuza"), "key_cluster") {
                 Box(Modifier.size(16.dp).shadow(1.dp, CircleShape).clip(CircleShape).background(Color.White).padding(1.dp)
                     .drawBehind { val w = 2.6.dp.toPx(); val st = androidx.compose.ui.graphics.drawscope.Stroke(w)
