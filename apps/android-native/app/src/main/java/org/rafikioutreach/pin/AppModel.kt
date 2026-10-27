@@ -96,10 +96,21 @@ class AppModel(app: Application) : AndroidViewModel(app) {
     val updateReady: Boolean get() = (_update.value?.code ?: 0) > BuildConfig.VERSION_CODE
     /** Asks the website. Returns false when it couldn't (no signal). */
     suspend fun checkUpdate(): Boolean {
+        if (BuildConfig.PLAY) return checkPlayUpdate()
         val r = api.appVersion()
         if (!r.ok || r.json.optInt("versionCode") <= 0) return false
         val u = Update(r.json.optInt("versionCode"), r.json.optString("versionName"), r.json.optString("notes"), System.currentTimeMillis(), r.json.optString("sha256"))
         prefs.updCode = u.code; prefs.updName = u.name; prefs.updNotes = u.notes; prefs.updAt = u.at; prefs.updSha = u.sha256
+        _update.value = u; return true
+    }
+    /** Google Play build: Play says whether there is a newer version; the website's version.json only gives its
+     *  name and notes, when it is about that same version. */
+    private suspend fun checkPlayUpdate(): Boolean {
+        val code = org.rafikioutreach.pin.data.Distro.availableCode(getApplication()) ?: return false
+        val r = if (code > BuildConfig.VERSION_CODE) runCatching { api.appVersion() }.getOrNull() else null
+        val same = r != null && r.ok && r.json.optInt("versionCode") == code
+        val u = Update(code, if (same) r!!.json.optString("versionName") else "", if (same) r!!.json.optString("notes") else "", System.currentTimeMillis())
+        prefs.updCode = u.code; prefs.updName = u.name; prefs.updNotes = u.notes; prefs.updAt = u.at; prefs.updSha = ""
         _update.value = u; return true
     }
     /** Once a day, quietly, when the app opens. */

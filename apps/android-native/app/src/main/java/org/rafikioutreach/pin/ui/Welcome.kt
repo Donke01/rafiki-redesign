@@ -59,7 +59,7 @@ private fun OnbFrame(back: (() -> Unit)?, content: @Composable ColumnScope.() ->
             drawCircle(Brush.radialGradient(listOf(Color(0x406EC3FF), Color.Transparent), Offset(size.width * .2f, size.height * .1f), size.width * .7f), size.width * .7f, Offset(size.width * .2f, size.height * .1f))
             drawCircle(Brush.radialGradient(listOf(Color(0x3878E8D2), Color.Transparent), Offset(size.width * .9f, size.height * .85f), size.width * .65f), size.width * .65f, Offset(size.width * .9f, size.height * .85f))
         }
-        Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().padding(horizontal = 22.dp, vertical = 10.dp)) {
+        Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().displayCutoutPadding().padding(horizontal = 22.dp, vertical = 10.dp)) {
             Box(Modifier.fillMaxWidth().height(44.dp)) {
                 if (back != null) Box(Modifier.size(44.dp).clip(CircleShape).clickable(role = Role.Button, onClick = back).testTag("onb_back"), contentAlignment = Alignment.Center) {
                     Icon(Ic.get("back"), t("Back", "Rudi"), tint = if (dark) Color.White else Ink, modifier = Modifier.size(22.dp))

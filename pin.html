@@ -7123,7 +7123,8 @@ html[data-theme=sun] #vMap :is(.mcl-sb,.mpa-key){border:2px solid #000;box-shado
     } else if (k === 'problem') {
       location.href = 'mailto:info@rafikioutreach.org?subject=' + encodeURIComponent('RAFIKI Pin problem') + '&body=' + encodeURIComponent('\n\nWhat happened:\n\n\n---\n' + (S.name || '') + ' · web app ' + APPV + ' · ' + navigator.userAgent);
     } else if (k === 'privacy' || k === 'terms') {
-      window.open(k === 'privacy' ? '/privacy-policy' : '/terms-of-use', '_blank', 'noopener');
+      // the app's own privacy policy (pin-privacy.html, open without signing in)
+      window.open(k === 'privacy' ? '/pin-privacy' : '/terms-of-use', '_blank', 'noopener');
     } else if (k === 'about') {
       panel(tr('About RAFIKI Pin', 'Kuhusu RAFIKI Pin'), '<div class="about">' + LOGO + '<p><b>RAFIKI Pin</b> · ' + tr('version ', 'toleo ') + esc(APPV) + '</p><p class="muted">' + tr('The field app for RAFIKI Outreach: pin projects, report visits and repairs, and keep monday.com up to date, even with no signal.', 'Programu ya uwanjani ya RAFIKI Outreach: weka mahali pa miradi, ripoti ziara na matengenezo, na usasishe monday.com, hata bila mtandao.') + '</p><a class="lnk" href="https://www.rafikioutreach.org" target="_blank" rel="noopener">rafikioutreach.org</a></div>');
     } else if (k === 'signout') {

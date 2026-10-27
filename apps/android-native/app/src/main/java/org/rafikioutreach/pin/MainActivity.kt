@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.displayCutoutPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -143,7 +144,9 @@ fun App(m: AppModel) {
     var onbSeen by remember { androidx.compose.runtime.mutableStateOf(m.prefs.onb) }
     Box(Modifier.fillMaxSize()) {
         org.rafikioutreach.pin.ui.AppBackground(Modifier.matchParentSize())
-        Box(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().imePadding()) {
+        // edge to edge (always on from Android 15, no opt-out from 16): nothing under the status bar, the navigation
+        // bar, a camera cutout (phones turned sideways) or the keyboard
+        Box(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().displayCutoutPadding().imePadding()) {
             val bioLocked by m.bioLocked.collectAsState()
             when {
                 // donor mode: a donor-only app, never the staff screens (feat-donorapp)

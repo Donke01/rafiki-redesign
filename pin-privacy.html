@@ -1,0 +1,154 @@
+<!doctype html>
+<!--
+  DRAFT for the owner to review before it is linked from Google Play.
+  Written from what the app and the server code do today (apps/android-native, pin.html, functions/, lib/).
+  It is not legal advice. Comments marked "OWNER:" are points to check or decide.
+  Served at https://pin.rafikioutreach.org/pin-privacy (also /pin-privacy on www); no sign-in needed:
+  functions/_middleware.js lets /pin-… paths through on the app's address.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="format-detection" content="telephone=no">
+<title>RAFIKI Pin privacy policy</title>
+<meta name="description" content="How the RAFIKI Pin app (Android and web, including donor mode) collects, uses, stores and deletes information.">
+<link rel="canonical" href="https://pin.rafikioutreach.org/pin-privacy">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#04263F">
+<style>
+  :root { --bg:#f6f9fc; --card:#ffffff; --ink:#0d2236; --text:#2c3e50; --muted:#5b6b7a; --line:#dde5ec; --blue:#0a78c2; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#0f1820; --card:#16222d; --ink:#eef4f9; --text:#d4dee7; --muted:#9db0c1; --line:#263646; --blue:#5cb8f2; } }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; overflow-wrap:normal; word-break:normal; hyphens:none; }
+  main { max-width:760px; margin:0 auto; padding:24px 16px 56px; }
+  header { padding:8px 0 4px; }
+  .kicker { font-size:13px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:0; }
+  h1 { color:var(--ink); font-size:30px; line-height:1.2; margin:6px 0 8px; }
+  h2 { color:var(--ink); font-size:20px; line-height:1.3; margin:32px 0 8px; }
+  h3 { color:var(--ink); font-size:16px; margin:20px 0 4px; }
+  p, li { margin:6px 0; }
+  ul { padding-left:20px; }
+  a { color:var(--blue); }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px 18px; margin:16px 0; }
+  .muted { color:var(--muted); font-size:14px; }
+  table { width:100%; border-collapse:collapse; font-size:15px; }
+  th, td { text-align:left; vertical-align:top; padding:8px 6px; border-bottom:1px solid var(--line); }
+  th { color:var(--ink); }
+  .nw { white-space:nowrap; }
+</style>
+</head>
+<body>
+<main>
+<header>
+  <p class="kicker">RAFIKI Outreach</p>
+  <h1>RAFIKI Pin privacy policy</h1>
+  <p class="muted">Last updated: <span class="nw">27 Oct 2026</span>. <!-- OWNER: set the date you publish it. --></p>
+</header>
+
+<div class="card">
+  <p><strong>In short.</strong> RAFIKI Pin is the field app of RAFIKI Outreach, a charity that builds and looks after wells, schools and health projects in East Africa. Our staff and volunteers use it to record site visits, and invited donors use it to follow the projects they funded. We collect what the work needs: who you are on the team, where a project is, the reports, photos and voice notes you add, and, only if you switch it on, where you are during work hours. We do not sell data, show ads, or use analytics or advertising trackers in the app.</p>
+</div>
+
+<h2>Who this covers</h2>
+<p>This policy covers the RAFIKI Pin app for Android (from Google Play or from our website), the web version at <span class="nw">pin.rafikioutreach.org</span>, and donor mode in both. Our public website has its own <a href="https://www.rafikioutreach.org/privacy-policy">privacy policy</a>.</p>
+<p>RAFIKI Outreach is responsible for the information described here. You can reach us at <a href="mailto:info@rafikioutreach.org">info@rafikioutreach.org</a>. <!-- OWNER: confirm the organisation's legal name and postal address, and add them here if you want them shown. --></p>
+
+<h2>Who can use the app</h2>
+<p>The app is a work tool for adult RAFIKI Outreach staff and volunteers (18 or over), who are given access by the office, and for donors the office invites. It is not meant for children and we do not knowingly collect information from anyone under 18. There is no public sign-up.</p>
+
+<h2>What we collect, and why</h2>
+
+<h3>Your account</h3>
+<ul>
+  <li><strong>Name, and how you sign in.</strong> You sign in with a PIN the office gives you or with your monday.com account. We keep your name, your home country, whether you are an office admin, and when you last used the app. PINs are stored on our server only as a scrambled (hashed) value. If you use monday.com, your monday.com sign-in token is kept on our server, encrypted, so the changes you make show your name in monday.com; your phone keeps only a session cookie, which expires after 180 days.</li>
+  <li><strong>Contact details the office adds.</strong> The office may add your phone number, e-mail address and role to the team list, so teammates can call or message you from the app. Team members can see the team list. You can ask the office to change or remove them.</li>
+</ul>
+
+<h3>Location</h3>
+<ul>
+  <li><strong>While you use the app</strong>, with your permission, the app uses your phone's location to show where you are on the map, to sort projects by distance, and to check you in at a site.</li>
+  <li><strong>When you pin a project, report a visit, add a new site or a road report</strong>, the location you pin (latitude, longitude and how accurate it was) is sent with it. Project locations are part of our project records.</li>
+  <li><strong>Share my location with the office</strong> is off unless you switch it on (Me › Settings › Security and alerts). When it is on, during the work hours you choose, the app sends your position at most every 10 minutes. Only the latest point is kept, for 12 hours, and only office admins can see it. Switching it off deletes it at once. The app never asks for background location permission.</li>
+</ul>
+
+<h3>Photos, voice notes and receipts</h3>
+<ul>
+  <li><strong>Photos</strong> you take or choose for a visit or a project are sent to our server and attached to the project's notes in monday.com. The app makes them smaller first, which also removes the camera's hidden details (such as the photo's GPS tag). <!-- OWNER: true for Android; the web app does the same unless the browser can't shrink the photo, when it sends the original. --> Photos are not published on our website by themselves; the office chooses any that are shown publicly or to a project's donors.</li>
+  <li><strong>Voice notes</strong> (up to 2 minutes, with your permission to use the microphone) are attached to the visit note in the same way. To make them searchable, the audio may be sent to a speech-to-text service that types it out; the text is added to the same note.</li>
+  <li><strong>Receipt photos</strong> for trip costs are kept with the trip for about 400 days.</li>
+</ul>
+
+<h3>Your work in the app</h3>
+<ul>
+  <li><strong>Visit reports, notes, repairs, readings, new sites, trip plans and costs.</strong> These are the records of our projects. Each one carries your name and the time.</li>
+  <li><strong>Activity.</strong> We keep a log of what the team did in the app in the last 30 days, so the team's notifications work.</li>
+  <li><strong>Settings</strong> such as language, appearance and offline map areas stay on your phone.</li>
+</ul>
+
+<h3>Donor mode</h3>
+<ul>
+  <li>Donors sign in with a private link or a donor code from the office. The office keeps the donor's name, e-mail address, organisation and the projects they supported. The link and code are stored on our server only as hashed values.</li>
+  <li>The app shows those projects' updates, approved photos and thank-you messages. Messages a donor sends to us from the app open in their own e-mail or WhatsApp app.</li>
+</ul>
+
+<h3>What we do not collect</h3>
+<ul>
+  <li>No analytics, advertising or tracking tools, and no crash-reporting service, in the app.</li>
+  <li>No contacts, calendar, SMS or call logs from your phone. The app reads QR stickers with Google's code scanner, which works on the phone without giving the app camera access.</li>
+  <li>When you report a problem with the app, it opens your e-mail app with the app version and phone model filled in. Nothing is sent unless you send that e-mail.</li>
+</ul>
+
+<h2>Where it is stored</h2>
+<ul>
+  <li><strong>Our server</strong> runs on Cloudflare (Cloudflare Pages, Workers KV and R2 storage). Team lists, repairs, the activity log, trip plans, receipts and donor records are kept there. <!-- OWNER: Cloudflare stores data in its global network; say so if your donors or staff need a statement on international transfers. --></li>
+  <li><strong>monday.com</strong> is where RAFIKI Outreach keeps its project records. Visit notes, photos and voice notes are attached to the project there.</li>
+  <li><strong>Your phone</strong> keeps a copy of the project list, your settings and work waiting to be sent, so the app works without a signal. Uninstalling the app removes it.</li>
+</ul>
+<p>Everything the app sends to our server, and from our server to these services, travels over encrypted connections (HTTPS).</p>
+
+<h2>Services we use</h2>
+<p>We use these services to run the app. They process data on our behalf or to answer the app's request. We do not sell or rent your information to anyone.</p>
+<table>
+  <tr><th>Service</th><th>What it receives</th></tr>
+  <tr><td>monday.com</td><td>Project notes, photos and voice notes, with the name of the person who added them. Sign in with monday.com.</td></tr>
+  <tr><td>Cloudflare</td><td>Hosts the app and our server; stores the data listed above.</td></tr>
+  <tr><td>OpenAI (or Google Cloud Speech-to-Text)</td><td>The audio of voice notes, to type them out, only while the office has this switched on. <!-- OWNER: confirm which provider is switched on in Cloudflare (OPENAI_API_KEY / GOOGLE_STT_KEY), or remove this row if neither is. --></td></tr>
+  <tr><td>Resend</td><td>E-mail addresses and the text of alerts and monthly donor updates we e-mail. <!-- OWNER: only if RESEND_API_KEY is set. --></td></tr>
+  <tr><td>OpenRouteService and Open-Meteo</td><td>The locations of planned visits (not who is going), to work out road routes and the weather.</td></tr>
+  <tr><td>Google Places, Photon and OpenStreetMap Nominatim</td><td>The text of a place search, to find a town or village.</td></tr>
+  <tr><td>Map tiles: OpenStreetMap, Esri and Google Maps</td><td>Your phone asks them for the map pictures of the area on screen, as any map app does; they see your internet address, not your name.</td></tr>
+  <tr><td>Google Maps and WhatsApp</td><td>Only when you tap Directions, a map link or a WhatsApp button: the place or message opens in that app, under its own privacy policy.</td></tr>
+  <tr><td>Google Play</td><td>The Google Play version checks Google Play for app updates.</td></tr>
+  <tr><td>Africa's Talking or Twilio</td><td>Text messages that water committees send to report a broken well (not from the app). <!-- OWNER: confirm which SMS provider is live. --></td></tr>
+</table>
+
+<h2>How long we keep it</h2>
+<ul>
+  <li>Project records in monday.com (visit notes, photos, voice notes and their typed text) are kept as part of the project's history for as long as RAFIKI Outreach looks after the project. <!-- OWNER: decide whether to set a limit, for example 7 years after a project closes. --></li>
+  <li>Shared live location: 12 hours, or until you switch sharing off.</li>
+  <li>The team activity log: 30 days. Undo information for a pinned location: 90 days.</li>
+  <li>Receipt photos and trip tracks: about 400 days.</li>
+  <li>Sign-in sessions: up to 180 days, or until you sign out.</li>
+  <li>Team list entries and donor records: until the office removes them.</li>
+</ul>
+
+<h2>Your choices and deleting your data</h2>
+<ul>
+  <li>You can switch off location, microphone and notifications at any time in your phone's settings. The app keeps working; features that need them will ask again.</li>
+  <li>You can switch off <em>Share my location with the office</em> at any time; your shared point is deleted at once.</li>
+  <li>Signing out removes your sign-in from the phone. Uninstalling the app removes everything it kept on the phone.</li>
+  <li>To see, correct or delete the information we hold about you, including your team account, contact details or donor record, e-mail <a href="mailto:info@rafikioutreach.org">info@rafikioutreach.org</a> from the address we know, or ask the office. We will answer within 30 days. We may keep records we need for our projects' history or by law, such as visit reports and costs; when you ask, we remove or replace your name and contact details on what we keep. <!-- OWNER: confirm the 30-day answer time and who handles these requests. --></li>
+</ul>
+
+<h2>Security</h2>
+<p>We use encrypted connections, hashed PINs and donor codes, encrypted monday.com tokens, rate limits on sign-in, and an optional fingerprint or PIN lock in the app. No system is perfectly secure; if you think your PIN or phone has been lost, tell the office so it can switch your access off.</p>
+
+<h2>Changes</h2>
+<p>If we change how the app uses information, we will update this page and the date at the top.</p>
+
+<h2>Contact</h2>
+<p>Questions about this policy or your information: <a href="mailto:info@rafikioutreach.org">info@rafikioutreach.org</a>.</p>
+</main>
+</body>
+</html>
