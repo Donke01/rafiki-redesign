@@ -64,7 +64,8 @@ class StoryTest {
         .put("type", "Borehole well").put("status", "Completed").put("pump", "manual").put("gps", JSONArray().put(0.40 + id.toInt() % 7 * 0.01).put(35.10))
     private fun snapshot(admin: Boolean) = JSONObject().put("ok", true).put("who", "Grace Achieng").put("admin", admin).put("reviewOpen", 0)
         .put("projects", JSONArray().put(proj("101", "Chepkongi Borehole")).put(proj("102", "Kapsaret Spring")).put(proj("103", "Turbo Well")))
-        .put("stories", JSONObject().put("101", JSONObject().put("st", status).put("n", 3)).put("102", JSONObject().put("st", "approved").put("n", 6)).put("103", JSONObject().put("st", "draft").put("n", 6)))
+        .put("stories", JSONObject().put("101", JSONObject().put("st", status).put("n", 3).put("at", Instant.now().toString())).put("102", JSONObject().put("st", "approved").put("n", 6).put("at", Instant.now().toString()))
+            .put("103", JSONObject().put("st", "draft").put("n", 6).put("at", Instant.now().toString())))
         .put("repairs", JSONObject()).put("visits", JSONObject()).put("jobs", JSONArray()).put("assigned", JSONArray()).put("confirmed", JSONObject())
 
     // the story on the fake server
@@ -111,6 +112,7 @@ class StoryTest {
                 }
                 u.contains("?id=") -> 200 to "{\"ok\":true,\"last\":null}"
                 u.contains("activity=1") -> 200 to "{\"ok\":true,\"activity\":[]}"
+                u.contains("view=review") -> 200 to JSONObject().put("ok", true).put("items", JSONArray().put(JSONObject().put("kind", "story-draft").put("id", "103").put("t", "Turbo Well").put("by", "Grace Achieng").put("at", Instant.now().toString()).put("status", "open"))).toString()
                 u.contains("team=1") || u.contains("view=") -> 200 to "{\"ok\":true,\"team\":[],\"items\":[]}"
                 u.contains("pin-auth/me") -> 200 to "{\"ok\":true,\"available\":false}"
                 u.contains("version.json") || u.contains("/api/chat") -> 0 to ""
@@ -230,6 +232,32 @@ class StoryTest {
         // a visit sent with "Add to this project's story" opens the Stories tab
         rule.onAllNodesWithText("Kapsaret Spring").onLast().performClick(); settle(1200)
         rule.runOnUiThread { StoryNav.open = "102" }; settle(); waitTag("story_status")
+    }
+
+    /** Office › Review lists "Draft ready" stories; each opens that project's Stories tab (feat-mea). */
+    @Test fun office_review_lists_draft_stories() {
+        val m = model(admin = true)
+        start(m)
+        tap("nav_office"); waitTag("o_review"); tap("o_review"); waitTag("rv_story_103")
+        rule.onNodeWithTag("rv_story_103").performScrollTo(); shot("story-review-en")
+        tap("rv_story_open_103"); waitTag("story_status")
+        rule.onNodeWithTag("tab_story").assertExists()
+    }
+
+    /** The monthly report counts stories collected, drafts ready and approved this month (feat-mea). */
+    @Test fun report_counts_stories() {
+        status = "collecting"
+        for ((sw, d) in listOf(false to false, true to true)) {
+            Lang.sw = sw
+            val r = org.rafikioutreach.pin.ui.buildReport(Snapshot.from(snapshot(false)), emptyList(), java.time.YearMonth.now(), "", "Grace")
+            assertEquals(3, r.storiesCollected); assertEquals(1, r.storiesDraft); assertEquals(1, r.storiesApproved)
+        }
+        Lang.sw = true; dark = true
+        val m = model(admin = false)
+        rule.setContent { RafikiTheme(dark = dark) { Box(Modifier.size(360.dp, 780.dp)) { org.rafikioutreach.pin.ui.ReportScreen(m) {} } } }
+        waitTag("rep_stories"); rule.onNodeWithTag("rep_stories").performScrollTo()
+        rule.onNodeWithText("rasimu iko tayari", substring = true).assertExists()
+        shot("story-report-sw-dark")
     }
 
     @Test fun donor_sees_the_approved_story() {

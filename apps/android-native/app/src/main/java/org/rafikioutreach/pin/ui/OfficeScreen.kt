@@ -848,3 +848,20 @@ internal fun mailResult(x: org.rafikioutreach.pin.data.Reply): String {
         else -> t("Not sent. Please try again in a moment.", "Haijatumwa. Tafadhali jaribu tena baadaye.")
     }
 }
+
+
+/** Office › Review: a story whose draft is ready to approve; it opens the project's Stories tab. */
+@Composable
+internal fun StoryDraftItem(it2: JSONObject, open: (String) -> Unit) {
+    val id = it2.optString("id")
+    Card(Modifier.padding(top = 10.dp).testTag("rv_story_$id")) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            IconTile("chat", C.hue("purple").fg, C.hue("purple").bg, 36.dp); Spacer(Modifier.width(10.dp))
+            Text(t("Story draft ready", "Rasimu ya hadithi iko tayari"), style = MaterialTheme.typography.titleSmall, color = C.ink, modifier = Modifier.weight(1f))
+            Text(whenText(it2.optString("at")), style = MaterialTheme.typography.bodySmall, color = C.muted)
+        }
+        Text(it2.optString("t").ifBlank { id }, style = MaterialTheme.typography.titleMedium, color = C.ink, modifier = Modifier.padding(top = 6.dp))
+        if (it2.optString("by").isNotBlank()) Text(t("Drafted by ", "Imeandikwa na ") + it2.optString("by"), style = MaterialTheme.typography.bodySmall, color = C.muted)
+        Btn(t("Open the Stories tab", "Fungua kichupo cha Hadithi"), { open(id) }, Modifier.padding(top = 10.dp).fillMaxWidth().testTag("rv_story_open_$id"), icon = "arrow", small = true)
+    }
+}

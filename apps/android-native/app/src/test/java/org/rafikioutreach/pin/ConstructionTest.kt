@@ -68,7 +68,7 @@ class ConstructionTest {
         .put("hist", JSONArray()
             .put(JSONObject().put("stage", "planned").put("at", ago(60)).put("by", "Reid Anderson").put("note", "Plans approved").put("photos", JSONArray().put("a1")))
             .put(JSONObject().put("stage", "foundation").put("at", ago(30)).put("by", "Meril Kiprop").put("note", "").put("photos", JSONArray().put("a2").put("a3")))
-            .apply { if (stage != "foundation") put(JSONObject().put("stage", "walls").put("at", ago(3)).put("by", "Meril Kiprop").put("note", "Up to the windows").put("photos", JSONArray().put("a4"))) })
+            .apply { if (stage != "foundation") put(JSONObject().put("stage", "walls").put("at", Instant.now().minusSeconds(60).toString()).put("by", "Meril Kiprop").put("note", "Up to the windows").put("photos", JSONArray().put("a4"))) })
 
     private val posts = mutableListOf<JSONObject>()
     private val uploads = mutableListOf<String>()
@@ -98,7 +98,8 @@ class ConstructionTest {
                 u.contains("?id=205") -> 200 to JSONObject().put("ok", true).put("last", JSONObject.NULL).put("stage", JSONObject.NULL)
                     .put("linked", JSONObject().put("parent", JSONObject.NULL).put("children", JSONArray().put(JSONObject().put("id", "301").put("t", "Dormitory construction").put("s", stage)))).toString()
                 u.contains("?id=") -> 200 to "{\"ok\":true,\"last\":null}"
-                u.contains("activity=1") -> 200 to "{\"ok\":true,\"activity\":[]}"
+                u.contains("activity=1") -> 200 to JSONObject().put("ok", true).put("activity", JSONArray()
+                    .put(JSONObject().put("a", "stage").put("s", "walls").put("id", "301").put("t", "Dormitory construction").put("by", "Meril Kiprop").put("at", Instant.now().minusSeconds(60).toString()))).toString()
                 u.contains("team=1") || u.contains("view=") -> 200 to "{\"ok\":true,\"team\":[],\"items\":[]}"
                 u.contains("pin-auth/me") -> 200 to "{\"ok\":true,\"available\":false}"
                 u.contains("version.json") || u.contains("/api/chat") -> 0 to ""
@@ -234,6 +235,30 @@ class ConstructionTest {
         shot("build-parent-also-here-en")
         tap("build_child_301"); waitTag("build_card")
     }
+
+    /** The monthly report (screen and PDF): the month's stage changes with their photos (feat-mea). */
+    private fun report(sw: Boolean, dark: Boolean) {
+        Lang.sw = sw
+        val m = model(admin = false)
+        rule.setContent { RafikiTheme(dark = dark) { Box(Modifier.size(360.dp, 780.dp)) { org.rafikioutreach.pin.ui.ReportScreen(m) {} } } }
+        rule.waitUntil(10000) { tagged("rep_build") }
+        rule.waitUntil(10000) { tagged("rep_build_photos") }
+        rule.onNodeWithText(if (sw) "Kuta" else "Walls").assertExists(); rule.onNodeWithText("Dormitory construction").assertExists()
+        rule.onNodeWithTag("rep_build").performScrollTo(); shot("build-report-${if (sw) "sw-dark" else "en-light"}")
+        // the PDF has the section too (it draws without failing, with the photos)
+        val act = m.activity.value.orEmpty()
+        val r = org.rafikioutreach.pin.ui.buildReport(m.snap.value!!, act, java.time.YearMonth.now(), "", "Meril Kiprop")
+        assertEquals(1, r.stages.size); assertEquals(if (sw) "Kuta" else "Walls", r.stages[0].stage)
+        // the PDF's own drawing code onto pages (Robolectric has no PDF back end): the section and its photos are on a page
+        val pages = mutableListOf<Bitmap>()
+        val photo = Bitmap.createBitmap(40, 30, Bitmap.Config.ARGB_8888).apply { eraseColor(0xFFD98200.toInt()) }
+        org.rafikioutreach.pin.ui.drawReportPages(app, r.copy(buildPhotos = listOf(photo)), "ke", { Bitmap.createBitmap(1190, 1684, Bitmap.Config.ARGB_8888).also { pages += it }.let { Canvas(it).apply { drawColor(-1); scale(2f, 2f) } } }, {})
+        assertTrue(pages.isNotEmpty())
+        assertTrue("the photo is drawn", pages.any { b -> (0 until b.height step 6).any { y -> (0 until b.width step 6).any { x -> b.getPixel(x, y) == 0xFFD98200.toInt() } } })
+        File(out, "build-report-pdf-p${pages.size}-${if (sw) "sw" else "en"}.png").outputStream().use { pages.last().compress(Bitmap.CompressFormat.PNG, 100, it) }
+    }
+    @Test fun report_construction_en_light() = report(false, false)
+    @Test fun report_construction_sw_dark() = report(true, true)
 
     @Test fun donor_sees_a_read_only_tracker() {
         for ((sw, dark) in listOf(false to false, true to true)) {
