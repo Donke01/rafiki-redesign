@@ -51,3 +51,20 @@ test('a paste that is not a token is not counted; ten wrong tokens wait 15 minut
   // Grace, on the same office network, is not affected
   assert.equal((await (await post(env, '4444', { action: 'monday-link', token: TOKEN })).json()).reason, 'token-bad');
 });
+
+test('a good token connects on today’s monday.com API, where photo_thumb_small no longer exists', async () => {
+  const { env } = setup();
+  const was = globalThis.fetch;
+  globalThis.fetch = async (u, o) => {
+    const q = JSON.parse(o.body).query;
+    const ok = data => new Response(JSON.stringify({ data }), { headers: { 'Content-Type': 'application/json' } });
+    if (/photo_thumb_small/.test(q)) return new Response(JSON.stringify({ errors: [{ message: 'Cannot query field "photo_thumb_small" on type "User".' }] }), { headers: { 'Content-Type': 'application/json' } });
+    if (/photo_url/.test(q)) return ok({ me: { photo_url: { thumb_small: 'https://files.monday.com/p.png' } } });
+    if (/country_code/.test(q)) return ok({ me: { country_code: 'KE' } });
+    return ok({ me: { id: '5', name: 'Meril Adoyo', account: { id: '1', slug: 'rafikicap-company' } }, boards: [{ id: '9412605754' }] });
+  };
+  try {
+    const j = await (await post(env, '3333', { action: 'monday-link', token: TOKEN })).json();
+    assert.deepEqual(j, { ok: true, name: 'Meril Adoyo', photo: 'https://files.monday.com/p.png' });
+  } finally { globalThis.fetch = was; }
+});
