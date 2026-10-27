@@ -183,11 +183,13 @@ fun DonorApp(m: AppModel) {
     val v = m.donor.view.collectAsState().value
     var tab by rememberSaveable { mutableStateOf("home") }
     var pid by rememberSaveable { mutableStateOf<String?>(null) }
+    // their group trip (feat-itina): on top of Home, like a project
+    var trip by rememberSaveable { mutableStateOf<Int?>(null) }
     val go = m.donor.goProject
     LaunchedEffect(go) { if (go != null) { pid = go; m.donor.goProject = null } }
     // fresh data on opening, and quietly every 5 minutes while open
     LaunchedEffect(Unit) { m.donor.refresh(); while (true) { kotlinx.coroutines.delay(5 * 60_000L); m.donor.refresh(bg = true) } }
-    BackHandler(pid != null || tab != "home") { if (pid != null) pid = null else tab = "home" }
+    BackHandler(pid != null || trip != null || tab != "home") { if (pid != null) pid = null else if (trip != null) trip = null else tab = "home" }
     val news = v?.updates?.count { m.donor.seen.isNotBlank() && it.at > m.donor.seen } ?: 0
     LaunchedEffect(tab) { if (tab == "updates") { kotlinx.coroutines.delay(1500); m.donor.markSeen() } }
     ProvideSpeaker {
@@ -198,19 +200,20 @@ fun DonorApp(m: AppModel) {
             else {
                 val p = pid?.let { v.project(it) }
                 // each screen keeps its own scroll, starting at the top
-                androidx.compose.runtime.key(p?.id ?: tab) {
+                androidx.compose.runtime.key(p?.id ?: trip?.let { "trip$it" } ?: tab) {
                     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).padding(top = 6.dp, bottom = 24.dp)) {
                         when {
                             p != null -> DonorProject(m, p) { pid = null }
+                            trip != null -> donorGroupTrips(m).getOrNull(trip!!)?.let { g -> GroupTripView(g) }
                             tab == "updates" -> DonorUpdates(m, v) { pid = it }
                             tab == "settings" -> DonorSettings(m, v)
-                            else -> DonorHome(m, v) { pid = it }
+                            else -> { DonorHome(m, v) { pid = it }; DonorTripCards(m) { trip = it } }
                         }
                     }
                 }
             }
         }
-        DonorTabs(if (pid != null) "" else tab, news) { tab = it; pid = null }
+        DonorTabs(if (pid != null || trip != null) "" else tab, news) { tab = it; pid = null; trip = null }
     }
     }
 }
