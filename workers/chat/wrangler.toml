@@ -6,6 +6,8 @@ main = "src/index.js"
 compatibility_date = "2026-08-01"
 workers_dev = false
 preview_urls = false
+# keep the variables set in the dashboard (FCM_PROJECT_ID) when the GitHub Action deploys
+keep_vars = true
 
 # Directory: one instance; membership, chat lists, unread counts, presence and every open WebSocket.
 # Conversation: one instance per chat; the messages, reactions and receipts of that chat.
@@ -32,3 +34,7 @@ enabled = true
 
 # Optional: a secret CHAT_SECRET (set it on this worker AND on the Pages project) makes the worker
 # refuse any request that doesn't carry it. It isn't needed while the worker has no public address.
+
+# Optional push notifications (FCM HTTP v1). Set both in Cloudflare › Workers › rafiki-chat › Settings ›
+# Variables and Secrets: FCM_PROJECT_ID (plain text, e.g. rafiki-pin) and FCM_SERVICE_ACCOUNT (secret: the
+# service account key JSON). With either missing, no push is sent and chat works as before.

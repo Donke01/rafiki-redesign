@@ -91,7 +91,8 @@ The client contract is in the chat brief, with the clarifications in `chat-contr
 - **Groups:** `POST group`, `group-update`, `members`, `link`, `join`, `leave`
 - **Messages:**
   - `GET msgs?c=&before=|after=&limit=`, `POST send`, `edit` (15 min), `delete`, `react`, `star`
-  - `GET starred`, `POST read`, `delivered`, `GET info`, `POST live`, `live-stop`, `prefs`
+  - `GET starred`, `POST read`, `delivered`, `GET info`, `POST live`, `live-stop`, `prefs`, `pin`
+- **Settings and push:** `GET/POST prefs` (no `c`), `POST device`
 - **Media:** `POST media`, `GET media/:id` (with Range, or signed `?e=&s=` links)
 - **Other:** `GET search?q=`, `GET preview?url=` (answered by Pages; project links become a project card), `POST ticket`, `GET ws?t=`
 
@@ -125,10 +126,39 @@ npm test           # vitest + @cloudflare/vitest-pool-workers: real Durable Obje
 
 The Pages side is tested with the rest of the site (`node --test tests/*.test.mjs`, file `tests/chat.test.mjs`).
 
-## Later: push notifications with Firebase (FCM)
+## Push notifications with Firebase (FCM)
 
-Not built yet. Android checks `list?since` in the background, and has the WebSocket while open. Push would need:
-1. A Firebase project, with the Android app (`org.rafikioutreach.pin`) registered and its `google-services.json` in the app.
-2. A service-account key, stored as a worker **secret** (`FCM_SERVICE_ACCOUNT`).
-3. A `POST /api/chat/push-token` endpoint, storing each phone's token in the Directory.
-4. The Directory sending a data message from `post()` to members who are offline and haven't muted the chat (FCM HTTP v1 API).
+Built (`src/fcm.js`), and OFF until both of these are set on the worker. With either missing nothing is sent and
+chat works as before (Android's 15-minute check plus the WebSocket).
+
+- `FCM_PROJECT_ID`: the Firebase project id, `rafiki-pin` (plain text variable)
+- `FCM_SERVICE_ACCOUNT`: the service account key JSON (a **secret**; paste the whole file as is)
+
+Owner steps:
+1. Firebase console (console.firebase.google.com) › project `rafiki-pin` › Add app › Android:
+   package `org.rafikioutreach.pin`, SHA-256 fingerprint
+   `36:D3:B6:78:00:D4:A2:FF:22:E6:38:7B:34:CB:64:B1:2F:2C:CF:EB:DA:53:06:72:31:F7:57:90:05:33:E8:A3`.
+   Download `google-services.json` and send it to Claude (it is not secret; it goes in `apps/android-native/app/`).
+2. Firebase › Project settings › Cloud Messaging: check "Firebase Cloud Messaging API (V1)" is Enabled.
+3. Firebase › Project settings › Service accounts › Generate new private key. A JSON file downloads. Keep it private.
+4. Cloudflare dashboard › Workers & Pages › **rafiki-chat** › Settings › Variables and Secrets › Add:
+   - Type **Text**, name `FCM_PROJECT_ID`, value `rafiki-pin`
+   - Type **Secret**, name `FCM_SERVICE_ACCOUNT`, value: the whole contents of the JSON file from step 3
+   Deploy. (`wrangler.toml` has `keep_vars = true`, so later deploys keep the text variable.)
+5. Delete the downloaded key file from your computer. `GET /api/chat/list` now answers `push: true`.
+
+How it works: phones register with `POST /api/chat/device {token, platform}` (and `{token, remove:true}` on sign-out).
+When a message arrives, the Directory sends an FCM HTTP v1 data message (high priority, `collapse_key` = chat id)
+to every member with no open WebSocket, except muted chats (unless @mentioned), Do-Not-Disturb hours (unless
+@mentioned and the person lets mentions through), tokens from before a "sign out of every phone", and group
+housekeeping system lines. The OAuth token is made with WebCrypto (RS256 JWT) and cached for its hour.
+Dead tokens (UNREGISTERED) are forgotten. Web Push (VAPID) is not built: TODO; the web keeps the Notification API
+while the tab is open.
+
+## Chat polish additions
+
+See `chatpolish-contract` (in the build notes) for the full shapes. In short: `POST pin {c, id, on}` (3 per chat),
+`GET/POST prefs` without `c` (quick replies, DND, double-tap emoji), `prefs {c, bubble}`, `POST device`, the
+Announcements chat `t:news` (everyone, admins post), list rows with `pins`, `seen`, `mentionId`, `bubble`,
+`country`, `announce`; WebSocket `{t:'seen'}` and `{t:'prefs'}`; `kind:'trip'` messages (the Pages proxy fills and
+refreshes the card from the itin code, `GET trip?id=`), and `media[].thumb` photo previews (`thumbUrl`).

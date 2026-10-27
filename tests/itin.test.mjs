@@ -386,7 +386,7 @@ test('share links: a private read-only page, live updates by ETag, rotate and tu
   assert.equal((await call(shareApi, env, '/api/trip-share?t=short')).status, 404);
   // the chat hook's card
   const card = await call(itinApi, env, '/api/itin/' + t.id + '?card=1', '3333');
-  assert.deepEqual(Object.keys(card.card), ['id', 'title', 'from', 'to', 'stops', 'people', 'url']);
+  assert.deepEqual(Object.keys(card.card), ['id', 'title', 'from', 'to', 'status', 'next', 'done', 'total', 'stops', 'people', 'url']);
 });
 test('monthly report: a "Trips" line when trips were finished', async () => {
   const env = makeEnv({ RESEND_API_KEY: 'k', ALERT_FROM: 'pin@example.org', ALERT_EMAILS: 'office@example.org' });

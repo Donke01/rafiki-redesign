@@ -164,7 +164,7 @@ Point keys (in `legs`, `matrix`, timeline `from`/`to`): `S` start, `E` end (same
 ### Endpoints
 - `GET /api/itin` → `{ ok, items: [<index rows>], admin }` — filters `?status=planned,active`, `?mine=1`, `?person=Grace` (admins), `?project=104` (project history), `?month=2026-10`.
 - `GET /api/itin?settings=1` → `{ ok, settings, admin }` · `?windows=1` → `{ ok, windows }` · `?alerts=1` (admins) → `{ ok, alerts: [{ at, id, title, kind: "replan|skip", by, en, sw }] }`.
-- `GET /api/itin/<id>` → `{ ok, itin, can: { edit, admin } }`; `?progress=1` adds `progress`; `?card=1` → `{ ok, card: { id, title, from, to, stops, people, url } }` (for `shareToChat(itineraryId)`: post `card.url`; `url` is null until shared).
+- `GET /api/itin/<id>` → `{ ok, itin, can: { edit, admin } }`; `?progress=1` adds `progress`; `?card=1` → `{ ok, card: { id, title, from, to, status, next: {name, date, at}|null, done, total, stops, people, url } }` (for `shareToChat(itineraryId)`: post `card.url`; `url` is null until shared).
 - `POST /api/itin/suggest` `{ ck, areas?: [..], from?: { lat, lng }, limit?: 30 }` → `{ ok, items: [{ id, name, area, ck, lat, lng, type, score, why: [{ code, en, sw }], windows, visitMin, km? }], total, areas, ck }`, ranked. `why.code`: `repair` / `urgent` ("open repair · urgent"), `notworking`, `overdue` ("due a visit · 8 months"), `never`, `test` ("water test due"), `community` ("community report 2 days ago"), `assigned` ("assigned to you").
 - `POST /api/itin/optimise` → `{ ok, plan }` (not saved). Body:
   ```json
