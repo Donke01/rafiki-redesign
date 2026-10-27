@@ -113,7 +113,8 @@ const val DONOR_APK = "https://pin.rafikioutreach.org/app/rafiki-pin.apk"
 const val DONOR_WEB_APP = "https://pin.rafikioutreach.org/pin"
 fun donorInviteText(name: String, code: String) =
     "Hello " + name.trim().split(Regex("\\s+")).firstOrNull().orEmpty() + ", you can now follow the projects you funded in the RAFIKI Pin app: photos, visits and thank-you messages from the communities.\n\n" +
-        "Android: download the app from $DONOR_APK, open it and tap “I’m a donor”.\n" +
+        (if (org.rafikioutreach.pin.BuildConfig.PLAY) "Android: get RAFIKI Pin on Google Play (${org.rafikioutreach.pin.data.Distro.APP_LINK}), open it and tap “I’m a donor”.\n"
+            else "Android: download the app from $DONOR_APK, open it and tap “I’m a donor”.\n") +
         "iPhone: open $DONOR_WEB_APP, tap “I’m a donor”, then Share › Add to Home Screen.\n\n" +
         "Your donor code: $code\nIt’s just for you, so please don’t share it."
 private fun shareInvite(ctx: android.content.Context, name: String, code: String) {

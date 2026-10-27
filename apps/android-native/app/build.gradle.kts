@@ -7,11 +7,11 @@ plugins {
 val keyProps = Properties().apply { rootProject.file("keystore.properties").takeIf { it.exists() }?.inputStream()?.use { load(it) } }
 android {
     namespace = "org.rafikioutreach.pin"
-    compileSdk = 35
+    compileSdk = 36
     defaultConfig {
         applicationId = "org.rafikioutreach.pin"
         minSdk = 24
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 48
         versionName = "2.23.0"
         buildConfigField("String", "SERVER", "\"https://rafiki-redesign.pages.dev\"")
@@ -23,6 +23,14 @@ android {
                 keyAlias = keyProps.getProperty("keyAlias"); keyPassword = keyProps.getProperty("keyPassword")
             }
         }
+    }
+    // Two ways to ship the same app (same applicationId, same signing key, so a phone can move from one to the other):
+    //  site: the APK on the website (/app/rafiki-pin.apk); updates itself from inside the app. assembleSiteRelease
+    //  play: Google Play; no self-update and no REQUEST_INSTALL_PACKAGES, Play's in-app updates instead. bundlePlayRelease
+    flavorDimensions += "store"
+    productFlavors {
+        create("site") { dimension = "store"; buildConfigField("boolean", "PLAY", "false") }
+        create("play") { dimension = "store"; buildConfigField("boolean", "PLAY", "true") }
     }
     buildTypes {
         release { isMinifyEnabled = true; isShrinkResources = true; proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"); signingConfig = signingConfigs.getByName("release") }
@@ -51,6 +59,8 @@ dependencies {
     // camera through Google Play services, so the app needs no camera permission and stays small
     implementation("com.google.zxing:core:3.5.3")
     implementation("com.google.android.gms:play-services-code-scanner:16.1.0")
+    // play flavor only: Google Play's in-app updates (flexible: downloads in the background, then a restart)
+    "playImplementation"("com.google.android.play:app-update-ktx:2.1.0")
     // Chat (feat-chata): a WebSocket for live messages, typing and presence; Media3 Transformer shrinks videos to 720p before upload
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("androidx.media3:media3-transformer:1.4.1")

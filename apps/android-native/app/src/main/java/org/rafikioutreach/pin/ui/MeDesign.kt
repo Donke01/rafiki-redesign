@@ -143,8 +143,16 @@ fun Toggle(on: Boolean, label: String, modifier: Modifier = Modifier, enabled: B
 }
 
 private fun openApk(ctx: android.content.Context) = runCatching {
-    ctx.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(org.rafikioutreach.pin.BuildConfig.SERVER + "/app/rafiki-pin.apk")))
+    // the Google Play build sends people to its Play listing, never to the website's APK
+    ctx.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(if (org.rafikioutreach.pin.BuildConfig.PLAY) org.rafikioutreach.pin.data.Distro.APP_LINK else org.rafikioutreach.pin.BuildConfig.SERVER + "/app/rafiki-pin.apk")))
 }
+
+/** " · 2.23.0", or nothing when the version's name isn't known (a Google Play update the website doesn't list yet). */
+internal fun verTail(name: String) = if (name.isBlank()) "" else " · $name"
+
+/** "Having trouble?" under a failed update: the website's APK, or (Google Play build) the app's page on Play. */
+private fun troubleText() = if (org.rafikioutreach.pin.BuildConfig.PLAY) t("Having trouble? Open RAFIKI Pin on Google Play", "Una tatizo? Fungua RAFIKI Pin kwenye Google Play")
+    else t("Having trouble? Download the app from the website", "Una tatizo? Pakua programu kutoka kwenye tovuti")
 
 /** "Checked just now", "Checked 5 min ago", "Checked yesterday"… */
 private fun checkedText(at: Long): String {
@@ -170,7 +178,8 @@ fun UpdateCard(m: AppModel) {
     val ctx = LocalContext.current
     val scope = rememberScope()
     val U = org.rafikioutreach.pin.data.Updater
-    fun start() { scope.launch { U.run(ctx.applicationContext, org.rafikioutreach.pin.BuildConfig.SERVER + "/app/rafiki-pin.apk", up.sha256) } }
+    // the website build downloads and installs the APK; the Google Play build starts Play's update (data/Distro.kt)
+    fun start() { scope.launch { org.rafikioutreach.pin.data.Distro.start(ctx as? android.app.Activity, ctx.applicationContext, org.rafikioutreach.pin.BuildConfig.SERVER + "/app/rafiki-pin.apk", up.sha256) } }
     // brought into view when "Check" finds an update or the pop-up's "Update now" is tapped
     val seen = remember { androidx.compose.foundation.relocation.BringIntoViewRequester() }
     var glow by remember { mutableStateOf(false) }
@@ -182,14 +191,14 @@ fun UpdateCard(m: AppModel) {
     // back from Android's "Install unknown apps" setting: carry on by itself
     val owner = androidx.compose.ui.platform.LocalLifecycleOwner.current
     DisposableEffect(owner) {
-        val o = androidx.lifecycle.LifecycleEventObserver { _, e -> if (e == androidx.lifecycle.Lifecycle.Event.ON_RESUME && U.state.value is org.rafikioutreach.pin.data.Updater.State.NeedsPermission && U.allowed(ctx)) U.install(ctx.applicationContext) }
+        val o = androidx.lifecycle.LifecycleEventObserver { _, e -> if (!org.rafikioutreach.pin.BuildConfig.PLAY && e == androidx.lifecycle.Lifecycle.Event.ON_RESUME && U.state.value is org.rafikioutreach.pin.data.Updater.State.NeedsPermission && U.allowed(ctx)) U.install(ctx.applicationContext) }
         owner.lifecycle.addObserver(o); onDispose { owner.lifecycle.removeObserver(o) }
     }
     Card(Modifier.padding(top = 14.dp).bringIntoViewRequester(seen).border(3.dp, ring, RoundedCornerShape(24.dp)).testTag("app_update"), border = C.blue) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             val hu = C.hue("pin"); IconTile("upload", hu.fg, hu.bg, 40.dp); Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
-                Text(t("Update available · ${up.name}", "Toleo jipya · ${up.name}"), style = MaterialTheme.typography.titleSmall, color = C.ink, modifier = Modifier.testTag("update_title"))
+                Text(t("Update available", "Toleo jipya") + verTail(up.name), style = MaterialTheme.typography.titleSmall, color = C.ink, modifier = Modifier.testTag("update_title"))
                 Text(up.notes.ifBlank { t("A newer RAFIKI Pin is ready.", "RAFIKI Pin mpya iko tayari.") } + t(" You have ${org.rafikioutreach.pin.BuildConfig.VERSION_NAME}.", " Unayo ${org.rafikioutreach.pin.BuildConfig.VERSION_NAME}."),
                     style = MaterialTheme.typography.bodySmall, color = C.muted)
             }
@@ -206,10 +215,17 @@ fun UpdateCard(m: AppModel) {
                 }
                 Text(t("Cancel", "Ghairi"), style = MaterialTheme.typography.labelLarge, color = C.blue, modifier = Modifier.padding(top = 8.dp).clip(RoundedCornerShape(8.dp)).clickable { U.cancel() }.padding(6.dp))
             }
-            org.rafikioutreach.pin.data.Updater.State.NeedsPermission -> {
+            // the website build only (Google Play installs its own updates; this state never comes up there)
+            org.rafikioutreach.pin.data.Updater.State.NeedsPermission -> if (!org.rafikioutreach.pin.BuildConfig.PLAY) {
                 Text(t("One more step: Android asks you to allow RAFIKI Pin to install updates. Turn on “Allow from this source”, then come back. The update carries on by itself.", "Hatua moja zaidi: Android inakuomba uruhusu RAFIKI Pin kusakinisha masasisho. Washa “Allow from this source”, kisha urudi. Sasisho litaendelea lenyewe."),
                     style = MaterialTheme.typography.bodySmall, color = C.text, modifier = Modifier.padding(top = 12.dp))
                 Btn(t("Allow updates", "Ruhusu masasisho"), { runCatching { ctx.startActivity(U.permissionIntent(ctx)) } }, Modifier.padding(top = 10.dp).fillMaxWidth().testTag("update_allow"), icon = "lock")
+            }
+            // Google Play build: downloaded by Play, one tap restarts into the new version
+            org.rafikioutreach.pin.data.Updater.State.Downloaded -> {
+                Text(t("Downloaded. Restart RAFIKI Pin to finish; it opens again by itself.", "Imepakuliwa. Fungua upya RAFIKI Pin kumaliza; itajifungua yenyewe."),
+                    style = MaterialTheme.typography.bodySmall, color = C.text, modifier = Modifier.padding(top = 12.dp))
+                Btn(t("Restart to update", "Fungua upya kusasisha"), { org.rafikioutreach.pin.data.Distro.finish(ctx.applicationContext) }, Modifier.padding(top = 10.dp).fillMaxWidth().testTag("update_restart"), icon = "refresh")
             }
             org.rafikioutreach.pin.data.Updater.State.Installing -> Row(Modifier.padding(top = 14.dp), verticalAlignment = Alignment.CenterVertically) {
                 androidx.compose.material3.CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp, color = C.blue); Spacer(Modifier.width(10.dp))
@@ -220,9 +236,10 @@ fun UpdateCard(m: AppModel) {
                     "offline", "http", "short" -> t("The download didn’t finish. Check your signal and try again.", "Upakuaji haukukamilika. Angalia mtandao kisha ujaribu tena.")
                     "check" -> t("The download didn’t match the app on the website, so it wasn’t installed. Try again.", "Kilichopakuliwa hakilingani na programu kwenye tovuti, kwa hiyo hakikusakinishwa. Jaribu tena.")
                     "aborted" -> t("The update was cancelled.", "Sasisho limeghairiwa.")
+                    "store" -> t("Google Play couldn’t start the update. Check your signal and try again.", "Google Play haikuweza kuanza sasisho. Angalia mtandao kisha ujaribu tena.")
                     else -> t("Android couldn’t install the update.", "Android haikuweza kusakinisha sasisho.")
                 }, style = MaterialTheme.typography.bodySmall, color = C.bad, modifier = Modifier.padding(top = 12.dp).testTag("update_error"))
-                if (s.why == "aborted" && U.samsung) {
+                if (s.why == "aborted" && U.samsung && !org.rafikioutreach.pin.BuildConfig.PLAY) {
                     val hu = C.hue("due")
                     Column(Modifier.padding(top = 10.dp).fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(hu.bg).padding(12.dp).testTag("auto_blocker")) {
                         Text(t("Tapped Update? Samsung’s Auto Blocker stopped it.", "Uligusa Sasisha? Auto Blocker ya Samsung imelizuia."), style = MaterialTheme.typography.labelLarge, color = hu.fg)
@@ -232,13 +249,14 @@ fun UpdateCard(m: AppModel) {
                         Btn(t("Open Security settings", "Fungua mipangilio ya usalama"), { runCatching { ctx.startActivity(U.securityIntent()) } }, Modifier.padding(top = 10.dp).fillMaxWidth().testTag("auto_blocker_open"), icon = "lock", light = true, small = true)
                     }
                 }
-                Btn(t("Try again", "Jaribu tena"), { if (s.why == "aborted" && U.file(ctx).exists()) U.install(ctx.applicationContext) else start() }, Modifier.padding(top = 10.dp).fillMaxWidth(), icon = "refresh")
-                Text(t("Having trouble? Download the app from the website", "Una tatizo? Pakua programu kutoka kwenye tovuti"), style = MaterialTheme.typography.labelMedium, color = C.blue,
+                Btn(t("Try again", "Jaribu tena"), { if (!org.rafikioutreach.pin.BuildConfig.PLAY && s.why == "aborted" && U.file(ctx).exists()) U.install(ctx.applicationContext) else start() }, Modifier.padding(top = 10.dp).fillMaxWidth(), icon = "refresh")
+                Text(troubleText(), style = MaterialTheme.typography.labelMedium, color = C.blue,
                     modifier = Modifier.padding(top = 8.dp).clip(RoundedCornerShape(8.dp)).clickable { openApk(ctx) }.padding(vertical = 6.dp))
             }
             else -> {
                 Btn(t("Update now", "Sasisha sasa"), { start() }, Modifier.padding(top = 12.dp).fillMaxWidth().testTag("update_go"), icon = "upload")
-                Text(t("Downloads here in the app, then Android asks once to update. Your PIN and saved work stay.", "Inapakuliwa hapa kwenye programu, kisha Android inauliza mara moja kusasisha. PIN yako na kazi iliyohifadhiwa vinabaki."),
+                Text(if (org.rafikioutreach.pin.BuildConfig.PLAY) t("Downloads from Google Play while you work, then the app restarts once. Your PIN and saved work stay.", "Inapakuliwa kutoka Google Play unapoendelea na kazi, kisha programu inajifungua upya mara moja. PIN yako na kazi iliyohifadhiwa vinabaki.")
+                    else t("Downloads here in the app, then Android asks once to update. Your PIN and saved work stay.", "Inapakuliwa hapa kwenye programu, kisha Android inauliza mara moja kusasisha. PIN yako na kazi iliyohifadhiwa vinabaki."),
                     style = MaterialTheme.typography.labelSmall, color = C.muted, modifier = Modifier.padding(top = 8.dp))
             }
         }
@@ -267,7 +285,7 @@ fun UpdatePrompt(m: AppModel, ready: Boolean) {
                 Column {
                     Box(Modifier.size(52.dp).clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.16f)), contentAlignment = Alignment.Center) { Icon(Ic.get("upload"), null, tint = Color.White, modifier = Modifier.size(26.dp)) }
                     Text(t("A new RAFIKI Pin is ready", "RAFIKI Pin mpya iko tayari"), style = MaterialTheme.typography.titleLarge, color = Color.White, modifier = Modifier.padding(top = 14.dp))
-                    Text(t("Version ${up.name} · you have ${org.rafikioutreach.pin.BuildConfig.VERSION_NAME}", "Toleo ${up.name} · unayo ${org.rafikioutreach.pin.BuildConfig.VERSION_NAME}"), style = MaterialTheme.typography.labelLarge, color = Color(0xFFCFE8FA), modifier = Modifier.padding(top = 4.dp))
+                    Text(if (up.name.isBlank()) t("You have ${org.rafikioutreach.pin.BuildConfig.VERSION_NAME}", "Unayo ${org.rafikioutreach.pin.BuildConfig.VERSION_NAME}") else t("Version ${up.name} · you have ${org.rafikioutreach.pin.BuildConfig.VERSION_NAME}", "Toleo ${up.name} · unayo ${org.rafikioutreach.pin.BuildConfig.VERSION_NAME}"), style = MaterialTheme.typography.labelLarge, color = Color(0xFFCFE8FA), modifier = Modifier.padding(top = 4.dp))
                 }
                 Box(Modifier.align(Alignment.TopEnd).size(36.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.16f)).clickable(role = Role.Button) { close() }
                     .semantics { contentDescription = t("Close", "Funga") }.testTag("update_prompt_close"), contentAlignment = Alignment.Center) { Icon(Ic.get("x"), null, tint = Color.White, modifier = Modifier.size(18.dp)) }
@@ -275,7 +293,8 @@ fun UpdatePrompt(m: AppModel, ready: Boolean) {
             Column(Modifier.padding(20.dp)) {
                 Text(t("What’s new", "Kipya"), style = MaterialTheme.typography.labelLarge, color = C.muted)
                 Text(up.notes.ifBlank { t("Fixes and improvements.", "Marekebisho na maboresho.") }, style = MaterialTheme.typography.bodyMedium, color = C.ink, modifier = Modifier.padding(top = 4.dp))
-                Text(t("Downloads right here in the app. Your PIN and saved work stay.", "Inapakuliwa hapa hapa kwenye programu. PIN yako na kazi iliyohifadhiwa vinabaki."), style = MaterialTheme.typography.labelSmall, color = C.muted, modifier = Modifier.padding(top = 10.dp))
+                Text(if (org.rafikioutreach.pin.BuildConfig.PLAY) t("Downloads from Google Play. Your PIN and saved work stay.", "Inapakuliwa kutoka Google Play. PIN yako na kazi iliyohifadhiwa vinabaki.")
+                    else t("Downloads right here in the app. Your PIN and saved work stay.", "Inapakuliwa hapa hapa kwenye programu. PIN yako na kazi iliyohifadhiwa vinabaki."), style = MaterialTheme.typography.labelSmall, color = C.muted, modifier = Modifier.padding(top = 10.dp))
                 Btn(t("Update now", "Sasisha sasa"), { show = false; m.updPromptClosed = true; m.updateGo = true; m.focusUpdate = true; m.goTab = "me" }, Modifier.padding(top = 16.dp).fillMaxWidth().testTag("update_prompt_go"), icon = "upload")
                 Btn(t("Remind me later", "Nikumbushe baadaye"), { show = false; m.updPromptClosed = true; m.updPromptClosedCode = up.code; m.prefs.updLater = System.currentTimeMillis() + 24 * 3600_000L; m.prefs.updLaterCode = up.code }, Modifier.padding(top = 10.dp).fillMaxWidth().testTag("update_prompt_later"), light = true)
             }
@@ -301,7 +320,7 @@ fun UpdateRow(m: AppModel) {
                 Text(when {
                     busy -> t("Checking…", "Inaangalia…")
                     failed -> t("Couldn’t check. Needs a signal.", "Haikuweza kuangalia. Inahitaji mtandao.")
-                    ready -> t("Update available · ${u!!.name}", "Toleo jipya · ${u!!.name}")
+                    ready -> t("Update available", "Toleo jipya") + verTail(u!!.name)
                     else -> t("You’re up to date · ${org.rafikioutreach.pin.BuildConfig.VERSION_NAME} ✓", "Uko na toleo jipya · ${org.rafikioutreach.pin.BuildConfig.VERSION_NAME} ✓")
                 }, style = MaterialTheme.typography.bodySmall, color = if (failed) C.bad else if (ready) C.blue else C.ok, modifier = Modifier.testTag("update_status"))
                 key(tick) { Text(checkedText(u?.at ?: 0L), style = MaterialTheme.typography.labelSmall, color = C.muted) }
@@ -315,7 +334,7 @@ fun UpdateRow(m: AppModel) {
                 Spacer(Modifier.width(6.dp)); Text(t("Check", "Angalia"), style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = C.blue)
             }
         }
-        if (failed) Text(t("Having trouble? Download the app from the website", "Una tatizo? Pakua programu kutoka kwenye tovuti"), style = MaterialTheme.typography.labelMedium, color = C.blue,
+        if (failed) Text(troubleText(), style = MaterialTheme.typography.labelMedium, color = C.blue,
             modifier = Modifier.padding(top = 8.dp).clip(RoundedCornerShape(8.dp)).clickable { openApk(ctx) }.padding(vertical = 6.dp).testTag("update_web"))
     }
 }

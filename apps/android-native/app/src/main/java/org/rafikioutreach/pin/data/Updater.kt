@@ -26,6 +26,8 @@ object Updater {
         /** Android needs the person to allow "Install unknown apps" for RAFIKI Pin once. */
         object NeedsPermission : State()
         object Installing : State()
+        /** Google Play build only: Play has downloaded the update; one tap restarts the app into it (data/Store.kt). */
+        object Downloaded : State()
         data class Failed(val why: String) : State()
     }
     private val _state = MutableStateFlow<State>(State.Idle)

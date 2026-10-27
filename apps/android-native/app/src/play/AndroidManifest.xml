@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Google Play build: Play doesn't allow an app to install updates itself, so the website build's
+     self-update permission and installer callback are taken out here. Updates come from Play (data/Distro.kt). -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" tools:node="remove" />
+    <application>
+        <receiver android:name=".data.InstallResult" tools:node="remove" />
+    </application>
+</manifest>

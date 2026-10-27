@@ -113,13 +113,17 @@ fun SettingsCard(m: AppModel, go: (String) -> Unit) {
         }
         Group(t("About", "Kuhusu"))
         SetRow("drop", "blue", t("About RAFIKI Pin", "Kuhusu RAFIKI Pin"), t("Version ", "Toleo ") + BuildConfig.VERSION_NAME, "set_about") { go("about") }
-        SetRow("lock", "slate", t("Privacy policy", "Sera ya faragha"), "", "set_privacy") { web(ctx, "/privacy-policy") }
+        // the app's own privacy policy (pin-privacy.html), on the app's address: Google Play links to the same page
+        SetRow("lock", "slate", t("Privacy policy", "Sera ya faragha"), "", "set_privacy") { runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(PRIVACY_URL))) } }
         SetRow("clip", "slate", t("Terms of use", "Masharti ya matumizi"), "", "set_terms") { web(ctx, "/terms-of-use") }
         // last, on its own
         HorizontalDivider(color = C.line, modifier = Modifier.padding(top = 12.dp, bottom = 4.dp))
         SetRow("undo", "coral", t("Sign out of this phone", "Toka kwenye simu hii"), t("You’ll need your PIN to come back in", "Utahitaji PIN yako kurudi"), "set_signout") { go("signout") }
     }
 }
+
+/** RAFIKI Pin's privacy policy (both builds, and the web app): pin-privacy.html at the repo root. */
+const val PRIVACY_URL = "https://pin.rafikioutreach.org/pin-privacy"
 
 /** A short message at the bottom of the screen (posted to the main thread). */
 private fun toast(ctx: android.content.Context, text: String) { android.os.Handler(android.os.Looper.getMainLooper()).post { runCatching { android.widget.Toast.makeText(ctx.applicationContext, text, android.widget.Toast.LENGTH_SHORT).show() } } }
@@ -268,7 +272,7 @@ private fun CheckUpdatesRow(m: AppModel) {
     }.padding(vertical = 10.dp, horizontal = 2.dp).testTag("about_update"), verticalAlignment = Alignment.CenterVertically) {
         val hu = C.hue(if (ready) "pin" else "near"); IconTile(if (ready) "upload" else "refresh", hu.fg, hu.bg, 40.dp); Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
-            Text(if (ready) t("Update available · ${u!!.name}", "Toleo jipya · ${u!!.name}") else t("Check for updates", "Angalia masasisho"), style = MaterialTheme.typography.titleSmall, color = C.ink)
+            Text(if (ready) t("Update available", "Toleo jipya") + verTail(u!!.name) else t("Check for updates", "Angalia masasisho"), style = MaterialTheme.typography.titleSmall, color = C.ink)
             Text(when {
                 busy -> t("Checking…", "Inaangalia…")
                 failed -> t("Couldn’t check. Needs a signal.", "Haikuweza kuangalia. Inahitaji mtandao.")

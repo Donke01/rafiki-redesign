@@ -37,6 +37,18 @@ class AlertWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx,
         val api = Api(BuildConfig.SERVER, { prefs.pin }, { prefs.session })
         // a newer app on the website: one notification per version, even when the app is closed
         runCatching {
+            if (BuildConfig.PLAY) {
+                // the Google Play build: Play says whether there is a newer version (data/Distro.kt); the website's
+                // version.json only gives its name and notes, when it is about that same version
+                val code = Distro.availableCode(applicationContext) ?: 0
+                if (code > BuildConfig.VERSION_CODE && code > prefs.updNotified) {
+                    val v = api.appVersion().takeIf { it.ok && it.json.optInt("versionCode") == code }
+                    val name = v?.json?.optString("versionName").orEmpty(); val notes = v?.json?.optString("notes").orEmpty()
+                    prefs.updCode = code; prefs.updName = name; prefs.updNotes = notes; prefs.updSha = ""; prefs.updAt = System.currentTimeMillis()
+                    showUpdate(applicationContext, name, notes); prefs.updNotified = code
+                }
+                return@runCatching
+            }
             val v = api.appVersion()
             val code = v.json.optInt("versionCode")
             if (v.ok && code > BuildConfig.VERSION_CODE && code > prefs.updNotified) {
@@ -149,8 +161,8 @@ class AlertWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx,
             channels(ctx)
             val open = Intent(ctx, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP).putExtra("open", "").putExtra("tab", "me")
             val pi = PendingIntent.getActivity(ctx, 7001, open, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-            val text = notes.ifBlank { t("Tap to update. It installs right in the app.", "Gusa kusasisha. Inasakinishwa ndani ya programu.") }
-            val n = NotificationCompat.Builder(ctx, CH_UPDATES).setSmallIcon(R.drawable.ic_stat_pin).setContentTitle(t("RAFIKI Pin update · $name", "Sasisho la RAFIKI Pin · $name")).setContentText(text)
+            val text = notes.ifBlank { if (BuildConfig.PLAY) t("Tap to update from Google Play.", "Gusa kusasisha kutoka Google Play.") else t("Tap to update. It installs right in the app.", "Gusa kusasisha. Inasakinishwa ndani ya programu.") }
+            val n = NotificationCompat.Builder(ctx, CH_UPDATES).setSmallIcon(R.drawable.ic_stat_pin).setContentTitle(t("RAFIKI Pin update", "Sasisho la RAFIKI Pin") + (if (name.isBlank()) "" else " · $name")).setContentText(text)
                 .setStyle(NotificationCompat.BigTextStyle().bigText(text)).setContentIntent(pi).setAutoCancel(true).setColor(0xFF0A78C2.toInt()).build()
             runCatching { NotificationManagerCompat.from(ctx).notify(7001, n) }
         }
