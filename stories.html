@@ -962,6 +962,7 @@ em.hl{font-style:normal;color:#0A78C2}
 .pj-search input{width:100%;min-height:48px;border-radius:999px;border:1.5px solid #E1E4E7;background:#FAF8F3;padding:0 18px 0 44px;font:inherit;font-size:15px;color:#0A0A0A;outline:none}
 .pj-search input:focus{border-color:#0A78C2;background:#FFFFFF}
 .pj-sel{display:flex;flex-direction:column;gap:2px;flex:1 1 140px;min-width:0}
+.pd-q{margin:14px 0;background:#E3F1FC;border-radius:22px;padding:18px 20px;font-size:18px;font-weight:600;color:#04263F}.pd-q cite{display:block;font-size:14px;font-style:normal;color:#5A6066;margin-top:6px}
 .pj-sel label{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#6A7076;padding-left:14px}
 .pj-sel select{min-height:44px;border-radius:999px;border:1.5px solid #E1E4E7;background:#FFFFFF;padding:0 14px;font:inherit;font-size:14px;font-weight:600;color:#0A0A0A;cursor:pointer}
 .pj-chips{display:flex;flex-wrap:wrap;gap:8px}
@@ -1246,6 +1247,7 @@ a.pj-card{text-decoration:none}
 <section class="pd-sec" aria-label="Photos"><div class="pd-sh"><h2 class="pd-st">Photos</h2></div>
 <sc-if value="{{d.hasPhotos}}" hint-placeholder-val="{{true}}"><div class="pd-gal"><sc-for list="{{d.photos}}" as="ph" hint-placeholder-count="3"><figure class="pd-ph"><img src="{{ph.src}}" srcset="{{ph.srcset}}" sizes="(max-width:900px) calc(100vw - 72px), 400px" alt="{{ph.alt}}" width="960" height="720" loading="lazy" decoding="async"></figure></sc-for></div></sc-if>
 <sc-if value="{{d.noPhotos}}" hint-placeholder-val="{{false}}"><div class="pd-noph"><sc-if value="{{d.water}}" hint-placeholder-val="{{true}}"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.2c3.3 4 5.6 7.3 5.6 10.3a5.6 5.6 0 01-11.2 0c0-3 2.3-6.3 5.6-10.3z"></path></svg></sc-if><sc-if value="{{d.notWater}}" hint-placeholder-val="{{false}}"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"></path><path d="M5 9.5V20h14V9.5"></path><path d="M10 20v-6h4v6"></path></svg></sc-if><span>No photos of this project yet.</span></div></sc-if></section>
+<sc-if value="{{d.hasStory}}" hint-placeholder-val="{{false}}"><section class="pd-sec" aria-labelledby="pd-story-h"><div class="pd-sh"><h2 class="pd-st" id="pd-story-h">Their story</h2></div><sc-for list="{{d.storyParas}}" as="sp" hint-placeholder-count="3"><p class="pd-p">{{sp.t}}</p></sc-for><sc-if value="{{d.hasQuote}}" hint-placeholder-val="{{false}}"><blockquote class="pd-q">“{{d.quote}}”<cite>{{d.quoteBy}}</cite></blockquote></sc-if><sc-if value="{{d.hasAfter}}" hint-placeholder-val="{{false}}"><div class="pd-gal"><sc-for list="{{d.after}}" as="ph" hint-placeholder-count="2"><figure class="pd-ph"><img src="{{ph.src}}" alt="{{ph.alt}}" loading="lazy"></figure></sc-for></div></sc-if></section></sc-if>
 <sc-if value="{{d.hasMore}}" hint-placeholder-val="{{false}}"><section class="pd-sec" aria-labelledby="pd-more-h"><div class="pd-sh"><h2 class="pd-st" id="pd-more-h">More like this</h2></div><p class="pd-p">{{d.moreLead}}</p><div class="pd-more"><sc-for list="{{d.more}}" as="m" hint-placeholder-count="4"><a class="pd-mi" href="{{m.href}}" onClick="{{m.go}}"><span class="pd-mi-ph" aria-hidden="true"><sc-if value="{{m.hasImg}}" hint-placeholder-val="{{true}}"><img src="{{m.img}}" alt="" width="64" height="64" loading="lazy" decoding="async"></sc-if></span><span class="pd-mi-b"><small>{{m.kick}}</small><b>{{m.title}}</b></span></a></sc-for></div><a class="pd-all" href="{{d.moreHref}}" onClick="{{d.moreGo}}">{{d.moreAll}}</a></section></sc-if>
 <div class="pd-cta"><a class="b" href="/donate">{{d.cta}}</a><button type="button" class="b ghost" style="border:0;cursor:pointer;font:inherit;font-weight:700" onClick="{{back}}">Back to all projects</button></div>
 </div>
@@ -1580,7 +1582,7 @@ class Component extends DCLogic {
         cat: cat, water: cat === 'water', grp: GROUP_ONE[cat], pump: cat === 'water' ? p.pump || '' : '', year: p.year || '',
         status: p.status, label: STATUS_LABEL[p.status] || p.status, people: p.people || 0, done: done,
         needed: p.status === 'Upcoming' && p.needed > 0 ? p.needed : 0,
-        depth: p.depth || 0, flow: p.flow || 0, photos: (p.photos || []).slice(),
+        depth: p.depth || 0, flow: p.flow || 0, photos: (p.photos || []).slice(), story: p.story && p.story.text ? p.story : null, // only Approved / Published stories reach the feed
         region: P.region(Object.assign({}, p, { ck: ck })) || '', serve: P.serves(Object.assign({}, p, { cat: cat })) || '' });
     });
     YEARS.length = 0; Object.keys(years).map(Number).sort().forEach(function (y) { YEARS.push(y); });
@@ -1657,7 +1659,7 @@ class Component extends DCLogic {
     if (s.q.trim()) chip('Search', '“' + s.q.trim() + '”', { q: '' });
     var remain = list.length - shown.length;
     var people = function (p) { return p.people ? (p.water ? num(p.people) + (p.done ? ' people served' : ' people expected') : 'About ' + num(p.people) + ' people') : ''; };
-    var d = { kick: '', title: '', place: '', status: '', track: [], facts: [], photos: [], hasPhotos: false, noPhotos: true, water: true, notWater: false, more: [], hasMore: false, cta: 'Fund the next well' };
+    var d = { kick: '', title: '', place: '', status: '', track: [], facts: [], photos: [], hasStory: false, storyParas: [], hasQuote: false, quote: '', quoteBy: '', hasAfter: false, after: [], hasPhotos: false, noPhotos: true, water: true, notWater: false, more: [], hasMore: false, cta: 'Fund the next well' };
     if (det) {
       var at = STEP_AT[det.status] || 0, facts = [];
       var add = function (l, v) { if (v !== '' && v != null && v !== 0) facts.push({ l: l, v: String(v) }); };
@@ -1688,6 +1690,10 @@ class Component extends DCLogic {
         facts: facts,
         photos: det.photos.map(function (id, k) { return { src: photoUrl(id, 960), srcset: photoUrl(id, 480) + ' 480w, ' + photoUrl(id, 960) + ' 960w', alt: 'Photo ' + (k + 1) + ' of ' + det.photos.length + ' from ' + det.title }; }),
         hasPhotos: det.photos.length > 0, noPhotos: !det.photos.length, water: det.water, notWater: !det.water,
+        // the project's story (written with the team on the ground, approved by the office)
+        hasStory: !!det.story, storyParas: det.story ? String(det.story.text).split(/\n\s*\n/).map(function (t) { return { t: t.trim() }; }).filter(function (x) { return x.t; }) : [],
+        hasQuote: !!(det.story && det.story.quote), quote: det.story ? String(det.story.quote || '').replace(/^[“"]|[”"]$/g, '') : '', quoteBy: det.story && det.story.quoteBy ? '— ' + det.story.quoteBy : '',
+        hasAfter: !!(det.story && (det.story.after || []).length), after: det.story ? (det.story.after || []).slice(0, 4).map(function (id, k) { return { src: photoUrl(id, 960), alt: 'After photo ' + (k + 1) + ' from ' + det.title + (det.story.credit ? ' (photo: ' + det.story.credit + ')' : '') }; }) : [],
         cta: det.water ? 'Fund the next well' : 'Support projects like this',
         hasMore: pool.length > 0, moreLead: 'Other ' + noun + ' in ' + where + '.',
         moreHref: moreHref, moreAll: 'See all ' + num(pool.length + 1) + ' ' + noun + ' in ' + where + ' →', moreGo: function (e) { self.follow(e, moreHref); },

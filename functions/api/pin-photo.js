@@ -10,7 +10,8 @@
 //   (lib/construction.js) → { ok, asset }. GET /api/pin-photo?stage=<project>&asset=<id>[&w=] → that photo, signed-in team only.
 import { checkPin } from './pin.js';
 import { load as loadItin, canEdit, canSee, newId } from '../../lib/itin.js';
-import { addFileToUpdate, assetInfo } from '../../lib/monday.js';
+import { addFileToUpdate, assetInfo, addFileToColumn, STORY_COL } from '../../lib/monday.js';
+import { loadRec, saveRec } from '../../lib/story.js';
 import { STAGES, loadStage, addStagePhoto, hasPhoto } from '../../lib/construction.js';
 // voice notes are typed out in the background (Kiswahili or English) and added to the same note: lib/voice-note.js
 import { typeOutVoiceNote } from '../../lib/voice-note.js';
@@ -46,6 +47,11 @@ export async function onRequestPost({ request, env, waitUntil }) {
     const stage = String(form.get('stage') || ''), project = String(form.get('project') || '').replace(/\D/g, '');
     if (!voice && STAGES.includes(stage) && project && typeof asset === 'string' && env.FEED) {
       await addStagePhoto(env, project, stage, update, asset);
+      // construction photos also go into the story's In-progress row (Stories tab)
+      try {
+        const pa = await addFileToColumn(chk.token || env.MONDAY_API_TOKEN, project, STORY_COL.progress, file, name, env.MONDAY_API_URL);
+        if (pa) { const rec = await loadRec(env, project); rec.photos.progress = (rec.photos.progress || []).concat([{ id: pa, name, children: false, by: chk.who || '', at: new Date().toISOString() }]).slice(-60); await saveRec(env, project, rec); }
+      } catch (e) { console.error('story progress photo:', e && e.message); }
       return json({ ok: true, asset }, 200);
     }
     if (voice && waitUntil) waitUntil(typeOutVoiceNote(env, { token: chk.token || env.MONDAY_API_TOKEN, update, bytes, mime: type, ip: request.headers.get('CF-Connecting-IP') || 'unknown', by: chk.who || '', apiUrl: env.MONDAY_API_URL, secs: Number(form.get('secs')) || 0 }).catch(e => console.error('voice note typing:', e && e.message)));

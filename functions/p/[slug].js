@@ -90,7 +90,8 @@ export async function onRequestGet({ env, params, request, waitUntil }) {
   if (!p) return Response.redirect(new URL('/stories', request.url).toString(), 302);
   if ((m[2] || '') !== slug(p.title)) return Response.redirect(new URL('/p/' + p.id + '-' + slug(p.title), request.url).toString(), 301);
   const stories = (await getJson(env, 'pinstories', [])).filter(s => String(s.id) === m[1]);
-  const story = stories.length ? { quote: stories[stories.length - 1].quote, who: stories[stories.length - 1].who } : null;
+  // an approved story from the Stories tab first (its quote), else the latest approved story moment
+  const story = p.story && p.story.quote ? { quote: p.story.quote.replace(/^[“"]|[”"]$/g, ''), who: p.story.quoteBy || '' } : stories.length ? { quote: stories[stories.length - 1].quote, who: stories[stories.length - 1].who } : null;
   const index = String(env.PUBLIC_CARDS_INDEX || '').toLowerCase() === 'on';
   return new Response(cardHtml(p, new URL(request.url).origin, story, index), {
     headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'public, max-age=300', 'X-Content-Type-Options': 'nosniff', ...(index ? {} : { 'X-Robots-Tag': 'noindex' }) }

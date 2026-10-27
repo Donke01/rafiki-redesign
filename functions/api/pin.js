@@ -31,6 +31,7 @@
 // Admins (PIN_ADMINS, or made admin in the app) also get the Office tools in /api/admin.
 import { getFeed, dropFeed } from '../../lib/feed-cache.js';
 import { parseGps, readGps, writeGps, createUpdate, createSite, readUpdates, tidyTitle, setStatus, BOARD_ID } from '../../lib/monday.js';
+import { storyIndex } from '../../lib/story.js';
 import { STAGES, STAGE_EN, BUILD_STATUS, DONE_STATUS, loadStage, saveStage, stageIndex, startRecord, applyStage, stageAllowed, stageNote, cleanPct, cleanDue, withBehind, behind, linked } from '../../lib/construction.js';
 import { session, configured, linkToken, linkedFor, unlink, signOut } from '../../lib/pin-auth.js';
 import { getJson as gj, putJson, team, saveTeam, hashPin, isAdminName, sameName, seen, addReview, sendMail, alertHtml, guards, guardFor } from '../../lib/pin-store.js';
@@ -277,6 +278,9 @@ export async function onRequestGet({ request, env, waitUntil }) {
     // construction stages for the list filter, the map badge, Office and the report
     const sIdx = await stageIndex(env), now = Date.now();
     extra.stages = {}; Object.keys(sIdx).forEach(k => { const x = sIdx[k]; extra.stages[k] = Object.assign({}, x, { behind: behind({ stage: x.s, due: x.due }, now) }); });
+    // stories (the Stories tab): status, answers and photo counts, for the list filter, the badge and the report
+    const stIdx = await storyIndex(env); extra.stories = {};
+    Object.keys(stIdx).forEach(k => { const x = stIdx[k]; extra.stories[k] = { st: x.st, n: x.n, b: x.b, i: x.i, a: x.a, c: x.c, at: x.at }; });
     // big repairs need a second approval above this (everyone sees it on the repair tracker)
     extra.approveAbove = await approveLimit(env);
     // Office overview: people served, from the latest visit counts and the board (two small KV reads)
