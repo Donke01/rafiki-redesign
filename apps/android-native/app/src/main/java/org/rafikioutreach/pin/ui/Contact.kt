@@ -213,9 +213,9 @@ private fun RowScope.CtTile(tag: String, label: String, circle: Color, fg: Color
         Box(Modifier.size(46.dp).clip(CircleShape).background(circle), contentAlignment = Alignment.Center) {
             if (brand != null) BrandIcon(brand, 24.dp) else Icon(DqmIc.get(icon), null, tint = fg, modifier = Modifier.size(22.dp))
         }
-        // shrinks to fit on one line, never cut short with "…" ("WhatsApp", "Barua pepe" with five tiles); the tiles
-        // are tall enough for a full-size label, so a shrunk one doesn't make its tile shorter than the others
-        WordFitText(label, MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold), C.ink, 1, Modifier.padding(top = 8.dp).testTag(tag + "_label"), textAlign = TextAlign.Center)
+        // one line that gets a little smaller rather than cut ("WhatsApp", "Barua pepe" with five tiles on a 360 dp phone);
+        // the tiles keep the height of a full-size label, so a shrunk one doesn't make its tile shorter than the others
+        FitWords(label, MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold), C.ink, Modifier.padding(top = 8.dp, start = 2.dp, end = 2.dp).testTag(tag + "_label"), lines = 1)
     }
 }
 
