@@ -167,6 +167,14 @@ html[data-theme=sun] .hero{background:#003E7E;box-shadow:none}
 .fund .row span{color:var(--muted);font-weight:600}
 .fund .row b{color:var(--ink);text-align:right}
 .bar{height:10px;border-radius:99px;background:var(--line);overflow:hidden;margin:6px 0 4px}
+/* construction stages and an approved story (mew) */
+.cstg .row{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-top:1px solid var(--line);font-size:.94rem}.cstg .row span{color:var(--muted);font-weight:600}.cstg .row b{color:var(--ink)}
+.cst{list-style:none;margin:6px 0 10px;padding:0}.cst li{position:relative;display:grid;grid-template-columns:22px 1fr;column-gap:10px;padding:0 0 10px}
+.cst li i{width:14px;height:14px;margin:3px 4px 0;border-radius:50%;border:2px solid var(--line);background:var(--card);position:relative;z-index:1}
+.cst li:not(:last-child)::before{content:"";position:absolute;left:10px;top:16px;bottom:0;width:2px;background:var(--line)}
+.cst li.done i{background:#1C9C5A;border-color:#1C9C5A}.cst li.now i{background:#0A78C2;border-color:#0A78C2}.cst li.todo b{color:var(--muted);font-weight:600}.cst li small{grid-column:2;color:var(--muted);font-size:.8rem}
+.cstp{margin-top:8px}.cstp > b{font-size:.88rem}.strip .ph{flex:0 0 120px;border:0;padding:0;background:none;cursor:pointer;scroll-snap-align:start}.strip .ph img{aspect-ratio:1}
+.dstory p{margin:0 0 10px;line-height:1.6}.dstory .quote{margin:6px 0 10px}
 .bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#47B4F5,#0A78C2)}
 /* updates */
 .month{margin-bottom:14px}
@@ -873,8 +881,25 @@ html{font-size:17px}html[data-size=s]{font-size:15px}html[data-size=l]{font-size
     if (rows.length || k === 'building') {
       var stg = ['Foundation', 'Walls going up', 'Roofing', 'Finishing', 'Finished'], cur = (p.visits || []).filter(function (v) { return v.stage; })[0], pct = cur ? Math.round((stg.indexOf(cur.stage) + 1) / stg.length * 100) : 0;
       h += '<div class="sh"><h2>' + tr('Progress', 'Maendeleo') + '</h2></div><div class="card fund">' +
-        (k === 'building' && cur ? '<div style="margin-bottom:6px"><b style="color:var(--ink)">' + esc(stage(cur.stage)) + '</b><div class="bar" role="img" aria-label="' + pct + '%"><i style="width:' + pct + '%"></i></div></div>' : '') +
+        (k === 'building' && cur && !p.construction ? '<div style="margin-bottom:6px"><b style="color:var(--ink)">' + esc(stage(cur.stage)) + '</b><div class="bar" role="img" aria-label="' + pct + '%"><i style="width:' + pct + '%"></i></div></div>' : '') +
         rows.map(function (r) { return '<div class="row"><span>' + esc(r[0]) + '</span><b>' + esc(r[1]) + '</b></div>'; }).join('') + '</div>';
+    }
+    // the build, stage by stage (read-only), and the project's approved story (mew, me-brief §8/§9)
+    var C = p.construction;
+    if (C) {
+      var CS = [['planned', 'Planned', 'Imepangwa'], ['foundation', 'Foundation', 'Msingi'], ['walls', 'Walls', 'Kuta'], ['roof', 'Roof', 'Paa'], ['finishing', 'Finishing', 'Umaliziaji'], ['handed', 'Handed over', 'Imekabidhiwa']];
+      var ci = CS.map(function (x) { return x[0]; }).indexOf(C.stage), seen = {}; (C.stages || []).forEach(function (x) { seen[x.stage] = x; });
+      h += '<div class="sh"><h2>' + tr('Construction', 'Ujenzi') + '</h2></div><div class="card cstg" data-testid="donor_build">' +
+        (C.behind ? '<span class="badge b-repairing"><i></i>' + esc(tr('Behind schedule', 'Imechelewa')) + '</span>' : '') +
+        '<ol class="cst">' + CS.map(function (x, i) { var e = seen[x[0]]; return '<li class="' + (i < ci ? 'done' : i === ci ? 'now' : 'todo') + '"><i></i><b>' + esc(tr(x[1], x[2])) + '</b>' + (e && i <= ci ? '<small>' + esc(day(e.at)) + '</small>' : '') + '</li>'; }).join('') + '</ol>' +
+        (C.pct != null ? '<div class="row"><span>' + esc(tr('Done', 'Imekamilika')) + '</span><b>' + C.pct + '%</b></div><div class="bar" role="img" aria-label="' + C.pct + '%"><i style="width:' + C.pct + '%"></i></div>' : '') +
+        (C.due ? '<div class="row"><span>' + esc(tr('Expected finish', 'Kukamilika kunatarajiwa')) + '</span><b>' + esc(day(C.due + 'T12:00:00Z')) + '</b></div>' : '') +
+        (C.stages || []).filter(function (x) { return (x.photos || []).length; }).map(function (x) { var l = CS.filter(function (y) { return y[0] === x.stage; })[0] || [x.stage, x.stage, x.stage]; return '<div class="cstp"><b>' + esc(tr(l[1], l[2])) + '</b><div class="strip">' + x.photos.slice(0, 8).map(function (id) { return '<button type="button" class="ph" data-zoom="' + esc(visitPhoto(id, 1600)) + '" data-cap="' + esc(tr(l[1], l[2])) + '"><img src="' + esc(visitPhoto(id, 480)) + '" alt="' + esc(tr(l[1], l[2])) + '" loading="lazy"></button>'; }).join('') + '</div></div>'; }).join('') + '</div>';
+    }
+    if (p.story && p.story.text) {
+      h += '<div class="sh"><h2>' + tr('Their story', 'Hadithi yao') + '</h2></div><div class="card dstory" data-testid="donor_story">' + String(p.story.text).split(/\n\s*\n/).map(function (t) { return '<p>' + esc(t.trim()) + '</p>'; }).join('') +
+        (p.story.quote ? '<blockquote class="quote">“' + esc(String(p.story.quote).replace(/^[“"]|[”"]$/g, '')) + '”' + (p.story.quoteBy ? '<small>— ' + esc(p.story.quoteBy) + '</small>' : '') + '</blockquote>' : '') +
+        ((p.story.after || []).length ? '<div class="strip">' + p.story.after.slice(0, 6).map(function (id) { return '<button type="button" class="ph" data-zoom="' + esc(visitPhoto(id, 1600)) + '" data-cap="' + esc(tr('After', 'Baada') + (p.story.credit ? ' · ' + p.story.credit : '')) + '"><img src="' + esc(visitPhoto(id, 480)) + '" alt="" loading="lazy"></button>'; }).join('') + '</div>' : '') + '</div>';
     }
     // visits: date, who, what they found
     var V = (p.visits || []).slice(0, 8), R = rep.slice(0, 4);

@@ -3508,11 +3508,11 @@ html .top #hAv[aria-current=page] .hav-l{color:var(--blue)}
 #hAv .hav-n.hidden{display:none}
 html .top #hTitle{max-width:min(calc(100% - 100px),var(--htw,100%))}
 /* the hint */
-.mehint{position:fixed;z-index:1200;padding:12px 14px 10px;border-radius:16px;background:#04263F;color:#FFFFFF;box-shadow:0 14px 34px rgba(4,38,63,.32);font-size:.92rem;line-height:1.4;opacity:0;transform:translateY(-6px)}
+.mehint{pointer-events:none;position:fixed;z-index:1200;padding:12px 14px 10px;border-radius:16px;background:#04263F;color:#FFFFFF;box-shadow:0 14px 34px rgba(4,38,63,.32);font-size:.92rem;line-height:1.4;opacity:0;transform:translateY(-6px)}
 .mehint.in{opacity:1;transform:none;transition:opacity .2s,transform .25s cubic-bezier(.3,1.4,.5,1)}.mehint.out{opacity:0;transition:opacity .18s}
 .mehint p{margin:0 0 8px;overflow-wrap:normal;word-break:normal;hyphens:none}
 .mehint-ar{position:absolute;top:-7px;width:16px;height:16px;background:inherit;transform:rotate(45deg);border-radius:3px}
-.mehint-ok{display:block;margin-left:auto;min-height:40px;padding:0 16px;border:0;border-radius:999px;background:#FFFFFF;color:#04263F;font:inherit;font-weight:800;cursor:pointer}
+.mehint-ok{pointer-events:auto;display:block;margin-left:auto;min-height:40px;padding:0 16px;border:0;border-radius:999px;background:#FFFFFF;color:#04263F;font:inherit;font-weight:800;cursor:pointer}
 html[data-theme=dark] .mehint{background:#E6EEF4;color:#04263F}html[data-theme=dark] .mehint-ok{background:#04263F;color:#FFFFFF}
 html[data-theme=sun] .mehint{background:#000;color:#FFF;box-shadow:none;border:2px solid #000}
 @media (prefers-reduced-motion: reduce){.mehint,.mehint.in,.mehint.out{transition:none;transform:none}}
@@ -3526,6 +3526,59 @@ img.avph{position:absolute;inset:0;width:100%;height:100%;border-radius:50%;obje
 #meAv .mh-cam svg{width:14px;height:14px}
 html[data-theme=sun] #meAv .mh-cam{border:2px solid #000;color:#000}
 .ct-phav{cursor:pointer}
+/* construction (§8) */
+.card.cn{padding:16px}.cn-h{display:flex;align-items:center;gap:10px;margin-bottom:8px}.cn-h h3{margin:0;flex:1;min-width:0}
+.cn-ic{width:34px;height:34px;flex:none;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--hb-amber,#FDF0DC);color:var(--hu-amber,#8A5200)}.cn-ic svg{width:20px;height:20px}
+.cn-late{white-space:nowrap}
+.cn-link{margin:4px 0;font-size:.9rem}.cn-link .lnk{border:0;background:none;padding:0;font:inherit;font-weight:700;color:var(--blue);cursor:pointer;text-decoration:underline;min-height:32px}
+.cn-st{list-style:none;margin:10px 0 6px;padding:0;display:grid;gap:0}
+.cn-st li{position:relative;display:grid;grid-template-columns:22px 1fr;column-gap:10px;padding:0 0 12px;align-items:start}
+.cn-st li i{grid-row:1/3;width:14px;height:14px;margin:3px 4px 0;border-radius:50%;border:2px solid var(--edge);background:var(--card);position:relative;z-index:1}
+.cn-st li:not(:last-child)::before{content:"";position:absolute;left:10px;top:16px;bottom:0;width:2px;background:var(--line)}
+.cn-st li.done i{background:var(--ok);border-color:var(--ok)}.cn-st li.done:not(:last-child)::before{background:var(--ok)}
+.cn-st li.now i{background:var(--blue);border-color:var(--blue);box-shadow:0 0 0 4px var(--tint)}
+.cn-st li b{font-size:.92rem;color:var(--ink)}.cn-st li.todo b{color:var(--muted);font-weight:600}.cn-st li small{grid-column:2;color:var(--muted);font-size:.78rem}
+.cn-meta{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:4px 0 10px}.cn-pct{display:flex;align-items:center;gap:8px;flex:1 1 180px;font-weight:700;font-size:.88rem}
+.cn-bar{flex:1;height:8px;border-radius:99px;background:var(--line);overflow:hidden}.cn-bar i{display:block;height:100%;background:var(--ok);border-radius:99px}
+.cn-due{font-size:.86rem;color:var(--muted);white-space:nowrap}
+.cn-g{margin:8px 0}.cn-g > b{font-size:.84rem}
+.cn-ths{display:flex;gap:8px;overflow-x:auto;padding:6px 0 2px;scrollbar-width:none}
+.cn-th{position:relative;flex:none;width:76px;height:76px;border-radius:12px;overflow:hidden;border:0;padding:0;background:var(--line);cursor:pointer}
+.cn-th img{width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .2s}.cn-th img.in{opacity:1}.cn-th.off{display:none}
+.cn-act{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}.cn-act .btn{flex:1 1 160px}
+.cn-sh .cn-fph{display:flex;gap:8px}.cn-sh .cn-fph .btn{flex:1;display:flex;align-items:center;justify-content:center;gap:6px}.cn-sh .cn-fph svg{width:18px;height:18px}
+.cn-sh .cn-fth{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}.cn-fi{position:relative;width:72px;height:72px;border-radius:12px;overflow:hidden}.cn-fi img{width:100%;height:100%;object-fit:cover}
+.cn-fi button{position:absolute;top:2px;right:2px;width:26px;height:26px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#FFF;font-size:16px;line-height:1;cursor:pointer}
+.tag.cn-tag,.tag.sty-tag{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}.tag.cn-tag svg{width:13px;height:13px}
+.tag.cn-tag{background:#FDF0DC;color:#7A4A00}.tag.sty-tag{background:#F3E8FF;color:#5B2AA8}
+html[data-theme=dark] .tag.cn-tag{background:#3A2A10;color:#F2B35B}html[data-theme=dark] .tag.sty-tag{background:#2E1F4A;color:#D6C2FF}
+html[data-theme=sun] .tag.cn-tag,html[data-theme=sun] .tag.sty-tag{background:#FFFFFF;color:#000;border:2px solid #000}
+.m3-cn{position:absolute;left:-5px;top:-5px;width:17px;height:17px;border-radius:50%;background:#F2B13A;color:#3A2400;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 2px #FFFFFF;text-decoration:none}
+.m3-cn svg{width:12px;height:12px}
+.m3-kc{display:inline-flex;width:16px;height:16px;border-radius:50%;background:#F2B13A;color:#3A2400;align-items:center;justify-content:center;margin-right:6px;vertical-align:-3px;text-decoration:none}.m3-kc svg{width:11px;height:11px}
+.rep-cnph{display:grid;gap:10px;margin:8px 0 14px}.rep-cnf{margin:0}.rep-cnf figcaption{font-weight:700;font-size:.86rem}
+/* New site: what's happening here, part of */
+.nb-l{display:block;margin:14px 0 6px;font-weight:700;font-size:.9rem}
+.seg.nbuild{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}@media (max-width:420px){.seg.nbuild{grid-template-columns:1fr;border-radius:18px}.seg.nbuild button{min-height:44px}}.seg.nbuild button{white-space:normal;line-height:1.2;min-height:48px;padding:6px 6px;overflow-wrap:normal;word-break:normal;hyphens:none;text-wrap:balance}
+.npart{position:relative}.npart-l{display:grid;gap:4px;margin-top:6px}.npart-o{display:flex;flex-direction:column;align-items:flex-start;text-align:left;border:var(--bw) solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);font:inherit;padding:8px 12px;min-height:48px;cursor:pointer}
+.npart-o small{color:var(--muted);font-size:.78rem}.npart-on{display:flex;align-items:center;gap:10px;justify-content:space-between;padding:8px 12px;border-radius:12px;background:var(--tint);font-weight:700}
+/* the Stories tab (§9) */
+#paneStory .card{margin-bottom:12px;padding:16px}#paneStory h3{margin:0 0 8px}
+.sty-st{list-style:none;margin:4px 0 0;padding:0;display:flex;justify-content:space-between;position:relative}.sty-st::before{content:"";position:absolute;left:8px;right:8px;top:7px;height:2px;background:var(--line)}
+.sty-now{margin:10px 0 0;text-align:center;font-size:.92rem}.sty-now b{color:var(--ink)}
+.sty-st li{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:.72rem;font-weight:700;color:var(--muted);line-height:1.15;overflow-wrap:normal;word-break:normal;hyphens:none}
+.sty-st li{position:relative;z-index:1}.sty-st li i{display:block;width:16px;height:16px;border-radius:50%;border:2px solid var(--edge);background:var(--card)}.sty-st li.done i{background:var(--ok);border-color:var(--ok)}.sty-st li.done{color:var(--ink)}
+.sty-st li.now i{background:#7A4FD0;border-color:#7A4FD0;box-shadow:0 0 0 4px rgba(122,79,208,.18)}.sty-st li.now{color:var(--ink)}
+.sty-miss{margin:10px 0 0;text-align:center;font-size:.84rem}
+.sty-row{padding:8px 0;border-top:var(--bw) solid var(--line)}.sty-row:first-of-type{border-top:0}
+.sty-rh{display:flex;align-items:center;gap:8px}.sty-rh b{flex:1}.sty-rh .n{min-width:22px;height:22px;border-radius:11px;background:var(--tint);color:var(--blue);font-size:.74rem;font-weight:800;display:inline-flex;align-items:center;justify-content:center;padding:0 6px}
+.sty-rh .btn{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}.sty-rh .btn svg{width:16px;height:16px}
+.sty-kid{position:absolute;left:4px;bottom:4px;font-style:normal;font-size:.62rem;font-weight:800;background:rgba(0,0,0,.6);color:#FFF;border-radius:6px;padding:1px 4px}
+.sty-qh{display:flex;align-items:baseline;justify-content:space-between;gap:8px}.sty-dots{display:flex;gap:6px;margin:2px 0 8px}.sty-dots i{width:10px;height:10px;border-radius:50%;background:var(--line)}.sty-dots i.ok{background:var(--ok)}.sty-dots i.on{box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--blue)}
+.sty-qa,.sty-acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.sty-qa .btn{display:inline-flex;align-items:center;gap:6px}.sty-qa .btn svg{width:16px;height:16px}.sty-qa .btn:last-child{margin-left:auto}
+.sty-acts .btn{flex:1 1 140px}
+.sty-txt{white-space:normal;line-height:1.55;font-size:.95rem}
+#paneStory textarea{width:100%}
 /* the photo sheet */
 .bsh.ph-sh{z-index:2300} /* above a contact sheet, under the app's own confirm */
 .ph-sh .phs{display:flex;flex-direction:column;align-items:stretch;gap:10px;padding-bottom:8px}
@@ -3677,10 +3730,12 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
         <div class="links" id="pLinks"></div>
       </div>
       <div id="pRepair"></div>
+      <div id="pBuild"></div>
       <div class="seg ptabs" role="tablist" aria-label="What do you want to do?">
         <button type="button" role="tab" id="tabPin" aria-selected="true" aria-controls="panePin">Pin location</button>
         <button type="button" role="tab" id="tabVisit" aria-selected="false" aria-controls="paneVisit">Site visit</button>
         <button type="button" role="tab" id="tabHist" aria-selected="false" aria-controls="paneHist">History</button>
+        <button type="button" role="tab" id="tabStory" aria-selected="false" aria-controls="paneStory">Stories</button>
       </div>
 
       <div id="panePin" role="tabpanel" aria-labelledby="tabPin">
@@ -3721,6 +3776,7 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
         <div id="vw"></div>
       </div>
 
+      <div id="paneStory" role="tabpanel" aria-labelledby="tabStory" class="hidden"><div id="styBody" data-testid="sty_tab"></div></div>
       <div id="paneHist" role="tabpanel" aria-labelledby="tabHist" class="hidden">
         <div id="prjBar"></div>
         <div id="prjTl"></div>
@@ -3744,6 +3800,10 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
         </div>
         <label for="nVillage">Village / community</label>
         <input type="text" id="nVillage" placeholder="e.g. Kiptoo, Nandi" autocomplete="off">
+        <span class="lbl nb-l" id="l-nBuild">What’s happening here?</span>
+        <div class="seg nbuild" role="group" aria-labelledby="l-nBuild" id="nBuild" data-testid="new_build"><button type="button" data-v="" aria-pressed="true">Already built</button><button type="button" data-v="building" aria-pressed="false">Being built now</button><button type="button" data-v="planned" aria-pressed="false">Planned</button></div>
+        <label for="nPartQ">Part of (optional)</label>
+        <div class="npart"><input type="text" id="nPartQ" placeholder="Search projects, e.g. Ndalat" autocomplete="off" data-testid="new_part"><div class="npart-l" id="nPartL"></div><div class="npart-on hidden" id="nPartOn"></div></div>
         <label for="nNote">Notes (optional)</label>
         <textarea id="nNote" placeholder="Who asked, how many people, current water source…"></textarea>
         <div class="media"><span id="nPhotoBtn"></span><span id="nVoiceBtn"></span></div>
@@ -3935,7 +3995,7 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
   var jget = function (k, d) { try { return JSON.parse(store.get(k) || 'null') || d; } catch (e) { return d; } };
   // the RAFIKI logo (dark and light versions) for headers
   var LOGO = '<img class="lg-d" src="/img/logo-dark-bold.webp" alt="RAFIKI" width="64" height="22"><img class="lg-l" src="/img/logo-light-bold.webp" alt="" width="64" height="22">';
-  var S = { gmaps: null, mode: store.get('rfPinMode') || '', photo: store.get('rfPinPhoto') || '', pin: store.get('rfPin') || '', gen: Number(store.get('rfPinGen')) || 0, name: store.get('rfPinName') || '', who: store.get('rfPinWho') || '', projects: jget('rfPinList', []), repairs: jget('rfPinRepairs', {}), visits: jget('rfPinVisits', {}), admin: jget('rfPinRole', {}).admin || false, jobs: jget('rfPinRole', {}).jobs || [], assigned: jget('rfPinRole', {}).assigned || [], confirmed: jget('rfPinRole', {}).confirmed || {}, reviewOpen: 0, lang: store.get('rfPinLang') || '', units: store.get('rfPinUnits') || 'km', srvHome: store.get('rfPinSrvHome') || '', gpsHome: '',
+  var S = { stages: (function () { try { return JSON.parse(localStorage.getItem('rfPinStages') || '{}') || {}; } catch (e) { return {}; } })(), stories: (function () { try { return JSON.parse(localStorage.getItem('rfPinStories') || '{}') || {}; } catch (e) { return {}; } })(), gmaps: null, mode: store.get('rfPinMode') || '', photo: store.get('rfPinPhoto') || '', pin: store.get('rfPin') || '', gen: Number(store.get('rfPinGen')) || 0, name: store.get('rfPinName') || '', who: store.get('rfPinWho') || '', projects: jget('rfPinList', []), repairs: jget('rfPinRepairs', {}), visits: jget('rfPinVisits', {}), admin: jget('rfPinRole', {}).admin || false, jobs: jget('rfPinRole', {}).jobs || [], assigned: jget('rfPinRole', {}).assigned || [], confirmed: jget('rfPinRole', {}).confirmed || {}, reviewOpen: 0, lang: store.get('rfPinLang') || '', units: store.get('rfPinUnits') || 'km', srvHome: store.get('rfPinSrvHome') || '', gpsHome: '',
     me: jget('rfPinMe', null), filter: store.get('rfPinFilter') || 'missing', ftype: store.get('rfPinType') || '', cur: null, here: null, hereAt: 0, view: 'vLock', prev: 'vMap', routeMode: false, pickedRoute: [], route: jget('rfPinRoute', []), dismissed: {} };
   var CENTER = { ke: [0.3, 37.9, 7], tz: [-6.3, 34.8, 6], ug: [1.4, 32.3, 7], mw: [-13.3, 34.3, 7] };
   var CNAME = { ke: 'Kenya', tz: 'Tanzania', ug: 'Uganda', mw: 'Malawi' };
@@ -4259,7 +4319,7 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
     if (first) bkInit();
     if (fldQrHash()) return; // a QR sticker: #p=<id> (field tools)
     if (cwHash(location.hash, first, mode)) return; // #chat/<id>, #chat/join/<token> (chatw)
-    var h = location.hash, m = /^#p\/(\d+)(?:\/(visit|hist))?$/.exec(h), o = /^#office(?:\/([a-z]+))?$/.exec(h), me = /^#me(\/team)?$/.exec(h);
+    var h = location.hash, m = /^#p\/(\d+)(?:\/(visit|hist|story))?$/.exec(h), o = /^#office(?:\/([a-z]+))?$/.exec(h), me = /^#me(\/team)?$/.exec(h);
     var v = { '#map': 'vMap', '#list': 'vList', '#route': 'vRoute', '#search': 'vSearch', '#new': 'vNew', '#report': 'vReport', '#chat': 'vChat' }[h] || (o ? 'vOffice' : me ? 'vMe' : '');
     BK.shown = h; BK.mode = first ? 'fresh' : mode || '';
     if (first && v) bkFresh(v); // a fresh open starts the screen over; the sub-tab comes from the address
@@ -4331,8 +4391,9 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
       .then(function (r) { return r.json().catch(function () { return { ok: false, reason: 'down' }; }).then(function (j) { j.status = r.status; return j; }); })
       .catch(function () { return { ok: false, reason: 'offline', status: 0 }; });
   }
-  function sendFile(updateId, blob, kind, label) {
+  function sendFile(updateId, blob, kind, label, extra) {
     var fd = new FormData(); fd.append('update', updateId); if (label) fd.append('label', label);
+    if (extra) Object.keys(extra).forEach(function (k) { fd.append(k, extra[k]); }); // e.g. a construction stage: stage + project
     var ext = kind === 'voice' ? (/mp4|m4a|aac/.test(blob.type) ? 'm4a' : /ogg/.test(blob.type) ? 'ogg' : 'webm') : 'jpg';
     fd.append('file', blob, (kind === 'voice' ? 'voice.' : 'photo.') + ext);
     return fetch('/api/pin-photo', { method: 'POST', headers: pinHdr(), body: fd })
@@ -4386,7 +4447,7 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
             files.forEach(function (f, i) {
               up = up.then(function (stop) {
                 if (stop || i < (it.done || 0)) return stop;
-                return sendFile(it.updateId, f.blob, f.kind, f.label).then(function (p) {
+                return sendFile(it.updateId, f.blob, f.kind, f.label, f.extra).then(function (p) {
                   if (p.ok) { it.done = i + 1; return false; }
                   if (p.status === 0 || p.status >= 500 || p.status === 429 || p.status === 401) return true;
                   lost++; it.done = i + 1; return false; // rejected (e.g. too large): skip it
@@ -4831,6 +4892,7 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
       store.set('rfPinName', S.name); store.set('rfPinWho', S.who);
       S.projects = j.projects || []; S.repairs = j.repairs || {}; S.visits = j.visits || {}; prjTestsSet(j.tests); saveList();
       if (j.me) { S.me = j.me; store.set('rfPinMe', JSON.stringify(j.me)); }
+      cnTake(j); // construction stages and stories (mew)
       if (j.photos) { phAll(j.photos); if (j.me && j.me.photo) phSet(S.name, j.me.photo); } // profile photos (mew)
       setTimeout(meHint, 1400);
       setTimeout(bellLoad, 0);   // the bell in the header counts what's new
@@ -5148,7 +5210,7 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
   }
   // a pin: the kind of project inside, a ring for how it is, a dot when a visit or water test is due (map3w)
   function mpaPinHtml(x, mine) {
-    return '<i class="mpa-dot c-' + x.c + '">' + oic(mpaTyIcon(x.p)[0]) + (mpaStOk(x.p, 'due', mine) ? '<s class="m3-due"></s>' : '') + '</i>';
+    return '<i class="mpa-dot c-' + x.c + '">' + oic(mpaTyIcon(x.p)[0]) + (mpaStOk(x.p, 'due', mine) ? '<s class="m3-due"></s>' : '') + (cnOn(x.p) ? '<s class="m3-cn" data-testid="pin_build">' + cnIc() + '</s>' : '') + '</i>';
   }
   function mpaDraw(anim) {
     var map = MPA.map; if (!map) return;
@@ -5381,7 +5443,8 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
       k.innerHTML = oic('mpaInfo') + '<span>' + tr('Key', 'Rangi') + '</span>';
       $('mclKeyPop').setAttribute('aria-label', tr('Map key', 'Maelezo ya rangi'));
       $('mclKeyPop').innerHTML = ['ok', 'repair', 'bad', 'old'].map(function (c) { return '<span><i class="c-' + c + '"></i>' + mpaCondName(c) + '</span>'; }).join('') +
-        '<span><s class="m3-kd"></s>' + tr('Visit or water test due', 'Ziara au kipimo cha maji kinasubiri') + '</span>';
+        '<span><s class="m3-kd"></s>' + tr('Visit or water test due', 'Ziara au kipimo cha maji kinasubiri') + '</span>' +
+        '<span><s class="m3-kc">' + cnIc() + '</s>' + tr('Being built', 'Inajengwa') + '</span>';
     };
     keyUi();
     $('mpaKey').addEventListener('click', function () { buzz(); mclKey(!MCL.key); });
@@ -5801,6 +5864,255 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
     img.src = url;
   }
 
+  // --- polish-mew: construction stages (me-brief §8) and the Stories tab (me-brief §9) -------------------------
+  // Contract: me-contract.md. Stage data comes with the snapshot (S.stages) and each project's ?id= answer.
+  var CNS = ['planned', 'foundation', 'walls', 'roof', 'finishing', 'handed'];
+  var CNL = { planned: ['Planned', 'Imepangwa'], foundation: ['Foundation', 'Msingi'], walls: ['Walls', 'Kuta'], roof: ['Roof', 'Paa'], finishing: ['Finishing', 'Umaliziaji'], handed: ['Handed over', 'Imekabidhiwa'] };
+  var CN_HAT = '<path d="M4 17h16"/><path d="M5.5 17a6.5 6.5 0 0 1 13 0"/><path d="M10 10.8V7.5h4v3.3"/>';
+  function cnName(k) { var x = CNL[k]; return x ? tr(x[0], x[1]) : k; }
+  function cnIc() { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + CN_HAT + '</svg>'; }
+  function cnTake(j) { if (j.stages) { S.stages = j.stages; store.set('rfPinStages', JSON.stringify(S.stages)); } if (j.stories) { S.stories = j.stories; store.set('rfPinStories', JSON.stringify(S.stories)); } }
+  // being built: a stage record that isn't handed over, or the board says Under construction
+  function cnOn(p) { var x = p && S.stages[p.id]; return x ? x.s !== 'handed' : !!(p && /under construction/i.test(p.status || '')); }
+  function cnBehind() { return Object.keys(S.stages).filter(function (k) { return S.stages[k].behind; }).length; }
+  var CNX = { rec: {}, link: {}, src: {} };
+  // a stage or story photo: fetched with the app's sign-in, shown from a blob
+  function cnSrc(url) {
+    if (CNX.src[url]) return Promise.resolve(CNX.src[url]);
+    return fetch(url, { headers: pinHdr(), credentials: 'same-origin' }).then(function (r) { return r.ok ? r.blob() : null; }).then(function (b) { if (!b || !/^image\//.test(b.type)) return null; CNX.src[url] = URL.createObjectURL(b); return CNX.src[url]; }).catch(function () { return null; });
+  }
+  function cnThumbs(root) { qa('img[data-src]', root).forEach(function (im) { var u = im.getAttribute('data-src'); im.removeAttribute('data-src'); cnSrc(u).then(function (s) { if (s) { im.src = s; im.classList.add('in'); } else im.closest('.cn-th') && im.closest('.cn-th').classList.add('off'); }); }); }
+  function cnPhotoUrl(pid, a, w) { return '/api/pin-photo?stage=' + encodeURIComponent(pid) + '&asset=' + encodeURIComponent(a) + '&w=' + (w || 480); }
+  function cnView(items, i, en, sw) { Promise.all(items.map(function (x) { return cnSrc(x.big); })).then(function (srcs) { prjView({ en: en, sw: sw, items: items.map(function (x, k) { return { url: srcs[k] || '', at: x.at, by: x.by }; }).filter(function (x) { return x.url; }) }, i); }); }
+
+  // the Construction card on the project page
+  function cnUi(p, j) {
+    var box = $('pBuild'); if (!box || !p) return;
+    if (j && j.ok) { CNX.rec[p.id] = j.stage || null; CNX.link[p.id] = j.linked || null; }
+    var r = CNX.rec[p.id], ix = S.stages[p.id], lk = CNX.link[p.id] || {};
+    var show = r || ix || cnOn(p) || (lk.children && lk.children.length) || lk.parent;
+    if (!show) { box.innerHTML = ''; return; }
+    var cur = r ? r.stage : ix ? ix.s : 'planned', at = CNS.indexOf(cur), pct = r ? r.pct : ix ? ix.pct : null, due = r ? r.due : ix ? ix.due : null, behind = r ? r.behind : ix ? ix.behind : false;
+    var hist = (r && r.hist) || [], last = function (k) { return hist.filter(function (h) { return h.stage === k; }).pop(); };
+    var tracked = !!(r || ix || cnOn(p));
+    var h = '<div class="card cn" data-testid="cn_card"><div class="cn-h"><span class="cn-ic" aria-hidden="true">' + cnIc() + '</span><h3>' + tr('Construction', 'Ujenzi') + '</h3>' + (behind ? '<span class="tag bad cn-late" data-testid="cn_behind">' + tr('Behind schedule', 'Imechelewa') + '</span>' : '') + '</div>';
+    if (lk.parent) h += '<p class="cn-link">' + tr('Part of: ', 'Sehemu ya: ') + '<button type="button" class="lnk" data-cn-open="' + esc(lk.parent.id) + '">' + esc(lk.parent.t || ('#' + lk.parent.id)) + '</button></p>';
+    (lk.children || []).forEach(function (c) { h += '<p class="cn-link">' + tr('Also here: ', 'Pia hapa: ') + '<button type="button" class="lnk" data-cn-open="' + esc(c.id) + '">' + esc(c.t || ('#' + c.id)) + '</button>' + (c.s ? ' · ' + esc(cnName(c.s)) : '') + '</p>'; });
+    if (tracked) {
+      h += '<ol class="cn-st" aria-label="' + esc(tr('Stages', 'Hatua')) + '">' + CNS.map(function (k, i) {
+        var e = last(k), st = i < at ? 'done' : i === at ? 'now' : 'todo';
+        return '<li class="' + st + '"' + (i === at ? ' aria-current="step"' : '') + '><i aria-hidden="true"></i><b>' + esc(cnName(k)) + '</b>' + (e && st !== 'todo' ? '<small>' + esc(dDay(e.at)) + (e.by ? ' · ' + esc(e.by) : '') + '</small>' : '') + '</li>';
+      }).join('') + '</ol>';
+      h += '<div class="cn-meta">' + (pct != null ? '<div class="cn-pct"><span>' + tr(pct + '% done', 'Imekamilika ' + pct + '%') + '</span><span class="cn-bar" role="img" aria-label="' + pct + '%"><i style="width:' + pct + '%"></i></span></div>' : '') +
+        (due ? '<span class="cn-due">' + tr('Expected finish: ', 'Inatarajiwa kukamilika: ') + esc(dDay(due + 'T12:00:00')) + '</span>' : '') +
+        (cur !== 'handed' ? '<button type="button" class="btn light small" data-cn="meta">' + tr('% done and finish date', '% na tarehe ya kukamilika') + '</button>' : '') + '</div>';
+      // galleries, one per stage that has photos
+      var gal = CNS.map(function (k) { var ph = []; hist.forEach(function (e) { if (e.stage === k) (e.photos || []).forEach(function (a) { ph.push({ a: a, at: e.at, by: e.by }); }); }); return { k: k, ph: ph }; }).filter(function (g) { return g.ph.length; });
+      if (gal.length) h += gal.map(function (g) { return '<div class="cn-g"><b>' + esc(cnName(g.k)) + ' · ' + g.ph.length + '</b><div class="cn-ths">' + g.ph.map(function (x, i) { return '<button type="button" class="cn-th" data-cn-g="' + g.k + '" data-cn-i="' + i + '" aria-label="' + esc(tr('Photo ' + (i + 1) + ', ' + cnName(g.k), 'Picha ' + (i + 1) + ', ' + cnName(g.k))) + '"><img alt="" data-src="' + esc(cnPhotoUrl(p.id, x.a)) + '"></button>'; }).join('') + '</div></div>'; }).join('');
+      var next = CNS[at + 1];
+      h += '<div class="cn-act">' + (next && next !== 'handed' ? '<button type="button" class="btn" data-cn="next" data-testid="cn_next">' + tr('Move to ' + cnName(next), 'Hamia ' + cnName(next)) + '</button>' : '') +
+        (next === 'handed' && S.admin ? '<button type="button" class="btn" data-cn="hand" data-testid="cn_hand">' + tr('Hand over', 'Kabidhi') + '</button>' : '') +
+        (cur !== 'handed' ? '<button type="button" class="btn light" data-cn="same">' + tr('Add progress photos', 'Ongeza picha za maendeleo') + '</button>' : '') + '</div>';
+    }
+    h += '</div>';
+    box.innerHTML = h; box._g = function (k) { var ph = []; hist.forEach(function (e) { if (e.stage === k) (e.photos || []).forEach(function (a) { ph.push({ big: cnPhotoUrl(p.id, a, 1600), at: e.at, by: e.by }); }); }); return ph; };
+    cnThumbs(box);
+  }
+  function cnTap(e) {
+    var p = S.cur; if (!p) return;
+    var o = e.target.closest('[data-cn-open]'); if (o) { buzz(); return openProj(o.getAttribute('data-cn-open'), 'pin'); }
+    var t = e.target.closest('[data-cn-g]'); if (t) { var k = t.getAttribute('data-cn-g'); return cnView($('pBuild')._g(k), +t.getAttribute('data-cn-i'), 'Construction: ' + CNL[k][0], 'Ujenzi: ' + CNL[k][1]); }
+    var b = e.target.closest('[data-cn]'); if (!b) return; buzz();
+    var r = CNX.rec[p.id], ix = S.stages[p.id], cur = r ? r.stage : ix ? ix.s : 'planned', k = b.getAttribute('data-cn');
+    if (k === 'meta') return cnMeta(p, r || {});
+    if (k === 'next') return cnMove(p, CNS[CNS.indexOf(cur) + 1], cur);
+    if (k === 'same') return cnMove(p, cur, cur);
+    if (k === 'hand') return cnMove(p, 'handed', cur);
+  }
+  // a stage change: at least one photo (required), a short note, % done and finish date optional
+  function cnMove(p, stage, cur) {
+    var same0 = stage === cur, files = [];
+    var w = panel(esc(same0 ? tr('Progress: ', 'Maendeleo: ') + cnName(stage) : stage === 'handed' ? tr('Hand over', 'Kabidhi') : tr('Move to ' + cnName(stage), 'Hamia ' + cnName(stage))),
+      '<div class="cn-f" data-testid="cn_form"><p class="muted">' + tr('Add at least one photo of the work, and a short note.', 'Ongeza angalau picha moja ya kazi, na maelezo mafupi.') + '</p>' +
+      '<div class="cn-fph"><button type="button" class="btn light" data-k="cam">' + oic('camera') + '<span>' + tr('Take a photo', 'Piga picha') + '</span></button><button type="button" class="btn light" data-k="pick">' + oic('image') + '<span>' + tr('Choose from gallery', 'Chagua kutoka kwenye picha') + '</span></button></div>' +
+      '<input type="file" accept="image/*" capture="environment" class="vh" data-k="fcam" tabindex="-1" aria-hidden="true"><input type="file" accept="image/*" multiple class="vh" data-k="fpick" tabindex="-1" aria-hidden="true">' +
+      '<div class="cn-fth" aria-live="polite"></div>' +
+      '<label for="cnNote">' + tr('Note', 'Maelezo') + '</label><textarea id="cnNote" maxlength="600" placeholder="' + esc(tr('e.g. Roof trusses up, iron sheets arrive Friday', 'mf. Kenchi za paa zimewekwa, mabati yanafika Ijumaa')) + '"></textarea>' +
+      '<div class="two"><div><label for="cnPct">' + tr('% done (optional)', '% iliyokamilika (si lazima)') + '</label><input id="cnPct" type="number" inputmode="numeric" min="0" max="100"></div><div><label for="cnDue">' + tr('Expected finish (optional)', 'Kukamilika kunatarajiwa (si lazima)') + '</label><input id="cnDue" type="date"></div></div>' +
+      '<p class="msg" aria-live="polite"></p><button type="button" class="btn block" data-k="save" data-testid="cn_save">' + tr('Save', 'Hifadhi') + '</button></div>', 'cn-sh');
+    var f = w.querySelector('.cn-f'), r = CNX.rec[p.id] || {};
+    if (r.pct != null) f.querySelector('#cnPct').value = r.pct; if (r.due) f.querySelector('#cnDue').value = r.due;
+    var draw = function () { if (files.length) { f.querySelector('.msg').textContent = ''; f.querySelector('.msg').className = 'msg'; } f.querySelector('.cn-fth').innerHTML = files.map(function (x, i) { return '<span class="cn-fi"><img alt="" src="' + x.url + '"><button type="button" data-rm="' + i + '" aria-label="' + esc(tr('Remove photo ' + (i + 1), 'Ondoa picha ' + (i + 1))) + '">×</button></span>'; }).join(''); };
+    f.addEventListener('click', function (e) {
+      var rm = e.target.closest('[data-rm]'); if (rm) { files.splice(+rm.getAttribute('data-rm'), 1); return draw(); }
+      var b = e.target.closest('button[data-k]'); if (!b) return; var k = b.getAttribute('data-k');
+      if (k === 'cam') f.querySelector('[data-k=fcam]').click(); else if (k === 'pick') f.querySelector('[data-k=fpick]').click();
+      else if (k === 'save') {
+        var m = f.querySelector('.msg');
+        if (!files.length) { m.className = 'msg bad'; m.textContent = tr('Add at least one photo first.', 'Ongeza angalau picha moja kwanza.'); return; }
+        var pv = f.querySelector('#cnPct').value, dv = f.querySelector('#cnDue').value, body = { action: 'stage', id: p.id, stage: stage, note: f.querySelector('#cnNote').value.trim(), by: S.name };
+        if (pv !== '') body.pct = Math.max(0, Math.min(100, Math.round(Number(pv)))); if (dv) body.due = dv;
+        var go = function () {
+          b.disabled = true; m.className = 'msg'; m.textContent = tr('Saving…', 'Inahifadhi…');
+          var label = 'Construction: ' + CNL[stage][0];
+          submit(body, files.map(function (x) { return { blob: x.blob, kind: 'photo', label: label, extra: { stage: stage, project: p.id } }; })).then(function (res) {
+            b.disabled = false;
+            if (res.state === 'locked') return lockOut({ reason: 'pin' });
+            if (res.state === 'failed') { m.className = 'msg bad'; m.textContent = res.text; return; }
+            var st = res.result && res.result.stage;
+            if (st) { CNX.rec[p.id] = st; S.stages[p.id] = Object.assign({}, S.stages[p.id], { s: st.stage, at: st.at, by: st.by, pct: st.pct, due: st.due, behind: st.behind }); store.set('rfPinStages', JSON.stringify(S.stages)); }
+            toast(res.state === 'queued' ? tr('Saved on this phone. It goes when there’s signal.', 'Imehifadhiwa kwenye simu. Itatumwa ukipata mtandao.') : tr('Saved ✓', 'Imehifadhiwa ✓'));
+            w.close(); cnUi(p, null); setTimeout(lastUi, 400);
+          });
+        };
+        if (stage === 'handed') poAsk(tr('Hand over ' + p.title + '?', 'Kabidhi ' + p.title + '?'), tr('The status in monday.com becomes Completed/Operational.', 'Hali kwenye monday.com inakuwa Completed/Operational.'), tr('Hand over', 'Kabidhi')).then(function (ok) { if (ok) go(); });
+        else go();
+      }
+    });
+    f.addEventListener('change', function (e) {
+      if (e.target.type !== 'file') return;
+      var fl = e.target.files ? Array.prototype.slice.call(e.target.files, 0, 6) : []; e.target.value = '';
+      Promise.all(fl.map(shrink)).then(function (bs) { bs.forEach(function (bl) { if (bl && files.length < 6) files.push({ blob: bl, url: URL.createObjectURL(bl) }); }); draw(); });
+    });
+  }
+  function cnMeta(p, r) {
+    var w = panel(esc(tr('% done and finish date', '% na tarehe ya kukamilika')), '<div class="cn-f"><div class="two"><div><label for="cnPct2">' + tr('% done', '% iliyokamilika') + '</label><input id="cnPct2" type="number" inputmode="numeric" min="0" max="100" value="' + (r.pct != null ? r.pct : '') + '"></div><div><label for="cnDue2">' + tr('Expected finish', 'Kukamilika kunatarajiwa') + '</label><input id="cnDue2" type="date" value="' + esc(r.due || '') + '"></div></div><p class="msg" aria-live="polite"></p><button type="button" class="btn block" data-k="save">' + tr('Save', 'Hifadhi') + '</button></div>', 'cn-sh');
+    w.querySelector('[data-k=save]').addEventListener('click', function () {
+      var b = this, m = w.querySelector('.msg'), pv = w.querySelector('#cnPct2').value, dv = w.querySelector('#cnDue2').value;
+      b.disabled = true;
+      api('POST', { action: 'stage-meta', id: p.id, pct: pv === '' ? null : Math.max(0, Math.min(100, Math.round(Number(pv)))), due: dv || null }).then(function (j) {
+        b.disabled = false; if (!j.ok) { m.className = 'msg bad'; m.textContent = why(j); return; }
+        CNX.rec[p.id] = j.stage; S.stages[p.id] = Object.assign({}, S.stages[p.id], { s: j.stage.stage, pct: j.stage.pct, due: j.stage.due, behind: j.stage.behind }); store.set('rfPinStages', JSON.stringify(S.stages));
+        toast(tr('Saved ✓', 'Imehifadhiwa ✓')); w.close(); cnUi(p, null);
+      });
+    });
+  }
+
+  // ---- Stories tab --------------------------------------------------------------------------------------------
+  var STY = { id: null, s: null, q: 0, busy: false, rec: null };
+  var STY_ST = [['not-started', 'Not started', 'Haijaanza'], ['collecting', 'Collecting', 'Inakusanywa'], ['draft', 'Draft ready', 'Rasimu iko tayari'], ['approved', 'Approved', 'Imeidhinishwa'], ['published', 'Published', 'Imechapishwa']];
+  var STY_ROWS = [['before', 'Before', 'Kabla'], ['progress', 'In progress', 'Wakati wa kazi'], ['after', 'After', 'Baada']];
+  function styApi(method, body, q, form) {
+    var h = Object.assign({ Accept: 'application/json' }, pinHdr()); if (body && !form) h['Content-Type'] = 'application/json';
+    return fetch('/api/story' + (q || ''), { method: method, headers: h, body: form || (body ? JSON.stringify(body) : undefined), credentials: 'same-origin' })
+      .then(function (r) { return r.json().catch(function () { return { ok: false, reason: 'down' }; }).then(function (j) { j.status = r.status; return j; }); })
+      .catch(function () { return { ok: false, reason: 'offline', status: 0 }; });
+  }
+  function styWhy(j) { return j.reason === 'consent' ? tr('Photo consent is needed first: a photo shows children.', 'Ruhusa ya picha inahitajika kwanza: picha inaonyesha watoto.') : j.reason === 'no-text' ? tr('Draft the story first.', 'Andaa hadithi kwanza.') : j.reason === 'offline' ? tr('Stories need a signal.', 'Hadithi zinahitaji mtandao.') : why(j); }
+  function styLoad(p) {
+    var box = $('styBody'); if (!box || !p) return;
+    if (STY.id !== p.id) { STY.id = p.id; STY.s = null; STY.q = 0; }
+    if (!STY.s) box.innerHTML = '<div class="skel"></div><div class="skel"></div>';
+    styApi('GET', null, '?id=' + encodeURIComponent(p.id)).then(function (j) {
+      if (!S.cur || S.cur.id !== p.id) return;
+      if (!j.ok) { if (!STY.s) box.innerHTML = '<p class="msg bad">' + esc(styWhy(j)) + '</p>'; return; }
+      styGot(j.story);
+    });
+  }
+  function styGot(s) {
+    STY.s = s; S.stories[s.id] = { st: s.status, n: QSN(s), b: s.photos.before.length, i: s.photos.progress.length, a: s.photos.after.length, c: s.consent, at: new Date().toISOString() };
+    store.set('rfPinStories', JSON.stringify(S.stories)); styDraw();
+  }
+  function QSN(s) { return ['q1', 'q2', 'q3', 'q4', 'q5', 'q6'].filter(function (q) { return String(s.answers[q] || '').trim(); }).length; }
+  function styMissing(s) {
+    var n = QSN(s), m = [];
+    if (n < 6) m.push(tr(n + ' of 6 answers', 'Majibu ' + n + ' kati ya 6'));
+    if (!s.photos.after.length) m.push(tr('no after photos', 'hakuna picha za baada'));
+    m.push(tr('consent: ', 'ruhusa: ') + (s.consent === 'received' ? tr('received', 'imepatikana') : tr('not yet', 'bado')));
+    return m.join(', ');
+  }
+  function styDraw() {
+    var s = STY.s, box = $('styBody'); if (!s || !box) return;
+    var at = STY_ST.map(function (x) { return x[0]; }).indexOf(s.status), adm = !!S.admin, P = s.prompts || {};
+    // five dots on a line (labels would crowd in Kiswahili), and the current step in words under them
+    var h = '<div class="card sty-h" data-testid="sty_status"><ol class="sty-st">' + STY_ST.map(function (x, i) { return '<li class="' + (i < at ? 'done' : i === at ? 'now' : 'todo') + '"' + (i === at ? ' aria-current="step"' : '') + ' title="' + esc(tr(x[1], x[2])) + '"><i aria-hidden="true"></i><span class="vh">' + tr(x[1], x[2]) + '</span></li>'; }).join('') + '</ol>' +
+      '<p class="sty-now" data-testid="sty_now"><b>' + tr(STY_ST[at][1], STY_ST[at][2]) + '</b> · ' + tr('step ' + (at + 1) + ' of 5', 'hatua ' + (at + 1) + ' kati ya 5') + (STY_ST[at + 1] ? ' · ' + tr('next: ', 'inayofuata: ') + tr(STY_ST[at + 1][1], STY_ST[at + 1][2]) : '') + '</p>' +
+      '<p class="muted sty-miss">' + esc(styMissing(s)) + '</p></div>';
+    // photos
+    h += '<div class="card sty-ph"><h3>' + tr('Photos', 'Picha') + '</h3>' + STY_ROWS.map(function (r) {
+      var ph = s.photos[r[0]] || [];
+      return '<div class="sty-row" data-row="' + r[0] + '"><div class="sty-rh"><b>' + tr(r[1], r[2]) + '</b><span class="n">' + ph.length + '</span><button type="button" class="btn light small" data-sty="add" data-row="' + r[0] + '" data-testid="sty_add_' + r[0] + '">' + oic('camera') + '<span>' + tr('Add photo', 'Ongeza picha') + '</span></button></div>' +
+        (ph.length ? '<div class="cn-ths">' + ph.map(function (x, i) { return '<button type="button" class="cn-th" data-sty-ph="' + r[0] + '" data-i="' + i + '" aria-label="' + esc(tr(r[1] + ' photo ' + (i + 1), 'Picha ' + (i + 1) + ', ' + r[2])) + '"><img alt="" data-src="/api/story?id=' + encodeURIComponent(s.id) + '&amp;asset=' + encodeURIComponent(x.id) + '&amp;w=480">' + (x.children ? '<em class="sty-kid" title="' + esc(tr('Children in photo', 'Watoto kwenye picha')) + '">' + tr('Children', 'Watoto') + '</em>' : '') + '</button>'; }).join('') + '</div>' : '') + '</div>';
+    }).join('') + '<input type="file" accept="image/*" class="vh" id="styFile" tabindex="-1" aria-hidden="true"></div>';
+    // questions: one card at a time
+    var qs = ['q1', 'q2', 'q3', 'q4', 'q5', 'q6'], q = qs[STY.q], pr = P[q] || {};
+    h += '<div class="card sty-q" data-testid="sty_q"><div class="sty-qh"><h3>' + tr('Questions', 'Maswali') + '</h3><span class="muted">' + tr('Question ' + (STY.q + 1) + ' of 6', 'Swali ' + (STY.q + 1) + ' kati ya 6') + '</span></div>' +
+      '<div class="sty-dots" aria-hidden="true">' + qs.map(function (x, i) { return '<i class="' + (String(s.answers[x] || '').trim() ? 'ok' : '') + (i === STY.q ? ' on' : '') + '"></i>'; }).join('') + '</div>' +
+      '<label for="styA">' + esc(tr(pr.en || q, pr.sw)) + '</label><textarea id="styA" rows="4">' + esc(s.answers[q] || '') + '</textarea>' +
+      '<div class="sty-qa"><button type="button" class="btn light small" data-sty="prev"' + (STY.q ? '' : ' disabled') + '>' + tr('Back', 'Rudi') + '</button>' + (window.MediaRecorder ? '<button type="button" class="btn light small" data-sty="rec">' + oic('mic') + '<span>' + (STY.rec ? tr('Stop', 'Simamisha') : tr('Record', 'Rekodi')) + '</span></button>' : '') +
+      '<button type="button" class="btn small" data-sty="save" data-testid="sty_qsave">' + (STY.q < 5 ? tr('Save and next', 'Hifadhi, endelea') : tr('Save', 'Hifadhi')) + '</button></div></div>';
+    // quote and credit
+    h += '<div class="card sty-quote"><h3>' + tr('Quote', 'Nukuu') + '</h3><label for="styQ">' + esc(tr((P.quote || {}).en || 'Quote', (P.quote || {}).sw)) + '</label><textarea id="styQ" rows="3">' + esc(s.quote || '') + '</textarea>' +
+      '<div class="two"><div><label for="styQB">' + esc(tr((P.quoteBy || {}).en || 'Who said it', (P.quoteBy || {}).sw)) + '</label><input id="styQB" type="text" value="' + esc(s.quoteBy || '') + '"></div><div><label for="styCr">' + esc(tr((P.credit || {}).en || 'Photo credit', (P.credit || {}).sw)) + '</label><input id="styCr" type="text" value="' + esc(s.credit || S.name || '') + '"></div></div>' +
+      '<button type="button" class="btn light small" data-sty="quote">' + tr('Save quote', 'Hifadhi nukuu') + '</button></div>';
+    // consent
+    h += '<div class="card sty-c"><h3>' + tr('Photo consent', 'Ruhusa ya picha') + '</h3><div class="seg" role="group" aria-label="' + esc(tr('Photo consent', 'Ruhusa ya picha')) + '"><button type="button" data-sty="consent" data-v="received" aria-pressed="' + (s.consent === 'received') + '">' + tr('Received', 'Imepatikana') + '</button><button type="button" data-sty="consent" data-v="not-yet" aria-pressed="' + (s.consent !== 'received') + '">' + tr('Not yet', 'Bado') + '</button></div>' +
+      (ROWSKID(s) ? '<p class="muted">' + tr('A photo shows children, so consent is needed before it can be approved.', 'Picha inaonyesha watoto, kwa hiyo ruhusa inahitajika kabla ya kuidhinishwa.') + '</p>' : '') + '</div>';
+    // the story
+    h += '<div class="card sty-s"><h3>' + tr('The story', 'Hadithi') + '</h3>' + (s.text ? (adm ? '<textarea id="styT" rows="10">' + esc(s.text) + '</textarea>' : '<div class="sty-txt">' + esc(s.text).replace(/\n/g, '<br>') + '</div>') + '<p class="muted">' + tr(wc(s.text) + ' words', 'Maneno ' + wc(s.text)) + '</p>' : '<p class="muted">' + tr('Not written yet. “Draft the story” writes it from the answers, the quote and the project.', 'Bado haijaandikwa. “Andaa hadithi” inaiandika kutoka kwa majibu, nukuu na mradi.') + '</p>') +
+      '<div class="sty-acts"><button type="button" class="btn' + (s.text ? ' light' : '') + '" data-sty="draft" data-testid="sty_draft">' + tr('Draft the story', 'Andaa hadithi') + '</button>' +
+      (adm && s.text ? '<button type="button" class="btn light" data-sty="text">' + tr('Save text', 'Hifadhi maandishi') + '</button>' : '') +
+      (adm && (s.status === 'draft' || s.status === 'collecting') ? '<button type="button" class="btn" data-sty="approve" data-testid="sty_approve"' + (s.text ? '' : ' disabled') + '>' + tr('Approve', 'Idhinisha') + '</button>' : '') +
+      (adm && s.status === 'approved' ? '<button type="button" class="btn" data-sty="publish">' + tr('Mark published', 'Weka imechapishwa') + '</button>' : '') +
+      ((s.status === 'draft') || (adm && (s.status === 'approved' || s.status === 'published')) ? '<button type="button" class="btn light" data-sty="collecting">' + tr('Back to Collecting', 'Rudi kukusanya') + '</button>' : '') + '</div><p class="msg" id="styMsg" aria-live="polite"></p></div>';
+    box.innerHTML = h; cnThumbs(box);
+  }
+  function ROWSKID(s) { return ['before', 'progress', 'after'].some(function (r) { return (s.photos[r] || []).some(function (x) { return x.children; }); }); }
+  function wc(t) { return String(t || '').trim().split(/\s+/).filter(Boolean).length; }
+  function stySay(cls, t) { var m = $('styMsg'); if (m) { m.className = 'msg ' + cls; m.textContent = t; } else if (t) toast(t); }
+  function styDo(body, okText) {
+    if (STY.busy) return; STY.busy = true;
+    return styApi('POST', body).then(function (j) { STY.busy = false; if (!j.ok) { stySay('bad', styWhy(j)); return j; } styGot(j.story); if (okText) toast(okText); return j; });
+  }
+  function styTap(e) {
+    var s = STY.s, p = S.cur; if (!s || !p) return;
+    var th = e.target.closest('[data-sty-ph]'); if (th) { var r = th.getAttribute('data-sty-ph'), rl = STY_ROWS.filter(function (x) { return x[0] === r; })[0]; return cnView((s.photos[r] || []).map(function (x) { return { big: '/api/story?id=' + encodeURIComponent(s.id) + '&asset=' + encodeURIComponent(x.id) + '&w=1600', at: x.at, by: x.by }; }), +th.getAttribute('data-i'), rl[1], rl[2]); }
+    var b = e.target.closest('[data-sty]'); if (!b) return; var k = b.getAttribute('data-sty'); buzz();
+    var ans = function () { var o = { action: 'answers', id: s.id }; o[['q1', 'q2', 'q3', 'q4', 'q5', 'q6'][STY.q]] = $('styA').value.trim(); return o; };
+    if (k === 'save') return styDo(ans()).then(function (j) { if (j && j.ok && STY.q < 5) { STY.q++; styDraw(); } });
+    if (k === 'prev') { STY.q = Math.max(0, STY.q - 1); return styDraw(); }
+    if (k === 'quote') return styDo({ action: 'answers', id: s.id, quote: $('styQ').value.trim(), quoteBy: $('styQB').value.trim(), credit: $('styCr').value.trim() }, tr('Saved ✓', 'Imehifadhiwa ✓'));
+    if (k === 'consent') return styDo({ action: 'consent', id: s.id, value: b.getAttribute('data-v') });
+    if (k === 'draft') { b.disabled = true; b.textContent = tr('Writing…', 'Inaandika…'); return styDo({ action: 'draft', id: s.id }, tr('Draft ready ✓', 'Rasimu iko tayari ✓')); }
+    if (k === 'text') return styDo({ action: 'text', id: s.id, text: $('styT').value }, tr('Saved ✓', 'Imehifadhiwa ✓'));
+    if (k === 'approve') return styDo(Object.assign({ action: 'approve', id: s.id }, $('styT') ? { text: $('styT').value } : {}), tr('Approved ✓', 'Imeidhinishwa ✓'));
+    if (k === 'publish') return styDo({ action: 'publish', id: s.id }, tr('Marked published ✓', 'Imewekwa imechapishwa ✓'));
+    if (k === 'collecting') return styDo({ action: 'collecting', id: s.id });
+    if (k === 'add') { STY.row = b.getAttribute('data-row'); return $('styFile').click(); }
+    if (k === 'rec') return styRec(b);
+  }
+  // a photo for a row: asks whether children are in it (consent then matters)
+  function styPhoto(file) {
+    var s = STY.s, row = STY.row; if (!s || !row || !file) return;
+    shrink(file).then(function (bl) {
+      if (!bl) return;
+      var w = panel(esc(tr('Children in this photo?', 'Watoto kwenye picha hii?')), '<p class="muted">' + tr('If children can be seen, the family’s consent is needed before the story is approved.', 'Kama watoto wanaonekana, ruhusa ya familia inahitajika kabla hadithi kuidhinishwa.') + '</p><button type="button" class="btn block" data-k="no">' + tr('No children', 'Hakuna watoto') + '</button><button type="button" class="btn light block" data-k="yes" style="margin-top:8px">' + tr('Yes, children', 'Ndiyo, watoto') + '</button>', 'sty-sh');
+      w.addEventListener('click', function (e) {
+        var b = e.target.closest('[data-k]'); if (!b) return; w.close();
+        var fd = new FormData(); fd.append('action', 'photo'); fd.append('id', s.id); fd.append('row', row); fd.append('children', b.getAttribute('data-k') === 'yes' ? 'true' : 'false'); fd.append('file', bl, 'story.jpg');
+        toast(tr('Uploading…', 'Inapakia…'));
+        styApi('POST', null, '', fd).then(function (j) { if (!j.ok) return toast(styWhy(j)); styGot(j.story); toast(tr('Photo added ✓', 'Picha imeongezwa ✓')); });
+      });
+    });
+  }
+  // a spoken answer: typed out on the server when speech-to-text is on, else kept as audio on monday.com
+  function styRec(b) {
+    if (STY.rec) { STY.rec.stop(); return; }
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return toast(tr('This phone can’t record here.', 'Simu hii haiwezi kurekodi hapa.'));
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(function (st) {
+      var ch = [], mr = new MediaRecorder(st); STY.rec = mr; styDraw();
+      mr.ondataavailable = function (e) { if (e.data && e.data.size) ch.push(e.data); };
+      mr.onstop = function () {
+        st.getTracks().forEach(function (t) { t.stop(); }); STY.rec = null;
+        var bl = new Blob(ch, { type: (mr.mimeType || 'audio/webm').split(';')[0] }), s = STY.s, q = ['q1', 'q2', 'q3', 'q4', 'q5', 'q6'][STY.q];
+        var fd = new FormData(); fd.append('action', 'voice'); fd.append('id', s.id); fd.append('q', q); fd.append('file', bl, 'answer.webm');
+        toast(tr('Sending the recording…', 'Inatuma rekodi…'));
+        styApi('POST', null, '', fd).then(function (j) { if (!j.ok) { styDraw(); return toast(styWhy(j)); } styGot(j.story); toast(j.typed ? tr('Typed out ✓', 'Imeandikwa ✓') : tr('Kept as a voice note on monday.com', 'Imehifadhiwa kama ujumbe wa sauti monday.com')); });
+      };
+      mr.start();
+    }).catch(function () { toast(tr('The microphone isn’t allowed.', 'Kipaza sauti hakiruhusiwi.')); });
+  }
+
   var DROPC = { b: 'mgA', g: 'mgG', c: 'mgC', p: 'mgP', y: 'mgY' };
   function drop(c, mood) {
     var mouth = mood === 'smile' ? '<path d="M10.4 18.1c.9.8 2.3.8 3.2 0" stroke="#04263F" stroke-width=".7" stroke-linecap="round" fill="none"/>' : mood === 'o' ? '<ellipse cx="12" cy="18.4" rx=".7" ry=".85" fill="#04263F"/>' : '';
@@ -5996,7 +6308,7 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
 
   // project tabs: swipe the page left or right (not on a map, a text box or a scrolling row)
   (function () {
-    var x0 = null, y0 = 0, ORDER = ['pin', 'visit', 'hist'];
+    var x0 = null, y0 = 0, ORDER = ['pin', 'visit', 'hist', 'story'];
     var skip = function (t) { for (var n = t; n && n !== document.body; n = n.parentElement) { if (n.matches && n.matches('.leaflet-container, input, textarea, select, .map, .photos, .seg')) return true; if (n.scrollWidth > n.clientWidth + 4 && /auto|scroll/.test(getComputedStyle(n).overflowX)) return true; } return false; };
     $('vProj').addEventListener('touchstart', function (e) { x0 = e.touches.length === 1 && !skip(e.target) ? e.touches[0].clientX : null; y0 = e.touches[0].clientY; }, { passive: true });
     $('vProj').addEventListener('touchend', function (e) {
@@ -6027,7 +6339,14 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
     var stc = S.repairs[p.id] ? (S.repairs[p.id].state === 'notworking' ? ' st-rep st-bad' : ' st-rep') : p.gps ? ' st-pin' : ' st-miss';
     return '<button class="row' + stc + '" style="--i:' + (rowI++) + '" type="button" data-id="' + esc(p.id) + '"' + (check ? ' role="checkbox" aria-checked="' + on + '"' + (dis ? ' aria-disabled="true"' : '') : '') + '>' +
       (check ? '<span class="ck" aria-hidden="true">' + (on ? '✓' : '') + '</span>' : '') + thumb(p) +
-      '<span class="tx"><span class="t">' + esc(p.title) + '</span><span class="s">' + esc(sub(p)) + '</span>' + (tag ? '<span class="tg">' + tag + '</span>' : '') + '</span>' + (check ? '' : '<span class="chev" aria-hidden="true">' + RCHEV + '</span>') + '</button>';
+      '<span class="tx"><span class="t">' + esc(p.title) + '</span><span class="s">' + esc(sub(p)) + '</span>' + (tag || cnOn(p) || sPass(p, 'sok') ? '<span class="tg">' + (tag || '') + rowBadges(p) + '</span>' : '') + '</span>' + (check ? '' : '<span class="chev" aria-hidden="true">' + RCHEV + '</span>') + '</button>';
+  }
+  // a small "being built · Walls" tag and a story badge when the story is approved (mew)
+  function rowBadges(p) {
+    var x = S.stages[p.id], b = '';
+    if (cnOn(p)) b += '<span class="tag cn-tag" data-testid="row_build">' + cnIc() + (x ? esc(cnName(x.s)) : tr('Building', 'Inajengwa')) + (x && x.behind ? ' · ' + tr('late', 'imechelewa') : '') + '</span>';
+    if (sPass(p, 'sok')) b += '<span class="tag sty-tag" data-testid="row_story">✨ ' + tr('Story', 'Hadithi') + '</span>';
+    return b;
   }
   var DUE_DAYS = 180, URGO = { urgent: 0, month: 1, watch: 2 };
   function ageDays(p) { var v = S.visits[p.id]; return v ? (Date.now() - Date.parse(v.at)) / 864e5 : 1e6; }
@@ -6058,6 +6377,8 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
       if (near && !p.gps) return false;
       if (f === 'repairs' && !S.repairs[p.id]) return false;
       if (f === 'due' && !lDue(p)) return false;
+      if (f === 'build' && !cnOn(p)) return false;
+      if ((f === 'snone' || f === 'sdraft' || f === 'sok') && !sPass(p, f)) return false;
       return true;
     });
     var from = near ? spotLL() : S.here;
@@ -6068,6 +6389,8 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
     $('count').textContent = near ? (S.here ? 'Closest pinned projects to you' : from ? tr('Closest to ', 'Karibu zaidi na ') + spotName() : 'Finding where you are…')
       : f === 'missing' ? tr(rows.length + ' with no location', rows.length + ' bila mahali')
       : f === 'repairs' ? tr(rows.length + ' to fix · most urgent first', rows.length + ' za kutengeneza · za haraka kwanza')
+      : f === 'build' ? tr(rows.length + ' under construction', rows.length + ' zinajengwa')
+      : f === 'snone' ? tr(rows.length + ' need a story', rows.length + ' zinahitaji hadithi') : f === 'sdraft' ? tr(rows.length + ' with a story draft ready', rows.length + ' zenye rasimu ya hadithi') : f === 'sok' ? tr(rows.length + ' with an approved story', rows.length + ' zenye hadithi iliyoidhinishwa')
       : f === 'due' ? tr(rows.length + ' not visited in 6 months · longest first', rows.length + ' bila ziara miezi 6 · za muda mrefu kwanza') + (prjTestCount(rows) ? tr(' · ' + prjTestCount(rows) + ' due a water test', ' · ' + prjTestCount(rows) + ' zinahitaji kipimo cha maji') : '')
       : rows.length + ' projects';
     // the country shows on its own button beside the count
@@ -6118,15 +6441,18 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
 
   // --- Projects: the calm head, the chip row and the Filter sheet, in step with the Office tabs (pwmap) ---------
   var LTY = []; // the kinds of project in the chosen country: [key, name, how many]
-  var LCH = [['all', 'All', 'Yote'], ['missing', 'No location', 'Hakuna mahali'], ['near', 'Nearby', 'Karibu nawe'], ['repairs', 'Repairs', 'Matengenezo'], ['due', 'Due a visit', 'Inasubiri ziara']];
+  var LCH = [['all', 'All', 'Yote'], ['missing', 'No location', 'Hakuna mahali'], ['near', 'Nearby', 'Karibu nawe'], ['repairs', 'Repairs', 'Matengenezo'], ['due', 'Due a visit', 'Inasubiri ziara'],
+    ['build', 'Under construction', 'Inajengwa'], ['snone', 'Needs a story', 'Inahitaji hadithi'], ['sdraft', 'Story draft ready', 'Rasimu ya hadithi'], ['sok', 'Story approved', 'Hadithi imeidhinishwa']]; // construction and stories (mew)
+  function styOf(p) { var x = S.stories[p.id]; return x ? x.st : 'not-started'; }
+  function sPass(p, f) { var st = styOf(p); return f === 'snone' ? st === 'not-started' || st === 'collecting' : f === 'sdraft' ? st === 'draft' : st === 'approved' || st === 'published'; }
   function lDue(p) { return !!p.gps && (ageDays(p) >= DUE_DAYS || prjTestDue(p)); }
   function lHeadUi(scope) {
-    var n = scope.length, miss = 0, rep = 0, due = 0;
-    scope.forEach(function (p) { if (!p.gps) miss++; if (S.repairs[p.id]) rep++; if (lDue(p)) due++; });
+    var n = scope.length, miss = 0, rep = 0, due = 0, bld = 0, sn = 0, sd = 0, so = 0;
+    scope.forEach(function (p) { if (!p.gps) miss++; if (S.repairs[p.id]) rep++; if (lDue(p)) due++; if (cnOn(p)) bld++; if (sPass(p, 'snone')) sn++; else if (sPass(p, 'sdraft')) sd++; else so++; });
     $('lHi').textContent = tr((n - miss) + ' of ' + n + ' projects pinned · ' + miss + '\u00a0to\u00a0go', 'Miradi ' + (n - miss) + ' kati ya ' + n + ' ina mahali · ' + miss + '\u00a0bado');
     var tile = function (k, v, label, cls) { return '<button type="button" class="rr-num' + (cls ? ' ' + cls : '') + '" data-f="' + k + '" aria-pressed="' + (S.filter === k) + '"><b>' + v + '</b><small>' + label + '</small></button>'; };
     $('lNums').innerHTML = tile('missing', miss, tr('No location', 'Hakuna mahali'), miss ? '' : 'off') + tile('repairs', rep, tr('Repairs', 'Matengenezo'), rep ? 'bad' : 'off') + tile('due', due, tr('Due a visit', 'Inasubiri ziara'), due ? '' : 'off');
-    lChipsUi({ all: n, missing: miss, repairs: rep, due: due });
+    lChipsUi({ all: n, missing: miss, repairs: rep, due: due, build: bld, snone: sn, sdraft: sd, sok: so });
   }
   function lChipsUi(cnt) {
     var row = $('lChips');
@@ -6265,13 +6591,14 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
   function tab(which, from) {
     var was = S.tab;
     S.tab = which; if (S.view === 'vProj') nav('vProj', 'sub');
-    if (S.view === 'vProj' && was && was !== which) { var pn = $({ pin: 'panePin', visit: 'paneVisit', hist: 'paneHist' }[which]); var fwd = from ? from === 'l' : ['pin', 'visit', 'hist'].indexOf(which) > ['pin', 'visit', 'hist'].indexOf(was); pn.classList.remove('pane-l', 'pane-r'); void pn.offsetWidth; pn.classList.add(fwd ? 'pane-l' : 'pane-r'); }
-    [['pin', 'tabPin', 'panePin'], ['visit', 'tabVisit', 'paneVisit'], ['hist', 'tabHist', 'paneHist']].forEach(function (t) {
+    if (S.view === 'vProj' && was && was !== which) { var pn = $({ pin: 'panePin', visit: 'paneVisit', hist: 'paneHist', story: 'paneStory' }[which]); var fwd = from ? from === 'l' : ['pin', 'visit', 'hist', 'story'].indexOf(which) > ['pin', 'visit', 'hist', 'story'].indexOf(was); pn.classList.remove('pane-l', 'pane-r'); void pn.offsetWidth; pn.classList.add(fwd ? 'pane-l' : 'pane-r'); }
+    [['pin', 'tabPin', 'panePin'], ['visit', 'tabVisit', 'paneVisit'], ['hist', 'tabHist', 'paneHist'], ['story', 'tabStory', 'paneStory']].forEach(function (t) {
       $(t[1]).setAttribute('aria-selected', t[0] === which ? 'true' : 'false'); $(t[2]).classList.toggle('hidden', t[0] !== which);
     });
     if (which === 'pin') setTimeout(pick.resize, 20); else pick.stop();
     if (which === 'visit') locate(function () { distUi(); });
     if (which === 'hist') histUi();
+    if (which === 'story') styLoad(S.cur); // the Stories tab (mew)
     visitBarUi();
   }
   // during a site visit the bottom tab bar steps aside, so the visit's own Back / Next bar has the room
@@ -6279,6 +6606,10 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
   $('tabPin').addEventListener('click', function () { tab('pin'); });
   $('tabVisit').addEventListener('click', function () { tab('visit'); });
   $('tabHist').addEventListener('click', function () { tab('hist'); });
+  $('tabStory').addEventListener('click', function () { tab('story'); });
+  $('pBuild').addEventListener('click', function (e) { cnTap(e); });
+  $('styBody').addEventListener('click', function (e) { styTap(e); });
+  $('styBody').addEventListener('change', function (e) { if (e.target.id === 'styFile') { var f = e.target.files && e.target.files[0]; e.target.value = ''; styPhoto(f); } });
 
   function openProj(id, pane, how) {
     var p = byId(id); if (!p) return;
@@ -6288,7 +6619,7 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
     $('pSub').textContent = sub(p);
     $('pHero').classList.toggle('hidden', !p.photo);
     if (p.photo) { $('pImg').onerror = function () { $('pHero').classList.add('hidden'); }; $('pImg').src = photoUrl(p, 960); }
-    $('pTiles')._c = undefined; curUi(); repairUi(); $('pLast').innerHTML = '';
+    $('pTiles')._c = undefined; curUi(); repairUi(); cnUi(p, null); $('pLast').innerHTML = '';
     msg('mSave', '', ''); $('confirm').classList.add('hidden'); $('bSave').classList.remove('hidden'); pMedia.clear();
     visitOpen(); visitLine(); $('hList').innerHTML = ''; prjOpen(p);
     show('vProj', how);
@@ -6365,7 +6696,7 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
   function lastUi() {
     var p = S.cur; if (!p || !navigator.onLine) return;
     api('GET', null, '?id=' + encodeURIComponent(p.id)).then(function (j) {
-      ofbProjCost(p, j); if (S.cur && S.cur.id === p.id && j && j.ok) tilesUi(j.costs || null);
+      ofbProjCost(p, j); if (S.cur && S.cur.id === p.id && j && j.ok) { tilesUi(j.costs || null); cnUi(p, j); }
       if (S.cur && S.cur.id === p.id && j.ok && j.visits) { prevVisits[p.id] = j.visits; if (V && STEPS[V.step][0] === 'read') vRender(); }
       if (!S.cur || S.cur.id !== p.id || !j.ok || !j.last) { $('pLast').innerHTML = ''; return; }
       $('pLast').innerHTML = '<span>' + esc(tr('Last pinned by ', 'Mahali paliwekwa mwisho na ')) + ctWho(j.last.by) + ' · ' + esc(when(j.last.at)) + '</span><button class="btn light small" id="bUndo" type="button">' + oic('undo') + '<span>' + tr('Undo', 'Tendua') + '</span></button>';
@@ -6709,20 +7040,14 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
     } else if (st === 'people' && !water(p)) {
       var cr = CARER[kind(p)] || CARER.building;
       h += '<h2>' + tr('Who looks after it', 'Anayeisimamia') + '</h2><div class="two">' + inp('c.chair', tr(cr[0], cr[1]), { ph: tr('Name', 'Jina') }) + inp('c.phone', tr('Their phone', 'Simu yake'), { type: 'tel', ph: '07…' }) + '</div>' +
-        '<h2 style="margin-top:22px">✨ ' + tr('Story moment (optional)', 'Kisa (si lazima)') + '</h2><p class="muted">' + tr('A few words from someone it helps, for the website.', 'Maneno machache kutoka kwa mtu anayesaidiwa, kwa ajili ya tovuti.') + '</p>' +
-        inp('story.quote', tr('What they said', 'Walichosema'), { area: 1, ph: tr('e.g. “Our children learn in a dry classroom now.”', 'mf. “Watoto wetu sasa wanasoma darasani pasipo kuvuja.”') }) +
-        inp('story.by', tr('Who said it', 'Aliyesema'), { ph: tr('e.g. Mary, a parent', 'mf. Mary, mzazi') }) +
-        '<label class="tick"><input type="checkbox" data-p="story.consent"' + (V.story.consent ? ' checked' : '') + '> ' + tr('They agreed to be quoted and photographed for RAFIKI’s website', 'Wamekubali kunukuliwa na kupigwa picha kwa tovuti ya RAFIKI') + '</label>';
+        '<h2 style="margin-top:22px">✨ ' + tr('Story', 'Hadithi') + '</h2><label class="tick"><input type="checkbox" data-p="storyGo"' + (V.storyGo ? ' checked' : '') + '> ' + tr('Add to this project’s story (the Stories tab opens after the visit)', 'Ongeza kwenye hadithi ya mradi huu (Hadithi inafunguka baada ya ziara)') + '</label>';
     } else if (st === 'people') {
       h += '<h2>' + tr('Water committee', 'Kamati ya maji') + '</h2>' +
         '<span class="lbl">' + tr('Is the committee active?', 'Je, kamati iko hai?') + '</span>' + seg('c.active', [['yes', tr('Yes', 'Ndiyo')], ['no', tr('No', 'Hapana')], ['unsure', tr('Not sure', 'Sina uhakika')]]) +
         '<div class="two">' + inp('c.chair', tr('Chairperson', 'Mwenyekiti'), { ph: tr('Name', 'Jina') }) + inp('c.phone', tr('Their phone', 'Simu yake'), { type: 'tel', ph: '07…' }) + '</div>' +
         '<span class="lbl">' + tr('Is a user fee collected?', 'Je, ada ya matumizi inakusanywa?') + '</span>' + seg('c.fee', [['yes', tr('Yes', 'Ndiyo')], ['no', tr('No', 'Hapana')], ['unsure', tr('Not sure', 'Sina uhakika')]]) +
         inp('c.fund', tr('Maintenance fund now (KES)', 'Mfuko wa matengenezo sasa (KES)'), { num: 1, ph: 'e.g. 3000' }) +
-        '<h2 style="margin-top:22px">✨ ' + tr('Story moment (optional)', 'Kisa (si lazima)') + '</h2><p class="muted">' + tr('A few words from someone who uses the water, for the website.', 'Maneno machache kutoka kwa mtumiaji wa maji, kwa ajili ya tovuti.') + '</p>' +
-        inp('story.quote', tr('What they said', 'Walichosema'), { area: 1, ph: tr('e.g. “Now my girls get to school on time.”', 'mf. “Sasa wasichana wangu wanafika shuleni kwa wakati.”') }) +
-        inp('story.by', tr('Who said it', 'Aliyesema'), { ph: tr('e.g. Mary, mother of three', 'mf. Mary, mama wa watoto watatu') }) +
-        '<label class="tick"><input type="checkbox" data-p="story.consent"' + (V.story.consent ? ' checked' : '') + '> ' + tr('They agreed to be quoted and photographed for RAFIKI’s website', 'Wamekubali kunukuliwa na kupigwa picha kwa tovuti ya RAFIKI') + '</label>';
+        '<h2 style="margin-top:22px">✨ ' + tr('Story', 'Hadithi') + '</h2><label class="tick"><input type="checkbox" data-p="storyGo"' + (V.storyGo ? ' checked' : '') + '> ' + tr('Add to this project’s story (the Stories tab opens after the visit)', 'Ongeza kwenye hadithi ya mradi huu (Hadithi inafunguka baada ya ziara)') + '</label>';
     } else if (st === 'review') {
       var pr = problems().map(function (k) { return tr(I[k][0], I[k][1]); }).concat(V.other ? [V.other] : []);
       var rows = [];
@@ -6809,6 +7134,7 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
     if (act === 'send') return visitSend(b);
     if (act === 'share') return visitShare();
     if (act === 'again') { V = blank(S.cur); return vRender(); }
+    if (act === 'story') { V = blank(S.cur); vRender(); return tab('story'); }
   });
   $('vw').addEventListener('input', function (e) {
     var el = e.target, pth = el.getAttribute && el.getAttribute('data-p'); if (!pth || !V) return;
@@ -6865,6 +7191,7 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
     $('vw').innerHTML = '<div class="card wiz done-card"><div class="okmark' + (q ? ' queued' : '') + '" aria-hidden="true"><svg viewBox="0 0 88 88"><circle cx="44" cy="44" r="40"/><path d="' + (q ? 'M44 26v22M44 60v2' : 'M27 45l11 11 23-24') + '"/></svg></div><h2>' + (q ? tr('Saved on this phone', 'Imehifadhiwa kwenye simu') : tr('Visit report sent', 'Ripoti ya ziara imetumwa')) + '</h2>' +
       '<p class="muted">' + (q ? tr('It will be sent to monday.com when you have signal.', 'Itatumwa monday.com ukipata mtandao.') : tr('It’s on the project in monday.com.', 'Iko kwenye mradi katika monday.com.')) + '</p>' +
       '<button class="btn block" type="button" data-act="share">' + brand('whatsapp') + tr('Share with the team (WhatsApp)', 'Shiriki na timu (WhatsApp)') + '</button>' +
+      (V.storyGo ? '<button class="btn block" type="button" data-act="story" style="margin-top:10px" data-testid="visit_story">✨ ' + tr('Add to this project’s story', 'Ongeza kwenye hadithi ya mradi') + '</button>' : '') +
       '<button class="btn block light" type="button" data-act="again" style="margin-top:10px">' + tr('Start another visit here', 'Anza ziara nyingine hapa') + '</button></div>';
   }
   function shareText() {
@@ -7270,6 +7597,7 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
     var d = jget('rfPinNewDraft', null); // a half-done form from before (navw)
     if (d) {
       newRest = true; $('nName').value = d.name || ''; $('nVillage').value = d.village || ''; $('nNote').value = d.note || ''; if (d.type) $('nType').value = d.type; if (d.ck && CENTER[d.ck]) $('nCountry').value = d.ck;
+      nbSet(d.build || ''); nbPart(d.part || null);
       if (d.ll) nPick.at(d.ll);
       setTimeout(function () { if (d.ll && nPick.pick) { nPick.how = d.how || 'map'; nPick.acc = d.acc || 0; } newRest = false; newUi(); }, 120);
     }
@@ -7279,9 +7607,24 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
   var newRest = false;
   function newDraftSave() {
     if (!newOpen || newRest) return;
-    var d = { name: $('nName').value, village: $('nVillage').value, note: $('nNote').value, type: $('nType').value, ck: $('nCountry').value, ll: nPick.pick, how: nPick.how, acc: nPick.acc };
-    if (!d.name.trim() && !d.village.trim() && !d.note.trim() && !d.ll) store.del('rfPinNewDraft'); else store.set('rfPinNewDraft', JSON.stringify(d));
+    var d = { name: $('nName').value, village: $('nVillage').value, note: $('nNote').value, type: $('nType').value, ck: $('nCountry').value, ll: nPick.pick, how: nPick.how, acc: nPick.acc, build: NB.build, part: NB.part };
+    if (!d.name.trim() && !d.village.trim() && !d.note.trim() && !d.ll && !d.build && !d.part) store.del('rfPinNewDraft'); else store.set('rfPinNewDraft', JSON.stringify(d));
   }
+  // "What's happening here?" (already built / being built now / planned) and "Part of" another project (mew, me-brief §8)
+  var NB = { build: '', part: null };
+  function nbSet(v) { NB.build = v || ''; qa('#nBuild button').forEach(function (b) { b.setAttribute('aria-pressed', String((b.getAttribute('data-v') || '') === NB.build)); }); }
+  function nbPart(x) {
+    NB.part = x && x.id ? { id: String(x.id), t: x.t || '' } : null; $('nPartL').innerHTML = '';
+    $('nPartOn').classList.toggle('hidden', !NB.part); $('nPartQ').classList.toggle('hidden', !!NB.part);
+    $('nPartOn').innerHTML = NB.part ? '<span>' + esc(NB.part.t) + '</span><button type="button" class="btn light small" id="nPartX">' + tr('Change', 'Badilisha') + '</button>' : '';
+  }
+  $('nBuild').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; buzz(); nbSet(b.getAttribute('data-v')); newDraftSave(); });
+  $('nPartQ').addEventListener('input', function () {
+    var q = this.value.trim().toLowerCase();
+    $('nPartL').innerHTML = q.length < 2 ? '' : S.projects.filter(function (p) { return (p.title + ' ' + (p.area || '')).toLowerCase().indexOf(q) >= 0; }).slice(0, 6).map(function (p) { return '<button type="button" class="npart-o" data-id="' + esc(p.id) + '"><b>' + esc(p.title) + '</b><small>' + esc(sub(p)) + '</small></button>'; }).join('') || '<p class="muted">' + tr('No projects match.', 'Hakuna mradi unaolingana.') + '</p>';
+  });
+  $('nPartL').addEventListener('click', function (e) { var o = e.target.closest('[data-id]'); if (!o) return; buzz(); var p = byId(o.getAttribute('data-id')); nbPart({ id: p.id, t: p.title }); $('nPartQ').value = ''; newDraftSave(); });
+  $('nPartOn').addEventListener('click', function (e) { if (e.target.closest('#nPartX')) { nbPart(null); newDraftSave(); $('nPartQ').focus(); } });
   $('vNew').addEventListener('input', newDraftSave); $('vNew').addEventListener('change', newDraftSave);
   // New site, started over: the map at its first view (what was typed stays)
   function newFresh() { if (!newOpen) return; var c = CENTER[$('nCountry').value] || CENTER.ke; nPick.view(S.here || [c[0], c[1]], S.here ? 15 : c[2]); }
@@ -7289,16 +7632,21 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
   $('bNewSave').addEventListener('click', function () {
     var ll = nPick.pick, name = $('nName').value.trim(); if (!ll || !name) return;
     if (nMedia.busy()) { msg('mNew', 'warn', 'Stop the recording first.'); return; }
-    pwAsk(tr('Add this site to monday.com?', 'Ongeza eneo hili kwenye monday.com?'), tr('“' + name + '” at ' + fmt(ll) + '. It goes onto the board as “Due Diligence”.', '“' + name + '” mahali ' + fmt(ll) + '. Linaingia kwenye ubao kama “Due Diligence”.'), tr('Add this site', 'Ongeza eneo hili'), tr('Not yet', 'Bado'), function () { newSend(ll, name); });
+    var stl = NB.build === 'building' ? 'Under Construction' : NB.build === 'planned' ? 'Planned and/or Permitted' : 'Due Diligence';
+    pwAsk(tr('Add this site to monday.com?', 'Ongeza eneo hili kwenye monday.com?'), tr('“' + name + '” at ' + fmt(ll) + '. It goes onto the board as “' + stl + '”.', '“' + name + '” mahali ' + fmt(ll) + '. Linaingia kwenye ubao kama “' + stl + '”.') + (NB.part ? tr(' Part of ' + NB.part.t + '.', ' Sehemu ya ' + NB.part.t + '.') : ''), tr('Add this site', 'Ongeza eneo hili'), tr('Not yet', 'Bado'), function () { newSend(ll, name); });
   });
   function newSend(ll, name) {
     $('bNewSave').disabled = true; msg('mNew', '', 'Adding…');
-    submit({ action: 'new', name: name, ck: $('nCountry').value, village: $('nVillage').value.trim(), type: $('nType').value, note: $('nNote').value.trim(), lat: ll[0], lng: ll[1], by: S.name }, nMedia.files()).then(function (r) {
+    var nb = { action: 'new', name: name, ck: $('nCountry').value, village: $('nVillage').value.trim(), type: $('nType').value, note: $('nNote').value.trim(), lat: ll[0], lng: ll[1], by: S.name };
+    if (NB.build) nb.build = NB.build; if (NB.part) nb.parent = NB.part.id;
+    var stl = NB.build === 'building' ? 'Under Construction' : NB.build === 'planned' ? 'Planned and/or Permitted' : 'Due Diligence';
+    submit(nb, nMedia.files()).then(function (r) {
       $('bNewSave').disabled = false;
       if (r.state === 'locked') return lockOut({ reason: 'pin' });
       if (r.state === 'failed') { msg('mNew', 'bad', r.text); return; }
-      nPick.saved(ll); ['nName', 'nVillage', 'nNote'].forEach(function (x) { $(x).value = ''; }); nMedia.clear(); newUi();
-      msg('mNew', r.state === 'queued' ? 'warn' : 'ok', r.state === 'queued' ? 'Saved on this phone. It will be added to monday.com when you have signal.' : 'Added to monday.com as “Due Diligence” ✓' + (r.note ? ' ' + r.note : ''));
+      nPick.saved(ll); ['nName', 'nVillage', 'nNote'].forEach(function (x) { $(x).value = ''; }); nMedia.clear(); nbSet(''); nbPart(null); newUi();
+      if (r.result && r.result.stage && r.result.id) { S.stages[r.result.id] = { s: r.result.stage.stage, at: r.result.stage.at, by: r.result.stage.by, parent: r.result.stage.parent, t: name }; store.set('rfPinStages', JSON.stringify(S.stages)); }
+      msg('mNew', r.state === 'queued' ? 'warn' : 'ok', r.state === 'queued' ? 'Saved on this phone. It will be added to monday.com when you have signal.' : tr('Added to monday.com as “' + stl + '” ✓', 'Imeongezwa monday.com kama “' + stl + '” ✓') + (r.note ? ' ' + r.note : ''));
     });
   }
 
@@ -7372,6 +7720,9 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
     "Back to all chats": "Rudi kwenye gumzo zote", "Archived": "Zilizohifadhiwa", "Messages": "Jumbe", "Jump to the newest message": "Nenda kwenye ujumbe mpya zaidi", "Message": "Ujumbe"});
   // polish-chatpw
   Object.assign(SW, {"Chat settings": "Mipangilio ya gumzo", "Jump to @mention": "Nenda kwenye kutajwa kwa @", "Drop photos to send": "Achilia picha kuzituma", "Share to chat": "Shiriki kwenye gumzo"});
+  // polish-mew
+  Object.assign(SW, {"What’s happening here?": "Kuna nini hapa?", "Already built": "Imeshajengwa", "Being built now": "Inajengwa sasa", "Planned": "Imepangwa", "Part of (optional)": "Sehemu ya (si lazima)",
+    "Search projects, e.g. Ndalat": "Tafuta miradi, mf. Ndalat", "Stories": "Hadithi", "Me": "Mimi"});
   // dates in the app's own style ("Thu 24 Oct", "24 Oct, 18:34") and relative times, when the language changes after they're drawn
   [['Sun', 'Jpl'], ['Mon', 'Jtt'], ['Tue', 'Jnn'], ['Wed', 'Jtn'], ['Thu', 'Alh'], ['Fri', 'Iju'], ['Sat', 'Jmo']].forEach(function (w) { SWP.push([new RegExp('^' + w[0] + ' (\\d{1,2}) ([A-Z][a-z]{2})$'), w[1] + ' $1 $2']); });
   SWP.push([/^(\d{1,2}) ([A-Z][a-z]{2})((?: \d{4})?(?:, \d{2}:\d{2})?)$/, "$1 $2$3"], [/^(\d+) h ago$/, "saa $1 zilizopita"], [/^(\d+) d ago$/, "siku $1 zilizopita"], [/^(\d+) wk ago$/, "wiki $1 zilizopita"],
@@ -7440,9 +7791,23 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
     if (!$('repCountry').dataset.set) { $('repCountry').value = homeCk() || ''; $('repCountry').dataset.set = '1'; }
     show('vReport', how);
     $('repBody').innerHTML = '<p class="muted">Loading…</p>';
-    var draw = function () { $('repBody').innerHTML = reportHtml($('repMonth').value, $('repCountry').value); repCards($('repBody')); };
+    var draw = function () { $('repBody').innerHTML = reportHtml($('repMonth').value, $('repCountry').value); repCards($('repBody')); repCn($('repBody')); };
     if (!navigator.onLine && actCache) return draw();
     api('GET', null, '?activity=1').then(function (j) { if (j.ok) actCache = j.activity || []; if (actCache) draw(); else $('repBody').innerHTML = '<p class="msg bad">' + esc(why(j)) + '</p>'; });
+  }
+  // the month's construction photos under the Construction table (each project's stage record)
+  function repCn(root) {
+    var box = root.querySelector('.rep-cnph'); if (!box || !navigator.onLine) return;
+    var from = +box.getAttribute('data-from'), to = +box.getAttribute('data-to');
+    (box.getAttribute('data-ids') || '').split(',').filter(Boolean).forEach(function (id) {
+      api('GET', null, '?id=' + encodeURIComponent(id)).then(function (j) {
+        if (!j.ok || !j.stage || !box.isConnected) return;
+        var ph = []; (j.stage.hist || []).forEach(function (e) { var t = Date.parse(e.at); if (t >= from && t < to) (e.photos || []).forEach(function (a) { ph.push({ a: a, s: e.stage }); }); });
+        if (!ph.length) return; var p = byId(id);
+        box.insertAdjacentHTML('beforeend', '<figure class="rep-cnf"><figcaption>' + esc(p ? p.title : id) + '</figcaption><div class="cn-ths">' + ph.slice(0, 4).map(function (x) { return '<span class="cn-th"><img alt="' + esc(cnName(x.s)) + '" data-src="' + esc(cnPhotoUrl(id, x.a, 480)) + '"></span>'; }).join('') + '</div></figure>');
+        cnThumbs(box);
+      });
+    });
   }
   // on a phone each table row becomes a card: every cell gets its column name (hidden on wider screens and in print)
   function repCards(root) {
@@ -7485,6 +7850,15 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
       open.map(function (x) { return '<tr><td><b>' + esc(x.p ? x.p.title : x.r.t || x.id) + '</b><br><small>' + esc(x.p ? x.p.country : '') + ' · ' + (x.r.state === 'notworking' ? '❌ not working' : '⚠️ needs repair') + '</small></td><td>' + esc(dDay(x.r.at, true)) + '<br><small>' + esc(isSms(x.r) ? tr('Community (SMS)', 'Jamii (SMS)') : x.r.by) + '</small></td><td>' + esc(x.r.urgency ? URG[x.r.urgency][0] : '–') + '</td><td>' + esc((x.r.problems || []).join(', ') || x.r.note || '–') + '</td><td>' + esc(x.r.parts || '–') + '</td><td>' + (x.r.cost ? Number(x.r.cost).toLocaleString() : '–') + '</td></tr>'; }).join('') + '</tbody></table></div>' : '<p class="muted">None. 🎉</p>');
     h += '<h2>Visits this month</h2>' + (visits.length ? '<div class="tw"><table class="rt"><thead><tr><th>Date</th><th>Project</th><th>By</th><th>Result</th></tr></thead><tbody>' +
       visits.slice().sort(function (a, b) { return a.at.localeCompare(b.at); }).map(function (e) { var p = byId(e.id); return '<tr><td>' + esc(dDay(e.at)) + '</td><td>' + esc(p ? p.title : e.t) + '</td><td>' + esc(isSms(e) ? tr('Community (SMS)', 'Jamii (SMS)') : e.by) + '</td><td>' + (STATES[e.s] ? STATES[e.s][0] + ' ' + STATES[e.s][1] : '') + (e.u ? ' · ' + URG[e.u][0] : '') + '</td></tr>'; }).join('') + '</tbody></table></div>' : '<p class="muted">No visits recorded in the app this month.</p>');
+    // construction stages and stories this month (mew)
+    var stg = ev.filter(function (e) { return e.a === 'stage'; }).sort(function (a, b) { return a.at.localeCompare(b.at); });
+    var inM = function (x) { var t = Date.parse(x.at || ''); return t >= from && t < to; };
+    var sts = Object.keys(S.stories || {}).filter(function (id) { return inC(id) && inM(S.stories[id]); }).map(function (id) { return S.stories[id]; });
+    var sCol = sts.filter(function (x) { return x.st !== 'not-started'; }).length, sOk = sts.filter(function (x) { return x.st === 'approved' || x.st === 'published'; }).length;
+    if (stg.length) h += '<h2>' + tr('Construction', 'Ujenzi') + '</h2><div class="tw"><table class="rt"><thead><tr><th>Date</th><th>Project</th><th>Stage</th><th>By</th></tr></thead><tbody>' +
+      stg.map(function (e) { var p = byId(e.id); return '<tr><td>' + esc(dDay(e.at)) + '</td><td>' + esc(p ? p.title : e.t || e.id) + '</td><td>' + esc(cnName(e.s)) + '</td><td>' + esc(e.by) + '</td></tr>'; }).join('') + '</tbody></table></div>' +
+      '<div class="rep-cnph" data-from="' + from + '" data-to="' + to + '" data-ids="' + esc(stg.map(function (e) { return e.id; }).filter(function (v, i, a) { return a.indexOf(v) === i; }).slice(0, 6).join(',')) + '"></div>';
+    h += '<h2>' + tr('Stories', 'Hadithi') + '</h2><div class="kpis">' + tile(sCol, sCol === 1 ? 'story collected' : 'stories collected') + tile(sOk, sOk === 1 ? 'story approved' : 'stories approved') + '</div>';
     h += '<p class="muted rep-f">Only visits, repairs and pins made with the RAFIKI Pin app are counted.</p>';
     return withLetterhead(h);
   }
@@ -8233,10 +8607,11 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
     new: ['New site', 'Eneo jipya', 'New site', 'Eneo jipya', 'plus', 'green'],
     move: ['Location moved over 500 m', 'Mahali pamehamishwa zaidi ya m 500', 'Location moved', 'Mahali pamehamishwa', 'pin', 'blue'],
     request: ['Change to a confirmed location', 'Badiliko la mahali palipothibitishwa', 'Confirmed location', 'Mahali palipothibitishwa', 'lock', 'amber'],
-    story: ['Story moment', 'Hadithi', 'Story', 'Hadithi', 'spark', 'coral'] };
+    story: ['Story moment', 'Hadithi', 'Story', 'Hadithi', 'spark', 'coral'],
+    'story-draft': ['Story draft ready', 'Rasimu ya hadithi iko tayari', 'Story draft', 'Rasimu ya hadithi', 'spark', 'coral'] };
   var RRKF = [['all', 'All', 'Zote'], ['cost', 'Costs', 'Gharama'], ['new', 'New sites', 'Maeneo mapya'], ['loc', 'Locations', 'Mahali'], ['story', 'Stories', 'Hadithi']];
   function rrK(k) { return RRK[k] || [k, k, k, k, 'inbox', 'slate']; }
-  function rrKf(x) { return x.kind === 'move' || x.kind === 'request' ? 'loc' : x.kind; }
+  function rrKf(x) { return x.kind === 'move' || x.kind === 'request' ? 'loc' : x.kind === 'story-draft' ? 'story' : x.kind; }
   function rrStep(k) { var m = { reported: ['Reported', 'Imeripotiwa'], assigned: ['Assigned', 'Imegawiwa'], parts: ['Parts ordered', 'Vipuri vimeagizwa'], fixed: ['Fixed', 'Imerekebishwa'] }[k || 'reported'] || [k, k]; return tr(m[0], m[1]); }
   function rrUrg(r) { return r.urgency in URGO ? URGO[r.urgency] : 3; }
   function rrAppr(r) { var s = ofbState(r); return s === 'needed' || s === 'pending' || s === 'declined'; }
@@ -8471,7 +8846,7 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
     if (O.tab !== 'repairs' && O.tab !== 'review') return;
     var t = e.target, rp = O.tab === 'repairs';
     var j = t.closest('[data-rrjob]'); if (j) { buzz(); rrJob(j.getAttribute('data-rrjob')); return; }
-    var r = t.closest('[data-rrrev]'); if (r) { var x = (O.review || []).filter(function (z) { return z.rid === r.getAttribute('data-rrrev'); })[0]; if (x) { buzz(); rrRev(x); } return; }
+    var r = t.closest('[data-rrrev]'); if (r) { var x = (O.review || []).filter(function (z) { return z.rid === r.getAttribute('data-rrrev'); })[0]; if (x) { buzz(); if (x.kind === 'story-draft') { if (byId(x.id)) openProj(x.id, 'story'); else toast(tr('That project isn’t in the list yet.', 'Mradi huo bado haupo kwenye orodha.')); } else rrRev(x); } return; }
     var f = t.closest('[data-rrf],[data-rrkf],[data-rrnf]');
     if (f) { var v = f.getAttribute('data-rrf') || f.getAttribute('data-rrkf') || f.getAttribute('data-rrnf'); buzz(); if (rp) { RR.f = v; RR.more = false; rrRepairs($('oBody'), true); } else { RR.rf = v; RR.rmore = false; rrRevDraw($('oBody'), true); } return; }
     if (t.closest('[data-rrmore]')) { if (rp) { RR.more = true; rrRepairs($('oBody'), true); } else { RR.rmore = true; rrRevDraw($('oBody'), true); } return; }
@@ -10211,6 +10586,7 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
       tile({ k: 'due', ic: 'cal', hue: 'blue', n: due, l: tr('due a visit', 'zinasubiri ziara'), go: 'list-due' }) +
       tile({ k: 'tests', ic: 'flask', hue: 'teal', n: tests, l: tr('water tests due', 'vipimo vya maji vinahitajika'), go: 'list-due', hot: tests > 0 }) +
       tile({ k: 'visits', ic: 'clip', hue: 'green', id: 'oVm', n: actCache ? ocvVm() : null, l: tr('visits this month', 'ziara za mwezi huu'), go: 'o-visits' }) +
+      (P.some(cnOn) ? tile({ k: 'build', ic: 'wrench', hue: 'amber', n: P.filter(cnOn).length, l: tr('under construction', 'zinajengwa'), sub: cnBehind() ? nw(tr(cnBehind() + ' behind schedule', cnBehind() + ' zimechelewa')) : '', go: 'list-build', hot: cnBehind() > 0 }) : '') +
       (pe && pe.total ? tile({ k: 'people', ic: 'people', hue: 'teal', n: pe.total, l: tr('people served', 'watu wanaohudumiwa'), sub: up > 0 ? '+' + up.toLocaleString('en-US') + ' ' + tr('in 12 months', 'kwa miezi 12') : '', up: true, go: 'people' }) : '');
     var mapStrip = '<button type="button" class="ocv-map" data-ocvgo="list-missing" data-testid="ocv_mapped"' + (missing ? '' : ' disabled') + '>' +
       '<span class="ocv-ring" data-p="' + pct + '" aria-hidden="true"><span>' + pct + '%</span></span><span class="tx"><b>' + tr(pinned + ' of ' + P.length + ' projects on the map', 'Miradi ' + pinned + ' kati ya ' + P.length + ' iko kwenye ramani') + '</b>' +

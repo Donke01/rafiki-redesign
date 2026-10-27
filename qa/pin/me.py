@@ -48,16 +48,52 @@ ACT = [{'by': 'Meril Kiprop', 'a': 'visit', 's': 'notworking', 'id': '101', 't':
 def snap(admin=True, who=ME):
     return {'ok': True, 'who': who, 'admin': admin, 'reviewOpen': 0, 'projects': P, 'repairs': REP, 'visits': {}, 'tests': {}, 'jobs': ['101'] if who == ME else [],
             'assigned': [{'id': '103', 't': 'Turbo Spring', 'to': who, 'by': 'Jessica Anderson', 'at': iso(5), 'due': day(2)}], 'confirmed': {},
-            'me': {'kind': 'app', 'nick': '', 'phone': '', 'home': 'ke', 'photo': url(who.lower())}, 'photos': photos(), 'approveAbove': 50000}
+            'me': {'kind': 'app', 'nick': '', 'phone': '', 'home': 'ke', 'photo': url(who.lower())}, 'photos': photos(), 'approveAbove': 50000,
+            'stages': {'101': {'s': CS['stage'], 'at': DAYS(6), 'by': 'Meril Kiprop', 'pct': 45, 'due': day(-3), 'parent': None, 't': 'Kapsaret Borehole', 'n': 3, 'behind': CS['stage'] != 'handed'}, '105': {'s': 'planned', 'at': DAYS(2), 'by': ME, 'pct': None, 'due': None, 'parent': '101', 't': 'Tamiha Dormitory', 'n': 0, 'behind': False}},
+            'stories': {k: {'st': v['status'], 'n': len([a for a in v['answers'].values() if a]), 'b': len(v['photos']['before']), 'i': 0, 'a': len(v['photos']['after']), 'c': v['consent'], 'at': DAYS(1)} for k, v in STORY.items()}}
 POSTS = []
+# construction (§8) and stories (§9): project 101 is being built (Walls, behind schedule, linked to 104), 102 has an approved story,
+# 103 a draft ready; what the app sends is kept in SENT
+DAYS = lambda d: (now - datetime.timedelta(days=d)).strftime('%Y-%m-%dT%H:%M:%SZ')
+def stage_rec():
+    return {'id': '101', 'stage': CS['stage'], 'at': DAYS(6), 'by': 'Meril Kiprop', 'pct': 45, 'due': day(-3), 'behind': CS['stage'] != 'handed', 'parent': None, 'ptitle': '',
+            'hist': [{'stage': 'planned', 'at': DAYS(60), 'by': 'Meril Kiprop', 'note': '', 'update': '1', 'photos': []}, {'stage': 'foundation', 'at': DAYS(40), 'by': 'Meril Kiprop', 'note': 'Trenches', 'update': '2', 'photos': ['9001', '9002']},
+                     {'stage': 'walls', 'at': DAYS(6), 'by': 'Bertin Mwangi', 'note': '', 'update': '3', 'photos': ['9003']}] + ([{'stage': CS['stage'], 'at': DAYS(0), 'by': ME, 'note': '', 'update': '4', 'photos': []}] if CS['stage'] not in ('walls',) else [])}
+CS = {'stage': 'walls'}
+STORY = {}
+def story_reset():
+    STORY.clear(); STORY.update({'102': {'id': '102', 'status': 'approved', 'consent': 'received', 'answers': {'q1': 'Patients waited outside in the rain.', 'q2': 'No clean water for the clinic.', 'q3': '1,200 patients a month', 'q4': 'The community dug the trench.', 'q5': 'Nurses wash their hands between patients.', 'q6': 'The first baby born with clean water at hand.'},
+        'quote': 'Now we can wash our hands between patients.', 'quoteBy': 'Mary, nurse', 'credit': 'Meril Kiprop', 'text': 'Before the tank, patients at Chepkongi waited outside.\n\nToday nurses wash their hands between every patient.',
+        'photos': {'before': [{'id': '8001', 'name': 'b.jpg', 'children': False, 'by': 'Meril Kiprop', 'at': DAYS(90)}], 'progress': [], 'after': [{'id': '8002', 'name': 'a.jpg', 'children': True, 'by': 'Meril Kiprop', 'at': DAYS(3)}]}},
+      '103': {'id': '103', 'status': 'draft', 'consent': 'not-yet', 'answers': {'q1': 'The spring was open to animals.', 'q2': '', 'q3': '', 'q4': '', 'q5': '', 'q6': ''}, 'quote': '', 'quoteBy': '', 'credit': '', 'text': 'Turbo Spring was open to animals.',
+        'photos': {'before': [], 'progress': [], 'after': []}}})
+story_reset()
+PROMPTS = {'q1': {'en': 'What was life like here before the project?', 'sw': 'Maisha yalikuwaje hapa kabla ya mradi?'}, 'q2': {'en': 'What was the main problem people faced?', 'sw': 'Tatizo kubwa ambalo watu walikabili lilikuwa nini?'},
+           'q3': {'en': 'Who does this project serve? (who, and how many)', 'sw': 'Mradi huu unawahudumia nani? (nani, na wangapi)'}, 'q4': {'en': 'What part did the community play?', 'sw': 'Jamii ilichangia nini?'},
+           'q5': {'en': 'What has changed since?', 'sw': 'Nini kimebadilika tangu hapo?'}, 'q6': {'en': 'Describe one moment that shows the change.', 'sw': 'Eleza tukio moja linaloonyesha mabadiliko.'},
+           'quote': {'en': 'A quote from someone it serves', 'sw': 'Nukuu kutoka kwa mtu anayehudumiwa'}, 'quoteBy': {'en': 'Who said it (name and role)', 'sw': 'Aliyesema (jina na nafasi yake)'}, 'credit': {'en': 'Photo credit', 'sw': 'Picha na'}}
+def story_of(pid):
+    x = STORY.get(pid) or {'id': pid, 'status': 'not-started', 'consent': 'not-yet', 'answers': {q: '' for q in ['q1', 'q2', 'q3', 'q4', 'q5', 'q6']}, 'quote': '', 'quoteBy': '', 'credit': '', 'text': '', 'photos': {'before': [], 'progress': [], 'after': []}}
+    STORY[pid] = x; y = dict(x); y['prompts'] = PROMPTS; y['missing'] = []; y['canApprove'] = True; return y
+SENT = []
 def install(pg, admin=True):
     def pin_api(route, req):
         u = req.url
-        if req.method != 'GET': return route.fulfill(json={'ok': True, 'updateId': '9001'})
-        if 'activity=' in u: return route.fulfill(json={'ok': True, 'activity': ACT})
+        if req.method != 'GET':
+            b = json.loads(req.post_data or '{}'); SENT.append(b)
+            if b.get('action') == 'stage': CS['stage'] = b['stage']; return route.fulfill(json={'ok': True, 'id': b['id'], 'updateId': '9001', 'stage': stage_rec()})
+            if b.get('action') == 'stage-meta': return route.fulfill(json={'ok': True, 'id': b['id'], 'stage': stage_rec()})
+            if b.get('action') == 'new': return route.fulfill(json={'ok': True, 'id': '401', 'updateId': '9002', 'stage': dict(stage_rec(), id='401', stage='planned') if b.get('build') else None})
+            return route.fulfill(json={'ok': True, 'updateId': '9001'})
+        if 'activity=' in u: return route.fulfill(json={'ok': True, 'activity': ACT + [{'by': 'Meril Kiprop', 'a': 'stage', 's': 'walls', 'id': '101', 't': 'Kapsaret Borehole', 'at': DAYS(6)}]})
         if 'team=' in u: return route.fulfill(json={'ok': True, 'team': team()})
         if 'history=' in u: return route.fulfill(json={'ok': True, 'notes': []})
-        if re.search(r'[?&]id=\d+', u): return route.fulfill(json={'ok': True, 'last': None, 'canUndo': False, 'visits': [], 'costs': {'sum': 0, 'n': 0, 'last': []}})
+        m = re.search(r'[?&]id=(\d+)', u)
+        if m:
+            pid = m.group(1)
+            st = stage_rec() if pid == '101' else None
+            lk = {'parent': None, 'children': [{'id': '105', 't': 'Tamiha Dormitory', 's': 'planned'}]} if pid == '101' else {'parent': {'id': '101', 't': 'Kapsaret Borehole', 's': CS['stage']}, 'children': []} if pid == '105' else {'parent': None, 'children': []}
+            return route.fulfill(json={'ok': True, 'last': None, 'canUndo': False, 'visits': [], 'costs': {'sum': 0, 'n': 0, 'last': []}, 'stage': st, 'linked': lk})
         return route.fulfill(json=snap(admin))
     def admin_api(route, req):
         u = req.url
@@ -86,6 +122,40 @@ def install(pg, admin=True):
     pg.route('**/api/pin-auth/me', lambda r, q: r.fulfill(json={'available': False}))
     pg.route(re.compile(r'/api/pin(\?.*)?$'), pin_api); pg.route(re.compile(r'/api/admin(\?.*)?$'), admin_api)
     pg.route(re.compile(r'/api/team-photo(\?.*)?$'), photo_api)
+    def pin_photo(route, req):
+        if req.method == 'GET': return route.fulfill(body=face((200, 150, 20)), content_type='image/png')
+        SENT.append({'photo': True, 'body': (req.post_data_buffer or b'')[:600]}); return route.fulfill(json={'ok': True, 'asset': '9100'})
+    pg.route(re.compile(r'/api/pin-photo(\?.*)?$'), pin_photo)
+    def story_api(route, req):
+        from urllib.parse import urlparse, parse_qs
+        q = parse_qs(urlparse(req.url).query)
+        if req.method == 'GET':
+            if 'asset' in q: return route.fulfill(body=face((122, 79, 208)), content_type='image/png')
+            return route.fulfill(json={'ok': True, 'story': story_of(q['id'][0])})
+        ct = req.headers.get('content-type', '')
+        if ct.startswith('multipart'):
+            raw = req.post_data_buffer or b''; SENT.append({'story-multipart': True, 'body': raw[:800]})
+            pid = re.search(rb'name="id"\r\n\r\n(\d+)', raw).group(1).decode(); row = re.search(rb'name="row"\r\n\r\n(\w+)', raw)
+            x = STORY.setdefault(pid, story_of(pid))
+            if row: x['photos'][row.group(1).decode()].append({'id': '8100', 'name': 'n.jpg', 'children': b'name="children"\r\n\r\ntrue' in raw, 'by': ME, 'at': DAYS(0)})
+            return route.fulfill(json={'ok': True, 'story': story_of(pid), 'typed': False, 'text': ''})
+        b = json.loads(req.post_data or '{}'); SENT.append(dict(b, story=True)); pid = b['id']; x = story_of(pid); x = STORY[pid]
+        a = b.get('action')
+        if a == 'answers':
+            for k in ['q1', 'q2', 'q3', 'q4', 'q5', 'q6']:
+                if k in b: x['answers'][k] = b[k]
+            for k in ['quote', 'quoteBy', 'credit']:
+                if k in b: x[k] = b[k]
+            if x['status'] == 'not-started': x['status'] = 'collecting'
+        elif a == 'consent': x['consent'] = b['value']
+        elif a == 'draft': x['text'] = 'A draft from the answers.'; x['status'] = 'draft'
+        elif a == 'approve':
+            if not admin: return route.fulfill(status=403, json={'ok': False, 'reason': 'admin-only'})
+            x['status'] = 'approved'
+        elif a == 'publish': x['status'] = 'published'
+        elif a == 'collecting': x['status'] = 'collecting'
+        return route.fulfill(json={'ok': True, 'story': story_of(pid), 'text': x['text'], 'how': 'template'})
+    pg.route(re.compile(r'/api/story(\?.*)?$'), story_api)
     pg.route(re.compile(r'/api/(place|sms-admin)(\?.*)?$'), lambda r, q: r.fulfill(json={'ok': True, 'places': []}))
     pg.route('**/api/photo/**', lambda r, q: r.fulfill(body=TILE, content_type='image/png'))
     pg.route(re.compile(r'https://(www\.google\.com/s2|fonts\.googleapis\.com)/.*'), lambda r, q: r.abort())
@@ -295,12 +365,143 @@ def s_photo(check):
     try: os.remove(pic)
     except Exception: pass
 
+
+# --- construction (§8) ----------------------------------------------------------------------------------------
+def wrapcheck(pg, sel):
+    # no word split across lines and nothing cut off inside sel
+    return pg.evaluate("""s => { const bad = []; document.querySelectorAll(s).forEach(el => { if (!el.offsetParent) return; if (el.scrollWidth > el.clientWidth + 1 && getComputedStyle(el).overflowX !== 'auto') bad.push('cut:' + el.className + ':' + el.textContent.slice(0, 30));
+      const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT); let t; while ((t = w.nextNode())) { const words = t.data.split(/(\\s+)/); let off = 0; for (const wd of words) { if (wd.trim().length > 1) { const r = document.createRange(); r.setStart(t, off); r.setEnd(t, off + wd.length); if (r.getClientRects().length > 1) bad.push('split:' + wd); } off += wd.length; } } }); return bad.slice(0, 6); }""", sel)
+def s_build(check):
+    pic = os.path.join(OUT, '_site.png'); make_png(pic, 800, 600)
+    with sync_playwright() as p:
+        br = p.chromium.launch()
+        for lang, th in (('en', ''), ('sw', ''), ('en', 'dark'), ('sw', 'sun')):
+            t = lang + ('-' + th if th else ''); CS['stage'] = 'walls'; del SENT[:]
+            ctx, pg = context(br, lang, 390, th)
+            check(pg.locator('#hMap [data-testid=pin_build]').count() >= 1, '[%s] the map pin carries a hard-hat badge' % t)
+            go(pg, '#p/101', 1800)
+            check(vis(pg, '[data-testid=cn_card]'), '[%s] the Construction card shows' % t)
+            check(pg.locator('.cn-st li.now').inner_text().startswith('Kuta' if lang == 'sw' else 'Walls'), '[%s] the stepper is on Walls' % t)
+            check(vis(pg, '[data-testid=cn_behind]'), '[%s] Behind schedule' % t)
+            pg.wait_for_timeout(600); check(pg.locator('.cn-th img.in').count() == 3, '[%s] the stage galleries load (%d)' % (t, pg.locator('.cn-th img.in').count()))
+            check(pg.locator('.cn-link').count() == 1 and 'Tamiha Dormitory' in pg.inner_text('.cn-link'), '[%s] “Also here” names the linked project' % t)
+            bad = wrapcheck(pg, '.cn'); check(not bad, '[%s] no word split or cut in the card (%s)' % (t, bad))
+            pg.locator('[data-testid=cn_card]').scroll_into_view_if_needed(); shot(pg, 'build-card-%s' % t)
+            if lang == 'en' and th == '':
+                pg.locator('.cn-th').first.click(); pg.wait_for_timeout(700); check(vis(pg, '.prj-lb'), '[%s] a photo opens full size' % t); pg.keyboard.press('Escape'); pg.wait_for_timeout(300)
+                pg.click('[data-testid=cn_next]'); pg.wait_for_timeout(600)
+                check(vis(pg, '[data-testid=cn_form]'), '[%s] Move to Roof asks for photos and a note' % t)
+                pg.click('[data-testid=cn_save]'); pg.wait_for_timeout(300); check('photo' in pg.inner_text('.cn-f .msg'), '[%s] a photo is required' % t)
+                pg.set_input_files('.cn-f input[data-k=fpick]', pic); pg.wait_for_timeout(800); pg.fill('#cnNote', 'Trusses up'); pg.fill('#cnPct', '60')
+                shot(pg, 'build-move-%s' % t)
+                pg.click('[data-testid=cn_save]'); pg.wait_for_timeout(1800)
+                st = [x for x in SENT if x.get('action') == 'stage']; ph = [x for x in SENT if x.get('photo')]
+                check(st and st[-1]['stage'] == 'roof' and st[-1]['note'] == 'Trusses up' and st[-1]['pct'] == 60, '[%s] the stage change is sent (%s)' % (t, st[-1:] ))
+                check(ph and b'name="stage"' in ph[-1]['body'] and b'roof' in ph[-1]['body'] and b'Construction: Roof' in ph[-1]['body'], '[%s] the photo goes with stage=roof, project and the label' % t)
+                check(pg.locator('.cn-st li.now').inner_text().startswith('Roof'), '[%s] the card moves on to Roof' % t)
+                # admin hand-over from Finishing, with a confirm
+                CS['stage'] = 'finishing'; go(pg, '#list', 900); go(pg, '#p/101', 1800)
+                check(vis(pg, '[data-testid=cn_hand]'), '[%s] admins can hand over from Finishing' % t)
+                pg.click('[data-testid=cn_hand]'); pg.wait_for_timeout(500); pg.set_input_files('.cn-f input[data-k=fpick]', pic); pg.wait_for_timeout(700); pg.click('[data-testid=cn_save]'); pg.wait_for_timeout(600)
+                check(vis(pg, '.bsh.po-ask'), '[%s] handing over asks first' % t); pg.click('.bsh.po-ask [data-k=yes]'); pg.wait_for_timeout(1500)
+                check([x for x in SENT if x.get('action') == 'stage'][-1]['stage'] == 'handed', '[%s] handed over is sent' % t)
+                CS['stage'] = 'walls'
+                # the list filter, the Office count, the report
+                go(pg, '#list', 1200); pg.click('#lChips [data-f=build]'); pg.wait_for_timeout(800)
+                check(pg.locator('#list [data-testid=row_build]').count() >= 1, '[%s] Projects › Under construction lists it with a stage tag' % t); shot(pg, 'build-list-%s' % t)
+                go(pg, '#office', 1800); check(vis(pg, '[data-testid=ocv_t_build]'), '[%s] the Office overview counts it' % t)
+                go(pg, '#report', 2200); check('Construction' in pg.inner_text('#repBody'), '[%s] the monthly report has a Construction section' % t)
+                pg.wait_for_timeout(800); check(pg.locator('.rep-cnph img.in').count() >= 1, '[%s] with this month’s photos' % t)
+                # New site: what's happening here + part of
+                go(pg, '#new', 1600); pg.fill('#nName', 'Kapsaret Dormitory'); pg.click('#nBuild [data-v=building]'); pg.fill('#nPartQ', 'Kapsa'); pg.wait_for_timeout(400)
+                pg.locator('#nPartL [data-id="101"]').click(); pg.wait_for_timeout(300)
+                check(vis(pg, '#nPartOn') and 'Kapsaret Borehole' in pg.inner_text('#nPartOn'), '[%s] Part of: picked' % t)
+                pg.click('#nGps'); pg.wait_for_timeout(1800); pg.locator('#nBuild').scroll_into_view_if_needed(); shot(pg, 'build-new-%s' % t)
+                pg.click('#bNewSave'); pg.wait_for_timeout(600)
+                if vis(pg, '.bsh [data-ask=y]'): pg.click('.bsh [data-ask=y]')
+                pg.wait_for_timeout(1500)
+                nw = [x for x in SENT if x.get('action') == 'new']
+                check(nw and nw[-1].get('build') == 'building' and nw[-1].get('parent') == '101', '[%s] New site sends build and parent (%s)' % (t, nw[-1:]))
+            ctx.close()
+        # the New site choice at 360 in Kiswahili: whole words only
+        ctx, pg = context(br, 'sw', 360); go(pg, '#new', 1600); pg.locator('#nBuild').scroll_into_view_if_needed()
+        bad = wrapcheck(pg, '#nBuild button'); check(not bad, '[360-sw] New site choices: no word split (%s)' % bad); shot(pg, 'build-new-360-sw'); ctx.close()
+        br.close()
+    try: os.remove(pic)
+    except Exception: pass
+
+# --- stories (§9) ------------------------------------------------------------------------------------------------
+def s_story(check):
+    pic = os.path.join(OUT, '_st.png'); make_png(pic, 800, 600)
+    with sync_playwright() as p:
+        br = p.chromium.launch()
+        for lang, th in (('en', ''), ('sw', ''), ('en', 'dark'), ('sw', 'sun')):
+            t = lang + ('-' + th if th else ''); story_reset(); del SENT[:]
+            ctx, pg = context(br, lang, 390, th)
+            go(pg, '#p/103/story', 2000)
+            check(vis(pg, '[data-testid=sty_status]') and pg.locator('[data-testid=sty_now]').inner_text().startswith('Rasimu' if lang == 'sw' else 'Draft'), '[%s] the Stories tab: Draft ready' % t)
+            check(pg.get_attribute('#tabStory', 'aria-selected') == 'true', '[%s] its own tab (#p/103/story)' % t)
+            tabs = pg.evaluate("[...document.querySelectorAll('.ptabs [role=tab]')].map(b => [b.textContent.trim(), b.scrollWidth <= b.clientWidth + 1])")
+            check(len(tabs) == 4 and all(x[1] for x in tabs), '[%s] four project tabs, nothing cut (%s)' % (t, tabs))
+            bad = wrapcheck(pg, '#paneStory .card'); check(not bad, '[%s] no word split or cut (%s)' % (t, bad))
+            shot(pg, 'story-top-%s' % t)
+            if lang == 'en' and th == '':
+                pg.fill('#styA', 'The spring was open to cattle.'); pg.click('[data-testid=sty_qsave]'); pg.wait_for_timeout(700)
+                a = [x for x in SENT if x.get('action') == 'answers']
+                check(a and a[-1].get('q1') == 'The spring was open to cattle.' and 'Question 2 of 6' in pg.inner_text('.sty-q'), '[%s] an answer is saved, on to question 2' % t)
+                pg.click('[data-testid=sty_add_after]'); pg.set_input_files('#styFile', pic); pg.wait_for_timeout(900)
+                check(vis(pg, '.sty-sh'), '[%s] a photo asks about children' % t); pg.click('.sty-sh [data-k=yes]'); pg.wait_for_timeout(1200)
+                mp = [x for x in SENT if x.get('story-multipart')]
+                check(mp and b'name="row"\r\n\r\nafter' in mp[-1]['body'] and b'name="children"\r\n\r\ntrue' in mp[-1]['body'], '[%s] the After photo is sent with children=true' % t)
+                check(pg.locator('.sty-row[data-row=after] .cn-th').count() == 1, '[%s] it shows in the After row' % t)
+                pg.click('[data-sty=consent][data-v=received]'); pg.wait_for_timeout(600); check([x for x in SENT if x.get('action') == 'consent'][-1]['value'] == 'received', '[%s] consent' % t)
+                pg.click('[data-testid=sty_draft]'); pg.wait_for_timeout(800); check([x for x in SENT if x.get('action') == 'draft'], '[%s] Draft the story' % t)
+                pg.click('[data-testid=sty_approve]'); pg.wait_for_timeout(800)
+                check([x for x in SENT if x.get('action') == 'approve'] and pg.locator('[data-testid=sty_now]').inner_text().startswith('Approved'), '[%s] an admin approves' % t)
+                pg.locator('[data-testid=sty_status]').scroll_into_view_if_needed(); shot(pg, 'story-approved-%s' % t)
+                go(pg, '#list', 1200); pg.click('#lChips [data-f=sok]'); pg.wait_for_timeout(800)
+                check(pg.locator('#list [data-testid=row_story]').count() >= 1, '[%s] Projects › Story approved, with the badge' % t); shot(pg, 'story-list-%s' % t)
+                go(pg, '#report', 2200); check('stories approved' in pg.inner_text('#repBody'), '[%s] the monthly report counts stories' % t)
+            ctx.close()
+        # field users collect and draft, never approve
+        story_reset(); ctx, pg = context(br, 'en', 390, admin=False); go(pg, '#p/103/story', 2000)
+        check(not vis(pg, '[data-testid=sty_approve]') and vis(pg, '[data-testid=sty_draft]'), 'field user: Draft, no Approve'); ctx.close()
+        br.close()
+    try: os.remove(pic)
+    except Exception: pass
+
+# --- donor mode ------------------------------------------------------------------------------------------------------
+def s_donor(check):
+    import subprocess
+    view = subprocess.run(['node', os.path.join(HERE, 'me_donor.mjs')], capture_output=True, text=True).stdout
+    with sync_playwright() as p:
+        br = p.chromium.launch()
+        for lang in ('en', 'sw'):
+            ctx = br.new_context(viewport={'width': 390, 'height': 844}, device_scale_factor=2, is_mobile=True, has_touch=True, service_workers='block')
+            pg = ctx.new_page(); pg.on('pageerror', lambda e: ERRS.append('donor pageerror: ' + str(e)[:200]))
+            pg.route(re.compile(r'/api/donor(\?.*)?$'), lambda r, q: r.fulfill(body=face((10, 120, 194)), content_type='image/png') if 'photo=' in q.url else r.fulfill(body=view, content_type='application/json'))
+            pg.route('**/api/photo/**', lambda r, q: r.fulfill(body=TILE, content_type='image/png'))
+            pg.route(re.compile(r'https://.*'), lambda r, q: r.abort())
+            pg.goto(BASE + '/pin-donor.html'); pg.evaluate("l => { localStorage.setItem('rfPinDonor', 'tok'); if (l === 'sw') localStorage.setItem('rfPinLang', 'sw'); }", lang)
+            pg.goto(BASE + '/pin-donor.html#p/301'); pg.reload(); pg.wait_for_timeout(2200)
+            check(vis(pg, '[data-testid=donor_build]'), '[%s] donors see the stage tracker' % lang)
+            check(pg.locator('[data-testid=donor_build] .strip .ph').count() == 3, '[%s] with the stage photos' % lang)
+            pg.locator('[data-testid=donor_build]').scroll_into_view_if_needed(); shot(pg, 'donor-build-%s' % lang)
+            pg.goto(BASE + '/pin-donor.html#p/101'); pg.reload(); pg.wait_for_timeout(2000)
+            check(vis(pg, '[data-testid=donor_story]') and pg.locator('[data-testid=donor_story] .ph').count() == 2, '[%s] and the approved story with its after photos' % lang)
+            pg.locator('[data-testid=donor_story]').scroll_into_view_if_needed(); shot(pg, 'donor-story-%s' % lang)
+            ctx.close()
+        br.close()
+
 if __name__ == '__main__':
     if WHAT == 'before':
         seq('centring before (screenshots only)', lambda check: centre(check, [768, 1024, 1280, 1440], ['en'], [''], 'before', judge=False))
     if WHAT in ('all', 'pill'): seq('The Me pill: 44 px, clear of the wordmark / refresh / bell at 320, 360, 390, EN/SW, light/dark/sun, both roles', s_pill)
     if WHAT in ('all', 'hint'): seq('The one-time hint: admins, under the pill, Back / tap / Got it close it, the map still gets the tap, never again', s_hint)
     if WHAT in ('all', 'photo'): seq('Profile photos: shown everywhere, initials as fallback, set / crop / remove, admins for anyone, offline', s_photo)
+    if WHAT in ('all', 'build'): seq('Construction: card, stepper, gallery, move a stage with photos, hand over, filter, map badge, Office, report, New site', s_build)
+    if WHAT in ('all', 'story'): seq('Stories tab: status, answers, photos with children, consent, draft, approve; filter, badge, report; field users', s_story)
+    if WHAT in ('all', 'donor'): seq('Donor mode: stage tracker and approved story, read-only', s_donor)
     if WHAT in ('all', 'centre'):
         seq('Centred on wide screens: 768, 1024, 1280, 1440 (EN, light; screenshots)', lambda check: centre(check, [768, 1024, 1280, 1440], ['en'], [''], 'after'))
         seq('Centred on wide screens: dark and sun, Kiswahili (checks only)', lambda check: centre(check, [768, 1024, 1280, 1440], ['sw'], ['dark', 'sun'], 'x', shots=False))
