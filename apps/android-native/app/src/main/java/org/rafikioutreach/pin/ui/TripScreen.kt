@@ -673,8 +673,10 @@ private fun CostsPane(m: AppModel, it: Itin, ctl: TripCtl, editable: Boolean) {
     }
     TripHead(t("Vehicle and fuel", "Gari na mafuta"))
     Card(Modifier.padding(top = 4.dp), pad = 14.dp) {
-        if (editable) Picker(t("Vehicle", "Gari"), it.vehicleId, listOf("" to t("No vehicle yet", "Bado hakuna gari")) + vehicles.map { x -> x.vid to (x.name + " · " + x.typeName()) },
+        if (editable) Picker(t("Vehicle", "Gari"), it.vehicleId, listOf("" to t("No vehicle yet", "Bado hakuna gari")) + org.rafikioutreach.pin.data.Vehicle.options(vehicles, it.vehicleId, it.raw.optJSONObject("cost")?.optJSONObject("fuel")?.optJSONObject("vehicle")),
             { vid -> ctl.edit(it.copy(raw = JSONObject(it.raw.toString()).put("vehicleId", vid), waiting = it.waiting + 1), JSONObject().put("action", "update").put("vehicleId", vid)) }, Modifier.testTag("cost_vehicle"))
+        if (!editable) org.rafikioutreach.pin.data.Vehicle.options(vehicles, it.vehicleId, it.raw.optJSONObject("cost")?.optJSONObject("fuel")?.optJSONObject("vehicle")).firstOrNull { o -> o.first == it.vehicleId }?.let { (_, l) ->
+            Text(l, style = MaterialTheme.typography.titleSmall, color = C.ink, modifier = Modifier.testTag("cost_vehicle_name")) }
         v?.let { x -> Text(listOfNotNull(x.typeName(), x.cc.takeIf { it > 0 }?.let { "%,d cc".format(java.util.Locale.US, it) }, x.fuelName()).joinToString(" · "), style = MaterialTheme.typography.bodyMedium, color = C.text, modifier = Modifier.padding(top = 8.dp)) }
         c?.lPer100?.let { l -> Text("%.1f L/\u2060100\u00A0km".format(java.util.Locale.US, l) + (c.litres?.let { lt -> " · " + "%.1f L".format(java.util.Locale.US, lt) } ?: ""), style = MaterialTheme.typography.titleSmall, color = C.ink, modifier = Modifier.padding(top = 6.dp).testTag("cost_l100")) }
         c?.basis?.takeIf { it.isNotBlank() }?.let { b -> Text(b, style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 2.dp)) }

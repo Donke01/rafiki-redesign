@@ -63,6 +63,7 @@ object TripFixtures {
             .put("cost", JSONObject().put("currency", "KES")
                 .put("fuel", JSONObject().put("litres", 51.6).put("lPer100", 10.6).put("basis", JSONObject().put("en", "Hilux 2.4 diesel pickup · model 9.0 L/100 km, murram +25%").put("sw", "Hilux 2.4 dizeli · modeli 9.0 L/100 km, murram +25%"))
                     .put("price", JSONObject().put("kes", 171.6).put("fuel", "diesel").put("town", "Eldoret").put("source", "EPRA").put("from", "2026-10-15").put("to", "2026-11-14").put("kind", "official"))
+                    .put("vehicle", JSONObject().put("vid", "vh_1").put("name", "Hilux KDA 123X").put("type", "pickup").put("fuel", "diesel"))
                     .put("kes", 8855).put("reason", JSONObject.NULL).put("label", JSONObject().put("en", "Fuel: KES 171.60/L diesel, Eldoret, EPRA 15 Oct–14 Nov").put("sw", "Mafuta: KES 171.60/L dizeli, Eldoret, EPRA 15 Okt–14 Nov")))
                 .put("days", JSONArray().put(JSONObject().put("date", d0).put("km", 157).put("totalKes", 11695)).put(JSONObject().put("date", d1).put("km", 330).put("totalKes", 10660)))
                 .put("est", JSONObject().put("fuelKes", 8855).put("lunchKes", 2000).put("perDiemKes", 6000).put("lodgingKes", 3500).put("extrasKes", 2000).put("totalKes", 22355))
@@ -139,6 +140,8 @@ object TripFixtures {
     /** A fake server that keeps one trip and answers like /api/itin and friends. [posts] records every request. */
     class Server(val posts: MutableList<String>, var it: JSONObject = itin(), val who: String = "Meril Kiprop", val admin: Boolean = false) {
         var offline = false
+        /** /api/vehicles can't be reached (the picker must still show the trip's vehicle by name). */
+        var noVehicles = false
         fun answer(method: String, url: String, body: String): Pair<Int, String> {
             if (offline) return 0 to ""
             posts += "$method $url $body"
@@ -161,7 +164,7 @@ object TripFixtures {
                 method == "POST" && url.endsWith("/api/itin") -> 201 to JSONObject().put("ok", true).put("itin", itin("it_2")).toString()
                 method == "POST" && url.contains("/api/itin/") -> { apply(b); 200 to JSONObject().put("ok", true).put("itin", it).apply { if (b.optString("action") == "share") { put("url", "https://pin.rafikioutreach.org/pin-trip?t=abc123"); put("token", "abc123") } }.toString() }
                 url.contains("/api/trip/week") -> 200 to JSONObject().put("ok", true).put("bestDay", JSONObject().put("date", today.plusDays(2).toString()).put("name", JSONObject().put("en", org.rafikioutreach.pin.ui.Dates.weekday(today.plusDays(2))).put("sw", org.rafikioutreach.pin.ui.Dates.weekday(today.plusDays(2)))).put("roadLevel", "dry")).toString()
-                url.contains("/api/vehicles") -> 200 to vehicles().toString()
+                url.contains("/api/vehicles") -> if (noVehicles) 0 to "" else 200 to vehicles().toString()
                 url.contains("/api/fuel?prices=1") -> 200 to prices().toString()
                 url.contains("/api/fuel?itin=") -> 200 to JSONObject().put("ok", true).put("logs", JSONArray().put(JSONObject().put("lid", "fl_1").put("vid", "vh_1").put("itinId", "it_1").put("at", "2026-10-26T06:40:00Z").put("by", "Meril Kiprop").put("litres", 40.2).put("kesPerL", 171.47).put("totalKes", 6893).put("odometer", 120455).put("full", true).put("town", "Kitale"))).toString()
                 url.contains("/api/fuel") -> 200 to JSONObject().put("ok", true).put("log", JSONObject().put("lid", "fl_2")).put("results", JSONObject().put("ke", JSONObject().put("ok", true)).put("tz", JSONObject().put("ok", false).put("reason", "blocked"))).toString()

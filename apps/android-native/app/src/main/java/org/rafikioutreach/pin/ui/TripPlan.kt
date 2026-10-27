@@ -247,7 +247,7 @@ private fun PlanDetails(m: AppModel, s: Snapshot, d: PlanDraft, here: LatLng?, n
         Field(d.hEnd, { d.hEnd = it.take(5) }, t("Back by", "Rudi kabla ya"), Modifier.weight(1f).testTag("plan_he"), placeholder = "17:30")
     }
     TripHead(t("Vehicle", "Gari"))
-    Picker(t("Vehicle", "Gari"), d.vehicle, listOf("" to t("Choose later", "Chagua baadaye")) + vehicles.map { v -> v.vid to (v.name + " · " + v.typeName()) }, { d.vehicle = it }, Modifier.testTag("plan_vehicle"))
+    Picker(t("Vehicle", "Gari"), d.vehicle, listOf("" to t("Choose later", "Chagua baadaye")) + org.rafikioutreach.pin.data.Vehicle.options(vehicles, d.vehicle, null), { d.vehicle = it }, Modifier.testTag("plan_vehicle"))
     if (!s.admin) Text(t("Add my motorbike", "Ongeza pikipiki yangu"), color = C.blue2, style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(top = 6.dp).clip(RoundedCornerShape(99.dp)).clickable(role = Role.Button) { addBike = true }.heightIn(min = 44.dp).padding(horizontal = 6.dp, vertical = 12.dp).testTag("plan_bike"))
     Field(d.passengers, { d.passengers = it.filter { c -> c.isDigit() }.take(2) }, t("People in the vehicle", "Watu ndani ya gari"), number = true, placeholder = "${maxOf(1, d.people.size)}")
     val ok = Hm.parse(d.hStart) != null && Hm.parse(d.hEnd) != null && d.from.isNotBlank() && d.to >= d.from && d.people.isNotEmpty() && (d.start != "place" || d.place != null) && (d.start != "here" || here != null)

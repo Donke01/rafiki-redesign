@@ -131,7 +131,7 @@ fun GroupTripEditor(m: AppModel, id: String?, created: (String) -> Unit, go: (St
     when (val k = sheet?.first) {
         "person" -> PersonSheet(gg, sheet?.second, { sheet = null }) { b -> change(b) }
         "item" -> ItemSheet(m, gg, sheet?.second, { sheet = null }, openProject) { b -> change(b) }
-        "remind" -> RemindSheet(gg, sheet!!.second!!, { sheet = null }) { b, then -> change(b, then) }
+        "remind" -> RemindSheet(m, gg, sheet!!.second!!, { sheet = null }) { x -> g = x }
         "cost" -> CostSheet(sheet?.second, { sheet = null }) { b -> change(b) }
         "pay" -> PaySheet(gg, sheet?.second, { sheet = null }) { b -> change(b) }
         "texts" -> TextsSheet(gg, { sheet = null }) { b -> change(b) }
@@ -306,25 +306,34 @@ private fun ItemSheet(m: AppModel, g: GroupTrip, i: JSONObject?, close: () -> Un
 
 /** E-mail the group a reminder about an item: Preview first, then Send (admin-triggered, through /api/mail). */
 @Composable
-private fun RemindSheet(g: GroupTrip, i: JSONObject, close: () -> Unit, ask: (JSONObject, (Reply) -> Unit) -> Unit) {
+private fun RemindSheet(m: AppModel, g: GroupTrip, i: JSONObject, close: () -> Unit, updated: (GroupTrip) -> Unit) {
+    val scope = rememberScope()
     var prev by remember { mutableStateOf<JSONObject?>(null) }
     var to by remember { mutableStateOf(0) }
     var missing by remember { mutableStateOf(0) }
     var res by remember { mutableStateOf<String?>(null) }
-    LaunchedEffect(Unit) { ask(JSONObject().put("action", "remind").put("iid", i.optString("iid")).put("send", false)) { r -> prev = r.json.optJSONObject("preview"); to = r.json.optInt("to"); missing = r.json.optInt("missing") } }
-    TripSheet("gt_remind_sheet", t("E-mail a reminder", "Tuma kikumbusho"), close) { hide ->
+    var err by remember { mutableStateOf<String?>(null) }
+    // the preview is asked for here, so its answer lands in this sheet whatever the editor behind it does
+    LaunchedEffect(i.optString("iid")) {
+        val r = m.trips.groupChange(g, JSONObject().put("action", "remind").put("iid", i.optString("iid")).put("send", false))
+        if (r.ok) { prev = r.json.optJSONObject("preview") ?: JSONObject(); to = r.json.optInt("to"); missing = r.json.optInt("missing") } else err = itinReason(r.reason)
+    }
+    TripSheet("gt_remind_sheet", t("E-mail a reminder", "Tuma kikumbusho"), close) { _ ->
         val p = prev
-        if (p == null) Text(t("Loading…", "Inapakia…"), color = C.muted)
-        else {
-            Text(if (to == 1) t("To 1 person", "Kwa mtu 1") else t("To $to people", "Kwa watu $to") + (if (missing > 0) t(" ($missing without an e-mail)", " ($missing bila barua pepe)") else ""), style = MaterialTheme.typography.bodyMedium, color = C.muted, modifier = Modifier.testTag("gr_to"))
-            Column(Modifier.padding(top = 10.dp).fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(C.tint).padding(14.dp).testTag("gr_preview")) {
-                Text(p.optString("subject"), style = MaterialTheme.typography.titleSmall, color = C.ink)
-                Text(p.optString("text"), style = MaterialTheme.typography.bodySmall, color = C.text, modifier = Modifier.padding(top = 6.dp))
-            }
-            Btn(t("Send", "Tuma"), { ask(JSONObject().put("action", "remind").put("iid", i.optString("iid")).put("send", true)) { r -> res = if (r.ok) t("Sent to ${r.json.optInt("sent")} ✓", "Imetumwa kwa ${r.json.optInt("sent")} ✓") else itinReason(r.reason) } },
-                Modifier.padding(top = 14.dp).fillMaxWidth().testTag("gr_send"), icon = "mail", enabled = to > 0 && res == null)
-            Msg(res, "ok")
+        if (p == null) { Text(err ?: t("Loading…", "Inapakia…"), color = if (err != null) C.bad else C.muted); return@TripSheet }
+        Text(if (to == 1) t("To 1 person", "Kwa mtu 1") else t("To $to people", "Kwa watu $to") + (if (missing > 0) t(" ($missing without an e-mail)", " ($missing bila barua pepe)") else ""), style = MaterialTheme.typography.bodyMedium, color = C.muted, modifier = Modifier.testTag("gr_to"))
+        Column(Modifier.padding(top = 10.dp).fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(C.tint).padding(14.dp).testTag("gr_preview")) {
+            Text(p.optString("subject"), style = MaterialTheme.typography.titleSmall, color = C.ink)
+            Text(p.optString("text"), style = MaterialTheme.typography.bodySmall, color = C.text, modifier = Modifier.padding(top = 6.dp))
         }
+        Btn(t("Send", "Tuma"), {
+            scope.launch {
+                val r = m.trips.groupChange(g, JSONObject().put("action", "remind").put("iid", i.optString("iid")).put("send", true))
+                res = if (r.ok) t("Sent to ${r.json.optInt("sent")} ✓", "Imetumwa kwa ${r.json.optInt("sent")} ✓") else itinReason(r.reason)
+                r.json.optJSONObject("trip")?.let { updated(GroupTrip(it)) }
+            }
+        }, Modifier.padding(top = 14.dp).fillMaxWidth().testTag("gr_send"), icon = "mail", enabled = to > 0 && res == null)
+        Msg(res, "ok")
     }
 }
 

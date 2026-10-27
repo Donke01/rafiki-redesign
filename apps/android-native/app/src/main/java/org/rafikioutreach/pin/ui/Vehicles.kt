@@ -104,8 +104,8 @@ private fun VehicleRow(v: Vehicle, i: Int, onClick: () -> Unit) {
         val hu = C.hue(if (v.type == "motorbike") "coral" else "teal")
         IconTile(if (v.type == "motorbike") "nav" else "map", hu.fg, hu.bg, 44.dp); Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
-            Text(v.name, style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold), color = C.ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text(listOfNotNull(v.typeName(), v.cc.takeIf { it > 0 }?.let { "%,d cc".format(java.util.Locale.US, it) }, v.fuelName(), v.owner.takeIf { it.isNotBlank() }).joinToString(" · "), style = MaterialTheme.typography.bodySmall, color = C.muted)
+            Text(v.name.ifBlank { v.plate }, style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold), color = C.ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(listOfNotNull(v.plate.takeIf { p -> p.isNotBlank() && !v.name.contains(p, ignoreCase = true) }, v.typeName(), v.cc.takeIf { it > 0 }?.let { "%,d cc".format(java.util.Locale.US, it) }, v.fuelName(), v.owner.takeIf { it.isNotBlank() }).joinToString(" · "), style = MaterialTheme.typography.bodySmall, color = C.muted)
             v.use?.let { u -> Text("%.1f L/\u2060100\u00A0km".format(java.util.Locale.US, u) + " · " + when (v.useSrc) {
                 "blend" -> if (v.realLogs == 1) t("from 1 fuel log", "kutoka kumbukumbu 1 ya mafuta") else t("from ${v.realLogs} fuel logs", "kutoka kumbukumbu ${v.realLogs} za mafuta")
                 "entered" -> t("entered", "imewekwa"); else -> t("model", "modeli") + (if (v.band.isNotBlank()) " " + v.band else "") }, style = MaterialTheme.typography.labelMedium, color = C.blue2, modifier = Modifier.padding(top = 2.dp)) }
@@ -126,7 +126,7 @@ fun VehicleSheet(m: AppModel, v: Vehicle?, bikeOnly: Boolean, close: () -> Unit,
     var l100 by remember { mutableStateOf(v?.lPer100?.toString() ?: "") }
     var msg by remember { mutableStateOf<String?>(null) }
     var sure by remember { mutableStateOf(false) }
-    TripSheet("veh_sheet", if (v == null) (if (bikeOnly) t("Add my motorbike", "Ongeza pikipiki yangu") else t("Add a vehicle", "Ongeza gari")) else v.name, close) { hide ->
+    TripSheet("veh_sheet", if (v == null) (if (bikeOnly) t("Add my motorbike", "Ongeza pikipiki yangu") else t("Add a vehicle", "Ongeza gari")) else v.name.ifBlank { v.plate }, close) { hide ->
         Field(name, { name = it.take(60) }, t("Name", "Jina"), Modifier.testTag("veh_name"), placeholder = t("e.g. Hilux", "mf. Hilux"))
         Field(plate, { plate = it.uppercase().take(12) }, t("Number plate", "Namba ya gari"), Modifier.testTag("veh_plate"), placeholder = "KDA 123X")
         if (!bikeOnly) Choices(Vehicle.TYPES.map { it to Vehicle.typeName(it) }, type, "veh_t_", Modifier.padding(top = 6.dp)) { type = it }

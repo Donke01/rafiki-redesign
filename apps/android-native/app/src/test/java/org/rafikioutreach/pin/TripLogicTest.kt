@@ -127,6 +127,11 @@ class TripLogicTest {
         assertEquals("Spare tyre checked", ItinEdit.packAdd(it, "Spare tyre checked").packing.last().text)
         assertEquals("L/\u2060100\u00A0km", org.rafikioutreach.pin.data.unbreak("L/100 km")); assertEquals(200L, it.extras.single().kes); assertTrue(it.extras.single().actual)
         assertEquals("No office location is set for this country yet. Choose another place to start, or ask an admin to set it (Office › Vehicles › Trip settings).", org.rafikioutreach.pin.data.itinReason("no-office"))
+        // vehicles by name (with the plate unless the name has it) and type, never the id
+        val vs = org.json.JSONArray(TripFixtures.vehicles().getJSONArray("vehicles").toString()).let { a -> (0 until a.length()).map { org.rafikioutreach.pin.data.Vehicle(a.getJSONObject(it)) } }
+        assertEquals(listOf("vh_1" to "Hilux KDA 123X · Pickup", "vh_2" to "Meril's motorbike · KMEX 456 · Motorbike"), org.rafikioutreach.pin.data.Vehicle.options(vs, "vh_1", null))
+        assertEquals("vh_9" to "Hilux KDA 123X · Pickup", org.rafikioutreach.pin.data.Vehicle.options(emptyList(), "vh_9", JSONObject().put("name", "Hilux KDA 123X").put("type", "pickup")).single())
+        assertEquals("The trip's vehicle", org.rafikioutreach.pin.data.Vehicle.options(emptyList(), "vh_9", null).single().second)
         assertEquals("Iten", it.days[0].night!!.town); assertEquals(3500L, it.days[0].night!!.kes)
         assertNotNull(ItinEdit.lodging(it, 0, null).days[0].let { d -> d }); assertNull(ItinEdit.lodging(it, 0, null).days[0].night)
     }

@@ -446,6 +446,8 @@ data class Vehicle(val raw: JSONObject) {
     val use = raw.optJSONObject("use")?.dblOrNull("lPer100"); val useSrc = raw.optJSONObject("use")?.str("src") ?: ""
     fun typeName() = typeName(type)
     fun fuelName() = fuelName(fuel)
+    /** How a vehicle is shown everywhere: "Hilux · KDA 123X · Pickup" (never its id). */
+    fun label(): String = vehicleLabel(name, plate, type)
     companion object {
         val TYPES = listOf("saloon", "suv", "pickup", "4x4", "van", "minibus", "motorbike")
         fun typeName(k: String) = when (k) {
@@ -453,6 +455,12 @@ data class Vehicle(val raw: JSONObject) {
             "minibus" -> t("Minibus", "Basi dogo"); "motorbike" -> t("Motorbike", "Pikipiki"); else -> k
         }
         fun fuelName(k: String) = if (k == "diesel") t("diesel", "dizeli") else t("petrol", "petroli")
+        /** The picker's options: every vehicle by its label, plus the trip's own vehicle when the list doesn't have it
+         *  (not loaded yet, or no signal) — labelled from the trip's costs, never by its id. */
+        fun options(list: List<Vehicle>, current: String, tripVehicle: JSONObject?): List<Pair<String, String>> =
+            list.map { it.vid to it.label() } + (if (current.isNotBlank() && list.none { it.vid == current })
+                listOf(current to (tripVehicle?.takeIf { it.str("vid") == current || it.str("vid").isBlank() }?.let { o -> vehicleLabel(o.str("name"), o.str("plate"), o.str("type")) }?.takeIf { it.isNotBlank() } ?: t("The trip's vehicle", "Gari la safari")))
+            else emptyList())
     }
 }
 
@@ -471,6 +479,10 @@ data class FuelCountry(val raw: JSONObject) {
     val statusOk = raw.optJSONObject("status")?.optBoolean("ok", true) ?: true
     val statusReason = raw.optJSONObject("status")?.str("reason") ?: ""
 }
+
+/** "Hilux · KDA 123X · Pickup": the name, the plate when it isn't already in the name, and the type. */
+fun vehicleLabel(name: String, plate: String, type: String): String =
+    listOf(name, plate.takeIf { p -> p.isNotBlank() && !name.contains(p, ignoreCase = true) } ?: "", if (type.isNotBlank()) Vehicle.typeName(type) else "").filter { it.isNotBlank() }.joinToString(" · ")
 
 /** "189.84", "4,250" (a price per litre: 2 decimals when it has them). */
 fun perL(v: Double): String = if (v >= 1000) "%,.0f".format(java.util.Locale.US, v) else "%,.2f".format(java.util.Locale.US, v)

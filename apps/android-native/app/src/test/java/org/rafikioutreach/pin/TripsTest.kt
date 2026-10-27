@@ -15,6 +15,7 @@ import androidx.test.core.app.ApplicationProvider
 import org.json.JSONObject
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -190,6 +191,8 @@ class TripsTest {
         openTrip()
         tap("trip_tab_costs"); waitTag("cost_fuel_label")
         assertEquals("Fuel: KES 171.60/L diesel, Eldoret, EPRA 15 Oct–14 Nov", textOf("cost_fuel_label").replace("\u2060", ""))
+        // the vehicle by its name and type, never its id
+        rule.waitUntil(8000) { has("Hilux KDA 123X · Pickup") }; assertFalse(has("vh_"))
         waitTag("fuel_log")
         shot("trip-14-costs")
         scrollTo("fuel_log"); shot("trip-15-costs-logs")
@@ -230,6 +233,20 @@ class TripsTest {
         rule.runOnIdle { kotlinx.coroutines.runBlocking { m.trips.flush() } }
         assertEquals(0, m.trips.pendingAll())
         assertTrue(posts.any { it.contains("\"action\":\"stops\"") && it.contains("\"s1\",\"s3\",\"s2\"") })
+    }
+
+    @Test fun vehicle_is_shown_by_name_never_its_id() {
+        // the vehicle list can't be fetched: the trip's own vehicle is still named (from its costs)
+        val m = model(); server.noVehicles = true; TripClock.now = { 6 * 60 }; show(m)
+        openTrip(); tap("trip_tab_costs"); waitTag("cost_vehicle")
+        rule.waitUntil(8000) { has("Hilux KDA 123X · Pickup") }; assertFalse(has("vh_"))
+        // the planner's picker: names and types only
+        server.noVehicles = false
+        back(); back(); waitTag("my_trips")
+        tap("me_plan_trip"); tap("plan_suggest"); waitTag("plan_sug_105"); tap("plan_sug_105"); tap("plan_next1"); waitTag("plan_title")
+        tap("plan_vehicle"); settle()
+        assertTrue(has("Hilux KDA 123X · Pickup") && has("Meril's motorbike · KMEX 456 · Motorbike")); assertFalse(has("vh_"))
+        shot("trip-30-vehicle-picker")
     }
 
     @Test fun receipt_photo_is_uploaded_then_linked() {
@@ -277,7 +294,7 @@ class TripsTest {
         tap("gt_tab_group"); waitTag("gt_person_p1"); shot("trip-24-group-people")
         tap("gt_tab_money"); waitTag("gt_totals"); shot("trip-25-group-costs")
         tap("gt_tab_plan"); waitTag("gt_remind_i1"); tap("gt_remind_i1")
-        rule.waitUntil(15000) { tagged("gt_remind_sheet") }; rule.waitUntil(15000) { tagged("gr_preview") }
+        rule.waitUntil(15000) { tagged("gr_preview") }
         sheetShot("trip-26-group-reminder")
         tapSheet("gr_send")
         rule.waitUntil(8000) { posts.any { it.contains("\"action\":\"remind\"") && it.contains("\"send\":true") } }
