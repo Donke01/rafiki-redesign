@@ -52,6 +52,9 @@ class Prefs(context: Context) {
     /** "Me is here now" was closed (feat-mea): never shown again. */
     var meHint: Boolean get() = sp.getBoolean("meHint", false); set(v) = sp.edit().putBoolean("meHint", v).apply()
     var lang: String get() = sp.getString("lang", "") ?: ""; set(v) = sp.edit().putString("lang", v).apply()
+    /** Office › Overview › Start here (web v71): the steps whose place has been opened, and whether the card was hidden. */
+    var startSeen: Set<String> get() = sp.getStringSet("startSeen", emptySet())?.toSet() ?: emptySet(); set(v) = sp.edit().putStringSet("startSeen", v.toSet()).apply()
+    var startOff: Boolean get() = sp.getBoolean("startOff", false); set(v) = sp.edit().putBoolean("startOff", v).apply()
 
     fun saveSnapshot(raw: JSONObject) = runCatching { listFile.writeText(raw.toString()) }
     fun loadSnapshot(): JSONObject? = runCatching { JSONObject(listFile.readText()) }.getOrNull()

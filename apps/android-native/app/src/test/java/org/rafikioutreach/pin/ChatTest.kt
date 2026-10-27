@@ -571,26 +571,19 @@ class ChatTest {
         assertTrue(fake.msgs["g1"]!!.any { it.optString("text") == "On my way" })
     }
 
-    // --- the bottom bar decision: 6 tabs don't fit a 360 dp phone in Kiswahili; Chat takes Me's place -----------------
-    private fun overflows(): List<String> = rule.onAllNodes(hasAnyAncestor(hasTestTag("bar")) and hasText("", substring = true), useUnmergedTree = true).fetchSemanticsNodes().mapNotNull { n ->
-        val r = mutableListOf<TextLayoutResult>()
-        n.config.getOrNull(SemanticsActions.GetTextLayoutResult)?.action?.invoke(r)
-        val t = n.config.getOrNull(androidx.compose.ui.semantics.SemanticsProperties.Text)?.joinToString("") { it.text }
-        // cut: the words need more width than the label was given
-        if (r.firstOrNull()?.let { it.multiParagraph.intrinsics.maxIntrinsicWidth > n.size.width + 1f } == true) t else null
-    }
-    private fun bar(sw: Boolean, six: Boolean): List<String> {
+    // --- the bottom bar: six tabs since 2.26.0 (Stories joined, web v72); they fit at 360 dp in both languages -----------
+    // (a label that doesn't fit on one line wraps between its words, never inside one: LayoutCheck)
+    private fun overflows(): List<String> = LayoutCheck.problems(rule, "bar", 360 * rule.density.density)
+    private fun bar(sw: Boolean): List<String> {
         Lang.sw = sw; world(); val m = model()
-        val items = listOf(Triple("map", t("Map", "Ramani"), "map"), Triple("list", t("Projects", "Miradi"), "list"), Triple("new", t("New site", "Eneo jipya"), "plus"), Triple("chat", t("Chat", "Gumzo"), "chat")) +
-            (if (six) listOf(Triple("me", t("Me", "Mimi"), "person")) else emptyList()) + Triple("office", t("Office", "Ofisi"), "inbox")
-        rule.setContent { RafikiTheme(dark = false) { Column(Modifier.width(360.dp).testTag("bar")) { BottomBar(m, "chat", 2, 4, items) { } } } }
+        rule.setContent { RafikiTheme(dark = false) { Column(Modifier.width(360.dp).testTag("bar")) { BottomBar(m, "chat", 2, 4) { } } } }
         settle()
-        shot("chat-tabbar-${if (six) 6 else 5}-${if (sw) "sw" else "en"}")
+        assertEquals(6, rule.onAllNodes(hasAnyAncestor(hasTestTag("bar")) and hasClickAction()).fetchSemanticsNodes().size)
+        shot("chat-tabbar-6-${if (sw) "sw" else "en"}")
         return overflows()
     }
-    @Test fun tab_bar_six_tabs_break_in_kiswahili_at_360() { val o = bar(true, true); assertTrue("6 tabs at 360 dp: $o", o.isNotEmpty()) }
-    @Test fun tab_bar_five_tabs_fit_at_360_kiswahili() { assertEquals(emptyList<String>(), bar(true, false)) }
-    @Test fun tab_bar_five_tabs_fit_at_360_english() { assertEquals(emptyList<String>(), bar(false, false)) }
+    @Test fun tab_bar_six_tabs_fit_at_360_kiswahili() { assertEquals(emptyList<String>(), bar(true)) }
+    @Test fun tab_bar_six_tabs_fit_at_360_english() { assertEquals(emptyList<String>(), bar(false)) }
 
     // --- the data, without screens ------------------------------------------------------------------------------------
     @Test fun previews_and_parsing() {

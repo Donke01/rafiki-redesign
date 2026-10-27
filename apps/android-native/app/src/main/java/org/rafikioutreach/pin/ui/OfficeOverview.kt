@@ -156,7 +156,7 @@ private fun kesSub(n: Long): String = if (Currency.code.value == "KES") "" else 
 
 /** A status: a dot and a short label, in its tone. */
 @Composable
-private fun OcvPill(label: String, tone: String, modifier: Modifier = Modifier) {
+internal fun OcvPill(label: String, tone: String, modifier: Modifier = Modifier) {
     val (fg, bg) = ocvTone(tone)
     Row(modifier.clip(RoundedCornerShape(12.dp)).background(bg).then(if (ocvSun) Modifier.border(1.5.dp, fg, RoundedCornerShape(12.dp)) else Modifier).padding(start = 8.dp, end = 10.dp, top = 3.dp, bottom = 3.dp), verticalAlignment = Alignment.CenterVertically) {
         Box(Modifier.size(7.dp).clip(CircleShape).background(fg)); Spacer(Modifier.width(6.dp))
@@ -287,8 +287,8 @@ private fun OcvFact(label: String, value: String, valueColor: Color = C.ink, sub
 
 /** A settings row that opens with a tap; the summary under the title says what's inside. */
 @Composable
-private fun OcvFold(tag: String, icon: String, hue: String, title: String, summary: String, content: @Composable () -> Unit) {
-    var openNow by remember { mutableStateOf(false) }
+private fun OcvFold(tag: String, icon: String, hue: String, title: String, summary: String, start: Boolean = false, content: @Composable () -> Unit) {
+    var openNow by remember { mutableStateOf(start) }
     val h = rememberHaptics()
     BackStep(openNow) { openNow = false }
     val turn by animateFloatAsState(if (openNow) 90f else 0f, tween(if (Motion.on) 220 else 0), label = "chev")
@@ -311,7 +311,7 @@ private fun OcvFold(tag: String, icon: String, hue: String, title: String, summa
 }
 
 @Composable
-private fun OcvBar(f: Float, color: Color, modifier: Modifier = Modifier, height: Dp = 6.dp) {
+internal fun OcvBar(f: Float, color: Color, modifier: Modifier = Modifier, height: Dp = 6.dp) {
     val g = rememberFill(f.coerceIn(0f, 1f), 1100)
     Box(modifier.fillMaxWidth().height(height).clip(RoundedCornerShape(99.dp)).background(C.line)) {
         if (g > 0.001f) Box(Modifier.fillMaxWidth(g).fillMaxHeight().clip(RoundedCornerShape(99.dp)).background(color))
@@ -326,7 +326,7 @@ private fun OcvMore(n: Int, tag: String, onClick: () -> Unit) =
 
 /** Office › Overview: how much is on the map, number tiles that open their list, tab or sheet, countries, the field. */
 @Composable
-fun OcvOverview(m: AppModel, s: Snapshot, open: (String) -> Unit, go: (String) -> Unit) {
+fun OcvOverview(m: AppModel, s: Snapshot, open: (String) -> Unit, top: () -> Unit = {}, go: (String) -> Unit) {
     val act by m.activity.collectAsState()
     LaunchedEffect(Unit) { m.loadActivity() }
     var people by remember { mutableStateOf(false) }
@@ -359,6 +359,9 @@ fun OcvOverview(m: AppModel, s: Snapshot, open: (String) -> Unit, go: (String) -
             if (missing > 0) Icon(Ic.get("chev"), null, tint = C.muted, modifier = Modifier.size(18.dp))
         }
     }
+    // a new admin's set-up steps, then only what is waiting for an admin (web v71, OfficeStart.kt)
+    if (s.admin) OcvStart(m) { top(); go(it) }
+    OcvTodo(s, due, { top(); go(it) }) { toList(it) }
     // the tiles, two by two
     val pe = s.people?.takeIf { it.total > 0 }
     val tiles = listOfNotNull(
@@ -644,9 +647,11 @@ fun OcvCosts(m: AppModel, s: Snapshot, open: (String) -> Unit) {
             }
         }
     }
-    // folded away: the second approval, and the download
-    Card(Modifier.padding(top = 12.dp), pad = 4.dp) {
-        OcvFold("approve_setting", "shield", "purple", t("Second approval", "Idhini ya pili"), t("Above ", "Zaidi ya ") + Money.kes(cv.approveAbove)) {
+    // folded away: the second approval, and the download (Start here's step brings the whole card into view)
+    Card(Modifier.padding(top = 12.dp).then(jumpHere("limit")), pad = 4.dp) {
+        // Overview › Start here › "Set when a repair needs a second approval" opens this fold and brings it into view
+        val jumpLim = remember { OfficeJump.to == "limit" }
+        OcvFold("approve_setting", "shield", "purple", t("Second approval", "Idhini ya pili"), t("Above ", "Zaidi ya ") + Money.kes(cv.approveAbove), start = jumpLim) {
             var lim by remember(cv.approveAbove) { mutableStateOf(cv.approveAbove.toString()) }
             var lm by remember { mutableStateOf<Pair<String, String>?>(null) }
             var saved by remember { mutableStateOf<String?>(null) }

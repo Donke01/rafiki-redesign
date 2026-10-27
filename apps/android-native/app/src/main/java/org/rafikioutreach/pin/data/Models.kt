@@ -139,14 +139,15 @@ data class Snapshot(
                 approveAbove = if (o.has("approveAbove")) o.optLong("approveAbove") else Money.APPROVE_DEFAULT,
                 people = PeopleServed.from(o.optJSONObject("people")),
                 tests = o.optJSONObject("tests")?.let { j -> j.keys().asSequence().associateWith { j.optString(it) } } ?: emptyMap(),
-                stories = o.optJSONObject("stories")?.let { j -> j.keys().asSequence().mapNotNull { k -> j.optJSONObject(k)?.let { k to StoryBrief(it.optString("st"), it.optInt("n"), it.optString("at")) } }.toMap() } ?: emptyMap(),
+                stories = o.optJSONObject("stories")?.let { j -> j.keys().asSequence().mapNotNull { k -> j.optJSONObject(k)?.let { k to StoryBrief(it.optString("st"), it.optInt("n"), it.optString("at"), it.optInt("b"), it.optInt("i"), it.optInt("a"), it.optString("c")) } }.toMap() } ?: emptyMap(),
                 stages = o.optJSONObject("stages")?.let { j -> j.keys().asSequence().mapNotNull { k -> j.optJSONObject(k)?.let { k to StageBrief.from(it) } }.toMap() } ?: emptyMap(),
             )
         }
     }
 }
 
-data class StoryBrief(val st: String, val n: Int = 0, val at: String = "")
+/** A project's story in the snapshot: status, answers filled (of 6), photos before / in progress / after, consent, last change. */
+data class StoryBrief(val st: String, val n: Int = 0, val at: String = "", val b: Int = 0, val i: Int = 0, val a: Int = 0, val c: String = "")
 
 /** A build's stage, as the app's list carries it (me-contract §construction): stage key, when, by whom, % done,
  *  expected finish, the project it's part of, its title, how many photos, and whether it's behind schedule. */

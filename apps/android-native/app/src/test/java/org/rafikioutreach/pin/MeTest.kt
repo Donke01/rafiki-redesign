@@ -285,23 +285,17 @@ class MeTest {
         assertTrue(tagged("nav_me_tab")); assertFalse("field users see Me in the bar: no hint", tagged("me_hint"))
     }
 
-    /** A field user's five tabs fit at 320 and 360 dp in English and Kiswahili: no label cut or squeezed. */
+    /** A field user's six tabs (Stories since 2.26.0) fit at 320 and 360 dp in English and Kiswahili: no label cut,
+     *  squeezed or split inside a word (a two-word label may wrap between its words). */
     @Test fun field_user_bar_fits() {
         val m = model(admin = false)
         rule.setContent { RafikiTheme(dark = dark) { androidx.compose.foundation.layout.Column(Modifier.size(w.dp, 120.dp)) { BottomBar(m, "me", 0, 3, waiting = 2) { } } } }
         settle()
         for (sw in listOf(false, true)) for (width in listOf(320, 360)) {
             Lang.sw = sw; w = width; settle()
-            val cut = rule.onAllNodes(hasTestTag("nav_me_tab") or hasTestTag("nav_map") or hasTestTag("nav_list") or hasTestTag("nav_new") or hasTestTag("nav_chat"), useUnmergedTree = true).fetchSemanticsNodes().flatMap { tab ->
-                tab.children.filter { it.config.contains(androidx.compose.ui.semantics.SemanticsProperties.Text) }.mapNotNull { n ->
-                    val res = mutableListOf<androidx.compose.ui.text.TextLayoutResult>()
-                    n.config.getOrNull(androidx.compose.ui.semantics.SemanticsActions.GetTextLayoutResult)?.action?.invoke(res)
-                    val txt = n.config[androidx.compose.ui.semantics.SemanticsProperties.Text].joinToString("") { it.text }
-                    if (res.firstOrNull()?.let { it.multiParagraph.intrinsics.maxIntrinsicWidth > n.size.width + 1f || n.boundsInRoot.right > tab.boundsInRoot.right + 1f } == true) txt else null
-                }
-            }
+            val cut = LayoutCheck.problems(rule, "bottom_bar", width * rule.density.density)
             assertEquals("${if (sw) "SW" else "EN"} $width", emptyList<String>(), cut)
-            assertEquals(5, rule.onAllNodes(hasTestTag("nav_me_tab") or hasTestTag("nav_map") or hasTestTag("nav_list") or hasTestTag("nav_new") or hasTestTag("nav_chat")).fetchSemanticsNodes().size)
+            assertEquals(6, rule.onAllNodes(hasTestTag("nav_me_tab") or hasTestTag("nav_map") or hasTestTag("nav_list") or hasTestTag("nav_new") or hasTestTag("nav_chat") or hasTestTag("nav_stories")).fetchSemanticsNodes().size)
             assertTrue(tagged("me_tab_waiting"))
             val v = rule.activity.window.decorView
             val b = Bitmap.createBitmap(v.width, (120 * rule.density.density).toInt(), Bitmap.Config.ARGB_8888); v.draw(Canvas(b))

@@ -187,6 +187,9 @@ fun StoryTab(m: AppModel, p: Project) {
             if (st.text.isNotBlank()) Text(t("${words(text)} words", "maneno ${words(text)}"), style = MaterialTheme.typography.labelSmall, color = if (words(text) in 150..300) C.muted else C.warn, modifier = Modifier.padding(top = 4.dp).testTag("story_words"))
             if (st.status in setOf("not-started", "collecting", "draft")) Btn(if (busy) t("Drafting…", "Inaandika…") else if (st.text.isBlank()) t("Draft the story", "Andika rasimu ya hadithi") else t("Draft it again", "Andika rasimu upya"),
                 { busy = true; post(JSONObject().put("action", "draft"), t("Draft ready ✓", "Rasimu iko tayari ✓")) { busy = false } }, Modifier.padding(top = 12.dp).fillMaxWidth().testTag("story_draft"), icon = "spark", enabled = !busy)
+            // field users: drafting sends it for review (web v72, sty_send)
+            if (!admin && st.status in setOf("not-started", "collecting")) Text(t("“Draft the story” sends it to an admin for review. Nothing goes on the website before it is approved.", "“Andika rasimu ya hadithi” inaituma kwa msimamizi akague. Hakuna kinachoenda kwenye tovuti kabla ya kuidhinishwa."),
+                style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 8.dp).testTag("sty_send"))
             if (admin) {
                 if (st.text.isNotBlank() && text != st.text && st.status != "published") Btn(t("Save text", "Hifadhi maandishi"), { post(JSONObject().put("action", "text").put("text", text), t("Saved ✓", "Imehifadhiwa ✓")) },
                     Modifier.padding(top = 8.dp).fillMaxWidth().testTag("story_text_save"), icon = "check", light = true, small = true)

@@ -106,26 +106,28 @@ fun OfficeScreen(m: AppModel, open: (String) -> Unit) {
         Triple("mail", t("Send an e-\u2060mail", "Tuma barua pepe"), "mail"), // Office › Send an e-mail (Mail.kt)
         Triple("trips", t("Trips", "Safari"), "route"), Triple("vehicles", t("Vehicles", "Magari"), "car"), // field and group trips, vehicles and fuel (feat-itina)
     )
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
+    // opening a section ticks off its Overview › Start here step (OfficeStart.kt)
+    LaunchedEffect(sec) { startMark(m, START_TAB[sec]) }
+    val page = rememberScrollState()
+    val pageScope = rememberScope()
+    Column(Modifier.fillMaxSize().verticalScroll(page).padding(16.dp)) {
         Text(t("Office", "Ofisi"), style = MaterialTheme.typography.headlineLarge, color = C.ink, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.fillMaxWidth())
-        val per = if (secs.size % 3 == 0 && secs.size % 4 != 0) 3 else 4
         val badgeOf = { k: String -> when (k) { "review" -> snap.reviewOpen; "repairs" -> snap.repairs.size; else -> 0 } }
-        // all the sections as tiles until one is picked; then a strip of chips, so the tab's content starts near the top
-        if (!strip) secs.chunked(per).forEachIndexed { ri, row ->
-            Row(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                row.forEachIndexed { ci, (k, l, ic) -> Tile(l, ic, sec == k, { sec = k; strip = true }, Modifier.weight(1f).rise(ri * per + ci, step = 35).testTag("o_$k"), badge = badgeOf(k)) }
-                repeat(per - row.size) { Spacer(Modifier.weight(1f)) }
-            }
-        } else {
+        // all the sections as tiles in four labelled groups (web v71) until one is picked; then a strip of chips in the
+        // same order, so the tab's content starts near the top
+        if (!strip) OfficeGroupsGrid(secs, sec, badgeOf) { k -> sec = k; strip = true }
+        else {
             val (scroll, spot) = rememberKeepInView(sec)
+            val byK = secs.associateBy { it.first }
             Row(Modifier.padding(top = 10.dp).fillMaxWidth().horizontalScroll(scroll).testTag("office_strip"), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                 Chip(t("All", "Zote"), "grid", false, { strip = false }, tag = "o_all", hue = "blue")
-                secs.forEach { (k, l, ic) -> Box(spot(k)) { Chip(l, ic, sec == k, { sec = k }, badge = badgeOf(k), tag = "o_$k", hue = "blue") } }
+                officeGroups(secs.map { it.first }).flatMap { it.second }.forEach { k -> val (_, l, ic) = byK.getValue(k); Box(spot(k)) { Chip(l, ic, sec == k, { sec = k }, badge = badgeOf(k), tag = "o_$k", hue = "blue") } }
             }
         }
         Spacer(Modifier.height(14.dp))
         when (sec) {
-            "overview" -> OcvOverview(m, snap, open) { sec = it; strip = true } // OfficeOverview.kt
+            // Start here and Needs you open their section from the top of the page
+            "overview" -> OcvOverview(m, snap, open, top = { pageScope.launch { page.scrollTo(0) } }) { sec = it; strip = true } // OfficeOverview.kt
             "repairs" -> RepairsSection(m, snap, open)   // OfficeRepairs.kt
             "costs" -> CostsSection(m, snap, open)
             "visits" -> OcvVisits(m, snap, open) // OfficeOverview.kt
@@ -340,7 +342,8 @@ private fun TeamSection(m: AppModel, openProject: (String) -> Unit) {
     field.forEach { p -> PersonCard(p, i++) { Contact.show(p.optString("name")) } }
     if (filtered && list.isEmpty()) Text(t("Nobody matches.", "Hakuna anayelingana."), style = MaterialTheme.typography.bodyMedium, color = C.muted, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(24.dp).testTag("team_none"))
     else if (people.isNotEmpty() && field.isEmpty() && !filtered) Text(t("Nobody here yet. Add a person above.", "Hakuna mtu bado. Ongeza mtu hapo juu."), style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(4.dp))
-    Card(Modifier.padding(top = 18.dp), pad = 16.dp) {
+    // Overview › Start here › "Check who gets alert e-mails" brings this card into view once the team has loaded
+    Card(Modifier.padding(top = 18.dp).then(jumpHere("alerts", ready = people.isNotEmpty())).testTag("team_alerts"), pad = 16.dp) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             val hu = C.hue("teal")
             IconTile("mail", hu.fg, hu.bg, 44.dp)

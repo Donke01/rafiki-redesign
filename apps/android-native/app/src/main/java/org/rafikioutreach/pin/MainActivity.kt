@@ -58,6 +58,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.layout.layout
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -392,6 +393,8 @@ fun Shell(m: AppModel) {
                         pl.tab == "new" -> NewSiteScreen(m) { id -> if (id != null) { tab("list", keepFilter = true); go(Place("list", id)) } }
                         pl.tab == "me" -> MeScreen(m, { go(Place("me", it)) }, { go(Place("me", sub = "report")) }, notes = { go(Place("me", sub = "notes")) }) { go(Place("me", sub = "set_$it")) }
                         pl.tab == "office" -> org.rafikioutreach.pin.ui.OfficeScreen(m) { go(Place("office", it)) }
+                        // Stories (web v72): a project opens on its Stories tab, at the writer; back comes here
+                        pl.tab == "stories" -> org.rafikioutreach.pin.ui.StoriesScreen(m) { go(Place("stories", it, "story")) }
                         else -> ProjectsScreen(m, { go(Place("list", it)) }, { go(Place("list", sub = "route")) }, { tab("new") }, { go(Place("list", it, "visit")) }, scan = { go(Place("list", sub = "scan")) }) { go(Place("list", sub = "search")) }
                     }
                 } }
@@ -402,38 +405,74 @@ fun Shell(m: AppModel) {
     }
 }
 
-/** The tabs at the bottom: Map, Projects, New site, Chat, then Office for admins or Me for field users (feat-mea).
+/** The tabs at the bottom: Map, Projects, New site, Chat, Stories, then Office for admins or Me for field users (web v72).
  *  Everyone also has the Me pill at the top left. [chat]: unread chat messages (the green badge); [waiting] and
- *  [updReady]: the Me tab carries the same badges as the pill. */
+ *  [updReady]: the Me tab carries the same badges as the pill; admins see the stories waiting for review on Stories.
+ *  Six tabs fit down to 320 dp: one label size for every tab, as large as fits (a label that still doesn't fit wraps
+ *  between its words, never inside one); the icon pill narrows with the column; badges stay inside their column. */
 @Composable
 fun BottomBar(m: AppModel, current: String, review: Int, chat: Int, items: List<Triple<String, String, String>>? = null, waiting: Int = 0, updReady: Boolean = false, go: (String) -> Unit) {
         val hp = org.rafikioutreach.pin.ui.rememberHaptics()
         val glassy = with(org.rafikioutreach.pin.ui.C) { this === org.rafikioutreach.pin.ui.Light || this === org.rafikioutreach.pin.ui.Dark }
         val barShape = RoundedCornerShape(28.dp)
+        val snap = m.snap.collectAsState().value
+        val admin = snap?.admin == true
+        // admins: drafts waiting for review (the web app's Stories dot)
+        val drafts = if (admin && snap != null) snap.projects.count { snap.stories[it.id]?.st == "draft" } else 0
+        val tabs = items ?: (listOf(Triple("map", t("Map", "Ramani"), "map"), Triple("list", t("Projects", "Miradi"), "list"), Triple("new", t("New site", "Eneo jipya"), "plus"), Triple("chat", t("Chat", "Gumzo"), "chat"),
+            Triple("stories", t("Stories", "Hadithi"), "book")) +
+            (if (admin) listOf(Triple("office", t("Office", "Ofisi"), "inbox")) else listOf(Triple("me", t("Me", "Mimi"), "person"))))
+        val measurer = androidx.compose.ui.text.rememberTextMeasurer()
+        val base = MaterialTheme.typography.labelSmall
         // on a wide screen the bar stays a comfortable size, in the middle (feat-mea)
-        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        val barW = (if (org.rafikioutreach.pin.ui.CentreLayout.on) minOf(maxWidth, 600.dp) else maxWidth) - 24.dp
+        val inner = 8.dp
+        val col = (barW - inner * 2) / tabs.size
+        val dens = androidx.compose.ui.platform.LocalDensity.current
+        // one label size for all: the whole label on one line if that needs no less than 9.5 sp, else wrap between words
+        val fs = remember(tabs.map { it.second }, col, dens) {
+            val avail = with(dens) { (col - 4.dp).toPx() }
+            fun w(s: String) = measurer.measure(s, base.copy(fontSize = 11.sp), softWrap = false, maxLines = 1).size.width.toFloat().coerceAtLeast(1f)
+            val line = tabs.minOf { 11f * avail / w(it.second) }
+            val word = tabs.minOf { tb -> tb.second.split(' ').minOf { 11f * avail / w(it) } }
+            minOf(11f, maxOf(line, 9.5f), word)
+        }
+        // a two-line label still fits the bar's usual 68 dp (4 + 30 + 2 + 2 × 12 + 4)
+        val label = base.copy(fontSize = fs.sp, lineHeight = (fs + 2.5f).sp, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+        val pillW = minOf(52.dp, col - 8.dp)
         Row(Modifier.then(if (org.rafikioutreach.pin.ui.CentreLayout.on) Modifier.widthIn(max = 600.dp) else Modifier).padding(start = 12.dp, end = 12.dp, bottom = 10.dp, top = 6.dp).fillMaxWidth().shadow(16.dp, barShape, spotColor = Color(0x33144678)).clip(barShape)
-            .background(if (glassy) (if (C.dark) Color(0xEB1E2A36) else Color(0xF2FFFFFF)) else C.card).border(1.dp, if (glassy) (if (C.dark) Color(0x17FFFFFF) else Color.White) else C.line, barShape).height(68.dp), verticalAlignment = Alignment.CenterVertically) {
-            val admin = m.snap.collectAsState().value?.admin == true
-            (items ?: (listOf(Triple("map", t("Map", "Ramani"), "map"), Triple("list", t("Projects", "Miradi"), "list"), Triple("new", t("New site", "Eneo jipya"), "plus"), Triple("chat", t("Chat", "Gumzo"), "chat")) +
-                (if (admin) listOf(Triple("office", t("Office", "Ofisi"), "inbox")) else listOf(Triple("me", t("Me", "Mimi"), "person"))))).forEach { (k, label, icon) ->
+            .background(if (glassy) (if (C.dark) Color(0xEB1E2A36) else Color(0xF2FFFFFF)) else C.card).border(1.dp, if (glassy) (if (C.dark) Color(0x17FFFFFF) else Color.White) else C.line, barShape).heightIn(min = 68.dp).padding(horizontal = inner)
+            .testTag("bottom_bar"), verticalAlignment = Alignment.CenterVertically) {
+            tabs.forEach { (k, text, icon) ->
                 // the tab you are in stays lit, also with a project or page open on top of it; one colour for every tab
                 val on = current == k
                 val hu = org.rafikioutreach.pin.ui.Hue(C.blue2, C.tint)
-                Column(Modifier.weight(1f).clickable(role = Role.Tab) { hp.tap(); go(k) }.semantics { selected = on }.padding(vertical = 6.dp).testTag(if (k == "me") "nav_me_tab" else "nav_$k"), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Box {
-                        if (k == "new") Box(Modifier.size(48.dp, 30.dp).clip(RoundedCornerShape(14.dp)).background(androidx.compose.ui.graphics.Brush.linearGradient(listOf(Color(0xFF9A78F0), Color(0xFF6E46C8)))), contentAlignment = Alignment.Center) { Icon(Ic.get(icon), null, tint = Color.White, modifier = Modifier.size(20.dp)) }
-                        else Box(Modifier.size(52.dp, 30.dp).clip(RoundedCornerShape(99.dp)).background(if (on) hu.bg else Color.Transparent), contentAlignment = Alignment.Center) { Icon(Ic.get(icon), null, tint = if (on) hu.fg else C.muted, modifier = Modifier.size(24.dp)) }
-                        if (k == "office" && review > 0) Text("$review", color = Color.White, fontSize = 10.sp, modifier = Modifier.align(Alignment.TopEnd).clip(RoundedCornerShape(99.dp)).background(C.warn).padding(horizontal = 5.dp))
-                        if (k == "me" && waiting > 0) Text("$waiting", color = Color.White, fontSize = 10.sp, maxLines = 1, softWrap = false, modifier = Modifier.align(Alignment.TopEnd).clip(RoundedCornerShape(99.dp)).background(C.warn).padding(horizontal = 5.dp).testTag("me_tab_waiting"))
-                        if (k == "me" && waiting == 0 && updReady) Box(Modifier.align(Alignment.TopEnd).padding(top = 2.dp, end = 8.dp).size(12.dp).clip(CircleShape).background(C.card).padding(2.dp).clip(CircleShape).background(C.blue).testTag("me_tab_update"))
-                        if (k == "chat" && chat > 0) Text(if (chat > 99) "99+" else "$chat", color = Color.White, fontSize = 10.sp, maxLines = 1, softWrap = false, modifier = Modifier.align(Alignment.TopEnd).clip(RoundedCornerShape(99.dp)).background(org.rafikioutreach.pin.ui.ChatLook.online).padding(horizontal = 5.dp).testTag("chat_badge"))
+                Column(Modifier.weight(1f).clickable(role = Role.Tab) { hp.tap(); go(k) }.semantics { selected = on }.padding(vertical = 4.dp).testTag(if (k == "me") "nav_me_tab" else "nav_$k"), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Box(Modifier.fillMaxWidth().height(30.dp)) {
+                        if (k == "new") Box(Modifier.align(Alignment.Center).size(minOf(48.dp, col - 10.dp), 30.dp).clip(RoundedCornerShape(14.dp)).background(androidx.compose.ui.graphics.Brush.linearGradient(listOf(Color(0xFF9A78F0), Color(0xFF6E46C8)))), contentAlignment = Alignment.Center) { Icon(Ic.get(icon), null, tint = Color.White, modifier = Modifier.size(20.dp)) }
+                        else Box(Modifier.align(Alignment.Center).size(pillW, 30.dp).clip(RoundedCornerShape(99.dp)).background(if (on) hu.bg else Color.Transparent), contentAlignment = Alignment.Center) { Icon(Ic.get(icon), null, tint = if (on) hu.fg else C.muted, modifier = Modifier.size(24.dp)) }
+                        val n = when (k) { "office" -> review; "me" -> waiting; "chat" -> chat; "stories" -> drafts; else -> 0 }
+                        if (n > 0) Text(if (k == "chat" && n > 99) "99+" else "$n", color = Color.White, fontSize = 10.sp, lineHeight = 14.sp, maxLines = 1, softWrap = false,
+                            modifier = Modifier.tabBadge().clip(RoundedCornerShape(99.dp)).background(if (k == "chat") org.rafikioutreach.pin.ui.ChatLook.online else C.warn).padding(horizontal = 5.dp)
+                                .testTag(when (k) { "me" -> "me_tab_waiting"; "chat" -> "chat_badge"; "stories" -> "stories_badge"; else -> "office_badge" }))
+                        if (k == "me" && waiting == 0 && updReady) Box(Modifier.tabBadge().size(12.dp).clip(CircleShape).background(C.card).padding(2.dp).clip(CircleShape).background(C.blue).testTag("me_tab_update"))
                     }
-                    Text(label, style = MaterialTheme.typography.labelSmall, color = if (on) hu.fg else C.muted, maxLines = 1, softWrap = false, modifier = Modifier.padding(top = 3.dp))
+                    Text(text, style = label, color = if (on) hu.fg else C.muted, maxLines = 2, modifier = Modifier.padding(top = 2.dp, start = 2.dp, end = 2.dp).testTag("nav_label_$k"))
                 }
             }
         }
         }
+}
+
+/** A badge on a bottom-bar tab: just right of the icon's middle, at the top of the icon, and always inside its column
+ *  (a wide "99+" moves left rather than over the next tab or past the bar's rounded end). */
+private fun Modifier.tabBadge() = this.layout { me, c ->
+    val p = me.measure(c.copy(minWidth = 0, minHeight = 0))
+    layout(c.maxWidth, c.maxHeight) {
+        val x = minOf(c.maxWidth / 2 + 3.dp.roundToPx(), c.maxWidth - p.width - 3.dp.roundToPx()).coerceAtLeast(0)
+        p.place(x, -2.dp.roundToPx())
+    }
 }
 
 @Composable
