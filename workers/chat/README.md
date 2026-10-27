@@ -93,6 +93,8 @@ The client contract is in the chat brief, with the clarifications in `chat-contr
   - `GET msgs?c=&before=|after=&limit=`, `POST send`, `edit` (15 min), `delete`, `react`, `star`
   - chat2: `POST delete-many { c, ids: [≤100], forAll }` (for everyone: all mine, or I'm an admin of the group/team/project chat; all or nothing),
     `POST clear { c, archive? }` (Clear chat for me: a per-person `cleared` id, so older messages never come back; `archive` = a DM's Delete chat)
+  - chat2, Pages side only: `POST transcribe { c, id }` types out a voice note (lib/transcribe.js, kept in KV `chattx:<c>:<id>`);
+    `GET list` also answers `tools: { translate, transcribe }`; translating is `/api/translate` (lib/translate.js)
   - `GET starred`, `POST read`, `delivered`, `GET info`, `POST live`, `live-stop`, `prefs`, `pin`
 - **Settings and push:** `GET/POST prefs` (no `c`), `POST device`
 - **Media:** `POST media`, `GET media/:id` (with Range, or signed `?e=&s=` links)
