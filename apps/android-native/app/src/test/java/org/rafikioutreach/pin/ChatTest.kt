@@ -466,6 +466,7 @@ class ChatTest {
         until("only admins") { fake.chats["g1"]!!.optBoolean("onlyAdmins") }
         rule.onNodeWithTag("member_Grace Wanjiru").performScrollTo(); tap("member_Grace Wanjiru"); waitTag("member_sheet"); tap("mem_admin")
         until("admin") { fake.chats["g1"]!!.getJSONArray("admins").toString().contains("Grace") }
+        until("member sheet closed") { !tagged("member_sheet") }; settle()
         rule.onNodeWithTag("info_link").performScrollTo(); tap("info_link"); waitTag("link_url")
         assertTrue(text("link_url").contains("join=TOKEN12345"))
         tap("link_reset"); until("reset") { text("link_url").contains("NEWTOKEN99") }

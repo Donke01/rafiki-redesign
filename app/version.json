@@ -1,8 +1,8 @@
 {
   "ok": true,
-  "versionCode": 49,
-  "versionName": "2.24.0",
-  "notes": "Chat gets better: instant notifications, quick replies, pinned messages, Announcements, trip cards, data saver, voice note preview, seen-by faces and much more polish. Built for Android 16.",
-  "sha256": "446d482bf44723fcb6f61c7b9002b9e9793a064afb90219d4dd01357b4fa3416",
+  "versionCode": 50,
+  "versionName": "2.25.0",
+  "notes": "Me is easy to find with your photo, profile photos, construction projects with stages and photos, Stories for each project, a calmer map while you explore, and no blink when you tap a tab again.",
+  "sha256": "84bae98fd825839b4fb0c71d6166b00252a657a84906cf3cb1afb3dc667353f5",
   "apk": "/app/rafiki-pin.apk"
 }
