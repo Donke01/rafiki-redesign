@@ -1,0 +1,82 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="common.css"><style>
+body{background:#ECE7DF}
+.wall{position:absolute;inset:0;opacity:.5;background-image:radial-gradient(circle at 10px 10px,rgba(10,120,194,.09) 2px,transparent 2.5px),radial-gradient(circle at 30px 30px,rgba(28,156,90,.08) 2px,transparent 2.5px);background-size:40px 40px}
+.hd{position:relative;z-index:2;display:flex;align-items:center;gap:10px;padding:12px 10px 10px;background:#fff;box-shadow:0 1px 0 var(--line)}
+.bk{width:34px;height:40px;display:flex;align-items:center;justify-content:center;color:var(--ink)}.bk svg{width:24px;height:24px}
+.hav{position:relative;width:42px;height:42px;flex:none}.hav img{width:42px;height:42px;border-radius:50%;object-fit:cover}
+.hav .pt{position:absolute;right:-3px;bottom:-3px;width:19px;height:19px;border-radius:6px;background:#0A78C2;border:2px solid #fff;display:flex;align-items:center;justify-content:center}.hav .pt svg{width:10px;height:10px;color:#fff}
+.ht{flex:1;min-width:0}.ht b{display:block;font-size:16.5px;font-weight:800;color:var(--ink)}.ht small{display:block;font-size:12.5px;color:var(--green);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hb{width:38px;height:38px;display:flex;align-items:center;justify-content:center;color:var(--ink)}.hb svg{width:22px;height:22px}
+.strip{position:relative;z-index:2;display:flex;align-items:center;gap:10px;padding:8px 14px;background:#F7FAFC;border-bottom:1px solid var(--line);font-size:12.5px;color:var(--text)}
+.strip .s{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:99px;background:#E3F4EA;color:#11643A;font-weight:700}
+.strip .s i{width:7px;height:7px;border-radius:50%;background:var(--green)}
+.strip span.x{flex:1;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.strip a{color:var(--blue);font-weight:800;text-decoration:none}
+.msgs{position:relative;z-index:1;padding:10px 10px 0;display:flex;flex-direction:column;gap:5px}
+.day{align-self:center;margin:6px 0;padding:4px 11px;border-radius:9px;background:rgba(255,255,255,.92);font-size:11.5px;font-weight:700;color:var(--muted);box-shadow:0 1px 1px rgba(0,0,0,.05)}
+.b{max-width:80%;padding:7px 10px 6px;border-radius:14px;background:#fff;box-shadow:0 1px 1px rgba(0,0,0,.07);font-size:15px;line-height:1.38;color:var(--text);position:relative}
+.b.me{align-self:flex-end;background:#D7F0FF;border-top-right-radius:4px}
+.b.th{align-self:flex-start;border-top-left-radius:4px}
+.b .who{display:block;font-size:12.5px;font-weight:800;margin-bottom:1px}
+.b .t{float:right;margin:7px 0 -3px 10px;font-size:11px;color:#7A8893}
+.b .t .k{color:#2E9BE6;font-weight:800;margin-left:2px}
+.b .tr{display:block;clear:both;margin-top:3px;font-size:12px;font-weight:700;color:var(--blue)}
+.ph{padding:3px}.ph img{display:block;width:236px;height:132px;object-fit:cover;border-radius:11px}
+.ph .cap{padding:5px 7px 2px}
+.ph .add{display:flex;align-items:center;gap:6px;margin:6px 4px 3px;padding:6px 9px;border-radius:9px;background:#EEF6FC;color:var(--blue);font-size:12.5px;font-weight:800}
+.ph .add svg{width:15px;height:15px}
+.voice{display:flex;align-items:center;gap:9px;min-width:230px}
+.voice .pl{width:34px;height:34px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;color:#fff;flex:none}.voice .pl svg{width:15px;height:15px}
+.voice .w{flex:1;height:22px;background:repeating-linear-gradient(90deg,#9FB1BE 0 2.5px,transparent 2.5px 5px);-webkit-mask:linear-gradient(transparent 30%,#000 30% 70%,transparent 70%);opacity:.9;border-radius:2px}
+.voice small{font-size:11.5px;color:var(--muted)}
+.react{position:absolute;left:10px;bottom:-12px;padding:1px 6px;border-radius:99px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.15);font-size:12px}
+.gap{height:10px}
+.qr{position:absolute;left:0;right:0;bottom:66px;z-index:2;display:flex;gap:7px;padding:0 10px;overflow:hidden}
+.qr span{flex:none;padding:6px 12px;border-radius:99px;background:rgba(255,255,255,.95);font-size:12.5px;font-weight:700;color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.cmp{position:absolute;left:0;right:0;bottom:0;z-index:2;display:flex;align-items:center;gap:8px;padding:8px 8px 12px}
+.in{flex:1;display:flex;align-items:center;gap:10px;height:46px;padding:0 12px;border-radius:24px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.08);font-size:15px;color:#8A97A1}
+.in svg{width:22px;height:22px;color:#6B7A86}.in span{flex:1}
+.mic{width:46px;height:46px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;color:#fff}.mic svg{width:21px;height:21px}
+
+.selhd{position:relative;z-index:3;display:flex;align-items:center;gap:6px;padding:12px 10px 10px;background:#0B1F2E;color:#fff}
+.selhd b{flex:1;font-size:17px;font-weight:800}
+.selhd .hb{color:#fff}
+.b.sel{box-shadow:0 0 0 3px #1C9C5A}
+.ck{position:absolute;left:-2px;top:50%;width:0}
+.row-sel{position:relative;display:flex;align-items:center;gap:8px}
+.tickc{flex:none;width:24px;height:24px;border-radius:50%;border:2px solid #9AA7B1;background:#fff;display:flex;align-items:center;justify-content:center}
+.tickc.on{background:#1C9C5A;border-color:#1C9C5A;color:#fff}
+.tickc svg{width:14px;height:14px}
+.dim{position:absolute;inset:0;z-index:4;background:rgba(4,20,34,.42)}
+.sh{position:absolute;left:0;right:0;bottom:0;z-index:5;background:#fff;border-radius:26px 26px 0 0;padding:12px 18px 26px;box-shadow:0 -10px 30px rgba(0,0,0,.2)}
+.sh .grab{display:block;width:40px;height:5px;border-radius:9px;background:#D5DDE3;margin:0 auto 14px}
+.sh h3{font-size:19px;font-weight:800;color:var(--ink);text-align:center}
+.sh p{font-size:13.5px;color:var(--muted);text-align:center;margin:6px 8px 14px;line-height:1.4}
+.opt{display:flex;align-items:center;gap:12px;width:100%;padding:13px 14px;border-radius:14px;background:#F6F8FA;margin-bottom:8px}
+.opt .ic{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex:none}
+.opt .ic svg{width:20px;height:20px}
+.opt b{display:block;font-size:15.5px;font-weight:800;color:var(--ink)}
+.opt small{display:block;font-size:12.5px;color:var(--muted);margin-top:2px;line-height:1.35}
+.opt.red .ic{background:#FDE7E5;color:#C62828}.opt.red b{color:#C62828}
+.opt.me .ic{background:#EEF2F5;color:#41515D}
+.cancel{display:block;text-align:center;font-size:15.5px;font-weight:800;color:var(--ink);padding:12px 0 0}
+</style></head><body><div class="wall"></div>
+<div class="selhd"><span class="hb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></span><b>2 selected</b>
+<span class="hb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z"/></svg></span>
+<span class="hb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg></span>
+<span class="hb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M5 7l1 13h12l1-13M9 7V4h6v3"/></svg></span></div>
+<div class="strip"><span class="s"><i></i>Working</span><span class="x">Visited 27 Oct · Eldoret, Kenya</span><a>Open project ›</a></div>
+<div class="msgs">
+<div class="day">Yesterday</div>
+<div class="b th sel"><span class="who" style="color:#B45309">Bertin Mwangi</span>Quote from Eldoret Hardware for the cylinder: KES 18,500. Can I order?<span class="t">16:02</span></div>
+<div class="b me sel">Yes, go ahead. I’ll approve it in the app.<span class="t">16:10<span class="k">✓✓</span></span></div>
+<div class="day">Today</div>
+<div class="b th ph"><span class="who" style="color:#0A78C2;padding:3px 7px 4px">Meril Kiprop</span><img src="washing-600.webp"><div class="cap">Water flowing again 🙌 The committee chair is here.<span class="t">00:12</span></div><span class="add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add to project photos</span></div>
+<div class="b th"><span class="who" style="color:#0A78C2">Meril Kiprop</span>Mwenyekiti anasema watoto sasa wanakunywa maji safi kila siku.<span class="t">00:13</span><span class="tr">Translate · Tafsiri</span><span class="react">🙏 2</span></div>
+</div>
+<div class="qr"><span>👍 Great work</span><span>On my way</span><span>Arrived at site</span><span>Pump fixed ✅</span></div>
+<div class="cmp"><div class="in"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9 10h.01M15 10h.01M8.5 14.5a4.5 4.5 0 0 0 7 0"/></svg><span>Message</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 11.5l-8.6 8.6a5 5 0 0 1-7.1-7.1l8.6-8.6a3.3 3.3 0 0 1 4.7 4.7l-8.6 8.6a1.7 1.7 0 0 1-2.4-2.4l8-8"/></svg><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></div><span class="mic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg></span></div>
+<div class="dim"></div><div class="sh"><span class="grab"></span><h3>Delete 2 messages?</h3><p>One of them is Bertin’s, so “Delete for everyone” is only there because you’re an admin of this chat.</p>
+<div class="opt red"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M5 7l1 13h12l1-13M9 7V4h6v3"/></svg></span><span><b>Delete for everyone</b><small>Gone for all 5 people. They see “This message was deleted”.</small></span></div>
+<div class="opt me"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c1-3.6 3.8-5.6 7-5.6s6 2 7 5.6"/></svg></span><span><b>Delete for me</b><small>Only gone from your phone. Others still see them.</small></span></div>
+<span class="cancel">Cancel</span></div></body></html>
