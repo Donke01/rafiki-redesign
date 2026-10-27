@@ -230,6 +230,7 @@ private val FILTERS = listOf(
     Triple("all", "All|Yote", "list"), Triple("missing", "Needs a location|Hakuna mahali", "pinq"), Triple("near", "Nearby|Karibu nawe", "compass"),
     Triple("repairs", "Repairs|Matengenezo", "wrench"), Triple("due", "Due a visit|Inasubiri ziara", "cal"),
     Triple("build", "Under construction|Inajengwa", "build"),
+    Triple("story", "Stories|Hadithi", "chat"),
 )
 
 @OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
@@ -253,6 +254,9 @@ fun ProjectsScreen(m: AppModel, open: (String) -> Unit, planRoute: () -> Unit = 
         "repairs" -> snap.repairs.containsKey(p.id)
         "due" -> p.gps != null && (ageDays(snap, p) >= DUE_DAYS || testDue(snap, p))
         "build" -> snap.building(p)
+        "story", "story:need" -> snap.storyIs(p, "need")
+        "story:draft" -> snap.storyIs(p, "draft")
+        "story:ok" -> snap.storyIs(p, "ok")
         else -> true
     }
     // what the Filter pill (country, type) leaves; the chips count within it
@@ -268,6 +272,9 @@ fun ProjectsScreen(m: AppModel, open: (String) -> Unit, planRoute: () -> Unit = 
         "due" -> testCount(snap, rows).let { n -> if (n > 0) t("${rows.size} due a visit · $n ${if (n == 1) "needs" else "need"} a water test", "${rows.size} zinasubiri ziara · $n zinahitaji kipimo cha maji")
             else t("${rows.size} not visited in the last 6 months, longest first", "${rows.size} hazijatembelewa miezi 6 iliyopita, za muda mrefu kwanza") }
         "build" -> t("${rows.size} being built", "${rows.size} inajengwa")
+        "story", "story:need" -> t("${rows.size} need a story", "${rows.size} zinahitaji hadithi")
+        "story:draft" -> t("${rows.size} with a draft ready", "${rows.size} zina rasimu tayari")
+        "story:ok" -> t("${rows.size} approved", "${rows.size} zimeidhinishwa")
         else -> t("${rows.size} projects", "Miradi ${rows.size}")
     }
     val mine = snap.assigned.mapNotNull { a -> snap.projects.firstOrNull { it.id == a.id }?.let { it to t("Visit by " + Dates.weekday(a.date), "Tembelea kabla ya " + Dates.weekday(a.date)) + if (a.note.isNotBlank()) " · ${a.note}" else "" } } +
@@ -340,9 +347,17 @@ fun ProjectsScreen(m: AppModel, open: (String) -> Unit, planRoute: () -> Unit = 
                     // Under construction shows when something is being built (or it's the chosen list)
                     FILTERS.filter { (k, _, _) -> k != "build" || f == k || scoped.any { snap.building(it) } }.forEach { (k, label, icon) ->
                         Box(Modifier.onGloballyPositioned { chipX[k] = it.positionInParent().x.toInt() }) {
-                            ProjChip(label.split("|").let { t(it[0], it[1]) }, icon, scoped.count { inFilter(it, k) }, f == k, "chip_$k") { f = k; m.prefs.filter = k }
+                            ProjChip(label.split("|").let { t(it[0], it[1]) }, icon, scoped.count { inFilter(it, k) }, f == k || (k == "story" && f.startsWith("story")), "chip_$k") { f = k; m.prefs.filter = k }
                         }
                     }
+                }
+            }
+        }
+        // Stories: which ones (needs a story / draft ready / approved), feat-mea
+        if (f.startsWith("story")) item(key = "storyseg") {
+            Row(Modifier.padding(bottom = 8.dp).horizontalScroll(rememberScrollState()).testTag("story_seg"), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                listOf("story:need" to t("Needs a story", "Inahitaji hadithi"), "story:draft" to t("Draft ready", "Rasimu iko tayari"), "story:ok" to t("Approved", "Imeidhinishwa")).forEach { (k, l) ->
+                    Box(Modifier.testTag("chip_$k")) { Pill("$l · ${scoped.count { inFilter(it, k) }}", f == k || (f == "story" && k == "story:need")) { f = k; m.prefs.filter = k } }
                 }
             }
         }
@@ -469,12 +484,14 @@ fun ProjectRow(m: AppModel, s: Snapshot, p: Project, here: LatLng?, showPinned: 
             // how far first, then how it is: both show (they wrap to a second line rather than squeeze)
             val dist = if (here != null && p.gps != null) Geo.dist(Geo.metres(here, p.gps), m.prefs.miles) else null
             val due = testDue(s, p)
-            if (dist != null || rep != null || p.gps == null || showPinned || due) androidx.compose.foundation.layout.FlowRow(Modifier.padding(top = 5.dp).testTag("row_tags"), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            val story = s.storyIs(p, "ok") && s.stories.containsKey(p.id)
+            if (dist != null || rep != null || p.gps == null || showPinned || due || story) androidx.compose.foundation.layout.FlowRow(Modifier.padding(top = 5.dp).testTag("row_tags"), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 if (dist != null) Tag(dist, C.tint, C.deep)
                 if (rep != null) Tag(if (rep.state == "notworking") t("Not working", "Haifanyi kazi") else t("Needs repair", "Inahitaji matengenezo"), if (rep.state == "notworking") C.badBg else C.warnBg, if (rep.state == "notworking") C.bad else C.warn)
                 if (p.gps == null) Tag(t("No location", "Hakuna mahali"), C.warnBg, C.warn)
                 else if (dist == null && rep == null && showPinned) Tag(t("Pinned", "Ina mahali"), C.okBg, C.ok)
                 if (due) WaterTestTag()
+                if (story) StoryTag()
             }
         }
         Spacer(Modifier.width(8.dp))

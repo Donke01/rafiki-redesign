@@ -94,7 +94,7 @@ object StagePics {
 }
 
 @Composable
-private fun AuthPic(m: AppModel, path: String, modifier: Modifier, fit: ContentScale = ContentScale.Crop) {
+internal fun AuthPic(m: AppModel, path: String, modifier: Modifier, fit: ContentScale = ContentScale.Crop) {
     val bmp by produceState(StagePics.cached(path), path) { if (value == null) value = StagePics.load(m.api, path) }
     Box(modifier, contentAlignment = Alignment.Center) {
         val b = bmp

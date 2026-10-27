@@ -175,6 +175,8 @@ class VisitDraft {
     var ecoli by mutableStateOf("")
     var active by mutableStateOf(""); var chair by mutableStateOf(""); var phone by mutableStateOf(""); var fee by mutableStateOf(""); var fund by mutableStateOf("")
     var quote by mutableStateOf(""); var quoteBy by mutableStateOf(""); var consent by mutableStateOf(false)
+    /** "Add to this project's story": open its Stories tab once the visit is sent (feat-mea). */
+    var toStory by mutableStateOf(false)
     var note by mutableStateOf("")
     var stage by mutableStateOf("")
     val nums = mutableStateMapOf<String, String>()
@@ -417,14 +419,7 @@ fun VisitTab(m: AppModel, p: Project) {
                     Field(v.chair, { v.chair = it }, t(cen, csw), Modifier.weight(1f).testTag("carer_name"), t("Name", "Jina"))
                     Field(v.phone, { v.phone = it }, t("Their phone", "Simu yake"), Modifier.weight(1f))
                 }
-                H2(t("Story moment (optional)", "Hadithi (si lazima)"), Modifier.padding(top = 18.dp))
-                Text(t("A few words from someone it helps, for the website.", "Maneno machache kutoka kwa mtu anayesaidiwa, kwa ajili ya tovuti."), style = MaterialTheme.typography.bodyMedium, color = C.muted)
-                Field(v.quote, { v.quote = it }, t("What they said", "Walichosema"), placeholder = t("e.g. “Our children learn in a dry classroom now.”", "mf. “Watoto wetu sasa wanasoma darasani pasipo kuvuja.”"), lines = 3)
-                Field(v.quoteBy, { v.quoteBy = it }, t("Who said it", "Aliyesema"), placeholder = t("e.g. Mary, a parent", "mf. Mary, mzazi"))
-                Row(Modifier.padding(top = 12.dp).clickable { v.consent = !v.consent }, verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(v.consent, { v.consent = it }, colors = CheckboxDefaults.colors(checkedColor = C.blue))
-                    Text(t("They agreed to be quoted and photographed for RAFIKI’s website", "Wamekubali kunukuliwa na kupigwa picha kwa tovuti ya RAFIKI"), style = MaterialTheme.typography.bodyMedium, color = C.text)
-                }
+                StoryShortcut(v)
             } else {
                 H2(t("Water committee", "Kamati ya maji"))
                 Text(t("Is the committee active?", "Je, kamati iko hai?"), style = MaterialTheme.typography.titleSmall, color = C.ink, modifier = Modifier.padding(top = 4.dp))
@@ -436,14 +431,7 @@ fun VisitTab(m: AppModel, p: Project) {
                     Field(v.phone, { v.phone = it }, t("Their phone", "Simu yake"), Modifier.weight(1f))
                 }
                 Field(v.fund, { v.fund = it }, t("Maintenance fund now", "Mfuko wa matengenezo sasa"), Modifier.testTag("fund"), money = true)
-                H2(t("Story moment (optional)", "Hadithi (si lazima)"), Modifier.padding(top = 18.dp))
-                Text(t("A few words from someone who uses the water, for the website.", "Maneno machache kutoka kwa mtu anayetumia maji, kwa ajili ya tovuti."), style = MaterialTheme.typography.bodyMedium, color = C.muted)
-                Field(v.quote, { v.quote = it }, t("What they said", "Walichosema"), placeholder = t("e.g. “Now my girls get to school on time.”", "mf. “Sasa wasichana wangu wanafika shuleni kwa wakati.”"), lines = 3)
-                Field(v.quoteBy, { v.quoteBy = it }, t("Who said it", "Aliyesema"), placeholder = t("e.g. Mary, mother of three", "mf. Mary, mama wa watoto watatu"))
-                Row(Modifier.padding(top = 12.dp).clickable { v.consent = !v.consent }, verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(v.consent, { v.consent = it }, colors = CheckboxDefaults.colors(checkedColor = C.blue))
-                    Text(t("They agreed to be quoted and photographed for RAFIKI’s website", "Wamekubali kunukuliwa na kupigwa picha kwa tovuti ya RAFIKI"), style = MaterialTheme.typography.bodyMedium, color = C.text)
-                }
+                StoryShortcut(v)
             }
             else -> {
                 H2(t("Check and send", "Hakiki na utume"))
@@ -479,8 +467,8 @@ fun VisitTab(m: AppModel, p: Project) {
                         (v.arrivedAt ?: fix?.ll)?.let { body.put("lat", it.lat).put("lng", it.lng) }
                         val files = v.shots.map { OutFile(it.file.path, "photo", it.label) } + listOfNotNull(v.voice?.let { OutFile(it.path, "voice", "Voice note") })
                         when (val o = m.submit(body, files)) {
-                            is Outcome.Sent -> { m.localVisit(p, v.state, v.note, v.urgency, bad); testedNow(m, p, body); v.sent = "sent"; msg = o.note?.let { "warn" to it } }
-                            Outcome.Queued -> { m.localVisit(p, v.state, v.note, v.urgency, bad); testedNow(m, p, body); v.sent = "queued" }
+                            is Outcome.Sent -> { m.localVisit(p, v.state, v.note, v.urgency, bad); testedNow(m, p, body); v.sent = "sent"; msg = o.note?.let { "warn" to it }; if (v.toStory) StoryNav.open = p.id }
+                            Outcome.Queued -> { m.localVisit(p, v.state, v.note, v.urgency, bad); testedNow(m, p, body); v.sent = "queued"; if (v.toStory) StoryNav.open = p.id }
                             is Outcome.Failed -> msg = "bad" to o.text
                             Outcome.Locked -> {}
                         }
@@ -550,4 +538,18 @@ fun Pill(label: String, on: Boolean, modifier: Modifier = Modifier, color: Color
             .clickable(role = Role.Button, onClick = onClick).heightIn(min = 44.dp).padding(horizontal = 10.dp),
         contentAlignment = Alignment.Center,
     ) { Text(label, color = if (on) Color.White else C.ink, style = MaterialTheme.typography.labelMedium, textAlign = TextAlign.Center) }
+}
+
+
+/** The visit's story moment is now one shortcut (feat-mea, me-brief §9): the Stories tab opens after the visit. */
+@Composable
+private fun StoryShortcut(v: VisitDraft) {
+    Row(Modifier.padding(top = 18.dp).fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(C.tint).clickable(role = androidx.compose.ui.semantics.Role.Checkbox) { v.toStory = !v.toStory }
+        .heightIn(min = 56.dp).padding(horizontal = 8.dp, vertical = 6.dp).testTag("visit_to_story"), verticalAlignment = Alignment.CenterVertically) {
+        Checkbox(v.toStory, { v.toStory = it }, colors = CheckboxDefaults.colors(checkedColor = C.blue))
+        Column(Modifier.weight(1f)) {
+            Text(t("Add to this project’s story", "Ongeza kwenye hadithi ya mradi huu"), style = MaterialTheme.typography.titleSmall, color = C.ink)
+            Text(t("After sending, the Stories tab opens: photos, questions and a quote.", "Ukishatuma, kichupo cha Hadithi kitafunguka: picha, maswali na nukuu."), style = MaterialTheme.typography.bodySmall, color = C.muted)
+        }
+    }
 }
