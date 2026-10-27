@@ -72,9 +72,10 @@ def context(br, lang):
     return ctx, pg
 
 def h(pg): return pg.evaluate('location.hash')
-def view(pg): return pg.evaluate("['vMap','vList','vSearch','vRoute','vProj','vNew','vMe','vReport','vOffice'].filter(v => !document.getElementById(v).classList.contains('hidden'))[0]")
+def view(pg): return pg.evaluate("['vMap','vList','vSearch','vRoute','vProj','vNew','vMe','vReport','vOffice','vChat','vRoom'].filter(v => !document.getElementById(v).classList.contains('hidden'))[0]")
 def back(pg, t=800): pg.evaluate('history.back()'); pg.wait_for_timeout(t)
-def tabbar(pg, v, t=1300): pg.click('#tabs button[data-v=%s]' % v); pg.wait_for_timeout(t)
+# Me left the bottom bar for the avatar at top left when Chat came in (chatw, S/chat-tabbar-decision.md); it starts over the same way
+def tabbar(pg, v, t=1300): pg.click('#hAv' if v == 'vMe' else '#tabs button[data-v=%s]' % v); pg.wait_for_timeout(t)
 def y(pg): return pg.evaluate('Math.round(scrollY)')
 def vis(pg, sel): loc = pg.locator(sel); return loc.count() > 0 and loc.first.is_visible()
 def shot(pg, name, lang): pg.wait_for_timeout(300); fn = os.path.join(OUT, '%s-%s.png' % (lang, name)); pg.screenshot(path=fn); return fn
@@ -202,7 +203,7 @@ def s_reload(pg, check, lang):
     back(pg, 1200); check(h(pg) == '#me' and view(pg) == 'vMe', 'Back after a reload still walks the earlier steps (%s)' % h(pg))
 
 def s_refresh(pg, check, lang):
-    for v in ['vMap', 'vList', 'vNew', 'vMe', 'vOffice']:
+    for v in ['vMap', 'vList', 'vNew', 'vMe', 'vOffice', 'vChat']:
         tabbar(pg, v, 1600); h0 = h(pg)
         if v != 'vMap': pg.evaluate('scrollTo(0, 260)'); pg.wait_for_timeout(300)
         y0 = y(pg); pg.click('#bRefresh'); pg.wait_for_timeout(1600)
@@ -229,7 +230,7 @@ def s_home(pg, check, lang):
     back(pg, 1500); check(h(pg) == '#map' and view(pg) == 'vMap', 'Back from it comes to Map home (%s)' % h(pg))
     # the bottom bar from a deeper screen: Back from there comes to Map home
     tabbar(pg, 'vList', 1300); pg.click('#list .row[data-id="102"]'); pg.wait_for_timeout(1300); pg.click('#tabHist'); pg.wait_for_timeout(800)
-    tabbar(pg, 'vMe', 1500); check(h(pg) == '#me', 'the bottom bar opens Me (%s)' % h(pg))
+    tabbar(pg, 'vChat', 1500); check(h(pg) == '#chat', 'the bottom bar opens Chat (%s)' % h(pg))
     back(pg, 1500); check(h(pg) == '#map' and view(pg) == 'vMap', 'Back from a bottom-bar screen comes to Map home (%s)' % h(pg))
     # a notification opens its project; Back comes to Me
     tabbar(pg, 'vMe', 1500); pg.click('#meBell'); pg.wait_for_timeout(800); pg.locator('.npg .np-r[data-id]').first.click(); pg.wait_for_timeout(1300)
