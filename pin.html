@@ -3531,6 +3531,117 @@ html[data-theme=sun] .cw-vpv{border:2px solid #000;box-shadow:none}
   body.cw2 #cwList .cw-row.cur{background:var(--tint)}
 }
 @media (prefers-reduced-motion: reduce){.cw-m.nw,.cw-sys.nw,.cw-rc.pop,.cw-tk.rd.up,.cw-dots i,.cw-skel i,.cw-unl.gone,.cw-fe,.cw-go > span{animation:none !important;transition:none !important}.cw-unl.gone{opacity:0}}
+/* cw2-list: the chat list (chat 2, design/chat-2026-10/list.png): a compact header with the Me photo, search in place and ⋯,
+   filter chips, "In the field now", a one-line alert prompt, dense rows with thin dividers, the new-chat button.
+   Text sizes only from the --cw-fs-* scale above. Phones: the RAFIKI bar steps aside (bell and refresh are in ⋯). */
+:root{--cw2-g:16px;--cw2-chip:#EEF0F2;--cw2-chipt:#141618;--cw2-on:#DDF1E6;--cw2-ont:#11643A;--cw2-at:#E3F4EA;--cw2-fab:#1C8A50;--cw2-nt:#EAF4FB}
+html[data-theme=dark]{--cw2-chip:#1E2830;--cw2-chipt:#E6EEF5;--cw2-on:rgba(60,192,122,.2);--cw2-ont:#8BE3B2;--cw2-at:rgba(60,192,122,.2);--cw2-fab:#1C8A50;--cw2-nt:rgba(91,192,255,.12)}
+html[data-theme=sun]{--cw2-chip:#FFFFFF;--cw2-chipt:#000000;--cw2-on:#00562A;--cw2-ont:#FFFFFF;--cw2-at:#FFFFFF;--cw2-fab:#00562A;--cw2-nt:#FFFFFF}
+@media (max-width:999px){
+  body.cwl header.top{display:none}
+  body.cwl,html:not([data-theme=sun]) body.cwl{background:var(--card)}
+  html:not([data-theme=sun]) body.cwl::before{display:none}
+}
+.cw2-top{position:sticky;top:0;z-index:30;margin:-16px calc(var(--cw2-g) * -1) 0;padding:calc(6px + env(safe-area-inset-top)) var(--cw2-g) 0;background:var(--card)}
+.cw2-hd{position:relative;display:flex;align-items:center;gap:6px;min-height:56px}
+.cw2-me{flex:none;width:42px;height:42px;margin-right:6px;padding:0;border:0;border-radius:50%;background:none;cursor:pointer;box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--blue)}
+.cw2-mea{display:flex;align-items:center;justify-content:center;width:100%;height:100%;border-radius:50%;overflow:hidden;background:linear-gradient(135deg,#1576BD,#054F81);color:#FFFFFF;font-size:var(--cw-fs-meta);font-weight:800}
+.cw2-mea img.avph{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:50%}
+.cw2-hd h1{flex:1;min-width:0;margin:0;font-size:var(--cw-fs-title);font-weight:var(--cw-fw-title);letter-spacing:-.015em;line-height:1.15;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cw2-ib{position:relative;flex:none;width:44px;height:44px;padding:0;border:0;border-radius:50%;background:none;color:var(--ink);display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.cw2-ib svg{width:23px;height:23px}.cw2-ib[aria-expanded=true]{background:var(--tint)}
+@media (hover:hover){.cw2-ib:hover,.cw2-p:hover,.cw2-arch:hover{background:var(--tint)}#cwList .cw-row:hover{background:var(--tint)}}
+.cw2-dot{position:absolute;top:9px;right:10px;width:9px;height:9px;border-radius:50%;background:var(--bad);border:2px solid var(--card)}
+.cw2-hd.srch > :not(.cw-sbox):not(.cw2-pop){display:none}
+.cw2-hd .cw-sbox{flex:1;min-width:0;min-height:44px;padding:0 4px}
+.cw2-hd .cw-sbox[hidden]{display:none}
+.cw2-hd .cw-sbox input{font-size:var(--cw-fs-name)}
+/* the ⋯ menu */
+.cw2-pop{position:absolute;top:52px;right:0;z-index:40;min-width:224px;max-width:calc(100vw - 32px);padding:6px;border-radius:16px;background:var(--card);border:var(--bw) solid var(--line);box-shadow:0 12px 32px rgba(4,38,63,.2)}
+.cw2-pop.hidden{display:none}
+.cw2-pop button{display:flex;align-items:center;gap:12px;width:100%;min-height:48px;padding:6px 12px;border:0;border-radius:11px;background:none;color:var(--text);font:inherit;font-size:var(--cw-fs-name);font-weight:600;text-align:left;cursor:pointer;white-space:nowrap}
+.cw2-pop button:hover,.cw2-pop button:focus-visible{background:var(--tint)}.cw2-pop button svg{flex:none;width:21px;height:21px;color:var(--muted)}
+.cw2-pop button span{flex:1}.cw2-pop button i{flex:none;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--bad);color:#FFFFFF;font-style:normal;font-size:var(--cw-fs-small);font-weight:800;line-height:22px;text-align:center}
+html[data-theme=sun] .cw2-pop{border:2px solid #000;box-shadow:none}
+/* the chips */
+.cw2-chips{display:flex;gap:8px;margin:0 calc(var(--cw2-g) * -1);padding:4px var(--cw2-g) 10px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.cw2-chips::-webkit-scrollbar{display:none}
+.cw2-chips button{flex:none;min-height:36px;padding:0 14px;border:0;border-radius:999px;background:var(--cw2-chip);color:var(--cw2-chipt);font:inherit;font-size:var(--cw-fs-meta);font-weight:700;white-space:nowrap;cursor:pointer}
+.cw2-chips button b{margin-left:1px;font-weight:800}
+.cw2-chips button[aria-pressed=true]{background:var(--cw2-on);color:var(--cw2-ont)}
+html[data-theme=sun] .cw2-chips button{border:2px solid #000}
+#cwTools.srch .cw2-chips,#cwTools.arch .cw2-chips{display:none}
+#cwTools .cw-archhd{margin:0 0 8px}
+/* In the field now */
+.cw2-fd{margin:0 calc(var(--cw2-g) * -1);padding:2px 0 10px var(--cw2-g);border-bottom:1px solid var(--line)}
+html[data-theme=sun] .cw2-fd{border-bottom:2px solid #000}
+.cw2-fd h2{display:flex;align-items:center;gap:7px;margin:0 0 8px;font-size:var(--cw-fs-small);font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.cw2-fd h2 i{width:8px;height:8px;border-radius:50%;background:var(--cw-un)}
+.cw2-ppl{display:flex;align-items:flex-start;gap:6px;padding-right:var(--cw2-g);overflow-x:auto;scrollbar-width:none}.cw2-ppl::-webkit-scrollbar{display:none}
+.cw2-p{flex:none;width:max(76px,5rem);padding:2px 0;border:0;border-radius:14px;background:none;color:var(--text);font:inherit;text-align:center;cursor:pointer}
+.cw2-rg{position:relative;display:block;width:58px;height:58px;margin:0 auto 4px;padding:2.5px;border-radius:50%;background:var(--line)}
+.cw2-rg.on{background:var(--cw-un)}.cw2-rg.site{background:conic-gradient(from 200deg,#1C9C5A,#0A78C2,#1C9C5A)}
+.cw2-rg .cw-av{width:100%;height:100%;border:2.5px solid var(--card);font-size:var(--cw-fs-name)}
+html[data-theme=sun] .cw2-rg .cw-av{border:2.5px solid #FFFFFF}
+.cw2-tag{position:absolute;right:-2px;bottom:-1px;width:22px;height:22px;border-radius:50%;background:var(--card);color:var(--cw-un);display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.cw2-tag svg{width:14px;height:14px}
+.cw2-p small,.cw2-p em{display:block;padding:0 2px;font-style:normal;line-height:1.25}
+.cw2-p small{font-size:var(--cw-fs-meta);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cw2-p em{font-size:var(--cw-fs-small);font-weight:700;color:var(--cw-un);display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;overflow-wrap:normal;word-break:normal;hyphens:none}
+.cw2-p em.old{color:var(--muted);font-weight:600}
+/* the alert prompt: one line */
+.cw2-nt{display:flex;align-items:center;gap:8px;margin:10px 0 2px;padding:4px 4px 4px 12px;min-height:44px;border-radius:12px;background:var(--cw2-nt);color:var(--text);font-size:var(--cw-fs-meta)}
+.cw2-nt > svg{flex:none;width:18px;height:18px;color:var(--blue)}
+.cw2-nt span{flex:1;min-width:0;line-height:1.3}
+.cw2-nt button{flex:none;min-height:36px;padding:0 8px;border:0;border-radius:10px;background:none;color:var(--blue);font:inherit;font-size:var(--cw-fs-meta);font-weight:800;white-space:nowrap;cursor:pointer}
+.cw2-nt button.x{width:36px;padding:0;color:var(--muted);display:flex;align-items:center;justify-content:center}.cw2-nt button.x svg{width:16px;height:16px}
+.cw2-nt button:hover{background:rgba(10,120,194,.1)}
+html[data-theme=sun] .cw2-nt{border:2px solid #000}html[data-theme=sun] .cw2-nt button{color:#0050A0}
+html[data-theme=dark] .cw2-nt button:not(.x){color:#5BC0FF}
+/* the rows: 74 px, a 52 px picture, a thin divider under the words */
+#cwList{margin-top:2px;padding-bottom:76px}
+#cwList .cw-rw{margin:0 calc(var(--cw2-g) * -1);border-radius:0}
+#cwList > .cw-row{width:calc(100% + var(--cw2-g) * 2);margin:0 calc(var(--cw2-g) * -1)}
+#cwList .cw-row{min-height:var(--cw-row);padding:0 var(--cw2-g);gap:13px;border-radius:0;background:transparent}
+#cwList .cw-rw.sw .cw-row,#cwList .cw-rw.swp .cw-row{background:var(--card) !important}
+#cwList .cw-rt{align-self:stretch;justify-content:center;gap:2px;min-height:var(--cw-row);padding:8px 0;border-bottom:1px solid var(--line)}
+html[data-theme=sun] #cwList .cw-row{border-bottom:0;background:#FFFFFF}html[data-theme=sun] #cwList .cw-rt{border-bottom:2px solid #000}
+#cwList .cw-r1 b{font-size:var(--cw-fs-name);font-weight:var(--cw-fw-name);line-height:1.3}
+#cwList .cw-row.un .cw-r1 b{font-weight:800}
+#cwList .cw-r1 time{font-size:var(--cw-fs-meta);font-weight:var(--cw-fw-meta)}
+#cwList .cw-row.un .cw-r1 time{color:var(--cw-un);font-weight:700}
+#cwList .cw-pv,#cwList .cw-typ{font-size:var(--cw-fs-msg);line-height:1.35}
+#cwList .cw-pv{font-weight:var(--cw-fw-msg)}#cwList .cw-row.un .cw-pv{color:var(--text);font-weight:500}
+#cwList .cw-typ{font-weight:600}
+#cwList .cw-un{min-width:22px;height:22px;font-size:var(--cw-fs-small);line-height:22px}
+#cwList .cw-at{width:auto;min-width:30px;padding:0 7px;background:var(--cw2-at);color:var(--cw-un);font-size:var(--cw-fs-meta)}
+html[data-theme=sun] #cwList .cw-at{border:2px solid #000;line-height:18px}
+#cwList .cw-bi svg{width:15px;height:15px}
+/* a chat's picture (cwChatAvatar): any size; a project's photo with a small blue water drop, or its type on a coloured tile */
+.cw-av.cav{font-size:var(--cw-fs-name)}.cw-av.cav.sm{font-size:var(--cw-fs-meta)}
+#cwList .cw-ra button{font-size:var(--cw-fs-small)}
+.cw-av.cav.ic svg{width:48%;height:48%}
+.cw-av.tile{border-radius:30%;background:var(--hb);color:var(--hu)}.cw-av.tile svg{width:50%;height:50%}
+html[data-theme=sun] .cw-av.tile{border-radius:30%}
+.cw-pdr{position:absolute;right:-3px;bottom:-3px;width:42%;height:42%;min-width:16px;min-height:16px;max-width:22px;max-height:22px;border-radius:30%;background:#0A78C2;border:2px solid var(--card);color:#FFFFFF;display:flex;align-items:center;justify-content:center}
+.cw-pdr svg{width:58%;height:58%}
+html[data-theme=sun] .cw-pdr{background:#0050A0;border-color:#000}
+/* Archived: a small grey row at the end */
+.cw2-arch{display:flex;align-items:center;gap:13px;width:calc(100% + var(--cw2-g) * 2);min-height:52px;margin:0 calc(var(--cw2-g) * -1);padding:0 var(--cw2-g);border:0;background:none;color:var(--muted);font:inherit;font-size:var(--cw-fs-meta);font-weight:600;text-align:left;cursor:pointer}
+.cw2-arch > svg{flex:none;width:var(--cw-av);height:20px}.cw2-arch span{flex:1;min-width:0}.cw2-arch i{font-style:normal;font-weight:700}
+/* the new-chat button: a green rounded square above the bottom bar */
+.cw2-fab{display:none;position:fixed;right:max(16px,calc(50% - 364px));bottom:calc(var(--tabh) + 30px + env(safe-area-inset-bottom));z-index:1150;width:56px;height:56px;padding:0;border:0;border-radius:18px;background:var(--cw2-fab);color:#FFFFFF;box-shadow:0 6px 16px rgba(28,138,80,.35);align-items:center;justify-content:center;cursor:pointer}
+.cw2-fab svg{width:25px;height:25px}.cw2-fab:active{transform:scale(.96)}
+body.cwl .cw2-fab{display:flex}#vChat.cw2-s + .cw2-fab{display:none !important}body.locked .cw2-fab{display:none !important}
+html[data-theme=sun] .cw2-fab{border:2px solid #000;box-shadow:none}
+@media (min-width:1000px){
+  body.cw2{--cw2-g:12px}
+  body.cw2 main > #vChat{background:var(--card);border-radius:18px 0 0 18px}
+  body.cw2 .cw2-top{top:-10px;margin-top:-10px;padding-top:4px;border-radius:18px 0 0 0}
+  body.cw2 .cw2-me{display:none}
+  body.cw2 .cw2-fab{display:flex;right:auto;left:calc(max(12px,calc(50% - 620px)) + 360px - 72px);bottom:calc(var(--tabh) + 42px)}
+}
+@media (prefers-reduced-motion: reduce){.cw2-fab:active{transform:none}}
 </style>
 <style id="mew-css">
 /* polish-mew: the Me pill at top left (avatar, person icon, "Me"), its one-time hint, profile photos, centred wide screens */
@@ -3959,18 +4070,25 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
     <!-- chatw:begin -->
     <!-- chat: every conversation, newest first (chatw) -->
     <section id="vChat" class="hidden" aria-labelledby="h-chat">
-      <div class="cw-head">
-        <span class="cw-hb"><button class="cw-ib" id="cwSet" type="button" aria-label="Chat settings" data-testid="cw_settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 13.5a7.6 7.6 0 0 0 0-3l2-1.5-2-3.4-2.3 1a7.5 7.5 0 0 0-2.6-1.5L14 2.6h-4l-.5 2.5A7.5 7.5 0 0 0 6.9 6.6l-2.3-1-2 3.4 2 1.5a7.6 7.6 0 0 0 0 3l-2 1.5 2 3.4 2.3-1a7.5 7.5 0 0 0 2.6 1.5l.5 2.5h4l.5-2.5a7.5 7.5 0 0 0 2.6-1.5l2.3 1 2-3.4z"/></svg></button><button class="cw-ib" id="cwStar" type="button" aria-label="Starred messages"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4l2.5 5.2 5.6.8-4.1 3.9 1 5.6L12 16.8l-5 2.7 1-5.6-4.1-3.9 5.6-.8z"/></svg></button></span>
-        <h1 id="h-chat">Chat</h1>
-        <span class="cw-hb r"><button class="cw-ib pri" id="cwNew" type="button" aria-label="New chat" data-testid="cw_new"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button></span>
+      <div class="cw2-top" id="cwTop">
+        <div class="cw2-hd" id="cwHead">
+          <button class="cw2-me" id="cwMe" type="button" aria-label="Me"><span class="cw2-mea" aria-hidden="true"></span></button>
+          <h1 id="h-chat">Chats</h1>
+          <button class="cw2-ib" id="cwSrch" type="button" aria-label="Search chats and messages" data-testid="cw_search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg></button>
+          <button class="cw2-ib" id="cwMore" type="button" aria-label="More" aria-haspopup="menu" aria-expanded="false" data-testid="cw_more"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5.5" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="12" cy="18.5" r="1.9"/></svg><i class="cw2-dot hidden" id="cwMoreDot" aria-hidden="true"></i></button>
+          <div class="cw-sbox" id="cwSb" hidden><button type="button" id="cwQb" aria-label="Close the search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><input type="search" id="cwQ" placeholder="Search chats and messages" aria-label="Search chats and messages" autocomplete="off" enterkeyhint="search"><button type="button" id="cwQx" class="hidden" aria-label="Clear the search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+          <div class="cw2-pop hidden" id="cwMenu" role="menu" aria-label="More"></div>
+        </div>
+        <div id="cwTools">
+          <div class="cw-archhd hidden" id="cwArchHd"><button type="button" class="cw-ib sm" id="cwArchBk" aria-label="Back to all chats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><b>Archived</b></div>
+          <div class="cw2-chips" id="cwChips" role="group" aria-label="Show"></div>
+        </div>
       </div>
-      <div id="cwTools">
-        <div class="cw-sbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg><input type="search" id="cwQ" placeholder="Search chats and messages" aria-label="Search chats and messages" autocomplete="off" enterkeyhint="search"><button type="button" id="cwQx" class="hidden" aria-label="Clear the search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
-        <div class="cw-archhd hidden" id="cwArchHd"><button type="button" class="cw-ib sm" id="cwArchBk" aria-label="Back to all chats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><b>Archived</b></div>
-      </div>
+      <div id="cwField"></div>
       <div id="cwNote"></div>
       <div class="cw-list" id="cwList"></div>
     </section>
+    <button class="cw2-fab" id="cwNew" type="button" aria-label="New chat" data-testid="cw_new"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 19.5l1.2-3.6A7.8 7.8 0 1 1 8.6 18.6z"/><path d="M12 8.6v6M9 11.6h6"/></svg></button>
 
     <!-- one chat: the messages and the box to write in (chatw) -->
     <section id="vRoom" class="hidden" aria-label="Chat">
@@ -15060,6 +15178,22 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
     var t = cwTitle(c);
     return '<span class="' + cls + '" style="' + cwHueVar(t) + '" aria-hidden="true">' + esc(initials(t)) + '</span>';
   }
+  // a chat's picture at any size (cw2-list): a project's photo with a small blue water drop, else its kind of project on a
+  // coloured tile; every other chat as cwAv. Shared: the one chat's header uses it too, as cwChatAvatar(c, 38).
+  var CW_DROPF = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.5S5.5 10 5.5 14.5a6.5 6.5 0 0 0 13 0C18.5 10 12 2.5 12 2.5z"/></svg>';
+  function cwChatAvatar(c, size) {
+    size = Math.round(+size || 52); var st = 'width:' + size + 'px;height:' + size + 'px;--cav:' + size + 'px';
+    if (!c) return '<span class="cw-av cav" style="' + st + '" aria-hidden="true"></span>';
+    if (c.kind === 'project' && !c.photo && !cwIsNews(c)) {
+      var pr = byId(c.project), pu = c.pphoto || (pr && pr.photo ? photoUrl(pr, 160) : '');
+      if (pu) return '<span class="cw-av cav ph pj" style="' + st + ';background-image:url(&quot;' + esc(pu) + '&quot;)" aria-hidden="true"><i class="cw-pdr">' + CW_DROPF + '</i></span>';
+      var ti = pr ? mpaTyIcon(pr) : ['drop', 'blue'];
+      return '<span class="cw-av cav tile pj" style="' + st + ';--hu:var(--hu-' + ti[1] + ');--hb:var(--hb-' + ti[1] + ')" aria-hidden="true">' + oic(ti[0]) + '</span>';
+    }
+    var h = cwAv(c), i = h.indexOf('>'), tag = h.slice(0, i).replace('class="cw-av', 'class="cw-av cav' + (size < 44 ? ' sm' : ''));
+    tag = /\sstyle="/.test(tag) ? tag.replace(' style="', ' style="' + st + ';') : tag + ' style="' + st + '"';
+    return tag + h.slice(i);
+  }
   function cwKindTx(c) { return cwIsNews(c) ? '' : c.kind === 'team' ? tr('Team', 'Timu') : c.kind === 'project' ? tr('Project', 'Mradi') : c.kind === 'group' ? tr('Group', 'Kikundi') : ''; }
   // "You: …", "🎤 Voice message 0:12", "📷 Photo"
   function cwPrev(m, c) {
@@ -15208,8 +15342,8 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
   }
 
   // the list screen
-  function cwListOpen() { var was = CH.started; cwStart(); cwListDraw(); if (was) cwLoad(false); }
-  function cwFresh() { CH.q = ''; CH.hits = null; CH.arch = false; if ($('cwQ')) $('cwQ').value = ''; if ($('cwQx')) $('cwQx').classList.add('hidden'); if (CH.ql) { var l = CH.ql; CH.ql = null; bkShut(l); } if (CH.al) { var a = CH.al; CH.al = null; bkShut(a); } }
+  function cwListOpen() { var was = CH.started; cwStart(); cwListDraw(); if (was) cwLoad(false); cwTmLoad(); }
+  function cwFresh() { CH.q = ''; CH.hits = null; CH.arch = false; if ($('cwQ')) $('cwQ').value = ''; if ($('cwQx')) $('cwQx').classList.add('hidden'); if (CH.ql) { var l = CH.ql; CH.ql = null; bkShut(l); } if (CH.al) { var a = CH.al; CH.al = null; bkShut(a); } CH.so = false; cwMenuShut(); }
   function cwSorted() {
     return CH.chats.slice().sort(function (a, z) { return (cwIsNews(z) - cwIsNews(a)) || cwMs((z.last || {}).at) - cwMs((a.last || {}).at); });
   }
@@ -15220,50 +15354,151 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
     var pv = typ ? '<span class="cw-typ">' + typ + '</span>' : dr ? '<span class="cw-pv" data-nosw><b class="cw-dr">' + tr('Draft:', 'Rasimu:') + '</b> ' + esc(dr.replace(/\s+/g, ' ')) + '</span>'
       : '<span class="cw-pv" data-nosw>' + st + esc(cwPrev(last, c) || (c.kind === 'project' ? tr('Project thread', 'Mazungumzo ya mradi') : cwIsNews(c) ? tr('News from the office', 'Habari kutoka ofisini') : tr('No messages yet', 'Bado hakuna jumbe'))) + '</span>';
     var badges = (c.mention ? '<i class="cw-at" aria-label="' + tr('You were mentioned', 'Umetajwa') + '">@</i>' : '') + (mu ? '<span class="cw-bi" aria-label="' + tr('Muted', 'Imenyamazishwa') + '">' + cwIc('mute') + '</span>' : '') +
-      (c.pinned && !CH.arch ? '<span class="cw-bi" aria-label="' + tr('Pinned', 'Imebandikwa') + '">' + cwIc('pinned') + '</span>' : '') + (un ? '<i class="cw-un' + (mu ? ' mu' : '') + '">' + (un > 99 ? '99+' : un) + '</i>' : '');
-    var kind = cwKindTx(c);
+      ((c.pinned && !CH.arch) || cwIsNews(c) ? '<span class="cw-bi" aria-label="' + tr('Pinned', 'Imebandikwa') + '">' + cwIc('pinned') + '</span>' : '') + (un ? '<i class="cw-un' + (mu ? ' mu' : '') + '">' + (un > 99 ? '99+' : un) + '</i>' : '');
     return '<div class="cw-rw" data-c="' + esc(c.id) + '"><div class="cw-ra" aria-hidden="true"><button type="button" tabindex="-1" data-ra="mute" class="mu">' + cwIc(mu ? 'sound' : 'mute') + '<span>' + (mu ? tr('Unmute', 'Washa sauti') : tr('Mute', 'Nyamazisha')) + '</span></button>' +
       '<button type="button" tabindex="-1" data-ra="arch" class="ar">' + cwIc('box') + '<span>' + (c.archived ? tr('Unarchive', 'Rudisha') : tr('Archive', 'Hifadhi')) + '</span></button></div>' +
-      '<button type="button" class="cw-row' + (un ? ' un' : '') + (CH.cur === c.id && S.view === 'vRoom' ? ' cur' : '') + '" data-open="' + esc(c.id) + '" data-testid="cw_row"' + (CH.cur === c.id && S.view === 'vRoom' ? ' aria-current="true"' : '') + '>' + cwAv(c) +
-      '<span class="cw-rt"><span class="cw-r1"><b data-nosw>' + esc(cwTitle(c)) + '</b>' + (kind ? '<small class="cw-k">' + kind + '</small>' : '') + '<time>' + esc(cwListTime((last || {}).at)) + '</time></span>' +
+      '<button type="button" class="cw-row' + (un ? ' un' : '') + (CH.cur === c.id && S.view === 'vRoom' ? ' cur' : '') + '" data-open="' + esc(c.id) + '" data-testid="cw_row"' + (CH.cur === c.id && S.view === 'vRoom' ? ' aria-current="true"' : '') + '>' + cwChatAvatar(c, 52) +
+      '<span class="cw-rt"><span class="cw-r1"><b data-nosw>' + esc(cwTitle(c)) + '</b><time>' + esc(cwListTime((last || {}).at)) + '</time></span>' +
       '<span class="cw-r2">' + pv + '<span class="cw-bs">' + badges + '</span></span></span></button></div>';
   }
   function cwListDraw() {
     var box = $('cwList'); if (!box) return;
-    $('cwNote').innerHTML = cwNoteHtml();
-    if (CH.on === false) { box.innerHTML = cwOffHtml(); $('cwTools').classList.add('hidden'); return; }
+    var put = function (el, h) { if (el.__h === h) return false; el.__h = h; el.innerHTML = h; return true; }; // the same list again: nothing redrawn, nothing blinks
+    var list = function (h) { if (put(box, h)) cwFill(box); };
+    cwTopDraw(); put($('cwNote'), cwNoteHtml()); put($('cwField'), cwFieldHtml());
+    if (CH.on === false) { list(cwOffHtml()); $('cwTools').classList.add('hidden'); return; }
     $('cwTools').classList.remove('hidden');
     var all = cwSorted(), q = CH.q.trim().toLowerCase(), h = '';
     $('cwArchHd').classList.toggle('hidden', !CH.arch);
     if (q) {
       var hit = all.filter(function (c) { return (cwTitle(c) + ' ' + (c.members || []).join(' ')).toLowerCase().indexOf(q) >= 0; });
-      if (!hit.length && CH.hits && !CH.hits.length) { box.innerHTML = cwEmpty('search', tr('Nothing found', 'Hakuna kilichopatikana'), esc(tr('No chats or messages with “' + CH.q.trim() + '”.', 'Hakuna gumzo wala jumbe zenye “' + CH.q.trim() + '”.')), 'clearq', tr('Clear the search', 'Futa utafutaji'), 'cw_empty_search'); return; }
+      if (!hit.length && CH.hits && !CH.hits.length) { list(cwEmpty('search', tr('Nothing found', 'Hakuna kilichopatikana'), esc(tr('No chats or messages with “' + CH.q.trim() + '”.', 'Hakuna gumzo wala jumbe zenye “' + CH.q.trim() + '”.')), 'clearq', tr('Clear the search', 'Futa utafutaji'), 'cw_empty_search')); return; }
       h += '<h2 class="cw-sec">' + tr('Chats', 'Gumzo') + '</h2>' + (hit.length ? hit.map(cwRow).join('') : '<p class="cw-none">' + tr('No chats with that name', 'Hakuna gumzo lenye jina hilo') + '</p>');
       h += '<h2 class="cw-sec">' + tr('Messages', 'Jumbe') + '</h2>' + (CH.hits == null ? '<p class="cw-none">' + tr('Searching…', 'Inatafuta…') + '</p>' : CH.hits.length ? CH.hits.map(cwHitRow).join('') : '<p class="cw-none">' + tr('No messages found', 'Hakuna jumbe zilizopatikana') + '</p>');
-      box.innerHTML = h; cwFill(box); return;
+      list(h); return;
     }
     if (CH.arch) {
       var ar = all.filter(function (c) { return c.archived; });
-      box.innerHTML = ar.length ? ar.map(cwRow).join('') : cwEmpty('box', tr('No archived chats', 'Hakuna gumzo zilizohifadhiwa'), tr('Swipe a chat left and tap Archive to keep it here.', 'Telezesha gumzo kushoto na uguse Hifadhi ili kuliweka hapa.'), 'unarch', tr('Back to all chats', 'Rudi kwenye gumzo zote'), 'cw_empty_arch'); cwFill(box); return;
+      list(ar.length ? ar.map(cwRow).join('') : cwEmpty('box', tr('No archived chats', 'Hakuna gumzo zilizohifadhiwa'), tr('Swipe a chat left and tap Archive to keep it here.', 'Telezesha gumzo kushoto na uguse Hifadhi ili kuliweka hapa.'), 'unarch', tr('Back to all chats', 'Rudi kwenye gumzo zote'), 'cw_empty_arch')); return;
     }
-    var live = all.filter(function (c) { return !c.archived || cwIsNews(c); }), news = live.filter(cwIsNews), pin = live.filter(function (c) { return c.pinned && !cwIsNews(c); }), rest = live.filter(function (c) { return !c.pinned && !cwIsNews(c); }), nArch = all.length - live.length;
-    if (nArch) h += '<button type="button" class="cw-arow" id="cwArch" data-testid="cw_archived">' + cwIc('box') + '<span>' + tr('Archived', 'Zilizohifadhiwa') + '</span><i>' + nArch + '</i></button>';
-    h += news.map(cwRow).join('');
-    if (pin.length) h += '<h2 class="cw-sec">' + tr('Pinned', 'Zilizobandikwa') + '</h2>' + pin.map(cwRow).join('') + (rest.length ? '<h2 class="cw-sec">' + tr('Chats', 'Gumzo') + '</h2>' : '');
-    else if (news.length && rest.length) h += '<h2 class="cw-sec">' + tr('Chats', 'Gumzo') + '</h2>';
-    h += rest.map(cwRow).join('');
+    // Announcements first, then pinned chats, then the rest newest first; the chip picks which; Archived is a small row at the end
+    var f = cwChip(), live = all.filter(function (c) { return !c.archived || cwIsNews(c); }), nArch = all.length - live.length, sh = live.filter(function (c) { return cwChipOk(c, f); });
+    h += sh.filter(cwIsNews).concat(sh.filter(function (c) { return c.pinned && !cwIsNews(c); }), sh.filter(function (c) { return !c.pinned && !cwIsNews(c); })).map(cwRow).join('');
     if (!live.length) h += '<div class="cw-empty"><span class="cw-offi" aria-hidden="true">' + cwIc('chat') + '</span><h2>' + (CH.on ? tr('No chats yet', 'Bado hakuna gumzo') : tr('Loading…', 'Inapakia…')) + '</h2>' + (CH.on ? '<p>' + tr('Tap + to message a teammate or start a group.', 'Gusa + kumtumia mwenzako ujumbe au kuanzisha kikundi.') + '</p>' : '') + '</div>';
-    box.innerHTML = h; cwFill(box);
+    else if (!sh.length) { var ce = CW_CHIPE[f] || CW_CHIPE.all; h += cwEmpty('hello', tr(ce[0], ce[1]), '', 'allchip', tr('Show all chats', 'Onyesha gumzo zote'), 'cw_empty_chip'); }
+    if (nArch && f === 'all') h += '<button type="button" class="cw2-arch" id="cwArch" data-testid="cw_archived">' + cwIc('box') + '<span>' + tr('Archived', 'Zilizohifadhiwa') + '</span><i>' + nArch + '</i></button>';
+    list(h);
+  }
+  // ---- cw2-list: the header, the chips, "In the field now", search in place, the ⋯ menu
+  var CW_CHIPS = [['all', 'All', 'Zote'], ['unread', 'Unread', 'Hazijasomwa'], ['project', 'Projects', 'Miradi'], ['group', 'Groups', 'Vikundi'], ['team', 'Teams', 'Timu'], ['dm', 'People', 'Watu']];
+  var CW_CHIPE = { all: ['No chats here', 'Hakuna gumzo hapa'], unread: ['No unread chats', 'Hakuna gumzo ambazo hazijasomwa'], project: ['No project chats yet', 'Bado hakuna gumzo za miradi'], group: ['No groups yet', 'Bado hakuna vikundi'], team: ['No team chats', 'Hakuna gumzo za timu'], dm: ['No chats with people yet', 'Bado hakuna gumzo na watu'] };
+  // the chip is kept for this visit (a reload keeps it too); changing it is not a step for Back
+  function cwChip() { var v = ''; try { v = sessionStorage.getItem('rfChatChip') || ''; } catch (e) {} return CW_CHIPS.some(function (x) { return x[0] === v; }) ? v : 'all'; }
+  function cwChipSet(v) { try { sessionStorage.setItem('rfChatChip', v); } catch (e) {} }
+  function cwChipOk(c, f) { return f === 'all' ? true : f === 'unread' ? !!(c.unread || c.mention) : f === 'dm' ? c.kind === 'dm' : !cwIsNews(c) && c.kind === f; }
+  function cwBellN() { var bn = $('meBellN'); return bn && !bn.classList.contains('hidden') ? +bn.textContent || 0 : 0; }
+  function cwTopDraw() {
+    var hd = $('cwHead'); if (!hd) return;
+    var t = tr('Chats', 'Gumzo'); if ($('h-chat').textContent !== t) $('h-chat').textContent = t;
+    var me = $('cwMe'), av = me.firstChild; me.setAttribute('aria-label', tr('Me', 'Mimi'));
+    if (!av.querySelector('b')) av.innerHTML = '<b></b>';
+    if (av.getAttribute('data-ph') !== (S.name || '')) av.setAttribute('data-ph', S.name || '');
+    av.querySelector('b').textContent = initials(S.name);
+    $('cwSrch').setAttribute('aria-label', tr('Search chats and messages', 'Tafuta gumzo na jumbe')); $('cwMore').setAttribute('aria-label', tr('More', 'Zaidi'));
+    $('cwQ').setAttribute('placeholder', tr('Search chats and messages', 'Tafuta gumzo na jumbe')); $('cwQ').setAttribute('aria-label', tr('Search chats and messages', 'Tafuta gumzo na jumbe'));
+    $('cwQb').setAttribute('aria-label', tr('Close the search', 'Funga utafutaji')); $('cwNew').setAttribute('aria-label', tr('New chat', 'Gumzo jipya'));
+    $('cwChips').setAttribute('aria-label', tr('Show', 'Onyesha'));
+    $('cwMoreDot').classList.toggle('hidden', !cwBellN() || cwWide());
+    hd.classList.toggle('srch', !!CH.so); $('cwSb').hidden = !CH.so; $('vChat').classList.toggle('cw2-s', !!CH.so);
+    $('cwTools').classList.toggle('srch', !!CH.so); $('cwTools').classList.toggle('arch', !!CH.arch);
+    var f = cwChip(), nUn = CH.chats.filter(function (c) { return (!c.archived || cwIsNews(c)) && (c.unread || c.mention); }).length, ch = $('cwChips');
+    var h = CW_CHIPS.map(function (x) { return '<button type="button" data-chip="' + x[0] + '" aria-pressed="' + (x[0] === f) + '" data-testid="cw_chip">' + tr(x[1], x[2]) + (x[0] === 'unread' && nUn ? ' <b>' + nUn + '</b>' : '') + '</button>'; }).join('');
+    if (ch.__h !== h) { ch.__h = h; ch.innerHTML = h; }
+  }
+  // In the field now: who is online or was on in the last 3 hours. Admins also see who shares their location (Office › Team map):
+  // "At <project>" near a project or after a visit there, else "On the road". Field users never see anyone's position.
+  var CW_PINF = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>';
+  function cwTmLoad(force) {
+    if (!S.admin || CH.tmBusy || (!force && CH.tmAt && Date.now() - CH.tmAt < 12e4)) return;
+    CH.tmBusy = true;
+    adminApi('GET', null, '?view=teammap').then(function (j) { CH.tmBusy = false; CH.tmAt = Date.now(); if (j && j.ok) { CH.tm = j; phAdd(j.people); if (S.view === 'vChat') cwListDraw(); } });
+  }
+  function cwFieldAt(p, tm) {
+    var now = Date.now(), v = (tm.visits || []).filter(function (x) { return same(x.by, p.name) && now - Date.parse(x.at) < 3 * 36e5 && byId(x.id); }).sort(function (a, z) { return Date.parse(z.at) - Date.parse(a.at); })[0], pr = v ? byId(v.id) : null;
+    if (!pr && isFinite(p.lat) && isFinite(p.lng)) { var best = 500; (S.projects || []).forEach(function (x) { if (!x.gps) return; var d = metres([+p.lat, +p.lng], x.gps); if (d < best) { best = d; pr = x; } }); }
+    return pr ? tr('At ' + pr.title, 'Yuko ' + pr.title) : tr('On the road', 'Njiani');
+  }
+  function cwFieldPeople() {
+    var now = Date.now(), out = [], got = {}, tm = S.admin && CH.tm ? CH.tm : null;
+    if (tm) (tm.people || []).forEach(function (p) {
+      var t = Date.parse(p.at); if (!p.name || cwIsMe(p.name) || !(now - t < 36e5)) return;
+      got[phKey(p.name)] = 1; out.push({ name: p.name, k: 'site', label: cwFieldAt(p, tm), t: t, o: 0 });
+    });
+    Object.keys(CH.pres || {}).forEach(function (n) {
+      var p = CH.pres[n]; if (!p || cwIsMe(n) || got[phKey(n)]) return;
+      if (p.online) out.push({ name: n, k: 'on', label: tr('Online', 'Mtandaoni'), t: now, o: 1 });
+      else { var s0 = cwMs(p.seen); if (s0 && now - s0 < 3 * 36e5) out.push({ name: n, k: '', label: dAgo(s0), t: s0, o: 2 }); }
+    });
+    return out.sort(function (a, z) { return a.o - z.o || z.t - a.t || a.name.localeCompare(z.name); }).slice(0, 24);
+  }
+  function cwFieldHtml() {
+    if (CH.on !== true || CH.so || CH.arch || CH.q) return '';
+    var ppl = cwFieldPeople(); if (!ppl.length) return '';
+    return '<section class="cw2-fd" aria-labelledby="cwFdH" data-testid="cw_field"><h2 id="cwFdH"><i aria-hidden="true"></i>' + tr('In the field now', 'Uwanjani sasa') + '</h2><div class="cw2-ppl">' + ppl.map(function (p) {
+      return '<button type="button" class="cw2-p" data-dmw="' + esc(p.name) + '" data-k="' + p.k + '" data-testid="cw_field_p" aria-label="' + esc(p.name + ', ' + p.label) + '" title="' + esc(p.name + ' · ' + p.label) + '"><span class="cw2-rg' + (p.k ? ' ' + p.k : '') + '"><span class="cw-av" style="' + cwHueVar(p.name) + '" data-ph="' + esc(p.name) + '" aria-hidden="true">' + esc(initials(p.name)) + '</span>' +
+        (p.k === 'site' ? '<i class="cw2-tag" aria-hidden="true">' + CW_PINF + '</i>' : '') + '</span><small data-nosw aria-hidden="true">' + esc(cwFirst(p.name)) + '</small><em' + (p.k ? '' : ' class="old"') + ' data-nosw aria-hidden="true">' + esc(p.label) + '</em></button>';
+    }).join('') + '</div></section>';
+  }
+  // search opens in place of the title; Back (or ←) closes it
+  function cwSearchOpen(focus) {
+    if (!CH.so) {
+      cwMenuShut(); CH.so = true;
+      CH.ql = bkOpen('in', function () { CH.ql = null; if (!CH.so) return false; cwSearchShut(); return true; }, $('cwSb'));
+      cwListDraw();
+    }
+    if (focus !== false) { try { $('cwQ').focus({ preventScroll: true }); } catch (e) {} }
+  }
+  function cwSearchShut() { CH.so = false; CH.q = ''; CH.hits = null; $('cwQ').value = ''; $('cwQx').classList.add('hidden'); cwListDraw(); }
+  // the ⋯ menu: settings, starred, archived, a new group, mark all read; on a phone also the bell and refresh from the top bar
+  function cwMenuOut(e) {
+    if (e.target.closest('#cwMenu, #cwMore')) return;
+    cwMenuShut(); // a tap outside only closes the menu: the tap itself goes nowhere
+    var eat = function (x) { x.preventDefault(); x.stopPropagation(); }; document.addEventListener('click', eat, true); setTimeout(function () { document.removeEventListener('click', eat, true); }, 450);
+  }
+  function cwMenuKey(e) { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); cwMenuShut(); $('cwMore').focus(); } }
+  function cwMenuShut(fromBack) {
+    var m = $('cwMenu'); if (!m || m.classList.contains('hidden')) return false;
+    m.classList.add('hidden'); $('cwMore').setAttribute('aria-expanded', 'false');
+    document.removeEventListener('pointerdown', cwMenuOut, true); document.removeEventListener('keydown', cwMenuKey, true);
+    if (!fromBack && CH.ml) { var l = CH.ml; CH.ml = null; bkShut(l); }
+    return true;
+  }
+  function cwMenuOpen() {
+    var m = $('cwMenu'); if (!m.classList.contains('hidden')) { cwMenuShut(); return; }
+    var nb = cwBellN(), wide = cwWide(), un = CH.chats.some(function (c) { return (c.unread || c.mention) && !c.archived; });
+    var it = function (k, ic, en, sw, extra) { return '<button type="button" role="menuitem" data-mn="' + k + '"' + (k === 'set' ? ' id="cwSet" data-testid="cw_settings"' : k === 'star' ? ' id="cwStar"' : '') + '>' + ic + '<span>' + tr(en, sw) + '</span>' + (extra || '') + '</button>'; };
+    m.innerHTML = it('set', cwIc('gear'), 'Chat settings', 'Mipangilio ya gumzo') + it('star', cwIc('star'), 'Starred messages', 'Jumbe zenye nyota') + it('arch', cwIc('box'), 'Archived', 'Zilizohifadhiwa') + it('group', cwIc('people'), 'New group', 'Kikundi kipya') +
+      (un ? it('read', cwIc('check'), 'Mark all as read', 'Weka zote kama zimesomwa') : '') +
+      (wide ? '' : it('bell', cwIc('bell'), 'Notifications', 'Arifa', nb ? '<i aria-label="' + nb + '">' + (nb > 99 ? '99+' : nb) + '</i>' : '') + it('rf', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>', 'Refresh', 'Onyesha upya'));
+    m.setAttribute('aria-label', tr('More', 'Zaidi')); m.classList.remove('hidden'); $('cwMore').setAttribute('aria-expanded', 'true');
+    CH.ml = bkOpen('in', function () { CH.ml = null; return cwMenuShut(true); }, m);
+    setTimeout(function () { if (m.classList.contains('hidden')) return; document.addEventListener('pointerdown', cwMenuOut, true); document.addEventListener('keydown', cwMenuKey, true); }, 0);
+    try { m.querySelector('button').focus({ preventScroll: true }); } catch (e) {}
+  }
+  function cwArchOpen() { if (CH.arch) return; CH.arch = true; CH.al = bkOpen('in', function () { CH.al = null; if (!CH.arch) return false; CH.arch = false; cwListDraw(); return true; }, $('cwArchHd')); cwListDraw(); window.scrollTo(0, 0); }
+  function cwAllRead() {
+    CH.chats.forEach(function (c) { if ((c.unread || c.mention) && !c.archived) { c.unread = 0; c.mention = false; if (c.last && c.last.id) cwApi('POST', 'read', { c: c.id, upTo: c.last.id }); } });
+    cwSave(); cwBadge(); cwListDraw(); toast(tr('All chats marked as read', 'Gumzo zote zimewekwa kama zimesomwa'));
   }
   function cwHitRow(x) {
     var c = cwChat(x.c) || { id: x.c, title: x.c, kind: 'group' };
-    return '<button type="button" class="cw-row cw-hit" data-open="' + esc(x.c) + '" data-jump="' + esc(x.id) + '">' + cwAv(c) + '<span class="cw-rt"><span class="cw-r1"><b data-nosw>' + esc(cwTitle(c)) + '</b><time>' + esc(cwListTime(x.at)) + '</time></span>' +
+    return '<button type="button" class="cw-row cw-hit" data-open="' + esc(x.c) + '" data-jump="' + esc(x.id) + '">' + cwChatAvatar(c, 52) + '<span class="cw-rt"><span class="cw-r1"><b data-nosw>' + esc(cwTitle(c)) + '</b><time>' + esc(cwListTime(x.at)) + '</time></span>' +
       '<span class="cw-r2"><span class="cw-pv" data-nosw>' + (x.from ? esc(cwIsMe(x.from) ? tr('You', 'Wewe') : cwFirst(x.from)) + ': ' : '') + cwMark(x.snippet || '', CH.q) + '</span></span></span></button>';
   }
   function cwMark(t, q) { var s = esc(t); q = q.trim(); if (!q) return s; var i = s.toLowerCase().indexOf(esc(q).toLowerCase()); return i < 0 ? s : s.slice(0, i) + '<mark>' + s.slice(i, i + esc(q).length) + '</mark>' + s.slice(i + esc(q).length); }
   function cwNoteHtml() {
-    if (CH.on !== true || !('Notification' in window) || Notification.permission !== 'default' || store.get('rfChatNoteAsk')) return '';
-    return '<div class="cw-nt" role="status">' + cwIc('bell') + '<span>' + tr('Get a notification when a message comes while RAFIKI Pin is open.', 'Pata arifa ujumbe ukifika wakati RAFIKI Pin iko wazi.') + '</span><button type="button" class="btn small" id="cwNtOn">' + tr('Turn on', 'Washa') + '</button><button type="button" class="cw-ib sm" id="cwNtX" aria-label="' + tr('Not now', 'Si sasa') + '">' + cwIc('x') + '</button></div>';
+    if (CH.on !== true || CH.so || CH.arch || !('Notification' in window) || Notification.permission !== 'default' || store.get('rfChatNoteAsk')) return '';
+    return '<div class="cw2-nt" role="status" data-testid="cw_alerts">' + cwIc('bell') + '<span>' + tr('Get message alerts', 'Pata arifa za jumbe') + '</span><button type="button" id="cwNtOn">' + tr('Turn on', 'Washa') + '</button><button type="button" class="x" id="cwNtX" aria-label="' + tr('Not now', 'Si sasa') + '">' + cwIc('x') + '</button></div>';
   }
 
   // ---- one chat
@@ -16654,7 +16889,7 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
   }
   function cwShown(v) {
     if (v !== 'vRoom' && document.body.classList.contains('room')) cwDraftSave();
-    document.body.classList.toggle('room', v === 'vRoom');
+    document.body.classList.toggle('room', v === 'vRoom'); document.body.classList.toggle('cwl', v === 'vChat');
     var hd = $('cwHd'); if (hd) hd.hidden = v !== 'vRoom';
     if (v === 'vLock') { cwStop(); return; }
     if (S.name || S.who) cwStart();
@@ -16671,22 +16906,36 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
   if (window.visualViewport) { visualViewport.addEventListener('resize', cwVv); visualViewport.addEventListener('scroll', cwVv); }
   addEventListener('resize', cwVv);
   document.addEventListener('visibilitychange', function () { if (!document.hidden && S.view === 'vRoom' && CH.cur) { cwRead(CH.cur); if (!CH.ws) cwMsgsLoad(CH.cur, true); } });
-  $('bRefresh').addEventListener('click', function () { if (CH.started && navigator.onLine !== false) { cwLoad(false); if (S.view === 'vRoom' && CH.cur) cwMsgsLoad(CH.cur, true); } });
+  $('bRefresh').addEventListener('click', function () { if (CH.started && navigator.onLine !== false) { cwLoad(false); if (S.view === 'vChat') cwTmLoad(true); if (S.view === 'vRoom' && CH.cur) cwMsgsLoad(CH.cur, true); } });
 
   // ---- taps
   $('cwHd').addEventListener('click', function () { buzz(); cwInfo(); });
   $('cwNew').addEventListener('click', function () { buzz(); cwNew(); });
-  $('cwStar').addEventListener('click', function () { buzz(); cwStarred(); });
   $('cwArchBk').addEventListener('click', function () { if (CH.al) { var l = CH.al; CH.al = null; CH.arch = false; bkShut(l); } else CH.arch = false; cwListDraw(); });
   $('cwQ').addEventListener('input', function () {
     var v = this.value; CH.q = v; $('cwQx').classList.toggle('hidden', !v);
-    if (v && !CH.ql) CH.ql = bkOpen('in', function () { CH.ql = null; if (!CH.q) return false; CH.q = ''; CH.hits = null; $('cwQ').value = ''; $('cwQx').classList.add('hidden'); cwListDraw(); return true; }, $('cwQ'));
-    if (!v && CH.ql) { var l = CH.ql; CH.ql = null; bkShut(l); }
+    if (!CH.so) cwSearchOpen(false);
     CH.hits = null; clearTimeout(CH.qT); cwListDraw();
     if (v.trim().length >= 2) CH.qT = setTimeout(function () { var q = v; cwApi('GET', 'search?q=' + encodeURIComponent(q.trim())).then(function (j) { if (CH.q !== q) return; CH.hits = j.hits || []; cwListDraw(); }); }, 300);
     else if (v) { CH.hits = []; }
   });
   $('cwQx').addEventListener('click', function () { $('cwQ').value = ''; $('cwQ').dispatchEvent(new Event('input')); $('cwQ').focus(); });
+  $('cwQb').addEventListener('click', function () { buzz(); if (CH.ql) { var l = CH.ql; CH.ql = null; bkShut(l); } cwSearchShut(); });
+  $('cwSrch').addEventListener('click', function () { buzz(); cwSearchOpen(); });
+  // an empty search left behind (focus went elsewhere) closes by itself, so it leaves no step for Back
+  $('cwQ').addEventListener('blur', function () { setTimeout(function () { if (CH.so && !CH.q && document.activeElement !== $('cwQ') && !$('cwSb').contains(document.activeElement)) { if (CH.ql) { var l = CH.ql; CH.ql = null; bkShut(l); } cwSearchShut(); } }, 250); });
+  $('cwMore').addEventListener('click', function () { buzz(); cwMenuOpen(); });
+  $('cwMe').addEventListener('click', function () { tabGo('vMe'); });
+  $('cwMenu').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-mn]'); if (!b) return; buzz(); var k = b.getAttribute('data-mn'); cwMenuShut();
+    setTimeout(function () {
+      if (k === 'set') cwSettings(); else if (k === 'star') cwStarred(); else if (k === 'arch') cwArchOpen(); else if (k === 'group') cwGroupNew();
+      else if (k === 'read') cwAllRead(); else if (k === 'bell') $('meBell').click(); else if (k === 'rf') $('bRefresh').click();
+    }, 200);
+  });
+  if (window.MutationObserver && $('meBellN')) new MutationObserver(function () { if (S.view === 'vChat') cwTopDraw(); }).observe($('meBellN'), { childList: true, characterData: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+  $('cwChips').addEventListener('click', function (e) { var b = e.target.closest('[data-chip]'); if (!b) return; buzz(); cwChipSet(b.getAttribute('data-chip')); cwListDraw(); });
+  $('cwField').addEventListener('click', function (e) { var b = e.target.closest('[data-dmw]'); if (!b) return; buzz(); cwDm(b.getAttribute('data-dmw')); });
   $('cwNote').addEventListener('click', function (e) {
     if (e.target.closest('#cwNtOn')) { try { Notification.requestPermission().then(function () { store.set('rfChatNoteAsk', '1'); cwListDraw(); }); } catch (x) { store.set('rfChatNoteAsk', '1'); cwListDraw(); } }
     if (e.target.closest('#cwNtX')) { store.set('rfChatNoteAsk', '1'); cwListDraw(); }
@@ -16697,10 +16946,10 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
     box.addEventListener('click', function (e) {
       if (skipClick) { skipClick = false; e.preventDefault(); return; }
       var es = e.target.closest('[data-es]');
-      if (es) { var k0 = es.getAttribute('data-es'); if (k0 === 'clearq') $('cwQx').click(); if (k0 === 'unarch') $('cwArchBk').click(); return; }
+      if (es) { var k0 = es.getAttribute('data-es'); if (k0 === 'clearq') $('cwQx').click(); if (k0 === 'unarch') $('cwArchBk').click(); if (k0 === 'allchip') { cwChipSet('all'); cwListDraw(); } return; }
       var ra = e.target.closest('[data-ra]');
       if (ra) { var c = cwChat(ra.closest('[data-c]').getAttribute('data-c')); if (!c) return; buzz(); if (ra.getAttribute('data-ra') === 'mute') cwMute(c); else cwArchive(c); return; }
-      if (e.target.closest('#cwArch')) { CH.arch = true; CH.al = bkOpen('in', function () { CH.al = null; if (!CH.arch) return false; CH.arch = false; cwListDraw(); return true; }, $('cwArch')); cwListDraw(); window.scrollTo(0, 0); return; }
+      if (e.target.closest('#cwArch')) { cwArchOpen(); return; }
       var o = e.target.closest('[data-open]'); if (!o) return;
       if (o.closest('.cw-rw.sw')) { o.closest('.cw-rw').classList.remove('sw'); o.style.transform = ''; return; }
       buzz(); var id = o.getAttribute('data-open'), j = o.getAttribute('data-jump');
@@ -16808,7 +17057,6 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
     var i = (CH.pinAt[c.id] || 0) % ps.length; cwJump(ps[i].id); CH.pinAt[c.id] = (i + 1) % ps.length; cwPinUi();
   });
   $('cwRh').addEventListener('click', function () { buzz(); cwInfo(); });
-  $('cwSet').addEventListener('click', function () { buzz(); cwSettings(); });
   // a photo pasted into the box, or dropped on the chat (a computer)
   (function () {
     var room = $('vRoom'), n = 0, drop = $('cwDrop');
@@ -16890,7 +17138,7 @@ html[data-theme=sun] .ph-sh .phs-av{background:#0050A0;border:2px solid #000}
     if (S.view !== 'vChat' && S.view !== 'vRoom') return;
     if (e.key === 'Escape') { var sh = qa('.bsh.cw-sheet:not(.out)').pop(); if (sh && sh.close) { e.preventDefault(); sh.close(); } return; }
     if ((e.ctrlKey || e.metaKey) && !e.altKey && (e.key === 'k' || e.key === 'K')) {
-      e.preventDefault(); if (S.view === 'vRoom' && !cwWide()) { goBack(function () { show('vChat', 'replace'); }); setTimeout(function () { $('cwQ').focus(); }, 350); } else { $('cwQ').focus(); $('cwQ').select(); }
+      e.preventDefault(); if (S.view === 'vRoom' && !cwWide()) { goBack(function () { show('vChat', 'replace'); }); setTimeout(function () { cwSearchOpen(); }, 350); } else { cwSearchOpen(); $('cwQ').select(); }
       return;
     }
     if (e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
