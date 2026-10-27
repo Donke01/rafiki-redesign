@@ -6,8 +6,13 @@ from urllib.parse import urlparse, parse_qs
 
 ME = 'Reid Anderson'
 # chat ids as the server makes them (t: team, d: direct, g: group, p: project); message ids are numbers, increasing within a chat
-CID = {'all': 't:all', 'ke': 't:ke', 'dm-meril': 'd:meril', 'p101': 'p:101', 'g-kitale': 'g:kitale', 'dm-grace': 'd:grace'}
-SYS_EN = {'repair': 'Bertin reported a repair', 'assigned': 'Assigned to Meril Kiprop', 'sms': 'A community report arrived (SMS)', 'created': 'Reid made the group'}
+CID = {'all': 't:all', 'ke': 't:ke', 'dm-meril': 'd:meril', 'p101': 'p:101', 'g-kitale': 'g:kitale', 'dm-grace': 'd:grace', 'news': 't:news'}
+SYS_EN = {'repair': 'Bertin reported a repair', 'assigned': 'Assigned to Meril Kiprop', 'sms': 'A community report arrived (SMS)', 'created': 'Reid made the group', 'pinned': 'Reid pinned a message', 'fixed': 'Meril fixed it'}
+# a trip card as the server resolves it for this viewer (chatpw): one they can open, one they can't
+def trip_card(tid):
+    d = datetime.date.today()
+    if tid == 'it_2': return {'id': 'it_2', 'title': 'Office planning trip', 'access': False}
+    return {'id': tid, 'title': 'Kitale repairs run', 'from': d.isoformat(), 'to': (d + datetime.timedelta(days=2)).isoformat(), 'status': 'active', 'next': {'name': 'Kapsaret Borehole', 'date': d.isoformat(), 'at': '09:30'}, 'done': 2, 'total': 5, 'access': True}
 def ms(iso): return int(datetime.datetime.strptime(iso, '%Y-%m-%dT%H:%M:%S.000Z').replace(tzinfo=datetime.timezone.utc).timestamp() * 1000)
 def now_ms(): return int(datetime.datetime.now(datetime.timezone.utc).timestamp() * 1000)
 TEAM = ['Reid Anderson', 'Meril Kiprop', 'Grace Achieng', 'Bertin Mwangi', 'Jessica Anderson']
@@ -66,20 +71,25 @@ class ChatMock:
             ],
             'g-kitale': [
                 m('g-kitale', 'g1', 'RAFIKI Pin', 5 * D, sys={'type': 'created', 'by': ME}),
-                m('g-kitale', 'g2', 'Grace Achieng', 3 * D, 'media', media=[{'id': 'img4', 'type': 'photo', 'w': 360, 'h': 480}]),
+                m('g-kitale', 'g2', 'Grace Achieng', 3 * D, 'media', media=[{'id': 'img4', 'type': 'photo', 'w': 360, 'h': 480, 'thumb': 'img4t', 'size': 240000}]),
+                m('g-kitale', 'g3', 'Bertin Mwangi', 3 * D - 20, 'trip', trip=trip_card('it_2')),
             ],
-            'all': [m('all', 'a1', 'Grace Achieng', 8, text='Morning team! Pump at Turbo Spring fixed ✓'), m('all', 'a2', 'Jessica Anderson', 3, text='Brilliant work 🙌')],
+            'all': [m('all', 'a0', 'Jessica Anderson', 40, 'trip', trip=trip_card('it_1')), m('all', 'a00', 'Jessica Anderson', 30, text='Our new stories page: https://rafikioutreach.org/stories'),
+                    m('all', 'a1', 'Grace Achieng', 8, text='Morning team! Pump at Turbo Spring fixed ✓'), m('all', 'a11', 'Meril Kiprop', 5, text='🎉🙌'), m('all', 'a2', 'Jessica Anderson', 3, text='Brilliant work 🙌')],
+            'news': [],
             'ke': [m('ke', 'k%d' % i, [ME, 'Meril Kiprop', 'Bertin Mwangi'][i % 3], 70 + (70 - i) * 9, text='Kenya team note %d' % i) for i in range(1, 70)] + [m('ke', 'k70', ME, 70, text='I’ll bring the cylinder tomorrow')],
             'dm-grace': [m('dm-grace', 'd1', 'Grace Achieng', 6 * D, text='Asante!')],
         }
         def last(c):
+            if not self.msgs[c]: return None
             x = self.msgs[c][-1]; return {'id': x['id'], 'from': x['from'], 'kind': x['kind'], 'text': x['text'] or '', 'at': x['at'], 'status': x.get('status'), 'deleted': x['deleted'], 'sys': x['sys']['type'] if x['sys'] else None}
         self.chats = {
-            'all': {'id': 'all', 'kind': 'team', 'title': 'All RAFIKI', 'photo': '', 'project': None, 'members': TEAM, 'admins': [ME, 'Jessica Anderson'], 'unread': 2, 'mention': False, 'pinned': True, 'muted': 0, 'archived': False, 'onlyAdmins': False},
+            'news': {'id': 'news', 'kind': 'team', 'title': 'Announcements', 'announce': True, 'photo': '', 'project': None, 'members': TEAM, 'admins': ['Jessica Anderson'], 'unread': 0, 'mention': False, 'pinned': False, 'muted': 0, 'archived': False, 'onlyAdmins': True},
+            'all': {'id': 'all', 'kind': 'team', 'title': 'All RAFIKI', 'seen': ['Meril Kiprop', 'Grace Achieng', 'Bertin Mwangi'], 'photo': '', 'project': None, 'members': TEAM, 'admins': [ME, 'Jessica Anderson'], 'unread': 2, 'mention': False, 'pinned': True, 'muted': 0, 'archived': False, 'onlyAdmins': False},
             'p101': {'id': 'p101', 'kind': 'project', 'title': 'Kapsaret Borehole', 'photo': '', 'project': '101', 'members': TEAM, 'admins': [ME], 'unread': 3, 'mention': True, 'pinned': False, 'muted': 0, 'archived': False, 'onlyAdmins': False},
             'dm-meril': {'id': 'dm-meril', 'kind': 'dm', 'title': 'Meril Kiprop', 'photo': '', 'project': None, 'members': [ME, 'Meril Kiprop'], 'admins': [], 'unread': 1, 'mention': False, 'pinned': False, 'muted': 0, 'archived': False, 'onlyAdmins': False},
-            'ke': {'id': 'ke', 'kind': 'team', 'title': 'Kenya team', 'photo': '', 'project': None, 'members': [ME, 'Meril Kiprop', 'Bertin Mwangi'], 'admins': [ME], 'unread': 0, 'mention': False, 'pinned': False, 'muted': 0, 'archived': False, 'onlyAdmins': False},
-            'g-kitale': {'id': 'g-kitale', 'kind': 'group', 'title': 'Kitale repairs', 'description': 'Parts, quotes and trips for the Kitale side.', 'photo': '', 'project': None, 'members': [ME, 'Grace Achieng', 'Bertin Mwangi'], 'admins': [ME], 'unread': 4, 'mention': False, 'pinned': False, 'muted': 'always', 'archived': False, 'onlyAdmins': False},
+            'ke': {'id': 'ke', 'kind': 'team', 'title': 'Kenya team', 'country': 'ke', 'photo': '', 'project': None, 'members': [ME, 'Meril Kiprop', 'Bertin Mwangi'], 'admins': [ME], 'unread': 0, 'mention': False, 'pinned': False, 'muted': 0, 'archived': False, 'onlyAdmins': False},
+            'g-kitale': {'id': 'g-kitale', 'kind': 'group', 'title': 'Kitale repairs', 'seen': ['Grace Achieng', 'Meril Kiprop', 'Jessica Anderson', 'Ann Wanjiru', 'Peter Otieno', 'Joy Chebet', 'Mary Akinyi'], 'description': 'Parts, quotes and trips for the Kitale side.', 'photo': '', 'project': None, 'members': [ME, 'Grace Achieng', 'Bertin Mwangi'], 'admins': [ME], 'unread': 4, 'mention': False, 'pinned': False, 'muted': 'always', 'archived': False, 'onlyAdmins': False},
             'dm-grace': {'id': 'dm-grace', 'kind': 'dm', 'title': 'Grace Achieng', 'photo': '', 'project': None, 'members': [ME, 'Grace Achieng'], 'admins': [], 'unread': 0, 'mention': False, 'pinned': False, 'muted': 0, 'archived': True, 'onlyAdmins': False},
         }
         # to the contract's types: number ids, epoch-ms times, kind 'sys', signed media urls, prefixed chat ids
@@ -95,13 +105,19 @@ class ChatMock:
                 if x['sys']: x['kind'] = 'sys'; x['from'] = ''; x['text'] = SYS_EN.get(x['sys']['type'], '')
                 for md in x['media']:
                     md['url'] = '/api/chat/media/%s?e=1&s=sig' % md['id']
+                    if md.get('thumb'): md['thumbUrl'] = '/api/chat/media/%s?e=1&s=sig' % md['thumb']
                     if md.get('poster'): md['posterUrl'] = '/api/chat/media/%s?e=1&s=sig' % md['poster']
         self.msgs = {CID[k]: v for k, v in self.msgs.items()}
         self.chats = {CID[k]: dict(v, id=CID[k]) for k, v in self.chats.items()}
-        for k in self.chats: self.chats[k]['last'] = last(k); self.chats[k].setdefault('wallpaper', ''); self.chats[k].setdefault('description', '')
+        for k in self.chats:
+            self.chats[k]['last'] = last(k); self.chats[k].setdefault('wallpaper', ''); self.chats[k].setdefault('description', '')
+            for f, v in (('bubble', ''), ('pins', []), ('seen', []), ('mentionId', 0), ('country', '')): self.chats[k].setdefault(f, v)
+            if self.chats[k]['last'] and self.chats[k]['last']['kind'] == 'trip': self.chats[k]['last']['text'] = self.msgs[k][-1]['trip']['title']
+        self.chats['p:101']['mentionId'] = 4
+        self.prefs = {'quick': None, 'dnd': {'on': False, 'from': '21:00', 'to': '06:30', 'mentions': False, 'tz': 180}, 'doubleTap': '❤️'}
         self.presence = {'Meril Kiprop': {'online': True, 'seen': ms(at(0))}, 'Grace Achieng': {'online': False, 'seen': ms(at(95))}, 'Bertin Mwangi': {'online': False, 'seen': ms(at(60 * 26))}}
         self.media = {'img1': ('image/png', png((10, 120, 194))), 'img2': ('image/png', png((28, 156, 90))), 'img3': ('image/png', png((227, 154, 30))), 'img4': ('image/png', png((122, 79, 208), 360, 480)),
-                      'vo1': ('audio/wav', wav()), 'doc1': ('application/pdf', b'%PDF-1.4\n%mock\n'), 'vid1': ('image/png', png((90, 96, 102)))}
+                      'vo1': ('audio/wav', wav()), 'img4t': ('image/png', png((122, 79, 208), 60, 80)), 'doc1': ('application/pdf', b'%PDF-1.4\n%mock\n'), 'vid1': ('image/png', png((90, 96, 102)))}
 
     # ---- the fake server
     def msg_by(self, c, i): return next((x for x in self.msgs.get(c, []) if x['id'] == i), None)
@@ -125,8 +141,23 @@ class ChatMock:
             self.posts.append(('media', {'type': q.get('type'), 'name': q.get('name'), 'size': len(req.post_data_buffer or b''), 'dur': q.get('dur')}))
             return self.fulfill(route, {'ok': True, 'id': mid, 'url': '/api/chat/media/%s?e=1&s=sig' % mid, 'type': q.get('type'), 'size': len(req.post_data_buffer or b''), 'name': q.get('name')})
         if path == 'list':
-            return self.fulfill(route, {'ok': True, 'me': ME, 'now': now_ms(), 'chats': list(self.chats.values()), 'presence': self.presence, 'gone': [] if q.get('since') else None})
+            return self.fulfill(route, {'ok': True, 'me': ME, 'now': now_ms(), 'chats': list(self.chats.values()), 'presence': self.presence, 'gone': [] if q.get('since') else None, 'prefs': self.prefs, 'push': False})
+        if path == 'prefs' and (req.method == 'GET' or 'c' not in body):
+            for k in ('quick', 'dnd', 'doubleTap'):
+                if k in body: self.prefs[k] = body[k]
+            return self.fulfill(route, {'ok': True, 'prefs': self.prefs})
+        if path == 'pin':
+            c = self.chats[body['c']]; x = self.msg_by(body['c'], body['id'])
+            if not x: return self.fulfill(route, {'ok': False, 'reason': 'not-found'}, 404)
+            pins = [p for p in c['pins'] if p['id'] != x['id']]
+            if body.get('on'): pins = [{'id': x['id'], 'from': x['from'], 'kind': x['kind'], 'text': (x['text'] or '')[:160], 'at': x['at'], 'by': ME, 'pinnedAt': now_ms()}] + pins
+            c['pins'] = pins[:3]; return self.fulfill(route, {'ok': True, 'pins': c['pins'], 'chat': c})
+        if path == 'trip':
+            return self.fulfill(route, {'ok': True, 'trip': trip_card(q.get('id'))})
+        if path == 'device':
+            return self.fulfill(route, {'ok': True})
         if path == 'msgs':
+            if q.get('before') and getattr(self, 'hold', False): self.held = getattr(self, 'held', []) + [(route, req)]; return  # answered by release()
             a = self.msgs.get(q.get('c'), []); lim = int(q.get('limit', 50))
             if q.get('before'): a = [x for x in a if x['id'] < int(q['before'])]
             if q.get('after'): a = [x for x in a if x['id'] > int(q['after'])]; return self.fulfill(route, {'ok': True, 'msgs': a[:lim], 'more': len(a) > lim})
@@ -138,6 +169,7 @@ class ChatMock:
                  'text': body.get('text'), 'media': body.get('media') or [], 'reply': body.get('reply'), 'fwd': bool(body.get('fwd')), 'mentions': body.get('mentions') or [], 'loc': body.get('loc'),
                  'live': body.get('live'), 'contact': body.get('contact'), 'reacts': {}, 'edited': None, 'deleted': False, 'sys': None, 'status': 'sent'}
             if x['kind'] == 'live' and x['loc']: x['live'] = dict(x['live'] or {}, lat=x['loc']['lat'], lng=x['loc']['lng'], at=x['at'])
+            if x['kind'] == 'trip': x['trip'] = trip_card((body.get('trip') or {}).get('id'))
             for md in x['media']: md['url'] = '/api/chat/media/%s?e=1&s=sig' % md['id']
             self.msgs.setdefault(c, []).append(x); self.chats[c]['last'] = {'id': x['id'], 'from': ME, 'kind': x['kind'], 'text': x['text'] or '', 'at': x['at'], 'status': 'sent'}
             return self.fulfill(route, {'ok': True, 'msg': x})
@@ -175,9 +207,9 @@ class ChatMock:
             ql = q.get('q', '').lower(); hits = [{'c': c, 'id': x['id'], 'from': x['from'], 'at': x['at'], 'snippet': x['text']} for c, a in self.msgs.items() for x in a if x['text'] and ql in x['text'].lower() and not x['deleted']]
             return self.fulfill(route, {'ok': True, 'hits': hits[:20]})
         if path == 'preview':
-            return self.fulfill(route, {'ok': True, 'title': 'RAFIKI Outreach', 'description': 'Clean water, schools and health in East Africa.', 'image': '', 'site': 'rafikioutreach.org'})
+            return self.fulfill(route, {'ok': True, 'title': 'RAFIKI Outreach', 'description': 'Clean water, schools and health in East Africa.', 'image': '/api/chat/media/img2?e=1&s=sig', 'site': 'rafikioutreach.org'})
         if path == 'starred':
-            return self.fulfill(route, {'ok': True, 'msgs': [dict(self.msgs['d:meril'][3], chat='')]})
+            return self.fulfill(route, {'ok': True, 'msgs': getattr(self, 'starred', None) if getattr(self, 'starred', None) is not None else [dict(self.msgs['d:meril'][3], chat='')]})
         if path == 'ticket':
             return self.fulfill(route, {'ok': True, 't': 'tk1', 'exp': now_ms() + 60000})
         if path == 'group':
@@ -187,7 +219,7 @@ class ChatMock:
             return self.fulfill(route, {'ok': True, 'id': 'g:kitale'})
         if path in ('read', 'delivered', 'prefs', 'star', 'group-update', 'members', 'leave', 'live', 'live-stop'):
             if path == 'prefs' and body.get('c') in self.chats:
-                for k in ('pinned', 'muted', 'archived', 'wallpaper'):
+                for k in ('pinned', 'muted', 'archived', 'wallpaper', 'bubble'):
                     if k in body: self.chats[body['c']][k] = body[k]
             if path == 'group-update' and body.get('c') in self.chats:
                 for k in ('title', 'description', 'photo', 'onlyAdmins'):
@@ -197,6 +229,9 @@ class ChatMock:
             return self.fulfill(route, {'ok': True})
         return self.fulfill(route, {'ok': False, 'reason': 'unknown'}, 404)
 
+    def release(self):
+        self.hold = False; held, self.held = getattr(self, 'held', []), []
+        for route, req in held: self.handle(route, req)
     def on_ws(self, ws):
         self.ws.append(ws); self.wsin = getattr(self, 'wsin', [])
         ws.on_message(lambda m: self.wsin.append(m))
