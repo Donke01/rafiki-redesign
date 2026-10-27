@@ -29,7 +29,7 @@ ones listed; nothing is used for analytics, advertising or marketing, fraud prev
 ### Location
 | Type | Collected | Required or optional | Purposes | Notes |
 |---|---|---|---|---|
-| Precise location | **Yes** | **Optional** (the app works without the permission; pinning and check-in need it) | App functionality | Sent with pins, visit reports, new sites and road reports; and, only if the person switches on "Share my location with the office", their latest position (kept 12 h). |
+| Precise location | **Yes** | **Optional** (the app works without the permission; pinning and check-in need it) | App functionality | Sent with pins, visit reports, new sites and road reports; and, only if the person switches on "Share my location with the office", their latest position (kept 12 h), seen by admins and by people on the same trip; and a live location someone chooses to share in a chat. |
 | Approximate location | **Yes** | Optional | App functionality | The app asks for coarse as well as fine location; answer Yes to be safe. |
 
 ### Personal info
@@ -53,18 +53,18 @@ No.
 | Type | Collected | Notes |
 |---|---|---|
 | Emails, SMS or MMS | No | The app does not read the phone's messages. |
-| Other in-app messages | **Yes**, optional, App functionality | Visit notes, repair notes and comments typed in the app. (The web app also has a team chat, if it is switched on.) |
+| Other in-app messages | **Yes**, optional, App functionality | Team chat (messages between team members, kept on our Cloudflare server until deleted), plus visit and repair notes. |
 
 ### Photos and videos
 | Type | Collected | Required or optional | Purposes |
 |---|---|---|---|
 | Photos | **Yes** | Optional | App functionality |
-| Videos | No (Android). OWNER: thank-you videos can be added to donor pages from the web app; answer Yes, optional, if you want to cover that too. | | |
+| Videos | **Yes** | Optional | App functionality (videos sent in team chat, shrunk to 720p on the phone; thank-you videos for donor pages) |
 
 ### Audio files
 | Type | Collected | Required or optional | Purposes | Notes |
 |---|---|---|---|---|
-| Voice or sound recordings | **Yes** | Optional | App functionality | Voice notes (up to 2 min) on visit reports. They may be typed out by OpenAI or Google Speech-to-Text acting for us (service providers, not sharing). |
+| Voice or sound recordings | **Yes** | Optional | App functionality | Voice notes (up to 2 min) on visit reports and in team chat. They may be typed out by OpenAI or Google Speech-to-Text acting for us (service providers, not sharing). |
 | Music files, other audio | No | | | |
 
 ### Files and docs
@@ -80,7 +80,7 @@ No. The app does not read the phone's contacts or calendar.
 |---|---|---|---|---|
 | App interactions | **Yes** | Required | App functionality | The team activity log (who reported, pinned or fixed what, kept 30 days) and "last seen" in the team list. |
 | In-app search history | No | | | Place searches are sent to answer them (Google Places, Photon, Nominatim) but are not stored against the user. OWNER: our server caches the results of a search text for 30 days without a name; if you want to be strict, declare "Yes, optional, App functionality". |
-| Installed apps, other user-generated content, other actions | **Other user-generated content: Yes**, optional, App functionality | Visit reports, readings, new sites, road reports, trip plans. |
+| Installed apps, other user-generated content, other actions | **Other user-generated content: Yes**, optional, App functionality | Visit reports, readings, new sites, road reports, trip plans, fuel logs and receipts. |
 
 ### Web browsing
 No.
@@ -106,7 +106,7 @@ address when they send map pictures, like any web request; this is not collected
 
 | Service | From | Data | Role |
 |---|---|---|---|
-| Cloudflare | server | everything the app sends | hosting and storage (service provider) |
+| Cloudflare | server | everything the app sends, including chat (Durable Objects, R2) | hosting and storage (service provider) |
 | monday.com | server | project notes, photos, voice notes, names | the organisation's project records (service provider) |
 | OpenAI / Google Speech-to-Text | server | voice-note audio | speech to text, only when a key is set (service provider) |
 | Resend | server | e-mail addresses, alert text | sends e-mail (service provider) |

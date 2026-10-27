@@ -191,7 +191,7 @@ fun UpdateCard(m: AppModel) {
     // back from Android's "Install unknown apps" setting: carry on by itself
     val owner = androidx.compose.ui.platform.LocalLifecycleOwner.current
     DisposableEffect(owner) {
-        val o = androidx.lifecycle.LifecycleEventObserver { _, e -> if (e == androidx.lifecycle.Lifecycle.Event.ON_RESUME && U.state.value is org.rafikioutreach.pin.data.Updater.State.NeedsPermission && U.allowed(ctx)) U.install(ctx.applicationContext) }
+        val o = androidx.lifecycle.LifecycleEventObserver { _, e -> if (!org.rafikioutreach.pin.BuildConfig.PLAY && e == androidx.lifecycle.Lifecycle.Event.ON_RESUME && U.state.value is org.rafikioutreach.pin.data.Updater.State.NeedsPermission && U.allowed(ctx)) U.install(ctx.applicationContext) }
         owner.lifecycle.addObserver(o); onDispose { owner.lifecycle.removeObserver(o) }
     }
     Card(Modifier.padding(top = 14.dp).bringIntoViewRequester(seen).border(3.dp, ring, RoundedCornerShape(24.dp)).testTag("app_update"), border = C.blue) {
@@ -215,7 +215,8 @@ fun UpdateCard(m: AppModel) {
                 }
                 Text(t("Cancel", "Ghairi"), style = MaterialTheme.typography.labelLarge, color = C.blue, modifier = Modifier.padding(top = 8.dp).clip(RoundedCornerShape(8.dp)).clickable { U.cancel() }.padding(6.dp))
             }
-            org.rafikioutreach.pin.data.Updater.State.NeedsPermission -> {
+            // the website build only (Google Play installs its own updates; this state never comes up there)
+            org.rafikioutreach.pin.data.Updater.State.NeedsPermission -> if (!org.rafikioutreach.pin.BuildConfig.PLAY) {
                 Text(t("One more step: Android asks you to allow RAFIKI Pin to install updates. Turn on “Allow from this source”, then come back. The update carries on by itself.", "Hatua moja zaidi: Android inakuomba uruhusu RAFIKI Pin kusakinisha masasisho. Washa “Allow from this source”, kisha urudi. Sasisho litaendelea lenyewe."),
                     style = MaterialTheme.typography.bodySmall, color = C.text, modifier = Modifier.padding(top = 12.dp))
                 Btn(t("Allow updates", "Ruhusu masasisho"), { runCatching { ctx.startActivity(U.permissionIntent(ctx)) } }, Modifier.padding(top = 10.dp).fillMaxWidth().testTag("update_allow"), icon = "lock")

@@ -57,7 +57,7 @@ in for 14 days in a row** before you can apply for production.
    Testers › Create e-mail list). Add at least **15** people to be safe (staff, volunteers, family with Android
    phones and Google accounts). They must use the Google account that is on their phone.
 2. **Testing › Closed testing › Create track** (or use "Alpha"), add the tester list, and set a feedback e-mail.
-3. **Create new release** › upload `app-play-release.aab` › release name e.g. `2.22.0 (47)` › notes › **Review and
+3. **Create new release** › upload `app-play-release.aab` › release name e.g. `2.23.0 (48)` › notes › **Review and
    roll out**. The first review can take a few days.
 4. Copy the **opt-in link** from the track's Testers tab and send it to every tester. Each tester must open it,
    tap **Become a tester**, then install RAFIKI Pin from Play. People who have the website APK installed get the

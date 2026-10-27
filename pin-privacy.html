@@ -69,7 +69,7 @@
 <ul>
   <li><strong>While you use the app</strong>, with your permission, the app uses your phone's location to show where you are on the map, to sort projects by distance, and to check you in at a site.</li>
   <li><strong>When you pin a project, report a visit, add a new site or a road report</strong>, the location you pin (latitude, longitude and how accurate it was) is sent with it. Project locations are part of our project records.</li>
-  <li><strong>Share my location with the office</strong> is off unless you switch it on (Me › Settings › Security and alerts). When it is on, during the work hours you choose, the app sends your position at most every 10 minutes. Only the latest point is kept, for 12 hours, and only office admins can see it. Switching it off deletes it at once. The app never asks for background location permission.</li>
+  <li><strong>Share my location with the office</strong> is off unless you switch it on (Me › Settings › Security and alerts). When it is on, during the work hours you choose, the app sends your position at most every 10 minutes. Only the latest point is kept, for 12 hours. Office admins can see it on the team map, and people on the same trip see where their trip's team is. Switching it off deletes it at once. The app never asks for background location permission.</li>
 </ul>
 
 <h3>Photos, voice notes and receipts</h3>
@@ -84,6 +84,19 @@
   <li><strong>Visit reports, notes, repairs, readings, new sites, trip plans and costs.</strong> These are the records of our projects. Each one carries your name and the time.</li>
   <li><strong>Activity.</strong> We keep a log of what the team did in the app in the last 30 days, so the team's notifications work.</li>
   <li><strong>Settings</strong> such as language, appearance and offline map areas stay on your phone.</li>
+</ul>
+
+<h3>Team chat</h3>
+<ul>
+  <li>Messages, photos, videos, voice notes, contacts and locations you send in a chat are stored on our server so the people in that chat can read them. Videos are made smaller on your phone before they are sent. Only members of a chat can read it; donors and the shared team PIN cannot use chat.</li>
+  <li>If you share your <strong>live location</strong> in a chat, the people in that chat see where you are until it ends or you stop it.</li>
+  <li>You can delete a message for everyone; its content is then removed from the chat. <!-- OWNER: chat photos and videos are kept in Cloudflare R2; check whether deleting a message also deletes the file there (workers/chat), and say so. --></li>
+</ul>
+
+<h3>Trips</h3>
+<ul>
+  <li>Trip plans hold the stops, dates, the people going, the vehicle, fuel logs, costs and receipt photos. The places of the stops are sent to route and weather services (see below), without names.</li>
+  <li>During a trip, the app records when each stop was checked in. The office can make a read-only share link for a trip (for example for a driver); it shows the plan, never PINs, the team's phone numbers, costs or private notes.</li>
 </ul>
 
 <h3>Donor mode</h3>
@@ -101,7 +114,7 @@
 
 <h2>Where it is stored</h2>
 <ul>
-  <li><strong>Our server</strong> runs on Cloudflare (Cloudflare Pages, Workers KV and R2 storage). Team lists, repairs, the activity log, trip plans, receipts and donor records are kept there. <!-- OWNER: Cloudflare stores data in its global network; say so if your donors or staff need a statement on international transfers. --></li>
+  <li><strong>Our server</strong> runs on Cloudflare (Cloudflare Pages, Workers KV, Durable Objects and R2 storage). Team lists, repairs, the activity log, chats, trip plans, receipts and donor records are kept there. <!-- OWNER: Cloudflare stores data in its global network; say so if your donors or staff need a statement on international transfers. --></li>
   <li><strong>monday.com</strong> is where RAFIKI Outreach keeps its project records. Visit notes, photos and voice notes are attached to the project there.</li>
   <li><strong>Your phone</strong> keeps a copy of the project list, your settings and work waiting to be sent, so the app works without a signal. Uninstalling the app removes it.</li>
 </ul>
@@ -112,7 +125,7 @@
 <table>
   <tr><th>Service</th><th>What it receives</th></tr>
   <tr><td>monday.com</td><td>Project notes, photos and voice notes, with the name of the person who added them. Sign in with monday.com.</td></tr>
-  <tr><td>Cloudflare</td><td>Hosts the app and our server; stores the data listed above.</td></tr>
+  <tr><td>Cloudflare</td><td>Hosts the app and our server; stores the data listed above, including team chat.</td></tr>
   <tr><td>OpenAI (or Google Cloud Speech-to-Text)</td><td>The audio of voice notes, to type them out, only while the office has this switched on. <!-- OWNER: confirm which provider is switched on in Cloudflare (OPENAI_API_KEY / GOOGLE_STT_KEY), or remove this row if neither is. --></td></tr>
   <tr><td>Resend</td><td>E-mail addresses and the text of alerts and monthly donor updates we e-mail. <!-- OWNER: only if RESEND_API_KEY is set. --></td></tr>
   <tr><td>OpenRouteService and Open-Meteo</td><td>The locations of planned visits (not who is going), to work out road routes and the weather.</td></tr>
@@ -130,6 +143,7 @@
   <li>The team activity log: 30 days. Undo information for a pinned location: 90 days.</li>
   <li>Receipt photos and trip tracks: about 400 days.</li>
   <li>Sign-in sessions: up to 180 days, or until you sign out.</li>
+  <li>Chat messages: until they are deleted. <!-- OWNER: decide whether to set a limit. --></li>
   <li>Team list entries and donor records: until the office removes them.</li>
 </ul>
 

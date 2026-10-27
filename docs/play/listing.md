@@ -28,7 +28,7 @@ Add Kiswahili under "Manage translations" › Add your own translation › Swahi
 
     The field app for RAFIKI Outreach: pin wells, report visits, track repairs.
 
-**Full description** (about 1,700 of 4,000 characters)
+**Full description** (about 1,800 of 4,000 characters)
 
     RAFIKI Pin is the field app of RAFIKI Outreach, a charity that drills wells and builds schools, clinics and farms with communities in Kenya, Tanzania, Uganda and Malawi.
 
@@ -40,7 +40,8 @@ Add Kiswahili under "Manage translations" › Add your own translation › Swahi
     • Report a visit: check in, choose the condition, add readings, photos and a voice note.
     • Works without a signal. Reports wait on the phone and send themselves when you are back online.
     • Save map areas for offline use before you drive out.
-    • Plan a route to the sites that are due a visit, with directions in Google Maps.
+    • Plan trips: the stops, the roads (tarmac or murram), the weather, fuel and costs, day by day.
+    • Team chat: groups, direct messages, photos, voice notes and a chat for every project.
     • Scan a project's RAFIKI QR sticker to open it and check in.
     • Notifications when a repair is reported or a visit is assigned to you.
 
@@ -80,7 +81,8 @@ Add Kiswahili under "Manage translations" › Add your own translation › Swahi
     • Ripoti ziara: ingia, chagua hali, ongeza vipimo, picha na ujumbe wa sauti.
     • Inafanya kazi bila mtandao. Ripoti zinasubiri kwenye simu na zinatumwa zenyewe ukipata mtandao tena.
     • Hifadhi maeneo ya ramani kwa matumizi bila mtandao kabla ya safari.
-    • Panga njia kwenda kwenye miradi inayohitaji ziara, na maelekezo kwenye Google Maps.
+    • Panga safari: vituo, barabara (lami au murram), hali ya hewa, mafuta na gharama, siku kwa siku.
+    • Gumzo la timu: vikundi, ujumbe wa moja kwa moja, picha, ujumbe wa sauti na gumzo kwa kila mradi.
     • Changanua kibandiko cha QR cha RAFIKI cha mradi kuufungua na kuingia.
     • Arifa matengenezo yanaporipotiwa au ziara inapokabidhiwa kwako.
 
@@ -104,7 +106,7 @@ Add Kiswahili under "Manage translations" › Add your own translation › Swahi
 |---|---|---|
 | App icon | `graphics/icon-512.png` | 512 × 512, 32-bit PNG, opaque |
 | Feature graphic | `graphics/feature-1024x500.png` | 1024 × 500, no small text |
-| Phone screenshots | `graphics/phone-1-…png` to `graphics/phone-6-…png` | 1080 × 1920 (9:16), English |
+| Phone screenshots | `graphics/phone-1-map.jpg` … `graphics/phone-8-me.jpg` (map, projects, project, visit, chat, trip, office, me) | 1080 × 1920 (9:16), English |
 
 The screenshots are real app screens drawn by the Robolectric test `PlayShotsTest` (apps/android-native) with made-up demo
-projects and people; run it again after big design changes and copy `app/build/shots/play-*.png` here.
+projects and people; run it again after big design changes and save `app/build/shots/play-*.png` here as `phone-*.jpg` (JPEG keeps the repo small).

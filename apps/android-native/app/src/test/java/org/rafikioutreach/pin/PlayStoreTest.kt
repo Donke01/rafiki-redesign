@@ -65,7 +65,7 @@ class PlayStoreTest {
     private val out = File(System.getProperty("user.dir"), "build/shots").apply { mkdirs() }
     private val app get() = ApplicationProvider.getApplicationContext<Application>()
 
-    @After fun reset() { Lang.sw = false; org.rafikioutreach.pin.ui.Motion.on = true; org.rafikioutreach.pin.ui.Onb.enabled = true; org.rafikioutreach.pin.ui.MapClean.revealed = false; org.rafikioutreach.pin.ui.HomeLayers.reset() }
+    @After fun reset() { Lang.sw = false; org.rafikioutreach.pin.ui.Motion.on = true; org.rafikioutreach.pin.ui.Whoosh.enabled = true; org.rafikioutreach.pin.ui.ChatNav.req = null; org.rafikioutreach.pin.ui.ChatNav.focus = null; org.rafikioutreach.pin.ui.Onb.enabled = true; org.rafikioutreach.pin.ui.MapClean.revealed = false; org.rafikioutreach.pin.ui.HomeLayers.reset() }
 
     // --- demo data: projects around Eldoret and Kitale, invented people ---------------------------------------------
     /** [d] days ago at 10:30 in the morning (a usual time for a site visit) */
@@ -108,18 +108,45 @@ class PlayStoreTest {
         .put(JSONObject().put("by", "Grace Achieng").put("a", "visit").put("s", "working").put("id", "106").put("t", "Kaptebee Farm").put("at", ago(4)))
         .put(JSONObject().put("by", "Grace Achieng").put("a", "visit").put("s", "working").put("id", "102").put("t", "Chepkongi Dispensary").put("at", ago(6)))
 
+    /** Chat (feat-chata) with the demo team: a group about a repair, a direct message, the whole team. */
+    /** Yesterday at [h]:[m], for the chat messages (a working afternoon whatever time the test runs). */
+    private fun yday(h: Int, m: Int) = LocalDate.now().minusDays(1).atTime(h, m).atZone(java.time.ZoneId.systemDefault()).toInstant().toString()
+    private fun chats(): FakeChat = FakeChat("Amani Wekesa").apply {
+        chat("t_all", "team", "All RAFIKI", listOf("Amani Wekesa", "Grace Achieng", "Daniel Kiprono", "Faith Njeri"), listOf("Amani Wekesa"), pinned = true)
+        chat("g1", "group", "Kapsaret repairs", listOf("Amani Wekesa", "Grace Achieng", "Daniel Kiprono"), listOf("Amani Wekesa"), unread = 2)
+        chat("dm_faith", "dm", "Faith Njeri", listOf("Amani Wekesa", "Faith Njeri"), unread = 1)
+        chat("p_101", "project", "Kapsaret Borehole", listOf("Amani Wekesa", "Daniel Kiprono"), project = "101")
+        msg("t_all", "Amani Wekesa", "Good morning team! Visits for this week are in Trips.", 60 * 24 * 2) { put("at", yday(7, 45)) }
+        msg("g1", "Daniel Kiprono", "The pump handle at Kapsaret Borehole is broken. The community is fetching water from the river.", 60 * 5) { put("at", yday(14, 10)) }
+        msg("g1", "Amani Wekesa", "Thanks Daniel. Can you take a new handle on Thursday?", 60 * 4 + 40, status = "read") { put("at", yday(14, 32)) }
+        msg("g1", "Grace Achieng", "I have a spare handle in the Kitale store", 60 * 3) { put("at", yday(15, 5)); put("reacts", JSONObject().put("👍", JSONArray().put("Amani Wekesa").put("Daniel Kiprono"))) }
+        msg("g1", "Daniel Kiprono", "Great, I’ll collect it tomorrow at 8", 50) { put("at", yday(15, 21)) }
+        msg("g1", "Amani Wekesa", "Perfect. Please send a photo once it’s fixed", 20, status = "delivered") { put("at", yday(15, 40)) }
+        msg("dm_faith", "Faith Njeri", "Tamiha Children’s Home visit done, water is clear ✓", 35) { put("at", yday(16, 15)) }
+        msg("p_101", "Daniel Kiprono", "Reported: not working", 60 * 6) { put("at", yday(13, 50)) }
+        presence.put("Grace Achieng", JSONObject().put("online", true).put("seen", ago(0))).put("Daniel Kiprono", JSONObject().put("online", false).put("seen", ago(0)))
+    }
+    private val posts = java.util.concurrent.CopyOnWriteArrayList<String>()
+
     private fun model(signedIn: Boolean = true): AppModel {
         org.rafikioutreach.pin.ui.Motion.on = false
+        org.rafikioutreach.pin.ui.Whoosh.enabled = false
+        java.io.File(app.filesDir, "chat").deleteRecursively()
+        listOf("chat", "chat_drafts", "chat_notes").forEach { app.getSharedPreferences(it, 0).edit().clear().commit() }
         MapSetup.init(app); OfflineMaps.setOnline(true)
         Prefs(app).apply {
             if (signedIn) { pin = "2580"; name = "Amani Wekesa"; saveSnapshot(snapshot()) } else { pin = ""; name = "" }
-            filter = "all"; country = ""; ftype = ""; lang = if (Lang.sw) "sw" else "en"; phoneAlerts = false
+            filter = "all"; country = ""; ftype = ""; lang = if (Lang.sw) "sw" else "en"; phoneAlerts = false; mePane = "me"
         }
         org.rafikioutreach.pin.ui.clearDrafts()
         app.getSharedPreferences("rafiki-pin", 0).edit().putString("currency", "KES").commit()
         val m = AppModel(app)
-        m.api.transport = { method, url, _, _ ->
-            when {
+        val chat = chats()
+        // Trips (feat-itina): a two-day trip for the demo team, from the trip test's fake server
+        val trips = TripFixtures.Server(posts, TripFixtures.itin(people = listOf("Amani Wekesa", "Grace Achieng")).put("title", "Kapsaret and Moiben repairs"), "Amani Wekesa", true)
+        m.api.transport = { method, url, _, body ->
+            chat.handle(method, url, body) ?: when {
+                Regex("/api/(itin|vehicles|fuel|trip|group-trips|road-reports)").containsMatchIn(url) -> trips.answer(method, url, body?.let { String(it) } ?: "")
                 url.contains("view=team") || url.contains("team=1") -> 200 to JSONObject().put("ok", true).put("team", team).toString()
                 url.contains("view=review") -> 200 to JSONObject().put("ok", true).put("items", JSONArray()).toString()
                 url.contains("view=") -> 200 to "{\"ok\":true,\"items\":[]}"
@@ -134,6 +161,7 @@ class PlayStoreTest {
                 else -> 200 to "{\"ok\":true,\"updateId\":\"9001\"}"
             }
         }
+        m.chat.wire = chat.Wire()
         // standing at Kapsaret Borehole, the project the screenshots open
         m.locator.pretend(Fix(LatLng(0.4703, 35.2510), 8, System.currentTimeMillis()))
         return m
@@ -143,7 +171,14 @@ class PlayStoreTest {
     private fun settle() { rule.mainClock.advanceTimeBy(900); rule.waitForIdle() }
     private fun tagged(t: String) = rule.onAllNodesWithTag(t).fetchSemanticsNodes().isNotEmpty()
     private fun has(t: String) = rule.onAllNodesWithText(t, substring = true).fetchSemanticsNodes().isNotEmpty()
-    private fun nav(k: String) { rule.onNodeWithTag("nav_$k").performClick(); settle() }
+    private fun nav(k: String) {
+        // Me is the picture at the top left; a screen without it (a chat, a project) goes back first, as a person would
+        if (k == "me") repeat(4) { if (!tagged("hav")) { rule.runOnUiThread { rule.activity.onBackPressedDispatcher.onBackPressed() }; settle() } }
+        rule.onNodeWithTag(if (k == "me") "hav" else "nav_$k").performClick(); settle()
+    }
+    private fun waitTag(t: String) = rule.waitUntil(8000) { tagged(t) }
+    private fun openChat(id: String) { nav("chat"); waitTag("chatrow_$id"); rule.onNodeWithTag("chatrow_$id").performClick(); waitTag("chat_room"); rule.mainClock.advanceTimeBy(1500); rule.waitForIdle() }
+    private fun openTrip() { nav("me"); waitTag("trip_row_it_1"); rule.onNodeWithTag("trip_row_it_1").performScrollTo().performClick(); settle(); waitTag("trip_screen"); settle() }
     private fun density() = rule.activity.resources.displayMetrics.density
     private fun bitmap(): Bitmap { rule.waitForIdle(); val v = rule.activity.window.decorView; return Bitmap.createBitmap(v.width, v.height, Bitmap.Config.ARGB_8888).also { v.draw(Canvas(it)) } }
     private fun save(b: Bitmap, name: String) = File(out, "$name.png").outputStream().use { b.compress(Bitmap.CompressFormat.PNG, 100, it) }
@@ -217,6 +252,9 @@ class PlayStoreTest {
         nav("new"); check("e2e-05-new-site")
         nav("me"); check("e2e-06-me")
         nav("office"); rule.waitUntil(5000) { has("Kapsaret Borehole") }; check("e2e-07-office")
+        nav("chat"); waitTag("chatrow_g1"); check("e2e-10-chat-list")
+        openChat("g1"); check("e2e-11-chat-room")
+        openTrip(); check("e2e-12-trip")
         nav("me"); rule.onNodeWithTag("set_about").performScrollTo().performClick(); settle()
         check("e2e-08-about")
     }
@@ -236,7 +274,7 @@ class PlayStoreTest {
     private fun demoOnly() {
         val texts = rule.onAllNodes(androidx.compose.ui.test.SemanticsMatcher("any") { true }, useUnmergedTree = true).fetchSemanticsNodes()
             .flatMap { it.config.getOrNull(SemanticsProperties.Text).orEmpty().map { t -> t.text } }
-        val bad = texts.filter { Regex("vh_|\\+?254\\d|\\b07\\d{2}\\s?\\d{3}|[A-Za-z0-9._-]+@[A-Za-z0-9.-]+").containsMatchIn(it) && !it.contains("info@rafikioutreach.org") }
+        val bad = texts.filter { Regex("vh_|it_1|\\b(Meril|Reid|Bertin|Jessica|Wanjiru)\\b|\\+?254\\d|\\b07\\d{2}\\s?\\d{3}|[A-Za-z0-9._-]+@[A-Za-z0-9.-]+").containsMatchIn(it) && !it.contains("info@rafikioutreach.org") }
         assertEquals("only made-up demo data on the store screenshots", emptyList<String>(), bad)
     }
 
@@ -277,13 +315,19 @@ class PlayStoreTest {
         rule.onAllNodes(hasText("Not working") and hasClickAction()).onFirst().performScrollTo().performClick(); settle()
         save(bitmap(), "play-4-visit"); demoOnly()
 
-        // 5. the office: repairs, review and the team
-        nav("office"); rule.waitUntil(5000) { has("Kapsaret Borehole") }; settle()
-        save(bitmap(), "play-5-office"); demoOnly()
+        // 5. team chat: a group about the repair
+        openChat("g1"); save(bitmap(), "play-5-chat"); demoOnly()
 
-        // 6. Me: this month's work and the team
+        // 6. a planned trip: stops, roads and the day plan
+        openTrip(); save(bitmap(), "play-6-trip"); demoOnly()
+
+        // 7. the office: repairs, review and the team
+        nav("office"); rule.waitUntil(5000) { has("Kapsaret Borehole") }; settle()
+        save(bitmap(), "play-7-office"); demoOnly()
+
+        // 8. Me: this month's work and my trips
         nav("me"); rule.mainClock.advanceTimeBy(1500); rule.waitForIdle()
-        save(bitmap(), "play-6-me"); demoOnly()
+        save(bitmap(), "play-8-me"); demoOnly()
 
     }
 }
