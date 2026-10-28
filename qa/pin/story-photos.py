@@ -90,6 +90,7 @@ def install(pg, admin=True):
                 if k in b:
                     if b[k]: ST['dates'][k] = b[k]
                     else: ST['dates'].pop(k, None)
+        if a == 'cover': ST['cover'] = b.get('asset') or ''
         if a == 'consent': ST['consent'] = b['value']
         if a == 'draft': ST['newPhotos'] = 0; ST['doc']['at'] = iso(0)
         if a == 'answers':
@@ -314,6 +315,13 @@ def s_details(check):
             pg.click('[data-testid=sty_kids]'); pg.wait_for_timeout(700)
             e = acts('photo-edit'); check(e and e[-1].get('children') is True and pg.get_attribute('[data-testid=sty_kids]', 'aria-checked') == 'true', '[%s] shows children: on' % lang)
             check(pg.locator('#styPh [data-id="9402"] .sty-kid').count() == 1, '[%s] … the thumbnail says Children' % lang)
+            # the cover: Use as cover, then the star on the thumbnail; tap again goes back to automatic
+            pg.click('[data-testid=sty_cover]'); pg.wait_for_timeout(800)
+            e = acts('cover'); check(e and e[-1].get('asset') == '9402' and pg.get_attribute('[data-testid=sty_cover]', 'aria-pressed') == 'true', '[%s] Use as cover' % lang)
+            check(pg.locator('#styPh [data-id="9402"] .sty-cvb').count() == 1, '[%s] … a star on the thumbnail' % lang)
+            shot(pg, 'details-cover-%s' % lang)
+            pg.click('[data-testid=sty_cover]'); pg.wait_for_timeout(800)
+            e = acts('cover'); check(e and e[-1].get('asset') == '' and pg.locator('#styPh .sty-cvb').count() == 0, '[%s] tap again: back to automatic' % lang)
             pg.click('[data-testid=sty_mv_after]'); pg.wait_for_timeout(800)
             e = acts('photo-edit'); check(e and e[-1].get('to') == 'after', '[%s] moved to After' % lang)
             check(pg.locator('.sty-row[data-row=after] .sty-t').count() == 1 and pg.locator('.sty-row[data-row=progress] .sty-t').count() == 2, '[%s] the rows show it' % lang)

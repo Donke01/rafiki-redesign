@@ -53,6 +53,9 @@ a{color:var(--blue2)}
 .btn .bspin{flex:none;display:inline-block;width:18px;height:18px;margin-right:8px;border:2.5px solid currentColor;border-right-color:transparent;border-radius:50%;animation:spin .75s linear infinite;vertical-align:-3px}
 .btn.is-busy{opacity:1 !important;cursor:progress}
 @media (prefers-reduced-motion:reduce){.btn .bspin{animation-duration:2.4s}}
+.sty-cvb{position:absolute;right:6px;top:6px;display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:#F2B33D;color:#3A2600;box-shadow:0 1px 4px rgba(0,0,0,.25)}.sty-cvb svg{width:15px;height:15px;fill:currentColor}
+.sty-cov{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px}.sty-cov svg{width:18px;height:18px;flex:none}.sty-cov[aria-pressed=true]{background:#FFF4DC;border-color:#F2B33D;color:#6B4300}.sty-cov[aria-pressed=true] svg{fill:#F2B33D;color:#B07A00}
+html[data-theme=dark] .sty-cov[aria-pressed=true]{background:#3A2C10;color:#F7D27E}
 .sh-ch{display:flex;flex-direction:column;gap:10px;padding-top:4px}.sh-ch .btn{display:flex;align-items:center;justify-content:center;gap:10px}.sh-ch .btn svg{width:20px;height:20px}
 .bsh.sh-rdsh .bsh-p{top:0;max-height:none;height:100vh;height:100dvh;border-radius:0;display:flex;flex-direction:column;padding-top:calc(10px + env(safe-area-inset-top))}
 .bsh.sh-rdsh .grab{display:none}
@@ -6764,7 +6767,7 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
     var fr = SQ.fresh[x.id], left = fr ? 2 - (Date.now() - fr) / 1000 : -1;
     return '<button type="button" class="sty-t' + (left > -0.5 ? ' up done' : '') + '"' + (left > -0.5 ? ' style="--fd:' + Math.max(0, left).toFixed(2) + 's"' : '') + ' data-sty-ph="' + r[0] + '" data-id="' + esc(x.id) + '" data-i="' + i + '" aria-label="' + esc(tr(r[1] + ' photo ' + (i + 1), 'Picha ' + (i + 1) + ', ' + r[2]) + (x.cap ? ': ' + x.cap : '')) + '">' +
       '<img alt="" data-src="' + styImg(s, x.id, 480) + '">' + (x.children ? '<em class="sty-kid">' + tr('Children', 'Watoto') + '</em>' : '') +
-      (ins[String(x.id)] ? '<span class="sty-ins">' + oic('spark') + tr('In story', 'Hadithini') + '</span>' : '') + (left > -0.5 ? '<span class="sty-tk" aria-hidden="true">' + oic('check') + '</span>' : '') + '</button>';
+      (ins[String(x.id)] ? '<span class="sty-ins">' + oic('spark') + tr('In story', 'Hadithini') + '</span>' : '') + (String(s.cover || '') === String(x.id) ? '<span class="sty-cvb" title="' + esc(tr('Cover photo', 'Picha ya jalada')) + '">' + oic('star') + '</span>' : '') + (left > -0.5 ? '<span class="sty-tk" aria-hidden="true">' + oic('check') + '</span>' : '') + '</button>';
   }
   function styPhCard(s) {
     var ins = styInStory(s), nIn = 0;
@@ -7212,6 +7215,8 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
   addEventListener('offline', function () { if (!SQ.busy) SQ.items.forEach(function (x) { if (x.state === 'wait') { x.state = 'off'; sqTick(x); } }); sqUi(); });
   setTimeout(sqResume, 1200);
   // a photo's details: big, its caption, move it to another row, "shows children", delete
+  // the cover button: "Use as cover" or, for the cover, "Cover photo ✓" with a way back to the automatic choice
+  function styCovLbl(on) { return oic('star') + '<span>' + (on ? tr('Cover photo ✓ · Tap to undo', 'Picha ya jalada ✓ · Gusa kutendua') : tr('Use as cover', 'Tumia kama jalada')) + '</span>'; }
   function styDetails(row, id) {
     var s = STY.s; if (!s) return; var x = (s.photos[row] || []).filter(function (y) { return String(y.id) === String(id); })[0]; if (!x) return;
     var ins = styInStory(s)[String(x.id)], saved = x.cap || '', busy = false;
@@ -7222,6 +7227,7 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
       '<p class="muted">' + tr('The story uses captions to describe photos.', 'Hadithi inatumia maelezo kuelezea picha.') + '</p>' +
       '<span class="sty-lbl" id="styMvL">' + tr('Move to', 'Hamisha kwenda') + '</span><div class="seg sty-seg" role="group" aria-labelledby="styMvL">' + STY_ROWS.map(function (r) { return '<button type="button" data-to="' + r[0] + '" aria-pressed="' + (r[0] === row) + '" data-testid="sty_mv_' + r[0] + '">' + tr(r[1], r[2]) + '</button>'; }).join('') + '</div>' +
       '<div class="sty-sw">' + oic('spKid') + '<span><b id="styKidL">' + tr('Shows children', 'Inaonyesha watoto') + '</b><small>' + tr('Only used on the website once photo consent is received', 'Inatumika kwenye tovuti tu baada ya ruhusa ya picha kupatikana') + '</small></span><button type="button" class="tgl" role="switch" aria-checked="' + !!x.children + '" aria-labelledby="styKidL" data-k="kids" data-testid="sty_kids"><i></i></button></div>' +
+      '<button type="button" class="btn light block sty-cov" data-k="cover" data-testid="sty_cover" aria-pressed="' + (String(s.cover || '') === String(x.id)) + '">' + styCovLbl(String(s.cover || '') === String(x.id)) + '</button>' +
       '<p class="msg" aria-live="polite"></p><button type="button" class="btn block sty-del" data-k="del" data-testid="sty_del">' + oic('spTrash') + '<span>' + tr('Delete', 'Futa') + '</span></button></div>', 'sty-sh sty-dsh');
     cnThumbs(w);
     var m = w.querySelector('.msg'), cap = w.querySelector('#styCap');
@@ -7243,6 +7249,15 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
       var to = b.getAttribute('data-to');
       if (to) { if (to === row) return; buzz(); var v = cap.value.replace(/\s+/g, ' ').trim(), o = { to: to }; if (v !== saved) { o.cap = v; saved = v; } return edit(o).then(function (j) { if (j) { toast(tr('Moved to ' + styRowName(to) + ' ✓', 'Imehamishwa kwenda ' + styRowName(to) + ' ✓')); row = to; qa('[data-to]', w).forEach(function (y) { y.setAttribute('aria-pressed', String(y.getAttribute('data-to') === to)); }); } }); }
       var k = b.getAttribute('data-k');
+      if (k === 'cover') {
+        buzz(); var was = b.getAttribute('aria-pressed') === 'true', html0 = b.innerHTML; b.disabled = true; b.classList.add('is-busy'); b.innerHTML = '<i class="bspin" aria-hidden="true"></i><span>' + esc(tr('Saving…', 'Inahifadhi…')) + '</span>';
+        return styApi('POST', { action: 'cover', id: s.id, asset: was ? '' : String(x.id) }).then(function (j) {
+          b.disabled = false; b.classList.remove('is-busy');
+          if (!j.ok) { b.innerHTML = html0; m.className = 'msg bad'; m.textContent = styWhy(j); return; }
+          s = j.story; styGot(j.story, true); b.setAttribute('aria-pressed', String(!was)); b.innerHTML = styCovLbl(!was);
+          toast(!was ? tr('Cover photo set ✓', 'Picha ya jalada imewekwa ✓') : tr('Cover back to automatic', 'Jalada limerudi kuchaguliwa lenyewe'));
+        });
+      }
       if (k === 'kids') { buzz(); var on = b.getAttribute('aria-checked') !== 'true'; b.setAttribute('aria-checked', String(on)); return edit({ children: on }).then(function (j) { if (!j) b.setAttribute('aria-checked', String(!on)); }); }
       if (k === 'del') return poAsk(tr('Delete this photo?', 'Futa picha hii?'), tr('It is taken out of the story’s photos.', 'Inaondolewa kwenye picha za hadithi.'), tr('Delete', 'Futa'), true).then(function (ok) {
         if (!ok) return; saved = cap.value.replace(/\s+/g, ' ').trim();
@@ -12352,6 +12367,7 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
   // projects, an exact-location map and updates. Group donors (a church, a company) can have several viewers,
   // each with their own link. The server checks every admin action.
   OIC.heart = '<path d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.3a4.3 4.3 0 0 1 7.5 2.5C19.5 15.4 12 20 12 20z"/>';
+  OIC.star = '<path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.8 6.8 19.6l1-5.8L3.5 9.7l5.9-.8z"/>';
   OIC.link = '<path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/>';
   var DNR = { list: null, mail: null, cron: false, origin: '', edit: null, form: null, q: '', cat: '', ck: '', only: false };
   var DNR_CAT = [['', 'All types', 'Aina zote'], ['water', 'Water', 'Maji'], ['school', 'Schools', 'Shule'], ['health', 'Health', 'Afya'], ['children', 'Children’s homes', 'Makao ya watoto'], ['other', 'Other', 'Nyingine']];
