@@ -207,18 +207,18 @@ class StoryTest {
         start(m)
         openStories("Chepkongi Borehole")
         waitTag("story_approve"); rule.onNodeWithTag("story_text_edit").assertExists()
-        tap("story_approve"); rule.waitUntil(8000) { posts.any { it.optString("action") == "approve" } }
+        // 2.27.0: "Approve and publish" asks first (an old plain-text draft sends its text)
+        tap("story_approve"); waitTag("story_approve_ask"); tap("story_approve_ask_yes"); rule.waitUntil(8000) { posts.any { it.optString("action") == "approve" } }
         assertEquals("A short draft.", posts.last { it.optString("action") == "approve" }.optString("text"))
-        waitTag("story_publish"); rule.onNodeWithTag("story_st_approved").performScrollTo()
+        rule.onNodeWithTag("story_st_approved").performScrollTo()
         shot("story-approved-en")
-        tap("story_publish"); rule.waitUntil(8000) { posts.any { it.optString("action") == "publish" } }
     }
 
     @Test fun approve_refused_without_consent_when_children() {
         status = "draft"; text = "A draft."; consent = "not-yet"; after += JSONObject().put("id", "a1").put("children", true)
         val m = model(admin = true)
         start(m); openStories("Chepkongi Borehole")
-        tap("story_approve"); waitTag("story_msg")
+        tap("story_approve"); waitTag("story_approve_ask"); tap("story_approve_ask_yes"); waitTag("story_msg")
         rule.onNodeWithText("Photo consent is needed first", substring = true).assertExists()
     }
 

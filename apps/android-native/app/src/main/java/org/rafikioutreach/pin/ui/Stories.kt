@@ -244,35 +244,8 @@ fun StoryTab(m: AppModel, p: Project) {
             if (st.photos.values.flatten().any { it.children }) Text(t("Children are in a photo, so consent is needed before it’s approved.", "Kuna watoto kwenye picha, kwa hiyo idhini inahitajika kabla ya kuidhinishwa."),
                 style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 6.dp).testTag("story_children_note"))
         }
-        // 6. the story itself
-        Card(Modifier.padding(top = 12.dp).bringIntoViewRequester(atDraft).testTag("story_text_card")) {
-            Text(t("The story", "Hadithi yenyewe"), style = MaterialTheme.typography.titleMedium, color = C.ink)
-            var busy by remember { mutableStateOf(false) }
-            var text by remember(st.text) { mutableStateOf(st.text) }
-            if (st.text.isBlank()) Text(t("Answer the questions, then draft it here: 150–300 words from the answers, the quote and the project’s facts.", "Jibu maswali, kisha andika rasimu hapa: maneno 150–300 kutoka kwa majibu, nukuu na taarifa za mradi."),
-                style = MaterialTheme.typography.bodyMedium, color = C.muted, modifier = Modifier.padding(top = 6.dp))
-            else if (admin && st.status != "published") Box(Modifier.testTag("story_text_edit")) { Field(text, { text = it }, t("Story text", "Maandishi ya hadithi"), lines = 8) }
-            else Text(st.text, style = MaterialTheme.typography.bodyMedium, color = C.text, modifier = Modifier.padding(top = 6.dp).testTag("story_text"))
-            if (st.text.isNotBlank()) Text(t("${words(text)} words", "maneno ${words(text)}"), style = MaterialTheme.typography.labelSmall, color = if (words(text) in 150..300) C.muted else C.warn, modifier = Modifier.padding(top = 4.dp).testTag("story_words"))
-            if (st.status in setOf("not-started", "collecting", "draft")) Btn(if (busy) t("Drafting…", "Inaandika…") else if (st.text.isBlank()) t("Draft the story", "Andika rasimu ya hadithi") else t("Draft it again", "Andika rasimu upya"),
-                { if (st.text.isNotBlank()) askDraft = true else { busy = true; post(JSONObject().put("action", "draft"), t("Draft ready ✓", "Rasimu iko tayari ✓")) { busy = false } } }, Modifier.padding(top = 12.dp).fillMaxWidth().testTag("story_draft"), icon = "spark", enabled = !busy)
-            // the completion date the story will use (monday.com)
-            if (st.status in setOf("not-started", "collecting", "draft") && !st.live) monthText(p.done)?.let { d ->
-                Text(t("Finished: $d (from monday.com)", "Ilikamilika: $d (kutoka monday.com)"), style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 6.dp).testTag("story_finished"))
-            }
-            // field users: drafting sends it for review (web v72, sty_send)
-            if (!admin && st.status in setOf("not-started", "collecting")) Text(t("“Draft the story” sends it to an admin for review. Nothing goes on the website before it is approved.", "“Andika rasimu ya hadithi” inaituma kwa msimamizi akague. Hakuna kinachoenda kwenye tovuti kabla ya kuidhinishwa."),
-                style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 8.dp).testTag("sty_send"))
-            if (admin) {
-                if (st.text.isNotBlank() && text != st.text && st.status != "published") Btn(t("Save text", "Hifadhi maandishi"), { post(JSONObject().put("action", "text").put("text", text), t("Saved ✓", "Imehifadhiwa ✓")) },
-                    Modifier.padding(top = 8.dp).fillMaxWidth().testTag("story_text_save"), icon = "check", light = true, small = true)
-                if (st.status == "draft") Btn(t("Approve", "Idhinisha"), { post(JSONObject().put("action", "approve").put("text", text), t("Approved ✓ It can go on the website.", "Imeidhinishwa ✓ Inaweza kuwekwa kwenye tovuti.")) },
-                    Modifier.padding(top = 8.dp).fillMaxWidth().testTag("story_approve"), icon = "check", enabled = st.text.isNotBlank())
-                if (st.status == "approved") Btn(t("Mark published", "Weka imechapishwa"), { post(JSONObject().put("action", "publish"), t("Published ✓", "Imechapishwa ✓")) }, Modifier.padding(top = 8.dp).fillMaxWidth().testTag("story_publish"), icon = "upload")
-            }
-            if (st.status == "draft" || (admin && st.status in setOf("approved", "published"))) Btn(t("Back to Collecting", "Rudi kwenye Kukusanya"), { post(JSONObject().put("action", "collecting")) },
-                Modifier.padding(top = 8.dp).fillMaxWidth().testTag("story_back"), icon = "undo", light = true, small = true, outline = true)
-        }
+        // 6. the story itself: the drafted story as sections with photos (web v74), Approve and publish, On the website
+        StoryDraftCard(m, p, st, admin, Modifier.padding(top = 12.dp).bringIntoViewRequester(atDraft), { b, ok, after -> post(b, ok, after) }) { askDraft = true }
     }
     if (st == null) return
     // --- the sheets ------------------------------------------------------------------------------------------------
@@ -316,7 +289,7 @@ fun StoryTab(m: AppModel, p: Project) {
         t("Draft it again", "Andika rasimu upya"), false, { askDraft = false }) { askDraft = false; post(JSONObject().put("action", "draft"), t("Draft ready ✓", "Rasimu iko tayari ✓")) }
 }
 
-private fun words(s: String) = s.trim().split(Regex("\\s+")).count { it.isNotBlank() }
+internal fun words(s: String) = s.trim().split(Regex("\\s+")).count { it.isNotBlank() }
 
 /** The six questions as a guided flow, one card at a time: type an answer, or record it (transcribed when the server can). */
 @Composable

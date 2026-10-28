@@ -74,15 +74,17 @@ class StoryPhotosTest {
         "progress" to mutableListOf(ph("p1", taken = "2025-01-10"), ph("p2", taken = "2025-03-04"), ph("p3")),
         "after" to mutableListOf<JSONObject>())
     private val dates = JSONObject().put("before", "2024-11")
+    private var doc = JSONObject().put("title", "Water at the dispensary").put("dek", "Clean water, close by, for every mother who comes to the clinic.").put("at", "2026-10-27T10:00:00Z").put("by", "Grace").put("model", "openai:gpt")
+        .put("sections", JSONArray().put(JSONObject().put("h", "Before the well").put("body", "Mothers walked two hours to the river.\n\nThe water made children sick.").put("photo", JSONObject().put("id", "b1").put("row", "before").put("cap", "The old river path")))
+            .put(JSONObject().put("h", "The work").put("body", "The drilling team reached water at 80 metres.").put("photo", JSONObject().put("id", "p1").put("row", "progress")))
+            .put(JSONObject().put("h", "Now").put("body", "Water is a few steps from the clinic door.").put("photo", JSONObject().put("id", "p3").put("row", "progress"))))
+        .put("pull", JSONObject().put("quote", "Now my girls get to school on time.").put("who", "Mary"))
     private var upMode = "ok"; private var refuseDates: String? = null
     private fun ph(id: String, kids: Boolean = false, taken: String = "", cap: String = "") = JSONObject().put("id", id).put("children", kids).put("by", "Meril").put("at", "${java.time.Year.now()}-10-28T10:42:00Z").put("cap", cap).also { if (taken.isNotBlank()) it.put("taken", taken) }
     private fun story() = JSONObject().put("id", "101").put("status", status).put("consent", consent)
         .put("answers", JSONObject().apply { StoryKit.QS.forEachIndexed { i, q -> put(q, if (i < 4) "An answer." else "") } }).put("quote", "").put("quoteBy", "").put("credit", "").put("text", "A first draft.")
         .put("photos", JSONObject().apply { rows.forEach { (r, l) -> put(r, JSONArray(l)) } })
-        .put("doc", JSONObject().put("title", "Water at the dispensary").put("dek", "Clean water, close by.").put("at", "2026-10-27T10:00:00Z").put("by", "Grace")
-            .put("sections", JSONArray().put(JSONObject().put("h", "Before").put("body", "Long walks.").put("photo", JSONObject().put("id", "b1").put("row", "before")))
-                .put(JSONObject().put("h", "The work").put("body", "Drilling.").put("photo", JSONObject().put("id", "p1").put("row", "progress")))
-                .put(JSONObject().put("h", "Now").put("body", "Water.").put("photo", JSONObject().put("id", "p3").put("row", "progress")))))
+        .put("doc", doc).put("pool", JSONArray().apply { rows.forEach { (r, l) -> l.forEach { put(JSONObject().put("id", it.optString("id")).put("row", r).put("cap", it.optString("cap")).put("children", it.optBoolean("children"))) } } })
         .put("dates", dates).put("newPhotos", newPhotos)
         .apply { if (pub) put("pub", JSONObject().put("at", "2026-10-27T12:00:00Z").put("by", "Jessica").put("url", "https://test.rafikioutreach.org/stories/101-water")) }
         .put("missing", JSONArray().apply {
@@ -124,6 +126,9 @@ class StoryPhotosTest {
                     when (j.optString("action")) {
                         "consent" -> consent = j.optString("value")
                         "draft" -> { status = "draft"; newPhotos = 0 }
+                        "doc" -> { val d = j.getJSONObject("doc"); doc.put("title", d.optString("title")).put("dek", d.optString("dek")).put("sections", d.getJSONArray("sections")) }
+                        "approve" -> { if (j.has("doc")) { val d = j.getJSONObject("doc"); doc.put("title", d.optString("title")).put("sections", d.getJSONArray("sections")) }; status = "published"; pub = true }
+                        "collecting" -> { status = "collecting"; pub = false }
                         "dates" -> if (refuseDates != null) refuse = refuseDates!! to "progress" else listOf("before", "progress", "progressEnd", "after").forEach { k -> if (j.has(k)) { if (j.optString(k).isBlank()) dates.remove(k) else dates.put(k, j.optString(k)) } }
                         "photo-edit" -> {
                             val l = rows[j.optString("row")]!!; val p = l.first { it.optString("id") == j.optString("asset") }
@@ -425,4 +430,56 @@ class StoryPhotosTest {
         start(m); openStory()
         waitTag("story_newphotos"); assertTrue(hasTextIn("story_newphotos_text", "story editor")); assertFalse(tagged("story_newphotos_draft"))
     }
+
+    // --- Part 2: the story draft as sections, Approve and publish, On the website -----------------------------------
+    private fun adminDraft(sw: Boolean, mode: String) {
+        Lang.sw = sw; dark = mode == "dark"; Look.mode = if (mode == "sun") "sun" else ""; consent = "received"
+        val m = model(admin = true)
+        start(m); openStory()
+        val tag = "${if (sw) "sw" else "en"}-$mode"
+        rule.onNodeWithTag("story_doc_edit").performScrollTo()
+        rule.onNode(hasAnyAncestor(hasTestTag("story_doc_title")) and hasSetTextAction()).performTextReplacement("Water reaches Chepkongi")
+        rule.onNodeWithTag("story_sec_0").performScrollTo(); shot("sp-doc-edit-$tag")
+        // section 2 loses its photo; section 1 gets another from the project's photos
+        tap("story_sec_rm_1"); waitTag("story_sec_add_1")
+        tap("story_sec_change_0"); waitTag("story_pool"); shot("sp-doc-pool-$tag"); noLayoutProblems("story_pool", tag)
+        tap("story_pool_1")
+        rule.waitUntil(5000) { !tagged("story_pool") }
+        tap("story_doc_save"); rule.waitUntil(8000) { posts.any { it.optString("action") == "doc" } }
+        val d = posts.last { it.optString("action") == "doc" }.getJSONObject("doc")
+        assertEquals("Water reaches Chepkongi", d.optString("title"))
+        assertEquals("b2", d.getJSONArray("sections").getJSONObject(0).getJSONObject("photo").optString("id"))
+        assertTrue(d.getJSONArray("sections").getJSONObject(1).isNull("photo"))
+        // Approve and publish asks first
+        tap("story_approve"); waitTag("story_approve_ask"); shot("sp-doc-approve-ask-$tag")
+        tap("story_approve_ask_yes"); rule.waitUntil(8000) { posts.any { it.optString("action") == "approve" } }
+        assertTrue(posts.last().has("doc")); settle()
+        waitTag("story_pub"); assertTrue(hasTextIn("story_pub", if (sw) "Iko kwenye tovuti" else "On the website"))
+        assertFalse(tagged("story_approve")); assertFalse(tagged("story_draft"))
+        rule.onNodeWithTag("story_pub").performScrollTo(); shot("sp-doc-live-$tag")
+        rule.onNodeWithTag("story_st_published", useUnmergedTree = true).assertExists()
+        listOf("story_text_card", "story_status").forEach { noLayoutProblems(it, tag) }
+        // Back to Collecting asks first when it is on the website
+        tap("story_back"); waitTag("story_off_ask"); shot("sp-doc-off-ask-$tag")
+        tap("story_off_ask_yes"); rule.waitUntil(8000) { posts.any { it.optString("action") == "collecting" } }; settle()
+        assertFalse(tagged("story_pub"))
+    }
+    @Test fun admin_edits_approves_and_publishes_en_light() = adminDraft(false, "light")
+    @Config(qualifiers = "w320dp-h640dp-xhdpi") @Test fun admin_edits_approves_and_publishes_sw_dark() { w = 320; h = 640; adminDraft(true, "dark") }
+
+    private fun fieldReads(sw: Boolean, mode: String) {
+        Lang.sw = sw; dark = mode == "dark"; Look.mode = if (mode == "sun") "sun" else ""
+        val m = model(admin = false)
+        start(m); openStory()
+        val tag = "${if (sw) "sw" else "en"}-$mode"
+        waitTag("story_doc"); assertFalse(tagged("story_doc_edit")); assertFalse(tagged("story_approve"))
+        assertEquals("Water at the dispensary", LayoutCheck.text(rule.onNodeWithTag("story_doc_title", useUnmergedTree = true).fetchSemanticsNode()))
+        rule.onNodeWithTag("story_doc").performScrollTo(); shot("sp-doc-read-$tag")
+        rule.onNodeWithTag("story_pull").performScrollTo(); shot("sp-doc-read2-$tag")
+        noLayoutProblems("story_text_card", tag)
+        // Draft it again asks first
+        tap("story_draft"); waitTag("story_draft_ask"); tap("story_draft_ask_no"); assertFalse(posts.any { it.optString("action") == "draft" })
+    }
+    @Test fun field_user_reads_the_story_en_light() = fieldReads(false, "light")
+    @Config(qualifiers = "w411dp-h860dp-xxhdpi") @Test fun field_user_reads_the_story_sw_sun() { w = 411; h = 860; fieldReads(true, "sun") }
 }
