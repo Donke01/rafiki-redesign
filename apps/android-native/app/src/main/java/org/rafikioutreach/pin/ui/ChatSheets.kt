@@ -41,7 +41,8 @@ import java.time.Instant
 
 /** Hold a message: a reaction, or Reply, Forward, Copy, Star, Info, Edit (own, 15 min), Delete, and "Turn into a job". */
 @Composable
-internal fun MsgSheet(m: AppModel, msg: Msg, row: ChatRow?, close: () -> Unit, onReply: () -> Unit, onEdit: () -> Unit, openChat: (String) -> Unit, openProject: (String, String) -> Unit, office: (String) -> Unit) {
+internal fun MsgSheet(m: AppModel, msg: Msg, row: ChatRow?, close: () -> Unit, onReply: () -> Unit, onEdit: () -> Unit, openChat: (String) -> Unit, openProject: (String, String) -> Unit, office: (String) -> Unit,
+                       onSelect: () -> Unit = {}, onDelete: (() -> Unit)? = null, story: (String, List<File>) -> Unit = { _, _ -> }) {
     val hub = m.chat
     val me = hub.me
     val mine = msg.from.equals(me, true)
@@ -86,6 +87,20 @@ internal fun MsgSheet(m: AppModel, msg: Msg, row: ChatRow?, close: () -> Unit, o
             SheetRow("act_star", "star", if (msg.starred) t("Unstar", "Ondoa nyota") else t("Star", "Weka nyota")) { hide { scope.launch { hub.star(msg, !msg.starred) } } }
             if (mine) SheetRow("act_info", "info", t("Message info", "Maelezo ya ujumbe")) { sub = "info" }
             if (canEdit) SheetRow("act_edit", "edit", t("Edit", "Hariri")) { hide { onEdit() } }
+            // chat 2: select several (B10), translate (B7), use in a story (B6), add a photo to the project (B5)
+            SheetRow("act_select", "selectall", t("Select", "Chagua")) { hide { onSelect() } }
+            if (msg.text.isNotBlank() && !mine && (msg.kind == "text" || msg.kind == "media")) SheetRow("act_translate", "translate", "Translate · Tafsiri") {
+                hide {
+                    if (hub.tools["translate"] != true) runCatching { ctx.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(googleTranslate(msg.text)))) }
+                    else scope.launch { val (tx, err, g) = hub.translate(msg.text); if (tx != null) hub.translated[msg.id] = tx else if (g != null) runCatching { ctx.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(g))) } else hub.note.value = err }
+                }
+            }
+            if (row?.kind == "project" && row.project.isNotBlank() && msg.kind == "text" && msg.text.isNotBlank()) SheetRow("act_story", "spark", t("Use in a story", "Tumia kwenye hadithi"), value = t("The words become the story’s quote", "Maneno yanakuwa nukuu ya hadithi")) {
+                hide { StoryNav.pre = Triple(row.project, msg.text.trim().take(600), msg.from); StoryNav.open = row.project; openProject(row.project, "story") }
+            }
+            if (row?.kind == "project" && row.project.isNotBlank() && msg.media.any { it.type == "photo" } && !hub.added(msg)) SheetRow("act_addphotos", "photoadd", t("Add to project photos", "Ongeza kwenye picha za mradi")) {
+                hide { scope.launch { val (files, err) = hub.addPhotos(msg, row.project); if (err != null) hub.note.value = err else { hub.note.value = t("Added to the project ✓", "Imeongezwa kwenye mradi ✓"); story(row.project, files) } } }
+            }
             // turn it into a job: the existing repair and assign screens, filled in from the message
             SheetRow("act_repair", "wrench", t("Report a repair", "Ripoti matengenezo"), value = t("With this message’s words and photos", "Kwa maneno na picha za ujumbe huu")) {
                 if (pid != null) hide { scope.launch { repairFrom(m, msg, pid); openProject(pid, "visit") } } else sub = "repair"
@@ -95,7 +110,7 @@ internal fun MsgSheet(m: AppModel, msg: Msg, row: ChatRow?, close: () -> Unit, o
             }
         }
         val canAll = (mine || (admin && row?.isGroup == true) || (row?.isGroup == true && row.admin(me))) && !msg.deleted
-        SheetRow("act_delete", "trash", t("Delete", "Futa"), red = true) { sub = if (canAll) "delete" else "deleteme" }
+        SheetRow("act_delete", "trash", t("Delete", "Futa"), red = true) { if (onDelete != null) hide { onDelete() } else sub = if (canAll) "delete" else "deleteme" }
         said?.let { org.rafikioutreach.pin.ui.Msg(it, "bad") }
     }
     when (sub) {
@@ -161,7 +176,7 @@ private fun ProjectPicker(m: AppModel, close: () -> Unit, pick: (String) -> Unit
 
 /** Forward to one or more chats. */
 @Composable
-private fun ForwardSheet(m: AppModel, msg: Msg, close: () -> Unit, open: (String) -> Unit) {
+internal fun ForwardSheet(m: AppModel, msg: Msg, close: () -> Unit, open: (String) -> Unit) {
     val rows by m.chat.rows.collectAsState()
     val chosen = remember { mutableStateListOf<String>() }
     val hp = rememberHaptics()
@@ -191,7 +206,7 @@ private fun ForwardSheet(m: AppModel, msg: Msg, close: () -> Unit, open: (String
 
 /** Message info: who read it and who received it, with the times (in groups, blue ticks once everyone has read it). */
 @Composable
-private fun InfoSheet(m: AppModel, msg: Msg, row: ChatRow?, close: () -> Unit) {
+internal fun InfoSheet(m: AppModel, msg: Msg, row: ChatRow?, close: () -> Unit) {
     var info by remember { mutableStateOf<Pair<List<Pair<String, Long>>, List<Pair<String, Long>>>?>(null) }
     var failed by remember { mutableStateOf(false) }
     LaunchedEffect(msg.id) { info = m.chat.info(msg); failed = info == null }

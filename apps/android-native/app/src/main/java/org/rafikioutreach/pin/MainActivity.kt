@@ -316,7 +316,7 @@ fun Shell(m: AppModel) {
         // app header: Me (or back), the wordmark, the bell
         val dispatcher = androidx.activity.compose.LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
         // chat 2: on a phone the chat list has its own header (Me photo, Chats, search, ⋯ with the bell and refresh)
-        val chatTop = here.tab == "chat" && !sub && org.rafikioutreach.pin.ui.chatListOwnsTop()
+        val chatTop = ((here.tab == "chat" && !sub) || here.sub?.startsWith("chat:") == true) && org.rafikioutreach.pin.ui.chatListOwnsTop()
         if (!chatTop) org.rafikioutreach.pin.ui.HeaderRow(left = { word ->
             // the same as the phone's back: an open sub-tab or fold closes first
             if (sub) Box(Modifier.size(44.dp), contentAlignment = Alignment.Center) { RoundBtn("back", t("Back", "Rudi"), "hback") { if (dispatcher != null) dispatcher.onBackPressed() else pop() } }
@@ -372,7 +372,8 @@ fun Shell(m: AppModel) {
                         pid != null -> ProjectScreen(m, pid, pl.projectTab) { pop() }
                         // Chat (feat-chata): a conversation, its info page, a new chat, archived and starred
                         pl.sub?.startsWith("chat:") == true -> org.rafikioutreach.pin.ui.ChatRoom(m, pl.sub.removePrefix("chat:"), openInfo = { go(Place(pl.tab, sub = "chatinfo:" + pl.sub.removePrefix("chat:"))) },
-                            openChat = { openChat(it) }, openProject = { id, t -> go(Place(pl.tab, id, t)) }, office = { s -> org.rafikioutreach.pin.ui.TeamGo.section = s; tab("office") })
+                            openChat = { openChat(it) }, openProject = { id, t -> go(Place(pl.tab, id, t)) }, office = { s -> org.rafikioutreach.pin.ui.TeamGo.section = s; tab("office") },
+                            back = if (chatTop) ({ if (dispatcher != null) dispatcher.onBackPressed() else pop() }) else null)
                         pl.sub?.startsWith("chatinfo:") == true -> org.rafikioutreach.pin.ui.ChatInfoScreen(m, pl.sub.removePrefix("chatinfo:"), back = { pop(); pop() }, openChat = { openChat(it) }, openProject = { go(Place(pl.tab, it)) })
                         pl.sub == "chatnew" -> org.rafikioutreach.pin.ui.NewChatScreen(m) { id -> pop(); openChat(id) }
                         pl.sub == "chatarch" -> org.rafikioutreach.pin.ui.ChatListScreen(m, { openChat(it) }, {}, archived = true, back = { pop() })

@@ -231,6 +231,11 @@ class ChatApi(val api: Api) {
     suspend fun deviceRemove(token: String) = api.postTo("/api/chat/device", JSONObject().put("token", token).put("remove", true))
     suspend fun trip(id: String) = api.get("/api/chat/trip?id=" + enc(id))
     suspend fun tripCard(id: String) = api.get("/api/itin/" + enc(id) + "?card=1")
+    // chat 2 (web feat-cwr): delete several, clear a chat for me (and archive a DM), type out a voice note
+    suspend fun deleteMany(c: String, ids: List<String>, forAll: Boolean) = api.postTo("/api/chat/delete-many", JSONObject().put("c", c).put("forAll", forAll)
+        .put("ids", JSONArray().apply { ids.forEach { id -> id.toLongOrNull()?.let { put(it) } ?: put(id) } }))
+    suspend fun clear(c: String, archive: Boolean) = api.postTo("/api/chat/clear", JSONObject().put("c", c).apply { if (archive) put("archive", true) })
+    suspend fun transcribe(c: String, id: String) = api.postTo("/api/chat/transcribe", JSONObject().put("c", c).put("id", id.toLongOrNull() ?: id))
     fun mediaPath(id: String) = "/api/chat/media/" + enc(id)
 }
 

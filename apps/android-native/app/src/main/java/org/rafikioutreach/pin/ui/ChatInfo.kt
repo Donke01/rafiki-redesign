@@ -175,7 +175,7 @@ fun ChatInfoScreen(m: AppModel, c: String, back: () -> Unit, openChat: (String) 
             }
         }
         "edit" -> EditGroupSheet(m, row, { sheet = null }) { said = it }
-        "add" -> TeammatePicker(m, t("Add members", "Ongeza wanachama"), row.members, multi = true, close = { sheet = null }) { names -> scope.launch { hub.members(c, add = names)?.let { said = "bad" to it } ?: run { said = "ok" to t("Added ✓", "Wameongezwa ✓") } } }
+        "add" -> AddPeopleSheet(m, row, true, { sheet = null }) { s -> TeamGo.section = s; m.goTab = "office" }
         "link" -> LinkSheet(m, c) { sheet = null }
         "leave" -> TeamSubSheet("leave_sheet", { sheet = null }) { hide ->
             Text(t("Leave “${row.title}”?", "Uondoke kwenye “${row.title}”?"), style = MaterialTheme.typography.titleLarge, color = C.ink)
@@ -238,7 +238,7 @@ private fun EditGroupSheet(m: AppModel, row: ChatRow, close: () -> Unit, said: (
 
 /** The invite link: copy, share, or reset it (the old one stops working). */
 @Composable
-private fun LinkSheet(m: AppModel, c: String, close: () -> Unit) {
+internal fun LinkSheet(m: AppModel, c: String, close: () -> Unit) {
     val scope = rememberScope()
     val ctx = LocalContext.current
     val clip = LocalClipboardManager.current

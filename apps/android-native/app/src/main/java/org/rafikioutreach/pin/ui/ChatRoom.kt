@@ -37,6 +37,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
@@ -100,7 +101,7 @@ private fun mentionsMe(m: Msg, me: String) = m.mentions.any { it.equals(me, true
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun ChatRoom(m: AppModel, c: String, openInfo: () -> Unit, openChat: (String) -> Unit, openProject: (String, String) -> Unit, office: (String) -> Unit) {
+fun ChatRoom(m: AppModel, c: String, openInfo: () -> Unit, openChat: (String) -> Unit, openProject: (String, String) -> Unit, office: (String) -> Unit, back: (() -> Unit)? = null) {
     val hub = m.chat
     val rows by hub.rows.collectAsState()
     val row = rows.firstOrNull { it.id == c }
@@ -182,31 +183,68 @@ fun ChatRoom(m: AppModel, c: String, openInfo: () -> Unit, openChat: (String) ->
 
     val wall = row?.wallpaper.orEmpty()
     val dbl = hub.settings.doubleTap
+    // chat 2: selecting (B10), finding (B13), the ⋯ sheets (B11, B12, B16), the story question after adding photos (B5)
+    val sel = remember(c) { mutableStateListOf<String>() }
+    var selecting by remember(c) { mutableStateOf(false) }
+    BackStep(selecting) { selecting = false; sel.clear() }
+    var finding by remember(c) { mutableStateOf(false) }
+    var fq by remember(c) { mutableStateOf("") }
+    var fAt by remember(c) { mutableIntStateOf(0) }
+    BackStep(finding) { finding = false; fq = "" }
+    var sheet by remember(c) { mutableStateOf<String?>(null) }
+    var delMsgs by remember { mutableStateOf<List<Msg>?>(null) }
+    var storyAsk by remember { mutableStateOf<Pair<String, List<File>>?>(null) }
+    var infoOf by remember { mutableStateOf<Msg?>(null) }
+    val officeAdmin = m.snap.collectAsState().value?.admin == true
+    val canAdd = row != null && (row.admin(me) || officeAdmin)
+    val found = remember(msgs, fq) { val w = fq.trim().lowercase(); if (w.isEmpty()) emptyList() else msgs.filter { !it.deleted && it.text.lowercase().contains(w) }.asReversed() }
+    LaunchedEffect(found) { fAt = 0; found.firstOrNull()?.let { jump(it.id) } }
+    val note by hub.note.collectAsState()
+    val ctxNote = LocalContext.current
+    LaunchedEffect(note) { note?.let { android.widget.Toast.makeText(ctxNote, it, android.widget.Toast.LENGTH_SHORT).show(); hub.note.value = null } }
+    fun selected() = msgs.filter { it.key in sel }
     Column(Modifier.fillMaxSize().testTag("chat_room")) {
-        ChatHead(m, row, c, me, presence, typingMap, openInfo)
+        when {
+            selecting -> SelBar(sel.size, sel.size == 1 && selected().firstOrNull()?.let { !it.deleted && !it.queued } == true, { selecting = false; sel.clear() },
+                fwd = { held = null; sheet = "fwd" }, star = { val l = selected(); scope.launch { l.filter { !it.queued && !it.deleted }.forEach { hub.star(it, !l.all { x -> x.starred }) } }; selecting = false; sel.clear() },
+                del = { delMsgs = selected() })
+            finding -> FindBar(fq, { fq = it }, found.size, fAt, up = { if (found.isNotEmpty()) { fAt = (fAt + 1) % found.size; jump(found[fAt].id) } },
+                down = { if (found.isNotEmpty()) { fAt = (fAt - 1 + found.size) % found.size; jump(found[fAt].id) } }) { finding = false; fq = "" }
+            else -> RoomHead(m, row, c, me, presence, typingMap, back, openInfo, { finding = true }) {
+                RoomMenu(row, canAdd) { k ->
+                    when (k) { "search" -> finding = true; "select" -> selecting = true; "info" -> openInfo(); else -> sheet = k }
+                }
+            }
+        }
+        if (row != null) ProjectStrip(m, row, openProject)
         if (row != null) PinBar(row, msgs) { jump(it) }
         Box(Modifier.weight(1f).fillMaxWidth()) {
-            ChatWall(wall, Modifier.matchParentSize())
+            if (wall.isBlank() && C === Light) WarmWall(Modifier.matchParentSize()) else ChatWall(wall, Modifier.matchParentSize())
             BoxWithConstraints(Modifier.fillMaxSize()) {
-                val maxW = maxWidth * 0.8f
+                val maxW = minOf(maxWidth * 0.8f, 560.dp)
                 LazyColumn(Modifier.fillMaxSize().testTag("chat_msgs"), state, reverseLayout = true, contentPadding = PaddingValues(start = 8.dp, end = 8.dp, top = 10.dp, bottom = 8.dp)) {
                     items(list, key = { it.key }, contentType = { it::class.simpleName }) { line ->
                         when (line) {
                             is Line.Day -> DayChip(line.label)
                             is Line.Unread -> {
                                 val a by animateFloatAsState(if (dividerGone) 0f else 1f, tween(if (motion) 320 else 0), label = "unread")
-                                Text(if (line.n == 1) t("1 unread message", "Ujumbe 1 haujasomwa") else t("${line.n} unread messages", "Ujumbe ${line.n} haujasomwa"),
-                                    style = MaterialTheme.typography.labelMedium, color = C.ink, textAlign = TextAlign.Center,
-                                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp).graphicsLayer { alpha = a }.background(if (C.dark) Color(0x22FFFFFF) else Color(0x14000000)).padding(vertical = 6.dp)
-                                        .testTag(if (dividerGone) "unread_line_faded" else "unread_line"))
+                                // styled like the day chips, smaller and centred (B3)
+                                Box(Modifier.fillMaxWidth().padding(vertical = 8.dp).graphicsLayer { alpha = a }, contentAlignment = Alignment.Center) {
+                                    Text(if (line.n == 1) t("1 unread message", "Ujumbe 1 haujasomwa") else t("${line.n} unread messages", "Ujumbe ${line.n} haujasomwa"),
+                                        style = CwType.small(FontWeight.Bold), color = if (C === Sun) Color.Black else cwTime(), textAlign = TextAlign.Center,
+                                        modifier = Modifier.widthIn(max = 320.dp).shadow(1.dp, RoundedCornerShape(9.dp)).clip(RoundedCornerShape(9.dp)).background(if (C.dark) Color(0xFF1E2A36) else Color.White).padding(horizontal = 12.dp, vertical = 4.dp)
+                                            .testTag(if (dividerGone) "unread_line_faded" else "unread_line"))
+                                }
                             }
                             is Line.B -> {
                                 val newestLine = list.firstOrNull { it is Line.B } === line
                                 val fresh = line.msg.key !in known && line.msg.at > openedAt - 5_000
-                                MsgLine(m, line.msg, row, me, group, line.first, line.last, maxW, flash == line.msg.id, fresh, motion,
+                                MsgLine(m, line.msg, row, me, group, line.first, line.last, maxW, flash == line.msg.id || (finding && found.getOrNull(fAt)?.id == line.msg.id), fresh, motion,
                                     seen = if (newestLine && group) row?.seen.orEmpty().filter { !it.equals(me, true) && !it.equals(line.msg.from, true) } else emptyList(),
                                     onReply = { hp.long(); reply = line.msg; editing = null },
-                                    onLong = { hp.long(); held = line.msg },
+                                    onLong = { hp.long(); if (selecting) { if (line.msg.key in sel) sel.remove(line.msg.key) else sel.add(line.msg.key) } else held = line.msg },
+                                    selecting = selecting, selected = line.msg.key in sel, toggle = { if (line.msg.key in sel) sel.remove(line.msg.key) else sel.add(line.msg.key); if (sel.isEmpty()) selecting = false },
+                                    story = { pid, files -> storyAsk = pid to files }, info = { infoOf = line.msg },
                                     onDouble = { if (!line.msg.queued && !line.msg.deleted && line.msg.sys == null) { hp.tap(); scope.launch { hub.react(line.msg, dbl) } } },
                                     openMedia = { md -> viewer = mediaAll.indexOfFirst { it.second == md && it.first.key == line.msg.key }.coerceAtLeast(0) },
                                     jump = { jump(it) }, openProject = openProject, reacts = { reactsOf = line.msg })
@@ -243,7 +281,23 @@ fun ChatRoom(m: AppModel, c: String, openInfo: () -> Unit, openChat: (String) ->
             else -> Composer(m, c, row, reply, editing, { reply = null }, { editing = null }) { scope.launch { state.scrollToItem(0) } }
         }
     }
-    held?.let { msg -> MsgSheet(m, msg, row, { held = null }, onReply = { reply = msg; editing = null }, onEdit = { editing = msg; reply = null }, openChat = openChat, openProject = openProject, office = office) }
+    held?.let { msg -> MsgSheet(m, msg, row, { held = null }, onReply = { reply = msg; editing = null }, onEdit = { editing = msg; reply = null }, openChat = openChat, openProject = openProject, office = office,
+        onSelect = { held = null; selecting = true; sel.clear(); sel.add(msg.key) }, onDelete = { held = null; delMsgs = listOf(msg) }, story = { pid, files -> storyAsk = pid to files }) }
+    delMsgs?.let { l -> DeleteSheet(m, row, l, { delMsgs = null }) { delMsgs = null; selecting = false; sel.clear() } }
+    storyAsk?.let { (pid, files) -> StoryAskSheet(m, pid, files) { storyAsk = null } }
+    infoOf?.let { msg -> InfoSheet(m, msg, row) { infoOf = null } }
+    when (sheet) {
+        "fwd" -> selected().firstOrNull()?.let { msg -> ForwardSheet(m, msg, { sheet = null; selecting = false; sel.clear() }) { openChat(it) } } ?: run { sheet = null }
+        "clear", "delete" -> if (row != null) ClearSheet(m, row, sheet == "delete", { sheet = null }) { (back ?: {}).invoke() } else sheet = null
+        "add" -> if (row != null) AddPeopleSheet(m, row, canAdd, { sheet = null }, office) else sheet = null
+        "media" -> MediaFilesSheet(m, c, mediaAll.map { it.second }) { sheet = null }
+        "date" -> JumpDateSheet({ sheet = null }) { day -> scope.launch {
+            // load older pages until that day is on the phone, then go to its first message
+            var tries = 0
+            while (hub.msgs(c).value.firstOrNull()?.let { Instant.ofEpochMilli(it.at).atZone(Dates.zone()).toLocalDate() > day } == true && hub.hasMore(c) && tries < 20) { hub.loadOlder(c); tries++ }
+            hub.msgs(c).value.firstOrNull { !Instant.ofEpochMilli(it.at).atZone(Dates.zone()).toLocalDate().isBefore(day) }?.let { jump(it.id) }
+        } }
+    }
     reactsOf?.let { msg -> ReactsSheet(m, msg) { reactsOf = null } }
     viewer?.let { i -> if (mediaAll.isNotEmpty()) MediaViewer(m, mediaAll, i) { viewer = null } else viewer = null }
 }
@@ -296,8 +350,8 @@ private fun ChatHead(m: AppModel, row: ChatRow?, c: String, me: String, presence
 @Composable
 private fun DayChip(label: String) {
     Box(Modifier.fillMaxWidth().padding(vertical = 8.dp), contentAlignment = Alignment.Center) {
-        Text(label, style = MaterialTheme.typography.labelMedium, color = C.ink, maxLines = 1, softWrap = false,
-            modifier = Modifier.clip(RoundedCornerShape(10.dp)).background(if (C.dark) Color(0xFF1E2A36) else Color(0xF2FFFFFF)).padding(horizontal = 12.dp, vertical = 5.dp).testTag("day_chip"))
+        Text(label, style = CwType.meta(FontWeight.Bold), color = if (C === Sun) Color.Black else cwTime(), maxLines = 1, softWrap = false,
+            modifier = Modifier.shadow(1.dp, RoundedCornerShape(9.dp)).clip(RoundedCornerShape(9.dp)).background(if (C.dark) Color(0xFF1E2A36) else Color.White).padding(horizontal = 11.dp, vertical = 4.dp).testTag("day_chip"))
     }
 }
 
@@ -315,7 +369,8 @@ internal fun bubbleSays(msg: Msg, mine: Boolean): String {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun MsgLine(m: AppModel, msg: Msg, row: ChatRow?, me: String, group: Boolean, first: Boolean, last: Boolean, maxW: androidx.compose.ui.unit.Dp, flash: Boolean, fresh: Boolean, motion: Boolean,
-                    seen: List<String>, onReply: () -> Unit, onLong: () -> Unit, onDouble: () -> Unit, openMedia: (ChatMedia) -> Unit, jump: (String) -> Unit, openProject: (String, String) -> Unit, reacts: () -> Unit) {
+                    seen: List<String>, onReply: () -> Unit, onLong: () -> Unit, onDouble: () -> Unit, openMedia: (ChatMedia) -> Unit, jump: (String) -> Unit, openProject: (String, String) -> Unit, reacts: () -> Unit,
+                    selecting: Boolean = false, selected: Boolean = false, toggle: () -> Unit = {}, story: (String, List<File>) -> Unit = { _, _ -> }, info: () -> Unit = {}) {
     if (msg.sys != null || msg.kind == "sys") { SysLine(m, msg, fresh, motion, openProject); return }
     val mine = msg.from.equals(me, true)
     val density = LocalDensity.current
@@ -325,7 +380,8 @@ private fun MsgLine(m: AppModel, msg: Msg, row: ChatRow?, me: String, group: Boo
     val hp = rememberHaptics()
     val bg = if (mine) bubbleColor(row?.bubble.orEmpty()) else ChatLook.theirs()
     val flashA by animateFloatAsState(if (flash) 1f else 0f, label = "flash")
-    val shape = remember(mine, first, last) { BubbleShape(mine, first, last) }
+    // chat 2 (B3): rounded bubbles, a square-ish corner where a run starts (no tail), smaller corners where they join
+    val shape = remember(mine, first, last) { bubble2(mine, first, last) }
     val big = if (msg.kind == "text" && !msg.deleted && msg.reply == null && !msg.fwd) emojiOnly(msg.text) else 0
     Box(Modifier.fillMaxWidth().settleIn(fresh, motion, mine).padding(top = if (first) 6.dp else 2.dp).background(C.blue.copy(alpha = 0.18f * flashA))
         .pointerInput(msg.key) {
@@ -359,14 +415,15 @@ private fun MsgLine(m: AppModel, msg: Msg, row: ChatRow?, me: String, group: Boo
                         if (mine) { Spacer(Modifier.width(3.dp)); Ticks(msg.status) }
                     }
                 }
-            } else Column(Modifier.widthIn(max = maxW + TAIL).shadow(if (C.dark) 0.dp else 0.5.dp, shape).clip(shape).background(bg)
-                .combinedClickable(onClick = {}, onLongClick = onLong, onDoubleClick = onDouble, role = Role.Button).semantics { contentDescription = says }
-                .padding(start = if (mine) 10.dp else 10.dp + TAIL, end = if (mine) 10.dp + TAIL else 10.dp, top = 6.dp, bottom = 5.dp).testTag(if (mine) "bubble_mine" else "bubble_theirs")) {
+            } else Column(Modifier.padding(start = if (mine) 0.dp else 4.dp, end = if (mine) 4.dp else 0.dp).widthIn(max = maxW).then(if (selected) Modifier.border(3.dp, cwSel(), shape) else Modifier).shadow(if (C.dark) 0.dp else 0.5.dp, shape).clip(shape).background(bg)
+                .then(if (selecting) Modifier.clickable(role = Role.Checkbox, onClick = toggle) else Modifier.combinedClickable(onClick = { if (msg.status == "failed") m.chat.retry(msg) }, onLongClick = onLong, onDoubleClick = onDouble, role = Role.Button))
+                .semantics { contentDescription = says; this.selected = selected }
+                .padding(start = 10.dp, end = 10.dp, top = 6.dp, bottom = 5.dp).testTag(if (mine) "bubble_mine" else "bubble_theirs")) {
                 if (group && !mine && first) Row(verticalAlignment = Alignment.CenterVertically) {
                     // their face next to their name, when they have a photo (feat-mea)
                     if (org.rafikioutreach.pin.data.TeamPhotos.url(msg.from) != null) { Box(Modifier.padding(bottom = 2.dp)) { PhotoOr(msg.from, 18.dp) {} }; Spacer(Modifier.width(5.dp)) }
-                    Text(msg.from, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold), color = ChatLook.nameColor(msg.from), maxLines = 1, overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.padding(bottom = 2.dp).testTag("sender"))
+                    Text(msg.from, style = CwType.meta(FontWeight.ExtraBold), color = ChatLook.nameColor(msg.from), maxLines = 1, overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(bottom = 1.dp).testTag("sender"))
                 }
                 if (msg.fwd && !msg.deleted) Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 2.dp)) {
                     Icon(ChatIc.get("fwd"), null, tint = C.muted, modifier = Modifier.size(13.dp)); Spacer(Modifier.width(4.dp))
@@ -377,16 +434,21 @@ private fun MsgLine(m: AppModel, msg: Msg, row: ChatRow?, me: String, group: Boo
                 } else {
                     msg.reply?.let { q -> QuoteBox(q, me, Modifier.padding(bottom = 4.dp).clickable(role = Role.Button) { jump(q.id) }) }
                     MsgBody(m, msg, mine, row, maxW, openMedia, openProject)
+                    // chat 2: Translate · Tafsiri (B7), Show text (B8), Add to project photos (B5)
+                    TranslateLine(m, msg, mine)
+                    if (msg.media.any { it.type == "voice" }) VoiceTextLine(m, msg)
+                    AddPhotosLine(m, msg, row, story)
                 }
-                // time, edited, star and ticks, bottom right
-                Row(Modifier.align(Alignment.End).padding(top = 1.dp), verticalAlignment = Alignment.CenterVertically) {
+                // time, edited, star and ticks, bottom right; on mine a tap shows who read it (B9)
+                Row(Modifier.align(Alignment.End).padding(top = 1.dp).then(if (mine && !msg.deleted && !msg.queued && !selecting) Modifier.clip(RoundedCornerShape(8.dp)).clickable(role = Role.Button, onClick = info).testTag("ticks_btn") else Modifier), verticalAlignment = Alignment.CenterVertically) {
                     if (row?.pins?.any { it.id == msg.id } == true) { Icon(Ic.get("pin"), t("Pinned", "Imebandikwa"), tint = C.muted, modifier = Modifier.size(11.dp).testTag("pinned_mark")); Spacer(Modifier.width(3.dp)) }
                     if (msg.starred) { Icon(ChatIc.get("star"), t("Starred", "Ina nyota"), tint = C.muted, modifier = Modifier.size(11.dp)); Spacer(Modifier.width(3.dp)) }
-                    if (msg.edited > 0 && !msg.deleted) Text(t("edited ", "imehaririwa "), style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, fontStyle = FontStyle.Italic), color = C.muted, modifier = Modifier.testTag("edited"))
-                    Text(Dates.time(Instant.ofEpochMilli(msg.at)), style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, fontWeight = FontWeight.Medium), color = C.muted, maxLines = 1, softWrap = false)
+                    if (msg.edited > 0 && !msg.deleted) Text(t("edited ", "imehaririwa "), style = CwType.small(FontWeight.Medium).copy(fontStyle = FontStyle.Italic), color = cwTime(), modifier = Modifier.testTag("edited"))
+                    Text(Dates.time(Instant.ofEpochMilli(msg.at)), style = CwType.small(FontWeight.Medium), color = cwTime(), maxLines = 1, softWrap = false)
                     if (mine && !msg.deleted) { Spacer(Modifier.width(3.dp)); Ticks(msg.status) }
                 }
-                if (msg.failed != null) Text(msg.failed, style = MaterialTheme.typography.labelSmall, color = C.bad, modifier = Modifier.padding(top = 2.dp))
+                if (msg.failed != null) Text(msg.failed, style = CwType.small(FontWeight.Medium), color = C.bad, modifier = Modifier.padding(top = 2.dp))
+                SendState(m, msg) // B14
             }
             if (msg.reacts.isNotEmpty()) Row(Modifier.padding(top = 1.dp, start = 6.dp + if (mine) 0.dp else TAIL, end = 6.dp + if (mine) TAIL else 0.dp).offset(y = (-4).dp).pop(msg.reacts.hashCode(), motion).clip(RoundedCornerShape(99.dp)).background(C.card).border(1.dp, C.line, RoundedCornerShape(99.dp))
                 .clickable(role = Role.Button) { reacts() }.padding(horizontal = 7.dp, vertical = 2.dp).testTag("reacts_${msg.key}"), verticalAlignment = Alignment.CenterVertically) {
@@ -506,7 +568,7 @@ private fun MsgBody(m: AppModel, msg: Msg, mine: Boolean, row: ChatRow?, maxW: a
     if (msg.text.isNotBlank() && msg.kind != "contact") {
         // @Name is highlighted when the name is in the message's mentions (older messages: any member)
         val names = msg.mentions.ifEmpty { row?.members.orEmpty() }
-        Text(richText(msg.text, names, m.chat.me) { openProject(it, "pin") }, style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.5.sp, lineHeight = 21.sp), color = C.text, modifier = Modifier.testTag("msg_text"))
+        Text(richText(msg.text, names, m.chat.me) { openProject(it, "pin") }, style = CwType.msg(), color = C.text, modifier = Modifier.testTag("msg_text"))
         URL_RE.find(msg.text)?.value?.trimEnd('.', ',', ')', '!', '?')?.let { LinkCard(m, it, openProject) }
     }
 }
@@ -649,3 +711,24 @@ private fun DocCard(m: AppModel, md: ChatMedia) {
 }
 
 internal fun sizeText(b: Long): String = when { b <= 0 -> ""; b < 1024 * 1024 -> "${(b + 1023) / 1024} KB"; else -> "%.1f MB".format(java.util.Locale.ROOT, b / 1048576.0) }
+
+/** B3 bubble corners: 14 dp, 6 dp where a run joins, 4 dp at the start of a run (top left theirs, top right mine). */
+internal fun bubble2(mine: Boolean, first: Boolean, last: Boolean): RoundedCornerShape {
+    val big = 14.dp; val join = 6.dp; val start = 4.dp
+    return if (mine) RoundedCornerShape(topStart = big, topEnd = if (first) start else join, bottomEnd = if (last) big else join, bottomStart = big)
+    else RoundedCornerShape(topStart = if (first) start else join, topEnd = big, bottomEnd = big, bottomStart = if (last) big else join)
+}
+/** The time inside a bubble and on the day chips: calmer than the text, with more contrast in sun. */
+@Composable internal fun cwTime() = if (C === Sun) Color(0xFF1E1E1E) else if (C.dark) Color(0xFF9AA8B3) else Color(0xFF66737D)
+/** The ring on a chosen message while selecting. */
+@Composable internal fun cwSel() = if (C === Sun) Color(0xFF00562A) else if (C.dark) Color(0xFF3CC07A) else Color(0xFF1C9C5A)
+/** The light theme's chat wall when no wallpaper is chosen: warm, with faint dots. */
+@Composable
+internal fun WarmWall(modifier: Modifier) {
+    Canvas(modifier.background(Color(0xFFECE7DF)).testTag("wall_warm")) {
+        val step = 40.dp.toPx(); val r = 2.dp.toPx()
+        var y = 0f
+        while (y < size.height + step) { var x = 0f; while (x < size.width + step) {
+            drawCircle(Color(0x0D0A78C2), r, Offset(x + 10.dp.toPx(), y + 10.dp.toPx())); drawCircle(Color(0x0B1C9C5A), r, Offset(x + 30.dp.toPx(), y + 30.dp.toPx())); x += step }; y += step }
+    }
+}
