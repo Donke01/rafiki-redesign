@@ -8,7 +8,7 @@
 //       status "Published" ("Approved" where the board has no such label), the story in the Story column and a note.
 //       Old apps send { text } instead of { doc }; publish is kept (nothing to do once it is on the website).
 //     collecting (admins, once approved): back to Collecting, and off the website
-//   POST /api/story multipart { action: photo, id, row: before|progress|after, children, cap?, file } / { action: voice, id, q, file }
+//   POST /api/story multipart { action: photo, id, row: before|progress|after, children, cap?, taken? (YYYY-MM-DD from the photo), file } / { action: voice, id, q, file }
 //   POST /api/story { action: photo-edit, id, row, asset, cap?, children?, to? } a photo's caption, "shows children", or its row
 //   story.newPhotos: photos added since the draft was written (the app offers "Draft again" to use them)
 // Field officers collect and draft; only admins edit the final text, approve and publish. Signed in like /api/pin
@@ -267,6 +267,8 @@ export async function onRequestPost({ request, env }) {
       const asset = await addFileToColumn(T, id, STORY_COL[b.row], file, name, api);
       const p = { id: asset || '', name, children: b.children === 'true' || b.children === true, by: chk.who, at: new Date().toISOString() };
       const cap = clip(String(b.cap || '').replace(/\s+/g, ' ').trim(), 120); if (cap) p.cap = cap;
+      // the day the photo was taken (the app reads it from the photo), if it is a real past date
+      const tk = /^(\d{4}-\d{2}-\d{2})/.exec(String(b.taken || '')); if (tk && tk[1] >= '2000-01-01' && tk[1] <= new Date().toISOString().slice(0, 10)) p.taken = tk[1];
       if (asset) { rec.photos[b.row] = (rec.photos[b.row] || []).concat([p]).slice(-60); await saveRec(env, id, rec); }
       await toCollecting();
       return done({ photo: p });

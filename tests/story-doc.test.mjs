@@ -6,7 +6,7 @@ import { material, templateDraft, aiDraft, checkAi, pickShape, SHAPES, opening, 
 
 const S = () => ({ consent: 'not-yet', answers: { q1: 'Girls walked 6 km home each night after evening classes', q2: 'There was no dormitory, so girls could not stay for evening study', q3: '120 girls boarding at Ndalat Girls Secondary', q4: 'Parents carried sand and water to the site and cooked for the builders every day', q5: 'Girls stay at school and study at night. Their results improved this term', q6: 'On the first night 40 girls slept there and sang until lights out' },
   quote: 'Now we can study at night', quoteBy: 'Faith, Form 3',
-  photos: { before: [{ id: '1', name: 'story-before-2026-01-10-09-00.jpg', at: '2026-01-10T09:00:00Z' }], progress: [{ id: '2', name: 'site-photo-walls-2026-02-01.jpg' }, { id: '5', name: 'story-progress-2026-02-03.jpg' }], after: [{ id: '3', name: 'story-after-2026-03-05.jpg', children: true }, { id: '4', name: 'girls-in-dorm.jpg' }] } });
+  photos: { before: [{ id: '1', name: 'story-before-2026-01-10-09-00.jpg', at: '2026-01-10T09:00:00Z', taken: '2026-01-10' }], progress: [{ id: '2', name: 'site-photo-walls-2026-02-01.jpg' }, { id: '5', name: 'story-progress-2026-02-03.jpg' }], after: [{ id: '3', name: 'story-after-2026-03-05.jpg', children: true }, { id: '4', name: 'girls-in-dorm.jpg' }] } });
 const STAGE = { hist: [{ stage: 'planned', at: '2025-11-01T00:00:00Z', note: '', photos: [] }, { stage: 'foundation', at: '2026-01-12T00:00:00Z', note: 'Foundation dug by 12 local workers. Paid the fundi KSh 20,000.', photos: ['11'] },
   { stage: 'walls', at: '2026-02-01T00:00:00Z', note: 'Walls up to window level', photos: ['12', '13'] }, { stage: 'roof', at: '2026-02-20T00:00:00Z', note: 'Iron sheets on', photos: ['14'] }, { stage: 'handed', at: '2026-03-02T00:00:00Z', note: 'Handed over to the principal. Call her on 0712 345 678.', photos: ['15'] }] };
 const FACTS = { type: 'School', area: 'Ndalat, Nandi', country: 'Kenya', ck: 'ke', people: 420, done: '2026-03-02', status: 'Completed' };
@@ -176,4 +176,11 @@ test('variety: each draft gets its own shape and voice, avoids the last ones, an
   const t0 = templateDraft(p, S(), 'M'), titles = new Set(), heads = new Set();
   for (let i = 0; i < 40; i++) { const t = templateDraft(p, S(), 'M', i); titles.add(t.title); heads.add(t.sections.map(x => x.h).join('|')); }
   assert.equal(t0.title, 'Learning at Ndalat'); assert.ok(titles.size >= 3, [...titles].join(' / ')); assert.ok(heads.size >= 5);
+});
+
+test('photo months: the day a photo was taken, never the day it was uploaded', () => {
+  const s = S(); s.photos = { before: [{ id: 'u', name: 'story-before-2026-10-28-16-00.jpg', at: '2026-10-28T16:00:00Z' }, { id: 't', name: 'x.jpg', at: '2026-10-28T16:00:00Z', taken: '2024-11-02' }], progress: [], after: [] };
+  const p = material('Chepkongi', FACTS, s, null, []);
+  assert.equal(p.photos.find(x => x.id === 'u').cap, 'Before the work began', 'uploaded today: no month');
+  assert.equal(p.photos.find(x => x.id === 't').cap, 'Before the work began, November 2024');
 });
