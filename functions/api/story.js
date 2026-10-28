@@ -14,7 +14,7 @@
 import { checkPin } from './pin.js';
 import { readStoryCols, writeCols, addFileToColumn, createUpdate, addFileToUpdate, assetInfo, readUpdates, columnLabels, STORY_COL, BOARD_ID } from '../../lib/monday.js';
 import { QS, ROWS, ST, CONSENT, MAXLEN, loadRec, saveRec, view, blocker, indexStory, clip, colValue } from '../../lib/story.js';
-import { material, templateDraft, aiDraft, editDoc, docFromText, legacyDoc, snapshot, putPublic, dropPublic, getPublic, storyPath, shortText, noteHtml } from '../../lib/story-doc.js';
+import { hash, opening, PUBIDX, material, templateDraft, aiDraft, editDoc, docFromText, legacyDoc, snapshot, putPublic, dropPublic, getPublic, storyPath, shortText, noteHtml } from '../../lib/story-doc.js';
 import { loadStage, hasPhoto } from '../../lib/construction.js';
 import { transcribe, transcribeSetup } from '../../lib/transcribe.js';
 
@@ -68,6 +68,24 @@ async function writeText(T, B, id, text, tail, status, api) {
     catch (e) { err = e; }
   }
   throw err;
+}
+
+// the last drafts written (any project) and the published stories: titles, first words, headings, shapes
+const RECENT = 'storyrecent';
+async function recentStories(env, id) {
+  if (!env.FEED) return [];
+  let a = [], b = [];
+  try { a = (await env.FEED.get(RECENT, 'json')) || []; } catch (e) { a = []; }
+  try { b = (await env.FEED.get(PUBIDX, 'json')) || []; } catch (e) { b = []; }
+  const out = a.filter(r => r && r.id !== id), have = new Set(out.map(r => r.id));
+  b.forEach(r => { if (r && r.id !== id && !have.has(r.id)) out.push({ id: r.id, title: r.title, open: r.dek || '' }); });
+  return out.slice(0, 10);
+}
+async function rememberStory(env, id, d) {
+  if (!env.FEED || !d) return;
+  let a = []; try { a = (await env.FEED.get(RECENT, 'json')) || []; } catch (e) { a = []; }
+  a = [{ id, title: d.title, open: opening(d), heads: (d.sections || []).map(x => x.h).slice(0, 8), shape: d.shape || '' }].concat(a.filter(r => r && r.id !== id)).slice(0, 12);
+  await env.FEED.put(RECENT, JSON.stringify(a));
 }
 
 export async function onRequestGet({ request, env }) {
@@ -163,7 +181,12 @@ export async function onRequestPost({ request, env }) {
       if (rec.pub) return json({ ok: false, reason: 'published' }, 409);
       let ups = []; try { ups = await readUpdates(T, id, api); } catch (e) { ups = []; }
       const pack = material(title, m.facts, s, f.stage, ups);
-      const ai = await aiDraft(env, pack, s, chk.who), doc = ai || templateDraft(pack, s, chk.who);
+      // variety: the shapes, titles and first words of the latest drafts and published stories, so this one differs
+      const recent = await recentStories(env, id);
+      const seed = ((Date.now() >>> 0) ^ hash(id)) >>> 0, prevShape = rec.doc && rec.doc.shape || '';
+      const ai = await aiDraft(env, pack, s, chk.who, { recent, prevShape, seed }), doc = ai || templateDraft(pack, s, chk.who, seed);
+      if (!ai) doc.shape = 'template';
+      await rememberStory(env, id, doc);
       if (!doc.sections.length || !doc.text.trim()) return json({ ok: false, reason: 'empty' }, 409);
       await writeText(T, B, id, doc.text, tail(), { label: ST.draft }, api);
       rec.doc = doc; await saveRec(env, id, rec);

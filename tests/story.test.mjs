@@ -107,7 +107,10 @@ test('the draft: a template from the answers when there is no AI key; Draft read
   assert.equal(/\b(19|20)\d\d\b/.test(d.text.replace(/2026/g, '')), false, 'no invented years');
   // the document: sections in the story's order, kept in KV and shown to the app
   const doc = d.story.doc; assert.equal(doc.v, 1); assert.equal(doc.model, 'template'); assert.equal(doc.by, 'Meril');
-  assert.deepEqual(doc.sections.map(x => x.h), ['Life before', 'The problem', 'The people it serves', 'Building it together', 'What changed', 'One moment']);
+  // six sections; their headings come in several versions so drafts don't all read alike
+  const HV = ['Life before', 'How it used to be', 'The old routine', 'Before', 'The problem', 'What was missing', 'The hard part', 'The people it serves', 'Who it is for', 'The people',
+    'Building it together', 'Many hands', 'The work', 'Side by side', 'What changed', 'Since then', 'Life now', 'Today', 'One moment', 'A day to remember', 'The moment', 'One scene'];
+  assert.equal(doc.sections.length, 6); doc.sections.forEach(x => assert.ok(HV.includes(x.h), x.h));
   assert.deepEqual(doc.pull, { quote: 'Now we can study at night', who: 'Faith' }); assert.equal(d.story.text, doc.text);
   // Office › Review lists it
   const rv = await (await adminGet({ env, waitUntil: () => {}, request: new Request('https://pin.example/api/admin?view=review', { headers: H('2222') }) })).json();

@@ -2,7 +2,7 @@
 // the facts (mocked OpenAI), the template, edits from the app and from old apps. Run: node --test tests/*.test.mjs
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { material, templateDraft, aiDraft, checkAi, target, editDoc, docFromText, scrub, visitNotes, photoLabel, snapshot, words } from '../lib/story-doc.js';
+import { material, templateDraft, aiDraft, checkAi, pickShape, SHAPES, opening, target, editDoc, docFromText, scrub, visitNotes, photoLabel, snapshot, words } from '../lib/story-doc.js';
 
 const S = () => ({ consent: 'not-yet', answers: { q1: 'Girls walked 6 km home each night after evening classes', q2: 'There was no dormitory, so girls could not stay for evening study', q3: '120 girls boarding at Ndalat Girls Secondary', q4: 'Parents carried sand and water to the site and cooked for the builders every day', q5: 'Girls stay at school and study at night. Their results improved this term', q6: 'On the first night 40 girls slept there and sang until lights out' },
   quote: 'Now we can study at night', quoteBy: 'Faith, Form 3',
@@ -147,4 +147,33 @@ test('the public copy: consent-safe photos only, nothing private, a hero and the
   const s2 = Object.assign({}, s, { consent: 'not-yet' }), d2 = JSON.parse(JSON.stringify(d)); d2.sections[6].photo = { row: 'after', id: '3', cap: 'x' };
   const pub2 = snapshot('301', d2, s2, material('N', FACTS, Object.assign({}, s, { consent: 'received' }), STAGE, []).photos, proj, 'J', null);
   assert.equal(pub2.photos.includes('3'), false); assert.equal(pub2.sections[6].photo, null);
+});
+
+test('variety: each draft gets its own shape and voice, avoids the last ones, and never repeats a recent title or opening', async () => {
+  const p = pack0();
+  // every shape the facts can carry is offered; a re-draft never gets the shape it had; recent shapes are skipped
+  const seen = new Set(); for (let i = 0; i < 400; i++) seen.add(pickShape(p, { seed: i * 7919 }).shape.k);
+  assert.ok(seen.size >= 6, [...seen].join(','));
+  for (let i = 0; i < 50; i++) assert.notEqual(pickShape(p, { seed: i, prevShape: 'moment' }).shape.k, 'moment');
+  const rec = [{ shape: 'moment' }, { shape: 'day' }, { shape: 'hands' }, { shape: 'diary' }];
+  for (let i = 0; i < 50; i++) assert.ok(!['moment', 'day', 'hands', 'diary'].includes(pickShape(p, { seed: i, recent: rec }).shape.k));
+  assert.ok(pickShape(p, { seed: -5 }).shape, 'any seed works');
+  // a thin story can only take the shapes its facts carry
+  const thin = material('X', FACTS, { answers: { q2: 'No water' }, photos: {} }, null, []);
+  for (let i = 0; i < 30; i++) assert.ok(['plain', 'arc'].includes(pickShape(thin, { seed: i }).shape.k));
+  // the instructions carry the shape, the voice and the recent stories to stay away from
+  CALLS = []; REPLIES = [good()];
+  const s = S(), d = await aiDraft(ENV, pack0(s), s, 'J', { seed: 3, recent: [{ title: 'Water at the school gate', open: 'Every evening the girls walked home', heads: ['Long nights'] }] });
+  const sys = CALLS[0].messages[0].content;
+  assert.match(sys, /SHAPE for this story: /); assert.match(sys, /VOICE for this story: /); assert.match(sys, /Water at the school gate/); assert.match(sys, /"Life before"/);
+  assert.equal(CALLS[0].temperature, 0.9); assert.ok(SHAPES.some(x => x.k === d.shape));
+  // the same title as a recent story is sent back
+  CALLS = []; REPLIES = [good(), good({ title: 'Nights of study at Ndalat' })];
+  const d2 = await aiDraft(ENV, pack0(s), s, 'J', { seed: 1, recent: [{ title: 'A dormitory for Ndalat' }] });
+  assert.equal(CALLS.length, 2); assert.match(CALLS[1].messages[3].content, /already used by another story/); assert.equal(d2.title, 'Nights of study at Ndalat');
+  assert.ok(opening(d2).split(' ').length <= 12);
+  // the template: titles and headings come in versions; without a number it keeps the first ones
+  const t0 = templateDraft(p, S(), 'M'), titles = new Set(), heads = new Set();
+  for (let i = 0; i < 40; i++) { const t = templateDraft(p, S(), 'M', i); titles.add(t.title); heads.add(t.sections.map(x => x.h).join('|')); }
+  assert.equal(t0.title, 'Learning at Ndalat'); assert.ok(titles.size >= 3, [...titles].join(' / ')); assert.ok(heads.size >= 5);
 });
