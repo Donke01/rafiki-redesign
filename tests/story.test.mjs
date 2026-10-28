@@ -188,14 +188,27 @@ test('story photos: a caption, "shows children" and another row (photo-edit); ne
   assert.ok(pub.hero && pub.hero.id, 'a cover photo'); assert.ok(pub.photos.includes(pub.hero.id));
 });
 
-test('photo dates: set or corrected by hand (month), cleared, refused in the future; undated photos counted', async () => {
+test('column dates: Before, In progress (from – to) and After each get a month; captions, the AI facts and the website use them', async () => {
   const { env } = setup();
-  const b = await form(env, '3333', { action: 'photo', id: '301', row: 'before', taken: '2024-11-02' }, jpg('b.jpg'));
-  assert.equal(b.photo.taken, '2024-11-02'); assert.equal(b.story.undated, 0);
-  const c = await form(env, '3333', { action: 'photo', id: '301', row: 'after' }, jpg('a.jpg')); assert.equal(c.story.undated, 1);
-  const e = await post(env, '3333', { action: 'photo-edit', id: '301', row: 'after', asset: c.photo.id, taken: '2025-06' });
-  assert.equal(e.story.photos.after[0].taken, '2025-06-15'); assert.equal(e.story.undated, 0);
-  assert.match(e.story.pool.find(p => p.id === c.photo.id).cap, /June 2025$/);
-  assert.equal((await post(env, '3333', { action: 'photo-edit', id: '301', row: 'after', asset: c.photo.id, taken: '2099-01' })).status, 400);
-  const x = await post(env, '3333', { action: 'photo-edit', id: '301', row: 'after', asset: c.photo.id, taken: '' }); assert.equal(x.story.photos.after[0].taken, undefined);
+  await post(env, '3333', { action: 'answers', id: '301', q1: 'Girls walked 6 km home each night', q2: 'There was no dormitory', q5: 'Girls stay at school' });
+  const b = await form(env, '3333', { action: 'photo', id: '301', row: 'before' }, jpg('b.jpg'));
+  assert.ok(b.story.missing.includes('dates'), 'a column with photos but no month');
+  const d = await post(env, '3333', { action: 'dates', id: '301', before: '2024-11', progress: '2025-01', progressEnd: '2025-03', after: '2025-06' });
+  assert.equal(d.ok, true); assert.deepEqual(d.story.dates, { before: '2024-11', progress: '2025-01', progressEnd: '2025-03', after: '2025-06' });
+  assert.equal(d.story.missing.includes('dates'), false);
+  assert.match(d.story.pool.find(p => p.id === b.photo.id).cap, /November 2024$/, 'the photo takes its column month');
+  // a photo's own date (from the photo) still wins
+  const t = await form(env, '3333', { action: 'photo', id: '301', row: 'before', taken: '2024-10-02' }, jpg('t.jpg'));
+  assert.match(t.story.pool.find(p => p.id === t.photo.id).cap, /October 2024$/);
+  // in order, none in the future, '' clears
+  assert.equal((await post(env, '3333', { action: 'dates', id: '301', after: '2024-01' })).status, 400);
+  assert.equal((await post(env, '3333', { action: 'dates', id: '301', after: '2099-01' })).status, 400);
+  assert.equal((await post(env, '3333', { action: 'dates', id: '301', before: '2025-13' })).status, 400);
+  const c = await post(env, '3333', { action: 'dates', id: '301', progressEnd: '' }); assert.equal(c.story.dates.progressEnd, undefined);
+  // the draft and the website copy carry them
+  const dr = await post(env, '3333', { action: 'draft', id: '301' });
+  assert.deepEqual(dr.story.doc.facts.dates, { before: '2024-11', progress: '2025-01', after: '2025-06' });
+  assert.match(dr.story.doc.text, /The work took place in January 2025\./);
+  await post(env, '2222', { action: 'approve', id: '301', doc: dr.story.doc });
+  assert.deepEqual(JSON.parse(env.FEED.m.get('pubstory:301')).facts.dates, { before: '2024-11', progress: '2025-01', after: '2025-06' });
 });

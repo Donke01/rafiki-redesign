@@ -1688,13 +1688,16 @@ class Component extends DCLogic {
       return { k: k, l: SY_STAGE[k] || String(x.stage).charAt(0).toUpperCase() + String(x.stage).slice(1), d: sxDate(x.date, true), p: x.photo && x.photo.id ? x.photo : first('stage:' + k) };
     });
     var handed = stages.length && stages[stages.length - 1].k === 'handed' ? stages.pop() : null;
-    var steps = [{ l: 'Before', d: '', p: first('before') }];
+    // the months the writer set for each column (Before, In progress from – to, After)
+    var D = f.dates || {}, md = function (v) { return v ? sxDate(v + '-15') : ''; };
+    var built = D.progress ? (D.progressEnd && D.progressEnd !== D.progress ? md(D.progress) + ' – ' + md(D.progressEnd) : md(D.progress)) : '';
+    var steps = [{ l: 'Before', d: md(D.before), p: first('before') }];
     if (stages.length) stages.forEach(function (x) { steps.push(x); });
     else {
       var prog = first('progress') || Object.keys(rows).filter(function (r) { return /^stage:/.test(r); }).map(first)[0] || null;
-      steps.push({ l: 'Building it together', d: '', p: prog });
+      steps.push({ l: 'Building it together', d: built, p: prog });
     }
-    steps.push({ l: handed ? 'Handed over' : 'Finished', d: handed ? handed.d : (f.year ? String(f.year) : ''), p: (handed && handed.p) || first('after'), done: true });
+    steps.push({ l: handed ? 'Handed over' : 'Finished', d: handed ? handed.d : (md(D.after) || (f.year ? String(f.year) : '')), p: (handed && handed.p) || first('after'), done: true });
     var journey = steps.map(function (x, i) {
       return Object.assign(ph(x.p, x.l + ': ' + st.title), { n: (i < 9 ? '0' : '') + (i + 1), l: x.l, d: x.d, hasDate: !!x.d, cls: 'sy-step sx-rv' + (x.done ? ' done' : '') });
     });

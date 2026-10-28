@@ -12,6 +12,8 @@
 //   POST /api/story { action: photo-edit, id, row, asset, cap?, children?, taken? (YYYY-MM or YYYY-MM-DD, '' clears), to? }
 //     a photo's caption, "shows children", the month it was taken, or its row
 //   story.newPhotos: photos added since the draft was written (the app offers "Draft again" to use them)
+//   POST /api/story { action: dates, id, before?, progress?, progressEnd?, after? } the month of each column (YYYY-MM, '' clears)
+//     story.dates; 'dates' is in story.missing while a column with photos has no month
 // Field officers collect and draft; only admins edit the final text, approve and publish. Signed in like /api/pin
 // (the shared team PIN and donors are refused). The words, files and statuses live in monday.com's story columns.
 import { checkPin } from './pin.js';
@@ -243,6 +245,22 @@ export async function onRequestPost({ request, env }) {
       if (!ROWS.includes(b.row)) return json({ ok: false, reason: 'row' }, 400);
       rec.photos[b.row] = (rec.photos[b.row] || []).filter(p => p.id !== String(b.asset));
       await saveRec(env, id, rec); return done();
+    }
+    // the month of each column: { before, progress, progressEnd, after } as YYYY-MM ('' clears); in order, none in the future
+    if (a === 'dates') {
+      const now = new Date().toISOString().slice(0, 7), d = Object.assign({}, rec.dates || {});
+      for (const k of ['before', 'progress', 'progressEnd', 'after']) {
+        if (!(k in b)) continue;
+        const v = String(b[k] || '').trim();
+        if (!v) { delete d[k]; continue; }
+        if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(v) || v < '2000-01' || v > now) return json({ ok: false, reason: 'date', field: k }, 400);
+        d[k] = v;
+      }
+      const seq = ['before', 'progress', 'progressEnd', 'after'].map(k => d[k]).filter(Boolean);
+      if (seq.some((v, i) => i && v < seq[i - 1])) return json({ ok: false, reason: 'order' }, 400);
+      rec.dates = d; await saveRec(env, id, rec);
+      if (rec.pub && rec.doc) { const g = await fresh(env, chk, id); f.pack = g.pack; rec.doc.facts = Object.assign({}, rec.doc.facts, { dates: g.pack.dates }); await republish(); await saveRec(env, id, rec); }
+      return done();
     }
     // a photo's caption, "shows children", or its row (Before / In progress / After)
     if (a === 'photo-edit') {
