@@ -7,6 +7,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -108,9 +109,14 @@ object StoryKit {
 }
 
 /** After a visit with "Add to this project's story" ticked: open that project on its Stories tab. */
-object StoryNav { var open by mutableStateOf<String?>(null) }
+object StoryNav {
+    var open by mutableStateOf<String?>(null)
+    /** "Use in a story" from a project chat (chat 2, B6): the project, the words and who said them, filled in (not saved). */
+    var pre: Triple<String, String, String>? = null
+}
 
 /** The Stories tab. */
+@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
 fun StoryTab(m: AppModel, p: Project) {
     val scope = rememberScope()
@@ -156,10 +162,14 @@ fun StoryTab(m: AppModel, p: Project) {
         // 3. the six questions, one at a time
         StoryQuestions(m, p, st) { body, ok -> post(body, ok) }
         // 4. the quote and 5. consent
-        Card(Modifier.padding(top = 12.dp).testTag("story_quote")) {
+        // a quote from the chat (B6): filled in and marked, saved only with Save quote
+        val pre = remember(p.id) { StoryNav.pre?.takeIf { it.first == p.id }.also { if (it != null) StoryNav.pre = null } }
+        val preAt = remember { androidx.compose.foundation.relocation.BringIntoViewRequester() }
+        LaunchedEffect(pre) { if (pre != null) { kotlinx.coroutines.delay(700); preAt.bringIntoView(); said = "ok" to t("Quote filled in from the chat. Tap Save quote to keep it.", "Nukuu imejazwa kutoka gumzo. Gusa Hifadhi nukuu kuiweka.") } }
+        Card(Modifier.padding(top = 12.dp).then(if (pre != null) Modifier.border(3.dp, C.blue, RoundedCornerShape(24.dp)).testTag("story_quote_from_chat") else Modifier).bringIntoViewRequester(preAt).testTag("story_quote")) {
             Text(t("Quote", "Nukuu"), style = MaterialTheme.typography.titleMedium, color = C.ink)
-            var quote by remember(st.quote) { mutableStateOf(st.quote) }
-            var by by remember(st.quoteBy) { mutableStateOf(st.quoteBy) }
+            var quote by remember(st.quote) { mutableStateOf(pre?.second ?: st.quote) }
+            var by by remember(st.quoteBy) { mutableStateOf(pre?.third ?: st.quoteBy) }
             var credit by remember(st.credit) { mutableStateOf(st.credit.ifBlank { m.prefs.name }) }
             Box(Modifier.testTag("story_quote_text")) { Field(quote, { quote = it }, t("What they said", "Walichosema"), placeholder = t("e.g. “Now my girls get to school on time.”", "mf. “Sasa wasichana wangu wanafika shuleni kwa wakati.”"), lines = 3) }
             Box(Modifier.testTag("story_quote_by")) { Field(by, { by = it }, t("Who said it", "Aliyesema"), placeholder = t("e.g. Mary, mother of three", "mf. Mary, mama wa watoto watatu")) }
@@ -187,6 +197,9 @@ fun StoryTab(m: AppModel, p: Project) {
             if (st.text.isNotBlank()) Text(t("${words(text)} words", "maneno ${words(text)}"), style = MaterialTheme.typography.labelSmall, color = if (words(text) in 150..300) C.muted else C.warn, modifier = Modifier.padding(top = 4.dp).testTag("story_words"))
             if (st.status in setOf("not-started", "collecting", "draft")) Btn(if (busy) t("Drafting…", "Inaandika…") else if (st.text.isBlank()) t("Draft the story", "Andika rasimu ya hadithi") else t("Draft it again", "Andika rasimu upya"),
                 { busy = true; post(JSONObject().put("action", "draft"), t("Draft ready ✓", "Rasimu iko tayari ✓")) { busy = false } }, Modifier.padding(top = 12.dp).fillMaxWidth().testTag("story_draft"), icon = "spark", enabled = !busy)
+            // field users: drafting sends it for review (web v72, sty_send)
+            if (!admin && st.status in setOf("not-started", "collecting")) Text(t("“Draft the story” sends it to an admin for review. Nothing goes on the website before it is approved.", "“Andika rasimu ya hadithi” inaituma kwa msimamizi akague. Hakuna kinachoenda kwenye tovuti kabla ya kuidhinishwa."),
+                style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 8.dp).testTag("sty_send"))
             if (admin) {
                 if (st.text.isNotBlank() && text != st.text && st.status != "published") Btn(t("Save text", "Hifadhi maandishi"), { post(JSONObject().put("action", "text").put("text", text), t("Saved ✓", "Imehifadhiwa ✓")) },
                     Modifier.padding(top = 8.dp).fillMaxWidth().testTag("story_text_save"), icon = "check", light = true, small = true)

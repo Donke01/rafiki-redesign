@@ -24,6 +24,8 @@ class FakeChat(val me: String = "Reid Anderson") {
     val devices = mutableListOf<String>()
     val trips = mutableMapOf<String, JSONObject>()
     @Volatile var push = false
+    /** chat 2: the list's "tools" (translate, transcribe) */
+    val tools = JSONObject().put("translate", false).put("transcribe", false)
     private var n = 1000
     private fun id() = "m${n++}"
     val now: Long get() = System.currentTimeMillis()
@@ -60,7 +62,7 @@ class FakeChat(val me: String = "Reid Anderson") {
         val path = url.substringAfter("/api/chat/").substringBefore('?')
         synchronized(this) {
             return when (path) {
-                "list" -> ok(JSONObject().put("now", now).put("me", me).put("chats", JSONArray(chats.values.toList())).put("presence", presence).put("prefs", userPrefs).put("push", push))
+                "list" -> ok(JSONObject().put("now", now).put("me", me).put("chats", JSONArray(chats.values.toList())).put("presence", presence).put("prefs", userPrefs).put("push", push).put("tools", tools))
                 "pin" -> {
                     val c = chats[b.optString("c")] ?: return bad("not-member", 403)
                     val m = find(b) ?: return bad("not-found", 404)
@@ -129,6 +131,12 @@ class FakeChat(val me: String = "Reid Anderson") {
                 }
                 "edit" -> { val m = find(b) ?: return bad("not-found", 404); m.put("text", b.optString("text")).put("edited", Instant.now().toString()); ok() }
                 "delete" -> { val m = find(b) ?: return bad("not-found", 404); if (b.optBoolean("forAll")) m.put("deleted", true).put("text", ""); ok() }
+                // chat 2 (web feat-cwr): delete several, clear for me (DM: and archive), type out a voice note
+                "delete-many" -> { val ids = b.optJSONArray("ids")?.let { a -> (0 until a.length()).map { a.get(it).toString() } }.orEmpty()
+                    val list = msgs[b.optString("c")] ?: return bad("not-member", 403)
+                    if (b.optBoolean("forAll")) list.filter { it.optString("id") in ids }.forEach { it.put("deleted", true).put("text", "") }; ok(JSONObject().put("n", ids.size)) }
+                "clear" -> { val c = chats[b.optString("c")] ?: return bad("not-member", 403); msgs[c.optString("id")]?.clear(); c.remove("last"); c.put("unread", 0); if (b.optBoolean("archive")) c.put("archived", true); ok(JSONObject().put("chat", c)) }
+                "transcribe" -> if (!tools.optBoolean("transcribe")) bad("off", 503) else ok(JSONObject().put("text", "The pump handle is loose again.").put("lang", "en"))
                 "react" -> { val m = find(b) ?: return bad("not-found", 404); val r = m.getJSONObject("reacts")
                     r.keys().asSequence().toList().forEach { k -> val a = r.getJSONArray(k); val l = (0 until a.length()).map { a.getString(it) }.filter { it != me }; if (l.isEmpty()) r.remove(k) else r.put(k, JSONArray(l)) }
                     b.optString("emoji").takeIf { it.isNotBlank() && it != "null" }?.let { e -> r.put(e, (r.optJSONArray(e) ?: JSONArray()).put(me)) }; ok() }

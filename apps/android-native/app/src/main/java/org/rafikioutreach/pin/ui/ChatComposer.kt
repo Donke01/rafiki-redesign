@@ -160,7 +160,7 @@ internal fun Composer(m: AppModel, c: String, row: ChatRow?, reply: Msg?, editin
                 val isVideo = u?.let { ChatPrep.isVideo(ctx, it) } ?: f0?.name?.endsWith(".mp4") ?: false
                 val f = f0 ?: withContext(Dispatchers.IO) { ChatPrep.copy(ctx, u!!, if (isVideo) "mp4" else "jpg") } ?: continue
                 if (isVideo) { val (md, w) = ChatPrep.video(ctx, f); md?.let { out += it }; if (w != null) why = w }
-                else withContext(Dispatchers.IO) { ChatPrep.photo(ctx, f) }?.let { out += it } ?: run { why = t("That photo couldn’t be read.", "Picha hiyo haikuweza kusomwa.") }
+                else withContext(Dispatchers.IO) { ChatPrep.photo(ctx, f, saver = org.rafikioutreach.pin.data.saverOn(ctx, hub.settings.saver)) }?.let { out += it } ?: run { why = t("That photo couldn’t be read.", "Picha hiyo haikuweza kusomwa.") }
                 if (f.path.contains("/cam/")) f.delete()
             }
             preparing = false
@@ -425,7 +425,7 @@ private fun FullEditor(box: TextFieldState, close: () -> Unit, send: () -> Unit)
         Column(Modifier.fillMaxSize().background(C.bg).statusBarsPadding().imePadding().padding(16.dp).testTag("full_editor")) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(Modifier.size(44.dp).clip(CircleShape).clickable(role = Role.Button) { close() }.semantics { contentDescription = t("Close", "Funga") }.testTag("full_close"), contentAlignment = Alignment.Center) { Icon(Ic.get("x"), null, tint = C.ink, modifier = Modifier.size(22.dp)) }
-                Text(t("Message", "Ujumbe"), style = MaterialTheme.typography.titleLarge, color = C.ink, modifier = Modifier.weight(1f).padding(start = 6.dp))
+                Text(t("Message", "Ujumbe"), style = CwType.sheet(), color = C.ink, modifier = Modifier.weight(1f).padding(start = 6.dp))
                 Btn(t("Send", "Tuma"), send, Modifier.testTag("full_send"), small = true, icon = "arrow", enabled = box.text.isNotBlank())
             }
             BasicTextField(box, Modifier.padding(top = 12.dp).fillMaxWidth().weight(1f).clip(RoundedCornerShape(16.dp)).background(C.card).padding(14.dp).testTag("full_input"),
@@ -465,7 +465,7 @@ internal object ChatDrafts {
 @Composable
 private fun AttachSheet(close: () -> Unit, pick: (String) -> Unit) {
     TeamSubSheet("attach_sheet", close) { hide ->
-        Text(t("Send", "Tuma"), style = MaterialTheme.typography.titleLarge, color = C.ink, modifier = Modifier.padding(bottom = 12.dp))
+        Text(t("Send", "Tuma"), style = CwType.sheet(), color = C.ink, modifier = Modifier.padding(bottom = 12.dp))
         val items = listOf(
             listOf(Triple("gallery", t("Photos & videos", "Picha na video"), "blue"), Triple("camera", t("Camera", "Kamera"), "coral"), Triple("video", t("Video", "Video"), "purple"), Triple("doc", t("Document", "Hati"), "amber")),
             listOf(Triple("loc", t("Location", "Mahali"), "green"), Triple("live", t("Live location", "Moja kwa moja"), "teal"), Triple("contact", t("Contact", "Mawasiliano"), "slate")),
@@ -491,7 +491,7 @@ private fun AttachSheet(close: () -> Unit, pick: (String) -> Unit) {
 @Composable
 private fun LiveSheet(close: () -> Unit, pick: (Int) -> Unit) {
     TeamSubSheet("live_sheet", close) { hide ->
-        Text(t("Share live location", "Shiriki mahali moja kwa moja"), style = MaterialTheme.typography.titleLarge, color = C.ink)
+        Text(t("Share live location", "Shiriki mahali moja kwa moja"), style = CwType.sheet(), color = C.ink)
         Text(t("Your position updates while RAFIKI Pin is open. Stop any time.", "Mahali ulipo panasasishwa RAFIKI Pin ikiwa wazi. Acha wakati wowote."), style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 4.dp, bottom = 8.dp))
         SheetRow("live_15", "clock", t("15 minutes", "Dakika 15")) { hide { pick(15) } }
         SheetRow("live_60", "clock", t("1 hour", "Saa 1")) { hide { pick(60) } }
@@ -504,7 +504,7 @@ private fun LiveSheet(close: () -> Unit, pick: (Int) -> Unit) {
 private fun MediaPreviewSheet(m: AppModel, list: List<ChatMedia>, change: (List<ChatMedia>) -> Unit, close: () -> Unit, send: (String) -> Unit) {
     var caption by remember { mutableStateOf("") }
     TeamSubSheet("media_preview", close) { hide ->
-        Text(if (list.size == 1) t("Send 1 item", "Tuma kimoja") else t("Send ${list.size} items", "Tuma vitu ${list.size}"), style = MaterialTheme.typography.titleLarge, color = C.ink, modifier = Modifier.padding(bottom = 10.dp))
+        Text(if (list.size == 1) t("Send 1 item", "Tuma kimoja") else t("Send ${list.size} items", "Tuma vitu ${list.size}"), style = CwType.sheet(), color = C.ink, modifier = Modifier.padding(bottom = 10.dp))
         Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             list.forEach { md ->
                 Box(Modifier.size(104.dp)) {
@@ -528,7 +528,7 @@ internal fun TeammatePicker(m: AppModel, title: String, exclude: List<String>, m
     var q by remember { mutableStateOf("") }
     val chosen = remember { mutableStateListOf<String>() }
     TeamSubSheet("mate_picker", close) { hide ->
-        Text(title, style = MaterialTheme.typography.titleLarge, color = C.ink)
+        Text(title, style = CwType.sheet(), color = C.ink)
         ChatSearchField(q, { q = it }, t("Search the team", "Tafuta kwenye timu"), "mate_search")
         val people = team.orEmpty().map { it.name }.filter { n -> !n.equals(m.chat.me, true) && exclude.none { it.equals(n, true) } && (q.isBlank() || n.contains(q.trim(), true)) }.sorted()
         if (team == null) Text(t("Loading…", "Inapakia…"), color = C.muted)

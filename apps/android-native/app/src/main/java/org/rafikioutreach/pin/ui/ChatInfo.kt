@@ -138,7 +138,7 @@ fun ChatInfoScreen(m: AppModel, c: String, back: () -> Unit, openChat: (String) 
     when (sheet) {
         "mute" -> MuteSheet(m, c) { sheet = null }
         "wall" -> TeamSubSheet("wall_sheet", { sheet = null }) { hide ->
-            Text(t("Wallpaper", "Mandhari"), style = MaterialTheme.typography.titleLarge, color = C.ink, modifier = Modifier.padding(bottom = 10.dp))
+            Text(t("Wallpaper", "Mandhari"), style = CwType.sheet(), color = C.ink, modifier = Modifier.padding(bottom = 10.dp))
             // RAFIKI's own first (water, savanna, night), then the simple patterns; two rows of four
             WALLS.chunked(4).forEach { r ->
                 Row(Modifier.fillMaxWidth().padding(bottom = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -158,7 +158,7 @@ fun ChatInfoScreen(m: AppModel, c: String, back: () -> Unit, openChat: (String) 
             }
         }
         "bubble" -> TeamSubSheet("bubble_sheet", { sheet = null }) { hide ->
-            Text(t("My bubble colour", "Rangi ya viputo vyangu"), style = MaterialTheme.typography.titleLarge, color = C.ink)
+            Text(t("My bubble colour", "Rangi ya viputo vyangu"), style = CwType.sheet(), color = C.ink)
             Text(t("Only you see it, in this chat.", "Unaiona wewe tu, kwenye gumzo hili."), style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 4.dp, bottom = 10.dp))
             BUBBLES.chunked(4).forEach { r ->
                 Row(Modifier.fillMaxWidth().padding(bottom = 10.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -175,10 +175,10 @@ fun ChatInfoScreen(m: AppModel, c: String, back: () -> Unit, openChat: (String) 
             }
         }
         "edit" -> EditGroupSheet(m, row, { sheet = null }) { said = it }
-        "add" -> TeammatePicker(m, t("Add members", "Ongeza wanachama"), row.members, multi = true, close = { sheet = null }) { names -> scope.launch { hub.members(c, add = names)?.let { said = "bad" to it } ?: run { said = "ok" to t("Added ✓", "Wameongezwa ✓") } } }
+        "add" -> AddPeopleSheet(m, row, true, { sheet = null }) { s -> TeamGo.section = s; m.goTab = "office" }
         "link" -> LinkSheet(m, c) { sheet = null }
         "leave" -> TeamSubSheet("leave_sheet", { sheet = null }) { hide ->
-            Text(t("Leave “${row.title}”?", "Uondoke kwenye “${row.title}”?"), style = MaterialTheme.typography.titleLarge, color = C.ink)
+            Text(t("Leave “${row.title}”?", "Uondoke kwenye “${row.title}”?"), style = CwType.sheet(), color = C.ink)
             Text(t("You won’t get its messages any more. An admin can add you back.", "Hutapata tena ujumbe wake. Msimamizi anaweza kukurudisha."), style = MaterialTheme.typography.bodyMedium, color = C.muted, modifier = Modifier.padding(vertical = 8.dp))
             Btn(t("Leave group", "Ondoka kwenye kikundi"), { hide { scope.launch { if (hub.leave(c) == null) back() } } }, Modifier.fillMaxWidth().testTag("leave_go"), color = C.bad, icon = "x")
         }
@@ -207,7 +207,7 @@ private fun SwitchRow(tag: String, label: String, on: Boolean, set: (Boolean) ->
 private fun MemberSheet(m: AppModel, row: ChatRow, n: String, iAdmin: Boolean, close: () -> Unit, openChat: (String) -> Unit, said: (Pair<String, String>) -> Unit) {
     val scope = rememberScope()
     TeamSubSheet("member_sheet", close) { hide ->
-        Row(verticalAlignment = Alignment.CenterVertically) { PersonAvatar(n, 44.dp); Spacer(Modifier.width(12.dp)); Text(n, style = MaterialTheme.typography.titleLarge, color = C.ink) }
+        Row(verticalAlignment = Alignment.CenterVertically) { PersonAvatar(n, 44.dp); Spacer(Modifier.width(12.dp)); Text(n, style = CwType.sheet(), color = C.ink) }
         Spacer(Modifier.height(8.dp))
         SheetRow("mem_msg", "chat", t("Message $n", "Mtumie $n ujumbe")) { hide { ChatNav.dm(n) } }
         SheetRow("mem_contact", "person", t("View contact", "Tazama mawasiliano")) { hide { Contact.show(n) } }
@@ -226,7 +226,7 @@ private fun EditGroupSheet(m: AppModel, row: ChatRow, close: () -> Unit, said: (
     var desc by remember { mutableStateOf(row.description) }
     var busy by remember { mutableStateOf(false) }
     TeamSubSheet("edit_group", close) { hide ->
-        Text(t("Edit group", "Hariri kikundi"), style = MaterialTheme.typography.titleLarge, color = C.ink)
+        Text(t("Edit group", "Hariri kikundi"), style = CwType.sheet(), color = C.ink)
         Field(title, { title = it }, t("Name", "Jina"), Modifier.fillMaxWidth().padding(top = 8.dp))
         Field(desc, { desc = it }, t("Description (optional)", "Maelezo (si lazima)"), Modifier.fillMaxWidth().padding(top = 8.dp), lines = 3)
         Btn(t("Save", "Hifadhi"), {
@@ -238,7 +238,7 @@ private fun EditGroupSheet(m: AppModel, row: ChatRow, close: () -> Unit, said: (
 
 /** The invite link: copy, share, or reset it (the old one stops working). */
 @Composable
-private fun LinkSheet(m: AppModel, c: String, close: () -> Unit) {
+internal fun LinkSheet(m: AppModel, c: String, close: () -> Unit) {
     val scope = rememberScope()
     val ctx = LocalContext.current
     val clip = LocalClipboardManager.current
@@ -247,7 +247,7 @@ private fun LinkSheet(m: AppModel, c: String, close: () -> Unit) {
     var note by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(Unit) { val (u, e) = m.chat.link(c, false); url = u; err = e }
     TeamSubSheet("link_sheet", close) { _ ->
-        Text(t("Invite link", "Kiungo cha mwaliko"), style = MaterialTheme.typography.titleLarge, color = C.ink)
+        Text(t("Invite link", "Kiungo cha mwaliko"), style = CwType.sheet(), color = C.ink)
         Text(t("A teammate who opens it in RAFIKI Pin joins this group. Donors can’t join.", "Mwenzako akikifungua kwenye RAFIKI Pin anajiunga na kikundi hiki. Wafadhili hawawezi kujiunga."), style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(vertical = 6.dp))
         val u = url
         when {
@@ -318,7 +318,7 @@ fun NewChatScreen(m: AppModel, openChat: (String) -> Unit) {
         var desc by remember { mutableStateOf("") }
         var b by remember { mutableStateOf(false) }
         TeamSubSheet("group_name_sheet", { naming = false }) { hide ->
-            Text(t("Name the group", "Kipe kikundi jina"), style = MaterialTheme.typography.titleLarge, color = C.ink)
+            Text(t("Name the group", "Kipe kikundi jina"), style = CwType.sheet(), color = C.ink)
             Text(chosen.joinToString(", "), style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 4.dp))
             Field(title, { title = it }, t("Group name", "Jina la kikundi"), Modifier.fillMaxWidth().padding(top = 8.dp), placeholder = t("e.g. Kitale repairs", "mf. Matengenezo Kitale"))
             Field(desc, { desc = it }, t("Description (optional)", "Maelezo (si lazima)"), Modifier.fillMaxWidth().padding(top = 8.dp), lines = 2)
@@ -332,7 +332,7 @@ fun NewChatScreen(m: AppModel, openChat: (String) -> Unit) {
         var link by remember { mutableStateOf("") }
         var b by remember { mutableStateOf(false) }
         TeamSubSheet("join_sheet", { joining = false }) { hide ->
-            Text(t("Join with a link", "Jiunge kwa kiungo"), style = MaterialTheme.typography.titleLarge, color = C.ink)
+            Text(t("Join with a link", "Jiunge kwa kiungo"), style = CwType.sheet(), color = C.ink)
             Field(link, { link = it }, t("Invite link", "Kiungo cha mwaliko"), Modifier.fillMaxWidth().padding(top = 8.dp))
             Btn(t("Join", "Jiunge"), {
                 b = true

@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.testTag
@@ -56,7 +57,8 @@ import org.rafikioutreach.pin.t
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun ChatListScreen(m: AppModel, open: (String) -> Unit, newChat: () -> Unit, archived: Boolean = false, openArchived: () -> Unit = {}, openStarred: () -> Unit = {}, openSettings: () -> Unit = {}, back: () -> Unit = {}) {
+fun ChatListScreen(m: AppModel, open: (String) -> Unit, newChat: () -> Unit, archived: Boolean = false, openArchived: () -> Unit = {}, openStarred: () -> Unit = {}, openSettings: () -> Unit = {}, back: () -> Unit = {},
+                   openMe: () -> Unit = {}, openNotes: () -> Unit = {}) {
     val hub = m.chat
     ChatDrafts.init(androidx.compose.ui.platform.LocalContext.current)
     LaunchedEffect(Unit) { hub.start() }
@@ -68,60 +70,53 @@ fun ChatListScreen(m: AppModel, open: (String) -> Unit, newChat: () -> Unit, arc
     var q by rememberSaveable { mutableStateOf("") }
     var searching by rememberSaveable { mutableStateOf(false) }
     BackStep(searching || q.isNotEmpty()) { q = ""; searching = false }
-    var menu by remember { mutableStateOf(false) }
     var held by remember { mutableStateOf<ChatRow?>(null) }
     val undo = remember { UndoState() }
     val hp = rememberHaptics()
     val me = hub.me
-    val list = hub.sorted(rows.filter { it.archived == archived })
-    val nArchived = rows.count { it.archived }
+    val scope = rememberScope()
+    val ownTop = !archived && chatListOwnsTop()
+    val chip = if (archived) "all" else ChatChip.now
+    // Announcements first, then pinned chats, then the rest newest first; the chip picks which; Archived is a row at the end
+    val live = hub.sorted(rows.filter { if (archived) it.archived else !it.archived || it.announce })
+    val shown = live.filter { ChatChip.ok(it, chip) }
+    val nArchived = rows.count { it.archived && !it.announce }
     val state = rememberLazyListState()
-    ShowInBar(m, if (archived) t("Archived", "Zilizohifadhiwa") else t("Chat", "Gumzo"), state.firstVisibleItemIndex > 0)
+    ShowInBar(m, if (archived) t("Archived", "Zilizohifadhiwa") else t("Chats", "Gumzo"), !ownTop && state.firstVisibleItemIndex > 0)
 
-    Box(Modifier.fillMaxSize()) {
+    Box(Modifier.fillMaxSize().background(if (ownTop) C.card else Color.Transparent)) {
         LazyColumn(Modifier.fillMaxSize().testTag(if (archived) "chat_archived" else "chat_list"), state, contentPadding = PaddingValues(bottom = 96.dp)) {
             item(key = "head") {
-                Row(Modifier.fillMaxWidth().padding(start = 20.dp, end = 8.dp, top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Text(if (archived) t("Archived", "Zilizohifadhiwa") else t("Chat", "Gumzo"), style = MaterialTheme.typography.headlineMedium, color = C.ink, modifier = Modifier.weight(1f).testTag("chat_title"))
-                    if (!archived) Box {
-                        Box(Modifier.size(44.dp).clip(CircleShape).clickable(role = Role.Button) { menu = true }.semantics { contentDescription = t("More", "Zaidi") }.testTag("chat_menu"), contentAlignment = Alignment.Center) {
-                            Icon(Ic.get("more"), null, tint = C.ink, modifier = Modifier.size(22.dp))
-                        }
-                        DropdownMenu(menu, { menu = false }) {
-                            DropdownMenuItem({ Text(t("New group", "Kikundi kipya")) }, { menu = false; newChat() }, leadingIcon = { Icon(ChatIc.get("group"), null, tint = C.blue) }, modifier = Modifier.testTag("menu_newgroup"))
-                            DropdownMenuItem({ Text(t("Starred messages", "Ujumbe wenye nyota")) }, { menu = false; openStarred() }, leadingIcon = { Icon(ChatIc.get("star"), null, tint = C.blue) }, modifier = Modifier.testTag("menu_starred"))
-                            DropdownMenuItem({ Text(t("Archived", "Zilizohifadhiwa")) }, { menu = false; openArchived() }, leadingIcon = { Icon(ChatIc.get("archive"), null, tint = C.blue) }, modifier = Modifier.testTag("menu_archived"))
-                            DropdownMenuItem({ Text(t("Chat settings", "Mipangilio ya gumzo")) }, { menu = false; openSettings() }, leadingIcon = { Icon(Ic.get("cog"), null, tint = C.blue) }, modifier = Modifier.testTag("menu_settings"))
-                        }
+                if (archived) Text(t("Archived", "Zilizohifadhiwa"), style = CwType.title(), color = C.ink, modifier = Modifier.padding(start = 16.dp, top = 8.dp, bottom = 4.dp).testTag("chat_title"))
+                else ChatHead(m, searching, q, { q = it }, { searching = true }, { q = ""; searching = false }, {
+                    ChatMoreMenu(m, ownTop, openSettings, openStarred, openArchived, newChat, openNotes) {
+                        scope.launch { hub.refreshList(); m.refresh(quiet = true) }
+                        android.widget.Toast.makeText(m.getApplication(), t("Updated", "Imesasishwa"), android.widget.Toast.LENGTH_SHORT).show()
                     }
-                }
+                }, openMe, ownTop)
             }
-            item(key = "search") { ChatSearchField(q, { q = it; searching = true }) }
             if (off) { item(key = "off") { ChatOff(Modifier.padding(horizontal = 16.dp, vertical = 8.dp), m.chat.offNeed) }; return@LazyColumn }
+            if (archived) item(key = "search") { ChatSearchField(q, { q = it; searching = true }) }
             if (q.isNotBlank()) { chatSearch(this, m, q, rows, open) { q = ""; searching = false }; return@LazyColumn }
-            if (!archived && nArchived > 0) item(key = "arch") {
-                Row(Modifier.fillMaxWidth().clickable(role = Role.Button) { openArchived() }.heightIn(min = 52.dp).padding(horizontal = 20.dp).testTag("chat_archived_row"), verticalAlignment = Alignment.CenterVertically) {
-                    Box(Modifier.width(52.dp), contentAlignment = Alignment.Center) { Icon(ChatIc.get("archive"), null, tint = C.muted, modifier = Modifier.size(22.dp)) }
-                    Text(t("Archived", "Zilizohifadhiwa"), style = MaterialTheme.typography.titleSmall, color = C.ink, modifier = Modifier.weight(1f).padding(start = 12.dp))
-                    Text("$nArchived", style = MaterialTheme.typography.labelMedium, color = C.muted)
-                }
+            if (searching) return@LazyColumn
+            if (!archived) {
+                item(key = "chips") { ChatChips(rows) }
+                item(key = "field") { ChatFieldRow(m, presence) }
+                item(key = "alerts") { ChatAlertPrompt(m) }
             }
-            val pinned = list.filter { it.pinned }
-            if (pinned.isNotEmpty()) item(key = "lp") { ChatLabel(t("PINNED", "ZILIZOBANDIKWA"), "chat_pinned_label") }
-            items(pinned, key = { "p" + it.id }) { r -> ChatRowSwipe(m, r, me, presence, typing, undo, { open(r.id) }) { hp.long(); held = r } }
-            if (pinned.isNotEmpty() && list.size > pinned.size) item(key = "la") { ChatLabel(t("ALL CHATS", "MAGUMZO YOTE"), "chat_all_label") }
-            items(list.filter { !it.pinned }, key = { it.id }) { r -> ChatRowSwipe(m, r, me, presence, typing, undo, { open(r.id) }) { hp.long(); held = r } }
-            if (list.isEmpty() && ready) item(key = "empty") {
+            items(shown, key = { it.id }) { r -> ChatRowSwipe(m, r, me, presence, typing, undo, { open(r.id) }) { hp.long(); held = r } }
+            if (!archived && live.isNotEmpty() && shown.isEmpty()) item(key = "chipnone") {
+                ChatEmpty(ChatChip.empty(chip), "chat_none_chip", t("Show all chats", "Onyesha gumzo zote"), onAction = { ChatChip.now = "all" })
+            }
+            if (!archived && nArchived > 0 && chip == "all") item(key = "arch") { ChatArchivedRow(nArchived, openArchived) }
+            if (live.isEmpty() && ready) item(key = "empty") {
                 if (archived) ChatEmpty(t("No archived chats. Swipe a chat left to tidy it away here.", "Hakuna magumzo yaliyohifadhiwa. Telezesha gumzo kushoto kuliweka hapa."), "chat_none_archived", t("Back to chats", "Rudi kwenye magumzo"), onAction = back)
                 else ChatEmpty(t("No chats yet. Say hello to the team 👋", "Bado hakuna magumzo. Isalimie timu 👋"), "chat_none", t("New chat", "Gumzo jipya"), onAction = newChat)
             }
             if (!ready) item(key = "loading") { Text(t("Loading…", "Inapakia…"), color = C.muted, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(20.dp)) }
         }
-        // New chat
-        if (!archived && !off) Box(Modifier.align(Alignment.BottomEnd).padding(end = 18.dp, bottom = 18.dp).size(58.dp).shadow(10.dp, RoundedCornerShape(20.dp)).clip(RoundedCornerShape(20.dp)).background(C.primary)
-            .clickable(role = Role.Button) { hp.tap(); newChat() }.semantics { contentDescription = t("New chat", "Gumzo jipya") }.testTag("chat_new"), contentAlignment = Alignment.Center) {
-            Icon(DqmIc.get("edit"), null, tint = Color.White, modifier = Modifier.size(24.dp))
-        }
+        // New chat: a green rounded square above the bottom bar (the list has room under its last row)
+        if (!archived && !off && !searching) ChatFab(Modifier.align(Alignment.BottomEnd).padding(end = 16.dp, bottom = 16.dp)) { newChat() }
         UndoSnack(undo, "chat_undo")
     }
     held?.let { r -> ChatRowSheet(m, r, { held = null }, undo) }
@@ -210,7 +205,9 @@ private fun ChatRowSwipe(m: AppModel, r: ChatRow, me: String, presence: Map<Stri
     }) { ChatRowPlain(m, r, me, presence, typing, open, long) }
 }
 
-/** One row of the chat list. */
+/** One row of the chat list (chat 2, list.png): 74 dp, a 52 dp picture, a thin divider under the words; unread = a bold
+ *  name, a green time and count; a light-green "@" when mentioned; "typing…" in green; muted and pinned small grey icons;
+ *  ticks before my own last message. */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun ChatRowPlain(m: AppModel, r: ChatRow, me: String, presence: Map<String, org.rafikioutreach.pin.data.Presence>, typing: Map<String, Map<String, Pair<String, Long>>>, open: () -> Unit, long: (() -> Unit)?) {
@@ -218,46 +215,53 @@ internal fun ChatRowPlain(m: AppModel, r: ChatRow, me: String, presence: Map<Str
     val online = r.kind == "dm" && presence[other]?.online == true
     val muted = r.muted()
     val typed = remember(typing, r.id) { m.chat.typingText(r.id, r.isGroup) }
-    val bg = if (C.glassy) (if (C.dark) Color(0xFF111A21) else Color(0xFFF7FAFC)) else C.card
-    Row(Modifier.fillMaxWidth().background(bg).combinedClickable(role = Role.Button, onClick = open, onLongClick = long).heightIn(min = 74.dp).padding(horizontal = 16.dp, vertical = 10.dp).testTag("chatrow_${r.id}"),
+    val un = r.unread > 0
+    val line = if (C === Sun) Color.Black else C.line
+    val lineW = if (C === Sun) 2.dp else 1.dp
+    Row(Modifier.fillMaxWidth().background(C.card).combinedClickable(role = Role.Button, onClick = open, onLongClick = long).padding(start = 16.dp, end = 16.dp).testTag("chatrow_${r.id}"),
         verticalAlignment = Alignment.CenterVertically) {
         ChatAvatar(r, me, 52.dp, online, m = m)
-        Column(Modifier.weight(1f).padding(start = 12.dp)) {
+        Spacer(Modifier.width(13.dp))
+        Column(Modifier.weight(1f).heightIn(min = 74.dp).drawBehind { val w = lineW.toPx(); drawLine(line, androidx.compose.ui.geometry.Offset(0f, size.height - w / 2), androidx.compose.ui.geometry.Offset(size.width, size.height - w / 2), w) }
+            .padding(vertical = 8.dp), verticalArrangement = Arrangement.Center) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Row(Modifier.weight(1f).padding(end = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Text(chatTitle(r, me), style = MaterialTheme.typography.titleSmall.copy(fontSize = 15.sp), color = C.ink, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
-                    if (r.kind == "project") { Spacer(Modifier.width(6.dp)); Icon(Ic.get("drop"), null, tint = C.hue("blue").fg, modifier = Modifier.size(14.dp)) }
-                }
-                Text(chatWhen(r.last?.at ?: 0), style = MaterialTheme.typography.labelSmall.copy(fontWeight = if (r.unread > 0) FontWeight.ExtraBold else FontWeight.SemiBold),
-                    color = if (r.unread > 0 && !muted) ChatLook.online else C.muted, maxLines = 1, softWrap = false, modifier = Modifier.testTag("rowtime"))
+                Text(chatTitle(r, me), style = CwType.name(if (un) FontWeight.ExtraBold else FontWeight.Bold), color = C.ink, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f).padding(end = 8.dp))
+                Text(chatWhen(r.last?.at ?: 0), style = CwType.meta(if (un && !muted) FontWeight.Bold else FontWeight.Medium),
+                    color = if (un && !muted) Cw2.un() else C.muted, maxLines = 1, softWrap = false, modifier = Modifier.testTag("rowtime"))
             }
-            Row(Modifier.padding(top = 3.dp), verticalAlignment = Alignment.CenterVertically) {
+            Row(Modifier.padding(top = 2.dp), verticalAlignment = Alignment.CenterVertically) {
                 // the half-written message, while it waits in the box (not for the chat that's open)
                 val draft = remember(ChatDrafts.version, r.id) { ChatDrafts.peek(r.id) }
-                if (typed != null) Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
-                    if (!(typed.contains("record") || typed.contains("rekodi"))) TypingDots(ChatLook.online, Modifier.padding(end = 6.dp), 4.dp)
-                    Text(typed, style = MaterialTheme.typography.bodySmall.copy(fontStyle = FontStyle.Italic, fontWeight = FontWeight.SemiBold), color = ChatLook.online, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.testTag("row_typing"))
-                }
+                val pv = CwType.msg(if (un) FontWeight.Medium else FontWeight.Normal)
+                if (typed != null) Text(typed, style = CwType.msg(FontWeight.SemiBold), color = Cw2.un(), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f).testTag("row_typing"))
                 else if (draft.isNotBlank() && m.chat.openChat != r.id) Text(androidx.compose.ui.text.buildAnnotatedString {
-                    withStyle(androidx.compose.ui.text.SpanStyle(color = ChatLook.online, fontWeight = FontWeight.Bold)) { append(t("Draft: ", "Rasimu: ")) }
+                    withStyle(androidx.compose.ui.text.SpanStyle(color = Cw2.un(), fontWeight = FontWeight.Bold)) { append(t("Draft: ", "Rasimu: ")) }
                     append(draft.replace('\n', ' '))
-                }, style = MaterialTheme.typography.bodySmall, color = C.muted, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f).testTag("row_draft"))
+                }, style = pv, color = C.muted, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f).testTag("row_draft"))
                 else {
                     val l = r.last
-                    val who = when { l == null -> ""; l.from.equals(me, true) -> t("You: ", "Wewe: "); r.isGroup && l.from.isNotBlank() && l.kind != "sys" -> l.from.substringBefore(' ') + ": "; else -> "" }
-                    Text(if (l == null) t("No messages yet", "Bado hakuna ujumbe") else if (l.kind == "sys" || l.sys.isNotBlank()) (if (org.rafikioutreach.pin.Lang.sw || l.text.isBlank()) sysText(org.rafikioutreach.pin.data.SysNote(l.sys, "", "", "", l.from)) else l.text) else who + chatPreview(l.kind, l.text, l.dur), style = MaterialTheme.typography.bodySmall, color = C.muted,
-                        maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f).testTag("rowprev"))
+                    val mine = l != null && l.from.equals(me, true) && l.kind != "sys" && l.sys.isBlank()
+                    if (mine) Ticks(if (r.seen.isNotEmpty()) "read" else "sent", Modifier.padding(end = 4.dp).testTag("row_ticks"), tint = if (r.seen.isNotEmpty()) cwRead() else ChatLook.tick())
+                    val who = when { l == null -> ""; mine -> t("You: ", "Wewe: "); r.isGroup && l.from.isNotBlank() && l.kind != "sys" -> l.from.substringBefore(' ') + ": "; else -> "" }
+                    Text(if (l == null) (if (r.kind == "project") t("Project thread", "Mazungumzo ya mradi") else if (r.announce) t("News from the office", "Habari kutoka ofisini") else t("No messages yet", "Bado hakuna ujumbe"))
+                        else if (l.kind == "sys" || l.sys.isNotBlank()) (if (org.rafikioutreach.pin.Lang.sw || l.text.isBlank()) sysText(org.rafikioutreach.pin.data.SysNote(l.sys, "", "", "", l.from)) else l.text) else who + chatPreview(l.kind, l.text, l.dur),
+                        style = pv, color = if (un) C.text else C.muted, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f).testTag("rowprev"))
                 }
-                if (muted) { Spacer(Modifier.width(4.dp)); Icon(ChatIc.get("mute"), t("Muted", "Imenyamazishwa"), tint = C.muted, modifier = Modifier.size(16.dp).testTag("row_muted")) }
-                if (r.pinned) { Spacer(Modifier.width(4.dp)); Icon(Ic.get("pin"), t("Pinned", "Imebandikwa"), tint = C.muted, modifier = Modifier.size(16.dp)) }
-                if (r.mention && r.unread > 0) { Spacer(Modifier.width(5.dp)); Box(Modifier.size(20.dp).clip(CircleShape).background(ChatLook.online).testTag("row_mention"), contentAlignment = Alignment.Center) { Text("@", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.ExtraBold) } }
-                if (r.unread > 0) { Spacer(Modifier.width(5.dp)); Text(if (r.unread > 99) "99+" else "${r.unread}", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.ExtraBold, maxLines = 1, softWrap = false,
-                    modifier = Modifier.clip(RoundedCornerShape(99.dp)).background(if (muted) C.muted else ChatLook.online).widthIn(min = 20.dp).padding(horizontal = 6.dp, vertical = 2.dp).testTag("row_unread"),
+                if (r.mention && un) { Spacer(Modifier.width(6.dp)); Text("@", color = Cw2.un(), style = CwType.meta(FontWeight.ExtraBold), textAlign = androidx.compose.ui.text.style.TextAlign.Center, maxLines = 1,
+                    modifier = Modifier.clip(RoundedCornerShape(99.dp)).then(if (C === Sun) Modifier.border(2.dp, Color.Black, RoundedCornerShape(99.dp)) else Modifier).background(Cw2.at()).widthIn(min = 30.dp).padding(horizontal = 7.dp, vertical = 2.dp).testTag("row_mention")) }
+                if (muted) { Spacer(Modifier.width(5.dp)); Icon(ChatIc.get("mute"), t("Muted", "Imenyamazishwa"), tint = C.muted, modifier = Modifier.size(15.dp).testTag("row_muted")) }
+                if (r.pinned || r.announce) { Spacer(Modifier.width(5.dp)); Icon(ChatIc.get("pushpin"), t("Pinned", "Imebandikwa"), tint = C.muted, modifier = Modifier.size(15.dp).testTag("row_pinned")) }
+                if (un) { Spacer(Modifier.width(6.dp)); Text(if (r.unread > 99) "99+" else "${r.unread}", color = Color.White, style = CwType.small(FontWeight.ExtraBold), maxLines = 1, softWrap = false,
+                    modifier = Modifier.clip(RoundedCornerShape(99.dp)).background(if (muted) C.muted else Cw2.un()).widthIn(min = 22.dp).padding(horizontal = 6.dp, vertical = 3.dp).testTag("row_unread"),
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center) }
             }
         }
     }
 }
+
+/** The blue of read ticks (the web's --cw-read). */
+@Composable
+internal fun cwRead() = if (C === Sun) Color(0xFF0050A0) else if (C.dark) Color(0xFF5BC0FF) else Color(0xFF1D8FE0)
 
 /** Hold a row: pin, mute, archive, mark as unread. */
 @Composable
@@ -266,7 +270,7 @@ private fun ChatRowSheet(m: AppModel, r: ChatRow, close: () -> Unit, undo: UndoS
     TeamSubSheet("chatrow_sheet", close) { hide ->
         Row(verticalAlignment = Alignment.CenterVertically) {
             ChatAvatar(r, m.chat.me, 44.dp, m = m); Spacer(Modifier.width(12.dp))
-            Text(chatTitle(r, m.chat.me), style = MaterialTheme.typography.titleLarge, color = C.ink, maxLines = 2)
+            Text(chatTitle(r, m.chat.me), style = CwType.sheet(), color = C.ink, maxLines = 2)
         }
         Spacer(Modifier.height(10.dp))
         SheetRow("cr_pin", "pin", if (r.pinned) t("Unpin", "Ondoa kibandiko") else t("Pin to the top", "Bandika juu")) { hide { m.chat.pin(r.id, !r.pinned) } }
@@ -283,7 +287,7 @@ private fun ChatRowSheet(m: AppModel, r: ChatRow, close: () -> Unit, undo: UndoS
 @Composable
 internal fun MuteSheet(m: AppModel, c: String, close: () -> Unit) {
     TeamSubSheet("mute_sheet", close) { hide ->
-        Text(t("Mute notifications", "Nyamazisha arifa"), style = MaterialTheme.typography.titleLarge, color = C.ink)
+        Text(t("Mute notifications", "Nyamazisha arifa"), style = CwType.sheet(), color = C.ink)
         Text(t("You’ll still see new messages in the app.", "Bado utaona ujumbe mpya ndani ya programu."), style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 4.dp, bottom = 8.dp))
         SheetRow("mute_8", "clock", t("8 hours", "Saa 8")) { hide { m.chat.mute(c, 8) } }
         SheetRow("mute_week", "cal", t("1 week", "Wiki 1")) { hide { m.chat.mute(c, 168) } }

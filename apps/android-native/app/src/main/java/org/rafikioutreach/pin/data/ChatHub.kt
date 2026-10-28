@@ -125,6 +125,7 @@ class ChatHub(private val ctx: Context, val api: Api, private val myName: () -> 
         r.json.optString("me").takeIf { it.isNotBlank() && it != "null" }?.let { _me = it }
         r.json.optJSONObject("prefs")?.let { settings.fromServer(it); settingsTick.value++ }
         if (r.json.has("push")) pushReady = r.json.optBoolean("push")
+        r.json.optJSONObject("tools")?.let { tl -> tools = mapOf("translate" to tl.optBoolean("translate"), "transcribe" to tl.optBoolean("transcribe")) }
         val gone = r.json.optJSONArray("gone")?.let { g -> (0 until g.length()).map { g.optString(it) } }.orEmpty().toSet()
         _rows.value = (if (full) fresh else merge(_rows.value, fresh)).filter { it.id !in gone }
         val p = ChatCache.presenceFrom(r.json.optJSONObject("presence"))
@@ -306,6 +307,56 @@ class ChatHub(private val ctx: Context, val api: Api, private val myName: () -> 
         if (forAll) patch(m.c, m.id) { it.copy(deleted = true, text = "", media = emptyList()) } else setThread(m.c, flowOf(m.c).value.filter { it.id != m.id })
         return null
     }
+    /** Delete several (chat 2, B10): one at a time is the old call; more go together (delete-many). */
+    suspend fun deleteMany(c: String, ms: List<Msg>, forAll: Boolean): String? {
+        ms.filter { it.queued }.forEach { unsend(it) }
+        val sent = ms.filter { !it.queued }
+        if (sent.isEmpty()) return null
+        if (sent.size == 1) return delete(sent[0], forAll)
+        val r = chat.deleteMany(c, sent.map { it.id }, forAll); if (!r.ok) return chatReason(r.reason)
+        val ids = sent.map { it.id }.toSet()
+        setThread(c, if (forAll) flowOf(c).value.map { if (it.id in ids) it.copy(deleted = true, text = "", media = emptyList()) else it } else flowOf(c).value.filter { it.id !in ids })
+        return null
+    }
+    /** Clear chat (for me), or a DM's Delete chat (cleared and archived): the server keeps when, so they never come back. */
+    suspend fun clear(c: String, archive: Boolean): String? {
+        val r = chat.clear(c, archive); if (!r.ok) return chatReason(r.reason)
+        setThread(c, emptyList()); more[c] = false
+        val fresh = r.json.optJSONObject("chat")?.let { runCatching { ChatRow.from(it) }.getOrNull() }
+        edit(c) { fresh ?: it.copy(last = null, unread = 0, mention = false, archived = it.archived || archive) }
+        return null
+    }
+    /** The server's extra tools (the chat list's "tools"): translating and typing out voice notes, when switched on. */
+    var tools = mapOf("translate" to false, "transcribe" to false)
+    /** Translations and typed-out voice notes, kept while the app runs (by message id). */
+    val translated = androidx.compose.runtime.mutableStateMapOf<String, String>()
+    val typedOut = androidx.compose.runtime.mutableStateMapOf<String, String>()
+    /** POST /api/translate: the text in the other language, or a reason; "google" says where to open it instead. */
+    suspend fun translate(text: String): Triple<String?, String?, String?> {
+        val r = api.postTo("/api/translate", JSONObject().put("text", text))
+        return if (r.ok) Triple(r.json.optString("text"), null, null) else Triple(null, chatReason(r.reason), r.json.optString("google").takeIf { it.startsWith("http") })
+    }
+    suspend fun transcribe(m: Msg): Pair<String?, String?> {
+        val r = chat.transcribe(m.c, m.id)
+        if (r.ok) return r.json.optString("text") to null
+        if (r.reason == "off") tools = tools + ("transcribe" to false)
+        return null to when (r.reason) { "off" -> t("Typing out voice notes isn’t switched on.", "Kuandika jumbe za sauti hakujawashwa."); "rate" -> t("That’s a lot for one hour. Try again later.", "Ni nyingi kwa saa moja. Jaribu tena baadaye."); else -> chatReason(r.reason) }
+    }
+    /** Add to project photos (B5): a note on the project ("📷 Photo from the … chat by …"), then each photo on it. */
+    suspend fun addPhotos(m: Msg, project: String): Pair<List<java.io.File>, String?> {
+        val r = api.postTo("/api/pin", JSONObject().put("action", "chat-photo").put("id", project).put("from", m.from))
+        val up = r.json.optString("updateId").takeIf { r.ok && it.isNotBlank() } ?: return emptyList<java.io.File>() to (if (r.status == 0) t("Adding photos needs a signal.", "Kuongeza picha kunahitaji mtandao.") else reasonText(r.reason))
+        val files = mutableListOf<java.io.File>()
+        for (md in m.media.filter { it.type == "photo" }) {
+            val f = file(md) ?: return files to t("Couldn’t add the photos. Please try again.", "Haikuweza kuongeza picha. Tafadhali jaribu tena.")
+            val x = api.postMultipart("/api/pin-photo", f.readBytes(), "image/jpeg", "photo.jpg", linkedMapOf("update" to up, "label" to "chat"))
+            if (!x.ok) return files to reasonText(x.reason)
+            files += f
+        }
+        sp.edit().putLong("added_${m.c}_${m.id}", now()).apply(); tick.value++
+        return files to null
+    }
+    fun added(m: Msg) = sp.contains("added_${m.c}_${m.id}")
     suspend fun react(m: Msg, emoji: String?): String? {
         val mine = m.reacts.filterValues { it.any { n -> n.equals(me, true) } }.keys.firstOrNull()
         val next = if (emoji == mine) null else emoji
@@ -345,6 +396,12 @@ class ChatHub(private val ctx: Context, val api: Api, private val myName: () -> 
     /** Mute for [hours] (8, 168), forever (-1), or unmute (0). */
     fun mute(c: String, hours: Int) = scope.launch { prefs(c, JSONObject().put("muted", when { hours < 0 -> "always"; hours == 0 -> 0; else -> now() + hours * 3_600_000L })) }
     fun markUnread(c: String) = edit(c) { it.copy(unread = maxOf(1, it.unread)) }
+    /** ⋯ › Mark all as read (chat 2): every unread chat on the list (not archived) is read, and the server is told. */
+    fun allRead() {
+        val todo = _rows.value.filter { (it.unread > 0 || it.mention) && !it.archived }
+        _rows.value = _rows.value.map { r -> if (todo.any { it.id == r.id }) r.copy(unread = 0, mention = false) else r }; recount(); save()
+        todo.forEach { r -> r.last?.id?.takeIf { it.isNotBlank() }?.let { id -> scope.launch { chat.read(r.id, id) } } }
+    }
     /** The chat's sound for new messages (this phone only). */
     fun quiet(c: String) = sp.getBoolean("quiet_$c", false)
     fun setQuiet(c: String, on: Boolean) { sp.edit().putBoolean("quiet_$c", on).apply(); tick.value++ }

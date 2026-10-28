@@ -537,7 +537,7 @@ class ChatPolishTest {
         until("hello sent") { fake.calls.any { it.startsWith("POST send") && it.contains("👋") } }
         back(); tap("chat_menu"); tap("menu_starred"); waitTag("starred_none")
         back(); tap("chat_menu"); tap("menu_archived"); waitTag("chat_none_archived"); tap("chat_none_archived_go"); waitTag("chat_list")
-        rule.onNodeWithTag("chat_search").performTextInput("zzqx"); settle(800)
+        tap("chat_search_btn"); rule.onNodeWithTag("chat_search").performTextInput("zzqx"); settle(800)
         waitTag("search_none"); tap("search_none_go"); waitTag("chatrow_g1")
     }
 

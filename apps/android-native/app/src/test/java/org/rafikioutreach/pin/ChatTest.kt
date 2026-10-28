@@ -206,7 +206,7 @@ class ChatTest {
         Lang.sw = sw; world(); val m = model(); show(m, dark)
         tap("nav_chat"); waitTag("chatrow_g1")
         // pinned first, newest next; previews, unread, @, muted, the online dot
-        assertTrue(tagged("chat_pinned_label"))
+        assertTrue(tagged("chat_chips"))
         val order = rule.onAllNodes(hasTestTag("chatrow_t_all") or hasTestTag("chatrow_g1") or hasTestTag("chatrow_dm_grace"), useUnmergedTree = true).fetchSemanticsNodes().map { n -> n.config.getOrNull(androidx.compose.ui.semantics.SemanticsProperties.TestTag) }
         assertEquals(listOf("chatrow_t_all", "chatrow_g1", "chatrow_dm_grace"), order)
         assertTrue(has(if (sw) "Grace: @Reid Anderson" else "Grace: @Reid Anderson"))
@@ -222,13 +222,13 @@ class ChatTest {
     @Test fun search_titles_and_messages_and_back_clears_it() {
         world(); val m = model(); show(m)
         tap("nav_chat"); waitTag("chatrow_g1")
-        rule.onNodeWithTag("chat_search").performTextInput("spare"); settle(600)
+        tap("chat_search_btn"); rule.onNodeWithTag("chat_search").performTextInput("spare"); settle(600)
         until("server search") { tagged("search_msgs_label") }
         assertTrue(has("I can bring the spare handle"))
         assertTrue(fake.calls.any { it.startsWith("GET search?q=spare") })
         shot("chat-09-search")
-        back(); assertTrue("back clears the search", rule.onNodeWithTag("chat_search").fetchSemanticsNode().config.getOrNull(androidx.compose.ui.semantics.SemanticsProperties.EditableText)?.text.isNullOrEmpty())
-        rule.onNodeWithTag("chat_search").performTextInput("Kitale"); settle()
+        back(); assertFalse("back closes the search", tagged("chat_search")); assertTrue(tagged("chat_title"))
+        tap("chat_search_btn"); rule.onNodeWithTag("chat_search").performTextInput("Kitale"); settle()
         assertTrue(tagged("chatrow_g1")); assertFalse(tagged("chatrow_dm_grace"))
         // start over: away via the bottom bar and back, the search is gone
         tap("nav_map"); tap("nav_chat"); waitTag("chatrow_dm_grace")
@@ -445,7 +445,7 @@ class ChatTest {
         tap("attach"); waitTag("attach_sheet"); tap("att_live"); waitTag("live_sheet"); tap("live_60")
         until("live sent") { fake.calls.any { it.startsWith("POST send") && it.contains("\"kind\":\"live\"") && it.contains("\"until\"") } }
         waitTag("live_card"); waitTag("live_stop")
-        tap("attach"); waitTag("attach_sheet"); tap("att_contact"); waitTag("mate_picker"); tap("mate_Meril Kiprop")
+        tap("attach"); waitTag("attach_sheet"); tap("att_contact"); waitTag("mate_picker"); waitTag("mate_Meril Kiprop"); tap("mate_Meril Kiprop")
         until("contact sent") { fake.calls.any { it.startsWith("POST send") && it.contains("\"contact\":{\"name\":\"Meril Kiprop\"}") } }
         waitTag("contact_card")
         shot("chat-13-live-and-contact")
@@ -571,26 +571,19 @@ class ChatTest {
         assertTrue(fake.msgs["g1"]!!.any { it.optString("text") == "On my way" })
     }
 
-    // --- the bottom bar decision: 6 tabs don't fit a 360 dp phone in Kiswahili; Chat takes Me's place -----------------
-    private fun overflows(): List<String> = rule.onAllNodes(hasAnyAncestor(hasTestTag("bar")) and hasText("", substring = true), useUnmergedTree = true).fetchSemanticsNodes().mapNotNull { n ->
-        val r = mutableListOf<TextLayoutResult>()
-        n.config.getOrNull(SemanticsActions.GetTextLayoutResult)?.action?.invoke(r)
-        val t = n.config.getOrNull(androidx.compose.ui.semantics.SemanticsProperties.Text)?.joinToString("") { it.text }
-        // cut: the words need more width than the label was given
-        if (r.firstOrNull()?.let { it.multiParagraph.intrinsics.maxIntrinsicWidth > n.size.width + 1f } == true) t else null
-    }
-    private fun bar(sw: Boolean, six: Boolean): List<String> {
+    // --- the bottom bar: six tabs since 2.26.0 (Stories joined, web v72); they fit at 360 dp in both languages -----------
+    // (a label that doesn't fit on one line wraps between its words, never inside one: LayoutCheck)
+    private fun overflows(): List<String> = LayoutCheck.problems(rule, "bar", 360 * rule.density.density)
+    private fun bar(sw: Boolean): List<String> {
         Lang.sw = sw; world(); val m = model()
-        val items = listOf(Triple("map", t("Map", "Ramani"), "map"), Triple("list", t("Projects", "Miradi"), "list"), Triple("new", t("New site", "Eneo jipya"), "plus"), Triple("chat", t("Chat", "Gumzo"), "chat")) +
-            (if (six) listOf(Triple("me", t("Me", "Mimi"), "person")) else emptyList()) + Triple("office", t("Office", "Ofisi"), "inbox")
-        rule.setContent { RafikiTheme(dark = false) { Column(Modifier.width(360.dp).testTag("bar")) { BottomBar(m, "chat", 2, 4, items) { } } } }
+        rule.setContent { RafikiTheme(dark = false) { Column(Modifier.width(360.dp).testTag("bar")) { BottomBar(m, "chat", 2, 4) { } } } }
         settle()
-        shot("chat-tabbar-${if (six) 6 else 5}-${if (sw) "sw" else "en"}")
+        assertEquals(6, rule.onAllNodes(hasAnyAncestor(hasTestTag("bar")) and hasClickAction()).fetchSemanticsNodes().size)
+        shot("chat-tabbar-6-${if (sw) "sw" else "en"}")
         return overflows()
     }
-    @Test fun tab_bar_six_tabs_break_in_kiswahili_at_360() { val o = bar(true, true); assertTrue("6 tabs at 360 dp: $o", o.isNotEmpty()) }
-    @Test fun tab_bar_five_tabs_fit_at_360_kiswahili() { assertEquals(emptyList<String>(), bar(true, false)) }
-    @Test fun tab_bar_five_tabs_fit_at_360_english() { assertEquals(emptyList<String>(), bar(false, false)) }
+    @Test fun tab_bar_six_tabs_fit_at_360_kiswahili() { assertEquals(emptyList<String>(), bar(true)) }
+    @Test fun tab_bar_six_tabs_fit_at_360_english() { assertEquals(emptyList<String>(), bar(false)) }
 
     // --- the data, without screens ------------------------------------------------------------------------------------
     @Test fun previews_and_parsing() {

@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
@@ -41,7 +42,8 @@ import java.time.Instant
 
 /** Hold a message: a reaction, or Reply, Forward, Copy, Star, Info, Edit (own, 15 min), Delete, and "Turn into a job". */
 @Composable
-internal fun MsgSheet(m: AppModel, msg: Msg, row: ChatRow?, close: () -> Unit, onReply: () -> Unit, onEdit: () -> Unit, openChat: (String) -> Unit, openProject: (String, String) -> Unit, office: (String) -> Unit) {
+internal fun MsgSheet(m: AppModel, msg: Msg, row: ChatRow?, close: () -> Unit, onReply: () -> Unit, onEdit: () -> Unit, openChat: (String) -> Unit, openProject: (String, String) -> Unit, office: (String) -> Unit,
+                       onSelect: () -> Unit = {}, onDelete: (() -> Unit)? = null, story: (String, List<File>) -> Unit = { _, _ -> }) {
     val hub = m.chat
     val me = hub.me
     val mine = msg.from.equals(me, true)
@@ -86,6 +88,20 @@ internal fun MsgSheet(m: AppModel, msg: Msg, row: ChatRow?, close: () -> Unit, o
             SheetRow("act_star", "star", if (msg.starred) t("Unstar", "Ondoa nyota") else t("Star", "Weka nyota")) { hide { scope.launch { hub.star(msg, !msg.starred) } } }
             if (mine) SheetRow("act_info", "info", t("Message info", "Maelezo ya ujumbe")) { sub = "info" }
             if (canEdit) SheetRow("act_edit", "edit", t("Edit", "Hariri")) { hide { onEdit() } }
+            // chat 2: select several (B10), translate (B7), use in a story (B6), add a photo to the project (B5)
+            SheetRow("act_select", "selectall", t("Select", "Chagua")) { hide { onSelect() } }
+            if (msg.text.isNotBlank() && !mine && (msg.kind == "text" || msg.kind == "media")) SheetRow("act_translate", "translate", "Translate · Tafsiri") {
+                hide {
+                    if (hub.tools["translate"] != true) runCatching { ctx.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(googleTranslate(msg.text)))) }
+                    else m.viewModelScope.launch { val (tx, err, g) = hub.translate(msg.text); if (tx != null) hub.translated[msg.id] = tx else if (g != null) runCatching { ctx.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(g))) } else hub.note.value = err }
+                }
+            }
+            if (row?.kind == "project" && row.project.isNotBlank() && msg.kind == "text" && msg.text.isNotBlank()) SheetRow("act_story", "spark", t("Use in a story", "Tumia kwenye hadithi"), value = t("The words become the story’s quote", "Maneno yanakuwa nukuu ya hadithi")) {
+                hide { StoryNav.pre = Triple(row.project, msg.text.trim().take(600), msg.from); StoryNav.open = row.project; openProject(row.project, "story") }
+            }
+            if (row?.kind == "project" && row.project.isNotBlank() && msg.media.any { it.type == "photo" } && !hub.added(msg)) SheetRow("act_addphotos", "photoadd", t("Add to project photos", "Ongeza kwenye picha za mradi")) {
+                hide { m.viewModelScope.launch { val (files, err) = hub.addPhotos(msg, row.project); if (err != null) hub.note.value = err else { hub.note.value = t("Added to the project ✓", "Imeongezwa kwenye mradi ✓"); story(row.project, files) } } }
+            }
             // turn it into a job: the existing repair and assign screens, filled in from the message
             SheetRow("act_repair", "wrench", t("Report a repair", "Ripoti matengenezo"), value = t("With this message’s words and photos", "Kwa maneno na picha za ujumbe huu")) {
                 if (pid != null) hide { scope.launch { repairFrom(m, msg, pid); openProject(pid, "visit") } } else sub = "repair"
@@ -95,14 +111,14 @@ internal fun MsgSheet(m: AppModel, msg: Msg, row: ChatRow?, close: () -> Unit, o
             }
         }
         val canAll = (mine || (admin && row?.isGroup == true) || (row?.isGroup == true && row.admin(me))) && !msg.deleted
-        SheetRow("act_delete", "trash", t("Delete", "Futa"), red = true) { sub = if (canAll) "delete" else "deleteme" }
+        SheetRow("act_delete", "trash", t("Delete", "Futa"), red = true) { if (onDelete != null) hide { onDelete() } else sub = if (canAll) "delete" else "deleteme" }
         said?.let { org.rafikioutreach.pin.ui.Msg(it, "bad") }
     }
     when (sub) {
         "fwd" -> ForwardSheet(m, msg, { sub = null; close() }) { openChat(it) }
         "info" -> InfoSheet(m, msg, row) { sub = null; close() }
         "delete", "deleteme" -> TeamSubSheet("delete_sheet", { sub = null }) { hide ->
-            Text(t("Delete this message?", "Futa ujumbe huu?"), style = MaterialTheme.typography.titleLarge, color = C.ink, modifier = Modifier.padding(bottom = 8.dp))
+            Text(t("Delete this message?", "Futa ujumbe huu?"), style = CwType.sheet(), color = C.ink, modifier = Modifier.padding(bottom = 8.dp))
             if (sub == "delete") SheetRow("del_all", "trash", t("Delete for everyone", "Futa kwa wote"), red = true) { hide { scope.launch { hub.delete(msg, true)?.let { said = it } }; close() } }
             SheetRow("del_me", "trash", t("Delete for me", "Futa kwangu"), red = sub != "delete") { hide { scope.launch { hub.delete(msg, false) }; close() } }
             SheetRow("del_no", "x", t("Cancel", "Ghairi")) { hide { } }
@@ -147,7 +163,7 @@ private fun ProjectPicker(m: AppModel, close: () -> Unit, pick: (String) -> Unit
     val snap by m.snap.collectAsState()
     var q by remember { mutableStateOf("") }
     TeamSubSheet("project_picker", close) { hide ->
-        Text(t("Which project?", "Mradi upi?"), style = MaterialTheme.typography.titleLarge, color = C.ink)
+        Text(t("Which project?", "Mradi upi?"), style = CwType.sheet(), color = C.ink)
         ChatSearchField(q, { q = it }, t("Search a project or place", "Tafuta mradi au mahali"), "pp_search")
         val list = snap?.projects.orEmpty().filter { q.isBlank() || "${it.title} ${it.area}".contains(q.trim(), true) }.take(30)
         list.forEach { p ->
@@ -161,13 +177,13 @@ private fun ProjectPicker(m: AppModel, close: () -> Unit, pick: (String) -> Unit
 
 /** Forward to one or more chats. */
 @Composable
-private fun ForwardSheet(m: AppModel, msg: Msg, close: () -> Unit, open: (String) -> Unit) {
+internal fun ForwardSheet(m: AppModel, msg: Msg, close: () -> Unit, open: (String) -> Unit) {
     val rows by m.chat.rows.collectAsState()
     val chosen = remember { mutableStateListOf<String>() }
     val hp = rememberHaptics()
     val ctx = LocalContext.current
     TeamSubSheet("fwd_sheet", close) { hide ->
-        Text(t("Forward to…", "Sambaza kwa…"), style = MaterialTheme.typography.titleLarge, color = C.ink, modifier = Modifier.padding(bottom = 8.dp))
+        Text(t("Forward to…", "Sambaza kwa…"), style = CwType.sheet(), color = C.ink, modifier = Modifier.padding(bottom = 8.dp))
         m.chat.sorted(rows.filter { !it.archived && !(it.onlyAdmins && !it.admin(m.chat.me)) }).forEach { r ->
             val on = r.id in chosen
             Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).clickable(role = Role.Checkbox) { if (on) chosen.remove(r.id) else chosen.add(r.id) }.heightIn(min = 56.dp).padding(horizontal = 6.dp).testTag("fwd_${r.id}"),
@@ -191,12 +207,12 @@ private fun ForwardSheet(m: AppModel, msg: Msg, close: () -> Unit, open: (String
 
 /** Message info: who read it and who received it, with the times (in groups, blue ticks once everyone has read it). */
 @Composable
-private fun InfoSheet(m: AppModel, msg: Msg, row: ChatRow?, close: () -> Unit) {
+internal fun InfoSheet(m: AppModel, msg: Msg, row: ChatRow?, close: () -> Unit) {
     var info by remember { mutableStateOf<Pair<List<Pair<String, Long>>, List<Pair<String, Long>>>?>(null) }
     var failed by remember { mutableStateOf(false) }
     LaunchedEffect(msg.id) { info = m.chat.info(msg); failed = info == null }
     TeamSubSheet("info_sheet", close) { _ ->
-        Text(t("Message info", "Maelezo ya ujumbe"), style = MaterialTheme.typography.titleLarge, color = C.ink)
+        Text(t("Message info", "Maelezo ya ujumbe"), style = CwType.sheet(), color = C.ink)
         Text(msg.preview(), style = MaterialTheme.typography.bodyMedium, color = C.muted, maxLines = 3, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 4.dp, bottom = 8.dp))
         val i = info
         when {
@@ -233,7 +249,7 @@ private fun InfoGroup(label: String, status: String, list: List<Pair<String, Lon
 internal fun ReactsSheet(m: AppModel, msg: Msg, close: () -> Unit) {
     val scope = rememberScope()
     TeamSubSheet("reacts_sheet", close) { hide ->
-        Text(t("Reactions", "Miitikio"), style = MaterialTheme.typography.titleLarge, color = C.ink, modifier = Modifier.padding(bottom = 8.dp))
+        Text(t("Reactions", "Miitikio"), style = CwType.sheet(), color = C.ink, modifier = Modifier.padding(bottom = 8.dp))
         msg.reacts.entries.sortedByDescending { it.value.size }.forEach { (e, names) ->
             names.forEach { n ->
                 val mine = n.equals(m.chat.me, true)

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.layout.boundsInRoot
 import kotlinx.coroutines.launch
 import androidx.compose.animation.togetherWith
@@ -96,7 +97,21 @@ fun ProjectScreen(m: AppModel, id: String, startTab: String, back: () -> Unit) {
     var dirs by remember(id) { mutableStateOf(false) }
     ShowInBar(m, p.title, titleBottom < top)
 
-    Column(Modifier.fillMaxSize().onGloballyPositioned { top = it.boundsInRoot().top }.verticalScroll(rememberScrollState()).padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 110.dp)) {
+    // opened from the Stories tab (web shOpen): straight to the writer, the project's tabs at the top of the screen
+    val page = rememberScrollState()
+    var tabsAt by remember { mutableFloatStateOf(-1f) }
+    var jumped by rememberSaveable(id) { mutableStateOf(startTab != "story") }
+    val gap = with(androidx.compose.ui.platform.LocalDensity.current) { 8.dp.toPx() }
+    LaunchedEffect(tabsAt) {
+        if (jumped || tabsAt < 0f) return@LaunchedEffect
+        val want = (tabsAt - gap).toInt().coerceAtLeast(0)
+        // the story loads after the page: wait (a moment) until the page is long enough to bring the tabs up
+        var n = 0
+        while (page.maxValue < want && n++ < 20) kotlinx.coroutines.delay(100)
+        jumped = true
+        if (Motion.on) page.animateScrollTo(want) else page.scrollTo(want)
+    }
+    Column(Modifier.fillMaxSize().onGloballyPositioned { top = it.boundsInRoot().top }.verticalScroll(page).padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 110.dp)) {
         if (p.photo != null) NetImage(m.api.photoUrl(p.photo, 960), Modifier.fillMaxWidth().aspectRatio(16f / 9f).padding(vertical = 6.dp).clip(RoundedCornerShape(24.dp)).background(C.tint)) {}
 
         // the project: glass in light colours (like the web app), deep blue in dark and bright sun
@@ -173,7 +188,7 @@ fun ProjectScreen(m: AppModel, id: String, startTab: String, back: () -> Unit) {
         }
 
         // what to do
-        Row(Modifier.padding(top = 14.dp).fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(C.card).border(1.dp, C.line, RoundedCornerShape(18.dp)).padding(5.dp)) {
+        Row(Modifier.padding(top = 14.dp).fillMaxWidth().onGloballyPositioned { if (!jumped) tabsAt = it.positionInParent().y }.clip(RoundedCornerShape(18.dp)).background(C.card).border(1.dp, C.line, RoundedCornerShape(18.dp)).padding(5.dp).testTag("prj_tabs")) {
             listOf("pin" to t("Pin location", "Weka mahali"), "visit" to t("Site visit", "Ziara"), "hist" to t("History", "Historia"), "story" to t("Stories", "Hadithi")).forEachIndexed { i, (k, label) ->
                 val on = tab == k
                 Text(label, color = if (on) Color.White else C.ink, style = MaterialTheme.typography.titleSmall, textAlign = TextAlign.Center,

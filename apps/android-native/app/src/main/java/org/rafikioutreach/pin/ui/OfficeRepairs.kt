@@ -131,7 +131,8 @@ private fun rrTone(tone: String): Pair<Color, Color> = when (tone) { "bad" -> C.
 fun RepairsSection(m: AppModel, s: Snapshot, open: (String) -> Unit) {
     var people by remember { mutableStateOf(listOf<String>()) }
     LaunchedEffect(Unit) { val a = m.api.adminGet("team").json.optJSONArray("team") ?: JSONArray(); people = a.objs().map { it.optString("name") }.filter { it.isNotBlank() }.sorted() }
-    var filter by remember { mutableStateOf("all") }
+    // Overview › Needs you › "urgent repairs have nobody on them" opens on Not assigned
+    var filter by remember { mutableStateOf(OfficeJump.repairs?.also { OfficeJump.repairs = null } ?: "all") }
     var shown by remember { mutableIntStateOf(30) }
     var picked by remember { mutableStateOf<String?>(null) }
     val lim = s.approveAbove

@@ -167,7 +167,7 @@ class NavTest {
      *  form, Chat shows its list at once. */
     private fun sameTabAgain(isAdmin: Boolean) {
         admin = isAdmin; start()
-        val tabs = listOf("map" to "map_home", "list" to "projects", "new" to "new_site", "chat" to "chat_list", (if (isAdmin) "me" else "me_tab") to "me_hero") +
+        val tabs = listOf("map" to "map_home", "list" to "projects", "new" to "new_site", "chat" to "chat_list", "stories" to "stories", (if (isAdmin) "me" else "me_tab") to "me_hero") +
             (if (isAdmin) listOf("office" to "o_repairs") else emptyList())
         for ((k, root) in tabs) {
             nav(k); waitTag(root)
@@ -509,7 +509,7 @@ class NavTest {
     // --- 9. Back from any top-level tab goes to Map home; the app's ← is the same as back -------------------------
     @Test fun every_tab_backs_to_map_home_then_asks() {
         Lang.sw = false; start()
-        listOf("list", "new", "me", "office").forEach { k -> nav(k); back(); assertTrue("$k → Map home", tagged("map_home")); rule.onNodeWithTag("nav_map").assertIsSelected() }
+        listOf("list", "new", "stories", "me", "office").forEach { k -> nav(k); back(); assertTrue("$k → Map home", tagged("map_home")); rule.onNodeWithTag("nav_map").assertIsSelected() }
         back()
         assertEquals("Press back again to leave", ShadowToast.getTextOfLatestToast())
         back(); assertFalse("never quits", rule.activity.isFinishing)
