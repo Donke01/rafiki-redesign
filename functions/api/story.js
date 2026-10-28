@@ -59,7 +59,7 @@ async function pubLabel(env, T, B, api) {
 // the story into the Story column: all of it, or (when monday.com refuses it) the first part and where the rest is
 async function writeText(T, B, id, text, tail, status, api) {
   const tries = [];
-  [status].concat(status && status.fallback ? [status.fallback] : []).forEach(st => [text, shortText(text, tail)].forEach((t, i) => { if (!i || t !== text) tries.push({ st, t, short: !!i }); }));
+  [status].concat(status && status.fallback ? [status.fallback] : []).forEach(st => [text].concat([1800, 900, 450].map(n => shortText(text, tail, n))).forEach((t, i, all) => { if (!i || (t !== text && t !== all[i - 1])) tries.push({ st, t, short: !!i }); }));
   let err;
   for (const x of tries) {
     try { await writeCols(T, B, id, Object.assign({ [STORY_COL.text]: { text: x.t } }, x.st ? { [STORY_COL.status]: { label: x.st.label } } : {}), api); return { short: x.short, label: x.st ? x.st.label : '' }; }
