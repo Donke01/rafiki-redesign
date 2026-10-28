@@ -3,7 +3,7 @@
 // Map tiles already seen are kept too (offline areas and the storage limit: see the end of this file), so a site
 // visited before still shows a map.
 // Whole-country maps (pin.html, feat-cmap) live in their own caches, rafiki-pin-cmap-<file>, kept until deleted in the app.
-var APP = 'rafiki-pin-app-v72', TILES = 'rafiki-pin-tiles-v1';
+var APP = 'rafiki-pin-app-v73', TILES = 'rafiki-pin-tiles-v1';
 var SHELL = ['/pin', '/vendor/leaflet/leaflet.js', '/vendor/leaflet/leaflet.css', '/img/logo-dark-bold.webp', '/pin.webmanifest', '/money.js', '/favicon.svg', '/img/logo-light-bold.webp', '/img/pin/icon-192.png'];
 
 self.addEventListener('install', function (e) {
