@@ -24,6 +24,8 @@ data class Project(
     val pump: String,
     /** People served (the board's number, or the latest visit count for admins): the map's heat layer. */
     val people: Int? = null,
+    /** The day it was finished (monday.com's completion date, for completed projects), "YYYY-MM-DD" or "". */
+    val done: String = "",
 ) {
     val sub: String get() = listOf(area, country, statusName(status)).filter { it.isNotBlank() }.joinToString(" · ")
 
@@ -32,6 +34,7 @@ data class Project(
         put("type", type); put("status", status); year?.let { put("year", it) }
         gps?.let { put("gps", JSONArray().put(it.lat).put(it.lng)) }
         photo?.let { put("photo", it) }; put("pump", pump); people?.let { put("people", it) }
+        if (done.isNotBlank()) put("done", done)
     }
 
     companion object {
@@ -48,6 +51,7 @@ data class Project(
             photo = o.optString("photo").takeIf { it.isNotBlank() && it != "null" },
             pump = o.optString("pump"),
             people = if (o.has("people") && !o.isNull("people")) o.optInt("people").takeIf { it > 0 } else null,
+            done = o.optString("done").takeIf { it != "null" && Regex("^\\d{4}-\\d{2}").containsMatchIn(it) }.orEmpty(),
         )
     }
 }

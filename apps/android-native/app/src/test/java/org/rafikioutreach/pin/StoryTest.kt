@@ -172,7 +172,7 @@ class StoryTest {
         openStories("Chepkongi Borehole")
         // the four tabs fit: no word split
         listOf("pin", "visit", "hist", "story").forEach { noMidWordBreak("tab_$it") }
-        rule.onNodeWithTag("story_missing").assertTextContains(if (sw) "majibu 2 kati ya 6" else "2 of 6 answers", substring = true)
+        assertTrue(rule.onAllNodes(hasAnyAncestor(hasTestTag("story_need_answers")) and hasText(if (sw) "Majibu 2 kati ya 6" else "2 of 6 answers", substring = true), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty())
         shot("story-top-${if (sw) "sw" else "en"}-${if (d) "dark" else "light"}")
         // question 3 (the first unanswered), with the server's wording
         rule.onNodeWithTag("story_prompt").performScrollTo().assertTextEquals(if (sw) "Hadithi hii inamhusu nani? Taja jina na umri." else "Who is this story about? Give their name and age.")
@@ -182,8 +182,10 @@ class StoryTest {
         rule.onNodeWithTag("story_prompt").assertTextContains(if (sw) "Jamii" else "community", substring = true)
         shot("story-questions-${if (sw) "sw" else "en"}-${if (d) "dark" else "light"}")
         // an after photo with children in it: consent is then needed
-        tap("story_add_after"); waitTag("story_children_ask"); tap("story_children_yes")
-        rule.waitUntil(8000) { forms.isNotEmpty() }; settle()
+        // 2.27.0: Add → Take photos → the tray → check them (children?) → they send
+        tap("story_add_after"); waitTag("story_add_sheet"); tap("story_add_camera"); waitTag("story_tray"); tap("story_tray_add")
+        waitTag("story_review"); tap("story_kids_yes"); tap("story_rev_ph_0"); tap("story_review_add")
+        run { val end = System.currentTimeMillis() + 15000; while (forms.isEmpty()) { check(System.currentTimeMillis() < end) { "no upload" }; rule.waitForIdle(); Thread.sleep(15) } }; settle()
         assertTrue(forms.last().contains("name=\"row\"\r\n\r\nafter")); assertTrue(forms.last().contains("name=\"children\"\r\n\r\ntrue")); assertTrue(forms.last().contains("name=\"id\"\r\n\r\n101"))
         waitTag("story_photo_after_0"); assertTrue(tagged("story_children_note"))
         rule.onNodeWithTag("story_count_after", useUnmergedTree = true).assertTextContains("1", substring = true)

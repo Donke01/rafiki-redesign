@@ -131,13 +131,13 @@ fun Tile(label: String, icon: String, selected: Boolean, onClick: () -> Unit, mo
 /** Up to two lines that wrap only between words: the text gets a little smaller until its longest word fits the width,
  *  so a long Kiswahili word ("Matengenezo") never splits in the middle. */
 @Composable
-fun FitWords(text: String, style: androidx.compose.ui.text.TextStyle, color: Color, modifier: Modifier = Modifier, align: Alignment = Alignment.Center, lines: Int = 2) {
+fun FitWords(text: String, style: androidx.compose.ui.text.TextStyle, color: Color, modifier: Modifier = Modifier, align: Alignment = Alignment.Center, lines: Int = 2, min: Float = 8f) {
     var size by remember(text, style) { mutableStateOf(style.fontSize.value) }
     Box(modifier, contentAlignment = align) {
         Text(text, color = color, style = style.copy(fontSize = size.sp, lineHeight = (size + 2).sp), maxLines = lines, onTextLayout = { r ->
             // a line that ends inside a word, or text that doesn't fit: try a little smaller
             val broken = (0 until r.lineCount - 1).any { l -> val e = r.getLineEnd(l); e in 1 until text.length && !text[e - 1].isWhitespace() && !text[e].isWhitespace() }
-            if ((broken || r.hasVisualOverflow) && size > 8f) size -= 0.5f
+            if ((broken || r.hasVisualOverflow) && size > min) size -= 0.5f
         })
     }
 }

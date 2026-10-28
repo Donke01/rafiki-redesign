@@ -29,6 +29,9 @@ class Api(val server: String, private val pin: () -> String, private val session
 
     /** Lets tests swap the network for a fake one. */
     var transport: (method: String, url: String, headers: Map<String, String>, body: ByteArray?) -> Pair<Int, String> = ::http
+        set(v) { field = v; faked = true }
+    /** True once a test swapped the network: uploads with progress then go through [transport] too. */
+    @Volatile private var faked = false
 
     suspend fun list(): Reply = call("GET", "/api/pin", null)
     suspend fun history(id: String): Reply = call("GET", "/api/pin?history=" + enc(id), null)
@@ -106,6 +109,19 @@ class Api(val server: String, private val pin: () -> String, private val session
         val h = mutableMapOf("Accept" to "application/json", "Content-Type" to "multipart/form-data; boundary=$boundary", "Origin" to server)
         auth(h)
         val (status, text) = transport("POST", server + path, h, out.toByteArray())
+        toReply(status, text)
+    }
+    /** A file as multipart/form-data, telling [progress] (0..1) as the bytes leave the phone (story photos, 2.27.0). */
+    suspend fun postMultipart(path: String, bytes: ByteArray, mime: String, filename: String, fields: Map<String, String>, progress: (Float) -> Unit): Reply = withContext(Dispatchers.IO) {
+        val boundary = "----rafiki" + System.nanoTime()
+        val out = ByteArrayOutputStream()
+        fields.forEach { (k, v) -> out.write("--$boundary\r\nContent-Disposition: form-data; name=\"$k\"\r\n\r\n$v\r\n".toByteArray()) }
+        out.write("--$boundary\r\nContent-Disposition: form-data; name=\"file\"; filename=\"${filename.replace("\"", "")}\"\r\nContent-Type: $mime\r\n\r\n".toByteArray())
+        out.write(bytes); out.write("\r\n--$boundary--\r\n".toByteArray())
+        val type = "multipart/form-data; boundary=$boundary"
+        val h = mutableMapOf("Accept" to "application/json", "Content-Type" to type, "Origin" to server)
+        auth(h)
+        val (status, text) = if (faked) transport("POST", server + path, h, out.toByteArray()).also { if (it.first in 200..299) progress(1f) } else httpUpload(server + path, h, out.toByteArray(), type, progress)
         toReply(status, text)
     }
     /** Lets tests swap file downloads for fake ones. */
@@ -193,6 +209,21 @@ class Api(val server: String, private val pin: () -> String, private val session
             val text = (if (code >= 400) c.errorStream else c.inputStream)?.bufferedReader()?.use { it.readText() } ?: ""
             c.disconnect()
             code to text
+        } catch (e: Exception) { 0 to "" }
+
+        private val upClient by lazy { okhttp3.OkHttpClient.Builder().connectTimeout(15, java.util.concurrent.TimeUnit.SECONDS).writeTimeout(60, java.util.concurrent.TimeUnit.SECONDS).readTimeout(60, java.util.concurrent.TimeUnit.SECONDS).build() }
+        /** A POST whose body reports how much of it has been sent (an upload-progress request body). */
+        fun httpUpload(url: String, headers: Map<String, String>, body: ByteArray, type: String, progress: (Float) -> Unit): Pair<Int, String> = try {
+            val rb = object : okhttp3.RequestBody() {
+                override fun contentType() = okhttp3.MediaType.Companion.run { type.toMediaType() }
+                override fun contentLength() = body.size.toLong()
+                override fun writeTo(sink: okio.BufferedSink) {
+                    var off = 0; progress(0f)
+                    while (off < body.size) { val n = minOf(16 * 1024, body.size - off); sink.write(body, off, n); sink.flush(); off += n; progress(off.toFloat() / body.size) }
+                }
+            }
+            val req = okhttp3.Request.Builder().url(url).post(rb).apply { headers.forEach { (k, v) -> if (!k.equals("Content-Type", true)) header(k, v) } }.build()
+            upClient.newCall(req).execute().use { r -> r.code to (r.body?.string() ?: "") }
         } catch (e: Exception) { 0 to "" }
 
         fun httpBytes(url: String, headers: Map<String, String>): Pair<Int, ByteArray?> = try {

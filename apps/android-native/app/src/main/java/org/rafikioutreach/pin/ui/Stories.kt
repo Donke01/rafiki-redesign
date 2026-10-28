@@ -17,6 +17,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,22 +47,56 @@ import java.io.File
 // feat-mea, me-brief §9: everything about a project's story in one tab, "Stories" / "Hadithi", on the project page,
 // against S/me-contract.md "Stories". monday.com's story columns hold the words, photos and statuses.
 
-/** A story photo: its asset id, whether children are in it, who added it and when. */
-data class StoryPhoto(val id: String, val children: Boolean, val by: String, val at: String)
+/** A story photo: its asset id, whether children are in it, who added it and when, its caption and the day it was taken. */
+data class StoryPhoto(val id: String, val children: Boolean, val by: String, val at: String, val cap: String = "", val taken: String = "")
+/** A photo a story section shows (from story.pool: the story rows and the building stages). */
+data class DocPhoto(val id: String, val row: String, val cap: String, val children: Boolean = false)
+/** One section of the drafted story: a heading, its words and maybe a photo. */
+data class DocSection(val h: String, val body: String, val photo: DocPhoto?)
+/** The drafted story (web v74, lib/story-doc.js): a title, the line under it, sections with photos, the quote. */
+data class StoryDoc(val title: String, val dek: String, val sections: List<DocSection>, val pull: Pair<String, String>?, val at: String, val by: String, val model: String) {
+    val words get() = (listOf(title, dek) + sections.map { it.body }).sumOf { w -> w.trim().split(Regex("\\s+")).count { it.isNotBlank() } }
+    /** As the server wants it back (action doc / approve). */
+    fun out(): JSONObject = JSONObject().put("title", title).put("dek", dek).put("sections", org.json.JSONArray().apply {
+        sections.forEach { x -> put(JSONObject().put("h", x.h).put("body", x.body).put("photo", x.photo?.let { JSONObject().put("id", it.id) } ?: JSONObject.NULL)) }
+    })
+}
+/** Where the story is on the website, once approved and published. */
+data class StoryPub(val at: String, val by: String, val url: String)
+/** The month of each column ("YYYY-MM" or ""): Before, In progress from – to, After (story.dates). */
+data class StoryDates(val before: String = "", val progress: String = "", val progressEnd: String = "", val after: String = "") {
+    fun of(row: String) = when (row) { "before" -> before; "progress" -> progress; else -> after }
+}
 data class Story(
     val status: String, val consent: String, val answers: Map<String, String>, val quote: String, val quoteBy: String, val credit: String, val text: String,
     val photos: Map<String, List<StoryPhoto>>, val missing: List<String>, val canApprove: Boolean, val prompts: Map<String, Pair<String, String>>,
+    val doc: StoryDoc? = null, val pool: List<DocPhoto> = emptyList(), val pub: StoryPub? = null, val newPhotos: Int = 0, val dates: StoryDates = StoryDates(),
 ) {
     val filled get() = StoryKit.QS.count { answers[it].orEmpty().isNotBlank() }
+    /** On the website (approved and published). */
+    val live get() = pub != null || status == "published"
+    /** The photos the drafted story shows. */
+    val inStory: Set<String> get() = doc?.sections?.mapNotNull { it.photo?.id }?.toSet().orEmpty()
     companion object {
         private fun JSONObject.str(k: String) = optString(k).takeIf { it != "null" }.orEmpty()
+        private fun JSONObject.ym(k: String) = str(k).takeIf { Regex("^\\d{4}-\\d{2}$").matches(it) }.orEmpty()
+        private fun docPhoto(o: JSONObject?) = o?.takeIf { it.str("id").isNotBlank() }?.let { DocPhoto(it.str("id"), it.str("row"), it.str("cap"), it.optBoolean("children")) }
         fun from(o: JSONObject?): Story? {
             if (o == null) return null
             val a = o.optJSONObject("answers") ?: JSONObject(); val ph = o.optJSONObject("photos") ?: JSONObject(); val pr = o.optJSONObject("prompts") ?: JSONObject()
+            val d = o.optJSONObject("doc")?.takeIf { it.optJSONArray("sections") != null }?.let { d ->
+                val secs = d.optJSONArray("sections")!!
+                StoryDoc(d.str("title"), d.str("dek"), (0 until secs.length()).mapNotNull { secs.optJSONObject(it) }.map { x -> DocSection(x.str("h"), x.str("body"), docPhoto(x.optJSONObject("photo"))) },
+                    d.optJSONObject("pull")?.takeIf { it.str("quote").isNotBlank() }?.let { it.str("quote") to it.str("who") }, d.str("at"), d.str("by"), d.str("model"))
+            }
+            val pool = o.optJSONArray("pool")?.let { arr -> (0 until arr.length()).mapNotNull { docPhoto(arr.optJSONObject(it)) } }.orEmpty()
+            val pub = o.optJSONObject("pub")?.takeIf { it.str("at").isNotBlank() || it.str("url").isNotBlank() }?.let { StoryPub(it.str("at"), it.str("by"), it.str("url")) }
             return Story(o.str("status").ifBlank { "not-started" }, o.str("consent").ifBlank { "not-yet" }, StoryKit.QS.associateWith { a.str(it) }, o.str("quote"), o.str("quoteBy"), o.str("credit"), o.str("text"),
-                StoryKit.ROWS.associateWith { r -> ph.optJSONArray(r)?.let { arr -> (0 until arr.length()).mapNotNull { arr.optJSONObject(it) }.map { StoryPhoto(it.str("id"), it.optBoolean("children"), it.str("by"), it.str("at")) } }.orEmpty() },
+                StoryKit.ROWS.associateWith { r -> ph.optJSONArray(r)?.let { arr -> (0 until arr.length()).mapNotNull { arr.optJSONObject(it) }.map { StoryPhoto(it.str("id"), it.optBoolean("children"), it.str("by"), it.str("at"), it.str("cap"), it.str("taken")) } }.orEmpty() },
                 o.optJSONArray("missing")?.let { m -> (0 until m.length()).map { m.optString(it) } }.orEmpty(), o.optBoolean("canApprove"),
-                pr.keys().asSequence().mapNotNull { k -> pr.optJSONObject(k)?.let { k to (it.str("en") to it.str("sw")) } }.toMap())
+                pr.keys().asSequence().mapNotNull { k -> pr.optJSONObject(k)?.let { k to (it.str("en") to it.str("sw")) } }.toMap(),
+                d, pool, pub, o.optInt("newPhotos"),
+                o.optJSONObject("dates")?.let { x -> StoryDates(x.ym("before"), x.ym("progress"), x.ym("progressEnd"), x.ym("after")) } ?: StoryDates())
         }
     }
 }
@@ -95,6 +130,7 @@ object StoryKit {
             k == "after-photos" -> t("no after photos", "hakuna picha za baada")
             k == "consent" -> t("consent: not yet", "idhini: bado")
             k == "text" -> t("no story text yet", "bado hakuna maandishi ya hadithi")
+            k == "dates" -> t("dates missing", "tarehe hazipo")
             else -> null
         }
     }.joinToString(", ")
@@ -124,43 +160,66 @@ fun StoryTab(m: AppModel, p: Project) {
     var s by remember(p.id) { mutableStateOf<Story?>(null) }
     var err by remember(p.id) { mutableStateOf<String?>(null) }
     var said by remember { mutableStateOf<Pair<String, String>?>(null) }
-    LaunchedEffect(p.id) { val r = m.api.get("/api/story?id=" + Api.enc(p.id)); if (r.ok) s = Story.from(r.json.optJSONObject("story")) else err = reasonText(r.reason) }
+    val up = m.storyUp
+    LaunchedEffect(p.id) { up.resume(); val r = m.api.get("/api/story?id=" + Api.enc(p.id)); if (r.ok) s = Story.from(r.json.optJSONObject("story")) else err = reasonText(r.reason) }
+    // each photo that reaches the server brings the story with it
+    val freshJ = up.fresh[p.id]
+    LaunchedEffect(freshJ) { if (freshJ != null) Story.from(freshJ)?.let { s = it } }
     /** Every POST answers with the fresh story. */
     fun post(body: JSONObject, ok: String? = null, after: (Reply) -> Unit = {}) = scope.launch {
         val r = m.api.postTo("/api/story", body.put("id", p.id))
         if (r.ok) { Story.from(r.json.optJSONObject("story"))?.let { s = it }; if (ok != null) said = "ok" to ok; m.refresh(quiet = true) } else said = "bad" to StoryKit.why(r)
         after(r)
     }
+    // adding photos: the sheet (which row, gallery or camera), the camera tray, the review sheet; kept if Android
+    // closes the app while the camera is open
+    val ctx = LocalContext.current
+    var addRow by rememberSaveable(p.id) { mutableStateOf<String?>(null) }
+    var pickRow by rememberSaveable(p.id) { mutableStateOf("after") }
+    var camPath by rememberSaveable(p.id) { mutableStateOf<String?>(null) }
+    var shots by rememberSaveable(p.id) { mutableStateOf(ArrayList<String>()) }
+    var review by rememberSaveable(p.id) { mutableStateOf<ArrayList<String>?>(null) }
+    var reviewCam by rememberSaveable(p.id) { mutableStateOf(false) }
+    var kids by rememberSaveable(p.id) { mutableStateOf(ArrayList<String>()) }
+    var kidsAsk by rememberSaveable(p.id) { mutableStateOf("") }
+    var datesRow by rememberSaveable(p.id) { mutableStateOf<String?>(null) }   // the column whose month is being set
+    var detail by rememberSaveable(p.id) { mutableStateOf<String?>(null) }   // "row/asset"
+    var askDraft by remember { mutableStateOf(false) }
+    fun toReview(files: List<String>, cam: Boolean) { review = ArrayList(files); reviewCam = cam; kids = ArrayList(); kidsAsk = "" }
+    fun camFile() = File(File(ctx.cacheDir, "cam").apply { mkdirs() }, "s${System.currentTimeMillis()}.jpg")
+    val cam = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok -> val f = camPath; camPath = null; if (ok && f != null && File(f).length() > 0) shots = ArrayList(shots + f) }
+    fun shoot() {
+        PhotoPick.fakeFile?.let { shots = ArrayList(shots + it().path); return }
+        val f = camFile(); camPath = f.path
+        runCatching { cam.launch(FileProvider.getUriForFile(ctx, "org.rafikioutreach.pin.files", f)) }
+    }
+    val gallery = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(20)) { uris ->
+        if (uris.isNotEmpty()) scope.launch {
+            val files = withContext(Dispatchers.IO) { uris.mapIndexedNotNull { i, u -> runCatching { File(File(ctx.cacheDir, "cam").apply { mkdirs() }, "g${System.currentTimeMillis()}_$i.jpg").also { f -> ctx.contentResolver.openInputStream(u)!!.use { inp -> f.outputStream().use { o -> inp.copyTo(o) } } }.path }.getOrNull() } }
+            if (files.isNotEmpty()) toReview(files, false)
+        }
+    }
+    fun choose() {
+        StoryPick.fakeGallery?.let { f -> toReview(f().map { it.path }, false); return }
+        runCatching { gallery.launch(androidx.activity.result.PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }
+    }
     val st = s
+    // scroll targets for the Still needed cards
+    val atConsent = remember { androidx.compose.foundation.relocation.BringIntoViewRequester() }
+    val atQuestions = remember { androidx.compose.foundation.relocation.BringIntoViewRequester() }
+    val atDraft = remember { androidx.compose.foundation.relocation.BringIntoViewRequester() }
     Column(Modifier.fillMaxWidth().testTag("story_tab")) {
         if (st == null) { Text(err ?: t("Loading…", "Inapakia…"), style = MaterialTheme.typography.bodyMedium, color = if (err != null) C.bad else C.muted, modifier = Modifier.testTag("story_loading")); return }
-        // 1. where it is, and what's still missing
-        Card(Modifier.testTag("story_status")) {
-            Text(t("Story", "Hadithi"), style = MaterialTheme.typography.titleMedium, color = C.ink)
-            val ci = StoryKit.STATUSES.indexOf(st.status)
-            Column(Modifier.padding(top = 8.dp)) {
-                StoryKit.STATUSES.forEachIndexed { i, k ->
-                    val done = i < ci; val now = i == ci
-                    Row(Modifier.padding(vertical = 3.dp).testTag("story_st_$k"), verticalAlignment = Alignment.CenterVertically) {
-                        Box(Modifier.size(22.dp).clip(CircleShape).background(when { done -> C.ok; now -> C.tint; else -> C.bg }).then(if (now) Modifier.border(2.dp, C.blue2, CircleShape) else Modifier), contentAlignment = Alignment.Center) {
-                            if (done) Icon(Ic.get("check"), null, tint = Color.White, modifier = Modifier.size(13.dp))
-                        }
-                        Spacer(Modifier.width(10.dp))
-                        Text(StoryKit.status(k), style = MaterialTheme.typography.bodyMedium.copy(fontWeight = if (now) FontWeight.ExtraBold else FontWeight.Normal), color = if (done || now) C.ink else C.muted)
-                    }
-                }
-            }
-            if (st.missing.isNotEmpty() && st.status !in setOf("approved", "published")) Text(t("Still needed: ", "Bado inahitajika: ") + StoryKit.missing(st.missing), style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold),
-                color = C.warn, modifier = Modifier.padding(top = 8.dp).testTag("story_missing"))
-        }
+        // 1. where it is, and what's still needed (each card goes and does it)
+        StoryStepper(st)
+        StoryNeedCards(st, addTo = { pickRow = it; addRow = it }, toConsent = { scope.launch { atConsent.bringIntoView() } }, toQuestions = { scope.launch { atQuestions.bringIntoView() } },
+            toDraft = { scope.launch { atDraft.bringIntoView() } }, toDates = { datesRow = storyDatesMissing(st).firstOrNull() ?: "before" })
+        StoryNewPhotos(st, admin) { askDraft = true }
         said?.let { (tone, text) -> Box(Modifier.padding(top = 8.dp).testTag("story_msg")) { Msg(text, tone) } }
         // 2. photos: before, in progress, after
-        Card(Modifier.padding(top = 12.dp).testTag("story_photos")) {
-            Text(t("Photos", "Picha"), style = MaterialTheme.typography.titleMedium, color = C.ink)
-            StoryKit.ROWS.forEach { r -> StoryPhotoRow(m, p, r, st.photos[r].orEmpty()) { fresh, msg -> if (fresh != null) s = fresh; said = msg } }
-        }
+        StoryPhotosCard(m, p.id, st, up.items.toList(), add = { pickRow = it; addRow = it }, dates = { datesRow = it }) { r, ph -> detail = "$r/${ph.id}" }
         // 3. the six questions, one at a time
-        StoryQuestions(m, p, st) { body, ok -> post(body, ok) }
+        Box(Modifier.bringIntoViewRequester(atQuestions)) { StoryQuestions(m, p, st) { body, ok -> post(body, ok) } }
         // 4. the quote and 5. consent
         // a quote from the chat (B6): filled in and marked, saved only with Save quote
         val pre = remember(p.id) { StoryNav.pre?.takeIf { it.first == p.id }.also { if (it != null) StoryNav.pre = null } }
@@ -176,7 +235,7 @@ fun StoryTab(m: AppModel, p: Project) {
             Box(Modifier.testTag("story_credit")) { Field(credit, { credit = it }, t("Photo credit", "Mpiga picha"), placeholder = m.prefs.name) }
             Btn(t("Save quote", "Hifadhi nukuu"), { post(JSONObject().put("action", "answers").put("quote", quote.trim()).put("quoteBy", by.trim()).put("credit", credit.trim()), t("Saved ✓", "Imehifadhiwa ✓")) },
                 Modifier.padding(top = 12.dp).fillMaxWidth().testTag("story_quote_save"), icon = "check", light = true, small = true)
-            Text(t("Photo consent", "Idhini ya picha"), style = MaterialTheme.typography.labelMedium, color = C.ink, modifier = Modifier.padding(top = 16.dp, bottom = 6.dp))
+            Text(t("Photo consent", "Idhini ya picha"), style = MaterialTheme.typography.labelMedium, color = C.ink, modifier = Modifier.padding(top = 16.dp, bottom = 6.dp).bringIntoViewRequester(atConsent))
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 listOf("received" to t("Received", "Imepokelewa"), "not-yet" to t("Not yet", "Bado")).forEach { (k, l) ->
                     Box(Modifier.weight(1f).testTag("story_consent_$k")) { Pill(l, st.consent == k, Modifier.fillMaxWidth()) { if (st.consent != k) post(JSONObject().put("action", "consent").put("value", k)) } }
@@ -186,7 +245,7 @@ fun StoryTab(m: AppModel, p: Project) {
                 style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 6.dp).testTag("story_children_note"))
         }
         // 6. the story itself
-        Card(Modifier.padding(top = 12.dp).testTag("story_text_card")) {
+        Card(Modifier.padding(top = 12.dp).bringIntoViewRequester(atDraft).testTag("story_text_card")) {
             Text(t("The story", "Hadithi yenyewe"), style = MaterialTheme.typography.titleMedium, color = C.ink)
             var busy by remember { mutableStateOf(false) }
             var text by remember(st.text) { mutableStateOf(st.text) }
@@ -196,7 +255,11 @@ fun StoryTab(m: AppModel, p: Project) {
             else Text(st.text, style = MaterialTheme.typography.bodyMedium, color = C.text, modifier = Modifier.padding(top = 6.dp).testTag("story_text"))
             if (st.text.isNotBlank()) Text(t("${words(text)} words", "maneno ${words(text)}"), style = MaterialTheme.typography.labelSmall, color = if (words(text) in 150..300) C.muted else C.warn, modifier = Modifier.padding(top = 4.dp).testTag("story_words"))
             if (st.status in setOf("not-started", "collecting", "draft")) Btn(if (busy) t("Drafting…", "Inaandika…") else if (st.text.isBlank()) t("Draft the story", "Andika rasimu ya hadithi") else t("Draft it again", "Andika rasimu upya"),
-                { busy = true; post(JSONObject().put("action", "draft"), t("Draft ready ✓", "Rasimu iko tayari ✓")) { busy = false } }, Modifier.padding(top = 12.dp).fillMaxWidth().testTag("story_draft"), icon = "spark", enabled = !busy)
+                { if (st.text.isNotBlank()) askDraft = true else { busy = true; post(JSONObject().put("action", "draft"), t("Draft ready ✓", "Rasimu iko tayari ✓")) { busy = false } } }, Modifier.padding(top = 12.dp).fillMaxWidth().testTag("story_draft"), icon = "spark", enabled = !busy)
+            // the completion date the story will use (monday.com)
+            if (st.status in setOf("not-started", "collecting", "draft") && !st.live) monthText(p.done)?.let { d ->
+                Text(t("Finished: $d (from monday.com)", "Ilikamilika: $d (kutoka monday.com)"), style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 6.dp).testTag("story_finished"))
+            }
             // field users: drafting sends it for review (web v72, sty_send)
             if (!admin && st.status in setOf("not-started", "collecting")) Text(t("“Draft the story” sends it to an admin for review. Nothing goes on the website before it is approved.", "“Andika rasimu ya hadithi” inaituma kwa msimamizi akague. Hakuna kinachoenda kwenye tovuti kabla ya kuidhinishwa."),
                 style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 8.dp).testTag("sty_send"))
@@ -211,63 +274,49 @@ fun StoryTab(m: AppModel, p: Project) {
                 Modifier.padding(top = 8.dp).fillMaxWidth().testTag("story_back"), icon = "undo", light = true, small = true, outline = true)
         }
     }
+    if (st == null) return
+    // --- the sheets ------------------------------------------------------------------------------------------------
+    addRow?.let { StoryAddSheet(p.title, pickRow, { pickRow = it }, { addRow = null }, { choose() }, { shots = ArrayList(); shoot() }) }
+    if (shots.isNotEmpty() && review == null) StoryShotsTray(shots, { shots = ArrayList() }, { shoot() }) { f -> shots = ArrayList(); toReview(f, true) }
+    review?.let { files ->
+        StoryReviewSheet(pickRow, files, kids.toSet(), kidsAsk, remove = { f -> review = ArrayList(files - f); kids = ArrayList(kids - f); if (files.size <= 1) review = null }, setAsk = { kidsAsk = it; if (it == "no") kids = ArrayList() },
+            toggle = { f -> kids = ArrayList(if (f in kids) kids - f else kids + f) }, close = { review = null }) {
+            val go = files.map { File(it) to (it in kids) }; val row = pickRow; val camera = reviewCam
+            review = null
+            scope.launch { up.add(p.id, row, go, camera) }
+        }
+    }
+    detail?.let { d ->
+        val (r, id) = d.split("/", limit = 2).let { it[0] to it.getOrElse(1) { "" } }
+        val ph = st.photos[r]?.firstOrNull { it.id == id }
+        if (ph == null) { LaunchedEffect(d) { detail = null } } else {
+            fun edit(extra: JSONObject.() -> Unit, ok: String? = null) = post(JSONObject().put("action", "photo-edit").put("row", r).put("asset", id).apply(extra), ok)
+            StoryPhotoSheet(m, p.id, r, ph, id in st.inStory, close = { cap -> detail = null; if (cap.trim() != ph.cap) edit({ put("cap", cap.trim()) }, t("Caption saved ✓", "Maelezo yamehifadhiwa ✓")) },
+                move = { to -> post(JSONObject().put("action", "photo-edit").put("row", r).put("asset", id).put("to", to), t("Moved to ${StoryKit.row(to)} ✓", "Imehamishiwa ${StoryKit.row(to)} ✓")) { if (it.ok) detail = "$to/$id" } },
+                kids = { k -> edit({ put("children", k) }) },
+                delete = { detail = null; post(JSONObject().put("action", "photo-remove").put("row", r).put("asset", id), t("Photo deleted", "Picha imefutwa")) })
+        }
+    }
+    // the month of a column (Before, In progress from – to, After): saved for the whole column, not per photo
+    datesRow?.let { r ->
+        var busy by remember(r) { mutableStateOf(false) }
+        var bad by remember(r) { mutableStateOf<String?>(null) }
+        StoryDatesSheet(r, st.dates, storyDateHint(st, r, p.done), busy, bad, close = { datesRow = null }) { vals ->
+            busy = true; bad = null
+            scope.launch {
+                val body = JSONObject().put("action", "dates").put("id", p.id); vals.forEach { (k, v) -> body.put(k, v) }
+                val res = m.api.postTo("/api/story", body)
+                busy = false
+                if (res.ok) { Story.from(res.json.optJSONObject("story"))?.let { s = it }; datesRow = null; said = "ok" to t("Dates saved ✓", "Tarehe zimehifadhiwa ✓") }
+                else bad = storyDateWhy(res.reason, res.json.optString("field"))
+            }
+        }
+    }
+    if (askDraft) StoryAsk("story_draft_ask", t("Write the draft again?", "Andika rasimu upya?"), t("A new draft replaces this one, with any changes made to it.", "Rasimu mpya inachukua nafasi ya hii, pamoja na mabadiliko yaliyofanywa."),
+        t("Draft it again", "Andika rasimu upya"), false, { askDraft = false }) { askDraft = false; post(JSONObject().put("action", "draft"), t("Draft ready ✓", "Rasimu iko tayari ✓")) }
 }
 
 private fun words(s: String) = s.trim().split(Regex("\\s+")).count { it.isNotBlank() }
-
-/** One photo row (Before, In progress, After): its count, thumbnails and Add photo (camera or gallery; then "children in it?"). */
-@Composable
-private fun StoryPhotoRow(m: AppModel, p: Project, row: String, photos: List<StoryPhoto>, done: (Story?, Pair<String, String>) -> Unit) {
-    val ctx = LocalContext.current
-    val scope = rememberScope()
-    var menu by remember { mutableStateOf(false) }
-    var picked by remember { mutableStateOf<File?>(null) }
-    var busy by remember { mutableStateOf(false) }
-    var camFile by remember { mutableStateOf<File?>(null) }
-    var view by remember { mutableStateOf<Int?>(null) }
-    fun got(f: File?) { if (f != null) scope.launch { picked = m.keepPhoto(f) } }
-    val cam = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok -> val f = camFile; camFile = null; if (ok) got(f) }
-    val gallery = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        if (uri != null) scope.launch { got(withContext(Dispatchers.IO) { runCatching { File(File(ctx.cacheDir, "cam").apply { mkdirs() }, "s${System.currentTimeMillis()}.jpg").also { f -> ctx.contentResolver.openInputStream(uri)!!.use { i -> f.outputStream().use { o -> i.copyTo(o) } } } }.getOrNull() }) }
-    }
-    fun upload(children: Boolean) {
-        val f = picked ?: return
-        busy = true
-        scope.launch {
-            val r = m.api.postMultipart("/api/story", withContext(Dispatchers.IO) { f.readBytes() }, "image/jpeg", "story.jpg", linkedMapOf("action" to "photo", "id" to p.id, "row" to row, "children" to children.toString()))
-            busy = false; picked = null
-            done(if (r.ok) Story.from(r.json.optJSONObject("story")) else null, if (r.ok) "ok" to t("Photo added ✓", "Picha imeongezwa ✓") else "bad" to StoryKit.why(r))
-        }
-    }
-    Column(Modifier.padding(top = 12.dp).testTag("story_row_$row")) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(StoryKit.row(row), style = MaterialTheme.typography.titleSmall, color = C.ink)
-            Text("  ·  ${photos.size}", style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.weight(1f).testTag("story_count_$row"))
-            Box {
-                Btn(t("Add photo", "Ongeza picha"), { PhotoPick.fakeFile?.let { picked = it(); return@Btn }; menu = true }, Modifier.testTag("story_add_$row"), icon = "camera", light = true, small = true, enabled = !busy)
-                DropdownMenu(menu, { menu = false }) {
-                    DropdownMenuItem({ Text(t("Take a photo", "Piga picha")) }, { menu = false; val f = File(File(ctx.cacheDir, "cam").apply { mkdirs() }, "s${System.currentTimeMillis()}.jpg"); camFile = f
-                        runCatching { cam.launch(FileProvider.getUriForFile(ctx, "org.rafikioutreach.pin.files", f)) } }, leadingIcon = { Icon(Ic.get("camera"), null, tint = C.blue) })
-                    DropdownMenuItem({ Text(t("Choose from gallery", "Chagua kutoka kwenye picha")) }, { menu = false; runCatching { gallery.launch("image/*") } }, leadingIcon = { Icon(Ic.get("upload"), null, tint = C.blue) })
-                }
-            }
-        }
-        if (photos.isNotEmpty()) Row(Modifier.padding(top = 6.dp).horizontalScroll(rememberScrollState()).testTag("story_thumbs_$row"), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            photos.forEachIndexed { i, ph ->
-                AuthPic(m, StoryKit.photoPath(p.id, ph.id), Modifier.size(64.dp).clip(RoundedCornerShape(12.dp)).background(C.tint).clickable(role = Role.Button) { view = i }
-                    .semantics { contentDescription = StoryKit.row(row) + " · " + t("photo ${i + 1}", "picha ${i + 1}") }.testTag("story_photo_${row}_$i"))
-            }
-        }
-        if (picked != null) Column(Modifier.padding(top = 8.dp).fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(C.tint).padding(12.dp).testTag("story_children_ask")) {
-            Text(t("Are there children in this photo?", "Kuna watoto kwenye picha hii?"), style = MaterialTheme.typography.titleSmall, color = C.ink)
-            Row(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Btn(t("No", "Hapana"), { upload(false) }, Modifier.weight(1f).testTag("story_children_no"), light = true, small = true, enabled = !busy)
-                Btn(t("Yes", "Ndiyo"), { upload(true) }, Modifier.weight(1f).testTag("story_children_yes"), small = true, enabled = !busy)
-            }
-        }
-    }
-    view?.let { i -> SwipeViewer(photos.size, i.coerceIn(0, photos.size - 1), { StoryKit.row(row) }, { view = null }) { j, mod -> AuthPic(m, StoryKit.photoPath(p.id, photos[j].id, 1600), mod, ContentScale.Fit) } }
-}
 
 /** The six questions as a guided flow, one card at a time: type an answer, or record it (transcribed when the server can). */
 @Composable

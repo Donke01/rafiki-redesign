@@ -60,6 +60,9 @@ class AppModel(app: Application) : AndroidViewModel(app) {
         viewModelScope.launch { locator.fix.collect { f -> if (f != null) h.onFix(f) } }
     } }
 
+    /** Story photos on their way (2.27.0): shrunk, kept on the phone, sent one by one with progress. */
+    val storyUp by lazy { org.rafikioutreach.pin.data.StoryUploads(File(app.filesDir, "story-queue"), api, viewModelScope, app) }
+
     private val _snap = MutableStateFlow<Snapshot?>(prefs.loadSnapshot()?.let { runCatching { Snapshot.from(it) }.getOrNull() })
     init { org.rafikioutreach.pin.ui.GoogleTiles.configure(app, _snap.value?.gmapsAndroid) }
     val snap: StateFlow<Snapshot?> = _snap
@@ -74,7 +77,9 @@ class AppModel(app: Application) : AndroidViewModel(app) {
     val fix: StateFlow<Fix?> get() = locator.fix
 
     init {
-        viewModelScope.launch { while (true) { delay(60000); if (_signedIn.value) sendWaiting() } }
+        viewModelScope.launch { while (true) { delay(60000); if (_signedIn.value) { sendWaiting(); if (storyUp.items.isNotEmpty()) storyUp.resume() } } }
+        // story photos left from last time: on their way again
+        viewModelScope.launch { if (_signedIn.value && File(app.filesDir, "story-queue/queue.json").exists()) storyUp.resume() }
         // Settings › Currency: the saved choice now, fresh rates (and where the phone is) from the server
         org.rafikioutreach.pin.data.Currency.init(app, myHome())
         viewModelScope.launch { org.rafikioutreach.pin.data.Currency.refresh(BuildConfig.SERVER) }

@@ -405,6 +405,8 @@ fun Shell(m: AppModel) {
                 } }
             }
         }
+        // story photos on their way for the open project: "Adding 3 photos to After · 1 of 3 sent", above the bottom bar (2.27.0)
+        here.project?.let { pid -> org.rafikioutreach.pin.ui.StoryUploadBanner(m, pid, Modifier.padding(start = 12.dp, end = 12.dp, top = 6.dp)) }
         // bottom tabs, floating; not inside a conversation, where the composer sits at the bottom (feat-chata)
         if (here.sub?.startsWith("chat:") != true) BottomBar(m, here.tab, review = m.snap.collectAsState().value?.reviewOpen ?: 0, chat = chatUnread, waiting = waiting, updReady = updReady) { tab(it) }
     }

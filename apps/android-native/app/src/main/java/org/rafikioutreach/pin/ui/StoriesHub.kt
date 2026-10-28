@@ -109,6 +109,8 @@ fun StoriesScreen(m: AppModel, open: (String) -> Unit) {
     val max = 60
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp).testTag("stories")) {
         Text(t("Stories", "Hadithi"), style = MaterialTheme.typography.headlineLarge, color = C.ink, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().semantics { heading() })
+        // story photos still on their way (they keep sending while you use the app)
+        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { StorySendingPill(m, Modifier.padding(top = 4.dp)) }
         // the hero: what this is, and the one big action
         Card(Modifier.padding(top = 8.dp).testTag("sh_hero"), pad = 16.dp) {
             Row(verticalAlignment = Alignment.CenterVertically) {
