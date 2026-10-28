@@ -46,6 +46,7 @@ async function fresh(env, chk, id) {
   if (!m) return null;
   const stage = await loadStage(env, id).catch(() => null);
   const s = view(id, m, rec, chk.admin);
+  s.done = m.facts.done || '';   // the project's completion date (monday.com), for "Finished: …" in the writer
   // the photos a story may show (story rows and construction stages), for the writer's photo picker
   const pack = material(m.facts.title || m.name, m.facts, s, stage, []);
   s.pool = pack.photos.map(p => ({ id: p.id, row: p.row, cap: p.cap, children: p.children }));
