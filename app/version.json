@@ -1,8 +1,8 @@
 {
   "ok": true,
-  "versionCode": 50,
-  "versionName": "2.25.0",
-  "notes": "Me is easy to find with your photo, profile photos, construction projects with stages and photos, Stories for each project, a calmer map while you explore, and no blink when you tap a tab again.",
-  "sha256": "84bae98fd825839b4fb0c71d6166b00252a657a84906cf3cb1afb3dc667353f5",
+  "versionCode": 51,
+  "versionName": "2.26.0",
+  "notes": "A new chat: quick filters, who is in the field now, project photos, select and delete for you or for everyone, clear a chat, add chat photos to a project, translate English and Kiswahili, and an easier way to add people. Plus a Stories tab and a simpler Office.",
+  "sha256": "8fd1a9c81af0970d6463c948dca0597adefb355dad0c82a00a2cfe725d7734ac",
   "apk": "/app/rafiki-pin.apk"
 }
