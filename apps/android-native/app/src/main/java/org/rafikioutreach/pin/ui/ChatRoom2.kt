@@ -81,8 +81,11 @@ internal fun RoomHead(m: AppModel, row: ChatRow?, c: String, me: String, presenc
             ChatAvatar(row, me, 40.dp, row?.kind == "dm" && p?.online == true, m = m)
             Column(Modifier.weight(1f).padding(start = 10.dp)) {
                 Text(row?.let { chatTitle(it, me) } ?: "", style = CwType.name(FontWeight.ExtraBold), color = C.ink, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.testTag("head_title"))
-                if (status.isNotBlank()) Text(status, style = CwType.meta(if (typed != null) FontWeight.SemiBold else FontWeight.Medium),
+                if (status.isNotBlank()) Row(verticalAlignment = Alignment.CenterVertically) {
+                if (typed != null && !(typed.contains("record") || typed.contains("rekodi"))) TypingDots(Cw2.un(), Modifier.padding(end = 6.dp), 4.dp)
+                Text(status, style = CwType.meta(if (typed != null) FontWeight.SemiBold else FontWeight.Medium),
                     color = if (typed != null || (p?.online == true && row?.kind == "dm")) Cw2.un() else C.muted, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.testTag("head_status"))
+                }
             }
             if (row?.muted() == true) Icon(ChatIc.get("mute"), t("Muted", "Imenyamazishwa"), tint = C.muted, modifier = Modifier.size(17.dp))
         }
