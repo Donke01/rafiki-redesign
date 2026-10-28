@@ -212,7 +212,10 @@ class ChatTest {
         assertTrue(has(if (sw) "Grace: @Reid Anderson" else "Grace: @Reid Anderson"))
         assertTrue(has("📷 " + (if (sw) "Picha" else "Photo")))
         assertTrue(tagged("row_mention") && tagged("row_muted") && tagged("online_dot"))
+        // 2.27.0 (RAFIKI Deep): the rows are cards, so the list is taller; Archived is its last row
+        rule.onNodeWithTag("chat_list").performScrollToNode(hasTestTag("chat_archived_row"))
         assertFalse("archived chats live under Archived", tagged("chatrow_g_old")); assertTrue(tagged("chat_archived_row"))
+        rule.onNodeWithTag("chat_list").performScrollToIndex(0); settle()
         rule.onNodeWithTag("chat_badge", useUnmergedTree = true).assertTextEquals("4")
         shot("chat-01-list-" + (if (sw) "sw" else "en") + (if (dark) "-dark" else "-light"))
     }

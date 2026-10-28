@@ -100,9 +100,10 @@ internal object ChatIc {
 internal object ChatLook {
     val online = Color(0xFF22B566)
     val readBlue = Color(0xFF34B7F1)
-    @Composable fun mine() = if (C.dark) Color(0xFF0E4A72) else if (C === Sun) Color(0xFFDCEBFF) else Color(0xFFD9EEFF)
+    /** My bubbles in the default colour: night blue (RAFIKI Deep, web v75); Bright sun keeps its pale blue. */
+    @Composable fun mine() = if (C === Sun) Color(0xFFDCEBFF) else Deep.me()
     @Composable fun theirs() = if (C.dark) Color(0xFF1E2A36) else Color.White
-    @Composable fun tick() = if (C.dark) Color(0xFF9CB4C6) else Color(0xFF6B7C8A)
+    @Composable fun tick() = if (LocalNight.current) Color(0xFFA9C3D6) else if (C.dark) Color(0xFF9CB4C6) else Color(0xFF6B7C8A)
     /** A sender's colour in a group (their name on the first bubble of a run). */
     @Composable fun nameColor(name: String) = C.hue(nameHue(name)).fg
 }
@@ -111,7 +112,7 @@ internal object ChatLook {
 @Composable
 internal fun Ticks(status: String, modifier: Modifier = Modifier, tint: Color = ChatLook.tick()) {
     // grey to blue: a soft fade when the message is read (chatpa)
-    val col by androidx.compose.animation.animateColorAsState(if (status == "read") ChatLook.readBlue else if (status == "failed") C.bad else tint,
+    val col by androidx.compose.animation.animateColorAsState(if (status == "read") (if (LocalNight.current) Deep.mint else ChatLook.readBlue) else if (status == "failed") C.bad else tint,
         androidx.compose.animation.core.tween(if (chatMotion()) 300 else 0), label = "tick")
     Canvas(modifier.size(if (status == "delivered" || status == "read") 18.dp else 14.dp, 12.dp).testTag("tick_$status")) {
         val sw = 1.6.dp.toPx()

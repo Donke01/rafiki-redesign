@@ -445,4 +445,45 @@ class Chat2Test {
     @Config(qualifiers = "w411dp-h891dp-xxhdpi") @Test fun room_411_en_dark() = roomLooks(411, 891, false, "dark")
     @Config(qualifiers = "w411dp-h891dp-xxhdpi") @Test fun room_411_en_sun() = roomLooks(411, 891, false, "sun")
     private fun text(t: String) = LayoutCheck.text(rule.onNodeWithTag(t, useUnmergedTree = true).fetchSemanticsNode())
+
+    // --- 2.27.0: the chat face lift, direction B "RAFIKI Deep" (web v75, design/chat-2026-10b/board-b.webp) -----------------
+    private fun deepLooks(width: Int, height: Int, sw: Boolean, mode: String) {
+        Lang.sw = sw; w = width; h = height; Look.mode = if (mode == "sun") "sun" else ""
+        world(); fake.tools.put("translate", true); val m = model(); show(m, dark = mode == "dark")
+        val tag = "$width-${if (sw) "sw" else "en"}-$mode"
+        val deep = mode != "sun"
+        tap("nav_chat"); waitTag("chatrow_g1"); until("field") { tagged("chat_field_Bertin Mwangi") }; settle(1500)
+        // the night header (with the chips and the field row) on top; the sun look stays plain
+        assertEquals(tag, deep, tagged("night"))
+        if (deep) assertTrue(rule.onAllNodes(hasTestTag("chat_chips") and hasAnyAncestor(hasTestTag("night")), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty())
+        shot("c3-list-$tag")
+        room("p_105")
+        assertEquals(tag, deep, rule.onAllNodes(hasTestTag("proj_strip") and hasAnyAncestor(hasTestTag("night")), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty())
+        assertTrue(tagged("wall_warm") == deep || !deep)
+        shot("c3-room-$tag")
+        // hold a message: the dark sheet with four tiles, Translate first below them, Delete last
+        hold("Mwenyekiti"); waitTag("msg_sheet")
+        if (deep) {
+            assertTrue(tagged("act_tiles"))
+            val ys = listOf("act_translate", "act_pin", "act_select", "act_repair", "act_delete").map { k -> rule.onNodeWithTag(k, useUnmergedTree = true).fetchSemanticsNode().positionInRoot.y }
+            assertEquals(tag, ys.sorted(), ys)
+            listOf("act_reply", "act_fwd", "act_copy", "act_star").forEach { k -> assertTrue(rule.onAllNodes(hasTestTag(k) and hasAnyAncestor(hasTestTag("act_tiles")), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty()) }
+        } else assertFalse(tagged("act_tiles"))
+        sheetShot("c3-sheet-$tag"); noLayoutProblems("msg_sheet", tag)
+        back(); assertFalse(tagged("msg_sheet"))
+        // chat info: the night header card, cards on sand; the default bubble is "Night blue", the default wallpaper "Standard"
+        tap("chat_head"); waitTag("chat_info"); settle(1200)
+        assertEquals(tag, deep, tagged("info_head"))
+        shot("c3-info-$tag"); noLayoutProblems("chat_info", tag)
+        if (deep) {
+            assertTrue(has(if (sw) "Bluu ya usiku" else "Night blue")); assertTrue(has(if (sw) "Kawaida" else "Standard"))
+            tap("info_wall"); waitTag("wall_sheet"); sheetShot("c3-wall-$tag"); noLayoutProblems("wall_sheet", tag); back()
+            tap("info_bubble"); waitTag("bubble_sheet"); sheetShot("c3-bubble-$tag"); noLayoutProblems("bubble_sheet", tag); back()
+        }
+    }
+    @Config(qualifiers = "w360dp-h800dp-xxhdpi") @Test fun deep_360_en_light() = deepLooks(360, 800, false, "light")
+    @Config(qualifiers = "w320dp-h640dp-xhdpi") @Test fun deep_320_sw_light() = deepLooks(320, 640, true, "light")
+    @Config(qualifiers = "w360dp-h800dp-xxhdpi") @Test fun deep_360_sw_dark() = deepLooks(360, 800, true, "dark")
+    @Config(qualifiers = "w411dp-h891dp-xxhdpi") @Test fun deep_411_en_dark() = deepLooks(411, 891, false, "dark")
+    @Config(qualifiers = "w320dp-h640dp-xhdpi") @Test fun deep_320_en_sun() = deepLooks(320, 640, false, "sun")
 }

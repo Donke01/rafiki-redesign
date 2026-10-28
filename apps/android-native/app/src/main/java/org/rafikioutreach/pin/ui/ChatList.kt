@@ -84,27 +84,36 @@ fun ChatListScreen(m: AppModel, open: (String) -> Unit, newChat: () -> Unit, arc
     val state = rememberLazyListState()
     ShowInBar(m, if (archived) t("Archived", "Zilizohifadhiwa") else t("Chats", "Gumzo"), !ownTop && state.firstVisibleItemIndex > 0)
 
-    Box(Modifier.fillMaxSize().background(if (ownTop) C.card else Color.Transparent)) {
+    // RAFIKI Deep (web v75): the night header on top, the chats as cards on sand
+    val deep = Deep.on()
+    Box(Modifier.fillMaxSize().background(if (deep) Deep.sand() else if (ownTop) C.card else Color.Transparent)) {
         LazyColumn(Modifier.fillMaxSize().testTag(if (archived) "chat_archived" else "chat_list"), state, contentPadding = PaddingValues(bottom = 96.dp)) {
             item(key = "head") {
                 if (archived) Text(t("Archived", "Zilizohifadhiwa"), style = CwType.title(), color = C.ink, modifier = Modifier.padding(start = 16.dp, top = 8.dp, bottom = 4.dp).testTag("chat_title"))
-                else ChatHead(m, searching, q, { q = it }, { searching = true }, { q = ""; searching = false }, {
-                    ChatMoreMenu(m, ownTop, openSettings, openStarred, openArchived, newChat, openNotes) {
-                        scope.launch { hub.refreshList(); m.refresh(quiet = true) }
-                        android.widget.Toast.makeText(m.getApplication(), t("Updated", "Imesasishwa"), android.widget.Toast.LENGTH_SHORT).show()
-                    }
-                }, openMe, ownTop)
+                else NightBlock(Modifier.padding(bottom = if (deep) 6.dp else 0.dp)) {
+                    ChatHead(m, searching, q, { q = it }, { searching = true }, { q = ""; searching = false }, {
+                        ChatMoreMenu(m, ownTop, openSettings, openStarred, openArchived, newChat, openNotes) {
+                            scope.launch { hub.refreshList(); m.refresh(quiet = true) }
+                            android.widget.Toast.makeText(m.getApplication(), t("Updated", "Imesasishwa"), android.widget.Toast.LENGTH_SHORT).show()
+                        }
+                    }, openMe, ownTop)
+                    // the chips and "In the field now" continue the night block
+                    if (!off && q.isBlank() && !searching) { ChatChips(rows); ChatFieldRow(m, presence) }
+                    if (deep) Spacer(Modifier.height(4.dp))
+                }
             }
             if (off) { item(key = "off") { ChatOff(Modifier.padding(horizontal = 16.dp, vertical = 8.dp), m.chat.offNeed) }; return@LazyColumn }
             if (archived) item(key = "search") { ChatSearchField(q, { q = it; searching = true }) }
             if (q.isNotBlank()) { chatSearch(this, m, q, rows, open) { q = ""; searching = false }; return@LazyColumn }
             if (searching) return@LazyColumn
             if (!archived) {
-                item(key = "chips") { ChatChips(rows) }
-                item(key = "field") { ChatFieldRow(m, presence) }
                 item(key = "alerts") { ChatAlertPrompt(m) }
             }
-            items(shown, key = { it.id }) { r -> ChatRowSwipe(m, r, me, presence, typing, undo, { open(r.id) }) { hp.long(); held = r } }
+            items(shown, key = { it.id }) { r ->
+                if (deep) Box(Modifier.padding(horizontal = 12.dp, vertical = 4.dp).shadow(2.dp, RoundedCornerShape(18.dp), ambientColor = Color(0x1F3C280A), spotColor = Color(0x1F3C280A)).clip(RoundedCornerShape(18.dp))) {
+                    ChatRowSwipe(m, r, me, presence, typing, undo, { open(r.id) }, card = true) { hp.long(); held = r }
+                } else ChatRowSwipe(m, r, me, presence, typing, undo, { open(r.id) }) { hp.long(); held = r }
+            }
             if (!archived && live.isNotEmpty() && shown.isEmpty()) item(key = "chipnone") {
                 ChatEmpty(ChatChip.empty(chip), "chat_none_chip", t("Show all chats", "Onyesha gumzo zote"), onAction = { ChatChip.now = "all" })
             }
@@ -181,7 +190,7 @@ private fun SearchHits(m: AppModel, q: String, rows: List<ChatRow>, open: (Strin
 /** A row that swipes: left to archive (or unarchive), right to mute or unmute. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ChatRowSwipe(m: AppModel, r: ChatRow, me: String, presence: Map<String, org.rafikioutreach.pin.data.Presence>, typing: Map<String, Map<String, Pair<String, Long>>>, undo: UndoState, open: () -> Unit, long: () -> Unit) {
+private fun ChatRowSwipe(m: AppModel, r: ChatRow, me: String, presence: Map<String, org.rafikioutreach.pin.data.Presence>, typing: Map<String, Map<String, Pair<String, Long>>>, undo: UndoState, open: () -> Unit, card: Boolean = false, long: () -> Unit) {
     val hp = rememberHaptics()
     val st = rememberSwipeToDismissBoxState(confirmValueChange = { v ->
         when (v) {
@@ -202,7 +211,7 @@ private fun ChatRowSwipe(m: AppModel, r: ChatRow, me: String, presence: Map<Stri
             Text(if (left) (if (r.muted()) t("Unmute", "Washa arifa") else t("Mute", "Nyamazisha")) else (if (r.archived) t("Unarchive", "Rudisha") else t("Archive", "Hifadhi")),
                 style = MaterialTheme.typography.labelLarge, color = if (left) C.hue("slate").fg else C.hue("green").fg, maxLines = 1, softWrap = false)
         }
-    }) { ChatRowPlain(m, r, me, presence, typing, open, long) }
+    }) { ChatRowPlain(m, r, me, presence, typing, open, long, card) }
 }
 
 /** One row of the chat list (chat 2, list.png): 74 dp, a 52 dp picture, a thin divider under the words; unread = a bold
@@ -210,19 +219,19 @@ private fun ChatRowSwipe(m: AppModel, r: ChatRow, me: String, presence: Map<Stri
  *  ticks before my own last message. */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-internal fun ChatRowPlain(m: AppModel, r: ChatRow, me: String, presence: Map<String, org.rafikioutreach.pin.data.Presence>, typing: Map<String, Map<String, Pair<String, Long>>>, open: () -> Unit, long: (() -> Unit)?) {
+internal fun ChatRowPlain(m: AppModel, r: ChatRow, me: String, presence: Map<String, org.rafikioutreach.pin.data.Presence>, typing: Map<String, Map<String, Pair<String, Long>>>, open: () -> Unit, long: (() -> Unit)?, card: Boolean = false) {
     val other = r.other(me)
     val online = r.kind == "dm" && presence[other]?.online == true
     val muted = r.muted()
     val typed = remember(typing, r.id) { m.chat.typingText(r.id, r.isGroup) }
     val un = r.unread > 0
     val line = if (C === Sun) Color.Black else C.line
-    val lineW = if (C === Sun) 2.dp else 1.dp
-    Row(Modifier.fillMaxWidth().background(C.card).combinedClickable(role = Role.Button, onClick = open, onLongClick = long).padding(start = 16.dp, end = 16.dp).testTag("chatrow_${r.id}"),
+    val lineW = if (card) 0.dp else if (C === Sun) 2.dp else 1.dp
+    Row(Modifier.fillMaxWidth().background(C.card).combinedClickable(role = Role.Button, onClick = open, onLongClick = long).padding(start = if (card) 12.dp else 16.dp, end = if (card) 12.dp else 16.dp).testTag("chatrow_${r.id}"),
         verticalAlignment = Alignment.CenterVertically) {
         ChatAvatar(r, me, 52.dp, online, m = m)
         Spacer(Modifier.width(13.dp))
-        Column(Modifier.weight(1f).heightIn(min = 74.dp).drawBehind { val w = lineW.toPx(); drawLine(line, androidx.compose.ui.geometry.Offset(0f, size.height - w / 2), androidx.compose.ui.geometry.Offset(size.width, size.height - w / 2), w) }
+        Column(Modifier.weight(1f).heightIn(min = 74.dp).drawBehind { val w = lineW.toPx(); if (w > 0f) drawLine(line, androidx.compose.ui.geometry.Offset(0f, size.height - w / 2), androidx.compose.ui.geometry.Offset(size.width, size.height - w / 2), w) }
             .padding(vertical = 8.dp), verticalArrangement = Arrangement.Center) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(chatTitle(r, me), style = CwType.name(if (un) FontWeight.ExtraBold else FontWeight.Bold), color = C.ink, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f).padding(end = 8.dp))

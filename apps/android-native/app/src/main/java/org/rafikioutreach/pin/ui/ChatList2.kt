@@ -64,15 +64,17 @@ internal object CwType {
 
 /** Chat 2 colours: the chips, the "@" pill, the new-chat button, the alert prompt (light, dark, sun). */
 internal object Cw2 {
-    @Composable fun chip() = if (C === Sun) Color.White else if (C.dark) Color(0xFF1E2830) else Color(0xFFEEF0F2)
-    @Composable fun chipText() = if (C === Sun) Color.Black else if (C.dark) Color(0xFFE6EEF5) else Color(0xFF141618)
-    @Composable fun on() = if (C === Sun) Color(0xFF00562A) else if (C.dark) Color(0x333CC07A) else Color(0xFFDDF1E6)
-    @Composable fun onText() = if (C === Sun) Color.White else if (C.dark) Color(0xFF8BE3B2) else Color(0xFF11643A)
-    @Composable fun at() = if (C === Sun) Color.White else if (C.dark) Color(0x333CC07A) else Color(0xFFE3F4EA)
-    @Composable fun un() = if (C === Sun) Color(0xFF00562A) else if (C.dark) Color(0xFF3CC07A) else Color(0xFF1C8A50)
+    // in a night part (RAFIKI Deep): white-on-night chips, the chosen one white with navy words, mint for unread
+    @Composable private fun night() = LocalNight.current
+    @Composable fun chip() = if (night()) Color(0x1AFFFFFF) else if (C === Sun) Color.White else if (C.dark) Color(0xFF1E2830) else Color(0xFFEEF0F2)
+    @Composable fun chipText() = if (night()) Color(0xFFDCEAF3) else if (C === Sun) Color.Black else if (C.dark) Color(0xFFE6EEF5) else Color(0xFF141618)
+    @Composable fun on() = if (night()) Color.White else if (C === Sun) Color(0xFF00562A) else if (C.dark) Color(0x333CC07A) else Color(0xFFDDF1E6)
+    @Composable fun onText() = if (night()) Color(0xFF04263F) else if (C === Sun) Color.White else if (C.dark) Color(0xFF8BE3B2) else Color(0xFF11643A)
+    @Composable fun at() = if (night()) Color(0x297FE3B0) else if (C === Sun) Color.White else if (C.dark) Color(0x333CC07A) else Color(0xFFE3F4EA)
+    @Composable fun un() = if (night()) Deep.mint else if (C === Sun) Color(0xFF00562A) else if (C.dark) Color(0xFF3CC07A) else Color(0xFF1C8A50)
     @Composable fun fab() = if (C === Sun) Color(0xFF00562A) else Color(0xFF1C8A50)
     @Composable fun note() = if (C === Sun) Color.White else if (C.dark) Color(0x1F5BC0FF) else Color(0xFFEAF4FB)
-    @Composable fun link() = if (C === Sun) Color(0xFF0050A0) else if (C.dark) Color(0xFF5BC0FF) else C.blue
+    @Composable fun link() = if (night()) Color.White else if (C === Sun) Color(0xFF0050A0) else if (C.dark) Color(0xFF5BC0FF) else C.blue
     @Composable fun edge(): Modifier = if (C === Sun) Modifier.border(2.dp, Color.Black, RoundedCornerShape(99.dp)) else Modifier
 }
 
@@ -116,7 +118,7 @@ internal fun ChatHead(m: AppModel, searching: Boolean, q: String, setQ: (String)
         }
         if (ownTop) {
             Box(Modifier.size(46.dp).clip(CircleShape).clickable(role = Role.Button) { hp.tap(); openMe() }.semantics { contentDescription = t("Me", "Mimi") }.testTag("chat_me"), contentAlignment = Alignment.Center) {
-                Box(Modifier.size(42.dp).border(2.dp, C.blue, CircleShape).padding(3.dp)) {
+                Box(Modifier.size(42.dp).border(2.dp, if (LocalNight.current) Color(0xFF5CC8E8) else C.blue, CircleShape).padding(3.dp)) {
                     PhotoOr(m.prefs.name, 36.dp) {
                         Box(Modifier.size(36.dp).clip(CircleShape).background(Brush.linearGradient(listOf(Color(0xFF1576BD), Color(0xFF054F81)))), contentAlignment = Alignment.Center) {
                             Text(initialsOf(m.prefs.name), color = Color.White, style = CwType.meta(FontWeight.ExtraBold), maxLines = 1, softWrap = false)
@@ -150,7 +152,7 @@ internal fun ChatMoreMenu(m: AppModel, ownTop: Boolean, openSettings: () -> Unit
             Icon(Ic.get("more"), null, tint = C.ink, modifier = Modifier.size(23.dp))
             if (ownTop && bell > 0) Box(Modifier.align(Alignment.TopEnd).padding(top = 9.dp, end = 10.dp).size(11.dp).clip(CircleShape).background(C.card).padding(2.dp).clip(CircleShape).background(C.bad).testTag("chat_menu_dot"))
         }
-        DropdownMenu(open, { open = false }, modifier = Modifier.background(C.card).testTag("chat_menu_pop")) {
+        Day { DropdownMenu(open, { open = false }, modifier = Modifier.background(C.card).testTag("chat_menu_pop")) {
             @Composable fun item(tag: String, icon: String, label: String, n: Int = 0, go: () -> Unit) = DropdownMenuItem(
                 { Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(label, style = CwType.name(FontWeight.SemiBold), color = C.text, modifier = Modifier.weight(1f, fill = false))
@@ -166,7 +168,7 @@ internal fun ChatMoreMenu(m: AppModel, ownTop: Boolean, openSettings: () -> Unit
                 item("menu_bell", "bell", t("Notifications", "Arifa"), bell, openNotes)
                 item("menu_refresh", "undo", t("Refresh", "Onyesha upya"), go = refresh)
             }
-        }
+        } }
     }
 }
 
@@ -238,14 +240,14 @@ internal fun ChatFieldRow(m: AppModel, presence: Map<String, Presence>) {
     Column(Modifier.fillMaxWidth().padding(bottom = 10.dp).testTag("chat_field")) {
         Row(Modifier.padding(start = 16.dp, bottom = 8.dp, top = 2.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.size(8.dp).clip(CircleShape).background(Cw2.un())); Spacer(Modifier.width(7.dp))
-            Text(t("In the field now", "Uwanjani sasa").uppercase(if (org.rafikioutreach.pin.Lang.sw) java.util.Locale("sw") else java.util.Locale.US), style = CwType.small(FontWeight.ExtraBold).copy(letterSpacing = 0.9.sp), color = C.muted, modifier = Modifier.semantics { heading() })
+            Text(t("In the field now", "Uwanjani sasa").uppercase(if (org.rafikioutreach.pin.Lang.sw) java.util.Locale("sw") else java.util.Locale.US), style = CwType.small(FontWeight.ExtraBold).copy(letterSpacing = 0.9.sp), color = if (LocalNight.current) Deep.ice else C.muted, modifier = Modifier.semantics { heading() })
         }
         Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(start = 12.dp, end = 12.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             people.forEach { p ->
                 Column(Modifier.width(80.dp).clip(RoundedCornerShape(14.dp)).clickable(role = Role.Button) { hp.tap(); ChatNav.dm(p.name) }
                     .semantics(mergeDescendants = true) { contentDescription = p.name + ", " + p.label }.padding(vertical = 2.dp).testTag("chat_field_${p.name}"), horizontalAlignment = Alignment.CenterHorizontally) {
                     Box(Modifier.size(58.dp)) {
-                        val ring = when (p.k) { "site" -> Brush.sweepGradient(listOf(Color(0xFF1C9C5A), Color(0xFF0A78C2), Color(0xFF1C9C5A))); "on" -> SolidColor(Cw2.un()); else -> SolidColor(C.line) }
+                        val ring = when (p.k) { "site" -> if (LocalNight.current) Brush.sweepGradient(listOf(Color(0xFF5CE0A0), Color(0xFF5CC8E8), Color(0xFF5CE0A0))) else Brush.sweepGradient(listOf(Color(0xFF1C9C5A), Color(0xFF0A78C2), Color(0xFF1C9C5A))); "on" -> SolidColor(Cw2.un()); else -> SolidColor(if (LocalNight.current) Color(0x40FFFFFF) else C.line) }
                         Box(Modifier.size(58.dp).clip(CircleShape).background(ring).padding(2.5.dp).clip(CircleShape).background(C.card).padding(2.5.dp)) { PersonAvatar(p.name, 48.dp) }
                         if (p.k == "site") Box(Modifier.align(Alignment.BottomEnd).offset(2.dp, 1.dp).size(22.dp).shadow(2.dp, CircleShape).clip(CircleShape).background(C.card).testTag("chat_field_pin"), contentAlignment = Alignment.Center) {
                             Icon(Ic.get("pin"), null, tint = Cw2.un(), modifier = Modifier.size(14.dp))
@@ -257,7 +259,7 @@ internal fun ChatFieldRow(m: AppModel, presence: Map<String, Presence>) {
             }
         }
     }
-    androidx.compose.material3.HorizontalDivider(color = if (C === Sun) Color.Black else C.line, thickness = if (C === Sun) 2.dp else 1.dp)
+    if (!LocalNight.current) androidx.compose.material3.HorizontalDivider(color = if (C === Sun) Color.Black else C.line, thickness = if (C === Sun) 2.dp else 1.dp)
 }
 
 // ---------------------------------------------------------------------------------------------- the alert prompt
@@ -298,7 +300,7 @@ internal fun ChatArchivedRow(n: Int, open: () -> Unit) {
 @Composable
 internal fun ChatFab(modifier: Modifier, onClick: () -> Unit) {
     val hp = rememberHaptics()
-    Box(modifier.size(56.dp).shadow(10.dp, RoundedCornerShape(18.dp), spotColor = Color(0x591C8A50)).clip(RoundedCornerShape(18.dp)).background(Cw2.fab())
+    Box(modifier.size(56.dp).shadow(10.dp, RoundedCornerShape(18.dp), spotColor = Color(0x591C8A50)).clip(RoundedCornerShape(18.dp)).then(if (Deep.on()) Modifier.background(Deep.go()) else Modifier.background(Cw2.fab()))
         .then(if (C === Sun) Modifier.border(2.dp, Color.Black, RoundedCornerShape(18.dp)) else Modifier)
         .clickable(role = Role.Button) { hp.tap(); onClick() }.semantics { contentDescription = t("New chat", "Gumzo jipya") }.testTag("chat_new"), contentAlignment = Alignment.Center) {
         Icon(ChatIc.get("newchat"), null, tint = Color.White, modifier = Modifier.size(25.dp))

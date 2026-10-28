@@ -73,7 +73,7 @@ internal fun RoomHead(m: AppModel, row: ChatRow?, c: String, me: String, presenc
     }
     val hp = rememberHaptics()
     val narrow = androidx.compose.ui.platform.LocalConfiguration.current.screenWidthDp < 360
-    Row(Modifier.fillMaxWidth().background(C.card).heightIn(min = 60.dp).padding(start = 2.dp, end = 4.dp, top = 4.dp, bottom = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(Modifier.fillMaxWidth().background(if (LocalNight.current) Color.Transparent else C.card).heightIn(min = 60.dp).padding(start = 2.dp, end = 4.dp, top = 4.dp, bottom = 4.dp), verticalAlignment = Alignment.CenterVertically) {
         if (back != null) Box(Modifier.size(44.dp).clip(CircleShape).clickable(role = Role.Button) { hp.tap(); back() }.semantics { contentDescription = t("Back", "Rudi") }.testTag("room_back"), contentAlignment = Alignment.Center) {
             Icon(Ic.get("back"), null, tint = C.ink, modifier = Modifier.size(24.dp))
         }
@@ -110,7 +110,8 @@ internal fun ProjectStrip(m: AppModel, row: ChatRow, openProject: (String, Strin
         snap.building(p) -> t("Under construction", "Inajengwa") to "build"
         else -> t("Working", "Inafanya kazi") to "ok"
     }
-    val (fg, bg) = when (tone) { "bad" -> C.bad to C.badBg; "warn" -> C.warn to C.warnBg; "build" -> C.blue2 to C.tint; else -> (if (C === Sun) Color(0xFF00562A) else if (C.dark) C.ok else Color(0xFF11643A)) to (if (C === Sun) Color(0xFFD8F5E3) else if (C.dark) C.okBg else Color(0xFFE3F4EA)) }
+    val night = LocalNight.current
+    val (fg, bg) = if (night) (when (tone) { "bad" -> Color(0xFFFF8A80); "warn" -> Color(0xFFF2B35B); "build" -> Deep.ice; else -> Deep.mint } to Color(0x1FFFFFFF)) else when (tone) { "bad" -> C.bad to C.badBg; "warn" -> C.warn to C.warnBg; "build" -> C.blue2 to C.tint; else -> (if (C === Sun) Color(0xFF00562A) else if (C.dark) C.ok else Color(0xFF11643A)) to (if (C === Sun) Color(0xFFD8F5E3) else if (C.dark) C.okBg else Color(0xFFE3F4EA)) }
     val v = snap.visits[p.id]
     val place = listOf(p.area, p.country).filter { it.isNotBlank() }.joinToString(", ")
     val line = listOfNotNull(v?.at?.takeIf { it.isNotBlank() }?.let { a -> runCatching { t("Visited ", "Ilitembelewa ") + Dates.day(Instant.parse(a).atZone(Dates.zone()).toLocalDate()) }.getOrNull() }, place.ifBlank { null }).joinToString(" · ")
@@ -118,7 +119,7 @@ internal fun ProjectStrip(m: AppModel, row: ChatRow, openProject: (String, Strin
     val measurer = androidx.compose.ui.text.rememberTextMeasurer()
     val st = CwType.meta(FontWeight.Bold); val so = CwType.meta(FontWeight.ExtraBold)
     val open = t("Open project ›", "Fungua mradi ›")
-    BoxWithConstraints(Modifier.fillMaxWidth().background(if (C === Sun) Color.White else if (C.dark) Color(0xFF121A21) else Color(0xFFF7FAFC)).clickable(role = Role.Button) { hp.tap(); openProject(p.id, "pin") }
+    BoxWithConstraints(Modifier.fillMaxWidth().background(if (night) Color.Transparent else if (C === Sun) Color.White else if (C.dark) Color(0xFF121A21) else Color(0xFFF7FAFC)).clickable(role = Role.Button) { hp.tap(); openProject(p.id, "pin") }
         .heightIn(min = 44.dp).padding(horizontal = 14.dp, vertical = 6.dp).testTag("proj_strip")) {
         val dens = androidx.compose.ui.platform.LocalDensity.current
         // the status and Open project always whole; the place gets what's left, or its own line when that's too little
@@ -139,7 +140,8 @@ internal fun ProjectStrip(m: AppModel, row: ChatRow, openProject: (String, Strin
             if (line.isNotBlank()) Text(line, style = CwType.meta(), color = C.muted, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 3.dp).testTag("proj_strip_line"))
         }
     }
-    HorizontalDivider(color = if (C === Sun) Color.Black else C.line, thickness = if (C === Sun) 2.dp else 1.dp)
+    if (!night) HorizontalDivider(color = if (C === Sun) Color.Black else C.line, thickness = if (C === Sun) 2.dp else 1.dp)
+    else Spacer(Modifier.height(4.dp))
 }
 
 /** B10: selecting: a dark bar over the header: × "2 selected", forward (one), star, delete. */
@@ -255,7 +257,7 @@ internal fun RoomMenu(row: ChatRow?, canAdd: Boolean, pick: (String) -> Unit) {
         Box(Modifier.size(42.dp).clip(CircleShape).background(if (open) C.tint else Color.Transparent).clickable(role = Role.Button) { hp.tap(); open = true }.semantics { contentDescription = t("More", "Zaidi") }.testTag("room_menu"), contentAlignment = Alignment.Center) {
             Icon(Ic.get("more"), null, tint = C.ink, modifier = Modifier.size(22.dp))
         }
-        DropdownMenu(open, { open = false }, modifier = Modifier.background(C.card).testTag("room_menu_pop")) {
+        Day { DropdownMenu(open, { open = false }, modifier = Modifier.background(C.card).testTag("room_menu_pop")) {
             @Composable fun item(k: String, icon: String, label: String, red: Boolean = false) = DropdownMenuItem({ Text(label, style = CwType.name(FontWeight.SemiBold), color = if (red) C.bad else C.text) },
                 { open = false; pick(k) }, leadingIcon = { Icon(ChatIc.get(icon), null, tint = if (red) C.bad else C.muted, modifier = Modifier.size(21.dp)) }, modifier = Modifier.heightIn(min = 48.dp).testTag("room_m_$k"))
             item("search", "search", t("Search", "Tafuta"))
@@ -266,7 +268,7 @@ internal fun RoomMenu(row: ChatRow?, canAdd: Boolean, pick: (String) -> Unit) {
             item("info", "info", t("Chat info", "Maelezo ya gumzo"))
             item("clear", "trash", t("Clear chat", "Futa jumbe"), red = true)
             if (row?.kind == "dm") item("delete", "trash", t("Delete chat", "Futa gumzo"), red = true)
-        }
+        } }
     }
 }
 
@@ -275,7 +277,7 @@ internal fun RoomMenu(row: ChatRow?, canAdd: Boolean, pick: (String) -> Unit) {
 internal fun FindBar(q: String, set: (String) -> Unit, n: Int, at: Int, up: () -> Unit, down: () -> Unit, close: () -> Unit) {
     val fr = remember { FocusRequester() }
     LaunchedEffect(Unit) { runCatching { fr.requestFocus() } }
-    Row(Modifier.fillMaxWidth().background(C.card).heightIn(min = 56.dp).padding(horizontal = 4.dp).testTag("find_bar"), verticalAlignment = Alignment.CenterVertically) {
+    Row(Modifier.fillMaxWidth().background(if (LocalNight.current) Color.Transparent else C.card).heightIn(min = 56.dp).padding(horizontal = 4.dp).testTag("find_bar"), verticalAlignment = Alignment.CenterVertically) {
         Box(Modifier.size(44.dp).clip(CircleShape).clickable(role = Role.Button, onClick = close).semantics { contentDescription = t("Close the search", "Funga utafutaji") }.testTag("find_close"), contentAlignment = Alignment.Center) {
             Icon(Ic.get("back"), null, tint = C.ink, modifier = Modifier.size(22.dp))
         }

@@ -6,6 +6,7 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.ui.draw.shadow
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -73,11 +74,15 @@ fun ChatInfoScreen(m: AppModel, c: String, back: () -> Unit, openChat: (String) 
         }
     }
     val other = row.other(me)
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 110.dp).testTag("chat_info")) {
+    // RAFIKI Deep (web v75): a night header card with the photo ring, then cards on sand
+    val deep = Deep.on()
+    Column(Modifier.fillMaxSize().then(if (deep) Modifier.background(Deep.sand()) else Modifier).verticalScroll(rememberScrollState()).padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 110.dp).testTag("chat_info")) {
         // who or what this is
-        Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+        Night(deep) {
+        Column(Modifier.fillMaxWidth().then(if (deep) with(Deep) { Modifier.shadow(8.dp, RoundedCornerShape(24.dp), ambientColor = Color(0x3304263F), spotColor = Color(0x3304263F)).clip(RoundedCornerShape(24.dp)).nightGlow().padding(horizontal = 16.dp, vertical = 20.dp).testTag("info_head") } else Modifier),
+            horizontalAlignment = Alignment.CenterHorizontally) {
             Box(Modifier.clickable(enabled = iAdmin && row.kind == "group", role = Role.Button) { photoPick.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }) {
-                ChatAvatar(row, me, 104.dp, row.kind == "dm" && presence[other]?.online == true, m = m)
+                Box(if (deep) Modifier.border(2.dp, Color(0xFF5CC8E8), CircleShape).padding(4.dp) else Modifier) { ChatAvatar(row, me, 104.dp, row.kind == "dm" && presence[other]?.online == true, m = m) }
                 if (iAdmin && row.kind == "group") Box(Modifier.align(Alignment.BottomEnd).size(32.dp).clip(CircleShape).background(C.card).border(1.dp, C.line, CircleShape).testTag("info_photo"), contentAlignment = Alignment.Center) {
                     Icon(Ic.get("camera"), t("Change photo", "Badilisha picha"), tint = C.blue, modifier = Modifier.size(16.dp))
                 }
@@ -88,9 +93,10 @@ fun ChatInfoScreen(m: AppModel, c: String, back: () -> Unit, openChat: (String) 
                 "team" -> t("Team group", "Kikundi cha timu") + " · " + t("${row.members.size} members", "wanachama ${row.members.size}")
                 "project" -> t("Project thread", "Mazungumzo ya mradi") + " · " + t("${row.members.size} people", "watu ${row.members.size}")
                 else -> t("Group", "Kikundi") + " · " + t("${row.members.size} members", "wanachama ${row.members.size}")
-            }, style = MaterialTheme.typography.bodyMedium, color = C.muted, textAlign = TextAlign.Center)
+            }, style = MaterialTheme.typography.bodyMedium, color = if (deep) Deep.ice else C.muted, textAlign = TextAlign.Center)
             if (row.description.isNotBlank()) Text(row.description, style = MaterialTheme.typography.bodyMedium, color = C.text, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 8.dp).testTag("info_desc"))
             said?.let { (tone, text) -> Msg(text, tone) }
+        }
         }
         Row(Modifier.padding(top = 14.dp).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             if (row.kind == "dm") Btn(t("Contact", "Mawasiliano"), { Contact.show(other) }, Modifier.weight(1f).testTag("info_contact"), icon = "person", light = true, small = true, outline = true)
@@ -104,8 +110,8 @@ fun ChatInfoScreen(m: AppModel, c: String, back: () -> Unit, openChat: (String) 
             SwitchRow("info_sound", t("Sound for new messages", "Sauti kwa ujumbe mpya"), !hub.quiet(c).also { tick }) { hub.setQuiet(c, !it) }
         }
         InfoCard(t("CHAT", "GUMZO")) {
-            SheetRow("info_bubble", "bubble", t("My bubble colour", "Rangi ya viputo vyangu"), value = bubbleName(row.bubble)) { sheet = "bubble" }
-            SheetRow("info_wall", "wall", t("Wallpaper", "Mandhari"), value = wallLabel(row.wallpaper)) { sheet = "wall" }
+            SheetRow("info_bubble", "bubble", t("My bubble colour", "Rangi ya viputo vyangu"), value = bubbleName(row.bubble, deep)) { sheet = "bubble" }
+            SheetRow("info_wall", "wall", t("Wallpaper", "Mandhari"), value = wallLabel(row.wallpaper, deep)) { sheet = "wall" }
             SheetRow("info_pin", "pin", if (row.pinned) t("Unpin chat", "Ondoa kibandiko") else t("Pin chat", "Bandika gumzo")) { hub.pin(c, !row.pinned) }
             if (row.isGroup) {
                 if (iAdmin) SwitchRow("info_only", t("Only admins can send messages", "Wasimamizi pekee wanaweza kutuma ujumbe"), row.onlyAdmins) { on -> scope.launch { hub.updateGroup(c, JSONObject().put("onlyAdmins", on))?.let { said = "bad" to it } } }
@@ -147,11 +153,11 @@ fun ChatInfoScreen(m: AppModel, c: String, back: () -> Unit, openChat: (String) 
                         Column(Modifier.weight(1f).clip(RoundedCornerShape(14.dp)).clickable(role = Role.RadioButton) { hide { scope.launch { hub.prefs(c, JSONObject().put("wallpaper", k)) } } }.testTag("wall_${k.ifBlank { "none" }}"),
                             horizontalAlignment = Alignment.CenterHorizontally) {
                             Box(Modifier.fillMaxWidth().aspectRatio(0.62f).clip(RoundedCornerShape(12.dp)).background(C.bg).border(if (on) 3.dp else 1.dp, if (on) C.blue else C.line, RoundedCornerShape(12.dp))) {
-                                ChatWall(k, Modifier.matchParentSize())
+                                if (k.isBlank() && Deep.on()) SandWall(Modifier.matchParentSize()) else ChatWall(k, Modifier.matchParentSize())
                                 // a bubble in my colour, to see how it reads
                                 Box(Modifier.align(Alignment.BottomEnd).padding(6.dp).size(28.dp, 12.dp).clip(RoundedCornerShape(6.dp)).background(bubbleColor(row.bubble)))
                             }
-                            FitWords(wallLabel(k), MaterialTheme.typography.labelSmall, C.ink, Modifier.padding(top = 4.dp), lines = 1)
+                            FitWords(wallLabel(k, Deep.on()), MaterialTheme.typography.labelSmall, C.ink, Modifier.padding(top = 4.dp), lines = 2)
                         }
                     }
                 }
@@ -168,7 +174,7 @@ fun ChatInfoScreen(m: AppModel, c: String, back: () -> Unit, openChat: (String) 
                             Box(Modifier.size(46.dp).clip(CircleShape).background(bubbleColor(k)).border(if (on) 3.dp else 1.dp, if (on) C.blue else C.line, CircleShape), contentAlignment = Alignment.Center) {
                                 if (on) Icon(Ic.get("check"), null, tint = C.blue, modifier = Modifier.size(20.dp))
                             }
-                            FitWords(bubbleName(k), MaterialTheme.typography.labelSmall, C.ink, Modifier.padding(top = 4.dp), lines = 1)
+                            FitWords(bubbleName(k, Deep.on()), MaterialTheme.typography.labelSmall.copy(textAlign = TextAlign.Center), C.ink, Modifier.padding(top = 4.dp), lines = 2)
                         }
                     }
                 }
@@ -188,8 +194,10 @@ fun ChatInfoScreen(m: AppModel, c: String, back: () -> Unit, openChat: (String) 
 
 @Composable
 private fun InfoCard(label: String, content: @Composable ColumnScope.() -> Unit) {
-    Column(Modifier.padding(top = 14.dp).fillMaxWidth().clip(RoundedCornerShape(22.dp)).background(C.card).border(if (C.glassy) 1.dp else 2.dp, C.line, RoundedCornerShape(22.dp)).padding(start = 6.dp, end = 6.dp, top = 4.dp, bottom = 6.dp)) {
-        if (label.isNotBlank()) Text(label, style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 0.8.sp, fontWeight = FontWeight.ExtraBold), color = C.muted, modifier = Modifier.padding(start = 8.dp, top = 8.dp, bottom = 4.dp))
+    val deep = Deep.on()
+    Column(Modifier.padding(top = 14.dp).fillMaxWidth().then(if (deep) Modifier.shadow(2.dp, RoundedCornerShape(22.dp), ambientColor = Color(0x1F3C280A), spotColor = Color(0x1F3C280A)) else Modifier).clip(RoundedCornerShape(22.dp)).background(C.card)
+        .then(if (deep) Modifier else Modifier.border(if (C.glassy) 1.dp else 2.dp, C.line, RoundedCornerShape(22.dp))).padding(start = 6.dp, end = 6.dp, top = 4.dp, bottom = 6.dp)) {
+        if (label.isNotBlank()) Text(label, style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 0.8.sp, fontWeight = FontWeight.ExtraBold), color = if (deep) Deep.dayText() else C.muted, modifier = Modifier.padding(start = 8.dp, top = 8.dp, bottom = 4.dp))
         content()
     }
 }

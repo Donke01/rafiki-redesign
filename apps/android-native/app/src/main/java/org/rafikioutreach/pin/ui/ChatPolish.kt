@@ -102,9 +102,10 @@ internal class BubbleShape(private val mine: Boolean, private val first: Boolean
 
 /** My bubble colours (contract tokens); '' keeps the app's usual blue. */
 internal val BUBBLES = listOf("", "green", "teal", "blue", "purple", "pink", "orange", "grey")
-internal fun bubbleName(k: String) = when (k) {
+/** [deep]: RAFIKI Deep is on (every look but Bright sun), where the default bubble is night blue. */
+internal fun bubbleName(k: String, deep: Boolean = false) = when (k) {
     "green" -> t("Green", "Kijani"); "teal" -> t("Teal", "Samawati"); "blue" -> t("Blue", "Buluu"); "purple" -> t("Purple", "Zambarau")
-    "pink" -> t("Pink", "Waridi"); "orange" -> t("Orange", "Machungwa"); "grey" -> t("Grey", "Kijivu"); else -> t("Usual", "Kawaida")
+    "pink" -> t("Pink", "Waridi"); "orange" -> t("Orange", "Machungwa"); "grey" -> t("Grey", "Kijivu"); else -> if (deep) t("Night blue", "Bluu ya usiku") else t("Usual", "Kawaida")
 }
 @Composable
 internal fun bubbleColor(k: String): Color {
@@ -157,8 +158,8 @@ internal fun Modifier.pop(key: Any, motion: Boolean): Modifier = composed {
 // --- wallpapers ---------------------------------------------------------------------------------------------------------
 /** The wallpapers: none, RAFIKI's own (water, savanna, night), and the simple patterns from before. */
 internal val WALLS = listOf("", "water", "savanna", "night", "dots", "waves", "leaves", "drops")
-internal fun wallLabel(k: String) = when (k) {
-    "water" -> t("Water", "Maji"); "savanna" -> t("Savanna", "Savana"); "night" -> t("Night", "Usiku"); else -> wallName(k)
+internal fun wallLabel(k: String, deep: Boolean = false) = when (k) {
+    "water" -> t("Water", "Maji"); "savanna" -> t("Savanna", "Savana"); "night" -> t("Night", "Usiku"); "", "none" -> if (deep) t("Standard", "Kawaida") else wallName(k); else -> wallName(k)
 }
 
 /** RAFIKI wallpapers, drawn on the phone (no pictures to download): water, savanna and night. Others: [Wallpaper]. */

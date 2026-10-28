@@ -265,7 +265,10 @@ internal fun Composer(m: AppModel, c: String, row: ChatRow?, reply: Msg?, editin
         box.edit { replace(start, end, "@$n "); selection = TextRange(start + n.length + 2) }; mentions += n
     }
 
-    Column(Modifier.fillMaxWidth().padding(start = 6.dp, end = 6.dp, top = 4.dp, bottom = 6.dp).testTag("composer")) {
+    // RAFIKI Deep (web v75): the composer is a white sheet with a rounded top, the field on sand, a green send button
+    val deep = Deep.on()
+    Column(Modifier.fillMaxWidth().then(if (deep) Modifier.shadow(10.dp, RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp), ambientColor = Color(0x143C280A), spotColor = Color(0x143C280A))
+        .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)).background(C.card).padding(top = 6.dp) else Modifier).padding(start = 6.dp, end = 6.dp, top = 4.dp, bottom = 6.dp).testTag("composer")) {
         msg?.let { Text(it, style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold), color = C.warn, modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp).testTag("composer_msg")) }
         if (preparing) Text(t("Getting it ready…", "Inaandaliwa…"), style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp))
         if (suggest.isNotEmpty()) Column(Modifier.padding(bottom = 6.dp).fillMaxWidth().shadow(6.dp, RoundedCornerShape(16.dp)).clip(RoundedCornerShape(16.dp)).background(C.card).testTag("mentions")) {
@@ -278,7 +281,7 @@ internal fun Composer(m: AppModel, c: String, row: ChatRow?, reply: Msg?, editin
         // quick replies while the box is empty: one tap sends
         if (text.isEmpty() && editing == null && !recording && note == null && suggest.isEmpty()) QuickChips(hub.settings.quick) { q -> sendText(q) }
         Row(verticalAlignment = Alignment.Bottom) {
-            Column(Modifier.weight(1f).shadow(if (C.dark) 0.dp else 1.dp, RoundedCornerShape(24.dp)).clip(RoundedCornerShape(24.dp)).background(C.card).border(1.dp, if (C.glassy) C.glassEdge else C.line, RoundedCornerShape(24.dp))) {
+            Column(Modifier.weight(1f).shadow(if (C.dark || deep) 0.dp else 1.dp, RoundedCornerShape(24.dp)).clip(RoundedCornerShape(24.dp)).background(if (deep) Deep.room() else C.card).border(1.dp, if (deep) Color.Transparent else if (C.glassy) C.glassEdge else C.line, RoundedCornerShape(24.dp)).testTag("composer_field")) {
                 // replying to / editing
                 if ((reply != null || editing != null) && note == null) Row(Modifier.padding(start = 8.dp, end = 4.dp, top = 6.dp), verticalAlignment = Alignment.CenterVertically) {
                     Box(Modifier.weight(1f)) {
@@ -342,7 +345,7 @@ internal fun Composer(m: AppModel, c: String, row: ChatRow?, reply: Msg?, editin
                 }
                 val sz by animateDpAsState(if (recording && !locked) 58.dp else 48.dp, tween(if (motion) 180 else 0), label = "mic")
                 Box(Modifier.size(sz).offset { IntOffset(if (recording && !locked) dragX.roundToInt().coerceAtMost(0) / 3 else 0, 0) }
-                    .clip(CircleShape).background(if (recording && !locked) C.bad else ChatLook.online)
+                    .clip(CircleShape).then(if (recording && !locked) Modifier.background(C.bad) else if (deep) Modifier.background(Deep.go()) else Modifier.background(ChatLook.online))
                     .then(if (canSend) Modifier.clickable(role = Role.Button) { when { note != null -> sendNote(); recording -> stopRec(); else -> sendText() } } else Modifier.pointerInput(c) {
                         awaitEachGesture {
                             val down = awaitFirstDown(requireUnconsumed = false)

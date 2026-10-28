@@ -56,11 +56,13 @@ internal fun MsgSheet(m: AppModel, msg: Msg, row: ChatRow?, close: () -> Unit, o
     val canEdit = mine && !msg.queued && msg.kind == "text" && !msg.deleted && System.currentTimeMillis() - msg.at < 15 * 60_000
     // the project this message is about: the thread's, a project link in it, or a system note's
     val pid = row?.project?.takeIf { it.isNotBlank() } ?: msg.sys?.project?.takeIf { it.isNotBlank() } ?: Regex("pin\\.rafikioutreach\\.org/pin#p[/=]([A-Za-z0-9_-]+)").find(msg.text)?.groupValues?.get(1)
-    TeamSubSheet("msg_sheet", close) { hide ->
+    // RAFIKI Deep (web v75): a dark navy sheet; Reply, Forward, Copy and Star as four big tiles; Translate first below; Delete last in red
+    val deep = Deep.on()
+    Night(deep) { TeamSubSheet("msg_sheet", close) { hide ->
         if (!msg.deleted && !msg.queued && msg.sys == null) {
             // reactions: 👍 ❤️ 😂 😮 😢 🙏 (yours is circled; tap it again to take it away)
             val myR = msg.reacts.filterValues { it.any { n -> n.equals(me, true) } }.keys.firstOrNull()
-            Row(Modifier.fillMaxWidth().padding(bottom = 10.dp).clip(RoundedCornerShape(99.dp)).background(C.hue("slate").bg).padding(6.dp).testTag("react_bar"), horizontalArrangement = Arrangement.SpaceEvenly) {
+            Row(Modifier.fillMaxWidth().padding(bottom = 10.dp).clip(RoundedCornerShape(99.dp)).background(if (deep) Color(0x14FFFFFF) else C.hue("slate").bg).padding(6.dp).testTag("react_bar"), horizontalArrangement = Arrangement.SpaceEvenly) {
                 ChatHub.EMOJI.forEach { e ->
                     Box(Modifier.size(44.dp).clip(CircleShape).background(if (e == myR) C.card else Color.Transparent).clickable(role = Role.Button) { hide { scope.launch { hub.react(msg, e) } } }
                         .semantics { contentDescription = t("React $e", "Jibu kwa $e") }.testTag("react_$e"), contentAlignment = Alignment.Center) { Text(e, fontSize = 24.sp) }
@@ -76,26 +78,37 @@ internal fun MsgSheet(m: AppModel, msg: Msg, row: ChatRow?, close: () -> Unit, o
             return@TeamSubSheet
         }
         if (!msg.deleted && msg.sys == null) {
+            val translate = msg.text.isNotBlank() && !mine && (msg.kind == "text" || msg.kind == "media")
+            fun doTranslate() = hide {
+                if (hub.tools["translate"] != true) runCatching { ctx.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(googleTranslate(msg.text)))) }
+                else m.viewModelScope.launch { val (tx, err, g) = hub.translate(msg.text); if (tx != null) hub.translated[msg.id] = tx else if (g != null) runCatching { ctx.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(g))) } else hub.note.value = err }
+            }
+            if (deep) {
+                // the four everyday actions as big tiles
+                Row(Modifier.fillMaxWidth().padding(bottom = 8.dp).height(IntrinsicSize.Min).testTag("act_tiles"), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    ActTile("act_reply", "reply", t("Reply", "Jibu")) { hide { onReply() } }
+                    ActTile("act_fwd", "fwd", t("Forward", "Sambaza")) { sub = "fwd" }
+                    if (msg.text.isNotBlank()) ActTile("act_copy", "copy", t("Copy", "Nakili")) { clip.setText(AnnotatedString(msg.text)); hide { } }
+                    ActTile("act_star", "star", if (msg.starred) t("Unstar", "Ondoa nyota") else t("Star", "Weka nyota")) { hide { scope.launch { hub.star(msg, !msg.starred) } } }
+                }
+                if (translate) SheetRow("act_translate", "translate", "Translate · Tafsiri", value = "English ↔ Kiswahili") { doTranslate() }
+            } else {
             SheetRow("act_reply", "reply", t("Reply", "Jibu")) { hide { onReply() } }
             SheetRow("act_fwd", "fwd", t("Forward", "Sambaza")) { sub = "fwd" }
             if (msg.text.isNotBlank()) SheetRow("act_copy", "copy", t("Copy", "Nakili")) { clip.setText(AnnotatedString(msg.text)); hide { } }
+            }
             // pin it to the top of the chat (DMs: anyone; elsewhere admins); a 4th pin replaces the oldest
             val pinned = row?.pins?.any { it.id == msg.id } == true
             if (hub.canPin(row, admin)) SheetRow("act_pin", "pin", if (pinned) t("Unpin", "Ondoa kibandiko") else t("Pin", "Bandika"),
                 value = if (!pinned && (row?.pins?.size ?: 0) >= 3) t("Replaces the oldest of the 3 pins", "Inachukua nafasi ya kibandiko cha zamani zaidi kati ya 3") else "") {
                 hide { hub.pinLater(msg, !pinned) }
             }
-            SheetRow("act_star", "star", if (msg.starred) t("Unstar", "Ondoa nyota") else t("Star", "Weka nyota")) { hide { scope.launch { hub.star(msg, !msg.starred) } } }
+            if (!deep) SheetRow("act_star", "star", if (msg.starred) t("Unstar", "Ondoa nyota") else t("Star", "Weka nyota")) { hide { scope.launch { hub.star(msg, !msg.starred) } } }
             if (mine) SheetRow("act_info", "info", t("Message info", "Maelezo ya ujumbe")) { sub = "info" }
             if (canEdit) SheetRow("act_edit", "edit", t("Edit", "Hariri")) { hide { onEdit() } }
             // chat 2: select several (B10), translate (B7), use in a story (B6), add a photo to the project (B5)
             SheetRow("act_select", "selectall", t("Select", "Chagua")) { hide { onSelect() } }
-            if (msg.text.isNotBlank() && !mine && (msg.kind == "text" || msg.kind == "media")) SheetRow("act_translate", "translate", "Translate · Tafsiri") {
-                hide {
-                    if (hub.tools["translate"] != true) runCatching { ctx.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(googleTranslate(msg.text)))) }
-                    else m.viewModelScope.launch { val (tx, err, g) = hub.translate(msg.text); if (tx != null) hub.translated[msg.id] = tx else if (g != null) runCatching { ctx.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(g))) } else hub.note.value = err }
-                }
-            }
+            if (translate && !deep) SheetRow("act_translate", "translate", "Translate · Tafsiri") { doTranslate() }
             if (row?.kind == "project" && row.project.isNotBlank() && msg.kind == "text" && msg.text.isNotBlank()) SheetRow("act_story", "spark", t("Use in a story", "Tumia kwenye hadithi"), value = t("The words become the story’s quote", "Maneno yanakuwa nukuu ya hadithi")) {
                 hide { StoryNav.pre = Triple(row.project, msg.text.trim().take(600), msg.from); StoryNav.open = row.project; openProject(row.project, "story") }
             }
@@ -113,7 +126,7 @@ internal fun MsgSheet(m: AppModel, msg: Msg, row: ChatRow?, close: () -> Unit, o
         val canAll = (mine || (admin && row?.isGroup == true) || (row?.isGroup == true && row.admin(me))) && !msg.deleted
         SheetRow("act_delete", "trash", t("Delete", "Futa"), red = true) { if (onDelete != null) hide { onDelete() } else sub = if (canAll) "delete" else "deleteme" }
         said?.let { org.rafikioutreach.pin.ui.Msg(it, "bad") }
-    }
+    } }
     when (sub) {
         "fwd" -> ForwardSheet(m, msg, { sub = null; close() }) { openChat(it) }
         "info" -> InfoSheet(m, msg, row) { sub = null; close() }
@@ -264,5 +277,16 @@ internal fun ReactsSheet(m: AppModel, msg: Msg, close: () -> Unit) {
                 }
             }
         }
+    }
+}
+
+/** A big action tile in the dark long-press sheet: a mint icon over its word (Reply, Forward, Copy, Star). */
+@Composable
+private fun RowScope.ActTile(tag: String, icon: String, label: String, go: () -> Unit) {
+    val hp = rememberHaptics()
+    Column(Modifier.weight(1f).fillMaxHeight().clip(RoundedCornerShape(16.dp)).background(Color(0x14FFFFFF)).clickable(role = Role.Button) { hp.tap(); go() }
+        .heightIn(min = 72.dp).padding(horizontal = 4.dp, vertical = 10.dp).semantics(mergeDescendants = true) {}.testTag(tag), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+        Icon(ChatIc.get(icon), null, tint = Deep.mint, modifier = Modifier.size(22.dp))
+        FitWords(label, MaterialTheme.typography.labelMedium.copy(textAlign = androidx.compose.ui.text.style.TextAlign.Center), C.ink, Modifier.padding(top = 6.dp).fillMaxWidth())
     }
 }

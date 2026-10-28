@@ -203,7 +203,10 @@ fun ChatRoom(m: AppModel, c: String, openInfo: () -> Unit, openChat: (String) ->
     val ctxNote = LocalContext.current
     LaunchedEffect(note) { note?.let { android.widget.Toast.makeText(ctxNote, it, android.widget.Toast.LENGTH_SHORT).show(); hub.note.value = null } }
     fun selected() = msgs.filter { it.key in sel }
-    Column(Modifier.fillMaxSize().testTag("chat_room")) {
+    // RAFIKI Deep (web v75): a night header and project strip with a rounded bottom over the chat's sand
+    val strip = row != null && row.kind == "project" && row.project.isNotBlank()
+    Column(Modifier.fillMaxSize().then(if (Deep.on()) Modifier.background(if (wall.isBlank()) Deep.room() else C.bg) else Modifier).testTag("chat_room")) {
+        NightBlock(round = if (strip) 22.dp else 0.dp) {
         when {
             selecting -> SelBar(sel.size, sel.size == 1 && selected().firstOrNull()?.let { !it.deleted && !it.queued } == true, { selecting = false; sel.clear() },
                 fwd = { held = null; sheet = "fwd" }, star = { val l = selected(); scope.launch { l.filter { !it.queued && !it.deleted }.forEach { hub.star(it, !l.all { x -> x.starred }) } }; selecting = false; sel.clear() },
@@ -217,9 +220,10 @@ fun ChatRoom(m: AppModel, c: String, openInfo: () -> Unit, openChat: (String) ->
             }
         }
         if (row != null) ProjectStrip(m, row, openProject)
+        }
         if (row != null) PinBar(row, msgs) { jump(it) }
         Box(Modifier.weight(1f).fillMaxWidth()) {
-            if (wall.isBlank() && C === Light) WarmWall(Modifier.matchParentSize()) else ChatWall(wall, Modifier.matchParentSize())
+            if (wall.isBlank() && Deep.on()) SandWall(Modifier.matchParentSize()) else if (wall.isBlank() && C === Light) WarmWall(Modifier.matchParentSize()) else ChatWall(wall, Modifier.matchParentSize())
             BoxWithConstraints(Modifier.fillMaxSize()) {
                 val maxW = minOf(maxWidth * 0.8f, 560.dp)
                 LazyColumn(Modifier.fillMaxSize().testTag("chat_msgs"), state, reverseLayout = true, contentPadding = PaddingValues(start = 8.dp, end = 8.dp, top = 10.dp, bottom = 8.dp)) {
@@ -350,8 +354,9 @@ private fun ChatHead(m: AppModel, row: ChatRow?, c: String, me: String, presence
 @Composable
 private fun DayChip(label: String) {
     Box(Modifier.fillMaxWidth().padding(vertical = 8.dp), contentAlignment = Alignment.Center) {
-        Text(label, style = CwType.meta(FontWeight.Bold), color = if (C === Sun) Color.Black else cwTime(), maxLines = 1, softWrap = false,
-            modifier = Modifier.shadow(1.dp, RoundedCornerShape(9.dp)).clip(RoundedCornerShape(9.dp)).background(if (C.dark) Color(0xFF1E2A36) else Color.White).padding(horizontal = 11.dp, vertical = 4.dp).testTag("day_chip"))
+        val deep = Deep.on()
+        Text(label, style = CwType.meta(FontWeight.Bold), color = if (C === Sun) Color.Black else if (deep) Deep.dayText() else cwTime(), maxLines = 1, softWrap = false,
+            modifier = Modifier.shadow(if (deep) 0.dp else 1.dp, RoundedCornerShape(9.dp)).clip(RoundedCornerShape(9.dp)).background(if (deep) Deep.day() else if (C.dark) Color(0xFF1E2A36) else Color.White).padding(horizontal = 11.dp, vertical = 4.dp).testTag("day_chip"))
     }
 }
 
@@ -415,7 +420,7 @@ private fun MsgLine(m: AppModel, msg: Msg, row: ChatRow?, me: String, group: Boo
                         if (mine) { Spacer(Modifier.width(3.dp)); Ticks(msg.status) }
                     }
                 }
-            } else Column(Modifier.padding(start = if (mine) 0.dp else 4.dp, end = if (mine) 4.dp else 0.dp).widthIn(max = maxW).then(if (selected) Modifier.border(3.dp, cwSel(), shape) else Modifier).shadow(if (C.dark) 0.dp else 0.5.dp, shape).clip(shape).background(bg)
+            } else Night(mine && row?.bubble.isNullOrBlank()) { Column(Modifier.padding(start = if (mine) 0.dp else 4.dp, end = if (mine) 4.dp else 0.dp).widthIn(max = maxW).then(if (selected) Modifier.border(3.dp, cwSel(), shape) else Modifier).shadow(if (C.dark) 0.dp else 0.5.dp, shape).clip(shape).background(bg)
                 .then(if (selecting) Modifier.clickable(role = Role.Checkbox, onClick = toggle) else Modifier.combinedClickable(onClick = { if (msg.status == "failed") m.chat.retry(msg) }, onLongClick = onLong, onDoubleClick = onDouble, role = Role.Button))
                 .semantics { contentDescription = says; this.selected = selected }
                 .padding(start = 10.dp, end = 10.dp, top = 6.dp, bottom = 5.dp).testTag(if (mine) "bubble_mine" else "bubble_theirs")) {
@@ -449,7 +454,7 @@ private fun MsgLine(m: AppModel, msg: Msg, row: ChatRow?, me: String, group: Boo
                 }
                 if (msg.failed != null) Text(msg.failed, style = CwType.small(FontWeight.Medium), color = C.bad, modifier = Modifier.padding(top = 2.dp))
                 SendState(m, msg) // B14
-            }
+            } }
             if (msg.reacts.isNotEmpty()) Row(Modifier.padding(top = 1.dp, start = 6.dp + if (mine) 0.dp else TAIL, end = 6.dp + if (mine) TAIL else 0.dp).offset(y = (-4).dp).pop(msg.reacts.hashCode(), motion).clip(RoundedCornerShape(99.dp)).background(C.card).border(1.dp, C.line, RoundedCornerShape(99.dp))
                 .clickable(role = Role.Button) { reacts() }.padding(horizontal = 7.dp, vertical = 2.dp).testTag("reacts_${msg.key}"), verticalAlignment = Alignment.CenterVertically) {
                 msg.reacts.entries.sortedByDescending { it.value.size }.take(4).forEach { (e, _) -> Text(e, fontSize = 13.sp) }
