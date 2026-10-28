@@ -2,3 +2,4 @@ dist
 .wrangler
 qa/pin/__pycache__/
 __pycache__/
+qa/pin/donor-tags/
