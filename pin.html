@@ -3782,15 +3782,130 @@ html[data-theme=sun] .tag.cn-tag,html[data-theme=sun] .tag.sty-tag{background:#F
 .npart-o small{color:var(--muted);font-size:.78rem}.npart-on{display:flex;align-items:center;gap:10px;justify-content:space-between;padding:8px 12px;border-radius:12px;background:var(--tint);font-weight:700}
 /* the Stories tab (§9) */
 #paneStory .card{margin-bottom:12px;padding:16px}#paneStory h3{margin:0 0 8px}
-.sty-st{list-style:none;margin:4px 0 0;padding:0;display:flex;justify-content:space-between;position:relative}.sty-st::before{content:"";position:absolute;left:8px;right:8px;top:7px;height:2px;background:var(--line)}
-.sty-now{margin:10px 0 0;text-align:center;font-size:.92rem}.sty-now b{color:var(--ink)}
-.sty-st li{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:.72rem;font-weight:700;color:var(--muted);line-height:1.15;overflow-wrap:normal;word-break:normal;hyphens:none}
-.sty-st li{position:relative;z-index:1}.sty-st li i{display:block;width:16px;height:16px;border-radius:50%;border:2px solid var(--edge);background:var(--card)}.sty-st li.done i{background:var(--ok);border-color:var(--ok)}.sty-st li.done{color:var(--ink)}
-.sty-st li.now i{background:#7A4FD0;border-color:#7A4FD0;box-shadow:0 0 0 4px rgba(122,79,208,.18)}.sty-st li.now{color:var(--ink)}
-.sty-miss{margin:10px 0 0;text-align:center;font-size:.84rem}
-.sty-row{padding:8px 0;border-top:var(--bw) solid var(--line)}.sty-row:first-of-type{border-top:0}
-.sty-rh{display:flex;align-items:center;gap:8px}.sty-rh b{flex:1}.sty-rh .n{min-width:22px;height:22px;border-radius:11px;background:var(--tint);color:var(--blue);font-size:.74rem;font-weight:800;display:inline-flex;align-items:center;justify-content:center;padding:0 6px}
-.sty-rh .btn{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}.sty-rh .btn svg{width:16px;height:16px}
+/* the story's status: four steps in a line, past ones ticked, the current one ringed (story photos, Oct 2026) */
+.sty-hh{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}.sty-hh h3{margin:0 !important}
+.sty-pill{display:inline-flex;align-items:center;padding:4px 10px;border-radius:999px;background:var(--tint);color:var(--blue2);font-size:.8rem;font-weight:800;white-space:nowrap}
+.sty-pill.ok{background:var(--okbg);color:var(--ok)}
+.sty-st{list-style:none;margin:14px 0 0;padding:0;display:flex}
+.sty-st li{flex:1 1 0;min-width:min-content;display:flex;flex-direction:column;align-items:center;gap:6px;position:relative;padding:0 2px;text-align:center;font-size:.72rem;font-weight:700;color:var(--muted);line-height:1.2;overflow-wrap:normal;word-break:normal;hyphens:none}
+.sty-st li::before,.sty-st li::after{content:"";position:absolute;top:13px;height:2px;background:var(--line);z-index:0}
+.sty-st li::before{left:0;right:50%}.sty-st li::after{left:50%;right:0}
+.sty-st li:first-child::before,.sty-st li:last-child::after{display:none}
+.sty-st li.done::before,.sty-st li.done::after,.sty-st li.now::before{background:var(--ok)}
+.sty-st li i{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;width:28px;height:28px;box-sizing:border-box;border-radius:50%;background:var(--line);color:#FFFFFF}
+.sty-st li i svg{width:16px;height:16px;stroke-width:2.6}
+.sty-st li.done i{background:var(--ok)}.sty-st li.done{color:var(--ink)}
+.sty-st li.now i{background:var(--card);border:3px solid var(--blue)}.sty-st li.now i::after{content:"";width:10px;height:10px;border-radius:50%;background:var(--blue)}.sty-st li.now{color:var(--ink);font-weight:800}
+.sty-st li span{max-width:100%}
+/* "Still needed": what can be fixed here, each with its button */
+.sty-need{margin:0 0 12px;padding:4px 14px;border-radius:20px;background:var(--warnbg);border:var(--bw) solid color-mix(in srgb,var(--warn) 30%,transparent)}
+html:not([data-theme=sun]) #paneStory .sty-need{background:var(--warnbg);-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:none}
+.sty-ni{display:flex;align-items:center;gap:12px;padding:12px 0;cursor:pointer}.sty-ni + .sty-ni{border-top:var(--bw) solid color-mix(in srgb,var(--warn) 22%,transparent)}
+.sty-ni > svg{flex:none;width:22px;height:22px;color:var(--warn)}
+.sty-ni > span{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;color:var(--warn)}
+.sty-ni b{font-size:.95rem;color:var(--ink)}.sty-ni small{font-size:.82rem;line-height:1.3}
+.sty-ni .btn{flex:none;min-height:44px;padding:0 16px;background:var(--warn);color:var(--warnbg);box-shadow:none;white-space:nowrap}
+.sty-ni .btn:hover{background:var(--warn);filter:brightness(1.1)}.sty-ni .btn svg{width:18px;height:18px}
+html[data-theme=sun] .sty-need{border-color:#000}html[data-theme=sun] .sty-ni + .sty-ni{border-top-color:#000}
+/* new photos since the draft */
+.sty-nudge{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 12px;padding:12px 14px;border-radius:18px;background:var(--tint);color:var(--ink)}
+.sty-nudge > svg{flex:none;width:22px;height:22px;color:var(--blue)}.sty-nudge > span{flex:1 1 170px;min-width:0;font-size:.9rem;line-height:1.35}.sty-nudge b{display:block}
+.sty-nudge .btn{flex:0 0 auto;margin-left:auto}
+html[data-theme=sun] .sty-nudge{background:#FFF;border:2px solid #000}
+/* the photos: three rows, a grid of thumbnails each, an "Add photos" tile at the end */
+.sty-phh{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap}.sty-phh h3{margin:0 !important}
+.sty-in{display:inline-flex;align-items:center;gap:4px;color:var(--ok);font-size:.84rem;font-weight:800;white-space:nowrap}.sty-in svg{width:14px;height:14px}
+.sty-row{padding:14px 0 0}
+.sty-rh{display:flex;align-items:center;gap:8px;margin-bottom:8px}.sty-rh b{color:var(--ink);font-size:.98rem}
+.sty-rh .n{min-width:22px;height:22px;border-radius:11px;background:var(--hb-slate,var(--line));color:var(--muted);font-size:.74rem;font-weight:800;display:inline-flex;align-items:center;justify-content:center;padding:0 6px}
+.sty-g{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+@media (min-width:700px){.sty-g{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.sty-t{position:relative;display:block;aspect-ratio:1;width:100%;border:0;padding:0;border-radius:16px;overflow:hidden;background:var(--line);cursor:pointer;color:#FFFFFF;font:inherit}
+.sty-t img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .2s}.sty-t img.in,.sty-t.up img{opacity:1}
+.sty-t .sty-kid{left:6px;top:6px;bottom:auto}
+.sty-ins{position:absolute;left:6px;bottom:6px;display:inline-flex;align-items:center;gap:3px;max-width:calc(100% - 12px);padding:3px 7px;border-radius:8px;background:rgba(4,38,63,.82);color:#FFFFFF;font-size:.66rem;font-weight:800;white-space:nowrap;overflow:hidden}
+.sty-ins svg{flex:none;width:11px;height:11px;color:#8FE3B5}.sty-ins{text-overflow:ellipsis}
+.sty-addt{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;aspect-ratio:1;width:100%;padding:6px;box-sizing:border-box;border-radius:16px;border:2px dashed color-mix(in srgb,var(--blue) 45%,transparent);background:color-mix(in srgb,var(--tint) 70%,transparent);color:var(--blue2);font:inherit;font-size:.8rem;font-weight:800;line-height:1.2;text-align:center;cursor:pointer}
+.sty-addt svg{width:26px;height:26px;stroke-width:2.2}
+html[data-theme=dark] .sty-addt{color:var(--blue2)}html[data-theme=sun] .sty-addt{border-color:#000;background:#FFF;color:#000}
+.sty-hint{margin:14px 0 0;font-size:.84rem;line-height:1.4}
+/* a photo on its way: a ring with the %, a tick when it's in, waiting for signal, tap to retry */
+.sty-t.up::after{content:"";position:absolute;inset:0;background:rgba(4,20,34,.45)}
+.sty-t.up.done::after,.sty-tk{animation:styFade .5s ease var(--fd,2s) forwards}
+.sty-ov{position:absolute;inset:0;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:4px;text-align:center;font-size:.7rem;font-weight:800;line-height:1.2;text-shadow:0 1px 2px rgba(0,0,0,.5)}
+.sty-ov svg{width:26px;height:26px}
+.sty-ring{position:relative;width:52px;height:52px}.sty-ring svg{position:absolute;inset:0;width:52px;height:52px;transform:rotate(-90deg)}
+.sty-ring circle{fill:none;stroke-width:4}.sty-ring .bg{stroke:rgba(255,255,255,.35)}.sty-ring .fg{stroke:#FFFFFF;stroke-linecap:round;transition:stroke-dashoffset .25s}
+.sty-ring b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.78rem}
+.sty-ring .sp{position:absolute;inset:-5px;border-radius:50%;border:2px solid transparent;border-top-color:rgba(255,255,255,.85);animation:stySpin 1s linear infinite}
+.sty-tk{position:absolute;right:6px;top:6px;z-index:1;width:28px;height:28px;border-radius:50%;background:var(--ok);color:#FFFFFF;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 2px #FFFFFF}.sty-tk svg{width:16px;height:16px;stroke-width:2.8}
+.sty-t.fail::after{background:rgba(60,8,4,.5)}.sty-rt{width:40px;height:40px;border-radius:50%;background:#FFFFFF;color:var(--bad);display:flex;align-items:center;justify-content:center}.sty-rt svg{width:22px;height:22px}
+html[data-theme=dark] .sty-rt{color:#B3261E}
+@keyframes stySpin{to{transform:rotate(360deg)}}@keyframes styFade{to{opacity:0}}
+/* the banner above the bottom bar while photos send */
+.sqb{position:fixed;left:12px;right:12px;bottom:calc(var(--tabh) + 10px + env(safe-area-inset-bottom));z-index:1250;max-width:560px;margin:0 auto;padding:12px 14px;border-radius:20px;background:#0B2E47;color:#FFFFFF;box-shadow:0 12px 30px rgba(4,38,63,.3);animation:sqbIn .3s cubic-bezier(.2,.8,.2,1) both}
+html:not([data-theme=sun]) .sqb{bottom:calc(var(--tabh) + var(--tabgap,0px) + 10px + env(safe-area-inset-bottom))}
+.sqb-r{display:flex;align-items:center;gap:12px}
+.sqb-i{flex:none;width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center}.sqb-i svg{width:22px;height:22px}
+.sqb-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.sqb-t b{font-size:.95rem;line-height:1.25}.sqb-t small{font-size:.8rem;opacity:.85;line-height:1.3}
+.sqb-x{flex:none;min-height:44px;padding:0 10px;border:0;border-radius:12px;background:transparent;color:#8FCBF5;font:inherit;font-size:.9rem;font-weight:800;cursor:pointer}
+.sqb-bar{height:6px;margin:10px 0 0;border-radius:99px;background:rgba(255,255,255,.18);overflow:hidden}.sqb-bar i{display:block;height:100%;border-radius:99px;background:#5FD08F;transition:width .3s}
+.sqb-w{display:flex;align-items:center;gap:6px;margin:8px 0 0;font-size:.8rem;color:#F2C46B}.sqb-w svg{flex:none;width:16px;height:16px}
+.sqb.end{background:var(--card);color:var(--ink);border:var(--bw) solid var(--line)}.sqb.end .sqb-i{border-radius:50%;background:var(--ok);color:#FFFFFF}.sqb.end small{color:var(--bad);opacity:1}
+.sqb.end .sqb-x{color:var(--blue)}.sqb .sqb-re{flex:none;min-height:44px;display:inline-flex;align-items:center;gap:6px;padding:0 14px;border:0;border-radius:999px;background:var(--badbg);color:var(--bad);font:inherit;font-size:.9rem;font-weight:800;cursor:pointer;white-space:nowrap}.sqb-re svg{width:18px;height:18px}
+html[data-theme=sun] .sqb{background:#000;border:2px solid #000}html[data-theme=sun] .sqb.end{background:#FFF;border:2px solid #000}
+body.sqon main{padding-bottom:calc(var(--tabh) + 140px + env(safe-area-inset-bottom))}
+@keyframes sqbIn{from{opacity:0;transform:translateY(16px)}}
+.sh-sending{display:flex;align-items:center;gap:8px;width:100%;margin:0 0 12px;padding:10px 14px;border:0;border-radius:999px;background:var(--tint);color:var(--blue2);font:inherit;font-size:.88rem;font-weight:800;cursor:pointer;text-align:left}.sh-sending svg{flex:none;width:18px;height:18px}
+/* the Add photos sheet, the review sheet and a photo's details */
+.sty-sub{margin:-4px 0 12px;text-align:center;font-size:.86rem}
+.sty-lbl{display:block;margin:4px 0 6px;font-weight:700;font-size:.9rem;color:var(--ink)}
+.seg.sty-seg{margin:0 0 14px}.seg.sty-seg button{white-space:normal;line-height:1.2;padding:4px 6px;overflow-wrap:normal;word-break:normal;hyphens:none}
+.sty-opt{display:flex;align-items:center;gap:14px;width:100%;min-height:76px;margin:0 0 10px;padding:12px 14px;border:0;border-radius:18px;background:var(--tint);color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+.sty-opt .oi{flex:none;width:48px;height:48px;border-radius:14px;background:var(--card);color:var(--blue);display:flex;align-items:center;justify-content:center}.sty-opt .oi svg{width:26px;height:26px}
+.sty-opt > span:not(.oi){flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.sty-opt b{font-size:1rem}.sty-opt small{font-size:.84rem;line-height:1.3;color:var(--muted)}
+.sty-opt > svg{flex:none;width:20px;height:20px}
+.sty-opt.pri{background:var(--blue);color:#FFFFFF}.sty-opt.pri small{color:rgba(255,255,255,.88)}.sty-opt.pri .oi{background:rgba(255,255,255,.18);color:#FFFFFF}
+html[data-theme=sun] .sty-opt{border:2px solid #000}
+.sty-fn{display:flex;gap:8px;align-items:flex-start;margin:4px 0 0;font-size:.82rem;line-height:1.35;color:var(--ok)}.sty-fn svg{flex:none;width:16px;height:16px;margin-top:1px}
+.sty-tray{margin:2px 0 12px;padding:10px;border-radius:16px;background:var(--hb-slate,var(--line))}
+.sty-tray .tt{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}.sty-tray .tt img{flex:none;width:52px;height:52px;border-radius:10px;object-fit:cover}
+.sty-tray p{margin:8px 0;font-size:.86rem;font-weight:700;color:var(--ink)}.sty-tray .two{display:flex;gap:8px;flex-wrap:wrap}.sty-tray .two .btn{flex:1 1 130px}
+.sty-rv{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0 0 14px}
+.sty-rvt{position:relative;aspect-ratio:1;border-radius:14px;overflow:hidden;background:var(--line)}
+.sty-rvt img{width:100%;height:100%;object-fit:cover;display:block}
+.sty-rvt .k{position:absolute;inset:0;width:100%;height:100%;border:0;padding:0;background:transparent;cursor:default;font:inherit}
+.sty-rvt.pick .k{cursor:pointer}.sty-rvt.pick .k[aria-pressed=true]{box-shadow:inset 0 0 0 4px var(--blue)}
+.sty-rvt .k .sty-kid{left:6px;bottom:6px}
+.sty-rvt .x{position:absolute;right:4px;top:4px;width:32px;height:32px;border-radius:50%;border:0;background:rgba(0,0,0,.62);color:#FFFFFF;display:flex;align-items:center;justify-content:center;cursor:pointer}.sty-rvt .x svg{width:16px;height:16px}
+.sty-q2{margin:0 0 6px;font-weight:800;color:var(--ink)}
+.sty-tapn{margin:-6px 0 12px;font-size:.84rem}
+.sty-pv{position:relative;display:block;width:100%;aspect-ratio:4/3;border:0;padding:0;border-radius:18px;overflow:hidden;background:var(--line);cursor:zoom-in}
+.sty-pv img{width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .2s}.sty-pv img.in{opacity:1}
+.sty-pv .sty-ins{left:10px;bottom:auto;top:10px;font-size:.74rem}
+.sty-df label{display:block;margin:14px 0 6px;font-weight:700;font-size:.9rem;color:var(--ink)}
+.sty-df input[type=text]{width:100%;box-sizing:border-box}.sty-df .muted{margin:6px 0 0;font-size:.82rem}
+.sty-sw{display:flex;align-items:center;gap:12px;margin:2px 0 14px;padding:12px 14px;border-radius:16px;background:var(--hb-slate,var(--line))}
+.sty-sw > svg{flex:none;width:22px;height:22px;color:var(--warn)}.sty-sw > span{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.sty-sw b{color:var(--ink);font-size:.95rem}.sty-sw small{color:var(--muted);font-size:.8rem;line-height:1.3}
+.btn.sty-del{background:var(--badbg) !important;color:var(--bad) !important;box-shadow:none !important;border-color:transparent !important}
+.sty-rh{flex-wrap:wrap;row-gap:4px}
+.sty-dbtn,.sty-dchip{display:inline-flex;align-items:center;gap:4px;min-height:32px;padding:0 10px;border:0;border-radius:999px;font:inherit;font-size:.8rem;font-weight:800;cursor:pointer;white-space:nowrap}
+.sty-dbtn{background:transparent;color:var(--muted);padding:0 6px}.sty-dbtn::before{content:"·";margin-right:4px}
+.sty-dchip{background:var(--tint);color:var(--blue2)}.sty-dchip svg{width:15px;height:15px}
+html[data-theme=sun] .sty-dchip{background:#FFF;border:2px solid #000;color:#000}
+.sty-ym{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:8px;margin:0 0 12px}.sty-ym select{width:100%;min-width:0;box-sizing:border-box}
+.sty-sug{display:flex;align-items:center;gap:8px;width:100%;min-height:44px;margin:2px 0 8px;padding:8px 12px;border:var(--bw) dashed color-mix(in srgb,var(--blue) 45%,transparent);border-radius:14px;background:transparent;color:var(--blue2);font:inherit;font-size:.86rem;font-weight:700;text-align:left;cursor:pointer}.sty-sug svg{flex:none;width:18px;height:18px}
+html[data-theme=sun] .sty-sug{border:2px solid #000;color:#000}
+.sty-fin{display:flex;align-items:center;gap:6px;margin:10px 0 0;font-size:.84rem}.sty-fin svg{flex:none;width:16px;height:16px}
+.sty-sub{text-align:left !important}
+.sty-dsh .sty-sub,.sty-addsh .sty-sub{margin-top:-8px}
+.sty-del{display:inline-flex;align-items:center;justify-content:center;gap:8px}.sty-del svg{width:18px;height:18px}
+.sqb.bad .sqb-i{background:var(--badbg);color:var(--bad)}.sqb.end.bad small{color:var(--bad)}
+body.locked .sqb{display:none}
+.sty-t{font-size:.7rem}.sty-ov small{font-size:.66rem;font-weight:700;opacity:.92}
+html .sty-need .sty-ni .btn{background:var(--warn) !important;color:var(--warnbg) !important;box-shadow:none !important;border-color:transparent !important}
+@media (max-width:379px){.sty-ni{flex-wrap:wrap;row-gap:8px}.sty-ni > span{flex:1 1 calc(100% - 34px)}.sty-ni .btn{margin-left:34px;min-height:40px}.sty-t .sty-ins{left:4px;bottom:4px;max-width:calc(100% - 8px);padding:3px 5px;font-size:.62rem}.sty-t .sty-ins svg{display:none}.sty-st li{font-size:.66rem;padding:0 1px}}
+@media (prefers-reduced-motion: reduce){.sty-ring .sp{display:none}.sty-tk,.sty-t.up.done::after{animation:none}.sqb{animation:none}.sty-ring .fg,.sqb-bar i,.sty-t img{transition:none}}
 .sty-kid{position:absolute;left:4px;bottom:4px;font-style:normal;font-size:.62rem;font-weight:800;background:rgba(0,0,0,.6);color:#FFF;border-radius:6px;padding:1px 4px}
 .sty-qh{display:flex;align-items:baseline;justify-content:space-between;gap:8px}.sty-dots{display:flex;gap:6px;margin:2px 0 8px}.sty-dots i{width:10px;height:10px;border-radius:50%;background:var(--line)}.sty-dots i.ok{background:var(--ok)}.sty-dots i.on{box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--blue)}
 .sty-qa,.sty-acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.sty-qa .btn{display:inline-flex;align-items:center;gap:6px}.sty-qa .btn svg{width:16px;height:16px}.sty-qa .btn:last-child{margin-left:auto}
@@ -4869,6 +4984,7 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
     // the bottom-bar tab you're already on, tapped again: it starts over in place, with no fade and no new map (mew, me-brief §6)
     var again = S.view === v && mode === 'fresh' && MAIN.indexOf(v) >= 0;
     if (S.view !== v && MAIN.indexOf(S.view) >= 0) S.prev = S.view;
+    if (S.view === 'vLock' && v !== 'vLock' && typeof sqResume === 'function') setTimeout(sqResume, 600); // signed in: the story photos waiting go
     if (v !== 'vProj') { pick.stop(); liveStop(); } if (v !== 'vNew') nPick.stop();
     S.view = v;
     nav(v, how);
@@ -6534,6 +6650,7 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
   function styLoad(p) {
     var box = $('styBody'); if (!box || !p) return;
     if (STY.id !== p.id) { STY.id = p.id; STY.s = null; STY.q = 0; }
+    sqResume(); // photos still waiting on this phone go now
     if (!STY.s) box.innerHTML = '<div class="skel"></div><div class="skel"></div>';
     styApi('GET', null, '?id=' + encodeURIComponent(p.id)).then(function (j) {
       if (!S.cur || S.cur.id !== p.id) return;
@@ -6541,34 +6658,125 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
       styGot(j.story);
     });
   }
-  function styGot(s) {
-    STY.s = s; S.stories[s.id] = { st: s.status, n: QSN(s), b: s.photos.before.length, i: s.photos.progress.length, a: s.photos.after.length, c: s.consent, at: new Date().toISOString() };
-    store.set('rfPinStories', JSON.stringify(S.stories)); styDraw();
+  function styGot(s, part) {
+    var same = STY.s && STY.s.id === s.id; STY.s = s; styCache(s);
+    if (part && same) styPart(); else styDraw();
+  }
+  function styCache(s) {
+    S.stories[s.id] = { st: s.status, n: QSN(s), b: s.photos.before.length, i: s.photos.progress.length, a: s.photos.after.length, c: s.consent, at: new Date().toISOString() };
+    store.set('rfPinStories', JSON.stringify(S.stories));
   }
   function QSN(s) { return ['q1', 'q2', 'q3', 'q4', 'q5', 'q6'].filter(function (q) { return String(s.answers[q] || '').trim(); }).length; }
-  function styMissing(s) {
-    var n = QSN(s), m = [];
-    if (n < 6) m.push(tr(n + ' of 6 answers', 'Majibu ' + n + ' kati ya 6'));
-    if (!s.photos.after.length) m.push(tr('no after photos', 'hakuna picha za baada'));
-    m.push(tr('consent: ', 'ruhusa: ') + (s.consent === 'received' ? tr('received', 'imepatikana') : tr('not yet', 'bado')));
-    return m.join(', ');
+  // ---- the writer, top to bottom: the status (four steps), what is still needed, the photos (story photos, Oct 2026) --
+  var STY_STEP = [['collecting', 'Collecting', 'Inakusanywa'], ['draft', 'Draft ready', 'Rasimu iko tayari'], ['approved', 'Approved', 'Imeidhinishwa'], ['published', 'On the website', 'Kwenye tovuti']];
+  Object.assign(OIC, {
+    spGrid: '<rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/>',
+    spImg: '<rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><circle cx="9" cy="10" r="1.7"/><path d="M20.5 16l-5-5-8.5 8.5"/>',
+    spUp: '<path d="M7 18.5a4.5 4.5 0 0 1-.6-9A6 6 0 0 1 18 9.6a4.5 4.5 0 0 1-.5 8.9"/><path d="M12 19.5v-7M9 15l3-3 3 3"/>',
+    spOff: '<path d="M3 3l18 18"/><path d="M8.5 16.5a5 5 0 0 1 7 0M5 12.8a10 10 0 0 1 4.2-2.5M19 12.8a10 10 0 0 0-3-2.1M2 9.3a15 15 0 0 1 4.6-2.8M22 9.3A15 15 0 0 0 11 5.1"/><path d="M12 20h.01"/>',
+    spRetry: '<path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3"/><path d="M19.5 4.5v4h-4"/>',
+    spKid: '<circle cx="12" cy="5.5" r="2.3"/><path d="M8 21l1.2-7.5H7.5L9 9h6l1.5 4.5h-1.7L16 21"/>',
+    spTrash: '<path d="M4.5 7h15M10 11v6M14 11v6"/><path d="M6 7l1 12.5a1.5 1.5 0 0 0 1.5 1.5h7a1.5 1.5 0 0 0 1.5-1.5L18 7M9.5 7V4.5h5V7"/>',
+    spX: '<path d="M6 6l12 12M18 6L6 18"/>'
+  });
+  var STY_MON = { en: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'], sw: ['Januari', 'Februari', 'Machi', 'Aprili', 'Mei', 'Juni', 'Julai', 'Agosti', 'Septemba', 'Oktoba', 'Novemba', 'Desemba'] };
+  function ymOk(v) { return /^\d{4}-(0[1-9]|1[0-2])$/.test(v || ''); }
+  function ymShort(v) { return ymOk(v) ? MO3[dL()][+v.slice(5) - 1] + ' ' + v.slice(0, 4) : ''; }
+  function ymLong(v) { return ymOk(v) ? STY_MON[dL()][+v.slice(5) - 1] + ' ' + v.slice(0, 4) : ''; }
+  function ymSpan(a, b) { if (!ymOk(a)) return ''; if (!ymOk(b) || b === a) return ymShort(a); return a.slice(0, 4) === b.slice(0, 4) ? MO3[dL()][+a.slice(5) - 1] + ' – ' + ymShort(b) : ymShort(a) + ' – ' + ymShort(b); }
+  function ymNow() { var d = new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2); }
+  function styRowName(r) { var x = STY_ROWS.filter(function (y) { return y[0] === r; })[0]; return x ? tr(x[1], x[2]) : r; }
+  function styAnd(a) { return a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + tr(' and ', ' na ') + a[a.length - 1]; }
+  function styDateTxt(s, r) { var D = s.dates || {}; return r === 'progress' ? ymSpan(D.progress, D.progressEnd) : ymShort(D[r]); }
+  // the day the project was finished, when the story knows it (monday.com's completion date)
+  function styDone(s) { var v = String(s.done || s.finished || (S.cur && S.cur.id === s.id && S.cur.done) || ''); return /^\d{4}-\d{2}/.test(v) ? v.slice(0, 7) : ''; }
+  function styStepAt(s) { return s.pub || s.status === 'published' ? 3 : s.status === 'approved' ? 2 : s.status === 'draft' ? 1 : 0; }
+  function styHead(s) {
+    var k = styStepAt(s), at = STY_ST.map(function (x) { return x[0]; }).indexOf(s.status), cur = k === 3 ? STY_ST[4] : STY_ST[at] || STY_ST[0];
+    return '<div class="card sty-h" id="styHead" data-testid="sty_status"><div class="sty-hh"><h3>' + tr('The story', 'Hadithi') + '</h3><span class="sty-pill' + (k === 3 ? ' ok' : '') + '" data-testid="sty_now">' + tr(cur[1], cur[2]) + '</span></div>' +
+      '<ol class="sty-st" aria-label="' + esc(tr('Where the story is', 'Hadithi ilipofika')) + '">' + STY_STEP.map(function (x, i) {
+        return '<li class="' + (i < k ? 'done' : i === k ? 'now' : 'todo') + '"' + (i === k ? ' aria-current="step"' : '') + '><i aria-hidden="true">' + (i < k ? oic('check') : '') + '</i><span>' + tr(x[1], x[2]) + '</span></li>';
+      }).join('') + '</ol></div>';
+  }
+  // what is still missing and can be done right here, each with its own button
+  function styNeeds(s) {
+    var out = [], D = s.dates || {}, n = QSN(s);
+    if (s.pub || s.status === 'approved' || s.status === 'published') return out;
+    if (!(s.photos.after || []).length) out.push({ k: 'after', ic: 'spImg', b: tr('Add after photos', 'Ongeza picha za baada'), m: tr('The story ends with what changed. 2\u2060–\u20603 photos of the finished project.', 'Hadithi inaishia na kilichobadilika. Picha 2\u2060–\u20603 za mradi uliokamilika.'), btn: tr('Add', 'Ongeza'), bi: 'camera' });
+    var nd = STY_ROWS.filter(function (r) { return (s.photos[r[0]] || []).length && !D[r[0]]; });
+    if (nd.length) out.push({ k: 'dates', row: nd[0][0], ic: 'cal', b: tr('Add the dates for ' + styAnd(nd.map(function (r) { return r[1]; })), 'Ongeza tarehe za ' + styAnd(nd.map(function (r) { return r[2]; }))), m: tr('The month each part happened, so the story tells it in order.', 'Mwezi kila sehemu ilipotokea, ili hadithi iseme kwa mpangilio.'), btn: tr('Add', 'Ongeza'), bi: 'cal' });
+    if (n < 6) out.push({ k: 'answers', ic: 'chat', b: tr('Answer the questions', 'Jibu maswali'), m: tr(n + ' of 6 answered', 'Majibu ' + n + ' kati ya 6'), btn: tr('Answer', 'Jibu'), bi: 'chev' });
+    if (s.consent !== 'received') out.push({ k: 'consent', ic: 'okc', b: tr('Photo consent', 'Ruhusa ya picha'), m: ROWSKID(s) ? tr('Not received yet. A photo shows children.', 'Bado haijapatikana. Picha inaonyesha watoto.') : tr('Not received yet', 'Bado haijapatikana'), btn: tr('Open', 'Fungua'), bi: 'chev' });
+    return out;
+  }
+  function styNeed(s) {
+    var l = styNeeds(s);
+    if (!l.length) return '<div id="styNeed" hidden></div>';
+    return '<div class="card sty-need" id="styNeed" data-testid="sty_need" role="group" aria-label="' + esc(tr('Still needed', 'Bado vinahitajika')) + '">' + l.map(function (x) {
+      return '<div class="sty-ni" data-sty="need" data-need="' + x.k + '"' + (x.row ? ' data-row="' + x.row + '"' : '') + ' data-testid="sty_need_' + x.k + '">' + oic(x.ic) + '<span><b>' + esc(x.b) + '</b><small>' + esc(x.m) + '</small></span>' +
+        '<button type="button" class="btn" data-sty="need" data-need="' + x.k + '"' + (x.row ? ' data-row="' + x.row + '"' : '') + ' aria-label="' + esc(x.b) + '">' + (x.bi === 'chev' ? '' : oic(x.bi)) + '<span>' + esc(x.btn) + '</span></button></div>';
+    }).join('') + '</div>';
+  }
+  // photos added after the draft was written
+  function styNudge(s, adm) {
+    var n = +s.newPhotos || 0, none = '<div id="styNudge" hidden></div>';
+    if (!n || !(s.doc || s.text)) return none;
+    var t = n === 1 ? tr('1 new photo', 'Picha 1 mpya') : tr(n + ' new photos', 'Picha ' + n + ' mpya');
+    if (s.pub) return adm ? '<div class="sty-nudge" id="styNudge" data-testid="sty_nudge">' + oic('spImg') + '<span><b>' + t + '</b>' + tr('Add them in the story editor below.', 'Ziongeze kwenye kihariri cha hadithi hapa chini.') + '</span></div>' : none;
+    return '<div class="sty-nudge" id="styNudge" data-testid="sty_nudge">' + oic('spImg') + '<span><b>' + tr(t + ' since this draft', t + ' tangu rasimu hii') + '</b>' + tr('Draft again to use them.', 'Andaa upya ili uzitumie.') + '</span><button type="button" class="btn light small" data-sty="draft" data-testid="sty_nudge_draft">' + tr('Draft again', 'Andaa upya') + '</button></div>';
+  }
+  function styInStory(s) { var o = {}; ((s.doc && s.doc.sections) || []).forEach(function (x) { if (x.photo && x.photo.id) o[String(x.photo.id)] = 1; }); return o; }
+  function styRing(it) {
+    var p = Math.max(0, Math.min(99, Math.round(it.pct || 0))), C = 138.2;
+    return '<span class="sty-ring"><svg viewBox="0 0 52 52" aria-hidden="true"><circle class="bg" cx="26" cy="26" r="22"/><circle class="fg" cx="26" cy="26" r="22" stroke-dasharray="' + C + '" stroke-dashoffset="' + (C * (1 - p / 100)).toFixed(1) + '"/></svg>' + (it.state === 'send' ? '<i class="sp" aria-hidden="true"></i>' : '') + '<b>' + p + '%</b></span>';
+  }
+  var SQ_WHY = { big: ['Too large', 'Kubwa mno'], type: ['Not a photo', 'Si picha'], off: ['No signal', 'Hakuna mtandao'], server: ['Server problem', 'Tatizo la seva'] };
+  function sqOv(it) {
+    if (it.state === 'off') return oic('spOff') + '<span>' + tr('Waiting for signal', 'Inasubiri mtandao') + '</span>';
+    if (it.state === 'fail') { var w = SQ_WHY[it.why] || SQ_WHY.server; return '<span class="sty-rt">' + oic('spRetry') + '</span><span>' + (it.why === 'type' ? tr('Tap to remove', 'Gusa kuondoa') : tr('Tap to retry', 'Gusa kujaribu tena')) + '</span><small>' + tr(w[0], w[1]) + '</small>'; }
+    return styRing(it);
+  }
+  function sqTileHtml(it) {
+    return '<button type="button" class="sty-t up' + (it.state === 'fail' ? ' fail' : '') + '" data-sq="' + it.key + '" data-st="' + it.state + '" data-testid="sty_q_' + it.state + '" aria-label="' + esc(it.state === 'fail' ? tr('Photo not sent. Tap to retry.', 'Picha haijatumwa. Gusa kujaribu tena.') : it.state === 'off' ? tr('Photo waiting for signal', 'Picha inasubiri mtandao') : tr('Photo sending', 'Picha inatumwa')) + '"><img class="in" alt="" src="' + it.url + '"><span class="sty-ov" aria-hidden="true">' + sqOv(it) + '</span></button>';
+  }
+  function styTile(s, r, x, i, ins) {
+    var fr = SQ.fresh[x.id], left = fr ? 2 - (Date.now() - fr) / 1000 : -1;
+    return '<button type="button" class="sty-t' + (left > -0.5 ? ' up done' : '') + '"' + (left > -0.5 ? ' style="--fd:' + Math.max(0, left).toFixed(2) + 's"' : '') + ' data-sty-ph="' + r[0] + '" data-id="' + esc(x.id) + '" data-i="' + i + '" aria-label="' + esc(tr(r[1] + ' photo ' + (i + 1), 'Picha ' + (i + 1) + ', ' + r[2]) + (x.cap ? ': ' + x.cap : '')) + '">' +
+      '<img alt="" data-src="' + styImg(s, x.id, 480) + '">' + (x.children ? '<em class="sty-kid">' + tr('Children', 'Watoto') + '</em>' : '') +
+      (ins[String(x.id)] ? '<span class="sty-ins">' + oic('spark') + tr('In story', 'Hadithini') + '</span>' : '') + (left > -0.5 ? '<span class="sty-tk" aria-hidden="true">' + oic('check') + '</span>' : '') + '</button>';
+  }
+  function styPhCard(s) {
+    var ins = styInStory(s), nIn = 0;
+    STY_ROWS.forEach(function (r) { (s.photos[r[0]] || []).forEach(function (x) { if (ins[String(x.id)]) nIn++; }); });
+    return '<div class="card sty-ph" id="styPh" data-testid="sty_photos"><div class="sty-phh"><h3>' + tr('Photos', 'Picha') + '</h3>' + (nIn ? '<span class="sty-in" data-testid="sty_in_n">' + oic('spark') + tr(nIn + ' in the story', (nIn === 1 ? 'Picha 1' : 'Picha ' + nIn) + ' kwenye hadithi') + '</span>' : '') + '</div>' +
+      STY_ROWS.map(function (r) {
+        var ph = s.photos[r[0]] || [], q = sqFor(s.id, r[0]), dt = styDateTxt(s, r[0]);
+        return '<div class="sty-row" data-row="' + r[0] + '"><div class="sty-rh"><b>' + tr(r[1], r[2]) + '</b><span class="n" aria-label="' + esc(tr((ph.length + q.length) + ' photos', 'Picha ' + (ph.length + q.length))) + '">' + (ph.length + q.length) + '</span>' +
+          (dt ? '<button type="button" class="sty-dbtn" data-sty="dates" data-row="' + r[0] + '" data-testid="sty_date_' + r[0] + '" aria-label="' + esc(tr('Change the date of ' + r[1] + ': ' + dt, 'Badilisha tarehe ya ' + r[2] + ': ' + dt)) + '">' + esc(dt) + '</button>'
+            : '<button type="button" class="sty-dchip" data-sty="dates" data-row="' + r[0] + '" data-testid="sty_date_' + r[0] + '">' + oic('cal') + '<span>' + tr('Add date', 'Ongeza tarehe') + '</span></button>') + '</div>' +
+          '<div class="sty-g">' + ph.map(function (x, i) { return styTile(s, r, x, i, ins); }).join('') + q.map(sqTileHtml).join('') +
+          '<button type="button" class="sty-addt" data-sty="add" data-row="' + r[0] + '" data-testid="sty_add_' + r[0] + '" aria-label="' + esc(tr('Add photos to ' + r[1], 'Ongeza picha kwenye ' + r[2])) + '">' + oic('plus') + '<span>' + tr('Add photos', 'Ongeza picha') + '</span></button></div></div>';
+      }).join('') + '<p class="muted sty-hint">' + tr('Tap a photo to add a caption, move it to another row, or mark that it shows children.', 'Gusa picha kuongeza maelezo, kuihamisha safu nyingine, au kuonyesha kwamba ina watoto.') + '</p></div>';
+  }
+  function styConsent(s) {
+    return '<div class="card sty-c" id="styC" data-testid="sty_consent"><h3>' + tr('Photo consent', 'Ruhusa ya picha') + '</h3><div class="seg" role="group" aria-label="' + esc(tr('Photo consent', 'Ruhusa ya picha')) + '"><button type="button" data-sty="consent" data-v="received" aria-pressed="' + (s.consent === 'received') + '">' + tr('Received', 'Imepatikana') + '</button><button type="button" data-sty="consent" data-v="not-yet" aria-pressed="' + (s.consent !== 'received') + '">' + tr('Not yet', 'Bado') + '</button></div>' +
+      (ROWSKID(s) ? '<p class="muted">' + tr('A photo shows children, so consent is needed before it can be approved.', 'Picha inaonyesha watoto, kwa hiyo ruhusa inahitajika kabla ya kuidhinishwa.') + '</p>' : '') + '</div>';
+  }
+  // only the parts the photos change (a photo sent, moved, captioned; a date): the answer being typed stays as it is
+  function styPart() {
+    var s = STY.s, box = $('styBody'); if (!s || !box || !$('styPh')) return styDraw();
+    [['styHead', styHead(s)], ['styNeed', styNeed(s)], ['styPh', styPhCard(s)], ['styC', styConsent(s)], ['styNudge', styNudge(s, !!S.admin)]].forEach(function (x) {
+      var el = $(x[0]); if (!el) return; var t = document.createElement('div'); t.innerHTML = x[1]; var n = t.firstElementChild; if (n) el.replaceWith(n);
+    });
+    cnThumbs($('styPh'));
   }
   function styDraw() {
     var s = STY.s, box = $('styBody'); if (!s || !box) return;
-    var at = STY_ST.map(function (x) { return x[0]; }).indexOf(s.status), adm = !!S.admin, P = s.prompts || {};
-    // five dots on a line (labels would crowd in Kiswahili), and the current step in words under them
-    var h = '<div class="card sty-h" data-testid="sty_status"><ol class="sty-st">' + STY_ST.map(function (x, i) { return '<li class="' + (i < at ? 'done' : i === at ? 'now' : 'todo') + '"' + (i === at ? ' aria-current="step"' : '') + ' title="' + esc(tr(x[1], x[2])) + '"><i aria-hidden="true"></i><span class="vh">' + tr(x[1], x[2]) + '</span></li>'; }).join('') + '</ol>' +
-      '<p class="sty-now" data-testid="sty_now"><b>' + tr(STY_ST[at][1], STY_ST[at][2]) + '</b> · ' + tr('step ' + (at + 1) + ' of 5', 'hatua ' + (at + 1) + ' kati ya 5') + (STY_ST[at + 1] ? ' · ' + tr('next: ', 'inayofuata: ') + tr(STY_ST[at + 1][1], STY_ST[at + 1][2]) : '') + '</p>' +
-      '<p class="muted sty-miss">' + esc(styMissing(s)) + '</p></div>';
-    // photos
-    h += '<div class="card sty-ph"><h3>' + tr('Photos', 'Picha') + '</h3>' + STY_ROWS.map(function (r) {
-      var ph = s.photos[r[0]] || [];
-      return '<div class="sty-row" data-row="' + r[0] + '"><div class="sty-rh"><b>' + tr(r[1], r[2]) + '</b><span class="n">' + ph.length + '</span><button type="button" class="btn light small" data-sty="add" data-row="' + r[0] + '" data-testid="sty_add_' + r[0] + '">' + oic('camera') + '<span>' + tr('Add photo', 'Ongeza picha') + '</span></button></div>' +
-        (ph.length ? '<div class="cn-ths">' + ph.map(function (x, i) { return '<button type="button" class="cn-th" data-sty-ph="' + r[0] + '" data-i="' + i + '" aria-label="' + esc(tr(r[1] + ' photo ' + (i + 1), 'Picha ' + (i + 1) + ', ' + r[2])) + '"><img alt="" data-src="/api/story?id=' + encodeURIComponent(s.id) + '&amp;asset=' + encodeURIComponent(x.id) + '&amp;w=480">' + (x.children ? '<em class="sty-kid" title="' + esc(tr('Children in photo', 'Watoto kwenye picha')) + '">' + tr('Children', 'Watoto') + '</em>' : '') + '</button>'; }).join('') + '</div>' : '') + '</div>';
-    }).join('') + '<input type="file" accept="image/*" class="vh" id="styFile" tabindex="-1" aria-hidden="true"></div>';
+    var adm = !!S.admin, P = s.prompts || {};
+    var h = styHead(s) + styNeed(s) + styPhCard(s);
     // questions: one card at a time
     var qs = ['q1', 'q2', 'q3', 'q4', 'q5', 'q6'], q = qs[STY.q], pr = P[q] || {};
-    h += '<div class="card sty-q" data-testid="sty_q"><div class="sty-qh"><h3>' + tr('Questions', 'Maswali') + '</h3><span class="muted">' + tr('Question ' + (STY.q + 1) + ' of 6', 'Swali ' + (STY.q + 1) + ' kati ya 6') + '</span></div>' +
+    h += '<div class="card sty-q" id="styQs" data-testid="sty_q"><div class="sty-qh"><h3>' + tr('Questions', 'Maswali') + '</h3><span class="muted">' + tr('Question ' + (STY.q + 1) + ' of 6', 'Swali ' + (STY.q + 1) + ' kati ya 6') + '</span></div>' +
       '<div class="sty-dots" aria-hidden="true">' + qs.map(function (x, i) { return '<i class="' + (String(s.answers[x] || '').trim() ? 'ok' : '') + (i === STY.q ? ' on' : '') + '"></i>'; }).join('') + '</div>' +
       '<label for="styA">' + esc(tr(pr.en || q, pr.sw)) + '</label><textarea id="styA" rows="4">' + esc(s.answers[q] || '') + '</textarea>' +
       '<div class="sty-qa"><button type="button" class="btn light small" data-sty="prev"' + (STY.q ? '' : ' disabled') + '>' + tr('Back', 'Rudi') + '</button>' + (window.MediaRecorder ? '<button type="button" class="btn light small" data-sty="rec">' + oic('mic') + '<span>' + (STY.rec ? tr('Stop', 'Simamisha') : tr('Record', 'Rekodi')) + '</span></button>' : '') +
@@ -6577,9 +6785,7 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
     h += '<div class="card sty-quote"><h3>' + tr('Quote', 'Nukuu') + '</h3><label for="styQ">' + esc(tr((P.quote || {}).en || 'Quote', (P.quote || {}).sw)) + '</label><textarea id="styQ" rows="3">' + esc(s.quote || '') + '</textarea>' +
       '<div class="two"><div><label for="styQB">' + esc(tr((P.quoteBy || {}).en || 'Who said it', (P.quoteBy || {}).sw)) + '</label><input id="styQB" type="text" value="' + esc(s.quoteBy || '') + '"></div><div><label for="styCr">' + esc(tr((P.credit || {}).en || 'Photo credit', (P.credit || {}).sw)) + '</label><input id="styCr" type="text" value="' + esc(s.credit || S.name || '') + '"></div></div>' +
       '<button type="button" class="btn light small" data-sty="quote">' + tr('Save quote', 'Hifadhi nukuu') + '</button></div>';
-    // consent
-    h += '<div class="card sty-c"><h3>' + tr('Photo consent', 'Ruhusa ya picha') + '</h3><div class="seg" role="group" aria-label="' + esc(tr('Photo consent', 'Ruhusa ya picha')) + '"><button type="button" data-sty="consent" data-v="received" aria-pressed="' + (s.consent === 'received') + '">' + tr('Received', 'Imepatikana') + '</button><button type="button" data-sty="consent" data-v="not-yet" aria-pressed="' + (s.consent !== 'received') + '">' + tr('Not yet', 'Bado') + '</button></div>' +
-      (ROWSKID(s) ? '<p class="muted">' + tr('A photo shows children, so consent is needed before it can be approved.', 'Picha inaonyesha watoto, kwa hiyo ruhusa inahitajika kabla ya kuidhinishwa.') + '</p>' : '') + '</div>';
+    h += styConsent(s) + styNudge(s, adm);
     // the story: the long draft with its photos (sections), or the plain text of a story drafted before
     h += s.doc ? styDocCard(s, adm) : '<div class="card sty-s"><h3>' + tr('The story', 'Hadithi') + '</h3>' + styPub(s) + (s.text ? (adm ? '<textarea id="styT" rows="10">' + esc(s.text) + '</textarea>' : '<div class="sty-txt">' + esc(s.text).replace(/\n/g, '<br>') + '</div>') + '<p class="muted">' + tr(wc(s.text) + ' words', 'Maneno ' + wc(s.text)) + '</p>' : '<p class="muted">' + tr('Not written yet. “Draft the story” writes it from the answers, the photos, the building stages and the visit notes.', 'Bado haijaandikwa. “Andaa hadithi” inaiandika kutoka kwa majibu, picha, hatua za ujenzi na maelezo ya ziara.') + '</p>') +
       styActs(s, adm) + '</div>';
@@ -6631,6 +6837,7 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
     if (adm && !live && (s.status === 'draft' || s.status === 'collecting' || s.status === 'approved')) h += '<button type="button" class="btn" data-sty="approve" data-testid="sty_approve"' + (s.text ? '' : ' disabled') + '>' + tr('Approve and publish', 'Idhinisha na uchapishe') + '</button>';
     if (s.status === 'draft' || (adm && (s.status === 'approved' || s.status === 'published' || live))) h += '<button type="button" class="btn light" data-sty="collecting" data-testid="sty_back">' + tr('Back to Collecting', 'Rudi kukusanya') + '</button>';
     h += '</div>';
+    if (!live && styDone(s)) h += '<p class="muted sty-fin" data-testid="sty_fin">' + oic('cal') + '<span>' + tr('Finished: ' + ymLong(styDone(s)) + ' (from monday.com)', 'Ilikamilika: ' + ymLong(styDone(s)) + ' (kutoka monday.com)') + '</span></p>';
     if (!adm && (s.status === 'not-started' || s.status === 'collecting')) h += '<p class="muted sty-send" data-testid="sty_send">' + tr('“Draft the story” sends it to an admin for review. Nothing goes on the website before it is approved.', '“Andaa hadithi” inaituma kwa msimamizi akague. Hakuna kinachoenda kwenye tovuti kabla ya kuidhinishwa.') + '</p>';
     if (adm && !live && s.text) h += '<p class="muted sty-send">' + tr('“Approve and publish” puts it on the website’s Stories page straight away, with a copy in monday.com.', '“Idhinisha na uchapishe” inaiweka kwenye ukurasa wa Hadithi wa tovuti mara moja, na nakala kwenye monday.com.') + '</p>';
     return h + '<p class="msg" id="styMsg" aria-live="polite"></p>';
@@ -6678,7 +6885,8 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
   }
   function styTap(e) {
     var s = STY.s, p = S.cur; if (!s || !p) return;
-    var th = e.target.closest('[data-sty-ph]'); if (th) { var r = th.getAttribute('data-sty-ph'), rl = STY_ROWS.filter(function (x) { return x[0] === r; })[0]; return cnView((s.photos[r] || []).map(function (x) { return { big: '/api/story?id=' + encodeURIComponent(s.id) + '&asset=' + encodeURIComponent(x.id) + '&w=1600', at: x.at, by: x.by }; }), +th.getAttribute('data-i'), rl[1], rl[2]); }
+    var th = e.target.closest('[data-sty-ph]'); if (th) { buzz(); return styDetails(th.getAttribute('data-sty-ph'), th.getAttribute('data-id')); }
+    var qt = e.target.closest('[data-sq]'); if (qt) { var it = SQ.items.filter(function (x) { return x.key === qt.getAttribute('data-sq'); })[0]; if (!it) return; buzz(); if (it.state === 'fail') return sqRetry(it); if (it.state === 'off') { toast(tr('It sends by itself when there’s signal.', 'Itajituma yenyewe ukipata mtandao.')); return sqResume(); } return; }
     var b = e.target.closest('[data-sty]'); if (!b) return; var k = b.getAttribute('data-sty'); buzz();
     var ans = function () { var o = { action: 'answers', id: s.id }; o[['q1', 'q2', 'q3', 'q4', 'q5', 'q6'][STY.q]] = $('styA').value.trim(); return o; };
     if (k === 'save') return styDo(ans()).then(function (j) { if (j && j.ok && STY.q < 5) { STY.q++; styDraw(); } });
@@ -6699,21 +6907,364 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
     if (k === 'pick') return styPick(+b.getAttribute('data-i'));
     if (k === 'nophoto') { var dd = STY.ed && STY.ed.d, ni = +b.getAttribute('data-i'); if (dd && dd.sections[ni]) { dd.sections[ni].photo = null; STY.ed.dirty = true; styDraw(); } return; }
     if (k === 'view') { var vd = s.doc, vi = +b.getAttribute('data-i'), ph = vd && vd.sections[vi] && vd.sections[vi].photo; if (ph) return cnView([{ big: styImg(s, ph.id, 1600) }], 0, ph.cap || 'Photo', ph.cap || 'Picha'); return; }
-    if (k === 'add') { STY.row = b.getAttribute('data-row'); return $('styFile').click(); }
+    if (k === 'add') return styAdd(b.getAttribute('data-row'));
+    if (k === 'dates') return styDates(b.getAttribute('data-row'));
+    if (k === 'need') {
+      var nk = b.getAttribute('data-need');
+      if (nk === 'after') return styAdd('after');
+      if (nk === 'dates') return styDates(b.getAttribute('data-row'));
+      var go2 = function (id) { var el = $(id); if (!el) return; var hd = document.querySelector('header.top'); window.scrollTo({ top: Math.max(0, el.getBoundingClientRect().top + window.scrollY - (hd ? hd.offsetHeight : 0) - 12), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); };
+      if (nk === 'answers') { var qn = ['q1', 'q2', 'q3', 'q4', 'q5', 'q6'].filter(function (x) { return !String(s.answers[x] || '').trim(); })[0]; var qi = qn ? +qn.slice(1) - 1 : STY.q, qa0 = $('styA'); if (qi !== STY.q && (!qa0 || qa0.value.trim() === String(s.answers['q' + (STY.q + 1)] || '').trim())) { STY.q = qi; styDraw(); } go2('styQs'); setTimeout(function () { var a = $('styA'); if (a) a.focus({ preventScroll: true }); }, 400); return; }
+      if (nk === 'consent') return go2('styC');
+      return;
+    }
     if (k === 'rec') return styRec(b);
   }
-  // a photo for a row: asks whether children are in it (consent then matters)
-  function styPhoto(file) {
-    var s = STY.s, row = STY.row; if (!s || !row || !file) return;
-    shrink(file).then(function (bl) {
-      if (!bl) return;
-      var w = panel(esc(tr('Children in this photo?', 'Watoto kwenye picha hii?')), '<p class="muted">' + tr('If children can be seen, the family’s consent is needed before the story is approved.', 'Kama watoto wanaonekana, ruhusa ya familia inahitajika kabla hadithi kuidhinishwa.') + '</p><button type="button" class="btn block" data-k="no">' + tr('No children', 'Hakuna watoto') + '</button><button type="button" class="btn light block" data-k="yes" style="margin-top:8px">' + tr('Yes, children', 'Ndiyo, watoto') + '</button>', 'sty-sh');
-      w.addEventListener('click', function (e) {
-        var b = e.target.closest('[data-k]'); if (!b) return; w.close();
-        var fd = new FormData(); fd.append('action', 'photo'); fd.append('id', s.id); fd.append('row', row); fd.append('children', b.getAttribute('data-k') === 'yes' ? 'true' : 'false'); fd.append('file', bl, 'story.jpg');
-        toast(tr('Uploading…', 'Inapakia…'));
-        styApi('POST', null, '', fd).then(function (j) { if (!j.ok) return toast(styWhy(j)); styGot(j.story); toast(tr('Photo added ✓', 'Picha imeongezwa ✓')); });
+  // ---- adding photos: several at once (gallery, or a few shots in a row), a check for children, then they send ------
+  // one by one with their progress on the tiles and a banner; with no signal they wait on the phone (IndexedDB)
+  function styExif(file) {   // the day the photo was taken (EXIF DateTimeOriginal), 'YYYY-MM-DD' or ''
+    if (!file || !file.slice || !/jpe?g/i.test(file.type || file.name || '')) return Promise.resolve('');
+    var rd = file.slice(0, 196608).arrayBuffer ? file.slice(0, 196608).arrayBuffer() : new Promise(function (ok) { var f = new FileReader(); f.onload = function () { ok(f.result); }; f.onerror = function () { ok(null); }; f.readAsArrayBuffer(file.slice(0, 196608)); });
+    return rd.then(function (buf) {
+      if (!buf) return '';
+      var v = new DataView(buf), n = v.byteLength, o = 2;
+      if (n < 4 || v.getUint16(0) !== 0xFFD8) return '';
+      while (o + 4 < n) {
+        var mk = v.getUint16(o), len = v.getUint16(o + 2);
+        if (mk === 0xFFE1 && v.getUint32(o + 4) === 0x45786966) {
+          var t = o + 10, le = v.getUint16(t) === 0x4949, u16 = function (p) { return v.getUint16(p, le); }, u32 = function (p) { return v.getUint32(p, le); };
+          var ifd = function (p, want) { if (p + 2 > n) return 0; var c = u16(p); for (var i = 0; i < c; i++) { var e = p + 2 + i * 12; if (e + 12 > n) return 0; if (u16(e) === want) return e; } return 0; };
+          var str = function (e) { var off = t + u32(e + 8), s = ''; for (var i = 0; i < 19 && off + i < n; i++) s += String.fromCharCode(v.getUint8(off + i)); return s; };
+          var i0 = t + u32(t + 4), ex = ifd(i0, 0x8769), d = '';
+          if (ex) { var e2 = ifd(t + u32(ex + 8), 0x9003); if (e2) d = str(e2); }
+          if (!d) { var e3 = ifd(i0, 0x0132); if (e3) d = str(e3); }
+          var m = /^(\d{4}):(\d{2}):(\d{2})/.exec(d), today = new Date().toISOString().slice(0, 10);
+          if (!m) return ''; var day = m[1] + '-' + m[2] + '-' + m[3];
+          return day >= '2000-01-01' && day <= today ? day : '';
+        }
+        if ((mk & 0xFF00) !== 0xFF00 || mk === 0xFFDA) break;
+        o += 2 + len;
+      }
+      return '';
+    }).catch(function () { return ''; });
+  }
+  function styToday() { var d = new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+  // made smaller on the phone first (longest side 1600 px, JPEG), turned the right way up
+  function styShrink(file, max, q) {
+    max = max || 1600; q = q || 0.82;
+    var draw = function (src, w, h) {
+      return new Promise(function (ok) {
+        var k = Math.min(1, max / Math.max(w, h)), c = document.createElement('canvas'); c.width = Math.max(1, Math.round(w * k)); c.height = Math.max(1, Math.round(h * k));
+        c.getContext('2d').drawImage(src, 0, 0, c.width, c.height); if (src.close) src.close();
+        c.toBlob(function (b) { ok(b || file); }, 'image/jpeg', q);
       });
+    };
+    var viaImg = function () { return new Promise(function (ok) { var url = URL.createObjectURL(file), im = new Image(); im.onload = function () { draw(im, im.naturalWidth, im.naturalHeight).then(function (b) { URL.revokeObjectURL(url); ok(b); }); }; im.onerror = function () { URL.revokeObjectURL(url); ok(file); }; im.src = url; }); };
+    if (window.createImageBitmap) return createImageBitmap(file, { imageOrientation: 'from-image' }).then(function (bm) { return draw(bm, bm.width, bm.height); }, viaImg);
+    return viaImg();
+  }
+  // the Add photos sheet: which row, then the gallery (several at once) or the camera (a few shots, then add them together)
+  function styAdd(row) {
+    var s = STY.s, p = S.cur; if (!s || !p) return;
+    var shots = [], cur = row || 'after';
+    var w = panel(esc(tr('Add photos', 'Ongeza picha')), '<div class="sty-addw" data-testid="sty_addsheet"><p class="muted sty-sub">' + esc(p.title) + '</p>' +
+      '<span class="sty-lbl" id="styAddL">' + tr('Which part of the story?', 'Sehemu gani ya hadithi?') + '</span><div class="seg sty-seg" role="group" aria-labelledby="styAddL">' + STY_ROWS.map(function (r) { return '<button type="button" data-row="' + r[0] + '" aria-pressed="' + (r[0] === cur) + '">' + tr(r[1], r[2]) + '</button>'; }).join('') + '</div>' +
+      '<div class="sty-tray hidden" aria-live="polite" data-testid="sty_tray"></div>' +
+      '<div class="sty-opts"><button type="button" class="sty-opt pri" data-k="pick" data-testid="sty_pick"><span class="oi">' + oic('spGrid') + '</span><span><b>' + tr('Choose from gallery', 'Chagua kutoka kwenye picha') + '</b><small>' + tr('Pick several at once — tap each photo you want', 'Chagua kadhaa kwa pamoja — gusa kila picha unayotaka') + '</small></span>' + oic('chev') + '</button>' +
+      '<button type="button" class="sty-opt" data-k="cam" data-testid="sty_cam"><span class="oi">' + oic('camera') + '</span><span><b>' + tr('Take photos', 'Piga picha') + '</b><small>' + tr('Keep shooting, then add them all together', 'Endelea kupiga, kisha uziongeze zote pamoja') + '</small></span>' + oic('chev') + '</button></div>' +
+      '<p class="sty-fn">' + oic('down') + '<span>' + tr('Photos are made smaller before sending to save data. No signal? They wait and send by themselves.', 'Picha zinapunguzwa ukubwa kabla ya kutumwa ili kuokoa data. Hakuna mtandao? Zinasubiri na kujituma zenyewe.') + '</span></p>' +
+      '<input type="file" accept="image/*" multiple class="vh" data-k="fpick" data-testid="sty_fpick" tabindex="-1" aria-hidden="true"><input type="file" accept="image/*" capture="environment" class="vh" data-k="fcam" data-testid="sty_fcam" tabindex="-1" aria-hidden="true"></div>', 'sty-sh sty-addsh');
+    var tray = w.querySelector('.sty-tray'), opts = w.querySelector('.sty-opts');
+    var drawTray = function () {
+      tray.classList.toggle('hidden', !shots.length); opts.classList.toggle('hidden', !!shots.length);
+      if (!shots.length) { tray.innerHTML = ''; return; }
+      tray.innerHTML = '<div class="tt">' + shots.map(function (x) { return '<img alt="" src="' + x.url + '">'; }).join('') + '</div><p>' + (shots.length === 1 ? tr('1 taken', 'Picha 1 imepigwa') : tr(shots.length + ' taken', 'Picha ' + shots.length + ' zimepigwa')) + '</p>' +
+        '<div class="two"><button type="button" class="btn light" data-k="cam">' + oic('camera') + '<span>' + tr('Take another', 'Piga nyingine') + '</span></button><button type="button" class="btn" data-k="camgo" data-testid="sty_camgo">' + (shots.length === 1 ? tr('Add 1 photo', 'Ongeza picha 1') : tr('Add ' + shots.length + ' photos', 'Ongeza picha ' + shots.length)) + '</button></div>';
+    };
+    var go = function (list) { w.close(); styReview(s.id, cur, list); };
+    w.addEventListener('click', function (e) {
+      var r = e.target.closest('.sty-seg [data-row]'); if (r) { buzz(); cur = r.getAttribute('data-row'); qa('.sty-seg [data-row]', w).forEach(function (b) { b.setAttribute('aria-pressed', String(b === r)); }); return; }
+      var b = e.target.closest('[data-k]'); if (!b) return; var k = b.getAttribute('data-k');
+      if (k === 'pick') w.querySelector('[data-k=fpick]').click(); else if (k === 'cam') w.querySelector('[data-k=fcam]').click();
+      else if (k === 'camgo' && shots.length) go(shots);
+    });
+    w.addEventListener('change', function (e) {
+      var k = e.target.getAttribute && e.target.getAttribute('data-k'); if (k !== 'fpick' && k !== 'fcam') return;
+      var fl = e.target.files ? Array.prototype.slice.call(e.target.files) : []; e.target.value = ''; if (!fl.length) return;
+      if (fl.length > 30) { toast(tr('Up to 30 photos at a time. The first 30 are added.', 'Hadi picha 30 kwa wakati mmoja. 30 za kwanza zinaongezwa.')); fl = fl.slice(0, 30); }
+      var list = fl.map(function (f) { return { file: f, url: URL.createObjectURL(f), cam: k === 'fcam' }; });
+      if (k === 'fcam') { shots = shots.concat(list); drawTray(); } else go(list);
+    });
+  }
+  // the chosen photos: take any out, say whether any show children (and which), then Add
+  function styReview(pid, row, list) {
+    var kids = null, rname = styRowName(row);
+    list.forEach(function (x) { if (!x.ready) x.ready = Promise.all([x.cam ? Promise.resolve(styToday()) : styExif(x.file), styShrink(x.file)]).then(function (r) { x.taken = r[0]; x.blob = r[1]; }); });
+    var w = panel(esc(tr('Add photos to ' + rname, 'Ongeza picha kwenye ' + rname)), '<div class="sty-rvw" data-testid="sty_review"><div class="sty-rv"></div>' +
+      '<p class="sty-q2" id="styKQ">' + tr('Do any of these show children?', 'Kuna yoyote kati ya hizi inayoonyesha watoto?') + '</p><div class="seg sty-seg" role="group" aria-labelledby="styKQ"><button type="button" data-kids="no" aria-pressed="false" data-testid="sty_kno">' + tr('No', 'Hapana') + '</button><button type="button" data-kids="yes" aria-pressed="false" data-testid="sty_kyes">' + tr('Yes', 'Ndiyo') + '</button></div>' +
+      '<p class="muted sty-tapn hidden">' + tr('Tap the ones that show children.', 'Gusa zile zinazoonyesha watoto.') + '</p><p class="msg" aria-live="polite"></p><button type="button" class="btn block" data-k="go" data-testid="sty_rv_go"></button></div>', 'sty-sh sty-rvsh');
+    var grid = w.querySelector('.sty-rv'), m = w.querySelector('.msg'), btn = w.querySelector('[data-k=go]');
+    var draw = function () {
+      if (!list.length) { w.close(); return; }
+      grid.innerHTML = list.map(function (x, i) {
+        return '<div class="sty-rvt' + (kids ? ' pick' : '') + '"><img alt="" src="' + x.url + '"><button type="button" class="k" data-i="' + i + '"' + (kids ? ' aria-pressed="' + !!x.kid + '" aria-label="' + esc(tr('Photo ' + (i + 1) + ' shows children', 'Picha ' + (i + 1) + ' inaonyesha watoto')) + '"' : ' tabindex="-1" aria-hidden="true"') + '>' + (kids && x.kid ? '<em class="sty-kid">' + tr('Children', 'Watoto') + '</em>' : '') + '</button>' +
+          '<button type="button" class="x" data-rm="' + i + '" aria-label="' + esc(tr('Take out photo ' + (i + 1), 'Ondoa picha ' + (i + 1))) + '">' + oic('spX') + '</button></div>';
+      }).join('');
+      w.querySelector('.sty-tapn').classList.toggle('hidden', !kids);
+      btn.textContent = list.length === 1 ? tr('Add 1 photo to ' + rname, 'Ongeza picha 1 kwenye ' + rname) : tr('Add ' + list.length + ' photos to ' + rname, 'Ongeza picha ' + list.length + ' kwenye ' + rname);
+    };
+    draw();
+    w.addEventListener('click', function (e) {
+      var rm = e.target.closest('[data-rm]'); if (rm) { buzz(); var gone = list.splice(+rm.getAttribute('data-rm'), 1)[0]; if (gone) setTimeout(function () { URL.revokeObjectURL(gone.url); }, 1000); return draw(); }
+      var kb = e.target.closest('[data-kids]'); if (kb) { buzz(); kids = kb.getAttribute('data-kids') === 'yes'; qa('[data-kids]', w).forEach(function (b) { b.setAttribute('aria-pressed', String(b === kb)); }); if (!kids) list.forEach(function (x) { x.kid = false; }); m.textContent = ''; m.className = 'msg'; return draw(); }
+      var k = e.target.closest('.sty-rvt .k'); if (k && kids) { buzz(); var x = list[+k.getAttribute('data-i')]; x.kid = !x.kid; m.textContent = ''; return draw(); }
+      if (e.target.closest('[data-k=go]')) {
+        if (kids === null) { m.className = 'msg bad'; m.textContent = tr('First say whether any of them show children.', 'Kwanza sema kama yoyote inaonyesha watoto.'); return; }
+        if (kids && !list.some(function (x) { return x.kid; })) { m.className = 'msg bad'; m.textContent = tr('Tap the photos that show children, or choose No.', 'Gusa picha zinazoonyesha watoto, au chagua Hapana.'); return; }
+        btn.disabled = true; btn.textContent = tr('Getting the photos ready…', 'Inaandaa picha…');
+        Promise.all(list.map(function (x) { return x.ready; })).then(function () {
+          list.forEach(function (x) { URL.revokeObjectURL(x.url); });
+          w.close(); sqAdd(pid, row, list.map(function (x) { return { blob: x.blob, taken: x.taken || '', children: !!(kids && x.kid) }; }));
+        });
+      }
+    });
+  }
+  // the queue of photos on their way, kept on the phone until each one is in
+  var SQ = { items: [], busy: false, hide: false, run: null, fresh: {}, db: null, seq: 1, endT: 0, boot: null, timer: 0 };
+  function sqDb() {
+    if (SQ.db) return SQ.db;
+    SQ.db = new Promise(function (ok, no) {
+      if (!window.indexedDB) return no(new Error('no indexedDB'));
+      var r = indexedDB.open('rafiki-story', 1);
+      r.onupgradeneeded = function () { if (!r.result.objectStoreNames.contains('q')) r.result.createObjectStore('q', { keyPath: 'k', autoIncrement: true }); };
+      r.onsuccess = function () { ok(r.result); }; r.onerror = function () { no(r.error); };
+    });
+    SQ.db.catch(function () {});
+    return SQ.db;
+  }
+  function sqTx(mode, fn) { return sqDb().then(function (d) { return new Promise(function (ok, no) { var t = d.transaction('q', mode), r = fn(t.objectStore('q')); t.oncomplete = function () { ok(r && r.result); }; t.onerror = t.onabort = function () { no(t.error); }; }); }); }
+  function sqSave(it) {
+    var rec = { pid: it.pid, row: it.row, children: it.children, cap: it.cap || '', taken: it.taken || '', blob: it.blob, at: it.at }; if (it.k) rec.k = it.k;
+    return sqTx('readwrite', function (st) { return st.put(rec); }).then(function (k) { it.k = k; }, function () {});
+  }
+  function sqDel(it) { return it.k ? sqTx('readwrite', function (st) { return st.delete(it.k); }).catch(function () {}) : Promise.resolve(); }
+  function sqMk(o) { return Object.assign({ key: 'q' + (SQ.seq++), state: 'wait', pct: 0, cap: '', at: Date.now() }, o, { url: URL.createObjectURL(o.blob) }); }
+  function sqFor(pid, row) { return SQ.items.filter(function (x) { return x.pid === pid && x.row === row && x.state !== 'done'; }); }
+  function sqPend() { return SQ.items.filter(function (x) { return x.state === 'wait' || x.state === 'send' || x.state === 'off'; }); }
+  function sqAdd(pid, row, list) {
+    if (!SQ.run || !sqPend().length) SQ.run = { n: 0, ok: 0, rows: {} };
+    SQ.endT = 0; SQ.hide = false;
+    list.forEach(function (x) { var it = sqMk({ pid: pid, row: row, children: x.children, taken: x.taken, blob: x.blob }); it.saved = sqSave(it); SQ.items.push(it); SQ.run.n++; SQ.run.rows[row] = 1; });
+    if (STY.s && STY.s.id === pid) styPart();
+    sqUi(); sqRun();
+  }
+  // the photos still on the phone from before (the app was closed, or there was no signal)
+  function sqBoot() {
+    if (SQ.boot) return SQ.boot;
+    SQ.boot = sqTx('readonly', function (st) { return st.getAll(); }).then(function (a) {
+      (a || []).forEach(function (r) {
+        if (!r || !r.blob || SQ.items.some(function (x) { return x.k === r.k; })) return;
+        var it = sqMk({ k: r.k, pid: r.pid, row: r.row, children: !!r.children, cap: r.cap || '', taken: r.taken || '', blob: r.blob, at: r.at || Date.now() }); it.saved = Promise.resolve(); SQ.items.push(it);
+        if (!SQ.run) SQ.run = { n: 0, ok: 0, rows: {} }; SQ.run.n++; SQ.run.rows[it.row] = 1;
+      });
+      if (SQ.items.length && STY.s) styPart();
+      sqUi();
+    }, function () {});
+    return SQ.boot;
+  }
+  function sqResume() { sqBoot().then(function () { SQ.items.forEach(function (x) { if (x.state === 'off') x.state = 'wait'; }); sqRun(); }); }
+  function sqSend(it) {
+    return new Promise(function (ok) {
+      var fd = new FormData(); fd.append('action', 'photo'); fd.append('id', it.pid); fd.append('row', it.row); fd.append('children', it.children ? 'true' : 'false');
+      if (it.cap) fd.append('cap', it.cap); if (it.taken) fd.append('taken', it.taken); fd.append('file', it.blob, 'story.jpg');
+      var x = new XMLHttpRequest(), h = Object.assign({ Accept: 'application/json' }, pinHdr());
+      x.open('POST', '/api/story'); x.withCredentials = true; x.timeout = 180000;
+      Object.keys(h).forEach(function (k) { x.setRequestHeader(k, h[k]); });
+      x.upload.onprogress = function (e) { if (e.lengthComputable) { it.pct = e.loaded / e.total * 100; sqTick(it); } };
+      x.onload = function () { var j = null; try { j = JSON.parse(x.responseText); } catch (e) {} ok({ status: x.status, j: j || {} }); };
+      x.onerror = x.ontimeout = x.onabort = function () { ok({ status: 0, j: {} }); };
+      x.send(fd);
+    });
+  }
+  function sqRun() {
+    if (SQ.busy) return;
+    var it = SQ.items.filter(function (x) { return x.state === 'wait'; })[0];
+    if (!it) { sqUi(); return; }
+    if (document.body.classList.contains('locked')) return;   // signed out: they wait, then go after sign-in
+    if (!navigator.onLine) { SQ.items.forEach(function (x) { if (x.state === 'wait') { x.state = 'off'; sqTick(x); } }); sqUi(); return; }
+    SQ.busy = true; it.state = 'send'; it.pct = 0; sqTick(it); sqUi();
+    sqSend(it).then(function (r) {
+      SQ.busy = false;
+      if (r.status === 200 && r.j.ok) {
+        it.state = 'done'; SQ.run && SQ.run.ok++;
+        var ph = r.j.photo; if (ph && ph.id) { CNX.src['/api/story?id=' + encodeURIComponent(it.pid) + '&asset=' + encodeURIComponent(ph.id) + '&w=480'] = it.url; SQ.fresh[ph.id] = Date.now(); }
+        SQ.items.splice(SQ.items.indexOf(it), 1); it.saved.then(function () { return sqDel(it); });
+        if (r.j.story) { if (STY.s && STY.s.id === it.pid) styGot(r.j.story, true); else styCache(r.j.story); }
+        else if (STY.s && STY.s.id === it.pid) styPart();
+        setTimeout(function () { if (STY.s && STY.s.id === it.pid && ph && SQ.fresh[ph.id]) { delete SQ.fresh[ph.id]; var t = document.querySelector('#styPh [data-id="' + ph.id + '"]'); if (t) { t.classList.remove('up', 'done'); var k = t.querySelector('.sty-tk'); if (k) k.remove(); } } }, 3000);
+      } else if (r.status === 0 || r.status === 401 || r.status === 503) {   // no signal (or signed out): it waits
+        SQ.items.forEach(function (x) { if (x.state === 'wait' || x === it) { x.state = 'off'; sqTick(x); } });
+        clearTimeout(SQ.timer); SQ.timer = setTimeout(sqResume, navigator.onLine ? 30000 : 120000);
+        sqUi(); return;
+      } else { it.state = 'fail'; it.why = r.status === 413 ? 'big' : r.status === 415 ? 'type' : 'server'; sqTick(it); }
+      sqUi(); sqRun();
+    });
+  }
+  // a tile's ring, tick or retry, changed in place (no redraw while something is being typed)
+  function sqTick(it) {
+    var t = document.querySelector('#styPh [data-sq="' + it.key + '"]'); if (!t) return;
+    if (t.getAttribute('data-st') === it.state && it.state === 'send') {
+      var p = Math.max(0, Math.min(99, Math.round(it.pct || 0))), fg = t.querySelector('.fg'), b = t.querySelector('.sty-ring b');
+      if (fg) fg.setAttribute('stroke-dashoffset', (138.2 * (1 - p / 100)).toFixed(1)); if (b) b.textContent = p + '%';
+    } else { var n = document.createElement('div'); n.innerHTML = sqTileHtml(it); t.replaceWith(n.firstElementChild); }
+    sqBar();
+  }
+  function sqRetry(it) {
+    if (it.why === 'type') return poAsk(tr('This file isn’t a photo', 'Faili hii si picha'), tr('Only photos can be added to a story. Take it out?', 'Picha tu ndizo zinaweza kuongezwa kwenye hadithi. Iondoe?'), tr('Take it out', 'Iondoe'), true).then(function (ok) { if (ok) sqDrop(it); });
+    var go = function () { it.state = 'wait'; it.pct = 0; it.why = ''; SQ.endT = 0; sqTick(it); sqUi(); sqRun(); };
+    if (it.why === 'big') return styShrink(it.blob, 1200, 0.7).then(function (b) { it.blob = b; it.saved = sqSave(it); go(); });
+    go();
+  }
+  function sqDrop(it) { SQ.items.splice(SQ.items.indexOf(it), 1); if (SQ.run) SQ.run.n = Math.max(0, SQ.run.n - 1); it.saved.then(function () { return sqDel(it); }); if (STY.s && STY.s.id === it.pid) styPart(); sqUi(); }
+  // the banner above the bottom bar: how many are in, the bar, the ones waiting for signal; then "added ✓" or Retry
+  function sqBar() {
+    var b = $('sqb'); if (!b || !SQ.run) return;
+    var cur = SQ.items.filter(function (x) { return x.state === 'send'; })[0], n = Math.max(1, SQ.run.n), ok = SQ.run.ok;
+    var bar = b.querySelector('.sqb-bar i'); if (bar) bar.style.width = Math.min(100, (ok + (cur ? Math.min(99, cur.pct || 0) / 100 : 0)) / n * 100).toFixed(1) + '%';
+    var sm = b.querySelector('[data-sqs]'); if (sm && cur) sm.textContent = sqSub(cur);
+  }
+  function sqSub(cur) {
+    var n = SQ.run.n, ok = SQ.run.ok, off = SQ.items.filter(function (x) { return x.state === 'off'; }).length;
+    return tr(ok + ' of ' + n + ' sent', ok + ' kati ya ' + n + ' zimetumwa') + (cur ? ' · ' + Math.max(0, Math.min(99, Math.round(cur.pct || 0))) + '%' : off ? ' · ' + tr('waiting for signal', 'inasubiri mtandao') : '');
+  }
+  function sqUi() {
+    sqPill();
+    var b = $('sqb'), pend = sqPend(), fail = SQ.items.filter(function (x) { return x.state === 'fail'; }), run = SQ.run;
+    var off = SQ.items.filter(function (x) { return x.state === 'off'; }).length, cur = SQ.items.filter(function (x) { return x.state === 'send'; })[0];
+    var gone = function () { if (b) b.remove(); document.body.classList.remove('sqon'); };
+    if (!run || (!pend.length && !fail.length && !run.ok)) { gone(); return; }
+    if (pend.length && SQ.hide) { gone(); return; }
+    var h, end = !pend.length, rows = Object.keys(run.rows), rn = rows.length === 1 ? styRowName(rows[0]) : '';
+    if (!end) {
+      h = '<div class="sqb-r"><span class="sqb-i" aria-hidden="true">' + oic('spUp') + '</span><span class="sqb-t"><b>' + (rn ? (run.n === 1 ? tr('Adding 1 photo to ' + rn, 'Inaongeza picha 1 kwenye ' + rn) : tr('Adding ' + run.n + ' photos to ' + rn, 'Inaongeza picha ' + run.n + ' kwenye ' + rn)) : (run.n === 1 ? tr('Adding 1 photo', 'Inaongeza picha 1') : tr('Adding ' + run.n + ' photos', 'Inaongeza picha ' + run.n))) + '</b><small data-sqs>' + esc(sqSub(cur)) + '</small></span>' +
+        '<button type="button" class="sqb-x" data-sqb="hide" data-testid="sqb_hide">' + tr('Hide', 'Ficha') + '</button></div><div class="sqb-bar" role="progressbar" aria-label="' + esc(tr('Photos sent', 'Picha zilizotumwa')) + '" aria-valuemin="0" aria-valuemax="' + run.n + '" aria-valuenow="' + run.ok + '"><i></i></div>' +
+        (off ? '<p class="sqb-w">' + oic('spOff') + '<span>' + (off === 1 ? tr('1 is waiting for signal — it sends by itself.', '1 inasubiri mtandao — itajituma yenyewe.') : tr(off + ' are waiting for signal — they send by themselves.', off + ' zinasubiri mtandao — zitajituma zenyewe.')) + '</span></p>' : '');
+    } else if (fail.length) {
+      var only = fail.every(function (x) { return x.why === 'type'; });
+      h = '<div class="sqb-r"><span class="sqb-i" aria-hidden="true">' + oic(run.ok ? 'check' : 'alert') + '</span><span class="sqb-t"><b>' + (run.ok ? (run.ok === 1 ? tr('1 photo added ✓', 'Picha 1 imeongezwa ✓') : tr(run.ok + ' photos added ✓', 'Picha ' + run.ok + ' zimeongezwa ✓')) : (fail.length === 1 ? tr('The photo wasn’t added', 'Picha haikuongezwa') : tr('The photos weren’t added', 'Picha hazikuongezwa'))) + '</b>' +
+        '<small>' + (fail.length === 1 ? tr('1 couldn’t send. ', '1 haikutumwa. ') : tr(fail.length + ' couldn’t send. ', fail.length + ' hazikutumwa. ')) + (only ? tr('It isn’t a photo.', 'Si picha.') : tr('Tap Retry.', 'Gusa Jaribu tena.')) + '</small></span>' +
+        '<button type="button" class="sqb-re" data-sqb="' + (only ? 'drop' : 'retry') + '" data-testid="sqb_retry">' + (only ? oic('spX') + '<span>' + tr('Take out', 'Ondoa') + '</span>' : oic('spRetry') + '<span>' + tr('Retry', 'Jaribu tena') + '</span>') + '</button></div>';
+    } else {
+      h = '<div class="sqb-r"><span class="sqb-i" aria-hidden="true">' + oic('check') + '</span><span class="sqb-t"><b>' + (run.ok === 1 ? tr('1 photo added ✓', 'Picha 1 imeongezwa ✓') : tr(run.ok + ' photos added ✓', 'Picha ' + run.ok + ' zimeongezwa ✓')) + '</b></span><button type="button" class="sqb-x" data-sqb="close">' + tr('OK', 'Sawa') + '</button></div>';
+      if (!SQ.endT) { SQ.endT = Date.now(); setTimeout(function () { if (SQ.endT && !sqPend().length && !SQ.items.some(function (x) { return x.state === 'fail'; })) { SQ.run = null; SQ.endT = 0; sqUi(); } }, 4000); }
+    }
+    if (!b) { b = document.createElement('div'); b.id = 'sqb'; b.setAttribute('role', 'status'); b.setAttribute('data-testid', 'sqb'); document.body.appendChild(b); b.addEventListener('click', sqBanTap); }
+    b.className = 'sqb' + (end ? ' end' : '') + (end && fail.length && !run.ok ? ' bad' : ''); b.innerHTML = h; document.body.classList.add('sqon'); sqBar();
+  }
+  function sqBanTap(e) {
+    var k = e.target.closest('[data-sqb]'); if (!k) return; buzz(); k = k.getAttribute('data-sqb');
+    if (k === 'hide') { SQ.hide = true; sqUi(); }
+    else if (k === 'close') { SQ.run = null; SQ.endT = 0; sqUi(); }
+    else if (k === 'retry') { SQ.items.filter(function (x) { return x.state === 'fail' && x.why !== 'type'; }).forEach(sqRetry); }
+    else if (k === 'drop') { SQ.items.filter(function (x) { return x.state === 'fail'; }).forEach(sqDrop); SQ.run = null; sqUi(); }
+  }
+  // the Stories tab: "Sending 2 photos…", back to that story with a tap
+  function sqPill() {
+    var el = $('shSend'); if (!el) return;
+    var p = sqPend(), f = SQ.items.filter(function (x) { return x.state === 'fail'; });
+    if (!p.length && !f.length) { el.innerHTML = ''; return; }
+    var pid = (p[0] || f[0]).pid, off = p.length && p.every(function (x) { return x.state === 'off'; });
+    el.innerHTML = '<button type="button" class="sh-sending" data-shopen="' + esc(pid) + '" data-testid="sh_sending">' + oic(p.length ? (off ? 'spOff' : 'spUp') : 'alert') + '<span>' + (p.length ? (off ? (p.length === 1 ? tr('1 photo waiting for signal', 'Picha 1 inasubiri mtandao') : tr(p.length + ' photos waiting for signal', 'Picha ' + p.length + ' zinasubiri mtandao')) : (p.length === 1 ? tr('Sending 1 photo…', 'Inatuma picha 1…') : tr('Sending ' + p.length + ' photos…', 'Inatuma picha ' + p.length + '…'))) : (f.length === 1 ? tr('1 photo couldn’t send', 'Picha 1 haikutumwa') : tr(f.length + ' photos couldn’t send', 'Picha ' + f.length + ' hazikutumwa'))) + '</span></button>';
+  }
+  addEventListener('online', function () { sqResume(); });
+  addEventListener('offline', function () { if (!SQ.busy) SQ.items.forEach(function (x) { if (x.state === 'wait') { x.state = 'off'; sqTick(x); } }); sqUi(); });
+  setTimeout(sqResume, 1200);
+  // a photo's details: big, its caption, move it to another row, "shows children", delete
+  function styDetails(row, id) {
+    var s = STY.s; if (!s) return; var x = (s.photos[row] || []).filter(function (y) { return String(y.id) === String(id); })[0]; if (!x) return;
+    var ins = styInStory(s)[String(x.id)], saved = x.cap || '', busy = false;
+    var by = x.by ? String(x.by).split(' ')[0] : '', added = x.at ? (by ? tr('Added ' + dDay(x.at, true) + ' by ' + by, 'Imeongezwa ' + dDay(x.at, true) + ' na ' + by) : tr('Added ' + dDay(x.at, true), 'Imeongezwa ' + dDay(x.at, true))) : '';
+    var w = panel(esc(tr('Photo', 'Picha')), '<div class="sty-df" data-testid="sty_details">' + (added ? '<p class="muted sty-sub">' + esc(added) + '</p>' : '') +
+      '<button type="button" class="sty-pv" data-k="big" aria-label="' + esc(tr('Open the photo full size', 'Fungua picha kwa ukubwa kamili')) + '"><img alt="" data-src="' + styImg(s, x.id, 1200) + '">' + (ins ? '<span class="sty-ins">' + oic('spark') + tr('In story', 'Hadithini') + '</span>' : '') + '</button>' +
+      '<label for="styCap">' + tr('Caption', 'Maelezo ya picha') + '</label><input id="styCap" type="text" maxlength="120" enterkeyhint="done" autocomplete="off" value="' + esc(saved) + '" placeholder="' + esc(tr('e.g. Drilling reached water', 'mf. Uchimbaji ulifika majini')) + '" data-testid="sty_cap">' +
+      '<p class="muted">' + tr('The story uses captions to describe photos.', 'Hadithi inatumia maelezo kuelezea picha.') + '</p>' +
+      '<span class="sty-lbl" id="styMvL">' + tr('Move to', 'Hamisha kwenda') + '</span><div class="seg sty-seg" role="group" aria-labelledby="styMvL">' + STY_ROWS.map(function (r) { return '<button type="button" data-to="' + r[0] + '" aria-pressed="' + (r[0] === row) + '" data-testid="sty_mv_' + r[0] + '">' + tr(r[1], r[2]) + '</button>'; }).join('') + '</div>' +
+      '<div class="sty-sw">' + oic('spKid') + '<span><b id="styKidL">' + tr('Shows children', 'Inaonyesha watoto') + '</b><small>' + tr('Only used on the website once photo consent is received', 'Inatumika kwenye tovuti tu baada ya ruhusa ya picha kupatikana') + '</small></span><button type="button" class="tgl" role="switch" aria-checked="' + !!x.children + '" aria-labelledby="styKidL" data-k="kids" data-testid="sty_kids"><i></i></button></div>' +
+      '<p class="msg" aria-live="polite"></p><button type="button" class="btn block sty-del" data-k="del" data-testid="sty_del">' + oic('spTrash') + '<span>' + tr('Delete', 'Futa') + '</span></button></div>', 'sty-sh sty-dsh');
+    cnThumbs(w);
+    var m = w.querySelector('.msg'), cap = w.querySelector('#styCap');
+    var edit = function (extra) {
+      if (busy) return Promise.resolve(null); busy = true; m.className = 'msg'; m.textContent = '';
+      return styApi('POST', Object.assign({ action: 'photo-edit', id: s.id, row: row, asset: String(x.id) }, extra)).then(function (j) {
+        busy = false;
+        if (!j.ok) { m.className = 'msg bad'; m.textContent = j.status === 404 ? tr('This photo has changed. Close and open it again.', 'Picha hii imebadilika. Funga na uifungue tena.') : styWhy(j); return null; }
+        if (j.photo) x = j.photo; styGot(j.story, true); return j;
+      });
+    };
+    var saveCap = function () { var v = cap.value.replace(/\s+/g, ' ').trim(); if (v === saved) return Promise.resolve(null); saved = v; return edit({ cap: v }).then(function (j) { if (j) toast(tr('Caption saved ✓', 'Maelezo yamehifadhiwa ✓')); return j; }); };
+    cap.addEventListener('blur', saveCap);
+    cap.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); cap.blur(); } });
+    var shut = w.close; w.close = function () { if (document.activeElement === cap) cap.blur(); else saveCap(); shut(); };
+    w.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-k],[data-to]'); if (!b) return;
+      if (b.getAttribute('data-k') === 'big') return cnView([{ big: styImg(s, x.id, 1600), at: x.at, by: x.by }], 0, styRowName(row), styRowName(row));
+      var to = b.getAttribute('data-to');
+      if (to) { if (to === row) return; buzz(); var v = cap.value.replace(/\s+/g, ' ').trim(), o = { to: to }; if (v !== saved) { o.cap = v; saved = v; } return edit(o).then(function (j) { if (j) { toast(tr('Moved to ' + styRowName(to) + ' ✓', 'Imehamishwa kwenda ' + styRowName(to) + ' ✓')); row = to; qa('[data-to]', w).forEach(function (y) { y.setAttribute('aria-pressed', String(y.getAttribute('data-to') === to)); }); } }); }
+      var k = b.getAttribute('data-k');
+      if (k === 'kids') { buzz(); var on = b.getAttribute('aria-checked') !== 'true'; b.setAttribute('aria-checked', String(on)); return edit({ children: on }).then(function (j) { if (!j) b.setAttribute('aria-checked', String(!on)); }); }
+      if (k === 'del') return poAsk(tr('Delete this photo?', 'Futa picha hii?'), tr('It is taken out of the story’s photos.', 'Inaondolewa kwenye picha za hadithi.'), tr('Delete', 'Futa'), true).then(function (ok) {
+        if (!ok) return; saved = cap.value.replace(/\s+/g, ' ').trim();
+        styApi('POST', { action: 'photo-remove', id: s.id, row: row, asset: String(x.id) }).then(function (j) { if (!j.ok) { m.className = 'msg bad'; m.textContent = styWhy(j); return; } styGot(j.story, true); shut(); toast(tr('Photo deleted', 'Picha imefutwa')); });
+      });
+    });
+  }
+  // the month of a column (Before, In progress from – to, After), with a suggestion from the photos or the building
+  function styDateSug(s, row) {
+    var taken = (s.photos[row] || []).map(function (x) { return String(x.taken || '').slice(0, 7); }).filter(ymOk).sort();
+    if (row === 'progress') {
+      var st = (((s.doc && s.doc.facts && s.doc.facts.stages) || []).map(function (g) { return String(g.date || '').slice(0, 7); }))
+        .concat(((CNX.rec[s.id] && CNX.rec[s.id].hist) || []).filter(function (h) { return h.stage !== 'planned'; }).map(function (h) { return String(h.at || '').slice(0, 7); })).filter(ymOk).sort();
+      if (st.length) return { a: st[0], b: st[st.length - 1], from: tr('from the building stages', 'kutoka kwa hatua za ujenzi') };
+      return taken.length ? { a: taken[0], b: taken[taken.length - 1], from: tr('from the photos', 'kutoka kwa picha') } : null;
+    }
+    if (row === 'after' && styDone(s)) return { a: styDone(s), from: tr('when the project was finished', 'mradi ulipokamilika') };
+    return taken.length ? { a: taken[0], from: tr('from the photos', 'kutoka kwa picha') } : null;
+  }
+  function styDates(row) {
+    var s = STY.s; if (!s) return; var D = s.dates || {}, Y = new Date().getFullYear(), sug = styDateSug(s, row), rn = styRowName(row);
+    var pick = function (id, v, lbl) {
+      var mm = ymOk(v) ? +v.slice(5) : 0, yy = ymOk(v) ? +v.slice(0, 4) : 0, ys = [];
+      for (var y = Y; y >= 2000; y--) ys.push(y);
+      return '<span class="sty-lbl" id="' + id + 'L">' + lbl + '</span><div class="sty-ym" role="group" aria-labelledby="' + id + 'L"><select id="' + id + 'M" aria-label="' + esc(lbl + ': ' + tr('month', 'mwezi')) + '" data-testid="' + id + 'M"><option value="">' + tr('Month', 'Mwezi') + '</option>' + STY_MON[dL()].map(function (n, i) { return '<option value="' + ('0' + (i + 1)).slice(-2) + '"' + (mm === i + 1 ? ' selected' : '') + '>' + n + '</option>'; }).join('') + '</select>' +
+        '<select id="' + id + 'Y" aria-label="' + esc(lbl + ': ' + tr('year', 'mwaka')) + '" data-testid="' + id + 'Y"><option value="">' + tr('Year', 'Mwaka') + '</option>' + ys.map(function (y) { return '<option' + (yy === y ? ' selected' : '') + '>' + y + '</option>'; }).join('') + '</select></div>';
+    };
+    var prog = row === 'progress', has = prog ? D.progress || D.progressEnd : D[row];
+    var w = panel(esc(tr('When: ' + rn, 'Lini: ' + rn)), '<div class="sty-dsh2" data-testid="sty_dates"><p class="muted sty-sub">' + (prog ? tr('The months the work ran. “To” is optional.', 'Miezi kazi ilipofanyika. “Hadi” si lazima.') : row === 'before' ? tr('The month the Before photos show.', 'Mwezi ambao picha za Kabla zinaonyesha.') : tr('The month the After photos show.', 'Mwezi ambao picha za Baada zinaonyesha.')) + '</p>' +
+      (prog ? pick('styYa', D.progress, tr('From', 'Kuanzia')) + pick('styYb', D.progressEnd, tr('To (optional)', 'Hadi (si lazima)')) : pick('styYa', D[row], tr('Month and year', 'Mwezi na mwaka'))) +
+      (sug ? '<button type="button" class="sty-sug" data-k="sug" data-testid="sty_sug">' + oic('spark') + '<span>' + esc(tr('Use ', 'Tumia ') + (prog ? ymSpan(sug.a, sug.b) : ymShort(sug.a)) + ' · ' + sug.from) + '</span></button>' : '') +
+      '<p class="msg" aria-live="polite"></p><button type="button" class="btn block" data-k="save" data-testid="sty_dsave">' + tr('Save', 'Hifadhi') + '</button>' + (has ? '<button type="button" class="btn light block" data-k="clear" style="margin-top:8px">' + tr('Clear the date', 'Futa tarehe') + '</button>' : '') + '</div>', 'sty-sh sty-dtsh');
+    var m = w.querySelector('.msg'), val = function (id) { var a = w.querySelector('#' + id + 'M').value, b = w.querySelector('#' + id + 'Y').value; return a && b ? b + '-' + a : a || b ? null : ''; };
+    var set = function (id, v) { if (!ymOk(v)) return; w.querySelector('#' + id + 'M').value = v.slice(5); w.querySelector('#' + id + 'Y').value = v.slice(0, 4); };
+    var send = function (body) {
+      var b = w.querySelector('[data-k=save]'); b.disabled = true; m.className = 'msg'; m.textContent = '';
+      styApi('POST', Object.assign({ action: 'dates', id: s.id }, body)).then(function (j) {
+        b.disabled = false;
+        if (!j.ok) { m.className = 'msg bad'; m.textContent = j.reason === 'order' ? tr('The months go in order: Before, then In progress, then After.', 'Miezi inafuata mpangilio: Kabla, kisha Wakati wa kazi, kisha Baada.') : j.reason === 'date' ? tr('Choose a month that isn’t in the future.', 'Chagua mwezi ambao haujafika bado.') : styWhy(j); return; }
+        styGot(j.story, true); w.close(); toast(tr('Saved ✓', 'Imehifadhiwa ✓'));
+      });
+    };
+    w.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-k]'); if (!b) return; var k = b.getAttribute('data-k'); buzz();
+      if (k === 'sug' && sug) { set('styYa', sug.a); if (prog && sug.b && sug.b !== sug.a) set('styYb', sug.b); return; }
+      if (k === 'clear') return send(prog ? { progress: '', progressEnd: '' } : (function () { var o = {}; o[row] = ''; return o; })());
+      if (k === 'save') {
+        var a = val('styYa'), z = prog ? val('styYb') : '';
+        if (a === null || z === null) { m.className = 'msg bad'; m.textContent = tr('Choose both the month and the year.', 'Chagua mwezi na mwaka pia.'); return; }
+        if (!a) { m.className = 'msg bad'; m.textContent = prog ? tr('Choose the month the work began.', 'Chagua mwezi kazi ilipoanza.') : tr('Choose the month and the year.', 'Chagua mwezi na mwaka.'); return; }
+        if (a > ymNow() || (z && z > ymNow())) { m.className = 'msg bad'; m.textContent = tr('Choose a month that isn’t in the future.', 'Chagua mwezi ambao haujafika bado.'); return; }
+        if (z && z < a) { m.className = 'msg bad'; m.textContent = tr('“To” can’t be before “From”.', '“Hadi” haiwezi kuwa kabla ya “Kuanzia”.'); return; }
+        var o = {}; if (prog) { o.progress = a; o.progressEnd = z || ''; } else o[row] = a; send(o);
+      }
     });
   }
   // a spoken answer: typed out on the server when speech-to-text is on, else kept as audio on monday.com
@@ -7097,6 +7648,7 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
     b.innerHTML = '<div class="o-grid ocv"><div class="ocv-main">' +
       ocvHero('stories', 'spark', 'coral', tr('Every project has a story', 'Kila mradi una hadithi'), tr('How a project changed lives, in the words of the people it serves. Everything is saved to monday.com.', 'Jinsi mradi ulivyobadilisha maisha, kwa maneno ya watu unaowahudumia. Kila kitu kinahifadhiwa monday.com.'), null,
         '<button type="button" class="btn sh-go" data-sh="write" data-testid="sh_write">' + oic('plus') + '<span>' + tr('Write a story', 'Andika hadithi') + '</span></button>') +
+      '<div id="shSend"></div>' +
       '<div class="rr-nums sh-nums" role="group" aria-label="' + esc(tr('Show', 'Onyesha')) + '">' + SHF.map(function (f) {
         return '<button type="button" class="rr-num' + (f[0] === 'draft' && c.draft && S.admin ? ' hot' : '') + '" data-shf="' + f[0] + '" aria-pressed="' + (SH.f === f[0]) + '" data-testid="sh_f_' + f[0] + '"><b>' + c[f[0]] + '</b><small>' + tr(f[1], f[2]) + '</small></button>';
       }).join('') + '</div>' +
@@ -7110,7 +7662,7 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
         '<li><b>' + tr('Approve and publish', 'Idhinisha na uchapishe') + '</b> ' + tr('An admin reads it, fixes the words and photos, and approves it. It goes on the website’s Stories page straight away, with a copy in monday.com.', 'Msimamizi anaisoma, anarekebisha maneno na picha, na kuiidhinisha. Inaenda kwenye ukurasa wa Hadithi wa tovuti mara moja, na nakala kwenye monday.com.') + '</li>' +
         '<li><b>' + tr('On the website', 'Kwenye tovuti') + '</b> ' + tr('Nothing goes public before it is approved. “Back to Collecting” takes a story off the website again.', 'Hakuna kinachotoka kabla ya kuidhinishwa. “Rudi kukusanya” inaiondoa hadithi kwenye tovuti tena.') + '</li></ol></details>' +
       '</div></div>';
-    shDot();
+    shDot(); sqPill();
   }
   function shPick() {
     var all = S.projects.slice().sort(shSort);
@@ -7309,7 +7861,6 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
   $('styBody').addEventListener('click', function (e) { styTap(e); });
   $('styBody').addEventListener('input', styInput);
   $('styBody').addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target.classList && e.target.classList.contains('sty-one')) e.preventDefault(); });
-  $('styBody').addEventListener('change', function (e) { if (e.target.id === 'styFile') { var f = e.target.files && e.target.files[0]; e.target.value = ''; styPhoto(f); } });
 
   function openProj(id, pane, how) {
     var p = byId(id); if (!p) return;
