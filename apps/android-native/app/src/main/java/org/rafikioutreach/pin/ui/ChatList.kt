@@ -270,7 +270,7 @@ private fun ChatRowSheet(m: AppModel, r: ChatRow, close: () -> Unit, undo: UndoS
     TeamSubSheet("chatrow_sheet", close) { hide ->
         Row(verticalAlignment = Alignment.CenterVertically) {
             ChatAvatar(r, m.chat.me, 44.dp, m = m); Spacer(Modifier.width(12.dp))
-            Text(chatTitle(r, m.chat.me), style = MaterialTheme.typography.titleLarge, color = C.ink, maxLines = 2)
+            Text(chatTitle(r, m.chat.me), style = CwType.sheet(), color = C.ink, maxLines = 2)
         }
         Spacer(Modifier.height(10.dp))
         SheetRow("cr_pin", "pin", if (r.pinned) t("Unpin", "Ondoa kibandiko") else t("Pin to the top", "Bandika juu")) { hide { m.chat.pin(r.id, !r.pinned) } }
@@ -287,7 +287,7 @@ private fun ChatRowSheet(m: AppModel, r: ChatRow, close: () -> Unit, undo: UndoS
 @Composable
 internal fun MuteSheet(m: AppModel, c: String, close: () -> Unit) {
     TeamSubSheet("mute_sheet", close) { hide ->
-        Text(t("Mute notifications", "Nyamazisha arifa"), style = MaterialTheme.typography.titleLarge, color = C.ink)
+        Text(t("Mute notifications", "Nyamazisha arifa"), style = CwType.sheet(), color = C.ink)
         Text(t("You’ll still see new messages in the app.", "Bado utaona ujumbe mpya ndani ya programu."), style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 4.dp, bottom = 8.dp))
         SheetRow("mute_8", "clock", t("8 hours", "Saa 8")) { hide { m.chat.mute(c, 8) } }
         SheetRow("mute_week", "cal", t("1 week", "Wiki 1")) { hide { m.chat.mute(c, 168) } }

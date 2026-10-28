@@ -39,6 +39,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.withContext
 import org.rafikioutreach.pin.AppModel
 import org.rafikioutreach.pin.data.ChatRow
@@ -111,16 +112,29 @@ internal fun ProjectStrip(m: AppModel, row: ChatRow, openProject: (String, Strin
     val place = listOf(p.area, p.country).filter { it.isNotBlank() }.joinToString(", ")
     val line = listOfNotNull(v?.at?.takeIf { it.isNotBlank() }?.let { a -> runCatching { t("Visited ", "Ilitembelewa ") + Dates.day(Instant.parse(a).atZone(Dates.zone()).toLocalDate()) }.getOrNull() }, place.ifBlank { null }).joinToString(" · ")
     val hp = rememberHaptics()
-    Row(Modifier.fillMaxWidth().background(if (C === Sun) Color.White else if (C.dark) Color(0xFF121A21) else Color(0xFFF7FAFC)).clickable(role = Role.Button) { hp.tap(); openProject(p.id, "pin") }
-        .heightIn(min = 44.dp).padding(horizontal = 14.dp, vertical = 6.dp).testTag("proj_strip"), verticalAlignment = Alignment.CenterVertically) {
-        Row(Modifier.clip(RoundedCornerShape(99.dp)).then(if (C === Sun) Modifier.border(2.dp, Color.Black, RoundedCornerShape(99.dp)) else Modifier).background(bg).padding(horizontal = 10.dp, vertical = 3.dp).testTag("proj_strip_status"), verticalAlignment = Alignment.CenterVertically) {
-            Box(Modifier.size(7.dp).clip(CircleShape).background(fg)); Spacer(Modifier.width(6.dp))
-            Text(label, style = CwType.meta(FontWeight.Bold), color = fg, maxLines = 1, softWrap = false)
+    val measurer = androidx.compose.ui.text.rememberTextMeasurer()
+    val st = CwType.meta(FontWeight.Bold); val so = CwType.meta(FontWeight.ExtraBold)
+    val open = t("Open project ›", "Fungua mradi ›")
+    BoxWithConstraints(Modifier.fillMaxWidth().background(if (C === Sun) Color.White else if (C.dark) Color(0xFF121A21) else Color(0xFFF7FAFC)).clickable(role = Role.Button) { hp.tap(); openProject(p.id, "pin") }
+        .heightIn(min = 44.dp).padding(horizontal = 14.dp, vertical = 6.dp).testTag("proj_strip")) {
+        val dens = androidx.compose.ui.platform.LocalDensity.current
+        // the status and Open project always whole; the place gets what's left, or its own line when that's too little
+        val need = with(dens) { (measurer.measure(label, st).size.width + measurer.measure(open, so).size.width).toDp() } + 31.dp + 18.dp + 80.dp
+        val pill = @Composable {
+            Row(Modifier.clip(RoundedCornerShape(99.dp)).then(if (C === Sun) Modifier.border(2.dp, Color.Black, RoundedCornerShape(99.dp)) else Modifier).background(bg).padding(horizontal = 10.dp, vertical = 3.dp).testTag("proj_strip_status"), verticalAlignment = Alignment.CenterVertically) {
+                Box(Modifier.size(7.dp).clip(CircleShape).background(fg)); Spacer(Modifier.width(6.dp))
+                Text(label, style = st, color = fg, maxLines = 1, softWrap = false)
+            }
         }
-        Spacer(Modifier.width(10.dp))
-        Text(line, style = CwType.meta(), color = C.muted, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f).testTag("proj_strip_line"))
-        Spacer(Modifier.width(8.dp))
-        Text(t("Open project ›", "Fungua mradi ›"), style = CwType.meta(FontWeight.ExtraBold), color = Cw2.link(), maxLines = 1, softWrap = false, modifier = Modifier.testTag("proj_strip_open"))
+        val openT = @Composable { Text(open, style = so, color = Cw2.link(), maxLines = 1, softWrap = false, modifier = Modifier.testTag("proj_strip_open")) }
+        if (need <= maxWidth) Row(verticalAlignment = Alignment.CenterVertically) {
+            pill(); Spacer(Modifier.width(10.dp))
+            Text(line, style = CwType.meta(), color = C.muted, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f).testTag("proj_strip_line"))
+            Spacer(Modifier.width(8.dp)); openT()
+        } else Column {
+            Row(verticalAlignment = Alignment.CenterVertically) { pill(); Spacer(Modifier.weight(1f).widthIn(min = 8.dp)); openT() }
+            if (line.isNotBlank()) Text(line, style = CwType.meta(), color = C.muted, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 3.dp).testTag("proj_strip_line"))
+        }
     }
     HorizontalDivider(color = if (C === Sun) Color.Black else C.line, thickness = if (C === Sun) 2.dp else 1.dp)
 }
@@ -168,7 +182,8 @@ internal fun DeleteSheet(m: AppModel, row: ChatRow?, ms: List<Msg>, close: () ->
     val forMe = if (one) t("Only gone from your phone. Others still see it.", "Unaondoka kwenye simu yako tu. Wengine bado wanauona.") else t("Only gone from your phone. Others still see them.", "Zinaondoka kwenye simu yako tu. Wengine bado wanaziona.")
     fun go(forAll: Boolean) {
         val c = ms.first().c
-        scope.launch { m.chat.deleteMany(c, ms, forAll)?.let { m.chat.note.value = it } ?: run { if (n > 1) m.chat.note.value = t("$n messages deleted", "Jumbe $n zimefutwa") } }
+        // the sheet closes at once: the work runs in the app's own scope, not the sheet's
+        m.viewModelScope.launch { m.chat.deleteMany(c, ms, forAll)?.let { m.chat.note.value = it } ?: run { if (n > 1) m.chat.note.value = t("$n messages deleted", "Jumbe $n zimefutwa") } }
         done()
     }
     TeamSubSheet("delete_sheet", close, x = false) { hide ->
@@ -390,7 +405,7 @@ internal fun StoryAskSheet(m: AppModel, pid: String, files: List<File>, close: (
                 Box(Modifier.weight(1f).clip(RoundedCornerShape(14.dp)).background(C.tint).clickable(role = Role.Button) {
                     hide {
                         m.chat.note.value = t("Adding to the story…", "Inaongeza kwenye hadithi…")
-                        scope.launch {
+                        m.viewModelScope.launch {
                             var ok = true
                             for (f in files) {
                                 val r = m.api.postMultipart("/api/story", withContext(Dispatchers.IO) { f.readBytes() }, "image/jpeg", "chat.jpg", linkedMapOf("action" to "photo", "id" to pid, "row" to k, "children" to kids.toString()))

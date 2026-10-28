@@ -80,8 +80,10 @@ internal fun outDir(ctx: Context) = File(File(ctx.filesDir, "chat"), "chat-out")
 
 // --- photos and videos: picked, shrunk, ready to send -----------------------------------------------------------------
 internal object ChatPrep {
-    /** A photo turned upright, at most 1600 px on its longest side and under 2 MB (JPEG, quality stepped down if needed). */
-    fun photo(ctx: Context, src: File, maxSide: Int = 1600): ChatMedia? = runCatching {
+    /** A photo turned upright, at most 1600 px on its longest side and under 2 MB (JPEG, quality stepped down if needed).
+     *  [saver] (chat 2, B15: the data saver is on, e.g. on mobile data): at most 960 px and quality 70; on Wi-Fi full size. */
+    fun photo(ctx: Context, src: File, maxSide0: Int = 1600, saver: Boolean = false): ChatMedia? = runCatching {
+        val maxSide = if (saver) minOf(maxSide0, 960) else maxSide0
         val o = BitmapFactory.Options().apply { inJustDecodeBounds = true }; BitmapFactory.decodeFile(src.path, o)
         if (o.outWidth <= 0) return null
         var sample = 1; while (maxOf(o.outWidth, o.outHeight) / (sample * 2) >= maxSide) sample *= 2
@@ -91,7 +93,7 @@ internal object ChatPrep {
         val rot = runCatching { when (ExifInterface(src.path).getAttributeInt(ExifInterface.TAG_ORIENTATION, 1)) { ExifInterface.ORIENTATION_ROTATE_90 -> 90f; ExifInterface.ORIENTATION_ROTATE_180 -> 180f; ExifInterface.ORIENTATION_ROTATE_270 -> 270f; else -> 0f } }.getOrDefault(0f)
         if (rot != 0f) bmp = Bitmap.createBitmap(bmp, 0, 0, bmp.width, bmp.height, Matrix().apply { postRotate(rot) }, true)
         val out = File(outDir(ctx), "p${System.nanoTime()}.jpg")
-        var q = 82
+        var q = if (saver) 70 else 82
         do { FileOutputStream(out).use { bmp.compress(Bitmap.CompressFormat.JPEG, q, it) }; q -= 12 } while (out.length() > ChatCaps.PHOTO && q > 30)
         // a small preview (longest side 320 px) for people with the data saver on (chatpa, contract §8)
         val thumb = if (maxSide > 320) runCatching {

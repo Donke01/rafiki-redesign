@@ -111,6 +111,8 @@ class Chat2Test {
         fake.msg("p_105", "Meril Kiprop", "", 200) { put("kind", "sys").put("text", "").put("sys", JSONObject().put("type", "repair").put("project", "105").put("by", "Meril Kiprop")) }
         fake.msg("p_105", "Reid Anderson", "Assigned to Meril for Thursday", 190, status = "read")
         fake.msg("t_ke", "Peter Otieno", "Fuel prices went up in Eldoret", 300)
+        fake.msg("p_105", "Meril Kiprop", "Water flowing again 🙌 The committee chair is here.", 20, kind = "media") { put("media", JSONArray().put(JSONObject().put("id", "ph9").put("type", "photo").put("w", 1200).put("h", 800))) }
+        fake.msg("p_105", "Meril Kiprop", "Mwenyekiti anasema watoto sasa wanakunywa maji safi kila siku.", 19)
         fake.chat("t:news", "team", "Announcements", listOf("Reid Anderson", "Grace Wanjiru", "Meril Kiprop", "Peter Otieno"), listOf("Reid Anderson"))
         fake.chats["t:news"]!!.put("announce", true)
         fake.msg("t:news", "Reid Anderson", "Kitale trip moved to 4 Nov", 60 * 24 * 3)
@@ -125,7 +127,11 @@ class Chat2Test {
         val m = AppModel(app)
         fake.online = !offline
         m.api.transport = { method, url, _, body ->
+            if (!url.contains("/api/chat/")) other += "$method ${url.substringAfter("/api/")} ${body?.let { b -> String(b).take(300) } ?: ""}"
             fake.handle(method, url, body) ?: when {
+                url.contains("/api/story") && method == "GET" -> 200 to JSONObject().put("ok", true).put("story", JSONObject().put("status", "collecting").put("consent", "not-yet").put("answers", JSONObject()).put("quote", "").put("quoteBy", "").put("credit", "").put("text", "")
+                    .put("photos", JSONObject().put("before", JSONArray()).put("progress", JSONArray()).put("after", JSONArray())).put("missing", JSONArray()).put("canApprove", false).put("prompts", JSONObject())).toString()
+                url.contains("/api/translate") -> 200 to JSONObject().put("ok", true).put("text", "The chairman says the children now drink clean water every day.").put("to", "en").toString()
                 url.contains("activity=1") -> 200 to "{\"ok\":true,\"activity\":[]}"
                 url.contains("view=teammap") -> 200 to JSONObject().put("ok", true).put("people", JSONArray().put(JSONObject().put("name", "Bertin Mwangi").put("lat", 1.0102).put("lng", 35.0003).put("acc", 8).put("at", fake.ago(5)))).put("visits", JSONArray()).toString()
                 url.contains("team=1") || url.contains("view=team") -> 200 to JSONObject().put("ok", true).put("team", team()).toString()
@@ -147,6 +153,7 @@ class Chat2Test {
     private fun photoBytes(): ByteArray { val b = Bitmap.createBitmap(120, 90, Bitmap.Config.ARGB_8888); Canvas(b).drawColor(0xFF6FA8DC.toInt()); return java.io.ByteArrayOutputStream().also { b.compress(Bitmap.CompressFormat.JPEG, 80, it) }.toByteArray() }
 
     private var w = 360; private var h = 800
+    private val other = java.util.concurrent.CopyOnWriteArrayList<String>()
     private fun show(m: AppModel, dark: Boolean = false) {
         rule.setContent { RafikiTheme(dark = dark) { Box(Modifier.size(w.dp, h.dp)) { App(m) } } }
         waitTag("nav_chat"); settle(1500)
@@ -281,4 +288,161 @@ class Chat2Test {
     @Config(qualifiers = "w360dp-h800dp-xxhdpi") @Test fun list_360_en_dark() = listLooks(360, 800, false, "dark")
     @Config(qualifiers = "w411dp-h891dp-xxhdpi") @Test fun list_411_en_sun() = listLooks(411, 891, false, "sun")
     @Config(qualifiers = "w411dp-h891dp-xxhdpi") @Test fun list_411_sw_light() = listLooks(411, 891, true, "light")
+
+    // --- B1–B17: one chat ----------------------------------------------------------------------------------------------
+    private fun room(id: String) { tap("nav_chat"); waitTag("chat_list"); until("rows") { tagged("chatrow_g1") || tagged("chatrow_t:news") }; rule.onNodeWithTag("chat_list").performScrollToNode(hasTestTag("chatrow_$id")); tap("chatrow_$id"); waitTag("chat_room"); settle(1500) }
+    /** Hold a message by its words (the newest of them, on screen). */
+    private fun bubble(text: String) = rule.onAllNodes((hasTestTag("bubble_mine") or hasTestTag("bubble_theirs")) and hasAnyDescendant(hasText(text, substring = true)), useUnmergedTree = true).onFirst()
+    private fun hold(text: String) { runCatching { rule.onNodeWithTag("chat_msgs").performScrollToNode(hasText(text, substring = true)) }; settle(); bubble(text).performSemanticsAction(SemanticsActions.OnLongClick); settle() }
+    private fun tapMsg(text: String) { bubble(text).performSemanticsAction(SemanticsActions.OnClick); settle() }
+    private fun longPress(tag: String, i: Int = 0) { rule.onAllNodesWithTag(tag, useUnmergedTree = true)[i].performTouchInput { longClick() }; settle() }
+    private fun bubbleWith(text: String) = rule.onAllNodes(hasTestTag("msg_text") and hasText(text, substring = true), useUnmergedTree = true).onFirst()
+
+    @Test fun room_header_strip_find_and_bubbles() {
+        world(); val m = model(); show(m)
+        room("p_105")
+        // B1: its own header: ←, the project's photo, name and members, search, ⋯ (no RAFIKI bar, no call)
+        assertFalse(tagged("bell")); assertTrue(tagged("room_back") && tagged("room_search") && tagged("room_menu"))
+        rule.onNodeWithTag("head_title", useUnmergedTree = true).assertTextEquals("Kapsaret Borehole")
+        // B2: the project strip
+        rule.onAllNodes(hasAnyAncestor(hasTestTag("proj_strip_status")) and hasText("Needs repair"), useUnmergedTree = true).onFirst().assertExists()
+        assertTrue(text("proj_strip_line").contains("Kitale, Kenya")); assertTrue(tagged("proj_strip_open"))
+        // B3: the warm wall, day chips; a long bubble stays inside 80%
+        assertTrue(tagged("wall_warm") && tagged("day_chip"))
+        shot("c2-room-360-en-light")
+        tap("proj_strip_open"); waitTag("tab_pin"); back(); waitTag("chat_room")
+        // B13: search in this chat; Back closes it
+        tap("room_search"); waitTag("find_bar"); rule.onNodeWithTag("find_q").performTextInput("assigned"); settle(800)
+        assertEquals("1/1", text("find_n")); shot("c2-room-find")
+        back(); assertFalse(tagged("find_bar")); assertTrue(tagged("room_search"))
+        // ⋯ and Back
+        tap("room_menu"); listOf("room_m_search", "room_m_date", "room_m_select", "room_m_media", "room_m_info", "room_m_clear").forEach { assertTrue(it, tagged(it)) }
+        back(); assertFalse(tagged("room_m_clear")); assertTrue(tagged("chat_room"))
+        // B12: media, files and links
+        tap("room_menu"); tap("room_m_media"); waitTag("media_sheet"); assertTrue(tagged("mf_media_0")); tap("mf_tab_links"); assertTrue(tagged("mf_none")); sheetShot("c2-room-media"); back(); settle()
+        // ← goes back to the list
+        tap("room_back"); waitTag("chat_list")
+    }
+
+    @Test fun select_and_delete_for_everyone_or_me() {
+        world(); val m = model(); show(m)
+        room("g1")
+        // B10: hold → Select; tap more bubbles; the dark bar with the count
+        hold("see the photo of the pump"); waitTag("msg_sheet"); tap("act_select"); waitTag("sel_bar")
+        assertEquals("1 selected", text("sel_n"))
+        tapMsg("Perfect, please do")
+        assertEquals("2 selected", text("sel_n")); shot("c2-room-select")
+        // Back leaves selecting
+        back(); assertFalse(tagged("sel_bar"))
+        hold("see the photo of the pump"); tap("act_select"); tapMsg("Perfect, please do")
+        tap("sel_delete"); waitTag("delete_sheet")
+        // one of them is someone else's: everyone is offered because I'm this group's admin, and it says so
+        assertTrue(tagged("del_all") && tagged("del_me") && tagged("del_note"))
+        assertTrue(text("del_note").contains("because you’re an admin of this chat"))
+        sheetShot("c2-room-delete")
+        tap("del_all"); settle(1200)
+        assertTrue(fake.calls.any { it.startsWith("POST delete-many") && it.contains("\"forAll\":true") })
+        assertFalse(tagged("sel_bar"))
+        // a single message of mine: the same sheet, from the long press
+        hold("Thanks Meril"); tap("act_delete"); waitTag("delete_sheet"); assertFalse(tagged("del_note")); tap("del_me"); settle(1200)
+        assertTrue(fake.calls.any { it.startsWith("POST delete ") && it.contains("\"forAll\":false") })
+    }
+
+    @Test fun field_user_cannot_delete_others_for_everyone() {
+        world(); val m = model(admin = false); show(m)
+        fake.chats["g1"]!!.put("admins", JSONArray().put("Grace Wanjiru"))
+        room("g1")
+        hold("see the photo of the pump"); tap("act_delete"); waitTag("delete_sheet")
+        assertFalse(tagged("del_all")); assertTrue(tagged("del_me"))
+    }
+
+    @Test fun clear_and_delete_chat() {
+        world(); val m = model(); show(m)
+        room("dm_grace")
+        tap("room_menu"); tap("room_m_clear"); waitTag("clear_sheet"); sheetShot("c2-room-clear"); tap("clear_go"); settle(1500)
+        assertTrue(fake.calls.any { it.startsWith("POST clear") }); waitTag("chat_empty")
+        tap("room_menu"); tap("room_m_delete"); waitTag("delchat_sheet"); tap("clear_go"); settle(1500)
+        assertTrue(fake.calls.any { it.startsWith("POST clear") && it.contains("archive") })
+        waitTag("chat_list"); assertFalse(tagged("chatrow_dm_grace"))
+    }
+
+    @Test fun add_people_by_country() {
+        world(); val m = model(); show(m)
+        room("g1")
+        tap("room_menu"); tap("room_m_add"); waitTag("add_people"); until("team") { tagged("ap_p_Peter Otieno") }
+        rule.onAllNodes(hasAnyAncestor(hasTestTag("ap_p_Meril Kiprop")) and hasText("Already in the group"), useUnmergedTree = true).onFirst().assertExists()
+        tap("ap_p_Peter Otieno"); assertTrue(tagged("ap_chip_Peter Otieno"))
+        rule.onNodeWithTag("ap_go").assertTextContains("Add 1 person", substring = true)
+        tap("ap_all_ke"); rule.onNodeWithTag("ap_go").assertTextContains("Add 2 people", substring = true)
+        sheetShot("c2-room-add-people")
+        tap("ap_go"); settle(1200)
+        until("members") { fake.calls.any { it.startsWith("POST members") && it.contains("Peter Otieno") && it.contains("Jessica Anderson") } }
+    }
+
+    @Test fun field_user_asks_an_admin_to_add() {
+        world(); val m = model(admin = false); show(m)
+        fake.chats["g1"]!!.put("admins", JSONArray().put("Grace Wanjiru"))
+        room("g1")
+        tap("room_menu"); tap("room_m_add"); waitTag("ap_note"); until("team") { tagged("ap_p_Peter Otieno") }
+        tap("ap_p_Peter Otieno"); tap("ap_go"); settle(1500)
+        until("asked") { fake.calls.any { it.startsWith("POST send") && it.contains("@Grace Wanjiru") && it.contains("Peter Otieno") } }
+    }
+
+    @Test fun photos_story_translate_voice_text_and_info() {
+        world(); fake.tools.put("translate", true).put("transcribe", true); val m = model(); show(m)
+        room("p_105")
+        // B7: the Kiswahili message offers Translate · Tafsiri; the answer in italics with Show original
+        waitTag("translate"); tap("translate"); waitTag("translation"); assertTrue(other.any { it.startsWith("POST translate") })
+        tap("translate_orig"); assertFalse(tagged("translation"))
+        // B5: Add to project photos → a note on the project, the photo on it → also the story?
+        waitTag("add_photos"); tap("add_photos"); waitTag("story_ask")
+        assertTrue(other.any { it.contains("pin ") && it.contains("chat-photo") }); assertTrue(other.any { it.startsWith("POST pin-photo") })
+        sheetShot("c2-room-story-ask"); tap("story_row_after"); settle(1500)
+        until("story") { other.any { it.startsWith("POST story") } }; waitTag("photos_added")
+        shot("c2-room-added")
+        // B9: the ticks on my message open Message info
+        tap("ticks_btn"); waitTag("info_sheet"); back(); settle()
+        // B8: a voice note's Show text
+        tap("room_back"); waitTag("chat_list"); room("g1")
+        rule.onNodeWithTag("chat_msgs").performScrollToNode(hasTestTag("voice_text")); tap("voice_text"); waitTag("voice_words")
+        assertTrue(fake.calls.any { it.startsWith("POST transcribe") })
+    }
+
+    @Test fun use_a_message_in_the_story() {
+        world(); val m = model(); show(m)
+        room("p_105")
+        hold("Mwenyekiti")
+        tap("act_story"); waitTag("story_quote_from_chat"); settle(1500)
+        // filled in, not saved: the words and who said them are in the fields, and nothing was sent
+        assertTrue(has("Mwenyekiti anasema")); assertFalse(other.any { it.startsWith("POST story") && it.contains("answers") })
+        rule.onNodeWithTag("nav_chat").assertIsSelected()
+        shot("c2-room-story-quote")
+    }
+
+    @Test fun waiting_for_signal_then_not_sent() {
+        world(); val m = model(); show(m)
+        room("dm_grace")
+        fake.online = false
+        rule.onNodeWithTag("composer_input").performTextInput("On my way"); settle(); tap("send"); settle(9500)
+        waitTag("waiting_signal"); assertTrue(tagged("retry")); shot("c2-room-waiting")
+    }
+
+    private fun roomLooks(width: Int, height: Int, sw: Boolean, mode: String) {
+        Lang.sw = sw; w = width; h = height; Look.mode = if (mode == "sun") "sun" else ""
+        world(); fake.tools.put("translate", true); val m = model(); show(m, dark = mode == "dark")
+        room("p_105")
+        val tag = "$width-${if (sw) "sw" else "en"}-$mode"
+        // the strip's place may end with … (as on the web); its status and Open project never do
+        listOf("chat_head", "proj_strip_status", "proj_strip_open").forEach { noLayoutProblems(it, tag) }
+        rule.onAllNodesWithTag("msg_text", useUnmergedTree = true).fetchSemanticsNodes().forEach { n -> assertEquals(tag, null, LayoutCheck.problem(n, w * rule.density.density)) }
+        shot("c2-room-$tag")
+        tap("room_menu"); shot("c2-room-menu-$tag"); back()
+    }
+    @Config(qualifiers = "w320dp-h640dp-xhdpi") @Test fun room_320_en_light() = roomLooks(320, 640, false, "light")
+    @Config(qualifiers = "w320dp-h640dp-xhdpi") @Test fun room_320_sw_dark() = roomLooks(320, 640, true, "dark")
+    @Config(qualifiers = "w320dp-h640dp-xhdpi") @Test fun room_320_sw_sun() = roomLooks(320, 640, true, "sun")
+    @Config(qualifiers = "w360dp-h800dp-xxhdpi") @Test fun room_360_sw_light() = roomLooks(360, 800, true, "light")
+    @Config(qualifiers = "w411dp-h891dp-xxhdpi") @Test fun room_411_en_dark() = roomLooks(411, 891, false, "dark")
+    @Config(qualifiers = "w411dp-h891dp-xxhdpi") @Test fun room_411_en_sun() = roomLooks(411, 891, false, "sun")
+    private fun text(t: String) = LayoutCheck.text(rule.onNodeWithTag(t, useUnmergedTree = true).fetchSemanticsNode())
 }

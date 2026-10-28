@@ -24,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -339,9 +340,11 @@ internal fun QuickChips(list: List<String>, pick: (String) -> Unit) {
     Box(Modifier.fillMaxWidth()) {
     Row(Modifier.fillMaxWidth().horizontalScroll(sc).padding(start = 4.dp, end = 28.dp, top = 4.dp, bottom = 4.dp).testTag("quick_row"), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
         list.forEachIndexed { i, q ->
-            Text(q, style = MaterialTheme.typography.labelLarge, color = C.ink, maxLines = 1, softWrap = false,
-                modifier = Modifier.clip(RoundedCornerShape(99.dp)).background(C.card).border(1.dp, if (C.glassy) C.glassEdge else C.line, RoundedCornerShape(99.dp))
-                    .clickable(role = Role.Button) { pick(q) }.heightIn(min = 36.dp).padding(horizontal = 14.dp, vertical = 8.dp).testTag("quick_$i"))
+            // chat 2 (B4): small chips
+            Text(q, style = CwType.meta(FontWeight.Bold), color = C.ink, maxLines = 1, softWrap = false,
+                modifier = Modifier.shadow(1.dp, RoundedCornerShape(16.dp)).clip(RoundedCornerShape(16.dp)).background(if (C.dark) C.card else Color.White.copy(alpha = .95f))
+                    .then(if (C === Sun) Modifier.border(2.dp, Color.Black, RoundedCornerShape(16.dp)) else Modifier)
+                    .clickable(role = Role.Button) { pick(q) }.heightIn(min = 32.dp).padding(horizontal = 12.dp, vertical = 7.dp).testTag("quick_$i"))
         }
     }
     Box(Modifier.matchParentSize()) {
