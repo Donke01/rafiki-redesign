@@ -48,7 +48,9 @@ async function fresh(env, chk, id) {
   return { m, rec, s, stage, pack };
 }
 // where the story lives on the website (the public site's address, as for donor links)
-const siteOrigin = env => String(env.STORY_LINK_ORIGIN || env.DONOR_LINK_ORIGIN || 'https://www.rafikioutreach.org').replace(/\/+$/, '');
+// the new website (the Stories pages) lives on test.rafikioutreach.org until rafikioutreach.org moves off Wix; set
+// STORY_LINK_ORIGIN in Cloudflare then. Not the donor-link origin: pin.rafikioutreach.org only serves the app.
+const siteOrigin = env => String(env.STORY_LINK_ORIGIN || 'https://test.rafikioutreach.org').replace(/\/+$/, '');
 // the Story status label for a published story: "Published", or "Approved" when the board has no "Published" label
 async function pubLabel(env, T, B, api) {
   const k = 'pinstorylabels', c = env.FEED ? await env.FEED.get(k, 'json') : null;
