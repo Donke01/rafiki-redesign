@@ -26,6 +26,7 @@
     if (/^\/(api|project)\//.test(u.pathname)) return;
     e.preventDefault();
     html.classList.add('mo-leave');
+    try { sessionStorage.setItem('moNav', '1'); } catch (x) {}
     setTimeout(function () { location.href = u.href; }, 180);
   });
   html.classList.add('mo');

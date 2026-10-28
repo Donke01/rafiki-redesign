@@ -23,6 +23,7 @@
 <script>window.__resources = {};</script>
 <script>/* Placeholders (yellow 'To add' boxes) show on previews and hide on the live domain. ?live or ?preview overrides. */(function(){var q=location.search,live=/(^|\.)rafikioutreach\.org$/.test(location.hostname);if(/[?&]preview\b/.test(q)||(!live&&!/[?&]live\b/.test(q)))document.documentElement.className+=' draft-mode';})();</script>
 <script>/* coming from the country picker: keep the screen blue until the wipe finishes on this page */try{if(sessionStorage.getItem('rfWipe'))document.documentElement.className+=' cx-arriving';}catch(e){}</script>
+<script>/* the page fades in only when arriving from a link on the site, never on a refresh or a first visit */try{if(sessionStorage.getItem('moNav')){sessionStorage.removeItem('moNav');var n=performance.getEntriesByType('navigation')[0];if(!n||n.type==='navigate')document.documentElement.className+=' mo-arrive';}}catch(e){}</script>
 <script src="/support.js"></script>
 <script src="/feed.js"></script>
 <script src="/motion.js" defer></script>
@@ -87,7 +88,7 @@ html .tm .h2{font-size:clamp(32px,4vw,58px);line-height:1.02;letter-spacing:-0.0
 <style>/* motion: water line, living heroes, waves, reveal, hover, counting, shimmer (all off for reduced motion) */
 /* page change: content fades out when a link is followed and fades in on the new page */
 @media (prefers-reduced-motion:no-preference){
-  #dc-root{animation:moPageIn .4s ease backwards}
+  html.mo-arrive #dc-root{animation:moPageIn .4s ease backwards}
   html.mo-leave #dc-root{opacity:0;transition:opacity .18s ease}
   html.mo-leave .mo-water i{transform:scaleX(1) !important;transition:transform .3s ease}
   @keyframes moPageIn{from{opacity:0}to{opacity:1}}
@@ -298,6 +299,29 @@ html footer.bf .bf-top:focus-visible{outline:3px solid #6BBDF2;outline-offset:3p
   .tm-ph img{transition:transform .6s cubic-bezier(.2,.7,.2,1)}.tm-card:hover .tm-ph img{transform:scale(1.06)}
 }
 @keyframes cv2Ring{0%{box-shadow:0 0 0 0 rgba(10,120,194,.35)}100%{box-shadow:0 0 0 16px rgba(10,120,194,0)}}
+</style>
+<style id="cc3-css">/* Where we work: the country cards (Figma "B · Night tiles" layout in the site's own colours, 29 Oct): the flag, the name
+   and an arrow; one big number; one line of well counts; Malawi's "Fund one" button */
+html body .cc-grid > a.cc-card{display:flex !important;flex-direction:column;align-items:stretch;gap:14px;padding:20px !important;text-align:left;background:#FFFFFF !important;border:1.5px solid #E3F1FC;border-radius:24px !important;box-shadow:0 10px 30px rgba(9,139,225,.08);color:#0A0A0A}
+html body .cc-grid > a.cc-card.on{border-color:#0A78C2;box-shadow:0 0 0 4px rgba(9,139,225,.12)}
+html body .cc-grid > a.cc-card .cc-here{position:absolute;top:-11px;left:20px;transform:none;grid-area:auto}
+.cc3-top{display:flex;align-items:center;gap:12px;min-width:0}
+.cc3-flag{flex:none;width:34px;height:23px;border-radius:5px;background-size:cover;background-position:center;box-shadow:0 0 0 1px rgba(0,0,0,.08)}
+.f-ke{background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2030%2020%22%3E%3Crect%20width%3D%2230%22%20height%3D%2220%22%20fill%3D%22%23000%22%2F%3E%3Crect%20y%3D%227%22%20width%3D%2230%22%20height%3D%226%22%20fill%3D%22%23BB0000%22%2F%3E%3Crect%20y%3D%2213%22%20width%3D%2230%22%20height%3D%227%22%20fill%3D%22%23006600%22%2F%3E%3Crect%20y%3D%226%22%20width%3D%2230%22%20height%3D%221%22%20fill%3D%22%23fff%22%2F%3E%3Crect%20y%3D%2213%22%20width%3D%2230%22%20height%3D%221%22%20fill%3D%22%23fff%22%2F%3E%3Cellipse%20cx%3D%2215%22%20cy%3D%2210%22%20rx%3D%223%22%20ry%3D%226%22%20fill%3D%22%23BB0000%22%20stroke%3D%22%23000%22%20stroke-width%3D%22.8%22%2F%3E%3C%2Fsvg%3E")}.f-tz{background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2030%2020%22%3E%3Crect%20width%3D%2230%22%20height%3D%2220%22%20fill%3D%22%231EB53A%22%2F%3E%3Cpath%20d%3D%22M30%200V20H0z%22%20fill%3D%22%2300A3DD%22%2F%3E%3Cpath%20d%3D%22M0%2020L30%200%22%20stroke%3D%22%23FCD116%22%20stroke-width%3D%229%22%2F%3E%3Cpath%20d%3D%22M0%2020L30%200%22%20stroke%3D%22%23000%22%20stroke-width%3D%226%22%2F%3E%3C%2Fsvg%3E")}.f-ug{background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2030%2020%22%3E%3Crect%20width%3D%2230%22%20height%3D%2220%22%20fill%3D%22%23000%22%2F%3E%3Crect%20y%3D%223.33%22%20width%3D%2230%22%20height%3D%223.33%22%20fill%3D%22%23FCDC04%22%2F%3E%3Crect%20y%3D%226.67%22%20width%3D%2230%22%20height%3D%223.33%22%20fill%3D%22%23D90000%22%2F%3E%3Crect%20y%3D%2213.33%22%20width%3D%2230%22%20height%3D%223.33%22%20fill%3D%22%23FCDC04%22%2F%3E%3Crect%20y%3D%2216.67%22%20width%3D%2230%22%20height%3D%223.33%22%20fill%3D%22%23D90000%22%2F%3E%3Ccircle%20cx%3D%2215%22%20cy%3D%2210%22%20r%3D%223.6%22%20fill%3D%22%23fff%22%2F%3E%3C%2Fsvg%3E")}.f-mw{background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2030%2020%22%3E%3Crect%20width%3D%2230%22%20height%3D%2220%22%20fill%3D%22%23000%22%2F%3E%3Crect%20y%3D%226.67%22%20width%3D%2230%22%20height%3D%226.67%22%20fill%3D%22%23CE1126%22%2F%3E%3Crect%20y%3D%2213.33%22%20width%3D%2230%22%20height%3D%226.67%22%20fill%3D%22%23339E35%22%2F%3E%3Ccircle%20cx%3D%2215%22%20cy%3D%227%22%20r%3D%223.2%22%20fill%3D%22%23CE1126%22%2F%3E%3C%2Fsvg%3E")}
+html body .cc-grid > a.cc-card .cc-cn{flex:1;min-width:0;font-size:22px !important;font-weight:800;letter-spacing:-.01em;color:#0A0A0A;grid-area:auto}
+.cc3-go{flex:none;width:40px;height:40px;border-radius:50%;background:#E3F1FC;display:grid;place-items:center;transition:transform .25s}
+.cc3-go::after{content:"→";font-size:19px;font-weight:700;line-height:1;color:#076DB1}
+a.cc-card:hover .cc3-go{transform:translateX(3px)}
+.cc3-big{display:flex;flex-direction:column;gap:2px}
+.cc3-big b{font-size:32px;font-weight:800;letter-spacing:-.02em;line-height:1.1;color:#0A78C2}
+.cc3-big small{font-size:13.5px;font-weight:600;line-height:1.35;color:#5A6066}
+.cc3-line{margin-top:auto;padding-top:12px;border-top:1px solid #EEF0F2;font-size:13.5px;font-weight:700;line-height:1.35;color:#3A3F44}
+.cc3-fund{margin-top:auto;align-self:flex-start;display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 22px;border-radius:999px;background:#0A78C2;color:#FFFFFF;font-size:15px;font-weight:700;cursor:pointer}
+.cc3-fund i{font-style:normal}
+.cc3-fund:hover{background:#076DB1}.cc3-fund:focus-visible{outline:3px solid #6BBDF2;outline-offset:3px}
+html body .cc-grid > a.cc-card > .cc-go{position:absolute !important;width:1px !important;height:1px !important;padding:0 !important;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;background:none}
+html body .cc-grid > a.cc-card > .cc-go::after{content:none}
+@media (min-width:601px) and (max-width:1100px){.cc3-big b{font-size:28px}}
 </style>
 </head>
 <body>
@@ -1481,7 +1505,7 @@ a.lw-card:hover .lw-ph > img{transform:scale(1.05)}
 <span class="cc-lab">Where we work</span>
 <h2 class="h2">Four countries, one mission</h2>
 <p class="p">RAFIKI partners with communities in Kenya, Tanzania, Uganda and Malawi. Each country has its own team and its own priorities. Choose a country to visit its page.</p>
-<div class="cc-grid"><sc-for list="{{wwCards}}" as="c" hint-placeholder-count="4"><a class="{{c.cls}}" href="{{c.href}}"><sc-if value="{{c.here}}" hint-placeholder-val="{{false}}"><span class="cc-here">You are viewing</span></sc-if><span class="cc-ab" aria-hidden="true">{{c.ab}}</span><span class="cc-cn">{{c.n}}</span><span class="cc-rows"><sc-if value="{{c.stats}}" hint-placeholder-val="{{true}}"><div><span>Wells completed</span><b>{{c.w}}</b></div><div><span>Under construction</span><b>{{c.u}}</b></div><div><span>People reached</span><b>{{c.p}}</b></div></sc-if><sc-if value="{{c.fund}}" hint-placeholder-val="{{false}}"><div class="cc-fund" role="link" tabindex="0" aria-label="{{c.fAria}}" onClick="{{c.fGo}}" onKeyDown="{{c.fKey}}"><span>Looking for funding</span><b>{{c.fTx}}<i aria-hidden="true"> →</i></b></div></sc-if></span><span class="cc-go">{{c.go}}</span></a></sc-for></div>
+<div class="cc-grid"><sc-for list="{{wwCards}}" as="c" hint-placeholder-count="4"><a class="{{c.cls}}" href="{{c.href}}"><sc-if value="{{c.here}}" hint-placeholder-val="{{false}}"><span class="cc-here">You are viewing</span></sc-if><span class="cc3-top"><span class="{{c.flagCls}}" aria-hidden="true"></span><span class="cc-cn">{{c.n}}</span><span class="cc3-go" aria-hidden="true"></span></span><span class="{{c.bigCls}}"><b>{{c.big}}</b><small>{{c.bigL}}</small></span><sc-if value="{{c.hasLine}}" hint-placeholder-val="{{true}}"><span class="cc3-line">{{c.line}}</span></sc-if><sc-if value="{{c.fund}}" hint-placeholder-val="{{false}}"><span class="cc3-fund" role="link" tabindex="0" aria-label="{{c.fAria}}" onClick="{{c.fGo}}" onKeyDown="{{c.fKey}}">Fund one<i aria-hidden="true"> →</i></span></sc-if><span class="cc-go">{{c.go}}</span></a></sc-for></div>
 </div>
 </section>
 <section class="fb" id="why-water" aria-label="Why water">
@@ -1712,7 +1736,12 @@ function countryVals(self) {
   var teamVals = { tmTitle: all ? 'The people behind RAFIKI' : 'Our team in ' + cur.n, tmOfficeTitle: offOwn ? cur.n + ' office' : 'Head office', tmAddr: off.addr, tmPhone: off.phone, tmBoss: plist.slice(0, nBoss), tmPeople: plist.slice(nBoss), tmSwap: s.swapN ? (s.swapN % 2 ? 'swA' : 'swB') : '', bioOpen: s.bioIdx != null && s.bioIdx < plist.length, bio: plist[s.bioIdx != null && s.bioIdx < plist.length ? s.bioIdx : 0], bioClose: function () { self.setState({ bioIdx: null }); } };
   return Object.assign(teamVals, rfCost(self).vals, { cn: cnVals(), cp: cpVals(self._feed), isKe: !all && (s.ctry || 'ke') === 'ke', wipeMaps: (s.wipeKey === 'all' ? CORDER : (s.wipeKey ? [s.wipeKey] : [])).map(function (k) { var fl = CFLAGS[k]; return { d: CMAPS[k], cid: 'cxclip-' + k, clip: 'clip-path:url(#cxclip-' + k + ')', tr: fl.tr, rects: fl.rects, circles: fl.circles }; }), wipeMapsCls: 'cx-maps' + (s.wipeKey === 'all' ? ' all' : ''), wipeOn: !!s.wipeOn, wipeCls: 'cx-wipe' + (s.wipeArrive ? ' arrive' : ''), wipeName: s.wipeName || '', zhSwap: s.swapN ? (s.swapN % 2 ? 'swA' : 'swB') : '', heroH1: heroVals.heroH1, heroNum: heroVals.heroNum, heroStatTx: heroVals.heroStatTx, menuCls: 'hd-menu' + (s.menu ? ' open' : (self._menuWasOpen ? ' shut' : '')), cName: all ? 'All countries' : cur.n, cCode: all ? 'All' : cur.ab, cAllOn: all, cFlagOn: !all, cFlag: all ? '' : FLAGS[s.ctry || 'ke'], csOpen: !!s.cs, csExpanded: s.cs ? 'true' : 'false',
     toggleCs: function () { self.setState({ cs: !self.state.cs }); }, csList: list,
-    wwCards: CORDER.map(function (k) { var on = picked && (s.ctry || 'ke') === k, C = CTRY[k], fund = !C.w && !C.u && C.fa > 0, fHref = '/stories?country=' + k + '&status=funding', fTx = C.fw ? C.fw + (C.fw === 1 ? ' well' : ' wells') : C.fa + (C.fa === 1 ? ' project' : ' projects'), fGo = function (e) { if (e) { e.preventDefault(); e.stopPropagation(); } window.location.href = fHref; }; return { n: C.n, ab: C.ab, w: C.w.toLocaleString('en-US'), u: C.u.toLocaleString('en-US'), p: C.p ? C.p.toLocaleString('en-US') + '+' : '–', stats: !fund, fund: fund, fTx: fTx, fAria: 'Looking for funding: ' + fTx + ' in ' + C.n + '. See them', fGo: fGo, fKey: function (e) { if (e && (e.key === 'Enter' || e.key === ' ')) fGo(e); }, on: on ? 'true' : 'false', here: on, cls: 'cc-card' + (on ? ' on' : ''), go: 'Visit the ' + C.n + ' page →', href: ({ ke: '/kenya', tz: '/tanzania', ug: '/uganda', mw: '/malawi' })[k] }; }) });
+    wwCards: CORDER.map(function (k) { var on = picked && (s.ctry || 'ke') === k, C = CTRY[k], fund = !C.w && !C.u && C.fa > 0, fHref = '/stories?country=' + k + '&status=funding', fTx = C.fw ? C.fw + (C.fw === 1 ? ' well' : ' wells') : C.fa + (C.fa === 1 ? ' project' : ' projects'), fGo = function (e) { if (e) { e.preventDefault(); e.stopPropagation(); } window.location.href = fHref; }; var pl = function (n, one, many) { return n.toLocaleString('en-US') + ' ' + (n === 1 ? one : many); }, big, bigL, line = '';
+      if (fund) { big = fTx; bigL = 'looking for funding'; }
+      else if (C.p) { big = C.p.toLocaleString('en-US') + '+'; bigL = 'people reached'; line = [C.w ? pl(C.w, 'well completed', 'wells completed') : '', C.u ? pl(C.u, 'under construction', 'under construction') : ''].filter(Boolean).join(' · '); }
+      else if (C.u && !C.w) { big = pl(C.u, 'well', 'wells'); bigL = 'being built: ' + C.n + '\u2019s first'; }
+      else { big = pl(C.w, 'well', 'wells'); bigL = 'completed'; line = C.u ? pl(C.u, 'under construction', 'under construction') : ''; }
+      return { flagCls: 'cc3-flag f-' + k, bigCls: 'cc3-big' + (fund ? ' fund' : ''), big: big, bigL: bigL, line: line, hasLine: !!line, n: C.n, ab: C.ab, w: C.w.toLocaleString('en-US'), u: C.u.toLocaleString('en-US'), p: C.p ? C.p.toLocaleString('en-US') + '+' : '–', stats: !fund, fund: fund, fTx: fTx, fAria: 'Looking for funding: ' + fTx + ' in ' + C.n + '. See them', fGo: fGo, fKey: function (e) { if (e && (e.key === 'Enter' || e.key === ' ')) fGo(e); }, on: on ? 'true' : 'false', here: on, cls: 'cc-card' + (on ? ' on' : ''), go: 'Visit the ' + C.n + ' page →', href: ({ ke: '/kenya', tz: '/tanzania', ug: '/uganda', mw: '/malawi' })[k] }; }) });
 }
 // home strips: latest finished wells and Upcoming projects looking for funding (feed only; hidden when the feed is down)
 function homeStrips(self) {

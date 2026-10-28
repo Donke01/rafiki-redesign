@@ -212,3 +212,24 @@ test('column dates: Before, In progress (from – to) and After each get a month
   await post(env, '2222', { action: 'approve', id: '301', doc: dr.story.doc });
   assert.deepEqual(JSON.parse(env.FEED.m.get('pubstory:301')).facts.dates, { before: '2024-11', progress: '2025-01', after: '2025-06' });
 });
+
+test('cover photo: chosen in the app, used by the website while it is safe; empty goes back to automatic', async () => {
+  const { env } = setup();
+  await post(env, '3333', { action: 'answers', id: '301', q1: 'Girls walked 6 km home each night', q2: 'There was no dormitory', q5: 'Girls stay at school' });
+  const a = await form(env, '3333', { action: 'photo', id: '301', row: 'after' }, jpg('a.jpg'));
+  const b = await form(env, '3333', { action: 'photo', id: '301', row: 'before' }, jpg('b.jpg'));
+  const c = await post(env, '3333', { action: 'cover', id: '301', asset: b.photo.id }); assert.equal(c.story.cover, b.photo.id);
+  assert.equal((await post(env, '3333', { action: 'cover', id: '301', asset: '999' })).status, 404);
+  const d = await post(env, '3333', { action: 'draft', id: '301' });
+  await post(env, '2222', { action: 'approve', id: '301', doc: d.story.doc });
+  assert.equal(JSON.parse(env.FEED.m.get('pubstory:301')).hero.id, b.photo.id, 'the website uses the chosen cover');
+  assert.equal(JSON.parse(env.FEED.m.get('pubstoryidx'))[0].hero.id, b.photo.id, 'so does the stories list');
+  // on the website already: changing the cover updates it straight away
+  await post(env, '2222', { action: 'cover', id: '301', asset: a.photo.id });
+  assert.equal(JSON.parse(env.FEED.m.get('pubstory:301')).hero.id, a.photo.id);
+  // a cover that shows children is not used until consent is received
+  await post(env, '3333', { action: 'photo-edit', id: '301', row: 'after', asset: a.photo.id, children: true });
+  await post(env, '2222', { action: 'cover', id: '301', asset: a.photo.id });
+  assert.notEqual(JSON.parse(env.FEED.m.get('pubstory:301')).hero.id, a.photo.id);
+  const back = await post(env, '3333', { action: 'cover', id: '301', asset: '' }); assert.equal(back.story.cover, '');
+});

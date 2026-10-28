@@ -22,6 +22,7 @@
 <script>window.__resources = {};</script>
 <script>/* Placeholders (yellow 'To add' boxes) show on previews and hide on the live domain. ?live or ?preview overrides. */(function(){var q=location.search,live=/(^|\.)rafikioutreach\.org$/.test(location.hostname);if(/[?&]preview\b/.test(q)||(!live&&!/[?&]live\b/.test(q)))document.documentElement.className+=' draft-mode';})();</script>
 <script>/* coming from the country picker: keep the screen blue until the wipe finishes on this page */try{if(sessionStorage.getItem('rfWipe'))document.documentElement.className+=' cx-arriving';}catch(e){}</script>
+<script>/* the page fades in only when arriving from a link on the site, never on a refresh or a first visit */try{if(sessionStorage.getItem('moNav')){sessionStorage.removeItem('moNav');var n=performance.getEntriesByType('navigation')[0];if(!n||n.type==='navigate')document.documentElement.className+=' mo-arrive';}}catch(e){}</script>
 <script src="/support.js"></script>
 <script src="/feed.js"></script>
 <script src="/places.js"></script>
@@ -86,7 +87,7 @@ html .tm .h2{font-size:clamp(32px,4vw,58px);line-height:1.02;letter-spacing:-0.0
 <style>/* motion: water line, living heroes, waves, reveal, hover, counting, shimmer (all off for reduced motion) */
 /* page change: content fades out when a link is followed and fades in on the new page */
 @media (prefers-reduced-motion:no-preference){
-  #dc-root{animation:moPageIn .4s ease backwards}
+  html.mo-arrive #dc-root{animation:moPageIn .4s ease backwards}
   html.mo-leave #dc-root{opacity:0;transition:opacity .18s ease}
   html.mo-leave .mo-water i{transform:scaleX(1) !important;transition:transform .3s ease}
   @keyframes moPageIn{from{opacity:0}to{opacity:1}}

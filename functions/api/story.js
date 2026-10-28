@@ -12,6 +12,7 @@
 //   POST /api/story { action: photo-edit, id, row, asset, cap?, children?, taken? (YYYY-MM or YYYY-MM-DD, '' clears), to? }
 //     a photo's caption, "shows children", the month it was taken, or its row
 //   story.newPhotos: photos added since the draft was written (the app offers "Draft again" to use them)
+//   POST /api/story { action: cover, id, asset } the story's cover photo ('' = automatic); story.cover
 //   POST /api/story { action: dates, id, before?, progress?, progressEnd?, after? } the month of each column (YYYY-MM, '' clears)
 //     story.dates; 'dates' is in story.missing while a column with photos has no month
 // Field officers collect and draft; only admins edit the final text, approve and publish. Signed in like /api/pin
@@ -246,6 +247,16 @@ export async function onRequestPost({ request, env }) {
       if (!ROWS.includes(b.row)) return json({ ok: false, reason: 'row' }, 400);
       rec.photos[b.row] = (rec.photos[b.row] || []).filter(p => p.id !== String(b.asset));
       await saveRec(env, id, rec); return done();
+    }
+    // the story's cover photo (any of its photos; '' goes back to the automatic choice)
+    if (a === 'cover') {
+      const aid = String(b.asset || '');
+      if (aid && !f.pack.photos.concat(f.s.pool || []).some(p => String(p.id) === aid) && !ROWS.some(r => (s.photos[r] || []).some(p => String(p.id) === aid))) return json({ ok: false, reason: 'photo' }, 404);
+      if (aid) rec.cover = aid; else delete rec.cover;
+      await saveRec(env, id, rec);
+      s.cover = aid;
+      if (rec.pub && rec.doc) { await republish(); await saveRec(env, id, rec); }
+      return done();
     }
     // the month of each column: { before, progress, progressEnd, after } as YYYY-MM ('' clears); in order, none in the future
     if (a === 'dates') {
