@@ -1,8 +1,8 @@
 {
   "ok": true,
-  "versionCode": 51,
-  "versionName": "2.26.0",
-  "notes": "A new chat: quick filters, who is in the field now, project photos, select and delete for you or for everyone, clear a chat, add chat photos to a project, translate English and Kiswahili, and an easier way to add people. Plus a Stories tab and a simpler Office.",
-  "sha256": "8fd1a9c81af0970d6463c948dca0597adefb355dad0c82a00a2cfe725d7734ac",
+  "versionCode": 52,
+  "versionName": "2.27.0",
+  "notes": "Story photos: pick several at once, see each one upload, and photos wait and send by themselves when there's no signal. A month for Before, In progress and After. The story shown in sections with Approve and publish. A new look for Chat.",
+  "sha256": "1c71f971ebd488f23b87718c16eb0f7bb5c41ba7ed5ff1c12f96a93d6742c895",
   "apk": "/app/rafiki-pin.apk"
 }
