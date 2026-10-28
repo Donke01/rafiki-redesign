@@ -151,9 +151,9 @@ def install(pg, admin=True):
         elif a == 'draft': x['text'] = 'A draft from the answers.'; x['status'] = 'draft'
         elif a == 'approve':
             if not admin: return route.fulfill(status=403, json={'ok': False, 'reason': 'admin-only'})
-            x['status'] = 'approved'
+            x['status'] = 'published'; x['pub'] = {'at': DAYS(0), 'by': ME, 'url': 'https://www.rafikioutreach.org/stories/' + pid + '-turbo-spring', 'path': '/stories/' + pid + '-turbo-spring'}   # approve = publish (Stories 2)
         elif a == 'publish': x['status'] = 'published'
-        elif a == 'collecting': x['status'] = 'collecting'
+        elif a == 'collecting': x['status'] = 'collecting'; x['pub'] = None
         return route.fulfill(json={'ok': True, 'story': story_of(pid), 'text': x['text'], 'how': 'template'})
     pg.route(re.compile(r'/api/story(\?.*)?$'), story_api)
     pg.route(re.compile(r'/api/(place|sms-admin)(\?.*)?$'), lambda r, q: r.fulfill(json={'ok': True, 'places': []}))
@@ -458,9 +458,9 @@ def s_story(check):
                 check(mp and b'name="row"\r\n\r\nafter' in mp[-1]['body'] and b'name="children"\r\n\r\ntrue' in mp[-1]['body'], '[%s] the After photo is sent with children=true' % t)
                 check(pg.locator('.sty-row[data-row=after] .cn-th').count() == 1, '[%s] it shows in the After row' % t)
                 pg.click('[data-sty=consent][data-v=received]'); pg.wait_for_timeout(600); check([x for x in SENT if x.get('action') == 'consent'][-1]['value'] == 'received', '[%s] consent' % t)
-                pg.click('[data-testid=sty_draft]'); pg.wait_for_timeout(800); check([x for x in SENT if x.get('action') == 'draft'], '[%s] Draft the story' % t)
-                pg.click('[data-testid=sty_approve]'); pg.wait_for_timeout(800)
-                check([x for x in SENT if x.get('action') == 'approve'] and pg.locator('[data-testid=sty_now]').inner_text().startswith('Approved'), '[%s] an admin approves' % t)
+                pg.click('[data-testid=sty_draft]'); pg.wait_for_timeout(500); pg.click('.po-ask [data-k=yes]'); pg.wait_for_timeout(800); check([x for x in SENT if x.get('action') == 'draft'], '[%s] Draft the story (again, after asking)' % t)
+                pg.click('[data-testid=sty_approve]'); pg.wait_for_timeout(500); pg.click('.po-ask [data-k=yes]'); pg.wait_for_timeout(800)
+                check([x for x in SENT if x.get('action') == 'approve'] and pg.locator('[data-testid=sty_now]').inner_text().startswith('Published') and vis(pg, '[data-testid=sty_pub]'), '[%s] an admin approves and publishes: on the website' % t)
                 pg.locator('[data-testid=sty_status]').scroll_into_view_if_needed(); shot(pg, 'story-approved-%s' % t)
                 go(pg, '#list', 1200); pg.click('#lChips [data-f=sok]'); pg.wait_for_timeout(800)
                 check(pg.locator('#list [data-testid=row_story]').count() >= 1, '[%s] Projects › Story approved, with the badge' % t); shot(pg, 'story-list-%s' % t)

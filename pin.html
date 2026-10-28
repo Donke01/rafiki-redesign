@@ -3731,6 +3731,36 @@ html[data-theme=sun] .tag.cn-tag,html[data-theme=sun] .tag.sty-tag{background:#F
 .sty-qa,.sty-acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.sty-qa .btn{display:inline-flex;align-items:center;gap:6px}.sty-qa .btn svg{width:16px;height:16px}.sty-qa .btn:last-child{margin-left:auto}
 .sty-acts .btn{flex:1 1 140px}
 .sty-txt{white-space:normal;line-height:1.55;font-size:.95rem}
+/* the long draft (Stories 2): sections with photos; admins edit in place, field users read */
+.sty-dh{display:flex;align-items:baseline;justify-content:space-between;gap:8px}.sty-dh h3{margin:0}.sty-dh .muted{font-size:.84rem;white-space:nowrap}
+.sty-how{margin:2px 0 10px;font-size:.82rem}
+.sty-doc label{display:block;margin:10px 0 4px;font-weight:700;font-size:.86rem}.sty-doc label.vh{margin:0}
+.sty-doc input[type=text],.sty-doc textarea{width:100%;box-sizing:border-box}
+#styDT{font-weight:800;font-size:1.05rem}#styDD{font-style:italic}
+.sty-sec{margin-top:16px;padding-top:14px;border-top:var(--bw) solid var(--line)}
+.sty-sech{display:flex;align-items:center;gap:8px;margin-bottom:8px}.sty-sech input{flex:1;min-width:0;font-weight:800}
+.sty-sech .n{flex:none;width:24px;height:24px;border-radius:12px;background:#F3E8FF;color:#5B2AA8;font-size:.76rem;font-weight:800;display:inline-flex;align-items:center;justify-content:center}
+html[data-theme=dark] .sty-sech .n{background:#2E1F4A;color:#D6C2FF}html[data-theme=sun] .sty-sech .n{background:#FFF;color:#000;border:2px solid #000}
+.sty-fig{margin:0 0 10px}.sty-im{display:block;width:100%;aspect-ratio:3/2;border:0;padding:0;border-radius:14px;overflow:hidden;background:var(--line);cursor:pointer}
+.sty-im img{width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .2s}.sty-im img.in{opacity:1}
+.sty-fig figcaption{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 10px;margin-top:6px;font-size:.82rem;color:var(--muted);overflow-wrap:anywhere}
+.sty-fig figcaption > span:first-child{flex:1 1 140px;min-width:0}.sty-fa{display:flex;gap:6px;flex:none}
+.sty-add{display:inline-flex;align-items:center;gap:6px;margin:0 0 10px}.sty-add svg{width:16px;height:16px}
+.sty-art .sty-tt{margin:4px 0 6px;font-size:1.25rem;line-height:1.25;color:var(--ink)}.sty-art .sty-dek{margin:0 0 4px;font-size:1rem;line-height:1.45;font-style:italic;color:var(--muted)}
+.sty-art h5{margin:0 0 8px;font-size:1rem;color:var(--ink)}.sty-art p{margin:0 0 10px;line-height:1.6;font-size:.95rem}
+.sty-pull{margin:18px 0 4px;padding:14px 16px;border-left:4px solid #7A4FD0;border-radius:0 14px 14px 0;background:#F7F1FF}
+.sty-pull p{margin:0;font-size:1.05rem;line-height:1.45;font-weight:700;color:var(--ink)}.sty-pull cite{display:block;margin-top:6px;font-style:normal;font-size:.86rem;color:var(--muted)}
+html[data-theme=dark] .sty-pull{background:#21183A}html[data-theme=sun] .sty-pull{background:#FFF;border:2px solid #000;border-left-width:6px}
+.sty-pn{margin:4px 0 0;font-size:.8rem}
+.sty-pub{display:flex;align-items:center;gap:10px;margin:0 0 12px;padding:10px 12px;border-radius:14px;background:#E7F7EE;color:#0B5A33;text-decoration:none}
+.sty-pub > svg{flex:none;width:22px;height:22px}.sty-pub > svg:last-child{width:18px;height:18px;margin-left:auto}.sty-pub span{display:flex;flex-direction:column;min-width:0}.sty-pub small{font-size:.82rem;text-decoration:underline}
+html[data-theme=dark] .sty-pub{background:#123526;color:#8FE3B5}html[data-theme=sun] .sty-pub{background:#FFF;color:#000;border:2px solid #000}
+.sty-pool{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:10px;max-height:60vh;overflow-y:auto}
+.sty-po{display:flex;flex-direction:column;gap:4px;padding:0;border:2px solid transparent;border-radius:14px;background:none;text-align:left;cursor:pointer;color:var(--ink);font:inherit}
+.sty-po.on{border-color:var(--blue)}.sty-poi{position:relative;display:block;aspect-ratio:4/3;border-radius:12px;overflow:hidden;background:var(--line)}
+.sty-poi img{width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .2s}.sty-poi img.in{opacity:1}
+.sty-po small{display:flex;flex-direction:column;gap:1px;padding:0 4px 4px;font-size:.76rem;line-height:1.3;color:var(--muted);overflow-wrap:anywhere}.sty-po small b{color:var(--ink);font-size:.8rem}.sty-po small i{font-style:normal;color:#5B2AA8;font-weight:700}
+html[data-theme=dark] .sty-po small i{color:#D6C2FF}
 #paneStory textarea{width:100%}
 /* the photo sheet */
 .bsh.ph-sh{z-index:2300} /* above a contact sheet, under the app's own confirm */
@@ -6337,7 +6367,7 @@ html[data-theme=sun] .cw-apall,html[data-theme=sun] .cw-apchip{border:2px solid 
       .then(function (r) { return r.json().catch(function () { return { ok: false, reason: 'down' }; }).then(function (j) { j.status = r.status; return j; }); })
       .catch(function () { return { ok: false, reason: 'offline', status: 0 }; });
   }
-  function styWhy(j) { return j.reason === 'consent' ? tr('Photo consent is needed first: a photo shows children.', 'Ruhusa ya picha inahitajika kwanza: picha inaonyesha watoto.') : j.reason === 'no-text' ? tr('Draft the story first.', 'Andaa hadithi kwanza.') : j.reason === 'offline' ? tr('Stories need a signal.', 'Hadithi zinahitaji mtandao.') : why(j); }
+  function styWhy(j) { return j.reason === 'consent' ? tr('Photo consent is needed first: a photo shows children.', 'Ruhusa ya picha inahitajika kwanza: picha inaonyesha watoto.') : j.reason === 'no-text' ? tr('Draft the story first.', 'Andaa hadithi kwanza.') : j.reason === 'published' ? tr('It is on the website. Send it back to Collecting first.', 'Iko kwenye tovuti. Irudishe kukusanya kwanza.') : j.reason === 'offline' ? tr('Stories need a signal.', 'Hadithi zinahitaji mtandao.') : why(j); }
   function styLoad(p) {
     var box = $('styBody'); if (!box || !p) return;
     if (STY.id !== p.id) { STY.id = p.id; STY.s = null; STY.q = 0; }
@@ -6387,16 +6417,88 @@ html[data-theme=sun] .cw-apall,html[data-theme=sun] .cw-apchip{border:2px solid 
     // consent
     h += '<div class="card sty-c"><h3>' + tr('Photo consent', 'Ruhusa ya picha') + '</h3><div class="seg" role="group" aria-label="' + esc(tr('Photo consent', 'Ruhusa ya picha')) + '"><button type="button" data-sty="consent" data-v="received" aria-pressed="' + (s.consent === 'received') + '">' + tr('Received', 'Imepatikana') + '</button><button type="button" data-sty="consent" data-v="not-yet" aria-pressed="' + (s.consent !== 'received') + '">' + tr('Not yet', 'Bado') + '</button></div>' +
       (ROWSKID(s) ? '<p class="muted">' + tr('A photo shows children, so consent is needed before it can be approved.', 'Picha inaonyesha watoto, kwa hiyo ruhusa inahitajika kabla ya kuidhinishwa.') + '</p>' : '') + '</div>';
-    // the story
-    h += '<div class="card sty-s"><h3>' + tr('The story', 'Hadithi') + '</h3>' + (s.text ? (adm ? '<textarea id="styT" rows="10">' + esc(s.text) + '</textarea>' : '<div class="sty-txt">' + esc(s.text).replace(/\n/g, '<br>') + '</div>') + '<p class="muted">' + tr(wc(s.text) + ' words', 'Maneno ' + wc(s.text)) + '</p>' : '<p class="muted">' + tr('Not written yet. “Draft the story” writes it from the answers, the quote and the project.', 'Bado haijaandikwa. “Andaa hadithi” inaiandika kutoka kwa majibu, nukuu na mradi.') + '</p>') +
-      '<div class="sty-acts"><button type="button" class="btn' + (s.text ? ' light' : '') + '" data-sty="draft" data-testid="sty_draft">' + tr('Draft the story', 'Andaa hadithi') + '</button>' +
-      (adm && s.text ? '<button type="button" class="btn light" data-sty="text">' + tr('Save text', 'Hifadhi maandishi') + '</button>' : '') +
-      (adm && (s.status === 'draft' || s.status === 'collecting') ? '<button type="button" class="btn" data-sty="approve" data-testid="sty_approve"' + (s.text ? '' : ' disabled') + '>' + tr('Approve', 'Idhinisha') + '</button>' : '') +
-      (adm && s.status === 'approved' ? '<button type="button" class="btn" data-sty="publish">' + tr('Mark published', 'Weka imechapishwa') + '</button>' : '') +
-      ((s.status === 'draft') || (adm && (s.status === 'approved' || s.status === 'published')) ? '<button type="button" class="btn light" data-sty="collecting">' + tr('Back to Collecting', 'Rudi kukusanya') + '</button>' : '') + '</div>' +
-      (!adm && (s.status === 'not-started' || s.status === 'collecting') ? '<p class="muted sty-send" data-testid="sty_send">' + tr('“Draft the story” sends it to an admin for review. Nothing goes on the website before it is approved.', '“Andaa hadithi” inaituma kwa msimamizi akague. Hakuna kinachoenda kwenye tovuti kabla ya kuidhinishwa.') + '</p>' : '') + '<p class="msg" id="styMsg" aria-live="polite"></p></div>';
+    // the story: the long draft with its photos (sections), or the plain text of a story drafted before
+    h += s.doc ? styDocCard(s, adm) : '<div class="card sty-s"><h3>' + tr('The story', 'Hadithi') + '</h3>' + (s.text ? (adm ? '<textarea id="styT" rows="10">' + esc(s.text) + '</textarea>' : '<div class="sty-txt">' + esc(s.text).replace(/\n/g, '<br>') + '</div>') + '<p class="muted">' + tr(wc(s.text) + ' words', 'Maneno ' + wc(s.text)) + '</p>' : '<p class="muted">' + tr('Not written yet. “Draft the story” writes it from the answers, the photos, the building stages and the visit notes.', 'Bado haijaandikwa. “Andaa hadithi” inaiandika kutoka kwa majibu, picha, hatua za ujenzi na maelezo ya ziara.') + '</p>') +
+      styActs(s, adm) + '</div>';
     box.innerHTML = h; cnThumbs(box);
     if (typeof cw2StoryPre === 'function') cw2StoryPre(s); // chat2: "Use in a story" from a project chat fills the quote
+  }
+  // ---- the long draft (Stories 2): title, standfirst, sections with their photos; admins edit, field users read --
+  function styEd(s) {   // what an admin is editing: kept across redraws until it is saved or a new draft comes
+    if (!STY.ed || STY.ed.id !== s.id || STY.ed.at !== s.doc.at) STY.ed = { id: s.id, at: s.doc.at, d: JSON.parse(JSON.stringify(s.doc)), dirty: false };
+    return STY.ed.d;
+  }
+  function styImg(s, id, w) { return '/api/story?id=' + encodeURIComponent(s.id) + '&asset=' + encodeURIComponent(id) + '&w=' + (w || 640); }
+  function styRows(t) { var n = String(t || '').length; return Math.max(3, Math.min(16, Math.ceil(n / 34) + (String(t || '').match(/\n\n/g) || []).length)); }
+  function styWords(d) { return wc(d.title) + wc(d.dek) + d.sections.reduce(function (n, x) { return n + wc(x.body); }, 0); }
+  function styHow(d) { return d.model && d.model.indexOf('openai:') === 0 ? tr('written with AI from the facts', 'imeandikwa na AI kutoka kwa ukweli') : d.model === 'text' ? tr('from the earlier story', 'kutoka kwa hadithi ya awali') : tr('written from the answers', 'imeandikwa kutoka kwa majibu'); }
+  function styPub(s) {
+    if (!s.pub) return '';
+    return '<a class="sty-pub" href="' + esc(s.pub.url) + '" target="_blank" rel="noopener" data-testid="sty_pub">' + oic('okc') + '<span><b>' + tr('On the website', 'Iko kwenye tovuti') + '</b><small>' + tr('Open the story page', 'Fungua ukurasa wa hadithi') + '</small></span>' + oic('arrow') + '</a>';
+  }
+  function styDocCard(s, adm) {
+    var d = adm ? styEd(s) : s.doc, words = styWords(d);
+    var h = '<div class="card sty-s sty-doc" data-testid="sty_doc"><div class="sty-dh"><h3>' + tr('The story', 'Hadithi') + '</h3><span class="muted" id="styWc">' + tr(words + ' words', 'Maneno ' + words) + '</span></div>' +
+      '<p class="muted sty-how">' + styHow(d) + (d.by ? ' · ' + esc(d.by) : '') + '</p>' + styPub(s);
+    var fig = function (x, i) {
+      var ph = x.photo;
+      if (!adm) return ph ? '<figure class="sty-fig"><button type="button" class="sty-im" data-sty="view" data-i="' + i + '" aria-label="' + esc(ph.cap || tr('Photo', 'Picha')) + '"><img alt="" data-src="' + styImg(s, ph.id) + '"></button><figcaption>' + esc(ph.cap || '') + '</figcaption></figure>' : '';
+      return ph ? '<figure class="sty-fig ed"><button type="button" class="sty-im" data-sty="pick" data-i="' + i + '" aria-label="' + esc(tr('Change the photo', 'Badilisha picha')) + '"><img alt="" data-src="' + styImg(s, ph.id) + '"></button><figcaption><span>' + esc(ph.cap || '') + '</span><span class="sty-fa"><button type="button" class="btn light small" data-sty="pick" data-i="' + i + '">' + tr('Change', 'Badilisha') + '</button><button type="button" class="btn light small" data-sty="nophoto" data-i="' + i + '">' + tr('Remove', 'Ondoa') + '</button></span></figcaption></figure>'
+        : '<button type="button" class="btn light small sty-add" data-sty="pick" data-i="' + i + '">' + oic('camera') + '<span>' + tr('Add a photo', 'Ongeza picha') + '</span></button>';
+    };
+    if (adm) {
+      h += '<label for="styDT">' + tr('Title', 'Kichwa') + '</label><input id="styDT" type="text" maxlength="90" data-ed="title" value="' + esc(d.title) + '">' +
+        '<label for="styDD">' + tr('The line under the title', 'Mstari chini ya kichwa') + '</label><textarea id="styDD" rows="2" maxlength="240" data-ed="dek">' + esc(d.dek) + '</textarea>';
+      h += d.sections.map(function (x, i) {
+        return '<section class="sty-sec" data-testid="sty_sec"><div class="sty-sech"><span class="n" aria-hidden="true">' + (i + 1) + '</span><label for="styH' + i + '" class="vh">' + tr('Heading ' + (i + 1), 'Kichwa kidogo ' + (i + 1)) + '</label><input id="styH' + i + '" type="text" maxlength="70" data-ed="h" data-i="' + i + '" value="' + esc(x.h) + '"></div>' +
+          fig(x, i) + '<label for="styB' + i + '" class="vh">' + tr('Section ' + (i + 1) + ' words', 'Maneno ya sehemu ' + (i + 1)) + '</label><textarea id="styB' + i + '" rows="' + styRows(x.body) + '" data-ed="body" data-i="' + i + '">' + esc(x.body) + '</textarea></section>';
+      }).join('');
+    } else {
+      h += '<article class="sty-art"><h4 class="sty-tt">' + esc(d.title) + '</h4>' + (d.dek ? '<p class="sty-dek">' + esc(d.dek) + '</p>' : '') +
+        d.sections.map(function (x, i) { return '<section class="sty-sec"><h5>' + esc(x.h) + '</h5>' + fig(x, i) + String(x.body || '').split(/\n\n+/).map(function (t) { return '<p>' + esc(t) + '</p>'; }).join('') + '</section>'; }).join('') + '</article>';
+    }
+    if (d.pull && d.pull.quote) h += '<blockquote class="sty-pull"><p>“' + esc(d.pull.quote) + '”</p>' + (d.pull.who ? '<cite>' + esc(d.pull.who) + '</cite>' : '') + '</blockquote>' + (adm ? '<p class="muted sty-pn">' + tr('The quote is shown word for word. Change it under “Quote” above.', 'Nukuu inaonyeshwa neno kwa neno. Ibadilishe chini ya “Nukuu” hapo juu.') + '</p>' : '');
+    return h + styActs(s, adm) + '</div>';
+  }
+  function styActs(s, adm) {
+    var live = !!s.pub, h = '<div class="sty-acts">';
+    if (!live) h += '<button type="button" class="btn' + (s.text ? ' light' : '') + '" data-sty="draft" data-testid="sty_draft">' + (s.text ? tr('Draft again', 'Andaa upya') : tr('Draft the story', 'Andaa hadithi')) + '</button>';
+    if (adm && s.doc) h += '<button type="button" class="btn light" data-sty="save-doc" data-testid="sty_save">' + (live ? tr('Save and update the website', 'Hifadhi na usasishe tovuti') : tr('Save changes', 'Hifadhi mabadiliko')) + '</button>';
+    else if (adm && s.text) h += '<button type="button" class="btn light" data-sty="text">' + tr('Save text', 'Hifadhi maandishi') + '</button>';
+    if (adm && !live && (s.status === 'draft' || s.status === 'collecting' || s.status === 'approved')) h += '<button type="button" class="btn" data-sty="approve" data-testid="sty_approve"' + (s.text ? '' : ' disabled') + '>' + tr('Approve and publish', 'Idhinisha na uchapishe') + '</button>';
+    if (s.status === 'draft' || (adm && (s.status === 'approved' || s.status === 'published' || live))) h += '<button type="button" class="btn light" data-sty="collecting" data-testid="sty_back">' + tr('Back to Collecting', 'Rudi kukusanya') + '</button>';
+    h += '</div>';
+    if (!adm && (s.status === 'not-started' || s.status === 'collecting')) h += '<p class="muted sty-send" data-testid="sty_send">' + tr('“Draft the story” sends it to an admin for review. Nothing goes on the website before it is approved.', '“Andaa hadithi” inaituma kwa msimamizi akague. Hakuna kinachoenda kwenye tovuti kabla ya kuidhinishwa.') + '</p>';
+    if (adm && !live && s.text) h += '<p class="muted sty-send">' + tr('“Approve and publish” puts it on the website’s Stories page straight away, with a copy in monday.com.', '“Idhinisha na uchapishe” inaiweka kwenye ukurasa wa Hadithi wa tovuti mara moja, na nakala kwenye monday.com.') + '</p>';
+    return h + '<p class="msg" id="styMsg" aria-live="polite"></p>';
+  }
+  // the document being edited, as the server wants it
+  function styEdOut() { var d = STY.ed && STY.ed.d; return d ? { title: d.title, dek: d.dek, sections: d.sections.map(function (x) { return { h: x.h, body: x.body, photo: x.photo ? { id: x.photo.id } : null }; }) } : null; }
+  function styInput(e) {
+    var t = e.target, k = t.getAttribute && t.getAttribute('data-ed'); if (!k || !STY.ed) return;
+    var d = STY.ed.d, i = +t.getAttribute('data-i');
+    if (k === 'title' || k === 'dek') d[k] = t.value; else if (d.sections[i]) d.sections[i][k] = t.value;
+    STY.ed.dirty = true;
+    var w = $('styWc'), n = styWords(d); if (w) w.textContent = tr(n + ' words', 'Maneno ' + n);
+  }
+  // a photo for a section, from the project's photos (story rows and building stages)
+  function styPick(i) {
+    var s = STY.s, d = STY.ed && STY.ed.d; if (!s || !d || !d.sections[i]) return;
+    var pool = s.pool || [], cur = d.sections[i].photo, rowName = function (r) { var x = STY_ROWS.filter(function (y) { return y[0] === r; })[0]; return x ? tr(x[1], x[2]) : r.indexOf('stage:') === 0 ? tr('Building', 'Ujenzi') : r; };
+    var used = {}; d.sections.forEach(function (x, j) { if (x.photo && j !== i) used[x.photo.id] = j + 1; });
+    var w = panel(esc(tr('Photo for “' + (d.sections[i].h || (i + 1)) + '”', 'Picha ya “' + (d.sections[i].h || (i + 1)) + '”')),
+      (pool.length ? '<div class="sty-pool">' + pool.map(function (p) {
+        return '<button type="button" class="sty-po' + (cur && cur.id === p.id ? ' on' : '') + '" data-pid="' + esc(p.id) + '" aria-pressed="' + !!(cur && cur.id === p.id) + '"><span class="sty-poi"><img alt="" data-src="' + styImg(s, p.id, 320) + '">' + (p.children ? '<em class="sty-kid">' + tr('Children', 'Watoto') + '</em>' : '') + '</span><small><b>' + esc(rowName(p.row)) + '</b>' + esc(p.cap || '') + (used[p.id] ? '<i>' + tr('In section ' + used[p.id], 'Kwenye sehemu ' + used[p.id]) + '</i>' : '') + '</small></button>';
+      }).join('') + '</div>' : '<p class="muted">' + tr('No photos yet. Add them under Photos above, or with the building stages.', 'Bado hakuna picha. Ziongeze chini ya Picha hapo juu, au pamoja na hatua za ujenzi.') + '</p>') +
+      '<button type="button" class="btn light block" data-pid="" style="margin-top:12px">' + tr('No photo for this section', 'Hakuna picha kwa sehemu hii') + '</button>', 'sty-psh');
+    cnThumbs(w);
+    w.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-pid]'); if (!b) return; buzz();
+      var id = b.getAttribute('data-pid'), p = pool.filter(function (x) { return x.id === id; })[0];
+      d.sections.forEach(function (x, j) { if (j !== i && p && x.photo && x.photo.id === id) x.photo = null; }); // a photo shows once
+      d.sections[i].photo = p ? { id: p.id, row: p.row, cap: p.cap } : null; STY.ed.dirty = true;
+      w.close(); styDraw();
+    });
   }
   function ROWSKID(s) { return ['before', 'progress', 'after'].some(function (r) { return (s.photos[r] || []).some(function (x) { return x.children; }); }); }
   function wc(t) { return String(t || '').trim().split(/\s+/).filter(Boolean).length; }
@@ -6414,11 +6516,20 @@ html[data-theme=sun] .cw-apall,html[data-theme=sun] .cw-apchip{border:2px solid 
     if (k === 'prev') { STY.q = Math.max(0, STY.q - 1); return styDraw(); }
     if (k === 'quote') return styDo({ action: 'answers', id: s.id, quote: $('styQ').value.trim(), quoteBy: $('styQB').value.trim(), credit: $('styCr').value.trim() }, tr('Saved ✓', 'Imehifadhiwa ✓'));
     if (k === 'consent') return styDo({ action: 'consent', id: s.id, value: b.getAttribute('data-v') });
-    if (k === 'draft') { b.disabled = true; b.textContent = tr('Writing…', 'Inaandika…'); return styDo({ action: 'draft', id: s.id }, tr('Draft ready ✓', 'Rasimu iko tayari ✓')); }
+    if (k === 'draft') {
+      var go = function () { b.disabled = true; b.textContent = tr('Writing…', 'Inaandika…'); stySay('', tr('Writing the story from the answers, photos and building stages. This can take a minute.', 'Inaandika hadithi kutoka kwa majibu, picha na hatua za ujenzi. Inaweza kuchukua dakika moja.')); return styDo({ action: 'draft', id: s.id }, tr('Draft ready ✓', 'Rasimu iko tayari ✓')).then(function (j) { if (j && !j.ok) { b.disabled = false; b.textContent = s.text ? tr('Draft again', 'Andaa upya') : tr('Draft the story', 'Andaa hadithi'); } }); };
+      return s.text ? poAsk(tr('Write the draft again?', 'Andaa rasimu upya?'), tr('A new draft replaces this one, with any changes made to it.', 'Rasimu mpya inachukua nafasi ya hii, pamoja na mabadiliko yaliyofanywa.'), tr('Draft again', 'Andaa upya')).then(function (ok) { if (ok) go(); }) : go();
+    }
+    if (k === 'save-doc') return styDo({ action: 'doc', id: s.id, doc: styEdOut() }, s.pub ? tr('Saved and updated on the website ✓', 'Imehifadhiwa na kusasishwa kwenye tovuti ✓') : tr('Saved ✓', 'Imehifadhiwa ✓'));
     if (k === 'text') return styDo({ action: 'text', id: s.id, text: $('styT').value }, tr('Saved ✓', 'Imehifadhiwa ✓'));
-    if (k === 'approve') return styDo(Object.assign({ action: 'approve', id: s.id }, $('styT') ? { text: $('styT').value } : {}), tr('Approved ✓', 'Imeidhinishwa ✓'));
-    if (k === 'publish') return styDo({ action: 'publish', id: s.id }, tr('Marked published ✓', 'Imewekwa imechapishwa ✓'));
-    if (k === 'collecting') return styDo({ action: 'collecting', id: s.id });
+    if (k === 'approve') return poAsk(tr('Approve and publish this story?', 'Idhinisha na uchapishe hadithi hii?'), tr('It goes on the website’s Stories page straight away, and a copy goes to monday.com.', 'Inaenda kwenye ukurasa wa Hadithi wa tovuti mara moja, na nakala inaenda monday.com.'), tr('Approve and publish', 'Idhinisha na uchapishe')).then(function (ok) {
+      if (ok) styDo(Object.assign({ action: 'approve', id: s.id }, s.doc ? { doc: styEdOut() } : $('styT') ? { text: $('styT').value } : {}), tr('On the website ✓', 'Iko kwenye tovuti ✓'));
+    });
+    if (k === 'publish') return styDo({ action: 'publish', id: s.id }, tr('On the website ✓', 'Iko kwenye tovuti ✓'));
+    if (k === 'collecting') return s.pub ? poAsk(tr('Take it off the website?', 'Iondoe kwenye tovuti?'), tr('The story goes back to Collecting and leaves the website’s Stories page.', 'Hadithi inarudi kukusanya na kuondoka kwenye ukurasa wa Hadithi wa tovuti.'), tr('Take it off', 'Iondoe'), true).then(function (ok) { if (ok) styDo({ action: 'collecting', id: s.id }, tr('Taken off the website', 'Imeondolewa kwenye tovuti')); }) : styDo({ action: 'collecting', id: s.id });
+    if (k === 'pick') return styPick(+b.getAttribute('data-i'));
+    if (k === 'nophoto') { var dd = STY.ed && STY.ed.d, ni = +b.getAttribute('data-i'); if (dd && dd.sections[ni]) { dd.sections[ni].photo = null; STY.ed.dirty = true; styDraw(); } return; }
+    if (k === 'view') { var vd = s.doc, vi = +b.getAttribute('data-i'), ph = vd && vd.sections[vi] && vd.sections[vi].photo; if (ph) return cnView([{ big: styImg(s, ph.id, 1600) }], 0, ph.cap || 'Photo', ph.cap || 'Picha'); return; }
     if (k === 'add') { STY.row = b.getAttribute('data-row'); return $('styFile').click(); }
     if (k === 'rec') return styRec(b);
   }
@@ -6819,14 +6930,14 @@ html[data-theme=sun] .cw-apall,html[data-theme=sun] .cw-apchip{border:2px solid 
         return '<button type="button" class="rr-num' + (f[0] === 'draft' && c.draft && S.admin ? ' hot' : '') + '" data-shf="' + f[0] + '" aria-pressed="' + (SH.f === f[0]) + '" data-testid="sh_f_' + f[0] + '"><b>' + c[f[0]] + '</b><small>' + tr(f[1], f[2]) + '</small></button>';
       }).join('') + '</div>' +
       '<div class="card ocv-box" data-testid="sh_list"><h3 class="ocv-h">' + tr(SHF.filter(function (f) { return f[0] === SH.f; })[0][1], SHF.filter(function (f) { return f[0] === SH.f; })[0][2]) + '</h3>' +
-      (SH.f === 'draft' ? '<p class="muted sh-note">' + (S.admin ? tr('Open one to read it, edit the words, then Approve.', 'Fungua moja uisome, hariri maneno, kisha Idhinisha.') : tr('An admin reads these and approves them for the website.', 'Msimamizi anazisoma na kuziidhinisha kwa ajili ya tovuti.')) + '</p>' : '') +
+      (SH.f === 'draft' ? '<p class="muted sh-note">' + (S.admin ? tr('Open one to read it, edit the words and photos, then Approve and publish.', 'Fungua moja uisome, hariri maneno na picha, kisha Idhinisha na uchapishe.') : tr('An admin reads these and approves them for the website.', 'Msimamizi anazisoma na kuziidhinisha kwa ajili ya tovuti.')) + '</p>' : '') +
       (list.length ? list.slice(0, MAXN).map(shRow).join('') + (more ? '<p class="muted sh-note">' + tr('Showing ' + MAXN + ' of ' + list.length + '. Use “Write a story” to find any project.', 'Inaonyesha ' + MAXN + ' kati ya ' + list.length + '. Tumia “Andika hadithi” kupata mradi wowote.') + '</p>' : '')
         : '<p class="otodo-ok">' + oic('check') + '<span>' + tr('Nothing here right now.', 'Hakuna kitu hapa sasa hivi.') + '</span></p>') + '</div>' +
       '<details class="card ocv-box sh-how"><summary>' + tr('How a story gets to the website', 'Jinsi hadithi inavyofika kwenye tovuti') + '</summary><ol>' +
         '<li><b>' + tr('Collect', 'Kusanya') + '</b> ' + tr('Answer the 6 questions (typing or a voice note), add before, during and after photos, a quote, and photo consent.', 'Jibu maswali 6 (kwa kuandika au sauti), ongeza picha za kabla, wakati na baada, nukuu, na ruhusa ya picha.') + '</li>' +
-        '<li><b>' + tr('Send for review', 'Tuma kwa ukaguzi') + '</b> ' + tr('“Draft the story” writes it from your answers and sends it to an admin.', '“Andaa hadithi” inaiandika kutoka kwa majibu yako na kuituma kwa msimamizi.') + '</li>' +
-        '<li><b>' + tr('Approve', 'Idhinisha') + '</b> ' + tr('An admin reads it, fixes the words and approves it.', 'Msimamizi anaisoma, anarekebisha maneno na kuiidhinisha.') + '</li>' +
-        '<li><b>' + tr('Publish', 'Chapisha') + '</b> ' + tr('Approved stories show on the website. Nothing goes public before that.', 'Hadithi zilizoidhinishwa zinaonekana kwenye tovuti. Hakuna kinachotoka kabla ya hapo.') + '</li></ol></details>' +
+        '<li><b>' + tr('Send for review', 'Tuma kwa ukaguzi') + '</b> ' + tr('“Draft the story” writes a full story from your answers, photos, the building stages and visit notes, and sends it to an admin.', '“Andaa hadithi” inaandika hadithi kamili kutoka kwa majibu yako, picha, hatua za ujenzi na maelezo ya ziara, na kuituma kwa msimamizi.') + '</li>' +
+        '<li><b>' + tr('Approve and publish', 'Idhinisha na uchapishe') + '</b> ' + tr('An admin reads it, fixes the words and photos, and approves it. It goes on the website’s Stories page straight away, with a copy in monday.com.', 'Msimamizi anaisoma, anarekebisha maneno na picha, na kuiidhinisha. Inaenda kwenye ukurasa wa Hadithi wa tovuti mara moja, na nakala kwenye monday.com.') + '</li>' +
+        '<li><b>' + tr('On the website', 'Kwenye tovuti') + '</b> ' + tr('Nothing goes public before it is approved. “Back to Collecting” takes a story off the website again.', 'Hakuna kinachotoka kabla ya kuidhinishwa. “Rudi kukusanya” inaiondoa hadithi kwenye tovuti tena.') + '</li></ol></details>' +
       '</div></div>';
     shDot();
   }
@@ -7023,6 +7134,7 @@ html[data-theme=sun] .cw-apall,html[data-theme=sun] .cw-apchip{border:2px solid 
   $('tabStory').addEventListener('click', function () { tab('story'); });
   $('pBuild').addEventListener('click', function (e) { cnTap(e); });
   $('styBody').addEventListener('click', function (e) { styTap(e); });
+  $('styBody').addEventListener('input', styInput);
   $('styBody').addEventListener('change', function (e) { if (e.target.id === 'styFile') { var f = e.target.files && e.target.files[0]; e.target.value = ''; styPhoto(f); } });
 
   function openProj(id, pane, how) {
