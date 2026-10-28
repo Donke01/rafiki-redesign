@@ -47,6 +47,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.draw.rotate
 import androidx.compose.foundation.layout.offset
@@ -344,7 +345,8 @@ fun Shell(m: AppModel) {
         val ctx = androidx.compose.ui.platform.LocalContext.current
         androidx.compose.material3.pulltorefresh.PullToRefreshBox(pulling, { pulling = true; m.refresh { ok -> pulling = false
                 android.widget.Toast.makeText(ctx, if (ok) t("Updated", "Imesasishwa") else t("Couldn’t update. Showing what’s on this phone.", "Imeshindwa kusasisha. Inaonyesha kilicho kwenye simu hii."), android.widget.Toast.LENGTH_SHORT).show() } },
-            Modifier.weight(1f).fillMaxWidth().testTag("pull")) {
+            // without the RAFIKI bar above (the chat list on a phone) the pull indicator waits inside the screen, not under the status bar
+            Modifier.weight(1f).fillMaxWidth().then(if (chatTop) Modifier.clipToBounds() else Modifier).testTag("pull")) {
             // screens slide in from the right when you go deeper and slide back out when you go back;
             // switching tabs fades through
             androidx.compose.animation.AnimatedContent(
