@@ -160,9 +160,38 @@ def s_flow(check):
             ctx.close()
         br.close()
 
+def s_busy(check):
+    # while Save / Approve are being sent, the button turns: a turning circle and "Saving…" / "Publishing…"; then it is back
+    with sync_playwright() as p:
+        br = p.chromium.launch()
+        for lang in ('en', 'sw'):
+            ctx, pg = open_writer(br, lang, 390, '')
+            held = []
+            def hold(route, req):
+                if req.method == 'POST' and json.loads(req.post_data or '{}').get('action') in ('doc', 'approve'): held.append(route); return
+                route.fallback()
+            pg.route(re.compile(r'/api/story(\?.*)?$'), hold)
+            pg.fill('#styDT', 'Clear water for Turbo'); pg.wait_for_timeout(200)
+            pg.locator('[data-testid=sty_save]').scroll_into_view_if_needed(); pg.click('[data-testid=sty_save]'); pg.wait_for_timeout(400)
+            b = pg.locator('[data-testid=sty_save]')
+            spin = pg.evaluate("() => { const i = document.querySelector('[data-testid=sty_save] .bspin'); return !!i && getComputedStyle(i).animationName === 'spin'; }")
+            check(spin and b.inner_text().strip() == ('Inahifadhi…' if lang == 'sw' else 'Saving…') and b.is_disabled(), '[%s] Save: turning circle and “Saving…” (%s)' % (lang, b.inner_text().strip()))
+            b.screenshot(path=os.path.join(OUT, 'busy-save-%s.png' % lang))
+            held.pop().fallback(); pg.wait_for_timeout(900)
+            check(pg.locator('[data-testid=sty_save] .bspin').count() == 0, '[%s] Save: back to normal when done' % lang)
+            pg.locator('[data-testid=sty_approve]').scroll_into_view_if_needed(); pg.click('[data-testid=sty_approve]'); pg.wait_for_timeout(500); pg.click('.po-ask [data-k=yes]'); pg.wait_for_timeout(400)
+            a = pg.locator('[data-testid=sty_approve]')
+            check(a.count() and a.inner_text().strip() == ('Inachapisha…' if lang == 'sw' else 'Publishing…'), '[%s] Approve: “Publishing…” while it is sent' % lang)
+            if a.count(): a.screenshot(path=os.path.join(OUT, 'busy-approve-%s.png' % lang))
+            held.pop().fallback(); pg.wait_for_timeout(900)
+            check(M.vis(pg, '[data-testid=sty_pub]'), '[%s] … then on the website' % lang)
+            ctx.close()
+        br.close()
+
 if __name__ == '__main__':
     M.seq('The draft: look at 320 / 390, EN / SW, light / dark / sun (admin, field user, published)', s_look)
     M.seq('The draft: edit, photos, Back, refresh, approve and publish, take off the website', s_flow)
+    M.seq('Buttons show what is happening while they send (Saving…, Publishing…)', s_busy)
     fails = [r for r in M.RESULTS if not r[1]]
     print('\n%d/%d passed' % (len(M.RESULTS) - len(fails), len(M.RESULTS)))
     errs = sorted(set(M.ERRS)); print('page errors: %d' % len(errs)); [print('  ' + e) for e in errs[:20]]

@@ -50,6 +50,27 @@ a{color:var(--blue2)}
 .rf svg{width:22px;height:22px}
 .rf.spin svg{animation:spin .9s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
+.btn .bspin{flex:none;display:inline-block;width:18px;height:18px;margin-right:8px;border:2.5px solid currentColor;border-right-color:transparent;border-radius:50%;animation:spin .75s linear infinite;vertical-align:-3px}
+.btn.is-busy{opacity:1 !important;cursor:progress}
+@media (prefers-reduced-motion:reduce){.btn .bspin{animation-duration:2.4s}}
+.sh-ch{display:flex;flex-direction:column;gap:10px;padding-top:4px}.sh-ch .btn{display:flex;align-items:center;justify-content:center;gap:10px}.sh-ch .btn svg{width:20px;height:20px}
+.bsh.sh-rdsh .bsh-p{top:0;max-height:none;height:100vh;height:100dvh;border-radius:0;display:flex;flex-direction:column;padding-top:calc(10px + env(safe-area-inset-top))}
+.bsh.sh-rdsh .grab{display:none}
+.bsh.sh-rdsh .bsh-h{justify-content:flex-start;min-height:44px;padding-right:48px}.bsh.sh-rdsh .bsh-h h3{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.bsh.sh-rdsh .bsh-h .sh-web{margin-left:auto}
+.sh-web .s{display:none}@media (max-width:374px){.sh-web .l{display:none}.sh-web .s{display:inline}}
+.sh-web{display:inline-flex;align-items:center;gap:6px;margin:0;white-space:nowrap;text-transform:none;letter-spacing:0}.sh-web svg{width:16px;height:16px;flex:none}
+.sh-rd{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:4px 2px 28px;max-width:720px;width:100%;margin:0 auto}
+.sh-rd h2{margin:6px 0 8px;font-size:1.55rem;line-height:1.2;font-weight:800;color:var(--ink);overflow-wrap:normal;hyphens:none}
+.sh-rd .sh-dek{margin:0 0 18px;font-size:1.05rem;line-height:1.5;color:var(--muted);font-weight:600}
+.sh-rd section h3{margin:22px 0 8px;font-size:1.15rem;font-weight:800;color:var(--ink)}
+.sh-rd p{margin:0 0 .9em;font-size:1rem;line-height:1.7;color:var(--text)}
+.sh-rd figure{margin:14px 0 18px}.sh-rd figure img{display:block;width:100%;aspect-ratio:3/2;object-fit:cover;border-radius:16px;background:var(--tint)}
+.sh-rd figcaption{margin-top:8px;font-size:.84rem;color:var(--muted);line-height:1.4}
+.sh-rd blockquote{margin:22px 0;padding:16px 18px;border-left:4px solid var(--blue);border-radius:0 14px 14px 0;background:var(--tint);font-size:1.15rem;font-weight:700;line-height:1.45;color:var(--ink)}
+.sh-rd blockquote cite{display:block;margin-top:8px;font-size:.88rem;font-style:normal;font-weight:600;color:var(--muted)}
+.sh-rd .sh-not{margin-top:18px}
+
 body.locked .rf{display:none}
 .toast{position:fixed;left:50%;top:calc(66px + env(safe-area-inset-top));transform:translateX(-50%);z-index:1300;background:var(--ink);color:var(--card);padding:10px 16px;border-radius:999px;font-size:.85rem;font-weight:700;box-shadow:0 4px 18px rgba(0,0,0,.2);max-width:90vw;text-align:center}
 .live{display:inline-flex;align-items:center;gap:6px;font-size:.78rem;font-weight:700;color:var(--ok)}
@@ -6879,9 +6900,20 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
   function ROWSKID(s) { return ['before', 'progress', 'after'].some(function (r) { return (s.photos[r] || []).some(function (x) { return x.children; }); }); }
   function wc(t) { return String(t || '').trim().split(/\s+/).filter(Boolean).length; }
   function stySay(cls, t) { var m = $('styMsg'); if (m) { m.className = 'msg ' + cls; m.textContent = t; } else if (t) toast(t); }
+  // while it is sent, its button turns: a turning circle and what is happening ("Saving…", "Publishing…")
+  function styBusyBtn(body) {
+    var live = STY.s && STY.s.pub, k = { doc: 'save-doc', text: 'text', approve: 'approve', collecting: 'collecting' }[body.action];
+    var b = k && document.querySelector('#styBody [data-sty="' + k + '"]'); if (!b) return null;
+    var say = { doc: live ? tr('Updating the website…', 'Inasasisha tovuti…') : tr('Saving…', 'Inahifadhi…'), text: tr('Saving…', 'Inahifadhi…'), approve: tr('Publishing…', 'Inachapisha…'),
+      collecting: live ? tr('Taking it off the website…', 'Inaiondoa kwenye tovuti…') : tr('Moving back…', 'Inarudisha…') }[body.action];
+    var was = b.innerHTML; b.disabled = true; b.classList.add('is-busy'); b.setAttribute('aria-busy', 'true');
+    b.innerHTML = '<i class="bspin" aria-hidden="true"></i><span>' + esc(say) + '</span>';
+    return function () { if (!b.isConnected) return; b.innerHTML = was; b.disabled = false; b.classList.remove('is-busy'); b.removeAttribute('aria-busy'); };
+  }
   function styDo(body, okText) {
     if (STY.busy) return; STY.busy = true;
-    return styApi('POST', body).then(function (j) { STY.busy = false; if (!j.ok) { stySay('bad', styWhy(j)); return j; } styGot(j.story); if (okText) toast(okText); return j; });
+    var undo = styBusyBtn(body);
+    return styApi('POST', body).then(function (j) { STY.busy = false; if (undo) undo(); if (!j.ok) { stySay('bad', styWhy(j)); return j; } styGot(j.story); if (okText) toast(okText); return j; });
   }
   function styTap(e) {
     var s = STY.s, p = S.cur; if (!s || !p) return;
@@ -6894,7 +6926,7 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
     if (k === 'quote') return styDo({ action: 'answers', id: s.id, quote: $('styQ').value.trim(), quoteBy: $('styQB').value.trim(), credit: $('styCr').value.trim() }, tr('Saved ✓', 'Imehifadhiwa ✓'));
     if (k === 'consent') return styDo({ action: 'consent', id: s.id, value: b.getAttribute('data-v') });
     if (k === 'draft') {
-      var go = function () { b.disabled = true; b.textContent = tr('Writing…', 'Inaandika…'); stySay('', tr('Writing the story from the answers, photos and building stages. This can take a minute.', 'Inaandika hadithi kutoka kwa majibu, picha na hatua za ujenzi. Inaweza kuchukua dakika moja.')); return styDo({ action: 'draft', id: s.id }, tr('Draft ready ✓', 'Rasimu iko tayari ✓')).then(function (j) { if (j && !j.ok) { b.disabled = false; b.textContent = s.text ? tr('Draft again', 'Andaa upya') : tr('Draft the story', 'Andaa hadithi'); } }); };
+      var go = function () { b.disabled = true; b.classList.add('is-busy'); b.innerHTML = '<i class="bspin" aria-hidden="true"></i><span>' + esc(tr('Writing…', 'Inaandika…')) + '</span>'; stySay('', tr('Writing the story from the answers, photos and building stages. This can take a minute.', 'Inaandika hadithi kutoka kwa majibu, picha na hatua za ujenzi. Inaweza kuchukua dakika moja.')); return styDo({ action: 'draft', id: s.id }, tr('Draft ready ✓', 'Rasimu iko tayari ✓')).then(function (j) { if (j && !j.ok) { b.disabled = false; b.textContent = s.text ? tr('Draft again', 'Andaa upya') : tr('Draft the story', 'Andaa hadithi'); } }); };
       return s.text ? poAsk(tr('Write the draft again?', 'Andaa rasimu upya?'), tr('A new draft replaces this one, with any changes made to it.', 'Rasimu mpya inachukua nafasi ya hii, pamoja na mabadiliko yaliyofanywa.'), tr('Draft again', 'Andaa upya')).then(function (ok) { if (ok) go(); }) : go();
     }
     if (k === 'save-doc') return styDo({ action: 'doc', id: s.id, doc: styEdOut() }, s.pub ? tr('Saved and updated on the website ✓', 'Imehifadhiwa na kusasishwa kwenye tovuti ✓') : tr('Saved ✓', 'Imehifadhiwa ✓'));
@@ -7681,10 +7713,40 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
     // straight to the writer: the project's tabs at the top of the screen, under the header
     setTimeout(function () { var t = $('tabStory'), l = t && t.closest('[role=tablist]'); if (!l || S.view !== 'vProj') return; var hd = document.querySelector('header.top'); window.scrollTo({ top: Math.max(0, l.getBoundingClientRect().top + window.scrollY - (hd ? hd.offsetHeight : 0) - 8), behavior: 'smooth' }); }, 350);
   }
+  // a story with words already (draft, approved, on the website): View story or Edit story; else straight to the writer
+  function shChoose(id) {
+    var x = S.stories[id], st = x ? x.st : '', p = byId(id);
+    if (!/^(draft|approved|published)$/.test(st) || !p) return shOpen(id);
+    var w = panel(esc(p.title || tr('Story', 'Hadithi')), '<div class="sh-ch" data-testid="sh_choose">' +
+      '<button type="button" class="btn block" data-k="view" data-testid="sh_view">' + oic('arrow') + '<span>' + tr('View story', 'Tazama hadithi') + '</span></button>' +
+      '<button type="button" class="btn light block" data-k="edit" data-testid="sh_edit">' + oic('dqmedit') + '<span>' + tr('Edit story', 'Hariri hadithi') + '</span></button></div>', 'sh-chsh');
+    w.addEventListener('click', function (e) { var b = e.target.closest('[data-k]'); if (!b) return; buzz(); var k = b.getAttribute('data-k'); w.close(); setTimeout(function () { if (k === 'view') shRead(id); else shOpen(id); }, 260); });
+  }
+  // the story as a full page: title, standfirst, sections with their photos, the quote; Open on the website at the top
+  function shRead(id) {
+    var w = panel(esc(tr('Story', 'Hadithi')), '<div class="sh-rd" data-testid="sh_read"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>', 'sh-rdsh');
+    var box = w.querySelector('.sh-rd');
+    styApi('GET', null, '?id=' + encodeURIComponent(id)).then(function (j) {
+      if (!w.isConnected) return;
+      var s = j && j.ok && j.story; if (!s) { box.innerHTML = '<p class="muted">' + esc(tr('The story could not be opened. Check the signal and try again.', 'Hadithi haikuweza kufunguliwa. Angalia mtandao kisha ujaribu tena.')) + '</p>'; return; }
+      var d = s.doc, url = s.pub && s.pub.url;
+      if (url) { var hd = w.querySelector('.bsh-h'), a = document.createElement('a'); a.className = 'btn small sh-web'; a.href = url; a.target = '_blank'; a.rel = 'noopener'; a.setAttribute('data-testid', 'sh_web'); a.setAttribute('aria-label', tr('Open on the website', 'Fungua kwenye tovuti'));
+        a.innerHTML = oic('link') + '<span class="l">' + tr('Open on the website', 'Fungua kwenye tovuti') + '</span><span class="s">' + tr('Website', 'Tovuti') + '</span>'; hd.insertBefore(a, hd.querySelector('.bsh-x')); }
+      var paras = function (t) { return String(t || '').split(/\n\s*\n/).filter(function (x) { return x.trim(); }).map(function (x) { return '<p>' + esc(x.trim()) + '</p>'; }).join(''); };
+      var fig = function (ph) { return ph && ph.id ? '<figure><img alt="' + esc(ph.cap || '') + '" data-src="' + styImg(s, ph.id, 1200) + '">' + (ph.cap ? '<figcaption>' + esc(ph.cap) + '</figcaption>' : '') + '</figure>' : ''; };
+      var h = '';
+      if (d && d.sections) {
+        h += '<h2>' + esc(d.title || '') + '</h2>' + (d.dek ? '<p class="sh-dek">' + esc(d.dek) + '</p>' : '');
+        d.sections.forEach(function (x, i) { h += '<section><h3>' + esc(x.h || '') + '</h3>' + paras(x.body) + fig(x.photo) + '</section>'; if (i === 1 && d.pull && d.pull.quote) h += '<blockquote>“' + esc(d.pull.quote) + '”' + (d.pull.who ? '<cite>— ' + esc(d.pull.who) + '</cite>' : '') + '</blockquote>'; });
+      } else h += paras(s.text);
+      if (!url) h += '<p class="muted sh-not">' + esc(s.status === 'approved' ? tr('Approved, not on the website yet.', 'Imeidhinishwa, bado haiko kwenye tovuti.') : tr('A draft: not on the website yet.', 'Rasimu: bado haiko kwenye tovuti.')) + '</p>';
+      box.innerHTML = h; cnThumbs(box);
+    });
+  }
   $('shBody').addEventListener('click', function (e) {
     var f = e.target.closest('[data-shf]'), o = e.target.closest('[data-shopen]'), g = e.target.closest('[data-sh]');
     if (f) { buzz(); SH.f = f.getAttribute('data-shf'); shRender(); return; }
-    if (o) { buzz(); shOpen(o.getAttribute('data-shopen')); return; }
+    if (o) { buzz(); if (o.classList.contains('sh-sending')) shOpen(o.getAttribute('data-shopen')); else shChoose(o.getAttribute('data-shopen')); return; }
     if (g && g.getAttribute('data-sh') === 'write') { buzz(); shPick(); }
   });
   // --- Projects: the calm head, the chip row and the Filter sheet, in step with the Office tabs (pwmap) ---------
