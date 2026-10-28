@@ -1,13 +1,13 @@
 // GET /project/<id>: the share link for one project (water or Beyond the well). Link previews (WhatsApp,
 // Facebook, X, Slack...) read the title, description and photo from this small page;
-// people are sent straight on to the project on /stories?project=<id>.
+// people are sent straight on to the project in the project list, /projects?project=<id>.
 // The project comes from the same cached monday.com feed as /api/projects
 // (lib/feed-cache.js, bindings FEED and MONDAY_API_TOKEN). Only public feed fields are
 // used, and no project cost except `needed` on projects still looking for funding.
 import { getFeed } from '../../lib/feed-cache.js';
 
 const SITE = 'RAFIKI Outreach';
-const FALLBACK_IMAGE = '/img/w-field3.jpg'; // the og:image of /stories
+const FALLBACK_IMAGE = '/img/w-field3.jpg'; // the og:image of the project list
 const WATER = { 'Borehole well': true, 'Water collection': true };
 // Beyond the well: how each group is named in a description ("School project in Ndalat, Kenya, ...")
 const GROUP = { health: 'Health project', school: 'School project', children: "Children's home project", livelihoods: 'Livelihoods project', community: 'Community project' };
@@ -63,7 +63,7 @@ function describe(p) {
 
 function page(p, origin) {
   const id = String(p.id);
-  const target = '/stories?project=' + encodeURIComponent(id);
+  const target = '/projects?project=' + encodeURIComponent(id);
   const title = p.title + (p.country ? ', ' + p.country : '') + ' — ' + SITE;
   const desc = describe(p);
   const photo = (p.photos || [])[0];
@@ -107,18 +107,18 @@ function page(p, origin) {
 
 export async function onRequestGet({ env, params, request, waitUntil }) {
   const id = String((params && params.id) || '');
-  if (!/^\d{1,20}$/.test(id)) return redirect('/stories', 'public, max-age=300');
-  const target = '/stories?project=' + id;
-  // no feed set up, or monday.com unreachable with nothing cached: let the stories page deal with it
+  if (!/^\d{1,20}$/.test(id)) return redirect('/projects?view=all', 'public, max-age=300');
+  const target = '/projects?project=' + id;
+  // no feed set up, or monday.com unreachable with nothing cached: let the project list deal with it
   if (!env.MONDAY_API_TOKEN) return redirect(target);
   let feed;
   try { feed = await getFeed(env, waitUntil); } catch (e) {
     console.error('project page feed:', e && e.message);
     return redirect(target);
   }
-  // the same projects /stories shows: every project in the feed, water and Beyond the well
+  // the same projects the project list shows: every project in the feed, water and Beyond the well
   const p = ((feed && feed.projects) || []).find(x => String(x.id) === id);
-  if (!p) return redirect('/stories');
+  if (!p) return redirect('/projects?view=all');
   const origin = new URL(request.url).origin;
   return new Response(page(p, origin), {
     status: 200,

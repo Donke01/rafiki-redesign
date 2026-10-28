@@ -83,11 +83,11 @@ ${story ? `<blockquote>“${esc(story.quote)}”${story.who ? `<cite>— ${esc(s
 
 export async function onRequestGet({ env, params, request, waitUntil }) {
   const m = /^(\d{1,20})(?:-([a-z0-9-]*))?$/.exec(String((params && params.slug) || ''));
-  if (!m) return Response.redirect(new URL('/stories', request.url).toString(), 302);
+  if (!m) return Response.redirect(new URL('/projects?view=all', request.url).toString(), 302);
   let feed;
-  try { feed = await getFeed(env, waitUntil); } catch (e) { return Response.redirect(new URL('/stories?project=' + m[1], request.url).toString(), 302); }
+  try { feed = await getFeed(env, waitUntil); } catch (e) { return Response.redirect(new URL('/projects?project=' + m[1], request.url).toString(), 302); }
   const p = ((feed && feed.projects) || []).find(x => String(x.id) === m[1]);
-  if (!p) return Response.redirect(new URL('/stories', request.url).toString(), 302);
+  if (!p) return Response.redirect(new URL('/projects?view=all', request.url).toString(), 302);
   if ((m[2] || '') !== slug(p.title)) return Response.redirect(new URL('/p/' + p.id + '-' + slug(p.title), request.url).toString(), 301);
   const stories = (await getJson(env, 'pinstories', [])).filter(s => String(s.id) === m[1]);
   // an approved story from the Stories tab first (its quote), else the latest approved story moment
