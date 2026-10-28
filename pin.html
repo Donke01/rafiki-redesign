@@ -1985,6 +1985,71 @@ label.dnr-p small{display:block;color:var(--muted);font-size:.76rem;font-weight:
 .dnr-thx input[type=file]{display:block;margin-top:6px;font-size:.9rem;width:100%}
 @media (max-width:420px){.dnr-f{grid-template-columns:1fr 1fr}.dnr-f .chip{grid-column:1/-1}}
 </style>
+<style id="dntCss">
+/* dnr-tags: projects by donor (the board's "Donors" tags): From monday.com in Add / Edit a donor, its picker,
+   "Funded by" groups in the project list, the update offer on a donor's sheet, the list chip, Projects › Filter › Donor,
+   and "Funded by" on the project screen (admins only) */
+.dnt-src{margin:4px 0 2px;padding:12px 14px 14px;border-radius:18px;background:var(--tint);border:var(--bw) solid transparent}
+.dnt-sh{display:flex;align-items:flex-start;gap:12px}
+.dnt-si{flex:none;width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:var(--card);color:var(--blue2)}.dnt-si svg{width:20px;height:20px}
+.dnt-st{min-width:0;flex:1 1 auto}.dnt-st b{display:block;font-size:.95rem;font-weight:800;line-height:1.3;color:var(--ink)}
+.dnt-st small{display:block;margin-top:2px;font-size:.8rem;font-weight:500;line-height:1.45;color:var(--muted);overflow-wrap:break-word;hyphens:none}
+.dnt-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.dnt-chip{display:inline-flex;align-items:center;max-width:100%;min-height:36px;padding:0 2px 0 12px;border-radius:999px;background:var(--card);color:var(--ink);font-size:.84rem;font-weight:700;border:var(--bw) solid var(--line)}
+.dnt-chip>span{min-width:0;overflow-wrap:anywhere;line-height:1.3;padding:6px 0}.dnt-chip i{font-style:normal;font-weight:800;color:var(--blue2);margin-left:2px}
+.dnt-chip button{flex:none;width:36px;height:36px;margin-left:2px;display:grid;place-items:center;border:0;border-radius:50%;background:none;color:var(--muted);cursor:pointer}.dnt-chip button svg{width:16px;height:16px}
+.dnt-chip button:hover{background:var(--tint);color:var(--ink)}.dnt-chip button:focus-visible{outline:3px solid var(--blue);outline-offset:-3px}
+.dnt-src .dnt-go{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:48px;margin-top:10px;background:var(--card);white-space:normal;line-height:1.25;text-align:center}.dnt-src .dnt-go svg{flex:none;width:18px;height:18px}
+/* the picker */
+.dnt-pk .dqm-shd{padding-bottom:4px}
+.dnt-q{display:block;width:100%;min-height:48px;margin:10px 0 8px}
+.dnt-pl{display:flex;flex-direction:column;gap:2px}
+.dnt-o{display:flex;align-items:center;gap:12px;width:100%;min-height:56px;margin:0;padding:8px 12px;border:0;border-radius:14px;background:none;color:var(--ink);font:inherit;text-align:left;cursor:pointer;text-transform:none;letter-spacing:0}
+.dnt-o:hover{background:var(--tint)}.dnt-o:focus-within,.dnt-o:focus-visible{outline:3px solid var(--blue);outline-offset:-3px}
+label.dnt-o input{flex:none;width:22px;height:22px;margin:0;accent-color:var(--blue)}
+.dnt-o .dnt-on{flex:1 1 auto;min-width:0}.dnt-o b{display:block;font-size:.95rem;font-weight:700;line-height:1.3;overflow-wrap:break-word;hyphens:none}
+.dnt-o small{display:block;margin-top:1px;font-size:.8rem;font-weight:500;color:var(--muted)}
+.dnt-o[aria-pressed=true],label.dnt-o:has(input:checked){background:var(--tint)}
+.dnt-o .dnt-ck{flex:none;display:flex;width:22px;color:var(--blue)}.dnt-o .dnt-ck svg{width:22px;height:22px}
+.dnt-pf{position:sticky;bottom:calc(-18px - env(safe-area-inset-bottom));z-index:1;display:grid;gap:8px;margin:12px -18px calc(-18px - env(safe-area-inset-bottom));padding:12px 18px calc(18px + env(safe-area-inset-bottom));background:var(--card);border-top:var(--bw) solid var(--line)}
+.dnt-pf .btn{width:100%;min-height:52px;white-space:normal;line-height:1.25}
+/* "Funded by" groups in the form's project list */
+.dnt-g{border-bottom:var(--bw) solid var(--line)}
+.dnt-gh{position:sticky;top:0;z-index:1;display:flex;flex-direction:column;gap:4px;padding:8px 12px;background:var(--tint);border-bottom:1px solid var(--line)}
+.dnt-gt{display:block;min-width:0;font-size:.86rem;font-weight:800;line-height:1.3;color:var(--ink);overflow-wrap:break-word;hyphens:none}
+.dnt-gr{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:4px 8px}
+.dnt-gn{flex:1 1 auto;font-size:.78rem;font-weight:700;color:var(--blue2);white-space:nowrap}
+.dnt-ga{flex:none;display:flex;gap:6px;margin-left:auto}
+.dnt-b{min-height:40px;padding:0 12px;border-radius:999px;border:var(--bw) solid var(--edge);background:var(--card);color:var(--ink);font:inherit;font-size:.8rem;font-weight:700;white-space:nowrap;cursor:pointer}
+.dnt-b:hover{border-color:var(--blue)}.dnt-b:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.dnt-gh.dnt-other{background:var(--field)}.dnt-gh.dnt-other .dnt-gt{color:var(--muted)}
+.dqm-fsh .dnr-plist.dnt-has{max-height:min(440px,62vh)}
+.dnt-g label.dnr-p:last-child{border-bottom:0}
+label.dnr-p small.dnt-by,.dnt-by{color:var(--blue2);font-weight:600;overflow-wrap:break-word}
+/* the update offer on a donor's sheet, and "linked" when up to date */
+.dnt-up{display:flex;align-items:flex-start;gap:12px;margin-top:14px;padding:12px 14px;border-radius:16px;background:var(--hb-slate);color:var(--ink)}
+.dnt-up.on{background:var(--tint)}.dnt-up .dnt-si{background:var(--card)}
+.dnt-ut{flex:1 1 auto;min-width:0}.dnt-ut b{display:block;font-size:.9rem;font-weight:800;line-height:1.35;overflow-wrap:break-word;hyphens:none}
+.dnt-ut small{display:block;margin-top:2px;font-size:.8rem;line-height:1.45;color:var(--muted);overflow-wrap:break-word}
+.dnt-ub{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.dnt-ub .btn{flex:1 1 120px;white-space:normal;line-height:1.2}
+/* the chip on a donor card */
+.dnt-tag{display:inline-flex;align-items:flex-start;gap:5px;max-width:100%;padding:3px 9px 3px 7px;border-radius:10px;background:var(--hb-purple);color:var(--hu-purple);font-size:.74rem;font-weight:800;line-height:1.35}
+.dnt-tag svg{flex:none;width:13px;height:13px;margin-top:.12em}.dnt-tag span{min-width:0;overflow-wrap:anywhere}
+.dnt-tag em{font-style:normal;font-weight:800;color:var(--hu-coral);white-space:nowrap}
+/* Projects › Filter › Donor, and the project screen */
+.lfilt .dnt-lf span{min-width:0;overflow-wrap:break-word;line-height:1.3}.lfilt .dnt-lf b{color:var(--muted)}
+.dnt-fund{display:flex;align-items:flex-start;gap:6px;margin-top:6px;font-size:.86rem;line-height:1.4}.dnt-fund svg{flex:none;width:16px;height:16px;margin-top:.15em}
+.dnt-fund b{color:inherit;font-weight:800}.dnt-fund span{min-width:0;overflow-wrap:break-word}
+.dnt-fund.hidden{display:none}
+.dnt-lchip{margin:0 0 10px}.dnt-lchip.hidden{display:none}
+.dnt-lc{display:flex;align-items:center;gap:8px;max-width:100%;min-height:44px;padding:6px 6px 6px 14px;border-radius:16px;border:var(--bw) solid var(--edge);background:var(--hb-purple);color:var(--ink);font:inherit;font-size:.88rem;text-align:left;cursor:pointer}
+.dnt-lc>svg{flex:none;width:18px;height:18px;color:var(--hu-purple)}.dnt-lc span{min-width:0;flex:1 1 auto;line-height:1.35;overflow-wrap:break-word;hyphens:none}.dnt-lc b{font-weight:800}
+.dnt-lc i{flex:none;display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--card);color:var(--muted)}.dnt-lc i svg{width:16px;height:16px}
+.dnt-lc:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+html[data-theme=sun] .dnt-lc{border:2px solid #000}
+html[data-theme=sun] .dnt-src,html[data-theme=sun] .dnt-up{border:2px solid #000}html[data-theme=sun] .dnt-tag{border:1.5px solid currentColor;color:#3A1D86;background:#EEE7FB}
+html[data-theme=sun] .dnt-gh{border-bottom:2px solid #000}html[data-theme=sun] .dnt-chip,html[data-theme=sun] .dnt-b{border:2px solid #000}
+</style>
 <style id="ocv-css">
 /* Office › Overview, Costs and Visits (ocv): calm heads, tappable tiles and cards, sheets, folded settings */
 @property --ocvp{syntax:'<number>';inherits:true;initial-value:0}
@@ -4051,6 +4116,7 @@ html[data-theme=sun] .cw-apall,html[data-theme=sun] .cw-apchip{border:2px solid 
       </select>
       <!-- the country and the kind of project: one Filter pill -->
       <div class="countrow"><button class="chip cchip" type="button" id="bCountry" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6.5h16M7 12h10M10 17.5h4"/></svg><span id="bCountryTx">All countries</span><svg class="dn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><p class="count" id="count" aria-live="polite"></p></div>
+      <div class="dnt-lchip hidden" id="dntLChip"></div>
       <div class="tchips" id="typeChips" hidden></div>
       <div class="list" id="list"></div>
       <p class="msg" id="mList" aria-live="polite"></p>
@@ -4074,6 +4140,7 @@ html[data-theme=sun] .cw-apall,html[data-theme=sun] .cw-apchip{border:2px solid 
       <div class="phead">
         <span class="t" id="pTitle"></span>
         <span class="muted" id="pSub"></span>
+        <span class="muted dnt-fund hidden" id="pDonors" data-testid="p_donors"></span>
         <span id="pState"></span>
         <div class="ptiles" id="pTiles"></div>
         <div class="links" id="pLinks"></div>
@@ -4587,7 +4654,7 @@ html[data-theme=sun] .cw-apall,html[data-theme=sun] .cw-apchip{border:2px solid 
   function bkFresh(v) {
     var sec = $(v);
     BK.opened = BK.opened.filter(function (d) { if (d.isConnected && sec && sec.contains(d)) { d.open = false; return false; } return d.isConnected; });
-    if (v === 'vList') { S.filter = 'all'; store.set('rfPinFilter', 'all'); S.ftype = ''; store.set('rfPinType', ''); $('iSearch').value = ''; }
+    if (v === 'vList') { S.filter = 'all'; store.set('rfPinFilter', 'all'); S.ftype = ''; store.set('rfPinType', ''); S.fdonor = ''; $('iSearch').value = ''; }
     if (v === 'vSearch') $('sQ').value = '';
     if (v === 'vStories') SH.f = '';
     if (v === 'vMap') mapFresh();
@@ -6827,6 +6894,7 @@ html[data-theme=sun] .cw-apall,html[data-theme=sun] .cw-apchip{border:2px solid 
     var scope = S.projects.filter(function (p) {
       if (S.ftype && tgroup(p) !== S.ftype) return false;
       if (ck && p.ck !== ck) return false;
+      if (!dntPass(p)) return false; // Filter › Donor (admins, dnr-tags)
       if (q && (p.title + ' ' + p.area + ' ' + p.country).toLowerCase().indexOf(q) < 0) return false;
       return true;
     });
@@ -6877,6 +6945,7 @@ html[data-theme=sun] .cw-apall,html[data-theme=sun] .cw-apchip{border:2px solid 
     var ck = $('iCountry').value, g = TGROUPS.filter(function (x) { return x[0] === S.ftype; })[0];
     $('bCountryTx').textContent = (ck ? CNAME[ck] : tr('All countries', 'Nchi zote')) + (g ? ' · ' + tr(g[1], g[2]) : '');
     $('bCountry').setAttribute('aria-label', tr('Filter: ', 'Kichujio: ') + $('bCountryTx').textContent);
+    dntLChipUi();
     swApply();
   }
   $('bCountry').addEventListener('click', lFilter);
@@ -7005,13 +7074,14 @@ html[data-theme=sun] .cw-apall,html[data-theme=sun] .cw-apchip{border:2px solid 
         '<h4 class="lfh">' + esc(tr('Country', 'Nchi')) + '</h4>' + cks.map(function (k) { return opt('lc', k, k ? CNAME[k] : tr('All countries', 'Nchi zote'), S.projects.filter(function (x) { return !k || x.ck === k; }).length, ck === k, k ? 'pin' : 'map'); }).join('') +
         (LTY.length ? '<h4 class="lfh">' + esc(tr('Kind of project', 'Aina ya mradi')) + '</h4>' + opt('lt', '', tr('All kinds', 'Aina zote'), null, !S.ftype, 'mclFilter') +
           LTY.map(function (t) { var ti = MPA_TY.filter(function (x) { return x[0] === t[0]; })[0]; return opt('lt', t[0], t[1], t[2], S.ftype === t[0], ti ? ti[1] : 'pin'); }).join('') : '') +
+        dntFilterHtml() +
         '<button type="button" class="btn block lfdone" data-lx="1">' + esc(tr('Done', 'Imekamilika')) + '</button>';
     };
     w.className = 'bsh'; w.setAttribute('role', 'dialog'); w.setAttribute('aria-modal', 'true'); w.setAttribute('aria-label', tr('Filter', 'Chuja'));
     w.innerHTML = '<div class="bsh-bg"></div><div class="bsh-p lfilt"></div>'; p = w.querySelector('.bsh-p');
     draw(); document.body.appendChild(w); swApply();
     var close = function () { w.classList.add('out'); setTimeout(function () { w.remove(); }, 220); document.removeEventListener('keydown', key); $('bCountry').focus({ preventScroll: true }); };
-    key = function (e) { if (e.key === 'Escape') close(); };
+    key = function (e) { if (e.key === 'Escape' && !document.querySelector('.tsh:not(.out)')) close(); }; // Esc in the donor picker closes only the picker
     document.addEventListener('keydown', key);
     requestAnimationFrame(function () { w.classList.add('in'); var f = p.querySelector('[aria-pressed=true]'); if (f) f.focus(); });
     w.querySelector('.bsh-bg').addEventListener('click', close);
@@ -7021,6 +7091,7 @@ html[data-theme=sun] .cw-apall,html[data-theme=sun] .cw-apchip{border:2px solid 
       var k;
       if (b.hasAttribute('data-lc')) { k = '[data-lc="' + b.getAttribute('data-lc') + '"]'; sel.value = b.getAttribute('data-lc'); sel.dispatchEvent(new Event('change')); }
       else if (b.hasAttribute('data-lt')) { k = '[data-lt="' + b.getAttribute('data-lt') + '"]'; S.ftype = b.getAttribute('data-lt'); store.set('rfPinType', S.ftype); S.animList = true; renderList(); }
+      else if (b.hasAttribute('data-ldn')) { return dntPick({ multi: false, chosen: S.fdonor ? [S.fdonor] : [], done: function (n) { S.fdonor = n; S.animList = true; renderList(); draw(); swApply(); var f = p.querySelector('[data-ldn]'); if (f) f.focus({ preventScroll: true }); } }); }
       else return;
       draw(); swApply(); var f = p.querySelector(k); if (f) f.focus();
     });
@@ -7150,7 +7221,7 @@ html[data-theme=sun] .cw-apall,html[data-theme=sun] .cw-apchip{border:2px solid 
     if (S.view !== 'vProj') S.from = S.view;
     S.cur = p; S.tab = pane || 'pin';
     $('pTitle').textContent = p.title;
-    $('pSub').textContent = sub(p);
+    $('pSub').textContent = sub(p); dntProj(p);
     $('pHero').classList.toggle('hidden', !p.photo);
     if (p.photo) { $('pImg').onerror = function () { $('pHero').classList.add('hidden'); }; $('pImg').src = photoUrl(p, 960); }
     $('pTiles')._c = undefined; curUi(); repairUi(); cnUi(p, null); $('pLast').innerHTML = '';
@@ -11622,21 +11693,21 @@ html[data-theme=sun] .cw-apall,html[data-theme=sun] .cw-apchip{border:2px solid 
     var meta = dqmDnProj(d.projects.length) + (d.viewers.length > 1 ? ' · ' + tr(d.viewers.length + ' people', 'watu ' + d.viewers.length) : '') + (d.showPhotos ? '' : ' · ' + tr('photos off', 'picha zimezimwa'));
     return '<button type="button" class="dqm-card' + (d.revoked ? ' dim' : '') + '" data-dqmdn="' + esc(d.id) + '" data-dn="' + esc(d.id) + '" data-testid="dn_card" style="--i:' + Math.min(i, 10) + '">' +
       '<span class="dqm-av" style="--hu:var(--hu-' + dqmHue(d.name) + ');--hb:var(--hb-' + dqmHue(d.name) + ')" data-ph="' + esc(d.name) + '" aria-hidden="true">' + mateInitials(d.name) + '</span>' +
-      '<span class="dqm-mid"><span class="dqm-tt">' + esc(d.name) + '</span>' + dqmDnPill(d) + '<span class="dqm-sub">' + esc(sub) + '</span><span class="dqm-sub">' + esc(meta) + '</span></span>' +
+      '<span class="dqm-mid"><span class="dqm-tt">' + esc(d.name) + '</span>' + dqmDnPill(d) + dntChip(d) + '<span class="dqm-sub">' + esc(sub) + '</span><span class="dqm-sub">' + esc(meta) + '</span></span>' +
       '<span class="dqm-end">' + (d.lastOpen ? esc(vxAgo(d.lastOpen)) : '') + oic('chev') + '</span></button>';
   }
   function dnrFormReset(d) {
     DNR.edit = d ? d.id : null;
-    DNR.form = d ? { name: d.name, email: d.email, org: d.org, projects: d.projects.slice(), showPhotos: d.showPhotos, photos: Object.assign({}, d.photos), digest: d.digest }
-      : { name: '', email: '', org: '', projects: [], showPhotos: true, photos: {}, digest: true };
-    DNR.q = ''; DNR.only = !!d;
+    DNR.form = d ? { name: d.name, email: d.email, org: d.org, projects: d.projects.slice(), showPhotos: d.showPhotos, photos: Object.assign({}, d.photos), digest: d.digest, mondayDonors: (d.mondayDonors || []).slice() }
+      : { name: '', email: '', org: '', projects: [], showPhotos: true, photos: {}, digest: true, mondayDonors: [] };
+    DNR.q = ''; DNR.only = !!d; DNR.auto = d ? dntJoin(d.mondayDonors || []) : '';
   }
   // the add / edit form, shown in a sheet
   function dnrFormHtml() {
     var f = DNR.form, d = DNR.edit && dqmDn(DNR.edit);
     return '<div class="dqm-shd"><span class="dqm-shi dqm-t-has" aria-hidden="true">' + oic(d ? 'dqmedit' : 'heart') + '</span><h3>' + (d ? esc(d.name) : tr('Add a donor', 'Ongeza mfadhili')) + '</h3><small>' +
       (d ? tr('Change their details, projects and photos.', 'Badilisha maelezo yao, miradi na picha.') : tr('They get a private link to their own page. You can copy it again, replace it or switch it off at any time.', 'Wanapata kiungo cha siri cha ukurasa wao. Unaweza kukinakili tena, kukibadilisha au kukizima wakati wowote.')) + '</small></div>' +
-      '<div class="dnr-form dqm-f" id="dnrForm">' +
+      '<div class="dnr-form dqm-f" id="dnrForm">' + dntSrcHtml() +
       '<label>' + tr('Name', 'Jina') + '<input type="text" id="dnName" autocomplete="off" placeholder="' + tr('e.g. Grace Community Church', 'mf. Kanisa la Grace') + '" value="' + esc(f.name) + '"></label>' +
       '<div class="dqm-f2"><label>' + tr('E-mail', 'Barua pepe') + '<input type="email" id="dnEmail" placeholder="' + tr('for the monthly update', 'kwa taarifa ya mwezi') + '" value="' + esc(f.email) + '"></label>' +
       '<label>' + tr('Organisation (optional)', 'Shirika (si lazima)') + '<input type="text" id="dnOrg" placeholder="' + tr('e.g. a church or company', 'mf. kanisa au kampuni') + '" value="' + esc(f.org) + '"></label></div>' +
@@ -11657,15 +11728,26 @@ html[data-theme=sun] .cw-apall,html[data-theme=sun] .cw-apchip{border:2px solid 
   function dnrPickDraw() {
     var f = DNR.form, el = $('dnList'); if (!el) return;
     var q = DNR.q.trim().toLowerCase(), tick = {}; f.projects.forEach(function (id) { tick[id] = 1; });
-    var P = S.projects.filter(function (p) {
+    var pass = function (p) {
       if (DNR.only && !tick[p.id]) return false;
       if (DNR.ck && p.ck !== DNR.ck) return false;
       if (DNR.cat && dnrCat(p) !== DNR.cat) return false;
       return !q || (p.title + ' ' + (p.area || '') + ' ' + (p.country || '')).toLowerCase().indexOf(q) >= 0;
-    }).sort(function (a, z) { return (!!tick[z.id] - !!tick[a.id]) || a.title.localeCompare(z.title); });
-    el.innerHTML = P.length ? P.slice(0, 150).map(function (p) {
-      return '<label class="dnr-p"><input type="checkbox" value="' + esc(p.id) + '"' + (tick[p.id] ? ' checked' : '') + '><span><b>' + esc(p.title) + '</b><small>' + esc([p.type, p.area, p.country, p.status].filter(Boolean).join(' · ')) + '</small></span></label>';
-    }).join('') + (P.length > 150 ? '<p class="muted">' + tr('…and ' + (P.length - 150) + ' more. Search to narrow it down.', '…na ' + (P.length - 150) + ' zaidi. Tafuta ili kupunguza.') + '</p>' : '') : '<p class="muted dqm-note">' + tr('No projects match.', 'Hakuna mradi unaolingana.') + '</p>';
+    };
+    var row = function (p, by) {
+      return '<label class="dnr-p"><input type="checkbox" value="' + esc(p.id) + '"' + (tick[p.id] ? ' checked' : '') + '><span><b>' + esc(p.title) + '</b><small>' + esc([p.type, p.area, p.country, p.status].filter(Boolean).join(' · ')) + '</small>' + (by ? dntBy(p) : '') + '</span></label>';
+    };
+    // the projects of the tags chosen "From monday.com" first, under "Funded by …" (dnr-tags); then the rest
+    var inG = {}, gs = dntGroups(), gh = gs.map(function (g) {
+      var rows = g.ids.map(byId).filter(function (p) { return p && !inG[p.id] && pass(p); }).sort(function (a, z) { return a.title.localeCompare(z.title); });
+      rows.forEach(function (p) { inG[p.id] = 1; });
+      return '<div class="dnt-g" data-dnt-g="' + g.i + '" data-testid="dnt_group">' + dntGroupHead(g) + rows.map(function (p) { return row(p, false); }).join('') + '</div>';
+    }).join('');
+    var P = S.projects.filter(function (p) { return !inG[p.id] && pass(p); }).sort(function (a, z) { return (!!tick[z.id] - !!tick[a.id]) || a.title.localeCompare(z.title); });
+    el.innerHTML = gh + (gs.length && P.length ? '<div class="dnt-gh dnt-other"><b class="dnt-gt">' + tr('Other projects', 'Miradi mingine') + '</b></div>' : '') + (P.length ? P.slice(0, 150).map(function (p) {
+      return row(p, true);
+    }).join('') + (P.length > 150 ? '<p class="muted">' + tr('…and ' + (P.length - 150) + ' more. Search to narrow it down.', '…na ' + (P.length - 150) + ' zaidi. Tafuta ili kupunguza.') + '</p>' : '') : gs.length ? '' : '<p class="muted dqm-note">' + tr('No projects match.', 'Hakuna mradi unaolingana.') + '</p>');
+    el.classList.toggle('dnt-has', !!gs.length);
     $('dnCount').textContent = dqmTicked(f.projects.length);
     dnrSensDraw();
   }
@@ -11732,11 +11814,12 @@ html[data-theme=sun] .cw-apall,html[data-theme=sun] .cw-apchip{border:2px solid 
       else if (t.closest('#dnList') && t.type === 'checkbox') {
         var id = t.value, i = f.projects.indexOf(id);
         if (t.checked && i < 0) f.projects.push(id); if (!t.checked && i >= 0) f.projects.splice(i, 1);
-        dnrRead(); $('dnCount').textContent = dqmTicked(f.projects.length); dnrSensDraw();
+        dnrRead(); $('dnCount').textContent = dqmTicked(f.projects.length); dnrSensDraw(); dntCountsUi();
       }
     });
     c.addEventListener('click', function (e) {
       var t = e.target;
+      if (dntFormClick(e)) return;
       if (t.closest('#dnOnly')) { dnrRead(); DNR.only = !DNR.only; t.closest('#dnOnly').setAttribute('aria-pressed', DNR.only); return dnrPickDraw(); }
       if (t.closest('#dnPh')) { dnrRead(); DNR.form.showPhotos = !DNR.form.showPhotos; t.closest('#dnPh').setAttribute('aria-checked', DNR.form.showPhotos); return dnrSensDraw(); }
       if (t.closest('#dnCancel')) { w.close(); return; }
@@ -11744,7 +11827,7 @@ html[data-theme=sun] .cw-apall,html[data-theme=sun] .cw-apchip{border:2px solid 
     });
     // scrolling the project list never drags the sheet down
     c.querySelector('.dnr-plist').addEventListener('touchstart', function (e) { e.stopPropagation(); }, { passive: true });
-    dnrPickDraw();
+    dnrPickDraw(); dntSrcDraw();
     if (!d && matchMedia('(pointer: fine)').matches) setTimeout(function () { if ($('dnName')) $('dnName').focus(); }, 300);
     return w;
   }
@@ -11753,7 +11836,7 @@ html[data-theme=sun] .cw-apall,html[data-theme=sun] .cw-apchip{border:2px solid 
     if (!f.name.trim()) { $('dnName').focus(); return dnrSay(m, 'bad', tr('Add their name.', 'Ongeza jina lao.')); }
     if (!f.projects.length && !sure) return poAsk(tr('Save with no projects?', 'Hifadhi bila miradi?'), tr('No projects are ticked yet. You can tick them later.', 'Bado hakuna mradi uliochaguliwa. Unaweza kuichagua baadaye.'), tr('Save anyway', 'Hifadhi hata hivyo')).then(function (ok) { if (ok) dnrSave(true); });
     dnrSay(m, '', tr('Saving…', 'Inahifadhi…'));
-    var body = { action: DNR.edit ? 'donor-update' : 'donor-add', id: DNR.edit || undefined, name: f.name, email: f.email, org: f.org, projects: f.projects, showPhotos: f.showPhotos, photos: f.photos, digest: f.digest };
+    var body = dntSaveBody({ action: DNR.edit ? 'donor-update' : 'donor-add', id: DNR.edit || undefined, name: f.name, email: f.email, org: f.org, projects: f.projects, showPhotos: f.showPhotos, photos: f.photos, digest: f.digest });
     var w = DNR.sheet, btn = $('dnSave'); if (btn) btn.disabled = true;
     adminApi('POST', body).then(function (j) {
       if (btn) btn.disabled = false;
@@ -11781,6 +11864,7 @@ html[data-theme=sun] .cw-apall,html[data-theme=sun] .cw-apchip{border:2px solid 
       var d = dqmDn(id); if (!d) return;
       var dvc = e.target.closest('[data-dvc]'); if (dvc) { buzz(); return dnContact(id, dvc.getAttribute('data-dvc'), draw); }
       var dv = e.target.closest('[data-dv]'); if (dv) return dnrViewerAct(dv, d, draw, c);
+      if (dntSheetClick(e, d, draw)) return;
       if (e.target.closest('#dnVAdd')) return dnrViewerAdd(d, draw);
       var a = e.target.closest('[data-a]'); if (!a) return;
       var act = a.getAttribute('data-a'), m = c.querySelector('.dqm-acts .msg'), cf = c.querySelector('.tm-cf'), lb = c.querySelector('.dqm-dnlink');
@@ -11813,7 +11897,7 @@ html[data-theme=sun] .cw-apall,html[data-theme=sun] .cw-apchip{border:2px solid 
     var on = !d.revoked, vs = d.viewers, ps = d.projects.map(function (id) { var p = byId(id); return p ? p.title : id; }), tone = d.revoked ? 'off' : d.lastOpen ? 'ok' : 'has';
     return '<div class="dqm-shd"><span class="dqm-shi dqm-t-' + tone + '" aria-hidden="true">' + oic('heart') + '</span><h3>' + esc(d.name) + '</h3>' +
       (d.org && d.org !== d.name ? '<small>' + esc(d.org) + '</small>' : '') + (d.email ? '<small class="dqm-mail">' + esc(d.email) + '</small>' : '') + dqmDnPill(d) + '</div>' +
-      '<div class="dqm-dnlink" aria-live="polite"></div>' +
+      '<div class="dqm-dnlink" aria-live="polite"></div>' + dntSheetHtml(d) +
       '<div class="dqm-acts">' + (on ? '<button class="btn" type="button" data-a="copy" data-testid="dn_copy">' + oic('link') + '<span>' + tr('Copy private link', 'Nakili kiungo cha siri') + '</span></button>' + dnaCodeRow(d) +
         '<div class="dqm-two"><button class="btn light" type="button" data-a="share" data-testid="dn_share">' + oic('dqmshare') + '<span>' + tr('Share link', 'Shiriki kiungo') + '</span></button><button class="btn light" type="button" data-a="edit" data-testid="dn_edit">' + oic('dqmedit') + '<span>' + tr('Edit', 'Hariri') + '</span></button></div>'
         : '<button class="btn" type="button" data-a="rotate" data-testid="dn_newlink">' + oic('link') + '<span>' + tr('Make a new link', 'Tengeneza kiungo kipya') + '</span></button><button class="btn light" type="button" data-a="edit" data-testid="dn_edit">' + oic('dqmedit') + '<span>' + tr('Edit', 'Hariri') + '</span></button>') +
@@ -11938,6 +12022,184 @@ html[data-theme=sun] .cw-apall,html[data-theme=sun] .cw-apchip{border:2px solid 
     };
     if (act === 'revoke' || act === 'remove') return tmAsk(box, (act === 'remove' ? tr('Remove ', 'Ondoa ') : tr('Revoke the link for ', 'Zima kiungo cha ')) + (v.name || d.name) + '?', act === 'remove' ? tr('Remove', 'Ondoa') : tr('Revoke', 'Zima'), true, go);
     go();
+  }
+
+  // --- Projects by donor (dnr-tags) ----------------------------------------------------------------------------
+  // The board's "Donors" tags (dropdown_mm8j9drr) come with each project for admins (/api/pin: p.donors). Office › Donors ›
+  // Add / Edit: "From monday.com" picks one or more tags, fills in the name and ticks their projects, grouped "Funded by …"
+  // with Select all / none. The donor remembers its tags (mondayDonors) and the tagged projects it was already offered
+  // (mondayKnown), so its sheet can offer projects tagged since. Also: the tag chip on the donor list, Projects › Filter ›
+  // Donor and "Funded by" on the project screen, all admins only. Donor names never reach the website (lib/monday.js).
+  OIC.dntTag = '<path d="M3.5 12.2V4.8A1.3 1.3 0 0 1 4.8 3.5h7.4l8.3 8.3a1.3 1.3 0 0 1 0 1.8l-6.9 6.9a1.3 1.3 0 0 1-1.8 0z"/><circle cx="8" cy="8" r="1.4"/>';
+  // every tag with its projects: most projects first, then by name
+  // donor names on screen: a hyphen never splits a name across lines ("Latter-day"); attributes keep the plain name
+  function dntT(s) { return esc(s).replace(/-/g, '-\u2060'); }
+  function dntAll() {
+    var m = {}; S.projects.forEach(function (p) { (p.donors || []).forEach(function (n) { (m[n] = m[n] || []).push(String(p.id)); }); });
+    return Object.keys(m).map(function (n) { return { name: n, ids: m[n] }; }).sort(function (a, z) { return z.ids.length - a.ids.length || a.name.localeCompare(z.name); });
+  }
+  function dntOn() { return !!S.admin && S.projects.some(function (p) { return p.donors && p.donors.length; }); }
+  // the projects tagged with any of these names
+  function dntIds(names) { return S.projects.filter(function (p) { return (p.donors || []).some(function (n) { return names.indexOf(n) >= 0; }); }).map(function (p) { return String(p.id); }); }
+  function dntUniq(a) { var seen = {}; return a.map(String).filter(function (x) { return !seen[x] && (seen[x] = 1); }); }
+  // "A", "A & B", "A, B & C" (a donor's name, so the same in both languages)
+  function dntJoin(n) { return n.length < 2 ? n[0] || '' : n.slice(0, -1).join(', ') + ' & ' + n[n.length - 1]; }
+  // tagged projects a linked donor hasn't been offered yet
+  function dntNew(d) {
+    var names = d.mondayDonors || [], have = {}; if (!names.length) return [];
+    (d.projects || []).concat(d.mondayKnown || []).forEach(function (id) { have[String(id)] = 1; });
+    return dntIds(names).filter(function (id) { return !have[id]; });
+  }
+  // the picker, in a sheet over what's open (Back closes it). multi: tick one or more, then Use; else (Filter): tap one
+  function dntPick(o) {
+    var all = dntAll(), on = {}; (o.chosen || []).forEach(function (n) { on[n] = 1; });
+    var head = o.multi ? [tr('From monday.com', 'Kutoka monday.com'), tr('The donor tags on the Projects board. Pick one, or several for one page (a church and a family together).', 'Lebo za wafadhili kwenye ubao wa Miradi. Chagua mmoja, au kadhaa kwa ukurasa mmoja (kanisa na familia pamoja).')]
+      : [tr('Filter by donor', 'Chuja kwa mfadhili'), tr('Only the projects a donor funded, from the tags on monday.com.', 'Miradi aliyofadhili mfadhili tu, kutoka lebo za monday.com.')];
+    var w = tSheet(head[0], '<div class="dnt-pk" data-testid="dnt_picker"><div class="dqm-shd"><span class="dqm-shi dqm-t-has" aria-hidden="true">' + oic('dntTag') + '</span><h3>' + dntT(head[0]) + '</h3><small>' + dntT(head[1]) + '</small></div>' +
+      '<input type="search" class="dnt-q" id="dntQ" autocomplete="off" placeholder="' + esc(tr('Search donors', 'Tafuta wafadhili')) + '" aria-label="' + esc(tr('Search donors', 'Tafuta wafadhili')) + '">' +
+      '<div class="dnt-pl" role="group" aria-label="' + esc(tr('Donors', 'Wafadhili')) + '"></div>' +
+      (o.multi ? '<div class="dnt-pf"><button class="btn" type="button" data-dnt="use" data-testid="dnt_use"></button><button class="btn light" type="button" data-dnt="cancel">' + tr('Cancel', 'Ghairi') + '</button></div>' : '') + '</div>');
+    var c = w.querySelector('.tsh-c'), L = c.querySelector('.dnt-pl'), q = c.querySelector('#dntQ'), use = c.querySelector('[data-dnt=use]');
+    var useUi = function () {
+      if (!use) return;
+      var n = all.filter(function (x) { return on[x.name]; }), ids = dntIds(n.map(function (x) { return x.name; })).length;
+      use.disabled = !n.length;
+      use.textContent = !n.length ? tr('Tick a donor', 'Chagua mfadhili') : (n.length === 1 ? tr('Use this donor', 'Tumia mfadhili huyu') : tr('Use these ' + n.length + ' donors', 'Tumia wafadhili hawa ' + n.length)) + ' · ' + dqmDnProj(ids);
+    };
+    var draw = function () {
+      var s = q.value.trim().toLowerCase(), l = all.filter(function (x) { return !s || x.name.toLowerCase().indexOf(s) >= 0; });
+      var row = function (x) {
+        var cnt = '<small>' + dntT(dqmDnProj(x.ids.length)) + '</small>';
+        return o.multi ? '<label class="dnt-o" data-testid="dnt_opt"><input type="checkbox" value="' + esc(x.name) + '"' + (on[x.name] ? ' checked' : '') + '><span class="dnt-on"><b>' + dntT(x.name) + '</b>' + cnt + '</span></label>'
+          : '<button type="button" class="dnt-o" data-testid="dnt_opt" data-dnn="' + esc(x.name) + '" aria-pressed="' + !!on[x.name] + '"><span class="dnt-on"><b>' + dntT(x.name) + '</b>' + cnt + '</span><span class="dnt-ck">' + (on[x.name] ? oic('check') : '') + '</span></button>';
+      };
+      L.innerHTML = (!o.multi && !s ? '<button type="button" class="dnt-o" data-dnn="" aria-pressed="' + !(o.chosen || []).length + '"><span class="dnt-on"><b>' + dntT(tr('All donors', 'Wafadhili wote')) + '</b><small>' + dntT(tr('No donor filter', 'Bila kichujio cha mfadhili')) + '</small></span><span class="dnt-ck">' + ((o.chosen || []).length ? '' : oic('check')) + '</span></button>' : '') +
+        (l.length ? l.map(row).join('') : '<p class="muted dqm-note">' + tr('No donor matches.', 'Hakuna mfadhili anayelingana.') + '</p>');
+      useUi();
+    };
+    draw();
+    q.addEventListener('input', draw);
+    L.addEventListener('change', function (e) { var t = e.target; if (t.type !== 'checkbox') return; if (t.checked) on[t.value] = 1; else delete on[t.value]; useUi(); });
+    c.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-dnn]');
+      if (b) { buzz(); w.close(); o.done(b.getAttribute('data-dnn')); return; }
+      if (e.target.closest('[data-dnt=cancel]')) { w.close(); return; }
+      if (e.target.closest('[data-dnt=use]')) { buzz(); var names = all.filter(function (x) { return on[x.name]; }).map(function (x) { return x.name; }); w.close(); o.done(names); }
+    });
+    if (matchMedia('(pointer: fine)').matches) setTimeout(function () { try { q.focus({ preventScroll: true }); } catch (x) {} }, 300);
+    return w;
+  }
+  // Add / Edit a donor: the "From monday.com" field (first in the form)
+  function dntSrcHtml() { return dntOn() ? '<div class="dnt-src" id="dntSrc" data-testid="dnt_src"></div>' : ''; }
+  function dntSrcDraw() {
+    var el = $('dntSrc'); if (!el) return;
+    var names = DNR.form.mondayDonors || [], cnt = {}; dntAll().forEach(function (x) { cnt[x.name] = x.ids.length; });
+    el.innerHTML = '<div class="dnt-sh"><span class="dnt-si" aria-hidden="true">' + oic('dntTag') + '</span><span class="dnt-st"><b>' + tr('From monday.com', 'Kutoka monday.com') + '</b><small>' +
+      (names.length ? tr('Their projects are ticked below. Untick any that aren’t theirs, or add others by hand.', 'Miradi yao imechaguliwa hapa chini. Ondoa tiki kwenye isiyo yao, au ongeza mingine wewe mwenyewe.')
+        : tr('Pick their donor tag from the Projects board. It fills in the name and ticks all their projects.', 'Chagua lebo yao ya mfadhili kutoka ubao wa Miradi. Inajaza jina na kuchagua miradi yao yote.')) + '</small></span></div>' +
+      (names.length ? '<div class="dnt-chips">' + names.map(function (n, i) {
+        return '<span class="dnt-chip" data-testid="dnt_chip"><span>' + dntT(n) + ' <i title="' + esc(dqmDnProj(cnt[n] || 0)) + '">' + (cnt[n] || 0) + '</i></span><button type="button" data-dnt-rm="' + i + '" aria-label="' + esc(tr('Remove ' + n, 'Ondoa ' + n)) + '">' + oic('x') + '</button></span>';
+      }).join('') + '</div>' : '') +
+      '<button class="btn light dnt-go" type="button" data-dnt="pick" data-testid="dnt_pick">' + oic('dntTag') + '<span>' + (names.length ? tr('Add or change donor tags', 'Ongeza au badilisha lebo') : tr('Choose from monday.com', 'Chagua kutoka monday.com')) + '</span></button>';
+  }
+  // tags chosen: tick their projects (and untick those of tags taken off), fill in the name while it's still ours to fill
+  function dntApply(names) {
+    dnrRead();
+    var f = DNR.form, before = f.mondayDonors || [], gone = before.filter(function (n) { return names.indexOf(n) < 0; }), add = names.filter(function (n) { return before.indexOf(n) < 0; });
+    var keep = dntIds(names), drop = dntIds(gone).filter(function (id) { return keep.indexOf(id) < 0; });
+    f.projects = f.projects.map(String).filter(function (id) { return drop.indexOf(id) < 0; });
+    dntIds(add).forEach(function (id) { if (f.projects.indexOf(id) < 0) f.projects.push(id); });
+    f.mondayDonors = names.slice();
+    var nm = $('dnName'), auto = dntJoin(names);
+    if (nm && (!nm.value.trim() || nm.value === DNR.auto)) { nm.value = auto; f.name = auto; }
+    DNR.auto = auto; DNR.only = false; var o = $('dnOnly'); if (o) o.setAttribute('aria-pressed', 'false');
+    dntSrcDraw(); dnrPickDraw(); var l = $('dnList'); if (l) l.scrollTop = 0;
+  }
+  // the list's "Funded by" groups: [{ name, ids, i }] for the chosen tags
+  function dntGroups() { var all = {}; dntAll().forEach(function (x) { all[x.name] = x.ids; }); return (DNR.form.mondayDonors || []).map(function (n, i) { return { name: n, ids: all[n] || [], i: i }; }); }
+  function dntGroupTicked(g) { var f = DNR.form; return g.ids.filter(function (id) { return f.projects.indexOf(id) >= 0; }).length; }
+  function dntGroupHead(g) {
+    return '<div class="dnt-gh"><b class="dnt-gt">' + dntT(tr('Funded by ' + g.name, 'Imefadhiliwa na ' + g.name)) + '</b><span class="dnt-gr"><small class="dnt-gn">' + dntT(tr(dntGroupTicked(g) + ' of ' + g.ids.length + ' ticked', dntGroupTicked(g) + ' kati ya ' + g.ids.length + ' zimechaguliwa')) + '</small>' +
+      '<span class="dnt-ga"><button type="button" class="dnt-b" data-dnt-all="' + g.i + '" data-testid="dnt_all">' + tr('Select all', 'Chagua zote') + '</button><button type="button" class="dnt-b" data-dnt-none="' + g.i + '" data-testid="dnt_none">' + tr('Select none', 'Ondoa zote') + '</button></span></span></div>';
+  }
+  function dntCountsUi() { dntGroups().forEach(function (g) { var x = document.querySelector('[data-dnt-g="' + g.i + '"] .dnt-gn'); if (x) x.textContent = tr(dntGroupTicked(g) + ' of ' + g.ids.length + ' ticked', dntGroupTicked(g) + ' kati ya ' + g.ids.length + ' zimechaguliwa'); }); }
+  function dntBy(p) { return S.admin && p.donors && p.donors.length ? '<small class="dnt-by">' + dntT(tr('Funded by ', 'Imefadhiliwa na ') + p.donors.join(', ')) + '</small>' : ''; }
+  // clicks in the Add / Edit form (true when it was one of ours)
+  function dntFormClick(e) {
+    var t = e.target, x, f = DNR.form;
+    if (t.closest('[data-dnt=pick]')) { buzz(); dnrRead(); dntPick({ multi: true, chosen: f.mondayDonors || [], done: dntApply }); return true; }
+    if ((x = t.closest('[data-dnt-rm]'))) { buzz(); var n = (f.mondayDonors || []).slice(); n.splice(+x.getAttribute('data-dnt-rm'), 1); dntApply(n); return true; }
+    if ((x = t.closest('[data-dnt-all], [data-dnt-none]'))) {
+      buzz(); dnrRead();
+      var all = x.hasAttribute('data-dnt-all'), g = dntGroups()[+x.getAttribute(all ? 'data-dnt-all' : 'data-dnt-none')]; if (!g) return true;
+      if (all) g.ids.forEach(function (id) { if (f.projects.indexOf(id) < 0) f.projects.push(id); });
+      else f.projects = f.projects.map(String).filter(function (id) { return g.ids.indexOf(id) < 0; });
+      var l = $('dnList'), y = l ? l.scrollTop : 0; dnrPickDraw(); if (l) l.scrollTop = y;
+      return true;
+    }
+    return false;
+  }
+  // what a save sends: the tags, and every project they tag now (all offered, ticked or not)
+  function dntSaveBody(body) {
+    var f = DNR.form, d = DNR.edit && dqmDn(DNR.edit), names = f.mondayDonors || [];
+    body.mondayDonors = names;
+    body.mondayKnown = names.length ? dntUniq(dntIds(names).concat(d && d.mondayKnown ? d.mondayKnown : [])) : [];
+    return body;
+  }
+  // a donor's sheet: "Update from monday.com" when projects were tagged for them since
+  function dntSheetHtml(d) {
+    var names = d.mondayDonors || []; if (!names.length) return '';
+    var n = dntNew(d), who = dntJoin(names);
+    if (!n.length) return '<div class="dnt-up" data-testid="dnt_linked"><span class="dnt-si" aria-hidden="true">' + oic('dntTag') + '</span><div class="dnt-ut"><b>' + dntT(tr('From monday.com: ' + who, 'Kutoka monday.com: ' + who)) + '</b><small>' + dntT(tr('Up to date. Projects tagged for them later are offered here.', 'Iko sawa. Miradi itakayowekewa lebo yao baadaye itaonekana hapa.')) + '</small></div></div>';
+    var t = n.map(function (id) { var p = byId(id); return p ? p.title : ''; }).filter(Boolean);
+    return '<div class="dnt-up on" data-testid="dnt_update"><span class="dnt-si" aria-hidden="true">' + oic('dntTag') + '</span><div class="dnt-ut"><b>' +
+      esc(n.length === 1 ? tr('1 new project tagged for ' + who + ', add it?', 'Mradi 1 mpya una lebo ya ' + who + ', uuongeze?') : tr(n.length + ' new projects tagged for ' + who + ', add them?', 'Miradi ' + n.length + ' mipya ina lebo ya ' + who + ', uiongeze?')) + '</b>' +
+      '<small>' + dntT(t.slice(0, 3).join(', ') + (t.length > 3 ? tr(' and ' + (t.length - 3) + ' more', ' na ' + (t.length - 3) + ' zaidi') : '')) + '</small>' +
+      '<div class="dnt-ub"><button class="btn small" type="button" data-dnt-up="add" data-testid="dnt_up_add">' + oic('dntTag') + '<span>' + (n.length === 1 ? tr('Add it', 'Uongeze') : tr('Add them', 'Iongeze')) + '</span></button>' +
+      '<button class="btn small light" type="button" data-dnt-up="skip" data-testid="dnt_up_skip">' + tr('Not now', 'Si sasa') + '</button></div></div></div>';
+  }
+  function dntSheetClick(e, d, draw) {
+    var b = e.target.closest('[data-dnt-up]'); if (!b) return false; buzz();
+    var n = dntNew(d), add = b.getAttribute('data-dnt-up') === 'add', box = b.parentNode;
+    var body = { action: 'donor-update', id: d.id, mondayKnown: dntUniq((d.mondayKnown || []).concat(n)) };
+    if (add) body.projects = dntUniq((d.projects || []).concat(n));
+    qa('button', box).forEach(function (x) { x.disabled = true; });
+    adminApi('POST', body).then(function (j) {
+      if (!j.ok) { qa('button', box).forEach(function (x) { x.disabled = false; }); toast(dnrWhy(j)); return; }
+      if (j.donor) DNR.list = DNR.list.map(function (x) { return x.id === j.donor.id ? j.donor : x; });
+      draw(); if (O.tab === 'donors' && S.view === 'vOffice') dnrOffice($('oBody'));
+      toast(add ? (n.length === 1 ? tr('1 project added ✓', 'Mradi 1 umeongezwa ✓') : tr(n.length + ' projects added ✓', 'Miradi ' + n.length + ' imeongezwa ✓')) : tr('Not added. New tags will still show here.', 'Haijaongezwa. Lebo mpya bado zitaonekana hapa.'));
+    });
+    return true;
+  }
+  // the chip on a donor's card in the list
+  function dntChip(d) {
+    var names = d.mondayDonors || []; if (!names.length) return '';
+    var n = dntNew(d).length;
+    return '<span class="dnt-tag" data-testid="dnt_tag">' + oic('dntTag') + '<span>' + dntT(dntJoin(names)) + (n ? ' <em>· ' + esc(tr(n + ' new', n + ' mpya')) + '</em>' : '') + '</span></span>';
+  }
+  // the project screen: "Funded by" for admins
+  function dntProj(p) {
+    var el = $('pDonors'); if (!el) return;
+    var n = S.admin && p && p.donors ? p.donors : [];
+    el.classList.toggle('hidden', !n.length);
+    el.innerHTML = n.length ? oic('dntTag') + '<span><b>' + tr('Funded by:', 'Imefadhiliwa na:') + '</b> ' + dntT(n.join(', ')) + '</span>' : '';
+  }
+  // Projects › Filter: the Donor row (admins), and the list it narrows
+  function dntPass(p) { return !S.fdonor || (p.donors || []).indexOf(S.fdonor) >= 0; }
+  // under the Filter pill while a donor is chosen: "Funded by …", tap to show every project again
+  function dntLChipUi() {
+    var el = $('dntLChip'); if (!el) return;
+    if (S.fdonor && !dntOn()) S.fdonor = '';
+    el.classList.toggle('hidden', !S.fdonor);
+    el.innerHTML = S.fdonor ? '<button type="button" class="dnt-lc" data-testid="l_donor" aria-label="' + esc(tr('Funded by ' + S.fdonor + '. Show all donors', 'Imefadhiliwa na ' + S.fdonor + '. Onyesha wafadhili wote')) + '">' + oic('dntTag') + '<span>' + dntT(tr('Funded by ', 'Imefadhiliwa na ')) + '<b>' + dntT(S.fdonor) + '</b></span><i>' + oic('x') + '</i></button>' : '';
+  }
+  $('dntLChip').addEventListener('click', function (e) { if (!e.target.closest('.dnt-lc')) return; buzz(); S.fdonor = ''; S.animList = true; renderList(); });
+  function dntFilterHtml() {
+    if (!dntOn()) { S.fdonor = ''; return ''; }
+    var n = S.fdonor ? S.projects.filter(dntPass).length : null;
+    return '<h4 class="lfh">' + dntT(tr('Donor', 'Mfadhili')) + '</h4><button type="button" class="bsh-o dnt-lf" data-ldn="1" aria-haspopup="dialog" aria-pressed="' + !!S.fdonor + '" data-testid="lf_donor"><i class="ei">' + oic('dntTag') + '</i><span>' + dntT(S.fdonor || tr('All donors', 'Wafadhili wote')) + '</span>' +
+      (n != null ? '<small class="lfn">' + n + '</small>' : '') + '<b aria-hidden="true">' + oic('chev') + '</b></button>';
   }
 
   // --- Office › Send an e-mail (ml…): one message to donors, the admins or team members (functions/api/mail.js) ---
