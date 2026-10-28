@@ -445,7 +445,7 @@ class ChatTest {
         tap("attach"); waitTag("attach_sheet"); tap("att_live"); waitTag("live_sheet"); tap("live_60")
         until("live sent") { fake.calls.any { it.startsWith("POST send") && it.contains("\"kind\":\"live\"") && it.contains("\"until\"") } }
         waitTag("live_card"); waitTag("live_stop")
-        tap("attach"); waitTag("attach_sheet"); tap("att_contact"); waitTag("mate_picker"); tap("mate_Meril Kiprop")
+        tap("attach"); waitTag("attach_sheet"); tap("att_contact"); waitTag("mate_picker"); waitTag("mate_Meril Kiprop"); tap("mate_Meril Kiprop")
         until("contact sent") { fake.calls.any { it.startsWith("POST send") && it.contains("\"contact\":{\"name\":\"Meril Kiprop\"}") } }
         waitTag("contact_card")
         shot("chat-13-live-and-contact")

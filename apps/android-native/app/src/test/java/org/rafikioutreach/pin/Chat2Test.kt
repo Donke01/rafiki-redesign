@@ -360,9 +360,9 @@ class Chat2Test {
         world(); val m = model(); show(m)
         room("dm_grace")
         tap("room_menu"); tap("room_m_clear"); waitTag("clear_sheet"); sheetShot("c2-room-clear"); tap("clear_go"); settle(1500)
-        assertTrue(fake.calls.any { it.startsWith("POST clear") }); waitTag("chat_empty")
+        until("cleared") { fake.calls.any { it.startsWith("POST clear") } }; waitTag("chat_empty")
         tap("room_menu"); tap("room_m_delete"); waitTag("delchat_sheet"); tap("clear_go"); settle(1500)
-        assertTrue(fake.calls.any { it.startsWith("POST clear") && it.contains("archive") })
+        until("deleted") { fake.calls.any { it.startsWith("POST clear") && it.contains("archive") } }
         waitTag("chat_list"); assertFalse(tagged("chatrow_dm_grace"))
     }
 
