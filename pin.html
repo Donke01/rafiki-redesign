@@ -3824,7 +3824,7 @@ html[data-theme=sun] .sty-nudge{background:#FFF;border:2px solid #000}
 .sty-t img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .2s}.sty-t img.in,.sty-t.up img{opacity:1}
 .sty-t .sty-kid{left:6px;top:6px;bottom:auto}
 .sty-ins{position:absolute;left:6px;bottom:6px;display:inline-flex;align-items:center;gap:3px;max-width:calc(100% - 12px);padding:3px 7px;border-radius:8px;background:rgba(4,38,63,.82);color:#FFFFFF;font-size:.66rem;font-weight:800;white-space:nowrap;overflow:hidden}
-.sty-ins svg{flex:none;width:11px;height:11px;color:#8FE3B5}
+.sty-ins svg{flex:none;width:11px;height:11px;color:#8FE3B5}.sty-ins{text-overflow:ellipsis}
 .sty-addt{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;aspect-ratio:1;width:100%;padding:6px;box-sizing:border-box;border-radius:16px;border:2px dashed color-mix(in srgb,var(--blue) 45%,transparent);background:color-mix(in srgb,var(--tint) 70%,transparent);color:var(--blue2);font:inherit;font-size:.8rem;font-weight:800;line-height:1.2;text-align:center;cursor:pointer}
 .sty-addt svg{width:26px;height:26px;stroke-width:2.2}
 html[data-theme=dark] .sty-addt{color:var(--blue2)}html[data-theme=sun] .sty-addt{border-color:#000;background:#FFF;color:#000}
@@ -3903,6 +3903,8 @@ html[data-theme=sun] .sty-sug{border:2px solid #000;color:#000}
 .sqb.bad .sqb-i{background:var(--badbg);color:var(--bad)}.sqb.end.bad small{color:var(--bad)}
 body.locked .sqb{display:none}
 .sty-t{font-size:.7rem}.sty-ov small{font-size:.66rem;font-weight:700;opacity:.92}
+html .sty-need .sty-ni .btn{background:var(--warn) !important;color:var(--warnbg) !important;box-shadow:none !important;border-color:transparent !important}
+@media (max-width:379px){.sty-ni{flex-wrap:wrap;row-gap:8px}.sty-ni > span{flex:1 1 calc(100% - 34px)}.sty-ni .btn{margin-left:34px;min-height:40px}.sty-t .sty-ins{left:4px;bottom:4px;max-width:calc(100% - 8px);padding:3px 5px;font-size:.62rem}.sty-t .sty-ins svg{display:none}.sty-st li{font-size:.66rem;padding:0 1px}}
 @media (prefers-reduced-motion: reduce){.sty-ring .sp{display:none}.sty-tk,.sty-t.up.done::after{animation:none}.sqb{animation:none}.sty-ring .fg,.sqb-bar i,.sty-t img{transition:none}}
 .sty-kid{position:absolute;left:4px;bottom:4px;font-style:normal;font-size:.62rem;font-weight:800;background:rgba(0,0,0,.6);color:#FFF;border-radius:6px;padding:1px 4px}
 .sty-qh{display:flex;align-items:baseline;justify-content:space-between;gap:8px}.sty-dots{display:flex;gap:6px;margin:2px 0 8px}.sty-dots i{width:10px;height:10px;border-radius:50%;background:var(--line)}.sty-dots i.ok{background:var(--ok)}.sty-dots i.on{box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--blue)}
@@ -6677,10 +6679,10 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
     spTrash: '<path d="M4.5 7h15M10 11v6M14 11v6"/><path d="M6 7l1 12.5a1.5 1.5 0 0 0 1.5 1.5h7a1.5 1.5 0 0 0 1.5-1.5L18 7M9.5 7V4.5h5V7"/>',
     spX: '<path d="M6 6l12 12M18 6L6 18"/>'
   });
-  var MON = { en: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'], sw: ['Januari', 'Februari', 'Machi', 'Aprili', 'Mei', 'Juni', 'Julai', 'Agosti', 'Septemba', 'Oktoba', 'Novemba', 'Desemba'] };
+  var STY_MON = { en: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'], sw: ['Januari', 'Februari', 'Machi', 'Aprili', 'Mei', 'Juni', 'Julai', 'Agosti', 'Septemba', 'Oktoba', 'Novemba', 'Desemba'] };
   function ymOk(v) { return /^\d{4}-(0[1-9]|1[0-2])$/.test(v || ''); }
   function ymShort(v) { return ymOk(v) ? MO3[dL()][+v.slice(5) - 1] + ' ' + v.slice(0, 4) : ''; }
-  function ymLong(v) { return ymOk(v) ? MON[dL()][+v.slice(5) - 1] + ' ' + v.slice(0, 4) : ''; }
+  function ymLong(v) { return ymOk(v) ? STY_MON[dL()][+v.slice(5) - 1] + ' ' + v.slice(0, 4) : ''; }
   function ymSpan(a, b) { if (!ymOk(a)) return ''; if (!ymOk(b) || b === a) return ymShort(a); return a.slice(0, 4) === b.slice(0, 4) ? MO3[dL()][+a.slice(5) - 1] + ' – ' + ymShort(b) : ymShort(a) + ' – ' + ymShort(b); }
   function ymNow() { var d = new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2); }
   function styRowName(r) { var x = STY_ROWS.filter(function (y) { return y[0] === r; })[0]; return x ? tr(x[1], x[2]) : r; }
@@ -6700,7 +6702,7 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
   function styNeeds(s) {
     var out = [], D = s.dates || {}, n = QSN(s);
     if (s.pub || s.status === 'approved' || s.status === 'published') return out;
-    if (!(s.photos.after || []).length) out.push({ k: 'after', ic: 'spImg', b: tr('Add after photos', 'Ongeza picha za baada'), m: tr('The story ends with what changed. 2–3 photos of the finished project.', 'Hadithi inaishia na kilichobadilika. Picha 2–3 za mradi uliokamilika.'), btn: tr('Add', 'Ongeza'), bi: 'camera' });
+    if (!(s.photos.after || []).length) out.push({ k: 'after', ic: 'spImg', b: tr('Add after photos', 'Ongeza picha za baada'), m: tr('The story ends with what changed. 2\u2060–\u20603 photos of the finished project.', 'Hadithi inaishia na kilichobadilika. Picha 2\u2060–\u20603 za mradi uliokamilika.'), btn: tr('Add', 'Ongeza'), bi: 'camera' });
     var nd = STY_ROWS.filter(function (r) { return (s.photos[r[0]] || []).length && !D[r[0]]; });
     if (nd.length) out.push({ k: 'dates', row: nd[0][0], ic: 'cal', b: tr('Add the dates for ' + styAnd(nd.map(function (r) { return r[1]; })), 'Ongeza tarehe za ' + styAnd(nd.map(function (r) { return r[2]; }))), m: tr('The month each part happened, so the story tells it in order.', 'Mwezi kila sehemu ilipotokea, ili hadithi iseme kwa mpangilio.'), btn: tr('Add', 'Ongeza'), bi: 'cal' });
     if (n < 6) out.push({ k: 'answers', ic: 'chat', b: tr('Answer the questions', 'Jibu maswali'), m: tr(n + ' of 6 answered', 'Majibu ' + n + ' kati ya 6'), btn: tr('Answer', 'Jibu'), bi: 'chev' });
@@ -6741,7 +6743,7 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
     var fr = SQ.fresh[x.id], left = fr ? 2 - (Date.now() - fr) / 1000 : -1;
     return '<button type="button" class="sty-t' + (left > -0.5 ? ' up done' : '') + '"' + (left > -0.5 ? ' style="--fd:' + Math.max(0, left).toFixed(2) + 's"' : '') + ' data-sty-ph="' + r[0] + '" data-id="' + esc(x.id) + '" data-i="' + i + '" aria-label="' + esc(tr(r[1] + ' photo ' + (i + 1), 'Picha ' + (i + 1) + ', ' + r[2]) + (x.cap ? ': ' + x.cap : '')) + '">' +
       '<img alt="" data-src="' + styImg(s, x.id, 480) + '">' + (x.children ? '<em class="sty-kid">' + tr('Children', 'Watoto') + '</em>' : '') +
-      (ins[String(x.id)] ? '<span class="sty-ins">' + oic('spark') + tr('In story', 'Kwenye hadithi') + '</span>' : '') + (left > -0.5 ? '<span class="sty-tk" aria-hidden="true">' + oic('check') + '</span>' : '') + '</button>';
+      (ins[String(x.id)] ? '<span class="sty-ins">' + oic('spark') + tr('In story', 'Hadithini') + '</span>' : '') + (left > -0.5 ? '<span class="sty-tk" aria-hidden="true">' + oic('check') + '</span>' : '') + '</button>';
   }
   function styPhCard(s) {
     var ins = styInStory(s), nIn = 0;
@@ -7157,7 +7159,7 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
       if (!SQ.endT) { SQ.endT = Date.now(); setTimeout(function () { if (SQ.endT && !sqPend().length && !SQ.items.some(function (x) { return x.state === 'fail'; })) { SQ.run = null; SQ.endT = 0; sqUi(); } }, 4000); }
     }
     if (!b) { b = document.createElement('div'); b.id = 'sqb'; b.setAttribute('role', 'status'); b.setAttribute('data-testid', 'sqb'); document.body.appendChild(b); b.addEventListener('click', sqBanTap); }
-    b.className = 'sqb' + (end ? ' end' : '') + (end && fail.length ? ' bad' : ''); b.innerHTML = h; document.body.classList.add('sqon'); sqBar();
+    b.className = 'sqb' + (end ? ' end' : '') + (end && fail.length && !run.ok ? ' bad' : ''); b.innerHTML = h; document.body.classList.add('sqon'); sqBar();
   }
   function sqBanTap(e) {
     var k = e.target.closest('[data-sqb]'); if (!k) return; buzz(); k = k.getAttribute('data-sqb');
@@ -7183,7 +7185,7 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
     var ins = styInStory(s)[String(x.id)], saved = x.cap || '', busy = false;
     var by = x.by ? String(x.by).split(' ')[0] : '', added = x.at ? (by ? tr('Added ' + dDay(x.at, true) + ' by ' + by, 'Imeongezwa ' + dDay(x.at, true) + ' na ' + by) : tr('Added ' + dDay(x.at, true), 'Imeongezwa ' + dDay(x.at, true))) : '';
     var w = panel(esc(tr('Photo', 'Picha')), '<div class="sty-df" data-testid="sty_details">' + (added ? '<p class="muted sty-sub">' + esc(added) + '</p>' : '') +
-      '<button type="button" class="sty-pv" data-k="big" aria-label="' + esc(tr('Open the photo full size', 'Fungua picha kwa ukubwa kamili')) + '"><img alt="" data-src="' + styImg(s, x.id, 1200) + '">' + (ins ? '<span class="sty-ins">' + oic('spark') + tr('In story', 'Kwenye hadithi') + '</span>' : '') + '</button>' +
+      '<button type="button" class="sty-pv" data-k="big" aria-label="' + esc(tr('Open the photo full size', 'Fungua picha kwa ukubwa kamili')) + '"><img alt="" data-src="' + styImg(s, x.id, 1200) + '">' + (ins ? '<span class="sty-ins">' + oic('spark') + tr('In story', 'Hadithini') + '</span>' : '') + '</button>' +
       '<label for="styCap">' + tr('Caption', 'Maelezo ya picha') + '</label><input id="styCap" type="text" maxlength="120" enterkeyhint="done" autocomplete="off" value="' + esc(saved) + '" placeholder="' + esc(tr('e.g. Drilling reached water', 'mf. Uchimbaji ulifika majini')) + '" data-testid="sty_cap">' +
       '<p class="muted">' + tr('The story uses captions to describe photos.', 'Hadithi inatumia maelezo kuelezea picha.') + '</p>' +
       '<span class="sty-lbl" id="styMvL">' + tr('Move to', 'Hamisha kwenda') + '</span><div class="seg sty-seg" role="group" aria-labelledby="styMvL">' + STY_ROWS.map(function (r) { return '<button type="button" data-to="' + r[0] + '" aria-pressed="' + (r[0] === row) + '" data-testid="sty_mv_' + r[0] + '">' + tr(r[1], r[2]) + '</button>'; }).join('') + '</div>' +
@@ -7233,7 +7235,7 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
     var pick = function (id, v, lbl) {
       var mm = ymOk(v) ? +v.slice(5) : 0, yy = ymOk(v) ? +v.slice(0, 4) : 0, ys = [];
       for (var y = Y; y >= 2000; y--) ys.push(y);
-      return '<span class="sty-lbl" id="' + id + 'L">' + lbl + '</span><div class="sty-ym" role="group" aria-labelledby="' + id + 'L"><select id="' + id + 'M" aria-label="' + esc(lbl + ': ' + tr('month', 'mwezi')) + '" data-testid="' + id + 'M"><option value="">' + tr('Month', 'Mwezi') + '</option>' + MON[dL()].map(function (n, i) { return '<option value="' + ('0' + (i + 1)).slice(-2) + '"' + (mm === i + 1 ? ' selected' : '') + '>' + n + '</option>'; }).join('') + '</select>' +
+      return '<span class="sty-lbl" id="' + id + 'L">' + lbl + '</span><div class="sty-ym" role="group" aria-labelledby="' + id + 'L"><select id="' + id + 'M" aria-label="' + esc(lbl + ': ' + tr('month', 'mwezi')) + '" data-testid="' + id + 'M"><option value="">' + tr('Month', 'Mwezi') + '</option>' + STY_MON[dL()].map(function (n, i) { return '<option value="' + ('0' + (i + 1)).slice(-2) + '"' + (mm === i + 1 ? ' selected' : '') + '>' + n + '</option>'; }).join('') + '</select>' +
         '<select id="' + id + 'Y" aria-label="' + esc(lbl + ': ' + tr('year', 'mwaka')) + '" data-testid="' + id + 'Y"><option value="">' + tr('Year', 'Mwaka') + '</option>' + ys.map(function (y) { return '<option' + (yy === y ? ' selected' : '') + '>' + y + '</option>'; }).join('') + '</select></div>';
     };
     var prog = row === 'progress', has = prog ? D.progress || D.progressEnd : D[row];

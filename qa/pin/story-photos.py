@@ -121,6 +121,9 @@ SELS = ['.sty-st > li', '.sty-st li > *', '.sty-hh > *', '.sty-ni > *', '.sty-ni
 def look(pg, check, t, scope='#paneStory .card, .bsh-p, #sqb'):
     bad = M.wrapcheck(pg, scope); check(not bad, '[%s] no word split or cut (%s)' % (t, bad))
     ov = pg.evaluate(OVERLAP, SELS); check(not ov, '[%s] no overlaps, nothing off-screen (%s)' % (t, ov))
+    cut = pg.evaluate("[...document.querySelectorAll('#paneStory .card *, .bsh-p *, #sqb *')].filter(e => e.offsetParent && !e.closest('.vh') && e.children.length === 0 && e.textContent.trim() && e.scrollWidth > e.clientWidth + 1 && getComputedStyle(e).overflow !== 'visible' && !['INPUT','SELECT','TEXTAREA','OPTION'].includes(e.tagName)).map(e => e.className + ':' + e.textContent.slice(0, 20)).slice(0, 5)")
+    cut += pg.evaluate("[...document.querySelectorAll('.sty-ins, .sty-kid, .sty-pill, .sty-dbtn, .sty-dchip, .sqb-x, .sqb-re')].filter(e => e.offsetParent && e.scrollWidth > e.clientWidth + 1).map(e => e.className + ':' + e.textContent.slice(0, 20)).slice(0, 5)")
+    check(not cut, '[%s] no text cut inside badges or buttons (%s)' % (t, cut))
 def shot(pg, name): pg.wait_for_timeout(350); pg.screenshot(path=os.path.join(OUT, name + '.png'))
 
 # ---- the look at every width, language and theme ---------------------------------------------------------------
@@ -140,14 +143,14 @@ def s_look(check):
             check(('In progress' if lang == 'en' else 'Wakati wa kazi') in dn and ('Before' not in dn and 'Kabla' not in dn), '[%s] the dates card names only In progress (%s)' % (t, dn))
             rows = pg.evaluate("[...document.querySelectorAll('#styPh .sty-row')].map(r => [r.dataset.row, r.querySelector('.n').textContent, r.querySelectorAll('.sty-t').length, r.querySelectorAll('.sty-addt').length])")
             check(rows == [['before', '2', 2, 1], ['progress', '3', 3, 1], ['after', '0', 0, 1]], '[%s] rows with counts, thumbnails and an Add tile (%s)' % (t, rows))
-            check(pg.locator('#styPh .sty-ins').count() == 3 and pg.inner_text('[data-testid=sty_in_n]').strip().startswith('3'), '[%s] 3 "In story" badges and "3 in the story"' % t)
+            check(pg.locator('#styPh .sty-ins').count() == 3 and '3' in pg.inner_text('[data-testid=sty_in_n]'), '[%s] 3 "In story" badges and "3 in the story"' % t)
             check(pg.inner_text('[data-testid=sty_date_before]').strip() == ('Nov 2024'), '[%s] Before · Nov 2024' % t)
             check(pg.locator('[data-testid=sty_date_after].sty-dchip').count() == 1, '[%s] "Add date" chip where there is no month' % t)
             check(M.vis(pg, '[data-testid=sty_nudge]') and M.vis(pg, '[data-testid=sty_nudge_draft]'), '[%s] the new-photos nudge with Draft again' % t)
             cols = pg.evaluate("getComputedStyle(document.querySelector('.sty-g')).gridTemplateColumns.split(' ').length")
             check(cols == (4 if w >= 700 else 3), '[%s] %d columns of thumbnails (%s)' % (t, 4 if w >= 700 else 3, cols))
             pg.wait_for_timeout(500); look(pg, check, t)
-            pg.evaluate("window.scrollTo(0, document.getElementById('styHead').getBoundingClientRect().top + scrollY - 70)"); shot(pg, 'page-%s' % t)
+            pg.evaluate("window.scrollTo(0, document.getElementById('styHead').getBoundingClientRect().top + scrollY - 190)"); shot(pg, 'page-%s' % t)
             pg.locator('#styPh').scroll_into_view_if_needed(); shot(pg, 'photos-%s' % t)
             if w == 390 or (w == 320 and th == '') or w == 1280:
                 # the sheets
@@ -168,7 +171,7 @@ def s_look(check):
                 CFG['hold'] = True; pg.click('[data-testid=sty_add_after]'); pg.wait_for_timeout(400)
                 pg.set_input_files('[data-testid=sty_fpick]', FILES[:3]); pg.wait_for_timeout(500); pg.click('[data-testid=sty_kno]'); pg.click('[data-testid=sty_rv_go]'); pg.wait_for_timeout(1500)
                 photos_card(pg); pg.locator('.sty-row[data-row=after]').scroll_into_view_if_needed(); look(pg, check, t + ' sending'); shot(pg, 'sending-%s' % t)
-                release(pg, 2); CFG['fail'] = [500]; release(pg); pg.wait_for_timeout(700)
+                release(pg, 1); pg.wait_for_timeout(700); CFG['fail'] = [500]; release(pg, 1); pg.wait_for_timeout(700); CFG['hold'] = False; release(pg); pg.wait_for_timeout(900)
                 look(pg, check, t + ' done/failed'); shot(pg, 'done-failed-%s' % t)
             ctx.close()
         br.close()
@@ -293,7 +296,7 @@ def s_fail(check):
         pg.click('[data-testid=sty_add_after]'); pg.wait_for_timeout(400); pg.set_input_files('[data-testid=sty_fpick]', FILES[1]); pg.wait_for_timeout(500)
         pg.click('[data-testid=sty_kno]'); pg.click('[data-testid=sty_rv_go]'); pg.wait_for_timeout(1500)
         sp = pg.evaluate("(() => { const s = document.querySelector('.sty-ring .sp'); return s ? getComputedStyle(s).display : 'none'; })()")
-        check(sp == 'none' and pg.locator('.sty-ring b').count() == 1, 'reduced motion: no spinner, the % stays (%s)' % sp)
+        check(sp == 'none' and pg.locator('.sty-ring b').count() == 1, 'reduced motion: no spinner, the %% stays (%s)' % sp)
         release(pg); ctx.close(); br.close()
 
 def s_details(check):
@@ -310,7 +313,7 @@ def s_details(check):
             e = acts('photo-edit'); check(e and e[-1].get('cap') == 'The drill at 60 metres' and e[-1]['row'] == 'progress' and e[-1]['asset'] == '9402', '[%s] caption saved (%s)' % (lang, e[-1:] if e else e))
             pg.click('[data-testid=sty_kids]'); pg.wait_for_timeout(700)
             e = acts('photo-edit'); check(e and e[-1].get('children') is True and pg.get_attribute('[data-testid=sty_kids]', 'aria-checked') == 'true', '[%s] shows children: on' % lang)
-            check(pg.locator('#styPh .sty-row[data-row=progress] .sty-t').first.locator('.sty-kid').count() == 1, '[%s] … the thumbnail says Children' % lang)
+            check(pg.locator('#styPh [data-id="9402"] .sty-kid').count() == 1, '[%s] … the thumbnail says Children' % lang)
             pg.click('[data-testid=sty_mv_after]'); pg.wait_for_timeout(800)
             e = acts('photo-edit'); check(e and e[-1].get('to') == 'after', '[%s] moved to After' % lang)
             check(pg.locator('.sty-row[data-row=after] .sty-t').count() == 1 and pg.locator('.sty-row[data-row=progress] .sty-t').count() == 2, '[%s] the rows show it' % lang)

@@ -452,11 +452,11 @@ def s_story(check):
                 pg.fill('#styA', 'The spring was open to cattle.'); pg.click('[data-testid=sty_qsave]'); pg.wait_for_timeout(700)
                 a = [x for x in SENT if x.get('action') == 'answers']
                 check(a and a[-1].get('q1') == 'The spring was open to cattle.' and 'Question 2 of 6' in pg.inner_text('.sty-q'), '[%s] an answer is saved, on to question 2' % t)
-                pg.click('[data-testid=sty_add_after]'); pg.set_input_files('#styFile', pic); pg.wait_for_timeout(900)
-                check(vis(pg, '.sty-sh'), '[%s] a photo asks about children' % t); pg.click('.sty-sh [data-k=yes]'); pg.wait_for_timeout(1200)
+                pg.click('[data-testid=sty_add_after]'); pg.wait_for_timeout(400); pg.set_input_files('[data-testid=sty_fpick]', pic); pg.wait_for_timeout(900)
+                check(vis(pg, '[data-testid=sty_review]'), '[%s] the chosen photo: asks about children' % t); pg.click('[data-testid=sty_kyes]'); pg.locator('.sty-rvt .k').first.click(); pg.click('[data-testid=sty_rv_go]'); pg.wait_for_timeout(2000)
                 mp = [x for x in SENT if x.get('story-multipart')]
                 check(mp and b'name="row"\r\n\r\nafter' in mp[-1]['body'] and b'name="children"\r\n\r\ntrue' in mp[-1]['body'], '[%s] the After photo is sent with children=true' % t)
-                check(pg.locator('.sty-row[data-row=after] .cn-th').count() == 1, '[%s] it shows in the After row' % t)
+                check(pg.locator('.sty-row[data-row=after] .sty-t').count() == 1, '[%s] it shows in the After row' % t)
                 pg.click('[data-sty=consent][data-v=received]'); pg.wait_for_timeout(600); check([x for x in SENT if x.get('action') == 'consent'][-1]['value'] == 'received', '[%s] consent' % t)
                 pg.click('[data-testid=sty_draft]'); pg.wait_for_timeout(500); pg.click('.po-ask [data-k=yes]'); pg.wait_for_timeout(800); check([x for x in SENT if x.get('action') == 'draft'], '[%s] Draft the story (again, after asking)' % t)
                 pg.click('[data-testid=sty_approve]'); pg.wait_for_timeout(500); pg.click('.po-ask [data-k=yes]'); pg.wait_for_timeout(800)
