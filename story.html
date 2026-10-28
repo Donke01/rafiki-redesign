@@ -1159,7 +1159,7 @@ a.vc:focus-visible{outline:3px solid #6BBDF2;outline-offset:3px}
 .sx-sky i{position:absolute;display:block;border-radius:50%;filter:blur(64px);will-change:transform}
 .sx-sky .g1{width:min(1000px,90vw);height:min(1000px,90vw);left:50%;top:-42%;margin-left:calc(min(1000px,90vw) / -2);background:radial-gradient(circle,rgba(19,150,235,.62) 0%,rgba(19,150,235,0) 66%);animation:sxDrift1 24s ease-in-out infinite alternate}
 .sx-sky .g2{width:min(720px,80vw);height:min(720px,80vw);left:-18%;bottom:-30%;background:radial-gradient(circle,rgba(60,198,227,.42) 0%,rgba(60,198,227,0) 66%);animation:sxDrift2 28s ease-in-out infinite alternate}
-.sx-sky .g3{width:min(560px,70vw);height:min(560px,70vw);right:-14%;top:18%;background:radial-gradient(circle,rgba(255,156,72,.2) 0%,rgba(255,156,72,0) 62%);animation:sxDrift3 30s ease-in-out infinite alternate}
+.sx-sky .g3{width:min(560px,70vw);height:min(560px,70vw);right:-14%;top:18%;background:radial-gradient(circle,rgba(255,190,120,.15) 0%,rgba(255,190,120,0) 60%);animation:sxDrift3 30s ease-in-out infinite alternate}
 .sx-sky .g4{width:min(480px,60vw);height:min(480px,60vw);right:12%;bottom:-26%;background:radial-gradient(circle,rgba(111,221,170,.24) 0%,rgba(111,221,170,0) 66%);animation:sxDrift2 26s ease-in-out infinite alternate-reverse}
 .sx-sky .beam{position:absolute;left:50%;top:-10%;width:min(760px,120vw);height:90%;transform:translateX(-50%);background:conic-gradient(from 180deg at 50% 0%,transparent 160deg,rgba(150,215,255,.16) 176deg,rgba(190,235,255,.24) 180deg,rgba(150,215,255,.16) 184deg,transparent 200deg);filter:blur(10px);opacity:.9;mask-image:linear-gradient(180deg,#000 0%,#000 30%,transparent 92%);-webkit-mask-image:linear-gradient(180deg,#000 0%,#000 30%,transparent 92%)}
 .sx-sky::after{content:"";position:absolute;inset:0;opacity:.07;mix-blend-mode:overlay;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E")}
@@ -1298,6 +1298,7 @@ a.vc:focus-visible{outline:3px solid #6BBDF2;outline-offset:3px}
 .sy-fact.big dd .sy-fsub{display:block;font-size:14px;font-weight:600;letter-spacing:0;color:rgba(226,240,250,.75)}
 @media (max-width:900px){.sy-facts{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:420px){.sy-facts{gap:10px}.sy-fact{padding:18px 16px;border-radius:18px}}
+@media (max-width:380px){.sy-facts{grid-template-columns:minmax(0,1fr);gap:8px}.sy-fact{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:14px 16px;border-radius:16px}.sy-fact dd{margin:0;text-align:right;font-size:18px}.sy-fact.big dd{font-size:26px}}
 /* the story itself: a calm reading column, photos a little wider than the text */
 .sy-body{background:#FFFFFF;padding:clamp(56px,7vw,100px) 0 clamp(40px,5vw,70px);overflow:hidden}
 .sy-body + .sy-pull{margin-top:0}
@@ -1307,12 +1308,12 @@ a.vc:focus-visible{outline:3px solid #6BBDF2;outline-offset:3px}
 .sy-num{display:block;margin-bottom:10px;font-size:13px;font-weight:800;letter-spacing:.12em;color:#0A78C2}
 .sy-sec p{margin:0 0 1.15em;font-size:clamp(17px,1.4vw,19px);line-height:1.78;font-weight:500;color:#2B353F;text-wrap:pretty}
 .sy-sec p.lead::first-letter{float:left;margin:.06em .12em 0 0;font-size:4.1em;line-height:.8;font-weight:800;color:#0A78C2}
-.sy-fig{position:relative;left:50%;width:min(1040px,calc(100vw - 40px));margin:clamp(32px,4vw,48px) 0;transform:translateX(-50%)}
+.sy-fig{position:relative;width:min(1040px,calc(100vw - 40px));margin:clamp(32px,4vw,48px) 0 clamp(32px,4vw,48px) calc((100% - min(1040px,calc(100vw - 40px))) / 2)}
 .sy-fig .ph{position:relative;aspect-ratio:3/2;border-radius:26px;overflow:hidden;background:#E3E8ED}
 .sy-fig img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .sy-fig figcaption{display:flex;gap:12px;max-width:680px;margin:14px auto 0;font-size:14.5px;line-height:1.5;font-weight:500;color:#55626E}
 .sy-fig figcaption::before{content:"";flex:none;width:3px;border-radius:2px;background:#0A78C2}
-@media (max-width:600px){.sy-fig{width:calc(100vw - 24px)}.sy-fig .ph{border-radius:18px;aspect-ratio:4/3}.sy-fig figcaption{padding:0 8px}}
+@media (max-width:600px){.sy-fig{width:calc(100vw - 24px);margin-left:calc((100% - (100vw - 24px)) / 2)}.sy-fig .ph{border-radius:18px;aspect-ratio:4/3}.sy-fig figcaption{padding:0 8px}}
 /* the quote */
 .sy-pull{margin:0;padding:clamp(80px,11vw,150px) 20px;text-align:center}
 .sy-pull .sx-sky .g1{top:-20%}
@@ -1327,6 +1328,7 @@ a.vc:focus-visible{outline:3px solid #6BBDF2;outline-offset:3px}
 .sy-give h2{margin:0;max-width:none}
 .sy-give p{margin:16px 0 0}
 .sy-give .sx-acts{margin:0;justify-content:flex-end}
+@media (min-width:901px){.sy-give .sx-acts{flex-direction:column;align-items:stretch;justify-self:end;min-width:260px}}
 @media (max-width:900px){.sy-give{grid-template-columns:minmax(0,1fr);text-align:center}.sy-give .sx-acts{justify-content:center}}
 .sy-share{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:10px 12px;margin:30px auto 0;padding:0 20px}
 .sy-share > span{font-size:14px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#55626E;margin-right:4px}
@@ -1542,7 +1544,7 @@ function sxCard(x, i) {
   var type = sxTypeShow(x.type || f.type), year = x.year || f.year || '';
   var pq = x.pull && x.pull.quote ? '“' + String(x.pull.quote).replace(/^[“"]|[”"]$/g, '') + '”' : '';
   return { hid: 'sx-c-' + String(x.id).replace(/\W/g, '') + '-' + (i || 0), href: sxHref(x), title: x.title, dek: x.dek || pq, hasDek: !!(x.dek || pq),
-    kick: [type, year].filter(Boolean).join(' · ') || 'Story', read: sxRead(x.words), place: place || 'East Africa',
+    kick: [type, year].filter(Boolean).join(' · ') || 'Story', read: sxRead(x.words), meta: [type, year, sxRead(x.words).replace(/ /g, '\u00a0')].filter(Boolean).join(' \u00b7\u00a0'), place: place || 'East Africa',
     hasFlag: !!FLAGS[ck], flag: FLAGS[ck] || '', hasImg: !!hero, noImg: !hero,
     img: hero ? sxPhoto(x.id, hero.id, 800) : '', srcset: hero ? sxSrcset(x.id, hero.id, [480, 800, 1200]) : '',
     alt: hero ? (hero.cap || 'Photo from the story: ' + x.title) : '' };

@@ -18,7 +18,9 @@ The menu follows the owner's eight sections.
 | `/progress` | Our impact in numbers, annual reports | Our impact |
 | `/donate` | Get involved: give, sponsor a project, expeditions, volunteer | Get involved |
 | `/trips`, `/event-list` | Expeditions and events | Get involved |
-| `/stories` | Stories and updates: every project, with filters | Stories & updates |
+| `/projects?…` | Every project, with filters (`project-list.html`, answered at `/projects?cat=…&status=…`, `?project=<id>` or `?view=all` by `functions/projects.js`). Old `/stories?…` list links go here | Projects |
+| `/stories` | Stories: the newest approved story up top, then every story with country and kind filters (`?where=ke&topic=water`) | Stories |
+| `/stories/<id>-<slug>` | One story: photo hero, the journey (before, each stage, finished), the story with its photos, quote, give and share. `functions/stories/[id].js` fills in the share preview from `pubstory:<id>`; stories appear here when an admin approves them in the app | Stories |
 | `/loan` | Loan program (closed; linked from About and the footer) | |
 
 Anything still to be supplied by Rafiki is shown on the page in a yellow "To add" box or tag.
@@ -35,7 +37,7 @@ Pages use the WebP files in `img/` (photos at most 1200px, logos 120px tall). Th
 - **Numbers:** the figures below are consistent across the site but still need confirming with Rafiki's real data.
   - Totals (`progress.html` data props, `index.html` counters): 300 wells completed, 12 under construction, 780,500+ people, 230,000+ households, 10,000 households a month goal, about 2,600 people per well, $5 per person.
   - Per country (`var CTRY` in every page): Kenya 120 + 6, Tanzania 60 + 2, Uganda 60 + 2, Malawi 60 + 2 wells; people 312,200 / 156,100 / 156,100 / 156,100.
-  - The 312 projects on `/stories` and `/progress` are sample data (`var PROJECTS`), generated in the page script. Replace with real projects.
+  - The 312 projects on `/projects?view=all` and `/progress` are sample data (`var PROJECTS`), generated in the page script. Replace with real projects.
 - **Team:** Uganda and Malawi directors and the Tanzania, Uganda and Malawi office details are hidden until added to `var OFFICES`.
 - **Newsletter:** the home page box posts to `/api/subscribe` (`functions/api/subscribe.js`), so visitors never leave the site or see the list provider. Set two Cloudflare secrets: `MAILCHIMP_API_KEY` (Mailchimp → Profile → Extras → API keys; audience id `7e30ec875e` is in the function) and `TURNSTILE_SECRET` (Cloudflare → Turnstile widget). The widget's public site key goes in `var TURNSTILE_SITEKEY` in `index.html`. Until the API key is set, signups wait in the FEED KV store (`sub:<email>`) and are added on the first signup after it is.
 
