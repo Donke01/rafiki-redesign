@@ -3,7 +3,7 @@
 // monday.com is a fake board kept in memory. Run: node --test tests/*.test.mjs
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { onRequestPost } from '../functions/api/story.js';
+import { onRequestPost, onRequestGet } from '../functions/api/story.js';
 import { onRequestGet as storiesGet } from '../functions/api/stories.js';
 import { onRequestGet as photoGet, width } from '../functions/api/stories/photo.js';
 import { STORY_COL } from '../lib/monday.js';
@@ -157,4 +157,18 @@ test('a story approved before Stories 2 (plain text, no document) is published a
   const r = await post(env, '2222', { action: 'publish', id: '301' });
   assert.equal(r.ok, true); const s = (await pub(env, '?id=301')).story;
   assert.equal(s.sections.length, 1); assert.equal(s.sections[0].body, 'Old words, paragraph one.\n\nParagraph two.'); assert.ok(s.pull);
+});
+
+test('building-stage photos: offered to the writer, shown in the app, placed in the draft and published', async () => {
+  const { env, store } = setup();
+  store.m.set('pinstage:301', JSON.stringify({ id: '301', stage: 'handed', hist: [{ stage: 'planned', at: '2025-11-01T00:00:00Z', photos: [] }, { stage: 'walls', at: '2026-02-01T00:00:00Z', note: 'Walls up to window level', photos: ['7701'] }, { stage: 'handed', at: '2026-03-02T00:00:00Z', note: '', photos: ['7702'] }] }));
+  const { d } = await collected(env, false);
+  assert.ok(d.story.pool.some(p => p.id === '7701' && p.row === 'stage:walls' && p.cap === 'Raising the walls, February 2026'));
+  assert.ok(d.story.doc.sections.some(x => x.h === 'Raising the walls' && x.photo && x.photo.id === '7701'));
+  const r = await onRequestGet({ env, request: new Request('https://pin.example/api/story?id=301&asset=7701', { headers: H('3333') }) });
+  assert.equal(r.status, 200, 'the app can show a stage photo');
+  await post(env, '2222', { action: 'approve', id: '301' });
+  const s = (await pub(env, '?id=301')).story;
+  assert.ok(s.photos.includes('7701')); assert.equal(s.facts.stages.find(g => g.stage === 'walls').photo.id, '7701');
+  assert.equal((await photo(env, '?id=301&asset=7701')).status, 200);
 });

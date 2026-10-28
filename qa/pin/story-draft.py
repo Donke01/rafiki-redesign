@@ -84,6 +84,8 @@ def s_look(check):
                     check(pg.locator('.sty-doc .sty-fig img.in').count() == 5, '[%s] 5 section photos shown (%d)' % (t, pg.locator('.sty-doc .sty-fig img.in').count()))
                     bad = M.wrapcheck(pg, '#paneStory .sty-doc'); check(not bad, '[%s] no word split or cut (%s)' % (t, bad))
                     ov = pg.evaluate(OVERLAP); check(not ov, '[%s] no overlaps, nothing off-screen (%s)' % (t, ov))
+                    hid = pg.evaluate("[...document.querySelectorAll('.sty-doc textarea')].filter(t => t.scrollHeight > t.clientHeight + 2).map(t => t.id)")
+                    check(not hid, '[%s] every edit box shows all its words (%s)' % (t, hid))
                     label = 'Idhinisha na uchapishe' if lang == 'sw' else 'Approve and publish'
                     check(pg.inner_text('[data-testid=sty_approve]').strip() == label, '[%s] the button says “%s”' % (t, label))
                     pg.locator('[data-testid=sty_doc]').screenshot(path=os.path.join(OUT, 'draft-admin-%s.png' % t))
