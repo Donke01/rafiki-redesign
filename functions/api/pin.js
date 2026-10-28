@@ -5,6 +5,7 @@
 //   GET  /api/pin?id=<item>     → the last pin made with the app on that project (for undo)
 //   GET  /api/pin?history=<item>→ the latest notes on that project in monday.com, with their files
 //   GET  /api/pin?activity=1    → what the team did with the app in the last 30 days
+//   (admins: each project also has donors: [names], from the board's "Donors" tags; never in public output)
 //   GET  /api/pin?team=1        → who is on the team: name, home country, phone (if the office added one), last seen, photo
 //   (the main answer also has photos: { Name: url } and me.photo, from /api/team-photo)
 //   POST /api/pin  { action: "pin",   id, lat, lng, acc, how, by }   saves "lat, lng" into "GPS Coordinates"
@@ -260,13 +261,14 @@ export async function onRequestGet({ request, env, waitUntil }) {
       if (chk.who) { const mine = t.find(p => sameName(p.name, chk.who)), x = list.find(y => sameName(y.name, chk.who)); if (mine && x) x.email = mine.email || ''; }
       return json({ ok: true, team: list.sort((a, b) => a.name.localeCompare(b.name)) }, 200);
     }
-    const feed = await getFeed(env, waitUntil);
-    const projects = (feed.projects || []).map(p => ({
+    // the full feed, with who funded each project (the board's "Donors" tags): admins only (Office › Donors, the Projects filter)
+    const feed = await getFeed(env, waitUntil, { donors: !!chk.admin });
+    const projects = (feed.projects || []).map(p => Object.assign({
       id: p.id, title: p.title, country: p.country, ck: p.ck, area: p.area || '', type: p.type, status: p.status, year: p.year || null,
       gps: p.gps || null, photo: (p.photos && p.photos[0]) || null, pump: p.pump || '',
       // people served (the board's number; admins get the latest visit count below): the map's heat layer
       people: p.people || null
-    }));
+    }, chk.admin && Array.isArray(p.donors) && p.donors.length ? { donors: p.donors.slice() } : {}));
     if (chk.who && waitUntil) waitUntil(seen(env, chk.who));
     const repairs = await getJson(env, 'pinrepairs', {});
     Object.keys(repairs).forEach(k => { if (repairs[k] && repairs[k].t) repairs[k].t = strip(repairs[k].t); });
