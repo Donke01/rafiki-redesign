@@ -19,6 +19,8 @@
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
+<script>/* /projects?cat=…&status=… (any project-list filter, or ?project=<id>) is the list of every project. On Cloudflare the server
+   answers with that list directly (functions/projects.js); on any other host the browser goes to it here. */(function(){if(/[?&](country|cat|kind|status|serve|region|q|year|pump|project|view)=/.test(location.search))location.replace('/project-list'+location.search+location.hash);})();</script>
 <script>window.__resources = {};</script>
 <script>/* Placeholders (yellow 'To add' boxes) show on previews and hide on the live domain. ?live or ?preview overrides. */(function(){var q=location.search,live=/(^|\.)rafikioutreach\.org$/.test(location.hostname);if(/[?&]preview\b/.test(q)||(!live&&!/[?&]live\b/.test(q)))document.documentElement.className+=' draft-mode';})();</script>
 <script>/* coming from the country picker: keep the screen blue until the wipe finishes on this page */try{if(sessionStorage.getItem('rfWipe'))document.documentElement.className+=' cx-arriving';}catch(e){}</script>

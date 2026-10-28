@@ -4,17 +4,17 @@
 <meta charset="utf-8">
 <meta name="format-detection" content="telephone=no">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Project stories: every well and beyond — RAFIKI Outreach</title>
+<title>All projects: every well and beyond — RAFIKI Outreach</title>
 <meta name="description" content="Browse every RAFIKI Outreach project: borehole wells and water collection first, plus the schools, clinics, children's homes and livelihood projects we build beyond the well.">
-<link rel="canonical" href="https://www.rafikioutreach.org/stories">
+<link rel="canonical" href="https://www.rafikioutreach.org/projects">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta name="theme-color" content="#098BE1">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="RAFIKI Outreach">
-<meta property="og:title" content="Project stories: every well and beyond — RAFIKI Outreach">
+<meta property="og:title" content="All projects: every well and beyond — RAFIKI Outreach">
 <meta property="og:description" content="Browse every RAFIKI Outreach project: borehole wells and water collection first, plus the schools, clinics, children's homes and livelihood projects we build beyond the well.">
-<meta property="og:url" content="https://www.rafikioutreach.org/stories">
+<meta property="og:url" content="https://www.rafikioutreach.org/projects">
 <meta property="og:image" content="https://www.rafikioutreach.org/img/og/w-field3.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -1192,7 +1192,7 @@ a.pj-card{text-decoration:none}
 <header class="wrap hd">
 <div class="hd-tile" style="{{tileShadow}}">
 <a href="/" aria-label="RAFIKI Outreach home" class="hd-logo"><img src="/img/logo-dark-bold.webp" alt="RAFIKI Outreach"></a>
-<nav aria-label="Main" class="hd-links"><a class="hl-link" href="/about">About</a><a class="hl-link" href="/#where-we-work">Where we work</a><a class="hl-link" href="/projects">Projects</a><a class="hl-link" href="/water">Approach</a><a class="hl-link" href="/progress">Impact</a><a class="hl-link" href="/donate">Get involved</a><a class="hl-link on" href="/stories">Stories</a></nav>
+<nav aria-label="Main" class="hd-links"><a class="hl-link" href="/about">About</a><a class="hl-link" href="/#where-we-work">Where we work</a><a class="hl-link on" href="/projects">Projects</a><a class="hl-link" href="/water">Approach</a><a class="hl-link" href="/progress">Impact</a><a class="hl-link" href="/donate">Get involved</a><a class="hl-link" href="/stories">Stories</a></nav>
 <div class="hd-act">
 <div class="cs"><button type="button" class="cs-btn" onClick="{{toggleCs}}" aria-expanded="{{csExpanded}}" aria-haspopup="true" aria-label="Country: {{cName}}"><sc-if value="{{cAllOn}}" hint-placeholder-val="{{false}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18"></path><path d="M12 3a14 14 0 010 18"></path><path d="M12 3a14 14 0 000 18"></path></svg><span class="cs-v">All</span></sc-if><sc-if value="{{cFlagOn}}" hint-placeholder-val="{{true}}"><img class="cs-flag" src="{{cFlag}}" loading="lazy" alt="" width="30" height="20"></sc-if><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></button><sc-if value="{{csOpen}}" hint-placeholder-val="{{false}}"><div class="cs-pop" role="menu"><span class="cs-h">Choose a country</span><sc-for list="{{csList}}" as="c" hint-placeholder-count="5"><button type="button" role="menuitemradio" aria-checked="{{c.on}}" class="{{c.cls}}" onClick="{{c.pick}}"><span>{{c.n}}</span><small>{{c.sub}}</small></button></sc-for></div></sc-if></div>
 <a class="hd-donate" href="/donate">Donate<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.7C8 7.5 6 10.7 6 14a6 6 0 0012 0c0-3.3-2-6.5-6-11.3z"></path></svg></a>
@@ -1200,13 +1200,13 @@ a.pj-card{text-decoration:none}
 </div>
 </div>
 <sc-if value="{{menuOpen}}" hint-placeholder-val="{{false}}">
-<nav id="bento-menu" aria-label="Mobile" class="mm-tile"><a class="mm-link" href="/" onClick="{{closeMenu}}">Home<span aria-hidden="true">→</span></a><a class="mm-link" href="/about" onClick="{{closeMenu}}">About<span aria-hidden="true">→</span></a><a class="mm-link" href="/#where-we-work" onClick="{{closeMenu}}">Where we work<span aria-hidden="true">→</span></a><a class="mm-link" href="/projects" onClick="{{closeMenu}}">Our projects<span aria-hidden="true">→</span></a><a class="mm-link" href="/water" onClick="{{closeMenu}}">Our approach<span aria-hidden="true">→</span></a><a class="mm-link" href="/progress" onClick="{{closeMenu}}">Our impact<span aria-hidden="true">→</span></a><a class="mm-link" href="/donate" onClick="{{closeMenu}}">Get involved<span aria-hidden="true">→</span></a><a class="mm-link on" href="/stories" onClick="{{closeMenu}}">Stories &amp; updates<span aria-hidden="true">→</span></a><div class="mm-cs"><span class="mm-lab">Country</span><div class="mm-cs-row"><sc-for list="{{csList}}" as="c" hint-placeholder-count="5"><button type="button" class="{{c.pill}}" aria-pressed="{{c.on}}" onClick="{{c.pick}}">{{c.pn}}</button></sc-for></div></div><div class="mm-contact"><span class="mm-lab">Get in touch</span><a class="mm-mail" href="mailto:info@rafikioutreach.org"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"></rect><path d="M3.5 7l8.5 6 8.5-6"></path></svg>info@rafikioutreach.org</a><div class="mm-social"><a class="soc soc-fb" href="https://www.facebook.com/rafikioutreach" target="_blank" rel="noopener" aria-label="RAFIKI Outreach on Facebook"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="#FFFFFF" d="M13.5 21v-7.5h2.6l.4-3h-3V8.6c0-.9.3-1.5 1.6-1.5h1.6V4.4c-.3 0-1.2-.1-2.3-.1-2.3 0-3.9 1.4-3.9 4V10.5H8v3h2.5V21h3z"></path></svg></a>
+<nav id="bento-menu" aria-label="Mobile" class="mm-tile"><a class="mm-link" href="/" onClick="{{closeMenu}}">Home<span aria-hidden="true">→</span></a><a class="mm-link" href="/about" onClick="{{closeMenu}}">About<span aria-hidden="true">→</span></a><a class="mm-link" href="/#where-we-work" onClick="{{closeMenu}}">Where we work<span aria-hidden="true">→</span></a><a class="mm-link on" href="/projects" onClick="{{closeMenu}}">Our projects<span aria-hidden="true">→</span></a><a class="mm-link" href="/water" onClick="{{closeMenu}}">Our approach<span aria-hidden="true">→</span></a><a class="mm-link" href="/progress" onClick="{{closeMenu}}">Our impact<span aria-hidden="true">→</span></a><a class="mm-link" href="/donate" onClick="{{closeMenu}}">Get involved<span aria-hidden="true">→</span></a><a class="mm-link" href="/stories" onClick="{{closeMenu}}">Stories &amp; updates<span aria-hidden="true">→</span></a><div class="mm-cs"><span class="mm-lab">Country</span><div class="mm-cs-row"><sc-for list="{{csList}}" as="c" hint-placeholder-count="5"><button type="button" class="{{c.pill}}" aria-pressed="{{c.on}}" onClick="{{c.pick}}">{{c.pn}}</button></sc-for></div></div><div class="mm-contact"><span class="mm-lab">Get in touch</span><a class="mm-mail" href="mailto:info@rafikioutreach.org"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"></rect><path d="M3.5 7l8.5 6 8.5-6"></path></svg>info@rafikioutreach.org</a><div class="mm-social"><a class="soc soc-fb" href="https://www.facebook.com/rafikioutreach" target="_blank" rel="noopener" aria-label="RAFIKI Outreach on Facebook"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="#FFFFFF" d="M13.5 21v-7.5h2.6l.4-3h-3V8.6c0-.9.3-1.5 1.6-1.5h1.6V4.4c-.3 0-1.2-.1-2.3-.1-2.3 0-3.9 1.4-3.9 4V10.5H8v3h2.5V21h3z"></path></svg></a>
 <a class="soc soc-ig" href="https://www.instagram.com/rafikioutreach" target="_blank" rel="noopener" aria-label="RAFIKI Outreach on Instagram"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.3" cy="6.7" r="1" fill="#FFFFFF" stroke="none"></circle></svg></a><a class="soc soc-yt" href="https://www.youtube.com/@rafikioutreach" target="_blank" rel="noopener" aria-label="RAFIKI Outreach on YouTube"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="#FFFFFF" d="M21.6 7.2a2.5 2.5 0 00-1.76-1.77C18.27 5 12 5 12 5s-6.27 0-7.84.43A2.5 2.5 0 002.4 7.2 26 26 0 002 12a26 26 0 00.4 4.8 2.5 2.5 0 001.76 1.77C5.73 19 12 19 12 19s6.27 0 7.84-.43a2.5 2.5 0 001.76-1.77A26 26 0 0022 12a26 26 0 00-.4-4.8zM10 15V9l5.2 3L10 15z"></path></svg></a></div></div></nav>
 </sc-if>
 </header>
 </div>
 <div class="hd-space" aria-hidden="true"></div>
-<sc-if value="{{listView}}" hint-placeholder-val="{{true}}"><section class="xh" aria-label="Project stories"><div class="wrap xh-in"><nav class="xh-crumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><span>Stories &amp; updates</span></nav><h1 class="xh-h1">Every well, and beyond</h1><p class="xh-p">Browse every project RAFIKI has built with communities. Water comes first: borehole wells and water collection. Beyond the well, we also build schools, clinics, children's homes and livelihood projects. Each one shows where it is, its status, when it was built and photos.</p><div class="xh-row"><span class="xh-note">Showing projects in <b>{{cName}}</b></span></div><a class="pj-link" href="/progress">See our progress in numbers →</a></div></section></sc-if>
+<sc-if value="{{listView}}" hint-placeholder-val="{{true}}"><section class="xh" aria-label="All projects"><div class="wrap xh-in"><nav class="xh-crumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><a href="/projects">Our projects</a><span aria-hidden="true">/</span><span>All projects</span></nav><h1 class="xh-h1">Every well, and beyond</h1><p class="xh-p">Browse every project RAFIKI has built with communities. Water comes first: borehole wells and water collection. Beyond the well, we also build schools, clinics, children's homes and livelihood projects. Each one shows where it is, its status, when it was built and photos.</p><div class="xh-row"><span class="xh-note">Showing projects in <b>{{cName}}</b></span></div><a class="pj-link" href="/progress">See our progress in numbers →</a></div></section></sc-if>
 <main tabindex="-1" class="wrap pj-main" id="top">
 <sc-if value="{{listView}}" hint-placeholder-val="{{true}}">
 <sc-if value="{{missing}}" hint-placeholder-val="{{false}}"><p class="pj-miss" role="status">We couldn't find that project. You can browse all our projects below.</p></sc-if>
@@ -1290,8 +1290,9 @@ function catOf(p) {
 }
 function placesKit() { return window.rafikiPlaces || { names: {}, serveNames: {}, region: function () { return ''; }, serves: function () { return ''; } }; }
 // The explorer URL (shared by every page that links here):
-// /stories?country=&cat=&kind=&status=&serve=&region=&q=&year=&project=  (+ pump=, only set from this page)
-var URL_KEYS = { country: 1, cat: 1, kind: 1, status: 1, serve: 1, region: 1, q: 1, year: 1, pump: 1, project: 1 };
+// /projects?country=&cat=&kind=&status=&serve=&region=&q=&year=&project=  (+ pump=, only set from this page; view=all when no filter is set)
+// Old links to /stories?… are sent here with the same parameters (functions/stories/index.js, and stories.html in the browser).
+var URL_KEYS = { country: 1, cat: 1, kind: 1, status: 1, serve: 1, region: 1, q: 1, year: 1, pump: 1, project: 1, view: 1 };
 function readQuery(search) {
   var o = {};
   String(search || '').replace(/^\?/, '').split('&').forEach(function (kv) {
@@ -1438,7 +1439,7 @@ class Component extends DCLogic {
     // every filter in the explorer URL (see URL_KEYS); with none, every project shows
     Object.assign(this.state, urlFilters(window.location.search));
     if (!this.state.cAll) this.state.ctryPicked = true;
-    // deep link to one project: /stories?project=<id> (share links /project/<id> land here); opened once the feed loads
+    // deep link to one project: /projects?project=<id> (share links /project/<id> land here); opened once the feed loads
     this._wantId = this.urlProject();
   }
   urlProject() { return String(readQuery(window.location.search).project || '').trim(); }
@@ -1466,7 +1467,8 @@ class Component extends DCLogic {
       var k = kv.split('=')[0]; try { k = decodeURIComponent(k); } catch (e) {}
       return !URL_KEYS[k];
     });
-    var qs = keep.concat(filterQuery(this.state, det ? String(det.id) : '') || []).filter(Boolean).join('&');
+    var fq = filterQuery(this.state, det ? String(det.id) : '') || 'view=all';
+    var qs = keep.concat(fq).filter(Boolean).join('&');
     if ('?' + qs === (window.location.search || '?') || (!qs && !window.location.search)) return;
     var url = window.location.pathname + (qs ? '?' + qs : '') + (window.location.hash || '');
     try { if (push) window.history.pushState({ rfPushed: push === 'list' }, '', url); else window.history.replaceState(window.history.state, '', url); } catch (e) {}
@@ -1684,7 +1686,7 @@ class Component extends DCLogic {
       var pool = near.length ? near : same.filter(function (p) { return p.ck === det.ck; });
       var where = near.length ? P.names[det.region][1] : det.country;
       var noun = GROUP_NOUN[det.cat] + ' projects';
-      var moreHref = '/stories?' + filterQuery(Object.assign({}, NO_FILTERS, { cat: det.cat, cAll: !det.ck, ctry: det.ck, region: near.length ? det.region : 'all' }));
+      var moreHref = '/projects?' + filterQuery(Object.assign({}, NO_FILTERS, { cat: det.cat, cAll: !det.ck, ctry: det.ck, region: near.length ? det.region : 'all' }));
       d = { kick: [det.water ? det.type : det.grp, det.year, det.label].filter(Boolean).join(' · '), title: det.title, place: [det.area, det.country].filter(Boolean).join(', '), status: det.label,
         track: STEPS.map(function (l, k) { var cur = k === at; return { l: l, cur: cur ? 'step' : 'false', cls: 'pd-tk' + (k < at ? ' done' : (cur ? ' now' : '')) }; }),
         facts: facts,
@@ -1698,7 +1700,7 @@ class Component extends DCLogic {
         hasMore: pool.length > 0, moreLead: 'Other ' + noun + ' in ' + where + '.',
         moreHref: moreHref, moreAll: 'See all ' + num(pool.length + 1) + ' ' + noun + ' in ' + where + ' →', moreGo: function (e) { self.follow(e, moreHref); },
         more: pool.slice(0, 4).map(function (p) {
-          var href = '/stories?project=' + encodeURIComponent(p.id), ph = p.photos[0];
+          var href = '/projects?project=' + encodeURIComponent(p.id), ph = p.photos[0];
           return { href: href, title: p.title, kick: [p.area || p.country, p.year, p.label].filter(Boolean).join(' · '), hasImg: !!ph, img: ph ? photoUrl(ph, 480) : '', go: function (e) { self.follow(e, href); } };
         }) };
     }
@@ -1733,7 +1735,7 @@ class Component extends DCLogic {
       cards: shown.map(function (p, i) {
         var ph = p.photos[0];
         return { hasPump: !!p.pump, kick: p.area ? p.area + ' · ' + p.country : p.country, title: p.title, loc: people(p), type: p.typeShow, hasType: !!p.typeShow && p.typeShow !== p.grp, grp: p.grp, pump: p.pump,
-          water: p.water, notWater: !p.water, href: '/stories?' + filterQuery(s, String(p.id)),
+          water: p.water, notWater: !p.water, href: '/projects?' + filterQuery(s, String(p.id)),
           hasYear: !!p.year, year: p.year, hasImg: !!ph, noImg: !ph, img: ph ? photoUrl(ph, 480) : '', srcset: ph ? photoUrl(ph, 480) + ' 480w, ' + photoUrl(ph, 960) + ' 960w' : '',
           alt: ph ? 'Photo from ' + p.title : '', country: p.country, status: p.label, stCls: p.status === 'Completed' ? 'ok' : (p.status === 'Upcoming' ? 'up' : 'uc'),
           aria: 'Open project: ' + p.title + ', ' + p.grp + ', ' + p.label,

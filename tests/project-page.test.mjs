@@ -27,7 +27,7 @@ const { onRequestGet } = await import('../functions/project/[id].js');
 const run = (id, e = env) => onRequestGet({ env: e, params: { id }, request: new Request('https://example.org/project/' + id), waitUntil: () => {} });
 const meta = (html, attr, name) => { const m = new RegExp('<meta ' + attr + '="' + name + '" content="([^"]*)"').exec(html); return m && m[1]; };
 
-test('known completed project: preview tags and redirect to /stories', async () => {
+test('known completed project: preview tags and redirect to the project list', async () => {
   const r = await run('11030694394');
   assert.equal(r.status, 200);
   assert.match(r.headers.get('Content-Type'), /text\/html/);
@@ -39,10 +39,10 @@ test('known completed project: preview tags and redirect to /stories', async () 
   assert.equal(meta(h, 'property', 'og:image'), 'https://example.org/api/photo/3210378757?w=1600');
   assert.equal(meta(h, 'property', 'og:url'), 'https://example.org/project/11030694394');
   assert.equal(meta(h, 'name', 'twitter:card'), 'summary_large_image');
-  assert.match(h, /<link rel="canonical" href="https:\/\/example.org\/stories\?project=11030694394">/);
-  assert.match(h, /<meta http-equiv="refresh" content="0; url=\/stories\?project=11030694394">/);
-  assert.match(h, /location\.replace\("\/stories\?project=11030694394"\)/);
-  assert.match(h, /<a href="\/stories\?project=11030694394">/);
+  assert.match(h, /<link rel="canonical" href="https:\/\/example.org\/projects\?project=11030694394">/);
+  assert.match(h, /<meta http-equiv="refresh" content="0; url=\/projects\?project=11030694394">/);
+  assert.match(h, /location\.replace\("\/projects\?project=11030694394"\)/);
+  assert.match(h, /<a href="\/projects\?project=11030694394">/);
   assert.doesNotMatch(h, /\$\d/); // no cost on a completed project
 });
 
@@ -77,7 +77,7 @@ test('Beyond the well projects get a share page too, worded by group', { skip: !
     const h = await r.text();
     assert.equal(meta(h, 'name', 'description'), desc, id);
     assert.equal(meta(h, 'property', 'og:url'), 'https://example.org/project/' + id);
-    assert.match(h, new RegExp('location\\.replace\\("/stories\\?project=' + id + '"\\)'));
+    assert.match(h, new RegExp('location\\.replace\\("/projects\\?project=' + id + '"\\)'));
   }
   const h = await (await run('12480701913')).text();
   assert.equal(meta(h, 'property', 'og:image'), 'https://example.org/img/w-field3.jpg');
@@ -99,16 +99,16 @@ test('every non-water project in the feed has a share page', { skip: !process.en
   }
 });
 
-test('unknown and malformed ids go to /stories', async () => {
+test('unknown and malformed ids go to the project list', async () => {
   for (const id of ['999999', 'abc', '1<2']) {
     const r = await run(id);
     assert.equal(r.status, 302, id);
-    assert.equal(r.headers.get('Location'), '/stories', id);
+    assert.equal(r.headers.get('Location'), '/projects?view=all', id);
   }
 });
 
-test('no feed configured: straight to the stories page for that project', async () => {
+test('no feed configured: straight to that project in the project list', async () => {
   const r = await run('11030694394', {});
   assert.equal(r.status, 302);
-  assert.equal(r.headers.get('Location'), '/stories?project=11030694394');
+  assert.equal(r.headers.get('Location'), '/projects?project=11030694394');
 });
