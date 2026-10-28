@@ -53,6 +53,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -60,7 +64,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 @Composable
-fun Btn(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, icon: String? = null, enabled: Boolean = true, light: Boolean = false, ok: Boolean = false, small: Boolean = false, saved: String? = null, color: Color? = null, outline: Boolean = false) {
+fun Btn(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, icon: String? = null, enabled: Boolean = true, light: Boolean = false, ok: Boolean = false, small: Boolean = false, saved: String? = null, color: Color? = null, outline: Boolean = false, busy: String? = null) {
     val src = remember { MutableInteractionSource() }
     val pressed by src.collectIsPressedAsState()
     if (saved != null) {
@@ -72,21 +76,27 @@ fun Btn(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, icon: 
         }
         return
     }
-    val bg: Brush = when { !enabled -> SolidColor(C.off); light -> SolidColor(if (C.glassy) C.glass2 else C.card); ok -> OkBrush; color != null -> SolidColor(color); else -> C.primary }
+    // busy: a turning circle and what is happening ("Saving…"), in the button's own colours; a light button that can't be
+    // used yet stays light and fades instead of turning grey
+    val working = busy != null
+    val bg: Brush = when { !enabled && !working && !light -> SolidColor(C.off); light -> SolidColor(if (C.glassy) C.glass2 else C.card); ok -> OkBrush; color != null -> SolidColor(color); else -> C.primary }
     val fg = if (light) C.ink else Color.White
     Row(
         modifier
+            .then(if (!enabled && !working && light) Modifier.alpha(0.45f) else Modifier)
             .scale(if (pressed) 0.97f else 1f)
             .clip(RoundedCornerShape(999.dp))
             .background(bg)
             .then(if (light) Modifier.border(1.dp, if (C.glassy && !outline) C.glassEdge else C.edge, RoundedCornerShape(999.dp)) else Modifier)
-            .clickable(enabled = enabled, interactionSource = src, indication = androidx.compose.material3.ripple(), role = Role.Button, onClick = onClick)
+            .then(if (working) Modifier.semantics { stateDescription = busy ?: "" } else Modifier)
+            .clickable(enabled = enabled && !working, interactionSource = src, indication = androidx.compose.material3.ripple(), role = Role.Button, onClick = onClick)
             .heightIn(min = if (small) 44.dp else 52.dp)
             .padding(horizontal = if (small) 16.dp else 22.dp),
         horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically,
     ) {
-        if (icon != null) { if (icon.startsWith("b:")) BrandIcon(icon.drop(2), if (small) 20.dp else 22.dp) else Icon(Ic.get(icon), null, tint = fg, modifier = Modifier.size(if (small) 18.dp else 20.dp)); Spacer(Modifier.width(8.dp)) }
-        Text(text, color = fg, style = if (small) MaterialTheme.typography.labelMedium.copy(fontSize = 14.sp) else MaterialTheme.typography.labelLarge, textAlign = TextAlign.Center)
+        if (working) { androidx.compose.material3.CircularProgressIndicator(Modifier.size(if (small) 18.dp else 20.dp).testTag("btn_busy"), color = fg, strokeWidth = 2.5.dp, trackColor = fg.copy(alpha = .2f)); Spacer(Modifier.width(10.dp)) }
+        else if (icon != null) { if (icon.startsWith("b:")) BrandIcon(icon.drop(2), if (small) 20.dp else 22.dp) else Icon(Ic.get(icon), null, tint = fg, modifier = Modifier.size(if (small) 18.dp else 20.dp)); Spacer(Modifier.width(8.dp)) }
+        Text(busy ?: text, color = fg, style = if (small) MaterialTheme.typography.labelMedium.copy(fontSize = 14.sp) else MaterialTheme.typography.labelLarge, textAlign = TextAlign.Center)
     }
 }
 

@@ -61,9 +61,17 @@ class StoriesHubTest {
             .put("104", JSONObject().put("st", "collecting").put("n", 3).put("b", 0).put("i", 0).put("a", 1).put("c", "not-yet").put("at", ago(30)))
             .put("107", JSONObject().put("st", "published").put("n", 6).put("b", 2).put("i", 1).put("a", 2).put("c", "received").put("at", ago(300))))
         .put("repairs", JSONObject()).put("visits", JSONObject()).put("jobs", JSONArray()).put("assigned", JSONArray()).put("confirmed", JSONObject())
-    private fun story(id: String, st: String) = JSONObject().put("id", id).put("status", st).put("consent", "not-yet").put("answers", JSONObject().put("q1", "Before, we walked 4 km"))
+    private fun story0(id: String, st: String) = JSONObject().put("id", id).put("status", st).put("consent", "not-yet").put("answers", JSONObject().put("q1", "Before, we walked 4 km"))
         .put("quote", "").put("quoteBy", "").put("credit", "").put("text", "").put("photos", JSONObject().put("before", JSONArray()).put("progress", JSONArray()).put("after", JSONArray()))
         .put("missing", JSONArray()).put("canApprove", false).put("prompts", JSONObject())
+    private fun story(id: String, st: String) = story0(id, st).apply {
+        if (st == "published") {
+            put("text", "Water at the school gate").put("pub", JSONObject().put("url", "https://test.rafikioutreach.org/stories/107-water").put("at", ago(1)))
+            put("doc", JSONObject().put("v", 1).put("title", "Water at the school gate").put("dek", "How a dry hillside got its own clean water.").put("at", ago(2)).put("by", "Reid").put("model", "template")
+                .put("pull", JSONObject().put("quote", "Now we drink clean water every day.").put("who", "Mary"))
+                .put("sections", org.json.JSONArray().put(JSONObject().put("h", "The long walk").put("body", "Families walked four kilometres.\n\nThe water was brown.")).put(JSONObject().put("h", "Today").put("body", "Children fill their cans at the gate."))))
+        }
+    }
 
     private fun model(admin: Boolean, chat: Int = 0): AppModel {
         Onb.enabled = false; Motion.on = false
@@ -182,6 +190,22 @@ class StoriesHubTest {
         rule.onNodeWithTag("sh_f_draft").assertIsSelected()
         // back from Stories: Map home
         back(); waitTag("map_home"); rule.onNodeWithTag("nav_map").assertIsSelected()
+    }
+
+    @Test fun a_story_with_words_view_or_edit() {
+        val m = model(admin = true); start(m)
+        tap("nav_stories"); waitTag("stories"); tap("sh_f_published")
+        tap("sh_p_107"); waitTag("sh_choose"); assertTrue(tagged("sh_view") && tagged("sh_edit")); shot("sh-10-choose")
+        tap("sh_view"); waitTag("sh_read_title")
+        assertEquals("Water at the school gate", text("sh_read_title")); assertTrue("Open on the website at the top", tagged("sh_web"))
+        val web = rule.onNodeWithTag("sh_web").fetchSemanticsNode(); val back = rule.onNodeWithTag("sh_read_back").fetchSemanticsNode()
+        assertTrue("same top bar", kotlin.math.abs(web.positionInRoot.y + web.size.height / 2 - (back.positionInRoot.y + back.size.height / 2)) < 4 * rule.density.density)
+        shot("sh-11-read")
+        back(); settle(); assertFalse(tagged("sh_read_title")); assertTrue(tagged("stories"))
+        tap("sh_p_107"); waitTag("sh_edit"); tap("sh_edit"); waitTag("story_status")
+        back(); waitTag("stories")
+        // still collecting: straight to the writer
+        tap("sh_f_need"); tap("sh_p_104"); waitTag("story_status"); assertFalse(tagged("sh_choose"))
     }
 
     // --- 2. Write a story: the project picker ---------------------------------------------------------------------------

@@ -46,6 +46,7 @@ internal fun StoryDraftCard(m: AppModel, p: Project, st: Story, admin: Boolean, 
     val doc = st.doc
     val live = st.live
     var busy by remember { mutableStateOf(false) }
+    var work by remember { mutableStateOf<String?>(null) }   // what is being sent now: save, text, approve, back
     var askApprove by remember { mutableStateOf(false) }
     var askOff by remember { mutableStateOf(false) }
     var pick by remember { mutableStateOf<Int?>(null) }
@@ -108,20 +109,22 @@ internal fun StoryDraftCard(m: AppModel, p: Project, st: Story, admin: Boolean, 
         }
 
         // --- what can be done -------------------------------------------------------------------------------------------
-        if (!live) Btn(if (busy) t("Drafting…", "Inaandika…") else if (st.text.isBlank() && doc == null) t("Draft the story", "Andika rasimu ya hadithi") else t("Draft it again", "Andika rasimu upya"),
+        if (!live) Btn(if (st.text.isBlank() && doc == null) t("Draft the story", "Andika rasimu ya hadithi") else t("Draft it again", "Andika rasimu upya"),
             { if (st.text.isNotBlank() || doc != null) draftAgain() else { busy = true; post(JSONObject().put("action", "draft"), t("Draft ready ✓", "Rasimu iko tayari ✓")) { busy = false } } },
-            Modifier.padding(top = 14.dp).fillMaxWidth().testTag("story_draft"), icon = "spark", enabled = !busy, light = st.text.isNotBlank() || doc != null)
+            Modifier.padding(top = 14.dp).fillMaxWidth().testTag("story_draft"), icon = "spark", enabled = work == null, light = st.text.isNotBlank() || doc != null, busy = if (busy) t("Drafting…", "Inaandika…") else null)
         // the completion date the story will use (monday.com)
         if (!live && st.status in setOf("not-started", "collecting", "draft")) monthText(p.done)?.let { d ->
             Text(t("Finished: $d (from monday.com)", "Ilikamilika: $d (kutoka monday.com)"), style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 6.dp).testTag("story_finished"))
         }
         if (admin && doc != null) Btn(if (live) t("Save and update the website", "Hifadhi na usasishe tovuti") else t("Save changes", "Hifadhi mabadiliko"),
-            { post(JSONObject().put("action", "doc").put("doc", edited().out()), if (live) t("Saved and updated on the website ✓", "Imehifadhiwa na kusasishwa kwenye tovuti ✓") else t("Saved ✓", "Imehifadhiwa ✓")) {} },
-            Modifier.padding(top = 8.dp).fillMaxWidth().testTag("story_doc_save"), icon = "check", light = true, small = true, enabled = dirty)
-        else if (admin && doc == null && st.text.isNotBlank() && text != st.text && !live) Btn(t("Save text", "Hifadhi maandishi"), { post(JSONObject().put("action", "text").put("text", text), t("Saved ✓", "Imehifadhiwa ✓")) {} },
-            Modifier.padding(top = 8.dp).fillMaxWidth().testTag("story_text_save"), icon = "check", light = true, small = true)
+            { work = "save"; post(JSONObject().put("action", "doc").put("doc", edited().out()), if (live) t("Saved and updated on the website ✓", "Imehifadhiwa na kusasishwa kwenye tovuti ✓") else t("Saved ✓", "Imehifadhiwa ✓")) { work = null } },
+            Modifier.padding(top = 8.dp).fillMaxWidth().testTag("story_doc_save"), icon = "check", light = !dirty, small = true, enabled = dirty && work == null,
+            busy = if (work == "save") (if (live) t("Updating the website…", "Inasasisha tovuti…") else t("Saving…", "Inahifadhi…")) else null)
+        else if (admin && doc == null && st.text.isNotBlank() && text != st.text && !live) Btn(t("Save text", "Hifadhi maandishi"), { work = "text"; post(JSONObject().put("action", "text").put("text", text), t("Saved ✓", "Imehifadhiwa ✓")) { work = null } },
+            Modifier.padding(top = 8.dp).fillMaxWidth().testTag("story_text_save"), icon = "check", small = true, enabled = work == null, busy = if (work == "text") t("Saving…", "Inahifadhi…") else null)
         if (admin && !live && st.status in setOf("draft", "collecting", "approved")) {
-            Btn(t("Approve and publish", "Idhinisha na uchapishe"), { askApprove = true }, Modifier.padding(top = 8.dp).fillMaxWidth().testTag("story_approve"), icon = "check", enabled = st.text.isNotBlank() || doc != null)
+            Btn(t("Approve and publish", "Idhinisha na uchapishe"), { askApprove = true }, Modifier.padding(top = 8.dp).fillMaxWidth().testTag("story_approve"), icon = "check", enabled = (st.text.isNotBlank() || doc != null) && work == null,
+                busy = if (work == "approve") t("Publishing…", "Inachapisha…") else null)
             Text(t("“Approve and publish” puts it on the website’s Stories page straight away, with a copy in monday.com.", "“Idhinisha na uchapishe” inaiweka kwenye ukurasa wa Hadithi wa tovuti mara moja, na nakala kwenye monday.com."),
                 style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 6.dp).testTag("story_approve_note"))
         }
@@ -129,7 +132,8 @@ internal fun StoryDraftCard(m: AppModel, p: Project, st: Story, admin: Boolean, 
         if (!admin && st.status in setOf("not-started", "collecting")) Text(t("“Draft the story” sends it to an admin for review. Nothing goes on the website before it is approved.", "“Andika rasimu ya hadithi” inaituma kwa msimamizi akague. Hakuna kinachoenda kwenye tovuti kabla ya kuidhinishwa."),
             style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 8.dp).testTag("sty_send"))
         if (st.status == "draft" || (admin && (st.status in setOf("approved", "published") || live))) Btn(t("Back to Collecting", "Rudi kukusanya"),
-            { if (live) askOff = true else post(JSONObject().put("action", "collecting"), null) {} }, Modifier.padding(top = 8.dp).fillMaxWidth().testTag("story_back"), icon = "undo", light = true, small = true, outline = true)
+            { if (live) askOff = true else { work = "back"; post(JSONObject().put("action", "collecting"), null) { work = null } } }, Modifier.padding(top = 8.dp).fillMaxWidth().testTag("story_back"), icon = "undo", light = true, small = true, outline = true,
+            enabled = work == null, busy = if (work == "back") (if (live) t("Taking it off the website…", "Inaiondoa kwenye tovuti…") else t("Moving back…", "Inarudisha…")) else null)
     }
 
     if (askApprove) StoryAsk("story_approve_ask", t("Approve and publish this story?", "Idhinisha na uchapishe hadithi hii?"),
@@ -138,10 +142,10 @@ internal fun StoryDraftCard(m: AppModel, p: Project, st: Story, admin: Boolean, 
         askApprove = false
         val b = JSONObject().put("action", "approve")
         if (doc != null) b.put("doc", edited().out()) else b.put("text", text)
-        post(b, t("On the website ✓", "Iko kwenye tovuti ✓")) {}
+        work = "approve"; post(b, t("On the website ✓", "Iko kwenye tovuti ✓")) { work = null }
     }
     if (askOff) StoryAsk("story_off_ask", t("Take it off the website?", "Iondoe kwenye tovuti?"), t("The story goes back to Collecting and leaves the website’s Stories page.", "Hadithi inarudi kukusanya na kuondoka kwenye ukurasa wa Hadithi wa tovuti."),
-        t("Take it off", "Iondoe"), true, { askOff = false }) { askOff = false; post(JSONObject().put("action", "collecting"), t("Taken off the website", "Imeondolewa kwenye tovuti")) {} }
+        t("Take it off", "Iondoe"), true, { askOff = false }) { askOff = false; work = "back"; post(JSONObject().put("action", "collecting"), t("Taken off the website", "Imeondolewa kwenye tovuti")) { work = null } }
     pick?.let { i ->
         if (i !in secs.indices) { LaunchedEffect(i) { pick = null } } else
         StoryPoolSheet(m, p.id, st.pool, secs.getOrNull(i)?.h.orEmpty(), i, secs.map { it.photo?.id }, { pick = null }) { ph ->
@@ -173,7 +177,7 @@ private fun StoryPubLink(st: Story) {
 
 /** A section's photo: big, with its caption; for admins Change and Remove, or Add a photo. */
 @Composable
-private fun SecPhoto(m: AppModel, pid: String, ph: DocPhoto?, admin: Boolean, i: Int, change: () -> Unit, remove: () -> Unit, open: () -> Unit) {
+internal fun SecPhoto(m: AppModel, pid: String, ph: DocPhoto?, admin: Boolean, i: Int, change: () -> Unit, remove: () -> Unit, open: () -> Unit) {
     if (ph == null) {
         if (admin) Btn(t("Add a photo", "Ongeza picha"), change, Modifier.padding(top = 10.dp).fillMaxWidth().testTag("story_sec_add_$i"), icon = "camera", light = true, small = true)
         return
@@ -198,7 +202,7 @@ private fun SecPhoto(m: AppModel, pid: String, ph: DocPhoto?, admin: Boolean, i:
 }
 
 @Composable
-private fun Pull(d: StoryDoc, admin: Boolean) {
+internal fun Pull(d: StoryDoc, admin: Boolean) {
     val q = d.pull ?: return
     Column(Modifier.padding(top = 16.dp).fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(C.tint).padding(start = 16.dp, end = 14.dp, top = 12.dp, bottom = 12.dp).testTag("story_pull")) {
         Text("“" + q.first + "”", style = MaterialTheme.typography.titleMedium.copy(fontStyle = FontStyle.Italic), color = C.ink)

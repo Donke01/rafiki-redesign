@@ -104,6 +104,8 @@ fun StoriesScreen(m: AppModel, open: (String) -> Unit) {
     // admins open on what is waiting for them, everyone else on what still needs a story
     var f by rememberSaveable { mutableStateOf(if (s.admin && (c["draft"] ?: 0) > 0) "draft" else "need") }
     var picking by rememberSaveable { mutableStateOf(false) }
+    var choose by rememberSaveable { mutableStateOf<String?>(null) }
+    var reading by rememberSaveable { mutableStateOf<String?>(null) }
     val h = rememberHaptics()
     val list = s.shSorted(s.projects.filter { s.shGroup(it) == f })
     val max = 60
@@ -142,7 +144,7 @@ fun StoriesScreen(m: AppModel, open: (String) -> Unit) {
                 style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 4.dp).testTag("sh_note"))
             if (list.isEmpty()) NothingHere(t("Nothing here right now.", "Hakuna kitu hapa sasa hivi."), "sh_none")
             else Column(Modifier.padding(top = 4.dp)) {
-                list.take(max).forEachIndexed { i, p -> if (i > 0) HorizontalDivider(color = C.line); ShRow(s, p, "sh_p_${p.id}") { h.tap(); open(p.id) } }
+                list.take(max).forEachIndexed { i, p -> if (i > 0) HorizontalDivider(color = C.line); ShRow(s, p, "sh_p_${p.id}") { h.tap(); if (s.storyStatus(p) in setOf("draft", "approved", "published")) choose = p.id else open(p.id) } }
                 if (list.size > max) Text(t("Showing $max of ${list.size}. Use “Write a story” to find any project.", "Inaonyesha $max kati ya ${list.size}. Tumia “Andika hadithi” kupata mradi wowote."),
                     style = MaterialTheme.typography.bodySmall, color = C.muted, modifier = Modifier.padding(top = 8.dp).testTag("sh_more"))
             }
@@ -151,6 +153,9 @@ fun StoriesScreen(m: AppModel, open: (String) -> Unit) {
         Spacer(Modifier.height(24.dp))
     }
     if (picking) ShPicker(s, { picking = false }) { id -> picking = false; open(id) }
+    // a story with words already: View story (full page, Open on the website) or Edit story (the writer)
+    choose?.let { id -> StoryChoose(s.projects.firstOrNull { it.id == id }?.title ?: t("Story", "Hadithi"), { choose = null }, { choose = null; reading = id }, { choose = null; open(id) }) }
+    reading?.let { id -> StoryReader(m, id) { reading = null } }
 }
 
 /** A count: the number, and what it counts (wraps between words, never inside one). */

@@ -1,8 +1,8 @@
 {
   "ok": true,
-  "versionCode": 52,
-  "versionName": "2.27.0",
-  "notes": "Story photos: pick several at once, see each one upload, and photos wait and send by themselves when there's no signal. A month for Before, In progress and After. The story shown in sections with Approve and publish. A new look for Chat.",
-  "sha256": "1c71f971ebd488f23b87718c16eb0f7bb5c41ba7ed5ff1c12f96a93d6742c895",
+  "versionCode": 53,
+  "versionName": "2.27.1",
+  "notes": "Buttons now show what is happening (Saving…, Publishing…). In Stories, tap a story to View it full page, with Open on the website, or Edit it. Plus story photos several at once with upload progress, a month for Before, In progress and After, and a new look for Chat.",
+  "sha256": "5f670c221afbf39204e2cdb805e7b3225b330ff25b5902c76d98adcdb33ae266",
   "apk": "/app/rafiki-pin.apk"
 }
