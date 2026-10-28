@@ -1,0 +1,348 @@
+{
+ "_note": "Sample stories for local QA of the website Stories pages only (qa/web/serve_stories.py). Not real stories; photos are stand-ins from /img.",
+ "index": [
+  {
+   "id": "9100000001",
+   "slug": "water-at-the-school-gate",
+   "title": "Water at the school gate",
+   "dek": "How Kapsaret's 1,500 pupils stopped walking to the river before lessons.",
+   "hero": {
+    "id": "5004",
+    "row": "after",
+    "cap": "Pupils at the new hand pump outside Kapsaret Primary School"
+   },
+   "place": "Kapsaret",
+   "country": "Kenya",
+   "ck": "ke",
+   "type": "Borehole well",
+   "year": 2026,
+   "approvedAt": "2026-10-26T09:12:00Z",
+   "words": 425
+  },
+  {
+   "id": "9100000002",
+   "slug": "a-classroom-with-walls-of-its-own",
+   "title": "A classroom with walls of its own",
+   "dek": "In Longido, a school that taught under a tree built four walls and a roof with its own hands.",
+   "hero": {
+    "id": "5013",
+    "row": "after",
+    "cap": "Pupils in the finished classroom at Longido"
+   },
+   "place": "Longido",
+   "country": "Tanzania",
+   "ck": "tz",
+   "type": "School",
+   "year": 2026,
+   "approvedAt": "2026-10-20T15:40:00Z",
+   "words": 195
+  },
+  {
+   "id": "9100000003",
+   "slug": "a-playground-built-from-old-tyres-at-the-childrens-home-in-busia",
+   "title": "A playground built from old tyres at the children's home in Busia",
+   "dek": "Forty children, one weekend and a pile of tyres nobody wanted.",
+   "hero": {
+    "id": "5021",
+    "row": "after",
+    "cap": "Children playing on the new tyre playground"
+   },
+   "place": "Busia",
+   "country": "Uganda",
+   "ck": "ug",
+   "type": "Orphanage",
+   "year": 2025,
+   "approvedAt": "2026-09-30T11:00:00Z",
+   "words": 111
+  }
+ ],
+ "stories": {
+  "9100000001": {
+   "id": "9100000001",
+   "slug": "water-at-the-school-gate",
+   "title": "Water at the school gate",
+   "dek": "How Kapsaret's 1,500 pupils stopped walking to the river before lessons.",
+   "hero": {
+    "id": "5004",
+    "row": "after",
+    "cap": "Pupils at the new hand pump outside Kapsaret Primary School"
+   },
+   "sections": [
+    {
+     "h": "Before the well",
+     "body": "For as long as anyone at Kapsaret Primary School can remember, the school day began at the river. Before the first bell, pupils carried yellow jerrycans down a steep path to the water and back again, often twice.\n\nThe river was shared with cattle and with the farms upstream. In the dry months it shrank to a few brown pools, and the walk grew longer as the water moved further away.",
+     "photo": {
+      "row": "before",
+      "id": "5001",
+      "cap": "Collecting water from the river before the well was drilled"
+     }
+    },
+    {
+     "h": "The problem nobody could ignore",
+     "body": "Teachers kept a register of absences, and the same pattern returned every dry season: stomach illness spread through the classes, and lessons started late because children arrived tired from carrying water.\n\nThe head teacher and the parents' committee asked RAFIKI to survey the school grounds. The survey team found good water about 90 metres down, close enough to the classrooms that no child would need to leave the compound again.",
+     "photo": null
+    },
+    {
+     "h": "A community that dug in",
+     "body": "The parents' committee did not wait to be asked. They cleared the site, fenced it and agreed a small monthly contribution towards repairs, so the well would never stand broken for want of a spare part.\n\nOn the day the drilling rig arrived, families came to watch. Older pupils were allowed out of class in turns to see the drill bit go down, and the committee chair kept a notebook of every metre.",
+     "photo": {
+      "row": "progress",
+      "id": "5002",
+      "cap": "The drilling rig at work on the school grounds"
+     }
+    },
+    {
+     "h": "Drilling to clean water",
+     "body": "The drill reached water-bearing rock at 88 metres. The team cased the borehole, tested the flow over a full day and sent a sample for laboratory testing before anyone drank from it.\n\nOnce the results came back clean, the hand pump was fitted and a concrete apron was poured around it so that spilled water drains away instead of pooling.",
+     "photo": {
+      "row": "progress",
+      "id": "5003",
+      "cap": "Fitting the pipes before the pump goes on"
+     }
+    },
+    {
+     "h": "What changed",
+     "body": "Today the pump stands thirty steps from the nearest classroom. Lessons start on time. The kitchen cooks with clean water, and the school has started a small vegetable garden watered from the pump in the evenings.\n\nThe committee meets every month to check the pump and the repair fund. Two parents have been trained to carry out simple repairs themselves.",
+     "photo": {
+      "row": "after",
+      "id": "5004",
+      "cap": "The new hand pump, thirty steps from the classrooms"
+     }
+    },
+    {
+     "h": "One morning in March",
+     "body": "On the first morning the pump was opened, a Standard Two class was sent out to fill the kitchen buckets. It took them four minutes. Their teacher timed it, because the same job used to take most of an hour, and the children wanted to know if they had broken a record.",
+     "photo": {
+      "row": "after",
+      "id": "5005",
+      "cap": "A pupil with a cup of clean water from the new well"
+     }
+    }
+   ],
+   "pull": {
+    "quote": "Our children now come to school to learn, not to fetch water.",
+    "who": "Grace Chebet, head teacher"
+   },
+   "facts": {
+    "place": "Kapsaret",
+    "country": "Kenya",
+    "ck": "ke",
+    "type": "Borehole well",
+    "people": 1500,
+    "year": 2026,
+    "stages": []
+   },
+   "approvedAt": "2026-10-26T09:12:00Z",
+   "approvedBy": "Jessica",
+   "updatedAt": "2026-10-26T09:12:00Z",
+   "project": {
+    "title": "Kapsaret Primary School",
+    "area": "Kapsaret",
+    "country": "Kenya",
+    "ck": "ke",
+    "type": "Borehole well",
+    "status": "Completed",
+    "people": 1500
+   },
+   "photos": [
+    "5001",
+    "5002",
+    "5003",
+    "5004",
+    "5005"
+   ],
+   "words": 425
+  },
+  "9100000002": {
+   "id": "9100000002",
+   "slug": "a-classroom-with-walls-of-its-own",
+   "title": "A classroom with walls of its own",
+   "dek": "In Longido, a school that taught under a tree built four walls and a roof with its own hands.",
+   "hero": {
+    "id": "5013",
+    "row": "after",
+    "cap": "Pupils in the finished classroom at Longido"
+   },
+   "sections": [
+    {
+     "h": "Lessons under the acacia",
+     "body": "For three years the youngest class at Longido met under an acacia tree. When it rained, lessons stopped. When the wind blew, the chalkboard fell over.\n\nThe school had pupils and teachers. What it lacked was a room.",
+     "photo": {
+      "row": "before",
+      "id": "5011",
+      "cap": "The school compound before building began"
+     }
+    },
+    {
+     "h": "Laying the foundation",
+     "body": "Parents brought sand and water, and the builders marked out a room big enough for fifty children. The foundation was poured in a single long day in May.",
+     "photo": {
+      "row": "stage:foundation",
+      "id": "5014",
+      "cap": "Digging and levelling for the foundation"
+     }
+    },
+    {
+     "h": "Walls, then a roof",
+     "body": "The walls went up course by course over the following weeks. Visiting volunteers from RAFIKI joined the parents to carry blocks, and the roof sheets were lifted into place before the long rains arrived.",
+     "photo": {
+      "row": "stage:roof",
+      "id": "5015",
+      "cap": "Volunteers and parents raising the roof timbers"
+     }
+    },
+    {
+     "h": "Finishing touches",
+     "body": "The last weeks were the most colourful. Volunteers and pupils painted the walls a deep green, and a carpenter from the village built the desks.",
+     "photo": {
+      "row": "stage:finishing",
+      "id": "5012",
+      "cap": "Painting the classroom walls"
+     }
+    },
+    {
+     "h": "What changed",
+     "body": "The classroom was handed over to the school committee in August. Lessons no longer stop for the weather, and the school has enrolled a second class of first-year pupils.",
+     "photo": {
+      "row": "after",
+      "id": "5013",
+      "cap": "The first lesson in the new classroom"
+     }
+    }
+   ],
+   "pull": {
+    "quote": "When it rains now, we keep reading.",
+    "who": "Pupil, Standard One"
+   },
+   "facts": {
+    "place": "Longido",
+    "country": "Tanzania",
+    "ck": "tz",
+    "type": "School",
+    "people": 320,
+    "year": 2026,
+    "stages": [
+     {
+      "stage": "Foundation",
+      "date": "2026-05-14"
+     },
+     {
+      "stage": "Walls",
+      "date": "2026-06-20"
+     },
+     {
+      "stage": "Roof",
+      "date": "2026-07-08"
+     },
+     {
+      "stage": "Finishing",
+      "date": "2026-07-30"
+     },
+     {
+      "stage": "Handed over",
+      "date": "2026-08-12"
+     }
+    ]
+   },
+   "approvedAt": "2026-10-20T15:40:00Z",
+   "approvedBy": "Morgan",
+   "updatedAt": "2026-10-20T15:40:00Z",
+   "project": {
+    "title": "Longido Primary classroom",
+    "area": "Longido",
+    "country": "Tanzania",
+    "ck": "tz",
+    "type": "School",
+    "status": "Completed",
+    "people": 320
+   },
+   "photos": [
+    "5011",
+    "5012",
+    "5013",
+    "5014",
+    "5015"
+   ],
+   "words": 195
+  },
+  "9100000003": {
+   "id": "9100000003",
+   "slug": "a-playground-built-from-old-tyres-at-the-childrens-home-in-busia",
+   "title": "A playground built from old tyres at the children's home in Busia",
+   "dek": "Forty children, one weekend and a pile of tyres nobody wanted.",
+   "hero": {
+    "id": "5021",
+    "row": "after",
+    "cap": "Children playing on the new tyre playground"
+   },
+   "sections": [
+    {
+     "h": "An empty yard",
+     "body": "The children's home in Busia had a large, dusty yard and nothing in it. The forty children who live there played with whatever they could find.",
+     "photo": null
+    },
+    {
+     "h": "Building it together",
+     "body": "Over one weekend, staff, older children and a visiting RAFIKI team dug, sawed and bolted. Old tyres became swings, steps and a climbing wall.",
+     "photo": {
+      "row": "progress",
+      "id": "5022",
+      "cap": "Setting tyres into the ground for the climbing steps"
+     }
+    },
+    {
+     "h": "What changed",
+     "body": "The yard is now the busiest place at the home after school. The staff say the children sleep better, and the older ones have taken charge of keeping it safe.",
+     "photo": {
+      "row": "after",
+      "id": "5023",
+      "cap": "Children and volunteers on the finished playground"
+     }
+    }
+   ],
+   "pull": null,
+   "facts": {
+    "place": "Busia",
+    "country": "Uganda",
+    "ck": "ug",
+    "type": "Orphanage",
+    "people": 40,
+    "year": 2025,
+    "stages": []
+   },
+   "approvedAt": "2026-09-30T11:00:00Z",
+   "approvedBy": "Jessica",
+   "updatedAt": "2026-09-30T11:00:00Z",
+   "project": {
+    "title": "Busia children's home",
+    "area": "Busia",
+    "country": "Uganda",
+    "ck": "ug",
+    "type": "Orphanage",
+    "status": "Completed",
+    "people": 40
+   },
+   "photos": [
+    "5021",
+    "5022",
+    "5023"
+   ],
+   "words": 111
+  }
+ },
+ "assets": {
+  "5001": "img/pg/ln-water.webp",
+  "5002": "img/w-drill1.webp",
+  "5003": "img/pg/g-pipe.webp",
+  "5004": "img/pg/g-pump.webp",
+  "5005": "img/w-child.webp",
+  "5011": "img/pg/g-school.webp",
+  "5012": "img/pg/g-paint.webp",
+  "5013": "img/pg/g-class.webp",
+  "5014": "img/pg/g-fence.webp",
+  "5015": "img/pg/g-team.webp",
+  "5021": "img/pg/g-play.webp",
+  "5022": "img/pg/g-tyres.webp",
+  "5023": "img/pg/g-kids.webp"
+ }
+}
