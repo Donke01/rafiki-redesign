@@ -102,33 +102,43 @@ test('the draft: a template from the answers when there is no AI key; Draft read
   await post(env, '3333', { action: 'answers', id: '301', q1: 'Girls walked 6 km home each night', q2: 'There was no dormitory', q4: 'Parents carried sand and water', q5: 'Girls stay at school and study at night', q6: 'The first night 40 girls slept there', quote: 'Now we can study at night', quoteBy: 'Faith' });
   const d = await post(env, '3333', { action: 'draft', id: '301' });
   assert.equal(d.ok, true); assert.equal(d.how, 'template'); assert.equal(d.story.status, 'draft');
-  assert.match(d.text, /Ndalat Dormitory/); assert.match(d.text, /“Now we can study at night” — Faith/); assert.match(d.text, /420 people|2026-03-02/);
+  assert.match(d.text, /Ndalat Dormitory/); assert.match(d.text, /“Now we can study at night” — Faith/); assert.match(d.text, /2 March 2026/);
   assert.equal(COLS[STORY_COL.status].text, 'Draft ready'); assert.equal(COLS[STORY_COL.text].text, d.text);
-  assert.equal(/\b(19|20)\d\d\b/.test(d.text.replace('2026-03-02', '')), false, 'no invented years');
+  assert.equal(/\b(19|20)\d\d\b/.test(d.text.replace(/2026/g, '')), false, 'no invented years');
+  // the document: sections in the story's order, kept in KV and shown to the app
+  const doc = d.story.doc; assert.equal(doc.v, 1); assert.equal(doc.model, 'template'); assert.equal(doc.by, 'Meril');
+  assert.deepEqual(doc.sections.map(x => x.h), ['Life before', 'The problem', 'The people it serves', 'Building it together', 'What changed', 'One moment']);
+  assert.deepEqual(doc.pull, { quote: 'Now we can study at night', who: 'Faith' }); assert.equal(d.story.text, doc.text);
   // Office › Review lists it
   const rv = await (await adminGet({ env, waitUntil: () => {}, request: new Request('https://pin.example/api/admin?view=review', { headers: H('2222') }) })).json();
   assert.ok(rv.items.some(x => x.kind === 'story-draft' && x.id === '301'));
-  // with a key: the AI text, if it is long enough
+  // with a key but an answer that is not the story JSON: the template (lib/story-doc.js has the AI tests)
   const { env: env2 } = setup({ OPENAI_API_KEY: 'k' }); AI = Array(120).fill('word').join(' ');
-  const d2 = await post(env2, '3333', { action: 'draft', id: '301' });
-  assert.equal(d2.how, 'ai'); assert.equal(words(d2.text), 120);
-  AI = null; const d3 = await post(env2, '3333', { action: 'draft', id: '301' }); assert.equal(d3.how, 'template');
+  await post(env2, '3333', { action: 'answers', id: '301', q1: 'a', q2: 'b' });
+  const d2 = await post(env2, '3333', { action: 'draft', id: '301' }); assert.equal(d2.how, 'template');
 });
 
-test('approve and publish: admins only; consent needed when a photo shows children; back to Collecting', async () => {
-  const { env } = setup();
+test('approve and publish: admins only; consent needed when a photo shows children; on the website; back to Collecting takes it off', async () => {
+  const { env, store } = setup();
   await post(env, '3333', { action: 'answers', id: '301', q1: 'a', q2: 'b' });
   await form(env, '3333', { action: 'photo', id: '301', row: 'after', children: 'true' }, jpg());
   await post(env, '3333', { action: 'draft', id: '301' });
   assert.equal((await post(env, '3333', { action: 'approve', id: '301' })).status, 403);
   const c = await post(env, '2222', { action: 'approve', id: '301' }); assert.equal(c.status, 409); assert.equal(c.reason, 'consent');
   assert.equal((await post(env, '2222', { action: 'publish', id: '301' })).reason, 'not-approved');
+  assert.equal(store.m.has('pubstory:301'), false);
   await post(env, '3333', { action: 'consent', id: '301', value: 'received' });
+  // an old app sends the whole text: it becomes the story
   const ok = await post(env, '2222', { action: 'approve', id: '301', text: 'Edited by the office.' });
-  assert.equal(ok.story.status, 'approved'); assert.equal(COLS[STORY_COL.text].text, 'Edited by the office.');
+  assert.equal(ok.story.status, 'published'); assert.match(COLS[STORY_COL.text].text, /Edited by the office\./);
+  assert.ok(ok.story.pub && /\/stories\/301-/.test(ok.story.pub.url)); assert.equal(ok.url, ok.story.pub.url);
+  const pub = JSON.parse(store.m.get('pubstory:301')); assert.match(JSON.stringify(pub.sections), /Edited by the office\./);
+  assert.equal(JSON.parse(store.m.get('pubstoryidx'))[0].id, '301');
   assert.equal((await post(env, '3333', { action: 'collecting', id: '301' })).status, 403);
-  const pb = await post(env, '2222', { action: 'publish', id: '301' }); assert.equal(pb.story.status, 'published');
-  const back = await post(env, '2222', { action: 'collecting', id: '301' }); assert.equal(back.story.status, 'collecting');
+  assert.equal((await post(env, '3333', { action: 'draft', id: '301' })).reason, 'published', 'no new draft over a published story');
+  const pb = await post(env, '2222', { action: 'publish', id: '301' }); assert.equal(pb.ok, true); assert.equal(pb.story.status, 'published');
+  const back = await post(env, '2222', { action: 'collecting', id: '301' }); assert.equal(back.story.status, 'collecting'); assert.equal(back.story.pub, null);
+  assert.equal(store.m.has('pubstory:301'), false); assert.deepEqual(JSON.parse(store.m.get('pubstoryidx')), []);
   assert.equal((await post(env, '9999', { action: 'answers', id: '301', q1: 'x' })).status, 403, 'not the shared team PIN');
 });
 
@@ -143,7 +153,8 @@ test('the website feed carries a story only when it is Approved or Published, wi
 });
 
 test('templateDraft leaves out what was not given', () => {
-  const t = templateDraft('Kapsaret Borehole', { type: 'Borehole well' }, { answers: { q5: 'women spend the mornings at the market' }, quote: '', quoteBy: '' });
-  assert.match(t, /Kapsaret Borehole/); assert.match(t, /Since then, women spend/);
-  assert.equal(/people|finished/.test(t), false);
+  const pack = { project: { title: 'Kapsaret Borehole', type: 'Borehole well', place: '', country: '', ck: '', people: 0, done: '', status: '' }, answers: { q5: 'women spend the mornings at the market' }, quote: '', quoteBy: '', stages: [], visits: [], photos: [] };
+  const d = templateDraft(pack, { answers: pack.answers, quote: '', quoteBy: '', consent: 'not-yet', photos: {} }, 'Meril');
+  assert.match(d.text, /Kapsaret Borehole/); assert.match(d.text, /Since then, women spend/);
+  assert.equal(/people|finished/.test(d.text), false); assert.equal(d.pull, null); assert.equal(d.title, 'Water for Kapsaret Borehole');
 });

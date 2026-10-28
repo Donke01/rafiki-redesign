@@ -1,13 +1,21 @@
 // /api/story: the Stories tab of a project in the RAFIKI Pin app (contract: me-contract.md, Stories; lib/story.js).
 //   GET  /api/story?id=<project>                     → { ok, story } (answers, quote, photos per row, consent, status, what's missing)
 //   GET  /api/story?id=<project>&asset=<id>[&w=]     → one story photo (only assets recorded for that project)
-//   POST /api/story { action: answers|consent|draft|text|approve|publish|collecting|photo-remove, id, … }
+//   POST /api/story { action: answers|consent|draft|doc|text|approve|publish|collecting|photo-remove, id, … }
+//     draft: the long story document (lib/story-doc.js: AI when OPENAI_API_KEY is set, else the template) → story.doc
+//     doc (admins): { doc: { title, dek, sections: [{ h, body, photo: { id } | null }] } } edits it (photos from story.pool)
+//     approve (admins) = approve and publish: the website copy (pubstory:<id>, pubstoryidx, read by /api/stories), the Story
+//       status "Published" ("Approved" where the board has no such label), the story in the Story column and a note.
+//       Old apps send { text } instead of { doc }; publish is kept (nothing to do once it is on the website).
+//     collecting (admins, once approved): back to Collecting, and off the website
 //   POST /api/story multipart { action: photo, id, row: before|progress|after, children, file } / { action: voice, id, q, file }
 // Field officers collect and draft; only admins edit the final text, approve and publish. Signed in like /api/pin
 // (the shared team PIN and donors are refused). The words, files and statuses live in monday.com's story columns.
 import { checkPin } from './pin.js';
-import { readStoryCols, writeCols, addFileToColumn, createUpdate, addFileToUpdate, assetInfo, STORY_COL, BOARD_ID } from '../../lib/monday.js';
-import { QS, ROWS, ST, CONSENT, MAXLEN, loadRec, saveRec, view, blocker, indexStory, clip, colValue, templateDraft, aiDraft, words } from '../../lib/story.js';
+import { readStoryCols, writeCols, addFileToColumn, createUpdate, addFileToUpdate, assetInfo, readUpdates, columnLabels, STORY_COL, BOARD_ID } from '../../lib/monday.js';
+import { QS, ROWS, ST, CONSENT, MAXLEN, loadRec, saveRec, view, blocker, indexStory, clip, colValue } from '../../lib/story.js';
+import { material, templateDraft, aiDraft, editDoc, docFromText, legacyDoc, snapshot, putPublic, dropPublic, getPublic, storyPath, shortText, noteHtml } from '../../lib/story-doc.js';
+import { loadStage, hasPhoto } from '../../lib/construction.js';
 import { transcribe, transcribeSetup } from '../../lib/transcribe.js';
 
 const PHOTO = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' };
@@ -31,9 +39,33 @@ async function item(env, chk, id) {
 async function fresh(env, chk, id) {
   const m = await item(env, chk, id), rec = await loadRec(env, id);
   if (!m) return null;
+  const stage = await loadStage(env, id).catch(() => null);
   const s = view(id, m, rec, chk.admin);
+  // the photos a story may show (story rows and construction stages), for the writer's photo picker
+  const pack = material(m.facts.title || m.name, m.facts, s, stage, []);
+  s.pool = pack.photos.map(p => ({ id: p.id, row: p.row, cap: p.cap, children: p.children }));
   if (env.FEED) await indexStory(env, s, m.name);
-  return { m, rec, s };
+  return { m, rec, s, stage, pack };
+}
+// where the story lives on the website (the public site's address, as for donor links)
+const siteOrigin = env => String(env.STORY_LINK_ORIGIN || env.DONOR_LINK_ORIGIN || 'https://www.rafikioutreach.org').replace(/\/+$/, '');
+// the Story status label for a published story: "Published", or "Approved" when the board has no "Published" label
+async function pubLabel(env, T, B, api) {
+  const k = 'pinstorylabels', c = env.FEED ? await env.FEED.get(k, 'json') : null;
+  let l = c && Date.now() - c.at < 86400000 ? c.l : undefined;
+  if (l === undefined) { l = await columnLabels(T, B, STORY_COL.status, api); if (env.FEED) await env.FEED.put(k, JSON.stringify({ l, at: Date.now() })); }
+  return { label: !l || l.some(x => /^published$/i.test(x)) ? ST.published : ST.approved, known: !!l };
+}
+// the story into the Story column: all of it, or (when monday.com refuses it) the first part and where the rest is
+async function writeText(T, B, id, text, tail, status, api) {
+  const tries = [];
+  [status].concat(status && status.fallback ? [status.fallback] : []).forEach(st => [text, shortText(text, tail)].forEach((t, i) => { if (!i || t !== text) tries.push({ st, t, short: !!i }); }));
+  let err;
+  for (const x of tries) {
+    try { await writeCols(T, B, id, Object.assign({ [STORY_COL.text]: { text: x.t } }, x.st ? { [STORY_COL.status]: { label: x.st.label } } : {}), api); return { short: x.short, label: x.st ? x.st.label : '' }; }
+    catch (e) { err = e; }
+  }
+  throw err;
 }
 
 export async function onRequestGet({ request, env }) {
@@ -49,7 +81,7 @@ export async function onRequestGet({ request, env }) {
 }
 async function photo(env, chk, id, asset) {
   const rec = await loadRec(env, id), known = ROWS.some(r => (rec.photos[r] || []).some(p => p.id === asset));
-  let ok = known;
+  let ok = known || hasPhoto(await loadStage(env, id).catch(() => null), asset);   // a construction stage photo of this project
   if (!ok) { const m = await item(env, chk, id); ok = !!m && ROWS.some(r => m.files(STORY_COL[r]).some(f => f.id === asset)); }
   if (!ok || !asset) return json({ ok: false, reason: 'not-found' }, 404);
   const info = await assetInfo(tok(chk, env), asset, env.MONDAY_API_URL);
@@ -86,7 +118,7 @@ export async function onRequestPost({ request, env }) {
   try {
     const f = await fresh(env, chk, id);
     if (!f) return json({ ok: false, reason: 'project' }, 404);
-    const { m, rec } = f; let s = f.s;
+    const { m, rec } = f; const s = f.s;
     const T = tok(chk, env), api = env.MONDAY_API_URL, B = board(env);
     const done = async extra => { const g = await fresh(env, chk, id); return json(Object.assign({ ok: true }, extra || {}, { story: g.s })); };
     const toCollecting = async () => { if (s.status === 'not-started') await setStatus(env, chk, id, 'collecting'); };
@@ -104,27 +136,80 @@ export async function onRequestPost({ request, env }) {
       await writeCols(T, B, id, Object.assign({ [STORY_COL.consent]: { label: CONSENT[b.value] } }, s.status === 'not-started' ? { [STORY_COL.status]: { label: ST.collecting } } : {}), api);
       return done();
     }
+    const title = m.facts.title || m.name;
+    const proj = () => ({ title, area: m.facts.area, country: m.facts.country, ck: m.facts.ck, type: m.facts.type, status: m.facts.status, people: m.facts.people || null, gps: m.facts.gps || null });
+    // the website copy, the Story column and a monday.com note; the Story status first, so a refusal publishes nothing
+    const publishNow = async (s1) => {
+      const prev = await getPublic(env, id), st = await pubLabel(env, T, B, api);
+      const snap = snapshot(id, rec.doc, s1, f.pack.photos, proj(), chk.who, prev), path = storyPath(id, snap.slug), url = siteOrigin(env) + path;
+      const w = await writeText(T, B, id, rec.doc.text, 'full story on the website: ' + url, { label: st.label, fallback: st.known || st.label !== ST.published ? null : { label: ST.approved } }, api);
+      await putPublic(env, snap);
+      rec.pub = { at: snap.approvedAt, by: snap.approvedBy, url, path, updated: snap.updatedAt };
+      await saveRec(env, id, rec);
+      await createUpdate(T, id, noteHtml('📖 Story ' + (prev ? 'updated' : 'approved and published') + ' on the website by ' + chk.who + ': <a href="' + url + '">' + url + '</a>', rec.doc), api);
+      return done({ url, monday: w.short ? 'short' : 'full' });
+    };
+    // an edit to a story already on the website goes there too
+    const republish = async () => {
+      const snap = snapshot(id, rec.doc, s, f.pack.photos, proj(), chk.who, await getPublic(env, id));
+      await putPublic(env, snap);
+      rec.pub = Object.assign({}, rec.pub, { path: storyPath(id, snap.slug), url: siteOrigin(env) + storyPath(id, snap.slug), updated: snap.updatedAt });
+    };
+    const tail = () => rec.pub ? 'full story on the website: ' + rec.pub.url : 'the full draft is in the RAFIKI Pin app';
+
     if (a === 'draft') {
-      const ai = await aiDraft(env, m.name, m.facts, s), text = ai || templateDraft(m.name, m.facts, s);
-      if (!text.trim()) return json({ ok: false, reason: 'empty' }, 409);
-      await writeCols(T, B, id, { [STORY_COL.text]: { text }, [STORY_COL.status]: { label: ST.draft } }, api);
-      return done({ text, how: ai ? 'ai' : 'template', words: words(text) });
+      if (rec.pub) return json({ ok: false, reason: 'published' }, 409);
+      let ups = []; try { ups = await readUpdates(T, id, api); } catch (e) { ups = []; }
+      const pack = material(title, m.facts, s, f.stage, ups);
+      const ai = await aiDraft(env, pack, s, chk.who), doc = ai || templateDraft(pack, s, chk.who);
+      if (!doc.sections.length || !doc.text.trim()) return json({ ok: false, reason: 'empty' }, 409);
+      await writeText(T, B, id, doc.text, tail(), { label: ST.draft }, api);
+      rec.doc = doc; await saveRec(env, id, rec);
+      return done({ text: doc.text, how: ai ? 'ai' : 'template', words: doc.words });
     }
-    if (a === 'text' || a === 'approve' || a === 'publish') {
+    if (a === 'doc' || a === 'text' || a === 'approve' || a === 'publish') {
       if (!chk.admin) return json({ ok: false, reason: 'admin-only' }, 403);
-      if (a === 'text') { await writeCols(T, B, id, { [STORY_COL.text]: { text: clip(b.text, MAXLEN.text) } }, api); return done(); }
-      if (a === 'approve') {
-        if ('text' in b) s = Object.assign({}, s, { text: clip(b.text, MAXLEN.text) });
-        const bad = blocker(s); if (bad) return json({ ok: false, reason: bad }, 409);
-        await writeCols(T, B, id, Object.assign({ [STORY_COL.status]: { label: ST.approved } }, 'text' in b ? { [STORY_COL.text]: { text: s.text } } : {}), api);
-        return done();
+      if (a === 'doc') {
+        if (!rec.doc) return json({ ok: false, reason: 'no-text' }, 409);
+        const d = editDoc(rec.doc, b.doc, f.pack, chk.who); if (!d) return json({ ok: false, reason: 'bad-request' }, 400);
+        rec.doc = d; await writeText(T, B, id, d.text, tail(), null, api);
+        if (rec.pub) await republish();
+        await saveRec(env, id, rec); return done();
       }
-      if (s.status !== 'approved' && s.status !== 'published') return json({ ok: false, reason: 'not-approved' }, 409);
-      await setStatus(env, chk, id, 'published'); return done();
+      if (a === 'text') {
+        const t = clip(b.text, MAXLEN.text);
+        if (!rec.doc) { await writeCols(T, B, id, { [STORY_COL.text]: { text: t } }, api); return done(); }
+        if (t !== rec.doc.text) { const d = docFromText(t, rec.doc, f.pack, chk.who); if (!d) return json({ ok: false, reason: 'bad-request' }, 400); rec.doc = d; }
+        await writeText(T, B, id, rec.doc.text, tail(), null, api);
+        if (rec.pub) await republish();
+        await saveRec(env, id, rec); return done();
+      }
+      if (a === 'publish') {
+        if (rec.pub) return done({ url: rec.pub.url });   // already on the website
+        if (s.status !== 'approved' && s.status !== 'published') return json({ ok: false, reason: 'not-approved' }, 409);
+      }
+      // approve (and publish): the edits sent with it first (the new app sends the document, old apps the text)
+      let text = s.text;
+      if (a === 'approve' && b.doc && typeof b.doc === 'object' && rec.doc) { rec.doc = editDoc(rec.doc, b.doc, f.pack, chk.who) || rec.doc; text = rec.doc.text; }
+      else if (a === 'approve' && 'text' in b) {
+        text = clip(b.text, MAXLEN.text);
+        if (rec.doc && text !== rec.doc.text) rec.doc = docFromText(text, rec.doc, f.pack, chk.who) || rec.doc;
+        if (rec.doc) text = rec.doc.text;
+      }
+      const s1 = Object.assign({}, s, { text });
+      const bad = blocker(s1); if (bad) return json({ ok: false, reason: bad }, 409);
+      if (!rec.doc) rec.doc = legacyDoc(text, f.pack, s, chk.who);
+      if (!rec.doc) return json({ ok: false, reason: 'no-text' }, 409);
+      return publishNow(s1);
     }
     if (a === 'collecting') {
-      if ((s.status === 'approved' || s.status === 'published') && !chk.admin) return json({ ok: false, reason: 'admin-only' }, 403);
-      await setStatus(env, chk, id, 'collecting'); return done();
+      if ((s.status === 'approved' || s.status === 'published' || rec.pub) && !chk.admin) return json({ ok: false, reason: 'admin-only' }, 403);
+      await setStatus(env, chk, id, 'collecting');
+      if (rec.pub) {   // withdrawn: off the website
+        await dropPublic(env, id); rec.pub = null; await saveRec(env, id, rec);
+        await createUpdate(T, id, '📖 Story taken off the website by ' + chk.who + ' (back to Collecting).', api);
+      }
+      return done();
     }
     if (a === 'photo-remove') {
       if (!ROWS.includes(b.row)) return json({ ok: false, reason: 'row' }, 400);
