@@ -161,3 +161,29 @@ test('templateDraft leaves out what was not given', () => {
   assert.match(d.text, /Kapsaret Borehole/); assert.match(d.text, /Since then, women spend/);
   assert.equal(/people|finished/.test(d.text), false); assert.equal(d.pull, null); assert.equal(d.title, 'Water for Kapsaret Borehole');
 });
+
+test('story photos: a caption, "shows children" and another row (photo-edit); new photos since the draft; the website cover', async () => {
+  const { env } = setup();
+  await post(env, '3333', { action: 'answers', id: '301', q1: 'Girls walked 6 km home each night', q2: 'There was no dormitory', q5: 'Girls stay at school' });
+  const b = await form(env, '3333', { action: 'photo', id: '301', row: 'before', cap: '  Girls  outside the old classroom ' }, jpg('b.jpg'));
+  assert.equal(b.photo.cap, 'Girls outside the old classroom');
+  const aid = b.photo.id;
+  // caption and children
+  const e = await post(env, '3333', { action: 'photo-edit', id: '301', row: 'before', asset: aid, cap: 'The old classroom at dusk', children: true });
+  assert.equal(e.ok, true); assert.equal(e.story.photos.before[0].cap, 'The old classroom at dusk'); assert.equal(e.story.photos.before[0].children, true);
+  // moved to After: only there (its file stays in the Before column on monday.com)
+  const mv = await post(env, '3333', { action: 'photo-edit', id: '301', row: 'before', asset: aid, to: 'after', children: false });
+  assert.equal(mv.story.photos.before.length, 0); assert.deepEqual(mv.story.photos.after.map(p => p.id), [aid]); assert.equal(mv.story.photos.after[0].cap, 'The old classroom at dusk');
+  assert.equal(mv.story.pool.find(p => p.id === aid).cap, 'The old classroom at dusk', 'the story uses the typed caption');
+  assert.equal((await post(env, '3333', { action: 'photo-edit', id: '301', row: 'before', asset: aid })).status, 404);
+  assert.equal((await post(env, '3333', { action: 'photo-edit', id: '301', row: 'after', asset: aid, to: 'side' })).status, 400);
+  // a photo added after the draft is counted, so the app can offer "Draft again"
+  const d = await post(env, '3333', { action: 'draft', id: '301' }); assert.equal(d.story.newPhotos, 0);
+  await new Promise(r => setTimeout(r, 5));
+  const late = await form(env, '3333', { action: 'photo', id: '301', row: 'progress' }, jpg('p.jpg')); assert.equal(late.story.newPhotos, 1);
+  // approved: the website always gets a cover when any photo is safe, even if the draft placed none
+  const ap = await post(env, '2222', { action: 'approve', id: '301', doc: { title: d.story.doc.title, dek: d.story.doc.dek, sections: d.story.doc.sections.map(x => ({ h: x.h, body: x.body, photo: null })) } });
+  assert.equal(ap.ok, true);
+  const pub = JSON.parse(env.FEED.m.get('pubstory:301'));
+  assert.ok(pub.hero && pub.hero.id, 'a cover photo'); assert.ok(pub.photos.includes(pub.hero.id));
+});

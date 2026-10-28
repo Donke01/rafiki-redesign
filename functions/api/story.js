@@ -8,7 +8,9 @@
 //       status "Published" ("Approved" where the board has no such label), the story in the Story column and a note.
 //       Old apps send { text } instead of { doc }; publish is kept (nothing to do once it is on the website).
 //     collecting (admins, once approved): back to Collecting, and off the website
-//   POST /api/story multipart { action: photo, id, row: before|progress|after, children, file } / { action: voice, id, q, file }
+//   POST /api/story multipart { action: photo, id, row: before|progress|after, children, cap?, file } / { action: voice, id, q, file }
+//   POST /api/story { action: photo-edit, id, row, asset, cap?, children?, to? } a photo's caption, "shows children", or its row
+//   story.newPhotos: photos added since the draft was written (the app offers "Draft again" to use them)
 // Field officers collect and draft; only admins edit the final text, approve and publish. Signed in like /api/pin
 // (the shared team PIN and donors are refused). The words, files and statuses live in monday.com's story columns.
 import { checkPin } from './pin.js';
@@ -241,6 +243,21 @@ export async function onRequestPost({ request, env }) {
       rec.photos[b.row] = (rec.photos[b.row] || []).filter(p => p.id !== String(b.asset));
       await saveRec(env, id, rec); return done();
     }
+    // a photo's caption, "shows children", or its row (Before / In progress / After)
+    if (a === 'photo-edit') {
+      const from = String(b.row || ''), to = String(b.to || from), aid = String(b.asset || '');
+      if (!ROWS.includes(from) || !ROWS.includes(to) || !aid) return json({ ok: false, reason: 'row' }, 400);
+      const cur = (s.photos[from] || []).find(p => String(p.id) === aid);
+      if (!cur) return json({ ok: false, reason: 'photo' }, 404);
+      const p = Object.assign({}, cur);
+      if ('cap' in b) p.cap = clip(String(b.cap || '').replace(/\s+/g, ' ').trim(), 120);
+      if ('children' in b) p.children = b.children === true || b.children === 'true';
+      ROWS.forEach(r => { rec.photos[r] = (rec.photos[r] || []).filter(x => String(x.id) !== aid); });
+      rec.photos[to] = (rec.photos[to] || []).concat([p]).slice(-60);
+      await saveRec(env, id, rec);
+      if (rec.pub && rec.doc) { const g = await fresh(env, chk, id); f.pack = g.pack; await republish(); await saveRec(env, id, rec); }
+      return done({ photo: p });
+    }
     if (a === 'photo') {
       if (!ROWS.includes(b.row)) return json({ ok: false, reason: 'row' }, 400);
       const file = form && form.get('file'); if (!file || typeof file === 'string') return json({ ok: false, reason: 'bad-request' }, 400);
@@ -249,6 +266,7 @@ export async function onRequestPost({ request, env }) {
       const name = 'story-' + b.row + '-' + new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-') + '.' + PHOTO[type];
       const asset = await addFileToColumn(T, id, STORY_COL[b.row], file, name, api);
       const p = { id: asset || '', name, children: b.children === 'true' || b.children === true, by: chk.who, at: new Date().toISOString() };
+      const cap = clip(String(b.cap || '').replace(/\s+/g, ' ').trim(), 120); if (cap) p.cap = cap;
       if (asset) { rec.photos[b.row] = (rec.photos[b.row] || []).concat([p]).slice(-60); await saveRec(env, id, rec); }
       await toCollecting();
       return done({ photo: p });
