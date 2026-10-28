@@ -187,3 +187,15 @@ test('story photos: a caption, "shows children" and another row (photo-edit); ne
   const pub = JSON.parse(env.FEED.m.get('pubstory:301'));
   assert.ok(pub.hero && pub.hero.id, 'a cover photo'); assert.ok(pub.photos.includes(pub.hero.id));
 });
+
+test('photo dates: set or corrected by hand (month), cleared, refused in the future; undated photos counted', async () => {
+  const { env } = setup();
+  const b = await form(env, '3333', { action: 'photo', id: '301', row: 'before', taken: '2024-11-02' }, jpg('b.jpg'));
+  assert.equal(b.photo.taken, '2024-11-02'); assert.equal(b.story.undated, 0);
+  const c = await form(env, '3333', { action: 'photo', id: '301', row: 'after' }, jpg('a.jpg')); assert.equal(c.story.undated, 1);
+  const e = await post(env, '3333', { action: 'photo-edit', id: '301', row: 'after', asset: c.photo.id, taken: '2025-06' });
+  assert.equal(e.story.photos.after[0].taken, '2025-06-15'); assert.equal(e.story.undated, 0);
+  assert.match(e.story.pool.find(p => p.id === c.photo.id).cap, /June 2025$/);
+  assert.equal((await post(env, '3333', { action: 'photo-edit', id: '301', row: 'after', asset: c.photo.id, taken: '2099-01' })).status, 400);
+  const x = await post(env, '3333', { action: 'photo-edit', id: '301', row: 'after', asset: c.photo.id, taken: '' }); assert.equal(x.story.photos.after[0].taken, undefined);
+});

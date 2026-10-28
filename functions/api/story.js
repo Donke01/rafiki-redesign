@@ -9,7 +9,8 @@
 //       Old apps send { text } instead of { doc }; publish is kept (nothing to do once it is on the website).
 //     collecting (admins, once approved): back to Collecting, and off the website
 //   POST /api/story multipart { action: photo, id, row: before|progress|after, children, cap?, taken? (YYYY-MM-DD from the photo), file } / { action: voice, id, q, file }
-//   POST /api/story { action: photo-edit, id, row, asset, cap?, children?, to? } a photo's caption, "shows children", or its row
+//   POST /api/story { action: photo-edit, id, row, asset, cap?, children?, taken? (YYYY-MM or YYYY-MM-DD, '' clears), to? }
+//     a photo's caption, "shows children", the month it was taken, or its row
 //   story.newPhotos: photos added since the draft was written (the app offers "Draft again" to use them)
 // Field officers collect and draft; only admins edit the final text, approve and publish. Signed in like /api/pin
 // (the shared team PIN and donors are refused). The words, files and statuses live in monday.com's story columns.
@@ -252,6 +253,12 @@ export async function onRequestPost({ request, env }) {
       const p = Object.assign({}, cur);
       if ('cap' in b) p.cap = clip(String(b.cap || '').replace(/\s+/g, ' ').trim(), 120);
       if ('children' in b) p.children = b.children === true || b.children === 'true';
+      if ('taken' in b) {   // the day it was taken, set or corrected by hand ('' clears it)
+        const tk = /^(\d{4}-\d{2})(-\d{2})?$/.exec(String(b.taken || '').trim());
+        if (!String(b.taken || '').trim()) delete p.taken;
+        else if (tk && tk[1] >= '2000-01' && tk[1] <= new Date().toISOString().slice(0, 7)) p.taken = tk[1] + (tk[2] || '-15');
+        else return json({ ok: false, reason: 'date' }, 400);
+      }
       ROWS.forEach(r => { rec.photos[r] = (rec.photos[r] || []).filter(x => String(x.id) !== aid); });
       rec.photos[to] = (rec.photos[to] || []).concat([p]).slice(-60);
       await saveRec(env, id, rec);
