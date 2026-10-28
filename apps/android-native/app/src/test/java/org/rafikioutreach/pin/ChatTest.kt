@@ -206,7 +206,7 @@ class ChatTest {
         Lang.sw = sw; world(); val m = model(); show(m, dark)
         tap("nav_chat"); waitTag("chatrow_g1")
         // pinned first, newest next; previews, unread, @, muted, the online dot
-        assertTrue(tagged("chat_pinned_label"))
+        assertTrue(tagged("chat_chips"))
         val order = rule.onAllNodes(hasTestTag("chatrow_t_all") or hasTestTag("chatrow_g1") or hasTestTag("chatrow_dm_grace"), useUnmergedTree = true).fetchSemanticsNodes().map { n -> n.config.getOrNull(androidx.compose.ui.semantics.SemanticsProperties.TestTag) }
         assertEquals(listOf("chatrow_t_all", "chatrow_g1", "chatrow_dm_grace"), order)
         assertTrue(has(if (sw) "Grace: @Reid Anderson" else "Grace: @Reid Anderson"))
@@ -222,13 +222,13 @@ class ChatTest {
     @Test fun search_titles_and_messages_and_back_clears_it() {
         world(); val m = model(); show(m)
         tap("nav_chat"); waitTag("chatrow_g1")
-        rule.onNodeWithTag("chat_search").performTextInput("spare"); settle(600)
+        tap("chat_search_btn"); rule.onNodeWithTag("chat_search").performTextInput("spare"); settle(600)
         until("server search") { tagged("search_msgs_label") }
         assertTrue(has("I can bring the spare handle"))
         assertTrue(fake.calls.any { it.startsWith("GET search?q=spare") })
         shot("chat-09-search")
-        back(); assertTrue("back clears the search", rule.onNodeWithTag("chat_search").fetchSemanticsNode().config.getOrNull(androidx.compose.ui.semantics.SemanticsProperties.EditableText)?.text.isNullOrEmpty())
-        rule.onNodeWithTag("chat_search").performTextInput("Kitale"); settle()
+        back(); assertFalse("back closes the search", tagged("chat_search")); assertTrue(tagged("chat_title"))
+        tap("chat_search_btn"); rule.onNodeWithTag("chat_search").performTextInput("Kitale"); settle()
         assertTrue(tagged("chatrow_g1")); assertFalse(tagged("chatrow_dm_grace"))
         // start over: away via the bottom bar and back, the search is gone
         tap("nav_map"); tap("nav_chat"); waitTag("chatrow_dm_grace")

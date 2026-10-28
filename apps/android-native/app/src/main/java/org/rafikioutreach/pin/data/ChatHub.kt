@@ -345,6 +345,12 @@ class ChatHub(private val ctx: Context, val api: Api, private val myName: () -> 
     /** Mute for [hours] (8, 168), forever (-1), or unmute (0). */
     fun mute(c: String, hours: Int) = scope.launch { prefs(c, JSONObject().put("muted", when { hours < 0 -> "always"; hours == 0 -> 0; else -> now() + hours * 3_600_000L })) }
     fun markUnread(c: String) = edit(c) { it.copy(unread = maxOf(1, it.unread)) }
+    /** ⋯ › Mark all as read (chat 2): every unread chat on the list (not archived) is read, and the server is told. */
+    fun allRead() {
+        val todo = _rows.value.filter { (it.unread > 0 || it.mention) && !it.archived }
+        _rows.value = _rows.value.map { r -> if (todo.any { it.id == r.id }) r.copy(unread = 0, mention = false) else r }; recount(); save()
+        todo.forEach { r -> r.last?.id?.takeIf { it.isNotBlank() }?.let { id -> scope.launch { chat.read(r.id, id) } } }
+    }
     /** The chat's sound for new messages (this phone only). */
     fun quiet(c: String) = sp.getBoolean("quiet_$c", false)
     fun setQuiet(c: String, on: Boolean) { sp.edit().putBoolean("quiet_$c", on).apply(); tick.value++ }

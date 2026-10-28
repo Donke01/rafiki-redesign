@@ -315,7 +315,9 @@ fun Shell(m: AppModel) {
     Column(Modifier.fillMaxSize()) {
         // app header: Me (or back), the wordmark, the bell
         val dispatcher = androidx.activity.compose.LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
-        org.rafikioutreach.pin.ui.HeaderRow(left = { word ->
+        // chat 2: on a phone the chat list has its own header (Me photo, Chats, search, ⋯ with the bell and refresh)
+        val chatTop = here.tab == "chat" && !sub && org.rafikioutreach.pin.ui.chatListOwnsTop()
+        if (!chatTop) org.rafikioutreach.pin.ui.HeaderRow(left = { word ->
             // the same as the phone's back: an open sub-tab or fold closes first
             if (sub) Box(Modifier.size(44.dp), contentAlignment = Alignment.Center) { RoundBtn("back", t("Back", "Rudi"), "hback") { if (dispatcher != null) dispatcher.onBackPressed() else pop() } }
             // Me: a labelled pill at the top left (feat-mea; Chat took Me's place in the bottom bar, feat-chata), lit while
@@ -377,7 +379,7 @@ fun Shell(m: AppModel) {
                         pl.sub == "chatstar" -> org.rafikioutreach.pin.ui.StarredScreen(m, back = { pop() }) { openChat(it) }
                         pl.sub == "chatsettings" -> org.rafikioutreach.pin.ui.ChatSettingsScreen(m)
                         pl.tab == "chat" -> org.rafikioutreach.pin.ui.ChatListScreen(m, { openChat(it) }, { go(Place("chat", sub = "chatnew")) }, openArchived = { go(Place("chat", sub = "chatarch")) }, openStarred = { go(Place("chat", sub = "chatstar")) },
-                            openSettings = { go(Place("chat", sub = "chatsettings")) })
+                            openSettings = { go(Place("chat", sub = "chatsettings")) }, openMe = { tab("me") }, openNotes = { go(Place("chat", sub = "notes")) })
                         pl.sub == "search" -> { val snap = m.snap.collectAsState().value; val fx = m.fix.collectAsState().value; if (snap != null) org.rafikioutreach.pin.ui.SearchScreen(m, snap, fx?.ll, { go(Place(pl.tab, it)) }) { pop() } }
                         pl.sub == "report" -> org.rafikioutreach.pin.ui.ReportScreen(m) { pop() }
                         pl.sub == "notes" -> org.rafikioutreach.pin.ui.NotificationsScreen(m, { go(Place(pl.tab, it)) }, { go(Place(pl.tab, sub = "set_notify")) }) { pop() }

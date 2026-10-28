@@ -78,6 +78,13 @@ internal object ChatIc {
         "bubble" to listOf("M5 5.5h14v10H10l-4 3.5v-3.5H5z"),
         "data" to listOf("M7 4v16M7 20l-3-3M7 20l3-3", "M17 20V4M17 4l-3 3M17 4l3 3"),
         "moon" to listOf("M19 14.5A7.5 7.5 0 0 1 9.5 5a7.5 7.5 0 1 0 9.5 9.5z"),
+        // chat 2 (cw2): new chat, select, delete, translate, a check
+        "pushpin" to listOf("M14.5 4l5.5 5.5-2.8 1.2-3.4 3.4.4 4-1.8 1.8-8-8 1.8-1.8 4 .4 3.4-3.4z", "M8.4 15.6L4 20"),
+        "newchat" to listOf("M4.5 19.5l1.2-3.6A7.8 7.8 0 1 1 8.6 18.6z", "M12 8.6v6M9 11.6h6"),
+        "trash" to listOf("M4.5 7h15M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13", "M10 11v5.5M14 11v5.5"),
+        "selectall" to listOf("M4 12.5l4 4 8.5-8.5", "M12.5 16.5l1 1 7-7"),
+        "translate" to listOf("M4 5h8M8 3.5V5M5.5 5c.6 3 2.5 5.5 5.5 6.8M10.5 5c-.6 3-2.6 5.5-6 7", "M11.5 20l4-9 4 9M13 17h5"),
+        "photoadd" to listOf("M4 6h11v4M4 6v13h16v-6", "M4 16l4.5-4.5 4 4", "M18.5 4v6M15.5 7h6"),
     )
     private val cache = HashMap<String, ImageVector>()
     fun get(name: String): ImageVector = D[name]?.let { paths ->
@@ -137,6 +144,10 @@ internal fun ChatAvatar(row: ChatRow?, me: String, size: Dp = 50.dp, online: Boo
         val cc = row?.country.orEmpty()
         val pphoto = row?.pphoto.orEmpty()
         when {
+            // chat 2: Announcements as a megaphone; a project as its photo with a water drop, else its kind on a tile
+            row?.announce == true && photo.isBlank() -> Box(Modifier.size(size).clip(CircleShape).background(C.hue("amber").bg).testTag("av_news"), contentAlignment = Alignment.Center) {
+                Icon(ChatIc.get("megaphone"), null, tint = C.hue("amber").fg, modifier = Modifier.size(size * 0.46f)) }
+            row != null && kind == "project" && photo.isBlank() -> ProjectChatAvatar(m, row, size)
             m != null && photo.isNotBlank() && kind != "dm" -> ChatImage(m, org.rafikioutreach.pin.data.ChatMedia(photo, "photo"), Modifier.size(size).clip(CircleShape), max = 256)
             kind == "dm" -> PersonAvatar(title, size)
             cc.isNotBlank() -> FlagAvatar(cc, size)
