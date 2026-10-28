@@ -175,7 +175,7 @@ def s_look(pg, check, lang, cm, W):
     check(pg.locator('.top [aria-label*="all" i], .top [data-hd=call]').count() == 0, 'no call button')
     check(T(lang, 'Kapsaret Borehole', 'Kapsaret Borehole') in txt(pg, '#cwHd') and 'Meril' in txt(pg, '#cwHd .cw-hdt small'), 'name and the members under it (%s)' % txt(pg, '#cwHd'))
     cm.push({'t': 'typing', 'c': 'p:101', 'who': 'Meril Kiprop', 'what': 'typing'}); pg.wait_for_timeout(400)
-    check(T(lang, 'Meril is typing', 'Meril anaandika') in txt(pg, '#cwHd') and pg.evaluate("getComputedStyle(document.querySelector('#cwHd small')).color") in ('rgb(28, 138, 80)', 'rgb(60, 192, 122)', 'rgb(0, 86, 42)'), 'typing… in green in the header (%s)' % txt(pg, '#cwHd'))
+    check(T(lang, 'Meril is typing', 'Meril anaandika') in txt(pg, '#cwHd') and pg.evaluate("getComputedStyle(document.querySelector('#cwHd small')).color") in ('rgb(28, 138, 80)', 'rgb(60, 192, 122)', 'rgb(0, 86, 42)', 'rgb(127, 227, 176)'), 'typing… in green in the header (%s)' % txt(pg, '#cwHd'))
     st = txt(pg, '#cwPs')
     check(vis(pg, '#cwPs') and T(lang, 'Working', 'Inafanya kazi') in st and T(lang, 'Visited', 'Ziara') in st and T(lang, 'Open project', 'Fungua mradi') in st, 'the project strip: status, last visit, Open project (%s)' % st)
     fs = pg.evaluate("['.cw-tx','.cw-sn','.cw-mt','.cw-day span','.cw-hdt b'].map(s => { const e = document.querySelector('#vRoom ' + s + ', #cwHd ' + s); return e ? parseFloat(getComputedStyle(e).fontSize) : 0; })")

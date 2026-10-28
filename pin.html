@@ -4013,6 +4013,101 @@ html[data-theme=sun] .cw-apall,html[data-theme=sun] .cw-apchip{border:2px solid 
 .cw-ap .cw-foot{bottom:calc(-18px - env(safe-area-inset-bottom));margin:0 -18px calc(-18px - env(safe-area-inset-bottom));padding:10px 18px calc(18px + env(safe-area-inset-bottom))}
 @media (prefers-reduced-motion: reduce){.cw-m.sel .cw-b{transition:none}}
 </style>
+<style id="cw3-css">/* cw3: the chat face lift, direction B "RAFIKI Deep" (design/chat-2026-10b/board-b.webp): a night-blue header with a
+   soft glow (as on the website's Stories page), warm sand behind the chats, chats as cards, my messages in deep blue, a dark
+   long-press sheet and a night header on chat info. The night parts reuse the app's own tokens, re-pointed to light-on-dark
+   values, so every existing control keeps working. The sun theme keeps its plain high-contrast look (nothing here applies). */
+:root{--c3-n1:#04263F;--c3-n2:#06375A;--c3-g1:rgba(46,180,170,.42);--c3-g2:rgba(10,120,194,.55);--c3-sand:#F6F2EC;--c3-room:#F3ECE2;
+  --c3-acc:#0B8F6A;--c3-acc2:#12A37A;--c3-mint:#7FE3B0;--c3-ice:#9FD3F7;--c3-day:#E8DCCB;--c3-dayt:#6A5A44;--c3-sh:0 2px 10px rgba(60,40,10,.07)}
+html[data-theme=dark]{--c3-n1:#03182A;--c3-n2:#052C48;--c3-g1:rgba(46,180,170,.26);--c3-g2:rgba(10,120,194,.34);--c3-sand:#0D1318;--c3-room:#0F151A;
+  --c3-acc:#2BB98C;--c3-acc2:#23A57D;--c3-day:#1C262E;--c3-dayt:#B9C6D0;--c3-sh:0 1px 0 rgba(255,255,255,.04)}
+html:not([data-theme=sun]){--c3-hd:radial-gradient(380px 190px at 88% -10%,var(--c3-g1),transparent 70%),radial-gradient(320px 200px at -5% -20%,var(--c3-g2),transparent 70%),var(--c3-n1)}
+/* the night parts: light text and controls on night blue */
+html:not([data-theme=sun]) :is(#cwTop,#cwField,body.room:not(.cw2) .top,body.cw2 .cw-rh,#cwPs,.bsh.cw-menu .bsh-p,.cw-info .cw-ihd){
+  --ink:#FFFFFF;--text:#E6EEF4;--muted:#A9C3D6;--tint:rgba(255,255,255,.12);--line:rgba(255,255,255,.14);--blue:#9FD3F7;--blue2:#9FD3F7;--bg:rgba(255,255,255,.08);
+  --cw2-chip:rgba(255,255,255,.1);--cw2-chipt:#DCEAF3;--cw2-on:#FFFFFF;--cw2-ont:#04263F;--cw-un:#7FE3B0;--cw2-at:rgba(127,227,176,.16);color:var(--text)}
+
+/* ---- the chat list ---- */
+html:not([data-theme=sun]) body.cwl,html:not([data-theme=sun]) body.cwl main{background:var(--c3-sand)}
+html:not([data-theme=sun]) #cwTop{background:var(--c3-hd);border-radius:0 0 26px 26px;box-shadow:0 6px 18px rgba(4,38,63,.18);padding-bottom:10px}
+html:not([data-theme=sun]) #cwTop .cw2-me{box-shadow:0 0 0 2px var(--c3-n1),0 0 0 4px #5CC8E8}
+html:not([data-theme=sun]) #cwTop .cw-sbox{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.16);color:var(--muted)}
+html:not([data-theme=sun]) #cwTop .cw-sbox input::placeholder{color:var(--muted)}
+html:not([data-theme=sun]) #cwTop .cw-sbox:focus-within{border-color:#9FD3F7;box-shadow:0 0 0 3px rgba(159,211,247,.25)}
+html:not([data-theme=sun]) #cwTop .cw2-chips button[aria-pressed=true]{font-weight:800}
+html:not([data-theme=sun]) #cwTop .cw2-pop{--ink:var(--c3-n1);--text:#141618;--muted:#5A6066;--tint:#E3F1FC;--line:#DCE1E5;--blue:#0A78C2;color:#141618}
+html[data-theme=dark] #cwTop .cw2-pop{--ink:#E6EEF4;--text:#E8EDF1;--muted:#9CA8B2;--tint:#12324A;--line:#26323C;--blue:#2F9BE6;color:#E8EDF1}
+/* "In the field now" continues the night block under the sticky header */
+html:not([data-theme=sun]) #cwField .cw2-fd{position:relative;z-index:0;margin-top:-26px;padding-top:34px;padding-bottom:14px;border:0;border-radius:0 0 26px 26px;
+  background:linear-gradient(var(--c3-n1),var(--c3-n2));box-shadow:0 6px 18px rgba(4,38,63,.16)}
+html:not([data-theme=sun]) #cwField .cw2-fd h2{color:var(--c3-ice)}
+html:not([data-theme=sun]) #cwField .cw2-rg{background:rgba(255,255,255,.25)}
+html:not([data-theme=sun]) #cwField .cw2-rg.on{background:var(--c3-mint)}
+html:not([data-theme=sun]) #cwField .cw2-rg.site{background:conic-gradient(from 200deg,#5CE0A0,#5CC8E8,#5CE0A0)}
+html:not([data-theme=sun]) #cwField .cw2-rg .cw-av{border-color:var(--c3-n1)}
+html:not([data-theme=sun]) #cwField .cw2-p{color:#FFFFFF}
+html:not([data-theme=sun]) #cwField .cw2-p em.old{color:var(--muted)}
+html:not([data-theme=sun]) #cwNote .cw2-nt{background:var(--card);box-shadow:var(--c3-sh)}
+/* chats as cards on sand */
+html:not([data-theme=sun]) #cwList{padding-top:12px}
+html:not([data-theme=sun]) #cwList .cw-rw{margin:0 0 8px;border-radius:18px;background:var(--card);box-shadow:var(--c3-sh)}
+html:not([data-theme=sun]) #cwList .cw-row{width:100%;margin:0;padding:0 12px;border-radius:18px}
+html:not([data-theme=sun]) #cwList .cw-rt{border-bottom:0}
+html:not([data-theme=sun]) #cwList .cw-row .cw-on{border-color:var(--card)}
+html:not([data-theme=sun]) #cwNew{background:linear-gradient(135deg,var(--c3-acc2),var(--c3-acc));color:#FFFFFF;box-shadow:0 10px 24px rgba(11,143,106,.38)}
+
+/* ---- one chat ---- */
+html:not([data-theme=sun]) body.room:not(.cw2) .top{background:var(--c3-hd) !important;-webkit-backdrop-filter:none;backdrop-filter:none;border-bottom:0;box-shadow:none}
+html:not([data-theme=sun]) body.room:not(.cw2) .top #hBack{color:#FFFFFF}
+html:not([data-theme=sun]) body.room:not(.cw2) .top .cw-hd .cw-on{border-color:var(--c3-n1)}
+html:not([data-theme=sun]) body.cw2 .cw-rh{background:var(--c3-hd);border-bottom:0}
+html:not([data-theme=sun]) #cwPs{background:linear-gradient(var(--c3-n1),var(--c3-n2));border-bottom:0;border-radius:0 0 22px 22px;box-shadow:0 6px 16px rgba(4,38,63,.16)}
+html:not([data-theme=sun]) #cwPs .cw-pso{color:#FFFFFF}
+html:not([data-theme=sun]) #vRoom:has(#cwPs:not(.hidden):not([hidden])) #cwMsgs{margin-top:-22px;padding-top:30px}
+/* the default background (no wallpaper chosen): warm sand with soft contour lines */
+html:not([data-theme=sun]) #cwMsgs.cw-msgs:not([class*="cw-wp-"]){background-color:var(--c3-room);background-size:160px 160px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cg fill='none' stroke='%23E4D8C6' stroke-width='1.2'%3E%3Cpath d='M0 40c40-20 80 20 160 0M0 90c40-20 80 20 160 0M0 140c40-20 80 20 160 0'/%3E%3C/g%3E%3C/svg%3E")}
+html[data-theme=dark] #cwMsgs.cw-msgs:not([class*="cw-wp-"]){background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cg fill='none' stroke='%23FFFFFF' stroke-opacity='.05' stroke-width='1.2'%3E%3Cpath d='M0 40c40-20 80 20 160 0M0 90c40-20 80 20 160 0M0 140c40-20 80 20 160 0'/%3E%3C/g%3E%3C/svg%3E")}
+html:not([data-theme=sun]) #cwMsgs:not([class*="cw-wp-"]) .cw-day span{background:var(--c3-day);color:var(--c3-dayt);box-shadow:none}
+/* my messages: deep blue with light text (the default colour; a colour picked in Wallpaper and colour still wins) */
+html:not([data-theme=sun]) #vRoom[data-bub=""],html:not([data-theme=sun]) #vRoom:not([data-bub]){--cw-me:#06375A}
+html[data-theme=dark] #vRoom[data-bub=""],html[data-theme=dark] #vRoom:not([data-bub]){--cw-me:#0E4A75}
+html:not([data-theme=sun]) #vRoom:is([data-bub=""],:not([data-bub])) .cw-m.me .cw-b{--ink:#FFFFFF;--text:#FFFFFF;--muted:#B5CCDC;--cw-time:#A9C3D6;--cw-tick:#A9C3D6;--cw-read:#7FE3B0;
+  --tint:rgba(255,255,255,.12);--line:rgba(255,255,255,.18);--blue:#9FD3F7;--blue2:#9FD3F7;--bg:rgba(255,255,255,.1);--card:rgba(255,255,255,.1);color:#FFFFFF}
+html:not([data-theme=sun]) #vRoom:is([data-bub=""],:not([data-bub])) .cw-m.me .cw-b a{color:#BFE3FB}
+html:not([data-theme=sun]) .cw-qr button{border-color:transparent;background:var(--card);box-shadow:var(--c3-sh)}
+html:not([data-theme=sun]) #cwComp{background:var(--card);border-radius:24px 24px 0 0;box-shadow:0 -4px 20px rgba(60,40,10,.08)}
+html:not([data-theme=sun]) #cwComp .cw-in{background:var(--c3-room);box-shadow:none}
+html:not([data-theme=sun]) #cwComp .cw-go{background:linear-gradient(135deg,var(--c3-acc2),var(--c3-acc));box-shadow:0 6px 14px rgba(11,143,106,.32)}
+
+/* ---- the long-press menu: a dark sheet, the four everyday actions as big buttons on top ---- */
+html:not([data-theme=sun]) .bsh.cw-menu .bsh-p{background:linear-gradient(#0A3354,var(--c3-n1));box-shadow:0 -10px 40px rgba(0,0,0,.4)}
+html:not([data-theme=sun]) .bsh.cw-menu .bsh-p .grab{background:rgba(255,255,255,.3)}
+html:not([data-theme=sun]) .bsh.cw-menu .bsh-x{background:rgba(255,255,255,.1);color:#FFFFFF}
+html:not([data-theme=sun]) .bsh.cw-menu .cw-rxp{background:rgba(255,255,255,.08)}
+html:not([data-theme=sun]) .bsh.cw-menu .cw-mn{display:flex;flex-direction:row;flex-wrap:wrap;gap:2px 8px}
+html:not([data-theme=sun]) .bsh.cw-menu .cw-mn button{flex:1 1 100%;border-top:0;border-radius:14px;min-height:50px;color:#FFFFFF;order:3}
+html:not([data-theme=sun]) .bsh.cw-menu .cw-mn button svg{color:var(--c3-ice)}
+html:not([data-theme=sun]) .bsh.cw-menu .cw-mn button:is([data-mk=reply],[data-mk=fwd],[data-mk=copy],[data-mk=star]){order:1;flex:1 1 0;min-width:0;flex-direction:column;justify-content:center;gap:6px;
+  min-height:72px;margin-bottom:8px;padding:10px 4px;background:rgba(255,255,255,.08);font-size:var(--cw-fs-meta);font-weight:700;text-align:center}
+html:not([data-theme=sun]) .bsh.cw-menu .cw-mn button:is([data-mk=reply],[data-mk=fwd],[data-mk=copy],[data-mk=star]) svg{color:var(--c3-mint)}
+html:not([data-theme=sun]) .bsh.cw-menu .cw-mn button:is([data-mk=reply],[data-mk=fwd],[data-mk=copy],[data-mk=star]) span{white-space:nowrap;overflow-wrap:normal}
+html:not([data-theme=sun]) .bsh.cw-menu .cw-mn button[data-mk=tr]{order:2}
+html:not([data-theme=sun]) .bsh.cw-menu .cw-mn button:not([data-mk=reply]):not([data-mk=fwd]):not([data-mk=copy]):not([data-mk=star]){margin:0;padding:8px 8px}
+html:not([data-theme=sun]) .bsh.cw-menu .cw-mn button.red{order:9}
+html:not([data-theme=sun]) .bsh.cw-menu .cw-mn button.red,html:not([data-theme=sun]) .bsh.cw-menu .cw-mn button.red svg{color:#FF8A80}
+html:not([data-theme=sun]) .bsh.cw-menu .cw-mn button:hover{background:rgba(255,255,255,.1)}
+
+/* ---- chat info: a night header, then cards on sand ---- */
+html:not([data-theme=sun]) .tsh-p:has(.cw-info){background:var(--c3-sand)}
+html:not([data-theme=sun]) .cw-info .cw-ihd{margin:-8px -16px 4px;padding:22px 16px 20px;border-radius:24px;background:var(--c3-hd);box-shadow:0 8px 22px rgba(4,38,63,.2)}
+html:not([data-theme=sun]) .cw-info .cw-ihd .cw-av.big{box-shadow:0 0 0 3px var(--c3-n1),0 0 0 5px #5CC8E8}
+html:not([data-theme=sun]) .cw-info .cw-ihd h3{color:#FFFFFF}
+html:not([data-theme=sun]) .cw-info .cw-ihd small{color:var(--c3-ice)}
+html:not([data-theme=sun]) .cw-info .cw-ihd p{color:#E6EEF4}
+html:not([data-theme=sun]) .cw-info .ct-list{border:0;box-shadow:var(--c3-sh)}
+html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
+</style>
 </head>
 <body class="locked">
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
@@ -15635,9 +15730,9 @@ html[data-theme=sun] .cw-apall,html[data-theme=sun] .cw-apchip{border:2px solid 
     failed: '<svg class="cw-tk bad" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.2" fill="currentColor"/><path d="M8 4.6v4.2M8 11v.2" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round"/></svg>'
   };
   var CW_RX = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
-  var CW_WALL = [['', 'None', 'Hakuna'], ['water', 'Water', 'Maji'], ['savanna', 'Savanna', 'Savana'], ['night', 'Night', 'Usiku'], ['sky', 'Sky', 'Anga'], ['dots', 'Dots', 'Nukta'], ['leaf', 'Leaves', 'Majani'], ['waves', 'Waves', 'Mawimbi'], ['sand', 'Sand', 'Mchanga']];
-  // my bubble colour per chat (the contract's shared tokens); '' is the app's own light blue
-  var CW_BUB = [['', '#D6EDFF', 'Blue sky', 'Anga ya bluu'], ['green', '#D9F5DF', 'Green', 'Kijani'], ['teal', '#CFF1EE', 'Teal', 'Kijani-bahari'], ['blue', '#DCE3FF', 'Blue', 'Bluu'], ['purple', '#EBE2FF', 'Purple', 'Zambarau'],
+  var CW_WALL = [['', 'Standard', 'Kawaida'], ['water', 'Water', 'Maji'], ['savanna', 'Savanna', 'Savana'], ['night', 'Night', 'Usiku'], ['sky', 'Sky', 'Anga'], ['dots', 'Dots', 'Nukta'], ['leaf', 'Leaves', 'Majani'], ['waves', 'Waves', 'Mawimbi'], ['sand', 'Sand', 'Mchanga']];
+  // my bubble colour per chat (the contract's shared tokens); '' is the app's own night blue (cw3)
+  var CW_BUB = [['', '#06375A', 'Night blue', 'Bluu ya usiku'], ['green', '#D9F5DF', 'Green', 'Kijani'], ['teal', '#CFF1EE', 'Teal', 'Kijani-bahari'], ['blue', '#DCE3FF', 'Blue', 'Bluu'], ['purple', '#EBE2FF', 'Purple', 'Zambarau'],
     ['pink', '#FFE1EC', 'Pink', 'Waridi'], ['orange', '#FFE7CF', 'Orange', 'Machungwa'], ['grey', '#E7EAED', 'Grey', 'Kijivu']];
   var CW_QUICK = [['On my way', 'Niko njiani'], ['Arrived at site', 'Nimefika eneo la kazi'], ['Pump fixed ✅', 'Pampu imetengenezwa ✅'], ['Need parts', 'Nahitaji vipuri'], ['Running late', 'Nimechelewa'], ['Call me', 'Nipigie simu']];
   var CW_DND0 = { on: false, from: '21:00', to: '06:30', mentions: false, tz: 180 };
