@@ -37,7 +37,7 @@ struct ChatComposer: View {
         .overlay(alignment: .top) { Rectangle().fill(C.line).frame(height: ChatLook.sun ? 2 : 1) }
         .onAppear {
             text = hub.drafts[c] ?? ""
-            if m.demo { switch Demo.arg("-sheet") ?? "" { case "attach", "live", "contact": sheet = Demo.arg("-sheet"); case "rec": rec.on = true; rec.secs = 7; default: break } }
+            if m.demo { switch Demo.arg("-sheet") ?? "" { case "attach", "live", "contact": sheet = Demo.arg("-sheet"); case "rec": rec.on = true; rec.secs = 7; rec.level = (0..<40).map { 20 + ($0 * 37) % 70 }; default: break } }
         }
         .onChange(of: text) { v in
             hub.drafts[c] = v

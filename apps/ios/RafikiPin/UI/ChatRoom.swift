@@ -94,8 +94,9 @@ struct ChatRoomView: View {
             case "msg": held = msgs.last { !chatSame($0.from, hub.me) && $0.sys == nil }
             case "select": selecting = true; if let l = msgs.last { sel = [l.key] }
             case "find": finding = true; fq = Demo.arg("-q") ?? "pump"
-            case "attach", "live", "contact", "quick": break
-            case let s where !s.isEmpty: sheet = s
+            // only the room's own sheets open here (the composer opens attach, live, contact and rec itself): an unknown
+            // key must never present an empty sheet, which shows as a blank screen
+            case "clear", "delete", "add", "media", "date", "mute": sheet = Demo.arg("-sheet")
             default: break
             }
         }
