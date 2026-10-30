@@ -82,7 +82,7 @@ struct OfficeOverview: View {
         }
     }
 
-    func tileList(_ due: Int) -> [OTile] {
+    fileprivate func tileList(_ due: Int) -> [OTile] {
         let urgent = s.repairs.values.filter { $0.urgency == "urgent" }.count
         let cost = s.repairs.values.reduce(0) { $0 + ($1.cost ?? 0) }
         let tests = testCount(m)

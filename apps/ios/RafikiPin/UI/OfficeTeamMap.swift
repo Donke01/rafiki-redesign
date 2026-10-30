@@ -185,7 +185,6 @@ private final class OAnn: NSObject, MKAnnotation {
 }
 private final class OLine: MKPolyline { var color: UIColor = .systemBlue; var dim = false }
 
-private func initialsOf(_ name: String) -> String { name.split(separator: " ").prefix(2).compactMap { $0.first.map { String($0).uppercased() } }.joined() }
 
 private func avatarImage(_ a: OMapAvatar) -> UIImage {
     let font = UIFont.boldSystemFont(ofSize: 10)
@@ -322,7 +321,7 @@ struct OfficeTeamMap: View {
         .task { await load() }
     }
 
-    @ViewBuilder func content(_ ps: [Sharer]) -> some View {
+    @ViewBuilder fileprivate func content(_ ps: [Sharer]) -> some View {
         let colors = Dictionary(ps.enumerated().map { ($0.element.name, ofaColor($0.offset)) }, uniquingKeysWith: { a, _ in a })
         let avatars = ps.map { OMapAvatar(key: $0.name, ll: $0.ll, color: colors[$0.name] ?? C.blue, label: agoText($0.at), faded: isOld($0.at)) }
         let pins = visits.compactMap { v in s.projects.first { $0.id == v.id }?.gps.map { OMapPin(ll: $0, color: stateColor(v.state), number: nil, title: v.title) } }
@@ -584,7 +583,7 @@ struct OfficePlanWeek: View {
         }
     }
 
-    @ViewBuilder func result(_ p: WeekPlan) -> some View {
+    @ViewBuilder fileprivate func result(_ p: WeekPlan) -> some View {
         let n = p.days.reduce(0) { $0 + $1.count }
         let km = p.days.reduce(0.0) { $0 + planMetres($1, s) }
         CardV(pad: 16) {
@@ -627,7 +626,7 @@ struct OfficePlanWeek: View {
         }.buttonStyle(.plain)
     }
 
-    func dayCard(_ p: WeekPlan, _ i: Int) -> some View {
+    fileprivate func dayCard(_ p: WeekPlan, _ i: Int) -> some View {
         let col = ofaColor(i)
         let stops = p.days[i].compactMap(proj)
         let ctr: LatLng? = stops.isEmpty ? nil : LatLng(lat: stops.compactMap { $0.gps?.lat }.reduce(0, +) / Double(stops.count), lng: stops.compactMap { $0.gps?.lng }.reduce(0, +) / Double(stops.count))
@@ -674,7 +673,7 @@ struct OfficePlanWeek: View {
         return " · " + Geo.dist(Geo.metres(a, b), miles: m.miles) + t(" from the last stop", " kutoka kituo cha mwisho")
     }
 
-    func assign(_ p: WeekPlan) {
+    fileprivate func assign(_ p: WeekPlan) {
         busy = true; amsg = nil
         Task {
             var made = 0; var cur = p
