@@ -8,6 +8,7 @@ struct ProjectView: View {
     let startTab: String
     @State private var tab = ""
     @State private var cm: String?
+    @State private var dirs = false
 
     var body: some View {
         if let snap = m.snap, let p = snap.projects.first(where: { $0.id == id }) {
@@ -22,7 +23,10 @@ struct ProjectView: View {
                     }
                     hero(snap, p).padding(.top, 6)
                     Btn(t("Chat", "Gumzo"), icon: "chat", light: true, small: true, wide: true) { Haptic.tap(); ChatNav.shared.project(p.id) }.padding(.top, 8)
-                    if let r = snap.repairs[p.id] { RepairCard(p: p, r: r).padding(.top, 12) }
+                    if let r = snap.repairs[p.id] { RepairTracker(p: p, r: r, here: loc.fix?.ll) }
+                    ConstructionCard(p: p)
+                    ProjectCostLine(p: p)
+                    ProjectMore(p: p) { tab = "hist"; withAnimation(Motion.on ? .easeInOut(duration: 0.35) : nil) { proxy.scrollTo("ptabs", anchor: .top) } }
                     HStack(spacing: 0) {
                         ForEach([("pin", t("Pin location", "Weka mahali")), ("visit", t("Site visit", "Ziara")), ("hist", t("History", "Historia")), ("story", t("Stories", "Hadithi"))], id: \.0) { k, label in
                             Button { tab = k } label: {
@@ -33,7 +37,7 @@ struct ProjectView: View {
                         }
                     }
                     .padding(5).background(C.card).clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-                    .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(C.line, lineWidth: 1)).padding(.top, 14)
+                    .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(C.line, lineWidth: 1)).padding(.top, 14).id("ptabs")
                     VStack(alignment: .leading, spacing: 0) {
                         switch tab {
                         case "visit": VisitTab(p: p)
@@ -47,6 +51,7 @@ struct ProjectView: View {
             }
             }
             .onAppear { if tab.isEmpty { tab = startTab } }
+            .sheet(isPresented: $dirs) { if let g = p.gps { DirectionsSheet(title: p.title, at: g) { dirs = false } } }
             .id(p.id)
         } else {
             Color.clear.onAppear { m.back() }
@@ -57,6 +62,7 @@ struct ProjectView: View {
         CardV(deep: true) {
             Text(p.title).font(.hMedium).foregroundColor(.white)
             Text(p.sub).font(.bMedium).foregroundColor(LightBlue)
+            if testDue(m, p) { WaterTestTag().padding(.top, 6) }
             Text(p.gps.map { t("Saved location: ", "Mahali palipohifadhiwa: ") + $0.text() } ?? t("No location saved yet.", "Bado hakuna mahali palipohifadhiwa.")).font(.bMedium).foregroundColor(LightBlue)
             let v = snap.visits[p.id]
             Text(v.map { t("Last visit: ", "Ziara ya mwisho: ") + When.text($0.at) + " · " + $0.by + " · " + stateName($0.state) } ?? t("No visit recorded in the app yet.", "Bado hakuna ziara iliyorekodiwa kwenye programu.")).font(.bMedium).foregroundColor(LightBlue)
@@ -87,9 +93,8 @@ struct ProjectView: View {
             if let g = p.gps {
                 let ll = "\(g.lat),\(g.lng)"
                 HStack(spacing: 8) {
-                    MapTile(label: t("Directions", "Maelekezo"), icon: "compass") { Share.open("https://www.google.com/maps/dir/?api=1&destination=\(ll)") }
-                    MapTile(label: "Google Maps", icon: "map") { Share.open("https://www.google.com/maps/search/?api=1&query=\(ll)") }
-                    MapTile(label: t("Share", "Shiriki"), icon: "share") { Share.items([p.title + "\nhttps://www.google.com/maps?q=\(ll)"]) }
+                    MapTile(label: t("Directions", "Maelekezo"), icon: "compass") { Haptic.tap(); dirs = true }
+                    MapTile(label: t("Share location", "Shiriki mahali"), icon: "share") { Share.items([p.title + "\nhttps://www.google.com/maps?q=\(ll)"]) }
                 }.padding(.top, 12)
             }
         }
@@ -152,6 +157,7 @@ struct HistoryTab: View {
             Text(t("Notes on this project in monday.com, newest first.", "Maelezo ya mradi huu kwenye monday.com, ya karibuni kwanza.")).font(.bMedium).foregroundColor(C.muted)
             Msg(err, "bad")
             if notes == nil && err == nil { Text(t("Loading…", "Inapakia…")).foregroundColor(C.muted).padding(.top, 12) }
+            if let n = notes { PhotoTimeline(p: p, notes: n) }
             if let n = notes, n.isEmpty { Text(t("No notes yet.", "Bado hakuna maelezo.")).foregroundColor(C.muted).padding(.top, 12) }
             ForEach(notes ?? []) { note in
                 CardV(pad: 14) {

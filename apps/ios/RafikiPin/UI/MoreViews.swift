@@ -44,7 +44,7 @@ struct NewSiteView: View {
                 }.padding(.top, 14)
                 CardV {
                     H2(t("Where is it?", "Iko wapi?"))
-                    SpotPicker(spot: spot, start: loc.fix?.ll, ck: ck)
+                    SpotPicker(spot: spot, start: MapNewSite.at ?? loc.fix?.ll, ck: ck)
                 }.padding(.top, 14)
                 CardV {
                     H2(t("Photos (optional)", "Picha (si lazima)"))
@@ -57,7 +57,8 @@ struct NewSiteView: View {
                 Spacer().frame(height: 24)
             }.padding(16)
         }
-        .onAppear { if ck.isEmpty { ck = m.prefs.country.isEmpty ? "ke" : m.prefs.country } }
+        .onAppear { if ck.isEmpty { ck = m.prefs.country.isEmpty ? "ke" : m.prefs.country }; if let a = MapNewSite.at { spot.ll = a; spot.how = "map" } }
+        .onDisappear { MapNewSite.at = nil }
     }
 
     func add() {

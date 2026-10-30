@@ -80,6 +80,7 @@ enum Demo {
             return j(["ok": true] as JSON)
         }
         DemoMe.setUp(p, api)
+        DemoOffice.setUp(p, api)
     }
 
     /// -screen office | office-repairs | me | report | route | project:104:visit | map | new | stories | story[:104] | story-photos | story-read
