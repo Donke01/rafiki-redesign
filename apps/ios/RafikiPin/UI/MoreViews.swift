@@ -80,42 +80,9 @@ struct NewSiteView: View {
     }
 }
 
+/// Me & team: the page is MeScreen (MeScreen.swift).
 struct MeView: View {
-    @EnvironmentObject var m: AppModel
-    @State private var pane = "me"
-    var body: some View {
-        ScrollViewReader { sv in
-            ScrollView {
-                VStack(alignment: .leading, spacing: 0) {
-                    HStack {
-                        Text(t("Me & team", "Mimi na timu")).font(.hLarge).foregroundColor(C.ink).id("top")
-                        Spacer(minLength: 8)
-                        SmallSeg(items: [("me", t("Me", "Mimi")), ("team", t("Team", "Timu"))], sel: pane) { p in pane = p; m.prefs.mePane = p; sv.scrollTo("top", anchor: .top) }
-                    }
-                    if pane == "team" {
-                        TeamToday(mates: m.team, act: m.activity, snap: m.snap)
-                        TeamMonth(act: m.activity)
-                        TeamFeed(act: m.activity, snap: m.snap)
-                    } else {
-                        MeHero(act: m.activity)
-                        WaitingList(snap: m.snap)
-                        if let snap = m.snap { MyWork(snap: snap) }
-                        MyMonth(act: m.activity)
-                        ThisPhone(snap: m.snap)
-                        CardV {
-                            H2(t("Monthly report", "Ripoti ya mwezi"))
-                            Text(t("Visits, repairs and how projects are doing for one month, ready to share as a PDF.", "Ziara, matengenezo na hali ya miradi kwa mwezi mmoja, tayari kushiriki kama PDF.")).font(.bMedium).foregroundColor(C.muted)
-                            Btn(t("Open report", "Fungua ripoti"), icon: "clip", small: true) { m.go(Place(tab: "me", sub: "report")) }.padding(.top, 10)
-                        }.padding(.top, 14)
-                        Text("RAFIKI Pin " + ((Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String) ?? "")).font(.bSmall).foregroundColor(C.muted).padding(.top, 18)
-                    }
-                }.padding(16)
-            }
-        }
-        .onAppear { pane = m.prefs.mePane }
-        .task { await m.loadActivity(); await m.loadTeam() }
-        .refreshable { await m.refreshNow(); await m.loadActivity(); await m.loadTeam() }
-    }
+    var body: some View { MeScreen() }
 }
 
 private struct MeRow: View {

@@ -1,6 +1,7 @@
 import SwiftUI
 
-// Me & team, to the Figma design "RAFIKI Pin — Me & team": a Me | Team switch, the profile card, and "This phone".
+// Me & team, to the Figma design "RAFIKI Pin — Me & team": a Me | Team switch and the profile card (the phone's own
+// settings are in Me › Settings, SettingsCard.swift).
 
 private let WORKS: Set<String> = ["pin", "visit", "fixed", "new"]
 private func dayOf(_ iso: String) -> Date? { When.parse(iso).map { Calendar.current.startOfDay(for: $0) } }
@@ -25,7 +26,9 @@ struct SmallSeg: View {
 /// The deep blue profile card: who you are, this month, days in a row, Lock the app and Monthly report.
 struct MeHero: View {
     @EnvironmentObject var m: AppModel
+    @ObservedObject private var ph = TeamPhotos.shared
     let act: [JSON]?
+    @State private var photo = false
     var body: some View {
         let mine = act?.filter { $0.str("by").trimmingCharacters(in: .whitespaces).lowercased() == m.prefs.name.trimmingCharacters(in: .whitespaces).lowercased() && WORKS.contains($0.str("a")) }
         let cal = Calendar.current, today = cal.startOfDay(for: Date()), start = cal.date(from: cal.dateComponents([.year, .month], from: today))!
@@ -39,11 +42,22 @@ struct MeHero: View {
         let ctry = countryName(m.prefs.country)
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 14) {
-                Text(m.prefs.name.split(separator: " ").compactMap { $0.first.map { String($0).uppercased() } }.prefix(2).joined())
-                    .font(.mont(19, .heavy)).foregroundColor(.white).frame(width: 56, height: 56)
-                    .background(Circle().fill(Color.white.opacity(0.16))).overlay(Circle().stroke(Color.white.opacity(0.35), lineWidth: 1.5))
+                // a tap on my picture: add or change my profile photo
+                Button { Haptic.tap(); photo = true } label: {
+                    PhotoOr(name: m.prefs.name, size: 56) {
+                        Text(initialsOf(m.prefs.name)).font(.mont(19, .heavy)).foregroundColor(.white).frame(width: 56, height: 56)
+                            .background(Circle().fill(Color.white.opacity(0.16)))
+                    }
+                    .overlay(Circle().stroke(Color.white.opacity(0.35), lineWidth: 1.5))
+                    .overlay(alignment: .bottomTrailing) {
+                        SFIcon("camera.fill", size: 14, color: Color(hex: 0x054F81)).frame(width: 24, height: 24).background(Circle().fill(Color.white)).offset(x: 4, y: 4)
+                    }
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(ph.url(m.prefs.name) != nil ? t("Change your photo", "Badilisha picha yako") : t("Add your photo", "Weka picha yako"))
+                .accessibilityIdentifier("me_photo")
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(m.prefs.name).font(.mont(19, .heavy)).foregroundColor(.white).lineLimit(1)
+                    Text(m.prefs.name).font(.mont(19, .heavy)).foregroundColor(.white).lineLimit(1).minimumScaleFactor(0.8)
                     Text((m.snap?.admin == true ? t("Admin", "Msimamizi") : t("Field team", "Timu ya uwanjani")) + (ctry.map { " · " + $0 } ?? "")).font(.mont(13, .semibold)).foregroundColor(Color(hex: 0xCFE8FA))
                 }
                 Spacer(minLength: 0)
@@ -67,7 +81,7 @@ struct MeHero: View {
                 }.padding(.horizontal, 14).padding(.vertical, 10).background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(Color.white.opacity(0.10))).padding(.top, 12)
             }
             HStack(spacing: 8) {
-                HeroBtn(text: t("Lock the app", "Funga programu"), icon: "lock", solid: true) { m.lockOrSignOut() }
+                HeroBtn(text: t("Lock the app", "Funga kwa PIN"), icon: "lock", solid: true) { m.lockOrSignOut() }
                 HeroBtn(text: t("Monthly report", "Ripoti ya mwezi"), icon: "file", solid: false) { m.go(Place(tab: "me", sub: "report")) }
             }.padding(.top, 16)
         }
@@ -77,6 +91,7 @@ struct MeHero: View {
         .shadow(color: Color(hex: 0x054F81).opacity(C.dark ? 0 : 0.28), radius: 12, y: 10)
         .padding(.top, 12)
         .rise(0)
+        .sheet(isPresented: $photo) { MePhotoSheet(name: m.prefs.name, me: true) { said in MeToast.say(said) }.environmentObject(m) }
     }
 }
 
@@ -103,73 +118,5 @@ struct Toggle2: View {
                 Circle().fill(Color.white).frame(width: 24, height: 24).shadow(color: .black.opacity(0.2), radius: 1.5, y: 1).padding(3)
             }.animation(Motion.on ? .spring(response: 0.3, dampingFraction: 0.8) : nil, value: on)
         }.buttonStyle(.plain).accessibilityLabel(label).accessibilityValue(on ? "on" : "off")
-    }
-}
-
-/// One row of "This phone": a coloured icon, a name (and a line under it), and a control on the right.
-private struct PhoneRow<Right: View>: View {
-    let icon: String; let hue: String; let title: String; var sub: String? = nil; var subOk = false
-    @ViewBuilder var right: () -> Right
-    var body: some View {
-        HStack(spacing: 12) {
-            IconTile(icon: icon, tint: C.hue(hue).fg, bg: C.hue(hue).bg, size: 40)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title).font(.tSmall).foregroundColor(C.ink)
-                if let sub { Text(sub).font(.bSmall).foregroundColor(subOk ? C.ok : C.muted) }
-            }
-            Spacer(minLength: 8)
-            right()
-        }.padding(.vertical, 12)
-    }
-}
-
-/// This phone: Face ID, your name on monday.com, colours, language, distances.
-struct ThisPhone: View {
-    @EnvironmentObject var m: AppModel
-    @Environment(\.colorScheme) var scheme
-    let snap: Snapshot?
-    @State private var bio = false
-    @State private var bioMsg: String?
-    @State private var open: Bool? = nil
-    @State private var miles = false
-    var body: some View {
-        CardV {
-            H2(t("This phone", "Simu hii"))
-            if Bio.available || bio {
-                PhoneRow(icon: Bio.face ? "face" : "finger", hue: "due", title: Bio.face ? t("Unlock with Face ID", "Fungua kwa Face ID") : t("Unlock with Touch ID", "Fungua kwa Touch ID"),
-                         sub: bioMsg ?? (bio ? t("Asked when the app opens and after a minute away.", "Inaulizwa programu inapofunguliwa na baada ya dakika moja nje.") : t("Keeps the app private if someone else picks up your phone.", "Inaweka programu faragha mtu mwingine akishika simu yako."))) {
-                    Toggle2(on: bio, label: bio ? t("Turn off", "Zima") : t("Turn on", "Washa")) {
-                        if bio { bio = false; m.prefs.bio = false; bioMsg = nil; return }
-                        Task { if await Bio.ask(t("Turn on Face ID unlock", "Washa kufungua kwa Face ID")) { bio = true; m.prefs.bio = true; bioMsg = nil; Haptic.ok() } else { bioMsg = t("Not turned on.", "Haijawashwa.") } }
-                    }
-                }
-                Divider().overlay(C.line)
-            }
-            if let snap, m.prefs.session.isEmpty {
-                let isOpen = open ?? (snap.linked.isEmpty && !snap.who.isEmpty)
-                Button { withAnimation(.easeOut(duration: 0.2)) { open = !isOpen } } label: {
-                    PhoneRow(icon: "link", hue: "new", title: t("Your name on monday.com", "Jina lako kwenye monday.com"),
-                             sub: !snap.linked.isEmpty ? t("Connected as \(snap.linked) ✓", "Imeunganishwa kama \(snap.linked) ✓") : snap.who.isEmpty ? t("Changes go in under the shared account", "Mabadiliko yanaingia kwa akaunti ya pamoja") : t("Takes 20 seconds, once", "Inachukua sekunde 20, mara moja"),
-                             subOk: !snap.linked.isEmpty) {
-                        Icon("chev", size: 18, color: C.muted).rotationEffect(.degrees(isOpen ? 90 : 0))
-                    }.contentShape(Rectangle())
-                }.buttonStyle(.plain)
-                if isOpen { ConnectMonday(snap: snap, inline: true).padding(.leading, 52).padding(.bottom, 12) }
-                Divider().overlay(C.line)
-            }
-            PhoneRow(icon: "sun", hue: "repairs", title: t("Colours", "Rangi")) {
-                SmallSeg(items: [("light", t("Light", "Mwanga")), ("dark", t("Dark", "Giza")), ("sun", t("Sun", "Jua"))], sel: Look.mode.isEmpty ? (scheme == .dark ? "dark" : "light") : Look.mode) { m.setTheme($0) }
-            }
-            Divider().overlay(C.line)
-            PhoneRow(icon: "globe", hue: "pin", title: t("Language", "Lugha")) {
-                SmallSeg(items: [("en", "English"), ("sw", "Kiswahili")], sel: Lang.sw ? "sw" : "en") { m.setLang($0 == "sw") }
-            }
-            Divider().overlay(C.line)
-            PhoneRow(icon: "nav", hue: "near", title: t("Distances", "Umbali")) {
-                SmallSeg(items: [("km", "km"), ("mi", t("miles", "maili"))], sel: miles ? "mi" : "km") { miles = $0 == "mi"; m.prefs.miles = miles }
-            }
-        }
-        .padding(.top, 14)
-        .onAppear { bio = m.prefs.bio; miles = m.prefs.miles }
     }
 }

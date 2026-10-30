@@ -79,12 +79,14 @@ enum Demo {
             if method == "GET" && url.contains("/api/pin") { return j(snapshot()) }
             return j(["ok": true] as JSON)
         }
+        DemoMe.setUp(p, api)
     }
 
     /// -screen office | office-repairs | me | report | route | project:104:visit | map | new | stories | story[:104] | story-photos | story-read
     @MainActor static func route(_ m: AppModel) {
         guard m.demo, let s = arg("-screen") else { return }
         let parts = s.split(separator: ":").map(String.init)
+        if DemoMe.route(m, parts) { return }
         switch parts[0] {
         case "story", "story-photos":
             m.stack = [Place(tab: "stories"), Place(tab: "stories", project: parts.count > 1 ? parts[1] : "101", projectTab: "story")]

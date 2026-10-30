@@ -161,6 +161,7 @@ func reasonText(_ reason: String?) -> String {
     case "pin": return t("That PIN isn’t right. Please check it with your team.", "PIN hiyo si sahihi. Tafadhali hakikisha na timu yako.")
     case "locked": return t("Too many wrong PINs from this connection. Please try again in an hour.", "PIN nyingi zisizo sahihi kutoka mtandao huu. Jaribu tena baada ya saa moja.")
     case "not-set-up": return t("The pin app isn’t switched on yet: PINs still need to be set up.", "Programu bado haijawashwa: PIN bado hazijawekwa.")
+    case "blocked", "signed-out", "pin-current", "pin-weak", "pin-taken", "pin-cloudflare": return meReason(reason)
     case "offline": return t("No signal. It will be sent when you’re back online.", "Hakuna mtandao. Itatumwa ukipata mtandao tena.")
     case "rate": return t("Too many changes from this phone. Please wait a little and try again.", "Mabadiliko mengi kutoka simu hii. Subiri kidogo kisha ujaribu tena.")
     case "project": return t("That project couldn’t be found.", "Mradi huo haukupatikana.")

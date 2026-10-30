@@ -27,7 +27,7 @@ struct BioLockView: View {
         let first = m.prefs.name.split(separator: " ").first.map(String.init) ?? ""
         ScrollView {
             VStack(spacing: 0) {
-                (Text("RAFIKI ").foregroundColor(C.ink) + Text("Pin").foregroundColor(C.blue)).font(.mont(15, .heavy)).tracking(1.5).padding(.top, 8)
+                Wordmark(height: 28).padding(.top, 12)
                 if !usePin {
                     Emblem(face: Bio.face).padding(.top, 34).onTapGesture { ask() }
                     Text(t("WELCOME BACK", "KARIBU TENA")).font(.lSmall).tracking(2).foregroundColor(C.blue).padding(.top, 18)

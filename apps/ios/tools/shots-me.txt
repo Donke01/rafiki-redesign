@@ -1,0 +1,124 @@
+m001-me -screen me
+m002-me-sw -screen me -lang sw
+m003-me-dark -screen me -theme dark
+m004-me-sun -screen me -theme sun
+m005-me-team -screen me -pane team
+m006-me-team-sw -screen me -pane team -lang sw
+m007-me-team-dark -screen me -pane team -theme dark
+m008-me-team-sun -screen me -pane team -theme sun
+m009-me-update -screen update
+m010-me-update-sw -screen update -lang sw
+m011-me-update-dark -screen update -theme dark
+m012-me-update-sun -screen update -theme sun
+m013-me-hint -screen list -hint 1
+m014-me-hint-sw -screen list -hint 1 -lang sw
+m015-me-hint-dark -screen list -hint 1 -theme dark
+m016-me-hint-sun -screen list -hint 1 -theme sun
+m017-notes -screen notes
+m018-notes-sw -screen notes -lang sw
+m019-notes-dark -screen notes -theme dark
+m020-notes-sun -screen notes -theme sun
+m021-set-profile -screen settings:profile
+m022-set-profile-sw -screen settings:profile -lang sw
+m023-set-profile-dark -screen settings:profile -theme dark
+m024-set-profile-sun -screen settings:profile -theme sun
+m025-set-pin -screen settings:pin
+m026-set-pin-sw -screen settings:pin -lang sw
+m027-set-pin-dark -screen settings:pin -theme dark
+m028-set-pin-sun -screen settings:pin -theme sun
+m029-set-notify -screen settings:notify
+m030-set-notify-sw -screen settings:notify -lang sw
+m031-set-notify-dark -screen settings:notify -theme dark
+m032-set-notify-sun -screen settings:notify -theme sun
+m033-set-monday -screen settings:monday -kind app
+m034-set-monday-sw -screen settings:monday -kind app -lang sw
+m035-set-monday-dark -screen settings:monday -kind app -theme dark
+m036-set-monday-sun -screen settings:monday -kind app -theme sun
+m037-set-help -screen settings:help
+m038-set-help-sw -screen settings:help -lang sw
+m039-set-help-dark -screen settings:help -theme dark
+m040-set-help-sun -screen settings:help -theme sun
+m041-set-look -screen settings:look
+m042-set-look-sw -screen settings:look -lang sw
+m043-set-look-dark -screen settings:look -theme dark
+m044-set-look-sun -screen settings:look -theme sun
+m045-set-lang -screen settings:lang
+m046-set-lang-sw -screen settings:lang -lang sw
+m047-set-lang-dark -screen settings:lang -theme dark
+m048-set-lang-sun -screen settings:lang -theme sun
+m049-set-units -screen settings:units
+m050-set-units-sw -screen settings:units -lang sw
+m051-set-units-dark -screen settings:units -theme dark
+m052-set-units-sun -screen settings:units -theme sun
+m053-set-signout -screen settings:signout
+m054-set-signout-sw -screen settings:signout -lang sw
+m055-set-signout-dark -screen settings:signout -theme dark
+m056-set-signout-sun -screen settings:signout -theme sun
+m057-set-about -screen settings:about
+m058-set-about-sw -screen settings:about -lang sw
+m059-set-about-dark -screen settings:about -theme dark
+m060-set-about-sun -screen settings:about -theme sun
+m061-set-pin-shared -screen settings:pin -kind shared
+m062-set-pin-shared-sw -screen settings:pin -kind shared -lang sw
+m063-set-pin-shared-dark -screen settings:pin -kind shared -theme dark
+m064-set-pin-shared-sun -screen settings:pin -kind shared -theme sun
+m065-contact -screen me -pane team -sheet contact
+m066-contact-sw -screen me -pane team -sheet contact -lang sw
+m067-contact-dark -screen me -pane team -sheet contact -theme dark
+m068-contact-sun -screen me -pane team -sheet contact -theme sun
+m069-contact-me -screen me -sheet contact-me
+m070-contact-me-sw -screen me -sheet contact-me -lang sw
+m071-contact-me-dark -screen me -sheet contact-me -theme dark
+m072-contact-me-sun -screen me -sheet contact-me -theme sun
+m073-contact-blocked -screen me -pane team -sheet contact-new
+m074-contact-blocked-sw -screen me -pane team -sheet contact-new -lang sw
+m075-contact-blocked-dark -screen me -pane team -sheet contact-new -theme dark
+m076-contact-blocked-sun -screen me -pane team -sheet contact-new -theme sun
+m077-contact-cf -screen me -pane team -sheet contact-cf
+m078-contact-cf-sw -screen me -pane team -sheet contact-cf -lang sw
+m079-contact-cf-dark -screen me -pane team -sheet contact-cf -theme dark
+m080-contact-cf-sun -screen me -pane team -sheet contact-cf -theme sun
+m081-contact-invite -screen me -pane team -sheet contact -sub invite
+m082-contact-invite-sw -screen me -pane team -sheet contact -sub invite -lang sw
+m083-contact-invite-dark -screen me -pane team -sheet contact -sub invite -theme dark
+m084-contact-invite-sun -screen me -pane team -sheet contact -sub invite -theme sun
+m085-contact-newpin -screen me -pane team -sheet contact -sub newpin
+m086-contact-newpin-sw -screen me -pane team -sheet contact -sub newpin -lang sw
+m087-contact-newpin-dark -screen me -pane team -sheet contact -sub newpin -theme dark
+m088-contact-newpin-sun -screen me -pane team -sheet contact -sub newpin -theme sun
+m089-contact-setpin -screen me -pane team -sheet contact -sub setpin
+m090-contact-setpin-sw -screen me -pane team -sheet contact -sub setpin -lang sw
+m091-contact-setpin-dark -screen me -pane team -sheet contact -sub setpin -theme dark
+m092-contact-setpin-sun -screen me -pane team -sheet contact -sub setpin -theme sun
+m093-contact-block -screen me -pane team -sheet contact -sub block
+m094-contact-block-sw -screen me -pane team -sheet contact -sub block -lang sw
+m095-contact-block-dark -screen me -pane team -sheet contact -sub block -theme dark
+m096-contact-block-sun -screen me -pane team -sheet contact -sub block -theme sun
+m097-contact-admin -screen me -pane team -sheet contact -sub admin
+m098-contact-admin-sw -screen me -pane team -sheet contact -sub admin -lang sw
+m099-contact-admin-dark -screen me -pane team -sheet contact -sub admin -theme dark
+m100-contact-admin-sun -screen me -pane team -sheet contact -sub admin -theme sun
+m101-contact-photo -screen me -sheet contact-me -sub photo
+m102-contact-photo-sw -screen me -sheet contact-me -sub photo -lang sw
+m103-contact-photo-dark -screen me -sheet contact-me -sub photo -theme dark
+m104-contact-photo-sun -screen me -sheet contact-me -sub photo -theme sun
+m105-contact-phone -screen me -pane team -sheet contact -sub phone
+m106-contact-phone-sw -screen me -pane team -sheet contact -sub phone -lang sw
+m107-contact-phone-dark -screen me -pane team -sheet contact -sub phone -theme dark
+m108-contact-phone-sun -screen me -pane team -sheet contact -sub phone -theme sun
+m109-welcome -screen welcome
+m110-welcome-sw -screen welcome -lang sw
+m111-welcome-dark -screen welcome -theme dark
+m112-welcome-sun -screen welcome -theme sun
+m113-hello -screen hello -signedin no
+m114-hello-sw -screen hello -signedin no -lang sw
+m115-hello-dark -screen hello -signedin no -theme dark
+m116-hello-sun -screen hello -signedin no -theme sun
+m117-lock -screen list -signedin no
+m118-lock-sw -screen list -signedin no -lang sw
+m119-lock-dark -screen list -signedin no -theme dark
+m120-lock-sun -screen list -signedin no -theme sun
+m121-bio -screen list -bio 1
+m122-bio-sw -screen list -bio 1 -lang sw
+m123-bio-dark -screen list -bio 1 -theme dark
+m124-bio-sun -screen list -bio 1 -theme sun

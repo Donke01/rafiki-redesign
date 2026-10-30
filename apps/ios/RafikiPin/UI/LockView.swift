@@ -13,6 +13,9 @@ struct LockView: View {
     @State private var shake: CGFloat = 0
     @State private var monday = false
     @State private var tokenSheet = false
+    /// The hello screen comes first, once each time the app starts signed out (Android Welcome "hello").
+    @State private var hello = !LockView.helloDone && !(ProcessInfo.processInfo.arguments.contains("-demo") && Demo.arg("-screen") != "hello")
+    static var helloDone = false
 
     private var checking: String { t("Checking…", "Inakagua…") }
 
@@ -41,11 +44,14 @@ struct LockView: View {
     }
 
     var body: some View {
+        if hello { MeHello { LockView.helloDone = true; withAnimation(.easeOut(duration: 0.25)) { hello = false } }.transition(.opacity) } else { keypad }
+    }
+
+    private var keypad: some View {
         ScrollView {
             VStack(spacing: 0) {
-                Image(systemName: "drop.fill").font(.system(size: 28)).foregroundColor(.white).frame(width: 56, height: 56).background(DeepBrush)
-                    .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous)).shadow(color: .black.opacity(0.2), radius: 8, y: 4)
-                Text("RAFIKI Pin").font(.lLarge).tracking(1.5).foregroundColor(C.ink).padding(.top, 12)
+                MeDrop(size: 84, color: .blue, mood: .smile)
+                Wordmark(height: 26).padding(.top, 14)
                 Text(t("Enter your PIN", "Weka PIN yako")).font(.hMedium).foregroundColor(C.ink).padding(.top, 14)
                 let first = m.prefs.name.split(separator: " ").first.map(String.init) ?? ""
                 Text(first.isEmpty ? t("Welcome back.", "Habari, karibu tena.") : t("Welcome back, \(first).", "Habari \(first), karibu tena.")).font(.bMedium).foregroundColor(C.muted)
@@ -59,8 +65,10 @@ struct LockView: View {
                 .padding(.top, 26).padding(.bottom, 6).offset(x: shake)
                 .accessibilityElement().accessibilityLabel(t("\(pin.count) of \(slots) digits entered", "Tarakimu \(pin.count) kati ya \(slots)"))
 
-                Msg(msg, msg == checking ? "" : "bad")
-                if msg == nil, let b = m.banner { Msg(b, b == t("Signing in…", "Inaingia…") ? "" : "bad") }
+                // blocked or signed out by the office: said kindly, not as an error
+                let kind = [meReason("blocked"), meReason("signed-out")]
+                Msg(msg, msg == checking ? "" : kind.contains(msg ?? "") ? "warn" : "bad")
+                if msg == nil, let b = m.banner { Msg(b, b == t("Signing in…", "Inaingia…") ? "" : kind.contains(b) ? "warn" : "bad") }
                 if needName { Field(t("Your name", "Jina lako"), $name, placeholder: t("e.g. Meril", "mf. Meril")) }
                 Spacer().frame(height: 14)
 

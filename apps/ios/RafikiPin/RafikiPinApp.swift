@@ -7,6 +7,7 @@ struct RafikiPinApp: App {
 
     init() {
         Fonts.register()
+        NotifPhone.register()
         _model = StateObject(wrappedValue: AppModel())
     }
 
@@ -51,6 +52,7 @@ struct Shell: View {
                     else if here.sub == "search" { SearchView() }
                     else if here.sub == "report" { ReportView() }
                     else if here.sub == "route" { RouteView() }
+                    else if MeRoutes.handles(here) { MeRoutes.view(here) }
                     else if here.tab == "map" { MapTab() }
                     else if here.tab == "new" { NewSiteView() }
                     else if here.tab == "me" { MeView() }
@@ -64,6 +66,8 @@ struct Shell: View {
                     : .asymmetric(insertion: .opacity, removal: .move(edge: .trailing).combined(with: .opacity)))
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            // pull down to refresh on every screen that scrolls (the header has the bell where Refresh was)
+            .refreshable { await m.refreshNow() }
             .animation(Motion.on ? .spring(response: 0.36, dampingFraction: 0.9) : nil, value: m.stack)
             .onChange(of: m.stack.count) { n in depth = n }
             // story photos on their way for the open project: "Adding 3 photos to After · 1 of 3 sent", above the bottom bar
@@ -74,37 +78,13 @@ struct Shell: View {
             // swipe from the left edge to go back, like other iPhone apps
             if g.startLocation.x < 30 && g.translation.width > 80 { m.back() }
         })
+        .meOverlays()
     }
 }
 
+/// The app header: Me (or Back), the RAFIKI logo, the notifications bell (MeHeader.swift).
 struct TopBar: View {
-    @EnvironmentObject var m: AppModel
-    var body: some View {
-        HStack(spacing: 0) {
-            if m.stack.count > 1 {
-                Button { Haptic.tap(); m.back() } label: { Icon("back", size: 22, color: C.ink).frame(width: 44, height: 44).background(C.card.opacity(0.85)).clipShape(Circle()) }
-                    .accessibilityLabel(t("Back", "Rudi"))
-            } else {
-                Button { m.tab("me") } label: {
-                    Avatar(name: m.prefs.name, size: 40).overlay(alignment: .topTrailing) {
-                        // admins have Office in the bottom bar instead of Me, so what is waiting to send shows here
-                        if m.snap?.admin == true && m.waiting > 0 {
-                            Text("\(m.waiting)").font(.mont(10, .bold)).foregroundColor(.white).padding(.horizontal, 5).background(C.warn).clipShape(Capsule()).offset(x: 6, y: -4)
-                        }
-                    }
-                }.accessibilityLabel(t("Me", "Mimi")).accessibilityIdentifier("hav")
-            }
-            Spacer()
-            HStack(spacing: 0) { Text("RAFIKI").font(.tMedium).tracking(2.5).foregroundColor(C.ink); Text(" Pin").font(.tMedium).foregroundColor(C.blue) }
-            Spacer()
-            Button { Haptic.tap(); m.refresh() } label: {
-                Icon("refresh", size: 22, color: C.ink).rotationEffect(.degrees(m.busy ? 360 : 0)).animation(m.busy ? .linear(duration: 0.8).repeatForever(autoreverses: false) : .default, value: m.busy)
-                    .frame(width: 44, height: 44).background(C.card.opacity(0.85)).clipShape(Circle())
-            }.accessibilityLabel(t("Refresh", "Onyesha upya"))
-        }
-        .padding(.horizontal, 12).frame(minHeight: 58)
-        .background(.ultraThinMaterial)
-    }
+    var body: some View { MeHeaderBar() }
 }
 
 struct BottomTabs: View {

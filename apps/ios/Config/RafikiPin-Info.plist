@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Merged with the keys Xcode generates from the build settings (GENERATE_INFOPLIST_FILE = YES).
+	     Phone alerts while the app is closed: iOS Background App Refresh runs NotifPhone's check (Data/NotifAlerts.swift). -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+	</array>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>org.rafikioutreach.pin.alerts</string>
+	</array>
+</dict>
+</plist>
