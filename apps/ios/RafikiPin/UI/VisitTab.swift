@@ -172,6 +172,7 @@ private struct VisitForm: View {
                         }.buttonStyle(.plain)
                     }
                 }
+                FieldQrCheckedIn(id: p.id)
                 CardV { stepBody }.padding(.top, 12)
                 HStack(spacing: 10) {
                     Btn(t("Back", "Rudi"), icon: "back", enabled: v.step > 0, light: true, wide: true) { if v.step > 0 { v.step -= 1 } }
@@ -329,10 +330,11 @@ private struct VisitForm: View {
                 body["numbers"] = ns; body["carer"] = ["name": trim(v.chair), "phone": trim(v.phone)] as JSON
             }
             if let a = v.arrived { body["arrive"] = a }
+            if FieldQrCheckin.isFor(p.id) { body["qr"] = true }
             if let ll = v.arrivedAt ?? loc.fix?.ll { body["lat"] = ll.lat; body["lng"] = ll.lng }
             let files = v.shots.map { OutFile(path: $0.path, kind: "photo", label: $0.label) } + (v.voice.map { [OutFile(path: $0, kind: "voice", label: "Voice note")] } ?? [])
             switch await m.submit(body, files) {
-            case .sent(_, let note): m.localVisit(p, state: v.state, note: v.note, urgency: v.urgency, problems: bad); v.sent = "sent"; msg = note.map { ("warn", $0) }
+            case .sent(_, let note): m.localVisit(p, state: v.state, note: v.note, urgency: v.urgency, problems: bad); v.sent = "sent"; msg = note.map { ("warn", $0) }; FieldQrCheckin.clear(p.id)
             case .queued: m.localVisit(p, state: v.state, note: v.note, urgency: v.urgency, problems: bad); v.sent = "queued"
             case .failed(let s): msg = ("bad", s)
             case .locked: break

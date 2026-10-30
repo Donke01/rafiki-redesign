@@ -1,0 +1,80 @@
+o01-office -screen office
+o02-office-repairs -screen office -section repairs
+o03-office-costs -screen office -section costs
+o04-office-visits -screen office -section visits
+o05-office-teammap -screen office -section teammap
+o06-office-plan -screen office -section plan
+o07-office-review -screen office -section review
+o08-office-team -screen office -section team
+o09-office-cleanup -screen office -section cleanup
+o10-office-export -screen office -section export
+o11-office-community -screen office -section sms
+o12-office-donors -screen office -section donors
+o13-office-qr -screen office -section qr
+o14-map -screen map
+o15-map-open -screen map -map open
+o16-projects -screen list
+o17-project-build -screen project:106:pin
+o18-project-repair -screen project:104:pin
+o19-project-history -screen project:110:hist
+o20-project-visit -screen project:110:visit
+o21-sw-office -screen office -lang sw
+o22-sw-office-repairs -screen office -section repairs -lang sw
+o23-sw-office-costs -screen office -section costs -lang sw
+o24-sw-office-visits -screen office -section visits -lang sw
+o25-sw-office-teammap -screen office -section teammap -lang sw
+o26-sw-office-plan -screen office -section plan -lang sw
+o27-sw-office-review -screen office -section review -lang sw
+o28-sw-office-team -screen office -section team -lang sw
+o29-sw-office-cleanup -screen office -section cleanup -lang sw
+o30-sw-office-export -screen office -section export -lang sw
+o31-sw-office-community -screen office -section sms -lang sw
+o32-sw-office-donors -screen office -section donors -lang sw
+o33-sw-office-qr -screen office -section qr -lang sw
+o34-sw-map -screen map -lang sw
+o35-sw-map-open -screen map -map open -lang sw
+o36-sw-projects -screen list -lang sw
+o37-sw-project-build -screen project:106:pin -lang sw
+o38-sw-project-repair -screen project:104:pin -lang sw
+o39-sw-project-history -screen project:110:hist -lang sw
+o40-sw-project-visit -screen project:110:visit -lang sw
+o41-dark-office -screen office -theme dark
+o42-dark-office-repairs -screen office -section repairs -theme dark
+o43-dark-office-costs -screen office -section costs -theme dark
+o44-dark-office-visits -screen office -section visits -theme dark
+o45-dark-office-teammap -screen office -section teammap -theme dark
+o46-dark-office-plan -screen office -section plan -theme dark
+o47-dark-office-review -screen office -section review -theme dark
+o48-dark-office-team -screen office -section team -theme dark
+o49-dark-office-cleanup -screen office -section cleanup -theme dark
+o50-dark-office-export -screen office -section export -theme dark
+o51-dark-office-community -screen office -section sms -theme dark
+o52-dark-office-donors -screen office -section donors -theme dark
+o53-dark-office-qr -screen office -section qr -theme dark
+o54-dark-map -screen map -theme dark
+o55-dark-map-open -screen map -map open -theme dark
+o56-dark-projects -screen list -theme dark
+o57-dark-project-build -screen project:106:pin -theme dark
+o58-dark-project-repair -screen project:104:pin -theme dark
+o59-dark-project-history -screen project:110:hist -theme dark
+o60-dark-project-visit -screen project:110:visit -theme dark
+o61-sun-office -screen office -theme sun
+o62-sun-office-repairs -screen office -section repairs -theme sun
+o63-sun-office-costs -screen office -section costs -theme sun
+o64-sun-office-visits -screen office -section visits -theme sun
+o65-sun-office-teammap -screen office -section teammap -theme sun
+o66-sun-office-plan -screen office -section plan -theme sun
+o67-sun-office-review -screen office -section review -theme sun
+o68-sun-office-team -screen office -section team -theme sun
+o69-sun-office-cleanup -screen office -section cleanup -theme sun
+o70-sun-office-export -screen office -section export -theme sun
+o71-sun-office-community -screen office -section sms -theme sun
+o72-sun-office-donors -screen office -section donors -theme sun
+o73-sun-office-qr -screen office -section qr -theme sun
+o74-sun-map -screen map -theme sun
+o75-sun-map-open -screen map -map open -theme sun
+o76-sun-projects -screen list -theme sun
+o77-sun-project-build -screen project:106:pin -theme sun
+o78-sun-project-repair -screen project:104:pin -theme sun
+o79-sun-project-history -screen project:110:hist -theme sun
+o80-sun-project-visit -screen project:110:visit -theme sun

@@ -79,6 +79,7 @@ enum Demo {
             if method == "GET" && url.contains("/api/pin") { return j(snapshot()) }
             return j(["ok": true] as JSON)
         }
+        DemoOffice.setUp(p, api)
     }
 
     /// -screen office | office-repairs | me | report | route | project:104:visit | map | new | stories | story[:104] | story-photos | story-read

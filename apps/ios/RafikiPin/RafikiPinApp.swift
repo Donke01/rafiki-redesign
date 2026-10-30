@@ -45,6 +45,7 @@ struct Shell: View {
         let here = m.here
         VStack(spacing: 0) {
             TopBar()
+            SharingBar()
             ZStack {
                 Group {
                     if let pid = here.project { ProjectView(id: pid, startTab: here.projectTab) }

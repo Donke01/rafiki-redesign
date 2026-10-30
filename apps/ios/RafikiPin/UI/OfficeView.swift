@@ -6,7 +6,10 @@ struct OfficeView: View {
     @EnvironmentObject var m: AppModel
     @State private var sec = "overview"
 
-    var body: some View {
+    var body: some View { OfficeHome() }
+
+    /// The 2.13 Office, no longer shown: the Office tab opens OfficeHome (Android 2.26 layout).
+    @ViewBuilder var before: some View {
         if let snap = m.snap {
             let secs = [("overview", t("Overview", "Muhtasari"), "drop"), ("repairs", t("Repairs", "Ukarabati"), "wrench"), ("visits", t("Visits", "Ziara"), "cal"),
                         ("review", t("Review", "Idhinisha"), "inbox"), ("team", t("Team", "Timu"), "people"), ("cleanup", t("Clean-up", "Usafi"), "spark"), ("export", t("Export", "Pakua"), "upload")]
