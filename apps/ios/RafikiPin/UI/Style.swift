@@ -28,7 +28,7 @@ extension Palette {
         case "new": name = "purple"
         case "repairs", "office": name = "amber"
         case "due": name = "teal"
-        case "me": name = "coral"
+        case "me", "stories": name = "coral"
         default: name = "slate"
         }
         return (dark ? HUE_DARK : HUE_LIGHT)[name]!

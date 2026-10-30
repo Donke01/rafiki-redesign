@@ -24,6 +24,8 @@ final class AppModel: ObservableObject {
     let prefs: Prefs
     let api: Api
     let outbox: Outbox
+    /// Story photos on their way to the server (kept until sent).
+    let storyUp: StoryUploads
     let locator = Locator.shared
     let demo: Bool
 
@@ -49,6 +51,7 @@ final class AppModel: ObservableObject {
         prefs = p
         api = Api(server: AppModel.server, pin: { p.pin }, session: { p.session })
         outbox = Outbox(file: Prefs.dataDir.appendingPathComponent(demo ? "outbox-demo.json" : "outbox.json"))
+        storyUp = StoryUploads(dir: Prefs.dataDir.appendingPathComponent(demo ? "story-queue-demo" : "story-queue", isDirectory: true), api: api)
         if demo { Demo.setUp(p, api) }
         let s = p.loadSnapshot().map(Snapshot.from)
         snap = s
@@ -60,8 +63,14 @@ final class AppModel: ObservableObject {
         Look.mode = p.theme
         bioLocked = p.bio && signedIn
         timer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
-            Task { @MainActor in if self?.signedIn == true { _ = await self?.sendWaiting() } }
+            Task { @MainActor in
+                if self?.signedIn == true {
+                    _ = await self?.sendWaiting()
+                    if self?.storyUp.items.isEmpty == false { self?.storyUp.resume() }
+                }
+            }
         }
+        if signedIn && !demo { storyUp.resume() }
     }
 
     var miles: Bool { prefs.miles }

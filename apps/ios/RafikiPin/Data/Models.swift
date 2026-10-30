@@ -37,6 +37,8 @@ struct LatLng: Equatable, Hashable {
 struct Project: Identifiable, Equatable {
     var id: String; var title: String; var country: String; var ck: String; var area: String
     var type: String; var status: String; var year: Int?; var gps: LatLng?; var photo: String?; var pump: String
+    /// When monday.com says the project was finished ("YYYY-MM…"), or "".
+    var done: String = ""
 
     var sub: String { [area, country, statusName(status)].filter { !$0.isEmpty }.joined(separator: " · ") }
 
@@ -45,7 +47,8 @@ struct Project: Identifiable, Equatable {
         if let a = o["gps"] as? [Any], a.count == 2, let la = (a[0] as? NSNumber)?.doubleValue, let ln = (a[1] as? NSNumber)?.doubleValue { gps = LatLng(lat: la, lng: ln) }
         let ph = o.str("photo")
         return Project(id: o.str("id"), title: o.str("title"), country: o.str("country"), ck: o.str("ck"), area: o.str("area"), type: o.str("type"),
-                       status: o.str("status"), year: o.num("year").map { Int($0) }, gps: gps, photo: ph.isEmpty || ph == "null" ? nil : ph, pump: o.str("pump"))
+                       status: o.str("status"), year: o.num("year").map { Int($0) }, gps: gps, photo: ph.isEmpty || ph == "null" ? nil : ph, pump: o.str("pump"),
+                       done: o.str("done").range(of: #"^\d{4}-\d{2}"#, options: .regularExpression) != nil ? o.str("done") : "")
     }
 }
 
@@ -71,6 +74,8 @@ struct Snapshot: Equatable {
     var jobs: [String]; var assigned: [Assignment]; var confirmed: Set<String>; var reviewOpen: Int
     /// The monday.com name this person's own token is connected as ("" when not connected).
     var linked = ""
+    /// Stories: where each project's story is ("not-started" … "published"), answers filled and photos, by project id.
+    var stories: [String: StoryBrief] = [:]
 
     static func from(_ o: JSON) -> Snapshot {
         var reps: [String: Repair] = [:]; (o.obj("repairs") ?? [:]).forEach { k, v in if let j = v as? JSON { reps[k] = Repair.from(j) } }
@@ -79,7 +84,7 @@ struct Snapshot: Equatable {
             who: o.str("who"), admin: o.bool("admin"), projects: o.objs("projects").map(Project.from), repairs: reps, visits: vis,
             jobs: (o.arr("jobs") ?? []).compactMap { $0 as? String },
             assigned: o.objs("assigned").map { Assignment(aid: $0.str("aid"), id: $0.str("id"), title: $0.str("t"), date: $0.str("date"), by: $0.str("by"), note: $0.str("note")) },
-            confirmed: Set((o.obj("confirmed") ?? [:]).keys), reviewOpen: o.int("reviewOpen"), linked: o.str("linked"))
+            confirmed: Set((o.obj("confirmed") ?? [:]).keys), reviewOpen: o.int("reviewOpen"), linked: o.str("linked"), stories: StoryBrief.all(o.obj("stories")))
     }
 }
 

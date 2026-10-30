@@ -15,6 +15,8 @@ final class Api {
     private let session: () -> String
     /// Lets the demo mode swap the network for a fake one.
     var transport: Transport = Api.http
+    /// True in demo mode: uploads go through `transport` too (no real progress).
+    var faked = false
 
     init(server: String, pin: @escaping () -> String, session: @escaping () -> String = { "" }) {
         self.server = server; self.pin = pin; self.session = session
@@ -35,6 +37,49 @@ final class Api {
     func team() async -> Reply { await call("GET", "/api/pin?team=1", nil) }
     func authToken(_ token: String) async -> Reply { await call("POST", "/api/pin-auth/token", ["token": token]) }
     func logout() async -> Reply { await call("POST", "/api/pin-auth/logout", [:]) }
+
+    // --- Stories: /api/story with the same sign-in headers ----------------------------------
+    func get(_ path: String) async -> Reply { await call("GET", path, nil) }
+    func postTo(_ path: String, _ body: JSON) async -> Reply { await call("POST", path, body) }
+
+    /// A file the server only gives to signed-in people (a story photo). Returns the status and the bytes.
+    func bytes(_ path: String) async -> (Int, Data) {
+        var h = ["Accept": "image/*"]
+        auth(&h)
+        return await transport("GET", server + path, h, nil)
+    }
+
+    /// A file as multipart/form-data ("file" plus text fields). `progress` (0…1) is told as the bytes leave the phone.
+    func multipart(_ path: String, data: Data, mime: String, filename: String, fields: [(String, String)], progress: ((Double) -> Void)? = nil) async -> Reply {
+        let boundary = "----rafiki\(UInt64(Date().timeIntervalSince1970 * 1000))\(Int.random(in: 1000...9999))"
+        var out = Data()
+        for (k, v) in fields { out.append(Data("--\(boundary)\r\nContent-Disposition: form-data; name=\"\(k)\"\r\n\r\n\(v)\r\n".utf8)) }
+        let safeName = filename.replacingOccurrences(of: "\"", with: "")
+        out.append(Data("--\(boundary)\r\nContent-Disposition: form-data; name=\"file\"; filename=\"\(safeName)\"\r\nContent-Type: \(mime)\r\n\r\n".utf8))
+        out.append(data)
+        out.append(Data("\r\n--\(boundary)--\r\n".utf8))
+        var h = ["Accept": "application/json", "Content-Type": "multipart/form-data; boundary=\(boundary)", "Origin": server]
+        auth(&h)
+        if faked || progress == nil {
+            let res: (Int, Data) = await transport("POST", server + path, h, out)
+            if (200..<300).contains(res.0) { progress?(1) }
+            return Api.toReply(res.0, res.1)
+        }
+        let res: (Int, Data) = await Api.httpUpload(server + path, h, out, progress: progress ?? { _ in })
+        return Api.toReply(res.0, res.1)
+    }
+
+    /// Sends a body with URLSession's upload task, telling how much has left the phone.
+    static func httpUpload(_ url: String, _ headers: [String: String], _ body: Data, progress: @escaping (Double) -> Void) async -> (Int, Data) {
+        guard let u = URL(string: url) else { return (0, Data()) }
+        var r = URLRequest(url: u); r.httpMethod = "POST"; r.timeoutInterval = 120
+        headers.forEach { r.setValue($0.value, forHTTPHeaderField: $0.key) }
+        let watch = UploadProgress(progress)
+        do {
+            let (d, resp) = try await net.upload(for: r, from: body, delegate: watch)
+            return ((resp as? HTTPURLResponse)?.statusCode ?? 0, d)
+        } catch { return (0, Data()) }
+    }
 
     func photoUrl(_ photo: String, w: Int = 480) -> String { "\(server)/api/photo/\(Api.enc(photo))?w=\(w)" }
 
@@ -98,5 +143,15 @@ final class Api {
             let (d, resp) = try await net.data(for: r)
             return ((resp as? HTTPURLResponse)?.statusCode ?? 0, d)
         } catch { return (0, Data()) }
+    }
+}
+
+/// Tells how far an upload has got (0…1).
+final class UploadProgress: NSObject, URLSessionTaskDelegate {
+    private let tell: (Double) -> Void
+    init(_ tell: @escaping (Double) -> Void) { self.tell = tell }
+    func urlSession(_ session: URLSession, task: URLSessionTask, didSendBodyData bytesSent: Int64, totalBytesSent: Int64, totalBytesExpectedToSend: Int64) {
+        guard totalBytesExpectedToSend > 0 else { return }
+        tell(min(1, Double(totalBytesSent) / Double(totalBytesExpectedToSend)))
     }
 }

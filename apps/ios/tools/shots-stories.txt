@@ -1,0 +1,33 @@
+s01-stories -screen stories
+s02-stories-pick -screen stories -sheet pick
+s03-stories-choose -screen stories -sheet choose
+s04-story -screen story
+s05-story-collecting -screen story:104
+s06-story-photos -screen story-photos
+s07-story-add -screen story -sheet add
+s08-story-review -screen story -sheet review
+s09-story-tray -screen story -sheet tray
+s10-story-detail -screen story -sheet detail
+s11-story-dates -screen story -sheet dates
+s12-story-read -screen story-read
+s13-story-live -screen story:105
+s14-sw-stories -screen stories -lang sw
+s15-sw-story -screen story -lang sw
+s16-sw-story-collecting -screen story:104 -lang sw
+s17-sw-story-photos -screen story-photos -lang sw
+s18-sw-story-add -screen story -sheet add -lang sw
+s19-sw-story-review -screen story -sheet review -lang sw
+s20-sw-story-detail -screen story -sheet detail -lang sw
+s21-sw-story-dates -screen story -sheet dates -lang sw
+s22-sw-story-read -screen story-read -lang sw
+s23-dark-stories -screen stories -theme dark
+s24-dark-story -screen story -theme dark
+s25-dark-story-photos -screen story-photos -theme dark
+s26-dark-story-detail -screen story -sheet detail -theme dark
+s27-dark-story-read -screen story-read -theme dark
+s28-dark-sw-story-collecting -screen story:104 -lang sw -theme dark
+s29-sun-stories -screen stories -theme sun
+s30-sun-story -screen story -theme sun
+s31-sun-story-photos -screen story-photos -theme sun
+s32-sun-sw-story-add -screen story -sheet add -lang sw -theme sun
+s33-sun-story-read -screen story-read -theme sun

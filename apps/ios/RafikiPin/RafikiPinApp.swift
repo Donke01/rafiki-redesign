@@ -15,7 +15,7 @@ struct RafikiPinApp: App {
             Root().environmentObject(model)
                 .onChange(of: phase) { p in
                     // GPS only while the app is open; refresh when coming back to it
-                    if p == .active, model.signedIn { model.cameBack(); model.locator.start(); if !model.demo { model.refresh() } }
+                    if p == .active, model.signedIn { model.cameBack(); model.locator.start(); if !model.demo { model.refresh(); model.storyUp.resume() } }
                     if p == .background { model.wentAway(); model.locator.stop() }
                 }
         }
@@ -55,6 +55,7 @@ struct Shell: View {
                     else if here.tab == "new" { NewSiteView() }
                     else if here.tab == "me" { MeView() }
                     else if here.tab == "office" { OfficeView() }
+                    else if here.tab == "stories" { StoriesView() }
                     else { ProjectsView() }
                 }
                 .id("\(here.tab)|\(here.project ?? "")|\(here.sub ?? "")|\(m.stack.count)")
@@ -65,6 +66,8 @@ struct Shell: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .animation(Motion.on ? .spring(response: 0.36, dampingFraction: 0.9) : nil, value: m.stack)
             .onChange(of: m.stack.count) { n in depth = n }
+            // story photos on their way for the open project: "Adding 3 photos to After · 1 of 3 sent", above the bottom bar
+            if let pid = here.project { StoryUploadBanner(up: m.storyUp, pid: pid) }
             BottomTabs()
         }
         .gesture(DragGesture(minimumDistance: 30).onEnded { g in
@@ -82,7 +85,14 @@ struct TopBar: View {
                 Button { Haptic.tap(); m.back() } label: { Icon("back", size: 22, color: C.ink).frame(width: 44, height: 44).background(C.card.opacity(0.85)).clipShape(Circle()) }
                     .accessibilityLabel(t("Back", "Rudi"))
             } else {
-                Button { m.tab("me") } label: { Avatar(name: m.prefs.name, size: 40) }.accessibilityLabel(t("Me", "Mimi")).accessibilityIdentifier("hav")
+                Button { m.tab("me") } label: {
+                    Avatar(name: m.prefs.name, size: 40).overlay(alignment: .topTrailing) {
+                        // admins have Office in the bottom bar instead of Me, so what is waiting to send shows here
+                        if m.snap?.admin == true && m.waiting > 0 {
+                            Text("\(m.waiting)").font(.mont(10, .bold)).foregroundColor(.white).padding(.horizontal, 5).background(C.warn).clipShape(Capsule()).offset(x: 6, y: -4)
+                        }
+                    }
+                }.accessibilityLabel(t("Me", "Mimi")).accessibilityIdentifier("hav")
             }
             Spacer()
             HStack(spacing: 0) { Text("RAFIKI").font(.tMedium).tracking(2.5).foregroundColor(C.ink); Text(" Pin").font(.tMedium).foregroundColor(C.blue) }
@@ -102,8 +112,11 @@ struct BottomTabs: View {
     var body: some View {
         let admin = m.snap?.admin == true
         let review = m.snap?.reviewOpen ?? 0
-        var tabs = [("map", t("Map", "Ramani"), "map"), ("list", t("Projects", "Miradi"), "list"), ("new", t("New site", "Eneo jipya"), "plus"), ("me", t("Me", "Mimi"), "person")]
-        if admin { tabs.append(("office", t("Office", "Ofisi"), "inbox")) }
+        let drafts = m.snap?.draftsWaiting ?? 0
+        // as Android: Map, Projects, New site, Stories, then Office for admins or Me for field users (everyone has Me
+        // at the top left too); five tabs keep every label whole down to a 320-point-wide iPhone
+        var tabs = [("map", t("Map", "Ramani"), "map"), ("list", t("Projects", "Miradi"), "list"), ("new", t("New site", "Eneo jipya"), "plus"), ("stories", t("Stories", "Hadithi"), "book")]
+        if admin { tabs.append(("office", t("Office", "Ofisi"), "inbox")) } else { tabs.append(("me", t("Me", "Mimi"), "person")) }
         return HStack(spacing: 0) {
             ForEach(tabs, id: \.0) { k, label, icon in
                 let on = m.here.tab == k && m.here.project == nil && m.here.sub == nil
@@ -117,7 +130,7 @@ struct BottomTabs: View {
                             } else {
                                 Icon(icon, size: 24, color: on ? hu.fg : C.muted).frame(width: 52, height: 30).background(on ? hu.bg : .clear).clipShape(Capsule())
                             }
-                            let n = k == "office" ? review : k == "me" ? m.waiting : 0
+                            let n = k == "office" ? review : k == "me" ? m.waiting : k == "stories" ? drafts : 0
                             if n > 0 { Text("\(n)").font(.mont(10, .bold)).foregroundColor(.white).padding(.horizontal, 5).background(C.warn).clipShape(Capsule()) }
                         }
                         Text(label).font(.lSmall).foregroundColor(on ? hu.fg : C.muted).lineLimit(1).minimumScaleFactor(0.8)

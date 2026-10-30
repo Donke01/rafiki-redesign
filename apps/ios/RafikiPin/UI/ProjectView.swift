@@ -11,6 +11,7 @@ struct ProjectView: View {
 
     var body: some View {
         if let snap = m.snap, let p = snap.projects.first(where: { $0.id == id }) {
+            ScrollViewReader { proxy in
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
                     BackLink(label: t("Back", "Rudi")) { m.back() }
@@ -22,9 +23,10 @@ struct ProjectView: View {
                     hero(snap, p).padding(.top, 6)
                     if let r = snap.repairs[p.id] { RepairCard(p: p, r: r).padding(.top, 12) }
                     HStack(spacing: 0) {
-                        ForEach([("pin", t("Pin location", "Weka mahali")), ("visit", t("Site visit", "Ziara")), ("hist", t("History", "Historia"))], id: \.0) { k, label in
+                        ForEach([("pin", t("Pin location", "Weka mahali")), ("visit", t("Site visit", "Ziara")), ("hist", t("History", "Historia")), ("story", t("Stories", "Hadithi"))], id: \.0) { k, label in
                             Button { tab = k } label: {
-                                Text(label).font(.tSmall).foregroundColor(tab == k ? .white : C.ink).frame(maxWidth: .infinity, minHeight: 44)
+                                FitWords(label, size: 14, weight: .bold, color: tab == k ? .white : C.ink, lines: 2, align: .center)
+                                    .padding(.horizontal, 3).padding(.vertical, 4).frame(maxWidth: .infinity, minHeight: 44)
                                     .background(Group { if tab == k { BlueBrush } else { Color.clear } }).clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                             }.buttonStyle(.plain).accessibilityIdentifier("tab_\(k)")
                         }
@@ -35,11 +37,13 @@ struct ProjectView: View {
                         switch tab {
                         case "visit": VisitTab(p: p)
                         case "hist": HistoryTab(p: p)
+                        case "story": StoryTab(up: m.storyUp, p: p) { key in withAnimation(Motion.on ? .easeInOut(duration: 0.35) : nil) { proxy.scrollTo(key, anchor: .top) } }
                         default: PinTab(p: p)
                         }
                     }.padding(.top, 14)
                     Spacer().frame(height: 24)
                 }.padding(16)
+            }
             }
             .onAppear { if tab.isEmpty { tab = startTab } }
             .id(p.id)

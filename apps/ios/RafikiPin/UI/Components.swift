@@ -11,6 +11,8 @@ enum Ic {
         "layers": "square.3.layers.3d", "del": "delete.left", "clock": "clock", "upload": "square.and.arrow.up", "inbox": "tray", "spark": "sparkle",
         "chev": "chevron.right", "finger": "touchid", "face": "faceid", "phone": "phone", "chat": "message", "down": "chevron.down", "share": "square.and.arrow.up", "satellite": "globe.europe.africa",
         "sun": "sun.max", "globe": "globe", "nav": "location", "file": "doc.text", "link": "link", "flame": "flame", "text": "textformat.size",
+        "book": "book", "star": "star", "starfill": "star.fill", "trash": "trash", "grid": "square.grid.2x2", "shield": "checkmark.shield", "offline": "wifi.slash",
+        "up": "chevron.up", "next": "arrow.right", "edit": "square.and.pencil",
     ]
     static func name(_ k: String) -> String { map[k] ?? "drop" }
 }
@@ -21,33 +23,37 @@ struct Icon: View {
     var body: some View { Image(systemName: Ic.name(k)).font(.system(size: size * 0.82, weight: .medium)).foregroundColor(color).frame(width: size, height: size) }
 }
 
-/// The main button: blue, light (outlined) or green.
+/// The main button: blue, light (outlined) or green. `busy`: a turning circle and what is happening ("Saving…"),
+/// in the button's own colours, and the button can't be pressed again meanwhile.
 struct Btn: View {
     let text: String; let action: () -> Void
-    var icon: String? = nil; var enabled = true; var light = false; var ok = false; var small = false; var wide = false
-    init(_ text: String, icon: String? = nil, enabled: Bool = true, light: Bool = false, ok: Bool = false, small: Bool = false, wide: Bool = false, action: @escaping () -> Void) {
-        self.text = text; self.action = action; self.icon = icon; self.enabled = enabled; self.light = light; self.ok = ok; self.small = small; self.wide = wide
+    var icon: String? = nil; var enabled = true; var light = false; var ok = false; var small = false; var wide = false; var busy: String? = nil
+    init(_ text: String, icon: String? = nil, enabled: Bool = true, light: Bool = false, ok: Bool = false, small: Bool = false, wide: Bool = false, busy: String? = nil, action: @escaping () -> Void) {
+        self.text = text; self.action = action; self.icon = icon; self.enabled = enabled; self.light = light; self.ok = ok; self.small = small; self.wide = wide; self.busy = busy
     }
     var body: some View {
         let fg: Color = light ? C.ink : .white
+        let working = busy != nil
         Button(action: action) {
-            HStack(spacing: 8) {
-                if let icon { Icon(icon, size: small ? 18 : 20, color: fg) }
-                Text(text).font(small ? .mont(14, .bold) : .lLarge).foregroundColor(fg).multilineTextAlignment(.center)
+            HStack(spacing: working ? 10 : 8) {
+                if working { ProgressView().progressViewStyle(.circular).tint(fg).frame(width: small ? 18 : 20, height: small ? 18 : 20) }
+                else if let icon { Icon(icon, size: small ? 18 : 20, color: fg) }
+                Text(busy ?? text).font(small ? .mont(14, .bold) : .lLarge).foregroundColor(fg).multilineTextAlignment(.center)
             }
             .padding(.horizontal, small ? 16 : 22)
             .frame(minHeight: small ? 44 : 52)
             .frame(maxWidth: wide ? .infinity : nil)
             .background(
                 Group {
-                    if !enabled { C.off } else if light { C.card } else if ok { OkBrush } else { BlueBrush }
+                    if !enabled && !working { C.off } else if light { C.card } else if ok { OkBrush } else { BlueBrush }
                 }
             )
             .clipShape(Capsule())
             .overlay(Capsule().stroke(light ? C.edge : .clear, lineWidth: 1))
         }
         .buttonStyle(Press())
-        .disabled(!enabled)
+        .disabled(!enabled || working)
+        .accessibilityValue(busy ?? "")
     }
 }
 
