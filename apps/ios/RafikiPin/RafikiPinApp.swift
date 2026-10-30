@@ -49,6 +49,7 @@ struct Shell: View {
             ZStack {
                 Group {
                     if let pid = here.project { ProjectView(id: pid, startTab: here.projectTab) }
+                    else if ChatRoutes.handles(here.sub) { ChatScreen(sub: here.sub ?? "") }
                     else if here.sub == "search" { SearchView() }
                     else if here.sub == "report" { ReportView() }
                     else if here.sub == "route" { RouteView() }
@@ -72,7 +73,7 @@ struct Shell: View {
             .onChange(of: m.stack.count) { n in depth = n }
             // story photos on their way for the open project: "Adding 3 photos to After · 1 of 3 sent", above the bottom bar
             if let pid = here.project { StoryUploadBanner(up: m.storyUp, pid: pid) }
-            BottomTabs()
+            if !ChatRoutes.hidesTabs(here.sub) { BottomTabs() }
         }
         .gesture(DragGesture(minimumDistance: 30).onEnded { g in
             // swipe from the left edge to go back, like other iPhone apps

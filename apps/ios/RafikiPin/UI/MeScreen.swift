@@ -25,6 +25,7 @@ struct MeScreen: View {
                         MeUpdateCard()
                         WaitingList(snap: m.snap)
                         if let snap = m.snap { MyWork(snap: snap) }
+                        MyTrips()
                         MyMonth(act: m.activity)
                         BadgeStamps(act: m.activity)
                         SettingsCard()

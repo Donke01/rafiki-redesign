@@ -9,7 +9,8 @@ struct OfficeView: View {
     var body: some View {
         if let snap = m.snap {
             let secs = [("overview", t("Overview", "Muhtasari"), "drop"), ("repairs", t("Repairs", "Ukarabati"), "wrench"), ("visits", t("Visits", "Ziara"), "cal"),
-                        ("review", t("Review", "Idhinisha"), "inbox"), ("team", t("Team", "Timu"), "people"), ("cleanup", t("Clean-up", "Usafi"), "spark"), ("export", t("Export", "Pakua"), "upload")]
+                        ("review", t("Review", "Idhinisha"), "inbox"), ("team", t("Team", "Timu"), "people"), ("cleanup", t("Clean-up", "Usafi"), "spark"), ("export", t("Export", "Pakua"), "upload"),
+                        ("trips", t("Trips", "Safari"), "nav")]
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
                     Text(t("Office", "Ofisi")).font(.hLarge).foregroundColor(C.ink)
@@ -26,6 +27,7 @@ struct OfficeView: View {
                         case "review": ReviewQueue()
                         case "team": TeamSection()
                         case "cleanup": Cleanup(s: snap)
+                        case "trips": TripsSection()
                         default: Export(s: snap)
                         }
                     }.padding(.top, 14)

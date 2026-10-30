@@ -99,7 +99,7 @@ struct MeHeaderBar: View {
                     }
                 }
                 Wordmark()
-                NotifBell()
+                HStack(spacing: 2) { ChatTopButton(hub: m.chat); NotifBell() }
             }
             .padding(.horizontal, 12)
             .frame(width: g.size.width, height: 58)
@@ -117,7 +117,7 @@ struct MeHeaderBar: View {
     /// The word "Me" fits when the pill, the logo (with room each side) and the bell all fit on one line.
     static func roomForWord(_ width: CGFloat) -> Bool {
         let w = (t("Me", "Mimi") as NSString).size(withAttributes: [.font: UIFont.systemFont(ofSize: 15, weight: .heavy)]).width * 1.1
-        return width >= 4 + 34 + 6 + 16 + 4 + w + 12 + 16 + Wordmark.width() + 46 + 4
+        return width >= 4 + 34 + 6 + 16 + 4 + w + 12 + 16 + Wordmark.width() + 46 + 46 + 4
     }
 
     private func started() {
