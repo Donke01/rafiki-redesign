@@ -324,6 +324,393 @@ html footer.bf .bf-top:focus-visible{outline:3px solid #6BBDF2;outline-offset:3p
 }
 @keyframes cv2Ring{0%{box-shadow:0 0 0 0 rgba(10,120,194,.35)}100%{box-shadow:0 0 0 16px rgba(10,120,194,0)}}
 </style>
+<style id="pv-css">/* Projects pages, October 2026 redesign: cream page, white panels with thin borders, numbered sections */
+html{background:#FAF8F3}
+html .pg{background:#FAF8F3}
+.pv-hero,.pv,.pv-list,.pv-d{--pv-bg:#FAF8F3;--pv-line:#E6E1D6;--pv-ink:#0A0A0A;--pv-mut:#5A6066;--pv-mut2:#3A3F44;--pv-blue:#0A78C2;--pv-blue2:#076DB1;--pv-ok:#1F8A4C;--pv-okt:#1A7741;--pv-uw:#0A78C2;--pv-uwt:#076DB1;--pv-fu:#B26B00;--pv-fut:#9A5C00;font-family:Montserrat,system-ui,sans-serif;color:var(--pv-ink)}
+.pv-hero *,.pv *,.pv-list *,.pv-d *{box-sizing:border-box}
+.pv-hero h1,.pv-hero p,.pv h2,.pv h3,.pv p,.pv ul,.pv dl,.pv dd,.pv-list h1,.pv-list p,.pv-d h1,.pv-d h2,.pv-d h3,.pv-d p,.pv-d ul,.pv-d ol,.pv-d dl,.pv-d dd,.pv-d figure,.pv-list ul{margin:0;padding:0}
+.pv ul,.pv-list ul,.pv-d ul,.pv-d ol{list-style:none}
+.pv a,.pv-hero a,.pv-list a,.pv-d a{color:inherit}
+.pv :focus-visible,.pv-hero :focus-visible,.pv-list :focus-visible,.pv-d :focus-visible,.pv-viewer :focus-visible{outline:3px solid #6BBDF2;outline-offset:3px}
+/* type */
+.pv-kick{font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--pv-blue2)}
+.pv-small{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--pv-blue2)}
+.pv-h1{font-size:clamp(36px,5.2vw,64px);line-height:1.04;font-weight:800;letter-spacing:-.03em;color:var(--pv-ink)}
+.pv-h2{font-size:clamp(24px,2.6vw,32px);line-height:1.15;font-weight:700;letter-spacing:-.02em;color:var(--pv-ink)}
+.pv-h2.big{font-size:clamp(26px,2.9vw,36px)}
+.pv-p{font-size:16px;line-height:1.65;color:var(--pv-mut)}
+.pv-lead{font-size:clamp(16px,1.5vw,19px);line-height:1.6;color:var(--pv-mut2);max-width:34em}
+/* links and buttons */
+.pv-go{display:inline-flex;align-items:center;gap:6px;min-height:44px;font-size:15px;font-weight:700;color:var(--pv-blue2) !important;text-decoration:none}
+.pv-go.sm{font-size:14px}
+.pv-go span,.pv-go i{font-style:normal;transition:transform .2s}
+.pv-go:hover span{transform:translateX(3px)}
+.pv-go:hover{text-decoration:underline;text-underline-offset:3px}
+.pv-sub{display:inline-flex;align-items:center;min-height:44px;font-size:14px;font-weight:600;color:var(--pv-blue2) !important;text-decoration:underline;text-underline-offset:3px;position:relative;z-index:2}
+.pv-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 24px;border-radius:999px;background:var(--pv-blue2);color:#FFFFFF !important;border:1.5px solid var(--pv-blue2);font:inherit;font-size:15px;font-weight:700;text-decoration:none;cursor:pointer;transition:background .2s,border-color .2s,color .2s;text-align:center}
+.pv-btn:hover{background:#054F81;border-color:#054F81}
+.pv-btn.ghost{background:transparent;color:var(--pv-blue2) !important}
+.pv-btn.ghost:hover{background:#E3F1FC}
+.pv-btn.white{background:#FFFFFF;border-color:#FFFFFF;color:var(--pv-blue2) !important}
+.pv-btn.white:hover{background:#E3F1FC;border-color:#E3F1FC}
+/* status: a small dot and a word */
+.pv-dot{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;line-height:1.3}
+.pv-dot::before{content:"";flex:none;width:7px;height:7px;border-radius:50%;background:currentColor}
+.pv-dot.ok{color:var(--pv-okt)}.pv-dot.ok::before{background:var(--pv-ok)}
+.pv-dot.uw{color:var(--pv-uwt)}.pv-dot.uw::before{background:var(--pv-uw)}
+.pv-dot.fu{color:var(--pv-fut)}.pv-dot.fu::before{background:var(--pv-fu)}
+/* breadcrumb */
+.pv-crumb{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;font-size:13px;color:var(--pv-mut)}
+.pv-crumb a{color:var(--pv-mut2) !important;text-decoration:none;display:inline-flex;align-items:center;min-height:32px}
+.pv-crumb a:hover{color:var(--pv-blue2) !important;text-decoration:underline}
+@media (max-width:800px){.pv-crumb a{min-height:44px}}
+
+/* ---------- overview ---------- */
+.pv-hero{background:#FAF8F3}
+.pv-hero-in{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(32px,5vw,72px);align-items:center;padding-top:calc(104px + clamp(16px,3vw,40px));padding-bottom:clamp(40px,5vw,64px)}
+.pv-hero-tx{display:flex;flex-direction:column;align-items:flex-start;gap:16px;min-width:0}
+.pv-hero-tx .pv-kick{margin-top:6px}
+.pv-hero-tx .pv-lead{margin-top:6px}
+.pv-btns{display:flex;flex-wrap:wrap;gap:12px;margin-top:12px}
+.pv-hero-ph{border-radius:6px;overflow:hidden;background:#E3F1FC;aspect-ratio:5/4}
+.pv-hero-ph img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 40%}
+@media (max-width:999px){.pv-hero-in{padding-top:104px}}
+@media (max-width:860px){.pv-hero-in{grid-template-columns:minmax(0,1fr);gap:28px}.pv-hero-ph{aspect-ratio:4/3}}
+@media (max-width:860px) and (min-width:561px){.pv-hero-ph{aspect-ratio:16/9}}
+@media (max-width:560px){.pv-btns{flex-direction:column;align-self:stretch}.pv-btns .pv-btn{width:100%}}
+.pv{padding-bottom:0}
+.pv-figs{margin:0 0 clamp(56px,7vw,96px)}
+.pv-figs-in{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));background:#FFFFFF;border:1px solid var(--pv-line);border-radius:6px}
+.pv-figs-in > div{display:flex;flex-direction:column-reverse;justify-content:flex-end;gap:6px;padding:24px 28px;border-left:1px solid var(--pv-line);min-width:0}
+.pv-figs-in > div:first-child{border-left:0}
+.pv-figs dd{font-size:clamp(28px,3vw,40px);line-height:1.05;font-weight:700;letter-spacing:-.02em;color:var(--pv-blue2);font-variant-numeric:tabular-nums}
+.pv-figs dt{font-size:14px;font-weight:500;color:var(--pv-mut2);line-height:1.35}
+@media (max-width:760px){.pv-figs-in{grid-template-columns:repeat(2,minmax(0,1fr))}.pv-figs-in > div{padding:20px}.pv-figs-in > div:nth-child(3){border-left:0}.pv-figs-in > div:nth-child(n+3){border-top:1px solid var(--pv-line)}}
+@media (max-width:380px){.pv-figs-in > div{padding:18px 14px}.pv-figs dd{font-size:26px}}
+/* numbered sections */
+.pv-sec{display:grid;grid-template-columns:minmax(180px,260px) minmax(0,1fr);gap:clamp(32px,5vw,72px);margin:0 0 clamp(64px,8vw,104px)}
+.pv-lab{display:flex;flex-direction:column;align-items:stretch;gap:12px;padding-top:6px}
+.pv-num{font-size:12px;font-weight:700;letter-spacing:.14em;color:var(--pv-blue2);padding-bottom:10px;border-bottom:1px solid var(--pv-blue)}
+.pv-lab i{display:none}
+.pv-lt{font-size:14px;font-weight:700;color:var(--pv-ink)}
+.pv-body{min-width:0;display:flex;flex-direction:column;gap:20px}
+.pv-cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px;margin-top:8px}
+.pv-intro{max-width:44em}
+@media (max-width:999px){
+  .pv-sec{grid-template-columns:minmax(0,1fr);gap:18px}
+  .pv-lab{flex-direction:row;align-items:center;gap:12px;padding-top:0}
+  .pv-num{border:0;padding:0}
+  .pv-lab i{display:block;flex:1;height:1px;background:var(--pv-blue)}
+  .pv-lt{font-size:13px}
+}
+@media (max-width:640px){.pv-cols{grid-template-columns:minmax(0,1fr);gap:16px;margin-top:0}}
+/* where things stand */
+.pv-st-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:8px}
+.pv-st{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:10px;background:#FFFFFF;border:1px solid var(--pv-line);border-radius:6px;padding:22px 22px 12px;min-width:0;transition:border-color .2s,box-shadow .2s}
+.pv-st:hover{border-color:#BFD9EE;box-shadow:0 8px 24px rgba(10,10,10,.06)}
+.pv-st .pv-dot{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+.pv-st-n{font-size:clamp(34px,3.4vw,44px);line-height:1;font-weight:700;letter-spacing:-.02em;color:var(--pv-ink);font-variant-numeric:tabular-nums}
+.pv-st-p{font-size:14px;line-height:1.55;color:var(--pv-mut);flex:1}
+.pv-st-go{align-self:stretch;border-top:1px solid var(--pv-line);margin-top:6px;font-size:14px}
+.pv-st-go::after{content:"";position:absolute;inset:0;border-radius:6px}
+.pv-st .pv-sub{margin:-6px 0 -8px}
+@media (max-width:860px){
+  .pv-st-grid{grid-template-columns:minmax(0,1fr);gap:0;background:#FFFFFF;border:1px solid var(--pv-line);border-radius:6px}
+  .pv-st{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-areas:"n d" "n p" "n s" "n g";column-gap:18px;row-gap:4px;border:0;border-top:1px solid var(--pv-line);border-radius:0;padding:18px 18px 8px;background:transparent}
+  .pv-st:first-child{border-top:0}
+  .pv-st:hover{box-shadow:none}
+  .pv-st-n{grid-area:n;min-width:48px;font-size:30px;align-self:start;padding-top:2px}
+  .pv-st .pv-dot{grid-area:d}
+  .pv-st-p{grid-area:p}
+  .pv-st-go{grid-area:g;border-top:0;margin-top:0;justify-self:start}
+  .pv-st .pv-sub{grid-area:s;margin:-4px 0 -12px;justify-self:start}
+}
+/* looking for funding now */
+.pv-up{background:#FFFFFF;border:1px solid var(--pv-line);border-radius:6px;padding:20px 22px 8px}
+.pv-up-list{margin-top:10px !important}
+.pv-up-list li{display:flex;align-items:center;justify-content:space-between;gap:6px 20px;flex-wrap:wrap;padding:10px 0;border-top:1px solid var(--pv-line)}
+.pv-up-list li:first-child{border-top:0}
+.pv-up-t{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1 1 220px}
+.pv-up-n{font-size:15px;font-weight:700;color:var(--pv-ink) !important;text-decoration:none;display:inline-flex;align-items:center;min-height:28px}
+.pv-up-n:hover{color:var(--pv-blue2) !important;text-decoration:underline;text-underline-offset:3px}
+.pv-up-c{font-size:13px;color:var(--pv-mut)}
+.pv-up-need{font-size:14px;font-weight:700;color:var(--pv-fut);white-space:nowrap}
+.pv-up-tbc{font-size:14px;font-weight:500;color:var(--pv-mut);white-space:nowrap}
+.pv-up-msg{font-size:14px;color:var(--pv-mut);padding:10px 0}
+.pv-up > .pv-go{border-top:1px solid var(--pv-line);width:100%;margin-top:4px}
+/* ledger */
+.pv-led{background:#FFFFFF;border:1px solid var(--pv-line);border-radius:6px;padding:8px 24px 12px;margin-top:8px}
+.pv-led-hd,.pv-led-r{display:grid;grid-template-columns:minmax(0,1fr) 110px 110px 130px 24px;align-items:center;column-gap:12px}
+.pv-led-hd{padding:14px 0 12px;border-bottom:1px solid var(--pv-ink);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--pv-mut2)}
+.pv-led-g + .pv-led-g{border-top:1px solid var(--pv-ink)}
+.pv-led-gh{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-top:8px}
+.pv-led-gh .pv-go{font-size:13px;min-height:40px}
+.pv-led-rows li + li{border-top:1px solid var(--pv-line)}
+.pv-led-r{min-height:56px;padding:8px 0;text-decoration:none;color:var(--pv-ink) !important;transition:background .2s}
+.pv-led-r b{font-size:15px;font-weight:600}
+.pv-led-c{font-size:15px;font-variant-numeric:tabular-nums;color:var(--pv-ink)}
+.pv-led-m{display:none}
+.pv-led-r i{font-style:normal;color:var(--pv-blue2);font-weight:700;text-align:right;transition:transform .2s}
+.pv-led-r:hover{background:#F5F9FD}
+.pv-led-r:hover b{color:var(--pv-blue2)}
+.pv-led-r:hover i{transform:translateX(3px)}
+@media (max-width:760px){
+  .pv-led{padding:6px 18px 8px}
+  .pv-led-hd{display:none}
+  .pv-led-g + .pv-led-g{border-top:1px solid var(--pv-ink);margin-top:4px}
+  .pv-led-r{grid-template-columns:minmax(0,1fr) 20px;grid-template-areas:"n i" "m i";row-gap:2px;padding:12px 0}
+  .pv-led-r b{grid-area:n}
+  .pv-led-c{display:none}
+  .pv-led-m{display:block;grid-area:m;font-size:13px;line-height:1.45;color:var(--pv-mut)}
+  .pv-led-r i{grid-area:i}
+}
+/* countries */
+.pv-cty{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px}
+.pv-cty-it{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:4px;min-width:0}
+.pv-cty-ph{width:100%;aspect-ratio:4/3;border-radius:4px;overflow:hidden;background:#E3F1FC;margin-bottom:10px}
+.pv-cty-ph img{display:block;width:100%;height:100%;object-fit:cover;transition:transform .5s cubic-bezier(.2,.7,.2,1)}
+.pv-cty-it:hover .pv-cty-ph img{transform:scale(1.04)}
+.pv-cty-n{font-size:17px;font-weight:700;color:var(--pv-ink)}
+.pv-cty-s{font-size:13px;line-height:1.45;color:var(--pv-mut);min-height:1.45em}
+.pv-cty-go{display:block !important;min-height:0 !important;padding:4px 0 6px;font-size:14px;line-height:1.4}
+.pv-cty-go span{display:inline-block;margin-left:6px}
+.pv-cty-go::after{content:"";position:absolute;inset:0}
+.pv-cty .pv-sub{font-size:13px;margin-top:-8px}
+@media (max-width:900px){.pv-cty{grid-template-columns:repeat(2,minmax(0,1fr));gap:24px 16px}}
+/* donors */
+.pv-donors{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,420px);gap:clamp(32px,6vw,96px);align-items:start;padding:clamp(8px,2vw,24px) 0 clamp(56px,7vw,96px)}
+.pv-dn-main{display:flex;flex-direction:column;align-items:flex-start;gap:14px;min-width:0}
+.pv-dn-main .pv-h2{font-size:clamp(26px,2.9vw,36px)}
+.pv-dn-list{align-self:stretch;max-width:560px;margin-top:8px !important;border-bottom:1px solid var(--pv-line)}
+.pv-dn-list li{padding:14px 0;border-top:1px solid var(--pv-line);font-size:15px;font-weight:600;color:var(--pv-ink)}
+.pv-give{border-radius:6px;overflow:hidden;background:var(--pv-blue2);color:#FFFFFF}
+.pv-give-ph{aspect-ratio:16/10;background:#C9E4F8}
+.pv-give-ph img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 35%}
+.pv-give-b{padding:24px 24px 28px;display:flex;flex-direction:column;align-items:flex-start;gap:4px}
+.pv-give-k{font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#FFFFFF;opacity:.9}
+.pv-give-n{font-size:clamp(34px,3.4vw,44px);font-weight:700;line-height:1.1;letter-spacing:-.02em;color:#FFFFFF !important;margin-top:4px !important}
+.pv-give-t{font-size:16px;color:#FFFFFF !important}
+.pv-give-s{font-size:14px;color:#FFFFFF !important;opacity:.92;margin-top:6px !important}
+.pv-give .pv-btn{margin-top:16px;min-width:96px}
+@media (max-width:860px){.pv-donors{grid-template-columns:minmax(0,1fr)}.pv-dn-list{max-width:none}}
+
+/* ---------- all projects ---------- */
+html main.pj-main{padding-top:124px !important}
+@media (max-width:999px){html main.pj-main{padding-top:104px !important}}
+.pj-main > .pv-list,.pj-main > .pv-d{width:100%;min-width:0}
+.pv-lh{display:flex;flex-direction:column;gap:14px;padding-bottom:clamp(24px,3vw,36px)}
+.pv-lh-row{display:flex;align-items:flex-end;justify-content:space-between;gap:12px 32px;flex-wrap:wrap}
+.pv-lh .pv-lead{max-width:40em}
+.pv-lh .pv-go{white-space:nowrap}
+.pv-miss{margin:0 0 20px !important;padding:14px 18px;background:#FFF6E5;border:1px solid #F1DDB4;border-radius:6px;font-size:15px;color:#5A3A00}
+.pv-tabs{display:flex;flex-wrap:wrap;gap:0 28px;border-bottom:1px solid var(--pv-line)}
+.pv-tab{flex:none;display:inline-flex;align-items:baseline;gap:6px;min-height:46px;padding:12px 0 10px;background:none;border:0;border-bottom:3px solid transparent;margin-bottom:-1px;font:inherit;font-size:15px;font-weight:500;color:var(--pv-mut2);cursor:pointer;white-space:nowrap}
+.pv-tab small{font-size:12px;font-weight:500;color:var(--pv-mut)}
+.pv-tab:hover{color:var(--pv-blue2)}
+.pv-tab.on{color:var(--pv-blue2);font-weight:700;border-bottom-color:var(--pv-blue2)}
+.pv-tab.on small{color:var(--pv-blue2)}
+.pv-kinds{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.pv-kind{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--pv-line);background:#FFFFFF;font:inherit;font-size:14px;font-weight:500;color:var(--pv-mut2);cursor:pointer}
+.pv-kind small{font-size:12px;color:var(--pv-mut)}
+.pv-kind.on{border-color:var(--pv-blue2);color:var(--pv-blue2);font-weight:700;background:#F0F7FD}
+.pv-find{display:flex;flex-wrap:wrap;gap:12px;margin-top:18px}
+.pv-search{position:relative;flex:1 1 320px;min-width:0;display:flex;align-items:center}
+.pv-search svg{position:absolute;left:16px;color:var(--pv-mut);pointer-events:none}
+.pv-search input{width:100%;min-height:48px;padding:0 16px 0 44px;border:1px solid #D9D3C6;border-radius:6px;background:#FFFFFF;font:inherit;font-size:15px;color:var(--pv-ink);-webkit-appearance:none;appearance:none}
+.pv-search input::placeholder{color:#7A8086}
+.pv-search input:focus{outline:2px solid var(--pv-blue);outline-offset:1px;border-color:var(--pv-blue)}
+.pv-sels{display:flex;flex-wrap:wrap;gap:12px}
+.pv-sel{position:relative;display:flex;align-items:center;min-height:48px;border:1px solid #D9D3C6;border-radius:6px;background:#FFFFFF;padding:0 34px 0 14px;font-size:15px;min-width:0}
+.pv-sel:focus-within{outline:2px solid var(--pv-blue);outline-offset:1px;border-color:var(--pv-blue)}
+.pv-sel label{color:var(--pv-mut);font-weight:500;white-space:nowrap;margin-right:4px}
+.pv-sel label::after{content:":"}
+.pv-sel select{-webkit-appearance:none;appearance:none;border:0;background:transparent;font:inherit;font-size:15px;font-weight:700;color:var(--pv-ink);padding:0;min-height:46px;cursor:pointer;outline:0;max-width:100%;text-overflow:ellipsis}
+.pv-sel::after{content:"";position:absolute;right:14px;top:50%;width:7px;height:7px;border-right:2px solid var(--pv-mut2);border-bottom:2px solid var(--pv-mut2);transform:translateY(-70%) rotate(45deg);pointer-events:none}
+.pv-ftog{display:none}
+.pv-bsub{display:none}
+html .pv-d .pv-d-h1:focus{outline:none !important}
+.pv-sum{display:flex;align-items:center;justify-content:space-between;gap:8px 20px;flex-wrap:wrap;margin-top:18px}
+.pv-sumt{font-size:15px;font-weight:700;color:var(--pv-ink)}
+.pv-count{font-size:14px;color:var(--pv-mut)}
+.pv-act{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:12px}
+.pv-x{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 10px 0 12px;border:1px solid var(--pv-line);border-radius:999px;background:#FFFFFF;font:inherit;font-size:13px;color:var(--pv-ink);cursor:pointer}
+.pv-x small{font-size:12px;color:var(--pv-mut)}
+.pv-x:hover{border-color:var(--pv-blue2)}
+.pv-reset{min-height:36px;border:0;background:none;font:inherit;font-size:13px;font-weight:700;color:var(--pv-blue2);text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:0 6px}
+.pv-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:40px 24px;margin-top:24px}
+.pv-card{display:flex;flex-direction:column;text-decoration:none;color:var(--pv-ink) !important;border-bottom:1px solid var(--pv-line);padding-bottom:16px;min-width:0}
+.pv-card-ph{position:relative;aspect-ratio:10/7;border-radius:4px;overflow:hidden;background:#E3F1FC}
+.pv-card-ph img{display:block;width:100%;height:100%;object-fit:cover;transition:transform .5s cubic-bezier(.2,.7,.2,1)}
+.pv-card:hover .pv-card-ph img{transform:scale(1.03)}
+.pv-noph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--pv-blue2);font-size:14px;font-weight:500;text-align:center;padding:12px}
+.pv-card-b{display:flex;flex-direction:column;gap:6px;padding-top:16px;flex:1}
+.pv-card-k{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--pv-blue2);line-height:1.4}
+.pv-card-t{font-size:19px;font-weight:700;line-height:1.3;letter-spacing:-.01em;color:var(--pv-ink)}
+.pv-card:hover .pv-card-t{color:var(--pv-blue2)}
+.pv-card-m{font-size:14px;color:var(--pv-mut);line-height:1.45}
+.pv-card-f{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px 12px;margin-top:auto;padding-top:6px}
+.pv-card-p{font-size:13px;font-weight:600;color:var(--pv-ink)}
+.pv-skel .pv-card-ph{animation:pvPulse 1.4s ease-in-out infinite}
+.pv-skel i{display:block;height:12px;border-radius:3px;background:#ECE7DC;animation:pvPulse 1.4s ease-in-out infinite}
+.pv-skel i:nth-child(2){height:18px;width:80%}.pv-skel i:nth-child(3){width:60%}
+@keyframes pvPulse{50%{opacity:.55}}
+@media (prefers-reduced-motion:reduce){.pv-skel .pv-card-ph,.pv-skel i{animation:none}}
+.pv-more{display:flex;flex-direction:column;align-items:center;gap:10px;margin:48px 0 8px}
+.pv-more small{font-size:14px;color:var(--pv-mut)}
+.pv-empty{background:#FFFFFF;border:1px solid var(--pv-line);border-radius:6px;padding:28px 24px;margin-top:24px;text-align:center;font-size:15px;color:var(--pv-mut2);display:flex;flex-direction:column;align-items:center;gap:12px}
+.pv-empty b{color:var(--pv-ink)}
+.pv-list-end{height:clamp(48px,6vw,88px)}
+@media (max-width:1100px){.pv-search{flex-basis:100%}}
+@media (max-width:900px){.pv-tab.sub{display:none}.pv-tab.on-m{color:var(--pv-blue2);font-weight:700;border-bottom-color:var(--pv-blue2)}.pv-tab.on-m small{color:var(--pv-blue2)}.pv-bsub{display:flex}}
+@media (max-width:980px){.pv-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){
+  .pv-lh .pv-lead{font-size:16px}
+  .pv-tabs{gap:0 20px}
+  .pv-find{gap:10px}
+  .pv-ftog{display:flex;flex:1 1 0;min-width:0;align-items:center;justify-content:center;gap:8px;min-height:48px;border:1px solid #D9D3C6;border-radius:6px;background:#FFFFFF;font:inherit;font-size:15px;font-weight:700;color:var(--pv-ink);cursor:pointer;padding:0 12px}
+  .pv-ftog::after{content:"";width:6px;height:6px;border-right:2px solid var(--pv-mut2);border-bottom:2px solid var(--pv-mut2);transform:translateY(-2px) rotate(45deg)}
+  .pv-ftog[aria-expanded="true"]::after{transform:translateY(2px) rotate(-135deg)}
+  .pv-sels{flex:1 1 100%;display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:10px}
+  .pv-sel{padding:0 30px 0 12px}
+  .pv-sel::after{right:12px}
+  .pv-sels .pv-sel{display:none}
+  .pv-sels.open .pv-sel{display:flex}
+  .pv-sels .pv-sel.sort{display:flex;grid-column:2;grid-row:1}
+  .pv-sels .pv-ftog{grid-column:1;grid-row:1}
+  .pv-sels.open .pv-sel:not(.sort){grid-column:1 / -1}
+  .pv-sel.sort label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .pv-sel.sort{justify-content:center}
+  .pv-sel select{flex:1;min-width:0}
+  .pv-sum{margin-top:14px}
+  .pv-count{display:none}
+  .pv-grid{grid-template-columns:minmax(0,1fr);gap:0;margin-top:12px;border-top:1px solid var(--pv-line)}
+  .pv-card{flex-direction:row;align-items:flex-start;gap:14px;padding:16px 0}
+  .pv-card-ph{flex:none;width:clamp(88px,27vw,112px);aspect-ratio:5/4}
+  .pv-noph{font-size:0;gap:0}
+  .pv-noph svg{width:26px;height:26px}
+  .pv-card-b{padding-top:0;gap:4px}
+  .pv-card-t{font-size:16px}
+  .pv-card-m,.pv-card-p{display:none}
+  .pv-card-f{padding-top:2px}
+  .pv-more{margin-top:28px}
+  .pv-more .pv-btn{width:100%}
+}
+@media (max-width:380px){.pv-tabs{gap:0 14px}.pv-tab{font-size:14px}.pv-tab small{font-size:11px}}
+
+/* ---------- one project ---------- */
+.pv-d{padding-top:0}
+.pv-d-top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.pv-d-nav{display:flex;gap:4px 18px}
+.pv-tb{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0;border:0;background:none;font:inherit;font-size:14px;font-weight:600;color:var(--pv-mut2);cursor:pointer}
+.pv-tb:hover{color:var(--pv-blue2)}
+.pv-tb.back{color:var(--pv-blue2);font-weight:700}
+.pv-d-head{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:16px 32px;margin-top:clamp(12px,2vw,24px)}
+.pv-d-ht{display:flex;flex-direction:column;align-items:flex-start;gap:12px;min-width:0}
+.pv-d-h1{font-size:clamp(30px,4.4vw,52px);line-height:1.06;font-weight:800;letter-spacing:-.03em;color:var(--pv-ink);max-width:16em;outline:0}
+.pv-d-place{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;font-size:16px;color:var(--pv-mut2)}
+.pv-badge{display:inline-flex;align-items:center;min-height:26px;padding:0 10px;border-radius:999px;font-size:12px !important}
+.pv-badge.ok{background:#E5F3EA}.pv-badge.uw{background:#E3F1FC}.pv-badge.fu{background:#FBF0DD}
+.pv-share{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.pv-shmsg{font-size:13px;color:var(--pv-mut2);min-height:1.2em;max-width:22em;text-align:right;overflow-wrap:anywhere}
+.pv-shmsg:empty{display:none}
+.pv-shbtn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:0 22px;border-radius:999px;border:1.5px solid var(--pv-blue2);background:transparent;font:inherit;font-size:15px;font-weight:700;color:var(--pv-blue2);cursor:pointer;white-space:nowrap}
+.pv-shbtn:hover{background:#E3F1FC}
+.pv-gal{display:grid;grid-template-columns:minmax(0,2.6fr) minmax(0,1fr);grid-template-rows:1fr 1fr;gap:14px;margin-top:clamp(20px,2.6vw,28px);aspect-ratio:2.25/1}
+.pv-gal.n1{grid-template-columns:minmax(0,1fr);grid-template-rows:1fr;aspect-ratio:2.25/1}
+.pv-gal.n2{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:1fr}
+.pv-gal button{position:relative;display:block;width:100%;height:100%;padding:0;border:0;border-radius:4px;overflow:hidden;background:#E3F1FC;cursor:zoom-in;min-width:0;min-height:0}
+.pv-gal button:first-child{grid-row:1 / -1}
+.pv-gal button:nth-child(4){display:none}
+.pv-gal img{display:block;width:100%;height:100%;object-fit:cover;transition:transform .5s cubic-bezier(.2,.7,.2,1)}
+.pv-gal button:hover img{transform:scale(1.02)}
+.pv-gal-cap{display:flex;flex-wrap:wrap;align-items:center;gap:0 8px;margin-top:6px !important;font-size:13px;color:var(--pv-mut)}
+.pv-gal-cap button{border:0;background:none;padding:0;min-height:40px;font:inherit;font-size:13px;font-weight:700;color:var(--pv-blue2);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.pv-d-noph{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;aspect-ratio:3/1;margin-top:clamp(20px,2.6vw,28px);border-radius:4px;background:#E3F1FC;color:var(--pv-blue2);font-size:15px;font-weight:500;text-align:center;padding:16px}
+.pv-d-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,400px);gap:clamp(32px,5vw,64px);align-items:start;margin-top:clamp(36px,4.4vw,56px)}
+.pv-d-main{display:flex;flex-direction:column;gap:20px;min-width:0}
+.pv-d-main > * + .pv-d-h3{padding-top:24px;border-top:1px solid var(--pv-line)}
+.pv-d-h2{font-size:clamp(24px,2.4vw,30px);font-weight:700;letter-spacing:-.02em;line-height:1.2;color:var(--pv-ink)}
+.pv-d-h3{font-size:19px;font-weight:700;color:var(--pv-ink)}
+.pv-d-p{font-size:17px;line-height:1.7;color:var(--pv-mut2)}
+.pv-q{margin:0;padding:4px 0 4px 18px;border-left:3px solid var(--pv-blue);font-size:18px;line-height:1.6;font-weight:500;color:var(--pv-ink)}
+.pv-q cite{display:block;margin-top:8px;font-size:14px;font-style:normal;font-weight:600;color:var(--pv-mut)}
+.pv-after{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.pv-after img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:4px;background:#E3F1FC}
+.pv-full{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:2px 16px;padding:16px 20px;border:1px solid var(--pv-line);border-radius:6px;background:#FFFFFF;text-decoration:none;color:var(--pv-ink) !important}
+.pv-full span{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--pv-blue2)}
+.pv-full b{grid-column:1;font-size:16px}
+.pv-full i{grid-column:2;grid-row:1 / span 2;font-style:normal;font-weight:700;color:var(--pv-blue2)}
+.pv-full:hover{border-color:var(--pv-blue2)}
+.pv-steps{position:relative;display:flex;flex-direction:column;gap:18px}
+.pv-step{position:relative;display:grid;grid-template-columns:22px minmax(0,1fr);column-gap:14px;align-items:start}
+.pv-step::before{content:"";position:absolute;left:10px;top:24px;bottom:-18px;width:2px;background:var(--pv-line)}
+.pv-step:last-child::before{display:none}
+.pv-step.done::before{background:var(--pv-ok)}
+.pv-step-i{width:22px;height:22px;border-radius:50%;border:2px solid #CFC8B9;background:#FFFFFF;display:flex;align-items:center;justify-content:center;margin-top:1px;position:relative;z-index:1}
+.pv-step.done .pv-step-i{background:var(--pv-ok);border-color:var(--pv-ok)}
+.pv-step.done .pv-step-i::after{content:"";width:5px;height:9px;border-right:2px solid #FFFFFF;border-bottom:2px solid #FFFFFF;transform:translateY(-1px) rotate(45deg)}
+.pv-step.now .pv-step-i{border-color:var(--pv-blue);box-shadow:0 0 0 4px #E3F1FC}
+.pv-step.now .pv-step-i::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--pv-blue)}
+.pv-step b{font-size:16px;font-weight:700;color:var(--pv-ink);line-height:1.4}
+.pv-step.next b{color:var(--pv-mut);font-weight:600}
+.pv-step small{display:block;font-size:13px;color:var(--pv-mut);margin-top:2px}
+.pv-d-side{display:flex;flex-direction:column;gap:20px;min-width:0}
+.pv-glance{background:#FFFFFF;border:1px solid var(--pv-line);border-radius:6px;padding:20px 22px 8px}
+.pv-glance dl{margin-top:8px !important}
+.pv-glance dl > div{display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding:12px 0;border-top:1px solid var(--pv-line)}
+.pv-glance dl > div:first-child{border-top:0}
+.pv-glance dt{font-size:14px;color:var(--pv-mut);flex:none;max-width:48%}
+.pv-glance dd{font-size:15px;font-weight:700;color:var(--pv-ink);text-align:right;min-width:0}
+.pv-glance dd.pv-dot{font-size:15px;justify-content:flex-end}
+.pv-sponsor{background:var(--pv-blue2);color:#FFFFFF;border-radius:6px;padding:26px 24px;display:flex;flex-direction:column;align-items:flex-start;gap:16px}
+.pv-sponsor h2{font-size:21px;font-weight:700;line-height:1.3;color:#FFFFFF}
+.pv-dm{margin-top:clamp(56px,7vw,96px)}
+.pv-dm-h{display:flex;align-items:flex-end;justify-content:space-between;gap:8px 24px;flex-wrap:wrap}
+.pv-dm-h p{margin-top:6px !important}
+.pv-dm-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;margin-top:20px}
+.pv-dm-grid .pv-card{border-bottom:0;padding-bottom:0}
+.pv-dm-grid .pv-card-t{font-size:17px}
+.pv-d-end{height:clamp(56px,7vw,96px)}
+@media (max-width:900px){
+  .pv-d-grid{grid-template-columns:minmax(0,1fr)}
+  .pv-d-side{display:contents}
+  .pv-glance{order:-1}
+  .pv-d-grid > .pv-d-main{order:0}
+  .pv-sponsor{order:1}
+  .pv-dm-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .pv-dm-grid > :nth-child(3){display:none}
+}
+@media (max-width:700px){
+  .pv-d-head{grid-template-columns:minmax(0,1fr)}
+  .pv-share{align-items:stretch;order:3}
+  .pv-shmsg{text-align:left}
+  .pv-shbtn{width:100%}
+  .pv-gal,.pv-gal.n2{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:auto auto;aspect-ratio:auto;gap:8px}
+  .pv-gal button{aspect-ratio:4/3}
+  .pv-gal button:first-child{grid-row:auto;grid-column:1 / -1;aspect-ratio:3/2}
+  .pv-gal.n1 button:first-child{aspect-ratio:3/2}
+  .pv-gal button:nth-child(4){display:block}
+  .pv-gal.n2{grid-template-columns:minmax(0,1fr)}
+  .pv-gal.n2 button{aspect-ratio:3/2}
+  .pv-gal.n3{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .pv-d-noph{aspect-ratio:3/2}
+  .pv-d-p{font-size:16px}
+  .pv-after{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:640px){.pv-dm-grid{grid-template-columns:minmax(0,1fr);gap:0;border-top:1px solid var(--pv-line)}.pv-dm-grid > :nth-child(3){display:flex}.pv-dm-grid .pv-card{border-bottom:1px solid var(--pv-line);padding:14px 0}.pv-dm-grid .pv-card-t{font-size:16px}}
+/* photo viewer */
+.pv-viewer{position:fixed;inset:0;z-index:300;background:rgba(6,14,22,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:56px 16px 16px;font-family:Montserrat,system-ui,sans-serif;color:#FFFFFF}
+.pv-viewer figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:12px;max-width:100%;max-height:100%;min-height:0}
+.pv-viewer img{display:block;max-width:min(1200px,100%);max-height:calc(100vh - 150px);max-height:calc(100dvh - 150px);object-fit:contain;border-radius:4px;background:#0E1C28}
+.pv-viewer figcaption{font-size:14px;color:#E6EEF5;text-align:center}
+.pv-vx{position:absolute;top:10px;right:10px;width:48px;height:48px;border-radius:50%;border:0;background:rgba(255,255,255,.12);color:#FFFFFF;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.pv-vn{display:flex;gap:12px;margin-top:4px}
+.pv-vn button{min-height:46px;min-width:110px;padding:0 18px;border-radius:999px;border:1.5px solid rgba(255,255,255,.6);background:transparent;color:#FFFFFF;font:inherit;font-size:15px;font-weight:700;cursor:pointer}
+.pv-vn button:hover,.pv-vx:hover{background:rgba(255,255,255,.2)}
+.pv-viewer :focus-visible{outline-color:#FFFFFF}
+html.pv-lock,html.pv-lock body{overflow:hidden}
+</style>
 </head>
 <body>
 <x-dc>
@@ -1493,14 +1880,7 @@ a.vc:focus-visible{outline:3px solid #6BBDF2;outline-offset:3px}
 </header>
 </div>
 <div class="hd-space" aria-hidden="true"></div>
-<section class="xh" aria-label="Our projects"><div class="wrap xh-in"><nav class="xh-crumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><span>Our projects</span></nav><h1 class="xh-h1">What we have been up to</h1><p class="xh-p">From the first site survey to the day the water flows: where RAFIKI works, and the people who make it possible.</p></div></section><main tabindex="-1" class="wrap xm" id="top"><section class="xs"><p class="xp-quote">We bring clean water in partnership with the communities who will use it.</p><div class="xp-cols"><p class="x-p">Every project is planned together with the community, and drilled by our own drilling team or a trusted local drilling company.</p><p class="x-p">Once the water flows, the well belongs to the community, who own it and look after it.</p></div></section><section class="xs"><h2 class="x-h2">Completed, current and upcoming</h2><div class="pr-grid"><a class="pr-it" href="/stories?status=completed" style="text-decoration:none;color:inherit"><b>Completed</b><p>Every finished project, with the story of how it was chosen, built and handed over.</p><span class="cw-go">Browse completed projects</span></a><a class="pr-it" href="/tracker" style="text-decoration:none;color:inherit"><b>Current</b><p>Wells being drilled right now, and the step each one has reached.</p><span class="cw-go">See projects under way</span></a><div class="pr-it"><b>Upcoming</b><p>Communities waiting for funding, and what each project needs.</p><sc-if value="{{upLoading}}" hint-placeholder-val="{{false}}"><p class="pr-up-msg" role="status">Loading projects…</p></sc-if><sc-if value="{{upLive}}" hint-placeholder-val="{{false}}"><ul class="pr-up"><sc-for list="{{upList}}" as="u" hint-placeholder-count="6"><li><span class="pr-up-t"><a class="pr-up-n ex-tx" href="{{u.href}}">{{u.title}}</a><span class="pr-up-c">{{u.country}}</span></span><span class="{{u.needCls}}">{{u.need}}</span></li></sc-for></ul><sc-if value="{{upMore}}" hint-placeholder-val="{{false}}"><p class="pr-up-msg">{{upMoreL}}</p></sc-if></sc-if><sc-if value="{{upDown}}" hint-placeholder-val="{{false}}"><p class="pr-up-msg">Projects looking for funding will appear here.</p></sc-if><a class="cw-go pr-up-go" href="/sponsor">Sponsor an upcoming project</a></div></div></section><section class="xs" id="project-types" aria-labelledby="pt-h2"><h2 class="x-h2" id="pt-h2">Water, and beyond the well</h2><p class="x-p pt-intro">Most of our projects bring water: borehole wells, and ways to collect and store water. Once a community has safe water, it often asks for the next thing: a clinic, a classroom, a safe home for children, a way to earn a living. We build those the same way, with the community leading and owning the work.</p><div class="pt-grp"><div class="pt-h"><h3 class="x-h3">Water</h3><a class="ex-tx" href="/stories?cat=water">All water projects<span class="ex-arw" aria-hidden="true">→</span></a></div><div class="pt-grid"><sc-for list="{{ptWater}}" as="t" hint-placeholder-count="0"><a class="pt-card ex-card" href="{{t.href}}"><b>{{t.name}}</b><span class="pt-ct">{{t.counts}}</span><span class="cw-go">See these projects<span class="ex-arw" aria-hidden="true">→</span></span></a></sc-for></div></div><div class="pt-grp"><div class="pt-h"><h3 class="x-h3">Beyond the well</h3><a class="ex-tx" href="/stories?cat=beyond">All Beyond the well projects<span class="ex-arw" aria-hidden="true">→</span></a></div><div class="pt-grid"><sc-for list="{{ptBeyond}}" as="t" hint-placeholder-count="0"><a class="pt-card ex-card" href="{{t.href}}"><b>{{t.name}}</b><span class="pt-ct">{{t.counts}}</span><span class="cw-go">See these projects<span class="ex-arw" aria-hidden="true">→</span></span></a></sc-for></div></div></section><section id="where-we-work" aria-label="Where we work">
-<div class="cc-ww">
-<span class="cc-lab">Where we work</span>
-<h2 class="h2">Four countries, one mission</h2> <span class="todo sample">Sample figures</span>
-<p class="p">RAFIKI partners with communities in Kenya, Tanzania, Uganda and Malawi. Choose a country to see its projects and people.</p>
-<div class="cc-grid"><sc-for list="{{wwCards}}" as="c" hint-placeholder-count="4"><a class="{{c.cls}}" href="{{c.href}}"><sc-if value="{{c.here}}" hint-placeholder-val="{{false}}"><span class="cc-here">You are viewing</span></sc-if><span class="cc-ab" aria-hidden="true">{{c.ab}}</span><span class="cc-cn">{{c.n}}</span><span class="cc-rows"><sc-if value="{{c.stats}}" hint-placeholder-val="{{true}}"><div><span>Wells completed</span><b>{{c.w}}</b></div><div><span>Under construction</span><b>{{c.u}}</b></div><div><span>People reached</span><b>{{c.p}}</b></div></sc-if><sc-if value="{{c.fund}}" hint-placeholder-val="{{false}}"><div class="cc-fund" role="link" tabindex="0" aria-label="{{c.fAria}}" onClick="{{c.fGo}}" onKeyDown="{{c.fKey}}"><span>Looking for funding</span><b>{{c.fTx}}<i aria-hidden="true"> →</i></b></div></sc-if></span><span class="cc-go">{{c.go}}</span></a></sc-for></div>
-</div>
-</section><section class="xs xs-donors"><div class="dn-grid"><div class="dn-main"><h2 class="x-h2">Thank you to our donors</h2><p class="x-p dn-lead">These families and organisations fund wells and projects with us.</p><ul class="dn-list"><li>The Maynes Family</li><li>The Do Good Foundation</li><li>Our expedition members</li><li>The Blaser Family</li><li>The Haslem Family</li></ul><a class="ex-tx dn-give" href="/donate">Become a donor<span class="ex-arw" aria-hidden="true">→</span></a></div><aside class="dn-impact" aria-label="Your giving at work"><img src="/img/pg/g-pump-600.webp" srcset="/img/pg/g-pump-600.webp 600w, /img/pg/g-pump.webp 631w" sizes="(max-width:900px) 100vw, 480px" alt="Students and a community member at a finished well, with water flowing" loading="lazy" decoding="async" width="600" height="648"><div class="dn-ov"><span class="dn-k">Your giving at work</span><p class="dn-big"><b>{{dnPeople}}</b> people with clean water</p><p class="dn-sm"><b>{{dnWells}}</b> wells finished, and more under way</p><a class="xb lt dn-btn" href="/donate">Give</a></div></aside></div></section><div class="xmq-band" role="region" aria-labelledby="xmq-lab"><p class="xmq-lab" id="xmq-lab">Our partners and sponsors</p><div class="xmq"><div class="xmq-tr"><img src="/img/pg/lg-bigge.webp" alt="Bigge" loading="lazy" decoding="async"><img src="/img/pg/lg-reliable.webp" alt="Reliable Crane Service" loading="lazy" decoding="async"><img src="/img/pg/lg-money.webp" alt="Money Insights" loading="lazy" decoding="async"><img src="/img/pg/lg-fcd.webp" alt="Falling Creek Dental" loading="lazy" decoding="async"><img src="/img/pg/lg-mountain.webp" alt="Mountain Crane" loading="lazy" decoding="async"><img src="/img/pg/lg-urban.webp" alt="Urban Property Management" loading="lazy" decoding="async"><img src="/img/pg/lg-bigge.webp" alt="" aria-hidden="true" loading="lazy" decoding="async"><img src="/img/pg/lg-reliable.webp" alt="" aria-hidden="true" loading="lazy" decoding="async"><img src="/img/pg/lg-money.webp" alt="" aria-hidden="true" loading="lazy" decoding="async"><img src="/img/pg/lg-fcd.webp" alt="" aria-hidden="true" loading="lazy" decoding="async"><img src="/img/pg/lg-mountain.webp" alt="" aria-hidden="true" loading="lazy" decoding="async"><img src="/img/pg/lg-urban.webp" alt="" aria-hidden="true" loading="lazy" decoding="async"></div></div></div><section class="xs blue"><div class="xc"><div class="x-col"><h2 class="x-h2">Every well has a story</h2><p class="x-p">Meet the villages and schools behind our wells, or follow every project from survey to handover.</p></div><div class="xc-row"><a class="xb lt" href="/communities">Partner communities</a><a class="xb2" href="/progress">Our impact</a></div></div></section></main>
+<section class="pv-hero" aria-labelledby="pv-h1"><div class="wrap pv-hero-in"><div class="pv-hero-tx"><nav class="pv-crumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><span aria-current="page">Our projects</span></nav><p class="pv-kick">Our projects</p><h1 class="pv-h1" id="pv-h1">What we have been up to</h1><p class="pv-lead">From the first site survey to the day the water flows: where RAFIKI works, and the people who make it possible.</p><div class="pv-btns"><a class="pv-btn" href="/projects?view=all">Browse all projects</a><a class="pv-btn ghost" href="/progress">Our impact</a></div></div><div class="pv-hero-ph"><img src="/img/w-drill1.webp" alt="Volunteers and a local crew turn the arms of The Village Drill" width="1050" height="1400" fetchpriority="high" decoding="async"></div></div></section><main tabindex="-1" class="wrap pv" id="top"><section class="pv-figs" aria-label="Our projects in numbers"><dl class="pv-figs-in"><div><dt>Wells finished</dt><dd>{{pv.wells}}</dd></div><div><dt>Wells being built</dt><dd>{{pv.wellsUc}}</dd></div><div><dt>Projects in all</dt><dd>{{pv.all}}</dd></div><div><dt>People with clean water</dt><dd>{{pv.people}}</dd></div></dl></section><section class="pv-sec" aria-labelledby="pv-s1"><div class="pv-lab" aria-hidden="true"><span class="pv-num">01</span><i></i><span class="pv-lt">How we work</span></div><div class="pv-body"><h2 class="pv-h2 big" id="pv-s1">We bring clean water in partnership with the communities who will use it.</h2><div class="pv-cols"><p class="pv-p">Every project is planned together with the community, and drilled by our own drilling team or a trusted local drilling company.</p><p class="pv-p">Once the water flows, the well belongs to the community, who own it and look after it.</p></div></div></section><section class="pv-sec" aria-labelledby="pv-s2"><div class="pv-lab" aria-hidden="true"><span class="pv-num">02</span><i></i><span class="pv-lt">Where things stand</span></div><div class="pv-body"><h2 class="pv-h2" id="pv-s2">Completed, current and upcoming</h2><div class="pv-st-grid"><div class="pv-st"><span class="pv-dot ok">Completed</span><b class="pv-st-n">{{pv.done}}</b><p class="pv-st-p">Every finished project, with the story of how it was chosen, built and handed over.</p><a class="pv-go pv-st-go" href="/projects?status=completed" aria-label="See completed projects">See these projects<span aria-hidden="true">→</span></a></div><div class="pv-st"><span class="pv-dot uw">Under way</span><b class="pv-st-n">{{pv.uc}}</b><p class="pv-st-p">Wells being drilled right now, and the step each one has reached.</p><a class="pv-sub" href="/tracker">Follow them on the well tracker</a><a class="pv-go pv-st-go" href="/projects?status=underway" aria-label="See projects under way">See these projects<span aria-hidden="true">→</span></a></div><div class="pv-st"><span class="pv-dot fu">Looking for funding</span><b class="pv-st-n">{{pv.up}}</b><p class="pv-st-p">Communities waiting for funding, and what each project needs.</p><a class="pv-go pv-st-go" href="/projects?status=funding" aria-label="See projects looking for funding">See these projects<span aria-hidden="true">→</span></a></div></div><div class="pv-up"><p class="pv-small">Looking for funding now</p><sc-if value="{{upLoading}}" hint-placeholder-val="{{false}}"><p class="pv-up-msg" role="status">Loading projects…</p></sc-if><sc-if value="{{upLive}}" hint-placeholder-val="{{false}}"><ul class="pv-up-list"><sc-for list="{{upList}}" as="u" hint-placeholder-count="6"><li><span class="pv-up-t"><a class="pv-up-n" href="{{u.href}}">{{u.title}}</a><span class="pv-up-c">{{u.country}}</span></span><span class="{{u.needCls}}">{{u.need}}</span></li></sc-for></ul><sc-if value="{{upMore}}" hint-placeholder-val="{{false}}"><p class="pv-up-msg">{{upMoreL}}</p></sc-if></sc-if><sc-if value="{{upDown}}" hint-placeholder-val="{{false}}"><p class="pv-up-msg">Projects looking for funding will appear here.</p></sc-if><a class="pv-go" href="/sponsor">Sponsor an upcoming project<span aria-hidden="true">→</span></a></div></div></section><section class="pv-sec" id="project-types" aria-labelledby="pt-h2"><div class="pv-lab" aria-hidden="true"><span class="pv-num">03</span><i></i><span class="pv-lt">What we build</span></div><div class="pv-body"><h2 class="pv-h2" id="pt-h2">Water, and beyond the well</h2><p class="pv-p pv-intro">Most of our projects bring water: borehole wells, and ways to collect and store water. Once a community has safe water, it often asks for the next thing: a clinic, a classroom, a safe home for children, a way to earn a living. We build those the same way, with the community leading and owning the work.</p><div class="pv-led"><div class="pv-led-hd" aria-hidden="true"><span>Kind of project</span><span>Completed</span><span>Under way</span><span>Funding needed</span><span></span></div><sc-if value="{{ledLoading}}" hint-placeholder-val="{{false}}"><p class="pv-up-msg" role="status">Loading projects…</p></sc-if><sc-if value="{{ledDown}}" hint-placeholder-val="{{false}}"><p class="pv-up-msg">The kinds of project will appear here.</p></sc-if><sc-for list="{{ledGroups}}" as="g" hint-placeholder-count="2"><div class="pv-led-g"><div class="pv-led-gh"><h3 class="pv-small">{{g.name}}</h3><a class="pv-go sm" href="{{g.href}}">{{g.all}}<span aria-hidden="true">→</span></a></div><ul class="pv-led-rows"><sc-for list="{{g.rows}}" as="r" hint-placeholder-count="3"><li><a class="pv-led-r" href="{{r.href}}" aria-label="{{r.aria}}"><b>{{r.name}}</b><span class="pv-led-c">{{r.c}}</span><span class="pv-led-c">{{r.u}}</span><span class="pv-led-c">{{r.f}}</span><span class="pv-led-m">{{r.sub}}</span><i aria-hidden="true">→</i></a></li></sc-for></ul></div></sc-for></div></div></section><section class="pv-sec" id="where-we-work" aria-labelledby="pv-s4"><div class="pv-lab" aria-hidden="true"><span class="pv-num">04</span><i></i><span class="pv-lt">Where we work</span></div><div class="pv-body"><h2 class="pv-h2" id="pv-s4">Four countries, one mission</h2><p class="pv-p pv-intro">RAFIKI partners with communities in Kenya, Tanzania, Uganda and Malawi. Choose a country to see its projects and people.</p><ul class="pv-cty"><sc-for list="{{pvCountries}}" as="c" hint-placeholder-count="4"><li class="pv-cty-it"><div class="pv-cty-ph"><img src="{{c.img}}" alt="" width="600" height="450" loading="lazy" decoding="async"></div><h3 class="pv-cty-n">{{c.n}}</h3><p class="pv-cty-s">{{c.sub}}</p><a class="pv-go sm pv-cty-go" href="{{c.href}}">{{c.go}}<span aria-hidden="true">→</span></a><sc-if value="{{c.fund}}" hint-placeholder-val="{{false}}"><a class="pv-sub" href="{{c.fHref}}">{{c.fTx}}</a></sc-if></li></sc-for></ul></div></section><section class="pv-donors" aria-labelledby="pv-dn"><div class="pv-dn-main"><p class="pv-kick">With thanks</p><h2 class="pv-h2" id="pv-dn">Thank you to our donors</h2><p class="pv-p">These families and organisations fund wells and projects with us.</p><ul class="pv-dn-list"><li>The Maynes Family</li><li>The Do Good Foundation</li><li>Our expedition members</li><li>The Blaser Family</li><li>The Haslem Family</li></ul><a class="pv-go" href="/donate">Become a donor<span aria-hidden="true">→</span></a></div><aside class="pv-give" aria-label="Your giving at work"><div class="pv-give-ph"><img src="/img/pg/g-pump-600.webp" srcset="/img/pg/g-pump-600.webp 600w, /img/pg/g-pump.webp 631w" sizes="(max-width:900px) 100vw, 420px" alt="Students and a community member at a finished well, with water flowing" loading="lazy" decoding="async" width="600" height="648"></div><div class="pv-give-b"><p class="pv-give-k">Your giving at work</p><p class="pv-give-n">{{dnPeople}}</p><p class="pv-give-t">people with clean water</p><p class="pv-give-s"><b>{{dnWells}}</b> wells finished, and more under way</p><a class="pv-btn white" href="/donate">Give</a></div></aside></section><div class="xmq-band" role="region" aria-labelledby="xmq-lab"><p class="xmq-lab" id="xmq-lab">Our partners and sponsors</p><div class="xmq"><div class="xmq-tr"><img src="/img/pg/lg-bigge.webp" alt="Bigge" loading="lazy" decoding="async"><img src="/img/pg/lg-reliable.webp" alt="Reliable Crane Service" loading="lazy" decoding="async"><img src="/img/pg/lg-money.webp" alt="Money Insights" loading="lazy" decoding="async"><img src="/img/pg/lg-fcd.webp" alt="Falling Creek Dental" loading="lazy" decoding="async"><img src="/img/pg/lg-mountain.webp" alt="Mountain Crane" loading="lazy" decoding="async"><img src="/img/pg/lg-urban.webp" alt="Urban Property Management" loading="lazy" decoding="async"><img src="/img/pg/lg-bigge.webp" alt="" aria-hidden="true" loading="lazy" decoding="async"><img src="/img/pg/lg-reliable.webp" alt="" aria-hidden="true" loading="lazy" decoding="async"><img src="/img/pg/lg-money.webp" alt="" aria-hidden="true" loading="lazy" decoding="async"><img src="/img/pg/lg-fcd.webp" alt="" aria-hidden="true" loading="lazy" decoding="async"><img src="/img/pg/lg-mountain.webp" alt="" aria-hidden="true" loading="lazy" decoding="async"><img src="/img/pg/lg-urban.webp" alt="" aria-hidden="true" loading="lazy" decoding="async"></div></div></div><section class="xs blue"><div class="xc"><div class="x-col"><h2 class="x-h2">Every well has a story</h2><p class="x-p">Meet the villages and schools behind our wells, or follow every project from survey to handover.</p></div><div class="xc-row"><a class="xb lt" href="/communities">Partner communities</a><a class="xb2" href="/progress">Our impact</a></div></div></section></main>
 <footer class="bf">
 <div class="wrap bf-tile">
 <div class="bf-row">
@@ -1540,29 +1920,52 @@ function MOUNT(self) {
   if (window.rafikiFeed) window.rafikiFeed().then(function (d) { self._upFeed = d || null; self.setState({ upTried: true }); });
   else self.setState({ upTried: true });
 }
-// every project type, each opening its projects in the explorer (feed only; groups with no projects are left out)
+// every project type, each opening its projects in the project list (feed only; groups with no projects are left out)
 var PT_WATER = [['Borehole wells', 'kind=borehole', function (p) { return p.type === 'Borehole well'; }], ['Water collection', 'kind=collection', function (p) { return p.type === 'Water collection'; }]];
 var PT_BEYOND = [['health', 'Health'], ['school', 'Schools'], ['children', 'Children’s homes'], ['livelihoods', 'Livelihoods'], ['community', 'Community']].map(function (g) { return [g[1], 'cat=' + g[0], function (p) { return p.cat === g[0]; }]; });
-function ptTiles(feed, groups) {
+var nbsp = function (x) { return String(x).replace(/ /g, ' '); };
+function ptRows(feed, groups) {
   var ps = feed && feed.projects ? feed.projects : [];
   return groups.map(function (g) {
     var mine = ps.filter(g[2]), n = function (st) { return mine.filter(function (p) { return p.status === st; }).length; };
-    var parts = [], done = n('Completed'), uc = n('Under construction'), up = n('Upcoming');
+    var parts = [], done = n('Completed'), uc = n('Under construction'), up = n('Upcoming'), dash = function (x) { return x ? x.toLocaleString('en-US') : '—'; };
     if (done) parts.push(done + ' completed');
     if (uc) parts.push(uc + ' under way');
-    if (up) parts.push(up + ' looking for funding');
-    return mine.length ? { name: g[0], href: '/stories?' + g[1], counts: parts.map(function (x) { return x.replace(/ /g, '\u00a0'); }).join('\u00a0· ') } : null;
+    if (up) parts.push(up + ' need' + (up === 1 ? 's' : '') + ' funding');
+    return mine.length ? { name: g[0], href: '/projects?' + g[1], c: dash(done), u: dash(uc), f: dash(up), sub: parts.map(nbsp).join(' · '),
+      aria: g[0] + ': ' + parts.join(', ') + '. See these projects' } : null;
   }).filter(Boolean);
 }
+// Before the live feed loads (or if it can't), the October 2026 totals from monday.com
+var PV_DEF = { wells: 109, wellsUc: 4, all: 181, people: 178032, done: 167, uc: 5, up: 9 };
+// country photos (the ones on the approved design)
+var CPHOTO = { ke: '/img/w-elder-600.webp', tz: '/img/washing-600.webp', ug: '/img/w-child-600.webp', mw: '/img/w-field3-600.webp' };
 function EXTRA(self, s) {
   var feed = self._feed || self._upFeed || null;
   var ups = feed && feed.projects ? feed.projects.filter(function (p) { return p.status === 'Upcoming'; }) : [];
   ups.sort(function (x, y) { return CORDER.indexOf(x.ck) - CORDER.indexOf(y.ck); });
   var live = ups.length > 0, tried = !!s.upTried || !!self._feed, more = Math.max(0, ups.length - UP_MAX);
+  var t = feed && feed.summary && feed.summary.total, n = function (v, d) { return (typeof v === 'number' ? v : d).toLocaleString('en-US'); };
+  var hasFeed = !!(feed && feed.projects);
+  var water = ptRows(feed, PT_WATER), beyond = ptRows(feed, PT_BEYOND);
+  var groups = [];
+  if (water.length) groups.push({ name: 'Water', href: '/projects?cat=water', all: 'All water projects', rows: water });
+  if (beyond.length) groups.push({ name: 'Beyond the well', href: '/projects?cat=beyond', all: 'All Beyond the well projects', rows: beyond });
   return {
+    pv: { wells: n(t && t.wells, PV_DEF.wells), wellsUc: n(t && t.wellsUnderConstruction, PV_DEF.wellsUc), all: n(hasFeed ? feed.projects.length : null, PV_DEF.all), people: n(t && t.people, PV_DEF.people),
+      done: n(t && t.projects, PV_DEF.done), uc: n(t && t.underConstruction, PV_DEF.uc), up: n(t && t.upcoming, PV_DEF.up) },
     upLive: live, upDown: tried && !live, upLoading: !tried && !live,
-    ptWater: ptTiles(feed, PT_WATER), ptBeyond: ptTiles(feed, PT_BEYOND),
-    upList: ups.slice(0, UP_MAX).map(function (p) { var has = p.needed > 0; return { href: '/stories?project=' + encodeURIComponent(p.id), title: p.title, country: p.country, need: has ? '$' + Math.round(p.needed).toLocaleString('en-US') + ' needed' : 'Amount to confirm', needCls: has ? 'pr-up-need' : 'pr-up-tbc' }; }),
+    ledGroups: groups, ledLoading: !tried && !groups.length, ledDown: tried && !groups.length,
+    pvCountries: CORDER.map(function (k) {
+      var C = CTRY[k], parts = [];
+      if (C.w) parts.push(C.w.toLocaleString('en-US') + (C.w === 1 ? ' well' : ' wells') + ' finished');
+      if (C.u) parts.push(C.u.toLocaleString('en-US') + (C.w ? ' being built' : (C.u === 1 ? ' well' : ' wells') + ' being built'));
+      var fund = !C.w && !C.u && C.fa > 0, fTx = C.fw ? C.fw + (C.fw === 1 ? ' well' : ' wells') : C.fa + (C.fa === 1 ? ' project' : ' projects');
+      if (fund) parts.push('Looking for funding');
+      return { n: C.n, img: CPHOTO[k], sub: parts.map(nbsp).join(' · '), href: ({ ke: '/kenya', tz: '/tanzania', ug: '/uganda', mw: '/malawi' })[k], go: 'Visit the ' + C.n + ' page',
+        fund: fund, fHref: '/projects?country=' + k + '&status=funding', fTx: 'See the ' + fTx + ' looking for funding' };
+    }),
+    upList: ups.slice(0, UP_MAX).map(function (p) { var has = p.needed > 0; return { href: '/projects?project=' + encodeURIComponent(p.id), title: p.title, country: p.country, need: has ? '$' + Math.round(p.needed).toLocaleString('en-US') + ' needed' : 'Amount to confirm', needCls: has ? 'pv-up-need' : 'pv-up-tbc' }; }),
     upMore: more > 0, upMoreL: 'and ' + more + ' more on the sponsor page'
   };
 }

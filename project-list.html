@@ -235,6 +235,393 @@ html footer.bf .bf-top:focus-visible{outline:3px solid #6BBDF2;outline-offset:3p
 }
 @keyframes cv2Ring{0%{box-shadow:0 0 0 0 rgba(10,120,194,.35)}100%{box-shadow:0 0 0 16px rgba(10,120,194,0)}}
 </style>
+<style id="pv-css">/* Projects pages, October 2026 redesign: cream page, white panels with thin borders, numbered sections */
+html{background:#FAF8F3}
+html .pg{background:#FAF8F3}
+.pv-hero,.pv,.pv-list,.pv-d{--pv-bg:#FAF8F3;--pv-line:#E6E1D6;--pv-ink:#0A0A0A;--pv-mut:#5A6066;--pv-mut2:#3A3F44;--pv-blue:#0A78C2;--pv-blue2:#076DB1;--pv-ok:#1F8A4C;--pv-okt:#1A7741;--pv-uw:#0A78C2;--pv-uwt:#076DB1;--pv-fu:#B26B00;--pv-fut:#9A5C00;font-family:Montserrat,system-ui,sans-serif;color:var(--pv-ink)}
+.pv-hero *,.pv *,.pv-list *,.pv-d *{box-sizing:border-box}
+.pv-hero h1,.pv-hero p,.pv h2,.pv h3,.pv p,.pv ul,.pv dl,.pv dd,.pv-list h1,.pv-list p,.pv-d h1,.pv-d h2,.pv-d h3,.pv-d p,.pv-d ul,.pv-d ol,.pv-d dl,.pv-d dd,.pv-d figure,.pv-list ul{margin:0;padding:0}
+.pv ul,.pv-list ul,.pv-d ul,.pv-d ol{list-style:none}
+.pv a,.pv-hero a,.pv-list a,.pv-d a{color:inherit}
+.pv :focus-visible,.pv-hero :focus-visible,.pv-list :focus-visible,.pv-d :focus-visible,.pv-viewer :focus-visible{outline:3px solid #6BBDF2;outline-offset:3px}
+/* type */
+.pv-kick{font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--pv-blue2)}
+.pv-small{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--pv-blue2)}
+.pv-h1{font-size:clamp(36px,5.2vw,64px);line-height:1.04;font-weight:800;letter-spacing:-.03em;color:var(--pv-ink)}
+.pv-h2{font-size:clamp(24px,2.6vw,32px);line-height:1.15;font-weight:700;letter-spacing:-.02em;color:var(--pv-ink)}
+.pv-h2.big{font-size:clamp(26px,2.9vw,36px)}
+.pv-p{font-size:16px;line-height:1.65;color:var(--pv-mut)}
+.pv-lead{font-size:clamp(16px,1.5vw,19px);line-height:1.6;color:var(--pv-mut2);max-width:34em}
+/* links and buttons */
+.pv-go{display:inline-flex;align-items:center;gap:6px;min-height:44px;font-size:15px;font-weight:700;color:var(--pv-blue2) !important;text-decoration:none}
+.pv-go.sm{font-size:14px}
+.pv-go span,.pv-go i{font-style:normal;transition:transform .2s}
+.pv-go:hover span{transform:translateX(3px)}
+.pv-go:hover{text-decoration:underline;text-underline-offset:3px}
+.pv-sub{display:inline-flex;align-items:center;min-height:44px;font-size:14px;font-weight:600;color:var(--pv-blue2) !important;text-decoration:underline;text-underline-offset:3px;position:relative;z-index:2}
+.pv-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 24px;border-radius:999px;background:var(--pv-blue2);color:#FFFFFF !important;border:1.5px solid var(--pv-blue2);font:inherit;font-size:15px;font-weight:700;text-decoration:none;cursor:pointer;transition:background .2s,border-color .2s,color .2s;text-align:center}
+.pv-btn:hover{background:#054F81;border-color:#054F81}
+.pv-btn.ghost{background:transparent;color:var(--pv-blue2) !important}
+.pv-btn.ghost:hover{background:#E3F1FC}
+.pv-btn.white{background:#FFFFFF;border-color:#FFFFFF;color:var(--pv-blue2) !important}
+.pv-btn.white:hover{background:#E3F1FC;border-color:#E3F1FC}
+/* status: a small dot and a word */
+.pv-dot{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;line-height:1.3}
+.pv-dot::before{content:"";flex:none;width:7px;height:7px;border-radius:50%;background:currentColor}
+.pv-dot.ok{color:var(--pv-okt)}.pv-dot.ok::before{background:var(--pv-ok)}
+.pv-dot.uw{color:var(--pv-uwt)}.pv-dot.uw::before{background:var(--pv-uw)}
+.pv-dot.fu{color:var(--pv-fut)}.pv-dot.fu::before{background:var(--pv-fu)}
+/* breadcrumb */
+.pv-crumb{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;font-size:13px;color:var(--pv-mut)}
+.pv-crumb a{color:var(--pv-mut2) !important;text-decoration:none;display:inline-flex;align-items:center;min-height:32px}
+.pv-crumb a:hover{color:var(--pv-blue2) !important;text-decoration:underline}
+@media (max-width:800px){.pv-crumb a{min-height:44px}}
+
+/* ---------- overview ---------- */
+.pv-hero{background:#FAF8F3}
+.pv-hero-in{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(32px,5vw,72px);align-items:center;padding-top:calc(104px + clamp(16px,3vw,40px));padding-bottom:clamp(40px,5vw,64px)}
+.pv-hero-tx{display:flex;flex-direction:column;align-items:flex-start;gap:16px;min-width:0}
+.pv-hero-tx .pv-kick{margin-top:6px}
+.pv-hero-tx .pv-lead{margin-top:6px}
+.pv-btns{display:flex;flex-wrap:wrap;gap:12px;margin-top:12px}
+.pv-hero-ph{border-radius:6px;overflow:hidden;background:#E3F1FC;aspect-ratio:5/4}
+.pv-hero-ph img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 40%}
+@media (max-width:999px){.pv-hero-in{padding-top:104px}}
+@media (max-width:860px){.pv-hero-in{grid-template-columns:minmax(0,1fr);gap:28px}.pv-hero-ph{aspect-ratio:4/3}}
+@media (max-width:860px) and (min-width:561px){.pv-hero-ph{aspect-ratio:16/9}}
+@media (max-width:560px){.pv-btns{flex-direction:column;align-self:stretch}.pv-btns .pv-btn{width:100%}}
+.pv{padding-bottom:0}
+.pv-figs{margin:0 0 clamp(56px,7vw,96px)}
+.pv-figs-in{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));background:#FFFFFF;border:1px solid var(--pv-line);border-radius:6px}
+.pv-figs-in > div{display:flex;flex-direction:column-reverse;justify-content:flex-end;gap:6px;padding:24px 28px;border-left:1px solid var(--pv-line);min-width:0}
+.pv-figs-in > div:first-child{border-left:0}
+.pv-figs dd{font-size:clamp(28px,3vw,40px);line-height:1.05;font-weight:700;letter-spacing:-.02em;color:var(--pv-blue2);font-variant-numeric:tabular-nums}
+.pv-figs dt{font-size:14px;font-weight:500;color:var(--pv-mut2);line-height:1.35}
+@media (max-width:760px){.pv-figs-in{grid-template-columns:repeat(2,minmax(0,1fr))}.pv-figs-in > div{padding:20px}.pv-figs-in > div:nth-child(3){border-left:0}.pv-figs-in > div:nth-child(n+3){border-top:1px solid var(--pv-line)}}
+@media (max-width:380px){.pv-figs-in > div{padding:18px 14px}.pv-figs dd{font-size:26px}}
+/* numbered sections */
+.pv-sec{display:grid;grid-template-columns:minmax(180px,260px) minmax(0,1fr);gap:clamp(32px,5vw,72px);margin:0 0 clamp(64px,8vw,104px)}
+.pv-lab{display:flex;flex-direction:column;align-items:stretch;gap:12px;padding-top:6px}
+.pv-num{font-size:12px;font-weight:700;letter-spacing:.14em;color:var(--pv-blue2);padding-bottom:10px;border-bottom:1px solid var(--pv-blue)}
+.pv-lab i{display:none}
+.pv-lt{font-size:14px;font-weight:700;color:var(--pv-ink)}
+.pv-body{min-width:0;display:flex;flex-direction:column;gap:20px}
+.pv-cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px;margin-top:8px}
+.pv-intro{max-width:44em}
+@media (max-width:999px){
+  .pv-sec{grid-template-columns:minmax(0,1fr);gap:18px}
+  .pv-lab{flex-direction:row;align-items:center;gap:12px;padding-top:0}
+  .pv-num{border:0;padding:0}
+  .pv-lab i{display:block;flex:1;height:1px;background:var(--pv-blue)}
+  .pv-lt{font-size:13px}
+}
+@media (max-width:640px){.pv-cols{grid-template-columns:minmax(0,1fr);gap:16px;margin-top:0}}
+/* where things stand */
+.pv-st-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:8px}
+.pv-st{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:10px;background:#FFFFFF;border:1px solid var(--pv-line);border-radius:6px;padding:22px 22px 12px;min-width:0;transition:border-color .2s,box-shadow .2s}
+.pv-st:hover{border-color:#BFD9EE;box-shadow:0 8px 24px rgba(10,10,10,.06)}
+.pv-st .pv-dot{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+.pv-st-n{font-size:clamp(34px,3.4vw,44px);line-height:1;font-weight:700;letter-spacing:-.02em;color:var(--pv-ink);font-variant-numeric:tabular-nums}
+.pv-st-p{font-size:14px;line-height:1.55;color:var(--pv-mut);flex:1}
+.pv-st-go{align-self:stretch;border-top:1px solid var(--pv-line);margin-top:6px;font-size:14px}
+.pv-st-go::after{content:"";position:absolute;inset:0;border-radius:6px}
+.pv-st .pv-sub{margin:-6px 0 -8px}
+@media (max-width:860px){
+  .pv-st-grid{grid-template-columns:minmax(0,1fr);gap:0;background:#FFFFFF;border:1px solid var(--pv-line);border-radius:6px}
+  .pv-st{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-areas:"n d" "n p" "n s" "n g";column-gap:18px;row-gap:4px;border:0;border-top:1px solid var(--pv-line);border-radius:0;padding:18px 18px 8px;background:transparent}
+  .pv-st:first-child{border-top:0}
+  .pv-st:hover{box-shadow:none}
+  .pv-st-n{grid-area:n;min-width:48px;font-size:30px;align-self:start;padding-top:2px}
+  .pv-st .pv-dot{grid-area:d}
+  .pv-st-p{grid-area:p}
+  .pv-st-go{grid-area:g;border-top:0;margin-top:0;justify-self:start}
+  .pv-st .pv-sub{grid-area:s;margin:-4px 0 -12px;justify-self:start}
+}
+/* looking for funding now */
+.pv-up{background:#FFFFFF;border:1px solid var(--pv-line);border-radius:6px;padding:20px 22px 8px}
+.pv-up-list{margin-top:10px !important}
+.pv-up-list li{display:flex;align-items:center;justify-content:space-between;gap:6px 20px;flex-wrap:wrap;padding:10px 0;border-top:1px solid var(--pv-line)}
+.pv-up-list li:first-child{border-top:0}
+.pv-up-t{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1 1 220px}
+.pv-up-n{font-size:15px;font-weight:700;color:var(--pv-ink) !important;text-decoration:none;display:inline-flex;align-items:center;min-height:28px}
+.pv-up-n:hover{color:var(--pv-blue2) !important;text-decoration:underline;text-underline-offset:3px}
+.pv-up-c{font-size:13px;color:var(--pv-mut)}
+.pv-up-need{font-size:14px;font-weight:700;color:var(--pv-fut);white-space:nowrap}
+.pv-up-tbc{font-size:14px;font-weight:500;color:var(--pv-mut);white-space:nowrap}
+.pv-up-msg{font-size:14px;color:var(--pv-mut);padding:10px 0}
+.pv-up > .pv-go{border-top:1px solid var(--pv-line);width:100%;margin-top:4px}
+/* ledger */
+.pv-led{background:#FFFFFF;border:1px solid var(--pv-line);border-radius:6px;padding:8px 24px 12px;margin-top:8px}
+.pv-led-hd,.pv-led-r{display:grid;grid-template-columns:minmax(0,1fr) 110px 110px 130px 24px;align-items:center;column-gap:12px}
+.pv-led-hd{padding:14px 0 12px;border-bottom:1px solid var(--pv-ink);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--pv-mut2)}
+.pv-led-g + .pv-led-g{border-top:1px solid var(--pv-ink)}
+.pv-led-gh{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-top:8px}
+.pv-led-gh .pv-go{font-size:13px;min-height:40px}
+.pv-led-rows li + li{border-top:1px solid var(--pv-line)}
+.pv-led-r{min-height:56px;padding:8px 0;text-decoration:none;color:var(--pv-ink) !important;transition:background .2s}
+.pv-led-r b{font-size:15px;font-weight:600}
+.pv-led-c{font-size:15px;font-variant-numeric:tabular-nums;color:var(--pv-ink)}
+.pv-led-m{display:none}
+.pv-led-r i{font-style:normal;color:var(--pv-blue2);font-weight:700;text-align:right;transition:transform .2s}
+.pv-led-r:hover{background:#F5F9FD}
+.pv-led-r:hover b{color:var(--pv-blue2)}
+.pv-led-r:hover i{transform:translateX(3px)}
+@media (max-width:760px){
+  .pv-led{padding:6px 18px 8px}
+  .pv-led-hd{display:none}
+  .pv-led-g + .pv-led-g{border-top:1px solid var(--pv-ink);margin-top:4px}
+  .pv-led-r{grid-template-columns:minmax(0,1fr) 20px;grid-template-areas:"n i" "m i";row-gap:2px;padding:12px 0}
+  .pv-led-r b{grid-area:n}
+  .pv-led-c{display:none}
+  .pv-led-m{display:block;grid-area:m;font-size:13px;line-height:1.45;color:var(--pv-mut)}
+  .pv-led-r i{grid-area:i}
+}
+/* countries */
+.pv-cty{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px}
+.pv-cty-it{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:4px;min-width:0}
+.pv-cty-ph{width:100%;aspect-ratio:4/3;border-radius:4px;overflow:hidden;background:#E3F1FC;margin-bottom:10px}
+.pv-cty-ph img{display:block;width:100%;height:100%;object-fit:cover;transition:transform .5s cubic-bezier(.2,.7,.2,1)}
+.pv-cty-it:hover .pv-cty-ph img{transform:scale(1.04)}
+.pv-cty-n{font-size:17px;font-weight:700;color:var(--pv-ink)}
+.pv-cty-s{font-size:13px;line-height:1.45;color:var(--pv-mut);min-height:1.45em}
+.pv-cty-go{display:block !important;min-height:0 !important;padding:4px 0 6px;font-size:14px;line-height:1.4}
+.pv-cty-go span{display:inline-block;margin-left:6px}
+.pv-cty-go::after{content:"";position:absolute;inset:0}
+.pv-cty .pv-sub{font-size:13px;margin-top:-8px}
+@media (max-width:900px){.pv-cty{grid-template-columns:repeat(2,minmax(0,1fr));gap:24px 16px}}
+/* donors */
+.pv-donors{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,420px);gap:clamp(32px,6vw,96px);align-items:start;padding:clamp(8px,2vw,24px) 0 clamp(56px,7vw,96px)}
+.pv-dn-main{display:flex;flex-direction:column;align-items:flex-start;gap:14px;min-width:0}
+.pv-dn-main .pv-h2{font-size:clamp(26px,2.9vw,36px)}
+.pv-dn-list{align-self:stretch;max-width:560px;margin-top:8px !important;border-bottom:1px solid var(--pv-line)}
+.pv-dn-list li{padding:14px 0;border-top:1px solid var(--pv-line);font-size:15px;font-weight:600;color:var(--pv-ink)}
+.pv-give{border-radius:6px;overflow:hidden;background:var(--pv-blue2);color:#FFFFFF}
+.pv-give-ph{aspect-ratio:16/10;background:#C9E4F8}
+.pv-give-ph img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 35%}
+.pv-give-b{padding:24px 24px 28px;display:flex;flex-direction:column;align-items:flex-start;gap:4px}
+.pv-give-k{font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#FFFFFF;opacity:.9}
+.pv-give-n{font-size:clamp(34px,3.4vw,44px);font-weight:700;line-height:1.1;letter-spacing:-.02em;color:#FFFFFF !important;margin-top:4px !important}
+.pv-give-t{font-size:16px;color:#FFFFFF !important}
+.pv-give-s{font-size:14px;color:#FFFFFF !important;opacity:.92;margin-top:6px !important}
+.pv-give .pv-btn{margin-top:16px;min-width:96px}
+@media (max-width:860px){.pv-donors{grid-template-columns:minmax(0,1fr)}.pv-dn-list{max-width:none}}
+
+/* ---------- all projects ---------- */
+html main.pj-main{padding-top:124px !important}
+@media (max-width:999px){html main.pj-main{padding-top:104px !important}}
+.pj-main > .pv-list,.pj-main > .pv-d{width:100%;min-width:0}
+.pv-lh{display:flex;flex-direction:column;gap:14px;padding-bottom:clamp(24px,3vw,36px)}
+.pv-lh-row{display:flex;align-items:flex-end;justify-content:space-between;gap:12px 32px;flex-wrap:wrap}
+.pv-lh .pv-lead{max-width:40em}
+.pv-lh .pv-go{white-space:nowrap}
+.pv-miss{margin:0 0 20px !important;padding:14px 18px;background:#FFF6E5;border:1px solid #F1DDB4;border-radius:6px;font-size:15px;color:#5A3A00}
+.pv-tabs{display:flex;flex-wrap:wrap;gap:0 28px;border-bottom:1px solid var(--pv-line)}
+.pv-tab{flex:none;display:inline-flex;align-items:baseline;gap:6px;min-height:46px;padding:12px 0 10px;background:none;border:0;border-bottom:3px solid transparent;margin-bottom:-1px;font:inherit;font-size:15px;font-weight:500;color:var(--pv-mut2);cursor:pointer;white-space:nowrap}
+.pv-tab small{font-size:12px;font-weight:500;color:var(--pv-mut)}
+.pv-tab:hover{color:var(--pv-blue2)}
+.pv-tab.on{color:var(--pv-blue2);font-weight:700;border-bottom-color:var(--pv-blue2)}
+.pv-tab.on small{color:var(--pv-blue2)}
+.pv-kinds{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.pv-kind{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--pv-line);background:#FFFFFF;font:inherit;font-size:14px;font-weight:500;color:var(--pv-mut2);cursor:pointer}
+.pv-kind small{font-size:12px;color:var(--pv-mut)}
+.pv-kind.on{border-color:var(--pv-blue2);color:var(--pv-blue2);font-weight:700;background:#F0F7FD}
+.pv-find{display:flex;flex-wrap:wrap;gap:12px;margin-top:18px}
+.pv-search{position:relative;flex:1 1 320px;min-width:0;display:flex;align-items:center}
+.pv-search svg{position:absolute;left:16px;color:var(--pv-mut);pointer-events:none}
+.pv-search input{width:100%;min-height:48px;padding:0 16px 0 44px;border:1px solid #D9D3C6;border-radius:6px;background:#FFFFFF;font:inherit;font-size:15px;color:var(--pv-ink);-webkit-appearance:none;appearance:none}
+.pv-search input::placeholder{color:#7A8086}
+.pv-search input:focus{outline:2px solid var(--pv-blue);outline-offset:1px;border-color:var(--pv-blue)}
+.pv-sels{display:flex;flex-wrap:wrap;gap:12px}
+.pv-sel{position:relative;display:flex;align-items:center;min-height:48px;border:1px solid #D9D3C6;border-radius:6px;background:#FFFFFF;padding:0 34px 0 14px;font-size:15px;min-width:0}
+.pv-sel:focus-within{outline:2px solid var(--pv-blue);outline-offset:1px;border-color:var(--pv-blue)}
+.pv-sel label{color:var(--pv-mut);font-weight:500;white-space:nowrap;margin-right:4px}
+.pv-sel label::after{content:":"}
+.pv-sel select{-webkit-appearance:none;appearance:none;border:0;background:transparent;font:inherit;font-size:15px;font-weight:700;color:var(--pv-ink);padding:0;min-height:46px;cursor:pointer;outline:0;max-width:100%;text-overflow:ellipsis}
+.pv-sel::after{content:"";position:absolute;right:14px;top:50%;width:7px;height:7px;border-right:2px solid var(--pv-mut2);border-bottom:2px solid var(--pv-mut2);transform:translateY(-70%) rotate(45deg);pointer-events:none}
+.pv-ftog{display:none}
+.pv-bsub{display:none}
+html .pv-d .pv-d-h1:focus{outline:none !important}
+.pv-sum{display:flex;align-items:center;justify-content:space-between;gap:8px 20px;flex-wrap:wrap;margin-top:18px}
+.pv-sumt{font-size:15px;font-weight:700;color:var(--pv-ink)}
+.pv-count{font-size:14px;color:var(--pv-mut)}
+.pv-act{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:12px}
+.pv-x{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 10px 0 12px;border:1px solid var(--pv-line);border-radius:999px;background:#FFFFFF;font:inherit;font-size:13px;color:var(--pv-ink);cursor:pointer}
+.pv-x small{font-size:12px;color:var(--pv-mut)}
+.pv-x:hover{border-color:var(--pv-blue2)}
+.pv-reset{min-height:36px;border:0;background:none;font:inherit;font-size:13px;font-weight:700;color:var(--pv-blue2);text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:0 6px}
+.pv-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:40px 24px;margin-top:24px}
+.pv-card{display:flex;flex-direction:column;text-decoration:none;color:var(--pv-ink) !important;border-bottom:1px solid var(--pv-line);padding-bottom:16px;min-width:0}
+.pv-card-ph{position:relative;aspect-ratio:10/7;border-radius:4px;overflow:hidden;background:#E3F1FC}
+.pv-card-ph img{display:block;width:100%;height:100%;object-fit:cover;transition:transform .5s cubic-bezier(.2,.7,.2,1)}
+.pv-card:hover .pv-card-ph img{transform:scale(1.03)}
+.pv-noph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--pv-blue2);font-size:14px;font-weight:500;text-align:center;padding:12px}
+.pv-card-b{display:flex;flex-direction:column;gap:6px;padding-top:16px;flex:1}
+.pv-card-k{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--pv-blue2);line-height:1.4}
+.pv-card-t{font-size:19px;font-weight:700;line-height:1.3;letter-spacing:-.01em;color:var(--pv-ink)}
+.pv-card:hover .pv-card-t{color:var(--pv-blue2)}
+.pv-card-m{font-size:14px;color:var(--pv-mut);line-height:1.45}
+.pv-card-f{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px 12px;margin-top:auto;padding-top:6px}
+.pv-card-p{font-size:13px;font-weight:600;color:var(--pv-ink)}
+.pv-skel .pv-card-ph{animation:pvPulse 1.4s ease-in-out infinite}
+.pv-skel i{display:block;height:12px;border-radius:3px;background:#ECE7DC;animation:pvPulse 1.4s ease-in-out infinite}
+.pv-skel i:nth-child(2){height:18px;width:80%}.pv-skel i:nth-child(3){width:60%}
+@keyframes pvPulse{50%{opacity:.55}}
+@media (prefers-reduced-motion:reduce){.pv-skel .pv-card-ph,.pv-skel i{animation:none}}
+.pv-more{display:flex;flex-direction:column;align-items:center;gap:10px;margin:48px 0 8px}
+.pv-more small{font-size:14px;color:var(--pv-mut)}
+.pv-empty{background:#FFFFFF;border:1px solid var(--pv-line);border-radius:6px;padding:28px 24px;margin-top:24px;text-align:center;font-size:15px;color:var(--pv-mut2);display:flex;flex-direction:column;align-items:center;gap:12px}
+.pv-empty b{color:var(--pv-ink)}
+.pv-list-end{height:clamp(48px,6vw,88px)}
+@media (max-width:1100px){.pv-search{flex-basis:100%}}
+@media (max-width:900px){.pv-tab.sub{display:none}.pv-tab.on-m{color:var(--pv-blue2);font-weight:700;border-bottom-color:var(--pv-blue2)}.pv-tab.on-m small{color:var(--pv-blue2)}.pv-bsub{display:flex}}
+@media (max-width:980px){.pv-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){
+  .pv-lh .pv-lead{font-size:16px}
+  .pv-tabs{gap:0 20px}
+  .pv-find{gap:10px}
+  .pv-ftog{display:flex;flex:1 1 0;min-width:0;align-items:center;justify-content:center;gap:8px;min-height:48px;border:1px solid #D9D3C6;border-radius:6px;background:#FFFFFF;font:inherit;font-size:15px;font-weight:700;color:var(--pv-ink);cursor:pointer;padding:0 12px}
+  .pv-ftog::after{content:"";width:6px;height:6px;border-right:2px solid var(--pv-mut2);border-bottom:2px solid var(--pv-mut2);transform:translateY(-2px) rotate(45deg)}
+  .pv-ftog[aria-expanded="true"]::after{transform:translateY(2px) rotate(-135deg)}
+  .pv-sels{flex:1 1 100%;display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:10px}
+  .pv-sel{padding:0 30px 0 12px}
+  .pv-sel::after{right:12px}
+  .pv-sels .pv-sel{display:none}
+  .pv-sels.open .pv-sel{display:flex}
+  .pv-sels .pv-sel.sort{display:flex;grid-column:2;grid-row:1}
+  .pv-sels .pv-ftog{grid-column:1;grid-row:1}
+  .pv-sels.open .pv-sel:not(.sort){grid-column:1 / -1}
+  .pv-sel.sort label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .pv-sel.sort{justify-content:center}
+  .pv-sel select{flex:1;min-width:0}
+  .pv-sum{margin-top:14px}
+  .pv-count{display:none}
+  .pv-grid{grid-template-columns:minmax(0,1fr);gap:0;margin-top:12px;border-top:1px solid var(--pv-line)}
+  .pv-card{flex-direction:row;align-items:flex-start;gap:14px;padding:16px 0}
+  .pv-card-ph{flex:none;width:clamp(88px,27vw,112px);aspect-ratio:5/4}
+  .pv-noph{font-size:0;gap:0}
+  .pv-noph svg{width:26px;height:26px}
+  .pv-card-b{padding-top:0;gap:4px}
+  .pv-card-t{font-size:16px}
+  .pv-card-m,.pv-card-p{display:none}
+  .pv-card-f{padding-top:2px}
+  .pv-more{margin-top:28px}
+  .pv-more .pv-btn{width:100%}
+}
+@media (max-width:380px){.pv-tabs{gap:0 14px}.pv-tab{font-size:14px}.pv-tab small{font-size:11px}}
+
+/* ---------- one project ---------- */
+.pv-d{padding-top:0}
+.pv-d-top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.pv-d-nav{display:flex;gap:4px 18px}
+.pv-tb{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0;border:0;background:none;font:inherit;font-size:14px;font-weight:600;color:var(--pv-mut2);cursor:pointer}
+.pv-tb:hover{color:var(--pv-blue2)}
+.pv-tb.back{color:var(--pv-blue2);font-weight:700}
+.pv-d-head{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:16px 32px;margin-top:clamp(12px,2vw,24px)}
+.pv-d-ht{display:flex;flex-direction:column;align-items:flex-start;gap:12px;min-width:0}
+.pv-d-h1{font-size:clamp(30px,4.4vw,52px);line-height:1.06;font-weight:800;letter-spacing:-.03em;color:var(--pv-ink);max-width:16em;outline:0}
+.pv-d-place{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;font-size:16px;color:var(--pv-mut2)}
+.pv-badge{display:inline-flex;align-items:center;min-height:26px;padding:0 10px;border-radius:999px;font-size:12px !important}
+.pv-badge.ok{background:#E5F3EA}.pv-badge.uw{background:#E3F1FC}.pv-badge.fu{background:#FBF0DD}
+.pv-share{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.pv-shmsg{font-size:13px;color:var(--pv-mut2);min-height:1.2em;max-width:22em;text-align:right;overflow-wrap:anywhere}
+.pv-shmsg:empty{display:none}
+.pv-shbtn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:0 22px;border-radius:999px;border:1.5px solid var(--pv-blue2);background:transparent;font:inherit;font-size:15px;font-weight:700;color:var(--pv-blue2);cursor:pointer;white-space:nowrap}
+.pv-shbtn:hover{background:#E3F1FC}
+.pv-gal{display:grid;grid-template-columns:minmax(0,2.6fr) minmax(0,1fr);grid-template-rows:1fr 1fr;gap:14px;margin-top:clamp(20px,2.6vw,28px);aspect-ratio:2.25/1}
+.pv-gal.n1{grid-template-columns:minmax(0,1fr);grid-template-rows:1fr;aspect-ratio:2.25/1}
+.pv-gal.n2{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:1fr}
+.pv-gal button{position:relative;display:block;width:100%;height:100%;padding:0;border:0;border-radius:4px;overflow:hidden;background:#E3F1FC;cursor:zoom-in;min-width:0;min-height:0}
+.pv-gal button:first-child{grid-row:1 / -1}
+.pv-gal button:nth-child(4){display:none}
+.pv-gal img{display:block;width:100%;height:100%;object-fit:cover;transition:transform .5s cubic-bezier(.2,.7,.2,1)}
+.pv-gal button:hover img{transform:scale(1.02)}
+.pv-gal-cap{display:flex;flex-wrap:wrap;align-items:center;gap:0 8px;margin-top:6px !important;font-size:13px;color:var(--pv-mut)}
+.pv-gal-cap button{border:0;background:none;padding:0;min-height:40px;font:inherit;font-size:13px;font-weight:700;color:var(--pv-blue2);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.pv-d-noph{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;aspect-ratio:3/1;margin-top:clamp(20px,2.6vw,28px);border-radius:4px;background:#E3F1FC;color:var(--pv-blue2);font-size:15px;font-weight:500;text-align:center;padding:16px}
+.pv-d-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,400px);gap:clamp(32px,5vw,64px);align-items:start;margin-top:clamp(36px,4.4vw,56px)}
+.pv-d-main{display:flex;flex-direction:column;gap:20px;min-width:0}
+.pv-d-main > * + .pv-d-h3{padding-top:24px;border-top:1px solid var(--pv-line)}
+.pv-d-h2{font-size:clamp(24px,2.4vw,30px);font-weight:700;letter-spacing:-.02em;line-height:1.2;color:var(--pv-ink)}
+.pv-d-h3{font-size:19px;font-weight:700;color:var(--pv-ink)}
+.pv-d-p{font-size:17px;line-height:1.7;color:var(--pv-mut2)}
+.pv-q{margin:0;padding:4px 0 4px 18px;border-left:3px solid var(--pv-blue);font-size:18px;line-height:1.6;font-weight:500;color:var(--pv-ink)}
+.pv-q cite{display:block;margin-top:8px;font-size:14px;font-style:normal;font-weight:600;color:var(--pv-mut)}
+.pv-after{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.pv-after img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:4px;background:#E3F1FC}
+.pv-full{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:2px 16px;padding:16px 20px;border:1px solid var(--pv-line);border-radius:6px;background:#FFFFFF;text-decoration:none;color:var(--pv-ink) !important}
+.pv-full span{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--pv-blue2)}
+.pv-full b{grid-column:1;font-size:16px}
+.pv-full i{grid-column:2;grid-row:1 / span 2;font-style:normal;font-weight:700;color:var(--pv-blue2)}
+.pv-full:hover{border-color:var(--pv-blue2)}
+.pv-steps{position:relative;display:flex;flex-direction:column;gap:18px}
+.pv-step{position:relative;display:grid;grid-template-columns:22px minmax(0,1fr);column-gap:14px;align-items:start}
+.pv-step::before{content:"";position:absolute;left:10px;top:24px;bottom:-18px;width:2px;background:var(--pv-line)}
+.pv-step:last-child::before{display:none}
+.pv-step.done::before{background:var(--pv-ok)}
+.pv-step-i{width:22px;height:22px;border-radius:50%;border:2px solid #CFC8B9;background:#FFFFFF;display:flex;align-items:center;justify-content:center;margin-top:1px;position:relative;z-index:1}
+.pv-step.done .pv-step-i{background:var(--pv-ok);border-color:var(--pv-ok)}
+.pv-step.done .pv-step-i::after{content:"";width:5px;height:9px;border-right:2px solid #FFFFFF;border-bottom:2px solid #FFFFFF;transform:translateY(-1px) rotate(45deg)}
+.pv-step.now .pv-step-i{border-color:var(--pv-blue);box-shadow:0 0 0 4px #E3F1FC}
+.pv-step.now .pv-step-i::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--pv-blue)}
+.pv-step b{font-size:16px;font-weight:700;color:var(--pv-ink);line-height:1.4}
+.pv-step.next b{color:var(--pv-mut);font-weight:600}
+.pv-step small{display:block;font-size:13px;color:var(--pv-mut);margin-top:2px}
+.pv-d-side{display:flex;flex-direction:column;gap:20px;min-width:0}
+.pv-glance{background:#FFFFFF;border:1px solid var(--pv-line);border-radius:6px;padding:20px 22px 8px}
+.pv-glance dl{margin-top:8px !important}
+.pv-glance dl > div{display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding:12px 0;border-top:1px solid var(--pv-line)}
+.pv-glance dl > div:first-child{border-top:0}
+.pv-glance dt{font-size:14px;color:var(--pv-mut);flex:none;max-width:48%}
+.pv-glance dd{font-size:15px;font-weight:700;color:var(--pv-ink);text-align:right;min-width:0}
+.pv-glance dd.pv-dot{font-size:15px;justify-content:flex-end}
+.pv-sponsor{background:var(--pv-blue2);color:#FFFFFF;border-radius:6px;padding:26px 24px;display:flex;flex-direction:column;align-items:flex-start;gap:16px}
+.pv-sponsor h2{font-size:21px;font-weight:700;line-height:1.3;color:#FFFFFF}
+.pv-dm{margin-top:clamp(56px,7vw,96px)}
+.pv-dm-h{display:flex;align-items:flex-end;justify-content:space-between;gap:8px 24px;flex-wrap:wrap}
+.pv-dm-h p{margin-top:6px !important}
+.pv-dm-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;margin-top:20px}
+.pv-dm-grid .pv-card{border-bottom:0;padding-bottom:0}
+.pv-dm-grid .pv-card-t{font-size:17px}
+.pv-d-end{height:clamp(56px,7vw,96px)}
+@media (max-width:900px){
+  .pv-d-grid{grid-template-columns:minmax(0,1fr)}
+  .pv-d-side{display:contents}
+  .pv-glance{order:-1}
+  .pv-d-grid > .pv-d-main{order:0}
+  .pv-sponsor{order:1}
+  .pv-dm-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .pv-dm-grid > :nth-child(3){display:none}
+}
+@media (max-width:700px){
+  .pv-d-head{grid-template-columns:minmax(0,1fr)}
+  .pv-share{align-items:stretch;order:3}
+  .pv-shmsg{text-align:left}
+  .pv-shbtn{width:100%}
+  .pv-gal,.pv-gal.n2{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:auto auto;aspect-ratio:auto;gap:8px}
+  .pv-gal button{aspect-ratio:4/3}
+  .pv-gal button:first-child{grid-row:auto;grid-column:1 / -1;aspect-ratio:3/2}
+  .pv-gal.n1 button:first-child{aspect-ratio:3/2}
+  .pv-gal button:nth-child(4){display:block}
+  .pv-gal.n2{grid-template-columns:minmax(0,1fr)}
+  .pv-gal.n2 button{aspect-ratio:3/2}
+  .pv-gal.n3{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .pv-d-noph{aspect-ratio:3/2}
+  .pv-d-p{font-size:16px}
+  .pv-after{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:640px){.pv-dm-grid{grid-template-columns:minmax(0,1fr);gap:0;border-top:1px solid var(--pv-line)}.pv-dm-grid > :nth-child(3){display:flex}.pv-dm-grid .pv-card{border-bottom:1px solid var(--pv-line);padding:14px 0}.pv-dm-grid .pv-card-t{font-size:16px}}
+/* photo viewer */
+.pv-viewer{position:fixed;inset:0;z-index:300;background:rgba(6,14,22,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:56px 16px 16px;font-family:Montserrat,system-ui,sans-serif;color:#FFFFFF}
+.pv-viewer figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:12px;max-width:100%;max-height:100%;min-height:0}
+.pv-viewer img{display:block;max-width:min(1200px,100%);max-height:calc(100vh - 150px);max-height:calc(100dvh - 150px);object-fit:contain;border-radius:4px;background:#0E1C28}
+.pv-viewer figcaption{font-size:14px;color:#E6EEF5;text-align:center}
+.pv-vx{position:absolute;top:10px;right:10px;width:48px;height:48px;border-radius:50%;border:0;background:rgba(255,255,255,.12);color:#FFFFFF;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.pv-vn{display:flex;gap:12px;margin-top:4px}
+.pv-vn button{min-height:46px;min-width:110px;padding:0 18px;border-radius:999px;border:1.5px solid rgba(255,255,255,.6);background:transparent;color:#FFFFFF;font:inherit;font-size:15px;font-weight:700;cursor:pointer}
+.pv-vn button:hover,.pv-vx:hover{background:rgba(255,255,255,.2)}
+.pv-viewer :focus-visible{outline-color:#FFFFFF}
+html.pv-lock,html.pv-lock body{overflow:hidden}
+</style>
 </head>
 <body>
 <x-dc>
@@ -1208,53 +1595,56 @@ a.pj-card{text-decoration:none}
 </header>
 </div>
 <div class="hd-space" aria-hidden="true"></div>
-<sc-if value="{{listView}}" hint-placeholder-val="{{true}}"><section class="xh" aria-label="All projects"><div class="wrap xh-in"><nav class="xh-crumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><a href="/projects">Our projects</a><span aria-hidden="true">/</span><span>All projects</span></nav><h1 class="xh-h1">Every well, and beyond</h1><p class="xh-p">Browse every project RAFIKI has built with communities. Water comes first: borehole wells and water collection. Beyond the well, we also build schools, clinics, children's homes and livelihood projects. Each one shows where it is, its status, when it was built and photos.</p><div class="xh-row"><span class="xh-note">Showing projects in <b>{{cName}}</b></span></div><a class="pj-link" href="/progress">See our progress in numbers →</a></div></section></sc-if>
 <main tabindex="-1" class="wrap pj-main" id="top">
-<sc-if value="{{listView}}" hint-placeholder-val="{{true}}">
-<sc-if value="{{missing}}" hint-placeholder-val="{{false}}"><p class="pj-miss" role="status">We couldn't find that project. You can browse all our projects below.</p></sc-if>
-<sc-if value="{{showBar}}" hint-placeholder-val="{{true}}"><section class="pj-bar" aria-label="Find a project">
-<div class="pj-row1">
-<div class="pj-search"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg><label for="pj-q" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Search projects</label><input id="pj-q" type="search" placeholder="Search by project name or place" value="{{q}}" onChange="{{onQ}}"></div>
-<div class="pj-sel"><label for="pj-country">Country</label><select id="pj-country" value="{{ctryVal}}" onChange="{{onCountry}}"><sc-for list="{{ctryOpts}}" as="o" hint-placeholder-count="5"><option value="{{o.v}}">{{o.l}}</option></sc-for></select></div>
-<div class="pj-sel"><label for="pj-status">Status</label><select id="pj-status" value="{{status}}" onChange="{{onStatus}}"><sc-for list="{{statusOpts}}" as="o" hint-placeholder-count="4"><option value="{{o.v}}">{{o.l}}</option></sc-for></select></div>
-<div class="pj-sel"><label for="pj-year">Year</label><select id="pj-year" value="{{year}}" onChange="{{onYear}}"><sc-for list="{{yearOpts}}" as="o" hint-placeholder-count="6"><option value="{{o.v}}">{{o.l}}</option></sc-for></select></div>
-<sc-if value="{{showPump}}" hint-placeholder-val="{{false}}"><div class="pj-sel"><label for="pj-pump">Pump</label><select id="pj-pump" value="{{pump}}" onChange="{{onPump}}"><sc-for list="{{pumpOpts}}" as="o" hint-placeholder-count="4"><option value="{{o.v}}">{{o.l}}</option></sc-for></select></div></sc-if>
-<div class="pj-sel"><label for="pj-sort">Sort</label><select id="pj-sort" value="{{sort}}" onChange="{{onSort}}"><option value="new">Newest first</option><option value="old">Oldest first</option></select></div>
+<sc-if value="{{listView}}" hint-placeholder-val="{{true}}"><div class="pv-list">
+<header class="pv-lh"><nav class="pv-crumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><a href="/projects">Our projects</a><span aria-hidden="true">/</span><span aria-current="page">All projects</span></nav><h1 class="pv-h1">All projects</h1><div class="pv-lh-row"><p class="pv-lead">Browse every project RAFIKI has built with communities. Water comes first: borehole wells and water collection. Beyond the well, we also build schools, clinics, children's homes and livelihood projects. Each one shows where it is, its status, when it was built and photos.</p><a class="pv-go" href="/progress">See our progress in numbers<span aria-hidden="true">→</span></a></div></header>
+<sc-if value="{{missing}}" hint-placeholder-val="{{false}}"><p class="pv-miss" role="status">We couldn't find that project. You can browse all our projects below.</p></sc-if>
+<sc-if value="{{showBar}}" hint-placeholder-val="{{true}}"><section class="pv-bar" aria-label="Find a project">
+<div class="pv-tabs" role="group" aria-label="Kind of project"><sc-for list="{{groupChips}}" as="c" hint-placeholder-count="7"><button type="button" class="{{c.cls}}" aria-pressed="{{c.pressed}}" onClick="{{c.pick}}">{{c.l}}<small>{{c.n}}</small></button></sc-for></div>
+<sc-if value="{{showBeyond}}" hint-placeholder-val="{{false}}"><div class="pv-kinds pv-bsub" role="group" aria-label="Beyond the well"><sc-for list="{{beyondChips}}" as="c" hint-placeholder-count="5"><button type="button" class="{{c.cls}}" aria-pressed="{{c.pressed}}" onClick="{{c.pick}}">{{c.l}}<small>{{c.n}}</small></button></sc-for></div></sc-if><sc-if value="{{showKinds}}" hint-placeholder-val="{{false}}"><div class="pv-kinds" role="group" aria-label="Kind of water project"><sc-for list="{{kindChips}}" as="c" hint-placeholder-count="3"><button type="button" class="{{c.cls}}" aria-pressed="{{c.pressed}}" onClick="{{c.pick}}">{{c.l}}<small>{{c.n}}</small></button></sc-for></div></sc-if>
+<div class="pv-find">
+<div class="pv-search"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg><label for="pj-q" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Search projects</label><input id="pj-q" type="search" placeholder="Search by name or place" value="{{q}}" onChange="{{onQ}}"></div>
+<div class="{{selsCls}}"><button type="button" class="pv-ftog" aria-expanded="{{fExpanded}}" aria-controls="pv-filters" onClick="{{toggleF}}">{{fLabel}}</button><div class="pv-sel"><label for="pj-country">Country</label><select id="pj-country" value="{{ctryVal}}" onChange="{{onCountry}}"><sc-for list="{{ctryOpts}}" as="o" hint-placeholder-count="5"><option value="{{o.v}}">{{o.l}}</option></sc-for></select></div><div class="pv-sel"><label for="pj-status">Status</label><select id="pj-status" value="{{status}}" onChange="{{onStatus}}"><sc-for list="{{statusOpts}}" as="o" hint-placeholder-count="4"><option value="{{o.v}}">{{o.l}}</option></sc-for></select></div><div class="pv-sel"><label for="pj-year">Year</label><select id="pj-year" value="{{year}}" onChange="{{onYear}}"><sc-for list="{{yearOpts}}" as="o" hint-placeholder-count="6"><option value="{{o.v}}">{{o.l}}</option></sc-for></select></div><sc-if value="{{showPump}}" hint-placeholder-val="{{false}}"><div class="pv-sel"><label for="pj-pump">Pump</label><select id="pj-pump" value="{{pump}}" onChange="{{onPump}}"><sc-for list="{{pumpOpts}}" as="o" hint-placeholder-count="4"><option value="{{o.v}}">{{o.l}}</option></sc-for></select></div></sc-if><div class="pv-sel sort"><label for="pj-sort">Sort</label><select id="pj-sort" value="{{sort}}" onChange="{{onSort}}"><option value="new">Newest first</option><option value="old">Oldest first</option></select></div></div>
 </div>
-<div class="pj-chips" role="group" aria-label="Kind of project"><sc-for list="{{groupChips}}" as="c" hint-placeholder-count="7"><button type="button" class="{{c.cls}}" aria-pressed="{{c.pressed}}" onClick="{{c.pick}}">{{c.l}}<span class="pj-n">{{c.n}}</span></button></sc-for></div>
-<sc-if value="{{showKinds}}" hint-placeholder-val="{{false}}"><div class="pj-chips pj-sub" role="group" aria-label="Kind of water project"><sc-for list="{{kindChips}}" as="c" hint-placeholder-count="3"><button type="button" class="{{c.cls}}" aria-pressed="{{c.pressed}}" onClick="{{c.pick}}">{{c.l}}<span class="pj-n">{{c.n}}</span></button></sc-for></div></sc-if>
-<div class="pj-sum">
-<p class="pj-sumt" role="status" aria-live="polite"><sc-if value="{{loading}}" hint-placeholder-val="{{false}}">Loading projects…</sc-if><sc-if value="{{hasCount}}" hint-placeholder-val="{{true}}">{{summary}}</sc-if></p>
-<sc-if value="{{hasCount}}" hint-placeholder-val="{{true}}"><span class="pj-count">Showing <b>{{shown}}</b> of <b>{{matched}}</b></span></sc-if>
-<sc-if value="{{hasActive}}" hint-placeholder-val="{{false}}"><div class="pj-act" role="group" aria-label="Active filters"><sc-for list="{{activeChips}}" as="a" hint-placeholder-count="2"><button type="button" class="pj-x" onClick="{{a.remove}}" aria-label="{{a.aria}}"><small>{{a.k}}</small><b>{{a.v}}</b><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></sc-for><button type="button" class="pj-reset" onClick="{{reset}}">Show all projects</button></div></sc-if>
+<div class="pv-sum">
+<p class="pv-sumt" role="status" aria-live="polite"><sc-if value="{{loading}}" hint-placeholder-val="{{false}}">Loading projects…</sc-if><sc-if value="{{hasCount}}" hint-placeholder-val="{{true}}">{{summary}}</sc-if></p>
+<sc-if value="{{hasCount}}" hint-placeholder-val="{{true}}"><span class="pv-count">Showing {{shown}} of {{matched}}</span></sc-if>
 </div>
+<sc-if value="{{hasActive}}" hint-placeholder-val="{{false}}"><div class="pv-act" role="group" aria-label="Active filters"><sc-for list="{{activeChips}}" as="a" hint-placeholder-count="2"><button type="button" class="pv-x" onClick="{{a.remove}}" aria-label="{{a.aria}}"><small>{{a.k}}</small><b>{{a.v}}</b><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></sc-for><button type="button" class="pv-reset" onClick="{{reset}}">Show all projects</button></div></sc-if>
 </section></sc-if>
-<sc-if value="{{loading}}" hint-placeholder-val="{{false}}"><section class="pj-grid" aria-label="Loading projects" aria-busy="true"><sc-for list="{{skeletons}}" as="k" hint-placeholder-count="6"><div class="pj-card pj-skel" aria-hidden="true"><div class="pj-card-ph"></div><div class="pj-card-b"><i></i><i></i><i></i></div></div></sc-for></section></sc-if>
-<sc-if value="{{feedDown}}" hint-placeholder-val="{{false}}"><div class="pj-empty" role="status"><p style="margin:0;font-weight:700">The project list could not be loaded just now.</p><p style="margin:8px 0 0">Our projects come straight from our project records. Please try again in a few minutes.</p><button type="button" onClick="{{retry}}">Try again</button></div></sc-if>
+<sc-if value="{{loading}}" hint-placeholder-val="{{false}}"><section class="pv-grid" aria-label="Loading projects" aria-busy="true"><sc-for list="{{skeletons}}" as="k" hint-placeholder-count="6"><div class="pv-card pv-skel" aria-hidden="true"><div class="pv-card-ph"></div><div class="pv-card-b"><i></i><i></i><i></i></div></div></sc-for></section></sc-if>
+<sc-if value="{{feedDown}}" hint-placeholder-val="{{false}}"><div class="pv-empty" role="status"><b>The project list could not be loaded just now.</b><span>Our projects come straight from our project records. Please try again in a few minutes.</span><button type="button" class="pv-btn" onClick="{{retry}}">Try again</button></div></sc-if>
 <sc-if value="{{hasResults}}" hint-placeholder-val="{{true}}">
-<section class="pj-grid" aria-label="Projects">
-<sc-for list="{{cards}}" as="p" hint-placeholder-count="9"><a class="pj-card" href="{{p.href}}" onClick="{{p.open}}" aria-label="{{p.aria}}"><div class="pj-card-ph"><sc-if value="{{p.hasImg}}" hint-placeholder-val="{{true}}"><img src="{{p.img}}" srcset="{{p.srcset}}" sizes="(max-width:900px) calc(100vw - 32px), (max-width:1100px) 50vw, 460px" alt="{{p.alt}}" width="480" height="320" loading="lazy" decoding="async"></sc-if><sc-if value="{{p.noImg}}" hint-placeholder-val="{{false}}"><div class="pj-noph" aria-hidden="true"><sc-if value="{{p.water}}" hint-placeholder-val="{{true}}"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2c3.3 4 5.6 7.3 5.6 10.3a5.6 5.6 0 01-11.2 0c0-3 2.3-6.3 5.6-10.3z"></path></svg></sc-if><sc-if value="{{p.notWater}}" hint-placeholder-val="{{false}}"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"></path><path d="M5 9.5V20h14V9.5"></path><path d="M10 20v-6h4v6"></path></svg></sc-if></div></sc-if><div class="pj-ba"><span class="{{p.stCls}}">{{p.status}}</span><sc-if value="{{p.hasYear}}" hint-placeholder-val="{{true}}"><span>{{p.year}}</span></sc-if></div></div><div class="pj-card-b"><span class="pj-k">{{p.kick}}</span><span class="pj-t">{{p.title}}</span><span class="pj-loc">{{p.loc}}</span><div class="pj-tags"><span class="pj-grp">{{p.grp}}</span><sc-if value="{{p.hasType}}" hint-placeholder-val="{{true}}"><span>{{p.type}}</span></sc-if><sc-if value="{{p.hasPump}}" hint-placeholder-val="{{true}}"><span>{{p.pump}} pump</span></sc-if></div></div></a></sc-for>
+<section class="pv-grid" aria-label="Projects">
+<sc-for list="{{cards}}" as="p" hint-placeholder-count="9"><a class="pv-card" href="{{p.href}}" onClick="{{p.open}}" aria-label="{{p.aria}}"><div class="pv-card-ph"><sc-if value="{{p.hasImg}}" hint-placeholder-val="{{true}}"><img src="{{p.img}}" srcset="{{p.srcset}}" sizes="(max-width:640px) 112px, (max-width:980px) 50vw, 380px" alt="{{p.alt}}" width="480" height="336" loading="lazy" decoding="async"></sc-if><sc-if value="{{p.noImg}}" hint-placeholder-val="{{false}}"><div class="pv-noph" aria-hidden="true"><sc-if value="{{p.water}}" hint-placeholder-val="{{true}}"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2c3.3 4 5.6 7.3 5.6 10.3a5.6 5.6 0 01-11.2 0c0-3 2.3-6.3 5.6-10.3z"></path></svg></sc-if><sc-if value="{{p.notWater}}" hint-placeholder-val="{{false}}"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"></path><path d="M5 9.5V20h14V9.5"></path><path d="M10 20v-6h4v6"></path></svg></sc-if>Photos coming soon</div></sc-if></div><div class="pv-card-b"><span class="pv-card-k">{{p.kick}}</span><span class="pv-card-t">{{p.title}}</span><span class="pv-card-m">{{p.meta}}</span><span class="pv-card-f"><span class="{{p.stCls}}">{{p.status}}</span><span class="pv-card-p">{{p.loc}}</span></span></div></a></sc-for>
 </section>
-<sc-if value="{{canMore}}" hint-placeholder-val="{{true}}"><div class="pj-more"><button type="button" onClick="{{more}}">Show more projects</button><small>{{remainLabel}}</small></div></sc-if>
+<sc-if value="{{canMore}}" hint-placeholder-val="{{true}}"><div class="pv-more"><button type="button" class="pv-btn ghost" onClick="{{more}}">Show more projects</button><small>{{remainLabel}}</small></div></sc-if>
 </sc-if>
-<sc-if value="{{noResults}}" hint-placeholder-val="{{false}}"><div class="pj-empty"><p style="margin:0;font-weight:600">No projects match those filters.</p><button type="button" onClick="{{reset}}">Show all projects</button></div></sc-if>
-</sc-if>
+<sc-if value="{{noResults}}" hint-placeholder-val="{{false}}"><div class="pv-empty"><b>No projects match those filters.</b><button type="button" class="pv-btn" onClick="{{reset}}">Show all projects</button></div></sc-if>
+<div class="pv-list-end" aria-hidden="true"></div>
+</div></sc-if>
 <sc-if value="{{detailView}}" hint-placeholder-val="{{false}}">
-<article class="pd" aria-label="Project">
-<div class="pd-top"><button type="button" class="pd-back" onClick="{{back}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>All projects</button><div class="pd-nav"><button type="button" onClick="{{prev}}">← Previous</button><button type="button" onClick="{{next}}">Next →</button></div></div>
-<div class="pd-card">
-<header class="pd-head"><span class="pd-kick">{{d.kick}}</span><h1 class="pd-h2" tabindex="-1" id="pd-title">{{d.title}}</h1><p class="pd-p" style="text-align:center;max-width:36em">{{d.place}}</p><div class="pd-share"><button type="button" class="pd-shbtn" onClick="{{share}}" aria-label="{{shareAria}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"></path></svg>Share this project</button><p class="pd-shmsg" role="status" aria-live="polite">{{shareMsg}}</p></div></header>
-<div class="pd-track" role="list" aria-label="Project progress: {{d.status}}"><sc-for list="{{d.track}}" as="t" hint-placeholder-count="3"><div class="{{t.cls}}" role="listitem" aria-current="{{t.cur}}"><i></i><span>{{t.l}}</span></div></sc-for></div>
-<dl class="pd-facts"><sc-for list="{{d.facts}}" as="f" hint-placeholder-count="8"><div class="pd-f"><dt class="fl">{{f.l}}</dt><dd class="fv">{{f.v}}</dd></div></sc-for></dl>
-<section class="pd-sec" aria-label="Photos"><div class="pd-sh"><h2 class="pd-st">Photos</h2></div>
-<sc-if value="{{d.hasPhotos}}" hint-placeholder-val="{{true}}"><div class="pd-gal"><sc-for list="{{d.photos}}" as="ph" hint-placeholder-count="3"><figure class="pd-ph"><img src="{{ph.src}}" srcset="{{ph.srcset}}" sizes="(max-width:900px) calc(100vw - 72px), 400px" alt="{{ph.alt}}" width="960" height="720" loading="lazy" decoding="async"></figure></sc-for></div></sc-if>
-<sc-if value="{{d.noPhotos}}" hint-placeholder-val="{{false}}"><div class="pd-noph"><sc-if value="{{d.water}}" hint-placeholder-val="{{true}}"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.2c3.3 4 5.6 7.3 5.6 10.3a5.6 5.6 0 01-11.2 0c0-3 2.3-6.3 5.6-10.3z"></path></svg></sc-if><sc-if value="{{d.notWater}}" hint-placeholder-val="{{false}}"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"></path><path d="M5 9.5V20h14V9.5"></path><path d="M10 20v-6h4v6"></path></svg></sc-if><span>No photos of this project yet.</span></div></sc-if></section>
-<sc-if value="{{d.hasStory}}" hint-placeholder-val="{{false}}"><section class="pd-sec" aria-labelledby="pd-story-h"><div class="pd-sh"><h2 class="pd-st" id="pd-story-h">Their story</h2></div><sc-for list="{{d.storyParas}}" as="sp" hint-placeholder-count="3"><p class="pd-p">{{sp.t}}</p></sc-for><sc-if value="{{d.hasQuote}}" hint-placeholder-val="{{false}}"><blockquote class="pd-q">“{{d.quote}}”<cite>{{d.quoteBy}}</cite></blockquote></sc-if><sc-if value="{{d.hasAfter}}" hint-placeholder-val="{{false}}"><div class="pd-gal"><sc-for list="{{d.after}}" as="ph" hint-placeholder-count="2"><figure class="pd-ph"><img src="{{ph.src}}" alt="{{ph.alt}}" loading="lazy"></figure></sc-for></div></sc-if></section></sc-if>
-<sc-if value="{{d.hasFull}}" hint-placeholder-val="{{false}}"><a class="pd-full" href="{{d.fullHref}}"><span>Read the full story</span><b>{{d.fullTitle}}</b><i aria-hidden="true">→</i></a></sc-if>
-<sc-if value="{{d.hasMore}}" hint-placeholder-val="{{false}}"><section class="pd-sec" aria-labelledby="pd-more-h"><div class="pd-sh"><h2 class="pd-st" id="pd-more-h">More like this</h2></div><p class="pd-p">{{d.moreLead}}</p><div class="pd-more"><sc-for list="{{d.more}}" as="m" hint-placeholder-count="4"><a class="pd-mi" href="{{m.href}}" onClick="{{m.go}}"><span class="pd-mi-ph" aria-hidden="true"><sc-if value="{{m.hasImg}}" hint-placeholder-val="{{true}}"><img src="{{m.img}}" alt="" width="64" height="64" loading="lazy" decoding="async"></sc-if></span><span class="pd-mi-b"><small>{{m.kick}}</small><b>{{m.title}}</b></span></a></sc-for></div><a class="pd-all" href="{{d.moreHref}}" onClick="{{d.moreGo}}">{{d.moreAll}}</a></section></sc-if>
-<div class="pd-cta"><a class="b" href="/donate">{{d.cta}}</a><button type="button" class="b ghost" style="border:0;cursor:pointer;font:inherit;font-weight:700" onClick="{{back}}">Back to all projects</button></div>
+<article class="pv-d" aria-labelledby="pd-title">
+<div class="pv-d-top"><button type="button" class="pv-tb back" onClick="{{back}}"><span aria-hidden="true">←</span>All projects</button><div class="pv-d-nav"><button type="button" class="pv-tb" onClick="{{prev}}" aria-label="Previous project"><span aria-hidden="true">←</span>Previous</button><button type="button" class="pv-tb" onClick="{{next}}" aria-label="Next project">Next<span aria-hidden="true">→</span></button></div></div>
+<header class="pv-d-head"><div class="pv-d-ht"><p class="pv-kick">{{d.kick}}</p><h1 class="pv-d-h1" tabindex="-1" id="pd-title">{{d.title}}</h1><p class="pv-d-place"><sc-if value="{{d.hasPlace}}" hint-placeholder-val="{{true}}"><span>{{d.place}}</span></sc-if><span class="{{d.badgeCls}}">{{d.status}}</span></p></div><div class="pv-share"><button type="button" class="pv-shbtn" onClick="{{share}}" aria-label="{{shareAria}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"></path></svg>Share this project</button><p class="pv-shmsg" role="status" aria-live="polite">{{shareMsg}}</p></div></header>
+<sc-if value="{{d.hasPhotos}}" hint-placeholder-val="{{true}}"><section aria-label="Photos"><div class="{{d.galCls}}"><sc-for list="{{d.photosTop}}" as="ph" hint-placeholder-count="3"><button type="button" onClick="{{ph.open}}" aria-label="{{ph.label}}"><img src="{{ph.src}}" srcset="{{ph.srcset}}" sizes="{{ph.sizes}}" alt="{{ph.alt}}" width="960" height="720" loading="lazy" decoding="async"></button></sc-for></div><p class="pv-gal-cap"><span>{{d.photoCap}}</span><sc-if value="{{d.hasSeeAll}}" hint-placeholder-val="{{false}}"><span aria-hidden="true">·</span><button type="button" onClick="{{d.seeAll}}">{{d.seeAllL}}</button></sc-if></p></section></sc-if>
+<sc-if value="{{d.noPhotos}}" hint-placeholder-val="{{false}}"><div class="pv-d-noph"><sc-if value="{{d.water}}" hint-placeholder-val="{{true}}"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.2c3.3 4 5.6 7.3 5.6 10.3a5.6 5.6 0 01-11.2 0c0-3 2.3-6.3 5.6-10.3z"></path></svg></sc-if><sc-if value="{{d.notWater}}" hint-placeholder-val="{{false}}"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"></path><path d="M5 9.5V20h14V9.5"></path><path d="M10 20v-6h4v6"></path></svg></sc-if><span>No photos of this project yet.</span></div></sc-if>
+<div class="pv-d-grid">
+<div class="pv-d-main">
+<sc-if value="{{d.hasStory}}" hint-placeholder-val="{{false}}"><h2 class="pv-d-h2" id="pd-story-h">About this project</h2><sc-for list="{{d.storyParas}}" as="sp" hint-placeholder-count="3"><p class="pv-d-p">{{sp.t}}</p></sc-for><sc-if value="{{d.hasQuote}}" hint-placeholder-val="{{false}}"><blockquote class="pv-q">“{{d.quote}}”<cite>{{d.quoteBy}}</cite></blockquote></sc-if><sc-if value="{{d.hasAfter}}" hint-placeholder-val="{{false}}"><div class="pv-after"><sc-for list="{{d.after}}" as="ph" hint-placeholder-count="2"><img src="{{ph.src}}" alt="{{ph.alt}}" loading="lazy" decoding="async"></sc-for></div></sc-if></sc-if>
+<sc-if value="{{d.hasFull}}" hint-placeholder-val="{{false}}"><a class="pv-full" href="{{d.fullHref}}"><span>Read the full story</span><b>{{d.fullTitle}}</b><i aria-hidden="true">→</i></a></sc-if>
+<h2 class="pv-d-h3">How it came together</h2>
+<ol class="pv-steps" aria-label="Project progress: {{d.status}}"><sc-for list="{{d.track}}" as="t" hint-placeholder-count="3"><li class="{{t.cls}}" aria-current="{{t.cur}}"><span class="pv-step-i" aria-hidden="true"></span><span><b>{{t.l}}</b><sc-if value="{{t.hasSub}}" hint-placeholder-val="{{false}}"><small>{{t.sub}}</small></sc-if><span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">{{t.sr}}</span></span></li></sc-for></ol>
 </div>
+<div class="pv-d-side">
+<section class="pv-glance" aria-labelledby="pv-glance-h"><h2 class="pv-small" id="pv-glance-h">At a glance</h2><dl><sc-for list="{{d.facts}}" as="f" hint-placeholder-count="8"><div><dt>{{f.l}}</dt><dd class="{{f.cls}}">{{f.v}}</dd></div></sc-for></dl></section>
+<section class="pv-sponsor" aria-label="Support this work"><h2>{{d.cta}}</h2><a class="pv-btn white" href="/donate">Give</a></section>
+</div>
+</div>
+<sc-if value="{{d.hasMore}}" hint-placeholder-val="{{false}}"><section class="pv-dm" aria-labelledby="pd-more-h"><div class="pv-dm-h"><div><h2 class="pv-d-h2" id="pd-more-h">More like this</h2><p class="pv-p">{{d.moreLead}}</p></div><a class="pv-go" href="{{d.moreHref}}" onClick="{{d.moreGo}}">{{d.moreAll}}<span aria-hidden="true">→</span></a></div><div class="pv-dm-grid"><sc-for list="{{d.more}}" as="m" hint-placeholder-count="3"><a class="pv-card" href="{{m.href}}" onClick="{{m.go}}"><div class="pv-card-ph"><sc-if value="{{m.hasImg}}" hint-placeholder-val="{{true}}"><img src="{{m.img}}" alt="" width="480" height="336" loading="lazy" decoding="async"></sc-if><sc-if value="{{m.noImg}}" hint-placeholder-val="{{false}}"><div class="pv-noph" aria-hidden="true"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2c3.3 4 5.6 7.3 5.6 10.3a5.6 5.6 0 01-11.2 0c0-3 2.3-6.3 5.6-10.3z"></path></svg>Photos coming soon</div></sc-if></div><div class="pv-card-b"><span class="pv-card-k">{{m.kick}}</span><span class="pv-card-t">{{m.title}}</span></div></a></sc-for></div></section></sc-if>
+<div class="pv-d-end" aria-hidden="true"></div>
 </article>
+<sc-if value="{{lbOpen}}" hint-placeholder-val="{{false}}"><div class="pv-viewer" role="dialog" aria-modal="true" aria-label="Photos from {{d.title}}"><button type="button" class="pv-vx" onClick="{{lbClose}}" aria-label="Close photos"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button><figure><img src="{{lbSrc}}" srcset="{{lbSrcset}}" sizes="(max-width:1240px) 100vw, 1200px" alt="{{lbAlt}}" loading="lazy"><figcaption aria-live="polite">{{lbPos}}</figcaption></figure><sc-if value="{{lbMany}}" hint-placeholder-val="{{true}}"><div class="pv-vn"><button type="button" onClick="{{lbPrev}}" aria-label="Previous photo">← Prev</button><button type="button" onClick="{{lbNext}}" aria-label="Next photo">Next →</button></div></sc-if></div></sc-if>
 </sc-if>
 </main>
 <footer class="bf">
@@ -1341,6 +1731,9 @@ var YEARS = [];
 var STATUS_LABEL = { 'Completed': 'Completed', 'Under construction': 'Under construction', 'Upcoming': 'Looking for funding' };
 var STEPS = ['Looking for funding', 'Under construction', 'Completed'];
 var STEP_AT = { 'Upcoming': 0, 'Under construction': 1, 'Completed': 3 };
+// the status as a small dot and a word (cards use the short name)
+var STATUS_SHORT = { 'Completed': 'Completed', 'Under construction': 'Under way', 'Upcoming': 'Looking for funding' };
+var STATUS_DOT = { 'Completed': 'ok', 'Under construction': 'uw', 'Upcoming': 'fu' };
 function photoUrl(id, w) { return (window.rafikiPhoto ? window.rafikiPhoto(id) : '/api/photo/' + encodeURIComponent(id)) + '?w=' + w; }
 function num(n) { return Number(n).toLocaleString('en-US'); }
 // the active filters in words, e.g. "26 completed boreholes in Kenya · Uasin Gishu (Eldoret)"
@@ -1438,7 +1831,7 @@ function countryVals(self) {
 class Component extends DCLogic {
   constructor(props) {
     super(props);
-    this.state = Object.assign({ menu: false, scrolled: false, sort: 'new', limit: 12, sel: -1, feed: 'loading' }, NO_FILTERS);
+    this.state = Object.assign({ menu: false, scrolled: false, sort: 'new', limit: 12, sel: -1, feed: 'loading', lb: null, fOpen: false }, NO_FILTERS);
     // every filter in the explorer URL (see URL_KEYS); with none, every project shows
     Object.assign(this.state, urlFilters(window.location.search));
     if (!this.state.cAll) this.state.ctryPicked = true;
@@ -1451,7 +1844,7 @@ class Component extends DCLogic {
   projectState(id, base) {
     var p = PROJECTS.filter(function (x) { return String(x.id) === String(id); })[0];
     if (!p) return { sel: -1, missing: true, shareMsg: '' };
-    var st = Object.assign({}, base || {}, { missing: false, shareMsg: '' }), cur = Object.assign({}, this.state, st);
+    var st = Object.assign({}, base || {}, { missing: false, shareMsg: '', lb: null }), cur = Object.assign({}, this.state, st);
     var i = this.filtered(null, cur).indexOf(p);
     if (i < 0) { Object.assign(st, NO_FILTERS); i = this.filtered(null, Object.assign(cur, NO_FILTERS)).indexOf(p); }
     st.sel = i; this._lastSel = Math.max(i, 0);
@@ -1480,7 +1873,7 @@ class Component extends DCLogic {
   fromUrl() {
     var f = urlFilters(window.location.search), id = this.urlProject();
     if (f.year !== 'all' && YEARS.indexOf(Number(f.year)) < 0) f.year = 'all';
-    var st = Object.assign(f, { sel: -1, missing: false, shareMsg: '' });
+    var st = Object.assign(f, { sel: -1, missing: false, shareMsg: '', lb: null });
     if (id) Object.assign(st, this.projectState(id, st));
     return st;
   }
@@ -1532,6 +1925,23 @@ class Component extends DCLogic {
       self.setState(self.fromUrl());
     };
     window.addEventListener('popstate', this._onPop);
+    // photo viewer keys: Escape closes, arrows move between photos, Tab stays inside
+    this._onKey = function (e) {
+      if (self.state.lb == null || self.state.sel < 0) return;
+      var det = self.filtered()[self.state.sel], n = det ? det.photos.length : 0;
+      if (e.key === 'Escape' || e.key === 'Esc') { e.preventDefault(); self.setState({ lb: null }); }
+      else if (e.key === 'ArrowRight' && n > 1) self.setState({ lb: (self.state.lb + 1) % n });
+      else if (e.key === 'ArrowLeft' && n > 1) self.setState({ lb: (self.state.lb - 1 + n) % n });
+      else if (e.key === 'Tab') {
+        var f = Array.prototype.slice.call(document.querySelectorAll('.pv-viewer button'));
+        if (!f.length) return;
+        var i = f.indexOf(document.activeElement);
+        if (e.shiftKey && i <= 0) { e.preventDefault(); f[f.length - 1].focus(); }
+        else if (!e.shiftKey && i === f.length - 1) { e.preventDefault(); f[0].focus(); }
+        else if (i < 0) { e.preventDefault(); f[0].focus(); }
+      }
+    };
+    window.addEventListener('keydown', this._onKey);
     this.watchFeed();
     // published stories (the Stories pages): a project with one links to it
     fetch('/api/stories', { headers: { Accept: 'application/json' } }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
@@ -1540,16 +1950,24 @@ class Component extends DCLogic {
       self.setState({ storiesAt: Date.now() });
     }).catch(function () {});
   }
-  componentWillUnmount() { window.removeEventListener('scroll', this._onScroll); window.removeEventListener('popstate', this._onPop); }
+  componentWillUnmount() { window.removeEventListener('scroll', this._onScroll); window.removeEventListener('popstate', this._onPop); window.removeEventListener('keydown', this._onKey); document.documentElement.classList.remove('pv-lock'); }
   componentDidUpdate() {
     this.syncUrl();
+    // photo viewer: focus moves into it while open and back to the photo it was opened from
+    var lbOn = this.state.lb != null && this.state.sel >= 0;
+    if (lbOn !== !!this._lbWas) {
+      this._lbWas = lbOn;
+      document.documentElement.classList.toggle('pv-lock', lbOn);
+      if (lbOn) { this._lbFrom = document.activeElement; setTimeout(function () { var x = document.querySelector('.pv-viewer .pv-vx'); if (x) x.focus(); }, 0); }
+      else if (this._lbFrom && this._lbFrom.isConnected) { try { this._lbFrom.focus({ preventScroll: true }); } catch (e) {} }
+    }
     // on phones the group chips scroll sideways: keep the selected ones in view
     var ck = this.state.feed + this.state.cat + this.state.kind + (this.state.sel >= 0 ? 'd' : '');
     if (ck !== this._chipKey) {
       this._chipKey = ck;
       var chipsInView = function () {
-        Array.prototype.forEach.call(document.querySelectorAll('.pj-bar .pj-chips'), function (row) {
-          var on = row.querySelector('.pj-chip.on');
+        Array.prototype.forEach.call(document.querySelectorAll('.pv-bar .pv-tabs'), function (row) {
+          var on = row.querySelector('.pv-tab.on');
           if (on && row.scrollWidth > row.clientWidth) row.scrollLeft = Math.max(0, on.offsetLeft - row.offsetLeft - (row.clientWidth - on.offsetWidth) / 2);
         });
       };
@@ -1561,7 +1979,7 @@ class Component extends DCLogic {
     if (this._focusAct) {
       this._focusAct = false;
       setTimeout(function () {
-        var el = document.querySelector('.pj-act .pj-x') || document.querySelector('.pj-bar .pj-chip.on') || document.getElementById('pj-q');
+        var el = document.querySelector('.pv-act .pv-x') || document.querySelector('.pv-bar .pv-tab.on') || document.getElementById('pj-q');
         if (el) { try { el.focus({ preventScroll: true }); } catch (e) { el.focus(); } }
       }, 30);
     }
@@ -1572,7 +1990,7 @@ class Component extends DCLogic {
     if (was === key) return;
     var self = this;
     setTimeout(function () {
-      var el = self.state.sel >= 0 ? document.getElementById('pd-title') : document.querySelectorAll('.pj-grid .pj-card')[self._lastSel || 0];
+      var el = self.state.sel >= 0 ? document.getElementById('pd-title') : document.querySelectorAll('.pv-list .pv-grid .pv-card')[self._lastSel || 0];
       if (el && el.focus) { try { el.focus({ preventScroll: self.state.sel >= 0 }); } catch (e) { el.focus(); } }
     }, 30);
   }
@@ -1624,7 +2042,7 @@ class Component extends DCLogic {
     if (s.sort === 'old') out = out.slice().reverse();
     return out;
   }
-  go(i) { if (i >= 0) this._lastSel = i; this._push = this.state.sel < 0 && i >= 0 ? 'list' : null; this.setState({ sel: i, missing: false, shareMsg: '' }); try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) { window.scrollTo(0, 0); } }
+  go(i) { if (i >= 0) this._lastSel = i; this._push = this.state.sel < 0 && i >= 0 ? 'list' : null; this.setState({ sel: i, missing: false, shareMsg: '', lb: null }); try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) { window.scrollTo(0, 0); } }
   renderVals() {
     var self = this, s = this.state;
     var list = this.filtered();
@@ -1636,19 +2054,26 @@ class Component extends DCLogic {
     // groups: every group that has projects, each counted with the other filters
     var byGroup = this.filtered({ cat: 1, kind: 1, pump: 1 }), has = {};
     PROJECTS.forEach(function (p) { has[p.cat] = 1; });
-    var gl = [['all', 'All projects'], ['water', 'Water']];
+    var gl = [['all', 'All'], ['water', 'Water']];
     if (!live || PROJECTS.some(function (p) { return !p.water; })) gl.push(['beyond', 'Beyond the well']);
     GROUPS.slice(1).forEach(function (g) { if (has[g[0]]) gl.push([g[0], g[1]]); });
+    var subOn = s.cat !== 'all' && s.cat !== 'water' && s.cat !== 'beyond';
     var groupChips = gl.map(function (c) {
       var n = byGroup.filter(function (p) { return c[0] === 'all' || (c[0] === 'beyond' ? !p.water : p.cat === c[0]); }).length, on = s.cat === c[0];
-      return { l: c[1], n: live ? num(n) : '', cls: 'pj-chip' + (on ? ' on' : ''), pressed: on ? 'true' : 'false',
+      // on phones only All / Water / Beyond the well are tabs; the Beyond the well groups show as chips below
+      var sub = c[0] !== 'all' && c[0] !== 'water' && c[0] !== 'beyond', inBeyond = c[0] === 'beyond' && subOn;
+      return { l: c[1], n: live ? num(n) : '', cls: 'pv-tab' + (sub ? ' sub' : '') + (on ? ' on' : '') + (inBeyond ? ' on-m' : ''), pressed: on ? 'true' : 'false', sub: sub, cat: c[0],
         pick: function () { pickF({ cat: c[0], kind: c[0] === 'water' ? self.state.kind : 'all', pump: c[0] === 'water' ? self.state.pump : 'all' }); } };
+    });
+    var beyondChips = groupChips.filter(function (c) { return c.sub || c.cat === 'beyond'; }).map(function (c) {
+      var on = s.cat === c.cat;
+      return { l: c.cat === 'beyond' ? 'All' : c.l, n: c.n, cls: 'pv-kind' + (on ? ' on' : ''), pressed: on ? 'true' : 'false', pick: c.pick };
     });
     // water: borehole wells / water collection
     var byKind = this.filtered({ kind: 1 });
     var kindChips = [['all', 'All water projects'], ['borehole', KIND_NAME.borehole], ['collection', KIND_NAME.collection]].map(function (c) {
       var n = c[0] === 'all' ? byKind.length : byKind.filter(function (p) { return p.type === KINDS[c[0]]; }).length, on = s.kind === c[0];
-      return { l: c[1], n: live ? num(n) : '', cls: 'pj-chip' + (on ? ' on' : ''), pressed: on ? 'true' : 'false', pick: function () { pickF({ kind: c[0] }); } };
+      return { l: c[1], n: live ? num(n) : '', cls: 'pv-kind' + (on ? ' on' : ''), pressed: on ? 'true' : 'false', pick: function () { pickF({ kind: c[0] }); } };
     });
     // country and status menus, counted with the other filters (a region stays only in its own country)
     var regionIn = function (k) { return s.region !== 'all' && P.names[s.region] && P.names[s.region][0] === k ? s.region : 'all'; };
@@ -1670,10 +2095,10 @@ class Component extends DCLogic {
     if (s.q.trim()) chip('Search', '“' + s.q.trim() + '”', { q: '' });
     var remain = list.length - shown.length;
     var people = function (p) { return p.people ? (p.water ? num(p.people) + (p.done ? ' people served' : ' people expected') : 'About ' + num(p.people) + ' people') : ''; };
-    var d = { kick: '', title: '', place: '', status: '', track: [], facts: [], photos: [], hasStory: false, storyParas: [], hasQuote: false, quote: '', quoteBy: '', hasAfter: false, after: [], hasPhotos: false, noPhotos: true, water: true, notWater: false, more: [], hasMore: false, cta: 'Fund the next well' };
+    var d = { kick: '', title: '', place: '', hasPlace: false, status: '', badgeCls: '', galCls: 'pv-gal', photosTop: [], photoCap: '', hasSeeAll: false, seeAllL: '', seeAll: null, track: [], facts: [], photos: [], hasStory: false, storyParas: [], hasQuote: false, quote: '', quoteBy: '', hasAfter: false, after: [], hasPhotos: false, noPhotos: true, water: true, notWater: false, more: [], hasMore: false, cta: 'Fund the next well' };
     if (det) {
       var at = STEP_AT[det.status] || 0, facts = [];
-      var add = function (l, v) { if (v !== '' && v != null && v !== 0) facts.push({ l: l, v: String(v) }); };
+      var add = function (l, v) { if (v !== '' && v != null && v !== 0) facts.push({ l: l, v: String(v), cls: '' }); };
       add('Country', det.country);
       add('Area', det.area);
       add('Region', det.region && P.names[det.region] ? P.names[det.region][1] : '');
@@ -1683,7 +2108,7 @@ class Component extends DCLogic {
       add('Pump', det.pump);
       if (det.water) add(det.done ? 'People served' : 'People expected', det.people ? num(det.people) : '');
       else add(det.done ? 'People' : 'People expected', det.people ? 'About ' + num(det.people) + ' people' : '');
-      add('Status', det.label);
+      facts.push({ l: 'Status', v: det.label, cls: 'pv-dot ' + STATUS_DOT[det.status] });
       if (det.needed) add('Still to raise', '$' + num(det.needed));
       if (det.water) {
         add(det.done ? 'Depth' : 'Planned depth', det.depth ? num(det.depth) + ' m' : '');
@@ -1696,8 +2121,13 @@ class Component extends DCLogic {
       var where = near.length ? P.names[det.region][1] : det.country;
       var noun = GROUP_NOUN[det.cat] + ' projects';
       var moreHref = '/projects?' + filterQuery(Object.assign({}, NO_FILTERS, { cat: det.cat, cAll: !det.ck, ctry: det.ck, region: near.length ? det.region : 'all' }));
-      d = { kick: [det.water ? det.type : det.grp, det.year, det.label].filter(Boolean).join(' · '), title: det.title, place: [det.area, det.country].filter(Boolean).join(', '), status: det.label,
-        track: STEPS.map(function (l, k) { var cur = k === at; return { l: l, cur: cur ? 'step' : 'false', cls: 'pd-tk' + (k < at ? ' done' : (cur ? ' now' : '')) }; }),
+      var nPh = det.photos.length, lbAt = function (k) { return function () { self.setState({ lb: k }); }; };
+      d = { kick: [det.water ? det.type : det.grp, det.year].filter(Boolean).join(' · '), title: det.title, place: [det.area, det.country].filter(Boolean).join(', '), status: det.label,
+        hasPlace: !!(det.area || det.country), badgeCls: 'pv-dot pv-badge ' + STATUS_DOT[det.status],
+        galCls: 'pv-gal n' + Math.min(nPh, 4),
+        photosTop: det.photos.slice(0, 4).map(function (id, k) { return { src: photoUrl(id, k ? 480 : 960), srcset: k ? photoUrl(id, 480) + ' 480w, ' + photoUrl(id, 960) + ' 960w' : photoUrl(id, 960) + ' 960w, ' + photoUrl(id, 1600) + ' 1600w', sizes: k ? '(max-width:700px) 33vw, 360px' : '(max-width:700px) calc(100vw - 32px), 860px', loading: k ? 'lazy' : 'eager', alt: 'Photo ' + (k + 1) + ' of ' + nPh + ' from ' + det.title, label: 'Open photo ' + (k + 1) + ' of ' + nPh + ' larger', open: lbAt(k) }; }),
+        photoCap: nPh === 1 ? 'Photo from the project' : 'Photos from the project', hasSeeAll: nPh > 3, seeAllL: 'See all ' + num(nPh), seeAll: lbAt(0),
+        track: STEPS.map(function (l, k) { var cur = k === at, done = k < at; return { l: l, cur: cur ? 'step' : 'false', cls: 'pv-step' + (done ? ' done' : (cur ? ' now' : ' next')), hasSub: done && k === STEPS.length - 1 && !!det.year, sub: String(det.year || ''), sr: done ? ' (done)' : (cur ? ' (now)' : ' (still to come)') }; }),
         facts: facts,
         photos: det.photos.map(function (id, k) { return { src: photoUrl(id, 960), srcset: photoUrl(id, 480) + ' 480w, ' + photoUrl(id, 960) + ' 960w', alt: 'Photo ' + (k + 1) + ' of ' + det.photos.length + ' from ' + det.title }; }),
         hasPhotos: det.photos.length > 0, noPhotos: !det.photos.length, water: det.water, notWater: !det.water,
@@ -1709,10 +2139,10 @@ class Component extends DCLogic {
         hasFull: !!(self._stories && self._stories[String(det.id)]), fullTitle: self._stories && self._stories[String(det.id)] ? self._stories[String(det.id)].title : '',
         fullHref: self._stories && self._stories[String(det.id)] ? '/stories/' + encodeURIComponent(String(det.id)) + '-' + (self._stories[String(det.id)].slug || 'story') : '',
         hasMore: pool.length > 0, moreLead: 'Other ' + noun + ' in ' + where + '.',
-        moreHref: moreHref, moreAll: 'See all ' + num(pool.length + 1) + ' ' + noun + ' in ' + where + ' →', moreGo: function (e) { self.follow(e, moreHref); },
-        more: pool.slice(0, 4).map(function (p) {
+        moreHref: moreHref, moreAll: 'See all ' + num(pool.length + 1) + ' ' + noun + ' in ' + where, moreGo: function (e) { self.follow(e, moreHref); },
+        more: pool.slice(0, 3).map(function (p) {
           var href = '/projects?project=' + encodeURIComponent(p.id), ph = p.photos[0];
-          return { href: href, title: p.title, kick: [p.area || p.country, p.year, p.label].filter(Boolean).join(' · '), hasImg: !!ph, img: ph ? photoUrl(ph, 480) : '', go: function (e) { self.follow(e, href); } };
+          return { href: href, title: p.title, kick: [p.area, p.country].filter(Boolean).join(' · '), hasImg: !!ph, noImg: !ph, img: ph ? photoUrl(ph, 480) : '', go: function (e) { self.follow(e, href); } };
         }) };
     }
     return Object.assign(countryVals(this), {
@@ -1733,7 +2163,7 @@ class Component extends DCLogic {
       onSort: function (e) { self.setState({ sort: e.target.value }); },
       yearOpts: [{ v: 'all', l: 'All years' }].concat(YEARS.slice().reverse().map(function (y) { return { v: String(y), l: String(y) }; })),
       pumpOpts: [{ v: 'all', l: 'All pumps' }].concat(PUMPS.map(function (p) { return { v: p, l: p }; })),
-      groupChips: groupChips, kindChips: kindChips, showKinds: s.cat === 'water', showPump: s.cat === 'water' && PUMPS.length > 0,
+      groupChips: groupChips, kindChips: kindChips, beyondChips: beyondChips, showBeyond: s.cat !== 'all' && s.cat !== 'water', showKinds: s.cat === 'water', showPump: s.cat === 'water' && PUMPS.length > 0,
       summary: live ? summaryText(list.length, s) : '', activeChips: act, hasActive: live && act.length > 0,
       loading: s.feed === 'loading', feedDown: s.feed === 'down', showBar: s.feed !== 'down', hasCount: live,
       skeletons: [1, 2, 3, 4, 5, 6],
@@ -1745,14 +2175,25 @@ class Component extends DCLogic {
       reset: function () { self._focusAct = true; pickF(Object.assign({}, NO_FILTERS)); },
       cards: shown.map(function (p, i) {
         var ph = p.photos[0];
-        return { hasPump: !!p.pump, kick: p.area ? p.area + ' · ' + p.country : p.country, title: p.title, loc: people(p), type: p.typeShow, hasType: !!p.typeShow && p.typeShow !== p.grp, grp: p.grp, pump: p.pump,
+        return { hasPump: !!p.pump, kick: p.area ? p.area + ' · ' + p.country : p.country, title: p.title, loc: people(p), meta: [p.typeShow || p.grp, p.pump ? p.pump + ' pump' : '', p.year].filter(Boolean).join(' · '), type: p.typeShow, hasType: !!p.typeShow && p.typeShow !== p.grp, grp: p.grp, pump: p.pump,
           water: p.water, notWater: !p.water, href: '/projects?' + filterQuery(s, String(p.id)),
           hasYear: !!p.year, year: p.year, hasImg: !!ph, noImg: !ph, img: ph ? photoUrl(ph, 480) : '', srcset: ph ? photoUrl(ph, 480) + ' 480w, ' + photoUrl(ph, 960) + ' 960w' : '',
-          alt: ph ? 'Photo from ' + p.title : '', country: p.country, status: p.label, stCls: p.status === 'Completed' ? 'ok' : (p.status === 'Upcoming' ? 'up' : 'uc'),
+          alt: ph ? 'Photo from ' + p.title : '', country: p.country, status: STATUS_SHORT[p.status] || p.label, stCls: 'pv-dot ' + (STATUS_DOT[p.status] || 'uw'),
           aria: 'Open project: ' + p.title + ', ' + p.grp + ', ' + p.label,
           open: function (e) { if (e && (e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey)) return; if (e) e.preventDefault(); self.go(i); } };
       }),
       d: d,
+      selsCls: 'pv-sels' + (s.fOpen ? ' open' : ''), fExpanded: s.fOpen ? 'true' : 'false',
+      fLabel: (function () { var n = (s.cAll ? 0 : 1) + (s.status !== 'all' ? 1 : 0) + (s.year !== 'all' ? 1 : 0) + (s.pump !== 'all' ? 1 : 0); return n ? 'Filters (' + n + ')' : 'Filters'; })(),
+      toggleF: function () { self.setState({ fOpen: !self.state.fOpen }); },
+      lbOpen: !!det && s.lb != null && s.lb < det.photos.length, lbMany: !!det && det.photos.length > 1,
+      lbSrc: det && s.lb != null && det.photos[s.lb] ? photoUrl(det.photos[s.lb], 1600) : '',
+      lbSrcset: det && s.lb != null && det.photos[s.lb] ? photoUrl(det.photos[s.lb], 960) + ' 960w, ' + photoUrl(det.photos[s.lb], 1600) + ' 1600w' : '',
+      lbAlt: det && s.lb != null ? 'Photo ' + (s.lb + 1) + ' of ' + det.photos.length + ' from ' + det.title : '',
+      lbPos: det && s.lb != null ? (s.lb + 1) + ' of ' + det.photos.length : '',
+      lbClose: function () { self.setState({ lb: null }); },
+      lbPrev: function () { var n = det ? det.photos.length : 0; if (n) self.setState({ lb: (self.state.lb - 1 + n) % n }); },
+      lbNext: function () { var n = det ? det.photos.length : 0; if (n) self.setState({ lb: (self.state.lb + 1) % n }); },
       missing: !!s.missing && !det,
       share: function () { self.share(det); }, shareMsg: s.shareMsg || '', shareAria: det ? 'Share this project: ' + det.title : 'Share this project',
       back: function () { if (window.history.state && window.history.state.rfPushed && self.urlProject()) { window.history.back(); return; } self.setState({ sel: -1 }); },
