@@ -80,12 +80,13 @@ class StoryPhotosTest {
             .put(JSONObject().put("h", "Now").put("body", "Water is a few steps from the clinic door.").put("photo", JSONObject().put("id", "p3").put("row", "progress"))))
         .put("pull", JSONObject().put("quote", "Now my girls get to school on time.").put("who", "Mary"))
     private var upMode = "ok"; private var refuseDates: String? = null
+    private var cover = ""; private var coverFail = false; @Volatile private var coverHold: java.util.concurrent.CountDownLatch? = null
     private fun ph(id: String, kids: Boolean = false, taken: String = "", cap: String = "") = JSONObject().put("id", id).put("children", kids).put("by", "Meril").put("at", "${java.time.Year.now()}-10-28T10:42:00Z").put("cap", cap).also { if (taken.isNotBlank()) it.put("taken", taken) }
     private fun story() = JSONObject().put("id", "101").put("status", status).put("consent", consent)
         .put("answers", JSONObject().apply { StoryKit.QS.forEachIndexed { i, q -> put(q, if (i < 4) "An answer." else "") } }).put("quote", "").put("quoteBy", "").put("credit", "").put("text", "A first draft.")
         .put("photos", JSONObject().apply { rows.forEach { (r, l) -> put(r, JSONArray(l)) } })
         .put("doc", doc).put("pool", JSONArray().apply { rows.forEach { (r, l) -> l.forEach { put(JSONObject().put("id", it.optString("id")).put("row", r).put("cap", it.optString("cap")).put("children", it.optBoolean("children"))) } } })
-        .put("dates", dates).put("newPhotos", newPhotos)
+        .put("dates", dates).put("newPhotos", newPhotos).apply { if (cover.isNotBlank()) put("cover", cover) }
         .apply { if (pub) put("pub", JSONObject().put("at", "2026-10-27T12:00:00Z").put("by", "Jessica").put("url", "https://test.rafikioutreach.org/stories/101-water")) }
         .put("missing", JSONArray().apply {
             put("answers:4/6"); if (rows["after"]!!.isEmpty()) put("after-photos")
@@ -136,6 +137,7 @@ class StoryPhotosTest {
                             if (j.has("to")) { l.remove(p); rows[j.optString("to")]!! += p }
                         }
                         "photo-remove" -> rows[j.optString("row")]!!.removeAll { it.optString("id") == j.optString("asset") }
+                        "cover" -> { coverHold?.await(10, java.util.concurrent.TimeUnit.SECONDS); if (coverFail) refuse = "server" to "" else cover = j.optString("asset") }
                     }
                     if (refuse != null) 400 to JSONObject().put("ok", false).put("reason", refuse.first).put("field", refuse.second).toString()
                     else 200 to JSONObject().put("ok", true).put("story", story()).toString()
@@ -482,4 +484,80 @@ class StoryPhotosTest {
     }
     @Test fun field_user_reads_the_story_en_light() = fieldReads(false, "light")
     @Config(qualifiers = "w411dp-h860dp-xxhdpi") @Test fun field_user_reads_the_story_sw_sun() { w = 411; h = 860; fieldReads(true, "sun") }
+
+    // --- 2.28.0: choose the story's cover photo (web v78) -------------------------------------------------------------
+    private fun bounds(tag: String) = rule.onNodeWithTag(tag, useUnmergedTree = true).fetchSemanticsNode().boundsInRoot
+    private fun coverFlow(width: Int, height: Int, sw: Boolean, mode: String) {
+        Lang.sw = sw; w = width; h = height; dark = mode == "dark"; Look.mode = if (mode == "sun") "sun" else ""
+        rows["progress"]!![0].put("children", true)   // the hardest tile: children, in the story and the cover
+        val m = model(admin = false)
+        start(m); openStory()
+        val tag = "${width}-${if (sw) "sw" else "en"}-$mode"
+        assertFalse("no cover chosen: automatic, no badge", tagged("sty_cover_badge"))
+        // the details sheet: Use as cover
+        tap("story_photo_progress_0"); waitTag("story_det")
+        rule.onNodeWithTag("sty_cover").performScrollTo().assertIsNotSelected().assertTextContains(if (sw) "Tumia kama jalada" else "Use as cover")
+        shot("cov-off-$tag"); noLayoutProblems("sty_cover", tag)
+        // tap: busy while it saves, then "Cover photo ✓ · Tap to undo"
+        coverHold = java.util.concurrent.CountDownLatch(1)
+        rule.onNodeWithTag("sty_cover").performSemanticsAction(SemanticsActions.OnClick)
+        rule.waitUntil(8000) { rule.onAllNodes(hasTestTag("btn_busy") and hasAnyAncestor(hasTestTag("sty_cover")), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
+        assertTrue(hasTextIn("sty_cover", if (sw) "Inahifadhi…" else "Saving…")); rule.onNodeWithTag("sty_cover").assertIsNotEnabled()
+        shot("cov-busy-$tag"); noLayoutProblems("sty_cover", tag)
+        coverHold!!.countDown(); coverHold = null
+        rule.waitUntil(8000) { cover == "p1" }; until { !tagged("btn_busy") }; settle()
+        val sent = posts.last { it.optString("action") == "cover" }
+        assertEquals("101", sent.optString("id")); assertEquals("p1", sent.optString("asset"))
+        rule.onNodeWithTag("sty_cover").assertIsSelected().assertTextContains(if (sw) "Picha ya jalada ✓\u00A0· Gusa kutendua" else "Cover photo ✓\u00A0· Tap to undo")
+        shot("cov-on-$tag"); noLayoutProblems("sty_cover", tag)
+        // back closes the sheet first; the grid shows the star on the cover only, next to (not over) the other badges
+        back(); assertFalse(tagged("story_det")); assertTrue(tagged("story_photos"))
+        assertEquals(1, rule.onAllNodesWithTag("sty_cover_badge", useUnmergedTree = true).fetchSemanticsNodes().size)
+        rule.onNode(hasTestTag("sty_cover_badge") and hasAnyAncestor(hasTestTag("story_photo_progress_0")), useUnmergedTree = true).assertExists()
+        rule.onNodeWithTag("story_photo_progress_0").performScrollTo(); settle()
+        val tile = bounds("story_photo_progress_0"); val star = bounds("sty_cover_badge"); val ins = bounds("story_instory_progress_0")
+        val kid = rule.onNode(hasText(if (sw) "Watoto" else "Children") and hasAnyAncestor(hasTestTag("story_photo_progress_0")), useUnmergedTree = true).fetchSemanticsNode().boundsInRoot
+        assertEquals("26dp", 26f * rule.density.density, star.width, 1.5f)
+        assertTrue("star top right: $star in $tile", star.right <= tile.right && star.top >= tile.top && star.right > tile.right - 10f * rule.density.density)
+        assertFalse("star over In story", star.overlaps(ins)); assertFalse("star over Children", star.overlaps(kid)); assertFalse("Children over In story", kid.overlaps(ins))
+        assertTrue("all inside the tile: $tile star $star ins $ins kid $kid", listOf(star, ins, kid).all { it.left >= tile.left - 1 && it.right <= tile.right + 1 && it.bottom <= tile.bottom + 1 })
+        shot("cov-grid-$tag"); noLayoutProblems("story_photos", tag)
+        // tap again: back to the automatic choice (asset '')
+        tap("story_photo_progress_0"); waitTag("story_det"); rule.onNodeWithTag("sty_cover").performScrollTo()
+        rule.onNodeWithTag("sty_cover").performSemanticsAction(SemanticsActions.OnClick)
+        rule.waitUntil(8000) { cover == "" }; until { !tagged("btn_busy") }; settle()
+        assertEquals("", posts.last { it.optString("action") == "cover" }.optString("asset"))
+        rule.onNodeWithTag("sty_cover").assertIsNotSelected().assertTextContains(if (sw) "Tumia kama jalada" else "Use as cover")
+        back(); assertFalse(tagged("sty_cover_badge"))
+    }
+    @Test fun cover_360_en_light() = coverFlow(360, 780, false, "light")
+    @Config(qualifiers = "w320dp-h640dp-xhdpi") @Test fun cover_320_sw_dark() = coverFlow(320, 640, true, "dark")
+    @Config(qualifiers = "w320dp-h640dp-xhdpi") @Test fun cover_320_en_light() = coverFlow(320, 640, false, "light")
+    @Config(qualifiers = "w411dp-h860dp-xxhdpi") @Test fun cover_411_sw_sun() = coverFlow(411, 860, true, "sun")
+    @Config(qualifiers = "w411dp-h860dp-xxhdpi") @Test fun cover_411_en_dark() = coverFlow(411, 860, false, "dark")
+    @Test fun cover_360_sw_light() = coverFlow(360, 780, true, "light")
+
+    /** The server refuses: the button goes back as it was and the sheet says why (the app's usual words). */
+    @Test fun cover_error() {
+        coverFail = true
+        val m = model(admin = false)
+        start(m); openStory()
+        tap("story_photo_before_1"); waitTag("story_det"); rule.onNodeWithTag("sty_cover").performScrollTo()
+        rule.onNodeWithTag("sty_cover").performSemanticsAction(SemanticsActions.OnClick)
+        rule.waitUntil(8000) { tagged("sty_cover_err") }; settle()
+        assertEquals("b2", posts.last().optString("asset"))
+        assertTrue(hasTextIn("sty_cover_err", org.rafikioutreach.pin.data.reasonText("server")))
+        rule.onNodeWithTag("sty_cover").assertIsNotSelected().assertHasClickAction(); assertFalse(tagged("btn_busy"))
+        rule.onNodeWithTag("sty_cover_err").performScrollTo(); shot("cov-error-en"); noLayoutProblems("sty_cover", "cover error"); noLayoutProblems("sty_cover_err", "cover error")
+        // a second try that works clears the message
+        coverFail = false; rule.onNodeWithTag("sty_cover").performSemanticsAction(SemanticsActions.OnClick)
+        rule.waitUntil(8000) { cover == "b2" }; until { !tagged("btn_busy") }; settle()
+        assertFalse(tagged("sty_cover_err")); rule.onNodeWithTag("sty_cover").assertIsSelected()
+    }
+
+    /** story.cover is read from the server (absent = automatic). */
+    @Test fun cover_parsed() {
+        assertEquals("p1", org.rafikioutreach.pin.ui.Story.from(story().put("cover", "p1"))!!.cover)
+        assertEquals("", org.rafikioutreach.pin.ui.Story.from(story().apply { remove("cover") })!!.cover)
+    }
 }

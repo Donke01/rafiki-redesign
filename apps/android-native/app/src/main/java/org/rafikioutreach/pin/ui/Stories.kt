@@ -71,6 +71,8 @@ data class Story(
     val status: String, val consent: String, val answers: Map<String, String>, val quote: String, val quoteBy: String, val credit: String, val text: String,
     val photos: Map<String, List<StoryPhoto>>, val missing: List<String>, val canApprove: Boolean, val prompts: Map<String, Pair<String, String>>,
     val doc: StoryDoc? = null, val pool: List<DocPhoto> = emptyList(), val pub: StoryPub? = null, val newPhotos: Int = 0, val dates: StoryDates = StoryDates(),
+    /** The photo chosen as the story's cover (web v78), or "" for the automatic choice. */
+    val cover: String = "",
 ) {
     val filled get() = StoryKit.QS.count { answers[it].orEmpty().isNotBlank() }
     /** On the website (approved and published). */
@@ -96,7 +98,7 @@ data class Story(
                 o.optJSONArray("missing")?.let { m -> (0 until m.length()).map { m.optString(it) } }.orEmpty(), o.optBoolean("canApprove"),
                 pr.keys().asSequence().mapNotNull { k -> pr.optJSONObject(k)?.let { k to (it.str("en") to it.str("sw")) } }.toMap(),
                 d, pool, pub, o.optInt("newPhotos"),
-                o.optJSONObject("dates")?.let { x -> StoryDates(x.ym("before"), x.ym("progress"), x.ym("progressEnd"), x.ym("after")) } ?: StoryDates())
+                o.optJSONObject("dates")?.let { x -> StoryDates(x.ym("before"), x.ym("progress"), x.ym("progressEnd"), x.ym("after")) } ?: StoryDates(), o.str("cover"))
         }
     }
 }
@@ -264,10 +266,22 @@ fun StoryTab(m: AppModel, p: Project) {
         val ph = st.photos[r]?.firstOrNull { it.id == id }
         if (ph == null) { LaunchedEffect(d) { detail = null } } else {
             fun edit(extra: JSONObject.() -> Unit, ok: String? = null) = post(JSONObject().put("action", "photo-edit").put("row", r).put("asset", id).apply(extra), ok)
+            // the story's cover (web v78): this photo, or "" for the automatic choice; the server republishes a live story
+            var coverBusy by remember(id) { mutableStateOf(false) }
+            var coverErr by remember(id) { mutableStateOf<String?>(null) }
+            val isCover = st.cover == id
             StoryPhotoSheet(m, p.id, r, ph, id in st.inStory, close = { cap -> detail = null; if (cap.trim() != ph.cap) edit({ put("cap", cap.trim()) }, t("Caption saved ✓", "Maelezo yamehifadhiwa ✓")) },
                 move = { to -> post(JSONObject().put("action", "photo-edit").put("row", r).put("asset", id).put("to", to), t("Moved to ${StoryKit.row(to)} ✓", "Imehamishiwa ${StoryKit.row(to)} ✓")) { if (it.ok) detail = "$to/$id" } },
                 kids = { k -> edit({ put("children", k) }) },
-                delete = { detail = null; post(JSONObject().put("action", "photo-remove").put("row", r).put("asset", id), t("Photo deleted", "Picha imefutwa")) })
+                delete = { detail = null; post(JSONObject().put("action", "photo-remove").put("row", r).put("asset", id), t("Photo deleted", "Picha imefutwa")) },
+                cover = isCover, coverBusy = coverBusy, coverErr = coverErr, setCover = {
+                    if (!coverBusy) { coverBusy = true; coverErr = null; scope.launch {
+                        val res = m.api.postTo("/api/story", JSONObject().put("action", "cover").put("id", p.id).put("asset", if (isCover) "" else id))
+                        coverBusy = false
+                        if (res.ok) { Story.from(res.json.optJSONObject("story"))?.let { s = it }; said = "ok" to (if (isCover) t("Cover back to automatic", "Jalada limerudi kuchaguliwa lenyewe") else t("Cover photo set ✓", "Picha ya jalada imewekwa ✓")) }
+                        else coverErr = StoryKit.why(res)
+                    } }
+                })
         }
     }
     // the month of a column (Before, In progress from – to, After): saved for the whole column, not per photo

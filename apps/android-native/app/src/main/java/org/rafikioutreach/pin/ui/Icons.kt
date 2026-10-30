@@ -66,6 +66,8 @@ object Ic {
         "clock" to listOf(circle(12f, 12f, 8.5f), "M12 7.5V12l3 2"),
         "upload" to listOf("M12 20V9M7 13.5l5-5 5 5M5 4h14"),
         "inbox" to listOf("M4 13l2.5-7.5h11L20 13v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z", "M4 13h4.5l1.5 2.5h4l1.5-2.5H20"),
+        // the story's cover photo (web v78, OIC.star)
+        "star" to listOf("M12 4l2.5 5.2 5.6.8-4.1 3.9 1 5.6L12 16.8l-5 2.7 1-5.6-4.1-3.9 5.6-.8z"),
         "spark" to listOf("M12 3.5l1.9 5.6 5.6 1.9-5.6 1.9L12 18.5l-1.9-5.6L4.5 11l5.6-1.9z"),
         "chev" to listOf("M9 6l6 6-6 6"),
         // Stories in the bottom bar (web v72): an open book
@@ -121,6 +123,20 @@ object Ic {
         ImageVector.Builder("crownFill", 24.dp, 24.dp, 24f, 24f).apply {
             listOf("M3.4 8.9 8.1 12.4l3.9-6.6 3.9 6.6 4.7-3.5-1.6 9.1H5z", "M6.1 19.3h11.8a1.1 1.1 0 0 1 0 2.2H6.1a1.1 1.1 0 0 1 0-2.2z", circle(3.1f, 7.7f, 1.6f), circle(12f, 4.3f, 1.7f), circle(20.9f, 7.7f, 1.6f))
                 .forEach { addPath(addPathNodes(it), fill = SolidColor(Color.Black)) }
+        }.build()
+    }
+
+    /** The star filled in, in the colour it is tinted (the cover badge on a story photo). */
+    val starFill: ImageVector by lazy {
+        ImageVector.Builder("starFill", 24.dp, 24.dp, 24f, 24f).apply {
+            addPath(addPathNodes(D.getValue("star")[0]), fill = SolidColor(Color.Black), stroke = SolidColor(Color.Black), strokeLineWidth = 1.9f, strokeLineCap = StrokeCap.Round, strokeLineJoin = StrokeJoin.Round)
+        }.build()
+    }
+
+    /** The star in gold with a darker edge (the cover button when the photo is the cover; draw it untinted). */
+    val starGold: ImageVector by lazy {
+        ImageVector.Builder("starGold", 24.dp, 24.dp, 24f, 24f).apply {
+            addPath(addPathNodes(D.getValue("star")[0]), fill = SolidColor(Color(0xFFF2B33D)), stroke = SolidColor(Color(0xFFB07A00)), strokeLineWidth = 1.9f, strokeLineCap = StrokeCap.Round, strokeLineJoin = StrokeJoin.Round)
         }.build()
     }
 

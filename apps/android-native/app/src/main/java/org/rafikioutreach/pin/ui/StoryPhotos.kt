@@ -226,7 +226,7 @@ internal fun StoryPhotosCard(m: AppModel, pid: String, st: Story, ups: List<Stor
                     }
                 }
                 val cells: List<@Composable (Modifier) -> Unit> = server.mapIndexed { i, ph -> @Composable { mod: Modifier ->
-                    ServerTile(m, pid, r, i, ph, ph.id in inStory, ph.id in ticked, mod) { open(r, ph) } } } +
+                    ServerTile(m, pid, r, i, ph, ph.id in inStory, ph.id in ticked, ph.id == st.cover, mod) { open(r, ph) } } } +
                     local.map { u -> @Composable { mod: Modifier -> LocalTile(m, u, mod) } } +
                     listOf(@Composable { mod: Modifier -> AddTile(r, mod) { add(r) } })
                 Grid3(cells, Modifier.padding(top = 8.dp))
@@ -252,15 +252,45 @@ private fun Grid3(cells: List<@Composable (Modifier) -> Unit>, modifier: Modifie
 private val TILE = RoundedCornerShape(16.dp)
 
 @Composable
-private fun ServerTile(m: AppModel, pid: String, row: String, i: Int, ph: StoryPhoto, inStory: Boolean, sent: Boolean, modifier: Modifier, tap: () -> Unit) {
+private fun ServerTile(m: AppModel, pid: String, row: String, i: Int, ph: StoryPhoto, inStory: Boolean, sent: Boolean, cover: Boolean, modifier: Modifier, tap: () -> Unit) {
     Box(modifier.clip(TILE).background(C.tint).clickable(role = Role.Button, onClick = tap)
-        .semantics { contentDescription = StoryKit.row(row) + " · " + t("photo ${i + 1}", "picha ${i + 1}") + (if (inStory) " · " + t("in the story", "kwenye hadithi") else "") + (if (ph.cap.isNotBlank()) " · " + ph.cap else "") }
+        .semantics { contentDescription = StoryKit.row(row) + " · " + t("photo ${i + 1}", "picha ${i + 1}") + (if (cover) " · " + t("cover photo", "picha ya jalada") else "") + (if (inStory) " · " + t("in the story", "kwenye hadithi") else "") + (if (ph.cap.isNotBlank()) " · " + ph.cap else "") }
         .testTag("story_photo_${row}_$i")) {
         AuthPic(m, StoryKit.photoPath(pid, ph.id), Modifier.matchParentSize())
         if (inStory) InStoryBadge(Modifier.align(Alignment.BottomStart).padding(5.dp).testTag("story_instory_${row}_$i"))
+        // with the cover star in the top right, "Children" goes just under it so the two never meet on a small tile
         if (ph.children) Text(t("Children", "Watoto"), style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp), color = Color.White, maxLines = 1,
-            modifier = Modifier.align(Alignment.TopStart).padding(5.dp).clip(RoundedCornerShape(99.dp)).background(Color(0xCC8A5200)).padding(horizontal = 6.dp, vertical = 2.dp))
-        if (sent) Tick(Modifier.align(Alignment.TopEnd).padding(5.dp).testTag("story_sent_${row}_$i"))
+            modifier = Modifier.align(Alignment.TopStart).padding(start = 5.dp, end = 5.dp, top = if (cover) 35.dp else 5.dp, bottom = 5.dp).clip(RoundedCornerShape(99.dp)).background(Color(0xCC8A5200)).padding(horizontal = 6.dp, vertical = 2.dp))
+        if (cover || sent) Row(Modifier.align(Alignment.TopEnd).padding(5.dp), horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
+            if (cover) CoverBadge(Modifier.testTag("sty_cover_badge"))
+            if (sent) Tick(Modifier.testTag("story_sent_${row}_$i"))
+        }
+    }
+}
+
+/** The story's cover photo: a small round amber star (web v78, .sty-cvb). */
+@Composable
+internal fun CoverBadge(modifier: Modifier = Modifier) = Box(modifier.size(26.dp).shadow(2.dp, CircleShape).clip(CircleShape).background(Color(0xFFF2B33D)), contentAlignment = Alignment.Center) {
+    Icon(Ic.starFill, t("Cover photo", "Picha ya jalada"), tint = Color(0xFF3A2600), modifier = Modifier.size(15.dp))
+}
+
+/** "Use as cover", or for the cover "Cover photo ✓ · Tap to undo" in amber (web v78, .sty-cov); busy while it saves.
+ *  The dot keeps to the tick, so a narrow phone breaks the line before "Tap to undo", never before the dot. */
+@Composable
+internal fun StoryCoverBtn(on: Boolean, busy: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val saving = if (busy) t("Saving…", "Inahifadhi…") else null
+    val mod = modifier.fillMaxWidth().semantics { selected = on }.testTag("sty_cover")
+    if (!on) { Btn(t("Use as cover", "Tumia kama jalada"), onClick, mod, icon = "star", light = true, small = true, busy = saving); return }
+    val shape = RoundedCornerShape(999.dp)
+    val fg = if (C.dark) Color(0xFFF7D27E) else Color(0xFF6B4300)
+    Row(mod.clip(shape).background(if (C.dark) Color(0xFF3A2C10) else Color(0xFFFFF4DC)).border(1.dp, Color(0xFFF2B33D), shape)
+        .then(if (busy) Modifier.semantics { stateDescription = saving ?: "" } else Modifier)
+        .clickable(enabled = !busy, role = Role.Button, onClick = onClick).heightIn(min = 44.dp).padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+        if (busy) androidx.compose.material3.CircularProgressIndicator(Modifier.size(18.dp).testTag("btn_busy"), color = fg, strokeWidth = 2.5.dp, trackColor = fg.copy(alpha = .2f))
+        else Icon(Ic.starGold, null, tint = Color.Unspecified, modifier = Modifier.size(18.dp))
+        Spacer(Modifier.width(if (busy) 10.dp else 8.dp))
+        Text(saving ?: t("Cover photo ✓\u00A0· Tap to undo", "Picha ya jalada ✓\u00A0· Gusa kutendua"), color = fg, style = MaterialTheme.typography.labelMedium.copy(fontSize = 14.sp), textAlign = TextAlign.Center)
     }
 }
 
@@ -532,7 +562,8 @@ internal fun StorySendingPill(m: AppModel, modifier: Modifier = Modifier) {
 
 /** One photo: a big look, its caption, which row, "shows children", and Delete. */
 @Composable
-internal fun StoryPhotoSheet(m: AppModel, pid: String, row: String, ph: StoryPhoto, inStory: Boolean, close: (cap: String) -> Unit, move: (String) -> Unit, kids: (Boolean) -> Unit, delete: () -> Unit) {
+internal fun StoryPhotoSheet(m: AppModel, pid: String, row: String, ph: StoryPhoto, inStory: Boolean, close: (cap: String) -> Unit, move: (String) -> Unit, kids: (Boolean) -> Unit, delete: () -> Unit,
+                             cover: Boolean = false, coverBusy: Boolean = false, coverErr: String? = null, setCover: () -> Unit = {}) {
     var cap by remember(ph.id) { mutableStateOf(ph.cap) }
     var ask by remember { mutableStateOf(false) }
     var big by remember { mutableStateOf(false) }
@@ -566,6 +597,9 @@ internal fun StoryPhotoSheet(m: AppModel, pid: String, row: String, ph: StoryPho
             Spacer(Modifier.width(8.dp))
             Switch(ph.children, { kids(it) }, Modifier.testTag("story_det_kids_sw"), colors = SwitchDefaults.colors(checkedTrackColor = C.blue2))
         }
+        // the story's cover (web v78): this photo, or back to the automatic choice
+        StoryCoverBtn(cover, coverBusy, setCover, Modifier.padding(top = 12.dp))
+        if (coverErr != null) Box(Modifier.testTag("sty_cover_err")) { Msg(coverErr, "bad") }
         Row(Modifier.padding(top = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Btn(t("Delete", "Futa"), { ask = true }, Modifier.weight(1f).testTag("story_det_del"), icon = "trash", light = true, small = true)
             Btn(t("Done", "Imekamilika"), { hide { } }, Modifier.weight(1f).testTag("story_det_done"), icon = "check", small = true)
