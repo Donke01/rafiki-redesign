@@ -100,6 +100,7 @@ struct MeView: View {
                         MeHero(act: m.activity)
                         WaitingList(snap: m.snap)
                         if let snap = m.snap { MyWork(snap: snap) }
+                        MyTrips()
                         MyMonth(act: m.activity)
                         ThisPhone(snap: m.snap)
                         CardV {

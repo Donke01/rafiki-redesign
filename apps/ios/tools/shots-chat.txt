@@ -1,0 +1,200 @@
+c01-chat-list -screen chat
+c01-chat-list-sw -screen chat -lang sw
+c01-chat-list-dark -screen chat -theme dark
+c01-chat-list-sun -screen chat -theme sun
+c02-chat-list-unread -screen chat -chip unread
+c02-chat-list-unread-sw -screen chat -chip unread -lang sw
+c02-chat-list-unread-dark -screen chat -chip unread -theme dark
+c02-chat-list-unread-sun -screen chat -chip unread -theme sun
+c03-chat-search -screen chat -sheet search -q pump
+c03-chat-search-sw -screen chat -sheet search -q pump -lang sw
+c03-chat-search-dark -screen chat -sheet search -q pump -theme dark
+c03-chat-search-sun -screen chat -sheet search -q pump -theme sun
+c04-chat-dm -screen chat:d:meril
+c04-chat-dm-sw -screen chat:d:meril -lang sw
+c04-chat-dm-dark -screen chat:d:meril -theme dark
+c04-chat-dm-sun -screen chat:d:meril -theme sun
+c05-chat-group -screen chat:g:kitale
+c05-chat-group-sw -screen chat:g:kitale -lang sw
+c05-chat-group-dark -screen chat:g:kitale -theme dark
+c05-chat-group-sun -screen chat:g:kitale -theme sun
+c06-chat-project -screen chat:p:104
+c06-chat-project-sw -screen chat:p:104 -lang sw
+c06-chat-project-dark -screen chat:p:104 -theme dark
+c06-chat-project-sun -screen chat:p:104 -theme sun
+c07-chat-news -screen chat:t:news
+c07-chat-news-sw -screen chat:t:news -lang sw
+c07-chat-news-dark -screen chat:t:news -theme dark
+c07-chat-news-sun -screen chat:t:news -theme sun
+c08-chat-msg-sheet -screen chat:d:meril -sheet msg
+c08-chat-msg-sheet-sw -screen chat:d:meril -sheet msg -lang sw
+c08-chat-msg-sheet-dark -screen chat:d:meril -sheet msg -theme dark
+c08-chat-msg-sheet-sun -screen chat:d:meril -sheet msg -theme sun
+c09-chat-select -screen chat:d:meril -sheet select
+c09-chat-select-sw -screen chat:d:meril -sheet select -lang sw
+c09-chat-select-dark -screen chat:d:meril -sheet select -theme dark
+c09-chat-select-sun -screen chat:d:meril -sheet select -theme sun
+c10-chat-find -screen chat:g:kitale -sheet find -q pump
+c10-chat-find-sw -screen chat:g:kitale -sheet find -q pump -lang sw
+c10-chat-find-dark -screen chat:g:kitale -sheet find -q pump -theme dark
+c10-chat-find-sun -screen chat:g:kitale -sheet find -q pump -theme sun
+c11-chat-attach -screen chat:d:meril -sheet attach
+c11-chat-attach-sw -screen chat:d:meril -sheet attach -lang sw
+c11-chat-attach-dark -screen chat:d:meril -sheet attach -theme dark
+c11-chat-attach-sun -screen chat:d:meril -sheet attach -theme sun
+c12-chat-live -screen chat:d:meril -sheet live
+c12-chat-live-sw -screen chat:d:meril -sheet live -lang sw
+c12-chat-live-dark -screen chat:d:meril -sheet live -theme dark
+c12-chat-live-sun -screen chat:d:meril -sheet live -theme sun
+c13-chat-recording -screen chat:d:meril -sheet rec
+c13-chat-recording-sw -screen chat:d:meril -sheet rec -lang sw
+c13-chat-recording-dark -screen chat:d:meril -sheet rec -theme dark
+c13-chat-recording-sun -screen chat:d:meril -sheet rec -theme sun
+c14-chat-clear -screen chat:d:meril -sheet clear
+c14-chat-clear-sw -screen chat:d:meril -sheet clear -lang sw
+c14-chat-clear-dark -screen chat:d:meril -sheet clear -theme dark
+c14-chat-clear-sun -screen chat:d:meril -sheet clear -theme sun
+c15-chat-add -screen chat:g:kitale -sheet add
+c15-chat-add-sw -screen chat:g:kitale -sheet add -lang sw
+c15-chat-add-dark -screen chat:g:kitale -sheet add -theme dark
+c15-chat-add-sun -screen chat:g:kitale -sheet add -theme sun
+c16-chat-media -screen chat:d:meril -sheet media
+c16-chat-media-sw -screen chat:d:meril -sheet media -lang sw
+c16-chat-media-dark -screen chat:d:meril -sheet media -theme dark
+c16-chat-media-sun -screen chat:d:meril -sheet media -theme sun
+c17-chat-date -screen chat:d:meril -sheet date
+c17-chat-date-sw -screen chat:d:meril -sheet date -lang sw
+c17-chat-date-dark -screen chat:d:meril -sheet date -theme dark
+c17-chat-date-sun -screen chat:d:meril -sheet date -theme sun
+c18-chat-info-dm -screen chatinfo:d:meril
+c18-chat-info-dm-sw -screen chatinfo:d:meril -lang sw
+c18-chat-info-dm-dark -screen chatinfo:d:meril -theme dark
+c18-chat-info-dm-sun -screen chatinfo:d:meril -theme sun
+c19-chat-info-group -screen chatinfo:g:kitale
+c19-chat-info-group-sw -screen chatinfo:g:kitale -lang sw
+c19-chat-info-group-dark -screen chatinfo:g:kitale -theme dark
+c19-chat-info-group-sun -screen chatinfo:g:kitale -theme sun
+c20-chat-bubble -screen chatinfo:g:kitale -sheet bubble
+c20-chat-bubble-sw -screen chatinfo:g:kitale -sheet bubble -lang sw
+c20-chat-bubble-dark -screen chatinfo:g:kitale -sheet bubble -theme dark
+c20-chat-bubble-sun -screen chatinfo:g:kitale -sheet bubble -theme sun
+c21-chat-wall -screen chatinfo:g:kitale -sheet wall
+c21-chat-wall-sw -screen chatinfo:g:kitale -sheet wall -lang sw
+c21-chat-wall-dark -screen chatinfo:g:kitale -sheet wall -theme dark
+c21-chat-wall-sun -screen chatinfo:g:kitale -sheet wall -theme sun
+c22-chat-leave -screen chatinfo:g:kitale -sheet leave
+c22-chat-leave-sw -screen chatinfo:g:kitale -sheet leave -lang sw
+c22-chat-leave-dark -screen chatinfo:g:kitale -sheet leave -theme dark
+c22-chat-leave-sun -screen chatinfo:g:kitale -sheet leave -theme sun
+c23-chat-new -screen chatnew
+c23-chat-new-sw -screen chatnew -lang sw
+c23-chat-new-dark -screen chatnew -theme dark
+c23-chat-new-sun -screen chatnew -theme sun
+c24-chat-new-group -screen chatnew -sheet group
+c24-chat-new-group-sw -screen chatnew -sheet group -lang sw
+c24-chat-new-group-dark -screen chatnew -sheet group -theme dark
+c24-chat-new-group-sun -screen chatnew -sheet group -theme sun
+c25-chat-starred -screen chatstar
+c25-chat-starred-sw -screen chatstar -lang sw
+c25-chat-starred-dark -screen chatstar -theme dark
+c25-chat-starred-sun -screen chatstar -theme sun
+c26-chat-archived -screen chatarch
+c26-chat-archived-sw -screen chatarch -lang sw
+c26-chat-archived-dark -screen chatarch -theme dark
+c26-chat-archived-sun -screen chatarch -theme sun
+c27-chat-settings -screen chatsettings
+c27-chat-settings-sw -screen chatsettings -lang sw
+c27-chat-settings-dark -screen chatsettings -theme dark
+c27-chat-settings-sun -screen chatsettings -theme sun
+c28-me-trips -screen me
+c28-me-trips-sw -screen me -lang sw
+c28-me-trips-dark -screen me -theme dark
+c28-me-trips-sun -screen me -theme sun
+c29-office-trips -screen office -section trips
+c29-office-trips-sw -screen office -section trips -lang sw
+c29-office-trips-dark -screen office -section trips -theme dark
+c29-office-trips-sun -screen office -section trips -theme sun
+c30-office-group-trips -screen office -section trips -pane group
+c30-office-group-trips-sw -screen office -section trips -pane group -lang sw
+c30-office-group-trips-dark -screen office -section trips -pane group -theme dark
+c30-office-group-trips-sun -screen office -section trips -pane group -theme sun
+c31-trip -screen trip:t1
+c31-trip-sw -screen trip:t1 -lang sw
+c31-trip-dark -screen trip:t1 -theme dark
+c31-trip-sun -screen trip:t1 -theme sun
+c32-trip-costs -screen trip:t1 -sheet tab-costs
+c32-trip-costs-sw -screen trip:t1 -sheet tab-costs -lang sw
+c32-trip-costs-dark -screen trip:t1 -sheet tab-costs -theme dark
+c32-trip-costs-sun -screen trip:t1 -sheet tab-costs -theme sun
+c33-trip-packing -screen trip:t1 -sheet tab-pack
+c33-trip-packing-sw -screen trip:t1 -sheet tab-pack -lang sw
+c33-trip-packing-dark -screen trip:t1 -sheet tab-pack -theme dark
+c33-trip-packing-sun -screen trip:t1 -sheet tab-pack -theme sun
+c34-trip-share -screen trip:t1 -sheet tab-share
+c34-trip-share-sw -screen trip:t1 -sheet tab-share -lang sw
+c34-trip-share-dark -screen trip:t1 -sheet tab-share -theme dark
+c34-trip-share-sun -screen trip:t1 -sheet tab-share -theme sun
+c35-trip-stop -screen trip:t1 -sheet stop
+c35-trip-stop-sw -screen trip:t1 -sheet stop -lang sw
+c35-trip-stop-dark -screen trip:t1 -sheet stop -theme dark
+c35-trip-stop-sun -screen trip:t1 -sheet stop -theme sun
+c36-trip-skip -screen trip:t1 -sheet skip
+c36-trip-skip-sw -screen trip:t1 -sheet skip -lang sw
+c36-trip-skip-dark -screen trip:t1 -sheet skip -theme dark
+c36-trip-skip-sun -screen trip:t1 -sheet skip -theme sun
+c37-trip-replan -screen trip:t1 -sheet replan
+c37-trip-replan-sw -screen trip:t1 -sheet replan -lang sw
+c37-trip-replan-dark -screen trip:t1 -sheet replan -theme dark
+c37-trip-replan-sun -screen trip:t1 -sheet replan -theme sun
+c38-trip-night -screen trip:t1 -sheet night
+c38-trip-night-sw -screen trip:t1 -sheet night -lang sw
+c38-trip-night-dark -screen trip:t1 -sheet night -theme dark
+c38-trip-night-sun -screen trip:t1 -sheet night -theme sun
+c39-trip-road -screen trip:t1 -sheet road
+c39-trip-road-sw -screen trip:t1 -sheet road -lang sw
+c39-trip-road-dark -screen trip:t1 -sheet road -theme dark
+c39-trip-road-sun -screen trip:t1 -sheet road -theme sun
+c40-trip-fuel -screen trip:t1 -sheet fuel
+c40-trip-fuel-sw -screen trip:t1 -sheet fuel -lang sw
+c40-trip-fuel-dark -screen trip:t1 -sheet fuel -theme dark
+c40-trip-fuel-sun -screen trip:t1 -sheet fuel -theme sun
+c41-trip-chat -screen trip:t1 -sheet chat
+c41-trip-chat-sw -screen trip:t1 -sheet chat -lang sw
+c41-trip-chat-dark -screen trip:t1 -sheet chat -theme dark
+c41-trip-chat-sun -screen trip:t1 -sheet chat -theme sun
+c42-plan-stops -screen trip_new
+c42-plan-stops-sw -screen trip_new -lang sw
+c42-plan-stops-dark -screen trip_new -theme dark
+c42-plan-stops-sun -screen trip_new -theme sun
+c43-plan-details -screen trip_new -step 2
+c43-plan-details-sw -screen trip_new -step 2 -lang sw
+c43-plan-details-dark -screen trip_new -step 2 -theme dark
+c43-plan-details-sun -screen trip_new -step 2 -theme sun
+c44-plan-preview -screen trip_new -step 3
+c44-plan-preview-sw -screen trip_new -step 3 -lang sw
+c44-plan-preview-dark -screen trip_new -step 3 -theme dark
+c44-plan-preview-sun -screen trip_new -step 3 -theme sun
+c45-group-trip -screen gtrip:g1
+c45-group-trip-sw -screen gtrip:g1 -lang sw
+c45-group-trip-dark -screen gtrip:g1 -theme dark
+c45-group-trip-sun -screen gtrip:g1 -theme sun
+c46-group-trip-people -screen gtrip:g1 -sheet tab-group
+c46-group-trip-people-sw -screen gtrip:g1 -sheet tab-group -lang sw
+c46-group-trip-people-dark -screen gtrip:g1 -sheet tab-group -theme dark
+c46-group-trip-people-sun -screen gtrip:g1 -sheet tab-group -theme sun
+c47-group-trip-costs -screen gtrip:g1 -sheet tab-money
+c47-group-trip-costs-sw -screen gtrip:g1 -sheet tab-money -lang sw
+c47-group-trip-costs-dark -screen gtrip:g1 -sheet tab-money -theme dark
+c47-group-trip-costs-sun -screen gtrip:g1 -sheet tab-money -theme sun
+c48-group-trip-page -screen gtrip:g1 -sheet tab-page
+c48-group-trip-page-sw -screen gtrip:g1 -sheet tab-page -lang sw
+c48-group-trip-page-dark -screen gtrip:g1 -sheet tab-page -theme dark
+c48-group-trip-page-sun -screen gtrip:g1 -sheet tab-page -theme sun
+c49-group-preview -screen gview:g1
+c49-group-preview-sw -screen gview:g1 -lang sw
+c49-group-preview-dark -screen gview:g1 -theme dark
+c49-group-preview-sun -screen gview:g1 -theme sun
+c50-group-new -screen gtrip_new
+c50-group-new-sw -screen gtrip_new -lang sw
+c50-group-new-dark -screen gtrip_new -theme dark
+c50-group-new-sun -screen gtrip_new -theme sun

@@ -21,6 +21,7 @@ struct ProjectView: View {
                             .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous)).padding(.vertical, 6)
                     }
                     hero(snap, p).padding(.top, 6)
+                    Btn(t("Chat", "Gumzo"), icon: "chat", light: true, small: true, wide: true) { Haptic.tap(); ChatNav.shared.project(p.id) }.padding(.top, 8)
                     if let r = snap.repairs[p.id] { RepairCard(p: p, r: r).padding(.top, 12) }
                     HStack(spacing: 0) {
                         ForEach([("pin", t("Pin location", "Weka mahali")), ("visit", t("Site visit", "Ziara")), ("hist", t("History", "Historia")), ("story", t("Stories", "Hadithi"))], id: \.0) { k, label in
