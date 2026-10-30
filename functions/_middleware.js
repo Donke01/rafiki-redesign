@@ -9,6 +9,10 @@ const PROD = 'https://www.rafikioutreach.org';
 const FIELD = 'pin.rafikioutreach.org';
 const HIDDEN = /^(pin|test)\.rafikioutreach\.org$/;
 
+// rafikioutreachkenya.org is a separate trial site: its front door is the Kenya copy (kenya-copy.html).
+// Shared files, the API and images still load; any other website page goes back to its front door.
+const KE = /^(www\.)?rafikioutreachkenya\.org$/;
+
 // Google Analytics (GA4) for the public website.
 // Never on the field app, the API, or private links (donor pages, project share links, the repair tracker).
 const GA_ID = /^G-[A-Z0-9]{4,20}$/;
@@ -17,7 +21,7 @@ const GA_DEFAULT = 'G-QQQ2X6420B';
 const GA_SKIP = /^\/(pin|app|api|donor|p|project|tracker|vendor)(\/|$|\.|-)/;
 function gaTag(env, url) {
   const id = String((env && env.GA_MEASUREMENT_ID) || GA_DEFAULT).trim().toUpperCase();
-  if (!GA_ID.test(id) || url.hostname === FIELD || HIDDEN.test(url.hostname) || GA_SKIP.test(url.pathname)) return '';
+  if (!GA_ID.test(id) || KE.test(url.hostname) || url.hostname === FIELD || HIDDEN.test(url.hostname) || GA_SKIP.test(url.pathname)) return '';
   return '<script async src="https://www.googletagmanager.com/gtag/js?id=' + id + '"></script>' +
     '<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date());gtag("config","' + id + '");' +
     // a tap on any Give / Sponsor / Fundraise link counts as donate_click (the gift itself is donation_complete on /thank-you)
@@ -32,10 +36,13 @@ export async function onRequest({ request, next, env }) {
   const dl = url.hostname === FIELD && /^\/donor\/([A-Za-z0-9_-]{43})\/?$/.exec(url.pathname);
   if (dl) return new Response(null, { status: 302, headers: { Location: url.origin + '/pin#donor=' + dl[1], 'Cache-Control': 'private, no-store', 'Referrer-Policy': 'no-referrer' } });
   // on the field app's address, any website page goes to the app; the app's own files, the API and assets still load
+  if (KE.test(url.hostname) && !/^\/(api|img|fonts|vendor|\.well-known)(\/|$|\.|-)/.test(url.pathname) && !/\.[a-z0-9]{2,12}$/i.test(url.pathname)) {
+    if (url.pathname !== '/') return Response.redirect(url.origin + '/', 302);
+  }
   if (url.hostname === FIELD && !/^\/(pin|api|app|vendor|img|fonts|\.well-known)(\/|$|\.|-)/.test(url.pathname) && !/\.[a-z0-9]{2,12}$/i.test(url.pathname)) {
     return Response.redirect(url.origin + '/pin' + url.search, 302);
   }
-  let res = await next();
+  let res = KE.test(url.hostname) && url.pathname === '/' ? await env.ASSETS.fetch(new Request(url.origin + '/kenya-copy', request)) : await next();
   // a WebSocket (team chat) must go back untouched; copying the response would drop the socket
   if (res.status === 101 || res.webSocket) return res;
   if (HIDDEN.test(url.hostname)) { res = new Response(res.body, res); res.headers.set('X-Robots-Tag', 'noindex, nofollow'); }
