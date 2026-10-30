@@ -474,7 +474,7 @@ html .pg{background:#FAF8F3}
 .pv-cty-n{font-size:17px;font-weight:700;color:var(--pv-ink)}
 .pv-cty-s{font-size:13px;line-height:1.45;color:var(--pv-mut);min-height:1.45em}
 .pv-cty-go{display:block !important;min-height:0 !important;padding:4px 0 6px;font-size:14px;line-height:1.4}
-.pv-cty-go span{display:inline-block;margin-left:6px}
+.pv-cty-go span{display:inline;margin-left:6px}
 .pv-cty-go::after{content:"";position:absolute;inset:0}
 .pv-cty .pv-sub{font-size:13px;margin-top:-8px}
 @media (max-width:900px){.pv-cty{grid-template-columns:repeat(2,minmax(0,1fr));gap:24px 16px}}
@@ -1962,7 +1962,7 @@ function EXTRA(self, s) {
       if (C.u) parts.push(C.u.toLocaleString('en-US') + (C.w ? ' being built' : (C.u === 1 ? ' well' : ' wells') + ' being built'));
       var fund = !C.w && !C.u && C.fa > 0, fTx = C.fw ? C.fw + (C.fw === 1 ? ' well' : ' wells') : C.fa + (C.fa === 1 ? ' project' : ' projects');
       if (fund) parts.push('Looking for funding');
-      return { n: C.n, img: CPHOTO[k], sub: parts.map(nbsp).join(' · '), href: ({ ke: '/kenya', tz: '/tanzania', ug: '/uganda', mw: '/malawi' })[k], go: 'Visit the ' + C.n + ' page',
+      return { n: C.n, img: CPHOTO[k], sub: parts.map(nbsp).join(' · '), href: ({ ke: '/kenya', tz: '/tanzania', ug: '/uganda', mw: '/malawi' })[k], go: 'Visit the ' + C.n + '\u00a0page',
         fund: fund, fHref: '/projects?country=' + k + '&status=funding', fTx: 'See the ' + fTx + ' looking for funding' };
     }),
     upList: ups.slice(0, UP_MAX).map(function (p) { var has = p.needed > 0; return { href: '/projects?project=' + encodeURIComponent(p.id), title: p.title, country: p.country, need: has ? '$' + Math.round(p.needed).toLocaleString('en-US') + ' needed' : 'Amount to confirm', needCls: has ? 'pv-up-need' : 'pv-up-tbc' }; }),
