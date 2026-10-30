@@ -103,9 +103,10 @@ struct ChatInfoView: View {
         }
     }
     private func card<V: View>(_ label: String, @ViewBuilder _ content: () -> V) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
+        let c = content()
+        return VStack(alignment: .leading, spacing: 4) {
             Text(label).font(.mont(11, .heavy)).tracking(0.8).foregroundColor(C.muted).padding(.leading, 6)
-            CardV(pad: 8) { content() }
+            CardV(pad: 8) { c }
         }
     }
     private func members(_ row: ChatRow, _ me: String) -> some View {
@@ -351,9 +352,10 @@ struct ChatSettingsView: View {
         .background(ChatLook.sand)
     }
     private func section<V: View>(_ label: String, @ViewBuilder _ content: () -> V) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
+        let c = content()
+        return VStack(alignment: .leading, spacing: 4) {
             Text(label).font(.mont(11, .heavy)).tracking(0.8).foregroundColor(C.muted).padding(.leading, 6)
-            CardV(pad: 10) { VStack(alignment: .leading, spacing: 6) { content() } }
+            CardV(pad: 10) { VStack(alignment: .leading, spacing: 6) { c } }
         }
     }
 }

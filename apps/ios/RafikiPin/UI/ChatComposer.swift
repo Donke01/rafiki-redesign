@@ -281,7 +281,7 @@ struct ChatMatePicker: View {
     @Environment(\.dismiss) private var dismiss
     var body: some View {
         let w = q.trimmingCharacters(in: .whitespaces).lowercased()
-        let people = (m.team ?? []).map(\.name).filter { !chatSame($0, hub.me) && !exclude.contains(where: { x in chatSame(x, $0) }) && (w.isEmpty || $0.lowercased().contains(w)) }
+        let people = (m.team ?? []).map(\.name).filter { n in !chatSame(n, hub.me) && !exclude.contains(where: { x in chatSame(x, n) }) && (w.isEmpty || n.lowercased().contains(w)) }
         ScrollView {
             VStack(alignment: .leading, spacing: 6) {
                 ChatSheetHead(title: title)
