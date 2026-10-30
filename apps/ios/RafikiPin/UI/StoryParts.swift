@@ -110,14 +110,16 @@ struct AuthPic: View {
     let path: String; var fit = false
     @State private var img: UIImage?
     var body: some View {
-        ZStack {
-            if let img {
-                if fit { Image(uiImage: img).resizable().scaledToFit() } else { Image(uiImage: img).resizable().scaledToFill() }
-            } else {
-                Icon("camera", size: 22, color: C.muted)
-            }
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        // the picture never makes its frame bigger: it fills (or fits) the space it is given and is cut to it
+        Color.clear
+            .overlay(Group {
+                if let img {
+                    if fit { Image(uiImage: img).resizable().scaledToFit() } else { Image(uiImage: img).resizable().scaledToFill() }
+                } else {
+                    Icon("camera", size: 22, color: C.muted)
+                }
+            })
+            .clipped()
         .task(id: path) {
             img = StoryPics.shared.cached(path)
             if img == nil { img = await StoryPics.shared.load(m.api, path) }
@@ -148,8 +150,9 @@ struct LocalPic: View {
     let path: String; var px = 360
     @State private var img: UIImage?
     var body: some View {
-        ZStack { if let img { Image(uiImage: img).resizable().scaledToFill() } }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        Color.clear
+            .overlay(Group { if let img { Image(uiImage: img).resizable().scaledToFill() } })
+            .clipped()
             .task(id: path) {
                 img = Thumbs.cached(path, px)
                 if img == nil { img = await Thumbs.load(path, px) }

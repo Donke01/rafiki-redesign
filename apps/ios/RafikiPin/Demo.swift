@@ -1,5 +1,6 @@
 import Foundation
 import UIKit
+import SwiftUI
 
 /// Demo mode (launch argument -demo): sample projects and a pretend server, used to check every
 /// screen on the simulator without touching the real monday.com board.
