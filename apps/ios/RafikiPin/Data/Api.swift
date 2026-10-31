@@ -46,7 +46,7 @@ final class Api {
     func bytes(_ path: String) async -> (Int, Data) {
         var h = ["Accept": "image/*"]
         auth(&h)
-        return await transport("GET", server + path, h, nil)
+        return await send("GET", server + path, h, nil)
     }
 
     /// A file as multipart/form-data ("file" plus text fields). `progress` (0…1) is told as the bytes leave the phone.
@@ -61,7 +61,7 @@ final class Api {
         var h = ["Accept": "application/json", "Content-Type": "multipart/form-data; boundary=\(boundary)", "Origin": server]
         auth(&h)
         if faked || progress == nil {
-            let res: (Int, Data) = await transport("POST", server + path, h, out)
+            let res: (Int, Data) = await send("POST", server + path, h, out)
             if (200..<300).contains(res.0) { progress?(1) }
             return Api.toReply(res.0, res.1)
         }
@@ -89,14 +89,23 @@ final class Api {
         let s = session(); if !s.isEmpty { h["Cookie"] = "rfpin=\(s)"; h["Origin"] = server }
     }
 
+    /// Every request runs on its own: when the screen that asked is closed or redrawn, SwiftUI cancels that screen's
+    /// work, but the request still finishes (a cut-off request used to show as "No signal" or "could not be opened").
+    private func send(_ method: String, _ url: String, _ headers: [String: String], _ body: Data?) async -> (Int, Data) {
+        let tr = transport
+        return await Task.detached { await tr(method, url, headers, body) }.value
+    }
+
     private func call(_ method: String, _ path: String, _ body: JSON?) async -> Reply {
         var h = ["Accept": "application/json"]
         auth(&h)
         var data: Data? = nil
         if let body { h["Content-Type"] = "application/json"; data = try? JSONSerialization.data(withJSONObject: body) }
         if method == "POST" { h["Origin"] = server }
-        let (status, out) = await transport(method, server + path, h, data)
-        return Api.toReply(status, out)
+        let (status, out) = await send(method, server + path, h, data)
+        let reply = Api.toReply(status, out)
+        if !reply.ok { print("RAFIKI reply \(method) \(path.prefix(80)) status=\(status) reason=\(reply.reason ?? "-")") }
+        return reply
     }
 
     /// Adds one photo or voice note to a monday.com note (after the change itself was saved).
@@ -112,12 +121,13 @@ final class Api {
         out.append("\r\n--\(boundary)--\r\n".data(using: .utf8)!)
         var h = ["Accept": "application/json", "Content-Type": "multipart/form-data; boundary=\(boundary)"]
         auth(&h)
-        let (status, text) = await transport("POST", "\(server)/api/pin-photo", h, out)
+        let (status, text) = await send("POST", "\(server)/api/pin-photo", h, out)
         return Api.toReply(status, text)
     }
 
     static func toReply(_ status: Int, _ data: Data) -> Reply {
         if status == 0 { return Reply(ok: false, status: 0, json: [:], reason: "offline") }
+        if status == -1 { return Reply(ok: false, status: 0, json: [:], reason: "cancelled") }
         let j = (try? JSONSerialization.jsonObject(with: data)) as? JSON ?? ["ok": false, "reason": "down"]
         let r = j.str("reason")
         return Reply(ok: j.bool("ok"), status: status, json: j, reason: r.isEmpty ? nil : r)
@@ -142,7 +152,12 @@ final class Api {
         do {
             let (d, resp) = try await net.data(for: r)
             return ((resp as? HTTPURLResponse)?.statusCode ?? 0, d)
-        } catch { return (0, Data()) }
+        } catch {
+            // a request the app itself stopped (a screen closed, a pull-to-refresh ended) is not "no signal"
+            if error is CancellationError || (error as? URLError)?.code == .cancelled { return (-1, Data()) }
+            print("RAFIKI net error \(method) \(u.path): \(error)")
+            return (0, Data())
+        }
     }
 }
 

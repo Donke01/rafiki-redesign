@@ -223,7 +223,12 @@ final class AppModel: ObservableObject {
     /// Sends anything waiting, then fetches the latest list.
     func refresh() { Task { _ = await refreshNow() } }
     func reload() { refresh() }
+    /// Runs on its own, so leaving a screen or letting go of pull-to-refresh never cuts it off half way
+    /// (a cut-off request used to look like "No signal").
     @discardableResult func refreshNow() async -> Bool {
+        await Task { await self.refreshNowInner() }.value
+    }
+    @discardableResult private func refreshNowInner() async -> Bool {
         busy = true
         _ = await sendWaiting()
         let r = await api.list()
@@ -234,7 +239,7 @@ final class AppModel: ObservableObject {
             return true
         }
         if r.status == 401 { lock(); banner = reasonText(r.reason) }
-        else if r.status == 0 { banner = t("No signal: showing the list saved on this phone.", "Hakuna mtandao: inaonyesha orodha iliyohifadhiwa kwenye simu hii.") }
+        else if r.status == 0 && r.reason != "cancelled" { banner = t("No signal: showing the list saved on this phone.", "Hakuna mtandao: inaonyesha orodha iliyohifadhiwa kwenye simu hii.") }
         return false
     }
 
