@@ -143,7 +143,7 @@ struct MeWelcome: View {
     @EnvironmentObject var m: AppModel
     @ObservedObject private var loc = Locator.shared
     let done: () -> Void
-    @State private var step = 0
+    @State private var step = MeNav.shared.welcomeStep
     @State private var role = ""
     @State private var ck = ""
     @State private var page = 0
@@ -162,6 +162,7 @@ struct MeWelcome: View {
             }.transition(.opacity)
         }
         .onAppear { ck = m.prefs.country; page = Lang.sw ? 1 : 0 }
+        .onChange(of: step) { st in MeNav.shared.welcomeStep = st }
         .onChange(of: loc.allowed) { ok in if ok && step == 4 && asked { m.locator.start(); withAnimation { step = 5 } } }
     }
 

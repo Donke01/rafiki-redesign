@@ -14,6 +14,7 @@ struct RafikiPinApp: App {
     var body: some Scene {
         WindowGroup {
             Root().environmentObject(model)
+                .modifier(MeWelcomeHost(m: model))
                 .onChange(of: phase) { p in
                     // GPS only while the app is open; refresh when coming back to it
                     if p == .active, model.signedIn { model.cameBack(); model.locator.start(); if !model.demo { model.refresh(); model.storyUp.resume() } }

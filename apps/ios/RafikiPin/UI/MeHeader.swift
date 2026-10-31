@@ -10,6 +10,22 @@ import UIKit
     static let shared = MeNav()
     /// Show the welcome screens (first time on this phone, or Help › Show the welcome screens again).
     @Published var welcome = false
+    /// Where the welcome screens are, kept outside the screen so redrawing the app never starts them over.
+    @Published var welcomeStep = 0
+    /// Bumped when the welcome screens are finished (the Me hint may show then).
+    @Published var welcomeFinished = 0
+}
+
+/// Shows the welcome screens above the whole app (outside the parts that are rebuilt when the language or look changes,
+/// which used to close them and start them again from the first screen).
+struct MeWelcomeHost: ViewModifier {
+    @ObservedObject var m: AppModel
+    @ObservedObject private var nav = MeNav.shared
+    func body(content: Content) -> some View {
+        content.fullScreenCover(isPresented: Binding(get: { nav.welcome && m.signedIn }, set: { if !$0 { nav.welcome = false } })) {
+            MeWelcome { nav.welcome = false; nav.welcomeStep = 0; nav.welcomeFinished += 1 }.environmentObject(m)
+        }
+    }
 }
 
 /// A short message at the bottom of the screen for a moment ("Photo saved ✓").
@@ -269,9 +285,9 @@ struct MeOverlays: ViewModifier {
             .overlay(alignment: .bottom) { MeToastView() }
             .overlay { MeUpdatePrompt() }
             .sheet(item: Binding(get: { contact.who }, set: { contact.who = $0 })) { who in ContactSheet(name: who.name).environmentObject(m) }
-            .fullScreenCover(isPresented: Binding(get: { nav.welcome }, set: { nav.welcome = $0 })) { MeWelcome { nav.welcome = false; showHint() }.environmentObject(m) }
+            .onChange(of: nav.welcomeFinished) { _ in showHint() }
             .onAppear {
-                if !m.prefs.onb && (!m.demo || Demo.arg("-screen") == "welcome") { nav.welcome = true } else { showHint() }
+                if !m.prefs.onb && (!m.demo || Demo.arg("-screen") == "welcome") { if !nav.welcome { nav.welcome = true } } else { showHint() }
             }
     }
     private func showHint() {
