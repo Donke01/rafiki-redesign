@@ -8,7 +8,9 @@
 // X-Chat-User (URI-encoded name), X-Chat-Admin (1 = Office admin), X-Chat-Home (ke/tz/ug/mw), X-Chat-Gen
 // (session number) and the team roster in X-Chat-Roster (base64url JSON [{n, h, a, g, b, p}]; p: profile photo version).
 import { DurableObject } from 'cloudflare:workers';
-import { json, fail, rand, keyOf, clean, sha, mediaUrl, makeTicket, readTicket } from './util.js';
+import { json, fail, rand, keyOf, clean, sha, mediaUrl, onceUrl, makeTicket, readTicket } from './util.js';
+import { readPrivacy, allowed } from './privacy.js';
+import { statusMethods } from './status.js';
 import { EDIT_MS } from './conversation.js';
 import { fcmOn, inDnd, message as fcmMessage, sendOne } from './fcm.js';
 
@@ -25,7 +27,11 @@ const TRIP_STATUS = ['draft', 'planned', 'active', 'done', 'cancelled'];
 const EMOJI = /^(?:\p{Extended_Pictographic}|\p{Emoji_Presentation})(?:️|‍|\p{Extended_Pictographic}|\p{Emoji_Modifier}|\p{Emoji_Presentation})*$/u;
 const MAX_TEXT = 4000;
 const LIVE_MAX = 8 * 3600e3 + 60e3;
-const LIMITS = { send: [60, 60e3], media: [120, 3600e3], group: [20, 3600e3], preview: [120, 3600e3] };
+const LIMITS = { send: [60, 60e3], media: [120, 3600e3], group: [20, 3600e3], preview: [120, 3600e3], status: [30, 3600e3] };
+// chatfx: a signed-in device (X-Chat-Dev, from the Pages side's linked-devices record)
+const DEV = /^[A-Za-z0-9_-]{8,64}$/;
+// after everyone opened a view-once photo, its file is deleted this long after (the last link still works until then)
+const ONCE_PURGE_MS = 10 * 60 * 1000;
 const P = s => { if (s == null || s === '') return null; try { return JSON.parse(s); } catch (e) { return null; } };
 const num = v => (v === '' || v == null || !isFinite(Number(v)) ? null : Number(v));
 const isMediaId = s => /^[A-Za-z0-9_-]{16,40}$/.test(String(s || ''));
@@ -42,6 +48,8 @@ export function tripCard(t) {
   if (out.done > out.total) out.done = out.total;
   return out;
 }
+// paths only the Pages Functions call (never from an app through the proxy)
+export const INTERNAL = ['sys', 'sync', 'people', 'kick', 'key'];
 const DEF_PREFS = home => ({ quick: null, dnd: { on: false, from: '21:00', to: '06:30', mentions: false, tz: home === 'mw' ? 120 : 180 }, doubleTap: '❤️' });
 
 export class Directory extends DurableObject {
@@ -72,6 +80,17 @@ export class Directory extends DurableObject {
     add('users', 'photo', "TEXT DEFAULT ''");
     // chat2: "Clear chat" keeps, per person, the newest message id they cleared away (it never comes back on reload)
     add('members', 'cleared', 'INTEGER DEFAULT 0');
+    // chatfx: locked chats (per person), privacy settings, the read pointer others may see (read receipts off keeps it
+    // where it was), the device behind each push token, statuses, their views and media waiting to be deleted
+    add('members', 'locked', 'INTEGER DEFAULT 0');
+    add('users', 'priv', 'TEXT');
+    add('devices', 'dev', 'TEXT');
+    if (!cols('members').has('pub_up')) { x('ALTER TABLE members ADD COLUMN pub_up INTEGER'); x('UPDATE members SET pub_up = read_up'); }
+    x(`CREATE TABLE IF NOT EXISTS statuses (id TEXT PRIMARY KEY, k TEXT, at INTEGER, exp INTEGER, kind TEXT, text TEXT, color TEXT, media TEXT,
+      caption TEXT, place TEXT, priv TEXT, via TEXT, cid TEXT)`);
+    x('CREATE INDEX IF NOT EXISTS statuses_k ON statuses (k)');
+    x('CREATE TABLE IF NOT EXISTS status_views (s TEXT, k TEXT, at INTEGER, liked INTEGER DEFAULT 0, reshared INTEGER DEFAULT 0, PRIMARY KEY (s, k))');
+    x('CREATE TABLE IF NOT EXISTS purge (id TEXT PRIMARY KEY, at INTEGER)');
   }
 
   // ---- small reads ----------------------------------------------------------------------------
@@ -101,13 +120,40 @@ export class Directory extends DurableObject {
   sendTo(k, payload) { const s = JSON.stringify(payload); for (const ws of this.sockets(k)) { try { ws.send(s); } catch (e) {} } }
   fan(c, payload, except) { for (const k of this.memberKeys(c)) if (k !== except) this.sendTo(k, payload); }
 
+  // ---- chatfx: privacy --------------------------------------------------------------------------------
+  privOf(k) { const u = this.user(k); return readPrivacy(u && u.priv); }
+  receiptsOn(k) { return this.privOf(k).readReceipts !== false; }
+  // last seen and online, both ways like WhatsApp: hidden from me if they don't share it with me or I don't share mine with them
+  seesLastSeen(owner, viewer) {
+    if (!viewer || owner === viewer) return owner === viewer;
+    return allowed(this.privOf(owner).lastSeen, owner, viewer) && allowed(this.privOf(viewer).lastSeen, viewer, owner);
+  }
+  seesPhoto(owner, viewer) { return allowed(this.privOf(owner).photo, owner, viewer); }
+  photoFor(u, viewer) { const pic = u ? photoUrl(u.name, u.photo) : ''; return pic && this.seesPhoto(u.k, viewer) ? pic : ''; }
+  // one person's presence as `viewer` may see it
+  presenceOf(u, viewer, online, seen) {
+    const p = this.seesLastSeen(u.k, viewer) ? { online: online == null ? this.sockets(u.k).length > 0 : online, seen: (seen === undefined ? u.seen : seen) || null } : { online: false, seen: null, hidden: true };
+    const pic = photoUrl(u.name, u.photo);
+    if (pic && this.seesPhoto(u.k, viewer)) p.photo = pic;
+    return p;
+  }
+  // a presence change for `u`, to every open socket, each seeing only what they may
+  presenceAll(u, online, seen, except) {
+    for (const ws of this.ctx.getWebSockets()) {
+      const a = ws.deserializeAttachment() || {};
+      if (!a.k || a.k === except) continue;
+      try { ws.send(JSON.stringify(Object.assign({ t: 'presence', who: u.name }, this.presenceOf(u, a.k, online, seen)))); } catch (e) {}
+    }
+  }
+
   // ---- people and the team roster ---------------------------------------------------------------
   me(request) {
     const h = request.headers;
     let name = ''; try { name = decodeURIComponent(h.get('X-Chat-User') || ''); } catch (e) {}
     name = clean(name, 80);
     if (!name) return null;
-    return { k: keyOf(name), name, admin: h.get('X-Chat-Admin') === '1', home: /^(ke|tz|ug|mw)$/.test(h.get('X-Chat-Home') || '') ? h.get('X-Chat-Home') : '', gen: Number(h.get('X-Chat-Gen')) || 0 };
+    const dev = DEV.test(h.get('X-Chat-Dev') || '') ? h.get('X-Chat-Dev') : '';
+    return { k: keyOf(name), name, admin: h.get('X-Chat-Admin') === '1', home: /^(ke|tz|ug|mw)$/.test(h.get('X-Chat-Home') || '') ? h.get('X-Chat-Home') : '', gen: Number(h.get('X-Chat-Gen')) || 0, dev };
   }
   async roster(request) {
     const raw = request.headers.get('X-Chat-Roster');
@@ -138,7 +184,7 @@ export class Directory extends DurableObject {
     for (const u of this.q('SELECT k FROM users WHERE roster = 1')) if (!seen.has(u.k)) { this.sql.exec('UPDATE users SET roster = 0, removed = 1 WHERE k = ?', u.k); kick.push(u.k); }
     for (const k of new Set(kick)) for (const ws of this.sockets(k)) { try { ws.close(4401, 'signed-out'); } catch (e) {} }
     // a new or removed profile photo: open chats swap the face straight away
-    for (const x of pics) this.everyone({ t: 'presence', who: x.name, online: this.sockets(x.k).length > 0, seen: x.seen, photo: photoUrl(x.name, x.pv) });
+    for (const x of pics) this.presenceAll({ k: x.k, name: x.name, photo: x.pv, seen: x.seen }, this.sockets(x.k).length > 0, x.seen);
     this.syncTeams(now);
   }
   ensureUser(me) {
@@ -171,7 +217,7 @@ export class Directory extends DurableObject {
     }
   }
   addMember(ch, k, admin, now) {
-    this.sql.exec('INSERT OR IGNORE INTO members (c, k, admin, joined, read_up, deliv_up, upd) VALUES (?,?,?,?,?,?,?)', ch.id, k, admin ? 1 : 0, now, ch.seq || 0, ch.seq || 0, now);
+    this.sql.exec('INSERT OR IGNORE INTO members (c, k, admin, joined, read_up, deliv_up, upd, pub_up) VALUES (?,?,?,?,?,?,?,?)', ch.id, k, admin ? 1 : 0, now, ch.seq || 0, ch.seq || 0, now, ch.seq || 0);
     this.sql.exec('DELETE FROM gone WHERE c = ? AND k = ?', ch.id, k);
     this.sql.exec('UPDATE members SET upd = ? WHERE c = ?', now, ch.id);
   }
@@ -190,14 +236,16 @@ export class Directory extends DurableObject {
     if (ch.kind === 'dm') { const o = mem.find(x => x.k !== k); title = o ? o.name || o.k : ch.title; }
     const cl = (m && Number(m.cleared)) || 0, last0 = P(ch.last), last = last0 && cl && last0.id <= cl ? null : last0, lk = last ? keyOf(last.from) : '';
     // "Seen by": members whose read receipt covers the last message (not me, not its sender), most recent first
-    const seen = ch.seq && last ? this.q('SELECT u.name, m.k FROM members m LEFT JOIN users u ON u.k = m.k WHERE m.c = ? AND m.read_up >= ? AND m.read_at > 0 AND m.k != ? AND m.k != ? ORDER BY m.read_at DESC', ch.id, ch.seq, k, lk).map(x => x.name || x.k) : [];
+    // (chatfx: the read pointer others may see; with my read receipts off I see nobody's in a 1:1 chat)
+    const hideReads = ch.kind === 'dm' && !this.receiptsOn(k);
+    const seen = ch.seq && last && !hideReads ? this.q('SELECT u.name, m.k FROM members m LEFT JOIN users u ON u.k = m.k WHERE m.c = ? AND COALESCE(m.pub_up, m.read_up) >= ? AND m.read_at > 0 AND m.k != ? AND m.k != ? ORDER BY m.read_at DESC', ch.id, ch.seq, k, lk).map(x => x.name || x.k) : [];
     const out = {
       id: ch.id, kind: ch.kind, title, photo: isMediaId(ch.photo) ? await mediaUrl(key, ch.photo, now) : '', project: ch.project || '', description: ch.description || '',
       members: mem.map(x => x.name || x.k), admins: mem.filter(x => x.admin).map(x => x.name || x.k), last,
       unread: m ? m.unread : 0, mention: !!(m && m.mention), pinned: !!(m && m.pinned),
       muted: m ? (m.muted === -1 ? 'always' : m.muted > now ? m.muted : 0) : 0, archived: !!(m && m.archived), onlyAdmins: !!ch.only_admins, wallpaper: (m && m.wallpaper) || '',
       bubble: (m && m.bubble) || '', pins: (P(ch.pins) || []).filter(x => x.id > cl), seen, mentionId: (m && m.mention) || 0, cleared: cl,
-      country: ch.kind === 'team' && COUNTRIES[ch.id.slice(2)] ? ch.id.slice(2) : ''
+      country: ch.kind === 'team' && COUNTRIES[ch.id.slice(2)] ? ch.id.slice(2) : '', locked: !!(m && m.locked)
     };
     if (ch.id === NEWS) out.announce = true;
     return out;
@@ -207,22 +255,38 @@ export class Directory extends DurableObject {
     if (!ch) return;
     for (const k of only ? [only] : this.memberKeys(c)) if (this.sockets(k).length) this.sendTo(k, { t: 'chat', chat: await this.row(ch, k, key) });
   }
-  async deco(msg, ch, key) {
+  // a message as `viewer` (a key; null = the same for everyone, e.g. a new message fanned out) sees it
+  async deco(msg, ch, key, viewer) {
     if (!msg) return null;
     const out = Object.assign({}, msg, { c: ch.id });
     delete out.fk;
     const n = this.q('SELECT COUNT(*) AS n FROM members WHERE c = ?', ch.id)[0].n;
     out.status = n < 2 ? 'sent' : msg.id <= ch.read_all ? 'read' : msg.id <= ch.deliv_all ? 'delivered' : 'sent';
+    // chatfx: read receipts off: no blue ticks for me in a 1:1 chat (delivered ticks stay)
+    if (out.status === 'read' && viewer && ch.kind === 'dm' && !this.receiptsOn(viewer)) out.status = 'delivered';
+    if (msg.once) {
+      // view once: never a file id, link, thumbnail or caption in a list; the receiver opens it with POST open-once
+      const opens = msg.opens || [];
+      delete out.opens;
+      out.text = '';
+      out.media = (msg.media || []).map(x => Object.assign({ type: x.type }, x.dur != null ? { dur: x.dur } : {}));
+      out.opened = !!viewer && (viewer === msg.fk ? opens.length > 0 : opens.some(o => o.k === viewer));
+      if (viewer && viewer === msg.fk && ch.kind !== 'dm') out.openedBy = opens.map(o => o.name);
+      return out;
+    }
     if (Array.isArray(out.media)) out.media = await Promise.all(out.media.map(async x => Object.assign({}, x, { url: await mediaUrl(key, x.id) }, x.thumb ? { thumbUrl: await mediaUrl(key, x.thumb) } : {})));
+    // a reply to a status: its picture (served only while the status lives)
+    if (msg.statusRef && typeof msg.statusRef === 'object') {
+      const q = Object.assign({}, msg.statusRef);
+      if (q.thumb) { q.thumbUrl = await mediaUrl(key, q.thumb); delete q.thumb; }
+      out.statusRef = q;
+    }
     if (!out.trip) delete out.trip;
     return out;
   }
-  presence() {
+  presence(viewer) {
     const p = {};
-    for (const u of this.q('SELECT k, name, seen, photo FROM users WHERE blocked = 0 AND removed = 0')) {
-      p[u.name] = { online: this.sockets(u.k).length > 0, seen: u.seen || null };
-      if (u.photo) p[u.name].photo = photoUrl(u.name, u.photo);
-    }
+    for (const u of this.q('SELECT k, name, seen, photo FROM users WHERE blocked = 0 AND removed = 0')) p[u.name] = this.presenceOf(u, viewer);
     return p;
   }
 
@@ -230,8 +294,13 @@ export class Directory extends DurableObject {
   async fetch(request) {
     const url = new URL(request.url), path = url.pathname.replace(/^\/+/, ''), q = url.searchParams;
     try {
+      // internal calls from the Pages Functions only: never with a signed-in person's headers (the Pages proxy also
+      // refuses these paths from apps)
+      if (INTERNAL.includes(path) && request.headers.get('X-Chat-User')) { await request.text().catch(() => ''); return fail('not-found', 404); }
       if (path === 'sys' && request.method === 'POST') return await this.sys(await request.json());
       if (path === 'sync' && request.method === 'POST') { await request.text(); await this.roster(request); return json({ ok: true }); }
+      if (path === 'people' && request.method === 'POST') return await this.people(await request.json());
+      if (path === 'kick' && request.method === 'POST') { const b = await request.json(); const r = await this.kick(b); await this.roster(request); return r; }
       if (path === 'ws') return await this.ws(request, q.get('t'));
       const me = this.me(request);
       if (!me) return fail('no-name', 403);
@@ -246,8 +315,11 @@ export class Directory extends DurableObject {
           case 'info': return await this.info(me, q.get('c'), q.get('id'));
           case 'starred': return await this.starred(me);
           case 'search': return this.search(me, q.get('q'));
-          case 'key': return json({ ok: true, key: await this.key() });
           case 'prefs': return json({ ok: true, prefs: this.userPrefs(me.k) });
+          // chatfx
+          case 'status': return await this.statusList(me);
+          case 'status-viewers': return await this.statusViewers(me, q.get('id'));
+          case 'locked': return json({ ok: true, locked: this.lockedIds(me.k) });
         }
         return fail('not-found', 404);
       }
@@ -271,7 +343,7 @@ export class Directory extends DurableObject {
         case 'delete-many': return await this.delMany(me, b);
         case 'clear': return await this.clear(me, b);
         case 'react': return await this.react(me, b);
-        case 'star': return this.star(me, b);
+        case 'star': return await this.star(me, b);
         case 'read': return await this.receipt(me, b, 'read');
         case 'delivered': return await this.receipt(me, b, 'delivered');
         case 'live': return await this.live(me, b, false);
@@ -279,6 +351,14 @@ export class Directory extends DurableObject {
         case 'prefs': return b.c == null ? this.setPrefs(me, b) : await this.prefs(me, b);
         case 'pin': return await this.pin(me, b);
         case 'device': return this.device(me, b);
+        // chatfx
+        case 'open-once': return await this.openOnce(me, b);
+        case 'lock': return await this.lock(me, b);
+        case 'locked': return await this.setLocked(me, b);
+        case 'status': return await this.statusPost(me, b);
+        case 'status-view': return await this.statusView(me, b);
+        case 'status-like': return await this.statusLike(me, b);
+        case 'status-delete': return await this.statusDelete(me, b);
       }
       return fail('not-found', 404);
     } catch (e) {
@@ -301,7 +381,7 @@ export class Directory extends DurableObject {
     const rows = this.q('SELECT c.* FROM chats c JOIN members m ON m.c = c.id WHERE m.k = ?' + (since ? ' AND m.upd > ?' : '') + ' ORDER BY c.last_at DESC', ...(since ? [me.k, since] : [me.k]));
     const chats = [];
     for (const ch of rows) if (!(ch.kind === 'dm' && !ch.seq && ch.by !== me.k)) chats.push(await this.row(ch, me.k, key));
-    const out = { ok: true, me: me.name, now, chats, presence: this.presence(), prefs: this.userPrefs(me.k), push: fcmOn(this.env) };
+    const out = { ok: true, me: me.name, now, chats, presence: this.presence(me.k), prefs: this.userPrefs(me.k), push: fcmOn(this.env), locked: this.lockedIds(me.k) };
     if (since) out.gone = this.q('SELECT c FROM gone WHERE k = ? AND at > ?', me.k, since).map(r => r.c);
     return json(out);
   }
@@ -309,7 +389,7 @@ export class Directory extends DurableObject {
     const { ch, res } = this.inChat(me, c);
     if (res) return res;
     const mm = this.member(ch.id, me.k), key = await this.key(), r = await this.conv(ch.id).page(me.k, num(before), num(after), num(limit), mm ? mm.cleared : 0);
-    return json({ ok: true, msgs: await Promise.all(r.msgs.map(m => this.deco(m, ch, key))), more: r.more });
+    return json({ ok: true, msgs: await Promise.all(r.msgs.map(m => this.deco(m, ch, key, me.k))), more: r.more });
   }
 
   // ---- opening chats ----------------------------------------------------------------------------
@@ -356,9 +436,16 @@ export class Directory extends DurableObject {
     this.sql.exec("INSERT INTO chats (id, kind, title, photo, project, description, created, by, last_at) VALUES (?, 'group', ?, '', '', ?, ?, ?, ?)", id, title, clean(b.description, 500), now, me.k, now);
     const ch = this.chat(id);
     this.addMember(ch, me.k, 1, now);
-    for (const u of this.names(b.members)) this.addMember(ch, u.k, 0, now);
+    const { ok: okAdd, refused } = this.addable(me, this.names(b.members));
+    for (const u of okAdd) this.addMember(ch, u.k, 0, now);
     await this.post(this.chat(id), { fk: '', from: '', kind: 'sys', text: me.name + ' created the group “' + title + '”', sys: { type: 'created', by: me.name } });
-    return json({ ok: true, id });
+    return json(refused.length ? { ok: true, id, refused } : { ok: true, id });
+  }
+  // chatfx: "Who can add me to groups: Admins only" (Office admins may still add them). → { ok: [users], refused: [names] }
+  addable(me, users) {
+    const ok = [], refused = [];
+    for (const u of users) (u.k === me.k || me.admin || this.privOf(u.k).groupAdd !== 'admins' ? ok : refused).push(u);
+    return { ok, refused: refused.map(u => u.name) };
   }
   groupish(ch) { return ch.kind === 'group' || ch.kind === 'team' || ch.kind === 'project'; }
   async groupUpdate(me, b) {
@@ -383,7 +470,8 @@ export class Directory extends DurableObject {
     if (ch.kind === 'dm') return fail('bad-request');
     if (!this.isAdmin(ch.id, me)) return fail('not-admin', 403);
     const now = Date.now(), added = [], removed = [];
-    for (const u of this.names(b.add)) if (!this.member(ch.id, u.k)) { this.addMember(this.chat(ch.id), u.k, 0, now); added.push(u.name); }
+    const { ok: okAdd, refused } = this.addable(me, this.names(b.add).filter(u => !this.member(ch.id, u.k)));
+    for (const u of okAdd) { this.addMember(this.chat(ch.id), u.k, 0, now); added.push(u.name); }
     for (const n of (Array.isArray(b.remove) ? b.remove : []).slice(0, 256)) { const k = keyOf(n); if (k !== me.k && this.member(ch.id, k)) { this.dropMember(ch.id, k, now); removed.push(this.nameOf(k)); } }
     for (const n of (Array.isArray(b.admin) ? b.admin : []).slice(0, 256)) this.sql.exec('UPDATE members SET admin = 1, upd = ? WHERE c = ? AND k = ?', now, ch.id, keyOf(n));
     for (const n of (Array.isArray(b.unadmin) ? b.unadmin : []).slice(0, 256)) if (keyOf(n) !== me.k || me.admin) this.sql.exec('UPDATE members SET admin = 0, upd = ? WHERE c = ? AND k = ?', now, ch.id, keyOf(n));
@@ -392,7 +480,7 @@ export class Directory extends DurableObject {
     this.sql.exec('UPDATE members SET upd = ? WHERE c = ?', now, ch.id);
     await this.recalc(this.chat(ch.id));
     await this.pushRows(ch.id);
-    return json({ ok: true, chat: await this.row(this.chat(ch.id), me.k, await this.key()) });
+    return json(Object.assign({ ok: true, chat: await this.row(this.chat(ch.id), me.k, await this.key()) }, refused.length ? { refused } : {}));
   }
   async link(me, b) {
     const { ch, res } = this.inChat(me, b.c);
@@ -443,13 +531,20 @@ export class Directory extends DurableObject {
     const r = await this.conv(ch.id).send(m);
     if (r.dup) return r;
     const msg = r.msg;
-    const last = { id: msg.id, from: msg.from, kind: msg.kind, text: String(msg.text || (msg.trip && msg.trip.title) || '').slice(0, 160), at: msg.at };
+    const last = { id: msg.id, from: msg.from, kind: msg.kind, text: msg.once ? '' : String(msg.text || (msg.trip && msg.trip.title) || '').slice(0, 160), at: msg.at };
     if (m.sys) last.sys = m.sys.type;
+    // chatfx: what the chat list shows ("📷 Photo", "🎥 Video"); view once never has text there
+    if (Array.isArray(msg.media) && msg.media[0]) last.media = msg.media[0].type;
+    if (msg.once) last.once = true;
     this.sql.exec('UPDATE chats SET seq = ?, last = ?, last_at = ? WHERE id = ?', msg.id, JSON.stringify(last), now, ch.id);
-    if (msg.text && msg.kind !== 'sys') this.sql.exec('INSERT OR REPLACE INTO texts (c, id, frm, at, text) VALUES (?,?,?,?,?)', ch.id, msg.id, msg.from, now, msg.text);
+    if (msg.text && msg.kind !== 'sys' && !msg.once) this.sql.exec('INSERT OR REPLACE INTO texts (c, id, frm, at, text) VALUES (?,?,?,?,?)', ch.id, msg.id, msg.from, now, msg.text);
     this.sql.exec('UPDATE members SET unread = unread + 1, upd = ? WHERE c = ? AND k != ?', now, ch.id, m.fk || '');
     for (const k of mentionKeys || []) this.sql.exec('UPDATE members SET mention = CASE WHEN mention > 0 THEN mention ELSE ? END WHERE c = ? AND k = ?', msg.id, ch.id, k);
-    if (m.fk) this.sql.exec('UPDATE members SET read_up = ?, deliv_up = ?, unread = 0, mention = 0, upd = ? WHERE c = ? AND k = ?', msg.id, msg.id, now, ch.id, m.fk);
+    if (m.fk) {
+      this.sql.exec('UPDATE members SET read_up = ?, deliv_up = ?, unread = 0, mention = 0, upd = ? WHERE c = ? AND k = ?', msg.id, msg.id, now, ch.id, m.fk);
+      // chatfx: with read receipts off, what others see of my reading doesn't move
+      if (this.receiptsOn(m.fk)) this.sql.exec('UPDATE members SET pub_up = ? WHERE c = ? AND k = ?', msg.id, ch.id, m.fk);
+    }
     const fresh = this.chat(ch.id), key = await this.key();
     this.fan(ch.id, { t: 'msg', msg: await this.deco(msg, fresh, key) });
     await this.pushRows(ch.id);
@@ -469,7 +564,7 @@ export class Directory extends DurableObject {
     // the same client id again: the message already sent (no rate limit, no second copy)
     if (cid) {
       const had = await this.conv(ch.id).byCid(me.k, cid);
-      if (had) return json({ ok: true, msg: await this.deco(had, ch, await this.key()) });
+      if (had) return json({ ok: true, msg: await this.deco(had, ch, await this.key(), me.k) });
     }
     if (this.limited(me.k, 'send')) return fail('rate', 429);
     const text = clean(b.text, MAX_TEXT + 1);
@@ -517,11 +612,25 @@ export class Directory extends DurableObject {
       m.trip = tripCard(t);
     }
     if (b.reply != null && num(b.reply) != null) m.reply = num(b.reply);
+    // chatfx: view once (one photo or video of my own, uploaded with for=once; no thumbnail, poster or forwarding)
+    if (b.once) {
+      if (kind !== 'media' || items.length !== 1 || items[0].thumb || items[0].poster) return fail('bad-request');
+      if (b.fwd) return fail('once', 409);
+      const o = this.env.CHAT_MEDIA ? await this.env.CHAT_MEDIA.head('m/' + items[0].id) : null, md = (o && o.customMetadata) || {};
+      if (!o || md.for !== 'once' || md.by !== me.k) return fail('media');
+      m.once = true;
+    }
+    // chatfx: a reply to a status, in the 1:1 chat with whoever posted it
+    if (b.statusRef != null) {
+      const q = this.statusQuote(me, ch, b.statusRef);
+      if (q.res) return q.res;
+      m.statusRef = q.quote;
+    }
     const mem = new Set(this.memberKeys(ch.id));
     const mk = (Array.isArray(b.mentions) ? b.mentions : []).slice(0, 50).map(keyOf).filter(k => mem.has(k) && k !== me.k);
     m.mentions = [...new Set(mk)].map(k => this.nameOf(k));
     const r = await this.post(ch, m, mk);
-    return json({ ok: true, msg: await this.deco(r.msg, this.chat(ch.id), await this.key()) });
+    return json({ ok: true, msg: await this.deco(r.msg, this.chat(ch.id), await this.key(), me.k) });
   }
   // a system line in a project thread (from the Pages Functions: repairs, visits, community reports)
   async sys(b) {
@@ -559,11 +668,11 @@ export class Directory extends DurableObject {
     const text = clean(b.text, MAX_TEXT + 1);
     if (text.length > MAX_TEXT) return fail('too-long', 413);
     const r = await this.conv(ch.id).edit(me.k, num(b.id), text, Date.now());
-    if (r.reason) return fail(r.reason, { 'not-found': 404, 'not-yours': 403, 'edit-window': 409 }[r.reason] || 400);
+    if (r.reason) return fail(r.reason, { 'not-found': 404, 'not-yours': 403, 'edit-window': 409, once: 409 }[r.reason] || 400);
     if (r.msg.text) this.sql.exec('INSERT OR REPLACE INTO texts (c, id, frm, at, text) VALUES (?,?,?,?,?)', ch.id, r.msg.id, r.msg.from, r.msg.at, r.msg.text);
     else this.sql.exec('DELETE FROM texts WHERE c = ? AND id = ?', ch.id, r.msg.id);
     await this.afterChange(ch, r.msg, { t: 'edit', c: ch.id, id: r.msg.id, text: r.msg.text, edited: r.msg.edited });
-    return json({ ok: true, msg: await this.deco(r.msg, this.chat(ch.id), await this.key()) });
+    return json({ ok: true, msg: await this.deco(r.msg, this.chat(ch.id), await this.key(), me.k) });
   }
   async del(me, b) {
     const { ch, res } = this.inChat(me, b.c);
@@ -581,6 +690,7 @@ export class Directory extends DurableObject {
     const own = m.fk === me.k, admin = this.groupish(ch) && this.isAdmin(ch.id, me);
     if (!own && !admin) return fail('not-yours', 403);
     if (m.deleted) return json({ ok: true });
+    if (m.once) await this.purgeLater((m.media || []).map(x => x.id), 0);
     const r = await conv.remove(id);
     this.sql.exec('DELETE FROM texts WHERE c = ? AND id = ?', ch.id, id);
     await this.afterChange(ch, r.msg, { t: 'delete', c: ch.id, id, forAll: true, by: own ? undefined : me.name });
@@ -609,6 +719,7 @@ export class Directory extends DurableObject {
     let n = 0;
     for (const m of list) {
       if (m.deleted) continue;
+      if (m.once) await this.purgeLater((m.media || []).map(x => x.id), 0);
       const r = await conv.remove(m.id);
       this.sql.exec('DELETE FROM texts WHERE c = ? AND id = ?', ch.id, m.id);
       await this.afterChange(this.chat(ch.id), r.msg, { t: 'delete', c: ch.id, id: m.id, forAll: true, by: m.fk === me.k ? undefined : me.name });
@@ -623,6 +734,7 @@ export class Directory extends DurableObject {
     if (res) return res;
     const now = Date.now(), up = ch.seq || 0;
     this.sql.exec('UPDATE members SET cleared = ?, unread = 0, mention = 0, read_up = MAX(read_up, ?), deliv_up = MAX(deliv_up, ?), upd = ?' + (b.archive ? ', archived = 1' : '') + ' WHERE c = ? AND k = ?', up, up, up, now, ch.id, me.k);
+    if (this.receiptsOn(me.k)) this.sql.exec('UPDATE members SET pub_up = MAX(COALESCE(pub_up, 0), ?) WHERE c = ? AND k = ?', up, ch.id, me.k);
     await this.recalc(this.chat(ch.id));
     const row = await this.row(this.chat(ch.id), me.k, await this.key());
     this.sendTo(me.k, { t: 'chat', chat: row });
@@ -638,11 +750,13 @@ export class Directory extends DurableObject {
     this.fan(ch.id, { t: 'react', c: ch.id, id: r.msg.id, reacts: r.msg.reacts, who: me.name, emoji: e });
     return json({ ok: true, reacts: r.msg.reacts });
   }
-  star(me, b) {
+  async isOnce(c, id) { const m = await this.conv(c).get(id); return !!(m && m.once); }
+  async star(me, b) {
     const { ch, res } = this.inChat(me, b.c);
     if (res) return res;
     const id = num(b.id);
     if (id == null) return fail('bad-request');
+    if (b.on && await this.isOnce(ch.id, id)) return fail('once', 409);
     if (b.on) this.sql.exec('INSERT OR REPLACE INTO stars (k, c, id, at) VALUES (?,?,?,?)', me.k, ch.id, id, Date.now());
     else this.sql.exec('DELETE FROM stars WHERE k = ? AND c = ? AND id = ?', me.k, ch.id, id);
     return json({ ok: true });
@@ -651,7 +765,7 @@ export class Directory extends DurableObject {
     const rows = this.q('SELECT s.c, s.id FROM stars s JOIN members m ON m.c = s.c AND m.k = s.k WHERE s.k = ? ORDER BY s.at DESC LIMIT 500', me.k), by = {};
     rows.forEach(r => (by[r.c] = by[r.c] || []).push(r.id));
     const key = await this.key(), out = [];
-    for (const [c, ids] of Object.entries(by)) { const ch = this.chat(c); for (const m of await this.conv(c).byIds(ids)) out.push(Object.assign(await this.deco(m, ch, key), { chat: ch.kind === 'dm' ? '' : ch.title })); }
+    for (const [c, ids] of Object.entries(by)) { const ch = this.chat(c); for (const m of await this.conv(c).byIds(ids)) out.push(Object.assign(await this.deco(m, ch, key, me.k), { chat: ch.kind === 'dm' ? '' : ch.title })); }
     const order = new Map(rows.map((r, i) => [r.c + '#' + r.id, i]));
     out.sort((a, b) => order.get(a.c + '#' + a.id) - order.get(b.c + '#' + b.id));
     return json({ ok: true, msgs: out });
@@ -663,10 +777,14 @@ export class Directory extends DurableObject {
     if (res) return res;
     const up = Math.min(Math.max(num(b.upTo) || 0, 0), ch.seq), m = this.member(ch.id, me.k), now = Date.now(), conv = this.conv(ch.id);
     if (kind === 'read' && up > m.read_up) {
-      const unread = await conv.unreadAfter(me.k, up);
+      const unread = await conv.unreadAfter(me.k, up), shown = this.receiptsOn(me.k);
       this.sql.exec('UPDATE members SET read_up = ?, read_at = ?, deliv_up = MAX(deliv_up, ?), unread = ?, mention = CASE WHEN mention > ? THEN mention ELSE 0 END, upd = ? WHERE c = ? AND k = ?', up, now, up, unread, up, now, ch.id, me.k);
-      this.fan(ch.id, { t: 'seen', c: ch.id, who: me.name, upTo: up }, me.k);
-      await conv.receipt(me.k, me.name, 'read', up, now);
+      // chatfx: read receipts off: my reading is not shown to others (only the delivered tick)
+      if (shown) {
+        this.sql.exec('UPDATE members SET pub_up = MAX(COALESCE(pub_up, 0), ?) WHERE c = ? AND k = ?', up, ch.id, me.k);
+        for (const k of this.memberKeys(ch.id)) if (k !== me.k && !(ch.kind === 'dm' && !this.receiptsOn(k))) this.sendTo(k, { t: 'seen', c: ch.id, who: me.name, upTo: up });
+        await conv.receipt(me.k, me.name, 'read', up, now);
+      }
       if (up > m.deliv_up) await conv.receipt(me.k, me.name, 'delivered', up, now);
       await this.pushRows(ch.id, me.k);
     } else if (kind === 'delivered' && up > m.deliv_up) {
@@ -679,13 +797,13 @@ export class Directory extends DurableObject {
   // blue ticks when everyone has read; grey double ticks when everyone has the message
   async recalc(ch) {
     if (!ch) return;
-    const r = this.one('SELECT MIN(read_up) AS r, MIN(deliv_up) AS d, COUNT(*) AS n FROM members WHERE c = ?', ch.id);
+    const r = this.one('SELECT MIN(COALESCE(pub_up, read_up)) AS r, MIN(deliv_up) AS d, COUNT(*) AS n FROM members WHERE c = ?', ch.id);
     if (!r || r.n < 2) return;
     const ra = Math.max(Number(r.r) || 0, ch.read_all), da = Math.max(Number(r.d) || 0, ra, ch.deliv_all);
     if (ra === ch.read_all && da === ch.deliv_all) return;
     this.sql.exec('UPDATE chats SET read_all = ?, deliv_all = ? WHERE id = ?', ra, da, ch.id);
     if (da > ch.deliv_all) this.fan(ch.id, { t: 'status', c: ch.id, upTo: da, status: 'delivered' });
-    if (ra > ch.read_all) this.fan(ch.id, { t: 'status', c: ch.id, upTo: ra, status: 'read' });
+    if (ra > ch.read_all) for (const k of this.memberKeys(ch.id)) if (!(ch.kind === 'dm' && !this.receiptsOn(k))) this.sendTo(k, { t: 'status', c: ch.id, upTo: ra, status: 'read' });
   }
   async info(me, c, id) {
     const { ch, res } = this.inChat(me, c);
@@ -693,7 +811,10 @@ export class Directory extends DurableObject {
     const conv = this.conv(ch.id), m = num(id) != null && await conv.get(num(id));
     if (!m) return fail('not-found', 404);
     if (m.fk !== me.k) return fail('not-yours', 403);
-    return json(Object.assign({ ok: true }, await conv.info(m.id, me.k)));
+    const inf = await conv.info(m.id, me.k);
+    // chatfx: with my read receipts off I don't see who read my messages in a 1:1 chat
+    if (ch.kind === 'dm' && !this.receiptsOn(me.k)) inf.read = [];
+    return json(Object.assign({ ok: true }, inf));
   }
 
   // ---- live location, settings, search --------------------------------------------------------------
@@ -788,6 +909,7 @@ export class Directory extends DurableObject {
       const m = await this.conv(ch.id).get(id);
       if (!m || m.deleted) return fail('not-found', 404);
       if (m.kind === 'sys') return fail('bad-request');
+      if (m.once) return fail('once', 409);
       const pin = { id, from: m.from, kind: m.kind, text: String(m.text || (m.trip && m.trip.title) || '').slice(0, 160), at: m.at, by: me.name, pinnedAt: now };
       pins = [pin].concat(pins.filter(x => x.id !== id));
       if (pins.length > MAX_PINS) { replaced = pins[pins.length - 1].id; pins = pins.slice(0, MAX_PINS); }
@@ -808,7 +930,7 @@ export class Directory extends DurableObject {
     if (b.remove) { this.sql.exec('DELETE FROM devices WHERE token = ?', token); return json({ ok: true }); }
     const platform = b.platform === 'web' ? 'web' : b.platform === 'android' ? 'android' : '';
     if (!platform) return fail('bad-request');
-    this.sql.exec('INSERT OR REPLACE INTO devices (token, k, platform, gen, at) VALUES (?,?,?,?,?)', token, me.k, platform, me.gen || 0, Date.now());
+    this.sql.exec('INSERT OR REPLACE INTO devices (token, k, platform, gen, at, dev) VALUES (?,?,?,?,?,?)', token, me.k, platform, me.gen || 0, Date.now(), me.dev || null);
     const old = this.q('SELECT token FROM devices WHERE k = ? ORDER BY at DESC LIMIT -1 OFFSET ?', me.k, MAX_DEVICES);
     for (const r of old) this.sql.exec('DELETE FROM devices WHERE token = ?', r.token);
     return json({ ok: true, push: fcmOn(this.env) });
@@ -822,8 +944,8 @@ export class Directory extends DurableObject {
     const ment = new Set(mentionKeys || []), out = [];
     const media = Array.isArray(msg.media) && msg.media[0] ? msg.media[0].type : '';
     const what = { photo: '📷 Photo', video: '🎥 Video', voice: '🎤 Voice message', doc: '📄 Document' }[media] || { location: '📍 Location', live: '📍 Live location', contact: '👤 Contact', trip: '🧭 Trip' }[msg.kind] || '';
-    const line = [what, msg.text || (msg.trip && msg.trip.title) || ''].filter(Boolean).join(' ');
-    for (const m of this.q('SELECT m.k, m.muted, m.unread, u.gen, u.blocked, u.removed, u.prefs, u.home FROM members m JOIN users u ON u.k = m.k WHERE m.c = ?', ch.id)) {
+    const line = [what, msg.once ? '' : msg.text || (msg.trip && msg.trip.title) || ''].filter(Boolean).join(' ');
+    for (const m of this.q('SELECT m.k, m.muted, m.unread, m.locked, u.gen, u.blocked, u.removed, u.prefs, u.home FROM members m JOIN users u ON u.k = m.k WHERE m.c = ?', ch.id)) {
       if (m.k === msg.fk || m.blocked || m.removed) continue;
       if (added && !added.has(m.k)) continue;
       if (this.sockets(m.k).length) continue;
@@ -841,6 +963,9 @@ export class Directory extends DurableObject {
         mention: mentioned ? '1' : '0', unread: m.unread, badge, at: msg.at, sys: msg.sys ? msg.sys.type : '',
         body: (added ? (msg.sys.by ? msg.sys.by + ' added you to ' + ch.title : 'You were added to ' + ch.title) : (msg.kind === 'sys' || ch.kind === 'dm' ? '' : msg.from + ': ') + line).slice(0, 200)
       };
+      // chatfx: a locked chat says only "New message": no name, chat or text
+      if (m.locked) Object.assign(data, { from: '', title: 'RAFIKI', kind: '', text: '', media: '', sys: '', mention: '0', body: 'New message', locked: '1' });
+      if (msg.once) data.text = '';
       for (const d of devs) out.push({ token: d.token, platform: d.platform, k: m.k, data });
     }
     return out;
@@ -855,6 +980,124 @@ export class Directory extends DurableObject {
     return plan.length;
   }
 
+  // ---- chatfx: privacy from the Pages side, linked devices -------------------------------------------
+  // internal POST /people { list: [{ n: name, priv: {…} }] }: each person's privacy settings (Pages keeps the source in KV)
+  async people(b) {
+    const list = Array.isArray(b && b.list) ? b.list.slice(0, 500) : [];
+    let n = 0;
+    for (const x of list) {
+      const name = clean(x && x.n, 80), k = keyOf(name);
+      if (!k) continue;
+      const priv = JSON.stringify(readPrivacy(x.priv)), u = this.user(k);
+      if (!u) this.sql.exec('INSERT INTO users (k, name, home, admin, gen, priv) VALUES (?,?,?,?,?,?)', k, name, '', 0, 0, priv);
+      else if (u.priv === priv) continue;
+      else this.sql.exec('UPDATE users SET priv = ? WHERE k = ?', priv, k);
+      n++;
+      // everyone's view of their last seen and photo may have changed (and theirs of everyone else's)
+      const me = this.user(k);
+      this.presenceAll(me, this.sockets(k).length > 0, me.seen, k);
+      for (const o of this.q('SELECT k, name, seen, photo FROM users WHERE blocked = 0 AND removed = 0 AND k != ?', k)) {
+        if (this.sockets(k).length) this.sendTo(k, Object.assign({ t: 'presence', who: o.name }, this.presenceOf(o, k)));
+      }
+    }
+    return json({ ok: true, n });
+  }
+  // internal POST /kick: a linked device signed out (Pages, /api/account/devices/…).
+  //   { name, dev }              that one device: its chat sockets close (4401) and its push tokens are forgotten
+  //   { name, keep, gen }        every other device: all sockets but `keep`'s close, other push tokens go, and the kept
+  //                              device carries on with the new session number `gen`
+  async kick(b) {
+    const k = keyOf(clean(b && b.name, 80));
+    if (!k) return fail('bad-request');
+    const dev = DEV.test(String(b.dev || '')) ? String(b.dev) : '', keep = DEV.test(String(b.keep || '')) ? String(b.keep) : '', gen = Math.max(0, Math.round(num(b.gen) || 0));
+    if (!dev && !keep) return fail('bad-request');
+    let closed = 0;
+    for (const ws of this.sockets(k)) {
+      const a = ws.deserializeAttachment() || {};
+      if (dev ? a.d === dev : a.d !== keep) { try { ws.close(4401, 'signed-out'); } catch (e) {} closed++; }
+      else if (keep && gen) ws.serializeAttachment(Object.assign({}, a, { gen }));
+    }
+    if (dev) this.sql.exec('DELETE FROM devices WHERE k = ? AND dev = ?', k, dev);
+    else {
+      this.sql.exec('DELETE FROM devices WHERE k = ? AND (dev IS NULL OR dev != ?)', k, keep);
+      if (gen) { this.sql.exec('UPDATE devices SET gen = ? WHERE k = ? AND dev = ?', gen, k, keep); this.sql.exec('UPDATE users SET gen = MAX(gen, ?) WHERE k = ?', gen, k); }
+    }
+    return json({ ok: true, closed });
+  }
+
+  // ---- chatfx: locked chats (per person, the same on every device) --------------------------------------
+  lockedIds(k) { return this.q('SELECT c FROM members WHERE k = ? AND locked = 1 ORDER BY c', k).map(r => r.c); }
+  async lockChanged(me, cs) {
+    const key = await this.key(), now = Date.now();
+    for (const c of cs) { this.sql.exec('UPDATE members SET upd = ? WHERE c = ? AND k = ?', now, c, me.k); const ch = this.chat(c); if (ch) this.sendTo(me.k, { t: 'chat', chat: await this.row(ch, me.k, key) }); }
+    const locked = this.lockedIds(me.k);
+    this.sendTo(me.k, { t: 'locked', locked });
+    return locked;
+  }
+  async lock(me, b) {
+    const { ch, res } = this.inChat(me, b.c);
+    if (res) return res;
+    const on = b.on ? 1 : 0, was = this.member(ch.id, me.k).locked ? 1 : 0;
+    if (on !== was) this.sql.exec('UPDATE members SET locked = ? WHERE c = ? AND k = ?', on, ch.id, me.k);
+    const locked = on !== was ? await this.lockChanged(me, [ch.id]) : this.lockedIds(me.k);
+    return json({ ok: true, locked, chat: await this.row(this.chat(ch.id), me.k, await this.key()) });
+  }
+  // the whole list at once: { ids: [chat ids] } (chats I'm not in are ignored)
+  async setLocked(me, b) {
+    if (!Array.isArray(b.ids) || b.ids.length > 500) return fail('bad-request');
+    const want = new Set(b.ids.map(String)), mine = this.q('SELECT c, locked FROM members WHERE k = ?', me.k), changed = [];
+    for (const r of mine) { const on = want.has(r.c) ? 1 : 0; if (on !== (r.locked ? 1 : 0)) { this.sql.exec('UPDATE members SET locked = ? WHERE c = ? AND k = ?', on, r.c, me.k); changed.push(r.c); } }
+    const locked = changed.length ? await this.lockChanged(me, changed) : this.lockedIds(me.k);
+    return json({ ok: true, locked });
+  }
+
+  // ---- chatfx: view once ---------------------------------------------------------------------------------
+  // POST open-once { c, id }: the receiver's one look. A link that works for 5 minutes, once per receiver; the sender
+  // (and everyone else in the chat) is told it was opened. After everyone opened it, the file is deleted.
+  async openOnce(me, b) {
+    const { ch, res } = this.inChat(me, b.c);
+    if (res) return res;
+    const id = num(b.id), conv = this.conv(ch.id);
+    if (id == null) return fail('bad-request');
+    const r = await conv.openOnce(me.k, me.name, id, Date.now());
+    if (r.reason) return fail(r.reason, { 'not-found': 404, 'not-once': 400, own: 403, opened: 410 }[r.reason] || 400);
+    const msg = r.msg, it = (msg.media || [])[0];
+    const o = it && this.env.CHAT_MEDIA ? await this.env.CHAT_MEDIA.head('m/' + it.id) : null;
+    if (!o) return fail('gone', 410);
+    const at = msg.opens.find(x => x.k === me.k).at, link = await onceUrl(await this.key(), it.id);
+    this.fan(ch.id, { t: 'opened', c: ch.id, id: msg.id, who: me.name, at });
+    const others = this.memberKeys(ch.id).filter(k => k !== msg.fk);
+    if (others.every(k => msg.opens.some(x => x.k === k))) await this.purgeLater([it.id], ONCE_PURGE_MS);
+    const media = { type: it.type, url: link.url, exp: link.exp, mime: (o.httpMetadata && o.httpMetadata.contentType) || '' };
+    for (const f of ['w', 'h', 'dur', 'size']) if (it[f] != null) media[f] = it[f];
+    return json({ ok: true, id: msg.id, media, text: msg.text || '', at });
+  }
+  // files to delete from R2 at a time (statuses that ended, view-once media everyone opened)
+  async purgeLater(ids, delay) {
+    const at = Date.now() + (delay || 0);
+    for (const id of ids.filter(isMediaId)) this.sql.exec('INSERT OR REPLACE INTO purge (id, at) VALUES (?, ?)', id, at);
+    if (!delay) await this.runPurge(Date.now());
+    await this.schedule(at);
+  }
+  async runPurge(now) {
+    const due = this.q('SELECT id FROM purge WHERE at <= ?', now).map(r => r.id);
+    if (!due.length) return 0;
+    if (this.env.CHAT_MEDIA) { try { await this.env.CHAT_MEDIA.delete(due.map(id => 'm/' + id)); } catch (e) { console.error('chat purge:', e && e.message); return 0; } }
+    for (const id of due) this.sql.exec('DELETE FROM purge WHERE id = ?', id);
+    return due.length;
+  }
+  // one alarm for both: the next status to end, or the next file to delete
+  async schedule(at) {
+    try { const cur = await this.ctx.storage.getAlarm(); if (!cur || at < cur || cur < Date.now()) await this.ctx.storage.setAlarm(Math.max(at, Date.now() + 1000)); } catch (e) {}
+  }
+  async alarm() {
+    const now = Date.now();
+    await this.pruneStatuses(now);
+    await this.runPurge(now);
+    const next = Math.min(Number(this.one('SELECT MIN(exp) AS t FROM statuses').t) || Infinity, Number(this.one('SELECT MIN(at) AS t FROM purge').t) || Infinity);
+    if (isFinite(next)) await this.ctx.storage.setAlarm(Math.max(next, now + 1000));
+  }
+
   // ---- WebSockets (hibernation API) -----------------------------------------------------------------
   async ws(request, t) {
     if (request.headers.get('Upgrade') !== 'websocket') return fail('bad-request', 426);
@@ -866,10 +1109,9 @@ export class Directory extends DurableObject {
     const pair = new WebSocketPair(), [client, server] = Object.values(pair);
     const first = this.sockets(k).length === 0;
     this.ctx.acceptWebSocket(server, [k]);
-    server.serializeAttachment({ k, name: v.n, gen: Number(v.g) || 0 });
+    server.serializeAttachment({ k, name: v.n, gen: Number(v.g) || 0, d: v.d && DEV.test(v.d) ? v.d : '' });
     server.send(JSON.stringify({ t: 'hello', me: v.n, now: Date.now() }));
-    const pic = photoUrl(v.n, (this.user(k) || {}).photo);
-    if (first) this.everyone(Object.assign({ t: 'presence', who: v.n, online: true, seen: Date.now() }, pic ? { photo: pic } : {}), k);
+    if (first) this.presenceAll(Object.assign({}, this.user(k), { k, name: v.n }), true, Date.now(), k);
     return new Response(null, { status: 101, webSocket: client });
   }
   everyone(payload, except) { const s = JSON.stringify(payload); for (const ws of this.ctx.getWebSockets()) { const a = ws.deserializeAttachment() || {}; if (a.k !== except) { try { ws.send(s); } catch (e) {} } } }
@@ -892,10 +1134,10 @@ export class Directory extends DurableObject {
     if (left.length) return;
     const now = Date.now();
     this.sql.exec('UPDATE users SET seen = ? WHERE k = ?', now, a.k);
-    const pic = photoUrl(a.name, (this.user(a.k) || {}).photo);
-    this.everyone(Object.assign({ t: 'presence', who: a.name, online: false, seen: now }, pic ? { photo: pic } : {}), a.k);
+    this.presenceAll(Object.assign({}, this.user(a.k), { k: a.k, name: a.name }), false, now, a.k);
   }
   async webSocketClose(ws, code) { try { ws.close(code === 1005 || code === 1006 ? 1000 : code, 'bye'); } catch (e) {} await this.gone(ws); }
   async webSocketError(ws) { await this.gone(ws); }
 }
+Object.assign(Directory.prototype, statusMethods);
 export { EDIT_MS };

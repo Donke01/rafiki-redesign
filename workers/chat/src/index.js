@@ -2,13 +2,15 @@
 // (functions/api/chat), which signs people in and passes who they are in X-Chat-* headers. This worker has no
 // public address (workers_dev = false, no routes). If a CHAT_SECRET is set on both sides it is also checked.
 //
-//   /media            POST  upload a photo, video, voice note or document to R2 (CHAT_MEDIA)
-//   /media/<id>       GET   stream it back (Range requests for video); ?e=&s= signed links are checked here
+//   /media            POST  upload a photo, video, voice note or document to R2 (CHAT_MEDIA); chatfx: `for=status`
+//                           (a status's photo/video: served only while the status lives) or `for=once` (view once)
+//   /media/<id>       GET   stream it back (Range requests for video); ?e=&s= signed links are checked here;
+//                           view-once files only with a 5-minute ?e=&o=1&s= link from POST open-once
 //   /ws?t=<ticket>    GET   WebSocket (to the Directory)
 //   everything else         the Directory Durable Object (src/directory.js)
 import { Directory } from './directory.js';
 import { Conversation } from './conversation.js';
-import { json, fail, rand, same, mediaUrl, mediaOk, keyOf } from './util.js';
+import { json, fail, rand, same, mediaUrl, mediaOk, onceOk, keyOf } from './util.js';
 
 export { Directory, Conversation };
 
@@ -54,7 +56,7 @@ export function sniff(b, type) {
 
 async function upload(request, env) {
   const q = new URL(request.url).searchParams;
-  let type = q.get('type') || '', name = q.get('name') || '', dur = Number(q.get('dur')) || 0, body;
+  let type = q.get('type') || '', name = q.get('name') || '', dur = Number(q.get('dur')) || 0, use = q.get('for') || '', body;
   const ct = request.headers.get('Content-Type') || '';
   const len = Number(request.headers.get('Content-Length')) || 0;
   if (len > CAPS.video + 64 * 1024) return fail('too-large', 413);
@@ -62,13 +64,16 @@ async function upload(request, env) {
     let fd; try { fd = await request.formData(); } catch (e) { return fail('bad-request'); }
     const f = fd.get('file') || [...fd.values()].find(v => typeof v === 'object' && v && 'arrayBuffer' in v);
     if (!f || typeof f === 'string') return fail('bad-request');
-    type = String(fd.get('type') || type); name = String(fd.get('name') || f.name || name); dur = Number(fd.get('dur')) || dur;
+    type = String(fd.get('type') || type); name = String(fd.get('name') || f.name || name); dur = Number(fd.get('dur')) || dur; use = String(fd.get('for') || use);
     body = new Uint8Array(await f.arrayBuffer());
   } else body = new Uint8Array(await request.arrayBuffer());
   if (!CAPS[type]) return fail('bad-request');
   if (!body.length) return fail('bad-request');
   if (body.length > CAPS[type]) return fail('too-large', 413, { max: CAPS[type] });
   if (DUR[type] && dur > DUR[type]) return fail('too-long', 413, { max: DUR[type] });
+  if (use && !['status', 'once'].includes(use)) return fail('bad-request');
+  if (use && type !== 'photo' && type !== 'video') return fail('bad-request');
+  if (use === 'status' && type === 'video' && dur > 30) return fail('too-long', 413, { max: 30 });
   name = String(name).replace(/[\u0000-\u001F\u007F/\\]/g, '').trim().slice(0, 120);
   let mime = sniff(body, type);
   if (!mime) return fail('type', 415);
@@ -80,19 +85,27 @@ async function upload(request, env) {
   if (!allow.ok) return allow;
   const id = rand(18);
   let by = ''; try { by = decodeURIComponent(request.headers.get('X-Chat-User') || ''); } catch (e) {}
-  await env.CHAT_MEDIA.put('m/' + id, body, { httpMetadata: { contentType: mime }, customMetadata: { by: keyOf(by), type, name, dur: String(dur || ''), at: String(Date.now()) } });
-  return json({ ok: true, id, url: await mediaUrl(await key(env), id), type, size: body.length, name, mime });
+  await env.CHAT_MEDIA.put('m/' + id, body, { httpMetadata: { contentType: mime }, customMetadata: Object.assign({ by: keyOf(by), type, name, dur: String(dur || ''), at: String(Date.now()) }, use ? { for: use } : {}) });
+  // a view-once file never gets a link (not even for the sender): it is opened with POST open-once
+  return json(Object.assign({ ok: true, id, url: use === 'once' ? '' : await mediaUrl(await key(env), id), type, size: body.length, name, mime }, use ? { for: use } : {}));
 }
 
 async function download(request, env, id) {
   const q = new URL(request.url).searchParams;
   // either Pages signed the person in (X-Chat-User), or the link carries a valid signature
-  if (!request.headers.get('X-Chat-User') && !(await mediaOk(await key(env), id, q.get('e'), q.get('s')))) return new Response('Not found', { status: 404 });
+  const user = request.headers.get('X-Chat-User') || '', k = await key(env);
+  const once = q.get('o') === '1' && await onceOk(k, id, q.get('e'), q.get('s'));
+  if (!user && !once && !(await mediaOk(k, id, q.get('e'), q.get('s')))) return new Response('Not found', { status: 404 });
   const range = request.headers.get('Range');
   const obj = await env.CHAT_MEDIA.get('m/' + id, range ? { range: request.headers } : {});
   if (!obj) return new Response('Not found', { status: 404, headers: { 'Cache-Control': 'no-store' } });
-  const h = new Headers({ 'Accept-Ranges': 'bytes', 'X-Content-Type-Options': 'nosniff', 'Cache-Control': 'private, max-age=86400', ETag: obj.httpEtag });
   const mime = (obj.httpMetadata && obj.httpMetadata.contentType) || 'application/octet-stream', meta = obj.customMetadata || {};
+  // chatfx: view once only through its 5-minute link; status media only while a status uses it (and, signed in, one
+  // this person may see); a view-once link opens nothing else
+  let viewer = ''; try { viewer = decodeURIComponent(user); } catch (e) {}
+  const ok = meta.for === 'once' ? once : meta.for === 'status' ? await dir(env).statusMediaOk(id, viewer) : !once || !!user;
+  if (!ok) { try { obj.body && obj.body.cancel(); } catch (e) {} return new Response('Not found', { status: 404, headers: { 'Cache-Control': 'no-store' } }); }
+  const h = new Headers({ 'Accept-Ranges': 'bytes', 'X-Content-Type-Options': 'nosniff', 'Cache-Control': meta.for === 'once' ? 'no-store' : meta.for === 'status' ? 'private, max-age=600' : 'private, max-age=86400', ETag: obj.httpEtag });
   h.set('Content-Type', mime);
   if (meta.type === 'doc' || !/^(image|video|audio)\//.test(mime)) {
     h.set('Content-Disposition', 'attachment; filename*=UTF-8\'\'' + encodeURIComponent(meta.name || 'file'));

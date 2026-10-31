@@ -166,3 +166,33 @@ See `chatpolish-contract` (in the build notes) for the full shapes. In short: `P
 Announcements chat `t:news` (everyone, admins post), list rows with `pins`, `seen`, `mentionId`, `bubble`,
 `country`, `announce`; WebSocket `{t:'seen'}` and `{t:'prefs'}`; `kind:'trip'` messages (the Pages proxy fills and
 refreshes the card from the itin code, `GET trip?id=`), and `media[].thumb` photo previews (`thumbUrl`).
+
+## chatfx additions (Status, view once, locked chats, privacy, linked devices)
+
+The full client contract, with example payloads, is the chatfx `api.md` (in the build notes). Nothing new needs a
+Cloudflare setting or binding: everything uses the existing Durable Objects, the R2 bucket and KV `FEED`.
+
+- **Status** (`src/status.js`, tables `statuses`, `status_views` in the Directory): `GET status`, `POST status`
+  (text on one of 5 colours, or a photo/video ≤ 30 s uploaded with `POST media?…&for=status`; `privacy`
+  `{mode:'all'|'except'|'only', names}`; `reshareOf` for Whole-team statuses only), `POST status-view`, `status-like`,
+  `GET status-viewers?id=` (poster only), `POST status-delete`. 24 hours; a Directory alarm ends them, and
+  `GET media/<id>` asks the Directory (`statusMediaOk`) before serving a status file, so it stops the moment its status
+  ends or is deleted (the file is deleted from R2 straight after). Replies are DMs with `statusRef`. WebSocket
+  `{t:'status'}`, `{t:'status-gone'}`, `{t:'status-view'}` (poster only).
+- **View once**: upload with `for=once` (no link is ever returned), `POST send {once:true}`. Message lists carry only
+  `{once, opened, media:[{type}]}`; `POST open-once {c, id}` gives each receiver one 5-minute link signed `o:` (the only
+  way such a file is served) and tells the chat `{t:'opened'}`; when everyone opened it the file is deleted 10 minutes
+  later (table `purge`, same alarm). Star, pin and edit refuse it; pushes and the chat list say just "📷 Photo".
+- **Locked chats**: `members.locked` per person; `GET locked`, `POST lock {c, on}`, `POST locked {ids}`; rows have
+  `locked`; pushes for locked chats are just "New message".
+- **Privacy** (`src/privacy.js`, `users.priv`): pushed by the Pages side (`lib/privacy.js`, `/api/account/privacy`)
+  through the internal `POST /people`. Enforced here: presence/last seen both ways, profile photo in presence and
+  status lists, status default audience, read receipts (`members.pub_up` is the read pointer others see; off = it
+  doesn't move and 1:1 blue ticks are hidden from me), and group adds (`refused: [names]`).
+- **Linked devices**: Pages passes the signed-in device in `X-Chat-Dev` (tickets carry it as `d`, sockets keep it,
+  push tokens store it in `devices.dev`). Internal `POST /kick {name, dev}` closes that device's sockets (4401) and
+  forgets its push tokens; `{name, keep, gen}` does it for every other device and lets `keep` carry on with the new
+  session number.
+- **Internal paths** (`sys`, `sync`, `people`, `kick`, `key`) are refused when a signed-in person's headers are present,
+  and the Pages proxy refuses them (and `allow`) from apps. Before this, `GET /api/chat/key` handed the signing key to
+  any signed-in person and `POST /api/chat/sys` let anyone post a project system line; both are closed now.

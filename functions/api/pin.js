@@ -36,12 +36,14 @@ import { getFeed, dropFeed } from '../../lib/feed-cache.js';
 import { parseGps, readGps, writeGps, createUpdate, createSite, readUpdates, tidyTitle, setStatus, BOARD_ID } from '../../lib/monday.js';
 import { storyIndex } from '../../lib/story.js';
 import { STAGES, STAGE_EN, BUILD_STATUS, DONE_STATUS, loadStage, saveStage, stageIndex, startRecord, applyStage, stageAllowed, stageNote, cleanPct, cleanDue, withBehind, behind, linked } from '../../lib/construction.js';
-import { session, configured, linkToken, linkedFor, unlink, signOut } from '../../lib/pin-auth.js';
+import { session, configured, linkToken, linkedFor, unlink, signOut, sessionKey } from '../../lib/pin-auth.js';
+import { deviceOf, touchDevice } from '../../lib/pin-devices.js';
 import { getJson as gj, putJson, team, saveTeam, hashPin, isAdminName, sameName, seen, addReview, sendMail, alertHtml, guards, guardFor } from '../../lib/pin-store.js';
 import { kes, money, estOf, stepAtOrAfter, stepBlocked, approveLimit, askApproval, costRow, addCost, projectCosts, peopleServed, notePeople, snapPeople, monthKey } from '../../lib/pin-office.js';
 import { postHere } from '../../lib/pin-here.js';
 import { chatSys } from '../../lib/chat.js';
 import { photoIndex, photoOf, photoMap } from '../../lib/team-photo.js';
+import { sees, profileOf, cleanAbout } from '../../lib/privacy.js';
 
 const MAX_FAILS = 8; // wrong PINs per connection per hour
 const MAX_SAVES = 120; // changes per connection per hour
@@ -158,8 +160,11 @@ export async function checkPin(request, env) {
     const g = guardFor(await guards(env), s.name);
     if (g && g.blocked) return { res: json({ ok: false, reason: 'blocked' }, 401) };
     if (g && g.out && !(s.at && s.at > g.out)) { await signOut(request, env).catch(() => {}); return { res: json({ ok: false, reason: 'signed-out' }, 401) }; }
+    // chatfx, Linked devices: this browser's session is one device (signing it out deletes the session)
+    const d = await deviceOf(request, await sessionKey(request)), td = await touchDevice(request, env, s.name, d, false);
+    if (td.res) { await signOut(request, env).catch(() => {}); return { res: json({ ok: false, reason: 'signed-out' }, 401) }; }
     const t = await team(env), mine = t.find(p => sameName(p.name, s.name));
-    return { who: s.name, token: s.token, monday: true, kind: 'monday', home: s.home || (mine && mine.home) || '', admin: isAdminName(env, t, s.name) };
+    return { who: s.name, token: s.token, monday: true, kind: 'monday', home: s.home || (mine && mine.home) || '', admin: isAdminName(env, t, s.name), dev: d.id, devKind: d.kind };
   }
   const t = await team(env);
   if (!(request.headers.get('X-Pin') || '').trim() && configured(env)) return { res: json({ ok: false, reason: 'signin' }, 401) };
@@ -181,19 +186,26 @@ export async function checkPin(request, env) {
   // blocked people can't sign in; after "Sign out of all phones" an app that still sends the old session number
   // (X-Pin-Gen) is sent back to the lock screen. A PIN typed on the lock screen (X-Pin-New: 1) starts a new session.
   // Apps that don't send a session number yet are let through.
-  let gen = 0;
+  let gen = 0, dev = null;
   if (who) {
     const g = guardFor(await guards(env), who);
     if (g && g.blocked) return { res: json({ ok: false, reason: 'blocked' }, 401) };
     gen = (g && Number(g.gen)) || 0;
-    const sent = (request.headers.get('X-Pin-Gen') || '').trim();
-    if (gen && sent !== '' && request.headers.get('X-Pin-New') !== '1' && Number(sent) !== gen) return { res: json({ ok: false, reason: 'signed-out' }, 401) };
+    const sent = (request.headers.get('X-Pin-Gen') || '').trim(), fresh = request.headers.get('X-Pin-New') === '1';
+    // chatfx, Linked devices: this app install (X-Pin-Device-Id), refused once signed out from another device; after
+    // "Sign out of all other devices" the device that asked keeps working with the new session number (g)
+    const d = await deviceOf(request, ''), td = await touchDevice(request, env, who, d, fresh);
+    if (td.res) return { res: json({ ok: false, reason: 'signed-out' }, 401) };
+    dev = d;
+    const kept = td.dev && Number(td.dev.g) === gen;
+    if (gen && sent !== '' && !fresh && Number(sent) !== gen && !kept) return { res: json({ ok: false, reason: 'signed-out' }, 401) };
   }
   const admin = !!who && isAdminName(env, t, who);
   // their own monday.com token, if they connected one: changes go in under their own name
   const ln = who ? await linkedFor(env, who).catch(() => null) : null;
-  if (ln) return { who, home: home || ln.home || '', admin, kind, gen, token: ln.tok, linked: ln.name };
-  return { who, home, admin, kind, gen };
+  const dv = dev ? { dev: dev.id, devKind: dev.kind } : {};
+  if (ln) return Object.assign({ who, home: home || ln.home || '', admin, kind, gen, token: ln.tok, linked: ln.name }, dv);
+  return Object.assign({ who, home, admin, kind, gen }, dv);
 }
 
 // --- open repairs and the activity log (KV) ------------------------------------------------
@@ -256,7 +268,13 @@ export async function onRequestGet({ request, env, waitUntil }) {
       list.forEach(x => { const k = Object.keys(prof).find(n => sameName(n, x.name)), pr = k && prof[k]; if (pr) { if (pr.phone) x.phone = pr.phone; if (pr.home) x.home = pr.home; if (pr.nick) x.nick = pr.nick; } });
       list.forEach(x => { const g = guardFor(gd, x.name); x.blocked = !!(g && g.blocked); });
       // profile photos (/api/team-photo): a URL with a version, or ""
-      const ph = await photoIndex(env); list.forEach(x => { x.photo = photoOf(ph, x.name); });
+      // chatfx: each person's About line, and their photo, only for those their privacy settings allow
+      const ph = await photoIndex(env);
+      list.forEach(x => {
+        x.photo = sees(prof, x.name, 'photo', chk.who) ? photoOf(ph, x.name) : '';
+        const ab = cleanAbout(profileOf(prof, x.name).about);
+        if (ab && sees(prof, x.name, 'about', chk.who)) x.about = ab;
+      });
       // your own e-mail, for your own contact card (nobody else's)
       if (chk.who) { const mine = t.find(p => sameName(p.name, chk.who)), x = list.find(y => sameName(y.name, chk.who)); if (mine && x) x.email = mine.email || ''; }
       return json({ ok: true, team: list.sort((a, b) => a.name.localeCompare(b.name)) }, 200);
@@ -299,11 +317,13 @@ export async function onRequestGet({ request, env, waitUntil }) {
     if (chk.who) {
       const prof = await getJson(env, 'pinprofiles', {}), k = Object.keys(prof).find(n => sameName(n, chk.who)), pr = (k && prof[k]) || {};
       const mine = (await team(env)).find(p => sameName(p.name, chk.who)) || {};
-      extra.me = { kind: chk.kind || '', nick: pr.nick || '', phone: pr.phone || mine.phone || '', home: pr.home || chk.home || '', photo: '' };
+      extra.me = { kind: chk.kind || '', nick: pr.nick || '', phone: pr.phone || mine.phone || '', home: pr.home || chk.home || '', photo: '', about: cleanAbout(pr.about) };
     } else extra.me = { kind: chk.kind || 'shared', nick: '', phone: '', home: '', photo: '' };
     // profile photos (/api/team-photo): { Name: url } for everyone who has one, and your own
-    const phIdx = await photoIndex(env);
+    const phIdx = await photoIndex(env), profAll = await getJson(env, 'pinprofiles', {});
     extra.photos = photoMap(phIdx);
+    // chatfx: photos hidden by their owner's privacy settings are left out
+    Object.keys(extra.photos).forEach(n => { if (!sees(profAll, n, 'photo', chk.who)) delete extra.photos[n]; });
     if (chk.who) extra.me.photo = photoOf(phIdx, chk.who);
     return json(Object.assign({ ok: true, who: chk.who, gen: chk.gen || 0, monday: !!chk.monday, linked: chk.linked || '', gmaps: env.GOOGLE_TILES_WEB_KEY || env.GOOGLE_TILES_ANDROID_KEY ? { web: env.GOOGLE_TILES_WEB_KEY || '', android: env.GOOGLE_TILES_ANDROID_KEY || '' } : null, offlineTiles: offlineTiles(env), countryMaps: countryMaps(env), home: chk.home || '', projects, repairs, visits: await getJson(env, 'pinlastvisit', {}), tests: await getJson(env, 'pintests', {}) }, extra), 200);
   } catch (e) {
@@ -346,7 +366,8 @@ export async function onRequestPost({ request, env, waitUntil }) {
     if (!env.FEED) return json({ ok: false, reason: 'not-set-up' }, 503);
     const phone = clean(b.phone, 30).replace(/[^\d+ ()-]/g, ''), nick = clean(b.nick, 40), home = /^(ke|tz|ug|mw)$/.test(b.home) ? b.home : '';
     const prof = await getJson(env, 'pinprofiles', {}), k = Object.keys(prof).find(n => sameName(n, chk.who)) || chk.who;
-    prof[k] = { nick, phone, home, at: new Date().toISOString() };
+    // (chatfx: keep the About line and privacy settings, which /api/account saves in the same record)
+    prof[k] = Object.assign({}, prof[k], { nick, phone, home, at: new Date().toISOString() });
     await putJson(env, 'pinprofiles', prof);
     // keep the admin's team list in step for people with an app PIN
     const t = await team(env), mine = t.find(p => sameName(p.name, chk.who));

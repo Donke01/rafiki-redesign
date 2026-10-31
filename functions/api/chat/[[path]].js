@@ -6,7 +6,8 @@
 import { checkPin } from '../pin.js';
 import { guards, guardFor } from '../../../lib/pin-store.js';
 import { getFeed } from '../../../lib/feed-cache.js';
-import { chatOn, NEED, roster, chatHeaders, preview, tripFor, freshTrips, projectPhotos } from '../../../lib/chat.js';
+import { chatOn, NEED, roster, chatHeaders, preview, tripFor, freshTrips, projectPhotos, CHAT_INTERNAL } from '../../../lib/chat.js';
+import { readDevices } from '../../../lib/pin-devices.js';
 import { transcribe, transcribeSetup } from '../../../lib/transcribe.js';
 import { translateOn } from '../../../lib/translate.js';
 
@@ -59,6 +60,8 @@ export async function onRequest({ request, env, params }) {
   // donors never see chat
   if (request.headers.get('X-Donor-Token')) return json({ ok: false, reason: 'donor' }, 403);
   if (!chatOn(env)) return json({ ok: false, reason: 'chat-off', need: NEED });
+  // chatfx: the worker's internal paths are for these Pages Functions only
+  if (CHAT_INTERNAL.includes(path)) return json({ ok: false, reason: 'not-found' }, 404);
   if (request.method !== 'GET' && request.method !== 'HEAD') {
     const origin = request.headers.get('Origin');
     if (origin) { let host = ''; try { host = new URL(origin).host; } catch (e) {} if (host !== url.host) return json({ ok: false, reason: 'origin' }, 403); }
@@ -71,6 +74,8 @@ export async function onRequest({ request, env, params }) {
     const g = guardFor(await guards(env), v.n);
     if (g && g.blocked) return json({ ok: false, reason: 'blocked' }, 401);
     if (g && Number(g.gen) > (Number(v.g) || 0)) return json({ ok: false, reason: 'signed-out' }, 401);
+    // chatfx: a device signed out in Settings › Linked devices can't reconnect with a ticket it got before
+    if (v.d) { const d = (await readDevices(env, v.n)).find(x => x.id === v.d); if (d && d.out) return json({ ok: false, reason: 'signed-out' }, 401); }
     const h = new Headers(request.headers); Object.entries(secretOnly(env)).forEach(([k, x]) => h.set(k, x));
     return env.CHAT.fetch(new Request(target('ws', url), { method: 'GET', headers: h }));
   }
@@ -85,7 +90,7 @@ export async function onRequest({ request, env, params }) {
   const chk = await checkPin(request, env);
   if (chk.res) return chk.res;
   if (!chk.who) return json({ ok: false, reason: 'no-name' }, 403);
-  const who = { name: chk.who, admin: !!chk.admin, home: chk.home || '' };
+  const who = { name: chk.who, admin: !!chk.admin, home: chk.home || '', dev: chk.dev || '' };
 
   try {
     if (path === 'preview') {

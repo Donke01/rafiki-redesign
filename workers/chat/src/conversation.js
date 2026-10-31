@@ -17,7 +17,12 @@ export class Conversation extends DurableObject {
     this.sql.exec('CREATE TABLE IF NOT EXISTS hidden (k TEXT, id INTEGER, PRIMARY KEY (k, id))');
     this.sql.exec('CREATE TABLE IF NOT EXISTS receipts (k TEXT, name TEXT, kind TEXT, up INTEGER, at INTEGER)');
     // chat polish: trip cards (kind 'trip')
-    if (![...this.sql.exec('PRAGMA table_info(msgs)')].some(r => r.name === 'trip')) this.sql.exec('ALTER TABLE msgs ADD COLUMN trip TEXT');
+    const cols = new Set([...this.sql.exec('PRAGMA table_info(msgs)')].map(r => r.name));
+    if (!cols.has('trip')) this.sql.exec('ALTER TABLE msgs ADD COLUMN trip TEXT');
+    // chatfx: view-once photos/videos (once = 1) and replies to a status (status = the quoted status)
+    if (!cols.has('once')) this.sql.exec('ALTER TABLE msgs ADD COLUMN once INTEGER DEFAULT 0');
+    if (!cols.has('status')) this.sql.exec('ALTER TABLE msgs ADD COLUMN status TEXT');
+    this.sql.exec('CREATE TABLE IF NOT EXISTS opens (id INTEGER, k TEXT, name TEXT, at INTEGER, PRIMARY KEY (id, k))');
   }
 
   row(r) {
@@ -26,7 +31,9 @@ export class Conversation extends DurableObject {
     for (const x of this.sql.exec('SELECT name, emoji FROM reacts WHERE id = ? ORDER BY at', r.id)) (reacts[x.emoji] = reacts[x.emoji] || []).push(x.name);
     return {
       id: r.id, cid: r.cid || null, from: r.frm, fk: r.fk, at: r.at, kind: r.kind, text: r.text || '', media: P(r.media), reply: P(r.reply), fwd: !!r.fwd,
-      mentions: P(r.mentions) || [], loc: P(r.loc), live: P(r.live), contact: P(r.contact), trip: P(r.trip), reacts, edited: r.edited || null, deleted: !!r.deleted, sys: P(r.sys)
+      mentions: P(r.mentions) || [], loc: P(r.loc), live: P(r.live), contact: P(r.contact), trip: P(r.trip), reacts, edited: r.edited || null, deleted: !!r.deleted, sys: P(r.sys),
+      ...(r.once ? { once: true, opens: [...this.sql.exec('SELECT k, name, at FROM opens WHERE id = ? ORDER BY at', r.id)].map(x => ({ k: x.k, name: x.name, at: x.at })) } : {}),
+      ...(r.status ? { statusRef: P(r.status) } : {})
     };
   }
   one(id) { return this.row([...this.sql.exec('SELECT * FROM msgs WHERE id = ?', Number(id))][0]); }
@@ -41,11 +48,12 @@ export class Conversation extends DurableObject {
     let reply = null;
     if (m.reply) {
       const o = this.one(m.reply);
-      if (o) reply = { id: o.id, from: o.from, kind: o.kind, text: o.deleted ? '' : String(o.text || (o.trip && o.trip.title) || '').slice(0, 200) };
+      if (o) reply = { id: o.id, from: o.from, kind: o.kind, text: o.deleted || o.once ? '' : String(o.text || (o.trip && o.trip.title) || '').slice(0, 200) };
+      if (o && o.once) reply.once = true;
     }
     const id = this.seq() + 1;
-    this.sql.exec('INSERT INTO msgs (id, cid, fk, frm, at, kind, text, media, reply, fwd, mentions, loc, live, contact, sys, trip) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
-      id, m.cid || null, m.fk || '', m.from || '', m.at, m.kind, m.text || '', J(m.media), J(reply), m.fwd ? 1 : 0, J(m.mentions && m.mentions.length ? m.mentions : null), J(m.loc), J(m.live), J(m.contact), J(m.sys), J(m.trip));
+    this.sql.exec('INSERT INTO msgs (id, cid, fk, frm, at, kind, text, media, reply, fwd, mentions, loc, live, contact, sys, trip, once, status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+      id, m.cid || null, m.fk || '', m.from || '', m.at, m.kind, m.text || '', J(m.media), J(reply), m.fwd ? 1 : 0, J(m.mentions && m.mentions.length ? m.mentions : null), J(m.loc), J(m.live), J(m.contact), J(m.sys), J(m.trip), m.once ? 1 : 0, J(m.statusRef));
     return { msg: this.one(id), dup: false };
   }
 
@@ -70,6 +78,7 @@ export class Conversation extends DurableObject {
     if (!m) return { reason: 'not-found' };
     if (m.fk !== fk || m.sys) return { reason: 'not-yours' };
     if (m.deleted || now - m.at > EDIT_MS) return { reason: 'edit-window' };
+    if (m.once) return { reason: 'once' };
     if (!['text', 'media', 'doc'].includes(m.kind) || (m.kind === 'text' && !text)) return { reason: 'bad-request' };
     this.sql.exec('UPDATE msgs SET text = ?, edited = ? WHERE id = ?', text, now, Number(id));
     return { msg: this.one(id) };
@@ -79,6 +88,16 @@ export class Conversation extends DurableObject {
     if (!this.one(id)) return { reason: 'not-found' };
     this.sql.exec("UPDATE msgs SET text = '', media = NULL, loc = NULL, live = NULL, contact = NULL, trip = NULL, mentions = NULL, reply = NULL, deleted = 1 WHERE id = ?", Number(id));
     this.sql.exec('DELETE FROM reacts WHERE id = ?', Number(id));
+    return { msg: this.one(id) };
+  }
+  // chatfx, view once: the first (and only) opening by `k`. → { msg, first } | { reason }
+  async openOnce(k, name, id, now) {
+    const m = this.one(id);
+    if (!m || m.deleted) return { reason: 'not-found' };
+    if (!m.once) return { reason: 'not-once' };
+    if (m.fk === k) return { reason: 'own' };
+    if (m.opens.some(o => o.k === k)) return { reason: 'opened' };
+    this.sql.exec('INSERT OR IGNORE INTO opens (id, k, name, at) VALUES (?,?,?,?)', Number(id), k, name, now);
     return { msg: this.one(id) };
   }
   async hide(k, id) { this.sql.exec('INSERT OR IGNORE INTO hidden (k, id) VALUES (?, ?)', k, Number(id)); return true; }

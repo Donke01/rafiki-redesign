@@ -34,9 +34,22 @@ export async function mediaOk(key, id, e, s, now) {
   return same((await hmac(key, 'm:' + id + ':' + e)).slice(0, 32), String(s || ''));
 }
 
-// WebSocket tickets: name, home, admin and session number, for 60 seconds
+// View once (chatfx): a link that works for a few minutes only, signed differently ('o:'), so a day link or a
+// signed-in request can never fetch view-once media. Handed out once per receiver by POST open-once.
+export const ONCE_MS = 5 * 60 * 1000;
+export async function onceUrl(key, id, now) {
+  const e = (now || Date.now()) + ONCE_MS;
+  return { url: '/api/chat/media/' + id + '?e=' + e + '&o=1&s=' + (await hmac(key, 'o:' + id + ':' + e)).slice(0, 32), exp: e };
+}
+export async function onceOk(key, id, e, s, now) {
+  const t = now || Date.now();
+  if (!/^\d{10,16}$/.test(String(e || '')) || Number(e) < t || Number(e) > t + ONCE_MS + 60000) return false;
+  return same((await hmac(key, 'o:' + id + ':' + e)).slice(0, 32), String(s || ''));
+}
+
+// WebSocket tickets: name, home, admin, session number and (chatfx) the signed-in device, for 60 seconds
 export async function makeTicket(key, who, now) {
-  const p = b64u(new TextEncoder().encode(JSON.stringify({ n: who.name, h: who.home || '', a: who.admin ? 1 : 0, g: who.gen || 0, e: (now || Date.now()) + 60000 })));
+  const p = b64u(new TextEncoder().encode(JSON.stringify(Object.assign({ n: who.name, h: who.home || '', a: who.admin ? 1 : 0, g: who.gen || 0, e: (now || Date.now()) + 60000 }, who.dev ? { d: who.dev } : {}))));
   return { t: p + '.' + (await hmac(key, 't:' + p)), exp: (now || Date.now()) + 60000 };
 }
 export function peekTicket(t) {

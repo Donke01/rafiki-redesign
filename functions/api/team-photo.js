@@ -9,6 +9,7 @@ import { checkPin } from './pin.js';
 import { getJson, sameName } from '../../lib/pin-store.js';
 import { roster, chatSync } from '../../lib/chat.js';
 import { PHOTO_MAX, PHOTO_TYPES, readPhoto, savePhoto, dropPhoto } from '../../lib/team-photo.js';
+import { sees } from '../../lib/privacy.js';
 
 const PER_HOUR = 30;
 function json(body, status) {
@@ -31,6 +32,8 @@ export async function onRequestGet({ request, env }) {
   const q = new URL(request.url).searchParams, name = clean(q.get('name'));
   const ph = name ? await readPhoto(env, name) : null;
   if (!ph || !ph.d) return json({ ok: false, reason: 'not-found' }, 404);
+  // chatfx: the owner's "Profile photo" privacy setting (Office admins still see everyone's, to manage them)
+  if (!chk.admin && !sees(await getJson(env, 'pinprofiles', {}), name, 'photo', chk.who)) return json({ ok: false, reason: 'not-found' }, 404);
   const etag = '"' + ph.v + '"', current = q.get('v') === ph.v;
   const head = { 'Content-Type': ph.t || 'image/jpeg', ETag: etag, 'Cache-Control': current ? 'private, max-age=31536000, immutable' : 'private, no-cache', 'X-Content-Type-Options': 'nosniff', 'X-Robots-Tag': 'noindex' };
   const inm = request.headers.get('If-None-Match') || '';
