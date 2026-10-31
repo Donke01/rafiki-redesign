@@ -1,0 +1,34 @@
+{
+  "_": "qa/web/chatfx.py: the world the chatfx screens are drawn from. Times are minutes ago ('ago'), turned into epoch ms when the test starts. Photos ('img') are files in /img served as /api/chat/media/<id>.",
+  "media": { "stp1": "w-field3-600.webp", "stp2": "w-drill2-600.webp", "stp3": "washing-600.webp", "once1": "w-child-600.webp" },
+  "status": [
+    { "name": "Reid Anderson", "me": true, "items": [
+      { "id": "st_me1", "ago": 95, "kind": "photo", "media": "stp2", "w": 600, "h": 800, "caption": "The rig is on site at Turbo Spring", "place": "Turbo", "views": 4, "likes": 1, "reshares": 2, "privacy": { "mode": "all", "names": [] } } ] },
+    { "name": "Meril Kiprop", "items": [
+      { "id": "st_m1", "ago": 120, "kind": "photo", "media": "stp1", "w": 600, "h": 800, "caption": "Water flowing again at Kapsaret today 🙌 The committee chair came to see it.", "place": "Kapsaret", "canReshare": true, "seen": false },
+      { "id": "st_m2", "ago": 60, "kind": "text", "text": "Drilling at Turbo Spring today 💧 Come and see!", "color": "#12A37A", "canReshare": true, "seen": false } ] },
+    { "name": "Bertin Mwangi", "items": [
+      { "id": "st_b1", "ago": 300, "kind": "text", "text": "Pump parts arrived at the Kitale office. Asante Jessica!", "color": "#6E46C8", "canReshare": false, "seen": false } ] },
+    { "name": "Jessica Anderson", "items": [
+      { "id": "st_j1", "ago": 600, "kind": "photo", "media": "stp3", "w": 600, "h": 400, "caption": "Hand-washing day at Nzoia Bridge Primary", "canReshare": true, "seen": true, "via": "Grace Achieng" } ] },
+    { "name": "Grace Achieng", "items": [
+      { "id": "st_g1", "ago": 700, "kind": "text", "text": "Sw: Tunaanza ziara za Bungoma kesho asubuhi.", "color": "#E8862A", "canReshare": true, "seen": true } ] }
+  ],
+  "viewers": [
+    { "name": "Meril Kiprop", "ago": 60, "liked": false, "reshared": true },
+    { "name": "Bertin Mwangi", "ago": 70, "liked": false, "reshared": true },
+    { "name": "Jessica Anderson", "ago": 80, "liked": true, "reshared": false },
+    { "name": "Grace Achieng", "ago": 85, "liked": false, "reshared": false }
+  ],
+  "account": { "name": "Reid Anderson", "kind": "app", "about": "Building wells in Trans Nzoia 💧", "hasPin": true, "pin": "4821",
+    "privacy": { "lastSeen": { "mode": "all", "names": [] }, "photo": { "mode": "all", "names": [] }, "about": { "mode": "all", "names": [] },
+                 "status": { "mode": "except", "names": ["Bertin Mwangi", "Grace Achieng"] }, "readReceipts": true, "groupAdd": "admins" } },
+  "devices": [
+    { "id": "THIS", "app": "web", "name": "Chrome on Windows", "city": "Kitale", "firstAgo": 40000, "ago": 0, "kind": "pin", "legacy": false, "current": true },
+    { "id": "dev_ios", "app": "ios", "name": "iPhone 17 Pro Max", "city": "Eldoret", "firstAgo": 90000, "ago": 12, "kind": "pin", "legacy": false },
+    { "id": "dev_and", "app": "android", "name": "Samsung Galaxy A15", "city": "", "firstAgo": 120000, "ago": 1500, "kind": "pin", "legacy": false },
+    { "id": "dev_old", "app": "android", "name": "Android phone", "city": "", "firstAgo": 200000, "ago": 40000, "kind": "pin", "legacy": true }
+  ],
+  "locked": ["g:kitale"],
+  "team_about": { "Meril Kiprop": "Clean water for every school in Trans Nzoia 💧" }
+}

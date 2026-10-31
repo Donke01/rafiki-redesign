@@ -4247,6 +4247,301 @@ html:not([data-theme=sun]) .cw-info .cw-ihd p{color:#E6EEF4}
 html:not([data-theme=sun]) .cw-info .ct-list{border:0;box-shadow:var(--c3-sh)}
 html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
 </style>
+<style id="cfx-css">/* chatfx: Status, view once, Locked chats and the Settings pages (S/chatfx s01–s11). The night parts use the cw3 tokens
+   (--c3-*); the sun theme keeps its plain black-on-white look with 2px edges. Full-screen layers sit above sheets. */
+.cfx-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+/* ---- the Status strip on the Chats list ---- */
+.cfx-st{margin:0 calc(var(--cw2-g) * -1);padding:4px 0 12px var(--cw2-g);border-bottom:var(--bw) solid var(--line)}
+.cfx-st h2{margin:0 0 8px;font-size:var(--cw-fs-small);font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--c3-acc,var(--ok))}
+.cfx-stl{display:flex;align-items:flex-start;gap:4px;padding-right:var(--cw2-g);overflow-x:auto;scrollbar-width:none}
+.cfx-stl::-webkit-scrollbar{display:none}
+.cfx-sp{position:relative;flex:none;width:max(74px,4.9rem)}
+.cfx-spb{display:block;width:100%;padding:2px 0;border:0;border-radius:14px;background:none;color:var(--text);font:inherit;text-align:center;cursor:pointer}
+.cfx-rg{position:relative;display:block;width:60px;height:60px;margin:0 auto 4px;padding:2.5px;border-radius:50%;background:var(--line)}
+.cfx-rg.new{background:conic-gradient(from 210deg,#25C08A,#12A37A,#5CE0A0,#25C08A)}
+.cfx-rg.mine{background:var(--c3-acc,var(--ok))}
+.cfx-rg .cw-av{width:100%;height:100%;border:2.5px solid var(--card);font-size:var(--cw-fs-name)}
+.cfx-spb small{display:block;padding:0 2px;font-size:var(--cw-fs-meta);font-weight:700;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cfx-spb em{display:block;padding:0 2px;font-size:var(--cw-fs-small);font-style:normal;font-weight:600;line-height:1.2;color:var(--muted);overflow-wrap:normal;word-break:normal;hyphens:none} /* "saa 5 zilizopita" takes two lines */
+.cfx-spb em.nw{color:var(--c3-acc,var(--ok));font-weight:700}
+.cfx-add{position:absolute;top:44px;left:50%;margin-left:12px;width:24px;height:24px;padding:0;border-radius:50%;border:2.5px solid var(--card);background:#22B067;color:#FFFFFF;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.cfx-add svg{width:15px;height:15px;stroke-width:3}
+html:not([data-theme=sun]) #cwField .cfx-st{position:relative;z-index:1;margin-top:-26px;padding-top:34px;padding-bottom:14px;border:0;border-radius:0 0 26px 26px;background:linear-gradient(var(--c3-n1),var(--c3-n2));box-shadow:0 6px 18px rgba(4,38,63,.16)}
+html:not([data-theme=sun]) #cwField .cfx-st.join{border-radius:0;box-shadow:none;padding-bottom:6px}
+html:not([data-theme=sun]) #cwField .cfx-st.join + .cw2-fd{margin-top:0;padding-top:8px;background:var(--c3-n2)}
+html:not([data-theme=sun]) #cwField .cfx-st h2{color:var(--c3-mint)}
+html:not([data-theme=sun]) #cwField .cfx-spb{color:#FFFFFF}
+html:not([data-theme=sun]) #cwField .cfx-spb em{color:var(--muted)}
+html:not([data-theme=sun]) #cwField .cfx-spb em.nw{color:var(--c3-mint)}
+html:not([data-theme=sun]) #cwField .cfx-rg.seen{background:rgba(255,255,255,.32)}
+html:not([data-theme=sun]) #cwField .cfx-rg .cw-av,html:not([data-theme=sun]) #cwField .cfx-add{border-color:var(--c3-n1)}
+html[data-theme=sun] .cfx-st{border-bottom:2px solid #000}
+html[data-theme=sun] .cfx-rg.new{background:#00562A}html[data-theme=sun] .cfx-rg.seen{background:#8A99A6}
+html[data-theme=sun] .cfx-rg .cw-av,html[data-theme=sun] .cfx-add{border-color:#FFFFFF}
+html[data-theme=sun] .cfx-add{background:#00562A}
+/* ---- the Locked chats row and list ---- */
+.cfx-lkr{display:flex;align-items:center;gap:12px;width:100%;min-height:68px;margin:0 0 8px;padding:10px 12px;border:var(--bw) solid var(--line);border-radius:18px;background:var(--card);color:var(--text);font:inherit;text-align:left;cursor:pointer;box-shadow:var(--c3-sh,none)}
+html:not([data-theme=sun]) .cfx-lkr{border:0}
+.cfx-lkri{flex:none;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--tint);color:var(--ink)}
+.cfx-lkri svg{width:22px;height:22px}
+.cfx-lkrt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.cfx-lkrt b{font-size:var(--cw-fs-name);font-weight:800;color:var(--ink)}
+.cfx-lkrt small{font-size:var(--cw-fs-meta);color:var(--muted);line-height:1.3}
+.cfx-lkr .cv,.cfx-r .cv,.cfx-me .cv{flex:none;width:20px;height:20px;color:var(--muted)}
+.cfx-lkhd{display:flex;align-items:center;gap:10px;margin:0 0 10px;padding:4px 0}
+.cfx-lkhd b{flex:1;font-size:1.1rem;font-weight:800;color:var(--ink)}
+.cfx-lkhn{width:22px;height:22px;color:var(--c3-acc,var(--ok))}.cfx-lkhn svg{width:100%;height:100%}
+#cwTools.cfx-lkm{display:none}
+body.cfx-cover main{visibility:hidden}
+/* ---- full-screen layers ---- */
+.cfx-sv,.cfx-ns,.cfx-ov1,.cfx-lk{position:fixed;inset:0;z-index:2600;display:flex;flex-direction:column;opacity:0;transition:opacity .2s;overscroll-behavior:contain}
+.cfx-sv.in,.cfx-ns.in,.cfx-ov1.in,.cfx-lk.in{opacity:1}
+.cfx-sv.out,.cfx-ns.out,.cfx-ov1.out,.cfx-lk.out{opacity:0}
+.bsh.cfx-hi,.tsh.cfx-hi{z-index:2700}
+body.cfx-fs .toast,body.cfx-fs .cw-snk{z-index:2950}
+body.cfx-fs{overflow:hidden}
+/* the viewer */
+.cfx-sv{background:#000000;color:#FFFFFF;touch-action:none;user-select:none;-webkit-user-select:none}
+.cfx-svs{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transition:transform .2s}
+.cfx-svs img,.cfx-svs video{max-width:100%;max-height:100%;object-fit:contain;-webkit-user-drag:none}
+.cfx-svt{width:100%;height:100%;display:flex;align-items:center;justify-content:center;padding:96px 28px 120px}
+.cfx-svt p{margin:0;max-width:34rem;text-align:center;font-weight:800;line-height:1.25;color:#FFFFFF;overflow-wrap:break-word;white-space:pre-wrap}
+.cfx-svt p.l{font-size:clamp(1.7rem,8vw,2.4rem)}.cfx-svt p.m{font-size:clamp(1.25rem,5.6vw,1.7rem)}.cfx-svt p.s{font-size:clamp(1rem,4.4vw,1.25rem);font-weight:700}
+.cfx-svtop{position:relative;z-index:2;padding:calc(8px + env(safe-area-inset-top)) 12px 18px;background:linear-gradient(rgba(0,0,0,.55),transparent)}
+.cfx-svbars{display:flex;gap:4px;height:3px}
+.cfx-svbars i{flex:1;border-radius:2px;background:rgba(255,255,255,.35);overflow:hidden}
+.cfx-svbars b{display:block;height:100%;background:#FFFFFF}
+.cfx-svh{display:flex;align-items:center;gap:10px;margin-top:10px}
+.cfx-svh .cw-av{width:40px;height:40px;font-size:.85rem;border:2px solid rgba(255,255,255,.85)}
+.cfx-svn{flex:1;min-width:0;display:flex;flex-direction:column}
+.cfx-svn b{font-size:1rem;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cfx-svn small{font-size:var(--cw-fs-meta);line-height:1.3;color:rgba(255,255,255,.82)}
+.cfx-svx{flex:none;width:44px;height:44px;border:0;border-radius:50%;background:none;color:#FFFFFF;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.cfx-svx svg{width:24px;height:24px}
+.cfx-svc{position:absolute;left:0;right:0;bottom:calc(84px + env(safe-area-inset-bottom));z-index:2;padding:0 20px;text-align:center;pointer-events:none}
+.cfx-svc p{margin:0;font-size:1rem;font-weight:600;line-height:1.4;text-shadow:0 1px 6px rgba(0,0,0,.7);overflow-wrap:break-word}
+.cfx-via{display:inline-flex;align-items:center;gap:6px;margin-bottom:8px;padding:4px 10px;border-radius:999px;background:rgba(0,0,0,.45);font-size:var(--cw-fs-meta);font-weight:700}
+.cfx-via svg{width:14px;height:14px}
+.cfx-svf{position:absolute;left:0;right:0;bottom:0;z-index:3;display:flex;align-items:center;gap:10px;padding:12px 14px calc(14px + env(safe-area-inset-bottom));background:linear-gradient(transparent,rgba(0,0,0,.6))}
+.cfx-rp{flex:1;min-width:0;display:flex;align-items:center;height:48px;padding:0 4px 0 16px;border-radius:24px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.24)}
+.cfx-rp input{flex:1;min-width:0;height:100%;border:0;background:none;color:#FFFFFF;font:inherit;font-size:1rem;outline:none}
+.cfx-rp input::placeholder{color:rgba(255,255,255,.75)}
+.cfx-rgo{flex:none;width:40px;height:40px;border:0;border-radius:50%;background:#22B067;color:#FFFFFF;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.cfx-rgo svg{width:20px;height:20px}
+.cfx-svb{flex:none;position:relative;width:52px;height:52px;padding:0;border:0;border-radius:50%;background:rgba(255,255,255,.16);color:#FFFFFF;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer}
+.cfx-svb svg{width:22px;height:22px}
+.cfx-svb small{position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:3px;font-size:.66rem;font-weight:700;white-space:nowrap}
+.cfx-svf:has(.cfx-svb small){padding-bottom:calc(26px + env(safe-area-inset-bottom))}
+.cfx-svb.lk[aria-pressed=true]{color:#FF5A6E}.cfx-svb.lk[aria-pressed=true] svg{fill:currentColor}
+.cfx-svb.pop svg{animation:cfxPop .35s cubic-bezier(.2,.8,.2,1.4)}
+@keyframes cfxPop{0%{transform:scale(.6)}100%{transform:scale(1)}}
+.cfx-seen{margin:0 auto;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 18px;border:0;border-radius:999px;background:rgba(255,255,255,.16);color:#FFFFFF;font:inherit;font-weight:700;cursor:pointer}
+.cfx-seen svg{width:20px;height:20px}.cfx-seen i{display:inline-flex;align-items:center;gap:4px;font-style:normal;color:#FF8A9A}.cfx-seen i svg{width:16px;height:16px;fill:currentColor}
+.cfx-sv.held .cfx-svtop,.cfx-sv.held .cfx-svf,.cfx-sv.held .cfx-svc{opacity:0;transition:opacity .2s}
+/* who saw mine */
+.cfx-vw{position:absolute;left:0;right:0;bottom:0;z-index:5;max-height:62%;display:flex;flex-direction:column;padding:8px 16px calc(16px + env(safe-area-inset-bottom));border-radius:24px 24px 0 0;background:#06283F;color:#FFFFFF;transform:translateY(100%);transition:transform .22s cubic-bezier(.2,.8,.2,1);touch-action:pan-y}
+.cfx-vw.in{transform:none}
+.cfx-vw .grab{display:block;width:40px;height:4px;margin:0 auto 10px;border-radius:2px;background:rgba(255,255,255,.3)}
+.cfx-vwh{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:4px 4px 10px}
+.cfx-vwh b{display:inline-flex;align-items:center;gap:8px;font-size:1.05rem;font-weight:800}
+.cfx-vwh b.rs{font-size:.9rem}.cfx-vwh svg{width:20px;height:20px;color:#7FE3B0}
+.cfx-vwl{flex:1;overflow:auto;min-height:60px}
+.cfx-vwl .muted{color:#A9C3D6}
+.cfx-vr{display:flex;align-items:center;gap:12px;padding:8px 4px}
+.cfx-vr .cw-av{width:44px;height:44px;font-size:.9rem}
+.cfx-vrt{flex:1;min-width:0;display:flex;flex-direction:column}
+.cfx-vrt b{font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cfx-vrt small{font-size:var(--cw-fs-meta);color:#7FE3B0}
+.cfx-vh,.cfx-vs{flex:none;width:22px;height:22px;color:#7FE3B0}.cfx-vh{color:#FF8A9A}.cfx-vh svg{fill:currentColor}.cfx-vh svg,.cfx-vs svg{width:100%;height:100%}
+.cfx-del{margin-top:10px;min-height:48px;border:0;border-radius:999px;background:rgba(255,255,255,.1);color:#FF8A80;font:inherit;font-weight:700;cursor:pointer}
+/* a new status */
+.cfx-ns{--nsc:#12A37A;background:var(--nsc);color:#FFFFFF;transition:opacity .2s,background-color .25s}
+.cfx-ns.media{background:#000000}
+.cfx-nsh{display:flex;align-items:center;gap:8px;padding:calc(8px + env(safe-area-inset-top)) 10px 6px}
+.cfx-nst{flex:1;min-width:0;font-weight:800;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cfx-nb{flex:none;width:46px;height:46px;border:0;border-radius:50%;background:rgba(0,0,0,.14);color:#FFFFFF;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+.cfx-nb svg{width:24px;height:24px}
+.cfx-nsc{position:relative;flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:12px 64px 12px 20px}
+.cfx-nta{width:100%;max-height:100%;border:0;background:none;color:#FFFFFF;font:inherit;font-weight:800;text-align:center;line-height:1.25;resize:none;outline:none;overflow:auto}
+.cfx-nta::placeholder{color:rgba(255,255,255,.72)}
+.cfx-nta.l{font-size:clamp(1.6rem,7.6vw,2.3rem)}.cfx-nta.m{font-size:clamp(1.25rem,5.4vw,1.6rem)}.cfx-nta.s{font-size:1.05rem;font-weight:700}
+.cfx-cols{position:absolute;top:8px;right:10px;display:flex;flex-direction:column;gap:10px}
+.cfx-cols button{width:36px;height:36px;padding:0;border-radius:50%;border:2.5px solid rgba(255,255,255,.75);background:var(--sw);cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.cfx-cols button[aria-checked=true]{border-color:#FFFFFF;box-shadow:0 0 0 3px rgba(255,255,255,.45)}
+.cfx-ncn{position:absolute;bottom:4px;left:0;right:0;text-align:center;font-size:var(--cw-fs-meta);font-weight:700}
+.cfx-ns.media .cfx-nsc{flex-direction:column;padding:8px 16px;gap:12px}
+.cfx-nsm{flex:1;min-height:0;width:100%;display:flex;align-items:center;justify-content:center}
+.cfx-nsm img,.cfx-nsm video{max-width:100%;max-height:100%;border-radius:16px;object-fit:contain}
+.cfx-cap{width:100%;height:48px;padding:0 18px;border:1px solid rgba(255,255,255,.25);border-radius:24px;background:rgba(255,255,255,.12);color:#FFFFFF;font:inherit;font-size:1rem;outline:none}
+.cfx-cap::placeholder{color:rgba(255,255,255,.7)}
+.cfx-nsf{display:flex;align-items:center;gap:10px;padding:12px 14px calc(14px + env(safe-area-inset-bottom));background:rgba(0,0,0,.14)}
+.cfx-chip{flex:1;min-width:0;max-width:230px;display:flex;align-items:center;gap:8px;height:48px;padding:0 14px;border:0;border-radius:24px;background:rgba(255,255,255,.2);color:#FFFFFF;font:inherit;font-weight:700;cursor:pointer}
+.cfx-chip svg{flex:none;width:20px;height:20px}.cfx-chip .cv{width:16px;height:16px;margin-left:auto}
+.cfx-chip span{min-width:0;font-size:.92rem;line-height:1.15;text-align:left;overflow-wrap:normal} /* two lines on the smallest phones, never cut */
+.cfx-nsf .cfx-nb{margin-left:auto}
+.cfx-go{flex:none;width:56px;height:56px;border:0;border-radius:50%;background:#FFFFFF;color:#0B8F6A;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.2)}
+.cfx-go svg{width:24px;height:24px}.cfx-go.busy{opacity:.6}
+/* view once */
+.cfx-ob{display:flex;align-items:center;gap:10px;min-width:min(200px,62vw);padding:4px 2px;border:0;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.cfx-ob[disabled]{cursor:default}
+.cfx-oi{flex:none;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--tint);color:var(--blue)}
+.cfx-oi svg{width:24px;height:24px}
+.cfx-ot{display:flex;flex-direction:column;min-width:0}
+.cfx-ot b{font-weight:800;font-size:var(--cw-fs-msg)}.cfx-ot small{font-size:var(--cw-fs-meta);opacity:.8}
+.cfx-ob.op .cfx-oi{background:none;width:28px;height:28px;opacity:.8}
+.cfx-ob.me .cfx-oi{background:rgba(255,255,255,.14);color:inherit}
+.cfx-1r{display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-top:12px}
+.cfx-1t{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border:var(--bw) solid var(--line);border-radius:999px;background:var(--card);color:var(--ink);font:inherit;font-weight:700;cursor:pointer}
+.cfx-1t svg{width:22px;height:22px}
+.cfx-1t[aria-pressed=true]{background:#0A78C2;border-color:#0A78C2;color:#FFFFFF}
+html[data-theme=sun] .cfx-1t[aria-pressed=true]{background:#0050A0;border-color:#000}
+.cfx-1r small{font-size:var(--cw-fs-meta);color:var(--muted)}
+.cfx-ov1{background:#000000;color:#FFFFFF}
+.cfx-o1h{display:flex;align-items:center;gap:10px;padding:calc(8px + env(safe-area-inset-top)) 12px 8px}
+.cfx-o1h span{min-width:0;display:flex;flex-direction:column}.cfx-o1h b{font-weight:800}.cfx-o1h small{font-size:var(--cw-fs-meta);opacity:.8}
+.cfx-o1s{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:8px}
+.cfx-o1s img,.cfx-o1s video{max-width:100%;max-height:100%;object-fit:contain;-webkit-user-drag:none;user-select:none;-webkit-touch-callout:none}
+.cfx-o1c{margin:0;padding:0 20px 8px;text-align:center}
+.cfx-o1n{display:flex;align-items:center;justify-content:center;gap:8px;margin:0;padding:10px 20px calc(16px + env(safe-area-inset-bottom));font-size:var(--cw-fs-meta);color:rgba(255,255,255,.8);text-align:center}
+.cfx-o1n svg{flex:none;width:18px;height:18px}
+/* a reply to a status, inside a bubble */
+.cfx-q{display:flex;align-items:stretch;gap:10px;padding:6px 6px 6px 10px}
+.cfx-qtx{flex:1;min-width:0;display:flex;flex-direction:column}
+.cfx-qt{flex:none;width:42px;height:52px;border-radius:8px;object-fit:cover;background:#2C3E4E;display:block}
+.cfx-qt.ph{background:linear-gradient(135deg,#5B7183,#2C3E4E)}
+/* the lock screen */
+.cfx-lk{background:var(--c3-n1,#04263F);background-image:radial-gradient(380px 260px at 50% 18%,rgba(46,180,170,.22),transparent 70%);color:#FFFFFF;overflow:auto}
+html[data-theme=sun] .cfx-lk{background:#FFFFFF;color:#000000}
+.cfx-lkh{padding:calc(8px + env(safe-area-inset-top)) 10px 0}
+.cfx-lk .cfx-nb{background:rgba(255,255,255,.12)}html[data-theme=sun] .cfx-lk .cfx-nb{background:#FFFFFF;color:#000;border:2px solid #000}
+.cfx-lkm{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:16px 24px;text-align:center}
+.cfx-lki{width:76px;height:76px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.1);color:#7FE3B0}
+html[data-theme=sun] .cfx-lki{background:#FFFFFF;border:2px solid #000;color:#00562A}
+.cfx-lki svg{width:34px;height:34px}
+.cfx-lkm h2{margin:6px 0 0;font-size:1.5rem;font-weight:800;color:inherit}
+.cfx-lkm p{margin:0;max-width:22rem;line-height:1.45;color:rgba(255,255,255,.82)}html[data-theme=sun] .cfx-lkm p{color:#000}
+.cfx-bio{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;width:180px;height:180px;margin-top:22px;border:0;border-radius:40px;background:rgba(255,255,255,.08);color:#7FE3B0;font:inherit;cursor:pointer}
+html[data-theme=sun] .cfx-bio{background:#FFFFFF;border:2px solid #000;color:#00562A}
+.cfx-bio svg{width:76px;height:76px}.cfx-bio span{color:#FFFFFF;font-weight:700;padding:0 10px}html[data-theme=sun] .cfx-bio span{color:#000}
+.cfx-lk .msg{min-height:1.3em;color:#FFB4A9}html[data-theme=sun] .cfx-lk .msg{color:#8C0000}
+.cfx-lk .msg:not(.bad){color:inherit}
+.cfx-lkf{padding:16px 24px calc(24px + env(safe-area-inset-bottom));text-align:center}
+.cfx-lkf p{margin:12px auto 0;max-width:22rem;font-size:var(--cw-fs-meta);line-height:1.45;color:rgba(255,255,255,.7)}html[data-theme=sun] .cfx-lkf p{color:#000}
+.cfx-pinb{max-width:340px;margin:0 auto;background:#22B067;border-color:#22B067;color:#FFFFFF}
+html[data-theme=sun] .cfx-pinb{background:#00562A}
+.cfx-pinf{display:flex;flex-direction:column;gap:12px;width:100%;max-width:300px;margin-top:10px}
+.cfx-pinf input{height:56px;border-radius:16px;border:2px solid rgba(255,255,255,.3);background:rgba(255,255,255,.08);color:#FFFFFF;font:inherit;font-size:1.6rem;letter-spacing:.5em;text-align:center;outline:none}
+.cfx-pinf input:focus{border-color:#7FE3B0}
+html[data-theme=sun] .cfx-pinf input{background:#FFFFFF;color:#000;border-color:#000}
+.cfx-pinf .btn{background:#22B067;border-color:#22B067;color:#FFFFFF}html[data-theme=sun] .cfx-pinf .btn{background:#00562A}
+/* ---- the Settings pages (#chat/settings…) ---- */
+body.cfxp .top,body.cfxp .tabs{display:none !important}
+body.cfxp main{padding:0 0 32px;background:var(--c3-sand,var(--bg))}
+html:not([data-theme=sun]) body.cfxp{background:var(--c3-sand)}
+html[data-theme=sun] body.cfxp main{background:#FFFFFF}
+#vCfx{min-height:100vh;min-height:100dvh}
+.cfx-hd{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:6px;min-height:64px;padding:calc(6px + env(safe-area-inset-top)) 12px 6px;background:var(--card);border-bottom:var(--bw) solid var(--line)}
+html:not([data-theme=sun]) .cfx-hd{background:var(--c3-hd);border:0;color:#FFFFFF}
+.cfx-hd h1{margin:0;min-width:0;font-size:1.35rem;font-weight:800;color:inherit;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cfx-bk{flex:none;width:44px;height:44px;border:0;border-radius:50%;background:none;color:inherit;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+.cfx-bk svg{width:26px;height:26px}
+.cfx-pg{max-width:640px;margin:0 auto;padding:16px 16px 8px}
+.cfx-card{margin:0 0 14px;border-radius:18px;background:var(--card);box-shadow:var(--c3-sh,none);overflow:hidden}
+html[data-theme=sun] .cfx-card,html[data-theme=sun] .cfx-me{border:2px solid #000;box-shadow:none}
+.cfx-sl{margin:18px 14px 8px;font-size:var(--cw-fs-small);font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.cfx-r{position:relative;display:flex;align-items:center;gap:12px;width:100%;min-height:64px;padding:10px 14px;border:0;background:none;color:var(--text);font:inherit;text-align:left;cursor:pointer}
+div.cfx-r{cursor:default}
+.cfx-r + .cfx-r::before,.cfx-rd + .cfx-r::before,.cfx-note + .cfx-r::before{content:'';position:absolute;top:0;left:62px;right:14px;height:1px;background:var(--line)}
+.cfx-card > .cfx-r:not(:has(.cfx-ri)) + .cfx-r::before{left:14px}
+.cfx-ri{flex:none;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--tint);color:var(--ink)}
+.cfx-ri svg{width:20px;height:20px}
+.cfx-rt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.cfx-rt b{font-size:var(--cw-fs-name);font-weight:800;color:var(--ink);overflow-wrap:anywhere}
+.cfx-rt small{font-size:var(--cw-fs-meta);color:var(--muted);line-height:1.35}
+.cfx-rt small.g{color:var(--c3-acc,var(--ok));font-weight:600}
+.cfx-rt small.lb,.cfx-rt label.lb{font-size:var(--cw-fs-small);font-weight:700;color:var(--muted)}
+.cfx-rt .ph{color:var(--muted);font-weight:600}
+.cfx-me{display:flex;align-items:center;gap:14px;width:100%;margin:0 0 14px;padding:14px;border:0;border-radius:18px;background:var(--card);box-shadow:var(--c3-sh,none);color:var(--text);font:inherit;text-align:left;cursor:pointer}
+.cfx-mav{width:64px;height:64px;font-size:1.25rem}
+.cfx-me .cfx-rt b{font-size:1.15rem}
+.cfx-ver{margin:18px 0 0;text-align:center;font-size:var(--cw-fs-meta);color:var(--muted)}
+.cfx-rd{display:flex;flex-direction:column}
+.cfx-rd button{position:relative;display:flex;align-items:center;gap:14px;width:100%;min-height:60px;padding:10px 14px;border:0;background:none;color:var(--text);font:inherit;text-align:left;cursor:pointer}
+.cfx-rd button span{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.cfx-rd button b{font-weight:800;color:var(--ink)}.cfx-rd button small{font-size:var(--cw-fs-meta);color:var(--muted)}
+.cfx-ro{flex:none;width:22px;height:22px;border-radius:50%;border:2px solid var(--muted);background:var(--card)}
+.cfx-rd [aria-checked=true] .cfx-ro{border-color:#22B067;background:radial-gradient(circle,#22B067 0 5px,var(--card) 5.5px)}
+html[data-theme=sun] .cfx-rd [aria-checked=true] .cfx-ro{border-color:#00562A;background:radial-gradient(circle,#00562A 0 5px,#FFFFFF 5.5px)}
+.tsh .cfx-rd,.bsh .cfx-rd{margin:0 0 12px}
+.cfx-note{margin:4px 14px 0;padding:10px 0 12px;border-top:1px solid var(--line);font-size:var(--cw-fs-meta);color:var(--muted)}
+.cfx-note.c{margin:0 14px;border:0;text-align:center}
+.cfx-none{margin:0;padding:18px 14px;color:var(--muted)}
+.cfx-hero{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;margin:0 0 6px;padding:16px;border-radius:20px;background:var(--g-deep,#04263F);color:#FFFFFF}
+html[data-theme=sun] .cfx-hero{background:#FFFFFF;color:#000;border:2px solid #000}
+.cfx-hi2{width:40px;height:40px;color:#7FE3B0}.cfx-hi2 svg{width:100%;height:100%}
+html[data-theme=sun] .cfx-hi2{color:#00562A}
+.cfx-hero h2{margin:2px 0 4px;font-size:1.1rem;font-weight:800;color:inherit}
+.cfx-hero p{margin:0;font-size:var(--cw-fs-meta);line-height:1.45;opacity:.85}
+.cfx-link{grid-column:1/-1;margin-top:12px;background:#22B067;border-color:#22B067;color:#FFFFFF}
+html[data-theme=sun] .cfx-link{background:#00562A}
+.cfx-this{flex:none;padding:4px 10px;border-radius:999px;background:var(--okbg);color:var(--ok);font-size:var(--cw-fs-small);font-weight:800;white-space:nowrap}
+.cfx-out{width:100%;min-height:56px;border:0;background:none;color:var(--bad);font:inherit;font-weight:800;cursor:pointer}
+.cfx-dsh{text-align:center}
+.cfx-dsi{display:flex;width:64px;height:64px;margin:4px auto 8px;border-radius:50%;align-items:center;justify-content:center;background:var(--tint);color:var(--ink)}
+.cfx-dsi svg{width:32px;height:32px}
+.cfx-dsh h3{margin:0;font-size:1.2rem;color:var(--ink)}
+.cfx-dsh dl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px 14px;margin:16px 0;text-align:left}
+.cfx-dsh dt{color:var(--muted);font-size:var(--cw-fs-meta)}.cfx-dsh dd{margin:0;font-weight:700}
+.cfx-steps{margin:14px 0 4px;padding-left:22px;text-align:left;line-height:1.5}
+.cfx-steps li{margin:0 0 8px}
+.cfx-ph{display:flex;flex-direction:column;align-items:center;gap:10px;margin:4px 0 16px;text-align:center}
+.cfx-ph p{margin:0;max-width:22rem;font-size:var(--cw-fs-meta);color:var(--muted)}
+.cfx-phb{position:relative;padding:0;border:0;border-radius:50%;background:none;cursor:pointer}
+.cfx-pav{width:148px;height:148px;font-size:2.6rem}
+.cfx-cam{position:absolute;right:0;bottom:6px;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#22B067;color:#FFFFFF;border:3px solid var(--c3-sand,var(--bg))}
+html[data-theme=sun] .cfx-cam{background:#00562A;border-color:#FFFFFF}
+.cfx-cam svg{width:24px;height:24px}
+.cfx-r.pf{align-items:flex-start}
+.cfx-r.pf .cfx-ri{margin-top:4px}
+.cfx-pen{flex:none;align-self:center;width:22px;height:22px;color:var(--c3-acc,var(--ok))}.cfx-pen svg{width:100%;height:100%}
+.cfx-r.ed input{width:100%;height:44px;margin:4px 0 2px;padding:0 12px;border:var(--bw) solid var(--edge);border-radius:12px;background:var(--field);color:var(--text);font:inherit;font-size:1rem}
+.cfx-abg{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}
+.cfx-abs{display:flex;flex-wrap:wrap;gap:8px;padding:0 2px}
+.cfx-abs button{min-height:40px;padding:0 16px;border:var(--bw) solid var(--line);border-radius:999px;background:var(--card);color:var(--ink);font:inherit;font-weight:700;cursor:pointer}
+html:not([data-theme=sun]) .cfx-abs button{border-color:transparent;box-shadow:var(--c3-sh)}
+.cfx-abs button[aria-pressed=true]{background:var(--okbg);color:var(--ok);border-color:var(--ok)}
+.cfx-pl{display:flex;flex-direction:column;max-height:50vh;overflow:auto;margin:8px 0 12px}
+.cfx-pl button{display:flex;align-items:center;gap:12px;min-height:56px;padding:6px 4px;border:0;border-bottom:1px solid var(--line);background:none;color:var(--text);font:inherit;text-align:left;cursor:pointer}
+.cfx-pl .cw-av{width:40px;height:40px;font-size:.85rem}
+.cfx-pl b{flex:1;min-width:0;font-weight:700}
+.cfx-ck{flex:none;width:24px;height:24px;border-radius:7px;border:2px solid var(--muted);color:transparent;display:flex;align-items:center;justify-content:center}
+.cfx-ck svg{width:16px;height:16px;stroke-width:3}
+.cfx-pl [aria-checked=true] .cfx-ck{background:#22B067;border-color:#22B067;color:#FFFFFF}
+.cfx-pq{width:100%;height:44px;padding:0 14px;border:var(--bw) solid var(--edge);border-radius:12px;background:var(--field);color:var(--text);font:inherit}
+.cfx-iab{padding:12px 16px}.cfx-iab small{font-size:var(--cw-fs-small);font-weight:700;color:var(--muted)}.cfx-iab p{margin:2px 0 0;color:var(--text);overflow-wrap:anywhere}
+.cfx-snk{justify-content:center}
+@media (min-width:1000px){.cfx-sv .cfx-svs img,.cfx-sv .cfx-svs video{max-width:min(100%,520px)}.cfx-svt{max-width:560px;margin:0 auto;border-radius:0}.cfx-svtop,.cfx-svf{max-width:560px;margin:0 auto;width:100%}.cfx-svf{left:50%;transform:translateX(-50%)}}
+/* the app's glass look for text boxes (html:not([data-theme=sun]) :is(input…, textarea)) doesn't belong on the dark and coloured layers */
+html body .cfx-sv .cfx-rp input[type=text],html body .cfx-ns textarea.cfx-nta,html body .cfx-ns input[type=text].cfx-cap,html body .cfx-lk .cfx-pinf input[type=password]{box-shadow:none;-webkit-appearance:none;appearance:none;transition:none}
+html body .cfx-sv .cfx-rp input[type=text]{min-height:0;padding:0;border:0;border-radius:0;background:none;background-color:transparent}
+html body .cfx-ns textarea.cfx-nta{min-height:0;padding:0;border:0;border-radius:0;background:none;background-color:transparent}
+html body .cfx-ns input[type=text].cfx-cap{min-height:0;border-radius:24px;background-color:rgba(255,255,255,.12);border-color:rgba(255,255,255,.25)}
+html body .cfx-lk .cfx-pinf input[type=password]{min-height:0;padding:0;border-radius:16px;background-color:rgba(255,255,255,.08);border-color:rgba(255,255,255,.3)}
+html[data-theme=sun] body .cfx-lk .cfx-pinf input[type=password]{background-color:#FFFFFF;border-color:#000;color:#000}
+html body .cfx-lk .cfx-pinf input[type=password]:focus{border-color:#7FE3B0}
+html .cfx-lk .btn.cfx-pinb,html .cfx-pinf .btn,html .cfx-hero .btn.cfx-link{background:#1E9E5C !important;border-color:#1E9E5C !important;color:#FFFFFF !important;box-shadow:none !important}
+html[data-theme=sun] .cfx-lk .btn.cfx-pinb,html[data-theme=sun] .cfx-pinf .btn,html[data-theme=sun] .cfx-hero .btn.cfx-link{background:#00562A !important;border-color:#000 !important}
+html .cfx-dsh .btn.po-red{background:var(--bad) !important;border-color:var(--bad) !important;color:#FFFFFF !important;box-shadow:none !important}
+.cfx-note + .cfx-r::before{left:14px}
+.cfx-o1h .cw-ib{background:rgba(255,255,255,.14);border:0;color:#FFFFFF;box-shadow:none}
+.cfx-iab{margin:0;padding:12px 16px;border-radius:18px;background:var(--card);box-shadow:var(--c3-sh,none)}
+html[data-theme=sun] .cfx-iab{border:2px solid #000}
+.cfx-sv.vw-open .cfx-svc,.cfx-sv.vw-open .cfx-svf{visibility:hidden}
+.cw-b .cw-q.cfx-q{flex-direction:row;align-items:stretch;gap:10px;padding:6px 6px 6px 10px;cursor:default}
+.cw-q.cfx-q .cfx-qtx{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center}
+.cw-q.cfx-q .cfx-qtx span{white-space:nowrap}
+@media (prefers-reduced-motion:reduce){.cfx-sv,.cfx-ns,.cfx-ov1,.cfx-lk,.cfx-vw,.cfx-svs{transition:none}}
+</style>
 </head>
 <body class="locked">
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
@@ -4600,6 +4895,8 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
       <div class="cw-none2" id="cwNone2"></div>
       <div class="cw-comp" id="cwComp"></div>
     </section>
+    <!-- chatfx: Settings, Profile, Privacy, Linked devices (#chat/settings…) -->
+    <section id="vCfx" class="hidden" aria-label="Settings"></section>
     <!-- chatw:end -->
   </main>
   <div class="tabs" id="tabs">
@@ -4765,7 +5062,7 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
 
   // --- views and tab bar -------------------------------------------------------------------
   var MAIN = ['vMap', 'vList', 'vNew', 'vMe', 'vOffice', 'vChat', 'vStories'];
-  var DEEP = { vProj: 1, vRoute: 1, vReport: 1, vSearch: 1, vRoom: 1 };
+  var DEEP = { vProj: 1, vRoute: 1, vReport: 1, vSearch: 1, vRoom: 1, vCfx: 1 };
   // Each screen, and each sub-tab in it, has its own address (#map, #list, #p/<id>, #p/<id>/hist, #office/repairs,
   // #me/team…), so Back and a page refresh keep you where you were.
   function hashFor(v) {
@@ -4773,6 +5070,7 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
     if (v === 'vMe') return '#me' + (store.get('rfPinMePane') === 'team' ? '/team' : '');
     if (v === 'vOffice') return '#office' + (O.tab && O.tab !== 'overview' ? '/' + O.tab : '');
     if (v === 'vRoom') return '#chat/' + encodeURIComponent(CH.cur || '').replace(/%3A/gi, ':'); // chat ids like t:all, p:101
+    if (v === 'vCfx') return '#chat/settings' + (CFX.pg ? '/' + CFX.pg : ''); // chatfx
     return '#' + ({ vMap: 'map', vList: 'list', vRoute: 'route', vSearch: 'search', vNew: 'new', vReport: 'report', vChat: 'chat', vStories: 'stories' }[v] || 'map');
   }
   // the address of a screen on its first sub-tab (Pin location, Overview, Me)
@@ -4921,7 +5219,7 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
   document.addEventListener('click', function (e) { BK.gest = Date.now(); var s = e.target.closest && e.target.closest('summary'); BK.sum = s ? s.parentNode : null; }, true);
   function bkTapped() { return Date.now() - BK.gest < 900 && S.view !== 'vLock'; }
   // sheets, dialogs and full-screen viewers: anything of these added to the page
-  var BK_OV = '.bsh, .tsh, .npg, .prj-lb, #prjSum, .fld-scan, .cw-lb';
+  var BK_OV = '.bsh, .tsh, .npg, .prj-lb, #prjSum, .fld-scan, .cw-lb, .cfx-sv, .cfx-ns, .cfx-ov1, .cfx-lk';
   function bkOvShut(el) { // closes it the way its own × (or a tap outside) does
     if (!el.isConnected || el.gone || el.classList.contains('out')) return false;
     var x = el.querySelector(':scope > .bsh-p > .bsh-h > .bsh-x, :scope > .tsh-p > .tsh-x, .prj-x, :scope > .prj-sbar > .prj-bk, :scope > .np-h > [data-np=back], #fldScX') || el.querySelector(':scope > .bsh-bg, :scope > .tsh-bg');
@@ -5012,11 +5310,11 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
     if (v !== 'vProj') { pick.stop(); liveStop(); } if (v !== 'vNew') nPick.stop();
     S.view = v;
     nav(v, how);
-    ['vLock', 'vMap', 'vList', 'vSearch', 'vRoute', 'vProj', 'vNew', 'vMe', 'vReport', 'vOffice', 'vChat', 'vRoom', 'vStories'].forEach(function (x) { $(x).classList.toggle('hidden', x !== v); });
+    ['vLock', 'vMap', 'vList', 'vSearch', 'vRoute', 'vProj', 'vNew', 'vMe', 'vReport', 'vOffice', 'vChat', 'vRoom', 'vStories', 'vCfx'].forEach(function (x) { $(x).classList.toggle('hidden', x !== v); });
     cwShown(v);
     document.body.classList.toggle('locked', v === 'vLock');
     $('main').classList.toggle('bare', v === 'vMap');
-    var tabFor = v === 'vReport' ? 'vMe' : v === 'vSearch' ? 'vList' : v === 'vRoom' ? 'vChat' : v === 'vRoute' || v === 'vProj' ? (S.prev === 'vMap' ? 'vMap' : S.prev === 'vStories' && v === 'vProj' ? 'vStories' : 'vList') : v;
+    var tabFor = v === 'vReport' ? 'vMe' : v === 'vSearch' ? 'vList' : v === 'vRoom' || v === 'vCfx' ? 'vChat' : v === 'vRoute' || v === 'vProj' ? (S.prev === 'vMap' ? 'vMap' : S.prev === 'vStories' && v === 'vProj' ? 'vStories' : 'vList') : v;
     qa('#tabs button').forEach(function (b) { if (b.getAttribute('data-v') === tabFor) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
     if (tabFor === 'vMe') $('hAv').setAttribute('aria-current', 'page'); else $('hAv').removeAttribute('aria-current'); // Me lives on the avatar (chatw)
     $('who').textContent = v === 'vLock' ? '' : S.name; headUi(v);
@@ -9490,6 +9788,7 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
     $('meSet').innerHTML = '<h2>' + tr('Settings', 'Mipangilio') + '</h2>' +
       '<div class="sgrp"><span class="sgl">' + tr('Account', 'Akaunti') + '</span><i data-slot="mon"></i>' +
       setRow('profile', 'people', 'blue', tr('Personal details', 'Taarifa zangu'), esc(me.nick || S.name || '') + (me.phone ? ' · ' + esc(me.phone) : '')) +
+      setRow('chatset', 'chat', 'green', tr('Chats, privacy and devices', 'Gumzo, faragha na vifaa'), tr('Profile, about, linked devices, locked chats', 'Wasifu, kuhusu, vifaa vilivyounganishwa, gumzo zilizofungwa')) + // chatfx
       setRow('pin', 'lock', 'purple', kind === 'monday' ? tr('Sign-in', 'Kuingia') : tr('Change my PIN', 'Badilisha PIN yangu'), kind === 'monday' ? tr('Signed in with monday.com', 'Umeingia kwa monday.com') : kind === 'app' ? tr('Your own 4-digit PIN', 'PIN yako ya tarakimu 4') : kind === 'cloudflare' ? tr('Set by the office', 'Imewekwa na ofisi') : tr('Shared team PIN', 'PIN ya timu')) + '</div>' +
       '<div class="sgrp" id="setPhone"><span class="sgl">' + tr('Security and alerts', 'Usalama na arifa') + '</span><i data-slot="bio"></i>' +
       setRow('notify', 'clock', 'amber', tr('What to tell me', 'Niarifu kuhusu nini'), tr('What the bell tells you about', 'Kengele inakuarifu nini')) +
@@ -9547,6 +9846,7 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
           S.pin = n; store.set('rfPin', n); toast(tr('PIN changed ✓ Use the new one next time.', 'PIN imebadilishwa ✓ Tumia mpya wakati ujao.')); w.close();
         });
       });
+    } else if (k === 'chatset') { cfxGo('');
     } else if (k === 'notify') {
       var o = jget('rfPinNoteKinds', {});
       w = panel(tr('What to tell me', 'Niarifu kuhusu nini'), '<p class="muted">' + tr('The bell in Me & team shows these. On Android the phone can also tell you when the app is closed (turn that on in the Android app).', 'Kengele kwenye Mimi na timu inaonyesha haya. Kwenye Android simu inaweza pia kukuarifu programu ikiwa imefungwa (washa kwenye programu ya Android).') + '</p>' +
@@ -16385,8 +16685,8 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
   }
   function cwWhy(j) { return j.reason === 'chat-off' ? cwOffTx() : j.reason === 'no-name' ? tr('Chat needs your own PIN or name. Ask the office.', 'Gumzo linahitaji PIN au jina lako mwenyewe. Uliza ofisi.') : j.reason === 'not-admin' ? tr('Only the group’s admins can do that.', 'Wasimamizi wa kikundi pekee wanaweza kufanya hivyo.') : j.reason === 'not-yours' ? tr('That isn’t your message.', 'Huo si ujumbe wako.') : j.reason === 'too-long' ? tr('Too long: videos up to 60 seconds, voice up to 5 minutes.', 'Ndefu mno: video hadi sekunde 60, sauti hadi dakika 5.') : j.reason === 'team' ? tr('Team chats follow the team list, so that can’t be changed here.', 'Gumzo za timu zinafuata orodha ya timu, kwa hiyo hilo haliwezi kubadilishwa hapa.') : j.reason === 'not-found' ? tr('That isn’t there any more.', 'Hicho hakipo tena.') : j.reason === 'not-member' ? tr('You’re no longer in this chat.', 'Hauko tena kwenye gumzo hili.') : j.reason === 'only-admins' ? tr('Only admins can send messages here.', 'Wasimamizi pekee wanaweza kutuma jumbe hapa.') : j.reason === 'edit-window' ? tr('Messages can only be edited for 15 minutes.', 'Jumbe zinaweza kuhaririwa kwa dakika 15 tu.') : j.reason === 'too-large' ? tr('That file is too large.', 'Faili hiyo ni kubwa mno.') : why(j); }
   function cwOffTx() { return tr('Chat isn’t switched on yet. The office can turn it on.', 'Gumzo bado halijawashwa. Ofisi inaweza kuliwasha.'); }
-  function cwUp(blob, kind, name, dur) {
-    return fetch('/api/chat/media?type=' + encodeURIComponent(kind) + '&name=' + encodeURIComponent(name || kind) + (dur ? '&dur=' + Math.round(dur) : ''), { method: 'POST', headers: Object.assign({ 'Content-Type': blob.type || 'application/octet-stream' }, pinHdr()), body: blob })
+  function cwUp(blob, kind, name, dur, forw) {
+    return fetch('/api/chat/media?type=' + encodeURIComponent(kind) + '&name=' + encodeURIComponent(name || kind) + (dur ? '&dur=' + Math.round(dur) : '') + (forw ? '&for=' + forw : ''), { method: 'POST', headers: Object.assign({ 'Content-Type': blob.type || 'application/octet-stream' }, pinHdr()), body: blob }) // for=status / for=once (chatfx)
       .then(function (r) { return r.json().catch(function () { return { ok: false, reason: 'down' }; }).then(function (j) { j.status = r.status; return j; }); })
       .catch(function () { return { ok: false, reason: 'offline', status: 0 }; });
   }
@@ -16476,7 +16776,7 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
     if (!m) return '';
     if (m.deleted) return tr('This message was deleted', 'Ujumbe huu ulifutwa');
     if (m.sys || m.kind === 'sys') return cwSysTx(m);
-    var md = (m.media || [])[0] || {}, t = m.text || '';
+    var md = typeof m.media === 'string' ? { type: m.media } : (m.media || [])[0] || {}, t = m.once ? '' : m.text || ''; // list rows: last.media is 'photo' | 'video' | …; view once never shows words
     var body = m.kind === 'voice' ? '🎤 ' + tr('Voice message', 'Ujumbe wa sauti') + ((m.dur || md.dur) ? ' ' + cwDur(m.dur || md.dur) : '')
       : m.kind === 'media' ? (md.type === 'video' ? '🎥 ' + (t || tr('Video', 'Video')) : '📷 ' + (t || tr('Photo', 'Picha')))
       : m.kind === 'location' ? '📍 ' + tr('Location', 'Mahali') : m.kind === 'live' ? '📍 ' + tr('Live location', 'Mahali papo hapo')
@@ -16593,7 +16893,8 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
       if (j.tools && typeof j.tools === 'object') { CW2.tools = { translate: !!j.tools.translate, transcribe: !!j.tools.transcribe }; store.set('rfChatTools', JSON.stringify(CW2.tools)); }
       if (j.presence) Object.keys(j.presence).forEach(function (k) { CH.pres[k] = j.presence[k]; if (j.presence[k] && j.presence[k].photo) phSet(k, j.presence[k].photo); });
       if (q) { (j.chats || []).forEach(cwUpsert); if (j.gone && j.gone.length) CH.chats = CH.chats.filter(function (x) { return j.gone.map(String).indexOf(String(x.id)) < 0; }); } else CH.chats = (j.chats || []).slice();
-      cwSave(); cwBadge(); cwDelivered();
+      if (Array.isArray(j.locked)) cfxLockedGot(j.locked); else if (!q) cfxLockedGot(CH.chats.filter(function (c) { return c.locked; }).map(function (c) { return c.id; })); // chatfx
+      cwSave(); cwBadge(); cwDelivered(); cfxStSoon();
       if (S.view === 'vChat') cwListDraw();
       if (S.view === 'vRoom') { cwHead(); if (!cwAll(CH.cur).length) cwMsgsDraw(true); }
       cwWs(); cwPoll();
@@ -16620,7 +16921,7 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
 
   // the list screen
   function cwListOpen() { var was = CH.started; cwStart(); cwListDraw(); if (was) cwLoad(false); cwTmLoad(); }
-  function cwFresh() { CH.q = ''; CH.hits = null; CH.arch = false; if ($('cwQ')) $('cwQ').value = ''; if ($('cwQx')) $('cwQx').classList.add('hidden'); if (CH.ql) { var l = CH.ql; CH.ql = null; bkShut(l); } if (CH.al) { var a = CH.al; CH.al = null; bkShut(a); } CH.so = false; cwMenuShut(); }
+  function cwFresh() { CH.q = ''; CH.hits = null; CH.arch = false; CH.lk = false; if (CH.lkl) { var lk = CH.lkl; CH.lkl = null; bkShut(lk); } if ($('cwQ')) $('cwQ').value = ''; if ($('cwQx')) $('cwQx').classList.add('hidden'); if (CH.ql) { var l = CH.ql; CH.ql = null; bkShut(l); } if (CH.al) { var a = CH.al; CH.al = null; bkShut(a); } CH.so = false; cwMenuShut(); }
   function cwSorted() {
     return CH.chats.slice().sort(function (a, z) { return (cwIsNews(z) - cwIsNews(a)) || cwMs((z.last || {}).at) - cwMs((a.last || {}).at); });
   }
@@ -16642,16 +16943,19 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
     var box = $('cwList'); if (!box) return;
     var put = function (el, h) { if (el.__h === h) return false; el.__h = h; el.innerHTML = h; return true; }; // the same list again: nothing redrawn, nothing blinks
     var list = function (h) { if (put(box, h)) cwFill(box); };
-    cwTopDraw(); put($('cwNote'), cwNoteHtml()); put($('cwField'), cwFieldHtml());
+    cwTopDraw(); put($('cwNote'), cwNoteHtml()); var sth = cfxStatHtml(), fdh = CH.lk ? '' : cwFieldHtml(); put($('cwField'), sth && fdh ? sth.replace('class="cfx-st"', 'class="cfx-st join"') + fdh : sth + fdh); // chatfx: the Status strip first
     if (CH.on === false) { list(cwOffHtml()); $('cwTools').classList.add('hidden'); return; }
     $('cwTools').classList.remove('hidden');
     var all = cwSorted(), q = CH.q.trim().toLowerCase(), h = '';
-    $('cwArchHd').classList.toggle('hidden', !CH.arch);
+    $('cwArchHd').classList.toggle('hidden', !CH.arch); $('cwTools').classList.toggle('cfx-lkm', !!CH.lk);
+    if (CH.lk) { list(cfxLkListHtml(all)); return; } // chatfx: Locked chats, once it's you
+    if (!CFX.unl) all = all.filter(function (c) { return !cfxIsLocked(c); }); else if (!q) all = all.filter(function (c) { return !cfxIsLocked(c); }); // locked chats live only in Locked chats
     if (q) {
       var hit = all.filter(function (c) { return (cwTitle(c) + ' ' + (c.members || []).join(' ')).toLowerCase().indexOf(q) >= 0; });
-      if (!hit.length && CH.hits && !CH.hits.length) { list(cwEmpty('search', tr('Nothing found', 'Hakuna kilichopatikana'), esc(tr('No chats or messages with “' + CH.q.trim() + '”.', 'Hakuna gumzo wala jumbe zenye “' + CH.q.trim() + '”.')), 'clearq', tr('Clear the search', 'Futa utafutaji'), 'cw_empty_search')); return; }
+      if (!hit.length && CH.hits && !CH.hits.filter(function (x) { return CFX.unl || !cfxIsLocked(x.c); }).length) { list(cwEmpty('search', tr('Nothing found', 'Hakuna kilichopatikana'), esc(tr('No chats or messages with “' + CH.q.trim() + '”.', 'Hakuna gumzo wala jumbe zenye “' + CH.q.trim() + '”.')), 'clearq', tr('Clear the search', 'Futa utafutaji'), 'cw_empty_search')); return; }
       h += '<h2 class="cw-sec">' + tr('Chats', 'Gumzo') + '</h2>' + (hit.length ? hit.map(cwRow).join('') : '<p class="cw-none">' + tr('No chats with that name', 'Hakuna gumzo lenye jina hilo') + '</p>');
-      h += '<h2 class="cw-sec">' + tr('Messages', 'Jumbe') + '</h2>' + (CH.hits == null ? '<p class="cw-none">' + tr('Searching…', 'Inatafuta…') + '</p>' : CH.hits.length ? CH.hits.map(cwHitRow).join('') : '<p class="cw-none">' + tr('No messages found', 'Hakuna jumbe zilizopatikana') + '</p>');
+      var hits = CH.hits && !CFX.unl ? CH.hits.filter(function (x) { return !cfxIsLocked(x.c); }) : CH.hits; // chatfx: nothing from locked chats until it's you
+      h += '<h2 class="cw-sec">' + tr('Messages', 'Jumbe') + '</h2>' + (hits == null ? '<p class="cw-none">' + tr('Searching…', 'Inatafuta…') + '</p>' : hits.length ? hits.map(cwHitRow).join('') : '<p class="cw-none">' + tr('No messages found', 'Hakuna jumbe zilizopatikana') + '</p>');
       list(h); return;
     }
     if (CH.arch) {
@@ -16660,6 +16964,7 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
     }
     // Announcements first, then pinned chats, then the rest newest first; the chip picks which; Archived is a small row at the end
     var f = cwChip(), live = all.filter(function (c) { return !c.archived || cwIsNews(c); }), nArch = all.length - live.length, sh = live.filter(function (c) { return cwChipOk(c, f); });
+    h += cfxLockRowHtml(); // chatfx
     h += sh.filter(cwIsNews).concat(sh.filter(function (c) { return c.pinned && !cwIsNews(c); }), sh.filter(function (c) { return !c.pinned && !cwIsNews(c); })).map(cwRow).join('');
     if (!live.length) h += '<div class="cw-empty"><span class="cw-offi" aria-hidden="true">' + cwIc('chat') + '</span><h2>' + (CH.on ? tr('No chats yet', 'Bado hakuna gumzo') : tr('Loading…', 'Inapakia…')) + '</h2>' + (CH.on ? '<p>' + tr('Tap + to message a teammate or start a group.', 'Gusa + kumtumia mwenzako ujumbe au kuanzisha kikundi.') + '</p>' : '') + '</div>';
     else if (!sh.length) { var ce = CW_CHIPE[f] || CW_CHIPE.all; h += cwEmpty('hello', tr(ce[0], ce[1]), '', 'allchip', tr('Show all chats', 'Onyesha gumzo zote'), 'cw_empty_chip'); }
@@ -16754,7 +17059,7 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
     var m = $('cwMenu'); if (!m.classList.contains('hidden')) { cwMenuShut(); return; }
     var nb = cwBellN(), wide = cwWide(), un = CH.chats.some(function (c) { return (c.unread || c.mention) && !c.archived; });
     var it = function (k, ic, en, sw, extra) { return '<button type="button" role="menuitem" data-mn="' + k + '"' + (k === 'set' ? ' id="cwSet" data-testid="cw_settings"' : k === 'star' ? ' id="cwStar"' : '') + '>' + ic + '<span>' + tr(en, sw) + '</span>' + (extra || '') + '</button>'; };
-    m.innerHTML = it('set', cwIc('gear'), 'Chat settings', 'Mipangilio ya gumzo') + it('star', cwIc('star'), 'Starred messages', 'Jumbe zenye nyota') + it('arch', cwIc('box'), 'Archived', 'Zilizohifadhiwa') + it('group', cwIc('people'), 'New group', 'Kikundi kipya') +
+    m.innerHTML = it('set', cwIc('gear'), 'Settings', 'Mipangilio') + it('star', cwIc('star'), 'Starred messages', 'Jumbe zenye nyota') + it('arch', cwIc('box'), 'Archived', 'Zilizohifadhiwa') + it('group', cwIc('people'), 'New group', 'Kikundi kipya') +
       (un ? it('read', cwIc('check'), 'Mark all as read', 'Weka zote kama zimesomwa') : '') +
       (wide ? '' : it('bell', cwIc('bell'), 'Notifications', 'Arifa', nb ? '<i aria-label="' + nb + '">' + (nb > 99 ? '99+' : nb) + '</i>' : '') + it('rf', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>', 'Refresh', 'Onyesha upya'));
     m.setAttribute('aria-label', tr('More', 'Zaidi')); m.classList.remove('hidden'); $('cwMore').setAttribute('aria-expanded', 'true');
@@ -16781,6 +17086,7 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
   // ---- one chat
   function cwOpen(id, how, mode) {
     if (!id) return;
+    if (cfxGuard(id, how, mode)) return; // a locked chat waits for the fingerprint or the PIN (chatfx)
     var same0 = S.view === 'vRoom' && CH.cur === id;
     if (!same0 && S.view === 'vRoom') { cwScrSave(); cwDraftSave(); if (cwWide() && !how) how = 'replace'; } // two panes: one chat to the next, Back still goes to the list
     CH.cur = id; CH.unseen = 0; CH.stick = true;
@@ -16897,7 +17203,7 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
     return a.concat(p);
   }
   function cwPendMsg(it) {
-    return { id: '', pend: it.cid, cid: it.cid, c: it.c, from: cwMe(), at: it.at, kind: it.kind, text: it.text, reply: it.reply, fwd: it.fwd, mentions: it.mentions, loc: it.loc, live: it.live, contact: it.contact, trip: it.trip,
+    return { id: '', pend: it.cid, cid: it.cid, c: it.c, from: cwMe(), at: it.at, kind: it.kind, text: it.text, reply: it.reply, once: it.once, statusQ: it.statusQ, fwd: it.fwd, mentions: it.mentions, loc: it.loc, live: it.live, contact: it.contact, trip: it.trip,
       media: (it.files || []).map(function (f) { return { type: f.type, w: f.w, h: f.h, dur: f.dur, wave: f.wave, name: f.name, size: f.size, id: f.id, lurl: f.lurl || (f.blob ? (f.lurl = URL.createObjectURL(f.blob)) : '') }; }).concat(it.media || []),
       status: it.failed ? 'failed' : 'queued', failed: it.failed };
   }
@@ -16957,7 +17263,9 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
     if (m.fwd) h += '<span class="cw-fw">' + cwIc('fwd') + tr('Forwarded', 'Imesambazwa') + '</span>';
     if (m.reply && (m.reply.id || m.reply.text)) h += '<button type="button" class="cw-q" data-jump="' + esc(m.reply.id || '') + '" style="' + cwHueVar(m.reply.from) + '"><b data-nosw>' + esc(cwIsMe(m.reply.from) ? tr('You', 'Wewe') : m.reply.from || '') + '</b><span data-nosw>' + esc(cwPrev({ kind: m.reply.kind, text: m.reply.text, media: [] }, null) || '') + '</span></button>';
     var md = m.media || [];
-    if (m.kind === 'media' && md.length) h += cwGrid(m, md);
+    if (m.statusRef || m.statusQ) h += cfxStRefHtml(m); // a reply to a status (chatfx)
+    if (m.once) h += cfxOnceHtml(m, me); // view once: never a picture in the chat (chatfx)
+    else if (m.kind === 'media' && md.length) h += cwGrid(m, md);
     else if (m.kind === 'voice') h += cwVoice(m, md[0] || {}) + cw2VoiceText(m);
     else if (m.kind === 'doc') h += cwDocHtml(m, md[0] || {});
     else if (m.kind === 'location' || m.kind === 'live') h += cwLocHtml(m, me);
@@ -16968,9 +17276,10 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
     var meta = cwMeta(m, me, me && st === 'read' && sw && sw !== 'read');
     // chat2: the time sits at the end of the words' last line when it fits (room.png), else on a line of its own
     var inl = !!m.text && !u && !emo;
-    if (m.text) h += '<div class="cw-tx" data-nosw>' + cwLinkify(m.text, m) + (inl ? meta : '') + '</div>' + cw2TrHtml(m, me);
+    if (m.once) inl = false;
+    if (m.text && !m.once) h += '<div class="cw-tx" data-nosw>' + cwLinkify(m.text, m) + (inl ? meta : '') + '</div>' + cw2TrHtml(m, me);
     if (u) h += cwPreviewHtml(u[1].replace(/[.,;:!?)\]'"]+$/, ''));
-    h += (inl ? '' : meta) + cw2PhotoAdd(m, c) + cw2SendState(m) + '</div>';
+    h += (inl ? '' : meta) + (m.once ? '' : cw2PhotoAdd(m, c)) + cw2SendState(m) + '</div>';
     var rx = m.reacts || {}, ks = Object.keys(rx).filter(function (x) { return (rx[x] || []).length; }), rw = CH.rxWas[k] || {}, rn = {};
     if (ks.length) h += '<div class="cw-rx">' + ks.map(function (x) { var mine = rx[x].some(cwIsMe), n = rx[x].length; rn[x] = n; return '<button type="button" class="cw-rc' + (mine ? ' on' : '') + (CH.rxWas[k] && n > (rw[x] || 0) ? ' pop' : '') + '" data-rx="' + esc(x) + '" aria-label="' + esc(x + ' ' + n) + '">' + x + (n > 1 ? '<i>' + n + '</i>' : '') + '</button>'; }).join('') + '</div>';
     CH.rxWas[k] = rn;
@@ -17166,7 +17475,7 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
     cwQueue({ c: c, kind: 'text', text: v, reply: cwReplyRef(), mentions: ment.length ? ment : undefined });
     t.value = ''; store.del('rfChatDraft:' + c); CH.reply = null; CH.ment = []; cwTyping(null); cwCompDraw(); t = $('cwTx'); if (t) t.focus({ preventScroll: true });
   }
-  function cwReplyRef() { var r = CH.reply; return r ? { id: r.id, from: r.from, kind: r.kind, text: r.kind === 'text' ? r.text : r.text || '' } : undefined; }
+  function cwReplyRef() { var r = CH.reply; return r ? { id: r.id, from: r.from, kind: r.kind, text: r.once ? '' : r.kind === 'text' ? r.text : r.text || '' } : undefined; }
   // the send sound: a short whoosh (and a tap on phones)
   var cwAC = null;
   function cwAudio() { try { if (!cwAC) cwAC = new (window.AudioContext || window.webkitAudioContext)(); if (cwAC.state === 'suspended') cwAC.resume(); } catch (e) { cwAC = null; } return cwAC; }
@@ -17236,9 +17545,9 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
           files.forEach(function (f) {
             up = up.then(function (st) {
               if (st || f.id) return st;
-              var pre = f.posterBlob && !f.poster ? cwUp(f.posterBlob, 'photo', 'poster.jpg') /* a poster is a small photo */.then(function (p) { if (p.ok) f.poster = p.id; }) : Promise.resolve();
-              if (f.thumbBlob && !f.thumb) pre = pre.then(function () { return cwUp(f.thumbBlob, 'photo', 'thumb.jpg').then(function (p) { if (p.ok) f.thumb = p.id; }); }); // the data saver's preview
-              return pre.then(function () { return cwUp(f.blob, f.type, f.name, f.dur); }).then(function (j) {
+              var pre = f.posterBlob && !f.poster && !it.once ? cwUp(f.posterBlob, 'photo', 'poster.jpg') /* a poster is a small photo */.then(function (p) { if (p.ok) f.poster = p.id; }) : Promise.resolve();
+              if (f.thumbBlob && !f.thumb && !it.once) pre = pre.then(function () { return cwUp(f.thumbBlob, 'photo', 'thumb.jpg').then(function (p) { if (p.ok) f.thumb = p.id; }); }); // the data saver's preview
+              return pre.then(function () { return cwUp(f.blob, f.type, f.name, f.dur, it.once ? 'once' : ''); }).then(function (j) {
                 if (j.ok) { f.id = j.id; if (j.url) f.url = j.url; cwOutPut(it); return false; }
                 if (j.status === 0 || j.status >= 500 || j.status === 429 || j.status === 401) return true;
                 it.failed = cwWhy(j); cwOutPut(it); return true;
@@ -17248,9 +17557,10 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
           return up.then(function (st) {
             if (st) return !it.failed;
             var body = { c: it.c, cid: it.cid, kind: it.kind };
-            ['text', 'reply', 'mentions', 'loc', 'live', 'contact', 'fwd'].forEach(function (k) { if (it[k] != null) body[k] = it[k]; });
+            ['text', 'reply', 'mentions', 'loc', 'live', 'contact', 'fwd', 'statusRef'].forEach(function (k) { if (it[k] != null) body[k] = it[k]; });
+            if (it.once) body.once = true; // view once (chatfx): one photo or video, no thumb or poster
             if (it.trip) body.trip = { id: it.trip.id }; // the server fills the card itself
-            var med = files.map(function (f) { var o = { id: f.id, type: f.type }; ['w', 'h', 'dur', 'wave', 'name', 'size', 'poster', 'thumb'].forEach(function (k) { if (f[k] != null) o[k] = f[k]; }); return o; }).concat(it.media || []);
+            var med = files.map(function (f) { var o = { id: f.id, type: f.type }; (it.once ? ['w', 'h', 'dur'] : ['w', 'h', 'dur', 'wave', 'name', 'size', 'poster', 'thumb']).forEach(function (k) { if (f[k] != null) o[k] = f[k]; }); return o; }).concat(it.media || []);
             if (med.length) body.media = med;
             return cwApi('POST', 'send', body).then(function (j) {
               if (j.ok && j.msg) { cwDropPend(j.msg.cid ? j.msg : Object.assign({ cid: it.cid, c: it.c }, j.msg)); cwPut(j.msg, true); if (it.kind === 'live' && it.live) cwLiveStart(j.msg); return false; }
@@ -17309,6 +17619,7 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
   function cwOn(d) {
     if (!d || !d.t || d.t === 'pong') return;
     if (d.t === 'hello') { if (d.me) CH.me = d.me; return; }
+    if (cfxOn(d)) return; // chatfx: status, status-gone, status-view, opened, locked
     if (d.t === 'msg' && d.msg) { var had = cwPut(d.msg); if (!had && !cwIsMe(d.msg.from)) { cwArrived(d.msg); cwApi('POST', 'delivered', { c: d.msg.c, upTo: d.msg.id }); } if (d.msg.kind === 'trip') cwTripsFresh(d.msg.c, d.msg.id); return; }
     if (d.t === 'seen') { cwSeen(d); return; }
     if (d.t === 'prefs' && d.prefs) { cwPrefsGot(d.prefs); return; }
@@ -17365,7 +17676,8 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
     if (loud) { if (men) cwMentionDing(); else cwDing(); }
     if ('Notification' in window && Notification.permission === 'granted' && (document.hidden || S.view !== 'vRoom' || CH.cur !== m.c)) {
       try {
-        var n = new Notification(cwTitle(c), { body: (c.kind !== 'dm' ? cwFirst(m.from) + ': ' : '') + cwPrev(Object.assign({}, m, { from: '' }), null), tag: 'rafiki-chat-' + m.c, renotify: !dnd || (men && d.mentions), silent: !loud, icon: '/apple-touch-icon.png' });
+        var lk = cfxIsLocked(c); // locked chats: no name, no words (chatfx)
+        var n = new Notification(lk ? 'RAFIKI' : cwTitle(c), { body: lk ? tr('New message', 'Ujumbe mpya') : (c.kind !== 'dm' ? cwFirst(m.from) + ': ' : '') + cwPrev(Object.assign({}, m, { from: '' }), null), tag: 'rafiki-chat-' + m.c, renotify: !dnd || (men && d.mentions), silent: !loud, icon: '/apple-touch-icon.png' });
         n.onclick = function () { try { window.focus(); } catch (e) {} cwOpen(m.c); n.close(); };
       } catch (e) {}
     }
@@ -17556,8 +17868,11 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
       list.forEach(function (x) { x.lurl = URL.createObjectURL(x.blob); });
       var w = tSheet(tr('Send photos', 'Tuma picha'), '<div class="cw-ms"><h3>' + (list.length === 1 ? (list[0].type === 'video' ? tr('Send a video', 'Tuma video') : tr('Send a photo', 'Tuma picha')) : tr('Send ' + list.length, 'Tuma ' + list.length)) + '</h3>' +
         '<div class="cw-msg' + (list.length > 1 ? ' many' : '') + '">' + list.map(function (x) { return x.type === 'video' ? '<video src="' + x.lurl + '" muted playsinline controls></video>' : '<img src="' + x.lurl + '" alt="">'; }).join('') + '</div>' +
-        '<div class="cw-capr"><input type="text" id="cwCap" placeholder="' + tr('Add a caption', 'Ongeza maelezo') + '" aria-label="' + tr('Add a caption', 'Ongeza maelezo') + '" autocomplete="off"><button type="button" class="cw-go" id="cwCapGo" aria-label="' + tr('Send', 'Tuma') + '" data-testid="cw_media_send">' + cwIc('send') + '</button></div></div>');
-      var send = function () { var cap = $('cwCap').value.trim(); w.close(); cwQueue({ c: c, kind: 'media', text: cap || undefined, reply: cwReplyRef(), files: list }); CH.reply = null; cwCompDraw(); };
+        '<div class="cw-capr"><input type="text" id="cwCap" placeholder="' + tr('Add a caption', 'Ongeza maelezo') + '" aria-label="' + tr('Add a caption', 'Ongeza maelezo') + '" autocomplete="off"><button type="button" class="cw-go" id="cwCapGo" aria-label="' + tr('Send', 'Tuma') + '" data-testid="cw_media_send">' + cwIc('send') + '</button></div>' +
+        (list.length === 1 ? '<div class="cfx-1r"><button type="button" class="cfx-1t" id="cwOnce" aria-pressed="false" data-testid="cfx_once_toggle">' + cfxIc('once') + '<span>' + tr('View once: off', 'Tazama mara moja: imezimwa') + '</span></button><small id="cwOnceN" class="hidden">' + tr('Opens one time. No forward, save or star.', 'Inafunguka mara moja. Hakuna kusambaza, kuhifadhi wala nyota.') + '</small></div>' : '') + '</div>'); // view once (chatfx)
+      var once = false, ob = $('cwOnce');
+      if (ob) ob.addEventListener('click', function () { buzz(); once = !once; ob.setAttribute('aria-pressed', once); ob.querySelector('span').textContent = once ? tr('View once: on', 'Tazama mara moja: imewashwa') : tr('View once: off', 'Tazama mara moja: imezimwa'); $('cwOnceN').classList.toggle('hidden', !once); });
+      var send = function () { var cap = $('cwCap').value.trim(); w.close(); if (once) list.forEach(function (x) { delete x.thumbBlob; delete x.posterBlob; }); cwQueue({ c: c, kind: 'media', text: cap || undefined, reply: cwReplyRef(), files: list, once: once || undefined }); CH.reply = null; cwCompDraw(); };
       $('cwCapGo').addEventListener('click', send); $('cwCap').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); send(); } });
     });
   }
@@ -17632,7 +17947,7 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
   // swipe down to close (a computer: the wheel zooms, a double-click too, the arrows move, Esc closes)
   function cwViewer(key, idx, list) {
     var all = [], at = 0;
-    (list || cwAll(CH.cur)).forEach(function (m) { if (m.kind === 'media' && !m.deleted) (m.media || []).forEach(function (x, i) { if (String(m.id || m.pend) === String(key) && i === idx) at = all.length; all.push({ m: m, x: x }); }); });
+    (list || cwAll(CH.cur)).forEach(function (m) { if (m.kind === 'media' && !m.deleted && !m.once) (m.media || []).forEach(function (x, i) { if (String(m.id || m.pend) === String(key) && i === idx) at = all.length; all.push({ m: m, x: x }); }); });
     if (!all.length) return;
     var w = document.createElement('div'); w.className = 'cw-lb'; w.setAttribute('role', 'dialog'); w.setAttribute('aria-modal', 'true'); w.setAttribute('aria-label', tr('Photos and videos', 'Picha na video'));
     w.innerHTML = '<div class="cw-lbh"><button type="button" class="cw-ib" data-lb="x" aria-label="' + tr('Close', 'Funga') + '">' + cwIc('x') + '</button><span class="cw-lbt"></span><span class="cw-lbn"></span></div><div class="cw-lbs"></div>' +
@@ -17712,6 +18027,11 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
       return;
     }
     if (m.deleted) return;
+    if (m.once) { // view once: reply (the quote says Photo), info and delete only; no forward, copy, star, pin or save (chatfx)
+      var wo = panel(tr('Message', 'Ujumbe'), '<div class="cw-mn"><button type="button" data-mk="reply">' + cwIc('reply') + '<span>' + tr('Reply', 'Jibu') + '</span></button>' + (me ? '<button type="button" data-mk="info">' + cwIc('info') + '<span>' + tr('Info', 'Maelezo') + '</span></button>' : '') + '<button type="button" data-mk="del" class="red">' + cwIc('trash') + '<span>' + tr('Delete', 'Futa') + '</span></button></div>', 'cw-sheet cw-menu');
+      wo.addEventListener('click', function (e) { var b = e.target.closest('[data-mk]'); if (!b) return; var k = b.getAttribute('data-mk'); wo.close(); buzz(); setTimeout(function () { if (k === 'reply') { CH.reply = m; CH.edit = null; cwCompDraw(); var t = $('cwTx'); if (t) t.focus(); } if (k === 'info') cwInfoMsg(m); if (k === 'del') cwDelete(m); }, 200); });
+      return;
+    }
     var canEdit = me && m.kind === 'text' && Date.now() - cwMs(m.at) < 15 * 60000, adm = cwAdmin(c);
     var photos = (m.media || []).filter(function (x) { return x.type === 'photo'; });
     var A = [['reply', 'reply', tr('Reply', 'Jibu')], ['fwd', 'fwd', tr('Forward', 'Sambaza')]];
@@ -17983,6 +18303,7 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
         rows.push(row('link', 'link', 'blue', tr('Invite link', 'Kiungo cha mwaliko'), tr('Anyone in the team with the link can join', 'Yeyote kwenye timu mwenye kiungo anaweza kujiunga')));
         rows.push('<div class="ct-r sw"><span class="ct-ri" style="--hu:var(--hu-amber);--hb:var(--hb-amber)" aria-hidden="true">' + cwIc('lock') + '</span><span class="ct-rl"><b>' + tr('Only admins can send messages', 'Wasimamizi pekee wanaweza kutuma jumbe') + '</b></span><button type="button" class="cw-sw" role="switch" aria-checked="' + !!c.onlyAdmins + '" data-i="only" aria-label="' + tr('Only admins can send messages', 'Wasimamizi pekee wanaweza kutuma jumbe') + '"><span class="kn"></span></button></div>');
       }
+      h += cfxInfoAbout(c); rows.push(cfxInfoLock(c)); // chatfx: their About, and Lock this chat
       h += '<section class="ct-g"><div class="ct-list">' + rows.join('') + '</div></section>';
       if (c.kind !== 'dm') {
         var mem = (c.members || []).slice().sort(function (a, z) { return (cwIsMe(z) - cwIsMe(a)) || ((c.admins || []).indexOf(z) >= 0) - ((c.admins || []).indexOf(a) >= 0) || a.localeCompare(z); });
@@ -17993,10 +18314,11 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
       h += '<section class="ct-g"><div class="ct-list">' + row('clear', 'trash', 'coral', tr('Clear chat', 'Futa jumbe za gumzo'), tr('Only from your view', 'Kwako tu'), true) + (c.kind === 'dm' ? row('delchat', 'trash', 'coral', tr('Delete chat', 'Futa gumzo'), '', true) : '') + (grp ? row('leave', 'leave', 'coral', tr('Leave the group', 'Ondoka kwenye kikundi'), '', true) : '') + '</div></section>';
       box.innerHTML = h; cwFill(box);
     };
-    draw();
+    draw(); if (c.kind === 'dm' && !teamCache) cwTeam(function () { if (box.isConnected) draw(); }); // their About (chatfx)
     box.addEventListener('click', function (e) {
       var b = e.target.closest('[data-i],[data-mem]'); if (!b) return; buzz();
       var k = b.getAttribute('data-i'), c0 = cwChat(CH.cur);
+      if (k === 'lock') return cfxLockToggle(c0, draw); // chatfx
       if (b.hasAttribute('data-mem')) return cwMember(c0, b.getAttribute('data-mem'), draw);
       if (k === 'proj') { w.close(); setTimeout(function () { openProj(String(c0.project), 'pin'); }, 230); return; }
       if (k === 'contact') { ctOpen(cwOther(c0)); return; }
@@ -18169,6 +18491,7 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
 
   // ---- the screens: addresses, start-over, the header
   function cwHash(h, first, mode) {
+    if (cfxHash(h, first, mode)) return true; // #chat/settings… (chatfx)
     var m = /^#chat\/(.+)$/.exec(h || ''); if (!m) return false;
     var j = /^join\/(.+)$/.exec(m[1]);
     if (j) {
@@ -18184,7 +18507,8 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
   }
   function cwShown(v) {
     if (v !== 'vRoom' && document.body.classList.contains('room')) cwDraftSave();
-    document.body.classList.toggle('room', v === 'vRoom'); document.body.classList.toggle('cwl', v === 'vChat');
+    document.body.classList.toggle('room', v === 'vRoom'); document.body.classList.toggle('cwl', v === 'vChat'); document.body.classList.toggle('cfxp', v === 'vCfx');
+    if (v === 'vCfx') { cfxDraw(); cfxFresh(); } // chatfx
     var hd = $('cwHd'); if (hd) hd.hidden = v !== 'vRoom';
     var hda = $('cwHda'); if (hda) hda.hidden = v !== 'vRoom';
     if (v !== 'vRoom') { cw2SelEnd(); cw2FindEnd(); }
@@ -18226,7 +18550,7 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
   $('cwMenu').addEventListener('click', function (e) {
     var b = e.target.closest('[data-mn]'); if (!b) return; buzz(); var k = b.getAttribute('data-mn'); cwMenuShut();
     setTimeout(function () {
-      if (k === 'set') cwSettings(); else if (k === 'star') cwStarred(); else if (k === 'arch') cwArchOpen(); else if (k === 'group') cwGroupNew();
+      if (k === 'set') cfxGo(''); else if (k === 'star') cwStarred(); else if (k === 'arch') cwArchOpen(); else if (k === 'group') cwGroupNew();
       else if (k === 'read') cwAllRead(); else if (k === 'bell') $('meBell').click(); else if (k === 'rf') $('bRefresh').click();
     }, 200);
   });
@@ -18453,6 +18777,702 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
   document.addEventListener('click', function (e) { var b = e.target.closest && e.target.closest('#pChat'); if (!b || !S.cur) return; buzz(); cwProject(S.cur.id); });
   cwBadge();
   // chatw:end
+  // chatfx:begin -----------------------------------------------------------------------------------------------------
+  // Chat features (S/chatfx/spec.md, api.md): Status (a strip on the Chats list, the viewer with Reply / Reshare / like,
+  // who saw mine, a new status of words on a colour or a photo or video), view-once photos and videos, Locked chats
+  // (opened with this device's fingerprint or face through WebAuthn, else the RAFIKI PIN checked by the server, locked
+  // again when the tab is hidden), and Settings: Profile, Privacy, Linked devices, Chats, Notifications and App lock.
+  // Settings pages have their own addresses (#chat/settings, #chat/settings/privacy|devices|profile), so Back and a
+  // refresh keep you there; the viewer, the editor and the lock screen are layers that Back closes first.
+  var CFX = { st: jget('rfChatSt', null), stBusy: false, stT: 0, acct: jget('rfAcct', null), locked: jget('rfChatLocked', []), unl: false, pg: '', devs: null, lkWait: null, hid: false };
+  var CFX_COL = ['#12A37A', '#0A78C2', '#6E46C8', '#E8862A', '#06375A'];
+  var CFX_PM = [['all', 'Whole team', 'Timu nzima'], ['except', 'Everyone except…', 'Kila mtu isipokuwa…'], ['only', 'Only these people…', 'Watu hawa tu…'], ['none', 'Nobody', 'Hakuna mtu']];
+  var CFX_AB = [['Available', 'Nipo'], ['In the field 🚙', 'Niko uwanjani 🚙'], ['At the office', 'Niko ofisini'], ['Busy, chat only', 'Nina shughuli, gumzo tu']];
+  var CFX_I = {
+    once: '<circle cx="12" cy="12" r="8.5" stroke-dasharray="2.6 2.4"/><path d="M10.6 9.6l1.9-1.4v7.6"/>', eye: '<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/>',
+    reshare: '<path d="M17 3.5l3 3-3 3"/><path d="M4 11.5v-1a4 4 0 0 1 4-4h12"/><path d="M7 20.5l-3-3 3-3"/><path d="M20 12.5v1a4 4 0 0 1-4 4H4"/>', heart: '<path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.4 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"/>',
+    shield: '<path d="M12 3.5l7.5 3v5.5c0 4.4-3.2 7.6-7.5 8.5-4.3-.9-7.5-4.1-7.5-8.5V6.5z"/>', devices: '<rect x="2.5" y="5" width="13" height="9.5" rx="1.5"/><path d="M5.5 18h7"/><rect x="16.5" y="8" width="5" height="11" rx="1.3"/>',
+    mobile: '<rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/>', laptop: '<rect x="4.5" y="5.5" width="15" height="10" rx="1.5"/><path d="M2.5 18.5h19"/>',
+    text: '<path d="M5 6.5V5h14v1.5M12 5v14M9 19h6"/>', face: '<path d="M4 8V5.5A1.5 1.5 0 0 1 5.5 4H8M16 4h2.5A1.5 1.5 0 0 1 20 5.5V8M20 16v2.5a1.5 1.5 0 0 1-1.5 1.5H16M8 20H5.5A1.5 1.5 0 0 1 4 18.5V16"/><path d="M9 9.5v1M15 9.5v1M12 9.5v3.5h-1M9.5 15.5a3.6 3.6 0 0 0 5 0"/>',
+    dots: '<circle cx="5.5" cy="12" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="18.5" cy="12" r="1.6" fill="currentColor"/>'
+  };
+  function cfxIc(n, cls) { return '<svg class="' + (cls || '') + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (CFX_I[n] || CWI[n] || '') + '</svg>'; }
+
+  // ---- this device: an id made once and kept, and the headers every API call carries (api.md §0)
+  function cfxDevId() {
+    var id = store.get('rfPinDev');
+    if (!/^[A-Za-z0-9_-]{16,64}$/.test(id || '')) {
+      var a = new Uint8Array(16); try { crypto.getRandomValues(a); } catch (e) { for (var i = 0; i < 16; i++) a[i] = Math.floor(Math.random() * 256); }
+      id = btoa(String.fromCharCode.apply(null, a)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); store.set('rfPinDev', id);
+    }
+    return id;
+  }
+  (function () {
+    if (!window.fetch || window.__cfxF) return; window.__cfxF = 1; var f0 = window.fetch;
+    window.fetch = function (u, o) {
+      var s = typeof u === 'string' ? u : u instanceof URL ? u.href : '';
+      var mine = s && (s.indexOf('/api/') === 0 || s.indexOf(location.origin + '/api/') === 0);
+      if (!mine) return f0.apply(this, arguments);
+      o = Object.assign({}, o || {}); var h = new Headers(o.headers || {});
+      if (!h.has('X-Pin-Device-Id')) h.set('X-Pin-Device-Id', cfxDevId());
+      if (!h.has('X-Pin-App')) h.set('X-Pin-App', 'web');
+      o.headers = h;
+      return f0.call(this, u, o).then(function (r) { if (r.status === 401) cfx401(r); return r; });
+    };
+  })();
+  // this device was signed out from another one (Linked devices): back to the lock screen, as after "Sign out of all phones"
+  function cfx401(r) {
+    try { r.clone().json().then(function (j) { if (j && j.reason === 'signed-out' && S.view !== 'vLock' && (S.pin || S.mode === 'monday')) { CFX.unl = false; lockOut(j); } }, function () {}); } catch (e) {}
+  }
+  function cfxApi(method, path, body) {
+    return fetch('/api/account' + (path ? '/' + path : ''), { method: method, headers: Object.assign({ Accept: 'application/json' }, pinHdr(), body ? { 'Content-Type': 'application/json' } : {}), body: body ? JSON.stringify(body) : undefined, credentials: 'same-origin' })
+      .then(function (r) { return r.json().catch(function () { return { ok: false, reason: 'down' }; }).then(function (j) { j.status = r.status; return j; }); })
+      .catch(function () { return { ok: false, reason: 'offline', status: 0 }; });
+  }
+  function cfxWhy(j) {
+    return j.reason === 'too-long' ? tr('That’s too long.', 'Ni ndefu mno.') : j.reason === 'too-many' ? tr('You have 30 statuses up already. Delete one first.', 'Una hali 30 tayari. Futa moja kwanza.')
+      : j.reason === 'private' ? tr('Only statuses for the whole team can be reshared.', 'Hali za timu nzima pekee ndizo zinaweza kushirikiwa tena.') : j.reason === 'own' ? tr('That one is yours.', 'Hiyo ni yako.')
+      : j.reason === 'not-found' ? tr('That status has ended.', 'Hali hiyo imeisha.') : j.reason === 'old-app' ? tr('Update RAFIKI Pin on that phone, or use Sign out of all other devices.', 'Sasisha RAFIKI Pin kwenye simu hiyo, au tumia Toka kwenye vifaa vingine vyote.')
+      : j.reason === 'current' ? tr('Use Sign out in Me › Settings for this device.', 'Tumia Toka kwenye Mimi › Mipangilio kwa kifaa hiki.') : j.reason === 'rate' ? tr('Too many changes. Please try again later.', 'Mabadiliko mengi mno. Tafadhali jaribu tena baadaye.')
+      : cwWhy(j);
+  }
+  // my account: About, privacy, whether I have a PIN (kept on this phone so the pages draw straight away)
+  function cfxAcct(force) {
+    if (CFX.acct && !force && CFX.acctAt && Date.now() - CFX.acctAt < 6e4) return Promise.resolve(CFX.acct);
+    return cfxApi('GET', '').then(function (j) {
+      if (j.ok) { CFX.acct = j; CFX.acctAt = Date.now(); store.set('rfAcct', JSON.stringify({ name: j.name, kind: j.kind, about: j.about || '', privacy: j.privacy || null, hasPin: j.hasPin })); }
+      return CFX.acct;
+    });
+  }
+  function cfxPriv() { var p = (CFX.acct && CFX.acct.privacy) || {}, d = { mode: 'all', names: [] }; return { lastSeen: p.lastSeen || d, photo: p.photo || d, about: p.about || d, status: p.status || d, readReceipts: p.readReceipts !== false, groupAdd: p.groupAdd || 'all' }; }
+  function cfxPrivTx(p) {
+    var n = (p && p.names || []).length;
+    return !p || p.mode === 'all' ? tr('Whole team', 'Timu nzima') : p.mode === 'none' ? tr('Nobody', 'Hakuna mtu')
+      : p.mode === 'except' ? (n ? tr('Everyone except ' + n, 'Wote isipokuwa ' + n) : tr('Whole team', 'Timu nzima')) : n === 1 ? tr('Only 1 person', 'Mtu 1 tu') : tr('Only ' + n + ' people', 'Watu ' + n + ' tu');
+  }
+
+  // ---- a sheet above a full-screen layer (the status viewer, the editor, the lock screen sit higher than sheets)
+  function cfxHi(w) { if (w) w.classList.add('cfx-hi'); return w; }
+  function cfxFs(on) { document.body.classList.toggle('cfx-fs', !!(on || document.querySelector('.cfx-sv, .cfx-ns, .cfx-ov1, .cfx-lk'))); }
+  // choose who: Whole team / Everyone except… / Only these people… / Nobody; the two lists pick names
+  function cfxPrivPick(title, cur, noNone) {
+    return new Promise(function (ok) {
+      var pick = { mode: (cur && cur.mode) || 'all', names: ((cur && cur.names) || []).slice() }, done = false;
+      var w = cfxHi(tSheet(title, '<h3 class="cw-shh" data-nosw>' + esc(title) + '</h3><div class="cfx-rd" role="radiogroup" aria-label="' + esc(title) + '"></div><button type="button" class="btn block" data-pp="ok">' + tr('Done', 'Tayari') + '</button>'));
+      var box = w.querySelector('.cfx-rd');
+      var sub = function (k) { var n = pick.mode === k ? pick.names.length : 0; return k === 'all' ? tr('Everyone in RAFIKI', 'Kila mtu ndani ya RAFIKI') : k === 'except' ? (n ? (n === 1 ? tr('1 person hidden', 'Mtu 1 amefichwa') : tr(n + ' people hidden', 'Watu ' + n + ' wamefichwa')) : tr('Pick who doesn’t see it', 'Chagua asiyeona')) : k === 'only' ? (n ? (n === 1 ? tr('1 person sees it', 'Mtu 1 anaona') : tr(n + ' people see it', 'Watu ' + n + ' wanaona')) : tr('Pick who sees it', 'Chagua anayeona')) : tr('No one sees it', 'Hakuna anayeona'); };
+      var draw = function () { box.innerHTML = CFX_PM.filter(function (x) { return !(noNone && x[0] === 'none'); }).map(function (x) { var on = pick.mode === x[0]; return '<button type="button" role="radio" aria-checked="' + on + '" data-pm="' + x[0] + '"><i class="cfx-ro" aria-hidden="true"></i><span><b>' + tr(x[1], x[2]) + '</b><small>' + sub(x[0]) + '</small></span></button>'; }).join(''); };
+      draw();
+      w.addEventListener('click', function (e) {
+        var b = e.target.closest('[data-pm]');
+        if (b) { buzz(); var m = b.getAttribute('data-pm'); if (m !== pick.mode) pick.names = []; pick.mode = m; draw(); if (m === 'except' || m === 'only') cfxPeople(m === 'except' ? tr('Hide it from', 'Ficha kwa') : tr('Show it to', 'Onyesha kwa'), pick.names).then(function (ns) { if (ns) { pick.names = ns; if (!ns.length) pick.mode = 'all'; } else if (!pick.names.length) pick.mode = 'all'; draw(); }); return; }
+        if (e.target.closest('[data-pp=ok]')) { done = true; w.close(); ok(pick); }
+      });
+      var t0 = setInterval(function () { if (!w.isConnected || w.gone) { clearInterval(t0); if (!done) ok(null); } }, 300);
+    });
+  }
+  // the team, to pick names from (not me)
+  function cfxPeople(title, chosen) {
+    return new Promise(function (ok) {
+      var sel = (chosen || []).slice(), done = false, q = '';
+      var w = cfxHi(tSheet(title, '<h3 class="cw-shh" data-nosw>' + esc(title) + '</h3><input type="search" class="cfx-pq" placeholder="' + tr('Search names', 'Tafuta majina') + '" aria-label="' + tr('Search names', 'Tafuta majina') + '"><div class="cfx-pl" role="group"><p class="muted">' + tr('Loading…', 'Inapakia…') + '</p></div><button type="button" class="btn block" data-pp="ok">' + tr('Done', 'Tayari') + '</button>'));
+      var box = w.querySelector('.cfx-pl'), team = [];
+      var draw = function () {
+        var a = team.filter(function (n) { return !q || n.toLowerCase().indexOf(q) >= 0; });
+        box.innerHTML = a.length ? a.map(function (n) { var on = sel.some(function (x) { return same(x, n); }); return '<button type="button" role="checkbox" aria-checked="' + on + '" data-pn="' + esc(n) + '"><span class="cw-av" style="' + cwHueVar(n) + '" data-ph="' + esc(n) + '" aria-hidden="true">' + esc(initials(n)) + '</span><b data-nosw>' + esc(n) + '</b><i class="cfx-ck" aria-hidden="true">' + cwIc('check') + '</i></button>'; }).join('') : '<p class="muted">' + tr('No one with that name', 'Hakuna mwenye jina hilo') + '</p>';
+      };
+      cwTeam(function (list) { team = (list || []).map(function (p) { return p.name; }).filter(function (n) { return n && !cwIsMe(n); }).sort(); draw(); });
+      w.querySelector('.cfx-pq').addEventListener('input', function () { q = this.value.trim().toLowerCase(); draw(); });
+      w.addEventListener('click', function (e) {
+        var b = e.target.closest('[data-pn]');
+        if (b) { buzz(); var n = b.getAttribute('data-pn'), i = sel.findIndex(function (x) { return same(x, n); }); if (i >= 0) sel.splice(i, 1); else sel.push(n); b.setAttribute('aria-checked', i < 0); return; }
+        if (e.target.closest('[data-pp=ok]')) { done = true; w.close(); ok(sel); }
+      });
+      var t0 = setInterval(function () { if (!w.isConnected || w.gone) { clearInterval(t0); if (!done) ok(null); } }, 300);
+    });
+  }
+
+  // ================================================================ Status ==================================================
+  function cfxStSave() { try { store.set('rfChatSt', JSON.stringify(CFX.st)); } catch (e) {} }
+  function cfxStLoad() {
+    if (CFX.stBusy || CH.on !== true) return Promise.resolve(CFX.st);
+    CFX.stBusy = true;
+    return cwApi('GET', 'status').then(function (j) {
+      CFX.stBusy = false;
+      if (j && j.ok) { CFX.stAt = Date.now(); CFX.st = { now: j.now || Date.now(), people: j.people || [] }; CFX.st.people.forEach(function (p) { if (p.photo) phSet(p.name, p.photo); }); cfxStSave(); if (S.view === 'vChat') cwListDraw(); }
+      return CFX.st;
+    });
+  }
+  // after the list loads (at most once a minute when nothing is new), or straight away when the socket says a status came or went
+  function cfxStSoon(now) { if (!now && CFX.stAt && Date.now() - CFX.stAt < 6e4) return; clearTimeout(CFX.stT); CFX.stT = setTimeout(cfxStLoad, now ? 150 : 400); }
+  // what is still live (24 h): expired items go even before the server says so
+  function cfxPeopleNow() {
+    var now = Date.now(), a = ((CFX.st && CFX.st.people) || []).map(function (p) { return Object.assign({}, p, { items: (p.items || []).filter(function (x) { return !x.exp || x.exp > now; }) }); });
+    if (!a.some(function (p) { return p.me; })) a.unshift({ name: cwMe(), me: true, items: [], unseen: 0 });
+    return a.filter(function (p) { return p.me || p.items.length; }).map(function (p) { p.unseen = p.me ? 0 : p.items.filter(function (x) { return !x.seen; }).length; return p; });
+  }
+  function cfxStatHtml() {
+    if (CH.on !== true || CH.so || CH.arch || CH.q || CH.lk) return '';
+    var ppl = cfxPeopleNow(), me = ppl.filter(function (p) { return p.me; })[0], oth = ppl.filter(function (p) { return !p.me; });
+    oth.sort(function (a, z) { return ((z.unseen > 0) - (a.unseen > 0)) || (z.last || 0) - (a.last || 0); });
+    var av = function (n) { return '<span class="cw-av" style="' + cwHueVar(n) + '" data-ph="' + esc(n) + '" aria-hidden="true">' + esc(initials(n)) + '</span>'; };
+    var mine = me.items.length;
+    var h = '<div class="cfx-sp me"><button type="button" class="cfx-spb" data-st="' + (mine ? 'mine' : 'new') + '" data-testid="cfx_my_status" aria-label="' + esc(mine ? tr('My status, ' + mine + ' posted', 'Hali yangu, ' + mine + ' zimewekwa') : tr('Add to my status', 'Ongeza kwenye hali yangu')) + '"><span class="cfx-rg' + (mine ? ' mine' : '') + '">' + av(me.name || cwMe()) + '</span><small data-nosw aria-hidden="true">' + tr('My status', 'Hali yangu') + '</small><em aria-hidden="true">' + (mine ? esc(dAgo(me.items[mine - 1].at)) : tr('Add', 'Ongeza')) + '</em></button>' +
+      '<button type="button" class="cfx-add" data-st="new" aria-label="' + tr('New status', 'Hali mpya') + '" data-testid="cfx_status_add">' + cwIc('plus') + '</button></div>';
+    h += oth.map(function (p) {
+      var nw = p.unseen > 0, last = p.items[p.items.length - 1] || {};
+      return '<div class="cfx-sp"><button type="button" class="cfx-spb" data-st="p" data-who="' + esc(p.name) + '" data-testid="cfx_status_p" aria-label="' + esc(p.name + ', ' + (nw ? tr('new status', 'hali mpya') : tr('seen', 'imeonwa'))) + '"><span class="cfx-rg ' + (nw ? 'new' : 'seen') + '">' + av(p.name) + '</span><small data-nosw aria-hidden="true">' + esc(cwFirst(p.name)) + '</small><em class="' + (nw ? 'nw' : '') + '" aria-hidden="true">' + (nw ? esc(dAgo(last.at)) : tr('Seen', 'Imeonwa')) + '</em></button></div>';
+    }).join('');
+    return '<section class="cfx-st" aria-labelledby="cfxStH" data-testid="cfx_status_strip"><h2 id="cfxStH">' + tr('Status', 'Hali') + '</h2><div class="cfx-stl">' + h + '</div></section>';
+  }
+
+  // ---- the viewer: tap right for the next, left for the one before, hold to pause, swipe down to close
+  function cfxStView(who) {
+    var ppl = cfxPeopleNow(), order = ppl.filter(function (p) { return p.me; }).concat(ppl.filter(function (p) { return !p.me; }).sort(function (a, z) { return ((z.unseen > 0) - (a.unseen > 0)) || (z.last || 0) - (a.last || 0); }));
+    var pi = order.findIndex(function (p) { return who === 'me' ? p.me : !p.me && same(p.name, who); }); if (pi < 0) return;
+    if (!order[pi].items.length) return;
+    var P = order[pi], ii = P.me ? 0 : Math.max(0, P.items.findIndex(function (x) { return !x.seen; })), timer = null, t0 = 0, spent = 0, dur = 5000, paused = 0, vid = null;
+    if (ii < 0) ii = 0;
+    var w = document.createElement('div'); w.className = 'cfx-sv'; w.setAttribute('role', 'dialog'); w.setAttribute('aria-modal', 'true'); w.setAttribute('aria-label', tr('Status', 'Hali')); w.setAttribute('data-testid', 'cfx_viewer');
+    w.innerHTML = '<div class="cfx-svs"></div><div class="cfx-svtop"><div class="cfx-svbars"></div><div class="cfx-svh"></div></div><div class="cfx-svc" data-nosw></div><div class="cfx-svf"></div>';
+    document.body.appendChild(w); cfxFs(true);
+    var stage = w.querySelector('.cfx-svs');
+    var it = function () { return P.items[ii]; };
+    var bars = function (k) { w.querySelector('.cfx-svbars').innerHTML = P.items.map(function (x, i) { return '<i><b style="width:' + (i < ii ? 100 : i > ii ? 0 : Math.round(k * 100)) + '%"></b></i>'; }).join(''); };
+    var tick = function () {
+      if (!w.isConnected) return; timer = requestAnimationFrame(tick);
+      if (paused || document.hidden) return;
+      var k = Math.min(1, (spent + Date.now() - t0) / dur), b = w.querySelector('.cfx-svbars i:nth-child(' + (ii + 1) + ') b'); if (b) b.style.width = (k * 100).toFixed(1) + '%';
+      if (k >= 1) next();
+    };
+    var pause = function (on) { if (on) { if (!paused) spent += Date.now() - t0; paused++; if (vid) try { vid.pause(); } catch (e) {} } else { paused = Math.max(0, paused - 1); if (!paused) { t0 = Date.now(); if (vid) try { vid.play().catch(function () {}); } catch (e) {} } } };
+    var head = function () {
+      var x = it(), place = x.place ? ' · ' + esc(x.place) : '', priv = P.me ? ' · ' + esc(cfxPrivTx(x.privacy)) : '';
+      w.querySelector('.cfx-svh').innerHTML = '<span class="cw-av" style="' + cwHueVar(P.name) + '" data-ph="' + esc(P.name) + '" aria-hidden="true">' + esc(initials(P.name)) + '</span><span class="cfx-svn"><b data-nosw>' + esc(P.me ? tr('My status', 'Hali yangu') : P.name) + '</b><small>' + esc(dAgo(x.at)) + place + priv + '</small></span>' +
+        (P.me ? '<button type="button" class="cfx-svx" data-sv="more" aria-label="' + tr('More', 'Zaidi') + '">' + cfxIc('dots') + '</button>' : '') + '<button type="button" class="cfx-svx" data-sv="x" aria-label="' + tr('Close', 'Funga') + '">' + cwIc('x') + '</button>';
+    };
+    var foot = function () {
+      var x = it(), f = w.querySelector('.cfx-svf');
+      if (P.me) { f.innerHTML = '<button type="button" class="cfx-seen" data-sv="seen" data-testid="cfx_seen_by">' + cfxIc('eye') + '<span>' + tr('Seen by ' + (x.views || 0), 'Imeonwa na ' + (x.views || 0)) + '</span>' + (x.likes ? '<i>' + cfxIc('heart') + x.likes + '</i>' : '') + '</button>'; return; }
+      f.innerHTML = '<label class="cfx-rp"><span class="cfx-sr">' + tr('Reply', 'Jibu') + '</span><input type="text" maxlength="700" placeholder="' + tr('Reply…', 'Jibu…') + '" data-sv="reply" enterkeyhint="send" autocomplete="off"><button type="button" class="cfx-rgo hidden" data-sv="send" aria-label="' + tr('Send', 'Tuma') + '">' + cwIc('send') + '</button></label>' +
+        (x.canReshare ? '<button type="button" class="cfx-svb" data-sv="reshare" data-testid="cfx_reshare">' + cfxIc('reshare') + '<small>' + tr('Reshare', 'Shiriki') + '</small></button>' : '') +
+        '<button type="button" class="cfx-svb lk" data-sv="like" aria-pressed="' + !!x.liked + '" aria-label="' + (x.liked ? tr('Liked', 'Umependa') : tr('Like', 'Penda')) + '" data-testid="cfx_like">' + cfxIc('heart') + '</button>';
+    };
+    var draw = function () {
+      var x = it(); if (!x) return close();
+      vid = null; spent = 0; t0 = Date.now(); dur = 5000;
+      if (x.kind === 'text') { var n = (x.text || '').length; dur = Math.min(10000, 5000 + n * 40); stage.innerHTML = '<div class="cfx-svt" style="background:' + esc(x.color || CFX_COL[0]) + '"><p class="' + (n <= 40 ? 'l' : n <= 140 ? 'm' : 's') + '" data-nosw>' + esc(x.text) + '</p></div>'; }
+      else if (x.media && x.media.type === 'video') { stage.innerHTML = '<video playsinline autoplay src="' + esc(x.media.url) + '"' + (x.media.posterUrl ? ' poster="' + esc(x.media.posterUrl) + '"' : '') + '></video>'; vid = stage.querySelector('video'); dur = Math.max(1000, (x.media.dur || 15) * 1000); vid.addEventListener('loadedmetadata', function () { if (isFinite(vid.duration) && vid.duration > 0) dur = vid.duration * 1000; }); }
+      else stage.innerHTML = '<img alt="' + esc(x.caption || tr('Photo', 'Picha')) + '" src="' + esc((x.media || {}).url || '') + '" draggable="false">';
+      var cap = x.kind !== 'text' ? x.caption || '' : '';
+      w.querySelector('.cfx-svc').innerHTML = (x.via && x.via.name ? '<span class="cfx-via">' + cfxIc('reshare') + esc(tr('via ' + x.via.name, 'kupitia ' + x.via.name)) + '</span>' : '') + (cap ? '<p>' + esc(cap) + '</p>' : '');
+      head(); foot(); bars(0);
+      if (!P.me && !x.seen) { x.seen = true; cfxSeenLocal(P.name, x.id); cwApi('POST', 'status-view', { id: x.id }); }
+    };
+    var next = function () { if (ii < P.items.length - 1) { ii++; draw(); return; } var j = pi + 1; while (j < order.length && (order[j].me || !order[j].items.length)) j++; if (P.me || j >= order.length) return close(); pi = j; P = order[pi]; ii = Math.max(0, P.items.findIndex(function (x) { return !x.seen; })); draw(); };
+    var prev = function () { if (ii > 0) { ii--; draw(); } else { spent = 0; t0 = Date.now(); bars(0); } };
+    var shut = false;
+    var close = function () { if (shut) return; shut = true; cancelAnimationFrame(timer); if (vl) { var l = vl; vl = null; bkShut(l); } w.classList.add('out'); setTimeout(function () { w.remove(); cfxFs(); }, 200); if (S.view === 'vChat') cwListDraw(); };
+    w.close = close;
+    // who saw mine (only the poster): a sheet inside the viewer
+    var vl = null;
+    var viewers = function () {
+      var x = it(); if (!P.me || w.querySelector('.cfx-vw')) return; pause(true);
+      var sh = document.createElement('div'); sh.className = 'cfx-vw'; sh.setAttribute('role', 'dialog'); sh.setAttribute('aria-label', tr('Seen by', 'Imeonwa na')); sh.setAttribute('data-testid', 'cfx_viewers');
+      sh.innerHTML = '<i class="grab" aria-hidden="true"></i><div class="cfx-vwh"><b>' + cfxIc('eye') + '<span>' + tr('Seen by ' + (x.views || 0), 'Imeonwa na ' + (x.views || 0)) + '</span></b>' + (x.reshares ? '<b class="rs">' + cfxIc('reshare') + '<span>' + tr('Reshared ' + x.reshares, 'Imeshirikiwa ' + x.reshares) + '</span></b>' : '') + '</div><div class="cfx-vwl"><p class="muted">' + tr('Loading…', 'Inapakia…') + '</p></div><button type="button" class="cfx-del" data-sv="del">' + tr('Delete this status', 'Futa hali hii') + '</button>';
+      w.appendChild(sh); w.classList.add('vw-open'); requestAnimationFrame(function () { sh.classList.add('in'); });
+      var shutSh = function () { if (!sh.isConnected) return false; sh.classList.remove('in'); w.classList.remove('vw-open'); setTimeout(function () { sh.remove(); }, 200); pause(false); return true; };
+      sh.shut = function () { if (vl) { var l = vl; vl = null; bkShut(l); } shutSh(); };
+      vl = bkOpen('in', function () { vl = null; return shutSh(); }, sh);
+      cwApi('GET', 'status-viewers?id=' + encodeURIComponent(x.id)).then(function (j) {
+        var l = sh.querySelector('.cfx-vwl'); if (!l) return;
+        if (!j.ok) { l.innerHTML = '<p class="muted">' + esc(cfxWhy(j)) + '</p>'; return; }
+        x.views = j.views; x.likes = j.likes; x.reshares = j.reshares; foot();
+        sh.querySelector('.cfx-vwh b span').textContent = tr('Seen by ' + (j.views || 0), 'Imeonwa na ' + (j.views || 0));
+        l.innerHTML = (j.viewers || []).length ? j.viewers.map(function (v) {
+          if (v.photo) phSet(v.name, v.photo);
+          return '<div class="cfx-vr"><span class="cw-av" style="' + cwHueVar(v.name) + '" data-ph="' + esc(v.name) + '" aria-hidden="true">' + esc(initials(v.name)) + '</span><span class="cfx-vrt"><b data-nosw>' + esc(v.name) + '</b><small>' + esc(tr('Seen ', 'Imeonwa ') + dClock(dOf(v.at))) + (v.reshared ? ' · ' + tr('reshared', 'ameshiriki') : '') + '</small></span>' +
+            (v.liked ? '<i class="cfx-vh" aria-label="' + tr('Liked', 'Amependa') + '">' + cfxIc('heart') + '</i>' : '') + (v.reshared ? '<i class="cfx-vs" aria-label="' + tr('Reshared', 'Ameshiriki') + '">' + cfxIc('reshare') + '</i>' : '') + '</div>';
+        }).join('') : '<p class="muted">' + tr('No one yet. Statuses last 24 hours.', 'Bado hakuna. Hali hudumu saa 24.') + '</p>';
+      });
+    };
+    var del = function () {
+      var x = it(); pause(true);
+      poAsk(tr('Delete this status?', 'Futa hali hii?'), tr('It goes for everyone who can see it.', 'Itaondoka kwa kila mtu anayeweza kuiona.'), tr('Delete', 'Futa'), true).then(function (ok) {
+        var q = qa('.bsh.po-ask'); q.forEach(function (b) { b.classList.add('cfx-hi'); });
+        if (!ok) { pause(false); return; }
+        cwApi('POST', 'status-delete', { id: x.id }).then(function (j) {
+          if (!j.ok) { toast(cfxWhy(j)); pause(false); return; }
+          P.items.splice(ii, 1); cfxStDrop(x.id); toast(tr('Status deleted', 'Hali imefutwa'));
+          var sh = w.querySelector('.cfx-vw'); if (sh) sh.shut();
+          if (!P.items.length) close(); else { ii = Math.min(ii, P.items.length - 1); pause(false); draw(); }
+        });
+      });
+      setTimeout(function () { qa('.bsh.po-ask').forEach(function (b) { b.classList.add('cfx-hi'); }); }, 0);
+    };
+    var reply = function () {
+      var inp = w.querySelector('[data-sv=reply]'), t = inp ? inp.value.trim() : '', x = it(); if (!t) return;
+      inp.value = ''; inp.blur(); w.querySelector('[data-sv=send]').classList.add('hidden');
+      cfxReply(P.name, x, t).then(function (ok) { if (ok) toast(tr('Reply sent to ' + cwFirst(P.name), 'Jibu limetumwa kwa ' + cwFirst(P.name))); });
+    };
+    w.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-sv]'); if (!b) return; var k = b.getAttribute('data-sv'), x = it();
+      if (k === 'x') { close(); return; }
+      if (k === 'seen') { buzz(); viewers(); return; }
+      if (k === 'more') { buzz(); pause(true); var m = cfxHi(panel(tr('My status', 'Hali yangu'), '<div class="cw-mn"><button type="button" data-mk="seen">' + cfxIc('eye') + '<span>' + tr('Seen by', 'Imeonwa na') + '</span></button><button type="button" data-mk="del" class="red">' + cwIc('trash') + '<span>' + tr('Delete', 'Futa') + '</span></button></div>', 'cw-sheet'));
+        var gone = setInterval(function () { if (!m.isConnected) { clearInterval(gone); pause(false); } }, 300);
+        m.addEventListener('click', function (ev) { var a = ev.target.closest('[data-mk]'); if (!a) return; var kk = a.getAttribute('data-mk'); m.close(); setTimeout(function () { if (kk === 'seen') viewers(); else del(); }, 230); }); return; }
+      if (k === 'del') { del(); return; }
+      if (k === 'send') { reply(); return; }
+      if (k === 'like') { buzz(); var on = !x.liked; x.liked = on; b.setAttribute('aria-pressed', on); b.classList.remove('pop'); void b.offsetWidth; if (on) b.classList.add('pop'); cwApi('POST', 'status-like', { id: x.id, on: on }).then(function (j) { if (!j.ok) { x.liked = !on; foot(); toast(cfxWhy(j)); } }); return; }
+      if (k === 'reshare') { buzz(); b.disabled = true; cwApi('POST', 'status', { reshareOf: x.id, privacy: { mode: 'all', names: [] }, cid: 'rs-' + x.id }).then(function (j) { b.disabled = false; if (!j.ok) return toast(cfxWhy(j)); toast(tr('Shared to your status', 'Imeshirikiwa kwenye hali yako')); cfxStLoad(); }); return; }
+    });
+    w.addEventListener('focusin', function (e) { if (e.target.matches('[data-sv=reply]')) pause(true); });
+    w.addEventListener('focusout', function (e) { if (e.target.matches('[data-sv=reply]')) pause(false); });
+    w.addEventListener('input', function (e) { if (e.target.matches('[data-sv=reply]')) w.querySelector('[data-sv=send]').classList.toggle('hidden', !e.target.value.trim()); });
+    w.addEventListener('keydown', function (e) {
+      if (e.target.matches('[data-sv=reply]')) { if (e.key === 'Enter') { e.preventDefault(); reply(); } if (e.key === 'Escape') e.target.blur(); return; }
+      if (e.key === 'ArrowRight') next(); else if (e.key === 'ArrowLeft') prev(); else if (e.key === 'Escape') close();
+    });
+    // the picture itself: taps, holding and swiping
+    var g = null;
+    stage.parentNode.addEventListener('pointerdown', function (e) {
+      if (e.target.closest('.cfx-svf, .cfx-svh button, .cfx-vw, input')) return;
+      g = { x: e.clientX, y: e.clientY, t: Date.now(), held: false };
+      g.hT = setTimeout(function () { if (g) { g.held = true; pause(true); w.classList.add('held'); } }, 220);
+    });
+    w.addEventListener('pointermove', function (e) { if (!g) return; var dy = e.clientY - g.y; if (dy > 8 && Math.abs(dy) > Math.abs(e.clientX - g.x)) { clearTimeout(g.hT); stage.style.transform = 'translateY(' + dy + 'px) scale(' + Math.max(.86, 1 - dy / 1400) + ')'; } });
+    var up = function (e) {
+      if (!g) return; var s = g; g = null; clearTimeout(s.hT); stage.style.transform = '';
+      if (s.held) { pause(false); w.classList.remove('held'); }
+      var dx = e.clientX - s.x, dy = e.clientY - s.y;
+      if (dy > 90 && Math.abs(dy) > Math.abs(dx)) { close(); return; }
+      if (dy < -70 && Math.abs(dy) > Math.abs(dx) && P.me) { viewers(); return; }
+      if (s.held || Math.abs(dx) > 12 || Math.abs(dy) > 12) return;
+      if (w.querySelector('.cfx-vw')) return;
+      if (s.x < w.clientWidth * 0.3) prev(); else next();
+    };
+    w.addEventListener('pointerup', up); w.addEventListener('pointercancel', function () { if (g) { clearTimeout(g.hT); if (g.held) { pause(false); w.classList.remove('held'); } g = null; stage.style.transform = ''; } });
+    draw(); requestAnimationFrame(function () { w.classList.add('in'); }); timer = requestAnimationFrame(tick);
+    try { w.querySelector('[data-sv=x]').focus({ preventScroll: true }); } catch (e) {}
+  }
+  function cfxSeenLocal(name, id) { ((CFX.st && CFX.st.people) || []).forEach(function (p) { if (same(p.name, name)) (p.items || []).forEach(function (x) { if (x.id === id) x.seen = true; }); }); cfxStSave(); }
+  function cfxStDrop(id) { ((CFX.st && CFX.st.people) || []).forEach(function (p) { p.items = (p.items || []).filter(function (x) { return x.id !== id; }); }); cfxStSave(); }
+  // a reply to a status: a private message to its poster that quotes it
+  function cfxReply(name, x, text) {
+    var go = function (cid) { cwQueue({ c: cid, kind: 'text', text: text, statusRef: x.id, statusQ: { id: x.id, from: name, kind: x.kind, text: (x.text || x.caption || '').slice(0, 120), color: x.color || '', thumbUrl: (x.media && (x.media.thumbUrl || x.media.posterUrl)) || '' } }); return true; };
+    var known = CH.chats.filter(function (c) { return c.kind === 'dm' && (c.members || []).some(function (n) { return same(n, name); }); })[0];
+    if (known) return Promise.resolve(go(known.id));
+    return cwApi('POST', 'open', { kind: 'dm', with: name }).then(function (j) { if (!j.ok) { toast(cwWhy(j)); return false; } if (j.chat) cwUpsert(j.chat); else cwLoad(true); return go(j.id); });
+  }
+  // a quoted status inside a message
+  function cfxStRefHtml(m) {
+    var r = m.statusRef && typeof m.statusRef === 'object' ? m.statusRef : m.statusQ; if (!r) return '';
+    var mine = cwIsMe(r.from), th = r.kind === 'text' ? '<i class="cfx-qt" style="background:' + esc(r.color || CFX_COL[0]) + '" aria-hidden="true"></i>' : r.thumbUrl ? '<img class="cfx-qt" alt="" src="' + esc(r.thumbUrl) + '" onerror="this.outerHTML=\'<i class=&quot;cfx-qt ph&quot; aria-hidden=&quot;true&quot;></i>\'">' : '<i class="cfx-qt ph" aria-hidden="true"></i>';
+    return '<div class="cw-q cfx-q" style="' + cwHueVar(r.from) + '"><span class="cfx-qtx"><b data-nosw>' + esc((mine ? tr('You', 'Wewe') : cwFirst(r.from)) + ' · ' + tr('Status', 'Hali')) + '</b><span data-nosw>' + esc(r.text || (r.kind === 'video' ? '🎥 ' + tr('Video', 'Video') : r.kind === 'photo' ? '📷 ' + tr('Photo', 'Picha') : '')) + '</span></span>' + th + '</div>';
+  }
+
+  // ---- a new status: words on a colour, or a photo or a short video with a caption; who sees it
+  function cfxStNew() {
+    var col = CFX_COL[0], med = null, priv = cfxPriv().status, busy = false;
+    cfxAcct().then(function () { if (!touched) { priv = cfxPriv().status; chip(); } });
+    var touched = false;
+    var w = document.createElement('div'); w.className = 'cfx-ns'; w.setAttribute('role', 'dialog'); w.setAttribute('aria-modal', 'true'); w.setAttribute('aria-label', tr('New status', 'Hali mpya')); w.setAttribute('data-testid', 'cfx_new_status');
+    w.innerHTML = '<div class="cfx-nsh"><button type="button" class="cfx-nb" data-ns="x" aria-label="' + tr('Close', 'Funga') + '">' + cwIc('x') + '</button><b class="cfx-nst">' + tr('New status', 'Hali mpya') + '</b><button type="button" class="cfx-nb" data-ns="text" aria-label="' + tr('Words on a colour', 'Maneno kwenye rangi') + '">' + cfxIc('text') + '</button></div>' +
+      '<div class="cfx-nsc"></div><div class="cfx-nsf"><button type="button" class="cfx-chip" data-ns="priv" data-testid="cfx_privacy_chip"></button><button type="button" class="cfx-nb" data-ns="cam" aria-label="' + tr('Photo or video', 'Picha au video') + '">' + cwIc('camera') + '</button><button type="button" class="cfx-go" data-ns="go" aria-label="' + tr('Post', 'Weka') + '" data-testid="cfx_post">' + cwIc('send') + '</button></div>';
+    document.body.appendChild(w); cfxFs(true);
+    var box = w.querySelector('.cfx-nsc');
+    var chip = function () { w.querySelector('[data-ns=priv]').innerHTML = cfxIc('eye') + '<span>' + esc(cfxPrivTx(priv)) + '</span>' + cwIc('down', 'cv'); };
+    var textUi = function () {
+      med = null; w.classList.remove('media'); w.style.setProperty('--nsc', col);
+      box.innerHTML = '<textarea class="cfx-nta" maxlength="700" placeholder="' + tr('Type a status', 'Andika hali') + '" aria-label="' + tr('Your status', 'Hali yako') + '"></textarea><div class="cfx-cols" role="radiogroup" aria-label="' + tr('Colour', 'Rangi') + '">' + CFX_COL.map(function (c, i) { return '<button type="button" role="radio" data-col="' + c + '" aria-checked="' + (c === col) + '" style="--sw:' + c + '" aria-label="' + tr('Colour ', 'Rangi ') + (i + 1) + '"></button>'; }).join('') + '</div><small class="cfx-ncn" aria-live="polite"></small>';
+      var ta = box.querySelector('textarea'); fit(ta); setTimeout(function () { try { ta.focus({ preventScroll: true }); } catch (e) {} }, 60);
+    };
+    var fit = function (ta) { var n = ta.value.length; ta.className = 'cfx-nta ' + (n <= 40 ? 'l' : n <= 140 ? 'm' : 's'); ta.style.height = 'auto'; ta.style.height = Math.min(ta.scrollHeight, box.clientHeight - 24) + 'px'; var c = box.querySelector('.cfx-ncn'); if (c) c.textContent = n > 600 ? String(700 - n) : ''; };
+    var mediaUi = function (x) {
+      med = x; w.classList.add('media'); x.lurl = x.lurl || URL.createObjectURL(x.blob);
+      box.innerHTML = '<div class="cfx-nsm">' + (x.type === 'video' ? '<video src="' + x.lurl + '" playsinline controls muted></video>' : '<img alt="" src="' + x.lurl + '">') + '</div><input type="text" class="cfx-cap" maxlength="700" placeholder="' + tr('Add a caption…', 'Ongeza maelezo…') + '" aria-label="' + tr('Add a caption', 'Ongeza maelezo') + '" autocomplete="off">';
+    };
+    var close = function () { if (w.gone) return; w.gone = true; if (med && med.lurl) try { URL.revokeObjectURL(med.lurl); } catch (e) {} w.classList.add('out'); setTimeout(function () { w.remove(); cfxFs(); }, 200); };
+    w.close = close;
+    var post = function () {
+      if (busy) return; var cid = 'st-' + cwUid(), body;
+      if (!med) { var t = box.querySelector('textarea').value.trim(); if (!t) { toast(tr('Write something first.', 'Andika kitu kwanza.')); return; } body = { kind: 'text', text: t, color: col, cid: cid }; }
+      busy = true; var go = w.querySelector('[data-ns=go]'); go.classList.add('busy'); go.disabled = true;
+      var up = med ? (function () {
+        var x = med, pre = Promise.resolve(null);
+        var small = x.type === 'video' ? x.posterBlob : x.thumbBlob;
+        if (small) pre = cwUp(small, 'photo', 'thumb.jpg', 0, 'status').then(function (p) { return p.ok ? p.id : null; });
+        return pre.then(function (tid) { return cwUp(x.blob, x.type, x.name, x.dur, 'status').then(function (j) { if (!j.ok) throw j; var m = { id: j.id }; if (x.w) m.w = x.w; if (x.h) m.h = x.h; if (x.type === 'video') { m.dur = x.dur; if (tid) m.poster = tid; } else if (tid) m.thumb = tid; return { kind: x.type, media: m, caption: (box.querySelector('.cfx-cap') || {}).value ? box.querySelector('.cfx-cap').value.trim() : '', cid: cid }; }); });
+      })() : Promise.resolve(body);
+      up.then(function (b) { b.privacy = { mode: priv.mode, names: priv.names || [] }; return cwApi('POST', 'status', b); }).then(function (j) {
+        busy = false; go.classList.remove('busy'); go.disabled = false;
+        if (!j.ok) { toast(cfxWhy(j)); return; }
+        toast(tr('Status posted', 'Hali imewekwa')); close(); cfxStLoad();
+      }, function (j) { busy = false; go.classList.remove('busy'); go.disabled = false; toast(cfxWhy(j || {})); });
+    };
+    w.addEventListener('click', function (e) {
+      var c = e.target.closest('[data-col]'); if (c) { buzz(); col = c.getAttribute('data-col'); w.style.setProperty('--nsc', col); qa('[data-col]', w).forEach(function (b) { b.setAttribute('aria-checked', b === c); }); return; }
+      var b = e.target.closest('[data-ns]'); if (!b) return; var k = b.getAttribute('data-ns'); buzz();
+      if (k === 'x') close();
+      if (k === 'text' && med) textUi();
+      if (k === 'go') post();
+      if (k === 'priv') cfxPrivPick(tr('Who sees this status', 'Nani anaona hali hii'), priv, true).then(function (p) { if (p) { priv = p; touched = true; chip(); } });
+      if (k === 'cam') cwPick('image/*,video/*', false, false, function (fs) {
+        var f = fs[0]; if (!f) return;
+        (/^video\//.test(f.type) ? cwVideo(f) : cwPhoto(f)).then(function (x) { if (!x) return; if (x.type === 'video' && x.dur > 30) { toast(tr('Status videos can be up to 30 seconds.', 'Video za hali zinaweza kuwa hadi sekunde 30.')); return; } mediaUi(x); });
+      });
+    });
+    w.addEventListener('input', function (e) { if (e.target.matches('.cfx-nta')) fit(e.target); });
+    w.addEventListener('keydown', function (e) { if (e.key === 'Escape') { e.preventDefault(); close(); } });
+    chip(); textUi(); requestAnimationFrame(function () { w.classList.add('in'); });
+  }
+
+  // ================================================================ View once ===============================================
+  function cfxOnceHtml(m, me) {
+    var vid = ((m.media || [])[0] || {}).type === 'video', op = !!m.opened, can = !me && !op && !m.pend && m.id;
+    var t = op ? tr('Opened', 'Imefunguliwa') : vid ? tr('Video', 'Video') : tr('Photo', 'Picha');
+    return '<button type="button" class="cfx-ob' + (op ? ' op' : '') + (me ? ' me' : '') + '"' + (can ? ' data-once="' + esc(m.id) + '"' : ' disabled') + ' data-testid="cfx_once" aria-label="' + esc(op ? tr('Opened', 'Imefunguliwa') : (vid ? tr('Video, view once', 'Video, tazama mara moja') : tr('Photo, view once', 'Picha, tazama mara moja')) + (can ? '. ' + tr('Tap to open', 'Gusa kufungua') : '')) + '">' +
+      '<span class="cfx-oi" aria-hidden="true">' + cfxIc('once') + '</span><span class="cfx-ot"><b>' + t + '</b>' + (op ? '' : '<small>' + tr('View once', 'Tazama mara moja') + '</small>') + '</span></button>';
+  }
+  function cfxOnceOpen(cid, id) {
+    var m = (CH.msgs[cid] || []).filter(function (x) { return cwSame(x.id, id); })[0]; if (!m || m.opened) return;
+    var gone = function () { m.opened = true; cwSaveM(cid); if (S.view === 'vRoom' && CH.cur === cid) cwMsgsDraw(true); };
+    cwApi('POST', 'open-once', { c: cid, id: m.id }).then(function (j) {
+      if (!j.ok) { if (j.reason === 'opened' || j.reason === 'gone') { gone(); toast(j.reason === 'gone' ? tr('This is no longer available.', 'Hiki hakipatikani tena.') : tr('You already opened it.', 'Ulishakifungua.')); } else toast(cwWhy(j)); return; }
+      var x = j.media || {};
+      fetch(x.url, { headers: pinHdr(), cache: 'no-store' }).then(function (r) { if (!r.ok) throw r; return r.blob(); }).then(function (b) {
+        var u = URL.createObjectURL(b), w = document.createElement('div'); w.className = 'cfx-ov1'; w.setAttribute('role', 'dialog'); w.setAttribute('aria-modal', 'true'); w.setAttribute('aria-label', tr('View once', 'Tazama mara moja')); w.setAttribute('data-testid', 'cfx_once_view');
+        w.innerHTML = '<div class="cfx-o1h"><button type="button" class="cw-ib" data-o1="x" aria-label="' + tr('Close', 'Funga') + '">' + cwIc('x') + '</button><span><b>' + (x.type === 'video' ? tr('Video', 'Video') : tr('Photo', 'Picha')) + ' · ' + tr('View once', 'Tazama mara moja') + '</b><small data-nosw>' + esc(cwIsMe(m.from) ? tr('You', 'Wewe') : m.from) + '</small></span></div>' +
+          '<div class="cfx-o1s">' + (x.type === 'video' ? '<video playsinline autoplay controls controlslist="nodownload" disablepictureinpicture src="' + u + '"></video>' : '<img alt="" draggable="false" src="' + u + '">') + '</div>' +
+          (j.text ? '<p class="cfx-o1c" data-nosw>' + esc(j.text) + '</p>' : '') + '<p class="cfx-o1n">' + cfxIc('once') + '<span>' + tr('It closes for good when you leave. No forward, save or star.', 'Itafungwa kabisa ukiondoka. Hakuna kusambaza, kuhifadhi wala nyota.') + '</span></p>';
+        w.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+        w.close = function () { if (w.gone) return; w.gone = true; w.classList.add('out'); setTimeout(function () { var v = w.querySelector('video'); if (v) { v.pause(); v.removeAttribute('src'); } w.remove(); try { URL.revokeObjectURL(u); } catch (e) {} cfxFs(); }, 180); gone(); };
+        w.addEventListener('click', function (e) { if (e.target.closest('[data-o1=x]')) w.close(); });
+        w.addEventListener('keydown', function (e) { if (e.key === 'Escape') w.close(); });
+        document.body.appendChild(w); cfxFs(true); requestAnimationFrame(function () { w.classList.add('in'); });
+        try { w.querySelector('[data-o1=x]').focus({ preventScroll: true }); } catch (e) {}
+      }).catch(function () { gone(); toast(tr('This couldn’t be opened.', 'Hiki hakikuweza kufunguliwa.')); });
+    });
+  }
+
+  // ================================================================ Locked chats ============================================
+  function cfxLockSave() { store.set('rfChatLocked', JSON.stringify(CFX.locked || [])); }
+  function cfxIsLocked(c) { if (!c) return false; var id = typeof c === 'string' ? c : c.id; return (CFX.locked || []).indexOf(id) >= 0; }
+  function cfxLockedGot(a) { if (!Array.isArray(a)) return; CFX.locked = a.map(String); cfxLockSave(); }
+  // the device check: this device's fingerprint or face (WebAuthn, a platform authenticator), made once and kept
+  function cfxBioId() { return store.get('rfPinBio') || store.get('rfChatBio') || ''; }
+  function cfxBioMake(key) {
+    return navigator.credentials.create({ publicKey: { challenge: rnd(32), rp: { name: 'RAFIKI Pin', id: location.hostname }, user: { id: rnd(16), name: S.name || 'RAFIKI Pin', displayName: S.name || 'RAFIKI Pin' },
+      pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }], authenticatorSelection: { authenticatorAttachment: 'platform', userVerification: 'required', residentKey: 'discouraged' }, timeout: 60000, attestation: 'none' } })
+      .then(function (c) { if (!c) return false; store.set(key || 'rfChatBio', b64u(c.rawId)); return true; }, function () { return false; });
+  }
+  function cfxBioCheck() {
+    var id = cfxBioId(); if (!id) return cfxBioMake('rfChatBio'); // the first time, making it is the check
+    return navigator.credentials.get({ publicKey: { challenge: rnd(32), rpId: location.hostname, allowCredentials: [{ type: 'public-key', id: unb64u(id) }], userVerification: 'required', timeout: 60000 } }).then(function (c) { return !!c; }, function () { return false; });
+  }
+  // the lock screen for Locked chats; resolves true once it's you (fingerprint/face, or the RAFIKI PIN checked by the server)
+  function cfxUnlock(why) {
+    if (CFX.unl) return Promise.resolve(true);
+    if (CFX.lkWait) return CFX.lkWait;
+    var p = CFX.lkWait = new Promise(function (ok) {
+      var acct = CFX.acct || {}, noPin = acct.hasPin === false || (S.mode === 'monday' && !S.pin), res = false;
+      var w = document.createElement('div'); w.className = 'cfx-lk'; w.setAttribute('role', 'dialog'); w.setAttribute('aria-modal', 'true'); w.setAttribute('aria-label', tr('Locked chats', 'Gumzo zilizofungwa')); w.setAttribute('data-testid', 'cfx_lock');
+      document.body.appendChild(w); cfxFs(true);
+      var fin = function (v) { if (w.gone) return; res = v; w.gone = true; if (v) CFX.unl = true; w.classList.add('out'); setTimeout(function () { w.remove(); cfxFs(); }, 200); CFX.lkWait = null; ok(v); };
+      w.close = function () { fin(false); };
+      var top = '<div class="cfx-lkh"><button type="button" class="cfx-nb" data-lk="back" aria-label="' + tr('Back', 'Rudi') + '">' + cwIc('back') + '</button></div><div class="cfx-lkm"><span class="cfx-lki" aria-hidden="true">' + cwIc('lock') + '</span><h2>' + tr('Locked chats', 'Gumzo zilizofungwa') + '</h2>';
+      var face = function (can) {
+        w.innerHTML = top + '<p>' + (can ? tr('Use your fingerprint or face to open your locked chats.', 'Tumia alama ya kidole au uso kufungua gumzo zako zilizofungwa.') : noPin ? tr('Set up a fingerprint or face unlock on this device to open locked chats.', 'Weka kufungua kwa alama ya kidole au uso kwenye kifaa hiki ili kufungua gumzo zilizofungwa.') : tr('Enter your RAFIKI PIN to open your locked chats.', 'Weka PIN yako ya RAFIKI kufungua gumzo zako zilizofungwa.')) + '</p>' +
+          (can ? '<button type="button" class="cfx-bio" data-lk="bio" data-testid="cfx_lock_bio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + FPI + '</svg><span>' + tr('Fingerprint or face', 'Kidole au uso') + '</span></button>' : '') +
+          '<span class="msg" id="cfxLkMsg" aria-live="polite"></span></div><div class="cfx-lkf">' + (noPin ? '' : '<button type="button" class="btn block cfx-pinb" data-lk="pin" data-testid="cfx_lock_pin">' + (can ? tr('Use RAFIKI PIN instead', 'Tumia PIN ya RAFIKI badala yake') : tr('Use my RAFIKI PIN', 'Tumia PIN yangu ya RAFIKI')) + '</button>') +
+          '<p>' + tr('Locked chats stay locked on this device until you open them. On other devices you unlock with your PIN.', 'Gumzo zilizofungwa zinabaki zimefungwa kwenye kifaa hiki hadi uzifungue. Kwenye vifaa vingine unafungua kwa PIN yako.') + '</p></div>';
+        try { (w.querySelector('[data-lk=bio]') || w.querySelector('[data-lk=pin]') || w.querySelector('[data-lk=back]')).focus({ preventScroll: true }); } catch (e) {}
+      };
+      var pinUi = function () {
+        w.innerHTML = top + '<p>' + tr('Enter your RAFIKI PIN.', 'Weka PIN yako ya RAFIKI.') + '</p><form class="cfx-pinf" autocomplete="off"><label class="cfx-sr" for="cfxPin">' + tr('RAFIKI PIN', 'PIN ya RAFIKI') + '</label><input id="cfxPin" type="password" inputmode="numeric" maxlength="6" autocomplete="current-password" data-testid="cfx_pin_input"><button type="submit" class="btn block" data-testid="cfx_pin_go">' + tr('Unlock', 'Fungua') + '</button></form><span class="msg" id="cfxLkMsg" aria-live="polite"></span></div><div class="cfx-lkf"><p>' + tr('Your PIN is checked with RAFIKI and never kept on this device.', 'PIN yako inakaguliwa na RAFIKI na haihifadhiwi kwenye kifaa hiki.') + '</p></div>';
+        var f = w.querySelector('form'), inp = $('cfxPin'); setTimeout(function () { try { inp.focus(); } catch (e) {} }, 60);
+        f.addEventListener('submit', function (e) {
+          e.preventDefault(); var v = inp.value.trim(); if (!/^\d{4,6}$/.test(v)) { msg('cfxLkMsg', 'bad', tr('Enter 4 to 6 digits.', 'Weka tarakimu 4 hadi 6.')); return; }
+          var b = f.querySelector('button'); b.disabled = true; msg('cfxLkMsg', '', tr('Checking…', 'Inakagua…'));
+          cfxApi('POST', 'verify-pin', { pin: v }).then(function (j) {
+            b.disabled = false; inp.value = '';
+            if (j.ok) return fin(true);
+            if (j.reason === 'no-pin') { noPin = true; if (CFX.acct) CFX.acct.hasPin = false; bioCan().then(face); return; }
+            msg('cfxLkMsg', 'bad', j.reason === 'pin' ? (j.left != null ? tr('That PIN isn’t right. ' + j.left + ' tries left.', 'PIN hiyo si sahihi. Majaribio ' + j.left + ' yamebaki.') : tr('That PIN isn’t right.', 'PIN hiyo si sahihi.')) : j.reason === 'locked' ? tr('Too many wrong PINs. Try again in ' + Math.max(1, Math.ceil((j.retryIn || 900) / 60)) + ' min.', 'PIN nyingi zisizo sahihi. Jaribu tena baada ya dakika ' + Math.max(1, Math.ceil((j.retryIn || 900) / 60)) + '.') : cfxWhy(j));
+            try { inp.focus(); } catch (x) {}
+          });
+        });
+      };
+      w.addEventListener('click', function (e) {
+        var b = e.target.closest('[data-lk]'); if (!b) return; var k = b.getAttribute('data-lk'); buzz();
+        if (k === 'back') fin(false);
+        if (k === 'pin') pinUi();
+        if (k === 'bio') { msg('cfxLkMsg', '', ''); cfxBioCheck().then(function (v) { if (v) fin(true); else msg('cfxLkMsg', 'bad', tr('Not unlocked. Try again.', 'Haijafunguliwa. Jaribu tena.')); }); }
+      });
+      w.addEventListener('keydown', function (e) { if (e.key === 'Escape') fin(false); });
+      face(false); bioCan().then(function (can) { if (!w.gone && !w.querySelector('form')) face(can); });
+      if (!CFX.acct) cfxAcct().then(function (a) { if (a && a.hasPin === false && !w.gone && !w.querySelector('form')) { noPin = true; bioCan().then(face); } });
+      requestAnimationFrame(function () { w.classList.add('in'); });
+    });
+    return p;
+  }
+  // lock / unlock one chat (chat info's switch): it asks that it's you first
+  function cfxLockToggle(c, after) {
+    var on = !cfxIsLocked(c);
+    bioCan().then(function (can) {
+      if (on && !can && ((CFX.acct && CFX.acct.hasPin === false) || (S.mode === 'monday' && !S.pin))) { toast(tr('Set up a fingerprint or face unlock on this device first.', 'Weka kufungua kwa alama ya kidole au uso kwenye kifaa hiki kwanza.')); return; }
+      cfxUnlock('toggle').then(function (ok) {
+        if (!ok) return;
+        var was = (CFX.locked || []).slice();
+        CFX.locked = on ? was.concat([c.id]) : was.filter(function (x) { return x !== c.id; }); cfxLockSave(); if (after) after();
+        cwApi('POST', 'lock', { c: c.id, on: on }).then(function (j) {
+          if (!j.ok) { CFX.locked = was; cfxLockSave(); if (after) after(); toast(cwWhy(j)); return; }
+          if (j.locked) cfxLockedGot(j.locked); if (j.chat) cwUpsert(j.chat);
+          cfxSnack(on ? tr('Chat locked. Find it in Locked chats.', 'Gumzo limefungwa. Lipate kwenye Gumzo zilizofungwa.') : tr('Chat unlocked', 'Gumzo limefunguliwa'));
+        });
+      });
+    });
+  }
+  function cfxSnack(t) { qa('.cw-snk').forEach(function (x) { x.remove(); }); var d = document.createElement('div'); d.className = 'cw-snk cfx-snk'; d.setAttribute('role', 'status'); d.innerHTML = '<span>' + esc(t) + '</span>'; document.body.appendChild(d); setTimeout(function () { d.classList.add('out'); setTimeout(function () { d.remove(); }, 300); }, 3200); }
+  function cfxLockRowHtml() {
+    var n = CH.chats.filter(cfxIsLocked).length; if (!n || CH.lk || CH.q || CH.arch || cwChip() !== 'all') return '';
+    return '<button type="button" class="cfx-lkr" id="cfxLkRow" data-testid="cfx_locked_row"><span class="cfx-lkri" aria-hidden="true">' + cwIc('lock') + '</span><span class="cfx-lkrt"><b>' + tr('Locked chats', 'Gumzo zilizofungwa') + '</b><small>' + (n === 1 ? tr('1 chat', 'Gumzo 1') : tr(n + ' chats', 'Gumzo ' + n)) + ' · ' + tr('open with fingerprint or PIN', 'fungua kwa kidole au PIN') + '</small></span>' + cwIc('chev', 'cv') + '</button>';
+  }
+  function cfxLkOpen() {
+    cfxUnlock('list').then(function (ok) {
+      if (!ok || CH.lk) return; CH.lk = true; cwMenuShut();
+      CH.lkl = bkOpen('in', function () { CH.lkl = null; if (!CH.lk) return false; CH.lk = false; cwListDraw(); return true; }, $('cwList'));
+      cwListDraw(); window.scrollTo(0, 0);
+    });
+  }
+  function cfxLkShut() { if (CH.lkl) { var l = CH.lkl; CH.lkl = null; bkShut(l); } CH.lk = false; cwListDraw(); }
+  function cfxLkListHtml(all) {
+    var lk = all.filter(cfxIsLocked);
+    return '<div class="cfx-lkhd" data-testid="cfx_locked_list"><button type="button" class="cw-ib sm" data-lkx="1" aria-label="' + tr('Back to all chats', 'Rudi kwenye gumzo zote') + '">' + cwIc('back') + '</button><b>' + tr('Locked chats', 'Gumzo zilizofungwa') + '</b><span class="cfx-lkhn" aria-hidden="true">' + cwIc('lock') + '</span></div>' +
+      (lk.length ? lk.map(cwRow).join('') : cwEmpty('box', tr('No locked chats', 'Hakuna gumzo zilizofungwa'), tr('Open a chat’s info and turn on Lock this chat.', 'Fungua maelezo ya gumzo na uwashe Funga gumzo hili.'), '', '', 'cfx_empty_locked'));
+  }
+  // a locked chat opens only once it's you (also after a refresh straight into it)
+  function cfxGuard(id, how, mode) {
+    if (!cfxIsLocked(id) || CFX.unl) return false;
+    if (how === 'none') show('vChat', 'replace'); // a refresh or an address straight into it: the Chats list underneath, the lock on top
+    cfxUnlock('open').then(function (ok) { if (ok) cwOpen(id, how === 'none' ? undefined : how, mode); });
+    return true;
+  }
+  // the tab hidden: locked chats lock again; a locked chat on screen is covered until it's you again
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) {
+      if (!CFX.unl) return; CFX.unl = false;
+      var on = (S.view === 'vRoom' && cfxIsLocked(CH.cur)) || CH.lk; if (on) { CFX.hid = true; document.body.classList.add('cfx-cover'); }
+      return;
+    }
+    if (!CFX.hid) return; CFX.hid = false;
+    cfxUnlock('back').then(function (ok) {
+      document.body.classList.remove('cfx-cover'); if (ok) return;
+      if (CH.lk) cfxLkShut();
+      if (S.view === 'vRoom' && cfxIsLocked(CH.cur)) goBack(function () { show('vChat', 'replace'); });
+    });
+  });
+
+  // ================================================================ Settings pages ==========================================
+  function cfxHash(h, first, mode) {
+    var m = /^#chat\/settings(?:\/(privacy|devices|profile))?$/.exec(h || ''); if (!m) return false;
+    var pg = m[1] || '';
+    BK.shown = h; BK.mode = first ? 'fresh' : mode || '';
+    if (!first && S.view === 'vCfx' && CFX.pg === pg) { BK.mode = ''; return true; }
+    CFX.pg = pg; cwStart(); show('vCfx', 'none');
+    return true;
+  }
+  function cfxGo(pg) { CFX.pg = pg || ''; show('vCfx'); }
+  function cfxBack() { goBack(function () { if (CFX.pg) { CFX.pg = ''; show('vCfx', 'replace'); } else show('vChat', 'replace'); }); }
+  function cfxHd(t) { return '<header class="cfx-hd"><button type="button" class="cfx-bk" data-cf="back" aria-label="' + tr('Back', 'Rudi') + '">' + cwIc('back') + '</button><h1 data-nosw>' + t + '</h1></header>'; }
+  function cfxRow(k, ic, title, sub, extra, cls) { return '<button type="button" class="cfx-r' + (cls ? ' ' + cls : '') + '" data-cf="' + k + '"><span class="cfx-ri" aria-hidden="true">' + cfxIc(ic) + '</span><span class="cfx-rt"><b>' + title + '</b>' + (sub ? '<small>' + sub + '</small>' : '') + '</span>' + (extra != null ? extra : cwIc('chev', 'cv')) + '</button>'; }
+  function cfxSw(k, on, label, dis) { return '<button type="button" class="cw-sw" role="switch" aria-checked="' + !!on + '" data-cf="' + k + '" aria-label="' + esc(label) + '"' + (dis ? ' disabled aria-disabled="true"' : '') + '><span class="kn"></span></button>'; }
+  function cfxDraw() {
+    var sec = $('vCfx'); if (!sec) return;
+    var pg = CFX.pg, h = pg === 'privacy' ? cfxPrivHtml() : pg === 'devices' ? cfxDevHtml() : pg === 'profile' ? cfxProfHtml() : cfxHubHtml();
+    if (sec.__h !== h) { sec.__h = h; sec.innerHTML = h; }
+    sec.setAttribute('aria-label', pg === 'privacy' ? tr('Privacy', 'Faragha') : pg === 'devices' ? tr('Linked devices', 'Vifaa vilivyounganishwa') : pg === 'profile' ? tr('Profile', 'Wasifu') : tr('Settings', 'Mipangilio'));
+    phScan();
+  }
+  function cfxFresh() { var was = CFX.acct && JSON.stringify(CFX.acct); cfxAcct(true).then(function () { if (S.view === 'vCfx' && JSON.stringify(CFX.acct) !== was) cfxDraw(); }); if (CFX.pg === 'devices' || CFX.pg === '') cfxDevLoad(); }
+  // -- the hub
+  function cfxHubHtml() {
+    var a = CFX.acct || {}, about = a.about != null ? a.about : ((S.me || {}).about || ''), nd = CFX.devs ? CFX.devs.length : 0, bio = !!store.get('rfPinBio');
+    return cfxHd(tr('Settings', 'Mipangilio')) + '<div class="cfx-pg" data-testid="cfx_settings">' +
+      '<button type="button" class="cfx-me" data-cf="profile"><span class="cw-av cfx-mav" style="' + cwHueVar(S.name) + '" data-ph="' + esc(S.name || '') + '" aria-hidden="true">' + esc(initials(S.name)) + '</span><span class="cfx-rt"><b data-nosw>' + esc(S.name || '') + '</b><small data-nosw>' + (about ? esc(about) : tr('Add an about', 'Ongeza maelezo kukuhusu')) + '</small></span>' + cwIc('chev', 'cv') + '</button>' +
+      '<div class="cfx-card">' + cfxRow('profile', 'user', tr('Profile', 'Wasifu'), tr('Photo, name, about', 'Picha, jina, kuhusu')) +
+      cfxRow('privacy', 'shield', tr('Privacy', 'Faragha'), tr('Last seen, status, read receipts', 'Mara ya mwisho, hali, risiti za kusoma')) +
+      cfxRow('devices', 'devices', tr('Linked devices', 'Vifaa vilivyounganishwa'), nd ? (nd === 1 ? tr('1 device', 'Kifaa 1') : tr(nd + ' devices', 'Vifaa ' + nd)) : tr('Phones and computers signed in', 'Simu na kompyuta zilizoingia')) +
+      cfxRow('chats', 'chat', tr('Chats', 'Gumzo'), tr('Reactions, quick replies, quiet hours, data saver', 'Hisia, majibu ya haraka, saa za kimya, okoa data')) +
+      cfxRow('notes', 'bell', tr('Notifications', 'Arifa'), tr('Message alerts and sounds', 'Arifa za jumbe na sauti')) + '</div>' +
+      '<div class="cfx-card"><div class="cfx-r sw"><span class="cfx-ri" aria-hidden="true">' + cwIc('lock') + '</span><span class="cfx-rt"><b>' + tr('App lock', 'Kufuli ya programu') + '</b><small id="cfxAlSub">' + tr('Ask for fingerprint or face when RAFIKI opens', 'Uliza alama ya kidole au uso RAFIKI inapofunguka') + '</small></span>' + cfxSw('applock', bio, tr('App lock', 'Kufuli ya programu')) + '</div></div>' +
+      '<p class="cfx-ver">RAFIKI Pin ' + esc(APPV) + ' · web</p></div>';
+  }
+  function cfxNotes() {
+    var w = tSheet(tr('Notifications', 'Arifa'), '<h3 class="cw-shh">' + tr('Notifications', 'Arifa') + '</h3><div class="cw-cs cfx-nt"></div>'), box = w.querySelector('.cfx-nt');
+    var draw = function () {
+      var perm = 'Notification' in window ? Notification.permission : 'none', d = CH.prefs.dnd || CW_DND0;
+      box.innerHTML = '<div class="row2"><span><b>' + tr('Message alerts', 'Arifa za jumbe') + '</b><small>' + (perm === 'granted' ? tr('On for this browser', 'Zimewashwa kwa kivinjari hiki') : perm === 'denied' ? tr('Blocked in this browser’s settings', 'Zimezuiwa kwenye mipangilio ya kivinjari hiki') : perm === 'none' ? tr('This browser can’t show alerts', 'Kivinjari hiki hakiwezi kuonyesha arifa') : tr('Off', 'Zimezimwa')) + '</small></span>' + (perm === 'default' ? '<button type="button" class="btn small" data-nt="ask">' + tr('Turn on', 'Washa') + '</button>' : '') + '</div>' +
+        '<div class="row2"><span><b>' + tr('Chat sounds', 'Sauti za gumzo') + '</b><small>' + tr('A soft send, and a brighter one when someone @mentions you', 'Sauti laini ya kutuma, na tofauti mtu akikutaja kwa @') + '</small></span>' + '<button type="button" class="cw-sw" role="switch" aria-checked="' + cwSoundsOn() + '" data-nt="snd" aria-label="' + tr('Chat sounds', 'Sauti za gumzo') + '"><span class="kn"></span></button></div>' +
+        '<div class="row2"><span><b>' + tr('Do not disturb', 'Usinisumbue') + '</b><small>' + (d.on ? tr('Quiet from ' + d.from + ' to ' + d.to, 'Kimya kuanzia ' + d.from + ' hadi ' + d.to) : tr('Off', 'Imezimwa')) + '</small></span><button type="button" class="btn small light" data-nt="chats">' + tr('Change', 'Badilisha') + '</button></div>' +
+        '<p class="muted">' + tr('Locked chats only ever say “New message”, with no name or words.', 'Gumzo zilizofungwa husema tu “Ujumbe mpya”, bila jina wala maneno.') + '</p>';
+    };
+    draw();
+    box.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-nt]'); if (!b) return; buzz(); var k = b.getAttribute('data-nt');
+      if (k === 'ask') { try { Notification.requestPermission().then(function () { store.set('rfChatNoteAsk', '1'); draw(); }); } catch (x) {} }
+      if (k === 'snd') { store.set('rfChatSounds', cwSoundsOn() ? '0' : '1'); draw(); }
+      if (k === 'chats') { w.close(); setTimeout(cwSettings, 240); }
+    });
+  }
+  function cfxAppLock(sw) {
+    if (store.get('rfPinBio')) { store.del('rfPinBio'); bioUi(); if ($('lockBtn')) $('lockBtn').textContent = S.mode === 'monday' ? 'Sign out' : 'Lock the app'; cfxDraw(); toast(tr('App lock is off', 'Kufuli ya programu imezimwa')); return; }
+    bioCan().then(function (can) {
+      if (!can) { toast(tr('This device has no fingerprint or face unlock for the browser.', 'Kifaa hiki hakina kufungua kwa alama ya kidole au uso kwa kivinjari.')); return; }
+      cfxBioMake('rfPinBio').then(function (ok) { if (!ok) { toast(tr('Not turned on.', 'Haijawashwa.')); return; } buzz(); bioUi(); if ($('lockBtn')) $('lockBtn').textContent = tr('Lock the app', 'Funga kwa PIN'); cfxDraw(); toast(tr('App lock is on ✓', 'Kufuli ya programu imewashwa ✓')); });
+    });
+  }
+  // -- Privacy
+  function cfxPrivHtml() {
+    var p = cfxPriv(), row = function (k, title) { return '<button type="button" class="cfx-r" data-cf="pv" data-pk="' + k + '"><span class="cfx-rt"><b>' + title + '</b><small class="g">' + esc(cfxPrivTx(p[k])) + '</small></span>' + cwIc('chev', 'cv') + '</button>'; };
+    var st = p.status, sn = (st.names || []).length;
+    return cfxHd(tr('Privacy', 'Faragha')) + '<div class="cfx-pg" data-testid="cfx_privacy"><h2 class="cfx-sl">' + tr('Who can see my personal info', 'Nani anaona taarifa zangu') + '</h2><div class="cfx-card">' +
+      row('lastSeen', tr('Last seen and online', 'Mara ya mwisho na mtandaoni')) + row('photo', tr('Profile photo', 'Picha ya wasifu')) + row('about', tr('About', 'Kuhusu')) + row('status', tr('Status', 'Hali')) + '</div>' +
+      '<div class="cfx-card"><div class="cfx-r sw"><span class="cfx-rt"><b>' + tr('Read receipts', 'Risiti za kusoma') + '</b><small>' + tr('If off, you won’t send or see blue ticks in one-to-one chats.', 'Ikizimwa, hutatuma wala kuona alama za bluu kwenye gumzo za mtu mmoja.') + '</small></span>' + cfxSw('rr', p.readReceipts, tr('Read receipts', 'Risiti za kusoma')) + '</div></div>' +
+      '<h2 class="cfx-sl">' + tr('Status privacy', 'Faragha ya hali') + '</h2><div class="cfx-card"><div class="cfx-rd" role="radiogroup" aria-label="' + tr('Status privacy', 'Faragha ya hali') + '">' +
+      CFX_PM.slice(0, 3).map(function (x) { var on = st.mode === x[0]; return '<button type="button" role="radio" aria-checked="' + on + '" data-cf="stp" data-pm="' + x[0] + '"><i class="cfx-ro" aria-hidden="true"></i><span><b>' + tr(x[1], x[2]) + '</b><small>' + (x[0] === 'all' ? tr('Everyone in RAFIKI', 'Kila mtu ndani ya RAFIKI') : x[0] === 'except' ? (on && sn ? (sn === 1 ? tr('1 person hidden', 'Mtu 1 amefichwa') : tr(sn + ' people hidden', 'Watu ' + sn + ' wamefichwa')) : tr('Pick who doesn’t see it', 'Chagua asiyeona')) : (on && sn ? (sn === 1 ? tr('1 person sees it', 'Mtu 1 anaona') : tr(sn + ' people see it', 'Watu ' + sn + ' wanaona')) : tr('Pick who sees it', 'Chagua anayeona'))) + '</small></span></button>'; }).join('') +
+      '</div><p class="cfx-note">' + tr('Changes apply to statuses you post from now on.', 'Mabadiliko yanahusu hali utakazoweka kuanzia sasa.') + '</p>' +
+      '<button type="button" class="cfx-r" data-cf="ga"><span class="cfx-rt"><b>' + tr('Who can add me to groups', 'Nani anaweza kuniongeza kwenye vikundi') + '</b><small class="g">' + (p.groupAdd === 'admins' ? tr('Admins only', 'Wasimamizi pekee') : tr('Everyone', 'Kila mtu')) + '</small></span>' + cwIc('chev', 'cv') + '</button></div></div>';
+  }
+  function cfxPrivSet(ch) {
+    var old = JSON.stringify(cfxPriv()); CFX.acct = CFX.acct || {}; CFX.acct.privacy = Object.assign({}, cfxPriv(), ch); cfxDraw();
+    cfxApi('POST', 'privacy', ch).then(function (j) {
+      if (!j.ok) { CFX.acct.privacy = JSON.parse(old); cfxDraw(); toast(cfxWhy(j)); return; }
+      if (j.privacy) CFX.acct.privacy = j.privacy; store.set('rfAcct', JSON.stringify(CFX.acct)); cfxDraw();
+    });
+  }
+  var CFX_PT = { lastSeen: ['Last seen and online', 'Mara ya mwisho na mtandaoni'], photo: ['Profile photo', 'Picha ya wasifu'], about: ['About', 'Kuhusu'], status: ['Status', 'Hali'] };
+  // -- Linked devices
+  function cfxDevLoad() {
+    return cfxApi('GET', 'devices').then(function (j) { if (j.ok) { CFX.devs = j.devices || []; CFX.devCur = j.current; if (S.view === 'vCfx' && (CFX.pg === 'devices' || CFX.pg === '')) cfxDraw(); } else if (CFX.pg === 'devices' && !CFX.devs) { CFX.devErr = cfxWhy(j); cfxDraw(); } return j; });
+  }
+  function cfxAppTx(a) { return a === 'ios' ? tr('iPhone app', 'Programu ya iPhone') : a === 'android' ? tr('Android app', 'Programu ya Android') : tr('Web app', 'Programu ya wavuti'); }
+  function cfxDevSub(d) { return d.current ? (d.app === 'web' ? tr('This browser', 'Kivinjari hiki') : tr('This phone', 'Simu hii')) + (d.city ? ' · ' + d.city : '') : cfxAppTx(d.app) + ' · ' + tr('active ', 'alitumia ') + dAgo(d.last); }
+  function cfxDevHtml() {
+    var ds = CFX.devs, list = !ds ? '<p class="cfx-none">' + esc(CFX.devErr || tr('Loading…', 'Inapakia…')) + '</p>' : ds.map(function (d, i) {
+      return '<button type="button" class="cfx-r dv" data-cf="dev" data-di="' + i + '" data-testid="cfx_device"><span class="cfx-ri" aria-hidden="true">' + cfxIc(d.app === 'web' ? 'laptop' : 'mobile') + '</span><span class="cfx-rt"><b data-nosw>' + esc(d.name || cfxAppTx(d.app)) + '</b><small data-nosw>' + esc(cfxDevSub(d)) + '</small></span>' + (d.current ? '<span class="cfx-this">' + tr('This one', 'Hiki') + '</span>' : cwIc('chev', 'cv')) + '</button>';
+    }).join('');
+    var others = ds && ds.some(function (d) { return !d.current; });
+    return cfxHd(tr('Linked devices', 'Vifaa vilivyounganishwa')) + '<div class="cfx-pg" data-testid="cfx_devices"><div class="cfx-hero"><span class="cfx-hi2" aria-hidden="true">' + cfxIc('devices') + '</span><div><h2>' + tr('Use RAFIKI on other devices', 'Tumia RAFIKI kwenye vifaa vingine') + '</h2><p>' + tr('Sign in on pin.rafikioutreach.org or another phone.', 'Ingia kwenye pin.rafikioutreach.org au simu nyingine.') + '</p></div><button type="button" class="btn block cfx-link" data-cf="link">' + tr('Link a device', 'Unganisha kifaa') + '</button></div>' +
+      '<h2 class="cfx-sl">' + tr('Signed in on', 'Umeingia kwenye') + '</h2><div class="cfx-card">' + list + '</div>' +
+      (others ? '<div class="cfx-card"><button type="button" class="cfx-out" data-cf="outall" data-testid="cfx_signout_all">' + tr('Sign out of all other devices', 'Toka kwenye vifaa vingine vyote') + '</button></div>' : '') +
+      '<p class="cfx-note c">' + tr('Tap a device to see when it was last used and sign it out.', 'Gusa kifaa kuona kilitumiwa lini mara ya mwisho na ukitoe.') + '</p></div>';
+  }
+  function cfxDevSheet(d) {
+    var w = tSheet(d.name || cfxAppTx(d.app), '<div class="cfx-dsh" data-testid="cfx_device_sheet"><span class="cfx-dsi" aria-hidden="true">' + cfxIc(d.app === 'web' ? 'laptop' : 'mobile') + '</span><h3 data-nosw>' + esc(d.name || cfxAppTx(d.app)) + '</h3><p class="muted">' + esc(cfxAppTx(d.app)) + (d.city ? ' · ' + esc(d.city) : '') + '</p>' +
+      '<dl><dt>' + tr('Last active', 'Ilitumika mwisho') + '</dt><dd>' + esc(dWhen(dOf(d.last))) + '</dd><dt>' + tr('Signed in', 'Iliingia') + '</dt><dd>' + esc(d.first ? dDay(dOf(d.first)) : '–') + '</dd></dl>' +
+      (d.legacy ? '<p class="msg warn">' + tr('This phone has an older RAFIKI Pin. Update it there, or use Sign out of all other devices.', 'Simu hii ina RAFIKI Pin ya zamani. Isasishe huko, au tumia Toka kwenye vifaa vingine vyote.') + '</p>' : '<button type="button" class="btn block po-red" data-ds="out" data-testid="cfx_device_signout">' + tr('Sign out', 'Toa') + '</button>') + '<span class="msg" aria-live="polite"></span></div>');
+    var b = w.querySelector('[data-ds=out]');
+    if (b) b.addEventListener('click', function () {
+      buzz(); b.disabled = true; var m = w.querySelector('.cfx-dsh .msg'); m.className = 'msg'; m.textContent = tr('Signing out…', 'Inatoa…');
+      cfxApi('POST', 'devices/sign-out', { id: d.id }).then(function (j) {
+        b.disabled = false; if (!j.ok) { m.className = 'msg bad'; m.textContent = cfxWhy(j); return; }
+        CFX.devs = (CFX.devs || []).filter(function (x) { return x.id !== d.id; }); w.close(); cfxDraw(); toast(tr('Signed out ✓', 'Imetolewa ✓')); cfxDevLoad();
+      });
+    });
+  }
+  function cfxOutAll() {
+    poAsk(tr('Sign out of all other devices?', 'Toka kwenye vifaa vingine vyote?'), tr('Every other phone and browser goes back to the sign-in screen. This one stays signed in.', 'Kila simu na kivinjari kingine kitarudi kwenye skrini ya kuingia. Hiki kinabaki ndani.'), tr('Sign out', 'Toa'), true).then(function (ok) {
+      if (!ok) return;
+      cfxApi('POST', 'devices/sign-out-others', {}).then(function (j) {
+        if (!j.ok) { toast(cfxWhy(j)); return; }
+        if (j.gen != null) { S.gen = Number(j.gen) || 0; store.set('rfPinGen', String(S.gen)); } // this device keeps working with the new number
+        CFX.devs = (CFX.devs || []).filter(function (d) { return d.current; }); cfxDraw();
+        toast(j.signedOut === 1 ? tr('1 device signed out', 'Kifaa 1 kimetolewa') : tr((j.signedOut || 0) + ' devices signed out', 'Vifaa ' + (j.signedOut || 0) + ' vimetolewa')); cfxDevLoad();
+      });
+    });
+  }
+  function cfxLinkSheet() {
+    tSheet(tr('Link a device', 'Unganisha kifaa'), '<div class="cfx-dsh"><span class="cfx-dsi" aria-hidden="true">' + cfxIc('devices') + '</span><h3>' + tr('Link a device', 'Unganisha kifaa') + '</h3><ol class="cfx-steps"><li>' + tr('On the other phone or computer, open <b>pin.rafikioutreach.org</b>, or install RAFIKI Pin.', 'Kwenye simu au kompyuta nyingine, fungua <b>pin.rafikioutreach.org</b>, au sakinisha RAFIKI Pin.') + '</li><li>' + tr('Sign in with your name and your RAFIKI PIN.', 'Ingia kwa jina lako na PIN yako ya RAFIKI.') + '</li><li>' + tr('It shows up here. No code to scan.', 'Kitaonekana hapa. Hakuna msimbo wa kuchanganua.') + '</li></ol></div>');
+  }
+  // -- Profile
+  function cfxProfHtml() {
+    var a = CFX.acct || {}, me = S.me || {}, about = a.about != null ? a.about : (me.about || ''), ed = CFX.abEd;
+    var left = 140 - (ed != null ? ed : about).length;
+    return cfxHd(tr('Profile', 'Wasifu')) + '<div class="cfx-pg" data-testid="cfx_profile"><div class="cfx-ph"><button type="button" class="cfx-phb" data-cf="photo" aria-label="' + tr('Change your photo', 'Badilisha picha yako') + '"><span class="cw-av cfx-pav" style="' + cwHueVar(S.name) + '" data-ph="' + esc(S.name || '') + '" aria-hidden="true">' + esc(initials(S.name)) + '</span><i class="cfx-cam" aria-hidden="true">' + cwIc('camera') + '</i></button><p>' + tr('Tap to change: take a photo, choose one, or remove it.', 'Gusa kubadilisha: piga picha, chagua moja, au iondoe.') + '</p></div>' +
+      '<div class="cfx-card"><div class="cfx-r pf"><span class="cfx-ri" aria-hidden="true">' + cwIc('user') + '</span><span class="cfx-rt"><small class="lb">' + tr('Name', 'Jina') + '</small><b data-nosw>' + esc(S.name || '') + '</b><small>' + tr('This is the name the team sees. The office can change it.', 'Hili ndilo jina timu inaona. Ofisi inaweza kulibadilisha.') + '</small></span></div>' +
+      (ed != null ? '<div class="cfx-r pf ed"><span class="cfx-ri" aria-hidden="true">' + cwIc('info') + '</span><span class="cfx-rt"><label class="lb" for="cfxAb">' + tr('About', 'Kuhusu') + '</label><input id="cfxAb" type="text" maxlength="140" value="' + esc(ed) + '" data-testid="cfx_about_input" enterkeyhint="done"><small id="cfxAbN">' + tr(left + ' characters left', 'Herufi ' + left + ' zimebaki') + '</small><span class="cfx-abg"><button type="button" class="btn small light" data-cf="abx">' + tr('Cancel', 'Ghairi') + '</button><button type="button" class="btn small" data-cf="abok" data-testid="cfx_about_save">' + tr('Save', 'Hifadhi') + '</button></span></span></div>'
+        : '<button type="button" class="cfx-r pf" data-cf="ab" data-testid="cfx_about"><span class="cfx-ri" aria-hidden="true">' + cwIc('info') + '</span><span class="cfx-rt"><small class="lb">' + tr('About', 'Kuhusu') + '</small><b data-nosw>' + (about ? esc(about) : '<span class="ph">' + tr('Add a few words', 'Ongeza maneno machache') + '</span>') + '</b><small>' + tr(left + ' characters left', 'Herufi ' + left + ' zimebaki') + '</small></span><span class="cfx-pen" aria-hidden="true">' + cwIc('edit') + '</span></button>') +
+      '<' + (S.admin ? 'button type="button" data-cf="phone"' : 'div') + ' class="cfx-r pf"><span class="cfx-ri" aria-hidden="true">' + cwIc('phone') + '</span><span class="cfx-rt"><small class="lb">' + tr('Phone', 'Simu') + '</small><b data-nosw>' + esc(me.phone || tr('Not added', 'Haijaongezwa')) + '</b><small>' + (S.admin ? tr('Tap to change it.', 'Gusa kuibadilisha.') : tr('Only admins can change this.', 'Wasimamizi pekee wanaweza kubadilisha hii.')) + '</small></span>' + (S.admin ? '<span class="cfx-pen" aria-hidden="true">' + cwIc('edit') + '</span></button>' : '</div>') + '</div>' +
+      '<h2 class="cfx-sl">' + tr('About suggestions', 'Mapendekezo ya kuhusu') + '</h2><div class="cfx-abs">' + CFX_AB.map(function (x) { var t = tr(x[0], x[1]); return '<button type="button" data-cf="abq" data-v="' + esc(t) + '" aria-pressed="' + (about === t) + '">' + esc(t) + '</button>'; }).join('') + '</div></div>';
+  }
+  function cfxAboutSave(v) {
+    v = String(v || '').replace(/\s+/g, ' ').trim().slice(0, 140);
+    var a = CFX.acct = CFX.acct || {}, was = a.about; a.about = v; CFX.abEd = null; cfxDraw();
+    cfxApi('POST', 'about', { about: v }).then(function (j) {
+      if (!j.ok) { a.about = was; cfxDraw(); toast(j.reason === 'too-long' ? tr('About can be up to 140 characters.', 'Kuhusu inaweza kuwa hadi herufi 140.') : cfxWhy(j)); return; }
+      a.about = j.about != null ? j.about : v; if (S.me) { S.me.about = a.about; store.set('rfPinMe', JSON.stringify(S.me)); } store.set('rfAcct', JSON.stringify(a)); cfxDraw(); toast(tr('Saved ✓', 'Imehifadhiwa ✓'));
+    });
+  }
+  // taps on the pages
+  (function () {
+    var sec = $('vCfx'); if (!sec) return;
+    sec.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-cf]'); if (!b || b.disabled) return; var k = b.getAttribute('data-cf'); buzz();
+      if (k === 'back') return cfxBack();
+      if (k === 'profile' || k === 'privacy' || k === 'devices') return cfxGo(k);
+      if (k === 'chats') return cwSettings();
+      if (k === 'notes') return cfxNotes();
+      if (k === 'applock') return cfxAppLock(b);
+      if (k === 'pv') { var pk = b.getAttribute('data-pk'); return cfxPrivPick(tr(CFX_PT[pk][0], CFX_PT[pk][1]), cfxPriv()[pk], pk === 'status').then(function (p) { if (p) { var ch = {}; ch[pk] = p; cfxPrivSet(ch); } }); }
+      if (k === 'rr') return cfxPrivSet({ readReceipts: !cfxPriv().readReceipts });
+      if (k === 'stp') { var m = b.getAttribute('data-pm'); if (m === 'all') return cfxPrivSet({ status: { mode: 'all', names: [] } }); return cfxPeople(m === 'except' ? tr('Hide my status from', 'Ficha hali yangu kwa') : tr('Show my status to', 'Onyesha hali yangu kwa'), cfxPriv().status.mode === m ? cfxPriv().status.names : []).then(function (ns) { if (ns && ns.length) cfxPrivSet({ status: { mode: m, names: ns } }); }); }
+      if (k === 'ga') { var w = panel(tr('Who can add me to groups', 'Nani anaweza kuniongeza kwenye vikundi'), '<div class="cfx-rd" role="radiogroup">' + [['all', 'Everyone', 'Kila mtu', 'Anyone in the team can add you', 'Yeyote kwenye timu anaweza kukuongeza'], ['admins', 'Admins only', 'Wasimamizi pekee', 'Only RAFIKI office admins can add you', 'Wasimamizi wa ofisi ya RAFIKI pekee']].map(function (x) { return '<button type="button" role="radio" aria-checked="' + (cfxPriv().groupAdd === x[0]) + '" data-ga="' + x[0] + '"><i class="cfx-ro" aria-hidden="true"></i><span><b>' + tr(x[1], x[2]) + '</b><small>' + tr(x[3], x[4]) + '</small></span></button>'; }).join('') + '</div>', 'cw-sheet');
+        w.addEventListener('click', function (ev) { var a = ev.target.closest('[data-ga]'); if (!a) return; buzz(); w.close(); cfxPrivSet({ groupAdd: a.getAttribute('data-ga') }); }); return; }
+      if (k === 'dev') { var d = (CFX.devs || [])[+b.getAttribute('data-di')]; if (d && !d.current) cfxDevSheet(d); return; }
+      if (k === 'outall') return cfxOutAll();
+      if (k === 'link') return cfxLinkSheet();
+      if (k === 'photo') { if (phCan(S.name)) phSheet(S.name); else toast(tr('Ask the office for your own PIN to add a photo.', 'Omba ofisi ikupe PIN yako mwenyewe ili kuongeza picha.')); return; }
+      if (k === 'phone') return setOpen('profile');
+      if (k === 'ab') { var a0 = CFX.acct || {}; CFX.abEd = a0.about != null ? a0.about : ((S.me || {}).about || ''); cfxDraw(); var i = $('cfxAb'); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } return; }
+      if (k === 'abx') { CFX.abEd = null; cfxDraw(); return; }
+      if (k === 'abok') return cfxAboutSave($('cfxAb').value);
+      if (k === 'abq') return cfxAboutSave(b.getAttribute('data-v'));
+    });
+    sec.addEventListener('input', function (e) { if (e.target.id !== 'cfxAb') return; CFX.abEd = e.target.value; var n = 140 - e.target.value.length; $('cfxAbN').textContent = tr(n + ' characters left', 'Herufi ' + n + ' zimebaki'); });
+    sec.addEventListener('keydown', function (e) { if (e.target.id === 'cfxAb' && e.key === 'Enter') { e.preventDefault(); cfxAboutSave(e.target.value); } if (e.target.id === 'cfxAb' && e.key === 'Escape') { CFX.abEd = null; cfxDraw(); } });
+  })();
+  // chat info: About (a person's own words, when they let me see them) and the lock switch
+  function cfxAboutOf(n) { var p = (teamCache || []).filter(function (x) { return same(x.name, n); })[0]; return p && p.about ? p.about : ''; }
+  function cfxInfoAbout(c) { if (!c || c.kind !== 'dm') return ''; var ab = cfxAboutOf(cwOther(c)); return ab ? '<section class="ct-g"><div class="cfx-iab"><small>' + tr('About', 'Kuhusu') + '</small><p data-nosw>' + esc(ab) + '</p></div></section>' : ''; }
+  function cfxInfoLock(c) {
+    var on = cfxIsLocked(c);
+    return '<div class="ct-r sw"><span class="ct-ri" style="--hu:var(--hu-green);--hb:var(--hb-green)" aria-hidden="true">' + cwIc('lock') + '</span><span class="ct-rl"><b>' + tr('Lock this chat', 'Funga gumzo hili') + '</b><small>' + tr('Hide it in Locked chats. Open with your fingerprint, face or RAFIKI PIN.', 'Lificha kwenye Gumzo zilizofungwa. Fungua kwa kidole, uso au PIN ya RAFIKI.') + '</small></span><button type="button" class="cw-sw" role="switch" aria-checked="' + on + '" data-i="lock" aria-label="' + tr('Lock this chat', 'Funga gumzo hili') + '" data-testid="cfx_lock_switch"><span class="kn"></span></button></div>';
+  }
+  // real time: new statuses, views of mine, view-once opened, the lock list from my other devices
+  function cfxOn(d) {
+    if (d.t === 'status' || d.t === 'status-gone') { if (d.t === 'status-gone') cfxStDrop(d.id); cfxStSoon(true); if (S.view === 'vChat') cwListDraw(); return true; }
+    if (d.t === 'status-view') { ((CFX.st && CFX.st.people) || []).forEach(function (p) { if (p.me) (p.items || []).forEach(function (x) { if (x.id === d.id) { x.views = (x.views || 0) + 1; if (d.liked) x.likes = (x.likes || 0) + 1; } }); }); cfxStSave(); return true; }
+    if (d.t === 'opened') {
+      var m = (CH.msgs[d.c] || []).filter(function (x) { return cwSame(x.id, d.id); })[0]; if (!m) return true;
+      if (cwIsMe(m.from)) { m.opened = true; if (d.who) m.openedBy = (m.openedBy || []).concat([d.who]); } else if (cwIsMe(d.who)) m.opened = true;
+      cwSaveM(d.c); if (S.view === 'vRoom' && CH.cur === d.c) cwMsgsDraw(true); return true;
+    }
+    if (d.t === 'locked') { cfxLockedGot(d.locked); if (S.view === 'vChat') cwListDraw(); return true; }
+    return false;
+  }
+  // taps: the Status strip, the Locked chats row, a view-once bubble
+  $('cwField').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-st]'); if (!b) return; buzz(); var k = b.getAttribute('data-st');
+    if (k === 'new') cfxStNew(); else if (k === 'mine') cfxStView('me'); else cfxStView(b.getAttribute('data-who'));
+  });
+  $('cwList').addEventListener('click', function (e) {
+    if (e.target.closest('#cfxLkRow')) { buzz(); cfxLkOpen(); return; }
+    if (e.target.closest('[data-lkx]')) { buzz(); cfxLkShut(); }
+  });
+  $('cwMsgs').addEventListener('click', function (e) { var b = e.target.closest('[data-once]'); if (!b || CW2.sel) return; buzz(); cfxOnceOpen(CH.cur, b.getAttribute('data-once')); });
+  // chatfx:end -------------------------------------------------------------------------------------------------------
 
   // cw2-room:begin ------------------------------------------------------------------------------------------------
   // Chat 2, one chat (design/chat-2026-10/room.png, delete.png): the header's search and ⋯, the project strip, select +
@@ -18788,7 +19808,7 @@ html:not([data-theme=sun]) .cw-info .ct-g h4{color:var(--c3-dayt)}
   function cw2MflSplit(a) {
     var S0 = { media: [], files: [], links: [] };
     a.forEach(function (m) {
-      if (m.kind === 'media') (m.media || []).forEach(function (x, i) { S0.media.push({ m: m, x: x, i: i }); });
+      if (m.kind === 'media' && !m.once) (m.media || []).forEach(function (x, i) { S0.media.push({ m: m, x: x, i: i }); });
       if (m.kind === 'doc' && (m.media || [])[0]) S0.files.push({ m: m, x: m.media[0] });
       (String(m.text || '').match(/https?:\/\/[^\s<]+[^\s<.,;:!?)\]'"]/g) || []).forEach(function (u) { S0.links.push({ m: m, u: u }); });
     });
