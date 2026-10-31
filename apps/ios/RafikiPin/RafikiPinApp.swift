@@ -96,10 +96,10 @@ struct BottomTabs: View {
         let admin = m.snap?.admin == true
         let review = m.snap?.reviewOpen ?? 0
         let drafts = m.snap?.draftsWaiting ?? 0
-        // as Android: Map, Projects, New site, Stories, then Office for admins or Me for field users (everyone has Me
-        // at the top left too); five tabs keep every label whole down to a 320-point-wide iPhone
+        // Map, Projects, New site, Stories, and Office for admins: Me is the button at the top left for everyone
+        // (with what is waiting to send), so team members have four tabs and admins five
         var tabs = [("map", t("Map", "Ramani"), "map"), ("list", t("Projects", "Miradi"), "list"), ("new", t("New site", "Eneo jipya"), "plus"), ("stories", t("Stories", "Hadithi"), "book")]
-        if admin { tabs.append(("office", t("Office", "Ofisi"), "inbox")) } else { tabs.append(("me", t("Me", "Mimi"), "person")) }
+        if admin { tabs.append(("office", t("Office", "Ofisi"), "inbox")) }
         return HStack(spacing: 0) {
             ForEach(tabs, id: \.0) { k, label, icon in
                 let on = m.here.tab == k && m.here.project == nil && m.here.sub == nil
