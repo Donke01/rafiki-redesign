@@ -56,6 +56,10 @@ struct ChatRoomView: View {
     @State private var sheet: String?
     @State private var delMsgs: [ChatMsg]?
     @State private var opened = false
+    /// The chat has been put at its starting place (the newest message, or the first unread one); until then every
+    /// change of the messages puts it there again, and older pages don't load.
+    @State private var settled = false
+    @State private var settleGen = 0
 
     var body: some View {
         let row = hub.row(c)
@@ -163,15 +167,16 @@ struct ChatRoomView: View {
     private func list(_ row: ChatRow?, _ msgs: [ChatMsg], _ me: String) -> some View {
         let lines = ChatLine.build(msgs, unreadFrom: unreadFrom, unreadN: max(0, unreadAtOpen))
         let group = row?.isGroup == true
-        let lastMine = msgs.last.map { chatSame($0.from, me) } ?? false
         var findId: String? = nil
         if self.finding { let f = found; if f.indices.contains(fAt) { findId = f[fAt].id } }
         return GeometryReader { g in
             let maxW = min(g.size.width * 0.8, 560)
+            let viewH = g.size.height
+            let lastAt = msgs.last?.at ?? 0
             ScrollViewReader { sp in
                 ScrollView {
                     LazyVStack(spacing: 0) {
-                        Color.clear.frame(height: 1).onAppear { older(sp, msgs) }
+                        Color.clear.frame(height: 1).onAppear { if settled { older(sp, msgs) } }
                         if loadingOlder || (hub.hasMore(c) && msgs.count >= 50) {
                             Text(t("Loading older…", "Inapakia za zamani…")).font(.lMedium).foregroundColor(C.muted).frame(maxWidth: .infinity).padding(10)
                         }
@@ -179,20 +184,30 @@ struct ChatRoomView: View {
                         ForEach(lines) { line in
                             lineView(line, row: row, me: me, group: group, maxW: maxW, flashId: flash ?? findId, newest: msgs.last?.key, msgs: msgs).id(line.id)
                         }
+                        // where the end of the list is, to know whether the reader is at (or within 150 points of) the bottom
                         Color.clear.frame(height: 4).id("bottom")
-                            .onAppear { atBottom = true; awayAt = nil }
-                            .onDisappear { atBottom = false; awayAt = msgs.last?.at ?? 0 }
+                            .background(GeometryReader { gp in Color.clear.preference(key: ChatBottomKey.self, value: gp.frame(in: .named("chatScroll")).maxY) })
                     }.padding(.horizontal, 8).padding(.top, 8)
                 }
+                .coordinateSpace(name: "chatScroll")
                 .scrollDismissesKeyboard(.interactively)
+                .onPreferenceChange(ChatBottomKey.self) { y in
+                    let near = y.map { $0 - viewH <= 150 } ?? false
+                    if near != atBottom { atBottom = near; awayAt = near ? nil : lastAt }
+                }
                 .onAppear {
                     proxy = sp
-                    if let f = ChatNav.shared.focus { ChatNav.shared.focus = nil; DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { jump(f) } }
-                    else if let u = unreadFrom, unreadAtOpen > 3 { sp.scrollTo(u, anchor: .top) }
-                    else { sp.scrollTo("bottom", anchor: .bottom) }
+                    if let f = ChatNav.shared.focus { ChatNav.shared.focus = nil; settled = true; DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { jump(f) } }
+                    else { settle(sp) }
                 }
+                .onChange(of: msgs.count) { _ in if !settled { settle(sp) } }
                 .onChange(of: msgs.last?.key) { _ in
-                    if atBottom || lastMine { withAnimation(Motion.on ? .easeOut(duration: 0.25) : nil) { sp.scrollTo("bottom", anchor: .bottom) } }
+                    let now = hub.threads[c] ?? []
+                    let mine = now.last.map { chatSame($0.from, hub.me) } ?? false
+                    // a new message: follow it when the reader is at the bottom, or when it's my own; otherwise "↓ N new"
+                    if settled && (atBottom || mine) {
+                        DispatchQueue.main.async { withAnimation(Motion.on ? .easeOut(duration: 0.25) : nil) { sp.scrollTo("bottom", anchor: .bottom) } }
+                    }
                     hub.markSeen(c)
                 }
             }
@@ -236,14 +251,32 @@ struct ChatRoomView: View {
         if sel.contains(msg.key) { sel.remove(msg.key) } else { sel.insert(msg.key) }
         if sel.isEmpty { selecting = false }
     }
+    /// Opens the chat at its newest message, or at the "N unread messages" line. The rows of a lazy list only exist after
+    /// the first layout, so the scroll is repeated a few times as they appear (and when the newest page arrives).
+    private func settle(_ sp: ScrollViewProxy) {
+        let msgs = hub.threads[c] ?? []
+        if unreadAtOpen > 0 && unreadFrom == nil && !msgs.isEmpty { unreadFrom = msgs.filter { !chatSame($0.from, hub.me) }.suffix(unreadAtOpen).first?.id }
+        settleGen += 1
+        let gen = settleGen
+        let toUnread = unreadAtOpen > 0 && unreadFrom != nil
+        for (i, d) in [0.0, 0.05, 0.15, 0.35, 0.6].enumerated() {
+            DispatchQueue.main.asyncAfter(deadline: .now() + d) {
+                guard gen == settleGen, !settled else { return }
+                if toUnread { sp.scrollTo("unread", anchor: .top) } else { sp.scrollTo("bottom", anchor: .bottom) }
+                if i == 4 && !msgs.isEmpty { settled = true }
+            }
+        }
+    }
+    /// Older messages while scrolling up; the message that was at the top stays where it was.
     private func older(_ sp: ScrollViewProxy, _ msgs: [ChatMsg]) {
-        guard opened, !loadingOlder, hub.hasMore(c), !msgs.isEmpty else { opened = true; return }
+        guard settled, !loadingOlder, hub.hasMore(c), !msgs.isEmpty else { return }
         loadingOlder = true
         let anchor = msgs.first?.key
         Task {
             await hub.loadOlder(c)
+            if let anchor { sp.scrollTo(anchor, anchor: .top); DispatchQueue.main.async { sp.scrollTo(anchor, anchor: .top) } }
+            try? await Task.sleep(nanoseconds: 300_000_000)
             loadingOlder = false
-            if let anchor { sp.scrollTo(anchor, anchor: .top) }
         }
     }
     /// Scroll to a message (a tapped quote, a search hit, a starred or pinned one), loading older pages if needed.
@@ -445,4 +478,10 @@ struct ChatDateSheet: View {
             Btn(t("Go", "Nenda"), icon: "next", wide: true) { go(d) }
         }.padding(20)
     }
+}
+
+/// Where the bottom of a chat's message list is, in the scroll view's own space (nil while it isn't laid out).
+struct ChatBottomKey: PreferenceKey {
+    static let defaultValue: CGFloat? = nil
+    static func reduce(value: inout CGFloat?, nextValue: () -> CGFloat?) { if let n = nextValue() { value = n } }
 }
