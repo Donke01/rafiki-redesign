@@ -133,7 +133,7 @@ class StoriesHubTest {
         val bar = rule.onNodeWithTag("bottom_bar", useUnmergedTree = true).fetchSemanticsNode()
         val bl = bar.positionInRoot.x; val br = bl + bar.size.width
         val shown = tabs.filter { tagged("nav_$it") || tagged("nav_${it}_tab") }
-        assertEquals("$label: six tabs", 6, shown.size)
+        assertEquals("$label: tabs", tabs.size, shown.size)
         noLayoutProblems("bottom_bar", label)
         // the bar keeps its usual height, even with a label on two lines (the map's room depends on it)
         assertEquals("$label: bar height", 68f, bar.size.height / rule.density.density, 0.6f)
@@ -234,7 +234,7 @@ class StoriesHubTest {
 
     @Test fun field_user_opens_on_needs_a_story_and_has_no_badge() {
         start(model(admin = false))
-        assertFalse(tagged("stories_badge")); assertTrue(tagged("nav_me_tab")); assertFalse(tagged("nav_office"))
+        assertFalse(tagged("stories_badge")); assertFalse(tagged("nav_me_tab")); assertTrue(tagged("nav_me")); assertFalse(tagged("nav_office"))
         tap("nav_stories"); waitTag("stories")
         rule.onNodeWithTag("sh_f_need").assertIsSelected()
         tap("sh_f_draft"); assertEquals("An admin reads these and approves them for the website.", text("sh_note"))
@@ -248,7 +248,7 @@ class StoriesHubTest {
         // badges on: chat unread, drafts (admin), what's waiting to send (field)
         start(m)
         val tag = "$width-${if (sw) "sw" else "en"}-$mode-${if (admin) "admin" else "field"}"
-        val tabs = listOf("map", "list", "new", "chat", "stories", if (admin) "office" else "me")
+        val tabs = listOf("map", "list", "new", "chat", "stories") + (if (admin) listOf("office") else emptyList())
         barChecks(tag, tabs)
         tap("nav_stories"); waitTag("stories"); settle()
         noLayoutProblems("stories", tag)

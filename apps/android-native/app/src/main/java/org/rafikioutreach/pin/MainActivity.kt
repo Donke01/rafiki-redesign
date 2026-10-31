@@ -412,8 +412,8 @@ fun Shell(m: AppModel) {
     }
 }
 
-/** The tabs at the bottom: Map, Projects, New site, Chat, Stories, then Office for admins or Me for field users (web v72).
- *  Everyone also has the Me pill at the top left. [chat]: unread chat messages (the green badge); [waiting] and
+/** The tabs at the bottom: Map, Projects, New site, Chat, Stories, and Office for admins. Me is the pill at the top left
+ *  for everyone (Oct 2026: no Me tab), so field users have five tabs and admins six. [chat]: unread chat messages (the green badge); [waiting] and
  *  [updReady]: the Me tab carries the same badges as the pill; admins see the stories waiting for review on Stories.
  *  Six tabs fit down to 320 dp: one label size for every tab, as large as fits (a label that still doesn't fit wraps
  *  between its words, never inside one); the icon pill narrows with the column; badges stay inside their column. */
@@ -428,7 +428,7 @@ fun BottomBar(m: AppModel, current: String, review: Int, chat: Int, items: List<
         val drafts = if (admin && snap != null) snap.projects.count { snap.stories[it.id]?.st == "draft" } else 0
         val tabs = items ?: (listOf(Triple("map", t("Map", "Ramani"), "map"), Triple("list", t("Projects", "Miradi"), "list"), Triple("new", t("New site", "Eneo jipya"), "plus"), Triple("chat", t("Chat", "Gumzo"), "chat"),
             Triple("stories", t("Stories", "Hadithi"), "book")) +
-            (if (admin) listOf(Triple("office", t("Office", "Ofisi"), "inbox")) else listOf(Triple("me", t("Me", "Mimi"), "person"))))
+            (if (admin) listOf(Triple("office", t("Office", "Ofisi"), "inbox")) else emptyList()))
         val measurer = androidx.compose.ui.text.rememberTextMeasurer()
         val base = MaterialTheme.typography.labelSmall
         // on a wide screen the bar stays a comfortable size, in the middle (feat-mea)

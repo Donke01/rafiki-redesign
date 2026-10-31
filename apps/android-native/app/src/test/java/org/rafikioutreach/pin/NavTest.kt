@@ -167,7 +167,7 @@ class NavTest {
      *  form, Chat shows its list at once. */
     private fun sameTabAgain(isAdmin: Boolean) {
         admin = isAdmin; start()
-        val tabs = listOf("map" to "map_home", "list" to "projects", "new" to "new_site", "chat" to "chat_list", "stories" to "stories", (if (isAdmin) "me" else "me_tab") to "me_hero") +
+        val tabs = listOf("map" to "map_home", "list" to "projects", "new" to "new_site", "chat" to "chat_list", "stories" to "stories", "me" to "me_hero") +
             (if (isAdmin) listOf("office" to "o_repairs") else emptyList())
         for ((k, root) in tabs) {
             nav(k); waitTag(root)
@@ -190,7 +190,7 @@ class NavTest {
         }
         // from a deeper screen the same tab still goes back to its first screen
         if (isAdmin) { nav("office"); tap("o_repairs"); waitTag("office_strip"); nav("office"); waitTag("o_repairs"); assertFalse(tagged("office_strip")) }
-        else { nav("me_tab"); tap("me_report"); waitTag("hback"); nav("me_tab"); waitTag("me_hero") }
+        else { nav("me"); tap("me_report"); waitTag("hback"); back(); waitTag("me_hero") }  // no Me tab: on a deeper screen the header has Back, not the pill
     }
     @Test fun same_tab_again_does_not_blink() = sameTabAgain(true)
     @Test fun same_tab_again_does_not_blink_field_user() = sameTabAgain(false)
@@ -477,30 +477,24 @@ class NavTest {
     }
     private fun fieldUserMe(sw: Boolean) {
         admin = false; Lang.sw = sw; start()
-        // Map · Projects · New site · Chat · Me, and the pill too
-        assertFalse(tagged("nav_office")); assertTrue(tagged("nav_me_tab")); assertTrue(tagged("nav_me"))
-        rule.onNodeWithTag("nav_me_tab").assertTextEquals(if (sw) "Mimi" else "Me")
-        // the tab opens Me and is lit; so is the pill
-        rule.onNodeWithTag("nav_me_tab").performClick(); settle(); waitTag("me_hero")
-        rule.onNodeWithTag("nav_me_tab").assertIsSelected(); rule.onNodeWithTag("nav_me").assertIsSelected()
-        shot(if (sw) "nav-me-tab-field-sw" else "nav-me-tab-field")
-        // it starts over: Team, then the tab again → Me (in place, no blink)
+        // Map · Projects · New site · Chat · Stories, and Me on the pill (no Me tab since Oct 2026)
+        assertFalse(tagged("nav_office")); assertFalse(tagged("nav_me_tab")); assertTrue(tagged("nav_me"))
+        // the pill opens Me and is lit
+        rule.onNodeWithTag("nav_me").performClick(); settle(); waitTag("me_hero")
+        rule.onNodeWithTag("nav_me").assertIsSelected()
+        shot(if (sw) "nav-me-pill-field-sw" else "nav-me-pill-field")
+        // it starts over: Team, then the pill again → Me (in place, no blink)
         tap("pane_team"); assertFalse(tagged("me_hero"))
         rule.mainClock.autoAdvance = false
-        rule.onNodeWithTag("nav_me_tab").performClick()
+        rule.onNodeWithTag("nav_me").performClick()
         rule.mainClock.advanceTimeByFrame(); rule.mainClock.advanceTimeByFrame()
         assertEquals("one Me screen, straight away", 1, rule.onAllNodesWithTag("me_hero").fetchSemanticsNodes().size)
         rule.mainClock.autoAdvance = true; settle()
-        rule.mainClock.autoAdvance = false
-        rule.onNodeWithTag("nav_me_tab").performClick()
-        rule.mainClock.advanceTimeByFrame(); rule.mainClock.advanceTimeByFrame()
-        assertEquals("re-tap: still one screen", 1, rule.onAllNodesWithTag("me_hero").fetchSemanticsNodes().size)
-        rule.mainClock.autoAdvance = true; settle()
-        // the pill opens the same Me; back goes to Map home
-        nav("list"); rule.onNodeWithTag("nav_me").performClick(); settle(); waitTag("me_hero"); rule.onNodeWithTag("nav_me_tab").assertIsSelected()
+        // back goes to Map home
+        nav("list"); rule.onNodeWithTag("nav_me").performClick(); settle(); waitTag("me_hero")
         back(); waitTag("map_home"); rule.onNodeWithTag("nav_map").assertIsSelected()
     }
-    @Test fun field_user_has_me_in_the_bar() = fieldUserMe(false)
+    @Test fun field_user_has_me_on_the_pill() = fieldUserMe(false)
     @Test fun field_user_has_me_in_the_bar_kiswahili() = fieldUserMe(true)
 
     @Test fun projects_start_over_from_bar_kept_with_back() = projectsStartOver(false)

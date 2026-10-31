@@ -282,10 +282,10 @@ class MeTest {
     @Test fun hint_is_for_admins_only() {
         val m = model(admin = false, onb = true, hintSeen = false)
         start(m); settle(4000)
-        assertTrue(tagged("nav_me_tab")); assertFalse("field users see Me in the bar: no hint", tagged("me_hint"))
+        assertFalse(tagged("nav_me_tab")); assertFalse("the hint is for admins only", tagged("me_hint"))
     }
 
-    /** A field user's six tabs (Stories since 2.26.0) fit at 320 and 360 dp in English and Kiswahili: no label cut,
+    /** A field user's five tabs (no Me tab since Oct 2026; Me is the pill) fit at 320 and 360 dp in English and Kiswahili: no label cut,
      *  squeezed or split inside a word (a two-word label may wrap between its words). */
     @Test fun field_user_bar_fits() {
         val m = model(admin = false)
@@ -295,8 +295,8 @@ class MeTest {
             Lang.sw = sw; w = width; settle()
             val cut = LayoutCheck.problems(rule, "bottom_bar", width * rule.density.density)
             assertEquals("${if (sw) "SW" else "EN"} $width", emptyList<String>(), cut)
-            assertEquals(6, rule.onAllNodes(hasTestTag("nav_me_tab") or hasTestTag("nav_map") or hasTestTag("nav_list") or hasTestTag("nav_new") or hasTestTag("nav_chat") or hasTestTag("nav_stories")).fetchSemanticsNodes().size)
-            assertTrue(tagged("me_tab_waiting"))
+            assertEquals(5, rule.onAllNodes(hasTestTag("nav_map") or hasTestTag("nav_list") or hasTestTag("nav_new") or hasTestTag("nav_chat") or hasTestTag("nav_stories")).fetchSemanticsNodes().size)
+            assertFalse(tagged("nav_me_tab"))
             val v = rule.activity.window.decorView
             val b = Bitmap.createBitmap(v.width, (120 * rule.density.density).toInt(), Bitmap.Config.ARGB_8888); v.draw(Canvas(b))
             File(out, "me-tabbar-field-$width-${if (sw) "sw" else "en"}.png").outputStream().use { b.compress(Bitmap.CompressFormat.PNG, 100, it) }
